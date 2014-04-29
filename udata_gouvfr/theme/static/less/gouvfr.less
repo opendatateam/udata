@@ -1,0 +1,71 @@
+/**
+ *  Etalab/Data.gouv.fr customization
+ */
+@import "site.less";
+@import "gouvfr/variables.less";
+@import "gouvfr/mixins.less";
+@import "gouvfr/navbars.less";
+@import "gouvfr/buttons.less";
+@import "gouvfr/modals.less";
+
+// @import url(//fonts.googleapis.com/css?family=Raleway:400,700,500);
+
+body {
+    padding-top: 0;
+}
+
+.container {
+    position: relative;
+}
+
+
+.nav-pills {
+    margin-top: 0;
+}
+
+// footer style
+section.footer {
+    padding-top: 0px;
+    padding-bottom: 40px;
+    background-color: #26353f;
+    color: white;
+    font-size: 12px;
+
+    a {
+        font-weight: bold;
+        color: white;
+    }
+
+    h5 {
+        font-family: @title-font;
+        font-size: 14px;
+        margin: 26px 0px 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    ul {
+        padding: 0;
+        list-style: none;
+        line-height: 1.78em;
+
+        li a {
+            font-weight: normal;
+        }
+    }
+
+    .logo {
+        margin: 20px 0px 8px;
+    }
+
+    .bottom-right {
+        position: absolute;
+        bottom: -40px;
+        right: 0px;
+
+        a {
+            background-color: rgba(255, 255, 255, 0.42);
+            padding: 3px 10px;
+        }
+    }
+}

@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en" prefix="og: http://ogp.me/ns#">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>Etalab</title>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <meta name="author" content="" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="css/style.css" type="text/css" media="screen" />
+
+    <script src="js/vendor/d3.js"></script>
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+	<script src="js/RadarChartDetails.js"></script>
+	<script src="js/RadarChartBasic.js"></script>
+
+</head>
+
+<body id='page3'>
+
+<section class="metriques">
+	<div id="radardetails">
+		<div class="chart">
+			<div id="selectedInfosRadar" class="selectedInfos">
+				<span></span>
+				<span></span>
+				<span></span>
+			</div>
+		</div>
+	</div>
+
+	<article style="padding-top:50px;">
+		<ul>
+			<li>
+				<a href="#" id="radarbasic_1">
+					<p></p>
+					<h4></h4>
+					<div class="chart">
+						<div id="selectedInfosRadar" class="selectedInfos">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+					</div>
+				</a>
+			</li><!--
+			!--><li>
+				<a href="#" id="radarbasic_2">
+					<p></p>
+					<h4></h4>
+					<div class="chart">
+						<div id="selectedInfosRadar" class="selectedInfos">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+					</div>	
+				</a>		
+			</li><!--
+			!--><li>
+					<a href="#" id="radarbasic_3">
+					<p></p>
+					<h4></h4>
+					<div class="chart">
+						<div id="selectedInfosRadar" class="selectedInfos">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+					</div>
+				</a>
+			</li>
+		</ul>
+	</article>
+	<article>
+		<h3>Journal de bord</h3>
+		<div class="tableMetriques">
+			<ul class='tableMetriquesHeader'>
+				<li>
+					Date d'ajout
+				</li><!--
+				!--><li>
+					Type
+				</li><!--
+				!--><li>
+					Nom
+				</li><!--
+				!--><li>
+					Producteur
+				</li><!--
+				!--><li>
+					Qualité
+				</li>
+			</ul>
+			<a href="#">
+				<ul class="tableMetriquesValue">
+					<li>
+						2013-12-01 23:02:08
+					</li><!--
+					!--><li>
+						<img src="img/jeux-données.png">
+			        	Jeu de données
+					</li><!--
+					!--><li>
+						Plan départemental de l'habitat
+					</li><!--
+					!--><li>
+						Le ministère de la culture et de la co...
+					</li><!--
+					!--><li class="quality-value-td">
+						<div class="quality-value">
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span></span>
+							<span></span>
+						</div>
+			        	19:29
+					</li>
+				</ul>
+			</a>
+			<a href="#">
+				<ul class="tableMetriquesValue">
+					<li>
+						2013-11-30 11:27:21
+					</li><!--
+					!--><li>
+						<img src="img/jeux-données.png">
+		        		Jeu de données
+					</li><!--
+					!--><li>
+						Liste des Immeubles protégés au titre des Monuments Historique
+					</li><!--
+					!--><li>
+						Mairie de Paris
+					</li><!--
+					!--><li class="quality-value-td">
+						<div class="quality-value">
+							<span class="yellow-value"></span>
+							<span class="yellow-value"></span>
+							<span class="yellow-value"></span>
+							<span class="yellow-value"></span>
+							<span class="yellow-value"></span>
+							<span></span>
+							<span></span>
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+			        	1:29
+					</li>
+				</ul>
+			</a>
+			<a href="#">
+				<ul class="tableMetriquesValue">
+					<li>
+						2013-11-30 10:22:59
+					</li><!--
+					!--><li>
+						<img src="img/ressources.png">
+		        		Ressource
+					</li><!--
+					!--><li>
+						Qualité des eaux de baignade
+					</li><!--
+					!--><li>
+						Agence européenne de l'en...
+					</li><!--
+					!--><li class="quality-value-td">
+						<div class="quality-value">
+							<span class="orange-value"></span>
+							<span class="orange-value"></span>
+							<span class="orange-value"></span>
+							<span></span>
+							<span></span>
+							<span></span>
+							<span></span>
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+			        	1:29
+					</li>
+				</ul>
+			</a>
+			<a href="#">
+				<ul class="tableMetriquesValue">
+					<li>
+						2013-11-29 21:10:44
+					</li><!--
+					!--><li>
+						<img src="img/reutilisations.png">
+		        		Réutilisation
+					</li><!--
+					!--><li>
+						Chiffres clés évolution et structure de la population
+					</li><!--
+					!--><li>
+						Pierre Pezziardi
+					</li><!--
+					!--><li class="quality-value-td">
+						<div class="quality-value">
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+						</div>
+						 55.69
+					</li>
+				</ul>
+			<a href="#">
+				<ul class="tableMetriquesValue">
+					<li>
+						2013-11-29 21:10:44
+					</li><!--
+					!--><li>
+						<img src="img/reutilisations.png">
+		        		Réutilisation
+					</li><!--
+					!--><li>
+						Chiffres clés évolution et structure de la population
+					</li><!--
+					!--><li>
+						Pierre Pezziardi
+					</li><!--
+					!--><li class="quality-value-td">
+						<div class="quality-value">
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+						</div>
+						 55.69
+					</li>
+				</ul>
+			<a href="#">
+				<ul class="tableMetriquesValue">
+					<li>
+						2013-11-29 21:10:44
+					</li><!--
+					!--><li>
+						<img src="img/reutilisations.png">
+		        		Réutilisation
+					</li><!--
+					!--><li>
+						Chiffres clés évolution et structure de la population
+					</li><!--
+					!--><li>
+						Pierre Pezziardi
+					</li><!--
+					!--><li class="quality-value-td">
+						<div class="quality-value">
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+						</div>
+						 55.69
+					</li>
+				</ul>
+			<a href="#">
+				<ul class="tableMetriquesValue">
+					<li>
+						2013-11-29 21:10:44
+					</li><!--
+					!--><li>
+						<img src="img/reutilisations.png">
+		        		Réutilisation
+					</li><!--
+					!--><li>
+						Chiffres clés évolution et structure de la population
+					</li><!--
+					!--><li>
+						Pierre Pezziardi
+					</li><!--
+					!--><li class="quality-value-td">
+						<div class="quality-value">
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+						</div>
+						 55.69
+					</li>
+				</ul>
+			<a href="#">
+				<ul class="tableMetriquesValue">
+					<li>
+						2013-11-29 21:10:44
+					</li><!--
+					!--><li>
+						<img src="img/reutilisations.png">
+		        		Réutilisation
+					</li><!--
+					!--><li>
+						Chiffres clés évolution et structure de la population
+					</li><!--
+					!--><li>
+						Pierre Pezziardi
+					</li><!--
+					!--><li class="quality-value-td">
+						<div class="quality-value">
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+						</div>
+						 55.69
+					</li>
+				</ul>
+			<a href="#">
+				<ul class="tableMetriquesValue">
+					<li>
+						2013-11-29 21:10:44
+					</li><!--
+					!--><li>
+						<img src="img/reutilisations.png">
+		        		Réutilisation
+					</li><!--
+					!--><li>
+						Chiffres clés évolution et structure de la population
+					</li><!--
+					!--><li>
+						Pierre Pezziardi
+					</li><!--
+					!--><li class="quality-value-td">
+						<div class="quality-value">
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+						</div>
+						 55.69
+					</li>
+				</ul>
+			<a href="#">
+				<ul class="tableMetriquesValue">
+					<li>
+						2013-11-29 21:10:44
+					</li><!--
+					!--><li>
+						<img src="img/reutilisations.png">
+		        		Réutilisation
+					</li><!--
+					!--><li>
+						Chiffres clés évolution et structure de la population
+					</li><!--
+					!--><li>
+						Pierre Pezziardi
+					</li><!--
+					!--><li class="quality-value-td">
+						<div class="quality-value">
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+						</div>
+						 55.69
+					</li>
+				</ul>
+			<a href="#">
+				<ul class="tableMetriquesValue">
+					<li>
+						2013-11-29 21:10:44
+					</li><!--
+					!--><li>
+						<img src="img/reutilisations.png">
+		        		Réutilisation
+					</li><!--
+					!--><li>
+						Chiffres clés évolution et structure de la population
+					</li><!--
+					!--><li>
+						Pierre Pezziardi
+					</li><!--
+					!--><li class="quality-value-td">
+						<div class="quality-value">
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+						</div>
+						 55.69
+					</li>
+				</ul>
+			<a href="#">
+				<ul class="tableMetriquesValue">
+					<li>
+						2013-11-29 21:10:44
+					</li><!--
+					!--><li>
+						<img src="img/reutilisations.png">
+		        		Réutilisation
+					</li><!--
+					!--><li>
+						Chiffres clés évolution et structure de la population
+					</li><!--
+					!--><li>
+						Pierre Pezziardi
+					</li><!--
+					!--><li class="quality-value-td">
+						<div class="quality-value">
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+						</div>
+						 55.69
+					</li>
+				</ul>
+			<a href="#">
+				<ul class="tableMetriquesValue">
+					<li>
+						2013-11-29 21:10:44
+					</li><!--
+					!--><li>
+						<img src="img/reutilisations.png">
+		        		Réutilisation
+					</li><!--
+					!--><li>
+						Chiffres clés évolution et structure de la population
+					</li><!--
+					!--><li>
+						Pierre Pezziardi
+					</li><!--
+					!--><li class="quality-value-td">
+						<div class="quality-value">
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+							<span class="green-value"></span>
+						</div>
+						 55.69
+					</li>
+				</ul>
+			</a>
+		</div>
+	</article>
+</section>
+
+<script type="text/javascript" src="js/radarBig.js"></script>
+</body>
+</html>

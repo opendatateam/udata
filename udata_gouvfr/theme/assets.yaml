@@ -1,0 +1,37 @@
+gouvfr-css:
+    filters: less,cssrewrite,cssmin
+    depends:
+        - less/*.less
+        - less/udata/*.less
+        - less/gouvfr/*.less
+    output: css/gouvfr.min.css
+    contents: less/gouvfr.less
+
+dataset-css:
+    filters: less,cssrewrite,cssmin
+    depends:
+        - less/*.less
+        - less/udata/*.less
+        - less/gouvfr/*.less
+    output: css/gouvfr-dataset.min.css
+    contents: less/gouvfr-dataset.less
+
+
+gouvfr-topic-css:
+    filters: less,cssrewrite,cssmin
+    depends:
+        - less/*.less
+        - less/udata/*.less
+        - less/gouvfr/*.less
+    output: css/gouvfr-topic.min.css
+    contents: less/gouvfr-topic.less
+
+
+gouvfr-forms-css:
+    filters: less,cssrewrite,cssmin
+    depends:
+        - less/*.less
+        - less/udata/*.less
+        - less/gouvfr/*.less
+    output: css/gouvfr-forms.min.css
+    contents: less/gouvfr-forms.less

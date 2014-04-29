@@ -1,0 +1,67 @@
+/**
+ * Common site styles and helpers.
+ */
+@import "udata/mixins.less";
+
+.sidebackground-width(@container-width, @cols) {
+    width: floor(1000px + @cols * (@container-width / @grid-columns) - (@grid-gutter-width / 2) + 1px);
+    max-width: 1000px + 400px + round(@grid-gutter-width / 2);
+}
+
+.transition2(...) {
+    @value: ~`"@{arguments}".replace(/[\[\]]|\,\sX/g, '')`;
+
+    -webkit-transition: @value;
+    -moz-transition: @value;
+    -ms-transition: @value;
+    -o-transition: @value;
+    transition: @value;
+}
+
+.scale(@ratio) {
+    -webkit-transform:scale(@ratio);
+       -moz-transform:scale(@ratio);
+        -ms-transform:scale(@ratio);
+         -o-transform:scale(@ratio);
+            transform:scale(@ratio);
+}
+
+.no-decoration {
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: none;
+    }
+}
+
+.square-stamp(@color) {
+    padding: 2px 4px;
+    color: @color !important;
+    text-transform: uppercase;
+    border: 2px solid @color;
+    font-size: 9px;
+    margin-left: 3px;
+    font-weight: bold;
+    top: -1px;
+    position: relative;
+    white-space: nowrap;
+}
+
+.glyph-left-square(@size) {
+    @base-padding: 15px;
+    padding-left: @size + @base-padding;
+    padding-right: @base-padding;
+    position: relative;
+
+    .glyphicon {
+        color: rgba(255, 255, 255, 0.5);
+        background-color: rgba(0, 0, 0, 0.15);
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: @size;
+        height: @size;
+        line-height: @size;
+    }
+
+}

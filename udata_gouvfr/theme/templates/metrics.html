@@ -1,0 +1,127 @@
+{% extends theme("layouts/1-column.html") %}
+
+{% block extra_head %}
+	{{ super() }}
+	{% assets "metrics-css" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet">
+    {% endassets %}
+{% endblock %}
+
+{% block main_content %}
+<section class='metrics'>
+	<article>
+		<h2>{{ _('Some data') }}</h2>
+		<ul class="chart-list row">
+			<li class="col-md-4">
+				<a href="{{ url_for('datasets.list') }}" data-chart-type="line" data-chart-data="datasets">
+					{{ _('Datasets') }}
+				</a>
+			</li>
+			<li class="col-md-4">
+				<a href="{{ url_for('reuses.list') }}" data-chart-type="line" data-chart-data="reuses">
+					{{ _('Reuses') }}
+				</a>
+			</li>
+			<li class="col-md-4">
+				<a data-chart-type="line" data-chart-data="resources">
+					{{ _('Resources') }}
+				</a>
+			</li>
+		</ul>
+	</article>
+	{# <article>
+		<h2>{{ _('Some content') }}</h2>
+		<ul class="chart-list row">
+			<li class="col-md-4">
+				<a href="#" id="radar_1">
+					<div class="chart">
+						<div id="selectedInfosRadar" class="selectedInfos">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+					</div>
+					<p></p>
+					<h4></h4>
+				</a>
+			</li><!--
+			!--><li class="col-md-4">
+				<a href="#" id="radar_2">
+					<div class="chart">
+						<div id="selectedInfosRadar" class="selectedInfos">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+					</div>
+					<p></p>
+					<h4></h4>
+				</a>
+			</li><!--
+			!--><li class="col-md-4">
+				<a href="#" id="radar_3">
+					<div class="chart">
+						<div id="selectedInfosRadar" class="selectedInfos">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+					</div>
+					<p></p>
+					<h4></h4>
+				</a>
+			</li>
+		</ul>
+	</article> #}
+	<article>
+		<h2>{{ _('A community') }}</h2>
+		<ul class="chart-list row">
+			<li class="col-md-4">
+				<a href="{{ url_for('datasets.list') }}" data-chart-type="bar" data-chart-data="organizations">
+					{{ _('Organizations') }}
+				</a>
+			</li>
+			<li class="col-md-4">
+				<a href="{{ url_for('organizations.list') }}" data-chart-type="bar" data-chart-data="public_services">
+					{{ _('Public services') }}
+				</a>
+			</li>
+			{# <li class="col-md-4">
+				<a href="#" id="bar_1">
+					<div class="chart">
+						<div id="selectedInfosRadar" class="selectedInfos">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+					</div>
+					<p>{{ metrics.organizations.value or 0 }}</p>
+					<h4>{{ _('Organizations') }}</h4>
+				</a>
+			</li> #}
+			<!--
+			!-->
+			{#<li class="col-md-4">
+				<a href="#" id="bar_2">
+					<div class="chart">
+						<div id="selectedInfosRadar" class="selectedInfos">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+					</div>
+					<p>0</p>
+					<h4>{{ _('Certified') }}</h4>
+				</a>
+			</li> #}
+			<!--
+			!-->
+			<li class="col-md-4">
+				<a data-chart-type="bar" data-chart-data="users">
+					{{ _('Users') }}
+				</a>
+			</li>
+		</ul>
+	</article>
+</section>
+{% endblock %}

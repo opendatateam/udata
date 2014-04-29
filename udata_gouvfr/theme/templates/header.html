@@ -1,0 +1,96 @@
+<section class="header">
+    <div class="container">
+        <nav class="navbar navbar-default navbar-static-top" role="navigation">
+            <header class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target=".navbar-collapse, .subnav-collapse, .sidebg-collapse">
+                    <span class="sr-only">{{ _('Toggle navigation') }}</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('front.home') }}">{{ config['SITE_TITLE'] }}</a>
+                <p class="navbar-text pull-right">{{ _('Open platform for french public data') }}</p>
+            </header>
+        </nav>
+    </div>
+</section>
+
+<section class="topmenu collapse navbar-collapse">
+    <div class="container">
+        <nav class="navbar navbar-default navbar-static-top" role="navigation">
+            <ul class="nav navbar-nav links">
+                <li>
+                    <a href="//wiki.data.gouv.fr/wiki/FAQ">{{ _('How it works ?') }}</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a>
+                </li>
+                <li>
+                    <a href="//wiki.data.gouv.fr/wiki/Licence_Ouverte_/_Open_Licence">
+                        {{ _('Open Licence') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('front.metrics') }}">{{ _('Metrics') }}</a>
+                </li>
+                {# <li><a href="http://pfee.leaftr.com">Activiz</a></li> #}
+                <li><a href="http://www.etalab.gouv.fr/">Etalab</a></li>
+                <li><a href="http://cada.data.gouv.fr/">CADA</a></li>
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown language">
+                    <button class="btn btn-link dropdown-toggle" data-toggle="dropdown">
+                        <img src="{{ theme_static('img/flags/{0}.png'.format(g.lang_code)) }}" alt="Current locale flag" />
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% for code, name in config['LANGUAGES'].items() %}
+                        <li>
+                            <a href="{{ request.url.replace('/{0}/'.format(g.lang_code),'/{0}/'.format(code)) }}">
+                                <img src="{{ theme_static('img/flags/{0}.png'.format(code)) }}"
+                                    alt="{{name}} flag" />
+                                {{name}}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% if current_user.is_authenticated() %}
+                <li class="dropdown user login">
+                    <button class="btn-link dropdown-toggle" data-toggle="dropdown">
+                        <span class="username">{{ current_user.fullname }} </span>
+                        <img src="{{ current_user|avatar_url(30) }}" width="30" height="30" />
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('users.show', user=current_user) }}">{{ _('Profile') }}</a></li>
+                        {% if user_orgs %}
+                        <li role="presentation" class="dropdown-header">{{ _('Organizations') }}</li>
+                        {% for org in user_orgs %}
+                        <li>
+                            <a href="{{ url_for('organizations.show', org=org) }}">
+                                <img src="{{ org.image_url|placeholder('organization') }}" width="20px" height="20px"/>
+                                {{ org.name }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                        <li class="divider"></li>
+                        {% endif %}
+                        <li><a href="{{ url_for('users.edit', user=current_user) }}">{{ _('Settings') }}</a></li>
+                        <li class="divider"></li>
+                        <li><a href="{{ url_for('security.logout') }}">Logout</a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li>
+                    <a title="{{ _('Sign In / Register') }}"
+                        href="{{ url_for('security.login') }}">
+                        <span class="glyphicon glyphicon-log-in"></span>
+                        {{ _('Sign In / Register') }}
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</section>

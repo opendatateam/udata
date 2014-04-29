@@ -1,0 +1,65 @@
+<section class="footer">
+    <div class="container">
+        <footer class="row">
+
+            <section class="col-xs-6 col-sm-3 col-md-2 col-lg-2">
+                <h5>{{ _('The Open Data') }}</h5>
+                <ul>
+                    <li><a href="//wiki.data.gouv.fr/wiki/FAQ">{{ _('How it works ?') }}</a></li>
+                    <li><a href="{{ url_for('organizations.list') }}">{{ _('Publishers') }}</a></li>
+                    <li>
+                        <a href="//wiki.data.gouv.fr/wiki/Licence_Ouverte_/_Open_Licence">
+                            {{ _('Open Licence') }}
+                        </a>
+                    </li>
+                    <li><a href="{#{ url_for('metrics') }#}">{{ _('Metrics') }}</a></li>
+                    <li><a href="http://pfee.leaftr.com">Activiz</a></li>
+                    <li><a href="http://www.etalab.gouv.fr/">Etalab</a></li>
+                    <li><a href="//wiki.data.gouv.fr/wiki/Cr%C3%A9dits">{{ _('Credits') }}</a></li>
+                    <li><a href="//wiki.data.gouv.fr/wiki/Conditions_G%C3%A9n%C3%A9rales_d%27Utilisation">{{ _('Terms of use') }}</a></li>
+                </ul>
+            </section>
+            <section class="col-xs-6 col-sm-3 col-md-2 col-lg-2">
+                <h5>{{ _('Topics') }}</h5>
+                <ul>
+                    {% for topic in g.featured_topics %}
+                    <li>
+                        <a href="{{ url_for('topics.display', topic=topic) }}" title="{{ topic.name }}">
+                        {{ topic.name }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <section class="col-xs-6 col-sm-3 col-md-2 col-lg-2">
+                <h5>{{ _('Network') }}</h5>
+                <ul>
+                    <li><a href="http://www.gouvernement.fr/">Gouvernement.fr </a></li>
+                    <li><a href="http://www.france.fr/">France.fr</a></li>
+                    <li><a href="http://www.legifrance.gouv.fr/">Legifrance.gouv.fr </a></li>
+                    <li><a href="http://www.service-public.fr/">Service-public.fr</a></li>
+                    <li><a href="http://opendatafrance.net/">Opendata France</a></li>
+                    <li><a href="http://www.cada.fr/">CADA.fr</a></li>
+                </ul>
+            </section>
+
+            <section class="col-xs-6 col-sm-3 col-md-4 col-lg-4">
+                <h5>{{ _('Contact') }}</h5>
+                <ul>
+                    <li><a href="https://twitter.com/Etalab">Twitter</a></li>
+                    <li><a href="https://github.com/etalab">GitHub</a></li>
+                    <li><a href="mailto:info@data.gouv.fr">info@data.gouv.fr</a></li>
+                </ul>
+            </section>
+
+            <section class="col-xs-9 col-xs-offset-3 col-sm-offset-0 col-sm-2 col-md-2 col-lg-2">
+                <img class="logo" src="{{ theme_static('img/etalab-logo.png') }}"></img>
+                <p>2013 ETALAB</p>
+            </section>
+
+            <p class="bottom-right"><a href="#">{{ _('Back to top') }}</a></p>
+
+        </footer>
+    </div>
+</section>

@@ -1,0 +1,517 @@
+{% extends theme('base.html') %}
+{% from theme('macros/starred.html') import starred with context %}
+
+{% block extra_head %}
+{% assets 'dataset-css' %}
+<link href="{{ ASSET_URL }}" rel="stylesheet">
+{% endassets %}
+{% endblock %}
+
+{% block breadcrumb %}
+    <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
+    <li class="active">{{ dataset.title|truncate(128) }}</li>
+{% endblock %}
+
+{% block toolbar %}
+<div class="btn-group btn-group-xs">
+    <a href="{{ url_for('datasets.edit', dataset=dataset) }}" class="btn btn-success">
+        <span class="glyphicon glyphicon-pencil"></span>
+        {{ _('Edit') }}
+    </a>
+</div>
+<div class="btn-group btn-group-xs">
+    <button type="button"
+        class="btn btn-success featured {% if dataset.featured %}active{% endif %}"
+        data-api-url="{{ url_for('api.dataset_featured', slug=dataset.slug) }}">
+        <span class="glyphicon glyphicon-bullhorn"></span>
+        {{ _('Featured') }}
+    </button>
+</div>
+<div class="btn-group btn-group-xs">
+    {{ starred(dataset) }}
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="content {% if not dataset.organization.public_service %}non{% endif %}certified">
+    <div class="container dataset-container">
+        <div class="row">
+
+            <div class="col-md-9 col-sm-9 smaller">
+                <div class="page-header">
+                    <h2>{{ dataset.title }}</h2>
+                </div>
+
+                <div class="row">
+                    {{ dataset.description|markdown }}
+                </div>
+
+                <div class="list-group resources-list">
+                    <h3>{{ _('Resources') }}</h3>
+                    {% if dataset.resources %}
+                        {% for resource in dataset.resources %}
+                            {% set resource_name = resource.name or resource.description or _('Nameless resource') %}
+                            {% set resource_format = resource.format|trim|lower or 'data' %}
+
+                            {% if loop.index == 4 %}<div id="all-resources" class="collapse">{% endif %}
+
+                            <div class="list-group-item"
+                                data-url="{{ resource.url }}" data-format="{{ resource_format }}"
+                                rel="popover" data-trigger="hover" data-placement="top"
+                                {% if resource.description %}
+                                title="{{ resource_name }} [{{ resource_format }}]"
+                                data-content="{{ resource.description }}"
+                                {% else %}
+                                data-content="{{ resource_name }} [{{ resource_format }}]"
+                                {% endif %}
+                                >
+                                <div class="format-label pull-left ellipsis-dot">
+                                    <span property="dc:format"data-format="{{ resource_format }}">
+                                        {{ resource_format }}
+                                    </span>
+                                </div>
+                                <h4 class="list-group-item-heading ellipsis {% if not resource.description.strip() %}dual{% endif %}">
+                                    {{ resource_name }}
+                                </h4>
+                                {% if resource.description.strip() %}
+                                <p class="list-group-item-text ellipsis">
+                                {{ resource.description|markdown|striptags }}
+                                </p>
+                                {% endif %}
+                                {% if can_edit %}
+                                <div class="btn-group btn-group-xs tools">
+                                    <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
+                                        href="{{ url_for('datasets.edit_resource', dataset=dataset, rid=resource.id) }}">
+                                        <span class="glyphicon glyphicon-edit"></span>
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        {% if loop.index0 >= 4 %}</div>{% endif %}
+                        {% if can_edit %}
+                        <a class="list-group-item add"
+                            href="{{ url_for('datasets.new_resource', dataset=dataset) }}">
+                            <div class="format-label pull-left">+</div>
+                            <h4 class="list-group-item-heading">
+                                {{ _('Add a resource') }}
+                            </h4>
+                        </a>
+                        {% endif %}
+                        {% if loop.index0 >= 4 %}
+                        <p class="text-center">
+                            <button id="more-resources" type="button" class="btn btn-default">
+                                <span class="glyphicon glyphicon-list" ></span>
+                                {% trans count=loop.index0 %}See the {{ count }} resources{% endtrans %}
+                            </button>
+                        </p>
+                        {% endif %}
+                    {% else %}
+                        {% if can_edit %}
+                        <a class="list-group-item add"
+                            href="{{ url_for('datasets.new_resource', dataset=dataset) }}">
+                            <div class="format-label pull-left">+</div>
+                            <h4 class="list-group-item-heading">
+                                {{ _('Add a resource') }}
+                            </h4>
+                        </a>
+                        {% else %}
+                        <p class="text-center">{{ _('No resources') }}</p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                {# end resources #}
+
+                {# button bar #}
+                <div class="row opinion">
+                    <div class="btn-toolbar">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{{ url_for('datasets.edit', dataset=dataset) }}" class="btn btn-success">
+                                <span class="glyphicon glyphicon-pencil"></span>
+                                {{ _('Edit') }}
+                            </a>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button"
+                                class="btn btn-success featured {% if dataset.featured %}active{% endif %}"
+                                data-api-url="{{ url_for('api.dataset_featured', slug=dataset.slug) }}">
+                                <span class="glyphicon glyphicon-bullhorn"></span>
+                                {{ _('Featured') }}
+                            </button>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            {{ starred(dataset) }}
+                        </div>
+                    </div>
+                </div>
+                {# end button bar #}
+
+            </div>
+            {# end left column #}
+
+            {# Right sidebar #}
+            <aside class="col-md-3 col-sm-3">
+
+                {# Optionnal organization panel #}
+                {% if dataset.organization %}
+                <div class="card text-center">
+                    <h3>{{ _('Producer') }}</h3>
+                    {% if dataset.organization.public_service %}
+                    <img src="{{ theme_static('img/certified-stamp.png')}}" alt="certified"
+                        class="certified" rel="popover"
+                        data-title="{{ _('Certified public service') }}"
+                        data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
+                        data-container="body" data-placement="left" data-trigger="hover"/>
+                    {% endif %}
+                    <a href="{{ url_for('organizations.show', org=dataset.organization) }}"
+                        title="{{ dataset.organization.name }}">
+                        <img src="{{ dataset.organization.image_url|placeholder('organization') }}"
+                            alt="{{ dataset.organization.name }}" class="organization-logo producer" />
+                    </a>
+                    <div class="caption text-left">
+                        {% if dataset.organization.description %}
+                        <p>
+                            {{ dataset.organization.description|markdown|striptags|truncate(180) }}
+                            <a href="{{ url_for('organizations.show', org=dataset.organization) }}"
+                                title="{{ _('more') }}"
+                                class="btn btn-grey btn-primary btn-mini">+</a>
+                        </p>
+                        {% else %}
+                        <br/>
+                        {% endif %}
+                        <a href class="btn btn-primary btn-block btn-sm icon-left follow"
+                            data-organization-id="{{ dataset.organization.id }}"
+                            data-organization-title="{{ dataset.organization.title }}"
+                            data-is-following="{% if is_following_org %}true{% else %}false{% endif %}"
+                            data-follow-api="{{ url_for('api.follow', id=dataset.organization.id) }}"
+                            data-follow-label="{{ _('Follow') }}"
+                            data-unfollow-label="{{ _('Unfollow') }}"
+                            {% if is_following_org %}
+                            title="{{ _('Unfollow') }}">
+                            <span class="glyphicon glyphicon-eye-close"></span>
+                            {% trans %}Unfollow{% endtrans %}
+                            {% else %}
+                            title="{% trans %}Follow{% endtrans %}">
+                            <span class="glyphicon glyphicon-eye-open"></span>
+                            {% trans %}Follow{% endtrans %}
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Information panel #}
+                <div class="card">
+                    <h3>{{ _('Informations') }}</h3>
+
+                    <ul id="infos-list" class="list-unstyled">
+
+                        {# License #}
+                        {% if dataset.license %}
+                        <li>
+                            <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="right auto"
+                                title="{{ _('License') }}">
+                                <span class="glyphicon glyphicon-copyright-mark"></span>
+                            </a>
+                            {% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
+                            {{ dataset.license.title }}
+                            {% if dataset.license.url %}</a>{% endif %}
+                        </li>
+                        {% endif %}
+
+                        {# Temporal coverage #}
+                        {% if dataset.temporal_coverage %}
+                        <li>
+                            <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                                title="{{ _('Temporal coverage') }}">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </a>
+                            {{ _('%(start)s to %(end)s',
+                                start=dataset.temporal_coverage.start|dateformat('short'),
+                                end=dataset.temporal_coverage.end|dateformat('short')
+                                ) }}
+                        </li>
+                        {% endif %}
+
+                        {% if dataset.frequency %}
+                        <li>
+                            <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="right auto"
+                                title="{{ _('Frequency') }}">
+                                <span class="glyphicon glyphicon-time"></span>
+                            </a>
+                            {{ UPDATE_FREQUENCIES[dataset.frequency] }}
+                        </li>
+                        {% endif %}
+
+                        {# Territorial coverage #}
+                        {% if dataset.territorial_coverage %}
+                            {% if dataset.territorial_coverage.codes %}
+                            <li>
+                                <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                                    title="{{ _('Territorial coverage') }}">
+                                    <span class="glyphicon glyphicon-globe"></span>
+                                </a>
+                                {% for code in dataset.territorial_coverage.codes %}
+                                {{ code }}
+                                {% endfor %}pd
+                            </li>
+                            {% endif %}
+
+                            {% if dataset.territorial_coverage.granularity %}
+                            <li>
+                                <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                                    title="{{ _('Territorial coverage granularity') }}">
+                                    <span class="glyphicon glyphicon-screenshot"></span>
+                                </a>
+                                {{ dataset.territorial_coverage.granularity }}
+                            </li>
+                            {% endif %}
+                        {% endif %}
+
+                    </ul>
+
+
+                    <div class="tags">
+                        {% for tag in dataset.tags %}
+                        <a href="{{ url_for('datasets.list', tag=tag) }}"
+                            class="btn btn-primary btn-grey btn-xs"
+                            title="{{ tag }}">
+                            {{ tag|truncate(14, True) }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# Quality panel #}
+                <div class="card">
+                    <h3>{{ _('Data quality') }}</h3>
+                    <div class="stats">
+                        <div class="row">
+                        {% if dataset.metrics.cow_score %}
+                            <a href="{{ cow_url_for(dataset) }}" title="{{ _("Go to the report page") }}">
+                                <div class="col-xs-5 col-sm-12 col-md-6 col-lg-6">
+                                    <span class="big_number">{{ dataset.metrics.cow_score|round(2) }}</span>
+                                    {% trans %}Performance{% endtrans %}
+                                </div>
+                                <div class="col-xs-7 col-sm-12 col-md-6 col-lg-6">
+                                    <div class="progress">
+                                        {% if dataset.metrics.cow_warnings %}
+                                        <div class="progress-bar progress-bar-warning" role="progressbar"
+                                            aria-valuenow="{{ dataset.metrics.cow_warnings|default(0) }}" aria-valuemin="0"
+                                            style="width: {{ dataset.metrics.cow_warnings|percent(g.cow_ceils.warning) }}%">
+                                            <span>{% trans nb=dataset.metrics.cow_warnings|default(0)
+                                                %}{{nb}} warning{%
+                                                pluralize %}{{nb}} warnings{% endtrans %}</span>
+                                        </div>
+                                        {% else %}
+                                        <div class="progress-bar progress-bar-success" role="progressbar"
+                                            aria-valuenow="0" aria-valuemin="0" style="width: 100%">
+                                        </div>
+                                        <span>{{ _('No warning') }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="progress">
+                                        {% if dataset.metrics.cow_errors %}
+                                        <div class="progress-bar progress-bar-danger" role="progressbar"
+                                            aria-valuenow="{{ dataset.metrics.cow_errors|default(0) }}" aria-valuemin="0"
+                                            style="width: {{ dataset.metrics.cow_errors|percent(g.cow_ceils.error) }}%">
+                                            <span>{% trans nb=dataset.metrics.cow_errors|default(0)
+                                                %}{{nb}} error{%
+                                                pluralize %}{{nb}} errors{% endtrans %}</span>
+                                        </div>
+                                        {% else %}
+                                        <div class="progress-bar progress-bar-success" role="progressbar"
+                                            aria-valuenow="0" aria-valuemin="0" style="width: 100%">
+                                        </div>
+                                        <span>{{ _('No error') }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="progress">
+                                        {% if dataset.metrics.cow_criticals %}
+                                        <div class="progress-bar progress-bar-info" role="progressbar"
+                                            aria-valuenow="{{ dataset.metrics.cow_criticals|default(0) }}" aria-valuemin="0"
+                                            style="width: {{ dataset.metrics.cow_criticals|percent(g.cow_ceils.criticals) }}%">
+                                            <span>{% trans nb=dataset.metrics.cow_criticals|default(0)
+                                                %}{{nb}} critical{%
+                                                pluralize %}{{nb}} criticals{% endtrans %}</span>
+                                        </div>
+                                        {% else %}
+                                        <div class="progress-bar progress-bar-success" role="progressbar"
+                                            aria-valuenow="0" aria-valuemin="0" style="width: 100%">
+                                        </div>
+                                        <span>{{ _('No critical') }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </a>
+                        {% else %}
+                        <p class="text-center">{% trans %}No report available{% endtrans %}</p>
+                        {% endif %}
+                        </div>
+                    </div>
+                    {% if can_edit %}
+                    <a href="{{ quality.url }}" title="{{ _("Improve quality") }}"
+                        class="btn btn-primary btn-block btn-sm icon-left">
+                        <span class="glyphicon glyphicon-tasks"></span>
+                        {{ _("Improve") }}
+                    </a>
+                    {% endif %}
+                </div>
+
+            </aside>
+        </div>
+    </div>
+</section>
+
+<section class="community_container">
+    <header>
+        <div class="container">
+            <div class="cover-communaute"></div>
+            <div class="page-header">
+                <h2>{{ _('Community contributions') }}</h2>
+                <small>{{ _('Explore with Datagouv') }}</small>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <h3>{{ _('Resources') }}</h3>
+        <div class="row">
+            <div class="col-sm-9 list-group resources-list smaller">
+            {% for resource in dataset.community_resources %}
+                {% set resource_name = resource.name or resource.description or _('Nameless resource') %}
+                {% set resource_format = resource.format|trim|lower or 'data' %}
+                <div id="community-resource-{{resource.id}}" class="list-group-item"
+                    data-url="{{ resource.url }}" data-format="{{ resource_format }}"
+                    rel="popover" data-trigger="hover" data-placement="top"
+                    {% if resource.description %}
+                    title="{{ resource_name }} [{{ resource_format }}]"
+                    data-content="{{ resource.description }}"
+                    {% else %}
+                    data-content="{{ resource_name }} [{{ resource_format }}]"
+                    {% endif %}
+                    >
+                    <div class="format-label pull-left ellipsis-dot">
+                        <span property="dc:format" data-format="{{ resource_format }}">
+                            {{ resource_format }}
+                        </span>
+                    </div>
+                    <h4 class="list-group-item-heading ellipsis {% if not resource.description %}dual{% endif %}">
+                        {{ resource.name }}
+                    </h4>
+                    {% if resource.description %}
+                    <p class="list-group-item-text ellipsis">
+                        {{ markdown_extract(resource.description) }}
+                    </p>
+                    {% endif %}
+                    {{
+                        publisher_avatar(resource.owner, resource.publish_as, 52,
+                            classes='resource-owner', overwrite=True
+                        )
+                    }}
+                    {% if user.sysadmin or resource.owner_id == user.id %}
+                    <div class="btn-group btn-group-xs tools">
+                        <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
+                            href="{{ url(lang, 'dataset', dataset.name, 'community/resource', resource.id, 'edit') }}">
+                            <span class="glyphicon glyphicon-edit"></span>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+                <a class="list-group-item add"
+                    href="{{ url_for('datasets.new_resource', dataset=dataset) }}">
+                    <div class="format-label pull-left">+</div>
+                    <h4 class="list-group-item-heading">
+                        {{ _('Add a resource') }}
+                    </h4>
+                </a>
+            </div>
+
+            <div class="col-sm-3 note">
+                <p>{{ _('You have built a more comprehensive database than those presented here? This is the time to share it!') }}</p>
+            </div>
+        </div>
+
+        <h3>{{ _('Reuses') }}</h3>
+        <div class="row">
+            <div class="col-sm-9 reuses-list smaller">
+                <div class="row">
+                    {% for reuse in reuses %}
+                    <div class="col-sm-6 col-lg-4">
+                        <div id="reuse-{{reuse.id}}" class="thumbnail reuse">
+                            <a class="preview" href="{{ reuse.url }}" target="_blank">
+                                <img class="media-object img-responsive" alt="{{ reuse.title }}"
+                                    src="{{ reuse.image_url|placeholder('reuse') }}">
+                            </a>
+                            <div class="caption">
+                                <h4 class="ellipsis-dot">
+                                    <a href="{{ reuse.url }}" target="_blank"
+                                        title="{{ reuse.title }}">
+                                        {{ reuse.title }}
+                                    </a>
+                                </h4>
+                                <div class="author">
+                                    {{ reuse|owner_avatar(25) }}
+                                    <a class="user" href="{{ reuse|owner_url }}" title="{{ reuse|owner_name }}">
+                                    {{ reuse|owner_name }}
+                                    </a>
+                                    <span class="date">{{ reuse.created_at|dateformat('long') }}</span>
+                                </div>
+                            </div>
+                            {% if reuse.description %}
+                            <a class="rollover fade in" href="{{reuse.url}}" target="_blank"
+                                title="{{ reuse.title }}">
+                                {{ reuse.description|markdown|striptags|truncate(180) }}
+                            </a>
+                            {% endif %}
+                            <div class="btn-group btn-group-xs">
+                                {% if current_user.sysadmin or reuse.owner == current_user %}
+                                <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
+                                    href="{{ url_for('reuses.edit', reuse=reuse) }}"
+                                    data-containter="body">
+                                    <span class="glyphicon glyphicon-edit"></span>
+                                </a>
+                                {% endif %}
+                                {% if current_user.sysadmin %}
+                                {% set btn_class = 'success' if reuse.featured else 'default' %}
+                                <a class="btn btn-{{ btn_class }} featured" rel="tooltip" href
+                                    {# data-api="{{ url('youckan/reuse', reuse.id, 'featured') }}" #}
+                                    {% if reuse.featured %}
+                                    title="{{ _('Unmark as featured') }}"
+                                    {% else %}
+                                    title="{{ _('Mark as featured') }}"
+                                    {% endif %}
+                                    data-featured-title="{{ _('Unmark as featured') }}"
+                                    data-unfeatured-title="{{ _('Mark as featured') }}"
+                                    data-containter="body">
+                                    <span class="glyphicon glyphicon-pushpin"></span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="col-sm-6 col-md-4">
+                        <a class="thumbnail reuse add" href="{{ url_for('reuses.new') }}">
+                            <div class="preview">+</div>
+                            <div class="caption">
+                                <h4>{{ _('Add a reuse') }}</h4>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-sm-3 note">
+                <p>{% trans %}You reused these data and published an article, a computer graphics, or an application?
+                It's time to let you know!
+                Reference your work in just a few clicks and increase your visibility.{% endtrans %}</p>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+@import "forms.less";
+@import "gouvfr/variables.less";
+
+section.form {
+    background-color: lighten(@bg-dark, 10%);
+    background-image: url('../img/datacover.png');
+    background-size: cover;
+
+    .form-bg {
+        padding: 25px;
+        border-radius: 3px;
+        background-color: fadeout(@bg-light, 30%);
+
+        .nav-pills {
+            margin-top: 0;
+            margin-bottom: 20px;
+
+            > li:not(.active) > a {
+                color: @gray-light;
+            }
+
+            > li > a:hover {
+                color: @gray;
+            }
+        }
+    }
+}

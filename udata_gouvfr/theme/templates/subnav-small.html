@@ -1,0 +1,49 @@
+<nav class="navbar navbar-static-top navbar-subnav">
+    <div class="container">
+        <div class="cover-marianne"></div>
+
+        <div class="search_bar">
+
+            <form class="navbar-form" role="search" action="{{ url_for('front.search') }}">
+                <div class="form-group col-sm-4 col-md-4 col-lg-6 col-xs-12">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button class="btn" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                        <input id="main-search" name="q" type="search" class="form-control"
+                            autocomplete="off" placeholder="{{ _('Search') }}"
+                            value="{{ request.args.q }}">
+                    </div>
+                </div>
+            </form>
+
+            {# Topic chooser #}
+            <div class="form-group col-sm-3 col-md-2 col-lg-3 col-xs-12">
+                <button class="dropdown-toggle btn-block btn-light" data-toggle="dropdown">
+                    {{ _('Topics') }}
+                    <span class="glyphicon glyphicon-chevron-down pull-right hidden-sm"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="topics">
+                    {% for topic in g.featured_topics %}
+                    <li role="presentation">
+                        <a role="menuitem" tabindex="-1" href="{{ url_for('topics.display', topic=topic) }}">
+                            {{ topic.name }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            {# Publish call to action #}
+            <div class="col-sm-2 col-md-4 col-lg-3 col-xs-12 collapse subnav-collapse">
+                <a class="btn btn-primary btn-dark btn-block hidden-sm btn-md icon-left"
+                        title="{{ _('Publish !') }}"
+                        data-toggle="modal" data-target="#publish-action-modal">
+                    <span class="glyphicon glyphicon-plus"></span>
+                    {{ _('Publish !') }}
+                </a>
+            </div>
+        </div>
+
+    </div>
+</nav>

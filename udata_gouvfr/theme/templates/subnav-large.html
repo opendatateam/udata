@@ -1,0 +1,52 @@
+<nav class="navbar navbar-static-top navbar-subnav cover-bubble subnav-large">
+    <div class="container">
+
+        <div class="side-bgs">
+            <div class="bg"></div>
+            <div class="bg collapse sidebg-collapse"></div>
+        </div>
+
+        <div class="search_sidebar col-sm-5 col-md-4 col-xs-12">
+
+            <nav class="sidebar panel">
+                <form class="navbar-form form-inline" role="search" action="{{ url_for('front.search') }}">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button class="btn" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                        <input id="main-search" name="q" type="search" class="form-control"
+                            autocomplete="off" placeholder="{{ _('Search') }}"
+                            value="{{request.args.q}}">
+                    </div>
+                </form>
+            </nav>
+
+            <nav class="sidebar panel">
+                <!-- Groups -->
+                <div class="list-group">
+                    {% for topic in g.featured_topics %}
+                    <a class="list-group-item" href="{{ url_for('topics.display', topic=topic) }}">
+                        {{ topic.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </nav>
+
+        </div>
+
+        <div class="call-to-action col-sm-7 col-md-8 col-lg-7 col-xs-12">
+            <h2>{{ _('Share, improve and reuse public data') }}</h2>
+            <div class="collapse subnav-collapse">
+                <a class="btn btn-primary btn-big btn-dark icon-left"
+                        title="{{ _('Publish !') }}"
+                        data-toggle="modal" data-target="#publish-action-modal">
+                    <span class="glyphicon glyphicon-plus"></span>
+                    {{ _('Publish !' )}}
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</nav>
+

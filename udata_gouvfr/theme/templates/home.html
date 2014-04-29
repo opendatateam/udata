@@ -1,0 +1,195 @@
+{% extends "home.html" %}
+
+{% block subnav %}
+    {% include theme('subnav-large.html') %}
+{% endblock %}
+
+{% block content %}
+{# Carousels section #}
+<section class="default">
+    <div class="container">
+
+        {# First row #}
+        <div class="row first-row">
+
+            {# News highlight #}
+            <div class="col-md-4">
+                <h3>{{ _('News') }}</h3>
+                <div id="news-carousel" class="carousel slide">
+                    <!-- Wrapper for slides -->
+                    <div class="carousel-inner">
+                        {% if last_post %}
+                        {% set post = last_post %}
+                        <div class="item active">
+                            <img class="slide" src="{{ post.image_url|placeholder('post') }}"
+                                alt="{{ post.name }}">
+
+                            <div class="carousel-caption">
+                                <label>{{ _('Discussion topic') }}</label>
+                                <h4 class="title ellipsis-dot">
+                                    <a href="{{ url_for('posts.show', post=post) }}"
+                                        title="{{ post.name }}">
+                                        {{ post.name }}
+                                    </a>
+                                    {% if post.credit_to %}
+                                        {% if post.credit_url %}<a href="{{ post.credit_url }}">{% endif %}
+                                            <small>{{ _('Photo by %(author)s', author=post.credit_to) }}</small>
+                                        {% if post.credit_url %}</a>{% endif %}
+                                    {% endif %}
+                                </h4>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {# end News highlight #}
+
+            {# Carousel #}
+            <div class="col-md-8">
+                <h3>{{ _('Best reuse cases') }}</h3>
+                <div id="home-carousel" class="carousel slide" data-ride="carousel" data-interval="4000">
+                    <!-- Wrapper for slides -->
+                    <div class="carousel-inner">
+                        {% for reuse in featured_reuses %}
+                        <div class="item {% if loop.first %}active{% endif %}">
+                            <img class="slide" src="{{ reuse.image_url }}" alt="{{ reuse.title }}">
+                            <div class="carousel-caption">
+                                <div class="publisher-avatar-80 slide-logo pull-left">
+                                    <div class="frame">
+                                        {{ reuse|owner_avatar(80) }}
+                                    </div>
+                                </div>
+                                <h4 class="title ellipsis-dot">
+                                    <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
+                                    {{ reuse.title }}
+                                    </a>
+                                    <label>{{ reuse.description|markdown|striptags|truncate(250) }}</label>
+                                </h4>
+                                {# {% if user.sysadmin %}
+                                <a class="btn btn-xs btn-warning unfeature" rel="tooltip" href
+                                    data-api="{{ url_for('youckan/reuse', reuse.id, 'unfeature') }}"
+                                    title="{{ _('Unmark as featured') }}">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </a>
+                                {% endif %} #}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <a class="left carousel-control" href="#home-carousel" data-slide="prev">
+                        <span class="icon-prev"></span>
+                    </a>
+                    <a class="right carousel-control" href="#home-carousel" data-slide="next">
+                        <span class="icon-next"></span>
+                    </a>
+                </div>
+            </div>
+            {# end carousel #}
+
+        </div>
+        {# end first row #}
+    </div>
+
+</section>
+{# End Carousels section #}
+
+
+{# Datasets section #}
+{% set dataset_tabs = (
+    ('popular', _('Most popular'), popular_datasets),
+    ('recent', _('Latest'), recent_datasets),
+) %}
+<section class="colored">
+      <div class="container">
+            {# Dataset tabs #}
+            <div class="row">
+                <div class="col-xs-12">
+                    <ul id="tabs" class="nav nav-pills" data-tabs="tabs">
+                        {% for tab_id, label, datasets in dataset_tabs %}
+                        <li {% if loop.first %}class="active"{% endif %}>
+                            <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="tab-content">
+
+                    {% for tab_id, label, datasets in dataset_tabs  %}
+                    <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{tab_id}}">
+                        <ul class="card-list">
+
+                            {% for dataset in datasets %}
+                            <li class="col-md-4 col-sm-6">
+                                {% include theme('dataset/card.html') %}
+                            </li>
+                            {% endfor %}
+
+                        </ul>
+                        <p class="text-center">
+                            <a href="{{ url_for('datasets.list') }}" class="btn btn-default">
+                                <span class="glyphicon glyphicon-list" ></span>
+                                {{ _('See more') }}
+                            </a>
+                        </p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {# end Dataset tabs #}
+      </div>
+</section>
+{# End datasets section #}
+
+{# Reuses section #}
+{% set reuse_tabs = (
+    ('popular', _('Most popular'), popular_reuses),
+    ('recent', _('Latest'), recent_reuses),
+) %}
+
+<section class="default">
+      <div class="container">
+            {# reuse tabs #}
+            <div class="row">
+                <div class="col-xs-12">
+                    <ul id="tabs" class="nav nav-pills" data-tabs="tabs">
+                        {% for tab_id, label, reuses in reuse_tabs %}
+                        <li {% if loop.first %}class="active"{% endif %}>
+                            <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="tab-content">
+
+                    {% for tab_id, label, reuses in reuse_tabs  %}
+                    <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{tab_id}}">
+                        <ul class="card-list">
+
+                            {% for reuse in reuses %}
+                            <li class="col-md-4 col-sm-6">
+                                {% include theme('reuse/card.html') %}
+                            </li>
+                            {% endfor %}
+
+                        </ul>
+                        <p class="text-center">
+                            <a href="{{ url_for('reuses.list') }}" class="btn btn-default">
+                                <span class="glyphicon glyphicon-list" ></span>
+                                {{ _('See more') }}
+                            </a>
+                        </p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {# end reuse tabs #}
+      </div>
+</section>
+{% endblock %}

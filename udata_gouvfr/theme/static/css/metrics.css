@@ -1,0 +1,530 @@
+@import url(http://fonts.googleapis.com/css?family=Raleway:400,100,200,300,500,600,700,800,900);
+/**************** Reset ****************/
+html,
+body,
+div,
+ul,
+ol,
+li,
+dl,
+dt,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+form,
+p,
+blockquote,
+fieldset,
+input,
+hr {
+  margin: 0;
+  padding: 0;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+code,
+address,
+caption,
+cite,
+code,
+em,
+strong,
+th {
+  font-size: 1rem;
+  font-weight: normal;
+  font-style: normal;
+}
+ul,
+ol {
+  list-style: none;
+}
+fieldset,
+img,
+hr {
+  border: none;
+}
+caption,
+th {
+  text-align: left;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+td {
+  vertical-align: top;
+}
+a {
+  text-decoration: none;
+}
+.fontThin {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 100;
+}
+.fontExtraLight {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 200;
+}
+.fontLight {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 300;
+}
+.fontNormal {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 400;
+}
+.fontMedium {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 500;
+}
+.fontSemiBold {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 600;
+}
+.fontBold {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 700;
+}
+.fontExtraBold {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 800;
+}
+.fontUltraBold {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 900;
+}
+body {
+  font-family: Helvetica, Arial, sans-serif;
+}
+.metriques {
+  max-width: 1150px;
+  padding-top: 50px;
+  margin: auto;
+}
+.metriques svg {
+  -moz-transition: all 0.5s;
+  -webkit-transition: all 0.5s;
+  -ms-transition: all 0.5s;
+  -khtml-transition: all 0.5s;
+  transition: all 0.5s;
+}
+.metriques article {
+  padding-bottom: 115px;
+  overflow-x: hidden;
+}
+.metriques article h2 {
+  margin-bottom: 10px;
+  font-family: 'Raleway', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #212121;
+  font-size: 24px;
+  font-size: 1.500rem;
+  border-bottom: 1px solid #d7d7d5;
+}
+.metriques article h3 {
+  text-transform: uppercase;
+  font-family: 'Raleway', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  font-size: 0.875rem;
+  color: #000000;
+}
+.metriques article ul li {
+  display: inline-block;
+  text-align: center;
+  width: -moz-calc(33.333333333333336%);
+  width: -webkit-calc(33.333333333333336%);
+  width: -ms-calc(33.333333333333336%);
+  width: -khtml-calc(33.333333333333336%);
+  width: -o-calc(33.333333333333336%);
+  width: calc(33.333333333333336%);
+  vertical-align: top;
+}
+.lt-ie9 .metriques article ul li {
+  display: inline;
+  zoom: 1;
+}
+.metriques article ul li a {
+  display: block;
+  height: 100%;
+  padding: 40px 0;
+  position: relative;
+}
+.metriques article ul li a p {
+  color: #ffb311;
+  font-size: 48px;
+  font-size: 3.000rem;
+  font-weight: bold;
+}
+.metriques article ul li a h4 {
+  color: #373c42;
+  font-size: 20px;
+  font-size: 1.250rem;
+}
+.metriques article ul li a img {
+  display: block;
+  margin: auto;
+  margin-top: 15px;
+}
+.metriques article ul li:hover {
+  background: #f0f0f0;
+}
+.metriques article .tableMetriques {
+  color: #fff;
+  margin-top: 15px;
+  width: 100%;
+}
+.metriques article .tableMetriques .tableMetriquesHeader {
+  position: relative;
+  width: 100%;
+  background: #354651;
+}
+.metriques article .tableMetriques .tableMetriquesHeader li {
+  text-align: left;
+  display: inline-block;
+  -webkit-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  -khtml-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 12px;
+}
+.metriques article .tableMetriques .tableMetriquesHeader li:nth-of-type(1) {
+  width: 15% !important;
+}
+.metriques article .tableMetriques .tableMetriquesHeader li:nth-of-type(2) {
+  width: 15% !important;
+}
+.metriques article .tableMetriques .tableMetriquesHeader li:nth-of-type(3) {
+  width: 30% !important;
+}
+.metriques article .tableMetriques .tableMetriquesHeader li:nth-of-type(4) {
+  width: 20% !important;
+}
+.metriques article .tableMetriques .tableMetriquesHeader li:nth-of-type(5) {
+  width: 20% !important;
+}
+.metriques article .tableMetriques .tableMetriquesHeader li:hover {
+  background: none;
+}
+.metriques article .tableMetriques a {
+  color: #fff;
+  display: block;
+  border-bottom: 1px solid #354651;
+}
+.metriques article .tableMetriques a .tableMetriquesValue {
+  font-size: 12px;
+  font-size: 0.75rem;
+  position: relative;
+  width: 100%;
+  background: #28343d;
+}
+.metriques article .tableMetriques a .tableMetriquesValue li {
+  text-align: left;
+  display: inline-block;
+  -webkit-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  -khtml-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 12px;
+}
+.metriques article .tableMetriques a .tableMetriquesValue li:nth-of-type(1) {
+  width: 15% !important;
+}
+.metriques article .tableMetriques a .tableMetriquesValue li:nth-of-type(2) {
+  width: 15% !important;
+}
+.metriques article .tableMetriques a .tableMetriquesValue li:nth-of-type(3) {
+  width: 30% !important;
+}
+.metriques article .tableMetriques a .tableMetriquesValue li:nth-of-type(4) {
+  width: 20% !important;
+}
+.metriques article .tableMetriques a .tableMetriquesValue li:nth-of-type(5) {
+  width: 20% !important;
+}
+.metriques article .tableMetriques a .tableMetriquesValue li:hover {
+  background: none;
+}
+.metriques article .tableMetriques a .tableMetriquesValue:hover {
+  background: #4f6a7e;
+}
+.metriques article .tableMetriques a .tableMetriquesValue .quality-value-td .quality-value {
+  float: left;
+  margin-top: -2px;
+  margin-right: 8px;
+}
+.metriques article .tableMetriques a .tableMetriquesValue .quality-value-td .quality-value span {
+  width: 5px;
+  height: 18px;
+  background: #354651;
+  display: block;
+  float: left;
+  margin-right: 2px;
+}
+.metriques article .tableMetriques a .tableMetriquesValue .quality-value-td .quality-value span.green-value {
+  background: #81c85b;
+}
+.metriques article .tableMetriques a .tableMetriquesValue .quality-value-td .quality-value span.yellow-value {
+  background: #d4a655;
+}
+.metriques article .tableMetriques a .tableMetriquesValue .quality-value-td .quality-value span.orange-value {
+  background: #c8763a;
+}
+#page1 path {
+  stroke: #49a5d6;
+  stroke-width: 3;
+  fill: none;
+}
+#page3 .chart {
+  width: auto;
+  margin: 0 auto;
+  text-align: center !important;
+}
+#page3 #radardetails {
+  width: 100%;
+}
+#page3 #radardetails .chart {
+  background: transparent;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  text-align: left;
+}
+#page3 #radarbasic_1:hover,
+#page3 #radarbasic_2:hover,
+#page3 #radarbasic_3:hover {
+  cursor: pointer;
+}
+#page3 #radardetails .chart svg {
+  background: transparent;
+}
+#page3 .legend {
+  font-weight: bold;
+  fill: #557da3;
+  font-size: 11px;
+}
+#page3 path {
+  stroke: #49a5d6;
+  stroke-width: 3;
+  fill: none;
+}
+#page3 article {
+  padding-top: 0 !important;
+}
+#page3 .selectedInfos {
+  margin-left: 250px;
+}
+/* GRAPHIQUES */
+.chart {
+  width: 280px;
+  height: 160px;
+  position: relative;
+  margin: auto;
+}
+.selectedInfos {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 10px;
+  font-size: 0.625rem;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  border-radius: 5px;
+  text-align: center;
+  padding: 5px;
+  margin-top: -50px;
+  width: 60px;
+  margin-left: -45px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.selectedInfos span {
+  display: block;
+}
+.selectedInfos span:nth-child(2) {
+  font-style: italic;
+}
+.selectedInfos.selected {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+#label,
+#globalValue {
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+}
+#globalValue {
+  font-size: 30px;
+  font-size: 1.875rem;
+  color: #ffb311;
+  font-weight: bold;
+}
+.blue_circle_background,
+.blue_circle_radar_background {
+  fill: rgba(255, 179, 17, 0.6);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.blue_circle_background.selected,
+.blue_circle_radar_background.selected {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+.blue_circle {
+  fill: #49a5d6;
+  stroke: #f0f0f0;
+  stroke-width: 3px;
+  z-index: 2 !important;
+}
+/* LineChart.js */
+.node {
+  fill: #000;
+  cursor: crosshair;
+}
+path.area {
+  fill: rgba(73, 165, 214, 0.1) !important;
+  stroke-width: 0 !important;
+}
+.lineOnSelect {
+  stroke: rgba(255, 179, 17, 0.6);
+  stroke-width: 2px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.lineOnSelect.selected {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+/* RadarChart.js */
+.blue_circle_radar {
+  fill: #49a5d6;
+  stroke: #f0f0f0;
+  stroke-width: 3px;
+  z-index: 2 !important;
+  opacity: 0;
+  transition: opacity 0.3s;
+  cursor: pointer;
+}
+.blue_circle_radar.selected {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+/* BarChart.js */
+.bar {
+  fill: #49a5d6;
+  cursor: pointer;
+  transition: fill 0.3s;
+}
+.barCircle {
+  fill-opacity: 0;
+  fill: transparent;
+  stroke-width: 2px;
+  stroke: #fff;
+}
+.selectedBar {
+  fill: #ffb311;
+  fill-opacity: 1 !important;
+  transition: fill 0.3s;
+}
+@media screen and (max-width: 600px) {
+  .metriques article h2 {
+    text-align: center;
+    padding-bottom: 20px;
+    width: 90%;
+    margin: auto;
+  }
+  .metriques article h3 {
+    display: none;
+    text-align: center;
+  }
+  .metriques article ul li {
+    width: 100% !important;
+    margin-bottom: 20px;
+  }
+  .tableMetriques {
+    display: none !important;
+  }
+  #radardetails {
+    margin-left: 0 !important;
+    display: none;
+  }
+  #radardetails {
+    -webkit-transform: scale(0.5);
+    -moz-transform: scale(0.5);
+    -o-transform: scale(0.5);
+    -khtml-transform: scale(0.5);
+    -ms-transform: scale(0.5);
+    transform: scale(0.5);
+  }
+  #radardetails .selectedInfos {
+    display: none !important;
+  }
+  .selectedInfos {
+    margin-left: 50px !important;
+  }
+}
+@media screen and (min-width: 600px) and (max-width: 800px) {
+  .metriques h2 {
+    text-align: center;
+  }
+  .metriques h3 {
+    display: none;
+    text-align: center;
+  }
+  .metriques article ul li {
+    width: 45% !important;
+    margin: 0 2.5% 20px 2.5%;
+  }
+  #radardetails {
+    margin-left: 0 !important;
+  }
+  .tableMetriques {
+    display: none !important;
+  }
+  #radardetails {
+    -webkit-transform: scale(0.8);
+    -moz-transform: scale(0.8);
+    -o-transform: scale(0.8);
+    -khtml-transform: scale(0.8);
+    -ms-transform: scale(0.8);
+    transform: scale(0.8);
+  }
+  .selectedInfos {
+    margin-left: 0px !important;
+  }
+}
+@media screen and (min-width: 801px) and (max-width: 900px) {
+  .selectedInfos {
+    margin-left: -50px !important;
+  }
+}
+div.no-data {
+  position: absolute;
+  width: 280px;
+  height: 160px;
+  background: #ECF5FA;
+  text-align: center;
+  color: #49A5D6;
+  text-transform: uppercase;
+  font-size: 10px;
+  vertical-align: middle;
+  line-height: 160px;
+}

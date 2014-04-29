@@ -1,0 +1,78 @@
+<div id="publish-action-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="publish-action-modal-title" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="publish-action-modal-title">{{ _('Publish ...') }}</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+
+                    {# Publish a datset #}
+                    <div class="col-xs-12 col-sm-6">
+                        <div class="card">
+                            <h3>{{ _('... a dataset') }}</h3>
+                            <p>
+                                {{ _('Contribute and add a new dataset to this site catalog.') }}
+                            </p>
+                            <p class="text-center">
+                                <a href="{{ url_for('datasets.new') }}" class="btn btn-primary" role="button">
+                                {{ _('Publish a dataset') }}
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+
+                    {# Publish a reuse #}
+                    <div class="col-xs-12 col-sm-6">
+                        <div class="card">
+                            <h3>{{ _('... a reuse') }}</h3>
+                            <p>
+                                {{ _('Contribute and add a new reuse to this site catalog.') }}
+                            </p>
+                            <p class="text-center">
+                                <a href="{{ url_for('reuses.new') }}" class="btn btn-primary" role="button">
+                                {{ _('Publish a reuse') }}
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+
+                    {# Publish as an organization #}
+                    <div class="col-xs-12 col-sm-6">
+                        <div class="card">
+                            <h3>{{ _('... as an existing organization') }}</h3>
+                            <p>
+                            {{ _('Find and join an existing organization to publish in this name.') }}
+                            </p>
+                            <p class="text-center">
+                                <a href="{{ url_for('organizations.list') }}" class="btn btn-primary" role="button">
+                                {{ _('Find my organization') }}
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+
+                    {# Publish as a new organization #}
+                    <div class="col-xs-12 col-sm-6">
+                        <div class="card">
+                            <h3>{{ _('... as a new organization') }}</h3>
+                            <p>
+                                {{ _("You can create a new organization if yours doesn't exists yet.") }}
+                            </p>
+                            <p class="text-center">
+                                <a href="{{ url_for('organizations.new') }}" class="btn btn-primary" role="button">
+                                {{ _('Create an organization') }}
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

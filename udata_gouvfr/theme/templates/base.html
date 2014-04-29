@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% set site_css_bundle = 'gouvfr-css' %}
+
+{% block subnav %}
+    {% include theme('subnav-small.html') %}
+{% endblock %}
+
+{% block modals %}
+    {{ super() }}
+    {% include theme('snippets/publish-action-modal.html') %}
+{% endblock %}

@@ -1,0 +1,656 @@
+/**
+ * Navbar styles.
+ */
+.cover {
+    background-image: url('../img/datacover.png');
+    background-size: cover;
+}
+
+.cover-bubble {
+    background-image: url('../img/datacover.png');
+    background-size: cover;
+}
+
+.cover-marianne {
+    width: 200px;
+    height: 83px;
+    top:0;
+    left: -78px;
+    position: absolute;
+    z-index: -10;
+    background: url('../img/marianne_cover.png') no-repeat;
+}
+
+.navbar {
+    color: #373c42;
+    margin-bottom: 0;
+    border: none;
+}
+
+.navbar-header {
+    width: 100%;
+}
+
+.navbar-nav li {
+    font-weight: bold;
+    font-size: 12px;
+
+    a {
+        padding: 8px 16px 5px 10px;
+    }
+}
+
+.links li a {
+    padding-left: 0px;
+}
+
+.navbar-nav > li > a.navbar-btn {
+    margin-right: 5px;
+    padding: @padding-base-vertical @padding-base-horizontal;
+}
+
+.navbar-static-top {
+
+    .navbar-right .dropdown {
+        display: inline-block;
+        vertical-align: top;
+
+        .caret {
+            color: white;
+            border-top-color: white;
+            border-bottom-color: white;
+        }
+
+        .dropdown-menu {
+            min-width: 150px;
+        }
+    }
+
+    .user button {
+        color: @text-dark;
+        border: 0;
+        padding-top: 6px;
+        vertical-align: bottom;
+    }
+}
+
+.navbar-default {
+    margin-bottom: 0;
+
+    .navbar-brand   {
+        text-indent: -1000em;
+        margin: 10px 0px;
+        display: block;
+        min-height: 48px;
+        width: 233px;
+        padding: 0px;
+        line-height: 47px;
+        font-weight: bold;
+        color: #373c42;
+        background-image: url('../img/logo.png') ;
+        background-repeat: no-repeat;
+        font-family: @title-font;
+
+        &:hover {
+            color: @bg-dark;
+        }
+
+    }
+
+    // Specific fix for btn-dark
+    .btn-dark:hover, .btn-dark:focus {
+        color: white !important;
+        background-color: darken(@bg-dark, 8%) !important;
+    }
+
+    .links > li > a {
+        padding-left: 0;
+    }
+}
+
+.navbar-text {
+    font-style: italic;
+    color: #5f5f5f !important;
+    font-size: 16px;
+    font-family: @title-font;
+
+    @media (min-width: @grid-float-breakpoint) {
+        padding-top: 9px;
+    }
+
+    @media (max-width: @grid-float-breakpoint) {
+        margin: 5px 10px;
+    }
+}
+
+.navbar-subnav {
+    background-color: @bg-dark;
+    z-index: 800;
+    min-height: 80px;
+
+    @media (max-width: @grid-float-breakpoint) {
+        .container {
+            padding: 10px;
+        }
+    }
+
+    .navbar-form {
+        margin: 0px;
+        padding: 0;
+    }
+
+    .subnav-collapse { // Copied from bootstrap navbar-collapse
+        max-height: 340px;
+        overflow-x: visible;
+        padding: 0px;
+        .clearfix();
+        -webkit-overflow-scrolling: touch;
+
+        &.in {
+            overflow-y: auto;
+        }
+
+        @media (min-width: @grid-float-breakpoint) {
+            border-top: 0;
+            box-shadow: none;
+
+            &.collapse {
+                display: block !important;
+                height: auto !important;
+                padding-bottom: 0; // Override default setting
+                overflow: visible !important;
+            }
+
+            &.in {
+                overflow-y: visible;
+            }
+
+            // Account for first and last children spacing
+            .navbar-nav.navbar-left:first-child {
+                margin-left: -@navbar-padding-horizontal;
+            }
+            .navbar-nav.navbar-right:last-child {
+                margin-right: -@navbar-padding-horizontal;
+            }
+            .navbar-text:last-child {
+                margin-right: 0;
+            }
+        }
+    }
+
+    .tt-hint, .tt-query {
+        color: #bfbfbf;
+        background-color: @bg-light;
+        border-radius: 0!important;
+        border: none;
+    }
+
+    .tt-hint {
+        color: @gray-lighter;
+        border-radius: 0;
+        border: none;
+    }
+
+    .tt-query {
+        color: @gray-light !important;
+    }
+
+    .glyphicon {
+        color: #bfbfbf;
+    }
+
+    .territory-clear {
+        color: red;
+        cursor: pointer;
+    }
+
+    .navbar-form {
+        border: none;
+        .box-shadow(none);
+    }
+
+    .input-group {
+        .input-group-addon {
+            background-color: @bg-light;
+            border: none;
+            border-radius: 0;
+        }
+
+        .input-group-btn .btn {
+            background-color: @bg-light;
+            border-radius: 0px;
+            color: #999;
+            border: 1px solid white;
+        }
+    }
+
+    /**
+     * Main search integration
+     */
+    #main-search {
+        border-radius: 0;
+    }
+}
+
+.input-group.collapse {
+    display: none;
+}
+
+.nav-pills {
+    margin-top: 20px;
+
+    @media (min-width: @screen-sm-min) {
+        margin-top: 40px;
+    }
+
+    & > li > a {
+        font-family: @title-font;
+        text-transform: uppercase;
+        color: @gray-lighter;
+        font-weight: bold;
+        padding: 0px;
+        margin-right: 5px;
+
+        @media (min-width: @screen-sm-min) {
+            margin-right: 15px;
+        }
+
+        &:hover {
+            color: #999;
+            background: none;
+        }
+
+    }
+
+    & > li.active > a, & > li.active > a:hover, & > li.active > a:focus {
+        color: @text-dark;
+        background: none;
+    }
+}
+
+.nav-tabs {
+    > li > a {
+        color: white;
+        background-color: @gray-light;
+        padding: 8px 10px;
+        border-radius: 2px 2px 0 0;
+
+        &:hover {
+            background-color: @highlight;
+        }
+    }
+}
+
+
+/**
+ * Sidebar style and fixes
+ */
+.sidebar {
+    background: none;
+    border-radius: 0px;
+    color: white;
+    max-width: 400px;
+    margin-bottom: 3px;
+    .box-shadow(none);
+
+    a {
+        color: white;
+        text-decoration: none;
+    }
+
+    .list-group {
+        margin: 8px 0px;
+    }
+
+    .list-group-item {
+        background: none;
+        border: 0px;
+        color: white;
+        padding: 4px 0px;
+        font-weight: normal;
+        font-size: 13px;
+
+        &:hover, &:focus {
+            border: 0px;
+            opacity: 0.75;
+            background: none !important;
+        }
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+}
+
+
+.sidebackground-width(@container-width, @cols) {
+    width: floor(1000px + @cols * (@container-width / @grid-columns) - (@grid-gutter-width / 2) + 1px);
+    max-width: 1000px + 400px + round(@grid-gutter-width / 2);
+}
+
+.side-bgs {
+    position: absolute;
+    left: -1000px;
+    top: 12px;
+    height: 100%;
+    z-index: -10;
+    .sidebackground-width(@container-lg, 4);
+
+    @media (max-width: @screen-md-max) {
+        .sidebackground-width(@container-md, 4);
+    }
+
+    @media (max-width: @screen-sm-max) {
+        .sidebackground-width(@container-sm, 5);
+    }
+
+    @media (max-width: @screen-xs-max) {
+        .sidebackground-width(@container-md, 6);
+    }
+
+    @media (max-width: @screen-xs-min) {
+        .sidebackground-width(@container-sm, 5);
+    }
+
+    .bg {
+        background-color: rgba(0,0,0,0.25);
+        width: 100%;
+        margin-bottom: 4px;
+
+        @media (max-width: @grid-float-breakpoint) {
+            margin-bottom: 5px;
+        }
+
+        &:first-child {
+            height: 34px !important;
+        }
+
+        &:nth-child(2) {
+            height: 242px;
+        }
+
+        &.sidebg-collapse { // Copied from bootstrap navbar-collapse
+            &.in {
+                display: block;
+            }
+
+            @media (min-width: @grid-float-breakpoint) {
+                display: block;
+            }
+        }
+    }
+}
+
+.subnav-large {
+    height: 343px;
+}
+
+// big banner call to action
+.call-to-action {
+    margin-bottom: 10px;
+
+    @media (min-width: @screen-sm-min) {
+        position: relative;
+        top: 65px;
+
+        @media (min-width: @screen-md-min) {
+            left: 50px;
+        }
+    }
+
+
+    h2 {
+        color: white;
+        font-style: italic;
+        font-family: @title-font;
+        font-size: 26px;
+        line-height: 1.1em;
+        margin-bottom: 20px;
+
+        @media (min-width: @grid-float-breakpoint) {
+            max-width: 390px;
+        }
+
+        @media (min-width: @screen-md-min) {
+            max-width: 570px;
+            font-size: 36px;
+            line-height: 1.2em;
+        }
+
+        @media (max-width: @grid-float-breakpoint) {
+            font-size: 18px;
+            margin: 10px 0;
+            max-width: 280px;
+        }
+    }
+}
+
+.search_sidebar {
+    padding-left: 0px;
+    margin-top: 11px;
+    margin-bottom: 8px;
+
+    @media(max-width: @grid-float-breakpoint) {
+        margin-top: 1px;
+    }
+}
+
+.search_bar {
+    padding-left: 0px;
+    margin-bottom: 0px;
+    margin-top: 34px;
+
+    @media (max-width: @screen-xs-max) {
+        margin-top: 0;
+
+        > .form-group {
+            margin-bottom: 0;
+            .btn-block {
+                margin-top: 0;
+            }
+        }
+
+        .btn-block {
+            margin-top: 5px;
+        }
+
+        @media (min-width: @grid-float-breakpoint) {
+            margin-top: 10px;
+
+            .btn-block {
+                margin-bottom: 10px;
+
+            }
+
+            .btn-block + .btn-block {
+                margin-top: 0;
+            }
+        }
+    }
+
+    @media (min-width: @screen-sm-min) {
+
+            .btn-dark {
+                position: relative;
+                right: -15px;
+            }
+
+    }
+
+    @media (max-width: @screen-md-min) and (max-width: @screen-md-max) {
+        .btn-block + .btn-block {
+            margin-top: 0;
+        }
+    }
+
+    .col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6,
+    .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12,
+    .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6,
+    .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12,
+    .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+    .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12,
+    .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6,
+    .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12 {
+        padding-left: 0px;
+        padding-right: 15px;
+
+        @media (max-width: @grid-float-breakpoint) {
+            padding-right: 0;
+        }
+    }
+}
+
+.search_sidebar, .search_bar {
+    .tt-dropdown-menu {
+        padding: 8px 0 5px;
+    }
+
+    .tt-suggestion {
+        margin: 4px 0;
+    }
+}
+
+
+// test for gray header menu bar
+.topmenu {
+    background-color: @bg-gray;
+
+    @media(min-width: @grid-float-breakpoint) {
+        &.navbar-collapse.collapse {
+            height: 60px !important;
+        }
+    }
+
+    @media(min-width: @screen-sm-min) {
+        &.navbar-collapse.collapse {
+            height: 30px !important;
+        }
+    }
+
+    .navbar-nav > li > a {
+        line-height: 16px!important;
+    }
+
+    .navbar-default {
+        background: none !important;
+    }
+
+    .dropdown .caret {
+        color: black !important;
+        border-top-color: black !important;
+        border-bottom-color: black !important;
+    }
+
+    .btn {
+        padding: 5px 12px;
+    }
+
+    .login {
+        margin-right: 15px;
+    }
+
+    .user button {
+        padding: 0 10px 0 0;
+        // color: darken(white, 10%);
+        // background: @gray;
+        vertical-align: middle;
+        height: 30px;
+
+        &:hover, &:active {
+            text-decoration: none !important;
+            color: darken(white, 15%);
+            background: @gray;
+        }
+
+        img {
+            margin-right: -10px;
+            // width: 22px;
+            // height: 22px;
+        }
+
+        .username {
+            padding: 0 6px 0 8px;
+            position: relative;
+            top: 1px;
+        }
+    }
+
+    .language button {
+        padding: 5px 6px;
+        vertical-align: middle;
+        // background: lighten(@gray-light, 10%);
+
+        &:hover, &:active {
+            background: @gray-light;
+        }
+    }
+
+
+    .dropdown {
+        .dropdown-menu {
+            margin-top: -1px;
+        }
+
+        &.open .dropdown-menu {
+            display: inline;
+        }
+    }
+}
+
+
+// Topics
+.topic-excerpt {
+    @media(min-width: @screen-md-min) {
+        padding-top: 12px;
+        padding-left: 30px;
+    }
+
+    margin-bottom: 10px;
+    color: white;
+    font-size: 14px;
+    line-height: 1.6em;
+    max-height: 270px;
+
+    h3 {
+        font-family: @title-font;
+        font-size: 32px;
+    }
+
+}
+
+.topic-toolbar {
+    margin: 10px 0;
+}
+
+.topic-1 {
+    background-color: #1b775d !important;
+}
+.topic-2 {
+    background-color: #905d4e !important;
+}
+.topic-3 {
+    background-color: #EE7836 !important;
+}
+.topic-4 {
+    background-color: #6a4570 !important;
+}
+.topic-5 {
+    background-color: #fc3f3f !important;
+}
+.topic-6 {
+    background-color: #9BBB45 !important;
+}
+.topic-7 {
+    background-color: #46b2a4 !important;
+}
+.topic-8 {
+    background-color: #8B4F78 !important;
+}
+.topic-9 {
+    background-color: #134d77 !important;
+}
+
+
+
+
