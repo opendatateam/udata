@@ -1,0 +1,5 @@
+-r install.pip
+-r test.pip
+-r report.pip
+nosexcover
+python-coveralls
