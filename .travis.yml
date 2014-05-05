@@ -1,6 +1,8 @@
 language: python
 python:
   - 2.7
+services:
+  - mongodb
 install:
   - pip install -r requirements/travis.pip --allow-external webassets --allow-unverified webassets
   - pip install --no-deps -e .
