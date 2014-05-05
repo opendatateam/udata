@@ -49,6 +49,7 @@ class Testing(Defaults):
     CELERY_ALWAYS_EAGER = True
     TEST_WITH_PLUGINS = False
     TEST_WITH_THEME = False
+    AUTO_BUILD = False
 
 
 class Debug(Defaults):

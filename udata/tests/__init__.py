@@ -49,6 +49,7 @@ class TestCase(BaseTestCase):
         app = create_app(self.settings)
         # Override some local config
         app.config['DEBUG_TOOLBAR'] = False
+        app.config['AUTO_BUILD'] = False
         app.config['SERVER_NAME'] = 'localhost'
         if not app.config.get('TEST_WITH_PLUGINS', False):
             app.config['PLUGINS'] = []
