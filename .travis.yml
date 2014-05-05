@@ -3,10 +3,11 @@ python:
   - 2.7
 services:
   - mongodb
+before_install:
+  - sudo requirements/elasticsearch-travisci.sh
 install:
   - pip install -r requirements/travis.pip --allow-external webassets --allow-unverified webassets
   - pip install --no-deps -e .
-  - requirements/elasticsearch-travisci.sh
 script:
   - nosetests --with-xcoverage udata
 after_success:
