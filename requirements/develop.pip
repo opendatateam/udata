@@ -1,3 +1,3 @@
 -r test.pip
 -r report.pip
-Flask-DebugToolbar==0.8.0
+Flask-DebugToolbar==0.9.0

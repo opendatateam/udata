@@ -1,0 +1,2 @@
+-r install.pip
+sphinx==1.2.2
