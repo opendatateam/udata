@@ -5,7 +5,7 @@ require.config({
         'jquery': '../bower/jquery/dist/jquery',
         'bootstrap': '../bower/bootstrap/dist/js/bootstrap',
         'text': "../bower/requirejs-text/text",
-        'moment': '../bower/moment/min/moment-with-langs',
+        'moment': '../bower/momentjs/min/moment-with-langs',
         'jquery.validation': '../bower/jquery.validation/jquery.validate',
         'markdown': '../bower/markdown/lib/markdown',
         'bootstrap-markdown': '../bower/bootstrap-markdown/js/bootstrap-markdown',
