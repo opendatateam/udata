@@ -51,3 +51,6 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# Force .gitignore files
+!.gitignore
