@@ -3,6 +3,7 @@ python:
   - 2.7
 services:
   - mongodb
+  - elasticsearch
 before_install:
   - sudo /usr/share/elasticsearch/bin/plugin -install elasticsearch/elasticsearch-analysis-icu/2.0.0
 install:
