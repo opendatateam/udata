@@ -4,8 +4,13 @@ uData
 
 .. image:: https://secure.travis-ci.org/etalab/udata.png
     :target: http://travis-ci.org/etalab/udata
+    :alt: Build status
 .. image:: https://coveralls.io/repos/etalab/udata/badge.png?branch=master
     :target: https://coveralls.io/r/etalab/udata
+    :alt: Code coverage
+.. image:: https://requires.io/github/etalab/udata/requirements.png?branch=master
+   :target: https://requires.io/github/etalab/udata/requirements/?branch=master
+   :alt: Requirements Status
 
 uData is an open and social data hub.
 This currently a work in progress and API is subject to change until the first official release.
