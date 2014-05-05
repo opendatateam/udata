@@ -1,0 +1,258 @@
+{% extends theme('layouts/2-columns.html') %}
+{% from theme('macros/starred.html') import starred with context %}
+
+{% block breadcrumb %}
+    <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
+    <li class="active">{{ dataset.title|truncate(128) }}</li>
+{% endblock %}
+
+{% block toolbar %}
+{% if can_edit %}
+<div class="btn-group btn-group-xs">
+    <a href="{{ url_for('datasets.edit', dataset=dataset) }}" class="btn btn-success">
+        <span class="glyphicon glyphicon-pencil"></span>
+        {{ _('Edit') }}
+    </a>
+</div>
+{% endif %}
+{% if sysadmin %}
+<div class="btn-group btn-group-xs">
+    <button type="button"
+        class="btn btn-success featured {% if dataset.featured %}active{% endif %}"
+        data-api-url="{{ url_for('api.dataset_featured', slug=dataset.slug) }}">
+        <span class="glyphicon glyphicon-bullhorn"></span>
+        {{ _('Featured') }}
+    </button>
+</div>
+{% endif %}
+<div class="btn-group btn-group-xs">
+    {{ starred(dataset) }}
+</div>
+{% endblock %}
+
+{% block main_content %}
+<h2>{{ dataset.title }}</h2>
+<div>
+    {{ dataset.description|markdown }}
+</div>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs">
+    <li class="active">
+        <a href="#resources" data-toggle="tab">
+            {{ _('Resources')}}
+            <span class="badge">{{ dataset.resources|length }}</span>
+        </a>
+    </li>
+    <li>
+        <a href="#community-resources" data-toggle="tab">
+            {{ _('Community resources') }}
+            <span class="badge">{{ dataset.community_resources|length }}</span>
+        </a>
+    </li>
+    <li>
+        <a href="#reuses" data-toggle="tab">
+            {{ _('Reuses') }}
+            <span class="badge">{{ reuses|length }}</span>
+        </a>
+    </li>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+    <!-- Resources pane -->
+    <div class="tab-pane active" id="resources">
+        <div class="list-group resources-list">
+            {% for resource in dataset.resources %}
+            {% include theme('dataset/resource/list-item.html') %}
+            {% else %}
+            <p class="text-center">{{ _('No resources') }}</p>
+            {% endfor %}
+        </div>
+        <div>
+            <a href="{{ url_for('datasets.new_resource', dataset=dataset) }}"
+                class="btn btn-primary btn-block">
+                <span class="glyphicon glyphicon-plus-sign"></span>
+                {{ _('New resource') }}
+            </a>
+        </div>
+    </div>
+    <div class="tab-pane" id="community-resources">
+        <div class="list-group resources-list">
+            {% for resource in dataset.community_resources %}
+            {% include theme('dataset/resource/list-item.html') %}
+            {% else %}
+            <p class="text-center">{{ _('No resources') }}</p>
+            {% endfor %}
+        </div>
+        <div>
+            <a href="{{ url_for('datasets.new_resource', dataset=dataset) }}"
+                class="btn btn-primary btn-block">
+                <span class="glyphicon glyphicon-plus-sign"></span>
+                {{ _('New community resource') }}
+            </a>
+        </div>
+    </div>
+    <div class="tab-pane" id="reuses">
+        <ul class="card-list">
+        {% for reuse in reuses %}
+        <li class="col-md-6 col-sm-6">{% include theme('reuse/card.html') %}</li>
+        {% endfor %}
+        </ul>
+
+        <div class="clearfix"></div>
+        <a href="{{ url_for('reuses.new') }}"
+            class="btn btn-primary btn-block">
+            <span class="glyphicon glyphicon-plus-sign"></span>
+            {{ _('New reuse') }}
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+{% if dataset.organization %}
+{% set org = dataset.organization %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">{{ _('Producer') }}</h3>
+    </div>
+    <div class="panel-body">
+        <a href="{{ url_for('organizations.show', org=org) }}"
+            title="{{ org.title }}">
+            <img src="{{ org.image_url or static('images/placeholders/organization.png') }}"
+                alt="{{ org.title }}" class="organization-logo producer img-responsive" />
+        </a>
+        <div class="caption text-left">
+            {% if org.description %}
+            <p>
+                {{ org.description|markdown }}
+                <a href="{{ url_for('organizations.show', org=org) }}"
+                    title="{{ _('more') }}"
+                    class="btn btn-grey btn-primary btn-mini">+</a>
+            </p>
+            {% else %}
+            <br/>
+            {% endif %}
+            <a href class="btn btn-primary btn-block btn-sm icon-left follow"
+                title="{{ _('Follow') }}">
+                <span class="glyphicon glyphicon-eye-open"></span>
+                {{ _('Follow') }}
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if dataset.supplier %}
+{% set org = dataset.supplier %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">{{ _('Supplier') }}</h3>
+    </div>
+    <div class="panel-body">
+        <a href="{{ url_for('organizations.show', org=org) }}"
+            title="{{ org.title }}">
+            <img src="{{ org.image_url or static('images/placeholders/organization.png') }}"
+                alt="{{ org.title }}" class="organization-logo producer img-responsive" />
+        </a>
+        <div class="caption text-left">
+            {% if org.description %}
+            <p>
+                {{ org.description|markdown }}
+                <a href="{{ url_for('organizations.show', org=org) }}"
+                    title="{{ _('more') }}"
+                    class="btn btn-grey btn-primary btn-mini">+</a>
+            </p>
+            {% else %}
+            <br/>
+            {% endif %}
+            <a href class="btn btn-primary btn-block btn-sm icon-left follow"
+                title="{{ _('Follow') }}">
+                <span class="glyphicon glyphicon-eye-open"></span>
+                {{ _('Follow') }}
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">{{ _('Informations') }}</h3>
+    </div>
+    <div class="panel-body">
+        <ul id="infos-list" class="list-unstyled">
+            {# License #}
+            {% if dataset.license %}
+            <li>
+                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="right auto"
+                    title="{{ _('License') }}">
+                    <span class="glyphicon glyphicon-copyright-mark"></span>
+                </a>
+                {% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
+                {{ dataset.license.title }}
+                {% if dataset.license.url %}</a>{% endif %}
+            </li>
+            {% endif %}
+
+            {# Temporal coverage #}
+            {% if dataset.temporal_coverage %}
+            <li>
+                <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                    title="{{ _('Temporal coverage') }}">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </a>
+                {{ _('%(start)s to %(end)s',
+                    start=dataset.temporal_coverage.start|dateformat('short'),
+                    end=dataset.temporal_coverage.end|dateformat('short')
+                    ) }}
+            </li>
+            {% endif %}
+
+            {% if dataset.frequency %}
+            <li>
+                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="right auto"
+                    title="{% trans %}Frequency{% endtrans %}">
+                    <span class="glyphicon glyphicon-time"></span>
+                </a>
+                {{ UPDATE_FREQUENCIES[dataset.frequency] }}
+            </li>
+            {% endif %}
+
+            {# Territorial coverage #}
+            {% if dataset.territorial_coverage %}
+                {% if dataset.territorial_coverage.codes %}
+                <li>
+                    <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                        title="{{ _('Territorial coverage') }}">
+                        <span class="glyphicon glyphicon-globe"></span>
+                    </a>
+                    {% for code in dataset.territorial_coverage.codes %}
+                    {{ code }}
+                    {% endfor %}pd
+                </li>
+                {% endif %}
+
+                {% if dataset.territorial_coverage.granularity %}
+                <li>
+                    <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                        title="{{ _('Territorial coverage granularity') }}">
+                        <span class="glyphicon glyphicon-screenshot"></span>
+                    </a>
+                    {{ dataset.territorial_coverage.granularity }}
+                </li>
+                {% endif %}
+            {% endif %}
+        </ul>
+
+        <div class="tags">
+            {% for tag in dataset.tags %}
+            <a href="{{ url_for('datasets.list', tag=tag) }}"
+                class="btn btn-primary btn-xs"
+                title="{{ tag }}">
+                {{ tag|truncate(14, True) }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

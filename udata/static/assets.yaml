@@ -1,0 +1,55 @@
+iecompat:
+    filters: uglifyjs
+    output: js/iecompat.min.js
+    contents:
+        - bower/html5shiv/dist/html5shiv.js
+        - bower/respond/dest/respond.src.js
+
+
+require-js:
+    filters: uglifyjs
+    output: js/require.min.js
+    contents:
+        - bower/requirejs/require.js
+
+app-js:
+    filters: requirejs
+    output: js/app.min.js
+    contents:
+        - js/app.js
+
+site-css:
+    filters: less,cssrewrite,cssmin
+    depends:
+        - less/*.less
+        - less/udata/*.less
+    output: css/site.min.css
+    contents: less/site.less
+
+
+forms-css:
+    filters: less,cssrewrite,cssmin
+    depends:
+        - less/*.less
+        - less/udata/*.less
+    output: css/forms.min.css
+    contents: less/forms.less
+
+
+home-css:
+    filters: less,cssrewrite,cssmin
+    depends:
+        - less/*.less
+        - less/udata/*.less
+    output: css/home.min.css
+    contents: less/home.less
+
+
+metrics-css:
+    filters: less,cssrewrite,cssmin
+    depends:
+        - less/*.less
+        - less/udata/*.less
+    output: css/metrics.min.css
+    contents: less/metrics.less
+

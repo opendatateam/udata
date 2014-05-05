@@ -1,0 +1,35 @@
+{% macro paginator(p, nb=3) %}
+{% if p.pages > 1 %}
+{% set start = 1 if p.page <= nb else p.page - nb %}
+{% set end = p.pages if p.page + nb > p.pages else p.page + nb %}
+<div class="text-center">
+    <ul class="pagination">
+        <li {% if p.page == 1 %}class="disabled"{% endif %}>
+            <a href="{{ url_rewrite(page=1) }}" title="{% trans %}First page{% endtrans %}">
+                &laquo;
+            </a>
+        </li>
+        <li {% if p.page == 1 %}class="disabled"{% endif %}>
+            <a href="{{ url_rewrite(page=p.page - 1) }}" title="{% trans %}Previous page{% endtrans %}">
+                &lsaquo;
+            </a>
+        </li>
+        {% for num_page in range(start, end + 1) %}
+        <li {% if num_page == p.page %}class="active"{% endif %}>
+            <a href="{{ url_rewrite(page=num_page) }}">{{ num_page }}</a>
+        </li>
+        {% endfor %}
+        <li {% if p.page == p.pages %}class="disabled"{% endif %}>
+            <a href="{{ url_rewrite(page=p.page + 1) }}" title="{% trans %}Next page{% endtrans %}">
+                &rsaquo;
+            </a>
+        </li>
+        <li {% if p.page == p.pages %}class="disabled"{% endif %}>
+            <a href="{{ url_rewrite(page=p.pages) }}" title="{% trans %}Last page{% endtrans %}">
+                &raquo;
+            </a>
+        </li>
+    </ul>
+</div>
+{% endif %}
+{% endmacro %}

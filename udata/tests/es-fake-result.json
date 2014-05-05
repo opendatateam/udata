@@ -1,0 +1,104 @@
+{
+    "hits": {
+        "hits": [{
+            "_score": 10.0,
+            "_type": "fake",
+            "_id": "52eb79f4beece919379f97f5",
+            "_source": {
+                "title": "Aut natus voluptatem rem et non ullam consequuntur.",
+                "tags": []
+            },
+            "_index": "udata-test"
+        }, {
+            "_score": 9.0,
+            "_type": "fake",
+            "_id": "52eb7940beece917a7355c20",
+            "_source": {
+                "title": "Quasi atque aliquid ut rerum facilis et minima hic.",
+                "tags": []
+            },
+            "_index": "udata-test"
+        }, {
+            "_score": 8.0,
+            "_type": "fake",
+            "_id": "52eb7886beece90c7ee70e30",
+            "_source": {
+                "title": "Fuga voluptate quae doloribus sunt veniam labore praesentium.",
+                "tags": []
+            },
+            "_index": "udata-test"
+        }, {
+            "_score": 7.0,
+            "_type": "fake",
+            "_id": "52eb7851beece90b2f4a40b8",
+            "_source": {
+                "title": "Incidunt ut quae excepturi reprehenderit maxime.",
+                "tags": []
+            },
+            "_index": "udata-test"
+        }, {
+            "_score": 6.0,
+            "_type": "fake",
+            "_id": "52eb7815beece90a35ff6542",
+            "_source": {
+                "title": "Enim repellat molestias labore est.",
+                "tags": []
+            },
+            "_index": "udata-test"
+        }, {
+            "_score": 5.0,
+            "_type": "fake",
+            "_id": "52eb7958beece917e98282d6",
+            "_source": {
+                "title": "Enim debitis ducimus voluptates expedita aut dicta libero.",
+                "tags": []
+            },
+            "_index": "udata-test"
+        }, {
+            "_score": 4.0,
+            "_type": "fake",
+            "_id": "52eb74f1beece9068f44fb08",
+            "_source": {
+                "title": "Sed debitis neque maxime rerum nihil.",
+                "tags": []
+            },
+            "_index": "udata-test"
+        }, {
+            "_score": 3.0,
+            "_type": "fake",
+            "_id": "52eb7b30beece919d6a413dd",
+            "_source": {
+                "title": "Maxime in assumenda maiores.",
+                "tags": []
+            },
+            "_index": "udata-test"
+        }, {
+            "_score": 2.0,
+            "_type": "fake",
+            "_id": "52eb7469beece905a2b94994",
+            "_source": {
+                "title": "Id voluptatum beatae consequuntur et aperiam.",
+                "tags": []
+            },
+            "_index": "udata-test"
+        }, {
+            "_score": 1.0,
+            "_type": "fake",
+            "_id": "52eb74a9beece90617fb6cae",
+            "_source": {
+                "title": "Rem non aut sint repudiandae voluptatum numquam qui.",
+                "tags": []
+            },
+            "_index": "udata-test"
+        }],
+        "total": 42,
+        "max_score": 10.0
+    },
+    "_shards": {
+        "successful": 5,
+        "failed": 0,
+        "total": 5
+    },
+    "took": 52,
+    "timed_out": false
+}

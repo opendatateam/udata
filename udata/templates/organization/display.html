@@ -1,0 +1,108 @@
+{% extends theme('layouts/1-column.html') %}
+{% from theme('macros/starred.html') import starred with context %}
+
+{% block breadcrumb %}
+    <li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
+    <li class="active">{{ org.name }}</li>
+{% endblock %}
+
+{% block toolbar %}
+{% if can_edit %}
+<div class="btn-group btn-group-xs">
+    <a href="{{ url_for('organizations.edit', org=org) }}" class="btn btn-success">
+        <span class="glyphicon glyphicon-pencil"></span>
+        {{ _('Edit') }}
+    </a>
+</div>
+{% endif %}
+<div class="btn-group btn-group-xs">
+    {{ starred(org) }}
+</div>
+{% endblock %}
+
+{% block main_content %}
+<h2>{{ org.name }}</h2>
+<div class="row">
+    <div class="col-md-3">
+        <img src="{{ org.image_url or static('/base/images/placeholder-organization.png') }}"
+            alt="{{ org.title }}" class="scalable img-responsive" />
+    </div>
+    <div class="col-md-9">{{ org.description|markdown }}</div>
+</div>
+
+<div>
+    <ul class="nav nav-tabs">{% set actived = False %}
+        {% if datasets %}
+        <li class="active">{% set actived = True %}
+            <a href="#datasets" data-toggle="tab">{{ _('Datasets') }}</a>
+        </li>
+        {% endif %}
+        {% if supplied_datasets %}
+        <li {% if not actived %}class="active"{% set actived = True %}{% endif %}>
+            <a href="#supplied-datasets" data-toggle="tab">{{ _('Supplied datasets') }}</a>
+        </li>
+        {% endif %}
+        {% if reuses %}
+        <li {% if not actived %}class="active"{% set actived = True %}{% endif %}>
+            <a href="#reuses" data-toggle="tab">{{ _('Reuses') }}</a>
+        </li>
+        {% endif %}
+    </ul>
+
+    <!-- Tab panes -->
+    {% set max_per_tab = 12 %}
+    <div class="tab-content">{% set actived = False %}
+        {% if datasets %}
+        <div id="datasets" class="tab-pane {% if not actived %}active{% set actived=True %}{% endif %}">
+            <ul class="card-list">
+                {% for dataset in datasets[:max_per_tab] %}
+                <li class="col-md-4 col-sm-6">{% include theme('dataset/card.html') %}</li>
+                {% endfor %}
+            </ul>
+            {% if datasets|length > max_per_tab %}
+            <div class="clearfix"></div>
+            <div class="text-center">
+                <a href="{{ url_for('datasets.list', organization=org.id) }}" class="btn btn-default">
+                    {{ _('See all') }}
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if supplied_datasets %}
+        <div id="supplied-datasets" class="tab-pane {% if not actived %}active{% set actived=True %}{% endif %}">
+            <ul class="card-list">
+                {% for dataset in supplied_datasets[:max_per_tab] %}
+                <li class="col-md-4 col-sm-6">{% include theme('dataset/card.html') %}</li>
+                {% endfor %}
+            </ul>
+            {% if supplied_datasets|length > max_per_tab %}
+            <div class="clearfix"></div>
+            <div class="text-center">
+                <a href="{{ url_for('datasets.list', supplier=org.id) }}" class="btn btn-default">
+                    {{ _('See all') }}
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if reuses %}
+        <div id="reuses" class="tab-pane {% if not actived %}active{% set actived=True %}{% endif %}">
+            <ul class="card-list">
+                {% for reuse in reuses[:max_per_tab] %}
+                <li class="col-md-4 col-sm-6">{% include theme('reuse/card.html') %}</li>
+                {% endfor %}
+            </ul>
+            {% if reuses|length > max_per_tab %}
+            <div class="clearfix"></div>
+            <div class="text-center">
+                <a href="{{ url_for('reuses.list', organization=org.id) }}" class="btn btn-default">
+                    {{ _('See all') }}
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

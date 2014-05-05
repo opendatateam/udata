@@ -1,0 +1,97 @@
+<nav class="navbar navbar-default navbar-static-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <!-- You'll want to use a responsive image option so this logo looks good on devices - I recommend using something like retina.js (do a quick Google search for it and you'll find it) -->
+      <a class="navbar-brand" href="{{ url_for('front.home') }}">{{ config['SITE_TITLE'] }}</a>
+    </div>
+
+    <div class="col-sm-2 col-lg-3 nav navbar-nav search-bar">
+      <form class="navbar-form" role="search" action="{{ url_for('front.search') }}">
+        <div class="form-group">
+          <div class="input-group input-group-sm">
+            <span class="input-group-addon">
+              <span class="glyphicon glyphicon-search"></span>
+            </span>
+            <input id="main-search" type="text" name="q"
+                class="form-control" placeholder="{{ _('Search') }}"
+                value="{{ request.args.q }}">
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <ul class="nav navbar-nav collapse navbar-collapse collapse-on-search">
+        <li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
+        <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
+        <li><a href="{{ url_for('reuses.list') }}">{{ _('Reuses') }}</a></li>
+        <li><a href="{{ url_for('front.explore') }}">{{ _('Explore') }}</a></li>
+    </ul>
+
+      <ul class="nav navbar-nav navbar-right collapse navbar-collapse">
+        {# <li><a href="{{ url_for('front.metrics') }}">{{ _('Metrics') }}</a></li> #}
+        {% if current_user.is_authenticated() %}
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <img src="{{ current_user|avatar_url(20) }}" width="20" height="20" />
+            {{ current_user.fullname }} <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="{{ url_for('users.show', user=current_user) }}">{{ _('Profile') }}</a>
+            </li>
+            {% if user_orgs %}
+            <li role="presentation" class="dropdown-header">{{ _('Organizations') }}</li>
+            {% for org in user_orgs %}
+            <li>
+              <a href="{{ url_for('organizations.show', org=org) }}">
+                <img src="{{ org.image_url|placeholder('organization') }}" width="20px" height="20px"/>
+                {{ org.name }}
+              </a>
+            </li>
+            {% endfor %}
+            {% endif %}
+            <li class="divider"></li>
+            <li>
+              <a href="{{ url_for('users.edit', user=current_user) }}">{{ _('Settings') }}</a>
+            </li>
+            <li class="divider"></li>
+            <li><a href="{{ url_for('security.logout') }}">Logout</a></li>
+          </ul>
+        </li>
+        {% else %}
+        <li>
+            <a title="{{ _('Sign In / Register') }}"
+                href="{{ url_for('security.login') }}">
+                <span class="glyphicon glyphicon-log-in"></span>
+                {{ _('Sign In / Register') }}
+            </a>
+        </li>
+        {% endif %}
+        <li class="dropdown language">{#
+            <button class="btn btn-link dropdown-toggle" data-toggle="dropdown">
+            </button> #}
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <img src="{{ theme_static('img/flags/{0}.png'.format(g.lang_code)) }}" alt="Current locale flag" />
+            </a>
+            <ul class="dropdown-menu">
+                {% for code, name in config['LANGUAGES'].items() %}
+                <li>
+                    <a href="{{ request.url.replace('/{0}/'.format(g.lang_code),'/{0}/'.format(code)) }}">
+                        <img src="{{ theme_static('img/flags/{0}.png'.format(code)) }}"
+                            alt="{{name}} flag" />
+                        {{name}}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container -->
+</nav>

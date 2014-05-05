@@ -1,0 +1,202 @@
+{% macro render(form, exclude=None) %}
+{% set excluded = exclude or [] %}
+<fieldset>
+{% for f in form %}
+    {% if f in excluded %}
+    {% elif f.type in ('CSRFTokenField', 'HiddenField') %}
+        {{ f() }}
+    {% else %}
+        {{ field(f) }}
+    {% endif %}
+{% endfor %}
+</fieldset>
+{% endmacro %}
+
+{% macro field(field, user=None, sizes='sm-2') %}
+{#% if field.is_visible(user) %#}
+{% set cols = form_grid(sizes) %}
+<div class="form-group{% if field.errors %} has-error{% endif %}">
+    <label for="{{ field.id }}"
+        class="{{ cols.label }} control-label{% if field.flags.required %} required{% endif %}">
+        {{ field.label.text }}
+        {% if field.description %}<span class="form-help" data-content="{{ field.description }}"></span>{% endif %}
+    </label>
+    <div class="{{ cols.control }}">
+        {% if field.type == 'PublishAsField' %}
+        {{ publish_as(field, user) }}
+        {% elif field.type == 'RadioField' %}
+        {{ radio(field, user) }}
+        {% elif field.type == 'BooleanField' %}
+        {{ checkbox(field, user) }}
+        {% elif field.type == 'KeyValueField' %}
+        {{ checkbox(field, user) }}
+        {% elif field.type == 'TagField' or field.type == 'TerritoryField' %}
+        <div class="tag-container"></div>
+        {{ field(class_='form-control') }}
+        {% elif field.type == 'UploadableURLField' %}
+        {{ uploadable_url(field, user) }}
+        {% else %}
+        {{ field(class_='form-control') }}
+        {% endif %}
+        {% for error in field.errors %}
+        <label for="{{ field.id }}" class="help-block">{{ error }}</label>
+        {% endfor %}
+    </div>
+</div>
+{#% endif %#}
+{% endmacro %}
+
+{% macro radio(field, user) %}
+{% if field.stacked %}
+{{ radio_stacked(field, user) }}
+{% else %}
+{{ radio_inline(field, user) }}
+{% endif %}
+{% endmacro %}
+
+{% macro radio_inline(field, user) %}
+{% for value, label, selected in field.iter_choices() %}
+<label class="radio-inline">
+    <input type="radio" name="{{ field.name }}" id="{{ field.id }}-{{ loop.index }}" value="{{ value }}"
+        {% if selected %}checked="checked"{% endif %}>
+    {{ _(label) }}
+</label>
+{% endfor %}
+{% endmacro %}
+
+{% macro radio_stacked(field, user) %}
+{% for value, label, selected in field.iter_choices() %}
+<div class="radio">
+    <label>
+        <input type="radio" name="{{ field.name }}" id="{{ field.id }}-{{ loop.index }}" value="{{ value }}"
+            {% if selected %}checked="checked"{% endif %}>
+        {{ _(label) }}
+    </label>
+</div>
+{% endfor %}
+{% endmacro %}
+
+
+{% macro checkbox(field, user) %}
+{% if field.stacked %}
+{{ checkbox_stacked(field, user) }}
+{% else %}
+{{ checkbox_inline(field, user) }}
+{% endif %}
+{% endmacro %}
+
+{% macro checkbox_inline(field, user) %}
+<label class="checkbox-inline">
+    {{ field() }}
+    {{ _(label) }}
+</label>
+{% endmacro %}
+
+{% macro checkbox_stacked(field, user) %}
+<div class="checkbox">
+    <label>
+        {{ field() }}
+        {{ _(label) }}
+    </label>
+</div>
+{% endmacro %}
+
+{% macro publish_as(field, user) %}
+{% if user.organizations %}
+<input id="{{ field.id }}" name="{{ field.name }}" type="hidden" {% if field.data %}value="{{ field.data }}"{% endif %}/>
+<ul class="card-list">
+    <li class="col-xs-4 col-sm-3">
+        <div class="publisher-card {% if not field.data %}active{% endif %}">
+            {{ publisher_avatar(user, None, 100) }}
+            <div class="caption"><p>{{ user.fullname }}</p></div>
+        </div>
+    </li>
+    {% for organization in user.organizations %}
+    <li class="col-xs-4 col-sm-3">
+        <div data-org-id="{{ organization.id }}"
+            class="publisher-card {% if field.data == organization.id %}active{% endif %}">
+            {{ publisher_avatar(user, organization, 100) }}
+            <div class="caption ellipsis-tooltip">
+            <p>{% trans org=organization.display_name %}{{org}} member{% endtrans %}</p>
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+<div class="clearfix"></div>
+{% endif %}
+{% endmacro %}
+
+{% macro key_values(field, user) %}
+{% for subfield in field %}
+{% set keyfield = subfield.key %}
+{% set valuefield = subfield.value %}
+<div class="row">
+    <div class="col-sm-5">
+        <div class="input-group">
+            <span class="input-group-addon">{{ _(keyfield.label.text) }}</span>
+            <input id="{{ keyfield.id }}" type="text" class="form-control" autocomplete="off" autofocus
+                name="{{ keyfield.name }}" placeholder="{{ _(keyfield.label.text) }}"
+                {% if keyfield.data %}value="{{ keyfield.data }}"{% endif %}/>
+        </div>
+    </div>
+    <div class="col-sm-7">
+        <div class="input-group">
+            <span class="input-group-addon">{{ _(valuefield.label.text) }}</span>
+            <input id="{{ valuefield.id }}" type="text" class="form-control" autocomplete="off" autofocus
+                name="{{ valuefield.name }}" placeholder="{{ _(valuefield.label.text) }}"
+                {% if valuefield.data %}value="{{ valuefield.data }}"{% endif %} />
+            <div class="input-group-btn">
+                {% if loop.last %}
+                <button class="btn btn-success btn-add" title="{{ _('Add') }}">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </button>
+                {% else %}
+                <button class="btn btn-danger btn-remove" title="{{ _('Remove') }}">
+                    <span class="glyphicon glyphicon-minus"></span>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+<div class="clearfix"></div>
+{% endmacro %}
+
+
+{% macro required_disclaimer(sizes='sm-2') %}
+{% set cols = form_grid(sizes) %}
+<div class="form-group">
+    <div class="{{ cols.offset }} {{ cols.control }}">
+        <p class="form-control-static">
+            <span class="red">*</span>
+            <i>{{ _('required fields') }}</i>
+        </p>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro uploadable_url(field, user) %}
+ <div class="input-group">
+    {{ field(class_='form-control') }}
+    <span class="input-group-btn">
+        <div class="btn btn-danger upload-remove-btn hide"
+            data-title="{{ _('Delete resource') }}"
+            data-content="{{ _('You can remove this uploaded file')|escape }}">
+            <span class="glyphicon glyphicon-remove"></span>
+        </div>
+        <div class="btn btn-primary upload-btn"
+            data-title="{{ _('Upload a resource') }}"
+            data-content="{{ _('If the resource doesn\'t exists online you can upload it')|escape }}">
+            <span class="glyphicon glyphicon-cloud-upload"></span>
+            {{_('Upload') }}
+        </div>
+    </span>
+</div>
+<div class="progress progress-striped active hide">
+    <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+    0%
+    </div>
+</div>
+{% endmacro %}

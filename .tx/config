@@ -1,0 +1,8 @@
+[main]
+host = https://www.transifex.com
+
+[udata.python]
+file_filter = udata/translations/<lang>/LC_MESSAGES/udata.po
+source_file = udata/translations/udata.pot
+source_lang = en
+type = PO

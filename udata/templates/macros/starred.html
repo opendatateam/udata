@@ -1,0 +1,18 @@
+{% macro starred(obj) %}
+{% set basename = obj.__class__.__name__|lower %}
+{% if basename == 'dataset' %}
+    {% set starred = current_user.starred_datasets %}
+{% elif basename == 'reuse' %}
+    {% set starred = current_user.starred_reuses %}
+{% elif basename == 'organization' %}
+    {% set starred = current_user.starred_organizations %}
+{% endif %}
+{% set icon = 'star' if obj in starred else 'star-empty' %}
+<button type="button" class="btn btn-primary btn-star
+    {% if obj in starred %}active{% endif %}"
+    data-api-url="{{ url_for('api.starred_{0}s'.format(basename), slug=obj.slug) }}"
+    rel="tooltip" title="{{ _('Star this') }}"
+    data-placement="right" data-container="body">
+    <span class="glyphicon glyphicon-{{icon}}"></span>
+</button>
+{% endmacro %}

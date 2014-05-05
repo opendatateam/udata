@@ -1,0 +1,69 @@
+{% extends theme('layouts/form.html') %}
+{% import 'macros/forms.html' as forms with context %}
+{% set tab = tab|default('description') %}
+
+
+{% block breadcrumb %}
+<li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
+<li><a href="{{ org.get_absolute_url() }}">{{ org.name }}</a></li>
+<li class="active">{{ _('Edition') }}</li>
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+    <div class="card side-card text-center col-sm-4 col-md-3 col-lg-2">
+        {% if org.certified_public_service %}
+        <img src="{{static('/img/certified-stamp.png')}}" alt="certified"
+            class="certified" rel="popover"
+            data-title="{{ _('Certified public service') }}"
+            data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
+            data-container="body" data-trigger="hover"/>
+        {% endif %}
+        <a href="{{ url_for('organizations.show', org=org) }}"
+            title="{{ org.name }}">
+            <img src="{{ org.image_url|placeholder('organization') }}"
+                alt="{{ org.name }}" class="img-responsive" />
+        </a>
+        <h3>{{ org.name }}</h3>
+        <div class="caption text-left ellipsis-dot">
+            {{ org.description|markdown }}
+        </div>
+    </div>
+    <div class="col-sm-8 col-md-9 col-lg-10">
+        <div class="form-bg">
+            <ul class="nav nav-pills nav-top">
+                <li {% if tab == 'description' %}class="active"{% endif %}>
+                    <a href="{{ url_for('organizations.edit', org=org) }}">
+                        {{ _('Descrition') }}
+                    </a>
+                </li>
+                <li {% if tab == 'members' %}class="active"{% endif %}>
+                    <a href="{{ url_for('organizations.edit_members', org=org) }}">
+                        {{ _('Members') }}
+                    </a>
+                </li>
+                <li {% if tab == 'teams' %}class="active"{% endif %}>
+                    <a href="{{ url_for('organizations.edit_teams', org=org) }}">
+                        {{ _('Teams') }}
+                    </a>
+                </li>
+                {# {% for tab, label, form_url in (
+                    ('description', _('Description'), 'edit'),
+                    ('extras', _('Additional informations'), 'extras'),
+                    ('members', _('Members'), 'members'),
+                    ('requests', _('Membership requests'), 'requests'),
+                ) %}
+                <li {% if active_tab == tab %}class="active"{% endif %}>
+                    <a href="{{ org_base_url }}/{{ form_url }}/{{ org.name }}">{{ label }}</a>
+                </li>
+                {% endfor %} #}
+            </ul>
+
+            <div class="row">
+                {% block tab_content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

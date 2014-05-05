@@ -1,0 +1,11 @@
+{% extends theme('reuse/form.html') %}
+
+{% block breadcrumb %}
+<li><a href="{{ url_for('reuses.list') }}">{{ _('Reuses') }}</a></li>
+<li class="active">{{ _('New') }}</li>
+{% endblock %}
+
+{% block form_controls %}
+<button type="submit" class="btn btn-default">{{ _('Create') }}</button>
+<a href="{{ url_for('reuses.list') }}" class="btn btn-warning">{{ _('Cancel') }}</a>
+{% endblock %}

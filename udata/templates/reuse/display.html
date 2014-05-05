@@ -1,0 +1,63 @@
+{% extends theme('layouts/1-column.html') %}
+{% from theme('macros/starred.html') import starred with context %}
+
+{% block breadcrumb %}
+    <li><a href="{{ url_for('reuses.list') }}">{{ _('Reuses') }}</a></li>
+    <li class="active">{{ reuse.title }}</li>
+{% endblock %}
+
+{% block toolbar %}
+{# Owner actions #}
+<div class="btn-group btn-group-xs">
+    <a href="{{ url_for('reuses.edit', reuse=reuse) }}" class="btn btn-success">
+        <span class="glyphicon glyphicon-pencil"></span>
+        {{ _('Edit') }}
+    </a>
+</div>
+{# Admin actions #}
+<div class="btn-group btn-group-xs">
+    <button type="button"
+        class="btn btn-success featured {% if reuse.featured %}active{% endif %}"
+        data-api-url="{{ url_for('api.reuse_featured', slug=reuse.slug) }}">
+        <span class="glyphicon glyphicon-bullhorn"></span>
+        {{ _('Featured') }}
+    </button>
+</div>
+{# Social actions #}
+<div class="btn-group btn-group-xs">
+    {{ starred(reuse) }}
+</div>
+{% endblock %}
+
+{% block main_content %}
+<h2>{{ reuse.title }}</h2>
+<div class="text-center">
+    <img src="{{ reuse.image_url|placeholder('reuse') }}"
+        alt="{{ reuse.title }}" class="scalable" />
+</div>
+<div>
+    {{ reuse.description|markdown }}
+</div>
+<div>
+    <a href="{{ reuse.url }}">
+        <span class="glyphicon glyphicon-new-window"></span>
+        {{ _('See the reuse') }}
+    </a>
+</div>
+
+<div class="page-header">
+    <h3>{{ _('Used datasets') }}</h3>
+</div>
+<div>
+    <ul class="card-list">
+        {% for dataset in reuse.datasets %}
+        <li class="col-md-4 col-sm-6">
+        {% include theme('dataset/card.html') %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

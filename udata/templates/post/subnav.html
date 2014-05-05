@@ -1,0 +1,53 @@
+<nav class="navbar navbar-static-top navbar-subnav cover-bubble subnav-large {% if topic.color %}topic-{{topic.color}}{% endif %}">
+    <div class="container">
+
+        <div class="side-bgs">
+            <div class="bg"></div>
+            <div class="bg collapse sidebg-collapse"></div>
+        </div>
+
+        <div class="search_sidebar col-sm-5 col-md-4 col-xs-12">
+
+            <nav class="sidebar panel">
+                <form class="navbar-form form-inline" role="search" action="{{ url_for('front.search') }}">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button class="btn" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                        <input id="search-input" name="q" type="search" class="form-control"
+                            autocomplete="off" placeholder="{{ _('Search') }}"
+                            value="{{request.args.q}}">
+                    </div>
+                </form>
+            </nav>
+
+            <nav class="sidebar panel">
+                <!-- Groups -->
+                <div class="list-group">
+                    {% for topic in g.featured_topics %}
+                    <a class="list-group-item" href="{{ url_for('topics.display', topic=topic) }}">
+                        {{ topic.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </nav>
+
+        </div>
+
+        <div class="topic-excerpt col-sm-7 col-md-8 col-xs-12">
+            <h3>{{ topic.name }}</h3>
+            {{ topic.description|markdown }}
+        </div>
+
+        <div class="topic-toolbar btn-toolbar pull-right">
+            <div class="btn-group btn-group-sm more">
+                <a href class="btn btn-default"
+                    data-toggle="modal" data-target="#topic-modal">
+                    {{ _('Read more') }}
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</nav>

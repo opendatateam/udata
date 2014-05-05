@@ -1,0 +1,29 @@
+{% extends theme("layouts/1-column.html") %}
+
+{% block title %}{{ post.name }}{% endblock %}
+
+{% block breadcrumb %}
+    <li><a href="{#{ url_for('posts.list') }#}">{{ _('News') }}</a></li>
+    <li class="active">{{ post.name }}</li>
+{% endblock %}
+
+
+{% block main_content %}
+<h2>{{ post.name }}</h2>
+
+{% if post.image_url %}
+<div class="text-center">
+    <img src="{{ post.image_url }}"
+        alt="{{ post.title }}" class="scalable" />
+
+    {% if post.credit_to %}
+        {{ _('Photo credit') }} to
+        {% if post.credit_url %}<a href="{{ post.credit_url }}" title="{{ post.credit_to }}">{% endif %}
+        {{ post.credit_to }}
+        {% if post.credit_url %}</a>{% endif %}
+    {% endif %}
+</div>
+{% endif %}
+
+<div>{{ post.content|markdown }}</div>
+{% endblock %}

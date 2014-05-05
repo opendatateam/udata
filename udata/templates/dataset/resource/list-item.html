@@ -1,0 +1,39 @@
+{% set resource_name = resource.name or resource.description or _('Nameless resource') %}
+{% set resource_format = resource.format|trim|lower or 'data' %}
+<div id="resource-{{resource.id}}" class="list-group-item"
+    data-url="{{ resource.url }}" data-format="{{ resource_format }}"
+    rel="popover" data-trigger="hover" data-placement="top"
+    {% if resource.description %}
+    title="{{ resource_name }} [{{ resource_format }}]"
+    data-content="{{ resource.description|markdown|striptags|truncate(300) }}"
+    {% else %}
+    data-content="{{ resource_name }} [{{ resource_format }}]"
+    {% endif %}
+    >
+    <div class="format-label pull-left ellipsis-dot">
+        <span property="dc:format" data-format="{{ resource_format }}">
+            {{ resource_format }}
+        </span>
+    </div>
+    <h4 class="list-group-item-heading ellipsis {% if not resource.description %}dual{% endif %}">
+        {{ resource.name }}
+    </h4>
+    {% if resource.description %}
+    <p class="list-group-item-text ellipsis">
+        {{ resource.description|markdown|striptags|truncate(200) }}
+    </p>
+    {% endif %}
+    {# {{
+        publisher_avatar(resource.owner, resource.publish_as, 52,
+            classes='resource-owner', overwrite=True
+        )
+    }} #}
+    {% if current_user.is_admin or resource.owner.id == current_user.id %}
+    <div class="btn-group btn-group-xs tools">
+        <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
+            href="{{ url_for('datasets.edit_resource', dataset=dataset, rid=resource.id) }}">
+            <span class="glyphicon glyphicon-edit"></span>
+        </a>
+    </div>
+    {% endif %}
+</div>

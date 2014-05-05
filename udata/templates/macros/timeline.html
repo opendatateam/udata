@@ -1,0 +1,11 @@
+{% macro timeline(activities) %}
+<ul class="timeline">
+    {% for activity in activities %}
+    <li class="timeline-entry">
+        {% include theme(activity.template or 'activity/{0}.html'.format(
+            activity.__class__.__name__|camel_to_lodash
+        )) %}
+    </li>
+    {% endfor %}
+</ul>
+{% endmacro %}

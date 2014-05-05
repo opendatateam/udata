@@ -1,0 +1,55 @@
+{% extends theme("layouts/1-column.html") %}
+{% from theme('macros/paginator.html') import paginator with context %}
+{% import theme('macros/search.html') as s %}
+
+{% block breadcrumb %}
+    <li class="active">
+        {{ _('Organizations') }}
+        <small>{{ _('%(start)s to %(end)s on %(total)s',
+            start=organizations.page_start,
+            end=organizations.page_end,
+            total=organizations.total) }}</small>
+    </li>
+{% endblock %}
+
+{% block toolbar %}
+<div class="btn-group btn-group-xs">
+    <a href="{{ url_for('organizations.new') }}" class="btn btn-success">
+        <span class="glyphicon glyphicon-plus-sign"></span>
+        {{ _('New organization') }}
+    </a>
+</div>
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-lg-8">
+        {{ s.search_bar(url_for('organizations.list'),
+            name=( _('Name'), 'alpha'),
+            datasets=(_('Datasets'), 'numeric'),
+            reuses=(_('Reuses'), 'numeric'),
+            stars=(_('Stars'), 'numeric'),
+        ) }}
+
+        <hr/>
+
+        <ul class="search-results">
+        {% for organization in organizations %}
+        {% include theme('organization/search-result.html') %}
+        {% endfor %}
+        </ul>
+        {{ paginator(organizations) }}
+    </div>
+
+    <aside class="col-lg-4 advanced-search-panel">
+        <div class="panel panel-default">
+            {{ s.panel_header(organizations) }}
+            {{ s.range_picker(organizations, 'datasets', _('Datasets')) }}
+            {{ s.range_picker(organizations, 'reuses', _('Reuses')) }}
+            {# {{ facet_picker(reuses, 'organization', _('Organizations')) }}
+            {{ facet_picker(reuses, 'type', _('Type'), REUSE_TYPES) }}
+            {{ facet_picker(reuses, 'tag', _('Tags')) }} #}
+        </div>
+    </aside>
+</div>
+{% endblock %}

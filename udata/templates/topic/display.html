@@ -1,0 +1,95 @@
+{% extends theme("layouts/1-column.html") %}
+
+{% block title %}{{ topic.name }}{% endblock %}
+
+{% block breadcrumb %}
+    <li><a href="{#{ url_for('topics.list') }#}">{{ _('Topics') }}</a></li>
+    <li class="active">{{ topic.name|truncate(128) }}</li>
+{% endblock %}
+
+
+{% block main_content %}
+<h2>{{ topic.name }}</h2>
+</div>{{ topic.description|markdown }}</div>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs">
+    <li class="active">
+        <a href="#datasets" data-toggle="tab">
+            {{ _('Datasets')}}
+            <span class="badge">{{ datasets.total }}</span>
+        </a>
+    </li>
+    <li>
+        <a href="#reuses" data-toggle="tab">
+            {{ _('Reuses') }}
+            <span class="badge">{{ reuses.total }}</span>
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content">
+
+    <div class="tab-pane active" id="datasets">
+        {% if datasets %}
+        <ul class="search-results">
+            {% for dataset in datasets %}
+            {% include theme('dataset/search-result.html') %}
+            {% endfor %}
+        </ul>
+            {% if datasets.has_next %}
+            <p class="text-center">
+                <a class="btn btn-grey btn-sm" href="{{ url_for('datasets.list', **request.args) }}">
+                    <span class="glyphicon glyphicon-list"></span>
+                    {{ _('See the %(total)s results', total=datasets.total) }}
+                </a>
+            </p>
+            {% endif %}
+        {% else %}
+        <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
+        {% endif %}
+    </div>
+
+    <div class="tab-pane" id="reuses">
+        {% if reuses %}
+        <ul class="search-results">
+            {% for reuse in reuses %}
+            {% include theme('reuse/search-result.html') %}
+            {% endfor %}
+        </ul>
+            {% if reuses.has_next %}
+            <p class="text-center">
+                <a class="btn btn-grey btn-sm" href="{{ url_for('reuses.list', **request.args) }}">
+                    <span class="glyphicon glyphicon-list"></span>
+                    {{ _('See the %(total)s results', total=reuses.total) }}
+                </a>
+            </p>
+            {% endif %}
+        {% else %}
+        <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block modals %}
+{{ super() }}
+<div id="topic-modal" class="modal fade" tabindex="-1" role="dialog"
+    aria-labelledby="topic-modal-title" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="topic-modal-title" class="modal-title">{{ topic.name }}</h4>
+            </div>
+            <div class="modal-body">
+                {{ topic.description|markdown }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{ _('Close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

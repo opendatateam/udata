@@ -1,0 +1,19 @@
+<p>Do you want to add this user as a member of your organization ?</p>
+<div class="row">
+    <div class="card user-card col-lg-offset-3 col-lg-6">
+        <div class="avatar">
+            <a href="{{! sso('user', 'slug'|swig) }}" title="{{ fullname }}">
+                <img src="{{ avatar_url }}" alt="{{ fullname }} avatar" />
+            </a>
+        </div>
+        <div class="caption">
+            <h3>
+                <a href="{{! sso('user', 'slug'|swig) }}"
+                    title="{{ fullname }}">
+                    {{ fullname }}
+                </a>
+            </h3>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>

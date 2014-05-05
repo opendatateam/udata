@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="{{ g.lang_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>{{ config['SITE_TITLE'] }}</title>
+
+    {% set site_css_bundle = site_css_bundle|default('site-css') %}
+    {% assets site_css_bundle %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet">
+    {% endassets %}
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      {% assets "iecompat" %}
+        <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+      {% endassets %}
+    <![endif]-->
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    {# ATOM Feeds #}
+    <link href="{{ url_for('datasets.recent_feed') }}"
+        rel="alternate" type="application/atom+xml"
+        title="{{ _('Recent datasets') }}" />
+
+    <link href="{{ url_for('reuses.recent_feed') }}"
+        rel="alternate" type="application/atom+xml"
+        title="{{ _('Recent reuses') }}" />
+
+    {% block extra_head %}{% endblock %}
+
+  </head>
+
+  <body>
+
+    {% include theme("header.html") %}
+    {% block subnav %}{% endblock %}
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-warning alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+    {% include theme('footer.html') %}
+
+
+    {% assets "require-js","app-js" %}
+    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
+    {% block extra_js %}{% endblock %}
+
+    {% block modals %}{% endblock %}
+
+  </body>
+</html>

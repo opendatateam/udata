@@ -1,0 +1,13 @@
+{% extends theme("layouts/1-column.html") %}
+
+{% block breadcrumb %}
+    <li class="active">{{ _('Metrics') }}</li>
+{% endblock %}
+
+{% block main_content %}
+<ul>
+{% for key, metric in metrics.items() %}
+<li class="{{key}}-metric">{{metric.label}}: {{ metric.value }}</li>
+{% endfor %}
+</ul>
+{% endblock %}

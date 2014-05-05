@@ -1,0 +1,49 @@
+{% extends theme('user/base.html') %}
+
+{% block breadcrumb %}
+    {{ super() }}
+    <li class="active">{{ _('Starred') }}</li>
+{% endblock %}
+
+{% set user_tab = 'starred' %}
+
+{% block tab_content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">{{ _('Reuses') }}</div>
+            <div class="panel-body">
+            <ul class="search-results">
+                {% for reuse in user.starred_reuses %}
+                {% include theme('reuse/search-result.html') %}
+                {% endfor %}
+            </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">{{ _('Datasets') }}</div>
+            <div class="panel-body">
+            <ul class="search-results">
+                {% for dataset in user.starred_datasets %}
+                {% include theme('dataset/search-result.html') %}
+                {% endfor %}
+            </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">{{ _('Organizations') }}</div>
+            <div class="panel-body">
+            <ul class="search-results">
+                {% for organization in user.starred_organizations %}
+                {% include theme('organization/search-result.html') %}
+                {% endfor %}
+            </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

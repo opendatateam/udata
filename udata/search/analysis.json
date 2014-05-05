@@ -1,0 +1,90 @@
+{
+    "filter": {
+        "nGram_filter": {
+           "type": "nGram",
+           "min_gram": 2,
+           "max_gram": 20,
+           "token_chars": [
+              "letter",
+              "digit",
+              "punctuation",
+              "symbol"
+           ]
+        },
+        "de_stop_filter": {
+            "type": "stop",
+            "stopwords": ["_german_"]
+        },
+        "de_stem_filter": {
+            "type": "stemmer",
+            "name": "minimal_german"
+        },
+        "en_stop_filter": {
+            "type": "stop",
+            "stopwords": ["_english_"]
+        },
+        "en_stem_filter": {
+            "type": "stemmer",
+            "name": "minimal_english"
+        },
+        "es_stop_filter": {
+            "type": "stop",
+            "stopwords": ["_spanish_"]
+        },
+        "es_stem_filter": {
+            "type": "stemmer",
+            "name": "light_spanish"
+        },
+        "fr_stop_filter": {
+            "type": "stop",
+            "stopwords": ["_french_"]
+        },
+        "fr_stem_filter": {
+            "type": "stemmer",
+            "name": "minimal_french"
+        }
+    },
+    "analyzer": {
+        "nGram_analyzer": {
+           "type": "custom",
+           "tokenizer": "whitespace",
+           "filter": [
+              "lowercase",
+              "asciifolding",
+              "nGram_filter"
+           ]
+        },
+        "whitespace_analyzer": {
+           "type": "custom",
+           "tokenizer": "whitespace",
+           "filter": [
+              "lowercase",
+              "asciifolding"
+           ]
+        },
+        "de_analyzer": {
+            "type": "custom",
+            "tokenizer": "icu_tokenizer",
+            "filter": ["icu_folding", "icu_normalizer", "de_stop_filter", "de_stem_filter"],
+            "char_filter": ["html_strip"]
+        },
+        "en_analyzer": {
+            "type": "custom",
+            "tokenizer": "icu_tokenizer",
+            "filter": ["icu_folding", "icu_normalizer", "en_stop_filter", "en_stem_filter"],
+            "char_filter": ["html_strip"]
+        },
+        "es_analyzer": {
+            "type": "custom",
+            "tokenizer": "icu_tokenizer",
+            "filter": ["icu_folding", "icu_normalizer", "es_stop_filter", "es_stem_filter"],
+            "char_filter": ["html_strip"]
+        },
+        "fr_analyzer": {
+            "type": "custom",
+            "tokenizer": "icu_tokenizer",
+            "filter": ["icu_folding", "icu_normalizer", "fr_stop_filter", "fr_stem_filter"],
+            "char_filter": ["html_strip"]
+        }
+    }
+}

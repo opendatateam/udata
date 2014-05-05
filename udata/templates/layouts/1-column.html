@@ -1,0 +1,30 @@
+{% extends theme('base.html') %}
+{% set section_class = section_class|default('default') %}
+
+{% block content %}
+{% if self.breadcrumb() %}
+<section class="breadcrumb">
+    <div class="container">
+        <ol class="breadcrumb col-md-9">
+            <li>
+                <a href="{{ url_for('front.home') }}" title="{{ _('Home') }}">
+                    <span class="glyphicon glyphicon-home"></span>
+                </a>
+            </li>
+            {% block breadcrumb %}{% endblock %}
+        </ol>
+        <div class="col-md-3 toolbar">
+            <div class="btn-toolbar pull-right" role="toolbar">
+            {% block toolbar %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="{{ section_class }}">
+    <div class="container">
+        {% block main_content %}{% endblock %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends theme('activity/base.html') %}
+
+{% set icon = 'glyphicon glyphicon-star' %}
+
+{% block endtitle %}
+{{_('starred dataset')}}
+<a href="{{ url_for('datasets.show', dataset=activity.dataset) }}">{{activity.dataset.title}}</a>
+{% endblock %}

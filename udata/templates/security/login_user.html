@@ -1,0 +1,18 @@
+{% extends theme('layouts/1-column.html') %}
+{% import 'macros/forms.html' as forms with context %}
+
+{% block main_content %}
+<div class="row box">
+    <form class="form-horizontal col-lg-10 col-lg-offset-1 validation"
+        method="post" action="{{ url_for('security.login') }}">
+        {{ forms.render(login_user_form, exclude=[login_user_form.submit]) }}
+        {{ forms.required_disclaimer() }}
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-default">{{ _('Login') }}</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

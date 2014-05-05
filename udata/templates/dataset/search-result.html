@@ -1,0 +1,89 @@
+<li class="search-result dataset-result">
+    {% if dataset.organization %}
+    <a class="result-logo pull-left" href="{{ url_for('datasets.show', dataset=dataset) }}">
+        <img alt="{{ dataset.organization.title }}"
+            src="{{ dataset.organization.image_url|placeholder('organization') }}">
+    </a>
+        {% if dataset.organization.certified_public_service %}
+        <img src="{{static('/img/certified-stamp.png')}}" alt="certified"
+            class="certified" rel="popover"
+            data-title="{% trans %}Certified public service{% endtrans %}"
+            data-content="{% trans %}The identity of this public service public is certified by Etalab{% endtrans %}"
+            data-container="body" data-placement="auto" data-trigger="hover"/>
+        {% endif %}
+    {% else %}
+    <div class="result-logo pull-left">
+        <img src="{{ ''|placeholder('organization') }}">
+    </div>
+    {% endif %}
+    <div class="result-body ellipsis-dot">
+        <h4>
+            <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{dataset.title}}">
+            {{ dataset.title }}
+            </a>
+        </h4>
+
+        <div class="result-description">
+            {{ dataset.description|markdown|striptags|truncate(300) }}
+        </div>
+    </div>
+
+    <ul class="list-inline result-infos">
+
+        {# Temporal coverage #}
+        {% if dataset.temporal_coverage %}
+        <li>
+            <a href class="btn btn-xs" rel="tooltip"
+                data-placement="top" data-container="body"
+                title="{{ _('Temporal coverage') }}">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </a>
+            {{ _('%(start)s to %(end)s', **dataset.temporal_coverage.to_dict()) }}
+        </li>
+        {% endif %}
+
+        {# Periodicity #}
+        {% if dataset.frequency %}
+        <li>
+            <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                title="{{ _('Frequency') }}">
+                <span class="glyphicon glyphicon-time"></span>
+            </a>
+            {{ dataset.frequency }}
+        </li>
+        {% endif %}
+
+        {# Territorial coverage #}
+        {% if dataset.territorial_coverage.codes %}
+        <li>
+            <a href class="btn btn-xs" rel="tooltip"
+                data-placement="top" data-container="body"
+                title="{{ _('Territorial coverage') }}">
+                <span class="glyphicon glyphicon-globe"></span>
+            </a>
+            {{ ' '.join(dataset.territorial_coverage.codes) }}
+        </li>
+        {% endif %}
+
+        {% if dataset.territorial_coverage.granularity %}
+        <li>
+            <a href class="btn btn-xs" rel="tooltip"
+                data-placement="top" data-container="body"
+                title="{{ _('Territorial coverage granularity') }}">
+                <span class="glyphicon glyphicon-screenshot"></span>
+            </a>
+            {{ dataset.territorial_coverage.granularity }}
+        </li>
+        {% endif %}
+
+        <li>
+            <a href class="btn btn-xs" rel="tooltip"
+                data-placement="top" data-container="body"
+                title="{% trans %}Reuse number{% endtrans %}">
+                <span class="glyphicon glyphicon-random"></span>
+            </a>
+            {{ dataset.metrics.reuses or 0 }}
+        </li>
+
+    </ul>
+</li>

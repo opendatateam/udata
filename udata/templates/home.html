@@ -1,0 +1,150 @@
+{% extends theme('base.html') %}
+
+{% block extra_head %}
+{% assets "home-css" %}
+<link href="{{ ASSET_URL }}" rel="stylesheet">
+{% endassets %}
+{% endblock %}
+
+{% block content %}
+<div id="home-carousel" class="carousel slide megarousel">
+  <!-- Indicators -->
+    <ol class="carousel-indicators">
+        <li data-target="#home-carousel" data-slide-to="0" class="active"></li>
+        <li data-target="#home-carousel" data-slide-to="1"></li>
+        <li data-target="#home-carousel" data-slide-to="2"></li>
+    </ol>
+
+    <!-- Wrapper for slides -->
+    <div class="carousel-inner">
+        <div class="item active">
+            <div class="container">
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">Titre de l'actu
+                            <small>Actualité du moment</small>
+                        </h1>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-7">
+                        <img class="img-responsive" src="http://placehold.it/650x300&text=Actualité">
+                    </div>
+                    <div class="col-md-5">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam viverra euismod odio, gravida pellentesque urna varius vitae. Sed dui lorem, adipiscing in adipiscing et, interdum nec metus. Mauris ultricies, justo eu convallis placerat, felis enim.</p>
+                        <h3>Project Details</h3>
+                        <ul>
+                            <li>Lorem Ipsum</li>
+                            <li>Dolor Sit Amet</li>
+                            <li>Consectetur</li>
+                            <li>Adipiscing Elit</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="item">
+            <div class="container">
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">Une réutilisation
+                            <small>Réutilisation</small>
+                        </h1>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-7">
+                        <img class="img-responsive" src="http://placehold.it/650x300">
+                    </div>
+                    <div class="col-md-5">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam viverra euismod odio, gravida pellentesque urna varius vitae. Sed dui lorem, adipiscing in adipiscing et, interdum nec metus. Mauris ultricies, justo eu convallis placerat, felis enim.</p>
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <h3 class="page-header">Jeux de données utilisés</h3>
+                            </div>
+
+                            <div class="col-sm-3 col-xs-6">
+                                <a href="#">
+                                  <img class="img-responsive portfolio-item" src="http://placehold.it/300x200">
+                                </a>
+                            </div>
+
+                            <div class="col-sm-3 col-xs-6">
+                                <a href="#">
+                                    <img class="img-responsive portfolio-item" src="http://placehold.it/300x200">
+                                </a>
+                            </div>
+
+                            <div class="col-sm-3 col-xs-6">
+                                <a href="#">
+                                    <img class="img-responsive portfolio-item" src="http://placehold.it/300x200">
+                                </a>
+                            </div>
+
+                            <div class="col-sm-3 col-xs-6">
+                                <a href="#">
+                                    <img class="img-responsive portfolio-item" src="http://placehold.it/300x200">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+      <div class="item">
+        <div class="fill" style="background-image:url('http://placehold.it/1900x1080&text=Slide Two');"></div>
+        <div class="carousel-caption">
+          <h1>Ready to Style &amp; Add Content</h1>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <a class="left carousel-control" href="#home-carousel" data-slide="prev">
+      <span class="icon-prev"></span>
+    </a>
+    <a class="right carousel-control" href="#home-carousel" data-slide="next">
+      <span class="icon-next"></span>
+    </a>
+</div>
+
+<div class="section">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h2>{{ _('Last datasets') }}</h2>
+      </div>
+      <ul class="card-list">
+          {% for dataset in recent_datasets %}
+          <li class="col-md-4 col-sm-6">
+            {% include theme('dataset/card.html') %}
+          </li>
+          {% endfor %}
+      </ul>
+    </div><!-- /.row -->
+  </div><!-- /.container -->
+</div><!-- /.section -->
+
+<div class="section-colored">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h2>{{ _('Last reuses') }}</h2>
+      </div>
+      <ul class="card-list">
+        {% for reuse in recent_reuses %}
+        <li class="col-md-4 col-sm-6">{% include theme('reuse/card.html') %}</li>
+        {% endfor %}
+      </ul>
+    </div><!-- /.row -->
+  </div><!-- /.container -->
+</div><!-- /.section -->
+{% endblock %}

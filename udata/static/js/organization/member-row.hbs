@@ -1,0 +1,28 @@
+<tr class="member" data-username="{{ slug }}">
+    <td class="text-center avatar">
+        <a class="avatar" href="{{! sso('user', 'slug'|swig) }}"
+            title="{{ fullname }}">
+            <img src="{{ avatar_url }}" alt="{{ fullname }} avatar"
+                width="30px" height="30px" class="avatar"/>
+        </a>
+    </td>
+    <td>
+        <a class="avatar" href="{{! sso('user', 'slug'|swig) }}"
+            title="{{ fullname }}">
+            {{ fullname }}
+        </a>
+    </td>
+    <td>
+        <a class="member-role" data-type="select" href
+            data-pk="{{ id }}" data-title="{{! _('Role') }}" data-value="member">
+            {{! roles['member'] }}
+        </a>
+    </td>
+    <td>
+        <div class="btn-group btn-group-xs">
+            <a class="btn btn-danger member-remove" title="{{! _('Remove') }}">
+                <span class="glyphicon glyphicon-remove"></span>
+            </a>
+        </div>
+    </td>
+</tr>

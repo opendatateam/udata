@@ -1,0 +1,21 @@
+{% set icon = icon or 'glyphicon glyphicon-info-sign' %}
+{% set user = activity.actor %}
+{% set org = activity.organization %}
+<time datetime="{{ activity.created_at.isoformat() }}">
+    <span>{{ activity.created_at|dateformat }}</span>
+    <span>{{ activity.created_at|timeformat('short') }}</span>
+</time>
+<span class="timeline-icon {{ icon }}"></span>
+<div class="timeline-body">
+    <h3>
+    {% block title %}
+    {% if organization %}
+    <a href="{{ url_for('organizations.show', org=org) }}">{{org.name}}</a>
+    {% else %}
+    <a href="{{ url_for('users.show', user=user) }}">{{user.fullname}}</a>
+    {% endif %}
+    {% block endtitle %}{% endblock %}
+    {% endblock %}
+    </h3>
+    {% block details %}{% endblock %}
+</div>

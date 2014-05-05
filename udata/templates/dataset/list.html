@@ -1,0 +1,74 @@
+{% extends theme("layouts/1-column.html") %}
+{% from theme('macros/paginator.html') import paginator with context %}
+{% import theme('macros/search.html') as s %}
+
+{% block breadcrumb %}
+    <li class="active">
+        {{ _('Datasets') }}
+        <small>{{ _('%(start)s to %(end)s on %(total)s',
+            start=datasets.page_start,
+            end=datasets.page_end,
+            total=datasets.total) }}</small>
+    </li>
+{% endblock %}
+
+{% block toolbar %}
+<div class="btn-group btn-group-xs">
+    <a href="{{ url_for('datasets.new') }}" class="btn btn-primary pull-right">
+        <span class="glyphicon glyphicon-plus"></span>
+        {{ _('New dataset') }}
+    </a>
+</div>
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-lg-8">
+        {{ s.search_bar(url_for('datasets.list'),
+            title=(_('Title'), 'alpha'),
+            created=_('Creation date'),
+            last_modified=_('Last modification date'),
+            reuses=(_('Reuses'), 'numeric'),
+            stars=(_('Stars'), 'numeric'),
+        ) }}
+
+        <div class="row">
+            <div class="col-sm-12 label-list">
+                {{ s.filter_label('organization', _('Organization'), 'home',
+                    formatter=facet_formater(datasets, 'organization')
+                ) }}
+                {{ s.filter_label('tag', _('Tag'), 'tag') }}
+                {{ s.filter_label('license', _('License'), 'copyright-mark',
+                    formatter=facet_formater(datasets, 'license')
+                ) }}
+                {{ s.filter_label('format', _('Format'), 'file') }}
+            </div>
+        </div>
+
+        <hr/>
+
+        <ul class="card-list">
+            {% for dataset in datasets %}
+            <li class="col-md-6">
+                {% include theme('dataset/card.html') %}
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="clearfix"></div>
+        {{ paginator(datasets) }}
+    </div>
+
+    <aside class="col-lg-4 advanced-search-panel">
+        <div class="panel panel-default">
+            {{ s.panel_header(datasets) }}
+            {{ s.facet_picker(datasets, 'organization', _('Organizations'), 'home') }}
+            {{ s.facet_picker(datasets, 'supplier', _('Suppliers'), 'home') }}
+            {{ s.facet_picker(datasets, 'tag', _('Tags'), 'tag') }}
+            {{ s.facet_picker(datasets, 'license', _('Licenses'), 'copyright-mark') }}
+            {{ s.facet_picker(datasets, 'format', _('Formats'), 'file') }}
+            {{ s.range_picker(datasets, 'reuses', _('Reuses'), 'random') }}
+            {# {{ s.range_picker(datasets, 'temporal_coverage', _('Temporal coverage'), 'calendar', isodate) }} #}
+        </div>
+    </aside>
+</div>
+{% endblock %}

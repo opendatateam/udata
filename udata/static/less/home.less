@@ -1,0 +1,221 @@
+@import "variables.less";
+@import "udata/variables.less";
+@import "udata/mixins.less";
+
+.tab-pane {
+  margin-top: 15px;
+}
+
+/* Half Page Height Carousel Customization */
+.carousel {
+  height: 50%;
+}
+
+.item,
+.active,
+.carousel-inner {
+  height: 100%;
+}
+
+.fill {
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-size: cover;
+}
+
+/* Social Icons Styles */
+.list-social-icons {
+  margin-bottom: 45px;
+}
+
+.tooltip-social a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.facebook-link a:hover {
+  color: #3b5998;
+}
+
+.linkedin-link a:hover {
+  color: #007fb1;
+}
+
+.twitter-link a:hover {
+  color: #39a9e0;
+}
+
+.google-plus-link a:hover {
+  color: #d14836;
+}
+
+/* Service Page Styles */
+.service-icon {
+  font-size: 50px;
+}
+
+/* 404 Page Styles */
+.error-404 {
+  font-size: 8em;
+}
+
+
+/* Responsive Styles */
+@media (max-width: 767px) {
+  .carousel {
+    height: 70%; /* increases the carousel height so it looks good on phones */
+  }
+}
+
+
+
+h3 {
+    font-family: @title-font;
+    text-transform: uppercase;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 0px;
+    margin-right: 15px;
+    margin-top: 12px;
+    margin-bottom: 8px;
+    color: @text-dark;
+}
+
+// Main Carsoussel
+.carousel {
+    border: 1px solid #d9d9d7;
+    height: 250px;
+
+    @media (min-width: @screen-sm-min) {
+        height: 300px;
+        overflow: hidden;
+    }
+
+    .carousel-inner {
+        height: 100%;
+
+        .item {
+            height: 100%;
+
+            img {
+                margin: 0 auto;
+            }
+
+            img.slide {
+                min-height: 148px;
+                position: absolute;
+                top: 0;
+                left: 0;
+                min-width: 100%;
+            }
+        }
+    }
+
+    .carousel-caption {
+        bottom: 0;
+        height: 100px;
+        z-index: 10;
+        width: 100%;
+        color: #3e3e3e;
+        background-color: rgba(243, 243, 243, 0.92);
+        padding: 5px;
+        left: 0px;
+        text-shadow: none;
+        text-align: left;
+        text-transform: uppercase;
+        font-family: @title-font;
+        padding: 10px;
+
+        .title  {
+            margin-top: 0px;
+            margin-bottom: 0;
+
+            a {
+                color: #3e3e3e;
+                display: block;
+                font-size: 20px;
+                line-height: 22px;
+                font-weight: bold;
+                font-family: @title-font;
+            }
+
+            label {
+                font-size: 10px;
+                line-height: 10px;
+                margin-top: 0px;
+                margin-bottom: 0px;
+                display: inline;
+            }
+
+            @media (min-width: @screen-xs-min) {
+                a {
+                    font-size: 28px;
+                    line-height: 30px;
+                }
+
+                label {
+                    font-size: 12px;
+                    line-height: 12px;
+                }
+            }
+        }
+    }
+}
+
+// News carousel
+#news-carousel {
+    .carousel-caption {
+        label {
+            font-size: 12px;
+            margin-top: 0px;
+            margin-bottom: 0px;
+        }
+
+        .title  {
+            height: 60px;
+
+            a {
+                font-size: 15px;
+                line-height: 17px;
+
+                @media (min-width: @screen-xs-min) {
+                    font-size: 17px;
+                    line-height: 20px;
+                }
+            }
+        }
+
+    }
+}
+
+// Main Carsoussel
+#home-carousel {
+    .carousel-caption {
+        .slide-logo {
+            margin-right: 10px;
+        }
+
+        .title  {
+            height: 80px;
+
+            a {
+                font-size: 24px;
+                margin-top: 5px;
+                .ellipsis();
+            }
+
+            @media (min-width: @screen-xs-min) {
+                a {
+                    height: 30px;
+                }
+            }
+        }
+
+        a.unfeature {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
+    }
+}

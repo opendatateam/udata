@@ -1,0 +1,20 @@
+{% macro breadcrumb(parts) %}
+<section class="breadcrumb">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li>
+                <a href="{{ url_for('home') }}" title="{{ _('Home') }}">
+                    <span class="glyphicon glyphicon-home"></span>
+                </a>
+            </li>
+            {% for label, url in parts %}
+            <li {% if loop.last %}class="active"{% endif %}>
+                {%- if not loop.last %}<a href="{{ url }}">{% endif -%}
+                    {{ label }}
+                {%- if not loop.last %}</a>{% endif -%}
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+</section>
+{% endmacro %}

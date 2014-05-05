@@ -1,0 +1,149 @@
+
+@bg-gray: #F0F0F0;
+@title-font: Arial, Arial, Helvetica, sans-serif;
+
+.card {
+    background-color: white;
+    border: 1px solid darken(@gray-lighter, 10%);
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+
+ul.card-list {
+    padding-left: 0;
+    list-style: none;
+
+    .card {
+        @card-font-size: 13px;
+        @logo-size: 70px;
+        @logo-margin: 5px;
+        @card-height: 170px;
+        @card-padding: 13px;
+        @card-footer-size: 24px;
+
+        position: relative;
+        margin-bottom: 18px;
+        background: white;
+        border: 1px solid @gray-lighter;
+        padding: @card-padding;
+        overflow: hidden;
+        zoom: 1;
+        height: @card-height;
+
+
+        &.card-mini {
+            @logo-size: 35px;
+        }
+
+        .card-logo {
+            .pull-left();
+            display: table-cell;
+            text-align: center;
+            line-height: @logo-size + 7px;
+            width: @logo-size + 2 * @logo-margin;
+            height: @logo-size + 2 * @logo-margin;
+            border: 1px solid @gray-lighter;
+            background-color: white;
+
+            img {
+                max-width: @logo-size;
+                max-height: @logo-size;
+            }
+        }
+
+        img.certified {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 34px;
+            height: 34px;
+            cursor: pointer;
+        }
+
+        .card-body {
+            padding-left: @logo-size + 2 * @logo-margin + @card-font-size;
+            color: #4f4f4f;
+            font-size: @card-font-size;
+            line-height: 1.3em;
+            height: @card-height - 2 * @card-padding - @card-footer-size;
+        }
+
+        footer {
+            height: @card-footer-size;
+            width: 100%;
+            position: absolute;
+            bottom: 0px;
+            left: 0px;
+
+            ul {
+                // .list-inline();
+                height: 100%;
+                max-width: 100%;
+                background-color: @bg-gray;
+                line-height: 25px;
+                font-weight: bold;
+                font-size: @card-font-size - 1px;
+                color: #7E7E7E;
+                // padding-left: 6px;
+                list-style: none;
+                margin: 0;
+                padding: 0;
+
+                .btn {
+                    background: none !important;
+                    color: #bababa;
+                }
+
+                &.corner {
+                    .text-center();
+                    padding: 0;
+                    background-color: darken(@bg-gray, 6%);
+                    color: darken(@bg-gray, 40%);
+
+                    .btn {
+                        color: darken(@bg-gray, 22%);
+                    }
+
+                }
+            }
+
+            li {
+                display: inline-block;
+                padding: 0 5px;
+            }
+
+        }
+
+        h4 {
+            margin: 0 0 8px;
+            line-height: 13px;
+
+            a {
+                font-size: 14px;
+                color: #494949;
+                font-family: @title-font;
+                font-weight: bold;
+            }
+        }
+
+        &.card-slim {
+            .glyphicon {
+                font-size: 2em;
+                top: -2px;
+                margin-right: 7px;
+            }
+
+            h4 {
+                vertical-align: top;
+                margin: 4px 0 0 5px;
+            }
+
+            .card-body {
+                padding-left: 0;
+                display: inline;
+            }
+        }
+
+    }
+}

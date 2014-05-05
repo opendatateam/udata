@@ -1,0 +1,67 @@
+{% extends theme("layouts/1-column.html") %}
+{% from theme('macros/paginator.html') import paginator with context %}
+{% import theme('macros/search.html') as s %}
+
+{% block breadcrumb %}
+    <li class="active">
+        {{ _('Reuses') }}
+        <small>{{ _('%(start)s to %(end)s on %(total)s',
+                    start=reuses.page_start,
+                    end=reuses.page_end,
+                    total=reuses.total) }}</small>
+    </li>
+{% endblock %}
+
+{% block toolbar %}
+<div class="btn-group btn-group-xs">
+    <a href="{{ url_for('reuses.new') }}" class="btn btn-primary">
+        <span class="glyphicon glyphicon-plus"></span>
+        {{ _('Add a reuse') }}
+    </a>
+</div>
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-lg-8">
+
+        {{ s.search_bar(url_for('reuses.list'),
+            title=(_('Title'), 'alpha'),
+            created=_('Creation date'),
+            last_modified=_('Last modification date'),
+            datasets=(_('Datasets used'), 'numeric'),
+            stars=(_('Stars'), 'numeric'),
+        ) }}
+
+        <div class="row">
+            <div class="col-sm-12 label-list">
+                {{ s.filter_label('organization', _('Organization'), 'home',
+                    formatter=facet_formater(reuses, 'organization')
+                ) }}
+                {{ s.filter_label('tag', _('Tag'), 'tag') }}
+                {{ s.filter_label('type', _('Type'), 'file') }}
+            </div>
+        </div>
+
+        <hr/>
+
+        <ul class="search-results">
+        {% for reuse in reuses %}
+        {% include theme('reuse/search-result.html') %}
+        {% endfor %}
+        </ul>
+        <div class="clearfix"></div>
+        {{ paginator(reuses) }}
+    </div>
+
+    <aside class="col-lg-4 advanced-search-panel">
+        <div class="panel panel-default">
+            {{ s.panel_header(reuses) }}
+            {{ s.facet_picker(reuses, 'organization', _('Organizations')) }}
+            {{ s.facet_picker(reuses, 'type', _('Type'), REUSE_TYPES) }}
+            {{ s.facet_picker(reuses, 'tag', _('Tags')) }}
+            {{ s.range_picker(reuses, 'datasets', _('Datasets')) }}
+        </div>
+    </aside>
+</div>
+{% endblock %}

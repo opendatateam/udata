@@ -1,0 +1,112 @@
+ul.timeline {
+    list-style: none;
+    position: relative;
+    padding: 0;
+    margin-top: 30px;
+
+    /* The line */
+    &:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        background: #afdcf8;
+        left: 20%;
+        margin-left: -8px;
+    }
+
+    & > li {
+        position: relative;
+
+        time {
+            display: block;
+            width: 25%;
+            padding-right: 100px;
+            position: absolute;
+
+            span {
+                display: block;
+                text-align: right;
+            }
+
+            span:first-child {
+                font-size: 1.2em;
+                color: #bdd0db;
+            }
+
+            span:last-child {
+                font-size: 1.4em;
+                color: #3594cb;
+            }
+        }
+
+        /* Right content */
+        .timeline-body {
+            margin: 0 0 15px 25%;
+            // background: #3594cb;
+            // color: #fff;
+            padding: 1em;
+            font-size: 1.1em;
+            font-weight: 300;
+            line-height: 1.3;
+            position: relative;
+            border-radius: 5px;
+            border: 3px solid #3594cb;
+
+            h3 {
+                font-size: 1.2em;
+                margin: 0;
+                padding: 0;
+
+                &:not(:last-child) {
+                    border-bottom: 1px solid rgba(255,255,255,0.4);
+                    padding-bottom: 10px;
+                }
+
+                // a {
+                //     color: @gray-lighter;
+                // }
+            }
+
+            /* The triangle */
+            &:after {
+                right: 100%;
+                border: solid transparent;
+                content: " ";
+                height: 0;
+                width: 0;
+                position: absolute;
+                pointer-events: none;
+                border-right-color: #3594cb;
+                border-width: 10px;
+                top: 8px;
+            }
+        }
+
+        /* The icons */
+        .timeline-icon {
+            width: 36px;
+            height: 36px;
+            // font-family: 'ecoico';
+            speak: none;
+            font-style: normal;
+            font-weight: normal;
+            font-variant: normal;
+            text-transform: none;
+            font-size: 1.2em;
+            line-height: 36px;
+            -webkit-font-smoothing: antialiased;
+            position: absolute;
+            color: #fff;
+            background: #46a4da;
+            border-radius: 50%;
+            box-shadow: 0 0 0 6px #afdcf8;
+            text-align: center;
+            left: 20%;
+            top: 0;
+            margin: 0 0 0 -23px;
+        }
+    }
+
+}

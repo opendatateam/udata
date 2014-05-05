@@ -1,0 +1,68 @@
+{% extends theme('layouts/1-column.html') %}
+
+{% block breadcrumb %}
+    <li><a>{{ _('Users') }}</a></li>
+    <li><a href="{{ url_for('users.show', user=user) }}">{{ user.fullname }}</a></li>
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="text-center">
+                    <img src="{{ user.avatar_url|placeholder('user') }}"
+                        alt="{{ user.fullname }}" class="scalable" />
+                </div>
+                <h2>{{ user.fullname }}</h2>
+                <div>
+                    {{ user.about or ''|markdown }}
+                </div>
+                <hr/>
+                <div>
+                    <ul class="list-unstyled">
+                        {% if user.website %}
+                        <li>
+                            <span class="glyphicon glyphicon-link"></span>
+                            <a href="{{user.website}}">{{user.website}}</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div>
+                    Social metrics
+                </div>
+                <div>
+                    Organizations
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-9">
+        <ul class="nav nav-tabs">
+            <li {% if user_tab == 'contributions' %}class="active"{% endif %}>
+                <a href="{{ url_for('users.show', user=user) }}">
+                    <span class="glyphicon glyphicon-random"></span>
+                    {{ _('Contributions')}}
+                </a>
+            </li>
+            <li {% if user_tab == 'starred' %}class="active"{% endif %}>
+                <a href="{{ url_for('users.starred', user=user) }}">
+                    <span class="glyphicon glyphicon-star"></span>
+                    {{ _('Starred')}}
+                </a>
+            </li>
+            <li {% if user_tab == 'activity' %}class="active"{% endif %}>
+                <a href="{{ url_for('users.activity', user=user) }}">
+                    <span class="glyphicon glyphicon-list"></span>
+                    {{ _('Activity') }}
+                </a>
+            </li>
+        </ul>
+
+        {% block tab_content %}{% endblock %}
+
+    </div>
+</div>
+{% endblock %}

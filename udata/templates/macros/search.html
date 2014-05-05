@@ -1,0 +1,187 @@
+{% macro search_bar(action, placeholder=None) %}
+<form class="form list-search-bar" role="search" action="{{ action }}">
+    <div class="form-group">
+        <div class="input-group">
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-search"></span>
+            </span>
+            <input type="text" name="q" class="form-control"
+                placeholder="{{ placeholder or _('Search') }}"
+                value="{{request.args.q}}">
+            {% if kwargs %}
+            <div class="input-group-btn">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    {% if in_url('sort') %}
+                        {% set sort, order = request.args.sort.split(' ') %}
+                        {% set label, typ = (kwargs[sort], 'amount') if kwargs[sort] is string else kwargs[sort] %}
+                        <span class="fa fa-sort-{{typ}}-{{order}}"></span>
+                        {{ label }}
+                    {% else %}
+                        <span class="fa fa-sort-amount-desc"></span>
+                        {{ _('Relevance') }}
+                    {% endif %}
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu pull-right">
+                    <li>
+                        <a href="{{ url_rewrite(page=1)|url_del('sort') }}">
+                            {{ _('Relevance') }}
+                        </a>
+                    </li>
+                    {% for field, label in kwargs.items() %}
+                    {{ sorter_entries(field, label) }}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</form>
+{% endmacro %}
+
+
+{% macro sorter_entries(field, label=None) %}
+{% set name, typ = (label or (field|title), 'amount') if label is string else label %}
+{% set orders = ['asc', 'desc'] if typ == 'alpha' else ['desc', 'asc'] %}
+{% for order in orders %}
+<li>
+    <a href="{{ url_rewrite(sort=field+' '+order)|url_del('page') }}">
+        <span class="fa fa-sort-{{typ}}-{{order}}"></span>
+        {{ name }}
+    </a>
+</li>
+{% endfor %}
+{% endmacro %}
+
+
+{% macro filter_label(name, label, icon=None, formatter=None) %}
+{% set values = request.args.getlist(name) or [] %}
+{# {% set values = [values] if values is string else values %} #}
+{% for value in values  %}
+<span class="tag label label-info" title="{{ label }}">
+    {% if icon %}
+    <span class="glyphicon glyphicon-{{ icon }}"></span>
+    {% endif %}
+    <span>{{ formatter(value) if formatter else value }}</span>
+    <a href="{{ ''|url_del('page', **{name: value}) }}">
+        <span class="close-icon glyphicon glyphicon-remove"></span>
+    </a>
+</span>
+{% endfor %}
+{% endmacro %}
+
+
+{% macro facet_picker(result, name, label, icon=None, labels=None) %}
+{% set facet = result.get_facet(name) %}
+{% if facet.terms|length > 1 %}
+<div class="panel-heading clickable" data-toggle="collapse" data-target="#collapse-{{name}}">
+    <h3 class="panel-title">
+        <span class="glyphicon glyphicon-{{icon or 'filter'}}"></span>
+        {{ label or name }}
+    </h3>
+</div>
+<div id="collapse-{{name}}" class="list-group collapse in">
+{% for term, count, active in facet.terms %}
+    {% if not active %}
+        {% if term is mapping and ('from' in term or 'to' in term) %}
+        {{ range_facet_item(name, term, count, active,  labels) }}
+        {% elif not term is string and 'id' in term %}
+        {{ model_facet_item(name, term, count, active, labels) }}
+        {% else %}
+        {{ term_facet_item(name, term, count, active, labels) }}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro term_facet_item(name, term, count, active, labels=None) %}
+    {% if active %}
+    <a href="{{ url_rewrite(page=1)|url_del(**{name: term}) }}"
+        class="list-group-item active">
+    {% else %}
+    <a href="{{ url_rewrite(page=1)|url_add(**{name: term}) }}"
+        class="list-group-item">
+    {% endif %}
+        {{ labels[term] if labels else term }}
+        <span class="badge pull-right">{{ count }}</span>
+    </a>
+{% endmacro %}
+
+{% macro model_facet_item(name, obj, count, active, labels=None) %}
+    {% if active %}
+    <a href="{{ url_rewrite(page=1)|url_del(**{name: obj.id}) }}"
+        class="list-group-item active">
+    {% else %}
+    <a href="{{ url_rewrite(page=1)|url_add(**{name: obj.id}) }}"
+        class="list-group-item">
+    {% endif %}
+        {{ labels[obj.id] if labels else obj }}
+        <span class="badge pull-right">{{ count }}</span>
+    </a>
+{% endmacro %}
+
+{% macro range_facet_item(name, item, count, active, labels=None) %}
+    {% set interval = '-'.join([item.from|string or '', item.to|string or '']) %}
+    {% if active %}
+    <a href="{{ url_rewrite(page=1)|url_del(**{name: interval}) }}"
+        class="list-group-item active">
+    {% else %}
+    <a href="{{ url_rewrite(page=1)|url_add(**{name: interval}) }}"
+        class="list-group-item">
+    {% endif %}
+    {% if item.from and item.to %}
+        {{ _('%(from)s to %(to)s', **item) }}
+    {% elif item.to == 1 %}
+        {{ _('None') }}
+    {% elif item.to %}
+        {{ _('Up to %(to)s', **item) }}
+    {% else %}
+        {{ _('More than %(from)s', **item) }}
+    {% endif %}
+        <span class="badge pull-right">{{ count }}</span>
+    </a>
+{% endmacro %}
+
+
+{% macro range_picker(result, field, label, icon=None, cast=None) %}
+{% set spec = result.get_range(field) %}
+{% if spec.min != spec.max %}
+<div class="panel-heading clickable" data-toggle="collapse" data-target="#collapse-{{field}}">
+    <h3 class="panel-title">
+        {% if in_url(field) %}
+        <a href="{{ url_del(None, field, 'page') }}"
+            class="btn btn-xs btn-link pull-right" title="{{ _('Clear filter') }}">
+            <span class="glyphicon glyphicon-remove"></span>
+        </a>
+        {% endif %}
+        <span class="glyphicon glyphicon-{{icon or 'resize-horizontal'}}"></span>
+        {{ label or field }}
+    </h3>
+</div>
+<div id="collapse-{{field}}" class="panel-body row">
+    <b class="col-md-1">{{ spec.min }}</b>
+    <input type="text" class="range-picker"  class="col-md-10"
+        data-url-pattern="{{ url_rewrite(**{field: '__r__'})|url_del('page') }}"
+        data-slider-min="{{ spec.min }}"
+        data-slider-max="{{ spec.max }}"
+        data-slider-value="[{{ spec.min }},{{ spec.max }}]"/>
+    <b class="col-md-1">{{ spec.max }}</b>
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro panel_header(result) %}
+<div class="panel-heading">
+    {% if result.total %}
+        {{ _('Results %(start)s to %(end)s on %(total)s found',
+            start=result.page_start,
+            end=result.page_end,
+            total=result.total,
+        ) }}
+    {% else %}
+        {{ _('No result found') }}
+    {% endif %}
+</div>
+{% endmacro %}

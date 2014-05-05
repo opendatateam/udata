@@ -1,0 +1,123 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+import logging
+
+import time
+from datetime import date
+
+from bson.objectid import ObjectId
+
+from udata.models import db
+
+
+log = logging.getLogger(__name__)
+
+__all__ = ('Sort', 'RangeFilter', 'DateRangeFilter', 'BoolFilter', 'TermFacet', 'ModelTermFacet', 'RangeFacet')
+
+
+class Sort(object):
+    def __init__(self, field):
+        self.field = field
+
+
+class RangeFilter(object):
+    def __init__(self, field, cast=int):
+        self.field = field
+        self.cast = cast
+
+    def to_query(self, value):
+        start, end = value.split('-')
+        return {self.field: {
+            'gte': self.cast(start),
+            'lte': self.cast(end),
+        }}
+
+
+class DateRangeFilter(object):
+    def __init__(self, start_field, end_field):
+        self.start_field = start_field
+        self.end_field = end_field
+
+    def to_query(self, value):
+        parts = value.split('-')
+        start = date(*map(int, parts[0:3]))
+        end = date(*map(int, parts[3:6]))
+        return {
+            self.start_field: {'lte': end.isoformat()},
+            self.end_field: {'gte': start.isoformat()},
+        }
+
+    def cast(self, value):
+        t = time.gmtime(value)
+        print t.tm_year, t.tm_mon, t.tm_mday
+        return date(t.tm_year, t.tm_mon, t.tm_mday)
+        # return datetime.fromtimestamp(long(value)).date()
+
+
+class BoolFilter(object):
+    def __init__(self, field):
+        self.field = field
+
+    def to_query(self, value):
+        return {
+            'term': {self.field: value},
+        }
+
+
+class TermFacet(object):
+    def __init__(self, field):
+        self.field = field
+
+    def to_query(self, size=10):
+        return {
+            'terms': {
+                'field': self.field,
+                'size': size,
+            }
+        }
+
+    def get_values(self, facet, actives=None):
+        actives = [actives] if isinstance(actives, basestring) else actives or []
+        return [
+            (term['term'], term['count'], term['term'] in actives)
+            for term in facet['terms']
+        ]
+
+
+class ModelTermFacet(TermFacet):
+    def __init__(self, field, model):
+        super(ModelTermFacet, self).__init__(field)
+        self.model = model
+
+    def get_values(self, facet, actives=None):
+        actives = [actives] if isinstance(actives, basestring) else actives or []
+        ids = [term['term'] for term in facet['terms']]
+        counts = [term['count'] for term in facet['terms']]
+        if isinstance(self.model.id, db.ObjectIdField):
+            ids = map(ObjectId, ids)
+        objects = self.model.objects.in_bulk(ids)
+        return [(objects.get(id), count, str(id) in actives) for id, count in zip(ids, counts)]
+
+
+class RangeFacet(object):
+    def __init__(self, field, ranges):
+        self.field = field
+        self.ranges = ranges
+
+    def to_query(self):
+        return {
+            'range': {
+                'field': self.field,
+                'ranges': self.ranges,
+            }
+        }
+
+    def get_values(self, facet, actives=None):
+        actives = [actives] if isinstance(actives, basestring) else actives or []
+        values = []
+        for idx, r in enumerate(facet['ranges']):
+            spec = self.ranges[idx]
+            interval = '-'.join([str(spec.get('from', '')), str(spec.get('to', ''))])
+            values.append((spec, r['count'], interval in actives))
+        return values

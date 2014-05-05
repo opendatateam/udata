@@ -1,0 +1,12 @@
+{
+  "name": "udata",
+  "version": "0.0.0",
+  "description": "Open and social data platform",
+  "author": "Axel Haustant",
+  "license": "AGPLv3+",
+  "devDependencies": {
+    "bower": "^1.3.3",
+    "less": "^1.7.0",
+    "requirejs": "^2.1.11"
+  }
+}

@@ -1,0 +1,12 @@
+{% extends theme('dataset/resource/form.html') %}
+
+{% block breadcrumb %}
+<li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
+<li><a href="{{ dataset.get_absolute_url() }}">{{ dataset.title|truncate(128) }}</a></li>
+<li class="active">{{ _('Edit resource') }}</li>
+{% endblock %}
+
+{% block form_controls %}
+<button type="submit" class="btn btn-default">{{ _('Save') }}</button>
+<a href="{{ dataset.get_absolute_url() }}" class="btn btn-warning">{{ _('Cancel') }}</a>
+{% endblock %}
