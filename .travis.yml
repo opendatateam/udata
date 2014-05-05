@@ -2,8 +2,8 @@ language: python
 python:
   - 2.7
 install:
-  - python setup.py develop
   - pip install -r requirements/travis.pip --allow-external webassets --allow-unverified webassets
+  - pip install --no-deps .
 script:
   - nosetests --with-xcoverage udata
 after_success:
