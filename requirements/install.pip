@@ -11,8 +11,6 @@ Flask-Login==0.2.10
 Flask-Mail==0.9.0
 Flask-Markdown==0.3
 flask-mongoengine==0.7.0
-Flask-OAuth==0.12
-Flask-OAuthlib==0.4.2
 Flask-RESTful==0.2.12
 Flask-Script==0.6.7
 Flask-SuperAdmin==1.7.1
