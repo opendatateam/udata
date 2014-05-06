@@ -50,6 +50,7 @@ class Testing(Defaults):
     TEST_WITH_PLUGINS = False
     TEST_WITH_THEME = False
     ASSETS_AUTO_BUILD = False
+    ASSETS_DEBUG = True
 
 
 class Debug(Defaults):
