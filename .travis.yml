@@ -10,6 +10,6 @@ install:
   - pip install -r requirements/travis.pip --allow-external webassets --allow-unverified webassets
   - pip install --no-deps -e .
 script:
-  - nosetests --with-xcoverage udata
+  - nosetests --with-coverage udata
 after_success:
-  - coveralls
+  - coveralls --rcfile=coverage.rc
