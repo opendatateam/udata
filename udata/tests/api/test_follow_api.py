@@ -3,10 +3,10 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import Follow
+from udata.models import Follow, FollowOrg, FollowReuse, FollowDataset
 
 from . import APITestCase
-from ..factories import UserFactory, OrganizationFactory, DatasetFactory
+from ..factories import UserFactory, OrganizationFactory, DatasetFactory, ReuseFactory
 
 
 class FollowAPITest(APITestCase):
@@ -15,11 +15,12 @@ class FollowAPITest(APITestCase):
         user = self.login()
         to_follow = UserFactory()
 
-        response = self.post(url_for('api.follow', id=to_follow.id))
+        response = self.post(url_for('api.follow_user', id=to_follow.id))
         self.assertStatus(response, 201)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
+        self.assertIsInstance(Follow.objects.followers(to_follow).first(), Follow)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
@@ -33,6 +34,7 @@ class FollowAPITest(APITestCase):
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
+        self.assertIsInstance(Follow.objects.followers(to_follow).first(), FollowOrg)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
@@ -46,6 +48,22 @@ class FollowAPITest(APITestCase):
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
+        self.assertIsInstance(Follow.objects.followers(to_follow).first(), FollowDataset)
+        self.assertEqual(Follow.objects.following(user).count(), 1)
+        self.assertEqual(Follow.objects.followers(user).count(), 0)
+
+
+    def test_follow_reuse(self):
+        '''It should follow a reuse on POST'''
+        user = self.login()
+        to_follow = ReuseFactory()
+
+        response = self.post(url_for('api.follow_reuse', id=to_follow.id))
+        self.assertStatus(response, 201)
+
+        self.assertEqual(Follow.objects.following(to_follow).count(), 0)
+        self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
+        self.assertIsInstance(Follow.objects.followers(to_follow).first(), FollowReuse)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
@@ -55,7 +73,7 @@ class FollowAPITest(APITestCase):
         to_follow = UserFactory()
         Follow.objects.create(follower=user, following=to_follow)
 
-        response = self.post(url_for('api.follow', id=to_follow.id))
+        response = self.post(url_for('api.follow_user', id=to_follow.id))
         self.assertStatus(response, 200)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
@@ -69,7 +87,7 @@ class FollowAPITest(APITestCase):
         to_follow = UserFactory()
         Follow.objects.create(follower=user, following=to_follow)
 
-        response = self.delete(url_for('api.follow', id=to_follow.id))
+        response = self.delete(url_for('api.follow_user', id=to_follow.id))
         self.assertStatus(response, 204)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
@@ -82,5 +100,5 @@ class FollowAPITest(APITestCase):
         self.login()
         to_follow = UserFactory()
 
-        response = self.delete(url_for('api.follow', id=to_follow.id))
+        response = self.delete(url_for('api.follow_user', id=to_follow.id))
         self.assert404(response)

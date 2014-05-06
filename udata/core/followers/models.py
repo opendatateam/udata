@@ -8,7 +8,7 @@ from blinker import Signal
 from udata.models import db
 
 
-__all__ = ('Follow', 'FollowOrg', 'FollowDataset')
+__all__ = ('Follow', 'FollowOrg', 'FollowDataset', 'FollowReuse')
 
 
 class FollowQuerySet(db.BaseQuerySet):
@@ -23,7 +23,7 @@ class FollowQuerySet(db.BaseQuerySet):
 
 
 class Follow(db.Document):
-    follower = db.ReferenceField('User')
+    follower = db.ReferenceField('User', required=True)
     following = db.ReferenceField('User')
     since = db.DateTimeField(required=True, default=datetime.now)
     until = db.DateTimeField()
@@ -48,6 +48,10 @@ class FollowOrg(Follow):
 
 class FollowDataset(Follow):
     following = db.ReferenceField('Dataset')
+
+
+class FollowReuse(Follow):
+    following = db.ReferenceField('Reuse')
 
 
 @db.post_save.connect_via(Follow)

@@ -8,7 +8,7 @@ from flask import abort
 from flask.ext.security import current_user
 
 from udata.api import api, API, marshal
-from udata.models import Follow, FollowOrg, FollowDataset
+from udata.models import FollowOrg, FollowDataset, Follow, FollowReuse
 
 
 class FollowAPI(API):
@@ -30,6 +30,10 @@ class FollowAPI(API):
         return '', 204
 
 
+class FollowUserAPI(FollowAPI):
+    model = Follow
+
+
 class FollowOrgAPI(FollowAPI):
     model = FollowOrg
 
@@ -38,6 +42,11 @@ class FollowDatasetAPI(FollowAPI):
     model = FollowDataset
 
 
-api.add_resource(FollowAPI, '/follow/<id>/', endpoint=b'api.follow')
+class FollowReuseAPI(FollowAPI):
+    model = FollowReuse
+
+
+api.add_resource(FollowUserAPI, '/follow/user/<id>/', endpoint=b'api.follow_user')
 api.add_resource(FollowOrgAPI, '/follow/org/<id>/', endpoint=b'api.follow_org')
 api.add_resource(FollowDatasetAPI, '/follow/dataset/<id>/', endpoint=b'api.follow_dataset')
+api.add_resource(FollowReuseAPI, '/follow/reuse/<id>/', endpoint=b'api.follow_reuse')
