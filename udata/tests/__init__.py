@@ -51,6 +51,8 @@ class TestCase(BaseTestCase):
         app.config['DEBUG_TOOLBAR'] = False
         app.config['ASSETS_DEBUG'] = True
         app.config['ASSETS_AUTO_BUILD'] = False
+        app.config['ASSETS_VERSIONS'] = False
+        app.config['ASSETS_URL_EXPIRE'] = False
         app.config['SERVER_NAME'] = 'localhost'
         if not app.config.get('TEST_WITH_PLUGINS', False):
             app.config['PLUGINS'] = []
