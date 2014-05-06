@@ -6,7 +6,6 @@ services:
 before_install:
   - sudo /usr/share/elasticsearch/bin/plugin -install elasticsearch/elasticsearch-analysis-icu/2.0.0
   - sudo service elasticsearch start
-  - npm install less
 install:
   - pip install -r requirements/travis.pip --allow-external webassets --allow-unverified webassets
   - pip install --no-deps -e .
