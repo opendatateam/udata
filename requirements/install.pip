@@ -22,6 +22,7 @@ mongoengine==0.8.7
 pytz==2014.2
 PyYAML==3.11
 py-bcrypt==0.4
+python-dateutil==2.2
 pillow
 redis
 unicodecsv==0.9.4

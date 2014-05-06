@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 
 import re
 
-from datetime import datetime
 from bson import ObjectId, DBRef
+from dateutil.parser import parse
 
 from wtforms import Form as WTForm, Field, validators, fields
 from wtforms.fields import html5
@@ -226,8 +226,8 @@ class DateRangeField(FieldHelper, fields.StringField):
         if valuelist and valuelist[0]:
             start, end = valuelist[0].split(' - ')
             self.data = db.DateRange(
-                start=datetime.strptime(start, '%Y-%m-%d').date(),
-                end=datetime.strptime(end, '%Y-%m-%d').date(),
+                start=parse(start, yearfirst=True).date(),
+                end=parse(end, yearfirst=True).date(),
             )
         else:
             self.data = None

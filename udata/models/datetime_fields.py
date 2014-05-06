@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import logging
 
 from datetime import date, datetime
+from dateutil.parser import parse
 
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import BaseField, DateTimeField
@@ -23,7 +24,7 @@ class DateField(BaseField):
         if isinstance(value, date):
             return value
         try:
-            value = datetime.strptime(value, '%Y-%m-%d').date()
+            value = parse(value, yearfirst=True).date()
         except:
             pass
         return value
