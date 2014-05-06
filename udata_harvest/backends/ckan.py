@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import requests
 import logging
 
 from uuid import UUID
 from urlparse import urljoin
-
-import requests
+from dateutil.parser import parse
 
 from flask.ext.security import current_user
 
@@ -125,12 +125,15 @@ class CkanBackend(BaseBackend):
             dataset = self.get_harvested(Dataset, details['id'])
 
             # Core attributes
+            dataset.slug = details['name']
             dataset.title = details['title']
             dataset.description = details.get('notes', 'No description')
             dataset.license = License.objects(id=details['license_id']).first() or License.objects.get(id='notspecified')
             dataset.tags = [tag['name'].lower() for tag in details['tags']]
 
             dataset.frequency = self.map('frequency', details)
+            dataset.created_at = parse(details['metadata_created'])
+            dataset.last_modified = parse(details['metadata_modified'])
 
             if any_field(details, 'territorial_coverage', 'territorial_coverage_granularity'):
                 dataset.territorial_coverage = TerritorialCoverage(
@@ -212,6 +215,8 @@ class CkanBackend(BaseBackend):
                 reuse.type = details['type']
                 reuse.url = details['url']
                 reuse.image_url = details.get('image_url')
+                reuse.featured = bool(details.get('featured', False))
+                reuse.created_at = parse(details['created'])
                 if details.get('owner_id'):
                     reuse.owner = self.get_harvested(User, details['owner_id'])
                 if not dataset in reuse.datasets:
