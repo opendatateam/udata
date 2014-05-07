@@ -5,7 +5,7 @@ uData development Launcher
 '''
 from __future__ import unicode_literals
 
-from udata.commands import get_manager
+from udata.commands import run_manager
 
 if __name__ == '__main__':
-    get_manager().run()
+    run_manager('udata.settings.Debug')

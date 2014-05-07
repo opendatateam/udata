@@ -6,7 +6,6 @@ elasticsearch==1.0.0
 Flask==0.10.1
 Flask-BabelEx==0.9.1
 Flask-Cache==0.13.1
-Flask-Collect==0.2.3
 Flask-Gravatar==0.4.1
 Flask-Login==0.2.10
 Flask-Mail==0.9.0

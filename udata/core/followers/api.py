@@ -12,6 +12,9 @@ from udata.models import FollowOrg, FollowDataset, Follow, FollowReuse
 
 
 class FollowAPI(API):
+    '''
+    Base Follow Model API.
+    '''
     model = Follow
 
     def post(self, id):

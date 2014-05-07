@@ -70,7 +70,7 @@ for module in MODULES:
         for model in models.__all__:
             loc[model] = getattr(models, model)
     except ImportError as e:
-        log.debug('Error for %s: %s', module, e)
+        pass
     except Exception as e:
         log.error('Unable to import %s: %s', module, e)
 del loc

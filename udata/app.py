@@ -21,6 +21,8 @@ cache = Cache()
 
 
 class UDataApp(Flask):
+    debug_log_format = '[%(levelname)s][%(name)s:%(lineno)d] %(message)s'
+
     def send_static_file(self, filename):
         '''
         Override default static handling:
@@ -28,7 +30,7 @@ class UDataApp(Flask):
         - handle static aliases
         '''
         if not self.debug:
-            self.logger.error('not debug')
+            self.logger.error('Static files are only served in debug')
             abort(404)
 
         cache_timeout = self.get_send_file_max_age(filename)
@@ -94,12 +96,8 @@ def standalone(app):
 
 
 def init_logging(app):
-    logging.getLogger('').addHandler(logging.NullHandler())
     log_level = logging.DEBUG if app.debug else logging.WARNING
     app.logger.setLevel(log_level)
-    # logging.getLogger('udata').setLevel(log_level)
-    logging.getLogger('werkzeug').setLevel(log_level)
-    logging.getLogger('celery.task').setLevel(log_level)
     loggers = [
         logging.getLogger('elasticsearch'),
         logging.getLogger('requests')
