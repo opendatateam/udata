@@ -184,7 +184,7 @@
                             data-organization-id="{{ dataset.organization.id }}"
                             data-organization-title="{{ dataset.organization.title }}"
                             data-is-following="{% if is_following_org %}true{% else %}false{% endif %}"
-                            data-follow-api="{{ url_for('api.follow', id=dataset.organization.id) }}"
+                            data-follow-api="{{ url_for('api.follow_org', id=dataset.organization.id) }}"
                             data-follow-label="{{ _('Follow') }}"
                             data-unfollow-label="{{ _('Unfollow') }}"
                             {% if is_following_org %}
