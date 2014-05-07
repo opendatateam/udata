@@ -1,0 +1,68 @@
+@import "variables.less";
+@import "mixins.less";
+@import "utilities.less";
+
+aside {
+    margin-top: 10px;
+
+    img.certified {
+        position: absolute;
+        top: -15px;
+        right: -5px;
+        widht: 70px;
+        height: 70px;
+        cursor: pointer;
+    }
+
+    a.btn-block:not(:last-of-type), .tooltip-wrapper:not(:last-child) {
+        margin-bottom: 7px;
+    }
+}
+
+.pending-request {
+    max-height: 62px;
+
+    @media (max-width: @screen-xs-max) {
+        max-height: 132px;
+
+        .col-xs-12:first-child {
+            height: 70px;
+        }
+
+        .col-xs-12:not(:first-child) {
+            height: 35px;
+        }
+    }
+
+    .avatar {
+        float: left;
+    }
+
+    .author-and-date {
+        float: left;
+        margin: 2px 10px;
+        display: inline-block;
+
+        .user {
+            display: block;
+            line-height: 13px;
+        }
+
+        .date {
+            color: @gray-light;
+            font-size: 12px;
+            font-style: italic;
+        }
+    }
+
+    .comment {
+        line-height: 16px;
+        max-height: 32px;
+    }
+
+    @media (min-width: @screen-sm-min) {
+        .btn-toolbar {
+            .pull-right();
+        }
+    }
+}
