@@ -73,6 +73,6 @@ class DateRangeTest(unittest.TestCase):
     def test_parse_daterange_end_year(self):
         self.assertEqual(daterange_end('1984'), date(1984, 12, 31))
 
-    def test_parse_before_1970(self):
+    def test_parse_before_1900(self):
         self.assertEqual(daterange_start('1860'), date(1860, 1, 1))
         self.assertEqual(daterange_end('1860'), date(1860, 12, 31))
