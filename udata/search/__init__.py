@@ -11,11 +11,13 @@ from flask import current_app, json
 from speaklater import make_lazy_string, is_lazy_string
 
 from udata.core import MODULES
-
+from udata.tasks import celery
 
 log = logging.getLogger(__name__)
 
 adapter_catalog = {}
+
+DEFAULT_PAGE_SIZE = 20
 
 
 class EsJSONSerializer(JSONSerializer):
@@ -101,13 +103,43 @@ def get_i18n_analyzer():
 i18n_analyzer = make_lazy_string(get_i18n_analyzer)
 
 
+@celery.task
+def reindex(obj):
+    adapter = adapter_catalog.get(obj.__class__)
+    log.info('Indexing %s (%s)', adapter.doc_type(), obj.id)
+
+    es.index(index=es.index_name, doc_type=adapter.doc_type(), id=obj.id, body=adapter.serialize(obj))
+
+
 # from . import fields
+from .adapter import ModelSearchAdapter
+from .query import SearchQuery
+from .result import SearchResult
 from .fields import *
-from .adapter import *
+
+
+def query(*adapters, **kwargs):
+    return SearchQuery(*adapters, **kwargs).execute()
+
+
+def multiquery(*queries):
+    body = []
+    for query in queries:
+        body.append({'type': query.adapter.doc_type()})
+        body.append(query.get_body())
+    try:
+        result = es.msearch(index=es.index_name, body=body)
+    except:
+        result = [{} for _ in range(len(queries))]
+    return [
+        SearchResult(query, response)
+        for response, query in zip(result['responses'], queries)
+    ]
 
 
 def init_app(app):
     es.init_app(app)
+
 
 # Load all core search adapters
 loc = locals()

@@ -6,6 +6,7 @@ import logging
 from flask import request
 from flask.ext.restful import Api, Resource, marshal, fields
 
+from udata import search
 from udata.core import MODULES
 from udata.utils import multi_to_dict
 
@@ -35,7 +36,7 @@ class ModelListAPI(API):
 
     def get(self):
         if self.search_adapter:
-            result = self.search_adapter.query(**multi_to_dict(request.args))
+            result = search.query(self.search_adapter, **multi_to_dict(request.args))
             objects = result.get_objects()
         else:
             objects = list(self.model.objects)

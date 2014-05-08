@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from flask import request, redirect, abort, g
 from flask.views import MethodView
 
+from udata import search
 from udata.auth import login_required
 from udata.frontend import render
 from udata.utils import multi_to_dict
@@ -50,7 +51,7 @@ class ListView(Templated, BaseView):
 
     def get_queryset(self):
         if self.search_adapter:
-            result = self.search_adapter.query(**multi_to_dict(request.args))
+            result = search.query(self.search_adapter, **multi_to_dict(request.args))
             return result
         return self.model.objects
 

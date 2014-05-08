@@ -43,20 +43,20 @@ class SearchQueryTest(TestCase):
     def test_execute_search_result(self):
         '''SearchQuery execution should return a SearchResult with the right model'''
         # query = FakeSearchQuery()
-        result = FakeSearch.query()
+        result = search.query(FakeSearch)
         self.assertIsInstance(result, search.SearchResult)
-        self.assertEqual(result.adapter, FakeSearch)
+        self.assertEqual(result.query.adapter, FakeSearch)
 
     def test_empty_search(self):
         '''An empty query should match all documents'''
-        fake_search = FakeSearch()
+        search_query = search.SearchQuery(FakeSearch)
         expected = {'match_all': {}}
-        self.assertEqual(fake_search.get_query(), expected)
+        self.assertEqual(search_query.get_query(), expected)
 
     def test_paginated_search(self):
         '''Search should handle pagination'''
-        fake_search = FakeSearch(page=3, page_size=10)
-        body = fake_search.get_body()
+        search_query = search.SearchQuery(FakeSearch, page=3, page_size=10)
+        body = search_query.get_body()
         self.assertIn('from', body)
         self.assertEqual(body['from'], 20)
         self.assertIn('size', body)
@@ -64,20 +64,20 @@ class SearchQueryTest(TestCase):
 
     def test_sorted_search_asc(self):
         '''Search should sort by field in ascending order'''
-        fake_search = FakeSearch(sort='title')
-        body = fake_search.get_body()
+        search_query = search.SearchQuery(FakeSearch, sort='title')
+        body = search_query.get_body()
         self.assertEqual(body['sort'], [{'title.raw': 'asc'}])
 
     def test_sorted_search_desc(self):
         '''Search should sort by field in descending order'''
-        fake_search = FakeSearch(sort='-title')
-        body = fake_search.get_body()
+        search_query = search.SearchQuery(FakeSearch, sort='-title')
+        body = search_query.get_body()
         self.assertEqual(body['sort'], [{'title.raw': 'desc'}])
 
     def test_multi_sorted_search(self):
         '''Search should sort'''
-        fake_search = FakeSearch(sort=['-title', 'description'])
-        body = fake_search.get_body()
+        search_query = search.SearchQuery(FakeSearch, sort=['-title', 'description'])
+        body = search_query.get_body()
         self.assertEqual(body['sort'], [
             {'title.raw': 'desc'},
             {'description.raw': 'asc'},
@@ -85,7 +85,7 @@ class SearchQueryTest(TestCase):
 
     def test_simple_query(self):
         '''A simple query should use query_string with specified fields'''
-        fake_search = FakeSearch(q='test')
+        search_query = search.SearchQuery(FakeSearch, q='test')
         expected = {
             'bool': {
                 'must': [
@@ -97,11 +97,11 @@ class SearchQueryTest(TestCase):
                 ]
             }
         }
-        self.assertEqual(fake_search.get_query(), expected)
+        self.assertEqual(search_query.get_query(), expected)
 
     def test_simple_query_flatten(self):
         '''A simple query should use query_string with specified fields and should flatten'''
-        fake_search = FakeSearch(q='test')
+        search_query = search.SearchQuery(FakeSearch, q='test')
         expected = {
             'bool': {
                 'must': [
@@ -113,10 +113,10 @@ class SearchQueryTest(TestCase):
                 ]
             }
         }
-        self.assertEqual(fake_search.get_query(), expected)
+        self.assertEqual(search_query.get_query(), expected)
 
     def test_term_facet(self):
-        fake_search = FakeSearch()
+        search_query = search.SearchQuery(FakeSearch, )
         expected = {
             'tag': {
                 'terms': {
@@ -131,7 +131,7 @@ class SearchQueryTest(TestCase):
                 }
             },
         }
-        self.assertEqual(fake_search.get_facets(), expected)
+        self.assertEqual(search_query.get_facets(), expected)
 
     def test_range_facet(self):
         facet = search.RangeFacet('some_field', [
@@ -154,7 +154,7 @@ class SearchQueryTest(TestCase):
         })
 
     def test_facet_filter(self):
-        fake_search = FakeSearch(q='test', tag='value')
+        search_query = search.SearchQuery(FakeSearch, q='test', tag='value')
         expected = {
             'bool': {
                 'must': [
@@ -167,10 +167,10 @@ class SearchQueryTest(TestCase):
                 ]
             }
         }
-        self.assertEqual(fake_search.get_query(), expected)
+        self.assertEqual(search_query.get_query(), expected)
 
     def test_facet_filter_multi(self):
-        fake_search = FakeSearch(q='test', tag=['value-1', 'value-2'], other='value')
+        search_query = search.SearchQuery(FakeSearch, q='test', tag=['value-1', 'value-2'], other='value')
         expected = {
             'bool': {
                 'must': [
@@ -185,10 +185,10 @@ class SearchQueryTest(TestCase):
                 ]
             }
         }
-        self.assertEqual(fake_search.get_query(), expected)
+        self.assertEqual(search_query.get_query(), expected)
 
     def test_range_filter(self):
-        fake_search = FakeSearch(myrange='3-7.5')
+        search_query = search.SearchQuery(FakeSearch, myrange='3-7.5')
         expected = {
             'bool': {
                 'must': [
@@ -201,18 +201,18 @@ class SearchQueryTest(TestCase):
                 ]
             }
         }
-        self.assertEqual(fake_search.get_query(), expected)
+        self.assertEqual(search_query.get_query(), expected)
 
     def test_range_min_max(self):
-        fake_search = FakeSearch()
+        search_query = search.SearchQuery(FakeSearch, )
 
-        aggregations = fake_search.get_aggregations()
+        aggregations = search_query.get_aggregations()
 
         self.assertEqual(aggregations['myrange_min'], {'min': {'field': 'numeric_field'}})
         self.assertEqual(aggregations['myrange_max'], {'max': {'field': 'numeric_field'}})
 
     def test_daterange_filter(self):
-        fake_search = FakeSearch(daterange='2013-01-07-2014-06-07')
+        search_query = search.SearchQuery(FakeSearch, daterange='2013-01-07-2014-06-07')
         expected = {
             'bool': {
                 'must': [
@@ -227,33 +227,33 @@ class SearchQueryTest(TestCase):
                 ]
             }
         }
-        self.assertEqual(fake_search.get_query(), expected)
+        self.assertEqual(search_query.get_query(), expected)
 
     def test_daterange_min_max(self):
-        fake_search = FakeSearch()
+        search_query = search.SearchQuery(FakeSearch, )
 
-        aggregations = fake_search.get_aggregations()
+        aggregations = search_query.get_aggregations()
 
         self.assertEqual(aggregations['daterange_min'], {'min': {'field': 'daterange_start'}})
         self.assertEqual(aggregations['daterange_max'], {'max': {'field': 'daterange_end'}})
 
     def test_bool_filter_true(self):
-        fake_search = FakeSearch(bool_filter=True)
+        search_query = search.SearchQuery(FakeSearch, bool_filter=True)
         expected = {'bool': {
             'must': [
                 {'term': {'bool_filter_field': True}}
             ]
         }}
-        self.assertEqual(fake_search.get_query(), expected)
+        self.assertEqual(search_query.get_query(), expected)
 
     def test_bool_filter_false(self):
-        fake_search = FakeSearch(bool_filter=False)
+        search_query = search.SearchQuery(FakeSearch, bool_filter=False)
         expected = {'bool': {
             'must': [
                 {'term': {'bool_filter_field': False}}
             ]
         }}
-        self.assertEqual(fake_search.get_query(), expected)
+        self.assertEqual(search_query.get_query(), expected)
 
 
 class SearchResultTest(TestCase):
@@ -264,7 +264,8 @@ class SearchResultTest(TestCase):
     def test_properties(self):
         '''Search result should map some properties for easy access'''
         fixture = self.load_result('es-fake-result.json')
-        result = search.SearchResult(fixture, FakeSearch)
+        query = search.SearchQuery(FakeSearch)
+        result = search.SearchResult(query, fixture)
 
         self.assertEqual(result.total, 42)
         self.assertEqual(result.max_score, 10.0)
@@ -274,7 +275,8 @@ class SearchResultTest(TestCase):
 
     def test_no_failures(self):
         '''Search result should not fail on missing properties'''
-        result = search.SearchResult({}, FakeSearch)
+        query = search.SearchQuery(FakeSearch)
+        result = search.SearchResult(query, {})
 
         self.assertEqual(result.total, 0)
         self.assertEqual(result.max_score, 0)
@@ -285,7 +287,8 @@ class SearchResultTest(TestCase):
     def test_pagination(self):
         '''Search results should be paginated'''
         kwargs = {'page': 2, 'page_size': 3}
-        result = search.SearchResult({'hits': {'total': 11}}, FakeSearch, **kwargs)
+        query = search.SearchQuery(FakeSearch, **kwargs)
+        result = search.SearchResult(query, {'hits': {'total': 11}})
 
         self.assertEqual(result.page, 2),
         self.assertEqual(result.page_size, 3)
@@ -293,7 +296,8 @@ class SearchResultTest(TestCase):
 
     def test_pagination_empty(self):
         '''Search results should be paginated even if empty'''
-        result = search.SearchResult({}, FakeSearch)
+        query = search.SearchQuery(FakeSearch)
+        result = search.SearchResult(query, {})
 
         self.assertEqual(result.page, 1),
         self.assertEqual(result.page_size, search.DEFAULT_PAGE_SIZE)
@@ -307,11 +311,11 @@ class SearchResultTest(TestCase):
                 'myrange_max': {'value': 35},
             }
         }
-        result = search.SearchResult(es_result, FakeSearch)
+        query = search.SearchQuery(FakeSearch)
+        result = search.SearchResult(query, es_result)
 
         range = result.get_range('myrange')
         self.assertEqual(range['min'], 3.0)
         self.assertIsInstance(range['min'], float)
         self.assertEqual(range['max'], 35.0)
         self.assertIsInstance(range['max'], float)
-
