@@ -1,0 +1,5 @@
+https://raw.githubusercontent.com/etalab/udata/master/requirements/install.pip
+https://raw.githubusercontent.com/etalab/udata/master/requirements/test.pip
+--no-deps git+https://github.com/etalab/udata.git#egg=udata
+--no-deps git+https://github.com/etalab/udata-cow.git#egg=udata-cow
+coveralls
