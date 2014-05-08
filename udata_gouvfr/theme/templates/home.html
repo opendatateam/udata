@@ -97,15 +97,15 @@
 
 {# Datasets section #}
 {% set dataset_tabs = (
-    ('popular', _('Most popular'), popular_datasets),
-    ('recent', _('Latest'), recent_datasets),
+    ('popular-datasets', _('Most popular'), popular_datasets),
+    ('recent-datasets', _('Latest'), recent_datasets),
 ) %}
 <section class="colored">
       <div class="container">
             {# Dataset tabs #}
             <div class="row">
                 <div class="col-xs-12">
-                    <ul id="tabs" class="nav nav-pills" data-tabs="tabs">
+                    <ul class="nav nav-pills" data-tabs="tabs">
                         {% for tab_id, label, datasets in dataset_tabs %}
                         <li {% if loop.first %}class="active"{% endif %}>
                             <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
@@ -146,8 +146,8 @@
 
 {# Reuses section #}
 {% set reuse_tabs = (
-    ('popular', _('Most popular'), popular_reuses),
-    ('recent', _('Latest'), recent_reuses),
+    ('popular-reuses', _('Most popular'), popular_reuses),
+    ('recent-reuses', _('Latest'), recent_reuses),
 ) %}
 
 <section class="default">
@@ -155,7 +155,7 @@
             {# reuse tabs #}
             <div class="row">
                 <div class="col-xs-12">
-                    <ul id="tabs" class="nav nav-pills" data-tabs="tabs">
+                    <ul class="nav nav-pills" data-tabs="tabs">
                         {% for tab_id, label, reuses in reuse_tabs %}
                         <li {% if loop.first %}class="active"{% endif %}>
                             <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
