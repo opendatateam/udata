@@ -77,7 +77,7 @@ class ModelSearchAdapter(object):
         '''Build sort query paramter from kwargs'''
         sorts = self.kwargs.get('sort', [])
         sorts = [sorts] if isinstance(sorts, basestring) else sorts
-        sorts = [s.split(' ') for s in sorts]
+        sorts = [(s[1:], 'desc') if s.startswith('-') else  (s, 'asc') for s in sorts]
         return [{self.sorts[s].field: d} for s, d in sorts if s in self.sorts]
 
     def get_filter(self):

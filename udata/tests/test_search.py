@@ -62,15 +62,21 @@ class SearchQueryTest(TestCase):
         self.assertIn('size', body)
         self.assertEqual(body['size'], 10)
 
-    def test_sorted_search(self):
-        '''Search should sort'''
-        fake_search = FakeSearch(sort='title desc')
+    def test_sorted_search_asc(self):
+        '''Search should sort by field in ascending order'''
+        fake_search = FakeSearch(sort='title')
+        body = fake_search.get_body()
+        self.assertEqual(body['sort'], [{'title.raw': 'asc'}])
+
+    def test_sorted_search_desc(self):
+        '''Search should sort by field in descending order'''
+        fake_search = FakeSearch(sort='-title')
         body = fake_search.get_body()
         self.assertEqual(body['sort'], [{'title.raw': 'desc'}])
 
     def test_multi_sorted_search(self):
         '''Search should sort'''
-        fake_search = FakeSearch(sort=['title desc', 'description asc'])
+        fake_search = FakeSearch(sort=['-title', 'description'])
         body = fake_search.get_body()
         self.assertEqual(body['sort'], [
             {'title.raw': 'desc'},
