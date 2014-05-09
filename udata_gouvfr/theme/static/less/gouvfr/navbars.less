@@ -178,22 +178,29 @@
         }
     }
 
-    .tt-hint, .tt-query {
-        color: #bfbfbf;
-        background-color: @bg-light;
-        border-radius: 0!important;
-        border: none;
+    .twitter-typeahead {
+        .tt-hint, .tt-query {
+            color: #bfbfbf;
+            background-color: @bg-light;
+            border-radius: 0!important;
+            border: none;
+        }
+
+        .tt-hint {
+            color: @gray-lighter;
+            border-radius: 0;
+            border: none;
+        }
+
+        .tt-query {
+            color: @gray-light !important;
+        }
+
+        & > * {
+            width: 100%;
+        }
     }
 
-    .tt-hint {
-        color: @gray-lighter;
-        border-radius: 0;
-        border: none;
-    }
-
-    .tt-query {
-        color: @gray-light !important;
-    }
 
     .glyphicon {
         color: #bfbfbf;
@@ -513,15 +520,15 @@
     }
 }
 
-.search_sidebar, .search_bar {
-    .tt-dropdown-menu {
-        padding: 8px 0 5px;
-    }
+// .search_sidebar, .search_bar {
+//     .tt-dropdown-menu {
+//         padding: 8px 0 5px;
+//     }
 
     .tt-suggestion {
         margin: 4px 0;
     }
-}
+// }
 
 
 // test for gray header menu bar
