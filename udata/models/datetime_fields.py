@@ -32,7 +32,7 @@ class DateField(BaseField):
     def to_mongo(self, value):
         if not value:
             return None
-        return value.strftime('%Y-%m-%d')
+        return value.isoformat()
 
     def validate(self, value):
         if not isinstance(value, date):
