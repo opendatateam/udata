@@ -5,8 +5,8 @@
             <img alt="{{ dataset.organization.title }}"
                 src="{{ dataset.organization.image_url|placeholder('organization') }}">
         </a>
-        {% if dataset.organization.certified_public_service %}
-        <img src="{{static('/img/certified-stamp.png')}}" alt="certified"
+        {% if dataset.organization.public_service %}
+        <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
             class="certified" rel="popover"
             data-title="{% trans %}Certified public service{% endtrans %}"
             data-content="{% trans %}The identity of this public service public is certified by Etalab{% endtrans %}"

@@ -12,7 +12,11 @@
             <div class="input-group-btn">
                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                     {% if in_url('sort') %}
-                        {% set sort, order = request.args.sort.split(' ') %}
+                        {% if request.args.sort.startswith('-') %}
+                            {% set sort, order = request.args.sort[1:], 'desc' %}
+                        {% else %}
+                            {% set sort, order = request.args.sort, 'asc' %}
+                        {% endif %}
                         {% set label, typ = (kwargs[sort], 'amount') if kwargs[sort] is string else kwargs[sort] %}
                         <span class="fa fa-sort-{{typ}}-{{order}}"></span>
                         {{ label }}
@@ -42,15 +46,18 @@
 
 {% macro sorter_entries(field, label=None) %}
 {% set name, typ = (label or (field|title), 'amount') if label is string else label %}
-{% set orders = ['asc', 'desc'] if typ == 'alpha' else ['desc', 'asc'] %}
-{% for order in orders %}
 <li>
-    <a href="{{ url_rewrite(sort=field+' '+order)|url_del('page') }}">
-        <span class="fa fa-sort-{{typ}}-{{order}}"></span>
+    <a href="{{ url_rewrite(sort=field)|url_del('page') }}">
+        <span class="fa fa-sort-{{typ}}-asc"></span>
         {{ name }}
     </a>
 </li>
-{% endfor %}
+<li>
+    <a href="{{ url_rewrite(sort='-'+field)|url_del('page') }}">
+        <span class="fa fa-sort-{{typ}}-desc"></span>
+        {{ name }}
+    </a>
+</li>
 {% endmacro %}
 
 

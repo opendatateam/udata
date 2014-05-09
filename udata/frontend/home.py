@@ -15,8 +15,8 @@ TAB_SIZE = 6
 def home():
     # TODO:allow customization
     recent_datasets, recent_reuses, featured_datasets, featured_reuses, popular_datasets, popular_reuses = multiquery(
-        SearchQuery(DatasetSearch, sort='-created_at', page_size=TAB_SIZE),
-        SearchQuery(ReuseSearch, sort='-created_at', page_size=TAB_SIZE),
+        SearchQuery(DatasetSearch, sort='-created', page_size=TAB_SIZE),
+        SearchQuery(ReuseSearch, sort='-created', page_size=TAB_SIZE),
         SearchQuery(DatasetSearch, featured=True, page_size=3),
         SearchQuery(ReuseSearch, featured=True, page_size=3),
         SearchQuery(DatasetSearch, page_size=TAB_SIZE),

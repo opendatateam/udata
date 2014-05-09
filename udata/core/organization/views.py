@@ -8,7 +8,7 @@ from udata.forms import OrganizationForm, OrganizationMemberForm
 from udata.frontend.views import ListView, DetailView, CreateView, EditView
 from udata.i18n import I18nBlueprint
 from udata.models import Organization, Member, Reuse, Dataset, ORG_ROLES, User
-from udata.search import OrganizationSearch
+from udata.search import OrganizationSearch, DatasetSearch, ReuseSearch, SearchQuery, multiquery
 from udata.utils import get_by
 
 from .permissions import EditOrganizationPermission
@@ -56,14 +56,19 @@ class OrganizationDetailView(OrgView, DetailView):
     def get_context(self):
         context = super(OrganizationDetailView, self).get_context()
 
-        reuses = list(Reuse.objects(organization=self.object))
-        datasets = list(Dataset.objects(organization=self.object))
-        supplied_datasets = list(Dataset.objects(supplier=self.object))
+        org_id = str(self.organization.id)
+        datasets, supplied_datasets, reuses = multiquery(
+            SearchQuery(DatasetSearch, sort='-created', organization=org_id, page_size=9),
+            SearchQuery(DatasetSearch, sort='-created', supplier=org_id, page_size=9),
+            SearchQuery(ReuseSearch, sort='-created', organization=org_id, page_size=9),
+        )
 
         context.update({
             'reuses': reuses,
             'datasets': datasets,
             'supplied_datasets': supplied_datasets,
+            'private_reuses': list(Reuse.objects(organization=self.object, private=True)),
+            'private_datasets': list(Dataset.objects(organization=self.object, private=True)),
             'can_edit': EditOrganizationPermission(self.organization.id)
         })
 
