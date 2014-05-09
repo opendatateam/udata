@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-04-28 09:52+0200\n"
+"POT-Creation-Date: 2014-05-09 03:29+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,6 +80,7 @@ msgstr ""
 #: udata_gouvfr/theme/templates/header.html:27
 #: udata_gouvfr/theme/templates/header.html:68
 #: udata_gouvfr/theme/templates/metrics.html:81
+#: udata_gouvfr/theme/templates/organization/display.html:12
 msgid "Organizations"
 msgstr ""
 
@@ -114,18 +115,24 @@ msgid "Best reuse cases"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/home.html:100
-#: udata_gouvfr/theme/templates/home.html:149
-msgid "Most popular"
+msgid "Popular datasets"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/home.html:101
-#: udata_gouvfr/theme/templates/home.html:150
-msgid "Latest"
+msgid "Latest datasets"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/home.html:135
 #: udata_gouvfr/theme/templates/home.html:185
 msgid "See more"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:149
+msgid "Popular reuses"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:150
+msgid "Latest reuses"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/metrics.html:13
@@ -134,12 +141,14 @@ msgstr ""
 
 #: udata_gouvfr/theme/templates/metrics.html:17
 #: udata_gouvfr/theme/templates/dataset/display.html:11
+#: udata_gouvfr/theme/templates/organization/display.html:136
 #: udata_gouvfr/theme/templates/topic/display.html:19
 msgid "Datasets"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/metrics.html:22
 #: udata_gouvfr/theme/templates/dataset/display.html:438
+#: udata_gouvfr/theme/templates/organization/display.html:141
 #: udata_gouvfr/theme/templates/topic/display.html:25
 msgid "Reuses"
 msgstr ""
@@ -180,6 +189,7 @@ msgstr ""
 #: udata_gouvfr/theme/templates/dataset/display.html:132
 #: udata_gouvfr/theme/templates/dataset/display.html:416
 #: udata_gouvfr/theme/templates/dataset/display.html:472
+#: udata_gouvfr/theme/templates/organization/display.html:32
 msgid "Edit"
 msgstr ""
 
@@ -213,6 +223,7 @@ msgid "Producer"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/dataset/display.html:163
+#: udata_gouvfr/theme/templates/organization/display.html:45
 msgid "Certified public service"
 msgstr ""
 
@@ -227,12 +238,15 @@ msgstr ""
 #: udata_gouvfr/theme/templates/dataset/display.html:188
 #: udata_gouvfr/theme/templates/dataset/display.html:195
 #: udata_gouvfr/theme/templates/dataset/display.html:197
+#: udata_gouvfr/theme/templates/organization/display.html:128
 msgid "Follow"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/dataset/display.html:189
 #: udata_gouvfr/theme/templates/dataset/display.html:191
 #: udata_gouvfr/theme/templates/dataset/display.html:193
+#: udata_gouvfr/theme/templates/organization/display.html:122
+#: udata_gouvfr/theme/templates/organization/display.html:124
 msgid "Unfollow"
 msgstr ""
 
@@ -357,6 +371,148 @@ msgid ""
 "                It's time to let you know!\n"
 "                Reference your work in just a few clicks and increase your "
 "visibility."
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:46
+msgid "This organization and its datasets are certified by data.gouv.fr"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:56
+#, python-format
+msgid "%(num)d member"
+msgid_plural "%(num)d members"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:61
+#, python-format
+msgid "%(num)d follower"
+msgid_plural "%(num)d followers"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:66
+#, python-format
+msgid "%(num)d dataset"
+msgid_plural "%(num)d datasets"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:71
+#, python-format
+msgid "%(num)d reuse"
+msgid_plural "%(num)d reuses"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:79
+msgid "I belong to this organization"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:81
+msgid "Join"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:84
+msgid "Waiting for approval"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:89
+msgid "Pending request"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:93
+msgid "You are an administrator of this organization"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:96
+msgid "Administrator"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:100
+msgid "You are editor in this organization"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:103
+msgid "Editor"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:107
+msgid "You are a member of this organization"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:110
+msgid "Member"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:126
+msgid "I'll be informed about this organization news"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:137
+msgid "Supplied datasets"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:138
+msgid "Private datasets"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:142
+msgid "Private reuses"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:182
+#, python-format
+msgid "See the %(nb)s datasets"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:209
+#, python-format
+msgid "See the %(nb)s reuses"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:227
+msgid "You need to be logged in to follow an organization"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:228
+msgid "You need to be logged in to request membership to an organization"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:229
+msgid "You need to be logged in to accept or refuse a membership request"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:232
+msgid "A request has been sent to the administrators"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:233
+msgid "Error while requesting membership to {org}"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:236
+msgid "Membership request has been accepted"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:237
+msgid "Membership request has been refused"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:238
+msgid "Error while responding to membership request"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:240
+msgid "You are now following {org}"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:241
+msgid "You are not following {org} anymore"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:242
+msgid "Error while toggling follower status"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:7

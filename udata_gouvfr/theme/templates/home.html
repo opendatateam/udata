@@ -97,8 +97,8 @@
 
 {# Datasets section #}
 {% set dataset_tabs = (
-    ('popular-datasets', _('Most popular'), popular_datasets),
-    ('recent-datasets', _('Latest'), recent_datasets),
+    ('popular-datasets', _('Popular datasets'), popular_datasets, {}),
+    ('recent-datasets', _('Latest datasets'), recent_datasets, {'sort': '-created'}),
 ) %}
 <section class="colored">
       <div class="container">
@@ -106,7 +106,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <ul class="nav nav-pills" data-tabs="tabs">
-                        {% for tab_id, label, datasets in dataset_tabs %}
+                        {% for tab_id, label, datasets, kwargs in dataset_tabs %}
                         <li {% if loop.first %}class="active"{% endif %}>
                             <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
                         </li>
@@ -118,7 +118,7 @@
             <div class="row">
                 <div class="tab-content">
 
-                    {% for tab_id, label, datasets in dataset_tabs  %}
+                    {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
                     <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{tab_id}}">
                         <ul class="card-list">
 
@@ -130,7 +130,7 @@
 
                         </ul>
                         <p class="text-center">
-                            <a href="{{ url_for('datasets.list') }}" class="btn btn-default">
+                            <a href="{{ url_for('datasets.list', **kwargs) }}" class="btn btn-default">
                                 <span class="glyphicon glyphicon-list" ></span>
                                 {{ _('See more') }}
                             </a>
@@ -146,8 +146,8 @@
 
 {# Reuses section #}
 {% set reuse_tabs = (
-    ('popular-reuses', _('Most popular'), popular_reuses),
-    ('recent-reuses', _('Latest'), recent_reuses),
+    ('popular-reuses', _('Popular reuses'), popular_reuses, {}),
+    ('recent-reuses', _('Latest reuses'), recent_reuses, {'sort': '-created'}),
 ) %}
 
 <section class="default">
@@ -156,7 +156,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <ul class="nav nav-pills" data-tabs="tabs">
-                        {% for tab_id, label, reuses in reuse_tabs %}
+                        {% for tab_id, label, reuses, kwargs in reuse_tabs %}
                         <li {% if loop.first %}class="active"{% endif %}>
                             <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
                         </li>
@@ -168,7 +168,7 @@
             <div class="row">
                 <div class="tab-content">
 
-                    {% for tab_id, label, reuses in reuse_tabs  %}
+                    {% for tab_id, label, reuses, kwargs in reuse_tabs  %}
                     <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{tab_id}}">
                         <ul class="card-list">
 
@@ -180,7 +180,7 @@
 
                         </ul>
                         <p class="text-center">
-                            <a href="{{ url_for('reuses.list') }}" class="btn btn-default">
+                            <a href="{{ url_for('reuses.list', **kwargs) }}" class="btn btn-default">
                                 <span class="glyphicon glyphicon-list" ></span>
                                 {{ _('See more') }}
                             </a>

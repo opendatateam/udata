@@ -255,9 +255,17 @@
             margin-right: 15px;
         }
 
+        section.colored & {
+            color: white;
+        }
+
         &:hover {
             color: #999;
             background: none;
+
+            section.colored & {
+                color: #999;
+            }
         }
 
     }
@@ -265,6 +273,10 @@
     & > li.active > a, & > li.active > a:hover, & > li.active > a:focus {
         color: @text-dark;
         background: none;
+
+        section.colored & {
+            color: @gray;
+        }
     }
 }
 
