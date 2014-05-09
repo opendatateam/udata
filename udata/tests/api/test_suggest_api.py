@@ -90,6 +90,7 @@ class SuggestAPITest(APITestCase):
             self.assertIn('title', suggestion)
             self.assertIn('slug', suggestion)
             self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
             self.assertTrue(suggestion['title'].startswith('test'))
 
     def test_suggest_datasets_api_empty(self):
@@ -177,5 +178,35 @@ class SuggestAPITest(APITestCase):
                 OrganizationFactory()
 
         response = self.get(url_for('api.suggest_orgs'), qs={'q': 'xxxxxx', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
+
+    def test_suggest_reuses_api(self):
+        '''It should suggest reuses'''
+        with self.autoindex():
+            for i in range(4):
+                ReuseFactory(title='test-{0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.suggest_reuses'), qs={'q': 'tes', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('title', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertTrue(suggestion['title'].startswith('test'))
+
+    def test_suggest_reuses_api_empty(self):
+        '''It should not provide reuse suggestion if no match'''
+        with self.autoindex():
+            for i in range(3):
+                ReuseFactory()
+
+        response = self.get(url_for('api.suggest_reuses'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)

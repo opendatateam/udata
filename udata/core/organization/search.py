@@ -35,7 +35,7 @@ class OrganizationSearch(ModelSearchAdapter):
             'url': {'type': 'string'},
             'nb_datasets': {'type': 'integer'},
             'nb_reuses': {'type': 'integer'},
-            'name_suggest': {
+            'org_suggest': {
                 'type': 'completion',
                 'index_analyzer': 'simple',
                 'search_analyzer': 'simple',
@@ -53,7 +53,7 @@ class OrganizationSearch(ModelSearchAdapter):
             'nb_datasets': organization.metrics.get('datasets', 0),
             'nb_reuses': organization.metrics.get('reuses', 0),
             'nb_stars': organization.metrics.get('stars', 0),
-            'name_suggest': {
+            'org_suggest': {
                 'input': [organization.name],
                 'payload': {
                     'id': str(organization.id),

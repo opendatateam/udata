@@ -49,7 +49,7 @@ class SuggestOrgsAPI(API):
             'organizations': {
                 'text': q,
                 'completion': {
-                    'field': 'name_suggest',
+                    'field': 'org_suggest',
                     'size': size
                 }
             }
@@ -74,7 +74,7 @@ class SuggestDatasetsAPI(API):
             'datasets': {
                 'text': q,
                 'completion': {
-                    'field': 'title_suggest',
+                    'field': 'dataset_suggest',
                     'size': size
                 }
             }
@@ -85,8 +85,34 @@ class SuggestDatasetsAPI(API):
                 'title': opt['text'],
                 'score': opt['score'],
                 'slug': opt['payload']['slug'],
+                'image_url': opt['payload']['image_url'],
             }
             for opt in result['datasets'][0]['options']
+        ]
+
+
+class SuggestReusesAPI(API):
+    def get(self):
+        q = request.args.get('q', '')
+        size = request.args.get('size', DEFAULT_SIZE)
+        result = es.suggest(index=es.index_name, body={
+            'reuses': {
+                'text': q,
+                'completion': {
+                    'field': 'reuse_suggest',
+                    'size': size
+                }
+            }
+        })
+        return [
+            {
+                'id': opt['payload']['id'],
+                'title': opt['text'],
+                'score': opt['score'],
+                'slug': opt['payload']['slug'],
+                'image_url': opt['payload']['image_url'],
+            }
+            for opt in result['reuses'][0]['options']
         ]
 
 
@@ -117,5 +143,6 @@ class SuggestUsersAPI(API):
 api.add_resource(SuggestTagsAPI, '/suggest/tags', endpoint=b'api.suggest_tags')
 api.add_resource(SuggestOrgsAPI, '/suggest/organizations', endpoint=b'api.suggest_orgs')
 api.add_resource(SuggestDatasetsAPI, '/suggest/datasets', endpoint=b'api.suggest_datasets')
+api.add_resource(SuggestReusesAPI, '/suggest/reuses', endpoint=b'api.suggest_reuses')
 api.add_resource(SuggestFormatsAPI, '/suggest/formats', endpoint=b'api.suggest_formats')
 api.add_resource(SuggestUsersAPI, '/suggest/users', endpoint=b'api.suggest_users')

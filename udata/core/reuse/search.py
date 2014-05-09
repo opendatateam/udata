@@ -54,6 +54,12 @@ class ReuseSearch(ModelSearchAdapter):
             'last_modified': {'type': 'date', 'format': 'date_hour_minute_second'},
             'nb_datasets': {'type': 'integer'},
             'featured': {'type': 'boolean'},
+            'reuse_suggest': {
+                'type': 'completion',
+                'index_analyzer': 'simple',
+                'search_analyzer': 'simple',
+                'payloads': True,
+            },
         }
     }
 
@@ -73,4 +79,12 @@ class ReuseSearch(ModelSearchAdapter):
             'nb_datasets': reuse.metrics.get('datasets', 0),
             'nb_stars': reuse.metrics.get('stars', 0),
             'featured': reuse.featured,
+            'reuse_suggest': {
+                'input': [reuse.title],
+                'payload': {
+                    'id': str(reuse.id),
+                    'slug': reuse.slug,
+                    'image_url': reuse.image_url,
+                },
+            },
         }

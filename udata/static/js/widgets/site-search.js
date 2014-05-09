@@ -1,7 +1,9 @@
 /**
  * Main site search
  */
-define(['jquery'], function($) {
+define([
+    'jquery', 'dataset/typeahead', 'reuse/typeahead', 'organization/typeahead', 'typeahead'
+], function($, datasets, reuses, organizations) {
     'use strict';
 
     var SEARCH_FOCUS_CLASS = 'col-sm-7 col-lg-8',
@@ -22,5 +24,22 @@ define(['jquery'], function($) {
             $('.collapse-on-search').removeClass('hide');
         })
     ;
+
+    // Typeahead
+    $('#main-search')
+        .typeahead({highlight: true}, organizations, datasets, reuses)
+        .on('typeahead:selected', function(e, data, dataset) {
+            switch (dataset) {
+                case 'datasets':
+                    window.location = '/datasets/' + data.slug;
+                    break;
+                case 'reuses':
+                    window.location = '/reuses/' + data.slug;
+                    break;
+                case 'organizations':
+                    window.location = '/organizations/' + data.slug;
+                    break;
+            }
+        });
 
 });

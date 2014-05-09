@@ -46,7 +46,7 @@ class DatasetSearch(ModelSearchAdapter):
                 'search_analyzer': 'simple',
                 'payloads': False,
             },
-            'title_suggest': {
+            'dataset_suggest': {
                 'type': 'completion',
                 'index_analyzer': 'simple',
                 'search_analyzer': 'simple',
@@ -87,6 +87,7 @@ class DatasetSearch(ModelSearchAdapter):
 
     @classmethod
     def serialize(cls, dataset):
+        image_url = dataset.organization.image_url if dataset.organization and dataset.organization.image_url else None
         document = {
             'title': dataset.title,
             'description': dataset.description,
@@ -104,11 +105,12 @@ class DatasetSearch(ModelSearchAdapter):
             'frequency': dataset.frequency,
             'organization': str(dataset.organization.id) if dataset.organization else None,
             'supplier': str(dataset.supplier.id) if dataset.supplier else None,
-            'title_suggest': {
+            'dataset_suggest': {
                 'input': [dataset.title],
                 'payload': {
                     'id': str(dataset.id),
                     'slug': dataset.slug,
+                    'image_url': image_url,
                 },
             },
             'created': dataset.created_at.strftime('%Y-%m-%dT%H:%M:%S'),

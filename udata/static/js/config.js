@@ -17,6 +17,8 @@ require.config({
         'router': '../bower/requirejs-router/router',
         'domReady': '../bower/requirejs-domready/domReady',
         'dotdotdot': '../bower/jquery.dotdotdot/src/js/jquery.dotdotdot' ,
+        'typeahead': '../bower/typeahead.js/dist/typeahead.jquery',
+        'bloodhound': '../bower/typeahead.js/dist/bloodhound',
 
         // To be extracted in extensions
         'd3': '../bower/d3/d3',
@@ -70,6 +72,14 @@ require.config({
         'dotdotdot': {
             deps: ['jquery'],
             exports: '$.fn.dotdotdot'
+        },
+        'typeahead': {
+            deps: ['jquery'],
+            exports: '$.fn.typeahead'
+        },
+        'bloodhound': {
+            deps: ['jquery'],
+            exports: 'Bloodhound'
         }
     }
 
