@@ -108,6 +108,7 @@ class DatasetSearch(ModelSearchAdapter):
                 'input': [dataset.title],
                 'payload': {
                     'id': str(dataset.id),
+                    'slug': dataset.slug,
                 },
             },
             'created': dataset.created_at.strftime('%Y-%m-%dT%H:%M:%S'),

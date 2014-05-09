@@ -43,7 +43,27 @@ class SuggestFormatsAPI(API):
 
 class SuggestOrgsAPI(API):
     def get(self):
-        return []
+        q = request.args.get('q', '')
+        size = request.args.get('size', DEFAULT_SIZE)
+        result = es.suggest(index=es.index_name, body={
+            'organizations': {
+                'text': q,
+                'completion': {
+                    'field': 'name_suggest',
+                    'size': size
+                }
+            }
+        })
+        return [
+            {
+                'id': opt['payload']['id'],
+                'name': opt['text'],
+                'score': opt['score'],
+                'slug': opt['payload']['slug'],
+                'image_url': opt['payload']['image_url'],
+            }
+            for opt in result['organizations'][0]['options']
+        ]
 
 
 class SuggestDatasetsAPI(API):
@@ -64,6 +84,7 @@ class SuggestDatasetsAPI(API):
                 'id': opt['payload']['id'],
                 'title': opt['text'],
                 'score': opt['score'],
+                'slug': opt['payload']['slug'],
             }
             for opt in result['datasets'][0]['options']
         ]
