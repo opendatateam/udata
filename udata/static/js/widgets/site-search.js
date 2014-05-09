@@ -28,18 +28,8 @@ define([
     // Typeahead
     $('#main-search')
         .typeahead({highlight: true}, organizations, datasets, reuses)
-        .on('typeahead:selected', function(e, data, dataset) {
-            switch (dataset) {
-                case 'datasets':
-                    window.location = '/datasets/' + data.slug;
-                    break;
-                case 'reuses':
-                    window.location = '/reuses/' + data.slug;
-                    break;
-                case 'organizations':
-                    window.location = '/organizations/' + data.slug;
-                    break;
-            }
+        .on('typeahead:selected', function(e, data, datatype) {
+            window.location = '/' + datatype + '/' + data.slug
         });
 
 });
