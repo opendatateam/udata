@@ -27,7 +27,7 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     slug = db.SlugField(max_length=255, required=True, populate_from='title', update=True)
     description = db.StringField(required=True)
     type = db.StringField(required=True, choices=REUSE_TYPES.keys())
-    url = db.StringField(required=True)
+    url = db.StringField(required=True, unique=True)
     image_url = db.StringField()
     datasets = db.ListField(db.ReferenceField('Dataset'))
     tags = db.ListField(db.StringField())
