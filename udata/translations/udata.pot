@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-04-28 10:38+0200\n"
+"POT-Creation-Date: 2014-05-09 03:29+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,7 +29,7 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: udata/core/dataset/forms.py:17 udata/templates/dataset/display.html:184
+#: udata/core/dataset/forms.py:17 udata/templates/dataset/display.html:188
 #: udata/templates/dataset/list.html:41
 msgid "License"
 msgstr ""
@@ -39,7 +39,7 @@ msgid "Update frequency"
 msgstr ""
 
 #: udata/core/dataset/forms.py:20 udata/templates/dataset/card.html:36
-#: udata/templates/dataset/display.html:197
+#: udata/templates/dataset/display.html:201
 #: udata/templates/dataset/search-result.html:38
 msgid "Temporal coverage"
 msgstr ""
@@ -71,9 +71,9 @@ msgstr ""
 #: udata/core/dataset/metrics.py:16 udata/core/metrics/metrics.py:25
 #: udata/core/organization/metrics.py:32 udata/templates/header.html:32
 #: udata/templates/search.html:18 udata/templates/dataset/card.html:82
-#: udata/templates/dataset/display.html:51 udata/templates/dataset/list.html:31
+#: udata/templates/dataset/display.html:55 udata/templates/dataset/list.html:31
 #: udata/templates/dataset/list.html:69
-#: udata/templates/organization/display.html:45
+#: udata/templates/organization/display.html:47
 #: udata/templates/organization/list.html:30
 #: udata/templates/organization/list.html:48 udata/templates/reuse/create.html:4
 #: udata/templates/reuse/display.html:5 udata/templates/reuse/edit.html:4
@@ -193,14 +193,14 @@ msgstr ""
 #: udata/templates/dataset/list.html:7
 #: udata/templates/dataset/resource/display.html:4
 #: udata/templates/dataset/resource/edit.html:4
-#: udata/templates/organization/display.html:35
+#: udata/templates/organization/display.html:37
 #: udata/templates/organization/list.html:29
 #: udata/templates/organization/list.html:47 udata/templates/reuse/list.html:63
 #: udata/templates/topic/display.html:19 udata/templates/user/starred.html:26
 msgid "Datasets"
 msgstr ""
 
-#: udata/core/metrics/metrics.py:35 udata/templates/dataset/display.html:39
+#: udata/core/metrics/metrics.py:35 udata/templates/dataset/display.html:43
 msgid "Resources"
 msgstr ""
 
@@ -302,6 +302,18 @@ msgstr ""
 msgid "About"
 msgstr ""
 
+#: udata/core/user/permissions.py:9
+msgid "System administrator"
+msgstr ""
+
+#: udata/core/user/permissions.py:10
+msgid "Site editorialist"
+msgstr ""
+
+#: udata/core/user/permissions.py:11
+msgid "Site moderator"
+msgstr ""
+
 #: udata/forms/fields.py:155
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
@@ -325,12 +337,12 @@ msgstr ""
 msgid "This field requires \"%(name)s\" to be set"
 msgstr ""
 
-#: udata/models/datetime_fields.py:50 udata/templates/dataset/list.html:29
+#: udata/models/datetime_fields.py:51 udata/templates/dataset/list.html:29
 #: udata/templates/reuse/list.html:30
 msgid "Creation date"
 msgstr ""
 
-#: udata/models/datetime_fields.py:51 udata/templates/dataset/list.html:30
+#: udata/models/datetime_fields.py:52 udata/templates/dataset/list.html:30
 #: udata/templates/reuse/list.html:31
 msgid "Last modification date"
 msgstr ""
@@ -443,23 +455,23 @@ msgstr ""
 msgid "The identity of this public service public is certified by Etalab"
 msgstr ""
 
-#: udata/templates/dataset/card.html:39 udata/templates/dataset/display.html:200
+#: udata/templates/dataset/card.html:39 udata/templates/dataset/display.html:204
 #: udata/templates/dataset/search-result.html:41
 #, python-format
 msgid "%(start)s to %(end)s"
 msgstr ""
 
-#: udata/templates/dataset/card.html:48 udata/templates/dataset/display.html:210
+#: udata/templates/dataset/card.html:48 udata/templates/dataset/display.html:214
 #: udata/templates/dataset/search-result.html:49
 msgid "Frequency"
 msgstr ""
 
-#: udata/templates/dataset/card.html:60 udata/templates/dataset/display.html:222
+#: udata/templates/dataset/card.html:60 udata/templates/dataset/display.html:226
 #: udata/templates/dataset/search-result.html:61
 msgid "Territorial coverage"
 msgstr ""
 
-#: udata/templates/dataset/card.html:71 udata/templates/dataset/display.html:234
+#: udata/templates/dataset/card.html:71 udata/templates/dataset/display.html:238
 #: udata/templates/dataset/search-result.html:72
 msgid "Territorial coverage granularity"
 msgstr ""
@@ -485,59 +497,59 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: udata/templates/dataset/display.html:13
+#: udata/templates/dataset/display.html:14
 #: udata/templates/dataset/resource/display.html:12
 #: udata/templates/dataset/resource/list-item.html:33
-#: udata/templates/organization/display.html:13
+#: udata/templates/organization/display.html:14
 #: udata/templates/reuse/display.html:14
 msgid "Edit"
 msgstr ""
 
-#: udata/templates/dataset/display.html:21 udata/templates/reuse/display.html:23
+#: udata/templates/dataset/display.html:24 udata/templates/reuse/display.html:23
 msgid "Featured"
 msgstr ""
 
-#: udata/templates/dataset/display.html:45
+#: udata/templates/dataset/display.html:49
 msgid "Community resources"
 msgstr ""
 
-#: udata/templates/dataset/display.html:65 udata/templates/dataset/display.html:81
+#: udata/templates/dataset/display.html:69 udata/templates/dataset/display.html:85
 msgid "No resources"
 msgstr ""
 
-#: udata/templates/dataset/display.html:72
+#: udata/templates/dataset/display.html:76
 msgid "New resource"
 msgstr ""
 
-#: udata/templates/dataset/display.html:88
+#: udata/templates/dataset/display.html:92
 msgid "New community resource"
 msgstr ""
 
-#: udata/templates/dataset/display.html:103
+#: udata/templates/dataset/display.html:107
 msgid "New reuse"
 msgstr ""
 
-#: udata/templates/dataset/display.html:114
+#: udata/templates/dataset/display.html:118
 msgid "Producer"
 msgstr ""
 
-#: udata/templates/dataset/display.html:127
-#: udata/templates/dataset/display.html:159
+#: udata/templates/dataset/display.html:131
+#: udata/templates/dataset/display.html:163
 msgid "more"
 msgstr ""
 
-#: udata/templates/dataset/display.html:134
-#: udata/templates/dataset/display.html:136
-#: udata/templates/dataset/display.html:166
-#: udata/templates/dataset/display.html:168
+#: udata/templates/dataset/display.html:138
+#: udata/templates/dataset/display.html:140
+#: udata/templates/dataset/display.html:170
+#: udata/templates/dataset/display.html:172
 msgid "Follow"
 msgstr ""
 
-#: udata/templates/dataset/display.html:146
+#: udata/templates/dataset/display.html:150
 msgid "Supplier"
 msgstr ""
 
-#: udata/templates/dataset/display.html:176
+#: udata/templates/dataset/display.html:180
 msgid "Informations"
 msgstr ""
 
@@ -658,39 +670,39 @@ msgstr ""
 msgid "Last page"
 msgstr ""
 
-#: udata/templates/macros/search.html:21 udata/templates/macros/search.html:28
+#: udata/templates/macros/search.html:25 udata/templates/macros/search.html:32
 msgid "Relevance"
 msgstr ""
 
-#: udata/templates/macros/search.html:135
+#: udata/templates/macros/search.html:142
 #, python-format
 msgid "%(from)s to %(to)s"
 msgstr ""
 
-#: udata/templates/macros/search.html:137
+#: udata/templates/macros/search.html:144
 msgid "None"
 msgstr ""
 
-#: udata/templates/macros/search.html:139
+#: udata/templates/macros/search.html:146
 #, python-format
 msgid "Up to %(to)s"
 msgstr ""
 
-#: udata/templates/macros/search.html:141
+#: udata/templates/macros/search.html:148
 #, python-format
 msgid "More than %(from)s"
 msgstr ""
 
-#: udata/templates/macros/search.html:155
+#: udata/templates/macros/search.html:162
 msgid "Clear filter"
 msgstr ""
 
-#: udata/templates/macros/search.html:178
+#: udata/templates/macros/search.html:185
 #, python-format
 msgid "Results %(start)s to %(end)s on %(total)s found"
 msgstr ""
 
-#: udata/templates/macros/search.html:184
+#: udata/templates/macros/search.html:191
 msgid "No result found"
 msgstr ""
 
@@ -698,13 +710,13 @@ msgstr ""
 msgid "Star this"
 msgstr ""
 
-#: udata/templates/organization/display.html:40
+#: udata/templates/organization/display.html:42
 msgid "Supplied datasets"
 msgstr ""
 
-#: udata/templates/organization/display.html:64
-#: udata/templates/organization/display.html:81
-#: udata/templates/organization/display.html:98
+#: udata/templates/organization/display.html:66
+#: udata/templates/organization/display.html:83
+#: udata/templates/organization/display.html:100
 msgid "See all"
 msgstr ""
 
