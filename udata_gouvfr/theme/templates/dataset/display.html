@@ -254,7 +254,7 @@
                                 </a>
                                 {% for code in dataset.territorial_coverage.codes %}
                                 {{ code }}
-                                {% endfor %}pd
+                                {% endfor %}
                             </li>
                             {% endif %}
 
@@ -442,15 +442,18 @@
                     {% for reuse in reuses %}
                     <div class="col-sm-6 col-lg-4">
                         <div id="reuse-{{reuse.id}}" class="thumbnail reuse">
-                            <a class="preview" href="{{ reuse.url }}" target="_blank">
+                            <a class="preview" href="{{ url_for('reuses.show', reuse=reuse) }}">
                                 <img class="media-object img-responsive" alt="{{ reuse.title }}"
                                     src="{{ reuse.image_url|placeholder('reuse') }}">
                             </a>
                             <div class="caption">
                                 <h4 class="ellipsis-dot">
+                                    <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
+                                        {{ reuse.title }}
+                                    </a>
                                     <a href="{{ reuse.url }}" target="_blank"
                                         title="{{ reuse.title }}">
-                                        {{ reuse.title }}
+                                        <span class="glyphicon glyphicon-new-window"></span>
                                     </a>
                                 </h4>
                                 <div class="author">
@@ -462,7 +465,7 @@
                                 </div>
                             </div>
                             {% if reuse.description %}
-                            <a class="rollover fade in" href="{{reuse.url}}" target="_blank"
+                            <a class="rollover fade in" href="{{url_for('reuses.show', reuse=reuse)}}"
                                 title="{{ reuse.title }}">
                                 {{ reuse.description|markdown|striptags|truncate(180) }}
                             </a>
