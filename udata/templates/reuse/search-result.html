@@ -17,6 +17,13 @@
     <ul class="list-inline result-infos">
         <li>
             <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                title="{{ _('Type') }}">
+                <span class="glyphicon glyphicon-file"></span>
+            </a>
+            {{ g.reuse_types[reuse.type] }}
+        </li>
+        <li>
+            <a href class="btn btn-xs" rel="tooltip" data-placement="top"
                 title="{{ _('Number of dataset') }}">
                 <span class="glyphicon glyphicon-stats"></span>
             </a>

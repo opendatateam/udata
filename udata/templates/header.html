@@ -12,7 +12,7 @@
     </div>
 
     <div class="col-sm-2 col-lg-3 nav navbar-nav search-bar">
-      <form class="navbar-form" role="search" action="{{ search_url }}">
+      <form class="navbar-form" role="search" action="{{ search_url or url_for('front.search') }}">
         <div class="form-group">
           <div class="input-group input-group-sm">
             <span class="input-group-addon">

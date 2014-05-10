@@ -55,7 +55,7 @@
                 stars=(_('Stars'), 'desc'),
             ) }}
             {{ s.facet_picker(reuses, 'organization', _('Organizations')) }}
-            {{ s.facet_picker(reuses, 'type', _('Type'), REUSE_TYPES) }}
+            {{ s.facet_picker(reuses, 'type', _('Type'), g.reuse_types) }}
             {{ s.facet_picker(reuses, 'tag', _('Tags')) }}
             {{ s.range_picker(reuses, 'datasets', _('Datasets')) }}
         </div>

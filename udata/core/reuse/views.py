@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import request, url_for
+from flask import request, url_for, g
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.forms import ReuseForm
@@ -13,6 +13,11 @@ from udata.search import ReuseSearch
 from .permissions import ReuseEditPermission, set_reuse_identity
 
 blueprint = I18nBlueprint('reuses', __name__, url_prefix='/reuses')
+
+
+@blueprint.before_app_request
+def store_references_lists():
+    g.reuse_types = REUSE_TYPES
 
 
 @blueprint.route('/recent.atom')
@@ -48,11 +53,6 @@ class ReuseListView(SearchView):
     search_adapter = ReuseSearch
     search_endpoint = 'reuses.list'
 
-    def get_context(self):
-        context = super(ReuseListView, self).get_context()
-        context['REUSE_TYPES'] = REUSE_TYPES
-        return context
-
 
 class ReuseView(object):
     model = Reuse
@@ -74,11 +74,6 @@ class ProtectedReuseView(ReuseView):
 
 class ReuseDetailView(ReuseView, DetailView):
     template_name = 'reuse/display.html'
-
-    def get_context(self):
-        context = super(ReuseDetailView, self).get_context()
-        context['REUSE_TYPES'] = REUSE_TYPES
-        return context
 
 
 class ReuseCreateView(CreateView):

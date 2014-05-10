@@ -44,7 +44,7 @@
             {{ s.range_picker(organizations, 'datasets', _('Datasets')) }}
             {{ s.range_picker(organizations, 'reuses', _('Reuses')) }}
             {# {{ facet_picker(reuses, 'organization', _('Organizations')) }}
-            {{ facet_picker(reuses, 'type', _('Type'), REUSE_TYPES) }}
+            {{ facet_picker(reuses, 'type', _('Type'), g.reuse_types) }}
             {{ facet_picker(reuses, 'tag', _('Tags')) }} #}
         </div>
     </aside>

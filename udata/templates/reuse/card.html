@@ -15,52 +15,13 @@
     </div>
     <footer>
         <ul class="col-xs-9 col-sm-10">
-            {# Temporal coverage #}
-            {# {% if dataset.temporal_coverage %}
             <li>
-                <a href class="btn btn-xs btn-default" rel="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Temporal coverage') }}">
-                    <span class="glyphicon glyphicon-calendar"></span>
+                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Type') }}">
+                    <span class="glyphicon glyphicon-file"></span>
                 </a>
-                {{ _('%s to %s') % (dataset.temporal_coverage.from, dataset.temporal_coverage.to) }}
+                {{ g.reuse_types[reuse.type] }}
             </li>
-            {% endif %} #}
-
-            {# frequency #}
-            {# {% if dataset.frequency %}
-            <li>
-                <a href class="btn btn-xs" rel="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Frequency') }}">
-                    <span class="glyphicon glyphicon-time"></span>
-                </a>
-                {{ dataset.frequency }}
-            </li>
-            {% endif %} #}
-
-            {# Territorial coverage #}
-            {# {% if dataset.territorial_coverage.codes %}
-            <li>
-                <a href class="btn btn-xs btn-default" rel="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Territorial coverage') }}">
-                    <span class="glyphicon glyphicon-globe"></span>
-                </a>
-                {{ ' '.join(dataset.territorial_coverage.codes) }}
-            </li>
-            {% endif %} #}
-
-            {# {% if dataset.territorial_coverage.granularity %}
-            <li>
-                <a href class="btn btn-xs btn-default" rel="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Territorial coverage granularity') }}">
-                    <span class="glyphicon glyphicon-screenshot"></span>
-                </a>
-                {{ dataset.territorial_coverage.granularity }}
-            </li>
-            {% endif %} #}
         </ul>
         <ul class="col-xs-3 col-sm-2 corner">
             <li>

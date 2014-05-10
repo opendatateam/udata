@@ -2,18 +2,24 @@
 from __future__ import unicode_literals
 
 
-from flask import abort, redirect, request, url_for
+from flask import abort, redirect, request, url_for, g
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.forms import DatasetForm, ResourceForm
 from udata.frontend.views import DetailView, CreateView, EditView, SingleObject, SearchView
 from udata.i18n import I18nBlueprint
-from udata.models import Dataset, Resource, Reuse, UPDATE_FREQUENCIES
+from udata.models import Dataset, Resource, Reuse, UPDATE_FREQUENCIES, TERRITORIAL_GRANULARITIES
 from udata.search import DatasetSearch
 
 from .permissions import DatasetEditPermission, set_dataset_identity
 
 blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
+
+
+@blueprint.before_app_request
+def store_references_lists():
+    g.update_frequencies = UPDATE_FREQUENCIES
+    g.territorial_granularities = TERRITORIAL_GRANULARITIES
 
 
 @blueprint.route('/recent.atom')
@@ -75,7 +81,6 @@ class DatasetDetailView(DatasetView, DetailView):
         context = super(DatasetDetailView, self).get_context()
         context['reuses'] = Reuse.objects(datasets=self.dataset)
         context['can_edit'] = DatasetEditPermission(self.dataset)
-        context['UPDATE_FREQUENCIES'] = UPDATE_FREQUENCIES
         return context
 
 
