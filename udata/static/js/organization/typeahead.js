@@ -29,7 +29,7 @@ define([
         displayKey: 'name',
         limit: MAX,
         templates: {
-            header: header({title: i18n._('ta_orgs_title')}),
+            header: header({title: i18n._('Organizations')}),
             suggestion: suggestion
         }
     };

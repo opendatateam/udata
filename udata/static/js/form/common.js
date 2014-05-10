@@ -1,7 +1,7 @@
 /**
  * Common form features
  */
-define(['jquery', 'jquery.validation', 'bootstrap' ], function($) {
+define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) {
     'use strict';
 
     // jQuery validate
@@ -21,36 +21,25 @@ define(['jquery', 'jquery.validation', 'bootstrap' ], function($) {
         }
     });
 
-
-    // i18n: function(key, replacements) {
-    //     var msg = $('meta[name="'+key+'-i18n"]').attr('content');
-    //     if (replacements) {
-    //         for (var key in replacements) {
-    //             msg = msg.replace(key, replacements[key]);
-    //         }
-    //     }
-    //     return msg;
-    // },
-
     // jQuery validate
-    // $.extend($.validator.messages, {
-    //     required: Utils.i18n('valid-required'),
-    //     remote: Utils.i18n('valid-remote'),
-    //     email: Utils.i18n('valid-email'),
-    //     url: Utils.i18n('valid-url'),
-    //     date: Utils.i18n('valid-date'),
-    //     dateISO: Utils.i18n('valid-date-iso'),
-    //     number: Utils.i18n('valid-number'),
-    //     digits: Utils.i18n('valid-digits'),
-    //     creditcard: Utils.i18n('valid-creditcard'),
-    //     equalTo: Utils.i18n('valid-equal-to'),
-    //     maxlength: $.validator.format(Utils.i18n('valid-maxlength')),
-    //     minlength: $.validator.format(Utils.i18n('valid-minlength')),
-    //     rangelength: $.validator.format(Utils.i18n('valid-range-length')),
-    //     range: $.validator.format(Utils.i18n('valid-range')),
-    //     max: $.validator.format(Utils.i18n('valid-max')),
-    //     min: $.validator.format(Utils.i18n('valid-min'))
-    // });
+    $.extend($.validator.messages, {
+        required: i18n._('valid-required'),
+        remote: i18n._('valid-remote'),
+        email: i18n._('valid-email'),
+        url: i18n._('valid-url'),
+        date: i18n._('valid-date'),
+        dateISO: i18n._('valid-date-iso'),
+        number: i18n._('valid-number'),
+        digits: i18n._('valid-digits'),
+        creditcard: i18n._('valid-creditcard'),
+        equalTo: i18n._('valid-equal-to'),
+        maxlength: $.validator.format(i18n._('valid-maxlength')),
+        minlength: $.validator.format(i18n._('valid-minlength')),
+        rangelength: $.validator.format(i18n._('valid-range-length')),
+        range: $.validator.format(i18n._('valid-range')),
+        max: $.validator.format(i18n._('valid-max')),
+        min: $.validator.format(i18n._('valid-min'))
+    });
 
     // Form help messages as popover on info sign
     $('.form-help').popover({

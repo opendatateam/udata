@@ -1,7 +1,7 @@
 /**
  * Date range picker widget
  */
-define(['jquery', 'moment', 'bootstrap-daterangepicker'], function($, moment) {
+define(['jquery', 'moment', 'i18n', 'bootstrap-daterangepicker'], function($, moment, i18n) {
     'use strict';
 
     $('.dtpicker').each(function() {
@@ -34,7 +34,16 @@ define(['jquery', 'moment', 'bootstrap-daterangepicker'], function($, moment) {
             .daterangepicker({
                 showDropdowns: true,
                 startDate: startDate,
-                endDate: endDate
+                endDate: endDate,
+                locale: {
+                    applyLabel: i18n._('OK'),
+                    cancelLabel: i18n._('Cancel'),
+                    fromLabel: i18n._('From'),
+                    toLabel: i18n._('To'),
+                    weekLabel: i18n._('week-label'),
+                    customRangeLabel: i18n._('Custom Range'),
+                    firstDay: moment.langData()._week.dow
+                }
             }, display);
 
         $clearBtn
