@@ -240,7 +240,7 @@
                                 title="{{ _('Frequency') }}">
                                 <span class="glyphicon glyphicon-time"></span>
                             </a>
-                            {{ UPDATE_FREQUENCIES[dataset.frequency] }}
+                            {{ g.update_frequencies[dataset.frequency] }}
                         </li>
                         {% endif %}
 
@@ -264,7 +264,7 @@
                                     title="{{ _('Territorial coverage granularity') }}">
                                     <span class="glyphicon glyphicon-screenshot"></span>
                                 </a>
-                                {{ dataset.territorial_coverage.granularity }}
+                                {{ g.territorial_granularities[dataset.territorial_coverage.granularity] }}
                             </li>
                             {% endif %}
                         {% endif %}

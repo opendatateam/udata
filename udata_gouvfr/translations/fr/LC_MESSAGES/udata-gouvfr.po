@@ -1,25 +1,25 @@
-# Translations template for udata-gouvfr.
+# French translations for udata-gouvfr.
 # Copyright (C) 2014 ORGANIZATION
-# This file is distributed under the same license as the udata-gouvfr project.
-# 
+# This file is distributed under the same license as the udata-gouvfr
+# project.
+#
 # Translators:
 # noirbizarre, 2014
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2014
-# noirbizarre, 2014
 msgid ""
 msgstr ""
-"Project-Id-Version: uData-gouv.fr\n"
+"Project-Id-Version:  uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-05-09 03:29+0200\n"
+"POT-Creation-Date: 2014-05-10 13:23+0200\n"
 "PO-Revision-Date: 2014-05-09 01:40+0000\n"
 "Last-Translator: noirbizarre\n"
-"Language-Team: French (http://www.transifex.com/projects/p/udata-gouvfr/language/fr/)\n"
+"Language-Team: French (http://www.transifex.com/projects/p/udata-"
+"gouvfr/language/fr/)\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
-"Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: udata_gouvfr/metrics.py:15 udata_gouvfr/theme/templates/metrics.html:86
 msgid "Public services"
@@ -192,7 +192,7 @@ msgstr "Publiez !"
 #: udata_gouvfr/theme/templates/dataset/display.html:83
 #: udata_gouvfr/theme/templates/dataset/display.html:132
 #: udata_gouvfr/theme/templates/dataset/display.html:416
-#: udata_gouvfr/theme/templates/dataset/display.html:472
+#: udata_gouvfr/theme/templates/dataset/display.html:475
 #: udata_gouvfr/theme/templates/organization/display.html:32
 msgid "Edit"
 msgstr "Editer"
@@ -350,30 +350,38 @@ msgstr "Explorer avec Datagouv"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:434
 msgid ""
-"You have built a more comprehensive database than those presented here? This"
-" is the time to share it!"
-msgstr "Vous avez construit une base de données plus complète que celles présentées ici ? C'est le moment de la partager !"
+"You have built a more comprehensive database than those presented here? "
+"This is the time to share it!"
+msgstr ""
+"Vous avez construit une base de données plus complète que celles "
+"présentées ici ? C'est le moment de la partager !"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:483
-#: udata_gouvfr/theme/templates/dataset/display.html:487
+#: udata_gouvfr/theme/templates/dataset/display.html:486
+#: udata_gouvfr/theme/templates/dataset/display.html:490
 msgid "Unmark as featured"
 msgstr "Ne plus mettre en avant"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:485
 #: udata_gouvfr/theme/templates/dataset/display.html:488
+#: udata_gouvfr/theme/templates/dataset/display.html:491
 msgid "Mark as featured"
 msgstr "Mettre en avant"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:501
+#: udata_gouvfr/theme/templates/dataset/display.html:504
 msgid "Add a reuse"
 msgstr "Ajouter une réutilisation"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:509
+#: udata_gouvfr/theme/templates/dataset/display.html:512
 msgid ""
-"You reused these data and published an article, a computer graphics, or an application?\n"
+"You reused these data and published an article, a computer graphics, or "
+"an application?\n"
 "                It's time to let you know!\n"
-"                Reference your work in just a few clicks and increase your visibility."
-msgstr "Vous avez réutilisé ces données et publié un article, une infographie, ou une application ?\nC'est le moment de vous faire connaître !\nRéférencez votre travail en quelques clics et augmentez votre visibilité."
+"                Reference your work in just a few clicks and increase "
+"your visibility."
+msgstr ""
+"Vous avez réutilisé ces données et publié un article, une infographie, ou"
+" une application ?\n"
+"C'est le moment de vous faire connaître !\n"
+"Référencez votre travail en quelques clics et augmentez votre visibilité."
 
 #: udata_gouvfr/theme/templates/organization/display.html:46
 msgid "This organization and its datasets are certified by data.gouv.fr"
@@ -583,3 +591,4 @@ msgstr "Aucun résultat trouvé"
 #: udata_gouvfr/theme/templates/topic/subnav.html:46
 msgid "Read more"
 msgstr "Lire plus"
+

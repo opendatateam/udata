@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-05-09 03:29+0200\n"
+"POT-Creation-Date: 2014-05-10 13:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -188,7 +188,7 @@ msgstr ""
 #: udata_gouvfr/theme/templates/dataset/display.html:83
 #: udata_gouvfr/theme/templates/dataset/display.html:132
 #: udata_gouvfr/theme/templates/dataset/display.html:416
-#: udata_gouvfr/theme/templates/dataset/display.html:472
+#: udata_gouvfr/theme/templates/dataset/display.html:475
 #: udata_gouvfr/theme/templates/organization/display.html:32
 msgid "Edit"
 msgstr ""
@@ -350,21 +350,21 @@ msgid ""
 "is the time to share it!"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/dataset/display.html:483
-#: udata_gouvfr/theme/templates/dataset/display.html:487
+#: udata_gouvfr/theme/templates/dataset/display.html:486
+#: udata_gouvfr/theme/templates/dataset/display.html:490
 msgid "Unmark as featured"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/dataset/display.html:485
 #: udata_gouvfr/theme/templates/dataset/display.html:488
+#: udata_gouvfr/theme/templates/dataset/display.html:491
 msgid "Mark as featured"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/dataset/display.html:501
+#: udata_gouvfr/theme/templates/dataset/display.html:504
 msgid "Add a reuse"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/dataset/display.html:509
+#: udata_gouvfr/theme/templates/dataset/display.html:512
 msgid ""
 "You reused these data and published an article, a computer graphics, or an "
 "application?\n"
