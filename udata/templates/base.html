@@ -36,6 +36,7 @@
   </head>
 
   <body>
+    {% set search_url = search_url or url_for('front.search') %}
 
     {% include theme("header.html") %}
     {% block subnav %}{% endblock %}

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import request, redirect, abort, g
+from flask import request, redirect, abort, g, url_for
 from flask.views import MethodView
 
 from udata import search
@@ -46,19 +46,36 @@ class ListView(Templated, BaseView):
     '''
     model = None
     context_name = 'objects'
-    search_adapter = None
-    metrics = False
 
     def get_queryset(self):
-        if self.search_adapter:
-            result = search.query(self.search_adapter, **multi_to_dict(request.args))
-            return result
         return self.model.objects
 
     def get_context(self):
         context = super(ListView, self).get_context()
         context[self.context_name] = self.get_queryset()
-        # context.update(request.args.to_dict())
+        return context
+
+    def get(self, **kwargs):
+        return self.render()
+
+
+class SearchView(Templated, BaseView):
+    '''
+    Render a Queryset as a list.
+    '''
+    model = None
+    context_name = 'objects'
+    search_adapter = None
+    search_endpoint = None
+
+    def get_queryset(self):
+        return search.query(self.search_adapter, **multi_to_dict(request.args))
+
+    def get_context(self):
+        context = super(SearchView, self).get_context()
+        context[self.context_name] = self.get_queryset()
+        if self.search_endpoint:
+            context['search_url'] = url_for(self.search_endpoint)
         return context
 
     def get(self, **kwargs):

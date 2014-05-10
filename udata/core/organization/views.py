@@ -5,7 +5,7 @@ from flask import request, g
 from flask.ext.security import current_user
 
 from udata.forms import OrganizationForm, OrganizationMemberForm
-from udata.frontend.views import ListView, DetailView, CreateView, EditView
+from udata.frontend.views import DetailView, CreateView, EditView, SearchView
 from udata.i18n import I18nBlueprint
 from udata.models import Organization, Member, Reuse, Dataset, ORG_ROLES, User
 from udata.search import OrganizationSearch, DatasetSearch, ReuseSearch, SearchQuery, multiquery
@@ -28,11 +28,12 @@ def inject_user_orgs():
     return {'user_orgs': getattr(g, 'user_organizations', [])}
 
 
-class OrganizationListView(ListView):
+class OrganizationListView(SearchView):
     model = Organization
     context_name = 'organizations'
     template_name = 'organization/list.html'
     search_adapter = OrganizationSearch
+    search_endpoint = 'organizations.list'
 
 
 class OrgView(object):

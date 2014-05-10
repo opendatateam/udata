@@ -24,15 +24,6 @@
 {% block main_content %}
 <div class="row">
     <div class="col-lg-8">
-        {{ s.search_bar(url_for('organizations.list'),
-            name=( _('Name'), 'alpha'),
-            datasets=(_('Datasets'), 'numeric'),
-            reuses=(_('Reuses'), 'numeric'),
-            stars=(_('Stars'), 'numeric'),
-        ) }}
-
-        <hr/>
-
         <ul class="search-results">
         {% for organization in organizations %}
         {% include theme('organization/search-result.html') %}
@@ -44,6 +35,12 @@
     <aside class="col-lg-4 advanced-search-panel">
         <div class="panel panel-default">
             {{ s.panel_header(organizations) }}
+            {{ s.panel_sorter(
+                name=( _('Name'), 'asc'),
+                datasets=(_('Datasets'), 'desc'),
+                reuses=(_('Reuses'), 'desc'),
+                stars=(_('Stars'), 'desc'),
+            ) }}
             {{ s.range_picker(organizations, 'datasets', _('Datasets')) }}
             {{ s.range_picker(organizations, 'reuses', _('Reuses')) }}
             {# {{ facet_picker(reuses, 'organization', _('Organizations')) }}

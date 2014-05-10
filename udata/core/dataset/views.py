@@ -6,7 +6,7 @@ from flask import abort, redirect, request, url_for
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.forms import DatasetForm, ResourceForm
-from udata.frontend.views import ListView, DetailView, CreateView, EditView, SingleObject
+from udata.frontend.views import DetailView, CreateView, EditView, SingleObject, SearchView
 from udata.i18n import I18nBlueprint
 from udata.models import Dataset, Resource, Reuse, UPDATE_FREQUENCIES
 from udata.search import DatasetSearch
@@ -42,11 +42,12 @@ def recent_feed():
     return feed.get_response()
 
 
-class DatasetListView(ListView):
+class DatasetListView(SearchView):
     model = Dataset
     context_name = 'datasets'
     template_name = 'dataset/list.html'
     search_adapter = DatasetSearch
+    search_endpoint = 'datasets.list'
 
 
 class DatasetView(object):

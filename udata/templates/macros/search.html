@@ -43,21 +43,53 @@
 </form>
 {% endmacro %}
 
-
-{% macro sorter_entries(field, label=None) %}
-{% set name, typ = (label or (field|title), 'amount') if label is string else label %}
-<li>
-    <a href="{{ url_rewrite(sort=field)|url_del('page') }}">
-        <span class="fa fa-sort-{{typ}}-asc"></span>
-        {{ name }}
-    </a>
-</li>
-<li>
-    <a href="{{ url_rewrite(sort='-'+field)|url_del('page') }}">
-        <span class="fa fa-sort-{{typ}}-desc"></span>
-        {{ name }}
-    </a>
-</li>
+{% macro panel_sorter() %}
+{% if kwargs %}
+{% if in_url('sort') %}
+    {% if request.args.sort.startswith('-') %}
+        {% set sort, order = request.args.sort[1:], 'desc' %}
+    {% else %}
+        {% set sort, order = request.args.sort, 'asc' %}
+    {% endif %}
+    {% set label, default_order = kwargs[sort] %}
+{% endif %}
+<div class="panel-heading panel-sorter" data-toggle="collapse" data-target="#collapse-sorter">
+    {% if sort %}
+        {% set btn_class = 'btn-default' if order == default_order else 'btn-warning' %}
+        <a class="btn {{ btn_class }} btn-xs pull-right"
+            href="{{ url_rewrite(sort=sort if order == 'desc' else '-'+sort)|url_del('page') }}"
+            title="{{ _('Ascending') if order == 'asc' else _('Descending') }}">
+            <span class="fa fa-sort-amount-{{order}}"></span>
+        </a>
+    {% endif %}
+    <h3 class="panel-title">
+        <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
+        {{ _('Sort by') }}
+    </h3>
+</div>
+<div class="btn-group btn-group-justified btn-sorter">
+    <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            {{ label or _('Relevance') }}
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a href="{{ url_rewrite(page=1)|url_del('sort') }}">
+                    {{ _('Relevance') }}
+                </a>
+            </li>
+            {% for field, (label, order) in kwargs.items() %}
+            <li>
+                <a href="{{ url_rewrite(sort=field if order == 'asc' else '-'+field)|url_del('page') }}">
+                    {{ label }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
 {% endmacro %}
 
 

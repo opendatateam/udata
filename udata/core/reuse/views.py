@@ -5,7 +5,7 @@ from flask import request, url_for
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.forms import ReuseForm
-from udata.frontend.views import ListView, DetailView, CreateView, EditView
+from udata.frontend.views import SearchView, DetailView, CreateView, EditView
 from udata.i18n import I18nBlueprint
 from udata.models import Reuse, REUSE_TYPES
 from udata.search import ReuseSearch
@@ -41,11 +41,12 @@ def recent_feed():
     return feed.get_response()
 
 
-class ReuseListView(ListView):
+class ReuseListView(SearchView):
     model = Reuse
     context_name = 'reuses'
     template_name = 'reuse/list.html'
     search_adapter = ReuseSearch
+    search_endpoint = 'reuses.list'
 
     def get_context(self):
         context = super(ReuseListView, self).get_context()

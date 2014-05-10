@@ -25,14 +25,6 @@
 <div class="row">
     <div class="col-lg-8">
 
-        {{ s.search_bar(url_for('reuses.list'),
-            title=(_('Title'), 'alpha'),
-            created=_('Creation date'),
-            last_modified=_('Last modification date'),
-            datasets=(_('Datasets used'), 'numeric'),
-            stars=(_('Stars'), 'numeric'),
-        ) }}
-
         <div class="row">
             <div class="col-sm-12 label-list">
                 {{ s.filter_label('organization', _('Organization'), 'home',
@@ -42,8 +34,6 @@
                 {{ s.filter_label('type', _('Type'), 'file') }}
             </div>
         </div>
-
-        <hr/>
 
         <ul class="search-results">
         {% for reuse in reuses %}
@@ -57,6 +47,13 @@
     <aside class="col-lg-4 advanced-search-panel">
         <div class="panel panel-default">
             {{ s.panel_header(reuses) }}
+            {{ s.panel_sorter(
+                title=(_('Title'), 'asc'),
+                created=(_('Creation date'), 'desc'),
+                last_modified=(_('Last modification date'), 'desc'),
+                datasets=(_('Datasets used'), 'desc'),
+                stars=(_('Stars'), 'desc'),
+            ) }}
             {{ s.facet_picker(reuses, 'organization', _('Organizations')) }}
             {{ s.facet_picker(reuses, 'type', _('Type'), REUSE_TYPES) }}
             {{ s.facet_picker(reuses, 'tag', _('Tags')) }}

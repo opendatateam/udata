@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from bson import ObjectId
+
 from werkzeug.routing import BaseConverter
 
 from udata import models
@@ -19,15 +21,38 @@ class ListConverter(BaseConverter):
 
 
 class ModelConverter(BaseConverter):
+    '''
+    A base class helper for model helper.
+
+    Allow to give model or slug or ObjectId as parameter to url_for().
+
+    When serializing to url using a model parameter
+    it use the slug field if possible and then fallback on the id field.
+
+    When serializing to python, ir try in the following order:
+
+    * fetch by slug
+    * fetch by id
+    * raise 404
+    '''
+
     model = None
 
     def to_python(self, value):
-        return self.model.objects.get_or_404(slug=value)
+        obj = self.model.objects(slug=value).first()
+        return obj or self.model.objects.get_or_404(id=value)
 
     def to_url(self, obj):
-        if hasattr(obj, 'slug'):
+        if isinstance(obj, (basestring, ObjectId)):
+            return obj
+        elif getattr(obj, 'slug'):
             return obj.slug
-        return obj
+        elif getattr(obj, 'id'):
+            return str(obj.id)
+        else:
+            raise ValueError('Unable to serialize "%s" to url' % obj)
+
+
 
 
 class DatasetConverter(ModelConverter):

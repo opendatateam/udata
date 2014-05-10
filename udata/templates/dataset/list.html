@@ -24,13 +24,6 @@
 {% block main_content %}
 <div class="row">
     <div class="col-lg-8">
-        {{ s.search_bar(url_for('datasets.list'),
-            title=(_('Title'), 'alpha'),
-            created=_('Creation date'),
-            last_modified=_('Last modification date'),
-            reuses=(_('Reuses'), 'numeric'),
-            stars=(_('Stars'), 'numeric'),
-        ) }}
 
         <div class="row">
             <div class="col-sm-12 label-list">
@@ -45,8 +38,6 @@
             </div>
         </div>
 
-        <hr/>
-
         <ul class="card-list">
             {% for dataset in datasets %}
             <li class="col-md-6">
@@ -54,13 +45,22 @@
             </li>
             {% endfor %}
         </ul>
+
         <div class="clearfix"></div>
+
         {{ paginator(datasets) }}
     </div>
 
     <aside class="col-lg-4 advanced-search-panel">
         <div class="panel panel-default">
             {{ s.panel_header(datasets) }}
+            {{ s.panel_sorter(
+                title=(_('Title'), 'asc'),
+                created=(_('Creation date'), 'desc'),
+                last_modified=(_('Last modification date'), 'desc'),
+                reuses=(_('Reuses'), 'desc'),
+                stars=(_('Stars'), 'desc')
+            ) }}
             {{ s.facet_picker(datasets, 'organization', _('Organizations'), 'home') }}
             {{ s.facet_picker(datasets, 'supplier', _('Suppliers'), 'home') }}
             {{ s.facet_picker(datasets, 'tag', _('Tags'), 'tag') }}

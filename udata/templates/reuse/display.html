@@ -32,8 +32,10 @@
 {% block main_content %}
 <h2>{{ reuse.title }}</h2>
 <div class="text-center">
-    <img src="{{ reuse.image_url|placeholder('reuse') }}"
-        alt="{{ reuse.title }}" class="scalable" />
+    <a href="{{ reuse.url }}" target="_blank">
+        <img src="{{ reuse.image_url|placeholder('reuse') }}"
+            alt="{{ reuse.title }}" class="scalable" />
+    </a>
 </div>
 <div>
     {{ reuse.description|markdown }}
