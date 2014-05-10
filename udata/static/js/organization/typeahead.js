@@ -5,8 +5,9 @@ define([
     'bloodhound',
     'hbs!widgets/ta-header',
     'hbs!widgets/ta-suggestion',
+    'i18n',
     'logger'
-], function(Bloodhound, header, suggestion, log) {
+], function(Bloodhound, header, suggestion, i18n, log) {
     var MAX = 2,
         engine = new Bloodhound({
             name: 'organizations',
@@ -28,7 +29,7 @@ define([
         displayKey: 'name',
         limit: MAX,
         templates: {
-            header: header({title: 'Organizations'}),
+            header: header({title: i18n._('ta_orgs_title')}),
             suggestion: suggestion
         }
     };

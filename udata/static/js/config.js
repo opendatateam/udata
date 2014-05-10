@@ -1,5 +1,4 @@
 require.config({
-    baseUrl: '/static/js/',
     paths: {
         // Libraries
         'jquery': '../bower/jquery/dist/jquery',
@@ -29,6 +28,7 @@ require.config({
 
         // i18n
         'moment-i18n': '../bower/moment/min/langs',
+        'i18next': '../bower/i18next/i18next.amd',
 
         // Local paths
         'templates': '../templates'

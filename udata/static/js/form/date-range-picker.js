@@ -4,7 +4,6 @@
 define(['jquery', 'moment', 'bootstrap-daterangepicker'], function($, moment) {
     'use strict';
 
-    moment.lang($('html').attr('lang')); // Set it globally in a module
     $('.dtpicker').each(function() {
         var $this = $(this),
             $widget = $('<input type="text" class="form-control" />'),
