@@ -2,7 +2,12 @@
  * Common stack, plugins and helpers
  */
 define([
-    'jquery', 'bootstrap', 'widgets/site-search', 'utils/ellipsis', 'i18n'
+    'jquery',
+    'bootstrap',
+    'widgets/site-search',
+    'utils/ellipsis',
+    'jquery.microdata',
+    'i18n'
 ], function($) {
 
     var csrftoken = $('meta[name=csrf-token]').attr('content');

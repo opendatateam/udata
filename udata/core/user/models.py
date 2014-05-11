@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import datetime
 
 from blinker import Signal
-from flask import url_for
+from flask import url_for, g
 from flask.ext.security import UserMixin, RoleMixin, MongoEngineUserDatastore
 
 from udata.models import db
@@ -77,6 +77,14 @@ class User(db.Document, UserMixin):
     @property
     def fullname(self):
         return ' '.join((self.first_name, self.last_name))
+
+    @property
+    def organizations(self):
+        return getattr(g, 'user_orgs', [])
+
+    @property
+    def sysadmin(self):
+        return bool(getattr(g, 'sysadmin'))
 
 
 datastore = MongoEngineUserDatastore(db, User, Role)

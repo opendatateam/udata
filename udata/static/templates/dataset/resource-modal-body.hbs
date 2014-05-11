@@ -1,0 +1,26 @@
+{{{ description }}}
+
+<dl class="dl-horizontal dl-wide">
+  <dt>{{_ 'URL'}}</dt>
+  <dd><a href="{{url}}">{{url}}</a></dd>
+  {{#if format}}
+  <dt>{{_ 'Format'}}</dt>
+  <dd>{{format}}</dd>
+  {{/if}}
+  {{#if size}}
+  <dt>{{_ 'Size'}}</dt>
+  <dd>{{size}}</dd>
+  {{/if}}
+  {{#if dateCreated}}
+  <dt>{{_ 'Created on'}}</dt>
+  <dd>{{dt dateCreated}}</dd>
+  {{/if}}
+  {{#if dateModified}}
+  <dt>{{_ 'Modified on'}}</dt>
+  <dd>{{dt dateModified}}</dd>
+  {{/if}}
+  {{#if datePublished}}
+  <dt>{{_ 'Published on'}}</dt>
+  <dd>{{dt datePublished}}</dd>
+  {{/if}}
+</dl>

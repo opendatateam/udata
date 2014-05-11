@@ -5,7 +5,6 @@ require.config({
         'bootstrap': '../bower/bootstrap/dist/js/bootstrap',
         'text': "../bower/requirejs-text/text",
         'moment': '../bower/momentjs/min/moment-with-langs',
-        'jquery.validation': '../bower/jquery.validation/jquery.validate',
         'markdown': '../bower/markdown/lib/markdown',
         'bootstrap-markdown': '../bower/bootstrap-markdown/js/bootstrap-markdown',
         'bootstrap-daterangepicker': '../bower/bootstrap-daterangepicker/daterangepicker',
@@ -15,9 +14,13 @@ require.config({
         'x-editable': '../bower/x-editable/dist/bootstrap3-editable/js/bootstrap-editable',
         'router': '../bower/requirejs-router/router',
         'domReady': '../bower/requirejs-domready/domReady',
-        'dotdotdot': '../bower/jquery.dotdotdot/src/js/jquery.dotdotdot' ,
         'typeahead': '../bower/typeahead.js/dist/typeahead.jquery',
         'bloodhound': '../bower/typeahead.js/dist/bloodhound',
+
+        // jQuery plugins
+        'jquery.microdata': '../bower/jquery.microdata/index',
+        'jquery.validation': '../bower/jquery.validation/jquery.validate',
+        'dotdotdot': '../bower/jquery.dotdotdot/src/js/jquery.dotdotdot' ,
 
         // To be extracted in extensions
         'd3': '../bower/d3/d3',
@@ -30,8 +33,9 @@ require.config({
         'moment-i18n': '../bower/moment/min/langs',
         'i18next': '../bower/i18next/i18next.amd',
 
-        // Local paths
-        'templates': '../templates'
+        // Local relative paths
+        'templates': '../templates',
+        'locales': '../locales'
     },
 
     shim: {

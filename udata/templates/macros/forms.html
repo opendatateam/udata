@@ -102,7 +102,7 @@
 {% endmacro %}
 
 {% macro publish_as(field, user) %}
-{% if user.organizations %}
+{% if g.user_orgs %}
 <input id="{{ field.id }}" name="{{ field.name }}" type="hidden" {% if field.data %}value="{{ field.data }}"{% endif %}/>
 <ul class="card-list">
     <li class="col-xs-4 col-sm-3">

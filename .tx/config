@@ -8,7 +8,7 @@ source_lang = en
 type = PO
 
 [udata.javascript]
-file_filter = udata/static/js/locales/udata.<lang>.json
-source_file = udata/static/js/locales/udata.en.json
+file_filter = udata/static/locales/udata.<lang>.json
+source_file = udata/static/locales/udata.en.json
 source_lang = en
 type = KEYVALUEJSON

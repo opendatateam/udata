@@ -64,13 +64,16 @@ class DatasetQuerySet(db.BaseQuerySet):
 
 class Resource(db.EmbeddedDocument):
     id = db.AutoUUIDField()
-    created_at = db.DateTimeField(default=datetime.datetime.now, required=True)
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
     url = db.StringField()
     checksum = db.StringField()
     format = db.StringField()
     owner = db.ReferenceField('User')
+
+    created_at = db.DateTimeField(default=datetime.datetime.now, required=True)
+    modified = db.DateTimeField(default=datetime.datetime.now, required=True)
+    published = db.DateTimeField(default=datetime.datetime.now, required=True)
 
     on_added = Signal()
     on_deleted = Signal()

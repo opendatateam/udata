@@ -43,6 +43,7 @@
     "d3": "~3.4.6",
     "typeahead.js": "~0.10.2",
     "typeahead.js-bootstrap3.less": "~0.2.3",
-    "i18next": "~1.7.3"
+    "i18next": "~1.7.3",
+    "jquery.microdata": "http://git.macropus.org/jquery-microdata/jquery.microdata.js"
   }
 }

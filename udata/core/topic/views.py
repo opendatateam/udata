@@ -14,6 +14,9 @@ blueprint = I18nBlueprint('topics', __name__, url_prefix='/topics')
 
 
 class TopicSearchQuery(SearchQuery):
+    '''
+    A SearchQuery that should also match on topic tags
+    '''
     def get_query(self):
         topic = self.kwargs['topic']
         must = []

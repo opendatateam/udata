@@ -187,6 +187,12 @@ def isodate(value, format='short'):
     return format_date(dt, format)
 
 
+@front.app_template_global()
+@front.app_template_filter()
+def isoformat(value):
+    return value.isoformat()
+
+
 front.add_app_template_filter(camel_to_lodash)
 
 
