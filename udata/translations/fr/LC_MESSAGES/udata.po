@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-05-10 13:23+0200\n"
-"PO-Revision-Date: 2014-05-10 11:26+0000\n"
+"POT-Creation-Date: 2014-05-12 01:27+0200\n"
+"PO-Revision-Date: 2014-05-11 23:29+0000\n"
 "Last-Translator: noirbizarre\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -90,7 +90,7 @@ msgstr "Réutilisations"
 #: udata/core/organization/metrics.py:54 udata/core/reuse/metrics.py:28
 #: udata/templates/dataset/card.html:90 udata/templates/dataset/list.html:62
 #: udata/templates/organization/list.html:42
-#: udata/templates/reuse/card.html:78 udata/templates/reuse/list.html:55
+#: udata/templates/reuse/card.html:39 udata/templates/reuse/list.html:55
 msgid "Stars"
 msgstr "Favoris"
 
@@ -247,8 +247,9 @@ msgstr "Administrateur"
 msgid "Content"
 msgstr "Contenu"
 
-#: udata/core/reuse/forms.py:16 udata/templates/reuse/list.html:34
-#: udata/templates/reuse/list.html:58
+#: udata/core/reuse/forms.py:16 udata/templates/reuse/card.html:20
+#: udata/templates/reuse/list.html:34 udata/templates/reuse/list.html:58
+#: udata/templates/reuse/search-result.html:20
 msgid "Type"
 msgstr "Type"
 
@@ -511,7 +512,7 @@ msgstr "Annuler"
 
 #: udata/templates/dataset/display.html:14
 #: udata/templates/dataset/resource/display.html:12
-#: udata/templates/dataset/resource/list-item.html:33
+#: udata/templates/dataset/resource/list-item.html:37
 #: udata/templates/organization/display.html:14
 #: udata/templates/reuse/display.html:14
 msgid "Edit"
@@ -619,9 +620,13 @@ msgstr "Nombre de réutilisations"
 msgid "Edit resource"
 msgstr "Édition d'une ressource"
 
-#: udata/templates/dataset/resource/list-item.html:1
+#: udata/templates/dataset/resource/list-item.html:13
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
+
+#: udata/templates/dataset/resource/list-item.html:27
+msgid "No Description"
+msgstr "Aucune description"
 
 #: udata/templates/layouts/1-column.html:10
 #: udata/templates/layouts/2-columns.html:10
@@ -805,7 +810,7 @@ msgid "Number of datasets"
 msgstr "Nombre de jeux de données"
 
 #: udata/templates/organization/search-result.html:30
-#: udata/templates/reuse/search-result.html:23
+#: udata/templates/reuse/search-result.html:30
 #, python-format
 msgid "%(num)s dataset"
 msgid_plural "%(num)s datasets"
@@ -824,12 +829,12 @@ msgstr[0] "%(num)s réutilisation"
 msgstr[1] "%(num)s réutilisations"
 
 #: udata/templates/organization/search-result.html:45
-#: udata/templates/reuse/search-result.html:27
+#: udata/templates/reuse/search-result.html:34
 msgid "Number of stars"
 msgstr "Nombre de favoris"
 
 #: udata/templates/organization/search-result.html:48
-#: udata/templates/reuse/search-result.html:30
+#: udata/templates/reuse/search-result.html:37
 #, python-format
 msgid "%(num)s star"
 msgid_plural "%(num)s stars"
@@ -859,7 +864,7 @@ msgstr "Crédits photos"
 msgid "Read more"
 msgstr "Lire plus"
 
-#: udata/templates/reuse/card.html:69
+#: udata/templates/reuse/card.html:30
 msgid "Number of datasets used"
 msgstr "Nombre de jeux de données utilisés"
 
@@ -875,7 +880,7 @@ msgstr "Ajouter un réutilisation"
 msgid "Datasets used"
 msgstr "Jeux de données utilisés"
 
-#: udata/templates/reuse/search-result.html:20
+#: udata/templates/reuse/search-result.html:27
 msgid "Number of dataset"
 msgstr "Nombre de jeux de données"
 

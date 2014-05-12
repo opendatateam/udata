@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-05-10 13:23+0200\n"
+"POT-Creation-Date: 2014-05-12 01:27+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -85,7 +85,7 @@ msgstr ""
 #: udata/core/dataset/metrics.py:25 udata/core/metrics/metrics.py:73
 #: udata/core/organization/metrics.py:54 udata/core/reuse/metrics.py:28
 #: udata/templates/dataset/card.html:90 udata/templates/dataset/list.html:62
-#: udata/templates/organization/list.html:42 udata/templates/reuse/card.html:78
+#: udata/templates/organization/list.html:42 udata/templates/reuse/card.html:39
 #: udata/templates/reuse/list.html:55
 msgid "Stars"
 msgstr ""
@@ -241,8 +241,9 @@ msgstr ""
 msgid "Content"
 msgstr ""
 
-#: udata/core/reuse/forms.py:16 udata/templates/reuse/list.html:34
-#: udata/templates/reuse/list.html:58
+#: udata/core/reuse/forms.py:16 udata/templates/reuse/card.html:20
+#: udata/templates/reuse/list.html:34 udata/templates/reuse/list.html:58
+#: udata/templates/reuse/search-result.html:20
 msgid "Type"
 msgstr ""
 
@@ -499,7 +500,7 @@ msgstr ""
 
 #: udata/templates/dataset/display.html:14
 #: udata/templates/dataset/resource/display.html:12
-#: udata/templates/dataset/resource/list-item.html:33
+#: udata/templates/dataset/resource/list-item.html:37
 #: udata/templates/organization/display.html:14
 #: udata/templates/reuse/display.html:14
 msgid "Edit"
@@ -605,8 +606,12 @@ msgstr ""
 msgid "Edit resource"
 msgstr ""
 
-#: udata/templates/dataset/resource/list-item.html:1
+#: udata/templates/dataset/resource/list-item.html:13
 msgid "Nameless resource"
+msgstr ""
+
+#: udata/templates/dataset/resource/list-item.html:27
+msgid "No Description"
 msgstr ""
 
 #: udata/templates/layouts/1-column.html:10
@@ -791,7 +796,7 @@ msgid "Number of datasets"
 msgstr ""
 
 #: udata/templates/organization/search-result.html:30
-#: udata/templates/reuse/search-result.html:23
+#: udata/templates/reuse/search-result.html:30
 #, python-format
 msgid "%(num)s dataset"
 msgid_plural "%(num)s datasets"
@@ -810,12 +815,12 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: udata/templates/organization/search-result.html:45
-#: udata/templates/reuse/search-result.html:27
+#: udata/templates/reuse/search-result.html:34
 msgid "Number of stars"
 msgstr ""
 
 #: udata/templates/organization/search-result.html:48
-#: udata/templates/reuse/search-result.html:30
+#: udata/templates/reuse/search-result.html:37
 #, python-format
 msgid "%(num)s star"
 msgid_plural "%(num)s stars"
@@ -845,7 +850,7 @@ msgstr ""
 msgid "Read more"
 msgstr ""
 
-#: udata/templates/reuse/card.html:69
+#: udata/templates/reuse/card.html:30
 msgid "Number of datasets used"
 msgstr ""
 
@@ -861,7 +866,7 @@ msgstr ""
 msgid "Datasets used"
 msgstr ""
 
-#: udata/templates/reuse/search-result.html:20
+#: udata/templates/reuse/search-result.html:27
 msgid "Number of dataset"
 msgstr ""
 

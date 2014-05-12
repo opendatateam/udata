@@ -7,9 +7,6 @@
       </div>
       <div class="modal-body">{{{ content }}}</div>
       <div class="modal-footer">
-        {{#if close_btn}}
-        <button type="button" class="btn btn-default" data-dismiss="modal">{{close_btn}}</button>
-        {{/if}}
         {{#each actions}}
           {{#if url}}
           <a href="{{url}}" class="btn {{classes}}">{{label}}</a>
@@ -17,6 +14,9 @@
           <button type="button" class="btn {{classes}}">{{label}}</button>
           {{/if}}
         {{/each}}
+        {{#if close_btn}}
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{close_btn}}</button>
+        {{/if}}
       </div>
     </div>
   </div>

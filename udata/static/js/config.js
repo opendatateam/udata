@@ -77,6 +77,10 @@ require.config({
             deps: ['jquery'],
             exports: '$.fn.dotdotdot'
         },
+        'jquery.microdata': {
+            deps: ['jquery'],
+            exports: '$.fn.microdata'
+        },
         'typeahead': {
             deps: ['jquery'],
             exports: '$.fn.typeahead'
