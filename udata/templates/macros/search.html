@@ -1,48 +1,3 @@
-{% macro search_bar(action, placeholder=None) %}
-<form class="form list-search-bar" role="search" action="{{ action }}">
-    <div class="form-group">
-        <div class="input-group">
-            <span class="input-group-addon">
-                <span class="glyphicon glyphicon-search"></span>
-            </span>
-            <input type="text" name="q" class="form-control"
-                placeholder="{{ placeholder or _('Search') }}"
-                value="{{request.args.q}}">
-            {% if kwargs %}
-            <div class="input-group-btn">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    {% if in_url('sort') %}
-                        {% if request.args.sort.startswith('-') %}
-                            {% set sort, order = request.args.sort[1:], 'desc' %}
-                        {% else %}
-                            {% set sort, order = request.args.sort, 'asc' %}
-                        {% endif %}
-                        {% set label, typ = (kwargs[sort], 'amount') if kwargs[sort] is string else kwargs[sort] %}
-                        <span class="fa fa-sort-{{typ}}-{{order}}"></span>
-                        {{ label }}
-                    {% else %}
-                        <span class="fa fa-sort-amount-desc"></span>
-                        {{ _('Relevance') }}
-                    {% endif %}
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu pull-right">
-                    <li>
-                        <a href="{{ url_rewrite(page=1)|url_del('sort') }}">
-                            {{ _('Relevance') }}
-                        </a>
-                    </li>
-                    {% for field, label in kwargs.items() %}
-                    {{ sorter_entries(field, label) }}
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-</form>
-{% endmacro %}
-
 {% macro panel_sorter() %}
 {% if kwargs %}
 {% if in_url('sort') %}
@@ -186,7 +141,7 @@
 
 {% macro range_picker(result, field, label, icon=None, cast=None) %}
 {% set spec = result.get_range(field) %}
-{% if spec.min != spec.max %}
+{% if spec.min != spec.max or in_url(field) %}
 <div class="panel-heading clickable" data-toggle="collapse" data-target="#collapse-{{field}}">
     <h3 class="panel-title">
         {% if in_url(field) %}
@@ -199,14 +154,20 @@
         {{ label or field }}
     </h3>
 </div>
-<div id="collapse-{{field}}" class="panel-body row">
-    <b class="col-md-1">{{ spec.min }}</b>
-    <input type="text" class="range-picker"  class="col-md-10"
-        data-url-pattern="{{ url_rewrite(**{field: '__r__'})|url_del('page') }}"
-        data-slider-min="{{ spec.min }}"
-        data-slider-max="{{ spec.max }}"
-        data-slider-value="[{{ spec.min }},{{ spec.max }}]"/>
-    <b class="col-md-1">{{ spec.max }}</b>
+<div id="collapse-{{field}}" class="panel-body">
+    <div class="row">
+        <div class="col-xs-12 slider-container">
+            <input type="text" class="range-picker"
+                data-url-pattern="{{ url_rewrite(**{field: '__r__'})|url_del('page') }}"
+                data-slider-min="{{ spec.min }}"
+                data-slider-max="{{ spec.max }}"
+                data-slider-value="[{{ spec.min }},{{ spec.max }}]"/>
+        </div>
+    </div>
+    <div class="row">
+        <b class="col-xs-6">{{ spec.min }}</b>
+        <b class="col-xs-6 text-right">{{ spec.max }}</b>
+    </div>
 </div>
 {% endif %}
 {% endmacro %}
