@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from tempfile import NamedTemporaryFile
+
 from flask import url_for
 
-from udata.models import Dataset, Organization, Reuse
+from udata.tests import TestCase, DBTestMixin
 from udata.tests.factories import DatasetFactory, ReuseFactory, OrganizationFactory
 from udata.tests.frontend import FrontTestCase
 from udata.settings import Testing
 
 from udata.ext import cow
 
+from .commands import certify
+from .metrics import PublicServicesMetric
 
-class GouvFrThemeSettings(Testing):
+
+class GouvFrSettings(Testing):
     TEST_WITH_THEME = True
     TEST_WITH_PLUGINS = True
     PLUGINS = ['cow', 'gouvfr']
@@ -20,7 +25,7 @@ class GouvFrThemeSettings(Testing):
 
 class GouvFrThemeTest(FrontTestCase):
     '''Ensure themed views render'''
-    settings = GouvFrThemeSettings
+    settings = GouvFrSettings
 
     def create_app(self):
         app = super(GouvFrThemeTest, self).create_app()
@@ -99,3 +104,40 @@ class GouvFrThemeTest(FrontTestCase):
 
         response = self.get(url_for('reuses.show', reuse=reuse))
         self.assert200(response)
+
+
+class GouvFrMetricsTest(DBTestMixin, TestCase):
+    '''Check metrics'''
+    settings = GouvFrSettings
+
+    def test_public_services(self):
+        public_services = [OrganizationFactory(public_service=True) for _ in range(2)]
+        for _ in range(3):
+            OrganizationFactory(public_service=False)
+
+        self.assertEqual(PublicServicesMetric().get_value(), len(public_services))
+
+
+class CertifyCommandTest(DBTestMixin, TestCase):
+    settings = GouvFrSettings
+
+    def test_certify_by_id(self):
+        org = OrganizationFactory()
+
+        certify(str(org.id))
+
+        org.reload()
+        self.assertTrue(org.public_service)
+
+    def test_certify_from_file(self):
+        orgs = [OrganizationFactory() for _ in range(2)]
+
+        with NamedTemporaryFile() as temp:
+            temp.write('\n'.join((str(org.id) for org in orgs)))
+            temp.flush()
+
+            certify(temp.name)
+
+        for org in orgs:
+            org.reload()
+            self.assertTrue(org.public_service)
