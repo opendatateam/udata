@@ -2,9 +2,15 @@
  * Organization members edit page
  */
 define([
-    'jquery', 'notify', 'auth', 'hbs!organization/member-row', 'hbs!organization/add-member-modal',
-    'x-editable', 'selectize',
-], function($, Notify, Auth, row_tpl, add_modal_tpl) {
+    'jquery',
+    'notify',
+    'auth',
+    'i18n',
+    'hbs!templates/organization/member-row',
+    'hbs!templates/organization/add-member-modal',
+    'x-editable',
+    'selectize',
+], function($, Notify, Auth, i18n, row_tpl, add_modal_tpl) {
     "use strict";
 
     var msg_container = 'section.form .container',
@@ -15,8 +21,8 @@ define([
         editableOpts = {
             url: window.location,
             source: [
-                {value: 'admin', text: 'Administrateur'},
-                {value: 'editor', text: 'Editeur'}
+                {value: 'admin', text: i18n._('Administrator')},
+                {value: 'editor', text: i18n._('Editor')}
             ]
         };
 

@@ -31,5 +31,8 @@
     "valid-max": "Veuillez saisir une valeur inférieure ou égale à {0}.",
     "valid-min": "Veuillez saisir une valeur supérieure ou égale à {0}.",
     "week-label": "S",
-    "Custom Range": "Période personnalisée"
+    "Administrator": "Administrateur",
+    "Editor": "Éditeur",
+    "Custom Range": "Période personnalisée",
+    "Do you want to add this user as a member of your organization ?": "Voulez ajouter cet utilisateur comme membre de votre organisation ?"
 }

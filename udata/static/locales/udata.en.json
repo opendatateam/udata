@@ -31,5 +31,8 @@
     "valid-max": "Please enter a value less than or equal to {0}.",
     "valid-min": "Please enter a value greater than or equal to {0}.",
     "week-label": "W",
-    "Custom Range": "Custom Range"
+    "Administrator": "Administrator",
+    "Editor": "Editor",
+    "Custom Range": "Custom Range",
+    "Do you want to add this user as a member of your organization ?": "Do you want to add this user as a member of your organization ?"
 }

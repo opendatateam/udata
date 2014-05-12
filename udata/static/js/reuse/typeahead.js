@@ -4,8 +4,8 @@
 define([
     'jquery',
     'bloodhound',
-    'hbs!widgets/ta-header',
-    'hbs!widgets/ta-suggestion',
+    'hbs!templates/search/header',
+    'hbs!templates/search/suggestion',
     'i18n',
     'logger'
 ], function($, Bloodhound, header, suggestion, i18n, log) {

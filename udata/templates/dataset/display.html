@@ -31,8 +31,9 @@
 {% endblock %}
 
 {% block main_content %}
-<h2>{{ dataset.title }}</h2>
-<div>
+<div itemscope="itemscope" itemtype="http://schema.org/Dataset" itemid="{{dataset.id}}">
+<h2 itemprop="name">{{ dataset.title }}</h2>
+<div itemprop="description">
     {{ dataset.description|markdown }}
 </div>
 
@@ -107,6 +108,7 @@
             {{ _('New reuse') }}
         </a>
     </div>
+</div>
 </div>
 {% endblock %}
 

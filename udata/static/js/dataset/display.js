@@ -1,5 +1,5 @@
 /**
- * Default JS module
+ * Dataset display page JS module
  */
 define([
     'jquery',
