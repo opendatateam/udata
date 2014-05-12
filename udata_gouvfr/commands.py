@@ -13,10 +13,8 @@ def certify_org(id_or_slug):
         try:
             organization = Organization.objects(id=id_or_slug).first()
         except:
-            pass
-    if not organization:
-        print 'No organization found for {0}'.format(id_or_slug)
-        return
+            print 'No organization found for {0}'.format(id_or_slug)
+            return
     print 'Certifying {0}'.format(organization.name)
     organization.public_service = True
     organization.save()
