@@ -34,92 +34,56 @@
 
 {% block content %}
 <section class="content {% if not dataset.organization.public_service %}non{% endif %}certified">
-    <div class="container dataset-container">
+    <div class="container dataset-container"  itemscope="itemscope" itemtype="http://schema.org/Dataset" itemid="{{dataset.id}}">
         <div class="row">
 
             <div class="col-md-9 col-sm-9 smaller">
                 <div class="page-header">
-                    <h2>{{ dataset.title }}</h2>
+                    <h2 itemprop="name">{{ dataset.title }}</h2>
                 </div>
 
-                <div class="row">
+                <div class="row" itemprop="description">
+                    <div class="col-xs-12">
                     {{ dataset.description|markdown }}
+                    </div>
                 </div>
 
                 <div class="list-group resources-list">
                     <h3>{{ _('Resources') }}</h3>
-                    {% if dataset.resources %}
-                        {% for resource in dataset.resources %}
-                            {% set resource_name = resource.name or resource.description or _('Nameless resource') %}
-                            {% set resource_format = resource.format|trim|lower or 'data' %}
 
-                            {% if loop.index == 4 %}<div id="all-resources" class="collapse">{% endif %}
-
-                            <div class="list-group-item"
-                                data-url="{{ resource.url }}" data-format="{{ resource_format }}"
-                                rel="popover" data-trigger="hover" data-placement="top"
-                                {% if resource.description %}
-                                title="{{ resource_name }} [{{ resource_format }}]"
-                                data-content="{{ resource.description }}"
-                                {% else %}
-                                data-content="{{ resource_name }} [{{ resource_format }}]"
-                                {% endif %}
-                                >
-                                <div class="format-label pull-left ellipsis-dot">
-                                    <span property="dc:format"data-format="{{ resource_format }}">
-                                        {{ resource_format }}
-                                    </span>
-                                </div>
-                                <h4 class="list-group-item-heading ellipsis {% if not resource.description.strip() %}dual{% endif %}">
-                                    {{ resource_name }}
-                                </h4>
-                                {% if resource.description.strip() %}
-                                <p class="list-group-item-text ellipsis">
-                                {{ resource.description|markdown|striptags }}
-                                </p>
-                                {% endif %}
-                                {% if can_edit %}
-                                <div class="btn-group btn-group-xs tools">
-                                    <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
-                                        href="{{ url_for('datasets.edit_resource', dataset=dataset, rid=resource.id) }}">
-                                        <span class="glyphicon glyphicon-edit"></span>
-                                    </a>
-                                </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-
-                        {% if loop.index0 >= 4 %}</div>{% endif %}
-                        {% if can_edit %}
-                        <a class="list-group-item add"
-                            href="{{ url_for('datasets.new_resource', dataset=dataset) }}">
-                            <div class="format-label pull-left">+</div>
-                            <h4 class="list-group-item-heading">
-                                {{ _('Add a resource') }}
-                            </h4>
-                        </a>
+                    {# TODO: extract max_resources conf #}
+                    {% set max_resources = 2 %}
+                    {% for resource in dataset.resources %}
+                        {% if loop.index0 == max_resources %}
+                        <div id="collapsed-resources" class="collapse">
                         {% endif %}
-                        {% if loop.index0 >= 4 %}
-                        <p class="text-center">
-                            <button id="more-resources" type="button" class="btn btn-default">
+                        {% include theme('dataset/resource/list-item.html') %}
+                    {% else %}
+                    <p class="text-center">{{ _('No resources') }}</p>
+                    {% endfor %}
+
+                    {% if dataset.resources|length > max_resources %}
+                        </div>
+
+                        <p class="text-center expander">
+                            <a id="more-resources" type="button" class="btn btn-default"
+                                data-toggle="collapse" href="#collapsed-resources">
                                 <span class="glyphicon glyphicon-list" ></span>
-                                {% trans count=loop.index0 %}See the {{ count }} resources{% endtrans %}
+                                {{ _('See the %(nb)d resources', nb=dataset.resources|length) }}
                             </button>
                         </p>
-                        {% endif %}
-                    {% else %}
-                        {% if can_edit %}
-                        <a class="list-group-item add"
-                            href="{{ url_for('datasets.new_resource', dataset=dataset) }}">
-                            <div class="format-label pull-left">+</div>
-                            <h4 class="list-group-item-heading">
-                                {{ _('Add a resource') }}
-                            </h4>
-                        </a>
-                        {% else %}
-                        <p class="text-center">{{ _('No resources') }}</p>
-                        {% endif %}
                     {% endif %}
+
+                    {% if can_edit %}
+                    <a class="list-group-item add"
+                        href="{{ url_for('datasets.new_resource', dataset=dataset) }}">
+                        <div class="format-label pull-left">+</div>
+                        <h4 class="list-group-item-heading">
+                            {{ _('Add a resource') }}
+                        </h4>
+                    </a>
+                    {% endif %}
+
                 </div>
                 {# end resources #}
 
@@ -451,10 +415,6 @@
                                     <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
                                         {{ reuse.title }}
                                     </a>
-                                    <a href="{{ reuse.url }}" target="_blank"
-                                        title="{{ reuse.title }}">
-                                        <span class="glyphicon glyphicon-new-window"></span>
-                                    </a>
                                 </h4>
                                 <div class="author">
                                     {{ reuse|owner_avatar(25) }}
@@ -471,6 +431,10 @@
                             </a>
                             {% endif %}
                             <div class="btn-group btn-group-xs">
+                                <a class="btn btn-default" href="{{ reuse.url }}" target="_blank"
+                                    rel="tooltip" title="{{ _('Open in a new window') }}" data-containter="body">
+                                    <span class="glyphicon glyphicon-new-window"></span>
+                                </a>
                                 {% if current_user.sysadmin or reuse.owner == current_user %}
                                 <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
                                     href="{{ url_for('reuses.edit', reuse=reuse) }}"
