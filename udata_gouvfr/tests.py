@@ -141,3 +141,23 @@ class CertifyCommandTest(DBTestMixin, TestCase):
         for org in orgs:
             org.reload()
             self.assertTrue(org.public_service)
+
+
+class LegacyUrlsTest(FrontTestCase):
+    settings = GouvFrSettings
+
+    def create_app(self):
+        app = super(LegacyUrlsTest, self).create_app()
+        cow.init_app(app)
+        app.config['DEFAULT_LANGUAGE'] = 'en'
+        return app
+
+    def test_redirect_datasets(self):
+        dataset = DatasetFactory()
+        response = self.client.get('/en/dataset/%s/' % dataset.slug)
+        self.assertRedirects(response, url_for('datasets.show', dataset=dataset))
+
+    def test_redirect_organizations(self):
+        org = OrganizationFactory()
+        response = self.client.get('/en/organization/%s/' % org.slug)
+        self.assertRedirects(response, url_for('organizations.show', org=org))
