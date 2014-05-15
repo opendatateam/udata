@@ -34,8 +34,7 @@ class SearchQuery(object):
         return SearchResult(self, result)
 
     def get_body(self):
-        return {
-            'query': self.get_query(),
+        body = {
             'filter': self.get_filter(),
             'facets': self.get_facets(),
             'from': (self.page - 1) * self.page_size,
@@ -44,6 +43,22 @@ class SearchQuery(object):
             'aggs': self.get_aggregations(),
             'fields': [],  # Only returns IDs
         }
+        if hasattr(self.adapter, 'boosters') and self.adapter.boosters:
+            body['query'] = {
+                'function_score': {
+                    'query': self.get_query(),
+                    'functions': self.get_score_functions(),
+                }
+            }
+        else:
+            body['query'] = self.get_query()
+
+        import json
+        print json.dumps(body)
+        return body
+
+    def get_score_functions(self):
+        return [b.to_query() for b in self.adapter.boosters]
 
     def get_sort(self):
         '''Build sort query paramter from kwargs'''

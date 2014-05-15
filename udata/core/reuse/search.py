@@ -2,7 +2,10 @@
 from __future__ import unicode_literals
 
 from udata.models import Reuse, Organization
-from udata.search import ModelSearchAdapter, Sort, RangeFilter, BoolFilter, TermFacet, ModelTermFacet, i18n_analyzer
+from udata.search import ModelSearchAdapter, Sort, i18n_analyzer
+from udata.search import RangeFilter, BoolFilter
+from udata.search import TermFacet, ModelTermFacet
+from udata.search import BoolBooster
 
 
 __all__ = ('ReuseSearch', )
@@ -62,6 +65,9 @@ class ReuseSearch(ModelSearchAdapter):
             },
         }
     }
+    boosters = [
+        BoolBooster('featured', 1.1),
+    ]
 
     @classmethod
     def serialize(cls, reuse):

@@ -39,6 +39,13 @@ class FakeSearch(search.ModelSearchAdapter):
     }
 
 
+class FakeBoostedSearch(FakeSearch):
+    boosters = [
+        search.BoolBooster('some_bool_field', 1.1)
+    ]
+
+
+
 class SearchQueryTest(TestCase):
     def test_execute_search_result(self):
         '''SearchQuery execution should return a SearchResult with the right model'''
@@ -82,6 +89,19 @@ class SearchQueryTest(TestCase):
             {'title.raw': 'desc'},
             {'description.raw': 'asc'},
         ])
+
+    def test_custom_scoring(self):
+        '''Search should handle field boosting'''
+        query = search.SearchQuery(FakeBoostedSearch)
+        body = query.get_body()
+        # Query should be wrapped in function_score
+        self.assertIn('function_score', body['query'])
+        self.assertIn('query', body['query']['function_score'])
+        self.assertIn('functions', body['query']['function_score'])
+        self.assertEqual(body['query']['function_score']['functions'][0], {
+            'filter': {'term': {'some_bool_field': True}},
+            'boost_factor': 1.1,
+        })
 
     def test_simple_query(self):
         '''A simple query should use query_string with specified fields'''

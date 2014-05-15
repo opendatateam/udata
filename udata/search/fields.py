@@ -13,7 +13,11 @@ from udata.models import db
 
 log = logging.getLogger(__name__)
 
-__all__ = ('Sort', 'RangeFilter', 'DateRangeFilter', 'BoolFilter', 'TermFacet', 'ModelTermFacet', 'RangeFacet')
+__all__ = ('Sort',
+    'RangeFilter', 'DateRangeFilter', 'BoolFilter',
+    'TermFacet', 'ModelTermFacet', 'RangeFacet',
+    'BoolBooster',
+)
 
 
 class Sort(object):
@@ -121,3 +125,15 @@ class RangeFacet(object):
             interval = '-'.join([str(spec.get('from', '')), str(spec.get('to', ''))])
             values.append((spec, r['count'], interval in actives))
         return values
+
+
+class BoolBooster(object):
+    def __init__(self, field, factor):
+        self.field = field
+        self.factor = factor
+
+    def to_query(self):
+        return {
+            'filter': {'term': {self.field: True}},
+            'boost_factor': self.factor,
+        }

@@ -3,7 +3,10 @@ from __future__ import unicode_literals
 
 from udata.models import Dataset, Organization, License
 from udata.search import ModelSearchAdapter, i18n_analyzer
-from udata.search.fields import Sort, RangeFilter, DateRangeFilter, BoolFilter, TermFacet, ModelTermFacet
+from udata.search.fields import Sort
+from udata.search.fields import RangeFilter, DateRangeFilter, BoolFilter
+from udata.search.fields import TermFacet, ModelTermFacet
+from udata.search.fields import BoolBooster
 
 __all__ = ('DatasetSearch', )
 
@@ -84,6 +87,10 @@ class DatasetSearch(ModelSearchAdapter):
         'temporal_coverage': DateRangeFilter('temporal_coverage_start', 'temporal_coverage_end'),
         'featured': BoolFilter('featured'),
     }
+    boosters = [
+        BoolBooster('featured', 1.1),
+        BoolBooster('from_public_service', 1.1),
+    ]
 
     @classmethod
     def serialize(cls, dataset):
@@ -118,6 +125,7 @@ class DatasetSearch(ModelSearchAdapter):
             'nb_reuses': dataset.metrics.get('reuses', 0),
             'nb_stars': dataset.metrics.get('stars', 0),
             'featured': dataset.featured,
+            'from_public_service': dataset.organization.public_service if dataset.organization else False,  # TODO: extract tis into plugin
         }
         if dataset.temporal_coverage and dataset.temporal_coverage.start and dataset.temporal_coverage.end:
             document.update({

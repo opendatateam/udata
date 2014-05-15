@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from udata.models import Organization
-from udata.search import ModelSearchAdapter, Sort, RangeFilter, i18n_analyzer
+from udata.search import ModelSearchAdapter, Sort, RangeFilter, i18n_analyzer, BoolBooster
 
 __all__ = ('OrganizationSearch', )
 
@@ -43,6 +43,9 @@ class OrganizationSearch(ModelSearchAdapter):
             },
         }
     }
+    boosters = [
+        BoolBooster('public_service', 1.1),
+    ]
 
     @classmethod
     def serialize(cls, organization):
@@ -61,4 +64,5 @@ class OrganizationSearch(ModelSearchAdapter):
                     'slug': organization.slug,
                 },
             },
+            'public_service': organization.public_service,  # TODO: extract tis into plugin
         }
