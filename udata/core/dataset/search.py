@@ -6,7 +6,7 @@ from udata.search import ModelSearchAdapter, i18n_analyzer
 from udata.search.fields import Sort
 from udata.search.fields import RangeFilter, DateRangeFilter, BoolFilter
 from udata.search.fields import TermFacet, ModelTermFacet
-from udata.search.fields import BoolBooster
+from udata.search.fields import BoolBooster, FunctionBooster
 
 __all__ = ('DatasetSearch', )
 
@@ -90,6 +90,7 @@ class DatasetSearch(ModelSearchAdapter):
     boosters = [
         BoolBooster('featured', 1.1),
         BoolBooster('from_public_service', 1.1),
+        FunctionBooster('_score * (1 + sqrt(0.01 * doc["nb_reuses"].value))'),
     ]
 
     @classmethod

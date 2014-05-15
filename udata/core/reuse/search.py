@@ -5,7 +5,7 @@ from udata.models import Reuse, Organization
 from udata.search import ModelSearchAdapter, Sort, i18n_analyzer
 from udata.search import RangeFilter, BoolFilter
 from udata.search import TermFacet, ModelTermFacet
-from udata.search import BoolBooster
+from udata.search import BoolBooster, FunctionBooster
 
 
 __all__ = ('ReuseSearch', )
@@ -67,6 +67,7 @@ class ReuseSearch(ModelSearchAdapter):
     }
     boosters = [
         BoolBooster('featured', 1.1),
+        FunctionBooster('_score * (1 + sqrt(0.01 * doc["nb_datasets"].value))'),
     ]
 
     @classmethod

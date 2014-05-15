@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 __all__ = ('Sort',
     'RangeFilter', 'DateRangeFilter', 'BoolFilter',
     'TermFacet', 'ModelTermFacet', 'RangeFacet',
-    'BoolBooster',
+    'BoolBooster', 'FunctionBooster',
 )
 
 
@@ -136,4 +136,16 @@ class BoolBooster(object):
         return {
             'filter': {'term': {self.field: True}},
             'boost_factor': self.factor,
+        }
+
+
+class FunctionBooster(object):
+    def __init__(self, function):
+        self.function = function
+
+    def to_query(self):
+        return {
+            'script_score': {
+                'script': self.function,
+            },
         }

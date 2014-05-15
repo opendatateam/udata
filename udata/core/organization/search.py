@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from udata.models import Organization
-from udata.search import ModelSearchAdapter, Sort, RangeFilter, i18n_analyzer, BoolBooster
+from udata.search import ModelSearchAdapter, Sort, RangeFilter, i18n_analyzer, BoolBooster, FunctionBooster
 
 __all__ = ('OrganizationSearch', )
 
@@ -45,6 +45,10 @@ class OrganizationSearch(ModelSearchAdapter):
     }
     boosters = [
         BoolBooster('public_service', 1.1),
+        FunctionBooster('_score * (1 + sqrt(0.01 * doc["nb_reuses"].value))'),
+        FunctionBooster('_score * (1 + sqrt(0.01 * doc["nb_datasets"].value))'),
+        # ValueBooster('nb_reuses', 'sqrt'),
+        # ValueBooster('nb_datasets', 'sqrt'),
     ]
 
     @classmethod
