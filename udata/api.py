@@ -17,7 +17,7 @@ class UDataApi(Api):
     def make_response(self, data, *args, **kwargs):
         response = super(UDataApi, self).make_response(data, *args, **kwargs)
         #  Remove the content type when there is no content
-        if response.status_code == 204:
+        if response.status_code == 204 and not response.data:
             response.headers.pop('Content-Type')
         return response
 

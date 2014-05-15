@@ -25,7 +25,10 @@ define(['jquery', 'bootstrap', 'fineuploader'], function($) {
                 uploaderType: 'basic',
                 request: {
                     endpoint: endpoint,
-                    inputName: 'file'
+                    inputName: 'file',
+                    customHeaders: {
+                        'X-CSRFToken': $('meta[name=csrf-token]').attr('content')
+                    }
                 }
             })
             .on('upload', function(ev, name) {

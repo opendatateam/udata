@@ -7,7 +7,7 @@ from blinker import Signal
 from flask import url_for, g
 from flask.ext.security import UserMixin, RoleMixin, MongoEngineUserDatastore
 
-from udata.models import db
+from udata.models import db, WithMetrics
 
 
 __all__ = ('User', 'Role', 'datastore')
@@ -24,7 +24,7 @@ class Role(db.Document, RoleMixin):
     description = db.StringField(max_length=255)
 
 
-class User(db.Document, UserMixin):
+class User(db.Document, WithMetrics,UserMixin):
     slug = db.SlugField(max_length=255, required=True, populate_from=populate_slug)
     email = db.StringField(max_length=255, required=True)
     password = db.StringField()

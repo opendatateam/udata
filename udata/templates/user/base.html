@@ -5,64 +5,78 @@
     <li><a href="{{ url_for('users.show', user=user) }}">{{ user.fullname }}</a></li>
 {% endblock %}
 
+{% block toolbar %}
+{% if can_edit %}
+<div class="btn-group btn-group-xs">
+    <a href="{{ url_for('users.edit', user=user) }}" class="btn btn-success">
+        <span class="glyphicon glyphicon-pencil"></span>
+        {{ _('Edit') }}
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
 {% block main_content %}
 <div class="row">
     <div class="col-md-3">
-        <div class="panel panel-default">
+        <div class="panel panel-default" itemscope itemtype="http://schema.org/Person">
             <div class="panel-body">
                 <div class="text-center">
                     <img src="{{ user.avatar_url|placeholder('user') }}"
-                        alt="{{ user.fullname }}" class="scalable" />
+                        alt="{{ user.fullname }}" class="scalable" itemprop="image"/>
                 </div>
-                <h2>{{ user.fullname }}</h2>
-                <div>
+                <h2 itemprop="name">{{ user.fullname }}</h2>
+                <div itemprop="description">
                     {{ user.about or ''|markdown }}
                 </div>
-                <hr/>
+                {# <hr/> #}
                 <div>
                     <ul class="list-unstyled">
                         {% if user.website %}
                         <li>
                             <span class="glyphicon glyphicon-link"></span>
-                            <a href="{{user.website}}">{{user.website}}</a>
+                            <a itemprop="url" href="{{user.website}}">{{user.website}}</a>
                         </li>
                         {% endif %}
                     </ul>
                 </div>
-                <div>
-                    Social metrics
-                </div>
-                <div>
-                    Organizations
-                </div>
             </div>
+
+            <div class="list-group text-center">
+                <a href="{{url_for('followers.user', user=user)}}"
+                    class="list-group-item {% if user_tab == 'followers' %}active{% endif %}">
+                    <strong>
+                        {{ ngettext('%(num)d follower', '%(num)d followers', user.metrics.followers or 0) }}
+                    </strong>
+                </a>
+                <a href="{{url_for('users.datasets', user=user)}}"
+                    class="list-group-item {% if user_tab == 'datasets' %}active{% endif %}">
+                    <strong>
+                        {{ ngettext('%(num)d dataset', '%(num)d datasets', user.metrics.datasets or 0) }}
+                    </strong>
+                </a>
+                <a href="{{url_for('users.reuses', user=user)}}"
+                    class="list-group-item {% if user_tab == 'reuses' %}active{% endif %}">
+                    <strong>
+                    {{ ngettext('%(num)d reuse', '%(num)d reuses', user.metrics.reuses or 0) }}
+                    </strong>
+                </a>
+            </div>
+
+            {% if organizations %}
+            <div class="panel-body">
+                <h4>{{ _('Organizations') }}</h4>
+                {% for org in organizations %}
+                <a href="{{ url_for('organizations.show', org=org) }}">
+                    <img src="{{ org.image_url|placeholder('organization') }}"
+                        class="avatar" width="48" height="48" />
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
 
     </div>
-    <div class="col-md-9">
-        <ul class="nav nav-tabs">
-            <li {% if user_tab == 'contributions' %}class="active"{% endif %}>
-                <a href="{{ url_for('users.show', user=user) }}">
-                    <span class="glyphicon glyphicon-random"></span>
-                    {{ _('Contributions')}}
-                </a>
-            </li>
-            <li {% if user_tab == 'starred' %}class="active"{% endif %}>
-                <a href="{{ url_for('users.starred', user=user) }}">
-                    <span class="glyphicon glyphicon-star"></span>
-                    {{ _('Starred')}}
-                </a>
-            </li>
-            <li {% if user_tab == 'activity' %}class="active"{% endif %}>
-                <a href="{{ url_for('users.activity', user=user) }}">
-                    <span class="glyphicon glyphicon-list"></span>
-                    {{ _('Activity') }}
-                </a>
-            </li>
-        </ul>
-
-        {% block tab_content %}{% endblock %}
-
-    </div>
+    <div class="col-md-9">{% block tab_content %}{% endblock %}</div>
 </div>
 {% endblock %}

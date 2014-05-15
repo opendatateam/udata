@@ -22,6 +22,11 @@ REUSE_TYPES = {
 }
 
 
+class ReuseQuerySet(db.BaseQuerySet):
+    def visible(self):
+        return self(private__ne=True, datasets__0__exists=True)
+
+
 class Reuse(db.Datetimed, WithMetrics, db.Document):
     title = db.StringField(max_length=255, required=True)
     slug = db.SlugField(max_length=255, required=True, populate_from='title', update=True)
@@ -50,6 +55,7 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
         'allow_inheritance': True,
         'indexes': ['-created_at', 'owner'],
         'ordering': ['-created_at'],
+        'queryset_class': ReuseQuerySet,
     }
 
     before_save = Signal()

@@ -1,0 +1,24 @@
+{% extends theme('user/base.html') %}
+
+{% set user_tab = 'followers' %}
+
+{% block breadcrumb %}
+    {{ super() }}
+    <li class="active">{{ _('Followers') }}</li>
+{% endblock %}
+
+{% block tab_content %}
+<h2>
+    {{ user.name }}
+    <small>
+        {{ ngettext('%(num)d follower', '%(num)d followers', followers|length) }}
+    </small>
+</h2>
+<div class="row">
+    {% for follow in followers %}
+    <div class="col-md-4">
+      {% include theme('follow/follower-card.html') %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

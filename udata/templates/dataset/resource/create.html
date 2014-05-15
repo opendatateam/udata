@@ -2,11 +2,11 @@
 
 {% block breadcrumb %}
 <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
-<li><a href="{{ url_for('datasets.show, dataset=dataset) }}">{{ dataset.title|truncate(64) }}</a></li>
+<li><a href="{{ url_for('datasets.show', dataset=dataset) }}">{{ dataset.title|truncate(64) }}</a></li>
 <li class="active">{{ _('New resource') }}</li>
 {% endblock %}
 
 {% block form_controls %}
 <button type="submit" class="btn btn-default">{{ _('Create') }}</button>
-<a href="{{ url_for('datasets.show, dataset=dataset) }}" class="btn btn-warning">{{ _('Cancel') }}</a>
+<a href="{{ url_for('datasets.show', dataset=dataset) }}" class="btn btn-warning">{{ _('Cancel') }}</a>
 {% endblock %}

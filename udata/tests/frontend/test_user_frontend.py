@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from flask import url_for
 
 from . import FrontTestCase
-from ..factories import UserFactory
+from ..factories import UserFactory, DatasetFactory, ReuseFactory, ResourceFactory
 
 
 class UserBlueprintTest(FrontTestCase):
@@ -15,6 +15,26 @@ class UserBlueprintTest(FrontTestCase):
         '''It should render the user profile'''
         response = self.get(url_for('users.show', user=self.user))
         self.assert200(response)
+
+    def test_render_profile_datasets(self):
+        '''It should render the user profile datasets page'''
+        datasets = [DatasetFactory(owner=self.user, resources=[ResourceFactory()]) for _ in range(3)]
+        for _ in range(2):
+            DatasetFactory(resources=[ResourceFactory()])
+        response = self.get(url_for('users.datasets', user=self.user))
+        self.assert200(response)
+        rendered_datasets = self.get_context_variable('datasets')
+        self.assertEqual(len(rendered_datasets), len(datasets))
+
+    def test_render_profile_reuses(self):
+        '''It should render the user profile reuses page'''
+        reuses = [ReuseFactory(owner=self.user, datasets=[DatasetFactory()]) for _ in range(3)]
+        for _ in range(2):
+            ReuseFactory(datasets=[DatasetFactory()])
+        response = self.get(url_for('users.reuses', user=self.user))
+        self.assert200(response)
+        rendered_reuses = self.get_context_variable('reuses')
+        self.assertEqual(len(rendered_reuses), len(reuses))
 
     def test_not_found(self):
         '''It should raise 404 if user is not found'''

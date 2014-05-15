@@ -1,0 +1,38 @@
+{% extends theme('layouts/1-column.html') %}
+{% from theme('macros/starred.html') import starred with context %}
+
+{% block breadcrumb %}
+    <li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
+    <li><a href="{{ url_for('organizations.show', org=org) }}">{{ org.name|truncate(120) }}</a></li>
+    <li class="active">{{ _('Followers') }}</li>
+{% endblock %}
+
+{% block toolbar %}
+{% if can_edit %}
+<div class="btn-group btn-group-xs">
+    <a href="{{ url_for('organizations.edit', org=org) }}" class="btn btn-success">
+        <span class="glyphicon glyphicon-pencil"></span>
+        {{ _('Edit') }}
+    </a>
+</div>
+{% endif %}
+<div class="btn-group btn-group-xs">
+    {{ starred(org) }}
+</div>
+{% endblock %}
+
+{% block main_content %}
+<h2>
+    {{ org.name }}
+    <small>
+        {{ ngettext('%(num)d follower', '%(num)d followers', followers|length) }}
+    </small>
+</h2>
+<div class="row">
+    {% for follow in followers %}
+    <div class="col-md-4">
+      {% include theme('follow/follower-card.html') %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

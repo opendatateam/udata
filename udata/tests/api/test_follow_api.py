@@ -18,8 +18,11 @@ class FollowAPITest(APITestCase):
         response = self.post(url_for('api.follow_user', id=to_follow.id))
         self.assertStatus(response, 201)
 
+        nb_followers = Follow.objects.followers(to_follow).count()
+
+        self.assertEqual(response.json['followers'], nb_followers)
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
-        self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
+        self.assertEqual(nb_followers, 1)
         self.assertIsInstance(Follow.objects.followers(to_follow).first(), Follow)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
@@ -29,7 +32,7 @@ class FollowAPITest(APITestCase):
         user = self.login()
         to_follow = OrganizationFactory()
 
-        response = self.post(url_for('api.follow_org', id=to_follow.id))
+        response = self.post(url_for('api.follow_organization', id=to_follow.id))
         self.assertStatus(response, 201)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
@@ -88,10 +91,14 @@ class FollowAPITest(APITestCase):
         Follow.objects.create(follower=user, following=to_follow)
 
         response = self.delete(url_for('api.follow_user', id=to_follow.id))
-        self.assertStatus(response, 204)
+        self.assert200(response)
+
+        nb_followers = Follow.objects.followers(to_follow).count()
+
+        self.assertEqual(response.json['followers'], nb_followers)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
-        self.assertEqual(Follow.objects.followers(to_follow).count(), 0)
+        self.assertEqual(nb_followers, 0)
         self.assertEqual(Follow.objects.following(user).count(), 0)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 

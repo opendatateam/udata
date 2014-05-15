@@ -1,5 +1,6 @@
 {% extends theme('layouts/2-columns.html') %}
 {% from theme('macros/starred.html') import starred with context %}
+{% from theme('macros/follow.html') import follow_btn with context %}
 
 {% block breadcrumb %}
     <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
@@ -27,6 +28,7 @@
 {% endif %}
 <div class="btn-group btn-group-xs">
     {{ starred(dataset) }}
+    {{ follow_btn(dataset) }}
 </div>
 {% endblock %}
 
@@ -101,12 +103,14 @@
         {% endfor %}
         </ul>
 
+        {% if can_edit %}
         <div class="clearfix"></div>
         <a href="{{ url_for('reuses.new') }}"
             class="btn btn-primary btn-block">
             <span class="glyphicon glyphicon-plus-sign"></span>
             {{ _('New reuse') }}
         </a>
+        {% endif %}
     </div>
 </div>
 </div>
@@ -230,7 +234,7 @@
                     </a>
                     {% for code in dataset.territorial_coverage.codes %}
                     {{ code }}
-                    {% endfor %}pd
+                    {% endfor %}
                 </li>
                 {% endif %}
 

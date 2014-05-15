@@ -1,0 +1,27 @@
+{% extends theme('user/base.html') %}
+
+
+{% block breadcrumb %}
+    {{ super() }}
+    <li class="active">
+        <a href="{{ url_for('users.datasets', user=user) }}">
+        {{ _('Datasets') }}
+        </a>
+    </li>
+{% endblock %}
+
+{% set user_tab = 'datasets' %}
+
+{% block tab_content %}
+<div class="row">
+    <div class="col-sm-12">
+        <ul class="card-list">
+            {% for dataset in datasets %}
+            <li class="col-md-4 col-sm-6">
+            {% include theme('dataset/card.html') %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

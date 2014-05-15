@@ -45,9 +45,9 @@ class ModelConverter(BaseConverter):
     def to_url(self, obj):
         if isinstance(obj, (basestring, ObjectId)):
             return obj
-        elif getattr(obj, 'slug'):
+        elif getattr(obj, 'slug', None):
             return obj.slug
-        elif getattr(obj, 'id'):
+        elif getattr(obj, 'id', None):
             return str(obj.id)
         else:
             raise ValueError('Unable to serialize "%s" to url' % obj)
