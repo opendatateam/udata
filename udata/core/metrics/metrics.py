@@ -78,15 +78,15 @@ class StarsMetric(SiteMetric):
             var starred_datasets = db[collection].aggregate(
                     {$unwind : "$starred_datasets"},
                     {$group : {_id: null, number: {$sum: 1}}}
-                ).result[0].number,
+                ).result[0].number || 0,
                 starred_orgs = db[collection].aggregate(
                     {$unwind : "$starred_datasets"},
                     {$group : {_id: null, number: {$sum: 1}}}
-                ).result[0].number,
+                ).result[0].number || 0,
                 starred_reuses = db[collection].aggregate(
                     {$unwind : "$starred_datasets"},
                     {$group : {_id: null, number: {$sum: 1}}}
-                ).result[0].number;
+                ).result[0].number || 0;
             return starred_datasets + starred_reuses + starred_orgs;
         }
         '''

@@ -49,6 +49,7 @@ class Metric(object):
         self.data = data
 
     def compute(self):
+        log.debug('Computing value for %s(%s) metric', self.name, self.target)
         self.value = self.get_value()
         if isinstance(self.target, db.Document):
             cmd = {'set__metrics__{0}'.format(self.name): self.value}
@@ -56,6 +57,7 @@ class Metric(object):
         self.notify_update()
 
     def store(self):
+        log.debug('Storing metric %s(%s)', self.name, self.target)
         kwargs = {self.name: self.value}
         Metrics.objects.update_daily(self.target, **kwargs)
 

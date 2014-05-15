@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from udata.core.metrics import Metric
 from udata.i18n import lazy_gettext as _
-from udata.models import db, Dataset, Reuse, User, Organization
+from udata.models import db, Dataset, Reuse, User, Organization, FollowOrg
 
 
 __all__ = ('DatasetsMetric', 'ReusesMetric', 'MembersMetric', 'StarsMetric')
@@ -27,7 +27,7 @@ def update_datasets_metrics(document, **kwargs):
 
 
 class ReusesMetric(Metric):
-    model = Reuse
+    model = Organization
     name = 'reuses'
     display_name = _('Reuses')
 
@@ -58,3 +58,17 @@ class StarsMetric(Metric):
 
 
 StarsMetric.connect(Organization.on_star, Organization.on_unstar)
+
+
+class FollowersMetric(Metric):
+    model = Organization
+    name = 'followers'
+    display_name = _('Followers')
+
+    def get_value(self):
+        return FollowOrg.objects.followers(self.target).count()
+
+
+@FollowOrg.on_new.connect
+def update_followers_metric(document, **kwargs):
+    FollowersMetric(document.following).trigger_update()
