@@ -53,8 +53,6 @@ class SearchQuery(object):
         else:
             body['query'] = self.get_query()
 
-        import json
-        print json.dumps(body)
         return body
 
     def get_score_functions(self):
