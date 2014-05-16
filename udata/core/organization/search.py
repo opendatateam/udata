@@ -61,7 +61,11 @@ class OrganizationSearch(ModelSearchAdapter):
             'nb_reuses': organization.metrics.get('reuses', 0),
             'nb_stars': organization.metrics.get('stars', 0),
             'org_suggest': {
-                'input': [organization.name],
+                'input': [organization.name] + [
+                    n for n in organization.name.split(' ')
+                    if len(n) > 3
+                ],
+                'output': organization.name,
                 'payload': {
                     'id': str(organization.id),
                     'image_url': organization.image_url,

@@ -114,7 +114,11 @@ class DatasetSearch(ModelSearchAdapter):
             'organization': str(dataset.organization.id) if dataset.organization else None,
             'supplier': str(dataset.supplier.id) if dataset.supplier else None,
             'dataset_suggest': {
-                'input': [dataset.title],
+                'input': [dataset.title] + [
+                    n for n in dataset.title.split(' ')
+                    if len(n) > 3
+                ],
+                'output': dataset.title,
                 'payload': {
                     'id': str(dataset.id),
                     'slug': dataset.slug,

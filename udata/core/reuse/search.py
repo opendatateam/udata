@@ -87,7 +87,11 @@ class ReuseSearch(ModelSearchAdapter):
             'nb_stars': reuse.metrics.get('stars', 0),
             'featured': reuse.featured,
             'reuse_suggest': {
-                'input': [reuse.title],
+                'input': [reuse.title] + [
+                    n for n in reuse.title.split(' ')
+                    if len(n) > 3
+                ],
+                'output': reuse.title,
                 'payload': {
                     'id': str(reuse.id),
                     'slug': reuse.slug,
