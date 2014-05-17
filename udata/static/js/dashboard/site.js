@@ -10,7 +10,7 @@ define([
     'use strict';
 
     var today = moment(),
-        last_week = moment().subtract('days', 7),
+        last_week = moment().subtract('days', 10),
         url = '/api/metrics/site/';
 
     url += last_week.format('YYYY-MM-DD') + '+' + today.format('YYYY-MM-DD');
