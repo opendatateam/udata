@@ -20,7 +20,7 @@
   "dependencies": {
     "jquery": "~2.1.1",
     "bootstrap": "~3.1.1",
-    "font-awesome": "~4.0.3",
+    "font-awesome": "~4.1.0",
     "momentjs": "~2.6.0",
     "bootstrap-markdown": "~2.4.0",
     "markdown": "~0.5.0",
