@@ -34,5 +34,21 @@
     "Administrator": "Administrateur",
     "Editor": "Éditeur",
     "Custom Range": "Période personnalisée",
-    "Do you want to add this user as a member of your organization ?": "Voulez ajouter cet utilisateur comme membre de votre organisation ?"
+    "Do you want to add this user as a member of your organization ?": "Voulez ajouter cet utilisateur comme membre de votre organisation ?",
+    "Bold": "Gras",
+    "Italic": "Italique",
+    "Heading": "Titre",
+    "URL/Link": "Insérer un lien HTTP",
+    "Image": "Insérer une image",
+    "List": "Liste à puces",
+    "Preview": "Prévisualiser",
+    "strong text": "texte important",
+    "emphasized text": "texte souligné",
+    "heading text": "texte d'entête",
+    "enter link description here": "entrez la description du lien ici",
+    "Insert Hyperlink": "Insérez le lien hypertexte",
+    "enter image description here": "entrez la description de l'image ici",
+    "Insert Image Hyperlink": "Insérez le lien hypertexte de l'image",
+    "enter image title here": "entrez le titre de l'image ici",
+    "list text here": "texte à puce ici"
 }
