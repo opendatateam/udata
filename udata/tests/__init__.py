@@ -60,9 +60,9 @@ class TestCase(BaseTestCase):
             app.config['THEME'] = 'default'
         return app
 
-    def login(self, user=None):
+    def login(self, user=None, client=None):
         self.user = user or UserFactory()
-        with self.client.session_transaction() as session:
+        with (client or self.client).session_transaction() as session:
             session['user_id'] = str(self.user.id)
             session['_fresh'] = True
         return self.user
