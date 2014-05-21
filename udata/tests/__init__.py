@@ -81,21 +81,21 @@ class WebTestMixin(object):
         with self.app.test_request_context(''):
             return urljoin(request.url_root, url_for(*args, **kwargs))
 
-    def get(self, url, **kwargs):
+    def get(self, url, client=None, **kwargs):
         url = self._build_url(url, kwargs)
-        return self.client.get(url, **kwargs)
+        return (client or self.client).get(url, **kwargs)
 
-    def post(self, url, data=None, **kwargs):
+    def post(self, url, data=None, client=None, **kwargs):
         url = self._build_url(url, kwargs)
-        return self.client.post(url, data=data, **kwargs)
+        return (client or self.client).post(url, data=data, **kwargs)
 
-    def put(self, url, data=None, **kwargs):
+    def put(self, url, data=None, client=None, **kwargs):
         url = self._build_url(url, kwargs)
-        return self.client.put(url, data=data, **kwargs)
+        return (client or self.client).put(url, data=data, **kwargs)
 
-    def delete(self, url, **kwargs):
+    def delete(self, url, client=None, **kwargs):
         url = self._build_url(url, kwargs)
-        return self.client.delete(url, **kwargs)
+        return (client or self.client).delete(url, **kwargs)
 
 
 class DBTestMixin(object):

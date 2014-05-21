@@ -1,0 +1,60 @@
+<div class="card">
+    <a class="card-logo" href="{{ url_for('organizations.show', org=organization) }}">
+        <img alt="{{ organization.title }}"
+            src="{{ organization.image_url|placeholder('organization') }}">
+    </a>
+    {% if organization.public_service %}
+    <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
+        class="certified" rel="popover"
+        data-title="{{ _('Certified public service') }}"
+        data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
+        data-container="body" data-trigger="hover"/>
+    {% endif %}
+    <div class="card-body ellipsis-dot">
+        <h4>
+            <a href="{{ url_for('organizations.show', org=organization) }}" title="{{organization.name}}">
+                {{ organization.name }}
+            </a>
+        </h4>
+        <div class="card-description">{{ organization.description|markdown|striptags|truncate(250) }}</div>
+
+    </div>
+    <footer>
+        <ul class="col-xs-9 col-sm-10">
+            {% if organization.metrics.datasets %}
+            <li>
+                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Number of datasets') }}">
+                    <span class="glyphicon glyphicon-stats"></span>
+                </a>
+                {{ ngettext('%(num)s dataset', '%(num)s datasets', organization.metrics.datasets or 0) }}
+            </li>
+            {% endif %}
+            {% if organization.metrics.reuses %}
+            <li>
+                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Number of reuses') }}">
+                    <span class="glyphicon glyphicon-random"></span>
+                </a>
+                {{ ngettext('%(num)s reuse', '%(num)s reuses', organization.metrics.reuses or 0) }}
+            </li>
+            {% endif %}
+            <li>
+                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Number of members') }}">
+                    <span class="glyphicon glyphicon-user"></span>
+                </a>
+                {{ ngettext('%(num)s members', '%(num)s members', organization.members|length) }}
+            </li>
+        </ul>
+        <ul class="col-xs-3 col-sm-2 corner">
+            <li>
+                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Number of stars') }}">
+                    <span class="glyphicon glyphicon-star"></span>
+                </a>
+                {{ ngettext('%(num)s star', '%(num)s stars', organization.metrics.stars or 0) }}
+            </li>
+        </ul>
+    </footer>
+</div>

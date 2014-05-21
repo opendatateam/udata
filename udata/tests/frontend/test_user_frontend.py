@@ -8,30 +8,39 @@ from ..factories import UserFactory, DatasetFactory, ReuseFactory, ResourceFacto
 
 
 class UserBlueprintTest(FrontTestCase):
-    def setUp(self):
-        self.user = UserFactory()
+    # def setUp(self):
+    #     self.user = UserFactory()
+
+    def test_user_list(self):
+        users = [UserFactory() for _ in range(3)]
+        response = self.get(url_for('users.list'))
+        self.assert200(response)
+
 
     def test_render_profile(self):
         '''It should render the user profile'''
-        response = self.get(url_for('users.show', user=self.user))
+        user = UserFactory()
+        response = self.get(url_for('users.show', user=user))
         self.assert200(response)
 
     def test_render_profile_datasets(self):
         '''It should render the user profile datasets page'''
-        datasets = [DatasetFactory(owner=self.user, resources=[ResourceFactory()]) for _ in range(3)]
+        user = UserFactory()
+        datasets = [DatasetFactory(owner=user, resources=[ResourceFactory()]) for _ in range(3)]
         for _ in range(2):
             DatasetFactory(resources=[ResourceFactory()])
-        response = self.get(url_for('users.datasets', user=self.user))
+        response = self.get(url_for('users.datasets', user=user))
         self.assert200(response)
         rendered_datasets = self.get_context_variable('datasets')
         self.assertEqual(len(rendered_datasets), len(datasets))
 
     def test_render_profile_reuses(self):
         '''It should render the user profile reuses page'''
-        reuses = [ReuseFactory(owner=self.user, datasets=[DatasetFactory()]) for _ in range(3)]
+        user = UserFactory()
+        reuses = [ReuseFactory(owner=user, datasets=[DatasetFactory()]) for _ in range(3)]
         for _ in range(2):
             ReuseFactory(datasets=[DatasetFactory()])
-        response = self.get(url_for('users.reuses', user=self.user))
+        response = self.get(url_for('users.reuses', user=user))
         self.assert200(response)
         rendered_reuses = self.get_context_variable('reuses')
         self.assertEqual(len(rendered_reuses), len(reuses))
@@ -43,14 +52,22 @@ class UserBlueprintTest(FrontTestCase):
 
     def test_render_user_profile_form(self):
         '''It should render the user profile form'''
+        self.login()
         response = self.get(url_for('users.edit', user=self.user))
         self.assert200(response)
 
+    def test_user_profile_form_is_protected(self):
+        '''It should raise a 403 if an user try to access another user profile form'''
+        user = UserFactory()
+        self.login()
+        response = self.get(url_for('users.edit', user=user))
+        self.assert403(response)
+
     def test_edit(self):
         '''It should handle edit form submit and redirect on user profile page'''
+        self.login()
         data = self.user.to_dict()
         data['about'] = 'bla bla bla'
-        self.login()
         response = self.post(url_for('users.edit', user=self.user), data)
 
         self.user.reload()
@@ -59,11 +76,13 @@ class UserBlueprintTest(FrontTestCase):
 
     def test_user_activity_empty(self):
         '''It should render an empty user activity page'''
-        response = self.get(url_for('users.activity', user=self.user))
+        user = UserFactory()
+        response = self.get(url_for('users.activity', user=user))
         self.assert200(response)
 
     def test_user_starred_empty(self):
         '''It should render an empty user starred page'''
-        response = self.get(url_for('users.starred', user=self.user))
+        user = UserFactory()
+        response = self.get(url_for('users.starred', user=user))
         self.assert200(response)
 

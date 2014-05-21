@@ -30,6 +30,9 @@
                 {{ s.filter_label('organization', _('Organization'), 'home',
                     formatter=facet_formater(datasets, 'organization')
                 ) }}
+                {{ s.filter_label('supplier', _('Supplier'), 'home',
+                    formatter=facet_formater(datasets, 'supplier')
+                ) }}
                 {{ s.filter_label('tag', _('Tag'), 'tag') }}
                 {{ s.filter_label('license', _('License'), 'copyright-mark',
                     formatter=facet_formater(datasets, 'license')

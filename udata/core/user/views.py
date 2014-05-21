@@ -4,12 +4,12 @@ from __future__ import unicode_literals
 from flask import url_for, g
 
 from udata.auth import current_user
-from udata.frontend.views import DetailView, EditView
+from udata.frontend.views import DetailView, EditView, ListView
 from udata.models import User, Activity, Organization, Dataset, Reuse
 from udata.i18n import I18nBlueprint
 from udata.forms import UserProfileForm
 
-from .permissions import sysadmin
+from .permissions import sysadmin, UserEditPermission
 
 blueprint = I18nBlueprint('users', __name__, url_prefix='/u')
 
@@ -22,6 +22,15 @@ def set_g_sysadmin():
 @blueprint.app_context_processor
 def inject_sysadmin_perms():
     return {'sysadmin': sysadmin}
+
+
+class UserListView(ListView):
+    model = User
+    template_name = 'user/list.html'
+    context_name = 'users'
+
+    def get_queryset(self):
+        return User.objects.order_by('first_name', 'last_name')
 
 
 class UserView(object):
@@ -45,6 +54,10 @@ class UserView(object):
 class UserProfileEditView(UserView, EditView):
     form = UserProfileForm
     template_name = 'user/edit.html'
+
+    def can(self, *args, **kwargs):
+        permission = UserEditPermission(self.user)
+        return permission.can()
 
     def get_success_url(self):
         return url_for('users.show', user=self.object)
@@ -81,6 +94,7 @@ class UserStarredView(UserView, DetailView):
     template_name = 'user/starred.html'
 
 
+blueprint.add_url_rule('/', view_func=UserListView.as_view(str('list')))
 blueprint.add_url_rule('/<user:user>/', view_func=UserActivityView.as_view(str('show')))
 blueprint.add_url_rule('/<user:user>/edit/', view_func=UserProfileEditView.as_view(str('edit')))
 blueprint.add_url_rule('/<user:user>/activity/', view_func=UserActivityView.as_view(str('activity')))

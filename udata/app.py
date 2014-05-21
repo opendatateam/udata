@@ -10,6 +10,7 @@ from os.path import abspath, join, dirname, isfile, exists
 
 from flask import Flask, abort, send_from_directory, json
 from flask.ext.cache import Cache
+from werkzeug.contrib.fixers import ProxyFix
 
 
 APP_NAME = __name__.split('.')[0]
@@ -74,6 +75,8 @@ def create_app(config='udata.settings.Defaults'):
     app.json_encoder = UDataJsonEncoder
 
     app.debug = app.config['DEBUG'] and not app.config['TESTING']
+
+    app.wsgi_app = ProxyFix(app.wsgi_app)
 
     init_logging(app)
     register_extensions(app)

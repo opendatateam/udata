@@ -1,7 +1,7 @@
 {% extends theme('layouts/1-column.html') %}
 
 {% block breadcrumb %}
-    <li><a>{{ _('Users') }}</a></li>
+    <li><a href="{{ url_for('users.list') }}">{{ _('Users') }}</a></li>
     <li><a href="{{ url_for('users.show', user=user) }}">{{ user.fullname }}</a></li>
 {% endblock %}
 
@@ -47,6 +47,12 @@
                     class="list-group-item {% if user_tab == 'followers' %}active{% endif %}">
                     <strong>
                         {{ ngettext('%(num)d follower', '%(num)d followers', user.metrics.followers or 0) }}
+                    </strong>
+                </a>
+                <a href="{{url_for('followers.user_following', user=user)}}"
+                    class="list-group-item {% if user_tab == 'following' %}active{% endif %}">
+                    <strong>
+                        {{ ngettext('%(num)d followed', '%(num)d followed', user.metrics.following or 0) }}
                     </strong>
                 </a>
                 <a href="{{url_for('users.datasets', user=user)}}"

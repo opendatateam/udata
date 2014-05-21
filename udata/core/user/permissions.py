@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
-from udata.auth import Permission, RoleNeed
+from udata.auth import Permission, RoleNeed, UserNeed
 from udata.i18n import lazy_gettext as _
 
 
@@ -12,3 +11,9 @@ ROLES = {
 }
 
 sysadmin = Permission(RoleNeed('admin'))
+
+
+class UserEditPermission(Permission):
+    def __init__(self, user):
+        need = UserNeed(user.id)
+        super(UserEditPermission, self).__init__(need)

@@ -1,0 +1,24 @@
+{% extends theme("layouts/1-column.html") %}
+{% from theme('macros/paginator.html') import paginator with context %}
+{#
+{% block breadcrumb %}
+    <li class="active">
+        {{ _('Users') }}
+        <small>{{ _('%(start)s to %(end)s on %(total)s',
+                    start=users.page_start,
+                    end=users.page_end,
+                    total=users.total) }}</small>
+    </li>
+{% endblock %} #}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-xs-12">
+        <ul>
+            {% for user in users %}
+            <li><a href="{{url_for('users.show', user=user)}}">{{user.fullname}}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
