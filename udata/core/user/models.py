@@ -23,6 +23,11 @@ class Role(db.Document, RoleMixin):
     name = db.StringField(max_length=80, unique=True)
     description = db.StringField(max_length=255)
 
+    def __str__(self):
+        return self.name
+
+    __unicode__ = __str__
+
 
 class User(db.Document, WithMetrics,UserMixin):
     slug = db.SlugField(max_length=255, required=True, populate_from=populate_slug)

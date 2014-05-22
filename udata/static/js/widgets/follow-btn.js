@@ -1,12 +1,14 @@
 /**
  * Follow button
  */
-define(['jquery'], function($) {
+define(['jquery', 'auth', 'i18n'], function($, Auth, i18n) {
     'use strict';
 
     // Handle featured button
     $('.btn-follow').click(function() {
         var $this = $(this);
+
+        Auth.ensure_user(i18n._('You need to be logged in to follow.'));
 
         if ($this.hasClass('active')) {
             $.ajax({

@@ -3,6 +3,7 @@
  */
 define([
     'jquery',
+    'auth',
     'bootstrap',
     'widgets/site-search',
     'utils/ellipsis',
