@@ -30,11 +30,7 @@ def to_row(dataset, specs):
         dataset.metrics.get(key, spec.default)
         for key, spec in specs.items()
     ))
-    return (
-        dataset.id,
-        dataset.slug,
-        dataset.title
-    )
+    return row
 
 
 def yield_csv_catalog(datasets):
