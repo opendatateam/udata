@@ -111,7 +111,6 @@ def _load_views(app, module):
         if blueprint:
             app.register_blueprint(blueprint)
     except ImportError as e:
-        print e
         pass
     except Exception as e:
         log.error('Error importing %s views: %s', module, e)
