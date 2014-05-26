@@ -17,7 +17,6 @@ from flask.ext.themes2 import Themes, Theme, render_theme_template, get_theme, p
 from flask.ext.wtf.csrf import CsrfProtect
 
 from udata.app import ROOT_DIR
-from udata.core import MODULES
 from udata.i18n import I18nBlueprint
 
 
@@ -152,9 +151,26 @@ def init_app(app):
 
     from . import explore, home, helpers, catalog, error_handlers
 
-    # Load all core modules frontend
-    for module in MODULES:
-        _load_views(app, 'udata.core.{0}.views'.format(module))
+    # Load all core views and blueprint
+    import udata.core.metrics.views
+    import udata.core.search.views
+
+    from udata.core.storages.views import blueprint as storages_blueprint
+    from udata.core.user.views import blueprint as user_blueprint
+    from udata.core.dataset.views import blueprint as dataset_blueprint
+    from udata.core.reuse.views import blueprint as reuse_blueprint
+    from udata.core.organization.views import blueprint as org_blueprint
+    from udata.core.followers.views import blueprint as follow_blueprint
+    from udata.core.topic.views import blueprint as topic_blueprint
+    from udata.core.post.views import blueprint as post_blueprint
+    app.register_blueprint(storages_blueprint)
+    app.register_blueprint(user_blueprint)
+    app.register_blueprint(dataset_blueprint)
+    app.register_blueprint(reuse_blueprint)
+    app.register_blueprint(org_blueprint)
+    app.register_blueprint(follow_blueprint)
+    app.register_blueprint(topic_blueprint)
+    app.register_blueprint(post_blueprint)
 
     # Load all plugins views and blueprints
     for plugin in app.config['PLUGINS']:
