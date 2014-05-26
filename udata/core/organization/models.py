@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
+
 from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
@@ -15,6 +17,13 @@ __all__ = ('Organization', 'Team', 'Member', 'ORG_ROLES')
 ORG_ROLES = {
     'admin': _('Administrateur'),
     'editor': _('Administrateur'),
+}
+
+
+MEMBERSHIP_STATUS = {
+    'pending': _('Pending'),
+    'accepted': _('Accepted'),
+    'refused': _('Refused'),
 }
 
 
@@ -41,6 +50,24 @@ class Team(db.EmbeddedDocument):
 class Member(db.EmbeddedDocument):
     user = db.ReferenceField('User')
     role = db.StringField(choices=ORG_ROLES.keys())
+    since = db.DateTimeField(default=datetime.now, required=True)
+
+
+class MembershipRequest(db.EmbeddedDocument):
+    '''
+    Pending organization membership requests
+    '''
+    id = db.AutoUUIDField()
+    user = db.ReferenceField('User')
+    status = db.StringField(choices=MEMBERSHIP_STATUS.keys(), default='pending')
+
+    created = db.DateTimeField(default=datetime.now, required=True)
+
+    handled_on = db.DateTimeField()
+    handled_by = db.ReferenceField('User')
+
+    comment = db.StringField()
+    refusal_comment = db.StringField()
 
 
 class Organization(WithMetrics, db.Datetimed, db.Document):
@@ -52,13 +79,13 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
 
     members = db.ListField(db.EmbeddedDocumentField(Member))
     teams = db.ListField(db.EmbeddedDocumentField(Team))
+    requests = db.ListField(db.EmbeddedDocumentField(MembershipRequest))
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.DictField()
 
     # TODO: Extract into extension
     public_service = db.BooleanField()
-
 
     meta = {
         'allow_inheritance': True,
@@ -96,4 +123,6 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
 
 pre_save.connect(Organization.pre_save, sender=Organization)
 post_save.connect(Organization.post_save, sender=Organization)
+
+
 

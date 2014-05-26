@@ -18,10 +18,12 @@ class OrganizationSearch(ModelSearchAdapter):
         'reuses': Sort('nb_reuses'),
         'datasets': Sort('nb_datasets'),
         'stars': Sort('nb_stars'),
+        'followers': Sort('nb_followers'),
     }
     filters = {
         'reuses': RangeFilter('nb_reuses'),
         'datasets': RangeFilter('nb_datasets'),
+        'followers': RangeFilter('nb_followers'),
     }
     mapping = {
         'properties': {
@@ -35,6 +37,8 @@ class OrganizationSearch(ModelSearchAdapter):
             'url': {'type': 'string'},
             'nb_datasets': {'type': 'integer'},
             'nb_reuses': {'type': 'integer'},
+            'nb_stars': {'type': 'integer'},
+            'nb_followers': {'type': 'integer'},
             'org_suggest': {
                 'type': 'completion',
                 'index_analyzer': 'simple',
@@ -60,6 +64,7 @@ class OrganizationSearch(ModelSearchAdapter):
             'nb_datasets': organization.metrics.get('datasets', 0),
             'nb_reuses': organization.metrics.get('reuses', 0),
             'nb_stars': organization.metrics.get('stars', 0),
+            'nb_followers': organization.metrics.get('followers', 0),
             'org_suggest': {
                 'input': [organization.name] + [
                     n for n in organization.name.split(' ')

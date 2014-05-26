@@ -5,7 +5,7 @@ define(['jquery', 'notify', 'i18n', 'class'], function($, Notify, i18n, Class) {
     'use strict';
 
     var DEFAULTS = {
-        need_role: i18n._('Role "{role}"" is required')
+        need_role: i18n._('Role "{role}" is required')
     }
 
 

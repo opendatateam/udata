@@ -58,6 +58,8 @@ class DatasetSearch(ModelSearchAdapter):
             'created': {'type': 'date', 'format': 'date_hour_minute_second'},
             'last_modified': {'type': 'date', 'format': 'date_hour_minute_second'},
             'nb_reuses': {'type': 'integer'},
+            'nb_followers': {'type': 'integer'},
+            'nb_stars': {'type': 'integer'},
             'featured': {'type': 'boolean'},
             'temporal_coverage_start': {'type': 'date', 'format': 'date'},
             'temporal_coverage_end': {'type': 'date', 'format': 'date'},
@@ -73,6 +75,7 @@ class DatasetSearch(ModelSearchAdapter):
         'created': Sort('created'),
         'last_modified': Sort('last_modified'),
         'reuses': Sort('nb_reuses'),
+        'followers': Sort('nb_followers'),
         'stars': Sort('nb_stars'),
     }
     facets = {
@@ -129,6 +132,7 @@ class DatasetSearch(ModelSearchAdapter):
             'last_modified': dataset.last_modified.strftime('%Y-%m-%dT%H:%M:%S'),
             'nb_reuses': dataset.metrics.get('reuses', 0),
             'nb_stars': dataset.metrics.get('stars', 0),
+            'nb_followers': dataset.metrics.get('followers', 0),
             'featured': dataset.featured,
             'from_public_service': dataset.organization.public_service if dataset.organization else False,  # TODO: extract tis into plugin
         }

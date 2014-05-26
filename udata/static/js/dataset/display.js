@@ -8,6 +8,7 @@ define([
     'hbs!templates/dataset/resource-modal-body',
     'widgets/modal',
     'widgets/featured',
+    'widgets/follow-btn',
     'widgets/starred'
 ], function($, log, i18n, template, modal) {
 

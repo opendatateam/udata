@@ -41,11 +41,11 @@
             </div>
         </div>
 
-        <ul class="card-list">
+        <ul class="search-results">
             {% for dataset in datasets %}
-            <li class="col-md-6">
-                {% include theme('dataset/card.html') %}
-            </li>
+            {# <li class="col-md-6"> #}
+                {% include theme('dataset/search-result.html') %}
+            {# </li> #}
             {% endfor %}
         </ul>
 

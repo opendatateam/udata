@@ -8,7 +8,7 @@ from udata.models import Post
 from . import front, render
 
 
-TAB_SIZE = 6
+TAB_SIZE = 12
 
 
 @front.route('/')

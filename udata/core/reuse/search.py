@@ -28,9 +28,12 @@ class ReuseSearch(ModelSearchAdapter):
         'last_modified': Sort('last_modified'),
         'datasets': Sort('nb_datasets'),
         'stars': Sort('nb_stars'),
+        'followers': Sort('nb_followers'),
     }
     filters = {
         'datasets': RangeFilter('nb_datasets'),
+        'stars': RangeFilter('nb_stars'),
+        'followers': RangeFilter('nb_followers'),
         'featured': BoolFilter('featured'),
     }
     mapping = {
@@ -56,6 +59,8 @@ class ReuseSearch(ModelSearchAdapter):
             'created': {'type': 'date', 'format': 'date_hour_minute_second'},
             'last_modified': {'type': 'date', 'format': 'date_hour_minute_second'},
             'nb_datasets': {'type': 'integer'},
+            'nb_stars': {'type': 'integer'},
+            'nb_followers': {'type': 'integer'},
             'featured': {'type': 'boolean'},
             'reuse_suggest': {
                 'type': 'completion',
@@ -85,6 +90,7 @@ class ReuseSearch(ModelSearchAdapter):
             'last_modified': reuse.last_modified.strftime('%Y-%m-%dT%H:%M:%S'),
             'nb_datasets': reuse.metrics.get('datasets', 0),
             'nb_stars': reuse.metrics.get('stars', 0),
+            'nb_followers': reuse.metrics.get('followers', 0),
             'featured': reuse.featured,
             'reuse_suggest': {
                 'input': [reuse.title] + [

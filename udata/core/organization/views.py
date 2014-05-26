@@ -7,7 +7,7 @@ from flask.ext.security import current_user
 from udata.forms import OrganizationForm, OrganizationMemberForm
 from udata.frontend.views import DetailView, CreateView, EditView, SearchView
 from udata.i18n import I18nBlueprint
-from udata.models import Organization, Member, Reuse, Dataset, ORG_ROLES, User
+from udata.models import Organization, Member, Reuse, Dataset, ORG_ROLES, User, FollowOrg
 from udata.search import OrganizationSearch, DatasetSearch, ReuseSearch, SearchQuery, multiquery
 from udata.utils import get_by
 
@@ -53,6 +53,7 @@ class ProtectedOrgView(OrgView):
 
 class OrganizationDetailView(OrgView, DetailView):
     template_name = 'organization/display.html'
+    nb_followers = 16
 
     def get_context(self):
         context = super(OrganizationDetailView, self).get_context()
@@ -62,7 +63,9 @@ class OrganizationDetailView(OrgView, DetailView):
             SearchQuery(DatasetSearch, sort='-created', organization=org_id, page_size=9),
             SearchQuery(DatasetSearch, sort='-created', supplier=org_id, page_size=9),
             SearchQuery(ReuseSearch, sort='-created', organization=org_id, page_size=9),
+
         )
+        followers = FollowOrg.objects.followers(self.organization).order_by('follower.fullname')
 
         context.update({
             'reuses': reuses,
@@ -70,6 +73,7 @@ class OrganizationDetailView(OrgView, DetailView):
             'supplied_datasets': supplied_datasets,
             'private_reuses': list(Reuse.objects(organization=self.object, private=True)),
             'private_datasets': list(Dataset.objects(organization=self.object, private=True)),
+            'followers': followers[:self.nb_followers],
             'can_edit': EditOrganizationPermission(self.organization.id)
         })
 

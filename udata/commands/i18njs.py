@@ -50,12 +50,13 @@ def i18njs(path, domain='udata'):
     dirnames = (d for d, _, _ in walks)
     for dirname, (pattern, regexps) in itertools.product(dirnames, specs.items()):
         for filename in iglob(join(dirname, pattern)):
+            print 'Extracting messages from {0}'.format(filename)
             content = open(filename, 'r').read()
             for regexp in regexps:
                 for match in regexp.finditer(content):
                     key = match.group(1)
                     if not key in catalog:
-                        catalog[key] = ''
+                        catalog[key] = key
 
     with open(catalog_filename, 'wb') as f:
         json.dump(catalog, f, sort_keys=True, indent=4)

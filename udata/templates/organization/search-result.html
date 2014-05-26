@@ -25,7 +25,7 @@
         <li>
             <a href class="btn btn-xs" rel="tooltip" data-placement="top"
                 title="{{ _('Number of datasets') }}">
-                <span class="glyphicon glyphicon-stats"></span>
+                <span class="fa fa-cubes"></span>
             </a>
             {{ ngettext('%(num)s dataset', '%(num)s datasets', organization.metrics.datasets or 0) }}
         </li>
@@ -46,6 +46,15 @@
                 <span class="glyphicon glyphicon-star"></span>
             </a>
             {{ ngettext('%(num)s star', '%(num)s stars', organization.metrics.stars or 0) }}
+        </li>
+        {% endif %}
+        {% if organization.metrics.followers %}
+        <li>
+            <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                title="{{ _('Number of followers') }}">
+                <span class="glyphicon glyphicon-eye-open"></span>
+            </a>
+            {{ ngettext('%(num)s follower', '%(num)s followers', organization.metrics.followers or 0) }}
         </li>
         {% endif %}
         <li>
