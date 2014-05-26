@@ -26,7 +26,7 @@
         </a>
         <h3>{{ org.name }}</h3>
         <div class="caption text-left ellipsis-dot">
-            {{ org.description|markdown }}
+            {{ org.description|markdown|striptags|truncate(200) }}
         </div>
     </div>
     <div class="col-sm-8 col-md-9 col-lg-10">
