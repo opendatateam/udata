@@ -5,7 +5,6 @@ import logging
 
 from blinker import Signal
 
-from udata.core import MODULES
 from udata.models import db
 
 from .models import Metrics
@@ -112,13 +111,12 @@ class SiteMetric(Metric):
 
 def init_app(app):
     # Load all core metrics
-    for module in MODULES:
-        try:
-            __import__('udata.core.{0}.metrics'.format(module))
-        except ImportError:
-            pass
-        except Exception as e:
-            log.error('Unable to import %s: %s', module, e)
+    import udata.core.metrics.metrics
+    import udata.core.user.metrics
+    import udata.core.dataset.metrics
+    import udata.core.reuse.metrics
+    import udata.core.organization.metrics
+    import udata.core.followers.metrics
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:
