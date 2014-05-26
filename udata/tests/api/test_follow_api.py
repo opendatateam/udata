@@ -102,6 +102,25 @@ class FollowAPITest(APITestCase):
         self.assertEqual(Follow.objects.following(user).count(), 0)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
+    def test_unfollow_org(self):
+        '''It should unfollow the user on DELETE'''
+        user = self.login()
+        # to_follow = UserFactory()
+        to_follow = OrganizationFactory()
+        FollowOrg.objects.create(follower=user, following=to_follow)
+
+        response = self.delete(url_for('api.follow_organization', id=str(to_follow.id)))
+        self.assert200(response)
+
+        nb_followers = Follow.objects.followers(to_follow).count()
+
+        self.assertEqual(nb_followers, 0)
+        self.assertEqual(response.json['followers'], nb_followers)
+
+        self.assertEqual(Follow.objects.following(to_follow).count(), 0)
+        self.assertEqual(Follow.objects.following(user).count(), 0)
+        self.assertEqual(Follow.objects.followers(user).count(), 0)
+
     def test_unfollow_not_existing(self):
         '''It should raise 404 when trying to unfollow someone not followed'''
         self.login()

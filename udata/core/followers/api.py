@@ -10,6 +10,8 @@ from flask.ext.security import current_user
 from udata.api import api, API, marshal, fields
 from udata.models import FollowOrg, FollowDataset, Follow, FollowReuse
 
+from .signals import on_unfollow
+
 
 class FollowAPI(API):
     '''
@@ -20,7 +22,7 @@ class FollowAPI(API):
     def post(self, id):
         if not current_user.is_authenticated():
             abort(401)
-        follow, created = self.model.objects.get_or_create(follower=current_user.id, following=id)
+        follow, created = self.model.objects.get_or_create(follower=current_user.id, following=id, until=None)
         count = self.model.objects.followers(id).count()
 
         return {'followers': count}, 201 if created else 200
@@ -31,6 +33,7 @@ class FollowAPI(API):
         follow = self.model.objects.get_or_404(follower=current_user.id, following=id, until=None)
         follow.until = datetime.now()
         follow.save()
+        on_unfollow.send(follow)
         count = self.model.objects.followers(id).count()
         return {'followers': count}, 200
 

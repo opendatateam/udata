@@ -54,7 +54,6 @@ class DateRangeFilter(object):
 
     def cast(self, value):
         t = time.gmtime(value)
-        print t.tm_year, t.tm_mon, t.tm_mday
         return date(t.tm_year, t.tm_mon, t.tm_mday)
         # return datetime.fromtimestamp(long(value)).date()
 

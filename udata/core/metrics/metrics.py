@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from . import SiteMetric
 from udata.i18n import lazy_gettext as _
-from udata.models import Dataset, Reuse, User, Organization, Resource
+from udata.models import Dataset, Reuse, User, Organization, Resource, Follow
 
 
 __all__ = ('DatasetsMetric', 'ReusesMetric', 'ResourcesMetric', 'UsersMetric', 'OrganizationsMetric', 'StarsMetric')
@@ -66,6 +66,16 @@ class OrganizationsMetric(SiteMetric):
         return Organization.objects.count()
 
 OrganizationsMetric.connect(Organization.on_update)
+
+
+class FollowersMetric(SiteMetric):
+    name = 'followers'
+    display_name = _('Followers')
+
+    def get_value(self):
+        return Follow.objects(until=None).count()
+
+FollowersMetric.connect(Follow.on_new)
 
 
 class StarsMetric(SiteMetric):

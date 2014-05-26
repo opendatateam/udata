@@ -1,4 +1,4 @@
-{% extends theme('layouts/1-column.html') %}
+{% extends theme('organization/display_base.html') %}
 {% from theme('macros/starred.html') import starred with context %}
 
 {% block breadcrumb %}
@@ -21,13 +21,10 @@
 </div>
 {% endblock %}
 
-{% block main_content %}
-<h2>
-    {{ org.name }}
-    <small>
-        {{ ngettext('%(num)d follower', '%(num)d followers', followers|length) }}
-    </small>
-</h2>
+{% block org_content %}
+<h3>
+    {{ ngettext('%(num)d follower', '%(num)d followers', followers|length) }}
+</h3>
 <div class="row">
     {% for follow in followers %}
     <div class="col-md-4">

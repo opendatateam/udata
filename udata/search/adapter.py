@@ -25,8 +25,8 @@ class SearchAdapterMetaClass(type):
         # register the class in the catalog
         if adapter.model:
             adapter_catalog[adapter.model] = adapter
-        # Automatically reindex objects on save
-        post_save.connect(reindex_model_on_save, sender=adapter.model)
+            # Automatically reindex objects on save
+            post_save.connect(reindex_model_on_save, sender=adapter.model)
         return adapter
 
 
