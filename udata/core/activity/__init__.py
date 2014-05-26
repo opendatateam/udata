@@ -4,20 +4,14 @@ from __future__ import unicode_literals
 import logging
 
 
-from udata.core import MODULES
-
 log = logging.getLogger(__name__)
 
 
 def init_app(app):
     # Load all core actvitiess
-    for module in MODULES:
-        try:
-            __import__('udata.core.{0}.activities'.format(module))
-        except ImportError:
-            pass
-        except Exception as e:
-            log.error('Unable to import activities for %s: %s', module, e)
+    import udata.core.user.activities
+    import udata.core.dataset.activities
+    import udata.core.reuse.activities
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:
