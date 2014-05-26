@@ -100,7 +100,7 @@ def avatar_url(obj, size):
     if hasattr(obj, 'avatar_url') and obj.avatar_url:
         return obj.avatar_url
     elif hasattr(obj, 'email') and obj.email:
-        return gravatar(obj.email)
+        return gravatar(obj.email, use_ssl=request.is_secure)
     else:
         return placeholder(None, 'user')
 

@@ -27,7 +27,7 @@ csrf = CsrfProtect()
 themes = Themes()
 gravatar = Gravatar(size=100,
                     rating='g',
-                    default='retro',
+                    default='mm',
                     force_default=True,
                     use_ssl=False,
                     base_url=None)
