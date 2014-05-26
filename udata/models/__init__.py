@@ -4,13 +4,10 @@ from __future__ import unicode_literals
 import logging
 
 from collections import Iterable
-from importlib import import_module
 
 from flask.ext.mongoengine import MongoEngine, MongoEngineSessionInterface, Document, BaseQuerySet
 from mongoengine.base import TopLevelDocumentMetaclass
 from mongoengine.signals import pre_save, post_save
-
-from udata.core import MODULES
 
 from .datetime_fields import DateField, DateRange, Datetimed
 from .slug_fields import SlugField
@@ -61,19 +58,16 @@ db = UDataMongoEngine()
 session_interface = MongoEngineSessionInterface(db)
 
 
-# Load all models mixins
-# Load all core models
-loc = locals()
-for module in MODULES:
-    try:
-        models = import_module('udata.core.{0}.models'.format(module))
-        for model in models.__all__:
-            loc[model] = getattr(models, model)
-    except ImportError as e:
-        pass
-    except Exception as e:
-        log.error('Unable to import %s: %s', module, e)
-del loc
+# Load all core models and mixins
+from udata.core.metrics.models import *
+from udata.core.user.models import *
+from udata.core.dataset.models import *
+from udata.core.reuse.models import *
+from udata.core.organization.models import *
+from udata.core.activity.models import *
+from udata.core.followers.models import *
+from udata.core.topic.models import *
+from udata.core.post.models import *
 
 
 def init_app(app):
