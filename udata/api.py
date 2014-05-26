@@ -7,7 +7,6 @@ from flask import request
 from flask.ext.restful import Api, Resource, marshal, fields
 
 from udata import search
-from udata.core import MODULES
 from udata.utils import multi_to_dict
 
 log = logging.getLogger(__name__)
@@ -81,13 +80,13 @@ class ModelAPI(SingleObjectAPI, API):
 
 def init_app(app):
     # Load all core APIs
-    for module in MODULES:
-        try:
-            __import__('udata.core.{0}.api'.format(module))
-        except ImportError as e:
-            pass
-        except Exception as e:
-            log.error('Unable to import %s: %s', module, e)
+    import udata.core.metrics.api
+    import udata.core.user.api
+    import udata.core.dataset.api
+    import udata.core.reuse.api
+    import udata.core.organization.api
+    import udata.core.suggest.api
+    import udata.core.followers.api
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:
