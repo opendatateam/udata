@@ -6,8 +6,6 @@ import logging
 from flask.ext.superadmin import Admin, AdminIndexView, expose
 from flask.ext.security import login_required, current_user
 
-from udata.core import MODULES
-
 log = logging.getLogger(__name__)
 
 
@@ -24,14 +22,12 @@ admin = Admin(name='uData', index_view=AdminView())
 
 def init_app(app):
     # Load all core admin modules
-    for module in MODULES:
-        try:
-            __import__('udata.core.{0}.admin'.format(module))
-        except ImportError as e:
-            # log.error('Unable to import %s: %s', module, e)
-            pass
-        except Exception as e:
-            log.error('Unable to import %s: %s', module, e)
+    import udata.core.user.admin
+    import udata.core.dataset.admin
+    import udata.core.reuse.admin
+    import udata.core.organization.admin
+    import udata.core.topic.admin
+    import udata.core.post.admin
 
     # Load all extensions admin
     for plugin in app.config['PLUGINS']:
