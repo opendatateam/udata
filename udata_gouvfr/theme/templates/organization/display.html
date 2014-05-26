@@ -53,20 +53,7 @@
                 </div>
                 <br/>
                 <div class="tab-links">
-                    <p class="text-center">
-                        <strong>
-                            <a href="{{url_for('organizations.show', org=org)}}#members">
-                            {{ ngettext('%(num)d member', '%(num)d members', org.metrics.members or 0) }}
-                            </a>
-                        </strong>
-                    </p>
-                    <p class="text-center">
-                        <strong>
-                            <a href="{{url_for('followers.organization', org=org)}}">
-                            {{ ngettext('%(num)d follower', '%(num)d followers', org.metrics.followers or 0) }}
-                            </a>
-                        </strong>
-                    </p>
+                    {% if org.metrics.datasets %}
                     <p class="text-center">
                         <strong>
                             <a href="{{url_for('organizations.show', org=org)}}#datasets">
@@ -74,12 +61,33 @@
                             </a>
                         </strong>
                     </p>
+                    {% endif %}
+                    {% if org.metrics.members %}
+                    <p class="text-center">
+                        <strong>
+                            <a href="{{url_for('organizations.show', org=org)}}#members">
+                            {{ ngettext('%(num)d member', '%(num)d members', org.metrics.members or 0) }}
+                            </a>
+                        </strong>
+                    </p>
+                    {% endif %}
+                    {% if org.metrics.followers %}
+                    <p class="text-center">
+                        <strong>
+                            <a href="{{url_for('organizations.show', org=org)}}#followers">
+                            {{ ngettext('%(num)d follower', '%(num)d followers', org.metrics.followers or 0) }}
+                            </a>
+                        </strong>
+                    </p>
+                    {% endif %}
+                    {% if org.metrics.reuses %}
                     <p class="text-center">
                         <strong>
                         <a href="{{url_for('organizations.show', org=org)}}#reuses">
                             {{ ngettext('%(num)d reuse', '%(num)d reuses', org.metrics.reuses or 0) }}
                         </strong>
                     </p>
+                    {% endif %}
                 </div>
                 {% if not is_member %}
                     {% if not pending %}
