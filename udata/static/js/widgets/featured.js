@@ -1,12 +1,14 @@
 /**
  * Featured button
  */
-define(['jquery'], function($) {
+define(['jquery', 'auth'], function($, Auth) {
     'use strict';
 
     // Handle featured button
     $('.btn.featured').click(function() {
         var $this = $(this);
+
+        Auth.need_role('admin');
 
         if ($this.hasClass('active')) {
             $.ajax({

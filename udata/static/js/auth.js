@@ -1,43 +1,76 @@
 /**
  * Authentication and permissions handling
  */
-define(['jquery'], function($) {
+define(['jquery', 'notify', 'i18n', 'class'], function($, Notify, i18n, Class) {
     'use strict';
 
-    var $el = $('meta[name=current-user]'),
-        auth_url = $('meta[name=auth-url]').attr('content'),
-        user;
-
-    if ($el.length) {
-        user = {
-            id: $el.attr('content'),
-            slug: $el.data('slug'),
-            first_name: $el.data('first_name'),
-            last_name: $el.data('last_name'),
-            roles: $el.data('roles').split(',')
-        }
+    var DEFAULTS = {
+        need_role: i18n._('Role "{role}"" is required')
     }
 
-    /**
-     * Build the authentication URL given the current page and an optionnal message.
-     */
-    function get_auth_url(message) {
-        var params = {next: window.location.href};
 
-        if (message) {
-            params.message = message
-        }
+    var Auth = Class.extend({
+        /**
+         * Store the current user if logged.
+         */
+        user: undefined,
 
-        return auth_url + '?' + $.param(params);
-    }
+        /**
+         * Fetch the needed data from the page.
+         */
+        init: function() {
 
-    return {
-        user: user,
-        ensure_user: function(reason) {
-            if (!user) {
-                window.location = get_auth_url(reason)
+            var $el = $('meta[name=current-user]');
+
+            if ($el.length) {
+                this.user = {
+                    id: $el.attr('content'),
+                    slug: $el.data('slug'),
+                    first_name: $el.data('first_name'),
+                    last_name: $el.data('last_name'),
+                    roles: $el.data('roles').split(',')
+                }
+            }
+
+            this.auth_url = $('meta[name=auth-url]').attr('content');
+
+        },
+
+        /**
+         * Build the authentication URL given the current page and an optionnal message.
+         */
+        get_auth_url: function(message) {
+            var params = {next: window.location.href};
+
+            if (message) {
+                params.message = message
+            }
+
+            return this.auth_url + '?' + $.param(params);
+        },
+
+        /**
+         * Check if an user is authenticated
+         */
+        need_user: function(message) {
+            if (!this.user) {
+                window.location = this.get_auth_url(message)
+            }
+        },
+
+        /**
+         * Check that the current authenticated user has a given role.
+         */
+        need_role: function(role, message) {
+            this.need_user();
+            if (this.user.roles.indexOf(role) < 0) {
+                var msg = (message || DEFAULTS.need_role).replace('{role}', role);
+                Notify.error(msg);
             }
         }
-    }
+
+    });
+
+    return new Auth();
 
 });
