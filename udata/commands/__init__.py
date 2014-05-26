@@ -11,7 +11,6 @@ from flask.ext.script.commands import Clean, ShowUrls, Server
 
 
 from udata.app import create_app, standalone
-from udata.core import MODULES
 
 log = logging.getLogger(__name__)
 
@@ -32,14 +31,12 @@ def register_commands(manager):
         except Exception as e:
             log.error('Unable to import %s: %s', module, e)
 
-    # Load all coremodules commands
-    for module in MODULES:
-        try:
-            __import__('udata.core.{0}.commands'.format(module))
-        except ImportError:
-            pass
-        except Exception as e:
-            log.error('Error importing %s commands: %s', module, e)
+    # Load all core modules commands
+    import udata.core.metrics.commands
+    import udata.core.user.commands
+    import udata.core.dataset.commands
+    import udata.core.organization.commands
+    import udata.core.search.commands
 
     # Dynamic module commands loading
     for plugin in manager.app.config['PLUGINS']:
