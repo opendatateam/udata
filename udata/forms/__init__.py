@@ -6,10 +6,7 @@ import logging
 from flask.ext.mongoengine.wtf.models import ModelForm as MEModelForm
 from flask.ext.security import current_user
 
-from importlib import import_module
-
 from udata import i18n
-from udata.core import MODULES
 
 log = logging.getLogger(__name__)
 
@@ -48,16 +45,10 @@ class UserModelForm(ModelForm):
         return data
 
 
-# Load all forms submodule
-loc = locals()
-for module in MODULES:
-    try:
-        module = import_module('udata.core.{0}.forms'.format(module))
-        for model in module.__all__:
-            loc[model] = getattr(module, model)
-    except ImportError as e:
-        # log.error('Error for %s: %s', module, e)
-        pass
-    except Exception as e:
-        log.error('Unable to import %s: %s', module, e)
-del loc
+# Load core forms
+from udata.core.user.forms import *
+from udata.core.dataset.forms import *
+from udata.core.reuse.forms import *
+from udata.core.organization.forms import *
+from udata.core.topic.forms import *
+from udata.core.post.forms import *
