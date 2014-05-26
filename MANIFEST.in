@@ -34,12 +34,12 @@ include udata/static/bower/respond/dest/respond.src.js
 include udata/static/bower/seiyria-bootstrap-slider/js/bootstrap-slider.js
 include udata/static/bower/seiyria-bootstrap-slider/less/bootstrap-slider.less
 include udata/static/bower/seiyria-bootstrap-slider/css/bootstrap-slider.css
-include udata/static/bower/selectize/dist/css/standalone/selectize.js
+include udata/static/bower/selectize/dist/js/standalone/selectize.js
 include udata/static/bower/selectize/dist/less/selectize.less
 include udata/static/bower/selectize/dist/less/selectize.bootstrap3.less
 recursive-include udata/static/bower/selectize/dist/less/plugins *
 include udata/static/bower/socket.io-client/dist/socket.io.js
-recursive-include udata/static/bower/x-editable/dist/bootstrap3-editable
+recursive-include udata/static/bower/x-editable/dist/bootstrap3-editable *
 recursive-include udata/static/bower/typeahead.js/dist *.js
 include udata/static/bower/typeahead.js-bootstrap3.less/typeahead.less
 
