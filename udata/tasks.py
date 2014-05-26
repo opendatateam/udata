@@ -6,8 +6,6 @@ import logging
 from celery import Celery
 from celery.schedules import crontab
 
-from udata.core import MODULES
-
 log = logging.getLogger(__name__)
 
 
@@ -35,14 +33,11 @@ def init_app(app):
                 return TaskBase.__call__(self, *args, **kwargs)
     celery.Task = ContextTask
 
-    # Load all core tasks
-    for module in MODULES:
-        try:
-            __import__('udata.core.{0}.tasks'.format(module))
-        except ImportError:
-            pass
-        except Exception as e:
-            log.error('Unable to import %s: %s', module, e)
+    # Load core tasks
+    import udata.core.metrics.tasks
+    import udata.core.storages.tasks
+    import udata.core.search.tasks
+    import udata.core.activity.tasks
 
     # Load plugins tasks
     for plugin in app.config['PLUGINS']:

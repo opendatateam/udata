@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import Image
+from PIL import Image
 
 from udata.tasks import celery
 
