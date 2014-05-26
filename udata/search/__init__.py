@@ -3,14 +3,12 @@ from __future__ import unicode_literals
 
 import logging
 
-from importlib import import_module
 from os.path import join, dirname
 
 from elasticsearch import Elasticsearch, JSONSerializer
 from flask import current_app, json
 from speaklater import make_lazy_string, is_lazy_string
 
-from udata.core import MODULES
 from udata.tasks import celery
 
 log = logging.getLogger(__name__)
@@ -46,27 +44,6 @@ class ElasticSearch(object):
         if not 'elasticsearch' in current_app.extensions.keys():
             raise Exception('not initialised, did you forget to call init_app?')
         return getattr(current_app.extensions['elasticsearch'], item)
-
-    def contribute(self):
-        # from . import fields
-        from . import fields
-        for name in fields.__all__:
-            setattr(self, name, getattr(fields, name))
-        from . import adapter
-        for name in adapter.__all__:
-            setattr(self, name, getattr(adapter, name))
-
-        # Load all core search adapters
-        for module in MODULES:
-            try:
-                module = import_module('udata.core.{0}.search'.format(module))
-                for name in module.__all__:
-                    setattr(self, name, getattr(module, name))
-            except ImportError as e:
-                pass
-            except Exception as e:
-                log.error('Unable to import %s: %s', module, e)
-
 
 
     @property
@@ -117,6 +94,12 @@ from .query import SearchQuery
 from .result import SearchResult
 from .fields import *
 
+# Import core adapters
+from udata.core.user.search import UserSearch
+from udata.core.dataset.search import DatasetSearch
+from udata.core.reuse.search import ReuseSearch
+from udata.core.organization.search import OrganizationSearch
+
 
 def query(*adapters, **kwargs):
     return SearchQuery(*adapters, **kwargs).execute()
@@ -139,17 +122,3 @@ def multiquery(*queries):
 
 def init_app(app):
     es.init_app(app)
-
-
-# Load all core search adapters
-loc = locals()
-for module in MODULES:
-    try:
-        module = import_module('udata.core.{0}.search'.format(module))
-        for cls in module.__all__:
-            loc[cls] = getattr(module, cls)
-    except ImportError as e:
-        pass
-    except Exception as e:
-        log.error('Unable to import %s: %s', module, e)
-del loc
