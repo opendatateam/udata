@@ -1,5 +1,6 @@
 {% extends theme('base.html') %}
 {% from theme('macros/starred.html') import starred with context %}
+{% from theme('macros/follow.html') import follow_btn with context %}
 
 {% block extra_head %}
 {% assets 'dataset-css' %}
@@ -13,12 +14,15 @@
 {% endblock %}
 
 {% block toolbar %}
+{% if can_edit %}
 <div class="btn-group btn-group-xs">
     <a href="{{ url_for('datasets.edit', dataset=dataset) }}" class="btn btn-success">
         <span class="glyphicon glyphicon-pencil"></span>
         {{ _('Edit') }}
     </a>
 </div>
+{% endif%}
+{% if sysadmin %}
 <div class="btn-group btn-group-xs">
     <button type="button"
         class="btn btn-success featured {% if dataset.featured %}active{% endif %}"
@@ -27,8 +31,10 @@
         {{ _('Featured') }}
     </button>
 </div>
+{% endif %}
 <div class="btn-group btn-group-xs">
     {{ starred(dataset) }}
+    {{ follow_btn(dataset) }}
 </div>
 {% endblock %}
 
@@ -52,7 +58,7 @@
                     <h3>{{ _('Resources') }}</h3>
 
                     {# TODO: extract max_resources conf #}
-                    {% set max_resources = 2 %}
+                    {% set max_resources = 3 %}
                     {% for resource in dataset.resources %}
                         {% if loop.index0 == max_resources %}
                         <div id="collapsed-resources" class="collapse">
@@ -90,12 +96,15 @@
                 {# button bar #}
                 <div class="row opinion">
                     <div class="btn-toolbar">
+                        {% if can_edit %}
                         <div class="btn-group btn-group-sm">
                             <a href="{{ url_for('datasets.edit', dataset=dataset) }}" class="btn btn-success">
                                 <span class="glyphicon glyphicon-pencil"></span>
                                 {{ _('Edit') }}
                             </a>
                         </div>
+                        {% endif %}
+                        {% if sysadmin %}
                         <div class="btn-group btn-group-sm">
                             <button type="button"
                                 class="btn btn-success featured {% if dataset.featured %}active{% endif %}"
@@ -104,8 +113,10 @@
                                 {{ _('Featured') }}
                             </button>
                         </div>
+                        {% endif %}
                         <div class="btn-group btn-group-sm">
                             {{ starred(dataset) }}
+                            {{ follow_btn(dataset) }}
                         </div>
                     </div>
                 </div>
@@ -147,11 +158,11 @@
                         <a href class="btn btn-primary btn-block btn-sm icon-left follow"
                             data-organization-id="{{ dataset.organization.id }}"
                             data-organization-title="{{ dataset.organization.title }}"
-                            data-is-following="{% if is_following_org %}true{% else %}false{% endif %}"
-                            data-follow-api="{{ url_for('api.follow_org', id=dataset.organization.id) }}"
+                            {# data-is-following="{% if is_following(dataset.organization) %}true{% else %}false{% endif %}"
+                            data-follow-api="{{ url_for('api.follow_org', id=dataset.organization.id|string) }}" #}
                             data-follow-label="{{ _('Follow') }}"
                             data-unfollow-label="{{ _('Unfollow') }}"
-                            {% if is_following_org %}
+                            {% if is_following(dataset.organization) %}
                             title="{{ _('Unfollow') }}">
                             <span class="glyphicon glyphicon-eye-close"></span>
                             {% trans %}Unfollow{% endtrans %}

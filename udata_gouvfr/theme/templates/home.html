@@ -97,16 +97,22 @@
 
 {# Datasets section #}
 {% set dataset_tabs = (
-    ('popular-datasets', _('Popular datasets'), popular_datasets, {}),
+    ('popular-datasets', _('Essential datasets'), popular_datasets, {}),
     ('recent-datasets', _('Latest datasets'), recent_datasets, {'sort': '-created'}),
 ) %}
-<section class="colored">
+
+{# Reuses section #}
+{% set reuse_tabs = (
+    ('popular-reuses', _('Popular reuses'), popular_reuses, {}),
+    ('recent-reuses', _('Latest reuses'), recent_reuses, {'sort': '-created'}),
+) %}
+<section class="default">
       <div class="container">
             {# Dataset tabs #}
             <div class="row">
                 <div class="col-xs-12">
                     <ul class="nav nav-pills" data-tabs="tabs">
-                        {% for tab_id, label, datasets, kwargs in dataset_tabs %}
+                        {% for tab_id, label, _, _ in dataset_tabs + reuse_tabs %}
                         <li {% if loop.first %}class="active"{% endif %}>
                             <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
                         </li>
@@ -137,39 +143,10 @@
                         </p>
                     </div>
                     {% endfor %}
-                </div>
-            </div>
-            {# end Dataset tabs #}
-      </div>
-</section>
-{# End datasets section #}
 
-{# Reuses section #}
-{% set reuse_tabs = (
-    ('popular-reuses', _('Popular reuses'), popular_reuses, {}),
-    ('recent-reuses', _('Latest reuses'), recent_reuses, {'sort': '-created'}),
-) %}
-
-<section class="default">
-      <div class="container">
-            {# reuse tabs #}
-            <div class="row">
-                <div class="col-xs-12">
-                    <ul class="nav nav-pills" data-tabs="tabs">
-                        {% for tab_id, label, reuses, kwargs in reuse_tabs %}
-                        <li {% if loop.first %}class="active"{% endif %}>
-                            <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="tab-content">
 
                     {% for tab_id, label, reuses, kwargs in reuse_tabs  %}
-                    <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{tab_id}}">
+                    <div class="tab-pane" id="{{tab_id}}">
                         <ul class="card-list">
 
                             {% for reuse in reuses %}
@@ -189,7 +166,8 @@
                     {% endfor %}
                 </div>
             </div>
-            {# end reuse tabs #}
+            {# end Dataset tabs #}
       </div>
 </section>
+{# End datasets section #}
 {% endblock %}

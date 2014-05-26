@@ -84,7 +84,7 @@
                 {% else %}
                 <li>
                     <a title="{{ _('Sign In / Register') }}"
-                        href="{{ url_for('security.login') }}">
+                        href="{{ url_for('security.login', next=request.url) }}">
                         <span class="glyphicon glyphicon-log-in"></span>
                         {{ _('Sign In / Register') }}
                     </a>

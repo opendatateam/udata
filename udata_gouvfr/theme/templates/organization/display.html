@@ -1,6 +1,7 @@
 {% extends theme("layouts/1-column.html") %}
 {% from theme('macros/paginator.html') import paginator with context %}
 {% from theme('macros/starred.html') import starred with context %}
+{% from theme('macros/follow.html') import follow_btn with context %}
 
 {% block extra_head %}
 {% assets 'gouvfr-org-css' %}
@@ -51,26 +52,35 @@
                         alt="{{ org.title }}" class="scalable" />
                 </div>
                 <br/>
-                <p class="text-center">
-                    <strong>
-                        {{ ngettext('%(num)d member', '%(num)d members', org.metrics.members or 0) }}
-                    </strong>
-                </p>
-                <p class="text-center">
-                    <strong>
-                        {{ ngettext('%(num)d follower', '%(num)d followers', org.metrics.followers or 0) }}
-                    </strong>
-                </p>
-                <p class="text-center">
-                    <strong>
-                        {{ ngettext('%(num)d dataset', '%(num)d datasets', org.metrics.datasets or 0) }}
-                    </strong>
-                </p>
-                <p class="text-center">
-                    <strong>
-                        {{ ngettext('%(num)d reuse', '%(num)d reuses', org.metrics.reuses or 0) }}
-                    </strong>
-                </p>
+                <div class="tab-links">
+                    <p class="text-center">
+                        <strong>
+                            <a href="{{url_for('organizations.show', org=org)}}#members">
+                            {{ ngettext('%(num)d member', '%(num)d members', org.metrics.members or 0) }}
+                            </a>
+                        </strong>
+                    </p>
+                    <p class="text-center">
+                        <strong>
+                            <a href="{{url_for('followers.organization', org=org)}}">
+                            {{ ngettext('%(num)d follower', '%(num)d followers', org.metrics.followers or 0) }}
+                            </a>
+                        </strong>
+                    </p>
+                    <p class="text-center">
+                        <strong>
+                            <a href="{{url_for('organizations.show', org=org)}}#datasets">
+                            {{ ngettext('%(num)d dataset', '%(num)d datasets', org.metrics.datasets or 0) }}
+                            </a>
+                        </strong>
+                    </p>
+                    <p class="text-center">
+                        <strong>
+                        <a href="{{url_for('organizations.show', org=org)}}#reuses">
+                            {{ ngettext('%(num)d reuse', '%(num)d reuses', org.metrics.reuses or 0) }}
+                        </strong>
+                    </p>
+                </div>
                 {% if not is_member %}
                     {% if not pending %}
                     <a href rel="tooltip" class="btn btn-primary btn-block btn-sm icon-left membership"
@@ -112,13 +122,11 @@
                 </div>
                 {% endif %}
 
-                <a href rel="tooltip" class="btn btn-primary btn-block btn-sm icon-left follow" data-placement="left"
-                    {# data-is-following="{% if is_following %}true{% else %}false{% endif %}"
-                    data-follow-api="{{ url('api/3/action/follow_group') }}"
-                    data-unfollow-api="{{ url('api/3/action/unfollow_group') }}"
-                    data-follow-label="{{ _('Follow') }}"
-                    data-unfollow-label="{{ _('Unfollow') }}" #}
-                    {% if is_following %}
+                <button type="button"
+                    class="btn btn-primary btn-follow btn-block btn-sm icon-left {% if is_following(org) %}active{% endif %}"
+                    rel="tooltip" data-placement="left"
+                    data-api-url="{{ url_for('api.follow_organization', id=org.id|string) }}"
+                    {% if is_following(org) %}
                     title="{{ _('Unfollow') }}">
                     <span class="glyphicon glyphicon-eye-close"></span>
                     {{ _('Unfollow') }}
@@ -141,12 +149,16 @@
             ('reuses', _('Reuses'), reuses, {'organization': org.id|string}),
             ('private-reuses', _('Private reuses'), private_reuses, {}),
         ) %}
+        {% set user_tabs = (
+            ('members', _('Members'), org.members, {}),
+            ('followers', _('Followers'), followers, {}),
+        ) %}
         {% set actived = False %}
 
         <div class="row">
             <div class="col-xs-12">
                 <ul class="nav nav-pills" data-tabs="tabs">
-                    {% for tab_id, label, content, kwargs in (dataset_tabs + reuse_tabs) %}
+                    {% for tab_id, label, content, kwargs in (dataset_tabs + reuse_tabs + user_tabs) %}
                     {% if content %}
                     <li {% if not actived %}class="active"{% set actived = True %}{% endif %}>
                         <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
@@ -190,7 +202,7 @@
                 {% for tab_id, label, reuses, kwargs in reuse_tabs  %}
                 {% if reuses %}
                 <div id="{{tab_id}}"
-                    class="tab-pane {% if not actived %}active{% set actived=True %}{% endif %}">
+                    class="tab-pane">
                     <ul class="card-list">
 
                         {% for reuse in reuses %}
@@ -214,6 +226,29 @@
                 {% endif %}
                 {% endfor %}
 
+                {% if org.members %}
+                <div id="members" class="tab-pane">
+                    <div class="row card-list">
+                        {% for member in org.members %}
+                        <div class="col-md-4">
+                          {% include theme('organization/member-card.html') %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if followers %}
+                <div id="followers" class="tab-pane">
+                    <div class="row card-list">
+                        {% for follow in followers %}
+                        <div class="col-md-4">
+                          {% include theme('follow/follower-card.html') %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
         {# end tabs #}
