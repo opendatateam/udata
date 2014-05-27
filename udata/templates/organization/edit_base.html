@@ -42,6 +42,11 @@
                         {{ _('Members') }}
                     </a>
                 </li>
+                <li {% if tab == 'requests' %}class="active"{% endif %}>
+                    <a href="{#{ url_for('organizations.edit_membership_requests', org=org) }#}">
+                        {{ _('Membership request') }}
+                    </a>
+                </li>
                 <li {% if tab == 'teams' %}class="active"{% endif %}>
                     <a href="{{ url_for('organizations.edit_teams', org=org) }}">
                         {{ _('Teams') }}

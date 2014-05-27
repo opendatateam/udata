@@ -36,7 +36,7 @@ def init_app(app):
     # Load core tasks
     import udata.core.metrics.tasks
     import udata.core.storages.tasks
-    import udata.core.search.tasks
+    # import udata.core.search.tasks
     import udata.core.activity.tasks
 
     # Load plugins tasks

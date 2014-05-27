@@ -1,0 +1,8 @@
+{% extends theme('activity/base.html') %}
+
+{% set icon = 'glyphicon glyphicon-pencil' %}
+
+{% block endtitle %}
+{{_('updated organization')}}
+<a href="{{ url_for('datasets.show', dataset=activity.organization) }}">{{activity.organization.name}}</a>
+{% endblock %}

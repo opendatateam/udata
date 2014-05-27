@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-05-26 23:15+0200\n"
+"POT-Creation-Date: 2014-05-27 09:18+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -75,7 +75,7 @@ msgstr ""
 #: udata/templates/dataset/list.html:64 udata/templates/dataset/list.html:72
 #: udata/templates/organization/display.html:49
 #: udata/templates/organization/list.html:41
-#: udata/templates/organization/list.html:45 udata/templates/reuse/create.html:4
+#: udata/templates/organization/list.html:46 udata/templates/reuse/create.html:4
 #: udata/templates/reuse/display.html:5 udata/templates/reuse/edit.html:4
 #: udata/templates/reuse/list.html:7 udata/templates/topic/display.html:25
 #: udata/templates/user/reuses.html:8 udata/templates/user/starred.html:14
@@ -85,7 +85,7 @@ msgstr ""
 #: udata/core/dataset/metrics.py:25 udata/core/metrics/metrics.py:83
 #: udata/core/organization/metrics.py:54 udata/core/reuse/metrics.py:28
 #: udata/templates/dataset/card.html:90 udata/templates/dataset/list.html:65
-#: udata/templates/organization/list.html:42 udata/templates/reuse/card.html:39
+#: udata/templates/organization/list.html:43 udata/templates/reuse/card.html:39
 #: udata/templates/reuse/list.html:55
 msgid "Stars"
 msgstr ""
@@ -182,7 +182,7 @@ msgstr ""
 #: udata/core/organization/metrics.py:66 udata/core/user/metrics.py:48
 #: udata/templates/dataset/followers.html:7
 #: udata/templates/organization/followers.html:7
-#: udata/templates/user/followers.html:7
+#: udata/templates/organization/list.html:42 udata/templates/user/followers.html:7
 msgid "Followers"
 msgstr ""
 
@@ -197,7 +197,7 @@ msgstr ""
 #: udata/templates/dataset/resource/edit.html:4
 #: udata/templates/organization/display.html:39
 #: udata/templates/organization/list.html:40
-#: udata/templates/organization/list.html:44 udata/templates/reuse/list.html:60
+#: udata/templates/organization/list.html:45 udata/templates/reuse/list.html:60
 #: udata/templates/topic/display.html:19 udata/templates/user/datasets.html:8
 #: udata/templates/user/starred.html:26
 msgid "Datasets"
@@ -443,6 +443,22 @@ msgstr ""
 msgid "deleted dataset"
 msgstr ""
 
+#: udata/templates/activity/user_followed_dataset.html:6
+msgid "followed dataset"
+msgstr ""
+
+#: udata/templates/activity/user_followed_organization.html:6
+msgid "followed organization"
+msgstr ""
+
+#: udata/templates/activity/user_followed_reuse.html:6
+msgid "followed reuse"
+msgstr ""
+
+#: udata/templates/activity/user_followed_user.html:6
+msgid "followed user"
+msgstr ""
+
 #: udata/templates/activity/user_starred_dataset.html:6
 msgid "starred dataset"
 msgstr ""
@@ -457,6 +473,10 @@ msgstr ""
 
 #: udata/templates/activity/user_updated_dataset.html:6
 msgid "updated dataset"
+msgstr ""
+
+#: udata/templates/activity/user_updated_organization.html:6
+msgid "updated organization"
 msgstr ""
 
 #: udata/templates/activity/user_updated_reuse.html:6
@@ -922,6 +942,10 @@ msgid "Descrition"
 msgstr ""
 
 #: udata/templates/organization/edit_base.html:47
+msgid "Membership request"
+msgstr ""
+
+#: udata/templates/organization/edit_base.html:52
 msgid "Teams"
 msgstr ""
 

@@ -12,6 +12,7 @@ def init_app(app):
     import udata.core.user.activities
     import udata.core.dataset.activities
     import udata.core.reuse.activities
+    import udata.core.organization.activities
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:

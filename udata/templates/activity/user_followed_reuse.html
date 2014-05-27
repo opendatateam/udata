@@ -1,0 +1,8 @@
+{% extends theme('activity/base.html') %}
+
+{% set icon = 'glyphicon glyphicon-eye-open' %}
+
+{% block endtitle %}
+{{_('followed reuse')}}
+<a href="{{ url_for('reuses.show', reuse=activity.followee) }}">{{activity.followee.name}}</a>
+{% endblock %}
