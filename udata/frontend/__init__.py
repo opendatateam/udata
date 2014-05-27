@@ -162,6 +162,7 @@ def init_app(app):
     from udata.core.followers.views import blueprint as follow_blueprint
     from udata.core.topic.views import blueprint as topic_blueprint
     from udata.core.post.views import blueprint as post_blueprint
+    from udata.core.activity.views import blueprint as activity_blueprint
     app.register_blueprint(storages_blueprint)
     app.register_blueprint(user_blueprint)
     app.register_blueprint(dataset_blueprint)
@@ -170,6 +171,7 @@ def init_app(app):
     app.register_blueprint(follow_blueprint)
     app.register_blueprint(topic_blueprint)
     app.register_blueprint(post_blueprint)
+    app.register_blueprint(activity_blueprint)
 
     # Load all plugins views and blueprints
     for plugin in app.config['PLUGINS']:

@@ -1,0 +1,15 @@
+{% extends theme('layouts/1-column.html') %}
+{% from theme('macros/timeline.html') import timeline with context %}
+
+{% block breadcrumb %}
+    {{ super() }}
+    <li class="active">{{ _('Activity') }}</li>
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-sm-12">
+        {{ timeline(activities) }}
+    </div>
+</div>
+{% endblock %}
