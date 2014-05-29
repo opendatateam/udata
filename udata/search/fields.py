@@ -17,6 +17,7 @@ __all__ = ('Sort',
     'RangeFilter', 'DateRangeFilter', 'BoolFilter',
     'TermFacet', 'ModelTermFacet', 'RangeFacet',
     'BoolBooster', 'FunctionBooster',
+    'GaussDecay', 'ExpDecay', 'LinearDecay',
 )
 
 
@@ -148,3 +149,42 @@ class FunctionBooster(object):
                 'script': self.function,
             },
         }
+
+
+class DecayFunction(object):
+    function = None
+
+    def __init__(self, field, origin, scale=None, offset=None, decay=None):
+        self.field = field
+        self.origin = origin
+        self.scale = scale or origin
+        self.offset = offset
+        self.decay = decay
+
+    def to_query(self):
+        params = {
+            'origin': self.origin,
+            'scale': self.scale,
+        }
+        if self.offset:
+            params['offset'] = self.offset
+        if self.decay:
+            params['decay'] = self.decay
+
+        return {
+            self.function: {
+                self.field: params
+            },
+        }
+
+
+class GaussDecay(DecayFunction):
+    function = 'gauss'
+
+
+class ExpDecay(DecayFunction):
+    function = 'exp'
+
+
+class LinearDecay(DecayFunction):
+    function = 'linear'

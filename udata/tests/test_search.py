@@ -101,6 +101,88 @@ class SearchQueryTest(TestCase):
             'boost_factor': 1.1,
         })
 
+    def test_decay_function_scoring(self):
+        '''Search should handle field decay'''
+        class FakeBoostedSearch(FakeSearch):
+            boosters = [
+                search.GaussDecay('a_num_field', 10),
+                search.ExpDecay('another_field', 20),
+                search.LinearDecay('last_field', 30),
+            ]
+
+        query = search.SearchQuery(FakeBoostedSearch)
+        body = query.get_body()
+        functions = body['query']['function_score']['functions']
+        # Query should be wrapped in a gaus decay function
+        self.assertEqual(functions[0], {
+            'gauss': {
+                'a_num_field': {
+                    'origin': 10,
+                    'scale': 10,
+                }
+            },
+        })
+        self.assertEqual(functions[1], {
+            'exp': {
+                'another_field': {
+                    'origin': 20,
+                    'scale': 20,
+                }
+            },
+        })
+        self.assertEqual(functions[2], {
+            'linear': {
+                'last_field': {
+                    'origin': 30,
+                    'scale': 30,
+                }
+            },
+        })
+
+    def test_decay_function_scoring_with_options(self):
+        '''Search should handle field decay with options'''
+        class FakeBoostedSearch(FakeSearch):
+            boosters = [
+                search.GaussDecay('a_num_field', 10, 20, offset=5, decay=0.5),
+                search.ExpDecay('another_field', 20, scale=30, offset=5, decay=0.5),
+                search.LinearDecay('last_field', 30, 40, offset=5, decay=0.5),
+            ]
+
+        query = search.SearchQuery(FakeBoostedSearch)
+        body = query.get_body()
+        functions = body['query']['function_score']['functions']
+        # Query should be wrapped in a gaus decay function
+        self.assertEqual(functions[0], {
+            'gauss': {
+                'a_num_field': {
+                    'origin': 10,
+                    'scale': 20,
+                    'offset': 5,
+                    'decay': 0.5,
+                }
+            },
+        })
+        self.assertEqual(functions[1], {
+            'exp': {
+                'another_field': {
+                    'origin': 20,
+                    'scale': 30,
+                    'offset': 5,
+                    'decay': 0.5,
+                }
+            },
+        })
+        self.assertEqual(functions[2], {
+            'linear': {
+                'last_field': {
+                    'origin': 30,
+                    'scale': 40,
+                    'offset': 5,
+                    'decay': 0.5
+                }
+            },
+        })
+
     def test_custom_function_scoring(self):
         '''Search should handle field boosting by function'''
         class FakeBoostedSearch(FakeSearch):
