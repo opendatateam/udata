@@ -12,7 +12,7 @@ from udata.core.organization.views import OrgView
 from udata.core.dataset.views import DatasetView
 from udata.core.user.views import UserView
 
-from .models import Follow, FollowOrg, FollowDataset
+from .models import Follow, FollowOrg, FollowDataset, FollowReuse
 
 blueprint = I18nBlueprint('followers', __name__)
 
@@ -37,10 +37,13 @@ class UserFollowingView(UserView, DetailView):
 
     def get_context(self):
         context = super(UserFollowingView, self).get_context()
-        datasets, organizations, users = [], [], []
+        datasets, reuses, organizations, users = [], [], [], []
         for follow in Follow.objects.following(self.user):
+            print type(follow.following)
             if isinstance(follow, FollowOrg):
                 organizations.append(follow)
+            elif isinstance(follow, FollowReuse):
+                reuses.append(follow)
             elif isinstance(follow, FollowDataset):
                 datasets.append(follow)
             else:
@@ -48,6 +51,7 @@ class UserFollowingView(UserView, DetailView):
 
         context.update({
             'followed_datasets': sorted(datasets, key=lambda f: f.following.title),
+            'followed_reuses': sorted(reuses, key=lambda f: f.following.name),
             'followed_organizations': sorted(organizations, key=lambda f: f.following.name),
             'followed_users': sorted(users, key=lambda f: f.following.fullname),
         })

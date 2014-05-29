@@ -7,67 +7,128 @@
     <li class="active">{{ _('Following') }}</li>
 {% endblock %}
 
-{% block tab_content %}
-{% if followed_users %}
+{% block user_content %}
+{% if followed_users or followed_datasets or followed_organizations or followed_reuses %}
+
+{% set activated = False %}
+{% set tabs = (
+    ('datasets', _('Datasets'), followed_datasets),
+    ('reuses', _('Reuses'), followed_reuses),
+    ('organizations', _('Organizations'), followed_organizations),
+    ('users', _('Users'), followed_users),
+) %}
+
 <div class="row">
-    <h3>
-    {{ ngettext(
-        'Follow %(num)d user',
-        'Follow %(num)d users',
-        followed_users|length
-    ) }}
-    </h3>
-    {% for follow in followed_users %}
-    <div class="col-sm-4">
-      {% include theme('follow/follower-card.html') %}
+    <div class="col-xs-12">
+        <ul class="nav nav-pills" data-tabs="tabs">
+            {% for tab_id, label, content in tabs %}
+            {% if content %}
+            <li {% if not actived %}class="active"{% set actived = True %}{% endif %}>
+                <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
     </div>
-    {% endfor %}
 </div>
-{% endif %}
 
-{% if followed_datasets %}
+{% set activated = False %}
 <div class="row">
-    <h3>
-    {{ ngettext(
-        'Follow %(num)d dataset',
-        'Follow %(num)d datasets',
-        followed_datasets|length
-    ) }}
-    </h3>
-    <ul class="card-list">
-        {% for follow in followed_datasets %}
-        {% set dataset = follow.following %}
-        <li class="col-sm-6">
-          {% include theme('dataset/card.html') %}
-        </li>
-        {% endfor %}
-    </ul>
-</div>
-{% endif %}
+    <div class="tab-content">
 
-{% if followed_organizations %}
+        {% if followed_datasets %}
+        <div id="datasets"
+            class="tab-pane {% if not actived %}active{% set actived = True %}{% endif %}">
+            <h3>
+            {{ ngettext(
+                'Follow %(num)d dataset',
+                'Follow %(num)d datasets',
+                followed_datasets|length
+            ) }}
+            </h3>
+            <ul class="card-list">
+                {% for follow in followed_datasets %}
+                {% set dataset = follow.following %}
+                <li class="col-sm-6">
+                  {% include theme('dataset/card.html') %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if followed_reuses %}
+        <div id="reuses"
+            class="tab-pane {% if not actived %}active{% set actived = True %}{% endif %}">
+            <h3>
+            {{ ngettext(
+                'Follow %(num)d reuse',
+                'Follow %(num)d reuses',
+                followed_reuses|length
+            ) }}
+            </h3>
+            <ul class="card-list">
+                {% for follow in followed_organizations %}
+                {% set reuse = follow.following %}
+                <li class="col-sm-6">
+                  {% include theme('reuse/card.html') %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if followed_organizations %}
+        <div id="organizations"
+            class="tab-pane {% if not actived %}active{% set actived = True %}{% endif %}">
+            <h3>
+            {{ ngettext(
+                'Follow %(num)d organization',
+                'Follow %(num)d organizations',
+                followed_organizations|length
+            ) }}
+            </h3>
+            <ul class="card-list">
+                {% for follow in followed_organizations %}
+                {% set organization = follow.following %}
+                <li class="col-sm-6">
+                  {% include theme('organization/card.html') %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if followed_users %}
+        <div id="users"
+            class="tab-pane {% if not actived %}active{% set actived = True %}{% endif %}">
+            <h3>
+            {{ ngettext(
+                'Follow %(num)d user',
+                'Follow %(num)d users',
+                followed_users|length
+            ) }}
+            </h3>
+            {% for follow in followed_users %}
+            <div class="col-sm-4">
+              {% include theme('follow/follower-card.html') %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% else %}
+
 <div class="row">
-    <h3>
-    {{ ngettext(
-        'Follow %(num)d organization',
-        'Follow %(num)d organizations',
-        followed_organizations|length
-    ) }}
-    </h3>
-    <ul class="card-list">
-        {% for follow in followed_organizations %}
-        {% set organization = follow.following %}
-        <li class="col-sm-6">
-          {% include theme('organization/card.html') %}
-        </li>
-        {% endfor %}
-    </ul>
-</div>
-{% endif %}
+    <div class="col-xs-12">
 
-{% if not (followed_users or followed_datasets or followed_organizations) %}
+    </div>
+</div>
 <p class="text-center lead">
 {{ _('%(user)s is not following anyone', user=user.fullname) }}
 </p>
+
 {% endif %}
 {% endblock %}

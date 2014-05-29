@@ -8,7 +8,7 @@
     {% set starred = current_user.starred_organizations %}
 {% endif %}
 {% set icon = 'star' if obj in starred else 'star-empty' %}
-<button type="button" class="btn btn-primary btn-star
+<button type="button" class="btn btn-success btn-star
     {% if obj in starred %}active{% endif %}"
     data-api-url="{{ url_for('api.starred_{0}s'.format(basename), slug=obj.slug) }}"
     rel="tooltip" title="{{ _('Star this') }}"

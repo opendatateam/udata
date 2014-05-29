@@ -15,20 +15,36 @@ define(['jquery', 'auth', 'i18n'], function($, Auth, i18n) {
                 url: $this.data('api-url'),
                 type: 'DELETE',
                 success: function(data) {
-                    $this
-                        .removeClass('active')
-                        .find('.glyphicon')
-                            .removeClass('glyphicon-star')
-                            .addClass('glyphicon-star-empty');
+                    var $icon = $this.find('.glyphicon');
+
+                    $icon
+                        .removeClass('glyphicon-star')
+                        .addClass('glyphicon-star-empty');
+
+                    $this.removeClass('active');
+
+                    if ($this.content()) {
+                        $this
+                            .text(i18n._('Star'))
+                            .prepend($icon);
+                    }
                 }
             })
         } else {
             $.post($this.data('api-url'), function(data) {
-                $this
-                    .addClass('active')
-                    .find('.glyphicon')
-                            .removeClass('glyphicon-star-empty')
-                            .addClass('glyphicon-star');
+                var $icon = $this.find('.glyphicon');
+
+                $icon
+                    .removeClass('glyphicon-star-empty')
+                    .addClass('glyphicon-star');
+
+                $this.addClass('active');
+
+                if ($this.content()) {
+                    $this
+                        .text(i18n._('Starred'))
+                        .prepend($icon);
+                }
             });
         }
     });

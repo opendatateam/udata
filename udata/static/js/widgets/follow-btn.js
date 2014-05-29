@@ -21,10 +21,14 @@ define(['jquery', 'auth', 'i18n'], function($, Auth, i18n) {
                         .removeClass('glyphicon-eye-open')
                         .addClass('glyphicon-eye-close');
 
-                    $this
-                        .removeClass('active')
-                        .text(i18n._('Follow'))
-                        .prepend($icon);
+                    $this.removeClass('active');
+
+                    if ($this.content()) {
+                        $this
+                            .text(i18n._('Follow'))
+                            .prepend($icon);
+                    }
+
                 }
             })
         } else {
@@ -35,10 +39,13 @@ define(['jquery', 'auth', 'i18n'], function($, Auth, i18n) {
                     .removeClass('glyphicon-eye-close')
                     .addClass('glyphicon-eye-open');
 
-                $this
-                    .text(i18n._('Following'))
-                    .addClass('active')
-                    .prepend($icon);
+                $this.addClass('active');
+
+                if ($this.content()) {
+                    $this
+                        .text(i18n._('Following'))
+                        .prepend($icon);
+                }
             });
         }
     });

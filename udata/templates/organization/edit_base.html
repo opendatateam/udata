@@ -52,6 +52,11 @@
                         {{ _('Teams') }}
                     </a>
                 </li>
+                <li {% if tab == 'alerts' %}class="active"{% endif %}>
+                    <a href="{#{ url_for('organizations.list_alerts', org=org) }#}">
+                        {{ _('Alertes') }}
+                    </a>
+                </li>
                 {# {% for tab, label, form_url in (
                     ('description', _('Description'), 'edit'),
                     ('extras', _('Additional informations'), 'extras'),
