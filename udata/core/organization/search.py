@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from udata.models import Organization
-from udata.search import ModelSearchAdapter, Sort, RangeFilter, i18n_analyzer, BoolBooster, GaussDecay
+from udata.search import ModelSearchAdapter, Sort, RangeFacet, i18n_analyzer, BoolBooster, GaussDecay
 
 __all__ = ('OrganizationSearch', )
 
@@ -20,10 +20,10 @@ class OrganizationSearch(ModelSearchAdapter):
         'stars': Sort('nb_stars'),
         'followers': Sort('nb_followers'),
     }
-    filters = {
-        'reuses': RangeFilter('nb_reuses'),
-        'datasets': RangeFilter('nb_datasets'),
-        'followers': RangeFilter('nb_followers'),
+    facets = {
+        'reuses': RangeFacet('nb_reuses'),
+        'datasets': RangeFacet('nb_datasets'),
+        'followers': RangeFacet('nb_followers'),
     }
     mapping = {
         'properties': {

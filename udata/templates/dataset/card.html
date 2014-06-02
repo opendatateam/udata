@@ -36,7 +36,7 @@
                     title="{{ _('Temporal coverage') }}">
                     <span class="glyphicon glyphicon-calendar"></span>
                 </a>
-                {{ _('%(start)s to %(end)s', **dataset.temporal_coverage.to_dict()) }}
+                {{ dataset.temporal_coverage|daterange }}
             </li>
             {% endif %}
 

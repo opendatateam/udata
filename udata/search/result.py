@@ -6,7 +6,6 @@ import logging
 from bson.objectid import ObjectId
 
 from udata.utils import Paginable
-from udata.search import es
 
 
 log = logging.getLogger(__name__)
@@ -51,24 +50,10 @@ class SearchResult(Paginable):
     def __getitem__(self, index):
         return self.get_objects()[index]
 
-    @property
-    def facets(self):
-        for name, content in self.result.get('facets', {}).items():
-            yield {
-                'name': name,
-                'terms': [(term['term'], term['count']) for term in content.get('terms', [])],
-            }
-
     def get_facet(self, name):
-        if not name in self.query.adapter.facets or not 'facets' in self.result or not name in self.result['facets']:
+        if not name in self.query.adapter.facets:
             return None
-        return {
-            'name': name,
-            'terms': self.query.adapter.facets[name].get_values(
-                self.result['facets'][name],
-                self.query.kwargs.get(name)
-            )
-        }
+        return self.query.adapter.facets[name].from_response(name, self.result)
 
     def get_range(self, name):
         min_name = '{0}_min'.format(name)
@@ -84,4 +69,15 @@ class SearchResult(Paginable):
         return {
             'min': spec.cast(min_value),
             'max': spec.cast(max_value),
+            'query_min': 0,
+            'query_max': 0,
         }
+
+    def label_func(self, name):
+        if not name in self.query.adapter.facets:
+            return None
+        return self.query.adapter.facets[name].labelize
+
+    def labelize(self, name, value):
+        func = self.label_func(name)
+        return func(value) if func else value

@@ -10,6 +10,7 @@ recursive-include udata/static/bower/bootstrap/dist *
 recursive-include udata/static/bower/bootstrap/font *
 recursive-include udata/static/bower/bootstrap/less *.less
 recursive-include udata/static/bower/bootstrap-daterangepicker *.css *.js
+recursive-include udata/static/bower/bootstrap-datepicker *.css *.js *.less
 recursive-include udata/static/bower/bootstrap-markdown *.css *.js *.less
 include udata/static/bower/d3/d3.js
 recursive-include udata/static/bower/font-awesome/less *.less

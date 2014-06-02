@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 
 import logging
 
-import time
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from bson.objectid import ObjectId
 
@@ -14,8 +13,8 @@ from udata.models import db
 log = logging.getLogger(__name__)
 
 __all__ = ('Sort',
-    'RangeFilter', 'DateRangeFilter', 'BoolFilter',
-    'TermFacet', 'ModelTermFacet', 'RangeFacet',
+    'BoolFacet', 'TermFacet', 'ModelTermFacet',
+    'RangeFacet', 'DateRangeFacet', 'TemporalCoverageFacet',
     'BoolBooster', 'FunctionBooster',
     'GaussDecay', 'ExpDecay', 'LinearDecay',
 )
@@ -26,67 +25,84 @@ class Sort(object):
         self.field = field
 
 
-class RangeFilter(object):
-    def __init__(self, field, cast=int):
+class Facet(object):
+    def __init__(self, field, label=None, filter_label=None, icon=None):
         self.field = field
-        self.cast = cast
 
-    def to_query(self, value):
-        start, end = value.split('-')
-        return {self.field: {
-            'gte': self.cast(start),
-            'lte': self.cast(end),
-        }}
+    def to_query(self, **kwargs):
+        '''Get the elasticsearch facet query'''
+        raise NotImplementedError
+
+    def to_filter(self, value):
+        '''Extract the elasticsearch query from the kwarg value filter'''
+        raise NotImplementedError
+
+    def from_response(self, name, response):
+        '''Parse the elasticsearch response'''
+        raise NotImplementedError
+
+    def labelize(self, value):
+        '''Get the label for a given value'''
+        return value
+
+    def to_aggregations(self):
+        return {}
 
 
-class DateRangeFilter(object):
-    def __init__(self, start_field, end_field):
-        self.start_field = start_field
-        self.end_field = end_field
-
-    def to_query(self, value):
-        parts = value.split('-')
-        start = date(*map(int, parts[0:3]))
-        end = date(*map(int, parts[3:6]))
-        return {
-            self.start_field: {'lte': end.isoformat()},
-            self.end_field: {'gte': start.isoformat()},
+class BoolFacet(Facet):
+    def to_query(self, **kwargs):
+        query = {
+            'terms': {
+                'field': self.field,
+                'size': 2,
+            }
         }
+        return query
 
-    def cast(self, value):
-        t = time.gmtime(value)
-        return date(t.tm_year, t.tm_mon, t.tm_mday)
-        # return datetime.fromtimestamp(long(value)).date()
+    def to_filter(self, value):
+        boolean = value is True or (isinstance(value, basestring) and value.lower() == 'true')
+        return {'term': {self.field: boolean}}
 
-
-class BoolFilter(object):
-    def __init__(self, field):
-        self.field = field
-
-    def to_query(self, value):
-        return {
-            'term': {self.field: value},
+    def from_response(self, name, response):
+        facet = response.get('facets', {}).get(name)
+        if not facet:
+            return
+        data = {
+            'type': 'bool',
+            'visible': len(facet['terms']) == 2,
         }
+        for row in facet['terms']:
+            data[row['term']] = row['count']
+        return data
 
 
-class TermFacet(object):
-    def __init__(self, field):
-        self.field = field
-
-    def to_query(self, size=10):
-        return {
+class TermFacet(Facet):
+    def to_query(self, size=10, args=None, **kwargs):
+        query = {
             'terms': {
                 'field': self.field,
                 'size': size,
             }
         }
+        if args:
+            query['terms']['exclude'] = [args] if isinstance(args, basestring) else args
+        return query
 
-    def get_values(self, facet, actives=None):
-        actives = [actives] if isinstance(actives, basestring) else actives or []
-        return [
-            (term['term'], term['count'], term['term'] in actives)
-            for term in facet['terms']
-        ]
+    def to_filter(self, value):
+        if isinstance(value, (list, tuple)):
+            return [{'term': {self.field: v}} for v in value]
+        else:
+            return {'term': {self.field: value}}
+
+    def from_response(self, name, response):
+        facet = response.get('facets', {}).get(name)
+        if not facet:
+            return
+        return {
+            'type': 'terms',
+            'terms': [(r['term'], r['count']) for r in facet['terms']],
+            'visible': len(facet['terms']) > 0,
+        }
 
 
 class ModelTermFacet(TermFacet):
@@ -94,37 +110,158 @@ class ModelTermFacet(TermFacet):
         super(ModelTermFacet, self).__init__(field)
         self.model = model
 
-    def get_values(self, facet, actives=None):
-        actives = [actives] if isinstance(actives, basestring) else actives or []
+    def from_response(self, name, response):
+        is_objectid = isinstance(self.model.id, db.ObjectIdField)
+        cast = lambda o: ObjectId(o) if is_objectid else o
+
+        facet = response.get('facets', {}).get(name)
+        if not facet:
+            return
         ids = [term['term'] for term in facet['terms']]
-        counts = [term['count'] for term in facet['terms']]
-        if isinstance(self.model.id, db.ObjectIdField):
+        if is_objectid:
             ids = map(ObjectId, ids)
+
         objects = self.model.objects.in_bulk(ids)
-        return [(objects.get(id), count, str(id) in actives) for id, count in zip(ids, counts)]
 
-
-class RangeFacet(object):
-    def __init__(self, field, ranges):
-        self.field = field
-        self.ranges = ranges
-
-    def to_query(self):
         return {
-            'range': {
-                'field': self.field,
-                'ranges': self.ranges,
+            'type': 'models',
+            'models': [
+                (objects.get(cast(f['term'])), f['count'])
+                for f in facet['terms']
+            ],
+            'visible': len(facet['terms']) > 0,
+        }
+
+    def labelize(self, value):
+        return unicode(self.model.objects.get(id=value))
+
+
+class RangeFacet(Facet):
+    def __init__(self, field, cast=int):
+        super(RangeFacet, self).__init__(field)
+        self.cast = cast
+
+    def to_query(self, **kwargs):
+        return {
+            'statistical': {
+                'field': self.field
             }
         }
 
-    def get_values(self, facet, actives=None):
-        actives = [actives] if isinstance(actives, basestring) else actives or []
-        values = []
-        for idx, r in enumerate(facet['ranges']):
-            spec = self.ranges[idx]
-            interval = '-'.join([str(spec.get('from', '')), str(spec.get('to', ''))])
-            values.append((spec, r['count'], interval in actives))
-        return values
+    def to_filter(self, value):
+        boundaries = [self.cast(v) for v in value.split('-')]
+        return {
+            'range': {
+                self.field: {
+                    'gte': min(*boundaries),
+                    'lte': max(*boundaries),
+                }
+            }
+        }
+
+    def from_response(self, name, response):
+        facet = response.get('facets', {}).get(name)
+        if not facet:
+            return
+        return {
+            'type': 'range',
+            'min': self.cast(facet['min']),
+            'max': self.cast(facet['max']),
+            'visible': facet['max'] - facet['min'] > 2,
+        }
+
+
+def ts_to_dt(value):
+    '''Convert an elasticsearch timestamp into a Python datetime'''
+    return datetime.fromtimestamp(value * 1E-3)
+
+
+class DateRangeFacet(RangeFacet):
+    def to_filter(self, value):
+        parts = value.split('-')
+        date1 = date(*map(int, parts[0:3]))
+        date2 = date(*map(int, parts[3:6]))
+        return {
+            'range': {
+                self.field: {
+                    'lte': max(date1, date2).isoformat(),
+                    'gte': min(date1, date2).isoformat(),
+                },
+            }
+        }
+
+    def from_response(self, name, response):
+        facet = response.get('facets', {}).get(name)
+        if not facet:
+            return
+        min_value = ts_to_dt(facet['min'])
+        max_value = ts_to_dt(facet['max'])
+        return {
+            'type': 'daterange',
+            'min': min_value,
+            'max': max_value,
+            'visible': (max_value - min_value) > timedelta(days=2),
+        }
+
+
+class TemporalCoverageFacet(Facet):
+    def to_query(self, **kwargs):
+        '''No facet query, only use aggregation'''
+        return None
+
+    def _from_iso(self, value):
+        parts = value.split('-') if isinstance(value, basestring) else value
+        return date(*map(int, parts[0:3]))
+
+    def to_filter(self, value):
+        parts = value.split('-')
+        date1 = date(*map(int, parts[0:3]))
+        date2 = date(*map(int, parts[3:6]))
+        return [{
+            'range': {
+                '{0}.start'.format(self.field): {
+                    'lte': max(date1, date2).toordinal(),
+                },
+            }
+        }, {
+            'range': {
+                '{0}.end'.format(self.field): {
+                    'gte': min(date1, date2).toordinal(),
+                },
+            }
+        }]
+
+    def from_response(self, name, response):
+        aggregations = response.get('aggregations', {})
+        min_value = aggregations.get('{0}_min'.format(self.field), {}).get('value')
+        max_value = aggregations.get('{0}_max'.format(self.field), {}).get('value')
+
+        if not (min_value and max_value):
+            return None
+
+        min_date = date.fromordinal(int(min_value))
+        max_date = date.fromordinal(int(max_value))
+
+        return {
+            'type': 'temporal-coverage',
+            'min': min_date,
+            'max': max_date,
+            'visible': (max_date - min_date) > timedelta(days=2),
+        }
+
+    def to_aggregations(self):
+        return {
+            '{0}_min'.format(self.field): {
+                'min': {
+                    'field': '{0}.start'.format(self.field)
+                }
+            },
+            '{0}_max'.format(self.field): {
+                'max': {
+                    'field': '{0}.end'.format(self.field)
+                }
+            }
+        }
 
 
 class BoolBooster(object):

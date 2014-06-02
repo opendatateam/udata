@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import copy
 import logging
 
-from bson.objectid import ObjectId
+from flask import request
+from werkzeug.urls import Href
 
 from udata.search import es, i18n_analyzer, DEFAULT_PAGE_SIZE
-from udata.search.fields import DateRangeFilter, RangeFilter
 from udata.search.result import SearchResult
 
 
@@ -91,60 +92,50 @@ class SearchQuery(object):
         for name, facet in self.adapter.facets.items():
             if name in self.kwargs:
                 value = self.kwargs[name]
-                for term in [value] if isinstance(value, basestring) else value:
-                    queries.append({'term': {facet.field: term}})
-        return queries
-
-    def build_filters_queries(self):
-        '''Build "must" filter query parameters from kwargs'''
-        if not self.adapter.filters:
-            return []
-        queries = []
-        ranges = {}
-        for name, spec in self.adapter.filters.items():
-            if name in self.kwargs:
-                if isinstance(spec, (RangeFilter, DateRangeFilter)):
-                    ranges.update(spec.to_query(self.kwargs[name]))
+                query = facet.to_filter(value)
+                if not query:
+                    continue
+                if isinstance(query, dict):
+                    queries.append(query)
                 else:
-                    queries.append(spec.to_query(self.kwargs[name]))
-        if ranges:
-            queries.append({'range': ranges})
+                    queries.extend(query)
         return queries
 
     def get_aggregations(self):
-        min_aggs = [
-            ('{0}_min'.format(name), {'min': {'field': spec.field}})
-            for name, spec in self.adapter.filters.items()
-            if isinstance(spec, RangeFilter)
-        ]
-        max_aggs = [
-            ('{0}_max'.format(name), {'max': {'field': spec.field}})
-            for name, spec in self.adapter.filters.items()
-            if isinstance(spec, RangeFilter)
-        ]
-        start_aggs = [
-            ('{0}_min'.format(name), {'min': {'field': spec.start_field}})
-            for name, spec in self.adapter.filters.items()
-            if isinstance(spec, DateRangeFilter)
-        ]
-        end_aggs = [
-            ('{0}_max'.format(name), {'max': {'field': spec.end_field}})
-            for name, spec in self.adapter.filters.items()
-            if isinstance(spec, DateRangeFilter)
-        ]
-        return dict(min_aggs + max_aggs + start_aggs + end_aggs)
+        aggregations = {}
+        for name, facet in self.adapter.facets.items():
+            aggregations.update(facet.to_aggregations())
+        return aggregations
 
     def get_facets(self):
         if not self.adapter.facets:
             return {}
-        return dict((name, facet.to_query()) for name, facet in self.adapter.facets.items())
+        return dict(
+            (name, facet.to_query(args=self.kwargs.get(name, [])))
+            for name, facet in self.adapter.facets.items()
+        )
 
     def get_query(self):
         must = []
         must.extend(self.build_text_queries())
         must.extend(self.build_facet_queries())
-        must.extend(self.build_filters_queries())
         return {'bool': {'must': must}} if must else {'match_all': {}}
+
+    def to_url(self, url=None, replace=False, **kwargs):
+        '''Serialize the query into an URL'''
+        params = copy.deepcopy(self.kwargs)
+        if kwargs:
+            params.pop('page', None)
+            for key, value in kwargs.items():
+                if not replace and key in params:
+                    if isinstance(params[key], basestring):
+                        params[key] = [params[key], value]
+                    else:
+                        params[key].append(value)
+                else:
+                    params[key] = value
+        href = Href(url or request.base_url)
+        return href(params)
 
 
 def multisearch(*adapters):

@@ -15,7 +15,7 @@ except ImportError:
 
 from babel.support import NullTranslations, Translations
 
-from flask.ext.babelex import Babel, Domain
+from flask.ext.babelex import Babel, Domain, refresh
 from flask.ext.babelex import format_date, format_datetime
 
 

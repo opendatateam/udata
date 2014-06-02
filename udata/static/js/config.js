@@ -7,6 +7,7 @@ require.config({
         'moment': '../bower/momentjs/min/moment-with-langs',
         'markdown': '../bower/markdown/lib/markdown',
         'bootstrap-markdown': '../bower/bootstrap-markdown/js/bootstrap-markdown',
+        'bootstrap-datepicker': '../bower/bootstrap-datepicker/js/bootstrap-datepicker',
         'bootstrap-daterangepicker': '../bower/bootstrap-daterangepicker/daterangepicker',
         'selectize': '../bower/selectize/dist/js/standalone/selectize',
         'fineuploader': '../vendor/jquery.fineuploader/jquery.fineuploader',
@@ -46,6 +47,10 @@ require.config({
         'bootstrap-markdown': {
             deps: ['markdown', 'bootstrap'],
             exports: '$.fn.markdown'
+        },
+        'bootstrap-datepicker': {
+            deps: ['bootstrap'],
+            exports: '$.fn.datepicker'
         },
         'bootstrap-daterangepicker': {
             deps: ['moment', 'bootstrap'],

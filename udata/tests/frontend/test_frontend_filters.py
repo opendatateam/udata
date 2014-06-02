@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import url_for, render_template_string
+from datetime import date
+
+from flask import url_for, render_template_string, g
 
 from . import FrontTestCase
 
+from udata.models import db
 from udata.frontend.helpers import in_url
 
 
@@ -159,3 +162,57 @@ class FrontEndRootTest(FrontTestCase):
                 render_template_string("{{ in_url('two') }}"),
                 'False'
             )
+
+    def test_daterange(self):
+        '''Daterange filter should display range in an adaptive'''
+        g.lang_code = 'en'
+        iso2date = lambda s: date(*[int(v) for v in s.split('-')])
+        dr = lambda s, e: db.DateRange(start=iso2date(s), end=iso2date(e))
+
+        specs = (
+            (dr('2014-02-01', '2014-02-01'), '2014/02/01'),
+            (dr('2012-01-01', '2012-01-31'), '2012/01'),
+            (dr('2012-01-01', '2012-01-14'), '2012/01/01 to 2012/01/14'),
+            (dr('2012-01-01', '2012-03-31'), '2012/01 to 2012/03'),
+            (dr('2012-01-01', '2012-02-29'), '2012/01 to 2012/02'),
+            (dr('2012-01-01', '2012-12-31'), '2012'),
+            (dr('2012-01-01', '2014-12-31'), '2012 to 2014'),
+            (dr('2012-02-02', '2014-12-25'), '2012/02/02 to 2014/12/25'),
+        )
+        for given, expected in specs:
+            self.assertEqual(
+                render_template_string('{{given|daterange}}', given=given),
+                expected
+            )
+
+    def test_daterange_before_1900(self):
+        '''Daterange filter should display range in an adaptive'''
+        g.lang_code = 'en'
+        iso2date = lambda s: date(*[int(v) for v in s.split('-')])
+        dr = lambda s, e: db.DateRange(start=iso2date(s), end=iso2date(e))
+
+        specs = (
+            (dr('1234-02-01', '1234-02-01'), '1234/02/01'),
+            (dr('1232-01-01', '1232-01-31'), '1232/01'),
+            (dr('1232-01-01', '1232-01-14'), '1232/01/01 to 1232/01/14'),
+            (dr('1232-01-01', '1232-03-31'), '1232/01 to 1232/03'),
+            (dr('1232-01-01', '1232-02-29'), '1232/01 to 1232/02'),
+            (dr('1232-01-01', '1232-12-31'), '1232'),
+            (dr('1232-01-01', '1234-12-31'), '1232 to 1234'),
+            (dr('1232-02-02', '1234-12-25'), '1232/02/02 to 1234/12/25'),
+        )
+        for given, expected in specs:
+            self.assertEqual(
+                render_template_string('{{given|daterange}}', given=given),
+                expected
+            )
+
+    def test_daterange_bad_type(self):
+        '''Daterange filter should only accept db.DateRange as parameter'''
+        with self.assertRaises(ValueError):
+            render_template_string('{{"value"|daterange}}')
+
+    def test_ficon(self):
+        '''Should choose a font icon between glyphicon and font-awesome'''
+        self.assertEqual(render_template_string('{{ficon("icon")}}'), 'glyphicon glyphicon-icon')
+        self.assertEqual(render_template_string('{{ficon("fa-icon")}}'), 'fa fa-icon')

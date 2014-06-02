@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import calendar
 import logging
 
 from datetime import date
@@ -12,7 +13,8 @@ from werkzeug import url_decode, url_encode
 
 from . import front, gravatar
 
-from udata.i18n import format_date
+from udata.models import db
+from udata.i18n import format_date, _, pgettext
 from udata.utils import camel_to_lodash
 
 
@@ -163,13 +165,13 @@ def owner_name(obj):
 
 
 @front.app_template_global()
-def facet_formater(facets, name):
+def facet_formater(results, name):
     '''Get label from model facet'''
-    facet = facets.get_facet(name)
+    facet = results.get_facet(name)
 
     if facet:
         labels = dict((
-            (unicode(o.id), unicode(o)) for o, _, _ in facet['terms'] if o
+            (unicode(o.id), unicode(o)) for o, _ in facet['models'] if o
         ))
 
         def formater(value):
@@ -215,3 +217,53 @@ def tooltip_ellipsis(source, length=0):
 def percent(value, max_value, over=False):
     percent = (value or 0) * 100. / max_value
     return percent if over else min(percent, 100)
+
+
+def is_first_month_day(date):
+    return date.day == 1
+
+
+def is_last_month_day(date):
+    _, last_day = calendar.monthrange(date.year, date.month)
+    return date.day == last_day
+
+
+def is_first_year_day(date):
+    return date.day == 1 and date.month == 1
+
+
+def is_last_year_day(date):
+    return date.month == 12 and is_last_month_day(date)
+
+short_month = lambda d: format_date(d, pgettext('month-format', 'yyyy/MM'))
+short_day = lambda d: format_date(d, pgettext('day-format', 'yyyy/MM/dd'))
+
+
+@front.app_template_global()
+@front.app_template_filter()
+def daterange(value):
+    '''Display a date range in the shorter possible maner.'''
+    if not isinstance(value, db.DateRange):
+        raise ValueError('daterange only accept db.DateRange as parameter')
+    delta = value.end - value.start
+    start, end = None, None
+    if is_first_year_day(value.start) and is_last_year_day(value.end):
+        start = value.start.year
+        if delta.days > 365:
+            end = value.end.year
+    elif is_first_month_day(value.start) and is_last_month_day(value.end):
+        start = short_month(value.start)
+        if delta.days > 31:
+            end = short_month(value.end)
+    else:
+        start = short_day(value.start)
+        if value.start != value.end:
+            end = short_day(value.end)
+    return _('%(start)s to %(end)s', start=start, end=end) if end else start
+
+
+@front.app_template_filter()
+@front.app_template_global()
+def ficon(value):
+    '''A simple helper for font icon class'''
+    return 'fa {0}'.format(value) if value.startswith('fa') else 'glyphicon glyphicon-{0}'.format(value)

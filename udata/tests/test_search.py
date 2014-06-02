@@ -2,12 +2,18 @@
 from __future__ import unicode_literals
 
 import json
+import time
 
+from datetime import datetime, timedelta, date
 from os.path import join, dirname
+
+from werkzeug.urls import url_decode, url_parse
 
 from udata import search
 from udata.models import db
-from udata.tests import TestCase
+from udata.tests import TestCase, DBTestMixin
+from udata.tests.factories import faker, MongoEngineFactory
+from udata.utils import multi_to_dict
 
 
 class Fake(db.Document):
@@ -16,6 +22,13 @@ class Fake(db.Document):
     description = db.StringField()
     tags = db.ListField(db.StringField())
     other = db.ListField(db.StringField())
+
+    def __unicode__(self):
+        return 'fake'
+
+
+class FakeFactory(MongoEngineFactory):
+    FACTORY_FOR = Fake
 
 
 class FakeSearch(search.ModelSearchAdapter):
@@ -27,22 +40,19 @@ class FakeSearch(search.ModelSearchAdapter):
     facets = {
         'tag': search.TermFacet('tags'),
         'other': search.TermFacet('other'),
+        'range': search.RangeFacet('a_num_field'),
+        'daterange': search.DateRangeFacet('a_daterange_field'),
+        'bool': search.BoolFacet('boolean'),
     }
     sorts = {
         'title': search.Sort('title.raw'),
         'description': search.Sort('description.raw'),
-    }
-    filters = {
-        'myrange': search.RangeFilter('numeric_field', float),
-        'daterange': search.DateRangeFilter('daterange_start', 'daterange_end'),
-        'bool_filter': search.BoolFilter('bool_filter_field'),
     }
 
 
 class SearchQueryTest(TestCase):
     def test_execute_search_result(self):
         '''SearchQuery execution should return a SearchResult with the right model'''
-        # query = FakeSearchQuery()
         result = search.query(FakeSearch)
         self.assertIsInstance(result, search.SearchResult)
         self.assertEqual(result.query.adapter, FakeSearch)
@@ -229,43 +239,12 @@ class SearchQueryTest(TestCase):
         }
         self.assertEqual(search_query.get_query(), expected)
 
-    def test_term_facet(self):
-        search_query = search.SearchQuery(FakeSearch, )
-        expected = {
-            'tag': {
-                'terms': {
-                    'field': 'tags',
-                    'size': 10,
-                }
-            },
-            'other': {
-                'terms': {
-                    'field': 'other',
-                    'size': 10,
-                }
-            },
-        }
-        self.assertEqual(search_query.get_facets(), expected)
-
-    def test_range_facet(self):
-        facet = search.RangeFacet('some_field', [
-            {'to': 10},
-            {'from': 10, 'to': 50},
-            {'from': 50, 'to': 100},
-            {'from': 100},
-        ])
-
-        self.assertEqual(facet.to_query(), {
-            'range': {
-                'field': 'some_field',
-                'ranges': [
-                    {'to': 10},
-                    {'from': 10, 'to': 50},
-                    {'from': 50, 'to': 100},
-                    {'from': 100}
-                ]
-            }
-        })
+    def test_facets(self):
+        search_query = search.SearchQuery(FakeSearch)
+        facets = search_query.get_facets()
+        self.assertEqual(len(facets), len(FakeSearch.facets))
+        for key in FakeSearch.facets.keys():
+            self.assertIn(key, facets.keys())
 
     def test_facet_filter(self):
         search_query = search.SearchQuery(FakeSearch, q='test', tag='value')
@@ -284,90 +263,441 @@ class SearchQueryTest(TestCase):
         self.assertEqual(search_query.get_query(), expected)
 
     def test_facet_filter_multi(self):
-        search_query = search.SearchQuery(FakeSearch, q='test', tag=['value-1', 'value-2'], other='value')
-        expected = {
-            'bool': {
-                'must': [
-                    {'multi_match': {
-                        'query': 'test',
-                        'analyzer': search.i18n_analyzer,
-                        'fields': ['title^2', 'description']
-                    }},
-                    {'term': {'tags': 'value-1'}},
-                    {'term': {'tags': 'value-2'}},
-                    {'term': {'other': 'value'}},
-                ]
+        search_query = search.SearchQuery(FakeSearch, q='test',
+            tag=['value-1', 'value-2'],
+            other='value',
+            range='3-8',
+            daterange='2013-01-07-2014-06-07'
+        )
+        expectations = [
+            {'multi_match': {
+                'query': 'test',
+                'analyzer': search.i18n_analyzer,
+                'fields': ['title^2', 'description']
+            }},
+            {'term': {'tags': 'value-1'}},
+            {'term': {'tags': 'value-2'}},
+            {'term': {'other': 'value'}},
+            {'range': {
+                'a_num_field': {
+                    'gte': 3,
+                    'lte': 8,
+                }
+            }},
+            {'range': {
+                'a_daterange_field': {
+                    'lte': '2014-06-07',
+                    'gte': '2013-01-07',
+                },
+            }},
+        ]
+        query = search_query.get_query()
+        for expected in expectations:
+            self.assertIn(expected, query['bool']['must'])
+
+    def test_to_url(self):
+        kwargs = {
+            'q': 'test',
+            'tag': ['tag1', 'tag2'],
+            'page': 2,
+        }
+        search_query = search.SearchQuery(FakeSearch, **kwargs)
+        with self.app.test_request_context('/an_url'):
+            url = search_query.to_url()
+        parsed_url = url_parse(url)
+        qs = url_decode(parsed_url.query)
+
+        self.assertEqual(parsed_url.path, '/an_url')
+        self.assertEqual(multi_to_dict(qs), {
+            'q': 'test',
+            'tag': ['tag1', 'tag2'],
+            'page': '2',
+        })
+
+    def test_to_url_with_override(self):
+        kwargs = {
+            'q': 'test',
+            'tag': ['tag1', 'tag2'],
+            'page': 2,
+        }
+        search_query = search.SearchQuery(FakeSearch, **kwargs)
+        with self.app.test_request_context('/an_url'):
+            url = search_query.to_url(tag='tag3', other='value')
+        parsed_url = url_parse(url)
+        qs = url_decode(parsed_url.query)
+
+        self.assertEqual(parsed_url.path, '/an_url')
+        self.assertEqual(multi_to_dict(qs), {
+            'q': 'test',
+            'tag': ['tag1', 'tag2', 'tag3'],
+            'other': 'value',
+        })
+
+    def test_to_url_with_override_and_replace(self):
+        kwargs = {
+            'q': 'test',
+            'tag': ['tag1', 'tag2'],
+            'page': 2,
+        }
+        search_query = search.SearchQuery(FakeSearch, **kwargs)
+        with self.app.test_request_context('/an_url'):
+            url = search_query.to_url(tag='tag3', other='value', replace=True)
+        parsed_url = url_parse(url)
+        qs = url_decode(parsed_url.query)
+
+        self.assertEqual(parsed_url.path, '/an_url')
+        self.assertEqual(multi_to_dict(qs), {
+            'q': 'test',
+            'tag': 'tag3',
+            'other': 'value',
+        })
+
+    def test_to_url_with_specified_url(self):
+        kwargs = {
+            'q': 'test',
+            'tag': ['tag1', 'tag2'],
+            'page': 2,
+        }
+        search_query = search.SearchQuery(FakeSearch, **kwargs)
+        with self.app.test_request_context('/an_url'):
+            url = search_query.to_url('/another_url')
+        parsed_url = url_parse(url)
+        qs = url_decode(parsed_url.query)
+
+        self.assertEqual(parsed_url.path, '/another_url')
+        self.assertEqual(multi_to_dict(qs), {
+            'q': 'test',
+            'tag': ['tag1', 'tag2'],
+            'page': '2',
+        })
+
+
+def hit_factory():
+    return {
+        "_score": float(faker.random_number(2)),
+        "_type": "fake",
+        "_id": faker.md5(),
+        "_source": {
+            "title": faker.sentence(),
+            "tags": [faker.word() for _ in range(faker.random_digit())]
+        },
+        "_index": "udata-test"
+    }
+
+
+def es_factory(nb=20, page=1, page_size=20, total=42):
+    '''Build a fake ElasticSearch response'''
+    hits = sorted(
+        (hit_factory() for _ in range(nb)),
+        key=lambda h: h['_score']
+    )
+    max_score = hits[-1]['_score']
+    return {
+        "hits": {
+            "hits": hits,
+            "total": total,
+            "max_score": max_score
+        },
+        "_shards": {
+            "successful": 5,
+            "failed": 0,
+            "total": 5
+        },
+        "took": 52,
+        "timed_out": False
+    }
+
+
+class TestBoolFacet(TestCase):
+    def setUp(self):
+        self.facet = search.BoolFacet('boolean')
+
+    def test_to_query(self):
+        self.assertEqual(self.facet.to_query(), {
+            'terms': {
+                'field': 'boolean',
+                'size': 2,
+            }
+        })
+
+    def test_from_response(self):
+        response = es_factory()
+        response['facets'] = {
+            'test': {
+                '_type': 'terms',
+                'total': 229,
+                'other': 33,
+                'missing': 0,
+                'terms': [
+                    {'term': True, 'count': 10},
+                    {'term': False, 'count': 15},
+                ],
             }
         }
-        self.assertEqual(search_query.get_query(), expected)
 
-    def test_range_filter(self):
-        search_query = search.SearchQuery(FakeSearch, myrange='3-7.5')
-        expected = {
-            'bool': {
-                'must': [
-                    {'range': {
-                        'numeric_field': {
-                            'gte': 3.0,
-                            'lte': 7.5,
-                        }
-                    }}
-                ]
+        extracted = self.facet.from_response('test', response)
+        self.assertEqual(extracted['type'], 'bool')
+        self.assertEqual(extracted[True], 10)
+        self.assertEqual(extracted[False], 15)
+
+    def test_to_filter(self):
+        self.assertEqual(self.facet.to_filter(True), {'term': {'boolean': True}})
+        self.assertEqual(self.facet.to_filter('True'), {'term': {'boolean': True}})
+        self.assertEqual(self.facet.to_filter('true'), {'term': {'boolean': True}})
+        self.assertEqual(self.facet.to_filter(False), {'term': {'boolean': False}})
+        self.assertEqual(self.facet.to_filter('False'), {'term': {'boolean': False}})
+        self.assertEqual(self.facet.to_filter('false'), {'term': {'boolean': False}})
+
+    def test_aggregations(self):
+        self.assertEqual(self.facet.to_aggregations(), {})
+
+
+class TestTermFacet(TestCase):
+    def setUp(self):
+        self.facet = search.TermFacet('tags')
+
+    def test_to_query(self):
+        self.assertEqual(self.facet.to_query(), {
+            'terms': {
+                'field': 'tags',
+                'size': 10,
+            }
+        })
+
+    def test_to_query_with_excludes(self):
+        self.assertEqual(self.facet.to_query(args=['tag1', 'tag2']), {
+            'terms': {
+                'field': 'tags',
+                'size': 10,
+                'exclude': ['tag1', 'tag2']
+            }
+        })
+
+    def test_from_response(self):
+        response = es_factory()
+        response['facets'] = {
+            'test': {
+                '_type': 'terms',
+                'total': 229,
+                'other': 33,
+                'missing': 2,
+                'terms': [{'term': faker.word(), 'count': faker.random_number(2)} for _ in range(10)],
             }
         }
-        self.assertEqual(search_query.get_query(), expected)
 
-    def test_range_min_max(self):
-        search_query = search.SearchQuery(FakeSearch, )
+        extracted = self.facet.from_response('test', response)
+        self.assertEqual(extracted['type'], 'terms')
+        self.assertEqual(len(extracted['terms']), 10)
 
-        aggregations = search_query.get_aggregations()
+    def test_to_filter(self):
+        self.assertEqual(
+            self.facet.to_filter('value'),
+            {'term': {'tags': 'value'}}
+        )
 
-        self.assertEqual(aggregations['myrange_min'], {'min': {'field': 'numeric_field'}})
-        self.assertEqual(aggregations['myrange_max'], {'max': {'field': 'numeric_field'}})
-
-    def test_daterange_filter(self):
-        search_query = search.SearchQuery(FakeSearch, daterange='2013-01-07-2014-06-07')
-        expected = {
-            'bool': {
-                'must': [
-                    {'range': {
-                        'daterange_start': {
-                            'lte': '2014-06-07',
-                        },
-                        'daterange_end': {
-                            'gte': '2013-01-07',
-                        },
-                    }}
-                ]
-            }
-        }
-        self.assertEqual(search_query.get_query(), expected)
-
-    def test_daterange_min_max(self):
-        search_query = search.SearchQuery(FakeSearch, )
-
-        aggregations = search_query.get_aggregations()
-
-        self.assertEqual(aggregations['daterange_min'], {'min': {'field': 'daterange_start'}})
-        self.assertEqual(aggregations['daterange_max'], {'max': {'field': 'daterange_end'}})
-
-    def test_bool_filter_true(self):
-        search_query = search.SearchQuery(FakeSearch, bool_filter=True)
-        expected = {'bool': {
-            'must': [
-                {'term': {'bool_filter_field': True}}
+    def test_to_filter_multi(self):
+        self.assertEqual(
+            self.facet.to_filter(['value1', 'value2']),
+            [
+                {'term': {'tags': 'value1'}},
+                {'term': {'tags': 'value2'}},
             ]
-        }}
-        self.assertEqual(search_query.get_query(), expected)
+        )
 
-    def test_bool_filter_false(self):
-        search_query = search.SearchQuery(FakeSearch, bool_filter=False)
-        expected = {'bool': {
-            'must': [
-                {'term': {'bool_filter_field': False}}
-            ]
-        }}
-        self.assertEqual(search_query.get_query(), expected)
+    def test_aggregations(self):
+        self.assertEqual(self.facet.to_aggregations(), {})
+
+
+class TestModelTermFacet(TestCase, DBTestMixin):
+    def setUp(self):
+        self.facet = search.ModelTermFacet('fakes', Fake)
+
+    def test_to_query(self):
+        self.assertEqual(self.facet.to_query(), {
+            'terms': {
+                'field': 'fakes',
+                'size': 10,
+            }
+        })
+
+    def test_to_query_with_excludes(self):
+        self.assertEqual(self.facet.to_query(args=['id1', 'id2']), {
+            'terms': {
+                'field': 'fakes',
+                'size': 10,
+                'exclude': ['id1', 'id2']
+            }
+        })
+
+    def test_labelize(self):
+        fake = FakeFactory()
+        self.assertEqual(self.facet.labelize(str(fake.id)), 'fake')
+
+    def test_from_response(self):
+        fakes = [FakeFactory() for _ in range(10)]
+        response = es_factory()
+        response['facets'] = {
+            'test': {
+                '_type': 'terms',
+                'total': 229,
+                'other': 33,
+                'missing': 2,
+                'terms': [{'term': str(f.id), 'count': faker.random_number(2)} for f in fakes],
+            }
+        }
+
+        extracted = self.facet.from_response('test', response)
+        self.assertEqual(extracted['type'], 'models')
+        self.assertEqual(len(extracted['models']), 10)
+        for fake, row in zip(fakes, extracted['models']):
+            self.assertIsInstance(row[0], Fake)
+            self.assertIsInstance(row[1], int)
+            self.assertEqual(fake.id, row[0].id)
+
+    def test_to_filter(self):
+        self.assertEqual(self.facet.to_filter('value'), {'term': {'fakes': 'value'}})
+
+    def test_aggregations(self):
+        self.assertEqual(self.facet.to_aggregations(), {})
+
+
+class TestRangeFacet(TestCase):
+    def setUp(self):
+        self.facet = search.RangeFacet('some_field')
+
+    def test_to_query(self):
+        self.assertEqual(self.facet.to_query(), {
+            'statistical': {
+                'field': 'some_field'
+            }
+        })
+
+    def test_from_response(self):
+        response = es_factory()
+        response['facets'] = {
+            'test': {
+                '_type': 'statistical',
+                'count': 123,
+                'total': 666,
+                'min': 3,
+                'max': 42,
+                'mean': 21.5,
+                'sum_of_squares': 29.0,
+                'variance': 2.25,
+                'std_deviation': 1.5
+            }
+        }
+
+        extracted = self.facet.from_response('test', response)
+        self.assertEqual(extracted['type'], 'range')
+        self.assertEqual(extracted['min'], 3)
+        self.assertEqual(extracted['max'], 42)
+
+    def test_to_filter(self):
+        self.assertEqual(self.facet.to_filter('3-8'), {
+            'range': {
+                'some_field': {
+                    'gte': 3,
+                    'lte': 8,
+                }
+            }
+        })
+
+    def test_aggregations(self):
+        self.assertEqual(self.facet.to_aggregations(), {})
+
+
+class TestDateRangeFacet(TestCase):
+    def setUp(self):
+        self.facet = search.DateRangeFacet('some_field')
+
+    def _es_timestamp(self, dt):
+        return time.mktime(dt.timetuple()) * 1E3
+
+    def test_to_query(self):
+        self.assertEqual(self.facet.to_query(), {
+            'statistical': {
+                'field': 'some_field'
+            }
+        })
+
+    def test_from_response(self):
+        now = datetime.now()
+        two_days_ago = now - timedelta(days=2)
+        response = es_factory()
+        response['facets'] = {
+            'test': {
+                '_type': 'statistical',
+                'count': 123,
+                'total': 666,
+                'min': self._es_timestamp(two_days_ago),
+                'max': self._es_timestamp(now),
+                'mean': 21.5,
+                'sum_of_squares': 29.0,
+                'variance': 2.25,
+                'std_deviation': 1.5
+            }
+        }
+
+        extracted = self.facet.from_response('test', response)
+        self.assertEqual(extracted['type'], 'daterange')
+        self.assertEqual(extracted['min'], two_days_ago.replace(microsecond=0))
+        self.assertEqual(extracted['max'], now.replace(microsecond=0))
+
+    def test_to_filter(self):
+        self.assertEqual(self.facet.to_filter('2013-01-07-2014-06-07'), {
+            'range': {
+                'some_field': {
+                    'lte': '2014-06-07',
+                    'gte': '2013-01-07',
+                },
+            }
+        })
+
+    def test_aggregations(self):
+        self.assertEqual(self.facet.to_aggregations(), {})
+
+
+class TestTemporalCoverageFacet(TestCase):
+    def setUp(self):
+        self.facet = search.TemporalCoverageFacet('some_field')
+
+    def test_to_query(self):
+        self.assertIsNone(self.facet.to_query())
+
+    def test_to_aggregations(self):
+        aggregations = self.facet.to_aggregations()
+        self.assertEqual(aggregations['some_field_min'], {'min': {'field': 'some_field.start'}})
+        self.assertEqual(aggregations['some_field_max'], {'max': {'field': 'some_field.end'}})
+
+    def test_from_response(self):
+        today = date.today()
+        two_days_ago = today - timedelta(days=2)
+        response = es_factory()
+        response['aggregations'] = {
+            'some_field_min': {'value': float(two_days_ago.toordinal())},
+            'some_field_max': {'value': float(today.toordinal())},
+        }
+
+        extracted = self.facet.from_response('test', response)
+        self.assertEqual(extracted['type'], 'temporal-coverage')
+        self.assertEqual(extracted['min'], two_days_ago)
+        self.assertEqual(extracted['max'], today)
+
+    def test_to_filter(self):
+        self.assertEqual(self.facet.to_filter('2013-01-07-2014-06-07'), [{
+            'range': {
+                'some_field.start': {
+                    'lte': date(2014, 6, 7).toordinal(),
+                },
+            }
+        }, {
+            'range': {
+                'some_field.end': {
+                    'gte': date(2013, 1, 7).toordinal(),
+                },
+            }
+        }])
 
 
 class SearchResultTest(TestCase):
@@ -377,12 +707,13 @@ class SearchResultTest(TestCase):
 
     def test_properties(self):
         '''Search result should map some properties for easy access'''
-        fixture = self.load_result('es-fake-result.json')
+        response = es_factory(nb=10, total=42)
+        max_score = response['hits']['max_score']
         query = search.SearchQuery(FakeSearch)
-        result = search.SearchResult(query, fixture)
+        result = search.SearchResult(query, response)
 
         self.assertEqual(result.total, 42)
-        self.assertEqual(result.max_score, 10.0)
+        self.assertEqual(result.max_score, max_score)
 
         ids = result.get_ids()
         self.assertEqual(len(ids), 10)
@@ -402,7 +733,7 @@ class SearchResultTest(TestCase):
         '''Search results should be paginated'''
         kwargs = {'page': 2, 'page_size': 3}
         query = search.SearchQuery(FakeSearch, **kwargs)
-        result = search.SearchResult(query, {'hits': {'total': 11}})
+        result = search.SearchResult(query, es_factory(nb=3, total=11))
 
         self.assertEqual(result.page, 2),
         self.assertEqual(result.page_size, 3)
@@ -416,20 +747,3 @@ class SearchResultTest(TestCase):
         self.assertEqual(result.page, 1),
         self.assertEqual(result.page_size, search.DEFAULT_PAGE_SIZE)
         self.assertEqual(result.pages, 0)
-
-    def test_get_range(self):
-        '''Search result should give access to range boundaries'''
-        es_result = {
-            'aggregations': {
-                'myrange_min': {'value': 3},
-                'myrange_max': {'value': 35},
-            }
-        }
-        query = search.SearchQuery(FakeSearch)
-        result = search.SearchResult(query, es_result)
-
-        range = result.get_range('myrange')
-        self.assertEqual(range['min'], 3.0)
-        self.assertIsInstance(range['min'], float)
-        self.assertEqual(range['max'], 35.0)
-        self.assertIsInstance(range['max'], float)

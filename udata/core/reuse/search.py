@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.models import Reuse, Organization
+from udata.models import Reuse, Organization, REUSE_TYPES
 from udata.search import ModelSearchAdapter, Sort, i18n_analyzer
-from udata.search import RangeFilter, BoolFilter
+from udata.search import RangeFacet, BoolFacet
 from udata.search import TermFacet, ModelTermFacet
-from udata.search import BoolBooster, FunctionBooster, GaussDecay
+from udata.search import BoolBooster, GaussDecay
 
 
 __all__ = ('ReuseSearch', )
+
+
+class ReuseTypeFacet(TermFacet):
+    def labelize(self, value):
+        return REUSE_TYPES[value]
 
 
 class ReuseSearch(ModelSearchAdapter):
@@ -20,7 +25,11 @@ class ReuseSearch(ModelSearchAdapter):
     facets = {
         'tag': TermFacet('tags'),
         'organization': ModelTermFacet('organization', Organization),
-        'type': TermFacet('type'),
+        'type': ReuseTypeFacet('type'),
+        'datasets': RangeFacet('nb_datasets'),
+        'stars': RangeFacet('nb_stars'),
+        'followers': RangeFacet('nb_followers'),
+        'featured': BoolFacet('featured'),
     }
     sorts = {
         'title': Sort('title.raw'),
@@ -29,12 +38,6 @@ class ReuseSearch(ModelSearchAdapter):
         'datasets': Sort('nb_datasets'),
         'stars': Sort('nb_stars'),
         'followers': Sort('nb_followers'),
-    }
-    filters = {
-        'datasets': RangeFilter('nb_datasets'),
-        'stars': RangeFilter('nb_stars'),
-        'followers': RangeFilter('nb_followers'),
-        'featured': BoolFilter('featured'),
     }
     mapping = {
         'properties': {

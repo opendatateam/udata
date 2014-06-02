@@ -8,7 +8,6 @@ from udata.models import Topic
 from udata.search import DatasetSearch, ReuseSearch, SearchQuery, multiquery
 from udata.i18n import I18nBlueprint
 from udata.utils import multi_to_dict
-# from udata.utils import get_by
 
 blueprint = I18nBlueprint('topics', __name__, url_prefix='/topics')
 
@@ -22,7 +21,6 @@ class TopicSearchQuery(SearchQuery):
         must = []
         must.extend(self.build_text_queries())
         must.extend(self.build_facet_queries())
-        must.extend(self.build_filters_queries())
         return {
             'bool': {
                 'must': must,

@@ -27,17 +27,17 @@
 
         <div class="row">
             <div class="col-sm-12 label-list">
-                {{ s.filter_label('organization', _('Organization'), 'home',
-                    formatter=facet_formater(datasets, 'organization')
+                {{ s.filter_label('organization', _('Organization'), ficon('fa-building-o'),
+                    labelize=datasets.label_func('organization')
                 ) }}
-                {{ s.filter_label('supplier', _('Supplier'), 'home',
-                    formatter=facet_formater(datasets, 'supplier')
+                {{ s.filter_label('supplier', _('Supplier'), ficon('fa-building-o'),
+                    labelize=datasets.label_func('supplier')
                 ) }}
-                {{ s.filter_label('tag', _('Tag'), 'tag') }}
-                {{ s.filter_label('license', _('License'), 'copyright-mark',
-                    formatter=facet_formater(datasets, 'license')
+                {{ s.filter_label('tag', _('Tag'), ficon('tag')) }}
+                {{ s.filter_label('license', _('License'), ficon('copyright-mark'),
+                    labelize=datasets.label_func('license')
                 ) }}
-                {{ s.filter_label('format', _('Format'), 'file') }}
+                {{ s.filter_label('format', _('Format'), ficon('file')) }}
             </div>
         </div>
 
@@ -64,13 +64,13 @@
                 reuses=(_('Reuses'), 'desc'),
                 stars=(_('Stars'), 'desc')
             ) }}
-            {{ s.facet_picker(datasets, 'organization', _('Organizations'), 'home') }}
-            {{ s.facet_picker(datasets, 'supplier', _('Suppliers'), 'home') }}
-            {{ s.facet_picker(datasets, 'tag', _('Tags'), 'tag') }}
-            {{ s.facet_picker(datasets, 'license', _('Licenses'), 'copyright-mark') }}
-            {{ s.facet_picker(datasets, 'format', _('Formats'), 'file') }}
-            {{ s.range_picker(datasets, 'reuses', _('Reuses'), 'random') }}
-            {# {{ s.range_picker(datasets, 'temporal_coverage', _('Temporal coverage'), 'calendar', isodate) }} #}
+            {{ s.facet_panel(datasets, 'organization', _('Organizations'), ficon('fa-building-o')) }}
+            {{ s.facet_panel(datasets, 'supplier', _('Suppliers'), ficon('fa-building-o')) }}
+            {{ s.facet_panel(datasets, 'tag', _('Tags'), ficon('tag')) }}
+            {{ s.facet_panel(datasets, 'license', _('Licenses'), ficon('copyright-mark')) }}
+            {{ s.facet_panel(datasets, 'temporal_coverage', _('Temporal coverage'), ficon('calendar')) }}
+            {{ s.facet_panel(datasets, 'reuses', _('Reuses'), ficon('random')) }}
+            {{ s.facet_panel(datasets, 'format', _('Formats'), ficon('file')) }}
         </div>
     </aside>
 </div>

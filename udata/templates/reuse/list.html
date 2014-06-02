@@ -27,11 +27,13 @@
 
         <div class="row">
             <div class="col-sm-12 label-list">
-                {{ s.filter_label('organization', _('Organization'), 'home',
-                    formatter=facet_formater(reuses, 'organization')
+                {{ s.filter_label('organization', _('Organization'), ficon('fa-building-o'),
+                    labelize=reuses.label_func('organization')
                 ) }}
-                {{ s.filter_label('tag', _('Tag'), 'tag') }}
-                {{ s.filter_label('type', _('Type'), 'file') }}
+                {{ s.filter_label('tag', _('Tag'), ficon('tag')) }}
+                {{ s.filter_label('type', _('Type'), ficon('file'),
+                    labelize=reuses.label_func('type')
+                ) }}
             </div>
         </div>
 
@@ -54,10 +56,10 @@
                 datasets=(_('Datasets used'), 'desc'),
                 stars=(_('Stars'), 'desc'),
             ) }}
-            {{ s.facet_picker(reuses, 'organization', _('Organizations')) }}
-            {{ s.facet_picker(reuses, 'type', _('Type'), g.reuse_types) }}
-            {{ s.facet_picker(reuses, 'tag', _('Tags')) }}
-            {{ s.range_picker(reuses, 'datasets', _('Datasets')) }}
+            {{ s.facet_panel(reuses, 'organization', _('Organizations'), ficon('fa-building-o')) }}
+            {{ s.facet_panel(reuses, 'type', _('Type'), ficon('random')) }}
+            {{ s.facet_panel(reuses, 'tag', _('Tags'), ficon('tag')) }}
+            {{ s.facet_panel(reuses, 'datasets', _('Datasets'), ficon('fa-cubes')) }}
         </div>
     </aside>
 </div>

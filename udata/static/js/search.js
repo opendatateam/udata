@@ -1,7 +1,11 @@
 /**
  * Common search features
  */
-define(['logger', 'widgets/range-picker'], function(log) {
+define([
+    'logger',
+    'search/temporal-coverage-facet',
+    'widgets/range-picker'
+], function(log) {
     'use strict';
 
     return {
