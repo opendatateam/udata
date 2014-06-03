@@ -34,6 +34,9 @@
 {% endif %}
 <div class="btn-group btn-group-xs">
     {{ starred(dataset) }}
+</div>
+
+<div class="btn-group btn-group-xs">
     {{ follow_btn(dataset) }}
 </div>
 {% endblock %}
@@ -155,23 +158,20 @@
                         {% else %}
                         <br/>
                         {% endif %}
-                        <a href class="btn btn-primary btn-block btn-sm icon-left follow"
-                            data-organization-id="{{ dataset.organization.id }}"
-                            data-organization-title="{{ dataset.organization.title }}"
-                            {# data-is-following="{% if is_following(dataset.organization) %}true{% else %}false{% endif %}"
-                            data-follow-api="{{ url_for('api.follow_org', id=dataset.organization.id|string) }}" #}
-                            data-follow-label="{{ _('Follow') }}"
-                            data-unfollow-label="{{ _('Unfollow') }}"
+                        <button type="button"
+                            class="btn btn-primary btn-follow btn-block btn-sm icon-left {% if is_following(dataset.organization) %}active{% endif %}"
+                            rel="tooltip" data-placement="left"
+                            data-api-url="{{ url_for('api.follow_organization', id=dataset.organization.id|string) }}"
                             {% if is_following(dataset.organization) %}
                             title="{{ _('Unfollow') }}">
                             <span class="glyphicon glyphicon-eye-close"></span>
-                            {% trans %}Unfollow{% endtrans %}
+                            {{ _('Unfollow') }}
                             {% else %}
-                            title="{% trans %}Follow{% endtrans %}">
+                            title="{{ _("I'll be informed about this organization news") }}">
                             <span class="glyphicon glyphicon-eye-open"></span>
-                            {% trans %}Follow{% endtrans %}
+                            {{ _('Follow') }}
                             {% endif %}
-                        </a>
+                        </button>
                     </div>
                 </div>
                 {% endif %}
@@ -202,10 +202,7 @@
                                 title="{{ _('Temporal coverage') }}">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </a>
-                            {{ _('%(start)s to %(end)s',
-                                start=dataset.temporal_coverage.start|dateformat('short'),
-                                end=dataset.temporal_coverage.end|dateformat('short')
-                                ) }}
+                            {{ dataset.temporal_coverage|daterange }}
                         </li>
                         {% endif %}
 

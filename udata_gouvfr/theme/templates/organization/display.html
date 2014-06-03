@@ -2,6 +2,7 @@
 {% from theme('macros/paginator.html') import paginator with context %}
 {% from theme('macros/starred.html') import starred with context %}
 {% from theme('macros/follow.html') import follow_btn with context %}
+{% from theme('macros/timeline.html') import timeline with context %}
 
 {% block extra_head %}
 {% assets 'gouvfr-org-css' %}
@@ -88,6 +89,15 @@
                         </strong>
                     </p>
                     {% endif %}
+                    {% if activities %}
+                    <p class="text-center">
+                        <strong>
+                            <a href="{{url_for('organizations.show', org=org)}}#activities">
+                                {{ _('Recent activities') }}
+                            </a>
+                        </strong>
+                    </p>
+                    {% endif %}
                 </div>
                 {% if not is_member %}
                     {% if not pending %}
@@ -143,7 +153,7 @@
                     <span class="glyphicon glyphicon-eye-open"></span>
                     {{ _('Follow') }}
                     {% endif %}
-                </a>
+                </button>
             </aside>
         </div>
 
@@ -161,6 +171,7 @@
             ('members', _('Members'), org.members, {}),
             ('followers', _('Followers'), followers, {}),
         ) %}
+        {% set activity_tab = ('activity', _('Activity'), activities, {}) %}
         {% set actived = False %}
 
         <div class="row">
@@ -254,6 +265,16 @@
                           {% include theme('follow/follower-card.html') %}
                         </div>
                         {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if activities %}
+                <div id="activities" class="tab-pane">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            {{ timeline(activities) }}
+                        </div>
                     </div>
                 </div>
                 {% endif %}
