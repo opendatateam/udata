@@ -25,7 +25,7 @@
             <li>
                 <a href class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Number of datasets') }}">
-                    <span class="glyphicon glyphicon-stats"></span>
+                    <span class="{{ ficon('fa-cubes') }}"></span>
                 </a>
                 {{ ngettext('%(num)s dataset', '%(num)s datasets', organization.metrics.datasets or 0) }}
             </li>
@@ -34,7 +34,7 @@
             <li>
                 <a href class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Number of reuses') }}">
-                    <span class="glyphicon glyphicon-random"></span>
+                    <span class="{{ ficon('fa-retweet') }}"></span>
                 </a>
                 {{ ngettext('%(num)s reuse', '%(num)s reuses', organization.metrics.reuses or 0) }}
             </li>

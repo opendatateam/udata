@@ -80,7 +80,7 @@
                 <a href class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Reuses') }}">
-                    <span class="glyphicon glyphicon-random"></span>
+                    <span class="{{ ficon('fa-retweet') }}"></span>
                 </a>
                 {{ dataset.metrics.reuses or 0 }}
             </li>
@@ -88,7 +88,7 @@
                 <a href class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Stars') }}">
-                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="{{ ficon('fa-star') }}"></span>
                 </a>
                 {{ dataset.metrics.stars or 0 }}
             </li>

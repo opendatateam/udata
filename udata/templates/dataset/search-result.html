@@ -79,10 +79,19 @@
         <li>
             <a href class="btn btn-xs" rel="tooltip"
                 data-placement="top" data-container="body"
-                title="{% trans %}Reuse number{% endtrans %}">
-                <span class="glyphicon glyphicon-random"></span>
+                title="{{ _('Reuse number') }}">
+                <span class="{{ ficon('fa-retweet') }}"></span>
             </a>
             {{ dataset.metrics.reuses or 0 }}
+        </li>
+
+        <li>
+            <a href class="btn btn-xs" rel="tooltip"
+                data-placement="top" data-container="body"
+                title="{{ _('Followers') }}">
+                <span class="{{ ficon('star') }}"></span>
+            </a>
+            {{ dataset.metrics.followers or 0 }}
         </li>
 
     </ul>
