@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-06-02 17:18+0200\n"
+"POT-Creation-Date: 2014-06-03 02:36+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -39,7 +39,7 @@ msgid "Update frequency"
 msgstr ""
 
 #: udata/core/dataset/forms.py:20 udata/templates/dataset/card.html:36
-#: udata/templates/dataset/display.html:207 udata/templates/dataset/list.html:73
+#: udata/templates/dataset/display.html:207 udata/templates/dataset/list.html:71
 #: udata/templates/dataset/search-result.html:38
 msgid "Temporal coverage"
 msgstr ""
@@ -667,7 +667,7 @@ msgstr ""
 msgid "Licenses"
 msgstr ""
 
-#: udata/templates/dataset/list.html:71
+#: udata/templates/dataset/list.html:73
 msgid "Formats"
 msgstr ""
 
@@ -771,43 +771,24 @@ msgstr ""
 msgid "Relevance"
 msgstr ""
 
-#: udata/templates/macros/search.html:75 udata/templates/macros/search.html:270
+#: udata/templates/macros/search.html:75
 msgid "Clear filter"
 msgstr ""
 
-#: udata/templates/macros/search.html:159
+#: udata/templates/macros/search.html:164
 msgid "to"
 msgstr ""
 
-#: udata/templates/macros/search.html:179
+#: udata/templates/macros/search.html:184
 msgid "Apply"
 msgstr ""
 
-#: udata/templates/macros/search.html:249
-#, python-format
-msgid "%(from)s to %(to)s"
-msgstr ""
-
-#: udata/templates/macros/search.html:251
-msgid "None"
-msgstr ""
-
-#: udata/templates/macros/search.html:253
-#, python-format
-msgid "Up to %(to)s"
-msgstr ""
-
-#: udata/templates/macros/search.html:255
-#, python-format
-msgid "More than %(from)s"
-msgstr ""
-
-#: udata/templates/macros/search.html:299
+#: udata/templates/macros/search.html:195
 #, python-format
 msgid "Results %(start)s to %(end)s on %(total)s found"
 msgstr ""
 
-#: udata/templates/macros/search.html:305
+#: udata/templates/macros/search.html:201
 msgid "No result found"
 msgstr ""
 
