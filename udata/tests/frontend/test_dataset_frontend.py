@@ -80,8 +80,76 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.post(url_for('datasets.edit', dataset=dataset), data)
 
         dataset.reload()
-        self.assertRedirects(response, dataset.get_absolute_url())
+        self.assertRedirects(response, dataset.display_url)
         self.assertEqual(dataset.description, 'new description')
+
+    def test_render_edit_extras(self):
+        '''It should render the dataset extras edit form'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        response = self.get(url_for('datasets.edit_extras', dataset=dataset))
+        self.assert200(response)
+
+    def test_add_extras(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = {'key': 'a_key', 'value': 'a_value'}
+
+        response = self.post(url_for('datasets.edit_extras', dataset=dataset), data)
+
+        self.assert200(response)
+        dataset.reload()
+        self.assertIn('a_key', dataset.extras)
+        self.assertEqual(dataset.extras['a_key'], 'a_value')
+
+    def test_update_extras(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user, extras={'a_key': 'a_value'})
+        data = {'key': 'a_key', 'value': 'new_value'}
+
+        response = self.post(url_for('datasets.edit_extras', dataset=dataset), data)
+
+        self.assert200(response)
+        dataset.reload()
+        self.assertIn('a_key', dataset.extras)
+        self.assertEqual(dataset.extras['a_key'], 'new_value')
+
+    def test_rename_extras(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user, extras={'a_key': 'a_value'})
+        data = {'key': 'new_key', 'value': 'a_value', 'old_key': 'a_key'}
+
+        response = self.post(url_for('datasets.edit_extras', dataset=dataset), data)
+
+        self.assert200(response)
+        dataset.reload()
+        self.assertIn('new_key', dataset.extras)
+        self.assertEqual(dataset.extras['new_key'], 'a_value')
+        self.assertNotIn('a_key', dataset.extras)
+
+    def test_delete_extras(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user, extras={'a_key': 'a_value'})
+
+        response = self.delete(url_for('datasets.delete_extra', dataset=dataset, extra='a_key'))
+
+        self.assert200(response)
+        dataset.reload()
+        self.assertNotIn('a_key', dataset.extras)
+
+    def test_render_edit_resources(self):
+        '''It should render the dataset resouces edit form'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user, resources=[ResourceFactory() for _ in range(3)])
+        response = self.get(url_for('datasets.edit_resources', dataset=dataset))
+        self.assert200(response)
+
+    def test_render_transfer(self):
+        '''It should render the dataset transfer form'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        response = self.get(url_for('datasets.transfer', dataset=dataset))
+        self.assert200(response)
 
     def test_not_found(self):
         '''It should render the dataset page'''

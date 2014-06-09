@@ -5,7 +5,7 @@
 
 {% block breadcrumb %}
 <li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
-<li><a href="{{ org.get_absolute_url() }}">{{ org.name }}</a></li>
+<li><a href="{{ org.display_url }}">{{ org.name }}</a></li>
 <li class="active">{{ _('Edition') }}</li>
 {% endblock %}
 
@@ -32,41 +32,11 @@
     <div class="col-sm-8 col-md-9 col-lg-10">
         <div class="form-bg">
             <ul class="nav nav-pills nav-top">
-                <li {% if tab == 'description' %}class="active"{% endif %}>
-                    <a href="{{ url_for('organizations.edit', org=org) }}">
-                        {{ _('Descrition') }}
-                    </a>
+                {% for item in nav.edit_org %}
+                <li class="{{ 'active' if item.is_active else '' }}">
+                    <a href="{{ item.url }}">{{ item.label }}</a>
                 </li>
-                <li {% if tab == 'members' %}class="active"{% endif %}>
-                    <a href="{{ url_for('organizations.edit_members', org=org) }}">
-                        {{ _('Members') }}
-                    </a>
-                </li>
-                <li {% if tab == 'requests' %}class="active"{% endif %}>
-                    <a href="{#{ url_for('organizations.edit_membership_requests', org=org) }#}">
-                        {{ _('Membership request') }}
-                    </a>
-                </li>
-                <li {% if tab == 'teams' %}class="active"{% endif %}>
-                    <a href="{{ url_for('organizations.edit_teams', org=org) }}">
-                        {{ _('Teams') }}
-                    </a>
-                </li>
-                <li {% if tab == 'alerts' %}class="active"{% endif %}>
-                    <a href="{#{ url_for('organizations.list_alerts', org=org) }#}">
-                        {{ _('Alerts') }}
-                    </a>
-                </li>
-                {# {% for tab, label, form_url in (
-                    ('description', _('Description'), 'edit'),
-                    ('extras', _('Additional informations'), 'extras'),
-                    ('members', _('Members'), 'members'),
-                    ('requests', _('Membership requests'), 'requests'),
-                ) %}
-                <li {% if active_tab == tab %}class="active"{% endif %}>
-                    <a href="{{ org_base_url }}/{{ form_url }}/{{ org.name }}">{{ label }}</a>
-                </li>
-                {% endfor %} #}
+                {% endfor %}
             </ul>
 
             <div class="row">

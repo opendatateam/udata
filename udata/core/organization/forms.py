@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.forms import ModelForm, fields, validators
+from udata.forms import Form, ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 from udata.models import Organization
 
-__all__ = ('OrganizationForm', 'OrganizationMemberForm')
+__all__ = ('OrganizationForm', 'OrganizationMemberForm', 'OrganizationExtraForm')
 
 
 class OrganizationForm(ModelForm):
@@ -22,3 +22,9 @@ class OrganizationMemberForm(ModelForm):
 
     pk = fields.UserField(validators=[validators.required()])
     value = fields.StringField(default='editor')
+
+
+class OrganizationExtraForm(Form):
+    key = fields.StringField(_('Key'), [validators.required()])
+    value = fields.StringField(_('Value'), [validators.required()])
+    old_key = fields.StringField(_('Old key'))

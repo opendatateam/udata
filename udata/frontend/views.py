@@ -129,7 +129,7 @@ class FormView(Templated, BaseView):
         return self.render(form=form)
 
     def get_success_url(self, obj):
-        raise obj.get_absolute_url()
+        return obj.display_url
 
     def post(self, **kwargs):
         context = self.get_context()
@@ -152,7 +152,7 @@ class CreateView(FormView):
         return redirect(self.get_success_url())
 
     def get_success_url(self):
-        return self.object.get_absolute_url()
+        return self.object.display_url
 
 
 class EditView(SingleObject, FormView):
@@ -169,4 +169,4 @@ class EditView(SingleObject, FormView):
         return redirect(self.get_success_url())
 
     def get_success_url(self):
-        return self.object.get_absolute_url()
+        return self.object.display_url

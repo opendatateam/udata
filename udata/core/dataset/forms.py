@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.forms import ModelForm, UserModelForm, fields, validators, widgets
+from udata.forms import Form, ModelForm, UserModelForm, fields, validators, widgets
 from udata.i18n import lazy_gettext as _
 
 from .models import Dataset, Resource, License, UPDATE_FREQUENCIES
 
-__all__ = ('DatasetForm', 'ResourceForm')
+__all__ = ('DatasetForm', 'ResourceForm', 'DatasetExtraForm')
 
 
 class DatasetForm(UserModelForm):
@@ -30,3 +30,9 @@ class ResourceForm(ModelForm):
     url = fields.UploadableURLField(_('URL'), endpoint='storage.add_resource')
     format = fields.StringField(_('Format'), widget=widgets.FormatAutocompleter())
     checksum = fields.StringField(_('Checksum'))
+
+
+class DatasetExtraForm(Form):
+    key = fields.StringField(_('Key'), [validators.required()])
+    value = fields.StringField(_('Value'), [validators.required()])
+    old_key = fields.StringField(_('Old key'))

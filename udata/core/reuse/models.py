@@ -45,9 +45,6 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
 
     featured = db.BooleanField()
 
-    def get_absolute_url(self):
-        return url_for('reuses.show', reuse=self)
-
     def __unicode__(self):
         return self.title
 
@@ -79,6 +76,10 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
             cls.on_create.send(document)
         else:
             cls.on_update.send(document)
+
+    @property
+    def display_url(self):
+        return url_for('reuses.show', reuse=self)
 
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)

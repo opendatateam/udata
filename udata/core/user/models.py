@@ -73,9 +73,6 @@ class User(db.Document, WithMetrics,UserMixin):
         'ordering': ['-created_at']
     }
 
-    def get_absolute_url(self):
-        return url_for('user', slug=self.slug)
-
     def __unicode__(self):
         return self.fullname
 
@@ -90,6 +87,10 @@ class User(db.Document, WithMetrics,UserMixin):
     @property
     def sysadmin(self):
         return bool(getattr(g, 'sysadmin'))
+
+    @property
+    def display_url(self):
+        return url_for('user', slug=self.slug)
 
 
 datastore = MongoEngineUserDatastore(db, User, Role)

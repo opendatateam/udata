@@ -93,9 +93,6 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
         'ordering': ['-created_at']
     }
 
-    def get_absolute_url(self):
-        return url_for('organizations.show', org=self)
-
     def __unicode__(self):
         return self.name
 
@@ -119,6 +116,10 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
             cls.on_create.send(document)
         else:
             cls.on_update.send(document)
+
+    @property
+    def display_url(self):
+        return url_for('organizations.show', org=self)
 
 
 pre_save.connect(Organization.pre_save, sender=Organization)

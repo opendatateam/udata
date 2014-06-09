@@ -5,6 +5,7 @@ import logging
 
 from flask.ext.mongoengine.wtf.models import ModelForm as MEModelForm
 from flask.ext.security import current_user
+from flask.ext.wtf import Form
 
 from udata import i18n
 

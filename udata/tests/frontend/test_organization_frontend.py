@@ -38,7 +38,7 @@ class OrganizationBlueprintTest(FrontTestCase):
         response = self.post(url_for('organizations.new'), data)
 
         organization = Organization.objects.first()
-        self.assertRedirects(response, organization.get_absolute_url())
+        self.assertRedirects(response, organization.display_url)
 
     def test_render_display(self):
         '''It should render the organization page'''
@@ -65,8 +65,62 @@ class OrganizationBlueprintTest(FrontTestCase):
         response = self.post(url_for('organizations.edit', org=organization), data)
 
         organization.reload()
-        self.assertRedirects(response, organization.get_absolute_url())
+        self.assertRedirects(response, organization.display_url)
         self.assertEqual(organization.description, 'new description')
+
+    def test_render_edit_extras(self):
+        '''It should render the organization extras edit form'''
+        user = self.login()
+        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
+        response = self.get(url_for('organizations.edit_extras', org=organization))
+        self.assert200(response)
+
+    def test_add_extras(self):
+        user = self.login()
+        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
+        data = {'key': 'a_key', 'value': 'a_value'}
+
+        response = self.post(url_for('organizations.edit_extras', org=organization), data)
+
+        self.assert200(response)
+        organization.reload()
+        self.assertIn('a_key', organization.extras)
+        self.assertEqual(organization.extras['a_key'], 'a_value')
+
+    def test_update_extras(self):
+        user = self.login()
+        organization = OrganizationFactory(members=[Member(user=user, role='admin')], extras={'a_key': 'a_value'})
+        data = {'key': 'a_key', 'value': 'new_value'}
+
+        response = self.post(url_for('organizations.edit_extras', org=organization), data)
+
+        self.assert200(response)
+        organization.reload()
+        self.assertIn('a_key', organization.extras)
+        self.assertEqual(organization.extras['a_key'], 'new_value')
+
+    def test_rename_extras(self):
+        user = self.login()
+        organization = OrganizationFactory(members=[Member(user=user, role='admin')], extras={'a_key': 'a_value'})
+        data = {'key': 'new_key', 'value': 'a_value', 'old_key': 'a_key'}
+
+        response = self.post(url_for('organizations.edit_extras', org=organization), data)
+
+        self.assert200(response)
+        organization.reload()
+        self.assertIn('new_key', organization.extras)
+        self.assertEqual(organization.extras['new_key'], 'a_value')
+        self.assertNotIn('a_key', organization.extras)
+
+    def test_delete_extras(self):
+        user = self.login()
+        organization = OrganizationFactory(members=[Member(user=user, role='admin')], extras={'a_key': 'a_value'})
+
+        response = self.delete(url_for('organizations.delete_extra', org=organization, extra='a_key'))
+
+        self.assert200(response)
+        organization.reload()
+        self.assertNotIn('a_key', organization.extras)
 
     def test_render_edit_members(self):
         '''It should render the organization member edit page'''

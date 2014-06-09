@@ -21,7 +21,6 @@ class ReuseBlueprintTest(FrontTestCase):
 
         self.assert200(response)
         rendered_reuses = self.get_context_variable('reuses')
-        print rendered_reuses
         self.assertEqual(rendered_reuses.total, len(reuses))
 
     def test_render_list_with_query(self):
@@ -52,7 +51,7 @@ class ReuseBlueprintTest(FrontTestCase):
         response = self.post(url_for('reuses.new'), data)
 
         reuse = Reuse.objects.first()
-        self.assertRedirects(response, reuse.get_absolute_url())
+        self.assertRedirects(response, reuse.display_url)
 
     def test_render_display(self):
         '''It should render the reuse page'''
@@ -76,7 +75,7 @@ class ReuseBlueprintTest(FrontTestCase):
         response = self.post(url_for('reuses.edit', reuse=reuse), data)
 
         reuse.reload()
-        self.assertRedirects(response, reuse.get_absolute_url())
+        self.assertRedirects(response, reuse.display_url)
         self.assertEqual(reuse.description, 'new description')
 
     def test_not_found(self):

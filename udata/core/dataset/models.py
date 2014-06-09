@@ -109,9 +109,6 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
 
     featured = db.BooleanField()
 
-    def get_absolute_url(self):
-        return url_for('datasets.show', dataset=self)
-
     def __unicode__(self):
         return self.title
 
@@ -143,6 +140,10 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
             cls.on_create.send(document)
         else:
             cls.on_update.send(document)
+
+    @property
+    def display_url(self):
+        return url_for('datasets.show', dataset=self)
 
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)

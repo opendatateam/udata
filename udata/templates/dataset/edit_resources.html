@@ -1,0 +1,46 @@
+{% extends theme('dataset/edit_base.html') %}
+{% import theme('macros/forms.html') as forms with context %}
+
+{% block tab_content %}
+<div class="row">
+    <div class="col-xs-12">
+        <div class="list-group resources-list">
+            {# <h3>{{ _('Resources') }}</h3> #}
+
+            {# TODO: extract max_resources conf #}
+            {% set max_resources = 3 %}
+            {% for resource in dataset.resources %}
+                {% if loop.index0 == max_resources %}
+                <div id="collapsed-resources" class="collapse">
+                {% endif %}
+                {% include theme('dataset/resource/list-item.html') %}
+            {% else %}
+            <p class="text-center">{{ _('No resources') }}</p>
+            {% endfor %}
+
+            {% if dataset.resources|length > max_resources %}
+                </div>
+
+                <p class="text-center expander">
+                    <a id="more-resources" type="button" class="btn btn-default"
+                        data-toggle="collapse" href="#collapsed-resources">
+                        <span class="glyphicon glyphicon-list" ></span>
+                        {{ _('See the %(nb)d resources', nb=dataset.resources|length) }}
+                    </button>
+                </p>
+            {% endif %}
+
+            {% if can_edit %}
+            <a class="list-group-item add"
+                href="{{ url_for('datasets.new_resource', dataset=dataset) }}">
+                <div class="format-label pull-left">+</div>
+                <h4 class="list-group-item-heading">
+                    {{ _('Add a resource') }}
+                </h4>
+            </a>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

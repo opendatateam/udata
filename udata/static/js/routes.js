@@ -18,6 +18,7 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
         datasetNew: {path: i18n('/datasets/new/'), moduleId: 'dataset/form'},
         datasetDisplay: {path: i18n('/datasets/:slug_or_id/'), moduleId: 'dataset/display'},
         datasetEdit: {path: i18n('/datasets/:slug_or_id/edit/'), moduleId: 'dataset/form'},
+        datasetEditExtras: {path: i18n('/datasets/:slug_or_id/edit/extras/'), moduleId: 'form/extras'},
 
         // Resources routes
         resourceNew: {path: i18n('/datasets/:slug_or_id/resources/new/'), moduleId: 'dataset/resource-form'},
@@ -29,6 +30,7 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
         orgDisplay: {path: i18n('/organizations/:slug_or_id/'), moduleId: 'organization/display'},
         orgEdit: {path: i18n('/organizations/:slug_or_id/edit/'), moduleId: 'organization/form'},
         orgMembers: {path: i18n('/organizations/:slug_or_id/edit/members/'), moduleId: 'organization/members'},
+        orgEditExtras: {path: i18n('/organizations/:slug_or_id/edit/extras/'), moduleId: 'form/extras'},
 
         // Reuses routes
         reuseSearch: {path: i18n('/reuses/'), moduleId: 'search'},

@@ -200,3 +200,56 @@
     </div>
 </div>
 {% endmacro %}
+
+
+{% macro extras(data) %}
+<table class="table table-stripped extras-table">
+    <thead>
+        <tr>
+            <th>{{ _('Key') }}</th>
+            <th>{{ _('Value') }}</th>
+            <th width="40px"></th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for key, value in data.items() %}
+    <tr class="extra">
+        <td>
+            <a class="key" href data-pk="{{ key }}" data-title="{{ _('Key') }}">
+                {{ key }}
+            </a>
+        </td>
+        <td>
+            <a class="value" href data-pk="{{ key }}" data-title="{{ _('Value') }}">
+                {{ value }}
+            </a>
+        </td>
+        <td>
+            <div class="btn-group btn-group-xs">
+                <a class="btn btn-danger extra-remove" title="{{ _('Remove') }}">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </a>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr >
+            <td>
+                <input id="new-key" type="text" class="form-control input-sm" placeholder="{{ _('New key') }}"/>
+            </td>
+            <td>
+                <input id="new-value" type="text" class="form-control input-sm" placeholder="{{ _('New value') }}"/>
+            </td>
+            <td>
+                <div class="btn-group btn-group-xs">
+                    <a class="btn btn-success extra-add" title="{{ _('Add') }}">
+                        <span class="glyphicon glyphicon-plus"></span>
+                    </a>
+                </div>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+{% endmacro %}

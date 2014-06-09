@@ -15,6 +15,7 @@ from flask.ext.gravatar import Gravatar
 from flask.ext.markdown import Markdown
 from flask.ext.themes2 import Themes, Theme, render_theme_template, get_theme, packaged_themes_loader
 from flask.ext.wtf.csrf import CsrfProtect
+from flask.ext.navigation import Navigation
 
 from udata.app import ROOT_DIR
 from udata.i18n import I18nBlueprint
@@ -25,6 +26,7 @@ log = logging.getLogger(__name__)
 assets = Environment()
 csrf = CsrfProtect()
 themes = Themes()
+nav = Navigation()
 gravatar = Gravatar(size=100,
                     rating='g',
                     default='mm',
@@ -119,6 +121,7 @@ def _load_views(app, module):
 def init_app(app):
     assets.init_app(app)
     gravatar.init_app(app)
+    nav.init_app(app)
     themes.init_themes(app, app_identifier='udata', loaders=[packaged_themes_loader, plugin_theme_loader])
 
     Markdown(app)
