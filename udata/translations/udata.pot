@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-06-11 01:09+0200\n"
+"POT-Creation-Date: 2014-06-11 01:35+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -593,10 +593,8 @@ msgstr ""
 #: udata/templates/dataset/resource/create.html:11
 #: udata/templates/dataset/resource/edit.html:11
 #: udata/templates/organization/create.html:10
-#: udata/templates/organization/edit.html:15
-#: udata/templates/organization/edit_teams.html:16
-#: udata/templates/reuse/create.html:10 udata/templates/reuse/edit.html:11
-#: udata/templates/user/edit.html:25
+#: udata/templates/organization/edit.html:15 udata/templates/reuse/create.html:10
+#: udata/templates/reuse/edit.html:11 udata/templates/user/edit.html:25
 msgid "Cancel"
 msgstr ""
 
@@ -664,9 +662,8 @@ msgstr ""
 
 #: udata/templates/dataset/edit.html:13
 #: udata/templates/dataset/resource/edit.html:10
-#: udata/templates/organization/edit.html:13
-#: udata/templates/organization/edit_teams.html:14
-#: udata/templates/reuse/edit.html:10 udata/templates/user/edit.html:24
+#: udata/templates/organization/edit.html:13 udata/templates/reuse/edit.html:10
+#: udata/templates/user/edit.html:24
 msgid "Save"
 msgstr ""
 
@@ -990,6 +987,11 @@ msgstr ""
 
 #: udata/templates/organization/display_base.html:121
 msgid "I'll be informed about this organization news"
+msgstr ""
+
+#: udata/templates/organization/edit_alerts.html:5
+#: udata/templates/organization/edit_teams.html:5
+msgid "Coming soon"
 msgstr ""
 
 #: udata/templates/organization/edit_members.html:12
