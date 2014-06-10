@@ -4,9 +4,54 @@
 define([
     'jquery',
     'logger',
+    'auth',
+    'i18n',
+    'notify',
+    'widgets/modal',
+    'hbs!templates/organization/request-membership-modal',
     'widgets/starred',
     'widgets/follow-btn'
-], function($, log) {
+], function($, log, Auth, i18n, Notify, modal, modal_tpl) {
+
+        // Async membership request
+        $('a.membership').click(function() {
+            var $this = $(this),
+                api_url = $this.data('api');
+
+            Auth.need_user(i18n._('You need to be logged in to request membership to an organization'));
+
+            var $modal = modal({
+                title: i18n._("Membership request"),
+                content: modal_tpl(),
+                close_btn: i18n._('Cancel'),
+                actions: [{
+                    label: i18n._('Send request'),
+                    classes: 'btn-success'
+                }]
+            });
+
+            $modal.find('.btn-success').click(function() {
+                var data = {comment: $modal.find('#comment').val()};
+                $.post(api_url, data, function(data) {
+                    var msg = i18n._('A request has been sent to the administrators');
+                    Notify.success(msg);
+                    $this.remove();
+                    $('#pending-button').removeClass('hide');
+                }).error(function(e) {
+                    var msg = i18n._('Error while requesting membership');
+                    Notify.error(msg);
+                    console.error(e.responseJSON);
+                }).always(function() {
+                    $modal.modal('hide').on('hidden.bs.modal', function() {
+                        this.remove();
+                    });
+                });
+                return false;
+            });
+
+            return false;
+        });
+
     return {
         start: function() {
             log.debug('Organization display page');

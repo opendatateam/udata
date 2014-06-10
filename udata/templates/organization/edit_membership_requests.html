@@ -1,107 +1,56 @@
 {% extends theme('organization/edit_base.html') %}
 {% import 'macros/forms.html' as forms with context %}
-{% set tab = 'members' %}
 
 
 {% block tab_content %}
-<table class="table table-stripped members-table">
+<table class="table table-stripped">
     <thead>
         <tr>
-            <th width="40px" class="text-center">
+            <th width="40px">
                 <span class="glyphicon glyphicon-user"></span>
             </th>
             <th>{{ _('User') }}</th>
-            <th>{{ _('Role') }}</th>
-            <th width="40px"></th>
+            <th>{{ _('Details') }}</th>
+            <th>{{ _('Date') }}</th>
+            <th width="80px">{{ _('Actions') }}</th>
         </tr>
     </thead>
     <tbody>
-        {% for member in org.members %}
-        <tr class="member" data-userid="{{member.user.id}}">
+        {% for request in org.pending_requests %}
+        <tr class="pending-request">
             <td class="text-center avatar">
-                {{ member.user|avatar(30) }}
-            </td>
-            <td>
-                <a href="{{ url_for('users.show', user=member.user) }}"
-                    title="{{ member.user.fullname }}">
-                    {{ member.user.fullname }}
+                <a class="avatar" href="{{ url_for('users.show', user=request.user) }}"
+                    title="{{ request.user.fullname }}">
+                    {{ request.user|avatar(30) }}
                 </a>
             </td>
             <td>
-                <a class="member-role" data-type="select" href
-                    data-pk="{{ member.user.id }}" data-title ="{{ _('Role') }}" data-value="{{member.role or 'editor'}}">
-                    {{ roles[member.role] }}
+                <a class="user" href="{{ url_for('users.show', user=request.user) }}"
+                    title="{{ request.user.fullname }}">
+                    {{ request.user.fullname }}
                 </a>
             </td>
+            <td>{{ request.comment }}</td>
+            <td>{{ request.created|dateformat(format='long') }}</td>
             <td>
                 <div class="btn-group btn-group-xs">
-                    <a class="btn btn-danger member-remove" title="{{ _('Remove') }}">
+                    <a class="btn btn-success membership-accept" title="{{ _('Accept') }}"
+                        data-api="{{ url_for('api.accept_membership', org=org, id=request.id) }}"}>
+                        <span class="glyphicon glyphicon-ok"></span>
+                    </a>
+                    <a class="btn btn-danger membership-refuse" title="{{ _('Refuse') }}"
+                        data-api="{{ url_for('api.refuse_membership', org=org, id=request.id) }}">
                         <span class="glyphicon glyphicon-remove"></span>
                     </a>
                 </div>
             </td>
         </tr>
         {% endfor %}
-        <tr class="empty {% if org.members %}hide{% endif %}">
-            <td colspan="5" class="text-center">{{ _('No members') }}</td>
+        <tr class="empty {% if org.pending_requests %}hide{% endif %}">
+            <td colspan="5" class="text-center">{{ _('No pending requests') }}</td>
         </tr>
     </tbody>
 </table>
-
-<div class="row">
-    <div class="col-xs-12 col-sm-offset-1 col-sm-10 col-md-offset-2 col-md-8 col-lg-offset-4 col-lg-4">
-        {# <span class="input-group-addon">
-            <span class="glyphicon glyphicon-user"></span>
-        </span> #}
-        <input id="user-picker" name="user" type="text"
-            placeholder="{{ _('Add a member') }}" />
-    </div>
-</div>
-
-
-{# Add members modal #}
-<div class="modal fade" id="add-member-modal" tabindex="-1" role="dialog" aria-labelledby="add-member-modal-title" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 id="add-member-modal-title" class="modal-title">{{ _("Add member") }}</h4>
-            </div>
-            <div class="modal-body"></div>
-            <div class="modal-footer">
-                <a id="add-button" class="btn btn-primary" href>
-                    <span class="glyphicon glyphicon-plus-sign"></span>
-                    {{ _("Add") }}
-                </a>
-                <button type="button" class="btn btn-warning" data-dismiss="modal">
-                    <span class="glyphicon glyphicon-remove"></span>
-                    {{ _("Cancel") }}
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-{# Confirm delete modal #}
-<div class="modal fade" id="confirm-delete-modal" tabindex="-1" role="dialog"
-    aria-labelledby="confirm-delete-modal-label" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="confirm-delete-modal-label">{{ _('Confirm deletion') }}</h4>
-            </div>
-            <div class="modal-body">
-                <p>
-                {{ _('You are about to delete this member.') }}<br/>
-                </p>
-                <p><strong>{{ _('Are you sure ?') }}</strong></p>
-            </div>
-            <div class="modal-footer">
-                <a href class="btn btn-primary">{{ _('Yes') }}</a>
-                <button type="button" class="btn btn-warning" data-dismiss="modal">{{ _('No') }}</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
+
+

@@ -30,6 +30,7 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
         orgDisplay: {path: i18n('/organizations/:slug_or_id/'), moduleId: 'organization/display'},
         orgEdit: {path: i18n('/organizations/:slug_or_id/edit/'), moduleId: 'organization/form'},
         orgMembers: {path: i18n('/organizations/:slug_or_id/edit/members/'), moduleId: 'organization/members'},
+        orgRequests: {path: i18n('/organizations/:slug_or_id/edit/requests/'), moduleId: 'organization/membership-requests'},
         orgEditExtras: {path: i18n('/organizations/:slug_or_id/edit/extras/'), moduleId: 'form/extras'},
 
         // Reuses routes

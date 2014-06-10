@@ -4,10 +4,10 @@
 define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) {
     'use strict';
 
-    // jQuery validate
-    $('form.validation').validate({
+    var rules = {
         errorClass: "help-block",
         highlight: function(element) {
+            console.log(element);
             $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
         },
         unhighlight: function(element) {
@@ -19,7 +19,10 @@ define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) 
                 label.remove();
             }
         }
-    });
+    };
+
+    // jQuery validate
+    $('form.validation').validate(rules);
 
     // jQuery validate
     $.extend($.validator.messages, {
@@ -61,5 +64,9 @@ define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) 
 
         return false;
     });
+
+    return {
+        rules: rules
+    };
 
 });

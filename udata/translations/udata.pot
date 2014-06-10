@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-06-03 02:36+0200\n"
+"POT-Creation-Date: 2014-06-11 01:09+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,6 +66,22 @@ msgstr ""
 
 #: udata/core/dataset/forms.py:32
 msgid "Checksum"
+msgstr ""
+
+#: udata/core/dataset/forms.py:36 udata/core/organization/forms.py:28
+#: udata/forms/fields.py:252 udata/templates/macros/forms.html:209
+#: udata/templates/macros/forms.html:218
+msgid "Key"
+msgstr ""
+
+#: udata/core/dataset/forms.py:37 udata/core/organization/forms.py:29
+#: udata/forms/fields.py:253 udata/templates/macros/forms.html:210
+#: udata/templates/macros/forms.html:223
+msgid "Value"
+msgstr ""
+
+#: udata/core/dataset/forms.py:38 udata/core/organization/forms.py:30
+msgid "Old key"
 msgstr ""
 
 #: udata/core/dataset/metrics.py:16 udata/core/metrics/metrics.py:25
@@ -179,9 +195,27 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
+#: udata/core/dataset/views.py:61 udata/core/organization/views.py:33
+msgid "Descrition"
+msgstr ""
+
+#: udata/core/dataset/views.py:62
+msgid "Additionnal informations"
+msgstr ""
+
+#: udata/core/dataset/views.py:63 udata/core/metrics/metrics.py:35
+#: udata/templates/dataset/display.html:46
+msgid "Resources"
+msgstr ""
+
+#: udata/core/dataset/views.py:64
+msgid "Transfer"
+msgstr ""
+
 #: udata/core/followers/metrics.py:15 udata/core/metrics/metrics.py:73
 #: udata/core/organization/metrics.py:66 udata/core/user/metrics.py:48
 #: udata/templates/dataset/followers.html:7
+#: udata/templates/dataset/search-result.html:91
 #: udata/templates/organization/followers.html:7
 #: udata/templates/organization/list.html:42 udata/templates/user/followers.html:7
 msgid "Followers"
@@ -191,8 +225,8 @@ msgstr ""
 #: udata/core/reuse/metrics.py:16 udata/core/user/metrics.py:24
 #: udata/templates/header.html:31 udata/templates/search.html:12
 #: udata/templates/dataset/create.html:4 udata/templates/dataset/display.html:6
-#: udata/templates/dataset/edit.html:4 udata/templates/dataset/followers.html:5
-#: udata/templates/dataset/list.html:7
+#: udata/templates/dataset/edit_base.html:4
+#: udata/templates/dataset/followers.html:5 udata/templates/dataset/list.html:7
 #: udata/templates/dataset/resource/create.html:4
 #: udata/templates/dataset/resource/display.html:4
 #: udata/templates/dataset/resource/edit.html:4
@@ -202,10 +236,6 @@ msgstr ""
 #: udata/templates/topic/display.html:19 udata/templates/user/datasets.html:8
 #: udata/templates/user/following.html:15 udata/templates/user/starred.html:26
 msgid "Datasets"
-msgstr ""
-
-#: udata/core/metrics/metrics.py:35 udata/templates/dataset/display.html:46
-msgid "Resources"
 msgstr ""
 
 #: udata/core/metrics/metrics.py:53 udata/templates/user/base.html:4
@@ -235,13 +265,21 @@ msgstr ""
 msgid "Image URL"
 msgstr ""
 
-#: udata/core/organization/metrics.py:43
-#: udata/templates/organization/edit_base.html:42
+#: udata/core/organization/forms.py:37
+msgid "Comment"
+msgstr ""
+
+#: udata/core/organization/metrics.py:43 udata/core/organization/views.py:35
 msgid "Members"
 msgstr ""
 
-#: udata/core/organization/models.py:18 udata/core/organization/models.py:19
+#: udata/core/organization/models.py:18
 msgid "Administrateur"
+msgstr ""
+
+#: udata/core/organization/models.py:19
+#: udata/templates/organization/display_base.html:100
+msgid "Editor"
 msgstr ""
 
 #: udata/core/organization/models.py:24
@@ -254,6 +292,22 @@ msgstr ""
 
 #: udata/core/organization/models.py:26
 msgid "Refused"
+msgstr ""
+
+#: udata/core/organization/views.py:34
+msgid "Additional informations"
+msgstr ""
+
+#: udata/core/organization/views.py:36
+msgid "Membership request"
+msgstr ""
+
+#: udata/core/organization/views.py:37
+msgid "Teams"
+msgstr ""
+
+#: udata/core/organization/views.py:38
+msgid "Alerts"
 msgstr ""
 
 #: udata/core/post/forms.py:17
@@ -346,14 +400,6 @@ msgstr ""
 #: udata/forms/fields.py:159
 #, python-format
 msgid "Tag \"%s\" must be alphanumeric characters or symbols: -_."
-msgstr ""
-
-#: udata/forms/fields.py:252
-msgid "Key"
-msgstr ""
-
-#: udata/forms/fields.py:253
-msgid "Value"
 msgstr ""
 
 #: udata/forms/validators.py:43
@@ -543,13 +589,11 @@ msgstr ""
 msgid "Create"
 msgstr ""
 
-#: udata/templates/dataset/create.html:10 udata/templates/dataset/edit.html:11
+#: udata/templates/dataset/create.html:10 udata/templates/dataset/edit.html:14
 #: udata/templates/dataset/resource/create.html:11
 #: udata/templates/dataset/resource/edit.html:11
 #: udata/templates/organization/create.html:10
 #: udata/templates/organization/edit.html:15
-#: udata/templates/organization/edit_members.html:78
-#: udata/templates/organization/edit_membership_requests.html:78
 #: udata/templates/organization/edit_teams.html:16
 #: udata/templates/reuse/create.html:10 udata/templates/reuse/edit.html:11
 #: udata/templates/user/edit.html:25
@@ -576,6 +620,7 @@ msgid "Community resources"
 msgstr ""
 
 #: udata/templates/dataset/display.html:72 udata/templates/dataset/display.html:88
+#: udata/templates/dataset/edit_resources.html:18
 msgid "No resources"
 msgstr ""
 
@@ -617,18 +662,27 @@ msgstr ""
 msgid "Informations"
 msgstr ""
 
-#: udata/templates/dataset/edit.html:6
-#: udata/templates/organization/edit_base.html:9 udata/templates/reuse/edit.html:6
-#: udata/templates/user/edit.html:13
-msgid "Edition"
-msgstr ""
-
-#: udata/templates/dataset/edit.html:10
+#: udata/templates/dataset/edit.html:13
 #: udata/templates/dataset/resource/edit.html:10
 #: udata/templates/organization/edit.html:13
 #: udata/templates/organization/edit_teams.html:14
 #: udata/templates/reuse/edit.html:10 udata/templates/user/edit.html:24
 msgid "Save"
+msgstr ""
+
+#: udata/templates/dataset/edit_base.html:6
+#: udata/templates/organization/edit_base.html:9 udata/templates/reuse/edit.html:6
+#: udata/templates/user/edit.html:13
+msgid "Edition"
+msgstr ""
+
+#: udata/templates/dataset/edit_resources.html:28
+#, python-format
+msgid "See the %(nb)d resources"
+msgstr ""
+
+#: udata/templates/dataset/edit_resources.html:38
+msgid "Add a resource"
 msgstr ""
 
 #: udata/templates/dataset/followers.html:28
@@ -703,15 +757,12 @@ msgstr ""
 msgid "%(org)s member"
 msgstr ""
 
-#: udata/templates/macros/forms.html:151
-#: udata/templates/organization/edit_members.html:74
-#: udata/templates/organization/edit_membership_requests.html:74
+#: udata/templates/macros/forms.html:151 udata/templates/macros/forms.html:247
 msgid "Add"
 msgstr ""
 
-#: udata/templates/macros/forms.html:155
-#: udata/templates/organization/edit_members.html:38
-#: udata/templates/organization/edit_membership_requests.html:38
+#: udata/templates/macros/forms.html:155 udata/templates/macros/forms.html:229
+#: udata/templates/organization/edit_members.html:37
 msgid "Remove"
 msgstr ""
 
@@ -737,6 +788,14 @@ msgstr ""
 
 #: udata/templates/macros/forms.html:193
 msgid "Upload"
+msgstr ""
+
+#: udata/templates/macros/forms.html:240
+msgid "New key"
+msgstr ""
+
+#: udata/templates/macros/forms.html:243
+msgid "New value"
 msgstr ""
 
 #: udata/templates/macros/paginator.html:8
@@ -916,10 +975,6 @@ msgstr ""
 msgid "You are editor in this organization"
 msgstr ""
 
-#: udata/templates/organization/display_base.html:100
-msgid "Editor"
-msgstr ""
-
 #: udata/templates/organization/display_base.html:104
 msgid "You are a member of this organization"
 msgstr ""
@@ -937,72 +992,66 @@ msgstr ""
 msgid "I'll be informed about this organization news"
 msgstr ""
 
-#: udata/templates/organization/edit_base.html:37
-msgid "Descrition"
-msgstr ""
-
-#: udata/templates/organization/edit_base.html:47
-msgid "Membership request"
-msgstr ""
-
-#: udata/templates/organization/edit_base.html:52
-msgid "Teams"
-msgstr ""
-
-#: udata/templates/organization/edit_base.html:57
-msgid "Alerts"
-msgstr ""
-
-#: udata/templates/organization/edit_members.html:13
-#: udata/templates/organization/edit_membership_requests.html:13
+#: udata/templates/organization/edit_members.html:12
+#: udata/templates/organization/edit_membership_requests.html:12
 msgid "User"
 msgstr ""
 
-#: udata/templates/organization/edit_members.html:14
-#: udata/templates/organization/edit_members.html:32
-#: udata/templates/organization/edit_membership_requests.html:14
-#: udata/templates/organization/edit_membership_requests.html:32
+#: udata/templates/organization/edit_members.html:13
+#: udata/templates/organization/edit_members.html:31
 msgid "Role"
 msgstr ""
 
-#: udata/templates/organization/edit_members.html:46
-#: udata/templates/organization/edit_membership_requests.html:46
+#: udata/templates/organization/edit_members.html:45
 msgid "No members"
 msgstr ""
 
 #: udata/templates/organization/edit_members.html:57
-#: udata/templates/organization/edit_membership_requests.html:57
 msgid "Add a member"
 msgstr ""
 
-#: udata/templates/organization/edit_members.html:68
-#: udata/templates/organization/edit_membership_requests.html:68
-msgid "Add member"
-msgstr ""
-
-#: udata/templates/organization/edit_members.html:92
-#: udata/templates/organization/edit_membership_requests.html:92
+#: udata/templates/organization/edit_members.html:70
 msgid "Confirm deletion"
 msgstr ""
 
-#: udata/templates/organization/edit_members.html:96
-#: udata/templates/organization/edit_membership_requests.html:96
+#: udata/templates/organization/edit_members.html:74
 msgid "You are about to delete this member."
 msgstr ""
 
-#: udata/templates/organization/edit_members.html:98
-#: udata/templates/organization/edit_membership_requests.html:98
+#: udata/templates/organization/edit_members.html:76
 msgid "Are you sure ?"
 msgstr ""
 
-#: udata/templates/organization/edit_members.html:101
-#: udata/templates/organization/edit_membership_requests.html:101
+#: udata/templates/organization/edit_members.html:79
 msgid "Yes"
 msgstr ""
 
-#: udata/templates/organization/edit_members.html:102
-#: udata/templates/organization/edit_membership_requests.html:102
+#: udata/templates/organization/edit_members.html:80
 msgid "No"
+msgstr ""
+
+#: udata/templates/organization/edit_membership_requests.html:13
+msgid "Details"
+msgstr ""
+
+#: udata/templates/organization/edit_membership_requests.html:14
+msgid "Date"
+msgstr ""
+
+#: udata/templates/organization/edit_membership_requests.html:15
+msgid "Actions"
+msgstr ""
+
+#: udata/templates/organization/edit_membership_requests.html:37
+msgid "Accept"
+msgstr ""
+
+#: udata/templates/organization/edit_membership_requests.html:41
+msgid "Refuse"
+msgstr ""
+
+#: udata/templates/organization/edit_membership_requests.html:50
+msgid "No pending requests"
 msgstr ""
 
 #: udata/templates/organization/list.html:19
@@ -1074,10 +1123,6 @@ msgid "%(num)d followed"
 msgid_plural "%(num)d followed"
 msgstr[0] ""
 msgstr[1] ""
-
-#: udata/templates/user/contributions.html:8
-msgid "Contributions"
-msgstr ""
 
 #: udata/templates/user/following.html:43
 #, python-format

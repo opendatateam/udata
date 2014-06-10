@@ -11,12 +11,12 @@ from udata.models import db, WithMetrics
 from udata.i18n import lazy_gettext as _
 
 
-__all__ = ('Organization', 'Team', 'Member', 'ORG_ROLES')
+__all__ = ('Organization', 'Team', 'Member', 'MembershipRequest', 'ORG_ROLES', 'MEMBERSHIP_STATUS')
 
 
 ORG_ROLES = {
     'admin': _('Administrateur'),
-    'editor': _('Administrateur'),
+    'editor': _('Editor'),
 }
 
 
@@ -52,6 +52,10 @@ class Member(db.EmbeddedDocument):
     role = db.StringField(choices=ORG_ROLES.keys())
     since = db.DateTimeField(default=datetime.now, required=True)
 
+    @property
+    def label(self):
+        return ORG_ROLES[self.role]
+
 
 class MembershipRequest(db.EmbeddedDocument):
     '''
@@ -68,6 +72,10 @@ class MembershipRequest(db.EmbeddedDocument):
 
     comment = db.StringField()
     refusal_comment = db.StringField()
+
+    @property
+    def status_label(self):
+        return MEMBERSHIP_STATUS[self.status]
 
 
 class Organization(WithMetrics, db.Datetimed, db.Document):
@@ -121,9 +129,33 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
     def display_url(self):
         return url_for('organizations.show', org=self)
 
+    @property
+    def pending_requests(self):
+        return [r for r in self.requests if r.status == 'pending']
+
+    @property
+    def refused_requests(self):
+        return [r for r in self.requests if r.status == 'refused']
+
+    @property
+    def accepted_requests(self):
+        return [r for r in self.requests if r.status == 'accepted']
+
+    def member(self, user):
+        for member in self.members:
+            if member.user == user:
+                return member
+        return None
+
+    def is_member(self, user):
+        return self.member(user) is not None
+
+    def pending_request(self, user):
+        for request in self.requests:
+            if request.user == user and request.status == 'pending':
+                return request
+        return None
+
 
 pre_save.connect(Organization.pre_save, sender=Organization)
 post_save.connect(Organization.post_save, sender=Organization)
-
-
-

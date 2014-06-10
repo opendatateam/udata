@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from bson import ObjectId
+from uuid import UUID
 
 from werkzeug.routing import BaseConverter
 
@@ -18,6 +19,11 @@ class ListConverter(BaseConverter):
 
     def to_url(self, values):
         return ','.join(super(ListConverter, self).to_url(value) for value in values)
+
+
+class UUIDConverter(BaseConverter):
+    def to_python(self, value):
+        return value if isinstance(value, UUID) else UUID(value)
 
 
 class ModelConverter(BaseConverter):
@@ -53,8 +59,6 @@ class ModelConverter(BaseConverter):
             raise ValueError('Unable to serialize "%s" to url' % obj)
 
 
-
-
 class DatasetConverter(ModelConverter):
     model = models.Dataset
 
@@ -82,6 +86,7 @@ class PostConverter(ModelConverter):
 def init_app(app):
     app.url_map.converters['lang'] = LanguagePrefixConverter
     app.url_map.converters['list'] = ListConverter
+    app.url_map.converters['uuid'] = UUIDConverter
     app.url_map.converters['dataset'] = DatasetConverter
     app.url_map.converters['org'] = OrganizationConverter
     app.url_map.converters['reuse'] = ReuseConverter

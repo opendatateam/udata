@@ -33,9 +33,9 @@ navbar = nav.Bar('edit_org', [
     nav.Item(_('Descrition'), 'organizations.edit'),
     nav.Item(_('Additional informations'), 'organizations.edit_extras'),
     nav.Item(_('Members'), 'organizations.edit_members'),
-    nav.Item(_('Membership request'), 'organizations.edit_members'),
+    nav.Item(_('Membership request'), 'organizations.edit_membership_requests'),
     nav.Item(_('Teams'), 'organizations.edit_teams'),
-    nav.Item(_('Alerts'), 'organizations.edit_members')
+    nav.Item(_('Alerts'), 'organizations.edit_alerts')
 ])
 
 
@@ -135,9 +135,9 @@ class OrganizationEditMembersView(ProtectedOrgView, EditView):
         return '', 204
 
 
-class OrganizationEditTeamsView(ProtectedOrgView, EditView):
+class OrganizationMembershipRequestsView(ProtectedOrgView, EditView):
     form = OrganizationForm
-    template_name = 'organization/edit_teams.html'
+    template_name = 'organization/edit_membership_requests.html'
 
 
 class OrganizationExtrasEditView(ProtectedOrgView, EditView):
@@ -159,11 +159,23 @@ class OrganizationExtraDeleteView(ProtectedOrgView, SingleObject, BaseView):
         return ''
 
 
+class OrganizationEditTeamsView(ProtectedOrgView, EditView):
+    form = OrganizationForm
+    template_name = 'organization/edit_teams.html'
+
+
+class OrganizationEditAlertsView(ProtectedOrgView, EditView):
+    form = OrganizationForm
+    template_name = 'organization/edit_alerts.html'
+
+
 blueprint.add_url_rule('/', view_func=OrganizationListView.as_view(str('list')))
 blueprint.add_url_rule('/new/', view_func=OrganizationCreateView.as_view(str('new')))
 blueprint.add_url_rule('/<org:org>/', view_func=OrganizationDetailView.as_view(str('show')))
 blueprint.add_url_rule('/<org:org>/edit/', view_func=OrganizationEditView.as_view(str('edit')))
 blueprint.add_url_rule('/<org:org>/edit/members/', view_func=OrganizationEditMembersView.as_view(str('edit_members')))
+blueprint.add_url_rule('/<org:org>/edit/requests/', view_func=OrganizationMembershipRequestsView.as_view(str('edit_membership_requests')))
 blueprint.add_url_rule('/<org:org>/edit/teams/', view_func=OrganizationEditTeamsView.as_view(str('edit_teams')))
+blueprint.add_url_rule('/<org:org>/edit/alerts/', view_func=OrganizationEditAlertsView.as_view(str('edit_alerts')))
 blueprint.add_url_rule('/<org:org>/edit/extras/', view_func=OrganizationExtrasEditView.as_view(str('edit_extras')))
 blueprint.add_url_rule('/<org:org>/edit/extras/<string:extra>/', view_func=OrganizationExtraDeleteView.as_view(str('delete_extra')))

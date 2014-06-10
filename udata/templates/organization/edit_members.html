@@ -49,37 +49,16 @@
 
 <div class="row">
     <div class="col-xs-12 col-sm-offset-1 col-sm-10 col-md-offset-2 col-md-8 col-lg-offset-4 col-lg-4">
-        {# <span class="input-group-addon">
-            <span class="glyphicon glyphicon-user"></span>
-        </span> #}
-        <input id="user-picker" name="user" type="text"
-            placeholder="{{ _('Add a member') }}" />
-    </div>
-</div>
-
-
-{# Add members modal #}
-<div class="modal fade" id="add-member-modal" tabindex="-1" role="dialog" aria-labelledby="add-member-modal-title" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 id="add-member-modal-title" class="modal-title">{{ _("Add member") }}</h4>
-            </div>
-            <div class="modal-body"></div>
-            <div class="modal-footer">
-                <a id="add-button" class="btn btn-primary" href>
-                    <span class="glyphicon glyphicon-plus-sign"></span>
-                    {{ _("Add") }}
-                </a>
-                <button type="button" class="btn btn-warning" data-dismiss="modal">
-                    <span class="glyphicon glyphicon-remove"></span>
-                    {{ _("Cancel") }}
-                </button>
-            </div>
+        <div class="input-group">
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-user"></span>
+            </span>
+            <input id="user-picker" name="user" type="text"
+                placeholder="{{ _('Add a member') }}" />
         </div>
     </div>
 </div>
+
 
 {# Confirm delete modal #}
 <div class="modal fade" id="confirm-delete-modal" tabindex="-1" role="dialog"
