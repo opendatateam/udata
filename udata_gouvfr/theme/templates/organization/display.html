@@ -1,6 +1,5 @@
 {% extends theme("layouts/1-column.html") %}
 {% from theme('macros/paginator.html') import paginator with context %}
-{% from theme('macros/starred.html') import starred with context %}
 {% from theme('macros/follow.html') import follow_btn with context %}
 {% from theme('macros/timeline.html') import timeline with context %}
 
@@ -99,11 +98,13 @@
                     </p>
                     {% endif %}
                 </div>
-                {% if not is_member %}
-                    {% if not pending %}
+                {% set member = org.member(current_user) %}
+                {% if not member %}
+                    {% set pending_request = org.pending_request(current_user) %}
+                    {% if not pending_request %}
                     <a href rel="tooltip" class="btn btn-primary btn-block btn-sm icon-left membership"
                         data-placement="left"
-                        {# data-api="{{ url_for(lang, 'youckan/organization', organization.name, 'membership') }}" #}
+                        data-api="{{ url_for('api.request_membership', org=org) }}"
                         title="{{ _('I belong to this organization') }}">
                         <span class="glyphicon glyphicon-user"></span>
                         {{ _('Join') }}
@@ -111,20 +112,20 @@
                     {% endif %}
                     <div class="tooltip-wrapper" rel="tooltip" title="{{ _('Waiting for approval') }}" data-placement="left">
                         <a id="pending-button" href rel="tooltip"
-                            class="btn btn-default btn-block btn-sm icon-left disabled {% if not pending %}hide{% endif %}"
+                            class="btn btn-default btn-block btn-sm icon-left disabled {% if not pending_request %}hide{% endif %}"
                             >
                             <span class="glyphicon glyphicon-user"></span>
                             {{ _('Pending request') }}
                         </a>
                     </div>
-                {% elif is_admin %}
+                {% elif member.role == 'admin' %}
                 <div class="tooltip-wrapper" rel="tooltip" title="{{ _('You are an administrator of this organization') }}" data-placement="left">
                     <a href class="btn btn-default btn-block btn-sm icon-left disabled">
                         <span class="glyphicon glyphicon-user"></span>
                         {{ _('Administrator') }}
                     </a>
                 </div>
-                {% elif is_editor %}
+                {% elif member.role == 'editor' %}
                 <div class="tooltip-wrapper" rel="tooltip" title="{{ _('You are editor in this organization') }}" data-placement="left">
                     <a href class="btn btn-default btn-block btn-sm icon-left disabled">
                         <span class="glyphicon glyphicon-user"></span>

@@ -1,5 +1,4 @@
 {% extends theme('base.html') %}
-{% from theme('macros/starred.html') import starred with context %}
 {% from theme('macros/follow.html') import follow_btn with context %}
 
 {% block extra_head %}
@@ -32,12 +31,9 @@
     </button>
 </div>
 {% endif %}
-<div class="btn-group btn-group-xs">
-    {{ starred(dataset) }}
-</div>
 
 <div class="btn-group btn-group-xs">
-    {{ follow_btn(dataset) }}
+    {{ follow_btn(dataset, icons=[ficon('fa-star-empty'), ficon('fa-star')]) }}
 </div>
 {% endblock %}
 
@@ -118,8 +114,7 @@
                         </div>
                         {% endif %}
                         <div class="btn-group btn-group-sm">
-                            {{ starred(dataset) }}
-                            {{ follow_btn(dataset) }}
+                            {{ follow_btn(dataset, ['fa-star-o', 'fa-star']) }}
                         </div>
                     </div>
                 </div>
@@ -162,6 +157,7 @@
                             class="btn btn-primary btn-follow btn-block btn-sm icon-left {% if is_following(dataset.organization) %}active{% endif %}"
                             rel="tooltip" data-placement="left"
                             data-api-url="{{ url_for('api.follow_organization', id=dataset.organization.id|string) }}"
+                            data-following-label="{{ _('Unfollow') }}"
                             {% if is_following(dataset.organization) %}
                             title="{{ _('Unfollow') }}">
                             <span class="glyphicon glyphicon-eye-close"></span>
