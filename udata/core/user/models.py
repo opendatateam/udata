@@ -53,10 +53,6 @@ class User(db.Document, WithMetrics,UserMixin):
     current_login_ip = db.StringField()
     login_count = db.IntField()
 
-    starred_datasets = db.ListField(db.ReferenceField('Dataset'))
-    starred_reuses = db.ListField(db.ReferenceField('Reuse'))
-    starred_organizations = db.ListField(db.ReferenceField('Organization'))
-
     ext = db.MapField(db.GenericEmbeddedDocumentField())
 
     before_save = Signal()

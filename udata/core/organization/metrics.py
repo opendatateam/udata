@@ -48,18 +48,6 @@ class MembersMetric(Metric):
 MembersMetric.connect(Organization.on_create, Organization.on_update)
 
 
-class StarsMetric(Metric):
-    model = Organization
-    name = 'stars'
-    display_name = _('Stars')
-
-    def get_value(self):
-        return User.objects(starred_organizations=self.target).count()
-
-
-StarsMetric.connect(Organization.on_star, Organization.on_unstar)
-
-
 class FollowersMetric(Metric):
     model = Organization
     name = 'followers'

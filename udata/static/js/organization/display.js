@@ -9,7 +9,6 @@ define([
     'notify',
     'widgets/modal',
     'hbs!templates/organization/request-membership-modal',
-    'widgets/starred',
     'widgets/follow-btn'
 ], function($, log, Auth, i18n, Notify, modal, modal_tpl) {
 

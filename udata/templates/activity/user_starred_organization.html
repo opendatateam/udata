@@ -1,8 +1,0 @@
-{% extends theme('activity/base.html') %}
-
-{% set icon = 'glyphicon glyphicon-star' %}
-
-{% block endtitle %}
-{{_('starred organization')}}
-<a href="{{ url_for('organizations.show', org=activity.organization) }}">{{activity.organization.name}}</a>
-{% endblock %}

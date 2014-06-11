@@ -9,7 +9,6 @@ define([
     'widgets/modal',
     'widgets/featured',
     'widgets/follow-btn',
-    'widgets/starred'
 ], function($, log, i18n, template, modal) {
 
     function prepare_resources() {

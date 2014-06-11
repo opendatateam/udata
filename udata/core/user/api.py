@@ -36,47 +36,4 @@ class MeAPI(ModelAPI):
     fields = user_fields
 
 
-class StarredModelAPI(SingleObjectAPI, API):
-    def post(self, slug):
-        if not current_user.is_authenticated():
-            abort(401)
-        obj = self.get_or_404(slug=slug)
-        key = obj.__class__.__name__.lower()
-        starred = getattr(current_user, 'starred_{0}s'.format(key))
-
-        if obj not in starred:
-            starred.append(obj)
-            current_user.save()
-            obj.on_star.send(obj)
-            return marshal(current_user, user_fields), 201
-        else:
-            return marshal(current_user, user_fields)
-
-    def delete(self, slug):
-        if not current_user.is_authenticated():
-            abort(401)
-        obj = self.get_or_404(slug=slug)
-        key = obj.__class__.__name__.lower()
-        starred = getattr(current_user, 'starred_{0}s'.format(key))
-        starred.remove(obj)
-        current_user.save()
-        obj.on_unstar.send(obj)
-        return marshal(current_user, user_fields), 204
-
-
-class StarredDatasetsAPI(StarredModelAPI):
-    model = Dataset
-
-
-class StarredReusesAPI(StarredModelAPI):
-    model = Reuse
-
-
-class StarredOrganizationsAPI(StarredModelAPI):
-    model = Organization
-
-
 api.add_resource(MeAPI, '/me/', endpoint=b'api.me')
-api.add_resource(StarredDatasetsAPI, '/me/starred_datasets/<string:slug>', endpoint=b'api.starred_datasets')
-api.add_resource(StarredReusesAPI, '/me/starred_reuses/<string:slug>', endpoint=b'api.starred_reuses')
-api.add_resource(StarredOrganizationsAPI, '/me/starred_organizations/<string:slug>', endpoint=b'api.starred_organizations')

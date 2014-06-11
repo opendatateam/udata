@@ -80,9 +80,3 @@ class UserBlueprintTest(FrontTestCase):
         response = self.get(url_for('users.activity', user=user))
         self.assert200(response)
 
-    def test_user_starred_empty(self):
-        '''It should render an empty user starred page'''
-        user = UserFactory()
-        response = self.get(url_for('users.starred', user=user))
-        self.assert200(response)
-

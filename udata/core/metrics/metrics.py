@@ -76,30 +76,3 @@ class FollowersMetric(SiteMetric):
         return Follow.objects(until=None).count()
 
 FollowersMetric.connect(Follow.on_new)
-
-
-class StarsMetric(SiteMetric):
-    name = 'stars'
-    display_name = _('Stars')
-
-    def get_value(self):
-        script = '''
-        function() {
-            var starred_datasets = db[collection].aggregate(
-                    {$unwind : "$starred_datasets"},
-                    {$group : {_id: null, number: {$sum: 1}}}
-                ).result[0].number || 0,
-                starred_orgs = db[collection].aggregate(
-                    {$unwind : "$starred_datasets"},
-                    {$group : {_id: null, number: {$sum: 1}}}
-                ).result[0].number || 0,
-                starred_reuses = db[collection].aggregate(
-                    {$unwind : "$starred_datasets"},
-                    {$group : {_id: null, number: {$sum: 1}}}
-                ).result[0].number || 0;
-            return starred_datasets + starred_reuses + starred_orgs;
-        }
-        '''
-        return int(User.objects.exec_js(script))
-
-StarsMetric.connect(Organization.on_star, Reuse.on_star, Dataset.on_star)

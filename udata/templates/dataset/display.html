@@ -1,5 +1,4 @@
 {% extends theme('layouts/2-columns.html') %}
-{% from theme('macros/starred.html') import starred with context %}
 {% from theme('macros/follow.html') import follow_btn with context %}
 
 {% block breadcrumb %}
@@ -27,7 +26,6 @@
 </div>
 {% endif %}
 <div class="btn-group btn-group-xs">
-    {{ starred(dataset) }}
     {{ follow_btn(dataset) }}
 </div>
 {% endblock %}

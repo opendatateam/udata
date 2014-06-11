@@ -1,8 +1,0 @@
-{% extends theme('activity/base.html') %}
-
-{% set icon = 'glyphicon glyphicon-star' %}
-
-{% block endtitle %}
-{{_('starred reuse')}}
-<a href="{{ url_for('reuses.show', reuse=activity.reuse) }}">{{activity.reuse.title}}</a>
-{% endblock %}

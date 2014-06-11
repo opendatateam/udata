@@ -90,14 +90,9 @@ class UserActivityView(UserView, DetailView):
         return context
 
 
-class UserStarredView(UserView, DetailView):
-    template_name = 'user/starred.html'
-
-
 blueprint.add_url_rule('/', view_func=UserListView.as_view(str('list')))
 blueprint.add_url_rule('/<user:user>/', view_func=UserActivityView.as_view(str('show')))
 blueprint.add_url_rule('/<user:user>/edit/', view_func=UserProfileEditView.as_view(str('edit')))
 blueprint.add_url_rule('/<user:user>/activity/', view_func=UserActivityView.as_view(str('activity')))
 blueprint.add_url_rule('/<user:user>/datasets/', view_func=UserDatasetsView.as_view(str('datasets')))
 blueprint.add_url_rule('/<user:user>/reuses/', view_func=UserReusesView.as_view(str('reuses')))
-blueprint.add_url_rule('/<user:user>/starred/', view_func=UserStarredView.as_view(str('starred')))

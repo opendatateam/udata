@@ -1,24 +1,9 @@
 {% extends theme('layouts/1-column.html') %}
-{% from theme('macros/starred.html') import starred with context %}
 
 {% block breadcrumb %}
     <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
     <li><a href="{{ url_for('datasets.show', dataset=dataset) }}">{{ dataset.name|truncate(120) }}</a></li>
     <li class="active">{{ _('Followers') }}</li>
-{% endblock %}
-
-{% block toolbar %}
-{% if can_edit %}
-<div class="btn-group btn-group-xs">
-    <a href="{{ url_for('organizations.edit', org=org) }}" class="btn btn-success">
-        <span class="glyphicon glyphicon-pencil"></span>
-        {{ _('Edit') }}
-    </a>
-</div>
-{% endif %}
-<div class="btn-group btn-group-xs">
-    {{ starred(dataset) }}
-</div>
 {% endblock %}
 
 {% block main_content %}

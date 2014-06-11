@@ -20,15 +20,3 @@ class DatasetsMetric(Metric):
 
 
 DatasetsMetric.connect(Reuse.on_create, Reuse.on_update)
-
-
-class StarsMetric(Metric):
-    model = Reuse
-    name = 'stars'
-    display_name = _('Stars')
-
-    def get_value(self):
-        return User.objects(starred_reuses=self.target).count()
-
-
-StarsMetric.connect(Reuse.on_star, Reuse.on_unstar)

@@ -1,12 +1,14 @@
-{% macro follow_btn(obj) %}
+{% macro follow_btn(obj, icons=None) %}
 {% set basename = obj.__class__.__name__|lower %}
 {% set following = is_following(obj) %}
-{% set icon = 'eye-open' if following else 'eye-close' %}
-<button type="button" class="btn btn-primary btn-follow
-    {% if following %}active{% endif %}"
+{% set following_icon = icons[1] if icons else 'eye-close' %}
+{% set follow_icon = icons[0] if icons else 'eye-open' %}
+<button type="button" class="btn btn-primary btn-follow {% if following %}active{% endif %}"
     data-api-url="{{ url_for('api.follow_{0}'.format(basename), id=obj.id|string) }}"
+    data-follow-icon="{{ ficon(follow_icon) }}"
+    data-following-icon="{{ ficon(following_icon) }}"
     rel="tooltip" title="{{ _('Follow') }}"
     data-placement="right" data-container="body">
-    <span class="glyphicon glyphicon-{{icon}}"></span>
+    <span class="{{ ficon(following_icon if following else follow_icon) }}"></span>
 </button>
 {% endmacro %}
