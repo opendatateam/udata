@@ -12,11 +12,6 @@ require-js:
     contents:
         - bower/requirejs/require.js
 
-app-js:
-    filters: requirejs
-    output: js/app.min.js
-    contents:
-        - js/app.js
 
 site-css:
     filters: less,cssrewrite,cssmin

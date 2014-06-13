@@ -8,7 +8,7 @@ from os.path import join, dirname, isdir, exists
 from pkg_resources import resource_stream
 
 from flask import current_app
-from webassets.filter import get_filter
+from webassets.filter import get_filter, ExternalTool, register_filter
 
 from flask.ext.assets import Environment, YAMLLoader, Bundle
 from flask.ext.gravatar import Gravatar
@@ -145,10 +145,8 @@ def init_app(app):
 
     # Load bundle from yaml file
     assets.from_yaml(resource_stream(__name__, '../static/assets.yaml'))
-    # if app.debug:
-    app.config['REQUIREJS_CONFIG'] = join(ROOT_DIR, 'static', 'js', 'app.build.js')
+
     if app.config['ASSETS_DEBUG']:
-        app.config['REQUIREJS_OPTIMIZE'] = False
         assets['require-js'].contents += ('js/config.js', 'js/debug.js')
 
     from . import explore, home, helpers, catalog, error_handlers

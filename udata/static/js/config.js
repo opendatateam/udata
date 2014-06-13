@@ -36,7 +36,6 @@ require.config({
 
         // Local relative paths
         'templates': '../templates',
-        'locales': '../locales'
     },
 
     shim: {

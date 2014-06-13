@@ -13,7 +13,7 @@ define(['jquery', 'i18next', 'moment'], function($, i18next, moment) {
         fallbackLng: 'en',
         nsseparator: '::', // Allow to use real sentences as keys
         keyseparator: '$$', // Allow to use real sentences as keys
-        resGetPath: require.toUrl('locales/__ns__.__lng__.json')
+        resGetPath: require.toUrl('../locales/__ns__.__lng__.json')
     });
 
     return {

@@ -27,6 +27,7 @@ bower
 *.log
 *.pid
 .webassets-cache
+js-built
 .DS_Store
 *.min.css
 *.min.js
