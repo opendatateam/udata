@@ -19,25 +19,26 @@ class ReuseTypeFacet(TermFacet):
 class ReuseSearch(ModelSearchAdapter):
     model = Reuse
     fields = (
-        'title^2',
-        'description',
+        'title^3',
+        'description^2',
+        'datasets.title',
     )
     facets = {
         'tag': TermFacet('tags'),
         'organization': ModelTermFacet('organization', Organization),
         'type': ReuseTypeFacet('type'),
-        'datasets': RangeFacet('nb_datasets'),
-        'stars': RangeFacet('nb_stars'),
-        'followers': RangeFacet('nb_followers'),
+        'datasets': RangeFacet('metrics.datasets'),
+        'stars': RangeFacet('metrics.stars'),
+        'followers': RangeFacet('metrics.followers'),
         'featured': BoolFacet('featured'),
     }
     sorts = {
         'title': Sort('title.raw'),
         'created': Sort('created'),
         'last_modified': Sort('last_modified'),
-        'datasets': Sort('nb_datasets'),
-        'stars': Sort('nb_stars'),
-        'followers': Sort('nb_followers'),
+        'datasets': Sort('metrics.datasets'),
+        'stars': Sort('metrics.stars'),
+        'followers': Sort('metrics.followers'),
     }
     mapping = {
         'properties': {
@@ -61,9 +62,13 @@ class ReuseSearch(ModelSearchAdapter):
             },
             'created': {'type': 'date', 'format': 'date_hour_minute_second'},
             'last_modified': {'type': 'date', 'format': 'date_hour_minute_second'},
-            'nb_datasets': {'type': 'integer'},
-            'nb_stars': {'type': 'integer'},
-            'nb_followers': {'type': 'integer'},
+            'datasets': {
+                'type': 'object',
+                'properties': {
+                    'title': {'type': 'string'}
+                }
+            },
+            'metrics': {'type': 'object', 'index_name': 'metrics'},
             'featured': {'type': 'boolean'},
             'reuse_suggest': {
                 'type': 'completion',
@@ -75,8 +80,8 @@ class ReuseSearch(ModelSearchAdapter):
     }
     boosters = [
         BoolBooster('featured', 1.1),
-        GaussDecay('nb_datasets', 30, decay=0.8),
-        GaussDecay('nb_followers', 200, decay=0.8),
+        GaussDecay('metrics.datasets', 30, decay=0.8),
+        GaussDecay('metrics.followers', 200, decay=0.8),
     ]
 
     @classmethod
@@ -92,9 +97,10 @@ class ReuseSearch(ModelSearchAdapter):
             'tag_suggest': reuse.tags,
             'created': reuse.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             'last_modified': reuse.last_modified.strftime('%Y-%m-%dT%H:%M:%S'),
-            'nb_datasets': reuse.metrics.get('datasets', 0),
-            'nb_stars': reuse.metrics.get('stars', 0),
-            'nb_followers': reuse.metrics.get('followers', 0),
+            'datasets': [
+                {'title': d.title} for d in reuse.datasets
+            ],
+            'metrics': reuse.metrics,
             'featured': reuse.featured,
             'reuse_suggest': {
                 'input': [reuse.title] + [

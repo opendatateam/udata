@@ -32,6 +32,11 @@ class MetricsModelTest(DBTestMixin, TestCase):
         obj = FakeModel()
         self.assertIsInstance(obj.metrics, dict)
 
+        obj.save()
+
+        self.assertIn('fake', obj.metrics)
+        self.assertEqual(obj.metrics['fake'], 0)
+
     def build_metrics(self, obj, days=3):
         today = date.today()
         for i in range(days):

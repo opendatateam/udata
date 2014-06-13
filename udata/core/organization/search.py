@@ -15,15 +15,15 @@ class OrganizationSearch(ModelSearchAdapter):
     )
     sorts = {
         'name': Sort('name.raw'),
-        'reuses': Sort('nb_reuses'),
-        'datasets': Sort('nb_datasets'),
-        'stars': Sort('nb_stars'),
-        'followers': Sort('nb_followers'),
+        'reuses': Sort('metrics.reuses'),
+        'datasets': Sort('metrics.datasets'),
+        'stars': Sort('metrics.stars'),
+        'followers': Sort('metrics.followers'),
     }
     facets = {
-        'reuses': RangeFacet('nb_reuses'),
-        'datasets': RangeFacet('nb_datasets'),
-        'followers': RangeFacet('nb_followers'),
+        'reuses': RangeFacet('metrics.reuses'),
+        'datasets': RangeFacet('metrics.datasets'),
+        'followers': RangeFacet('metrics.followers'),
     }
     mapping = {
         'properties': {
@@ -35,10 +35,7 @@ class OrganizationSearch(ModelSearchAdapter):
             },
             'description': {'type': 'string', 'analyzer': i18n_analyzer},
             'url': {'type': 'string'},
-            'nb_datasets': {'type': 'integer'},
-            'nb_reuses': {'type': 'integer'},
-            'nb_stars': {'type': 'integer'},
-            'nb_followers': {'type': 'integer'},
+            'metrics': {'type': 'object', 'index_name': 'metrics'},
             'org_suggest': {
                 'type': 'completion',
                 'index_analyzer': 'simple',
@@ -49,9 +46,9 @@ class OrganizationSearch(ModelSearchAdapter):
     }
     boosters = [
         BoolBooster('public_service', 1.5),
-        GaussDecay('nb_followers', 200, decay=0.8),
-        GaussDecay('nb_reuses', 50, decay=0.9),
-        GaussDecay('nb_datasets', 50, decay=0.9),
+        GaussDecay('metrics.followers', 200, decay=0.8),
+        GaussDecay('metrics.reuses', 50, decay=0.9),
+        GaussDecay('metrics.datasets', 50, decay=0.9),
     ]
 
     @classmethod
@@ -60,10 +57,7 @@ class OrganizationSearch(ModelSearchAdapter):
             'name': organization.name,
             'description': organization.description,
             'url': organization.url,
-            'nb_datasets': organization.metrics.get('datasets', 0),
-            'nb_reuses': organization.metrics.get('reuses', 0),
-            'nb_stars': organization.metrics.get('stars', 0),
-            'nb_followers': organization.metrics.get('followers', 0),
+            'metrics': organization.metrics,
             'org_suggest': {
                 'input': [organization.name] + [
                     n for n in organization.name.split(' ')

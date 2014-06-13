@@ -31,6 +31,7 @@ class SearchQuery(object):
         try:
             result = es.search(index=es.index_name, doc_type=self.adapter.doc_type(), body=self.get_body())
         except:
+            log.exception('Unable to execute search query')
             result = {}
         return SearchResult(self, result)
 

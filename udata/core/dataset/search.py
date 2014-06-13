@@ -56,8 +56,7 @@ class DatasetSearch(ModelSearchAdapter):
             },
             'created': {'type': 'date', 'format': 'date_hour_minute_second'},
             'last_modified': {'type': 'date', 'format': 'date_hour_minute_second'},
-            'nb_reuses': {'type': 'integer'},
-            'nb_followers': {'type': 'integer'},
+            'metrics': {'type': 'object', 'index_name': 'metrics'},
             'featured': {'type': 'boolean'},
             'temporal_coverage': {  # Store dates as ordinals to handle pre-1900 dates
                 'type': 'object',
@@ -77,8 +76,8 @@ class DatasetSearch(ModelSearchAdapter):
         'title': Sort('title.raw'),
         'created': Sort('created'),
         'last_modified': Sort('last_modified'),
-        'reuses': Sort('nb_reuses'),
-        'followers': Sort('nb_followers'),
+        'reuses': Sort('metrics.reuses'),
+        'followers': Sort('metrics.followers'),
     }
     facets = {
         'tag': TermFacet('tags'),
@@ -86,15 +85,15 @@ class DatasetSearch(ModelSearchAdapter):
         'supplier': ModelTermFacet('supplier', Organization),
         'license': ModelTermFacet('license', License),
         'format': TermFacet('resources.format'),
-        'reuses': RangeFacet('nb_reuses'),
+        'reuses': RangeFacet('metrics.reuses'),
         'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
         'featured': BoolFacet('featured'),
     }
     boosters = [
         BoolBooster('featured', 1.1),
         BoolBooster('from_public_service', 1.3),
-        GaussDecay('nb_reuses', 50, decay=0.8),
-        GaussDecay('nb_followers', 200, 200, decay=0.8),
+        GaussDecay('metrics.reuses', 50, decay=0.8),
+        GaussDecay('metrics.followers', 200, 200, decay=0.8),
     ]
 
     @classmethod
@@ -131,8 +130,7 @@ class DatasetSearch(ModelSearchAdapter):
             },
             'created': dataset.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             'last_modified': dataset.last_modified.strftime('%Y-%m-%dT%H:%M:%S'),
-            'nb_reuses': dataset.metrics.get('reuses', 0),
-            'nb_followers': dataset.metrics.get('followers', 0),
+            'metrics': dataset.metrics,
             'featured': dataset.featured,
             'from_public_service': dataset.organization.public_service if dataset.organization else False,  # TODO: extract tis into plugin
         }

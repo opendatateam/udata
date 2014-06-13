@@ -7,14 +7,15 @@ from blinker import Signal
 
 from udata.models import db
 
-from .models import Metrics
-from .tasks import update_metric, archive_metric
 
 log = logging.getLogger(__name__)
 
 __all__ = ('Metric', 'SiteMetric')
 
 metric_catalog = {}
+
+from .models import Metrics
+from .tasks import update_metric, archive_metric
 
 
 class MetricMetaClass(type):

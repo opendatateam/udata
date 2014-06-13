@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from datetime import date, timedelta
 
 from udata.models import db
+from . import metric_catalog
 
 
 __all__ = ('Metrics', 'WithMetrics')
@@ -34,6 +35,13 @@ class MetricsQuerySet(db.BaseQuerySet):
 
 class WithMetrics(object):
     metrics = db.DictField()
+
+    def save(self, **kwargs):
+        '''Fill metrics with defaults on create'''
+        if not self.metrics:
+            for name, spec in metric_catalog.get(self.__class__, {}).items():
+                self.metrics[name] = spec.default
+        return super(WithMetrics, self).save(**kwargs)
 
 
 class Metrics(db.Document):
