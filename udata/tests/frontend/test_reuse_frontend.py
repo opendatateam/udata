@@ -8,14 +8,14 @@ from flask import url_for
 from udata.models import Reuse
 
 from . import FrontTestCase
-from ..factories import ReuseFactory, UserFactory, AdminFactory, OrganizationFactory
+from ..factories import ReuseFactory, ReuseWithMetricsFactory, UserFactory, AdminFactory, OrganizationFactory
 
 
 class ReuseBlueprintTest(FrontTestCase):
     def test_render_list(self):
         '''It should render the reuse list page'''
         with self.autoindex():
-            reuses = [ReuseFactory() for i in range(3)]
+            reuses = [ReuseWithMetricsFactory() for i in range(3)]
 
         response = self.get(url_for('reuses.list'))
 
@@ -26,7 +26,7 @@ class ReuseBlueprintTest(FrontTestCase):
     def test_render_list_with_query(self):
         '''It should render the reuse list page with a query'''
         with self.autoindex():
-            [ReuseFactory(title='Reuse {0}'.format(i)) for i in range(3)]
+            [ReuseWithMetricsFactory(title='Reuse {0}'.format(i)) for i in range(3)]
 
         response = self.get(url_for('reuses.list'), qs={'q': '2'})
 
@@ -52,6 +52,21 @@ class ReuseBlueprintTest(FrontTestCase):
 
         reuse = Reuse.objects.first()
         self.assertRedirects(response, reuse.display_url)
+        self.assertEqual(reuse.owner, self.user)
+        self.assertIsNone(reuse.organization)
+
+    def test_create_as_org(self):
+        '''It should create a reuse and redirect to reuse page'''
+        org = OrganizationFactory()
+        data = ReuseFactory.attributes()
+        data['organization'] = str(org.id)
+        self.login()
+        response = self.post(url_for('reuses.new'), data)
+
+        reuse = Reuse.objects.first()
+        self.assertRedirects(response, reuse.display_url)
+        self.assertIsNone(reuse.owner)
+        self.assertEqual(reuse.organization, org)
 
     def test_render_display(self):
         '''It should render the reuse page'''

@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from flask import request, url_for, g
 from werkzeug.contrib.atom import AtomFeed
 
-from udata.forms import ReuseForm
+from udata.forms import ReuseForm, ReuseCreateForm
 from udata.frontend.views import SearchView, DetailView, CreateView, EditView
 from udata.i18n import I18nBlueprint
 from udata.models import Reuse, REUSE_TYPES
@@ -78,7 +78,7 @@ class ReuseDetailView(ReuseView, DetailView):
 
 class ReuseCreateView(CreateView):
     model = Reuse
-    form = ReuseForm
+    form = ReuseCreateForm
     template_name = 'reuse/create.html'
 
 

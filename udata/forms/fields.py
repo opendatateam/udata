@@ -15,7 +15,8 @@ from . import widgets
 
 from .validators import RequiredIf
 
-from udata.models import db
+from udata.auth import current_user
+from udata.models import db, Organization
 from udata.i18n import gettext as _
 
 
@@ -36,7 +37,8 @@ class FieldHelper(object):
     def id(self, value):
         pass
 
-    def is_visible(self, user):
+    @property
+    def is_visible(self):
         return True
 
     def __call__(self, **kwargs):
@@ -47,11 +49,6 @@ class FieldHelper(object):
         if required is True:
             kwargs['required'] = required
         return super(FieldHelper, self).__call__(**kwargs)
-
-    # def gettext(self, string):
-    #     return i18n._(string)
-
-    # _ = gettext
 
 
 class EmptyNone(object):
@@ -233,55 +230,17 @@ class DateRangeField(FieldHelper, fields.StringField):
             self.data = None
 
 
-class PublishAsField(FieldHelper, Field):
-    def is_visible(self, user):
-        return len(user.organizations) > 0
+class PublishAsField(FieldHelper, fields.HiddenField):
+    @property
+    def is_visible(self):
+        return len(current_user.organizations) > 0
 
-    def process_data(self, value):
-        self.data = value.id if isinstance(value, model.Group) else value
+    def process_formdata(self, valuelist):
+        if valuelist and valuelist[0].strip():
+            self.data = DBRef('organization', ObjectId(valuelist[0].strip()))
 
     def populate_obj(self, obj, name):
-        fkey = '{0}_id'.format(name)
-        if hasattr(obj, fkey):
-            setattr(obj, fkey, self.data or None)
-        else:
-            setattr(obj, name, self.data)
-
-
-class KeyValueForm(WTForm):
-    key = StringField(_('Key'), [RequiredIf('value')])
-    value = StringField(_('Value'))
-
-
-class KeyValueField(FieldHelper, fields.FieldList):
-    # widget = KeyValueWidget()
-    def __init__(self, *args, **kwargs):
-        kwargs['min_entries'] = kwargs.pop('min_entries', 1)
-        super(KeyValueField, self).__init__(fields.FormField(KeyValueForm), *args, **kwargs)
-
-    def process_data(self, values):
-        print 'process_data', values
-        return super(KeyValueField, self).process_data(values)
-
-    def process(self, formdata, data=object()):
-        print 'process', formdata, data
-        return super(KeyValueField, self).process(formdata, data)
-
-    @property
-    def data(self):
-        for f in self.entries:
-            print f
-        return [f.data for f in self.entries]
-
-    # def process_data(self, values):
-    #     if isinstance(values, dict):
-    #         self.data = [(key, value) for key, value in values.items()]
-    #     else:
-    #         self.data = values
-
-    # def _value(self):
-    #     return self.data
-        # if self.data:
-        #     return u', '.join(self.data)
-        # else:
-        #     return u''
+        ret = super(PublishAsField, self).populate_obj(obj, name)
+        if hasattr(obj, 'owner') and obj.owner and getattr(obj, name):
+            obj.owner = None
+        return ret

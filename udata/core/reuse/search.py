@@ -28,7 +28,6 @@ class ReuseSearch(ModelSearchAdapter):
         'organization': ModelTermFacet('organization', Organization),
         'type': ReuseTypeFacet('type'),
         'datasets': RangeFacet('metrics.datasets'),
-        'stars': RangeFacet('metrics.stars'),
         'followers': RangeFacet('metrics.followers'),
         'featured': BoolFacet('featured'),
     }
@@ -37,7 +36,6 @@ class ReuseSearch(ModelSearchAdapter):
         'created': Sort('created'),
         'last_modified': Sort('last_modified'),
         'datasets': Sort('metrics.datasets'),
-        'stars': Sort('metrics.stars'),
         'followers': Sort('metrics.followers'),
     }
     mapping = {

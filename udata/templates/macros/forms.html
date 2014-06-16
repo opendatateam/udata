@@ -12,8 +12,8 @@
 </fieldset>
 {% endmacro %}
 
-{% macro field(field, user=None, sizes='sm-2') %}
-{#% if field.is_visible(user) %#}
+{% macro field(field, sizes='sm-2') %}
+{% if field.is_visible %}
 {% set cols = form_grid(sizes) %}
 <div class="form-group{% if field.errors %} has-error{% endif %}">
     <label for="{{ field.id }}"
@@ -23,18 +23,18 @@
     </label>
     <div class="{{ cols.control }}">
         {% if field.type == 'PublishAsField' %}
-        {{ publish_as(field, user) }}
+        {{ publish_as(field) }}
         {% elif field.type == 'RadioField' %}
-        {{ radio(field, user) }}
+        {{ radio(field) }}
         {% elif field.type == 'BooleanField' %}
-        {{ checkbox(field, user) }}
+        {{ checkbox(field) }}
         {% elif field.type == 'KeyValueField' %}
-        {{ checkbox(field, user) }}
+        {{ checkbox(field) }}
         {% elif field.type == 'TagField' or field.type == 'TerritoryField' %}
         <div class="tag-container"></div>
         {{ field(class_='form-control') }}
         {% elif field.type == 'UploadableURLField' %}
-        {{ uploadable_url(field, user) }}
+        {{ uploadable_url(field) }}
         {% else %}
         {{ field(class_='form-control') }}
         {% endif %}
@@ -43,18 +43,18 @@
         {% endfor %}
     </div>
 </div>
-{#% endif %#}
-{% endmacro %}
-
-{% macro radio(field, user) %}
-{% if field.stacked %}
-{{ radio_stacked(field, user) }}
-{% else %}
-{{ radio_inline(field, user) }}
 {% endif %}
 {% endmacro %}
 
-{% macro radio_inline(field, user) %}
+{% macro radio(field) %}
+{% if field.stacked %}
+{{ radio_stacked(field) }}
+{% else %}
+{{ radio_inline(field) }}
+{% endif %}
+{% endmacro %}
+
+{% macro radio_inline(field) %}
 {% for value, label, selected in field.iter_choices() %}
 <label class="radio-inline">
     <input type="radio" name="{{ field.name }}" id="{{ field.id }}-{{ loop.index }}" value="{{ value }}"
@@ -64,7 +64,7 @@
 {% endfor %}
 {% endmacro %}
 
-{% macro radio_stacked(field, user) %}
+{% macro radio_stacked(field) %}
 {% for value, label, selected in field.iter_choices() %}
 <div class="radio">
     <label>
@@ -77,22 +77,22 @@
 {% endmacro %}
 
 
-{% macro checkbox(field, user) %}
+{% macro checkbox(field) %}
 {% if field.stacked %}
-{{ checkbox_stacked(field, user) }}
+{{ checkbox_stacked(field) }}
 {% else %}
-{{ checkbox_inline(field, user) }}
+{{ checkbox_inline(field) }}
 {% endif %}
 {% endmacro %}
 
-{% macro checkbox_inline(field, user) %}
+{% macro checkbox_inline(field) %}
 <label class="checkbox-inline">
     {{ field() }}
     {{ _(label) }}
 </label>
 {% endmacro %}
 
-{% macro checkbox_stacked(field, user) %}
+{% macro checkbox_stacked(field) %}
 <div class="checkbox">
     <label>
         {{ field() }}
@@ -101,23 +101,25 @@
 </div>
 {% endmacro %}
 
-{% macro publish_as(field, user) %}
-{% if g.user_orgs %}
+{% macro publish_as(field) %}
+{% if current_user.organizations %}
 <input id="{{ field.id }}" name="{{ field.name }}" type="hidden" {% if field.data %}value="{{ field.data }}"{% endif %}/>
 <ul class="card-list">
     <li class="col-xs-4 col-sm-3">
         <div class="publisher-card {% if not field.data %}active{% endif %}">
-            {{ publisher_avatar(user, None, 100) }}
-            <div class="caption"><p>{{ user.fullname }}</p></div>
+            {{ current_user|avatar(100) }}
+            <div class="caption"><p>{{ current_user.fullname }}</p></div>
         </div>
     </li>
-    {% for organization in user.organizations %}
+    {% for organization in current_user.organizations %}
     <li class="col-xs-4 col-sm-3">
         <div data-org-id="{{ organization.id }}"
             class="publisher-card {% if field.data == organization.id %}active{% endif %}">
-            {{ publisher_avatar(user, organization, 100) }}
+            <img src="{{organization.image_url|placeholder('organization') }}"
+                alt="{{ organization.title }}" class="scalable"
+                width="100" height="100" />
             <div class="caption ellipsis-tooltip">
-            <p>{% trans org=organization.display_name %}{{org}} member{% endtrans %}</p>
+            <p>{{ _('%(organization)s member', organization=organization.name) }}</p>
             </div>
         </div>
     </li>
@@ -127,7 +129,7 @@
 {% endif %}
 {% endmacro %}
 
-{% macro key_values(field, user) %}
+{% macro key_values(field) %}
 {% for subfield in field %}
 {% set keyfield = subfield.key %}
 {% set valuefield = subfield.value %}
@@ -177,7 +179,7 @@
 </div>
 {% endmacro %}
 
-{% macro uploadable_url(field, user) %}
+{% macro uploadable_url(field) %}
  <div class="input-group">
     {{ field(class_='form-control') }}
     <span class="input-group-btn">

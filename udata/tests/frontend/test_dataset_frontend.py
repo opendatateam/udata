@@ -2,22 +2,20 @@
 from __future__ import unicode_literals
 
 import feedparser
-import StringIO
-import unicodecsv
 
 from flask import url_for
 
 from udata.models import Dataset
 
 from . import FrontTestCase
-from ..factories import ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory
+from ..factories import ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory, DatasetWithMetricsFactory
 
 
 class DatasetBlueprintTest(FrontTestCase):
     def test_render_list(self):
         '''It should render the dataset list page'''
         with self.autoindex():
-            datasets = [DatasetFactory() for i in range(3)]
+            datasets = [DatasetWithMetricsFactory() for i in range(3)]
 
         response = self.get(url_for('datasets.list'))
 
@@ -28,8 +26,8 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_render_list_with_query(self):
         '''It should render the dataset list page with a query string'''
         with self.autoindex():
-            datasets = [DatasetFactory() for i in range(3)]
-            expected_dataset = DatasetFactory(title='test for query')
+            datasets = [DatasetWithMetricsFactory() for i in range(3)]
+            expected_dataset = DatasetWithMetricsFactory(title='test for query')
             datasets.append(expected_dataset)
 
         response = self.get(url_for('datasets.list'), qs={'q': 'test for query'})
@@ -57,6 +55,23 @@ class DatasetBlueprintTest(FrontTestCase):
 
         dataset = Dataset.objects.first()
         self.assertRedirects(response, url_for('datasets.show', dataset=dataset))
+
+        self.assertEqual(dataset.owner, self.user)
+        self.assertIsNone(dataset.organization)
+
+    def test_create_as_org(self):
+        '''It should create a dataset as an organization and redirect to dataset page'''
+        org = OrganizationFactory()
+        data = DatasetFactory.attributes()
+        data['organization'] = str(org.id)
+        self.login()
+        response = self.post(url_for('datasets.new'), data)
+
+        dataset = Dataset.objects.first()
+        self.assertRedirects(response, url_for('datasets.show', dataset=dataset))
+
+        self.assertIsNone(dataset.owner)
+        self.assertEqual(dataset.organization, org)
 
     def test_render_display(self):
         '''It should render the dataset page'''

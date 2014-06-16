@@ -78,7 +78,7 @@ class User(db.Document, WithMetrics,UserMixin):
 
     @property
     def organizations(self):
-        return getattr(g, 'user_orgs', [])
+        return getattr(g, 'user_organizations', [])
 
     @property
     def sysadmin(self):

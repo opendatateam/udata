@@ -31,9 +31,9 @@ class UserModelForm(ModelForm):
         return _errors
 
     def populate_obj(self, obj):
-        super(UserModelForm, self).populate_obj(obj)
         if not getattr(obj, self.user_field):
             setattr(obj, self.user_field, current_user.to_dbref())
+        super(UserModelForm, self).populate_obj(obj)
 
     def save(self, **kwargs):
         self.data[self.user_field] = self.data.get(self.user_field, current_user.to_dbref())

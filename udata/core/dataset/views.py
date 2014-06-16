@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from flask import abort, redirect, request, url_for, g, jsonify
 from werkzeug.contrib.atom import AtomFeed
 
-from udata.forms import DatasetForm, ResourceForm, DatasetExtraForm
+from udata.forms import DatasetForm, DatasetCreateForm, ResourceForm, DatasetExtraForm
 from udata.frontend import nav
 from udata.frontend.views import DetailView, CreateView, EditView, SingleObject, SearchView, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
@@ -100,7 +100,7 @@ class DatasetDetailView(DatasetView, DetailView):
 
 class DatasetCreateView(CreateView):
     model = Dataset
-    form = DatasetForm
+    form = DatasetCreateForm
     template_name = 'dataset/create.html'
 
 

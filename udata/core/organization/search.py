@@ -17,7 +17,6 @@ class OrganizationSearch(ModelSearchAdapter):
         'name': Sort('name.raw'),
         'reuses': Sort('metrics.reuses'),
         'datasets': Sort('metrics.datasets'),
-        'stars': Sort('metrics.stars'),
         'followers': Sort('metrics.followers'),
     }
     facets = {

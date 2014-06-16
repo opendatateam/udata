@@ -6,7 +6,7 @@ from udata.i18n import lazy_gettext as _
 
 from .models import Dataset, Resource, License, UPDATE_FREQUENCIES
 
-__all__ = ('DatasetForm', 'ResourceForm', 'DatasetExtraForm')
+__all__ = ('DatasetForm', 'DatasetCreateForm', 'ResourceForm', 'DatasetExtraForm')
 
 
 class DatasetForm(UserModelForm):
@@ -20,6 +20,10 @@ class DatasetForm(UserModelForm):
     temporal_coverage = fields.DateRangeField(_('Temporal coverage'))
     tags = fields.TagField(_('Tags'))
     private = fields.BooleanField(_('Private'))
+
+
+class DatasetCreateForm(DatasetForm):
+    organization = fields.PublishAsField(_('Publish as'))
 
 
 class ResourceForm(ModelForm):
