@@ -4,15 +4,15 @@ from __future__ import unicode_literals
 from flask import url_for
 
 from udata.tests.frontend import FrontTestCase
-from udata.tests.factories import DatasetWithMetricsFactory, ReuseWithMetricsFactory, TopicFactory
+from udata.tests.factories import DatasetFactory, ReuseFactory, TopicFactory
 
 
 class TopicsBlueprintTest(FrontTestCase):
     def test_render_display(self):
         '''It should render a topic page'''
         with self.autoindex():
-            [ReuseWithMetricsFactory(tags=['tag-{0}'.format(i)]) for i in range(3)]
-            [DatasetWithMetricsFactory(tags=['tag-{0}'.format(i)]) for i in range(3)]
+            [ReuseFactory(tags=['tag-{0}'.format(i)]) for i in range(3)]
+            [DatasetFactory(tags=['tag-{0}'.format(i)]) for i in range(3)]
         topic = TopicFactory(tags=['tag-0', 'tag-2'])
 
         response = self.get(url_for('topics.display', topic=topic))

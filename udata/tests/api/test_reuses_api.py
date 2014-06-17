@@ -6,14 +6,14 @@ from flask import url_for
 from udata.models import Reuse
 
 from . import APITestCase
-from ..factories import ReuseFactory, ReuseWithMetricsFactory
+from ..factories import ReuseFactory
 
 
 class ReuseAPITest(APITestCase):
     def test_reuse_api_list(self):
         '''It should fetch a reuse list from the API'''
         with self.autoindex():
-            reuses = [ReuseWithMetricsFactory() for i in range(3)]
+            reuses = [ReuseFactory() for i in range(3)]
 
         response = self.get(url_for('api.reuses'))
         self.assert200(response)

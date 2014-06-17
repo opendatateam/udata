@@ -8,14 +8,14 @@ from flask import url_for
 from udata.models import Reuse
 
 from . import FrontTestCase
-from ..factories import ReuseFactory, ReuseWithMetricsFactory, UserFactory, AdminFactory, OrganizationFactory
+from ..factories import ReuseFactory, UserFactory, AdminFactory, OrganizationFactory
 
 
 class ReuseBlueprintTest(FrontTestCase):
     def test_render_list(self):
         '''It should render the reuse list page'''
         with self.autoindex():
-            reuses = [ReuseWithMetricsFactory() for i in range(3)]
+            reuses = [ReuseFactory() for i in range(3)]
 
         response = self.get(url_for('reuses.list'))
 
@@ -26,7 +26,7 @@ class ReuseBlueprintTest(FrontTestCase):
     def test_render_list_with_query(self):
         '''It should render the reuse list page with a query'''
         with self.autoindex():
-            [ReuseWithMetricsFactory(title='Reuse {0}'.format(i)) for i in range(3)]
+            [ReuseFactory(title='Reuse {0}'.format(i)) for i in range(3)]
 
         response = self.get(url_for('reuses.list'), qs={'q': '2'})
 

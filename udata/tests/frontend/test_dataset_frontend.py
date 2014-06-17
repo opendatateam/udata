@@ -8,14 +8,14 @@ from flask import url_for
 from udata.models import Dataset
 
 from . import FrontTestCase
-from ..factories import ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory, DatasetWithMetricsFactory
+from ..factories import ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory
 
 
 class DatasetBlueprintTest(FrontTestCase):
     def test_render_list(self):
         '''It should render the dataset list page'''
         with self.autoindex():
-            datasets = [DatasetWithMetricsFactory() for i in range(3)]
+            datasets = [DatasetFactory() for i in range(3)]
 
         response = self.get(url_for('datasets.list'))
 
@@ -26,8 +26,8 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_render_list_with_query(self):
         '''It should render the dataset list page with a query string'''
         with self.autoindex():
-            datasets = [DatasetWithMetricsFactory() for i in range(3)]
-            expected_dataset = DatasetWithMetricsFactory(title='test for query')
+            datasets = [DatasetFactory() for i in range(3)]
+            expected_dataset = DatasetFactory(title='test for query')
             datasets.append(expected_dataset)
 
         response = self.get(url_for('datasets.list'), qs={'q': 'test for query'})
@@ -54,7 +54,7 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.post(url_for('datasets.new'), data)
 
         dataset = Dataset.objects.first()
-        self.assertRedirects(response, url_for('datasets.show', dataset=dataset))
+        self.assertRedirects(response, url_for('datasets.new_resource', dataset=dataset))
 
         self.assertEqual(dataset.owner, self.user)
         self.assertIsNone(dataset.organization)
@@ -68,7 +68,7 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.post(url_for('datasets.new'), data)
 
         dataset = Dataset.objects.first()
-        self.assertRedirects(response, url_for('datasets.show', dataset=dataset))
+        self.assertRedirects(response, url_for('datasets.new_resource', dataset=dataset))
 
         self.assertIsNone(dataset.owner)
         self.assertEqual(dataset.organization, org)

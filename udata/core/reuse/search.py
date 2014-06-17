@@ -7,6 +7,9 @@ from udata.search import RangeFacet, BoolFacet
 from udata.search import TermFacet, ModelTermFacet
 from udata.search import BoolBooster, GaussDecay
 
+# Metrics are require for reuse search
+from . import metrics
+
 
 __all__ = ('ReuseSearch', )
 

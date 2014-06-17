@@ -8,14 +8,14 @@ from flask import url_for
 from udata.models import Dataset
 
 from . import APITestCase
-from ..factories import DatasetFactory,DatasetWithMetricsFactory, ResourceFactory, faker
+from ..factories import DatasetFactory, ResourceFactory, faker
 
 
 class DatasetAPITest(APITestCase):
     def test_dataset_api_list(self):
         '''It should fetch a dataset list from the API'''
         with self.autoindex():
-            datasets = [DatasetWithMetricsFactory() for i in range(3)]
+            datasets = [DatasetFactory() for i in range(3)]
 
         response = self.get(url_for('api.datasets'))
         self.assert200(response)

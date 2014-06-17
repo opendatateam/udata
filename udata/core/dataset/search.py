@@ -7,6 +7,9 @@ from udata.search.fields import Sort, BoolFacet, TemporalCoverageFacet
 from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
 from udata.search.fields import BoolBooster, GaussDecay
 
+# Metrics are require for dataset search
+from . import metrics
+
 __all__ = ('DatasetSearch', )
 
 

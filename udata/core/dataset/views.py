@@ -103,6 +103,9 @@ class DatasetCreateView(CreateView):
     form = DatasetCreateForm
     template_name = 'dataset/create.html'
 
+    def get_success_url(self):
+        return url_for('datasets.new_resource', dataset=self.object)
+
 
 class DatasetEditView(ProtectedDatasetView, EditView):
     form = DatasetForm

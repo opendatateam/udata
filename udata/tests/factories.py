@@ -42,10 +42,6 @@ class DatasetFactory(MongoEngineFactory):
     frequency = 'unknown'
 
 
-class DatasetWithMetricsFactory(DatasetFactory):
-    metrics = factory.LazyAttribute(lambda o: {'followers': 0, 'reuses': 0})
-
-
 class OrganizationFactory(MongoEngineFactory):
     FACTORY_FOR = models.Organization
 
@@ -60,10 +56,6 @@ class ReuseFactory(MongoEngineFactory):
     description = factory.LazyAttribute(lambda o: faker.text())
     url = factory.LazyAttribute(lambda o: faker.url())
     type = FuzzyChoice(models.REUSE_TYPES.keys())
-
-
-class ReuseWithMetricsFactory(ReuseFactory):
-    metrics = factory.LazyAttribute(lambda o: {'followers': 0, 'datasets': 0})
 
 
 class LicenseFactory(MongoEngineFactory):

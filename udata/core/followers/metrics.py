@@ -4,10 +4,11 @@ from __future__ import unicode_literals
 
 from udata.core.metrics import Metric
 from udata.i18n import lazy_gettext as _
-from udata.models import User, Dataset, Follow, Organization, Follow, FollowOrg, FollowDataset
+from udata.models import User, Dataset, Organization
+from udata.models import Follow, Follow, FollowOrg, FollowDataset
 
 
-__all__ = ('UserFollowers', 'UserFollowing')
+# __all__ = ('UserFollowers', 'UserFollowing')
 
 
 class FollowersMetric(Metric):
@@ -28,21 +29,6 @@ class OrgFollowers(FollowersMetric):
 
 class DatasetFollowers(FollowersMetric):
     model = Dataset
-
-
-# class UserFollowing(Metric):
-#     model = User
-#     name = 'following'
-#     display_name = _('Following')
-
-#     def get_value(self):
-#         return Follow.objects.following(self.target).count()
-
-
-# @Follow.on_new.connect
-# def on_new_follower(follow):
-#     UserFollowers(follow.following).trigger_update()
-#     UserFollowing(follow.follower).trigger_update()
 
 
 @FollowOrg.on_new.connect
