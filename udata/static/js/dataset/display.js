@@ -9,6 +9,7 @@ define([
     'widgets/modal',
     'widgets/featured',
     'widgets/follow-btn',
+    'widgets/issues-btn',
 ], function($, log, i18n, template, modal) {
 
     function prepare_resources() {

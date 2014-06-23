@@ -1,0 +1,20 @@
+<div class="issue-details">
+    <h4 class="media-heading text-left">{{get labels issue.type}} ({{dt issue.created }})</h4>
+    {{#each issue.discussion}}
+    <div class="media">
+        <a class="pull-left" href="{{posted_by.page}}">
+            <img class="media-object" width="50px" height="50px"
+                src="{{posted_by.avatar_url}}" alt="{{posted_by.first_name}} {{posted_by.last_name}}">
+        </a>
+        <div class="media-body">
+            <div class="message text-left">{{content}}</div>
+        </div>
+    </div>
+    {{/each}}
+    <form role="form" action="{{issue.url}}">
+         <div class="form-group">
+            <label for="comment">{{_ "Comment" }}</label>
+            <textarea id="comment" name="comment" class="form-control" rows="3" required></textarea>
+        </div>
+    </form>
+</div>

@@ -61,6 +61,14 @@ define(['jquery', 'notify', 'i18n', 'class'], function($, Notify, i18n, Class) {
         /**
          * Check that the current authenticated user has a given role.
          */
+        has_role: function(role) {
+            return this.user && this.user.roles.indexOf(role) > 0;
+        },
+
+        /**
+         * Check that the current authenticated user has a given role.
+         * Notify if not.
+         */
         need_role: function(role, message) {
             this.need_user();
             if (this.user.roles.indexOf(role) < 0) {

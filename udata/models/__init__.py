@@ -25,6 +25,7 @@ class UDataMongoEngine(MongoEngine):
         self.SlugField = SlugField
         self.AutoUUIDField = AutoUUIDField
         self.Document = UDataDocument
+        self.DomainModel = DomainModel
         self.DateRange = DateRange
         self.BaseQuerySet = BaseQuerySet
         self.BaseDocumentMetaclass = TopLevelDocumentMetaclass
@@ -54,12 +55,18 @@ class UDataDocument(Document):
         ))
 
 
+class DomainModel(UDataDocument):
+    '''Placeholder for inheritance'''
+    pass
+
+
 db = UDataMongoEngine()
 session_interface = MongoEngineSessionInterface(db)
 
 
 # Load all core models and mixins
 from udata.core.metrics.models import *
+from udata.core.issues.models import *
 from udata.core.user.models import *
 from udata.core.dataset.models import *
 from udata.core.reuse.models import *

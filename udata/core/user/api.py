@@ -27,6 +27,9 @@ class UserField(fields.Raw):
             'id': str(user.id),
             # 'uri': url_for('api.organization', slug=organization.slug, _external=True),
             'page': url_for('users.show', user=user, _external=True),
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'avatar_url': user.avatar_url,
         }
 
 

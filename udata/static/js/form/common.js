@@ -7,7 +7,6 @@ define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) 
     var rules = {
         errorClass: "help-block",
         highlight: function(element) {
-            console.log(element);
             $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
         },
         unhighlight: function(element) {
@@ -18,6 +17,9 @@ define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) 
             if (!label.text()) {
                 label.remove();
             }
+        },
+        errorPlacement: function(error, element) {
+            $(element).closest('.form-group').append(error);
         }
     };
 

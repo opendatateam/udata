@@ -8,6 +8,10 @@ from udata.forms import ReuseForm
 from udata.models import Reuse
 from udata.search import ReuseSearch
 
+from udata.core.issues.api import IssuesAPI
+
+from .models import ReuseIssue
+
 reuse_fields = {
     'id': fields.String,
     'title': fields.String,
@@ -46,6 +50,10 @@ class ReuseFeaturedAPI(SingleObjectAPI, API):
         return marshal(reuse, reuse_fields)
 
 
+class ReuseIssuesAPI(IssuesAPI):
+    model = ReuseIssue
+
 api.add_resource(ReuseListAPI, '/reuses/', endpoint=b'api.reuses')
 api.add_resource(ReuseAPI, '/reuses/<string:slug>', endpoint=b'api.reuse')
 api.add_resource(ReuseFeaturedAPI, '/reuses/<string:slug>/featured', endpoint=b'api.reuse_featured')
+api.add_resource(ReuseIssuesAPI, '/reuses/<id>/issues/', endpoint=b'api.reuse_issues')

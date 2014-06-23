@@ -9,13 +9,22 @@
       <div class="modal-footer">
         {{#each actions}}
           {{#if url}}
-          <a href="{{url}}" class="btn {{classes}}">{{label}}</a>
+          <a href="{{url}}" class="btn {{classes}}">
+            {{#if icon}}{{icon icon}}{{/if}}
+            {{label}}
+          </a>
           {{else}}
-          <button type="button" class="btn {{classes}}">{{label}}</button>
+          <button type="button" class="btn {{classes}}">
+            {{#if icon}}{{icon icon}}{{/if}}
+            {{label}}
+          </button>
           {{/if}}
         {{/each}}
         {{#if close_btn}}
-        <button type="button" class="btn btn-default" data-dismiss="modal">{{close_btn}}</button>
+        <button type="button" class="btn {{close_cls}}" data-dismiss="modal">
+          {{#if close_icon}}{{icon close_icon}}{{/if}}
+          {{close_btn}}
+        </button>
         {{/if}}
       </div>
     </div>

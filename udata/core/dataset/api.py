@@ -6,10 +6,11 @@ from uuid import UUID
 from flask import request, abort, url_for
 
 from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API, marshal, fields
+from udata.core.issues.api import IssuesAPI
 from udata.core.organization.api import OrganizationField
 from udata.utils import get_by
 
-from .models import Dataset, Resource
+from .models import Dataset, Resource, DatasetIssue
 from .forms import DatasetForm, ResourceForm
 from .search import DatasetSearch
 
@@ -115,8 +116,13 @@ class ResourceAPI(API):
         return '', 204
 
 
+class DatasetIssuesAPI(IssuesAPI):
+    model = DatasetIssue
+
+
 api.add_resource(DatasetListAPI, '/datasets/', endpoint=b'api.datasets')
 api.add_resource(DatasetAPI, '/datasets/<string:slug>', endpoint=b'api.dataset')
 api.add_resource(DatasetFeaturedAPI, '/datasets/<string:slug>/featured', endpoint=b'api.dataset_featured')
 api.add_resource(ResourcesAPI, '/datasets/<string:slug>/resources', endpoint=b'api.resources')
 api.add_resource(ResourceAPI, '/datasets/<string:slug>/resources/<string:rid>', endpoint=b'api.resource')
+api.add_resource(DatasetIssuesAPI, '/datasets/<id>/issues/', endpoint=b'api.dataset_issues')

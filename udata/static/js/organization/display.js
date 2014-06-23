@@ -41,9 +41,7 @@ define([
                     Notify.error(msg);
                     console.error(e.responseJSON);
                 }).always(function() {
-                    $modal.modal('hide').on('hidden.bs.modal', function() {
-                        this.remove();
-                    });
+                    $modal.modal('hide');
                 });
                 return false;
             });

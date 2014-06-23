@@ -55,7 +55,6 @@ class FollowAPITest(APITestCase):
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
-
     def test_follow_reuse(self):
         '''It should follow a reuse on POST'''
         user = self.login()

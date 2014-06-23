@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import logging
 
-from flask import request
+from flask import request, url_for
 from flask.ext.restful import Api, Resource, marshal, fields
 
 from udata import search
@@ -76,6 +76,28 @@ class ModelAPI(SingleObjectAPI, API):
         obj = self.get_or_404(**kwargs)
         obj.delete()
         return '', 204
+
+
+class ISODateTime(fields.Raw):
+    def format(self, value):
+        return value.isoformat()
+
+fields.ISODateTime = ISODateTime
+
+
+class SelfUrl(fields.Raw):
+    def __init__(self, endpoint, mapper=None):
+        super(SelfUrl, self).__init__()
+        self.endpoint = endpoint
+        self.mapper = mapper or self.default_mapper
+
+    def default_mapper(self, obj):
+        return {'id': str(obj.id)}
+
+    def output(self, key, obj):
+        return url_for(self.endpoint, _external=True, **self.mapper(obj))
+
+fields.SelfUrl = SelfUrl
 
 
 def init_app(app):

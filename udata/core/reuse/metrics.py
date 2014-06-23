@@ -9,6 +9,8 @@ from udata.models import Reuse
 from udata.core.followers.models import FollowReuse
 from udata.core.followers.metrics import FollowersMetric
 
+from udata.core.issues.metrics import IssuesMetric
+
 
 __all__ = ('DatasetsMetric', )
 
@@ -31,3 +33,7 @@ class ReuseFollowers(FollowersMetric):
 @FollowReuse.on_new.connect
 def on_new_reuse_follower(follow):
     ReuseFollowers(follow.following).trigger_update()
+
+
+class ReuseIssuesMetric(IssuesMetric):
+    model = Reuse
