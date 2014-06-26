@@ -19,6 +19,7 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
         datasetDisplay: {path: i18n('/datasets/:slug_or_id/'), moduleId: 'dataset/display'},
         datasetEdit: {path: i18n('/datasets/:slug_or_id/edit/'), moduleId: 'dataset/form'},
         datasetEditExtras: {path: i18n('/datasets/:slug_or_id/edit/extras/'), moduleId: 'form/extras'},
+        datasetIssues: {path: i18n('/datasets/:slug_or_id/issues/'), moduleId: 'issue/list'},
 
         // Resources routes
         resourceNew: {path: i18n('/datasets/:slug_or_id/resources/new/'), moduleId: 'dataset/resource-form'},
@@ -32,12 +33,14 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
         orgMembers: {path: i18n('/organizations/:slug_or_id/edit/members/'), moduleId: 'organization/members'},
         orgRequests: {path: i18n('/organizations/:slug_or_id/edit/requests/'), moduleId: 'organization/membership-requests'},
         orgEditExtras: {path: i18n('/organizations/:slug_or_id/edit/extras/'), moduleId: 'form/extras'},
+        orgIssues: {path: i18n('/organizations/:slug_or_id/issues/'), moduleId: 'issue/list'},
 
         // Reuses routes
         reuseSearch: {path: i18n('/reuses/'), moduleId: 'search'},
         reuseNew: {path: i18n('/reuses/new/'), moduleId: 'reuse/form'},
         reuseDisplay: {path: i18n('/reuses/:slug_or_id/'), moduleId: 'reuse/display'},
         reuseEdit: {path: i18n('/reuses/:slug_or_id/edit/'), moduleId: 'reuse/form'},
+        reusesIssues: {path: i18n('/reuses/:slug_or_id/issues/'), moduleId: 'issue/list'},
 
         // Topics routes
         topicDisplay: {path: i18n('/topics/:slug_or_id/'), moduleId: 'topic/display'}

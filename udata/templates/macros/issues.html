@@ -8,3 +8,42 @@
     <span class="count">{% if obj.metrics.issues or 0 > 0 %}({{ obj.metrics.issues }}){% endif %}</span>
 </button>
 {% endmacro %}
+
+{% macro issues_list(issues, related=False) %}
+{# {% set open_issues = [issue for issue in issues if not issue.closed] %}
+{% set closed_issues = [issue for issue in issues if issue.closed] %} #}
+{% if not issues %}
+<p class="text-center">{{ _('No Issues') }}</p>
+{% else %}
+    <h4>{{ _('Open issues') }}</h4>
+    <div class="issue-list open-issues">
+        {% for issue in issues|rejectattr('closed') %}
+            {{ issue_list_item(issue) }}
+        {% else %}
+            <p class="text-center">{{ _('No Issues') }}</p>
+        {% endfor %}
+    </div>
+    <h4>{{ _('Closed issues') }}</h4>
+    <div class="issue-list closed-issues">
+        {% for issue in issues|selectattr('closed') %}
+            {{ issue_list_item(issue) }}
+        {% else %}
+            <p class="text-center">{{ _('No Issues') }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endmacro %}
+
+
+{% macro issue_list_item(issue) %}
+<div class="issue" data-issue-id="{{issue.id}}" data-api-url="{{url_for('api.issue', id=issue.id)}}">
+    <div class="pull-left">
+        <img class="media-object" width="50px" height="50px"
+            src="{{issue.user.avatar_url}}" alt="{{issue.user.fullname}}">
+    </div>
+    <div class="media-body">
+        <h4 class="media-heading text-left">{{ issue.type_label }} ({{ issue.created|dateformat }})</h4>
+        <div class="message text-left">{{issue.description.content}}</div>
+    </div>
+</div>
+{% endmacro %}

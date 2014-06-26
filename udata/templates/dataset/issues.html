@@ -1,0 +1,10 @@
+{% extends theme('dataset/edit_base.html') %}
+{% from theme('macros/issues.html') import issues_list with context %}
+
+{% block tab_content %}
+<div class="row">
+    <div class="col-xs-12">
+        {{ issues_list(issues) }}
+    </div>
+</div>
+{% endblock %}

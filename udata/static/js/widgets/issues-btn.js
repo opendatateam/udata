@@ -17,7 +17,7 @@ define([
     var labels = {
         illegal: i18n._('Illegal content'),
         tendencious: i18n._('Tendencious content'),
-        advertisement: i18n._('Advertisement'),
+        advertisement: i18n._('Advertising content'),
         other: i18n._('Other'),
     };
 
@@ -28,7 +28,7 @@ define([
                 title: i18n._('Issues'),
                 content: modalTpl(),
                 actions: [{
-                    label: i18n._('New'),
+                    label: i18n._('New issue'),
                     icon: 'fa-plus',
                     classes: 'btn-primary btn-new'
                 }, {
@@ -49,6 +49,7 @@ define([
                     classes: 'btn-info btn-back hide'
                 }]
             }),
+            $title = $modal.find('.modal-title'),
             $form= $modal.find('#new-form form'),
             $newBtn = $modal.find('.btn-new'),
             $submitBtn = $modal.find('.btn-submit'),
@@ -65,6 +66,7 @@ define([
                 $submitBtn.removeClass('hide');
                 $backBtn.removeClass('hide');
                 $commentBtns.addClass('hide');
+                $title.text(i18n._('New issue'));
             });
         }
 
@@ -91,6 +93,7 @@ define([
                 $submitBtn.addClass('hide');
                 $backBtn.addClass('hide');
                 $commentBtns.addClass('hide');
+                $title.text(i18n._('Issues'));
             });
         });
 
@@ -123,13 +126,14 @@ define([
 
         // Issues details
         $modal.on('click', '.issue-list .issue', function() {
-            $('<a href="#tab-'+ $(this).data('issue-id') +'"/>').tab('show').on('shown.bs.tab', function() {
+            var $this = $(this);
+            $('<a href="#tab-'+ $this.data('issue-id') +'"/>').tab('show').on('shown.bs.tab', function() {
                 $backBtn.removeClass('hide');
                 $newBtn.addClass('hide');
                 $submitBtn.addClass('hide');
                 $commentBtns.removeClass('hide');
                 // $closeBtn.removeClass('hide');
-
+                $title.text($this.find('h4').text());
                 $modal.find('.tab-pane.active form')[0].reset();
             });
         });

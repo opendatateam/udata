@@ -9,7 +9,7 @@ from udata.forms import DatasetForm, DatasetCreateForm, ResourceForm, DatasetExt
 from udata.frontend import nav
 from udata.frontend.views import DetailView, CreateView, EditView, SingleObject, SearchView, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Resource, Reuse, UPDATE_FREQUENCIES, TERRITORIAL_GRANULARITIES
+from udata.models import Dataset, Resource, Reuse, Issue, UPDATE_FREQUENCIES, TERRITORIAL_GRANULARITIES
 from udata.search import DatasetSearch
 
 from .permissions import DatasetEditPermission, set_dataset_identity
@@ -61,6 +61,7 @@ navbar = nav.Bar('edit_dataset', [
     nav.Item(_('Descrition'), 'datasets.edit'),
     nav.Item(_('Additionnal informations'), 'datasets.edit_extras'),
     nav.Item(_('Resources'), 'datasets.edit_resources'),
+    nav.Item(_('Issues'), 'datasets.issues'),
     nav.Item(_('Transfer'), 'datasets.transfer'),
 ])
 
@@ -136,6 +137,15 @@ class DatasetResourcesEditView(ProtectedDatasetView, EditView):
     template_name = 'dataset/edit_resources.html'
 
 
+class DatasetIssuesView(ProtectedDatasetView, DetailView):
+    template_name = 'dataset/issues.html'
+
+    def get_context(self):
+        context = super(DatasetIssuesView, self).get_context()
+        context['issues'] = Issue.objects(subject=self.dataset)
+        return context
+
+
 class DatasetTransferView(ProtectedDatasetView, EditView):
     form = DatasetForm
     template_name = 'dataset/transfer.html'
@@ -191,6 +201,7 @@ blueprint.add_url_rule('/<dataset:dataset>/edit/', view_func=DatasetEditView.as_
 blueprint.add_url_rule('/<dataset:dataset>/edit/extras/', view_func=DatasetExtrasEditView.as_view(str('edit_extras')))
 blueprint.add_url_rule('/<dataset:dataset>/edit/extras/<string:extra>/', view_func=DatasetExtraDeleteView.as_view(str('delete_extra')))
 blueprint.add_url_rule('/<dataset:dataset>/edit/resources/', view_func=DatasetResourcesEditView.as_view(str('edit_resources')))
+blueprint.add_url_rule('/<dataset:dataset>/issues/', view_func=DatasetIssuesView.as_view(str('issues')))
 blueprint.add_url_rule('/<dataset:dataset>/transfer/', view_func=DatasetTransferView.as_view(str('transfer')))
 blueprint.add_url_rule('/<dataset:dataset>/resources/new/', view_func=ResourceCreateView.as_view(str('new_resource')))
 blueprint.add_url_rule('/<dataset:dataset>/resources/<rid>/', view_func=ResourceEditView.as_view(str('edit_resource')))

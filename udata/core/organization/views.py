@@ -8,7 +8,7 @@ from udata.forms import OrganizationForm, OrganizationMemberForm, OrganizationEx
 from udata.frontend import nav
 from udata.frontend.views import DetailView, CreateView, EditView, SearchView, BaseView, SingleObject
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Organization, Member, Reuse, Dataset, ORG_ROLES, User, FollowOrg
+from udata.models import Organization, Member, Reuse, Dataset, ORG_ROLES, User, FollowOrg, Issue
 from udata.search import OrganizationSearch, DatasetSearch, ReuseSearch, SearchQuery, multiquery
 from udata.utils import get_by
 
@@ -35,7 +35,7 @@ navbar = nav.Bar('edit_org', [
     nav.Item(_('Members'), 'organizations.edit_members'),
     nav.Item(_('Membership request'), 'organizations.edit_membership_requests'),
     nav.Item(_('Teams'), 'organizations.edit_teams'),
-    nav.Item(_('Alerts'), 'organizations.edit_alerts')
+    nav.Item(_('Issues'), 'organizations.issues')
 ])
 
 
@@ -169,6 +169,19 @@ class OrganizationEditAlertsView(ProtectedOrgView, EditView):
     template_name = 'organization/edit_alerts.html'
 
 
+class OrganizationIssuesView(ProtectedOrgView, DetailView):
+    template_name = 'organization/issues.html'
+
+    def get_context(self):
+        context = super(OrganizationIssuesView, self).get_context()
+        datasets = Dataset.objects(organization=self.organization)
+        reuses = Reuse.objects(organization=self.organization)
+        ids = [o.id for o in list(datasets) + list(reuses)]
+        context['issues'] = Issue.objects(subject__in=ids)
+        return context
+
+
+
 blueprint.add_url_rule('/', view_func=OrganizationListView.as_view(str('list')))
 blueprint.add_url_rule('/new/', view_func=OrganizationCreateView.as_view(str('new')))
 blueprint.add_url_rule('/<org:org>/', view_func=OrganizationDetailView.as_view(str('show')))
@@ -176,6 +189,6 @@ blueprint.add_url_rule('/<org:org>/edit/', view_func=OrganizationEditView.as_vie
 blueprint.add_url_rule('/<org:org>/edit/members/', view_func=OrganizationEditMembersView.as_view(str('edit_members')))
 blueprint.add_url_rule('/<org:org>/edit/requests/', view_func=OrganizationMembershipRequestsView.as_view(str('edit_membership_requests')))
 blueprint.add_url_rule('/<org:org>/edit/teams/', view_func=OrganizationEditTeamsView.as_view(str('edit_teams')))
-blueprint.add_url_rule('/<org:org>/edit/alerts/', view_func=OrganizationEditAlertsView.as_view(str('edit_alerts')))
+blueprint.add_url_rule('/<org:org>/issues/', view_func=OrganizationIssuesView.as_view(str('issues')))
 blueprint.add_url_rule('/<org:org>/edit/extras/', view_func=OrganizationExtrasEditView.as_view(str('edit_extras')))
 blueprint.add_url_rule('/<org:org>/edit/extras/<string:extra>/', view_func=OrganizationExtraDeleteView.as_view(str('delete_extra')))

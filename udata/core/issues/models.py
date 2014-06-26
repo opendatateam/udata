@@ -16,7 +16,7 @@ __all__ = ('Issue', 'Message', 'ISSUE_TYPES')
 ISSUE_TYPES = {
     'illegal': _('Illegal content'),
     'tendencious': _('Tendencious content'),
-    'advertisement': _('Advertisement'),
+    'advertisement': _('Advertising content'),
     'other': _('Other'),
 }
 
@@ -50,3 +50,7 @@ class Issue(db.Document):
     @property
     def type_label(self):
         return ISSUE_TYPES[self.type]
+
+    @property
+    def description(self):
+        return self.discussion[0]
