@@ -147,6 +147,13 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     def display_url(self):
         return url_for('datasets.show', dataset=self)
 
+    @property
+    def image_url(self):
+        if self.organization:
+            return self.organization.image_url
+        else:
+            return self.owner.avatar_url
+
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
