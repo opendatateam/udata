@@ -10,8 +10,6 @@
 {% endmacro %}
 
 {% macro issues_list(issues, related=False) %}
-{# {% set open_issues = [issue for issue in issues if not issue.closed] %}
-{% set closed_issues = [issue for issue in issues if issue.closed] %} #}
 {% if not issues %}
 <p class="text-center">{{ _('No Issues') }}</p>
 {% else %}
