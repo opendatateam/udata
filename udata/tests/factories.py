@@ -13,7 +13,8 @@ faker = Faker()
 
 
 class UserFactory(MongoEngineFactory):
-    FACTORY_FOR = models.User
+    class Meta:
+        model = models.User
 
     first_name = factory.LazyAttribute(lambda o: faker.first_name())
     last_name = factory.LazyAttribute(lambda o: faker.last_name())
@@ -28,14 +29,16 @@ class AdminFactory(UserFactory):
 
 
 class ResourceFactory(MongoEngineFactory):
-    FACTORY_FOR = models.Resource
+    class Meta:
+        model = models.Resource
 
     title = factory.LazyAttribute(lambda o: faker.sentence())
     description = factory.LazyAttribute(lambda o: faker.text())
 
 
 class DatasetFactory(MongoEngineFactory):
-    FACTORY_FOR = models.Dataset
+    class Meta:
+        model = models.Dataset
 
     title = factory.LazyAttribute(lambda o: faker.sentence())
     description = factory.LazyAttribute(lambda o: faker.text())
@@ -43,14 +46,16 @@ class DatasetFactory(MongoEngineFactory):
 
 
 class OrganizationFactory(MongoEngineFactory):
-    FACTORY_FOR = models.Organization
+    class Meta:
+        model = models.Organization
 
     name = factory.LazyAttribute(lambda o: faker.sentence())
     description = factory.LazyAttribute(lambda o: faker.text())
 
 
 class ReuseFactory(MongoEngineFactory):
-    FACTORY_FOR = models.Reuse
+    class Meta:
+        model = models.Reuse
 
     title = factory.LazyAttribute(lambda o: faker.sentence())
     description = factory.LazyAttribute(lambda o: faker.text())
@@ -59,21 +64,24 @@ class ReuseFactory(MongoEngineFactory):
 
 
 class LicenseFactory(MongoEngineFactory):
-    FACTORY_FOR = models.License
+    class Meta:
+        model = models.License
 
     id = factory.LazyAttribute(lambda o: faker.word())
     title = factory.LazyAttribute(lambda o: faker.sentence())
 
 
 class TopicFactory(MongoEngineFactory):
-    FACTORY_FOR = models.Topic
+    class Meta:
+        model = models.Topic
 
     name = factory.LazyAttribute(lambda o: faker.sentence())
     description = factory.LazyAttribute(lambda o: faker.text())
 
 
 class PostFactory(MongoEngineFactory):
-    FACTORY_FOR = models.Post
+    class Meta:
+        model = models.Post
 
     name = factory.LazyAttribute(lambda o: faker.sentence())
     content = factory.LazyAttribute(lambda o: faker.text())
