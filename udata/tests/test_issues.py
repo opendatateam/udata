@@ -27,7 +27,7 @@ class Fake(WithMetrics, db.Document):
 
 
 class FakeIssue(Issue):
-    subject = db.ReferenceField('Fake')
+    subject = db.ReferenceField(Fake)
 
 
 class FakeIssuesMetric(IssuesMetric):
@@ -190,6 +190,7 @@ class IssuesTest(APITestCase):
 
     def test_add_comment_to_issue(self):
         fake = Fake.objects.create(metrics={'issues': 1})
+        print fake, fake.id
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
         issue = FakeIssue.objects.create(
