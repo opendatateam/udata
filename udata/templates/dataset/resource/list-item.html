@@ -10,7 +10,7 @@
     </div>
     <h4 class="list-group-item-heading ellipsis">
         <a itemprop="url" href="{{resource.url}}">
-            <span itemprop="name">{{ resource.name or _('Nameless resource') }}</span>
+            <span itemprop="name">{{ resource.title or _('Nameless resource') }}</span>
             <meta itemprop="contentUrl" content="{{resource.url}}" />
             {% if resource.description %}
             <meta itemprop="description" content="{{ resource.description|markdown|escape }}" />
