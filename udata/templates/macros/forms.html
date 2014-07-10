@@ -21,7 +21,7 @@
         {{ field.label.text }}
         {% if field.description %}<span class="form-help" data-content="{{ field.description }}"></span>{% endif %}
     </label>
-    <div class="{{ cols.control }}">
+    <div class="field-wrapper {{ cols.control }}">
         {% if field.type == 'PublishAsField' %}
         {{ publish_as(field) }}
         {% elif field.type == 'RadioField' %}

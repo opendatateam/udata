@@ -20,7 +20,7 @@ require.config({
 
         // jQuery plugins
         'jquery.microdata': '../bower/jquery.microdata/index',
-        'jquery.validation': '../bower/jquery.validation/jquery.validate',
+        'jquery.validation': '../bower/jquery.validation/dist/jquery.validate',
         'dotdotdot': '../bower/jquery.dotdotdot/src/js/jquery.dotdotdot' ,
 
         // To be extracted in extensions

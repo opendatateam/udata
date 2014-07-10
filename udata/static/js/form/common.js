@@ -19,7 +19,7 @@ define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) 
             }
         },
         errorPlacement: function(error, element) {
-            $(element).closest('.form-group').append(error);
+            $(element).closest('.form-group,.field-wrapper').append(error);
         }
     };
 
