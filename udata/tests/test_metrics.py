@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from datetime import date, timedelta
 
 from udata.models import db, Metrics, WithMetrics
-from udata.core.metrics import Metric, SiteMetric
+from udata.core.metrics import Metric
 from udata.tests import TestCase, DBTestMixin
 
 
@@ -14,13 +14,6 @@ class FakeModel(WithMetrics, db.Document):
 
 class FakeMetric(Metric):
     model = FakeModel
-    name = 'fake'
-
-    def get_value(self):
-        return 'fake-value'
-
-
-class FakeSiteMetric(SiteMetric):
     name = 'fake'
 
     def get_value(self):
@@ -170,32 +163,3 @@ class MetricTest(DBTestMixin, TestCase):
     def test_get_for(self):
         '''All metrics should be registered'''
         self.assertEqual(Metric.get_for(FakeModel), {'fake': FakeMetric})
-
-
-class SiteMetricTest(DBTestMixin, TestCase):
-    def setUp(self):
-        self.updated_emitted = False
-        self.need_update_emitted = False
-
-    def on_need_update(self, metric):
-        self.assertIsInstance(metric, FakeSiteMetric)
-        self.need_update_emitted = True
-
-    def on_updated(self, metric):
-        self.assertIsInstance(metric, FakeSiteMetric)
-        self.assertIsNotNone(metric.value)
-        self.updated_emitted = True
-
-    def test_update(self):
-        '''It should store the updated metric on "updated" signal'''
-
-        with FakeSiteMetric.need_update.connected_to(self.on_need_update):
-            with FakeSiteMetric.updated.connected_to(self.on_updated):
-                FakeSiteMetric.update()
-                # metric.notify_update()
-
-        self.assertTrue(self.need_update_emitted)
-        self.assertTrue(self.updated_emitted)
-
-        metrics = Metrics.objects.last_for('site')
-        self.assertEqual(metrics.values['fake'], 'fake-value')

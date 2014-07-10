@@ -1,13 +1,31 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-
-from . import SiteMetric
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, Reuse, User, Organization, Resource, Follow
+from udata.core.metrics import Metric
 
 
-__all__ = ('DatasetsMetric', 'ReusesMetric', 'ResourcesMetric', 'UsersMetric', 'OrganizationsMetric', 'StarsMetric')
+__all__ = ('DatasetsMetric', 'ReusesMetric', 'ResourcesMetric', 'UsersMetric', 'OrganizationsMetric')
+
+
+class SiteMetric(Metric):
+    model = 'site'
+
+    def __init__(self, value=None):
+        super(SiteMetric, self).__init__('site', value)
+
+    @classmethod
+    def update(cls):
+        metric = cls()
+        metric.trigger_update()
+
+    @classmethod
+    def connect(cls, *signals):
+        def callback(sender, **kwargs):
+            cls.update()
+        for signal in signals:
+            signal.connect(callback, weak=False)
 
 
 class DatasetsMetric(SiteMetric):

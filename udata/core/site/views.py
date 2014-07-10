@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from udata.i18n import I18nBlueprint
 from udata.core.metrics import Metric
-from udata.frontend import front, render
+from udata.frontend import render
 from udata.models import Metrics
 
 
-@front.route('/metrics/')
+blueprint = I18nBlueprint('site', __name__)
+
+
+@blueprint.route('/metrics/')
 def metrics():
     metrics = Metrics.objects.last_for('site')
     specs = Metric.get_for('site')

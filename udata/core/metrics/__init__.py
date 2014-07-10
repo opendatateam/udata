@@ -7,7 +7,7 @@ from blinker import Signal
 
 log = logging.getLogger(__name__)
 
-__all__ = ('Metric', 'SiteMetric')
+__all__ = ('Metric', )
 
 metric_catalog = {}
 
@@ -90,28 +90,9 @@ class Metric(object):
             signal.connect(callback, weak=False)
 
 
-class SiteMetric(Metric):
-    model = 'site'
-
-    def __init__(self, value=None):
-        super(SiteMetric, self).__init__('site', value)
-
-    @classmethod
-    def update(cls):
-        metric = cls()
-        metric.trigger_update()
-
-    @classmethod
-    def connect(cls, *signals):
-        def callback(sender, **kwargs):
-            cls.update()
-        for signal in signals:
-            signal.connect(callback, weak=False)
-
-
 def init_app(app):
     # Load all core metrics
-    import udata.core.metrics.metrics
+    import udata.core.site.metrics
     import udata.core.user.metrics
     import udata.core.dataset.metrics
     import udata.core.reuse.metrics

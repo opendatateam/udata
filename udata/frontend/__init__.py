@@ -154,11 +154,11 @@ def init_app(app):
     from . import explore, home, helpers, catalog, error_handlers
 
     # Load all core views and blueprint
-    import udata.core.metrics.views
     import udata.core.search.views
 
     from udata.core.storages.views import blueprint as storages_blueprint
     from udata.core.user.views import blueprint as user_blueprint
+    from udata.core.site.views import blueprint as site_blueprint
     from udata.core.dataset.views import blueprint as dataset_blueprint
     from udata.core.reuse.views import blueprint as reuse_blueprint
     from udata.core.organization.views import blueprint as org_blueprint
@@ -166,8 +166,10 @@ def init_app(app):
     from udata.core.topic.views import blueprint as topic_blueprint
     from udata.core.post.views import blueprint as post_blueprint
     from udata.core.activity.views import blueprint as activity_blueprint
+
     app.register_blueprint(storages_blueprint)
     app.register_blueprint(user_blueprint)
+    app.register_blueprint(site_blueprint)
     app.register_blueprint(dataset_blueprint)
     app.register_blueprint(reuse_blueprint)
     app.register_blueprint(org_blueprint)
