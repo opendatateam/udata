@@ -70,12 +70,12 @@ class GouvFrThemeTest(FrontTestCase):
             org = OrganizationFactory()
             DatasetFactory(organzation=org)
             ReuseFactory(organzation=org)
-        response = self.get(url_for('front.metrics'))
+        response = self.get(url_for('site.metrics'))
         self.assert200(response)
 
     def test_render_metrics_no_data(self):
         '''It should render the search page without data'''
-        response = self.get(url_for('front.metrics'))
+        response = self.get(url_for('site.metrics'))
         self.assert200(response)
 
     def test_render_dataset_page(self):

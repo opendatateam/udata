@@ -5,7 +5,7 @@
         <div class="search_bar">
 
             <form class="navbar-form" role="search" action="{{ search_url or url_for('front.search') }}">
-                <div class="form-group col-sm-4 col-md-4 col-lg-6 col-xs-12">
+                <div class="form-group col-sm-4 col-md-6 col-lg-6 col-xs-12">
                     <div class="input-group">
                         <div class="input-group-btn">
                             <button class="btn" type="submit"><i class="glyphicon glyphicon-search"></i></button>
@@ -18,7 +18,7 @@
             </form>
 
             {# Topic chooser #}
-            <div class="form-group col-sm-3 col-md-2 col-lg-3 col-xs-12">
+            <div class="form-group col-sm-4 col-md-3 col-lg-3 col-xs-12">
                 <button class="dropdown-toggle btn-block btn-light" data-toggle="dropdown">
                     {{ _('Topics') }}
                     <span class="glyphicon glyphicon-chevron-down pull-right hidden-sm"></span>
@@ -35,7 +35,7 @@
             </div>
 
             {# Publish call to action #}
-            <div class="col-sm-2 col-md-4 col-lg-3 col-xs-12 collapse subnav-collapse">
+            <div class="col-sm-4 col-md-3 col-lg-3 col-xs-12 collapse subnav-collapse">
                 <a class="btn btn-primary btn-dark btn-block btn-md icon-left"
                         title="{{ _('Contribute !') }}"
                         data-toggle="modal" data-target="#publish-action-modal">

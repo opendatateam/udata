@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 
-from udata.core.metrics import SiteMetric
+from udata.core.site.metrics import SiteMetric
 from udata.i18n import lazy_gettext as _
 from udata.models import Organization
 
