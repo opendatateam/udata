@@ -24,7 +24,7 @@ REUSE_TYPES = {
 
 class ReuseQuerySet(db.BaseQuerySet):
     def visible(self):
-        return self(private__ne=True, datasets__0__exists=True)
+        return self(private__ne=True, datasets__0__exists=True, deleted=None)
 
 
 class Reuse(db.Datetimed, WithMetrics, db.Document):
@@ -44,6 +44,7 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     ext = db.MapField(db.GenericEmbeddedDocumentField())
 
     featured = db.BooleanField()
+    deleted = db.DateTimeField()
 
     def __unicode__(self):
         return self.title

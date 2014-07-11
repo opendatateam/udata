@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 
+from datetime import datetime
+
 from flask import request, url_for
 from flask.ext.restful import Api, Resource, marshal, fields
 
@@ -74,7 +76,11 @@ class ModelAPI(SingleObjectAPI, API):
 
     def delete(self, **kwargs):
         obj = self.get_or_404(**kwargs)
-        obj.delete()
+        if hasattr(obj, 'deleted'):
+            obj.deleted = datetime.now()
+            obj.save()
+        else:
+            obj.delete()
         return '', 204
 
 

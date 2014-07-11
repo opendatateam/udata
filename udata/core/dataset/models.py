@@ -61,7 +61,7 @@ class License(db.Document):
 
 class DatasetQuerySet(db.BaseQuerySet):
     def visible(self):
-        return self(private__ne=True, resources__0__exists=True)
+        return self(private__ne=True, resources__0__exists=True, deleted=None)
 
 
 class Resource(db.EmbeddedDocument):
@@ -76,6 +76,7 @@ class Resource(db.EmbeddedDocument):
     created_at = db.DateTimeField(default=datetime.datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.datetime.now, required=True)
     published = db.DateTimeField(default=datetime.datetime.now, required=True)
+    deleted = db.DateTimeField()
 
     on_added = Signal()
     on_deleted = Signal()
@@ -110,6 +111,8 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     extras = db.DictField()
 
     featured = db.BooleanField()
+
+    deleted = db.DateTimeField()
 
     def __unicode__(self):
         return self.title

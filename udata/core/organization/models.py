@@ -78,6 +78,11 @@ class MembershipRequest(db.EmbeddedDocument):
         return MEMBERSHIP_STATUS[self.status]
 
 
+class OrganizationQuerySet(db.BaseQuerySet):
+    def visible(self):
+        return self(deleted=None)
+
+
 class Organization(WithMetrics, db.Datetimed, db.Document):
     name = db.StringField(max_length=255, required=True)
     slug = db.SlugField(max_length=255, required=True, populate_from='name', update=True)
@@ -92,13 +97,16 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.DictField()
 
+    deleted = db.DateTimeField()
+
     # TODO: Extract into extension
     public_service = db.BooleanField()
 
     meta = {
         'allow_inheritance': True,
         'indexes': ['-created_at', 'slug'],
-        'ordering': ['-created_at']
+        'ordering': ['-created_at'],
+        'queryset_class': OrganizationQuerySet,
     }
 
     def __unicode__(self):

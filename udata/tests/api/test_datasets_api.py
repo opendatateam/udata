@@ -56,7 +56,8 @@ class DatasetAPITest(APITestCase):
         dataset = DatasetFactory()
         response = self.delete(url_for('api.dataset', slug=dataset.slug))
         self.assertStatus(response, 204)
-        self.assertEqual(Dataset.objects.count(), 0)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertIsNotNone(Dataset.objects[0].deleted)
 
     def test_dataset_api_feature(self):
         '''It should mark the dataset featured on POST'''

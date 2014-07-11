@@ -54,7 +54,8 @@ class OrganizationAPITest(APITestCase):
         organization = OrganizationFactory()
         response = self.delete(url_for('api.organization', slug=organization.slug))
         self.assertStatus(response, 204)
-        self.assertEqual(Organization.objects.count(), 0)
+        self.assertEqual(Organization.objects.count(), 1)
+        self.assertIsNotNone(Organization.objects[0].deleted)
 
     # def test_organization_api_delete_not_found(self):
     #     '''It should raise a 404 on delete from the API if not found'''

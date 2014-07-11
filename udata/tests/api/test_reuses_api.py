@@ -49,7 +49,8 @@ class ReuseAPITest(APITestCase):
         reuse = ReuseFactory()
         response = self.delete(url_for('api.reuse', slug=reuse.slug))
         self.assertStatus(response, 204)
-        self.assertEqual(Reuse.objects.count(), 0)
+        self.assertEqual(Reuse.objects.count(), 1)
+        self.assertIsNotNone(Reuse.objects[0].deleted)
 
     def test_reuse_api_feature(self):
         '''It should mark the reuse featured on POST'''

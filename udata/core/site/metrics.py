@@ -43,7 +43,7 @@ class ReusesMetric(SiteMetric):
     display_name = _('Reuses')
 
     def get_value(self):
-        return Reuse.objects.count()
+        return Reuse.objects.visible().count()
 
 ReusesMetric.connect(Reuse.on_create, Reuse.on_update)
 
@@ -81,7 +81,7 @@ class OrganizationsMetric(SiteMetric):
     display_name = _('Organizations')
 
     def get_value(self):
-        return Organization.objects.count()
+        return Organization.objects.visible().count()
 
 OrganizationsMetric.connect(Organization.on_update)
 

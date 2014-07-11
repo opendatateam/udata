@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from udata.models import Organization
 from udata.search import ModelSearchAdapter, Sort, RangeFacet, i18n_analyzer, BoolBooster, GaussDecay
 
+from . import metrics  # Metrics are need for the mapping
+
 __all__ = ('OrganizationSearch', )
 
 
