@@ -18,10 +18,11 @@ define(['jquery', 'd3', 'chart/base'], function($, d3, BaseChart) {
                 }),
                 yMax = d3.max(data, function(d) {
                     return +d.value;
-                });
+                }),
+                yMargin = (yMax - yMin) / 10;
 
             var x = d3.scale.linear().domain([0, data.length]).range([0, bbox.width]),
-                y = d3.scale.linear().domain([yMin - (2 * yMin), yMax + 20]).range([bbox.height, 0]),
+                y = d3.scale.linear().domain([yMin - yMargin, yMax + yMargin]).range([bbox.height, 0]),
                 opacity = d3.scale.linear().domain([yMin, yMax]).range([0.5, 1]),
                 fillOpacity = function(d) { return opacity(d.value); };
 
