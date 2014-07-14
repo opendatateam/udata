@@ -59,6 +59,7 @@ class ElasticSearch(object):
             for adapter in adapter_catalog.values()
             if adapter.mapping
         ]
+        print mappings
         if es.indices.exists(self.index_name):
             for doc_type, mapping in mappings:
                 es.indices.put_mapping(index=self.index_name, doc_type=doc_type, body=mapping)
@@ -89,7 +90,7 @@ def reindex(obj):
 
 
 # from . import fields
-from .adapter import ModelSearchAdapter
+from .adapter import ModelSearchAdapter, metrics_mapping
 from .query import SearchQuery
 from .result import SearchResult
 from .fields import *

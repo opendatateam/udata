@@ -15,6 +15,8 @@ from udata.tests import TestCase, DBTestMixin
 from udata.tests.factories import faker, MongoEngineFactory
 from udata.utils import multi_to_dict
 
+from udata.core.metrics import Metric
+
 
 class Fake(db.Document):
     INDEX_TYPE = 'fake'
@@ -25,6 +27,17 @@ class Fake(db.Document):
 
     def __unicode__(self):
         return 'fake'
+
+
+class FakeMetricInt(Metric):
+    model = Fake
+    name = 'fake-metric-int'
+
+
+class FakeMetricFloat(Metric):
+    model = Fake
+    name = 'fake-metric-float'
+    value_type = float
 
 
 class FakeFactory(MongoEngineFactory):
@@ -369,6 +382,23 @@ class SearchQueryTest(TestCase):
             'q': 'test',
             'tag': ['tag1', 'tag2'],
             'page': '2',
+        })
+
+
+class TestMetricsMapping(TestCase):
+    def test_map_metrics(self):
+        mapping = search.metrics_mapping(Fake)
+        self.assertEqual(mapping, {
+            'type': 'object',
+            'index_name': 'metrics',
+            'properties': {
+                'fake-metric-int': {
+                    'type': 'integer',
+                },
+                'fake-metric-float': {
+                    'type': 'float',
+                },
+            }
         })
 
 

@@ -53,6 +53,10 @@ class OrganizationSearch(ModelSearchAdapter):
     ]
 
     @classmethod
+    def is_indexable(cls, org):
+        return org.deleted is None
+
+    @classmethod
     def serialize(cls, organization):
         return {
             'name': organization.name,

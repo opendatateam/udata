@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from udata.models import Dataset, Organization, License
-from udata.search import ModelSearchAdapter, i18n_analyzer
+from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
 from udata.search.fields import Sort, BoolFacet, TemporalCoverageFacet
 from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
 from udata.search.fields import BoolBooster, GaussDecay
@@ -59,7 +59,7 @@ class DatasetSearch(ModelSearchAdapter):
             },
             'created': {'type': 'date', 'format': 'date_hour_minute_second'},
             'last_modified': {'type': 'date', 'format': 'date_hour_minute_second'},
-            'metrics': {'type': 'object', 'index_name': 'metrics'},
+            'metrics': metrics_mapping(Dataset),
             'featured': {'type': 'boolean'},
             'temporal_coverage': {  # Store dates as ordinals to handle pre-1900 dates
                 'type': 'object',
@@ -98,6 +98,10 @@ class DatasetSearch(ModelSearchAdapter):
         GaussDecay('metrics.reuses', 50, decay=0.8),
         GaussDecay('metrics.followers', 200, 200, decay=0.8),
     ]
+
+    @classmethod
+    def is_indexable(cls, dataset):
+        return dataset.deleted is None and len(dataset.resources) > 0 and not dataset.private
 
     @classmethod
     def serialize(cls, dataset):

@@ -7,13 +7,15 @@ from flask import current_app
 from mongoengine.signals import post_save
 
 from udata.search import adapter_catalog, reindex
+from udata.core.metrics import Metric
 
 log = logging.getLogger(__name__)
 
 
 def reindex_model_on_save(sender, document, **kwargs):
     '''(Re)Index Mongo document on post_save'''
-    if current_app.config.get('AUTO_INDEX'):
+    adapter = adapter_catalog.get(document.__class__)
+    if current_app.config.get('AUTO_INDEX') and adapter and adapter.is_indexable(document):
         reindex.delay(document)
 
 
@@ -46,6 +48,25 @@ class ModelSearchAdapter(object):
         return cls.model.__name__
 
     @classmethod
+    def is_indexable(cls, document):
+        return True
+
+    @classmethod
     def serialize(cls, document):
         '''By default use the ``to_dict`` method and exclude ``_id``, ``_cls`` and ``owner`` fields'''
         return document.to_dict(exclude=('_id', '_cls', 'owner'))
+
+metrics_types = {
+    int: 'integer',
+    float: 'float',
+}
+
+def metrics_mapping(cls):
+    mapping = {
+        'type': 'object',
+        'index_name': 'metrics',
+        'properties': {}
+    }
+    for name, metric in Metric.get_for(cls).items():
+        mapping['properties'][metric.name] = {'type': metrics_types[metric.value_type]}
+    return mapping

@@ -86,6 +86,10 @@ class ReuseSearch(ModelSearchAdapter):
     ]
 
     @classmethod
+    def is_indexable(cls, reuse):
+        return reuse.deleted is None and len(reuse.datasets) > 0 and not reuse.private
+
+    @classmethod
     def serialize(cls, reuse):
         '''By default use the ``to_dict`` method and exclude ``_id``, ``_cls`` and ``owner`` fields'''
         return {

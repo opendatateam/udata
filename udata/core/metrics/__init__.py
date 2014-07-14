@@ -40,6 +40,7 @@ class Metric(object):
     display_name = None
     value = None
     default = 0
+    value_type = int
 
     __metaclass__ = MetricMetaClass
 
