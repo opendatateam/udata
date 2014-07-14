@@ -15,7 +15,7 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_render_list(self):
         '''It should render the dataset list page'''
         with self.autoindex():
-            datasets = [DatasetFactory() for i in range(3)]
+            datasets = [DatasetFactory(resources=[ResourceFactory()]) for i in range(3)]
 
         response = self.get(url_for('datasets.list'))
 
@@ -26,8 +26,8 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_render_list_with_query(self):
         '''It should render the dataset list page with a query string'''
         with self.autoindex():
-            datasets = [DatasetFactory() for i in range(3)]
-            expected_dataset = DatasetFactory(title='test for query')
+            datasets = [DatasetFactory(resources=[ResourceFactory()]) for i in range(3)]
+            expected_dataset = DatasetFactory(title='test for query', resources=[ResourceFactory()])
             datasets.append(expected_dataset)
 
         response = self.get(url_for('datasets.list'), qs={'q': 'test for query'})
@@ -172,7 +172,7 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assert404(response)
 
     def test_recent_feed(self):
-        datasets = [DatasetFactory() for i in range(3)]
+        datasets = [DatasetFactory(resources=[ResourceFactory()]) for i in range(3)]
 
         response = self.get(url_for('datasets.recent_feed'))
 
@@ -188,7 +188,7 @@ class DatasetBlueprintTest(FrontTestCase):
 
     def test_recent_feed_owner(self):
         owner = UserFactory()
-        DatasetFactory(owner=owner)
+        DatasetFactory(owner=owner, resources=[ResourceFactory()])
 
         response = self.get(url_for('datasets.recent_feed'))
 
@@ -206,7 +206,7 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_recent_feed_org(self):
         owner = UserFactory()
         org = OrganizationFactory()
-        DatasetFactory(owner=owner, organization=org)
+        DatasetFactory(owner=owner, organization=org, resources=[ResourceFactory()])
 
         response = self.get(url_for('datasets.recent_feed'))
 

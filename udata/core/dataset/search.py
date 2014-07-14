@@ -119,7 +119,7 @@ class DatasetSearch(ModelSearchAdapter):
                     'format': r.format,
                 }
                 for r in dataset.resources],
-            'format_suggest': [r.format.lower() for r in dataset.resources],
+            'format_suggest': [r.format.lower() for r in dataset.resources if r.format],
             'frequency': dataset.frequency,
             'organization': str(dataset.organization.id) if dataset.organization else None,
             'supplier': str(dataset.supplier.id) if dataset.supplier else None,

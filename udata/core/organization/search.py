@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from udata.models import Organization
-from udata.search import ModelSearchAdapter, Sort, RangeFacet, i18n_analyzer, BoolBooster, GaussDecay
+from udata.search import ModelSearchAdapter, Sort, RangeFacet, i18n_analyzer, BoolBooster, GaussDecay, metrics_mapping
 
 from . import metrics  # Metrics are need for the mapping
 
@@ -36,7 +36,7 @@ class OrganizationSearch(ModelSearchAdapter):
             },
             'description': {'type': 'string', 'analyzer': i18n_analyzer},
             'url': {'type': 'string'},
-            'metrics': {'type': 'object', 'index_name': 'metrics'},
+            'metrics': metrics_mapping(Organization),
             'org_suggest': {
                 'type': 'completion',
                 'index_analyzer': 'simple',

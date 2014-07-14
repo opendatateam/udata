@@ -8,14 +8,14 @@ from flask import url_for
 from udata.models import Reuse
 
 from . import FrontTestCase
-from ..factories import ReuseFactory, UserFactory, AdminFactory, OrganizationFactory
+from ..factories import ReuseFactory, UserFactory, AdminFactory, OrganizationFactory, DatasetFactory
 
 
 class ReuseBlueprintTest(FrontTestCase):
     def test_render_list(self):
         '''It should render the reuse list page'''
         with self.autoindex():
-            reuses = [ReuseFactory() for i in range(3)]
+            reuses = [ReuseFactory(datasets=[DatasetFactory()]) for i in range(3)]
 
         response = self.get(url_for('reuses.list'))
 
@@ -26,7 +26,7 @@ class ReuseBlueprintTest(FrontTestCase):
     def test_render_list_with_query(self):
         '''It should render the reuse list page with a query'''
         with self.autoindex():
-            [ReuseFactory(title='Reuse {0}'.format(i)) for i in range(3)]
+            [ReuseFactory(title='Reuse {0}'.format(i), datasets=[DatasetFactory()]) for i in range(3)]
 
         response = self.get(url_for('reuses.list'), qs={'q': '2'})
 
@@ -99,7 +99,7 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assert404(response)
 
     def test_recent_feed(self):
-        datasets = [ReuseFactory() for i in range(3)]
+        datasets = [ReuseFactory(datasets=[DatasetFactory()]) for i in range(3)]
 
         response = self.get(url_for('reuses.recent_feed'))
 
@@ -115,7 +115,7 @@ class ReuseBlueprintTest(FrontTestCase):
 
     def test_recent_feed_owner(self):
         owner = UserFactory()
-        ReuseFactory(owner=owner)
+        ReuseFactory(owner=owner, datasets=[DatasetFactory()])
 
         response = self.get(url_for('reuses.recent_feed'))
 
@@ -133,7 +133,7 @@ class ReuseBlueprintTest(FrontTestCase):
     def test_recent_feed_org(self):
         owner = UserFactory()
         org = OrganizationFactory()
-        ReuseFactory(owner=owner, organization=org)
+        ReuseFactory(owner=owner, organization=org, datasets=[DatasetFactory()])
 
         response = self.get(url_for('reuses.recent_feed'))
 

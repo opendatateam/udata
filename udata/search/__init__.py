@@ -59,7 +59,7 @@ class ElasticSearch(object):
             for adapter in adapter_catalog.values()
             if adapter.mapping
         ]
-        print mappings
+
         if es.indices.exists(self.index_name):
             for doc_type, mapping in mappings:
                 es.indices.put_mapping(index=self.index_name, doc_type=doc_type, body=mapping)
@@ -85,7 +85,6 @@ i18n_analyzer = make_lazy_string(get_i18n_analyzer)
 def reindex(obj):
     adapter = adapter_catalog.get(obj.__class__)
     log.info('Indexing %s (%s)', adapter.doc_type(), obj.id)
-
     es.index(index=es.index_name, doc_type=adapter.doc_type(), id=obj.id, body=adapter.serialize(obj))
 
 
@@ -113,8 +112,10 @@ def multiquery(*queries):
         body.append(query.get_body())
     try:
         result = es.msearch(index=es.index_name, body=body)
-    except:
+    except Exception as e:
+        log.exception('Unable to perform multiquery')
         result = [{} for _ in range(len(queries))]
+
     return [
         SearchResult(query, response)
         for response, query in zip(result['responses'], queries)

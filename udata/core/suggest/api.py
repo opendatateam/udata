@@ -22,7 +22,7 @@ class SuggestTagsAPI(API):
                 }
             }
         })
-        return result['tags'][0]['options']
+        return sorted(result['tags'][0]['options'], key=lambda o: len(o['text']))
 
 
 class SuggestFormatsAPI(API):
@@ -38,7 +38,7 @@ class SuggestFormatsAPI(API):
                 }
             }
         })
-        return result['formats'][0]['options']
+        return sorted(result['formats'][0]['options'], key=lambda o: len(o['text']))
 
 
 class SuggestOrgsAPI(API):

@@ -61,6 +61,7 @@ metrics_types = {
     float: 'float',
 }
 
+
 def metrics_mapping(cls):
     mapping = {
         'type': 'object',

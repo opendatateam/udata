@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from udata.models import Reuse, Organization, REUSE_TYPES
-from udata.search import ModelSearchAdapter, Sort, i18n_analyzer
+from udata.search import ModelSearchAdapter, Sort, i18n_analyzer, metrics_mapping
 from udata.search import RangeFacet, BoolFacet
 from udata.search import TermFacet, ModelTermFacet
 from udata.search import BoolBooster, GaussDecay
@@ -69,7 +69,7 @@ class ReuseSearch(ModelSearchAdapter):
                     'title': {'type': 'string'}
                 }
             },
-            'metrics': {'type': 'object', 'index_name': 'metrics'},
+            'metrics': metrics_mapping(Reuse),
             'featured': {'type': 'boolean'},
             'reuse_suggest': {
                 'type': 'completion',

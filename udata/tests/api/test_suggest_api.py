@@ -13,8 +13,8 @@ class SuggestAPITest(APITestCase):
         with self.autoindex():
             for i in range(3):
                 tags = [faker.word(), faker.word(), 'test', 'test-{0}'.format(i)]
-                ReuseFactory(tags=tags)
-                DatasetFactory(tags=tags)
+                ReuseFactory(tags=tags, datasets=[DatasetFactory()])
+                DatasetFactory(tags=tags, resources=[ResourceFactory()])
 
         response = self.get(url_for('api.suggest_tags'), qs={'q': 'tes', 'size': '5'})
         self.assert200(response)
@@ -33,8 +33,8 @@ class SuggestAPITest(APITestCase):
         with self.autoindex():
             for i in range(3):
                 tags = ['aaaa', 'aaaa-{0}'.format(i)]
-                ReuseFactory(tags=tags)
-                DatasetFactory(tags=tags)
+                ReuseFactory(tags=tags, datasets=[DatasetFactory()])
+                DatasetFactory(tags=tags, resources=[ResourceFactory()])
 
         response = self.get(url_for('api.suggest_tags'), qs={'q': 'bbbb', 'size': '5'})
         self.assert200(response)
@@ -43,9 +43,6 @@ class SuggestAPITest(APITestCase):
     def test_suggest_formats_api(self):
         '''It should suggest formats'''
         with self.autoindex():
-            for i in range(3):
-                tags = [faker.word(), faker.word(), 'test', 'test-{0}'.format(i)]
-                ReuseFactory(tags=tags)
             DatasetFactory(resources=[
                 ResourceFactory(format=f) for f in (faker.word(), faker.word(), 'test', 'test-1')
             ])
@@ -55,7 +52,7 @@ class SuggestAPITest(APITestCase):
 
         self.assertLessEqual(len(response.json), 5)
         self.assertGreater(len(response.json), 1)
-        self.assertEqual(response.json[0]['text'], 'test')
+        self.assertEqual(response.json[0]['text'], 'test') # Shortest match first
 
         for suggestion in response.json:
             self.assertIn('text', suggestion)
@@ -77,7 +74,7 @@ class SuggestAPITest(APITestCase):
         '''It should suggest datasets'''
         with self.autoindex():
             for i in range(4):
-                DatasetFactory(title='test-{0}'.format(i) if i % 2 else faker.word())
+                DatasetFactory(title='test-{0}'.format(i) if i % 2 else faker.word(), resources=[ResourceFactory()])
 
         response = self.get(url_for('api.suggest_datasets'), qs={'q': 'tes', 'size': '5'})
         self.assert200(response)
@@ -97,7 +94,7 @@ class SuggestAPITest(APITestCase):
         '''It should not provide dataset suggestion if no match'''
         with self.autoindex():
             for i in range(3):
-                DatasetFactory()
+                DatasetFactory(resources=[ResourceFactory()])
 
         response = self.get(url_for('api.suggest_datasets'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
@@ -185,7 +182,7 @@ class SuggestAPITest(APITestCase):
         '''It should suggest reuses'''
         with self.autoindex():
             for i in range(4):
-                ReuseFactory(title='test-{0}'.format(i) if i % 2 else faker.word())
+                ReuseFactory(title='test-{0}'.format(i) if i % 2 else faker.word(), datasets=[DatasetFactory()])
 
         response = self.get(url_for('api.suggest_reuses'), qs={'q': 'tes', 'size': '5'})
         self.assert200(response)
@@ -205,7 +202,7 @@ class SuggestAPITest(APITestCase):
         '''It should not provide reuse suggestion if no match'''
         with self.autoindex():
             for i in range(3):
-                ReuseFactory()
+                ReuseFactory(datasets=[DatasetFactory()])
 
         response = self.get(url_for('api.suggest_reuses'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)

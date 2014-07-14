@@ -24,7 +24,7 @@ def store_references_lists():
 def recent_feed():
     feed = AtomFeed('Recent Articles',
                     feed_url=request.url, url=request.url_root)
-    datasets = Reuse.objects.order_by('-date').limit(15)
+    datasets = Reuse.objects.visible().order_by('-date').limit(15)
     for dataset in datasets:
         author = None
         if dataset.organization:

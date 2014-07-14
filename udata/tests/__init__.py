@@ -95,7 +95,6 @@ class WebTestMixin(object):
 
     def delete(self, url, client=None, **kwargs):
         url = self._build_url(url, kwargs)
-        print (client or self.client)
         return (client or self.client).delete(url, **kwargs)
 
 

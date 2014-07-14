@@ -38,10 +38,8 @@ class CatalogTest(FrontTestCase):
         self.assertEqual(header[1], 'slug')
         self.assertEqual(header[2], 'title')
 
-        print metrics.Metric.get_for(Dataset)
         for key, spec in metrics.Metric.get_for(Dataset).items():
             self.assertIn('metric.{0}'.format(key), header)
-        # self.assertEqual(header['1'], 'slug')
 
         self.assertEqual(len(rows), len(datasets))
         self.assertNotIn(str(hidden_dataset.id), (row[0] for row in rows))

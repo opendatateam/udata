@@ -21,7 +21,8 @@ class Reindex(Command):
         es.initialize()
         for model, adapter in adapter_catalog.items():
             print 'Reindexing {0} objects'.format(model.__name__)
-            for obj in model.objects:
+            qs = model.objects.visible() if hasattr(model.objects, 'visible') else model.objects
+            for obj in qs:
                 es.index(index=es.index_name, doc_type=adapter.doc_type(), id=obj.id, body=adapter.serialize(obj))
         es.indices.refresh(index=es.index_name)
 

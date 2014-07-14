@@ -7,6 +7,9 @@ from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, Reuse, User
 
 from udata.core.issues.metrics import IssuesMetric
+from udata.core.followers.metrics import FollowersMetric
+
+from udata.models import FollowDataset
 
 
 __all__ = ('DatasetReuses', )
@@ -31,3 +34,12 @@ def update_dataset_reuses_metric(reuse, **kwargs):
 
 class DatasetIssuesMetric(IssuesMetric):
     model = Dataset
+
+
+class DatasetFollowers(FollowersMetric):
+    model = Dataset
+
+
+@FollowDataset.on_new.connect
+def on_new_dataset_follower(follow):
+    DatasetFollowers(follow.following).trigger_update()

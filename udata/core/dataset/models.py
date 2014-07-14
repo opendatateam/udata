@@ -110,7 +110,7 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.DictField()
 
-    featured = db.BooleanField()
+    featured = db.BooleanField(required=True, default=False)
 
     deleted = db.DateTimeField()
 

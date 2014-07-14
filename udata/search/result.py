@@ -16,6 +16,7 @@ class SearchResult(Paginable):
     def __init__(self, query, result):
         self.result = result
         self.query = query
+
     @property
     def total(self):
         return self.result.get('hits', {}).get('total', 0)
