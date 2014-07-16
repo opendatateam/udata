@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import hashlib
+
 from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
@@ -33,6 +35,7 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     description = db.StringField(required=True)
     type = db.StringField(required=True, choices=REUSE_TYPES.keys())
     url = db.StringField(required=True, unique=True)
+    urlhash = db.StringField(required=True, unique=True)
     image_url = db.StringField()
     datasets = db.ListField(db.ReferenceField('Dataset'))
     tags = db.ListField(db.StringField())
@@ -51,7 +54,7 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
 
     meta = {
         'allow_inheritance': True,
-        'indexes': ['-created_at', 'owner'],
+        'indexes': ['-created_at', 'owner', 'urlhash'],
         'ordering': ['-created_at'],
         'queryset_class': ReuseQuerySet,
     }
@@ -67,7 +70,14 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     on_unstar = Signal()
 
     @classmethod
+    def hash_url(cls, url):
+        return hashlib.sha1(url).hexdigest()
+
+    @classmethod
     def pre_save(cls, sender, document, **kwargs):
+        # auto populate url_sha1 from url
+        document.urlhash = cls.hash_url(document.url)
+        # Emit before_save
         cls.before_save.send(document)
 
     @classmethod
