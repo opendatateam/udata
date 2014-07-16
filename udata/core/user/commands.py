@@ -45,5 +45,14 @@ class DeleteUserCommand(Command):
         print 'User deleted successfully'
 
 
+@manager.command
+def set_admin(email):
+    '''Set an user as administrator'''
+    user = datastore.get_user(email)
+    print 'Adding admin role to user %s (%s)' % (user.fullname, user.email)
+    datastore.add_role_to_user(user, 'admin')
+    print 'User %s (%s) is now administrator' % (user.fullname, user.email)
+
+
 manager.add_command('create_user', CreateUserCommand())
 manager.add_command('delete_user', DeleteUserCommand())
