@@ -50,7 +50,8 @@ def set_admin(email):
     '''Set an user as administrator'''
     user = datastore.get_user(email)
     print 'Adding admin role to user %s (%s)' % (user.fullname, user.email)
-    datastore.add_role_to_user(user, 'admin')
+    role = datastore.find_or_create_role('admin')
+    datastore.add_role_to_user(user, role)
     print 'User %s (%s) is now administrator' % (user.fullname, user.email)
 
 
