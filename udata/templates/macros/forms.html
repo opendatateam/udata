@@ -13,7 +13,7 @@
 {% endmacro %}
 
 {% macro field(field, sizes='sm-2') %}
-{% if field.is_visible %}
+{% if not field|attr('is_visible') or field.is_visible %}
 {% set cols = form_grid(sizes) %}
 <div class="form-group{% if field.errors %} has-error{% endif %}">
     <label for="{{ field.id }}"
