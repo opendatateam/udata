@@ -38,8 +38,8 @@ class FieldHelper(object):
         pass
 
     @property
-    def is_visible(self):
-        return True
+    def hidden(self):
+        return False
 
     def __call__(self, **kwargs):
         placeholder = kwargs.pop('placeholder', _(self.label.text))
@@ -232,8 +232,8 @@ class DateRangeField(FieldHelper, fields.StringField):
 
 class PublishAsField(FieldHelper, fields.HiddenField):
     @property
-    def is_visible(self):
-        return len(current_user.organizations) > 0
+    def hidden(self):
+        return len(current_user.organizations) <= 0
 
     def process_formdata(self, valuelist):
         if valuelist and valuelist[0].strip():
