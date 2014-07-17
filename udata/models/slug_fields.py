@@ -29,6 +29,8 @@ class SlugField(StringField):
 
     def __set__(self, instance, value):
         '''Store the previous value'''
+        if not instance._initialised:
+            self.clear()
         old_value = getattr(instance, self.db_field)
         if old_value != value:
             self.old_value = old_value

@@ -66,7 +66,8 @@ class SlugFieldTest(DBTestMixin, TestCase):
 
     def test_populate_next(self):
         '''SlugField should not keep other fields value'''
-        SlugTester.objects.create(title="A Title")
+        obj = SlugTester.objects.create(title="A Title")
+        obj.slug = 'fake'
         obj = SlugTester.objects.create(title="Another title")
         self.assertEqual(obj.slug, 'another-title')
 
