@@ -11,7 +11,6 @@ from udata.auth import current_user
 from udata.forms import OrganizationForm, MembershipRequestForm
 from udata.models import Organization, MembershipRequest, Member
 from udata.search import OrganizationSearch
-from udata.utils import get_by
 
 
 org_fields = {
@@ -19,7 +18,7 @@ org_fields = {
     'name': fields.String,
     'slug': fields.String,
     'description': fields.String,
-    'created_at': fields.DateTime,
+    'created_at': fields.ISODateTime,
     'metrics': fields.Raw,
 }
 

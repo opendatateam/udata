@@ -17,7 +17,7 @@ reuse_fields = {
     'title': fields.String,
     'slug': fields.String,
     'description': fields.String,
-    'created_at': fields.DateTime
+    'created_at': fields.ISODateTime,
 }
 
 

@@ -20,7 +20,7 @@ resource_fields = {
     'description': fields.String,
     'url': fields.String,
     'checksum': fields.String,
-    'created_at': fields.DateTime,
+    'created_at': fields.ISODateTime,
 }
 
 
@@ -29,8 +29,8 @@ dataset_fields = {
     'title': fields.String,
     'slug': fields.String,
     'description': fields.String,
-    'created_at': fields.DateTime,
-    'last_modified': fields.DateTime,
+    'created_at': fields.ISODateTime,
+    'last_modified': fields.ISODateTime,
     'featured': fields.Boolean,
     'tags': fields.List(fields.String),
     'resources': fields.Nested(resource_fields),
