@@ -117,7 +117,6 @@ class OrganizationEditMembersView(ProtectedOrgView, EditView):
         return context
 
     def on_form_valid(self, form):
-        print form.pk.data
         user = User.objects.get_or_404(id=form.pk.data)
         member = get_by(self.organization.members, 'user', user)
         if member:
@@ -133,7 +132,6 @@ class OrganizationEditMembersView(ProtectedOrgView, EditView):
 
     def delete(self, **kwargs):
         self.kwargs = kwargs
-        print request.form, ',', request.environ.get('CONTENT_TYPE', 'NO'), 'end'
         user = User.objects.get_or_404(id=request.form.get('user_id'))
         member = get_by(self.organization.members, 'user', user)
         self.organization.members.remove(member)
