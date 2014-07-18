@@ -13,8 +13,8 @@ from udata.models import db, WithMetrics
 __all__ = ('User', 'Role', 'datastore')
 
 
-def populate_slug(user):
-    return ' '.join([user.first_name, user.last_name])
+# def populate_slug(user):
+#     return ' '.join([user.first_name, user.last_name])
 
 
 # TODO: use simple text for role
@@ -30,7 +30,7 @@ class Role(db.Document, RoleMixin):
 
 
 class User(db.Document, WithMetrics,UserMixin):
-    slug = db.SlugField(max_length=255, required=True, populate_from=populate_slug)
+    slug = db.SlugField(max_length=255, required=True, populate_from='fullname')
     email = db.StringField(max_length=255, required=True)
     password = db.StringField()
     active = db.BooleanField()

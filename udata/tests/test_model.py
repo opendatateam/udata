@@ -71,6 +71,13 @@ class SlugFieldTest(DBTestMixin, TestCase):
         obj = SlugTester.objects.create(title="Another title")
         self.assertEqual(obj.slug, 'another-title')
 
+    def test_populate_parallel(self):
+        '''SlugField should not take other instance values'''
+        obj1 = SlugTester.objects.create(title="A Title")
+        obj = SlugTester.objects.create(title="Another title")
+        obj1.slug = 'fake'
+        self.assertEqual(obj.slug, 'another-title')
+
     def test_no_populate(self):
         '''SlugField should not populate itself if a value is set'''
         obj = SlugTester(title='A Title', slug='a-slug')

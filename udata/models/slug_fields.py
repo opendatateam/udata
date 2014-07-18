@@ -23,23 +23,7 @@ class SlugField(StringField):
         self.lower_case = lower_case
         self.separator = separator
         self.follow = follow
-        self.old_value = None
-        self.new_value = None
         super(SlugField, self).__init__(**kwargs)
-
-    def __set__(self, instance, value):
-        '''Store the previous value'''
-        if not instance._initialised:
-            self.clear()
-        old_value = getattr(instance, self.db_field)
-        if old_value != value:
-            self.old_value = old_value
-            self.new_value = value
-        return super(SlugField, self).__set__(instance, value)
-
-    def clear(self):
-        self.old_value = None
-        self.new_value = None
 
 
 class SlugFollow(Document):
@@ -65,25 +49,30 @@ def populate_slug(instance, field):
     '''
     Populate a slug field if needed.
     '''
-    if not field.populate_from and not field.new_value:
-        return
+    value = getattr(instance, field.db_field)
 
-    if field.new_value:
-        value = field.new_value
-    elif callable(field.populate_from):
-        value = field.populate_from(instance)
-    else:
+    try:
+        previous = instance.__class__.objects.get(id=instance.id)
+    except:
+        previous = None
+
+    manual = not previous and value or field.db_field in instance._get_changed_fields()
+
+    if not manual and field.populate_from:
         value = getattr(instance, field.populate_from)
+        if previous and value == getattr(previous, field.populate_from):
+            return
+
+    if previous and (getattr(previous, field.db_field) == value or not field.update):
+        return
 
     if field.lower_case:
         value = value.lower()
 
     slug = slugify.slugify(value, max_length=field.max_length, separator=field.separator)
+    old_slug = getattr(previous, field.db_field, None) # if previous and slug ==
 
-    # Do nothing if unchanged
-    old_slug = field.old_value or getattr(instance, field.db_field)
-    if slug == old_slug or (not field.update and old_slug):
-        field.clear()
+    if slug == old_slug:
         return
 
     # Ensure uniqueness
@@ -91,7 +80,9 @@ def populate_slug(instance, field):
         base_slug = slug
         index = 1
         qs = instance.__class__.objects
-        exists = lambda s: qs(class_check=False, **dict([(field.db_field, s)])).first()
+        if previous:
+            qs = qs(id__ne=previous.id)
+        exists = lambda s: qs(class_check=False, **{field.db_field: s}).first()
         while exists(slug):
             slug = '{0}-{1}'.format(base_slug, index)
             index += 1
@@ -107,7 +98,6 @@ def populate_slug(instance, field):
         slug_follower.save()
 
     setattr(instance, field.db_field, slug)
-    field.clear()
 
 
 @pre_save.connect
