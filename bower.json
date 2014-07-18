@@ -33,7 +33,7 @@
     "jcrop": "~0.9.12",
     "seiyria-bootstrap-slider": "~3.1.0",
     "jquery.validation": "~1.13.0",
-    "x-editable": "~1.5.1",
+    "x-editable": "noirbizarre/x-editable#1.5.1-nbz",
     "requirejs": "~2.1.11",
     "requirejs-router": "~0.7.3",
     "requirejs-domready": "~2.0.1",

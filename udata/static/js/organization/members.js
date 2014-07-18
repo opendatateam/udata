@@ -6,20 +6,20 @@ define([
     'notify',
     'auth',
     'i18n',
+    'widgets/modal',
     'hbs!templates/organization/member-row',
     'hbs!templates/organization/add-member-modal',
+    'hbs!templates/organization/remove-member-modal',
     'x-editable',
     'selectize',
-], function($, Notify, Auth, i18n, row_tpl, add_modal_tpl) {
+], function($, Notify, Auth, i18n, modal, row_tpl, add_modal_tpl, remove_modal_tpl) {
     "use strict";
 
     var msg_container = 'section.form .container',
         $input = $('#user-picker'),
-        group_title = $('section.form').data('group-title'),
-        group_id = $('section.form').data('group-id'),
-        mapping = {'{org}': group_title},
         editableOpts = {
             url: window.location,
+            type: 'select',
             source: [
                 {value: 'admin', text: i18n._('Administrator')},
                 {value: 'editor', text: i18n._('Editor')}
@@ -38,26 +38,37 @@ define([
         var $this = $(this),
             $row = $this.closest('tr'),
             user_id = $row.data('userid'),
-            $modal = $('#confirm-delete-modal');
+            fullname = $row.find('.user-fullname').text(),
+            user_url = $row.find('.user-fullname').attr('href'),
+            avatar_url = $row.find('.avatar img').attr('src'),
+            $modal = modal({
+                title: i18n._('Confirm deletion'),
+                content: remove_modal_tpl({
+                    avatar_url: avatar_url,
+                    fullname: fullname,
+                    user_url: user_url
+                }),
+                close_btn: i18n._('No'),
+                actions: [{
+                    label: i18n._('Yes'),
+                    icon: 'fa-check',
+                    classes: 'btn-primary'
+                }]
+            });
 
         // Auth.ensure_user(Utils.i18n('login-for-members'));
 
-        $modal.modal();
-        $modal.find('.modal-footer .btn-primary').off('click').click(function() {
+        $modal.find('.modal-footer .btn-primary').click(function() {
             $.ajax({
                 url: window.location,
                 type: 'DELETE',
                 data: {user_id: user_id},
                 success:  function(data) {
-                    // var msg = Utils.i18n('member-deleted', mapping);
-                    // Notify.success(msg, msg_container);
                     Notify.success('Member deleted', msg_container);
                     $row.remove();
                 }
             }).error(function(e) {
                 Notify.error('Error on deletion', msg_container);
-                // var msg = Utils.i18n('member-error', mapping);
-                // Utils.error(msg, msg_container);
                 console.error(e.responseJSON);
             }).always(function() {
                 toggleEmpty();
@@ -70,15 +81,20 @@ define([
     }
 
     function add_member(user) {
-        var $modal = $('#add-member-modal');
+        var $modal = modal({
+            title: i18n._('Add member'),
+            content: add_modal_tpl(user),
+            close_btn: i18n._('Cancel'),
+            actions: [{
+                label: i18n._('Add'),
+                classes: 'btn-primary'
+            }]
+        });
 
-        // Auth.ensure_user(Utils.i18n('login-for-members'));
-
-        $modal.find('.modal-body').html(add_modal_tpl(user));
-        $modal.modal();
-        $modal.find('#add-button').off('click').click(function() {
+        $modal.find('.btn-primary').off('click').click(function() {
             $.post(window.location, {pk: user.id}, function(data) {
                 var $row = $(row_tpl(user));
+                console.log(data);
                 $('tr.empty').before($row);
                 $row.find('.member-role').editable(editableOpts);
                 $row.find('.member-remove').click(member_remove_handler);

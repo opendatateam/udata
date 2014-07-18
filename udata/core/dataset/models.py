@@ -26,6 +26,7 @@ UPDATE_FREQUENCIES = {
     'quarterly': _('Quarterly'),
     'biannuel': _('Biannual'),
     'annual': _('Annual'),
+    'biennial': _('Biennial'),
     'triennial': _('Triennial'),
     'quinquennial': _('Quinquennial'),
     'unknown': _('Unknown'),

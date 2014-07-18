@@ -6,7 +6,7 @@ from flask import url_for
 from udata.models import Organization, Member
 
 from . import FrontTestCase
-from ..factories import OrganizationFactory
+from ..factories import OrganizationFactory, UserFactory
 
 
 class OrganizationBlueprintTest(FrontTestCase):
@@ -129,6 +129,58 @@ class OrganizationBlueprintTest(FrontTestCase):
         response = self.get(url_for('organizations.edit_members', org=organization))
         self.assert200(response)
 
+    def test_add_member(self):
+        '''It should add a member to the organization'''
+        user = self.login()
+        new_user = UserFactory()
+        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
+        data = {'pk': str(new_user.id)}
+        response = self.post(url_for('organizations.edit_members', org=organization), data)
+        self.assert200(response)
+
+        organization.reload()
+        self.assertEqual(len(organization.members), 2)
+
+        new_member = organization.members[1]
+        self.assertEqual(new_member.user, new_user)
+        self.assertEqual(new_member.role, 'editor')
+
+    def test_change_member_role(self):
+        '''It should edit a member role into the organization'''
+        user = self.login()
+        user_modified = UserFactory()
+        organization = OrganizationFactory(members=[
+            Member(user=user, role='admin'),
+            Member(user=user_modified, role='editor'),
+        ])
+        data = {'pk': str(user_modified.id), 'value': 'admin'}
+        response = self.post(url_for('organizations.edit_members', org=organization), data)
+        self.assert200(response)
+
+        organization.reload()
+        self.assertEqual(len(organization.members), 2)
+
+        member = organization.members[1]
+        self.assertEqual(member.user, user_modified)
+        self.assertEqual(member.role, 'admin')
+
+    def test_remove_member(self):
+        '''It should remove a member from the organization'''
+        user = self.login()
+        deleted = UserFactory()
+        organization = OrganizationFactory(members=[
+            Member(user=user, role='admin'),
+            Member(user=deleted, role='editor'),
+        ])
+        data = {'user_id': str(deleted.id)}
+        response = self.delete(url_for('organizations.edit_members', org=organization), data, content_type='multipart/form-data')
+        self.assertStatus(response, 204)
+
+        organization.reload()
+        self.assertEqual(len(organization.members), 1)
+
+        self.assertEqual(organization.members[0].user, user)
+
     def test_render_edit_teams(self):
         '''It should render the organization team edit form'''
         user = self.login()
@@ -141,4 +193,3 @@ class OrganizationBlueprintTest(FrontTestCase):
         '''It should render the organization page'''
         response = self.get(url_for('organizations.show', org='not-found'))
         self.assert404(response)
-

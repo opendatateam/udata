@@ -93,9 +93,9 @@ class WebTestMixin(object):
         url = self._build_url(url, kwargs)
         return (client or self.client).put(url, data=data, **kwargs)
 
-    def delete(self, url, client=None, **kwargs):
+    def delete(self, url, data=None, client=None, **kwargs):
         url = self._build_url(url, kwargs)
-        return (client or self.client).delete(url, **kwargs)
+        return (client or self.client).delete(url, data=data, **kwargs)
 
 
 class DBTestMixin(object):

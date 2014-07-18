@@ -117,9 +117,15 @@ class OrganizationEditMembersView(ProtectedOrgView, EditView):
         return context
 
     def on_form_valid(self, form):
-        member = Member(user=form.pk.data, role=form.value.data)
-        self.object.members.append(member)
-        self.object.save()
+        print form.pk.data
+        user = User.objects.get_or_404(id=form.pk.data)
+        member = get_by(self.organization.members, 'user', user)
+        if member:
+            member.role = form.value.data
+        else:
+            member = Member(user=user, role=form.value.data or 'editor')
+            self.organization.members.append(member)
+        self.organization.save()
         return '', 200
 
     def on_form_error(self, form):
@@ -127,11 +133,11 @@ class OrganizationEditMembersView(ProtectedOrgView, EditView):
 
     def delete(self, **kwargs):
         self.kwargs = kwargs
-        org = self.get_object()
+        print request.form, ',', request.environ.get('CONTENT_TYPE', 'NO'), 'end'
         user = User.objects.get_or_404(id=request.form.get('user_id'))
-        member = get_by(org.members, 'user', user)
-        org.members.remove(member)
-        org.save()
+        member = get_by(self.organization.members, 'user', user)
+        self.organization.members.remove(member)
+        self.organization.save()
         return '', 204
 
 

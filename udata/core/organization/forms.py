@@ -20,7 +20,7 @@ class OrganizationForm(ModelForm):
 class OrganizationMemberForm(ModelForm):
     model_class = Organization
 
-    pk = fields.UserField(validators=[validators.required()])
+    pk = fields.StringField(validators=[validators.required()])
     value = fields.StringField(default='editor')
 
 

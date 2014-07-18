@@ -16,20 +16,22 @@
     </thead>
     <tbody>
         {% for member in org.members %}
+        {% set role = member.role or 'editor' %}
         <tr class="member" data-userid="{{member.user.id}}">
             <td class="text-center avatar">
                 {{ member.user|avatar(30) }}
             </td>
             <td>
                 <a href="{{ url_for('users.show', user=member.user) }}"
+                    class="user-fullname"
                     title="{{ member.user.fullname }}">
                     {{ member.user.fullname }}
                 </a>
             </td>
             <td>
-                <a class="member-role" data-type="select" href
-                    data-pk="{{ member.user.id }}" data-title ="{{ _('Role') }}" data-value="{{member.role or 'editor'}}">
-                    {{ roles[member.role] }}
+                <a class="member-role" href
+                    data-pk="{{ member.user.id }}" data-title ="{{ _('Role') }}" data-value="{{ role }}">
+                    {{ roles[role] }}
                 </a>
             </td>
             <td>
@@ -55,30 +57,6 @@
             </span>
             <input id="user-picker" name="user" type="text"
                 placeholder="{{ _('Add a member') }}" />
-        </div>
-    </div>
-</div>
-
-
-{# Confirm delete modal #}
-<div class="modal fade" id="confirm-delete-modal" tabindex="-1" role="dialog"
-    aria-labelledby="confirm-delete-modal-label" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="confirm-delete-modal-label">{{ _('Confirm deletion') }}</h4>
-            </div>
-            <div class="modal-body">
-                <p>
-                {{ _('You are about to delete this member.') }}<br/>
-                </p>
-                <p><strong>{{ _('Are you sure ?') }}</strong></p>
-            </div>
-            <div class="modal-footer">
-                <a href class="btn btn-primary">{{ _('Yes') }}</a>
-                <button type="button" class="btn btn-warning" data-dismiss="modal">{{ _('No') }}</button>
-            </div>
         </div>
     </div>
 </div>
