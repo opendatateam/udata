@@ -10,6 +10,7 @@ define([
     'widgets/featured',
     'widgets/follow-btn',
     'widgets/issues-btn',
+    'widgets/share-btn',
 ], function($, log, i18n, template, modal) {
 
     function prepare_resources() {

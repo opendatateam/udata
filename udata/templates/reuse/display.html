@@ -1,6 +1,7 @@
 {% extends theme('layouts/1-column.html') %}
 {% from theme('macros/follow.html') import follow_btn with context %}
 {% from theme('macros/issues.html') import issues_btn with context %}
+{% from theme('macros/share.html') import share_btn with context %}
 
 {% block breadcrumb %}
     <li><a href="{{ url_for('reuses.list') }}">{{ _('Reuses') }}</a></li>
@@ -30,6 +31,9 @@
 </div>
 <div class="btn-group btn-group-xs">
     {{ issues_btn(reuse) }}
+</div>
+<div class="btn-group btn-group-xs">
+    {{ share_btn(reuse.title) }}
 </div>
 {% endblock %}
 

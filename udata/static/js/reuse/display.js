@@ -5,7 +5,8 @@ define([
     'logger',
     'widgets/featured',
     'widgets/follow-btn',
-    'widgets/issues-btn'
+    'widgets/issues-btn',
+    'widgets/share-btn'
 ], function(log) {
     return {
         start: function() {
