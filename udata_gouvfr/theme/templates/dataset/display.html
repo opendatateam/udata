@@ -1,5 +1,6 @@
 {% extends theme('base.html') %}
 {% from theme('macros/follow.html') import follow_btn with context %}
+{% from theme('macros/share.html') import share_btn with context %}
 {% from theme('macros/issues.html') import issues_btn with context %}
 
 {% block extra_head %}
@@ -116,6 +117,9 @@
                         {% endif %}
                         <div class="btn-group btn-group-sm">
                             {{ follow_btn(dataset, ['fa-star-o', 'fa-star']) }}
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            {{ share_btn(dataset.title) }}
                         </div>
                         <div class="btn-group btn-group-sm">
                             {{ issues_btn(dataset) }}
