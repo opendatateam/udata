@@ -60,6 +60,8 @@ class UDataJsonEncoder(json.JSONEncoder):
             return str(obj)
         elif isinstance(obj, datetime.datetime):
             return obj.isoformat()
+        elif hasattr(obj, 'serialize'):
+            return obj.serialize()
         return super(UDataJsonEncoder, self).default(obj)
 
 

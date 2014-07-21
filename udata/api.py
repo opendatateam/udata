@@ -5,7 +5,7 @@ import logging
 
 from datetime import datetime
 
-from flask import request, url_for
+from flask import request, url_for, json, make_response
 from flask.ext.restful import Api, Resource, marshal, fields
 
 from udata import search
@@ -23,6 +23,14 @@ class UDataApi(Api):
         return response
 
 api = UDataApi(prefix='/api')
+
+
+@api.representation('application/json')
+def output_json(data, code, headers=None):
+    '''Use Flask JSON to serialize'''
+    resp = make_response(json.dumps(data), code)
+    resp.headers.extend(headers or {})
+    return resp
 
 
 class API(Resource):  # Avoid name collision as resource is a core model

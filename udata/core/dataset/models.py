@@ -87,6 +87,12 @@ class TerritorialCoverage(db.EmbeddedDocument):
     codes = db.ListField(db.StringField())
     granularity = db.StringField(choices=TERRITORIAL_GRANULARITIES.keys())
 
+    def serialize(self):
+        return {
+            'codes': self.codes,
+            'granularity': self.granularity,
+        }
+
 
 # @db.historize
 class Dataset(WithMetrics, db.Datetimed, db.Document):
