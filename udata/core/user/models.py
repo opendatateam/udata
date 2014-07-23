@@ -74,7 +74,7 @@ class User(db.Document, WithMetrics,UserMixin):
 
     meta = {
         'allow_inheritance': True,
-        'indexes': ['-created_at', 'slug'],
+        'indexes': ['-created_at', 'slug', 'apikey'],
         'ordering': ['-created_at']
     }
 

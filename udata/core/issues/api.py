@@ -39,9 +39,8 @@ class IssuesAPI(API):
     '''
     model = Issue
 
+    @api.secure
     def post(self, id):
-        if not current_user.is_authenticated():
-            abort(401)
         message = Message(content=request.form['comment'], posted_by=current_user.id)
         issue = self.model.objects.create(
             subject=id,
@@ -69,9 +68,8 @@ class IssueAPI(API):
         issue = Issue.objects.get_or_404(id=id)
         return marshal(issue, issue_fields)
 
+    @api.secure
     def post(self, id):
-        if not current_user.is_authenticated():
-            abort(401)
         issue = Issue.objects.get_or_404(id=id)
         issue.discussion.append(Message(
             content=request.form['comment'],

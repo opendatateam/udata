@@ -67,12 +67,14 @@ class DatasetAPI(ModelAPI):
 class DatasetFeaturedAPI(SingleObjectAPI, API):
     model = Dataset
 
+    @api.secure
     def post(self, slug):
         dataset = self.get_or_404(slug=slug)
         dataset.featured = True
         dataset.save()
         return marshal(dataset, dataset_fields)
 
+    @api.secure
     def delete(self, slug):
         dataset = self.get_or_404(slug=slug)
         dataset.featured = False
@@ -81,11 +83,10 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
 
 
 class ResourcesAPI(API):
+    @api.secure
     def post(self, slug):
         dataset = Dataset.objects.get_or_404(slug=slug)
-        form = ResourceForm(request.form, csrf_enabled=False)
-        if not form.validate():
-            return {'errors': form.errors}, 400
+        form = api.validate(ResourceForm)
         resource = Resource()
         form.populate_obj(resource)
         dataset.resources.append(resource)
@@ -94,18 +95,18 @@ class ResourcesAPI(API):
 
 
 class ResourceAPI(API):
+    @api.secure
     def put(self, slug, rid):
         dataset = Dataset.objects.get_or_404(slug=slug)
         resource = get_by(dataset.resources, 'id', UUID(rid))
         if not resource:
             abort(404)
-        form = ResourceForm(request.form, instance=resource, csrf_enabled=False)
-        if not form.validate():
-            return {'errors': form.errors}, 400
+        form = api.validate(ResourceForm, resource)
         form.populate_obj(resource)
         dataset.save()
         return marshal(resource, resource_fields)
 
+    @api.secure
     def delete(self, slug, rid):
         dataset = Dataset.objects.get_or_404(slug=slug)
         resource = get_by(dataset.resources, 'id', UUID(rid))

@@ -37,12 +37,14 @@ class ReuseAPI(ModelAPI):
 class ReuseFeaturedAPI(SingleObjectAPI, API):
     model = Reuse
 
+    @api.secure
     def post(self, slug):
         reuse = self.get_or_404(slug=slug)
         reuse.featured = True
         reuse.save()
         return marshal(reuse, reuse_fields)
 
+    @api.secure
     def delete(self, slug):
         reuse = self.get_or_404(slug=slug)
         reuse.featured = False

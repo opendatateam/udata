@@ -59,14 +59,12 @@ class MembershipRequestAPI(API):
     '''
     Apply for membership to a given organization.
     '''
+    @api.secure
     def post(self, org):
         membership_request = org.pending_request(current_user._get_current_object())
         code = 200 if membership_request else 201
-        form = MembershipRequestForm(request.form, membership_request)
 
-        if not form.validate():
-            # TODO: factorize form handling in APIs
-            return {'errors': form.errors}, 400
+        form = api.validate(MembershipRequestForm, membership_request)
 
         if not membership_request:
             membership_request = MembershipRequest()
@@ -82,6 +80,7 @@ class MembershipAcceptAPI(API):
     '''
     Accept user membership to a given organization.
     '''
+    @api.secure
     def post(self, org, id):
         for membership_request in org.requests:
             if membership_request.id == id:
@@ -99,6 +98,7 @@ class MembershipRefuseAPI(API):
     '''
     Refuse user membership to a given organization.
     '''
+    @api.secure
     def post(self, org, id):
         for membership_request in org.requests:
             if membership_request.id == id:

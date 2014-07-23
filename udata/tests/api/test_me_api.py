@@ -16,6 +16,11 @@ class MeAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(response.json['email'], self.user.email)
 
+    def test_get_profile_404(self):
+        '''It should raise a 404 on GET /me if no user is authenticated'''
+        response = self.get(url_for('api.me'))
+        self.assert404(response)
+
     def test_update_profile(self):
         '''It should update a dataset from the API'''
         self.login()

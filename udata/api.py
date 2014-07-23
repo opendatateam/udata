@@ -4,23 +4,62 @@ from __future__ import unicode_literals
 import logging
 
 from datetime import datetime
+from functools import wraps
 
 from flask import request, url_for, json, make_response
-from flask.ext.restful import Api, Resource, marshal, fields
+from flask.ext.restful import Api, Resource, marshal, fields, abort
 
 from udata import search
+from udata.auth import current_user, login_user
 from udata.utils import multi_to_dict
+from udata.core.user.models import User
 
 log = logging.getLogger(__name__)
 
 
+# class InvalidAPIKey(Exception):
+#     pass
+
+# class InactiveUserException(Exception):
+#     pass
+
+
 class UDataApi(Api):
-    def make_response(self, data, *args, **kwargs):
-        response = super(UDataApi, self).make_response(data, *args, **kwargs)
-        #  Remove the content type when there is no content
-        if response.status_code == 204 and not response.data:
-            response.headers.pop('Content-Type')
-        return response
+    def secure(self, func):
+        '''Enforce authentication on a given method/verb'''
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if current_user.is_authenticated():
+                return func(*args, **kwargs)
+
+            apikey = request.form.get('apikey') or request.headers.get('X-API-KEY')
+            if not apikey:
+                self.abort(401)
+            try:
+                user = User.objects.get(apikey=apikey)
+            except User.DoesNotExist:
+                # abort(401)
+                self.abort(401, 'Invalid API Key')
+
+            if not login_user(user, False):
+                self.abort(401, 'Inactive user')
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    def abort(self, code=500, message=None, **kwargs):
+        if message or kwargs and not 'status' in kwargs:
+            kwargs['status'] = code
+        if message:
+            kwargs['message'] = message
+        abort(code, **kwargs)
+
+    def validate(self, form_cls, instance=None):
+        form = form_cls(request.form, instance=instance, csrf_enabled=False)
+        if not form.validate():
+            self.abort(400, errors=form.errors)
+        return form
+
 
 api = UDataApi(prefix='/api')
 
@@ -51,10 +90,9 @@ class ModelListAPI(API):
             objects = list(self.model.objects)
         return marshal(objects, self.fields)
 
+    @api.secure
     def post(self):
-        form = self.form(request.form, csrf_enabled=False)
-        if not form.validate():
-            return {'errors': form.errors}, 400
+        form = api.validate(self.form)
         return marshal(form.save(), self.fields), 201
 
 
@@ -75,13 +113,13 @@ class ModelAPI(SingleObjectAPI, API):
         obj = self.get_or_404(**kwargs)
         return marshal(obj, self.fields)
 
+    @api.secure
     def put(self, **kwargs):
         obj = self.get_or_404(**kwargs)
-        form = self.form(request.form, instance=obj, csrf_enabled=False)
-        if not form.validate():
-            return {'errors': form.errors}, 400
+        form = api.validate(self.form, obj)
         return marshal(form.save(), self.fields)
 
+    @api.secure
     def delete(self, **kwargs):
         obj = self.get_or_404(**kwargs)
         if hasattr(obj, 'deleted'):

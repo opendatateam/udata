@@ -19,17 +19,15 @@ class FollowAPI(API):
     '''
     model = Follow
 
+    @api.secure
     def post(self, id):
-        if not current_user.is_authenticated():
-            abort(401)
         follow, created = self.model.objects.get_or_create(follower=current_user.id, following=id, until=None)
         count = self.model.objects.followers(id).count()
 
         return {'followers': count}, 201 if created else 200
 
+    @api.secure
     def delete(self, id):
-        if not current_user.is_authenticated():
-            abort(401)
         follow = self.model.objects.get_or_404(follower=current_user.id, following=id, until=None)
         follow.until = datetime.now()
         follow.save()

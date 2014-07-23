@@ -52,7 +52,8 @@ class OrganizationAPITest(APITestCase):
     def test_organization_api_delete(self):
         '''It should delete an organization from the API'''
         organization = OrganizationFactory()
-        response = self.delete(url_for('api.organization', slug=organization.slug))
+        with self.api_user():
+            response = self.delete(url_for('api.organization', slug=organization.slug))
         self.assertStatus(response, 204)
         self.assertEqual(Organization.objects.count(), 1)
         self.assertIsNotNone(Organization.objects[0].deleted)

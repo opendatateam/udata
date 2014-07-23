@@ -47,7 +47,8 @@ class ReuseAPITest(APITestCase):
     def test_reuse_api_delete(self):
         '''It should delete a reuse from the API'''
         reuse = ReuseFactory()
-        response = self.delete(url_for('api.reuse', slug=reuse.slug))
+        with self.api_user():
+            response = self.delete(url_for('api.reuse', slug=reuse.slug))
         self.assertStatus(response, 204)
         self.assertEqual(Reuse.objects.count(), 1)
         self.assertIsNotNone(Reuse.objects[0].deleted)
@@ -56,7 +57,8 @@ class ReuseAPITest(APITestCase):
         '''It should mark the reuse featured on POST'''
         reuse = ReuseFactory(featured=False)
 
-        response = self.post(url_for('api.reuse_featured', slug=reuse.slug))
+        with self.api_user():
+            response = self.post(url_for('api.reuse_featured', slug=reuse.slug))
         self.assert200(response)
 
         reuse.reload()
@@ -66,7 +68,8 @@ class ReuseAPITest(APITestCase):
         '''It shouldn't do anything to feature an already featured reuse'''
         reuse = ReuseFactory(featured=True)
 
-        response = self.post(url_for('api.reuse_featured', slug=reuse.slug))
+        with self.api_user():
+            response = self.post(url_for('api.reuse_featured', slug=reuse.slug))
         self.assert200(response)
 
         reuse.reload()
@@ -76,7 +79,8 @@ class ReuseAPITest(APITestCase):
         '''It should mark the reuse featured on POST'''
         reuse = ReuseFactory(featured=True)
 
-        response = self.delete(url_for('api.reuse_featured', slug=reuse.slug))
+        with self.api_user():
+            response = self.delete(url_for('api.reuse_featured', slug=reuse.slug))
         self.assert200(response)
 
         reuse.reload()
@@ -86,7 +90,8 @@ class ReuseAPITest(APITestCase):
         '''It shouldn't do anything to unfeature a not featured reuse'''
         reuse = ReuseFactory(featured=False)
 
-        response = self.delete(url_for('api.reuse_featured', slug=reuse.slug))
+        with self.api_user():
+            response = self.delete(url_for('api.reuse_featured', slug=reuse.slug))
         self.assert200(response)
 
         reuse.reload()

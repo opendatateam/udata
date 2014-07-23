@@ -19,6 +19,7 @@ class UserFactory(MongoEngineFactory):
     first_name = factory.LazyAttribute(lambda o: faker.first_name())
     last_name = factory.LazyAttribute(lambda o: faker.last_name())
     email = factory.LazyAttribute(lambda o: faker.email())
+    active = True
 
 
 class AdminFactory(UserFactory):
