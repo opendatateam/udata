@@ -11,17 +11,11 @@ from flask.ext.restful import Api, Resource, marshal, fields, abort
 
 from udata import search
 from udata.auth import current_user, login_user
+from udata.frontend import csrf
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
 
 log = logging.getLogger(__name__)
-
-
-# class InvalidAPIKey(Exception):
-#     pass
-
-# class InactiveUserException(Exception):
-#     pass
 
 
 class UDataApi(Api):
@@ -61,7 +55,7 @@ class UDataApi(Api):
         return form
 
 
-api = UDataApi(prefix='/api')
+api = UDataApi(prefix='/api', decorators=[csrf.exempt])
 
 
 @api.representation('application/json')
