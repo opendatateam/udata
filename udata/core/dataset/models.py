@@ -138,8 +138,6 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     before_delete = Signal()
     after_delete = Signal()
     on_delete = Signal()
-    on_star = Signal()
-    on_unstar = Signal()
 
     @classmethod
     def pre_save(cls, sender, document, **kwargs):

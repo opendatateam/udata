@@ -66,8 +66,6 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     before_delete = Signal()
     after_delete = Signal()
     on_delete = Signal()
-    on_star = Signal()
-    on_unstar = Signal()
 
     @classmethod
     def hash_url(cls, url):
