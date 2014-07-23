@@ -39,6 +39,8 @@ dataset_fields = {
     'extras': fields.Raw,
     'metrics': fields.Raw,
     'organization': OrganizationField,
+
+    'uri': fields.SelfUrl('api.dataset', lambda o: {'slug': o.slug}),
 }
 
 

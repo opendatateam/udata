@@ -20,6 +20,7 @@ org_fields = {
     'description': fields.String,
     'created_at': fields.ISODateTime,
     'metrics': fields.Raw,
+    'uri': fields.SelfUrl('api.organization', lambda o: {'slug': o.slug}),
 }
 
 request_fields = {

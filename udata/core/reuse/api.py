@@ -18,6 +18,7 @@ reuse_fields = {
     'slug': fields.String,
     'description': fields.String,
     'created_at': fields.ISODateTime,
+    'uri': fields.SelfUrl('api.reuse', lambda o: {'slug': o.slug}),
 }
 
 
