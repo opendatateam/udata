@@ -102,6 +102,7 @@ class SelectField(FieldHelper, fields.SelectField):
     # widget = widgets.SelectPicker()
 
     def __init__(self, label=None, validators=None, coerce=nullable_text, **kwargs):
+        # self._choices = kwargs.pop('choices')
         super(SelectField, self).__init__(label, validators, coerce, **kwargs)
 
     def iter_choices(self):
@@ -111,6 +112,17 @@ class SelectField(FieldHelper, fields.SelectField):
         ]
         for value, label, selected in sorted(localized_choices, key=lambda c: c[1]):
             yield (value, label, selected)
+
+    @property
+    def choices(self):
+        if callable(self._choices):
+            return self._choices()
+        else:
+            return self._choices
+
+    @choices.setter
+    def choices(self, value):
+        self._choices = value
 
 
 class ModelSelectField(FieldHelper, mefields.ModelSelectField):

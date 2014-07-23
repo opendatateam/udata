@@ -74,9 +74,67 @@ class UserBlueprintTest(FrontTestCase):
         self.assertRedirects(response, url_for('users.show', user=self.user))
         self.assertEqual(self.user.about, 'bla bla bla')
 
+    def test_render_user_api_key_settings(self):
+        '''It should render the user api settings page'''
+        self.login()
+        response = self.get(url_for('users.apikey_settings', user=self.user))
+        self.assert200(response)
+
+    def test_create_user_api_key(self):
+        '''It should generate an API Key'''
+        user = self.login()
+
+        self.assertIsNone(user.apikey)
+
+        response = self.post(url_for('users.apikey_settings', user=self.user), {'action': 'generate'})
+        self.assert200(response)
+
+        user.reload()
+        self.assertIsNotNone(user.apikey)
+
+    def test_regenerate_user_api_key(self):
+        '''It should regenerate an API Key'''
+        user = self.login()
+        user.generate_api_key()
+        user.save()
+        self.assertIsNotNone(user.apikey)
+
+        old_key = user.apikey
+
+        response = self.post(url_for('users.apikey_settings', user=self.user), {'action': 'generate'})
+        self.assert200(response)
+
+        user.reload()
+        self.assertIsNotNone(user.apikey)
+        self.assertNotEqual(user.apikey, old_key)
+
+    def test_clear_user_api_key(self):
+        '''It should clear the API Key'''
+        user = self.login()
+        user.generate_api_key()
+        user.save()
+        self.assertIsNotNone(user.apikey)
+
+        response = self.post(url_for('users.apikey_settings', user=self.user), {'action': 'clear'})
+        self.assert200(response)
+
+        user.reload()
+        self.assertIsNone(user.apikey)
+
+    def test_render_user_settings(self):
+        '''It should render the user preferences page'''
+        self.login()
+        response = self.get(url_for('users.settings', user=self.user))
+        self.assert200(response)
+
+    def test_render_user_notifications_settings(self):
+        '''It should render the user notifications settings page'''
+        self.login()
+        response = self.get(url_for('users.notifications_settings', user=self.user))
+        self.assert200(response)
+
     def test_user_activity_empty(self):
         '''It should render an empty user activity page'''
         user = UserFactory()
         response = self.get(url_for('users.activity', user=user))
         self.assert200(response)
-

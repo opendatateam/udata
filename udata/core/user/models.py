@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import datetime
+from datetime import datetime
+from time import time
 
 from blinker import Signal
-from flask import url_for, g
+from flask import url_for, g, current_app
 from flask.ext.security import UserMixin, RoleMixin, MongoEngineUserDatastore
+from itsdangerous import JSONWebSignatureSerializer
 
 from udata.models import db, WithMetrics
 
@@ -29,6 +31,10 @@ class Role(db.Document, RoleMixin):
     __unicode__ = __str__
 
 
+class UserSettings(db.EmbeddedDocument):
+    prefered_language = db.StringField()
+
+
 class User(db.Document, WithMetrics,UserMixin):
     slug = db.SlugField(max_length=255, required=True, populate_from='fullname')
     email = db.StringField(max_length=255, required=True)
@@ -45,7 +51,9 @@ class User(db.Document, WithMetrics,UserMixin):
 
     prefered_language = db.StringField()
 
-    created_at = db.DateTimeField(default=datetime.datetime.now, required=True)
+    apikey = db.StringField()
+
+    created_at = db.DateTimeField(default=datetime.now, required=True)
     confirmed_at = db.DateTimeField()
     last_login_at = db.DateTimeField()
     current_login_at = db.DateTimeField()
@@ -87,7 +95,16 @@ class User(db.Document, WithMetrics,UserMixin):
 
     @property
     def display_url(self):
-        return url_for('user', slug=self.slug)
+        return url_for('users.show', user=self)
 
+    def generate_api_key(self):
+        s = JSONWebSignatureSerializer(current_app.config['SECRET_KEY'])
+        self.apikey = s.dumps({
+            'user': str(self.id),
+            'time': time(),
+        })
+
+    def clear_api_key(self):
+        self.apikey = None
 
 datastore = MongoEngineUserDatastore(db, User, Role)
