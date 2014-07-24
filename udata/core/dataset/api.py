@@ -21,6 +21,7 @@ resource_fields = {
     'url': fields.String,
     'checksum': fields.String,
     'created_at': fields.ISODateTime,
+    'last_modified': fields.ISODateTime(attribute='modified'),
 }
 
 
