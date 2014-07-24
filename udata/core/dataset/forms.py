@@ -31,7 +31,7 @@ class ResourceForm(ModelForm):
 
     title = fields.StringField(_('Title'), [validators.required()])
     description = fields.MarkdownField(_('Description'), [validators.required()])
-    url = fields.UploadableURLField(_('URL'), endpoint='storage.add_resource')
+    url = fields.UploadableURLField(_('URL'), [validators.required()], endpoint='storage.add_resource')
     format = fields.StringField(_('Format'), widget=widgets.FormatAutocompleter())
     checksum = fields.StringField(_('Checksum'))
 

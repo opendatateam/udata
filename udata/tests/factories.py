@@ -35,6 +35,7 @@ class ResourceFactory(MongoEngineFactory):
 
     title = factory.LazyAttribute(lambda o: faker.sentence())
     description = factory.LazyAttribute(lambda o: faker.text())
+    url = factory.LazyAttribute(lambda o: faker.url())
 
 
 class DatasetFactory(MongoEngineFactory):
