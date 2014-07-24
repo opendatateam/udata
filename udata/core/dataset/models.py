@@ -16,7 +16,7 @@ __all__ = ('License', 'Resource', 'TerritorialCoverage', 'Dataset', 'UPDATE_FREQ
     )
 
 UPDATE_FREQUENCIES = {
-    'ponctual': _('Punctual'),
+    'punctual': _('Punctual'),
     'realtime': _('Real time'),
     'daily': _('Daily'),
     'weekly': _('Weekly'),
@@ -24,7 +24,7 @@ UPDATE_FREQUENCIES = {
     'monthly': _('Monthly'),
     'bimonthly': _('Bimonthly'),
     'quarterly': _('Quarterly'),
-    'biannuel': _('Biannual'),
+    'biannual': _('Biannual'),
     'annual': _('Annual'),
     'biennial': _('Biennial'),
     'triennial': _('Triennial'),
