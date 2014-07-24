@@ -16,6 +16,7 @@ class SearchResult(Paginable):
     def __init__(self, query, result):
         self.result = result
         self.query = query
+        self._objects = None
 
     @property
     def total(self):
@@ -37,9 +38,15 @@ class SearchResult(Paginable):
         return [hit['_id'] for hit in self.result.get('hits', {}).get('hits', [])]
 
     def get_objects(self):
-        ids = [ObjectId(id) for id in self.get_ids()]
-        objects = self.query.adapter.model.objects.in_bulk(ids)
-        return [objects.get(id) for id in ids]
+        if not self._objects:
+            ids = [ObjectId(id) for id in self.get_ids()]
+            objects = self.query.adapter.model.objects.in_bulk(ids)
+            self._objects = [objects.get(id) for id in ids]
+        return self._objects
+
+    @property
+    def objects(self):
+        return self.get_objects()
 
     def __iter__(self):
         for obj in self.get_objects():

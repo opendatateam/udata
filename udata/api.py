@@ -18,6 +18,9 @@ from udata.core.user.models import User
 log = logging.getLogger(__name__)
 
 
+DEFAULT_PAGE_SIZE = 50
+
+
 class UDataApi(Api):
     def secure(self, func):
         '''Enforce authentication on a given method/verb'''
@@ -49,6 +52,7 @@ class UDataApi(Api):
         abort(code, **kwargs)
 
     def validate(self, form_cls, instance=None):
+        '''Validate a form from the request and handle errors'''
         form = form_cls(request.form, instance=instance, csrf_enabled=False)
         if not form.validate():
             self.abort(400, errors=form.errors)
@@ -78,11 +82,10 @@ class ModelListAPI(API):
 
     def get(self):
         if self.search_adapter:
-            result = search.query(self.search_adapter, **multi_to_dict(request.args))
-            objects = result.get_objects()
+            objects = search.query(self.search_adapter, **multi_to_dict(request.args))
         else:
             objects = list(self.model.objects)
-        return marshal(objects, self.fields)
+        return marshal_page(objects, self.fields)
 
     @api.secure
     def post(self):
@@ -131,9 +134,9 @@ class ISODateTime(fields.Raw):
 fields.ISODateTime = ISODateTime
 
 
-class SelfUrl(fields.Raw):
+class UrlFor(fields.Raw):
     def __init__(self, endpoint, mapper=None):
-        super(SelfUrl, self).__init__()
+        super(UrlFor, self).__init__()
         self.endpoint = endpoint
         self.mapper = mapper or self.default_mapper
 
@@ -143,7 +146,41 @@ class SelfUrl(fields.Raw):
     def output(self, key, obj):
         return url_for(self.endpoint, _external=True, **self.mapper(obj))
 
-fields.SelfUrl = SelfUrl
+fields.UrlFor = UrlFor
+
+
+class NextPageUrl(fields.Raw):
+    def output(self, key, obj):
+        if not obj.has_next:
+            return None
+        args = request.args.copy()
+        args['page'] = obj.page + 1
+        return url_for(request.endpoint, _external=True, **args)
+
+
+class PreviousPageUrl(fields.Raw):
+    def output(self, key, obj):
+        if not obj.has_prev:
+            return None
+        args = request.args.copy()
+        args['page'] = obj.page - 1
+        return url_for(request.endpoint, _external=True, **args)
+
+
+def marshal_page(page, page_fields):
+    pager_fields = {
+        'data': fields.Nested(page_fields, attribute='objects'),
+        'page': fields.Integer,
+        'page_size': fields.Integer,
+        'total': fields.Integer,
+        'next_page': NextPageUrl,
+        'previous_page': PreviousPageUrl,
+    }
+    return marshal(page, pager_fields)
+
+
+def marshal_page_with(func):
+    pass
 
 
 def init_app(app):

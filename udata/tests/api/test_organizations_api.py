@@ -17,7 +17,7 @@ class OrganizationAPITest(APITestCase):
 
         response = self.get(url_for('api.organizations'))
         self.assert200(response)
-        self.assertEqual(len(response.json), len(organizations))
+        self.assertEqual(len(response.json['data']), len(organizations))
 
     # def test_organization_api_get_not_found(self):
     #     '''It should raise 404 on API fetch if not found'''

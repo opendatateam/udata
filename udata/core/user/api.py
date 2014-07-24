@@ -8,6 +8,8 @@ from udata.api import api, ModelAPI, SingleObjectAPI, API, marshal, fields
 from udata.models import Dataset, Reuse, Organization, User
 from udata.forms import UserProfileForm
 
+from udata.core.organization.api import OrganizationField
+
 
 user_fields = {
     'id': fields.String,
@@ -18,6 +20,7 @@ user_fields = {
     'avatar_url': fields.String,
     'website': fields.String,
     'about': fields.String,
+    'organizations': fields.List(OrganizationField),
 }
 
 
@@ -37,6 +40,12 @@ class MeAPI(ModelAPI):
     model = User
     form = UserProfileForm
     fields = user_fields
+    decorators = [api.secure]
+
+    def get_or_404(self, **kwargs):
+        if not current_user.is_authenticated():
+            api.abort(404)
+        return current_user._get_current_object()
 
 
 api.add_resource(MeAPI, '/me/', endpoint=b'api.me')

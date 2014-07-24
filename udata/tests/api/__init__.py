@@ -3,18 +3,16 @@ from __future__ import unicode_literals
 
 from contextlib import contextmanager
 
-from udata import api
 from udata.core import storages
 from udata.core.storages.views import blueprint
 
-from .. import TestCase, WebTestMixin, SearchTestMixin
 from ..factories import UserFactory
+from ..frontend import FrontTestCase
 
 
-class APITestCase(WebTestMixin, SearchTestMixin, TestCase):
+class APITestCase(FrontTestCase):
     def create_app(self):
         app = super(APITestCase, self).create_app()
-        api.init_app(app)
         storages.init_app(app)
         app.register_blueprint(blueprint)
         return app

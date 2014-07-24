@@ -40,7 +40,7 @@ dataset_fields = {
     'metrics': fields.Raw,
     'organization': OrganizationField,
 
-    'uri': fields.SelfUrl('api.dataset', lambda o: {'slug': o.slug}),
+    'uri': fields.UrlFor('api.dataset', lambda o: {'slug': o.slug}),
 }
 
 
@@ -48,7 +48,7 @@ class DatasetField(fields.Raw):
     def format(self, dataset):
         return {
             'id': str(dataset.id),
-            'uri': url_for('api.dataset', id=dataset.id, _external=True),
+            'uri': url_for('api.dataset', slug=dataset.slug, _external=True),
             'page': url_for('datasets.show', dataset=dataset, _external=True),
         }
 

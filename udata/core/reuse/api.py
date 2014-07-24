@@ -8,6 +8,9 @@ from udata.forms import ReuseForm
 from udata.models import Reuse
 from udata.search import ReuseSearch
 
+from udata.core.organization.api import OrganizationField
+from udata.core.dataset.api import DatasetField
+
 from udata.core.issues.api import IssuesAPI
 
 from .models import ReuseIssue
@@ -18,7 +21,9 @@ reuse_fields = {
     'slug': fields.String,
     'description': fields.String,
     'created_at': fields.ISODateTime,
-    'uri': fields.SelfUrl('api.reuse', lambda o: {'slug': o.slug}),
+    'datasets': fields.List(DatasetField),
+    'organization': OrganizationField,
+    'uri': fields.UrlFor('api.reuse', lambda o: {'slug': o.slug}),
 }
 
 

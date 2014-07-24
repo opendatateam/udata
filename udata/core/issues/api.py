@@ -29,7 +29,7 @@ issue_fields = {
     'closed': fields.ISODateTime,
     'closed_by': fields.String(attribute='closed_by.id'),
     'discussion': fields.Nested(message_fields),
-    'url': fields.SelfUrl('api.issue'),
+    'url': fields.UrlFor('api.issue'),
 }
 
 

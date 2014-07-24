@@ -17,7 +17,7 @@ class ReuseAPITest(APITestCase):
 
         response = self.get(url_for('api.reuses'))
         self.assert200(response)
-        self.assertEqual(len(response.json), len(reuses))
+        self.assertEqual(len(response.json['data']), len(reuses))
 
     def test_reuse_api_get(self):
         '''It should fetch a reuse from the API'''
