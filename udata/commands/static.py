@@ -9,7 +9,7 @@ import subprocess
 
 from glob import iglob
 from os import makedirs
-from os.path import exists, join, isdir, commonprefix
+from os.path import exists, join, isdir
 from sys import exit
 
 from flask import current_app

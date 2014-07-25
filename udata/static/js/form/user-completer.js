@@ -1,7 +1,7 @@
 /**
  * User autocompleter
  */
-define(['jquery', 'selectize'], function($) {
+define(['jquery', 'form/widgets'], function($) {
     'use strict';
 
     $('.user-completer').each(function() {

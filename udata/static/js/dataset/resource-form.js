@@ -3,8 +3,7 @@
  */
 define([
     'logger',
-    'form/common',
-    'form/markdown',
+    'form/widgets',
     'form/format-completer',
     'form/upload'
 ], function(log) {

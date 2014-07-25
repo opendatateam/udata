@@ -10,8 +10,7 @@ define([
     'hbs!templates/organization/member-row',
     'hbs!templates/organization/add-member-modal',
     'hbs!templates/organization/remove-member-modal',
-    'x-editable',
-    'selectize',
+    'form/widgets',
 ], function($, Notify, Auth, i18n, modal, row_tpl, add_modal_tpl, remove_modal_tpl) {
     "use strict";
 

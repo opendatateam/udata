@@ -42,6 +42,9 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
         reuseEdit: {path: i18n('/reuses/:slug_or_id/edit/'), moduleId: 'reuse/form'},
         reusesIssues: {path: i18n('/reuses/:slug_or_id/issues/'), moduleId: 'issue/list'},
 
+        // User routes
+        userEdit: {path: i18n('/u/:slug_or_id/edit/'), moduleId: 'user/form'},
+
         // Topics routes
         topicDisplay: {path: i18n('/topics/:slug_or_id/'), moduleId: 'topic/display'}
     })

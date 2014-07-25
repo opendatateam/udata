@@ -1,10 +1,10 @@
 /**
- * Organization form
+ * User form
  */
 define(['logger', 'form/widgets'], function(log) {
     return {
         start: function() {
-            log.debug('Organization form page');
+            log.debug('User form page');
         }
     }
 });

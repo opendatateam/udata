@@ -1,7 +1,7 @@
 /**
  * Dataset completer widget
  */
-define(['jquery', 'selectize'], function($) {
+define(['jquery', 'form/widgets'], function($) {
     'use strict';
 
 
