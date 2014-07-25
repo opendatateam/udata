@@ -24,6 +24,10 @@ resource_fields = {
     'last_modified': fields.ISODateTime(attribute='modified'),
 }
 
+temporal_coverage_fields = {
+    'start': fields.ISODateTime,
+    'end': fields.ISODateTime,
+}
 
 dataset_fields = {
     'id': fields.String,
@@ -40,6 +44,7 @@ dataset_fields = {
     'extras': fields.Raw,
     'metrics': fields.Raw,
     'organization': OrganizationField,
+    'temporal_coverage': fields.Nested(temporal_coverage_fields, allow_null=True),
 
     'uri': fields.UrlFor('api.dataset', lambda o: {'slug': o.slug}),
 }
