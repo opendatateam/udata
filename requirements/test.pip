@@ -1,4 +1,4 @@
-Flask-Testing==0.4.1
+Flask-Testing==0.4.2
 factory-boy==2.4.1
 fake-factory==0.4.0
 mock==1.0.1

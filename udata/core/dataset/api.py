@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from uuid import UUID
-
-from flask import abort, url_for
+from flask import url_for
 
 from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API, marshal, fields
 from udata.core.issues.api import IssuesAPI
