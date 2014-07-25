@@ -9,6 +9,8 @@ from functools import wraps
 from flask import request, url_for, json, make_response
 from flask.ext.restful import Api, Resource, marshal, fields, abort
 
+from werkzeug.datastructures import MultiDict
+
 from udata import search
 from udata.auth import current_user, login_user
 from udata.frontend import csrf
@@ -29,7 +31,7 @@ class UDataApi(Api):
             if current_user.is_authenticated():
                 return func(*args, **kwargs)
 
-            apikey = request.form.get('apikey') or request.headers.get('X-API-KEY')
+            apikey = request.headers.get('X-API-KEY')
             if not apikey:
                 self.abort(401)
             try:
@@ -53,7 +55,7 @@ class UDataApi(Api):
 
     def validate(self, form_cls, instance=None):
         '''Validate a form from the request and handle errors'''
-        form = form_cls(request.form, instance=instance, csrf_enabled=False)
+        form = form_cls(MultiDict(request.json), instance=instance, csrf_enabled=False)
         if not form.validate():
             self.abort(400, errors=form.errors)
         return form

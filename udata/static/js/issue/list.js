@@ -23,7 +23,7 @@ define([
     $('.issue').click(function() {
         var $this = $(this);
 
-        $.get($this.data('api-url'), function(issue) {
+        API.get($this.data('api-url'), function(issue) {
             var $modal = modal({
                     title: labels[issue.type],
                     content: detailsTpl({issue: issue, labels: labels}),
@@ -54,7 +54,7 @@ define([
                         close: close
                     };
 
-                    $.post(issue.url, data, function(data) {
+                    API.post(issue.url, data, function(data) {
                         var msg = close ? i18n._('The issue has been closed') : i18n._('Your comment has been sent to the team');
                         Notify.success(msg);
                         if (close) {

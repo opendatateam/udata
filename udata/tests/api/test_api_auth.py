@@ -60,15 +60,6 @@ class APIAuthTest(APITestCase):
         self.assertEqual(response.content_type, 'application/json')
         self.assertEqual(response.json, {'success': True})
 
-    def test_body_auth(self):
-        '''Should handle body API Key authentication'''
-        user = UserFactory(apikey='apikey')
-        response = self.post(url_for('api.fake'), {'apikey': user.apikey})
-
-        self.assert200(response)
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json, {'success': True})
-
     def test_no_apikey(self):
         '''Should raise a HTTP 401 if no API Key is provided'''
         response = self.post(url_for('api.fake'))
@@ -79,7 +70,7 @@ class APIAuthTest(APITestCase):
 
     def test_invalid_apikey(self):
         '''Should raise a HTTP 401 if an invalid API Key is provided'''
-        response = self.post(url_for('api.fake'), {'apikey': 'fake'})
+        response = self.post(url_for('api.fake'), headers={'X-API-KEY': 'fake'})
 
         self.assert401(response)
         self.assertEqual(response.content_type, 'application/json')

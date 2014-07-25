@@ -5,7 +5,13 @@ from udata.forms import Form, ModelForm, UserModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 from udata.models import Organization, MembershipRequest
 
-__all__ = ('OrganizationForm', 'OrganizationMemberForm', 'OrganizationExtraForm', 'MembershipRequestForm')
+__all__ = (
+    'OrganizationForm',
+    'OrganizationMemberForm',
+    'OrganizationExtraForm',
+    'MembershipRequestForm',
+    'MembershipRefuseForm',
+)
 
 
 class OrganizationForm(ModelForm):
@@ -34,4 +40,8 @@ class MembershipRequestForm(UserModelForm):
     model_class = MembershipRequest
     user_field = 'user'
 
+    comment = fields.StringField(_('Comment'), [validators.required()])
+
+
+class MembershipRefuseForm(Form):
     comment = fields.StringField(_('Comment'), [validators.required()])

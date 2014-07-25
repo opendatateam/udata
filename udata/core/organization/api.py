@@ -3,12 +3,12 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from flask import url_for, request
+from flask import url_for
 from flask.ext.restful import fields
 
 from udata.api import api, ModelAPI, ModelListAPI, API, marshal
 from udata.auth import current_user
-from udata.forms import OrganizationForm, MembershipRequestForm
+from udata.forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm
 from udata.models import Organization, MembershipRequest, Member
 from udata.search import OrganizationSearch
 
@@ -77,39 +77,50 @@ class MembershipRequestAPI(API):
         return marshal(membership_request, request_fields), code
 
 
-class MembershipAcceptAPI(API):
+class MembershipAPI(API):
+    def get_or_404(self, org, id):
+        for membership_request in org.requests:
+            if membership_request.id == id:
+                return membership_request
+        api.abort(404, 'Unknown membership request id')
+
+
+class MembershipAcceptAPI(MembershipAPI):
     '''
     Accept user membership to a given organization.
     '''
     @api.secure
     def post(self, org, id):
-        for membership_request in org.requests:
-            if membership_request.id == id:
-                membership_request.status = 'accepted'
-                membership_request.handled_by = current_user._get_current_object()
-                membership_request.handled_on = datetime.now()
-                member = Member(user=membership_request.user, role='editor')
-                org.members.append(member)
-                org.save()
-                return marshal(member, member_fields), 200
-        return {'error': 'Unknown membership request id'}, 400
+        membership_request = self.get_or_404(org, id)
+
+        membership_request.status = 'accepted'
+        membership_request.handled_by = current_user._get_current_object()
+        membership_request.handled_on = datetime.now()
+        member = Member(user=membership_request.user, role='editor')
+
+        org.members.append(member)
+        org.save()
+
+        return marshal(member, member_fields), 200
 
 
-class MembershipRefuseAPI(API):
+class MembershipRefuseAPI(MembershipAPI):
     '''
     Refuse user membership to a given organization.
     '''
     @api.secure
     def post(self, org, id):
-        for membership_request in org.requests:
-            if membership_request.id == id:
-                membership_request.status = 'refused'
-                membership_request.handled_by = current_user._get_current_object()
-                membership_request.handled_on = datetime.now()
-                membership_request.refusal_comment = request.form['comment']
-                org.save()
-                return {}, 200
-        return {'error': 'Unknown membership request id'}, 400
+        membership_request = self.get_or_404(org, id)
+        form = api.validate(MembershipRefuseForm)
+
+        membership_request.status = 'refused'
+        membership_request.handled_by = current_user._get_current_object()
+        membership_request.handled_on = datetime.now()
+        membership_request.refusal_comment = form.comment.data
+
+        org.save()
+
+        return {}, 200
 
 
 api.add_resource(OrganizationListAPI, '/organizations/', endpoint=b'api.organizations')

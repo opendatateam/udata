@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 from contextlib import contextmanager
 
+from flask import json
+
 from udata.core import storages
 from udata.core.storages.views import blueprint
 
@@ -25,22 +27,32 @@ class APITestCase(FrontTestCase):
             self._api_user.save()
         yield self._api_user
 
-    def inject_apikey(self, verb, *args, **kwargs):
+    def perform(self, verb, url, **kwargs):
+        headers = kwargs.pop('headers', {})
+        headers['Content-Type'] = 'application/json'
+
+        data = kwargs.get('data')
+        if data is not None:
+            data = json.dumps(data)
+            headers['Content-Length'] = len(data)
+            kwargs['data'] = data
+
         if getattr(self, '_api_user', None):
-            headers = kwargs.pop('headers', {})
             headers['X-API-KEY'] = kwargs.get('X-API-KEY', self._api_user.apikey)
-            kwargs['headers'] = headers
+
+        print verb, url, kwargs, headers
+        kwargs['headers'] = headers
         method = getattr(super(APITestCase, self), verb)
-        return method(*args, **kwargs)
+        return method(url, **kwargs)
 
-    def get(self, *args, **kwargs):
-        return self.inject_apikey('get', *args, **kwargs)
+    def get(self, url, client=None, *args, **kwargs):
+        return self.perform('get', url, client=client, *args, **kwargs)
 
-    def post(self, *args, **kwargs):
-        return self.inject_apikey('post', *args, **kwargs)
+    def post(self, url, data=None, client=None, *args, **kwargs):
+        return self.perform('post', url, data=data or {}, client=client, *args, **kwargs)
 
-    def put(self, *args, **kwargs):
-        return self.inject_apikey('put', *args, **kwargs)
+    def put(self, url, data=None, client=None, *args, **kwargs):
+        return self.perform('put', url, data=data or {}, client=client, *args, **kwargs)
 
-    def delete(self, *args, **kwargs):
-        return self.inject_apikey('delete', *args, **kwargs)
+    def delete(self, url, data=None, client=None, *args, **kwargs):
+        return self.perform('delete', url, data=data or {}, client=client, *args, **kwargs)

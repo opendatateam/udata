@@ -3,6 +3,7 @@
  */
 define([
     'jquery',
+    'api',
     'auth',
     'i18n',
     'notify',
@@ -11,7 +12,7 @@ define([
     'hbs!templates/issues/list',
     'hbs!templates/issues/details',
     'form/common'
-], function($, Auth, i18n, Notify, modal, modalTpl, listTpl, detailsTpl, forms) {
+], function($, API, Auth, i18n, Notify, modal, modalTpl, listTpl, detailsTpl, forms) {
     'use strict';
 
     var labels = {
@@ -70,7 +71,7 @@ define([
             });
         }
 
-        $.get($this.data('api-url'), function(data) {
+        API.get($this.data('api-url'), function(data) {
             $modal.find('.spinner-container').html(listTpl({issues: data, labels: labels}));
             count = data.length;
             if (!data.length && Auth.user) {
@@ -108,7 +109,7 @@ define([
                     comment: $modal.find('#comment').val()
                 };
 
-                $.post($this.data('api-url'), data, function(data) {
+                API.post($this.data('api-url'), data, function(data) {
                     var msg = i18n._('Your issue has been sent to the team');
                     Notify.success(msg);
                     count++;
@@ -150,7 +151,7 @@ define([
                     close: close
                 };
 
-                $.post($form.attr('action'), data, function(data) {
+                API.post($form.attr('action'), data, function(data) {
                     var msg = close ? i18n._('The issue has been closed') : i18n._('Your comment has been sent to the team');
                     Notify.success(msg);
                     if (close) {

@@ -3,13 +3,14 @@
  */
 define([
     'jquery',
+    'api',
     'i18n',
     'notify',
     'auth',
     'widgets/modal',
     'hbs!templates/organization/refuse-membership-modal',
     'form/common'
-], function($, i18n, Notify, Auth, modal, refusal_tpl, forms) {
+], function($, API, i18n, Notify, Auth, modal, refusal_tpl, forms) {
     "use strict";
 
     $('a.membership-accept').click(function() {
@@ -18,7 +19,7 @@ define([
 
         // Auth.need_user(i18n('login-for-pending'));
 
-        $.post(api_url, {}, function(data) {
+        API.post(api_url, {}, function(data) {
             var msg = i18n._('Membership request has been accepted');
             Notify.success(msg);
             $this.closest('.pending-request').remove();
@@ -53,7 +54,7 @@ define([
         $modal.find('.modal-footer .btn-primary').off('click').click(function() {
             if ($modal.find('form').valid()) {
                 var data = {comment: $modal.find('#comment').val()};
-                $.post(api_url, data, function(data) {
+                API.post(api_url, data, function(data) {
                     var msg = i18n._('Membership request has been refused');
                     Notify.success(msg);
                     $this.closest('.pending-request').remove();

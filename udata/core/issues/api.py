@@ -11,6 +11,7 @@ from udata.api import api, API, marshal, fields
 
 from udata.core.user.api import UserField
 
+from .forms import IssueCreateForm, IssueCommentForm
 from .models import Issue, Message
 from .signals import on_new_issue, on_issue_closed
 
@@ -41,10 +42,12 @@ class IssuesAPI(API):
 
     @api.secure
     def post(self, id):
-        message = Message(content=request.form['comment'], posted_by=current_user.id)
+        form = api.validate(IssueCreateForm)
+
+        message = Message(content=form.comment.data, posted_by=current_user.id)
         issue = self.model.objects.create(
             subject=id,
-            type=request.form['type'],
+            type=form.type.data,
             user=current_user.id,
             discussion=[message]
         )
@@ -71,11 +74,12 @@ class IssueAPI(API):
     @api.secure
     def post(self, id):
         issue = Issue.objects.get_or_404(id=id)
+        form = api.validate(IssueCommentForm)
         issue.discussion.append(Message(
-            content=request.form['comment'],
+            content=form.comment.data,
             posted_by=current_user.id
         ))
-        close = request.form.get('close', '').lower() == 'true'
+        close = form.close.data
         if close:
             issue.closed_by = current_user._get_current_object()
             issue.closed = datetime.now()

@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from uuid import UUID
 
-from flask import request, abort, url_for
+from flask import abort, url_for
 
 from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API, marshal, fields
 from udata.core.issues.api import IssuesAPI
@@ -103,12 +103,16 @@ class ResourcesAPI(API):
 
 
 class ResourceAPI(API):
+    def get_or_404(self, dataset, id):
+        resource = get_by(dataset.resources, 'id', id)
+        if not resource:
+            api.abort(404, 'Ressource does not exists')
+        return resource
+
     @api.secure
     def put(self, slug, rid):
         dataset = Dataset.objects.get_or_404(slug=slug)
-        resource = get_by(dataset.resources, 'id', UUID(rid))
-        if not resource:
-            abort(404)
+        resource = self.get_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
         form.populate_obj(resource)
         dataset.save()
@@ -117,9 +121,7 @@ class ResourceAPI(API):
     @api.secure
     def delete(self, slug, rid):
         dataset = Dataset.objects.get_or_404(slug=slug)
-        resource = get_by(dataset.resources, 'id', UUID(rid))
-        if not resource:
-            abort(404)
+        resource = self.get_or_404(dataset, rid)
         dataset.resources.remove(resource)
         dataset.save()
         return '', 204
@@ -133,5 +135,5 @@ api.add_resource(DatasetListAPI, '/datasets/', endpoint=b'api.datasets')
 api.add_resource(DatasetAPI, '/datasets/<string:slug>', endpoint=b'api.dataset')
 api.add_resource(DatasetFeaturedAPI, '/datasets/<string:slug>/featured', endpoint=b'api.dataset_featured')
 api.add_resource(ResourcesAPI, '/datasets/<string:slug>/resources', endpoint=b'api.resources')
-api.add_resource(ResourceAPI, '/datasets/<string:slug>/resources/<string:rid>', endpoint=b'api.resource')
+api.add_resource(ResourceAPI, '/datasets/<string:slug>/resources/<uuid:rid>', endpoint=b'api.resource')
 api.add_resource(DatasetIssuesAPI, '/datasets/<id>/issues/', endpoint=b'api.dataset_issues')

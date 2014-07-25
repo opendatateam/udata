@@ -142,6 +142,17 @@ class MembershipAPITest(APITestCase):
         self.assertIsNotNone(request.handled_on)
         self.assertIsNone(request.refusal_comment)
 
+    def test_accept_membership_404(self):
+        user = self.login()
+        member = Member(user=user, role='admin')
+        organization = OrganizationFactory(members=[member])
+
+        api_url = url_for('api.accept_membership', org=organization, id=MembershipRequest().id)
+        response = self.post(api_url)
+        self.assert404(response)
+
+        self.assertEqual(response.json, {'status': 404, 'message': 'Unknown membership request id'})
+
     def test_refuse_membership(self):
         user = self.login()
         applicant = UserFactory()
@@ -168,3 +179,14 @@ class MembershipAPITest(APITestCase):
         self.assertEqual(request.refusal_comment, 'no')
         self.assertEqual(request.handled_by, user)
         self.assertIsNotNone(request.handled_on)
+
+    def test_refuse_membership_404(self):
+        user = self.login()
+        member = Member(user=user, role='admin')
+        organization = OrganizationFactory(members=[member])
+
+        api_url = url_for('api.refuse_membership', org=organization, id=MembershipRequest().id)
+        response = self.post(api_url)
+        self.assert404(response)
+
+        self.assertEqual(response.json, {'status': 404, 'message': 'Unknown membership request id'})

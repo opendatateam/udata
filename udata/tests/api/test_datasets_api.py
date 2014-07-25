@@ -85,7 +85,7 @@ class DatasetAPITest(APITestCase):
         self.assertTrue(dataset.featured)
 
     def test_dataset_api_unfeature(self):
-        '''It should mark the dataset featured on POST'''
+        '''It should unmark the dataset featured on POST'''
         dataset = DatasetFactory(featured=True)
 
         with self.api_user():
@@ -141,6 +141,16 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(updated.description, data['description'])
         self.assertEqual(updated.url, data['url'])
 
+    def test_update_404(self):
+        data = {
+            'title': faker.sentence(),
+            'description': faker.text(),
+            'url': faker.url(),
+        }
+        with self.api_user():
+            response = self.put(url_for('api.resource', slug=self.dataset.slug, rid=str(ResourceFactory().id)), data)
+        self.assert404(response)
+
     def test_delete(self):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
@@ -150,3 +160,8 @@ class DatasetResourceAPITest(APITestCase):
         self.assertStatus(response, 204)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 0)
+
+    def test_delete_404(self):
+        with self.api_user():
+            response = self.delete(url_for('api.resource', slug=self.dataset.slug, rid=str(ResourceFactory().id)))
+        self.assert404(response)
