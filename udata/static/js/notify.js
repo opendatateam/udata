@@ -1,7 +1,7 @@
 /**
  * User notification module
  */
-define(['jquery', 'hbs!templates/notification'], function($, message_template) {
+define(['jquery', 'logger', 'hbs!templates/notification'], function($, Log, message_template) {
     'use strict';
 
     function show_message(message, type, container) {
@@ -10,6 +10,7 @@ define(['jquery', 'hbs!templates/notification'], function($, message_template) {
             level: type == 'error' ? 'danger' : type,
             message: message
         }));
+        Log.debug('Notify:', {type: type, message: message, container: container});
     }
 
     return {
