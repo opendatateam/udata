@@ -39,7 +39,6 @@ class UserFollowingView(UserView, DetailView):
         context = super(UserFollowingView, self).get_context()
         datasets, reuses, organizations, users = [], [], [], []
         for follow in Follow.objects.following(self.user):
-            print type(follow.following)
             if isinstance(follow, FollowOrg):
                 organizations.append(follow)
             elif isinstance(follow, FollowReuse):
