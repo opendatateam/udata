@@ -59,7 +59,7 @@
                     <h3>{{ _('Resources') }}</h3>
 
                     {# TODO: extract max_resources conf #}
-                    {% set max_resources = 3 %}
+                    {% set max_resources = 6 %}
                     {% for resource in dataset.resources %}
                         {% if loop.index0 == max_resources %}
                         <div id="collapsed-resources" class="collapse">
