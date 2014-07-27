@@ -71,5 +71,9 @@
 
     {% block modals %}{% endblock %}
 
+    {% for snippet in footer_snippets %}
+    {{ snippet()|safe }}
+    {% endfor %}
+
   </body>
 </html>

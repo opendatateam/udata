@@ -36,6 +36,9 @@ gravatar = Gravatar(size=100,
 front = I18nBlueprint('front', __name__)
 
 
+_footer_snippets = []
+
+
 class ThemeYAMLLoader(YAMLLoader):
     '''
     YAML theme assets loaders
@@ -104,6 +107,16 @@ def render(template, **context):
     '''
     theme = current_app.config['THEME']
     return render_theme_template(get_theme(theme), template, **context)
+
+
+def footer_snippet(func):
+    _footer_snippets.append(func)
+    return func
+
+
+@front.app_context_processor
+def inject_footer_snippets():
+    return {'footer_snippets': _footer_snippets}
 
 
 def _load_views(app, module):
