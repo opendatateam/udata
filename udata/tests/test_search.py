@@ -70,6 +70,12 @@ class SearchQueryTest(TestCase):
         self.assertIsInstance(result, search.SearchResult)
         self.assertEqual(result.query.adapter, FakeSearch)
 
+    def test_execute_search_result_with_model(self):
+        '''SearchQuery execution from a model should return a SearchResult with the right model'''
+        result = search.query(Fake)
+        self.assertIsInstance(result, search.SearchResult)
+        self.assertEqual(result.query.adapter, FakeSearch)
+
     def test_empty_search(self):
         '''An empty query should match all documents'''
         search_query = search.SearchQuery(FakeSearch)

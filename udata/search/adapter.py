@@ -25,7 +25,7 @@ class SearchAdapterMetaClass(type):
         # Ensure any child class dispatch the signals
         adapter = super(SearchAdapterMetaClass, cls).__new__(cls, name, bases, attrs)
         # register the class in the catalog
-        if adapter.model:
+        if adapter.model and adapter.model not in adapter_catalog:
             adapter_catalog[adapter.model] = adapter
             # Automatically reindex objects on save
             post_save.connect(reindex_model_on_save, sender=adapter.model)

@@ -7,7 +7,8 @@ import logging
 from flask import request
 from werkzeug.urls import Href
 
-from udata.search import es, i18n_analyzer, DEFAULT_PAGE_SIZE
+from udata.models import db
+from udata.search import es, i18n_analyzer, DEFAULT_PAGE_SIZE, adapter_catalog
 from udata.search.result import SearchResult
 
 
@@ -21,6 +22,8 @@ class SearchQuery(object):
 
     def __init__(self, *adapters, **kwargs):
         self.adapter = adapters[0]
+        if issubclass(self.adapter, db.Document):
+            self.adapter = adapter_catalog[self.adapter]
         self.adapters = adapters
         self.kwargs = kwargs
 
