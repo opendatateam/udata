@@ -8,7 +8,7 @@ from blinker import Signal
 from udata.models import db
 
 
-__all__ = ('Follow', 'FollowOrg', 'FollowDataset', 'FollowReuse')
+__all__ = ('Follow', 'FollowUser', 'FollowOrg', 'FollowDataset', 'FollowReuse')
 
 
 class FollowQuerySet(db.BaseQuerySet):
@@ -24,7 +24,7 @@ class FollowQuerySet(db.BaseQuerySet):
 
 class Follow(db.Document):
     follower = db.ReferenceField('User', required=True)
-    following = db.ReferenceField('User')
+    following = db.ReferenceField(db.DomainModel)
     since = db.DateTimeField(required=True, default=datetime.now)
     until = db.DateTimeField()
 
@@ -42,6 +42,10 @@ class Follow(db.Document):
     }
 
 
+class FollowUser(Follow):
+    following = db.ReferenceField('User')
+
+
 class FollowOrg(Follow):
     following = db.ReferenceField('Organization')
 
@@ -54,16 +58,9 @@ class FollowReuse(Follow):
     following = db.ReferenceField('Reuse')
 
 
-@db.post_save.connect_via(Follow)
-def emit_new_follower(sender, document, **kwargs):
-    document.on_new.send(document)
-
-
+@db.post_save.connect_via(FollowUser)
 @db.post_save.connect_via(FollowOrg)
-def emit_new_org_follower(sender, document, **kwargs):
-    document.on_new.send(document)
-
-
 @db.post_save.connect_via(FollowDataset)
-def emit_new_dataset_follower(sender, document, **kwargs):
+@db.post_save.connect_via(FollowReuse)
+def emit_new_org_follower(sender, document, **kwargs):
     document.on_new.send(document)

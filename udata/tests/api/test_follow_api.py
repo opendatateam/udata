@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import Follow, FollowOrg, FollowReuse, FollowDataset
+from udata.models import Follow, FollowUser, FollowOrg, FollowReuse, FollowDataset
 
 from . import APITestCase
 from ..factories import UserFactory, OrganizationFactory, DatasetFactory, ReuseFactory
@@ -73,7 +73,7 @@ class FollowAPITest(APITestCase):
         '''It shouldn't do anything when following an already followed user'''
         user = self.login()
         to_follow = UserFactory()
-        Follow.objects.create(follower=user, following=to_follow)
+        FollowUser.objects.create(follower=user, following=to_follow)
 
         response = self.post(url_for('api.follow_user', id=to_follow.id))
         self.assertStatus(response, 200)
@@ -87,7 +87,7 @@ class FollowAPITest(APITestCase):
         '''It should unfollow the user on DELETE'''
         user = self.login()
         to_follow = UserFactory()
-        Follow.objects.create(follower=user, following=to_follow)
+        FollowUser.objects.create(follower=user, following=to_follow)
 
         response = self.delete(url_for('api.follow_user', id=to_follow.id))
         self.assert200(response)

@@ -40,7 +40,6 @@ class APITestCase(FrontTestCase):
         if getattr(self, '_api_user', None):
             headers['X-API-KEY'] = kwargs.get('X-API-KEY', self._api_user.apikey)
 
-        print verb, url, kwargs, headers
         kwargs['headers'] = headers
         method = getattr(super(APITestCase, self), verb)
         return method(url, **kwargs)
