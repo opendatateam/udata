@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask import json
+
 from uuid import uuid4
 from datetime import date, datetime, timedelta
 
@@ -250,3 +252,33 @@ class ExtrasField(DBTestMixin, TestCase):
 
         tester.extras['test'] = EmbeddedExtra(name='test')
         tester.validate()
+
+    def test_is_json_serializable(self):
+        class Tester(db.Document):
+            extras = db.ExtrasField()
+
+        @Tester.extras('dict')
+        class ExtraDict(db.Extra):
+            def validate(self, value):
+                if not isinstance(value, dict):
+                    raise db.ValidationError('Should be a dict instance')
+
+        @Tester.extras('embedded')
+        class EmbeddedExtra(db.EmbeddedDocument):
+            name = db.StringField(required=True)
+
+        tester = Tester(extras={
+            'test': {'key': 'value'},
+            'embedded': EmbeddedExtra(name='An embedded field'),
+            'string': 'a value',
+            'integer': 5,
+            'float': 5.5,
+        })
+
+        self.assertEqual(json.dumps(tester.extras), json.dumps({
+            'test': {'key': 'value'},
+            'embedded': {'name': 'An embedded field'},
+            'string': 'a value',
+            'integer': 5,
+            'float': 5.5,
+        }))

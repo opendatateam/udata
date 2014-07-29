@@ -62,6 +62,8 @@ class UDataJsonEncoder(json.JSONEncoder):
             return obj.isoformat()
         elif hasattr(obj, 'serialize'):
             return obj.serialize()
+        elif hasattr(obj, '_data'): # Serialize Raw data for Document and EmbeddedDocument
+            return obj._data
         return super(UDataJsonEncoder, self).default(obj)
 
 

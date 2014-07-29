@@ -42,6 +42,11 @@ class ExtrasField(DictField):
             return cls
         return inner
 
+    def to_python(self, value):
+        if isinstance(value, EmbeddedDocument):
+            return value
+        return super(ExtrasField, self).to_python(value)
+
 
 class Extra(object):
     def validate(self, value):
