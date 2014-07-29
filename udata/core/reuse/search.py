@@ -77,6 +77,10 @@ class ReuseSearch(ModelSearchAdapter):
                 'search_analyzer': 'simple',
                 'payloads': True,
             },
+            'extras': {
+                'type': 'object',
+                'index_name': 'extra',
+            },
         }
     }
     boosters = [
@@ -107,6 +111,7 @@ class ReuseSearch(ModelSearchAdapter):
             ],
             'metrics': reuse.metrics,
             'featured': reuse.featured,
+            'extras': reuse.extras,
             'reuse_suggest': {
                 'input': [reuse.title] + [
                     n for n in reuse.title.split(' ')

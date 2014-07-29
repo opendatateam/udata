@@ -201,3 +201,52 @@ class DatetimedTest(DBTestMixin, TestCase):
 
         self.assertGreaterEqual(datetimed.last_modified, now)
         self.assertLessEqual(datetimed.last_modified, datetime.now())
+
+
+class ExtrasField(DBTestMixin, TestCase):
+    def test_default_validate(self):
+        class Tester(db.Document):
+            extras = db.ExtrasField()
+
+        tester = Tester(extras={'string': 'string', 'integer': 5, 'float': 5.5})
+        tester.validate()
+
+    def test_validate_unregistered_type(self):
+        class Tester(db.Document):
+            extras = db.ExtrasField()
+
+        tester = Tester(extras={'dict': {}})
+
+        with self.assertRaises(ValidationError):
+            tester.validate()
+
+    def test_validate_registered_type(self):
+        class Tester(db.Document):
+            extras = db.ExtrasField()
+
+        @Tester.extras('test')
+        class ExtraDict(db.Extra):
+            def validate(self, value):
+                if not isinstance(value, dict):
+                    raise db.ValidationError('Should be a dict instance')
+
+        tester = Tester(extras={'test': {}})
+        tester.validate()
+
+    def test_validate_registered_type_embedded_document(self):
+        class Tester(db.Document):
+            extras = db.ExtrasField()
+
+        @Tester.extras('test')
+        class EmbeddedExtra(db.EmbeddedDocument):
+            name = db.StringField(required=True)
+
+        tester = Tester(extras={'test': {}})
+        with self.assertRaises(ValidationError):
+            tester.validate()
+
+        tester.extras['test'] = {'name': 'test'}
+        tester.validate()
+
+        tester.extras['test'] = EmbeddedExtra(name='test')
+        tester.validate()

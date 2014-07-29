@@ -68,6 +68,10 @@ class DatasetSearch(ModelSearchAdapter):
                     'end': {'type': 'long'},
                 }
             },
+            'extras': {
+                'type': 'object',
+                'index_name': 'extra',
+            },
         }
     }
     fields = (
@@ -138,6 +142,7 @@ class DatasetSearch(ModelSearchAdapter):
             'created': dataset.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             'last_modified': dataset.last_modified.strftime('%Y-%m-%dT%H:%M:%S'),
             'metrics': dataset.metrics,
+            'extras': dataset.extras,
             'featured': dataset.featured,
             'from_public_service': dataset.organization.public_service if dataset.organization else False,  # TODO: extract tis into plugin
         }

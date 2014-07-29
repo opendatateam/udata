@@ -9,6 +9,7 @@ from elasticsearch import Elasticsearch, JSONSerializer
 from flask import current_app, json
 from speaklater import make_lazy_string, is_lazy_string
 
+from udata.app import UDataJsonEncoder
 from udata.tasks import celery
 
 log = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ class EsJSONSerializer(JSONSerializer):
         if is_lazy_string(data):
             return unicode(data)
         else:
-            return super(EsJSONSerializer, self).default(data)
+            return UDataJsonEncoder().default(data)
 
 
 class ElasticSearch(object):

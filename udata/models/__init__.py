@@ -10,6 +10,7 @@ from mongoengine.base import TopLevelDocumentMetaclass
 from mongoengine.signals import pre_save, post_save
 
 from .datetime_fields import DateField, DateRange, Datetimed
+from .extras_fields import ExtrasField, Extra
 from .slug_fields import SlugField
 from .uuid_fields import AutoUUIDField
 
@@ -22,6 +23,8 @@ class UDataMongoEngine(MongoEngine):
         super(UDataMongoEngine, self).__init__(app)
         self.DateField = DateField
         self.Datetimed = Datetimed
+        self.Extra = Extra
+        self.ExtrasField = ExtrasField
         self.SlugField = SlugField
         self.AutoUUIDField = AutoUUIDField
         self.Document = UDataDocument

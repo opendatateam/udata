@@ -45,6 +45,7 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     organization = db.ReferenceField('Organization')
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
+    extras = db.ExtrasField()
 
     featured = db.BooleanField()
     deleted = db.DateTimeField()

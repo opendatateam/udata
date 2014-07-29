@@ -115,7 +115,7 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     territorial_coverage = db.EmbeddedDocumentField(TerritorialCoverage)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
-    extras = db.DictField()
+    extras = db.ExtrasField()
 
     featured = db.BooleanField(required=True, default=False)
 

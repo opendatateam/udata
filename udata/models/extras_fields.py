@@ -1,0 +1,54 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+import logging
+
+from mongoengine import EmbeddedDocument
+from mongoengine.errors import ValidationError
+from mongoengine.fields import DictField
+
+log = logging.getLogger(__name__)
+
+
+class ExtrasField(DictField):
+    def __init__(self, **kwargs):
+        self.registered = {}
+        super(ExtrasField, self).__init__()
+
+    def register(self, key, extra):
+        self.registered[key] = extra
+
+    def validate(self, value):
+        super(ExtrasField, self).validate(value)
+
+        errors = {}
+        for key, value in value.items():
+            extra_cls = self.registered.get(key, DefaultExtra)
+
+            try:
+                if issubclass(extra_cls, EmbeddedDocument):
+                    value.validate() if isinstance(value, extra_cls) else extra_cls(**value).validate()
+                else:
+                    extra_cls().validate(value)
+            except ValidationError as e:
+                errors[key] = e.message
+
+        if errors:
+            self.error('Unsupported types', errors=errors)
+
+    def __call__(self, key):
+        def inner(cls):
+            self.register(key, cls)
+            return cls
+        return inner
+
+
+class Extra(object):
+    def validate(self, value):
+        raise NotImplemented
+
+
+class DefaultExtra(Extra):
+    def validate(self, value):
+        if not isinstance(value, (basestring, int, float)):
+            raise ValidationError('Value should be an instance of string, integer or float')
