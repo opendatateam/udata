@@ -51,7 +51,7 @@
 
                 <div class="row" itemprop="description">
                     <div class="col-xs-12">
-                    {{ dataset.description|markdown }}
+                    {{ dataset.description or ''|markdown }}
                     </div>
                 </div>
 

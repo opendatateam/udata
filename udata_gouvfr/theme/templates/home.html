@@ -64,7 +64,7 @@
                                     <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
                                     {{ reuse.title }}
                                     </a>
-                                    <label>{{ reuse.description|markdown|striptags|truncate(250) }}</label>
+                                    <label>{{ reuse.description or ''|markdown|striptags|truncate(250) }}</label>
                                 </h4>
                                 {# {% if user.sysadmin %}
                                 <a class="btn btn-xs btn-warning unfeature" rel="tooltip" href
