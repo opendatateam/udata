@@ -19,6 +19,7 @@ org_fields = {
     'slug': fields.String,
     'description': fields.String,
     'created_at': fields.ISODateTime,
+    'last_modified': fields.ISODateTime,
     'metrics': fields.Raw,
     'uri': fields.UrlFor('api.organization', lambda o: {'slug': o.slug}),
 }

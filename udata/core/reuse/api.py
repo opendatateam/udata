@@ -21,8 +21,10 @@ reuse_fields = {
     'slug': fields.String,
     'description': fields.String,
     'created_at': fields.ISODateTime,
+    'last_modified': fields.ISODateTime,
     'datasets': fields.List(DatasetField),
     'organization': OrganizationField,
+    'metrics': fields.Raw,
     'uri': fields.UrlFor('api.reuse', lambda o: {'slug': o.slug}),
 }
 
