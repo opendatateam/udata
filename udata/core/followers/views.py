@@ -38,10 +38,10 @@ class UserFollowingView(UserView, DetailView):
     def get_context(self):
         context = super(UserFollowingView, self).get_context()
         context.update({
-            'followed_datasets': FollowDataset.objects.following(self.user).order_by('following.title'),
-            'followed_reuses': FollowReuse.objects.following(self.user).order_by('following.name'),
-            'followed_organizations': FollowReuse.objects.following(self.user).order_by('following.name'),
-            'followed_users': FollowUser.objects.following(self.user).order_by('following.fullname'),
+            'followed_datasets': FollowDataset.objects.following(self.user).order_by('following.title').select_related(),
+            'followed_reuses': FollowReuse.objects.following(self.user).order_by('following.name').select_related(),
+            'followed_organizations': FollowOrg.objects.following(self.user).order_by('following.name').select_related(),
+            'followed_users': FollowUser.objects.following(self.user).order_by('following.fullname').select_related(),
         })
         return context
 
