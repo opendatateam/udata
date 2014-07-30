@@ -23,7 +23,7 @@
                 {{ dataset.title }}
             </a>
         </h4>
-        <div class="card-description">{{ dataset.description|markdown|striptags|truncate(250) }}</div>
+        <div class="card-description">{{ dataset.description or ''|markdown|striptags|truncate(250) }}</div>
 
     </div>
     <footer>

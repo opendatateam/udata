@@ -11,7 +11,7 @@
             </a>
         </h4>
         <div class="result-description">
-        {{ reuse.description|markdown|striptags|truncate(300) }}
+        {{ reuse.description or ''|markdown|striptags|truncate(300) }}
         </div>
     </div>
     <ul class="list-inline result-infos">

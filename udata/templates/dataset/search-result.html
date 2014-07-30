@@ -24,7 +24,7 @@
         </h4>
 
         <div class="result-description">
-            {{ dataset.description|markdown|striptags|truncate(300) }}
+            {{ dataset.description or ''|markdown|striptags|truncate(300) }}
         </div>
     </div>
 

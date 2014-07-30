@@ -10,7 +10,7 @@
 
 {% block main_content %}
 <h2>{{ topic.name }}</h2>
-</div>{{ topic.description|markdown }}</div>
+</div>{{ topic.description or ''|markdown }}</div>
 
 <!-- Nav tabs -->
 <ul class="nav nav-tabs">
@@ -84,7 +84,7 @@
                 <h4 id="topic-modal-title" class="modal-title">{{ topic.name }}</h4>
             </div>
             <div class="modal-body">
-                {{ topic.description|markdown }}
+                {{ topic.description or ''|markdown }}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">{{ _('Close') }}</button>

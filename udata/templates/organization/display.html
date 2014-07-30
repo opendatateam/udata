@@ -27,7 +27,7 @@
         <img src="{{ org.image_url or static('/base/images/placeholder-organization.png') }}"
             alt="{{ org.title }}" class="scalable img-responsive" />
     </div>
-    <div class="col-md-9">{{ org.description|markdown }}</div>
+    <div class="col-md-9">{{ org.description or ''|markdown }}</div>
 </div>
 
 <div>
