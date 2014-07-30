@@ -48,8 +48,8 @@ TERRITORIAL_GRANULARITIES = {
 class License(db.Document):
     id = db.StringField(primary_key=True)
     created_at = db.DateTimeField(default=datetime.datetime.now, required=True)
-    title = db.StringField(max_length=255, required=True)
-    slug = db.SlugField(max_length=255, required=True, populate_from='title')
+    title = db.StringField(required=True)
+    slug = db.SlugField(required=True, populate_from='title')
     url = db.URLField()
     maintainer = db.StringField()
     flags = db.ListField(db.StringField())

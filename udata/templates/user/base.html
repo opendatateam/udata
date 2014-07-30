@@ -49,7 +49,7 @@
                         {{ ngettext('%(num)d follower', '%(num)d followers', user.metrics.followers or 0) }}
                     </strong>
                 </a>
-                <a href="{{url_for('followers.user_following', user=user)}}"
+                <a href="{{url_for('users.following', user=user)}}"
                     class="list-group-item {% if user_tab == 'following' %}active{% endif %}">
                     <strong>
                         {{ ngettext('%(num)d followed', '%(num)d followed', user.metrics.following or 0) }}

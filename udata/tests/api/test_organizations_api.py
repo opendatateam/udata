@@ -27,7 +27,7 @@ class OrganizationAPITest(APITestCase):
     def test_organization_api_get(self):
         '''It should fetch an organization from the API'''
         organization = OrganizationFactory()
-        response = self.get(url_for('api.organization', slug=organization.slug))
+        response = self.get(url_for('api.organization', org=organization))
         self.assert200(response)
 
     def test_organization_api_create(self):
@@ -44,7 +44,7 @@ class OrganizationAPITest(APITestCase):
         data = org.to_dict()
         data['description'] = 'new description'
         self.login()
-        response = self.put(url_for('api.organization', slug=org.slug), data)
+        response = self.put(url_for('api.organization', org=org), data)
         self.assert200(response)
         self.assertEqual(Organization.objects.count(), 1)
         self.assertEqual(Organization.objects.first().description, 'new description')
@@ -53,7 +53,7 @@ class OrganizationAPITest(APITestCase):
         '''It should delete an organization from the API'''
         organization = OrganizationFactory()
         with self.api_user():
-            response = self.delete(url_for('api.organization', slug=organization.slug))
+            response = self.delete(url_for('api.organization', org=organization))
         self.assertStatus(response, 204)
         self.assertEqual(Organization.objects.count(), 1)
         self.assertIsNotNone(Organization.objects[0].deleted)

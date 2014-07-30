@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 from flask import url_for
 
 from . import FrontTestCase
-from ..factories import UserFactory, DatasetFactory, ReuseFactory, ResourceFactory
+from udata.models import FollowDataset, FollowOrg, FollowReuse, FollowUser
+from ..factories import UserFactory, DatasetFactory, ReuseFactory, ResourceFactory, OrganizationFactory
 
 
 class UserBlueprintTest(FrontTestCase):
@@ -15,7 +16,6 @@ class UserBlueprintTest(FrontTestCase):
         users = [UserFactory() for _ in range(3)]
         response = self.get(url_for('users.list'))
         self.assert200(response)
-
 
     def test_render_profile(self):
         '''It should render the user profile'''
@@ -44,6 +44,30 @@ class UserBlueprintTest(FrontTestCase):
         self.assert200(response)
         rendered_reuses = self.get_context_variable('reuses')
         self.assertEqual(len(rendered_reuses), len(reuses))
+
+    def test_render_profile_following(self):
+        '''It should render the user profile following page'''
+        user = UserFactory()
+        for _ in range(2):
+            reuse = ReuseFactory()
+            FollowReuse.objects.create(follower=user, following=reuse)
+            dataset = DatasetFactory()
+            FollowDataset.objects.create(follower=user, following=dataset)
+            org = OrganizationFactory()
+            FollowOrg.objects.create(follower=user, following=org)
+            other_user = UserFactory()
+            FollowUser.objects.create(follower=user, following=other_user)
+        response = self.get(url_for('users.following', user=user))
+        self.assert200(response)
+        for name in 'datasets', 'users', 'reuses', 'organizations':
+            rendered = self.get_context_variable('followed_{0}'.format(name))
+            self.assertEqual(len(rendered), 2)
+
+    def test_render_profile_following_empty(self):
+        '''It should render an empty user profile following page'''
+        user = UserFactory()
+        response = self.get(url_for('users.following', user=user))
+        self.assert200(response)
 
     def test_not_found(self):
         '''It should raise 404 if user is not found'''

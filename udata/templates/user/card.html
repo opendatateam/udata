@@ -1,8 +1,8 @@
-{% set user_url = url_for('users.show', dataset=dataset) %}
+{% set user_url = url_for('users.show', user=user) %}
 <div class="card">
-    <div class="card-logo">
-        <img src="{{ user|avatar(48) }}">
-    </div>
+    <a class="card-logo" href="{{ user_url }}">
+        <img src="{{ user|avatar(48) }}" alt="{{ user.fullname }}">
+    </a>
     <div class="card-body ellipsis-dot">
         <h4>
             <a href="{{ user_url }}" title="{{user.fullname}}">
@@ -39,7 +39,7 @@
                     title="{{ _('Stars') }}">
                     <span class="{{ ficon('fa-star') }}"></span>
                 </a>
-                {{ user.metrics.followers or 0) }}
+                {{ user.metrics.followers or 0 }}
             </li>
         </ul>
     </footer>

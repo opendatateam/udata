@@ -21,7 +21,7 @@ org_fields = {
     'created_at': fields.ISODateTime,
     'last_modified': fields.ISODateTime,
     'metrics': fields.Raw,
-    'uri': fields.UrlFor('api.organization', lambda o: {'slug': o.slug}),
+    'uri': fields.UrlFor('api.organization', lambda o: {'org': o}),
 }
 
 request_fields = {
@@ -39,7 +39,7 @@ class OrganizationField(fields.Raw):
     def format(self, organization):
         return {
             'id': str(organization.id),
-            'uri': url_for('api.organization', slug=organization.slug, _external=True),
+            'uri': url_for('api.organization', org=organization, _external=True),
             'page': url_for('organizations.show', org=organization, _external=True),
         }
 
@@ -125,7 +125,7 @@ class MembershipRefuseAPI(MembershipAPI):
 
 
 api.add_resource(OrganizationListAPI, '/organizations/', endpoint=b'api.organizations')
-api.add_resource(OrganizationAPI, '/organizations/<slug>', endpoint=b'api.organization')
+api.add_resource(OrganizationAPI, '/organizations/<org:org>', endpoint=b'api.organization')
 
 api.add_resource(MembershipRequestAPI, '/organizations/<org:org>/membership', endpoint=b'api.request_membership')
 api.add_resource(MembershipAcceptAPI, '/organizations/<org:org>/membership/<uuid:id>/accept', endpoint=b'api.accept_membership')

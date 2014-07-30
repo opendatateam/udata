@@ -45,7 +45,7 @@ dataset_fields = {
     'supplier': OrganizationField,
     'temporal_coverage': fields.Nested(temporal_coverage_fields, allow_null=True),
 
-    'uri': fields.UrlFor('api.dataset', lambda o: {'slug': o.slug}),
+    'uri': fields.UrlFor('api.dataset', lambda o: {'dataset': o}),
 }
 
 
@@ -53,7 +53,7 @@ class DatasetField(fields.Raw):
     def format(self, dataset):
         return {
             'id': str(dataset.id),
-            'uri': url_for('api.dataset', slug=dataset.slug, _external=True),
+            'uri': url_for('api.dataset', dataset=dataset, _external=True),
             'page': url_for('datasets.show', dataset=dataset, _external=True),
         }
 
@@ -75,15 +75,13 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
     model = Dataset
 
     @api.secure
-    def post(self, slug):
-        dataset = self.get_or_404(slug=slug)
+    def post(self, dataset):
         dataset.featured = True
         dataset.save()
         return marshal(dataset, dataset_fields)
 
     @api.secure
-    def delete(self, slug):
-        dataset = self.get_or_404(slug=slug)
+    def delete(self, dataset):
         dataset.featured = False
         dataset.save()
         return marshal(dataset, dataset_fields)
@@ -91,8 +89,7 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
 
 class ResourcesAPI(API):
     @api.secure
-    def post(self, slug):
-        dataset = Dataset.objects.get_or_404(slug=slug)
+    def post(self, dataset):
         form = api.validate(ResourceForm)
         resource = Resource()
         form.populate_obj(resource)
@@ -102,25 +99,23 @@ class ResourcesAPI(API):
 
 
 class ResourceAPI(API):
-    def get_or_404(self, dataset, id):
+    def get_resource_or_404(self, dataset, id):
         resource = get_by(dataset.resources, 'id', id)
         if not resource:
             api.abort(404, 'Ressource does not exists')
         return resource
 
     @api.secure
-    def put(self, slug, rid):
-        dataset = Dataset.objects.get_or_404(slug=slug)
-        resource = self.get_or_404(dataset, rid)
+    def put(self, dataset, rid):
+        resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
         form.populate_obj(resource)
         dataset.save()
         return marshal(resource, resource_fields)
 
     @api.secure
-    def delete(self, slug, rid):
-        dataset = Dataset.objects.get_or_404(slug=slug)
-        resource = self.get_or_404(dataset, rid)
+    def delete(self, dataset, rid):
+        resource = self.get_resource_or_404(dataset, rid)
         dataset.resources.remove(resource)
         dataset.save()
         return '', 204
@@ -131,8 +126,8 @@ class DatasetIssuesAPI(IssuesAPI):
 
 
 api.add_resource(DatasetListAPI, '/datasets/', endpoint=b'api.datasets')
-api.add_resource(DatasetAPI, '/datasets/<string:slug>', endpoint=b'api.dataset')
-api.add_resource(DatasetFeaturedAPI, '/datasets/<string:slug>/featured', endpoint=b'api.dataset_featured')
-api.add_resource(ResourcesAPI, '/datasets/<string:slug>/resources', endpoint=b'api.resources')
-api.add_resource(ResourceAPI, '/datasets/<string:slug>/resources/<uuid:rid>', endpoint=b'api.resource')
+api.add_resource(DatasetAPI, '/datasets/<dataset:dataset>', endpoint=b'api.dataset')
+api.add_resource(DatasetFeaturedAPI, '/datasets/<dataset:dataset>/featured', endpoint=b'api.dataset_featured')
+api.add_resource(ResourcesAPI, '/datasets/<dataset:dataset>/resources', endpoint=b'api.resources')
+api.add_resource(ResourceAPI, '/datasets/<dataset:dataset>/resources/<uuid:rid>', endpoint=b'api.resource')
 api.add_resource(DatasetIssuesAPI, '/datasets/<id>/issues/', endpoint=b'api.dataset_issues')

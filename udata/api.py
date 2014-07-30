@@ -99,8 +99,9 @@ class SingleObjectAPI(object):
     model = None
 
     def get_or_404(self, **kwargs):
-        if self.model.__class__.__name__.lower() in kwargs:
-            return kwargs[self.model.__class__.__name__.lower()]
+        for key, value in kwargs.items():
+            if isinstance(value, self.model):
+                return value
         return self.model.objects.get_or_404(**kwargs)
 
 

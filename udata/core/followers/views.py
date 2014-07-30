@@ -28,32 +28,7 @@ class UserFollowersView(UserView, DetailView):
 
     def get_context(self):
         context = super(UserFollowersView, self).get_context()
-        context['followers'] = FollowUser.objects.followers(self.user).order_by('follower.fullname')
-        return context
-
-
-class UserFollowingView(UserView, DetailView):
-    template_name = 'user/following.html'
-
-    def get_context(self):
-        context = super(UserFollowingView, self).get_context()
-        specs = {
-            'datasets': (FollowDataset, 'following.title'),
-            'reuses': (FollowReuse, 'following.name'),
-            'organizations': (FollowOrg, 'following.name'),
-            'users': (FollowUser, 'following.fullname'),
-        }
-        for name, (cls, sort) in specs.items():
-            key = 'followed_{0}'.format(name)
-            context.update({
-                key: [f.following for f in cls.objects.following(self.user).order_by(sort).select_related()]
-            })
-        # context.update({
-        #     'followed_datasets': FollowDataset.objects.following(self.user).order_by('following.title').select_related(),
-        #     'followed_reuses': FollowReuse.objects.following(self.user).order_by('following.name').select_related(),
-        #     'followed_organizations': FollowOrg.objects.following(self.user).order_by('following.name').select_related(),
-        #     'followed_users': FollowUser.objects.following(self.user).order_by('following.fullname').select_related(),
-        # })
+        context['followers'] = Follow.objects.followers(self.user).order_by('follower.fullname')
         return context
 
 
@@ -88,9 +63,4 @@ blueprint.add_url_rule(
 blueprint.add_url_rule(
     '/u/<user:user>/followers/',
     view_func=UserFollowersView.as_view(str('user'))
-)
-
-blueprint.add_url_rule(
-    '/u/<user:user>/following/',
-    view_func=UserFollowingView.as_view(str('user_following'))
 )

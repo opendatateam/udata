@@ -27,7 +27,7 @@ class DatasetAPITest(APITestCase):
             resources = [ResourceFactory() for _ in range(3)]
             dataset = DatasetFactory(resources=resources)
 
-        response = self.get(url_for('api.dataset', slug=dataset.slug))
+        response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert200(response)
         data = json.loads(response.data)
         self.assertEqual(len(data['resources']), len(resources))
@@ -46,7 +46,7 @@ class DatasetAPITest(APITestCase):
         data = dataset.to_dict()
         data['description'] = 'new description'
         with self.api_user():
-            response = self.put(url_for('api.dataset', slug=dataset.slug), data)
+            response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert200(response)
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, 'new description')
@@ -55,7 +55,7 @@ class DatasetAPITest(APITestCase):
         '''It should delete a dataset from the API'''
         dataset = DatasetFactory()
         with self.api_user():
-            response = self.delete(url_for('api.dataset', slug=dataset.slug))
+            response = self.delete(url_for('api.dataset', dataset=dataset))
         self.assertStatus(response, 204)
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertIsNotNone(Dataset.objects[0].deleted)
@@ -65,7 +65,7 @@ class DatasetAPITest(APITestCase):
         dataset = DatasetFactory(featured=False)
 
         with self.api_user():
-            response = self.post(url_for('api.dataset_featured', slug=dataset.slug))
+            response = self.post(url_for('api.dataset_featured', dataset=dataset))
 
         self.assert200(response)
 
@@ -77,7 +77,7 @@ class DatasetAPITest(APITestCase):
         dataset = DatasetFactory(featured=True)
 
         with self.api_user():
-            response = self.post(url_for('api.dataset_featured', slug=dataset.slug))
+            response = self.post(url_for('api.dataset_featured', dataset=dataset))
 
         self.assert200(response)
 
@@ -89,7 +89,7 @@ class DatasetAPITest(APITestCase):
         dataset = DatasetFactory(featured=True)
 
         with self.api_user():
-            response = self.delete(url_for('api.dataset_featured', slug=dataset.slug))
+            response = self.delete(url_for('api.dataset_featured', dataset=dataset))
 
         self.assert200(response)
 
@@ -101,7 +101,7 @@ class DatasetAPITest(APITestCase):
         dataset = DatasetFactory(featured=False)
 
         with self.api_user():
-            response = self.delete(url_for('api.dataset_featured', slug=dataset.slug))
+            response = self.delete(url_for('api.dataset_featured', dataset=dataset))
 
         self.assert200(response)
 
@@ -117,7 +117,7 @@ class DatasetResourceAPITest(APITestCase):
     def test_create(self):
         data = ResourceFactory.attributes()
         with self.api_user():
-            response = self.post(url_for('api.resources', slug=self.dataset.slug), data)
+            response = self.post(url_for('api.resources', dataset=self.dataset), data)
         self.assertStatus(response, 201)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 1)
@@ -132,7 +132,7 @@ class DatasetResourceAPITest(APITestCase):
             'url': faker.url(),
         }
         with self.api_user():
-            response = self.put(url_for('api.resource', slug=self.dataset.slug, rid=str(resource.id)), data)
+            response = self.put(url_for('api.resource', dataset=self.dataset, rid=str(resource.id)), data)
         self.assert200(response)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 1)
@@ -148,7 +148,7 @@ class DatasetResourceAPITest(APITestCase):
             'url': faker.url(),
         }
         with self.api_user():
-            response = self.put(url_for('api.resource', slug=self.dataset.slug, rid=str(ResourceFactory().id)), data)
+            response = self.put(url_for('api.resource', dataset=self.dataset, rid=str(ResourceFactory().id)), data)
         self.assert404(response)
 
     def test_delete(self):
@@ -156,12 +156,12 @@ class DatasetResourceAPITest(APITestCase):
         self.dataset.resources.append(resource)
         self.dataset.save()
         with self.api_user():
-            response = self.delete(url_for('api.resource', slug=self.dataset.slug, rid=str(resource.id)))
+            response = self.delete(url_for('api.resource', dataset=self.dataset, rid=str(resource.id)))
         self.assertStatus(response, 204)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 0)
 
     def test_delete_404(self):
         with self.api_user():
-            response = self.delete(url_for('api.resource', slug=self.dataset.slug, rid=str(ResourceFactory().id)))
+            response = self.delete(url_for('api.resource', dataset=self.dataset, rid=str(ResourceFactory().id)))
         self.assert404(response)

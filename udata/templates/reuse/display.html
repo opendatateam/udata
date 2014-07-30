@@ -20,7 +20,7 @@
 <div class="btn-group btn-group-xs">
     <button type="button"
         class="btn btn-success featured {% if reuse.featured %}active{% endif %}"
-        data-api-url="{{ url_for('api.reuse_featured', slug=reuse.slug) }}">
+        data-api-url="{{ url_for('api.reuse_featured', reuse=reuse) }}">
         <span class="glyphicon glyphicon-bullhorn"></span>
         {{ _('Featured') }}
     </button>

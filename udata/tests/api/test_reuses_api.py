@@ -22,7 +22,7 @@ class ReuseAPITest(APITestCase):
     def test_reuse_api_get(self):
         '''It should fetch a reuse from the API'''
         reuse = ReuseFactory()
-        response = self.get(url_for('api.reuse', slug=reuse.slug))
+        response = self.get(url_for('api.reuse', reuse=reuse))
         self.assert200(response)
 
     def test_reuse_api_create(self):
@@ -39,7 +39,7 @@ class ReuseAPITest(APITestCase):
         data = reuse.to_dict()
         data['description'] = 'new description'
         self.login()
-        response = self.put(url_for('api.reuse', slug=reuse.slug), data)
+        response = self.put(url_for('api.reuse', reuse=reuse), data)
         self.assert200(response)
         self.assertEqual(Reuse.objects.count(), 1)
         self.assertEqual(Reuse.objects.first().description, 'new description')
@@ -48,7 +48,7 @@ class ReuseAPITest(APITestCase):
         '''It should delete a reuse from the API'''
         reuse = ReuseFactory()
         with self.api_user():
-            response = self.delete(url_for('api.reuse', slug=reuse.slug))
+            response = self.delete(url_for('api.reuse', reuse=reuse))
         self.assertStatus(response, 204)
         self.assertEqual(Reuse.objects.count(), 1)
         self.assertIsNotNone(Reuse.objects[0].deleted)
@@ -58,7 +58,7 @@ class ReuseAPITest(APITestCase):
         reuse = ReuseFactory(featured=False)
 
         with self.api_user():
-            response = self.post(url_for('api.reuse_featured', slug=reuse.slug))
+            response = self.post(url_for('api.reuse_featured', reuse=reuse))
         self.assert200(response)
 
         reuse.reload()
@@ -69,7 +69,7 @@ class ReuseAPITest(APITestCase):
         reuse = ReuseFactory(featured=True)
 
         with self.api_user():
-            response = self.post(url_for('api.reuse_featured', slug=reuse.slug))
+            response = self.post(url_for('api.reuse_featured', reuse=reuse))
         self.assert200(response)
 
         reuse.reload()
@@ -80,7 +80,7 @@ class ReuseAPITest(APITestCase):
         reuse = ReuseFactory(featured=True)
 
         with self.api_user():
-            response = self.delete(url_for('api.reuse_featured', slug=reuse.slug))
+            response = self.delete(url_for('api.reuse_featured', reuse=reuse))
         self.assert200(response)
 
         reuse.reload()
@@ -91,7 +91,7 @@ class ReuseAPITest(APITestCase):
         reuse = ReuseFactory(featured=False)
 
         with self.api_user():
-            response = self.delete(url_for('api.reuse_featured', slug=reuse.slug))
+            response = self.delete(url_for('api.reuse_featured', reuse=reuse))
         self.assert200(response)
 
         reuse.reload()

@@ -3,10 +3,9 @@ from __future__ import unicode_literals
 
 from flask import url_for, g
 
-from udata.auth import current_user
 from udata.frontend import nav
 from udata.frontend.views import DetailView, EditView, ListView
-from udata.models import User, Activity, Organization, Dataset, Reuse
+from udata.models import User, Activity, Organization, Dataset, Reuse, Follow
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.forms import UserProfileForm, UserSettingsForm, UserAPIKeyForm, UserNotificationsForm
 
@@ -133,12 +132,40 @@ class UserActivityView(UserView, DetailView):
         return context
 
 
+class UserFollowingView(UserView, DetailView):
+    template_name = 'user/following.html'
+
+    def get_context(self):
+        context = super(UserFollowingView, self).get_context()
+        datasets, reuses, organizations, users = [], [], [], []
+
+        for follow in Follow.objects.following(self.user).select_related():
+            if isinstance(follow.following, Organization):
+                organizations.append(follow.following)
+            elif isinstance(follow.following, Reuse):
+                reuses.append(follow.following)
+            elif isinstance(follow.following, Dataset):
+                datasets.append(follow.following)
+            else:
+                users.append(follow.following)
+
+        context.update({
+            'followed_datasets': sorted(datasets, key=lambda d: d.title),
+            'followed_reuses': sorted(reuses, key=lambda r: r.title),
+            'followed_organizations': sorted(organizations, key=lambda o: o.name),
+            'followed_users': sorted(users, key=lambda u: u.fullname),
+        })
+
+        return context
+
+
 blueprint.add_url_rule('/', view_func=UserListView.as_view(str('list')))
 blueprint.add_url_rule('/<user:user>/', view_func=UserActivityView.as_view(str('show')))
 blueprint.add_url_rule('/<user:user>/edit/', view_func=UserProfileEditView.as_view(str('edit')))
 blueprint.add_url_rule('/<user:user>/activity/', view_func=UserActivityView.as_view(str('activity')))
 blueprint.add_url_rule('/<user:user>/datasets/', view_func=UserDatasetsView.as_view(str('datasets')))
 blueprint.add_url_rule('/<user:user>/reuses/', view_func=UserReusesView.as_view(str('reuses')))
+blueprint.add_url_rule('/<user:user>/following/', view_func=UserFollowingView.as_view(str('following')))
 
 blueprint.add_url_rule('/<user:user>/edit/settings/', view_func=UserSettingsView.as_view(str('settings')))
 blueprint.add_url_rule('/<user:user>/edit/apikey/', view_func=UserAPIKeySettingsView.as_view(str('apikey_settings')))

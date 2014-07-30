@@ -25,7 +25,7 @@ reuse_fields = {
     'datasets': fields.List(DatasetField),
     'organization': OrganizationField,
     'metrics': fields.Raw,
-    'uri': fields.UrlFor('api.reuse', lambda o: {'slug': o.slug}),
+    'uri': fields.UrlFor('api.reuse', lambda o: {'reuse': o}),
 }
 
 
@@ -46,15 +46,13 @@ class ReuseFeaturedAPI(SingleObjectAPI, API):
     model = Reuse
 
     @api.secure
-    def post(self, slug):
-        reuse = self.get_or_404(slug=slug)
+    def post(self, reuse):
         reuse.featured = True
         reuse.save()
         return marshal(reuse, reuse_fields)
 
     @api.secure
-    def delete(self, slug):
-        reuse = self.get_or_404(slug=slug)
+    def delete(self, reuse):
         reuse.featured = False
         reuse.save()
         return marshal(reuse, reuse_fields)
@@ -64,6 +62,6 @@ class ReuseIssuesAPI(IssuesAPI):
     model = ReuseIssue
 
 api.add_resource(ReuseListAPI, '/reuses/', endpoint=b'api.reuses')
-api.add_resource(ReuseAPI, '/reuses/<string:slug>', endpoint=b'api.reuse')
-api.add_resource(ReuseFeaturedAPI, '/reuses/<string:slug>/featured', endpoint=b'api.reuse_featured')
+api.add_resource(ReuseAPI, '/reuses/<reuse:reuse>', endpoint=b'api.reuse')
+api.add_resource(ReuseFeaturedAPI, '/reuses/<reuse:reuse>/featured', endpoint=b'api.reuse_featured')
 api.add_resource(ReuseIssuesAPI, '/reuses/<id>/issues/', endpoint=b'api.reuse_issues')

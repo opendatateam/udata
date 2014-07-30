@@ -8,7 +8,7 @@ from flask import abort
 from flask.ext.security import current_user
 
 from udata.api import api, API, marshal, fields
-from udata.models import FollowOrg, FollowDataset, Follow, FollowReuse
+from udata.models import FollowOrg, FollowDataset, Follow, FollowReuse, FollowUser
 
 from .signals import on_unfollow
 
@@ -37,7 +37,7 @@ class FollowAPI(API):
 
 
 class FollowUserAPI(FollowAPI):
-    model = Follow
+    model = FollowUser
 
 
 class FollowOrgAPI(FollowAPI):
