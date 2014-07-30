@@ -47,8 +47,7 @@
             ) }}
             </h3>
             <ul class="card-list">
-                {% for follow in followed_datasets %}
-                {% set dataset = follow.following %}
+                {% for dataset in followed_datasets %}
                 <li class="col-sm-6">
                   {% include theme('dataset/card.html') %}
                 </li>
@@ -68,8 +67,7 @@
             ) }}
             </h3>
             <ul class="card-list">
-                {% for follow in followed_organizations %}
-                {% set reuse = follow.following %}
+                {% for reuse in followed_organizations %}
                 <li class="col-sm-6">
                   {% include theme('reuse/card.html') %}
                 </li>
@@ -89,8 +87,7 @@
             ) }}
             </h3>
             <ul class="card-list">
-                {% for follow in followed_organizations %}
-                {% set organization = follow.following %}
+                {% for organization in followed_organizations %}
                 <li class="col-sm-6">
                   {% include theme('organization/card.html') %}
                 </li>
@@ -109,9 +106,9 @@
                 followed_users|length
             ) }}
             </h3>
-            {% for follow in followed_users %}
+            {% for user in followed_users %}
             <div class="col-sm-4">
-              {% include theme('follow/follower-card.html') %}
+              {% include theme('user/card.html') %}
             </div>
             {% endfor %}
         </div>

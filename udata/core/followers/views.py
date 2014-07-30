@@ -37,12 +37,23 @@ class UserFollowingView(UserView, DetailView):
 
     def get_context(self):
         context = super(UserFollowingView, self).get_context()
-        context.update({
-            'followed_datasets': FollowDataset.objects.following(self.user).order_by('following.title').select_related(),
-            'followed_reuses': FollowReuse.objects.following(self.user).order_by('following.name').select_related(),
-            'followed_organizations': FollowOrg.objects.following(self.user).order_by('following.name').select_related(),
-            'followed_users': FollowUser.objects.following(self.user).order_by('following.fullname').select_related(),
-        })
+        specs = {
+            'datasets': (FollowDataset, 'following.title'),
+            'reuses': (FollowReuse, 'following.name'),
+            'organizations': (FollowOrg, 'following.name'),
+            'users': (FollowUser, 'following.fullname'),
+        }
+        for name, (cls, sort) in specs.items():
+            key = 'followed_{0}'.format(name)
+            context.update({
+                key: [f.following for f in cls.objects.following(self.user).order_by(sort).select_related()]
+            })
+        # context.update({
+        #     'followed_datasets': FollowDataset.objects.following(self.user).order_by('following.title').select_related(),
+        #     'followed_reuses': FollowReuse.objects.following(self.user).order_by('following.name').select_related(),
+        #     'followed_organizations': FollowOrg.objects.following(self.user).order_by('following.name').select_related(),
+        #     'followed_users': FollowUser.objects.following(self.user).order_by('following.fullname').select_related(),
+        # })
         return context
 
 

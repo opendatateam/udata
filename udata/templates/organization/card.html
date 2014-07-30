@@ -50,10 +50,10 @@
         <ul class="col-xs-3 col-sm-2 corner">
             <li>
                 <a href class="btn btn-xs" rel="tooltip" data-placement="top"
-                    title="{{ _('Number of stars') }}">
-                    <span class="glyphicon glyphicon-star"></span>
+                    title="{{ _('Stars') }}">
+                    <span class="{{ ficon('fa-star') }}"></span>
                 </a>
-                {{ ngettext('%(num)s star', '%(num)s stars', organization.metrics.stars or 0) }}
+                {{ organization.metrics.followers or 0 }}
             </li>
         </ul>
     </footer>

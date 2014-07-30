@@ -1,0 +1,46 @@
+{% set user_url = url_for('users.show', dataset=dataset) %}
+<div class="card">
+    <div class="card-logo">
+        <img src="{{ user|avatar(48) }}">
+    </div>
+    <div class="card-body ellipsis-dot">
+        <h4>
+            <a href="{{ user_url }}" title="{{user.fullname}}">
+                {{ user.fullname }}
+            </a>
+        </h4>
+        <div class="card-description">{{ user.about or ''|markdown|striptags|truncate(250) }}</div>
+
+    </div>
+    <footer>
+        <ul class="col-xs-9 col-sm-10">
+            {% if user.metrics.datasets %}
+            <li>
+                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Number of datasets') }}">
+                    <span class="{{ ficon('fa-cubes') }}"></span>
+                </a>
+                {{ ngettext('%(num)s dataset', '%(num)s datasets', user.metrics.datasets or 0) }}
+            </li>
+            {% endif %}
+            {% if user.metrics.reuses %}
+            <li>
+                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Number of reuses') }}">
+                    <span class="{{ ficon('fa-retweet') }}"></span>
+                </a>
+                {{ ngettext('%(num)s reuse', '%(num)s reuses', user.metrics.reuses or 0) }}
+            </li>
+            {% endif %}
+        </ul>
+        <ul class="col-xs-3 col-sm-2 corner">
+            <li>
+                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Stars') }}">
+                    <span class="{{ ficon('fa-star') }}"></span>
+                </a>
+                {{ user.metrics.followers or 0) }}
+            </li>
+        </ul>
+    </footer>
+</div>
