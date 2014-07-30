@@ -42,6 +42,7 @@ dataset_fields = {
     'extras': fields.Raw,
     'metrics': fields.Raw,
     'organization': OrganizationField,
+    'supplier': OrganizationField,
     'temporal_coverage': fields.Nested(temporal_coverage_fields, allow_null=True),
 
     'uri': fields.UrlFor('api.dataset', lambda o: {'slug': o.slug}),
