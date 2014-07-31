@@ -1,5 +1,6 @@
-{% macro panel_sorter() %}
+{% macro panel_sorter(result, url=None) %}
 {% if kwargs %}
+{% set to_url = result.query.to_url %}
 {% if in_url('sort') %}
     {% if request.args.sort.startswith('-') %}
         {% set sort, order = request.args.sort[1:], 'desc' %}
@@ -12,7 +13,7 @@
     {% if sort %}
         {% set btn_class = 'btn-default' if order == default_order else 'btn-warning' %}
         <a class="btn {{ btn_class }} btn-xs pull-right"
-            href="{{ url_rewrite(sort=sort if order == 'desc' else '-'+sort)|url_del('page') }}"
+            href="{{ to_url(url=url, replace=True, sort=sort if order == 'desc' else '-'+sort) }}"
             title="{{ _('Ascending') if order == 'asc' else _('Descending') }}">
             <span class="fa fa-sort-amount-{{order}}"></span>
         </a>
@@ -30,13 +31,14 @@
         </button>
         <ul class="dropdown-menu">
             <li>
-                <a href="{{ url_rewrite(page=1)|url_del('sort') }}">
+                <a href="{{ to_url(url=url, sort=None) }}">
                     {{ _('Relevance') }}
                 </a>
             </li>
             {% for field, (label, order) in kwargs.items() %}
+                {% set sort = field if order == 'asc' else '-'+field %}
             <li>
-                <a href="{{ url_rewrite(sort=field if order == 'asc' else '-'+field)|url_del('page') }}">
+                <a href="{{ to_url(url=url, replace=True, sort=sort) }}">
                     {{ label }}
                 </a>
             </li>
@@ -64,7 +66,7 @@
 {% endmacro %}
 
 
-{% macro facet_panel(result, name, label, icon=None) %}
+{% macro facet_panel(result, name, label, icon=None, url=None) %}
 {% set facet = result.get_facet(name) %}
 {% if facet.visible %}
     <div class="panel-heading clickable"
@@ -81,24 +83,24 @@
         </h3>
     </div>
     {% if facet.type == 'terms' %}
-        {{ term_facet(name, facet, result.query) }}
+        {{ term_facet(name, facet, result.query, url=url) }}
     {% elif facet.type == 'models' %}
-        {{ model_facet(name, facet, result.query) }}
+        {{ model_facet(name, facet, result.query, url=url) }}
     {% elif facet.type == 'range' %}
-        {{ range_facet(name, facet, result.query) }}
+        {{ range_facet(name, facet, result.query, url=url) }}
     {% elif facet.type == 'daterange' %}
-        {{ daterange_facet(name, facet, result.query) }}
+        {{ daterange_facet(name, facet, result.query, url=url) }}
     {% elif facet.type == 'temporal-coverage' %}
-        {{ temporal_coverage_facet(name, facet, result.query) }}
+        {{ temporal_coverage_facet(name, facet, result.query, url=url) }}
     {% endif %}
 {% endif %}
 {% endmacro %}
 
 
-{% macro term_facet(name, facet, query, labels=None) %}
+{% macro term_facet(name, facet, query, labels=None, url=None) %}
 <div id="collapse-{{name}}" class="list-group collapse in">
 {% for term, count in facet.terms %}
-    <a href="{{ query.to_url(**{name: term}) }}"
+    <a href="{{ query.to_url(url, **{name: term}) }}"
         class="list-group-item">
         {{ query.adapter.facets[name].labelize(term) }}
         <span class="badge pull-right">{{ count }}</span>
@@ -108,10 +110,10 @@
 {% endmacro %}
 
 
-{% macro model_facet(name, facet, query) %}
+{% macro model_facet(name, facet, query, url=None) %}
 <div id="collapse-{{name}}" class="list-group collapse in">
     {% for obj, count in facet.models %}
-        <a href="{{ query.to_url(**{name: obj.id|string}) }}"
+        <a href="{{ query.to_url(url, **{name: obj.id|string}) }}"
             class="list-group-item">
             {{ obj }}
             <span class="badge pull-right">{{ count }}</span>
@@ -121,12 +123,12 @@
 {% endmacro %}
 
 
-{% macro range_facet(name, facet, query) %}
+{% macro range_facet(name, facet, query, url=None) %}
 <div id="collapse-{{name}}" class="panel-body collapse in">
     <div class="row">
         <div class="col-xs-12 slider-container">
             <input type="text" class="range-picker"
-                data-url-pattern="{{ query.to_url(**{name: '__r__', 'replace': True}) }}"
+                data-url-pattern="{{ query.to_url(url, **{name: '__r__', 'replace': True}) }}"
                 data-slider-min="{{ facet.min }}"
                 data-slider-max="{{ facet.max }}"
                 data-slider-value="[{{ facet.min }},{{ facet.max }}]"/>
@@ -140,7 +142,7 @@
 {% endmacro %}
 
 
-{% macro daterange_facet(name, facet, query) %}
+{% macro daterange_facet(name, facet, query, url=None) %}
 <div id="collapse-{{name}}" class="panel-body collapse in">
     <div class="row">
         <div class="col-xs-12">
@@ -152,9 +154,9 @@
 {% endmacro %}
 
 
-{% macro temporal_coverage_facet(name, facet, query) %}
+{% macro temporal_coverage_facet(name, facet, query, url=None) %}
 <div id="collapse-{{name}}" class="panel-body collapse in temporal-coverage"
-    data-url-pattern="{{ query.to_url(**{name: '__r__', 'replace': True}) }}">
+    data-url-pattern="{{ query.to_url(url, **{name: '__r__', 'replace': True}) }}">
     <div class="row">
         <div class="col-xs-12">
             <div class="input-daterange input-group" id="datepicker">

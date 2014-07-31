@@ -1,0 +1,23 @@
+{% import theme('macros/search.html') as s %}
+{% set url = search_url %}
+<div class="panel panel-default advanced-search-panel">
+    {{ s.panel_header(datasets) }}
+    {{ s.panel_sorter(datasets, url=url,
+        title=(_('Title'), 'asc'),
+        created=(_('Creation date'), 'desc'),
+        last_modified=(_('Last modification date'), 'desc'),
+        reuses=(_('Reuses'), 'desc'),
+        followers=(_('Stars'), 'desc')
+    ) }}
+    {{ s.facet_panel(datasets,
+        'organization', _('Organizations'), ficon('fa-building-o'), url=url
+    ) }}
+    {{ s.facet_panel(datasets,
+        'supplier', _('Suppliers'), ficon('fa-building-o'), url=url
+    ) }}
+    {{ s.facet_panel(datasets, 'tag', _('Tags'), ficon('tag'), url=url) }}
+    {{ s.facet_panel(datasets, 'license', _('Licenses'), ficon('copyright-mark'), url=url) }}
+    {{ s.facet_panel(datasets, 'temporal_coverage', _('Temporal coverage'), ficon('calendar'), url=url) }}
+    {{ s.facet_panel(datasets, 'reuses', _('Reuses'), ficon('random'), url=url) }}
+    {{ s.facet_panel(datasets, 'format', _('Formats'), ficon('file'), url=url) }}
+</div>

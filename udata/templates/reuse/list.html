@@ -46,21 +46,8 @@
         {{ paginator(reuses) }}
     </div>
 
-    <aside class="col-lg-4 advanced-search-panel">
-        <div class="panel panel-default">
-            {{ s.panel_header(reuses) }}
-            {{ s.panel_sorter(
-                title=(_('Title'), 'asc'),
-                created=(_('Creation date'), 'desc'),
-                last_modified=(_('Last modification date'), 'desc'),
-                datasets=(_('Datasets used'), 'desc'),
-                followers=(_('Stars'), 'desc'),
-            ) }}
-            {{ s.facet_panel(reuses, 'organization', _('Organizations'), ficon('fa-building-o')) }}
-            {{ s.facet_panel(reuses, 'type', _('Type'), ficon('random')) }}
-            {{ s.facet_panel(reuses, 'tag', _('Tags'), ficon('tag')) }}
-            {{ s.facet_panel(reuses, 'datasets', _('Datasets'), ficon('fa-cubes')) }}
-        </div>
+    <aside class="col-lg-4">
+        {% include theme('reuse/search-panel.html') %}
     </aside>
 </div>
 {% endblock %}

@@ -153,5 +153,4 @@ class DatasetSearch(ModelSearchAdapter):
                     'end': dataset.temporal_coverage.end.toordinal(),
                 }
             })
-        print document
         return document

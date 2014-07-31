@@ -66,7 +66,6 @@ class SearchView(Templated, BaseView):
     model = None
     context_name = 'objects'
     search_adapter = None
-    search_endpoint = None
 
     def get_queryset(self):
         return search.query(self.search_adapter, **multi_to_dict(request.args))
@@ -74,8 +73,6 @@ class SearchView(Templated, BaseView):
     def get_context(self):
         context = super(SearchView, self).get_context()
         context[self.context_name] = self.get_queryset()
-        if self.search_endpoint:
-            context['search_url'] = url_for(self.search_endpoint)
         return context
 
     def get(self, **kwargs):

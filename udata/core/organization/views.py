@@ -44,7 +44,6 @@ class OrganizationListView(SearchView):
     context_name = 'organizations'
     template_name = 'organization/list.html'
     search_adapter = OrganizationSearch
-    search_endpoint = 'organizations.list'
 
 
 class OrgView(object):

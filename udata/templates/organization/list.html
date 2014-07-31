@@ -32,21 +32,8 @@
         {{ paginator(organizations) }}
     </div>
 
-    <aside class="col-lg-4 advanced-search-panel">
-        <div class="panel panel-default">
-            {{ s.panel_header(organizations) }}
-            {{ s.panel_sorter(
-                name=( _('Name'), 'asc'),
-                datasets=(_('Datasets'), 'desc'),
-                reuses=(_('Reuses'), 'desc'),
-                followers=(_('Followers'), 'desc'),
-            ) }}
-            {{ s.facet_panel(organizations, 'datasets', _('Datasets')) }}
-            {{ s.facet_panel(organizations, 'reuses', _('Reuses')) }}
-            {# {{ facet_picker(reuses, 'organization', _('Organizations')) }}
-            {{ facet_picker(reuses, 'type', _('Type'), g.reuse_types) }}
-            {{ facet_picker(reuses, 'tag', _('Tags')) }} #}
-        </div>
+    <aside class="col-lg-4">
+        {% include theme('organization/search-panel.html') %}
     </aside>
 </div>
 {% endblock %}

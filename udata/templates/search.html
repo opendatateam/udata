@@ -1,4 +1,5 @@
 {% extends theme("layouts/1-column.html") %}
+{% import theme('macros/search.html') as s %}
 
 {% block breadcrumb %}
     <li class="active">{{ _('Search') }}</li>
@@ -31,19 +32,26 @@
 
     <div class="tab-pane active" id="datasets">
         {% if datasets %}
-        <ul class="search-results">
-            {% for dataset in datasets %}
-            {% include theme('dataset/search-result.html') %}
-            {% endfor %}
-        </ul>
-            {% if datasets.has_next %}
-            <p class="text-center">
-                <a class="btn btn-grey btn-sm" href="{{ url_for('datasets.list', **request.args) }}">
-                    <span class="glyphicon glyphicon-list"></span>
-                    {{ _('See the %(total)s results', total=datasets.total) }}
-                </a>
-            </p>
-            {% endif %}
+            <div class="col-lg-8">
+                <ul class="search-results">
+                    {% for dataset in datasets %}
+                    {% include theme('dataset/search-result.html') %}
+                    {% endfor %}
+                </ul>
+                {% if datasets.has_next %}
+                <p class="text-center">
+                    <a class="btn btn-grey btn-sm" href="{{ url_for('datasets.list', **request.args) }}">
+                        <span class="glyphicon glyphicon-list"></span>
+                        {{ _('See the %(total)s results', total=datasets.total) }}
+                    </a>
+                </p>
+                {% endif %}
+            </div>
+
+            <aside class="col-lg-4">
+                {% set search_url = url_for('datasets.list') %}
+                {% include theme('dataset/search-panel.html') %}
+            </aside>
         {% else %}
         <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
         {% endif %}
@@ -51,19 +59,26 @@
 
     <div class="tab-pane" id="reuses">
         {% if reuses %}
-        <ul class="search-results">
-            {% for reuse in reuses %}
-            {% include theme('reuse/search-result.html') %}
-            {% endfor %}
-        </ul>
-            {% if reuses.has_next %}
-            <p class="text-center">
-                <a class="btn btn-grey btn-sm" href="{{ url_for('reuses.list', **request.args) }}">
-                    <span class="glyphicon glyphicon-list"></span>
-                    {{ _('See the %(total)s results', total=reuses.total) }}
-                </a>
-            </p>
-            {% endif %}
+            <div class="col-lg-8">
+                <ul class="search-results">
+                    {% for reuse in reuses %}
+                    {% include theme('reuse/search-result.html') %}
+                    {% endfor %}
+                </ul>
+                {% if reuses.has_next %}
+                <p class="text-center">
+                    <a class="btn btn-grey btn-sm" href="{{ url_for('reuses.list', **request.args) }}">
+                        <span class="glyphicon glyphicon-list"></span>
+                        {{ _('See the %(total)s results', total=reuses.total) }}
+                    </a>
+                </p>
+                {% endif %}
+            </div>
+
+            <aside class="col-lg-4">
+                {% set search_url = url_for('reuses.list') %}
+                {% include theme('reuse/search-panel.html') %}
+            </aside>
         {% else %}
         <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
         {% endif %}
@@ -71,19 +86,26 @@
 
     <div class="tab-pane" id="organizations">
         {% if organizations %}
-        <ul class="search-results">
-            {% for organization in organizations %}
-            {% include theme('organization/search-result.html') %}
-            {% endfor %}
-        </ul>
-            {% if organizations.has_next %}
-            <p class="text-center">
-                <a class="btn btn-grey btn-sm" href="{{ url_for('organizations.list', **request.args) }}">
-                    <span class="glyphicon glyphicon-list"></span>
-                    {{ _('See the %(total)s results', total=organizations.total) }}
-                </a>
-            </p>
-            {% endif %}
+            <div class="col-lg-8">
+                <ul class="search-results">
+                    {% for organization in organizations %}
+                    {% include theme('organization/search-result.html') %}
+                    {% endfor %}
+                </ul>
+                {% if organizations.has_next %}
+                <p class="text-center">
+                    <a class="btn btn-grey btn-sm" href="{{ url_for('organizations.list', **request.args) }}">
+                        <span class="glyphicon glyphicon-list"></span>
+                        {{ _('See the %(total)s results', total=organizations.total) }}
+                    </a>
+                </p>
+                {% endif %}
+            </div>
+
+            <aside class="col-lg-4">
+                {% set search_url = url_for('organizations.list') %}
+                {% include theme('organization/search-panel.html') %}
+            </aside>
         {% else %}
         <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
         {% endif %}

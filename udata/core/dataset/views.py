@@ -54,7 +54,6 @@ class DatasetListView(SearchView):
     context_name = 'datasets'
     template_name = 'dataset/list.html'
     search_adapter = DatasetSearch
-    search_endpoint = 'datasets.list'
 
 
 navbar = nav.Bar('edit_dataset', [

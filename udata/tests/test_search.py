@@ -371,6 +371,24 @@ class SearchQueryTest(TestCase):
             'other': 'value',
         })
 
+    def test_to_url_with_none(self):
+        kwargs = {
+            'q': 'test',
+            'tag': ['tag1', 'tag2'],
+            'page': 2,
+        }
+        search_query = search.SearchQuery(FakeSearch, **kwargs)
+        with self.app.test_request_context('/an_url'):
+            url = search_query.to_url(tag=None, other='value', replace=True)
+        parsed_url = url_parse(url)
+        qs = url_decode(parsed_url.query)
+
+        self.assertEqual(parsed_url.path, '/an_url')
+        self.assertEqual(multi_to_dict(qs), {
+            'q': 'test',
+            'other': 'value',
+        })
+
     def test_to_url_with_specified_url(self):
         kwargs = {
             'q': 'test',

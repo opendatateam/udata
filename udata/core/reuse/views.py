@@ -51,7 +51,6 @@ class ReuseListView(SearchView):
     context_name = 'reuses'
     template_name = 'reuse/list.html'
     search_adapter = ReuseSearch
-    search_endpoint = 'reuses.list'
 
 
 class ReuseView(object):
