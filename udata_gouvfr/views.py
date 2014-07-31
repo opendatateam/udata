@@ -23,3 +23,8 @@ def redirect_organizations(org):
 @blueprint.route('/Redevances')
 def redevances():
     return render('redevances.html')
+
+
+@blueprint.route('/developer')
+def developer():
+    return render('developer.html')

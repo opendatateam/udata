@@ -161,3 +161,20 @@ class LegacyUrlsTest(FrontTestCase):
         org = OrganizationFactory()
         response = self.client.get('/en/organization/%s/' % org.slug)
         self.assertRedirects(response, url_for('organizations.show', org=org))
+
+
+class SpecificUrlsTest(FrontTestCase):
+    settings = GouvFrSettings
+
+    def create_app(self):
+        app = super(SpecificUrlsTest, self).create_app()
+        cow.init_app(app)
+        return app
+
+    def test_redevances(self):
+        response = self.client.get(url_for('gouvfr.redevances'))
+        self.assert200(response)
+
+    def test_developer(self):
+        response = self.client.get(url_for('gouvfr.developer'))
+        self.assert200(response)
