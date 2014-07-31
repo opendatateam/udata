@@ -2,7 +2,10 @@
 {% import theme('macros/search.html') as s %}
 
 {% block breadcrumb %}
-    <li class="active">{{ _('Search') }}</li>
+    <li class="active">
+        {{ _('Search') }}
+        <div class="label-list">{{ s.filter_label('tag', _('Tag'), ficon('tag')) }}</div>
+    </li>
 {% endblock %}
 
 {% block main_content %}
