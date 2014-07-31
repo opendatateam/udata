@@ -654,8 +654,8 @@ class TestRangeFacet(TestCase):
                 '_type': 'statistical',
                 'count': 0,
                 'total': 0,
-                'min': '-Infinity',
-                'max': 'Infinity',
+                'min': 'Infinity',
+                'max': '-Infinity',
                 'mean': 0.0,
                 'sum_of_squares': 0.0,
                 'variance': 'NaN',
@@ -665,8 +665,9 @@ class TestRangeFacet(TestCase):
 
         extracted = self.facet.from_response('test', response)
         self.assertEqual(extracted['type'], 'range')
-        self.assertEqual(extracted['min'], -float('Inf'))
-        self.assertEqual(extracted['max'], float('Inf'))
+        self.assertEqual(extracted['min'], None)
+        self.assertEqual(extracted['max'], None)
+        self.assertFalse(extracted['visible'])
 
     def test_to_filter(self):
         self.assertEqual(self.facet.to_filter('3-8'), {

@@ -20,6 +20,9 @@ __all__ = ('Sort',
 )
 
 
+ES_NUM_FAILURES = '-Infinity', 'Infinity', 'NaN'
+
+
 class Sort(object):
     def __init__(self, field):
         self.field = field
@@ -163,11 +166,11 @@ class RangeFacet(Facet):
         facet = response.get('facets', {}).get(name)
         if not facet:
             return
-        failure = facet['min'] == '-Infinity' or facet['max'] == 'Infinity'
+        failure = facet['min'] in ES_NUM_FAILURES or facet['max'] in ES_NUM_FAILURES
         return {
             'type': 'range',
-            'min': -float('Inf') if failure else self.cast(facet['min']),
-            'max': float('Inf') if failure else self.cast(facet['max']),
+            'min': None if failure else self.cast(facet['min']),
+            'max': None if failure else self.cast(facet['max']),
             'visible': not failure and facet['max'] - facet['min'] > 2,
         }
 
