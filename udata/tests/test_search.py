@@ -647,6 +647,27 @@ class TestRangeFacet(TestCase):
         self.assertEqual(extracted['min'], 3)
         self.assertEqual(extracted['max'], 42)
 
+    def test_from_response_with_error(self):
+        response = es_factory()
+        response['facets'] = {
+            'test': {
+                '_type': 'statistical',
+                'count': 0,
+                'total': 0,
+                'min': '-Infinity',
+                'max': 'Infinity',
+                'mean': 0.0,
+                'sum_of_squares': 0.0,
+                'variance': 'NaN',
+                'std_deviation': 'NaN'
+            }
+        }
+
+        extracted = self.facet.from_response('test', response)
+        self.assertEqual(extracted['type'], 'range')
+        self.assertEqual(extracted['min'], -float('Inf'))
+        self.assertEqual(extracted['max'], float('Inf'))
+
     def test_to_filter(self):
         self.assertEqual(self.facet.to_filter('3-8'), {
             'range': {

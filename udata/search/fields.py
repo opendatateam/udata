@@ -163,11 +163,12 @@ class RangeFacet(Facet):
         facet = response.get('facets', {}).get(name)
         if not facet:
             return
+        failure = facet['min'] == '-Infinity' or facet['max'] == 'Infinity'
         return {
             'type': 'range',
-            'min': self.cast(facet['min']),
-            'max': self.cast(facet['max']),
-            'visible': facet['max'] - facet['min'] > 2,
+            'min': -float('Inf') if failure else self.cast(facet['min']),
+            'max': float('Inf') if failure else self.cast(facet['max']),
+            'visible': not failure and facet['max'] - facet['min'] > 2,
         }
 
 
