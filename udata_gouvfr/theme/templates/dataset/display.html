@@ -250,7 +250,7 @@
 
                     <div class="tags">
                         {% for tag in dataset.tags %}
-                        <a href="{{ url_for('datasets.list', tag=tag) }}"
+                        <a href="{{ url_for('front.search', tag=tag) }}"
                             class="btn btn-primary btn-grey btn-xs"
                             title="{{ tag }}">
                             {{ tag|truncate(14, True) }}
