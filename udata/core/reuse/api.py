@@ -19,6 +19,7 @@ reuse_fields = {
     'id': fields.String,
     'title': fields.String,
     'slug': fields.String,
+    'type': fields.String,
     'description': fields.String,
     'created_at': fields.ISODateTime,
     'last_modified': fields.ISODateTime,
@@ -62,6 +63,6 @@ class ReuseIssuesAPI(IssuesAPI):
     model = ReuseIssue
 
 api.add_resource(ReuseListAPI, '/reuses/', endpoint=b'api.reuses')
-api.add_resource(ReuseAPI, '/reuses/<reuse:reuse>', endpoint=b'api.reuse')
-api.add_resource(ReuseFeaturedAPI, '/reuses/<reuse:reuse>/featured', endpoint=b'api.reuse_featured')
+api.add_resource(ReuseAPI, '/reuses/<reuse:reuse>/', endpoint=b'api.reuse')
+api.add_resource(ReuseFeaturedAPI, '/reuses/<reuse:reuse>/featured/', endpoint=b'api.reuse_featured')
 api.add_resource(ReuseIssuesAPI, '/reuses/<id>/issues/', endpoint=b'api.reuse_issues')

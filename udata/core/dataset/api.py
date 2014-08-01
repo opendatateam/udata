@@ -44,6 +44,7 @@ dataset_fields = {
     'organization': OrganizationField,
     'supplier': OrganizationField,
     'temporal_coverage': fields.Nested(temporal_coverage_fields, allow_null=True),
+    'license': fields.String(attribute='license.id'),
 
     'uri': fields.UrlFor('api.dataset', lambda o: {'dataset': o}),
 }
