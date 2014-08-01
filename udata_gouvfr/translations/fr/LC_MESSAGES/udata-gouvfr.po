@@ -4,15 +4,16 @@
 # project.
 #
 # Translators:
-# noirbizarre, 2014
+# Axel Haustant, 2014
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2014
+# noirbizarre, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version:  uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-07-21 19:14+0200\n"
-"PO-Revision-Date: 2014-06-03 00:39+0000\n"
-"Last-Translator: noirbizarre\n"
+"POT-Creation-Date: 2014-08-01 15:36+0200\n"
+"PO-Revision-Date: 2014-08-01 13:36+0000\n"
+"Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata-"
 "gouvfr/language/fr/)\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -82,22 +83,26 @@ msgid "Open platform for french public data"
 msgstr "Plateforme ouverte des données publiques françaises"
 
 #: udata_gouvfr/theme/templates/header.html:27
-#: udata_gouvfr/theme/templates/header.html:68
+#: udata_gouvfr/theme/templates/header.html:73
 #: udata_gouvfr/theme/templates/metrics.html:81
 #: udata_gouvfr/theme/templates/organization/display.html:13
 msgid "Organizations"
 msgstr "Organisations"
 
-#: udata_gouvfr/theme/templates/header.html:66
-msgid "Profile"
-msgstr "Profile"
+#: udata_gouvfr/theme/templates/header.html:69
+msgid "My profile"
+msgstr "Mon profile"
 
-#: udata_gouvfr/theme/templates/header.html:79
+#: udata_gouvfr/theme/templates/header.html:87
 msgid "Settings"
 msgstr "Réglages"
 
-#: udata_gouvfr/theme/templates/header.html:86
-#: udata_gouvfr/theme/templates/header.html:89
+#: udata_gouvfr/theme/templates/header.html:94
+msgid "Logout"
+msgstr "Se déconnecter"
+
+#: udata_gouvfr/theme/templates/header.html:101
+#: udata_gouvfr/theme/templates/header.html:104
 msgid "Sign In / Register"
 msgstr "Connexion / Inscription"
 
