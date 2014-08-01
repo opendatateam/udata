@@ -63,7 +63,12 @@
                         <img src="{{ current_user|avatar_url(30) }}" width="30" height="30" />
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a href="{{ url_for('users.show', user=current_user) }}">{{ _('Profile') }}</a></li>
+                        <li>
+                            <a href="{{ url_for('users.show', user=current_user) }}">
+                                <span class="fa fa-fw fa-user"></span>
+                                {{ _('My profile') }}
+                            </a>
+                        </li>
                         {% if user_orgs %}
                         <li role="presentation" class="dropdown-header">{{ _('Organizations') }}</li>
                         {% for org in user_orgs %}
@@ -76,9 +81,19 @@
                         {% endfor %}
                         <li class="divider"></li>
                         {% endif %}
-                        <li><a href="{{ url_for('users.edit', user=current_user) }}">{{ _('Settings') }}</a></li>
+                        <li>
+                            <a href="{{ url_for('users.edit', user=current_user) }}">
+                                <span class="fa fa-fw fa-wrench"></span>
+                                {{ _('Settings') }}
+                            </a>
+                        </li>
                         <li class="divider"></li>
-                        <li><a href="{{ url_for('security.logout') }}">Logout</a></li>
+                        <li>
+                            <a href="{{ url_for('security.logout') }}">
+                                <span class="fa fa-fw fa-sign-out"></span>
+                                {{ _('Logout') }}
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 {% else %}
