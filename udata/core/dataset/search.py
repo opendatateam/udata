@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from udata.models import Dataset, Organization, License
 from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
-from udata.search.fields import Sort, BoolFacet, TemporalCoverageFacet
+from udata.search.fields import Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
 from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
 from udata.search.fields import BoolBooster, GaussDecay
 
@@ -95,6 +95,7 @@ class DatasetSearch(ModelSearchAdapter):
         'reuses': RangeFacet('metrics.reuses'),
         'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
         'featured': BoolFacet('featured'),
+        'extra': ExtrasFacet('extras'),
     }
     boosters = [
         BoolBooster('featured', 1.1),

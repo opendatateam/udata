@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from udata.models import Reuse, Organization, REUSE_TYPES
 from udata.search import ModelSearchAdapter, Sort, i18n_analyzer, metrics_mapping
-from udata.search import RangeFacet, BoolFacet
+from udata.search import RangeFacet, BoolFacet, ExtrasFacet
 from udata.search import TermFacet, ModelTermFacet
 from udata.search import BoolBooster, GaussDecay
 
@@ -33,6 +33,7 @@ class ReuseSearch(ModelSearchAdapter):
         'datasets': RangeFacet('metrics.datasets'),
         'followers': RangeFacet('metrics.followers'),
         'featured': BoolFacet('featured'),
+        'extra': ExtrasFacet('extras'),
     }
     sorts = {
         'title': Sort('title.raw'),

@@ -13,7 +13,7 @@ from udata.models import db
 log = logging.getLogger(__name__)
 
 __all__ = ('Sort',
-    'BoolFacet', 'TermFacet', 'ModelTermFacet',
+    'BoolFacet', 'TermFacet', 'ModelTermFacet', 'ExtrasFacet',
     'RangeFacet', 'DateRangeFacet', 'TemporalCoverageFacet',
     'BoolBooster', 'FunctionBooster',
     'GaussDecay', 'ExpDecay', 'LinearDecay',
@@ -39,6 +39,11 @@ class Facet(object):
     def to_filter(self, value):
         '''Extract the elasticsearch query from the kwarg value filter'''
         raise NotImplementedError
+
+    def filter_from_kwargs(self, name, kwargs):
+        if name in kwargs:
+            value = kwargs[name]
+            return self.to_filter(value)
 
     def from_response(self, name, response):
         '''Parse the elasticsearch response'''
@@ -137,6 +142,22 @@ class ModelTermFacet(TermFacet):
 
     def labelize(self, value):
         return unicode(self.model.objects.get(id=value))
+
+
+class ExtrasFacet(Facet):
+    def to_query(self, **kwargs):
+        pass
+
+    def filter_from_kwargs(self, name, kwargs):
+        prefix = '{0}.'.format(name)
+        filters = []
+        for key, value in kwargs.items():
+            if key.startswith(prefix):
+                filters.append({'term': {key.replace(name, self.field): value}})
+        return filters
+
+    def from_response(self, name, response):
+        pass
 
 
 class RangeFacet(Facet):

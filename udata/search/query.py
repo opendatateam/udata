@@ -94,15 +94,13 @@ class SearchQuery(object):
             return []
         queries = []
         for name, facet in self.adapter.facets.items():
-            if name in self.kwargs:
-                value = self.kwargs[name]
-                query = facet.to_filter(value)
-                if not query:
-                    continue
-                if isinstance(query, dict):
-                    queries.append(query)
-                else:
-                    queries.extend(query)
+            query = facet.filter_from_kwargs(name, self.kwargs)
+            if not query:
+                continue
+            if isinstance(query, dict):
+                queries.append(query)
+            else:
+                queries.extend(query)
         return queries
 
     def get_aggregations(self):

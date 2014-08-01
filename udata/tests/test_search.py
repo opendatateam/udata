@@ -56,6 +56,7 @@ class FakeSearch(search.ModelSearchAdapter):
         'range': search.RangeFacet('a_num_field'),
         'daterange': search.DateRangeFacet('a_daterange_field'),
         'bool': search.BoolFacet('boolean'),
+        'extra': search.ExtrasFacet('extras'),
     }
     sorts = {
         'title': search.Sort('title.raw'),
@@ -276,6 +277,22 @@ class SearchQueryTest(TestCase):
                         'fields': ['title^2', 'description']
                     }},
                     {'term': {'tags': 'value'}},
+                ]
+            }
+        }
+        self.assertEqual(search_query.get_query(), expected)
+
+    def test_facet_filter_extras(self):
+        search_query = search.SearchQuery(FakeSearch, **{'q': 'test', 'extra.key': 'value'})
+        expected = {
+            'bool': {
+                'must': [
+                    {'multi_match': {
+                        'query': 'test',
+                        'analyzer': search.i18n_analyzer,
+                        'fields': ['title^2', 'description']
+                    }},
+                    {'term': {'extras.key': 'value'}},
                 ]
             }
         }

@@ -21,6 +21,17 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json['data']), len(datasets))
 
+    def test_dataset_api_list_with_extra_filter(self):
+        '''It should allow tofetch a dataset list from the API filtering on extras'''
+        with self.autoindex():
+            for i in range(3):
+                DatasetFactory(resources=[ResourceFactory()], extras={'key': i})
+
+        response = self.get(url_for('api.datasets', **{'extra.key': 1}))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['extras']['key'], 1)
+
     def test_dataset_api_get(self):
         '''It should fetch a dataset from the API'''
         with self.autoindex():
