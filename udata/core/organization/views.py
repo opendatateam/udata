@@ -31,7 +31,7 @@ def inject_user_orgs():
 
 navbar = nav.Bar('edit_org', [
     nav.Item(_('Descrition'), 'organizations.edit'),
-    nav.Item(_('Additional informations'), 'organizations.edit_extras'),
+    # nav.Item(_('Additional informations'), 'organizations.edit_extras'),
     nav.Item(_('Members'), 'organizations.edit_members'),
     nav.Item(_('Membership request'), 'organizations.edit_membership_requests'),
     nav.Item(_('Teams'), 'organizations.edit_teams'),
