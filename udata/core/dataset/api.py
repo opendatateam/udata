@@ -127,8 +127,8 @@ class DatasetIssuesAPI(IssuesAPI):
 
 
 api.add_resource(DatasetListAPI, '/datasets/', endpoint=b'api.datasets')
-api.add_resource(DatasetAPI, '/datasets/<dataset:dataset>', endpoint=b'api.dataset')
-api.add_resource(DatasetFeaturedAPI, '/datasets/<dataset:dataset>/featured', endpoint=b'api.dataset_featured')
-api.add_resource(ResourcesAPI, '/datasets/<dataset:dataset>/resources', endpoint=b'api.resources')
-api.add_resource(ResourceAPI, '/datasets/<dataset:dataset>/resources/<uuid:rid>', endpoint=b'api.resource')
+api.add_resource(DatasetAPI, '/datasets/<dataset:dataset>/', endpoint=b'api.dataset')
+api.add_resource(DatasetFeaturedAPI, '/datasets/<dataset:dataset>/featured/', endpoint=b'api.dataset_featured')
+api.add_resource(ResourcesAPI, '/datasets/<dataset:dataset>/resources/', endpoint=b'api.resources')
+api.add_resource(ResourceAPI, '/datasets/<dataset:dataset>/resources/<uuid:rid>/', endpoint=b'api.resource')
 api.add_resource(DatasetIssuesAPI, '/datasets/<id>/issues/', endpoint=b'api.dataset_issues')

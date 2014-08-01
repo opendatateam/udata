@@ -125,8 +125,8 @@ class MembershipRefuseAPI(MembershipAPI):
 
 
 api.add_resource(OrganizationListAPI, '/organizations/', endpoint=b'api.organizations')
-api.add_resource(OrganizationAPI, '/organizations/<org:org>', endpoint=b'api.organization')
+api.add_resource(OrganizationAPI, '/organizations/<org:org>/', endpoint=b'api.organization')
 
-api.add_resource(MembershipRequestAPI, '/organizations/<org:org>/membership', endpoint=b'api.request_membership')
-api.add_resource(MembershipAcceptAPI, '/organizations/<org:org>/membership/<uuid:id>/accept', endpoint=b'api.accept_membership')
-api.add_resource(MembershipRefuseAPI, '/organizations/<org:org>/membership/<uuid:id>/refuse', endpoint=b'api.refuse_membership')
+api.add_resource(MembershipRequestAPI, '/organizations/<org:org>/membership/', endpoint=b'api.request_membership')
+api.add_resource(MembershipAcceptAPI, '/organizations/<org:org>/membership/<uuid:id>/accept/', endpoint=b'api.accept_membership')
+api.add_resource(MembershipRefuseAPI, '/organizations/<org:org>/membership/<uuid:id>/refuse/', endpoint=b'api.refuse_membership')
