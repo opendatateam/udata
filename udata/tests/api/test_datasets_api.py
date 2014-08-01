@@ -40,6 +40,24 @@ class DatasetAPITest(APITestCase):
         self.assertStatus(response, 201)
         self.assertEqual(Dataset.objects.count(), 1)
 
+    def test_dataset_api_create_with_extras(self):
+        '''It should create a dataset with extras from the API'''
+        data = DatasetFactory.attributes()
+        data['extras'] = {
+            'integer': 42,
+            'float': 42.0,
+            'string': 'value',
+        }
+        with self.api_user():
+            response = self.post(url_for('api.datasets'), data)
+        self.assertStatus(response, 201)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.extras['integer'], 42)
+        self.assertEqual(dataset.extras['float'], 42.0)
+        self.assertEqual(dataset.extras['string'], 'value')
+
     def test_dataset_api_update(self):
         '''It should update a dataset from the API'''
         dataset = DatasetFactory()

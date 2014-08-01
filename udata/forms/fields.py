@@ -256,3 +256,36 @@ class PublishAsField(FieldHelper, fields.HiddenField):
         if hasattr(obj, 'owner') and obj.owner and getattr(obj, name):
             obj.owner = None
         return ret
+
+
+class ExtrasField(FieldHelper, fields.Field):
+    def __init__(self, *args, **kwargs):
+        if not 'extras' in kwargs:
+            raise ValueError('extras parameter should be specified')
+        self.extras = kwargs.pop('extras')
+        super(ExtrasField, self).__init__(*args, **kwargs)
+
+    def process_formdata(self, valuelist):
+        if valuelist:
+            data = valuelist[0]
+            if isinstance(data, dict):
+                self.data = data
+            else:
+                raise 'Unsupported datatype'
+        else:
+            self.data = {}
+
+    def pre_validate(self, form):
+        if self.data:
+            try:
+                self.extras.validate(self.data)
+            except db.ValidationError as e:
+                if e.errors:
+                    self.errors.extend([': '.join((k, v)) for k, v in e.errors.items()])
+                else:
+                    self.errors.append(e.message)
+
+
+
+
+

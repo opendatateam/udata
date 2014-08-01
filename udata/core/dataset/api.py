@@ -9,7 +9,7 @@ from udata.core.organization.api import OrganizationField
 from udata.utils import get_by
 
 from .models import Dataset, Resource, DatasetIssue
-from .forms import DatasetForm, ResourceForm, DatasetCreateForm
+from .forms import DatasetForm, ResourceForm, DatasetFullForm
 from .search import DatasetSearch
 
 resource_fields = {
@@ -60,7 +60,7 @@ class DatasetField(fields.Raw):
 
 class DatasetListAPI(ModelListAPI):
     model = Dataset
-    form = DatasetCreateForm
+    form = DatasetFullForm
     fields = dataset_fields
     search_adapter = DatasetSearch
 

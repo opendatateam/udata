@@ -26,6 +26,11 @@ class DatasetCreateForm(DatasetForm):
     organization = fields.PublishAsField(_('Publish as'))
 
 
+class DatasetFullForm(DatasetForm):
+    organization = fields.PublishAsField()
+    extras = fields.ExtrasField(extras=Dataset.extras)
+
+
 class ResourceForm(ModelForm):
     model_class = Resource
 
