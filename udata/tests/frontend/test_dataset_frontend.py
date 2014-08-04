@@ -98,6 +98,16 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertRedirects(response, dataset.display_url)
         self.assertEqual(dataset.description, 'new description')
 
+    def test_delete(self):
+        '''It should handle deletion from form submit and redirect on dataset page'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        response = self.post(url_for('datasets.delete', dataset=dataset))
+
+        dataset.reload()
+        self.assertRedirects(response, dataset.display_url)
+        self.assertIsNotNone(dataset.deleted)
+
     def test_render_edit_extras(self):
         '''It should render the dataset extras edit form'''
         user = self.login()

@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import request, url_for, g
+from datetime import datetime
+
+from flask import request, url_for, g, redirect
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.forms import ReuseForm, ReuseCreateForm
-from udata.frontend.views import SearchView, DetailView, CreateView, EditView
-from udata.i18n import I18nBlueprint
-from udata.models import Reuse, REUSE_TYPES
+from udata.frontend import nav
+from udata.frontend.views import SearchView, DetailView, CreateView, EditView, SingleObject, BaseView
+from udata.i18n import I18nBlueprint, lazy_gettext as _
+from udata.models import Reuse, REUSE_TYPES, Issue
 from udata.search import ReuseSearch
 
 from .permissions import ReuseEditPermission, set_reuse_identity
@@ -53,6 +56,13 @@ class ReuseListView(SearchView):
     search_adapter = ReuseSearch
 
 
+navbar = nav.Bar('edit_reuse', [
+    nav.Item(_('Descrition'), 'reuses.edit'),
+    nav.Item(_('Issues'), 'reuses.issues'),
+    nav.Item(_('Transfer'), 'reuses.transfer'),
+])
+
+
 class ReuseView(object):
     model = Reuse
     object_name = 'reuse'
@@ -63,6 +73,11 @@ class ReuseView(object):
 
     def set_identity(self, identity):
         set_reuse_identity(identity, self.reuse)
+
+    def get_context(self):
+        for item in navbar:
+            item._args = {'reuse': self.reuse}
+        return super(ReuseView, self).get_context()
 
 
 class ProtectedReuseView(ReuseView):
@@ -86,7 +101,31 @@ class ReuseEditView(ProtectedReuseView, EditView):
     template_name = 'reuse/edit.html'
 
 
+class ReuseDeleteView(ProtectedReuseView, SingleObject, BaseView):
+    def post(self, reuse):
+        reuse.deleted = datetime.now()
+        reuse.save()
+        return redirect(url_for('reuses.show', reuse=self.reuse))
+
+
+class ReuseIssuesView(ProtectedReuseView, DetailView):
+    template_name = 'reuse/issues.html'
+
+    def get_context(self):
+        context = super(ReuseIssuesView, self).get_context()
+        context['issues'] = Issue.objects(subject=self.reuse)
+        return context
+
+
+class ReuseTransferView(ProtectedReuseView, EditView):
+    form = ReuseForm
+    template_name = 'reuse/transfer.html'
+
+
 blueprint.add_url_rule('/', view_func=ReuseListView.as_view(str('list')))
 blueprint.add_url_rule('/new/', view_func=ReuseCreateView.as_view(str('new')))
 blueprint.add_url_rule('/<reuse:reuse>/', view_func=ReuseDetailView.as_view(str('show')))
 blueprint.add_url_rule('/<reuse:reuse>/edit/', view_func=ReuseEditView.as_view(str('edit')))
+blueprint.add_url_rule('/<reuse:reuse>/delete/', view_func=ReuseDeleteView.as_view(str('delete')))
+blueprint.add_url_rule('/<reuse:reuse>/issues/', view_func=ReuseIssuesView.as_view(str('issues')))
+blueprint.add_url_rule('/<reuse:reuse>/transfer/', view_func=ReuseTransferView.as_view(str('transfer')))

@@ -4,24 +4,31 @@
 define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) {
     'use strict';
 
-    var rules = {
-        errorClass: "help-block",
-        highlight: function(element) {
-            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
-        },
-        unhighlight: function(element) {
-            $(element).closest('.form-group').removeClass('has-error');
-        },
-        success: function(label) {
-            label.closest('.form-group').addClass('has-success');
-            if (!label.text()) {
-                label.remove();
+    var csrftoken = $('meta[name=csrf-token]').attr('content'),
+        rules = {
+            errorClass: "help-block",
+            highlight: function(element) {
+                $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+            },
+            unhighlight: function(element) {
+                $(element).closest('.form-group').removeClass('has-error');
+            },
+            success: function(label) {
+                label.closest('.form-group').addClass('has-success');
+                if (!label.text()) {
+                    label.remove();
+                }
+            },
+            errorPlacement: function(error, element) {
+                $(element).closest('.form-group,.field-wrapper').append(error);
             }
-        },
-        errorPlacement: function(error, element) {
-            $(element).closest('.form-group,.field-wrapper').append(error);
-        }
-    };
+        };
+
+    function build(url) {
+        return $('<form/>', {method: 'post', action: url})
+            .append($('<input/>').attr({name: 'csrf_token', value: csrftoken}))
+            .appendTo('body');
+    }
 
     // jQuery validate
     $('form.validation').validate(rules);
@@ -58,10 +65,8 @@ define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) 
     $('a.postable').click(function() {
         var $a = $(this);
 
-        $('<form/>', {method: 'post', action: $a.attr('href')})
+        build($a.attr('href'))
             .append($('<input/>', {name: $a.data('field-name'), value: $a.data('field-value')}))
-            .append($('<input/>', {name: 'csrfmiddlewaretoken', value: $.cookie('csrftoken')}))
-            .appendTo('body')
             .submit();
 
         return false;
@@ -83,7 +88,9 @@ define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) 
     });
 
     return {
-        rules: rules
+        rules: rules,
+        build: build,
+        csrftoken: csrftoken
     };
 
 });

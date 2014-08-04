@@ -93,6 +93,23 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertRedirects(response, reuse.display_url)
         self.assertEqual(reuse.description, 'new description')
 
+    def test_delete(self):
+        '''It should handle deletion from form submit and redirect on reuse page'''
+        self.login(AdminFactory())
+        reuse = ReuseFactory()
+        response = self.post(url_for('reuses.delete', reuse=reuse))
+
+        reuse.reload()
+        self.assertRedirects(response, reuse.display_url)
+        self.assertIsNotNone(reuse.deleted)
+
+    def test_render_transfer(self):
+        '''It should render the reuse transfer form'''
+        user = self.login()
+        reuse = ReuseFactory(owner=user)
+        response = self.get(url_for('reuses.transfer', reuse=reuse))
+        self.assert200(response)
+
     def test_not_found(self):
         '''It should render the reuse page'''
         response = self.get(url_for('reuses.show', reuse='not-found'))

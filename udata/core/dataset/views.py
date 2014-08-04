@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
 
 from flask import abort, redirect, request, url_for, g, jsonify
 from werkzeug.contrib.atom import AtomFeed
@@ -112,6 +113,13 @@ class DatasetEditView(ProtectedDatasetView, EditView):
     template_name = 'dataset/edit.html'
 
 
+class DatasetDeleteView(ProtectedDatasetView, SingleObject, BaseView):
+    def post(self, dataset):
+        dataset.deleted = datetime.now()
+        dataset.save()
+        return redirect(url_for('datasets.show', dataset=self.dataset))
+
+
 class DatasetExtrasEditView(ProtectedDatasetView, EditView):
     form = DatasetExtraForm
     template_name = 'dataset/edit_extras.html'
@@ -204,3 +212,4 @@ blueprint.add_url_rule('/<dataset:dataset>/issues/', view_func=DatasetIssuesView
 blueprint.add_url_rule('/<dataset:dataset>/transfer/', view_func=DatasetTransferView.as_view(str('transfer')))
 blueprint.add_url_rule('/<dataset:dataset>/resources/new/', view_func=ResourceCreateView.as_view(str('new_resource')))
 blueprint.add_url_rule('/<dataset:dataset>/resources/<rid>/', view_func=ResourceEditView.as_view(str('edit_resource')))
+blueprint.add_url_rule('/<dataset:dataset>/delete/', view_func=DatasetDeleteView.as_view(str('delete')))

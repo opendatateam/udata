@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import request, g, jsonify
+from datetime import datetime
+
+from flask import request, g, jsonify, redirect, url_for
 from flask.ext.security import current_user
 
 from udata.forms import OrganizationForm, OrganizationMemberForm, OrganizationExtraForm
@@ -106,6 +108,13 @@ class OrganizationEditView(ProtectedOrgView, EditView):
     template_name = 'organization/edit.html'
 
 
+class OrganizationDeleteView(ProtectedOrgView, SingleObject, BaseView):
+    def post(self, org):
+        org.deleted = datetime.now()
+        org.save()
+        return redirect(url_for('organizations.show', org=self.organization))
+
+
 class OrganizationEditMembersView(ProtectedOrgView, EditView):
     form = OrganizationMemberForm
     template_name = 'organization/edit_members.html'
@@ -195,3 +204,4 @@ blueprint.add_url_rule('/<org:org>/edit/teams/', view_func=OrganizationEditTeams
 blueprint.add_url_rule('/<org:org>/issues/', view_func=OrganizationIssuesView.as_view(str('issues')))
 blueprint.add_url_rule('/<org:org>/edit/extras/', view_func=OrganizationExtrasEditView.as_view(str('edit_extras')))
 blueprint.add_url_rule('/<org:org>/edit/extras/<string:extra>/', view_func=OrganizationExtraDeleteView.as_view(str('delete_extra')))
+blueprint.add_url_rule('/<org:org>/delete/', view_func=OrganizationDeleteView.as_view(str('delete')))

@@ -13,6 +13,11 @@
                     class="btn btn-default">{{ _('Save') }}</button>
                 <a href="{{ url_for('organizations.show', org=org) }}"
                     class="btn btn-warning">{{ _('Cancel') }}</a>
+                <button class="btn btn-danger pull-right btn-delete"
+                    title="{{ _('Delete') }}"
+                    data-url="{{ url_for('organizations.delete', org=org) }}">
+                    {{ _('Delete') }}
+                </button>
             </div>
         </div>
     </form>

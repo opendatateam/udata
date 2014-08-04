@@ -68,6 +68,17 @@ class OrganizationBlueprintTest(FrontTestCase):
         self.assertRedirects(response, organization.display_url)
         self.assertEqual(organization.description, 'new description')
 
+    def test_delete(self):
+        '''It should handle deletion from form submit and redirect on organization page'''
+        user = self.login()
+
+        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
+        response = self.post(url_for('organizations.delete', org=organization))
+
+        organization.reload()
+        self.assertRedirects(response, organization.display_url)
+        self.assertIsNotNone(organization.deleted)
+
     def test_render_edit_extras(self):
         '''It should render the organization extras edit form'''
         user = self.login()
