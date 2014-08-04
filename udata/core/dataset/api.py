@@ -34,6 +34,7 @@ dataset_fields = {
     'description': fields.String,
     'created_at': fields.ISODateTime,
     'last_modified': fields.ISODateTime,
+    'deleted': fields.ISODateTime,
     'featured': fields.Boolean,
     'tags': fields.List(fields.String),
     'resources': fields.Nested(resource_fields),

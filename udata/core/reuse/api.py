@@ -23,6 +23,7 @@ reuse_fields = {
     'description': fields.String,
     'created_at': fields.ISODateTime,
     'last_modified': fields.ISODateTime,
+    'deleted': fields.ISODateTime,
     'datasets': fields.List(DatasetField),
     'organization': OrganizationField,
     'metrics': fields.Raw,
