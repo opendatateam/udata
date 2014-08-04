@@ -32,13 +32,26 @@ define([
             // Set initial value
             $this.val(moment($this.data('isodate')).format('L'));
 
+            // Handle picker displya on input or focus
             $this.on('click focus', function() {
                 var dt = moment($this.data('isodate'));
 
                 $current = $this;
                 $picker.datepicker('update', dt.toDate())
                 $panel.find('.hide').removeClass('hide');
+            })
+            // Handle user input
+            .on('input', function() {
+                var dt = moment($this.val(), 'L', true);
+                if (dt.isValid()) {
+                    $this.data('isodate', dt.format('YYYY-MM-DD'));
+                    if ($this == $current && !$picker.hasClass('hide')) {
+                        $picker.datepicker('update', dt.toDate());
+                        $picker.addClass('hide');
+                    }
+                }
             });
+
         });
 
         $picker
