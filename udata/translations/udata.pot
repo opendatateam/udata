@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-04 11:45+0200\n"
+"POT-Creation-Date: 2014-08-04 14:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,6 +54,7 @@ msgstr ""
 
 #: udata/core/dataset/forms.py:22 udata/core/post/forms.py:21
 #: udata/core/reuse/forms.py:21 udata/core/topic/forms.py:21
+#: udata/templates/reuse/display.html:46 udata/templates/reuse/display.html:48
 msgid "Private"
 msgstr ""
 
@@ -98,7 +99,7 @@ msgstr ""
 #: udata/templates/organization/search-panel.html:8
 #: udata/templates/organization/search-panel.html:12
 #: udata/templates/reuse/create.html:4 udata/templates/reuse/display.html:7
-#: udata/templates/reuse/edit.html:4 udata/templates/reuse/list.html:7
+#: udata/templates/reuse/edit_base.html:4 udata/templates/reuse/list.html:7
 #: udata/templates/topic/display.html:25 udata/templates/user/following.html:16
 #: udata/templates/user/reuses.html:8
 msgid "Reuses"
@@ -196,25 +197,27 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-#: udata/core/dataset/views.py:60 udata/core/organization/views.py:33
+#: udata/core/dataset/views.py:61 udata/core/organization/views.py:35
+#: udata/core/reuse/views.py:60
 msgid "Descrition"
 msgstr ""
 
-#: udata/core/dataset/views.py:61
+#: udata/core/dataset/views.py:62
 msgid "Additionnal informations"
 msgstr ""
 
-#: udata/core/dataset/views.py:62 udata/core/site/metrics.py:53
+#: udata/core/dataset/views.py:63 udata/core/site/metrics.py:53
 #: udata/templates/dataset/display.html:48
 msgid "Resources"
 msgstr ""
 
-#: udata/core/dataset/views.py:63 udata/core/issues/metrics.py:14
-#: udata/core/organization/views.py:38 udata/templates/macros/issues.html:5
+#: udata/core/dataset/views.py:64 udata/core/issues/metrics.py:14
+#: udata/core/organization/views.py:40 udata/core/reuse/views.py:61
+#: udata/templates/macros/issues.html:5
 msgid "Issues"
 msgstr ""
 
-#: udata/core/dataset/views.py:64
+#: udata/core/dataset/views.py:65 udata/core/reuse/views.py:62
 msgid "Transfer"
 msgstr ""
 
@@ -277,7 +280,7 @@ msgstr ""
 msgid "Datasets"
 msgstr ""
 
-#: udata/core/organization/metrics.py:44 udata/core/organization/views.py:35
+#: udata/core/organization/metrics.py:44 udata/core/organization/views.py:37
 msgid "Members"
 msgstr ""
 
@@ -302,11 +305,11 @@ msgstr ""
 msgid "Refused"
 msgstr ""
 
-#: udata/core/organization/views.py:36
+#: udata/core/organization/views.py:38
 msgid "Membership request"
 msgstr ""
 
-#: udata/core/organization/views.py:37
+#: udata/core/organization/views.py:39
 msgid "Teams"
 msgstr ""
 
@@ -314,7 +317,7 @@ msgstr ""
 msgid "Content"
 msgstr ""
 
-#: udata/core/reuse/forms.py:20 udata/templates/reuse/display.html:59
+#: udata/core/reuse/forms.py:20 udata/templates/reuse/display.html:75
 msgid "Used datasets"
 msgstr ""
 
@@ -619,7 +622,7 @@ msgstr ""
 #: udata/templates/dataset/resource/edit.html:11
 #: udata/templates/organization/create.html:10
 #: udata/templates/organization/edit.html:15 udata/templates/reuse/create.html:10
-#: udata/templates/reuse/edit.html:11 udata/templates/user/edit.html:13
+#: udata/templates/reuse/edit.html:14 udata/templates/user/edit.html:13
 #: udata/templates/user/edit_settings.html:13
 msgid "Cancel"
 msgstr ""
@@ -687,14 +690,21 @@ msgstr ""
 
 #: udata/templates/dataset/edit.html:13
 #: udata/templates/dataset/resource/edit.html:10
-#: udata/templates/organization/edit.html:13 udata/templates/reuse/edit.html:10
+#: udata/templates/organization/edit.html:13 udata/templates/reuse/edit.html:13
 #: udata/templates/user/edit.html:12 udata/templates/user/edit_settings.html:12
 msgid "Save"
 msgstr ""
 
+#: udata/templates/dataset/edit.html:16 udata/templates/dataset/edit.html:18
+#: udata/templates/organization/edit.html:17
+#: udata/templates/organization/edit.html:19 udata/templates/reuse/edit.html:16
+#: udata/templates/reuse/edit.html:18
+msgid "Delete"
+msgstr ""
+
 #: udata/templates/dataset/edit_base.html:6
-#: udata/templates/organization/edit_base.html:9 udata/templates/reuse/edit.html:6
-#: udata/templates/user/edit_base.html:7
+#: udata/templates/organization/edit_base.html:9
+#: udata/templates/reuse/edit_base.html:6 udata/templates/user/edit_base.html:7
 msgid "Edition"
 msgstr ""
 
@@ -749,6 +759,7 @@ msgstr ""
 
 #: udata/templates/dataset/transfer.html:5
 #: udata/templates/organization/edit_teams.html:5
+#: udata/templates/reuse/transfer.html:5
 #: udata/templates/user/edit_notifications.html:5
 msgid "Coming soon"
 msgstr ""
@@ -1111,7 +1122,19 @@ msgstr ""
 msgid "Number of datasets used"
 msgstr ""
 
-#: udata/templates/reuse/display.html:54
+#: udata/templates/reuse/display.html:47
+msgid "This reuse is private and will not be visible by other users"
+msgstr ""
+
+#: udata/templates/reuse/display.html:52 udata/templates/reuse/display.html:54
+msgid "Deleted"
+msgstr ""
+
+#: udata/templates/reuse/display.html:53
+msgid "This reuse has been deleted. This will be permanent in the next 24 hours"
+msgstr ""
+
+#: udata/templates/reuse/display.html:70
 msgid "See the reuse"
 msgstr ""
 
