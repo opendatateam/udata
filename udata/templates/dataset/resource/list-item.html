@@ -13,7 +13,7 @@
             <span itemprop="name">{{ resource.title or _('Nameless resource') }}</span>
             <meta itemprop="contentUrl" content="{{resource.url}}" />
             {% if resource.description %}
-            <meta itemprop="description" content="{{ resource.description|markdown|escape }}" />
+            <meta itemprop="description" content="{{ resource.description|markdown|forceescape }}" />
             {% endif %}
             <meta itemprop="encodingFormat" content="{{resource.format}}" />
             <meta itemprop="dateCreated" content="{{resource.created_at|isoformat}}" />
