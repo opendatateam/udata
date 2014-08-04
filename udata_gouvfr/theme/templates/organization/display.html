@@ -35,6 +35,17 @@
                     </small>
                     {% endif %}
                 </h1>
+
+                <div class="row">
+                    <p class="col-md-12">
+                        {% if org.deleted %}
+                        <small class="deleted" rel="popover"
+                            data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
+                            data-content="{{ _('This organization has been deleted. This will be permanent in the next 24 hours') }}"
+                            >{{ _('Deleted') }}</small>
+                        {% endif %}
+                    </p>
+                </div>
                 <div>{{ org.description or ''|markdown }}</div>
             </div>
 
