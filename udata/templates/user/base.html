@@ -27,7 +27,7 @@
                 </div>
                 <h2 itemprop="name">{{ user.fullname }}</h2>
                 <div itemprop="description">
-                    {{ user.about or ''|markdown }}
+                    {{ user.about|default('', true)|markdown }}
                 </div>
                 {# <hr/> #}
                 <div>

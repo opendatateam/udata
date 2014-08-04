@@ -15,7 +15,7 @@
         {% endif %}
         <h3>{{ dataset.title }}</h3>
         <div class="caption text-left">
-            {{ dataset.description or ''|markdown|striptags|truncate(300) }}
+            {{ dataset.description|default('', true)|markdown|striptags|truncate(300) }}
         </div>
     </div>
     <div class="col-sm-8 col-md-9 col-lg-10">

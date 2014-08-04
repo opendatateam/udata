@@ -28,7 +28,7 @@
                     </small>
                     {% endif %}
                 </h1>
-                <div>{{ org.description or ''|markdown }}</div>
+                <div>{{ org.description|default('', true)|markdown }}</div>
             </div>
 
             {# Left sidebar with organization aside ( counters, logo, social...) #}

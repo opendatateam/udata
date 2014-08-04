@@ -9,7 +9,7 @@
                 {{ user.fullname }}
             </a>
         </h4>
-        <div class="card-description">{{ user.about or ''|markdown|striptags|truncate(250) }}</div>
+        <div class="card-description">{{ user.about|default('', true)|markdown|striptags|truncate(250) }}</div>
 
     </div>
     <footer>

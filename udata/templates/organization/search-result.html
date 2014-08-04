@@ -17,7 +17,7 @@
             </a>
         </h4>
         <div class="result-description">
-            {{ organization.description or ''|markdown|striptags|truncate(300) }}
+            {{ organization.description|default('', true)|markdown|striptags|truncate(300) }}
         </div>
     </div>
     <ul class="list-inline result-infos">

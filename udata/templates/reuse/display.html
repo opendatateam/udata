@@ -62,7 +62,7 @@
     </a>
 </div>
 <div>
-    {{ reuse.description or ''|markdown }}
+    {{ reuse.description|default('', true)|markdown }}
 </div>
 <div>
     <a href="{{ reuse.url }}">

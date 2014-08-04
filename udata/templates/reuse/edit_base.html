@@ -13,7 +13,7 @@
             alt="{{ reuse.title }}" class="img-responsive" />
         <h3>{{ reuse.title }}</h3>
         <div class="caption text-left">
-            {{ reuse.description or ''|markdown|striptags|truncate(300) }}
+            {{ reuse.description|default('', true)|markdown|striptags|truncate(300) }}
         </div>
     </div>
     <div class="col-sm-8 col-md-9 col-lg-10">

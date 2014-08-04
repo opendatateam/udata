@@ -14,7 +14,7 @@
     <h2>{{ dataset.title }}</h2>
 </div>
 <div>
-    {{ dataset.description or ''|markdown }}
+    {{ dataset.description|default('', true)|markdown }}
 </div>
 {% endblock %}
 
