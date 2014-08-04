@@ -164,3 +164,10 @@ class ReuseBlueprintTest(FrontTestCase):
         author = entry.authors[0]
         self.assertEqual(author.name, org.name)
         self.assertEqual(author.href, self.full_url('organizations.show', org=org))
+
+    def test_render_issues(self):
+        '''It should render the reuse issues page'''
+        self.login(AdminFactory())
+        reuse = ReuseFactory()
+        response = self.get(url_for('reuses.issues', reuse=reuse))
+        self.assert200(response)

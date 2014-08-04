@@ -204,3 +204,10 @@ class OrganizationBlueprintTest(FrontTestCase):
         '''It should render the organization page'''
         response = self.get(url_for('organizations.show', org='not-found'))
         self.assert404(response)
+
+    def test_render_issues(self):
+        '''It should render the organization issues page'''
+        user = self.login()
+        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
+        response = self.get(url_for('organizations.issues', org=organization))
+        self.assert200(response)

@@ -176,6 +176,13 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.get(url_for('datasets.transfer', dataset=dataset))
         self.assert200(response)
 
+    def test_render_issues(self):
+        '''It should render the dataset issues'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        response = self.get(url_for('datasets.issues', dataset=dataset))
+        self.assert200(response)
+
     def test_not_found(self):
         '''It should render the dataset page'''
         response = self.get(url_for('datasets.show', dataset='not-found'))
