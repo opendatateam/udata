@@ -127,7 +127,7 @@ class DatasetSearch(ModelSearchAdapter):
             'format_suggest': [r.format.lower() for r in dataset.resources if r.format],
             'frequency': dataset.frequency,
             'organization': str(dataset.organization.id) if dataset.organization else None,
-            'supplier': str(dataset.supplier.id) if dataset.supplier else None,
+            'supplier': str(dataset.supplier.id) if dataset.supplier != dataset.organization else None,
             'dataset_suggest': {
                 'input': [dataset.title] + [
                     n for n in dataset.title.split(' ')
