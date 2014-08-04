@@ -6,7 +6,7 @@ define(['jquery', 'i18next', 'moment'], function($, i18next, moment) {
     var lang = $('html').attr('lang');
 
     // Initialize required modules
-    moment.locale(lang);
+    moment.lang(lang);
     i18next.init({
         lng: lang,
         ns: 'udata',

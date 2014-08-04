@@ -4,7 +4,7 @@ require.config({
         'jquery': '../bower/jquery/dist/jquery',
         'bootstrap': '../bower/bootstrap/dist/js/bootstrap',
         'text': "../bower/requirejs-text/text",
-        'moment': '../bower/momentjs/min/moment-with-locales',
+        'moment': '../bower/momentjs/min/moment-with-langs',
         'markdown': '../bower/markdown/lib/markdown',
         'bootstrap-markdown': '../bower/bootstrap-markdown/js/bootstrap-markdown',
         'bootstrap-datepicker': '../bower/bootstrap-datepicker/js/bootstrap-datepicker',
@@ -31,6 +31,7 @@ require.config({
         'hbs': '../bower/require-handlebars-plugin/hbs',
 
         // i18n
+        'moment-i18n': '../bower/moment/min/langs',
         'i18next': '../bower/i18next/i18next.amd',
 
         // Local relative paths
