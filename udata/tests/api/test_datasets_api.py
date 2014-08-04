@@ -82,12 +82,18 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_delete(self):
         '''It should delete a dataset from the API'''
-        dataset = DatasetFactory()
-        with self.api_user():
-            response = self.delete(url_for('api.dataset', dataset=dataset))
+        with self.autoindex():
+            dataset = DatasetFactory(resources=[ResourceFactory()])
+            with self.api_user():
+                response = self.delete(url_for('api.dataset', dataset=dataset))
+
         self.assertStatus(response, 204)
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertIsNotNone(Dataset.objects[0].deleted)
+
+        response = self.get(url_for('api.datasets'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 0)
 
     def test_dataset_api_feature(self):
         '''It should mark the dataset featured on POST'''

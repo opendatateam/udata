@@ -89,6 +89,14 @@ def reindex(obj):
     es.index(index=es.index_name, doc_type=adapter.doc_type(), id=obj.id, body=adapter.serialize(obj))
 
 
+@celery.task
+def unindex(obj):
+    adapter = adapter_catalog.get(obj.__class__)
+    if es.exists(index=es.index_name, doc_type=adapter.doc_type(), id=obj.id):
+        log.info('Unindexing %s (%s)', adapter.doc_type(), obj.id)
+        es.delete(index=es.index_name, doc_type=adapter.doc_type(), id=obj.id, refresh=True)
+
+
 # from . import fields
 from .adapter import ModelSearchAdapter, metrics_mapping
 from .query import SearchQuery
