@@ -120,7 +120,7 @@
 
                 <div class="row" itemprop="description">
                     <div class="col-xs-12">
-                    {{ dataset.description or ''|markdown }}
+                    {{ dataset.description|default('', true)|markdown }}
                     </div>
                 </div>
 

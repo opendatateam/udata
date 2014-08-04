@@ -36,7 +36,7 @@
 
         <div class="topic-excerpt col-sm-7 col-md-8 col-xs-12">
             <h3>{{ topic.name }}</h3>
-            {{ topic.description or ''|markdown }}
+            {{ topic.description|default('', true)|markdown }}
         </div>
 
         <div class="topic-toolbar btn-toolbar pull-right">
