@@ -12,6 +12,7 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
     router.registerRoutes({
         home: {path: i18n('/'), moduleId: 'home'},
         metrics: {path: i18n('/metrics/'), moduleId: 'dashboard/site'},
+        search: {path: i18n('/search/'), moduleId: 'search'},
 
         // Datasets routes
         datasetSearch: {path: i18n('/datasets/'), moduleId: 'search'},
@@ -54,6 +55,7 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
             log.debug('Starting module "'+router.activeRoute.moduleId+'" with parameters:', routeArguments);
             module.start();
         }
+        log.debug('Module loaded');
     });
 
     return {
@@ -63,7 +65,7 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
             router.init({
                 // fireInitialStateChange: false
             });
-            log.debug('Router starting');
+            log.debug('Router started');
         }
     }
 });

@@ -8,7 +8,7 @@ from udata.search import DatasetSearch, OrganizationSearch, ReuseSearch, SearchQ
 from udata.utils import multi_to_dict
 
 
-@front.route('/search')
+@front.route('/search/')
 def search():
     datasets, organizations, reuses = multiquery(
         SearchQuery(DatasetSearch, **multi_to_dict(request.args)),
