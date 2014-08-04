@@ -116,10 +116,10 @@
         <div data-org-id="{{ organization.id }}"
             class="publisher-card {% if field.data == organization.id %}active{% endif %}">
             <img src="{{organization.image_url|placeholder('organization') }}"
-                alt="{{ organization.title }}" class="scalable"
+                alt="{{ organization.name }}" class="scalable"
                 width="100" height="100" />
             <div class="caption ellipsis-tooltip">
-            <p>{{ _('%(organization)s member', organization=organization.name) }}</p>
+            <p>{{ organization.name }}</p>
             </div>
         </div>
     </li>
