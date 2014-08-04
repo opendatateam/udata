@@ -58,7 +58,7 @@ define([
             .datepicker({
                 format: "yyyy-mm-dd",
                 language: i18n.lang,
-                weekStart: moment.langData()._week.dow
+                weekStart: moment.localeData()._week.dow
             })
             .on('changeDate', function(e) {
                 if ($current) {

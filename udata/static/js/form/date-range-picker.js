@@ -42,7 +42,7 @@ define(['jquery', 'moment', 'i18n', 'bootstrap-daterangepicker'], function($, mo
                     toLabel: i18n._('To'),
                     weekLabel: i18n._('week-label'),
                     customRangeLabel: i18n._('Custom Range'),
-                    firstDay: moment.langData()._week.dow
+                    firstDay: moment.localeData()._week.dow
                 }
             }, display);
 
