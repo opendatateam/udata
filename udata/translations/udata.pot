@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-01 15:36+0200\n"
+"POT-Creation-Date: 2014-08-04 11:45+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -300,10 +300,6 @@ msgstr ""
 
 #: udata/core/organization/models.py:26
 msgid "Refused"
-msgstr ""
-
-#: udata/core/organization/views.py:34
-msgid "Additional informations"
 msgstr ""
 
 #: udata/core/organization/views.py:36
