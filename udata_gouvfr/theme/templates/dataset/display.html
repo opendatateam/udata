@@ -47,7 +47,76 @@
             <div class="col-md-9 col-sm-9 smaller">
                 <div class="page-header">
                     <h2 itemprop="name">{{ dataset.title }}</h2>
+
+                    <div class="row">
+                        <p class="col-md-12">
+                            {% if dataset.organization %}
+                                <small>
+                                    {% if dataset.organization.public_service %}
+                                    <strong>{{ _('This dataset comes from a certified public service') }}</strong><br/>
+                                    {% endif %}
+                                    {% trans
+                                        date=dataset.created_at|dateformat(format='long'),
+                                        author=dataset.organization.name,
+                                        url=url_for('organizations.show', org=dataset.organization)
+                                    %}Published on {{date}} by <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
+                                </small>
+                            {% elif dataset.owner %}
+                                <small>
+                                    {% trans
+                                        date=dataset.created_at|dateformat(format='long'),
+                                        author=dataset.owner.fullname,
+                                        url=url_for('users.show', user=dataset.owner)
+                                    %}This dataset has been published on {{date}} on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
+                                </small>
+                            {% endif %}
+                            {% if not dataset.organization.public_service %}
+                            <small class="not-certified" rel="popover"
+                                data-title="{{ _('Not certified') }}" data-trigger="hover" data-placement="top"
+                                data-content="{{ _('This dataset is not provided by a certified public service') }}"
+                                >{{ _('Not certified') }}</small>
+                            {% endif %}
+                            {% if dataset.private %}
+                            <small class="private"rel="popover"
+                                data-title="{{ _('Private') }}" data-trigger="hover" data-placement="top"
+                                data-content="{{ _('This dataset is private and will not be visible by other users') }}"
+                                >{{ _('Private') }}</small>
+                            {% endif %}
+                            {% if dataset.deleted %}
+                            <small class="deleted" rel="popover"
+                                data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
+                                data-content="{{ _('This dataset has been deleted. This will be permanent in the next 24 hours') }}"
+                                >{{ _('Deleted') }}</small>
+                            {% endif %}
+                        </p>
+                    </div>
                 </div>
+
+                {% if dataset.supplier and dataset.supplier != dataset.organization %}
+                <div class="row provider">
+                    <h3>{{ _('Provided by') }}</h3>
+                    <p>
+                        <small>
+                            <a href="{{ url_for('organizations.show', org=dataset.supplier) }}"
+                                title="{{ dataset.supplier.name }}">
+                                {% if dataset.supplier.image_url %}
+                                <img src="{{ dataset.supplier.image_url }}"
+                                    alt="{{ dataset.supplier.name }}" height="16px"/>
+                                {% endif %}
+
+                                <span class="name">
+                                {{ dataset.supplier.name }}
+                                </span>
+                            </a>
+                            {% if dataset.url %}
+                            <a href="{{ dataset.url }}" class="btn btn-grey btn-primary btn-sm pull-right">
+                                {{ _('See the original website') }}
+                            </a>
+                            {% endif %}
+                        </small>
+                    </p>
+                </div>
+                {% endif %}
 
                 <div class="row" itemprop="description">
                     <div class="col-xs-12">
