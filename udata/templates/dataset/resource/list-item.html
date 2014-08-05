@@ -23,7 +23,7 @@
     </h4>
     {% if resource.description %}
     <p class="list-group-item-text ellipsis">
-        {{ resource.description|striptags|truncate(200) or _('No Description') }}{#   #}
+        {{ resource.description|default('',true)|markdown|striptags|truncate(200) or _('No Description') }}{#   #}
     </p>
     {% endif %}
     {# {{
