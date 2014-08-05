@@ -3,6 +3,8 @@
 {% from theme('macros/share.html') import share_btn with context %}
 {% from theme('macros/issues.html') import issues_btn with context %}
 
+{% set title = dataset.title %}
+
 {% block extra_head %}
 {% assets 'dataset-css' %}
 <link href="{{ ASSET_URL }}" rel="stylesheet">

@@ -3,6 +3,8 @@
 {% from theme('macros/follow.html') import follow_btn with context %}
 {% from theme('macros/timeline.html') import timeline with context %}
 
+{% set title = org.name %}
+
 {% block extra_head %}
 {% assets 'gouvfr-org-css' %}
 <link href="{{ ASSET_URL }}" rel="stylesheet">

@@ -1,5 +1,7 @@
 {% extends theme("layouts/1-column.html") %}
 
+{% set title = _('Metrics') %}
+
 {% block extra_head %}
 	{{ super() }}
 	{% assets "metrics-css" %}
@@ -29,50 +31,6 @@
 			</li>
 		</ul>
 	</article>
-	{# <article>
-		<h2>{{ _('Some content') }}</h2>
-		<ul class="chart-list row">
-			<li class="col-md-4">
-				<a href="#" id="radar_1">
-					<div class="chart">
-						<div id="selectedInfosRadar" class="selectedInfos">
-							<span></span>
-							<span></span>
-							<span></span>
-						</div>
-					</div>
-					<p></p>
-					<h4></h4>
-				</a>
-			</li><!--
-			!--><li class="col-md-4">
-				<a href="#" id="radar_2">
-					<div class="chart">
-						<div id="selectedInfosRadar" class="selectedInfos">
-							<span></span>
-							<span></span>
-							<span></span>
-						</div>
-					</div>
-					<p></p>
-					<h4></h4>
-				</a>
-			</li><!--
-			!--><li class="col-md-4">
-				<a href="#" id="radar_3">
-					<div class="chart">
-						<div id="selectedInfosRadar" class="selectedInfos">
-							<span></span>
-							<span></span>
-							<span></span>
-						</div>
-					</div>
-					<p></p>
-					<h4></h4>
-				</a>
-			</li>
-		</ul>
-	</article> #}
 	<article>
 		<h2>{{ _('A community') }}</h2>
 		<ul class="chart-list row">
@@ -86,36 +44,6 @@
 					{{ _('Public services') }}
 				</a>
 			</li>
-			{# <li class="col-md-4">
-				<a href="#" id="bar_1">
-					<div class="chart">
-						<div id="selectedInfosRadar" class="selectedInfos">
-							<span></span>
-							<span></span>
-							<span></span>
-						</div>
-					</div>
-					<p>{{ metrics.organizations.value or 0 }}</p>
-					<h4>{{ _('Organizations') }}</h4>
-				</a>
-			</li> #}
-			<!--
-			!-->
-			{#<li class="col-md-4">
-				<a href="#" id="bar_2">
-					<div class="chart">
-						<div id="selectedInfosRadar" class="selectedInfos">
-							<span></span>
-							<span></span>
-							<span></span>
-						</div>
-					</div>
-					<p>0</p>
-					<h4>{{ _('Certified') }}</h4>
-				</a>
-			</li> #}
-			<!--
-			!-->
 			<li class="col-md-4">
 				<a data-chart-type="bar" data-chart-data="users">
 					{{ _('Users') }}
