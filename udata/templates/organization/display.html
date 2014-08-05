@@ -1,6 +1,8 @@
 {% extends theme('layouts/1-column.html') %}
 {% from theme('macros/follow.html') import follow_btn with context %}
 
+{% set title = org.name %}
+
 {% block extra_head %}
 <link rel="canonical" href="{{ url_for('organizations.show', org=org) }}" />
 {% endblock %}

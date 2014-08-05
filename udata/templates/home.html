@@ -1,5 +1,7 @@
 {% extends theme('base.html') %}
 
+{% set title = _('Home') %}
+
 {% block extra_head %}
 {% assets "home-css" %}
 <link href="{{ ASSET_URL }}" rel="stylesheet">

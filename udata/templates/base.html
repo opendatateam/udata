@@ -6,7 +6,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>{{ config['SITE_TITLE'] }}</title>
+    <title>{% if title %}{{ title }} - {% endif %}{{ config['SITE_TITLE'] }}</title>
 
     {% set site_css_bundle = site_css_bundle|default('site-css') %}
     {% assets site_css_bundle %}
