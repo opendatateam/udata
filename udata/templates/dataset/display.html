@@ -2,6 +2,10 @@
 {% from theme('macros/follow.html') import follow_btn with context %}
 {% from theme('macros/share.html') import share_btn with context %}
 
+{% block extra_head %}
+<link rel="canonical" href="{{ url_for('datasets.show', dataset=dataset) }}" />
+{% endblock %}
+
 {% block breadcrumb %}
     <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
     <li class="active">{{ dataset.title|truncate(128) }}</li>
