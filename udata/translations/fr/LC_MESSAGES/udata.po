@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-04 14:34+0200\n"
-"PO-Revision-Date: 2014-08-04 13:15+0000\n"
+"POT-Creation-Date: 2014-08-05 15:03+0200\n"
+"PO-Revision-Date: 2014-08-05 13:09+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -481,14 +481,6 @@ msgstr "Date de création"
 msgid "Last modification date"
 msgstr "Date de dernière modification"
 
-#: udata/templates/404.html:8
-msgid "Page Not Found"
-msgstr "Page non trouvée"
-
-#: udata/templates/404.html:9
-msgid "The page you're looking for could not be found."
-msgstr "La page que vous cherchez ne peut être trouvée."
-
 #: udata/templates/base.html:37
 msgid "Recent datasets"
 msgstr "Jeux de données recents"
@@ -803,21 +795,49 @@ msgstr "Ressource sans nom"
 msgid "No Description"
 msgstr "Aucune description"
 
-#: udata/templates/follow/follower-card.html:9
-#, python-format
-msgid "Following since %(date)s"
-msgstr "Abonné depuis %(date)s"
+#: udata/templates/errors/403.html:3
+msgid "Forbidden"
+msgstr "Interdit"
 
+#: udata/templates/errors/403.html:6
+msgid "You are not allowed to display this page."
+msgstr "Vous n'êtes pas autorisé à afficher cette page."
+
+#: udata/templates/errors/404.html:3
+msgid "Page Not Found"
+msgstr "Page non trouvée"
+
+#: udata/templates/errors/404.html:6
+msgid "The page you're looking for could not be found."
+msgstr "La page que vous cherchez ne peut être trouvée."
+
+#: udata/templates/errors/500.html:3
+msgid "Internal server error"
+msgstr "Erreur interne du serveur"
+
+#: udata/templates/errors/500.html:6
+msgid ""
+"The server encountered an internal error and was unable to complete your "
+"request. Either the server is overloaded or there is an error in the "
+"application."
+msgstr "Le serveur a rencontré une erreur interne et n'a pas été capable de compléter votre requête. Soit le serveur est surchargé ou il y a une erreur dans l'application."
+
+#: udata/templates/errors/base.html:11
+#, python-format
+msgid "Error %(code)s"
+msgstr "Erreur %(code)s"
+
+#: udata/templates/errors/base.html:17
 #: udata/templates/layouts/1-column.html:10
 #: udata/templates/layouts/2-columns.html:10
 #: udata/templates/macros/breadcrumb.html:6
 msgid "Home"
 msgstr "Accueil"
 
-#: udata/templates/macros/forms.html:122
+#: udata/templates/follow/follower-card.html:9
 #, python-format
-msgid "%(organization)s member"
-msgstr "Membre de %(organization)s"
+msgid "Following since %(date)s"
+msgstr "Abonné depuis %(date)s"
 
 #: udata/templates/macros/forms.html:153 udata/templates/macros/forms.html:249
 msgid "Add"

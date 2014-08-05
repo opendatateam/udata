@@ -7,7 +7,7 @@ from importlib import import_module
 from os.path import join, dirname, isdir, exists
 from pkg_resources import resource_stream
 
-from flask import current_app
+from flask import current_app, abort
 from webassets.filter import get_filter, ExternalTool, register_filter
 
 from flask.ext.assets import Environment, YAMLLoader, Bundle
@@ -203,6 +203,20 @@ def init_app(app):
         bundles = ThemeYAMLLoader(theme).load_bundles()
         for name in bundles:
             assets.register(name, bundles[name])
+
+    # Optionnaly register debug views
+    if app.config.get('DEBUG'):
+        @front.route('/403/')
+        def test_403():
+            abort(403)
+
+        @front.route('/404/')
+        def test_404():
+            abort(404)
+
+        @front.route('/500/')
+        def test_500():
+            abort(500)
 
     # Load front only views and helpers
     app.register_blueprint(front)
