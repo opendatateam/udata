@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-06 11:40+0200\n"
+"POT-Creation-Date: 2014-08-06 21:35+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -583,52 +583,56 @@ msgstr ""
 msgid "See the %(nb)s datasets"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/organization/display.html:259
+#: udata_gouvfr/theme/templates/organization/display.html:237
+msgid "Download as CSV"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:264
 #, python-format
 msgid "See the %(nb)s reuses"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/organization/display.html:310
+#: udata_gouvfr/theme/templates/organization/display.html:315
 msgid "You need to be logged in to follow an organization"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/organization/display.html:311
+#: udata_gouvfr/theme/templates/organization/display.html:316
 msgid "You need to be logged in to request membership to an organization"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/organization/display.html:312
+#: udata_gouvfr/theme/templates/organization/display.html:317
 msgid "You need to be logged in to accept or refuse a membership request"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/organization/display.html:315
+#: udata_gouvfr/theme/templates/organization/display.html:320
 msgid "A request has been sent to the administrators"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/organization/display.html:316
+#: udata_gouvfr/theme/templates/organization/display.html:321
 msgid "Error while requesting membership to {org}"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/organization/display.html:319
+#: udata_gouvfr/theme/templates/organization/display.html:324
 msgid "Membership request has been accepted"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/organization/display.html:320
+#: udata_gouvfr/theme/templates/organization/display.html:325
 msgid "Membership request has been refused"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/organization/display.html:321
+#: udata_gouvfr/theme/templates/organization/display.html:326
 msgid "Error while responding to membership request"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/organization/display.html:323
+#: udata_gouvfr/theme/templates/organization/display.html:328
 msgid "You are now following {org}"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/organization/display.html:324
+#: udata_gouvfr/theme/templates/organization/display.html:329
 msgid "You are not following {org} anymore"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/organization/display.html:325
+#: udata_gouvfr/theme/templates/organization/display.html:330
 msgid "Error while toggling follower status"
 msgstr ""
 

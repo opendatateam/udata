@@ -231,6 +231,11 @@
                             <span class="glyphicon glyphicon-list" ></span>
                             {{ _('See the %(nb)s datasets', nb=datasets.total) }}
                         </a>
+                        <a class="btn btn-default"
+                            href="{{ url_for('organizations.{0}_csv'.format(tab_id.replace('-', '_')), org=org) }}">
+                            <span class="fa fa-file-o" ></span>
+                            {{ _('Download as CSV') }}
+                        </a>
                     </p>
                     {% endif %}
                 </div>
