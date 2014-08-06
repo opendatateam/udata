@@ -1,5 +1,11 @@
 {% extends theme("layouts/1-column.html") %}
 
+{% set meta = {
+    'title': _('Developer documentation'),
+    'description': _('Developer documentation and contribution guidelines'),
+    'keywords': [_('developer'), _('documentation'), 'API'],
+} %}
+
 {% block breadcrumb %}
     <li class="active">{{ _('Developers') }}</li>
 {% endblock %}

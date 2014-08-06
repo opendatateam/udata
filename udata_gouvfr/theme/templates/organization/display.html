@@ -3,7 +3,11 @@
 {% from theme('macros/follow.html') import follow_btn with context %}
 {% from theme('macros/timeline.html') import timeline with context %}
 
-{% set title = org.name %}
+{% set meta = {
+    'title': org.name,
+    'description': org.description|default('', true)|markdown|striptags|forceescape,
+    'keywords': [_('organization')],
+} %}
 
 {% block extra_head %}
 {% assets 'gouvfr-org-css' %}
