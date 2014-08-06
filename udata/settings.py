@@ -37,6 +37,8 @@ class Defaults(object):
 
     SITE_TITLE = 'uData'
     SITE_KEYWORDS = ['opendata', 'udata']
+    SITE_AUTHOR_URL = None
+    SITE_AUTHOR = None
 
     PLUGINS = []
     THEME = 'default'

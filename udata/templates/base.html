@@ -7,7 +7,15 @@
     {% set meta = meta or {} %}
     <meta name="description" content="{{ meta.description or '' }}">
     <meta name="keywords" content="{{ ', '.join(config['SITE_KEYWORDS'] + (meta.keywords or [])) }}">
-    {# <meta name="author" content=""> #}
+    {% if config.SITE_AUTHOR %}
+    <meta name="author" content="{{config.SITE_AUTHOR}}">
+    {% endif %}
+    {% if config.SITE_AUTHOR_URL %}
+    <link rel="publisher" href="{{config.SITE_AUTHOR_URL}}"
+    {% if config.SITE_AUTHOR %}title="{{config.SITE_AUTHOR}}"{% endif %}
+    />
+    {% endif %}
+    <meta name="generator" content="uData" />
 
     <title>{% if meta.title %}{{ meta.title }} - {% endif %}{{ config['SITE_TITLE'] }}</title>
 
