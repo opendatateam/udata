@@ -162,7 +162,7 @@ def init_app(app):
     if app.config['ASSETS_DEBUG']:
         assets['require-js'].contents += ('js/config.js', 'js/debug.js')
 
-    from . import explore, home, helpers, catalog, error_handlers
+    from . import explore, home, helpers, error_handlers
 
     # Load all core views and blueprint
     import udata.core.search.views
