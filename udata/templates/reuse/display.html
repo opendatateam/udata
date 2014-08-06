@@ -3,7 +3,11 @@
 {% from theme('macros/issues.html') import issues_btn with context %}
 {% from theme('macros/share.html') import share_btn with context %}
 
-{% set title = reuse.title %}
+{% set meta = {
+    'title': reuse.title,
+    'description': reuse.description|default('', true)|markdown|striptags|forceescape,
+    'keywords': [_('reuse')] + reuse.tags,
+} %}
 
 {% block extra_head %}
 <link rel="canonical" href="{{ url_for('reuses.show', reuse=reuse) }}" />

@@ -2,7 +2,11 @@
 {% from theme('macros/follow.html') import follow_btn with context %}
 {% from theme('macros/share.html') import share_btn with context %}
 
-{% set title = dataset.title %}
+{% set meta = {
+    'title': dataset.title,
+    'description': dataset.description|default('', true)|markdown|striptags|forceescape,
+    'keywords': [_('dataset')] + dataset.tags,
+} %}
 
 {% block extra_head %}
 <link rel="canonical" href="{{ url_for('datasets.show', dataset=dataset) }}" />

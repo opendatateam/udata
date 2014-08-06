@@ -1,6 +1,10 @@
 {% extends theme("layouts/1-column.html") %}
 
-{% set title = _('Metrics') %}
+{% set meta = {
+    'title': _('Metrics'),
+    'description': _('Site metrics'),
+    'keywords': [_('metrics')],
+} %}
 
 {% block breadcrumb %}
     <li class="active">{{ _('Metrics') }}</li>

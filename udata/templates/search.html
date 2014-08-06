@@ -1,7 +1,11 @@
 {% extends theme("layouts/1-column.html") %}
 {% import theme('macros/search.html') as s %}
 
-{% set title = _('Search') %}
+{% set meta = {
+    'title': _('Search'),
+    'description': _("%(site)s search", site=config['SITE_TITLE']),
+    'keywords': [_('search')],
+} %}
 
 {% block breadcrumb %}
     <li class="active">

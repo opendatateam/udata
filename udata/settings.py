@@ -36,6 +36,7 @@ class Defaults(object):
     AUTO_INDEX = True
 
     SITE_TITLE = 'uData'
+    SITE_KEYWORDS = ['opendata', 'udata']
 
     PLUGINS = []
     THEME = 'default'

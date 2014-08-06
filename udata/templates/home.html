@@ -1,6 +1,10 @@
 {% extends theme('base.html') %}
 
-{% set title = _('Home') %}
+{% set meta = {
+    'title': _('Home'),
+    'description': _("%(site)s home", site=config['SITE_TITLE']),
+    'keywords': [_('home')],
+} %}
 
 {% block extra_head %}
 {% assets "home-css" %}

@@ -3,10 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{{ description }}">
-    <meta name="author" content="">
 
-    <title>{% if title %}{{ title }} - {% endif %}{{ config['SITE_TITLE'] }}</title>
+    {% set meta = meta or {} %}
+    <meta name="description" content="{{ meta.description or '' }}">
+    <meta name="keywords" content="{{ ', '.join(config['SITE_KEYWORDS'] + (meta.keywords or [])) }}">
+    {# <meta name="author" content=""> #}
+
+    <title>{% if meta.title %}{{ meta.title }} - {% endif %}{{ config['SITE_TITLE'] }}</title>
 
     {% set site_css_bundle = site_css_bundle|default('site-css') %}
     {% assets site_css_bundle %}
