@@ -19,7 +19,6 @@ from udata.core.metrics import Metric
 
 
 class Fake(db.Document):
-    INDEX_TYPE = 'fake'
     title = db.StringField()
     description = db.StringField()
     tags = db.ListField(db.StringField())
@@ -41,7 +40,8 @@ class FakeMetricFloat(Metric):
 
 
 class FakeFactory(MongoEngineFactory):
-    FACTORY_FOR = Fake
+    class Meta:
+        model = Fake
 
 
 class FakeSearch(search.ModelSearchAdapter):
