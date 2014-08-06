@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import StringIO
+import unicodecsv
+
 from flask import url_for
 
 from udata.models import Organization, Member
 
 from . import FrontTestCase
-from ..factories import OrganizationFactory, UserFactory
+from ..factories import OrganizationFactory, UserFactory, DatasetFactory, ResourceFactory
 
 
 class OrganizationBlueprintTest(FrontTestCase):
@@ -211,3 +214,37 @@ class OrganizationBlueprintTest(FrontTestCase):
         organization = OrganizationFactory(members=[Member(user=user, role='admin')])
         response = self.get(url_for('organizations.issues', org=organization))
         self.assert200(response)
+
+    def test_datasets_csv(self):
+        with self.autoindex():
+            org = OrganizationFactory()
+            datasets = [DatasetFactory(organization=org, resources=[ResourceFactory()]) for _ in range(3)]
+            not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
+            hidden_dataset = DatasetFactory()
+
+        response = self.get(url_for('organizations.datasets_csv', org=org))
+
+        self.assert200(response)
+        self.assertEqual(response.mimetype, 'text/csv')
+        self.assertEqual(response.charset, 'utf-8')
+
+        csvfile = StringIO.StringIO(response.data)
+        reader = unicodecsv.reader(csvfile, encoding='utf-8', delimiter=b',', quotechar=b'"')
+        header = reader.next()
+
+        self.assertEqual(header[0], 'id')
+        self.assertIn('title', header)
+        self.assertIn('description', header)
+        self.assertIn('created_at', header)
+        self.assertIn('last_modified', header)
+        self.assertIn('tags', header)
+        self.assertIn('metric.reuses', header)
+
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), len(datasets))
+        for dataset in datasets:
+            self.assertIn(str(dataset.id), ids)
+        self.assertNotIn(str(hidden_dataset.id), ids)
+        self.assertNotIn(str(not_org_dataset.id), ids)

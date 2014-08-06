@@ -110,11 +110,15 @@ class DatasetSearch(ModelSearchAdapter):
 
     @classmethod
     def serialize(cls, dataset):
+        org_id = str(dataset.organization.id) if dataset.organization is not None else None
+        supplier_id = str(dataset.supplier.id) if dataset.supplier is not None else None
+        supplier_id = supplier_id if supplier_id != org_id else None
         image_url = dataset.organization.image_url if dataset.organization and dataset.organization.image_url else None
+
         document = {
             'title': dataset.title,
             'description': dataset.description,
-            'license': dataset.license.id if dataset.license else None,
+            'license': dataset.license.id if dataset.license is not None else None,
             'tags': dataset.tags,
             'tag_suggest': dataset.tags,
             'resources': [
@@ -126,8 +130,8 @@ class DatasetSearch(ModelSearchAdapter):
                 for r in dataset.resources],
             'format_suggest': [r.format.lower() for r in dataset.resources if r.format],
             'frequency': dataset.frequency,
-            'organization': str(dataset.organization.id) if dataset.organization else None,
-            'supplier': str(dataset.supplier.id) if dataset.supplier != dataset.organization else None,
+            'organization': org_id,
+            'supplier': supplier_id,
             'dataset_suggest': {
                 'input': [dataset.title] + [
                     n for n in dataset.title.split(' ')
@@ -154,4 +158,5 @@ class DatasetSearch(ModelSearchAdapter):
                     'end': dataset.temporal_coverage.end.toordinal(),
                 }
             })
+
         return document

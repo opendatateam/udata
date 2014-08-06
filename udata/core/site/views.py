@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 
 from udata.i18n import I18nBlueprint
 from udata.core.metrics import Metric
-from udata.frontend import render
-from udata.models import Metrics
+from udata.frontend import render, csv
+from udata.models import Metrics, Dataset
 
 
 blueprint = I18nBlueprint('site', __name__)
@@ -21,9 +21,8 @@ def metrics():
             for key, spec in specs.items()
         )
     )
-    # return render('metrics.html',
-    #     metrics=dict(
-    #         (key, {'value': value, 'label': specs[key].display_name})
-    #         for key, value in values.items()
-    #     )
-    # )
+
+
+@blueprint.route('/datasets.csv')
+def datasets_csv():
+    return csv.stream(Dataset.objects.visible(), 'datasets')

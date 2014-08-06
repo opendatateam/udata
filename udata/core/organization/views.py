@@ -7,12 +7,14 @@ from flask import request, g, jsonify, redirect, url_for
 from flask.ext.security import current_user
 
 from udata.forms import OrganizationForm, OrganizationMemberForm, OrganizationExtraForm
-from udata.frontend import nav
+from udata.frontend import nav, csv
 from udata.frontend.views import DetailView, CreateView, EditView, SearchView, BaseView, SingleObject
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Organization, Member, Reuse, Dataset, ORG_ROLES, User, FollowOrg, Issue
-from udata.search import OrganizationSearch, DatasetSearch, ReuseSearch, SearchQuery, multiquery
+from udata.search import OrganizationSearch, DatasetSearch, ReuseSearch, SearchQuery, multiquery, query
 from udata.utils import get_by
+
+from udata.core.dataset.csv import DatasetCsvAdapter
 
 from .permissions import EditOrganizationPermission
 
@@ -192,6 +194,12 @@ class OrganizationIssuesView(ProtectedOrgView, DetailView):
         context['issues'] = Issue.objects(subject__in=ids)
         return context
 
+
+@blueprint.route('/<org:org>/datasets.csv')
+def datasets_csv(org):
+    datasets = query(Dataset, organization=str(org.id))
+    adapter = DatasetCsvAdapter(datasets.objects)
+    return csv.stream(adapter, 'datasets')
 
 
 blueprint.add_url_rule('/', view_func=OrganizationListView.as_view(str('list')))

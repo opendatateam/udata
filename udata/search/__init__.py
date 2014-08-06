@@ -46,7 +46,6 @@ class ElasticSearch(object):
             raise Exception('not initialised, did you forget to call init_app?')
         return getattr(current_app.extensions['elasticsearch'], item)
 
-
     @property
     def index_name(self):
         if current_app.config.get('TESTING'):
@@ -121,7 +120,7 @@ def multiquery(*queries):
         body.append(query.get_body())
     try:
         result = es.msearch(index=es.index_name, body=body)
-    except Exception as e:
+    except:
         log.exception('Unable to perform multiquery')
         result = [{} for _ in range(len(queries))]
 
