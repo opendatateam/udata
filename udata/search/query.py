@@ -86,6 +86,8 @@ class SearchQuery(object):
         query = {'multi_match': {'query': query_string, 'analyzer': i18n_analyzer}}
         if self.adapter.fields:
             query['multi_match']['fields'] = self.adapter.fields
+        if self.adapter.fuzzy:
+            query['multi_match']['fuzziness'] = 'AUTO'
         return [query]
 
     def build_facet_queries(self):

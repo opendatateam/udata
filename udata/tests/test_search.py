@@ -64,6 +64,10 @@ class FakeSearch(search.ModelSearchAdapter):
     }
 
 
+class FuzzySearch(FakeSearch):
+    fuzzy = True
+
+
 class SearchQueryTest(TestCase):
     def test_execute_search_result(self):
         '''SearchQuery execution should return a SearchResult with the right model'''
@@ -237,6 +241,23 @@ class SearchQueryTest(TestCase):
                         'query': 'test',
                         'analyzer': search.i18n_analyzer,
                         'fields': ['title^2', 'description']
+                    }}
+                ]
+            }
+        }
+        self.assertEqual(search_query.get_query(), expected)
+
+    def test_simple_query_fuzzy(self):
+        '''A simple query should use query_string with specified fields'''
+        search_query = search.SearchQuery(FuzzySearch, q='test')
+        expected = {
+            'bool': {
+                'must': [
+                    {'multi_match': {
+                        'query': 'test',
+                        'analyzer': search.i18n_analyzer,
+                        'fields': ['title^2', 'description'],
+                        'fuzziness': 'AUTO',
                     }}
                 ]
             }

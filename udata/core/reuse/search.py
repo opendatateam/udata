@@ -21,6 +21,7 @@ class ReuseTypeFacet(TermFacet):
 
 class ReuseSearch(ModelSearchAdapter):
     model = Reuse
+    fuzzy = True
     fields = (
         'title^3',
         'description^2',

@@ -43,6 +43,7 @@ class ModelSearchAdapter(object):
     sorts = None
     filters = None
     mapping = None
+    fuzzy = False
 
     __metaclass__ = SearchAdapterMetaClass
 

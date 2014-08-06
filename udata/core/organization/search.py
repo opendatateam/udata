@@ -11,6 +11,7 @@ __all__ = ('OrganizationSearch', )
 
 class OrganizationSearch(ModelSearchAdapter):
     model = Organization
+    fuzzy = True
     fields = (
         'name^2',
         'description',

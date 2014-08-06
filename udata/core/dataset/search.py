@@ -15,6 +15,7 @@ __all__ = ('DatasetSearch', )
 
 class DatasetSearch(ModelSearchAdapter):
     model = Dataset
+    fuzzy = True
     mapping = {
         'properties': {
             'title': {
