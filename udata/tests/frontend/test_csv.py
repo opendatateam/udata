@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import re
 import StringIO
-import unicodecsv
 
 from random import randint
 
@@ -213,7 +212,7 @@ class CsvTest(FrontTestCase):
         self.assertEqual(response.charset, 'utf-8')
 
         csvfile = StringIO.StringIO(response.data)
-        reader = unicodecsv.reader(csvfile, encoding='utf-8', delimiter=b',', quotechar=b'"')
+        reader = csv.get_reader(csvfile)
         header = reader.next()
         self.assertEqual(header, ['title', 'description'])
 

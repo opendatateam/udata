@@ -2,9 +2,10 @@
 from __future__ import unicode_literals
 
 import StringIO
-import unicodecsv
 
 from flask import url_for
+
+from udata.frontend import csv
 
 from udata.tests.frontend import FrontTestCase
 from udata.tests.factories import DatasetFactory, ReuseFactory, OrganizationFactory, ResourceFactory
@@ -37,7 +38,7 @@ class SiteMetricsViewTest(FrontTestCase):
         self.assertEqual(response.charset, 'utf-8')
 
         csvfile = StringIO.StringIO(response.data)
-        reader = unicodecsv.reader(csvfile, encoding='utf-8', delimiter=b',', quotechar=b'"')
+        reader = csv.get_reader(csvfile)
         header = reader.next()
 
         self.assertEqual(header[0], 'id')

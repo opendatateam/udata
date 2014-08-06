@@ -15,8 +15,15 @@ from udata.core.metrics import Metric
 
 _adapters = {}
 
+CONFIG = {
+    'encoding': 'utf-8',
+    'delimiter': b';',
+    'quotechar': b'"',
+}
+
 
 class Adapter(object):
+    '''A Base model CSV adapter'''
     fields = None
 
     def __init__(self, queryset):
@@ -59,6 +66,7 @@ class Adapter(object):
 
 
 def adapter(model):
+    '''Register an adapter class for a given model'''
     def inner(cls):
         _adapters[model] = cls
         return cls
@@ -76,23 +84,33 @@ def metric_fields(cls):
     ]
 
 
+def get_writer(out):
+    '''Get a preconfigured CSV writer for a given output file'''
+    return unicodecsv.writer(out, quoting=unicodecsv.QUOTE_NONNUMERIC, **CONFIG)
+
+
+def get_reader(infile):
+    '''Get a preconfigured CSV reader for a given input file'''
+    return unicodecsv.reader(infile, **CONFIG)
+
+
 def yield_rows(adapter):
     '''Yield a dataset catalog line by line'''
     csvfile = StringIO.StringIO()
-    writer = unicodecsv.writer(csvfile, encoding='utf-8', delimiter=b',', quotechar=b'"')
+    writer = get_writer(csvfile)
     # Generate header
     writer.writerow(adapter.header())
     yield csvfile.getvalue()
 
     for row in adapter.rows():
         csvfile = StringIO.StringIO()
-        writer = unicodecsv.writer(csvfile, encoding='utf-8', delimiter=b',', quotechar=b'"')
+        writer = get_writer(csvfile)
         writer.writerow(row)
         yield csvfile.getvalue()
 
 
 def stream(queryset_or_adapter, basename=None):
-    '''Stream a csv list of datasets'''
+    '''Stream a csv file from an object list, a queryset or an instanciated adapter'''
     if isinstance(queryset_or_adapter, Adapter):
         adapter = queryset_or_adapter
     elif isinstance(queryset_or_adapter, (list, tuple)):
