@@ -17,6 +17,7 @@ from babel.support import NullTranslations, Translations
 
 from flask.ext.babelex import Babel, Domain, refresh
 from flask.ext.babelex import format_date, format_datetime
+from flask.ext.babelex import get_locale as get_current_locale
 
 
 class PluggableDomain(Domain):

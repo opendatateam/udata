@@ -7,14 +7,14 @@ import logging
 from datetime import date
 from urlparse import urlsplit, urlunsplit
 
-from flask import url_for, request
+from flask import url_for, request, current_app, g
 from jinja2 import Markup
 from werkzeug import url_decode, url_encode
 
 from . import front, gravatar
 
 from udata.models import db
-from udata.i18n import format_date, _, pgettext
+from udata.i18n import format_date, _, pgettext, get_current_locale
 from udata.utils import camel_to_lodash
 
 
@@ -267,3 +267,27 @@ def daterange(value):
 def ficon(value):
     '''A simple helper for font icon class'''
     return 'fa {0}'.format(value) if value.startswith('fa') else 'glyphicon glyphicon-{0}'.format(value)
+
+
+@front.app_template_filter()
+@front.app_template_global()
+def i18n_alternate_links():
+    '''Render the <link rel="alternate" hreflang /> if page is in a I18nBlueprint'''
+    if not request.endpoint or not current_app.url_map.is_endpoint_expecting(request.endpoint, 'lang_code'):
+        return Markup('')
+
+    LINK_PATTERN = '<link rel="alternate" href="{url}" hreflang="{lang}" />'
+    links = []
+    current_lang = get_current_locale().language
+
+    params = {}
+    if request.args:
+        params.update(request.args)
+    if request.view_args:
+        params.update(request.view_args)
+
+    for lang in current_app.config['LANGUAGES']:
+        if lang != current_lang:
+            url = url_for(request.endpoint, lang_code=lang, **params)
+            links.append(LINK_PATTERN.format(url=url, lang=lang))
+    return Markup(''.join(links))

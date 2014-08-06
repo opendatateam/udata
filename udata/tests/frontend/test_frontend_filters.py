@@ -3,10 +3,11 @@ from __future__ import unicode_literals
 
 from datetime import date
 
-from flask import url_for, render_template_string, g
+from flask import url_for, render_template_string, g, Blueprint
 
 from . import FrontTestCase
 
+from udata.i18n import I18nBlueprint
 from udata.models import db
 from udata.frontend.helpers import in_url
 
@@ -216,3 +217,42 @@ class FrontEndRootTest(FrontTestCase):
         '''Should choose a font icon between glyphicon and font-awesome'''
         self.assertEqual(render_template_string('{{ficon("icon")}}'), 'glyphicon glyphicon-icon')
         self.assertEqual(render_template_string('{{ficon("fa-icon")}}'), 'fa fa-icon')
+
+    def test_i18n_alternate_links(self):
+        test = I18nBlueprint('test', __name__)
+
+        @test.route('/i18n/<key>/')
+        def i18n(key):
+            return render_template_string('{{ i18n_alternate_links() }}')
+
+        self.app.register_blueprint(test)
+        self.app.config['DEFAULT_LANGUAGE'] = 'en'
+        self.app.config['LANGUAGES'] = {
+            'en': 'English',
+            'fr': 'Français',
+            'de': 'German',
+        }
+
+        response = self.get(url_for('test.i18n', key='value', param='other'))
+        self.assertEqual(response.data, ''.join([
+            '<link rel="alternate" href="/fr/i18n/value/?param=other" hreflang="fr" />',
+            '<link rel="alternate" href="/de/i18n/value/?param=other" hreflang="de" />',
+        ]))
+
+    def test_i18n_alternate_links_outside_i18n_blueprint(self):
+        test = Blueprint('test', __name__)
+
+        @test.route('/not-i18n/<key>/')
+        def i18n(key):
+            return render_template_string('{{ i18n_alternate_links() }}')
+
+        self.app.register_blueprint(test)
+        self.app.config['DEFAULT_LANGUAGE'] = 'en'
+        self.app.config['LANGUAGES'] = {
+            'en': 'English',
+            'fr': 'Français',
+            'de': 'German',
+        }
+
+        response = self.get(url_for('test.i18n', key='value', param='other'))
+        self.assertEqual(response.data, '')
