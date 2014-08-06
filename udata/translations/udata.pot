@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-06 11:40+0200\n"
+"POT-Creation-Date: 2014-08-06 21:35+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -197,7 +197,7 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-#: udata/core/dataset/views.py:61 udata/core/organization/views.py:35
+#: udata/core/dataset/views.py:61 udata/core/organization/views.py:37
 #: udata/core/reuse/views.py:60
 msgid "Descrition"
 msgstr ""
@@ -212,7 +212,7 @@ msgid "Resources"
 msgstr ""
 
 #: udata/core/dataset/views.py:64 udata/core/issues/metrics.py:14
-#: udata/core/organization/views.py:40 udata/core/reuse/views.py:61
+#: udata/core/organization/views.py:42 udata/core/reuse/views.py:61
 #: udata/templates/macros/issues.html:5
 msgid "Issues"
 msgstr ""
@@ -280,7 +280,7 @@ msgstr ""
 msgid "Datasets"
 msgstr ""
 
-#: udata/core/organization/metrics.py:44 udata/core/organization/views.py:37
+#: udata/core/organization/metrics.py:44 udata/core/organization/views.py:39
 msgid "Members"
 msgstr ""
 
@@ -305,11 +305,11 @@ msgstr ""
 msgid "Refused"
 msgstr ""
 
-#: udata/core/organization/views.py:38
+#: udata/core/organization/views.py:40
 msgid "Membership request"
 msgstr ""
 
-#: udata/core/organization/views.py:39
+#: udata/core/organization/views.py:41
 msgid "Teams"
 msgstr ""
 
@@ -468,11 +468,11 @@ msgstr ""
 msgid "Last modification date"
 msgstr ""
 
-#: udata/templates/base.html:40
+#: udata/templates/base.html:48
 msgid "Recent datasets"
 msgstr ""
 
-#: udata/templates/base.html:44
+#: udata/templates/base.html:52
 msgid "Recent reuses"
 msgstr ""
 
@@ -1012,10 +1012,14 @@ msgstr ""
 msgid "Supplied datasets"
 msgstr ""
 
-#: udata/templates/organization/display.html:77
-#: udata/templates/organization/display.html:94
-#: udata/templates/organization/display.html:111
+#: udata/templates/organization/display.html:78
+#: udata/templates/organization/display.html:99
+#: udata/templates/organization/display.html:116
 msgid "See all"
+msgstr ""
+
+#: udata/templates/organization/display.html:82
+msgid "Download as CSV"
 msgstr ""
 
 #: udata/templates/organization/display_base.html:40

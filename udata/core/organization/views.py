@@ -197,9 +197,16 @@ class OrganizationIssuesView(ProtectedOrgView, DetailView):
 
 @blueprint.route('/<org:org>/datasets.csv')
 def datasets_csv(org):
-    datasets = query(Dataset, organization=str(org.id))
+    datasets = query(Dataset, organization=str(org.id), page_size=org.metrics.get('datasets'))
     adapter = DatasetCsvAdapter(datasets.objects)
-    return csv.stream(adapter, 'datasets')
+    return csv.stream(adapter, '{0}-datasets'.format(org.slug))
+
+
+@blueprint.route('/<org:org>/supplied-datasets.csv')
+def supplied_datasets_csv(org):
+    datasets = query(Dataset, supplier=str(org.id), page_size=org.metrics.get('datasets'))
+    adapter = DatasetCsvAdapter(datasets.objects)
+    return csv.stream(adapter, '{0}-supplied-datasets'.format(org.slug))
 
 
 blueprint.add_url_rule('/', view_func=OrganizationListView.as_view(str('list')))

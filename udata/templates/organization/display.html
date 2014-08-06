@@ -74,7 +74,12 @@
             <div class="clearfix"></div>
             <div class="text-center">
                 <a href="{{ url_for('datasets.list', organization=org.id) }}" class="btn btn-default">
+                    <span class="glyphicon glyphicon-list" ></span>
                     {{ _('See all') }}
+                </a>
+                <a href="{{ url_for('organizations.datasets_csv', org=org) }}" class="btn btn-default">
+                    <span class="fa fa-file-o" ></span>
+                    {{ _('Download as CSV') }}
                 </a>
             </div>
             {% endif %}
@@ -92,6 +97,10 @@
             <div class="text-center">
                 <a href="{{ url_for('datasets.list', supplier=org.id) }}" class="btn btn-default">
                     {{ _('See all') }}
+                </a>
+                <a href="{{ url_for('organizations.supplied_datasets_csv', org=org) }}" class="btn btn-default">
+                    <span class="fa fa-file-o" ></span>
+                    {{ _('Download as CSV') }}
                 </a>
             </div>
             {% endif %}
