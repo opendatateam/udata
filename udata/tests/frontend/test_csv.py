@@ -27,6 +27,7 @@ class Fake(db.Document):
     description = db.StringField()
     tags = db.ListField(db.StringField())
     other = db.ListField(db.StringField())
+    metrics = db.DictField()
 
     def __unicode__(self):
         return 'fake'
@@ -184,15 +185,17 @@ class CsvTest(FrontTestCase):
             self.assertEqual(row[3], ','.join(obj.tags))
 
     def test_metric_fields(self):
-        expected = (
-            'metric.fake-metric-int',
-            'metric.fake-metric-float',
-        )
+        expected = {
+            'metric.fake-metric-int': 5,
+            'metric.fake-metric-float': 0.5,
+        }
+        fake = FakeFactory(metrics={'fake-metric-int': 5, 'fake-metric-float': 0.5})
+
         fields = csv.metric_fields(Fake)
         self.assertEqual(len(fields), len(expected))
         for name, getter in fields:
-            self.assertIn(name, expected)
-            self.assertTrue(callable(getter))
+            self.assertIn(name, expected.keys())
+            self.assertEqual(getter(fake), expected[name])
 
     def assert_stream_csv(self, endpoint):
         return self.assert_csv(endpoint, [FakeFactory() for _ in range(3)])

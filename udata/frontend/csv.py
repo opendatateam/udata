@@ -77,9 +77,13 @@ def get_adapter(cls):
     return _adapters.get(cls)
 
 
+def _metric_getter(key, spec):
+    return lambda o: o.metrics.get(key, spec.default)
+
+
 def metric_fields(cls):
     return [
-        ('metric.{0}'.format(key), lambda o: o.metrics.get(key, spec.default))
+        ('metric.{0}'.format(key), _metric_getter(key, spec))
         for key, spec in Metric.get_for(cls).items()
     ]
 
