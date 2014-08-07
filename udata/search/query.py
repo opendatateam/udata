@@ -97,6 +97,7 @@ class SearchQuery(object):
             query['multi_match']['fields'] = self.adapter.fields
         if self.adapter.fuzzy:
             query['multi_match']['fuzziness'] = 'AUTO'
+            query['multi_match']['prefix_length'] = 2  # Make it configurable
         return [query]
 
     def build_facet_queries(self):

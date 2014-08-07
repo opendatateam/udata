@@ -258,6 +258,7 @@ class SearchQueryTest(TestCase):
                         'analyzer': search.i18n_analyzer,
                         'fields': ['title^2', 'description'],
                         'fuzziness': 'AUTO',
+                        'prefix_length': 2,
                     }}
                 ]
             }
