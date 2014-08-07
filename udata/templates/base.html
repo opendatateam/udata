@@ -53,6 +53,14 @@
 
     {{ i18n_alternate_links() }}
 
+
+
+    {% set base_url = static('js/' if config.ASSETS_DEBUG else 'js-built') %}
+    <script>var require = {baseUrl: "{{ base_url }}"};</script>
+    {% assets "require-js" %}
+    <script type="text/javascript" src="{{ ASSET_URL }}" data-main="app"></script>
+    {% endassets %}
+
     {% block extra_head %}{% endblock %}
 
   </head>
@@ -73,12 +81,6 @@
     {% endwith %}
     {% block content %}{% endblock %}
     {% include theme('footer.html') %}
-
-    {% set base_url = static('js/' if config.ASSETS_DEBUG else 'js-built') %}
-    <script>var require = {baseUrl: "{{ base_url }}"};</script>
-    {% assets "require-js" %}
-    <script type="text/javascript" src="{{ ASSET_URL }}" data-main="app"></script>
-    {% endassets %}
 
     {% block extra_js %}{% endblock %}
 
