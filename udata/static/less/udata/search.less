@@ -75,6 +75,7 @@ ul.search-results {
         }
 
         .result-infos {
+            @color: #6a6a6a;
             padding-left: 93px;
             z-index: 1000;
             display: block;
@@ -83,7 +84,7 @@ ul.search-results {
             line-height: 25px;
             font-weight: bold;
             font-size: 12px;
-            color: #6a6a6a;
+            color: @color;
             margin-top: 2px;
 
             li {
@@ -91,7 +92,7 @@ ul.search-results {
             }
 
             .btn {
-                color: #6a6a6a;
+                color: @color;
                 text-transform: none;
 
                 .glyphicon, .fa {

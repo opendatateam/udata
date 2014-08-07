@@ -77,6 +77,8 @@ ul.card-list {
             left: 0px;
 
             ul {
+                @color: #7E7E7E;
+
                 // .list-inline();
                 height: 100%;
                 max-width: 100%;
@@ -84,15 +86,20 @@ ul.card-list {
                 line-height: 25px;
                 font-weight: bold;
                 font-size: @card-font-size - 1px;
-                color: #7E7E7E;
+                color: @color;
                 // padding-left: 6px;
                 list-style: none;
                 margin: 0;
                 padding: 0;
 
                 .btn {
-                    background: none !important;
-                    color: #bababa;
+                    color: @color;
+                    text-transform: none;
+
+                    .glyphicon, .fa {
+                        background: none !important;
+                        color: #bababa;
+                    }
                 }
 
                 &.corner {
@@ -101,8 +108,14 @@ ul.card-list {
                     background-color: darken(@bg-gray, 6%);
                     color: darken(@bg-gray, 40%);
 
+
                     .btn {
-                        color: darken(@bg-gray, 22%);
+                        color: @color;
+                        text-transform: none;
+
+                        .glyphicon, .fa {
+                            color: darken(@bg-gray, 22%);
+                        }
                     }
 
                 }

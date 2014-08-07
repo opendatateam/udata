@@ -23,37 +23,37 @@
         <ul class="col-xs-9 col-sm-10">
             {% if organization.metrics.datasets %}
             <li>
-                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Number of datasets') }}">
                     <span class="{{ ficon('fa-cubes') }}"></span>
+                    {{ ngettext('%(num)s dataset', '%(num)s datasets', organization.metrics.datasets or 0) }}
                 </a>
-                {{ ngettext('%(num)s dataset', '%(num)s datasets', organization.metrics.datasets or 0) }}
             </li>
             {% endif %}
             {% if organization.metrics.reuses %}
             <li>
-                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Number of reuses') }}">
                     <span class="{{ ficon('fa-retweet') }}"></span>
+                    {{ ngettext('%(num)s reuse', '%(num)s reuses', organization.metrics.reuses or 0) }}
                 </a>
-                {{ ngettext('%(num)s reuse', '%(num)s reuses', organization.metrics.reuses or 0) }}
             </li>
             {% endif %}
             <li>
-                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Number of members') }}">
                     <span class="glyphicon glyphicon-user"></span>
+                    {{ ngettext('%(num)s members', '%(num)s members', organization.members|length) }}
                 </a>
-                {{ ngettext('%(num)s members', '%(num)s members', organization.members|length) }}
             </li>
         </ul>
         <ul class="col-xs-3 col-sm-2 corner">
             <li>
-                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Stars') }}">
                     <span class="{{ ficon('fa-star') }}"></span>
+                    {{ organization.metrics.followers or 0 }}
                 </a>
-                {{ organization.metrics.followers or 0 }}
             </li>
         </ul>
     </footer>

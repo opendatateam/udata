@@ -16,30 +16,30 @@
     <footer>
         <ul class="col-xs-9 col-sm-10">
             <li>
-                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Type') }}">
                     <span class="glyphicon glyphicon-file"></span>
+                    {{ g.reuse_types[reuse.type] }}
                 </a>
-                {{ g.reuse_types[reuse.type] }}
             </li>
         </ul>
         <ul class="col-xs-3 col-sm-2 corner">
             <li>
-                <a href class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Number of datasets used') }}">
                     <span class="fa fa-cubes"></span>
+                    {{ reuse.datasets|length or 0 }}
                 </a>
-                {{ reuse.datasets|length or 0 }}
             </li>
 
             <li>
-                <a href class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Stars') }}">
                     <span class="glyphicon glyphicon-star"></span>
+                    {{ reuse.metrics.stars or 0 }}
                 </a>
-                {{ reuse.metrics.stars or 0 }}
             </li>
         </ul>
     </footer>

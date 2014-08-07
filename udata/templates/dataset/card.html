@@ -31,66 +31,66 @@
             {# Temporal coverage #}
             {% if dataset.temporal_coverage %}
             <li>
-                <a href class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Temporal coverage') }}">
                     <span class="glyphicon glyphicon-calendar"></span>
+                    {{ dataset.temporal_coverage|daterange }}
                 </a>
-                {{ dataset.temporal_coverage|daterange }}
             </li>
             {% endif %}
 
             {# frequency #}
             {% if dataset.frequency %}
             <li>
-                <a href class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Frequency') }}">
                     <span class="glyphicon glyphicon-time"></span>
+                    {{ g.update_frequencies[dataset.frequency] }}
                 </a>
-                {{ g.update_frequencies[dataset.frequency] }}
             </li>
             {% endif %}
 
             {# Territorial coverage #}
             {% if dataset.territorial_coverage.codes %}
             <li>
-                <a href class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Territorial coverage') }}">
                     <span class="glyphicon glyphicon-globe"></span>
+                    {{ ' '.join(dataset.territorial_coverage.codes) }}
                 </a>
-                {{ ' '.join(dataset.territorial_coverage.codes) }}
             </li>
             {% endif %}
 
             {% if dataset.territorial_coverage.granularity %}
             <li>
-                <a href class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Territorial coverage granularity') }}">
                     <span class="glyphicon glyphicon-screenshot"></span>
+                    {{ g.territorial_granularities[dataset.territorial_coverage.granularity] }}
                 </a>
-                {{ g.territorial_granularities[dataset.territorial_coverage.granularity] }}
             </li>
             {% endif %}
         </ul>
         <ul class="col-xs-3 col-sm-2 corner">
             <li>
-                <a href class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Reuses') }}">
                     <span class="{{ ficon('fa-retweet') }}"></span>
+                    {{ dataset.metrics.reuses or 0 }}
                 </a>
-                {{ dataset.metrics.reuses or 0 }}
             </li>
             <li>
-                <a href class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Stars') }}">
                     <span class="{{ ficon('fa-star') }}"></span>
+                    {{ dataset.metrics.followers or 0 }}
                 </a>
-                {{ dataset.metrics.followers or 0 }}
             </li>
         </ul>
     </footer>
