@@ -16,25 +16,25 @@
     </div>
     <ul class="list-inline result-infos">
         <li>
-            <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+            <a class="btn btn-xs" rel="tooltip" data-placement="top"
                 title="{{ _('Type') }}">
                 <span class="glyphicon glyphicon-file"></span>
+                {{ g.reuse_types[reuse.type] }}
             </a>
-            {{ g.reuse_types[reuse.type] }}
         </li>
         <li>
-            <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+            <a class="btn btn-xs" rel="tooltip" data-placement="top"
                 title="{{ _('Number of dataset') }}">
                 <span class="fa fa-cubes"></span>
+                {{ ngettext('%(num)s dataset', '%(num)s datasets', reuse.datasets|length) }}
             </a>
-            {{ ngettext('%(num)s dataset', '%(num)s datasets', reuse.datasets|length) }}
         </li>
         <li>
-            <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+            <a class="btn btn-xs" rel="tooltip" data-placement="top"
                 title="{{ _('Number of stars') }}">
                 <span class="glyphicon glyphicon-star"></span>
+                {{ ngettext('%(num)s star', '%(num)s stars', reuse.metrics.stars or 0) }}
             </a>
-            {{ ngettext('%(num)s star', '%(num)s stars', reuse.metrics.stars or 0) }}
         </li>
     </ul>
 </li>
