@@ -10,6 +10,7 @@ from os.path import abspath, join, dirname, isfile, exists
 
 from flask import Flask, abort, send_from_directory, json
 from flask.ext.cache import Cache
+from speaklater import is_lazy_string
 from werkzeug.contrib.fixers import ProxyFix
 
 
@@ -56,7 +57,9 @@ class UDataJsonEncoder(json.JSONEncoder):
     type C{bson.objectid.ObjectId}, C{datetime.datetime}
     """
     def default(self, obj):
-        if isinstance(obj, bson.objectid.ObjectId):
+        if is_lazy_string(obj):
+            return unicode(obj)
+        elif isinstance(obj, bson.objectid.ObjectId):
             return str(obj)
         elif isinstance(obj, datetime.datetime):
             return obj.isoformat()

@@ -8,7 +8,7 @@ from os.path import join, dirname
 from elasticsearch import Elasticsearch, JSONSerializer
 from elasticsearch.helpers import scan
 from flask import current_app, json
-from speaklater import make_lazy_string, is_lazy_string
+from speaklater import make_lazy_string
 
 from udata.app import UDataJsonEncoder
 from udata.tasks import celery
@@ -22,10 +22,7 @@ DEFAULT_PAGE_SIZE = 20
 
 class EsJSONSerializer(JSONSerializer):
     def default(self, data):
-        if is_lazy_string(data):
-            return unicode(data)
-        else:
-            return UDataJsonEncoder().default(data)
+        return UDataJsonEncoder().default(data)
 
 
 class ElasticSearch(object):
