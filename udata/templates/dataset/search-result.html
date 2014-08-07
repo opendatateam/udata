@@ -1,98 +1,96 @@
 <li class="search-result dataset-result">
-    {% if dataset.organization %}
-    <a class="result-logo pull-left" href="{{ url_for('datasets.show', dataset=dataset) }}">
-        <img alt="{{ dataset.organization.title }}"
-            src="{{ dataset.organization.image_url|placeholder('organization') }}">
-    </a>
-        {% if dataset.organization.public_service %}
-        <img src="{{theme_static('img/certified-stamp.png')}}" alt="certified"
-            class="certified" rel="popover"
-            data-title="{{ _('Certified public service') }}"
-            data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
-            data-container="body" data-placement="auto" data-trigger="hover"/>
-        {% endif %}
-    {% else %}
-    <div class="result-logo pull-left">
-        <img src="{{ ''|placeholder('organization') }}">
-    </div>
-    {% endif %}
-    <div class="result-body ellipsis-dot">
-        <h4>
-            <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{dataset.title}}">
-            {{ dataset.title }}
-            </a>
-        </h4>
-
-        <div class="result-description">
-            {{ dataset.description|default('', true)|markdown|striptags|truncate(300) }}
+    <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}">
+        {% if dataset.organization %}
+        <div class="result-logo pull-left">
+            <img alt="{{ dataset.organization.title }}"
+                src="{{ dataset.organization.image_url|placeholder('organization') }}">
         </div>
-    </div>
-
-    <ul class="list-inline result-infos">
-
-        {# Temporal coverage #}
-        {% if dataset.temporal_coverage %}
-        <li>
-            <a class="btn btn-xs" rel="tooltip"
-                data-placement="top" data-container="body"
-                title="{{ _('Temporal coverage') }}">
-                <span class="glyphicon glyphicon-calendar"></span>
-                {{ dataset.temporal_coverage|daterange }}
-            </a>
-        </li>
+            {% if dataset.organization.public_service %}
+            <img src="{{theme_static('img/certified-stamp.png')}}" alt="certified"
+                class="certified" rel="popover"
+                data-title="{{ _('Certified public service') }}"
+                data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
+                data-container="body" data-placement="auto" data-trigger="hover"/>
+            {% endif %}
+        {% else %}
+        <div class="result-logo pull-left">
+            <img src="{{ ''|placeholder('organization') }}">
+        </div>
         {% endif %}
+        <div class="result-body ellipsis-dot">
+            <h4 class="result-title">{{ dataset.title }}</h4>
 
-        {# Periodicity #}
-        {% if dataset.frequency %}
-        <li>
-            <a class="btn btn-xs" rel="tooltip" data-placement="top"
-                title="{{ _('Frequency') }}">
-                <span class="glyphicon glyphicon-time"></span>
-                {{ g.update_frequencies[dataset.frequency] }}
-            </a>
-        </li>
-        {% endif %}
+            <div class="result-description">
+                {{ dataset.description|default('', true)|markdown|striptags|truncate(300) }}
+            </div>
+        </div>
 
-        {# Territorial coverage #}
-        {% if dataset.territorial_coverage.codes %}
-        <li>
-            <a class="btn btn-xs" rel="tooltip"
-                data-placement="top" data-container="body"
-                title="{{ _('Territorial coverage') }}">
-                <span class="glyphicon glyphicon-globe"></span>
-                {{ ' '.join(dataset.territorial_coverage.codes) }}
-            </a>
-        </li>
-        {% endif %}
+        <ul class="list-inline result-infos">
 
-        {% if dataset.territorial_coverage.granularity %}
-        <li>
-            <a class="btn btn-xs" rel="tooltip"
-                data-placement="top" data-container="body"
-                title="{{ _('Territorial coverage granularity') }}">
-                <span class="glyphicon glyphicon-screenshot"></span>
-                {{ g.territorial_granularities[dataset.territorial_coverage.granularity] }}
-            </a>
-        </li>
-        {% endif %}
+            {# Temporal coverage #}
+            {% if dataset.temporal_coverage %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Temporal coverage') }}">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                    {{ dataset.temporal_coverage|daterange }}
+                </a>
+            </li>
+            {% endif %}
 
-        <li>
-            <a class="btn btn-xs" rel="tooltip"
-                data-placement="top" data-container="body"
-                title="{{ _('Reuse number') }}">
-                <span class="{{ ficon('fa-retweet') }}"></span>
-                {{ dataset.metrics.reuses or 0 }}
-            </a>
-        </li>
+            {# Periodicity #}
+            {% if dataset.frequency %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Frequency') }}">
+                    <span class="glyphicon glyphicon-time"></span>
+                    {{ g.update_frequencies[dataset.frequency] }}
+                </a>
+            </li>
+            {% endif %}
 
-        <li>
-            <a class="btn btn-xs" rel="tooltip"
-                data-placement="top" data-container="body"
-                title="{{ _('Followers') }}">
-                <span class="{{ ficon('star') }}"></span>
-                {{ dataset.metrics.followers or 0 }}
-            </a>
-        </li>
+            {# Territorial coverage #}
+            {% if dataset.territorial_coverage.codes %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Territorial coverage') }}">
+                    <span class="glyphicon glyphicon-globe"></span>
+                    {{ ' '.join(dataset.territorial_coverage.codes) }}
+                </a>
+            </li>
+            {% endif %}
 
-    </ul>
+            {% if dataset.territorial_coverage.granularity %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Territorial coverage granularity') }}">
+                    <span class="glyphicon glyphicon-screenshot"></span>
+                    {{ g.territorial_granularities[dataset.territorial_coverage.granularity] }}
+                </a>
+            </li>
+            {% endif %}
+
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Reuse number') }}">
+                    <span class="{{ ficon('fa-retweet') }}"></span>
+                    {{ dataset.metrics.reuses or 0 }}
+                </a>
+            </li>
+
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Followers') }}">
+                    <span class="{{ ficon('star') }}"></span>
+                    {{ dataset.metrics.followers or 0 }}
+                </a>
+            </li>
+
+        </ul>
+    </a>
 </li>
