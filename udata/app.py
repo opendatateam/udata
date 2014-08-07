@@ -53,9 +53,16 @@ class UDataApp(Flask):
 
 
 class UDataJsonEncoder(json.JSONEncoder):
-    """A C{json.JSONEncoder} subclass to encode documents that have fields of
-    type C{bson.objectid.ObjectId}, C{datetime.datetime}
-    """
+    '''
+    A JSONEncoder subclass to encode unsupported types:
+
+        - ObjectId
+        - datetime
+        - lazy strings
+
+    Handle special serialize() method and _data attribute.
+    Ensure an app context is always present.
+    '''
     def default(self, obj):
         if is_lazy_string(obj):
             return unicode(obj)

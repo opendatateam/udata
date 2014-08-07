@@ -7,7 +7,7 @@ import unicodecsv
 
 from datetime import datetime
 
-from flask import Response
+from flask import Response, stream_with_context
 
 from udata.models import db
 from udata.core.metrics import Metric
@@ -132,4 +132,5 @@ def stream(queryset_or_adapter, basename=None):
     headers = {
         b'Content-Disposition': 'attachment; filename={0}-{1}.csv'.format(basename or 'export', timestamp),
     }
-    return Response(yield_rows(adapter), mimetype="text/csv", headers=headers)
+    streamer = stream_with_context(yield_rows(adapter))
+    return Response(streamer, mimetype="text/csv", headers=headers)
