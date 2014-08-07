@@ -58,13 +58,13 @@ class SiteMetricsViewTest(FrontTestCase):
         self.assertNotIn(str(hidden_dataset.id), ids)
 
     def test_datasets_csv_with_filters(self):
-        '''Should handle filtering but ignore paging'''
+        '''Should handle filtering but ignore paging or facets'''
         with self.autoindex():
             filtered_datasets = [DatasetFactory(resources=[ResourceFactory()], tags=['selected']) for _ in range(6)]
             datasets = [DatasetFactory(resources=[ResourceFactory()]) for _ in range(3)]
             hidden_dataset = DatasetFactory()
 
-        response = self.get(url_for('site.datasets_csv', page_size=3, tag='selected'))
+        response = self.get(url_for('site.datasets_csv', tag='selected', page_size=3, facets=True))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')

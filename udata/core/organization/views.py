@@ -6,12 +6,12 @@ from datetime import datetime
 from flask import request, g, jsonify, redirect, url_for
 from flask.ext.security import current_user
 
+from udata import search
 from udata.forms import OrganizationForm, OrganizationMemberForm, OrganizationExtraForm
 from udata.frontend import nav, csv
 from udata.frontend.views import DetailView, CreateView, EditView, SearchView, BaseView, SingleObject
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Organization, Member, Reuse, Dataset, ORG_ROLES, User, FollowOrg, Issue
-from udata.search import OrganizationSearch, DatasetSearch, ReuseSearch, SearchQuery, multiquery, query
 from udata.utils import get_by
 
 from udata.core.dataset.csv import DatasetCsvAdapter
@@ -47,7 +47,6 @@ class OrganizationListView(SearchView):
     model = Organization
     context_name = 'organizations'
     template_name = 'organization/list.html'
-    search_adapter = OrganizationSearch
 
 
 class OrgView(object):
@@ -78,10 +77,10 @@ class OrganizationDetailView(OrgView, DetailView):
         context = super(OrganizationDetailView, self).get_context()
 
         org_id = str(self.organization.id)
-        datasets, supplied_datasets, reuses = multiquery(
-            SearchQuery(DatasetSearch, sort='-created', organization=org_id, page_size=9),
-            SearchQuery(DatasetSearch, sort='-created', supplier=org_id, page_size=9),
-            SearchQuery(ReuseSearch, sort='-created', organization=org_id, page_size=9),
+        datasets, supplied_datasets, reuses = search.multiquery(
+            search.SearchQuery(Dataset, sort='-created', organization=org_id, page_size=9),
+            search.SearchQuery(Dataset, sort='-created', supplier=org_id, page_size=9),
+            search.SearchQuery(Reuse, sort='-created', organization=org_id, page_size=9),
 
         )
         followers = FollowOrg.objects.followers(self.organization).order_by('follower.fullname')
@@ -197,15 +196,15 @@ class OrganizationIssuesView(ProtectedOrgView, DetailView):
 
 @blueprint.route('/<org:org>/datasets.csv')
 def datasets_csv(org):
-    datasets = query(Dataset, organization=str(org.id))
-    adapter = DatasetCsvAdapter(datasets.objects)
+    datasets = search.iter(Dataset, organization=str(org.id))
+    adapter = DatasetCsvAdapter(datasets)
     return csv.stream(adapter, '{0}-datasets'.format(org.slug))
 
 
 @blueprint.route('/<org:org>/supplied-datasets.csv')
 def supplied_datasets_csv(org):
-    datasets = query(Dataset, supplier=str(org.id))
-    adapter = DatasetCsvAdapter(datasets.objects)
+    datasets = search.iter(Dataset, supplier=str(org.id))
+    adapter = DatasetCsvAdapter(datasets)
     return csv.stream(adapter, '{0}-supplied-datasets'.format(org.slug))
 
 

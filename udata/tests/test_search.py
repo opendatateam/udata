@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
 import time
 
 from datetime import datetime, timedelta, date
-from os.path import join, dirname
 
 from werkzeug.urls import url_decode, url_parse
 
 from udata import search
+from udata.core.metrics import Metric
 from udata.models import db
-from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import faker, MongoEngineFactory
 from udata.utils import multi_to_dict
 
-from udata.core.metrics import Metric
+from udata.tests import TestCase, DBTestMixin, SearchTestMixin
+from udata.tests.factories import faker, MongoEngineFactory
 
 
 class Fake(db.Document):
@@ -828,10 +826,6 @@ class TestTemporalCoverageFacet(TestCase):
 
 
 class SearchResultTest(TestCase):
-    def load_result(self, filename):
-        with open(join(dirname(__file__), filename)) as result:
-            return json.load(result)
-
     def test_properties(self):
         '''Search result should map some properties for easy access'''
         response = es_factory(nb=10, total=42)
@@ -883,3 +877,19 @@ class SearchResultTest(TestCase):
         self.assertEqual(result.page, 1),
         self.assertEqual(result.page_size, search.DEFAULT_PAGE_SIZE)
         self.assertEqual(result.pages, 0)
+
+
+class SearchIteratorTest(SearchTestMixin, TestCase):
+    def test_iterate(self):
+        with self.autoindex():
+            objects = [FakeFactory() for _ in range(5)]
+        query = search.SearchQuery(FakeSearch)
+        for idx, obj in enumerate(query.iter(), 1):
+            self.assertIsInstance(obj, Fake)
+        self.assertEqual(idx, len(objects))
+
+    def test_iterate_empty(self):
+        with self.autoindex():
+            [FakeFactory() for _ in range(5)]
+        query = search.SearchQuery(FakeSearch, tag='not-found')
+        self.assertEqual(len(list(query.iter())), 0)

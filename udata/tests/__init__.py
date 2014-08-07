@@ -107,6 +107,7 @@ class DBTestMixin(object):
 
 
 class SearchTestMixin(DBTestMixin):
+    '''A mixin allowing to optionnaly enable indexation and cleanup after'''
     _used_search = False
 
     @contextmanager

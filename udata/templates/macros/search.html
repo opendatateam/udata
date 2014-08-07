@@ -191,7 +191,7 @@
 {% endmacro %}
 
 
-{% macro panel_header(result) %}
+{% macro panel_header(result, csv_endpoint=None) %}
 <div class="panel-heading">
     {% if result.total %}
         {{ _('Results %(start)s to %(end)s on %(total)s found',
@@ -199,6 +199,15 @@
             end=result.page_end,
             total=result.total,
         ) }}
+        {% if csv_endpoint %}
+        <a class="btn btn-xs btn-info pull-right"
+            href="{{ result.query.to_url(
+                url_for(csv_endpoint), facets=None, page=None, page_size=None, replace=true)
+            }}">
+            <span class="fa fa-download"></span>
+            CSV
+        </a>
+        {% endif %}
     {% else %}
         {{ _('No result found') }}
     {% endif %}

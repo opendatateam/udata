@@ -32,5 +32,6 @@ def metrics():
 def datasets_csv():
     params = multi_to_dict(request.args)
     params['facets'] = False
-    datasets = search.query(Dataset, **params)
-    return csv.stream(datasets.objects, 'datasets')
+    datasets = search.iter(Dataset, **params)
+    adapter = csv.get_adapter(Dataset)
+    return csv.stream(adapter(datasets), 'datasets')

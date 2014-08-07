@@ -89,3 +89,17 @@ class SearchResult(Paginable):
     def labelize(self, name, value):
         func = self.label_func(name)
         return func(value) if func else value
+
+
+class SearchIterator(object):
+    '''An ElasticSearch scroll result iterator that fetch objects on each hit'''
+    def __init__(self, query, result):
+        self.result = result or self._empty()
+        self.query = query
+
+    def _empty(self):
+        return (x for x in list())
+
+    def __iter__(self):
+        for hit in self.result:
+            yield self.query.adapter.model.objects.get(id=hit['_id'])

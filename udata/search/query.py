@@ -9,7 +9,7 @@ from werkzeug.urls import Href
 
 from udata.models import db
 from udata.search import es, i18n_analyzer, DEFAULT_PAGE_SIZE, adapter_catalog
-from udata.search.result import SearchResult
+from udata.search.result import SearchResult, SearchIterator
 
 
 log = logging.getLogger(__name__)
@@ -37,6 +37,14 @@ class SearchQuery(object):
             log.exception('Unable to execute search query')
             result = {}
         return SearchResult(self, result)
+
+    def iter(self):
+        try:
+            result = es.scan(index=es.index_name, doc_type=self.adapter.doc_type(), body=self.get_body())
+        except:
+            log.exception('Unable to execute search query')
+            result = None
+        return SearchIterator(self, result)
 
     def get_body(self):
         body = {

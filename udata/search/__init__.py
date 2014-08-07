@@ -6,6 +6,7 @@ import logging
 from os.path import join, dirname
 
 from elasticsearch import Elasticsearch, JSONSerializer
+from elasticsearch.helpers import scan
 from flask import current_app, json
 from speaklater import make_lazy_string, is_lazy_string
 
@@ -47,10 +48,19 @@ class ElasticSearch(object):
         return getattr(current_app.extensions['elasticsearch'], item)
 
     @property
+    def client(self):
+        if not 'elasticsearch' in current_app.extensions.keys():
+            raise Exception('not initialised, did you forget to call init_app?')
+        return current_app.extensions['elasticsearch']
+
+    @property
     def index_name(self):
         if current_app.config.get('TESTING'):
             return '{0}-test'.format(current_app.name)
         return current_app.name
+
+    def scan(self, body, **kwargs):
+        return scan(self.client, query=body, **kwargs)
 
     def initialize(self):
         '''Create or update indices and mappings'''
@@ -99,7 +109,7 @@ def unindex(obj):
 # from . import fields
 from .adapter import ModelSearchAdapter, metrics_mapping
 from .query import SearchQuery
-from .result import SearchResult
+from .result import SearchResult, SearchIterator
 from .fields import *
 
 # Import core adapters
@@ -111,6 +121,10 @@ from udata.core.organization.search import OrganizationSearch
 
 def query(*adapters, **kwargs):
     return SearchQuery(*adapters, **kwargs).execute()
+
+
+def iter(*adapters, **kwargs):
+    return SearchQuery(*adapters, **kwargs).iter()
 
 
 def multiquery(*queries):
