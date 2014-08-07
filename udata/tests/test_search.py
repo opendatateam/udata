@@ -84,8 +84,10 @@ class SearchQueryTest(TestCase):
     def test_empty_search(self):
         '''An empty query should match all documents'''
         search_query = search.SearchQuery(FakeSearch)
-        expected = {'match_all': {}}
-        self.assertEqual(search_query.get_query(), expected)
+        body = search_query.get_body()
+        self.assertEqual(body['query'], {'match_all': {}})
+        self.assertEqual(body['facets'], {})
+        self.assertEqual(body['sort'], [])
 
     def test_paginated_search(self):
         '''Search should handle pagination'''
@@ -281,11 +283,22 @@ class SearchQueryTest(TestCase):
         self.assertEqual(search_query.get_query(), expected)
 
     def test_facets(self):
-        search_query = search.SearchQuery(FakeSearch)
+        search_query = search.SearchQuery(FakeSearch, facets=True)
         facets = search_query.get_facets()
         self.assertEqual(len(facets), len(FakeSearch.facets))
         for key in FakeSearch.facets.keys():
             self.assertIn(key, facets.keys())
+
+    def test_selected_facets(self):
+        selected_facets = ['tag', 'other']
+        search_query = search.SearchQuery(FakeSearch, facets=selected_facets)
+        facets = search_query.get_facets()
+        self.assertEqual(len(facets), len(selected_facets))
+        for key in FakeSearch.facets.keys():
+            if key in selected_facets:
+                self.assertIn(key, facets.keys())
+            else:
+                self.assertNotIn(key, facets.keys())
 
     def test_facet_filter(self):
         search_query = search.SearchQuery(FakeSearch, q='test', tag='value')
@@ -855,6 +868,15 @@ class SearchResultTest(TestCase):
 
     def test_pagination_empty(self):
         '''Search results should be paginated even if empty'''
+        query = search.SearchQuery(FakeSearch, page=2, page_size=3)
+        result = search.SearchResult(query, {})
+
+        self.assertEqual(result.page, 1),
+        self.assertEqual(result.page_size, 3)
+        self.assertEqual(result.pages, 0)
+
+    def test_no_pagination_in_query(self):
+        '''Search results should be paginated even if not asked'''
         query = search.SearchQuery(FakeSearch)
         result = search.SearchResult(query, {})
 

@@ -28,7 +28,7 @@ class SearchResult(Paginable):
 
     @property
     def page(self):
-        return self.query.page
+        return (self.query.page or 1) if self.pages else 1
 
     @property
     def page_size(self):

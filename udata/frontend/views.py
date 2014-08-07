@@ -68,7 +68,9 @@ class SearchView(Templated, BaseView):
     search_adapter = None
 
     def get_queryset(self):
-        return search.query(self.search_adapter, **multi_to_dict(request.args))
+        params = multi_to_dict(request.args)
+        params['facets'] = True
+        return search.query(self.search_adapter or self.model, **params)
 
     def get_context(self):
         context = super(SearchView, self).get_context()

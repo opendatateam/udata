@@ -38,7 +38,10 @@ class Paginable(object):
     '''
     @property
     def pages(self):
-        return int(ceil(self.total / float(self.page_size)))
+        if self.page_size:
+            return int(ceil(self.total / float(self.page_size)))
+        else:
+            return 0
 
     @property
     def has_prev(self):
@@ -50,7 +53,10 @@ class Paginable(object):
 
     @property
     def page_start(self):
-        return (self.page - 1) * self.page_size + 1
+        if self.page_size is not None:
+            return (self.page - 1) * self.page_size + 1
+        else:
+            return 1
 
     @property
     def page_end(self):

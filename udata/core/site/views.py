@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask import request
+
+from udata import search
+
 from udata.i18n import I18nBlueprint
 from udata.core.metrics import Metric
 from udata.frontend import render, csv
 from udata.models import Metrics, Dataset
+from udata.utils import multi_to_dict
 
 
 blueprint = I18nBlueprint('site', __name__)
@@ -25,4 +30,7 @@ def metrics():
 
 @blueprint.route('/datasets.csv')
 def datasets_csv():
-    return csv.stream(Dataset.objects.visible(), 'datasets')
+    params = multi_to_dict(request.args)
+    params['facets'] = False
+    datasets = search.query(Dataset, **params)
+    return csv.stream(datasets.objects, 'datasets')

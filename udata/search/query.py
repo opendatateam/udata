@@ -27,8 +27,8 @@ class SearchQuery(object):
         self.adapters = adapters
         self.kwargs = kwargs
 
-        self.page = max(int(self.kwargs.get('page', 1)), 1)
-        self.page_size = int(self.kwargs.get('page_size', DEFAULT_PAGE_SIZE))
+        self.page = max(int(self.kwargs.get('page', 1) or 1), 1)
+        self.page_size = int(self.kwargs.get('page_size', DEFAULT_PAGE_SIZE) or DEFAULT_PAGE_SIZE)
 
     def execute(self):
         try:
@@ -48,6 +48,7 @@ class SearchQuery(object):
             'aggs': self.get_aggregations(),
             'fields': [],  # Only returns IDs
         }
+
         if hasattr(self.adapter, 'boosters') and self.adapter.boosters:
             body['query'] = {
                 'function_score': {
@@ -107,16 +108,22 @@ class SearchQuery(object):
 
     def get_aggregations(self):
         aggregations = {}
+        selected_facets = self.kwargs.get('facets')
+        if not self.adapter.facets or not selected_facets:
+            return aggregations
         for name, facet in self.adapter.facets.items():
-            aggregations.update(facet.to_aggregations())
+            if selected_facets is True or name in selected_facets:
+                aggregations.update(facet.to_aggregations())
         return aggregations
 
     def get_facets(self):
-        if not self.adapter.facets:
+        selected_facets = self.kwargs.get('facets')
+        if not self.adapter.facets or not selected_facets:
             return {}
         return dict(
             (name, facet.to_query(args=self.kwargs.get(name, [])))
             for name, facet in self.adapter.facets.items()
+            if selected_facets is True or name in selected_facets
         )
 
     def get_query(self):
@@ -132,7 +139,7 @@ class SearchQuery(object):
             params.pop('page', None)
             for key, value in kwargs.items():
                 if not replace and key in params:
-                    if isinstance(params[key], basestring):
+                    if not isinstance(params[key], (list, tuple)):
                         params[key] = [params[key], value]
                     else:
                         params[key].append(value)
