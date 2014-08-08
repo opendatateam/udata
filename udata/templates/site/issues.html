@@ -1,0 +1,10 @@
+{% extends theme('site/admin_base.html') %}
+{% from theme('macros/issues.html') import issues_tabs with context %}
+
+{% block tab_content %}
+<div class="row">
+    <div class="col-xs-12">
+        {{ issues_tabs(issues, related=True) }}
+    </div>
+</div>
+{% endblock %}

@@ -11,7 +11,7 @@ from udata.tests.frontend import FrontTestCase
 from udata.tests.factories import DatasetFactory, ReuseFactory, OrganizationFactory, ResourceFactory
 
 
-class SiteMetricsViewTest(FrontTestCase):
+class SiteViewsTest(FrontTestCase):
     def test_render_metrics(self):
         '''It should render the search page'''
         for i in range(3):
