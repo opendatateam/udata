@@ -11,7 +11,6 @@ from udata.frontend import nav
 from udata.frontend.views import DetailView, CreateView, EditView, SingleObject, SearchView, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Resource, Reuse, Issue, UPDATE_FREQUENCIES, TERRITORIAL_GRANULARITIES
-from udata.search import DatasetSearch
 
 from .permissions import DatasetEditPermission, set_dataset_identity
 
@@ -55,7 +54,6 @@ class DatasetListView(SearchView):
     model = Dataset
     context_name = 'datasets'
     template_name = 'dataset/list.html'
-    search_adapter = DatasetSearch
 
 
 navbar = nav.Bar('edit_dataset', [

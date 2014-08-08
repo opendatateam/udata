@@ -6,7 +6,6 @@ from flask.ext.restful import fields
 from udata.api import api, API, ModelAPI, ModelListAPI, SingleObjectAPI, marshal
 from udata.forms import ReuseForm
 from udata.models import Reuse
-from udata.search import ReuseSearch
 
 from udata.core.organization.api import OrganizationField
 from udata.core.dataset.api import DatasetField
@@ -14,6 +13,7 @@ from udata.core.dataset.api import DatasetField
 from udata.core.issues.api import IssuesAPI
 
 from .models import ReuseIssue
+from .search import ReuseSearch
 
 reuse_fields = {
     'id': fields.String,

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-08 15:04+0200\n"
+"POT-Creation-Date: 2014-08-08 17:55+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -97,7 +97,7 @@ msgstr ""
 #: udata/templates/dataset/search-panel.html:21
 #: udata/templates/organization/display.html:58
 #: udata/templates/organization/search-panel.html:8
-#: udata/templates/organization/search-panel.html:12
+#: udata/templates/organization/search-panel.html:13
 #: udata/templates/reuse/create.html:4 udata/templates/reuse/display.html:17
 #: udata/templates/reuse/edit_base.html:4 udata/templates/reuse/list.html:7
 #: udata/templates/topic/display.html:25 udata/templates/user/following.html:16
@@ -197,31 +197,31 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-#: udata/core/dataset/views.py:29 udata/templates/home.html:129
+#: udata/core/dataset/views.py:28 udata/templates/home.html:129
 msgid "Last datasets"
 msgstr ""
 
-#: udata/core/dataset/views.py:62 udata/core/organization/views.py:37
-#: udata/core/reuse/views.py:61
+#: udata/core/dataset/views.py:60 udata/core/organization/views.py:37
+#: udata/core/reuse/views.py:59
 msgid "Descrition"
 msgstr ""
 
-#: udata/core/dataset/views.py:63
+#: udata/core/dataset/views.py:61
 msgid "Additionnal informations"
 msgstr ""
 
-#: udata/core/dataset/views.py:64 udata/core/site/metrics.py:53
+#: udata/core/dataset/views.py:62 udata/core/site/metrics.py:53
 #: udata/templates/dataset/display.html:58
 msgid "Resources"
 msgstr ""
 
-#: udata/core/dataset/views.py:65 udata/core/issues/metrics.py:14
-#: udata/core/organization/views.py:42 udata/core/reuse/views.py:62
+#: udata/core/dataset/views.py:63 udata/core/issues/metrics.py:14
+#: udata/core/organization/views.py:42 udata/core/reuse/views.py:60
 #: udata/core/site/views.py:88 udata/templates/macros/issues.html:5
 msgid "Issues"
 msgstr ""
 
-#: udata/core/dataset/views.py:66 udata/core/reuse/views.py:63
+#: udata/core/dataset/views.py:64 udata/core/reuse/views.py:61
 msgid "Transfer"
 msgstr ""
 
@@ -230,6 +230,7 @@ msgstr ""
 #: udata/templates/dataset/search-result.html:88
 #: udata/templates/organization/followers.html:7
 #: udata/templates/organization/search-panel.html:9
+#: udata/templates/organization/search-panel.html:14
 #: udata/templates/user/followers.html:7
 msgid "Followers"
 msgstr ""
@@ -278,7 +279,7 @@ msgstr ""
 #: udata/templates/dataset/resource/edit.html:4
 #: udata/templates/organization/display.html:48
 #: udata/templates/organization/search-panel.html:7
-#: udata/templates/organization/search-panel.html:11
+#: udata/templates/organization/search-panel.html:12
 #: udata/templates/reuse/search-panel.html:15 udata/templates/topic/display.html:19
 #: udata/templates/user/datasets.html:8 udata/templates/user/following.html:15
 msgid "Datasets"
@@ -353,7 +354,7 @@ msgstr ""
 msgid "Visualization"
 msgstr ""
 
-#: udata/core/reuse/views.py:28 udata/templates/home.html:146
+#: udata/core/reuse/views.py:27 udata/templates/home.html:146
 msgid "Last reuses"
 msgstr ""
 
@@ -601,6 +602,7 @@ msgstr ""
 #: udata/templates/organization/card.html:9
 #: udata/templates/organization/display_base.html:39
 #: udata/templates/organization/edit_base.html:18
+#: udata/templates/organization/search-panel.html:11
 #: udata/templates/organization/search-result.html:10
 msgid "Certified public service"
 msgstr ""
@@ -947,20 +949,28 @@ msgstr ""
 msgid "Clear filter"
 msgstr ""
 
-#: udata/templates/macros/search.html:166
+#: udata/templates/macros/search.html:132
+msgid "Yes"
+msgstr ""
+
+#: udata/templates/macros/search.html:137
+msgid "No"
+msgstr ""
+
+#: udata/templates/macros/search.html:184
 msgid "to"
 msgstr ""
 
-#: udata/templates/macros/search.html:186
+#: udata/templates/macros/search.html:204
 msgid "Apply"
 msgstr ""
 
-#: udata/templates/macros/search.html:197
+#: udata/templates/macros/search.html:215
 #, python-format
 msgid "Results %(start)s to %(end)s on %(total)s found"
 msgstr ""
 
-#: udata/templates/macros/search.html:212
+#: udata/templates/macros/search.html:230
 msgid "No result found"
 msgstr ""
 

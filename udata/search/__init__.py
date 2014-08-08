@@ -109,12 +109,6 @@ from .query import SearchQuery
 from .result import SearchResult, SearchIterator
 from .fields import *
 
-# Import core adapters
-from udata.core.user.search import UserSearch
-from udata.core.dataset.search import DatasetSearch
-from udata.core.reuse.search import ReuseSearch
-from udata.core.organization.search import OrganizationSearch
-
 
 def query(*adapters, **kwargs):
     return SearchQuery(*adapters, **kwargs).execute()
@@ -142,4 +136,10 @@ def multiquery(*queries):
 
 
 def init_app(app):
+    # Register core adapters
+    import udata.core.user.search
+    import udata.core.dataset.search
+    import udata.core.reuse.search
+    import udata.core.organization.search
+
     es.init_app(app)

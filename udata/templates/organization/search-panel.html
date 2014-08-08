@@ -8,9 +8,8 @@
         reuses=(_('Reuses'), 'desc'),
         followers=(_('Followers'), 'desc'),
     ) }}
+    {{ s.facet_panel(organizations, 'public_services', _('Certified public service'), url=url) }}
     {{ s.facet_panel(organizations, 'datasets', _('Datasets'), url=url) }}
     {{ s.facet_panel(organizations, 'reuses', _('Reuses'), url=url) }}
-    {# {{ facet_picker(reuses, 'organization', _('Organizations')) }}
-    {{ facet_picker(reuses, 'type', _('Type'), g.reuse_types) }}
-    {{ facet_picker(reuses, 'tag', _('Tags')) }} #}
+    {{ s.facet_panel(organizations, 'followers', _('Followers'), url=url) }}
 </div>

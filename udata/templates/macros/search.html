@@ -86,6 +86,8 @@
         {{ term_facet(name, facet, result.query, url=url) }}
     {% elif facet.type == 'models' %}
         {{ model_facet(name, facet, result.query, url=url) }}
+    {% elif facet.type == 'bool' %}
+        {{ bool_facet(name, facet, result.query, url=url) }}
     {% elif facet.type == 'range' %}
         {{ range_facet(name, facet, result.query, url=url) }}
     {% elif facet.type == 'daterange' %}
@@ -119,6 +121,22 @@
             <span class="badge pull-right">{{ count }}</span>
         </a>
     {% endfor %}
+</div>
+{% endmacro %}
+
+
+{% macro bool_facet(name, facet, query, url=None) %}
+<div id="collapse-{{name}}" class="list-group collapse in">
+    <a href="{{ query.to_url(url, **{name: true}) }}"
+        class="list-group-item">
+        {{ _('Yes') }}
+        <span class="badge pull-right">{{ facet[true] }}</span>
+    </a>
+    <a href="{{ query.to_url(url, **{name: false}) }}"
+        class="list-group-item">
+        {{ _('No') }}
+        <span class="badge pull-right">{{ facet[false] }}</span>
+    </a>
 </div>
 {% endmacro %}
 

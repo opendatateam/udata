@@ -73,14 +73,16 @@ class BoolFacet(Facet):
 
     def from_response(self, name, response):
         facet = response.get('facets', {}).get(name)
-        if not facet:
+        if not facet or not len(facet['terms']):
             return
+        true_count = facet['terms'][0]['count']
+        false_count = facet['missing'] + facet['other']
         data = {
             'type': 'bool',
-            'visible': len(facet['terms']) == 2,
+            'visible': true_count > 0 and false_count > 0,
+            True: true_count,
+            False: false_count
         }
-        for row in facet['terms']:
-            data[row['term']] = row['count']
         return data
 
 

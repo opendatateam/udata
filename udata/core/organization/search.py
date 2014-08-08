@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from udata import search
 from udata.models import Organization
-from udata.search import ModelSearchAdapter, Sort, RangeFacet, i18n_analyzer, BoolBooster, GaussDecay, metrics_mapping
+# from udata.search import ModelSearchAdapter, Sort, RangeFacet, i18n_analyzer, BoolBooster, GaussDecay, metrics_mapping
 
 from . import metrics  # Metrics are need for the mapping
 
 __all__ = ('OrganizationSearch', )
 
 
-class OrganizationSearch(ModelSearchAdapter):
+class OrganizationSearch(search.ModelSearchAdapter):
     model = Organization
     fuzzy = True
     fields = (
@@ -17,15 +18,16 @@ class OrganizationSearch(ModelSearchAdapter):
         'description',
     )
     sorts = {
-        'name': Sort('name.raw'),
-        'reuses': Sort('metrics.reuses'),
-        'datasets': Sort('metrics.datasets'),
-        'followers': Sort('metrics.followers'),
+        'name': search.Sort('name.raw'),
+        'reuses': search.Sort('metrics.reuses'),
+        'datasets': search.Sort('metrics.datasets'),
+        'followers': search.Sort('metrics.followers'),
     }
     facets = {
-        'reuses': RangeFacet('metrics.reuses'),
-        'datasets': RangeFacet('metrics.datasets'),
-        'followers': RangeFacet('metrics.followers'),
+        'reuses': search.RangeFacet('metrics.reuses'),
+        'datasets': search.RangeFacet('metrics.datasets'),
+        'followers': search.RangeFacet('metrics.followers'),
+        'public_services': search.BoolFacet('public_service'),
     }
     mapping = {
         'properties': {
@@ -35,9 +37,9 @@ class OrganizationSearch(ModelSearchAdapter):
                     'raw': {'type': 'string', 'index': 'not_analyzed'}
                 }
             },
-            'description': {'type': 'string', 'analyzer': i18n_analyzer},
+            'description': {'type': 'string', 'analyzer': search.i18n_analyzer},
             'url': {'type': 'string'},
-            'metrics': metrics_mapping(Organization),
+            'metrics': search.metrics_mapping(Organization),
             'org_suggest': {
                 'type': 'completion',
                 'index_analyzer': 'simple',
@@ -47,10 +49,10 @@ class OrganizationSearch(ModelSearchAdapter):
         }
     }
     boosters = [
-        BoolBooster('public_service', 1.5),
-        GaussDecay('metrics.followers', 200, decay=0.8),
-        GaussDecay('metrics.reuses', 50, decay=0.9),
-        GaussDecay('metrics.datasets', 50, decay=0.9),
+        search.BoolBooster('public_service', 1.5),
+        search.GaussDecay('metrics.followers', 200, decay=0.8),
+        search.GaussDecay('metrics.reuses', 50, decay=0.9),
+        search.GaussDecay('metrics.datasets', 50, decay=0.9),
     ]
 
     @classmethod

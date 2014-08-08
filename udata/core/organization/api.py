@@ -10,7 +10,8 @@ from udata.api import api, ModelAPI, ModelListAPI, API, marshal
 from udata.auth import current_user
 from udata.forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm
 from udata.models import Organization, MembershipRequest, Member
-from udata.search import OrganizationSearch
+
+from .search import OrganizationSearch
 
 
 org_fields = {

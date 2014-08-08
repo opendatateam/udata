@@ -11,7 +11,6 @@ from udata.frontend import nav
 from udata.frontend.views import SearchView, DetailView, CreateView, EditView, SingleObject, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Reuse, REUSE_TYPES, Issue
-from udata.search import ReuseSearch
 
 from .permissions import ReuseEditPermission, set_reuse_identity
 
@@ -54,7 +53,6 @@ class ReuseListView(SearchView):
     model = Reuse
     context_name = 'reuses'
     template_name = 'reuse/list.html'
-    search_adapter = ReuseSearch
 
 
 navbar = nav.Bar('edit_reuse', [

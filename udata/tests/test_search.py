@@ -529,12 +529,11 @@ class TestBoolFacet(TestCase):
         response['facets'] = {
             'test': {
                 '_type': 'terms',
-                'total': 229,
+                'total': 10,
                 'other': 33,
-                'missing': 0,
+                'missing': 22,
                 'terms': [
                     {'term': True, 'count': 10},
-                    {'term': False, 'count': 15},
                 ],
             }
         }
@@ -542,7 +541,7 @@ class TestBoolFacet(TestCase):
         extracted = self.facet.from_response('test', response)
         self.assertEqual(extracted['type'], 'bool')
         self.assertEqual(extracted[True], 10)
-        self.assertEqual(extracted[False], 15)
+        self.assertEqual(extracted[False], 55)
 
     def test_to_filter(self):
         self.assertEqual(self.facet.to_filter(True), {'term': {'boolean': True}})
