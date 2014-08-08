@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from flask import abort, redirect, request, url_for, g, jsonify
+from flask import abort, redirect, request, url_for, g, jsonify, render_template
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.forms import DatasetForm, DatasetCreateForm, ResourceForm, DatasetExtraForm
@@ -26,7 +26,7 @@ def store_references_lists():
 
 @blueprint.route('/recent.atom')
 def recent_feed():
-    feed = AtomFeed('Recent Articles',
+    feed = AtomFeed(_('Last datasets'),
                     feed_url=request.url, url=request.url_root)
     datasets = Dataset.objects.visible().order_by('-date').limit(15)
     for dataset in datasets:
@@ -41,12 +41,13 @@ def recent_feed():
                 'name': dataset.owner.fullname,
                 'uri': url_for('users.show', user=dataset.owner, _external=True),
             }
-        feed.add(dataset.title, dataset.description,
-                 content_type='html',
-                 author=author,
-                 url=url_for('datasets.show', dataset=dataset, _external=True),
-                 updated=dataset.last_modified,
-                 published=dataset.created_at)
+        feed.add(dataset.title,
+                render_template('dataset/feed_item.html', dataset=dataset),
+                content_type='html',
+                author=author,
+                url=url_for('datasets.show', dataset=dataset, _external=True),
+                updated=dataset.last_modified,
+                published=dataset.created_at)
     return feed.get_response()
 
 

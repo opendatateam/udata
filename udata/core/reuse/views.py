@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from flask import request, url_for, g, redirect
+from flask import request, url_for, g, redirect, render_template
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.forms import ReuseForm, ReuseCreateForm
@@ -25,27 +25,28 @@ def store_references_lists():
 
 @blueprint.route('/recent.atom')
 def recent_feed():
-    feed = AtomFeed('Recent Articles',
+    feed = AtomFeed(_('Last reuses'),
                     feed_url=request.url, url=request.url_root)
-    datasets = Reuse.objects.visible().order_by('-date').limit(15)
-    for dataset in datasets:
+    reuses = Reuse.objects.visible().order_by('-date').limit(15)
+    for reuse in reuses:
         author = None
-        if dataset.organization:
+        if reuse.organization:
             author = {
-                'name': dataset.organization.name,
-                'uri': url_for('organizations.show', org=dataset.organization, _external=True),
+                'name': reuse.organization.name,
+                'uri': url_for('organizations.show', org=reuse.organization, _external=True),
             }
-        elif dataset.owner:
+        elif reuse.owner:
             author = {
-                'name': dataset.owner.fullname,
-                'uri': url_for('users.show', user=dataset.owner, _external=True),
+                'name': reuse.owner.fullname,
+                'uri': url_for('users.show', user=reuse.owner, _external=True),
             }
-        feed.add(dataset.title, dataset.description,
-                 content_type='html',
-                 author=author,
-                 url=url_for('datasets.show', dataset=dataset, _external=True),
-                 updated=dataset.created_at,
-                 published=dataset.created_at)
+        feed.add(reuse.title,
+                render_template('reuse/feed_item.html', reuse=reuse),
+                content_type='html',
+                author=author,
+                url=url_for('reuses.show', reuse=reuse, _external=True),
+                updated=reuse.created_at,
+                published=reuse.created_at)
     return feed.get_response()
 
 

@@ -1,0 +1,15 @@
+{{dataset.description|default('', true)|markdown}}
+
+{% if dataset.organization %}
+<a href="{{ url_for('datasets.show', dataset=dataset, _external=True) }}"
+    title="{{ dataset.title }}">
+    <img alt="{{ dataset.organization.title }}"
+        src="{{ dataset.organization.image_url|placeholder('organization') }}">
+</a>
+{% elif dataset.owner %}
+<a href="{{ url_for('datasets.show', dataset=dataset, _external=True) }}"
+    title="{{ dataset.title }}">
+    <img alt="{{ dataset.owner.fullname }}"
+        src="{{ dataset.owner.avatar_url|placeholder('user') }}">
+</a>
+{% endif %}
