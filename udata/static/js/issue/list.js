@@ -5,11 +5,12 @@ define([
     'jquery',
     'auth',
     'i18n',
+    'api',
     'notify',
     'widgets/modal',
     'hbs!templates/issues/details',
     'form/common'
-], function($, Auth, i18n, Notify, modal, detailsTpl, forms) {
+], function($, Auth, i18n, API, Notify, modal, detailsTpl, forms) {
     'use strict';
 
     var labels = {
