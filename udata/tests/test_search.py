@@ -369,6 +369,7 @@ class SearchQueryTest(TestCase):
             'q': 'test',
             'tag': ['tag1', 'tag2'],
             'page': 2,
+            'facets': True,
         }
         search_query = search.SearchQuery(FakeSearch, **kwargs)
         with self.app.test_request_context('/an_url'):

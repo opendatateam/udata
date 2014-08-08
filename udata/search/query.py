@@ -154,6 +154,7 @@ class SearchQuery(object):
                         params[key].append(value)
                 else:
                     params[key] = value
+        params.pop('facets', None)  # Always true when used
         href = Href(url or request.base_url)
         return href(params)
 
