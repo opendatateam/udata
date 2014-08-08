@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import request, redirect, abort, g, url_for
+from flask import request, redirect, abort, g
 from flask.views import MethodView
 
-from udata import search
-from udata.auth import login_required
+from udata import search, auth
 from udata.frontend import render
 from udata.utils import multi_to_dict
 
@@ -34,7 +33,14 @@ class BaseView(MethodView):
 
     def can(self, *args, **kwargs):
         '''Overwrite this method to implement custom contextual permissions'''
-        return not self.require or self.require().can()
+        if isinstance(self.require, auth.Permission):
+            return self.require.can()
+        elif callable(self.require):
+            return self.require()
+        elif isinstance(self.require, bool):
+            return self.require
+        else:
+            return True
 
     def set_identity(self, *args, **kwargs):
         pass
@@ -141,7 +147,7 @@ class FormView(Templated, BaseView):
 
 
 class CreateView(FormView):
-    decorators = [login_required]
+    decorators = [auth.login_required]
 
     def on_form_valid(self, form):
         obj = self.model()
@@ -155,7 +161,7 @@ class CreateView(FormView):
 
 
 class EditView(SingleObject, FormView):
-    decorators = [login_required]
+    decorators = [auth.login_required]
 
     def get_context(self):
         context = super(EditView, self).get_context()
