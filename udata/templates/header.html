@@ -60,6 +60,12 @@
             <li>
               <a href="{{ url_for('users.edit', user=current_user) }}">{{ _('Settings') }}</a>
             </li>
+            {% if current_user.sysadmin %}
+            <li class="divider"></li>
+            <li>
+              <a href="{{ url_for('site.admin') }}">{{ _('Site administration') }}</a>
+            </li>
+            {% endif %}
             <li class="divider"></li>
             <li><a href="{{ url_for('security.logout') }}">Logout</a></li>
           </ul>

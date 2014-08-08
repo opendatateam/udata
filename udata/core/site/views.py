@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import g, request
+from flask import g, request, redirect, url_for
 from werkzeug.contrib.atom import AtomFeed
 
 from udata import search
@@ -101,5 +101,9 @@ class SiteIssuesView(SiteAdminView, DetailView):
         context['issues'] = Issue.objects
         return context
 
+
+@blueprint.route('/site/', endpoint='admin')
+def redirect_to_first_admin_tab():
+    return redirect(url_for('site.issues'))
 
 blueprint.add_url_rule('/site/issues/', view_func=SiteIssuesView.as_view(str('issues')))
