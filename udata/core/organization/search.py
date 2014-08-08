@@ -78,5 +78,5 @@ class OrganizationSearch(search.ModelSearchAdapter):
                     'slug': organization.slug,
                 },
             },
-            'public_service': organization.public_service,  # TODO: extract tis into plugin
+            'public_service': organization.public_service or False,  # TODO: extract tis into plugin
         }
