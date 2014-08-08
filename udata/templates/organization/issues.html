@@ -4,7 +4,14 @@
 {% block tab_content %}
 <div class="row">
     <div class="col-xs-12">
-        {{ issues_list(issues, related=True) }}
+        {% if not issues %}
+        <p class="text-center">{{ _('No Issues') }}</p>
+        {% else %}
+            <h4>{{ _('Open issues') }}</h4>
+            {{ issues_list(issues, status='open', related=related) }}
+            <h4>{{ _('Closed issues') }}</h4>
+            {{ issues_list(issues, status='closed', related=related) }}
+        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -9,21 +9,39 @@
 </button>
 {% endmacro %}
 
-{% macro issues_list(issues, related=False) %}
-{% if not issues %}
-<p class="text-center">{{ _('No Issues') }}</p>
-{% else %}
-    <h4>{{ _('Open issues') }}</h4>
-    <div class="issue-list open-issues">
-        {% for issue in issues|rejectattr('closed') %}
-            {{ issue_list_item(issue, related) }}
-        {% else %}
-            <p class="text-center">{{ _('No Issues') }}</p>
-        {% endfor %}
+{% macro issues_tabs(issues, related=False) %}
+<ul class="nav nav-pills nav-top" role="tablist">
+    <li class="active">
+        <a href="#open-issues" data-toggle="tab">{{ _('Open issues') }}</a>
+    </li>
+    <li>
+        <a href="#closed-issues" data-toggle="tab">{{ _('Closed issues') }}</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div id="open-issues" class="tab-pane active">
+        {{ issues_list(issues, status='open', related=related) }}
     </div>
-    <h4>{{ _('Closed issues') }}</h4>
-    <div class="issue-list closed-issues">
-        {% for issue in issues|selectattr('closed') %}
+    <div id="closed-issues" class="tab-pane">
+        {{ issues_list(issues, status='closed', related=related) }}
+    </div>
+</div>
+{% endmacro %}
+
+{% macro issues_list(issues, related=False, status='open') %}
+{% if not issues %}
+    <p class="text-center">{{ _('No Issues') }}</p>
+{% else %}
+    {% if status == 'open' %}
+        {% set filtered_issues = issues|rejectattr('closed') %}
+    {% elif status == 'closed' %}
+        {% set filtered_issues = issues|selectattr('closed') %}
+    {% else %}
+        {% set filtered_issues = issues %}
+    {% endif %}
+    <div class="issue-list {{status}}-issues">
+        {% for issue in filtered_issues %}
             {{ issue_list_item(issue, related) }}
         {% else %}
             <p class="text-center">{{ _('No Issues') }}</p>
