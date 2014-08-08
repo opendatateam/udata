@@ -83,10 +83,19 @@
                         {% endif %}
                         <li>
                             <a href="{{ url_for('users.edit', user=current_user) }}">
-                                <span class="fa fa-fw fa-wrench"></span>
+                                <span class="fa fa-fw fa-sliders"></span>
                                 {{ _('Settings') }}
                             </a>
                         </li>
+                        {% if current_user.sysadmin %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{{ url_for('site.admin') }}">
+                                <span class="fa fa-fw fa-wrench"></span>
+                                {{ _('Site administration') }}
+                            </a>
+                        </li>
+                        {% endif %}
                         <li class="divider"></li>
                         <li>
                             <a href="{{ url_for('security.logout') }}">
