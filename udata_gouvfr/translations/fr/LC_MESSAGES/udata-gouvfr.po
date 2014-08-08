@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-06 21:35+0200\n"
-"PO-Revision-Date: 2014-08-06 19:37+0000\n"
+"POT-Creation-Date: 2014-08-08 15:04+0200\n"
+"PO-Revision-Date: 2014-08-08 13:05+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata-gouvfr/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -122,12 +122,16 @@ msgstr "Mon profile"
 msgid "Settings"
 msgstr "Réglages"
 
-#: udata_gouvfr/theme/templates/header.html:94
+#: udata_gouvfr/theme/templates/header.html:95
+msgid "Site administration"
+msgstr "Administration du site"
+
+#: udata_gouvfr/theme/templates/header.html:103
 msgid "Logout"
 msgstr "Se déconnecter"
 
-#: udata_gouvfr/theme/templates/header.html:101
-#: udata_gouvfr/theme/templates/header.html:104
+#: udata_gouvfr/theme/templates/header.html:110
+#: udata_gouvfr/theme/templates/header.html:113
 msgid "Sign In / Register"
 msgstr "Connexion / Inscription"
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-06 21:35+0200\n"
+"POT-Creation-Date: 2014-08-08 15:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -117,12 +117,16 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/header.html:94
+#: udata_gouvfr/theme/templates/header.html:95
+msgid "Site administration"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/header.html:103
 msgid "Logout"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/header.html:101
-#: udata_gouvfr/theme/templates/header.html:104
+#: udata_gouvfr/theme/templates/header.html:110
+#: udata_gouvfr/theme/templates/header.html:113
 msgid "Sign In / Register"
 msgstr ""
 
