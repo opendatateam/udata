@@ -127,12 +127,12 @@
 
 {% macro bool_facet(name, facet, query, url=None) %}
 <div id="collapse-{{name}}" class="list-group collapse in">
-    <a href="{{ query.to_url(url, **{name: true}) }}"
+    <a href="{{ query.to_url(url, **{name: 'true'}) }}"
         class="list-group-item">
         {{ _('Yes') }}
         <span class="badge pull-right">{{ facet[true] }}</span>
     </a>
-    <a href="{{ query.to_url(url, **{name: false}) }}"
+    <a href="{{ query.to_url(url, **{name: 'false'}) }}"
         class="list-group-item">
         {{ _('No') }}
         <span class="badge pull-right">{{ facet[false] }}</span>

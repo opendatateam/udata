@@ -43,7 +43,10 @@ class Facet(object):
     def filter_from_kwargs(self, name, kwargs):
         if name in kwargs:
             value = kwargs[name]
-            return self.to_filter(value)
+            query = self.to_filter(value)
+            if not query:
+                return
+            return {'must': ([query] if isinstance(query, dict) else query)}
 
     def from_response(self, name, response):
         '''Parse the elasticsearch response'''
@@ -67,16 +70,29 @@ class BoolFacet(Facet):
         }
         return query
 
-    def to_filter(self, value):
+    def filter_from_kwargs(self, name, kwargs):
+        if not name in kwargs:
+            return
+        value = kwargs[name]
         boolean = value is True or (isinstance(value, basestring) and value.lower() == 'true')
-        return {'term': {self.field: boolean}}
+        if boolean:
+            return {'must': [{'term': {self.field: True}}]}
+        else:
+            return {'must_not': [{'term': {self.field: True}}]}
+        # return {'term': {self.field: True}} if boolean else {'terms': {self.field: [False, None]}}
 
     def from_response(self, name, response):
         facet = response.get('facets', {}).get(name)
         if not facet or not len(facet['terms']):
             return
-        true_count = facet['terms'][0]['count']
-        false_count = facet['missing'] + facet['other']
+        true_count = 0
+        false_count = 0
+        for row in facet['terms']:
+            if row['term'] == 'T':
+                true_count = row['count']
+            else:
+                false_count = row['count']
+        false_count += facet['missing'] + facet['other']
         data = {
             'type': 'bool',
             'visible': true_count > 0 and false_count > 0,
@@ -156,7 +172,7 @@ class ExtrasFacet(Facet):
         for key, value in kwargs.items():
             if key.startswith(prefix):
                 filters.append({'term': {key.replace(name, self.field): value}})
-        return filters
+        return {'must': filters}
 
     def from_response(self, name, response):
         pass

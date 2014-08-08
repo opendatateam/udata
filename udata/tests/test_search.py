@@ -301,35 +301,35 @@ class SearchQueryTest(TestCase):
 
     def test_facet_filter(self):
         search_query = search.SearchQuery(FakeSearch, q='test', tag='value')
-        expected = {
-            'bool': {
-                'must': [
-                    {'multi_match': {
-                        'query': 'test',
-                        'analyzer': search.i18n_analyzer,
-                        'fields': ['title^2', 'description']
-                    }},
-                    {'term': {'tags': 'value'}},
-                ]
-            }
-        }
-        self.assertEqual(search_query.get_query(), expected)
+        expectations = [
+            {'multi_match': {
+                'query': 'test',
+                'analyzer': search.i18n_analyzer,
+                'fields': ['title^2', 'description']
+            }},
+            {'term': {'tags': 'value'}},
+        ]
+
+        query = search_query.get_query()
+        self.assertEqual(len(query['bool']['must']), len(expectations))
+        for expected in expectations:
+            self.assertIn(expected, query['bool']['must'])
 
     def test_facet_filter_extras(self):
         search_query = search.SearchQuery(FakeSearch, **{'q': 'test', 'extra.key': 'value'})
-        expected = {
-            'bool': {
-                'must': [
-                    {'multi_match': {
-                        'query': 'test',
-                        'analyzer': search.i18n_analyzer,
-                        'fields': ['title^2', 'description']
-                    }},
-                    {'term': {'extras.key': 'value'}},
-                ]
-            }
-        }
-        self.assertEqual(search_query.get_query(), expected)
+        expectations = [
+            {'multi_match': {
+                'query': 'test',
+                'analyzer': search.i18n_analyzer,
+                'fields': ['title^2', 'description']
+            }},
+            {'term': {'extras.key': 'value'}},
+        ]
+
+        query = search_query.get_query()
+        self.assertEqual(len(query['bool']['must']), len(expectations))
+        for expected in expectations:
+            self.assertIn(expected, query['bool']['must'])
 
     def test_facet_filter_multi(self):
         search_query = search.SearchQuery(FakeSearch, q='test',
@@ -530,11 +530,12 @@ class TestBoolFacet(TestCase):
         response['facets'] = {
             'test': {
                 '_type': 'terms',
-                'total': 10,
+                'total': 25,
                 'other': 33,
                 'missing': 22,
                 'terms': [
-                    {'term': True, 'count': 10},
+                    {'term': 'T', 'count': 10},
+                    {'term': 'F', 'count': 15},
                 ],
             }
         }
@@ -542,15 +543,19 @@ class TestBoolFacet(TestCase):
         extracted = self.facet.from_response('test', response)
         self.assertEqual(extracted['type'], 'bool')
         self.assertEqual(extracted[True], 10)
-        self.assertEqual(extracted[False], 55)
+        self.assertEqual(extracted[False], 70)
 
     def test_to_filter(self):
-        self.assertEqual(self.facet.to_filter(True), {'term': {'boolean': True}})
-        self.assertEqual(self.facet.to_filter('True'), {'term': {'boolean': True}})
-        self.assertEqual(self.facet.to_filter('true'), {'term': {'boolean': True}})
-        self.assertEqual(self.facet.to_filter(False), {'term': {'boolean': False}})
-        self.assertEqual(self.facet.to_filter('False'), {'term': {'boolean': False}})
-        self.assertEqual(self.facet.to_filter('false'), {'term': {'boolean': False}})
+
+        for value in True, 'True', 'true':
+            kwargs = {'boolean': value}
+            expected = {'must': [{'term': {'boolean': True}}]}
+            self.assertEqual(self.facet.filter_from_kwargs('boolean', kwargs), expected)
+
+        for value in False, 'False', 'false':
+            kwargs = {'boolean': value}
+            expected = {'must_not': [{'term': {'boolean': True}}]}
+            self.assertEqual(self.facet.filter_from_kwargs('boolean', kwargs), expected)
 
     def test_aggregations(self):
         self.assertEqual(self.facet.to_aggregations(), {})

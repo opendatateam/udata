@@ -17,16 +17,17 @@ class TopicSearchQuery(search.SearchQuery):
     A SearchQuery that should also match on topic tags
     '''
     def get_query(self):
+        query = super(TopicSearchQuery, self).get_query()
         topic = self.kwargs['topic']
-        must = []
-        must.extend(self.build_text_queries())
-        must.extend(self.build_facet_queries())
-        return {
-            'bool': {
-                'must': must,
-                'should': [{'term': {'tags': tag}} for tag in topic.tags]
-            }
-        }
+        should = [{'term': {'tags': tag}} for tag in topic.tags]
+        if query == {'match_all': {}}:
+            return {'bool': {'should': should}}
+        else:
+            if not 'should' in query:
+                query['should'] = should
+            else:
+                query['should'].extend(should)
+        return query
 
 
 @blueprint.route('/<topic:topic>/')

@@ -85,10 +85,10 @@ class SearchQuery(object):
     def get_filter(self):
         return {}
 
-    def build_text_queries(self):
+    def build_text_query(self):
         '''Build full text query from kwargs'''
         if not self.kwargs.get('q'):
-            return []
+            return
         query_string = self.kwargs.get('q')
         if isinstance(query_string, (list, tuple)):
             query_string = ' '.join(query_string)
@@ -98,22 +98,20 @@ class SearchQuery(object):
         if self.adapter.fuzzy:
             query['multi_match']['fuzziness'] = 'AUTO'
             query['multi_match']['prefix_length'] = 2  # Make it configurable
-        return [query]
+        return query
 
     def build_facet_queries(self):
         '''Build sort query parameters from kwargs'''
         if not self.adapter.facets:
-            return []
-        queries = []
+            return {}
+        bool_query = {'must': [], 'must_not': [], 'should': []}
         for name, facet in self.adapter.facets.items():
             query = facet.filter_from_kwargs(name, self.kwargs)
             if not query:
                 continue
-            if isinstance(query, dict):
-                queries.append(query)
-            else:
-                queries.extend(query)
-        return queries
+            for key in 'must', 'must_not', 'should':
+                bool_query[key].extend(query.get(key, []))
+        return bool_query
 
     def get_aggregations(self):
         aggregations = {}
@@ -136,10 +134,26 @@ class SearchQuery(object):
         )
 
     def get_query(self):
-        must = []
-        must.extend(self.build_text_queries())
-        must.extend(self.build_facet_queries())
-        return {'bool': {'must': must}} if must else {'match_all': {}}
+        text_query = self.build_text_query()
+        bool_query = self.build_facet_queries()
+
+        if not text_query and not (bool_query and (
+                bool_query.get('must')
+                or bool_query.get('must_not')
+                or bool_query.get('should')
+            )):
+            return {'match_all': {}}
+
+        if text_query:
+            if not 'must' in bool_query:
+                bool_query['must'] = []
+            bool_query['must'].append(text_query)
+
+        for key in 'must', 'must_not', 'should':
+            if not bool_query[key]:
+                del bool_query[key]
+
+        return {'bool': bool_query}
 
     def to_url(self, url=None, replace=False, **kwargs):
         '''Serialize the query into an URL'''
