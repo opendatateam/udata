@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import logging
+
 from flask import url_for, g
 
 from udata.frontend import nav
@@ -11,7 +13,10 @@ from udata.forms import UserProfileForm, UserSettingsForm, UserAPIKeyForm, UserN
 
 from .permissions import sysadmin, UserEditPermission
 
+
 blueprint = I18nBlueprint('users', __name__, url_prefix='/u')
+
+log = logging.getLogger(__name__)
 
 
 @blueprint.before_app_request
@@ -146,8 +151,10 @@ class UserFollowingView(UserView, DetailView):
                 reuses.append(follow.following)
             elif isinstance(follow.following, Dataset):
                 datasets.append(follow.following)
-            else:
+            elif isinstance(follow.following, User):
                 users.append(follow.following)
+            else:
+                log.warning('Follow object %s has not dereferenced %s', follow.id, follow.following)
 
         context.update({
             'followed_datasets': sorted(datasets, key=lambda d: d.title),

@@ -1,4 +1,5 @@
 {% extends theme('layouts/1-column.html') %}
+{% from theme('macros/follow.html') import follow_btn with context %}
 
 {% block breadcrumb %}
     <li><a href="{{ url_for('users.list') }}">{{ _('Users') }}</a></li>
@@ -14,6 +15,10 @@
     </a>
 </div>
 {% endif %}
+{# Social actions #}
+<div class="btn-group btn-group-xs">
+    {{ follow_btn(user) }}
+</div>
 {% endblock %}
 
 {% block main_content %}

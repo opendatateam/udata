@@ -1,7 +1,7 @@
 {% set user_url = url_for('users.show', user=user) %}
 <div class="card">
     <a class="card-logo" href="{{ user_url }}">
-        <img src="{{ user|avatar(48) }}" alt="{{ user.fullname }}">
+        <img src="{{ user|avatar_url(48) }}" alt="{{ user.fullname }}">
     </a>
     <div class="card-body ellipsis-dot">
         <h4>
@@ -19,8 +19,8 @@
                 <a href class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Number of datasets') }}">
                     <span class="{{ ficon('fa-cubes') }}"></span>
+                    {{ ngettext('%(num)s dataset', '%(num)s datasets', user.metrics.datasets or 0) }}
                 </a>
-                {{ ngettext('%(num)s dataset', '%(num)s datasets', user.metrics.datasets or 0) }}
             </li>
             {% endif %}
             {% if user.metrics.reuses %}
@@ -28,8 +28,8 @@
                 <a href class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Number of reuses') }}">
                     <span class="{{ ficon('fa-retweet') }}"></span>
+                    {{ ngettext('%(num)s reuse', '%(num)s reuses', user.metrics.reuses or 0) }}
                 </a>
-                {{ ngettext('%(num)s reuse', '%(num)s reuses', user.metrics.reuses or 0) }}
             </li>
             {% endif %}
         </ul>
@@ -38,8 +38,8 @@
                 <a href class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Stars') }}">
                     <span class="{{ ficon('fa-star') }}"></span>
+                    {{ user.metrics.followers or 0 }}
                 </a>
-                {{ user.metrics.followers or 0 }}
             </li>
         </ul>
     </footer>

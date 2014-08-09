@@ -106,11 +106,13 @@
                 followed_users|length
             ) }}
             </h3>
+            <ul class="card-list">
             {% for user in followed_users %}
-            <div class="col-sm-4">
-              {% include theme('user/card.html') %}
-            </div>
+                <li class="col-sm-6">
+                {% include theme('user/card.html') %}
+                </li>
             {% endfor %}
+            </ul>
         </div>
         {% endif %}
     </div>
