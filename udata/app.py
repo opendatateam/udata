@@ -32,7 +32,7 @@ class UDataApp(Flask):
         - handle static aliases
         '''
         if not self.debug:
-            self.logger.error('Static files are only served in debug')
+            self.logger.error('Static files are only served in debug (%s)', filename)
             abort(404)
 
         cache_timeout = self.get_send_file_max_age(filename)
