@@ -15,6 +15,8 @@ from udata.core.issues.api import IssuesAPI
 from .models import ReuseIssue
 from .search import ReuseSearch
 
+ns = api.namespace('reuses', 'Reuse related operations')
+
 reuse_fields = {
     'id': fields.String,
     'title': fields.String,
@@ -31,6 +33,7 @@ reuse_fields = {
 }
 
 
+@ns.resource('/', endpoint='reuses')
 class ReuseListAPI(ModelListAPI):
     model = Reuse
     form = ReuseForm
@@ -38,32 +41,32 @@ class ReuseListAPI(ModelListAPI):
     search_adapter = ReuseSearch
 
 
+@ns.resource('/<reuse:reuse>/', endpoint='reuse')
 class ReuseAPI(ModelAPI):
     model = Reuse
     form = ReuseForm
     fields = reuse_fields
 
 
+@ns.resource('/<reuse:reuse>/featured/', endpoint='reuse_featured')
 class ReuseFeaturedAPI(SingleObjectAPI, API):
     model = Reuse
 
     @api.secure
     def post(self, reuse):
+        '''Mark a reuse as featured'''
         reuse.featured = True
         reuse.save()
         return marshal(reuse, reuse_fields)
 
     @api.secure
     def delete(self, reuse):
+        '''Unmark a reuse as featured'''
         reuse.featured = False
         reuse.save()
         return marshal(reuse, reuse_fields)
 
 
+@ns.resource('/<id>/issues/', endpoint='reuse_issues')
 class ReuseIssuesAPI(IssuesAPI):
     model = ReuseIssue
-
-api.add_resource(ReuseListAPI, '/reuses/', endpoint=b'api.reuses')
-api.add_resource(ReuseAPI, '/reuses/<reuse:reuse>/', endpoint=b'api.reuse')
-api.add_resource(ReuseFeaturedAPI, '/reuses/<reuse:reuse>/featured/', endpoint=b'api.reuse_featured')
-api.add_resource(ReuseIssuesAPI, '/reuses/<id>/issues/', endpoint=b'api.reuse_issues')

@@ -11,6 +11,9 @@ from udata.models import FollowOrg, FollowDataset, Follow, FollowReuse, FollowUs
 from .signals import on_unfollow
 
 
+ns = api.namespace('follow', 'Follower/Followee related operations')
+
+
 class FollowAPI(API):
     '''
     Base Follow Model API.
@@ -19,7 +22,7 @@ class FollowAPI(API):
 
     @api.secure
     def post(self, id):
-
+        '''Follow a given object'''
         follow, created = self.model.objects.get_or_create(follower=current_user.id, following=id, until=None)
         count = self.model.objects.followers(id).count()
 
@@ -27,6 +30,7 @@ class FollowAPI(API):
 
     @api.secure
     def delete(self, id):
+        '''Unfollow a given object'''
         follow = self.model.objects.get_or_404(follower=current_user.id, following=id, until=None)
         follow.until = datetime.now()
         follow.save()
@@ -35,6 +39,7 @@ class FollowAPI(API):
         return {'followers': count}, 200
 
 
+@ns.resource('/user/<id>/', endpoint='follow_user')
 class FollowUserAPI(FollowAPI):
     model = FollowUser
 
@@ -45,19 +50,16 @@ class FollowUserAPI(FollowAPI):
         return super(FollowUserAPI, self).post(id)
 
 
+@ns.resource('/organization/<id>/', endpoint='follow_organization')
 class FollowOrgAPI(FollowAPI):
     model = FollowOrg
 
 
+@ns.resource('/dataset/<id>/', endpoint='follow_dataset')
 class FollowDatasetAPI(FollowAPI):
     model = FollowDataset
 
 
+@ns.resource('/reuse/<id>/', endpoint='follow_reuse')
 class FollowReuseAPI(FollowAPI):
     model = FollowReuse
-
-
-api.add_resource(FollowUserAPI, '/follow/user/<id>/', endpoint=b'api.follow_user')
-api.add_resource(FollowOrgAPI, '/follow/organization/<id>/', endpoint=b'api.follow_organization')
-api.add_resource(FollowDatasetAPI, '/follow/dataset/<id>/', endpoint=b'api.follow_dataset')
-api.add_resource(FollowReuseAPI, '/follow/reuse/<id>/', endpoint=b'api.follow_reuse')

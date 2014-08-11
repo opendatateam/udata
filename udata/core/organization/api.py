@@ -13,6 +13,7 @@ from udata.models import Organization, MembershipRequest, Member
 
 from .search import OrganizationSearch
 
+ns = api.namespace('organizations', 'Organization related operations')
 
 org_fields = {
     'id': fields.String,
@@ -46,6 +47,7 @@ class OrganizationField(fields.Raw):
         }
 
 
+@ns.resource('/', endpoint='organizations')
 class OrganizationListAPI(ModelListAPI):
     model = Organization
     fields = org_fields
@@ -53,18 +55,18 @@ class OrganizationListAPI(ModelListAPI):
     search_adapter = OrganizationSearch
 
 
+@ns.resource('/<org:org>/', endpoint='organization')
 class OrganizationAPI(ModelAPI):
     model = Organization
     fields = org_fields
     form = OrganizationForm
 
 
+@ns.resource('/<org:org>/membership/', endpoint='request_membership')
 class MembershipRequestAPI(API):
-    '''
-    Apply for membership to a given organization.
-    '''
     @api.secure
     def post(self, org):
+        '''Apply for membership to a given organization.'''
         membership_request = org.pending_request(current_user._get_current_object())
         code = 200 if membership_request else 201
 
@@ -88,12 +90,11 @@ class MembershipAPI(API):
         api.abort(404, 'Unknown membership request id')
 
 
+@ns.resource('/<org:org>/membership/<uuid:id>/accept/', endpoint='accept_membership')
 class MembershipAcceptAPI(MembershipAPI):
-    '''
-    Accept user membership to a given organization.
-    '''
     @api.secure
     def post(self, org, id):
+        '''Accept user membership to a given organization.'''
         membership_request = self.get_or_404(org, id)
 
         membership_request.status = 'accepted'
@@ -107,12 +108,11 @@ class MembershipAcceptAPI(MembershipAPI):
         return marshal(member, member_fields), 200
 
 
+@ns.resource('/<org:org>/membership/<uuid:id>/refuse/', endpoint='refuse_membership')
 class MembershipRefuseAPI(MembershipAPI):
-    '''
-    Refuse user membership to a given organization.
-    '''
     @api.secure
     def post(self, org, id):
+        '''Refuse user membership to a given organization.'''
         membership_request = self.get_or_404(org, id)
         form = api.validate(MembershipRefuseForm)
 
@@ -124,11 +124,3 @@ class MembershipRefuseAPI(MembershipAPI):
         org.save()
 
         return {}, 200
-
-
-api.add_resource(OrganizationListAPI, '/organizations/', endpoint=b'api.organizations')
-api.add_resource(OrganizationAPI, '/organizations/<org:org>/', endpoint=b'api.organization')
-
-api.add_resource(MembershipRequestAPI, '/organizations/<org:org>/membership/', endpoint=b'api.request_membership')
-api.add_resource(MembershipAcceptAPI, '/organizations/<org:org>/membership/<uuid:id>/accept/', endpoint=b'api.accept_membership')
-api.add_resource(MembershipRefuseAPI, '/organizations/<org:org>/membership/<uuid:id>/refuse/', endpoint=b'api.refuse_membership')

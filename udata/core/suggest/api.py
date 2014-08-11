@@ -8,9 +8,13 @@ from udata.search import es
 
 DEFAULT_SIZE = 8
 
+ns = api.namespace('suggest', 'Completion suggester APIs')
 
+
+@ns.resource('/tags', endpoint='suggest_tags')
 class SuggestTagsAPI(API):
     def get(self):
+        '''Suggest tags'''
         q = request.args.get('q', '')
         size = request.args.get('size', DEFAULT_SIZE)
         result = es.suggest(index=es.index_name, body={
@@ -25,8 +29,10 @@ class SuggestTagsAPI(API):
         return sorted(result['tags'][0]['options'], key=lambda o: len(o['text']))
 
 
+@ns.resource('/formats', endpoint='suggest_formats')
 class SuggestFormatsAPI(API):
     def get(self):
+        '''Suggest file formats'''
         q = request.args.get('q', '')
         size = request.args.get('size', DEFAULT_SIZE)
         result = es.suggest(index=es.index_name, body={
@@ -41,8 +47,10 @@ class SuggestFormatsAPI(API):
         return sorted(result['formats'][0]['options'], key=lambda o: len(o['text']))
 
 
+@ns.resource('/organizations', endpoint='suggest_orgs')
 class SuggestOrgsAPI(API):
     def get(self):
+        '''Suggest organizations'''
         q = request.args.get('q', '')
         size = request.args.get('size', DEFAULT_SIZE)
         result = es.suggest(index=es.index_name, body={
@@ -66,8 +74,10 @@ class SuggestOrgsAPI(API):
         ]
 
 
+@ns.resource('/datasets', endpoint='suggest_datasets')
 class SuggestDatasetsAPI(API):
     def get(self):
+        '''Suggest datasets'''
         q = request.args.get('q', '')
         size = request.args.get('size', DEFAULT_SIZE)
         result = es.suggest(index=es.index_name, body={
@@ -91,8 +101,10 @@ class SuggestDatasetsAPI(API):
         ]
 
 
+@ns.resource('/reuses', endpoint='suggest_reuses')
 class SuggestReusesAPI(API):
     def get(self):
+        '''Suggest reuses'''
         q = request.args.get('q', '')
         size = request.args.get('size', DEFAULT_SIZE)
         result = es.suggest(index=es.index_name, body={
@@ -116,8 +128,10 @@ class SuggestReusesAPI(API):
         ]
 
 
+@ns.resource('/users', endpoint='suggest_users')
 class SuggestUsersAPI(API):
     def get(self):
+        '''Suggest users'''
         q = request.args.get('q', '')
         size = request.args.get('size', DEFAULT_SIZE)
         result = es.suggest(index=es.index_name, body={
@@ -138,11 +152,3 @@ class SuggestUsersAPI(API):
             }
             for opt in result['users'][0]['options']
         ]
-
-
-api.add_resource(SuggestTagsAPI, '/suggest/tags', endpoint=b'api.suggest_tags')
-api.add_resource(SuggestOrgsAPI, '/suggest/organizations', endpoint=b'api.suggest_orgs')
-api.add_resource(SuggestDatasetsAPI, '/suggest/datasets', endpoint=b'api.suggest_datasets')
-api.add_resource(SuggestReusesAPI, '/suggest/reuses', endpoint=b'api.suggest_reuses')
-api.add_resource(SuggestFormatsAPI, '/suggest/formats', endpoint=b'api.suggest_formats')
-api.add_resource(SuggestUsersAPI, '/suggest/users', endpoint=b'api.suggest_users')

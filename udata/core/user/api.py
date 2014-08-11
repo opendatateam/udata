@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import abort, url_for
+from flask import url_for
 from flask.ext.security import current_user
 
-from udata.api import api, ModelAPI, SingleObjectAPI, API, marshal, fields
-from udata.models import Dataset, Reuse, Organization, User
+from udata.api import api, ModelAPI, fields
+from udata.models import User
 from udata.forms import UserProfileForm
 
 from udata.core.organization.api import OrganizationField
 
+ns = api.namespace('me', 'Current related operations')
 
 user_fields = {
     'id': fields.String,
@@ -36,6 +37,7 @@ class UserField(fields.Raw):
         }
 
 
+@ns.resource('/', endpoint='me')
 class MeAPI(ModelAPI):
     model = User
     form = UserProfileForm
@@ -46,6 +48,3 @@ class MeAPI(ModelAPI):
         if not current_user.is_authenticated():
             api.abort(404)
         return current_user._get_current_object()
-
-
-api.add_resource(MeAPI, '/me/', endpoint=b'api.me')

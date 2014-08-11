@@ -13,13 +13,14 @@ from udata.core.user.views import blueprint as user_bp
 
 from udata.core.issues.models import Issue, Message, ISSUE_TYPES
 from udata.core.issues.metrics import IssuesMetric
-from udata.core.issues.api import IssuesAPI, IssueAPI
+from udata.core.issues.api import IssuesAPI
 
 from .api import APITestCase
 from .factories import faker, UserFactory
 
 
 bp = Blueprint('test_issues', __name__)
+ns = api.namespace('test', 'A test namespace')
 
 
 class Fake(WithMetrics, db.Document):
@@ -34,15 +35,9 @@ class FakeIssuesMetric(IssuesMetric):
     model = Fake
 
 
+@ns.resource('/<id>/issues/', endpoint='fake_issues')
 class FakeIssuesAPI(IssuesAPI):
     model = FakeIssue
-
-
-class FakeIssueAPI(IssueAPI):
-    model = FakeIssue
-
-
-api.add_resource(FakeIssuesAPI, '/test/<id>/issues/', endpoint=b'api.fake_issues')
 
 
 class IssuesTest(APITestCase):

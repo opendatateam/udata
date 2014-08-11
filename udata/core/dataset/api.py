@@ -12,6 +12,8 @@ from .models import Dataset, Resource, DatasetIssue
 from .forms import DatasetForm, ResourceForm, DatasetFullForm
 from .search import DatasetSearch
 
+ns = api.namespace('datasets', 'Dataset related operations')
+
 resource_fields = {
     'id': fields.String,
     'title': fields.String,
@@ -60,6 +62,7 @@ class DatasetField(fields.Raw):
         }
 
 
+@ns.resource('/', endpoint='datasets')
 class DatasetListAPI(ModelListAPI):
     model = Dataset
     form = DatasetFullForm
@@ -67,31 +70,37 @@ class DatasetListAPI(ModelListAPI):
     search_adapter = DatasetSearch
 
 
+@ns.resource('/<dataset:dataset>/', endpoint='dataset')
 class DatasetAPI(ModelAPI):
     model = Dataset
     form = DatasetForm
     fields = dataset_fields
 
 
+@ns.resource('/<dataset:dataset>/featured/', endpoint='dataset_featured')
 class DatasetFeaturedAPI(SingleObjectAPI, API):
     model = Dataset
 
     @api.secure
     def post(self, dataset):
+        '''Mark the dataset as featured'''
         dataset.featured = True
         dataset.save()
         return marshal(dataset, dataset_fields)
 
     @api.secure
     def delete(self, dataset):
+        '''Unmark the dataset as featured'''
         dataset.featured = False
         dataset.save()
         return marshal(dataset, dataset_fields)
 
 
+@ns.resource('/<dataset:dataset>/resources/', endpoint='resources')
 class ResourcesAPI(API):
     @api.secure
     def post(self, dataset):
+        '''Create a new resource for a given dataset'''
         form = api.validate(ResourceForm)
         resource = Resource()
         form.populate_obj(resource)
@@ -100,6 +109,7 @@ class ResourcesAPI(API):
         return marshal(resource, resource_fields), 201
 
 
+@ns.resource('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource')
 class ResourceAPI(API):
     def get_resource_or_404(self, dataset, id):
         resource = get_by(dataset.resources, 'id', id)
@@ -109,6 +119,7 @@ class ResourceAPI(API):
 
     @api.secure
     def put(self, dataset, rid):
+        '''Update a given resource on a given dataset'''
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
         form.populate_obj(resource)
@@ -117,19 +128,13 @@ class ResourceAPI(API):
 
     @api.secure
     def delete(self, dataset, rid):
+        '''Delete a given resource on a given dataset'''
         resource = self.get_resource_or_404(dataset, rid)
         dataset.resources.remove(resource)
         dataset.save()
         return '', 204
 
 
+@ns.resource('/<id>/issues/', endpoint='dataset_issues')
 class DatasetIssuesAPI(IssuesAPI):
     model = DatasetIssue
-
-
-api.add_resource(DatasetListAPI, '/datasets/', endpoint=b'api.datasets')
-api.add_resource(DatasetAPI, '/datasets/<dataset:dataset>/', endpoint=b'api.dataset')
-api.add_resource(DatasetFeaturedAPI, '/datasets/<dataset:dataset>/featured/', endpoint=b'api.dataset_featured')
-api.add_resource(ResourcesAPI, '/datasets/<dataset:dataset>/resources/', endpoint=b'api.resources')
-api.add_resource(ResourceAPI, '/datasets/<dataset:dataset>/resources/<uuid:rid>/', endpoint=b'api.resource')
-api.add_resource(DatasetIssuesAPI, '/datasets/<id>/issues/', endpoint=b'api.dataset_issues')

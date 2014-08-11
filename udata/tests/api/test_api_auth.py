@@ -10,6 +10,8 @@ from udata.forms import Form, fields, validators
 from . import APITestCase
 from ..factories import UserFactory
 
+ns = api.namespace('fake', 'A Fake namespace')
+
 
 class FakeForm(Form):
     required = fields.StringField(validators=[validators.required()])
@@ -17,6 +19,7 @@ class FakeForm(Form):
     email = fields.StringField(validators=[validators.Email()])
 
 
+@ns.resource('/', endpoint='fake')
 class FakeAPI(API):
     @api.secure
     def post(self):
@@ -28,8 +31,6 @@ class FakeAPI(API):
     def put(self):
         api.validate(FakeForm)
         return {'success': True}
-
-api.add_resource(FakeAPI, '/fake/', endpoint=b'api.fake')
 
 
 class APIAuthTest(APITestCase):

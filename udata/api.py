@@ -61,7 +61,10 @@ class UDataApi(Api):
         return form
 
 
-api = UDataApi(prefix='/api', decorators=[csrf.exempt])
+api = UDataApi(prefix='/api', decorators=[csrf.exempt],
+    version='1.0', title='uData API',
+    description='Bla bla bla'
+)
 
 
 @api.representation('application/json')
@@ -83,6 +86,7 @@ class ModelListAPI(API):
     search_adapter = None
 
     def get(self):
+        '''List all objects'''
         if self.search_adapter:
             objects = search.query(self.search_adapter, **multi_to_dict(request.args))
         else:
@@ -91,6 +95,7 @@ class ModelListAPI(API):
 
     @api.secure
     def post(self):
+        '''Create a new object'''
         form = api.validate(self.form)
         return marshal(form.save(), self.fields), 201
 
@@ -110,17 +115,20 @@ class ModelAPI(SingleObjectAPI, API):
     form = None
 
     def get(self, **kwargs):
+        '''Get a given object'''
         obj = self.get_or_404(**kwargs)
         return marshal(obj, self.fields)
 
     @api.secure
     def put(self, **kwargs):
+        '''Update a given object'''
         obj = self.get_or_404(**kwargs)
         form = api.validate(self.form, obj)
         return marshal(form.save(), self.fields)
 
     @api.secure
     def delete(self, **kwargs):
+        '''Delete a given object'''
         obj = self.get_or_404(**kwargs)
         if hasattr(obj, 'deleted'):
             obj.deleted = datetime.now()

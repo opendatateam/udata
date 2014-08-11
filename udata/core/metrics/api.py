@@ -9,6 +9,9 @@ from flask.ext.restful import fields
 from udata.api import api, API, marshal, reqparse
 from udata.models import Metrics
 
+
+ns = api.namespace('metrics', 'Metrics related operations')
+
 metrics_fields = {
     'object_id': fields.String,
     'date': fields.String,
@@ -24,6 +27,7 @@ parser.add_argument('end', type=isodate, help='End of the period to fetch', loca
 parser.add_argument('day', type=isodate, help='Specific day date to fetch', location='args')
 
 
+@ns.resource('/<id>', endpoint='metrics')
 class MetricsAPI(API):
     def get(self, id):
         try:
@@ -41,6 +45,3 @@ class MetricsAPI(API):
         else:
             result = queryset.first_or_404()
         return marshal(result, metrics_fields)
-
-
-api.add_resource(MetricsAPI, '/metrics/<id>/', endpoint=b'api.metrics')
