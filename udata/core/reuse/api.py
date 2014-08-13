@@ -33,7 +33,7 @@ reuse_fields = {
 }
 
 
-@ns.resource('/', endpoint='reuses')
+@ns.route('/', endpoint='reuses')
 class ReuseListAPI(ModelListAPI):
     model = Reuse
     form = ReuseForm
@@ -41,14 +41,14 @@ class ReuseListAPI(ModelListAPI):
     search_adapter = ReuseSearch
 
 
-@ns.resource('/<reuse:reuse>/', endpoint='reuse')
+@ns.route('/<reuse:reuse>/', endpoint='reuse')
 class ReuseAPI(ModelAPI):
     model = Reuse
     form = ReuseForm
     fields = reuse_fields
 
 
-@ns.resource('/<reuse:reuse>/featured/', endpoint='reuse_featured')
+@ns.route('/<reuse:reuse>/featured/', endpoint='reuse_featured')
 class ReuseFeaturedAPI(SingleObjectAPI, API):
     model = Reuse
 
@@ -67,6 +67,6 @@ class ReuseFeaturedAPI(SingleObjectAPI, API):
         return marshal(reuse, reuse_fields)
 
 
-@ns.resource('/<id>/issues/', endpoint='reuse_issues')
+@ns.route('/<id>/issues/', endpoint='reuse_issues')
 class ReuseIssuesAPI(IssuesAPI):
     model = ReuseIssue

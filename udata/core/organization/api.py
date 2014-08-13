@@ -47,7 +47,7 @@ class OrganizationField(fields.Raw):
         }
 
 
-@ns.resource('/', endpoint='organizations')
+@ns.route('/', endpoint='organizations')
 class OrganizationListAPI(ModelListAPI):
     model = Organization
     fields = org_fields
@@ -55,14 +55,14 @@ class OrganizationListAPI(ModelListAPI):
     search_adapter = OrganizationSearch
 
 
-@ns.resource('/<org:org>/', endpoint='organization')
+@ns.route('/<org:org>/', endpoint='organization')
 class OrganizationAPI(ModelAPI):
     model = Organization
     fields = org_fields
     form = OrganizationForm
 
 
-@ns.resource('/<org:org>/membership/', endpoint='request_membership')
+@ns.route('/<org:org>/membership/', endpoint='request_membership')
 class MembershipRequestAPI(API):
     @api.secure
     def post(self, org):
@@ -90,7 +90,7 @@ class MembershipAPI(API):
         api.abort(404, 'Unknown membership request id')
 
 
-@ns.resource('/<org:org>/membership/<uuid:id>/accept/', endpoint='accept_membership')
+@ns.route('/<org:org>/membership/<uuid:id>/accept/', endpoint='accept_membership')
 class MembershipAcceptAPI(MembershipAPI):
     @api.secure
     def post(self, org, id):
@@ -108,7 +108,7 @@ class MembershipAcceptAPI(MembershipAPI):
         return marshal(member, member_fields), 200
 
 
-@ns.resource('/<org:org>/membership/<uuid:id>/refuse/', endpoint='refuse_membership')
+@ns.route('/<org:org>/membership/<uuid:id>/refuse/', endpoint='refuse_membership')
 class MembershipRefuseAPI(MembershipAPI):
     @api.secure
     def post(self, org, id):

@@ -62,7 +62,7 @@ class DatasetField(fields.Raw):
         }
 
 
-@ns.resource('/', endpoint='datasets')
+@ns.route('/', endpoint='datasets')
 class DatasetListAPI(ModelListAPI):
     model = Dataset
     form = DatasetFullForm
@@ -70,14 +70,14 @@ class DatasetListAPI(ModelListAPI):
     search_adapter = DatasetSearch
 
 
-@ns.resource('/<dataset:dataset>/', endpoint='dataset')
+@ns.route('/<dataset:dataset>/', endpoint='dataset')
 class DatasetAPI(ModelAPI):
     model = Dataset
     form = DatasetForm
     fields = dataset_fields
 
 
-@ns.resource('/<dataset:dataset>/featured/', endpoint='dataset_featured')
+@ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')
 class DatasetFeaturedAPI(SingleObjectAPI, API):
     model = Dataset
 
@@ -96,7 +96,7 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
         return marshal(dataset, dataset_fields)
 
 
-@ns.resource('/<dataset:dataset>/resources/', endpoint='resources')
+@ns.route('/<dataset:dataset>/resources/', endpoint='resources')
 class ResourcesAPI(API):
     @api.secure
     def post(self, dataset):
@@ -109,7 +109,7 @@ class ResourcesAPI(API):
         return marshal(resource, resource_fields), 201
 
 
-@ns.resource('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource')
+@ns.route('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource')
 class ResourceAPI(API):
     def get_resource_or_404(self, dataset, id):
         resource = get_by(dataset.resources, 'id', id)
@@ -135,6 +135,6 @@ class ResourceAPI(API):
         return '', 204
 
 
-@ns.resource('/<id>/issues/', endpoint='dataset_issues')
+@ns.route('/<id>/issues/', endpoint='dataset_issues')
 class DatasetIssuesAPI(IssuesAPI):
     model = DatasetIssue

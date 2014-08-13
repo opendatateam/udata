@@ -37,7 +37,7 @@ class UserField(fields.Raw):
         }
 
 
-@ns.resource('/', endpoint='me')
+@ns.route('/', endpoint='me')
 class MeAPI(ModelAPI):
     model = User
     form = UserProfileForm

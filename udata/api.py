@@ -6,18 +6,21 @@ import logging
 from datetime import datetime
 from functools import wraps
 
-from flask import request, url_for, json, make_response
+from flask import request, url_for, json, make_response, redirect
 from flask.ext.restful import Api, Resource, marshal, fields, abort, reqparse
 
 from werkzeug.datastructures import MultiDict
 
 from udata import search
+from udata.i18n import I18nBlueprint
 from udata.auth import current_user, login_user
-from udata.frontend import csrf
+from udata.frontend import csrf, render
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
 
 log = logging.getLogger(__name__)
+
+bp = I18nBlueprint('apii18n', __name__)
 
 
 DEFAULT_PAGE_SIZE = 50
@@ -60,11 +63,19 @@ class UDataApi(Api):
             self.abort(400, errors=form.errors)
         return form
 
+    def render_ui(self):
+        return redirect(url_for('apii18n.apidoc'))
+
 
 api = UDataApi(prefix='/api', decorators=[csrf.exempt],
     version='1.0', title='uData API',
     description='Bla bla bla'
 )
+
+
+@bp.route('/apidoc/')
+def apidoc():
+    return render('apidoc.html', api_endpoint=api.endpoint, specs_url=api.specs_url)
 
 
 @api.representation('application/json')
@@ -215,3 +226,4 @@ def init_app(app):
             log.error('Error importing %s: %s', name, e)
 
     api.init_app(app)
+    app.register_blueprint(bp)

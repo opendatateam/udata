@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from flask import abort, request
+from flask import request
 
 from flask.ext.security import current_user
 
@@ -66,7 +66,7 @@ class IssuesAPI(API):
         return marshal(list(issues), issue_fields)
 
 
-@ns.resource('/<id>', endpoint='issue')
+@ns.route('/<id>', endpoint='issue')
 class IssueAPI(API):
     '''
     Single Issue Model API (Read and update).

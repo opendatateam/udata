@@ -27,7 +27,7 @@ parser.add_argument('end', type=isodate, help='End of the period to fetch', loca
 parser.add_argument('day', type=isodate, help='Specific day date to fetch', location='args')
 
 
-@ns.resource('/<id>', endpoint='metrics')
+@ns.route('/<id>', endpoint='metrics')
 class MetricsAPI(API):
     def get(self, id):
         try:

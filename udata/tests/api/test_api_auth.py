@@ -19,7 +19,7 @@ class FakeForm(Form):
     email = fields.StringField(validators=[validators.Email()])
 
 
-@ns.resource('/', endpoint='fake')
+@ns.route('/', endpoint='fake')
 class FakeAPI(API):
     @api.secure
     def post(self):

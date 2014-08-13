@@ -151,6 +151,7 @@ def init_app(app):
         'bower/font-awesome/less',
         'bower/bootstrap-markdown/less',
         'bower/selectize/dist/less',
+        'bower/swagger-ui',
     ]
 
     # Hook into flask security to user themed auth pages

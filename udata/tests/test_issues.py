@@ -35,7 +35,7 @@ class FakeIssuesMetric(IssuesMetric):
     model = Fake
 
 
-@ns.resource('/<id>/issues/', endpoint='fake_issues')
+@ns.route('/<id>/issues/', endpoint='fake_issues')
 class FakeIssuesAPI(IssuesAPI):
     model = FakeIssue
 

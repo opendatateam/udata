@@ -39,7 +39,7 @@ class FollowAPI(API):
         return {'followers': count}, 200
 
 
-@ns.resource('/user/<id>/', endpoint='follow_user')
+@ns.route('/user/<id>/', endpoint='follow_user')
 class FollowUserAPI(FollowAPI):
     model = FollowUser
 
@@ -50,16 +50,16 @@ class FollowUserAPI(FollowAPI):
         return super(FollowUserAPI, self).post(id)
 
 
-@ns.resource('/organization/<id>/', endpoint='follow_organization')
+@ns.route('/organization/<id>/', endpoint='follow_organization')
 class FollowOrgAPI(FollowAPI):
     model = FollowOrg
 
 
-@ns.resource('/dataset/<id>/', endpoint='follow_dataset')
+@ns.route('/dataset/<id>/', endpoint='follow_dataset')
 class FollowDatasetAPI(FollowAPI):
     model = FollowDataset
 
 
-@ns.resource('/reuse/<id>/', endpoint='follow_reuse')
+@ns.route('/reuse/<id>/', endpoint='follow_reuse')
 class FollowReuseAPI(FollowAPI):
     model = FollowReuse
