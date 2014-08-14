@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import wraps
 
 from flask import request, url_for, json, make_response, redirect
-from flask.ext.restful import Api, Resource, marshal, fields, abort, reqparse
+from flask.ext.restplus import Api, Resource, marshal, fields, reqparse
 
 from werkzeug.datastructures import MultiDict
 
@@ -40,7 +40,6 @@ class UDataApi(Api):
             try:
                 user = User.objects.get(apikey=apikey)
             except User.DoesNotExist:
-                # abort(401)
                 self.abort(401, 'Invalid API Key')
 
             if not login_user(user, False):
@@ -48,13 +47,6 @@ class UDataApi(Api):
             return func(*args, **kwargs)
 
         return wrapper
-
-    def abort(self, code=500, message=None, **kwargs):
-        if message or kwargs and not 'status' in kwargs:
-            kwargs['status'] = code
-        if message:
-            kwargs['message'] = message
-        abort(code, **kwargs)
 
     def validate(self, form_cls, instance=None):
         '''Validate a form from the request and handle errors'''
@@ -105,6 +97,7 @@ class ModelListAPI(API):
         return marshal_page(objects, self.fields)
 
     @api.secure
+    @api.doc(responses={400: 'Validation error'})
     def post(self):
         '''Create a new object'''
         form = api.validate(self.form)
@@ -121,6 +114,7 @@ class SingleObjectAPI(object):
         return self.model.objects.get_or_404(**kwargs)
 
 
+@api.doc(responses={404: 'Object not found'})
 class ModelAPI(SingleObjectAPI, API):
     fields = None
     form = None
@@ -131,6 +125,7 @@ class ModelAPI(SingleObjectAPI, API):
         return marshal(obj, self.fields)
 
     @api.secure
+    @api.doc(responses={400: 'Validation error'})
     def put(self, **kwargs):
         '''Update a given object'''
         obj = self.get_or_404(**kwargs)

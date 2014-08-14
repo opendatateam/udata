@@ -27,6 +27,10 @@ require.config({
         'd3': '../bower/d3/d3',
         'highstock': '../bower/highstock-components/highstock',
 
+        // Swagger based API doc
+        'swagger-ui': '../bower/swagger-ui/dist',
+        'jquery.browser': '../bower/jquery.browser/dist/jquery.browser',
+
         //Plugins
         'hbs': '../bower/require-handlebars-plugin/hbs',
 
@@ -92,6 +96,41 @@ require.config({
         'bloodhound': {
             deps: ['jquery'],
             exports: 'Bloodhound'
+        },
+        // Swagger UI
+        'swagger-ui/lib/swagger': {
+            deps: ['swagger-ui/lib/shred.bundle'],
+            exports: 'SwaggerApi'
+        },
+        'swagger-ui/lib/backbone-min': {
+            deps: ['swagger-ui/lib/underscore-min'],
+            exports: 'Backbone'
+        },
+        'swagger-ui/lib/highlight.7.3.pack': {
+            exports: 'hljs'
+        },
+        'swagger-ui/lib/jquery.ba-bbq.min': {
+            deps: ['jquery', 'jquery.browser']
+        },
+        'swagger-ui/lib/jquery.slideto.min': {
+            deps: ['jquery']
+        },
+        'swagger-ui/lib/jquery.wiggle.min': {
+            deps: ['jquery']
+        },
+        'swagger-ui/swagger-ui': {
+            deps: [
+                'jquery',
+                'swagger-ui/lib/swagger',
+                'swagger-ui/lib/handlebars-1.0.0',
+                'swagger-ui/lib/underscore-min',
+                'swagger-ui/lib/backbone-min',
+                'swagger-ui/lib/jquery.ba-bbq.min',
+                'swagger-ui/lib/jquery.slideto.min',
+                'swagger-ui/lib/jquery.wiggle.min',
+                'swagger-ui/lib/highlight.7.3.pack',
+            ],
+            exports: 'SwaggerUi'
         }
     }
 

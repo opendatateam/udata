@@ -14,6 +14,8 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
         metrics: {path: i18n('/metrics/'), moduleId: 'dashboard/site'},
         search: {path: i18n('/search/'), moduleId: 'search'},
 
+        apidoc: {path: i18n('/apidoc/*'), moduleId: 'apidoc'},
+
         // Site admin
         siteIssues: {path: i18n('/site/issues/'), moduleId: 'issue/list'},
 

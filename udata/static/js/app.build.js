@@ -95,6 +95,11 @@
                 'app',
                 'form/widgets'
             ],
+        }, {
+            name: 'apidoc',
+            exclude: [
+                'app',
+            ],
         }
     ]
 })

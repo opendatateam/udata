@@ -10,8 +10,14 @@ DEFAULT_SIZE = 8
 
 ns = api.namespace('suggest', 'Completion suggester APIs')
 
+params = {'q': {
+    'type': 'string',
+    'paramType': 'query',
+    'description': 'The string to autocomplete/suggest'
+}}
 
-@ns.route('/tags', endpoint='suggest_tags')
+
+@ns.route('/tags', endpoint='suggest_tags', doc={'params': params})
 class SuggestTagsAPI(API):
     def get(self):
         '''Suggest tags'''
@@ -29,7 +35,7 @@ class SuggestTagsAPI(API):
         return sorted(result['tags'][0]['options'], key=lambda o: len(o['text']))
 
 
-@ns.route('/formats', endpoint='suggest_formats')
+@ns.route('/formats', endpoint='suggest_formats', doc={'params': params})
 class SuggestFormatsAPI(API):
     def get(self):
         '''Suggest file formats'''
@@ -47,7 +53,7 @@ class SuggestFormatsAPI(API):
         return sorted(result['formats'][0]['options'], key=lambda o: len(o['text']))
 
 
-@ns.route('/organizations', endpoint='suggest_orgs')
+@ns.route('/organizations', endpoint='suggest_orgs', doc={'params': params})
 class SuggestOrgsAPI(API):
     def get(self):
         '''Suggest organizations'''
@@ -74,7 +80,7 @@ class SuggestOrgsAPI(API):
         ]
 
 
-@ns.route('/datasets', endpoint='suggest_datasets')
+@ns.route('/datasets', endpoint='suggest_datasets', doc={'params': params})
 class SuggestDatasetsAPI(API):
     def get(self):
         '''Suggest datasets'''
@@ -101,7 +107,7 @@ class SuggestDatasetsAPI(API):
         ]
 
 
-@ns.route('/reuses', endpoint='suggest_reuses')
+@ns.route('/reuses', endpoint='suggest_reuses', doc={'params': params})
 class SuggestReusesAPI(API):
     def get(self):
         '''Suggest reuses'''
@@ -128,7 +134,7 @@ class SuggestReusesAPI(API):
         ]
 
 
-@ns.route('/users', endpoint='suggest_users')
+@ns.route('/users', endpoint='suggest_users', doc={'params': params})
 class SuggestUsersAPI(API):
     def get(self):
         '''Suggest users'''

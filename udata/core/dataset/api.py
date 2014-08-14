@@ -52,6 +52,10 @@ dataset_fields = {
     'uri': fields.UrlFor('api.dataset', lambda o: {'dataset': o}),
 }
 
+common_doc = {
+    'params': {'dataset': {'description': 'The dataset ID or slug'}}
+}
+
 
 class DatasetField(fields.Raw):
     def format(self, dataset):
@@ -70,14 +74,14 @@ class DatasetListAPI(ModelListAPI):
     search_adapter = DatasetSearch
 
 
-@ns.route('/<dataset:dataset>/', endpoint='dataset')
+@ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)
 class DatasetAPI(ModelAPI):
     model = Dataset
     form = DatasetForm
     fields = dataset_fields
 
 
-@ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')
+@ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured', doc=common_doc)
 class DatasetFeaturedAPI(SingleObjectAPI, API):
     model = Dataset
 
@@ -96,7 +100,7 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
         return marshal(dataset, dataset_fields)
 
 
-@ns.route('/<dataset:dataset>/resources/', endpoint='resources')
+@ns.route('/<dataset:dataset>/resources/', endpoint='resources', doc=common_doc)
 class ResourcesAPI(API):
     @api.secure
     def post(self, dataset):
@@ -109,7 +113,8 @@ class ResourcesAPI(API):
         return marshal(resource, resource_fields), 201
 
 
-@ns.route('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource')
+@ns.route('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource', doc=common_doc)
+@api.doc(params={'rid': {'description': 'The resource unique identifier'}})
 class ResourceAPI(API):
     def get_resource_or_404(self, dataset, id):
         resource = get_by(dataset.resources, 'id', id)
@@ -136,5 +141,6 @@ class ResourceAPI(API):
 
 
 @ns.route('/<id>/issues/', endpoint='dataset_issues')
+@api.doc(params={'id': {'description': 'The dataset ID'}})
 class DatasetIssuesAPI(IssuesAPI):
     model = DatasetIssue
