@@ -16,9 +16,11 @@
 </div>
 {% endif %}
 {# Social actions #}
+{% if current_user != user %}
 <div class="btn-group btn-group-xs">
     {{ follow_btn(user) }}
 </div>
+{% endif %}
 {% endblock %}
 
 {% block main_content %}

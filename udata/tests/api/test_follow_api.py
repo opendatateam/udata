@@ -27,6 +27,15 @@ class FollowAPITest(APITestCase):
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
+    def test_follow_myself(self):
+        '''It should not allow to follow myself'''
+        user = self.login()
+
+        response = self.post(url_for('api.follow_user', id=user.id))
+        self.assertStatus(response, 403)
+
+        self.assertEqual(Follow.objects.followers(user).count(), 0)
+
     def test_follow_org(self):
         '''It should follow an org on POST'''
         user = self.login()

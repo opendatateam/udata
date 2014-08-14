@@ -21,6 +21,7 @@ class FollowAPI(API):
 
     @api.secure
     def post(self, id):
+
         follow, created = self.model.objects.get_or_create(follower=current_user.id, following=id, until=None)
         count = self.model.objects.followers(id).count()
 
@@ -38,6 +39,12 @@ class FollowAPI(API):
 
 class FollowUserAPI(FollowAPI):
     model = FollowUser
+
+    @api.secure
+    def post(self, id):
+        if id == str(current_user.id):
+            api.abort(403, "You can't follow yourself")
+        return super(FollowUserAPI, self).post(id)
 
 
 class FollowOrgAPI(FollowAPI):
