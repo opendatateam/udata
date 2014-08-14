@@ -3,11 +3,9 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from flask import abort
-
 from flask.ext.security import current_user
 
-from udata.api import api, API, marshal, fields
+from udata.api import api, API
 from udata.models import FollowOrg, FollowDataset, Follow, FollowReuse, FollowUser
 
 from .signals import on_unfollow

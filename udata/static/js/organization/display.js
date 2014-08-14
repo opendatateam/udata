@@ -6,11 +6,12 @@ define([
     'logger',
     'auth',
     'i18n',
+    'api',
     'notify',
     'widgets/modal',
     'hbs!templates/organization/request-membership-modal',
     'widgets/follow-btn'
-], function($, log, Auth, i18n, Notify, modal, modal_tpl) {
+], function($, log, Auth, i18n, API, Notify, modal, modal_tpl) {
 
         // Async membership request
         $('a.membership').click(function() {
@@ -31,7 +32,7 @@ define([
 
             $modal.find('.btn-success').click(function() {
                 var data = {comment: $modal.find('#comment').val()};
-                $.post(api_url, data, function(data) {
+                API.post(api_url, data, function(data) {
                     var msg = i18n._('A request has been sent to the administrators');
                     Notify.success(msg);
                     $this.remove();
