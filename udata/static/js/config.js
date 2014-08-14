@@ -17,6 +17,7 @@ require.config({
         'domReady': '../bower/requirejs-domready/domReady',
         'typeahead': '../bower/typeahead.js/dist/typeahead.jquery',
         'bloodhound': '../bower/typeahead.js/dist/bloodhound',
+        'highlight': '../bower/highlightjs/highlight.pack',
 
         // jQuery plugins
         'jquery.microdata': '../bower/jquery.microdata/index',
@@ -106,7 +107,7 @@ require.config({
             deps: ['swagger-ui/lib/underscore-min'],
             exports: 'Backbone'
         },
-        'swagger-ui/lib/highlight.7.3.pack': {
+        'highlight': {
             exports: 'hljs'
         },
         'swagger-ui/lib/jquery.ba-bbq.min': {
@@ -128,7 +129,7 @@ require.config({
                 'swagger-ui/lib/jquery.ba-bbq.min',
                 'swagger-ui/lib/jquery.slideto.min',
                 'swagger-ui/lib/jquery.wiggle.min',
-                'swagger-ui/lib/highlight.7.3.pack',
+                // 'highlight.7.3.pack',
             ],
             exports: 'SwaggerUi'
         }

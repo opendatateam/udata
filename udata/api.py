@@ -65,6 +65,14 @@ api = UDataApi(prefix='/api', decorators=[csrf.exempt],
 )
 
 
+@api.representation('application/json')
+def output_json(data, code, headers=None):
+    '''Use Flask JSON to serialize'''
+    resp = make_response(json.dumps(data), code)
+    resp.headers.extend(headers or {})
+    return resp
+
+
 @bp.route('/apidoc/')
 def apidoc():
     return render('apidoc.html', api_endpoint=api.endpoint, specs_url=api.specs_url)

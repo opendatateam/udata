@@ -4,13 +4,14 @@
 define([
     'jquery',
     'swagger-ui/swagger-ui',
-    'swagger-ui/lib/highlight.7.3.pack',
+    'highlight',
     'logger'
 ], function($, SwaggerUi, hljs, log) {
     'use strict';
 
     return {
         start: function() {
+            hljs.initHighlightingOnLoad();
             window.swaggerUi = new SwaggerUi({
                 url: $('meta[name="swagger-specs"]').attr('content'),
                 dom_id: "swagger-ui-container",
@@ -34,7 +35,7 @@ define([
                 onFailure: function(data) {
                     log.error("Unable to Load SwaggerUI");
                 },
-                docExpansion: "list",
+                docExpansion: "none",
                 sorter: "alpha"
             });
 

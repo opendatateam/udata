@@ -22,6 +22,7 @@ reuse_fields = api.model('Reuse', {
     'title': fields.String,
     'slug': fields.String,
     'type': fields.String,
+    'featured': fields.Boolean,
     'description': fields.String,
     'created_at': fields.ISODateTime,
     'last_modified': fields.ISODateTime,

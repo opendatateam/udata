@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-08 17:55+0200\n"
+"POT-Creation-Date: 2014-08-14 17:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -358,7 +358,7 @@ msgstr ""
 msgid "Last reuses"
 msgstr ""
 
-#: udata/core/site/metrics.py:71 udata/templates/user/base.html:4
+#: udata/core/site/metrics.py:71 udata/templates/user/base.html:5
 #: udata/templates/user/edit_base.html:5 udata/templates/user/following.html:18
 msgid "Users"
 msgstr ""
@@ -372,7 +372,7 @@ msgstr ""
 #: udata/templates/organization/edit_base.html:7
 #: udata/templates/organization/followers.html:5
 #: udata/templates/organization/list.html:7
-#: udata/templates/reuse/search-panel.html:12 udata/templates/user/base.html:74
+#: udata/templates/reuse/search-panel.html:12 udata/templates/user/base.html:81
 #: udata/templates/user/following.html:17
 msgid "Organizations"
 msgstr ""
@@ -421,19 +421,19 @@ msgstr ""
 msgid "Site moderator"
 msgstr ""
 
-#: udata/core/user/views.py:28 udata/templates/header.html:46
+#: udata/core/user/views.py:33 udata/templates/header.html:46
 msgid "Profile"
 msgstr ""
 
-#: udata/core/user/views.py:29 udata/templates/header.html:61
+#: udata/core/user/views.py:34 udata/templates/header.html:61
 msgid "Settings"
 msgstr ""
 
-#: udata/core/user/views.py:30 udata/templates/user/edit_apikey.html:10
+#: udata/core/user/views.py:35 udata/templates/user/edit_apikey.html:10
 msgid "API KEY"
 msgstr ""
 
-#: udata/core/user/views.py:31
+#: udata/core/user/views.py:36
 msgid "Notifications"
 msgstr ""
 
@@ -475,6 +475,76 @@ msgstr ""
 #: udata/models/datetime_fields.py:52 udata/templates/dataset/search-panel.html:8
 #: udata/templates/reuse/search-panel.html:8
 msgid "Last modification date"
+msgstr ""
+
+#: udata/templates/apidoc.html:4
+msgid "API Documentation"
+msgstr ""
+
+#: udata/templates/apidoc.html:5
+#, python-format
+msgid "%s dynamic API documentation"
+msgstr ""
+
+#: udata/templates/apidoc.html:21
+msgid "This page describe this website's free and open RESTful API's behavior"
+msgstr ""
+
+#: udata/templates/apidoc.html:27
+msgid "Authentication"
+msgstr ""
+
+#: udata/templates/apidoc.html:32
+msgid "In order to be able to execute write operations,"
+msgstr ""
+
+#: udata/templates/apidoc.html:34
+#, python-format
+msgid "you first need to obtain an %(apikey)s in your profile settings."
+msgstr ""
+
+#: udata/templates/apidoc.html:38
+msgid "API Key"
+msgstr ""
+
+#: udata/templates/apidoc.html:41
+msgid "you first need to authenticate and obtain an API Key in your profile settings."
+msgstr ""
+
+#: udata/templates/apidoc.html:44
+msgid ""
+"This key should be provided on each call in the <code>X-API-KEY</code> HTTP "
+"header."
+msgstr ""
+
+#: udata/templates/apidoc.html:50
+msgid "Pagination"
+msgstr ""
+
+#: udata/templates/apidoc.html:54
+msgid ""
+"Some method are paginated and always follow the same pattern.\n"
+"                The object list is wrapped in a <code>Pagination</code> "
+"object.\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:58
+msgid ""
+"You don't have to compute yourself the previous and next pages\n"
+"                because the URLs are available in the response under the\n"
+"                <code>previous_page</code> and <code>next_page</code> "
+"attributes.\n"
+"                They will be set to <code>null</code> if there is no previous"
+" and/or next page."
+msgstr ""
+
+#: udata/templates/apidoc.html:63
+msgid "Example"
+msgstr ""
+
+#: udata/templates/apidoc.html:77
+msgid "Reference"
 msgstr ""
 
 #: udata/templates/base.html:48
@@ -668,7 +738,7 @@ msgstr ""
 #: udata/templates/organization/display.html:25
 #: udata/templates/organization/display_base.html:26
 #: udata/templates/organization/followers.html:15
-#: udata/templates/reuse/display.html:26 udata/templates/user/base.html:13
+#: udata/templates/reuse/display.html:26 udata/templates/user/base.html:14
 msgid "Edit"
 msgstr ""
 
@@ -754,7 +824,7 @@ msgstr ""
 
 #: udata/templates/dataset/followers.html:13
 #: udata/templates/organization/display_base.html:56
-#: udata/templates/organization/followers.html:26 udata/templates/user/base.html:49
+#: udata/templates/organization/followers.html:26 udata/templates/user/base.html:56
 #: udata/templates/user/followers.html:14
 #, python-format
 msgid "%(num)d follower"
@@ -986,7 +1056,7 @@ msgstr ""
 
 #: udata/templates/organization/card.html:29
 #: udata/templates/organization/search-result.html:26
-#: udata/templates/reuse/search-result.html:25 udata/templates/user/card.html:23
+#: udata/templates/reuse/search-result.html:25 udata/templates/user/card.html:22
 #, python-format
 msgid "%(num)s dataset"
 msgid_plural "%(num)s datasets"
@@ -1001,7 +1071,7 @@ msgstr ""
 
 #: udata/templates/organization/card.html:38
 #: udata/templates/organization/search-result.html:35
-#: udata/templates/user/card.html:32
+#: udata/templates/user/card.html:31
 #, python-format
 msgid "%(num)s reuse"
 msgid_plural "%(num)s reuses"
@@ -1052,7 +1122,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: udata/templates/organization/display_base.html:62
-#: udata/templates/user/base.html:61
+#: udata/templates/user/base.html:68
 #, python-format
 msgid "%(num)d dataset"
 msgid_plural "%(num)d datasets"
@@ -1060,7 +1130,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: udata/templates/organization/display_base.html:67
-#: udata/templates/user/base.html:67
+#: udata/templates/user/base.html:74
 #, python-format
 msgid "%(num)d reuse"
 msgid_plural "%(num)d reuses"
@@ -1246,7 +1316,7 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: udata/templates/user/base.html:55
+#: udata/templates/user/base.html:62
 #, python-format
 msgid "%(num)d followed"
 msgid_plural "%(num)d followed"
@@ -1305,7 +1375,7 @@ msgid_plural "Follow %(num)d users"
 msgstr[0] ""
 msgstr[1] ""
 
-#: udata/templates/user/following.html:127
+#: udata/templates/user/following.html:129
 #, python-format
 msgid "%(user)s is not following anyone"
 msgstr ""

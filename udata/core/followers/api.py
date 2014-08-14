@@ -46,7 +46,9 @@ class FollowUserAPI(FollowAPI):
     model = FollowUser
 
     @api.secure
+    @api.doc(notes="You can't follow yourself.", response={403: 'When tring to follow yourself'})
     def post(self, id):
+        '''Follow an user given its ID'''
         if id == str(current_user.id):
             api.abort(403, "You can't follow yourself")
         return super(FollowUserAPI, self).post(id)

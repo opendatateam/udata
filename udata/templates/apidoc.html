@@ -2,7 +2,7 @@
 
 {% set meta = {
     'title': _('API Documentation'),
-    'description': _('%s dyanmic API documentation'),
+    'description': _('%s dynamic API documentation'),
     'keywords': ['API', 'documentation', 'swagger'],
 } %}
 
@@ -15,6 +15,66 @@
     <div class="container">
         <div class="page-header">
             <h1>{{ meta.title }}</h1>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>{{ _("This page describe this website's free and open RESTful API's behavior") }}</p>
+            </div>
+        </div>
+
+
+        <div class="page-header">
+            <h2>{{ _('Authentication') }}</h2>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>
+                    {{ _('In order to be able to execute write operations,') }}
+                    {% if current_user.is_authenticated() %}
+                        {{ _(
+                            'you first need to obtain an %(apikey)s in your profile settings.',
+                            apikey='<a href="%s">%s</a>'|format(
+                                url_for('users.apikey_settings', user=current_user),
+                                _('API Key')
+                        )|safe) }}
+                    {% else %}
+                        {{ _('you first need to authenticate and obtain an API Key in your profile settings.') }}
+                    {% endif %}
+                </p>
+                <p>{{ _('This key should be provided on each call in the <code>X-API-KEY</code> HTTP header.') }}</p>
+            </div>
+        </div>
+
+
+        <div class="page-header">
+            <h2>{{ _('Pagination') }}</h2>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>{% trans %}Some method are paginated and always follow the same pattern.
+                The object list is wrapped in a <code>Pagination</code> object.
+                {% endtrans %}</p>
+
+                <p>{% trans %}You don't have to compute yourself the previous and next pages
+                because the URLs are available in the response under the
+                <code>previous_page</code> and <code>next_page</code> attributes.
+                They will be set to <code>null</code> if there is no previous and/or next page.{% endtrans %}</p>
+
+                <p><u>{{ _('Example') }}</u>:
+                <pre><code class="json">{
+    "data": [{...}, {...}],
+    "page": 1,
+    "page_size": 20,
+    "total": 43,
+    "next_page": "http://{{config.SERVER_NAME}}/api/endpoint/?page=2",
+    "previous_page": null
+}</code></pre>
+                </p>
+            </div>
+        </div>
+
+        <div class="page-header">
+            <h2>{{ _('Reference') }}</h2>
         </div>
         <div class="row">
             <div class="col-xs-12 swagger-doc">
