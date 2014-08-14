@@ -17,13 +17,13 @@ from .signals import on_new_issue, on_issue_closed
 
 ns = api.namespace('issues', 'Issue related operations')
 
-message_fields = {
+message_fields = api.model('IssueMessage', {
     'content': fields.String,
     'posted_by': UserField,
     'posted_on': fields.ISODateTime,
-}
+})
 
-issue_fields = {
+issue_fields = api.model('Issue', {
     'id': fields.String,
     'type': fields.String,
     'subject': fields.String(attribute='subject.id'),
@@ -33,7 +33,7 @@ issue_fields = {
     'closed_by': fields.String(attribute='closed_by.id'),
     'discussion': fields.Nested(message_fields),
     'url': fields.UrlFor('api.issue'),
-}
+})
 
 
 class IssuesAPI(API):
@@ -67,6 +67,7 @@ class IssuesAPI(API):
 
 
 @ns.route('/<id>', endpoint='issue')
+@api.doc(model=issue_fields)
 class IssueAPI(API):
     '''
     Single Issue Model API (Read and update).

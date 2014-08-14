@@ -15,7 +15,7 @@ from .search import OrganizationSearch
 
 ns = api.namespace('organizations', 'Organization related operations')
 
-org_fields = {
+org_fields = api.model('Organization', {
     'id': fields.String,
     'name': fields.String,
     'slug': fields.String,
@@ -25,19 +25,20 @@ org_fields = {
     'deleted': fields.ISODateTime,
     'metrics': fields.Raw,
     'uri': fields.UrlFor('api.organization', lambda o: {'org': o}),
-}
+})
 
-request_fields = {
+request_fields = api.model('MembershripRequest', {
     'status': fields.String,
     'comment': fields.String,
-}
+})
 
-member_fields = {
+member_fields = api.model('Member', {
     'user': fields.String,
     'role': fields.String,
-}
+})
 
 
+@api.model('OrganizationReference')
 class OrganizationField(fields.Raw):
     def format(self, organization):
         return {

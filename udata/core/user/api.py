@@ -12,7 +12,7 @@ from udata.core.organization.api import OrganizationField
 
 ns = api.namespace('me', 'Current related operations')
 
-user_fields = {
+user_fields = api.model('User', {
     'id': fields.String,
     'slug': fields.String,
     'email': fields.String,
@@ -22,9 +22,9 @@ user_fields = {
     'website': fields.String,
     'about': fields.String,
     'organizations': fields.List(OrganizationField),
-}
+})
 
-
+@api.model('UserReference')
 class UserField(fields.Raw):
     def format(self, user):
         return {

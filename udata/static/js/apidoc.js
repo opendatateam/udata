@@ -1,9 +1,8 @@
 /**
- * Common stack, plugins and helpers
+ * Display a SwaggerUI documentation
  */
 define([
     'jquery',
-    // 'swagger-ui/lib/swagger',
     'swagger-ui/swagger-ui',
     'swagger-ui/lib/highlight.7.3.pack',
     'logger'

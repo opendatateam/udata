@@ -12,12 +12,12 @@ from udata.models import Metrics
 
 ns = api.namespace('metrics', 'Metrics related operations')
 
-metrics_fields = {
+metrics_fields = api.model('Metric', {
     'object_id': fields.String,
     'date': fields.String,
     'level': fields.String,
     'values': fields.Raw,
-}
+})
 
 isodate = lambda v: date(*(int(p) for p in v.split('-'))).isoformat()
 

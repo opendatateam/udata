@@ -14,7 +14,7 @@ from .search import DatasetSearch
 
 ns = api.namespace('datasets', 'Dataset related operations')
 
-resource_fields = {
+resource_fields = api.model('Resource', {
     'id': fields.String,
     'title': fields.String,
     'description': fields.String,
@@ -22,14 +22,14 @@ resource_fields = {
     'checksum': fields.String,
     'created_at': fields.ISODateTime,
     'last_modified': fields.ISODateTime(attribute='modified'),
-}
+})
 
-temporal_coverage_fields = {
+temporal_coverage_fields = api.model('TemporalCoverage', {
     'start': fields.ISODateTime,
     'end': fields.ISODateTime,
-}
+})
 
-dataset_fields = {
+dataset_fields = api.model('Dataset', {
     'id': fields.String,
     'title': fields.String,
     'slug': fields.String,
@@ -50,13 +50,14 @@ dataset_fields = {
     'license': fields.String(attribute='license.id'),
 
     'uri': fields.UrlFor('api.dataset', lambda o: {'dataset': o}),
-}
+})
 
 common_doc = {
     'params': {'dataset': {'description': 'The dataset ID or slug'}}
 }
 
 
+@api.model('DatasetReference')
 class DatasetField(fields.Raw):
     def format(self, dataset):
         return {
@@ -86,6 +87,7 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
     model = Dataset
 
     @api.secure
+    @api.doc(model=dataset_fields)
     def post(self, dataset):
         '''Mark the dataset as featured'''
         dataset.featured = True
@@ -93,6 +95,7 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
         return marshal(dataset, dataset_fields)
 
     @api.secure
+    @api.doc(model=dataset_fields)
     def delete(self, dataset):
         '''Unmark the dataset as featured'''
         dataset.featured = False
@@ -103,6 +106,7 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources', doc=common_doc)
 class ResourcesAPI(API):
     @api.secure
+    @api.doc(model=resource_fields)
     def post(self, dataset):
         '''Create a new resource for a given dataset'''
         form = api.validate(ResourceForm)
@@ -123,6 +127,7 @@ class ResourceAPI(API):
         return resource
 
     @api.secure
+    @api.doc(model=resource_fields)
     def put(self, dataset, rid):
         '''Update a given resource on a given dataset'''
         resource = self.get_resource_or_404(dataset, rid)

@@ -17,7 +17,7 @@ from .search import ReuseSearch
 
 ns = api.namespace('reuses', 'Reuse related operations')
 
-reuse_fields = {
+reuse_fields = api.model('Reuse', {
     'id': fields.String,
     'title': fields.String,
     'slug': fields.String,
@@ -30,7 +30,7 @@ reuse_fields = {
     'organization': OrganizationField,
     'metrics': fields.Raw,
     'uri': fields.UrlFor('api.reuse', lambda o: {'reuse': o}),
-}
+})
 
 
 @ns.route('/', endpoint='reuses')

@@ -21,6 +21,7 @@ class FollowAPI(API):
     model = Follow
 
     @api.secure
+    @api.doc(notes='Returns the number of followers')
     def post(self, id):
         '''Follow a given object'''
         follow, created = self.model.objects.get_or_create(follower=current_user.id, following=id, until=None)
@@ -29,6 +30,7 @@ class FollowAPI(API):
         return {'followers': count}, 201 if created else 200
 
     @api.secure
+    @api.doc(notes='Returns the number of followers')
     def delete(self, id):
         '''Unfollow a given object'''
         follow = self.model.objects.get_or_404(follower=current_user.id, following=id, until=None)
