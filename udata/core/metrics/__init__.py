@@ -7,7 +7,7 @@ from blinker import Signal
 
 log = logging.getLogger(__name__)
 
-__all__ = ('Metric', )
+__all__ = ('Metric', 'MetricMetaClass')
 
 metric_catalog = {}
 

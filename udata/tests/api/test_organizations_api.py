@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import Organization, Member, MembershipRequest
+from udata.models import Organization, Member, MembershipRequest, Follow, FollowOrg
 
 from . import APITestCase
 from ..factories import OrganizationFactory, UserFactory
@@ -190,3 +190,35 @@ class MembershipAPITest(APITestCase):
         self.assert404(response)
 
         self.assertEqual(response.json, {'status': 404, 'message': 'Unknown membership request id'})
+
+    def test_follow_org(self):
+        '''It should follow an organization on POST'''
+        user = self.login()
+        to_follow = OrganizationFactory()
+
+        response = self.post(url_for('api.follow_organization', id=to_follow.id))
+        self.assertStatus(response, 201)
+
+        self.assertEqual(Follow.objects.following(to_follow).count(), 0)
+        self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
+        self.assertIsInstance(Follow.objects.followers(to_follow).first(), FollowOrg)
+        self.assertEqual(Follow.objects.following(user).count(), 1)
+        self.assertEqual(Follow.objects.followers(user).count(), 0)
+
+    def test_unfollow_org(self):
+        '''It should unfollow the organization on DELETE'''
+        user = self.login()
+        to_follow = OrganizationFactory()
+        FollowOrg.objects.create(follower=user, following=to_follow)
+
+        response = self.delete(url_for('api.follow_organization', id=to_follow.id))
+        self.assert200(response)
+
+        nb_followers = Follow.objects.followers(to_follow).count()
+
+        self.assertEqual(nb_followers, 0)
+        self.assertEqual(response.json['followers'], nb_followers)
+
+        self.assertEqual(Follow.objects.following(to_follow).count(), 0)
+        self.assertEqual(Follow.objects.following(user).count(), 0)
+        self.assertEqual(Follow.objects.followers(user).count(), 0)

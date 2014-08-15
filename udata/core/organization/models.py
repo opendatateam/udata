@@ -7,11 +7,14 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
-from udata.models import db, WithMetrics
+from udata.models import db, WithMetrics, Follow
 from udata.i18n import lazy_gettext as _
 
 
-__all__ = ('Organization', 'Team', 'Member', 'MembershipRequest', 'ORG_ROLES', 'MEMBERSHIP_STATUS')
+__all__ = (
+    'Organization', 'Team', 'Member', 'MembershipRequest',
+    'ORG_ROLES', 'MEMBERSHIP_STATUS', 'FollowOrg'
+)
 
 
 ORG_ROLES = {
@@ -165,3 +168,7 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
 
 pre_save.connect(Organization.pre_save, sender=Organization)
 post_save.connect(Organization.post_save, sender=Organization)
+
+
+class FollowOrg(Follow):
+    following = db.ReferenceField(Organization)

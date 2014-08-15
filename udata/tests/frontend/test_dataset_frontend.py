@@ -5,7 +5,7 @@ import feedparser
 
 from flask import url_for
 
-from udata.models import Dataset
+from udata.models import Dataset, FollowDataset
 
 from . import FrontTestCase
 from ..factories import ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory
@@ -237,3 +237,14 @@ class DatasetBlueprintTest(FrontTestCase):
         author = entry.authors[0]
         self.assertEqual(author.name, org.name)
         self.assertEqual(author.href, self.full_url('organizations.show', org=org))
+
+    def test_dataset_followers(self):
+        '''It should render the dataset followers list page'''
+        dataset = DatasetFactory()
+        followers = [FollowDataset.objects.create(follower=UserFactory(), following=dataset) for _ in range(3)]
+
+        response = self.get(url_for('datasets.followers', dataset=dataset))
+
+        self.assert200(response)
+        rendered_followers = self.get_context_variable('followers')
+        self.assertEqual(len(rendered_followers), len(followers))

@@ -5,10 +5,11 @@ from flask import url_for
 
 from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API, marshal, fields
 from udata.core.issues.api import IssuesAPI
+from udata.core.followers.api import FollowAPI
 from udata.core.organization.api import OrganizationField
 from udata.utils import get_by
 
-from .models import Dataset, Resource, DatasetIssue
+from .models import Dataset, Resource, DatasetIssue, FollowDataset
 from .forms import DatasetForm, ResourceForm, DatasetFullForm
 from .search import DatasetSearch
 
@@ -149,3 +150,8 @@ class ResourceAPI(API):
 @api.doc(params={'id': {'description': 'The dataset ID'}})
 class DatasetIssuesAPI(IssuesAPI):
     model = DatasetIssue
+
+
+@ns.route('/<id>/follow/', endpoint='follow_dataset')
+class FollowDatasetAPI(FollowAPI):
+    model = FollowDataset

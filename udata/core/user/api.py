@@ -5,12 +5,13 @@ from flask import url_for
 from flask.ext.security import current_user
 
 from udata.api import api, ModelAPI, fields
-from udata.models import User
+from udata.models import User, FollowUser
 from udata.forms import UserProfileForm
 
 from udata.core.organization.api import OrganizationField
+from udata.core.followers.api import FollowAPI
 
-ns = api.namespace('me', 'Current related operations')
+ns = api.namespace('users', 'User related operations')
 
 user_fields = api.model('User', {
     'id': fields.String,
@@ -23,6 +24,7 @@ user_fields = api.model('User', {
     'about': fields.String,
     'organizations': fields.List(OrganizationField),
 })
+
 
 @api.model('UserReference')
 class UserField(fields.Raw):
@@ -37,7 +39,7 @@ class UserField(fields.Raw):
         }
 
 
-@ns.route('/', endpoint='me')
+@api.route('/me/', endpoint='me')
 class MeAPI(ModelAPI):
     model = User
     form = UserProfileForm
@@ -48,3 +50,16 @@ class MeAPI(ModelAPI):
         if not current_user.is_authenticated():
             api.abort(404)
         return current_user._get_current_object()
+
+
+@ns.route('/<id>/follow/', endpoint='follow_user')
+class FollowUserAPI(FollowAPI):
+    model = FollowUser
+
+    @api.secure
+    @api.doc(notes="You can't follow yourself.", response={403: 'When tring to follow yourself'})
+    def post(self, id):
+        '''Follow an user given its ID'''
+        if id == str(current_user.id):
+            api.abort(403, "You can't follow yourself")
+        return super(FollowUserAPI, self).post(id)

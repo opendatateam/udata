@@ -4,10 +4,10 @@ from __future__ import unicode_literals
 from udata.core.metrics import Metric
 from udata.i18n import lazy_gettext as _
 from udata.core.followers.metrics import FollowersMetric
-from udata.models import db, Dataset, Reuse, User, Organization, FollowOrg
+from udata.models import db, Dataset, Reuse, Organization
 
 
-__all__ = ('DatasetsMetric', 'ReusesMetric', 'MembersMetric', 'StarsMetric')
+__all__ = ('DatasetsMetric', 'ReusesMetric', 'MembersMetric', 'StarsMetric', 'OrgFollowers')
 
 
 class DatasetsMetric(Metric):
@@ -51,8 +51,3 @@ MembersMetric.connect(Organization.on_create, Organization.on_update)
 
 class OrgFollowersMetric(FollowersMetric):
     model = Organization
-
-
-@FollowOrg.on_new.connect
-def update_followers_metric(document, **kwargs):
-    OrgFollowersMetric(document.following).trigger_update()

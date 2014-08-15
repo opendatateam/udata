@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, Reuse, User, Organization, Resource, Follow
 from udata.core.metrics import Metric
+from udata.core.followers.signals import on_follow, on_unfollow
 
 
 __all__ = ('DatasetsMetric', 'ReusesMetric', 'ResourcesMetric', 'UsersMetric', 'OrganizationsMetric')
@@ -93,4 +94,4 @@ class FollowersMetric(SiteMetric):
     def get_value(self):
         return Follow.objects(until=None).count()
 
-FollowersMetric.connect(Follow.on_new)
+FollowersMetric.connect(on_follow, on_unfollow)

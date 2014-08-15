@@ -50,7 +50,7 @@
             </div>
 
             <div class="list-group text-center">
-                <a href="{{url_for('followers.user', user=user)}}"
+                <a href="{{url_for('users.followers', user=user)}}"
                     class="list-group-item {% if user_tab == 'followers' %}active{% endif %}">
                     <strong>
                         {{ ngettext('%(num)d follower', '%(num)d followers', user.metrics.followers or 0) }}

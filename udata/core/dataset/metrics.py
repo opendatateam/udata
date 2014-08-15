@@ -4,15 +4,13 @@ from __future__ import unicode_literals
 
 from udata.core.metrics import Metric
 from udata.i18n import lazy_gettext as _
-from udata.models import Dataset, Reuse, User
+from udata.models import Dataset, Reuse
 
 from udata.core.issues.metrics import IssuesMetric
 from udata.core.followers.metrics import FollowersMetric
 
-from udata.models import FollowDataset
 
-
-__all__ = ('DatasetReuses', )
+__all__ = ('DatasetReuses', 'DatasetIssuesMetric', 'DatasetFollowers')
 
 
 class DatasetReuses(Metric):
@@ -38,8 +36,3 @@ class DatasetIssuesMetric(IssuesMetric):
 
 class DatasetFollowers(FollowersMetric):
     model = Dataset
-
-
-@FollowDataset.on_new.connect
-def on_new_dataset_follower(follow):
-    DatasetFollowers(follow.following).trigger_update()

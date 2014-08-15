@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import Reuse
+from udata.models import Reuse, FollowReuse, Follow
 
 from . import APITestCase
 from ..factories import ReuseFactory, DatasetFactory
@@ -96,3 +96,35 @@ class ReuseAPITest(APITestCase):
 
         reuse.reload()
         self.assertFalse(reuse.featured)
+
+    def test_follow_reuse(self):
+        '''It should follow a reuse on POST'''
+        user = self.login()
+        to_follow = ReuseFactory()
+
+        response = self.post(url_for('api.follow_reuse', id=to_follow.id))
+        self.assertStatus(response, 201)
+
+        self.assertEqual(Follow.objects.following(to_follow).count(), 0)
+        self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
+        self.assertIsInstance(Follow.objects.followers(to_follow).first(), FollowReuse)
+        self.assertEqual(Follow.objects.following(user).count(), 1)
+        self.assertEqual(Follow.objects.followers(user).count(), 0)
+
+    def test_unfollow_reuse(self):
+        '''It should unfollow the reuse on DELETE'''
+        user = self.login()
+        to_follow = ReuseFactory()
+        FollowReuse.objects.create(follower=user, following=to_follow)
+
+        response = self.delete(url_for('api.follow_reuse', id=to_follow.id))
+        self.assert200(response)
+
+        nb_followers = Follow.objects.followers(to_follow).count()
+
+        self.assertEqual(response.json['followers'], nb_followers)
+
+        self.assertEqual(Follow.objects.following(to_follow).count(), 0)
+        self.assertEqual(nb_followers, 0)
+        self.assertEqual(Follow.objects.following(user).count(), 0)
+        self.assertEqual(Follow.objects.followers(user).count(), 0)

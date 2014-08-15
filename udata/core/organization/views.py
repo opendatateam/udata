@@ -11,7 +11,7 @@ from udata.forms import OrganizationForm, OrganizationMemberForm, OrganizationEx
 from udata.frontend import nav, csv
 from udata.frontend.views import DetailView, CreateView, EditView, SearchView, BaseView, SingleObject
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Organization, Member, Reuse, Dataset, ORG_ROLES, User, FollowOrg, Issue
+from udata.models import Organization, Member, Reuse, Dataset, ORG_ROLES, User, Follow, FollowOrg, Issue
 from udata.utils import get_by
 
 from udata.core.dataset.csv import DatasetCsvAdapter

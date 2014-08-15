@@ -7,13 +7,15 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
-from udata.models import db, WithMetrics, Issue
+from udata.models import db, WithMetrics, Issue, Follow
 from udata.i18n import lazy_gettext as _
 
 
-__all__ = ('License', 'Resource', 'TerritorialCoverage', 'Dataset', 'UPDATE_FREQUENCIES', 'TERRITORIAL_GRANULARITIES',
-    'DatasetIssue',
-    )
+__all__ = (
+    'License', 'Resource', 'TerritorialCoverage', 'Dataset',
+    'UPDATE_FREQUENCIES', 'TERRITORIAL_GRANULARITIES',
+    'DatasetIssue', 'FollowDataset'
+)
 
 UPDATE_FREQUENCIES = {
     'punctual': _('Punctual'),
@@ -169,3 +171,7 @@ post_save.connect(Dataset.post_save, sender=Dataset)
 
 class DatasetIssue(Issue):
     subject = db.ReferenceField(Dataset)
+
+
+class FollowDataset(Follow):
+    following = db.ReferenceField(Dataset)

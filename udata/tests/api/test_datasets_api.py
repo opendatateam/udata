@@ -5,7 +5,7 @@ import json
 
 from flask import url_for
 
-from udata.models import Dataset
+from udata.models import Dataset, Follow, FollowDataset
 
 from . import APITestCase
 from ..factories import DatasetFactory, ResourceFactory, faker
@@ -200,3 +200,35 @@ class DatasetResourceAPITest(APITestCase):
         with self.api_user():
             response = self.delete(url_for('api.resource', dataset=self.dataset, rid=str(ResourceFactory().id)))
         self.assert404(response)
+
+    def test_follow_dataset(self):
+        '''It should follow a dataset on POST'''
+        user = self.login()
+        to_follow = DatasetFactory()
+
+        response = self.post(url_for('api.follow_dataset', id=to_follow.id))
+        self.assertStatus(response, 201)
+
+        self.assertEqual(Follow.objects.following(to_follow).count(), 0)
+        self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
+        self.assertIsInstance(Follow.objects.followers(to_follow).first(), FollowDataset)
+        self.assertEqual(Follow.objects.following(user).count(), 1)
+        self.assertEqual(Follow.objects.followers(user).count(), 0)
+
+    def test_unfollow_dataset(self):
+        '''It should unfollow the dataset on DELETE'''
+        user = self.login()
+        to_follow = DatasetFactory()
+        FollowDataset.objects.create(follower=user, following=to_follow)
+
+        response = self.delete(url_for('api.follow_dataset', id=to_follow.id))
+        self.assert200(response)
+
+        nb_followers = Follow.objects.followers(to_follow).count()
+
+        self.assertEqual(response.json['followers'], nb_followers)
+
+        self.assertEqual(Follow.objects.following(to_follow).count(), 0)
+        self.assertEqual(nb_followers, 0)
+        self.assertEqual(Follow.objects.following(user).count(), 0)
+        self.assertEqual(Follow.objects.followers(user).count(), 0)

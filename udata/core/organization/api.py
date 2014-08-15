@@ -9,7 +9,9 @@ from flask.ext.restful import fields
 from udata.api import api, ModelAPI, ModelListAPI, API, marshal
 from udata.auth import current_user
 from udata.forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm
-from udata.models import Organization, MembershipRequest, Member
+from udata.models import Organization, MembershipRequest, Member, FollowOrg
+
+from udata.core.followers.api import FollowAPI
 
 from .search import OrganizationSearch
 
@@ -125,3 +127,8 @@ class MembershipRefuseAPI(MembershipAPI):
         org.save()
 
         return {}, 200
+
+
+@ns.route('/<id>/follow/', endpoint='follow_organization')
+class FollowOrgAPI(FollowAPI):
+    model = FollowOrg

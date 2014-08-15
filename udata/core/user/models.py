@@ -9,10 +9,10 @@ from flask import url_for, g, current_app
 from flask.ext.security import UserMixin, RoleMixin, MongoEngineUserDatastore
 from itsdangerous import JSONWebSignatureSerializer
 
-from udata.models import db, WithMetrics
+from udata.models import db, WithMetrics, Follow
 
 
-__all__ = ('User', 'Role', 'datastore')
+__all__ = ('User', 'Role', 'datastore', 'FollowUser')
 
 
 # def populate_slug(user):
@@ -108,3 +108,7 @@ class User(db.Document, WithMetrics,UserMixin):
         self.apikey = None
 
 datastore = MongoEngineUserDatastore(db, User, Role)
+
+
+class FollowUser(Follow):
+    following = db.ReferenceField(User)

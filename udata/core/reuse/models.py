@@ -8,9 +8,9 @@ from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
 from udata.i18n import lazy_gettext as _
-from udata.models import db, WithMetrics, Issue
+from udata.models import db, WithMetrics, Issue, Follow
 
-__all__ = ('Reuse', 'REUSE_TYPES', 'ReuseIssue')
+__all__ = ('Reuse', 'REUSE_TYPES', 'ReuseIssue', 'FollowReuse')
 
 
 REUSE_TYPES = {
@@ -98,3 +98,7 @@ post_save.connect(Reuse.post_save, sender=Reuse)
 
 class ReuseIssue(Issue):
     subject = db.ReferenceField(Reuse)
+
+
+class FollowReuse(Follow):
+    following = db.ReferenceField(Reuse)

@@ -9,10 +9,10 @@ from udata.models import Reuse
 
 from udata.core.organization.api import OrganizationField
 from udata.core.dataset.api import DatasetField
-
 from udata.core.issues.api import IssuesAPI
+from udata.core.followers.api import FollowAPI
 
-from .models import ReuseIssue
+from .models import ReuseIssue, FollowReuse
 from .search import ReuseSearch
 
 ns = api.namespace('reuses', 'Reuse related operations')
@@ -71,3 +71,8 @@ class ReuseFeaturedAPI(SingleObjectAPI, API):
 @ns.route('/<id>/issues/', endpoint='reuse_issues')
 class ReuseIssuesAPI(IssuesAPI):
     model = ReuseIssue
+
+
+@ns.route('/reuse/<id>/', endpoint='follow_reuse')
+class FollowReuseAPI(FollowAPI):
+    model = FollowReuse

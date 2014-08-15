@@ -10,7 +10,7 @@ from udata.forms import DatasetForm, DatasetCreateForm, ResourceForm, DatasetExt
 from udata.frontend import nav
 from udata.frontend.views import DetailView, CreateView, EditView, SingleObject, SearchView, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Resource, Reuse, Issue, UPDATE_FREQUENCIES, TERRITORIAL_GRANULARITIES
+from udata.models import Dataset, Resource, Reuse, Issue, Follow, UPDATE_FREQUENCIES, TERRITORIAL_GRANULARITIES
 
 from .permissions import DatasetEditPermission, set_dataset_identity
 
@@ -200,6 +200,15 @@ class ResourceEditView(EditView):
         return redirect(url_for('datasets.show', dataset=self.dataset))
 
 
+class DatasetFollowersView(DatasetView, DetailView):
+    template_name = 'dataset/followers.html'
+
+    def get_context(self):
+        context = super(DatasetFollowersView, self).get_context()
+        context['followers'] = Follow.objects.followers(self.dataset).order_by('follower.fullname')
+        return context
+
+
 blueprint.add_url_rule('/', view_func=DatasetListView.as_view(str('list')))
 blueprint.add_url_rule('/new/', view_func=DatasetCreateView.as_view(str('new')))
 blueprint.add_url_rule('/<dataset:dataset>/', view_func=DatasetDetailView.as_view(str('show')))
@@ -212,3 +221,4 @@ blueprint.add_url_rule('/<dataset:dataset>/transfer/', view_func=DatasetTransfer
 blueprint.add_url_rule('/<dataset:dataset>/resources/new/', view_func=ResourceCreateView.as_view(str('new_resource')))
 blueprint.add_url_rule('/<dataset:dataset>/resources/<rid>/', view_func=ResourceEditView.as_view(str('edit_resource')))
 blueprint.add_url_rule('/<dataset:dataset>/delete/', view_func=DatasetDeleteView.as_view(str('delete')))
+blueprint.add_url_rule('/<dataset:dataset>/followers/', view_func=DatasetFollowersView.as_view(str('followers')))

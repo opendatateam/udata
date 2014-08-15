@@ -166,6 +166,15 @@ class UserFollowingView(UserView, DetailView):
         return context
 
 
+class UserFollowersView(UserView, DetailView):
+    template_name = 'user/followers.html'
+
+    def get_context(self):
+        context = super(UserFollowersView, self).get_context()
+        context['followers'] = Follow.objects.followers(self.user).order_by('follower.fullname')
+        return context
+
+
 blueprint.add_url_rule('/', view_func=UserListView.as_view(str('list')))
 blueprint.add_url_rule('/<user:user>/', view_func=UserActivityView.as_view(str('show')))
 blueprint.add_url_rule('/<user:user>/edit/', view_func=UserProfileEditView.as_view(str('edit')))
@@ -177,3 +186,4 @@ blueprint.add_url_rule('/<user:user>/following/', view_func=UserFollowingView.as
 blueprint.add_url_rule('/<user:user>/edit/settings/', view_func=UserSettingsView.as_view(str('settings')))
 blueprint.add_url_rule('/<user:user>/edit/apikey/', view_func=UserAPIKeySettingsView.as_view(str('apikey_settings')))
 blueprint.add_url_rule('/<user:user>/edit/notifications/', view_func=UserNotificationsView.as_view(str('notifications_settings')))
+blueprint.add_url_rule('/<user:user>/followers/', view_func=UserFollowersView.as_view(str('followers')))

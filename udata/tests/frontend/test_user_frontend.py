@@ -63,6 +63,17 @@ class UserBlueprintTest(FrontTestCase):
             rendered = self.get_context_variable('followed_{0}'.format(name))
             self.assertEqual(len(rendered), 2)
 
+    def test_render_profile_followers(self):
+        '''It should render the user profile followers page'''
+        user = UserFactory()
+        followers = [FollowUser.objects.create(follower=UserFactory(), following=user) for _ in range(3)]
+        response = self.get(url_for('users.followers', user=user))
+
+        self.assert200(response)
+
+        rendered_followers = self.get_context_variable('followers')
+        self.assertEqual(len(rendered_followers), len(followers))
+
     def test_render_profile_following_empty(self):
         '''It should render an empty user profile following page'''
         user = UserFactory()

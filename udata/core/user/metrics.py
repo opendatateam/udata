@@ -3,12 +3,13 @@ from __future__ import unicode_literals
 
 from udata.core.metrics import Metric
 from udata.i18n import lazy_gettext as _
-from udata.models import db, Dataset, Reuse, User, Follow
+from udata.models import Dataset, Reuse, User, Follow
 
-from udata.core.followers.signals import on_unfollow
+from udata.core.followers.metrics import FollowersMetric
+from udata.core.followers.signals import on_follow, on_unfollow
 
 
-__all__ = ('DatasetsMetric', 'ReusesMetric', 'FollowersMetric', 'FollowingMetric')
+__all__ = ('DatasetsMetric', 'ReusesMetric', 'UserFollowersMetric', 'UserFollowingMetric')
 
 
 class UserMetric(Metric):
@@ -43,15 +44,11 @@ class ReusesMetric(UserMetric):
 ReusesMetric.connect(Reuse.on_create, Reuse.on_update)
 
 
-class FollowersMetric(UserMetric):
-    name = 'followers'
-    display_name = _('Followers')
-
-    def get_value(self):
-        return Follow.objects.followers(self.user).count()
+class UserFollowersMetric(FollowersMetric):
+    model = User
 
 
-class FollowingMetric(UserMetric):
+class UserFollowingMetric(UserMetric):
     name = 'following'
     display_name = _('Following')
 
@@ -59,15 +56,7 @@ class FollowingMetric(UserMetric):
         return Follow.objects.following(self.user).count()
 
 
-@Follow.on_new.connect
-def update_followers_metric(document, **kwargs):
-    FollowingMetric(document.follower).trigger_update()
-    if isinstance(document.following, User):
-        FollowersMetric(document.following).trigger_update()
-
-
+@on_follow.connect
 @on_unfollow.connect
-def update_follow_metrics(sender):
-    FollowingMetric(sender.follower).trigger_update()
-    if isinstance(sender.following, User):
-        FollowersMetric(sender.following).trigger_update()
+def update_user_following_metric(follow):
+    UserFollowingMetric(follow.follower).trigger_update()

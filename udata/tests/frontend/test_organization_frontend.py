@@ -6,7 +6,7 @@ import StringIO
 from flask import url_for
 
 from udata.frontend import csv
-from udata.models import Organization, Member
+from udata.models import Organization, Member, FollowOrg
 
 from . import FrontTestCase
 from ..factories import OrganizationFactory, UserFactory, DatasetFactory, ResourceFactory
@@ -48,6 +48,17 @@ class OrganizationBlueprintTest(FrontTestCase):
         organization = OrganizationFactory()
         response = self.get(url_for('organizations.show', org=organization))
         self.assert200(response)
+
+    def test_render_display_with_followers(self):
+        '''It should render the organization page with followers'''
+        org = OrganizationFactory()
+        followers = [FollowOrg.objects.create(follower=UserFactory(), following=org) for _ in range(3)]
+
+        response = self.get(url_for('organizations.show', org=org))
+        self.assert200(response)
+
+        rendered_followers = self.get_context_variable('followers')
+        self.assertEqual(len(rendered_followers), len(followers))
 
     def test_render_edit(self):
         '''It should render the organization edit form'''

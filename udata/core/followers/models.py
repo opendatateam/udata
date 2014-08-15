@@ -7,8 +7,10 @@ from blinker import Signal
 
 from udata.models import db
 
+from .signals import on_follow, on_unfollow
 
-__all__ = ('Follow', 'FollowUser', 'FollowOrg', 'FollowDataset', 'FollowReuse')
+
+__all__ = ('Follow', )
 
 
 class FollowQuerySet(db.BaseQuerySet):
@@ -28,8 +30,6 @@ class Follow(db.Document):
     since = db.DateTimeField(required=True, default=datetime.now)
     until = db.DateTimeField()
 
-    on_new = Signal()
-
     meta = {
         'indexes': [
             'follower',
@@ -42,25 +42,10 @@ class Follow(db.Document):
     }
 
 
-class FollowUser(Follow):
-    following = db.ReferenceField('User')
-
-
-class FollowOrg(Follow):
-    following = db.ReferenceField('Organization')
-
-
-class FollowDataset(Follow):
-    following = db.ReferenceField('Dataset')
-
-
-class FollowReuse(Follow):
-    following = db.ReferenceField('Reuse')
-
-
-@db.post_save.connect_via(FollowUser)
-@db.post_save.connect_via(FollowOrg)
-@db.post_save.connect_via(FollowDataset)
-@db.post_save.connect_via(FollowReuse)
-def emit_new_org_follower(sender, document, **kwargs):
-    document.on_new.send(document)
+@db.post_save.connect
+def emit_new_follower(sender, document, **kwargs):
+    if isinstance(document, Follow):
+        if document.until:
+            on_unfollow.send(document)
+        else:
+            on_follow.send(document)

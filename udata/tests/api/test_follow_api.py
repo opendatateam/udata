@@ -3,19 +3,45 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import Follow, FollowUser, FollowOrg, FollowReuse, FollowDataset
+from udata.api import api
+from udata.models import db, Follow
+
+from udata.core.followers.api import FollowAPI
+from udata.core.followers.signals import on_follow, on_unfollow
 
 from . import APITestCase
-from ..factories import UserFactory, OrganizationFactory, DatasetFactory, ReuseFactory
+
+
+class Fake(db.Document):
+    name = db.StringField()
+
+
+class FollowFake(Follow):
+    following = db.ReferenceField(Fake)
+
+
+@api.route('/fake/<id>/follow/', endpoint='follow_fake')
+class FollowFakeAPI(FollowAPI):
+    model = FollowFake
 
 
 class FollowAPITest(APITestCase):
-    def test_follow_user(self):
-        '''It should follow an user on POST'''
-        user = self.login()
-        to_follow = UserFactory()
+    def setUp(self):
+        self.signal_emitted = False
+        super(FollowAPITest, self).setUp()
 
-        response = self.post(url_for('api.follow_user', id=to_follow.id))
+    def handler(self, sender):
+        self.assertIsInstance(sender, FollowFake)
+        self.signal_emitted = True
+
+    def test_follow(self):
+        '''It should follow on POST'''
+        user = self.login()
+        to_follow = Fake.objects.create()
+
+        with on_follow.connected_to(self.handler):
+            response = self.post(url_for('api.follow_fake', id=to_follow.id))
+
         self.assertStatus(response, 201)
 
         nb_followers = Follow.objects.followers(to_follow).count()
@@ -26,79 +52,34 @@ class FollowAPITest(APITestCase):
         self.assertIsInstance(Follow.objects.followers(to_follow).first(), Follow)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
-
-    def test_follow_myself(self):
-        '''It should not allow to follow myself'''
-        user = self.login()
-
-        response = self.post(url_for('api.follow_user', id=user.id))
-        self.assertStatus(response, 403)
-
-        self.assertEqual(Follow.objects.followers(user).count(), 0)
-
-    def test_follow_org(self):
-        '''It should follow an org on POST'''
-        user = self.login()
-        to_follow = OrganizationFactory()
-
-        response = self.post(url_for('api.follow_organization', id=to_follow.id))
-        self.assertStatus(response, 201)
-
-        self.assertEqual(Follow.objects.following(to_follow).count(), 0)
-        self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(), FollowOrg)
-        self.assertEqual(Follow.objects.following(user).count(), 1)
-        self.assertEqual(Follow.objects.followers(user).count(), 0)
-
-    def test_follow_dataset(self):
-        '''It should follow a dataset on POST'''
-        user = self.login()
-        to_follow = DatasetFactory()
-
-        response = self.post(url_for('api.follow_dataset', id=to_follow.id))
-        self.assertStatus(response, 201)
-
-        self.assertEqual(Follow.objects.following(to_follow).count(), 0)
-        self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(), FollowDataset)
-        self.assertEqual(Follow.objects.following(user).count(), 1)
-        self.assertEqual(Follow.objects.followers(user).count(), 0)
-
-    def test_follow_reuse(self):
-        '''It should follow a reuse on POST'''
-        user = self.login()
-        to_follow = ReuseFactory()
-
-        response = self.post(url_for('api.follow_reuse', id=to_follow.id))
-        self.assertStatus(response, 201)
-
-        self.assertEqual(Follow.objects.following(to_follow).count(), 0)
-        self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(), FollowReuse)
-        self.assertEqual(Follow.objects.following(user).count(), 1)
-        self.assertEqual(Follow.objects.followers(user).count(), 0)
+        self.assertTrue(self.signal_emitted)
 
     def test_follow_already_followed(self):
-        '''It shouldn't do anything when following an already followed user'''
+        '''It shouldn't do anything when following an already followed object'''
         user = self.login()
-        to_follow = UserFactory()
-        FollowUser.objects.create(follower=user, following=to_follow)
+        to_follow = Fake.objects.create()
+        FollowFake.objects.create(follower=user, following=to_follow)
 
-        response = self.post(url_for('api.follow_user', id=to_follow.id))
+        with on_follow.connected_to(self.handler):
+            response = self.post(url_for('api.follow_fake', id=to_follow.id))
+
         self.assertStatus(response, 200)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
+        self.assertFalse(self.signal_emitted)
 
     def test_unfollow(self):
-        '''It should unfollow the user on DELETE'''
+        '''It should unfollow on DELETE'''
         user = self.login()
-        to_follow = UserFactory()
-        FollowUser.objects.create(follower=user, following=to_follow)
+        to_follow = Fake.objects.create()
+        FollowFake.objects.create(follower=user, following=to_follow)
 
-        response = self.delete(url_for('api.follow_user', id=to_follow.id))
+        with on_unfollow.connected_to(self.handler):
+            response = self.delete(url_for('api.follow_fake', id=to_follow.id))
+
         self.assert200(response)
 
         nb_followers = Follow.objects.followers(to_follow).count()
@@ -109,30 +90,12 @@ class FollowAPITest(APITestCase):
         self.assertEqual(nb_followers, 0)
         self.assertEqual(Follow.objects.following(user).count(), 0)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
-
-    def test_unfollow_org(self):
-        '''It should unfollow the user on DELETE'''
-        user = self.login()
-        # to_follow = UserFactory()
-        to_follow = OrganizationFactory()
-        FollowOrg.objects.create(follower=user, following=to_follow)
-
-        response = self.delete(url_for('api.follow_organization', id=str(to_follow.id)))
-        self.assert200(response)
-
-        nb_followers = Follow.objects.followers(to_follow).count()
-
-        self.assertEqual(nb_followers, 0)
-        self.assertEqual(response.json['followers'], nb_followers)
-
-        self.assertEqual(Follow.objects.following(to_follow).count(), 0)
-        self.assertEqual(Follow.objects.following(user).count(), 0)
-        self.assertEqual(Follow.objects.followers(user).count(), 0)
+        self.assertTrue(self.signal_emitted)
 
     def test_unfollow_not_existing(self):
-        '''It should raise 404 when trying to unfollow someone not followed'''
+        '''It should raise 404 when trying to unfollow a not followed object'''
         self.login()
-        to_follow = UserFactory()
+        to_follow = Fake.objects.create()
 
-        response = self.delete(url_for('api.follow_user', id=to_follow.id))
+        response = self.delete(url_for('api.follow_fake', id=to_follow.id))
         self.assert404(response)
