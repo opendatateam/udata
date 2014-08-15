@@ -43,7 +43,7 @@ class IssuesAPI(API):
     @api.secure
     @api.doc(model=issue_fields)
     def post(self, id):
-        '''Create a new Issue for a given object'''
+        '''Create a new Issue for an object given its ID'''
         form = api.validate(IssueCreateForm)
 
         message = Message(content=form.comment.data, posted_by=current_user.id)
@@ -58,7 +58,7 @@ class IssuesAPI(API):
         return marshal(issue, issue_fields), 201
 
     def get(self, id):
-        '''List all Issues for a given object'''
+        '''List all Issues for an object given its ID'''
         issues = self.model.objects(subject=id)
         if not request.args.get('closed'):
             issues = issues(closed=None)

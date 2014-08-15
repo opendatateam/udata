@@ -54,7 +54,7 @@ dataset_fields = api.model('Dataset', {
 })
 
 common_doc = {
-    'params': {'dataset': {'description': 'The dataset ID or slug'}}
+    'params': {'dataset': 'The dataset ID or slug'}
 }
 
 
@@ -119,7 +119,7 @@ class ResourcesAPI(API):
 
 
 @ns.route('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource', doc=common_doc)
-@api.doc(params={'rid': {'description': 'The resource unique identifier'}})
+@api.doc(params={'rid': 'The resource unique identifier'})
 class ResourceAPI(API):
     def get_resource_or_404(self, dataset, id):
         resource = get_by(dataset.resources, 'id', id)
@@ -147,7 +147,7 @@ class ResourceAPI(API):
 
 
 @ns.route('/<id>/issues/', endpoint='dataset_issues')
-@api.doc(params={'id': {'description': 'The dataset ID'}})
+@api.doc(params={'id': 'The dataset ID'})
 class DatasetIssuesAPI(IssuesAPI):
     model = DatasetIssue
 

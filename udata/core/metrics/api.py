@@ -28,6 +28,7 @@ parser.add_argument('day', type=isodate, help='Specific day date to fetch', loca
 @api.route('/metrics/<id>', endpoint='metrics')
 class MetricsAPI(API):
     @api.doc(parser=parser, notes='If day is set, start and end will be ignored')
+    @api.doc(params={'id': 'The object ID to fetch metric for'})
     def get(self, id):
         '''Fetch metrics for an object given its ID'''
         try:
