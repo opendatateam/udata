@@ -30,9 +30,10 @@ class MetricsAPITest(APITestCase):
         FakeSiteMetric.update()
 
         response = self.get(url_for('api.metrics', id='site'))
-
         self.assert200(response)
-        self.assertEqual(response.json['level'], 'daily')
-        self.assertEqual(response.json['date'], date.today().isoformat())
-        self.assertEqual(len(response.json['values']), 1)
-        self.assertEqual(response.json['values']['fake-site-metric'], 2)
+
+        data = response.json[0]
+        self.assertEqual(data['level'], 'daily')
+        self.assertEqual(data['date'], date.today().isoformat())
+        self.assertEqual(len(data['values']), 1)
+        self.assertEqual(data['values']['fake-site-metric'], 2)

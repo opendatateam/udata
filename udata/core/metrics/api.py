@@ -27,6 +27,7 @@ parser.add_argument('day', type=isodate, help='Specific day date to fetch', loca
 
 @api.route('/metrics/<id>', endpoint='metrics')
 class MetricsAPI(API):
+    @api.doc(parser=parser, notes='If day is set, start and end will be ignored')
     def get(self, id):
         '''Fetch metrics for an object given its ID'''
         try:
@@ -35,12 +36,11 @@ class MetricsAPI(API):
             object_id = id
         queryset = Metrics.objects(object_id=object_id).order_by('-date')
         args = parser.parse_args()
-        print args
         if args.get('day'):
-            result = queryset(date=args['day']).first_or_404()
+            result = [queryset(date=args['day']).first_or_404()]
         elif args.get('start'):
             end = args.get('end', date.today().isoformat())
             result = list(queryset(date__gte=args['start'], date__lte=end))
         else:
-            result = queryset.first_or_404()
+            result = [queryset.first_or_404()]
         return marshal(result, metrics_fields)

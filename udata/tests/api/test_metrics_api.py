@@ -39,10 +39,12 @@ class MetricsAPITest(APITestCase):
         response = self.get(url_for('api.metrics', id=obj.id))
 
         self.assert200(response)
-        self.assertEqual(response.json['level'], 'daily')
-        self.assertEqual(response.json['date'], date.today().isoformat())
-        self.assertEqual(len(response.json['values']), 1)
-        self.assertEqual(response.json['values']['fake-model-metric'], 1)
+
+        data = response.json[0]
+        self.assertEqual(data['level'], 'daily')
+        self.assertEqual(data['date'], date.today().isoformat())
+        self.assertEqual(len(data['values']), 1)
+        self.assertEqual(data['values']['fake-model-metric'], 1)
 
     # def test_get_missing_metric(self):
     #     '''Missing metric should fallback on default value'''
@@ -70,13 +72,14 @@ class MetricsAPITest(APITestCase):
         Metrics.objects.update_daily(obj, yesterday, metric1='value1', metric2='value2')
 
         response = self.get(url_for('api.metrics', id=obj.id, day=yesterday))
-
         self.assert200(response)
-        self.assertEqual(response.json['level'], 'daily')
-        self.assertEqual(response.json['date'], yesterday)
-        self.assertEqual(len(response.json['values']), 2)
+
+        data = response.json[0]
+        self.assertEqual(data['level'], 'daily')
+        self.assertEqual(data['date'], yesterday)
+        self.assertEqual(len(data['values']), 2)
         for i in range(1, 3):
-            self.assertEqual(response.json['values']['metric{0}'.format(i)], 'value{0}'.format(i))
+            self.assertEqual(data['values']['metric{0}'.format(i)], 'value{0}'.format(i))
 
     def test_get_metrics_for_day_range(self):
         '''It should fetch daily metrics for a given period'''
