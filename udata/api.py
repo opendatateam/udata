@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import wraps
 
 from flask import request, url_for, json, make_response
-from flask.ext.restful import Api, Resource, marshal, fields, abort
+from flask.ext.restful import Api, Resource, marshal, fields, abort, reqparse
 
 from werkzeug.datastructures import MultiDict
 

@@ -2,10 +2,11 @@
 from __future__ import unicode_literals
 
 from bson import ObjectId
+from datetime import date
 
 from flask.ext.restful import fields
 
-from udata.api import api, API, marshal
+from udata.api import api, API, marshal, reqparse
 from udata.models import Metrics
 
 metrics_fields = {
@@ -15,33 +16,31 @@ metrics_fields = {
     'values': fields.Raw,
 }
 
+isodate = lambda v: date(*(int(p) for p in v.split('-'))).isoformat()
 
-def parse_period(value):
-    if '+' in value:
-        start, end = value.split('+')
-        return start, end
-    else:
-        return value
+parser = reqparse.RequestParser()
+parser.add_argument('start', type=isodate, help='Start of the period to fetch', location='args')
+parser.add_argument('end', type=isodate, help='End of the period to fetch', location='args')
+parser.add_argument('day', type=isodate, help='Specific day date to fetch', location='args')
 
 
 class MetricsAPI(API):
-    def get(self, id, period=None, names=None):
+    def get(self, id):
         try:
             object_id = ObjectId(id)
         except:
             object_id = id
         queryset = Metrics.objects(object_id=object_id).order_by('-date')
-        if period:
-            period = parse_period(period)
-            if isinstance(period, basestring):
-                result = queryset(date=period).first_or_404()
-            else:
-                result = list(queryset(date__gte=period[0], date__lte=period[1]))
+        args = parser.parse_args()
+        print args
+        if args.get('day'):
+            result = queryset(date=args['day']).first_or_404()
+        elif args.get('start'):
+            end = args.get('end', date.today().isoformat())
+            result = list(queryset(date__gte=args['start'], date__lte=end))
         else:
             result = queryset.first_or_404()
         return marshal(result, metrics_fields)
 
 
 api.add_resource(MetricsAPI, '/metrics/<id>/', endpoint=b'api.metrics')
-api.add_resource(MetricsAPI, '/metrics/<id>/<period>/', endpoint=b'api.metrics_period')
-api.add_resource(MetricsAPI, '/metrics/<id>/<period>/<names>/', endpoint=b'api.metrics_by_name')

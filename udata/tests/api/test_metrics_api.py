@@ -62,7 +62,6 @@ class MetricsAPITest(APITestCase):
 
     def test_get_metrics_for_day(self):
         '''It should fetch daily metrics for a given day'''
-        # FakeSiteMetric.update()
         obj = FakeModel.objects.create(name='fake')
         metric = FakeModelMetric(obj)
         metric.compute()
@@ -70,7 +69,7 @@ class MetricsAPITest(APITestCase):
 
         Metrics.objects.update_daily(obj, yesterday, metric1='value1', metric2='value2')
 
-        response = self.get(url_for('api.metrics_period', id=obj.id, period=yesterday))
+        response = self.get(url_for('api.metrics', id=obj.id, day=yesterday))
 
         self.assert200(response)
         self.assertEqual(response.json['level'], 'daily')
@@ -80,16 +79,15 @@ class MetricsAPITest(APITestCase):
             self.assertEqual(response.json['values']['metric{0}'.format(i)], 'value{0}'.format(i))
 
     def test_get_metrics_for_day_range(self):
-        '''It should fetch my user data on GET'''
+        '''It should fetch daily metrics for a given period'''
         for i in range(5):
             day = (date.today() - timedelta(i)).isoformat()
             Metrics.objects.update_daily('site', day, metric='value')
 
         period_start = (date.today() - timedelta(3)).isoformat()
         period_end = (date.today() - timedelta(1)).isoformat()
-        period = '+'.join([period_start, period_end])
 
-        response = self.get(url_for('api.metrics_period', id='site', period=period))
+        response = self.get(url_for('api.metrics', id='site', start=period_start, end=period_end))
 
         self.assert200(response)
         self.assertEqual(len(response.json), 3)
