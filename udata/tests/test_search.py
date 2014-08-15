@@ -247,6 +247,45 @@ class SearchQueryTest(TestCase):
         }
         self.assertEqual(search_query.get_query(), expected)
 
+    def test_simple_excluding_query(self):
+        '''A simple query should negate a simple term in query_string'''
+        search_query = search.SearchQuery(FakeSearch, q='-test')
+        expected = {
+            'bool': {
+                'must_not': [
+                    {'multi_match': {
+                        'query': 'test',
+                        'analyzer': search.i18n_analyzer,
+                        'fields': ['title^2', 'description']
+                    }}
+                ]
+            }
+        }
+        self.assertEqual(search_query.get_query(), expected)
+
+    def test_query_with_both_including_and_excluding_terms(self):
+        '''A simple query should detect negation on each term in query_string'''
+        search_query = search.SearchQuery(FakeSearch, q='test -negated')
+        expected = {
+            'bool': {
+                'must': [
+                    {'multi_match': {
+                        'query': 'test',
+                        'analyzer': search.i18n_analyzer,
+                        'fields': ['title^2', 'description']
+                    }}
+                ],
+                'must_not': [
+                    {'multi_match': {
+                        'query': 'negated',
+                        'analyzer': search.i18n_analyzer,
+                        'fields': ['title^2', 'description']
+                    }}
+                ]
+            }
+        }
+        self.assertEqual(search_query.get_query(), expected)
+
     def test_simple_query_fuzzy(self):
         '''A simple query should use query_string with specified fields'''
         search_query = search.SearchQuery(FuzzySearch, q='test')

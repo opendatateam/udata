@@ -85,14 +85,18 @@ class SearchQuery(object):
     def get_filter(self):
         return {}
 
-    def build_text_query(self):
-        '''Build full text query from kwargs'''
-        if not self.kwargs.get('q'):
-            return
-        query_string = self.kwargs.get('q')
-        if isinstance(query_string, (list, tuple)):
-            query_string = ' '.join(query_string)
-        query = {'multi_match': {'query': query_string, 'analyzer': i18n_analyzer}}
+    def _bool_query(self):
+        return {'must': [], 'must_not': [], 'should': []}
+
+    def _update_bool_query(self, query, new):
+        if not query:
+            query = self._bool_query()
+        for key in 'must', 'must_not', 'should':
+            query[key].extend(new.get(key, []))
+        return query
+
+    def _multi_match(self, terms):
+        query = {'multi_match': {'query': ' '.join(terms), 'analyzer': i18n_analyzer}}
         if self.adapter.fields:
             query['multi_match']['fields'] = self.adapter.fields
         if self.adapter.fuzzy:
@@ -100,18 +104,36 @@ class SearchQuery(object):
             query['multi_match']['prefix_length'] = 2  # Make it configurable
         return query
 
+    def build_text_query(self):
+        '''Build full text query from kwargs'''
+        qs = self.kwargs.get('q', '')
+        included, excluded = [], []
+        terms = qs.split(' ') if isinstance(qs, basestring) else qs
+        for term in terms:
+            if not term.strip():
+                continue
+            if term.startswith('-'):
+                excluded.append(term[1:])
+            else:
+                included.append(term)
+        query = self._bool_query()
+        if included:
+            query['must'].append(self._multi_match(included))
+        if excluded:
+            query['must_not'].append(self._multi_match(excluded))
+        return query
+
     def build_facet_queries(self):
         '''Build sort query parameters from kwargs'''
+        query = self._bool_query()
         if not self.adapter.facets:
-            return {}
-        bool_query = {'must': [], 'must_not': [], 'should': []}
+            return query
         for name, facet in self.adapter.facets.items():
-            query = facet.filter_from_kwargs(name, self.kwargs)
-            if not query:
+            new_query = facet.filter_from_kwargs(name, self.kwargs)
+            if not new_query:
                 continue
-            for key in 'must', 'must_not', 'should':
-                bool_query[key].extend(query.get(key, []))
-        return bool_query
+            self._update_bool_query(query, new_query)
+        return query
 
     def get_aggregations(self):
         aggregations = {}
@@ -134,26 +156,17 @@ class SearchQuery(object):
         )
 
     def get_query(self):
-        text_query = self.build_text_query()
-        bool_query = self.build_facet_queries()
+        query = self.build_text_query()
+        self._update_bool_query(query, self.build_facet_queries())
 
-        if not text_query and not (bool_query and (
-                bool_query.get('must')
-                or bool_query.get('must_not')
-                or bool_query.get('should')
-            )):
-            return {'match_all': {}}
-
-        if text_query:
-            if not 'must' in bool_query:
-                bool_query['must'] = []
-            bool_query['must'].append(text_query)
-
+        has_query = False
         for key in 'must', 'must_not', 'should':
-            if not bool_query[key]:
-                del bool_query[key]
+            if not query[key]:
+                del query[key]
+            else:
+                has_query = True
 
-        return {'bool': bool_query}
+        return {'bool': query} if has_query else {'match_all': {}}
 
     def to_url(self, url=None, replace=False, **kwargs):
         '''Serialize the query into an URL'''
