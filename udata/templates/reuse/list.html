@@ -26,14 +26,8 @@
     <div class="col-lg-8">
 
         <div class="row">
-            <div class="col-sm-12 label-list">
-                {{ s.filter_label('organization', _('Organization'), ficon('fa-building-o'),
-                    labelize=reuses.label_func('organization')
-                ) }}
-                {{ s.filter_label('tag', _('Tag'), ficon('tag')) }}
-                {{ s.filter_label('type', _('Type'), ficon('file'),
-                    labelize=reuses.label_func('type')
-                ) }}
+            <div class="col-xs-12">
+                {% include "reuse/search-labels.html" %}
             </div>
         </div>
 

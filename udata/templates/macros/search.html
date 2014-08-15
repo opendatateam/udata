@@ -57,7 +57,7 @@
     {% if icon %}
     <span class="{{ icon }}"></span>
     {% endif %}
-    <span>{{ labelize(value) if labelize else value }}</span>
+    <span>{{ labelize(label, value) if labelize else value }}</span>
     <a href="{{ ''|url_del('page', **{name: value}) }}">
         <span class="close-icon glyphicon glyphicon-remove"></span>
     </a>
@@ -99,12 +99,12 @@
 {% endmacro %}
 
 
-{% macro term_facet(name, facet, query, labels=None, url=None) %}
+{% macro term_facet(name, facet, query, url=None) %}
 <div id="collapse-{{name}}" class="list-group collapse in">
 {% for term, count in facet.terms %}
     <a href="{{ query.to_url(url, **{name: term}) }}"
         class="list-group-item">
-        {{ query.adapter.facets[name].labelize(term) }}
+        {{ query.adapter.facets[name].labelize('', term) }}
         <span class="badge pull-right">{{ count }}</span>
     </a>
 {% endfor %}

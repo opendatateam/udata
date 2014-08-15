@@ -11,6 +11,7 @@ from udata import search
 from udata.core.metrics import Metric
 from udata.models import db
 from udata.utils import multi_to_dict
+from udata.i18n import gettext as _, format_date
 
 from udata.tests import TestCase, DBTestMixin, SearchTestMixin
 from udata.tests.factories import faker, MongoEngineFactory
@@ -585,7 +586,6 @@ class TestBoolFacet(TestCase):
         self.assertEqual(extracted[False], 70)
 
     def test_to_filter(self):
-
         for value in True, 'True', 'true':
             kwargs = {'boolean': value}
             expected = {'must': [{'term': {'boolean': True}}]}
@@ -598,6 +598,13 @@ class TestBoolFacet(TestCase):
 
     def test_aggregations(self):
         self.assertEqual(self.facet.to_aggregations(), {})
+
+    def test_labelize(self):
+        self.assertEqual(self.facet.labelize('label', True), 'label: {0}'.format(_('yes')))
+        self.assertEqual(self.facet.labelize('label', False), 'label: {0}'.format(_('no')))
+
+        self.assertEqual(self.facet.labelize('label', 'true'), 'label: {0}'.format(_('yes')))
+        self.assertEqual(self.facet.labelize('label', 'false'), 'label: {0}'.format(_('no')))
 
 
 class TestTermFacet(TestCase):
@@ -655,6 +662,9 @@ class TestTermFacet(TestCase):
     def test_aggregations(self):
         self.assertEqual(self.facet.to_aggregations(), {})
 
+    def test_labelize(self):
+        self.assertEqual(self.facet.labelize('label', 'fake'), 'fake')
+
 
 class TestModelTermFacet(TestCase, DBTestMixin):
     def setUp(self):
@@ -679,7 +689,7 @@ class TestModelTermFacet(TestCase, DBTestMixin):
 
     def test_labelize(self):
         fake = FakeFactory()
-        self.assertEqual(self.facet.labelize(str(fake.id)), 'fake')
+        self.assertEqual(self.facet.labelize('label', str(fake.id)), 'fake')
 
     def test_from_response(self):
         fakes = [FakeFactory() for _ in range(10)]
@@ -776,6 +786,9 @@ class TestRangeFacet(TestCase):
     def test_aggregations(self):
         self.assertEqual(self.facet.to_aggregations(), {})
 
+    def test_labelize(self):
+        self.assertEqual(self.facet.labelize('label', '4-15'), 'label: 4-15')
+
 
 class TestDateRangeFacet(TestCase):
     def setUp(self):
@@ -868,6 +881,15 @@ class TestTemporalCoverageFacet(TestCase):
                 },
             }
         }])
+
+
+    def test_labelize(self):
+        label = self.facet.labelize('label', '1940-01-01-2014-12-31')
+        expected = 'label: {0} - {1}'.format(
+            format_date(date(1940, 01, 01), 'short'),
+            format_date(date(2014, 12, 31), 'short')
+        )
+        self.assertEqual(label, expected)
 
 
 class SearchResultTest(TestCase):

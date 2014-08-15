@@ -8,6 +8,8 @@ from datetime import date, datetime, timedelta
 from bson.objectid import ObjectId
 
 from udata.models import db
+from udata.i18n import lazy_gettext as _, format_date
+from udata.utils import to_bool
 
 
 log = logging.getLogger(__name__)
@@ -52,7 +54,7 @@ class Facet(object):
         '''Parse the elasticsearch response'''
         raise NotImplementedError
 
-    def labelize(self, value):
+    def labelize(self, label, value):
         '''Get the label for a given value'''
         return value
 
@@ -74,12 +76,11 @@ class BoolFacet(Facet):
         if not name in kwargs:
             return
         value = kwargs[name]
-        boolean = value is True or (isinstance(value, basestring) and value.lower() == 'true')
+        boolean = to_bool(value)
         if boolean:
             return {'must': [{'term': {self.field: True}}]}
         else:
             return {'must_not': [{'term': {self.field: True}}]}
-        # return {'term': {self.field: True}} if boolean else {'terms': {self.field: [False, None]}}
 
     def from_response(self, name, response):
         facet = response.get('facets', {}).get(name)
@@ -100,6 +101,9 @@ class BoolFacet(Facet):
             False: false_count
         }
         return data
+
+    def labelize(self, label, value):
+        return ': '.join([label, str(_('yes') if to_bool(value) else _('no'))])
 
 
 class TermFacet(Facet):
@@ -158,7 +162,7 @@ class ModelTermFacet(TermFacet):
             'visible': len(facet['terms']) > 0,
         }
 
-    def labelize(self, value):
+    def labelize(self, label, value):
         return unicode(self.model.objects.get(id=value))
 
 
@@ -213,6 +217,9 @@ class RangeFacet(Facet):
             'visible': not failure and facet['max'] - facet['min'] > 2,
         }
 
+    def labelize(self, label, value):
+        return ': '.join([label, value])
+
 
 def ts_to_dt(value):
     '''Convert an elasticsearch timestamp into a Python datetime'''
@@ -252,24 +259,24 @@ class TemporalCoverageFacet(Facet):
         '''No facet query, only use aggregation'''
         return None
 
-    def _from_iso(self, value):
-        parts = value.split('-') if isinstance(value, basestring) else value
-        return date(*map(int, parts[0:3]))
+    def parse_value(self, value):
+        parts = value.split('-')
+        start = date(*map(int, parts[0:3]))
+        end = date(*map(int, parts[3:6]))
+        return start, end
 
     def to_filter(self, value):
-        parts = value.split('-')
-        date1 = date(*map(int, parts[0:3]))
-        date2 = date(*map(int, parts[3:6]))
+        start, end = self.parse_value(value)
         return [{
             'range': {
                 '{0}.start'.format(self.field): {
-                    'lte': max(date1, date2).toordinal(),
+                    'lte': max(start, end).toordinal(),
                 },
             }
         }, {
             'range': {
                 '{0}.end'.format(self.field): {
-                    'gte': min(date1, date2).toordinal(),
+                    'gte': min(start, end).toordinal(),
                 },
             }
         }]
@@ -305,6 +312,11 @@ class TemporalCoverageFacet(Facet):
                 }
             }
         }
+
+
+    def labelize(self, label, value):
+        start, end = self.parse_value(value)
+        return '{0}: {1} - {2}'.format(label, format_date(start, 'short'), format_date(end, 'short'))
 
 
 class BoolBooster(object):

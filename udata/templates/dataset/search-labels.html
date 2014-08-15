@@ -1,0 +1,23 @@
+{% import theme('macros/search.html') as s %}
+<div class="label-list">
+    {{ s.filter_label('organization', _('Organization'), ficon('fa-building-o'),
+        labelize=datasets.label_func('organization')
+    ) }}
+    {{ s.filter_label('supplier', _('Supplier'), ficon('fa-building-o'),
+        labelize=datasets.label_func('supplier')
+    ) }}
+    {{ s.filter_label('tag', _('Tag'), ficon('tag')) }}
+    {{ s.filter_label('license', _('License'), ficon('copyright-mark'),
+        labelize=datasets.label_func('license')
+    ) }}
+    {{ s.filter_label('temporal_coverage', _('Temporal coverage'), ficon('calendar'),
+        labelize=datasets.label_func('temporal_coverage')
+    ) }}
+    {{ s.filter_label('format', _('Format'), ficon('file')) }}
+    {{ s.filter_label('reuses', _('Reuses'), ficon('random'),
+        labelize=datasets.label_func('reuses')
+    ) }}
+    {{ s.filter_label('followers', _('Followers'), ficon('eye-open'),
+        labelize=datasets.label_func('followers')
+    ) }}
+</div>

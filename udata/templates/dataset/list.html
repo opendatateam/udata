@@ -1,6 +1,5 @@
 {% extends theme("layouts/1-column.html") %}
 {% from theme('macros/paginator.html') import paginator with context %}
-{% import theme('macros/search.html') as s %}
 
 {% block breadcrumb %}
     <li class="active">
@@ -26,18 +25,8 @@
     <div class="col-lg-8">
 
         <div class="row">
-            <div class="col-sm-12 label-list">
-                {{ s.filter_label('organization', _('Organization'), ficon('fa-building-o'),
-                    labelize=datasets.label_func('organization')
-                ) }}
-                {{ s.filter_label('supplier', _('Supplier'), ficon('fa-building-o'),
-                    labelize=datasets.label_func('supplier')
-                ) }}
-                {{ s.filter_label('tag', _('Tag'), ficon('tag')) }}
-                {{ s.filter_label('license', _('License'), ficon('copyright-mark'),
-                    labelize=datasets.label_func('license')
-                ) }}
-                {{ s.filter_label('format', _('Format'), ficon('file')) }}
+            <div class="col-xs-12">
+                {% include "dataset/search-labels.html" %}
             </div>
         </div>
 

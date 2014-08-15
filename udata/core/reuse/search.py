@@ -15,7 +15,7 @@ __all__ = ('ReuseSearch', )
 
 
 class ReuseTypeFacet(TermFacet):
-    def labelize(self, value):
+    def labelize(self, label, value):
         return REUSE_TYPES[value]
 
 

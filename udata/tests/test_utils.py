@@ -5,7 +5,7 @@ import unittest
 
 from datetime import date
 
-from udata.utils import get_by, daterange_start, daterange_end
+from udata.utils import get_by, daterange_start, daterange_end, to_bool
 
 TEST_LIST = [
     {'name': 'aaa', 'other': 'bbb'},
@@ -76,3 +76,25 @@ class DateRangeTest(unittest.TestCase):
     def test_parse_before_1900(self):
         self.assertEqual(daterange_start('1860'), date(1860, 1, 1))
         self.assertEqual(daterange_end('1860'), date(1860, 12, 31))
+
+
+class ToBoolTest(unittest.TestCase):
+    def test_bool_values(self):
+        self.assertEqual(to_bool(True), True)
+        self.assertEqual(to_bool(False), False)
+
+    def test_string_values(self):
+        self.assertEqual(to_bool('True'), True)
+        self.assertEqual(to_bool('true'), True)
+        self.assertEqual(to_bool('False'), False)
+        self.assertEqual(to_bool('false'), False)
+        self.assertEqual(to_bool('bla'), False)
+
+    def test_int_values(self):
+        self.assertEqual(to_bool(0), False)
+        self.assertEqual(to_bool(-1), False)
+        self.assertEqual(to_bool(1), True)
+        self.assertEqual(to_bool(10), True)
+
+
+

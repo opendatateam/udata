@@ -110,3 +110,22 @@ def daterange_end(string):
         return date(year, month, end_of_month)
     else:
         return date(int(parts[0]), 12, 31)
+
+
+def to_bool(value):
+    '''
+    Transform a value into a boolean with the following rules:
+
+    - a boolean is returned untouched
+    - a string value should match any casinf of 'true' to be True
+    - an integer should be superior to zero to be True
+    - all other values are False
+    '''
+    if isinstance(value, bool):
+        return value
+    elif isinstance(value, basestring):
+        return value.lower() == 'true'
+    elif isinstance(value, int):
+        return value > 0
+    else:
+        return False
