@@ -15,8 +15,6 @@ from .forms import IssueCreateForm, IssueCommentForm
 from .models import Issue, Message
 from .signals import on_new_issue, on_issue_closed
 
-ns = api.namespace('issues', 'Issue related operations')
-
 message_fields = api.model('IssueMessage', {
     'content': fields.String,
     'posted_by': UserField,
@@ -43,6 +41,7 @@ class IssuesAPI(API):
     model = Issue
 
     @api.secure
+    @api.doc(model=issue_fields)
     def post(self, id):
         '''Create a new Issue for a given object'''
         form = api.validate(IssueCreateForm)
@@ -66,7 +65,7 @@ class IssuesAPI(API):
         return marshal(list(issues), issue_fields)
 
 
-@ns.route('/<id>', endpoint='issue')
+@api.route('/issues/<id>', endpoint='issue')
 @api.doc(model=issue_fields)
 class IssueAPI(API):
     '''
@@ -74,13 +73,13 @@ class IssueAPI(API):
     '''
 
     def get(self, id):
-        '''Get a given issue'''
+        '''Get an issue given its ID'''
         issue = Issue.objects.get_or_404(id=id)
         return marshal(issue, issue_fields)
 
     @api.secure
     def post(self, id):
-        '''Add comment and optionnaly close a given issue'''
+        '''Add comment and optionnaly close an issue given its ID'''
         issue = Issue.objects.get_or_404(id=id)
         form = api.validate(IssueCommentForm)
         issue.discussion.append(Message(

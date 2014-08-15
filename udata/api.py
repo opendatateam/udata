@@ -61,7 +61,7 @@ class UDataApi(Api):
 
 api = UDataApi(prefix='/api', decorators=[csrf.exempt],
     version='1.0', title='uData API',
-    description='Bla bla bla'
+    description='Bla bla bla', default='site', default_label='Site global namespace'
 )
 
 

@@ -11,7 +11,7 @@ define([
 
     var today = moment(),
         last_week = moment().subtract('days', 10),
-        url = '/api/metrics/site/';
+        url = '/api/metrics/site';
 
     url += '?' + $.param({start: last_week.format('YYYY-MM-DD'), end: today.format('YYYY-MM-DD')});
 

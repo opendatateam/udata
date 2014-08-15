@@ -10,8 +10,6 @@ from udata.api import api, API, marshal, reqparse
 from udata.models import Metrics
 
 
-ns = api.namespace('metrics', 'Metrics related operations')
-
 metrics_fields = api.model('Metric', {
     'object_id': fields.String,
     'date': fields.String,
@@ -27,9 +25,10 @@ parser.add_argument('end', type=isodate, help='End of the period to fetch', loca
 parser.add_argument('day', type=isodate, help='Specific day date to fetch', location='args')
 
 
-@ns.route('/<id>', endpoint='metrics')
+@api.route('/metrics/<id>', endpoint='metrics')
 class MetricsAPI(API):
     def get(self, id):
+        '''Fetch metrics for an object given its ID'''
         try:
             object_id = ObjectId(id)
         except:
