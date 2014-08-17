@@ -276,18 +276,22 @@ def i18n_alternate_links():
     if not request.endpoint or not current_app.url_map.is_endpoint_expecting(request.endpoint, 'lang_code'):
         return Markup('')
 
-    LINK_PATTERN = '<link rel="alternate" href="{url}" hreflang="{lang}" />'
-    links = []
-    current_lang = get_current_locale().language
+    try:
+        LINK_PATTERN = '<link rel="alternate" href="{url}" hreflang="{lang}" />'
+        links = []
+        current_lang = get_current_locale().language
 
-    params = {}
-    if request.args:
-        params.update(request.args)
-    if request.view_args:
-        params.update(request.view_args)
+        params = {}
+        if request.args:
+            params.update(request.args)
+        if request.view_args:
+            params.update(request.view_args)
 
-    for lang in current_app.config['LANGUAGES']:
-        if lang != current_lang:
-            url = url_for(request.endpoint, lang_code=lang, **params)
-            links.append(LINK_PATTERN.format(url=url, lang=lang))
-    return Markup(''.join(links))
+        for lang in current_app.config['LANGUAGES']:
+            if lang != current_lang:
+                url = url_for(request.endpoint, lang_code=lang, **params)
+                links.append(LINK_PATTERN.format(url=url, lang=lang))
+        return Markup(''.join(links))
+    except:
+        # Never fails
+        return Markup('')

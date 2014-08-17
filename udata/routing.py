@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 from bson import ObjectId
 from uuid import UUID
 
-from werkzeug.routing import BaseConverter
+from flask import request, abort
+from werkzeug.routing import BaseConverter, NotFound
 
 from udata import models
 
@@ -46,7 +47,10 @@ class ModelConverter(BaseConverter):
 
     def to_python(self, value):
         obj = self.model.objects(slug=value).first()
-        return obj or self.model.objects.get_or_404(id=value)
+        try:
+            return obj or self.model.objects.get_or_404(id=value)
+        except NotFound as e:
+            return e
 
     def to_url(self, obj):
         if isinstance(obj, (basestring, ObjectId)):
@@ -83,7 +87,16 @@ class PostConverter(ModelConverter):
     model = models.Post
 
 
+def lazy_raise_404():
+    '''Raise 404 lazily to ensure request.endpoint is set'''
+    for arg in request.view_args.values():
+        if isinstance(arg, NotFound):
+            request.routing_exception = arg
+            break
+
+
 def init_app(app):
+    app.before_request(lazy_raise_404)
     app.url_map.converters['lang'] = LanguagePrefixConverter
     app.url_map.converters['list'] = ListConverter
     app.url_map.converters['uuid'] = UUIDConverter
