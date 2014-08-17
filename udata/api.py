@@ -185,16 +185,20 @@ class PreviousPageUrl(fields.Raw):
         return url_for(request.endpoint, _external=True, **args)
 
 
-def marshal_page(page, page_fields):
+def pager(page_fields):
     pager_fields = {
-        'data': fields.Nested(page_fields, attribute='objects'),
+        'data': api.as_list(fields.Nested(page_fields, attribute='objects')),
         'page': fields.Integer,
         'page_size': fields.Integer,
         'total': fields.Integer,
         'next_page': NextPageUrl,
         'previous_page': PreviousPageUrl,
     }
-    return marshal(page, pager_fields)
+    return pager_fields
+
+
+def marshal_page(page, page_fields):
+    return marshal(page, pager(page_fields))
 
 
 def marshal_page_with(func):

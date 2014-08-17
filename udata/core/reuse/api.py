@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask.ext.restful import fields
 
-from udata.api import api, API, ModelAPI, ModelListAPI, SingleObjectAPI, marshal
+from udata.api import api, API, ModelAPI, ModelListAPI, SingleObjectAPI, marshal, pager
 from udata.forms import ReuseForm
 from udata.models import Reuse
 
@@ -33,13 +33,15 @@ reuse_fields = api.model('Reuse', {
     'uri': fields.UrlFor('api.reuse', lambda o: {'reuse': o}),
 })
 
+reuse_page_fields = api.model('ReusePage', pager(reuse_fields))
+
 common_doc = {
     'params': {'reuse': 'The reuse ID or slug'}
 }
 
 
 @ns.route('/', endpoint='reuses')
-@api.doc(get={'model': [reuse_fields]}, post={'model': reuse_fields})
+@api.doc(get={'model': reuse_page_fields}, post={'model': reuse_fields})
 class ReuseListAPI(ModelListAPI):
     model = Reuse
     form = ReuseForm

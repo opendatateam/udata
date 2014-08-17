@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API, marshal, fields
+from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API, marshal, fields, pager
 from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
 from udata.core.organization.api import OrganizationField
@@ -53,6 +53,8 @@ dataset_fields = api.model('Dataset', {
     'uri': fields.UrlFor('api.dataset', lambda o: {'dataset': o}),
 })
 
+dataset_page_fields = api.model('DatasetPage', pager(dataset_fields))
+
 common_doc = {
     'params': {'dataset': 'The dataset ID or slug'}
 }
@@ -69,7 +71,7 @@ class DatasetField(fields.Raw):
 
 
 @ns.route('/', endpoint='datasets')
-@api.doc(get={'model': [dataset_fields]}, post={'model': dataset_fields})
+@api.doc(get={'model': dataset_page_fields}, post={'model': dataset_fields})
 class DatasetListAPI(ModelListAPI):
     model = Dataset
     form = DatasetFullForm

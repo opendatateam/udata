@@ -6,7 +6,7 @@ from datetime import datetime
 from flask import url_for
 from flask.ext.restful import fields
 
-from udata.api import api, ModelAPI, ModelListAPI, API, marshal
+from udata.api import api, ModelAPI, ModelListAPI, API, marshal, pager
 from udata.auth import current_user
 from udata.forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm
 from udata.models import Organization, MembershipRequest, Member, FollowOrg
@@ -28,6 +28,8 @@ org_fields = api.model('Organization', {
     'metrics': fields.Raw,
     'uri': fields.UrlFor('api.organization', lambda o: {'org': o}),
 })
+
+org_page_fields = api.model('OrganizationPage', pager(org_fields))
 
 request_fields = api.model('MembershripRequest', {
     'status': fields.String,
@@ -55,7 +57,7 @@ class OrganizationField(fields.Raw):
 
 
 @ns.route('/', endpoint='organizations')
-@api.doc(get={'model': [org_fields]}, post={'model': org_fields})
+@api.doc(get={'model': org_page_fields}, post={'model': org_fields})
 class OrganizationListAPI(ModelListAPI):
     model = Organization
     fields = org_fields
