@@ -133,6 +133,7 @@ class ModelAPI(SingleObjectAPI, API):
         return marshal(form.save(), self.fields)
 
     @api.secure
+    @api.doc(model=None, responses={204: 'Object deleted'})
     def delete(self, **kwargs):
         '''Delete a given object'''
         obj = self.get_or_404(**kwargs)

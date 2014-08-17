@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import request
-
 from udata.api import api, API
 from udata.search import es
 
@@ -10,61 +8,56 @@ DEFAULT_SIZE = 8
 
 ns = api.namespace('suggest', 'Completion suggester APIs')
 
-params = {'q': {
-    'type': 'string',
-    'paramType': 'query',
-    'description': 'The string to autocomplete/suggest'
-}}
+parser = api.parser()
+parser.add_argument('q', type=str, help='The string to autocomplete/suggest', location='args', required=True)
+parser.add_argument('size', type=int, help='The moutn of suggestion to fetch', location='args', default=DEFAULT_SIZE)
 
 
-@ns.route('/tags', endpoint='suggest_tags', doc={'params': params})
+@ns.route('/tags', endpoint='suggest_tags', doc={'parser': parser})
 class SuggestTagsAPI(API):
     def get(self):
         '''Suggest tags'''
-        q = request.args.get('q', '')
-        size = request.args.get('size', DEFAULT_SIZE)
+        args = parser.parse_args()
         result = es.suggest(index=es.index_name, body={
             'tags': {
-                'text': q,
+                'text': args['q'],
                 'completion': {
                     'field': 'tag_suggest',
-                    'size': size
+                    'size': args['size'],
                 }
             }
         })
         return sorted(result['tags'][0]['options'], key=lambda o: len(o['text']))
 
 
-@ns.route('/formats', endpoint='suggest_formats', doc={'params': params})
+@ns.route('/formats', endpoint='suggest_formats', doc={'parser': parser})
 class SuggestFormatsAPI(API):
     def get(self):
         '''Suggest file formats'''
-        q = request.args.get('q', '')
-        size = request.args.get('size', DEFAULT_SIZE)
+        args = parser.parse_args()
         result = es.suggest(index=es.index_name, body={
             'formats': {
-                'text': q,
+                'text': args['q'],
                 'completion': {
                     'field': 'format_suggest',
-                    'size': size
+                    'size': args['size'],
                 }
             }
         })
         return sorted(result['formats'][0]['options'], key=lambda o: len(o['text']))
 
 
-@ns.route('/organizations', endpoint='suggest_orgs', doc={'params': params})
+@ns.route('/organizations', endpoint='suggest_orgs', doc={'parser': parser})
 class SuggestOrgsAPI(API):
     def get(self):
         '''Suggest organizations'''
-        q = request.args.get('q', '')
-        size = request.args.get('size', DEFAULT_SIZE)
+        args = parser.parse_args()
         result = es.suggest(index=es.index_name, body={
             'organizations': {
-                'text': q,
+                'text': args['q'],
                 'completion': {
                     'field': 'org_suggest',
-                    'size': size
+                    'size': args['size'],
                 }
             }
         })
@@ -80,18 +73,17 @@ class SuggestOrgsAPI(API):
         ]
 
 
-@ns.route('/datasets', endpoint='suggest_datasets', doc={'params': params})
+@ns.route('/datasets', endpoint='suggest_datasets', doc={'parser': parser})
 class SuggestDatasetsAPI(API):
     def get(self):
         '''Suggest datasets'''
-        q = request.args.get('q', '')
-        size = request.args.get('size', DEFAULT_SIZE)
+        args = parser.parse_args()
         result = es.suggest(index=es.index_name, body={
             'datasets': {
-                'text': q,
+                'text': args['q'],
                 'completion': {
                     'field': 'dataset_suggest',
-                    'size': size
+                    'size': args['size'],
                 }
             }
         })
@@ -107,18 +99,17 @@ class SuggestDatasetsAPI(API):
         ]
 
 
-@ns.route('/reuses', endpoint='suggest_reuses', doc={'params': params})
+@ns.route('/reuses', endpoint='suggest_reuses', doc={'parser': parser})
 class SuggestReusesAPI(API):
     def get(self):
         '''Suggest reuses'''
-        q = request.args.get('q', '')
-        size = request.args.get('size', DEFAULT_SIZE)
+        args = parser.parse_args()
         result = es.suggest(index=es.index_name, body={
             'reuses': {
-                'text': q,
+                'text': args['q'],
                 'completion': {
                     'field': 'reuse_suggest',
-                    'size': size
+                    'size': args['size'],
                 }
             }
         })
@@ -134,18 +125,17 @@ class SuggestReusesAPI(API):
         ]
 
 
-@ns.route('/users', endpoint='suggest_users', doc={'params': params})
+@ns.route('/users', endpoint='suggest_users', doc={'parser': parser})
 class SuggestUsersAPI(API):
     def get(self):
         '''Suggest users'''
-        q = request.args.get('q', '')
-        size = request.args.get('size', DEFAULT_SIZE)
+        args = parser.parse_args()
         result = es.suggest(index=es.index_name, body={
             'users': {
-                'text': q,
+                'text': args['q'],
                 'completion': {
                     'field': 'user_suggest',
-                    'size': size
+                    'size': args['size'],
                 }
             }
         })

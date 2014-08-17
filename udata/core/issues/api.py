@@ -57,6 +57,7 @@ class IssuesAPI(API):
 
         return marshal(issue, issue_fields), 201
 
+    @api.doc(model=[issue_fields])
     def get(self, id):
         '''List all Issues for an object given its ID'''
         issues = self.model.objects(subject=id)

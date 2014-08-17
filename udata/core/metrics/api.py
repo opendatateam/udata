@@ -6,7 +6,7 @@ from datetime import date
 
 from flask.ext.restful import fields
 
-from udata.api import api, API, marshal, reqparse
+from udata.api import api, API, marshal
 from udata.models import Metrics
 
 
@@ -19,7 +19,7 @@ metrics_fields = api.model('Metric', {
 
 isodate = lambda v: date(*(int(p) for p in v.split('-'))).isoformat()
 
-parser = reqparse.RequestParser()
+parser = api.parser()
 parser.add_argument('start', type=isodate, help='Start of the period to fetch', location='args')
 parser.add_argument('end', type=isodate, help='End of the period to fetch', location='args')
 parser.add_argument('day', type=isodate, help='Specific day date to fetch', location='args')
@@ -27,8 +27,9 @@ parser.add_argument('day', type=isodate, help='Specific day date to fetch', loca
 
 @api.route('/metrics/<id>', endpoint='metrics')
 class MetricsAPI(API):
-    @api.doc(parser=parser, notes='If day is set, start and end will be ignored')
+    @api.doc(model=[metrics_fields], parser=parser)
     @api.doc(params={'id': 'The object ID to fetch metric for'})
+    @api.doc(notes='If day is set, start and end will be ignored')
     def get(self, id):
         '''Fetch metrics for an object given its ID'''
         try:

@@ -33,8 +33,13 @@ reuse_fields = api.model('Reuse', {
     'uri': fields.UrlFor('api.reuse', lambda o: {'reuse': o}),
 })
 
+common_doc = {
+    'params': {'reuse': 'The reuse ID or slug'}
+}
+
 
 @ns.route('/', endpoint='reuses')
+@api.doc(get={'model': [reuse_fields]}, post={'model': reuse_fields})
 class ReuseListAPI(ModelListAPI):
     model = Reuse
     form = ReuseForm
@@ -42,7 +47,8 @@ class ReuseListAPI(ModelListAPI):
     search_adapter = ReuseSearch
 
 
-@ns.route('/<reuse:reuse>/', endpoint='reuse')
+@ns.route('/<reuse:reuse>/', endpoint='reuse', doc=common_doc)
+@api.doc(model=reuse_fields)
 class ReuseAPI(ModelAPI):
     model = Reuse
     form = ReuseForm
@@ -50,6 +56,7 @@ class ReuseAPI(ModelAPI):
 
 
 @ns.route('/<reuse:reuse>/featured/', endpoint='reuse_featured')
+@api.doc(model=reuse_fields, **common_doc)
 class ReuseFeaturedAPI(SingleObjectAPI, API):
     model = Reuse
 
@@ -73,6 +80,6 @@ class ReuseIssuesAPI(IssuesAPI):
     model = ReuseIssue
 
 
-@ns.route('/reuse/<id>/', endpoint='follow_reuse')
+@ns.route('/<id>/follow/', endpoint='follow_reuse')
 class FollowReuseAPI(FollowAPI):
     model = FollowReuse

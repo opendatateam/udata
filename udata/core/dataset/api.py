@@ -69,6 +69,7 @@ class DatasetField(fields.Raw):
 
 
 @ns.route('/', endpoint='datasets')
+@api.doc(get={'model': [dataset_fields]}, post={'model': dataset_fields})
 class DatasetListAPI(ModelListAPI):
     model = Dataset
     form = DatasetFullForm
@@ -77,18 +78,19 @@ class DatasetListAPI(ModelListAPI):
 
 
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)
+@api.doc(model=dataset_fields)
 class DatasetAPI(ModelAPI):
     model = Dataset
     form = DatasetForm
     fields = dataset_fields
 
 
-@ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured', doc=common_doc)
+@ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')
+@api.doc(model=dataset_fields, **common_doc)
 class DatasetFeaturedAPI(SingleObjectAPI, API):
     model = Dataset
 
     @api.secure
-    @api.doc(model=dataset_fields)
     def post(self, dataset):
         '''Mark the dataset as featured'''
         dataset.featured = True
@@ -96,7 +98,6 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
         return marshal(dataset, dataset_fields)
 
     @api.secure
-    @api.doc(model=dataset_fields)
     def delete(self, dataset):
         '''Unmark the dataset as featured'''
         dataset.featured = False

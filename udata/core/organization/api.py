@@ -39,6 +39,10 @@ member_fields = api.model('Member', {
     'role': fields.String,
 })
 
+common_doc = {
+    'params': {'org': 'The organization ID or slug'}
+}
+
 
 @api.model('OrganizationReference')
 class OrganizationField(fields.Raw):
@@ -51,6 +55,7 @@ class OrganizationField(fields.Raw):
 
 
 @ns.route('/', endpoint='organizations')
+@api.doc(get={'model': [org_fields]}, post={'model': org_fields})
 class OrganizationListAPI(ModelListAPI):
     model = Organization
     fields = org_fields
@@ -58,16 +63,18 @@ class OrganizationListAPI(ModelListAPI):
     search_adapter = OrganizationSearch
 
 
-@ns.route('/<org:org>/', endpoint='organization')
+@ns.route('/<org:org>/', endpoint='organization', doc=common_doc)
+@api.doc(model=org_fields)
 class OrganizationAPI(ModelAPI):
     model = Organization
     fields = org_fields
     form = OrganizationForm
 
 
-@ns.route('/<org:org>/membership/', endpoint='request_membership')
+@ns.route('/<org:org>/membership/', endpoint='request_membership', doc=common_doc)
 class MembershipRequestAPI(API):
     @api.secure
+    @api.doc(model=request_fields)
     def post(self, org):
         '''Apply for membership to a given organization.'''
         membership_request = org.pending_request(current_user._get_current_object())
@@ -93,9 +100,10 @@ class MembershipAPI(API):
         api.abort(404, 'Unknown membership request id')
 
 
-@ns.route('/<org:org>/membership/<uuid:id>/accept/', endpoint='accept_membership')
+@ns.route('/<org:org>/membership/<uuid:id>/accept/', endpoint='accept_membership', doc=common_doc)
 class MembershipAcceptAPI(MembershipAPI):
     @api.secure
+    @api.doc(model=member_fields)
     def post(self, org, id):
         '''Accept user membership to a given organization.'''
         membership_request = self.get_or_404(org, id)
@@ -111,7 +119,7 @@ class MembershipAcceptAPI(MembershipAPI):
         return marshal(member, member_fields), 200
 
 
-@ns.route('/<org:org>/membership/<uuid:id>/refuse/', endpoint='refuse_membership')
+@ns.route('/<org:org>/membership/<uuid:id>/refuse/', endpoint='refuse_membership', doc=common_doc)
 class MembershipRefuseAPI(MembershipAPI):
     @api.secure
     def post(self, org, id):
