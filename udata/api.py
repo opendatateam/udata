@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import wraps
 
 from flask import request, url_for, json, make_response, redirect
-from flask.ext.restplus import Api, Resource, marshal, fields, reqparse
+from flask.ext.restplus import Api, Resource, marshal, fields
 
 from werkzeug.datastructures import MultiDict
 
@@ -24,17 +24,24 @@ bp = I18nBlueprint('apii18n', __name__)
 
 
 DEFAULT_PAGE_SIZE = 50
+HEADER_API_KEY = 'X-API-KEY'
 
 
 class UDataApi(Api):
+    def __init__(self, **kwargs):
+        super(UDataApi, self).__init__(**kwargs)
+        self.authorizations = {'apikey': {'type': 'apiKey', 'passAs': 'header', 'keyname': HEADER_API_KEY}}
+
     def secure(self, func):
         '''Enforce authentication on a given method/verb'''
+        self._handle_api_doc(func, {'authorizations': 'apikey'})
+
         @wraps(func)
         def wrapper(*args, **kwargs):
             if current_user.is_authenticated():
                 return func(*args, **kwargs)
 
-            apikey = request.headers.get('X-API-KEY')
+            apikey = request.headers.get(HEADER_API_KEY)
             if not apikey:
                 self.abort(401)
             try:
@@ -76,6 +83,11 @@ def output_json(data, code, headers=None):
 @bp.route('/apidoc/')
 def apidoc():
     return render('apidoc.html', api_endpoint=api.endpoint, specs_url=api.specs_url)
+
+
+@bp.route('/apidoc/images/throbber.gif')
+def fix_apidoc_throbber():
+    return redirect(url_for('api.fix_throbber'))
 
 
 class API(Resource):  # Avoid name collision as resource is a core model
