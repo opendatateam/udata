@@ -17,6 +17,8 @@ recursive-include udata/static/bower/font-awesome/less *.less
 recursive-include udata/static/bower/font-awesome/fonts *
 include udata/static/bower/highstock-components/highstock.js
 include udata/static/bower/html5shiv/dist/html5shiv.js
+include udata/static/bower/highlightjs/highlight.pack.js
+recursive-include udata/static/bower/highlightjs/styles *.css
 include udata/static/bower/i18next/i18next.amd.js
 include udata/static/bower/jcrop/css/jquery.Jcrop.css
 include udata/static/bower/jcrop/js/jquery.Jcrop.js
