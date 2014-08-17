@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-14 17:32+0200\n"
+"POT-Creation-Date: 2014-08-17 21:12+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgid "Description"
 msgstr ""
 
 #: udata/core/dataset/forms.py:17 udata/templates/dataset/display.html:206
-#: udata/templates/dataset/list.html:37
+#: udata/templates/dataset/search-labels.html:10
 msgid "License"
 msgstr ""
 
@@ -40,6 +40,7 @@ msgstr ""
 
 #: udata/core/dataset/forms.py:20 udata/templates/dataset/card.html:36
 #: udata/templates/dataset/display.html:219
+#: udata/templates/dataset/search-labels.html:13
 #: udata/templates/dataset/search-panel.html:20
 #: udata/templates/dataset/search-result.html:35
 msgid "Temporal coverage"
@@ -67,7 +68,7 @@ msgstr ""
 msgid "URL"
 msgstr ""
 
-#: udata/core/dataset/forms.py:40 udata/templates/dataset/list.html:40
+#: udata/core/dataset/forms.py:40 udata/templates/dataset/search-labels.html:16
 msgid "Format"
 msgstr ""
 
@@ -89,13 +90,15 @@ msgstr ""
 msgid "Old key"
 msgstr ""
 
-#: udata/core/dataset/metrics.py:21 udata/core/organization/metrics.py:33
-#: udata/core/site/metrics.py:43 udata/core/user/metrics.py:38
+#: udata/core/dataset/metrics.py:19 udata/core/organization/metrics.py:33
+#: udata/core/site/metrics.py:44 udata/core/user/metrics.py:39
 #: udata/templates/header.html:32 udata/templates/search.html:28
 #: udata/templates/dataset/card.html:82 udata/templates/dataset/display.html:70
+#: udata/templates/dataset/search-labels.html:17
 #: udata/templates/dataset/search-panel.html:9
-#: udata/templates/dataset/search-panel.html:21
+#: udata/templates/dataset/search-panel.html:22
 #: udata/templates/organization/display.html:58
+#: udata/templates/organization/search-labels.html:9
 #: udata/templates/organization/search-panel.html:8
 #: udata/templates/organization/search-panel.html:13
 #: udata/templates/reuse/create.html:4 udata/templates/reuse/display.html:17
@@ -105,95 +108,95 @@ msgstr ""
 msgid "Reuses"
 msgstr ""
 
-#: udata/core/dataset/models.py:19
+#: udata/core/dataset/models.py:21
 msgid "Punctual"
 msgstr ""
 
-#: udata/core/dataset/models.py:20
+#: udata/core/dataset/models.py:22
 msgid "Real time"
 msgstr ""
 
-#: udata/core/dataset/models.py:21
+#: udata/core/dataset/models.py:23
 msgid "Daily"
 msgstr ""
 
-#: udata/core/dataset/models.py:22
+#: udata/core/dataset/models.py:24
 msgid "Weekly"
 msgstr ""
 
-#: udata/core/dataset/models.py:23
+#: udata/core/dataset/models.py:25
 msgid "Fortnighly"
 msgstr ""
 
-#: udata/core/dataset/models.py:24
+#: udata/core/dataset/models.py:26
 msgid "Monthly"
 msgstr ""
 
-#: udata/core/dataset/models.py:25
+#: udata/core/dataset/models.py:27
 msgid "Bimonthly"
 msgstr ""
 
-#: udata/core/dataset/models.py:26
+#: udata/core/dataset/models.py:28
 msgid "Quarterly"
 msgstr ""
 
-#: udata/core/dataset/models.py:27
+#: udata/core/dataset/models.py:29
 msgid "Biannual"
 msgstr ""
 
-#: udata/core/dataset/models.py:28
+#: udata/core/dataset/models.py:30
 msgid "Annual"
 msgstr ""
 
-#: udata/core/dataset/models.py:29
+#: udata/core/dataset/models.py:31
 msgid "Biennial"
 msgstr ""
 
-#: udata/core/dataset/models.py:30
+#: udata/core/dataset/models.py:32
 msgid "Triennial"
 msgstr ""
 
-#: udata/core/dataset/models.py:31
+#: udata/core/dataset/models.py:33
 msgid "Quinquennial"
 msgstr ""
 
-#: udata/core/dataset/models.py:32
+#: udata/core/dataset/models.py:34
 msgid "Unknown"
 msgstr ""
 
-#: udata/core/dataset/models.py:36
+#: udata/core/dataset/models.py:38
 msgid "POI"
 msgstr ""
 
-#: udata/core/dataset/models.py:37
+#: udata/core/dataset/models.py:39
 msgid "Iris (Insee districts)"
 msgstr ""
 
-#: udata/core/dataset/models.py:38
+#: udata/core/dataset/models.py:40
 msgid "Town"
 msgstr ""
 
-#: udata/core/dataset/models.py:39
+#: udata/core/dataset/models.py:41
 msgid "Canton"
 msgstr ""
 
-#: udata/core/dataset/models.py:40
+#: udata/core/dataset/models.py:42
 msgid "Intermunicipal (EPCI)"
 msgstr ""
 
-#: udata/core/dataset/models.py:41
+#: udata/core/dataset/models.py:43
 msgid "County"
 msgstr ""
 
-#: udata/core/dataset/models.py:42
+#: udata/core/dataset/models.py:44
 msgid "Region"
 msgstr ""
 
-#: udata/core/dataset/models.py:43
+#: udata/core/dataset/models.py:45
 msgid "Country"
 msgstr ""
 
-#: udata/core/dataset/models.py:44 udata/core/issues/models.py:20
+#: udata/core/dataset/models.py:46 udata/core/issues/models.py:20
 msgid "Other"
 msgstr ""
 
@@ -210,7 +213,7 @@ msgstr ""
 msgid "Additionnal informations"
 msgstr ""
 
-#: udata/core/dataset/views.py:62 udata/core/site/metrics.py:53
+#: udata/core/dataset/views.py:62 udata/core/site/metrics.py:54
 #: udata/templates/dataset/display.html:58
 msgid "Resources"
 msgstr ""
@@ -225,13 +228,17 @@ msgstr ""
 msgid "Transfer"
 msgstr ""
 
-#: udata/core/followers/metrics.py:14 udata/core/site/metrics.py:91
-#: udata/core/user/metrics.py:48 udata/templates/dataset/followers.html:6
+#: udata/core/followers/metrics.py:28 udata/core/site/metrics.py:92
+#: udata/templates/dataset/followers.html:6
+#: udata/templates/dataset/search-labels.html:20
+#: udata/templates/dataset/search-panel.html:23
 #: udata/templates/dataset/search-result.html:88
 #: udata/templates/organization/followers.html:7
+#: udata/templates/organization/search-labels.html:12
 #: udata/templates/organization/search-panel.html:9
 #: udata/templates/organization/search-panel.html:14
-#: udata/templates/user/followers.html:7
+#: udata/templates/reuse/search-labels.html:13
+#: udata/templates/reuse/search-panel.html:16 udata/templates/user/followers.html:7
 msgid "Followers"
 msgstr ""
 
@@ -241,7 +248,7 @@ msgid "Comment"
 msgstr ""
 
 #: udata/core/issues/forms.py:14 udata/core/reuse/forms.py:16
-#: udata/templates/reuse/card.html:20 udata/templates/reuse/list.html:34
+#: udata/templates/reuse/card.html:20 udata/templates/reuse/search-labels.html:6
 #: udata/templates/reuse/search-panel.html:13
 #: udata/templates/reuse/search-result.html:16
 msgid "Type"
@@ -268,18 +275,20 @@ msgstr ""
 msgid "Image URL"
 msgstr ""
 
-#: udata/core/organization/metrics.py:16 udata/core/reuse/metrics.py:21
-#: udata/core/site/metrics.py:33 udata/core/user/metrics.py:24
+#: udata/core/organization/metrics.py:16 udata/core/reuse/metrics.py:20
+#: udata/core/site/metrics.py:34 udata/core/user/metrics.py:25
 #: udata/templates/header.html:31 udata/templates/search.html:22
 #: udata/templates/dataset/create.html:4 udata/templates/dataset/display.html:16
 #: udata/templates/dataset/edit_base.html:4
-#: udata/templates/dataset/followers.html:4 udata/templates/dataset/list.html:7
+#: udata/templates/dataset/followers.html:4 udata/templates/dataset/list.html:6
 #: udata/templates/dataset/resource/create.html:4
 #: udata/templates/dataset/resource/display.html:4
 #: udata/templates/dataset/resource/edit.html:4
 #: udata/templates/organization/display.html:48
+#: udata/templates/organization/search-labels.html:6
 #: udata/templates/organization/search-panel.html:7
 #: udata/templates/organization/search-panel.html:12
+#: udata/templates/reuse/search-labels.html:10
 #: udata/templates/reuse/search-panel.html:15 udata/templates/topic/display.html:19
 #: udata/templates/user/datasets.html:8 udata/templates/user/following.html:15
 msgid "Datasets"
@@ -289,24 +298,24 @@ msgstr ""
 msgid "Members"
 msgstr ""
 
-#: udata/core/organization/models.py:18
+#: udata/core/organization/models.py:21
 msgid "Administrateur"
 msgstr ""
 
-#: udata/core/organization/models.py:19
+#: udata/core/organization/models.py:22
 #: udata/templates/organization/display_base.html:99
 msgid "Editor"
 msgstr ""
 
-#: udata/core/organization/models.py:24
+#: udata/core/organization/models.py:27
 msgid "Pending"
 msgstr ""
 
-#: udata/core/organization/models.py:25
+#: udata/core/organization/models.py:28
 msgid "Accepted"
 msgstr ""
 
-#: udata/core/organization/models.py:26
+#: udata/core/organization/models.py:29
 msgid "Refused"
 msgstr ""
 
@@ -358,12 +367,12 @@ msgstr ""
 msgid "Last reuses"
 msgstr ""
 
-#: udata/core/site/metrics.py:71 udata/templates/user/base.html:5
+#: udata/core/site/metrics.py:72 udata/templates/user/base.html:5
 #: udata/templates/user/edit_base.html:5 udata/templates/user/following.html:18
 msgid "Users"
 msgstr ""
 
-#: udata/core/site/metrics.py:81 udata/templates/header.html:30
+#: udata/core/site/metrics.py:82 udata/templates/header.html:30
 #: udata/templates/header.html:49 udata/templates/search.html:34
 #: udata/templates/dataset/search-panel.html:13
 #: udata/templates/organization/create.html:4
@@ -371,7 +380,7 @@ msgstr ""
 #: udata/templates/organization/display_base.html:6
 #: udata/templates/organization/edit_base.html:7
 #: udata/templates/organization/followers.html:5
-#: udata/templates/organization/list.html:7
+#: udata/templates/organization/list.html:6
 #: udata/templates/reuse/search-panel.html:12 udata/templates/user/base.html:81
 #: udata/templates/user/following.html:17
 msgid "Organizations"
@@ -405,7 +414,7 @@ msgstr ""
 msgid "Prefered language"
 msgstr ""
 
-#: udata/core/user/metrics.py:56 udata/templates/user/following.html:7
+#: udata/core/user/metrics.py:53 udata/templates/user/following.html:7
 msgid "Following"
 msgstr ""
 
@@ -477,6 +486,16 @@ msgstr ""
 msgid "Last modification date"
 msgstr ""
 
+#: udata/search/fields.py:106 udata/tests/test_search.py:603
+#: udata/tests/test_search.py:606
+msgid "yes"
+msgstr ""
+
+#: udata/search/fields.py:106 udata/tests/test_search.py:604
+#: udata/tests/test_search.py:607
+msgid "no"
+msgstr ""
+
 #: udata/templates/apidoc.html:4
 msgid "API Documentation"
 msgstr ""
@@ -518,18 +537,31 @@ msgid ""
 msgstr ""
 
 #: udata/templates/apidoc.html:50
-msgid "Pagination"
+msgid "Authorizations"
 msgstr ""
 
 #: udata/templates/apidoc.html:54
+msgid "API calls are subject to the same permissions than the web interface."
+msgstr ""
+
+#: udata/templates/apidoc.html:55
+msgid ""
+"By example, you need to be part of the organization to modify one of its "
+"datasets."
+msgstr ""
+
+#: udata/templates/apidoc.html:61
+msgid "Pagination"
+msgstr ""
+
+#: udata/templates/apidoc.html:65
 msgid ""
 "Some method are paginated and always follow the same pattern.\n"
-"                The object list is wrapped in a <code>Pagination</code> "
-"object.\n"
+"                The object list is wrapped in a <code>Page</code> object.\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:58
+#: udata/templates/apidoc.html:69
 msgid ""
 "You don't have to compute yourself the previous and next pages\n"
 "                because the URLs are available in the response under the\n"
@@ -539,11 +571,11 @@ msgid ""
 " and/or next page."
 msgstr ""
 
-#: udata/templates/apidoc.html:63
+#: udata/templates/apidoc.html:74
 msgid "Example"
 msgstr ""
 
-#: udata/templates/apidoc.html:77
+#: udata/templates/apidoc.html:88
 msgid "Reference"
 msgstr ""
 
@@ -609,8 +641,8 @@ msgstr ""
 msgid "search"
 msgstr ""
 
-#: udata/templates/search.html:13 udata/templates/dataset/list.html:36
-#: udata/templates/reuse/list.html:33
+#: udata/templates/search.html:13 udata/templates/dataset/search-labels.html:9
+#: udata/templates/reuse/search-labels.html:9
 msgid "Tag"
 msgstr ""
 
@@ -785,7 +817,8 @@ msgstr ""
 msgid "Follow"
 msgstr ""
 
-#: udata/templates/dataset/display.html:168 udata/templates/dataset/list.html:33
+#: udata/templates/dataset/display.html:168
+#: udata/templates/dataset/search-labels.html:6
 msgid "Supplier"
 msgstr ""
 
@@ -848,17 +881,18 @@ msgstr ""
 msgid "Closed issues"
 msgstr ""
 
-#: udata/templates/dataset/list.html:8 udata/templates/organization/list.html:8
+#: udata/templates/dataset/list.html:7 udata/templates/organization/list.html:7
 #: udata/templates/reuse/list.html:8
 #, python-format
 msgid "%(start)s to %(end)s on %(total)s"
 msgstr ""
 
-#: udata/templates/dataset/list.html:19
+#: udata/templates/dataset/list.html:18
 msgid "New dataset"
 msgstr ""
 
-#: udata/templates/dataset/list.html:30 udata/templates/reuse/list.html:30
+#: udata/templates/dataset/search-labels.html:3
+#: udata/templates/reuse/search-labels.html:3
 msgid "Organization"
 msgstr ""
 
@@ -870,7 +904,7 @@ msgstr ""
 msgid "Licenses"
 msgstr ""
 
-#: udata/templates/dataset/search-panel.html:22
+#: udata/templates/dataset/search-panel.html:21
 msgid "Formats"
 msgstr ""
 
@@ -1224,8 +1258,12 @@ msgstr ""
 msgid "No pending requests"
 msgstr ""
 
-#: udata/templates/organization/list.html:19
+#: udata/templates/organization/list.html:18
 msgid "New organization"
+msgstr ""
+
+#: udata/templates/organization/search-labels.html:3
+msgid "Public service"
 msgstr ""
 
 #: udata/templates/organization/search-result.html:42
