@@ -89,6 +89,8 @@ class PostConverter(ModelConverter):
 
 def lazy_raise_404():
     '''Raise 404 lazily to ensure request.endpoint is set'''
+    if not request.view_args:
+        return
     for arg in request.view_args.values():
         if isinstance(arg, NotFound):
             request.routing_exception = arg
