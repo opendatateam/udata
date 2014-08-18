@@ -164,6 +164,14 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
         else:
             return self.owner.avatar_url
 
+    @property
+    def frequency_label(self):
+        return UPDATE_FREQUENCIES.get(self.frequency or 'unknown', UPDATE_FREQUENCIES['unknown'])
+
+    @property
+    def territorial_granularity_label(self):
+        return TERRITORIAL_GRANULARITIES[self.territorial_coverage.granularity or 'other']
+
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)

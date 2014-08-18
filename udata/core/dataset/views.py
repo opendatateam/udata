@@ -10,17 +10,11 @@ from udata.forms import DatasetForm, DatasetCreateForm, ResourceForm, DatasetExt
 from udata.frontend import nav
 from udata.frontend.views import DetailView, CreateView, EditView, SingleObject, SearchView, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Resource, Reuse, Issue, Follow, UPDATE_FREQUENCIES, TERRITORIAL_GRANULARITIES
+from udata.models import Dataset, Resource, Reuse, Issue, Follow
 
 from .permissions import DatasetEditPermission, set_dataset_identity
 
 blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
-
-
-@blueprint.before_app_request
-def store_references_lists():
-    g.update_frequencies = UPDATE_FREQUENCIES
-    g.territorial_granularities = TERRITORIAL_GRANULARITIES
 
 
 @blueprint.route('/recent.atom')

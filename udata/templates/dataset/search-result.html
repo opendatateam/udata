@@ -45,12 +45,23 @@
                 <a class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Frequency') }}">
                     <span class="glyphicon glyphicon-time"></span>
-                    {{ g.update_frequencies[dataset.frequency] }}
+                    {{ dataset.frequency_label }}
                 </a>
             </li>
             {% endif %}
 
             {# Territorial coverage #}
+            {% if dataset.territorial_coverage.granularity %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Territorial coverage granularity') }}">
+                    <span class="glyphicon glyphicon-screenshot"></span>
+                    {{ dataset.territorial_granularity_label }}
+                </a>
+            </li>
+            {% endif %}
+
             {% if dataset.territorial_coverage.codes %}
             <li>
                 <a class="btn btn-xs" rel="tooltip"
@@ -58,17 +69,6 @@
                     title="{{ _('Territorial coverage') }}">
                     <span class="glyphicon glyphicon-globe"></span>
                     {{ ' '.join(dataset.territorial_coverage.codes) }}
-                </a>
-            </li>
-            {% endif %}
-
-            {% if dataset.territorial_coverage.granularity %}
-            <li>
-                <a class="btn btn-xs" rel="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Territorial coverage granularity') }}">
-                    <span class="glyphicon glyphicon-screenshot"></span>
-                    {{ g.territorial_granularities[dataset.territorial_coverage.granularity] }}
                 </a>
             </li>
             {% endif %}
