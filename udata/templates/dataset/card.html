@@ -34,7 +34,7 @@
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Temporal coverage') }}">
-                    <span class="glyphicon glyphicon-calendar"></span>
+                    <span class="fa fa-calendar fa-fw"></span>
                     {{ dataset.temporal_coverage|daterange }}
                 </a>
             </li>
@@ -46,7 +46,7 @@
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Frequency') }}">
-                    <span class="glyphicon glyphicon-time"></span>
+                    <span class="fa fa-clock-o fa-fw"></span>
                     {{ dataset.frequency_label }}
                 </a>
             </li>
@@ -58,7 +58,7 @@
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Territorial coverage granularity') }}">
-                    <span class="glyphicon glyphicon-screenshot"></span>
+                    <span class="fa fa-bullseye fa-fw"></span>
                     {{ dataset.territorial_granularity_label }}
                 </a>
             </li>
@@ -69,7 +69,7 @@
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Territorial coverage') }}">
-                    <span class="glyphicon glyphicon-globe"></span>
+                    <span class="fa fa-globe fa-fw"></span>
                     {{ dataset.territorial_coverage|territorial_coverage }}
                 </a>
             </li>
@@ -80,7 +80,7 @@
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Reuses') }}">
-                    <span class="{{ ficon('fa-retweet') }}"></span>
+                    <span class="{{ ficon('fa-retweet') }} fa-fw"></span>
                     {{ dataset.metrics.reuses or 0 }}
                 </a>
             </li>
@@ -88,7 +88,7 @@
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Stars') }}">
-                    <span class="{{ ficon('fa-star') }}"></span>
+                    <span class="{{ ficon('fa-star') }} fa-fw"></span>
                     {{ dataset.metrics.followers or 0 }}
                 </a>
             </li>

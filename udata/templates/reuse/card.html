@@ -18,7 +18,7 @@
             <li>
                 <a class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Type') }}">
-                    <span class="glyphicon glyphicon-file"></span>
+                    <span class="fa fa-file fa-fw"></span>
                     {{ reuse.type_label }}
                 </a>
             </li>
@@ -28,7 +28,7 @@
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Number of datasets used') }}">
-                    <span class="fa fa-cubes"></span>
+                    <span class="fa fa-cubes fa-fw"></span>
                     {{ reuse.datasets|length or 0 }}
                 </a>
             </li>
@@ -37,7 +37,7 @@
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Stars') }}">
-                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="fa fa-star fa-fw"></span>
                     {{ reuse.metrics.stars or 0 }}
                 </a>
             </li>

@@ -19,7 +19,7 @@
         </a>
     {% endif %}
     <h3 class="panel-title">
-        <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
+        <span class="fa fa-sort-amount-desc fa-fw"></span>
         {{ _('Sort by') }}
     </h3>
 </div>
@@ -55,7 +55,7 @@
 {% for value in values %}
 <span class="tag label label-info" title="{{ label }}">
     {% if icon %}
-    <span class="{{ icon }}"></span>
+    <span class="{{ icon }} fa-fw"></span>
     {% endif %}
     <span>{{ labelize(label, value) if labelize else value }}</span>
     <a href="{{ ''|url_del('page', **{name: value}) }}">
@@ -78,7 +78,7 @@
                 <span class="glyphicon glyphicon-remove"></span>
             </a>
             {% endif %}
-            <span class="{{icon or 'glyphicon glyphicon-filter'}}"></span>
+            <span class="{{icon or 'glyphicon glyphicon-filter'}} fa-fw"></span>
             {{ label or name }}
         </h3>
     </div>

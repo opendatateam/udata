@@ -10,8 +10,8 @@
         followers=(_('Stars'), 'desc'),
     ) }}
     {{ s.facet_panel(reuses, 'organization', _('Organizations'), ficon('fa-building-o'), url=url) }}
-    {{ s.facet_panel(reuses, 'type', _('Type'), ficon('random'), url=url) }}
-    {{ s.facet_panel(reuses, 'tag', _('Tags'), ficon('tag'), url=url) }}
+    {{ s.facet_panel(reuses, 'type', _('Type'), ficon('fa-file'), url=url) }}
+    {{ s.facet_panel(reuses, 'tag', _('Tags'), ficon('fa-tags'), url=url) }}
     {{ s.facet_panel(reuses, 'datasets', _('Datasets'), ficon('fa-cubes'), url=url) }}
-    {{ s.facet_panel(reuses, 'followers', _('Followers'), ficon('eye-open'), url=url) }}
+    {{ s.facet_panel(reuses, 'followers', _('Followers'), ficon('fa-eye'), url=url) }}
 </div>

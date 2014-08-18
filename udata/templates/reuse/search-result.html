@@ -14,21 +14,21 @@
             <li>
                 <a class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Type') }}">
-                    <span class="glyphicon glyphicon-file"></span>
+                    <span class="fa fa-file fa-fw"></span>
                     {{ reuse.type_label }}
                 </a>
             </li>
             <li>
                 <a class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Number of dataset') }}">
-                    <span class="fa fa-cubes"></span>
+                    <span class="fa fa-cubes fa-fw"></span>
                     {{ ngettext('%(num)s dataset', '%(num)s datasets', reuse.datasets|length) }}
                 </a>
             </li>
             <li>
                 <a class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Number of stars') }}">
-                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="fa fa-star fa-fw"></span>
                     {{ ngettext('%(num)s star', '%(num)s stars', reuse.metrics.stars or 0) }}
                 </a>
             </li>
