@@ -70,7 +70,7 @@
                     data-placement="top" data-container="body"
                     title="{{ _('Territorial coverage') }}">
                     <span class="glyphicon glyphicon-globe"></span>
-                    {{ ' '.join(dataset.territorial_coverage.codes) }}
+                    {{ dataset.territorial_coverage|territorial_coverage }}
                 </a>
             </li>
             {% endif %}

@@ -295,3 +295,31 @@ def i18n_alternate_links():
     except:
         # Never fails
         return Markup('')
+
+KINDS = [
+    'InternationalOrganization',
+    'Country',
+    'MetropoleOfCountry',
+    'OverseasOfCountry',
+    'RegionOfFrance',
+    'OverseasCollectivityOfFrance',
+    'IntercommunalityOfFrance',
+    'CommuneOfFrance',
+]
+
+
+@front.app_template_filter()
+@front.app_template_global()
+def territorial_coverage(coverage):
+    '''Display the biggest territory and labelize code'''
+    if not coverage or not coverage.codes:
+        return Markup('')
+    code = coverage.codes[0]
+    data = {}
+    for code in coverage.codes:
+        parts = code.split('/')
+        kind, label = parts[0], parts[-1].title()
+        if kind not in data:
+            data[kind] = label
+    sorter = lambda r: KINDS.index(r[0]) if r[0] in KINDS else len(KINDS)
+    return [row[1] for row in sorted(data.items(), key=sorter)][0]
