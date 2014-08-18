@@ -292,12 +292,22 @@
                                 title="{{ _('Frequency') }}">
                                 <span class="glyphicon glyphicon-time"></span>
                             </a>
-                            {{ g.update_frequencies[dataset.frequency] }}
+                            {{ dataset.frequency_label }}
                         </li>
                         {% endif %}
 
                         {# Territorial coverage #}
                         {% if dataset.territorial_coverage %}
+                            {% if dataset.territorial_coverage.granularity %}
+                            <li>
+                                <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                                    title="{{ _('Territorial coverage granularity') }}">
+                                    <span class="glyphicon glyphicon-screenshot"></span>
+                                </a>
+                                {{ dataset.territorial_granularity_label }}
+                            </li>
+                            {% endif %}
+
                             {% if dataset.territorial_coverage.codes %}
                             <li>
                                 <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
@@ -307,16 +317,6 @@
                                 {% for code in dataset.territorial_coverage.codes %}
                                 {{ code }}
                                 {% endfor %}
-                            </li>
-                            {% endif %}
-
-                            {% if dataset.territorial_coverage.granularity %}
-                            <li>
-                                <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
-                                    title="{{ _('Territorial coverage granularity') }}">
-                                    <span class="glyphicon glyphicon-screenshot"></span>
-                                </a>
-                                {{ g.territorial_granularities[dataset.territorial_coverage.granularity] }}
                             </li>
                             {% endif %}
                         {% endif %}
