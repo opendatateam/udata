@@ -28,11 +28,6 @@ def set_g_user_orgs():
         g.user_organizations = Organization.objects(members__user=current_user.id)
 
 
-@blueprint.app_context_processor
-def inject_user_orgs():
-    return {'user_orgs': getattr(g, 'user_organizations', [])}
-
-
 navbar = nav.Bar('edit_org', [
     nav.Item(_('Descrition'), 'organizations.edit'),
     # nav.Item(_('Additional informations'), 'organizations.edit_extras'),

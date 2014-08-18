@@ -8,7 +8,7 @@ from os.path import join, dirname, isdir, exists
 from pkg_resources import resource_stream
 
 from flask import current_app, abort
-from webassets.filter import get_filter, ExternalTool, register_filter
+from webassets.filter import get_filter
 
 from flask.ext.assets import Environment, YAMLLoader, Bundle
 from flask.ext.gravatar import Gravatar

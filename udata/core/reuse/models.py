@@ -91,6 +91,11 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     def display_url(self):
         return url_for('reuses.show', reuse=self)
 
+    @property
+    def type_label(self):
+        return REUSE_TYPES[self.type]
+
+
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)
 post_save.connect(Reuse.post_save, sender=Reuse)

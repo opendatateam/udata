@@ -45,9 +45,9 @@
             <li>
               <a href="{{ url_for('users.show', user=current_user) }}">{{ _('Profile') }}</a>
             </li>
-            {% if user_orgs %}
+            {% if current_user.organizations %}
             <li role="presentation" class="dropdown-header">{{ _('Organizations') }}</li>
-            {% for org in user_orgs %}
+            {% for org in current_user.organizations %}
             <li>
               <a href="{{ url_for('organizations.show', org=org) }}">
                 <img src="{{ org.image_url|placeholder('organization') }}" width="20px" height="20px"/>

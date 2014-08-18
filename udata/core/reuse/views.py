@@ -3,23 +3,18 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from flask import request, url_for, g, redirect, render_template
+from flask import request, url_for, redirect, render_template
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.forms import ReuseForm, ReuseCreateForm
 from udata.frontend import nav
 from udata.frontend.views import SearchView, DetailView, CreateView, EditView, SingleObject, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Reuse, REUSE_TYPES, Issue
+from udata.models import Reuse, Issue
 
 from .permissions import ReuseEditPermission, set_reuse_identity
 
 blueprint = I18nBlueprint('reuses', __name__, url_prefix='/reuses')
-
-
-@blueprint.before_app_request
-def store_references_lists():
-    g.reuse_types = REUSE_TYPES
 
 
 @blueprint.route('/recent.atom')
