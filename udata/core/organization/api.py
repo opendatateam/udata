@@ -3,10 +3,7 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from flask import url_for
-from flask.ext.restful import fields
-
-from udata.api import api, ModelAPI, ModelListAPI, API, marshal, pager
+from udata.api import api, ModelAPI, ModelListAPI, API, marshal
 from udata.auth import current_user
 from udata.forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm
 from udata.models import Organization, MembershipRequest, Member, FollowOrg
@@ -14,46 +11,13 @@ from udata.models import Organization, MembershipRequest, Member, FollowOrg
 from udata.core.followers.api import FollowAPI
 
 from .search import OrganizationSearch
+from .api_fields import org_fields, org_page_fields, request_fields, member_fields
 
 ns = api.namespace('organizations', 'Organization related operations')
-
-org_fields = api.model('Organization', {
-    'id': fields.String,
-    'name': fields.String,
-    'slug': fields.String,
-    'description': fields.String,
-    'created_at': fields.ISODateTime,
-    'last_modified': fields.ISODateTime,
-    'deleted': fields.ISODateTime,
-    'metrics': fields.Raw,
-    'uri': fields.UrlFor('api.organization', lambda o: {'org': o}),
-})
-
-org_page_fields = api.model('OrganizationPage', pager(org_fields))
-
-request_fields = api.model('MembershripRequest', {
-    'status': fields.String,
-    'comment': fields.String,
-})
-
-member_fields = api.model('Member', {
-    'user': fields.String,
-    'role': fields.String,
-})
 
 common_doc = {
     'params': {'org': 'The organization ID or slug'}
 }
-
-
-@api.model('OrganizationReference')
-class OrganizationField(fields.Raw):
-    def format(self, organization):
-        return {
-            'id': str(organization.id),
-            'uri': url_for('api.organization', org=organization, _external=True),
-            'page': url_for('organizations.show', org=organization, _external=True),
-        }
 
 
 @ns.route('/', endpoint='organizations')
@@ -76,7 +40,7 @@ class OrganizationAPI(ModelAPI):
 @ns.route('/<org:org>/membership/', endpoint='request_membership', doc=common_doc)
 class MembershipRequestAPI(API):
     @api.secure
-    @api.doc(model=request_fields)
+    @api.marshal_with(request_fields)
     def post(self, org):
         '''Apply for membership to a given organization.'''
         membership_request = org.pending_request(current_user._get_current_object())
@@ -91,7 +55,7 @@ class MembershipRequestAPI(API):
         form.populate_obj(membership_request)
         org.save()
 
-        return marshal(membership_request, request_fields), code
+        return membership_request, code
 
 
 class MembershipAPI(API):
@@ -105,7 +69,7 @@ class MembershipAPI(API):
 @ns.route('/<org:org>/membership/<uuid:id>/accept/', endpoint='accept_membership', doc=common_doc)
 class MembershipAcceptAPI(MembershipAPI):
     @api.secure
-    @api.doc(model=member_fields)
+    @api.marshal_with(member_fields)
     def post(self, org, id):
         '''Accept user membership to a given organization.'''
         membership_request = self.get_or_404(org, id)
@@ -118,7 +82,7 @@ class MembershipAcceptAPI(MembershipAPI):
         org.members.append(member)
         org.save()
 
-        return marshal(member, member_fields), 200
+        return member
 
 
 @ns.route('/<org:org>/membership/<uuid:id>/refuse/', endpoint='refuse_membership', doc=common_doc)

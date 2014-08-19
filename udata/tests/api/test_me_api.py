@@ -5,6 +5,8 @@ from flask import url_for
 
 from udata.models import User
 
+from udata.tests.factories import ReuseFactory
+
 from . import APITestCase
 
 
@@ -31,3 +33,16 @@ class MeAPITest(APITestCase):
         self.assertEqual(User.objects.count(), 1)
         self.user.reload()
         self.assertEqual(self.user.about, 'new about')
+
+    def test_my_reuses(self):
+        user = self.login()
+        reuses = [ReuseFactory(owner=user) for _ in range(3)]
+
+        response = self.get(url_for('api.my_reuses'))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), len(reuses))
+
+    def test_my_reuses_401(self):
+        response = self.get(url_for('api.my_reuses'))
+        self.assert401(response)

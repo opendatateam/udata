@@ -171,3 +171,25 @@ class ReuseBlueprintTest(FrontTestCase):
         reuse = ReuseFactory()
         response = self.get(url_for('reuses.issues', reuse=reuse))
         self.assert200(response)
+
+    def test_add_dataset_to_reuse(self):
+        '''It should add the dataset to the reuse and redirect its page'''
+        self.login(AdminFactory())
+        reuse = ReuseFactory()
+        dataset = DatasetFactory()
+        data = {'dataset': str(dataset.id)}
+        response = self.post(url_for('reuses.add_dataset', reuse=reuse), data)
+
+        reuse.reload()
+        self.assertRedirects(response, reuse.display_url)
+        self.assertIn(dataset, reuse.datasets)
+
+    def test_add_non_existant_dataset_to_reuse(self):
+        '''It should not add a non existant dataset to the reuse and redirect its edit page'''
+        self.login(AdminFactory())
+        reuse = ReuseFactory()
+        data = {'dataset': 'not-found'}
+        response = self.post(url_for('reuses.add_dataset', reuse=reuse), data)
+
+        reuse.reload()
+        self.assertRedirects(response, url_for('reuses.edit', reuse=reuse))

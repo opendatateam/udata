@@ -61,16 +61,20 @@ define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) 
         html: true
     });
 
+    function handle_postables(selector) {
+        $(selector).click(function() {
+            var $a = $(this);
+
+            build($a.attr('href'))
+                .append($('<input/>').attr({name: $a.data('field-name'), value: $a.data('field-value')}))
+                .submit();
+
+            return false;
+        });
+    }
+
     // Transform some links into postable forms
-    $('a.postable').click(function() {
-        var $a = $(this);
-
-        build($a.attr('href'))
-            .append($('<input/>', {name: $a.data('field-name'), value: $a.data('field-value')}))
-            .submit();
-
-        return false;
-    });
+    handle_postables('a.postable');
 
 
     // Publisher card handling
@@ -90,7 +94,8 @@ define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) 
     return {
         rules: rules,
         build: build,
-        csrftoken: csrftoken
+        csrftoken: csrftoken,
+        handle_postables: handle_postables
     };
 
 });

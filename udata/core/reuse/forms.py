@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.forms import UserModelForm, fields, validators
+from udata.forms import Form, UserModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 from udata.models import Reuse, REUSE_TYPES
 
-__all__ = ('ReuseForm', 'ReuseCreateForm')
+__all__ = ('ReuseForm', 'ReuseCreateForm', 'AddDatasetToReuseForm')
 
 
 class ReuseForm(UserModelForm):
@@ -23,3 +23,7 @@ class ReuseForm(UserModelForm):
 
 class ReuseCreateForm(ReuseForm):
     organization = fields.PublishAsField(_('Publish as'))
+
+
+class AddDatasetToReuseForm(Form):
+    dataset = fields.StringField()

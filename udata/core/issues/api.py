@@ -9,7 +9,7 @@ from flask.ext.security import current_user
 
 from udata.api import api, API, marshal, fields
 
-from udata.core.user.api import UserField
+from udata.core.user.api_fields import UserField
 
 from .forms import IssueCreateForm, IssueCommentForm
 from .models import Issue, Message

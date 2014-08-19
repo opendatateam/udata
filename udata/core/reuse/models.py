@@ -96,7 +96,6 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
         return REUSE_TYPES[self.type]
 
 
-
 pre_save.connect(Reuse.pre_save, sender=Reuse)
 post_save.connect(Reuse.post_save, sender=Reuse)
 

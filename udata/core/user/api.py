@@ -1,42 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import url_for
 from flask.ext.security import current_user
 
-from udata.api import api, ModelAPI, fields
-from udata.models import User, FollowUser
+from udata.api import api, ModelAPI, API
+from udata.models import User, FollowUser, Reuse
 from udata.forms import UserProfileForm
 
-from udata.core.organization.api import OrganizationField
 from udata.core.followers.api import FollowAPI
+from udata.core.reuse.api_fields import reuse_fields
+
+from .api_fields import user_fields
 
 ns = api.namespace('users', 'User related operations')
-
-user_fields = api.model('User', {
-    'id': fields.String,
-    'slug': fields.String,
-    'email': fields.String,
-    'first_name': fields.String,
-    'last_name': fields.String,
-    'avatar_url': fields.String,
-    'website': fields.String,
-    'about': fields.String,
-    'organizations': fields.List(OrganizationField),
-})
-
-
-@api.model('UserReference')
-class UserField(fields.Raw):
-    def format(self, user):
-        return {
-            'id': str(user.id),
-            # 'uri': url_for('api.organization', slug=organization.slug, _external=True),
-            'page': url_for('users.show', user=user, _external=True),
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'avatar_url': user.avatar_url,
-        }
 
 
 @api.route('/me/', endpoint='me')
@@ -50,6 +26,16 @@ class MeAPI(ModelAPI):
         if not current_user.is_authenticated():
             api.abort(404)
         return current_user._get_current_object()
+
+
+@api.route('/me/reuses/', endpoint='my_reuses')
+class MyReusesAPI(API):
+    @api.marshal_list_with(reuse_fields)
+    def get(self):
+        '''List all my reuses (including private ones)'''
+        if not current_user.is_authenticated():
+            api.abort(401)
+        return list(Reuse.objects(owner=current_user.id))
 
 
 @ns.route('/<id>/follow/', endpoint='follow_user')

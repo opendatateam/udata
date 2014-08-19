@@ -3,57 +3,18 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API, marshal, fields, pager
+from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API, marshal, fields
 from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
-from udata.core.organization.api import OrganizationField
 from udata.utils import get_by
 
+from .api_fields import resource_fields, dataset_fields, dataset_page_fields
 from .models import Dataset, Resource, DatasetIssue, FollowDataset
 from .forms import DatasetForm, ResourceForm, DatasetFullForm
 from .search import DatasetSearch
 
 ns = api.namespace('datasets', 'Dataset related operations')
 
-resource_fields = api.model('Resource', {
-    'id': fields.String,
-    'title': fields.String,
-    'description': fields.String,
-    'url': fields.String,
-    'checksum': fields.String,
-    'created_at': fields.ISODateTime,
-    'last_modified': fields.ISODateTime(attribute='modified'),
-})
-
-temporal_coverage_fields = api.model('TemporalCoverage', {
-    'start': fields.ISODateTime,
-    'end': fields.ISODateTime,
-})
-
-dataset_fields = api.model('Dataset', {
-    'id': fields.String,
-    'title': fields.String,
-    'slug': fields.String,
-    'description': fields.String,
-    'created_at': fields.ISODateTime,
-    'last_modified': fields.ISODateTime,
-    'deleted': fields.ISODateTime,
-    'featured': fields.Boolean,
-    'tags': fields.List(fields.String),
-    'resources': fields.Nested(resource_fields),
-    'community_resources': fields.Nested(resource_fields),
-    'frequency': fields.String,
-    'extras': fields.Raw,
-    'metrics': fields.Raw,
-    'organization': OrganizationField,
-    'supplier': OrganizationField,
-    'temporal_coverage': fields.Nested(temporal_coverage_fields, allow_null=True),
-    'license': fields.String(attribute='license.id'),
-
-    'uri': fields.UrlFor('api.dataset', lambda o: {'dataset': o}),
-})
-
-dataset_page_fields = api.model('DatasetPage', pager(dataset_fields))
 
 common_doc = {
     'params': {'dataset': 'The dataset ID or slug'}
@@ -88,29 +49,31 @@ class DatasetAPI(ModelAPI):
 
 
 @ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')
-@api.doc(model=dataset_fields, **common_doc)
+@api.doc(**common_doc)
 class DatasetFeaturedAPI(SingleObjectAPI, API):
     model = Dataset
 
     @api.secure
+    @api.marshal_with(dataset_fields)
     def post(self, dataset):
         '''Mark the dataset as featured'''
         dataset.featured = True
         dataset.save()
-        return marshal(dataset, dataset_fields)
+        return dataset
 
     @api.secure
+    @api.marshal_with(dataset_fields)
     def delete(self, dataset):
         '''Unmark the dataset as featured'''
         dataset.featured = False
         dataset.save()
-        return marshal(dataset, dataset_fields)
+        return dataset
 
 
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources', doc=common_doc)
 class ResourcesAPI(API):
     @api.secure
-    @api.doc(model=resource_fields)
+    @api.marshal_with(resource_fields)
     def post(self, dataset):
         '''Create a new resource for a given dataset'''
         form = api.validate(ResourceForm)
@@ -118,7 +81,7 @@ class ResourcesAPI(API):
         form.populate_obj(resource)
         dataset.resources.append(resource)
         dataset.save()
-        return marshal(resource, resource_fields), 201
+        return resource, 201
 
 
 @ns.route('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource', doc=common_doc)
@@ -131,14 +94,14 @@ class ResourceAPI(API):
         return resource
 
     @api.secure
-    @api.doc(model=resource_fields)
+    @api.marshal_with(resource_fields)
     def put(self, dataset, rid):
         '''Update a given resource on a given dataset'''
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
         form.populate_obj(resource)
         dataset.save()
-        return marshal(resource, resource_fields)
+        return resource
 
     @api.secure
     def delete(self, dataset, rid):

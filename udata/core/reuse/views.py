@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from bson import ObjectId
+
 from datetime import datetime
 
-from flask import request, url_for, redirect, render_template
+from flask import request, url_for, redirect, render_template, flash
 from werkzeug.contrib.atom import AtomFeed
 
-from udata.forms import ReuseForm, ReuseCreateForm
+from udata.forms import ReuseForm, ReuseCreateForm, AddDatasetToReuseForm
 from udata.frontend import nav
 from udata.frontend.views import SearchView, DetailView, CreateView, EditView, SingleObject, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Reuse, Issue, FollowReuse
+from udata.models import Reuse, Issue, FollowReuse, Dataset
 
 from .permissions import ReuseEditPermission, set_reuse_identity
 
@@ -111,6 +113,22 @@ class ReuseEditView(ProtectedReuseView, EditView):
     template_name = 'reuse/edit.html'
 
 
+class ReuseAddDatasetView(ProtectedReuseView, SingleObject, BaseView):
+    def post(self, reuse):
+        form = AddDatasetToReuseForm(request.form)
+        if form.validate():
+            try:
+                dataset = Dataset.objects.get(id=ObjectId(form.dataset.data))
+                if dataset not in self.reuse.datasets:
+                    self.reuse.datasets.append(dataset)
+                    self.reuse.save()
+                    flash(_('The dataset "%(title)s" has been added to the reuse', title=dataset.title), 'success')
+                return redirect(url_for('reuses.show', reuse=self.reuse))
+            except:
+                pass
+        return redirect(url_for('reuses.edit', reuse=self.reuse))
+
+
 class ReuseDeleteView(ProtectedReuseView, SingleObject, BaseView):
     def post(self, reuse):
         reuse.deleted = datetime.now()
@@ -139,3 +157,4 @@ blueprint.add_url_rule('/<reuse:reuse>/edit/', view_func=ReuseEditView.as_view(s
 blueprint.add_url_rule('/<reuse:reuse>/delete/', view_func=ReuseDeleteView.as_view(str('delete')))
 blueprint.add_url_rule('/<reuse:reuse>/issues/', view_func=ReuseIssuesView.as_view(str('issues')))
 blueprint.add_url_rule('/<reuse:reuse>/transfer/', view_func=ReuseTransferView.as_view(str('transfer')))
+blueprint.add_url_rule('/<reuse:reuse>/add/', view_func=ReuseAddDatasetView.as_view(str('add_dataset')))

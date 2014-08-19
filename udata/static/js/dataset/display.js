@@ -5,13 +5,20 @@ define([
     'jquery',
     'logger',
     'i18n',
+    'auth',
+    'api',
     'hbs!templates/dataset/resource-modal-body',
+    'hbs!templates/dataset/add-reuse-modal-body',
+    'form/common',
     'widgets/modal',
     'widgets/featured',
     'widgets/follow-btn',
     'widgets/issues-btn',
     'widgets/share-btn',
-], function($, log, i18n, template, modal) {
+], function($, log, i18n, Auth, API, template, addReuseTpl, forms, modal) {
+    'use strict';
+
+    var user_reuses;
 
     function prepare_resources() {
         $('.resources-list').items('http://schema.org/DataDownload').each(function() {
@@ -50,10 +57,43 @@ define([
         });
     }
 
+    function fetch_reuses() {
+        if (Auth.user) {
+            API.get('/api/me/reuses/', function(data) {
+                user_reuses = data;
+            });
+        }
+    }
+
+    function add_reuse() {
+        var $this = $(this);
+        if (user_reuses) {
+            var url_pattern = $this.data('add-url'),
+                $modal = modal({
+                    title: i18n._('Add a reuse'),
+                    content: addReuseTpl({
+                        reuses: $.map(user_reuses, function(reuse) {
+                            reuse.add_url = url_pattern.replace('{placeholder}', reuse.id);
+                            return reuse;
+                        }),
+                        new_reuse_url: $this.attr('href'),
+                        csrf_token: forms.csrftoken,
+                        dataset: $('.dataset-container').attr('itemid')
+                    })
+                });
+            $modal.on('shown.bs.modal', function() {
+                forms.handle_postables($modal.find('a.reuse.postable'));
+            });
+            return false;
+        }
+    }
+
     return {
         start: function() {
             log.debug('Dataset display page');
             prepare_resources();
+            fetch_reuses();
+            $('.reuse.add').click(add_reuse);
         }
     }
 });
