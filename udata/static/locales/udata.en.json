@@ -1,6 +1,7 @@
 {
     "A request has been sent to the administrators": "A request has been sent to the administrators", 
     "Add": "Add", 
+    "Add a reuse": "Add a reuse", 
     "Add member": "Add member", 
     "Administrator": "Administrator", 
     "Advertisement": "Advertisement", 
@@ -48,6 +49,7 @@
     "Modified on": "Modified on", 
     "New": "New", 
     "New issue": "New issue", 
+    "New reuse": "New reuse", 
     "No": "No", 
     "No issue.": "No issue.", 
     "OK": "OK", 
@@ -83,6 +85,7 @@
     "You are about to delete this organization.": "You are about to delete this organization.", 
     "You are about to delete this reuse.": "You are about to delete this reuse.", 
     "You are about to remove this member from the current organization.": "You are about to remove this member from the current organization.", 
+    "You can either add a new reuse or an existing one": "You can either add a new reuse or an existing one", 
     "You need to be authenticated to edit additional informations": "You need to be authenticated to edit additional informations", 
     "You need to be logged in to follow.": "You need to be logged in to follow.", 
     "You need to be logged in to request membership to an organization": "You need to be logged in to request membership to an organization", 

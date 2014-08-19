@@ -1,6 +1,7 @@
 {
     "A request has been sent to the administrators": "Une demande a été envoyée aux administrateurs",
     "Add": "Ajouter",
+    "Add a reuse": "Ajouter une réutilisation",
     "Add member": "Ajouter un membre",
     "Administrator": "Administrateur",
     "Advertisement": "Publicité",
@@ -48,6 +49,7 @@
     "Modified on": "Modifiée le",
     "New": "New",
     "New issue": "Nouvelle anomalie",
+    "New reuse": "Nouvelle réutilisation",
     "No": "Non",
     "No issue.": "Aucune anomalie.",
     "OK": "OK",
@@ -83,6 +85,7 @@
     "You are about to delete this organization.": "Vous êtes sur le point de supprimer cette organisation.",
     "You are about to delete this reuse.": "Vous êtes sur le point de supprimer cette réutilisation.",
     "You are about to remove this member from the current organization.": "Vous êtes sur le point de supprimer ce membre de l'organisation.",
+    "You can either add a new reuse or an existing one": "Vous pouvez ajouter un nouvelle réutilisation ou une existante",
     "You need to be authenticated to edit additional informations": "Vous devez être authentifié pour éditer les informations additionelles",
     "You need to be logged in to follow.": "Vous devez être authentifié pour vous abonner",
     "You need to be logged in to request membership to an organization": "Vous devez être authentifié pour demander l'adhésion à une organisation",
