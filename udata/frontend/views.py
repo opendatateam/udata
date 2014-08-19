@@ -15,10 +15,13 @@ class Templated(object):
     def get_context(self):
         return {}
 
+    def get_template_name(self):
+        return self.template_name
+
     def render(self, context=None, **kwargs):
         context = context or self.get_context()
         context.update(kwargs)
-        return render(self.template_name, **context)
+        return render(self.get_template_name(), **context)
 
 
 class BaseView(MethodView):

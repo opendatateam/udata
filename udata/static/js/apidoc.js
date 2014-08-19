@@ -29,7 +29,7 @@ define([
 
                     // }
                     $('pre code').each(function(i, e) {
-                        hljs.highlightBlock(e)
+                        hljs.highlightBlock(e);
                     });
                 },
                 onFailure: function(data) {

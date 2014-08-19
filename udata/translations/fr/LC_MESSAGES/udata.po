@@ -1,26 +1,25 @@
-# Translations template for udata.
+# French translations for udata.
 # Copyright (C) 2014 ORGANIZATION
 # This file is distributed under the same license as the udata project.
-# 
+#
 # Translators:
-# Axel Haustant, 2014
 # Axel Haustant, 2014
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2013
 # noirbizarre, 2014
 msgid ""
 msgstr ""
-"Project-Id-Version: uData\n"
+"Project-Id-Version:  uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-17 21:12+0200\n"
-"PO-Revision-Date: 2014-08-17 19:12+0000\n"
+"POT-Creation-Date: 2014-08-19 14:57+0200\n"
+"PO-Revision-Date: 2014-08-19 12:56+0000\n"
 "Last-Translator: Axel Haustant\n"
-"Language-Team: French (http://www.transifex.com/projects/p/udata/language/fr/)\n"
+"Language-Team: French "
+"(http://www.transifex.com/projects/p/udata/language/fr/)\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
-"Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: udata/core/dataset/forms.py:15 udata/core/dataset/forms.py:37
 #: udata/core/reuse/forms.py:14 udata/templates/dataset/search-panel.html:6
@@ -60,7 +59,8 @@ msgstr "Tags"
 
 #: udata/core/dataset/forms.py:22 udata/core/post/forms.py:21
 #: udata/core/reuse/forms.py:21 udata/core/topic/forms.py:21
-#: udata/templates/reuse/display.html:56 udata/templates/reuse/display.html:58
+#: udata/templates/reuse/display_base.html:63
+#: udata/templates/reuse/display_base.html:65
 msgid "Private"
 msgstr "Privé"
 
@@ -73,8 +73,7 @@ msgstr "Publier en tant que"
 msgid "URL"
 msgstr "URL"
 
-#: udata/core/dataset/forms.py:40
-#: udata/templates/dataset/search-labels.html:16
+#: udata/core/dataset/forms.py:40 udata/templates/dataset/search-labels.html:16
 msgid "Format"
 msgstr "Format"
 
@@ -99,8 +98,7 @@ msgstr "Ancienne clé"
 #: udata/core/dataset/metrics.py:19 udata/core/organization/metrics.py:33
 #: udata/core/site/metrics.py:44 udata/core/user/metrics.py:39
 #: udata/templates/header.html:32 udata/templates/search.html:28
-#: udata/templates/dataset/card.html:82
-#: udata/templates/dataset/display.html:70
+#: udata/templates/dataset/card.html:82 udata/templates/dataset/display.html:70
 #: udata/templates/dataset/search-labels.html:17
 #: udata/templates/dataset/search-panel.html:9
 #: udata/templates/dataset/search-panel.html:22
@@ -108,10 +106,11 @@ msgstr "Ancienne clé"
 #: udata/templates/organization/search-labels.html:9
 #: udata/templates/organization/search-panel.html:8
 #: udata/templates/organization/search-panel.html:13
-#: udata/templates/reuse/create.html:4 udata/templates/reuse/display.html:17
+#: udata/templates/reuse/create.html:4
+#: udata/templates/reuse/display_base.html:17
 #: udata/templates/reuse/edit_base.html:4 udata/templates/reuse/list.html:7
-#: udata/templates/topic/display.html:25
-#: udata/templates/user/following.html:16 udata/templates/user/reuses.html:8
+#: udata/templates/topic/display.html:25 udata/templates/user/following.html:16
+#: udata/templates/user/reuses.html:8
 msgid "Reuses"
 msgstr "Réutilisations"
 
@@ -207,31 +206,31 @@ msgstr "Pays"
 msgid "Other"
 msgstr "Autre"
 
-#: udata/core/dataset/views.py:28 udata/templates/home.html:129
+#: udata/core/dataset/views.py:22 udata/templates/home.html:129
 msgid "Last datasets"
 msgstr "Derniers jeux de données"
 
-#: udata/core/dataset/views.py:60 udata/core/organization/views.py:37
-#: udata/core/reuse/views.py:59
+#: udata/core/dataset/views.py:54 udata/core/organization/views.py:32
+#: udata/core/reuse/views.py:54
 msgid "Descrition"
 msgstr "Description"
 
-#: udata/core/dataset/views.py:61
+#: udata/core/dataset/views.py:55
 msgid "Additionnal informations"
 msgstr "Informations additionnelles"
 
-#: udata/core/dataset/views.py:62 udata/core/site/metrics.py:54
+#: udata/core/dataset/views.py:56 udata/core/site/metrics.py:54
 #: udata/templates/dataset/display.html:58
 msgid "Resources"
 msgstr "Ressources"
 
-#: udata/core/dataset/views.py:63 udata/core/issues/metrics.py:14
-#: udata/core/organization/views.py:42 udata/core/reuse/views.py:60
+#: udata/core/dataset/views.py:57 udata/core/issues/metrics.py:14
+#: udata/core/organization/views.py:37 udata/core/reuse/views.py:55
 #: udata/core/site/views.py:88 udata/templates/macros/issues.html:5
 msgid "Issues"
 msgstr "Anomalies"
 
-#: udata/core/dataset/views.py:64 udata/core/reuse/views.py:61
+#: udata/core/dataset/views.py:58 udata/core/reuse/views.py:56
 msgid "Transfer"
 msgstr "Transferer"
 
@@ -244,6 +243,7 @@ msgstr "Transferer"
 #: udata/templates/organization/search-labels.html:12
 #: udata/templates/organization/search-panel.html:9
 #: udata/templates/organization/search-panel.html:14
+#: udata/templates/reuse/display_base.html:231
 #: udata/templates/reuse/search-labels.html:13
 #: udata/templates/reuse/search-panel.html:16
 #: udata/templates/user/followers.html:7
@@ -291,8 +291,7 @@ msgstr "URL de l'image"
 #: udata/templates/dataset/create.html:4
 #: udata/templates/dataset/display.html:16
 #: udata/templates/dataset/edit_base.html:4
-#: udata/templates/dataset/followers.html:4
-#: udata/templates/dataset/list.html:6
+#: udata/templates/dataset/followers.html:4 udata/templates/dataset/list.html:6
 #: udata/templates/dataset/resource/create.html:4
 #: udata/templates/dataset/resource/display.html:4
 #: udata/templates/dataset/resource/edit.html:4
@@ -307,7 +306,7 @@ msgstr "URL de l'image"
 msgid "Datasets"
 msgstr "Jeux de données"
 
-#: udata/core/organization/metrics.py:44 udata/core/organization/views.py:39
+#: udata/core/organization/metrics.py:44 udata/core/organization/views.py:34
 msgid "Members"
 msgstr "Membres"
 
@@ -332,11 +331,11 @@ msgstr "Acceptée"
 msgid "Refused"
 msgstr "Refusée"
 
-#: udata/core/organization/views.py:40
+#: udata/core/organization/views.py:35
 msgid "Membership request"
 msgstr "Demande d'adhésion"
 
-#: udata/core/organization/views.py:41
+#: udata/core/organization/views.py:36
 msgid "Teams"
 msgstr "Equipes"
 
@@ -344,7 +343,7 @@ msgstr "Equipes"
 msgid "Content"
 msgstr "Contenu"
 
-#: udata/core/reuse/forms.py:20 udata/templates/reuse/display.html:85
+#: udata/core/reuse/forms.py:20 udata/templates/reuse/display_base.html:228
 msgid "Used datasets"
 msgstr "Jeux de données utilisés"
 
@@ -376,13 +375,12 @@ msgstr "Article de blog"
 msgid "Visualization"
 msgstr "Visualisation"
 
-#: udata/core/reuse/views.py:27 udata/templates/home.html:146
+#: udata/core/reuse/views.py:22 udata/templates/home.html:146
 msgid "Last reuses"
 msgstr "Dernières réutilisations"
 
 #: udata/core/site/metrics.py:72 udata/templates/user/base.html:5
-#: udata/templates/user/edit_base.html:5
-#: udata/templates/user/following.html:18
+#: udata/templates/user/edit_base.html:5 udata/templates/user/following.html:18
 msgid "Users"
 msgstr "Utilisateurs"
 
@@ -395,8 +393,8 @@ msgstr "Utilisateurs"
 #: udata/templates/organization/edit_base.html:7
 #: udata/templates/organization/followers.html:5
 #: udata/templates/organization/list.html:6
-#: udata/templates/reuse/search-panel.html:12
-#: udata/templates/user/base.html:81 udata/templates/user/following.html:17
+#: udata/templates/reuse/search-panel.html:12 udata/templates/user/base.html:81
+#: udata/templates/user/following.html:17
 msgid "Organizations"
 msgstr "Organisations"
 
@@ -468,7 +466,9 @@ msgstr "Le tag \"%(tag)s\" doit avoir entre %(min)d et %(max)d caracters."
 #: udata/forms/fields.py:168
 #, python-format
 msgid "Tag \"%s\" must be alphanumeric characters or symbols: -_."
-msgstr "Le tag \"%s\" doit contenir uniquement des caractères alphanumériques or les symboles: -_."
+msgstr ""
+"Le tag \"%s\" doit contenir uniquement des caractères alphanumériques or "
+"les symboles: -_."
 
 #: udata/forms/validators.py:43
 #, python-format
@@ -536,7 +536,9 @@ msgstr "De façon à pouvoir exécuter des opérations d'écriture,"
 #: udata/templates/apidoc.html:34
 #, python-format
 msgid "you first need to obtain an %(apikey)s in your profile settings."
-msgstr "vous devez commencer par obtenir une %(apikey)s dans les paramètres de votre profil."
+msgstr ""
+"vous devez commencer par obtenir une %(apikey)s dans les paramètres de "
+"votre profil."
 
 #: udata/templates/apidoc.html:38
 msgid "API Key"
@@ -546,13 +548,17 @@ msgstr "Clé d'API"
 msgid ""
 "you first need to authenticate and obtain an API Key in your profile "
 "settings."
-msgstr "vous devez d'abord être authentifié et obtenir une clé d'API dans les paramètres de votre profil."
+msgstr ""
+"vous devez d'abord être authentifié et obtenir une clé d'API dans les "
+"paramètres de votre profil."
 
 #: udata/templates/apidoc.html:44
 msgid ""
-"This key should be provided on each call in the <code>X-API-KEY</code> HTTP "
-"header."
-msgstr "Cette clé doit être fourni à chaque appel dans l'entête HTTP <code>X-API-KEY</code>."
+"This key should be provided on each call in the <code>X-API-KEY</code> "
+"HTTP header."
+msgstr ""
+"Cette clé doit être fourni à chaque appel dans l'entête HTTP <code>X-API-"
+"KEY</code>."
 
 #: udata/templates/apidoc.html:50
 msgid "Authorizations"
@@ -566,7 +572,9 @@ msgstr "Les appels d'API sont soumis aux même permissions que l'interface web."
 msgid ""
 "By example, you need to be part of the organization to modify one of its "
 "datasets."
-msgstr "Par exemple, vous devez être membre de l'organisation pour modifier l'un de ses jeux de données."
+msgstr ""
+"Par exemple, vous devez être membre de l'organisation pour modifier l'un "
+"de ses jeux de données."
 
 #: udata/templates/apidoc.html:61
 msgid "Pagination"
@@ -575,17 +583,27 @@ msgstr "Pagination"
 #: udata/templates/apidoc.html:65
 msgid ""
 "Some method are paginated and always follow the same pattern.\n"
-"                The object list is wrapped in a <code>Page</code> object.\n"
+"                The object list is wrapped in a <code>Page</code> object."
+"\n"
 "                "
-msgstr "Certaines méthodes sont paginées et suivent le même modèle de pagination. La liste d'objets est encapsulée dans un objet <code>Page</code>."
+msgstr ""
+"Certaines méthodes sont paginées et suivent le même modèle de pagination."
+" La liste d'objets est encapsulée dans un objet <code>Page</code>."
 
 #: udata/templates/apidoc.html:69
 msgid ""
 "You don't have to compute yourself the previous and next pages\n"
 "                because the URLs are available in the response under the\n"
-"                <code>previous_page</code> and <code>next_page</code> attributes.\n"
-"                They will be set to <code>null</code> if there is no previous and/or next page."
-msgstr "Vous n'avez pas à calculer vous-même les pages précédentes et suivantes\npuisque les URL sont disponible dans la réponse\ndans les attributs <code>previous_page</code> et <code>next_page</code>.\nIls seront définis à <code>null</code> si il n'y a pas de page précédente et/ou suivante."
+"                <code>previous_page</code> and <code>next_page</code> "
+"attributes.\n"
+"                They will be set to <code>null</code> if there is no "
+"previous and/or next page."
+msgstr ""
+"Vous n'avez pas à calculer vous-même les pages précédentes et suivantes\n"
+"puisque les URL sont disponible dans la réponse\n"
+"dans les attributs <code>previous_page</code> et <code>next_page</code>.\n"
+"Ils seront définis à <code>null</code> si il n'y a pas de page précédente"
+" et/ou suivante."
 
 #: udata/templates/apidoc.html:74
 msgid "Example"
@@ -722,6 +740,7 @@ msgstr "a édité la réutilisation"
 #: udata/templates/organization/edit_base.html:18
 #: udata/templates/organization/search-panel.html:11
 #: udata/templates/organization/search-result.html:10
+#: udata/templates/reuse/display_base.html:126
 msgid "Certified public service"
 msgstr "Service public certifié"
 
@@ -730,6 +749,7 @@ msgstr "Service public certifié"
 #: udata/templates/organization/card.html:10
 #: udata/templates/organization/edit_base.html:19
 #: udata/templates/organization/search-result.html:11
+#: udata/templates/reuse/display_base.html:127
 msgid "The identity of this public service public is certified by Etalab"
 msgstr "L'identité de ce service public est certifiée par Etalab"
 
@@ -740,23 +760,21 @@ msgid "Frequency"
 msgstr "Fréquence"
 
 #: udata/templates/dataset/card.html:60
-#: udata/templates/dataset/display.html:244
-#: udata/templates/dataset/search-result.html:58
-msgid "Territorial coverage"
-msgstr "Couverture territoriale"
-
-#: udata/templates/dataset/card.html:71
 #: udata/templates/dataset/display.html:256
-#: udata/templates/dataset/search-result.html:69
+#: udata/templates/dataset/search-result.html:58
 msgid "Territorial coverage granularity"
 msgstr "Granularité de la couverture territoriale"
 
+#: udata/templates/dataset/card.html:71
+#: udata/templates/dataset/display.html:244
+#: udata/templates/dataset/search-result.html:69
+msgid "Territorial coverage"
+msgstr "Couverture territoriale"
+
 #: udata/templates/dataset/card.html:90
 #: udata/templates/dataset/search-panel.html:10
-#: udata/templates/organization/card.html:53
-#: udata/templates/reuse/card.html:39
-#: udata/templates/reuse/search-panel.html:10
-#: udata/templates/user/card.html:39
+#: udata/templates/organization/card.html:53 udata/templates/reuse/card.html:39
+#: udata/templates/reuse/search-panel.html:10 udata/templates/user/card.html:39
 msgid "Stars"
 msgstr "Favoris"
 
@@ -779,8 +797,7 @@ msgstr "Créer"
 #: udata/templates/organization/create.html:10
 #: udata/templates/organization/edit.html:15
 #: udata/templates/reuse/create.html:10 udata/templates/reuse/edit.html:14
-#: udata/templates/user/edit.html:13
-#: udata/templates/user/edit_settings.html:13
+#: udata/templates/user/edit.html:13 udata/templates/user/edit_settings.html:13
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -794,12 +811,14 @@ msgstr "jeu de données"
 #: udata/templates/organization/display.html:25
 #: udata/templates/organization/display_base.html:26
 #: udata/templates/organization/followers.html:15
-#: udata/templates/reuse/display.html:26 udata/templates/user/base.html:14
+#: udata/templates/reuse/display_base.html:26
+#: udata/templates/reuse/display_base.html:86 udata/templates/user/base.html:14
 msgid "Edit"
 msgstr "Éditer"
 
 #: udata/templates/dataset/display.html:35
-#: udata/templates/reuse/display.html:35
+#: udata/templates/reuse/display_base.html:35
+#: udata/templates/reuse/display_base.html:96
 msgid "Featured"
 msgstr "Mis en avant"
 
@@ -827,11 +846,15 @@ msgid "New reuse"
 msgstr "Nouvelle réutilisation"
 
 #: udata/templates/dataset/display.html:136
+#: udata/templates/reuse/display_base.html:122
+#: udata/templates/reuse/display_base.html:165
 msgid "Producer"
 msgstr "Producteur"
 
 #: udata/templates/dataset/display.html:149
 #: udata/templates/dataset/display.html:181
+#: udata/templates/reuse/display_base.html:140
+#: udata/templates/reuse/display_base.html:177
 msgid "more"
 msgstr "plus"
 
@@ -841,6 +864,8 @@ msgstr "plus"
 #: udata/templates/dataset/display.html:190
 #: udata/templates/macros/follow.html:10
 #: udata/templates/organization/display_base.html:122
+#: udata/templates/reuse/display_base.html:158
+#: udata/templates/reuse/display_base.html:195
 msgid "Follow"
 msgstr "Suivre"
 
@@ -850,28 +875,27 @@ msgid "Supplier"
 msgstr "Fournisseur"
 
 #: udata/templates/dataset/display.html:198
+#: udata/templates/reuse/display_base.html:204
 msgid "Informations"
 msgstr "Informations"
 
 #: udata/templates/dataset/edit.html:13
 #: udata/templates/dataset/resource/edit.html:10
-#: udata/templates/organization/edit.html:13
-#: udata/templates/reuse/edit.html:13 udata/templates/user/edit.html:12
-#: udata/templates/user/edit_settings.html:12
+#: udata/templates/organization/edit.html:13 udata/templates/reuse/edit.html:13
+#: udata/templates/user/edit.html:12 udata/templates/user/edit_settings.html:12
 msgid "Save"
 msgstr "Enregistrer"
 
 #: udata/templates/dataset/edit.html:16 udata/templates/dataset/edit.html:18
 #: udata/templates/organization/edit.html:17
-#: udata/templates/organization/edit.html:19
-#: udata/templates/reuse/edit.html:16 udata/templates/reuse/edit.html:18
+#: udata/templates/organization/edit.html:19 udata/templates/reuse/edit.html:16
+#: udata/templates/reuse/edit.html:18
 msgid "Delete"
 msgstr "Supprimer"
 
 #: udata/templates/dataset/edit_base.html:6
 #: udata/templates/organization/edit_base.html:9
-#: udata/templates/reuse/edit_base.html:6
-#: udata/templates/user/edit_base.html:7
+#: udata/templates/reuse/edit_base.html:6 udata/templates/user/edit_base.html:7
 msgid "Edition"
 msgstr "Édition"
 
@@ -901,22 +925,20 @@ msgstr[1] "%(num)d abonnés"
 msgid "No Issues"
 msgstr "Aucune anomalie"
 
-#: udata/templates/dataset/issues.html:10
-#: udata/templates/macros/issues.html:15
+#: udata/templates/dataset/issues.html:10 udata/templates/macros/issues.html:15
 #: udata/templates/organization/issues.html:10
 #: udata/templates/reuse/issues.html:10
 msgid "Open issues"
 msgstr "Anomalies ouvertes"
 
-#: udata/templates/dataset/issues.html:12
-#: udata/templates/macros/issues.html:18
+#: udata/templates/dataset/issues.html:12 udata/templates/macros/issues.html:18
 #: udata/templates/organization/issues.html:12
 #: udata/templates/reuse/issues.html:12
 msgid "Closed issues"
 msgstr "Anomalies fermées"
 
-#: udata/templates/dataset/list.html:7
-#: udata/templates/organization/list.html:7 udata/templates/reuse/list.html:8
+#: udata/templates/dataset/list.html:7 udata/templates/organization/list.html:7
+#: udata/templates/reuse/list.html:8
 #, python-format
 msgid "%(start)s to %(end)s on %(total)s"
 msgstr "%(start)s à %(end)s sur %(total)s"
@@ -990,7 +1012,10 @@ msgid ""
 "The server encountered an internal error and was unable to complete your "
 "request. Either the server is overloaded or there is an error in the "
 "application."
-msgstr "Le serveur a rencontré une erreur interne et n'a pas été capable de compléter votre requête. Soit le serveur est surchargé ou il y a une erreur dans l'application."
+msgstr ""
+"Le serveur a rencontré une erreur interne et n'a pas été capable de "
+"compléter votre requête. Soit le serveur est surchargé ou il y a une "
+"erreur dans l'application."
 
 #: udata/templates/errors/base.html:11
 #, python-format
@@ -1244,10 +1269,17 @@ msgstr "Membre"
 
 #: udata/templates/organization/display_base.html:116
 #: udata/templates/organization/display_base.html:118
+#: udata/templates/reuse/display_base.html:150
+#: udata/templates/reuse/display_base.html:152
+#: udata/templates/reuse/display_base.html:154
+#: udata/templates/reuse/display_base.html:187
+#: udata/templates/reuse/display_base.html:189
+#: udata/templates/reuse/display_base.html:191
 msgid "Unfollow"
 msgstr "Ne plus suivre"
 
 #: udata/templates/organization/display_base.html:120
+#: udata/templates/reuse/display_base.html:156
 msgid "I'll be informed about this organization news"
 msgstr "Je serais informé de l'activité de cette organisation"
 
@@ -1341,26 +1373,43 @@ msgstr "Lire plus"
 msgid "Number of datasets used"
 msgstr "Nombre de jeux de données utilisés"
 
-#: udata/templates/reuse/display.html:9
+#: udata/templates/reuse/display.html:12
+msgid "See the reuse"
+msgstr "Voir la réutilisation"
+
+#: udata/templates/reuse/display_base.html:9
 msgid "reuse"
 msgstr "réutilisation"
 
-#: udata/templates/reuse/display.html:57
+#: udata/templates/reuse/display_base.html:64
 msgid "This reuse is private and will not be visible by other users"
-msgstr "Cette réutilisation est privée et sera invisible par les autres utilisateurs"
+msgstr ""
+"Cette réutilisation est privée et sera invisible par les autres "
+"utilisateurs"
 
-#: udata/templates/reuse/display.html:62 udata/templates/reuse/display.html:64
+#: udata/templates/reuse/display_base.html:69
+#: udata/templates/reuse/display_base.html:71
 msgid "Deleted"
 msgstr "Supprimé"
 
-#: udata/templates/reuse/display.html:63
-msgid ""
-"This reuse has been deleted. This will be permanent in the next 24 hours"
-msgstr "Cette réutilisation a été supprimée. Cela sera permanent dans les prochaines 24 heures"
+#: udata/templates/reuse/display_base.html:70
+msgid "This reuse has been deleted. This will be permanent in the next 24 hours"
+msgstr ""
+"Cette réutilisation a été supprimée. Cela sera permanent dans les "
+"prochaines 24 heures"
 
-#: udata/templates/reuse/display.html:80
-msgid "See the reuse"
-msgstr "Voir la réutilisation"
+#: udata/templates/reuse/display_base.html:193
+msgid "I'll be informed about this user news"
+msgstr "Je serais informé de l'activité de cet utilisateur"
+
+#: udata/templates/reuse/display_base.html:235
+#: udata/templates/site/activity.html:6 udata/templates/user/activity.html:6
+msgid "Activity"
+msgstr "Activité"
+
+#: udata/templates/reuse/display_base.html:262
+msgid "No followers yet"
+msgstr "Aucun abonné pour l'instant"
 
 #: udata/templates/reuse/list.html:19
 msgid "Add a reuse"
@@ -1377,10 +1426,6 @@ msgstr "Nombre de jeux de données"
 #: udata/templates/security/login_user.html:13
 msgid "Login"
 msgstr "Identifiant"
-
-#: udata/templates/site/activity.html:6 udata/templates/user/activity.html:6
-msgid "Activity"
-msgstr "Activité"
 
 #: udata/templates/topic/display.html:6
 msgid "Topics"
@@ -1453,3 +1498,7 @@ msgstr[1] "Suis %(num)d utilisateurs"
 #, python-format
 msgid "%(user)s is not following anyone"
 msgstr "%(user)s ne suis personne"
+
+#~ msgid "Activité"
+#~ msgstr ""
+

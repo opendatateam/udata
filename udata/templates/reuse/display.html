@@ -1,99 +1,18 @@
-{% extends theme('layouts/1-column.html') %}
-{% from theme('macros/follow.html') import follow_btn with context %}
-{% from theme('macros/issues.html') import issues_btn with context %}
-{% from theme('macros/share.html') import share_btn with context %}
+{% extends theme('reuse/display_base.html') %}
 
-{% set meta = {
-    'title': reuse.title,
-    'description': reuse.description|default('', true)|markdown|striptags|forceescape,
-    'keywords': [_('reuse')] + reuse.tags,
-} %}
-
-{% block extra_head %}
-<link rel="canonical" href="{{ url_for('reuses.show', reuse=reuse) }}" />
-{% endblock %}
-
-{% block breadcrumb %}
-    <li><a href="{{ url_for('reuses.list') }}">{{ _('Reuses') }}</a></li>
-    <li class="active">{{ reuse.title }}</li>
-{% endblock %}
-
-{% block toolbar %}
-{# Owner actions #}
-<div class="btn-group btn-group-xs">
-    <a href="{{ url_for('reuses.edit', reuse=reuse) }}" class="btn btn-success">
-        <span class="glyphicon glyphicon-pencil"></span>
-        {{ _('Edit') }}
-    </a>
-</div>
-{# Admin actions #}
-<div class="btn-group btn-group-xs">
-    <button type="button"
-        class="btn btn-success featured {% if reuse.featured %}active{% endif %}"
-        data-api-url="{{ url_for('api.reuse_featured', reuse=reuse) }}">
-        <span class="glyphicon glyphicon-bullhorn"></span>
-        {{ _('Featured') }}
-    </button>
-</div>
-{# Social actions #}
-<div class="btn-group btn-group-xs">
-    {{ follow_btn(reuse) }}
-</div>
-<div class="btn-group btn-group-xs">
-    {{ issues_btn(reuse) }}
-</div>
-<div class="btn-group btn-group-xs">
-    {{ share_btn(reuse.title) }}
-</div>
-{% endblock %}
-
-{% block main_content %}
-<h2>{{ reuse.title }}</h2>
-<div class="row">
-    <p class="col-md-12">
-        {% if reuse.private %}
-        <small class="private"rel="popover"
-            data-title="{{ _('Private') }}" data-trigger="hover" data-placement="top"
-            data-content="{{ _('This reuse is private and will not be visible by other users') }}"
-            >{{ _('Private') }}</small>
-        {% endif %}
-        {% if reuse.deleted %}
-        <small class="deleted" rel="popover"
-            data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
-            data-content="{{ _('This reuse has been deleted. This will be permanent in the next 24 hours') }}"
-            >{{ _('Deleted') }}</small>
-        {% endif %}
-    </p>
-</div>
-<div class="text-center">
-    <a href="{{ reuse.url }}" target="_blank">
-        <img src="{{ reuse.image_url|placeholder('reuse') }}"
-            alt="{{ reuse.title }}" class="scalable" />
-    </a>
-</div>
+{% block reuse_content %}
 <div>
+    <div class="reuse-image">
+        <a href="{{ reuse.url }}" target="_blank">
+            <img src="{{ reuse.image_url|placeholder('reuse') }}"
+                alt="{{ reuse.title }}" class="scalable" />
+            <br/>
+            <span class="reuse-link">
+                <span class="glyphicon glyphicon-new-window"></span>
+                {{ _('See the reuse') }}
+            </span>
+        </a>
+    </div>
     {{ reuse.description|default('', true)|markdown }}
 </div>
-<div>
-    <a href="{{ reuse.url }}">
-        <span class="glyphicon glyphicon-new-window"></span>
-        {{ _('See the reuse') }}
-    </a>
-</div>
-
-<div class="page-header">
-    <h3>{{ _('Used datasets') }}</h3>
-</div>
-<div>
-    <ul class="card-list">
-        {% for dataset in reuse.datasets %}
-        <li class="col-md-4 col-sm-6">
-        {% include theme('dataset/card.html') %}
-        </li>
-        {% endfor %}
-    </ul>
-</div>
-{% endblock %}
-
-{% block sidebar %}
 {% endblock %}

@@ -10,7 +10,7 @@ from udata.forms import ReuseForm, ReuseCreateForm
 from udata.frontend import nav
 from udata.frontend.views import SearchView, DetailView, CreateView, EditView, SingleObject, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Reuse, Issue
+from udata.models import Reuse, Issue, FollowReuse
 
 from .permissions import ReuseEditPermission, set_reuse_identity
 
@@ -81,7 +81,23 @@ class ProtectedReuseView(ReuseView):
 
 
 class ReuseDetailView(ReuseView, DetailView):
-    template_name = 'reuse/display.html'
+    def get_context(self):
+        context = super(ReuseDetailView, self).get_context()
+
+        followers = FollowReuse.objects.followers(self.reuse).order_by('follower.fullname')
+
+        context.update(
+            followers=followers,
+            can_edit=ReuseEditPermission(self.reuse)
+        )
+
+        return context
+
+    def get_template_name(self):
+        if self.reuse.type == 'visualization' and self.reuse.url == self.reuse.image_url:
+            return 'reuse/display-big-picture.html'
+        else:
+            return 'reuse/display.html'
 
 
 class ReuseCreateView(CreateView):
