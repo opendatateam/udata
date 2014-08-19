@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-17 21:12+0200\n"
+"POT-Creation-Date: 2014-08-19 14:57+0200\n"
 "PO-Revision-Date: 2014-08-08 13:05+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata-"
@@ -375,12 +375,12 @@ msgid "Frequency"
 msgstr "Fréquence"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:304
-msgid "Territorial coverage"
-msgstr "Couverture territoriale"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:316
 msgid "Territorial coverage granularity"
 msgstr "Granularité de la couverture territoriale"
+
+#: udata_gouvfr/theme/templates/dataset/display.html:314
+msgid "Territorial coverage"
+msgstr "Couverture territoriale"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:340
 msgid "Data quality"
@@ -616,50 +616,6 @@ msgstr "Télécharger en CSV"
 msgid "See the %(nb)s reuses"
 msgstr "Voir les %(nb)s réutilisations"
 
-#: udata_gouvfr/theme/templates/organization/display.html:315
-msgid "You need to be logged in to follow an organization"
-msgstr "Vous devez êtes enregistré pour suivre une organisation"
-
-#: udata_gouvfr/theme/templates/organization/display.html:316
-msgid "You need to be logged in to request membership to an organization"
-msgstr "Vous devez êtes authentifié pour effectuer une demande d'adhésion"
-
-#: udata_gouvfr/theme/templates/organization/display.html:317
-msgid "You need to be logged in to accept or refuse a membership request"
-msgstr "Vous devez être authentifié pour refuser une demande d'adhésion"
-
-#: udata_gouvfr/theme/templates/organization/display.html:320
-msgid "A request has been sent to the administrators"
-msgstr "Une demande a été envoyée aux administrateurs"
-
-#: udata_gouvfr/theme/templates/organization/display.html:321
-msgid "Error while requesting membership to {org}"
-msgstr "Erreur lors de la demande d'adhésion à {org}"
-
-#: udata_gouvfr/theme/templates/organization/display.html:324
-msgid "Membership request has been accepted"
-msgstr "La demande d'adhésion a été acceptée"
-
-#: udata_gouvfr/theme/templates/organization/display.html:325
-msgid "Membership request has been refused"
-msgstr "La demande d'adhésion a été refusée"
-
-#: udata_gouvfr/theme/templates/organization/display.html:326
-msgid "Error while responding to membership request"
-msgstr "Erreur lors de la réponse à la demande d'adhésion"
-
-#: udata_gouvfr/theme/templates/organization/display.html:328
-msgid "You are now following {org}"
-msgstr "Vous suivez maintenant {org}"
-
-#: udata_gouvfr/theme/templates/organization/display.html:329
-msgid "You are not following {org} anymore"
-msgstr "Vous ne suivez plus {org}"
-
-#: udata_gouvfr/theme/templates/organization/display.html:330
-msgid "Error while toggling follower status"
-msgstr "Erreur lors du changement du statut d'abonné"
-
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:7
 msgid "Choose your contribution"
 msgstr "Choisissez votre contribution"
@@ -710,4 +666,37 @@ msgstr "Aucun résultat trouvé"
 #: udata_gouvfr/theme/templates/topic/subnav.html:46
 msgid "Read more"
 msgstr "Lire plus"
+
+#~ msgid "You need to be logged in to follow an organization"
+#~ msgstr "Vous devez êtes enregistré pour suivre une organisation"
+
+#~ msgid "You need to be logged in to request membership to an organization"
+#~ msgstr "Vous devez êtes authentifié pour effectuer une demande d'adhésion"
+
+#~ msgid "You need to be logged in to accept or refuse a membership request"
+#~ msgstr "Vous devez être authentifié pour refuser une demande d'adhésion"
+
+#~ msgid "A request has been sent to the administrators"
+#~ msgstr "Une demande a été envoyée aux administrateurs"
+
+#~ msgid "Error while requesting membership to {org}"
+#~ msgstr "Erreur lors de la demande d'adhésion à {org}"
+
+#~ msgid "Membership request has been accepted"
+#~ msgstr "La demande d'adhésion a été acceptée"
+
+#~ msgid "Membership request has been refused"
+#~ msgstr "La demande d'adhésion a été refusée"
+
+#~ msgid "Error while responding to membership request"
+#~ msgstr "Erreur lors de la réponse à la demande d'adhésion"
+
+#~ msgid "You are now following {org}"
+#~ msgstr "Vous suivez maintenant {org}"
+
+#~ msgid "You are not following {org} anymore"
+#~ msgstr "Vous ne suivez plus {org}"
+
+#~ msgid "Error while toggling follower status"
+#~ msgstr "Erreur lors du changement du statut d'abonné"
 

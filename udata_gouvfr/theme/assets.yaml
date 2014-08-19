@@ -37,6 +37,16 @@ gouvfr-org-css:
     contents: less/gouvfr-org.less
 
 
+gouvfr-reuse-css:
+    filters: less,cssrewrite,cssmin
+    depends:
+        - less/*.less
+        - less/udata/*.less
+        - less/gouvfr/*.less
+    output: css/gouvfr-reuse.min.css
+    contents: less/gouvfr-reuse.less
+
+
 gouvfr-forms-css:
     filters: less,cssrewrite,cssmin
     depends:
