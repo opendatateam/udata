@@ -203,7 +203,15 @@
                 <div class="card">
                     <h3>{{ _('Informations') }}</h3>
 
-                    <ul id="infos-list" class="list-unstyled">
+                    <ul class="list-unstyled infos-list">
+                        {# Reuse type #}
+                        <li>
+                            <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                                title="{{ _('Type') }}">
+                                <span class="{{ ficon('fa-file') }}"></span>
+                            </a>
+                            {{ reuse.type_label }}
+                        </li>
                     </ul>
 
 
