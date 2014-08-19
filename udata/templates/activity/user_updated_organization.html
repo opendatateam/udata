@@ -4,5 +4,5 @@
 
 {% block endtitle %}
 {{_('updated organization')}}
-<a href="{{ url_for('datasets.show', dataset=activity.organization) }}">{{activity.organization.name}}</a>
+<a href="{{ url_for('orgniazation.show', org=activity.organization) }}">{{activity.organization.name}}</a>
 {% endblock %}
