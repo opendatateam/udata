@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-19 14:57+0200\n"
+"POT-Creation-Date: 2014-08-20 00:39+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -459,11 +459,11 @@ msgstr ""
 msgid "Mark as featured"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/dataset/display.html:556
+#: udata_gouvfr/theme/templates/dataset/display.html:558
 msgid "Add a reuse"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/dataset/display.html:564
+#: udata_gouvfr/theme/templates/dataset/display.html:566
 msgid ""
 "You reused these data and published an article, a computer graphics, or an "
 "application?\n"

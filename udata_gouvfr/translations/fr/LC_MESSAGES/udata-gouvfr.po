@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-19 14:57+0200\n"
+"POT-Creation-Date: 2014-08-20 00:39+0200\n"
 "PO-Revision-Date: 2014-08-08 13:05+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata-"
@@ -473,11 +473,11 @@ msgstr "Ne plus mettre en avant"
 msgid "Mark as featured"
 msgstr "Mettre en avant"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:556
+#: udata_gouvfr/theme/templates/dataset/display.html:558
 msgid "Add a reuse"
 msgstr "Ajouter une réutilisation"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:564
+#: udata_gouvfr/theme/templates/dataset/display.html:566
 msgid ""
 "You reused these data and published an article, a computer graphics, or "
 "an application?\n"

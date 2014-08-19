@@ -550,7 +550,9 @@
                     </div>
                     {% endfor %}
                     <div class="col-sm-6 col-md-4">
-                        <a class="thumbnail reuse add" href="{{ url_for('reuses.new') }}">
+                        <a class="thumbnail reuse add"
+                            href="{{ url_for('reuses.new') }}"
+                            data-add-url="{{ url_for('reuses.add_dataset', reuse='{placeholder}') }}">
                             <div class="preview">+</div>
                             <div class="caption">
                                 <h4>{{ _('Add a reuse') }}</h4>
