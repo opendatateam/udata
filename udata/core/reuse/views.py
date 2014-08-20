@@ -107,6 +107,15 @@ class ReuseCreateView(CreateView):
     form = ReuseCreateForm
     template_name = 'reuse/create.html'
 
+    def initialize_form(self, form):
+        if 'dataset' in request.args:
+            try:
+                dataset = Dataset.objects.get(id=request.args['dataset'])
+                form.datasets.data = [dataset]
+            except:
+                pass
+        return form
+
 
 class ReuseEditView(ProtectedReuseView, EditView):
     form = ReuseForm

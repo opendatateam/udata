@@ -124,8 +124,12 @@ class FormView(Templated, BaseView):
 
     def get_context(self):
         context = super(FormView, self).get_context()
-        context['form'] = self.form(request.form)
+        form = self.form(request.form)
+        context['form'] = self.initialize_form(form)
         return context
+
+    def initialize_form(self, form):
+        return form
 
     def get(self, **kwargs):
         return self.render()

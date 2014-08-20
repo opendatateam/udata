@@ -44,6 +44,19 @@ class ReuseBlueprintTest(FrontTestCase):
         response = self.get(url_for('reuses.new'))
         self.assert200(response)
 
+    def test_render_create_with_dataset(self):
+        '''It should render the reuse create form with preentered dataset'''
+        dataset = DatasetFactory()
+        response = self.get(url_for('reuses.new', dataset=str(dataset.id)))
+        self.assert200(response)
+        form = self.get_context_variable('form')
+        self.assertEqual(form.datasets.data, [dataset])
+
+    def test_render_create_with_dataset_does_not_fails(self):
+        '''It should render the reuse create form without failing with an unknown dataset'''
+        response = self.get(url_for('reuses.new', dataset='not-found'))
+        self.assert200(response)
+
     def test_create(self):
         '''It should create a reuse and redirect to reuse page'''
         data = ReuseFactory.attributes()
