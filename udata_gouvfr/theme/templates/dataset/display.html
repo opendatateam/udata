@@ -115,8 +115,8 @@
                                 {{ dataset.supplier.name }}
                                 </span>
                             </a>
-                            {% if dataset.url %}
-                            <a href="{{ dataset.url }}" class="btn btn-grey btn-primary btn-sm pull-right">
+                            {% if dataset.extras.remote_url %}
+                            <a href="{{ dataset.extras.remote_url }}" class="btn btn-grey btn-primary btn-sm pull-right">
                                 {{ _('See the original website') }}
                             </a>
                             {% endif %}
@@ -551,7 +551,7 @@
                     {% endfor %}
                     <div class="col-sm-6 col-md-4">
                         <a class="thumbnail reuse add"
-                            href="{{ url_for('reuses.new') }}"
+                            href="{{ url_for('reuses.new', dataset=dataset.id) }}"
                             data-add-url="{{ url_for('reuses.add_dataset', reuse='{placeholder}') }}">
                             <div class="preview">+</div>
                             <div class="caption">
