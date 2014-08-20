@@ -319,7 +319,6 @@
 }
 
 
-
 .community_container {
     background-color: #354651;
     padding-bottom: 20px;
@@ -577,6 +576,68 @@
         font-size: 13px;
         line-height: 1.4em;
         margin-top: -3px;
+    }
+}
+
+.reuses-list.in-modal {
+    .reuse {
+        @preview-height: 110px;
+        @border-size: 2px;
+
+        border-radius: 0px;
+        border: @border-size dashed @gray-light;
+        height: 150px;
+        margin-bottom: 15px;
+        overflow: hidden;
+        padding: 0px;
+        position: relative;
+        background-color: lighten(@gray-lighter, 10%);
+
+        h4 {
+            text-align: center;
+            font-size: 15px;
+            color: #7d8489;
+        }
+
+        .preview {
+            display: block;
+            height: @preview-height - @border-size;
+            text-align: center;
+            overflow: hidden;
+            background-color: white;
+
+            img {
+                min-height: @preview-height;
+                min-width: 100%;
+            }
+        }
+
+        .caption {
+            padding: 0;
+            color: #6B6B6B;
+            font-size: 13px;
+            line-height: 16px;
+        }
+
+        &.add {
+            .preview {
+                color: #7d8489;
+                text-align: center;
+                font-size: 36px;
+                font-weight: bold;
+                line-height: 100px;
+
+            }
+
+            &:hover .preview {
+                background-color: lighten(@gray-lighter, 10%);
+            }
+        }
+
+        &:hover {
+            background-color: @gray-lighter;
+            text-decoration: none;
+        }
     }
 }
 
