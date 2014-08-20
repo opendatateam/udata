@@ -17,6 +17,7 @@ org_fields = api.model('Organization', {
     'deleted': fields.ISODateTime,
     'metrics': fields.Raw,
     'uri': fields.UrlFor('api.organization', lambda o: {'org': o}),
+    'page': fields.UrlFor('organizations.show', lambda o: {'org': o}),
 })
 
 org_page_fields = api.model('OrganizationPage', pager(org_fields))
@@ -39,4 +40,6 @@ class OrganizationField(fields.Raw):
             'id': str(organization.id),
             'uri': url_for('api.organization', org=organization, _external=True),
             'page': url_for('organizations.show', org=organization, _external=True),
+            'image_url': organization.image_url,
+            'name': organization.name,
         }

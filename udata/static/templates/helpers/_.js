@@ -1,5 +1,7 @@
 define(['hbs/handlebars', 'i18n'], function ( Handlebars, i18n ) {
 
-    Handlebars.registerHelper('_', i18n._);
+    Handlebars.registerHelper('_', function(value) {
+        return value && typeof value === 'string' ? i18n._(value) : '';
+    });
 
 });

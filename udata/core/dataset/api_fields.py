@@ -42,6 +42,7 @@ dataset_fields = api.model('Dataset', {
     'license': fields.String(attribute='license.id'),
 
     'uri': fields.UrlFor('api.dataset', lambda o: {'dataset': o}),
+    'page': fields.UrlFor('datasets.show', lambda o: {'dataset': o}),
 })
 
 dataset_page_fields = api.model('DatasetPage', pager(dataset_fields))

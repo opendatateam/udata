@@ -1,12 +1,19 @@
 /**
  * Dataset completer widget
  */
-define(['jquery', 'form/widgets'], function($) {
+define([
+    'jquery',
+    'api',
+    'hbs!templates/dataset/dropdown-item',
+    'hbs!templates/dataset/card',
+    'form/widgets'
+], function($, API, itemTpl, cardTpl) {
     'use strict';
 
 
     $('.dataset-completer').each(function() {
-        var $this = $(this);
+        var $this = $(this),
+            $group = $this.closest('.form-group');
 
         $this.selectize({
             persist: false,
@@ -32,6 +39,21 @@ define(['jquery', 'form/widgets'], function($) {
                         callback(data);
                     }
                 });
+            },
+            render: {
+                option: function(data, escape) {
+                    return itemTpl(data);
+                },
+                item: function(data, escape) {
+                    var dataset = API.sync.get('/api/datasets/' + data.id);
+                    return '<div class="card-list">'+cardTpl(dataset)+'</div>';
+                }
+            },
+            onItemAdd: function(value, $item) {
+                $item.dotdotdot();
+            },
+            onInitialize: function() {
+                $group.find('.ellipsis-dot').dotdotdot();
             }
         });
     });

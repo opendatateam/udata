@@ -1,0 +1,93 @@
+<div class="card">
+    {{#if organization }}
+        <a class="card-logo" href="{{ page }}">
+            <img alt="{{ organization.name }}"
+                src="{{ organization.image_url }}">
+        </a>
+        {{#if organization.public_service }}
+        <img src="{{! theme_static('img/certified-stamp.png') }}" alt="certified"
+            class="certified" rel="popover"
+            data-title="{{_ 'Certified public service' }}"
+            data-content="{{_ 'The identity of this public service public is certified by Etalab' }}"
+            data-container="body" data-trigger="hover"/>
+        {{/if}}
+    {{else}}
+    <div class="card-logo">
+        <img src="{{! ''|placeholder('organization') }}">
+    </div>
+    {{/if}}
+    <div class="card-body ellipsis-dot">
+        <h4>
+            <a href="{{ page }}" title="{{title}}">
+                {{ title }}
+            </a>
+        </h4>
+        <div class="card-description">{{md description }}</div>
+
+    </div>
+    <footer>
+        <ul class="col-xs-8 col-lg-9">
+            {{#if temporal_coverage }}
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{_ 'Temporal coverage' }}">
+                    <span class="fa fa-calendar fa-fw"></span>
+                    {{dt temporal_coverage.start format='L' }} - {{dt temporal_coverage.end format='L' }}
+                </a>
+            </li>
+            {{/if}}
+
+            {{#if frequency }}
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{_ 'Frequency' }}">
+                    <span class="fa fa-clock-o fa-fw"></span>
+                    {{_ frequency }}
+                </a>
+            </li>
+            {{/if}}
+
+            {{#if territorial_coverage.granularity }}
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{_ 'Territorial coverage granularity' }}">
+                    <span class="fa fa-bullseye fa-fw"></span>
+                    {{_ territorial_coverage.granularity }}
+                </a>
+            </li>
+            {{/if}}
+
+            {{#if territorial_coverage.codes }}
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{_ 'Territorial coverage' }}">
+                    <span class="fa fa-globe fa-fw"></span>
+                    {{ territorial_coverage.codes }}
+                </a>
+            </li>
+            {{/if}}
+        </ul>
+        <ul class="col-xs-4 col-lg-3 corner">
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{_ 'Reuses' }}">
+                    <span class="fa fa-retweet fa-fw"></span>
+                    {{default metrics.reuses 0 }}
+                </a>
+            </li>
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{_ 'Stars' }}">
+                    <span class="fa fa-star fa-fw"></span>
+                    {{default metrics.followers 0 }}
+                </a>
+            </li>
+        </ul>
+    </footer>
+</div>

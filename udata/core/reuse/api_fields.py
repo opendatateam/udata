@@ -23,6 +23,7 @@ reuse_fields = api.model('Reuse', {
     'organization': OrganizationField,
     'metrics': fields.Raw,
     'uri': fields.UrlFor('api.reuse', lambda o: {'reuse': o}),
+    'page': fields.UrlFor('reuses.show', lambda o: {'reuse': o}),
 })
 
 reuse_page_fields = api.model('ReusePage', pager(reuse_fields))
