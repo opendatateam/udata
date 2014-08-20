@@ -97,6 +97,24 @@ class WebTestMixin(object):
         url = self._build_url(url, kwargs)
         return (client or self.client).delete(url, data=data, **kwargs)
 
+    def assert_flashes(self, expected_message, expected_category='message'):
+        with self.client.session_transaction() as session:
+            try:
+                category, message = session['_flashes'][0]
+            except KeyError:
+                raise AssertionError('nothing flashed')
+            self.assertIn(expected_message, message)
+            self.assertEqual(expected_category, category)
+
+    def assert_not_flash(self):
+        with self.client.session_transaction() as session:
+            flashes = session.get('_flashes', [])
+            self.assertNotIn('_flashes', session,
+                'There is {0} unexpected flashed message(s): {1}'.format(
+                    len(flashes),
+                    ', '.join('"{0} ({1})"'.format(msg, cat) for cat, msg in flashes)
+                ))
+
 
 class DBTestMixin(object):
     def tearDown(self):
