@@ -1,7 +1,7 @@
-define(['hbs/handlebars', 'markdown'], function ( Handlebars, markdown ) {
+define(['hbs/handlebars', 'marked'], function ( Handlebars, marked ) {
 
     Handlebars.registerHelper('md', function (value) {
-        return new Handlebars.SafeString(markdown.toHTML(value));
+        return new Handlebars.SafeString(marked(value));
     });
 
 });

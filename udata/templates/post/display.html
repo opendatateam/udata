@@ -25,5 +25,5 @@
 </div>
 {% endif %}
 
-<div>{{ post.content|default('', true)|markdown }}</div>
+<div>{{ post.content|markdown }}</div>
 {% endblock %}

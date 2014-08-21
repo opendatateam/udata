@@ -16,7 +16,7 @@
                 {{ organization.name }}
             </a>
         </h4>
-        <div class="card-description">{{ organization.description|default('', true)|markdown|striptags|truncate(250) }}</div>
+        <div class="card-description">{{ organization.description|mdstrip(250) }}</div>
 
     </div>
     <footer>

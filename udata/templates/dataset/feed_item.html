@@ -1,4 +1,4 @@
-{{dataset.description|default('', true)|markdown}}
+{{dataset.description|markdown}}
 
 {% if dataset.organization %}
 <a href="{{ url_for('datasets.show', dataset=dataset, _external=True) }}"

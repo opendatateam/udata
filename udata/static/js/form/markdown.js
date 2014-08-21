@@ -1,8 +1,12 @@
 /**
  * Markdown editor widget
  */
-define(['jquery', 'i18n', 'bootstrap-markdown'], function($, i18n) {
+define(['jquery', 'i18n', 'marked', 'bootstrap-markdown'], function($, i18n, md) {
     'use strict';
+
+    var EXCERPT_TOKEN = '<!--- excerpt -->';
+
+    window.marked = md;
 
     $.fn.markdown.messages[i18n.lang] = {
         'Bold': i18n._('Bold'),
@@ -27,7 +31,26 @@ define(['jquery', 'i18n', 'bootstrap-markdown'], function($, i18n) {
     $('textarea.md').markdown({
         language: i18n.lang,
         autofocus: false,
-        savable: false
+        savable: false,
+        resize: 'both',
+        iconlibrary: 'fa',
+        additionalButtons: [
+            [{
+                name: 'extras',
+                data: [{
+                    name: 'btnSummary',
+                    title: i18n._('Summary'),
+                    icon: 'fa fa-scissors',
+                    callback: function(e){
+                        var selected = e.getSelection(),
+                            cursor = selected.start;
+
+                        e.replaceSelection(EXCERPT_TOKEN);
+                        e.setSelection(cursor, cursor + EXCERPT_TOKEN.length);
+                    }
+                }]
+            }]
+        ]
     });
 
 });

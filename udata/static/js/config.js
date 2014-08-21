@@ -5,7 +5,7 @@ require.config({
         'bootstrap': '../bower/bootstrap/dist/js/bootstrap',
         'text': "../bower/requirejs-text/text",
         'moment': '../bower/momentjs/min/moment-with-locales',
-        'markdown': '../bower/markdown/lib/markdown',
+        'marked': '../bower/marked/lib/marked',
         'bootstrap-markdown': '../bower/bootstrap-markdown/js/bootstrap-markdown',
         'bootstrap-datepicker': '../bower/bootstrap-datepicker/js/bootstrap-datepicker',
         'bootstrap-daterangepicker': '../bower/bootstrap-daterangepicker/daterangepicker',
@@ -48,7 +48,7 @@ require.config({
             exports: '$.fn.popover'
         },
         'bootstrap-markdown': {
-            deps: ['markdown', 'bootstrap'],
+            deps: ['marked', 'bootstrap'],
             exports: '$.fn.markdown'
         },
         'bootstrap-datepicker': {
@@ -58,9 +58,6 @@ require.config({
         'bootstrap-daterangepicker': {
             deps: ['moment', 'bootstrap'],
             exports: '$.fn.daterangepicker'
-        },
-        'markdown': {
-            exports: 'markdown'
         },
         'jquery.validation': {
             deps: ['jquery'],

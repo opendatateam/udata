@@ -4,7 +4,7 @@
 
 {% set meta = {
     'title': dataset.title,
-    'description': dataset.description|default('', true)|markdown|striptags|forceescape,
+    'description': dataset.description|mdstrip|forceescape,
     'keywords': [_('dataset')] + dataset.tags,
 } %}
 
@@ -48,7 +48,7 @@
 <div itemscope="itemscope" itemtype="http://schema.org/Dataset" itemid="{{dataset.id}}">
 <h2 itemprop="name">{{ dataset.title }}</h2>
 <div itemprop="description">
-    {{ dataset.description|default('', true)|markdown }}
+    {{ dataset.description|markdown }}
 </div>
 
 <!-- Nav tabs -->

@@ -10,7 +10,7 @@
                 {{ reuse.title }}
             </a>
         </h4>
-        <div class="card-description">{{ reuse.description|default('', true)|markdown|striptags|truncate(250) }}</div>
+        <div class="card-description">{{ reuse.description|mdstrip(250) }}</div>
 
     </div>
     <footer>

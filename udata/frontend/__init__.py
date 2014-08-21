@@ -12,13 +12,14 @@ from webassets.filter import get_filter
 
 from flask.ext.assets import Environment, YAMLLoader, Bundle
 from flask.ext.gravatar import Gravatar
-from flask.ext.markdown import Markdown
 from flask.ext.themes2 import Themes, Theme, render_theme_template, get_theme, packaged_themes_loader
 from flask.ext.wtf.csrf import CsrfProtect
 from flask.ext.navigation import Navigation
 
 from udata.app import ROOT_DIR
 from udata.i18n import I18nBlueprint
+
+from .markdown import md, init_app as init_markdown
 
 
 log = logging.getLogger(__name__)
@@ -137,7 +138,7 @@ def init_app(app):
     nav.init_app(app)
     themes.init_themes(app, app_identifier='udata', loaders=[packaged_themes_loader, plugin_theme_loader])
 
-    Markdown(app)
+    init_markdown(app)
     csrf.init_app(app)
 
     app.config['STATIC_DIRS'] = app.config.get('STATIC_DIRS', []) + [

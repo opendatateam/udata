@@ -7,7 +7,7 @@
         <div class="result-body ellipsis-dot">
             <h4 class="result-title">{{ reuse.title }}</h4>
             <div class="result-description">
-            {{ reuse.description|default('', true)|markdown|striptags|truncate(300) }}
+            {{ reuse.description|mdstrip(300) }}
             </div>
         </div>
         <ul class="list-inline result-infos">

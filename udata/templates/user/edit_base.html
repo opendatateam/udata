@@ -18,7 +18,7 @@
         <h3>{{ user.fullname }}</h3>
         {% if user.about %}
         <div class="caption text-left ellipsis-dot">
-            {{ user.about|markdown|striptags|truncate(200) }}
+            {{ user.about|mdstrip(200) }}
         </div>
         {% endif %}
     </div>

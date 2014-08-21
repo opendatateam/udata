@@ -5,7 +5,7 @@
 
 {% set meta = {
     'title': reuse.title,
-    'description': reuse.description|default('', true)|markdown|striptags|forceescape,
+    'description': reuse.description|mdstrip|forceescape,
     'keywords': [_('reuse')] + reuse.tags,
 } %}
 
@@ -137,7 +137,7 @@
                     <div class="caption text-left">
                         {% if reuse.organization.description %}
                         <p>
-                            {{ reuse.organization.description|markdown|striptags|truncate(180) }}
+                            {{ reuse.organization.description|mdstrip(180) }}
                             <a href="{{ url_for('organizations.show', org=reuse.organization) }}"
                                 title="{{ _('more') }}"
                                 class="btn btn-grey btn-primary btn-mini">+</a>
@@ -174,7 +174,7 @@
                     <div class="caption text-left">
                         {% if reuse.owner.about %}
                         <p>
-                            {{ reuse.owner.about|markdown|striptags|truncate(180) }}
+                            {{ reuse.owner.about|mdstrip(180) }}
                             <a href="{{ url_for('users.show', user=reuse.owner) }}"
                                 title="{{ _('more') }}"
                                 class="btn btn-grey btn-primary btn-mini">+</a>
