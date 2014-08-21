@@ -5,7 +5,7 @@
 
 {% set meta = {
     'title': dataset.title,
-    'description': dataset.description|default('', true)|markdown|striptags|forceescape,
+    'description': dataset.description|mdstrip|forceescape,
     'keywords': [_('dataset')] + dataset.tags,
 } %}
 
@@ -127,7 +127,7 @@
 
                 <div class="row" itemprop="description">
                     <div class="col-xs-12">
-                    {{ dataset.description|default('', true)|markdown }}
+                    {{ dataset.description|markdown }}
                     </div>
                 </div>
 
@@ -229,7 +229,7 @@
                     <div class="caption text-left">
                         {% if dataset.organization.description %}
                         <p>
-                            {{ dataset.organization.description|markdown|striptags|truncate(180) }}
+                            {{ dataset.organization.description|mdstrip(180) }}
                             <a href="{{ url_for('organizations.show', org=dataset.organization) }}"
                                 title="{{ _('more') }}"
                                 class="btn btn-grey btn-primary btn-mini">+</a>
@@ -515,7 +515,7 @@
                             {% if reuse.description %}
                             <a class="rollover fade in" href="{{url_for('reuses.show', reuse=reuse)}}"
                                 title="{{ reuse.title }}">
-                                {{ reuse.description|markdown|striptags|truncate(180) }}
+                                {{ reuse.description|mdstrip(180) }}
                             </a>
                             {% endif %}
                             <div class="btn-group btn-group-xs">

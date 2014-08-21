@@ -5,7 +5,7 @@
 
 {% set meta = {
     'title': org.name,
-    'description': org.description|default('', true)|markdown|striptags|forceescape,
+    'description': org.description|mdstrip|forceescape,
     'keywords': [_('organization')],
 } %}
 
@@ -53,7 +53,7 @@
                         {% endif %}
                     </p>
                 </div>
-                <div>{{ org.description|default('', true)|markdown }}</div>
+                <div>{{ org.description|markdown }}</div>
             </div>
 
             {# Left sidebar with organization aside ( counters, logo, social...) #}
