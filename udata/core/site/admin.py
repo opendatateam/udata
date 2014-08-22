@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from flask import redirect, url_for
 
+from udata import tasks
 from udata.core.user.permissions import sysadmin
 from udata.frontend import nav, theme
 from udata.frontend.views import DetailView, EditView
@@ -18,6 +19,7 @@ navbar = nav.Bar('site_admin', [
     nav.Item(_('General'), 'site_admin.config'),
     nav.Item(_('Theme'), 'site_admin.theme'),
     nav.Item(_('Issues'), 'site_admin.issues'),
+    nav.Item(_('Jobs'), 'site_admin.jobs'),
 ])
 
 
@@ -76,4 +78,15 @@ class SiteIssuesView(SiteAdminView, DetailView):
     def get_context(self):
         context = super(SiteIssuesView, self).get_context()
         context['issues'] = Issue.objects
+        return context
+
+
+@site_admin.route('/jobs/', endpoint='jobs')
+class SiteJobsView(SiteAdminView, DetailView):
+    template_name = 'site/jobs.html'
+
+    def get_context(self):
+        context = super(SiteJobsView, self).get_context()
+        context['schedulables'] = tasks.schedulables()
+        context['jobs'] = tasks.PeriodicTask.objects
         return context

@@ -1,0 +1,19 @@
+{% extends theme('site/admin_base.html') %}
+
+{% block tab_content %}
+<div class="row">
+    <div class="col-xs-12">
+        {% for job in jobs %}
+        {{ job }}
+        {% endfor %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <a class="btn btn-success add-btn pull-right">
+            <span class="fa fa-plus-circle"></span>
+            {{ _('Add a job') }}
+        </a>
+    </div>
+</div>
+{% endblock %}

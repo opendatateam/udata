@@ -71,6 +71,8 @@ api = UDataApi(prefix='/api/1', decorators=[csrf.exempt],
     description='uData API', default='site', default_label='Site global namespace'
 )
 
+refs = api.namespace('references', 'References list namespace')
+
 
 @api.representation('application/json')
 def output_json(data, code, headers=None):
@@ -233,6 +235,7 @@ def init_app(app):
     import udata.core.organization.api
     import udata.core.suggest.api
     import udata.core.followers.api
+    import udata.core.jobs.api
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:

@@ -25,3 +25,9 @@ class SiteAdminViewTest(FrontTestCase):
         self.login(AdminFactory())
         response = self.get(url_for('admin.issues'))
         self.assert200(response)
+
+    def test_render_jobs_empty(self):
+        '''It should render the site jobs page'''
+        self.login(AdminFactory())
+        response = self.get(url_for('site.jobs'))
+        self.assert200(response)

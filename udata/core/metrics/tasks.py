@@ -5,7 +5,7 @@ from datetime import date, timedelta
 
 from celery.utils.log import get_task_logger
 
-from udata.tasks import celery
+from udata.tasks import celery, job
 
 log = get_task_logger(__name__)
 
@@ -22,7 +22,7 @@ def archive_metric(metric):
     metric.store()
 
 
-@celery.task(name='bump-metrics')
+@job('bump-metrics')
 def bump_metrics():
     from .models import Metrics
     today = date.today().isoformat()
