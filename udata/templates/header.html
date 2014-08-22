@@ -79,6 +79,7 @@
             </a>
         </li>
         {% endif %}
+        {% if g.lang_code %}
         <li class="dropdown language">{#
             <button class="btn btn-link dropdown-toggle" data-toggle="dropdown">
             </button> #}
@@ -97,6 +98,7 @@
                 {% endfor %}
             </ul>
         </li>
+        {% endif %}
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container -->
