@@ -26,7 +26,7 @@ include udata/static/bower/jquery/dist/jquery.js
 include udata/static/bower/jquery.dotdotdot/src/js/jquery.dotdotdot.js
 include udata/static/bower/jquery.microdata/index.js
 include udata/static/bower/jquery.validation/dist/jquery.validate.js
-include udata/static/bower/markdown/lib/markdown.js
+include udata/static/bower/marked/lib/marked.js
 include udata/static/bower/momentjs/min/moment-with-langs.js
 include udata/static/bower/require-handlebars-plugin/hbs.js
 recursive-include udata/static/bower/require-handlebars-plugin/hbs *.js
