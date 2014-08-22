@@ -77,6 +77,9 @@ class TestCase(BaseTestCase):
     def data(self, filename):
         return os.path.join(os.path.dirname(__file__), 'data', filename)
 
+    def assert201(self, response):
+        self.assertStatus(response, 201)
+
 
 class WebTestMixin(object):
     user = None

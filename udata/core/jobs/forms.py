@@ -7,6 +7,23 @@ from udata.i18n import lazy_gettext as _
 from .models import PeriodicTask
 
 
+class CrontabForm(ModelForm):
+    model_class = PeriodicTask.Crontab
+
+    minute = fields.StringField()
+    hour = fields.StringField()
+    day_of_week = fields.StringField()
+    day_of_month = fields.StringField()
+    month_of_year = fields.StringField()
+
+
+class IntervalForm(ModelForm):
+    model_class = PeriodicTask.Interval
+
+    every = fields.IntegerField(validators=[validators.NumberRange(min=0)])
+    period = fields.StringField()
+
+
 class PeriodicTaskForm(ModelForm):
     model_class = PeriodicTask
 
@@ -14,3 +31,10 @@ class PeriodicTaskForm(ModelForm):
     description = fields.StringField(_('Description'))
     task = fields.StringField(_('Tasks'))
 
+
+class CrontabTaskForm(PeriodicTaskForm):
+    crontab = fields.FormField(CrontabForm)
+
+
+class IntervalTaskForm(PeriodicTaskForm):
+    interval = fields.FormField(IntervalForm)

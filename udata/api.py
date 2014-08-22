@@ -57,7 +57,7 @@ class UDataApi(Api):
 
     def validate(self, form_cls, instance=None):
         '''Validate a form from the request and handle errors'''
-        form = form_cls(MultiDict(request.json), instance=instance, csrf_enabled=False)
+        form = form_cls.from_json(request.json, instance=instance, csrf_enabled=False)
         if not form.validate():
             self.abort(400, errors=form.errors)
         return form
@@ -71,7 +71,7 @@ api = UDataApi(prefix='/api/1', decorators=[csrf.exempt],
     description='uData API', default='site', default_label='Site global namespace'
 )
 
-refs = api.namespace('references', 'References list namespace')
+refs = api.namespace('references', 'References lists')
 
 
 @api.representation('application/json')

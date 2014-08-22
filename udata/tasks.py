@@ -4,9 +4,6 @@ from __future__ import unicode_literals
 import logging
 
 from celery import Celery, Task
-from celery.schedules import crontab
-
-from celerybeatmongo.models import PeriodicTask
 
 from udata.models import db
 
@@ -35,10 +32,6 @@ def schedulables():
     return [task for task in celery.tasks.values() if task.schedulable]
 
 
-# def periodic_tasks():
-#     PeriodicTask
-
-
 def init_app(app):
     celery.main = app.import_name
 
@@ -50,38 +43,7 @@ def init_app(app):
 
     celery.conf.update(app.config)
 
-    # celery.conf['CELERYBEAT_SCHEDULE'] = {
-    #     'bump-metrics-every-nights': {
-    #         'task': 'bump-metrics',
-    #         'schedule': crontab(hour=0, minute=0),
-    #     },
-    #     'purge-datasets-every-nights': {
-    #         'task': 'purge-datasets',
-    #         'schedule': crontab(hour=0, minute=0),
-    #     },
-    #     'purge-reuses-every-nights': {
-    #         'task': 'purge-reuses',
-    #         'schedule': crontab(hour=0, minute=0),
-    #     },
-    #     'purge-organizations-every-nights': {
-    #         'task': 'purge-organizations',
-    #         'schedule': crontab(hour=0, minute=0),
-    #     },
-    # }
     ContextTask.current_app = app
-
-    # TaskBase = celery.Task
-
-    # class ContextTask(TaskBase):
-    #     abstract = True
-    #     schedulable = None
-
-    #     # def __init__(self, schedulable)
-
-    #     def __call__(self, *args, **kwargs):
-    #         with app.app_context():
-    #             return TaskBase.__call__(self, *args, **kwargs)
-    # celery.Task = ContextTask
 
     # Load core tasks
     import udata.core.metrics.tasks

@@ -11,6 +11,7 @@ from udata.models import db, WithMetrics
 from udata.tasks import celery, job
 
 from udata.tests.api import APITestCase
+from udata.tests.factories import faker
 
 
 class FakeModel(db.Document, WithMetrics):
@@ -61,14 +62,139 @@ class JobsAPITest(APITestCase):
         self.assert200(response)
         self.assertIn('a-job', response.json)
 
+    def test_scheduled_jobs_list(self):
+        @job('a-job')
+        def test_job():
+            pass
+
+        for i in range(6):
+            params = {
+                'name': faker.name(),
+                'description': faker.sentence(),
+                'task': 'a-job'
+            }
+            if i % 2:
+                params['crontab'] = PeriodicTask.Crontab(minutes=i)
+            else:
+                params['interval'] = PeriodicTask.Interval(every=i, period='minutes')
+            PeriodicTask.objects.create(**params)
+
+        response = self.get(url_for('api.jobs'))
+        self.assert200(response)
+
     def test_create_crontab_job(self):
-        pass
+        @job('a-job')
+        def test_job():
+            pass
+
+        data = {
+            'name': 'A crontab job',
+            'description': 'A simple crontab job doing nothing',
+            'task': 'a-job',
+            'crontab': {
+                'minute': '0',
+                'hour': '0'
+            }
+        }
+
+        response = self.post(url_for('api.jobs'), data)
+        self.assert201(response)
+        self.assertEqual(response.json['name'], data['name'])
+        self.assertEqual(response.json['description'], data['description'])
+        self.assertEqual(response.json['task'], data['task'])
+        self.assertEqual(response.json['crontab'], {
+            'minute': '0',
+            'hour': '0',
+            'day_of_week': None,
+            'day_of_month': None,
+            'month_of_year': None,
+        })
 
     def test_create_interval_job(self):
-        pass
+        @job('a-job')
+        def test_job():
+            pass
+
+        data = {
+            'name': 'An interval job',
+            'description': 'A simple interval job doing nothing',
+            'task': 'a-job',
+            'interval': {
+                'every': 5,
+                'period': 'minutes'
+            }
+        }
+
+        response = self.post(url_for('api.jobs'), data)
+        self.assert201(response)
+        self.assertEqual(response.json['name'], data['name'])
+        self.assertEqual(response.json['description'], data['description'])
+        self.assertEqual(response.json['task'], data['task'])
+        self.assertEqual(response.json['interval'], data['interval'])
+
+    def test_fail_on_create_with_both_crontab_and_interval(self):
+        @job('a-job')
+        def test_job():
+            pass
+
+        data = {
+            'name': 'A mixed job',
+            'description': 'A simple crontab job doing nothing',
+            'task': 'a-job',
+            'crontab': {
+                'minute': '0',
+                'hour': '0'
+            },
+            'interval': {
+                'every': 5,
+                'period': 'minutes'
+            }
+        }
+
+        response = self.post(url_for('api.jobs'), data)
+        self.assertStatus(response, 400)
 
     def test_create_manual_job(self):
         pass
 
-    def test_list_jobs(self):
-        pass
+    def test_get_job(self):
+        @job('a-job')
+        def test_job():
+            pass
+
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            description=faker.sentence(),
+            task='a-job',
+            crontab=PeriodicTask.Crontab(minutes=5)
+        )
+
+        response = self.get(url_for('api.job', name=task.name))
+        self.assert200(response)
+        self.assertEqual(response.json['name'], task.name)
+        self.assertEqual(response.json['description'], task.description)
+        self.assertEqual(response.json['task'], task.task)
+
+    def test_update_job(self):
+        @job('a-job')
+        def test_job():
+            pass
+
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            description=faker.sentence(),
+            task='a-job',
+            crontab=PeriodicTask.Crontab(minutes=5)
+        )
+
+        response = self.put(url_for('api.job', name=task.name), {
+            'name': task.name,
+            'description': 'New description',
+            'task': task.task,
+            'crontab': task.crontab._data
+        })
+        self.assert200(response)
+
+        self.assertEqual(response.json['name'], task.name)
+        self.assertEqual(response.json['task'], task.task)
+        self.assertEqual(response.json['description'], 'New description')
