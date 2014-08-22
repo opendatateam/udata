@@ -24,6 +24,10 @@
     <link href="{{ ASSET_URL }}" rel="stylesheet">
     {% endassets %}
 
+    <link rel="theme-static-root" href="{{ theme_static('') }}" />
+    <link rel="static-root" href="{{ static('') }}" />
+    <link rel="api-root" href="{{ url_for('api.root') }}" />
+
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       {% assets "iecompat" %}

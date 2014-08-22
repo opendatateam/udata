@@ -1,26 +1,25 @@
-# Translations template for udata.
+# French translations for udata.
 # Copyright (C) 2014 ORGANIZATION
 # This file is distributed under the same license as the udata project.
-# 
+#
 # Translators:
-# Axel Haustant, 2014
 # Axel Haustant, 2014
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2013
 # noirbizarre, 2014
 msgid ""
 msgstr ""
-"Project-Id-Version: uData\n"
+"Project-Id-Version:  uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-20 00:39+0200\n"
+"POT-Creation-Date: 2014-08-22 11:13+0200\n"
 "PO-Revision-Date: 2014-08-19 22:40+0000\n"
 "Last-Translator: Axel Haustant\n"
-"Language-Team: French (http://www.transifex.com/projects/p/udata/language/fr/)\n"
+"Language-Team: French "
+"(http://www.transifex.com/projects/p/udata/language/fr/)\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
-"Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: udata/core/dataset/forms.py:15 udata/core/dataset/forms.py:37
 #: udata/core/reuse/forms.py:14 udata/templates/dataset/search-panel.html:6
@@ -74,8 +73,7 @@ msgstr "Publier en tant que"
 msgid "URL"
 msgstr "URL"
 
-#: udata/core/dataset/forms.py:40
-#: udata/templates/dataset/search-labels.html:16
+#: udata/core/dataset/forms.py:40 udata/templates/dataset/search-labels.html:16
 msgid "Format"
 msgstr "Format"
 
@@ -84,12 +82,12 @@ msgid "Checksum"
 msgstr "Somme de contrôle"
 
 #: udata/core/dataset/forms.py:45 udata/core/organization/forms.py:34
-#: udata/templates/macros/forms.html:211 udata/templates/macros/forms.html:220
+#: udata/templates/macros/forms.html:217 udata/templates/macros/forms.html:226
 msgid "Key"
 msgstr "Clé"
 
 #: udata/core/dataset/forms.py:46 udata/core/organization/forms.py:35
-#: udata/templates/macros/forms.html:212 udata/templates/macros/forms.html:225
+#: udata/templates/macros/forms.html:218 udata/templates/macros/forms.html:231
 msgid "Value"
 msgstr "Valeur"
 
@@ -100,8 +98,7 @@ msgstr "Ancienne clé"
 #: udata/core/dataset/metrics.py:19 udata/core/organization/metrics.py:33
 #: udata/core/site/metrics.py:44 udata/core/user/metrics.py:39
 #: udata/templates/header.html:32 udata/templates/search.html:28
-#: udata/templates/dataset/card.html:82
-#: udata/templates/dataset/display.html:70
+#: udata/templates/dataset/card.html:82 udata/templates/dataset/display.html:70
 #: udata/templates/dataset/search-labels.html:17
 #: udata/templates/dataset/search-panel.html:9
 #: udata/templates/dataset/search-panel.html:22
@@ -112,8 +109,8 @@ msgstr "Ancienne clé"
 #: udata/templates/reuse/create.html:4
 #: udata/templates/reuse/display_base.html:17
 #: udata/templates/reuse/edit_base.html:4 udata/templates/reuse/list.html:7
-#: udata/templates/topic/display.html:25
-#: udata/templates/user/following.html:16 udata/templates/user/reuses.html:8
+#: udata/templates/topic/display.html:25 udata/templates/user/following.html:16
+#: udata/templates/user/reuses.html:8
 msgid "Reuses"
 msgstr "Réutilisations"
 
@@ -295,8 +292,7 @@ msgstr "URL de l'image"
 #: udata/templates/dataset/create.html:4
 #: udata/templates/dataset/display.html:16
 #: udata/templates/dataset/edit_base.html:4
-#: udata/templates/dataset/followers.html:4
-#: udata/templates/dataset/list.html:6
+#: udata/templates/dataset/followers.html:4 udata/templates/dataset/list.html:6
 #: udata/templates/dataset/resource/create.html:4
 #: udata/templates/dataset/resource/display.html:4
 #: udata/templates/dataset/resource/edit.html:4
@@ -384,14 +380,13 @@ msgstr "Visualisation"
 msgid "Last reuses"
 msgstr "Dernières réutilisations"
 
-#: udata/core/reuse/views.py:125
+#: udata/core/reuse/views.py:134
 #, python-format
 msgid "The dataset \"%(title)s\" has been added to the reuse"
 msgstr "Le jeux de données %(title)s a été ajouté à la réutilisation"
 
 #: udata/core/site/metrics.py:72 udata/templates/user/base.html:5
-#: udata/templates/user/edit_base.html:5
-#: udata/templates/user/following.html:18
+#: udata/templates/user/edit_base.html:5 udata/templates/user/following.html:18
 msgid "Users"
 msgstr "Utilisateurs"
 
@@ -404,8 +399,8 @@ msgstr "Utilisateurs"
 #: udata/templates/organization/edit_base.html:7
 #: udata/templates/organization/followers.html:5
 #: udata/templates/organization/list.html:6
-#: udata/templates/reuse/search-panel.html:12
-#: udata/templates/user/base.html:81 udata/templates/user/following.html:17
+#: udata/templates/reuse/search-panel.html:12 udata/templates/user/base.html:81
+#: udata/templates/user/following.html:17
 msgid "Organizations"
 msgstr "Organisations"
 
@@ -477,7 +472,9 @@ msgstr "Le tag \"%(tag)s\" doit avoir entre %(min)d et %(max)d caracters."
 #: udata/forms/fields.py:168
 #, python-format
 msgid "Tag \"%s\" must be alphanumeric characters or symbols: -_."
-msgstr "Le tag \"%s\" doit contenir uniquement des caractères alphanumériques or les symboles: -_."
+msgstr ""
+"Le tag \"%s\" doit contenir uniquement des caractères alphanumériques or "
+"les symboles: -_."
 
 #: udata/forms/validators.py:43
 #, python-format
@@ -545,7 +542,9 @@ msgstr "De façon à pouvoir exécuter des opérations d'écriture,"
 #: udata/templates/apidoc.html:34
 #, python-format
 msgid "you first need to obtain an %(apikey)s in your profile settings."
-msgstr "vous devez commencer par obtenir une %(apikey)s dans les paramètres de votre profil."
+msgstr ""
+"vous devez commencer par obtenir une %(apikey)s dans les paramètres de "
+"votre profil."
 
 #: udata/templates/apidoc.html:38
 msgid "API Key"
@@ -555,13 +554,17 @@ msgstr "Clé d'API"
 msgid ""
 "you first need to authenticate and obtain an API Key in your profile "
 "settings."
-msgstr "vous devez d'abord être authentifié et obtenir une clé d'API dans les paramètres de votre profil."
+msgstr ""
+"vous devez d'abord être authentifié et obtenir une clé d'API dans les "
+"paramètres de votre profil."
 
 #: udata/templates/apidoc.html:44
 msgid ""
-"This key should be provided on each call in the <code>X-API-KEY</code> HTTP "
-"header."
-msgstr "Cette clé doit être fourni à chaque appel dans l'entête HTTP <code>X-API-KEY</code>."
+"This key should be provided on each call in the <code>X-API-KEY</code> "
+"HTTP header."
+msgstr ""
+"Cette clé doit être fourni à chaque appel dans l'entête HTTP <code>X-API-"
+"KEY</code>."
 
 #: udata/templates/apidoc.html:50
 msgid "Authorizations"
@@ -575,7 +578,9 @@ msgstr "Les appels d'API sont soumis aux même permissions que l'interface web."
 msgid ""
 "By example, you need to be part of the organization to modify one of its "
 "datasets."
-msgstr "Par exemple, vous devez être membre de l'organisation pour modifier l'un de ses jeux de données."
+msgstr ""
+"Par exemple, vous devez être membre de l'organisation pour modifier l'un "
+"de ses jeux de données."
 
 #: udata/templates/apidoc.html:61
 msgid "Pagination"
@@ -584,17 +589,27 @@ msgstr "Pagination"
 #: udata/templates/apidoc.html:65
 msgid ""
 "Some method are paginated and always follow the same pattern.\n"
-"                The object list is wrapped in a <code>Page</code> object.\n"
+"                The object list is wrapped in a <code>Page</code> object."
+"\n"
 "                "
-msgstr "Certaines méthodes sont paginées et suivent le même modèle de pagination. La liste d'objets est encapsulée dans un objet <code>Page</code>."
+msgstr ""
+"Certaines méthodes sont paginées et suivent le même modèle de pagination."
+" La liste d'objets est encapsulée dans un objet <code>Page</code>."
 
 #: udata/templates/apidoc.html:69
 msgid ""
 "You don't have to compute yourself the previous and next pages\n"
 "                because the URLs are available in the response under the\n"
-"                <code>previous_page</code> and <code>next_page</code> attributes.\n"
-"                They will be set to <code>null</code> if there is no previous and/or next page."
-msgstr "Vous n'avez pas à calculer vous-même les pages précédentes et suivantes\npuisque les URL sont disponible dans la réponse\ndans les attributs <code>previous_page</code> et <code>next_page</code>.\nIls seront définis à <code>null</code> si il n'y a pas de page précédente et/ou suivante."
+"                <code>previous_page</code> and <code>next_page</code> "
+"attributes.\n"
+"                They will be set to <code>null</code> if there is no "
+"previous and/or next page."
+msgstr ""
+"Vous n'avez pas à calculer vous-même les pages précédentes et suivantes\n"
+"puisque les URL sont disponible dans la réponse\n"
+"dans les attributs <code>previous_page</code> et <code>next_page</code>.\n"
+"Ils seront définis à <code>null</code> si il n'y a pas de page précédente"
+" et/ou suivante."
 
 #: udata/templates/apidoc.html:74
 msgid "Example"
@@ -764,10 +779,8 @@ msgstr "Couverture territoriale"
 
 #: udata/templates/dataset/card.html:90
 #: udata/templates/dataset/search-panel.html:10
-#: udata/templates/organization/card.html:53
-#: udata/templates/reuse/card.html:39
-#: udata/templates/reuse/search-panel.html:10
-#: udata/templates/user/card.html:39
+#: udata/templates/organization/card.html:53 udata/templates/reuse/card.html:39
+#: udata/templates/reuse/search-panel.html:10 udata/templates/user/card.html:39
 msgid "Stars"
 msgstr "Favoris"
 
@@ -790,8 +803,7 @@ msgstr "Créer"
 #: udata/templates/organization/create.html:10
 #: udata/templates/organization/edit.html:15
 #: udata/templates/reuse/create.html:10 udata/templates/reuse/edit.html:14
-#: udata/templates/user/edit.html:13
-#: udata/templates/user/edit_settings.html:13
+#: udata/templates/user/edit.html:13 udata/templates/user/edit_settings.html:13
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -806,8 +818,7 @@ msgstr "jeu de données"
 #: udata/templates/organization/display_base.html:26
 #: udata/templates/organization/followers.html:15
 #: udata/templates/reuse/display_base.html:26
-#: udata/templates/reuse/display_base.html:88
-#: udata/templates/user/base.html:14
+#: udata/templates/reuse/display_base.html:88 udata/templates/user/base.html:14
 msgid "Edit"
 msgstr "Éditer"
 
@@ -876,23 +887,21 @@ msgstr "Informations"
 
 #: udata/templates/dataset/edit.html:13
 #: udata/templates/dataset/resource/edit.html:10
-#: udata/templates/organization/edit.html:13
-#: udata/templates/reuse/edit.html:13 udata/templates/user/edit.html:12
-#: udata/templates/user/edit_settings.html:12
+#: udata/templates/organization/edit.html:13 udata/templates/reuse/edit.html:13
+#: udata/templates/user/edit.html:12 udata/templates/user/edit_settings.html:12
 msgid "Save"
 msgstr "Enregistrer"
 
 #: udata/templates/dataset/edit.html:16 udata/templates/dataset/edit.html:18
 #: udata/templates/organization/edit.html:17
-#: udata/templates/organization/edit.html:19
-#: udata/templates/reuse/edit.html:16 udata/templates/reuse/edit.html:18
+#: udata/templates/organization/edit.html:19 udata/templates/reuse/edit.html:16
+#: udata/templates/reuse/edit.html:18
 msgid "Delete"
 msgstr "Supprimer"
 
 #: udata/templates/dataset/edit_base.html:6
 #: udata/templates/organization/edit_base.html:9
-#: udata/templates/reuse/edit_base.html:6
-#: udata/templates/user/edit_base.html:7
+#: udata/templates/reuse/edit_base.html:6 udata/templates/user/edit_base.html:7
 msgid "Edition"
 msgstr "Édition"
 
@@ -922,22 +931,20 @@ msgstr[1] "%(num)d abonnés"
 msgid "No Issues"
 msgstr "Aucune anomalie"
 
-#: udata/templates/dataset/issues.html:10
-#: udata/templates/macros/issues.html:15
+#: udata/templates/dataset/issues.html:10 udata/templates/macros/issues.html:15
 #: udata/templates/organization/issues.html:10
 #: udata/templates/reuse/issues.html:10
 msgid "Open issues"
 msgstr "Anomalies ouvertes"
 
-#: udata/templates/dataset/issues.html:12
-#: udata/templates/macros/issues.html:18
+#: udata/templates/dataset/issues.html:12 udata/templates/macros/issues.html:18
 #: udata/templates/organization/issues.html:12
 #: udata/templates/reuse/issues.html:12
 msgid "Closed issues"
 msgstr "Anomalies fermées"
 
-#: udata/templates/dataset/list.html:7
-#: udata/templates/organization/list.html:7 udata/templates/reuse/list.html:8
+#: udata/templates/dataset/list.html:7 udata/templates/organization/list.html:7
+#: udata/templates/reuse/list.html:8
 #, python-format
 msgid "%(start)s to %(end)s on %(total)s"
 msgstr "%(start)s à %(end)s sur %(total)s"
@@ -1011,7 +1018,10 @@ msgid ""
 "The server encountered an internal error and was unable to complete your "
 "request. Either the server is overloaded or there is an error in the "
 "application."
-msgstr "Le serveur a rencontré une erreur interne et n'a pas été capable de compléter votre requête. Soit le serveur est surchargé ou il y a une erreur dans l'application."
+msgstr ""
+"Le serveur a rencontré une erreur interne et n'a pas été capable de "
+"compléter votre requête. Soit le serveur est surchargé ou il y a une "
+"erreur dans l'application."
 
 #: udata/templates/errors/base.html:11
 #, python-format
@@ -1023,44 +1033,44 @@ msgstr "Erreur %(code)s"
 msgid "Following since %(date)s"
 msgstr "Abonné depuis %(date)s"
 
-#: udata/templates/macros/forms.html:153 udata/templates/macros/forms.html:249
+#: udata/templates/macros/forms.html:159 udata/templates/macros/forms.html:255
 msgid "Add"
 msgstr "Ajouter"
 
-#: udata/templates/macros/forms.html:157 udata/templates/macros/forms.html:231
+#: udata/templates/macros/forms.html:163 udata/templates/macros/forms.html:237
 #: udata/templates/organization/edit_members.html:39
 msgid "Remove"
 msgstr "Supprimer"
 
-#: udata/templates/macros/forms.html:176
+#: udata/templates/macros/forms.html:182
 msgid "required fields"
 msgstr "champs requis"
 
-#: udata/templates/macros/forms.html:187
+#: udata/templates/macros/forms.html:193
 msgid "Delete resource"
 msgstr "Suppression de la ressource"
 
-#: udata/templates/macros/forms.html:188
+#: udata/templates/macros/forms.html:194
 msgid "You can remove this uploaded file"
 msgstr "Vous pouvez supprimer le fichier distant"
 
-#: udata/templates/macros/forms.html:192
+#: udata/templates/macros/forms.html:198
 msgid "Upload a resource"
 msgstr "Envoyer une ressource"
 
-#: udata/templates/macros/forms.html:193
+#: udata/templates/macros/forms.html:199
 msgid "If the resource doesn't exists online you can upload it"
 msgstr "Si la ressource n'est pas disponible en ligne, vous pouvez l'uploader"
 
-#: udata/templates/macros/forms.html:195
+#: udata/templates/macros/forms.html:201
 msgid "Upload"
 msgstr "Envoyer"
 
-#: udata/templates/macros/forms.html:242
+#: udata/templates/macros/forms.html:248
 msgid "New key"
 msgstr "Nouvelle clé"
 
-#: udata/templates/macros/forms.html:245
+#: udata/templates/macros/forms.html:251
 msgid "New value"
 msgstr "Nouvelle valeur"
 
@@ -1379,7 +1389,9 @@ msgstr "réutilisation"
 
 #: udata/templates/reuse/display_base.html:64
 msgid "This reuse is private and will not be visible by other users"
-msgstr "Cette réutilisation est privée et sera invisible par les autres utilisateurs"
+msgstr ""
+"Cette réutilisation est privée et sera invisible par les autres "
+"utilisateurs"
 
 #: udata/templates/reuse/display_base.html:69
 #: udata/templates/reuse/display_base.html:71
@@ -1387,9 +1399,10 @@ msgid "Deleted"
 msgstr "Supprimé"
 
 #: udata/templates/reuse/display_base.html:70
-msgid ""
-"This reuse has been deleted. This will be permanent in the next 24 hours"
-msgstr "Cette réutilisation a été supprimée. Cela sera permanent dans les prochaines 24 heures"
+msgid "This reuse has been deleted. This will be permanent in the next 24 hours"
+msgstr ""
+"Cette réutilisation a été supprimée. Cela sera permanent dans les "
+"prochaines 24 heures"
 
 #: udata/templates/reuse/display_base.html:195
 msgid "I'll be informed about this user news"
@@ -1491,3 +1504,4 @@ msgstr[1] "Suis %(num)d utilisateurs"
 #, python-format
 msgid "%(user)s is not following anyone"
 msgstr "%(user)s ne suis personne"
+

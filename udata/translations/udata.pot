@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-20 00:39+0200\n"
+"POT-Creation-Date: 2014-08-22 11:13+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -78,12 +78,12 @@ msgid "Checksum"
 msgstr ""
 
 #: udata/core/dataset/forms.py:45 udata/core/organization/forms.py:34
-#: udata/templates/macros/forms.html:211 udata/templates/macros/forms.html:220
+#: udata/templates/macros/forms.html:217 udata/templates/macros/forms.html:226
 msgid "Key"
 msgstr ""
 
 #: udata/core/dataset/forms.py:46 udata/core/organization/forms.py:35
-#: udata/templates/macros/forms.html:212 udata/templates/macros/forms.html:225
+#: udata/templates/macros/forms.html:218 udata/templates/macros/forms.html:231
 msgid "Value"
 msgstr ""
 
@@ -370,7 +370,7 @@ msgstr ""
 msgid "Last reuses"
 msgstr ""
 
-#: udata/core/reuse/views.py:125
+#: udata/core/reuse/views.py:134
 #, python-format
 msgid "The dataset \"%(title)s\" has been added to the reuse"
 msgstr ""
@@ -988,44 +988,44 @@ msgstr ""
 msgid "Following since %(date)s"
 msgstr ""
 
-#: udata/templates/macros/forms.html:153 udata/templates/macros/forms.html:249
+#: udata/templates/macros/forms.html:159 udata/templates/macros/forms.html:255
 msgid "Add"
 msgstr ""
 
-#: udata/templates/macros/forms.html:157 udata/templates/macros/forms.html:231
+#: udata/templates/macros/forms.html:163 udata/templates/macros/forms.html:237
 #: udata/templates/organization/edit_members.html:39
 msgid "Remove"
 msgstr ""
 
-#: udata/templates/macros/forms.html:176
+#: udata/templates/macros/forms.html:182
 msgid "required fields"
 msgstr ""
 
-#: udata/templates/macros/forms.html:187
+#: udata/templates/macros/forms.html:193
 msgid "Delete resource"
 msgstr ""
 
-#: udata/templates/macros/forms.html:188
+#: udata/templates/macros/forms.html:194
 msgid "You can remove this uploaded file"
 msgstr ""
 
-#: udata/templates/macros/forms.html:192
+#: udata/templates/macros/forms.html:198
 msgid "Upload a resource"
 msgstr ""
 
-#: udata/templates/macros/forms.html:193
+#: udata/templates/macros/forms.html:199
 msgid "If the resource doesn't exists online you can upload it"
 msgstr ""
 
-#: udata/templates/macros/forms.html:195
+#: udata/templates/macros/forms.html:201
 msgid "Upload"
 msgstr ""
 
-#: udata/templates/macros/forms.html:242
+#: udata/templates/macros/forms.html:248
 msgid "New key"
 msgstr ""
 
-#: udata/templates/macros/forms.html:245
+#: udata/templates/macros/forms.html:251
 msgid "New value"
 msgstr ""
 

@@ -2,10 +2,10 @@
     {{#if organization }}
         <a class="card-logo" href="{{ page }}">
             <img alt="{{ organization.name }}"
-                src="{{ organization.image_url }}">
+                src="{{placeholder organization.image_url 'organization' }}">
         </a>
         {{#if organization.public_service }}
-        <img src="{{! theme_static('img/certified-stamp.png') }}" alt="certified"
+        <img src="{{theme 'img/certified-stamp.png' }}" alt="certified"
             class="certified" rel="popover"
             data-title="{{_ 'Certified public service' }}"
             data-content="{{_ 'The identity of this public service public is certified by Etalab' }}"
@@ -13,7 +13,7 @@
         {{/if}}
     {{else}}
     <div class="card-logo">
-        <img src="{{! ''|placeholder('organization') }}">
+        <img src="{{placeholder '' 'organization' }}">
     </div>
     {{/if}}
     <div class="card-body ellipsis-dot">
