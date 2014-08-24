@@ -86,6 +86,7 @@ from udata.core.reuse.models import *
 from udata.core.activity.models import *
 from udata.core.topic.models import *
 from udata.core.post.models import *
+from udata.core.jobs.models import *
 
 
 def init_app(app):

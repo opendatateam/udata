@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from flask import request
 
 from udata.api import api, API, refs, fields
+from udata.auth import admin_permission
 from udata.tasks import schedulables
 
 from .forms import CrontabTaskForm, IntervalTaskForm
@@ -40,6 +41,7 @@ class JobsAPI(API):
         '''List all scheduled jobs'''
         return list(PeriodicTask.objects)
 
+    @api.secure(admin_permission)
     @api.marshal_with(job_fields)
     def post(self):
         '''Create a new scheduled job'''
@@ -65,6 +67,7 @@ class JobAPI(API):
         '''Fetch a single scheduled job'''
         return self.get_or_404(name)
 
+    @api.secure('admin')
     @api.marshal_with(job_fields)
     def put(self, name):
         '''Update a single scheduled job'''

@@ -1,5 +1,4 @@
-<form class="form-horizontal validation" method="post" action=".">
-    <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
+<form id="job-form" class="form-horizontal validation">
     <div class="form-group">
         <label for="name-id"
             class="col-sm-2 control-label required">
@@ -36,4 +35,94 @@
             <textarea id="description-id" name="description" class="form-control" rows="3"></textarea>
         </div>
     </div>
+
+    <fieldset>
+        <legend>
+            <input type="radio" name="type" value="crontab">
+            {{_ "Crontab" }}
+            <span class="form-help" data-content="{{_ "Use cron expressions for each field"}}"></span>
+        </legend>
+        <div class="fieldset-collapse collapse in">
+            <div class="form-group">
+                <label for="crontab-minute"
+                    class="col-sm-2 control-label required">
+                    {{_ 'Minute' }}
+                </label>
+                <div class="field-wrapper col-sm-10">
+                    <input type="text" id="crontab-minute" name="crontab-minute" class="form-control" value="*"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="crontab-hour"
+                    class="col-sm-2 control-label required">
+                    {{_ 'Hour' }}
+                </label>
+                <div class="field-wrapper col-sm-10">
+                    <input type="text" id="crontab-hour" name="crontab-hour" class="form-control" value="*"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="crontab-day_of_week"
+                    class="col-sm-2 control-label required">
+                    {{_ 'Day of week' }}
+                </label>
+                <div class="field-wrapper col-sm-10">
+                    <input type="text" id="crontab-day_of_week" name="crontab-day_of_week" class="form-control"  value="*"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="crontab-day_of_month"
+                    class="col-sm-2 control-label required">
+                    {{_ 'Day of month' }}
+                </label>
+                <div class="field-wrapper col-sm-10">
+                    <input type="text" id="crontab-day_of_month" name="crontab-day_of_month" class="form-control"  value="*"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="crontab-month_of_year"
+                    class="col-sm-2 control-label required">
+                    {{_ 'Month of year' }}
+                </label>
+                <div class="field-wrapper col-sm-10">
+                    <input type="text" id="crontab-month_of_year" name="crontab-month_of_year" class="form-control"  value="*"/>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>
+            <input type="radio" name="type" value="interval">
+            {{_ "Interval" }}
+        </legend>
+        <div class="fieldset-collapse collapse">
+            <div class="form-group">
+                <label for="interval-every-id"
+                    class="col-sm-2 control-label required">
+                    {{_ 'Every' }}
+                    <span class="form-help" data-content="{{_ "A positive integer"}}"></span>
+                </label>
+                <div class="field-wrapper colvalue="*"-sm-10">
+                    <input type="text" id="interval-every-id" name="every" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="interval-period-id"
+                    class="col-sm-2 control-label required">
+                    {{_ 'Period' }}
+                    <span class="form-help" data-content="The perivalue="*"od type"></span>
+                </label>
+                <div class="field-wrapper col-sm-10">
+                    <select id="interval-period-id" name="period" class="form-control">
+                        {{#each periods}}
+                        <option value="{{@key}}">{{this}}</option>
+                        {{/each}}
+                    </select>
+        lvalue="*"        </div>
+            </div>
+lvalue="*"        </div>
+    </fieldselvalue="*"t>
+
 </form>

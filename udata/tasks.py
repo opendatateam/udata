@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import logging
 
 from celery import Celery, Task
+from celerybeatmongo.schedulers import MongoScheduler
 
 from udata.models import db
 
@@ -20,12 +21,28 @@ class ContextTask(Task):
             return super(ContextTask, self).__call__(*args, **kwargs)
 
 
+class Scheduler(MongoScheduler):
+    def apply_async(self, entry, **kwargs):
+        '''A MongoScheduler storing the last task_id'''
+        result = super(Scheduler, self).apply_async(entry, **kwargs)
+        entry._task.last_id = result.id
+        return result
+
+
 celery = Celery(task_cls=ContextTask)
 
 
 def job(name, **kwargs):
     '''A shortcut decorator for declaring jobs'''
     return celery.task(name=name, schedulable=True, **kwargs)
+
+
+@job('HelloWorld')
+def helloworld():
+    log.debug('HelloWorld')
+    log.info('HelloWorld')
+    log.warning('HelloWorld')
+    log.error('HelloWorld')
 
 
 def schedulables():

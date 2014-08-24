@@ -87,6 +87,5 @@ class SiteJobsView(SiteAdminView, DetailView):
 
     def get_context(self):
         context = super(SiteJobsView, self).get_context()
-        context['schedulables'] = tasks.schedulables()
         context['jobs'] = tasks.PeriodicTask.objects
         return context

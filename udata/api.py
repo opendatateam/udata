@@ -9,12 +9,10 @@ from functools import wraps
 from flask import request, url_for, json, make_response, redirect
 from flask.ext.restplus import Api, Resource, marshal, fields
 
-from werkzeug.datastructures import MultiDict
-
 from udata import search
 from udata.i18n import I18nBlueprint
-from udata.auth import current_user, login_user
-from udata.frontend import csrf, render
+from udata.auth import current_user, login_user, Permission, RoleNeed
+from udata.frontend import render
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
 
@@ -29,13 +27,43 @@ HEADER_API_KEY = 'X-API-KEY'
 
 class UDataApi(Api):
     def __init__(self, **kwargs):
+        kwargs['decorators'] = (kwargs.pop('decorators', []) or []) + [self.authentify]
         super(UDataApi, self).__init__(**kwargs)
         self.authorizations = {'apikey': {'type': 'apiKey', 'passAs': 'header', 'keyname': HEADER_API_KEY}}
 
     def secure(self, func):
+        '''Enforce authentication on a given method/verb and optionnaly check a given permission'''
+        if isinstance(func, basestring):
+            return self._apply_permission(Permission(RoleNeed(func)))
+        elif isinstance(func, Permission):
+            return self._apply_permission(func)
+        else:
+            return self._apply_secure(func)
+
+    def _apply_permission(self, permission):
+        def wrapper(func):
+            return self._apply_secure(func, permission)
+        return wrapper
+
+    def _apply_secure(self, func, permission=None):
         '''Enforce authentication on a given method/verb'''
         self._handle_api_doc(func, {'authorizations': 'apikey'})
 
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if not current_user.is_authenticated():
+                self.abort(401)
+
+            if permission is not None:
+                with permission.require(403):
+                    return func(*args, **kwargs)
+            else:
+                return func(*args, **kwargs)
+
+        return wrapper
+
+    def authentify(self, func):
+        '''Authentify the user if credentials are given'''
         @wraps(func)
         def wrapper(*args, **kwargs):
             if current_user.is_authenticated():
@@ -43,7 +71,7 @@ class UDataApi(Api):
 
             apikey = request.headers.get(HEADER_API_KEY)
             if not apikey:
-                self.abort(401)
+                return func(*args, **kwargs)
             try:
                 user = User.objects.get(apikey=apikey)
             except User.DoesNotExist:
@@ -51,8 +79,8 @@ class UDataApi(Api):
 
             if not login_user(user, False):
                 self.abort(401, 'Inactive user')
-            return func(*args, **kwargs)
 
+            return func(*args, **kwargs)
         return wrapper
 
     def validate(self, form_cls, instance=None):

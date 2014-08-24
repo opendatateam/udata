@@ -24,7 +24,7 @@ class Defaults(object):
     CELERY_RESULT_BACKEND = 'redis://localhost:6379'
     CELERY_ACCEPT_CONTENT = ['pickle', 'json']
     CELERYD_HIJACK_ROOT_LOGGER = False
-    CELERYBEAT_SCHEDULER = 'celerybeatmongo.schedulers.MongoScheduler'
+    CELERYBEAT_SCHEDULER = 'udata.tasks.Scheduler'
     CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
     # CELERY_TASK_SERIALIZER = 'pickle'
     # CELERYD_POOL = 'gevent'

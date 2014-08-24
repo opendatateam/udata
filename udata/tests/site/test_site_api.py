@@ -11,7 +11,7 @@ from udata.models import db, WithMetrics
 from udata.tasks import celery, job
 
 from udata.tests.api import APITestCase
-from udata.tests.factories import faker
+from udata.tests.factories import faker, AdminFactory
 
 
 class FakeModel(db.Document, WithMetrics):
@@ -82,6 +82,21 @@ class JobsAPITest(APITestCase):
         response = self.get(url_for('api.jobs'))
         self.assert200(response)
 
+    def test_create_job_need_admin(self):
+        @job('a-job')
+        def test_job():
+            pass
+
+        data = {
+            'name': 'A crontab job',
+            'description': 'A simple crontab job doing nothing',
+            'task': 'a-job',
+        }
+
+        self.login()
+        response = self.post(url_for('api.jobs'), data)
+        self.assert403(response)
+
     def test_create_crontab_job(self):
         @job('a-job')
         def test_job():
@@ -97,17 +112,19 @@ class JobsAPITest(APITestCase):
             }
         }
 
+        self.login(AdminFactory())
         response = self.post(url_for('api.jobs'), data)
         self.assert201(response)
+
         self.assertEqual(response.json['name'], data['name'])
         self.assertEqual(response.json['description'], data['description'])
         self.assertEqual(response.json['task'], data['task'])
         self.assertEqual(response.json['crontab'], {
             'minute': '0',
             'hour': '0',
-            'day_of_week': None,
-            'day_of_month': None,
-            'month_of_year': None,
+            'day_of_week': '*',
+            'day_of_month': '*',
+            'month_of_year': '*',
         })
 
     def test_create_interval_job(self):
@@ -125,8 +142,10 @@ class JobsAPITest(APITestCase):
             }
         }
 
+        self.login(AdminFactory())
         response = self.post(url_for('api.jobs'), data)
         self.assert201(response)
+
         self.assertEqual(response.json['name'], data['name'])
         self.assertEqual(response.json['description'], data['description'])
         self.assertEqual(response.json['task'], data['task'])
@@ -151,6 +170,7 @@ class JobsAPITest(APITestCase):
             }
         }
 
+        self.login(AdminFactory())
         response = self.post(url_for('api.jobs'), data)
         self.assertStatus(response, 400)
 
@@ -175,6 +195,27 @@ class JobsAPITest(APITestCase):
         self.assertEqual(response.json['description'], task.description)
         self.assertEqual(response.json['task'], task.task)
 
+    def test_update_job_need_admin(self):
+        @job('a-job')
+        def test_job():
+            pass
+
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            description=faker.sentence(),
+            task='a-job',
+            crontab=PeriodicTask.Crontab(minutes=5)
+        )
+
+        self.login()
+        response = self.put(url_for('api.job', name=task.name), {
+            'name': task.name,
+            'description': 'New description',
+            'task': task.task,
+            'crontab': task.crontab._data
+        })
+        self.assert403(response)
+
     def test_update_job(self):
         @job('a-job')
         def test_job():
@@ -187,6 +228,7 @@ class JobsAPITest(APITestCase):
             crontab=PeriodicTask.Crontab(minutes=5)
         )
 
+        self.login(AdminFactory())
         response = self.put(url_for('api.job', name=task.name), {
             'name': task.name,
             'description': 'New description',

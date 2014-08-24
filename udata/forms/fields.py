@@ -81,10 +81,6 @@ class IntegerField(FieldHelper, fields.IntegerField):
     pass
 
 
-class FormField(FieldHelper, fields.FormField):
-    pass
-
-
 class BooleanField(FieldHelper, fields.BooleanField):
     def __init__(self, *args, **kwargs):
         self.stacked = kwargs.pop('stacked', False)
@@ -166,6 +162,15 @@ class UploadableURLField(URLField):
 
 class TextAreaField(FieldHelper, EmptyNone, fields.TextAreaField):
     pass
+
+
+class FormField(FieldHelper, fields.FormField):
+    def __init__(self, form_class, **kwargs):
+        def wrapper(**kwargs):
+            kwargs['csrf_enabled'] = False
+            return form_class(**kwargs)
+
+        super(FormField, self).__init__(wrapper, **kwargs)
 
 
 def nullable_text(value):

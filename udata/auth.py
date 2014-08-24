@@ -29,6 +29,8 @@ class Permission(BasePermission):
         '''Let administrator bypass all permissions'''
         super(Permission, self).__init__(RoleNeed('admin'), *needs)
 
+admin_permission = Permission()
+
 
 def init_app(app):
     from udata.models import datastore
