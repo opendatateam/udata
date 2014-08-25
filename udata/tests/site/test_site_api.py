@@ -189,8 +189,9 @@ class JobsAPITest(APITestCase):
             crontab=PeriodicTask.Crontab(minutes=5)
         )
 
-        response = self.get(url_for('api.job', name=task.name))
+        response = self.get(url_for('api.job', id=task.id))
         self.assert200(response)
+        self.assertEqual(response.json['id'], str(task.id))
         self.assertEqual(response.json['name'], task.name)
         self.assertEqual(response.json['description'], task.description)
         self.assertEqual(response.json['task'], task.task)
@@ -208,7 +209,7 @@ class JobsAPITest(APITestCase):
         )
 
         self.login()
-        response = self.put(url_for('api.job', name=task.name), {
+        response = self.put(url_for('api.job', id=task.id), {
             'name': task.name,
             'description': 'New description',
             'task': task.task,
@@ -229,7 +230,7 @@ class JobsAPITest(APITestCase):
         )
 
         self.login(AdminFactory())
-        response = self.put(url_for('api.job', name=task.name), {
+        response = self.put(url_for('api.job', id=task.id), {
             'name': task.name,
             'description': 'New description',
             'task': task.task,
@@ -237,6 +238,75 @@ class JobsAPITest(APITestCase):
         })
         self.assert200(response)
 
+        self.assertEqual(response.json['id'], str(task.id))
         self.assertEqual(response.json['name'], task.name)
         self.assertEqual(response.json['task'], task.task)
         self.assertEqual(response.json['description'], 'New description')
+        self.assertIsNotNone(response.json['crontab'])
+        self.assertIsNone(response.json['interval'])
+
+    def test_update_job_change_type(self):
+        @job('a-job')
+        def test_job():
+            pass
+
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            description=faker.sentence(),
+            task='a-job',
+            crontab=PeriodicTask.Crontab(minutes=5)
+        )
+
+        self.login(AdminFactory())
+        response = self.put(url_for('api.job', id=task.id), {
+            'name': task.name,
+            'description': task.description,
+            'task': task.task,
+            'interval': {
+                'every': 5,
+                'period': 'minutes',
+            }
+        })
+        self.assert200(response)
+
+        self.assertEqual(response.json['id'], str(task.id))
+        self.assertEqual(response.json['name'], task.name)
+        self.assertEqual(response.json['task'], task.task)
+        self.assertEqual(response.json['description'], task.description)
+        self.assertEqual(response.json['interval']['every'], 5)
+        self.assertEqual(response.json['interval']['period'], 'minutes')
+        self.assertIsNone(response.json['crontab'])
+
+    def test_delete_job_need_admin(self):
+        @job('a-job')
+        def test_job():
+            pass
+
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            description=faker.sentence(),
+            task='a-job',
+            crontab=PeriodicTask.Crontab(minutes=5)
+        )
+
+        self.login()
+        response = self.delete(url_for('api.job', id=task.id))
+        self.assert403(response)
+
+    def test_delete_job(self):
+        @job('a-job')
+        def test_job():
+            pass
+
+        task = PeriodicTask.objects.create(
+            name=faker.name(),
+            description=faker.sentence(),
+            task='a-job',
+            crontab=PeriodicTask.Crontab(minutes=5)
+        )
+
+        self.login(AdminFactory())
+        response = self.delete(url_for('api.job', id=task.id))
+        self.assert204(response)
+
+        self.assertIsNone(PeriodicTask.objects(id=task.id).first())

@@ -1,0 +1,25 @@
+<tr class="job" data-id="{{ id }}">
+    <td class="text-center">
+        {{#if crontab}}
+        <span class="fa fa-fw fa-clock-o"></span>
+        {{else}}
+        <span class="fa fa-fw fa-history"></span>
+        {{/if}}
+    </td>
+    <td>{{ name }}</td>
+    <td>{{ description }}</td>
+    <td>{{ schedule }}</td>
+    <td>
+        <div class="btn-group btn-group-xs">
+            <button class="btn btn-xs {{#if enabled}}btn-success active{{else}}btn-default{{/if}} job-enabled" title="{{_ 'Enabled' }}">
+                <span class="fa fa-fw fa-play"></span>
+            </button>
+            <button class="btn btn-warning job-edit" title="{{_ 'Edit' }}">
+                <span class="fa fa-fw fa-edit"></span>
+            </button>
+            <a class="btn btn-danger job-delete" title="{{_ 'Delete' }}">
+                <span class="fa fa-fw fa-times"></span>
+            </a>
+        </div>
+    </td>
+</tr>

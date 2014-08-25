@@ -24,6 +24,7 @@ interval_fields = api.model('Interval', {
 })
 
 job_fields = api.model('Job', {
+    'id': fields.String,
     'name': fields.String,
     'description': fields.String,
     'task': fields.String,
@@ -31,6 +32,8 @@ job_fields = api.model('Job', {
     'interval': fields.Nested(interval_fields, allow_null=True),
     'args': fields.List(fields.Raw),
     'kwargs': fields.Raw,
+    'schedule': fields.String(attribute='schedule_display'),
+    'enabled': fields.Boolean,
 })
 
 
@@ -54,29 +57,42 @@ class JobsAPI(API):
         return form.save(), 201
 
 
-@api.route('/jobs/<string:name>', endpoint='job')
+@api.route('/jobs/<string:id>', endpoint='job')
+@api.doc(params={'id': 'A job ID'})
 class JobAPI(API):
-    def get_or_404(self, name):
-        task = PeriodicTask.objects(name=name).first()
+    def get_or_404(self, id):
+        task = PeriodicTask.objects(id=id).first()
         if not task:
             api.abort(404)
         return task
 
     @api.marshal_with(job_fields)
-    def get(self, name):
+    def get(self, id):
         '''Fetch a single scheduled job'''
-        return self.get_or_404(name)
+        return self.get_or_404(id)
 
     @api.secure('admin')
     @api.marshal_with(job_fields)
-    def put(self, name):
+    def put(self, id):
         '''Update a single scheduled job'''
-        task = self.get_or_404(name)
-        if task.crontab:
+        task = self.get_or_404(id)
+        if 'crontab' in request.json:
+            task.interval = None
+            task.crontab = PeriodicTask.Crontab()
             form = api.validate(CrontabTaskForm, task)
         else:
+            task.crontab = None
+            task.interval = PeriodicTask.Interval()
             form = api.validate(IntervalTaskForm, task)
         return form.save()
+
+    @api.secure('admin')
+    @api.doc(responses={204: 'Successfuly deleted'})
+    def delete(self, id):
+        '''Delete a single scheduled job'''
+        task = self.get_or_404(id)
+        task.delete()
+        return '', 204
 
 
 @refs.route('/jobs', endpoint='schedulable_jobs')

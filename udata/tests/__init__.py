@@ -80,6 +80,9 @@ class TestCase(BaseTestCase):
     def assert201(self, response):
         self.assertStatus(response, 201)
 
+    def assert204(self, response):
+        self.assertStatus(response, 204)
+
 
 class WebTestMixin(object):
     user = None

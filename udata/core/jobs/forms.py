@@ -30,6 +30,7 @@ class PeriodicTaskForm(ModelForm):
     name = fields.StringField(_('Name'), [validators.required()])
     description = fields.StringField(_('Description'))
     task = fields.StringField(_('Tasks'))
+    enabled = fields.BooleanField(_('Enabled'))
 
 
 class CrontabTaskForm(PeriodicTaskForm):

@@ -3,9 +3,49 @@
 {% block tab_content %}
 <div class="row">
     <div class="col-xs-12">
-        {% for job in jobs %}
-        {{ job }}
-        {% endfor %}
+        <table class="table table-stripped jobs-table">
+            <thead>
+                <tr>
+                    <th width="20px" class="text-center"></th>
+                    <th>{{ _('Name') }}</th>
+                    <th>{{ _('Description') }}</th>
+                    <th>{{ _('Schedule') }}</th>
+                    <th width="100px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in jobs %}
+                <tr class="job" data-id="{{job.id}}">
+                    <td class="text-center">
+                        {% if job.crontab %}
+                        <span class="fa fa-fw fa-clock-o"></span>
+                        {% else %}
+                        <span class="fa fa-fw fa-history"></span>
+                        {% endif %}
+                    </td>
+                    <td>{{ job.name }}</td>
+                    <td>{{ job.description }}</td>
+                    <td>{{ job.schedule_display }}</td>
+                    <td>
+                        <div class="btn-group btn-group-xs">
+                            <button class="btn btn-xs {%if job.enabled%}btn-success active{%else%}btn-default{%endif%} job-enabled" title="{{ _('Enabled') }}">
+                                <span class="fa fa-fw fa-play"></span>
+                            </button>
+                            <button class="btn btn-warning job-edit" title="{{ _('Edit') }}">
+                                <span class="fa fa-fw fa-edit"></span>
+                            </button>
+                            <a class="btn btn-danger job-delete" title="{{ _('Delete') }}">
+                                <span class="fa fa-fw fa-times"></span>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr class="empty {% if jobs %}hide{% endif %}">
+                    <td colspan="5" class="text-center">{{ _('No jobs') }}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 <div class="row">

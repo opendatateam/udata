@@ -6,7 +6,8 @@
             <span class="form-help" data-content="{{ field.description }}"></span>
         </label>
         <div class="field-wrapper col-sm-10">
-            <input id="name-id" name="name" type="text" class="form-control" required>
+            <input id="name-id" name="name" type="text" class="form-control"
+                value="{{job.name}}" required>
         </div>
     </div>
 
@@ -19,7 +20,7 @@
         <div class="field-wrapper col-sm-10">
             <select id="task-id" name="task"  type="text" class="form-control" required>
             {{#each schedulables}}
-            <option value="{{this}}">{{this}}</option>
+            <option value="{{this}}" {{#ifeq ../job.task this}}selected{{/ifeq}}>{{this}}</option>
             {{/each}}
             </select>
         </div>
@@ -32,24 +33,37 @@
             <span class="form-help" data-content="An optionnal description"></span>
         </label>
         <div class="field-wrapper col-sm-10">
-            <textarea id="description-id" name="description" class="form-control" rows="3"></textarea>
+            <textarea id="description-id" name="description" class="form-control" rows="3">{{job.description}}</textarea>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <div class="checkbox">
+                <label>
+                    <input id="enabled" type="checkbox" name="enabled"{{#if job.enabled}}checked{{/if}}>
+                    {{_ 'Enabled'}}
+                </label>
+            </div>
         </div>
     </div>
 
     <fieldset>
         <legend>
-            <input type="radio" name="type" value="crontab">
+            <input type="radio" name="type" value="crontab"
+                {{#ifnot job.interval}}checked{{/ifnot}}>
             {{_ "Crontab" }}
             <span class="form-help" data-content="{{_ "Use cron expressions for each field"}}"></span>
         </legend>
-        <div class="fieldset-collapse collapse in">
+        <div class="fieldset-collapse collapse {{#ifnot job.interval}}in{{/ifnot}}">
             <div class="form-group">
                 <label for="crontab-minute"
                     class="col-sm-2 control-label required">
                     {{_ 'Minute' }}
                 </label>
                 <div class="field-wrapper col-sm-10">
-                    <input type="text" id="crontab-minute" name="crontab-minute" class="form-control" value="*"/>
+                    <input type="text" id="crontab-minute" class="form-control"
+                        name="crontab-minute" value="{{default job.crontab.minute '*'}}"/>
                 </div>
             </div>
             <div class="form-group">
@@ -58,7 +72,8 @@
                     {{_ 'Hour' }}
                 </label>
                 <div class="field-wrapper col-sm-10">
-                    <input type="text" id="crontab-hour" name="crontab-hour" class="form-control" value="*"/>
+                    <input type="text" id="crontab-hour" class="form-control"
+                        name="crontab-hour" value="{{default job.crontab.hour '*'}}"/>
                 </div>
             </div>
             <div class="form-group">
@@ -67,7 +82,8 @@
                     {{_ 'Day of week' }}
                 </label>
                 <div class="field-wrapper col-sm-10">
-                    <input type="text" id="crontab-day_of_week" name="crontab-day_of_week" class="form-control"  value="*"/>
+                    <input type="text" id="crontab-day_of_week" name="crontab-day_of_week" class="form-control"
+                        value="{{default job.crontab.day_of_week '*'}}"/>
                 </div>
             </div>
             <div class="form-group">
@@ -76,7 +92,8 @@
                     {{_ 'Day of month' }}
                 </label>
                 <div class="field-wrapper col-sm-10">
-                    <input type="text" id="crontab-day_of_month" name="crontab-day_of_month" class="form-control"  value="*"/>
+                    <input type="text" id="crontab-day_of_month" class="form-control"
+                        name="crontab-day_of_month" value="{{default job.crontab.day_of_month '*'}}"/>
                 </div>
             </div>
             <div class="form-group">
@@ -85,7 +102,8 @@
                     {{_ 'Month of year' }}
                 </label>
                 <div class="field-wrapper col-sm-10">
-                    <input type="text" id="crontab-month_of_year" name="crontab-month_of_year" class="form-control"  value="*"/>
+                    <input type="text" id="crontab-month_of_year" class="form-control"
+                        name="crontab-month_of_year"  value="{{default job.crontab.month_of_year '*'}}"/>
                 </div>
             </div>
         </div>
@@ -93,18 +111,19 @@
 
     <fieldset>
         <legend>
-            <input type="radio" name="type" value="interval">
+            <input type="radio" name="type" value="interval" {{#if job.interval}}checked{{/if}}>
             {{_ "Interval" }}
         </legend>
-        <div class="fieldset-collapse collapse">
+        <div class="fieldset-collapse collapse {{#if job.interval}}in{{/if}}">
             <div class="form-group">
                 <label for="interval-every-id"
                     class="col-sm-2 control-label required">
                     {{_ 'Every' }}
                     <span class="form-help" data-content="{{_ "A positive integer"}}"></span>
                 </label>
-                <div class="field-wrapper colvalue="*"-sm-10">
-                    <input type="text" id="interval-every-id" name="every" class="form-control" />
+                <div class="field-wrapper col-sm-10">
+                    <input type="text" id="interval-every" name="every" class="form-control"
+                        value="{{job.interval.every}}"/>
                 </div>
             </div>
 
@@ -112,17 +131,17 @@
                 <label for="interval-period-id"
                     class="col-sm-2 control-label required">
                     {{_ 'Period' }}
-                    <span class="form-help" data-content="The perivalue="*"od type"></span>
+                    <span class="form-help" data-content="The period type" value="*"></span>
                 </label>
                 <div class="field-wrapper col-sm-10">
-                    <select id="interval-period-id" name="period" class="form-control">
+                    <select id="interval-period" name="period" class="form-control">
                         {{#each periods}}
-                        <option value="{{@key}}">{{this}}</option>
+                        <option value="{{@key}}" {{#ifeq ../job.interval.period @key}}selected{{/ifeq}}>{{this}}</option>
                         {{/each}}
                     </select>
-        lvalue="*"        </div>
+                </div>
             </div>
-lvalue="*"        </div>
-    </fieldselvalue="*"t>
+        </div>
+    </fieldset>
 
 </form>
