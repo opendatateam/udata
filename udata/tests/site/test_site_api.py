@@ -310,3 +310,14 @@ class JobsAPITest(APITestCase):
         self.assert204(response)
 
         self.assertIsNone(PeriodicTask.objects(id=task.id).first())
+
+    def test_get_task(self):
+        @celery.task
+        def test_task():
+            print 'hello'
+
+        result = test_task.delay()  # Always eager so no async
+
+        response = self.get(url_for('api.task', id=result.id))
+        self.assert200(response)
+        self.assertEqual(response.json['id'], result.id)

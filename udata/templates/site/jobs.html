@@ -15,7 +15,7 @@
             </thead>
             <tbody>
                 {% for job in jobs %}
-                <tr class="job" data-id="{{job.id}}">
+                <tr class="job" data-id="{{job.id}}" {% if job.last_run_id %}data-task-id="{{job.last_run_id}}"{% endif%}>
                     <td class="text-center">
                         {% if job.crontab %}
                         <span class="fa fa-fw fa-clock-o"></span>

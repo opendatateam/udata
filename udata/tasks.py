@@ -25,7 +25,7 @@ class Scheduler(MongoScheduler):
     def apply_async(self, entry, **kwargs):
         '''A MongoScheduler storing the last task_id'''
         result = super(Scheduler, self).apply_async(entry, **kwargs)
-        entry._task.last_id = result.id
+        entry._task.last_run_id = result.id
         return result
 
 

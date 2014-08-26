@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from celery import states
+from celery.result import AsyncResult
+from celery.utils import get_full_cls_name
+from celery.utils.encoding import safe_repr
 from flask import request
 
 from udata.api import api, API, refs, fields
 from udata.auth import admin_permission
-from udata.tasks import schedulables
+from udata.tasks import schedulables, celery
 
 from .forms import CrontabTaskForm, IntervalTaskForm
 from .models import PeriodicTask
@@ -33,7 +37,17 @@ job_fields = api.model('Job', {
     'args': fields.List(fields.Raw),
     'kwargs': fields.Raw,
     'schedule': fields.String(attribute='schedule_display'),
+    'last_run_at': fields.String,
+    'last_run_id': fields.String,
     'enabled': fields.Boolean,
+})
+
+task_fields = api.model('Task', {
+    'id': fields.String,
+    'status': fields.String,
+    'result': fields.String,
+    'exc': fields.String,
+    'traceback': fields.String,
 })
 
 
@@ -93,6 +107,24 @@ class JobAPI(API):
         task = self.get_or_404(id)
         task.delete()
         return '', 204
+
+
+@api.route('/tasks/<string:id>', endpoint='task')
+class TaskAPI(API):
+    @api.marshal_with(task_fields)
+    def get(self, id):
+        '''Get a tasks status given its ID'''
+        result = AsyncResult(id, app=celery)
+        status, retval = result.status, result.result
+        data = {'id': id, 'status': status, 'result': retval}
+        if status in states.EXCEPTION_STATES:
+            traceback = result.traceback
+            data.update({
+                'result': safe_repr(retval),
+                'exc': get_full_cls_name(retval.__class__),
+                'traceback': traceback,
+            })
+        return data
 
 
 @refs.route('/jobs', endpoint='schedulable_jobs')

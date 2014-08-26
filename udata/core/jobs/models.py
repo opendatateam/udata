@@ -11,7 +11,7 @@ __all__ = ('PeriodicTask', )
 
 
 class PeriodicTask(BasePeriodicTask):
-    last_id = db.StringField()
+    last_run_id = db.StringField()
 
     class Interval(BasePeriodicTask.Interval):
         def __unicode__(self):

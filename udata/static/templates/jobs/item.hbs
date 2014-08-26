@@ -1,4 +1,4 @@
-<tr class="job" data-id="{{ id }}">
+<tr class="job" data-id="{{ id }}" {{#if job.last_run_id}}data-task-id="{{job.last_run_id}}"{{/if}}>
     <td class="text-center">
         {{#if crontab}}
         <span class="fa fa-fw fa-clock-o"></span>

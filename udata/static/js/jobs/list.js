@@ -17,6 +17,7 @@ define([
 
     var schedulables,
         $notifBar = $('.notifications-bar'),
+        POLL_INTERVAL = 10,
         PERIODS = {
             minutes: i18n._('minutes'),
             hours: i18n._('hours'),
@@ -77,7 +78,6 @@ define([
                 }
                 if (job) {
                     promise = API.put('/api/jobs/'+job.id, data, function(job) {
-                        console.log('.jobs-table tr[data-id='+job.id+']',$('.job-table tr[data-id='+job.id+']'));
                         $('.jobs-table tr[data-id='+job.id+']').replaceWith(itemTpl(job));
                         Notify.success(i18n._('The job has been updated'), $notifBar);
                     });
@@ -109,6 +109,21 @@ define([
         }
     }
 
+    /**
+     * Poll tasks
+     */
+    function poll() {
+        $('tr.job').each(function() {
+            var task_id = $(this).data('task-id');
+            if (task_id) {
+                API.get('/api/tasks/'+task_id, function(data) {
+                    console.log('Task status', task_id, data);
+                });
+            }
+        });
+        setTimeout(poll, POLL_INTERVAL * 1000);
+    }
+
     $('.add-btn').click(function() {
         display_modal();
         return false;
@@ -137,7 +152,6 @@ define([
 
         $modal.find('.modal-footer .btn-primary').click(function() {
             API.delete('/api/jobs/'+job_id, function() {
-                console.log($('.jobs-table tr.job[data-id='+job_id+']'), '.jobs-table tr.job[data-id='+job_id+']');
                 $('.jobs-table tr.job[data-id='+job_id+']').remove();
                 Notify.success(i18n._('Job has been deleted'), $notifBar);
             }).error(function(e) {
@@ -158,6 +172,7 @@ define([
             API.get('/api/references/jobs', function(data) {
                 schedulables = data;
             });
+            poll();
         }
     };
 
