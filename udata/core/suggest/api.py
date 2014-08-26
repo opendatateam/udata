@@ -10,7 +10,7 @@ ns = api.namespace('suggest', 'Completion suggester APIs')
 
 parser = api.parser()
 parser.add_argument('q', type=str, help='The string to autocomplete/suggest', location='args', required=True)
-parser.add_argument('size', type=int, help='The moutn of suggestion to fetch', location='args', default=DEFAULT_SIZE)
+parser.add_argument('size', type=int, help='The amount of suggestion to fetch', location='args', default=DEFAULT_SIZE)
 
 
 @ns.route('/tags', endpoint='suggest_tags', doc={'parser': parser})

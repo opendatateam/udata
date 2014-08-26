@@ -4,17 +4,15 @@ from __future__ import unicode_literals
 from bson import ObjectId
 from datetime import date
 
-from flask.ext.restful import fields
-
-from udata.api import api, API, marshal
+from udata.api import api, API, marshal, fields
 from udata.models import Metrics
 
 
 metrics_fields = api.model('Metric', {
-    'object_id': fields.String,
-    'date': fields.String,
-    'level': fields.String,
-    'values': fields.Raw,
+    'object_id': fields.String(description='The object identifier which metrics belongs to', required=True),
+    'date': fields.String(description='The metrics sampling date', required=True),
+    'level': fields.String(description='The metrics granularity level', required=True, enum=['daily', 'monthly']),
+    'values': fields.Raw(description='The metrics as key-value pairs', required=True),
 })
 
 isodate = lambda v: date(*(int(p) for p in v.split('-'))).isoformat()

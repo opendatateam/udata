@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import url_for
-
-from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API, marshal, fields
+from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API
 from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by
@@ -19,16 +17,6 @@ ns = api.namespace('datasets', 'Dataset related operations')
 common_doc = {
     'params': {'dataset': 'The dataset ID or slug'}
 }
-
-
-@api.model('DatasetReference')
-class DatasetField(fields.Raw):
-    def format(self, dataset):
-        return {
-            'id': str(dataset.id),
-            'uri': url_for('api.dataset', dataset=dataset, _external=True),
-            'page': url_for('datasets.show', dataset=dataset, _external=True),
-        }
 
 
 @ns.route('/', endpoint='datasets')

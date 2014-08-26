@@ -1,29 +1,31 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask.ext.restful import fields
+from udata.api import api, pager, fields
 
-from udata.api import api, pager
+from udata.core.organization.api_fields import OrganizationReference
+from udata.core.dataset.api_fields import DatasetReference
 
-from udata.core.organization.api_fields import OrganizationField
-from udata.core.dataset.api_fields import DatasetField
+from .models import REUSE_TYPES
 
 reuse_fields = api.model('Reuse', {
-    'id': fields.String,
-    'title': fields.String,
-    'slug': fields.String,
-    'type': fields.String,
-    'featured': fields.Boolean,
-    'description': fields.String,
-    'image_url': fields.String,
-    'created_at': fields.ISODateTime,
-    'last_modified': fields.ISODateTime,
-    'deleted': fields.ISODateTime,
-    'datasets': fields.List(DatasetField),
-    'organization': OrganizationField,
-    'metrics': fields.Raw,
-    'uri': fields.UrlFor('api.reuse', lambda o: {'reuse': o}),
-    'page': fields.UrlFor('reuses.show', lambda o: {'reuse': o}),
+    'id': fields.String(description='The reuse identifier', required=True),
+    'title': fields.String(description='The reuse title', required=True),
+    'slug': fields.String(description='The reuse permalink string', required=True),
+    'type': fields.String(description='The reuse type', required=True, enum=REUSE_TYPES.keys()),
+    'featured': fields.Boolean(description='Is the reuse featured'),
+    'description': fields.String(description='The reuse description in Markdown', required=True),
+    'image_url': fields.String(description='The reuse thumbnail'),
+    'created_at': fields.ISODateTime(description='The reuse creation date', required=True),
+    'last_modified': fields.ISODateTime(description='The reuse last modification date', required=True),
+    'deleted': fields.ISODateTime(description='The organization identifier', required=True),
+    'datasets': fields.List(DatasetReference, description='The reused datasets'),
+    'organization': OrganizationReference(description='The publishing organization'),
+    'metrics': fields.Raw(description='The reuse metrics'),
+    'uri': fields.UrlFor('api.reuse', lambda o: {'reuse': o},
+        description='The reuse API URI', required=True),
+    'page': fields.UrlFor('reuses.show', lambda o: {'reuse': o},
+        description='The reuse page URL', required=True),
 })
 
 reuse_page_fields = api.model('ReusePage', pager(reuse_fields))

@@ -9,28 +9,28 @@ from flask.ext.security import current_user
 
 from udata.api import api, API, marshal, fields
 
-from udata.core.user.api_fields import UserField
+from udata.core.user.api_fields import UserReference
 
 from .forms import IssueCreateForm, IssueCommentForm
-from .models import Issue, Message
+from .models import Issue, Message, ISSUE_TYPES
 from .signals import on_new_issue, on_issue_closed
 
 message_fields = api.model('IssueMessage', {
-    'content': fields.String,
-    'posted_by': UserField,
-    'posted_on': fields.ISODateTime,
+    'content': fields.String(description='The message body', required=True),
+    'posted_by': UserReference(description='The message author', required=True),
+    'posted_on': fields.ISODateTime(description='The message posting date', required=True),
 })
 
 issue_fields = api.model('Issue', {
-    'id': fields.String,
-    'type': fields.String,
-    'subject': fields.String(attribute='subject.id'),
-    'user': UserField,
-    'created': fields.ISODateTime,
-    'closed': fields.ISODateTime,
-    'closed_by': fields.String(attribute='closed_by.id'),
+    'id': fields.String(description='The issue identifier', required=True),
+    'type': fields.String(description='The issue type', required=True, enum=ISSUE_TYPES.keys()),
+    'subject': fields.String(attribute='subject.id', description='The issue target object identifier', required=True),
+    'user': UserReference(description='The issue author', required=True),
+    'created': fields.ISODateTime(description='The issue creation date', required=True),
+    'closed': fields.ISODateTime(description='The issue closing date'),
+    'closed_by': fields.String(attribute='closed_by.id', description='The user who closed the issue'),
     'discussion': fields.Nested(message_fields),
-    'url': fields.UrlFor('api.issue'),
+    'url': fields.UrlFor('api.issue', description='The issue API URI', required=True),
 })
 
 

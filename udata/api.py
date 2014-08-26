@@ -157,6 +157,7 @@ class ModelAPI(SingleObjectAPI, API):
         return '', 204
 
 
+@api.model(type='string', format='date-time')
 class ISODateTime(fields.Raw):
     def format(self, value):
         return value.isoformat()
@@ -165,8 +166,8 @@ fields.ISODateTime = ISODateTime
 
 
 class UrlFor(fields.Raw):
-    def __init__(self, endpoint, mapper=None):
-        super(UrlFor, self).__init__()
+    def __init__(self, endpoint, mapper=None, **kwargs):
+        super(UrlFor, self).__init__(**kwargs)
         self.endpoint = endpoint
         self.mapper = mapper or self.default_mapper
 
@@ -199,12 +200,12 @@ class PreviousPageUrl(fields.Raw):
 
 def pager(page_fields):
     pager_fields = {
-        'data': api.as_list(fields.Nested(page_fields, attribute='objects')),
-        'page': fields.Integer,
-        'page_size': fields.Integer,
-        'total': fields.Integer,
-        'next_page': NextPageUrl,
-        'previous_page': PreviousPageUrl,
+        'data': api.as_list(fields.Nested(page_fields, attribute='objects', description='The page data')),
+        'page': fields.Integer(description='The current page', required=True, min=0),
+        'page_size': fields.Integer(description='The page size used for pagination', required=True, min=0),
+        'total': fields.Integer(description='The total paginated items', required=True, min=0),
+        'next_page': NextPageUrl(description='The next page URL if exists'),
+        'previous_page': PreviousPageUrl(description='The previous page URL if exists'),
     }
     return pager_fields
 
