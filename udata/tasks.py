@@ -37,12 +37,18 @@ def job(name, **kwargs):
     return celery.task(name=name, schedulable=True, **kwargs)
 
 
-@job('HelloWorld')
+@job('log-test')
 def helloworld():
     log.debug('HelloWorld')
     log.info('HelloWorld')
     log.warning('HelloWorld')
     log.error('HelloWorld')
+
+
+@job('error-test')
+def error_test_task():
+    log.info('There should be an error soon')
+    raise Exception('There is an error')
 
 
 def schedulables():
