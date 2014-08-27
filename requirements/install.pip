@@ -34,7 +34,7 @@ Shapely==1.4.3
 unicodecsv==0.9.4
 webassets==0.10.1
 wtforms==2.0.1
-wtforms-json==0.2.6
+wtforms-json==0.2.8
 
 # Until release of MongoEngine 0.9 with MultiPolygon support
 # mongoengine==0.8.7
