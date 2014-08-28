@@ -21,7 +21,7 @@ blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
 def recent_feed():
     feed = AtomFeed(_('Last datasets'),
                     feed_url=request.url, url=request.url_root)
-    datasets = Dataset.objects.visible().order_by('-date').limit(15)
+    datasets = Dataset.objects.visible().order_by('-created_at').limit(15)
     for dataset in datasets:
         author = None
         if dataset.organization:

@@ -23,7 +23,7 @@ blueprint = I18nBlueprint('reuses', __name__, url_prefix='/reuses')
 def recent_feed():
     feed = AtomFeed(_('Last reuses'),
                     feed_url=request.url, url=request.url_root)
-    reuses = Reuse.objects.visible().order_by('-date').limit(15)
+    reuses = Reuse.objects.visible().order_by('-created_at').limit(15)
     for reuse in reuses:
         author = None
         if reuse.organization:
