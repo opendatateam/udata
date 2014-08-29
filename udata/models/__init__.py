@@ -71,6 +71,7 @@ session_interface = MongoEngineSessionInterface(db)
 from udata.core.metrics.models import *
 from udata.core.issues.models import *
 from udata.core.followers.models import *
+from udata.core.territories.models import *
 from udata.core.user.models import *
 from udata.core.dataset.models import *
 from udata.core.reuse.models import *

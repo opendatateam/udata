@@ -7,14 +7,14 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
-from udata.models import db, WithMetrics, Issue, Follow
+from udata.models import db, WithMetrics, Issue, Follow, TerritoryReference
 from udata.i18n import lazy_gettext as _
 
 
 __all__ = (
     'License', 'Resource', 'TerritorialCoverage', 'Dataset',
     'UPDATE_FREQUENCIES', 'TERRITORIAL_GRANULARITIES',
-    'DatasetIssue', 'FollowDataset'
+    'DatasetIssue', 'FollowDataset', 'GeoCoverage',
 )
 
 UPDATE_FREQUENCIES = {
@@ -96,6 +96,11 @@ class TerritorialCoverage(db.EmbeddedDocument):
         }
 
 
+class GeoCoverage(db.EmbeddedDocument):
+    geom = db.MultiPolygonField()
+    territories = db.ListField(db.EmbeddedDocumentField(TerritoryReference))
+
+
 # @db.historize
 class Dataset(WithMetrics, db.Datetimed, db.Document):
     title = db.StringField(max_length=255, required=True)
@@ -115,6 +120,7 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     frequency = db.StringField(choices=UPDATE_FREQUENCIES.keys())
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
     territorial_coverage = db.EmbeddedDocumentField(TerritorialCoverage)
+    geo_coverage = db.EmbeddedDocumentField(GeoCoverage)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()

@@ -26,67 +26,6 @@ def territory_extractor(level, regex):
     return wrapper
 
 
-@territory_extractor('district', r'^arrondissements-')
-def extract_french_district(polygon):
-    props = polygon['properties']
-    code = props['insee_ar']
-    name = props['nom']
-    keys = {
-        'insee': code,
-    }
-    return code, name, keys
-
-
-@territory_extractor('epci', r'^epci-')
-def extract_french_epci(polygon):
-    props = polygon['properties']
-    code = props['siren_epci']
-    name = props.get('nom_osm') or props['nom_epci']
-    keys = {
-        'siren': props['siren_epci'],
-        'ptot': props['ptot_epci'],
-        'osm_id': props['osm_id'],
-        'type_epci': props['type_epci']
-    }
-    return code, name.decode('cp1252'), keys
-
-
-@territory_extractor('county', r'^departements-')
-def extract_french_county(polygon):
-    props = polygon['properties']
-    code = props['code_insee']
-    name = props['nom']
-    keys = {
-        'insee': code,
-        'nuts3': props['nuts3'],
-    }
-    return code, name.decode('cp1252'), keys
-
-
-@territory_extractor('region', r'^regions-')
-def extract_french_region(polygon):
-    props = polygon['properties']
-    code = props['code_insee']
-    name = props['nom']
-    keys = {
-        'insee': code,
-        'nuts2': props['nuts2'],
-        'iso3166_2': props['iso3166_2'],
-    }
-    return code, name, keys
-
-
-@territory_extractor('town', r'^communes-')
-def extract_french_town(polygon):
-    props = polygon['properties']
-    code = props['insee']
-    name = props['nom']
-    keys = {
-        'insee': code,
-    }
-    return code, name, keys
-
-
 @territory_extractor('country', r'^TM_WORLD_BORDER-')
 def extract_country(polygon):
     '''
@@ -94,13 +33,13 @@ def extract_country(polygon):
     Based on data from http://thematicmapping.org/downloads/world_borders.php
     '''
     props = polygon['properties']
-    code = props['ISO2']
+    code = props['ISO2'].lower()
     name = props['NAME']
     keys = {
         'iso2': code,
-        'iso3': props['ISO3'],
-        'un': props['UN'],
-        'fips': props['FIPS'],
+        'iso3': props['ISO3'].lower(),
+        'un': props['UN'].lower(),
+        'fips': props['FIPS'].lower(),
     }
     return code, name.decode('cp1252'), keys
 
@@ -123,7 +62,11 @@ def extract_shapefile(filename, level, extractor):
                 elif geom.geom_type != 'MultiPolygon':
                     print 'Unsupported geometry type "{0}" for "{1}"'.format(geom.geom_type, name)
                     continue
-                territory, _ = Territory.objects.get_or_create(level=level, code=code)
+                territory, _ = Territory.objects.get_or_create(level=level, code=code, defaults={
+                    'geom': geom.__geo_interface__,
+                    'name': name,
+                    'keys': keys,
+                })
                 territory.geom = geom.__geo_interface__
                 territory.name = name
                 territory.keys = keys
@@ -131,6 +74,7 @@ def extract_shapefile(filename, level, extractor):
                 imported += 1
             except Exception as e:
                 print 'Error extracting polygon {0}: {1}'.format(polygon['properties'], e)
+                print code, name
 
     print 'Imported {0} territories for level {1} from file {2}'.format(imported, level, filename)
     return imported
