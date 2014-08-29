@@ -7,6 +7,8 @@ from udata.commands import manager
 from udata.models import Organization
 from udata.core.territories.commands import territory_extractor
 
+from .tasks import geocode_territorial_coverage
+
 
 @territory_extractor('district', r'^arrondissements-')
 def extract_french_district(polygon):
@@ -111,3 +113,8 @@ def certify(path_or_id):
                 certify_org(id_or_slug.strip())
     else:
         certify_org(path_or_id)
+
+
+@manager.command
+def comarquage_to_geo():
+    geocode_territorial_coverage()
