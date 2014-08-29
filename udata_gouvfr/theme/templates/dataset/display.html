@@ -314,9 +314,7 @@
                                     title="{{ _('Territorial coverage') }}">
                                     <span class="glyphicon glyphicon-globe"></span>
                                 </a>
-                                {% for code in dataset.territorial_coverage.codes %}
-                                {{ code }}
-                                {% endfor %}
+                                {{ dataset.territorial_coverage|territorial_coverage }}
                             </li>
                             {% endif %}
                         {% endif %}
