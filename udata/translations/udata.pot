@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-22 11:13+0200\n"
+"POT-Creation-Date: 2014-08-29 17:02+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -587,11 +587,11 @@ msgstr ""
 msgid "Reference"
 msgstr ""
 
-#: udata/templates/base.html:48
+#: udata/templates/base.html:52
 msgid "Recent datasets"
 msgstr ""
 
-#: udata/templates/base.html:52
+#: udata/templates/base.html:56
 msgid "Recent reuses"
 msgstr ""
 
