@@ -49,6 +49,7 @@
     "jquery-sortable": "~0.9.12",
     "swagger-ui": "~2.0.22",
     "jquery.browser": "~0.0.6",
-    "highlightjs": "~8.0.0"
+    "highlightjs": "~8.0.0",
+    "leaflet": "~0.7.3"
   }
 }
