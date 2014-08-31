@@ -307,18 +307,20 @@
                                 {{ dataset.territorial_granularity_label }}
                             </li>
                             {% endif %}
+                        {% endif %}
 
-                            {% if dataset.territorial_coverage.codes %}
+                        {# Territorial coverage #}
+                        {% if dataset.geo_coverage %}
+                            {% if dataset.geo_coverage.territories %}
                             <li>
                                 <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
                                     title="{{ _('Territorial coverage') }}">
                                     <span class="glyphicon glyphicon-globe"></span>
                                 </a>
-                                {{ dataset.territorial_coverage|territorial_coverage }}
+                                {{ dataset.geo_coverage|geolabel }}
                             </li>
                             {% endif %}
                         {% endif %}
-
                     </ul>
 
 
@@ -332,6 +334,15 @@
                         {% endfor %}
                     </div>
                 </div>
+
+                {# Geospatial panel #}
+                {% if dataset.geo_coverage %}
+                <div class="card">
+                    <h3>{{ _('Spatial coverage') }}</h3>
+                    <div id="coverage-map" class="aside-map"
+                        data-geojson="{{dataset.geo_coverage|geocoverage}}"></div>
+                </div>
+                {% endif %}
 
                 {# Quality panel #}
                 <div class="card">

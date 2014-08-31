@@ -9,36 +9,44 @@ from udata.models import Dataset, GeoCoverage, Territory
 
 
 LEVEL_MAPPING = {
-    'RegionOfFrance': 'region',
-    'CommuneOfFrance': 'town',
-    'Country': 'country',
-    'IntercommunalityOfFrance': 'epci',
-    'DepartmentOfFrance': 'county',
+    'regionoffrance': 'fr-region',
+    'communeoffrance': 'fr-town',
+    'country': 'country',
+    'intercommunalityoffrance': 'fr-epci',
+    'departmentoffrance': 'fr-county',
+    'internationalorganization': 'country-group',
+    'metropoleofcountry': 'country-subset',
+    'overseascollectivityoffrance': 'fr-county',
+    'overseasofcountry': 'country-subset',
+}
+
+SUBSETS = {
+    'france d outre mer': 'fr-domtom',
+    'france metropolitaine': 'fr-metro',
 }
 
 
-def territory_from_comarquage(code):
-    parts = code.split('/', 2)
+def territory_from_comarquage(co_code):
+    parts = co_code.lower().split('/', 2)
     if len(parts) < 2:
         return None
-    level, code = parts[0], parts[1].lower()
-    # level, code, tail = code.split('/', 2)
+    level = parts[0]
+    # France metro & DOM-TOM
     if not level in LEVEL_MAPPING:
-        print 'Unknown level "{0}"'.format(level)
+        print 'Unknown level "{0}" for "{1}"'.format(level, co_code)
         return None
     level = LEVEL_MAPPING[level]
+    code = SUBSETS[parts[2]] if level == 'country-subset' else parts[1]
     try:
         return Territory.objects.get(level=level, code=code)
     except Territory.DoesNotExist:
-        print 'Territory not found: level={0} code={1}'.format(level, code)
+        print 'Territory not found: level={0} code={1} for {2}'.format(level, code, co_code)
         return None
-
-
 
 
 @celery.task
 def geocode_territorial_coverage():
-    for dataset in Dataset.objects:
+    for dataset in Dataset.objects(territorial_coverage__codes__not__size=0):
         if not dataset.territorial_coverage:
             continue
         polygons = []
@@ -62,5 +70,5 @@ def geocode_territorial_coverage():
         dataset.geo_coverage = coverage
         try:
             dataset.save()
-        except:
-            print 'Unable to save dataset "{0}"'.format(dataset.title)
+        except Exception as e:
+            print 'Unable to save dataset "{0}": {1}'.format(dataset.title, e)
