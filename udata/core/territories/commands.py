@@ -10,12 +10,14 @@ import fiona
 
 from fiona.crs import to_string
 from shapely.geometry import shape, MultiPolygon
+from shapely.ops import cascaded_union
 
 from udata.commands import manager
 from udata.core.territories.models import Territory
 
 
 EXTRACTORS = {}
+AGGREGATORS = []
 
 
 def territory_extractor(level, regex):
@@ -26,7 +28,11 @@ def territory_extractor(level, regex):
     return wrapper
 
 
-@territory_extractor('country', r'^TM_WORLD_BORDER-')
+def register_aggregate(level, code, name, territories):
+    AGGREGATORS.append((level, code, name, territories))
+
+
+@territory_extractor('country', r'^TM_WORLD_BORDERS-')
 def extract_country(polygon):
     '''
     Extract a country information from single MultiPolygon.
@@ -34,14 +40,15 @@ def extract_country(polygon):
     '''
     props = polygon['properties']
     code = props['ISO2'].lower()
-    name = props['NAME']
+    name = 'Åland Islands' if code == 'ax' else props['NAME']  # Fix wrong character
     keys = {
         'iso2': code,
         'iso3': props['ISO3'].lower(),
-        'un': props['UN'].lower(),
-        'fips': props['FIPS'].lower(),
+        'un': props['UN'],
+        'fips': (props.get('FIPS', '') or '').lower() or None,
     }
-    return code, name.decode('cp1252'), keys
+    # return code, name.decode('cp1252'), keys
+    return code, name, keys
 
 
 def extract_shapefile(filename, level, extractor):
@@ -74,10 +81,35 @@ def extract_shapefile(filename, level, extractor):
                 imported += 1
             except Exception as e:
                 print 'Error extracting polygon {0}: {1}'.format(polygon['properties'], e)
-                print code, name
 
     print 'Imported {0} territories for level {1} from file {2}'.format(imported, level, filename)
     return imported
+
+
+def build_aggregate(level, code, name, territories):
+    print 'Building aggregate "{0}" (level={1}, code={2})'.format(name, level, code)
+    polygons = []
+    for tlevel, tcode in territories:
+        try:
+            territory = Territory.objects.get(level=tlevel, code=tcode)
+        except Territory.DoesNotExist:
+            print 'Territory {0}/{1} not found'.format(tlevel, tcode)
+            continue
+        if not shape(territory.geom).is_valid:
+            print 'Skipping invalid polygon for {0}'.format(territory.name)
+            continue
+        polygons.append(territory.geom)
+
+    geom = cascaded_union([shape(p) for p in polygons])
+    if geom.geom_type == 'Polygon':
+        geom = MultiPolygon([geom])
+    try:
+        territory = Territory.objects.get(level=level, code=code)
+    except Territory.DoesNotExist:
+        territory = Territory(level=level, code=code)
+    territory.name = name
+    territory.geom = geom.__geo_interface__
+    territory.save()
 
 
 @manager.command
@@ -90,9 +122,19 @@ def load_territories(folder, level=None):
             if level and file_level != level:
                 continue
             if regex.match(basename(filename)):
-                print '-' * 80
                 print 'Found matching file for level {0}: {1}'.format(file_level, basename(filename))
                 total += extract_shapefile(filename, file_level, extractor)
                 print '-' * 80
+
+    if not level or level == 'aggregate':
+        for level, code, name, territories in AGGREGATORS:
+            build_aggregate(level, code, name, territories)
+            total += 1
+            print '-' * 80
+
+        # Special world Aggregate
+        build_aggregate('country-group', 'ww', 'World', [
+            ('country', code) for code in Territory.objects(level='country').distinct('code')
+        ])
 
     print 'Done: Imported {0} territories'.format(total)

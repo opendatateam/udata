@@ -7,6 +7,7 @@ define([
     'i18n',
     'auth',
     'api',
+    'leaflet',
     'hbs!templates/dataset/resource-modal-body',
     'hbs!templates/dataset/add-reuse-modal-body',
     'form/common',
@@ -15,7 +16,7 @@ define([
     'widgets/follow-btn',
     'widgets/issues-btn',
     'widgets/share-btn',
-], function($, log, i18n, Auth, API, template, addReuseTpl, forms, modal) {
+], function($, log, i18n, Auth, API, L, template, addReuseTpl, forms, modal) {
     'use strict';
 
     var user_reuses;
@@ -88,10 +89,32 @@ define([
         }
     }
 
+    function load_coverage_map() {
+        var $el = $('#coverage-map'),
+            attributions = '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            tilesUrl = 'http://otile{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png',
+            map = L.map($el[0], {zoomControl: false}),
+            layer = L.geoJson($el.data('geojson'));
+
+        // Disable drag and zoom handlers.
+        map.dragging.disable();
+        map.touchZoom.disable();
+        map.doubleClickZoom.disable();
+        map.scrollWheelZoom.disable();
+
+        // Disable tap handler, if present.
+        if (map.tap) map.tap.disable();
+
+        L.tileLayer(tilesUrl, {subdomains: '1234'}).addTo(map);
+        layer.addTo(map);
+        map.fitBounds(layer.getBounds());
+    }
+
     return {
         start: function() {
             log.debug('Dataset display page');
             prepare_resources();
+            load_coverage_map();
             fetch_reuses();
             $('.reuse.add').click(add_reuse);
         }

@@ -8,8 +8,9 @@ from flask import url_for, render_template_string, g, Blueprint
 from . import FrontTestCase
 
 from udata.i18n import I18nBlueprint
-from udata.models import db, TerritorialCoverage
+from udata.models import db, TerritorialCoverage, GeoCoverage, TerritoryReference
 from udata.frontend.helpers import in_url
+from udata.core.territories import register_level
 
 
 class FrontEndRootTest(FrontTestCase):
@@ -320,3 +321,61 @@ class FrontEndRootTest(FrontTestCase):
 
         response = self.get(url_for('test.coverage'))
         self.assertEqual(response.data, 'Union Europeenne')
+
+    def test_geolabel_empty(self):
+        test = Blueprint('test', __name__)
+
+        @test.route('/geolabel/')
+        def geolabel():
+            coverage = GeoCoverage()
+            return render_template_string('{{ coverage|geolabel }}', coverage=coverage)
+
+        self.app.register_blueprint(test)
+
+        response = self.get(url_for('test.geolabel'))
+        self.assertEqual(response.data, '')
+
+    def test_geolabel(self):
+        test = Blueprint('test', __name__)
+
+        specs = {
+            ('country', 'fr'): 'France',
+            ('region', '02'): 'Martinique',
+            ('town', '44109'): 'Nantes',
+            ('country-group', 'ue'): 'Union Europeenne',
+            ('epci', '241300177'): 'San Ouest Provence',
+            ('county', '60'): 'Oise',
+        }
+
+        @test.route('/geolabel/<level>/<code>/')
+        def geolabel(level, code):
+            label = specs[(level, code)]
+            territory = TerritoryReference(name=label, level=level, code=code)
+            coverage = GeoCoverage(territories=[territory])
+            return render_template_string('{{ coverage|geolabel}}', coverage=coverage)
+
+        self.app.register_blueprint(test)
+
+        for (level, code), label in specs.items():
+            response = self.get(url_for('test.geolabel', level=level, code=code))
+            self.assertEqual(response.data, label)
+
+    def test_geolabel_priority(self):
+        test = Blueprint('test', __name__)
+
+        register_level('country', 'fake', 'Fake level')
+
+        coverage = GeoCoverage(territories=[
+            TerritoryReference(name='France', level='country', code='fr'),
+            TerritoryReference(name='Fake', level='fake', code='fake'),
+            TerritoryReference(name='Union Européenne', level='country-group', code='ue'),
+        ])
+
+        @test.route('/geolabel/')
+        def geolabel():
+            return render_template_string('{{ coverage|geolabel }}', coverage=coverage)
+
+        self.app.register_blueprint(test)
+
+        response = self.get(url_for('test.geolabel'))
+        self.assertEqual(response.data.decode('utf8'), 'Union Européenne')

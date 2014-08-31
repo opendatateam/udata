@@ -64,13 +64,13 @@
             </li>
             {% endif %}
 
-            {% if dataset.territorial_coverage.codes %}
+            {% if dataset.geo_coverage.territories %}
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Territorial coverage') }}">
                     <span class="fa fa-globe fa-fw"></span>
-                    {{ dataset.territorial_coverage|territorial_coverage }}
+                    {{ dataset.geo_coverage|geolabel }}
                 </a>
             </li>
             {% endif %}

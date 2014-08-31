@@ -7,7 +7,7 @@ import logging
 from datetime import date
 from urlparse import urlsplit, urlunsplit
 
-from flask import url_for, request, current_app, g
+from flask import url_for, request, current_app, g, json
 from jinja2 import Markup
 from werkzeug import url_decode, url_encode
 
@@ -323,3 +323,30 @@ def territorial_coverage(coverage):
             data[kind] = label
     sorter = lambda r: KINDS.index(r[0]) if r[0] in KINDS else len(KINDS)
     return [row[1] for row in sorted(data.items(), key=sorter)][0]
+
+
+@front.app_template_filter()
+@front.app_template_global()
+def geocoverage(coverage):
+    '''Display the biggest territory and labelize code'''
+    if not coverage or not coverage.geom:
+        return Markup('')
+    return json.dumps(coverage.geom)
+
+
+@front.app_template_filter()
+@front.app_template_global()
+def geolabel(coverage):
+    '''Display the biggest territory and labelize code'''
+
+    if not coverage or not coverage.territories:
+        return Markup('')
+    from udata.core.territories import LEVELS
+    top = None
+    for territory in coverage.territories:
+        if not top:
+            top = territory
+            continue
+        if LEVELS[territory.level]['position'] < LEVELS[top.level]['position']:
+            top  = territory
+    return top.name
