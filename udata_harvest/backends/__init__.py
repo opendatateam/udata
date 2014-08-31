@@ -100,8 +100,13 @@ class BaseBackend(object):
 
     def harvest_users(self):
         self.stdout('Harvesting users\n')
-        for user in self.remote_users():
-            user.save()
+        for idx, user in enumerate(self.remote_users()):
+            try:
+                user.save()
+            except Exception as e:
+                current_app.logger.error('Unable to save user %s: %s', user.fullname, e)
+            self.stdout('.' if idx % LOG_EACH else idx)
+        self.stdout('\n')
 
     def remote_users(self):
         log.debug('Remote users not implemented')

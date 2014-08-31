@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import hashlib
 import requests
 import logging
 
@@ -11,7 +12,7 @@ from dateutil.parser import parse
 from flask.ext.security import current_user
 
 from udata.models import db, Dataset, Resource, Organization, Reuse, User, License, TerritorialCoverage, Member
-from udata.models import Follow, FollowOrg, FollowDataset
+from udata.models import Follow, FollowUser, FollowOrg, FollowDataset
 from udata.utils import get_by, daterange_start, daterange_end
 
 from . import BaseBackend
@@ -131,12 +132,16 @@ class CkanBackend(BaseBackend):
             dataset.license = License.objects(id=details['license_id']).first() or License.objects.get(id='notspecified')
             dataset.tags = [tag['name'].lower() for tag in details['tags']]
 
-            dataset.frequency = self.map('frequency', details)
+            dataset.frequency = self.map('frequency', details) or 'unknown'
             dataset.created_at = parse(details['metadata_created'])
             dataset.last_modified = parse(details['metadata_modified'])
 
             if any_field(details, 'territorial_coverage', 'territorial_coverage_granularity'):
                 dataset.territorial_coverage = TerritorialCoverage(
+                    codes=[code.strip() for code in details.get('territorial_coverage', '').split(',') if code.strip()],
+                    granularity=self.map('territorial_coverage_granularity', details),
+                )
+                dataset.extras['territorial_coverage'] = TerritorialCoverage(
                     codes=[code.strip() for code in details.get('territorial_coverage', '').split(',') if code.strip()],
                     granularity=self.map('territorial_coverage_granularity', details),
                 )
@@ -153,12 +158,21 @@ class CkanBackend(BaseBackend):
             # Organization
             if details.get('organization'):
                 dataset.organization = self.get_harvested(Organization, details['organization']['id'], False)
+            else:
+                # Need to fetch user from roles
+                roles = self.get('roles_show', {'domain_object': name})['result']['roles']
+                for role in roles:
+                    if role['role'] == 'admin' and role['context'] == 'Package':
+                        dataset.owner = self.get_harvested(User, role['user_id'])
+                        break
 
             # Supplier
             if details.get('supplier_id'):
                 dataset.supplier = self.get_harvested(Organization, details['supplier_id'], False)
-                if dataset.supplier == dataset.organization:
-                    dataset.supplier = None
+
+            # Remote URL
+            if details.get('url'):
+                dataset.extras['remote_url'] = details['url']
 
             # Extras
             if 'extras' in details:
@@ -183,11 +197,14 @@ class CkanBackend(BaseBackend):
                 if not resource:
                     resource = Resource(id=res['id'])
                     dataset.resources.append(resource)
-                resource.title = res.get('title', 'No name')
+                resource.title = res.get('name', '') or ''
                 resource.url = res['url']
                 resource.description = res.get('description')
                 resource.format = res.get('format')
                 resource.hash = res.get('hash')
+                resource.created = parse(res['created'])
+                resource.modified = parse(res['revision_timestamp'])
+                resource.published = resource.published or resource.created
             yield dataset
 
             if dataset.id:
@@ -209,11 +226,13 @@ class CkanBackend(BaseBackend):
                 continue
             for details in resp['result']:
                 reuse_url = details['url']
-                reuse = self.get_harvested(Reuse, details['id'], url=reuse_url)
+                urlhash = Reuse.hash_url(reuse_url)
+                reuse, _ = Reuse.objects.get_or_create(urlhash=urlhash, auto_save=False)
+                reuse.url = reuse_url
                 reuse.title = details['title']
                 reuse.description = details['description']
                 reuse.type = details['type']
-                reuse.url = details['url']
+                # reuse.url = details['url']
                 reuse.image_url = details.get('image_url')
                 reuse.featured = bool(details.get('featured', False))
                 reuse.created_at = parse(details['created'])
