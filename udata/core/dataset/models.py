@@ -13,7 +13,7 @@ from udata.i18n import lazy_gettext as _
 
 __all__ = (
     'License', 'Resource', 'TerritorialCoverage', 'Dataset',
-    'UPDATE_FREQUENCIES', 'TERRITORIAL_GRANULARITIES',
+    'UPDATE_FREQUENCIES', 'TERRITORIAL_GRANULARITIES', 'GEO_GRANULARITIES',
     'DatasetIssue', 'FollowDataset', 'GeoCoverage',
 )
 

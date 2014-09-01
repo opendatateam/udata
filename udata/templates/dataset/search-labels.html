@@ -6,18 +6,24 @@
     {{ s.filter_label('supplier', _('Supplier'), ficon('fa-building-o'),
         labelize=datasets.label_func('supplier')
     ) }}
-    {{ s.filter_label('tag', _('Tag'), ficon('tag')) }}
+    {{ s.filter_label('tag', _('Tag'), ficon('fa-tag')) }}
     {{ s.filter_label('license', _('License'), ficon('copyright-mark'),
         labelize=datasets.label_func('license')
     ) }}
-    {{ s.filter_label('temporal_coverage', _('Temporal coverage'), ficon('calendar'),
+    {{ s.filter_label('temporal_coverage', _('Temporal coverage'), ficon('fa-calendar'),
         labelize=datasets.label_func('temporal_coverage')
     ) }}
-    {{ s.filter_label('format', _('Format'), ficon('file')) }}
-    {{ s.filter_label('reuses', _('Reuses'), ficon('random'),
+    {{ s.filter_label('territory', _('Territorial coverage'), ficon('fa-globe'),
+        labelize=datasets.label_func('territory')
+    ) }}
+    {{ s.filter_label('granularity', _('Territorial granularity'), ficon('fa-bullseye'),
+        labelize=datasets.label_func('granularity')
+    ) }}
+    {{ s.filter_label('format', _('Format'), ficon('fa-file')) }}
+    {{ s.filter_label('reuses', _('Reuses'), ficon('fa-retweet'),
         labelize=datasets.label_func('reuses')
     ) }}
-    {{ s.filter_label('followers', _('Followers'), ficon('eye-open'),
+    {{ s.filter_label('followers', _('Followers'), ficon('fa-eye'),
         labelize=datasets.label_func('followers')
     ) }}
 </div>

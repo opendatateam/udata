@@ -23,10 +23,14 @@ class Territory(db.Document):
     }
 
     def reference(self):
-        return TerritoryReference(name=self.name, level=self.level, code=self.code)
+        return TerritoryReference(id=self.id, name=self.name, level=self.level, code=self.code)
+
+    def __unicode__(self):
+        return self.name
 
 
 class TerritoryReference(db.EmbeddedDocument):
+    id = db.ObjectIdField(required=True)
     name = db.StringField(required=True)
     level = db.StringField(required=True)
     code = db.StringField(required=True)

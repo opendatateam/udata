@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.models import Dataset, Organization, License
+from udata.models import Dataset, Organization, License, Territory, GEO_GRANULARITIES
 from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
 from udata.search.fields import Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
 from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
 from udata.search.fields import BoolBooster, GaussDecay
 
 # Metrics are require for dataset search
-from . import metrics
+from . import metrics  # noqa
 
 __all__ = ('DatasetSearch', )
 
@@ -73,6 +73,7 @@ class DatasetSearch(ModelSearchAdapter):
                 'type': 'object',
                 'index_name': 'territories',
                 'properties': {
+                    'id': {'type': 'string'},
                     'name': {'type': 'string'},
                     'code': {'type': 'string'},
                 }
@@ -105,6 +106,8 @@ class DatasetSearch(ModelSearchAdapter):
         'organization': ModelTermFacet('organization', Organization),
         'supplier': ModelTermFacet('supplier', Organization),
         'license': ModelTermFacet('license', License),
+        'territory': ModelTermFacet('territories.id', Territory),
+        'granularity': TermFacet('granularity', lambda l, v: GEO_GRANULARITIES[v]),
         'format': TermFacet('resources.format'),
         'reuses': RangeFacet('metrics.reuses'),
         'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
@@ -175,7 +178,7 @@ class DatasetSearch(ModelSearchAdapter):
 
         if dataset.geo_coverage is not None:
             document.update({
-                'territories': [{'name': t.name, 'code': t.code} for t in dataset.geo_coverage.territories],
+                'territories': [{'id': str(t.id), 'name': t.name, 'code': t.code} for t in dataset.geo_coverage.territories],
                 'geom': dataset.geo_coverage.geom,
                 'granularity': dataset.geo_coverage.granularity,
             })

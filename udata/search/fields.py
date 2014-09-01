@@ -31,8 +31,9 @@ class Sort(object):
 
 
 class Facet(object):
-    def __init__(self, field, label=None, filter_label=None, icon=None):
+    def __init__(self, field, labelizer=None):
         self.field = field
+        self.labelizer = labelizer
 
     def to_query(self, **kwargs):
         '''Get the elasticsearch facet query'''
@@ -56,7 +57,7 @@ class Facet(object):
 
     def labelize(self, label, value):
         '''Get the label for a given value'''
-        return value
+        return self.labelizer(label, value) if self.labelizer else value
 
     def to_aggregations(self):
         return {}
@@ -136,8 +137,8 @@ class TermFacet(Facet):
 
 
 class ModelTermFacet(TermFacet):
-    def __init__(self, field, model):
-        super(ModelTermFacet, self).__init__(field)
+    def __init__(self, field, model, labelizer=None):
+        super(ModelTermFacet, self).__init__(field, labelizer)
         self.model = model
 
     def from_response(self, name, response):
@@ -163,7 +164,7 @@ class ModelTermFacet(TermFacet):
         }
 
     def labelize(self, label, value):
-        return unicode(self.model.objects.get(id=value))
+        return self.labelizer(label, value) if self.labelizer else unicode(self.model.objects.get(id=value))
 
 
 class ExtrasFacet(Facet):
@@ -183,8 +184,8 @@ class ExtrasFacet(Facet):
 
 
 class RangeFacet(Facet):
-    def __init__(self, field, cast=int):
-        super(RangeFacet, self).__init__(field)
+    def __init__(self, field, cast=int, labelizer=None):
+        super(RangeFacet, self).__init__(field, labelizer)
         self.cast = cast
 
     def to_query(self, **kwargs):
@@ -218,7 +219,7 @@ class RangeFacet(Facet):
         }
 
     def labelize(self, label, value):
-        return ': '.join([label, value])
+        return self.labelizer(label, value) if self.labelizer else ': '.join([label, value])
 
 
 def ts_to_dt(value):
@@ -312,7 +313,6 @@ class TemporalCoverageFacet(Facet):
                 }
             }
         }
-
 
     def labelize(self, label, value):
         start, end = self.parse_value(value)
