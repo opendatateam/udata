@@ -236,27 +236,24 @@
             </li>
             {% endif %}
 
-            {# Territorial coverage #}
-            {% if dataset.territorial_coverage %}
-                {% if dataset.territorial_coverage.codes %}
-                <li>
-                    <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
-                        title="{{ _('Territorial coverage') }}">
-                        <span class="glyphicon glyphicon-globe"></span>
-                    </a>
-                    {% for code in dataset.territorial_coverage.codes %}
-                    {{ code }}
-                    {% endfor %}
-                </li>
-                {% endif %}
-
-                {% if dataset.territorial_coverage.granularity %}
+            {# Spatial coverage #}
+            {% if dataset.geo_coverage %}
+                {% if dataset.geo_coverage.granularity %}
                 <li>
                     <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
                         title="{{ _('Territorial coverage granularity') }}">
                         <span class="glyphicon glyphicon-screenshot"></span>
                     </a>
-                    {{ dataset.territorial_coverage.granularity }}
+                    {{ dataset.geo_granularity_label }}
+                </li>
+                {% endif %}
+                {% if dataset.geo_coverage.territories %}
+                <li>
+                    <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                        title="{{ _('Territorial coverage') }}">
+                        <span class="glyphicon glyphicon-globe"></span>
+                    </a>
+                    {{ dataset.geo_coverage|geolabel }}
                 </li>
                 {% endif %}
             {% endif %}

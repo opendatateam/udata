@@ -53,13 +53,13 @@
             {% endif %}
 
             {# Territorial coverage #}
-            {% if dataset.territorial_coverage.granularity %}
+            {% if dataset.geo_coverage.granularity %}
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Territorial coverage granularity') }}">
                     <span class="fa fa-bullseye fa-fw"></span>
-                    {{ dataset.territorial_granularity_label }}
+                    {{ dataset.geo_granularity_label }}
                 </a>
             </li>
             {% endif %}

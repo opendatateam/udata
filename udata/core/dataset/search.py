@@ -69,6 +69,19 @@ class DatasetSearch(ModelSearchAdapter):
                     'end': {'type': 'long'},
                 }
             },
+            'territories': {
+                'type': 'object',
+                'index_name': 'territories',
+                'properties': {
+                    'name': {'type': 'string'},
+                    'code': {'type': 'string'},
+                }
+            },
+            'granularity': {'type': 'string', 'index': 'not_analyzed'},
+            'geom': {
+                'type': 'geo_shape',
+                'precision': '100m',
+            },
             'extras': {
                 'type': 'object',
                 'index_name': 'extra',
@@ -158,6 +171,13 @@ class DatasetSearch(ModelSearchAdapter):
                     'start': dataset.temporal_coverage.start.toordinal(),
                     'end': dataset.temporal_coverage.end.toordinal(),
                 }
+            })
+
+        if dataset.geo_coverage is not None:
+            document.update({
+                'territories': [{'name': t.name, 'code': t.code} for t in dataset.geo_coverage.territories],
+                'geom': dataset.geo_coverage.geom,
+                'granularity': dataset.geo_coverage.granularity,
             })
 
         return document

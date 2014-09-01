@@ -46,6 +46,18 @@ TERRITORIAL_GRANULARITIES = {
     'other': _('Other'),
 }
 
+GEO_GRANULARITIES = {
+    'poi': _('POI'),
+    'iris': _('Iris (Insee districts)'),
+    'town': _('Town'),
+    'canton': _('Canton'),
+    'epci': _('Intermunicipal (EPCI)'),
+    'county': _('County'),
+    'region': _('Region'),
+    'country': _('Country'),
+    'other': _('Other'),
+}
+
 
 class License(db.Document):
     id = db.StringField(primary_key=True)
@@ -99,9 +111,9 @@ class TerritorialCoverage(db.EmbeddedDocument):
 class GeoCoverage(db.EmbeddedDocument):
     geom = db.MultiPolygonField()
     territories = db.ListField(db.EmbeddedDocumentField(TerritoryReference))
+    granularity = db.StringField(choices=GEO_GRANULARITIES.keys())
 
 
-# @db.historize
 class Dataset(WithMetrics, db.Datetimed, db.Document):
     title = db.StringField(max_length=255, required=True)
     slug = db.SlugField(max_length=255, required=True, populate_from='title', update=True)
@@ -177,6 +189,10 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     @property
     def territorial_granularity_label(self):
         return TERRITORIAL_GRANULARITIES[self.territorial_coverage.granularity or 'other']
+
+    @property
+    def geo_granularity_label(self):
+        return GEO_GRANULARITIES[self.geo_coverage.granularity or 'other']
 
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)
