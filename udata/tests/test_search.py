@@ -241,6 +241,7 @@ class SearchQueryTest(TestCase):
                     {'multi_match': {
                         'query': 'test',
                         'analyzer': search.i18n_analyzer,
+                        'type': 'cross_fields',
                         'fields': ['title^2', 'description']
                     }}
                 ]
@@ -257,6 +258,7 @@ class SearchQueryTest(TestCase):
                     {'multi_match': {
                         'query': 'test',
                         'analyzer': search.i18n_analyzer,
+                        'type': 'cross_fields',
                         'fields': ['title^2', 'description']
                     }}
                 ]
@@ -273,6 +275,7 @@ class SearchQueryTest(TestCase):
                     {'multi_match': {
                         'query': 'test',
                         'analyzer': search.i18n_analyzer,
+                        'type': 'cross_fields',
                         'fields': ['title^2', 'description']
                     }}
                 ],
@@ -280,6 +283,7 @@ class SearchQueryTest(TestCase):
                     {'multi_match': {
                         'query': 'negated',
                         'analyzer': search.i18n_analyzer,
+                        'type': 'cross_fields',
                         'fields': ['title^2', 'description']
                     }}
                 ]
@@ -296,6 +300,7 @@ class SearchQueryTest(TestCase):
                     {'multi_match': {
                         'query': 'test',
                         'analyzer': search.i18n_analyzer,
+                        'type': 'cross_fields',
                         'fields': ['title^2', 'description'],
                         'fuzziness': 'AUTO',
                         'prefix_length': 2,
@@ -314,6 +319,7 @@ class SearchQueryTest(TestCase):
                     {'multi_match': {
                         'query': 'test',
                         'analyzer': search.i18n_analyzer,
+                        'type': 'cross_fields',
                         'fields': ['title^2', 'description']
                     }}
                 ]
@@ -345,6 +351,7 @@ class SearchQueryTest(TestCase):
             {'multi_match': {
                 'query': 'test',
                 'analyzer': search.i18n_analyzer,
+                'type': 'cross_fields',
                 'fields': ['title^2', 'description']
             }},
             {'term': {'tags': 'value'}},
@@ -361,6 +368,7 @@ class SearchQueryTest(TestCase):
             {'multi_match': {
                 'query': 'test',
                 'analyzer': search.i18n_analyzer,
+                'type': 'cross_fields',
                 'fields': ['title^2', 'description']
             }},
             {'term': {'extras.key': 'value'}},
@@ -382,6 +390,7 @@ class SearchQueryTest(TestCase):
             {'multi_match': {
                 'query': 'test',
                 'analyzer': search.i18n_analyzer,
+                'type': 'cross_fields',
                 'fields': ['title^2', 'description']
             }},
             {'term': {'tags': 'value-1'}},

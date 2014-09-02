@@ -132,7 +132,7 @@ class TermFacet(Facet):
         return {
             'type': 'terms',
             'terms': [(r['term'], r['count']) for r in facet['terms']],
-            'visible': len(facet['terms']) > 0,
+            'visible': len(facet['terms']) > 1,
         }
 
 
@@ -160,7 +160,7 @@ class ModelTermFacet(TermFacet):
                 (objects.get(cast(f['term'])), f['count'])
                 for f in facet['terms']
             ],
-            'visible': len(facet['terms']) > 0,
+            'visible': len(facet['terms']) > 1,
         }
 
     def labelize(self, label, value):

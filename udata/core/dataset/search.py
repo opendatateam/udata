@@ -93,6 +93,8 @@ class DatasetSearch(ModelSearchAdapter):
         'title^3',
         'description',
         'tags',
+        'territories.name',
+        'code',
     )
     sorts = {
         'title': Sort('title.raw'),
