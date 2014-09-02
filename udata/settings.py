@@ -9,6 +9,7 @@ class Defaults(object):
     LANGUAGES = {
         'en': 'English',
         'fr': 'Français',
+        'es': 'Español',
     }
     DEFAULT_LANGUAGE = 'en'
     SECRET_KEY = 'Default uData secret key'
