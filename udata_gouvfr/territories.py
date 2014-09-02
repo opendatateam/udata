@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.core.territories import register_level_tree, register_level
-from udata.core.territories.commands import territory_extractor, register_aggregate
+from udata.core.spatial import register_level_tree, register_level
+from udata.core.spatial.commands import territory_extractor, register_aggregate
 from udata.i18n import lazy_gettext as _
 
 register_level_tree('country', (

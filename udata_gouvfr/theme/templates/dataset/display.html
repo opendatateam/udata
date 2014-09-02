@@ -297,23 +297,23 @@
                         {% endif %}
 
                         {# Spatial coverage #}
-                        {% if dataset.geo_coverage %}
-                            {% if dataset.geo_coverage.granularity %}
+                        {% if dataset.spatial %}
+                            {% if dataset.spatial.granularity %}
                             <li>
                                 <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
                                     title="{{ _('Territorial coverage granularity') }}">
                                     <span class="glyphicon glyphicon-screenshot"></span>
                                 </a>
-                                {{ dataset.geo_granularity_label }}
+                                {{ dataset.spatial.granularity_label }}
                             </li>
                             {% endif %}
-                            {% if dataset.geo_coverage.territories %}
+                            {% if dataset.spatial.territories %}
                             <li>
                                 <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
                                     title="{{ _('Territorial coverage') }}">
                                     <span class="glyphicon glyphicon-globe"></span>
                                 </a>
-                                {{ dataset.geo_coverage|geolabel }}
+                                {{ dataset.spatial.top_label }}
                             </li>
                             {% endif %}
                         {% endif %}
@@ -332,11 +332,11 @@
                 </div>
 
                 {# Geospatial panel #}
-                {% if dataset.geo_coverage %}
+                {% if dataset.spatial %}
                 <div class="card">
                     <h3>{{ _('Spatial coverage') }}</h3>
                     <div id="coverage-map" class="aside-map"
-                        data-geojson="{{dataset.geo_coverage|geocoverage}}"></div>
+                        data-geojson="{{dataset.spatial.geom|to_json}}"></div>
                 </div>
                 {% endif %}
 
