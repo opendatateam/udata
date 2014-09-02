@@ -51,24 +51,24 @@
             {% endif %}
 
             {# Spatial coverage #}
-            {% if dataset.geo_coverage.granularity %}
+            {% if dataset.spatial.granularity %}
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Territorial coverage granularity') }}">
                     <span class="fa fa-bullseye fa-fw"></span>
-                    {{ dataset.geo_coverage.granularity_label }}
+                    {{ dataset.spatial.granularity_label }}
                 </a>
             </li>
             {% endif %}
 
-            {% if dataset.geo_coverage.territories %}
+            {% if dataset.spatial.territories %}
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Territorial coverage') }}">
                     <span class="fa fa-globe fa-fw"></span>
-                    {{ dataset.geo_coverage|geolabel }}
+                    {{ dataset.spatial|geolabel }}
                 </a>
             </li>
             {% endif %}

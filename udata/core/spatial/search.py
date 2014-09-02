@@ -2,10 +2,7 @@
 from __future__ import unicode_literals
 
 from udata.models import Territory
-from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
-from udata.search.fields import Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
-from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
-from udata.search.fields import BoolBooster, GaussDecay
+from udata.search import ModelSearchAdapter
 
 __all__ = ('TerritorySearch', )
 

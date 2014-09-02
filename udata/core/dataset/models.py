@@ -7,14 +7,14 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
-from udata.models import db, WithMetrics, Issue, Follow, GeoCoverage
+from udata.models import db, WithMetrics, Issue, Follow, SpatialCoverage
 from udata.i18n import lazy_gettext as _
 
 
 __all__ = (
-    'License', 'Resource', 'TerritorialCoverage', 'Dataset',
-    'UPDATE_FREQUENCIES', 'TERRITORIAL_GRANULARITIES',
+    'License', 'Resource', 'Dataset',
     'DatasetIssue', 'FollowDataset',
+    'UPDATE_FREQUENCIES',
 )
 
 UPDATE_FREQUENCIES = {
@@ -32,18 +32,6 @@ UPDATE_FREQUENCIES = {
     'triennial': _('Triennial'),
     'quinquennial': _('Quinquennial'),
     'unknown': _('Unknown'),
-}
-
-TERRITORIAL_GRANULARITIES = {
-    'poi': _('POI'),
-    'iris': _('Iris (Insee districts)'),
-    'town': _('Town'),
-    'canton': _('Canton'),
-    'epci': _('Intermunicipal (EPCI)'),
-    'county': _('County'),
-    'region': _('Region'),
-    'country': _('Country'),
-    'other': _('Other'),
 }
 
 
@@ -85,17 +73,6 @@ class Resource(db.EmbeddedDocument):
     on_deleted = Signal()
 
 
-class TerritorialCoverage(db.EmbeddedDocument):
-    codes = db.ListField(db.StringField())
-    granularity = db.StringField(choices=TERRITORIAL_GRANULARITIES.keys())
-
-    def serialize(self):
-        return {
-            'codes': self.codes,
-            'granularity': self.granularity,
-        }
-
-
 class Dataset(WithMetrics, db.Datetimed, db.Document):
     title = db.StringField(max_length=255, required=True)
     slug = db.SlugField(max_length=255, required=True, populate_from='title', update=True)
@@ -113,8 +90,7 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
 
     frequency = db.StringField(choices=UPDATE_FREQUENCIES.keys())
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
-    territorial_coverage = db.EmbeddedDocumentField(TerritorialCoverage)
-    geo_coverage = db.EmbeddedDocumentField(GeoCoverage)
+    spatial = db.EmbeddedDocumentField(SpatialCoverage)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()

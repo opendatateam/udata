@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.models import Dataset, Organization, License, Territory, GEO_GRANULARITIES
+from udata.models import Dataset, Organization, License, Territory, SPATIAL_GRANULARITIES
 from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
 from udata.search.fields import Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
 from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
@@ -109,7 +109,7 @@ class DatasetSearch(ModelSearchAdapter):
         'supplier': ModelTermFacet('supplier', Organization),
         'license': ModelTermFacet('license', License),
         'territory': ModelTermFacet('territories.id', Territory),
-        'granularity': TermFacet('granularity', lambda l, v: GEO_GRANULARITIES[v]),
+        'granularity': TermFacet('granularity', lambda l, v: SPATIAL_GRANULARITIES[v]),
         'format': TermFacet('resources.format'),
         'reuses': RangeFacet('metrics.reuses'),
         'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
@@ -178,11 +178,11 @@ class DatasetSearch(ModelSearchAdapter):
                 }
             })
 
-        if dataset.geo_coverage is not None:
+        if dataset.spatial is not None:
             document.update({
-                'territories': [{'id': str(t.id), 'name': t.name, 'code': t.code} for t in dataset.geo_coverage.territories],
-                'geom': dataset.geo_coverage.geom,
-                'granularity': dataset.geo_coverage.granularity,
+                'territories': [{'id': str(t.id), 'name': t.name, 'code': t.code} for t in dataset.spatial.territories],
+                'geom': dataset.spatial.geom,
+                'granularity': dataset.spatial.granularity,
             })
 
         return document

@@ -5,10 +5,10 @@ from udata.i18n import lazy_gettext as _
 from udata.models import db
 
 
-__all__ = ('Territory', 'TerritoryReference', 'GeoCoverage', 'GEO_GRANULARITIES')
+__all__ = ('Territory', 'TerritoryReference', 'SpatialCoverage', 'SPATIAL_GRANULARITIES')
 
 
-GEO_GRANULARITIES = {
+SPATIAL_GRANULARITIES = {
     'poi': _('POI'),
     'iris': _('Iris (Insee districts)'),
     'town': _('Town'),
@@ -50,11 +50,12 @@ class TerritoryReference(db.EmbeddedDocument):
     code = db.StringField(required=True)
 
 
-class GeoCoverage(db.EmbeddedDocument):
+class SpatialCoverage(db.EmbeddedDocument):
+    '''Represent a spatial coverage as a list of territories and/or a geometry'''
     geom = db.MultiPolygonField()
     territories = db.ListField(db.EmbeddedDocumentField(TerritoryReference))
-    granularity = db.StringField(choices=GEO_GRANULARITIES.keys())
+    granularity = db.StringField(choices=SPATIAL_GRANULARITIES.keys())
 
     @property
     def granularity_label(self):
-        return GEO_GRANULARITIES[self.granularity or 'other']
+        return SPATIAL_GRANULARITIES[self.granularity or 'other']

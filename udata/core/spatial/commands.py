@@ -13,7 +13,7 @@ from shapely.geometry import shape, MultiPolygon
 from shapely.ops import cascaded_union
 
 from udata.commands import manager
-from udata.core.territories.models import Territory
+from udata.models import Territory
 
 
 EXTRACTORS = {}
