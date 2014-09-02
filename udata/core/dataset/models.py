@@ -7,14 +7,14 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
-from udata.models import db, WithMetrics, Issue, Follow, TerritoryReference
+from udata.models import db, WithMetrics, Issue, Follow, GeoCoverage
 from udata.i18n import lazy_gettext as _
 
 
 __all__ = (
     'License', 'Resource', 'TerritorialCoverage', 'Dataset',
-    'UPDATE_FREQUENCIES', 'TERRITORIAL_GRANULARITIES', 'GEO_GRANULARITIES',
-    'DatasetIssue', 'FollowDataset', 'GeoCoverage',
+    'UPDATE_FREQUENCIES', 'TERRITORIAL_GRANULARITIES',
+    'DatasetIssue', 'FollowDataset',
 )
 
 UPDATE_FREQUENCIES = {
@@ -35,18 +35,6 @@ UPDATE_FREQUENCIES = {
 }
 
 TERRITORIAL_GRANULARITIES = {
-    'poi': _('POI'),
-    'iris': _('Iris (Insee districts)'),
-    'town': _('Town'),
-    'canton': _('Canton'),
-    'epci': _('Intermunicipal (EPCI)'),
-    'county': _('County'),
-    'region': _('Region'),
-    'country': _('Country'),
-    'other': _('Other'),
-}
-
-GEO_GRANULARITIES = {
     'poi': _('POI'),
     'iris': _('Iris (Insee districts)'),
     'town': _('Town'),
@@ -106,12 +94,6 @@ class TerritorialCoverage(db.EmbeddedDocument):
             'codes': self.codes,
             'granularity': self.granularity,
         }
-
-
-class GeoCoverage(db.EmbeddedDocument):
-    geom = db.MultiPolygonField()
-    territories = db.ListField(db.EmbeddedDocumentField(TerritoryReference))
-    granularity = db.StringField(choices=GEO_GRANULARITIES.keys())
 
 
 class Dataset(WithMetrics, db.Datetimed, db.Document):
@@ -185,14 +167,6 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     @property
     def frequency_label(self):
         return UPDATE_FREQUENCIES.get(self.frequency or 'unknown', UPDATE_FREQUENCIES['unknown'])
-
-    @property
-    def territorial_granularity_label(self):
-        return TERRITORIAL_GRANULARITIES[self.territorial_coverage.granularity or 'other']
-
-    @property
-    def geo_granularity_label(self):
-        return GEO_GRANULARITIES[self.geo_coverage.granularity or 'other']
 
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)

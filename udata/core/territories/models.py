@@ -1,10 +1,24 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from udata.i18n import lazy_gettext as _
 from udata.models import db
 
 
-__all__ = ('Territory', 'TerritoryReference')
+__all__ = ('Territory', 'TerritoryReference', 'GeoCoverage', 'GEO_GRANULARITIES')
+
+
+GEO_GRANULARITIES = {
+    'poi': _('POI'),
+    'iris': _('Iris (Insee districts)'),
+    'town': _('Town'),
+    'canton': _('Canton'),
+    'epci': _('Intermunicipal (EPCI)'),
+    'county': _('County'),
+    'region': _('Region'),
+    'country': _('Country'),
+    'other': _('Other'),
+}
 
 
 class Territory(db.Document):
@@ -34,3 +48,13 @@ class TerritoryReference(db.EmbeddedDocument):
     name = db.StringField(required=True)
     level = db.StringField(required=True)
     code = db.StringField(required=True)
+
+
+class GeoCoverage(db.EmbeddedDocument):
+    geom = db.MultiPolygonField()
+    territories = db.ListField(db.EmbeddedDocumentField(TerritoryReference))
+    granularity = db.StringField(choices=GEO_GRANULARITIES.keys())
+
+    @property
+    def granularity_label(self):
+        return GEO_GRANULARITIES[self.granularity or 'other']
