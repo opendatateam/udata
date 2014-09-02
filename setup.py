@@ -78,8 +78,7 @@ setup(
     tests_require=tests_require,
     extras_require={
         'test': tests_require,
-        # 'sentry': pip('sentry.pip'),
-        # 'harvest': pip('harvest.pip'),
+        'geo': pip('geo.pip'),
     },
     entry_points={
         'console_scripts': [

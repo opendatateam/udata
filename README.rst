@@ -20,6 +20,8 @@ Compatibility
 
 udata requires Python 2.7+, MongoDB, 2.4+, ElasticSearch 1.0+ and Redis.
 
+Some geospatial features requires GDAL 1.8+ and GEOS 3.1+.
+
 
 Installation
 ============
@@ -29,12 +31,16 @@ You can install udata with pip:
 .. code-block:: console
 
     $ pip install udata
+    # or
+    $ pip install udata[geo]
 
 or with easy_install:
 
 .. code-block:: console
 
     $ easy_install udata
+    # or
+    $ easy_install udata[geo]
 
 
 ElasticSearch
