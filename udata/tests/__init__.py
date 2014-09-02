@@ -128,11 +128,14 @@ class SearchTestMixin(DBTestMixin):
     '''A mixin allowing to optionnaly enable indexation and cleanup after'''
     _used_search = False
 
-    @contextmanager
-    def autoindex(self):
+    def init_search(self):
         self._used_search = True
         self.app.config['AUTO_INDEX'] = True
         es.initialize()
+
+    @contextmanager
+    def autoindex(self):
+        self.init_search()
         yield
         es.indices.refresh(index=es.index_name)
 

@@ -27,6 +27,8 @@ class SuggestTagsAPI(API):
                 }
             }
         })
+        if 'tags' not in result:
+            return []
         return sorted(result['tags'][0]['options'], key=lambda o: len(o['text']))
 
 
@@ -44,6 +46,8 @@ class SuggestFormatsAPI(API):
                 }
             }
         })
+        if 'formats' not in result:
+            return []
         return sorted(result['formats'][0]['options'], key=lambda o: len(o['text']))
 
 
@@ -61,6 +65,8 @@ class SuggestOrgsAPI(API):
                 }
             }
         })
+        if 'organizations' not in result:
+            return []
         return [
             {
                 'id': opt['payload']['id'],
@@ -87,6 +93,8 @@ class SuggestDatasetsAPI(API):
                 }
             }
         })
+        if 'datasets' not in result:
+            return []
         return [
             {
                 'id': opt['payload']['id'],
@@ -113,6 +121,8 @@ class SuggestReusesAPI(API):
                 }
             }
         })
+        if 'reuses' not in result:
+            return []
         return [
             {
                 'id': opt['payload']['id'],
@@ -139,6 +149,8 @@ class SuggestUsersAPI(API):
                 }
             }
         })
+        if 'users' not in result:
+            return []
         return [
             {
                 'id': opt['payload']['id'],
@@ -164,6 +176,8 @@ class SuggestTerritoriesAPI(API):
                 }
             }
         })
+        if 'territories' not in result:
+            return []
         return [
             {
                 'id': opt['payload']['id'],

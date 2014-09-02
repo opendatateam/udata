@@ -36,7 +36,7 @@ class SuggestAPITest(APITestCase):
             self.assertIn('score', suggestion)
             self.assertTrue(suggestion['text'].startswith('test'))
 
-    def test_suggest_tags_api_empty(self):
+    def test_suggest_tags_api_no_match(self):
         '''It should not provide tag suggestion if no match'''
         with self.autoindex():
             for i in range(3):
@@ -44,6 +44,13 @@ class SuggestAPITest(APITestCase):
                 ReuseFactory(tags=tags, datasets=[DatasetFactory()])
                 DatasetFactory(tags=tags, resources=[ResourceFactory()])
 
+        response = self.get(url_for('api.suggest_tags'), qs={'q': 'bbbb', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
+
+    def test_suggest_tags_api_empty(self):
+        '''It should not provide tag suggestion if no data'''
+        self.init_search()
         response = self.get(url_for('api.suggest_tags'), qs={'q': 'bbbb', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
@@ -67,13 +74,20 @@ class SuggestAPITest(APITestCase):
             self.assertIn('score', suggestion)
             self.assertTrue(suggestion['text'].startswith('test'))
 
-    def test_suggest_format_api_empty(self):
+    def test_suggest_format_api_no_match(self):
         '''It should not provide format suggestion if no match'''
         with self.autoindex():
             DatasetFactory(resources=[
                 ResourceFactory(format=faker.word()) for _ in range(3)
             ])
 
+        response = self.get(url_for('api.suggest_formats'), qs={'q': 'test', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
+
+    def test_suggest_format_api_empty(self):
+        '''It should not provide format suggestion if no data'''
+        self.init_search()
         response = self.get(url_for('api.suggest_formats'), qs={'q': 'test', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
@@ -98,12 +112,19 @@ class SuggestAPITest(APITestCase):
             self.assertIn('image_url', suggestion)
             self.assertTrue(suggestion['title'].startswith('test'))
 
-    def test_suggest_datasets_api_empty(self):
+    def test_suggest_datasets_api_no_match(self):
         '''It should not provide dataset suggestion if no match'''
         with self.autoindex():
             for i in range(3):
                 DatasetFactory(resources=[ResourceFactory()])
 
+        response = self.get(url_for('api.suggest_datasets'), qs={'q': 'xxxxxx', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
+
+    def test_suggest_datasets_api_empty(self):
+        '''It should not provide dataset suggestion if no data'''
+        self.init_search()
         response = self.get(url_for('api.suggest_datasets'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
@@ -146,12 +167,19 @@ class SuggestAPITest(APITestCase):
             self.assertIn('score', suggestion)
             self.assertIn('test', suggestion['fullname'])
 
-    def test_suggest_users_api_empty(self):
+    def test_suggest_users_api_no_match(self):
         '''It should not provide user suggestion if no match'''
         with self.autoindex():
             for i in range(3):
                 UserFactory()
 
+        response = self.get(url_for('api.suggest_users'), qs={'q': 'xxxxxx', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
+
+    def test_suggest_users_api_empty(self):
+        '''It should not provide user suggestion if no data'''
+        self.init_search()
         response = self.get(url_for('api.suggest_users'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
@@ -176,12 +204,19 @@ class SuggestAPITest(APITestCase):
             self.assertIn('image_url', suggestion)
             self.assertTrue(suggestion['name'].startswith('test'))
 
-    def test_suggest_organizations_api_empty(self):
+    def test_suggest_organizations_api_no_match(self):
         '''It should not provide organization suggestion if no match'''
         with self.autoindex():
             for i in range(3):
                 OrganizationFactory()
 
+        response = self.get(url_for('api.suggest_orgs'), qs={'q': 'xxxxxx', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
+
+    def test_suggest_organizations_api_empty(self):
+        '''It should not provide organization suggestion if no data'''
+        self.init_search()
         response = self.get(url_for('api.suggest_orgs'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
@@ -206,12 +241,19 @@ class SuggestAPITest(APITestCase):
             self.assertIn('image_url', suggestion)
             self.assertTrue(suggestion['title'].startswith('test'))
 
-    def test_suggest_reuses_api_empty(self):
+    def test_suggest_reuses_api_no_match(self):
         '''It should not provide reuse suggestion if no match'''
         with self.autoindex():
             for i in range(3):
                 ReuseFactory(datasets=[DatasetFactory()])
 
+        response = self.get(url_for('api.suggest_reuses'), qs={'q': 'xxxxxx', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
+
+    def test_suggest_reuses_api_empty(self):
+        '''It should not provide reuse suggestion if no data'''
+        self.init_search()
         response = self.get(url_for('api.suggest_reuses'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
@@ -273,12 +315,19 @@ class SuggestAPITest(APITestCase):
             self.assertIn('code', suggestion)
             self.assertEqual(suggestion['name'], 'in')
 
-    def test_suggest_territory_empty(self):
+    def test_suggest_territory_no_match(self):
         '''It should not provide reuse suggestion if no match'''
         with self.autoindex():
             for i in range(3):
                 TerritoryFactory(name=5 * '{0}'.format(i), code=3 * '{0}'.format(i))
 
+        response = self.get(url_for('api.suggest_territories'), qs={'q': 'xxxxxx', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
+
+    def test_suggest_territory_empty(self):
+        '''It should not provide reuse suggestion if no data'''
+        self.init_search()
         response = self.get(url_for('api.suggest_territories'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
