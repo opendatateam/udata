@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from udata.models import User
-from udata.search import ModelSearchAdapter, Sort, i18n_analyzer
+from udata.search import ModelSearchAdapter
 
 __all__ = ('UserSearch', )
 

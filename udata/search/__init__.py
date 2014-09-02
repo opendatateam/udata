@@ -141,5 +141,6 @@ def init_app(app):
     import udata.core.dataset.search
     import udata.core.reuse.search
     import udata.core.organization.search
+    import udata.core.territories.search
 
     es.init_app(app)

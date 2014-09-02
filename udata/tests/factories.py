@@ -3,13 +3,90 @@ from __future__ import unicode_literals
 
 import factory
 
-from factory.mongoengine import MongoEngineFactory
 from factory.fuzzy import FuzzyChoice
+from factory.mongoengine import MongoEngineFactory
 from faker import Faker
+from faker.providers import BaseProvider
 
 from udata import models
 
 faker = Faker()
+
+
+class GeoJsonProvider(BaseProvider):
+    '''A Fake GeoJSON provider'''
+    def random_range(self, max=5):
+        return range(self.random_int(1, max))
+
+    def coordinates(self):
+        return [float(faker.latitude()), float(faker.longitude())]
+
+    def random_coordinates(self):
+        return [self.coordinates() for _ in self.random_range()]
+
+    def point(self):
+        return {
+            'type': 'Point',
+            'coordinates': self.coordinates()
+        }
+
+    def linestring(self):
+        return {
+            'type': 'LineString',
+            'coordinates': [self.coordinates() for _ in self.random_range()]
+        }
+
+    def _closed_line(self):
+        start = self.coordinates()
+        return [start] + [self.coordinates() for _ in self.random_range()] + [start]
+
+    def polygon(self):
+        return {
+            'type': 'Polygon',
+            'coordinates': [self._closed_line() for _ in self.random_range()]
+        }
+
+    def multipoint(self):
+        return {
+            'type': 'MultiPoint',
+            'coordinates': [
+                self.coordinates() for _ in self.random_range()
+            ]
+        }
+
+    def multilinestring(self):
+        return {
+            'type': 'MultiLineString',
+            'coordinates': [
+                [
+                    self.coordinates() for _ in self.random_range()
+                ]  for _ in self.random_range()
+            ]
+        }
+
+    def multipolygon(self):
+        return {
+            'type': 'MultiPolygon',
+            'coordinates': [
+                [self._closed_line() for _ in self.random_range()]
+                for _ in self.random_range()
+            ]
+        }
+
+    def geometry_collection(self):
+        element_factories = [
+            self.point, self.linestring, self.polygon,
+            self.multipoint, self.multilinestring, self.multipolygon
+        ]
+        return {
+            'type': 'GeometryCollection',
+            'geometries': [
+                self.random_element(element_factories)()
+                for _ in self.random_range()
+            ]
+        }
+
+faker.add_provider(GeoJsonProvider)
 
 
 class UserFactory(MongoEngineFactory):
@@ -87,3 +164,13 @@ class PostFactory(MongoEngineFactory):
 
     name = factory.LazyAttribute(lambda o: faker.sentence())
     content = factory.LazyAttribute(lambda o: faker.text())
+
+
+class TerritoryFactory(MongoEngineFactory):
+    class Meta:
+        model = models.Territory
+
+    level = 'town'
+    name = factory.LazyAttribute(lambda o: faker.city())
+    code = factory.LazyAttribute(lambda o: faker.postcode())
+    geom = factory.LazyAttribute(lambda o: faker.multipolygon())

@@ -148,3 +148,28 @@ class SuggestUsersAPI(API):
             }
             for opt in result['users'][0]['options']
         ]
+
+
+@ns.route('/territories', endpoint='suggest_territories', doc={'parser': parser})
+class SuggestTerritoriesAPI(API):
+    def get(self):
+        '''Suggest territories'''
+        args = parser.parse_args()
+        result = es.suggest(index=es.index_name, body={
+            'territories': {
+                'text': args['q'],
+                'completion': {
+                    'field': 'territory_suggest',
+                    'size': args['size'],
+                }
+            }
+        })
+        return [
+            {
+                'id': opt['payload']['id'],
+                'name': opt['payload']['name'],
+                'code': opt['payload']['code'],
+                'score': opt['score'],
+            }
+            for opt in result['territories'][0]['options']
+        ]
