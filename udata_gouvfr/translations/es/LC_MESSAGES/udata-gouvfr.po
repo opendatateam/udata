@@ -1,0 +1,644 @@
+# Translations template for udata-gouvfr.
+# Copyright (C) 2014 ORGANIZATION
+# This file is distributed under the same license as the udata-gouvfr project.
+# 
+# Translators:
+msgid ""
+msgstr ""
+"Project-Id-Version: uData-gouv.fr\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2014-08-29 17:02+0200\n"
+"PO-Revision-Date: 2014-04-28 08:28+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Spanish (http://www.transifex.com/projects/p/udata-gouvfr/language/es/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 1.3\n"
+"Language: es\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: udata_gouvfr/metrics.py:15 udata_gouvfr/theme/templates/metrics.html:48
+msgid "Public services"
+msgstr ""
+
+#: udata_gouvfr/templates/developer.html:4
+msgid "Developer documentation"
+msgstr ""
+
+#: udata_gouvfr/templates/developer.html:5
+msgid "Developer documentation and contribution guidelines"
+msgstr ""
+
+#: udata_gouvfr/templates/developer.html:6
+msgid "developer"
+msgstr ""
+
+#: udata_gouvfr/templates/developer.html:6
+msgid "documentation"
+msgstr ""
+
+#: udata_gouvfr/templates/developer.html:10
+msgid "Developers"
+msgstr ""
+
+#: udata_gouvfr/templates/developer.html:17
+msgid "Coming soon"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:6
+msgid "The Open Data"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:8
+#: udata_gouvfr/theme/templates/header.html:24
+msgid "How it works ?"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:9
+msgid "Publishers"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:12
+#: udata_gouvfr/theme/templates/header.html:31
+msgid "Open Licence"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:15
+#: udata_gouvfr/theme/templates/header.html:35
+#: udata_gouvfr/theme/templates/metrics.html:4
+msgid "Metrics"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:18
+msgid "Credits"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:19
+msgid "Terms of use"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:23
+#: udata_gouvfr/theme/templates/subnav-small.html:23
+msgid "Topics"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:36
+msgid "Network"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:48
+msgid "Contact"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:61
+msgid "Back to top"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/header.html:7
+msgid "Toggle navigation"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/header.html:13
+msgid "Open platform for french public data"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/header.html:27
+#: udata_gouvfr/theme/templates/header.html:75
+#: udata_gouvfr/theme/templates/metrics.html:43
+#: udata_gouvfr/theme/templates/organization/display.html:20
+msgid "Organizations"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/header.html:71
+msgid "My profile"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/header.html:89
+msgid "Settings"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/header.html:97
+msgid "Site administration"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/header.html:105
+msgid "Logout"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/header.html:112
+#: udata_gouvfr/theme/templates/header.html:115
+msgid "Sign In / Register"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:17
+msgid "News"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:28
+msgid "Discussion topic"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:36
+#, python-format
+msgid "Photo by %(author)s"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:50
+msgid "Best reuse cases"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:100
+msgid "Essential datasets"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:101
+msgid "Latest datasets"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:106
+msgid "Popular reuses"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:107
+msgid "Latest reuses"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:141
+#: udata_gouvfr/theme/templates/home.html:162
+msgid "See more"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/metrics.html:5
+msgid "Site metrics"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/metrics.html:6
+msgid "metrics"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/metrics.html:19
+msgid "Data"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/metrics.html:23
+#: udata_gouvfr/theme/templates/dataset/display.html:20
+#: udata_gouvfr/theme/templates/organization/display.html:181
+#: udata_gouvfr/theme/templates/topic/display.html:19
+msgid "Datasets"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/metrics.html:28
+#: udata_gouvfr/theme/templates/dataset/display.html:488
+#: udata_gouvfr/theme/templates/organization/display.html:186
+#: udata_gouvfr/theme/templates/topic/display.html:25
+msgid "Reuses"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/metrics.html:33
+#: udata_gouvfr/theme/templates/dataset/display.html:135
+#: udata_gouvfr/theme/templates/dataset/display.html:430
+msgid "Resources"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/metrics.html:39
+msgid "Community"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/metrics.html:53
+msgid "Users"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/subnav-large.html:18
+#: udata_gouvfr/theme/templates/subnav-small.html:14
+#: udata_gouvfr/theme/templates/topic/subnav.html:18
+msgid "Search"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/subnav-large.html:38
+msgid "Share, improve and reuse public data"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/subnav-large.html:41
+#: udata_gouvfr/theme/templates/subnav-large.html:44
+#: udata_gouvfr/theme/templates/subnav-small.html:40
+#: udata_gouvfr/theme/templates/subnav-small.html:43
+msgid "Contribute !"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:9
+msgid "dataset"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:29
+#: udata_gouvfr/theme/templates/dataset/display.html:180
+#: udata_gouvfr/theme/templates/dataset/display.html:466
+#: udata_gouvfr/theme/templates/dataset/display.html:525
+#: udata_gouvfr/theme/templates/organization/display.html:40
+msgid "Edit"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:39
+#: udata_gouvfr/theme/templates/dataset/display.html:190
+msgid "Featured"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:63
+msgid "This dataset comes from a certified public service"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:65
+#, python-format
+msgid ""
+"Published on %(date)s by <a href=\"%(url)s\" "
+"title=\"%(author)s\">%(author)s</a>"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:73
+#, python-format
+msgid ""
+"This dataset has been published on %(date)s on the initiative and under the "
+"responsibility of <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:82
+#: udata_gouvfr/theme/templates/dataset/display.html:84
+msgid "Not certified"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:83
+msgid "This dataset is not provided by a certified public service"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:88
+#: udata_gouvfr/theme/templates/dataset/display.html:90
+msgid "Private"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:89
+msgid "This dataset is private and will not be visible by other users"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:94
+#: udata_gouvfr/theme/templates/dataset/display.html:96
+#: udata_gouvfr/theme/templates/organization/display.html:50
+#: udata_gouvfr/theme/templates/organization/display.html:52
+msgid "Deleted"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:95
+msgid ""
+"This dataset has been deleted. This will be permanent in the next 24 hours"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:104
+msgid "Provided by"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:120
+msgid "See the original website"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:145
+msgid "No resources"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:155
+#, python-format
+msgid "See the %(nb)d resources"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:165
+#: udata_gouvfr/theme/templates/dataset/display.html:478
+msgid "Add a resource"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:216
+msgid "Producer"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:220
+#: udata_gouvfr/theme/templates/organization/display.html:64
+msgid "Certified public service"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:221
+msgid "The identity of this public service public is certified by Etalab"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:234
+msgid "more"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:244
+#: udata_gouvfr/theme/templates/dataset/display.html:246
+#: udata_gouvfr/theme/templates/dataset/display.html:248
+#: udata_gouvfr/theme/templates/organization/display.html:167
+#: udata_gouvfr/theme/templates/organization/display.html:169
+msgid "Unfollow"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:250
+#: udata_gouvfr/theme/templates/organization/display.html:171
+msgid "I'll be informed about this organization news"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:252
+#: udata_gouvfr/theme/templates/organization/display.html:173
+msgid "Follow"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:261
+msgid "Informations"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:269
+msgid "License"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:282
+msgid "Temporal coverage"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:292
+msgid "Frequency"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:304
+msgid "Territorial coverage granularity"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:314
+msgid "Territorial coverage"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:338
+msgid "Data quality"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:342
+msgid "Go to the report page"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:345
+msgid "Performance"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:353
+#, python-format
+msgid "%(nb)s warning"
+msgid_plural "%(nb)s warnings"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:361
+msgid "No warning"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:369
+#, python-format
+msgid "%(nb)s error"
+msgid_plural "%(nb)s errors"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:377
+msgid "No error"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:385
+#, python-format
+msgid "%(nb)s critical"
+msgid_plural "%(nb)s criticals"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:393
+msgid "No critical"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:399
+msgid "No report available"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:404
+msgid "Improve quality"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:407
+msgid "Improve"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:422
+msgid "Community contributions"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:423
+msgid "Explore with Datagouv"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:434
+msgid "Nameless resource"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:484
+msgid ""
+"You have built a more comprehensive database than those presented here? This"
+" is the time to share it!"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:521
+msgid "Open in a new window"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:536
+#: udata_gouvfr/theme/templates/dataset/display.html:540
+msgid "Unmark as featured"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:538
+#: udata_gouvfr/theme/templates/dataset/display.html:541
+msgid "Mark as featured"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:556
+msgid "Add a reuse"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/dataset/display.html:564
+msgid ""
+"You reused these data and published an article, a computer graphics, or an application?\n"
+"                It's time to let you know!\n"
+"                Reference your work in just a few clicks and increase your visibility."
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:9
+msgid "organization"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:51
+msgid ""
+"This organization has been deleted. This will be permanent in the next 24 "
+"hours"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:65
+msgid "This organization and its datasets are certified by data.gouv.fr"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:78
+#, python-format
+msgid "%(num)d dataset"
+msgid_plural "%(num)d datasets"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:87
+#, python-format
+msgid "%(num)d member"
+msgid_plural "%(num)d members"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:96
+#, python-format
+msgid "%(num)d follower"
+msgid_plural "%(num)d followers"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:105
+#, python-format
+msgid "%(num)d reuse"
+msgid_plural "%(num)d reuses"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:113
+msgid "Recent activities"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:126
+msgid "I belong to this organization"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:128
+msgid "Join"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:131
+msgid "Waiting for approval"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:136
+msgid "Pending request"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:140
+msgid "You are an administrator of this organization"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:143
+msgid "Administrator"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:147
+msgid "You are editor in this organization"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:150
+msgid "Editor"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:154
+msgid "You are a member of this organization"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:157
+msgid "Member"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:182
+msgid "Supplied datasets"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:183
+msgid "Private datasets"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:187
+msgid "Private reuses"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:190
+msgid "Members"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:191
+msgid "Followers"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:193
+msgid "Activity"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:232
+#, python-format
+msgid "See the %(nb)s datasets"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:237
+msgid "Download as CSV"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/organization/display.html:264
+#, python-format
+msgid "See the %(nb)s reuses"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:18
+msgid "Publish a dataset"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:21
+msgid "Contribute and add a new dataset to this site catalog."
+msgstr ""
+
+#: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:30
+msgid "Publish a reuse"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:33
+msgid "Contribute and add a new reuse to this site catalog."
+msgstr ""
+
+#: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:42
+msgid "Find my organization"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:45
+msgid "Find and join an existing organization to publish in this name."
+msgstr ""
+
+#: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:54
+msgid "Create an organization"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:57
+msgid "You can create a new organization if yours doesn't exists yet."
+msgstr ""
+
+#: udata_gouvfr/theme/templates/topic/display.html:44
+#: udata_gouvfr/theme/templates/topic/display.html:64
+#, python-format
+msgid "See the %(total)s results"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/topic/display.html:49
+#: udata_gouvfr/theme/templates/topic/display.html:69
+msgid "No results found"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/topic/subnav.html:46
+msgid "Read more"
+msgstr ""
