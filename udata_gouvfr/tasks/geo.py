@@ -67,6 +67,7 @@ def geocode_territorial_coverage():
         else:
             print 'Unsupported geometry type "{0}" for "{1}"'.format(polygon.geom_type, dataset.name)
             continue
+        coverage.granularity = dataset.territorial_coverage.granularity
         dataset.geo_coverage = coverage
         try:
             dataset.save()
