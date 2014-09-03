@@ -18,6 +18,7 @@ class DatasetForm(UserModelForm):
     frequency = fields.SelectField(_('Update frequency'),
         choices=UPDATE_FREQUENCIES.items(), validators=[validators.optional()])
     temporal_coverage = fields.DateRangeField(_('Temporal coverage'))
+    spatial = fields.SpatialCoverageField(_('Spatial coverage'))
     tags = fields.TagField(_('Tags'))
     private = fields.BooleanField(_('Private'))
 

@@ -48,6 +48,15 @@ class FormatAutocompleter(WidgetHelper, widgets.TextInput):
 class TerritoryAutocompleter(WidgetHelper, widgets.TextInput):
     classes = 'territory-completer'
 
+    def __call__(self, field, **kwargs):
+        '''Store the values as JSON to prefeed selectize'''
+        if field.data:
+            kwargs['data-values'] = json.dumps([{
+                'id': str(territory.id),
+                'name': territory.name
+            } for territory in field.data.territories])
+        return super(TerritoryAutocompleter, self).__call__(field, **kwargs)
+
 
 class DatasetAutocompleter(WidgetHelper, widgets.TextInput):
     classes = 'dataset-completer'

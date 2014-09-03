@@ -16,7 +16,7 @@ from . import widgets
 from .validators import RequiredIf
 
 from udata.auth import current_user
-from udata.models import db, Organization
+from udata.models import db, Organization, SpatialCoverage, Territory
 from udata.i18n import gettext as _
 
 
@@ -216,6 +216,27 @@ class TerritoryField(StringField):
 
     def pre_validate(self, form):
         pass
+
+
+class SpatialCoverageField(StringField):
+    widget = widgets.TerritoryAutocompleter()
+
+    def _value(self):
+        if self.data:
+            return u','.join([str(t.id) for t in self.data.territories])
+        else:
+            return u''
+
+    def process_formdata(self, valuelist):
+        if valuelist:
+            try:
+                ids = list(set([ObjectId(x.strip()) for x in valuelist[0].split(',') if x.strip()]))
+                territories = Territory.objects.in_bulk(ids).values()
+                self.data = SpatialCoverage(territories=[t.reference() for t in territories])
+            except Exception as e:
+                raise ValueError(str(e))
+        else:
+            self.data = None
 
 
 class MarkdownField(FieldHelper, fields.TextAreaField):
