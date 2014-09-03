@@ -6,10 +6,14 @@ import re
 from bson import ObjectId, DBRef
 from dateutil.parser import parse
 
+from flask import url_for
+from flask.ext.mongoengine.wtf import fields as mefields
+
 from wtforms import Form as WTForm, Field, validators, fields
 from wtforms.fields import html5
-from flask.ext.mongoengine.wtf import fields as mefields
-from flask import url_for
+
+from shapely.geometry import shape, MultiPolygon
+from shapely.ops import cascaded_union
 
 from . import widgets
 
@@ -232,7 +236,14 @@ class SpatialCoverageField(StringField):
             try:
                 ids = list(set([ObjectId(x.strip()) for x in valuelist[0].split(',') if x.strip()]))
                 territories = Territory.objects.in_bulk(ids).values()
-                self.data = SpatialCoverage(territories=[t.reference() for t in territories])
+                polygon = cascaded_union([shape(t.geom) for t in territories])
+                if polygon.geom_type == 'MultiPolygon':
+                    geom = polygon.__geo_interface__
+                elif polygon.geom_type == 'Polygon':
+                    geom = MultiPolygon([polygon]).__geo_interface__
+                else:
+                    raise ValueError('Unsupported geometry type "{0}"'.format(polygon.geom_type))
+                self.data = SpatialCoverage(territories=[t.reference() for t in territories], geom=geom)
             except Exception as e:
                 raise ValueError(str(e))
         else:
@@ -305,8 +316,3 @@ class ExtrasField(FieldHelper, fields.Field):
                     self.errors.extend([': '.join((k, v)) for k, v in e.errors.items()])
                 else:
                     self.errors.append(e.message)
-
-
-
-
-

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from shapely.geometry import shape
+from shapely.ops import cascaded_union
+
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form, fields
@@ -53,6 +56,28 @@ class TerritoryFieldTest(TestCase):
 
         self.assertEqual(len(fake.spatial.territories), 1)
         self.assertEqual(fake.spatial.territories[0], territory.reference())
+        self.assertTrue(shape(fake.spatial.geom).equals(shape(territory.geom)))
+
+    def test_with_valid_territory_ids(self):
+        Fake, FakeForm = self.factory()
+        territories = [TerritoryFactory() for _ in range(3)]
+
+        fake = Fake()
+        form = FakeForm(MultiDict({'spatial': ','.join([str(t.id) for t in territories])}))
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.spatial.territories), len(territories))
+        expected_references = dict((str(t.id), t.reference()) for t in territories)
+        for territory in fake.spatial.territories:
+            self.assertIn(str(territory.id), expected_references)
+            self.assertEqual(territory, expected_references[str(territory.id)])
+
+        expected_geom = cascaded_union([shape(t.geom) for t in territories])
+        self.assertTrue(shape(fake.spatial.geom).equals(expected_geom))
 
     def test_with_invalid_data(self):
         Fake, FakeForm = self.factory()

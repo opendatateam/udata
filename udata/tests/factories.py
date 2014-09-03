@@ -15,7 +15,7 @@ faker = Faker()
 
 class GeoJsonProvider(BaseProvider):
     '''A Fake GeoJSON provider'''
-    def random_range(self, max=5):
+    def random_range(self, min=1, max=5):
         return range(self.random_int(1, max))
 
     def coordinates(self):
@@ -36,14 +36,21 @@ class GeoJsonProvider(BaseProvider):
             'coordinates': [self.coordinates() for _ in self.random_range()]
         }
 
-    def _closed_line(self):
+    def _polygon(self):
         start = self.coordinates()
-        return [start] + [self.coordinates() for _ in self.random_range()] + [start]
+        increment = .1 * self.random_digit_not_null()
+        return [
+            start,
+            [start[0], start[1] + increment],
+            [start[0] + increment, start[1] + increment],
+            [start[0] + increment, start[1]],
+            start,
+        ]
 
     def polygon(self):
         return {
             'type': 'Polygon',
-            'coordinates': [self._closed_line() for _ in self.random_range()]
+            'coordinates': [self._polygon()]
         }
 
     def multipoint(self):
@@ -60,17 +67,14 @@ class GeoJsonProvider(BaseProvider):
             'coordinates': [
                 [
                     self.coordinates() for _ in self.random_range()
-                ]  for _ in self.random_range()
+                ] for _ in self.random_range()
             ]
         }
 
     def multipolygon(self):
         return {
             'type': 'MultiPolygon',
-            'coordinates': [
-                [self._closed_line() for _ in self.random_range()]
-                for _ in self.random_range()
-            ]
+            'coordinates': [[self._polygon()] for _ in self.random_range(3)]
         }
 
     def geometry_collection(self):

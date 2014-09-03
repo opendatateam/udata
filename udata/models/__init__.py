@@ -84,7 +84,10 @@ from udata.core.post.models import *
 def init_app(app):
     db.init_app(app)
     for plugin in app.config['PLUGINS']:
+        name = 'udata.ext.{0}.models'.format(plugin)
         try:
-            __import__('udata.ext.{0}.models'.format(plugin))
-        except:
+            __import__(name)
+        except ImportError:
             pass
+        except Exception as e:
+            log.error('Error importing %s: %s', name, e)

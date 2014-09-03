@@ -51,6 +51,9 @@ class TerritoryReference(db.EmbeddedDocument):
     level = db.StringField(required=True)
     code = db.StringField(required=True)
 
+    def __unicode__(self):
+        return self.name
+
 
 class SpatialCoverage(db.EmbeddedDocument):
     '''Represent a spatial coverage as a list of territories and/or a geometry'''
