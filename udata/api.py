@@ -220,6 +220,7 @@ def marshal_page_with(func):
 
 def init_app(app):
     # Load all core APIs
+    import udata.core.spatial.api
     import udata.core.metrics.api
     import udata.core.user.api
     import udata.core.dataset.api
