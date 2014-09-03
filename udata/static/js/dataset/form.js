@@ -10,7 +10,8 @@ define([
     'form/common',
     'form/widgets',
     'form/date-range-picker',
-    'form/tag-completer'
+    'form/tag-completer',
+    'form/territory-completer'
 ], function($, modal, tpl, i18n, log, Forms) {
     "use strict";
 
