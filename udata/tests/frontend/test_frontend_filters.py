@@ -8,9 +8,9 @@ from flask import url_for, render_template_string, g, Blueprint
 from . import FrontTestCase
 
 from udata.i18n import I18nBlueprint
-from udata.models import db, TerritorialCoverage, GeoCoverage, TerritoryReference
+from udata.models import db, SpatialCoverage, TerritoryReference
 from udata.frontend.helpers import in_url
-from udata.core.territories import register_level
+from udata.core.spatial import register_level
 
 
 class FrontEndRootTest(FrontTestCase):
@@ -258,76 +258,12 @@ class FrontEndRootTest(FrontTestCase):
         response = self.get(url_for('test.i18n', key='value', param='other'))
         self.assertEqual(response.data, '')
 
-    def test_territorial_coverage_empty(self):
-        test = Blueprint('test', __name__)
-
-        @test.route('/coverage/')
-        def coverage():
-            coverage = TerritorialCoverage()
-            return render_template_string('{{ coverage|territorial_coverage }}', coverage=coverage)
-
-        self.app.register_blueprint(test)
-
-        response = self.get(url_for('test.coverage'))
-        self.assertEqual(response.data, '')
-
-    def test_territorial_coverage_labelize(self):
-        test = Blueprint('test', __name__)
-
-        specs = {
-            'MetropoleOfCountry/FR/FRANCE METROPOLITAINE': 'France Metropolitaine',
-            'Country/FR/FRANCE': 'France',
-            'OverseasOfCountry/FR/FRANCE D OUTRE MER': 'France D Outre Mer',  # Ugly
-            'RegionOfFrance/02/MARTINIQUE': 'Martinique',
-            'CommuneOfFrance/44109/44000 NANTES': '44000 Nantes',
-            'InternationalOrganization/UE/UNION EUROPEENNE': 'Union Europeenne',
-            'OverseasCollectivityOfFrance/975/975 ST PIERRE ET MIQUELON': '975 St Pierre Et Miquelon',
-            'IntercommunalityOfFrance/241300177/SAN OUEST PROVENCE': 'San Ouest Provence',
-            'DepartmentOfFrance/60/60 OISE': '60 Oise',
-        }
-
-        @test.route('/coverage/<path:value>/')
-        def coverage(value):
-            coverage = TerritorialCoverage(codes=[value])
-            return render_template_string('{{ coverage|territorial_coverage }}', coverage=coverage)
-
-        self.app.register_blueprint(test)
-
-        for value, expected in specs.items():
-            response = self.get(url_for('test.coverage', value=value))
-            self.assertEqual(response.data, expected)
-
-    def test_territorial_coverage_priority(self):
-        test = Blueprint('test', __name__)
-
-        codes = [
-            'MetropoleOfCountry/FR/FRANCE METROPOLITAINE',
-            'Country/FR/FRANCE',
-            'OverseasOfCountry/FR/FRANCE D OUTRE MER',
-            'RegionOfFrance/02/MARTINIQUE',
-            'CommuneOfFrance/44109/44000 NANTES',
-            'InternationalOrganization/UE/UNION EUROPEENNE',
-            'OverseasCollectivityOfFrance/975/975 ST PIERRE ET MIQUELON',
-            'IntercommunalityOfFrance/241300177/SAN OUEST PROVENCE',
-            'DepartmentOfFrance/60/60 OISE',
-        ]
-
-        @test.route('/coverage/')
-        def coverage():
-            coverage = TerritorialCoverage(codes=codes)
-            return render_template_string('{{ coverage|territorial_coverage }}', coverage=coverage)
-
-        self.app.register_blueprint(test)
-
-        response = self.get(url_for('test.coverage'))
-        self.assertEqual(response.data, 'Union Europeenne')
-
     def test_geolabel_empty(self):
         test = Blueprint('test', __name__)
 
         @test.route('/geolabel/')
         def geolabel():
-            coverage = GeoCoverage()
+            coverage = SpatialCoverage()
             return render_template_string('{{ coverage|geolabel }}', coverage=coverage)
 
         self.app.register_blueprint(test)
@@ -351,7 +287,7 @@ class FrontEndRootTest(FrontTestCase):
         def geolabel(level, code):
             label = specs[(level, code)]
             territory = TerritoryReference(name=label, level=level, code=code)
-            coverage = GeoCoverage(territories=[territory])
+            coverage = SpatialCoverage(territories=[territory])
             return render_template_string('{{ coverage|geolabel}}', coverage=coverage)
 
         self.app.register_blueprint(test)
@@ -365,7 +301,7 @@ class FrontEndRootTest(FrontTestCase):
 
         register_level('country', 'fake', 'Fake level')
 
-        coverage = GeoCoverage(territories=[
+        coverage = SpatialCoverage(territories=[
             TerritoryReference(name='France', level='country', code='fr'),
             TerritoryReference(name='Fake', level='fake', code='fake'),
             TerritoryReference(name='Union Européenne', level='country-group', code='ue'),
