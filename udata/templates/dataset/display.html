@@ -253,7 +253,7 @@
                         title="{{ _('Territorial coverage') }}">
                         <span class="glyphicon glyphicon-globe"></span>
                     </a>
-                    {{ dataset.spatial|geolabel }}
+                    {{ dataset.spatial.top_label }}
                 </li>
                 {% endif %}
             {% endif %}

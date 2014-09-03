@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from udata.i18n import lazy_gettext as _
 from udata.models import db
 
+from . import LEVELS
+
 
 __all__ = ('Territory', 'TerritoryReference', 'SpatialCoverage', 'SPATIAL_GRANULARITIES')
 
@@ -59,3 +61,16 @@ class SpatialCoverage(db.EmbeddedDocument):
     @property
     def granularity_label(self):
         return SPATIAL_GRANULARITIES[self.granularity or 'other']
+
+    @property
+    def top_label(self):
+        if not self.territories:
+            return None
+        top = None
+        for territory in self.territories:
+            if not top:
+                top = territory
+                continue
+            if LEVELS[territory.level]['position'] < LEVELS[top.level]['position']:
+                top = territory
+        return top.name

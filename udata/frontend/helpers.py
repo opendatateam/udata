@@ -7,7 +7,7 @@ import logging
 from datetime import date
 from urlparse import urlsplit, urlunsplit
 
-from flask import url_for, request, current_app, g, json
+from flask import url_for, request, current_app, json
 from jinja2 import Markup
 from werkzeug import url_decode, url_encode
 
@@ -296,40 +296,11 @@ def i18n_alternate_links():
         # Never fails
         return Markup('')
 
-KINDS = [
-    'InternationalOrganization',
-    'Country',
-    'MetropoleOfCountry',
-    'OverseasOfCountry',
-    'RegionOfFrance',
-    'OverseasCollectivityOfFrance',
-    'IntercommunalityOfFrance',
-    'CommuneOfFrance',
-]
-
 
 @front.app_template_filter()
 @front.app_template_global()
-def geocoverage(coverage):
+def to_json(data):
     '''Display the biggest territory and labelize code'''
-    if not coverage or not coverage.geom:
+    if not data:
         return Markup('')
-    return json.dumps(coverage.geom)
-
-
-@front.app_template_filter()
-@front.app_template_global()
-def geolabel(coverage):
-    '''Display the biggest territory and labelize code'''
-
-    if not coverage or not coverage.territories:
-        return Markup('')
-    from udata.core.spatial import LEVELS
-    top = None
-    for territory in coverage.territories:
-        if not top:
-            top = territory
-            continue
-        if LEVELS[territory.level]['position'] < LEVELS[top.level]['position']:
-            top  = territory
-    return top.name
+    return json.dumps(data)
