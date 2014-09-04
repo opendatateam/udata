@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-29 17:02+0200\n"
-"PO-Revision-Date: 2014-08-29 15:08+0000\n"
+"POT-Creation-Date: 2014-09-04 03:21+0200\n"
+"PO-Revision-Date: 2014-09-04 01:26+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata-gouvfr/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -25,6 +25,58 @@ msgstr ""
 #: udata_gouvfr/metrics.py:15 udata_gouvfr/theme/templates/metrics.html:48
 msgid "Public services"
 msgstr "Services publics"
+
+#: udata_gouvfr/models.py:14
+msgid "POI"
+msgstr "POI"
+
+#: udata_gouvfr/models.py:15
+msgid "Iris (Insee districts)"
+msgstr "Iris (quartiers INSEE)"
+
+#: udata_gouvfr/models.py:16
+msgid "Town"
+msgstr "Commune"
+
+#: udata_gouvfr/models.py:17
+msgid "Canton"
+msgstr "Canton"
+
+#: udata_gouvfr/models.py:18
+msgid "Intermunicipal (EPCI)"
+msgstr "Intercommunalité (EPCI)"
+
+#: udata_gouvfr/models.py:19
+msgid "County"
+msgstr "Département"
+
+#: udata_gouvfr/models.py:20
+msgid "Region"
+msgstr "Région"
+
+#: udata_gouvfr/models.py:21
+msgid "Country"
+msgstr "Pays"
+
+#: udata_gouvfr/models.py:22
+msgid "Other"
+msgstr "Autre"
+
+#: udata_gouvfr/territories.py:9
+msgid "French region"
+msgstr "Région française"
+
+#: udata_gouvfr/territories.py:10
+msgid "French county"
+msgstr "Département français"
+
+#: udata_gouvfr/territories.py:11
+msgid "Arrondissement"
+msgstr "Arrondissement"
+
+#: udata_gouvfr/territories.py:12
+msgid "French town"
+msgstr "Commune française"
 
 #: udata_gouvfr/templates/developer.html:4
 msgid "Developer documentation"
@@ -193,7 +245,7 @@ msgid "Datasets"
 msgstr "Jeux de données"
 
 #: udata_gouvfr/theme/templates/metrics.html:28
-#: udata_gouvfr/theme/templates/dataset/display.html:488
+#: udata_gouvfr/theme/templates/dataset/display.html:495
 #: udata_gouvfr/theme/templates/organization/display.html:186
 #: udata_gouvfr/theme/templates/topic/display.html:25
 msgid "Reuses"
@@ -201,7 +253,7 @@ msgstr "Réutilisations"
 
 #: udata_gouvfr/theme/templates/metrics.html:33
 #: udata_gouvfr/theme/templates/dataset/display.html:135
-#: udata_gouvfr/theme/templates/dataset/display.html:430
+#: udata_gouvfr/theme/templates/dataset/display.html:437
 msgid "Resources"
 msgstr "Ressources"
 
@@ -236,8 +288,8 @@ msgstr "jeu de données"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:29
 #: udata_gouvfr/theme/templates/dataset/display.html:180
-#: udata_gouvfr/theme/templates/dataset/display.html:466
-#: udata_gouvfr/theme/templates/dataset/display.html:525
+#: udata_gouvfr/theme/templates/dataset/display.html:473
+#: udata_gouvfr/theme/templates/dataset/display.html:532
 #: udata_gouvfr/theme/templates/organization/display.html:40
 msgid "Edit"
 msgstr "Editer"
@@ -313,7 +365,7 @@ msgid "See the %(nb)d resources"
 msgstr "Voir les %(nb)d ressources"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:165
-#: udata_gouvfr/theme/templates/dataset/display.html:478
+#: udata_gouvfr/theme/templates/dataset/display.html:485
 msgid "Add a resource"
 msgstr "Ajouter une ressource"
 
@@ -372,104 +424,108 @@ msgstr "Fréquence"
 msgid "Territorial coverage granularity"
 msgstr "Granularité de la couverture territoriale"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:314
+#: udata_gouvfr/theme/templates/dataset/display.html:313
 msgid "Territorial coverage"
 msgstr "Couverture territoriale"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:338
+#: udata_gouvfr/theme/templates/dataset/display.html:337
+msgid "Spatial coverage"
+msgstr "Couverture spatiale"
+
+#: udata_gouvfr/theme/templates/dataset/display.html:345
 msgid "Data quality"
 msgstr "Qualité des données"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:342
+#: udata_gouvfr/theme/templates/dataset/display.html:349
 msgid "Go to the report page"
 msgstr "Aller sur la page du rapport"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:345
+#: udata_gouvfr/theme/templates/dataset/display.html:352
 msgid "Performance"
 msgstr "Performance"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:353
+#: udata_gouvfr/theme/templates/dataset/display.html:360
 #, python-format
 msgid "%(nb)s warning"
 msgid_plural "%(nb)s warnings"
 msgstr[0] "%(nb)s avertissement"
 msgstr[1] "%(nb)s avertissements"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:361
+#: udata_gouvfr/theme/templates/dataset/display.html:368
 msgid "No warning"
 msgstr "Aucun avertissement"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:369
+#: udata_gouvfr/theme/templates/dataset/display.html:376
 #, python-format
 msgid "%(nb)s error"
 msgid_plural "%(nb)s errors"
 msgstr[0] "%(nb)s erreur"
 msgstr[1] "%(nb)s erreurs"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:377
+#: udata_gouvfr/theme/templates/dataset/display.html:384
 msgid "No error"
 msgstr "Aucune erreur"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:385
+#: udata_gouvfr/theme/templates/dataset/display.html:392
 #, python-format
 msgid "%(nb)s critical"
 msgid_plural "%(nb)s criticals"
 msgstr[0] "%(nb)s critique"
 msgstr[1] "%(nb)s critiques"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:393
+#: udata_gouvfr/theme/templates/dataset/display.html:400
 msgid "No critical"
 msgstr "Aucune erreur critique"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:399
+#: udata_gouvfr/theme/templates/dataset/display.html:406
 msgid "No report available"
 msgstr "Aucun rapport disponible"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:404
+#: udata_gouvfr/theme/templates/dataset/display.html:411
 msgid "Improve quality"
 msgstr "Améliorer la qualité"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:407
+#: udata_gouvfr/theme/templates/dataset/display.html:414
 msgid "Improve"
 msgstr "Améliorer"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:422
+#: udata_gouvfr/theme/templates/dataset/display.html:429
 msgid "Community contributions"
 msgstr "Contributions communautaires"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:423
+#: udata_gouvfr/theme/templates/dataset/display.html:430
 msgid "Explore with Datagouv"
 msgstr "Explorer avec Datagouv"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:434
+#: udata_gouvfr/theme/templates/dataset/display.html:441
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:484
+#: udata_gouvfr/theme/templates/dataset/display.html:491
 msgid ""
 "You have built a more comprehensive database than those presented here? This"
 " is the time to share it!"
 msgstr "Vous avez construit une base de données plus complète que celles présentées ici ? C'est le moment de la partager !"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:521
+#: udata_gouvfr/theme/templates/dataset/display.html:528
 msgid "Open in a new window"
 msgstr "Ouvrir dans une nouvelle fenêtre"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:536
-#: udata_gouvfr/theme/templates/dataset/display.html:540
+#: udata_gouvfr/theme/templates/dataset/display.html:543
+#: udata_gouvfr/theme/templates/dataset/display.html:547
 msgid "Unmark as featured"
 msgstr "Ne plus mettre en avant"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:538
-#: udata_gouvfr/theme/templates/dataset/display.html:541
+#: udata_gouvfr/theme/templates/dataset/display.html:545
+#: udata_gouvfr/theme/templates/dataset/display.html:548
 msgid "Mark as featured"
 msgstr "Mettre en avant"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:556
+#: udata_gouvfr/theme/templates/dataset/display.html:563
 msgid "Add a reuse"
 msgstr "Ajouter une réutilisation"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:564
+#: udata_gouvfr/theme/templates/dataset/display.html:571
 msgid ""
 "You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
