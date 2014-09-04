@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.api import api, API, fields
+from udata.api import api, API, fields, refs
 
 from . import LEVELS
 from udata.models import SPATIAL_GRANULARITIES, Territory, Dataset
@@ -56,7 +56,7 @@ spatial_coverage_fields = api.model('SpatialCoverage', {
 })
 
 
-@api.route('/references/spatial/levels/', endpoint='territory_levels')
+@refs.route('/spatial/levels/', endpoint='territory_levels')
 class TerritoryLevelsAPI(API):
     @api.marshal_list_with(level_fields)
     def get(self):
@@ -70,7 +70,7 @@ class TerritoryLevelsAPI(API):
         } for id, level in LEVELS.items()]
 
 
-@api.route('/references/spatial/granularities/', endpoint='spatial_granularities')
+@refs.route('/spatial/granularities/', endpoint='spatial_granularities')
 class SpatialGranularitiesAPI(API):
     @api.marshal_list_with(granularity_fields)
     def get(self):
