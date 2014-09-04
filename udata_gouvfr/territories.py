@@ -58,7 +58,6 @@ register_aggregate('country-subset', 'fr-domtom', 'France d\'outre-mer', [
 ])
 
 
-
 @territory_extractor('fr-district', r'^arrondissements-')
 def extract_french_district(polygon):
     '''
