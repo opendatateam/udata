@@ -7,6 +7,17 @@ from . import LEVELS
 from .models import SPATIAL_GRANULARITIES
 
 
+GEOM_TYPES = ('Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon')
+
+
+@api.model(fields={
+    'type': fields.String(description='The GeoJSON Type', required=True, enum=GEOM_TYPES),
+    'coordinates': fields.List(fields.Raw(), description='The geometry as coordinates lists', required=True),
+})
+class GeoJSON(fields.Raw):
+    pass
+
+
 level_fields = api.model('TerritoryLevel', {
     'id': fields.String(description='The level identifier', required=True),
     'label': fields.String(description='The level name', required=True),
@@ -15,9 +26,22 @@ level_fields = api.model('TerritoryLevel', {
     'children': fields.List(fields.String, description='The known children levels'),
 })
 
-granularity_fields = api.model('SptialGranularity', {
+granularity_fields = api.model('SpatialGranularity', {
     'id': fields.String(description='The granularity identifier', required=True),
     'label': fields.String(description='The granularity name', required=True),
+})
+
+territory_reference_fields = api.model('TerritoryReference', {
+    'id': fields.String(description='The territory identifier', required=True),
+    'name': fields.String(description='The territory name', required=True),
+    'level': fields.String(description='The territory level identifier', required=True),
+    'code': fields.String(description='The territory code (depends on level)', required=True),
+})
+
+spatial_coverage_fields = api.model('SpatialCoverage', {
+    'geom': GeoJSON(description='A multipolygon for the whole coverage'),
+    'territories': api.as_list(fields.Nested(territory_reference_fields, description='The covered teritories')),
+    'granularity': fields.String(description='The spatial/territorial granularity', enum=SPATIAL_GRANULARITIES.keys()),
 })
 
 

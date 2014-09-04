@@ -5,6 +5,7 @@ from flask import url_for
 
 from udata.api import api, fields, pager
 from udata.core.organization.api_fields import OrganizationReference
+from udata.core.spatial.api import spatial_coverage_fields
 
 from .models import UPDATE_FREQUENCIES
 
@@ -34,8 +35,9 @@ dataset_fields = api.model('Dataset', {
     'deleted': fields.ISODateTime(description='The deletion date if deleted'),
     'featured': fields.Boolean(description='Is the dataset featured'),
     'tags': fields.List(fields.String),
-    'resources': fields.Nested(resource_fields, description='The dataset resources'),
-    'community_resources': fields.Nested(resource_fields, description='The dataset community submitted resources'),
+    'resources': api.as_list(fields.Nested(resource_fields, description='The dataset resources')),
+    'community_resources': api.as_list(fields.Nested(resource_fields,
+        description='The dataset community submitted resources')),
     'frequency': fields.String(description='The update frequency', required=True, enum=UPDATE_FREQUENCIES.keys()),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
     'metrics': fields.Raw(description='The dataset metrics'),
@@ -43,6 +45,7 @@ dataset_fields = api.model('Dataset', {
     'supplier': OrganizationReference(description='The supplyer organization (if different from the producer)'),
     'temporal_coverage': fields.Nested(temporal_coverage_fields, allow_null=True,
         description='The temporal coverage'),
+    'spatial': fields.Nested(spatial_coverage_fields, allow_null=True, description='The spatial coverage'),
     'license': fields.String(attribute='license.id', description='The dataset license'),
 
     'uri': fields.UrlFor('api.dataset', lambda o: {'dataset': o},
