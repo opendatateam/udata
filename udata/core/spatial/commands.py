@@ -98,6 +98,9 @@ def build_aggregate(level, code, name, territories):
         if not shape(territory.geom).is_valid:
             print 'Skipping invalid polygon for {0}'.format(territory.name)
             continue
+        if shape(territory.geom).is_empty:
+            print 'Skipping empty polygon for {0}'.format(territory.name)
+            continue
         polygons.append(territory.geom)
 
     geom = cascaded_union([shape(p) for p in polygons])
