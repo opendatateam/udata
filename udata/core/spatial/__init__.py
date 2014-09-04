@@ -17,11 +17,14 @@ def register_level(parent, key, label):
         raise ValueError('Parent level "{0}" does not exists'.format(parent))
     parent_level = LEVELS[parent]
     position = parent_level['position'] + 1
-    LEVELS[key] = {'label': label, 'parent': parent, 'children': [], 'position': position}
+    level = {'label': label, 'parent': parent, 'children': [], 'position': position}
+    LEVELS[key] = level
     parent_level['children'].append(key)
+    return level
 
 
 def register_level_tree(parent, levels):
     '''Register a complete territory level tree'''
     for key, label in levels:
         register_level(parent, key, label)
+        parent = key
