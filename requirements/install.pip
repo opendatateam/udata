@@ -35,4 +35,4 @@ webassets==0.10.1
 
 # Until release of MongoEngine 0.9 with MultiPolygon support
 # mongoengine==0.8.7
-git+https://github.com/MongoEngine/mongoengine.git#759f72169aa5426a1b34be8975e85fdd3ed3307b@egg=mongoengine
+git+https://github.com/MongoEngine/mongoengine.git@759f72169aa5426a1b34be8975e85fdd3ed3307b#egg=mongoengine
