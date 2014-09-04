@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-08-29 17:02+0200\n"
+"POT-Creation-Date: 2014-09-04 03:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,13 +17,13 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
 
-#: udata/core/dataset/forms.py:15 udata/core/dataset/forms.py:37
+#: udata/core/dataset/forms.py:15 udata/core/dataset/forms.py:38
 #: udata/core/reuse/forms.py:14 udata/templates/dataset/search-panel.html:6
 #: udata/templates/reuse/search-panel.html:6
 msgid "Title"
 msgstr ""
 
-#: udata/core/dataset/forms.py:16 udata/core/dataset/forms.py:38
+#: udata/core/dataset/forms.py:16 udata/core/dataset/forms.py:39
 #: udata/core/organization/forms.py:21 udata/core/reuse/forms.py:15
 #: udata/core/topic/forms.py:17
 msgid "Description"
@@ -46,48 +46,52 @@ msgstr ""
 msgid "Temporal coverage"
 msgstr ""
 
-#: udata/core/dataset/forms.py:21 udata/core/post/forms.py:19
+#: udata/core/dataset/forms.py:21
+msgid "Spatial coverage"
+msgstr ""
+
+#: udata/core/dataset/forms.py:22 udata/core/post/forms.py:19
 #: udata/core/reuse/forms.py:19 udata/core/topic/forms.py:20
 #: udata/templates/dataset/search-panel.html:18
 #: udata/templates/reuse/search-panel.html:14
 msgid "Tags"
 msgstr ""
 
-#: udata/core/dataset/forms.py:22 udata/core/post/forms.py:21
+#: udata/core/dataset/forms.py:23 udata/core/post/forms.py:21
 #: udata/core/reuse/forms.py:21 udata/core/topic/forms.py:21
 #: udata/templates/reuse/display_base.html:63
 #: udata/templates/reuse/display_base.html:65
 msgid "Private"
 msgstr ""
 
-#: udata/core/dataset/forms.py:26 udata/core/reuse/forms.py:25
+#: udata/core/dataset/forms.py:27 udata/core/reuse/forms.py:25
 msgid "Publish as"
 msgstr ""
 
-#: udata/core/dataset/forms.py:39 udata/core/organization/forms.py:22
+#: udata/core/dataset/forms.py:40 udata/core/organization/forms.py:22
 #: udata/core/reuse/forms.py:17
 msgid "URL"
 msgstr ""
 
-#: udata/core/dataset/forms.py:40 udata/templates/dataset/search-labels.html:16
+#: udata/core/dataset/forms.py:41 udata/templates/dataset/search-labels.html:22
 msgid "Format"
 msgstr ""
 
-#: udata/core/dataset/forms.py:41
+#: udata/core/dataset/forms.py:42
 msgid "Checksum"
 msgstr ""
 
-#: udata/core/dataset/forms.py:45 udata/core/organization/forms.py:34
+#: udata/core/dataset/forms.py:46 udata/core/organization/forms.py:34
 #: udata/templates/macros/forms.html:217 udata/templates/macros/forms.html:226
 msgid "Key"
 msgstr ""
 
-#: udata/core/dataset/forms.py:46 udata/core/organization/forms.py:35
+#: udata/core/dataset/forms.py:47 udata/core/organization/forms.py:35
 #: udata/templates/macros/forms.html:218 udata/templates/macros/forms.html:231
 msgid "Value"
 msgstr ""
 
-#: udata/core/dataset/forms.py:47 udata/core/organization/forms.py:36
+#: udata/core/dataset/forms.py:48 udata/core/organization/forms.py:36
 msgid "Old key"
 msgstr ""
 
@@ -95,9 +99,9 @@ msgstr ""
 #: udata/core/site/metrics.py:44 udata/core/user/metrics.py:39
 #: udata/templates/header.html:32 udata/templates/search.html:28
 #: udata/templates/dataset/card.html:82 udata/templates/dataset/display.html:70
-#: udata/templates/dataset/search-labels.html:17
+#: udata/templates/dataset/search-labels.html:23
 #: udata/templates/dataset/search-panel.html:9
-#: udata/templates/dataset/search-panel.html:22
+#: udata/templates/dataset/search-panel.html:24
 #: udata/templates/organization/display.html:58
 #: udata/templates/organization/search-labels.html:9
 #: udata/templates/organization/search-panel.html:8
@@ -165,42 +169,6 @@ msgstr ""
 msgid "Unknown"
 msgstr ""
 
-#: udata/core/dataset/models.py:38
-msgid "POI"
-msgstr ""
-
-#: udata/core/dataset/models.py:39
-msgid "Iris (Insee districts)"
-msgstr ""
-
-#: udata/core/dataset/models.py:40
-msgid "Town"
-msgstr ""
-
-#: udata/core/dataset/models.py:41
-msgid "Canton"
-msgstr ""
-
-#: udata/core/dataset/models.py:42
-msgid "Intermunicipal (EPCI)"
-msgstr ""
-
-#: udata/core/dataset/models.py:43
-msgid "County"
-msgstr ""
-
-#: udata/core/dataset/models.py:44
-msgid "Region"
-msgstr ""
-
-#: udata/core/dataset/models.py:45
-msgid "Country"
-msgstr ""
-
-#: udata/core/dataset/models.py:46 udata/core/issues/models.py:20
-msgid "Other"
-msgstr ""
-
 #: udata/core/dataset/views.py:22 udata/templates/home.html:129
 msgid "Last datasets"
 msgstr ""
@@ -231,8 +199,8 @@ msgstr ""
 
 #: udata/core/followers/metrics.py:28 udata/core/site/metrics.py:92
 #: udata/templates/dataset/followers.html:6
-#: udata/templates/dataset/search-labels.html:20
-#: udata/templates/dataset/search-panel.html:23
+#: udata/templates/dataset/search-labels.html:26
+#: udata/templates/dataset/search-panel.html:25
 #: udata/templates/dataset/search-result.html:88
 #: udata/templates/organization/followers.html:7
 #: udata/templates/organization/search-labels.html:12
@@ -267,6 +235,10 @@ msgstr ""
 
 #: udata/core/issues/models.py:19
 msgid "Advertising content"
+msgstr ""
+
+#: udata/core/issues/models.py:20 udata/core/spatial/models.py:22
+msgid "Other"
 msgstr ""
 
 #: udata/core/organization/forms.py:20 udata/core/post/forms.py:16
@@ -394,6 +366,46 @@ msgstr ""
 msgid "Organizations"
 msgstr ""
 
+#: udata/core/spatial/__init__.py:8
+msgid "Country group"
+msgstr ""
+
+#: udata/core/spatial/__init__.py:9 udata/core/spatial/models.py:21
+msgid "Country"
+msgstr ""
+
+#: udata/core/spatial/__init__.py:10
+msgid "Country subset"
+msgstr ""
+
+#: udata/core/spatial/models.py:14
+msgid "POI"
+msgstr ""
+
+#: udata/core/spatial/models.py:15
+msgid "Iris (Insee districts)"
+msgstr ""
+
+#: udata/core/spatial/models.py:16
+msgid "Town"
+msgstr ""
+
+#: udata/core/spatial/models.py:17
+msgid "Canton"
+msgstr ""
+
+#: udata/core/spatial/models.py:18
+msgid "Intermunicipal (EPCI)"
+msgstr ""
+
+#: udata/core/spatial/models.py:19
+msgid "County"
+msgstr ""
+
+#: udata/core/spatial/models.py:20
+msgid "Region"
+msgstr ""
+
 #: udata/core/topic/forms.py:18
 msgid "Query"
 msgstr ""
@@ -454,12 +466,12 @@ msgstr ""
 msgid "Notifications"
 msgstr ""
 
-#: udata/forms/fields.py:164
+#: udata/forms/fields.py:168
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr ""
 
-#: udata/forms/fields.py:168
+#: udata/forms/fields.py:172
 #, python-format
 msgid "Tag \"%s\" must be alphanumeric characters or symbols: -_."
 msgstr ""
@@ -494,13 +506,13 @@ msgstr ""
 msgid "Last modification date"
 msgstr ""
 
-#: udata/search/fields.py:106 udata/tests/test_search.py:603
-#: udata/tests/test_search.py:606
+#: udata/search/fields.py:107 udata/tests/test_search.py:612
+#: udata/tests/test_search.py:615
 msgid "yes"
 msgstr ""
 
-#: udata/search/fields.py:106 udata/tests/test_search.py:604
-#: udata/tests/test_search.py:607
+#: udata/search/fields.py:107 udata/tests/test_search.py:613
+#: udata/tests/test_search.py:616
 msgid "no"
 msgstr ""
 
@@ -732,12 +744,14 @@ msgstr ""
 msgid "Frequency"
 msgstr ""
 
-#: udata/templates/dataset/card.html:60 udata/templates/dataset/display.html:256
+#: udata/templates/dataset/card.html:60 udata/templates/dataset/display.html:244
 #: udata/templates/dataset/search-result.html:58
 msgid "Territorial coverage granularity"
 msgstr ""
 
-#: udata/templates/dataset/card.html:71 udata/templates/dataset/display.html:244
+#: udata/templates/dataset/card.html:71 udata/templates/dataset/display.html:253
+#: udata/templates/dataset/search-labels.html:16
+#: udata/templates/dataset/search-panel.html:21
 #: udata/templates/dataset/search-result.html:69
 msgid "Territorial coverage"
 msgstr ""
@@ -916,6 +930,11 @@ msgstr ""
 msgid "Organization"
 msgstr ""
 
+#: udata/templates/dataset/search-labels.html:19
+#: udata/templates/dataset/search-panel.html:22
+msgid "Territorial granularity"
+msgstr ""
+
 #: udata/templates/dataset/search-panel.html:16
 msgid "Suppliers"
 msgstr ""
@@ -924,7 +943,7 @@ msgstr ""
 msgid "Licenses"
 msgstr ""
 
-#: udata/templates/dataset/search-panel.html:21
+#: udata/templates/dataset/search-panel.html:23
 msgid "Formats"
 msgstr ""
 
