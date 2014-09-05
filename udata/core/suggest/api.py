@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.api import api, API
+from udata.api import api, API, fields
 from udata.search import es
 
 DEFAULT_SIZE = 8
@@ -53,6 +53,13 @@ class SuggestFormatsAPI(API):
 
 @ns.route('/organizations', endpoint='suggest_orgs', doc={'parser': parser})
 class SuggestOrgsAPI(API):
+    @api.marshal_list_with(api.model('OrganizationSuggestion', {
+        'id': fields.String(description='The organization identifier', required=True),
+        'name': fields.String(description='The organization name', required=True),
+        'slug': fields.String(description='The organization permalink string', required=True),
+        'image_url': fields.String(description='The organization logo URL'),
+        'score': fields.Float(description='The internal match score', required=True),
+    }))
     def get(self):
         '''Suggest organizations'''
         args = parser.parse_args()
@@ -81,6 +88,13 @@ class SuggestOrgsAPI(API):
 
 @ns.route('/datasets', endpoint='suggest_datasets', doc={'parser': parser})
 class SuggestDatasetsAPI(API):
+    @api.marshal_list_with(api.model('DatasetSuggestion', {
+        'id': fields.String(description='The dataset identifier', required=True),
+        'title': fields.String(description='The dataset title', required=True),
+        'slug': fields.String(description='The dataset permalink string', required=True),
+        'image_url': fields.String(description='The dataset (organization) logo URL'),
+        'score': fields.Float(description='The internal match score', required=True),
+    }))
     def get(self):
         '''Suggest datasets'''
         args = parser.parse_args()
@@ -109,6 +123,13 @@ class SuggestDatasetsAPI(API):
 
 @ns.route('/reuses', endpoint='suggest_reuses', doc={'parser': parser})
 class SuggestReusesAPI(API):
+    @api.marshal_list_with(api.model('ReuseSuggestion', {
+        'id': fields.String(description='The reuse identifier', required=True),
+        'title': fields.String(description='The reuse title', required=True),
+        'slug': fields.String(description='The reuse permalink string', required=True),
+        'image_url': fields.String(description='The reuse thumbnail URL'),
+        'score': fields.Float(description='The internal match score', required=True),
+    }))
     def get(self):
         '''Suggest reuses'''
         args = parser.parse_args()
@@ -137,6 +158,12 @@ class SuggestReusesAPI(API):
 
 @ns.route('/users', endpoint='suggest_users', doc={'parser': parser})
 class SuggestUsersAPI(API):
+    @api.marshal_list_with(api.model('UserSuggestion', {
+        'id': fields.String(description='The user identifier', required=True),
+        'fullname': fields.String(description='The user fullname', required=True),
+        'avatar_url': fields.String(description='The user avatar URL'),
+        'score': fields.Float(description='The internal match score', required=True),
+    }))
     def get(self):
         '''Suggest users'''
         args = parser.parse_args()
@@ -164,6 +191,14 @@ class SuggestUsersAPI(API):
 
 @ns.route('/territories', endpoint='suggest_territories', doc={'parser': parser})
 class SuggestTerritoriesAPI(API):
+    @api.marshal_list_with(api.model('TerritorySuggestion', {
+        'id': fields.String(description='The territory identifier', required=True),
+        'name': fields.String(description='The territory name', required=True),
+        'code': fields.String(description='The territory main code', required=True),
+        'level': fields.String(description='The territory administrative level', required=True),
+        'keys': fields.Raw(description='The territory known codes'),
+        'score': fields.Float(description='The internal match score', required=True),
+    }))
     def get(self):
         '''Suggest territories'''
         args = parser.parse_args()
@@ -176,13 +211,17 @@ class SuggestTerritoriesAPI(API):
                 }
             }
         })
+
         if 'territories' not in result:
             return []
+
         return [
             {
                 'id': opt['payload']['id'],
                 'name': opt['payload']['name'],
                 'code': opt['payload']['code'],
+                'level': opt['payload']['level'],
+                'keys': opt['payload']['keys'],
                 'score': opt['score'],
             }
             for opt in result['territories'][0]['options']

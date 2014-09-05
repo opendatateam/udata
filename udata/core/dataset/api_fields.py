@@ -13,6 +13,7 @@ resource_fields = api.model('Resource', {
     'id': fields.String(description='The resource unique ID', required=True),
     'title': fields.String(description='The resource title', required=True),
     'description': fields.String(description='The resource markdown description'),
+    'format': fields.String(description='The resource format', required=True),
     'url': fields.String(description='The resource URL', required=True),
     'checksum': fields.String(description='A checksum to validate file validity'),
     'created_at': fields.ISODateTime(description='The resource creation date', required=True),

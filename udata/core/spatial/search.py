@@ -14,8 +14,8 @@ class TerritorySearch(ModelSearchAdapter):
         'properties': {
             'territory_suggest': {
                 'type': 'completion',
-                'index_analyzer': 'simple',
-                'search_analyzer': 'simple',
+                'index_analyzer': 'standard',
+                'search_analyzer': 'standard',
                 'payloads': True,
             },
         }
@@ -26,10 +26,13 @@ class TerritorySearch(ModelSearchAdapter):
         return {
             'territory_suggest': {
                 'input': list(set([territory.name, territory.code] + territory.keys.values())),
+                'output': '/'.join([territory.level, territory.code, territory.name]),  # Ensure same name are duplicated
                 'payload': {
                     'id': str(territory.id),
                     'name': territory.name,
                     'code': territory.code,
+                    'level': territory.level,
+                    'keys': territory.keys,
                 },
             },
         }

@@ -11,7 +11,7 @@ define(['jquery', 'form/widgets'], function($) {
             persist: false,
             valueField: 'id',
             labelField: 'name',
-            searchField: ['name', 'code'],
+            searchField: ['name', 'code', 'keys'],
             options: $this.data('values'),
             plugins: ['remove_button'],
             load: function(query, callback) {
@@ -28,6 +28,12 @@ define(['jquery', 'form/widgets'], function($) {
                         callback();
                     },
                     success: function(data) {
+                        data = $.map(data, function(item) {
+                            item.keys = $.map(item.keys, function(value, key) {
+                                return value;
+                            });
+                            return item
+                        });
                         callback(data);
                     }
                 });

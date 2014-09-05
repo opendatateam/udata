@@ -264,16 +264,18 @@ class SuggestAPITest(APITestCase):
             for i in range(4):
                 TerritoryFactory(name='test-{0}'.format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for('api.suggest_territories'), qs={'q': 'tes', 'size': '5'})
+        response = self.get(url_for('api.suggest_territories'), qs={'q': 'test', 'size': '5'})
         self.assert200(response)
 
-        self.assertLessEqual(len(response.json), 5)
-        self.assertGreater(len(response.json), 1)
+        self.assertEqual(len(response.json), 2)
 
         for suggestion in response.json:
             self.assertIn('id', suggestion)
             self.assertIn('name', suggestion)
             self.assertIn('code', suggestion)
+            self.assertIn('level', suggestion)
+            self.assertIn('keys', suggestion)
+            self.assertIsInstance(suggestion['keys'], dict)
             self.assertTrue(suggestion['name'].startswith('test'))
 
     def test_suggest_territory_on_code(self):
@@ -282,16 +284,18 @@ class SuggestAPITest(APITestCase):
             for i in range(4):
                 TerritoryFactory(code='test-{0}'.format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for('api.suggest_territories'), qs={'q': 'tes', 'size': '5'})
+        response = self.get(url_for('api.suggest_territories'), qs={'q': 'test', 'size': '5'})
         self.assert200(response)
 
-        self.assertLessEqual(len(response.json), 5)
-        self.assertGreater(len(response.json), 1)
+        self.assertEqual(len(response.json), 2)
 
         for suggestion in response.json:
             self.assertIn('id', suggestion)
             self.assertIn('name', suggestion)
             self.assertIn('code', suggestion)
+            self.assertIn('level', suggestion)
+            self.assertIn('keys', suggestion)
+            self.assertIsInstance(suggestion['keys'], dict)
             self.assertTrue(suggestion['code'].startswith('test'))
 
     def test_suggest_territory_on_extra_key(self):
@@ -303,16 +307,18 @@ class SuggestAPITest(APITestCase):
                     keys={str(i): 'test-{0}'.format(i) if i % 2 else faker.word()}
                 )
 
-        response = self.get(url_for('api.suggest_territories'), qs={'q': 'tes', 'size': '5'})
+        response = self.get(url_for('api.suggest_territories'), qs={'q': 'test', 'size': '5'})
         self.assert200(response)
 
-        self.assertLessEqual(len(response.json), 5)
-        self.assertGreater(len(response.json), 1)
+        self.assertEqual(len(response.json), 2)
 
         for suggestion in response.json:
             self.assertIn('id', suggestion)
             self.assertIn('name', suggestion)
             self.assertIn('code', suggestion)
+            self.assertIn('level', suggestion)
+            self.assertIn('keys', suggestion)
+            self.assertIsInstance(suggestion['keys'], dict)
             self.assertEqual(suggestion['name'], 'in')
 
     def test_suggest_territory_no_match(self):
