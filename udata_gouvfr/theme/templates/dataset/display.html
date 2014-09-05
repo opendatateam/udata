@@ -332,7 +332,7 @@
                 </div>
 
                 {# Geospatial panel #}
-                {% if dataset.spatial %}
+                {% if dataset.spatial.geom %}
                 <div class="card">
                     <h3>{{ _('Spatial coverage') }}</h3>
                     <div id="coverage-map" class="aside-map"
