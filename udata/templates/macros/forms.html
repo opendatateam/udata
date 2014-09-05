@@ -105,7 +105,7 @@
 {% if current_user.organizations %}
 <input id="{{ field.id }}" name="{{ field.name }}" type="hidden" {% if field.data %}value="{{ field.data }}"{% endif %}/>
 <ul class="card-list">
-    <li class="col-xs-4 col-sm-3">
+    <li class="col-xs-4 col-sm-3 col-lg-2">
         <div class="publisher-card {% if not field.data %}active{% endif %}">
             {{ current_user|avatar(100) }}
             <div class="caption">
@@ -116,7 +116,7 @@
         </div>
     </li>
     {% for organization in current_user.organizations %}
-    <li class="col-xs-4 col-sm-3">
+    <li class="col-xs-4 col-sm-3 col-lg-2">
         <div data-org-id="{{ organization.id }}"
             class="publisher-card {% if field.data == organization.id %}active{% endif %}">
             <img src="{{organization.image_url|placeholder('organization') }}"
