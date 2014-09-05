@@ -40,14 +40,13 @@
             </li>
             {% endif %}
 
-            {# frequency #}
-            {% if dataset.frequency %}
+            {% if dataset.spatial.territories %}
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Frequency') }}">
-                    <span class="fa fa-clock-o fa-fw"></span>
-                    {{ dataset.frequency_label }}
+                    title="{{ _('Territorial coverage') }}">
+                    <span class="fa fa-globe fa-fw"></span>
+                    {{ dataset.spatial.top_label }}
                 </a>
             </li>
             {% endif %}
@@ -64,13 +63,14 @@
             </li>
             {% endif %}
 
-            {% if dataset.spatial.territories %}
+            {# frequency #}
+            {% if dataset.frequency %}
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Territorial coverage') }}">
-                    <span class="fa fa-globe fa-fw"></span>
-                    {{ dataset.spatial.top_label }}
+                    title="{{ _('Frequency') }}">
+                    <span class="fa fa-clock-o fa-fw"></span>
+                    {{ dataset.frequency_label }}
                 </a>
             </li>
             {% endif %}
