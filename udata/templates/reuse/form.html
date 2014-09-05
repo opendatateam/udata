@@ -3,7 +3,16 @@
 
 {% block main_content %}
 <div class="row form-bg">
-    <div class="col-sm-12">
+    <div class="col-sm-12 col-md-3 col-md-push-9">
+    <p>{{ _('This page allows you to describe your reuse.') }}</p>
+    <p>{{ _('Try to be as exhaustif as possible because the completed fields will improve your search scoring and allow users to find your reuse easier.') }}</p>
+    <p>{{ _('It is advised to describe the reuse build protocol and its specifics.') }}</p>
+
+    <p>{{ _('Try to reuse existing tags too because it will improve your chances to found in a category.') }}</p>
+    <p>{{ _('Try to provide a clean and proper thumbnail too as it will be the first detail users will see from your reuse.') }}</p>
+    <p>{{ _('If your thumbnail URL is the same as your reuse URL, it will be displayed as big picture.') }}</p>
+    </div>
+    <div class="col-sm-12 col-md-9 col-md-pull-3">
         <form class="form-horizontal validation" method="post" action=".">
             {{ forms.render(form) }}
             {{ forms.required_disclaimer() }}

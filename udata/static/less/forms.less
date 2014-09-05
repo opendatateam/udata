@@ -1,5 +1,6 @@
 @import "variables.less";
 @import "mixins.less";
+@import "font-awesome.less";
 @import "udata/variables.less";
 @import "bootstrap-markdown.less";
 @import "selectize.bootstrap3.less";
@@ -44,6 +45,29 @@ section.form {
         td.avatar {
             padding: 3px;
         }
+    }
+}
+
+/**
+ * Form adjustments
+ */
+form {
+    label.required:after {
+        color: red;
+        content: '*';
+    }
+
+    span.red {
+        color: red;
+    }
+
+    .form-help {
+        .fa();
+        .fa-fw();
+        width: 1em;
+        cursor: pointer;
+
+        &:before { content: @fa-var-info-circle; }
     }
 }
 

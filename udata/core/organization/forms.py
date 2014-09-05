@@ -18,9 +18,11 @@ class OrganizationForm(ModelForm):
     model_class = Organization
 
     name = fields.StringField(_('Name'), [validators.required()])
-    description = fields.MarkdownField(_('Description'), [validators.required()])
-    url = fields.URLField(_('URL'))
-    image_url = fields.URLField(_('Image URL'))
+    description = fields.MarkdownField(_('Description'), [validators.required()],
+        description=_('The details about your organization'))
+    url = fields.URLField(_('Website'), description=_('The organization website URL'))
+    image_url = fields.URLField(_('Logo'),
+        description=_('Your organization logo URL'))
 
 
 class OrganizationMemberForm(ModelForm):

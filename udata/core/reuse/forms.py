@@ -12,13 +12,16 @@ class ReuseForm(UserModelForm):
     model_class = Reuse
 
     title = fields.StringField(_('Title'), [validators.required()])
-    description = fields.MarkdownField(_('Description'), [validators.required()])
+    description = fields.MarkdownField(_('Description'), [validators.required()],
+        description=_('The details about the reuse (build process, specifics, self-critics...).'))
     type = fields.SelectField(_('Type'), choices=REUSE_TYPES.items())
     url = fields.URLField(_('URL'), [validators.required()])
-    image_url = fields.URLField(_('Image URL'))
-    tags = fields.TagField(_('Tags'))
+    image_url = fields.URLField(_('Image URL'),
+        description=_('The reuse thumbnail'))
+    tags = fields.TagField(_('Tags'), description=_('Some taxonomy keywords'))
     datasets = fields.DatasetListField(_('Used datasets'))
-    private = fields.BooleanField(_('Private'))
+    private = fields.BooleanField(_('Private'),
+        description=_('Restrict the dataset visibility to you or your organization only.'))
 
 
 class ReuseCreateForm(ReuseForm):
