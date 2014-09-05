@@ -37,14 +37,14 @@ def territory_from_comarquage(co_code):
     level = parts[0]
     # France metro & DOM-TOM
     if not level in LEVEL_MAPPING:
-        print 'Unknown level "{0}" for "{1}"'.format(level, co_code)
+        log.error('Unknown level "%s" for "%s"', level, co_code)
         return None
     level = LEVEL_MAPPING[level]
     code = SUBSETS[parts[2]] if level == 'country-subset' else parts[1]
     try:
         return Territory.objects.get(level=level, code=code)
     except Territory.DoesNotExist:
-        print 'Territory not found: level={0} code={1} for {2}'.format(level, code, co_code)
+        log.error('Territory not found: level=%s code=%s for %s', level, code, co_code)
         return None
 
 
@@ -64,13 +64,13 @@ def territorial_to_spatial(dataset):
         polygons.append(territory.geom)
     polygon = cascaded_union([shape(p) for p in polygons])
     if polygon.is_empty:
-        log.error('Empty polygon for dataset "{0}"'.format(dataset.title))
+        log.error('Empty polygon for dataset "%s"', dataset.title)
     elif polygon.geom_type == 'MultiPolygon':
         coverage.geom = polygon.__geo_interface__
     elif polygon.geom_type == 'Polygon':
         coverage.geom = MultiPolygon([polygon]).__geo_interface__
     else:
-        log.error('Unsupported geometry type "{0}" for dataset "{1}"'.format(polygon.geom_type, dataset.title))
+        log.error('Unsupported geometry type "%s" for dataset "%s"', polygon.geom_type, dataset.title)
     return coverage
 
 
@@ -81,10 +81,10 @@ def geocode_territorial_coverage():
             continue
         try:
             dataset.spatial = territorial_to_spatial(dataset)
-        except Exception as e:
-            print 'Exception while processing {0}:'.format(dataset.title), e
+        except:
+            log.exception('Exception while processing dataset %s:', dataset.title)
             continue
         try:
             dataset.save()
-        except Exception as e:
-            print 'Unable to save dataset "{0}": {1}'.format(dataset.title, e)
+        except:
+            log.exception('Unable to save dataset "%s"', dataset.title)
