@@ -10,12 +10,12 @@ define([
     'use strict';
 
     var today = moment(),
-        last_week = moment().subtract('days', 10),
+        last_week = moment().subtract(10, 'days'),
         url = '/api/metrics/site';
 
     url += '?' + $.param({start: last_week.format('YYYY-MM-DD'), end: today.format('YYYY-MM-DD')});
 
-    function start() {
+    function load_metrics() {
         log.debug('Fetching metrics');
         $.get(url, function(data) {
             log.debug('Metrics fetched:', data);
@@ -34,10 +34,13 @@ define([
                 new BarChart($this).draw(serie.getLasts(10));
             });
         });
-
     }
 
-    return {start: start};
+    return {
+        start: function() {
+            load_metrics();
+        }
+    };
 });
 
 

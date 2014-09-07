@@ -8,14 +8,14 @@ define(['jquery', 'moment', 'logger'], function($, moment, logger) {
             key: 'YYYY-MM-DD',
             short: 'L',
             add: function(value, days) {
-                return value.add('days', days)
+                return value.add(days, 'days')
             }
         },
         monthly: {
             key: 'YYYY-MM',
             short: 'MMM. YYYY',
             add: function(value, months) {
-                return value.add('months', months)
+                return value.add(months, 'months')
             }
         }
     };

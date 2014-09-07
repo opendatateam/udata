@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from udata.api import api, API, fields
 
 from . import LEVELS
-from .models import SPATIAL_GRANULARITIES
+from udata.models import SPATIAL_GRANULARITIES, Territory, Dataset
 
 
 GEOM_TYPES = ('Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon')
@@ -17,6 +17,24 @@ GEOM_TYPES = ('Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString',
 class GeoJSON(fields.Raw):
     pass
 
+# @api.model(fields={
+#     'type': fields.String(description='The GeoJSON Type', required=True, enum=GEOM_TYPES),
+#     'coordinates': fields.List(fields.Raw(), description='The geometry as coordinates lists', required=True),
+# })
+# class GeoJSON(fields.Raw):
+#     pass
+
+feature_fields = api.model('GeoJSONFeature', {
+    'id': fields.String,
+    'type': fields.String(required=True, enum=['Feature']),
+    'geometry': GeoJSON(required=True),
+    'properties': fields.Raw,
+})
+
+feature_collection_fields = api.model('GeoJSONFeatureCollection', {
+    'type': fields.String(required=True, enum=['FeatureCollection']),
+    'features': api.as_list(fields.Nested(feature_fields))
+})
 
 level_fields = api.model('TerritoryLevel', {
     'id': fields.String(description='The level identifier', required=True),
@@ -68,3 +86,35 @@ class SpatialGranularitiesAPI(API):
             'id': id,
             'label': label,
         } for id, label in SPATIAL_GRANULARITIES.items()]
+
+
+@api.route('/spatial/coverage/<string:level>/', endpoint='spatial-coverage')
+class SpatialCoverageAPI(API):
+    @api.marshal_list_with(feature_collection_fields)
+    def get(self, level):
+        pipeline = [
+            {'$project': {'territory': '$spatial.territories'}},
+            {'$unwind': '$territory'},
+            {'$match': {'territory.level': level}},
+            {'$group': {'_id': '$territory.id', 'count': {'$sum': 1}}}
+        ]
+        features = []
+
+        for row in Dataset.objects(spatial__territories__level=level).visible().aggregate(*pipeline):
+            territory = Territory.objects.get(id=row['_id'])
+            features.append({
+                'id': str(territory.id),
+                'type': 'Feature',
+                'geometry': territory.geom,
+                'properties': {
+                    'name': territory.name,
+                    'code': territory.code,
+                    'level': territory.level,
+                    'datasets': row['count']
+                }
+            })
+
+        return {
+            'type': 'FeatureCollection',
+            'features': features
+        }

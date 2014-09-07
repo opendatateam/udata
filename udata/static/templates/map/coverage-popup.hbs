@@ -1,0 +1,15 @@
+<div class="territory-popup">
+    <b>{{feature.properties.name}}</b>
+    <br/>
+    <a href="/datasets?territory={{feature.id}}">
+        {{feature.properties.datasets}}
+        {{_ 'datasets'}}
+    </a>
+    {{#each children}}
+    <br/>
+    <a href class="drill-down" data-level="{{id}}" data-feature-id="{{../feature.id}}">
+        <span class="fa fa fa-arrow-circle-down"></span>
+        {{label}}
+    </a>
+    {{/each}}
+</div>

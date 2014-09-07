@@ -19,6 +19,8 @@ require.config({
         'bloodhound': '../bower/typeahead.js/dist/bloodhound',
         'highlight': '../bower/highlightjs/highlight.pack',
         'leaflet': '../bower/leaflet/dist/leaflet-src',
+        'leaflet.spin': '../bower/leaflet.spin/leaflet.spin',
+        'spin': '../bower/spin.js/spin',
 
         // jQuery plugins
         'jquery.microdata': '../bower/jquery.microdata/index',
