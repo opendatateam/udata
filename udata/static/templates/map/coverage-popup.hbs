@@ -2,8 +2,7 @@
     <b>{{feature.properties.name}}</b>
     <br/>
     <a href="/datasets?territory={{feature.id}}">
-        {{feature.properties.datasets}}
-        {{_ 'datasets'}}
+        {{_ 'n_datasets' count=feature.properties.datasets }}
     </a>
     {{#each children}}
     <br/>
