@@ -17,13 +17,6 @@ GEOM_TYPES = ('Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString',
 class GeoJSON(fields.Raw):
     pass
 
-# @api.model(fields={
-#     'type': fields.String(description='The GeoJSON Type', required=True, enum=GEOM_TYPES),
-#     'coordinates': fields.List(fields.Raw(), description='The geometry as coordinates lists', required=True),
-# })
-# class GeoJSON(fields.Raw):
-#     pass
-
 feature_fields = api.model('GeoJSONFeature', {
     'id': fields.String,
     'type': fields.String(required=True, enum=['Feature']),
