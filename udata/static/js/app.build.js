@@ -21,13 +21,27 @@
 
     modules: [
         {
-            name: "app",
-            include: [
-                'dataset/display',
-                'organization/display',
-                'reuse/display',
-                'topic/display'
-            ]
+            name: "app"
+        }, {
+            name: 'dataset/display',
+            exclude: [
+                'app'
+            ],
+        }, {
+            name: 'reuse/display',
+            exclude: [
+                'app'
+            ],
+        }, {
+            name: 'organization/display',
+            exclude: [
+                'app'
+            ],
+        }, {
+            name: 'topic/display',
+            exclude: [
+                'app'
+            ],
         }, {
             name: 'form/widgets',
             exclude: [
@@ -102,6 +116,11 @@
             ],
         }, {
             name: 'site/map',
+            exclude: [
+                'app',
+            ],
+        }, {
+            name: 'issue/list',
             exclude: [
                 'app',
             ],
