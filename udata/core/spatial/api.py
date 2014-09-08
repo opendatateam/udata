@@ -88,7 +88,7 @@ class SpatialGranularitiesAPI(API):
         } for id, label in SPATIAL_GRANULARITIES.items()]
 
 
-@api.route('/spatial/coverage/<string:level>/', endpoint='spatial-coverage')
+@api.route('/spatial/coverage/<string:level>/', endpoint='spatial_coverage')
 class SpatialCoverageAPI(API):
     @api.marshal_list_with(feature_collection_fields)
     def get(self, level):

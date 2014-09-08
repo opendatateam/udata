@@ -128,6 +128,15 @@ class DatasetFactory(MongoEngineFactory):
     frequency = 'unknown'
 
 
+class VisibleDatasetFactory(DatasetFactory):
+    class Meta:
+        model = models.Dataset
+
+    @factory.lazy_attribute
+    def resources(self):
+        return [ResourceFactory()]
+
+
 class OrganizationFactory(MongoEngineFactory):
     class Meta:
         model = models.Organization
@@ -177,4 +186,11 @@ class TerritoryFactory(MongoEngineFactory):
     level = 'town'
     name = factory.LazyAttribute(lambda o: faker.city())
     code = factory.LazyAttribute(lambda o: faker.postcode())
+    geom = factory.LazyAttribute(lambda o: faker.multipolygon())
+
+
+class SpatialCoverageFactory(MongoEngineFactory):
+    class Meta:
+        model = models.SpatialCoverage
+
     geom = factory.LazyAttribute(lambda o: faker.multipolygon())
