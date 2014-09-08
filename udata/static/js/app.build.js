@@ -100,6 +100,11 @@
             exclude: [
                 'app',
             ],
+        }, {
+            name: 'site/map',
+            exclude: [
+                'app',
+            ],
         }
     ]
 })

@@ -12,7 +12,7 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
     router.registerRoutes({
         home: {path: i18n('/'), moduleId: 'home'},
         metrics: {path: i18n('/metrics/'), moduleId: 'dashboard/site'},
-        explore: {path: i18n('/explore/'), moduleId: 'site/explore'},
+        map: {path: i18n('/map/'), moduleId: 'site/map'},
         search: {path: i18n('/search/'), moduleId: 'search'},
 
         // API Documentation

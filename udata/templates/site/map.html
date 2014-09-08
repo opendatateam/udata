@@ -1,0 +1,13 @@
+{% extends theme("layouts/1-column.html") %}
+
+{% set meta = {
+    'title': _('Coverage map'),
+    'description': _('Display datasets on a map'),
+    'keywords': [_('coverage'), _('map')],
+} %}
+
+{% set section_class = 'big-map' %}
+
+{% block breadcrumb %}
+    <li class="active">{{ _('Coverage map') }}</li>
+{% endblock %}

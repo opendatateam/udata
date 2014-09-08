@@ -66,6 +66,11 @@ def metrics():
     )
 
 
+@blueprint.route('/map/')
+def map():
+    return render('site/map.html')
+
+
 @blueprint.route('/datasets.csv')
 def datasets_csv():
     params = multi_to_dict(request.args)

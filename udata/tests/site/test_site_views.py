@@ -93,3 +93,7 @@ class SiteViewsTest(FrontTestCase):
         for dataset in datasets:
             self.assertNotIn(str(dataset.id), ids)
         self.assertNotIn(str(hidden_dataset.id), ids)
+
+    def test_map_view(self):
+        response = self.get(url_for('site.map'))
+        self.assert200(response)

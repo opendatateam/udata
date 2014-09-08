@@ -39,19 +39,3 @@ class FrontEndRootTest(FrontTestCase):
         '''It should render the search page without data'''
         response = self.get(url_for('front.search'))
         self.assert200(response)
-
-    def test_render_explore(self):
-        '''It should render the explore page'''
-        with self.autoindex():
-            for i in range(3):
-                org = OrganizationFactory()
-                DatasetFactory(organzation=org)
-                ReuseFactory(organzation=org)
-
-        response = self.get(url_for('front.explore'))
-        self.assert200(response)
-
-    def test_render_explore_empty(self):
-        '''It should render the explore page even without data'''
-        response = self.get(url_for('front.explore'))
-        self.assert200(response)
