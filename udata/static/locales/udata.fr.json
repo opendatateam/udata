@@ -111,6 +111,8 @@
     "heading text": "texte d'entête",
     "licence concern, privacy concern, defamatory statements ...": "problème de licence, propos diffamatoires, atteinte à la vie privée ...",
     "list text here": "texte à puce ici",
+    "n_datasets": "__count__ jeu de données",
+    "n_datasets_plural": "__count__ jeux de données",
     "strong text": "texte important",
     "the content is a commercial advertisement": "le contenu est une publicité commerciale",
     "valid-creditcard": "Veuillez saisir un numéro de carte valide.",

@@ -4,13 +4,14 @@
 # 
 # Translators:
 # AuraC <cifuentes.aura@gmail.com>, 2014
+# Axel Haustant, 2014
 # AuraC <cifuentes.aura@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-09-05 15:18+0200\n"
-"PO-Revision-Date: 2014-09-05 13:19+0000\n"
+"POT-Creation-Date: 2014-09-08 11:54+0200\n"
+"PO-Revision-Date: 2014-09-08 10:13+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/udata/language/es/)\n"
 "MIME-Version: 1.0\n"
@@ -218,7 +219,7 @@ msgstr "Recursos"
 
 #: udata/core/dataset/views.py:57 udata/core/issues/metrics.py:14
 #: udata/core/organization/views.py:37 udata/core/reuse/views.py:57
-#: udata/core/site/views.py:88 udata/templates/macros/issues.html:5
+#: udata/core/site/views.py:93 udata/templates/macros/issues.html:5
 msgid "Issues"
 msgstr "Anomalías"
 
@@ -670,14 +671,14 @@ msgstr "Conjuntos de datos recientes"
 msgid "Recent reuses"
 msgstr "Reutilizaciones recientes"
 
-#: udata/templates/explore.html:4 udata/templates/header.html:33
-msgid "Explore"
-msgstr "Explorar"
-
 #: udata/templates/header.html:22 udata/templates/search.html:5
 #: udata/templates/search.html:12 udata/templates/post/subnav.html:18
 msgid "Search"
 msgstr "Buscar"
+
+#: udata/templates/header.html:33
+msgid "Map"
+msgstr ""
 
 #: udata/templates/header.html:66 udata/templates/site/admin_base.html:8
 msgid "Site administration"
@@ -1302,8 +1303,8 @@ msgstr[1] "%(num)d miembros"
 #, python-format
 msgid "%(num)d dataset"
 msgid_plural "%(num)d datasets"
-msgstr[0] "%(num)d conjunto de datos\n\n\n\n"
-msgstr[1] "%(num)d conjuntos de datos"
+msgstr[0] "%(num)d conjunto de datos"
+msgstr[1] "%(num)d conjuntos de datos"
 
 #: udata/templates/organization/display_base.html:67
 #: udata/templates/user/base.html:74
@@ -1547,6 +1548,22 @@ msgstr "Cantidad de conjunto de datos"
 #: udata/templates/security/login_user.html:13
 msgid "Login"
 msgstr "Ingresar"
+
+#: udata/templates/site/map.html:4 udata/templates/site/map.html:12
+msgid "Coverage map"
+msgstr ""
+
+#: udata/templates/site/map.html:5
+msgid "Display datasets on a map"
+msgstr ""
+
+#: udata/templates/site/map.html:6
+msgid "coverage"
+msgstr ""
+
+#: udata/templates/site/map.html:6
+msgid "map"
+msgstr ""
 
 #: udata/templates/topic/display.html:6
 msgid "Topics"

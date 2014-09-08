@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-09-05 15:18+0200\n"
+"POT-Creation-Date: 2014-09-08 11:54+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -212,7 +212,7 @@ msgstr ""
 
 #: udata/core/dataset/views.py:57 udata/core/issues/metrics.py:14
 #: udata/core/organization/views.py:37 udata/core/reuse/views.py:57
-#: udata/core/site/views.py:88 udata/templates/macros/issues.html:5
+#: udata/core/site/views.py:93 udata/templates/macros/issues.html:5
 msgid "Issues"
 msgstr ""
 
@@ -654,13 +654,13 @@ msgstr ""
 msgid "Recent reuses"
 msgstr ""
 
-#: udata/templates/explore.html:4 udata/templates/header.html:33
-msgid "Explore"
-msgstr ""
-
 #: udata/templates/header.html:22 udata/templates/search.html:5
 #: udata/templates/search.html:12 udata/templates/post/subnav.html:18
 msgid "Search"
+msgstr ""
+
+#: udata/templates/header.html:33
+msgid "Map"
 msgstr ""
 
 #: udata/templates/header.html:66 udata/templates/site/admin_base.html:8
@@ -1509,6 +1509,22 @@ msgstr ""
 
 #: udata/templates/security/login_user.html:13
 msgid "Login"
+msgstr ""
+
+#: udata/templates/site/map.html:4 udata/templates/site/map.html:12
+msgid "Coverage map"
+msgstr ""
+
+#: udata/templates/site/map.html:5
+msgid "Display datasets on a map"
+msgstr ""
+
+#: udata/templates/site/map.html:6
+msgid "coverage"
+msgstr ""
+
+#: udata/templates/site/map.html:6
+msgid "map"
 msgstr ""
 
 #: udata/templates/topic/display.html:6
