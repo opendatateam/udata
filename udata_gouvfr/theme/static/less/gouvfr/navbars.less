@@ -6,9 +6,26 @@
     background-size: cover;
 }
 
-.cover-bubble {
-    background-image: url('../img/datacover.png');
+
+.cover-default {
+    .colored-cover();
+}
+
+.colored-cover(@color: #1b71af) {
+    @end: lighten(@color, 10%);
+    @img: url('../img/datawatch-bulles.svg');
+    @png: '../img/datawatch-bulles.png';
     background-size: cover;
+    background: @color; /* Old browsers */
+    background: @img, -moz-linear-gradient(top,  @color 0%, @end 100%); /* FF3.6+ */
+    background: @img, -webkit-gradient(linear, left top, left bottom, color-stop(0%,@color), color-stop(100%,@end)); /* Chrome,Safari4+ */
+    background: @img, -webkit-linear-gradient(top,  @color 0%,@end 100%); /* Chrome10+,Safari5.1+ */
+    background: @img, -o-linear-gradient(top,  @color 0%,@end 100%); /* Opera 11.10+ */
+    background: @img, -ms-linear-gradient(top,  @color 0%,@end 100%); /* IE10+ */
+    background: @img, linear-gradient(to bottom,  @color 0%,@end 100%); /* W3C */
+    filter:
+        e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d',GradientType=0)", @color, @end)),
+        e(%("progid:DXImageTransform.Microsoft.AlphaImageLoader(src=%s)", @png)); /* IE6-9 */
 }
 
 .cover-marianne {
@@ -124,7 +141,6 @@
 }
 
 .navbar-subnav {
-    background-color: @bg-dark;
     z-index: 800;
     min-height: 80px;
 
@@ -643,29 +659,29 @@
 }
 
 .topic-1 {
-    background-color: #1b775d !important;
+    .colored-cover(#1b775d);
 }
 .topic-2 {
-    background-color: #905d4e !important;
+    .colored-cover(#905d4e);
 }
 .topic-3 {
-    background-color: #EE7836 !important;
+    .colored-cover(#EE7836);
 }
 .topic-4 {
-    background-color: #6a4570 !important;
+    .colored-cover(#6a4570);
 }
 .topic-5 {
-    background-color: #fc3f3f !important;
+    .colored-cover(#fc3f3f);
 }
 .topic-6 {
-    background-color: #9BBB45 !important;
+    .colored-cover(#9BBB45);
 }
 .topic-7 {
-    background-color: #46b2a4 !important;
+    .colored-cover(#46b2a4);
 }
 .topic-8 {
-    background-color: #8B4F78 !important;
+    .colored-cover(#8B4F78);
 }
 .topic-9 {
-    background-color: #134d77 !important;
+    .colored-cover(#134d77);
 }
