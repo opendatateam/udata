@@ -129,3 +129,25 @@
     padding-left: 13px;
     padding-right: 13px;
 }
+
+
+.btn-transparent {
+    @base-color: fadeout(white, 50%);
+    background-color: @base-color;
+
+    .glyphicon {
+        color: @bg-dark !important;
+        background-color: white !important;
+
+    }
+
+    &:hover {
+        color: @bg-dark;
+        background-color: fadein(@base-color, 20%);
+
+        .glyphicon {
+            color: white !important;
+            background-color: @bg-dark !important;
+        }
+    }
+}
