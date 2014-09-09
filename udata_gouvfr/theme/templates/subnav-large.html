@@ -10,7 +10,7 @@
 
             <nav class="sidebar panel">
                 <form class="navbar-form" role="search" action="{{ url_for('front.search') }}">
-                    <div class="input-group">
+                    <div class="input-group input-group-lg">
                         <div class="input-group-btn">
                             <button class="btn" type="submit"><i class="glyphicon glyphicon-search"></i></button>
                         </div>
@@ -21,7 +21,7 @@
                 </form>
             </nav>
 
-            <nav class="sidebar panel">
+            <nav class="sidebar panel collapse subnav-collapse">
                 <!-- Groups -->
                 <div class="list-group">
                     {% for topic in g.featured_topics %}
