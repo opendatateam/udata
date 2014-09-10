@@ -12,17 +12,17 @@
 }
 
 .colored-cover(@color: #1b71af) {
-    @end: lighten(@color, 10%);
+    @end: lighten(@color, 22%);
     @img: url('../img/datawatch-bulles.svg');
     @png: '../img/datawatch-bulles.png';
     background-size: cover;
     background: @color; /* Old browsers */
-    background: @img, -moz-linear-gradient(top,  @color 0%, @end 100%); /* FF3.6+ */
-    background: @img, -webkit-gradient(linear, left top, left bottom, color-stop(0%,@color), color-stop(100%,@end)); /* Chrome,Safari4+ */
-    background: @img, -webkit-linear-gradient(top,  @color 0%,@end 100%); /* Chrome10+,Safari5.1+ */
-    background: @img, -o-linear-gradient(top,  @color 0%,@end 100%); /* Opera 11.10+ */
-    background: @img, -ms-linear-gradient(top,  @color 0%,@end 100%); /* IE10+ */
-    background: @img, linear-gradient(to bottom,  @color 0%,@end 100%); /* W3C */
+    background: @img, -moz-linear-gradient(45deg,  @color 0%, @end 100%); /* FF3.6+ */
+    background: @img, -webkit-gradient(linear, left bottom, right top, color-stop(0%, @color), color-stop(100%, @end)); /* Chrome,Safari4+ */
+    background: @img, -webkit-linear-gradient(45deg, @color 0%, @end 100%); /* Chrome10+,Safari5.1+ */
+    background: @img, -o-linear-gradient(45deg,  @color 0%,@end 100%); /* Opera 11.10+ */
+    background: @img, -ms-linear-gradient(45deg,  @color 0%,@end 100%); /* IE10+ */
+    background: @img, linear-gradient(45deg,  @color 0%,@end 100%); /* W3C */
     filter:
         e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d',GradientType=0)", @color, @end)),
         e(%("progid:DXImageTransform.Microsoft.AlphaImageLoader(src=%s)", @png)); /* IE6-9 */
