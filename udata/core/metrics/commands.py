@@ -26,20 +26,20 @@ def update_metrics(site=False, organizations=False, users=False, datasets=False,
 
     if do_all or datasets:
         print 'Update datasets metrics'
-        for dataset in Dataset.objects:
+        for dataset in Dataset.objects.timeout(False):
             update_metrics_for(dataset)
 
     if do_all or reuses:
         print 'Update reuses metrics'
-        for reuse in Reuse.objects:
+        for reuse in Reuse.objects.timeout(False):
             update_metrics_for(reuse)
 
     if do_all or organizations:
         print 'Update organizations metrics'
-        for organization in Organization.objects:
+        for organization in Organization.objects.timeout(False):
             update_metrics_for(organization)
 
     if do_all or users:
         print 'Update user metrics'
-        for user in User.objects:
+        for user in User.objects.timeout(False):
             update_metrics_for(user)
