@@ -4,12 +4,13 @@
 # 
 # Translators:
 # Axel Haustant, 2014
+# AuraC <cifuentes.aura@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-09-08 11:54+0200\n"
-"PO-Revision-Date: 2014-09-08 10:41+0000\n"
+"POT-Creation-Date: 2014-09-11 11:00+0200\n"
+"PO-Revision-Date: 2014-09-11 09:00+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/udata-gouvfr/language/es/)\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +22,7 @@ msgstr ""
 
 #: udata_gouvfr/metrics.py:15 udata_gouvfr/theme/templates/metrics.html:48
 msgid "Public services"
-msgstr ""
+msgstr "Sevicios públicos"
 
 #: udata_gouvfr/models.py:14
 msgid "POI"
@@ -61,23 +62,23 @@ msgstr "Otro"
 
 #: udata_gouvfr/territories.py:9
 msgid "French region"
-msgstr ""
+msgstr "Región francesa"
 
 #: udata_gouvfr/territories.py:10
 msgid "French county"
-msgstr ""
+msgstr "Condado francés"
 
 #: udata_gouvfr/territories.py:11
 msgid "Arrondissement"
-msgstr ""
+msgstr "Distrito"
 
 #: udata_gouvfr/territories.py:12
 msgid "French town"
-msgstr ""
+msgstr "Ciudad francesa"
 
 #: udata_gouvfr/templates/developer.html:4
 msgid "Developer documentation"
-msgstr ""
+msgstr "Desarrollador de documentación"
 
 #: udata_gouvfr/templates/developer.html:5
 msgid "Developer documentation and contribution guidelines"
@@ -85,15 +86,15 @@ msgstr ""
 
 #: udata_gouvfr/templates/developer.html:6
 msgid "developer"
-msgstr ""
+msgstr "desarrollador"
 
 #: udata_gouvfr/templates/developer.html:6
 msgid "documentation"
-msgstr ""
+msgstr "documentación"
 
 #: udata_gouvfr/templates/developer.html:10
 msgid "Developers"
-msgstr ""
+msgstr "Desarrolladores"
 
 #: udata_gouvfr/templates/developer.html:17
 msgid "Coming soon"
@@ -101,7 +102,7 @@ msgstr "Próximamente"
 
 #: udata_gouvfr/theme/templates/footer.html:6
 msgid "The Open Data"
-msgstr ""
+msgstr "Los datos abiertos"
 
 #: udata_gouvfr/theme/templates/footer.html:8
 #: udata_gouvfr/theme/templates/header.html:24
@@ -110,12 +111,12 @@ msgstr ""
 
 #: udata_gouvfr/theme/templates/footer.html:9
 msgid "Publishers"
-msgstr ""
+msgstr "Editores"
 
 #: udata_gouvfr/theme/templates/footer.html:12
 #: udata_gouvfr/theme/templates/header.html:31
 msgid "Open Licence"
-msgstr ""
+msgstr "Licencia Abierta"
 
 #: udata_gouvfr/theme/templates/footer.html:15
 #: udata_gouvfr/theme/templates/header.html:35
@@ -125,11 +126,11 @@ msgstr "Métricas"
 
 #: udata_gouvfr/theme/templates/footer.html:18
 msgid "Credits"
-msgstr ""
+msgstr "Créditos "
 
 #: udata_gouvfr/theme/templates/footer.html:19
 msgid "Terms of use"
-msgstr ""
+msgstr "Términos de uso"
 
 #: udata_gouvfr/theme/templates/footer.html:23
 #: udata_gouvfr/theme/templates/subnav-small.html:23
@@ -138,15 +139,15 @@ msgstr "Temas"
 
 #: udata_gouvfr/theme/templates/footer.html:36
 msgid "Network"
-msgstr ""
+msgstr "Vínculo"
 
 #: udata_gouvfr/theme/templates/footer.html:48
 msgid "Contact"
-msgstr ""
+msgstr "Contacto"
 
-#: udata_gouvfr/theme/templates/footer.html:61
+#: udata_gouvfr/theme/templates/footer.html:73
 msgid "Back to top"
-msgstr ""
+msgstr "Volver arriba"
 
 #: udata_gouvfr/theme/templates/header.html:7
 msgid "Toggle navigation"
@@ -154,7 +155,7 @@ msgstr ""
 
 #: udata_gouvfr/theme/templates/header.html:13
 msgid "Open platform for french public data"
-msgstr ""
+msgstr "Plataforma abierta para los datos públicos franceses "
 
 #: udata_gouvfr/theme/templates/header.html:27
 #: udata_gouvfr/theme/templates/header.html:75
@@ -165,7 +166,7 @@ msgstr "Organizaciones"
 
 #: udata_gouvfr/theme/templates/header.html:71
 msgid "My profile"
-msgstr ""
+msgstr "Mi perfil"
 
 #: udata_gouvfr/theme/templates/header.html:89
 msgid "Settings"
@@ -173,11 +174,11 @@ msgstr "Ajustes"
 
 #: udata_gouvfr/theme/templates/header.html:97
 msgid "Site administration"
-msgstr ""
+msgstr "Sitio web de la administración"
 
 #: udata_gouvfr/theme/templates/header.html:105
 msgid "Logout"
-msgstr ""
+msgstr "Cerrar sesión"
 
 #: udata_gouvfr/theme/templates/header.html:112
 #: udata_gouvfr/theme/templates/header.html:115
@@ -186,24 +187,24 @@ msgstr "Conexión / Registro"
 
 #: udata_gouvfr/theme/templates/home.html:17
 msgid "News"
-msgstr ""
+msgstr "Noticias"
 
 #: udata_gouvfr/theme/templates/home.html:28
 msgid "Discussion topic"
-msgstr ""
+msgstr "Tema de discusión"
 
 #: udata_gouvfr/theme/templates/home.html:36
 #, python-format
 msgid "Photo by %(author)s"
-msgstr ""
+msgstr "Foto tomada por %(author)s "
 
 #: udata_gouvfr/theme/templates/home.html:50
 msgid "Best reuse cases"
-msgstr ""
+msgstr "Los mejores casos de reutilización"
 
 #: udata_gouvfr/theme/templates/home.html:100
 msgid "Essential datasets"
-msgstr ""
+msgstr "Conjuntos de datos esenciales"
 
 #: udata_gouvfr/theme/templates/home.html:101
 msgid "Latest datasets"
@@ -211,7 +212,7 @@ msgstr "Ultimos conjuntos de datos"
 
 #: udata_gouvfr/theme/templates/home.html:106
 msgid "Popular reuses"
-msgstr ""
+msgstr "Reutilizaciones populares"
 
 #: udata_gouvfr/theme/templates/home.html:107
 msgid "Latest reuses"
@@ -220,7 +221,7 @@ msgstr "Ultimas reutilizaciones"
 #: udata_gouvfr/theme/templates/home.html:141
 #: udata_gouvfr/theme/templates/home.html:162
 msgid "See more"
-msgstr ""
+msgstr "Ver más"
 
 #: udata_gouvfr/theme/templates/metrics.html:5
 msgid "Site metrics"
@@ -232,7 +233,7 @@ msgstr "métricas"
 
 #: udata_gouvfr/theme/templates/metrics.html:19
 msgid "Data"
-msgstr ""
+msgstr "Datos"
 
 #: udata_gouvfr/theme/templates/metrics.html:23
 #: udata_gouvfr/theme/templates/dataset/display.html:20
@@ -670,7 +671,7 @@ msgid "Contribute and add a new reuse to this site catalog."
 msgstr ""
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:42
-msgid "Find my organization"
+msgid "Find your organization"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:45
