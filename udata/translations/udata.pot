@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-09-11 10:54+0200\n"
+"POT-Creation-Date: 2014-09-11 11:18+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -421,7 +421,7 @@ msgstr ""
 #: udata/templates/organization/edit_base.html:7
 #: udata/templates/organization/followers.html:5
 #: udata/templates/organization/list.html:6
-#: udata/templates/reuse/search-panel.html:12 udata/templates/user/base.html:81
+#: udata/templates/reuse/search-panel.html:12 udata/templates/user/base.html:85
 #: udata/templates/user/following.html:17 udata/templates/user/search-panel.html:13
 msgid "Organizations"
 msgstr ""
@@ -947,7 +947,7 @@ msgstr ""
 
 #: udata/templates/dataset/followers.html:13
 #: udata/templates/organization/display_base.html:56
-#: udata/templates/organization/followers.html:26 udata/templates/user/base.html:56
+#: udata/templates/organization/followers.html:26 udata/templates/user/base.html:60
 #: udata/templates/user/followers.html:14
 #, python-format
 msgid "%(num)d follower"
@@ -1194,6 +1194,10 @@ msgstr ""
 msgid "Share"
 msgstr ""
 
+#: udata/templates/macros/timeline.html:13
+msgid "No recent activity"
+msgstr ""
+
 #: udata/templates/organization/card.html:27
 #: udata/templates/organization/search-result.html:24
 #: udata/templates/user/card.html:20 udata/templates/user/search-result.html:17
@@ -1269,7 +1273,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: udata/templates/organization/display_base.html:62
-#: udata/templates/user/base.html:68
+#: udata/templates/user/base.html:72
 #, python-format
 msgid "%(num)d dataset"
 msgid_plural "%(num)d datasets"
@@ -1277,7 +1281,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: udata/templates/organization/display_base.html:67
-#: udata/templates/user/base.html:74
+#: udata/templates/user/base.html:78
 #, python-format
 msgid "%(num)d reuse"
 msgid_plural "%(num)d reuses"
@@ -1470,7 +1474,7 @@ msgid "I'll be informed about this user news"
 msgstr ""
 
 #: udata/templates/reuse/display_base.html:245 udata/templates/site/activity.html:6
-#: udata/templates/user/activity.html:6
+#: udata/templates/user/activity.html:6 udata/templates/user/base.html:55
 msgid "Activity"
 msgstr ""
 
@@ -1544,7 +1548,7 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: udata/templates/user/base.html:62
+#: udata/templates/user/base.html:66
 #, python-format
 msgid "%(num)d followed"
 msgid_plural "%(num)d followed"

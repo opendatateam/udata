@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-09-11 10:54+0200\n"
-"PO-Revision-Date: 2014-09-11 08:56+0000\n"
+"POT-Creation-Date: 2014-09-11 11:18+0200\n"
+"PO-Revision-Date: 2014-09-11 09:24+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -438,7 +438,7 @@ msgstr "Utilisateurs"
 #: udata/templates/organization/followers.html:5
 #: udata/templates/organization/list.html:6
 #: udata/templates/reuse/search-panel.html:12
-#: udata/templates/user/base.html:81 udata/templates/user/following.html:17
+#: udata/templates/user/base.html:85 udata/templates/user/following.html:17
 #: udata/templates/user/search-panel.html:13
 msgid "Organizations"
 msgstr "Organisations"
@@ -980,7 +980,7 @@ msgstr "Ajouter une ressource"
 #: udata/templates/dataset/followers.html:13
 #: udata/templates/organization/display_base.html:56
 #: udata/templates/organization/followers.html:26
-#: udata/templates/user/base.html:56 udata/templates/user/followers.html:14
+#: udata/templates/user/base.html:60 udata/templates/user/followers.html:14
 #, python-format
 msgid "%(num)d follower"
 msgid_plural "%(num)d followers"
@@ -1233,6 +1233,10 @@ msgstr "Aucun résultat trouvé"
 msgid "Share"
 msgstr "Partager"
 
+#: udata/templates/macros/timeline.html:13
+msgid "No recent activity"
+msgstr "Aucune activité récente"
+
 #: udata/templates/organization/card.html:27
 #: udata/templates/organization/search-result.html:24
 #: udata/templates/user/card.html:20
@@ -1312,7 +1316,7 @@ msgstr[0] "%(num)d membre"
 msgstr[1] "%(num)d membres"
 
 #: udata/templates/organization/display_base.html:62
-#: udata/templates/user/base.html:68
+#: udata/templates/user/base.html:72
 #, python-format
 msgid "%(num)d dataset"
 msgid_plural "%(num)d datasets"
@@ -1320,7 +1324,7 @@ msgstr[0] "%(num)d jeu de données"
 msgstr[1] "%(num)d jeux de données"
 
 #: udata/templates/organization/display_base.html:67
-#: udata/templates/user/base.html:74
+#: udata/templates/user/base.html:78
 #, python-format
 msgid "%(num)d reuse"
 msgid_plural "%(num)d reuses"
@@ -1515,6 +1519,7 @@ msgstr "Je serais informé de l'activité de cet utilisateur"
 
 #: udata/templates/reuse/display_base.html:245
 #: udata/templates/site/activity.html:6 udata/templates/user/activity.html:6
+#: udata/templates/user/base.html:55
 msgid "Activity"
 msgstr "Activité"
 
@@ -1588,7 +1593,7 @@ msgstr "Thématiques"
 msgid "Close"
 msgstr "Fermer"
 
-#: udata/templates/user/base.html:62
+#: udata/templates/user/base.html:66
 #, python-format
 msgid "%(num)d followed"
 msgid_plural "%(num)d followed"

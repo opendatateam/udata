@@ -1,4 +1,5 @@
 {% macro timeline(activities) %}
+{% if activities %}
 <ul class="timeline">
     {% for activity in activities %}
     <li class="timeline-entry">
@@ -8,4 +9,7 @@
     </li>
     {% endfor %}
 </ul>
+{% else %}
+<p class="text-center lead">{{ _('No recent activity') }}</p>
+{% endif %}
 {% endmacro %}

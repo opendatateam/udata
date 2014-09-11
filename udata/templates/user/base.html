@@ -50,6 +50,10 @@
             </div>
 
             <div class="list-group text-center">
+                <a href="{{url_for('users.show', user=user)}}"
+                    class="list-group-item {% if user_tab == 'activity' %}active{% endif %}">
+                    <strong>{{ _('Activity') }}</strong>
+                </a>
                 <a href="{{url_for('users.followers', user=user)}}"
                     class="list-group-item {% if user_tab == 'followers' %}active{% endif %}">
                     <strong>
