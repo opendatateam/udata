@@ -1,0 +1,43 @@
+<li class="search-result user-result">
+    <a href="{{ url_for('users.show', user=user) }}" title="{{ user.fullname }}">
+        <div class="result-logo pull-left">
+            <img alt="{{ user.fullname }}"
+                src="{{ user.avatar_url|placeholder('user') }}">
+        </div>
+        <div class="result-body ellipsis-dot">
+            <h4 class="result-title">{{ user.fullname }}</h4>
+            <div class="result-description">
+                {{ user.about|mdstrip(300) }}
+            </div>
+        </div>
+        <ul class="list-inline result-infos">
+            {% if user.metrics.datasets %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Number of datasets') }}">
+                    <span class="fa fa-cubes fa-fw"></span>
+                    {{ ngettext('%(num)s dataset', '%(num)s datasets', user.metrics.datasets or 0) }}
+                </a>
+            </li>
+            {% endif %}
+            {% if user.metrics.reuses %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Number of reuses') }}">
+                    <span class="{{ ficon('fa-retweet') }} fa-fw"></span>
+                    {{ ngettext('%(num)s reuse', '%(num)s reuses', user.metrics.reuses or 0) }}
+                </a>
+            </li>
+            {% endif %}
+            {% if user.metrics.followers %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Number of followers') }}">
+                    <span class="{{ ficon('fa-eye') }} fa-fw"></span>
+                    {{ ngettext('%(num)s follower', '%(num)s followers', user.metrics.followers or 0) }}
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </a>
+</li>

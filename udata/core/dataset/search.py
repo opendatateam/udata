@@ -90,10 +90,10 @@ class DatasetSearch(ModelSearchAdapter):
         }
     }
     fields = (
-        'title^3',
+        'title^6',
+        'tags^3',
+        'territories.name^3',
         'description',
-        'tags',
-        'territories.name',
         'code',
     )
     sorts = {

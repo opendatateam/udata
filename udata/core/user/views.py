@@ -6,7 +6,7 @@ import logging
 from flask import url_for, g
 
 from udata.frontend import nav
-from udata.frontend.views import DetailView, EditView, ListView
+from udata.frontend.views import DetailView, EditView, SearchView
 from udata.models import User, Activity, Organization, Dataset, Reuse, Follow
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.forms import UserProfileForm, UserSettingsForm, UserAPIKeyForm, UserNotificationsForm
@@ -14,7 +14,7 @@ from udata.forms import UserProfileForm, UserSettingsForm, UserAPIKeyForm, UserN
 from .permissions import sysadmin, UserEditPermission
 
 
-blueprint = I18nBlueprint('users', __name__, url_prefix='/u')
+blueprint = I18nBlueprint('users', __name__, url_prefix='/users')
 
 log = logging.getLogger(__name__)
 
@@ -37,13 +37,11 @@ navbar = nav.Bar('edit_user', [
 ])
 
 
-class UserListView(ListView):
+class UserListView(SearchView):
     model = User
     template_name = 'user/list.html'
     context_name = 'users'
-
-    def get_queryset(self):
-        return User.objects.order_by('first_name', 'last_name')
+    default_sort = ('last_name', 'first_name')
 
 
 class UserView(object):

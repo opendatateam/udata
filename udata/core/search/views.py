@@ -5,7 +5,7 @@ from flask import request
 
 from udata import search
 from udata.frontend import front, render
-from udata.models import Dataset, Organization, Reuse
+from udata.models import Dataset, Organization, Reuse, User
 from udata.utils import multi_to_dict
 
 
@@ -13,13 +13,15 @@ from udata.utils import multi_to_dict
 def render_search():
     params = multi_to_dict(request.args)
     params['facets'] = True
-    datasets, organizations, reuses = search.multiquery(
+    datasets, organizations, reuses, users = search.multiquery(
         search.SearchQuery(Dataset, **params),
         search.SearchQuery(Organization, **params),
         search.SearchQuery(Reuse, **params),
+        search.SearchQuery(User, **params),
     )
     return render('search.html',
         datasets=datasets,
         organizations=organizations,
         reuses=reuses,
+        users=users
     )

@@ -35,6 +35,12 @@
             <span class="badge">{{ organizations.total }}</span>
         </a>
     </li>
+    <li>
+        <a href="#users" data-toggle="tab">
+            {{ _('Users') }}
+            <span class="badge">{{ users.total }}</span>
+        </a>
+    </li>
 </ul>
 
 <div class="tab-content">
@@ -114,6 +120,33 @@
             <aside class="col-lg-4">
                 {% set search_url = url_for('organizations.list') %}
                 {% include theme('organization/search-panel.html') %}
+            </aside>
+        {% else %}
+        <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
+        {% endif %}
+    </div>
+
+    <div class="tab-pane" id="users">
+        {% if users %}
+            <div class="col-lg-8">
+                <ul class="search-results">
+                    {% for user in users %}
+                    {% include theme('user/search-result.html') %}
+                    {% endfor %}
+                </ul>
+                {% if users.has_next %}
+                <p class="text-center">
+                    <a class="btn btn-grey btn-sm" href="{{ url_for('users.list', **request.args) }}">
+                        <span class="glyphicon glyphicon-list"></span>
+                        {{ _('See the %(total)s results', total=users.total) }}
+                    </a>
+                </p>
+                {% endif %}
+            </div>
+
+            <aside class="col-lg-4">
+                {% set search_url = url_for('users.list') %}
+                {% include theme('user/search-panel.html') %}
             </aside>
         {% else %}
         <p class="text-center"><strong>{{ _('No results found') }}</strong></p>

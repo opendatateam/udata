@@ -145,6 +145,7 @@ class SuggestAPITest(APITestCase):
             self.assertIn('id', suggestion)
             self.assertIn('fullname', suggestion)
             self.assertIn('avatar_url', suggestion)
+            self.assertIn('slug', suggestion)
             self.assertIn('score', suggestion)
             self.assertIn('test', suggestion['fullname'])
 

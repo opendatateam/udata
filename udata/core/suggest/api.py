@@ -162,6 +162,7 @@ class SuggestUsersAPI(API):
         'id': fields.String(description='The user identifier', required=True),
         'fullname': fields.String(description='The user fullname', required=True),
         'avatar_url': fields.String(description='The user avatar URL'),
+        'slug': fields.String(description='The user permalink string', required=True),
         'score': fields.Float(description='The internal match score', required=True),
     }))
     def get(self):
@@ -183,6 +184,7 @@ class SuggestUsersAPI(API):
                 'id': opt['payload']['id'],
                 'fullname': opt['payload']['fullname'],
                 'avatar_url': opt['payload']['avatar_url'],
+                'slug': opt['payload']['slug'],
                 'score': opt['score'],
             }
             for opt in result['users'][0]['options']

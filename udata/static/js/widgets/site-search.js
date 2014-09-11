@@ -2,8 +2,13 @@
  * Main site search
  */
 define([
-    'jquery', 'dataset/typeahead', 'reuse/typeahead', 'organization/typeahead', 'typeahead'
-], function($, datasets, reuses, organizations) {
+    'jquery',
+    'dataset/typeahead',
+    'reuse/typeahead',
+    'organization/typeahead',
+    'user/typeahead',
+    'typeahead'
+], function($, datasets, reuses, organizations, users) {
     'use strict';
 
     var SEARCH_FOCUS_CLASS = 'col-sm-7 col-lg-8',
@@ -27,7 +32,7 @@ define([
 
     // Typeahead
     $('#main-search')
-        .typeahead({highlight: true}, organizations, datasets, reuses)
+        .typeahead({highlight: true}, organizations, datasets, reuses, users)
         .on('typeahead:selected', function(e, data, datatype) {
             window.location = '/' + datatype + '/' + data.slug
         });

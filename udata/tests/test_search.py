@@ -249,6 +249,46 @@ class SearchQueryTest(TestCase):
         }
         self.assertEqual(search_query.get_query(), expected)
 
+    def test_default_analyzer(self):
+        '''Default analyzer is overridable'''
+        class FakeAnalyzerSearch(FakeSearch):
+            analyzer = 'simple'
+
+        search_query = search.SearchQuery(FakeAnalyzerSearch, q='test')
+        expected = {
+            'bool': {
+                'must': [
+                    {'multi_match': {
+                        'query': 'test',
+                        'analyzer': 'simple',
+                        'type': 'cross_fields',
+                        'fields': ['title^2', 'description']
+                    }}
+                ]
+            }
+        }
+        self.assertEqual(search_query.get_query(), expected)
+
+    def test_default_type(self):
+        '''Default analyzer is overridable'''
+        class FakeAnalyzerSearch(FakeSearch):
+            match_type = 'most_fields'
+
+        search_query = search.SearchQuery(FakeAnalyzerSearch, q='test')
+        expected = {
+            'bool': {
+                'must': [
+                    {'multi_match': {
+                        'query': 'test',
+                        'analyzer': search.i18n_analyzer,
+                        'type': 'most_fields',
+                        'fields': ['title^2', 'description']
+                    }}
+                ]
+            }
+        }
+        self.assertEqual(search_query.get_query(), expected)
+
     def test_simple_excluding_query(self):
         '''A simple query should negate a simple term in query_string'''
         search_query = search.SearchQuery(FakeSearch, q='-test')

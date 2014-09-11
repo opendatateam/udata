@@ -38,11 +38,13 @@ class SearchAdapterMetaClass(type):
 class ModelSearchAdapter(object):
     '''This class allow to describe and customize the search behavior for a given model'''
     model = None
+    analyzer = None
     fields = None
     facets = None
     sorts = None
     filters = None
     mapping = None
+    match_type = 'cross_fields'
     fuzzy = False
 
     __metaclass__ = SearchAdapterMetaClass

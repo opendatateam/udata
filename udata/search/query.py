@@ -96,7 +96,13 @@ class SearchQuery(object):
         return query
 
     def _multi_match(self, terms):
-        query = {'multi_match': {'query': ' '.join(terms), 'analyzer': i18n_analyzer, 'type': 'cross_fields'}}
+        query = {
+            'multi_match': {
+                'query': ' '.join(terms),
+                'analyzer': self.adapter.analyzer or i18n_analyzer,
+                'type': self.adapter.match_type
+            }
+        }
         if self.adapter.fields:
             query['multi_match']['fields'] = self.adapter.fields
         if self.adapter.fuzzy:

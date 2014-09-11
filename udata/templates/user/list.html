@@ -1,24 +1,39 @@
 {% extends theme("layouts/1-column.html") %}
 {% from theme('macros/paginator.html') import paginator with context %}
-{#
+
 {% block breadcrumb %}
     <li class="active">
         {{ _('Users') }}
         <small>{{ _('%(start)s to %(end)s on %(total)s',
-                    start=users.page_start,
-                    end=users.page_end,
-                    total=users.total) }}</small>
+            start=users.page_start,
+            end=users.page_end,
+            total=users.total) }}</small>
     </li>
-{% endblock %} #}
+{% endblock %}
 
 {% block main_content %}
 <div class="row">
-    <div class="col-xs-12">
-        <ul>
+    <div class="col-lg-8">
+
+        <div class="row">
+            <div class="col-xs-12">
+                {% include "user/search-labels.html" %}
+            </div>
+        </div>
+
+        <ul class="search-results">
             {% for user in users %}
-            <li><a href="{{url_for('users.show', user=user)}}">{{user.fullname}}</a></li>
+            {% include theme('user/search-result.html') %}
             {% endfor %}
         </ul>
+
+        <div class="clearfix"></div>
+        {{ paginator(users) }}
     </div>
+
+    <aside class="col-lg-4">
+    {% include theme('user/search-panel.html') %}
+    </aside>
+
 </div>
 {% endblock %}

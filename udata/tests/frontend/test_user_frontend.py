@@ -9,11 +9,38 @@ from ..factories import UserFactory, DatasetFactory, ReuseFactory, ResourceFacto
 
 
 class UserBlueprintTest(FrontTestCase):
-    # def setUp(self):
-    #     self.user = UserFactory()
+    def test_render_list(self):
+        '''It should render the user list page'''
+        with self.autoindex():
+            users = [UserFactory() for _ in range(3)]
 
-    def test_user_list(self):
-        users = [UserFactory() for _ in range(3)]
+        response = self.get(url_for('users.list'))
+        self.assert200(response)
+
+        rendered_users = self.get_context_variable('users')
+        self.assertEqual(len(rendered_users), len(users))
+
+    def test_render_list_with_query(self):
+        '''It should render the user list page with a query string'''
+        with self.autoindex():
+            users = [UserFactory() for i in range(2)]
+            expected_users = [
+                UserFactory(first_name='test'),
+                UserFactory(last_name='test'),
+            ]
+            users.extend(expected_users)
+
+        response = self.get(url_for('users.list'), qs={'q': 'test'})
+
+        self.assert200(response)
+        rendered_users = self.get_context_variable('users')
+        self.assertEqual(len(rendered_users), 2)
+        rendered_ids = [u.id for u in rendered_users]
+        for user in expected_users:
+            self.assertIn(user.id, rendered_ids)
+
+    def test_render_list_empty(self):
+        '''It should render the dataset list page event if empty'''
         response = self.get(url_for('users.list'))
         self.assert200(response)
 
