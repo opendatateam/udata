@@ -19,6 +19,6 @@ def reindex(doc_type=None):
                 es.indices.delete_mapping(index=es.index_name, doc_type=adapter.doc_type())
             es.indices.put_mapping(index=es.index_name, doc_type=adapter.doc_type(), body=adapter.mapping)
             qs = model.objects.visible() if hasattr(model.objects, 'visible') else model.objects
-            for obj in qs:
+            for obj in qs.timeout(False):
                 es.index(index=es.index_name, doc_type=adapter.doc_type(), id=obj.id, body=adapter.serialize(obj))
     es.indices.refresh(index=es.index_name)
