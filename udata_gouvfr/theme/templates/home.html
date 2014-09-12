@@ -132,7 +132,7 @@
     ('popular-reuses', _('Popular reuses'), popular_reuses, {}),
     ('recent-reuses', _('Latest reuses'), recent_reuses, {'sort': '-created'}),
 ) %} #}
-<section class="default">
+<section class="default spaced">
       <div class="container">
             {# Dataset tabs #}
             <div class="row">
@@ -193,6 +193,44 @@
                 </div>
             </div>
             {# end Dataset tabs #}
+      </div>
+</section>
+{# End datasets section #}
+
+{# Blog section #}
+<section class="default blog">
+      <div class="container blog-container">
+            <div class="row">
+                <div class="col-xs-12">
+                    <h3>{{ _('The blog') }}</h3>
+                </div>
+            </div>
+
+            <div class="row gray">
+                <div class="col-xs-4 photo">
+                    <img src="http://www.etalab.cst.easter-eggs.com/wp-content/uploads/2014/07/Plaque_de_rue_de_la_Place_Beauvau.jpg">
+                </div>
+                <div class="col-xs-8 body">
+                    <span class="post-date">24 juillet 2014</span>
+                    <h4>
+                        <a href="http://www.etalab.cst.easter-eggs.com/le-ministere-de-linterieur-met-a-disposition-en-open-data-les-subventions-accordees-au-titre-de-la-reserve-ministerielle-pour-2012-et-2013"
+                            title="Le ministère de l’Intérieur met à disposition en open data les subventions accordées au titre de la réserve ministérielle pour 2012 et 2013">
+                            Le ministère de l’Intérieur met à disposition
+                            en open data les subventions accordées au titre
+                            de la réserve ministérielle pour 2012 et 2013
+                        </a>
+                    </h4>
+                    <p>
+                        Le ministère de l’Intérieur assure l’exécution de l’action 01 du programme budgétaire 122, « aides
+exceptionnelles aux collectivités territoriales ». Ce programme comprend les subventions d’investissement des collectivités territoriales accordées au titre de la « réserve parlementaire » et de
+la « réserve ministérielle ».
+                        <a href="http://www.etalab.cst.easter-eggs.com/le-ministere-de-linterieur-met-a-disposition-en-open-data-les-subventions-accordees-au-titre-de-la-reserve-ministerielle-pour-2012-et-2013"
+                            title="{{ _('more') }}"
+                            class="btn btn-grey btn-primary btn-mini">+</a>
+                    </p>
+
+                </div>
+            </div>
       </div>
 </section>
 {# End datasets section #}
