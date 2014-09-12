@@ -13,8 +13,8 @@
 <span class="text">{{ _('Sort by') }}</span>
 <div class="btn-group">
     <button type="button" class="btn btn-sorter btn-xs dropdown-toggle" data-toggle="dropdown">
-        {{ label|truncate(12, True) or _('Relevance') }}
         <span class="fa fa-fw fa-chevron-down hidden-sm"></span>
+        {{ label|truncate(12, True) or _('Relevance') }}
     </button>
     <ul class="dropdown-menu">
         <li>
@@ -41,12 +41,12 @@
     </a>
 {% endif %}
 {% if result.total and csv_endpoint %}
-    <a class="btn btn-xs btn-warning pull-right"
-        href="{{ result.query.to_url(
-            url_for(csv_endpoint), facets=None, page=None, page_size=None, replace=true)
-        }}">
+    <a class="btn btn-xs btn-warning pull-right export-btn" title="{{ _('Export') }}"
+        data-placement="bottom" tabindex="0">
         <span class="fa fa-download"></span>
-        CSV
+        <link rel="alternate" type="text/csv" title="csv" href="{{ result.query.to_url(
+            url_for(csv_endpoint), facets=None, page=None, page_size=None, replace=true)
+        }}" />
     </a>
 {% endif %}
 {% endmacro %}

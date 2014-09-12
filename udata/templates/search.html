@@ -11,6 +11,11 @@
     'keywords': [_('search')],
 } %}
 
+{% set datasets_search_url = url_for('datasets.list') %}
+{% set reuses_search_url = url_for('reuses.list') %}
+{% set organizations_search_url = url_for('organizations.list') %}
+{% set users_search_url = url_for('users.list') %}
+
 {% block breadcrumb %}
     <li class="active">
         {{ _('Search') }}
@@ -19,8 +24,8 @@
 {% endblock %}
 
 {% block toolbar_container %}
-<div class="btn-toolbar wrapper" data-tab="#datasets">
-{{ s.breadcrum_toolbar(datasets, 'site.datasets_csv', url=url,
+<div class="btn-toolbar wrapper search-toolbar" data-tab="#datasets">
+{{ s.breadcrum_toolbar(datasets, 'site.datasets_csv', url=datasets_search_url,
     title=(_('Title'), 'asc'),
     created=(_('Creation date'), 'desc'),
     last_modified=(_('Last modification date'), 'desc'),
@@ -29,7 +34,7 @@
 ) }}
 </div>
 <div class="btn-toolbar wrapper hide" data-tab="#reuses">
-{{ s.breadcrum_toolbar(reuses, url=url,
+{{ s.breadcrum_toolbar(reuses, url=reuses_search_url,
     title=(_('Title'), 'asc'),
     created=(_('Creation date'), 'desc'),
     last_modified=(_('Last modification date'), 'desc'),
@@ -38,7 +43,7 @@
 ) }}
 </div>
 <div class="btn-toolbar wrapper hide" data-tab="#organizations">
-{{ s.breadcrum_toolbar(organizations, url=url,
+{{ s.breadcrum_toolbar(organizations, url=organizations_search_url,
     name=( _('Name'), 'asc'),
     datasets=(_('Datasets'), 'desc'),
     reuses=(_('Reuses'), 'desc'),
@@ -46,7 +51,7 @@
 ) }}
 </div>
 <div class="btn-toolbar wrapper hide" data-tab="#users">
-{{ s.breadcrum_toolbar(users, url=url,
+{{ s.breadcrum_toolbar(users, url=users_search_url,
     last_name=( _('Last Name'), 'asc'),
     first_name=( _('First Name'), 'asc'),
     datasets=(_('Datasets'), 'desc'),
@@ -106,7 +111,7 @@
             </div>
 
             <aside class="col-md-4 col-lg-3">
-                {% set search_url = url_for('datasets.list') %}
+                {% set search_url = datasets_search_url %}
                 {% include theme('dataset/search-panel.html') %}
             </aside>
         {% else %}
@@ -133,7 +138,7 @@
             </div>
 
             <aside class="col-md-4 col-lg-3">
-                {% set search_url = url_for('reuses.list') %}
+                {% set search_url = reuses_search_url %}
                 {% include theme('reuse/search-panel.html') %}
             </aside>
         {% else %}
@@ -160,7 +165,7 @@
             </div>
 
             <aside class="col-md-4 col-lg-3">
-                {% set search_url = url_for('organizations.list') %}
+                {% set search_url =organizations_search_url %}
                 {% include theme('organization/search-panel.html') %}
             </aside>
         {% else %}
@@ -187,7 +192,7 @@
             </div>
 
             <aside class="col-md-4 col-lg-3">
-                {% set search_url = url_for('users.list') %}
+                {% set search_url = users_search_url %}
                 {% include theme('user/search-panel.html') %}
             </aside>
         {% else %}

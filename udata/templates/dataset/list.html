@@ -2,6 +2,8 @@
 {% from theme('macros/paginator.html') import paginator with context %}
 {% import theme('macros/search.html') as s %}
 
+{% set toolbar_class='search-toolbar' %}
+
 {% block breadcrumb %}
     <li class="active">
         {{ _('Datasets') }}
