@@ -104,21 +104,32 @@
         }
 
         &.rollover {
-            // @color: white;
-            color: white;
+            @base-size: 20px;
+            @padding: 1px;
+            @line-height: @base-size - 2 * @padding;
+            @color: lighten(black, 35%);
+            color: lighten(@color, 5%);
+            font-size: @line-height - 4px;
+            background-color: fadeout(@gray-lighter, 20%);
             padding: 0;
-            background: fadeout(@gray-darker, 10%);
             display: none;
-            bottom: -@footer-line-height;
+            bottom: -@base-size - 1px;
+            line-height: @line-height;
+            z-index: 0;
             left: 0;
             right: 0;
             position: absolute;
             z-index: 100;
 
             ul {
+                line-height: @line-height;
                 .btn {
-                    color: @gray-lighter;
-                    padding: 1px 5px;
+                    color: @color;
+                    padding: @padding 5px;
+
+                    .fa, .glyphicon {
+                        color: ligthen(@color, 2%);
+                    }
                 }
             }
         }
@@ -150,6 +161,7 @@
         overflow: hidden;
         color: darken(white, 10%);
         text-decoration: none;
+        z-index: 10;
     }
 
     &:hover .rollover {
@@ -241,7 +253,7 @@
     list-style: none;
 
     .card {
-        margin-bottom: 18px;
+        margin-bottom: 22px;
     }
 }
 
