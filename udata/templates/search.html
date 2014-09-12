@@ -1,6 +1,10 @@
 {% extends theme("layouts/1-column.html") %}
 {% import theme('macros/search.html') as s %}
 
+{% set body_class = 'multisearch' %}
+{% set container_class = 'push-up' %}
+{% set toolbar_class = '' %}
+
 {% set meta = {
     'title': _('Search'),
     'description': _("%(site)s search", site=config['SITE_TITLE']),
@@ -14,9 +18,47 @@
     </li>
 {% endblock %}
 
+{% block toolbar_container %}
+<div class="btn-toolbar wrapper" data-tab="#datasets">
+{{ s.breadcrum_toolbar(datasets, 'site.datasets_csv', url=url,
+    title=(_('Title'), 'asc'),
+    created=(_('Creation date'), 'desc'),
+    last_modified=(_('Last modification date'), 'desc'),
+    reuses=(_('Reuses'), 'desc'),
+    followers=(_('Stars'), 'desc')
+) }}
+</div>
+<div class="btn-toolbar wrapper hide" data-tab="#reuses">
+{{ s.breadcrum_toolbar(reuses, url=url,
+    title=(_('Title'), 'asc'),
+    created=(_('Creation date'), 'desc'),
+    last_modified=(_('Last modification date'), 'desc'),
+    datasets=(_('Datasets used'), 'desc'),
+    followers=(_('Stars'), 'desc'),
+) }}
+</div>
+<div class="btn-toolbar wrapper hide" data-tab="#organizations">
+{{ s.breadcrum_toolbar(organizations, url=url,
+    name=( _('Name'), 'asc'),
+    datasets=(_('Datasets'), 'desc'),
+    reuses=(_('Reuses'), 'desc'),
+    followers=(_('Followers'), 'desc'),
+) }}
+</div>
+<div class="btn-toolbar wrapper hide" data-tab="#users">
+{{ s.breadcrum_toolbar(users, url=url,
+    last_name=( _('Last Name'), 'asc'),
+    first_name=( _('First Name'), 'asc'),
+    datasets=(_('Datasets'), 'desc'),
+    reuses=(_('Reuses'), 'desc'),
+    followers=(_('Followers'), 'desc')
+) }}
+</div>
+{% endblock %}
+
 {% block main_content %}
 <!-- Nav tabs -->
-<ul class="nav nav-tabs">
+<ul class="nav nav-tabs search-tabs">
     <li class="active">
         <a href="#datasets" data-toggle="tab">
             {{ _('Datasets')}}
@@ -45,9 +87,9 @@
 
 <div class="tab-content">
 
-    <div class="tab-pane active" id="datasets">
+    <div class="tab-pane row active" id="datasets">
         {% if datasets %}
-            <div class="col-lg-8">
+            <div class="col-md-8 col-lg-9 smaller">
                 <ul class="search-results">
                     {% for dataset in datasets %}
                     {% include theme('dataset/search-result.html') %}
@@ -63,7 +105,7 @@
                 {% endif %}
             </div>
 
-            <aside class="col-lg-4">
+            <aside class="col-md-4 col-lg-3">
                 {% set search_url = url_for('datasets.list') %}
                 {% include theme('dataset/search-panel.html') %}
             </aside>
@@ -72,9 +114,9 @@
         {% endif %}
     </div>
 
-    <div class="tab-pane" id="reuses">
+    <div class="tab-pane row" id="reuses">
         {% if reuses %}
-            <div class="col-lg-8">
+            <div class="col-md-8 col-lg-9 smaller">
                 <ul class="search-results">
                     {% for reuse in reuses %}
                     {% include theme('reuse/search-result.html') %}
@@ -90,7 +132,7 @@
                 {% endif %}
             </div>
 
-            <aside class="col-lg-4">
+            <aside class="col-md-4 col-lg-3">
                 {% set search_url = url_for('reuses.list') %}
                 {% include theme('reuse/search-panel.html') %}
             </aside>
@@ -99,9 +141,9 @@
         {% endif %}
     </div>
 
-    <div class="tab-pane" id="organizations">
+    <div class="tab-pane row" id="organizations">
         {% if organizations %}
-            <div class="col-lg-8">
+            <div class="col-md-8 col-lg-9 smaller">
                 <ul class="search-results">
                     {% for organization in organizations %}
                     {% include theme('organization/search-result.html') %}
@@ -117,7 +159,7 @@
                 {% endif %}
             </div>
 
-            <aside class="col-lg-4">
+            <aside class="col-md-4 col-lg-3">
                 {% set search_url = url_for('organizations.list') %}
                 {% include theme('organization/search-panel.html') %}
             </aside>
@@ -126,9 +168,9 @@
         {% endif %}
     </div>
 
-    <div class="tab-pane" id="users">
+    <div class="tab-pane row" id="users">
         {% if users %}
-            <div class="col-lg-8">
+            <div class="col-md-8 col-lg-9 smaller">
                 <ul class="search-results">
                     {% for user in users %}
                     {% include theme('user/search-result.html') %}
@@ -144,7 +186,7 @@
                 {% endif %}
             </div>
 
-            <aside class="col-lg-4">
+            <aside class="col-md-4 col-lg-3">
                 {% set search_url = url_for('users.list') %}
                 {% include theme('user/search-panel.html') %}
             </aside>

@@ -1,54 +1,55 @@
-{% macro panel_sorter(result, url=None) %}
+{% macro breadcrum_toolbar(result, csv_endpoint=None, url=None) %}
 {% if kwargs %}
-{% set to_url = result.query.to_url %}
-{% if in_url('sort') %}
-    {% if request.args.sort.startswith('-') %}
-        {% set sort, order = request.args.sort[1:], 'desc' %}
-    {% else %}
-        {% set sort, order = request.args.sort, 'asc' %}
+    {% set to_url = result.query.to_url %}
+    {% if in_url('sort') %}
+        {% if request.args.sort.startswith('-') %}
+            {% set current_sort, current_order = request.args.sort[1:], 'desc' %}
+        {% else %}
+            {% set current_sort, current_order = request.args.sort, 'asc' %}
+        {% endif %}
+        {% set label, default_order = kwargs[current_sort] %}
     {% endif %}
-    {% set label, default_order = kwargs[sort] %}
 {% endif %}
-<div class="panel-heading panel-sorter" data-toggle="collapse" data-target="#collapse-sorter">
-    {% if sort %}
-        {% set btn_class = 'btn-default' if order == default_order else 'btn-warning' %}
-        <a class="btn {{ btn_class }} btn-xs pull-right"
-            href="{{ to_url(url=url, replace=True, sort=sort if order == 'desc' else '-'+sort) }}"
-            title="{{ _('Ascending') if order == 'asc' else _('Descending') }}">
-            <span class="fa fa-sort-amount-{{order}}"></span>
-        </a>
-    {% endif %}
-    <h3 class="panel-title">
-        <span class="fa fa-sort-amount-desc fa-fw"></span>
-        {{ _('Sort by') }}
-    </h3>
-</div>
-<div class="btn-group btn-group-justified btn-sorter">
-    <div class="btn-group">
-        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-            {{ label or _('Relevance') }}
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-            <li>
-                <a href="{{ to_url(url=url, sort=None) }}">
-                    {{ _('Relevance') }}
-                </a>
-            </li>
-            {% for field, (label, order) in kwargs.items() %}
-                {% set sort = field if order == 'asc' else '-'+field %}
+<span class="text">{{ _('Sort by') }}</span>
+<div class="btn-group">
+    <button type="button" class="btn btn-sorter btn-xs dropdown-toggle" data-toggle="dropdown">
+        {{ label|truncate(12, True) or _('Relevance') }}
+        <span class="fa fa-fw fa-chevron-down hidden-sm"></span>
+    </button>
+    <ul class="dropdown-menu">
+        <li>
+            <a href="{{ to_url(url=url, sort=None) }}">
+                {{ _('Relevance') }}
+            </a>
+        </li>
+        {% for field, (label, order) in kwargs.items() %}
+            {% set sort = field if order == 'asc' else '-'+field %}
             <li>
                 <a href="{{ to_url(url=url, replace=True, sort=sort) }}">
                     {{ label }}
                 </a>
             </li>
-            {% endfor %}
-        </ul>
-    </div>
+        {% endfor %}
+    </ul>
 </div>
+{% if current_sort %}
+    {% set btn_class = 'btn-default' if current_order == default_order else 'btn-warning' %}
+    <a class="btn {{ btn_class }} btn-xs"
+        href="{{ to_url(url=url, replace=True, sort=current_sort if current_order == 'desc' else '-'+current_sort) }}"
+        title="{{ _('Ascending') if current_order == 'asc' else _('Descending') }}">
+        <span class="fa fa-sort-amount-{{current_order}}"></span>
+    </a>
+{% endif %}
+{% if result.total and csv_endpoint %}
+    <a class="btn btn-xs btn-warning pull-right"
+        href="{{ result.query.to_url(
+            url_for(csv_endpoint), facets=None, page=None, page_size=None, replace=true)
+        }}">
+        <span class="fa fa-download"></span>
+        CSV
+    </a>
 {% endif %}
 {% endmacro %}
-
 
 {% macro filter_label(name, label, icon=None, labelize=None) %}
 {% set values = request.args.getlist(name) or [] %}

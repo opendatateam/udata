@@ -1,5 +1,7 @@
 {% extends theme("layouts/1-column.html") %}
 {% from theme('macros/paginator.html') import paginator with context %}
+{% import theme('macros/search.html') as s %}
+
 
 {% block breadcrumb %}
     <li class="active">
@@ -8,27 +10,25 @@
             start=organizations.page_start,
             end=organizations.page_end,
             total=organizations.total) }}</small>
+        {% include "organization/search-labels.html" %}
     </li>
 {% endblock %}
 
+{# // 'site.organizations_csv', url=url, #}
 {% block toolbar %}
-<div class="btn-group btn-group-xs">
-    <a href="{{ url_for('organizations.new') }}" class="btn btn-success">
-        <span class="glyphicon glyphicon-plus-sign"></span>
-        {{ _('New organization') }}
-    </a>
-</div>
+{{ s.breadcrum_toolbar(organizations, url=url,
+    title=(_('Title'), 'asc'),
+    created=(_('Creation date'), 'desc'),
+    last_modified=(_('Last modification date'), 'desc'),
+    datasets=(_('Datasets'), 'desc'),
+    reuses=(_('Reuses'), 'desc'),
+    followers=(_('Followers'), 'desc')
+) }}
 {% endblock %}
 
 {% block main_content %}
 <div class="row">
-    <div class="col-lg-8">
-
-        <div class="row">
-            <div class="col-xs-12">
-                {% include "organization/search-labels.html" %}
-            </div>
-        </div>
+    <div class="col-md-8 col-lg-9 smaller">
 
         <ul class="search-results">
         {% for organization in organizations %}
@@ -38,7 +38,7 @@
         {{ paginator(organizations) }}
     </div>
 
-    <aside class="col-lg-4">
+    <aside class="col-md-4 col-lg-3">
         {% include theme('organization/search-panel.html') %}
     </aside>
 </div>

@@ -1,5 +1,6 @@
 {% extends theme("layouts/1-column.html") %}
 {% from theme('macros/paginator.html') import paginator with context %}
+{% import theme('macros/search.html') as s %}
 
 {% block breadcrumb %}
     <li class="active">
@@ -8,18 +9,23 @@
             start=datasets.page_start,
             end=datasets.page_end,
             total=datasets.total) }}</small>
+        {% include "dataset/search-labels.html" %}
     </li>
+{% endblock %}
+
+{% block toolbar %}
+{{ s.breadcrum_toolbar(datasets, 'site.datasets_csv', url=url,
+    title=(_('Title'), 'asc'),
+    created=(_('Creation date'), 'desc'),
+    last_modified=(_('Last modification date'), 'desc'),
+    reuses=(_('Reuses'), 'desc'),
+    followers=(_('Stars'), 'desc')
+) }}
 {% endblock %}
 
 {% block main_content %}
 <div class="row">
-    <div class="col-lg-8">
-
-        <div class="row">
-            <div class="col-xs-12">
-                {% include "dataset/search-labels.html" %}
-            </div>
-        </div>
+    <div class="col-md-8 col-lg-9 smaller">
 
         <ul class="search-results">
             {% for dataset in datasets %}
@@ -31,7 +37,7 @@
         {{ paginator(datasets) }}
     </div>
 
-    <aside class="col-lg-4">
+    <aside class="col-md-4 col-lg-3">
     {% include theme('dataset/search-panel.html') %}
     </aside>
 

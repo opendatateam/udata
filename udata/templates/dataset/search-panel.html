@@ -1,14 +1,6 @@
 {% import theme('macros/search.html') as s %}
 {% set url = search_url %}
 <div class="panel panel-default advanced-search-panel">
-    {{ s.panel_header(datasets, 'site.datasets_csv') }}
-    {{ s.panel_sorter(datasets, url=url,
-        title=(_('Title'), 'asc'),
-        created=(_('Creation date'), 'desc'),
-        last_modified=(_('Last modification date'), 'desc'),
-        reuses=(_('Reuses'), 'desc'),
-        followers=(_('Stars'), 'desc')
-    ) }}
     {{ s.facet_panel(datasets,
         'organization', _('Organizations'), ficon('fa-building-o'), url=url
     ) }}

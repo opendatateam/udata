@@ -136,17 +136,6 @@ ul.search-results {
     }
 }
 
-.btn-sorter {
-    button {
-        padding: 10px 16px;
-    }
-
-    .dropdown-menu {
-        width: 100%;
-    }
-}
-
-
 .advanced-search-panel {
     .slider-container {
         width: 100%;
@@ -159,5 +148,75 @@ ul.search-results {
 
     .temporal-coverage .datepicker-inline {
         margin: auto;
+    }
+}
+
+
+.btn-sorter {
+    color: @gray;
+    background: none !important;
+    border: 1px solid @gray !important;
+}
+
+
+.multisearch {
+
+    section.breadcrumb {
+        height: 42px;
+
+        .breadcrumb {
+            padding: 9px 15px;
+            background: none;
+        }
+
+        .toolbar {
+            padding-top: 9px;
+            z-index: 100;
+        }
+    }
+
+    .nav-tabs {
+        position: relative;
+        top: -22px;
+        border: none;
+
+        > li {
+            > a {
+                border-radius: 0;
+                background-color: #d3d3d3;
+                margin-right: 1px;
+                font-size: 12px;
+                font-weight: bold;
+                color: #777777;
+                padding: 7px 10px;
+                border: none;
+            }
+
+            &.active > a {
+                border: none;
+                background-color: white;
+                color: #555;
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 0px;
+            margin-left: 22px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #9a9a9a;
+            line-height: 1;
+            vertical-align: middle;
+            white-space: nowrap;
+            float: right;
+            text-align: right;
+            background: none;
+        }
+    }
+
+    .tab-content {
+        top: -8px;
+        position: relative;
     }
 }

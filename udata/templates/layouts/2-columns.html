@@ -3,7 +3,7 @@
 
 {% block content %}
 {% if self.breadcrumb() %}
-<section class="breadcrumb">
+<section class="breadcrumb {{ breadcrum_class }}">
     <div class="container">
         <ol class="breadcrumb col-md-9">
             <li>
@@ -23,7 +23,7 @@
 {% endif %}
 
 <section class="{{ section_class }}">
-    <div class="container">
+    <div class="container {{ container_class }}">
         <div class="row">
             <div class="col-lg-8">
                 {% block main_content %}{% endblock %}
