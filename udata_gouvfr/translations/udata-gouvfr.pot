@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-09-11 11:18+0200\n"
+"POT-Creation-Date: 2014-09-12 16:09+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -183,41 +183,37 @@ msgid "Sign In / Register"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/home.html:17
-msgid "News"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/home.html:28
-msgid "Discussion topic"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/home.html:36
-#, python-format
-msgid "Photo by %(author)s"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/home.html:50
 msgid "Best reuse cases"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/home.html:100
-msgid "Essential datasets"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/home.html:101
-msgid "Latest datasets"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/home.html:106
-msgid "Popular reuses"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/home.html:107
+#: udata_gouvfr/theme/templates/home.html:57
+#: udata_gouvfr/theme/templates/home.html:58
 msgid "Latest reuses"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/home.html:141
-#: udata_gouvfr/theme/templates/home.html:162
+#: udata_gouvfr/theme/templates/home.html:98
+msgid "Discussion topic"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:124
+msgid "Essential datasets"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:125
+msgid "Latest datasets"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:160
 msgid "See more"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:178
+msgid "The blog"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:201
+#: udata_gouvfr/theme/templates/dataset/display.html:234
+msgid "more"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/metrics.html:5
@@ -374,10 +370,6 @@ msgstr ""
 
 #: udata_gouvfr/theme/templates/dataset/display.html:221
 msgid "The identity of this public service public is certified by Etalab"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:234
-msgid "more"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/dataset/display.html:244

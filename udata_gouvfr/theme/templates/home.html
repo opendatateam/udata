@@ -22,17 +22,12 @@
                         <div class="item {% if loop.first %}active{% endif %}">
                             <img class="slide" src="{{ reuse.image_url }}" alt="{{ reuse.title }}">
                             <div class="carousel-caption">
-                                <div class="slide-logo pull-left">
-                                    {{ reuse|owner_avatar(40) }}
-                                    {# <div class="frame">
-                                    </div> #}
-                                </div>
+                                <div class="slide-logo pull-left">{{ reuse|owner_avatar(40) }}</div>
                                 <span class="author">{{ reuse|owner_name}}</span>
                                 <h4 class="title">
                                     <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
                                     {{ reuse.title }}
                                     </a>
-                                    {# <label>{{ reuse.description|mdstrip(250) }}</label> #}
                                 </h4>
                                 {# {% if user.sysadmin %}
                                 <a class="btn btn-xs btn-warning unfeature" rel="tooltip" href
@@ -81,6 +76,7 @@
 </section>
 {# End Carousels section #}
 
+{% if last_post %}
 {% set post = last_post %}
 <section class="highlight-bar">
 
@@ -120,6 +116,7 @@
         </div>
     </div>
 </section>
+{% endif %}
 
 
 {# Datasets section #}
@@ -128,11 +125,6 @@
     ('recent-datasets', _('Latest datasets'), recent_datasets, {'sort': '-created'}),
 ) %}
 
-{# Reuses section #}
-{# {% set reuse_tabs = (
-    ('popular-reuses', _('Popular reuses'), popular_reuses, {}),
-    ('recent-reuses', _('Latest reuses'), recent_reuses, {'sort': '-created'}),
-) %} #}
 <section class="default spaced">
       <div class="container">
             {# Dataset tabs #}
@@ -171,26 +163,6 @@
                     </div>
                     {% endfor %}
 
-
-                    {# {% for tab_id, label, reuses, kwargs in reuse_tabs  %}
-                    <div class="tab-pane" id="{{tab_id}}">
-                        <ul class="card-list">
-
-                            {% for reuse in reuses %}
-                            <li class="col-md-4 col-sm-6">
-                                {% include theme('reuse/card.html') %}
-                            </li>
-                            {% endfor %}
-
-                        </ul>
-                        <p class="text-center">
-                            <a href="{{ url_for('reuses.list', **kwargs) }}" class="btn btn-default">
-                                <span class="glyphicon glyphicon-list" ></span>
-                                {{ _('See more') }}
-                            </a>
-                        </p>
-                    </div>
-                    {% endfor %} #}
                 </div>
             </div>
             {# end Dataset tabs #}

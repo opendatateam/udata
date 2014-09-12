@@ -1,26 +1,26 @@
-# French translations for udata-gouvfr.
+# Translations template for udata-gouvfr.
 # Copyright (C) 2014 ORGANIZATION
-# This file is distributed under the same license as the udata-gouvfr
-# project.
-#
+# This file is distributed under the same license as the udata-gouvfr project.
+# 
 # Translators:
+# Axel Haustant, 2014
 # Axel Haustant, 2014
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2014
 # noirbizarre, 2014
 msgid ""
 msgstr ""
-"Project-Id-Version:  uData-gouv.fr\n"
+"Project-Id-Version: uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-09-11 11:18+0200\n"
-"PO-Revision-Date: 2014-09-11 09:00+0000\n"
+"POT-Creation-Date: 2014-09-12 16:09+0200\n"
+"PO-Revision-Date: 2014-09-12 14:10+0000\n"
 "Last-Translator: Axel Haustant\n"
-"Language-Team: French (http://www.transifex.com/projects/p/udata-"
-"gouvfr/language/fr/)\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"Language-Team: French (http://www.transifex.com/projects/p/udata-gouvfr/language/fr/)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: udata_gouvfr/metrics.py:15 udata_gouvfr/theme/templates/metrics.html:48
 msgid "Public services"
@@ -188,42 +188,38 @@ msgid "Sign In / Register"
 msgstr "Connexion / Inscription"
 
 #: udata_gouvfr/theme/templates/home.html:17
-msgid "News"
-msgstr "Actualités"
-
-#: udata_gouvfr/theme/templates/home.html:28
-msgid "Discussion topic"
-msgstr "Thématique"
-
-#: udata_gouvfr/theme/templates/home.html:36
-#, python-format
-msgid "Photo by %(author)s"
-msgstr "Photo de %(author)s"
-
-#: udata_gouvfr/theme/templates/home.html:50
 msgid "Best reuse cases"
 msgstr "Meilleures réutilisations"
 
-#: udata_gouvfr/theme/templates/home.html:100
-msgid "Essential datasets"
-msgstr "Jeux de données essentiels"
-
-#: udata_gouvfr/theme/templates/home.html:101
-msgid "Latest datasets"
-msgstr "Derniers jeux de données"
-
-#: udata_gouvfr/theme/templates/home.html:106
-msgid "Popular reuses"
-msgstr "Réutilisations populaires"
-
-#: udata_gouvfr/theme/templates/home.html:107
+#: udata_gouvfr/theme/templates/home.html:57
+#: udata_gouvfr/theme/templates/home.html:58
 msgid "Latest reuses"
 msgstr "Dernières réutilisations"
 
-#: udata_gouvfr/theme/templates/home.html:141
-#: udata_gouvfr/theme/templates/home.html:162
+#: udata_gouvfr/theme/templates/home.html:98
+msgid "Discussion topic"
+msgstr "Thématique"
+
+#: udata_gouvfr/theme/templates/home.html:124
+msgid "Essential datasets"
+msgstr "Jeux de données essentiels"
+
+#: udata_gouvfr/theme/templates/home.html:125
+msgid "Latest datasets"
+msgstr "Derniers jeux de données"
+
+#: udata_gouvfr/theme/templates/home.html:160
 msgid "See more"
 msgstr "Voir plus"
+
+#: udata_gouvfr/theme/templates/home.html:178
+msgid "The blog"
+msgstr "Le blog"
+
+#: udata_gouvfr/theme/templates/home.html:201
+#: udata_gouvfr/theme/templates/dataset/display.html:234
+msgid "more"
+msgstr "plus"
 
 #: udata_gouvfr/theme/templates/metrics.html:5
 msgid "Site metrics"
@@ -308,19 +304,14 @@ msgstr "Ce jeu de données provient d'un service public certifié"
 msgid ""
 "Published on %(date)s by <a href=\"%(url)s\" "
 "title=\"%(author)s\">%(author)s</a>"
-msgstr ""
-"Publié le %(date)s par <a href=\"%(url)s\" "
-"title=\"%(author)s\">%(author)s</a>"
+msgstr "Publié le %(date)s par <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:73
 #, python-format
 msgid ""
-"This dataset has been published on %(date)s on the initiative and under "
-"the responsibility of <a href=\"%(url)s\" "
-"title=\"%(author)s\">%(author)s</a>"
-msgstr ""
-"Ce jeu de données a été publié le %(date)s à l'initiative et sous la "
-"responsabilité de <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
+"This dataset has been published on %(date)s on the initiative and under the "
+"responsibility of <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
+msgstr "Ce jeu de données a été publié le %(date)s à l'initiative et sous la responsabilité de <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:82
 #: udata_gouvfr/theme/templates/dataset/display.html:84
@@ -348,10 +339,9 @@ msgid "Deleted"
 msgstr "Supprimé"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:95
-msgid "This dataset has been deleted. This will be permanent in the next 24 hours"
-msgstr ""
-"Ce jeu de données a été supprimé. Cela deviendra permanent dans les "
-"prochaines 24 heures."
+msgid ""
+"This dataset has been deleted. This will be permanent in the next 24 hours"
+msgstr "Ce jeu de données a été supprimé. Cela deviendra permanent dans les prochaines 24 heures."
 
 #: udata_gouvfr/theme/templates/dataset/display.html:104
 msgid "Provided by"
@@ -387,10 +377,6 @@ msgstr "Service public certifié"
 #: udata_gouvfr/theme/templates/dataset/display.html:221
 msgid "The identity of this public service public is certified by Etalab"
 msgstr "L'identité de ce service public est certifiée par Etalab"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:234
-msgid "more"
-msgstr "plus"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:244
 #: udata_gouvfr/theme/templates/dataset/display.html:246
@@ -509,11 +495,9 @@ msgstr "Ressource sans nom"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:491
 msgid ""
-"You have built a more comprehensive database than those presented here? "
-"This is the time to share it!"
-msgstr ""
-"Vous avez construit une base de données plus complète que celles "
-"présentées ici ? C'est le moment de la partager !"
+"You have built a more comprehensive database than those presented here? This"
+" is the time to share it!"
+msgstr "Vous avez construit une base de données plus complète que celles présentées ici ? C'est le moment de la partager !"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:528
 msgid "Open in a new window"
@@ -535,16 +519,10 @@ msgstr "Ajouter une réutilisation"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:571
 msgid ""
-"You reused these data and published an article, a computer graphics, or "
-"an application?\n"
+"You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
-"                Reference your work in just a few clicks and increase "
-"your visibility."
-msgstr ""
-"Vous avez réutilisé ces données et publié un article, une infographie, ou"
-" une application ?\n"
-"C'est le moment de vous faire connaître !\n"
-"Référencez votre travail en quelques clics et augmentez votre visibilité."
+"                Reference your work in just a few clicks and increase your visibility."
+msgstr "Vous avez réutilisé ces données et publié un article, une infographie, ou une application ?\nC'est le moment de vous faire connaître !\nRéférencez votre travail en quelques clics et augmentez votre visibilité."
 
 #: udata_gouvfr/theme/templates/organization/display.html:9
 msgid "organization"
@@ -552,11 +530,9 @@ msgstr "organisation"
 
 #: udata_gouvfr/theme/templates/organization/display.html:51
 msgid ""
-"This organization has been deleted. This will be permanent in the next 24"
-" hours"
-msgstr ""
-"Cette organisation a été supprimée. Cela deviendra permanent dans les "
-"prochaines 24 heures"
+"This organization has been deleted. This will be permanent in the next 24 "
+"hours"
+msgstr "Cette organisation a été supprimée. Cela deviendra permanent dans les prochaines 24 heures"
 
 #: udata_gouvfr/theme/templates/organization/display.html:65
 msgid "This organization and its datasets are certified by data.gouv.fr"
@@ -718,4 +694,3 @@ msgstr "Aucun résultat trouvé"
 #: udata_gouvfr/theme/templates/topic/subnav.html:46
 msgid "Read more"
 msgstr "Lire plus"
-
