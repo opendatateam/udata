@@ -7,6 +7,16 @@
 </time>
 <span class="timeline-icon {{ icon }}"></span>
 <div class="timeline-body">
+    {% if organization %}
+    <a class="avatar" title="{{ organization.name }}"
+        href="{{ url_for('organizations.show', org=org) }}">
+        <img src="{{organization.image_url|placeholder('organization') }}"
+            alt="{{ organization.name }}" class="scalable"
+            width="60" height="60" />
+    </a>
+    {% else %}
+    {{ user|avatar(60) }}
+    {% endif %}
     <h3>
     {% block title %}
     {% if organization %}
