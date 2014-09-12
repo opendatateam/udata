@@ -79,12 +79,55 @@ section.colored {
 
 section.highlight-bar {
     background-color: @gray-lighter;
-    height: 120px;
+    height: 140px;
     overflow: hidden;
+    position: relative;
+
+    .photo-bg, .color-overlay {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .photo-bg {
+        z-index: 10;
+
+        img {
+            width: 100%;
+        }
+    }
+
+    .color-overlay {
+        // background-color: rgba(255, 255, 255, 0.15);
+        background-color: rgba(50, 75, 100, 0.50);
+        z-index: 20;
+    }
+
+    .container {
+        z-index: 30;
+    }
 
     .photo {
         img {
-            max-width: 100%;
+            width: 100%;
+        }
+    }
+
+    .body {
+        color: white;
+
+        label {
+            color: @gray-lighter;
+            margin-top: 10px;
+        }
+
+        h3 {
+            margin-top: 5px;
+        }
+
+        a {
+            color: white;
         }
     }
 }

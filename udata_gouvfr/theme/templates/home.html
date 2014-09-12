@@ -82,12 +82,20 @@
 
 {% set post = last_post %}
 <section class="highlight-bar">
+
+    <div class="photo-bg">
+        <img src="{{ post.image_url|placeholder('post') }}"
+            alt="{{ post.name }}">
+    </div>
+    <div class="color-overlay"></div>
+
     <div class="container">
         <div class="row">
             <div class="photo col-sm-4">
                 <img src="{{ post.image_url|placeholder('post') }}"
                     alt="{{ post.name }}">
             </div>
+
 
             <div class="body col-sm-8">
                 <label>{{ _('Discussion topic') }}</label>
@@ -97,14 +105,15 @@
                         {{ post.name }}
                     </a>
                 </h3>
+                <p>{{post.content|mdstrip(280)}}</p>
 
-                {% if post.credit_to %}
+              {#   {% if post.credit_to %}
                 <p>
                     {% if post.credit_url %}<a href="{{ post.credit_url }}">{% endif %}
                         <small>{{ _('Photo by %(author)s', author=post.credit_to) }}</small>
                     {% if post.credit_url %}</a>{% endif %}
                 </p>
-                {% endif %}
+                {% endif %} #}
 
             </div>
         </div>
