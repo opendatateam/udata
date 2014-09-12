@@ -77,6 +77,32 @@ section.colored {
     background-color: @gray-lighter;
 }
 
+section.highlight-bar {
+    background-color: @gray-lighter;
+    height: 120px;
+    overflow: hidden;
+
+    .photo {
+        img {
+            max-width: 100%;
+        }
+    }
+}
+
+.single-column {
+    h3 {
+        a {
+            text-decoration: none;
+            color: @text-color;
+        }
+    }
+    .card-list {
+        li {
+            padding-left: 0;
+        }
+    }
+}
+
 
 /**
  * Calls to action.

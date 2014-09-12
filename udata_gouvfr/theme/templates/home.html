@@ -12,39 +12,6 @@
         {# First row #}
         <div class="row first-row">
 
-            {# News highlight #}
-            <div class="col-md-4">
-                <h3>{{ _('News') }}</h3>
-                <div id="news-carousel" class="carousel slide">
-                    <!-- Wrapper for slides -->
-                    <div class="carousel-inner">
-                        {% if last_post %}
-                        {% set post = last_post %}
-                        <div class="item active">
-                            <img class="slide" src="{{ post.image_url|placeholder('post') }}"
-                                alt="{{ post.name }}">
-
-                            <div class="carousel-caption">
-                                <label>{{ _('Discussion topic') }}</label>
-                                <h4 class="title ellipsis-dot">
-                                    <a href="{{ url_for('posts.show', post=post) }}"
-                                        title="{{ post.name }}">
-                                        {{ post.name }}
-                                    </a>
-                                    {% if post.credit_to %}
-                                        {% if post.credit_url %}<a href="{{ post.credit_url }}">{% endif %}
-                                            <small>{{ _('Photo by %(author)s', author=post.credit_to) }}</small>
-                                        {% if post.credit_url %}</a>{% endif %}
-                                    {% endif %}
-                                </h4>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {# end News highlight #}
-
             {# Carousel #}
             <div class="col-md-8">
                 <h3>{{ _('Best reuse cases') }}</h3>
@@ -60,11 +27,11 @@
                                         {{ reuse|owner_avatar(80) }}
                                     </div>
                                 </div>
-                                <h4 class="title ellipsis-dot">
+                                <h4 class="title">
                                     <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
                                     {{ reuse.title }}
                                     </a>
-                                    <label>{{ reuse.description|mdstrip(250) }}</label>
+                                    {# <label>{{ reuse.description|mdstrip(250) }}</label> #}
                                 </h4>
                                 {# {% if user.sysadmin %}
                                 <a class="btn btn-xs btn-warning unfeature" rel="tooltip" href
@@ -87,12 +54,62 @@
             </div>
             {# end carousel #}
 
+            {# Last reuses #}
+            <div class="col-md-4 single-column">
+                <h3>
+                    <a href="{{ url_for('reuses.list', sort='-created') }}"
+                        title="{{ _('Latest reuses') }}">
+                        {{ _('Latest reuses') }}
+                    </a>
+                </h3>
+                <ul class="card-list">
+                    {% for reuse in recent_reuses[:3] %}
+                    <li class="col-xs-12">
+                        {% include theme('reuse/card.html') %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {# End last reuses #}
+
+
         </div>
         {# end first row #}
     </div>
 
 </section>
 {# End Carousels section #}
+
+{% set post = last_post %}
+<section class="highlight-bar">
+    <div class="container">
+        <div class="row">
+            <div class="photo col-sm-4">
+                <img src="{{ post.image_url|placeholder('post') }}"
+                    alt="{{ post.name }}">
+            </div>
+
+            <div class="body col-sm-8">
+                <label>{{ _('Discussion topic') }}</label>
+                <h3 class="title ellipsis-dot">
+                    <a href="{{ url_for('posts.show', post=post) }}"
+                        title="{{ post.name }}">
+                        {{ post.name }}
+                    </a>
+                </h3>
+
+                {% if post.credit_to %}
+                <p>
+                    {% if post.credit_url %}<a href="{{ post.credit_url }}">{% endif %}
+                        <small>{{ _('Photo by %(author)s', author=post.credit_to) }}</small>
+                    {% if post.credit_url %}</a>{% endif %}
+                </p>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</section>
 
 
 {# Datasets section #}
@@ -102,17 +119,17 @@
 ) %}
 
 {# Reuses section #}
-{% set reuse_tabs = (
+{# {% set reuse_tabs = (
     ('popular-reuses', _('Popular reuses'), popular_reuses, {}),
     ('recent-reuses', _('Latest reuses'), recent_reuses, {'sort': '-created'}),
-) %}
+) %} #}
 <section class="default">
       <div class="container">
             {# Dataset tabs #}
             <div class="row">
                 <div class="col-xs-12">
                     <ul class="nav nav-pills" data-tabs="tabs">
-                        {% for tab_id, label, _, _ in dataset_tabs + reuse_tabs %}
+                        {% for tab_id, label, _, _ in dataset_tabs %}
                         <li {% if loop.first %}class="active"{% endif %}>
                             <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
                         </li>
@@ -145,7 +162,7 @@
                     {% endfor %}
 
 
-                    {% for tab_id, label, reuses, kwargs in reuse_tabs  %}
+                    {# {% for tab_id, label, reuses, kwargs in reuse_tabs  %}
                     <div class="tab-pane" id="{{tab_id}}">
                         <ul class="card-list">
 
@@ -163,7 +180,7 @@
                             </a>
                         </p>
                     </div>
-                    {% endfor %}
+                    {% endfor %} #}
                 </div>
             </div>
             {# end Dataset tabs #}

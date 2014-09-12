@@ -57,7 +57,7 @@
             </div>
 
             {# Left sidebar with organization aside ( counters, logo, social...) #}
-            <aside class="col-sm-3 card">
+            <aside class="col-sm-3 panel panel-default">
                 {% if org.public_service %}
                     <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
                         class="certified" rel="popover"
@@ -274,7 +274,7 @@
                     <div class="row card-list">
                         {% for member in org.members %}
                         <div class="col-md-4">
-                          {% include theme('organization/member-card.html') %}
+                            {% include theme('organization/member-card.html') %}
                         </div>
                         {% endfor %}
                     </div>

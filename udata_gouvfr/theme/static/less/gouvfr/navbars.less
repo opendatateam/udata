@@ -335,28 +335,31 @@
         text-decoration: none;
     }
 
-    .list-group {
-        margin: 8px 0px;
-    }
+    &.panel {
+        .list-group {
+            margin: 8px 0px;
+        }
 
-    .list-group-item {
-        background: none;
-        border: 0px;
-        color: white;
-        padding: 4px 0px;
-        font-weight: normal;
-        font-size: 13px;
-
-        &:hover, &:focus {
+        .list-group-item {
+            background: none;
             border: 0px;
-            opacity: 0.75;
-            background: none !important;
-        }
+            color: white;
+            padding: 4px 0px;
+            font-weight: normal;
+            font-size: 13px;
 
-        &:last-child {
-            border-bottom: none;
+            &:hover, &:focus {
+                border: 0px;
+                opacity: 0.75;
+                background: none !important;
+            }
+
+            &:last-child {
+                border-bottom: none;
+            }
         }
     }
+
 
 }
 
@@ -369,7 +372,12 @@
 .side-bgs {
     position: absolute;
     left: -1000px;
-    top: 12px;
+    padding-top: 12px;
+
+    @media(max-width: @grid-float-breakpoint) {
+        // margin-top: 1px;
+        padding-top: 2px;
+    }
     height: 100%;
     z-index: -10;
     .sidebackground-width(@container-lg, 4);
@@ -405,6 +413,8 @@
 
         &:nth-child(2) {
             height: 242px !important;
+            // top: 50px;
+            // bottom: 5px;
         }
 
         &.sidebg-collapse { // Copied from bootstrap navbar-collapse
@@ -552,18 +562,10 @@
 
 // test for gray header menu bar
 .topmenu {
-    background-color: @bg-gray;
+    // background-color: @bg-gray;
 
-    @media(min-width: @grid-float-breakpoint) {
-        &.navbar-collapse.collapse {
-            height: 60px !important;
-        }
-    }
-
-    @media(min-width: @screen-sm-min) {
-        &.navbar-collapse.collapse {
-            height: 30px !important;
-        }
+    .navbar {
+        min-height: 28px;
     }
 
     .navbar-nav > li > a {
@@ -588,23 +590,23 @@
         margin-right: 15px;
     }
 
-    .user button {
-        padding: 0 10px 0 0;
-        // color: darken(white, 10%);
-        // background: @gray;
+
+    button {
         vertical-align: middle;
-        height: 30px;
 
         &:hover, &:active {
             text-decoration: none !important;
-            color: darken(white, 15%);
-            background: @gray;
+            color: darken(white, 5%);
+            background: @gray-light;
         }
+    }
+
+    .user button {
+        padding: 0 10px 0 0;
+        height: 30px;
 
         img {
             margin-right: -10px;
-            // width: 22px;
-            // height: 22px;
         }
 
         .username {
@@ -616,18 +618,12 @@
 
     .language button {
         padding: 5px 6px;
-        vertical-align: middle;
-        // background: lighten(@gray-light, 10%);
-
-        &:hover, &:active {
-            background: @gray-light;
-        }
     }
 
 
     .dropdown {
         .dropdown-menu {
-            margin-top: -1px;
+            border-top: none;
         }
 
         &.open .dropdown-menu {
