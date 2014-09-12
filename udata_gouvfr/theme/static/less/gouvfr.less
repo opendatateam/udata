@@ -308,3 +308,47 @@ ul.search-results {
         }
     }
 }
+
+
+#home-carousel {
+    .carousel-caption {
+        background-color: white;
+        height: 60px;
+
+        .slide-logo {
+            margin-right: 10px;
+            border: 1px solid @gray-lighter;
+        }
+
+        .author {
+            color: @highlight;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .title  {
+            height: 15px;
+
+            a {
+                font-size: 14px;
+                line-height: 16px;
+                // margin-top: 5px;
+                .ellipsis();
+            }
+
+            @media (min-width: @screen-xs-min) {
+                a {
+                    // height: 20px;
+                    font-size: 16px;
+                    line-height: 18px;
+                }
+            }
+        }
+
+        a.unfeature {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
+    }
+}
