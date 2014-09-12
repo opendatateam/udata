@@ -213,207 +213,214 @@
                 {# Optionnal organization panel #}
                 {% if dataset.organization %}
                 <div class="panel panel-default text-center">
-                    <h3>{{ _('Producer') }}</h3>
-                    {% if dataset.organization.public_service %}
-                    <img src="{{ theme_static('img/certified-stamp.png')}}" alt="certified"
-                        class="certified" rel="popover"
-                        data-title="{{ _('Certified public service') }}"
-                        data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
-                        data-container="body" data-placement="left" data-trigger="hover"/>
-                    {% endif %}
-                    <a href="{{ url_for('organizations.show', org=dataset.organization) }}"
-                        title="{{ dataset.organization.name }}">
-                        <img src="{{ dataset.organization.image_url|placeholder('organization') }}"
-                            alt="{{ dataset.organization.name }}" class="organization-logo producer" />
-                    </a>
-                    <div class="caption text-left">
-                        {% if dataset.organization.description %}
-                        <p>
-                            {{ dataset.organization.description|mdstrip(180) }}
-                            <a href="{{ url_for('organizations.show', org=dataset.organization) }}"
-                                title="{{ _('more') }}"
-                                class="btn btn-grey btn-primary btn-mini">+</a>
-                        </p>
-                        {% else %}
-                        <br/>
+                    <div class="panel-body">
+                        <h3>{{ _('Producer') }}</h3>
+                        {% if dataset.organization.public_service %}
+                        <img src="{{ theme_static('img/certified-stamp.png')}}" alt="certified"
+                            class="certified" rel="popover"
+                            data-title="{{ _('Certified public service') }}"
+                            data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
+                            data-container="body" data-placement="left" data-trigger="hover"/>
                         {% endif %}
-                        <button type="button"
-                            class="btn btn-primary btn-follow btn-block btn-sm icon-left {% if is_following(dataset.organization) %}active{% endif %}"
-                            rel="tooltip" data-placement="left"
-                            data-api-url="{{ url_for('api.follow_organization', id=dataset.organization.id|string) }}"
-                            data-following-label="{{ _('Unfollow') }}"
-                            {% if is_following(dataset.organization) %}
-                            title="{{ _('Unfollow') }}">
-                            <span class="glyphicon glyphicon-eye-close"></span>
-                            {{ _('Unfollow') }}
+                        <a href="{{ url_for('organizations.show', org=dataset.organization) }}"
+                            title="{{ dataset.organization.name }}">
+                            <img src="{{ dataset.organization.image_url|placeholder('organization') }}"
+                                alt="{{ dataset.organization.name }}" class="organization-logo producer" />
+                        </a>
+                        <div class="caption text-left">
+                            {% if dataset.organization.description %}
+                            <p>
+                                {{ dataset.organization.description|mdstrip(180) }}
+                                <a href="{{ url_for('organizations.show', org=dataset.organization) }}"
+                                    title="{{ _('more') }}"
+                                    class="btn btn-grey btn-primary btn-mini">+</a>
+                            </p>
                             {% else %}
-                            title="{{ _("I'll be informed about this organization news") }}">
-                            <span class="glyphicon glyphicon-eye-open"></span>
-                            {{ _('Follow') }}
+                            <br/>
                             {% endif %}
-                        </button>
+                            <button type="button"
+                                class="btn btn-primary btn-follow btn-block btn-sm icon-left {% if is_following(dataset.organization) %}active{% endif %}"
+                                rel="tooltip" data-placement="left"
+                                data-api-url="{{ url_for('api.follow_organization', id=dataset.organization.id|string) }}"
+                                data-following-label="{{ _('Unfollow') }}"
+                                {% if is_following(dataset.organization) %}
+                                title="{{ _('Unfollow') }}">
+                                <span class="glyphicon glyphicon-eye-close"></span>
+                                {{ _('Unfollow') }}
+                                {% else %}
+                                title="{{ _("I'll be informed about this organization news") }}">
+                                <span class="glyphicon glyphicon-eye-open"></span>
+                                {{ _('Follow') }}
+                                {% endif %}
+                            </button>
+                        </div>
                     </div>
                 </div>
                 {% endif %}
 
                 {# Information panel #}
-                <div class="card">
-                    <h3>{{ _('Informations') }}</h3>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3>{{ _('Informations') }}</h3>
 
-                    <ul id="infos-list" class="list-unstyled">
+                        <ul class="list-unstyled infos-list">
 
-                        {# License #}
-                        {% if dataset.license %}
-                        <li>
-                            <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="right auto"
-                                title="{{ _('License') }}">
-                                <span class="glyphicon glyphicon-copyright-mark"></span>
-                            </a>
-                            {% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
-                            {{ dataset.license.title }}
-                            {% if dataset.license.url %}</a>{% endif %}
-                        </li>
-                        {% endif %}
-
-                        {# Temporal coverage #}
-                        {% if dataset.temporal_coverage %}
-                        <li>
-                            <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
-                                title="{{ _('Temporal coverage') }}">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </a>
-                            {{ dataset.temporal_coverage|daterange }}
-                        </li>
-                        {% endif %}
-
-                        {% if dataset.frequency %}
-                        <li>
-                            <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="right auto"
-                                title="{{ _('Frequency') }}">
-                                <span class="glyphicon glyphicon-time"></span>
-                            </a>
-                            {{ dataset.frequency_label }}
-                        </li>
-                        {% endif %}
-
-                        {# Spatial coverage #}
-                        {% if dataset.spatial %}
-                            {% if dataset.spatial.granularity %}
+                            {# License #}
+                            {% if dataset.license %}
                             <li>
-                                <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
-                                    title="{{ _('Territorial coverage granularity') }}">
-                                    <span class="glyphicon glyphicon-screenshot"></span>
+                                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="right auto"
+                                    title="{{ _('License') }}">
+                                    <span class="glyphicon glyphicon-copyright-mark"></span>
                                 </a>
-                                {{ dataset.spatial.granularity_label }}
+                                {% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
+                                {{ dataset.license.title }}
+                                {% if dataset.license.url %}</a>{% endif %}
                             </li>
                             {% endif %}
-                            {% if dataset.spatial.territories %}
+
+                            {# Temporal coverage #}
+                            {% if dataset.temporal_coverage %}
                             <li>
                                 <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
-                                    title="{{ _('Territorial coverage') }}">
-                                    <span class="glyphicon glyphicon-globe"></span>
+                                    title="{{ _('Temporal coverage') }}">
+                                    <span class="glyphicon glyphicon-calendar"></span>
                                 </a>
-                                {{ dataset.spatial.top_label }}
+                                {{ dataset.temporal_coverage|daterange }}
                             </li>
                             {% endif %}
-                        {% endif %}
-                    </ul>
 
+                            {% if dataset.frequency %}
+                            <li>
+                                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="right auto"
+                                    title="{{ _('Frequency') }}">
+                                    <span class="glyphicon glyphicon-time"></span>
+                                </a>
+                                {{ dataset.frequency_label }}
+                            </li>
+                            {% endif %}
 
-                    <div class="tags">
-                        {% for tag in dataset.tags %}
-                        <a href="{{ url_for('front.search', tag=tag) }}"
-                            class="btn btn-primary btn-grey btn-xs"
-                            title="{{ tag }}">
-                            {{ tag|truncate(14, True) }}
-                        </a>
-                        {% endfor %}
+                            {# Spatial coverage #}
+                            {% if dataset.spatial %}
+                                {% if dataset.spatial.granularity %}
+                                <li>
+                                    <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                                        title="{{ _('Territorial coverage granularity') }}">
+                                        <span class="glyphicon glyphicon-screenshot"></span>
+                                    </a>
+                                    {{ dataset.spatial.granularity_label }}
+                                </li>
+                                {% endif %}
+                                {% if dataset.spatial.territories %}
+                                <li>
+                                    <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                                        title="{{ _('Territorial coverage') }}">
+                                        <span class="glyphicon glyphicon-globe"></span>
+                                    </a>
+                                    {{ dataset.spatial.top_label }}
+                                </li>
+                                {% endif %}
+                            {% endif %}
+                        </ul>
+
+                        <div class="tags">
+                            {% for tag in dataset.tags %}
+                            <a href="{{ url_for('front.search', tag=tag) }}"
+                                class="btn btn-primary btn-grey btn-xs"
+                                title="{{ tag }}">
+                                {{ tag|truncate(14, True) }}
+                            </a>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
 
                 {# Geospatial panel #}
                 {% if dataset.spatial.geom %}
-                <div class="card">
-                    <h3>{{ _('Spatial coverage') }}</h3>
-                    <div id="coverage-map" class="aside-map"
-                        data-geojson="{{dataset.spatial.geom|to_json}}"></div>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3>{{ _('Spatial coverage') }}</h3>
+                        <div id="coverage-map" class="aside-map"
+                            data-geojson="{{dataset.spatial.geom|to_json}}"></div>
+                    </div>
                 </div>
                 {% endif %}
 
                 {# Quality panel #}
-                <div class="card">
-                    <h3>{{ _('Data quality') }}</h3>
-                    <div class="stats">
-                        <div class="row">
-                        {% if dataset.metrics.cow_score %}
-                            <a href="{{ cow_url_for(dataset) }}" title="{{ _("Go to the report page") }}">
-                                <div class="col-xs-5 col-sm-12 col-md-6 col-lg-6">
-                                    <span class="big_number">{{ dataset.metrics.cow_score|round(2) }}</span>
-                                    {% trans %}Performance{% endtrans %}
-                                </div>
-                                <div class="col-xs-7 col-sm-12 col-md-6 col-lg-6">
-                                    <div class="progress">
-                                        {% if dataset.metrics.cow_warnings %}
-                                        <div class="progress-bar progress-bar-warning" role="progressbar"
-                                            aria-valuenow="{{ dataset.metrics.cow_warnings|default(0) }}" aria-valuemin="0"
-                                            style="width: {{ dataset.metrics.cow_warnings|percent(g.cow_ceils.warning) }}%">
-                                            <span>{% trans nb=dataset.metrics.cow_warnings|default(0)
-                                                %}{{nb}} warning{%
-                                                pluralize %}{{nb}} warnings{% endtrans %}</span>
-                                        </div>
-                                        {% else %}
-                                        <div class="progress-bar progress-bar-success" role="progressbar"
-                                            aria-valuenow="0" aria-valuemin="0" style="width: 100%">
-                                        </div>
-                                        <span>{{ _('No warning') }}</span>
-                                        {% endif %}
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3>{{ _('Data quality') }}</h3>
+                        <div class="stats">
+                            <div class="row">
+                            {% if dataset.metrics.cow_score %}
+                                <a href="{{ cow_url_for(dataset) }}" title="{{ _("Go to the report page") }}">
+                                    <div class="col-xs-5 col-sm-12 col-md-6 col-lg-6">
+                                        <span class="big_number">{{ dataset.metrics.cow_score|round(2) }}</span>
+                                        {% trans %}Performance{% endtrans %}
                                     </div>
-                                    <div class="progress">
-                                        {% if dataset.metrics.cow_errors %}
-                                        <div class="progress-bar progress-bar-danger" role="progressbar"
-                                            aria-valuenow="{{ dataset.metrics.cow_errors|default(0) }}" aria-valuemin="0"
-                                            style="width: {{ dataset.metrics.cow_errors|percent(g.cow_ceils.error) }}%">
-                                            <span>{% trans nb=dataset.metrics.cow_errors|default(0)
-                                                %}{{nb}} error{%
-                                                pluralize %}{{nb}} errors{% endtrans %}</span>
+                                    <div class="col-xs-7 col-sm-12 col-md-6 col-lg-6">
+                                        <div class="progress">
+                                            {% if dataset.metrics.cow_warnings %}
+                                            <div class="progress-bar progress-bar-warning" role="progressbar"
+                                                aria-valuenow="{{ dataset.metrics.cow_warnings|default(0) }}" aria-valuemin="0"
+                                                style="width: {{ dataset.metrics.cow_warnings|percent(g.cow_ceils.warning) }}%">
+                                                <span>{% trans nb=dataset.metrics.cow_warnings|default(0)
+                                                    %}{{nb}} warning{%
+                                                    pluralize %}{{nb}} warnings{% endtrans %}</span>
+                                            </div>
+                                            {% else %}
+                                            <div class="progress-bar progress-bar-success" role="progressbar"
+                                                aria-valuenow="0" aria-valuemin="0" style="width: 100%">
+                                            </div>
+                                            <span>{{ _('No warning') }}</span>
+                                            {% endif %}
                                         </div>
-                                        {% else %}
-                                        <div class="progress-bar progress-bar-success" role="progressbar"
-                                            aria-valuenow="0" aria-valuemin="0" style="width: 100%">
+                                        <div class="progress">
+                                            {% if dataset.metrics.cow_errors %}
+                                            <div class="progress-bar progress-bar-danger" role="progressbar"
+                                                aria-valuenow="{{ dataset.metrics.cow_errors|default(0) }}" aria-valuemin="0"
+                                                style="width: {{ dataset.metrics.cow_errors|percent(g.cow_ceils.error) }}%">
+                                                <span>{% trans nb=dataset.metrics.cow_errors|default(0)
+                                                    %}{{nb}} error{%
+                                                    pluralize %}{{nb}} errors{% endtrans %}</span>
+                                            </div>
+                                            {% else %}
+                                            <div class="progress-bar progress-bar-success" role="progressbar"
+                                                aria-valuenow="0" aria-valuemin="0" style="width: 100%">
+                                            </div>
+                                            <span>{{ _('No error') }}</span>
+                                            {% endif %}
                                         </div>
-                                        <span>{{ _('No error') }}</span>
-                                        {% endif %}
+                                        <div class="progress">
+                                            {% if dataset.metrics.cow_criticals %}
+                                            <div class="progress-bar progress-bar-info" role="progressbar"
+                                                aria-valuenow="{{ dataset.metrics.cow_criticals|default(0) }}" aria-valuemin="0"
+                                                style="width: {{ dataset.metrics.cow_criticals|percent(g.cow_ceils.criticals) }}%">
+                                                <span>{% trans nb=dataset.metrics.cow_criticals|default(0)
+                                                    %}{{nb}} critical{%
+                                                    pluralize %}{{nb}} criticals{% endtrans %}</span>
+                                            </div>
+                                            {% else %}
+                                            <div class="progress-bar progress-bar-success" role="progressbar"
+                                                aria-valuenow="0" aria-valuemin="0" style="width: 100%">
+                                            </div>
+                                            <span>{{ _('No critical') }}</span>
+                                            {% endif %}
+                                        </div>
                                     </div>
-                                    <div class="progress">
-                                        {% if dataset.metrics.cow_criticals %}
-                                        <div class="progress-bar progress-bar-info" role="progressbar"
-                                            aria-valuenow="{{ dataset.metrics.cow_criticals|default(0) }}" aria-valuemin="0"
-                                            style="width: {{ dataset.metrics.cow_criticals|percent(g.cow_ceils.criticals) }}%">
-                                            <span>{% trans nb=dataset.metrics.cow_criticals|default(0)
-                                                %}{{nb}} critical{%
-                                                pluralize %}{{nb}} criticals{% endtrans %}</span>
-                                        </div>
-                                        {% else %}
-                                        <div class="progress-bar progress-bar-success" role="progressbar"
-                                            aria-valuenow="0" aria-valuemin="0" style="width: 100%">
-                                        </div>
-                                        <span>{{ _('No critical') }}</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </a>
-                        {% else %}
-                        <p class="text-center">{% trans %}No report available{% endtrans %}</p>
-                        {% endif %}
+                                </a>
+                            {% else %}
+                            <p class="text-center">{% trans %}No report available{% endtrans %}</p>
+                            {% endif %}
+                            </div>
                         </div>
+                        {% if can_edit %}
+                        <a href="{{ cow_url_for(dataset) }}" title="{{ _("Improve quality") }}"
+                            class="btn btn-primary btn-block btn-sm icon-left">
+                            <span class="glyphicon glyphicon-tasks"></span>
+                            {{ _("Improve") }}
+                        </a>
+                        {% endif %}
                     </div>
-                    {% if can_edit %}
-                    <a href="{{ cow_url_for(dataset) }}" title="{{ _("Improve quality") }}"
-                        class="btn btn-primary btn-block btn-sm icon-left">
-                        <span class="glyphicon glyphicon-tasks"></span>
-                        {{ _("Improve") }}
-                    </a>
-                    {% endif %}
                 </div>
 
             </aside>
