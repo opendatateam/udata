@@ -1,4 +1,4 @@
-<div class="card">
+<div class="card organization-card">
     <a class="card-logo" href="{{ url_for('organizations.show', org=organization) }}">
         <img alt="{{ organization.title }}"
             src="{{ organization.image_url|placeholder('organization') }}">
@@ -10,17 +10,17 @@
         data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
         data-container="body" data-trigger="hover"/>
     {% endif %}
-    <div class="card-body ellipsis-dot">
+
+    <div class="card-body">
         <h4>
             <a href="{{ url_for('organizations.show', org=organization) }}" title="{{organization.name}}">
-                {{ organization.name }}
+                {{ organization.name|truncate(250) }}
             </a>
         </h4>
-        <div class="card-description">{{ organization.description|mdstrip(250) }}</div>
-
     </div>
+
     <footer>
-        <ul class="col-xs-9 col-sm-10">
+        <ul>
             {% if organization.metrics.datasets %}
             <li>
                 <a class="btn btn-xs" rel="tooltip" data-placement="top"
@@ -39,15 +39,13 @@
                 </a>
             </li>
             {% endif %}
-            <li>
+            {# <li>
                 <a class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Number of members') }}">
                     <span class="fa fa-users fa-fw"></span>
                     {{ ngettext('%(num)s members', '%(num)s members', organization.members|length) }}
                 </a>
-            </li>
-        </ul>
-        <ul class="col-xs-3 col-sm-2 corner">
+            </li> #}
             <li>
                 <a class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Stars') }}">

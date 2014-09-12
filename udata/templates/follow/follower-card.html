@@ -1,11 +1,7 @@
-<div class="media follower-card card">
-    <div class="pull-left">{{ follow.follower|avatar(48) }}</div>
-    <div class="media-body">
-      <h4 class="media-heading">
-          <a href="{{ url_for('users.show', user=follow.follower) }}">
-          {{ follow.follower.fullname }}
-          </a>
-      </h4>
-      {{ _('Following since %(date)s', date=follow.since|dateformat) }}
-    </div>
-</div>
+{% extends theme('user/card.html') %}
+
+{% set user =  follow.follower %}
+
+{% block footer %}
+<p>{{ _('Following since %(date)s', date=follow.since|dateformat) }}</p>
+{% endblock %}

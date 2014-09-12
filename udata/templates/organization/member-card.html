@@ -1,11 +1,9 @@
-<div class="media member-card card">
-    <div class="pull-left">{{ member.user|avatar(48) }}</div>
-    <div class="media-body">
-      <h4 class="media-heading">
-          <a href="{{ url_for('users.show', user=member.user) }}">
-          {{ member.user.fullname }}
-          </a>
-      </h4>
-      <span class="label label-info">{{ member.role }}</span>
-    </div>
+{% extends theme('user/card.html') %}
+
+{% set user =  member.user %}
+
+{% block footer %}
+<div class="label-list">
+    <span class="label label-info">{{ member.role }}</span>
 </div>
+{% endblock %}

@@ -1,5 +1,5 @@
 {% set dataset_url = url_for('datasets.show', dataset=dataset) %}
-<div class="card">
+<div class="card dataset-card">
     {% if dataset.organization %}
         <a class="card-logo" href="{{ dataset_url }}">
             <img alt="{{ dataset.organization.name }}"
@@ -17,17 +17,87 @@
         <img src="{{ ''|placeholder('organization') }}">
     </div>
     {% endif %}
-    <div class="card-body ellipsis-dot">
+    <div class="card-body">
         <h4>
             <a href="{{ dataset_url }}" title="{{dataset.title}}">
-                {{ dataset.title }}
+                {{ dataset.title|truncate(250) }}
             </a>
         </h4>
-        <div class="card-description">{{ dataset.description|mdstrip(250) }}</div>
-
     </div>
     <footer>
-        <ul class="col-xs-8 col-lg-9">
+        <ul>
+            {# Temporal coverage #}
+            {# {% if dataset.temporal_coverage %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Temporal coverage') }}">
+                    <span class="fa fa-calendar fa-fw"></span>
+                    {{ dataset.temporal_coverage|daterange }}
+                </a>
+            </li>
+            {% endif %}
+ #}
+            {% if dataset.spatial.territories %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Territorial coverage') }}">
+                    <span class="fa fa-globe fa-fw"></span>
+                    {{ dataset.spatial.top_label }}
+                </a>
+            </li>
+            {% endif %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Reuses') }}">
+                    <span class="{{ ficon('fa-retweet') }} fa-fw"></span>
+                    {{ dataset.metrics.reuses or 0 }}
+                </a>
+            </li>
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Stars') }}">
+                    <span class="{{ ficon('fa-star') }} fa-fw"></span>
+                    {{ dataset.metrics.followers or 0 }}
+                </a>
+            </li>
+            {# {# Territorial coverage
+            {% if dataset.spatial.granularity %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Territorial coverage granularity') }}">
+                    <span class="fa fa-bullseye fa-fw"></span>
+                    {{ dataset.spatial.granularity_label }}
+                </a>
+            </li>
+            {% endif %}
+
+            {# frequency
+            {% if dataset.frequency %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Frequency') }}">
+                    <span class="fa fa-clock-o fa-fw"></span>
+                    {{ dataset.frequency_label }}
+                </a>
+            </li>
+            {% endif %}#}
+        </ul>
+
+    </footer>
+
+
+    <a class="rollover fade in" href="{{url_for('datasets.show', dataset=dataset)}}"
+        title="{{ dataset.title }}">
+        {{ dataset.description|mdstrip(180) }}
+    </a>
+    <footer class="rollover fade in">
+        <ul>
             {# Temporal coverage #}
             {% if dataset.temporal_coverage %}
             <li>
@@ -75,23 +145,6 @@
             </li>
             {% endif %}
         </ul>
-        <ul class="col-xs-4 col-lg-3 corner">
-            <li>
-                <a class="btn btn-xs" rel="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Reuses') }}">
-                    <span class="{{ ficon('fa-retweet') }} fa-fw"></span>
-                    {{ dataset.metrics.reuses or 0 }}
-                </a>
-            </li>
-            <li>
-                <a class="btn btn-xs" rel="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Stars') }}">
-                    <span class="{{ ficon('fa-star') }} fa-fw"></span>
-                    {{ dataset.metrics.followers or 0 }}
-                </a>
-            </li>
-        </ul>
+
     </footer>
 </div>

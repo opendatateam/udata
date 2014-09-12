@@ -3,15 +3,15 @@
     <a class="card-logo" href="{{ user_url }}">
         <img src="{{ user|avatar_url(48) }}" alt="{{ user.fullname }}">
     </a>
-    <div class="card-body ellipsis-dot">
+
+    <div class="card-body">
         <h4>
             <a href="{{ user_url }}" title="{{user.fullname}}">
                 {{ user.fullname }}
             </a>
         </h4>
-        <div class="card-description">{{ user.about|mdstrip(250) }}</div>
-
     </div>
+
     <footer>
         <ul class="col-xs-9 col-sm-10">
             {% if user.metrics.datasets %}
@@ -43,4 +43,15 @@
             </li>
         </ul>
     </footer>
+
+    <a class="rollover fade in" href="{{url_for('users.show', user=user)}}"
+        title="{{ user.fullname }}">
+        {{ user.about|mdstrip(180) }}
+    </a>
+
+    {% if self.footer() %}
+    <footer class="rollover fade in">
+    {% block footer %}{% endblock %}
+    </footer>
+    {% endif %}
 </div>
