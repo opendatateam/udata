@@ -9,7 +9,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{{ url_for('front.home') }}">{{ config['SITE_TITLE'] }}</a>
+                <a class="navbar-brand" href="{{ url_for('front.home') }}">{{ g.site.title }}</a>
                 <p class="navbar-text pull-right">{{ _('Open platform for french public data') }}</p>
             </header>
         </nav>
@@ -92,7 +92,7 @@
                         {% if current_user.sysadmin %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ url_for('site.admin') }}">
+                            <a href="{{ url_for('site_admin.root') }}">
                                 <span class="fa fa-fw fa-wrench"></span>
                                 {{ _('Site administration') }}
                             </a>
