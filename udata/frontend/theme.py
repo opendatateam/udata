@@ -158,8 +158,6 @@ def init_app(app):
 
     # Load all theme assets
     theme = app.theme_manager.themes[app.config['THEME']]
-    # with app.app_context():
-    #     load_theme(theme)
     app.config['STATIC_DIRS'].append(('', theme.static_path))
 
     if isdir(join(theme.static_path, 'less')):
