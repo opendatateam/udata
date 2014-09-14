@@ -32,8 +32,8 @@ def get_current_theme():
         config_path = join(g.theme.path, 'config.py')
         if exists(config_path):
             imp.load_source('udata.frontend.theme.{0}'.format(g.theme.identifier), config_path)
-        if hasattr(g.theme, 'config_class') and g.theme.identifier not in current_site.themes:
-            current_site.themes[g.theme.identifier] = g.theme.config_class()
+        if hasattr(g.theme, 'defaults') and g.theme.identifier not in current_site.themes:
+            current_site.themes[g.theme.identifier] = g.theme.defaults
             try:
                 current_site.save()
             except:
@@ -131,6 +131,15 @@ def config(cls=None):
             g.theme.form = cls
             return cls
         return wrapper
+
+
+def admin_form(cls):
+    g.theme.form = cls
+    return cls
+
+
+def defaults(values):
+    g.theme.defaults = values
 
 
 def home_context(func):

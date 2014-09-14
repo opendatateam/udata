@@ -22,15 +22,6 @@ navbar = nav.Bar('site_admin', [
 ])
 
 
-# @navbar.initializer
-# def insert_them_tab(nav):
-#     print 'initializer'
-#     if theme.current and hasattr(theme.current, 'config_class'):
-#         print 'has config'
-#         navbar = nav['site_admin']
-#         navbar.items.insert(1, nav.Item(_('Theme configuration'), 'site_admin.theme'))
-
-
 @site_admin.route('/', endpoint='root')
 def redirect_to_first_admin_tab():
     return redirect(url_for('site_admin.config'))
@@ -67,15 +58,12 @@ class SiteThemeView(SiteAdminView, EditView):
     def get_form(self, data, obj=None):
         config = self.site.themes.get(theme.current.identifier)
         if hasattr(theme.current, 'form'):
-            return theme.current.form(data, config)
-        elif hasattr(theme.current, 'config_class'):
-            form = model_form(theme.current.config_class)
-            return form(data, config)
+            return theme.current.form(data, data=config)
         else:
             return None
 
     def on_form_valid(self, form):
-        form.populate_obj(theme.current.config)
+        self.site.themes[theme.current.identifier] = form.data
         self.site.save()
         return self.get()
 
