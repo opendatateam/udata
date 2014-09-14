@@ -8,6 +8,7 @@ from shapely.ops import cascaded_union
 
 from udata.tasks import celery
 from udata.models import Dataset, SpatialCoverage, Territory
+from udata.core.spatial import LEVELS
 
 log = logging.getLogger(__name__)
 
@@ -61,6 +62,7 @@ def territorial_to_spatial(dataset):
         if not territory:
             continue
         coverage.territories.append(territory.reference())
+        coverage.territories = sorted(coverage.territories, key=lambda t: LEVELS[t.level]['position'])
         polygons.append(territory.geom)
     polygon = cascaded_union([shape(p) for p in polygons])
     if polygon.is_empty:

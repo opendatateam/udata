@@ -40,12 +40,12 @@ class GouvFrThemeTest(FrontTestCase):
                 DatasetFactory(organzation=org)
                 ReuseFactory(organzation=org)
 
-        response = self.get(url_for('front.home'))
+        response = self.get(url_for('site.home'))
         self.assert200(response)
 
     def test_render_home_no_data(self):
         '''It should render the home page without data'''
-        response = self.get(url_for('front.home'))
+        response = self.get(url_for('site.home'))
         self.assert200(response)
 
     def test_render_search(self):
