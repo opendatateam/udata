@@ -1,0 +1,24 @@
+{% extends theme('site/admin_base.html') %}
+{% import theme('macros/forms.html') as forms with context %}
+
+{% block tab_content %}
+<div class="row">
+    <div class="col-xs-12">
+        {% if form %}
+        <form class="form-horizontal validation" method="post" action=".">
+            <legend>{{ _('Theme configuration') }}</legend>
+            {{ forms.render(form) }}
+            {{ forms.required_disclaimer() }}
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-default">{{ _('Save') }}</button>
+                </div>
+            </div>
+        </form>
+        {% else %}
+        <p class="lead text-center">{{ _('Current theme has no configuration') }}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

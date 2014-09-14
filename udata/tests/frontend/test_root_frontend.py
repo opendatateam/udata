@@ -8,22 +8,6 @@ from udata.tests.factories import DatasetFactory, ReuseFactory, OrganizationFact
 
 
 class FrontEndRootTest(FrontTestCase):
-    def test_render_home(self):
-        '''It should render the home page'''
-        with self.autoindex():
-            for i in range(3):
-                org = OrganizationFactory()
-                DatasetFactory(organzation=org)
-                ReuseFactory(organzation=org)
-
-        response = self.get(url_for('front.home'))
-        self.assert200(response)
-
-    def test_render_home_no_data(self):
-        '''It should render the home page without data'''
-        response = self.get(url_for('front.home'))
-        self.assert200(response)
-
     def test_render_search(self):
         '''It should render the search page'''
         with self.autoindex():

@@ -21,6 +21,7 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
 
         // Site admin
         siteConfig: {path: i18n('/admin/config/'), moduleId: 'site/form'},
+        siteTheme: {path: i18n('/admin/theme/'), moduleId: 'site/form'},
         siteIssues: {path: i18n('/admin/issues/'), moduleId: 'issue/list'},
 
         // Datasets routes

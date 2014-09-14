@@ -7,9 +7,9 @@ from werkzeug.local import LocalProxy
 
 from udata import search
 from udata.core.metrics import Metric
-from udata.frontend import render, csv
+from udata.frontend import render, csv, theme
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Metrics, Dataset, Activity, Site
+from udata.models import Metrics, Dataset, Activity, Site, Reuse
 from udata.utils import multi_to_dict
 
 
@@ -60,6 +60,22 @@ def activity_feed():
     #              updated=dataset.last_modified,
     #              published=dataset.created_at)
     return feed.get_response()
+
+
+@blueprint.route('/')
+def home():
+    if hasattr(theme.current, 'home_context'):
+        context = theme.current.home_context(theme.current)
+    else:
+        recent_datasets, recent_reuses = search.multiquery(
+            search.SearchQuery(Dataset, sort='-created', page_size=12),
+            search.SearchQuery(Reuse, sort='-created', page_size=12),
+        )
+        context = {
+            'recent_datasets': recent_datasets,
+            'recent_reuses': recent_reuses,
+        }
+    return render('home.html', **context)
 
 
 @blueprint.route('/metrics/')

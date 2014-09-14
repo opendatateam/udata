@@ -6,6 +6,8 @@ define([
     'logger',
     'form/common',
     'form/widgets',
+    'form/dataset-completer',
+    'form/reuse-completer',
     'form/tag-completer'
 ], function($, log, Forms) {
     "use strict";

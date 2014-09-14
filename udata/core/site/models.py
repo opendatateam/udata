@@ -15,3 +15,5 @@ class Site(WithMetrics, db.Document):
     title = db.StringField(required=True)
     keywords = db.ListField(db.StringField())
     feed_size = db.IntField(required=True, default=DEFAULT_FEED_SIZE)
+    configs = db.DictField()
+    themes = db.MapField(db.EmbeddedDocumentField('ThemeConfig'))

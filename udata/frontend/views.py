@@ -124,9 +124,12 @@ class FormView(Templated, BaseView):
 
     def get_context(self):
         context = super(FormView, self).get_context()
-        form = self.form(request.form)
+        form = self.get_form(request.form)
         context['form'] = self.initialize_form(form)
         return context
+
+    def get_form(self, data, obj=None):
+        return self.form(data, obj)
 
     def initialize_form(self, form):
         return form
@@ -172,7 +175,7 @@ class EditView(SingleObject, FormView):
 
     def get_context(self):
         context = super(EditView, self).get_context()
-        context['form'] = self.form(request.form, self.object)
+        context['form'] = self.get_form(request.form, self.object)
         return context
 
     def on_form_valid(self, form):

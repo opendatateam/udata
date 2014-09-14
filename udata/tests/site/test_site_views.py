@@ -22,6 +22,22 @@ class SiteViewsTest(FrontTestCase):
             self.assertIsInstance(current_site._get_current_object(), Site)
             self.assertEqual(current_site.id, self.app.config['SITE_ID'])
 
+    def test_render_home(self):
+        '''It should render the home page'''
+        with self.autoindex():
+            for i in range(3):
+                org = OrganizationFactory()
+                DatasetFactory(organzation=org)
+                ReuseFactory(organzation=org)
+
+        response = self.get(url_for('site.home'))
+        self.assert200(response)
+
+    def test_render_home_no_data(self):
+        '''It should render the home page without data'''
+        response = self.get(url_for('site.home'))
+        self.assert200(response)
+
     def test_render_metrics(self):
         '''It should render the search page'''
         for i in range(3):
