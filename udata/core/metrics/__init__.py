@@ -13,13 +13,13 @@ metric_catalog = {}
 
 
 from udata.models import db
-from .models import Metrics
-from .tasks import update_metric, archive_metric
 
 
 class MetricMetaClass(type):
     '''Ensure any child class dispatch the signals'''
     def __new__(cls, name, bases, attrs):
+        from .tasks import update_metric, archive_metric
+
         # Ensure any child class dispatch the signals
         new_class = super(MetricMetaClass, cls).__new__(cls, name, bases, attrs)
         if new_class.model and new_class.name:
@@ -57,6 +57,7 @@ class Metric(object):
         self.notify_update()
 
     def store(self):
+        from .models import Metrics
         log.debug('Storing metric %s(%s)', self.name, self.target)
         kwargs = {self.name: self.value}
         Metrics.objects.update_daily(self.target, **kwargs)

@@ -34,24 +34,10 @@ def inject_site():
     return dict(current_site=current_site)
 
 
-
-# @blueprint.before_app_request
-# def set_g_site():
-
-#     site_id = current_app.config['SITE_ID']
-#     g.site, _ = Site.objects.get_or_create(id=site_id, defaults={
-#         'title': current_app.config.get('SITE_TITLE'),
-#         'keywords': current_app.config.get('SITE_KEYWORDS', []),
-#     })
-
-
-FEED_SIZE = 20
-
-
 @blueprint.route('/activity.atom')
 def activity_feed():
     feed = AtomFeed('Site activity', feed_url=request.url, url=request.url_root)
-    activities = Activity.objects.order_by('-created_at').limit(FEED_SIZE)
+    activities = Activity.objects.order_by('-created_at').limit(current_site.feed_size)
     for activity in activities:
         feed.add('Activity', 'Description')
     # datasets = Dataset.objects.visible().order_by('-date').limit(15)
@@ -78,7 +64,7 @@ def activity_feed():
 
 @blueprint.route('/metrics/')
 def metrics():
-    metrics = Metrics.objects.last_for('site')
+    metrics = Metrics.objects.last_for(current_site)
     specs = Metric.get_for('site')
     values = metrics.values if metrics else {}
     return render('metrics.html',

@@ -12,6 +12,8 @@ from udata.frontend.views import DetailView, CreateView, EditView, SingleObject,
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Resource, Reuse, Issue, Follow
 
+from udata.core.site.views import current_site
+
 from .permissions import DatasetEditPermission, set_dataset_identity
 
 blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
@@ -21,7 +23,7 @@ blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
 def recent_feed():
     feed = AtomFeed(_('Last datasets'),
                     feed_url=request.url, url=request.url_root)
-    datasets = Dataset.objects.visible().order_by('-created_at').limit(15)
+    datasets = Dataset.objects.visible().order_by('-created_at').limit(current_site.feed_size)
     for dataset in datasets:
         author = None
         if dataset.organization:

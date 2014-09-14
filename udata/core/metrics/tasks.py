@@ -56,6 +56,7 @@ def update_metrics_for(obj):
 @celery.task
 def update_site_metrics():
     from udata.core.metrics import Metric
-    metrics = Metric.get_for('site')
+    from udata.models import Site
+    metrics = Metric.get_for(Site)
     for metric in metrics.values():
         metric.update()

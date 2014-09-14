@@ -85,12 +85,12 @@ class MetricsAPITest(APITestCase):
         '''It should fetch daily metrics for a given period'''
         for i in range(5):
             day = (date.today() - timedelta(i)).isoformat()
-            Metrics.objects.update_daily('site', day, metric='value')
+            Metrics.objects.update_daily('test', day, metric='value')
 
         period_start = (date.today() - timedelta(3)).isoformat()
         period_end = (date.today() - timedelta(1)).isoformat()
 
-        response = self.get(url_for('api.metrics', id='site', start=period_start, end=period_end))
+        response = self.get(url_for('api.metrics', id='test', start=period_start, end=period_end))
 
         self.assert200(response)
         self.assertEqual(len(response.json), 3)

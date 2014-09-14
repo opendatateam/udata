@@ -21,7 +21,6 @@ class FakeSiteMetric(SiteMetric):
 
 class SiteMetricTest(DBTestMixin, TestCase):
     def setUp(self):
-        self.site = SiteFactory()
         self.updated_emitted = False
         self.need_update_emitted = False
 
@@ -45,5 +44,5 @@ class SiteMetricTest(DBTestMixin, TestCase):
         self.assertTrue(self.need_update_emitted)
         self.assertTrue(self.updated_emitted)
 
-        metrics = Metrics.objects.last_for(self.site)
+        metrics = Metrics.objects.last_for(self.app.config['SITE_ID'])
         self.assertEqual(metrics.values['fake'], 'fake-value')
