@@ -1,6 +1,6 @@
 {% import theme('macros/search.html') as s %}
 {% set url = search_url %}
-<div class="panel panel-default advanced-search-panel">
+<div class="panel panel-default panel-search advanced-search-panel">
     {{ s.facet_panel(datasets,
         'organization', _('Organizations'), ficon('fa-building-o'), url=url
     ) }}
@@ -10,7 +10,7 @@
     {{ s.facet_panel(datasets, 'tag', _('Tags'), ficon('fa-tags'), url=url) }}
     {{ s.facet_panel(datasets, 'license', _('Licenses'), ficon('copyright-mark'), url=url) }}
     {{ s.facet_panel(datasets, 'temporal_coverage', _('Temporal coverage'), ficon('fa-calendar'), url=url) }}
-    {{ s.facet_panel(datasets, 'territory', _('Territorial coverage'), ficon('fa-globe'), url=url) }}
+    {{ s.facet_panel(datasets, 'territory', _('Territorial coverage'), ficon('fa-map-marker'), url=url) }}
     {{ s.facet_panel(datasets, 'granularity', _('Territorial granularity'), ficon('fa-bullseye'), url=url) }}
     {{ s.facet_panel(datasets, 'format', _('Formats'), ficon('fa-file'), url=url) }}
     {{ s.facet_panel(datasets, 'reuses', _('Reuses'), ficon('fa-retweet'), url=url) }}

@@ -21,6 +21,7 @@ from .validators import RequiredIf
 
 from udata.auth import current_user
 from udata.models import db, Organization, SpatialCoverage, Territory
+from udata.core.spatial import LEVELS
 from udata.i18n import gettext as _
 
 
@@ -222,6 +223,10 @@ class TerritoryField(StringField):
         pass
 
 
+def level_key(territory):
+    return LEVELS[territory.level]['position']
+
+
 class SpatialCoverageField(StringField):
     widget = widgets.TerritoryAutocompleter()
 
@@ -243,7 +248,8 @@ class SpatialCoverageField(StringField):
                     geom = MultiPolygon([polygon]).__geo_interface__
                 else:
                     raise ValueError('Unsupported geometry type "{0}"'.format(polygon.geom_type))
-                self.data = SpatialCoverage(territories=[t.reference() for t in territories], geom=geom)
+                territories = [t.reference() for t in sorted(territories, key=level_key)]
+                self.data = SpatialCoverage(territories=territories, geom=geom)
             except Exception as e:
                 raise ValueError(str(e))
         else:

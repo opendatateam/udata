@@ -105,7 +105,7 @@ def standalone(app):
     core.init_app(app)
     frontend.init_app(app)
     api.init_app(app)
-    admin.init_app(app)
+    # admin.init_app(app)
 
     from udata import ext
     ext.init_app(app)

@@ -1,36 +1,33 @@
 {% extends theme('layouts/form.html') %}
-{% import 'macros/forms.html' as forms with context %}
-{% set tab = tab|default('description') %}
+
+{% block breadcrumb %}
+<li><a href="{{ url_for('site_admin.root') }}">{{ _('Administration') }}</a></li>
+<li class="active">{{ current_item.label }}</li>
+{% endblock %}
 
 {% block main_content %}
 <div class="row">
-    <div class="card side-card text-center col-sm-4 col-md-3 col-lg-2">
-        <h3>{{ _('Site administration') }}</h3>
+    <div class="col-sm-4 col-md-3 col-lg-2">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h3>{{ _('Administration') }}</h3>
+            </div>
 
-        <div class="list-group text-center">
-            {% for item in nav.site_admin %}
-            <a href="{{ item.url }}"
-                class="list-group-item {% if item_is_active %}active{% endif %}">
-                <strong>
-                    {{ item.label }}
-                </strong>
-            </a>
-            {% endfor %}
+            <div class="list-group text-center">
+                {% for item in nav.site_admin %}
+                <a href="{{ item.url }}"
+                    class="list-group-item {% if item.is_active %}active{% endif %}">
+                    <strong>
+                        {{ item.label }}
+                    </strong>
+                </a>
+                {% endfor %}
+            </div>
         </div>
     </div>
     <div class="col-sm-8 col-md-9 col-lg-10">
         <div class="form-bg">
             {% block tab_content %}{% endblock %}
-            {# <ul class="nav nav-pills nav-top">
-                {% for item in nav.site_admin %}
-                <li class="{{ 'active' if item.is_active else '' }}">
-                    <a href="{{ item.url }}">{{ item.label }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-
-            <div class="row">
-            </div> #}
         </div>
     </div>
 

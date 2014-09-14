@@ -1,25 +1,48 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import g, request, redirect, url_for
+from flask import g, request, current_app
 from werkzeug.contrib.atom import AtomFeed
+from werkzeug.local import LocalProxy
 
 from udata import search
 from udata.core.metrics import Metric
-from udata.core.user.permissions import sysadmin
-from udata.frontend import render, csv, nav
-from udata.frontend.views import DetailView
+from udata.frontend import render, csv
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Metrics, Dataset, Issue, Activity
+from udata.models import Metrics, Dataset, Activity, Site
 from udata.utils import multi_to_dict
 
 
 blueprint = I18nBlueprint('site', __name__)
 
 
-@blueprint.before_app_request
-def set_g_site():
-    g.site = None
+def get_current_site():
+    if getattr(g, 'site', None) is None:
+        site_id = current_app.config['SITE_ID']
+        g.site, _ = Site.objects.get_or_create(id=site_id, defaults={
+            'title': current_app.config.get('SITE_TITLE'),
+            'keywords': current_app.config.get('SITE_KEYWORDS', []),
+        })
+    return g.site
+
+
+current_site = LocalProxy(get_current_site)
+
+
+@blueprint.app_context_processor
+def inject_site():
+    return dict(current_site=current_site)
+
+
+
+# @blueprint.before_app_request
+# def set_g_site():
+
+#     site_id = current_app.config['SITE_ID']
+#     g.site, _ = Site.objects.get_or_create(id=site_id, defaults={
+#         'title': current_app.config.get('SITE_TITLE'),
+#         'keywords': current_app.config.get('SITE_KEYWORDS', []),
+#     })
 
 
 FEED_SIZE = 20
@@ -83,32 +106,6 @@ def datasets_csv():
 class SiteView(object):
     @property
     def site(self):
-        return self.get_object()
+        return current_site
 
-    def get_object(self):
-        return g.site
-
-
-navbar = nav.Bar('site_admin', [
-    nav.Item(_('Issues'), 'site.issues'),
-])
-
-
-class SiteAdminView(SiteView):
-    require = sysadmin
-
-
-class SiteIssuesView(SiteAdminView, DetailView):
-    template_name = 'site/issues.html'
-
-    def get_context(self):
-        context = super(SiteIssuesView, self).get_context()
-        context['issues'] = Issue.objects
-        return context
-
-
-@blueprint.route('/site/', endpoint='admin')
-def redirect_to_first_admin_tab():
-    return redirect(url_for('site.issues'))
-
-blueprint.add_url_rule('/site/issues/', view_func=SiteIssuesView.as_view(str('issues')))
+    object = site

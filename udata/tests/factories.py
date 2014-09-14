@@ -9,6 +9,7 @@ from faker import Faker
 from faker.providers import BaseProvider
 
 from udata import models
+from udata.core.spatial import LEVELS
 
 faker = Faker()
 
@@ -91,6 +92,15 @@ class GeoJsonProvider(BaseProvider):
         }
 
 faker.add_provider(GeoJsonProvider)
+
+
+class SiteFactory(MongoEngineFactory):
+    class Meta:
+        model = models.Site
+
+    id = factory.LazyAttribute(lambda o: faker.word())
+    title = factory.LazyAttribute(lambda o: faker.name())
+
 
 
 class UserFactory(MongoEngineFactory):
@@ -183,7 +193,7 @@ class TerritoryFactory(MongoEngineFactory):
     class Meta:
         model = models.Territory
 
-    level = 'town'
+    level = factory.LazyAttribute(lambda o: faker.random_element(LEVELS.keys()))
     name = factory.LazyAttribute(lambda o: faker.city())
     code = factory.LazyAttribute(lambda o: faker.postcode())
     geom = factory.LazyAttribute(lambda o: faker.multipolygon())

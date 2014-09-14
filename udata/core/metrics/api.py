@@ -7,6 +7,8 @@ from datetime import date
 from udata.api import api, API, marshal, fields
 from udata.models import Metrics
 
+from udata.core.site.views import current_site
+
 
 metrics_fields = api.model('Metric', {
     'object_id': fields.String(description='The object identifier which metrics belongs to', required=True),
@@ -30,10 +32,13 @@ class MetricsAPI(API):
     @api.doc(notes='If day is set, start and end will be ignored')
     def get(self, id):
         '''Fetch metrics for an object given its ID'''
-        try:
-            object_id = ObjectId(id)
-        except:
-            object_id = id
+        if id == 'site':
+            object_id = current_site.id
+        else:
+            try:
+                object_id = ObjectId(id)
+            except:
+                object_id = id
         queryset = Metrics.objects(object_id=object_id).order_by('-date')
         args = parser.parse_args()
         if args.get('day'):

@@ -27,7 +27,8 @@ class FakeSiteMetric(SiteMetric):
 class MetricsAPITest(APITestCase):
     def test_get_metrics_for_site(self):
         '''It should fetch my user data on GET'''
-        FakeSiteMetric.update()
+        with self.app.app_context():
+            FakeSiteMetric.update()
 
         response = self.get(url_for('api.metrics', id='site'))
         self.assert200(response)

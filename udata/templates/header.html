@@ -8,7 +8,7 @@
         <span class="icon-bar"></span>
       </button>
       <!-- You'll want to use a responsive image option so this logo looks good on devices - I recommend using something like retina.js (do a quick Google search for it and you'll find it) -->
-      <a class="navbar-brand" href="{{ url_for('front.home') }}">{{ config['SITE_TITLE'] }}</a>
+      <a class="navbar-brand" href="{{ url_for('front.home') }}">{{ g.site.title }}</a>
     </div>
 
     <div class="col-sm-2 col-lg-3 nav navbar-nav search-bar">
@@ -63,7 +63,7 @@
             {% if current_user.sysadmin %}
             <li class="divider"></li>
             <li>
-              <a href="{{ url_for('site.admin') }}">{{ _('Site administration') }}</a>
+              <a href="{{ url_for('site_admin.root') }}">{{ _('Site administration') }}</a>
             </li>
             {% endif %}
             <li class="divider"></li>

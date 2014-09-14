@@ -1,20 +1,24 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask import g
+
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, Reuse, User, Organization, Resource, Follow
 from udata.core.metrics import Metric
 from udata.core.followers.signals import on_follow, on_unfollow
 
+from .models import Site
+from .views import current_site
 
 __all__ = ('DatasetsMetric', 'ReusesMetric', 'ResourcesMetric', 'UsersMetric', 'OrganizationsMetric')
 
 
 class SiteMetric(Metric):
-    model = 'site'
+    model = Site
 
     def __init__(self, value=None):
-        super(SiteMetric, self).__init__('site', value)
+        super(SiteMetric, self).__init__(current_site.id, value)
 
     @classmethod
     def update(cls):

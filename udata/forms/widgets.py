@@ -103,3 +103,11 @@ class UploadableURL(WidgetHelper, widgets.html5.URLInput):
     def __call__(self, field, **kwargs):
         kwargs['data-endpoint'] = field.endpoint
         return super(UploadableURL, self).__call__(field, **kwargs)
+
+
+class ImageURL(WidgetHelper, widgets.html5.URLInput):
+    # classes = 'uploadable-url'
+
+    def __call__(self, field, **kwargs):
+        kwargs['data-endpoint'] = field.endpoint
+        return super(ImageURL, self).__call__(field, **kwargs)

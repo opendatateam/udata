@@ -10,7 +10,6 @@ define([
 ], function($, API, itemTpl, cardTpl) {
     'use strict';
 
-
     $('.dataset-completer').each(function() {
         var $this = $(this),
             $group = $this.closest('.form-group');
@@ -46,14 +45,8 @@ define([
                 },
                 item: function(data, escape) {
                     var dataset = API.sync.get('/api/datasets/' + data.id);
-                    return '<div class="card-list">'+cardTpl(dataset)+'</div>';
+                    return '<div class="card-input">'+cardTpl(dataset)+'</div>';
                 }
-            },
-            onItemAdd: function(value, $item) {
-                $item.dotdotdot();
-            },
-            onInitialize: function() {
-                $group.find('.ellipsis-dot').dotdotdot();
             }
         });
     });

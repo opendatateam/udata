@@ -6,7 +6,7 @@
 
     {% set meta = meta or {} %}
     <meta name="description" content="{{ meta.description or '' }}">
-    <meta name="keywords" content="{{ ', '.join(config['SITE_KEYWORDS'] + (meta.keywords or [])) }}">
+    <meta name="keywords" content="{{ ', '.join(current_site.keywords + (meta.keywords or [])) }}">
     {% if config.SITE_AUTHOR %}
     <meta name="author" content="{{config.SITE_AUTHOR}}">
     {% endif %}
@@ -17,7 +17,7 @@
     {% endif %}
     <meta name="generator" content="uData" />
 
-    <title>{% if meta.title %}{{ meta.title }} - {% endif %}{{ config['SITE_TITLE'] }}</title>
+    <title>{% if meta.title %}{{ meta.title }} - {% endif %}{{ current_site.title }}</title>
 
     {% set site_css_bundle = site_css_bundle|default('site-css') %}
     {% assets site_css_bundle %}

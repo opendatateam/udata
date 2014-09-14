@@ -26,24 +26,12 @@
     </div>
     <footer>
         <ul>
-            {# Temporal coverage #}
-            {# {% if dataset.temporal_coverage %}
-            <li>
-                <a class="btn btn-xs" rel="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Temporal coverage') }}">
-                    <span class="fa fa-calendar fa-fw"></span>
-                    {{ dataset.temporal_coverage|daterange }}
-                </a>
-            </li>
-            {% endif %}
- #}
             {% if dataset.spatial.territories %}
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Territorial coverage') }}">
-                    <span class="fa fa-globe fa-fw"></span>
+                    <span class="fa fa-map-marker fa-fw"></span>
                     {{ dataset.spatial.top_label }}
                 </a>
             </li>
@@ -64,29 +52,6 @@
                     {{ dataset.metrics.followers or 0 }}
                 </a>
             </li>
-            {# {# Territorial coverage
-            {% if dataset.spatial.granularity %}
-            <li>
-                <a class="btn btn-xs" rel="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Territorial coverage granularity') }}">
-                    <span class="fa fa-bullseye fa-fw"></span>
-                    {{ dataset.spatial.granularity_label }}
-                </a>
-            </li>
-            {% endif %}
-
-            {# frequency
-            {% if dataset.frequency %}
-            <li>
-                <a class="btn btn-xs" rel="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Frequency') }}">
-                    <span class="fa fa-clock-o fa-fw"></span>
-                    {{ dataset.frequency_label }}
-                </a>
-            </li>
-            {% endif %}#}
         </ul>
 
     </footer>
@@ -106,17 +71,6 @@
                     title="{{ _('Temporal coverage') }}">
                     <span class="fa fa-calendar fa-fw"></span>
                     {{ dataset.temporal_coverage|daterange }}
-                </a>
-            </li>
-            {% endif %}
-
-            {% if dataset.spatial.territories %}
-            <li>
-                <a class="btn btn-xs" rel="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Territorial coverage') }}">
-                    <span class="fa fa-globe fa-fw"></span>
-                    {{ dataset.spatial.top_label }}
                 </a>
             </li>
             {% endif %}

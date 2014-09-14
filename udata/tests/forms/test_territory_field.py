@@ -9,7 +9,7 @@ from werkzeug.datastructures import MultiDict
 from udata.forms import Form, fields
 from udata.models import db, SpatialCoverage
 from udata.tests import TestCase
-from udata.tests.factories import TerritoryFactory, faker
+from udata.tests.factories import TerritoryFactory
 
 
 class TerritoryFieldTest(TestCase):

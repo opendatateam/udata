@@ -3,15 +3,25 @@ from __future__ import unicode_literals
 
 import StringIO
 
-from flask import url_for
+from flask import url_for, g
 
 from udata.frontend import csv
+from udata.models import Site
+
+from udata.core.site.views import current_site
 
 from udata.tests.frontend import FrontTestCase
 from udata.tests.factories import DatasetFactory, ReuseFactory, OrganizationFactory, ResourceFactory
 
 
 class SiteViewsTest(FrontTestCase):
+    def test_site_global(self):
+        '''It should create and/or load the current site'''
+        with self.app.test_request_context(''):
+            self.app.preprocess_request()
+            self.assertIsInstance(current_site._get_current_object(), Site)
+            self.assertEqual(current_site.id, self.app.config['SITE_ID'])
+
     def test_render_metrics(self):
         '''It should render the search page'''
         for i in range(3):
