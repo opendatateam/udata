@@ -73,13 +73,6 @@
                                         url=author_url
                                     )|safe
                                 ) }}
-                                 {# {% endtrans %}
-                                {% trans
-                                {% trans
-                                    date=reuse.created_at|dateformat(format='long'),
-                                    author=author_name,
-                                    url=author_url
-                                %}Published on {{date}} by <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %} #}
                             </small>
                             {% if reuse.private %}
                             <small class="private"rel="popover"
