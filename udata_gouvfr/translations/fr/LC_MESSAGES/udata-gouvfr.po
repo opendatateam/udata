@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-09-14 22:26+0200\n"
-"PO-Revision-Date: 2014-09-14 20:29+0000\n"
+"POT-Creation-Date: 2014-09-15 05:30+0200\n"
+"PO-Revision-Date: 2014-09-15 03:32+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata-gouvfr/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -102,11 +102,11 @@ msgstr "Développeurs"
 msgid "Coming soon"
 msgstr "Bientôt"
 
-#: udata_gouvfr/theme/config.py:13
+#: udata_gouvfr/theme/theme.py:13
 msgid "Tab size"
 msgstr "Taille d'onglet"
 
-#: udata_gouvfr/theme/config.py:13
+#: udata_gouvfr/theme/theme.py:13
 msgid "Home page tab size"
 msgstr "Taille des onglets de la page d'accueil"
 
@@ -208,23 +208,23 @@ msgstr "Dernières réutilisations"
 msgid "Discussion topic"
 msgstr "Thématique"
 
-#: udata_gouvfr/theme/templates/home.html:124
+#: udata_gouvfr/theme/templates/home.html:115
 msgid "Essential datasets"
 msgstr "Jeux de données essentiels"
 
-#: udata_gouvfr/theme/templates/home.html:125
+#: udata_gouvfr/theme/templates/home.html:116
 msgid "Latest datasets"
 msgstr "Derniers jeux de données"
 
-#: udata_gouvfr/theme/templates/home.html:160
+#: udata_gouvfr/theme/templates/home.html:151
 msgid "See more"
 msgstr "Voir plus"
 
-#: udata_gouvfr/theme/templates/home.html:178
+#: udata_gouvfr/theme/templates/home.html:169
 msgid "The blog"
 msgstr "Le blog"
 
-#: udata_gouvfr/theme/templates/home.html:201
+#: udata_gouvfr/theme/templates/home.html:192
 #: udata_gouvfr/theme/templates/dataset/display.html:235
 msgid "more"
 msgstr "plus"
@@ -433,8 +433,8 @@ msgid "Spatial coverage"
 msgstr "Couverture spatiale"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:351
-msgid "Data quality"
-msgstr "Qualité des données"
+msgid "Metadata quality"
+msgstr "Qualité des métadonnées"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:355
 msgid "Go to the report page"

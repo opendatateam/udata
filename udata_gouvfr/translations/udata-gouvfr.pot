@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-09-14 22:26+0200\n"
+"POT-Creation-Date: 2014-09-15 05:30+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -97,11 +97,11 @@ msgstr ""
 msgid "Coming soon"
 msgstr ""
 
-#: udata_gouvfr/theme/config.py:13
+#: udata_gouvfr/theme/theme.py:13
 msgid "Tab size"
 msgstr ""
 
-#: udata_gouvfr/theme/config.py:13
+#: udata_gouvfr/theme/theme.py:13
 msgid "Home page tab size"
 msgstr ""
 
@@ -203,23 +203,23 @@ msgstr ""
 msgid "Discussion topic"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/home.html:124
+#: udata_gouvfr/theme/templates/home.html:115
 msgid "Essential datasets"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/home.html:125
+#: udata_gouvfr/theme/templates/home.html:116
 msgid "Latest datasets"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/home.html:160
+#: udata_gouvfr/theme/templates/home.html:151
 msgid "See more"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/home.html:178
+#: udata_gouvfr/theme/templates/home.html:169
 msgid "The blog"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/home.html:201
+#: udata_gouvfr/theme/templates/home.html:192
 #: udata_gouvfr/theme/templates/dataset/display.html:235
 msgid "more"
 msgstr ""
@@ -427,7 +427,7 @@ msgid "Spatial coverage"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/dataset/display.html:351
-msgid "Data quality"
+msgid "Metadata quality"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/dataset/display.html:355
