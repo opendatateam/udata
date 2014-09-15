@@ -1,4 +1,8 @@
-{% extends "reuse/display_base.html" %}
+{% extends "reuse/display.html" %}
+
+{% block subnav %}
+    {% include theme('subnav-community.html') with context %}
+{% endblock %}
 
 {% block extra_head %}
 {{ super() }}
