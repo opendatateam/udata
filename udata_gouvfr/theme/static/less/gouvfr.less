@@ -114,6 +114,11 @@ section.highlight-bar {
 
     .container {
         z-index: 30;
+        height: 100%;
+
+        .row {
+            height: 100%;
+        }
     }
 
     .photo {
@@ -123,7 +128,9 @@ section.highlight-bar {
     }
 
     .body {
+        height: 90%;
         color: white;
+        overflow: hidden;
 
         label {
             color: @gray-lighter;
