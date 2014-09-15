@@ -55,4 +55,9 @@
             </li>
         </ul>
     </footer>
+
+    <a class="rollover fade in" href="{{url_for('organizations.show', org=organization)}}"
+        title="{{ organization.name }}">
+        {{ organization.description|mdstrip(180) }}
+    </a>
 </div>

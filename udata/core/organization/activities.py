@@ -3,19 +3,31 @@ from __future__ import unicode_literals
 
 from flask.ext.security import current_user
 
+from udata.i18n import lazy_gettext as _
 from udata.models import db, Organization, Activity
 from udata.core.activity.tasks import write_activity
 
 
-__all__ = ('UserCreatedOrganization', 'UserUpdatedOrganization')
+__all__ = ('UserCreatedOrganization', 'UserUpdatedOrganization', 'OrgRelatedActivity')
 
 
-class UserCreatedOrganization(Activity):
-    organization = db.ReferenceField('Organization')
+class OrgRelatedActivity(object):
+    related_to = db.ReferenceField('Organization')
+    template = 'activity/organization.html'
 
 
-class UserUpdatedOrganization(Activity):
-    organization = db.ReferenceField('Organization')
+class UserCreatedOrganization(OrgRelatedActivity, Activity):
+    key = 'organization:created'
+    icon = 'fa fa-plus'
+    badge_type = 'success'
+    label = _('created an organization')
+
+
+class UserUpdatedOrganization(OrgRelatedActivity, Activity):
+    key = 'organization:updated'
+    icon = 'fa fa-pencil'
+    badge_type = 'error'
+    label = _('updated an organization')
 
 
 # class UserDeletedOrganization(Activity):

@@ -6,5 +6,5 @@ from udata.tasks import celery
 
 
 @celery.task
-def write_activity(cls, actor, as_organization=None, **kwargs):
-    cls.objects.create(actor=actor, as_organization=as_organization, **kwargs)
+def write_activity(cls, actor, related_to, organization=None, **kwargs):
+    cls.objects.create(actor=actor, related_to=related_to, organization=organization, kwargs=kwargs)

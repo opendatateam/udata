@@ -1,0 +1,8 @@
+{% extends theme('activity/base.html') %}
+
+{% block label %}{{activity.label}}{% endblock %}
+
+{% block body %}
+{% set organization = activity.related_to %}
+{% include theme('organization/card.html') %}
+{% endblock %}

@@ -11,7 +11,7 @@ from udata.forms import OrganizationForm, OrganizationMemberForm, OrganizationEx
 from udata.frontend import nav, csv
 from udata.frontend.views import DetailView, CreateView, EditView, SearchView, BaseView, SingleObject
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Organization, Member, Reuse, Dataset, ORG_ROLES, User, Follow, FollowOrg, Issue
+from udata.models import db, Organization, Member, Reuse, Dataset, ORG_ROLES, User, Follow, FollowOrg, Activity, Issue
 from udata.utils import get_by
 
 from udata.core.dataset.csv import DatasetCsvAdapter
@@ -189,6 +189,17 @@ class OrganizationIssuesView(ProtectedOrgView, DetailView):
         return context
 
 
+class OrganizationActivityView(OrgView, DetailView):
+    template_name = 'organization/activity.html'
+
+    def get_context(self):
+        context = super(OrganizationActivityView, self).get_context()
+        predicate = db.Q(organization=self.object) | db.Q(related_to=self.object)
+        context['activities'] = Activity.objects(predicate).order_by('-created_at')
+        context['switcher'] = lambda a: a.related_to == self.organization
+        return context
+
+
 @blueprint.route('/<org:org>/datasets.csv')
 def datasets_csv(org):
     datasets = search.iter(Dataset, organization=str(org.id))
@@ -206,6 +217,7 @@ def supplied_datasets_csv(org):
 blueprint.add_url_rule('/', view_func=OrganizationListView.as_view(str('list')))
 blueprint.add_url_rule('/new/', view_func=OrganizationCreateView.as_view(str('new')))
 blueprint.add_url_rule('/<org:org>/', view_func=OrganizationDetailView.as_view(str('show')))
+blueprint.add_url_rule('/<org:org>/activity', view_func=OrganizationActivityView.as_view(str('activity')))
 blueprint.add_url_rule('/<org:org>/edit/', view_func=OrganizationEditView.as_view(str('edit')))
 blueprint.add_url_rule('/<org:org>/edit/members/', view_func=OrganizationEditMembersView.as_view(str('edit_members')))
 blueprint.add_url_rule('/<org:org>/edit/requests/', view_func=OrganizationMembershipRequestsView.as_view(str('edit_membership_requests')))

@@ -7,16 +7,22 @@ from blinker import Signal
 from mongoengine.signals import post_save
 
 from udata.models import db
+from udata.auth import current_user
 
 
 __all__ = ('Activity', )
+
+
+_registered_activities = {}
 
 
 class EmitNewActivityMetaClass(db.BaseDocumentMetaclass):
     '''Ensure any child class dispatch the on_new signal'''
     def __new__(cls, name, bases, attrs):
         new_class = super(EmitNewActivityMetaClass, cls).__new__(cls, name, bases, attrs)
-        post_save.connect(cls.post_save, sender=new_class)
+        if new_class.key:
+            post_save.connect(cls.post_save, sender=new_class)
+            _registered_activities[new_class.key] = new_class
         return new_class
 
     @classmethod
@@ -27,8 +33,11 @@ class EmitNewActivityMetaClass(db.BaseDocumentMetaclass):
 class Activity(db.Document):
     '''Store the activity entries for a single related object'''
     actor = db.ReferenceField('User', required=True)
-    as_organization = db.ReferenceField('Organization')
+    organization = db.ReferenceField('Organization')
+    related_to = db.ReferenceField(db.DomainModel, required=True)
     created_at = db.DateTimeField(default=datetime.now, required=True)
+
+    kwargs = db.DictField()
 
     on_new = Signal()
 
@@ -37,14 +46,31 @@ class Activity(db.Document):
     meta = {
         'indexes': [
             'actor',
-            'as_organization',
+            'organization',
+            'related_to',
             '-created_at',
             ('actor', '-created_at'),
-            ('as_organization', '-created_at'),
+            ('organization', '-created_at'),
+            ('related_to', '-created_at'),
         ],
         'allow_inheritance': True,
     }
 
+    key = None
+    label = None
+    badge_type = 'primary'
+    icon = 'fa fa-info-circle'
+    template = 'activity/base.html'
+
     @classmethod
     def connect(cls, func):
         return cls.on_new.connect(func, sender=cls)
+
+    @classmethod
+    def emit(cls, related_to, organization=None, **kwargs):
+        print cls, current_user
+        return cls.objects.create(
+            actor=current_user._get_current_object(),
+            related_to=related_to,
+            organization=organization
+        )

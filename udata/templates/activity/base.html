@@ -1,31 +1,43 @@
-{% set icon = icon or 'glyphicon glyphicon-info-sign' %}
 {% set user = activity.actor %}
-{% set org = activity.organization %}
-<time datetime="{{ activity.created_at.isoformat() }}">
-    <span>{{ activity.created_at|dateformat }}</span>
-    <span>{{ activity.created_at|timeformat('short') }}</span>
-</time>
-<span class="timeline-icon {{ icon }}"></span>
-<div class="timeline-body">
-    {% if organization %}
-    <a class="avatar" title="{{ organization.name }}"
-        href="{{ url_for('organizations.show', org=org) }}">
-        <img src="{{organization.image_url|placeholder('organization') }}"
-            alt="{{ organization.name }}" class="scalable"
-            width="60" height="60" />
-    </a>
-    {% else %}
-    {{ user|avatar(60) }}
+{% set organization = activity.organization %}
+<li {# {% if switcher and switcher(activity) %}class="timeline-inverted"{% endif %} #}>
+    <div class="timeline-badge {{activity.badge_type}}">
+        <span class="{{activity.icon}}"></span>
+    </div>
+    <div class="timeline-panel">
+        <div class="timeline-heading">
+            {% if organization %}
+            <a class="avatar" title="{{ organization.name }}"
+                href="{{ url_for('organizations.show', org=organization) }}">
+                <img src="{{organization.image_url|placeholder('organization') }}"
+                    alt="{{ organization.name }}" class="scalable"
+                    width="32" height="32" />
+            </a>
+            {% else %}
+            {{ user|avatar(32) }}
+            {% endif %}
+            <h4 class="timeline-title">
+                {% if organization %}
+                <a href="{{ url_for('organizations.show', org=organization) }}">{{organization.name}}</a>
+                {% else %}
+                <a href="{{ url_for('users.show', user=user) }}">{{user.fullname}}</a>
+                {% endif %}
+                {% block label %}
+                {{activity.label}}
+                <a href="{{activity.related_to.display_url}}">{{activity.related_to}}</a>
+                {% endblock %}
+            </h4>
+            <small class="text-muted timeline-date">
+                <span class="fa fa-clock-o"></span>
+                <time datetime="{{ activity.created_at.isoformat() }}">
+                    <span>{{ activity.created_at|datetimeformat }}</span>
+                </time>
+            </small>
+        </div>
+    </div>
+    {% if self.body() %}
+    <div class="timeline-panel timeline-content">
+        {% block body %}{% endblock %}
+    </div>
     {% endif %}
-    <h3>
-    {% block title %}
-    {% if organization %}
-    <a href="{{ url_for('organizations.show', org=org) }}">{{org.name}}</a>
-    {% else %}
-    <a href="{{ url_for('users.show', user=user) }}">{{user.fullname}}</a>
-    {% endif %}
-    {% block endtitle %}{% endblock %}
-    {% endblock %}
-    </h3>
-    {% block details %}{% endblock %}
-</div>
+</li>

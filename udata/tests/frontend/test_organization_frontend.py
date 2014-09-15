@@ -293,3 +293,8 @@ class OrganizationBlueprintTest(FrontTestCase):
             self.assertIn(str(dataset.id), ids)
         self.assertNotIn(str(hidden_dataset.id), ids)
         self.assertNotIn(str(not_org_dataset.id), ids)
+
+    def test_render_activity_empty(self):
+        org = OrganizationFactory()
+        response = self.get(url_for('organizations.activity', org=org))
+        self.assert200(response)
