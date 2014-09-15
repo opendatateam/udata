@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-09-15 05:30+0200\n"
+"POT-Creation-Date: 2014-09-15 15:29+0200\n"
 "PO-Revision-Date: 2014-09-15 03:32+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata-gouvfr/language/fr/)\n"
@@ -204,27 +204,27 @@ msgstr "Meilleures réutilisations"
 msgid "Latest reuses"
 msgstr "Dernières réutilisations"
 
-#: udata_gouvfr/theme/templates/home.html:98
+#: udata_gouvfr/theme/templates/home.html:97
 msgid "Discussion topic"
 msgstr "Thématique"
 
-#: udata_gouvfr/theme/templates/home.html:115
+#: udata_gouvfr/theme/templates/home.html:114
 msgid "Essential datasets"
 msgstr "Jeux de données essentiels"
 
-#: udata_gouvfr/theme/templates/home.html:116
+#: udata_gouvfr/theme/templates/home.html:115
 msgid "Latest datasets"
 msgstr "Derniers jeux de données"
 
-#: udata_gouvfr/theme/templates/home.html:151
+#: udata_gouvfr/theme/templates/home.html:150
 msgid "See more"
 msgstr "Voir plus"
 
-#: udata_gouvfr/theme/templates/home.html:169
+#: udata_gouvfr/theme/templates/home.html:168
 msgid "The blog"
 msgstr "Le blog"
 
-#: udata_gouvfr/theme/templates/home.html:192
+#: udata_gouvfr/theme/templates/home.html:191
 #: udata_gouvfr/theme/templates/dataset/display.html:235
 msgid "more"
 msgstr "plus"
