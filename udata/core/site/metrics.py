@@ -16,7 +16,9 @@ class SiteMetric(Metric):
     model = Site
 
     def __init__(self, value=None):
-        super(SiteMetric, self).__init__(current_site.id, value)
+        if current_site is None:
+            raise ValueError('Need to be inside app context')
+        super(SiteMetric, self).__init__(current_site._get_current_object(), value)
 
     @classmethod
     def update(cls):

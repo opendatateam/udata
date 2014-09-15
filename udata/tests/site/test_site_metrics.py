@@ -2,21 +2,23 @@
 from __future__ import unicode_literals
 
 
-from udata.models import db, Metrics, WithMetrics
+from udata.models import db, Metrics, WithMetrics, Site
 from udata.core.site.metrics import SiteMetric
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import SiteFactory
 
 
 class FakeModel(WithMetrics, db.Document):
     pass
 
 
+FAKE_VALUE = 42
+
+
 class FakeSiteMetric(SiteMetric):
     name = 'fake'
 
     def get_value(self):
-        return 'fake-value'
+        return FAKE_VALUE
 
 
 class SiteMetricTest(DBTestMixin, TestCase):
@@ -45,4 +47,7 @@ class SiteMetricTest(DBTestMixin, TestCase):
         self.assertTrue(self.updated_emitted)
 
         metrics = Metrics.objects.last_for(self.app.config['SITE_ID'])
-        self.assertEqual(metrics.values['fake'], 'fake-value')
+        self.assertEqual(metrics.values['fake'], FAKE_VALUE)
+
+        site = Site.objects.get(id=self.app.config['SITE_ID'])
+        self.assertEqual(site.metrics['fake'], FAKE_VALUE)
