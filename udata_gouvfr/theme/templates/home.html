@@ -88,13 +88,13 @@
 
     <div class="container">
         <div class="row">
-            <div class="photo col-sm-4">
+            <div class="photo col-xs-4">
                 <img src="{{ post.image_url|placeholder('post') }}"
                     alt="{{ post.name }}">
             </div>
 
 
-            <div class="body col-sm-8">
+            <div class="body col-xs-8">
                 <label>{{ _('Discussion topic') }}</label>
                 <h3 class="title ellipsis-dot">
                     <a href="{{ url_for('posts.show', post=post) }}"
@@ -103,15 +103,6 @@
                     </a>
                 </h3>
                 <p>{{post.content|mdstrip(280)}}</p>
-
-              {#   {% if post.credit_to %}
-                <p>
-                    {% if post.credit_url %}<a href="{{ post.credit_url }}">{% endif %}
-                        <small>{{ _('Photo by %(author)s', author=post.credit_to) }}</small>
-                    {% if post.credit_url %}</a>{% endif %}
-                </p>
-                {% endif %} #}
-
             </div>
         </div>
     </div>
