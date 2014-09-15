@@ -83,6 +83,8 @@ class ProtectedReuseView(ReuseView):
 
 
 class ReuseDetailView(ReuseView, DetailView):
+    template_name = 'reuse/display.html'
+
     def get_context(self):
         context = super(ReuseDetailView, self).get_context()
 
@@ -94,12 +96,6 @@ class ReuseDetailView(ReuseView, DetailView):
         )
 
         return context
-
-    def get_template_name(self):
-        if self.reuse.type == 'visualization' and self.reuse.url == self.reuse.image_url:
-            return 'reuse/display-big-picture.html'
-        else:
-            return 'reuse/display.html'
 
 
 class ReuseCreateView(CreateView):

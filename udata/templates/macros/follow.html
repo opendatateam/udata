@@ -3,7 +3,8 @@
 {% set following = is_following(obj) %}
 {% set following_icon = icons[1] if icons else 'eye-close' %}
 {% set follow_icon = icons[0] if icons else 'eye-open' %}
-<button type="button" class="btn btn-primary btn-follow {% if following %}active{% endif %}"
+
+<button type="button" class="btn {{kwargs.get('btn_class', 'btn-primary')}} btn-follow {% if following %}active{% endif %}"
     data-api-url="{{ url_for('api.follow_{0}'.format(basename), id=obj.id|string) }}"
     data-follow-icon="{{ ficon(follow_icon) }}"
     data-following-icon="{{ ficon(following_icon) }}"
