@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from flask import redirect, url_for
 
 from udata.core.user.permissions import sysadmin
-from udata.forms import model_form
 from udata.frontend import nav, theme
 from udata.frontend.views import DetailView, EditView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
@@ -56,9 +55,9 @@ class SiteThemeView(SiteAdminView, EditView):
     model = Site
 
     def get_form(self, data, obj=None):
-        config = self.site.themes.get(theme.current.identifier)
-        if hasattr(theme.current, 'form'):
-            return theme.current.form(data, data=config)
+        if theme.current.admin_form:
+            theme_config = theme.current.config
+            return theme.current.admin_form(data, data=theme_config)
         else:
             return None
 

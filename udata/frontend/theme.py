@@ -26,28 +26,49 @@ themes = Themes()
 
 
 def get_current_theme():
-    from udata.core.site.views import current_site
     if getattr(g, 'theme', None) is None:
         g.theme = current_app.theme_manager.themes[current_app.config['THEME']]
-        config_path = join(g.theme.path, 'config.py')
-        if exists(config_path):
-            imp.load_source('udata.frontend.theme.{0}'.format(g.theme.identifier), config_path)
-        if hasattr(g.theme, 'defaults') and g.theme.identifier not in current_site.themes:
-            current_site.themes[g.theme.identifier] = g.theme.defaults
-            try:
-                current_site.save()
-            except:
-                log.exception('Unable to save theme configuration')
+        g.theme.configure()
     return g.theme
 
 current = LocalProxy(get_current_theme)
 
 
 class ConfigurableTheme(Theme):
+    context_processors = None
+    defaults = None
+    admin_form = None
+    _configured = False
+
+    def __init__(self, path):
+        super(ConfigurableTheme, self).__init__(path)
+        self.context_processors = {}
+
+    @property
+    def site(self):
+        from udata.core.site.views import current_site
+        return current_site
+
     @property
     def config(self):
-        from udata.core.site.views import current_site
-        return current_site.themes.get(self.identifier)
+        return self.site.themes.get(self.identifier)
+
+    def configure(self):
+        if self._configured:
+            return
+        config_path = join(self.path, 'theme.py')
+        if exists(config_path):
+            imp.load_source('udata.frontend.theme.{0}'.format(self.identifier), config_path)
+        if self.defaults and self.identifier not in self.site.themes:
+            self.site.themes[self.identifier] = self.defaults
+            try:
+                self.site.save()
+            except:
+                log.exception('Unable to save theme configuration')
+        self._configured = True
+
+    def get_processor(self, context_name, default=lambda c: c):
+        return self.context_processors.get(context_name, default)
 
 
 class ThemeYAMLLoader(YAMLLoader):
@@ -102,7 +123,12 @@ class ThemeYAMLLoader(YAMLLoader):
         })
 
 
-def plugin_theme_loader(app):
+def udata_themes_loader(app):
+    for theme in packaged_themes_loader(app):
+        yield ConfigurableTheme(theme.path)
+
+
+def plugin_themes_loader(app):
     for plugin in app.config['PLUGINS']:
         module = import_module('udata.ext.{0}'.format(plugin))
         path = join(dirname(module.__file__), 'theme')
@@ -120,21 +146,8 @@ def render(template, **context):
     return render_theme_template(get_theme(theme), template, **context)
 
 
-def config(cls=None):
-    '''Register a configuration class for the current theme'''
-    if issubclass(cls, ThemeConfig):
-        g.theme.config_class = cls
-        return cls
-    else:
-        def wrapper(config_cls):
-            g.theme.config_class = config_cls
-            g.theme.form = cls
-            return cls
-        return wrapper
-
-
 def admin_form(cls):
-    g.theme.form = cls
+    g.theme.admin_form = cls
     return cls
 
 
@@ -142,19 +155,16 @@ def defaults(values):
     g.theme.defaults = values
 
 
-def home_context(func):
-    g.theme.home_context = func
-    return func
-
-
-class ThemeConfig(db.EmbeddedDocument):
-    meta = {
-        'allow_inheritance': True,
-    }
+def context(name):
+    '''A decorator for theme context processors'''
+    def wrapper(func):
+        g.theme.context_processors[name] = func
+        return func
+    return wrapper
 
 
 def init_app(app):
-    themes.init_themes(app, app_identifier='udata', loaders=[packaged_themes_loader, plugin_theme_loader])
+    themes.init_themes(app, app_identifier='udata', loaders=[udata_themes_loader, plugin_themes_loader])
 
     # Load all theme assets
     theme = app.theme_manager.themes[app.config['THEME']]

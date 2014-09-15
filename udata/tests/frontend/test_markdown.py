@@ -16,7 +16,7 @@ class MarkdownTestCase(TestCase, WebTestMixin):
 
     def test_excerpt_is_not_removed(self):
         with self.app.test_request_context('/'):
-            self.assertEqual(md('<!--- excerpt -->'), '<!--- excerpt -->')
+            self.assertEqual(md(EXCERPT_TOKEN), EXCERPT_TOKEN)
 
     def test_markdown_filter_with_none(self):
         '''Markdown filter should not fails with None'''
@@ -34,8 +34,8 @@ class MarkdownTestCase(TestCase, WebTestMixin):
 
         self.assertEqual(result, '1 2 ...')
 
-    def test_mdstrip_filter_does_not_truncate_wuthout_size(self):
-        '''mdstrip should truncate to 128 characters by default'''
+    def test_mdstrip_filter_does_not_truncate_without_size(self):
+        '''mdstrip should not truncate by default'''
         text = 'aaaa ' * 300
         with self.app.test_request_context('/'):
             result = render_template_string('{{ text|mdstrip }}', text=text)
@@ -51,7 +51,7 @@ class MarkdownTestCase(TestCase, WebTestMixin):
         self.assertEqual(result, '')
 
     def test_mdstrip_filter_with_excerpt(self):
-        '''mdstrip should truncate to 128 characters by default'''
+        '''mdstrip should truncate on token if shorter than required size'''
         text = ''.join(['excerpt', EXCERPT_TOKEN, 'aaaa ' * 10])
         with self.app.test_request_context('/'):
             result = render_template_string('{{ text|mdstrip(20) }}', text=text)

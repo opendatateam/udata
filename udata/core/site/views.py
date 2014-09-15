@@ -62,20 +62,20 @@ def activity_feed():
     return feed.get_response()
 
 
+def default_home_context_processor(context):
+    recent_datasets, recent_reuses = search.multiquery(
+        search.SearchQuery(Dataset, sort='-created', page_size=12),
+        search.SearchQuery(Reuse, sort='-created', page_size=12),
+    )
+    context.update(recent_datasets=recent_datasets, recent_reuses=recent_reuses)
+    return context
+
+
 @blueprint.route('/')
 def home():
-    if hasattr(theme.current, 'home_context'):
-        context = theme.current.home_context(theme.current)
-    else:
-        recent_datasets, recent_reuses = search.multiquery(
-            search.SearchQuery(Dataset, sort='-created', page_size=12),
-            search.SearchQuery(Reuse, sort='-created', page_size=12),
-        )
-        context = {
-            'recent_datasets': recent_datasets,
-            'recent_reuses': recent_reuses,
-        }
-    return render('home.html', **context)
+    context = {}
+    processor = theme.current.get_processor('home', default_home_context_processor)
+    return render('home.html', **processor(context))
 
 
 @blueprint.route('/metrics/')

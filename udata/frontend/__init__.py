@@ -96,7 +96,7 @@ def init_app(app):
     ]
 
     # Hook into flask security to user themed auth pages
-    app.config.setdefault('SECURITY_RENDER', 'udata.frontend:render')
+    app.config.setdefault('SECURITY_RENDER', 'udata.frontend.theme:render')
 
     # Load bundle from yaml file
     assets.from_yaml(resource_stream(__name__, '../static/assets.yaml'))

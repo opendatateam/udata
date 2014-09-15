@@ -10,7 +10,7 @@ from jinja2.filters import do_truncate, do_striptags
 
 md = LocalProxy(lambda: current_app.extensions['markdown'])
 
-EXCERPT_TOKEN = '<!--- excerpt -->'
+EXCERPT_TOKEN = '<!--- --- -->'
 
 
 class UDataMarkdown(Markdown):
