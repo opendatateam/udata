@@ -1,6 +1,11 @@
 {% macro timeline(activities) %}
 {% if activities %}
 <ul class="timeline">
+    <li class="timeline-header">
+        <div class="timeline-badge">
+            <span class="fa fa-clock-o"></span>
+        </div>
+    </li>
     {% for activity in activities %}
     <li>{% include theme(activity.template) %}</li>
     {% endfor %}

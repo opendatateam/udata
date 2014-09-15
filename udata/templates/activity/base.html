@@ -1,6 +1,6 @@
 {% set user = activity.actor %}
 {% set organization = activity.organization %}
-<li {# {% if switcher and switcher(activity) %}class="timeline-inverted"{% endif %} #}>
+<li>
     <div class="timeline-badge {{activity.badge_type}}">
         <span class="{{activity.icon}}"></span>
     </div>
