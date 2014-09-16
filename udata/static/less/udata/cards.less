@@ -50,7 +50,8 @@
     .card-body {
         overflow: hidden;
         padding-top: 1px;
-        padding-left: @card-padding;
+        padding-left: 11px;
+        // padding-left: @card-padding;
         color: #4f4f4f;
         font-size: @card-font-size;
         line-height: 1.3em;
@@ -61,9 +62,11 @@
         @color: #7E7E7E;
         width: 100%;
         position: absolute;
-        padding-left: @logo-size + 2 * @logo-margin + @card-padding;
+        // padding-left: @logo-size + 2 * @logo-margin + @card-padding;
+        padding-left: 78px;
         padding-right: 2 * @logo-margin;
-        bottom: 0;
+        // bottom: 0;
+        bottom: -4px;
         padding-bottom: @card-padding;
         overflow: hidden;
 
@@ -113,10 +116,10 @@
             @color: lighten(black, 35%);
             color: lighten(@color, 5%);
             font-size: @line-height - 4px;
-            background-color: fadeout(@gray-lighter, 20%);
+            background-color: fadeourgba(235, 235, 235, 1);
             padding: 0;
             display: none;
-            bottom: -@base-size - 1px;
+            bottom: 0;
             line-height: @line-height;
             z-index: 0;
             left: 0;
@@ -127,8 +130,9 @@
             ul {
                 line-height: @line-height;
                 .btn {
-                    color: @color;
-                    padding: @padding 5px;
+                    color: #595959;
+                    padding: 2px 5px;
+                    font-size: 11px;
 
                     .fa, .glyphicon {
                         color: ligthen(@color, 2%);
@@ -141,10 +145,10 @@
 
     h4 {
         margin: 0 0 8px;
-        line-height: 13px;
+        line-height: 11px;
 
         a {
-            font-size: 14px;
+            font-size: 13px;
             color: #494949;
             font-family: @title-font;
             font-weight: bold;
@@ -152,8 +156,9 @@
     }
 
     a.rollover {
-        background: fadeout(@gray-darker, 20%);
+        background: rgba(255, 255, 255, 0.91);
         font-size: 13px;
+        line-height: 13px;
         position: absolute;
         display: none;
         top: 0;
@@ -162,7 +167,7 @@
         height: 100%;
         padding: 10px;
         overflow: hidden;
-        color: darken(white, 10%);
+        color: #5E5E5E;
         text-decoration: none;
         z-index: 10;
     }
@@ -182,6 +187,7 @@
     &.reuse-card {
         @full-margin: @card-padding + @logo-margin;
         @logo-full-size: @logo-size + 2 * @full-margin;
+        @logo-full-size: 86px;
 
         .card-logo {
             width: @logo-full-size;
@@ -191,6 +197,9 @@
             border-right: 1px solid fadein(@gray-lighter, 40%);
             line-height: @logo-full-size;
             background-color: fadein(@gray-lighter, 40%);
+            position: absolute;
+            display: block;
+            overflow: hidden;
 
             img {
                 max-width: @logo-full-size;
@@ -199,7 +208,8 @@
         }
 
         .card-body, footer {
-            padding-left: @card-padding + @logo-margin;
+            // padding-left: @card-padding + @logo-margin;
+            padding-left: 88px;
         }
 
         .author {
@@ -207,7 +217,9 @@
             display: block;
             height: 28px;
             position: absolute;
-            bottom: @card-padding;
+            // bottom: @card-padding;
+            bottom: 9px;
+            left: 88px;
             line-height: 14px;
 
             .avatar {
@@ -215,7 +227,8 @@
                 float: left;
                 width: 25px;
                 height: 25px;
-                border: 1px solid #7e7e7e;
+                // border: 1px solid #7e7e7e;
+                border: 1px solid #BEBEBE;
                 margin-right: @card-padding;
                 z-index: 150; // Fix hover reactivity
 
@@ -241,7 +254,9 @@
         }
 
         footer {
-            padding-left: @logo-full-size + @card-padding;
+            // padding-left: @logo-full-size + @card-padding;
+            padding-left: 78px;
+            // bottom: 0;
             overflow: visible;
 
             &.rollover {
@@ -256,7 +271,8 @@
     list-style: none;
 
     .card {
-        margin-bottom: 22px;
+        margin-bottom: 12px;
+        // margin-bottom: 22px;
     }
 }
 
