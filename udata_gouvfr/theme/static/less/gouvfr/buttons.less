@@ -67,6 +67,10 @@
     }
 }
 
+.btn-more {
+    font-size: 11px;
+}
+
 .btn-highlight {
     .button-variant(white; @highlight; @highlight);
 }
@@ -131,7 +135,8 @@
 
 .btn-transparent {
     @base-color: fadeout(white, 50%);
-    background-color: @base-color;
+    // background-color: @base-color;
+    background-color: rgba(255, 255, 255, 0.3);
 
     .glyphicon {
         color: @bg-dark !important;
@@ -140,8 +145,10 @@
     }
 
     &:hover {
-        color: @bg-dark;
-        background-color: fadein(@base-color, 20%);
+        color: white;
+        background-color: rgba(255, 255, 255, 0.55);
+        // color: @bg-dark;
+        // background-color: fadein(@base-color, 20%);
 
         .glyphicon {
             color: white !important;

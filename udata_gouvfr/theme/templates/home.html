@@ -1,5 +1,7 @@
 {% extends "home.html" %}
 
+{% set body_class = 'home' %}
+
 {% block subnav %}
     {% include theme('subnav-large.html') %}
 {% endblock %}
@@ -145,7 +147,7 @@
 
                         </ul>
                         <p class="text-center">
-                            <a href="{{ url_for('datasets.list', **kwargs) }}" class="btn btn-default">
+                            <a href="{{ url_for('datasets.list', **kwargs) }}" class="btn btn-default btn-more">
                                 <span class="glyphicon glyphicon-list" ></span>
                                 {{ _('See more') }}
                             </a>

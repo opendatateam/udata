@@ -70,11 +70,23 @@ section.footer {
         }
     }
 
+
     .social {
+        .fa, .glyphicon {
+            opacity: 0.3;
+            margin-right: 6px;
+            font-size: 2.5em;
+        }
+
         a:hover {
-            font-size: 14px;
+            font-size: 1em;
             color: @gray-lighter;
             text-decoration: none;
+
+            .fa, .glyphicon {
+                opacity: 1;
+                color: white;
+            }
         }
     }
 }
@@ -102,7 +114,12 @@ section.highlight-bar {
         z-index: 10;
 
         img {
-            width: 100%;
+            width: 130%;
+            -webkit-filter: blur(6px);
+               -moz-filter: blur(6px);
+                -ms-filter: blur(6px);
+                 -o-filter: blur(6px);
+                    filter: blur(6px);
         }
     }
 
@@ -134,7 +151,8 @@ section.highlight-bar {
 
         label {
             color: @gray-lighter;
-            margin-top: 10px;
+            margin-top: 13px;
+            margin-bottom: 3px;
         }
 
         h3 {
@@ -161,13 +179,20 @@ section.highlight-bar {
     }
 }
 
+section.default {
+    padding: 20px 0 20px 0;
+}
+
 section.spaced {
-    padding-top: 30px;
+    padding-top: 40px;
+    padding-bottom: 0;
 }
 
 section.blog {
+    padding: 0 0 40px;
+
     .row.gray {
-        background-color: @gray-lighter;
+        background-color: #ececec;
         max-height: 250px;
         > * {
             height: 100%;
@@ -188,6 +213,8 @@ section.blog {
 
     .body {
         padding-top: 20px;
+        padding-right: 30px;
+        color: #484d54;
 
         .post-date {
             font-weight: bold;
@@ -372,7 +399,7 @@ ul.search-results {
 
 
 #home-carousel {
-    height: 305px;
+    height: 286px;
     .carousel-caption {
         background-color: white;
         height: 60px;
@@ -383,7 +410,8 @@ ul.search-results {
         }
 
         .author {
-            color: @highlight;
+            color: #3BA6E0;
+            // color: @highlight;
             font-size: 12px;
             font-weight: bold;
         }
