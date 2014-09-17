@@ -8,7 +8,8 @@ define([
     'form/widgets',
     'form/dataset-completer',
     'form/reuse-completer',
-    'form/tag-completer'
+    'form/tag-completer',
+    'form/upload'
 ], function($, log, Forms) {
     "use strict";
 

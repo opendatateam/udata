@@ -23,6 +23,7 @@ class UserSearch(ModelSearchAdapter):
             'last_name': {'type': 'string'},
             'about': {'type': 'string', 'analyzer': i18n_analyzer},
             'organizations': {'type': 'string', 'index_name': 'organization'},
+            'visible': {'type': 'boolean'},
             'metrics': metrics_mapping(User),
             'user_suggest': {
                 'type': 'completion',
@@ -73,4 +74,5 @@ class UserSearch(ModelSearchAdapter):
                     'slug': user.slug,
                 },
             },
+            'visible': user.visible
         }

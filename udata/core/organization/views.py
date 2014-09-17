@@ -195,8 +195,7 @@ class OrganizationActivityView(OrgView, DetailView):
     def get_context(self):
         context = super(OrganizationActivityView, self).get_context()
         predicate = db.Q(organization=self.object) | db.Q(related_to=self.object)
-        context['activities'] = Activity.objects(predicate).order_by('-created_at')
-        context['switcher'] = lambda a: a.related_to == self.organization
+        context['activities'] = Activity.objects(predicate).order_by('-created_at').limit(30)
         return context
 
 

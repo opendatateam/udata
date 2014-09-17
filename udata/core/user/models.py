@@ -97,6 +97,10 @@ class User(db.Document, WithMetrics,UserMixin):
     def display_url(self):
         return url_for('users.show', user=self)
 
+    @property
+    def visible(self):
+        return self.metrics.get('datasets', 0) + self.metrics.get('reuses', 0) > 0
+
     def generate_api_key(self):
         s = JSONWebSignatureSerializer(current_app.config['SECRET_KEY'])
         self.apikey = s.dumps({

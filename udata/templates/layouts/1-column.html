@@ -7,12 +7,14 @@
 <section class="breadcrumb {{ breadcrum_class }}">
     <div class="container">
         <ol class="breadcrumb col-md-8 col-lg-9">
+            {% block breadcrumb_replace %}
             <li>
                 <a href="{{ url_for('site.home') }}" title="{{ _('Home') }}">
                     <span class="glyphicon glyphicon-home"></span>
                 </a>
             </li>
             {% block breadcrumb %}{% endblock %}
+            {% endblock breadcrumb_replace %}
         </ol>
         <div class="col-md-4 col-lg-3 toolbar">
             {% block toolbar_container %}
@@ -30,4 +32,6 @@
         {% block main_content %}{% endblock %}
     </div>
 </section>
+
+{% block extra_sections %}{% endblock %}
 {% endblock %}

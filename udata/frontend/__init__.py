@@ -112,7 +112,8 @@ def init_app(app):
     from udata.core.storages.views import blueprint as storages_blueprint
     from udata.core.user.views import blueprint as user_blueprint
     from udata.core.site.views import blueprint as site_blueprint
-    from udata.core.site.admin import site_admin
+    # from udata.core.site.admin import site_admin
+    from udata.core.admin import blueprint as admin_blueprint
     from udata.core.dataset.views import blueprint as dataset_blueprint
     from udata.core.reuse.views import blueprint as reuse_blueprint
     from udata.core.organization.views import blueprint as org_blueprint
@@ -120,11 +121,13 @@ def init_app(app):
     from udata.core.topic.views import blueprint as topic_blueprint
     from udata.core.post.views import blueprint as post_blueprint
     from udata.core.activity.views import blueprint as activity_blueprint
+    import udata.core.post.admin
+    import udata.core.topic.admin
 
     app.register_blueprint(storages_blueprint)
     app.register_blueprint(user_blueprint)
     app.register_blueprint(site_blueprint)
-    app.register_blueprint(site_admin)
+    app.register_blueprint(admin_blueprint)
     app.register_blueprint(dataset_blueprint)
     app.register_blueprint(reuse_blueprint)
     app.register_blueprint(org_blueprint)

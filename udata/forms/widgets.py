@@ -32,6 +32,10 @@ class WidgetHelper(object):
         return super(WidgetHelper, self).__call__(field, **kwargs)
 
 
+class TextArea(WidgetHelper, widgets.TextArea):
+    pass
+
+
 class SelectPicker(WidgetHelper, widgets.Select):
     classes = 'selectpicker'
 
@@ -69,6 +73,19 @@ class DatasetAutocompleter(WidgetHelper, widgets.TextInput):
                 'title': dataset.title
             } for dataset in field.data])
         return super(DatasetAutocompleter, self).__call__(field, **kwargs)
+
+
+class ReuseAutocompleter(WidgetHelper, widgets.TextInput):
+    classes = 'reuse-completer'
+
+    def __call__(self, field, **kwargs):
+        '''Store the values as JSON to prefeed selectize'''
+        if field.data:
+            kwargs['data-values'] = json.dumps([{
+                'id': str(reuse.id),
+                'title': reuse.title
+            } for reuse in field.data])
+        return super(ReuseAutocompleter, self).__call__(field, **kwargs)
 
 
 class TagAutocompleter(WidgetHelper, widgets.TextInput):

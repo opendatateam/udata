@@ -194,6 +194,22 @@ class DatasetListField(StringField):
             self.data = []
 
 
+class ReuseListField(StringField):
+    widget = widgets.ReuseAutocompleter()
+
+    def _value(self):
+        if self.data:
+            return u','.join([str(reuse.id) for reuse in self.data])
+        else:
+            return u''
+
+    def process_formdata(self, valuelist):
+        if valuelist:
+            self.data = [DBRef('reuse', ObjectId(id.strip())) for id in valuelist[0].split(',') if id.strip()]
+        else:
+            self.data = []
+
+
 class UserField(StringField):
     def _value(self):
         if self.data:
@@ -251,7 +267,8 @@ class SpatialCoverageField(StringField):
                 elif polygon.geom_type == 'Polygon':
                     geom = MultiPolygon([polygon]).__geo_interface__
                 else:
-                    raise ValueError('Unsupported geometry type "{0}"'.format(polygon.geom_type))
+                    geom = None
+                    # raise ValueError('Unsupported geometry type "{0}"'.format(polygon.geom_type))
                 territories = [t.reference() for t in sorted(territories, key=level_key)]
                 self.data = SpatialCoverage(territories=territories, geom=geom)
             except Exception as e:

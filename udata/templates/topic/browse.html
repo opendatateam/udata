@@ -1,17 +1,7 @@
 {% extends theme("topic/display_base.html") %}
 
-{% block title %}{{ topic.name }}{% endblock %}
-
-{% block breadcrumb %}
-    <li><a href="{#{ url_for('topics.list') }#}">{{ _('Topics') }}</a></li>
-    <li class="active">{{ topic.name|truncate(128) }}</li>
-{% endblock %}
-
 
 {% block main_content %}
-<h2>{{ topic.name }}</h2>
-</div>{{ topic.description|markdown }}</div>
-
 <!-- Nav tabs -->
 <ul class="nav nav-tabs">
     <li class="active">
@@ -70,26 +60,5 @@
         {% endif %}
     </div>
 
-</div>
-{% endblock %}
-
-{% block modals %}
-{{ super() }}
-<div id="topic-modal" class="modal fade" tabindex="-1" role="dialog"
-    aria-labelledby="topic-modal-title" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 id="topic-modal-title" class="modal-title">{{ topic.name }}</h4>
-            </div>
-            <div class="modal-body">
-                {{ topic.description|markdown }}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">{{ _('Close') }}</button>
-            </div>
-        </div>
-    </div>
 </div>
 {% endblock %}

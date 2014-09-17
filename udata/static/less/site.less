@@ -213,3 +213,112 @@ small.deleted {
 .big-map {
     height: 600px;
 }
+
+
+
+// Main Carsoussel
+.carousel {
+    border: 1px solid #d9d9d7;
+    height: 250px;
+
+    @media (min-width: @screen-sm-min) {
+        height: 300px;
+        overflow: hidden;
+    }
+
+    .carousel-inner {
+        height: 100%;
+
+        .item {
+            height: 100%;
+
+            img {
+                margin: 0 auto;
+            }
+
+            img.slide {
+                min-height: 148px;
+                position: absolute;
+                top: 0;
+                left: 0;
+                min-width: 100%;
+            }
+        }
+    }
+
+    .carousel-caption {
+        bottom: 0;
+        height: 100px;
+        z-index: 10;
+        width: 100%;
+        color: #3e3e3e;
+        background-color: rgba(243, 243, 243, 0.92);
+        padding: 5px;
+        left: 0px;
+        text-shadow: none;
+        text-align: left;
+        text-transform: uppercase;
+        font-family: @title-font;
+        padding: 10px;
+
+        .title  {
+            margin-top: 0px;
+            margin-bottom: 0;
+
+            a {
+                color: #3e3e3e;
+                display: block;
+                font-size: 20px;
+                line-height: 22px;
+                font-weight: bold;
+                font-family: @title-font;
+            }
+
+            label {
+                font-size: 10px;
+                line-height: 10px;
+                margin-top: 0px;
+                margin-bottom: 0px;
+                display: inline;
+            }
+
+            @media (min-width: @screen-xs-min) {
+                a {
+                    font-size: 28px;
+                    line-height: 30px;
+                }
+
+                label {
+                    font-size: 12px;
+                    line-height: 12px;
+                }
+            }
+        }
+    }
+}
+
+// News carousel
+#news-carousel {
+    .carousel-caption {
+        label {
+            font-size: 12px;
+            margin-top: 0px;
+            margin-bottom: 0px;
+        }
+
+        .title  {
+            height: 60px;
+
+            a {
+                font-size: 15px;
+                line-height: 17px;
+
+                @media (min-width: @screen-xs-min) {
+                    font-size: 17px;
+                    line-height: 20px;
+                }
+            }
+        }
+
+    }
+}

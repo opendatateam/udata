@@ -17,6 +17,7 @@ __all__ = (
     'UserFollowedDataset', 'UserFollowedReuse', 'UserFollowedOrganization', 'UserFollowedUser',
 )
 
+
 class FollowActivity(object):
     icon = 'fa fa-eye'
     badge_type = 'warning'

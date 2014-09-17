@@ -55,13 +55,20 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
 
         // User routes
         userSearch: {path: i18n('/users/'), moduleId: 'search'},
-        userEdit: {path: i18n('/u/:slug_or_id/edit/'), moduleId: 'user/form'},
-        userEdit2: {path: i18n('/u/:slug_or_id/edit/*/'), moduleId: 'user/form'},
-        userDisplay: {path: i18n('/u/:slug_or_id/'), moduleId: 'user/display'},
-        userDisplay2: {path: i18n('/u/:slug_or_id/*/'), moduleId: 'user/display'},
+        userEdit: {path: i18n('/users/:slug_or_id/edit/'), moduleId: 'user/form'},
+        userEdit2: {path: i18n('/users/:slug_or_id/edit/*/'), moduleId: 'user/form'},
+        userDisplay: {path: i18n('/users/:slug_or_id/'), moduleId: 'user/display'},
+        userDisplay2: {path: i18n('/users/:slug_or_id/*/'), moduleId: 'user/display'},
+
+        // Posts routes
+        postNew: {path: i18n('/posts/new/'), moduleId: 'site/form'},
+        postDisplay: {path: i18n('/posts/:slug_or_id/'), moduleId: 'post/display'},
+        postEdit: {path: i18n('/posts/:slug_or_id/edit/'), moduleId: 'site/form'},
 
         // Topics routes
-        topicDisplay: {path: i18n('/topics/:slug_or_id/'), moduleId: 'topic/display'}
+        topicNew: {path: i18n('/topics/new/'), moduleId: 'site/form'},
+        topicDisplay: {path: i18n('/topics/:slug_or_id/'), moduleId: 'topic/display'},
+        topicsEdit: {path: i18n('/topics/:slug_or_id/edit/'), moduleId: 'site/form'}
     })
     .on('routeload', function(module, routeArguments) {
         log.debug('Module "'+router.activeRoute.moduleId+'" loaded by route "'+router.activeRoute.path+'"');

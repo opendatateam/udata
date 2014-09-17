@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 
+from flask import url_for
+
 from udata.models import db
 
 
@@ -15,9 +17,17 @@ class Topic(db.Document):
     tags = db.ListField(db.StringField())
     color = db.IntField()
 
+    tags = db.ListField(db.StringField())
+    datasets = db.ListField(db.ReferenceField('Dataset'))
+    reuses = db.ListField(db.ReferenceField('Reuse'))
+
     owner = db.ReferenceField('User')
     featured = db.BooleanField()
     private = db.BooleanField()
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def display_url(self):
+        return url_for('topics.display', topic=self)

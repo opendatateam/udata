@@ -15,7 +15,10 @@ class TopicForm(UserModelForm):
 
     name = fields.StringField(_('Name'), [validators.required()])
     description = fields.MarkdownField(_('Description'), [validators.required()])
-    query = fields.StringField(_('Query'), [validators.required()])
 
-    tags = fields.TagField(_('Tags'))
+    datasets = fields.DatasetListField(_('Associated datasets'))
+    reuses = fields.ReuseListField(_('Associated reuses'))
+
+    query = fields.StringField(_('Search Query'))
+    tags = fields.TagField(_('Tags'), [validators.required()])
     private = fields.BooleanField(_('Private'))

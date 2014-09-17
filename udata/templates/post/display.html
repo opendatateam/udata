@@ -1,9 +1,16 @@
-{% extends theme("layouts/1-column.html") %}
+{% extends theme('base.html') %}
+{% from theme('macros/share.html') import share_btn with context %}
+
+{% set meta = {
+    'title': post.name,
+    'description': post.headline|mdstrip|forceescape,
+    'keywords': post.tags
+} %}
 
 {% block title %}{{ post.name }}{% endblock %}
 
 {% block breadcrumb %}
-    <li><a href="{#{ url_for('posts.list') }#}">{{ _('News') }}</a></li>
+    <li><a href="{{ url_for('posts.list') }}">{{ _('News') }}</a></li>
     <li class="active">{{ post.name }}</li>
 {% endblock %}
 
@@ -14,7 +21,7 @@
 {% if post.image_url %}
 <div class="text-center">
     <img src="{{ post.image_url }}"
-        alt="{{ post.title }}" class="scalable" />
+        alt="{{ post.name }}" class="scalable" />
 
     {% if post.credit_to %}
         {{ _('Photo credit') }} to
@@ -26,4 +33,152 @@
 {% endif %}
 
 <div>{{ post.content|markdown }}</div>
+{% endblock %}
+
+
+{% block content %}
+<section class="post-section default">
+    <div class="container post-container">
+        <div class="row">
+
+            <div class="col-sm-8 smaller">
+                <div class="page-header">
+                    <h2 itemprop="name">{{ post.name }}</h2>
+
+                    <div class="row">
+                        <p class="col-xs-12">
+                            <small>
+                                {{ _('Published on %(date)s',
+                                    date=post.created_at|dateformat(format='long')
+                                ) }}
+                            </small>
+                            {% if post.private %}
+                            <small class="private"rel="popover"
+                                data-title="{{ _('Private') }}" data-trigger="hover" data-placement="top"
+                                data-content="{{ _('This post is private and will not be visible by other users') }}"
+                                >{{ _('Private') }}</small>
+                            {% endif %}
+                            {% if post.deleted %}
+                            <small class="deleted" rel="popover"
+                                data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
+                                data-content="{{ _('This post has been deleted. This will be permanent in the next 24 hours') }}"
+                                >{{ _('Deleted') }}</small>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                {% if post.headline %}
+                <div class="post-headline">{{ post.headline }}</div>
+                {% endif %}
+
+                {% if post.image_url %}
+                <div class="post-image">
+                    <img src="{{ post.image_url }}"
+                        alt="{{ post.name }}" class="scalable" />
+                    <br/>
+                    {% if post.credit_to %}
+                        {{ _('Photo credit') }} to
+                        {% if post.credit_url %}<a href="{{ post.credit_url }}"
+                            title="{{ post.credit_to }}"
+                            class="credit-link"
+                            >{% endif %}
+                        {{ post.credit_to }}
+                        {% if post.credit_url %}
+                        <span class="glyphicon glyphicon-new-window"></span>
+                        </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="clearfix"></div>
+                <br/>
+
+                <div class="post-body">
+                    {{ post.content|markdown }}
+                </div>
+
+                {# button bar #}
+                <div class="row main-toolbar">
+                    <div class="btn-toolbar">
+                        <div class="btn-group btn-group-sm">
+                            {{ share_btn(post.name) }}
+                        </div>
+                        {% if sysadmin %}
+                        <div class="btn-group btn-group-sm">
+                            <a href="{{ url_for('posts.edit', post=post) }}" class="btn btn-success">
+                                <span class="glyphicon glyphicon-pencil"></span>
+                                {{ _('Edit') }}
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {# end button bar #}
+
+            </div>
+            {# end left column #}
+
+            {# Right sidebar #}
+            <aside class="col-sm-4">
+
+                {# Reuses list #}
+                {% if post.reuses %}
+                <h3>{{ _('Associated reuses') }}</h3>
+                <ul class="card-list">
+                    {% for reuse in post.reuses %}
+                    <li class="col-xs-12">
+                        {% include theme('reuse/card.html') %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {# end reuses list #}
+
+                {# Datasets list #}
+                {% if post.datasets %}
+                <h3>{{ _('Associated datasets') }}</h3>
+                <ul class="card-list">
+                    {% for dataset in post.datasets %}
+                    <li class="col-xs-12">
+                        {% include theme('dataset/card.html') %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {# end post list #}
+
+            </aside>
+        </div>
+
+    </div>
+</section>
+
+<section class="content post-section history-section">
+    {# <header>
+        <div class="container">
+            <div class="page-header">
+                <h2>
+                    <span class='fa fa-refresh header-logo'></span>
+                    {{ _('Used datasets') }}
+                </h2>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <ul class="card-list">
+                    {% for dataset in reuse.datasets %}
+                    <li class="col-md-4 col-sm-6">
+                    {% include theme('dataset/card.html') %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div> #}
+</section>
 {% endblock %}

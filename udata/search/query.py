@@ -88,6 +88,9 @@ class SearchQuery(object):
     def _bool_query(self):
         return {'must': [], 'must_not': [], 'should': []}
 
+    def initial_bool_query(self):
+        return self._bool_query()
+
     def _update_bool_query(self, query, new):
         if not query:
             query = self._bool_query()

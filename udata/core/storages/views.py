@@ -53,6 +53,13 @@ class ResourcesStorage(StorageView):
 
 ResourcesStorage.register(blueprint)
 
+
+
+class ImagesStorage(StorageView):
+    storage = images_storage
+
+ImagesStorage.register(blueprint)
+
 # @blueprint.route('/resource', methods=['POST'])
 # @login_required
 # def add_resource():
@@ -60,15 +67,22 @@ ResourcesStorage.register(blueprint)
 #     return jsonify({'url': resources_storage.url(filename)})
 
 
-@blueprint.route('/avatar', methods=['POST'])
-@login_required
-def add_avatar():
-    filename = avatars_storage.save(request.files['file'])
-    return jsonify({'url': avatars_storage.url(filename)})
+# @blueprint.route('/post_thumbnails', methods=['POST'])
+# @login_required
+# def add_post_thumbnail():
+#     filename = resources_storage.save(request.files['file'])
+#     return jsonify({'url': resources_storage.url(filename)})
 
 
-@blueprint.route('/image', methods=['POST'])
-@login_required
-def add_image():
-    filename = images_storage.save(request.files['file'])
-    return jsonify({'url': images_storage.url(filename)})
+# @blueprint.route('/avatar', methods=['POST'])
+# @login_required
+# def add_avatar():
+#     filename = avatars_storage.save(request.files['file'])
+#     return jsonify({'url': avatars_storage.url(filename)})
+
+
+# @blueprint.route('/image', methods=['POST'])
+# @login_required
+# def add_image():
+#     filename = images_storage.save(request.files['file'])
+#     return jsonify({'url': images_storage.url(filename)})

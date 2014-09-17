@@ -120,6 +120,11 @@
                 'app',
             ],
         }, {
+            name: 'site/form',
+            exclude: [
+                'app',
+            ],
+        }, {
             name: 'issue/list',
             exclude: [
                 'app',

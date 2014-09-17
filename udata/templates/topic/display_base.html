@@ -1,0 +1,33 @@
+{% extends theme("layouts/1-column.html") %}
+
+
+{% block extra_sections %}
+<section class="content topic-section related-tags-section">
+    <header>
+        <div class="container">
+            <div class="page-header">
+                <h2>
+                    <span class='fa fa-tags header-logo'></span>
+                    {{ _('Related tags') }}
+                </h2>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="tags">
+                    {% for tag in topic.tags %}
+                    <a href="{{ url_for('front.search', tag=tag) }}"
+                        class="btn btn-primary btn-grey btn-xs"
+                        title="{{ tag }}">
+                        {{ tag|truncate(14, True) }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

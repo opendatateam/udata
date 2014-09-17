@@ -1,9 +1,7 @@
-define(['hbs/handlebars', 'jquery'], function(Handlebars, $) {
-
-    var static_root = $('link[rel="static-root"]').attr('href');
+define(['hbs/handlebars', 'utils/placeholder'], function(Handlebars, placeholder) {
 
     Handlebars.registerHelper('placeholder', function(url, type) {
-        return url ? url : static_root + 'img/placeholders/' + type + '.png';
+        return url ? url : placeholder(type);
     });
 
 });

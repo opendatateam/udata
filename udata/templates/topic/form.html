@@ -1,0 +1,19 @@
+{% extends theme('layouts/form.html') %}
+{% import 'macros/forms.html' as forms with context %}
+
+{% block main_content %}
+<div class="row form-bg">
+    <div class="col-xs-12">
+        <form class="form-horizontal validation" method="post" action=".">
+            {{ forms.render(form) }}
+            {{ forms.required_disclaimer() }}
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    {% block form_controls %}{% endblock %}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

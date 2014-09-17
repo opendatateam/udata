@@ -91,7 +91,7 @@ define([
 
     function load_coverage_map() {
         var $el = $('#coverage-map'),
-            attributions = '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            attributions = '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> / <a href="http://open.mapquest.com/">MapQuest</a>',
             tilesUrl = 'http://otile{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png',
             map = L.map($el[0], {zoomControl: false}),
             layer = L.geoJson($el.data('geojson'));
@@ -105,7 +105,7 @@ define([
         // Disable tap handler, if present.
         if (map.tap) map.tap.disable();
 
-        L.tileLayer(tilesUrl, {subdomains: '1234'}).addTo(map);
+        L.tileLayer(tilesUrl, {subdomains: '1234', attribution: attributions}).addTo(map);
         layer.addTo(map);
         map.fitBounds(layer.getBounds());
     }

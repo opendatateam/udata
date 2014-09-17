@@ -1,7 +1,7 @@
 {% extends theme('layouts/form.html') %}
 
 {% block breadcrumb %}
-<li><a href="{{ url_for('site_admin.root') }}">{{ _('Administration') }}</a></li>
+<li><a href="{{ url_for('admin.root') }}">{{ _('Administration') }}</a></li>
 <li class="active">{{ current_item.label }}</li>
 {% endblock %}
 
@@ -14,7 +14,7 @@
             </div>
 
             <div class="list-group text-center">
-                {% for item in nav.site_admin %}
+                {% for item in nav.admin %}
                 <a href="{{ item.url }}"
                     class="list-group-item {% if item.is_active %}active{% endif %}">
                     <strong>

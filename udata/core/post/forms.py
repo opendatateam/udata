@@ -14,7 +14,16 @@ class PostForm(UserModelForm):
     model_class = Post
 
     name = fields.StringField(_('Name'), [validators.required()])
+    headline = fields.StringField(_('Headline'), widget=widgets.TextArea())
     content = fields.MarkdownField(_('Content'), [validators.required()])
+
+    datasets = fields.DatasetListField(_('Associated datasets'))
+    reuses = fields.ReuseListField(_('Associated reuses'))
+
+    image_url = fields.UploadableURLField(_('Image URL'), description=_('The post thumbnail'),
+        endpoint='storage.add_image')
+    credit_to = fields.StringField(_('Image credits'))
+    credit_url = fields.URLField(_('Credit URL'))
 
     tags = fields.TagField(_('Tags'))
 
