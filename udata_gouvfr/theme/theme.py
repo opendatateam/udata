@@ -14,7 +14,9 @@ class GouvfrThemeForm(Form):
         validators=[validators.required()])
 
 theme.defaults({
-    'tab_size': 8
+    'tab_size': 8,
+    'home_datasets': [],
+    'home_reuses': []
 })
 
 
@@ -24,8 +26,8 @@ def home_context(context):
     specs = {
         'recent_datasets': search.SearchQuery(Dataset, sort='-created', page_size=config['tab_size']),
         'recent_reuses': search.SearchQuery(Reuse, sort='-created', page_size=config['tab_size']),
-        'featured_datasets': search.SearchQuery(Dataset, featured=True, page_size=3),
-        'featured_reuses': search.SearchQuery(Reuse, featured=True, page_size=3),
+        # 'featured_datasets': search.SearchQuery(Dataset, featured=True, page_size=3),
+        'featured_reuses': search.SearchQuery(Reuse, featured=True, page_size=9),
         'popular_datasets': search.SearchQuery(Dataset, page_size=config['tab_size']),
         'popular_reuses': search.SearchQuery(Reuse, page_size=config['tab_size']),
     }

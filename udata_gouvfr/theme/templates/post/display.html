@@ -1,0 +1,8 @@
+{% extends "post/display.html" %}
+
+{% block extra_head %}
+{{ super() }}
+{% assets 'gouvfr-post-css' %}
+<link href="{{ ASSET_URL }}" rel="stylesheet">
+{% endassets %}
+{% endblock %}

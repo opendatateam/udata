@@ -1,0 +1,10 @@
+{% extends "topic/display_base.html" %}
+
+{% block subnav %}{% include theme('topic/subnav.html') %}{% endblock %}
+
+{% block extra_head %}
+{{ super() }}
+{% assets "gouvfr-topic-css" %}
+<link href="{{ ASSET_URL }}" rel="stylesheet">
+{% endassets %}
+{% endblock %}
