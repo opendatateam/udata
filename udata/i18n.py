@@ -5,7 +5,7 @@ from os.path import exists, join, dirname
 
 from importlib import import_module
 
-from flask import g, request, current_app, Blueprint
+from flask import g, request, current_app, Blueprint, abort, redirect, url_for
 from flask.blueprints import BlueprintSetupState, _endpoint_from_view_func
 try:
     from flask import _app_ctx_stack as stack
@@ -101,11 +101,16 @@ def init_app(app):
 
 
 def _add_language_code(endpoint, values):
-    values.setdefault('lang_code', getattr(g, 'lang_code', current_app.config['DEFAULT_LANGUAGE']))
+    if not endpoint.endswith('_redirect'):
+        values.setdefault('lang_code', getattr(g, 'lang_code', current_app.config['DEFAULT_LANGUAGE']))
 
 
 def _pull_lang_code(endpoint, values):
-    g.lang_code = values.pop('lang_code', current_app.config['DEFAULT_LANGUAGE'])
+    default_lang = current_app.config['DEFAULT_LANGUAGE']
+    lang = values.pop('lang_code', default_lang)
+    if not lang in current_app.config['LANGUAGES']:
+        abort(redirect(url_for(endpoint, lang_code=default_lang, **values)))
+    g.lang_code = lang
 
 
 class I18nBlueprintSetupState(BlueprintSetupState):

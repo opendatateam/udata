@@ -27,8 +27,14 @@ class SearchQuery(object):
         self.adapters = adapters
         self.kwargs = kwargs
 
-        self.page = max(int(self.kwargs.get('page', 1) or 1), 1)
-        self.page_size = int(self.kwargs.get('page_size', DEFAULT_PAGE_SIZE) or DEFAULT_PAGE_SIZE)
+        try:
+            self.page = max(int(self.kwargs.get('page', 1) or 1), 1)
+        except:
+            self.page = 1
+        try:
+            self.page_size = int(self.kwargs.get('page_size', DEFAULT_PAGE_SIZE) or DEFAULT_PAGE_SIZE)
+        except:
+            self.page_size = DEFAULT_PAGE_SIZE
 
     def execute(self):
         try:

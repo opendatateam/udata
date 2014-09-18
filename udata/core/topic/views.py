@@ -20,33 +20,20 @@ class TopicSearchQuery(search.SearchQuery):
     '''
     A SearchQuery that should also match on topic tags
     '''
-    # def get_query(self):
-    #     query = super(TopicSearchQuery, self).get_query()
-    #     topic = self.kwargs['topic']
-    #     should = [{'term': {'tags': tag}} for tag in topic.tags]
-    #     if query == {'match_all': {}}:
-    #         return {'bool': {'should': should}}
-    #     else:
-    #         if not 'should' in query:
-    #             query['should'] = should
-    #         else:
-    #             query['should'].extend(should)
-    #     return query
-    #
     @property
     def topic(self):
         return self.kwargs['topic']
 
-    def initial_bool_query(self):
-        query = super(TopicSearchQuery, self).build_text_query()
-        self._update_bool_query(query, {'should': [{'term': {'tags': tag}} for tag in self.topic.tags]})
-        return query
+    # def initial_bool_query(self):
+    #     query = super(TopicSearchQuery, self).build_text_query()
+    #     self._update_bool_query(query, {'should': [{'term': {'tags': tag}} for tag in self.topic.tags]})
+    #     return query
 
-    def get_body(self):
-        body = super(TopicSearchQuery, self).get_body()
-        from flask import json
-        print json.dumps(body)
-        return body
+    # def get_body(self):
+    #     body = super(TopicSearchQuery, self).get_body()
+    #     from flask import json
+    #     print json.dumps(body)
+    #     return body
 
     def build_text_query(self):
         query = super(TopicSearchQuery, self).build_text_query()

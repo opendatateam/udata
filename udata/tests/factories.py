@@ -102,7 +102,6 @@ class SiteFactory(MongoEngineFactory):
     title = factory.LazyAttribute(lambda o: faker.name())
 
 
-
 class UserFactory(MongoEngineFactory):
     class Meta:
         model = models.User
@@ -139,8 +138,8 @@ class DatasetFactory(MongoEngineFactory):
 
 
 class VisibleDatasetFactory(DatasetFactory):
-    class Meta:
-        model = models.Dataset
+    # class Meta:
+    #     model = models.Dataset
 
     @factory.lazy_attribute
     def resources(self):
@@ -163,6 +162,13 @@ class ReuseFactory(MongoEngineFactory):
     description = factory.LazyAttribute(lambda o: faker.text())
     url = factory.LazyAttribute(lambda o: faker.url())
     type = FuzzyChoice(models.REUSE_TYPES.keys())
+
+
+class VisibleReuseFactory(ReuseFactory):
+    @factory.lazy_attribute
+    def datasets(self):
+        return [DatasetFactory()]
+
 
 
 class LicenseFactory(MongoEngineFactory):

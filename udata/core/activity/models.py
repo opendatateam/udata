@@ -68,7 +68,6 @@ class Activity(db.Document):
 
     @classmethod
     def emit(cls, related_to, organization=None, **kwargs):
-        print cls, current_user
         return cls.objects.create(
             actor=current_user._get_current_object(),
             related_to=related_to,
