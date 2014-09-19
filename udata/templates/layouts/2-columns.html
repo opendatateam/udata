@@ -1,26 +1,9 @@
 {% extends theme('base.html') %}
+{% from theme('macros/breadcrumb.html') import breadcrumb with context %}
 {% set section_class = section_class|default('default') %}
 
 {% block content %}
-{% if self.breadcrumb() %}
-<section class="breadcrumb {{ breadcrum_class }}">
-    <div class="container">
-        <ol class="breadcrumb col-md-9">
-            <li>
-                <a href="{{ url_for('site.home') }}" title="{{ _('Home') }}">
-                    <span class="glyphicon glyphicon-home"></span>
-                </a>
-            </li>
-            {% block breadcrumb %}{% endblock %}
-        </ol>
-        <div class="col-md-3 toolbar">
-            <div class="btn-toolbar pull-right" role="toolbar">
-            {% block toolbar %}{% endblock %}
-            </div>
-        </div>
-    </div>
-</section>
-{% endif %}
+{{ breadcrumb(self) }}
 
 <section class="{{ section_class }}">
     <div class="container {{ container_class }}">

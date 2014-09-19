@@ -1,7 +1,11 @@
-{% extends theme("layouts/1-column.html") %}
+{% extends theme("base.html") %}
+{% from theme('macros/breadcrumb.html') import breadcrumb with context %}
 
+{% block title %}{{ topic.name }}{% endblock %}
 
-{% block extra_sections %}
+{% block content %}
+{{ breadcrumb(self) }}
+{% block main_content %}{% endblock %}
 <section class="content topic-section related-tags-section">
     <header>
         <div class="container">
