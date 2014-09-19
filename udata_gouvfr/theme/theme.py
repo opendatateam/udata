@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from udata import search
 from udata.forms import Form, fields, validators
-from udata.frontend import theme
+from udata.frontend import theme, nav
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, Reuse, Post
 
@@ -18,6 +18,18 @@ theme.defaults({
     'home_datasets': [],
     'home_reuses': []
 })
+
+
+gouvfr_menu = nav.Bar('gouvfr_menu', [
+    nav.Item(_('How it works ?'), 'faq', url='//wiki.data.gouv.fr/wiki/FAQ'),
+    nav.Item(_('Organizations'), 'organizations.list'),
+    nav.Item(_('Open Licence'), 'license', url='//wiki.data.gouv.fr/wiki/Licence_Ouverte_/_Open_Licence'),
+    nav.Item(_('Dashboard'), 'site.dashboard'),
+    nav.Item('Etalab', 'etalab', url='http://www.etalab.gouv.fr/'),
+    nav.Item('CADA', 'cada', url='http://cada.data.gouv.fr/'),
+])
+
+theme.menu(gouvfr_menu)
 
 
 @theme.context('home')

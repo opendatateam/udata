@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-09-17 08:07+0200\n"
-"PO-Revision-Date: 2014-09-17 06:09+0000\n"
+"POT-Creation-Date: 2014-09-19 12:58+0200\n"
+"PO-Revision-Date: 2014-09-19 10:58+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/udata-gouvfr/language/es/)\n"
 "MIME-Version: 1.0\n"
@@ -108,26 +108,33 @@ msgstr "Tamaño de la pestaña"
 msgid "Home page tab size"
 msgstr "Tamaño de la página de inicio"
 
+#: udata_gouvfr/theme/theme.py:24 udata_gouvfr/theme/templates/footer.html:8
+msgid "How it works ?"
+msgstr "¿Cómo funciona?"
+
+#: udata_gouvfr/theme/theme.py:25 udata_gouvfr/theme/templates/header.html:61
+#: udata_gouvfr/theme/templates/metrics.html:43
+#: udata_gouvfr/theme/templates/organization/display.html:20
+msgid "Organizations"
+msgstr "Organizaciones"
+
+#: udata_gouvfr/theme/theme.py:26 udata_gouvfr/theme/templates/footer.html:12
+msgid "Open Licence"
+msgstr "Licencia Abierta"
+
+#: udata_gouvfr/theme/theme.py:27
+msgid "Dashboard"
+msgstr ""
+
 #: udata_gouvfr/theme/templates/footer.html:6
 msgid "The Open Data"
 msgstr "Los datos abiertos"
-
-#: udata_gouvfr/theme/templates/footer.html:8
-#: udata_gouvfr/theme/templates/header.html:24
-msgid "How it works ?"
-msgstr "¿Cómo funciona?"
 
 #: udata_gouvfr/theme/templates/footer.html:9
 msgid "Publishers"
 msgstr "Editores"
 
-#: udata_gouvfr/theme/templates/footer.html:12
-#: udata_gouvfr/theme/templates/header.html:31
-msgid "Open Licence"
-msgstr "Licencia Abierta"
-
 #: udata_gouvfr/theme/templates/footer.html:15
-#: udata_gouvfr/theme/templates/header.html:35
 #: udata_gouvfr/theme/templates/metrics.html:4
 msgid "Metrics"
 msgstr "Métricas"
@@ -165,31 +172,24 @@ msgstr "Navegador"
 msgid "Open platform for french public data"
 msgstr "Plataforma abierta para los datos públicos franceses "
 
-#: udata_gouvfr/theme/templates/header.html:27
-#: udata_gouvfr/theme/templates/header.html:75
-#: udata_gouvfr/theme/templates/metrics.html:43
-#: udata_gouvfr/theme/templates/organization/display.html:20
-msgid "Organizations"
-msgstr "Organizaciones"
-
-#: udata_gouvfr/theme/templates/header.html:71
+#: udata_gouvfr/theme/templates/header.html:57
 msgid "My profile"
 msgstr "Mi perfil"
 
-#: udata_gouvfr/theme/templates/header.html:89
+#: udata_gouvfr/theme/templates/header.html:75
 msgid "Settings"
 msgstr "Ajustes"
 
-#: udata_gouvfr/theme/templates/header.html:97
+#: udata_gouvfr/theme/templates/header.html:83
 msgid "Site administration"
 msgstr "Sitio web de la administración"
 
-#: udata_gouvfr/theme/templates/header.html:105
+#: udata_gouvfr/theme/templates/header.html:91
 msgid "Logout"
 msgstr "Cerrar sesión"
 
-#: udata_gouvfr/theme/templates/header.html:112
-#: udata_gouvfr/theme/templates/header.html:115
+#: udata_gouvfr/theme/templates/header.html:98
+#: udata_gouvfr/theme/templates/header.html:101
 msgid "Sign In / Register"
 msgstr "Conexión / Registro"
 
@@ -222,7 +222,7 @@ msgstr "Ver más"
 msgid "The blog"
 msgstr "El blog"
 
-#: udata_gouvfr/theme/templates/home.html:193
+#: udata_gouvfr/theme/templates/home.html:189
 #: udata_gouvfr/theme/templates/dataset/display.html:235
 msgid "more"
 msgstr "más"
@@ -242,14 +242,12 @@ msgstr "Datos"
 #: udata_gouvfr/theme/templates/metrics.html:23
 #: udata_gouvfr/theme/templates/dataset/display.html:20
 #: udata_gouvfr/theme/templates/organization/display.html:181
-#: udata_gouvfr/theme/templates/topic/display.html:19
 msgid "Datasets"
 msgstr "Conjunto de datos"
 
 #: udata_gouvfr/theme/templates/metrics.html:28
 #: udata_gouvfr/theme/templates/dataset/display.html:502
 #: udata_gouvfr/theme/templates/organization/display.html:186
-#: udata_gouvfr/theme/templates/topic/display.html:25
 msgid "Reuses"
 msgstr "Reutilizaciones"
 
@@ -281,6 +279,8 @@ msgstr "Comparta, mejore y reutilice datos públicos"
 #: udata_gouvfr/theme/templates/subnav-large.html:44
 #: udata_gouvfr/theme/templates/subnav-small.html:40
 #: udata_gouvfr/theme/templates/subnav-small.html:43
+#: udata_gouvfr/theme/templates/topic/subnav.html:49
+#: udata_gouvfr/theme/templates/topic/subnav.html:52
 msgid "Contribute !"
 msgstr "¡Contribuya!"
 
@@ -685,22 +685,3 @@ msgstr "Crear una organización"
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:57
 msgid "You can create a new organization if yours doesn't exists yet."
 msgstr "Usted puede crear una nueva organización si la suya no existe aun. "
-
-#: udata_gouvfr/theme/templates/topic/display.html:44
-#: udata_gouvfr/theme/templates/topic/display.html:64
-#, python-format
-msgid "See the %(total)s results"
-msgstr "Ver los resultados %(total)s "
-
-#: udata_gouvfr/theme/templates/topic/display.html:49
-#: udata_gouvfr/theme/templates/topic/display.html:69
-msgid "No results found"
-msgstr "Ningún resultado encontrado"
-
-#: udata_gouvfr/theme/templates/topic/display.html:83
-msgid "Related tags"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/topic/subnav.html:46
-msgid "Read more"
-msgstr "Leer más"
