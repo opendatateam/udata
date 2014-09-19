@@ -1,17 +1,18 @@
 define([
     'jquery',
+    'api',
     'logger',
     'class',
     'hbs!templates/map/coverage-popup',
     'leaflet',
     'spin',
     'leaflet.spin'
-], function($, log, Class, popupTpl, L, Spinner) {
+], function($, API, log, Class, popupTpl, L, Spinner) {
     'use strict';
 
     var DEFAULTS = {
-            levels_url: '/api/references/spatial/levels/',
-            coverage_url: '/api/spatial/coverage/{level}/',
+            levels_url: '/references/spatial/levels/',
+            coverage_url: '/spatial/coverage/{level}/',
             style: {
                 clickable: true,
                 weight: 0.5,
@@ -54,7 +55,7 @@ define([
             log.debug('Loading coverage map');
             this.map = L.map(this.$el[0]);
             this.map.spin(true);
-            $.get(this.opts.levels_url, $.proxy(this.on_levels_loaded, this));
+            API.get(this.opts.levels_url, $.proxy(this.on_levels_loaded, this));
         },
 
         on_levels_loaded: function(data) {
@@ -118,7 +119,7 @@ define([
             }
 
             if (!level.layer.loaded) {
-                $.get(level.data_url, $.proxy(function(data) {
+                API.get(level.data_url, $.proxy(function(data) {
                     level.layer.loaded = true;
                     this.layer.addData(data);
                     this.data_loaded();

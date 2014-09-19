@@ -22,20 +22,13 @@ define(['jquery', 'form/widgets'], function($) {
             },
             load: function(query, callback) {
                 if (!query.length) return callback();
-                $.ajax({
-                    url: '/api/suggest/tags',
-                    type: 'GET',
-                    dataType: 'json',
-                    data: {
-                        q: query,
-                        size: 10
-                    },
-                    error: function() {
-                        callback();
-                    },
-                    success: function(data) {
-                        callback(data);
-                    }
+                API.get('/suggest/tags', {
+                    q: query,
+                    size: 10
+                }, function(data) {
+                    callback(data);
+                }).fail(function() {
+                    callback();
                 });
             }
         });

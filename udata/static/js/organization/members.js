@@ -3,6 +3,7 @@
  */
 define([
     'jquery',
+    'api',
     'notify',
     'auth',
     'i18n',
@@ -11,7 +12,7 @@ define([
     'hbs!templates/organization/add-member-modal',
     'hbs!templates/organization/remove-member-modal',
     'form/widgets',
-], function($, Notify, Auth, i18n, modal, row_tpl, add_modal_tpl, remove_modal_tpl) {
+], function($, API, Notify, Auth, i18n, modal, row_tpl, add_modal_tpl, remove_modal_tpl) {
     "use strict";
 
     var msg_container = 'section.form .container',
@@ -124,20 +125,13 @@ define([
             searchField: ['fullname'],
             load: function(query, callback) {
                 if (!query.length) return callback();
-                $.ajax({
-                    url: '/api/suggest/users',
-                    type: 'GET',
-                    dataType: 'json',
-                    data: {
-                        q: query,
-                        size: 10
-                    },
-                    error: function() {
-                        callback();
-                    },
-                    success: function(data) {
-                        callback(data);
-                    }
+                API.get('/suggest/users', {
+                    q: query,
+                    size: 10
+                }, function(data) {
+                    callback(data);
+                }).fail(function() {
+                    callback();
                 });
             },
             render: {

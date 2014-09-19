@@ -4,12 +4,35 @@
 define(['jquery'], function($) {
     'use strict';
 
+    var API_ROOT = $('link[rel=api-root]').attr('href');
+
+    if (API_ROOT[API_ROOT.length - 1] == '/') {
+        // Remove trailing slash
+        API_ROOT = API_ROOT.substr(0, API_ROOT.length - 1);
+    }
+
+    function build_url(url) {
+        var path = url[0] === '/' ? url: '/' + url,
+            api_url;
+
+        if (API_ROOT == path.substring(0, API_ROOT.length)) {
+            api_url = path;
+        } else {
+            api_url = API_ROOT + path;
+        }
+        return api_url;
+    }
+
     function call(method, url, data, callback) {
+        if (method.toLowerCase() != 'get') {
+            data = JSON.stringify(data||{});
+        }
+
         return $.ajax({
             type: method,
-            url: url,
+            url: build_url(url),
             contentType: 'application/json',
-            data: JSON.stringify(data||{}),
+            data: data,
             dataType: 'json',
             success: callback
         });
@@ -35,7 +58,15 @@ define(['jquery'], function($) {
     }
 
     var API = {
-        get: $.get,
+        root: API_ROOT,
+        build_url: build_url,
+        get: function(url, data, callback) {
+            if (callback) {
+                return call('get', url, data, callback);
+            } else {
+                return call('get', url, null, data);
+            }
+        },
         post: function(url, data, callback) {
             return call('post', url, data, callback);
         },

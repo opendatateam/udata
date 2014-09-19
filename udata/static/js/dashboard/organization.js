@@ -1,5 +1,6 @@
 define([
     'jquery',
+    'api',
     'logger',
     'moment',
     'chart/bar',
@@ -7,19 +8,19 @@ define([
     'chart/timeserie',
     'chart/radar',
     'widgets/follow-btn'
-], function($, log, moment, BarChart, LineChart, TimeSerie, RadarChart) {
+], function($, API, log, moment, BarChart, LineChart, TimeSerie, RadarChart) {
     'use strict';
 
     var today = moment(),
         last_week = moment().subtract(10, 'days'),
         org_id = $('[data-organization-id]').data('organization-id'),
-        url = '/api/metrics/' + org_id;
+        url = '/metrics/' + org_id;
 
     url += '?' + $.param({start: last_week.format('YYYY-MM-DD'), end: today.format('YYYY-MM-DD')});
 
     function load_metrics() {
         log.debug('Fetching metrics');
-        $.get(url, function(data) {
+        API.get(url, function(data) {
             log.debug('Metrics fetched:', data);
 
             $('[data-chart-type="line"]').each(function() {

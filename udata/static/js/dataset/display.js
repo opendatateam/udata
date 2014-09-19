@@ -60,7 +60,7 @@ define([
 
     function fetch_reuses() {
         if (Auth.user) {
-            API.get('/api/me/reuses/', function(data) {
+            API.get('/me/reuses/', function(data) {
                 user_reuses = data;
             });
         }

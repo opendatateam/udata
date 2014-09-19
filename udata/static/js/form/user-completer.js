@@ -16,20 +16,13 @@ define(['jquery', 'form/widgets'], function($) {
             plugins: ['remove_button'],
             load: function(query, callback) {
                 if (!query.length) return callback();
-                $.ajax({
-                    url: '/api/suggest/users',
-                    type: 'GET',
-                    dataType: 'json',
-                    data: {
-                        q: query,
-                        size: 10
-                    },
-                    error: function() {
-                        callback();
-                    },
-                    success: function(data) {
-                        callback(data);
-                    }
+                API.get('/suggest/users', {
+                    q: query,
+                    size: 10
+                }, function(data) {
+                    callback(data);
+                }).fail(function() {
+                    callback();
                 });
             },
             render: {

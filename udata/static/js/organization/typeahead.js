@@ -2,12 +2,13 @@
  * Typeahead.js/Bloodhound completion definition for organizations
  */
 define([
+    'api',
     'bloodhound',
     'hbs!templates/search/header',
     'hbs!templates/search/suggestion',
     'i18n',
     'logger'
-], function(Bloodhound, header, suggestion, i18n, log) {
+], function(API, Bloodhound, header, suggestion, i18n, log) {
     var MAX = 2,
         engine = new Bloodhound({
             name: 'organizations',
@@ -17,7 +18,7 @@ define([
                 return Bloodhound.tokenizers.whitespace(d.name);
             },
             remote: {
-                url: '/api/suggest/organizations?q=%QUERY&size='+MAX
+                url: API.build_url('/suggest/organizations') + '?q=%QUERY&size='+MAX
             }
         });
 

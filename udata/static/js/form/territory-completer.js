@@ -1,7 +1,7 @@
 /**
  * User autocompleter
  */
-define(['jquery', 'form/widgets'], function($) {
+define(['jquery', 'api', 'form/widgets'], function($, API) {
     'use strict';
 
     $('.territory-completer').each(function() {
@@ -16,26 +16,19 @@ define(['jquery', 'form/widgets'], function($) {
             plugins: ['remove_button'],
             load: function(query, callback) {
                 if (!query.length) return callback();
-                $.ajax({
-                    url: '/api/suggest/territories',
-                    type: 'GET',
-                    dataType: 'json',
-                    data: {
-                        q: query,
-                        size: 10
-                    },
-                    error: function() {
-                        callback();
-                    },
-                    success: function(data) {
-                        data = $.map(data, function(item) {
-                            item.keys = $.map(item.keys, function(value, key) {
-                                return value;
-                            });
-                            return item
+                API.get('/suggest/territories', {
+                    q: query,
+                    size: 10
+                }, function(data) {
+                    data = $.map(data, function(item) {
+                        item.keys = $.map(item.keys, function(value, key) {
+                            return value;
                         });
-                        callback(data);
-                    }
+                        return item
+                    });
+                    callback(data);
+                }).fail(function() {
+                    callback();
                 });
             }
         });

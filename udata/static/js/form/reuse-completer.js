@@ -23,20 +23,13 @@ define([
             plugins: ['remove_button'],
             load: function(query, callback) {
                 if (!query.length) return callback();
-                $.ajax({
-                    url: '/api/suggest/reuses',
-                    type: 'GET',
-                    dataType: 'json',
-                    data: {
-                        q: query,
-                        size: 10
-                    },
-                    error: function() {
-                        callback();
-                    },
-                    success: function(data) {
-                        callback(data);
-                    }
+                API.get('/suggest/reuses', {
+                    q: query,
+                    size: 10
+                }, function(data) {
+                    callback(data);
+                }).fail(function() {
+                    callback();
                 });
             },
             render: {
@@ -44,7 +37,7 @@ define([
                     return itemTpl(data);
                 },
                 item: function(data, escape) {
-                    var reuse = API.sync.get('/api/reuses/' + data.id);
+                    var reuse = API.sync.get('/reuses/' + data.id);
                     return '<div class="card-input">'+cardTpl(reuse)+'</div>';
                 }
             }

@@ -3,12 +3,13 @@
  */
 define([
     'jquery',
+    'api',
     'bloodhound',
     'hbs!templates/search/header',
     'hbs!templates/search/suggestion',
     'i18n',
     'logger'
-], function($, Bloodhound, header, suggestion, i18n, log) {
+], function($, API, Bloodhound, header, suggestion, i18n, log) {
     var MAX = 6,
         engine = new Bloodhound({
             name: 'datasets',
@@ -18,7 +19,7 @@ define([
                 return Bloodhound.tokenizers.whitespace(d.name);
             },
             remote: {
-                url: '/api/suggest/datasets?q=%QUERY&size='+MAX,
+                url: API.build_url('/suggest/datasets') + '?q=%QUERY&size='+MAX,
                 // Keep until model is uniformised
                 filter: function(response) {
                     return $.map(response, function(row, idx) {

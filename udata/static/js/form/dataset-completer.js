@@ -23,20 +23,13 @@ define([
             plugins: ['remove_button'],
             load: function(query, callback) {
                 if (!query.length) return callback();
-                $.ajax({
-                    url: '/api/suggest/datasets',
-                    type: 'GET',
-                    dataType: 'json',
-                    data: {
-                        q: query,
-                        size: 10
-                    },
-                    error: function() {
-                        callback();
-                    },
-                    success: function(data) {
-                        callback(data);
-                    }
+                API.get('/suggest/datasets', {
+                    q: query,
+                    size: 10
+                }, function(data) {
+                    callback(data);
+                }).fail(function() {
+                    callback();
                 });
             },
             render: {
@@ -44,7 +37,7 @@ define([
                     return itemTpl(data);
                 },
                 item: function(data, escape) {
-                    var dataset = API.sync.get('/api/datasets/' + data.id);
+                    var dataset = API.sync.get('/datasets/' + data.id);
                     return '<div class="card-input">'+cardTpl(dataset)+'</div>';
                 }
             }

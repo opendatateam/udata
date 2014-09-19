@@ -66,9 +66,9 @@ class UDataApi(Api):
         return redirect(url_for('apii18n.apidoc'))
 
 
-api = UDataApi(prefix='/api', decorators=[csrf.exempt],
+api = UDataApi(prefix='/api/1', decorators=[csrf.exempt],
     version='1.0', title='uData API',
-    description='Bla bla bla', default='site', default_label='Site global namespace'
+    description='uData API', default='site', default_label='Site global namespace'
 )
 
 
@@ -78,6 +78,11 @@ def output_json(data, code, headers=None):
     resp = make_response(json.dumps(data), code)
     resp.headers.extend(headers or {})
     return resp
+
+
+@bp.route('/api/')
+def default_api():
+    return redirect(url_for('apii18n.apidoc'))
 
 
 @bp.route('/apidoc/')
