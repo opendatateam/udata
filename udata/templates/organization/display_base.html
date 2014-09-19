@@ -67,7 +67,6 @@
                         </strong>
                     </p>
                     {% endif %}
-                    {% if activities %}
                     <p class="text-center">
                         <strong>
                             <a href="{{url_for('organizations.dashboard', org=org)}}">
@@ -75,7 +74,6 @@
                             </a>
                         </strong>
                     </p>
-                    {% endif %}
                 </div>
                 {% set member = org.member(current_user) %}
                 {% if not member %}
