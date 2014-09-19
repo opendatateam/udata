@@ -109,8 +109,12 @@ def _pull_lang_code(endpoint, values):
     default_lang = current_app.config['DEFAULT_LANGUAGE']
     lang = values.pop('lang_code', default_lang)
     if not lang in current_app.config['LANGUAGES']:
-        abort(redirect(url_for(endpoint, lang_code=default_lang, **values)))
+        try:
+            abort(redirect(url_for(endpoint, lang_code=default_lang, **values)))
+        except:
+            abort(redirect(request.url.replace('/{0}/'.format(lang), '/{0}/'.format(default_lang)) ))
     g.lang_code = lang
+    refresh()
 
 
 class I18nBlueprintSetupState(BlueprintSetupState):

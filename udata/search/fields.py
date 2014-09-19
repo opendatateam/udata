@@ -104,7 +104,7 @@ class BoolFacet(Facet):
         return data
 
     def labelize(self, label, value):
-        return ': '.join([label, str(_('yes') if to_bool(value) else _('no'))])
+        return ': '.join([label, unicode(_('yes') if to_bool(value) else _('no'))])
 
 
 class TermFacet(Facet):

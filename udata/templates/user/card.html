@@ -13,7 +13,7 @@
     </div>
 
     <footer>
-        <ul class="col-xs-9 col-sm-10">
+        <ul>
             {% if user.metrics.datasets %}
             <li>
                 <a href class="btn btn-xs" rel="tooltip" data-placement="top"
@@ -32,8 +32,6 @@
                 </a>
             </li>
             {% endif %}
-        </ul>
-        <ul class="col-xs-3 col-sm-2 corner">
             <li>
                 <a href class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Stars') }}">

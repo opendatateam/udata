@@ -7,7 +7,9 @@
         {% else %}
             {% set current_sort, current_order = request.args.sort, 'asc' %}
         {% endif %}
-        {% set label, default_order = kwargs[current_sort] %}
+        {% if current_sort in kwargs %}
+            {% set label, default_order = kwargs[current_sort] %}
+        {% endif %}
     {% endif %}
 {% endif %}
 <span class="text">{{ _('Sort by') }}</span>
@@ -32,7 +34,7 @@
         {% endfor %}
     </ul>
 </div>
-{% if current_sort %}
+{% if current_sort and current_order and default_order %}
     {% set btn_class = 'btn-default' if current_order == default_order else 'btn-warning' %}
     <a class="btn {{ btn_class }} btn-xs"
         href="{{ to_url(url=url, replace=True, sort=current_sort if current_order == 'desc' else '-'+current_sort) }}"

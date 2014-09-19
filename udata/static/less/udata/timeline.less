@@ -14,10 +14,7 @@ ul.timeline {
         margin-left: -1.5px;
     }
 
-    .timeline-header {
-        margin-top: -40px;
-        margin-bottom: 20px;
-
+    .timeline-header, .timeline-expander {
         .timeline-badge {
             color: @gray-light;
             background-color: @gray-lighter;
@@ -33,9 +30,19 @@ ul.timeline {
             margin-left: -11px;
 
             span {
-                padding-top: 1px
+                margin: 1px 0 0 -1.5px;
             }
         }
+    }
+
+    .timeline-header {
+        margin-top: -40px;
+        margin-bottom: 20px;
+    }
+
+    .timeline-expander {
+        margin-top: 0;
+        margin-bottom: 0;
     }
 
     & > li {
@@ -93,6 +100,7 @@ ul.timeline {
         & > .timeline-panel {
             width: 40%;
             float: left;
+            background-color: white;
             border: 1px solid #d4d4d4;
             border-radius: 2px;
             padding: 15px;
@@ -103,7 +111,7 @@ ul.timeline {
             &:before {
                 position: absolute;
                 top: 26px;
-                right: -15px;
+                right: -14px;
                 display: inline-block;
                 border-top: 15px solid transparent;
                 border-left: 15px solid #ccc;
@@ -115,7 +123,7 @@ ul.timeline {
             &:after {
                 position: absolute;
                 top: 27px;
-                right: -14px;
+                right: -13px;
                 display: inline-block;
                 border-top: 14px solid transparent;
                 border-left: 14px solid #fff;
@@ -180,14 +188,14 @@ ul.timeline {
                 &:before {
                     border-left-width: 0;
                     border-right-width: 15px;
-                    left: -15px;
+                    left: -14px;
                     right: auto;
                 }
 
                 &:after {
                     border-left-width: 0;
                     border-right-width: 14px;
-                    left: -14px;
+                    left: -13px;
                     right: auto;
                 }
             }

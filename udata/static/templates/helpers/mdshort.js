@@ -1,9 +1,13 @@
 define(['hbs/handlebars', 'marked'], function(Handlebars, marked) {
 
-    var EXCERPT_TOKEN = '<!--- excerpt -->',
+    var EXCERPT_TOKEN = '<!--- --- -->',
         DEFAULT_LENGTH = 128;
 
     Handlebars.registerHelper('mdshort', function(value, length) {
+        if (!value) {
+            return;
+        }
+
         var text, ellipsis;
         if (value.indexOf('<!--- excerpt -->')) {
             value = value.split(EXCERPT_TOKEN, 1)[0];

@@ -24,32 +24,10 @@ class TopicSearchQuery(search.SearchQuery):
     def topic(self):
         return self.kwargs['topic']
 
-    # def initial_bool_query(self):
-    #     query = super(TopicSearchQuery, self).build_text_query()
-    #     self._update_bool_query(query, {'should': [{'term': {'tags': tag}} for tag in self.topic.tags]})
-    #     return query
-
-    # def get_body(self):
-    #     body = super(TopicSearchQuery, self).get_body()
-    #     from flask import json
-    #     print json.dumps(body)
-    #     return body
-
     def build_text_query(self):
         query = super(TopicSearchQuery, self).build_text_query()
         self._update_bool_query(query, {'should': [{'term': {'tags': tag}} for tag in self.topic.tags]})
         return query
-
-    # def build_facet_queries(self):
-    #     query = super(TopicSearchQuery, self).build_facet_queries()
-    #     self._update_bool_query(query, {'should': [{'term': {'tags': tag}} for tag in self.topic.tags]})
-    #     return query
-
-    # def _bool_query(self):
-    #     query = super(TopicSearchQuery, self)._bool_query()
-    #     print query
-    #     topic = self.kwargs['topic']
-    #     query['should'].extend([{'term': {'tags': tag}} for tag in topic.tags])
 
 
 @blueprint.route('/<topic:topic>/')

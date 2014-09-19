@@ -91,6 +91,13 @@ def metrics():
     )
 
 
+@blueprint.route('/dashboard/')
+def dashboard():
+    return render('site/dashboard.html',
+        activities=Activity.objects.order_by('-created_at')[:10]
+    )
+
+
 @blueprint.route('/map/')
 def map():
     return render('site/map.html')
