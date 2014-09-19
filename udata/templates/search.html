@@ -2,7 +2,6 @@
 {% import theme('macros/search.html') as s %}
 
 {% set body_class = 'multisearch' %}
-{% set container_class = 'push-up' %}
 {% set toolbar_class = '' %}
 
 {% set meta = {
@@ -16,11 +15,35 @@
 {% set organizations_search_url = url_for('organizations.list') %}
 {% set users_search_url = url_for('users.list') %}
 
-{% block breadcrumb %}
+{% block breadcrumb_bar %}
+<!-- Nav tabs -->
+<ul class="nav nav-tabs search-tabs">
     <li class="active">
-        {{ _('Search') }}
-        <div class="label-list">{{ s.filter_label('tag', _('Tag'), ficon('tag')) }}</div>
+        <a href="#datasets" data-toggle="tab">
+            {{ _('Datasets')}}
+            <span class="badge">{{ datasets.total }}</span>
+        </a>
     </li>
+    <li>
+        <a href="#reuses" data-toggle="tab">
+            {{ _('Reuses') }}
+            <span class="badge">{{ reuses.total }}</span>
+        </a>
+    </li>
+    <li>
+        <a href="#organizations" data-toggle="tab">
+            {{ _('Organizations') }}
+            <span class="badge">{{ organizations.total }}</span>
+        </a>
+    </li>
+    <li>
+        <a href="#users" data-toggle="tab">
+            {{ _('Users') }}
+            <span class="badge">{{ users.total }}</span>
+        </a>
+    </li>
+</ul>
+<div class="label-list">{{ s.filter_label('tag', _('Tag'), ficon('tag')) }}</div>
 {% endblock %}
 
 {% block toolbar_container %}
@@ -62,34 +85,6 @@
 {% endblock %}
 
 {% block main_content %}
-<!-- Nav tabs -->
-<ul class="nav nav-tabs search-tabs">
-    <li class="active">
-        <a href="#datasets" data-toggle="tab">
-            {{ _('Datasets')}}
-            <span class="badge">{{ datasets.total }}</span>
-        </a>
-    </li>
-    <li>
-        <a href="#reuses" data-toggle="tab">
-            {{ _('Reuses') }}
-            <span class="badge">{{ reuses.total }}</span>
-        </a>
-    </li>
-    <li>
-        <a href="#organizations" data-toggle="tab">
-            {{ _('Organizations') }}
-            <span class="badge">{{ organizations.total }}</span>
-        </a>
-    </li>
-    <li>
-        <a href="#users" data-toggle="tab">
-            {{ _('Users') }}
-            <span class="badge">{{ users.total }}</span>
-        </a>
-    </li>
-</ul>
-
 <div class="tab-content">
 
     <div class="tab-pane row active" id="datasets">

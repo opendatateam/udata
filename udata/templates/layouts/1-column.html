@@ -3,19 +3,23 @@
 {% set toolbar_class = toolbar_class|default('') %}
 
 {% block content %}
-{% if self.breadcrumb() %}
-<section class="breadcrumb {{ breadcrum_class }}">
+{% if self.breadcrumb() or self.breadcrumb_bar() %}
+<section class="breadcrumb-bar {{ breadcrum_class }}">
     <div class="container">
+        {% if self.breadcrumb_bar() %}
+        <div class="left-bar col-md-8 col-lg-9">
+            {% block breadcrumb_bar %}{% endblock %}
+        </div>
+        {% elif self.breadcrumb() %}
         <ol class="breadcrumb col-md-8 col-lg-9">
-            {% block breadcrumb_replace %}
             <li>
                 <a href="{{ url_for('site.home') }}" title="{{ _('Home') }}">
                     <span class="glyphicon glyphicon-home"></span>
                 </a>
             </li>
             {% block breadcrumb %}{% endblock %}
-            {% endblock breadcrumb_replace %}
         </ol>
+        {% endif %}
         <div class="col-md-4 col-lg-3 toolbar">
             {% block toolbar_container %}
                 <div class="btn-toolbar {{ toolbar_class }}" role="toolbar">
