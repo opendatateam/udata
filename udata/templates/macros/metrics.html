@@ -1,0 +1,20 @@
+{% macro metric_widgets(rows, size='col-md-4') %}
+{% for row in rows %}
+<div>
+    <h2>{{ row.title }}</h2>
+    <ul class="chart-list row">
+        {% for widget in row.widgets %}
+        <li class="{{size}}">
+            <a {% if widget.endpoint %}
+                href="{{ url_for(widget.endpoint, **(widget.args or {})) }}"
+                {% endif %}
+                data-chart-type="{{ widget.type }}"
+                data-chart-data="{{ widget.metric }}">
+                {{ widget.title }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endfor %}
+{% endmacro %}

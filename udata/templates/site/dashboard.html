@@ -1,5 +1,6 @@
 {% extends theme("base.html") %}
 {% from theme('macros/timeline.html') import timeline with context %}
+{% from theme('macros/metrics.html') import metric_widgets %}
 
 {% set meta = {
     'title': _('Dashboard'),
@@ -14,24 +15,7 @@
 {% block content %}
 <section class='metrics'>
     <div class="container">
-        {% for row in metrics %}
-        <article>
-            <h2>{{ row.title }}</h2>
-            <ul class="chart-list row">
-                {% for widget in row.widgets %}
-                <li class="col-md-4">
-                    <a {% if widget.endpoint %}
-                        href="{{ url_for(widget.endpoint, **(widget.args or {})) }}"
-                        {% endif %}
-                        data-chart-type="{{ widget.type }}"
-                        data-chart-data="{{ widget.metric }}">
-                        {{ widget.title }}
-                    </a>
-                </li>
-                {% endfor %}
-            </ul>
-        </article>
-        {% endfor %}
+        {{ metric_widgets(metrics) }}
     </div>
 </section>
 
@@ -52,6 +36,4 @@
         </div>
     </div>
 </section>
-
-
 {% endblock %}
