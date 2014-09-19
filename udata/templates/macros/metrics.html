@@ -1,7 +1,7 @@
 {% macro metric_widgets(rows, size='col-md-4') %}
 {% for row in rows %}
 <div>
-    <h2>{{ row.title }}</h2>
+    {% if row.title %}<h2>{{ row.title }}</h2>{% endif %}
     <ul class="chart-list row">
         {% for widget in row.widgets %}
         <li class="{{size}}">

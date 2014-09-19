@@ -98,6 +98,11 @@
                 'app'
             ],
         }, {
+            name: 'dashboard/organization',
+            exclude: [
+                'app'
+            ],
+        }, {
             name: 'reuse/form',
             exclude: [
                 'app',

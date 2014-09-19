@@ -46,6 +46,7 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
         orgRequests: {path: i18n('/organizations/:slug_or_id/edit/requests/'), moduleId: 'organization/membership-requests'},
         orgEditExtras: {path: i18n('/organizations/:slug_or_id/edit/extras/'), moduleId: 'form/extras'},
         orgIssues: {path: i18n('/organizations/:slug_or_id/issues/'), moduleId: 'issue/list'},
+        orgDashboard: {path: i18n('/organizations/:slug_or_id/dashboard/'), moduleId: 'dashboard/organization'},
 
         // Reuses routes
         reuseSearch: {path: i18n('/reuses/'), moduleId: 'search'},

@@ -1,5 +1,4 @@
-{% extends theme('layouts/1-column.html') %}
-{% from theme('macros/follow.html') import follow_btn with context %}
+{% extends theme("organization/display_base.html") %}
 
 {% set meta = {
     'title': org.name,
@@ -7,122 +6,155 @@
     'keywords': [_('organization')],
 } %}
 
-
-{% block extra_head %}
-<link rel="canonical" href="{{ url_for('organizations.show', org=org) }}" />
-{% endblock %}
-
 {% block breadcrumb %}
-    <li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
+    {{ super() }}
     <li class="active">{{ org.name }}</li>
 {% endblock %}
 
-{% block toolbar %}
-{% if can_edit %}
-<div class="btn-group btn-group-xs">
-    <a href="{{ url_for('organizations.edit', org=org) }}" class="btn btn-success">
-        <span class="glyphicon glyphicon-pencil"></span>
-        {{ _('Edit') }}
-    </a>
+{% block main_content %}
+<h1>
+    {{ org.name }}
+    {% if can_edit %}
+    <small>
+        <a class="btn btn-xs btn-default"
+            href="{{ url_for('organizations.edit', org=org) }}">
+            <span class="glyphicon glyphicon-edit" ></span>
+            {{ _('Edit') }}
+        </a>
+    </small>
+    {% endif %}
+</h1>
+
+<div class="row">
+    <p class="col-md-12">
+        {% if org.deleted %}
+        <small class="deleted" rel="popover"
+            data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
+            data-content="{{ _('This organization has been deleted. This will be permanent in the next 24 hours') }}"
+            >{{ _('Deleted') }}</small>
+        {% endif %}
+    </p>
 </div>
-{% endif %}
-<div class="btn-group btn-group-xs">
-    {{ follow_btn(org) }}
-</div>
+<div>{{ org.description|markdown }}</div>
 {% endblock %}
 
-{% block main_content %}
-<h2>{{ org.name }}</h2>
+{% block secondary_content %}
+{# Datasets and reuses tabs #}
+{% set dataset_tabs = (
+    ('datasets', _('Datasets'), datasets, {'organization': org.id|string}),
+    ('supplied-datasets', _('Supplied datasets'), supplied_datasets, {'supplier': org.id|string}),
+    ('private-datasets', _('Private datasets'), private_datasets, {}),
+) %}
+{% set reuse_tabs = (
+    ('reuses', _('Reuses'), reuses, {'organization': org.id|string}),
+    ('private-reuses', _('Private reuses'), private_reuses, {}),
+) %}
+{% set user_tabs = (
+    ('members', _('Members'), org.members, {}),
+    ('followers', _('Followers'), followers, {}),
+) %}
+{% set actived = False %}
+
 <div class="row">
-    <div class="col-md-3">
-        <img src="{{ org.image_url or static('/base/images/placeholder-organization.png') }}"
-            alt="{{ org.title }}" class="scalable img-responsive" />
+    <div class="col-xs-12">
+        <ul class="nav nav-pills" data-tabs="tabs">
+            {% for tab_id, label, content, kwargs in (dataset_tabs + reuse_tabs + user_tabs) %}
+            {% if content %}
+            <li {% if not actived %}class="active"{% set actived = True %}{% endif %}>
+                <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
     </div>
-    <div class="col-md-9">{{ org.description|markdown }}</div>
 </div>
+<div class="row">
+    <div class="tab-content">
+        {% set actived = False %}
 
-<div>
-    <ul class="nav nav-tabs">{% set actived = False %}
+        {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
         {% if datasets %}
-        <li class="active">{% set actived = True %}
-            <a href="#datasets" data-toggle="tab">{{ _('Datasets') }}</a>
-        </li>
-        {% endif %}
-        {% if supplied_datasets %}
-        <li {% if not actived %}class="active"{% set actived = True %}{% endif %}>
-            <a href="#supplied-datasets" data-toggle="tab">{{ _('Supplied datasets') }}</a>
-        </li>
-        {% endif %}
-        {% if reuses %}
-        <li {% if not actived %}class="active"{% set actived = True %}{% endif %}>
-            <a href="#reuses" data-toggle="tab">{{ _('Reuses') }}</a>
-        </li>
-        {% endif %}
-    </ul>
-
-    <!-- Tab panes -->
-    {% set max_per_tab = 12 %}
-    <div class="tab-content">{% set actived = False %}
-        {% if datasets %}
-        <div id="datasets" class="tab-pane {% if not actived %}active{% set actived=True %}{% endif %}">
+        <div id="{{tab_id}}"
+            class="tab-pane {% if not actived %}active{% set actived=True %}{% endif %}">
             <ul class="card-list">
-                {% for dataset in datasets[:max_per_tab] %}
-                <li class="col-md-4 col-sm-6">{% include theme('dataset/card.html') %}</li>
+
+                {% for dataset in datasets %}
+                <li class="col-md-4 col-sm-6">
+                    {% include theme('dataset/card.html') %}
+                </li>
                 {% endfor %}
+
             </ul>
-            {% if datasets|length > max_per_tab %}
+            {% if datasets.total > datasets|length %}
             <div class="clearfix"></div>
-            <div class="text-center">
-                <a href="{{ url_for('datasets.list', organization=org.id) }}" class="btn btn-default">
+            <p class="text-center">
+                <a class="btn btn-default"
+                    href="{{ url_for('datasets.list', sort='-created', **kwargs) }}">
                     <span class="glyphicon glyphicon-list" ></span>
-                    {{ _('See all') }}
+                    {{ _('See the %(nb)s datasets', nb=datasets.total) }}
                 </a>
-                <a href="{{ url_for('organizations.datasets_csv', org=org) }}" class="btn btn-default">
+                <a class="btn btn-default"
+                    href="{{ url_for('organizations.{0}_csv'.format(tab_id.replace('-', '_')), org=org) }}">
                     <span class="fa fa-file-o" ></span>
                     {{ _('Download as CSV') }}
                 </a>
-            </div>
+            </p>
             {% endif %}
         </div>
         {% endif %}
-        {% if supplied_datasets %}
-        <div id="supplied-datasets" class="tab-pane {% if not actived %}active{% set actived=True %}{% endif %}">
-            <ul class="card-list">
-                {% for dataset in supplied_datasets[:max_per_tab] %}
-                <li class="col-md-4 col-sm-6">{% include theme('dataset/card.html') %}</li>
-                {% endfor %}
-            </ul>
-            {% if supplied_datasets|length > max_per_tab %}
-            <div class="clearfix"></div>
-            <div class="text-center">
-                <a href="{{ url_for('datasets.list', supplier=org.id) }}" class="btn btn-default">
-                    {{ _('See all') }}
-                </a>
-                <a href="{{ url_for('organizations.supplied_datasets_csv', org=org) }}" class="btn btn-default">
-                    <span class="fa fa-file-o" ></span>
-                    {{ _('Download as CSV') }}
-                </a>
-            </div>
-            {% endif %}
-        </div>
-        {% endif %}
+        {% endfor %}
+
+        {% for tab_id, label, reuses, kwargs in reuse_tabs  %}
         {% if reuses %}
-        <div id="reuses" class="tab-pane {% if not actived %}active{% set actived=True %}{% endif %}">
+        <div id="{{tab_id}}"
+            class="tab-pane">
             <ul class="card-list">
-                {% for reuse in reuses[:max_per_tab] %}
-                <li class="col-md-4 col-sm-6">{% include theme('reuse/card.html') %}</li>
+
+                {% for reuse in reuses %}
+                <li class="col-md-4 col-sm-6">
+                    {% include theme('reuse/card.html') %}
+                </li>
                 {% endfor %}
+
             </ul>
-            {% if reuses|length > max_per_tab %}
+            {% if reuses.total > reuses|length %}
             <div class="clearfix"></div>
-            <div class="text-center">
-                <a href="{{ url_for('reuses.list', organization=org.id) }}" class="btn btn-default">
-                    {{ _('See all') }}
+            <p class="text-center">
+                <a class="btn btn-default"
+                    href="{{ url_for('reuses.list', sort='-created', **kwargs) }}">
+                    <span class="glyphicon glyphicon-list" ></span>
+                    {{ _('See the %(nb)s reuses', nb=reuses.total) }}
                 </a>
-            </div>
+            </p>
             {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        {% if org.members %}
+        <div id="members" class="tab-pane">
+            <div class="row card-list">
+                {% for member in org.members %}
+                <div class="col-md-4">
+                    {% include theme('organization/member-card.html') %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if followers %}
+        <div id="followers" class="tab-pane">
+            <div class="row card-list">
+                {% for follow in followers %}
+                <div class="col-md-4">
+                  {% include theme('follow/follower-card.html') %}
+                </div>
+                {% endfor %}
+            </div>
         </div>
         {% endif %}
     </div>
 </div>
+{# end tabs #}
 {% endblock %}

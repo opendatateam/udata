@@ -1,10 +1,8 @@
 {% extends theme("layouts/1-column.html") %}
-{% from theme('macros/paginator.html') import paginator with context %}
 {% from theme('macros/follow.html') import follow_btn with context %}
 
 {% block breadcrumb %}
     <li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
-    <li class="active">{{ org.name }}</li>
 {% endblock %}
 
 {% block content %}
@@ -16,120 +14,133 @@
         <div class="row">
 
             <div class="col-sm-9">
-                <h1>
-                    {{ org.name }}
-                    {% if can_edit %}
-                    <small>
-                        <a class="btn btn-xs btn-default"
-                            href="{{ url_for('organizations.edit', org=org) }}">
-                            <span class="glyphicon glyphicon-edit" ></span>
-                            {{ _('Edit') }}
-                        </a>
-                    </small>
-                    {% endif %}
-                </h1>
-                <div>{{ org.description|markdown }}</div>
+                {% block main_content %}{% endblock %}
             </div>
 
-            {# Left sidebar with organization aside ( counters, logo, social...) #}
+            {# Right sidebar with organization aside ( counters, logo, social...) #}
             <aside class="col-sm-3 panel panel-default">
-                <div class="panel-body">
-                    {% if org.public_service %}
-                        <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
-                            class="certified" rel="popover"
-                            data-title="{{ _('Certified public service') }}"
-                            data-content="{{ _('This organization and its datasets are certified by data.gouv.fr') }}"
-                            data-container="body" data-placement="left" data-trigger="hover"/>
-                    {% endif %}
-                    <div class="text-center">
-                        <img src="{{org.image_url|placeholder('organization') }}"
-                            alt="{{ org.title }}" class="scalable" />
-                    </div>
-                    <br/>
+                {% if org.public_service %}
+                    <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
+                        class="certified" rel="popover"
+                        data-title="{{ _('Certified public service') }}"
+                        data-content="{{ _('This organization and its datasets are certified by data.gouv.fr') }}"
+                        data-container="body" data-placement="left" data-trigger="hover"/>
+                {% endif %}
+                <div class="text-center">
+                    <img src="{{org.image_url|placeholder('organization') }}"
+                        alt="{{ org.title }}" class="scalable" />
+                </div>
+                <br/>
+                <div class="tab-links">
+                    {% if org.metrics.datasets %}
                     <p class="text-center">
                         <strong>
-                            {{ ngettext('%(num)d member', '%(num)d members', org.metrics.members or 0) }}
+                            <a href="{{url_for('organizations.show', org=org)}}#datasets">
+                            {{ ngettext('%(num)d dataset', '%(num)d datasets', org.metrics.datasets or 0) }}
+                            </a>
                         </strong>
                     </p>
+                    {% endif %}
+                    {% if org.metrics.members %}
                     <p class="text-center">
                         <strong>
-                            <a href="{{url_for('followers.organization', org=org)}}">
+                            <a href="{{url_for('organizations.show', org=org)}}#members">
+                            {{ ngettext('%(num)d member', '%(num)d members', org.metrics.members or 0) }}
+                            </a>
+                        </strong>
+                    </p>
+                    {% endif %}
+                    {% if org.metrics.followers %}
+                    <p class="text-center">
+                        <strong>
+                            <a href="{{url_for('organizations.show', org=org)}}#followers">
                             {{ ngettext('%(num)d follower', '%(num)d followers', org.metrics.followers or 0) }}
                             </a>
                         </strong>
                     </p>
+                    {% endif %}
+                    {% if org.metrics.reuses %}
                     <p class="text-center">
                         <strong>
-                            {{ ngettext('%(num)d dataset', '%(num)d datasets', org.metrics.datasets or 0) }}
-                        </strong>
-                    </p>
-                    <p class="text-center">
-                        <strong>
+                        <a href="{{url_for('organizations.show', org=org)}}#reuses">
                             {{ ngettext('%(num)d reuse', '%(num)d reuses', org.metrics.reuses or 0) }}
                         </strong>
                     </p>
-                    {% if not is_member %}
-                        {% if not pending %}
-                        <a href rel="tooltip" class="btn btn-primary btn-block btn-sm icon-left membership"
-                            data-placement="left"
-                            {# data-api="{{ url_for(lang, 'youckan/organization', organization.name, 'membership') }}" #}
-                            title="{{ _('I belong to this organization') }}">
-                            <span class="glyphicon glyphicon-user"></span>
-                            {{ _('Join') }}
-                        </a>
-                        {% endif %}
-                        <div class="tooltip-wrapper" rel="tooltip" title="{{ _('Waiting for approval') }}" data-placement="left">
-                            <a id="pending-button" href rel="tooltip"
-                                class="btn btn-default btn-block btn-sm icon-left disabled {% if not pending %}hide{% endif %}"
-                                >
-                                <span class="glyphicon glyphicon-user"></span>
-                                {{ _('Pending request') }}
-                            </a>
-                        </div>
-                    {% elif is_admin %}
-                    <div class="tooltip-wrapper" rel="tooltip" title="{{ _('You are an administrator of this organization') }}" data-placement="left">
-                        <a href class="btn btn-default btn-block btn-sm icon-left disabled">
-                            <span class="glyphicon glyphicon-user"></span>
-                            {{ _('Administrator') }}
-                        </a>
-                    </div>
-                    {% elif is_editor %}
-                    <div class="tooltip-wrapper" rel="tooltip" title="{{ _('You are editor in this organization') }}" data-placement="left">
-                        <a href class="btn btn-default btn-block btn-sm icon-left disabled">
-                            <span class="glyphicon glyphicon-user"></span>
-                            {{ _('Editor') }}
-                        </a>
-                    </div>
-                    {% else %}
-                    <div  class="tooltip-wrapper" rel="tooltip" title="{{ _('You are a member of this organization') }}" data-placement="left">
-                        <a href class="btn btn-default btn-block btn-sm icon-left disabled">
-                            <span class="glyphicon glyphicon-user"></span>
-                            {{ _('Member') }}
-                        </a>
-                    </div>
                     {% endif %}
-
-                    <button type="button"
-                        class="btn btn-primary btn-follow btn-block btn-sm icon-left {% if is_following(org) %}active{% endif %}"
-                        rel="tooltip" data-placement="left"
-                        data-api-url="{{ url_for('api.follow_organization', id=org.id|string) }}"
-                        {% if is_following(org) %}
-                        title="{{ _('Unfollow') }}">
-                        <span class="glyphicon glyphicon-eye-close"></span>
-                        {{ _('Unfollow') }}
-                        {% else %}
-                        title="{{ _("I'll be informed about this organization news") }}">
-                        <span class="glyphicon glyphicon-eye-open"></span>
-                        {{ _('Follow') }}
-                        {% endif %}
+                    {% if activities %}
+                    <p class="text-center">
+                        <strong>
+                            <a href="{{url_for('organizations.dashboard', org=org)}}">
+                                {{ _('Dashboard') }}
+                            </a>
+                        </strong>
+                    </p>
+                    {% endif %}
+                </div>
+                {% set member = org.member(current_user) %}
+                {% if not member %}
+                    {% set pending_request = org.pending_request(current_user) %}
+                    {% if not pending_request %}
+                    <a href rel="tooltip" class="btn btn-primary btn-block btn-sm icon-left membership"
+                        data-placement="left"
+                        data-api="{{ url_for('api.request_membership', org=org) }}"
+                        title="{{ _('I belong to this organization') }}">
+                        <span class="glyphicon glyphicon-user"></span>
+                        {{ _('Join') }}
+                    </a>
+                    {% endif %}
+                    <div class="tooltip-wrapper" rel="tooltip" title="{{ _('Waiting for approval') }}" data-placement="left">
+                        <a id="pending-button" href rel="tooltip"
+                            class="btn btn-default btn-block btn-sm icon-left disabled {% if not pending_request %}hide{% endif %}"
+                            >
+                            <span class="glyphicon glyphicon-user"></span>
+                            {{ _('Pending request') }}
+                        </a>
+                    </div>
+                {% elif member.role == 'admin' %}
+                <div class="tooltip-wrapper" rel="tooltip" title="{{ _('You are an administrator of this organization') }}" data-placement="left">
+                    <a href class="btn btn-default btn-block btn-sm icon-left disabled">
+                        <span class="glyphicon glyphicon-user"></span>
+                        {{ _('Administrator') }}
                     </a>
                 </div>
+                {% elif member.role == 'editor' %}
+                <div class="tooltip-wrapper" rel="tooltip" title="{{ _('You are editor in this organization') }}" data-placement="left">
+                    <a href class="btn btn-default btn-block btn-sm icon-left disabled">
+                        <span class="glyphicon glyphicon-user"></span>
+                        {{ _('Editor') }}
+                    </a>
+                </div>
+                {% else %}
+                <div  class="tooltip-wrapper" rel="tooltip" title="{{ _('You are a member of this organization') }}" data-placement="left">
+                    <a href class="btn btn-default btn-block btn-sm icon-left disabled">
+                        <span class="glyphicon glyphicon-user"></span>
+                        {{ _('Member') }}
+                    </a>
+                </div>
+                {% endif %}
+
+                <button type="button"
+                    class="btn btn-primary btn-follow btn-block btn-sm icon-left {% if is_following(org) %}active{% endif %}"
+                    rel="tooltip" data-placement="left"
+                    data-api-url="{{ url_for('api.follow_organization', id=org.id|string) }}"
+                    {% if is_following(org) %}
+                    title="{{ _('Unfollow') }}">
+                    <span class="glyphicon glyphicon-eye-close"></span>
+                    {{ _('Unfollow') }}
+                    {% else %}
+                    title="{{ _("I'll be informed about this organization news") }}">
+                    <span class="glyphicon glyphicon-eye-open"></span>
+                    {{ _('Follow') }}
+                    {% endif %}
+                </button>
             </aside>
         </div>
 
-        {% block org_content %}{% endblock %}
-
+        {% block secondary_content %}{% endblock %}
 
     </div>
 </section>
+
+{% block after_content %}{% endblock %}
 {% endblock %}

@@ -1,8 +1,0 @@
-{% extends theme('activity/base.html') %}
-
-{% set icon = 'glyphicon glyphicon-eye-open' %}
-
-{% block endtitle %}
-{{_('followed dataset')}}
-<a href="{{ url_for('datasets.show', dataset=activity.followee) }}">{{activity.followee.title}}</a>
-{% endblock %}

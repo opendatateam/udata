@@ -8,10 +8,12 @@ from werkzeug.local import LocalProxy
 from udata import search
 from udata.core.metrics import Metric
 from udata.frontend import render, csv, theme
+from udata.frontend.views import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Metrics, Dataset, Activity, Site, Reuse
 from udata.utils import multi_to_dict
 
+from udata.core.activity.views import ActivityView
 
 blueprint = I18nBlueprint('site', __name__)
 
@@ -91,10 +93,35 @@ def metrics():
     )
 
 
-@blueprint.route('/dashboard/')
-def dashboard():
-    return render('site/dashboard.html',
-        metrics=({
+@blueprint.route('/map/')
+def map():
+    return render('site/map.html')
+
+
+@blueprint.route('/datasets.csv')
+def datasets_csv():
+    params = multi_to_dict(request.args)
+    params['facets'] = False
+    datasets = search.iter(Dataset, **params)
+    adapter = csv.get_adapter(Dataset)
+    return csv.stream(adapter(datasets), 'datasets')
+
+
+class SiteView(object):
+    @property
+    def site(self):
+        return current_site
+
+    object = site
+
+
+class SiteDashboard(SiteView, ActivityView, DetailView):
+    template_name = 'site/dashboard.html'
+
+    def get_context(self):
+        context = super(SiteDashboard, self).get_context()
+
+        context['metrics'] = ({
             'title': _('Data'),
             'widgets': [
                 {
@@ -138,28 +165,9 @@ def dashboard():
                     'endpoint': 'users.list'
                 }
             ]
-        }),
-        activities=Activity.objects.order_by('-created_at')[:10]
-    )
+        })
+
+        return context
 
 
-@blueprint.route('/map/')
-def map():
-    return render('site/map.html')
-
-
-@blueprint.route('/datasets.csv')
-def datasets_csv():
-    params = multi_to_dict(request.args)
-    params['facets'] = False
-    datasets = search.iter(Dataset, **params)
-    adapter = csv.get_adapter(Dataset)
-    return csv.stream(adapter(datasets), 'datasets')
-
-
-class SiteView(object):
-    @property
-    def site(self):
-        return current_site
-
-    object = site
+blueprint.add_url_rule('/dashboard/', view_func=SiteDashboard.as_view(str('dashboard')))

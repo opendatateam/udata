@@ -1,8 +1,0 @@
-{% extends theme('activity/base.html') %}
-
-{% set icon = 'glyphicon glyphicon-eye-open' %}
-
-{% block endtitle %}
-{{_('followed user')}}
-<a href="{{ url_for('users.show', user=activity.followee) }}">{{activity.followee.fullname}}</a>
-{% endblock %}

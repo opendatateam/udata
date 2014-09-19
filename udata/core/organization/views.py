@@ -15,6 +15,7 @@ from udata.models import db, Organization, Member, Reuse, Dataset, ORG_ROLES, Us
 from udata.utils import get_by
 
 from udata.core.dataset.csv import DatasetCsvAdapter
+from udata.core.activity.views import ActivityView
 
 from .permissions import EditOrganizationPermission
 
@@ -55,7 +56,9 @@ class OrgView(object):
     def get_context(self):
         for item in navbar.items:
             item._args = {'org': self.organization}
-        return super(OrgView, self).get_context()
+        context = super(OrgView, self).get_context()
+        context['can_edit'] = EditOrganizationPermission(self.organization.id)
+        return context
 
 
 class ProtectedOrgView(OrgView):
@@ -91,6 +94,44 @@ class OrganizationDetailView(OrgView, DetailView):
         })
 
         return context
+
+
+class OrganizationDashboardView(OrgView, ActivityView, DetailView):
+    template_name = 'organization/dashboard.html'
+
+    def get_context(self):
+        context = super(OrganizationDashboardView, self).get_context()
+
+        context['metrics'] = [{
+            # 'title': _('Data'),
+            'widgets': [
+                {
+                    'title': _('Datasets'),
+                    'metric': 'datasets',
+                    'type': 'line',
+                    'endpoint': 'datasets.list',
+                    'args': {'org': self.organization}
+                },
+                {
+                    'title': _('Reuses'),
+                    'metric': 'reuses',
+                    'type': 'line',
+                    'endpoint': 'reuses.list',
+                    'args': {'org': self.organization}
+                },
+                {
+                    'title': _('Followers'),
+                    'metric': 'followers',
+                    'type': 'line',
+                }
+            ]
+        }]
+
+        return context
+
+    def filter_activities(self, qs):
+        predicate = db.Q(organization=self.organization) | db.Q(related_to=self.organization)
+        return qs(predicate)
 
 
 class OrganizationCreateView(CreateView):
@@ -217,6 +258,7 @@ blueprint.add_url_rule('/', view_func=OrganizationListView.as_view(str('list')))
 blueprint.add_url_rule('/new/', view_func=OrganizationCreateView.as_view(str('new')))
 blueprint.add_url_rule('/<org:org>/', view_func=OrganizationDetailView.as_view(str('show')))
 blueprint.add_url_rule('/<org:org>/activity', view_func=OrganizationActivityView.as_view(str('activity')))
+blueprint.add_url_rule('/<org:org>/dashboard/', view_func=OrganizationDashboardView.as_view(str('dashboard')))
 blueprint.add_url_rule('/<org:org>/edit/', view_func=OrganizationEditView.as_view(str('edit')))
 blueprint.add_url_rule('/<org:org>/edit/members/', view_func=OrganizationEditMembersView.as_view(str('edit_members')))
 blueprint.add_url_rule('/<org:org>/edit/requests/', view_func=OrganizationMembershipRequestsView.as_view(str('edit_membership_requests')))
