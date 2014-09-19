@@ -16,7 +16,8 @@
 {% endblock %}
 
 {# // 'site.organizations_csv', url=url, #}
-{% block toolbar %}
+{% block toolbar_container %}
+<div class="btn-toolbar search-toolbar" role="toolbar">
 {{ s.breadcrum_toolbar(organizations, url=url,
     title=(_('Title'), 'asc'),
     created=(_('Creation date'), 'desc'),
@@ -25,6 +26,7 @@
     reuses=(_('Reuses'), 'desc'),
     followers=(_('Followers'), 'desc')
 ) }}
+</div>
 {% endblock %}
 
 {% block main_content %}

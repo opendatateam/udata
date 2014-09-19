@@ -47,7 +47,7 @@
 {% endblock %}
 
 {% block toolbar_container %}
-<div class="btn-toolbar wrapper search-toolbar" data-tab="#datasets">
+<div class="btn-toolbar search-toolbar wrapper" data-tab="#datasets">
 {{ s.breadcrum_toolbar(datasets, 'site.datasets_csv', url=datasets_search_url,
     title=(_('Title'), 'asc'),
     created=(_('Creation date'), 'desc'),
@@ -56,7 +56,7 @@
     followers=(_('Stars'), 'desc')
 ) }}
 </div>
-<div class="btn-toolbar wrapper hide" data-tab="#reuses">
+<div class="btn-toolbar search-toolbar wrapper hide" data-tab="#reuses">
 {{ s.breadcrum_toolbar(reuses, url=reuses_search_url,
     title=(_('Title'), 'asc'),
     created=(_('Creation date'), 'desc'),
@@ -65,7 +65,7 @@
     followers=(_('Stars'), 'desc'),
 ) }}
 </div>
-<div class="btn-toolbar wrapper hide" data-tab="#organizations">
+<div class="btn-toolbar search-toolbar wrapper hide" data-tab="#organizations">
 {{ s.breadcrum_toolbar(organizations, url=organizations_search_url,
     name=( _('Name'), 'asc'),
     datasets=(_('Datasets'), 'desc'),
@@ -73,7 +73,7 @@
     followers=(_('Followers'), 'desc'),
 ) }}
 </div>
-<div class="btn-toolbar wrapper hide" data-tab="#users">
+<div class="btn-toolbar search-toolbar wrapper hide" data-tab="#users">
 {{ s.breadcrum_toolbar(users, url=users_search_url,
     last_name=( _('Last Name'), 'asc'),
     first_name=( _('First Name'), 'asc'),

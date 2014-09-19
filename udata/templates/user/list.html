@@ -16,7 +16,8 @@
 {% endblock %}
 
 {# // 'site.reuses_csv', url=url, #}
-{% block toolbar %}
+{% block toolbar_container %}
+<div class="btn-toolbar search-toolbar" role="toolbar">
 {{ s.breadcrum_toolbar(users, url=url,
     title=(_('Last name'), 'asc'),
     datasets=(_('Datasets'), 'desc'),
@@ -24,6 +25,7 @@
     followers=(_('Followers'), 'desc'),
     last_name=(_('Name'), 'desc')
 ) }}
+</div>
 {% endblock %}
 
 {% block main_content %}

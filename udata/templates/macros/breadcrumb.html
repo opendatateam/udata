@@ -1,27 +1,29 @@
 {% macro breadcrumb(tpl) %}
 {% if tpl.breadcrumb and tpl.breadcrumb() or tpl.breadcrumb_bar and tpl.breadcrumb_bar() %}
-<section class="breadcrumb-bar {{ breadcrum_class }}">
+<section class="breadcrumb-bar {{ tpl.breadcrum_class }}">
     <div class="container">
-        {% if tpl.breadcrumb_bar %}
+        {% if tpl.breadcrumb_bar and tpl.breadcrumb_bar() %}
         <div class="left-bar col-md-8 col-lg-9">
-            {% block breadcrumb_bar %}{% endblock %}
+            {{ tpl.breadcrumb_bar() }}
         </div>
-        {% elif tpl.breadcrumb %}
+        {% elif tpl.breadcrumb and tpl.breadcrumb() %}
         <ol class="breadcrumb col-md-8 col-lg-9">
             <li>
                 <a href="{{ url_for('site.home') }}" title="{{ _('Home') }}">
                     <span class="glyphicon glyphicon-home"></span>
                 </a>
             </li>
-            {% block breadcrumb %}{% endblock %}
+            {{ tpl.breadcrumb() }}
         </ol>
         {% endif %}
         <div class="col-md-4 col-lg-3 toolbar">
-            {% block toolbar_container %}
-                <div class="btn-toolbar {{ toolbar_class }}" role="toolbar">
-                {% block toolbar %}{% endblock %}
+            {% if tpl.toolbar_container and tpl.toolbar_container() %}
+                {{ tpl.toolbar_container() }}
+            {% elif tpl.toolbar and tpl.toolbar() %}
+                <div class="btn-toolbar {{ tpl.toolbar_class }}" role="toolbar">
+                {{ tpl.toolbar() }}
                 </div>
-            {% endblock %}
+            {% endif %}
         </div>
     </div>
 </section>

@@ -20,7 +20,8 @@
     </li>
 {% endblock %}
 
-{% block toolbar %}
+{% block toolbar_container %}
+<div class="btn-toolbar search-toolbar" role="toolbar">
 {{ s.breadcrum_toolbar(datasets, url=url,
     title=(_('Title'), 'asc'),
     created=(_('Creation date'), 'desc'),
@@ -28,25 +29,30 @@
     reuses=(_('Reuses'), 'desc'),
     followers=(_('Stars'), 'desc')
 ) }}
+</div>
 {% endblock %}
 
 {% block main_content %}
-<div class="row">
-    <div class="col-md-8 col-lg-9 smaller">
+<section class="default">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-lg-9 smaller">
 
-        <ul class="search-results">
-            {% for dataset in datasets %}
-            {% include theme('dataset/search-result.html') %}
-            {% endfor %}
-        </ul>
+                <ul class="search-results">
+                    {% for dataset in datasets %}
+                    {% include theme('dataset/search-result.html') %}
+                    {% endfor %}
+                </ul>
 
-        <div class="clearfix"></div>
-        {{ paginator(datasets) }}
+                <div class="clearfix"></div>
+                {{ paginator(datasets) }}
+            </div>
+
+            <aside class="col-md-4 col-lg-3">
+            {% include theme('dataset/search-panel.html') %}
+            </aside>
+
+        </div>
     </div>
-
-    <aside class="col-md-4 col-lg-3">
-    {% include theme('dataset/search-panel.html') %}
-    </aside>
-
-</div>
+</section>
 {% endblock %}
