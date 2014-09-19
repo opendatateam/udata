@@ -65,3 +65,13 @@ gouvfr-forms-css:
         - less/gouvfr/*.less
     output: css/gouvfr-forms.min.css
     contents: less/gouvfr-forms.less
+
+
+gouvfr-dashboard-css:
+    filters: less,cssrewrite,cssmin
+    depends:
+        - less/*.less
+        - less/udata/*.less
+        - less/gouvfr/*.less
+    output: css/gouvfr-dashboard.min.css
+    contents: less/gouvfr-dashboard.less
