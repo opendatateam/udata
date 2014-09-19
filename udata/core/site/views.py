@@ -94,6 +94,51 @@ def metrics():
 @blueprint.route('/dashboard/')
 def dashboard():
     return render('site/dashboard.html',
+        metrics=({
+            'title': _('Data'),
+            'widgets': [
+                {
+                    'title': _('Datasets'),
+                    'metric': 'datasets',
+                    'type': 'line',
+                    'endpoint': 'datasets.list',
+                },
+                {
+                    'title': _('Reuses'),
+                    'metric': 'reuses',
+                    'type': 'line',
+                    'endpoint': 'reuses.list',
+                },
+                {
+                    'title': _('Resources'),
+                    'metric': 'resources',
+                    'type': 'line',
+                }
+            ]
+        }, {
+            'title': _('Community'),
+            'widgets': [
+                {
+                    'title': _('Organizations'),
+                    'metric': 'organizations',
+                    'type': 'bar',
+                    'endpoint': 'organizations.list',
+                },
+                {
+                    'title': _('Public services'),
+                    'metric': 'public_services',
+                    'type': 'bar',
+                    'endpoint': 'organizations.list',
+                    'args': {'public_services': True}
+                },
+                {
+                    'title': _('Users'),
+                    'metric': 'users',
+                    'type': 'bar',
+                    'endpoint': 'users.list'
+                }
+            ]
+        }),
         activities=Activity.objects.order_by('-created_at')[:10]
     )
 

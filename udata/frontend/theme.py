@@ -14,9 +14,9 @@ from werkzeug.local import LocalProxy
 from flask.ext.assets import YAMLLoader, Bundle
 from flask.ext.themes2 import Themes, Theme, render_theme_template, get_theme, packaged_themes_loader
 
-from udata.models import db
+from udata.i18n import lazy_gettext as _
 
-from . import assets
+from . import assets, nav
 
 
 log = logging.getLogger(__name__)
@@ -34,10 +34,19 @@ def get_current_theme():
 current = LocalProxy(get_current_theme)
 
 
+default_menu = nav.Bar('default_menu', [
+    nav.Item(_('Organizations'), 'organizations.list'),
+    nav.Item(_('Datasets'), 'datasets.list'),
+    nav.Item(_('Reuses'), 'reuses.list'),
+    nav.Item(_('Map'), 'site.map'),
+])
+
+
 class ConfigurableTheme(Theme):
     context_processors = None
     defaults = None
     admin_form = None
+    _menu = None
     _configured = False
 
     def __init__(self, path):
@@ -52,6 +61,15 @@ class ConfigurableTheme(Theme):
     @property
     def config(self):
         return self.site.themes.get(self.identifier)
+
+    @property
+    def menu(self):
+        return self._menu or default_menu
+
+    @menu.setter
+    def menu(self, value):
+        print 'set menu', value
+        self._menu = value
 
     def configure(self):
         if self._configured:
@@ -153,6 +171,10 @@ def admin_form(cls):
 
 def defaults(values):
     g.theme.defaults = values
+
+
+def menu(navbar):
+    g.theme.menu = navbar
 
 
 def context(name):

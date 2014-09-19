@@ -27,10 +27,9 @@
     </div>
 
     <ul class="nav navbar-nav collapse navbar-collapse collapse-on-search">
-        <li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
-        <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
-        <li><a href="{{ url_for('reuses.list') }}">{{ _('Reuses') }}</a></li>
-        <li><a href="{{ url_for('site.map') }}">{{ _('Map') }}</a></li>
+        {% for item in current_theme.menu %}
+        <li><a href="{{ item.url }}">{{ item.label }}</a></li>
+        {% endfor %}
     </ul>
 
       <ul class="nav navbar-nav navbar-right collapse navbar-collapse">

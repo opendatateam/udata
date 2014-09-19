@@ -14,46 +14,24 @@
 {% block content %}
 <section class='metrics'>
     <div class="container">
+        {% for row in metrics %}
         <article>
-            <h2>{{ _('Data') }}</h2>
+            <h2>{{ row.title }}</h2>
             <ul class="chart-list row">
+                {% for widget in row.widgets %}
                 <li class="col-md-4">
-                    <a href="{{ url_for('datasets.list') }}" data-chart-type="line" data-chart-data="datasets">
-                        {{ _('Datasets') }}
+                    <a {% if widget.endpoint %}
+                        href="{{ url_for(widget.endpoint, **(widget.args or {})) }}"
+                        {% endif %}
+                        data-chart-type="{{ widget.type }}"
+                        data-chart-data="{{ widget.metric }}">
+                        {{ widget.title }}
                     </a>
                 </li>
-                <li class="col-md-4">
-                    <a href="{{ url_for('reuses.list') }}" data-chart-type="line" data-chart-data="reuses">
-                        {{ _('Reuses') }}
-                    </a>
-                </li>
-                <li class="col-md-4">
-                    <a data-chart-type="line" data-chart-data="resources">
-                        {{ _('Resources') }}
-                    </a>
-                </li>
+                {% endfor %}
             </ul>
         </article>
-        <article>
-            <h2>{{ _('Community') }}</h2>
-            <ul class="chart-list row">
-                <li class="col-md-4">
-                    <a href="{{ url_for('organizations.list') }}" data-chart-type="bar" data-chart-data="organizations">
-                        {{ _('Organizations') }}
-                    </a>
-                </li>
-                <li class="col-md-4">
-                    <a href="{{ url_for('organizations.list') }}" data-chart-type="bar" data-chart-data="public_services">
-                        {{ _('Public services') }}
-                    </a>
-                </li>
-                <li class="col-md-4">
-                    <a data-chart-type="bar" data-chart-data="users">
-                        {{ _('Users') }}
-                    </a>
-                </li>
-            </ul>
-        </article>
+        {% endfor %}
     </div>
 </section>
 

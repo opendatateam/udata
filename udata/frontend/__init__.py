@@ -60,6 +60,11 @@ def inject_footer_snippets():
     return {'footer_snippets': _footer_snippets}
 
 
+@front.app_context_processor
+def inject_current_theme():
+    return {'current_theme': theme.current}
+
+
 def _load_views(app, module):
     try:
         views = import_module(module)
