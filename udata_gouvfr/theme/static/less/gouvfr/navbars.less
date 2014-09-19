@@ -9,42 +9,29 @@
 
 .cover-default {
     // .colored-cover();
+    background-image: url('../img/datawatch-bulles.png');
+    background-size: cover;
+    position: absolute;
+    min-height: 100%;
+    min-width: 100%;
+    // overflow:
 
-    .subnav-gradient();
 
-    &:before {
-        content: url('../img/datawatch-bulles.png');
-        position: absolute;
-        // top
+    // &:before {
+    //     content: url('../img/datawatch-bulles.png');
+    //     position: absolute;
+    //     // top
 
-        // background-image: url('../img/datawatch-bulles.png');
-        // background-size: cover;
+    //     // background-image: url('../img/datawatch-bulles.png');
+    //     // background-size: cover;
 
-    }
+    // }
 }
 
 @topic-png:  '../img/arcs.png';
 
-// .colored-cover(@color: #1b71af, @png: '../img/datawatch-bulles.png') {
-//     @end: lighten(@color, 22%);
-//     @img: url(@png);
-//     // @png: '../img/datawatch-bulles.png';
-//     background-size: cover;
-//     background: @color; /* Old browsers */
-//     background: @img, -moz-linear-gradient(45deg,  @color 0%, @end 100%); /* FF3.6+ */
-//     background: @img, -webkit-gradient(linear, left bottom, right top, color-stop(0%, @color), color-stop(100%, @end)); /* Chrome,Safari4+ */
-//     background: @img, -webkit-linear-gradient(45deg, @color 0%, @end 100%); /* Chrome10+,Safari5.1+ */
-//     background: @img, -o-linear-gradient(45deg, @color 0%, @end 100%); /* Opera 11.10+ */
-//     background: @img, -ms-linear-gradient(45deg, @color 0%, @end 100%); /* IE10+ */
-//     background: @img, linear-gradient(45deg, @color 0%, @end 100%); /* W3C */
-//     filter:
-//         e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d',GradientType=0)", @color, @end)),
-//         e(%("progid:DXImageTransform.Microsoft.AlphaImageLoader(src=%s)", @png)); /* IE6-9 */
-// }
-
 .subnav-gradient(@color: #1b71af) {
     @end: lighten(@color, 22%);
-    // @png: '../img/datawatch-bulles.png';
     background-size: cover;
     background: @color; /* Old browsers */
     background: -moz-linear-gradient(45deg,  @color 0%, @end 100%); /* FF3.6+ */
@@ -56,7 +43,6 @@
     filter:
         e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d',GradientType=0)", @color, @end));
 
-    overflow: hidden;
 }
 
 .cover-marianne {
@@ -172,7 +158,9 @@
 }
 
 .navbar-subnav {
-    background-color: @bg-dark;
+    // background-color: @bg-dark;
+
+    .subnav-gradient();
 
     z-index: 800;
     min-height: 80px;
@@ -228,6 +216,7 @@
     }
 
     .twitter-typeahead {
+
         .tt-hint, .tt-query {
             color: #bfbfbf;
             background-color: @bg-light;
@@ -668,85 +657,44 @@
 
 
 // Topics
-// .topic-excerpt {
-//     @media(min-width: @screen-md-min) {
-//         padding-top: 12px;
-//         padding-left: 30px;
-//     }
-
-//     margin-bottom: 10px;
-//     color: white;
-//     font-size: 14px;
-//     line-height: 1.6em;
-//     max-height: 270px;
-
-//     h3 {
-//         font-family: @title-font;
-//         font-size: 32px;
-//     }
-
-// }
-
-// .topic-toolbar {
-//     margin: 10px 10px 10px 0;
-// }
-
-// .subnav-topic {
-//     .call-to-action {
-//         // position: absolute;
-//         bottom: 10px;
-//         right: 10px;
-//     }
-// }
-
-.subnav-topic-cover(@color) {
-    .subnav-gradient(@color);
-    // background-position: right bottom;
-    // height: 100%;
-    // width: 100%;
-    overflow: hidden;
+.subnav-topic {
     position: relative;
+}
 
-
-    &:before {
-        content: url(@topic-png);
-        position: absolute;
-        bottom: -6px;
-        // left: -80%;
-        width: 100%;
-        right: -30%;
-        // top: 0;
-        // height: 100%;
-        // max-height: 100%;
-        // background: url(@topic-png) ;
-        // background-size: cover;
-    }
+.cover-topic {
+    background-image: url(@topic-png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: bottom right;
+    position: absolute;
+    min-width: 100%;
+    min-height: 100%;
 }
 
 .topic-1 {
-    .subnav-topic-cover(#1b775d);
+    .subnav-gradient(#1b775d);
 }
 .topic-2 {
-    .subnav-topic-cover(#905d4e);
+    .subnav-gradient(#905d4e);
 }
 .topic-3 {
-    .subnav-topic-cover(#EE7836);
+    .subnav-gradient(#EE7836);
 }
 .topic-4 {
-    .subnav-topic-cover(#6a4570);
+    .subnav-gradient(#6a4570);
 }
 .topic-5 {
-    .subnav-topic-cover(#fc3f3f);
+    .subnav-gradient(#fc3f3f);
 }
 .topic-6 {
-    .subnav-topic-cover(#9BBB45);
+    .subnav-gradient(#9BBB45);
 }
 .topic-7 {
-    .subnav-topic-cover(#46b2a4);
+    .subnav-gradient(#46b2a4);
 }
 .topic-8 {
-    .subnav-topic-cover(#8B4F78);
+    .subnav-gradient(#8B4F78);
 }
 .topic-9 {
-    .subnav-topic-cover(#134d77);
+    .subnav-gradient(#134d77);
 }
