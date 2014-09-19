@@ -1,7 +1,11 @@
 {% extends theme("base.html") %}
 {% from theme('macros/breadcrumb.html') import breadcrumb with context %}
 
-{% block title %}{{ topic.name }}{% endblock %}
+{% set meta = {
+    'title': topic.name,
+    'description': topic.description|mdstrip|forceescape,
+    'keywords': [_('topic')] + topic.tags,
+} %}
 
 {% block content %}
 {{ breadcrumb(self) }}
