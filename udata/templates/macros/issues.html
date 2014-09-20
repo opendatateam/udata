@@ -5,7 +5,7 @@
     rel="tooltip" title="{{ _('Issues') }}"
     data-placement="right" data-container="body">
     <span class="{{ ficon('fa-warning') }}"></span>
-    <span class="count">{% if obj.metrics.issues or 0 > 0 %}({{ obj.metrics.issues }}){% endif %}</span>
+    <span class="count">{% if obj.metrics.issues %}{{ obj.metrics.issues }}{% endif %}</span>
 </button>
 {% endmacro %}
 

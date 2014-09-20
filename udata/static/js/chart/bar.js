@@ -6,8 +6,6 @@ define(['jquery', 'd3', 'chart/base'], function($, d3, BaseChart) {
                 svg = this.svg,
                 bbox = this.bbox();
 
-            this.$value.text(data[data.length - 1].value);
-
             var margin = bbox.width / (data.length * 4),
                 barWidth = (bbox.width - data.length * margin)  / data.length,
                 barHeight = bbox.height,
@@ -19,10 +17,13 @@ define(['jquery', 'd3', 'chart/base'], function($, d3, BaseChart) {
                 yMax = d3.max(data, function(d) {
                     return +d.value;
                 }),
-                yMargin = (yMax - yMin) / 10;
+                yMargin = Math.max((yMax - yMin) / 10, 1);
 
-            var x = d3.scale.linear().domain([0, data.length]).range([0, bbox.width]),
-                y = d3.scale.linear().domain([yMin - yMargin, yMax + yMargin]).range([bbox.height, 0]),
+            var x = d3.scale.linear()
+                    .domain([0, data.length]).range([0, bbox.width]),
+                y = d3.scale.linear()
+                    .domain([Math.max(yMin - yMargin, -1), Math.max(yMax + yMargin, 10)])
+                    .range([bbox.height, 0]),
                 opacity = d3.scale.linear().domain([yMin, yMax]).range([0.5, 1]),
                 fillOpacity = function(d) { return opacity(d.value); };
 

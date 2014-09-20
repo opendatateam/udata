@@ -1,4 +1,4 @@
-{% macro metric_widgets(rows, size='col-md-4') %}
+{% macro metric_widgets(metrics, rows, size='col-md-4') %}
 {% for row in rows %}
 <div>
     {% if row.title %}<h2>{{ row.title }}</h2>{% endif %}
@@ -10,7 +10,11 @@
                 {% endif %}
                 data-chart-type="{{ widget.type }}"
                 data-chart-data="{{ widget.metric }}">
-                {{ widget.title }}
+                <div class="chart">
+                    <span class="fa fa-4x fa-cog fa-spin"></span>
+                </div>
+                <p>{{ metrics[widget.metric] }}</p>
+                <h4>{{ widget.title }}</h4>
             </a>
         </li>
         {% endfor %}

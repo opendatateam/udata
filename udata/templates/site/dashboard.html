@@ -15,7 +15,7 @@
 {% block content %}
 <section class='metrics'>
     <div class="container">
-        {{ metric_widgets(metrics) }}
+        {{ metric_widgets(g.site.metrics, metrics) }}
     </div>
 </section>
 

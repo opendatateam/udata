@@ -11,18 +11,18 @@ define(['jquery', 'd3', 'chart/base'], function($, d3, BaseChart) {
 
             var current = data[data.length - 1];
 
-            this.$value.text(current.value);
-
             var yMin = d3.min(data, function(d) {
                     return +d.value;
                 }),
                 yMax = d3.max(data, function(d) {
                     return +d.value;
                 }),
-                yMargin = (yMax - yMin) / 10;
+                yMargin = Math.max((yMax - yMin) / 10, 1);
 
             var x = d3.scale.linear().domain([0, data.length - 1]).range([0, bbox.width - radius]),
-                y = d3.scale.linear().domain([yMin - yMargin, yMax + yMargin]).range([bbox.height, 0]);
+                y = d3.scale.linear()
+                    .domain([Math.max(yMin - yMargin, 0), Math.max(yMax + yMargin, 10)])
+                    .range([bbox.height, 0]);
 
             var sliceWidth = Math.round((bbox.width - radius) / data.length),
                 sliceHeight = bbox.height;

@@ -131,7 +131,7 @@ class UserActivityView(UserView, DetailView):
 
     def get_context(self):
         context = super(UserActivityView, self).get_context()
-        context['activities'] = Activity.objects(actor=self.object).order_by('-created_at')
+        context['activities'] = Activity.objects(actor=self.object).order_by('-created_at').limit(15)
         return context
 
 

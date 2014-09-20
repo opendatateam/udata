@@ -4,34 +4,21 @@ define(['jquery', 'd3', 'class'], function($, d3, Class) {
         init: function(el) {
             this.$el = $(el);
             this.el = this.$el[0];
+            this.$chart = this.$el.find('.chart');
             this._build();
         },
 
         _build: function() {
-            this.$chart = $('<div class="chart" />');
             this.$infobox = $('<div class="infobox"/>');
-            this.$value = $('<p/>');
-            this.$label = $('<h4/>');
-
-            if (!this.label) {
-                this.label = this.$el.text() || this.$el.data('label') || '';
-            }
-            this.$label.text(this.label);
 
             this.$infobox.append($('<span class="value" />'));
             this.$infobox.append($('<span class="diff" />'));
             this.$infobox.append($('<span class="label" />'));
 
-            this.$chart.append(this.$infobox);
-
-            this.$el.empty();
-            this.$el.append(this.$chart);
-            this.$el.append(this.$value);
-            this.$el.append(this.$label);
+            this.$chart.empty().append(this.$infobox);
 
             this.d3 = d3.select(this.$chart[0]);
             this.svg = this.d3.append("svg:svg");
-
         },
 
         bbox: function() {

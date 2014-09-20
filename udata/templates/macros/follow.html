@@ -11,5 +11,6 @@
     rel="tooltip" title="{{ _('Follow') }}"
     data-placement="right" data-container="body">
     <span class="{{ ficon(following_icon if following else follow_icon) }}"></span>
+    {% if obj.metrics.followers %}{{obj.metrics.followers}}{% endif %}
 </button>
 {% endmacro %}

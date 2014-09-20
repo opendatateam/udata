@@ -16,12 +16,12 @@
 <div class="btn-group">
     <button type="button" class="btn btn-sorter btn-xs dropdown-toggle" data-toggle="dropdown">
         <span class="fa fa-fw fa-chevron-down hidden-sm"></span>
-        {{ label|truncate(12, True) or _('Relevance') }}
+        {{ label|truncate(12, True) or '---' }}
     </button>
     <ul class="dropdown-menu">
         <li>
             <a href="{{ to_url(url=url, sort=None) }}">
-                {{ _('Relevance') }}
+                ---
             </a>
         </li>
         {% for field, (label, order) in kwargs.items() %}
