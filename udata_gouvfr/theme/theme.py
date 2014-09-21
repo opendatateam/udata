@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+# from copy import deepcopy
+
 from udata import search
 from udata.forms import Form, fields, validators
 from udata.frontend import theme, nav
@@ -30,6 +32,23 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
 ])
 
 theme.menu(gouvfr_menu)
+
+nav.Bar('gouvfr_footer', list(gouvfr_menu.items) + [
+    nav.Item(_('Credits'), 'credits', url='//wiki.data.gouv.fr/wiki/Crédits'),
+    nav.Item(_('Terms of use'), 'terms', url='//wiki.data.gouv.fr/wiki/Conditions_Générales_d\'Utilisation'),
+])
+
+
+NETWORK_LINKS = [
+    ('Gouvernement.fr', 'http://www.gouvernement.fr'),
+    ('France.fr', 'http://www.france.fr'),
+    ('Legifrance.gouv.fr', 'http://www.legifrance.gouv.fr'),
+    ('Service-public.fr', 'http://www.service-public.fr'),
+    ('Opendata France', 'http://opendatafrance.net'),
+    ('CADA.fr', 'http://www.cada.fr'),
+]
+
+nav.Bar('gouvfr_network', [nav.Item(label, label, url=url) for label, url in NETWORK_LINKS])
 
 
 @theme.context('home')
