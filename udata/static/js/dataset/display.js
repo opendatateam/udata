@@ -93,8 +93,14 @@ define([
         var $el = $('#coverage-map'),
             attributions = '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> / <a href="http://open.mapquest.com/">MapQuest</a>',
             tilesUrl = 'http://otile{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png',
-            map = L.map($el[0], {zoomControl: false}),
-            layer = L.geoJson($el.data('geojson'));
+            map, layer;
+
+        if (!$el.length) {
+            return;
+        }
+
+        map = L.map($el[0], {zoomControl: false});
+        layer = L.geoJson($el.data('geojson'));
 
         // Disable drag and zoom handlers.
         map.dragging.disable();
