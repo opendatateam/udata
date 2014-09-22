@@ -445,48 +445,10 @@
         <div class="row">
             <div class="col-sm-9 list-group resources-list smaller">
             {% for resource in dataset.community_resources %}
-                {% set resource_name = resource.name or resource.description or _('Nameless resource') %}
-                {% set resource_format = resource.format|trim|lower or 'data' %}
-                <div id="community-resource-{{resource.id}}" class="list-group-item"
-                    data-url="{{ resource.url }}" data-format="{{ resource_format }}"
-                    rel="popover" data-trigger="hover" data-placement="top"
-                    {% if resource.description %}
-                    title="{{ resource_name }} [{{ resource_format }}]"
-                    data-content="{{ resource.description }}"
-                    {% else %}
-                    data-content="{{ resource_name }} [{{ resource_format }}]"
-                    {% endif %}
-                    >
-                    <div class="format-label pull-left ellipsis-dot">
-                        <span property="dc:format" data-format="{{ resource_format }}">
-                            {{ resource_format }}
-                        </span>
-                    </div>
-                    <h4 class="list-group-item-heading ellipsis {% if not resource.description %}dual{% endif %}">
-                        {{ resource.name }}
-                    </h4>
-                    {% if resource.description %}
-                    <p class="list-group-item-text ellipsis">
-                        {{ markdown_extract(resource.description) }}
-                    </p>
-                    {% endif %}
-                    {{
-                        publisher_avatar(resource.owner, resource.publish_as, 52,
-                            classes='resource-owner', overwrite=True
-                        )
-                    }}
-                    {% if user.sysadmin or resource.owner_id == user.id %}
-                    <div class="btn-group btn-group-xs tools">
-                        <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
-                            href="{{ url(lang, 'dataset', dataset.name, 'community/resource', resource.id, 'edit') }}">
-                            <span class="glyphicon glyphicon-edit"></span>
-                        </a>
-                    </div>
-                    {% endif %}
-                </div>
+                {% include theme('dataset/resource/list-item.html') %}
             {% endfor %}
                 <a class="list-group-item add"
-                    href="{{ url_for('datasets.new_resource', dataset=dataset) }}">
+                    href="{{ url_for('datasets.new_community_resource', dataset=dataset) }}">
                     <div class="format-label pull-left">+</div>
                     <h4 class="list-group-item-heading">
                         {{ _('Add a resource') }}
