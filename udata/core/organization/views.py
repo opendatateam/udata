@@ -230,16 +230,6 @@ class OrganizationIssuesView(ProtectedOrgView, DetailView):
         return context
 
 
-class OrganizationActivityView(OrgView, DetailView):
-    template_name = 'organization/activity.html'
-
-    def get_context(self):
-        context = super(OrganizationActivityView, self).get_context()
-        predicate = db.Q(organization=self.object) | db.Q(related_to=self.object)
-        context['activities'] = Activity.objects(predicate).order_by('-created_at').limit(30)
-        return context
-
-
 @blueprint.route('/<org:org>/datasets.csv')
 def datasets_csv(org):
     datasets = search.iter(Dataset, organization=str(org.id))
@@ -257,7 +247,6 @@ def supplied_datasets_csv(org):
 blueprint.add_url_rule('/', view_func=OrganizationListView.as_view(str('list')))
 blueprint.add_url_rule('/new/', view_func=OrganizationCreateView.as_view(str('new')))
 blueprint.add_url_rule('/<org:org>/', view_func=OrganizationDetailView.as_view(str('show')))
-blueprint.add_url_rule('/<org:org>/activity', view_func=OrganizationActivityView.as_view(str('activity')))
 blueprint.add_url_rule('/<org:org>/dashboard/', view_func=OrganizationDashboardView.as_view(str('dashboard')))
 blueprint.add_url_rule('/<org:org>/edit/', view_func=OrganizationEditView.as_view(str('edit')))
 blueprint.add_url_rule('/<org:org>/edit/members/', view_func=OrganizationEditMembersView.as_view(str('edit_members')))

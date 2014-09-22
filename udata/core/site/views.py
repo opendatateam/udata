@@ -6,11 +6,10 @@ from werkzeug.contrib.atom import AtomFeed
 from werkzeug.local import LocalProxy
 
 from udata import search
-from udata.core.metrics import Metric
 from udata.frontend import render, csv, theme
 from udata.frontend.views import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Metrics, Dataset, Activity, Site, Reuse
+from udata.models import Dataset, Activity, Site, Reuse
 from udata.utils import multi_to_dict
 
 from udata.core.activity.views import ActivityView
@@ -78,19 +77,6 @@ def home():
     context = {}
     processor = theme.current.get_processor('home', default_home_context_processor)
     return render('home.html', **processor(context))
-
-
-@blueprint.route('/metrics/')
-def metrics():
-    metrics = Metrics.objects.last_for(current_site)
-    specs = Metric.get_for('site')
-    values = metrics.values if metrics else {}
-    return render('metrics.html',
-        metrics=dict(
-            (key, {'value': values.get(key, spec.default), 'label': spec.display_name})
-            for key, spec in specs.items()
-        )
-    )
 
 
 @blueprint.route('/map/')
