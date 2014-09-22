@@ -6,15 +6,15 @@ from datetime import datetime
 from flask import abort, redirect, request, url_for, g, jsonify, render_template
 from werkzeug.contrib.atom import AtomFeed
 
-from udata.forms import DatasetForm, DatasetCreateForm, ResourceForm, DatasetExtraForm
+from udata.forms import DatasetForm, DatasetCreateForm, ResourceForm, CommunityResourceForm, DatasetExtraForm
 from udata.frontend import nav
-from udata.frontend.views import DetailView, CreateView, EditView, SingleObject, SearchView, BaseView
+from udata.frontend.views import DetailView, CreateView, EditView, NestedEditView, SingleObject, SearchView, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Resource, Reuse, Issue, Follow
 
 from udata.core.site.views import current_site
 
-from .permissions import DatasetEditPermission, set_dataset_identity
+from .permissions import CommunityResourceEditPermission, DatasetEditPermission, set_dataset_identity
 
 blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
 
@@ -91,6 +91,7 @@ class DatasetDetailView(DatasetView, DetailView):
         context = super(DatasetDetailView, self).get_context()
         context['reuses'] = Reuse.objects(datasets=self.dataset)
         context['can_edit'] = DatasetEditPermission(self.dataset)
+        context['can_edit_resource'] = CommunityResourceEditPermission
         return context
 
 
@@ -153,10 +154,8 @@ class DatasetTransferView(ProtectedDatasetView, EditView):
     template_name = 'dataset/transfer.html'
 
 
-class ResourceCreateView(SingleObject, CreateView):
-    model = Dataset
+class ResourceCreateView(ProtectedDatasetView, SingleObject, CreateView):
     form = ResourceForm
-    object_name = 'dataset'
     template_name = 'dataset/resource/create.html'
 
     def on_form_valid(self, form):
@@ -167,33 +166,42 @@ class ResourceCreateView(SingleObject, CreateView):
         return redirect(url_for('datasets.show', dataset=self.object))
 
 
-class ResourceEditView(EditView):
-    model = Resource
-    form = ResourceForm
-    object_name = 'resource'
-    template_name = 'dataset/resource/edit.html'
-
-    def get_object(self):
-        if not self.object:
-            self.dataset = self.kwargs['dataset']
-            rid = self.kwargs.get('rid')
-            for resource in self.dataset.resources:
-                if str(resource.id) == rid:
-                    self.object = resource
-                    break
-            else:
-                abort(404, 'Resource {0} does not exists in dataset'.format(rid))
-        return self.object
-
-    def get_context(self):
-        context = super(ResourceEditView, self).get_context()
-        context['dataset'] = self.dataset
-        return context
+class CommunityResourceCreateView(DatasetView, SingleObject, CreateView):
+    form = CommunityResourceForm
+    template_name = 'dataset/resource/create.html'
 
     def on_form_valid(self, form):
-        form.populate_obj(self.object)
-        self.dataset.save()
-        return redirect(url_for('datasets.show', dataset=self.dataset))
+        resource = Resource()
+        form.populate_obj(resource)
+        self.object.community_resources.append(resource)
+        self.object.save()
+        return redirect(url_for('datasets.show', dataset=self.object))
+
+
+class ResourceEditView(ProtectedDatasetView, NestedEditView):
+    nested_model = Resource
+    form = ResourceForm
+    nested_object_name = 'resource'
+    nested_attribute = 'resources'
+    template_name = 'dataset/resource/edit.html'
+
+    def get_success_url(self):
+        return url_for('datasets.show', dataset=self.dataset)
+
+
+class CommunityResourceEditView(DatasetView, NestedEditView):
+    form = CommunityResourceForm
+    nested_model = Resource
+    nested_object_name = 'resource'
+    nested_attribute = 'community_resources'
+    template_name = 'dataset/resource/edit.html'
+
+    def can(self, *args, **kwargs):
+        permission = CommunityResourceEditPermission(self.nested_object)
+        return permission.can()
+
+    def get_success_url(self):
+        return url_for('datasets.show', dataset=self.dataset)
 
 
 class DatasetFollowersView(DatasetView, DetailView):
@@ -215,6 +223,8 @@ blueprint.add_url_rule('/<dataset:dataset>/edit/resources/', view_func=DatasetRe
 blueprint.add_url_rule('/<dataset:dataset>/issues/', view_func=DatasetIssuesView.as_view(str('issues')))
 blueprint.add_url_rule('/<dataset:dataset>/transfer/', view_func=DatasetTransferView.as_view(str('transfer')))
 blueprint.add_url_rule('/<dataset:dataset>/resources/new/', view_func=ResourceCreateView.as_view(str('new_resource')))
-blueprint.add_url_rule('/<dataset:dataset>/resources/<rid>/', view_func=ResourceEditView.as_view(str('edit_resource')))
+blueprint.add_url_rule('/<dataset:dataset>/resources/<resource>/', view_func=ResourceEditView.as_view(str('edit_resource')))
+blueprint.add_url_rule('/<dataset:dataset>/community_resources/new/', view_func=CommunityResourceCreateView.as_view(str('new_community_resource')))
+blueprint.add_url_rule('/<dataset:dataset>/community_resources/<resource>/', view_func=CommunityResourceEditView.as_view(str('edit_community_resource')))
 blueprint.add_url_rule('/<dataset:dataset>/delete/', view_func=DatasetDeleteView.as_view(str('delete')))
 blueprint.add_url_rule('/<dataset:dataset>/followers/', view_func=DatasetFollowersView.as_view(str('followers')))

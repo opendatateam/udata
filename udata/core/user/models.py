@@ -63,6 +63,7 @@ class User(db.Document, WithMetrics,UserMixin):
 
     deleted = db.DateTimeField()
     ext = db.MapField(db.GenericEmbeddedDocumentField())
+    extras = db.ExtrasField()
 
     before_save = Signal()
     after_save = Signal()

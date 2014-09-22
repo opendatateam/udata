@@ -53,6 +53,8 @@ define(['jquery', 'auth', 'i18n'], function($, Auth, i18n) {
                 }
             });
         }
+
+        return false;
     });
 
 });

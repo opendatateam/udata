@@ -26,15 +26,20 @@
         {{ resource.description|mdstrip(200) or _('No Description') }}{#   #}
     </p>
     {% endif %}
-    {# {{
-        publisher_avatar(resource.owner, resource.publish_as, 52,
-            classes='resource-owner', overwrite=True
-        )
-    }} #}
-    {% if can_edit %}
+    {% if resource.owner %}
+    {{ resource.owner|avatar(52, 'resource-owner') }}
+    {% endif %}
+    {% if resource.owner and can_edit_resource(resource) %}
     <div class="btn-group btn-group-xs tools">
         <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
-            href="{{ url_for('datasets.edit_resource', dataset=dataset, rid=resource.id) }}">
+            href="{{ url_for('datasets.edit_community_resource', dataset=dataset, resource=resource.id) }}">
+            <span class="glyphicon glyphicon-edit"></span>
+        </a>
+    </div>
+    {% elif not resource.owner and can_edit %}
+    <div class="btn-group btn-group-xs tools">
+        <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
+            href="{{ url_for('datasets.edit_resource', dataset=dataset, resource=resource.id) }}">
             <span class="glyphicon glyphicon-edit"></span>
         </a>
     </div>

@@ -129,12 +129,18 @@ def owner_url(obj):
 
 @front.app_template_filter()
 @front.app_template_global()
-def avatar(user, size):
+def avatar(user, size, classes=''):
     markup = '''
-        <a class="avatar" href="{url}" title="{title}">
+        <a class="avatar {classes}" href="{url}" title="{title}">
         <img src="{avatar_url}" class="avatar" width="{size}" height="{size}"/>
         </a>
-    '''.format(title=user.fullname, url=url_for('users.show', user=user), size=size, avatar_url=avatar_url(user, size))
+    '''.format(
+        title=user.fullname,
+        url=url_for('users.show', user=user),
+        size=size,
+        avatar_url=avatar_url(user, size),
+        classes=classes
+    )
     return Markup(markup)
 
 

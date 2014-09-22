@@ -163,7 +163,7 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertNotIn('a_key', dataset.extras)
 
     def test_render_edit_resources(self):
-        '''It should render the dataset resouces edit form'''
+        '''It should render the dataset resources edit form'''
         user = self.login()
         dataset = DatasetFactory(owner=user, resources=[ResourceFactory() for _ in range(3)])
         response = self.get(url_for('datasets.edit_resources', dataset=dataset))
@@ -248,3 +248,33 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assert200(response)
         rendered_followers = self.get_context_variable('followers')
         self.assertEqual(len(rendered_followers), len(followers))
+
+    def test_render_create_resource(self):
+        '''It should render the dataset new resource page'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        response = self.get(url_for('datasets.new_resource', dataset=dataset))
+        self.assert200(response)
+
+    def test_render_create_community_resource(self):
+        '''It should render the dataset new community resource page'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        response = self.get(url_for('datasets.new_community_resource', dataset=dataset))
+        self.assert200(response)
+
+    def test_render_edit_resource(self):
+        '''It should render the dataset new resource page'''
+        user = self.login()
+        resource = ResourceFactory()
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        response = self.get(url_for('datasets.edit_resource', dataset=dataset, resource=resource.id))
+        self.assert200(response)
+
+    def test_render_edit_community_resource(self):
+        '''It should render the dataset new community resource page'''
+        user = self.login()
+        resource = ResourceFactory(owner=user)
+        dataset = DatasetFactory(owner=UserFactory(), community_resources=[resource])
+        response = self.get(url_for('datasets.edit_community_resource', dataset=dataset, resource=resource.id))
+        self.assert200(response)

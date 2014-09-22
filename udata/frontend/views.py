@@ -6,7 +6,7 @@ from flask.views import MethodView
 
 from udata import search, auth
 from udata.frontend import render
-from udata.utils import multi_to_dict
+from udata.utils import multi_to_dict, get_by
 
 
 class Templated(object):
@@ -111,6 +111,39 @@ class SingleObject(object):
         return context
 
 
+class NestedObject(SingleObject):
+    nested_model = None
+    nested_object_name = 'nested'
+    nested_object = None
+    nested_attribute = None
+    nested_id = None
+
+    def get_object(self):
+        obj = super(NestedObject, self).get_object()
+        if not self.nested_object:
+            if not self.nested_attribute:
+                raise ValueError('nested_attribute should be set')
+            if self.nested_object_name in self.kwargs:
+                self.nested_id = self.kwargs[self.nested_object_name]
+            nested = getattr(obj, self.nested_attribute)
+            if isinstance(nested, (list, tuple)):
+                for item in nested:
+                    if self.is_nested(item):
+                        self.nested_object = item
+                        break
+            else:
+                self.nested_object = nested
+        return obj
+
+    def is_nested(self, obj):
+        return str(obj.id) == self.nested_id
+
+    def get_context(self):
+        context = super(NestedObject, self).get_context()
+        context[self.nested_object_name] = self.nested_object
+        return context
+
+
 class DetailView(SingleObject, Templated, BaseView):
     '''
     Render a single object.
@@ -185,3 +218,17 @@ class EditView(SingleObject, FormView):
 
     def get_success_url(self):
         return self.object.display_url
+
+
+class NestedEditView(NestedObject, FormView):
+    decorators = [auth.login_required]
+
+    def get_context(self):
+        context = super(NestedEditView, self).get_context()
+        context['form'] = self.get_form(request.form, self.nested_object)
+        return context
+
+    def on_form_valid(self, form):
+        form.populate_obj(self.nested_object)
+        self.object.save()
+        return redirect(self.get_success_url())

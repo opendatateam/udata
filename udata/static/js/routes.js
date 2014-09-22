@@ -37,6 +37,10 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
         resourceNew: {path: i18n('/datasets/:slug_or_id/resources/new/'), moduleId: 'dataset/resource-form'},
         resourceEdit: {path: i18n('/datasets/:slug_or_id/resources/:rid/'), moduleId: 'dataset/resource-form'},
 
+        // Community Resources routes
+        communityResourceNew: {path: i18n('/datasets/:slug_or_id/community_resources/new/'), moduleId: 'dataset/resource-form'},
+        communityResourceEdit: {path: i18n('/datasets/:slug_or_id/community_resources/:rid/'), moduleId: 'dataset/resource-form'},
+
         // Organizations routes
         orgSearch: {path: i18n('/organizations/'), moduleId: 'search'},
         orgNew: {path: i18n('/organizations/new/'), moduleId: 'organization/form'},

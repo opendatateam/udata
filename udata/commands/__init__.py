@@ -17,6 +17,12 @@ log = logging.getLogger(__name__)
 manager = Manager()
 
 
+def submanager(name, **kwargs):
+    sub_manager = Manager(**kwargs)
+    manager.add_command(name, sub_manager)
+    return sub_manager
+
+
 def register_commands(manager):
     '''Register all core commands'''
     manager.add_command('clean', Clean())

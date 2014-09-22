@@ -10,6 +10,7 @@ from udata.auth import current_user, Permission
 from udata.core.organization.permissions import OrganizationAdminNeed, OrganizationEditorNeed
 
 DatasetOwnerNeed = namedtuple('dataset_owner', 'value')
+ResourceOwnerNeed = namedtuple('resource_owner', 'value')
 
 
 def set_dataset_identity(identity, dataset):
@@ -17,6 +18,10 @@ def set_dataset_identity(identity, dataset):
         return
     if dataset.owner and current_user.id == dataset.owner.id:
         identity.provides.add(DatasetOwnerNeed(str(dataset.id)))
+
+    for resource in dataset.resources + dataset.community_resources:
+        if resource.owner and current_user.id == resource.owner.id:
+            identity.provides.add(ResourceOwnerNeed(str(resource.id)))
 
 
 class DatasetEditPermission(Permission):
@@ -28,3 +33,10 @@ class DatasetEditPermission(Permission):
             needs.append(OrganizationEditorNeed(dataset.organization.id))
 
         super(DatasetEditPermission, self).__init__(*needs)
+
+
+class CommunityResourceEditPermission(Permission):
+    def __init__(self, resource):
+        needs = [ResourceOwnerNeed(str(resource.id))]
+
+        super(CommunityResourceEditPermission, self).__init__(*needs)

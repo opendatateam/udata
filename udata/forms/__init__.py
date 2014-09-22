@@ -18,15 +18,15 @@ class ModelForm(MEModelForm):
         return i18n.domain.get_translations()
 
 
-class UserModelForm(ModelForm):
+class UserModelFormMixin(object):
     user_field = 'owner'
 
     def validate(self):
-        return super(UserModelForm, self).validate() and current_user.is_authenticated()
+        return super(UserModelFormMixin, self).validate() and current_user.is_authenticated()
 
     @property
     def errors(self):
-        _errors = super(UserModelForm, self).errors
+        _errors = super(UserModelFormMixin, self).errors
         if not current_user.is_authenticated():
             _errors[self.user_field] = 'An authenticated user is required'
         return _errors
@@ -34,17 +34,21 @@ class UserModelForm(ModelForm):
     def populate_obj(self, obj):
         if not getattr(obj, self.user_field):
             setattr(obj, self.user_field, current_user.to_dbref())
-        super(UserModelForm, self).populate_obj(obj)
+        super(UserModelFormMixin, self).populate_obj(obj)
 
     def save(self, **kwargs):
         self.data[self.user_field] = self.data.get(self.user_field, current_user.to_dbref())
-        return super(UserModelForm, self).save(**kwargs)
+        return super(UserModelFormMixin, self).save(**kwargs)
 
     @property
     def data(self):
-        data = super(UserModelForm, self).data
+        data = super(UserModelFormMixin, self).data
         data[self.user_field] = data.get(self.user_field, current_user.to_dbref())
         return data
+
+
+class UserModelForm(UserModelFormMixin, ModelForm):
+    pass
 
 
 # Load core forms

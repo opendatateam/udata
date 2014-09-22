@@ -17,7 +17,7 @@ class FakeMetric(Metric):
     name = 'fake'
 
     def get_value(self):
-        return 'fake-value'
+        return 42
 
 
 class MetricsModelTest(DBTestMixin, TestCase):
@@ -143,7 +143,7 @@ class MetricTest(DBTestMixin, TestCase):
         self.assertTrue(self.updated_emitted)
 
         self.obj.reload()
-        self.assertEqual(self.obj.metrics['fake'], 'fake-value')
+        self.assertEqual(self.obj.metrics['fake'], 42)
 
     def test_updated(self):
         '''It should store the updated metric on "updated" signal'''
