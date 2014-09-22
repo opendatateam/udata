@@ -90,6 +90,7 @@ def lazy_pgettext(*args, **kwargs):
 
 @babel.localeselector
 def get_locale():
+    print 'get locale'
     if hasattr(g, 'lang_code'):
         return g.lang_code
     return request.accept_languages.best_match(current_app.config['LANGUAGES'].keys())
@@ -102,19 +103,18 @@ def init_app(app):
 
 def _add_language_code(endpoint, values):
     if not endpoint.endswith('_redirect'):
-        values.setdefault('lang_code', getattr(g, 'lang_code', current_app.config['DEFAULT_LANGUAGE']))
+        values.setdefault('lang_code', g.get('lang_code', current_app.config['DEFAULT_LANGUAGE']))
 
 
 def _pull_lang_code(endpoint, values):
     default_lang = current_app.config['DEFAULT_LANGUAGE']
-    lang = values.pop('lang_code', default_lang)
-    if not lang in current_app.config['LANGUAGES']:
+    lang_code = values.pop('lang_code', g.get('lang_code', default_lang))
+    if not lang_code in current_app.config['LANGUAGES']:
         try:
             abort(redirect(url_for(endpoint, lang_code=default_lang, **values)))
         except:
-            abort(redirect(request.url.replace('/{0}/'.format(lang), '/{0}/'.format(default_lang)) ))
-    g.lang_code = lang
-    refresh()
+            abort(redirect(request.url.replace('/{0}/'.format(lang_code), '/{0}/'.format(default_lang))))
+    g.lang_code = lang_code
 
 
 class I18nBlueprintSetupState(BlueprintSetupState):

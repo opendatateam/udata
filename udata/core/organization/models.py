@@ -98,7 +98,7 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
     requests = db.ListField(db.EmbeddedDocumentField(MembershipRequest))
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
-    extras = db.DictField()
+    extras = db.ExtrasField()
 
     deleted = db.DateTimeField()
 

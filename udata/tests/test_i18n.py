@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import g, url_for, request
+from flask import g, url_for
 
 from udata.i18n import I18nBlueprint
 
