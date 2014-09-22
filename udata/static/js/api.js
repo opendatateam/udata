@@ -42,7 +42,7 @@ define(['jquery'], function($) {
         var result,
             options = {
                 type: method,
-                url: url,
+                url: build_url(url),
                 contentType: 'application/json',
                 dataType: 'json',
                 async: false,
@@ -50,8 +50,11 @@ define(['jquery'], function($) {
                     result = data
                 }
             };
-        if (data) {
-            options.data = JSON.stringify(data);
+
+        if (method.toLowerCase() != 'get') {
+            options.data = JSON.stringify(data||{});
+        } else {
+            options.data = data
         }
         $.ajax(options);
         return result;
