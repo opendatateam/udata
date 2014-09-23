@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.models import db, Dataset
+from udata.models import db, Dataset, User, Organization, Reuse
 from udata.i18n import lazy_gettext as _
 
 # Ensure territories are registered
@@ -34,3 +34,8 @@ class TerritorialCoverage(db.EmbeddedDocument):
         }
 
 Dataset.extras.register('territorial_coverage', TerritorialCoverage)
+
+Dataset.extras.register('datagouv_ckan_last_sync', db.DateTimeField)
+Organization.extras.register('datagouv_ckan_last_sync', db.DateTimeField)
+Reuse.extras.register('datagouv_ckan_last_sync', db.DateTimeField)
+User.extras.register('datagouv_ckan_last_sync', db.DateTimeField)
