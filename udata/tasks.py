@@ -21,6 +21,18 @@ def init_app(app):
             'task': 'bump-metrics',
             'schedule': crontab(hour=0, minute=0),
         },
+        'purge-datasets-every-nights': {
+            'task': 'purge-datasets',
+            'schedule': crontab(hour=0, minute=0),
+        },
+        'purge-reuses-every-nights': {
+            'task': 'purge-reuses',
+            'schedule': crontab(hour=0, minute=0),
+        },
+        'purge-organizations-every-nights': {
+            'task': 'purge-organizations',
+            'schedule': crontab(hour=0, minute=0),
+        },
     }
 
     TaskBase = celery.Task
@@ -38,6 +50,9 @@ def init_app(app):
     import udata.core.storages.tasks
     # import udata.core.search.tasks
     import udata.core.activity.tasks
+    import udata.core.dataset.tasks
+    import udata.core.reuse.tasks
+    import udata.core.organization.tasks
 
     # Load plugins tasks
     for plugin in app.config['PLUGINS']:
