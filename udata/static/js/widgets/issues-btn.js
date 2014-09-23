@@ -118,7 +118,7 @@ define([
                     Notify.error(msg);
                     console.error(e.responseJSON);
                 }).always(function() {
-                    $this.find('.count').text(count > 0 ? '('+count+')' : '');
+                    $this.find('.count').text(count > 0 ? count : '');
                     $modal.modal('hide');
                 });
             }
