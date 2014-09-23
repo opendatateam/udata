@@ -68,7 +68,7 @@ class ResourcesMetric(SiteMetric):
         }
         '''))
 
-ResourcesMetric.connect(Resource.on_added, Resource.on_deleted)
+ResourcesMetric.connect(Dataset.on_create, Dataset.on_update, Resource.on_added, Resource.on_deleted)
 
 
 class UsersMetric(SiteMetric):
