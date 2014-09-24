@@ -22,8 +22,20 @@ theme.defaults({
 })
 
 
+class Wikitem(nav.Item):
+    def __init__(self, label, page, **kwargs):
+        super(Wikitem, self).__init__(label, page.lower(), url='//wiki.data.gouv.fr/wiki/{0}'.format(page), **kwargs)
+
+
+
 gouvfr_menu = nav.Bar('gouvfr_menu', [
-    nav.Item(_('How it works ?'), 'faq', url='//wiki.data.gouv.fr/wiki/FAQ'),
+    nav.Item(_('How it works ?'), 'faq', url='//wiki.data.gouv.fr/wiki/FAQ', items=[
+        # nav.Wikitem(_('Organizations'), 'organizations.list'),
+        Wikitem(_('About this site'), 'FAQ'),
+        Wikitem(_('Publication guide'), 'Guide_de_publication'),
+        Wikitem(_('Tools'), 'Outillage_pour_les_datavisualisations'),
+        nav.Item(_('API'), 'api.root')
+    ]),
     nav.Item(_('Organizations'), 'organizations.list'),
     nav.Item(_('Open Licence'), 'license', url='//wiki.data.gouv.fr/wiki/Licence_Ouverte_/_Open_Licence'),
     nav.Item(_('Dashboard'), 'site.dashboard'),
