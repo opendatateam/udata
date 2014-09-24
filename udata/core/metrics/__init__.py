@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import logging
 
 from blinker import Signal
+from datetime import date, datetime
 
 log = logging.getLogger(__name__)
 
@@ -48,6 +49,10 @@ class Metric(object):
         self.target = target
         self.data = data
 
+    @property
+    def objects(self):
+        return self.model.objects(id=self.target.id)
+
     def compute(self):
         log.debug('Computing value for %s(%s) metric', self.name, self.target)
         self.value = self.get_value()
@@ -69,6 +74,25 @@ class Metric(object):
         Implement this method when you inherit this class.
         '''
         raise NotImplementedError
+
+    def aggregate(self, start, end):
+        '''
+        This method encpsualte the metric aggregation logic.
+        Override this method when you inherit this class.
+        By default, it takes the last value.
+        '''
+        last = self.objects(level='daily', date__lte=self.iso(end), date__gte=self.iso(start)).order_by('-date').first()
+        return last.values[self.name]
+
+    def iso(self, value):
+        if isinstance(value, basestring):
+            return value
+        elif isinstance(value, datetime):
+            return value.date().isoformat()
+        elif isinstance(value, date):
+            return value.isoformat()
+        else:
+            raise ValueError('Unsupported format: {0} ({1})'.format(value, type(value)))
 
     def trigger_update(self):
         self.need_update.send(self)

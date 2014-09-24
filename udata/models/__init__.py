@@ -9,6 +9,7 @@ from flask.ext.mongoengine import MongoEngine, MongoEngineSessionInterface, Docu
 from mongoengine.base import TopLevelDocumentMetaclass
 from mongoengine.signals import pre_save, post_save
 
+from .badges_field import BadgesField
 from .datetime_fields import DateField, DateRange, Datetimed
 from .extras_fields import ExtrasField, Extra
 from .slug_fields import SlugField
@@ -21,6 +22,7 @@ class UDataMongoEngine(MongoEngine):
     '''Customized mongoengine with extra fields types and helpers'''
     def __init__(self, app=None):
         super(UDataMongoEngine, self).__init__(app)
+        self.BadgesField = BadgesField
         self.DateField = DateField
         self.Datetimed = Datetimed
         self.Extra = Extra

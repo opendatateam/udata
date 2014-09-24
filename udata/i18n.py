@@ -90,7 +90,6 @@ def lazy_pgettext(*args, **kwargs):
 
 @babel.localeselector
 def get_locale():
-    print 'get locale'
     if hasattr(g, 'lang_code'):
         return g.lang_code
     return request.accept_languages.best_match(current_app.config['LANGUAGES'].keys())
