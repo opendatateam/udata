@@ -56,7 +56,7 @@ def home_context(context):
     config = theme.current.config
     specs = {
         'recent_datasets': search.SearchQuery(Dataset, sort='-created', page_size=config['tab_size']),
-        'recent_reuses': search.SearchQuery(Reuse, sort='-created', page_size=config['tab_size']),
+        # 'recent_reuses': search.SearchQuery(Reuse, sort='-created', page_size=config['tab_size']),
         # 'featured_datasets': search.SearchQuery(Dataset, featured=True, page_size=3),
         'featured_reuses': search.SearchQuery(Reuse, featured=True, page_size=9),
         'popular_datasets': search.SearchQuery(Dataset, page_size=config['tab_size']),
@@ -67,5 +67,6 @@ def home_context(context):
     results = search.multiquery(*queries)
 
     context.update(zip(keys, results))
+    context['recent_reuses'] = Reuse.objects(featured=True).visible().order_by('-created_at').limit(3)
     context['last_post'] = Post.objects(private=False).order_by('-created_at').first()
     return context
