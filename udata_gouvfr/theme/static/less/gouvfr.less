@@ -455,8 +455,19 @@ ul.search-results {
 }
 
 
-@media (min-width: 768px) {
-    .dropdown-hover:hover .dropdown-menu {
-        display: block;
+@media (min-width: @screen-md-min) {
+    .navbar .links {
+        .dropdown-hover:hover .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown-menu {
+            border: none;
+            .box-shadow(5px 5px 5px rgba(0, 0, 0, 0.176));
+
+            li > a  {
+                font-weight: bold;
+            }
+        }
     }
 }

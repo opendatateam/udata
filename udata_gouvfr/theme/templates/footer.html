@@ -6,7 +6,16 @@
                 <h5>{{ _('The Open Data') }}</h5>
                 <ul>
                     {% for item in nav.gouvfr_footer %}
-                    <li><a href="{{ item.url }}">{{ item.label }}</a></li>
+                    <li>
+                        <a href="{{ item.url }}">{{ item.label }}</a>
+                        {% if item.items %}
+                        <ul>
+                            {% for subitem in item.items %}
+                            <li><a href="{{ subitem.url }}">{{ subitem.label }}</a></li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </li>
                     {% endfor %}
                 </ul>
             </section>

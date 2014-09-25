@@ -27,17 +27,17 @@ class Wikitem(nav.Item):
         super(Wikitem, self).__init__(label, page.lower(), url='//wiki.data.gouv.fr/wiki/{0}'.format(page), **kwargs)
 
 
-
 gouvfr_menu = nav.Bar('gouvfr_menu', [
-    nav.Item(_('How it works ?'), 'faq', url='//wiki.data.gouv.fr/wiki/FAQ', items=[
-        # nav.Wikitem(_('Organizations'), 'organizations.list'),
-        Wikitem(_('About this site'), 'FAQ'),
+    Wikitem(_('How it works ?'), 'FAQ', items=[
         Wikitem(_('Publication guide'), 'Guide_de_publication'),
         Wikitem(_('Tools'), 'Outillage_pour_les_datavisualisations'),
+        Wikitem(_('Open Licence'), 'Licence_Ouverte_/_Open_Licence'),
         nav.Item(_('API'), 'api.root')
     ]),
-    nav.Item(_('Organizations'), 'organizations.list'),
-    nav.Item(_('Open Licence'), 'license', url='//wiki.data.gouv.fr/wiki/Licence_Ouverte_/_Open_Licence'),
+    nav.Item(_('Data'), 'datasets.list', items=[
+        nav.Item(_('Reuses'), 'reuses.list'),
+        nav.Item(_('Organizations'), 'organizations.list'),
+    ]),
     nav.Item(_('Dashboard'), 'site.dashboard'),
     nav.Item('Etalab', 'etalab', url='http://www.etalab.gouv.fr/'),
     nav.Item('CADA', 'cada', url='http://cada.data.gouv.fr/'),

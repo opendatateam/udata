@@ -22,9 +22,10 @@
             <ul class="nav navbar-nav links">
                 {% for item in current_theme.menu %}
                 <li {% if item.items %}class="dropdown dropdown-hover"{% endif %}>
-                    <a href="{{ item.url }}" {% if item.items %}data-toggle="dropdown"{% endif %}>{{ item.label }}</a>
+                    <a href="{{ item.url }}">{{ item.label }}</a>
                     {% if item.items %}
                     <ul class="dropdown-menu" role="menu">
+                        <li><a href="{{ item.url }}">{{ item.label }}</a></li>
                         {% for subitem in item.items %}
                         <li><a href="{{ subitem.url }}">{{ subitem.label }}</a></li>
                         {% endfor %}
