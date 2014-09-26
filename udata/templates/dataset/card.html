@@ -26,7 +26,7 @@
     </div>
     <footer>
         <ul>
-            {% if dataset.spatial.territories %}
+            {% if dataset.spatial and dataset.spatial.territories %}
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
@@ -36,6 +36,7 @@
                 </a>
             </li>
             {% endif %}
+            {% if dataset.metrics %}
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
@@ -52,6 +53,7 @@
                     {{ dataset.metrics.followers or 0 }}
                 </a>
             </li>
+            {% endif %}
         </ul>
 
     </footer>
@@ -76,7 +78,7 @@
             {% endif %}
 
             {# Territorial coverage #}
-            {% if dataset.spatial.granularity %}
+            {% if dataset.spatial and dataset.spatial.granularity %}
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
