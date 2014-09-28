@@ -193,27 +193,57 @@ section.blog {
 
     .row.gray {
         background-color: #ececec;
-        max-height: 250px;
-        > * {
-            height: 100%;
-        }
         overflow: hidden;
         margin: 0;
         padding: 0;
+
+        height: 500px;
+        max-height: 500px;
+
+        > * {
+            height: 50%;
+        }
+
+
+        @media (min-width: @screen-sm-min) {
+            height: 250px;
+            max-height: 250px;
+
+            > * {
+                height: 100%;
+            }
+        }
+
+
     }
 
     .photo {
         max-height: 100%;
         vertical-align: middle;
+        text-align: center;
+        font: 0/0 a;       /* Hide the characters like spaces */
+        overflow: hidden;
+
+        @media (min-width: @screen-sm-min) {
+            padding-left: 0;
+        }
+
+        &:before {
+            content: ' ';
+            display: inline-block;
+            vertical-align: middle;
+            height: 100%;
+        }
+
         img {
             width: 100%;
+            vertical-align: middle;
+            display: inline-block;
         }
-        padding-left: 0;
     }
 
     .body {
-        padding-top: 20px;
-        padding-right: 30px;
+        padding: 20px 30px 20px 0;
         color: #484d54;
 
         .post-date {

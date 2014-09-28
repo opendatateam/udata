@@ -164,6 +164,7 @@
 {# End datasets section #}
 
 {# Blog section #}
+{% if blogpost %}
 <section class="default blog">
       <div class="container blog-container">
             <div class="row">
@@ -174,19 +175,19 @@
 
             <div class="row gray">
                 <div class="col-xs-12 col-sm-4 photo">
-                    <img src="http://www.etalab.gouv.fr/wp-content/uploads/2014/09/ogp-summit-logo-806x375.png">
+                    <img src="{{ blogpost.image_url|safe }}" alt="{{ blogpost.title|safe }}">
                 </div>
                 <div class="col-xs-12 col-sm-8 body">
                     <span class="post-date">5 Août 2014</span>
                     <h4>
-                        <a href="http://www.etalab.gouv.fr/la-france-entre-au-comite-directeur-de-logp"
-                            title="La France entre au Comité Directeur de l’OGP">
-                            La France entre au Comité Directeur de l’OGP
+                        <a href="{{ blogpost.link }}"
+                            title="{{ blogpost.title|safe }}">
+                            {{ blogpost.title|safe }}
                         </a>
                     </h4>
                     <p>
-                        Le Partenariat pour le Gouvernement Ouvert (Open Government Partnership ou OGP), initiative multi-latérale que la France a rejoint en avril dernier, vient d’élire son comité directeur (« Steering Committee »).
-                        <a href="http://www.etalab.gouv.fr/la-france-entre-au-comite-directeur-de-logp"
+                        {{ blogpost.summary|safe }}
+                        <a href="{{ blogpost.link }}"
                             title="{{ _('more') }}"
                             class="btn btn-grey btn-primary btn-mini">+</a>
                     </p>
@@ -195,5 +196,6 @@
             </div>
       </div>
 </section>
-{# End datasets section #}
+{% endif %}
+{# End blog section #}
 {% endblock %}

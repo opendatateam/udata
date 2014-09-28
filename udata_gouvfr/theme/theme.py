@@ -1,19 +1,30 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import re
+
 # from copy import deepcopy
+import feedparser
+
+from flask import g, current_app
 
 from udata import search
+from udata.app import cache
 from udata.forms import Form, fields, validators
 from udata.frontend import theme, nav
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, Reuse, Post
 
 
+RE_POST_IMG = re.compile(r'\<img .* src="(?P<src>.+\.(?:png|jpg))" .* />(?P<content>.+)')
+
+
 @theme.admin_form
 class GouvfrThemeForm(Form):
     tab_size = fields.IntegerField(_('Tab size'), description=_('Home page tab size'),
         validators=[validators.required()])
+    atom_url = fields.StringField(_('ATOM Feed URL'),
+        description=_('An optionnal atom feed URL for display blog post in home page'))
 
 theme.defaults({
     'tab_size': 8,
@@ -63,6 +74,29 @@ NETWORK_LINKS = [
 nav.Bar('gouvfr_network', [nav.Item(label, label, url=url) for label, url in NETWORK_LINKS])
 
 
+@cache.memoize(50)
+def get_blog_post(url, lang):
+    for code in lang, current_app.config['DEFAULT_LANGUAGE']:
+        feed_url = url.format(lang=code)
+        feed = feedparser.parse(feed_url)
+        if len(feed['entries']) > 0:
+            break
+    if len(feed['entries']) <= 0:
+        return None
+
+    post = feed['entries'][0]
+    blogpost = {
+        'title': post['title'],
+        'link': post['link'],
+    }
+    match = RE_POST_IMG.match(post['summary'])
+    if match:
+        blogpost.update(image_url=match.group('src'), summary=match.group('content'))
+    else:
+        blogpost['summary'] = post['summary']
+    return blogpost
+
+
 @theme.context('home')
 def home_context(context):
     config = theme.current.config
@@ -81,4 +115,6 @@ def home_context(context):
     context.update(zip(keys, results))
     context['recent_reuses'] = Reuse.objects(featured=True).visible().order_by('-created_at').limit(3)
     context['last_post'] = Post.objects(private=False).order_by('-created_at').first()
+    if 'atom_url' in config:
+        context['blogpost'] = get_blog_post(config['atom_url'], g.lang_code)
     return context
