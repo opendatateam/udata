@@ -68,7 +68,6 @@ class ConfigurableTheme(Theme):
 
     @menu.setter
     def menu(self, value):
-        print 'set menu', value
         self._menu = value
 
     def configure(self):

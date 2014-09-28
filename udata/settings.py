@@ -27,6 +27,7 @@ class Defaults(object):
     # CELERY_TASK_SERIALIZER = 'pickle'
     # CELERYD_POOL = 'gevent'
 
+    CACHE_KEY_PREFIX = 'udata-cache'
     CACHE_TYPE = 'redis'
 
     SECURITY_PASSWORD_HASH = b'bcrypt'
@@ -73,3 +74,4 @@ class Debug(Defaults):
         'flask.ext.debugtoolbar.panels.profiler.ProfilerDebugPanel',
         'flask.ext.mongoengine.panels.MongoDebugPanel',
     )
+    CACHE_TYPE = 'simple'
