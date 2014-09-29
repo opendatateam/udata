@@ -21,7 +21,7 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
         apidoc_hash: {path: /\/\w+\.json(\/(get|post|put|delete|patch)_[\w_]+)?/, moduleId: 'apidoc'},
 
         // Site admin
-        siteConfig: {path: i18n('/admin/config/'), moduleId: 'site/form'},
+        siteConfig: {path: i18n('/admin/site/'), moduleId: 'site/form'},
         siteTheme: {path: i18n('/admin/theme/'), moduleId: 'site/form'},
         siteIssues: {path: i18n('/admin/issues/'), moduleId: 'issue/list'},
 

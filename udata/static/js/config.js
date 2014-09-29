@@ -132,13 +132,10 @@ require.config({
             ],
             exports: 'SwaggerUi'
         }
-    }
+    },
 
-    // hbs: { // optional
-    //     helpers: true,            // default: true
-    //     i18n: false,              // default: false
-    //     templateExtension: 'hbs', // default: 'hbs'
-    //     partialsUrl: ''           // default: ''
-    // }
+    hbs: { // optional
+        disablei18n: true,              // default: false
+    }
 
 });
