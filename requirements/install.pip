@@ -28,7 +28,7 @@ python-dateutil==2.2
 pytz==2014.7
 PyYAML==3.11
 redis
-Shapely==1.4.1
+Shapely==1.4.2
 unicodecsv==0.9.4
 webassets==0.10.1
 
