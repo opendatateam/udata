@@ -84,16 +84,16 @@ def get_blog_post(url, lang):
     if len(feed['entries']) <= 0:
         return None
 
-    post = feed['entries'][0]
+    post = feed.entries[0]
     blogpost = {
-        'title': post['title'],
-        'link': post['link'],
+        'title': post.title,
+        'link': post.link,
     }
-    match = RE_POST_IMG.match(post['summary'])
+    match = RE_POST_IMG.match(post.content[0].value)
     if match:
         blogpost.update(image_url=match.group('src'), summary=match.group('content'))
     else:
-        blogpost['summary'] = post['summary']
+        blogpost['summary'] = post.summary
     return blogpost
 
 
@@ -102,11 +102,8 @@ def home_context(context):
     config = theme.current.config
     specs = {
         'recent_datasets': search.SearchQuery(Dataset, sort='-created', page_size=config['tab_size']),
-        # 'recent_reuses': search.SearchQuery(Reuse, sort='-created', page_size=config['tab_size']),
-        # 'featured_datasets': search.SearchQuery(Dataset, featured=True, page_size=3),
         'featured_reuses': search.SearchQuery(Reuse, featured=True, page_size=9),
         'popular_datasets': search.SearchQuery(Dataset, page_size=config['tab_size']),
-        'popular_reuses': search.SearchQuery(Reuse, page_size=config['tab_size']),
     }
     keys, queries = zip(*specs.items())
 

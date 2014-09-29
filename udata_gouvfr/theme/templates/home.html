@@ -186,7 +186,7 @@
                         </a>
                     </h4>
                     <p>
-                        {{ blogpost.summary|safe }}
+                        {{ blogpost.summary|striptags|truncate(400) }}
                         <a href="{{ blogpost.link }}"
                             title="{{ _('more') }}"
                             class="btn btn-grey btn-primary btn-mini">+</a>
