@@ -43,6 +43,10 @@ class OrganizationBlueprintTest(FrontTestCase):
         organization = Organization.objects.first()
         self.assertRedirects(response, organization.display_url)
 
+        member = organization.member(self.user)
+        self.assertIsNotNone(member, 'Current user should be a member')
+        self.assertEqual(member.role, 'admin', 'Current user should be an administrator')
+
     def test_render_display(self):
         '''It should render the organization page'''
         organization = OrganizationFactory()
