@@ -74,4 +74,5 @@ class Debug(Defaults):
         'flask.ext.debugtoolbar.panels.profiler.ProfilerDebugPanel',
         'flask.ext.mongoengine.panels.MongoDebugPanel',
     )
-    CACHE_TYPE = 'simple'
+    CACHE_TYPE = 'null'
+    CACHE_NO_NULL_WARNING = True
