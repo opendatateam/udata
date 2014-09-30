@@ -1,7 +1,7 @@
 /**
  * Tag autocompleter widget
  */
-define(['jquery', 'form/widgets'], function($) {
+define(['jquery', 'api', 'form/widgets'], function($, API) {
     'use strict';
 
     $('.tag-completer').each(function() {
