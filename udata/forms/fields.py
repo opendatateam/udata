@@ -170,11 +170,11 @@ class TagField(StringField):
             return
         for tag in self.data:
             if not MIN_TAG_LENGTH <= len(tag) <= MAX_TAG_LENGTH:
-                message = self._('Tag "%(tag)s" must be between %(min)d and %(max)d characters long.')
+                message = _('Tag "%(tag)s" must be between %(min)d and %(max)d characters long.')
                 params = {'min': MIN_TAG_LENGTH, 'max': MAX_TAG_LENGTH, 'tag': tag}
                 raise validators.ValidationError(message % params)
             if not RE_TAG.match(tag):
-                message = self._('Tag "%s" must be alphanumeric characters or symbols: -_.')
+                message = _('Tag "%s" must be alphanumeric characters or symbols: -_.')
                 raise validators.ValidationError(message % tag)
 
 
