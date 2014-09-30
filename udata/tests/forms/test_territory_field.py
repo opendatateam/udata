@@ -11,9 +11,13 @@ from udata.models import db, SpatialCoverage
 from udata.tests import TestCase
 from udata.tests.factories import TerritoryFactory
 
+from udata.models import SPATIAL_GRANULARITIES
+
+
+VALID_GRANULARITY = SPATIAL_GRANULARITIES.keys()[0]
+
 
 class TerritoryFieldTest(TestCase):
-
     def factory(self):
         class Fake(db.Document):
             spatial = db.EmbeddedDocumentField(SpatialCoverage)
@@ -27,27 +31,37 @@ class TerritoryFieldTest(TestCase):
         Fake, FakeForm = self.factory()
 
         form = FakeForm()
-        self.assertEqual(form.spatial._value(), '')
-        self.assertIsNone(form.spatial.data)
+        self.assertEqual(form.spatial.territories._value(), '')
+        self.assertEqual(form.spatial.territories.data, [])
+        # self.assertEqual(form.spatial.granularity._value(), '')
+        self.assertEqual(form.spatial.granularity.data, 'other')
+
+        self.assertEqual(form.spatial.data, {'territories': [], 'granularity': 'other'})
 
         fake = Fake()
         form.populate_obj(fake)
-        self.assertIsNone(fake.spatial)
+        self.assertIsInstance(fake.spatial, SpatialCoverage)
 
-    def test_initial_value_with_territories(self):
+    def test_initial_values(self):
         Fake, FakeForm = self.factory()
         territories = [TerritoryFactory() for _ in range(3)]
 
-        fake = Fake(spatial=SpatialCoverage(territories=[t.reference() for t in territories]))
+        fake = Fake(spatial=SpatialCoverage(
+            territories=[t.reference() for t in territories],
+            granularity=SPATIAL_GRANULARITIES.keys()[1]
+        ))
         form = FakeForm(None, fake)
-        self.assertEqual(form.spatial._value(), ','.join([str(t.id) for t in territories]))
+        self.assertEqual(form.spatial.territories._value(), ','.join([str(t.id) for t in territories]))
 
     def test_with_valid_territory_id(self):
         Fake, FakeForm = self.factory()
         territory = TerritoryFactory()
 
         fake = Fake()
-        form = FakeForm(MultiDict({'spatial': str(territory.id)}))
+        form = FakeForm(MultiDict({
+            'spatial-territories': str(territory.id),
+            'spatial-granularity': VALID_GRANULARITY
+        }))
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -63,7 +77,10 @@ class TerritoryFieldTest(TestCase):
         territories = [TerritoryFactory() for _ in range(3)]
 
         fake = Fake()
-        form = FakeForm(MultiDict({'spatial': ','.join([str(t.id) for t in territories])}))
+        form = FakeForm(MultiDict({
+            'spatial-territories': ','.join([str(t.id) for t in territories]),
+            'spatial-granularity': VALID_GRANULARITY
+        }))
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -82,8 +99,58 @@ class TerritoryFieldTest(TestCase):
     def test_with_invalid_data(self):
         Fake, FakeForm = self.factory()
 
-        form = FakeForm(MultiDict({'spatial': 'wrong-data'}))
+        form = FakeForm(MultiDict({'spatial-territories': 'wrong-data', 'spatial-granularity': 'wrong'}))
 
         form.validate()
         self.assertIn('spatial', form.errors)
-        self.assertEqual(len(form.errors['spatial']), 1)
+        self.assertEqual(len(form.errors['spatial']), 2)
+
+        self.assertIn('granularity', form.errors['spatial'])
+        self.assertEqual(len(form.errors['spatial']['granularity']), 1)
+        self.assertIn('territories', form.errors['spatial'])
+        self.assertEqual(len(form.errors['spatial']['territories']), 1)
+
+    def test_with_initial(self):
+        Fake, FakeForm = self.factory()
+        territories = [TerritoryFactory() for _ in range(3)]
+
+        fake = Fake(spatial=SpatialCoverage(
+            territories=[t.reference() for t in territories],
+            granularity=SPATIAL_GRANULARITIES.keys()[1]
+        ))
+
+        territory = TerritoryFactory()
+        data = MultiDict({
+            'spatial-territories': str(territory.id),
+            'spatial-granularity': VALID_GRANULARITY
+        })
+
+        form = FakeForm(data, fake)
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.spatial.territories), 1)
+        self.assertEqual(fake.spatial.territories[0], territory.reference())
+        self.assertTrue(shape(fake.spatial.geom).equals(shape(territory.geom)))
+
+    def test_with_initial_none(self):
+        Fake, FakeForm = self.factory()
+        territory = TerritoryFactory()
+
+        fake = Fake(spatial=None)
+        form = FakeForm(MultiDict({
+            'spatial-territories': str(territory.id),
+            'spatial-granularity': VALID_GRANULARITY
+        }), fake)
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.spatial.territories), 1)
+        self.assertEqual(fake.spatial.territories[0], territory.reference())
+        self.assertTrue(shape(fake.spatial.geom).equals(shape(territory.geom)))

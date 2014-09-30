@@ -59,7 +59,7 @@ class SpatialCoverage(db.EmbeddedDocument):
     '''Represent a spatial coverage as a list of territories and/or a geometry'''
     geom = db.MultiPolygonField()
     territories = db.ListField(db.EmbeddedDocumentField(TerritoryReference))
-    granularity = db.StringField(choices=SPATIAL_GRANULARITIES.keys())
+    granularity = db.StringField(choices=SPATIAL_GRANULARITIES.keys(), default='other')
 
     @property
     def granularity_label(self):

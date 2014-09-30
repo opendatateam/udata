@@ -58,7 +58,7 @@ class TerritoryAutocompleter(WidgetHelper, widgets.TextInput):
             kwargs['data-values'] = json.dumps([{
                 'id': str(territory.id),
                 'name': territory.name
-            } for territory in field.data.territories])
+            } for territory in field.data])
         return super(TerritoryAutocompleter, self).__call__(field, **kwargs)
 
 

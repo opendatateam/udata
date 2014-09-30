@@ -20,7 +20,7 @@ from . import widgets
 from .validators import RequiredIf
 
 from udata.auth import current_user
-from udata.models import db, Organization, SpatialCoverage, Territory
+from udata.models import db, Organization, SpatialCoverage, Territory, SPATIAL_GRANULARITIES
 from udata.core.spatial import LEVELS
 from udata.i18n import gettext as _
 
@@ -224,35 +224,16 @@ class UserField(StringField):
             self.data = None
 
 
-class TerritoryField(StringField):
-    widget = widgets.TerritoryAutocompleter()
-
-    def _value(self):
-        if self.data:
-            return u','.join(self.data)
-        else:
-            return u''
-
-    def process_formdata(self, valuelist):
-        if valuelist:
-            self.data = list(set([x.strip() for x in valuelist[0].split(',') if x.strip()]))
-        else:
-            self.data = []
-
-    def pre_validate(self, form):
-        pass
-
-
 def level_key(territory):
     return LEVELS[territory.level]['position']
 
 
-class SpatialCoverageField(StringField):
+class TerritoriesField(StringField):
     widget = widgets.TerritoryAutocompleter()
 
     def _value(self):
         if self.data:
-            return u','.join([str(t.id) for t in self.data.territories])
+            return u','.join([str(t.id) for t in self.data])
         else:
             return u''
 
@@ -260,21 +241,43 @@ class SpatialCoverageField(StringField):
         if valuelist:
             try:
                 ids = list(set([ObjectId(x.strip()) for x in valuelist[0].split(',') if x.strip()]))
-                territories = Territory.objects.in_bulk(ids).values()
-                polygon = cascaded_union([shape(t.geom) for t in territories])
-                if polygon.geom_type == 'MultiPolygon':
-                    geom = polygon.__geo_interface__
-                elif polygon.geom_type == 'Polygon':
-                    geom = MultiPolygon([polygon]).__geo_interface__
-                else:
-                    geom = None
-                    # raise ValueError('Unsupported geometry type "{0}"'.format(polygon.geom_type))
-                territories = [t.reference() for t in sorted(territories, key=level_key)]
-                self.data = SpatialCoverage(territories=territories, geom=geom)
+                self.data = Territory.objects.in_bulk(ids).values()
             except Exception as e:
                 raise ValueError(str(e))
         else:
             self.data = None
+
+
+class SpatialCoverageForm(WTForm):
+    territories = TerritoriesField(_('Territorial coverage'))
+    granularity = SelectField(_('Territorial granularity'), choices=SPATIAL_GRANULARITIES.items(), default='other')
+
+    def populate_obj(self, obj):
+        super(SpatialCoverageForm, self).populate_obj(obj)
+        try:
+            territories = obj.territories
+            polygon = cascaded_union([shape(t.geom) for t in territories])
+            if polygon.geom_type == 'MultiPolygon':
+                geom = polygon.__geo_interface__
+            elif polygon.geom_type == 'Polygon':
+                geom = MultiPolygon([polygon]).__geo_interface__
+            else:
+                geom = None
+                # raise ValueError('Unsupported geometry type "{0}"'.format(polygon.geom_type))
+            obj.territories = [t.reference() for t in sorted(territories, key=level_key)]
+            obj.geom = geom
+        except Exception as e:
+            raise ValueError(str(e))
+
+
+class SpatialCoverageField(FieldHelper, fields.FormField):
+    def __init__(self, label=None, validators=None, **kwargs):
+        default = kwargs.pop('default', lambda: SpatialCoverage())
+        super(SpatialCoverageField, self).__init__(SpatialCoverageForm, label, validators, default=default, **kwargs)
+
+    def populate_obj(self, obj, name):
+        self._obj = self._obj or SpatialCoverage()
+        super(SpatialCoverageField, self).populate_obj(obj, name)
 
 
 class MarkdownField(FieldHelper, fields.TextAreaField):

@@ -12,34 +12,45 @@
 </fieldset>
 {% endmacro %}
 
-{% macro field(field, sizes='sm-2,md-3') %}
-{% if not field.hidden %}
+{% macro field(f, sizes='sm-2,md-3') %}
+{% if f.type == 'FormField' %}
+<fieldset>
+    <legend>{{f.label}}</legend>
+    {% for subfield in f %}
+    {{ field(subfield, sizes) }}
+    {% endfor %}
+</fieldset>
+{% elif f.type == 'SpatialCoverageField' %}
+    {% for subfield in f %}
+    {{ field(subfield, sizes) }}
+    {% endfor %}
+{% elif not f.hidden %}
 {% set cols = form_grid(sizes) %}
-<div class="form-group{% if field.errors %} has-error{% endif %}">
-    <label for="{{ field.id }}"
-        class="{{ cols.label }} control-label{% if field.flags.required %} required{% endif %}">
-        {{ field.label.text }}
-        {% if field.description %}<span class="form-help" data-content="{{ field.description }}"></span>{% endif %}
+<div class="form-group{% if f.errors %} has-error{% endif %}">
+    <label for="{{ f.id }}"
+        class="{{ cols.label }} control-label{% if f.flags.required %} required{% endif %}">
+        {{ f.label.text }}
+        {% if f.description %}<span class="form-help" data-content="{{ f.description }}"></span>{% endif %}
     </label>
     <div class="field-wrapper {{ cols.control }}">
-        {% if field.type == 'PublishAsField' %}
-        {{ publish_as(field) }}
-        {% elif field.type == 'RadioField' %}
-        {{ radio(field) }}
-        {% elif field.type == 'BooleanField' %}
-        {{ checkbox(field) }}
-        {% elif field.type == 'KeyValueField' %}
-        {{ checkbox(field) }}
-        {% elif field.type == 'TagField' or field.type == 'TerritoryField' %}
+        {% if f.type == 'PublishAsField' %}
+        {{ publish_as(f) }}
+        {% elif f.type == 'RadioField' %}
+        {{ radio(f) }}
+        {% elif f.type == 'BooleanField' %}
+        {{ checkbox(f) }}
+        {% elif f.type == 'KeyValueField' %}
+        {{ checkbox(f) }}
+        {% elif f.type == 'TagField' or f.type == 'TerritoryField' %}
         <div class="tag-container"></div>
-        {{ field(class_='form-control') }}
-        {% elif field.type == 'UploadableURLField' %}
-        {{ uploadable_url(field) }}
+        {{ f(class_='form-control') }}
+        {% elif f.type == 'UploadableURLField' %}
+        {{ uploadable_url(f) }}
         {% else %}
-        {{ field(class_='form-control') }}
+        {{ f(class_='form-control') }}
         {% endif %}
-        {% for error in field.errors %}
-        <label for="{{ field.id }}" class="help-block">{{ error }}</label>
+        {% for error in f.errors %}
+        <label for="{{ f.id }}" class="help-block">{{ error }}</label>
         {% endfor %}
     </div>
 </div>
