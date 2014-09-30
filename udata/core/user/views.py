@@ -37,6 +37,7 @@ navbar = nav.Bar('edit_user', [
 ])
 
 
+@blueprint.route('/', endpoint='list')
 class UserListView(SearchView):
     model = User
     template_name = 'user/list.html'
@@ -71,6 +72,7 @@ class UserEditView(UserView):
         return permission.can()
 
 
+@blueprint.route('/<user:user>/edit/', endpoint='edit')
 class UserProfileEditView(UserEditView, EditView):
     form = UserProfileForm
     template_name = 'user/edit.html'
@@ -79,6 +81,7 @@ class UserProfileEditView(UserEditView, EditView):
         return url_for('users.show', user=self.object)
 
 
+@blueprint.route('/<user:user>/edit/settings/', endpoint='settings')
 class UserSettingsView(UserEditView, EditView):
     form = UserSettingsForm
     template_name = 'user/edit_settings.html'
@@ -87,6 +90,7 @@ class UserSettingsView(UserEditView, EditView):
         return url_for('users.show', user=self.object)
 
 
+@blueprint.route('/<user:user>/edit/apikey/', endpoint='apikey_settings')
 class UserAPIKeySettingsView(UserEditView, EditView):
     form = UserAPIKeyForm
     template_name = 'user/edit_apikey.html'
@@ -100,6 +104,7 @@ class UserAPIKeySettingsView(UserEditView, EditView):
         return self.render()
 
 
+@blueprint.route('/<user:user>/edit/notifications/', endpoint='notifications_settings')
 class UserNotificationsView(UserEditView, EditView):
     form = UserNotificationsForm
     template_name = 'user/edit_notifications.html'
@@ -108,6 +113,7 @@ class UserNotificationsView(UserEditView, EditView):
         return url_for('users.show', user=self.object)
 
 
+@blueprint.route('/<user:user>/datasets/', endpoint='datasets')
 class UserDatasetsView(UserView, DetailView):
     template_name = 'user/datasets.html'
 
@@ -117,6 +123,7 @@ class UserDatasetsView(UserView, DetailView):
         return context
 
 
+@blueprint.route('/<user:user>/reuses/', endpoint='reuses')
 class UserReusesView(UserView, DetailView):
     template_name = 'user/reuses.html'
 
@@ -126,6 +133,7 @@ class UserReusesView(UserView, DetailView):
         return context
 
 
+@blueprint.route('/<user:user>/', endpoint='show')
 class UserActivityView(UserView, DetailView):
     template_name = 'user/activity.html'
 
@@ -135,6 +143,7 @@ class UserActivityView(UserView, DetailView):
         return context
 
 
+@blueprint.route('/<user:user>/following/', endpoint='following')
 class UserFollowingView(UserView, DetailView):
     template_name = 'user/following.html'
 
@@ -164,6 +173,7 @@ class UserFollowingView(UserView, DetailView):
         return context
 
 
+@blueprint.route('/<user:user>/followers/', endpoint='followers')
 class UserFollowersView(UserView, DetailView):
     template_name = 'user/followers.html'
 
@@ -171,17 +181,3 @@ class UserFollowersView(UserView, DetailView):
         context = super(UserFollowersView, self).get_context()
         context['followers'] = Follow.objects.followers(self.user).order_by('follower.fullname')
         return context
-
-
-blueprint.add_url_rule('/', view_func=UserListView.as_view(str('list')))
-blueprint.add_url_rule('/<user:user>/', view_func=UserActivityView.as_view(str('show')))
-blueprint.add_url_rule('/<user:user>/edit/', view_func=UserProfileEditView.as_view(str('edit')))
-blueprint.add_url_rule('/<user:user>/activity/', view_func=UserActivityView.as_view(str('activity')))
-blueprint.add_url_rule('/<user:user>/datasets/', view_func=UserDatasetsView.as_view(str('datasets')))
-blueprint.add_url_rule('/<user:user>/reuses/', view_func=UserReusesView.as_view(str('reuses')))
-blueprint.add_url_rule('/<user:user>/following/', view_func=UserFollowingView.as_view(str('following')))
-
-blueprint.add_url_rule('/<user:user>/edit/settings/', view_func=UserSettingsView.as_view(str('settings')))
-blueprint.add_url_rule('/<user:user>/edit/apikey/', view_func=UserAPIKeySettingsView.as_view(str('apikey_settings')))
-blueprint.add_url_rule('/<user:user>/edit/notifications/', view_func=UserNotificationsView.as_view(str('notifications_settings')))
-blueprint.add_url_rule('/<user:user>/followers/', view_func=UserFollowersView.as_view(str('followers')))

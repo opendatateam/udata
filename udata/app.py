@@ -5,10 +5,11 @@ import bson
 import datetime
 import logging
 import os
+import types
 
 from os.path import abspath, join, dirname, isfile, exists
 
-from flask import Flask, abort, send_from_directory, json
+from flask import Flask, abort, send_from_directory, json, Blueprint as BaseBlueprint
 from flask.ext.cache import Cache
 from speaklater import is_lazy_string
 from werkzeug.contrib.fixers import ProxyFix
@@ -50,6 +51,19 @@ class UDataApp(Flask):
                 if isfile(join(directory, real_filename)):
                     return send_from_directory(directory, real_filename, cache_timeout=cache_timeout)
         abort(404)
+
+
+class Blueprint(BaseBlueprint):
+    '''A blueprint allowing to decorate class too'''
+    def route(self, rule, **options):
+        def wrapper(func_or_cls):
+            endpoint = str(options.pop('endpoint', func_or_cls.__name__))
+            if isinstance(func_or_cls, types.FunctionType):
+                self.add_url_rule(rule, endpoint, func_or_cls, **options)
+            else:
+                self.add_url_rule(rule, view_func=func_or_cls.as_view(endpoint), **options)
+            return func_or_cls
+        return wrapper
 
 
 class UDataJsonEncoder(json.JSONEncoder):

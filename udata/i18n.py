@@ -5,7 +5,7 @@ from os.path import exists, join, dirname
 
 from importlib import import_module
 
-from flask import g, request, current_app, Blueprint, abort, redirect, url_for
+from flask import g, request, current_app, abort, redirect, url_for
 from flask.blueprints import BlueprintSetupState, _endpoint_from_view_func
 try:
     from flask import _app_ctx_stack as stack
@@ -18,6 +18,8 @@ from babel.support import NullTranslations, Translations
 from flask.ext.babelex import Babel, Domain, refresh
 from flask.ext.babelex import format_date, format_datetime
 from flask.ext.babelex import get_locale as get_current_locale
+
+from udata.app import Blueprint
 
 
 class PluggableDomain(Domain):

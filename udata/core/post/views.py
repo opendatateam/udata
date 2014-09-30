@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from udata.frontend import render
 from udata.i18n import I18nBlueprint
-from udata.frontend.views import DetailView, CreateView, EditView
+from udata.frontend.views import CreateView, EditView
 
 from udata.models import Post
 
@@ -37,16 +37,14 @@ def show(post):
     return render('post/display.html', post=post)
 
 
+@blueprint.route('/new/', endpoint='new')
 class PostCreateView(ProtectedPostView, CreateView):
     model = Post
     form = PostForm
     template_name = 'post/create.html'
 
 
+@blueprint.route('/<post:post>/edit/', endpoint='edit')
 class PostEditView(ProtectedPostView, EditView):
     form = PostForm
     template_name = 'post/edit.html'
-
-
-blueprint.add_url_rule('/new/', view_func=PostCreateView.as_view(str('new')))
-blueprint.add_url_rule('/<post:post>/edit/', view_func=PostEditView.as_view(str('edit')))

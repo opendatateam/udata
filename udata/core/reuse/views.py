@@ -46,6 +46,7 @@ def recent_feed():
     return feed.get_response()
 
 
+@blueprint.route('/', endpoint='list')
 class ReuseListView(SearchView):
     model = Reuse
     context_name = 'reuses'
@@ -82,6 +83,7 @@ class ProtectedReuseView(ReuseView):
         return permission.can()
 
 
+@blueprint.route('/<reuse:reuse>/', endpoint='show')
 class ReuseDetailView(ReuseView, DetailView):
     template_name = 'reuse/display.html'
 
@@ -98,6 +100,7 @@ class ReuseDetailView(ReuseView, DetailView):
         return context
 
 
+@blueprint.route('/new/', endpoint='new')
 class ReuseCreateView(CreateView):
     model = Reuse
     form = ReuseCreateForm
@@ -113,11 +116,13 @@ class ReuseCreateView(CreateView):
         return form
 
 
+@blueprint.route('/<reuse:reuse>/edit/', endpoint='edit')
 class ReuseEditView(ProtectedReuseView, EditView):
     form = ReuseForm
     template_name = 'reuse/edit.html'
 
 
+@blueprint.route('/<reuse:reuse>/add/', endpoint='add_dataset')
 class ReuseAddDatasetView(ProtectedReuseView, SingleObject, BaseView):
     def post(self, reuse):
         form = AddDatasetToReuseForm(request.form)
@@ -134,6 +139,7 @@ class ReuseAddDatasetView(ProtectedReuseView, SingleObject, BaseView):
         return redirect(url_for('reuses.edit', reuse=self.reuse))
 
 
+@blueprint.route('/<reuse:reuse>/delete/', endpoint='delete')
 class ReuseDeleteView(ProtectedReuseView, SingleObject, BaseView):
     def post(self, reuse):
         reuse.deleted = datetime.now()
@@ -141,6 +147,7 @@ class ReuseDeleteView(ProtectedReuseView, SingleObject, BaseView):
         return redirect(url_for('reuses.show', reuse=self.reuse))
 
 
+@blueprint.route('/<reuse:reuse>/issues/', endpoint='issues')
 class ReuseIssuesView(ProtectedReuseView, DetailView):
     template_name = 'reuse/issues.html'
 
@@ -150,16 +157,7 @@ class ReuseIssuesView(ProtectedReuseView, DetailView):
         return context
 
 
+@blueprint.route('/<reuse:reuse>/transfer/', endpoint='transfer')
 class ReuseTransferView(ProtectedReuseView, EditView):
     form = ReuseForm
     template_name = 'reuse/transfer.html'
-
-
-blueprint.add_url_rule('/', view_func=ReuseListView.as_view(str('list')))
-blueprint.add_url_rule('/new/', view_func=ReuseCreateView.as_view(str('new')))
-blueprint.add_url_rule('/<reuse:reuse>/', view_func=ReuseDetailView.as_view(str('show')))
-blueprint.add_url_rule('/<reuse:reuse>/edit/', view_func=ReuseEditView.as_view(str('edit')))
-blueprint.add_url_rule('/<reuse:reuse>/delete/', view_func=ReuseDeleteView.as_view(str('delete')))
-blueprint.add_url_rule('/<reuse:reuse>/issues/', view_func=ReuseIssuesView.as_view(str('issues')))
-blueprint.add_url_rule('/<reuse:reuse>/transfer/', view_func=ReuseTransferView.as_view(str('transfer')))
-blueprint.add_url_rule('/<reuse:reuse>/add/', view_func=ReuseAddDatasetView.as_view(str('add_dataset')))

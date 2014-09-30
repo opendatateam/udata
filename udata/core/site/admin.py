@@ -39,6 +39,7 @@ class SiteAdminView(SiteView):
         return context
 
 
+@site_admin.route('/config/', endpoint='config')
 class SiteConfigView(SiteAdminView, EditView):
     template_name = 'site/config.html'
     model = Site
@@ -50,6 +51,7 @@ class SiteConfigView(SiteAdminView, EditView):
         return self.get()
 
 
+@site_admin.route('/theme/', endpoint='theme')
 class SiteThemeView(SiteAdminView, EditView):
     template_name = 'site/theme.html'
     model = Site
@@ -67,6 +69,7 @@ class SiteThemeView(SiteAdminView, EditView):
         return self.get()
 
 
+@site_admin.route('/issues/', endpoint='issues')
 class SiteIssuesView(SiteAdminView, DetailView):
     template_name = 'site/issues.html'
 
@@ -74,7 +77,3 @@ class SiteIssuesView(SiteAdminView, DetailView):
         context = super(SiteIssuesView, self).get_context()
         context['issues'] = Issue.objects
         return context
-
-site_admin.add_url_rule('/config/', view_func=SiteConfigView.as_view(str('config')))
-site_admin.add_url_rule('/theme/', view_func=SiteThemeView.as_view(str('theme')))
-site_admin.add_url_rule('/issues/', view_func=SiteIssuesView.as_view(str('issues')))

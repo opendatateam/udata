@@ -46,6 +46,7 @@ def recent_feed():
     return feed.get_response()
 
 
+@blueprint.route('/', endpoint='list')
 class DatasetListView(SearchView):
     model = Dataset
     context_name = 'datasets'
@@ -84,6 +85,7 @@ class ProtectedDatasetView(DatasetView):
         return permission.can()
 
 
+@blueprint.route('/<dataset:dataset>/', endpoint='show')
 class DatasetDetailView(DatasetView, DetailView):
     template_name = 'dataset/display.html'
 
@@ -95,6 +97,7 @@ class DatasetDetailView(DatasetView, DetailView):
         return context
 
 
+@blueprint.route('/new/', endpoint='new')
 class DatasetCreateView(CreateView):
     model = Dataset
     form = DatasetCreateForm
@@ -104,11 +107,13 @@ class DatasetCreateView(CreateView):
         return url_for('datasets.new_resource', dataset=self.object)
 
 
+@blueprint.route('/<dataset:dataset>/edit/', endpoint='edit')
 class DatasetEditView(ProtectedDatasetView, EditView):
     form = DatasetForm
     template_name = 'dataset/edit.html'
 
 
+@blueprint.route('/<dataset:dataset>/delete/', endpoint='delete')
 class DatasetDeleteView(ProtectedDatasetView, SingleObject, BaseView):
     def post(self, dataset):
         dataset.deleted = datetime.now()
@@ -116,6 +121,7 @@ class DatasetDeleteView(ProtectedDatasetView, SingleObject, BaseView):
         return redirect(url_for('datasets.show', dataset=self.dataset))
 
 
+@blueprint.route('/<dataset:dataset>/edit/extras/', endpoint='edit_extras')
 class DatasetExtrasEditView(ProtectedDatasetView, EditView):
     form = DatasetExtraForm
     template_name = 'dataset/edit_extras.html'
@@ -128,6 +134,7 @@ class DatasetExtrasEditView(ProtectedDatasetView, EditView):
         return jsonify({'key': form.key.data, 'value': form.value.data})
 
 
+@blueprint.route('/<dataset:dataset>/edit/extras/<string:extra>/', endpoint='delete_extra')
 class DatasetExtraDeleteView(ProtectedDatasetView, SingleObject, BaseView):
     def delete(self, dataset, extra, **kwargs):
         del dataset.extras[extra]
@@ -135,11 +142,13 @@ class DatasetExtraDeleteView(ProtectedDatasetView, SingleObject, BaseView):
         return ''
 
 
+@blueprint.route('/<dataset:dataset>/edit/resources/', endpoint='edit_resources')
 class DatasetResourcesEditView(ProtectedDatasetView, EditView):
     form = DatasetForm
     template_name = 'dataset/edit_resources.html'
 
 
+@blueprint.route('/<dataset:dataset>/issues/', endpoint='issues')
 class DatasetIssuesView(ProtectedDatasetView, DetailView):
     template_name = 'dataset/issues.html'
 
@@ -149,11 +158,13 @@ class DatasetIssuesView(ProtectedDatasetView, DetailView):
         return context
 
 
+@blueprint.route('/<dataset:dataset>/transfer/', endpoint='transfer')
 class DatasetTransferView(ProtectedDatasetView, EditView):
     form = DatasetForm
     template_name = 'dataset/transfer.html'
 
 
+@blueprint.route('/<dataset:dataset>/resources/new/', endpoint='new_resource')
 class ResourceCreateView(ProtectedDatasetView, SingleObject, CreateView):
     form = ResourceForm
     template_name = 'dataset/resource/create.html'
@@ -166,6 +177,7 @@ class ResourceCreateView(ProtectedDatasetView, SingleObject, CreateView):
         return redirect(url_for('datasets.show', dataset=self.object))
 
 
+@blueprint.route('/<dataset:dataset>/community_resources/new/', endpoint='new_community_resource')
 class CommunityResourceCreateView(DatasetView, SingleObject, CreateView):
     form = CommunityResourceForm
     template_name = 'dataset/resource/create.html'
@@ -178,6 +190,7 @@ class CommunityResourceCreateView(DatasetView, SingleObject, CreateView):
         return redirect(url_for('datasets.show', dataset=self.object))
 
 
+@blueprint.route('/<dataset:dataset>/resources/<resource>/', endpoint='edit_resource')
 class ResourceEditView(ProtectedDatasetView, NestedEditView):
     nested_model = Resource
     form = ResourceForm
@@ -189,6 +202,7 @@ class ResourceEditView(ProtectedDatasetView, NestedEditView):
         return url_for('datasets.show', dataset=self.dataset)
 
 
+@blueprint.route('/<dataset:dataset>/community_resources/<resource>/', endpoint='edit_community_resource')
 class CommunityResourceEditView(DatasetView, NestedEditView):
     form = CommunityResourceForm
     nested_model = Resource
@@ -204,6 +218,7 @@ class CommunityResourceEditView(DatasetView, NestedEditView):
         return url_for('datasets.show', dataset=self.dataset)
 
 
+@blueprint.route('/<dataset:dataset>/followers/', endpoint='followers')
 class DatasetFollowersView(DatasetView, DetailView):
     template_name = 'dataset/followers.html'
 
@@ -211,20 +226,3 @@ class DatasetFollowersView(DatasetView, DetailView):
         context = super(DatasetFollowersView, self).get_context()
         context['followers'] = Follow.objects.followers(self.dataset).order_by('follower.fullname')
         return context
-
-
-blueprint.add_url_rule('/', view_func=DatasetListView.as_view(str('list')))
-blueprint.add_url_rule('/new/', view_func=DatasetCreateView.as_view(str('new')))
-blueprint.add_url_rule('/<dataset:dataset>/', view_func=DatasetDetailView.as_view(str('show')))
-blueprint.add_url_rule('/<dataset:dataset>/edit/', view_func=DatasetEditView.as_view(str('edit')))
-blueprint.add_url_rule('/<dataset:dataset>/edit/extras/', view_func=DatasetExtrasEditView.as_view(str('edit_extras')))
-blueprint.add_url_rule('/<dataset:dataset>/edit/extras/<string:extra>/', view_func=DatasetExtraDeleteView.as_view(str('delete_extra')))
-blueprint.add_url_rule('/<dataset:dataset>/edit/resources/', view_func=DatasetResourcesEditView.as_view(str('edit_resources')))
-blueprint.add_url_rule('/<dataset:dataset>/issues/', view_func=DatasetIssuesView.as_view(str('issues')))
-blueprint.add_url_rule('/<dataset:dataset>/transfer/', view_func=DatasetTransferView.as_view(str('transfer')))
-blueprint.add_url_rule('/<dataset:dataset>/resources/new/', view_func=ResourceCreateView.as_view(str('new_resource')))
-blueprint.add_url_rule('/<dataset:dataset>/resources/<resource>/', view_func=ResourceEditView.as_view(str('edit_resource')))
-blueprint.add_url_rule('/<dataset:dataset>/community_resources/new/', view_func=CommunityResourceCreateView.as_view(str('new_community_resource')))
-blueprint.add_url_rule('/<dataset:dataset>/community_resources/<resource>/', view_func=CommunityResourceEditView.as_view(str('edit_community_resource')))
-blueprint.add_url_rule('/<dataset:dataset>/delete/', view_func=DatasetDeleteView.as_view(str('delete')))
-blueprint.add_url_rule('/<dataset:dataset>/followers/', view_func=DatasetFollowersView.as_view(str('followers')))

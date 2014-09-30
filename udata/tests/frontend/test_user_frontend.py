@@ -194,9 +194,3 @@ class UserBlueprintTest(FrontTestCase):
         self.login()
         response = self.get(url_for('users.notifications_settings', user=self.user))
         self.assert200(response)
-
-    def test_user_activity_empty(self):
-        '''It should render an empty user activity page'''
-        user = UserFactory()
-        response = self.get(url_for('users.activity', user=user))
-        self.assert200(response)

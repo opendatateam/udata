@@ -103,6 +103,7 @@ class SiteView(object):
     object = site
 
 
+@blueprint.route('/dashboard/', endpoint='dashboard')
 class SiteDashboard(SiteView, ActivityView, DetailView):
     template_name = 'site/dashboard.html'
 
@@ -156,6 +157,3 @@ class SiteDashboard(SiteView, ActivityView, DetailView):
         })
 
         return context
-
-
-blueprint.add_url_rule('/dashboard/', view_func=SiteDashboard.as_view(str('dashboard')))

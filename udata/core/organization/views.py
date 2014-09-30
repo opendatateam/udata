@@ -39,6 +39,7 @@ navbar = nav.Bar('edit_org', [
 ])
 
 
+@blueprint.route('/', endpoint='list')
 class OrganizationListView(SearchView):
     model = Organization
     context_name = 'organizations'
@@ -67,6 +68,7 @@ class ProtectedOrgView(OrgView):
         return permission.can()
 
 
+@blueprint.route('/<org:org>/', endpoint='show')
 class OrganizationDetailView(OrgView, DetailView):
     template_name = 'organization/display.html'
     nb_followers = 16
@@ -96,6 +98,7 @@ class OrganizationDetailView(OrgView, DetailView):
         return context
 
 
+@blueprint.route('/<org:org>/dashboard/', endpoint='dashboard')
 class OrganizationDashboardView(OrgView, ActivityView, DetailView):
     template_name = 'organization/dashboard.html'
 
@@ -134,6 +137,7 @@ class OrganizationDashboardView(OrgView, ActivityView, DetailView):
         return qs(predicate)
 
 
+@blueprint.route('/new/', endpoint='new')
 class OrganizationCreateView(CreateView):
     model = Organization
     form = OrganizationForm
@@ -146,11 +150,13 @@ class OrganizationCreateView(CreateView):
         return org
 
 
+@blueprint.route('/<org:org>/edit/', endpoint='edit')
 class OrganizationEditView(ProtectedOrgView, EditView):
     form = OrganizationForm
     template_name = 'organization/edit.html'
 
 
+@blueprint.route('/<org:org>/delete/', endpoint='delete')
 class OrganizationDeleteView(ProtectedOrgView, SingleObject, BaseView):
     def post(self, org):
         org.deleted = datetime.now()
@@ -158,6 +164,7 @@ class OrganizationDeleteView(ProtectedOrgView, SingleObject, BaseView):
         return redirect(url_for('organizations.show', org=self.organization))
 
 
+@blueprint.route('/<org:org>/edit/members/', endpoint='edit_members')
 class OrganizationEditMembersView(ProtectedOrgView, EditView):
     form = OrganizationMemberForm
     template_name = 'organization/edit_members.html'
@@ -190,11 +197,13 @@ class OrganizationEditMembersView(ProtectedOrgView, EditView):
         return '', 204
 
 
+@blueprint.route('/<org:org>/edit/requests/', endpoint='edit_membership_requests')
 class OrganizationMembershipRequestsView(ProtectedOrgView, EditView):
     form = OrganizationForm
     template_name = 'organization/edit_membership_requests.html'
 
 
+@blueprint.route('/<org:org>/edit/extras/', endpoint='edit_extras')
 class OrganizationExtrasEditView(ProtectedOrgView, EditView):
     form = OrganizationExtraForm
     template_name = 'organization/edit_extras.html'
@@ -207,6 +216,7 @@ class OrganizationExtrasEditView(ProtectedOrgView, EditView):
         return jsonify({'key': form.key.data, 'value': form.value.data})
 
 
+@blueprint.route('/<org:org>/edit/extras/<string:extra>/', endpoint='delete_extra')
 class OrganizationExtraDeleteView(ProtectedOrgView, SingleObject, BaseView):
     def delete(self, org, extra, **kwargs):
         del org.extras[extra]
@@ -214,16 +224,13 @@ class OrganizationExtraDeleteView(ProtectedOrgView, SingleObject, BaseView):
         return ''
 
 
+@blueprint.route('/<org:org>/edit/teams/', endpoint='edit_teams')
 class OrganizationEditTeamsView(ProtectedOrgView, EditView):
     form = OrganizationForm
     template_name = 'organization/edit_teams.html'
 
 
-class OrganizationEditAlertsView(ProtectedOrgView, EditView):
-    form = OrganizationForm
-    template_name = 'organization/edit_alerts.html'
-
-
+@blueprint.route('/<org:org>/issues/', endpoint='issues')
 class OrganizationIssuesView(ProtectedOrgView, DetailView):
     template_name = 'organization/issues.html'
 
@@ -248,17 +255,3 @@ def supplied_datasets_csv(org):
     datasets = search.iter(Dataset, supplier=str(org.id))
     adapter = DatasetCsvAdapter(datasets)
     return csv.stream(adapter, '{0}-supplied-datasets'.format(org.slug))
-
-
-blueprint.add_url_rule('/', view_func=OrganizationListView.as_view(str('list')))
-blueprint.add_url_rule('/new/', view_func=OrganizationCreateView.as_view(str('new')))
-blueprint.add_url_rule('/<org:org>/', view_func=OrganizationDetailView.as_view(str('show')))
-blueprint.add_url_rule('/<org:org>/dashboard/', view_func=OrganizationDashboardView.as_view(str('dashboard')))
-blueprint.add_url_rule('/<org:org>/edit/', view_func=OrganizationEditView.as_view(str('edit')))
-blueprint.add_url_rule('/<org:org>/edit/members/', view_func=OrganizationEditMembersView.as_view(str('edit_members')))
-blueprint.add_url_rule('/<org:org>/edit/requests/', view_func=OrganizationMembershipRequestsView.as_view(str('edit_membership_requests')))
-blueprint.add_url_rule('/<org:org>/edit/teams/', view_func=OrganizationEditTeamsView.as_view(str('edit_teams')))
-blueprint.add_url_rule('/<org:org>/issues/', view_func=OrganizationIssuesView.as_view(str('issues')))
-blueprint.add_url_rule('/<org:org>/edit/extras/', view_func=OrganizationExtrasEditView.as_view(str('edit_extras')))
-blueprint.add_url_rule('/<org:org>/edit/extras/<string:extra>/', view_func=OrganizationExtraDeleteView.as_view(str('delete_extra')))
-blueprint.add_url_rule('/<org:org>/delete/', view_func=OrganizationDeleteView.as_view(str('delete')))

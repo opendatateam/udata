@@ -8,7 +8,7 @@ from udata.frontend import render
 from udata.i18n import I18nBlueprint
 from udata.models import Topic, Reuse, Dataset
 from udata.utils import multi_to_dict
-from udata.frontend.views import DetailView, CreateView, EditView
+from udata.frontend.views import CreateView, EditView
 
 from .forms import TopicForm
 from .permissions import TopicEditPermission
@@ -81,12 +81,14 @@ class ProtectedTopicView(TopicView):
     require = TopicEditPermission()
 
 
+@blueprint.route('/new/', endpoint='new')
 class TopicCreateView(ProtectedTopicView, CreateView):
     model = Topic
     form = TopicForm
     template_name = 'topic/create.html'
 
 
+@blueprint.route('/<topic:topic>/edit/', endpoint='edit')
 class TopicEditView(ProtectedTopicView, EditView):
     form = TopicForm
     template_name = 'topic/edit.html'
@@ -95,7 +97,3 @@ class TopicEditView(ProtectedTopicView, EditView):
 @blueprint.before_app_request
 def store_featured_topics():
     g.featured_topics = sorted(Topic.objects(featured=True), key=lambda t: t.slug)
-
-
-blueprint.add_url_rule('/new/', view_func=TopicCreateView.as_view(str('new')))
-blueprint.add_url_rule('/<topic:topic>/edit/', view_func=TopicEditView.as_view(str('edit')))
