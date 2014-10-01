@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-09-29 23:28+0200\n"
+"POT-Creation-Date: 2014-10-01 09:53+0200\n"
 "PO-Revision-Date: 2014-09-19 10:58+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/udata-"
@@ -591,96 +591,91 @@ msgstr "Usted puede crear una nueva organización si la suya no existe aun. "
 #~ msgstr "organización"
 
 #~ msgid ""
-#~ "This organization has been deleted. This"
-#~ " will be permanent in the next "
-#~ "24 hours"
 #~ msgstr ""
-#~ "Esta organización se ha eliminado. Esto"
-#~ " será permanente durante las próximas "
-#~ "24 horas"
 
 #~ msgid "This organization and its datasets are certified by data.gouv.fr"
 #~ msgstr ""
-#~ "Esta organización y sus conjuntos de "
-#~ "datos están certificados por data.gouv.fr"
 
 #~ msgid "%(num)d dataset"
 #~ msgid_plural "%(num)d datasets"
 #~ msgstr[0] "%(num)d conjunto de datos"
-#~ msgstr[1] "%(num)d conjuntos de datos"
+#~ msgstr[1] ""
 
 #~ msgid "%(num)d member"
-#~ msgid_plural "%(num)d members"
-#~ msgstr[0] "%(num)d miembro"
-#~ msgstr[1] "%(num)d miembros"
+#~ msgstr ""
+
+#~ msgid "%(num)d members"
+#~ msgstr "%(num)d conjuntos de datos"
 
 #~ msgid "%(num)d follower"
-#~ msgid_plural "%(num)d followers"
-#~ msgstr[0] "%(num)d seguidor"
-#~ msgstr[1] "%(num)d seguidores"
+#~ msgstr "%(num)d miembro"
+
+#~ msgid "%(num)d followers"
+#~ msgstr "%(num)d miembros"
 
 #~ msgid "%(num)d reuse"
-#~ msgid_plural "%(num)d reuses"
-#~ msgstr[0] "%(num)d reutilización"
-#~ msgstr[1] "%(num)d reutilizaciones"
+#~ msgstr "%(num)d seguidor"
+
+#~ msgid "%(num)d reuses"
+#~ msgstr "%(num)d seguidores"
 
 #~ msgid "Recent activities"
-#~ msgstr "Actividades recientes"
+#~ msgstr "%(num)d reutilización"
 
 #~ msgid "I belong to this organization"
-#~ msgstr "Yo hago parte de esta organización"
+#~ msgstr "%(num)d reutilizaciones"
 
 #~ msgid "Join"
-#~ msgstr "Unase "
+#~ msgstr "Actividades recientes"
 
 #~ msgid "Waiting for approval"
-#~ msgstr "A la espera de aprobación"
+#~ msgstr "Yo hago parte de esta organización"
 
 #~ msgid "Pending request"
-#~ msgstr "Solicitud pendiente"
+#~ msgstr "Unase "
 
 #~ msgid "You are an administrator of this organization"
-#~ msgstr "Usted es un administrador de esta organización"
+#~ msgstr "A la espera de aprobación"
 
 #~ msgid "Administrator"
-#~ msgstr "Administrador"
+#~ msgstr "Solicitud pendiente"
 
 #~ msgid "You are editor in this organization"
-#~ msgstr "Usted es editor de esta organización"
+#~ msgstr "Usted es un administrador de esta organización"
 
 #~ msgid "Editor"
-#~ msgstr "Editor"
+#~ msgstr "Administrador"
 
 #~ msgid "You are a member of this organization"
-#~ msgstr "Usted es un miembro de esta organización"
+#~ msgstr "Usted es editor de esta organización"
 
 #~ msgid "Member"
-#~ msgstr "Miembro"
+#~ msgstr "Editor"
 
 #~ msgid "Supplied datasets"
-#~ msgstr "Conjuntos de datos suministrados"
+#~ msgstr "Usted es un miembro de esta organización"
 
 #~ msgid "Private datasets"
-#~ msgstr "Conjuntos de datos privados"
+#~ msgstr "Miembro"
 
 #~ msgid "Private reuses"
-#~ msgstr "Reutilizaciones privadas"
+#~ msgstr "Conjuntos de datos suministrados"
 
 #~ msgid "Members"
-#~ msgstr "Miembros"
+#~ msgstr "Conjuntos de datos privados"
 
 #~ msgid "Followers"
-#~ msgstr "Seguidores"
+#~ msgstr "Reutilizaciones privadas"
 
 #~ msgid "Activity"
-#~ msgstr "Actividad"
+#~ msgstr "Miembros"
 
 #~ msgid "See the %(nb)s datasets"
-#~ msgstr "Ver los %(nb)s de conjuntos de datos"
+#~ msgstr "Seguidores"
 
 #~ msgid "Download as CSV"
-#~ msgstr "Descargue como CSV"
+#~ msgstr "Actividad"
 
 #~ msgid "See the %(nb)s reuses"
-#~ msgstr "Ver los %(nb)s de reutilizaciones "
+#~ msgstr "Ver los %(nb)s de conjuntos de datos"
 
