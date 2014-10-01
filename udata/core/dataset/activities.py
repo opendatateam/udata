@@ -38,20 +38,23 @@ class UserDeletedDataset(DatasetRelatedActivity, Activity):
 
 @Dataset.on_create.connect
 def on_user_created_dataset(dataset):
-    user = current_user._get_current_object()
-    organization = dataset.organization
-    write_activity.delay(UserCreatedDataset, user, dataset, organization)
+    if not dataset.private:
+        user = current_user._get_current_object()
+        organization = dataset.organization
+        write_activity.delay(UserCreatedDataset, user, dataset, organization)
 
 
 @Dataset.on_update.connect
 def on_user_updated_dataset(dataset):
-    user = current_user._get_current_object()
-    organization = dataset.organization
-    write_activity.delay(UserUpdatedDataset, user, dataset, organization)
+    if not dataset.private:
+        user = current_user._get_current_object()
+        organization = dataset.organization
+        write_activity.delay(UserUpdatedDataset, user, dataset, organization)
 
 
 @Dataset.on_delete.connect
 def on_user_deleted_dataset(dataset):
-    user = current_user._get_current_object()
-    organization = dataset.organization
-    write_activity.delay(UserDeletedDataset, user, dataset, organization)
+    if not dataset.private:
+        user = current_user._get_current_object()
+        organization = dataset.organization
+        write_activity.delay(UserDeletedDataset, user, dataset, organization)
