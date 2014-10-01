@@ -278,3 +278,33 @@ class DatasetBlueprintTest(FrontTestCase):
         dataset = DatasetFactory(owner=UserFactory(), community_resources=[resource])
         response = self.get(url_for('datasets.edit_community_resource', dataset=dataset, resource=resource.id))
         self.assert200(response)
+
+    def test_delete_resource(self):
+        '''It should handle deletion from form submit and redirect on dataset page'''
+        user = self.login()
+        resource = ResourceFactory()
+        dataset = DatasetFactory(owner=user, resources=[resource, ResourceFactory()])
+        response = self.post(url_for('datasets.delete_resource', dataset=dataset, resource=resource.id))
+
+        dataset.reload()
+        self.assertRedirects(response, dataset.display_url)
+        self.assertIsNone(dataset.deleted)
+        self.assertEqual(len(dataset.resources), 1)
+        self.assertNotEqual(dataset.resources[0].id, resource.id)
+
+    def test_delete_community_resource(self):
+        '''It should handle deletion from form submit and redirect on dataset page'''
+        user = self.login()
+        resource = ResourceFactory(owner=user)
+        dataset = DatasetFactory(
+            owner=UserFactory(),
+            resources=[ResourceFactory()],
+            community_resources=[resource, ResourceFactory()]
+        )
+        response = self.post(url_for('datasets.delete_community_resource', dataset=dataset, resource=resource.id))
+
+        dataset.reload()
+        self.assertRedirects(response, dataset.display_url)
+        self.assertIsNone(dataset.deleted)
+        self.assertEqual(len(dataset.community_resources), 1)
+        self.assertNotEqual(dataset.community_resources[0].id, resource.id)

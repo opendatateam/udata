@@ -8,7 +8,7 @@ from werkzeug.contrib.atom import AtomFeed
 
 from udata.forms import DatasetForm, DatasetCreateForm, ResourceForm, CommunityResourceForm, DatasetExtraForm
 from udata.frontend import nav
-from udata.frontend.views import DetailView, CreateView, EditView, NestedEditView, SingleObject, SearchView, BaseView
+from udata.frontend.views import DetailView, CreateView, EditView, NestedEditView, SingleObject, SearchView, BaseView, NestedObject
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Resource, Reuse, Issue, Follow
 
@@ -208,7 +208,7 @@ class CommunityResourceEditView(DatasetView, NestedEditView):
     nested_model = Resource
     nested_object_name = 'resource'
     nested_attribute = 'community_resources'
-    template_name = 'dataset/resource/edit.html'
+    template_name = 'dataset/resource/edit_community.html'
 
     def can(self, *args, **kwargs):
         permission = CommunityResourceEditPermission(self.nested_object)
@@ -216,6 +216,34 @@ class CommunityResourceEditView(DatasetView, NestedEditView):
 
     def get_success_url(self):
         return url_for('datasets.show', dataset=self.dataset)
+
+
+@blueprint.route('/<dataset:dataset>/resources/<resource>/delete/', endpoint='delete_resource')
+class ResourceDeleteView(ProtectedDatasetView, NestedObject, BaseView):
+    nested_model = Resource
+    nested_object_name = 'resource'
+    nested_attribute = 'resources'
+
+    def post(self, dataset, resource):
+        dataset.resources.remove(self.nested_object)
+        dataset.save()
+        return redirect(url_for('datasets.show', dataset=self.dataset))
+
+
+@blueprint.route('/<dataset:dataset>/community_resources/<resource>/delete/', endpoint='delete_community_resource')
+class CommunityResourceDeleteView(ProtectedDatasetView, NestedObject, BaseView):
+    nested_model = Resource
+    nested_object_name = 'resource'
+    nested_attribute = 'community_resources'
+
+    def can(self, *args, **kwargs):
+        permission = CommunityResourceEditPermission(self.nested_object)
+        return permission.can()
+
+    def post(self, dataset, resource):
+        dataset.community_resources.remove(self.nested_object)
+        dataset.save()
+        return redirect(url_for('datasets.show', dataset=self.dataset))
 
 
 @blueprint.route('/<dataset:dataset>/followers/', endpoint='followers')

@@ -3,7 +3,7 @@
 {% block breadcrumb %}
 <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
 <li><a href="{{ dataset.display_url }}">{{ dataset.title|truncate(128) }}</a></li>
-<li class="active">{{ _('Edit resource') }}</li>
+<li class="active">{{ _('Edit community resource') }}</li>
 {% endblock %}
 
 {% block form_controls %}
@@ -11,7 +11,7 @@
 <a href="{{ dataset.display_url }}" class="btn btn-warning">{{ _('Cancel') }}</a>
 <button class="btn btn-danger pull-right btn-delete"
     title="{{ _('Delete') }}"
-    data-url="{{ url_for('datasets.delete_resource', dataset=dataset, resource=resource.id) }}">
+    data-url="{{ url_for('datasets.delete_community_resource', dataset=dataset, resource=resource.id) }}">
     {{ _('Delete') }}
 </button>
 {% endblock %}
