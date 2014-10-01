@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-10-01 09:45+0200\n"
-"PO-Revision-Date: 2014-10-01 07:48+0000\n"
+"POT-Creation-Date: 2014-10-01 09:53+0200\n"
+"PO-Revision-Date: 2014-10-01 07:54+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -690,10 +690,18 @@ msgstr "Le tag \"%s\" doit contenir uniquement des caractères alphanumériques 
 msgid "Territorial coverage"
 msgstr "Couverture territoriale"
 
+#: udata/forms/fields.py:252
+msgid "A list of covered territories"
+msgstr "Une liste des territoires couverts"
+
 #: udata/forms/fields.py:253 udata/templates/dataset/search-labels.html:19
 #: udata/templates/dataset/search-panel.html:14
 msgid "Territorial granularity"
 msgstr "Granularité territoriale"
+
+#: udata/forms/fields.py:253
+msgid "The size of the data increment"
+msgstr "La taille de l'incrément de donnée"
 
 #: udata/forms/validators.py:43
 #, python-format

@@ -22,7 +22,7 @@ from .validators import RequiredIf
 from udata.auth import current_user
 from udata.models import db, Organization, SpatialCoverage, Territory, SPATIAL_GRANULARITIES
 from udata.core.spatial import LEVELS
-from udata.i18n import gettext as _
+from udata.i18n import lazy_gettext as _
 
 
 # _ = lambda s: s
@@ -249,8 +249,9 @@ class TerritoriesField(StringField):
 
 
 class SpatialCoverageForm(WTForm):
-    territories = TerritoriesField(_('Territorial coverage'))
-    granularity = SelectField(_('Territorial granularity'), choices=SPATIAL_GRANULARITIES.items(), default='other')
+    territories = TerritoriesField(_('Territorial coverage'), description=_('A list of covered territories'))
+    granularity = SelectField(_('Territorial granularity'), description=_('The size of the data increment'),
+        choices=SPATIAL_GRANULARITIES.items(), default='other')
 
     def populate_obj(self, obj):
         super(SpatialCoverageForm, self).populate_obj(obj)

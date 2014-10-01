@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-10-01 09:45+0200\n"
+"POT-Creation-Date: 2014-10-01 09:53+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -675,9 +675,17 @@ msgstr ""
 msgid "Territorial coverage"
 msgstr ""
 
+#: udata/forms/fields.py:252
+msgid "A list of covered territories"
+msgstr ""
+
 #: udata/forms/fields.py:253 udata/templates/dataset/search-labels.html:19
 #: udata/templates/dataset/search-panel.html:14
 msgid "Territorial granularity"
+msgstr ""
+
+#: udata/forms/fields.py:253
+msgid "The size of the data increment"
 msgstr ""
 
 #: udata/forms/validators.py:43
