@@ -79,6 +79,12 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.get(url_for('datasets.show', dataset=dataset))
         self.assert200(response)
 
+    def test_raise_404_if_private(self):
+        '''It should raise a 404 if the dataset is private'''
+        dataset = DatasetFactory(private=True)
+        response = self.get(url_for('datasets.show', dataset=dataset))
+        self.assert404(response)
+
     def test_render_edit(self):
         '''It should render the dataset edit form'''
         user = self.login()

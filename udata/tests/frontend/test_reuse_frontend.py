@@ -87,6 +87,12 @@ class ReuseBlueprintTest(FrontTestCase):
         response = self.get(url_for('reuses.show', reuse=reuse))
         self.assert200(response)
 
+    def test_raise_404_if_private(self):
+        '''It should raise a 404 if the reuse is private'''
+        reuse = ReuseFactory(private=True)
+        response = self.get(url_for('reuses.show', reuse=reuse))
+        self.assert404(response)
+
     def test_render_edit(self):
         '''It should render the reuse edit form'''
         self.login(AdminFactory())

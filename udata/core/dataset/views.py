@@ -91,6 +91,8 @@ class DatasetDetailView(DatasetView, DetailView):
 
     def get_context(self):
         context = super(DatasetDetailView, self).get_context()
+        if self.dataset.private and not DatasetEditPermission(self.dataset).can():
+            abort(404)
         context['reuses'] = Reuse.objects(datasets=self.dataset)
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = CommunityResourceEditPermission

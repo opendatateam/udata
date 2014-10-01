@@ -5,7 +5,7 @@ from bson import ObjectId
 
 from datetime import datetime
 
-from flask import request, url_for, redirect, render_template, flash
+from flask import abort, request, url_for, redirect, render_template, flash
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.forms import ReuseForm, ReuseCreateForm, AddDatasetToReuseForm
@@ -89,6 +89,9 @@ class ReuseDetailView(ReuseView, DetailView):
 
     def get_context(self):
         context = super(ReuseDetailView, self).get_context()
+
+        if self.reuse.private and not ReuseEditPermission(self.reuse).can():
+            abort(404)
 
         followers = FollowReuse.objects.followers(self.reuse).order_by('follower.fullname')
 
