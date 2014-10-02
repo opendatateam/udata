@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import wraps
 
 from flask import request, url_for, json, make_response, redirect
-from flask.ext.restplus import Api, Resource, marshal, fields
+from flask.ext.restplus import Api, Resource, marshal
 
 from udata import search
 from udata.i18n import I18nBlueprint
@@ -101,6 +101,8 @@ api = UDataApi(prefix='/api/1', decorators=[csrf.exempt],
 
 refs = api.namespace('references', 'References lists')
 
+from . import fields  # Needs to be imported after api declaration
+
 
 @api.representation('application/json')
 def output_json(data, code, headers=None):
@@ -192,55 +194,14 @@ class ModelAPI(SingleObjectAPI, API):
         return '', 204
 
 
-@api.model(type='string', format='date-time')
-class ISODateTime(fields.Raw):
-    def format(self, value):
-        return value.isoformat()
-
-fields.ISODateTime = ISODateTime
-
-
-class UrlFor(fields.Raw):
-    def __init__(self, endpoint, mapper=None, **kwargs):
-        super(UrlFor, self).__init__(**kwargs)
-        self.endpoint = endpoint
-        self.mapper = mapper or self.default_mapper
-
-    def default_mapper(self, obj):
-        return {'id': str(obj.id)}
-
-    def output(self, key, obj):
-        return url_for(self.endpoint, _external=True, **self.mapper(obj))
-
-fields.UrlFor = UrlFor
-
-
-class NextPageUrl(fields.Raw):
-    def output(self, key, obj):
-        if not obj.has_next:
-            return None
-        args = request.args.copy()
-        args['page'] = obj.page + 1
-        return url_for(request.endpoint, _external=True, **args)
-
-
-class PreviousPageUrl(fields.Raw):
-    def output(self, key, obj):
-        if not obj.has_prev:
-            return None
-        args = request.args.copy()
-        args['page'] = obj.page - 1
-        return url_for(request.endpoint, _external=True, **args)
-
-
 def pager(page_fields):
     pager_fields = {
         'data': api.as_list(fields.Nested(page_fields, attribute='objects', description='The page data')),
         'page': fields.Integer(description='The current page', required=True, min=0),
         'page_size': fields.Integer(description='The page size used for pagination', required=True, min=0),
         'total': fields.Integer(description='The total paginated items', required=True, min=0),
-        'next_page': NextPageUrl(description='The next page URL if exists'),
-        'previous_page': PreviousPageUrl(description='The previous page URL if exists'),
+        'next_page': fields.NextPageUrl(description='The next page URL if exists'),
+        'previous_page': fields.PreviousPageUrl(description='The previous page URL if exists'),
     }
     return pager_fields
 
