@@ -16,6 +16,8 @@ from udata.frontend import render, csrf
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
 
+from . import oauth2
+
 log = logging.getLogger(__name__)
 
 bp = I18nBlueprint('apii18n', __name__)
@@ -70,15 +72,17 @@ class UDataApi(Api):
                 return func(*args, **kwargs)
 
             apikey = request.headers.get(HEADER_API_KEY)
-            if not apikey:
-                return func(*args, **kwargs)
-            try:
-                user = User.objects.get(apikey=apikey)
-            except User.DoesNotExist:
-                self.abort(401, 'Invalid API Key')
+            if apikey:
+                try:
+                    user = User.objects.get(apikey=apikey)
+                except User.DoesNotExist:
+                    self.abort(401, 'Invalid API Key')
 
-            if not login_user(user, False):
-                self.abort(401, 'Inactive user')
+                if not login_user(user, False):
+                    self.abort(401, 'Inactive user')
+            else:
+                oauth2.check_credentials()
+            return func(*args, **kwargs)
 
             return func(*args, **kwargs)
         return wrapper
@@ -238,3 +242,5 @@ def init_app(app):
 
     api.init_app(app)
     app.register_blueprint(bp)
+
+    oauth2.init_app(app)

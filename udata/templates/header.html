@@ -78,7 +78,7 @@
             </a>
         </li>
         {% endif %}
-        {% if g.lang_code %}
+        {% if g.lang_code and request.url %}
         <li class="dropdown language">{#
             <button class="btn btn-link dropdown-toggle" data-toggle="dropdown">
             </button> #}

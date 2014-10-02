@@ -59,11 +59,3 @@ def pager(page_fields):
         'previous_page': PreviousPageUrl(description='The previous page URL if exists'),
     }
     return pager_fields
-
-
-def marshal_page(page, page_fields):
-    return marshal(page, pager(page_fields))
-
-
-def marshal_page_with(func):
-    pass

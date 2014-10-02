@@ -49,6 +49,8 @@ class Defaults(object):
     PLUGINS = []
     THEME = 'default'
 
+    OAUTH2_PROVIDER_ERROR_ENDPOINT = 'oauth-i18n.oauth_error'
+
 
 class Testing(Defaults):
     TESTING = True

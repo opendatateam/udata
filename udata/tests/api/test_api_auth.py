@@ -5,6 +5,7 @@ from flask import url_for
 
 
 from udata.api import api, API
+from udata.api.oauth2 import OAuth2Client, OAuth2Grant, OAuth2Token
 from udata.forms import Form, fields, validators
 
 from . import APITestCase
@@ -34,6 +35,14 @@ class FakeAPI(API):
 
 
 class APIAuthTest(APITestCase):
+    def oauth_app(self, name='test-client'):
+        owner = UserFactory()
+        return OAuth2Client.objects.create(
+            name=name,
+            user=owner,
+            redirect_uris=['https://test.org/callback']
+        )
+
     def test_no_auth(self):
         '''Should not return a content type if there is no content on delete'''
         response = self.get(url_for('api.fake'))
@@ -56,6 +65,26 @@ class APIAuthTest(APITestCase):
         '''Should handle header API Key authentication'''
         user = UserFactory(apikey='apikey')
         response = self.post(url_for('api.fake'), headers={'X-API-KEY': user.apikey})
+
+        self.assert200(response)
+        self.assertEqual(response.content_type, 'application/json')
+        self.assertEqual(response.json, {'success': True})
+
+    def test_oauth_auth(self):
+        '''Should handle  OAuth header authentication'''
+        user = UserFactory()
+        client = self.oauth_app()
+        # grant = OAuth2Grant.objects.create(user=user, client=client, code='test-code')
+        token = OAuth2Token.objects.create(
+            client=client,
+            user=user,
+            access_token='access-token',
+            refresh_token='refresh-token'
+        )
+
+        response = self.post(url_for('api.fake'), headers={
+            'Authorization': ' '.join(['Bearer', token.access_token])
+        })
 
         self.assert200(response)
         self.assertEqual(response.content_type, 'application/json')
@@ -108,3 +137,24 @@ class APIAuthTest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.json, {'success': True})
+
+    def test_authorization_display(self):
+        '''Should display the OAuth authorization page'''
+        self.login()
+
+        client = self.oauth_app()
+        print url_for('apii18n.oauth_authorize',
+            response_type='code',
+            client_id=client.client_id,
+            redirect_uri=client.default_redirect_uri
+        )
+
+        response = self.get(url_for('apii18n.oauth_authorize',
+            response_type='code',
+            client_id=client.client_id,
+            redirect_uri=client.default_redirect_uri
+        ))
+
+        print response.location
+
+        self.assert200(response)

@@ -1,0 +1,20 @@
+{% extends theme("base.html") %}
+
+{% block content %}
+<section class="error">
+    <div class="container">
+
+        <div class="jumbotron">
+            <h1>{{ _('OAuth Authentication Error') }}</h1>
+            <p class="lead">{{ request.args.error }}</p>
+            <p class="text-center">
+                <a class="btn btn-primary btn-lg" role="button" href="{{ url_for('site.home') }}">
+                    <span class="fa fa-home"></span>
+                    {{ _('Home') }}
+                </a>
+            </p>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
