@@ -143,18 +143,51 @@ class APIAuthTest(APITestCase):
         self.login()
 
         client = self.oauth_app()
-        print url_for('apii18n.oauth_authorize',
-            response_type='code',
-            client_id=client.client_id,
-            redirect_uri=client.default_redirect_uri
-        )
-
-        response = self.get(url_for('apii18n.oauth_authorize',
+        response = self.get(url_for('oauth-i18n.authorize',
             response_type='code',
             client_id=client.client_id,
             redirect_uri=client.default_redirect_uri
         ))
 
-        print response.location
-
         self.assert200(response)
+
+    def test_authorization_decline(self):
+        '''Should redirect to the redirect_uri on authorization denied'''
+        self.login()
+
+        client = self.oauth_app()
+        response = self.post(url_for('oauth-i18n.authorize',
+            response_type='code',
+            client_id=client.client_id,
+            redirect_uri=client.default_redirect_uri
+        ), {
+            'scopes': ['default'],
+            'refuse': '',
+        })
+
+        self.assertStatus(response, 302)
+        print response.location
+        uri, params = response.location.split('?')
+        self.assertEqual(uri, client.default_redirect_uri)
+        raise 'test params'
+
+    def test_authorization_accept(self):
+        '''Should redirect to the redirect_uri on authorization accepted'''
+        self.login()
+
+        client = self.oauth_app()
+
+        response = self.post(url_for('oauth-i18n.authorize',
+            response_type='code',
+            client_id=client.client_id,
+            redirect_uri=client.default_redirect_uri
+        ), {
+            'scopes': ['default'],
+            'accept': '',
+        })
+
+        self.assertStatus(response, 302)
+        print response.location
+        uri, params = response.location.split('?')
+        self.assertEqual(uri, client.default_redirect_uri)
+        raise 'test params'
