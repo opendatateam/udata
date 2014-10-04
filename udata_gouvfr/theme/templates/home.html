@@ -178,7 +178,7 @@
                     <img src="{{ blogpost.image_url|safe }}" alt="{{ blogpost.title|safe }}">
                 </div>
                 <div class="col-xs-12 col-sm-8 body">
-                    <span class="post-date">5 Août 2014</span>
+                    <span class="post-date">{{blogpost.date|dateformat('long')|title}}</span>
                     <h4>
                         <a href="{{ blogpost.link }}"
                             title="{{ blogpost.title|safe }}">

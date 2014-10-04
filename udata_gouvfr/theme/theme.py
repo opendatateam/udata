@@ -3,9 +3,9 @@ from __future__ import unicode_literals
 
 import re
 
-# from copy import deepcopy
 import feedparser
 
+from dateutil.parser import parse
 from flask import g, current_app
 
 from udata import search
@@ -88,6 +88,7 @@ def get_blog_post(url, lang):
     blogpost = {
         'title': post.title,
         'link': post.link,
+        'date': parse(post.published)
     }
     match = RE_POST_IMG.match(post.content[0].value)
     if match:
