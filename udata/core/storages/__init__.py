@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from os.path import join
+from flask.ext import fs
 
-from flaskext.uploads import UploadSet, AllExcept, SCRIPTS, EXECUTABLES, IMAGES, configure_uploads
+AUTHORIZED_TYPES = fs.AllExcept(fs.SCRIPTS + fs.EXECUTABLES)
 
-AUTHORIZED_TYPES = AllExcept(SCRIPTS + EXECUTABLES)
-
-resources_storage = UploadSet('resources', AUTHORIZED_TYPES)
-avatars_storage = UploadSet('avatars', IMAGES)
-images_storage = UploadSet('images', IMAGES)
+resources = fs.Storage('resources', AUTHORIZED_TYPES)
+avatars = fs.Storage('avatars', fs.IMAGES)
+images = fs.Storage('images', fs.IMAGES)
+chunks = fs.Storage('resources', AUTHORIZED_TYPES)
 
 
 def init_app(app):
-    app.config.setdefault('UPLOADS_DEFAULT_DEST', join(app.instance_path, 'uploads'))
-    configure_uploads(app, (resources_storage, avatars_storage, images_storage))
+    if not 'BUCKETS_PREFIX' in app.config:
+        app.config['BUCKETS_PREFIX'] = '/s'
+    fs.init_app(app, resources, avatars, images, chunks)

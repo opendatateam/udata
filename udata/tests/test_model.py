@@ -10,6 +10,7 @@ from mongoengine.errors import ValidationError
 
 from udata.models import db
 from udata.tests import TestCase, DBTestMixin
+from udata.tests.test_storages import StorageTestMixin
 
 
 class UUIDTester(db.Document):
@@ -282,3 +283,40 @@ class ExtrasField(DBTestMixin, TestCase):
             'integer': 5,
             'float': 5.5,
         }))
+
+
+class ImageFieldTest(StorageTestMixin, DBTestMixin, TestCase):
+
+    def test_default_validate(self):
+        class Tester(db.Document):
+            image = db.ImageField()
+
+        tester = Tester()
+        tester.validate()
+
+        self.assertFalse(tester.image)
+        # self.assertIsNone(tester.image.to_mongo())
+        # self.assertIsNone(tester.image.to_python())
+
+    def test_url_to_original(self):
+
+        class Tester(db.Document):
+            image = db.ImageField()
+
+        filename = 'img.png'
+        source = 'http://somewhere.net/' + filename
+
+        tester = Tester(image=source)
+        tester.validate()
+
+        self.assertTrue(tester.image)
+        self.assertEqual(str(tester.image), source)
+        self.assertEqual(tester.image.source, source)
+        self.assertEqual(tester.image.filename, filename)
+        # self.assertEqual(tester.image.original, )
+        #
+        self.assertEqual(tester.image.to_mongo(), {
+            'source': source,
+            'filename': filename,
+        })
+        # self.assertIsInstance(tester.image.to_python(), Im)

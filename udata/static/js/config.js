@@ -21,6 +21,7 @@ require.config({
         'leaflet': '../bower/leaflet/dist/leaflet-src',
         'leaflet.spin': '../bower/leaflet.spin/leaflet.spin',
         'spin': '../bower/spin.js/spin',
+        'jcrop': '../bower/jcrop/js/jquery.Jcrop',
 
         // jQuery plugins
         'jquery.microdata': '../bower/jquery.microdata/index',
@@ -88,6 +89,10 @@ require.config({
         'jquery.microdata': {
             deps: ['jquery'],
             exports: '$.fn.microdata'
+        },
+        'jcrop': {
+            deps: ['jquery'],
+            exports: '$.fn.Jcrop'
         },
         'typeahead': {
             deps: ['jquery'],

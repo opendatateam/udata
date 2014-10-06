@@ -7,7 +7,8 @@
 @import "../bower/bootstrap-daterangepicker/daterangepicker-bs3.css";
 @import "../bower/bootstrap-datepicker/css/datepicker3.css";
 @import "../bower/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css";
-@import "../vendor/jquery.fineuploader/fineuploader.css";
+@import "../bower/fineuploader-dist/dist/fineuploader.css";
+@import "../bower/jcrop/css/jquery.Jcrop.css";
 
 @selectize-color-item: @label-primary-bg;
 @selectize-color-item-text: @label-color;
@@ -116,5 +117,106 @@ form {
             }
         }
 
+    }
+}
+
+/**
+ * Image picker and jCrop styling
+ */
+.image-cropper {
+    img {
+        max-width: none !important;
+    }
+
+    .cropper-pane {
+        min-height: 200px;
+        max-height: 600px;
+
+        .jcrop-holder {
+            margin: auto;
+
+            border: 1px solid black;
+
+            -webkit-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+               -moz-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+                    box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+        }
+    }
+
+    .preview-pane {
+
+        /* The Javascript code will set the aspect ratio of the crop
+           area based on the size of the thumbnail preview,
+           specified here */
+        .preview-container {
+            // width: 150px;
+            // height: 150px;
+            overflow: hidden;
+            border: 1px solid black;
+            margin-bottom: 15px;
+
+            -webkit-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+               -moz-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+                    box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+        }
+    }
+}
+
+.uploader {
+    .drop-pane {
+        padding: 15px;
+        margin: 15px 0;
+        border: 5px dashed @gray-light; // lighten(@gray, 10%);
+
+        &.drop-active {
+            border-color: blue;
+        }
+    }
+}
+
+.form-upload {
+    color: lighten(@gray, 5%);
+
+    .btn-file {
+        color: lighten(@gray, 10%);
+    }
+}
+
+
+.image-picker {
+    color: lighten(@gray, 5%);
+
+    // .dropicon {
+    //     margin-top: 10px;
+    // }
+
+    .btn-file {
+        color: lighten(@gray, 10%);
+    }
+
+    .modal-body.over & {
+        border: 5px dashed @gray-lighter;
+    }
+}
+
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+
+    input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        background: white;
+        cursor: inherit;
+        display: block;
     }
 }

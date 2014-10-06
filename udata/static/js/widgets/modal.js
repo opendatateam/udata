@@ -13,7 +13,8 @@ define([
         close_btn: i18n._('Close'),
         close_icon: 'fa-times',
         close_cls: 'btn-default',
-        actions: null
+        actions: null,
+        size: null
     };
 
     return function(options) {

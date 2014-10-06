@@ -31,7 +31,7 @@ def iter_catalog(*models):
 def iter_months(since):
     year, month = (int(t) for t in since.split('-'))
     _, end = calendar.monthrange(year, month)
-    dt = date(yaer, month, 1)
+    dt = date(year, month, 1)
 
 
 @m.option('-s', '--site', action='store_true', default=False, help='Update site metrics')

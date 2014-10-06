@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import mock
+import shutil
+import tempfile
 import feedparser
 
-from flask import url_for
+from datetime import datetime
+from StringIO import StringIO
 
+from flask import url_for
+from flask.ext import fs
+
+from udata.core import storages
 from udata.models import Dataset, FollowDataset
 
 from . import FrontTestCase
@@ -255,6 +263,27 @@ class DatasetBlueprintTest(FrontTestCase):
         rendered_followers = self.get_context_variable('followers')
         self.assertEqual(len(rendered_followers), len(followers))
 
+
+class MockBackend(fs.BaseBackend):
+    pass
+
+
+MOCK_BACKEND = '.'.join((__name__, MockBackend.__name__))
+
+
+def mock_backend(func):
+    return mock.patch(MOCK_BACKEND)(func)
+
+
+class ResourcesTest(FrontTestCase):
+    @mock_backend
+    def create_app(self, mock_backend):
+        app = super(ResourcesTest, self).create_app()
+        app.config['FS_BACKEND'] = MOCK_BACKEND
+        storages.init_app(app)
+        self.backend = mock_backend.return_value
+        return app
+
     def test_render_create_resource(self):
         '''It should render the dataset new resource page'''
         user = self.login()
@@ -262,12 +291,53 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.get(url_for('datasets.new_resource', dataset=dataset))
         self.assert200(response)
 
+    def test_upload_new_resource(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = {'file': (StringIO(b'aaa'), 'test.tar.gz')}
+        now = datetime.now()
+
+        response = self.post(url_for('datasets.upload_new_resource', dataset=dataset), data)
+        self.assert200(response)
+
+        self.assertTrue(response.json['success'])
+        self.assertIn('filename', response.json)
+        self.assertIn('url', response.json)
+        self.assertIn('sha1', response.json)
+        self.assertEqual(response.json['format'], 'tar.gz')
+        # self.assertEqual(response.json['size'], 3)
+        filename = response.json['filename']
+        self.assertIn(dataset.slug, filename)
+        self.assertIn(now.strftime('%Y%m%d-%H%M%S'), filename)
+        self.assertTrue(filename.endswith('test.tar.gz'))
+
     def test_render_create_community_resource(self):
         '''It should render the dataset new community resource page'''
         user = self.login()
         dataset = DatasetFactory(owner=user)
         response = self.get(url_for('datasets.new_community_resource', dataset=dataset))
         self.assert200(response)
+
+    def test_upload_new_community_resource(self):
+        self.login()
+        dataset = DatasetFactory(owner=UserFactory())
+        data = {'file': (StringIO(b'aaa'), 'test.txt')}
+        now = datetime.now()
+
+        response = self.post(url_for('datasets.upload_new_community_resource', dataset=dataset), data)
+        self.assert200(response)
+
+        self.assertTrue(response.json['success'])
+        self.assertIn('filename', response.json)
+        self.assertIn('url', response.json)
+        self.assertIn('sha1', response.json)
+        self.assertEqual(response.json['format'], 'txt')
+        # self.assertEqual(response.json['size'], 3)
+        filename = response.json['filename']
+        self.assertIn('community', filename)
+        self.assertIn(dataset.slug, filename)
+        self.assertIn(now.strftime('%Y%m%d-%H%M%S'), filename)
+        self.assertTrue(filename.endswith('test.txt'))
 
     def test_render_edit_resource(self):
         '''It should render the dataset new resource page'''

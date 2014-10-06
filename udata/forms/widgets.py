@@ -128,3 +128,7 @@ class ImageURL(WidgetHelper, widgets.html5.URLInput):
     def __call__(self, field, **kwargs):
         kwargs['data-endpoint'] = field.endpoint
         return super(ImageURL, self).__call__(field, **kwargs)
+
+
+class ImagePicker(WidgetHelper, widgets.HiddenInput):
+    classes = 'image-picker'

@@ -46,6 +46,8 @@
         {{ f(class_='form-control') }}
         {% elif f.type == 'UploadableURLField' %}
         {{ uploadable_url(f) }}
+        {% elif f.type == 'ImageField' %}
+        {{ image_picker(f) }}
         {% else %}
         {{ f(class_='form-control') }}
         {% endif %}
@@ -196,27 +198,25 @@
 </div>
 {% endmacro %}
 
+{% macro image_picker(field) %}
+{{ field() }}
+{% if field.value %}
+{% else %}
+<button class="image-picker-btn btn btn-default" data-sizes="120,50,20">Pick</button>
+{% endif %}
+{% endmacro %}
+
 {% macro uploadable_url(field) %}
  <div class="input-group">
     {{ field(class_='form-control') }}
+    <span class="input-group-addon hide"><span class="fa fa-fw fa-globe"></span></span>
     <span class="input-group-btn">
-        <div class="btn btn-danger upload-remove-btn hide"
+        <div class="btn btn-danger"
             data-title="{{ _('Delete resource') }}"
             data-content="{{ _('You can remove this uploaded file')|escape }}">
-            <span class="glyphicon glyphicon-remove"></span>
-        </div>
-        <div class="btn btn-primary upload-btn"
-            data-title="{{ _('Upload a resource') }}"
-            data-content="{{ _('If the resource doesn\'t exists online you can upload it')|escape }}">
-            <span class="glyphicon glyphicon-cloud-upload"></span>
-            {{_('Upload') }}
+            <span class="fa fa-fw fa-remove"></span>
         </div>
     </span>
-</div>
-<div class="progress progress-striped active hide">
-    <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-    0%
-    </div>
 </div>
 {% endmacro %}
 

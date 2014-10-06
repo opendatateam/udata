@@ -91,11 +91,16 @@ class URLField(FieldHelper, EmptyNone, html5.URLField):
     pass
 
 
+class ImageField(StringField):
+    widget = widgets.ImagePicker()
+
+
 class UploadableURLField(URLField):
     widget = widgets.UploadableURL()
 
     def __init__(self, *args, **kwargs):
-        self.endpoint = url_for(kwargs.pop('endpoint'))
+        storage = kwargs.pop('storage')
+        self.endpoint = url_for('storage.upload', name=storage.name)
         super(UploadableURLField, self).__init__(*args, **kwargs)
 
 

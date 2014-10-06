@@ -12,6 +12,7 @@ from mongoengine.signals import pre_save, post_save
 from .badges_field import BadgesField
 from .datetime_fields import DateField, DateRange, Datetimed
 from .extras_fields import ExtrasField, Extra
+from .image_field import ImageField
 from .slug_fields import SlugField
 from .uuid_fields import AutoUUIDField
 
@@ -34,6 +35,7 @@ class UDataMongoEngine(MongoEngine):
         self.DateRange = DateRange
         self.BaseQuerySet = BaseQuerySet
         self.BaseDocumentMetaclass = TopLevelDocumentMetaclass
+        self.ImageField = ImageField
         self.post_save = post_save
         self.pre_save = pre_save
 

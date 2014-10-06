@@ -6,12 +6,15 @@ from datetime import datetime
 from flask import abort, redirect, request, url_for, g, jsonify, render_template
 from werkzeug.contrib.atom import AtomFeed
 
+from udata import fileutils
+from udata.auth import login_required
 from udata.forms import DatasetForm, DatasetCreateForm, ResourceForm, CommunityResourceForm, DatasetExtraForm
 from udata.frontend import nav
 from udata.frontend.views import DetailView, CreateView, EditView, NestedEditView, SingleObject, SearchView, BaseView, NestedObject
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Resource, Reuse, Issue, Follow
 
+from udata.core import storages
 from udata.core.site.views import current_site
 
 from .permissions import CommunityResourceEditPermission, DatasetEditPermission, set_dataset_identity
@@ -177,6 +180,53 @@ class ResourceCreateView(ProtectedDatasetView, SingleObject, CreateView):
         self.object.resources.append(resource)
         self.object.save()
         return redirect(url_for('datasets.show', dataset=self.object))
+
+
+class UploadNewResource(SingleObject, BaseView):
+    def post(self, dataset):
+        if not 'file' in request.files:
+            return jsonify({'success': False, 'error': '"file" should be set'}), 400
+
+        storage = storages.resources
+
+        prefix = self.get_prefix(dataset)
+
+        file = request.files['file']
+        filename = storage.save(file, prefix=prefix)
+
+        extension = fileutils.extension(filename)
+
+        file.seek(0)
+        sha1 = storages.utils.sha1(file)
+
+        print dir(file)
+
+        return jsonify({
+            'success': True,
+            'url': storage.url(filename),
+            'filename': filename,
+            'sha1': sha1,
+            'format': extension,
+            'size': file.content_length
+        })
+
+    def get_prefix(self, dataset):
+        return '/'.join((dataset.slug, datetime.now().strftime('%Y%m%d-%H%M%S')))
+
+
+@blueprint.route('/<dataset:dataset>/resources/new/upload', endpoint='upload_new_resource')
+class UploadNewResourceView(ProtectedDatasetView, UploadNewResource):
+    '''Handle upload on POST if authorized.'''
+    pass
+
+
+@blueprint.route('/<dataset:dataset>/community_resources/new/upload', endpoint='upload_new_community_resource')
+class UploadNewCommunityResourceView(DatasetView, UploadNewResource):
+    '''Handle upload on POST if authorized.'''
+    decorators = [login_required]
+
+    def get_prefix(self, dataset):
+        return '/'.join((dataset.slug, 'community', datetime.now().strftime('%Y%m%d-%H%M%S')))
 
 
 @blueprint.route('/<dataset:dataset>/community_resources/new/', endpoint='new_community_resource')

@@ -1,5 +1,7 @@
 {% extends theme('dataset/resource/form.html') %}
 
+{% set form_title = _('New resource') %}
+
 {% block breadcrumb %}
 <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
 <li><a href="{{ url_for('datasets.show', dataset=dataset) }}">{{ dataset.title|truncate(64) }}</a></li>
