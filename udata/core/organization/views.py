@@ -85,15 +85,19 @@ class OrganizationDetailView(OrgView, DetailView):
         )
         followers = FollowOrg.objects.followers(self.organization).order_by('follower.fullname')
 
+        can_edit = EditOrganizationPermission(self.organization.id)
         context.update({
             'reuses': reuses,
             'datasets': datasets,
             'supplied_datasets': supplied_datasets,
-            'private_reuses': list(Reuse.objects(organization=self.object, private=True)),
-            'private_datasets': list(Dataset.objects(organization=self.object, private=True)),
             'followers': followers[:self.nb_followers],
-            'can_edit': EditOrganizationPermission(self.organization.id)
+            'can_edit': can_edit
         })
+        if can_edit:
+            context.update({
+                'private_reuses': list(Reuse.objects(organization=self.object, private=True)),
+                'private_datasets': list(Dataset.objects(organization=self.object, private=True)),
+            })
 
         return context
 
