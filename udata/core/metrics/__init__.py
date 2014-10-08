@@ -56,10 +56,11 @@ class Metric(object):
     def compute(self):
         log.debug('Computing value for %s(%s) metric', self.name, self.target)
         self.value = self.get_value()
-        if isinstance(self.target, db.Document):
-            cmd = {'set__metrics__{0}'.format(self.name): self.value}
-            self.model.objects(id=self.target.id).update_one(**cmd)
-        self.notify_update()
+        if self.value is not None:
+            if isinstance(self.target, db.Document):
+                cmd = {'set__metrics__{0}'.format(self.name): self.value}
+                self.model.objects(id=self.target.id).update_one(**cmd)
+            self.notify_update()
 
     def store(self):
         from .models import Metrics
