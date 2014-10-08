@@ -94,7 +94,8 @@ def lazy_pgettext(*args, **kwargs):
 def get_locale():
     if hasattr(g, 'lang_code'):
         return g.lang_code
-    return request.accept_languages.best_match(current_app.config['LANGUAGES'].keys())
+    return current_app.config['DEFAULT_LANGUAGE']
+    # return request.accept_languages.best_match(current_app.config['LANGUAGES'].keys())
 
 
 def init_app(app):

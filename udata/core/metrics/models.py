@@ -47,7 +47,7 @@ class WithMetrics(object):
 class Metrics(db.Document):
     object_id = db.DynamicField(required=True)
     date = db.StringField(required=True)
-    level = db.StringField(required=True, default='daily', choices=('daily', 'monthly'))
+    level = db.StringField(required=True, default='daily', choices=('hourly', 'daily', 'monthly', 'yearly'))
     values = db.DictField()
 
     meta = {
