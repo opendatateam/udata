@@ -74,7 +74,6 @@ def default_home_context_processor(context):
 
 
 @blueprint.route('/')
-@cache.cached(timeout=50)
 def home():
     context = {}
     processor = theme.current.get_processor('home', default_home_context_processor)
