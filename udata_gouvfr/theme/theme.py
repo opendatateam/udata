@@ -98,6 +98,7 @@ def get_blog_post(url, lang):
     return blogpost
 
 
+# @cache.memoize(50)
 @theme.context('home')
 def home_context(context):
     config = theme.current.config

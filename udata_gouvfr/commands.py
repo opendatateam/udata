@@ -22,8 +22,32 @@ def certify_org(id_or_slug):
     organization.save()
 
 
+def uncertify_org(id_or_slug):
+    organization = Organization.objects(slug=id_or_slug).first()
+    if not organization:
+        try:
+            organization = Organization.objects(id=id_or_slug).first()
+        except:
+            print 'No organization found for {0}'.format(id_or_slug)
+            return
+    print 'Uncertifying {0}'.format(organization.name)
+    organization.public_service = False
+    organization.save()
+
+
 @manager.command
 def certify(path_or_id):
+    '''Certify an organization as a public service'''
+    if exists(path_or_id):
+        with open(path_or_id) as open_file:
+            for id_or_slug in open_file.readlines():
+                certify_org(id_or_slug.strip())
+    else:
+        certify_org(path_or_id)
+
+
+@manager.command
+def uncertify(path_or_id):
     '''Certify an organization as a public service'''
     if exists(path_or_id):
         with open(path_or_id) as open_file:
