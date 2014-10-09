@@ -21,11 +21,12 @@
             <meta itemprop="datePublished" content="{{resource.published|isoformat}}" />
         </a>
     </h4>
-    {% if resource.description %}
     <p class="list-group-item-text ellipsis">
-        {{ resource.description|mdstrip(200) or _('No Description') }}{#   #}
+        {{ _('Last modified on %(date)s at %(time)s',
+            date=resource.modified|dateformat('full'),
+            time=resource.modified|timeformat('short'),
+        ) }}
     </p>
-    {% endif %}
     {% if resource.owner %}
     {{ resource.owner|avatar(52, 'resource-owner') }}
     {% endif %}
