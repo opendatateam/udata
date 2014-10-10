@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-10-01 09:53+0200\n"
-"PO-Revision-Date: 2014-10-01 07:54+0000\n"
+"POT-Creation-Date: 2014-10-10 11:03+0200\n"
+"PO-Revision-Date: 2014-10-10 09:07+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -21,6 +21,50 @@ msgstr ""
 "Generated-By: Babel 1.3\n"
 "Language: fr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: udata/api/oauth2.py:26
+msgid "Public"
+msgstr "Public"
+
+#: udata/api/oauth2.py:27
+msgid "Confidential"
+msgstr "Confidentiel"
+
+#: udata/api/oauth2.py:31
+msgid "Web Application"
+msgstr "Application web"
+
+#: udata/api/oauth2.py:32
+msgid "User Agent"
+msgstr "User Agent"
+
+#: udata/api/oauth2.py:33
+msgid "Native"
+msgstr "Native"
+
+#: udata/api/oauth2.py:37
+msgid "Authorization Code"
+msgstr "Code d'autorisation"
+
+#: udata/api/oauth2.py:38
+msgid "Implicit"
+msgstr "Implicite"
+
+#: udata/api/oauth2.py:39
+msgid "Resource Owner Password Credentials"
+msgstr "Mot de passe du proprioétaire de la resource"
+
+#: udata/api/oauth2.py:40
+msgid "Client Credentials"
+msgstr "Identifiants du client"
+
+#: udata/api/oauth2.py:44
+msgid "Bearer Token"
+msgstr "Bearer Token"
+
+#: udata/api/oauth2.py:48
+msgid "Default scope"
+msgstr "Scope par défaut"
 
 #: udata/core/admin/__init__.py:48
 msgid "Site"
@@ -156,8 +200,8 @@ msgid "Old key"
 msgstr "Ancienne clé"
 
 #: udata/core/dataset/metrics.py:19 udata/core/organization/metrics.py:33
-#: udata/core/organization/views.py:119 udata/core/site/metrics.py:48
-#: udata/core/site/views.py:123 udata/core/user/metrics.py:39
+#: udata/core/organization/views.py:123 udata/core/site/metrics.py:48
+#: udata/core/site/views.py:122 udata/core/user/metrics.py:39
 #: udata/frontend/theme.py:40 udata/templates/search.html:29
 #: udata/templates/search.html:55 udata/templates/search.html:72
 #: udata/templates/search.html:81 udata/templates/dataset/card.html:43
@@ -249,7 +293,7 @@ msgid "Additionnal informations"
 msgstr "Informations additionnelles"
 
 #: udata/core/dataset/views.py:59 udata/core/site/metrics.py:58
-#: udata/core/site/views.py:129 udata/templates/dataset/display.html:58
+#: udata/core/site/views.py:128 udata/templates/dataset/display.html:58
 msgid "Resources"
 msgstr "Ressources"
 
@@ -257,7 +301,7 @@ msgstr "Ressources"
 msgid "Transfer"
 msgstr "Transferer"
 
-#: udata/core/followers/metrics.py:28 udata/core/organization/views.py:126
+#: udata/core/followers/metrics.py:28 udata/core/organization/views.py:130
 #: udata/core/site/metrics.py:96 udata/templates/search.html:73
 #: udata/templates/search.html:82 udata/templates/dataset/followers.html:6
 #: udata/templates/dataset/search-labels.html:26
@@ -342,9 +386,9 @@ msgstr "Logo"
 msgid "Your organization logo URL"
 msgstr "L'URL du logo de votre organisation"
 
-#: udata/core/organization/metrics.py:16 udata/core/organization/views.py:112
+#: udata/core/organization/metrics.py:16 udata/core/organization/views.py:116
 #: udata/core/reuse/metrics.py:20 udata/core/site/metrics.py:38
-#: udata/core/site/views.py:117 udata/core/user/metrics.py:25
+#: udata/core/site/views.py:116 udata/core/user/metrics.py:25
 #: udata/frontend/theme.py:39 udata/templates/search.html:23
 #: udata/templates/search.html:71 udata/templates/search.html:80
 #: udata/templates/dataset/create.html:4
@@ -501,7 +545,7 @@ msgstr "Visualisation"
 msgid "Last reuses"
 msgstr "Dernières réutilisations"
 
-#: udata/core/reuse/views.py:135
+#: udata/core/reuse/views.py:138
 #, python-format
 msgid "The dataset \"%(title)s\" has been added to the reuse"
 msgstr "Le jeux de données %(title)s a été ajouté à la réutilisation"
@@ -522,14 +566,14 @@ msgstr "Taille du flux"
 msgid "Number of elements in feeds"
 msgstr "Nombre d'élements dans les flux"
 
-#: udata/core/site/metrics.py:76 udata/core/site/views.py:151
+#: udata/core/site/metrics.py:76 udata/core/site/views.py:150
 #: udata/templates/search.html:41 udata/templates/user/base.html:5
 #: udata/templates/user/edit_base.html:5
 #: udata/templates/user/following.html:18 udata/templates/user/list.html:9
 msgid "Users"
 msgstr "Utilisateurs"
 
-#: udata/core/site/metrics.py:86 udata/core/site/views.py:138
+#: udata/core/site/metrics.py:86 udata/core/site/views.py:137
 #: udata/frontend/theme.py:38 udata/templates/header.html:48
 #: udata/templates/search.html:35 udata/templates/dataset/search-panel.html:5
 #: udata/templates/organization/create.html:4
@@ -543,15 +587,15 @@ msgstr "Utilisateurs"
 msgid "Organizations"
 msgstr "Organisations"
 
-#: udata/core/site/views.py:114
+#: udata/core/site/views.py:113
 msgid "Data"
 msgstr "Données"
 
-#: udata/core/site/views.py:135
+#: udata/core/site/views.py:134
 msgid "Community"
 msgstr "Communauté"
 
-#: udata/core/site/views.py:144
+#: udata/core/site/views.py:143
 msgid "Public services"
 msgstr "Services publics"
 
@@ -679,8 +723,8 @@ msgstr "Le tag \"%(tag)s\" doit avoir entre %(min)d et %(max)d caracters."
 
 #: udata/forms/fields.py:177
 #, python-format
-msgid "Tag \"%s\" must be alphanumeric characters or symbols: -_."
-msgstr "Le tag \"%s\" doit contenir uniquement des caractères alphanumériques or les symboles: -_."
+msgid "Tag \"%(tag)s\" must be alphanumeric characters or symbols: -_."
+msgstr "Le tag \"%(tag)s\" doit contenir uniquement des caractères alphanumériques or les symboles: -_."
 
 #: udata/forms/fields.py:252 udata/templates/dataset/card.html:33
 #: udata/templates/dataset/display.html:253
@@ -999,8 +1043,8 @@ msgstr "jeu de données"
 
 #: udata/templates/dataset/display.html:25
 #: udata/templates/dataset/resource/display.html:12
-#: udata/templates/dataset/resource/list-item.html:34
-#: udata/templates/dataset/resource/list-item.html:41
+#: udata/templates/dataset/resource/list-item.html:35
+#: udata/templates/dataset/resource/list-item.html:42
 #: udata/templates/organization/display.html:22
 #: udata/templates/organization/followers.html:15
 #: udata/templates/post/display.html:112 udata/templates/post/edit.html:5
@@ -1215,9 +1259,10 @@ msgstr "Édition d'une ressource communautaire"
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
-#: udata/templates/dataset/resource/list-item.html:26
-msgid "No Description"
-msgstr "Aucune description"
+#: udata/templates/dataset/resource/list-item.html:25
+#, python-format
+msgid "Last modified on %(date)s at %(time)s"
+msgstr "Date de dernière modification le %(date)s à %(time)s"
 
 #: udata/templates/errors/403.html:3
 msgid "Forbidden"
