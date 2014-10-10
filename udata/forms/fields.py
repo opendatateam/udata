@@ -170,12 +170,12 @@ class TagField(StringField):
             return
         for tag in self.data:
             if not MIN_TAG_LENGTH <= len(tag) <= MAX_TAG_LENGTH:
-                message = _('Tag "%(tag)s" must be between %(min)d and %(max)d characters long.')
-                params = {'min': MIN_TAG_LENGTH, 'max': MAX_TAG_LENGTH, 'tag': tag}
-                raise validators.ValidationError(message % params)
+                message = _('Tag "%(tag)s" must be between %(min)d and %(max)d characters long.',
+                    min=MIN_TAG_LENGTH, max=MAX_TAG_LENGTH, tag=tag)
+                raise validators.ValidationError(message)
             if not RE_TAG.match(tag):
-                message = _('Tag "%s" must be alphanumeric characters or symbols: -_.')
-                raise validators.ValidationError(message % tag)
+                message = _('Tag "%(tag)s" must be alphanumeric characters or symbols: -_.', tag=tag)
+                raise validators.ValidationError(message)
 
 
 class DatasetListField(StringField):
