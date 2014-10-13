@@ -157,6 +157,15 @@ class LegacyUrlsTest(FrontTestCase):
         response = self.client.get('/en/dataset/%s/' % dataset.slug)
         self.assertRedirects(response, url_for('datasets.show', dataset=dataset))
 
+    def test_redirect_datasets_v1(self):
+        response = self.client.get('/en/DataSet/30377655')
+        self.assertRedirects(response, url_for('datasets.show',
+            dataset='enseignement-d-exploration-programme-d-enseignement-de-creation-et-innovation-technologique-30377655'))
+
+    def test_redirect_datasets_not_found(self):
+        response = self.client.get('/en/DataSet/wtf')
+        self.assert404(response)
+
     def test_redirect_organizations(self):
         org = OrganizationFactory()
         response = self.client.get('/en/organization/%s/' % org.slug)
