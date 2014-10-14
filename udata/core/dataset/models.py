@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import datetime
 
+from collections import OrderedDict
+
 from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
@@ -14,7 +16,7 @@ from udata.i18n import lazy_gettext as _
 __all__ = (
     'License', 'Resource', 'Dataset',
     'DatasetIssue', 'FollowDataset',
-    'UPDATE_FREQUENCIES',
+    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES',
 )
 
 UPDATE_FREQUENCIES = {
@@ -33,6 +35,12 @@ UPDATE_FREQUENCIES = {
     'quinquennial': _('Quinquennial'),
     'unknown': _('Unknown'),
 }
+
+RESOURCE_TYPES = OrderedDict([
+    ('file', _('Uploaded file')),
+    ('remote', _('Remote file')),
+    ('api', _('API')),
+])
 
 
 class License(db.Document):
@@ -59,6 +67,7 @@ class Resource(db.EmbeddedDocument):
     id = db.AutoUUIDField()
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
+    type = db.StringField(choices=RESOURCE_TYPES.keys(), default='file', required=True)
     url = db.StringField()
     checksum = db.StringField()
     format = db.StringField()

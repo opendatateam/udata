@@ -4,7 +4,9 @@ from __future__ import unicode_literals
 from udata.forms import Form, ModelForm, UserModelForm, UserModelFormMixin, fields, validators, widgets
 from udata.i18n import lazy_gettext as _
 
-from .models import Dataset, Resource, License, UPDATE_FREQUENCIES
+from udata.core.storages import resources
+
+from .models import Dataset, Resource, License, UPDATE_FREQUENCIES, RESOURCE_TYPES
 
 __all__ = ('DatasetForm', 'DatasetCreateForm', 'ResourceForm', 'CommunityResourceForm', 'DatasetExtraForm')
 
@@ -42,7 +44,10 @@ class ResourceForm(ModelForm):
 
     title = fields.StringField(_('Title'), [validators.required()])
     description = fields.MarkdownField(_('Description'), [validators.required()])
-    url = fields.UploadableURLField(_('URL'), [validators.required()], endpoint='storage.add_resource')
+    type = fields.RadioField(_('Type'), [validators.required()],
+        choices=RESOURCE_TYPES.items(), default='file',
+        description=_('Whether the resource is an uploaded file, a remote file or an API'))
+    url = fields.UploadableURLField(_('URL'), [validators.required()], storage=resources)
     format = fields.StringField(_('Format'), widget=widgets.FormatAutocompleter())
     checksum = fields.StringField(_('Checksum'))
 

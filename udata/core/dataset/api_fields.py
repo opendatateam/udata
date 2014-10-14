@@ -7,12 +7,14 @@ from udata.api import api, fields, pager
 from udata.core.organization.api_fields import OrganizationReference
 from udata.core.spatial.api import spatial_coverage_fields
 
-from .models import UPDATE_FREQUENCIES
+from .models import UPDATE_FREQUENCIES, RESOURCE_TYPES
 
 resource_fields = api.model('Resource', {
     'id': fields.String(description='The resource unique ID', required=True),
     'title': fields.String(description='The resource title', required=True),
     'description': fields.String(description='The resource markdown description'),
+    'type': fields.String(description='Whether the resource is an uploaded file, a remote file or an API',
+        required=True, enum=RESOURCE_TYPES.keys()),
     'format': fields.String(description='The resource format', required=True),
     'url': fields.String(description='The resource URL', required=True),
     'checksum': fields.String(description='A checksum to validate file validity'),
