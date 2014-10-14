@@ -23,11 +23,14 @@ define([
             }));
 
             this.$crop_pane = this.$el.find('.crop-pane');
-            this.$cropper = this.$crop_pane.find('.cropper'),
+            this.$cropper = this.$crop_pane.find('.cropper');
 
             this.$preview_pane = this.$el.find('.preview-pane');
-            this.$preview = this.$preview_pane.find('.preview'),
-            this.$preview_containers = this.$preview_pane.find('.preview-container'),
+            this.$preview = this.$preview_pane.find('.preview');
+            this.$preview_containers = this.$preview_pane.find('.preview-container');
+            this.$checkbox = this.$preview_pane.find('input[type=checkbox]');
+
+            this.$checkbox.change(this.f('toggle_center'));
 
             log.debug('Cropper initialized');
         },
@@ -38,11 +41,8 @@ define([
 
         load: function(src) {
             var that = this,
-                max_width , max_height;
-
-
-            max_width = this.$crop_pane.width(),
-            max_height = parseInt(this.$crop_pane.css('max-height').replace('px', ''));
+                max_width = this.$crop_pane.width(),
+                max_height = parseInt(this.$crop_pane.css('max-height').replace('px', ''));
 
             this.$preview.attr('src', src);
             this.$cropper
@@ -62,7 +62,29 @@ define([
                 });
         },
 
+        /**
+         * Toggle centering
+         */
+        toggle_center: function() {
+            var enabled = this.$checkbox.is(':checked');
+            if (enabled) {
+                var bounds = this.Jcrop.getBounds(),
+                    attr = bounds[0] > bounds[1] ? 'width' : 'height';
 
+                this.Jcrop.disable();
+                this.$crop_pane.addClass('centered');
+                this.$preview_containers.addClass('centered');
+                this.$preview.removeAttr('style').css(attr, '100%');
+            } else {
+                this.Jcrop.enable();
+                this.$crop_pane.removeClass('centered');
+                this.$preview_containers.removeClass('centered');
+            }
+        },
+
+        /**
+         * Adjust the preview given the cropper position and size
+         */
         preview: function(coords) {
             var bounds = this.Jcrop.getBounds(),
                 w = bounds[0],
@@ -75,7 +97,7 @@ define([
                     rx = px / coords.w,
                     ry = py / coords.h;
 
-                $this.find('.preview').css({
+                $this.find('.preview').removeAttr('style').css({
                     width: Math.round(rx * w) + 'px',
                     height: Math.round(ry * h) + 'px',
                     marginLeft: '-' + Math.round(rx * coords.x) + 'px',

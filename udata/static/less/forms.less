@@ -128,7 +128,7 @@ form {
         max-width: none !important;
     }
 
-    .cropper-pane {
+    .crop-pane {
         min-height: 200px;
         max-height: 600px;
 
@@ -141,6 +141,16 @@ form {
                -moz-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
                     box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
         }
+
+        &.centered .jcrop-holder {
+            :not(.cropper) {
+                display: none;
+            }
+
+            .cropper {
+                opacity: 1 !important;
+            }
+        }
     }
 
     .preview-pane {
@@ -149,8 +159,6 @@ form {
            area based on the size of the thumbnail preview,
            specified here */
         .preview-container {
-            // width: 150px;
-            // height: 150px;
             overflow: hidden;
             border: 1px solid black;
             margin-bottom: 15px;
@@ -158,6 +166,17 @@ form {
             -webkit-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
                -moz-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
                     box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+
+            &.centered {
+                display: table-cell;
+                vertical-align: middle;
+                text-align: center;
+
+                > img {
+                    max-width: 100%;
+                    max-height: 100%;
+                }
+            }
         }
     }
 }
