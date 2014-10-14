@@ -171,6 +171,14 @@ class LegacyUrlsTest(FrontTestCase):
         response = self.client.get('/en/organization/%s/' % org.slug)
         self.assertRedirects(response, url_for('organizations.show', org=org))
 
+    def test_redirect_organization_list(self):
+        response = self.client.get('/en/organization/')
+        self.assertRedirects(response, url_for('organizations.list'))
+
+    def test_redirect_topics(self):
+        response = self.client.get('/en/group/societe/')
+        self.assertRedirects(response, url_for('topics.display', topic='societe'))
+
 
 class SpecificUrlsTest(FrontTestCase):
     settings = GouvFrSettings
