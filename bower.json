@@ -52,6 +52,7 @@
     "highlightjs": "~8.0.0",
     "leaflet": "~0.7.3",
     "spin.js": "~2.0.1",
-    "leaflet.spin": "https://github.com/makinacorpus/Leaflet.Spin.git"
+    "leaflet.spin": "https://github.com/makinacorpus/Leaflet.Spin.git",
+    "fineuploader-dist": "~5.0.7"
   }
 }

@@ -10,7 +10,7 @@ require.config({
         'bootstrap-datepicker': '../bower/bootstrap-datepicker/js/bootstrap-datepicker',
         'bootstrap-daterangepicker': '../bower/bootstrap-daterangepicker/daterangepicker',
         'selectize': '../bower/selectize/dist/js/standalone/selectize',
-        'fineuploader': '../vendor/jquery.fineuploader/jquery.fineuploader',
+        'fineuploader': '../bower/fineuploader-dist/dist/jquery.fineuploader',
         'bootstrap-slider': '../bower/seiyria-bootstrap-slider/js/bootstrap-slider',
         'x-editable': '../bower/x-editable/dist/bootstrap3-editable/js/bootstrap-editable',
         'router': '../bower/requirejs-router/router',

@@ -15,6 +15,8 @@ recursive-include udata/static/bower/bootstrap-markdown *.css *.js *.less
 include udata/static/bower/d3/d3.js
 recursive-include udata/static/bower/font-awesome/less *.less
 recursive-include udata/static/bower/font-awesome/fonts *
+include udata/static/bower/fineuploader-dist/dist/jquery.fineuploader.js
+include udata/static/bower/fineuploader-dist/dist/fineuploader.css
 include udata/static/bower/highstock-components/highstock.js
 include udata/static/bower/html5shiv/dist/html5shiv.js
 include udata/static/bower/highlightjs/highlight.pack.js
