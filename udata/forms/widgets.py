@@ -132,3 +132,7 @@ class ImageURL(WidgetHelper, widgets.html5.URLInput):
 
 class ImagePicker(WidgetHelper, widgets.HiddenInput):
     classes = 'image-picker'
+
+    def __call__(self, field, **kwargs):
+        kwargs['data-sizes'] = ','.join(str(s) for s in field.sizes)
+        return super(ImagePicker, self).__call__(field, **kwargs)

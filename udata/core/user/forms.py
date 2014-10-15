@@ -17,7 +17,7 @@ class UserProfileForm(ModelForm):
     first_name = fields.StringField(_('First name'), [validators.required()])
     last_name = fields.StringField(_('Last name'), [validators.required()])
     avatar_url = fields.URLField(_('Avatar URL'))
-    avatar = fields.ImageField(_('Avatar'))
+    avatar = fields.ImageField(_('Avatar'), sizes=[120, 50, 20])
     website = fields.URLField(_('Website'))
     about = fields.MarkdownField(_('About'))
 

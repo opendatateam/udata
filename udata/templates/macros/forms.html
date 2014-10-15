@@ -201,8 +201,13 @@
 {% macro image_picker(field) %}
 {{ field() }}
 {% if field.value %}
+{% for size in field.sizes %}
+<div>{{size}}</div>
+{% endfor %}
 {% else %}
-<button class="image-picker-btn btn btn-default" data-sizes="120,50,20">Pick</button>
+<button class="image-picker-btn btn btn-default">
+    {{  _('Choose a picture') }}
+</button>
 {% endif %}
 {% endmacro %}
 

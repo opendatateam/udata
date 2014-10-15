@@ -94,6 +94,10 @@ class URLField(FieldHelper, EmptyNone, html5.URLField):
 class ImageField(StringField):
     widget = widgets.ImagePicker()
 
+    def __init__(self, *args, **kwargs):
+        self.sizes = kwargs.pop('sizes', [100])
+        super(ImageField, self).__init__(*args, **kwargs)
+
 
 class UploadableURLField(URLField):
     widget = widgets.UploadableURL()
