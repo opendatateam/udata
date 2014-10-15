@@ -10,7 +10,7 @@ define(['jquery', 'i18next', 'moment'], function($, i18next, moment) {
     i18next.init({
         lng: lang,
         ns: 'udata',
-        fallbackLng: 'en',
+        fallbackLng: false,
         getAsync: false,
         nsseparator: '::', // Allow to use real sentences as keys
         keyseparator: '$$', // Allow to use real sentences as keys
