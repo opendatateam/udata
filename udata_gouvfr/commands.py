@@ -52,9 +52,9 @@ def uncertify(path_or_id):
     if exists(path_or_id):
         with open(path_or_id) as open_file:
             for id_or_slug in open_file.readlines():
-                certify_org(id_or_slug.strip())
+                uncertify_org(id_or_slug.strip())
     else:
-        certify_org(path_or_id)
+        uncertify_org(path_or_id)
 
 
 @manager.command
