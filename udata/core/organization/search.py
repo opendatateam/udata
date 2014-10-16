@@ -14,7 +14,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
     model = Organization
     fuzzy = True
     fields = (
-        'name^2',
+        'name^4',
         'description',
     )
     sorts = {
