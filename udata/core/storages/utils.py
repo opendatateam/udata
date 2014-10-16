@@ -12,7 +12,6 @@ CHUNK_SIZE = 2 ** 16
 
 
 def hash(file, hasher):
-    # filehash = hashlib.md5()
     blk_size_to_read = hasher.block_size * CHUNK_SIZE
     while (True):
         read_data = file.read(blk_size_to_read)

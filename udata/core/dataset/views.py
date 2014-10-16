@@ -199,8 +199,6 @@ class UploadNewResource(SingleObject, BaseView):
         file.seek(0)
         sha1 = storages.utils.sha1(file)
 
-        print dir(file)
-
         return jsonify({
             'success': True,
             'url': storage.url(filename),

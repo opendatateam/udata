@@ -19,6 +19,7 @@ define([
             this.$btns = $(btns);
 
             this.$btns.click(this.f('on_click'));
+            this.endpoint = this.$el.data('endpoint');
             this.sizes = $((this.$el.data('sizes') || '100').toString().split(','))
                 .map(function(idx, value) { return parseInt(value); })
                 .filter(function(idx, value) { return !isNaN(value); })
@@ -49,9 +50,12 @@ define([
                 }]
             });
 
+            this.$btn_submit = this.$modal.find('.btn-submit');
+            this.$btn_clear = this.$modal.find('.btn-clear');
+
             var uploader = new Uploader(this.$modal.find('.uploader'), {
-                endpoint: 'upload',
-                auto: false
+                endpoint: this.endpoint,
+                auto: false,
             });
             this.$uploader = $(uploader);
             this.$cropper = this.$modal.find('.image-cropper-container')
@@ -64,13 +68,15 @@ define([
                 }
             }, this));
 
+            this.$btn_clear.click(this.f('clear'));
+
             return false;
         },
 
         crop: function(image) {
             this.$modal.find('section').addClass('hide');
-            this.$modal.find('.btn-submit').removeClass('hide');
-            this.$modal.find('.btn-clear').removeClass('hide');
+            this.$btn_submit.removeClass('hide');
+            this.$btn_clear.removeClass('hide');
             this.$modal.find('.modal-title').text(i18n._('Crop your thumbnail'));
             this.$cropper.removeClass('hide');
 
@@ -79,6 +85,16 @@ define([
             });
 
             this.cropper.load(image);
+        },
+
+        clear: function() {
+            this.$modal.find('.image-cropper-container').addClass('hide');
+            this.$modal.find('.uploader').removeClass('hide');
+            this.$uploader[0].clear();
+        },
+
+        upload: function() {
+            this
         }
 
     });

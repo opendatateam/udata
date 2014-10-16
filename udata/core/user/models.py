@@ -18,6 +18,12 @@ __all__ = ('User', 'Role', 'datastore', 'FollowUser')
 # def populate_slug(user):
 #     return ' '.join([user.first_name, user.last_name])
 
+AVATAR_SIZES = [100, 50, 25]
+
+
+def download_avatar_to(user):
+    return '/'.join((user.fullname, datetime.now().strftime('%Y%m%d-%H%M%S')))
+
 
 # TODO: use simple text for role
 class Role(db.Document, RoleMixin):

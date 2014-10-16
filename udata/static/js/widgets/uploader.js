@@ -149,6 +149,11 @@ define([
                     .css('width', '100%')
                     .addClass('progress-bar-striped active');
             }
+        },
+
+        clear: function() {
+            this.$progress.addClass('hide');
+            this.$drop.removeClass('hide');
         }
 
     });

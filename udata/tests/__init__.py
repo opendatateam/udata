@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
 import logging
 
 import mock
@@ -68,6 +69,9 @@ class TestCase(BaseTestCase):
             session['user_id'] = str(self.user.id)
             session['_fresh'] = True
         return self.user
+
+    def data(self, filename):
+        return os.path.join(os.path.dirname(__file__), 'data', filename)
 
 
 class WebTestMixin(object):
