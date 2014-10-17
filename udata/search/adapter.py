@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import itertools
 import logging
 
 from flask import current_app
@@ -61,6 +62,16 @@ class ModelSearchAdapter(object):
     def serialize(cls, document):
         '''By default use the ``to_dict`` method and exclude ``_id``, ``_cls`` and ``owner`` fields'''
         return document.to_dict(exclude=('_id', '_cls', 'owner'))
+
+    @classmethod
+    def completer_tokenize(cls, value, min_length=3):
+        '''Quick and dirty tokenizer for completion suggester'''
+        tokens = list(itertools.chain(*[
+            [m for m in n.split("'") if len(m) > min_length]
+            for n in value.split(' ')
+        ]))
+        return list(set([value] + tokens + [' '.join(tokens)]))
+
 
 metrics_types = {
     int: 'integer',

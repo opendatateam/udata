@@ -152,10 +152,7 @@ class DatasetSearch(ModelSearchAdapter):
             'organization': org_id,
             'supplier': supplier_id,
             'dataset_suggest': {
-                'input': [dataset.title] + [
-                    n for n in dataset.title.split(' ')
-                    if len(n) > 3
-                ],
+                'input': cls.completer_tokenize(dataset.title),
                 'output': dataset.title,
                 'payload': {
                     'id': str(dataset.id),

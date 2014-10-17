@@ -6,7 +6,7 @@ define([
     'dataset/typeahead',
     'reuse/typeahead',
     'organization/typeahead',
-    'user/typeahead',
+    // 'user/typeahead',
     'typeahead'
 ], function($, datasets, reuses, organizations, users) {
     'use strict';
@@ -32,7 +32,7 @@ define([
 
     // Typeahead
     $('#main-search')
-        .typeahead({highlight: true}, organizations, datasets, reuses, users)
+        .typeahead({highlight: true}, organizations, datasets, reuses)
         .on('typeahead:selected', function(e, data, datatype) {
             window.location = '/' + datatype + '/' + data.slug
         });

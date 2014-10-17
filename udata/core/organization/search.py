@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 from udata import search
 from udata.models import Organization
-# from udata.search import ModelSearchAdapter, Sort, RangeFacet, i18n_analyzer, BoolBooster, GaussDecay, metrics_mapping
 
 from . import metrics  # Metrics are need for the mapping
 
@@ -67,10 +66,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
             'url': organization.url,
             'metrics': organization.metrics,
             'org_suggest': {
-                'input': [organization.name] + [
-                    n for n in organization.name.split(' ')
-                    if len(n) > 3
-                ],
+                'input': cls.completer_tokenize(organization.name),
                 'output': organization.name,
                 'payload': {
                     'id': str(organization.id),

@@ -1009,3 +1009,14 @@ class SearchIteratorTest(SearchTestMixin, TestCase):
             [FakeFactory() for _ in range(5)]
         query = search.SearchQuery(FakeSearch, tag='not-found')
         self.assertEqual(len(list(query.iter())), 0)
+
+
+class SearchAdaptorTest(SearchTestMixin, TestCase):
+    def assert_tokens(self, input, output):
+        self.assertEqual(set(search.ModelSearchAdapter.completer_tokenize(input)), set(output))
+
+    def test_completer_tokenizer(self):
+        self.assert_tokens('test', ['test'])
+        self.assert_tokens('test square', ['test square', 'test', 'square'])
+        self.assert_tokens('test\'s square', ['test\'s square', 'test square', 'test', 'square'])
+        self.assert_tokens('test l\'apostrophe', ['test l\'apostrophe', 'test apostrophe', 'test', 'apostrophe'])

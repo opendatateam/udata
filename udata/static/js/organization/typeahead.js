@@ -9,7 +9,7 @@ define([
     'i18n',
     'logger'
 ], function(API, Bloodhound, header, suggestion, i18n, log) {
-    var MAX = 2,
+    var MAX = 3,
         engine = new Bloodhound({
             name: 'organizations',
             limit: MAX,

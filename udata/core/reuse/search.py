@@ -115,10 +115,7 @@ class ReuseSearch(ModelSearchAdapter):
             'featured': reuse.featured,
             'extras': reuse.extras,
             'reuse_suggest': {
-                'input': [reuse.title] + [
-                    n for n in reuse.title.split(' ')
-                    if len(n) > 3
-                ],
+                'input': cls.completer_tokenize(reuse.title),
                 'output': reuse.title,
                 'payload': {
                     'id': str(reuse.id),

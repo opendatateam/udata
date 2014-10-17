@@ -9,7 +9,7 @@ DEFAULT_SIZE = 8
 ns = api.namespace('suggest', 'Completion suggester APIs')
 
 parser = api.parser()
-parser.add_argument('q', type=str, help='The string to autocomplete/suggest', location='args', required=True)
+parser.add_argument('q', type=unicode, help='The string to autocomplete/suggest', location='args', required=True)
 parser.add_argument('size', type=int, help='The amount of suggestion to fetch', location='args', default=DEFAULT_SIZE)
 
 

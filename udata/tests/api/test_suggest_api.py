@@ -112,6 +112,26 @@ class SuggestAPITest(APITestCase):
             self.assertIn('image_url', suggestion)
             self.assertTrue(suggestion['title'].startswith('test'))
 
+    def test_suggest_datasets_api_unicode(self):
+        '''It should suggest datasets withspecial characters'''
+        with self.autoindex():
+            for i in range(4):
+                DatasetFactory(title='testé-{0}'.format(i) if i % 2 else faker.word(), resources=[ResourceFactory()])
+
+        response = self.get(url_for('api.suggest_datasets'), qs={'q': 'testé', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('title', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertTrue(suggestion['title'].startswith('test'))
+
     def test_suggest_datasets_api_no_match(self):
         '''It should not provide dataset suggestion if no match'''
         with self.autoindex():
@@ -130,7 +150,7 @@ class SuggestAPITest(APITestCase):
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_users_api_first_name(self):
-        '''It should suggest users'''
+        '''It should suggest users baed on first name'''
         with self.autoindex():
             for i in range(4):
                 UserFactory(first_name='test-{0}'.format(i) if i % 2 else faker.word())
@@ -150,12 +170,31 @@ class SuggestAPITest(APITestCase):
             self.assertIn('test', suggestion['fullname'])
 
     def test_suggest_users_api_last_name(self):
-        '''It should suggest users'''
+        '''It should suggest users based on last'''
         with self.autoindex():
             for i in range(4):
                 UserFactory(last_name='test-{0}'.format(i) if i % 2 else faker.word())
 
         response = self.get(url_for('api.suggest_users'), qs={'q': 'tes', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('fullname', suggestion)
+            self.assertIn('avatar_url', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('test', suggestion['fullname'])
+
+    def test_suggest_users_api_unicode(self):
+        '''It should suggest users with special characters'''
+        with self.autoindex():
+            for i in range(4):
+                UserFactory(last_name='testé-{0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.suggest_users'), qs={'q': 'testé', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -205,6 +244,66 @@ class SuggestAPITest(APITestCase):
             self.assertIn('image_url', suggestion)
             self.assertTrue(suggestion['name'].startswith('test'))
 
+    def test_suggest_organizations_with_special_chars(self):
+        '''It should suggest organizations with special caracters'''
+        with self.autoindex():
+            for i in range(4):
+                OrganizationFactory(name='testé-{0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.suggest_orgs'), qs={'q': 'testé', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('name', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertTrue(suggestion['name'].startswith('testé'))
+
+    def test_suggest_organizations_with_multiple_words(self):
+        '''It should suggest organizations with words'''
+        with self.autoindex():
+            for i in range(4):
+                OrganizationFactory(name='mon testé-{0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.suggest_orgs'), qs={'q': 'mon testé', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('name', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertTrue(suggestion['name'].startswith('mon testé'))
+
+    def test_suggest_organizations_with_apostrophe(self):
+        '''It should suggest organizations with words'''
+        with self.autoindex():
+            for i in range(4):
+                OrganizationFactory(name='Ministère de l\'intérieur {0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.suggest_orgs'), qs={'q': 'Ministère intérieur', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('name', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertTrue(suggestion['name'].startswith('Ministère de l\'intérieur'))
+
     def test_suggest_organizations_api_no_match(self):
         '''It should not provide organization suggestion if no match'''
         with self.autoindex():
@@ -229,6 +328,26 @@ class SuggestAPITest(APITestCase):
                 ReuseFactory(title='test-{0}'.format(i) if i % 2 else faker.word(), datasets=[DatasetFactory()])
 
         response = self.get(url_for('api.suggest_reuses'), qs={'q': 'tes', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('title', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertTrue(suggestion['title'].startswith('test'))
+
+    def test_suggest_reuses_api_unicode(self):
+        '''It should suggest reuses with special characters'''
+        with self.autoindex():
+            for i in range(4):
+                ReuseFactory(title='testé-{0}'.format(i) if i % 2 else faker.word(), datasets=[DatasetFactory()])
+
+        response = self.get(url_for('api.suggest_reuses'), qs={'q': 'testé', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
