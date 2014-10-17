@@ -84,9 +84,9 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     community_resources = db.ListField(db.EmbeddedDocumentField(Resource))
 
     private = db.BooleanField()
-    owner = db.ReferenceField('User')
-    organization = db.ReferenceField('Organization')
-    supplier = db.ReferenceField('Organization')
+    owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
+    organization = db.ReferenceField('Organization', reverse_delete_rule=db.NULLIFY)
+    supplier = db.ReferenceField('Organization', reverse_delete_rule=db.NULLIFY)
 
     frequency = db.StringField(choices=UPDATE_FREQUENCIES.keys())
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)

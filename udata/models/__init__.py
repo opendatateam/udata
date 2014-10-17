@@ -75,10 +75,10 @@ from udata.core.metrics.models import *
 from udata.core.issues.models import *
 from udata.core.followers.models import *
 from udata.core.user.models import *
+from udata.core.organization.models import *
 from udata.core.site.models import *
 from udata.core.dataset.models import *
 from udata.core.reuse.models import *
-from udata.core.organization.models import *
 from udata.core.activity.models import *
 from udata.core.topic.models import *
 from udata.core.post.models import *

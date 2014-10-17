@@ -22,4 +22,5 @@ def purge_datasets():
         Activity.objects(related_to=dataset).delete()
         # Remove metrics
         Metrics.objects(object_id=dataset.id).delete()
+        # Remove
         dataset.delete()

@@ -37,12 +37,12 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     url = db.StringField(required=True, unique=True)
     urlhash = db.StringField(required=True, unique=True)
     image_url = db.StringField()
-    datasets = db.ListField(db.ReferenceField('Dataset'))
+    datasets = db.ListField(db.ReferenceField('Dataset', reverse_delete_rule=db.PULL))
     tags = db.ListField(db.StringField())
 
     private = db.BooleanField()
-    owner = db.ReferenceField('User')
-    organization = db.ReferenceField('Organization')
+    owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
+    organization = db.ReferenceField('Organization', reverse_delete_rule=db.NULLIFY)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
