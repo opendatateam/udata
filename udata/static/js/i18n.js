@@ -9,6 +9,7 @@ define(['jquery', 'i18next', 'moment'], function($, i18next, moment) {
     moment.locale(lang);
     i18next.init({
         lng: lang,
+        load: 'unspecific',
         ns: 'udata',
         fallbackLng: false,
         getAsync: false,
