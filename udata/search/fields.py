@@ -342,6 +342,8 @@ class FunctionBooster(object):
             },
         }
 
+_v = lambda v: v() if callable(v) else v
+
 
 class DecayFunction(object):
     function = None
@@ -355,13 +357,13 @@ class DecayFunction(object):
 
     def to_query(self):
         params = {
-            'origin': self.origin,
-            'scale': self.scale,
+            'origin': _v(self.origin),
+            'scale': _v(self.scale),
         }
         if self.offset:
-            params['offset'] = self.offset
+            params['offset'] = _v(self.offset)
         if self.decay:
-            params['decay'] = self.decay
+            params['decay'] = _v(self.decay)
 
         return {
             self.function: {
