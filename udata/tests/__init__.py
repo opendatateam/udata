@@ -7,10 +7,13 @@ import logging
 import mock
 
 from contextlib import contextmanager
+from StringIO import StringIO
 from urlparse import urljoin
 
 from flask import request, url_for
 from flask.ext.testing import TestCase as BaseTestCase
+from werkzeug.test import EnvironBuilder
+from werkzeug.wrappers import Request
 
 from nose.plugins import Plugin
 
@@ -156,3 +159,13 @@ def mock_task(name, **kwargs):
     def wrapper(func):
         return mock.patch(name, **kwargs)(func)
     return wrapper
+
+
+def filestorage(filename, content):
+    data = StringIO(str(content)) if isinstance(content, basestring) else content
+    builder = EnvironBuilder(method='POST', data={
+        'file': (data, filename)
+    })
+    env = builder.get_environ()
+    req = Request(env)
+    return req.files['file']

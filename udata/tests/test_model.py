@@ -5,11 +5,12 @@ from flask import json
 
 from uuid import uuid4
 from datetime import date, datetime, timedelta
+from flask.ext import fs
 
 from mongoengine.errors import ValidationError
 
 from udata.models import db
-from udata.tests import TestCase, DBTestMixin
+from udata.tests import TestCase, DBTestMixin, filestorage
 from udata.tests.test_storages import StorageTestMixin
 
 
@@ -285,38 +286,85 @@ class ExtrasField(DBTestMixin, TestCase):
         }))
 
 
-class ImageFieldTest(StorageTestMixin, DBTestMixin, TestCase):
+class FileFieldTest(StorageTestMixin, DBTestMixin, TestCase):
+    def setUp(self):
+        super(FileFieldTest, self).setUp()
+        self.storage = fs.Storage('test', fs.ALL)
+        self.storage.configure(self.app)
 
     def test_default_validate(self):
         class Tester(db.Document):
-            image = db.ImageField()
+            file = db.FileField(fs=self.storage)
+
+        tester = Tester()
+        tester.validate()
+
+        self.assertFalse(tester.file)
+        self.assertIsNone(Tester.to_mongo(tester.file), {})
+        # self.assertIsNotNone(tester.file.to_python())
+
+    def test_save(self):
+        class Tester(db.Document):
+            file = db.FileField(fs=self.storage)
+
+        filename = 'test.txt'
+        # source = 'http://somewhere.net/' + filename
+
+        tester = Tester()
+        tester.file.save(filestorage(filename, 'this is a stest'))
+        tester.validate()
+
+        self.assertTrue(tester.file)
+        self.assertEqual(str(tester.file), tester.file.url)
+        self.assertIn(filename, self.storage)
+        # self.assertEqual(url_for(tester.file.url)
+        # self.assertEqual(tester.image.source, source)
+        # self.assertEqual(tester.image.filename, filename)
+        # self.assertEqual(tester.image.original, )
+        #
+        self.assertEqual(tester.to_mongo(), {
+            # 'source': source,
+            'file': {
+                'filename': filename,
+            }
+        })
+
+
+class ImageFieldTest(StorageTestMixin, DBTestMixin, TestCase):
+    def setUp(self):
+        super(ImageFieldTest, self).setUp()
+        self.storage = fs.Storage('test', fs.ALL)
+        self.storage.configure(self.app)
+
+    def test_default_validate(self):
+        class Tester(db.Document):
+            image = db.ImageField(fs=self.storage)
 
         tester = Tester()
         tester.validate()
 
         self.assertFalse(tester.image)
-        # self.assertIsNone(tester.image.to_mongo())
+        self.assertIsNone(tester.image.to_mongo())
         # self.assertIsNone(tester.image.to_python())
 
-    def test_url_to_original(self):
+    # def test_url_to_original(self):
 
-        class Tester(db.Document):
-            image = db.ImageField()
+    #     class Tester(db.Document):
+    #         image = db.ImageField(fs=self.storage)
 
-        filename = 'img.png'
-        source = 'http://somewhere.net/' + filename
+    #     filename = 'img.png'
 
-        tester = Tester(image=source)
-        tester.validate()
+    #     tester = Tester(image=source)
+    #     tester.validate()
 
-        self.assertTrue(tester.image)
-        self.assertEqual(str(tester.image), source)
-        self.assertEqual(tester.image.source, source)
-        self.assertEqual(tester.image.filename, filename)
-        # self.assertEqual(tester.image.original, )
-        #
-        self.assertEqual(tester.image.to_mongo(), {
-            'source': source,
-            'filename': filename,
-        })
-        # self.assertIsInstance(tester.image.to_python(), Im)
+    #     self.assertTrue(tester.image)
+    #     self.assertEqual(str(tester.image), source)
+    #     self.assertEqual(tester.image.source, source)
+    #     self.assertEqual(tester.image.filename, filename)
+    #     # self.assertEqual(tester.image.original, )
+    #     #
+    #     self.assertEqual(tester.image.to_mongo(), {
+    #         'source': source,
+    #         'filename': filename,
+    #     })
+    #     # self.assertIsInstance(tester.image.to_python(), Im)
