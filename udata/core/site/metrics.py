@@ -99,3 +99,90 @@ class FollowersMetric(SiteMetric):
         return Follow.objects(until=None).count()
 
 FollowersMetric.connect(on_follow, on_unfollow)
+
+
+class MaxDatasetFollowersMetric(SiteMetric):
+    name = 'max_dataset_followers'
+    display_name = _('Maximum dataset followers')
+    archived = False
+
+    def get_value(self):
+        dataset = Dataset.objects(metrics__followers__gt=0).visible().order_by('-metrics.followers').first()
+        return dataset.metrics.get('followers', 0)
+
+MaxDatasetFollowersMetric.connect(Dataset.on_create, Dataset.on_update)
+
+
+class MaxDatasetReusesMetric(SiteMetric):
+    name = 'max_dataset_reuses'
+    display_name = _('Maximum dataset reuses')
+    archived = False
+
+    def get_value(self):
+        dataset = Dataset.objects(metrics__reuses__gt=0).visible().order_by('-metrics.reuses').first()
+        return dataset.metrics.get('reuses', 0)
+
+MaxDatasetReusesMetric.connect(Dataset.on_create, Dataset.on_update)
+
+
+class MaxReuseDatasetsMetric(SiteMetric):
+    name = 'max_reuse_datasets'
+    display_name = _('Maximum datasets in reuses')
+    archived = False
+
+    def get_value(self):
+        reuse = Reuse.objects(metrics__datasets__gt=0).visible().order_by('-metrics.datasets').first()
+        return reuse.metrics.get('datasets', 0)
+
+MaxReuseDatasetsMetric.connect(Reuse.on_create, Reuse.on_update)
+
+
+class MaxReuseFollowersMetric(SiteMetric):
+    name = 'max_reuse_followers'
+    display_name = _('Maximum reuse followers')
+    archived = False
+
+    def get_value(self):
+        reuse = Reuse.objects(metrics__followers__gt=0).visible().order_by('-metrics.followers').first()
+        return reuse.metrics.get('followers', 0)
+
+MaxReuseFollowersMetric.connect(on_follow, on_unfollow)
+
+
+class MaxOrgFollowersMetric(SiteMetric):
+    name = 'max_org_followers'
+    display_name = _('Maximum organization followers')
+    archived = False
+
+    def get_value(self):
+        org = Organization.objects(metrics__followers__gt=0).visible().order_by('-metrics.followers').first()
+        return org.metrics.get('followers', 0)
+
+MaxOrgFollowersMetric.connect(Organization.on_create, Organization.on_update, on_follow, on_unfollow)
+
+
+class MaxOrgReusesMetric(SiteMetric):
+    name = 'max_org_reuses'
+    display_name = _('Maximum organization reuses')
+    archived = False
+
+    def get_value(self):
+        org = Organization.objects(metrics__reuses__gt=0).visible().order_by('-metrics.reuses').first()
+        if org:
+            return org.metrics.get('reuses', 0)
+        else:
+            return 0
+
+MaxOrgReusesMetric.connect(Dataset.on_create, Dataset.on_update)
+
+
+class MaxOrgDatasetsMetric(SiteMetric):
+    name = 'max_org_datasets'
+    display_name = _('Maximum organization datasets')
+    archived = False
+
+    def get_value(self):
+        org = Organization.objects(metrics__datasets__gt=0).visible().order_by('-metrics.datasets').first()
+        return org.metrics.get('datasets', 0)
+
+MaxOrgDatasetsMetric.connect(Organization.on_create, Organization.on_update, Reuse.on_create, Reuse.on_update)

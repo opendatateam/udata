@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from udata.core.site.views import current_site
+
 from udata.models import Dataset, Organization, License, Territory, SPATIAL_GRANULARITIES
 from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
 from udata.search.fields import Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
@@ -11,6 +13,10 @@ from udata.search.fields import BoolBooster, GaussDecay
 from . import metrics  # noqa
 
 __all__ = ('DatasetSearch', )
+
+
+max_reuses = lambda: max(current_site.metrics['max_dataset_reuses'], 10)
+max_followers = lambda: max(current_site.metrics['max_dataset_followers'], 10)
 
 
 class DatasetSearch(ModelSearchAdapter):
@@ -119,8 +125,8 @@ class DatasetSearch(ModelSearchAdapter):
     boosters = [
         BoolBooster('featured', 1.1),
         BoolBooster('from_public_service', 1.3),
-        GaussDecay('metrics.reuses', 50, decay=0.8),
-        GaussDecay('metrics.followers', 200, 200, decay=0.8),
+        GaussDecay('metrics.reuses', max_reuses, decay=0.8),
+        GaussDecay('metrics.followers', max_followers, max_followers, decay=0.8),
     ]
 
     @classmethod

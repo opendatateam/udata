@@ -3,10 +3,16 @@ from __future__ import unicode_literals
 
 from udata import search
 from udata.models import Organization
+from udata.core.site.views import current_site
 
 from . import metrics  # Metrics are need for the mapping
 
 __all__ = ('OrganizationSearch', )
+
+
+max_reuses = lambda: max(current_site.metrics['max_org_reuses'], 10)
+max_datasets = lambda: max(current_site.metrics['max_org_datasets'], 10)
+max_followers = lambda: max(current_site.metrics['max_org_followers'], 10)
 
 
 class OrganizationSearch(search.ModelSearchAdapter):
@@ -50,9 +56,9 @@ class OrganizationSearch(search.ModelSearchAdapter):
     }
     boosters = [
         search.BoolBooster('public_service', 1.5),
-        search.GaussDecay('metrics.followers', 200, decay=0.8),
-        search.GaussDecay('metrics.reuses', 50, decay=0.9),
-        search.GaussDecay('metrics.datasets', 50, decay=0.9),
+        search.GaussDecay('metrics.followers', max_followers, decay=0.8),
+        search.GaussDecay('metrics.reuses', max_reuses, decay=0.9),
+        search.GaussDecay('metrics.datasets', max_datasets, decay=0.9),
     ]
 
     @classmethod

@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from udata.core.site.views import current_site
 from udata.models import Reuse, Organization, REUSE_TYPES
+from udata.search import BoolBooster, GaussDecay
 from udata.search import ModelSearchAdapter, Sort, i18n_analyzer, metrics_mapping
 from udata.search import RangeFacet, BoolFacet, ExtrasFacet
 from udata.search import TermFacet, ModelTermFacet
-from udata.search import BoolBooster, GaussDecay
 
 # Metrics are require for reuse search
 from . import metrics
 
 
 __all__ = ('ReuseSearch', )
+
+
+max_datasets = lambda: max(current_site.metrics['max_reuse_datasets'], 5)
+max_followers = lambda: max(current_site.metrics['max_reuse_followers'], 10)
 
 
 class ReuseTypeFacet(TermFacet):
@@ -23,7 +28,7 @@ class ReuseSearch(ModelSearchAdapter):
     model = Reuse
     fuzzy = True
     fields = (
-        'title^3',
+        'title^4',
         'description^2',
         'datasets.title',
     )
@@ -87,8 +92,8 @@ class ReuseSearch(ModelSearchAdapter):
     }
     boosters = [
         BoolBooster('featured', 1.1),
-        GaussDecay('metrics.datasets', 30, decay=0.8),
-        GaussDecay('metrics.followers', 200, decay=0.8),
+        GaussDecay('metrics.datasets', max_datasets, decay=0.8),
+        GaussDecay('metrics.followers', max_followers, decay=0.8),
     ]
 
     @classmethod
