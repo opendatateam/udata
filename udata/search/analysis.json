@@ -1,16 +1,5 @@
 {
     "filter": {
-        "nGram_filter": {
-           "type": "nGram",
-           "min_gram": 2,
-           "max_gram": 20,
-           "token_chars": [
-              "letter",
-              "digit",
-              "punctuation",
-              "symbol"
-           ]
-        },
         "de_stop_filter": {
             "type": "stop",
             "stopwords": ["_german_"]
@@ -42,25 +31,24 @@
         "fr_stem_filter": {
             "type": "stemmer",
             "name": "minimal_french"
+        },
+        "fr_elision": {
+            "type": "elision",
+            "articles": [
+                "l", "m", "t", "qu", "n", "s",
+                "j", "d", "c", "jusqu", "quoiqu",
+                "lorsqu", "puisqu"
+            ]
         }
     },
     "analyzer": {
-        "nGram_analyzer": {
-           "type": "custom",
-           "tokenizer": "whitespace",
-           "filter": [
-              "lowercase",
-              "asciifolding",
-              "nGram_filter"
-           ]
-        },
         "whitespace_analyzer": {
-           "type": "custom",
-           "tokenizer": "whitespace",
-           "filter": [
-              "lowercase",
-              "asciifolding"
-           ]
+            "type": "custom",
+            "tokenizer": "whitespace",
+            "filter": [
+                "lowercase",
+                "asciifolding"
+            ]
         },
         "de_analyzer": {
             "type": "custom",
@@ -83,7 +71,13 @@
         "fr_analyzer": {
             "type": "custom",
             "tokenizer": "icu_tokenizer",
-            "filter": ["icu_folding", "icu_normalizer", "fr_stop_filter", "fr_stem_filter"],
+            "filter": [
+                "icu_folding",
+                "icu_normalizer",
+                "fr_elision",
+                "fr_stop_filter",
+                "fr_stem_filter"
+            ],
             "char_filter": ["html_strip"]
         }
     }

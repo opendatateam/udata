@@ -19,6 +19,8 @@ adapter_catalog = {}
 
 DEFAULT_PAGE_SIZE = 20
 
+ANALYSIS_JSON = join(dirname(__file__), 'analysis.json')
+
 
 class EsJSONSerializer(JSONSerializer):
     def default(self, data):
@@ -73,8 +75,7 @@ class ElasticSearch(object):
                     es.indices.delete_mapping(index=self.index_name, doc_type=doc_type)
                 es.indices.put_mapping(index=self.index_name, doc_type=doc_type, body=mapping)
         else:
-            filename = join(dirname(__file__), 'analysis.json')
-            with open(filename) as analysis:
+            with open(ANALYSIS_JSON) as analysis:
                 es.indices.create(self.index_name, {
                     'mappings': dict(mappings),
                     'settings': {'analysis': json.load(analysis)},

@@ -61,7 +61,10 @@ def initialize(name=None):
         print 'Indexing {0} objects'.format(model.__name__)
         qs = model.objects.visible() if hasattr(model.objects, 'visible') else model.objects
         for obj in qs.timeout(False):
-            es.index(index=index_name, doc_type=adapter.doc_type(), id=obj.id, body=adapter.serialize(obj))
+            try:
+                es.index(index=index_name, doc_type=adapter.doc_type(), id=obj.id, body=adapter.serialize(obj))
+            except:
+                log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
 
     print 'Creating alias "{0}" index "{1}"'.format(es.index_name, index_name)
     es.indices.put_alias(index=index_name, name=es.index_name)
