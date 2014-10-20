@@ -13,7 +13,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
     model = Organization
     fuzzy = True
     fields = (
-        'name^4',
+        'name^6',
         'description',
     )
     sorts = {
@@ -32,6 +32,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
         'properties': {
             'name': {
                 'type': 'string',
+                'analyzer': search.i18n_analyzer,
                 'fields': {
                     'raw': {'type': 'string', 'index': 'not_analyzed'}
                 }
