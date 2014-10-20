@@ -7,8 +7,6 @@ from celery.utils.log import get_task_logger
 
 from udata.tasks import celery
 
-from .models import Metrics
-
 log = get_task_logger(__name__)
 
 
@@ -26,6 +24,7 @@ def archive_metric(metric):
 
 @celery.task(name='bump-metrics')
 def bump_metrics():
+    from .models import Metrics
     today = date.today().isoformat()
     yesterday = (date.today() - timedelta(1)).isoformat()
     log.info('Bumping metrics from to %s to %s', yesterday, today)

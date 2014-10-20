@@ -15,19 +15,29 @@ metric_catalog = {}
 
 from udata.models import db
 
+from .tasks import update_metric, archive_metric
+
+
+def update_on_demand(metric):
+    update_metric.delay(metric)
+
+
+def archive_on_updated(metric):
+    if metric.archived:
+        archive_metric.delay(metric)
+
 
 class MetricMetaClass(type):
     '''Ensure any child class dispatch the signals'''
     def __new__(cls, name, bases, attrs):
-        from .tasks import update_metric, archive_metric
 
         # Ensure any child class dispatch the signals
         new_class = super(MetricMetaClass, cls).__new__(cls, name, bases, attrs)
         if new_class.model and new_class.name:
             new_class.need_update = Signal()
-            new_class.need_update.connect(update_metric.delay)
+            new_class.need_update.connect(update_on_demand)
             new_class.updated = Signal()
-            new_class.updated.connect(archive_metric.delay)
+            new_class.updated.connect(archive_on_updated)
             # register the class in the catalog
             if not new_class.model in metric_catalog:
                 metric_catalog[new_class.model] = {}
@@ -42,6 +52,7 @@ class Metric(object):
     value = None
     default = 0
     value_type = int
+    archived = True
 
     __metaclass__ = MetricMetaClass
 

@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 
+import mock
+
 from contextlib import contextmanager
 from urlparse import urljoin
 
@@ -144,3 +146,9 @@ class SearchTestMixin(DBTestMixin):
         super(SearchTestMixin, self).tearDown()
         if self._used_search and es.indices.exists(index=es.index_name):
             es.indices.delete(index=es.index_name)
+
+
+def mock_task(name, **kwargs):
+    def wrapper(func):
+        return mock.patch(name, **kwargs)(func)
+    return wrapper
