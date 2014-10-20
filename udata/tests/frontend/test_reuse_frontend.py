@@ -147,7 +147,7 @@ class ReuseBlueprintTest(FrontTestCase):
         for i in range(1, len(feed.entries)):
             published_date = feed.entries[i].published_parsed
             prev_published_date = feed.entries[i - 1].published_parsed
-            self.assertGreaterEqual(published_date, prev_published_date)
+            self.assertGreaterEqual(prev_published_date, published_date)
 
     def test_recent_feed_owner(self):
         owner = UserFactory()
