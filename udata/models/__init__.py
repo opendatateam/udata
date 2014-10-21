@@ -9,10 +9,11 @@ from flask.ext.mongoengine import MongoEngine, MongoEngineSessionInterface, Docu
 from mongoengine.base import TopLevelDocumentMetaclass
 from mongoengine.signals import pre_save, post_save
 
+from flask.ext.fs.mongo import FileField, ImageField
+
 from .badges_field import BadgesField
 from .datetime_fields import DateField, DateRange, Datetimed
 from .extras_fields import ExtrasField, Extra
-from .file_fields import FileField, ImageField
 from .slug_fields import SlugField
 from .uuid_fields import AutoUUIDField
 

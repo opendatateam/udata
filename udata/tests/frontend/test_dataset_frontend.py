@@ -310,6 +310,7 @@ class ResourcesTest(FrontTestCase):
         self.assertIn(dataset.slug, filename)
         self.assertIn(now.strftime('%Y%m%d-%H%M%S'), filename)
         self.assertTrue(filename.endswith('test.tar.gz'))
+        self.assertIn(filename, storages.resources)
 
     def test_render_create_community_resource(self):
         '''It should render the dataset new community resource page'''

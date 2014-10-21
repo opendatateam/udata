@@ -10,6 +10,7 @@ from flask.ext.security import UserMixin, RoleMixin, MongoEngineUserDatastore
 from itsdangerous import JSONWebSignatureSerializer
 
 from udata.models import db, WithMetrics, Follow
+from udata.core.storages import avatars
 
 
 __all__ = ('User', 'Role', 'datastore', 'FollowUser')
@@ -52,6 +53,7 @@ class User(db.Document, WithMetrics,UserMixin):
     last_name = db.StringField(max_length=255, required=True)
 
     avatar_url = db.URLField()
+    avatar = db.ImageField(fs=avatars)
     website = db.URLField()
     about = db.StringField()
 
