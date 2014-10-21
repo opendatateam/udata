@@ -15,8 +15,8 @@ from . import metrics
 __all__ = ('ReuseSearch', )
 
 
-max_datasets = lambda: max(current_site.metrics['max_reuse_datasets'], 5)
-max_followers = lambda: max(current_site.metrics['max_reuse_followers'], 10)
+max_datasets = lambda: max(current_site.metrics.get('max_reuse_datasets'), 5)
+max_followers = lambda: max(current_site.metrics.get('max_reuse_followers'), 10)
 
 
 class ReuseTypeFacet(TermFacet):

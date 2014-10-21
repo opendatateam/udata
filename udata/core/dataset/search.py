@@ -15,8 +15,8 @@ from . import metrics  # noqa
 __all__ = ('DatasetSearch', )
 
 
-max_reuses = lambda: max(current_site.metrics['max_dataset_reuses'], 10)
-max_followers = lambda: max(current_site.metrics['max_dataset_followers'], 10)
+max_reuses = lambda: max(current_site.metrics.get('max_dataset_reuses'), 10)
+max_followers = lambda: max(current_site.metrics.get('max_dataset_followers'), 10)
 
 
 class DatasetSearch(ModelSearchAdapter):

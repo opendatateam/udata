@@ -10,9 +10,9 @@ from . import metrics  # Metrics are need for the mapping
 __all__ = ('OrganizationSearch', )
 
 
-max_reuses = lambda: max(current_site.metrics['max_org_reuses'], 10)
-max_datasets = lambda: max(current_site.metrics['max_org_datasets'], 10)
-max_followers = lambda: max(current_site.metrics['max_org_followers'], 10)
+max_reuses = lambda: max(current_site.metrics.get('max_org_reuses'), 10)
+max_datasets = lambda: max(current_site.metrics.get('max_org_datasets'), 10)
+max_followers = lambda: max(current_site.metrics.get('max_org_followers'), 10)
 
 
 class OrganizationSearch(search.ModelSearchAdapter):
