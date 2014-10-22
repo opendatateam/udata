@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from udata.forms import UserModelForm, fields, validators, widgets
 from udata.i18n import lazy_gettext as _
 
-from .models import Post
+from .models import Post, IMAGE_SIZES
 
 
 __all__ = ('PostForm', )
@@ -20,6 +20,7 @@ class PostForm(UserModelForm):
     datasets = fields.DatasetListField(_('Associated datasets'))
     reuses = fields.ReuseListField(_('Associated reuses'))
 
+    avatar = fields.ImageField(_('Image'), sizes=IMAGE_SIZES)
     image_url = fields.UploadableURLField(_('Image URL'), description=_('The post thumbnail'),
         endpoint='storage.add_image')
     credit_to = fields.StringField(_('Image credits'))

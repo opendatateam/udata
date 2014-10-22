@@ -2,7 +2,7 @@
     <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
         <div class="result-logo pull-left">
             <img alt="{{ reuse.title }}"
-                src="{{ reuse.image_url|placeholder('reuse') }}">
+                src="{{ reuse.image|placeholder('reuse') }}">
         </div>
         <div class="result-body ellipsis-dot">
             <h4 class="result-title">{{ reuse.title }}</h4>

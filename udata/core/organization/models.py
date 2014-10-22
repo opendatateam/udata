@@ -7,6 +7,7 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
+from udata.core.storages import avatars, default_image_basename
 from udata.models import db, WithMetrics, Follow
 from udata.i18n import lazy_gettext as _
 
@@ -28,6 +29,12 @@ MEMBERSHIP_STATUS = {
     'accepted': _('Accepted'),
     'refused': _('Refused'),
 }
+
+LOGO_SIZES = [100, 50, 25]
+
+
+def upload_logo_to(org):
+    return '/'.join((org.slug, datetime.now().strftime('%Y%m%d-%H%M%S')))
 
 
 class OrgUnit(object):
@@ -92,6 +99,7 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
     description = db.StringField(required=True)
     url = db.StringField()
     image_url = db.StringField()
+    logo = db.ImageField(fs=avatars, basename=default_image_basename)
 
     members = db.ListField(db.EmbeddedDocumentField(Member))
     teams = db.ListField(db.EmbeddedDocumentField(Team))
@@ -113,7 +121,7 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
     }
 
     def __unicode__(self):
-        return self.name
+        return self.name or ''
 
     before_save = Signal()
     after_save = Signal()

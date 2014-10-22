@@ -7,6 +7,7 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
+from udata.core.storages import images, default_image_basename
 from udata.i18n import lazy_gettext as _
 from udata.models import db, WithMetrics, Issue, Follow
 
@@ -24,6 +25,9 @@ REUSE_TYPES = {
 }
 
 
+IMAGE_SIZES = [100, 50, 25]
+
+
 class ReuseQuerySet(db.BaseQuerySet):
     def visible(self):
         return self(private__ne=True, datasets__0__exists=True, deleted=None)
@@ -37,6 +41,7 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     url = db.StringField(required=True, unique=True)
     urlhash = db.StringField(required=True, unique=True)
     image_url = db.StringField()
+    image = db.ImageField(fs=images, basename=default_image_basename)
     datasets = db.ListField(db.ReferenceField('Dataset', reverse_delete_rule=db.PULL))
     tags = db.ListField(db.StringField())
 
@@ -51,7 +56,7 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     deleted = db.DateTimeField()
 
     def __unicode__(self):
-        return self.title
+        return self.title or ''
 
     meta = {
         'allow_inheritance': True,

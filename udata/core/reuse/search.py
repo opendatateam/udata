@@ -125,7 +125,7 @@ class ReuseSearch(ModelSearchAdapter):
                 'payload': {
                     'id': str(reuse.id),
                     'slug': reuse.slug,
-                    'image_url': reuse.image_url,
+                    'image_url': reuse.image.url,
                 },
             },
         }

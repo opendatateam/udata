@@ -145,9 +145,9 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     @property
     def image_url(self):
         if self.organization:
-            return self.organization.image_url
+            return self.organization.logo.url
         else:
-            return self.owner.avatar_url
+            return self.owner.avatar.url
 
     @property
     def frequency_label(self):

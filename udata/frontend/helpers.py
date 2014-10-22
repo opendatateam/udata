@@ -99,10 +99,10 @@ def placeholder(url, name):
 @front.app_template_filter()
 @front.app_template_global()
 def avatar_url(obj, size):
-    if hasattr(obj, 'avatar_url') and obj.avatar_url:
-        return obj.avatar_url
-    elif hasattr(obj, 'email') and obj.email:
-        return gravatar(obj.email, use_ssl=request.is_secure)
+    if hasattr(obj, 'avatar') and obj.avatar.url:
+        return obj.avatar.url
+    elif hasattr(obj, 'logo') and obj.logo.url:
+        return obj.logo.url
     else:
         return placeholder(None, 'user')
 
@@ -111,7 +111,7 @@ def avatar_url(obj, size):
 @front.app_template_filter()
 def owner_avatar_url(obj, size=32):
     if hasattr(obj, 'organization') and obj.organization:
-        return obj.organization.image_url
+        return obj.organization.logo.url
     elif hasattr(obj, 'owner') and obj.owner:
         return avatar_url(obj.owner, size)
     return placeholder(None, 'user')

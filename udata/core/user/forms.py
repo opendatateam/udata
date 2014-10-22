@@ -7,6 +7,8 @@ from udata.forms import ModelForm, fields, validators, widgets
 from udata.i18n import lazy_gettext as _
 from udata.models import User
 
+from .models import AVATAR_SIZES
+
 
 __all__ = ('UserProfileForm', 'UserSettingsForm', 'UserAPIKeyForm', 'UserNotificationsForm')
 
@@ -17,7 +19,7 @@ class UserProfileForm(ModelForm):
     first_name = fields.StringField(_('First name'), [validators.required()])
     last_name = fields.StringField(_('Last name'), [validators.required()])
     avatar_url = fields.URLField(_('Avatar URL'))
-    avatar = fields.ImageField(_('Avatar'), sizes=[120, 50, 20])
+    avatar = fields.ImageField(_('Avatar'), sizes=AVATAR_SIZES)
     website = fields.URLField(_('Website'))
     about = fields.MarkdownField(_('About'))
 

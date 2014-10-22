@@ -1,7 +1,7 @@
 {{reuse.description|markdown}}
-{% if reuse.image_url %}
+{% if reuse.image %}
 <a href="{{ url_for('reuses.show', reuse=reuse, _external=True) }}"
     title="{{ reuse.title }}">
-    <img alt="{{ reuse.title }}" src="{{ reuse.image_url }}" />
+    <img alt="{{ reuse.title }}" src="{{ reuse.image }}" />
 </a>
 {% endif %}

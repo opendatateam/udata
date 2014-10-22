@@ -91,6 +91,11 @@ class URLField(FieldHelper, EmptyNone, html5.URLField):
     pass
 
 
+class ImageForm(WTForm):
+    file = FileField()
+    crop = fields.HiddenField()
+
+
 class ImageField(StringField):
     widget = widgets.ImagePicker()
 

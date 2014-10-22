@@ -4,9 +4,13 @@ from __future__ import unicode_literals
 from flask import url_for
 
 from udata.models import db
+from udata.core.storages import images, default_image_basename
 
 
 __all__ = ('Post', )
+
+
+IMAGE_SIZES = [100, 50, 25]
 
 
 class Post(db.Datetimed, db.Document):
@@ -15,6 +19,7 @@ class Post(db.Datetimed, db.Document):
     headline = db.StringField()
     content = db.StringField(required=True)
     image_url = db.StringField()
+    image = db.ImageField(fs=images, basename=default_image_basename)
 
     credit_to = db.StringField()
     credit_url = db.URLField()
@@ -27,7 +32,7 @@ class Post(db.Datetimed, db.Document):
     private = db.BooleanField()
 
     def __unicode__(self):
-        return self.name
+        return self.name or ''
 
     @property
     def display_url(self):

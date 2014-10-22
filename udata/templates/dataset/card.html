@@ -3,7 +3,7 @@
     {% if dataset.organization %}
         <a class="card-logo" href="{{ dataset_url }}">
             <img alt="{{ dataset.organization.name }}"
-                src="{{ dataset.organization.image_url|placeholder('organization') }}">
+                src="{{ dataset.organization.logo|placeholder('organization') }}">
         </a>
         {% if dataset.organization.public_service %}
         <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"

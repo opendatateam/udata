@@ -138,7 +138,7 @@
     <div class="panel-body">
         <a href="{{ url_for('organizations.show', org=org) }}"
             title="{{ org.title }}">
-            <img src="{{ org.image_url or static('images/placeholders/organization.png') }}"
+            <img src="{{ org.logo|placeholder('organization') }}"
                 alt="{{ org.title }}" class="organization-logo producer img-responsive" />
         </a>
         <div class="caption text-left">
@@ -170,7 +170,7 @@
     <div class="panel-body">
         <a href="{{ url_for('organizations.show', org=org) }}"
             title="{{ org.title }}">
-            <img src="{{ org.image_url|placeholder('organization') }}"
+            <img src="{{ org.logo|placeholder('organization') }}"
                 alt="{{ org.title }}" class="organization-logo producer img-responsive" />
         </a>
         <div class="caption text-left">

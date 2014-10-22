@@ -1,7 +1,7 @@
 <div class="card reuse-card">
     <a class="card-logo" href="{{ url_for('reuses.show', reuse=reuse) }}">
         <img alt="{{ reuse.title }}"
-            src="{{ reuse.image_url|placeholder('reuse') }}">
+            src="{{ reuse.image|placeholder('reuse') }}">
     </a>
 
     <div class="card-body">

@@ -5,6 +5,8 @@ from udata.forms import Form, UserModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 from udata.models import Reuse, REUSE_TYPES
 
+from .models import IMAGE_SIZES
+
 __all__ = ('ReuseForm', 'ReuseCreateForm', 'AddDatasetToReuseForm')
 
 
@@ -18,6 +20,7 @@ class ReuseForm(UserModelForm):
     url = fields.URLField(_('URL'), [validators.required()])
     image_url = fields.URLField(_('Image URL'),
         description=_('The reuse thumbnail'))
+    image = fields.ImageField(_('Image'), sizes=IMAGE_SIZES)
     tags = fields.TagField(_('Tags'), description=_('Some taxonomy keywords'))
     datasets = fields.DatasetListField(_('Used datasets'))
     private = fields.BooleanField(_('Private'),

@@ -69,7 +69,7 @@ class UserSearch(ModelSearchAdapter):
                 'input': [user.first_name, user.last_name],
                 'payload': {
                     'id': str(user.id),
-                    'avatar_url': user.avatar_url,
+                    'avatar_url': user.avatar.url,
                     'fullname': user.fullname,
                     'slug': user.slug,
                 },

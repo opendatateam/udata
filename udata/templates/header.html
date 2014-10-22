@@ -49,7 +49,7 @@
             {% for org in current_user.organizations %}
             <li>
               <a href="{{ url_for('organizations.show', org=org) }}">
-                <img src="{{ org.image_url|placeholder('organization') }}" width="20px" height="20px"/>
+                <img src="{{ org.logo|placeholder('organization') }}" width="20px" height="20px"/>
                 {{ org.name }}
               </a>
             </li>

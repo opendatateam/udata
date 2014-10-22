@@ -138,7 +138,6 @@ class DatasetSearch(ModelSearchAdapter):
         org_id = str(dataset.organization.id) if dataset.organization is not None else None
         supplier_id = str(dataset.supplier.id) if dataset.supplier is not None else None
         supplier_id = supplier_id if supplier_id != org_id else None
-        image_url = dataset.organization.image_url if dataset.organization and dataset.organization.image_url else None
 
         document = {
             'title': dataset.title,
@@ -163,7 +162,7 @@ class DatasetSearch(ModelSearchAdapter):
                 'payload': {
                     'id': str(dataset.id),
                     'slug': dataset.slug,
-                    'image_url': image_url,
+                    'image_url': dataset.image_url,
                 },
             },
             'created': dataset.created_at.strftime('%Y-%m-%dT%H:%M:%S'),

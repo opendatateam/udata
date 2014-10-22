@@ -21,7 +21,7 @@
         {% endif %}
         <a href="{{ url_for('organizations.show', org=org) }}"
             title="{{ org.name }}">
-            <img src="{{ org.image_url|placeholder('organization') }}"
+            <img src="{{ org.logo|placeholder('organization') }}"
                 alt="{{ org.name }}" class="img-responsive" />
         </a>
         <h3>{{ org.name }}</h3>

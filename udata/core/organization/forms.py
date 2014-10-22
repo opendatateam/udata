@@ -5,6 +5,8 @@ from udata.forms import Form, ModelForm, UserModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 from udata.models import Organization, MembershipRequest
 
+from .models import LOGO_SIZES
+
 __all__ = (
     'OrganizationForm',
     'OrganizationMemberForm',
@@ -23,6 +25,7 @@ class OrganizationForm(ModelForm):
     url = fields.URLField(_('Website'), description=_('The organization website URL'))
     image_url = fields.URLField(_('Logo'),
         description=_('Your organization logo URL'))
+    logo = fields.ImageField(_('Logo'), sizes=LOGO_SIZES)
 
 
 class OrganizationMemberForm(ModelForm):

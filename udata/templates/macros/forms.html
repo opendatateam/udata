@@ -132,7 +132,7 @@
     <li class="col-xs-4 col-sm-3">
         <div data-org-id="{{ organization.id }}"
             class="publisher-card {% if field.data == organization.id %}active{% endif %}">
-            <img src="{{organization.image_url|placeholder('organization') }}"
+            <img src="{{organization.logo|placeholder('organization') }}"
                 alt="{{ organization.name }}" class="scalable"
                 width="100" height="100" />
             <div class="caption ellipsis-tooltip">

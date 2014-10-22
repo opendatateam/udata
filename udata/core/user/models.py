@@ -22,8 +22,8 @@ __all__ = ('User', 'Role', 'datastore', 'FollowUser')
 AVATAR_SIZES = [100, 50, 25]
 
 
-def download_avatar_to(user):
-    return '/'.join((user.fullname, datetime.now().strftime('%Y%m%d-%H%M%S')))
+def upload_avatar_to(user):
+    return '/'.join((user.slug, datetime.now().strftime('%Y%m%d-%H%M%S')))
 
 
 # TODO: use simple text for role
@@ -53,7 +53,7 @@ class User(db.Document, WithMetrics,UserMixin):
     last_name = db.StringField(max_length=255, required=True)
 
     avatar_url = db.URLField()
-    avatar = db.ImageField(fs=avatars)
+    avatar = db.ImageField(fs=avatars, upload_to=upload_avatar_to)
     website = db.URLField()
     about = db.StringField()
 
@@ -92,7 +92,7 @@ class User(db.Document, WithMetrics,UserMixin):
 
     @property
     def fullname(self):
-        return ' '.join((self.first_name, self.last_name))
+        return ' '.join((self.first_name or '', self.last_name or '')).strip()
 
     @property
     def organizations(self):

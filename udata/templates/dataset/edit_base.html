@@ -10,7 +10,7 @@
 <div class="row">
     <div class="card side-card text-center col-sm-4 col-md-3 col-lg-2">
         {% if dataset.organization %}
-            <img src="{{ dataset.organization.image_url|placeholder('organization') }}"
+            <img src="{{ dataset.organization.logo|placeholder('organization') }}"
                 alt="{{ dataset.organization.name }}" class="img-responsive" />
         {% endif %}
         <h3>{{ dataset.title }}</h3>

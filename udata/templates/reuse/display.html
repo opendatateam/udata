@@ -96,7 +96,7 @@
 
                 <div class="reuse-image">
                     <a href="{{ reuse.url }}" target="_blank">
-                        <img src="{{ reuse.image_url|placeholder('reuse') }}"
+                        <img src="{{ reuse.image|placeholder('reuse') }}"
                             alt="{{ reuse.title }}" class="scalable" />
                         <br/>
                         <span class="reuse-link">
@@ -159,7 +159,7 @@
                         {% endif %}
                         <a href="{{ url_for('organizations.show', org=reuse.organization) }}"
                             title="{{ reuse.organization.name }}">
-                            <img src="{{ reuse.organization.image_url|placeholder('organization') }}"
+                            <img src="{{ reuse.organization.logo|placeholder('organization') }}"
                                 alt="{{ reuse.organization.name }}" class="organization-logo producer" />
                         </a>
                         <div class="caption text-left">

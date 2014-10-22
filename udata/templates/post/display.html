@@ -18,9 +18,9 @@
 {% block main_content %}
 <h2>{{ post.name }}</h2>
 
-{% if post.image_url %}
+{% if post.image %}
 <div class="text-center">
-    <img src="{{ post.image_url }}"
+    <img src="{{ post.image }}"
         alt="{{ post.name }}" class="scalable" />
 
     {% if post.credit_to %}
@@ -72,9 +72,9 @@
                 <div class="post-headline">{{ post.headline }}</div>
                 {% endif %}
 
-                {% if post.image_url %}
+                {% if post.image %}
                 <div class="post-image">
-                    <img src="{{ post.image_url }}"
+                    <img src="{{ post.image }}"
                         alt="{{ post.name }}" class="scalable" />
                     <br/>
                     {% if post.credit_to %}

@@ -85,7 +85,7 @@
                 <h4>{{ _('Organizations') }}</h4>
                 {% for org in organizations %}
                 <a href="{{ url_for('organizations.show', org=org) }}">
-                    <img src="{{ org.image_url|placeholder('organization') }}"
+                    <img src="{{ org.logo|placeholder('organization') }}"
                         class="avatar" width="48" height="48" />
                 </a>
                 {% endfor %}
