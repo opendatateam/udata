@@ -46,8 +46,6 @@
         {{ f(class_='form-control') }}
         {% elif f.type == 'UploadableURLField' %}
         {{ uploadable_url(f) }}
-        {% elif f.type == 'ImageField' %}
-        {{ image_picker(f) }}
         {% else %}
         {{ f(class_='form-control') }}
         {% endif %}

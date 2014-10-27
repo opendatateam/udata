@@ -60,6 +60,10 @@ class TestStorageUtils(TestCase):
         expected = 'CA975130'  # Output of cksfv
         self.assertEqual(utils.crc32(self.file), expected)
 
+    def test_mime(self):
+        self.assertEqual(utils.mime('test.txt'), 'text/plain')
+        self.assertIsNone(utils.mime('test'))
+
 
 class StorageTestMixin(object):
     def create_app(self):
@@ -81,40 +85,24 @@ class StorageTestCase(StorageTestMixin, WebTestMixin, TestCase):
     pass
 
 
-class ResoucesStorageTest(StorageTestCase):
-    def test_upload_resource(self):
+class StorageUploadViewTest(StorageTestCase):
+    def test_upload(self):
         self.login()
-        response = self.post(url_for('storage.upload', name='resources'), {'file': (StringIO(b'aaa'), 'test.txt')})
+        response = self.post(url_for('storage.upload', name='tmp'), {'file': (StringIO(b'aaa'), 'test.txt')})
 
         self.assert200(response)
         self.assertTrue(response.json['success'])
+        self.assertIn('filename', response.json)
         self.assertIn('url', response.json)
+        self.assertIn('mime', response.json)
+        self.assertIn('size', response.json)
+        self.assertIn('sha1', response.json)
+        self.assertEqual(response.json['url'], storages.tmp.url(response.json['filename']))
+        self.assertEqual(response.json['mime'], 'text/plain')
 
     def test_upload_resource_bad_request(self):
         self.login()
-        response = self.post(url_for('storage.upload', name='resources'), {'bad': (StringIO(b'aaa'), 'test.txt')})
-
-        self.assert400(response)
-        self.assertFalse(response.json['success'])
-        self.assertIn('error', response.json)
-
-
-class ImagesStorageTest(StorageTestCase):
-    pass
-
-
-class AvatarsStorageTest(StorageTestCase):
-    def test_upload_resource(self):
-        self.login()
-        response = self.post(url_for('storage.add_avatar'), {'file': (StringIO(b'aaa'), 'test.png')})
-
-        self.assert200(response)
-        self.assertTrue(response.json['success'])
-        self.assertIn('url', response.json)
-
-    def test_upload_resource_bad_request(self):
-        self.login()
-        response = self.post(url_for('storage.add_avatar'), {'bad': (StringIO(b'aaa'), 'test.png')})
+        response = self.post(url_for('storage.upload', name='tmp'), {'bad': (StringIO(b'aaa'), 'test.txt')})
 
         self.assert400(response)
         self.assertFalse(response.json['success'])

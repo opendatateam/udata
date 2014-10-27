@@ -10,7 +10,7 @@ from udata.core.storages import images, default_image_basename
 __all__ = ('Post', )
 
 
-IMAGE_SIZES = [100, 50, 25]
+IMAGE_SIZES = [400, 100, 50]
 
 
 class Post(db.Datetimed, db.Document):
@@ -19,7 +19,7 @@ class Post(db.Datetimed, db.Document):
     headline = db.StringField()
     content = db.StringField(required=True)
     image_url = db.StringField()
-    image = db.ImageField(fs=images, basename=default_image_basename)
+    image = db.ImageField(fs=images, basename=default_image_basename, thumbnails=IMAGE_SIZES)
 
     credit_to = db.StringField()
     credit_url = db.URLField()

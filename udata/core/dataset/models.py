@@ -146,7 +146,7 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     def image_url(self):
         if self.organization:
             return self.organization.logo.url
-        else:
+        elif self.owner:
             return self.owner.avatar.url
 
     @property

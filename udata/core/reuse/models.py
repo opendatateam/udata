@@ -26,6 +26,7 @@ REUSE_TYPES = {
 
 
 IMAGE_SIZES = [100, 50, 25]
+IMAGE_MAX_SIZE = 800
 
 
 class ReuseQuerySet(db.BaseQuerySet):
@@ -38,10 +39,10 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     slug = db.SlugField(max_length=255, required=True, populate_from='title', update=True)
     description = db.StringField(required=True)
     type = db.StringField(required=True, choices=REUSE_TYPES.keys())
-    url = db.StringField(required=True, unique=True)
+    url = db.StringField(required=True)
     urlhash = db.StringField(required=True, unique=True)
     image_url = db.StringField()
-    image = db.ImageField(fs=images, basename=default_image_basename)
+    image = db.ImageField(fs=images, basename=default_image_basename, max_size=IMAGE_MAX_SIZE, thumbnails=IMAGE_SIZES)
     datasets = db.ListField(db.ReferenceField('Dataset', reverse_delete_rule=db.PULL))
     tags = db.ListField(db.StringField())
 

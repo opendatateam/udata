@@ -13,7 +13,8 @@
     <p>{{ _('If your thumbnail URL is the same as your reuse URL, it will be displayed as big picture.') }}</p>
     </div>
     <div class="col-sm-12 col-md-9 col-md-pull-3">
-        <form class="form-horizontal validation" method="post" action=".">
+        <form class="form-horizontal validation" method="post" action="."
+            enctype="multipart/form-data">
             {{ forms.render(form) }}
             {{ forms.required_disclaimer() }}
 

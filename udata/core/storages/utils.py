@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import hashlib
 import zlib
 import logging
+import mimetypes
 
 log = logging.getLogger(__name__)
 
@@ -35,3 +36,8 @@ def crc32(file):
     '''Perform a CRC digest on a file'''
     value = zlib.crc32(file.read())
     return '%08X' % (value & 0xFFFFFFFF)
+
+
+def mime(url):
+    '''Get the mimetype from an url or a filename'''
+    return mimetypes.guess_type(url)[0]

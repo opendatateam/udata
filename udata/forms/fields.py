@@ -2,15 +2,18 @@
 from __future__ import unicode_literals
 
 import re
+import tempfile
 
 from bson import ObjectId, DBRef
 from dateutil.parser import parse
 
-from flask import url_for
+from flask import url_for, request
 from flask.ext.mongoengine.wtf import fields as mefields
-
+from werkzeug.datastructures import FileStorage
+from werkzeug.utils import secure_filename
 from wtforms import Form as WTForm, Field, validators, fields
 from wtforms.fields import html5
+from wtforms.utils import unset_value
 
 from shapely.geometry import shape, MultiPolygon
 from shapely.ops import cascaded_union
@@ -22,6 +25,7 @@ from .validators import RequiredIf
 from udata.auth import current_user
 from udata.models import db, Organization, SpatialCoverage, Territory, SPATIAL_GRANULARITIES
 from udata.core.spatial import LEVELS
+from udata.core.storages import tmp
 from udata.i18n import lazy_gettext as _
 
 
@@ -63,6 +67,10 @@ class EmptyNone(object):
         self.data = self.data or None
 
 
+class HiddenField(FieldHelper, EmptyNone, fields.HiddenField):
+    pass
+
+
 class StringField(FieldHelper, EmptyNone, fields.StringField):
     pass
 
@@ -91,12 +99,58 @@ class URLField(FieldHelper, EmptyNone, html5.URLField):
     pass
 
 
+class TmpFilename(fields.HiddenField):
+    def _value(self):
+        return u''
+
+
+class BBoxField(fields.HiddenField):
+    def _value(self):
+        if self.data:
+            return u','.join([str(x) for x in self.data])
+        else:
+            return u''
+
+    def process_formdata(self, valuelist):
+        if valuelist:
+            self.data = [int(float(x)) for x in valuelist[0].split(',')]
+            print 'data', self.data
+        else:
+            self.data = None
+
+
 class ImageForm(WTForm):
-    file = FileField()
-    crop = fields.HiddenField()
+    filename = TmpFilename()
+    bbox = BBoxField()
 
 
-class ImageField(StringField):
+class ImageField(FieldHelper, fields.FormField):
+    widget = widgets.ImagePicker()
+
+    def __init__(self, label=None, validators=None, **kwargs):
+        self.sizes = kwargs.pop('sizes', [100])
+        self.placeholder = kwargs.pop('placeholder', 'default')
+        super(ImageField, self).__init__(ImageForm, label, validators, **kwargs)
+
+    def process(self, formdata, data=unset_value):
+        self.src = getattr(data, 'url', None)
+        super(ImageField, self).process(formdata, data)
+
+    def populate_obj(self, obj, name):
+        field = getattr(obj, name)
+        bbox = self.form.bbox.data or None
+        filename = self.form.filename.data or None
+        if filename and filename in tmp:
+            with tmp.open(filename) as infile:
+                field.save(infile, filename, bbox=bbox)
+            tmp.delete(filename)
+
+    @property
+    def endpoint(self):
+        return url_for('storage.upload', name='tmp')
+
+
+class ImageFieldBak(StringField):
     widget = widgets.ImagePicker()
 
     def __init__(self, *args, **kwargs):

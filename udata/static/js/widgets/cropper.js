@@ -104,6 +104,16 @@ define([
                     marginTop: '-' + Math.round(ry * coords.y) + 'px'
                 });
             });
+        },
+
+        /**
+         * Get the current selected crop Bounding Box (realsize) if any.
+         */
+        get_bbox: function() {
+            if (!this.$checkbox.is(':checked')) {
+                var selection = this.Jcrop.tellSelect();
+                return [selection.x, selection.y, selection.x2, selection.y2];
+            }
         }
 
     });

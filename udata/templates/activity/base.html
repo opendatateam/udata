@@ -9,7 +9,7 @@
             {% if organization %}
             <a class="avatar" title="{{ organization.name }}"
                 href="{{ url_for('organizations.show', org=organization) }}">
-                <img src="{{organization.logo|placeholder('organization') }}"
+                <img src="{{organization.logo(32)|placeholder('organization') }}"
                     alt="{{ organization.name }}" class="scalable"
                     width="32" height="32" />
             </a>

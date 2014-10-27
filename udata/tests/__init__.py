@@ -60,6 +60,7 @@ class TestCase(BaseTestCase):
         app.config['ASSETS_VERSIONS'] = False
         app.config['ASSETS_URL_EXPIRE'] = False
         app.config['SERVER_NAME'] = 'localhost'
+        app.config['DEFAULT_LANGUAGE'] = 'en'
         if not app.config.get('TEST_WITH_PLUGINS', False):
             app.config['PLUGINS'] = []
         if not app.config.get('TEST_WITH_THEME', False):

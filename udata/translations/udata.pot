@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-10-10 11:03+0200\n"
+"POT-Creation-Date: 2014-10-24 03:42+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,47 +17,47 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
 
-#: udata/api/oauth2.py:26
+#: udata/api/oauth2.py:27
 msgid "Public"
 msgstr ""
 
-#: udata/api/oauth2.py:27
+#: udata/api/oauth2.py:28
 msgid "Confidential"
 msgstr ""
 
-#: udata/api/oauth2.py:31
+#: udata/api/oauth2.py:32
 msgid "Web Application"
 msgstr ""
 
-#: udata/api/oauth2.py:32
+#: udata/api/oauth2.py:33
 msgid "User Agent"
 msgstr ""
 
-#: udata/api/oauth2.py:33
+#: udata/api/oauth2.py:34
 msgid "Native"
 msgstr ""
 
-#: udata/api/oauth2.py:37
+#: udata/api/oauth2.py:38
 msgid "Authorization Code"
 msgstr ""
 
-#: udata/api/oauth2.py:38
+#: udata/api/oauth2.py:39
 msgid "Implicit"
 msgstr ""
 
-#: udata/api/oauth2.py:39
+#: udata/api/oauth2.py:40
 msgid "Resource Owner Password Credentials"
 msgstr ""
 
-#: udata/api/oauth2.py:40
+#: udata/api/oauth2.py:41
 msgid "Client Credentials"
 msgstr ""
 
-#: udata/api/oauth2.py:44
+#: udata/api/oauth2.py:45
 msgid "Bearer Token"
 msgstr ""
 
-#: udata/api/oauth2.py:48
+#: udata/api/oauth2.py:49
 msgid "Default scope"
 msgstr ""
 
@@ -69,7 +69,7 @@ msgstr ""
 msgid "Theme"
 msgstr ""
 
-#: udata/core/admin/__init__.py:78 udata/core/dataset/views.py:60
+#: udata/core/admin/__init__.py:78 udata/core/dataset/views.py:63
 #: udata/core/issues/metrics.py:14 udata/core/organization/views.py:38
 #: udata/core/reuse/views.py:58 udata/core/site/admin.py:20
 #: udata/templates/macros/issues.html:5
@@ -88,8 +88,8 @@ msgstr ""
 msgid "deleted a dataset"
 msgstr ""
 
-#: udata/core/dataset/forms.py:15 udata/core/dataset/forms.py:43
-#: udata/core/reuse/forms.py:14 udata/core/site/forms.py:15
+#: udata/core/dataset/forms.py:17 udata/core/dataset/forms.py:45
+#: udata/core/reuse/forms.py:16 udata/core/site/forms.py:15
 #: udata/templates/search.html:52 udata/templates/search.html:61
 #: udata/templates/dataset/list.html:21 udata/templates/organization/list.html:22
 #: udata/templates/reuse/list.html:24 udata/templates/topic/datasets.html:26
@@ -97,30 +97,30 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: udata/core/dataset/forms.py:16 udata/core/dataset/forms.py:44
-#: udata/core/organization/forms.py:21 udata/core/reuse/forms.py:15
+#: udata/core/dataset/forms.py:18 udata/core/dataset/forms.py:46
+#: udata/core/organization/forms.py:23 udata/core/reuse/forms.py:17
 #: udata/core/topic/forms.py:17
 msgid "Description"
 msgstr ""
 
-#: udata/core/dataset/forms.py:17
+#: udata/core/dataset/forms.py:19
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr ""
 
-#: udata/core/dataset/forms.py:18 udata/templates/dataset/display.html:206
+#: udata/core/dataset/forms.py:20 udata/templates/dataset/display.html:206
 #: udata/templates/dataset/search-labels.html:10
 msgid "License"
 msgstr ""
 
-#: udata/core/dataset/forms.py:19
+#: udata/core/dataset/forms.py:21
 msgid "Update frequency"
 msgstr ""
 
-#: udata/core/dataset/forms.py:21
+#: udata/core/dataset/forms.py:23
 msgid "The frequency at which data are updated."
 msgstr ""
 
-#: udata/core/dataset/forms.py:22 udata/templates/dataset/card.html:73
+#: udata/core/dataset/forms.py:24 udata/templates/dataset/card.html:73
 #: udata/templates/dataset/display.html:219
 #: udata/templates/dataset/search-labels.html:13
 #: udata/templates/dataset/search-panel.html:12
@@ -128,67 +128,80 @@ msgstr ""
 msgid "Temporal coverage"
 msgstr ""
 
-#: udata/core/dataset/forms.py:23
+#: udata/core/dataset/forms.py:25
 msgid "The period covered by the data"
 msgstr ""
 
-#: udata/core/dataset/forms.py:24
+#: udata/core/dataset/forms.py:26
 msgid "Spatial coverage"
 msgstr ""
 
-#: udata/core/dataset/forms.py:25
+#: udata/core/dataset/forms.py:27
 msgid "The geographical area covered by the data."
 msgstr ""
 
-#: udata/core/dataset/forms.py:26 udata/core/post/forms.py:28
-#: udata/core/reuse/forms.py:21 udata/core/site/forms.py:16
+#: udata/core/dataset/forms.py:28 udata/core/post/forms.py:29
+#: udata/core/reuse/forms.py:24 udata/core/site/forms.py:16
 #: udata/core/topic/forms.py:23 udata/templates/dataset/search-panel.html:10
 #: udata/templates/reuse/search-panel.html:6
 msgid "Tags"
 msgstr ""
 
-#: udata/core/dataset/forms.py:26 udata/core/reuse/forms.py:21
+#: udata/core/dataset/forms.py:28 udata/core/reuse/forms.py:24
 msgid "Some taxonomy keywords"
 msgstr ""
 
-#: udata/core/dataset/forms.py:27 udata/core/post/forms.py:30
-#: udata/core/reuse/forms.py:23 udata/core/topic/forms.py:24
+#: udata/core/dataset/forms.py:29 udata/core/post/forms.py:31
+#: udata/core/reuse/forms.py:26 udata/core/topic/forms.py:24
 #: udata/templates/post/display.html:57 udata/templates/post/display.html:59
 #: udata/templates/reuse/display.html:79 udata/templates/reuse/display.html:81
 msgid "Private"
 msgstr ""
 
-#: udata/core/dataset/forms.py:28 udata/core/reuse/forms.py:24
+#: udata/core/dataset/forms.py:30 udata/core/reuse/forms.py:27
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr ""
 
-#: udata/core/dataset/forms.py:32 udata/core/reuse/forms.py:28
+#: udata/core/dataset/forms.py:34 udata/core/reuse/forms.py:31
 msgid "Publish as"
 msgstr ""
 
-#: udata/core/dataset/forms.py:45 udata/core/reuse/forms.py:18
+#: udata/core/dataset/forms.py:47 udata/core/issues/forms.py:14
+#: udata/core/reuse/forms.py:19 udata/templates/reuse/card.html:33
+#: udata/templates/reuse/display.html:244
+#: udata/templates/reuse/search-labels.html:6
+#: udata/templates/reuse/search-panel.html:5
+#: udata/templates/reuse/search-result.html:16
+msgid "Type"
+msgstr ""
+
+#: udata/core/dataset/forms.py:49
+msgid "Whether the resource is an uploaded file, a remote file or an API"
+msgstr ""
+
+#: udata/core/dataset/forms.py:50 udata/core/reuse/forms.py:20
 msgid "URL"
 msgstr ""
 
-#: udata/core/dataset/forms.py:46 udata/templates/dataset/search-labels.html:22
+#: udata/core/dataset/forms.py:51 udata/templates/dataset/search-labels.html:22
 msgid "Format"
 msgstr ""
 
-#: udata/core/dataset/forms.py:47
+#: udata/core/dataset/forms.py:52
 msgid "Checksum"
 msgstr ""
 
-#: udata/core/dataset/forms.py:55 udata/core/organization/forms.py:36
-#: udata/templates/macros/forms.html:228 udata/templates/macros/forms.html:237
+#: udata/core/dataset/forms.py:60 udata/core/organization/forms.py:39
+#: udata/templates/macros/forms.html:233 udata/templates/macros/forms.html:242
 msgid "Key"
 msgstr ""
 
-#: udata/core/dataset/forms.py:56 udata/core/organization/forms.py:37
-#: udata/templates/macros/forms.html:229 udata/templates/macros/forms.html:242
+#: udata/core/dataset/forms.py:61 udata/core/organization/forms.py:40
+#: udata/templates/macros/forms.html:234 udata/templates/macros/forms.html:247
 msgid "Value"
 msgstr ""
 
-#: udata/core/dataset/forms.py:57 udata/core/organization/forms.py:38
+#: udata/core/dataset/forms.py:62 udata/core/organization/forms.py:41
 msgid "Old key"
 msgstr ""
 
@@ -215,81 +228,93 @@ msgstr ""
 msgid "Reuses"
 msgstr ""
 
-#: udata/core/dataset/models.py:21
+#: udata/core/dataset/models.py:23
 msgid "Punctual"
 msgstr ""
 
-#: udata/core/dataset/models.py:22
+#: udata/core/dataset/models.py:24
 msgid "Real time"
 msgstr ""
 
-#: udata/core/dataset/models.py:23
+#: udata/core/dataset/models.py:25
 msgid "Daily"
 msgstr ""
 
-#: udata/core/dataset/models.py:24
+#: udata/core/dataset/models.py:26
 msgid "Weekly"
 msgstr ""
 
-#: udata/core/dataset/models.py:25
+#: udata/core/dataset/models.py:27
 msgid "Fortnighly"
 msgstr ""
 
-#: udata/core/dataset/models.py:26
+#: udata/core/dataset/models.py:28
 msgid "Monthly"
 msgstr ""
 
-#: udata/core/dataset/models.py:27
+#: udata/core/dataset/models.py:29
 msgid "Bimonthly"
 msgstr ""
 
-#: udata/core/dataset/models.py:28
+#: udata/core/dataset/models.py:30
 msgid "Quarterly"
 msgstr ""
 
-#: udata/core/dataset/models.py:29
+#: udata/core/dataset/models.py:31
 msgid "Biannual"
 msgstr ""
 
-#: udata/core/dataset/models.py:30
+#: udata/core/dataset/models.py:32
 msgid "Annual"
 msgstr ""
 
-#: udata/core/dataset/models.py:31
+#: udata/core/dataset/models.py:33
 msgid "Biennial"
 msgstr ""
 
-#: udata/core/dataset/models.py:32
+#: udata/core/dataset/models.py:34
 msgid "Triennial"
 msgstr ""
 
-#: udata/core/dataset/models.py:33
+#: udata/core/dataset/models.py:35
 msgid "Quinquennial"
 msgstr ""
 
-#: udata/core/dataset/models.py:34
+#: udata/core/dataset/models.py:36
 msgid "Unknown"
 msgstr ""
 
-#: udata/core/dataset/views.py:24 udata/templates/home.html:129
+#: udata/core/dataset/models.py:40
+msgid "Uploaded file"
+msgstr ""
+
+#: udata/core/dataset/models.py:41
+msgid "Remote file"
+msgstr ""
+
+#: udata/core/dataset/models.py:42 udata/core/reuse/models.py:18
+msgid "API"
+msgstr ""
+
+#: udata/core/dataset/views.py:27 udata/templates/home.html:129
 msgid "Last datasets"
 msgstr ""
 
-#: udata/core/dataset/views.py:57 udata/core/organization/views.py:33
+#: udata/core/dataset/views.py:60 udata/core/organization/views.py:33
 #: udata/core/reuse/views.py:57
 msgid "Descrition"
 msgstr ""
 
-#: udata/core/dataset/views.py:58
+#: udata/core/dataset/views.py:61
 msgid "Additionnal informations"
 msgstr ""
 
-#: udata/core/dataset/views.py:59 udata/core/site/metrics.py:58
+#: udata/core/dataset/views.py:62 udata/core/site/metrics.py:58
 #: udata/core/site/views.py:128 udata/templates/dataset/display.html:58
 msgid "Resources"
 msgstr ""
 
-#: udata/core/dataset/views.py:61 udata/core/reuse/views.py:59
+#: udata/core/dataset/views.py:64 udata/core/reuse/views.py:59
 msgid "Transfer"
 msgstr ""
 
@@ -314,16 +339,8 @@ msgid "Followers"
 msgstr ""
 
 #: udata/core/issues/forms.py:13 udata/core/issues/forms.py:18
-#: udata/core/organization/forms.py:45 udata/core/organization/forms.py:49
+#: udata/core/organization/forms.py:48 udata/core/organization/forms.py:52
 msgid "Comment"
-msgstr ""
-
-#: udata/core/issues/forms.py:14 udata/core/reuse/forms.py:17
-#: udata/templates/reuse/card.html:33 udata/templates/reuse/display.html:244
-#: udata/templates/reuse/search-labels.html:6
-#: udata/templates/reuse/search-panel.html:5
-#: udata/templates/reuse/search-result.html:16
-msgid "Type"
 msgstr ""
 
 #: udata/core/issues/models.py:17
@@ -350,30 +367,30 @@ msgstr ""
 msgid "updated an organization"
 msgstr ""
 
-#: udata/core/organization/forms.py:20 udata/core/post/forms.py:16
+#: udata/core/organization/forms.py:22 udata/core/post/forms.py:16
 #: udata/core/topic/forms.py:16 udata/templates/search.html:70
 #: udata/templates/post/admin.html:9 udata/templates/topic/admin.html:9
 #: udata/templates/user/list.html:26
 msgid "Name"
 msgstr ""
 
-#: udata/core/organization/forms.py:22
+#: udata/core/organization/forms.py:24
 msgid "The details about your organization"
 msgstr ""
 
-#: udata/core/organization/forms.py:23 udata/core/user/forms.py:20
+#: udata/core/organization/forms.py:25 udata/core/user/forms.py:23
 msgid "Website"
 msgstr ""
 
-#: udata/core/organization/forms.py:23
+#: udata/core/organization/forms.py:25
 msgid "The organization website URL"
 msgstr ""
 
-#: udata/core/organization/forms.py:24
+#: udata/core/organization/forms.py:26 udata/core/organization/forms.py:28
 msgid "Logo"
 msgstr ""
 
-#: udata/core/organization/forms.py:25
+#: udata/core/organization/forms.py:27
 msgid "Your organization logo URL"
 msgstr ""
 
@@ -385,7 +402,7 @@ msgstr ""
 #: udata/templates/dataset/create.html:4 udata/templates/dataset/display.html:16
 #: udata/templates/dataset/edit_base.html:4
 #: udata/templates/dataset/followers.html:4 udata/templates/dataset/list.html:9
-#: udata/templates/dataset/resource/create.html:4
+#: udata/templates/dataset/resource/create.html:6
 #: udata/templates/dataset/resource/display.html:4
 #: udata/templates/dataset/resource/edit.html:4
 #: udata/templates/dataset/resource/edit_community.html:4
@@ -407,24 +424,24 @@ msgstr ""
 msgid "Members"
 msgstr ""
 
-#: udata/core/organization/models.py:21
+#: udata/core/organization/models.py:22
 msgid "Administrateur"
 msgstr ""
 
-#: udata/core/organization/models.py:22
+#: udata/core/organization/models.py:23
 #: udata/templates/organization/display_base.html:109
 msgid "Editor"
 msgstr ""
 
-#: udata/core/organization/models.py:27
+#: udata/core/organization/models.py:28
 msgid "Pending"
 msgstr ""
 
-#: udata/core/organization/models.py:28
+#: udata/core/organization/models.py:29
 msgid "Accepted"
 msgstr ""
 
-#: udata/core/organization/models.py:29
+#: udata/core/organization/models.py:30
 msgid "Refused"
 msgstr ""
 
@@ -459,19 +476,23 @@ msgstr ""
 msgid "Associated reuses"
 msgstr ""
 
-#: udata/core/post/forms.py:23 udata/core/reuse/forms.py:19
+#: udata/core/post/forms.py:23 udata/core/reuse/forms.py:23
+msgid "Image"
+msgstr ""
+
+#: udata/core/post/forms.py:24 udata/core/reuse/forms.py:21
 msgid "Image URL"
 msgstr ""
 
-#: udata/core/post/forms.py:23
+#: udata/core/post/forms.py:24
 msgid "The post thumbnail"
 msgstr ""
 
-#: udata/core/post/forms.py:25
+#: udata/core/post/forms.py:26
 msgid "Image credits"
 msgstr ""
 
-#: udata/core/post/forms.py:26
+#: udata/core/post/forms.py:27
 msgid "Credit URL"
 msgstr ""
 
@@ -487,43 +508,39 @@ msgstr ""
 msgid "deleted a reuse"
 msgstr ""
 
-#: udata/core/reuse/forms.py:16
+#: udata/core/reuse/forms.py:18
 msgid "The details about the reuse (build process, specifics, self-critics...)."
 msgstr ""
 
-#: udata/core/reuse/forms.py:20
+#: udata/core/reuse/forms.py:22
 msgid "The reuse thumbnail"
 msgstr ""
 
-#: udata/core/reuse/forms.py:22 udata/templates/reuse/display.html:289
+#: udata/core/reuse/forms.py:25 udata/templates/reuse/display.html:289
 msgid "Used datasets"
 msgstr ""
 
-#: udata/core/reuse/models.py:17
-msgid "API"
-msgstr ""
-
-#: udata/core/reuse/models.py:18
+#: udata/core/reuse/models.py:19
 msgid "Application"
 msgstr ""
 
-#: udata/core/reuse/models.py:19
+#: udata/core/reuse/models.py:20
 msgid "Idea"
 msgstr ""
 
-#: udata/core/reuse/models.py:20
+#: udata/core/reuse/models.py:21
 msgid "News Article"
 msgstr ""
 
-#: udata/core/reuse/models.py:21
+#: udata/core/reuse/models.py:22
 msgid "Paper"
 msgstr ""
 
-#: udata/core/reuse/models.py:22
+#: udata/core/reuse/models.py:23
 msgid "Post"
 msgstr ""
 
-#: udata/core/reuse/models.py:23
+#: udata/core/reuse/models.py:24
 msgid "Visualization"
 msgstr ""
 
@@ -570,6 +587,34 @@ msgstr ""
 #: udata/templates/reuse/search-panel.html:4 udata/templates/user/base.html:85
 #: udata/templates/user/following.html:17 udata/templates/user/search-panel.html:5
 msgid "Organizations"
+msgstr ""
+
+#: udata/core/site/metrics.py:106
+msgid "Maximum dataset followers"
+msgstr ""
+
+#: udata/core/site/metrics.py:118
+msgid "Maximum dataset reuses"
+msgstr ""
+
+#: udata/core/site/metrics.py:130
+msgid "Maximum datasets in reuses"
+msgstr ""
+
+#: udata/core/site/metrics.py:142
+msgid "Maximum reuse followers"
+msgstr ""
+
+#: udata/core/site/metrics.py:154
+msgid "Maximum organization followers"
+msgstr ""
+
+#: udata/core/site/metrics.py:166
+msgid "Maximum organization reuses"
+msgstr ""
+
+#: udata/core/site/metrics.py:181
+msgid "Maximum organization datasets"
 msgstr ""
 
 #: udata/core/site/views.py:113
@@ -649,23 +694,27 @@ msgstr ""
 msgid "followed a reuse"
 msgstr ""
 
-#: udata/core/user/forms.py:17
+#: udata/core/user/forms.py:19
 msgid "First name"
 msgstr ""
 
-#: udata/core/user/forms.py:18 udata/templates/user/list.html:22
+#: udata/core/user/forms.py:20 udata/templates/user/list.html:22
 msgid "Last name"
 msgstr ""
 
-#: udata/core/user/forms.py:19
+#: udata/core/user/forms.py:21
 msgid "Avatar URL"
 msgstr ""
 
-#: udata/core/user/forms.py:21
+#: udata/core/user/forms.py:22
+msgid "Avatar"
+msgstr ""
+
+#: udata/core/user/forms.py:24
 msgid "About"
 msgstr ""
 
-#: udata/core/user/forms.py:27
+#: udata/core/user/forms.py:30
 msgid "Prefered language"
 msgstr ""
 
@@ -701,17 +750,17 @@ msgstr ""
 msgid "Notifications"
 msgstr ""
 
-#: udata/forms/fields.py:173
+#: udata/forms/fields.py:205
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr ""
 
-#: udata/forms/fields.py:177
+#: udata/forms/fields.py:209
 #, python-format
 msgid "Tag \"%(tag)s\" must be alphanumeric characters or symbols: -_."
 msgstr ""
 
-#: udata/forms/fields.py:252 udata/templates/dataset/card.html:33
+#: udata/forms/fields.py:284 udata/templates/dataset/card.html:33
 #: udata/templates/dataset/display.html:253
 #: udata/templates/dataset/search-labels.html:16
 #: udata/templates/dataset/search-panel.html:13
@@ -719,22 +768,26 @@ msgstr ""
 msgid "Territorial coverage"
 msgstr ""
 
-#: udata/forms/fields.py:252
+#: udata/forms/fields.py:284
 msgid "A list of covered territories"
 msgstr ""
 
-#: udata/forms/fields.py:253 udata/templates/dataset/search-labels.html:19
+#: udata/forms/fields.py:285 udata/templates/dataset/search-labels.html:19
 #: udata/templates/dataset/search-panel.html:14
 msgid "Territorial granularity"
 msgstr ""
 
-#: udata/forms/fields.py:253
+#: udata/forms/fields.py:285
 msgid "The size of the data increment"
 msgstr ""
 
 #: udata/forms/validators.py:43
 #, python-format
 msgid "This field requires \"%(name)s\" to be set"
+msgstr ""
+
+#: udata/forms/widgets.py:144 udata/templates/macros/forms.html:209
+msgid "Choose a picture"
 msgstr ""
 
 #: udata/frontend/helpers.py:244
@@ -770,13 +823,13 @@ msgstr ""
 msgid "Last modification date"
 msgstr ""
 
-#: udata/search/fields.py:107 udata/tests/test_search.py:652
-#: udata/tests/test_search.py:655
+#: udata/search/fields.py:107 udata/tests/test_search.py:703
+#: udata/tests/test_search.py:706
 msgid "yes"
 msgstr ""
 
-#: udata/search/fields.py:107 udata/tests/test_search.py:653
-#: udata/tests/test_search.py:656
+#: udata/search/fields.py:107 udata/tests/test_search.py:704
+#: udata/tests/test_search.py:707
 msgid "no"
 msgstr ""
 
@@ -994,14 +1047,14 @@ msgid "New"
 msgstr ""
 
 #: udata/templates/dataset/create.html:9
-#: udata/templates/dataset/resource/create.html:10
+#: udata/templates/dataset/resource/create.html:12
 #: udata/templates/organization/create.html:9 udata/templates/post/create.html:9
 #: udata/templates/reuse/create.html:9 udata/templates/topic/create.html:9
 msgid "Create"
 msgstr ""
 
 #: udata/templates/dataset/create.html:10 udata/templates/dataset/edit.html:15
-#: udata/templates/dataset/resource/create.html:11
+#: udata/templates/dataset/resource/create.html:13
 #: udata/templates/dataset/resource/edit.html:11
 #: udata/templates/dataset/resource/edit_community.html:11
 #: udata/templates/organization/create.html:10
@@ -1044,7 +1097,8 @@ msgid "No resources"
 msgstr ""
 
 #: udata/templates/dataset/display.html:91
-#: udata/templates/dataset/resource/create.html:6
+#: udata/templates/dataset/resource/create.html:3
+#: udata/templates/dataset/resource/create.html:8
 msgid "New resource"
 msgstr ""
 
@@ -1260,45 +1314,33 @@ msgstr ""
 msgid "Following since %(date)s"
 msgstr ""
 
-#: udata/templates/macros/forms.html:170 udata/templates/macros/forms.html:266
+#: udata/templates/macros/forms.html:172 udata/templates/macros/forms.html:271
 msgid "Add"
 msgstr ""
 
-#: udata/templates/macros/forms.html:174 udata/templates/macros/forms.html:248
+#: udata/templates/macros/forms.html:176 udata/templates/macros/forms.html:253
 #: udata/templates/organization/edit_members.html:39
 #: udata/templates/post/admin.html:25 udata/templates/topic/admin.html:25
 msgid "Remove"
 msgstr ""
 
-#: udata/templates/macros/forms.html:193
+#: udata/templates/macros/forms.html:195
 msgid "required fields"
 msgstr ""
 
-#: udata/templates/macros/forms.html:204
+#: udata/templates/macros/forms.html:220
 msgid "Delete resource"
 msgstr ""
 
-#: udata/templates/macros/forms.html:205
+#: udata/templates/macros/forms.html:221
 msgid "You can remove this uploaded file"
 msgstr ""
 
-#: udata/templates/macros/forms.html:209
-msgid "Upload a resource"
-msgstr ""
-
-#: udata/templates/macros/forms.html:210
-msgid "If the resource doesn't exists online you can upload it"
-msgstr ""
-
-#: udata/templates/macros/forms.html:212
-msgid "Upload"
-msgstr ""
-
-#: udata/templates/macros/forms.html:259
+#: udata/templates/macros/forms.html:264
 msgid "New key"
 msgstr ""
 
-#: udata/templates/macros/forms.html:262
+#: udata/templates/macros/forms.html:267
 msgid "New value"
 msgstr ""
 
@@ -1377,6 +1419,18 @@ msgstr ""
 
 #: udata/templates/macros/timeline.html:19
 msgid "No recent activity"
+msgstr ""
+
+#: udata/templates/macros/uploader.html:8
+msgid "Drag a file here"
+msgstr ""
+
+#: udata/templates/macros/uploader.html:11
+msgid "or"
+msgstr ""
+
+#: udata/templates/macros/uploader.html:15
+msgid "Select a file from your computer"
 msgstr ""
 
 #: udata/templates/organization/activity.html:6

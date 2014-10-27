@@ -12,18 +12,15 @@ define([
             endpoint: null,
             dropzones: null,
             auto: true,
-
         };
 
     var Uploader = Class.extend({
         init: function(el, options) {
-
             this.$el = $(el);
             this.options = $.extend({}, DEFAULTS, options);
 
             this.$drop = this.$el.find('.drop-pane');
             this.$btn = this.$drop.find('.btn-file');
-            this.$input = this.$drop.find('input:file');
 
             this.$progress = this.$el.find('.progress-pane');
             this.$progress_bar = this.$progress.find('.progress-bar')
@@ -31,9 +28,9 @@ define([
             this.$uploader = this.$btn.fineUploader({
                 debug: true,
                 multiple: false,
+                uploaderType: 'basic',
                 autoUpload: this.options.auto,
                 button: this.$btn,
-                uploaderType: 'basic',
                 request: {
                     endpoint: this.options.endpoint,
                     inputName: 'file',
@@ -86,7 +83,6 @@ define([
          */
         on_submit: function(ev, id, name) {
             var file;
-            console.log('on submit');
             if (HAS_FILE_API) {
                 file = this.$uploader.fineUploader('getFile', id);
             }
@@ -113,7 +109,7 @@ define([
          */
         on_complete: function(event, id, name, response, xhr) {
             log.debug('on complete', id, name, response, xhr);
-            $(this).trigger('complete', [id, name, response]);
+            $(this).trigger('complete', [name, response]);
         },
 
         /**

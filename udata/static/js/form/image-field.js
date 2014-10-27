@@ -14,11 +14,18 @@ define([
     var HAS_FILE_API = window.File && window.FileReader && window.FileList && window.Blob;
 
     var ImagePicker = Class.extend({
-        init: function(el, btns) {
+        init: function(el, opts) {
             this.$el = $(el);
-            this.$btns = $(btns);
+            this.opts = opts;
+            this.basename = this.$el.data('basename');
 
-            this.$btns.click(this.f('on_click'));
+            this.$btn = this.$el.find('.image-picker-btn');
+            this.$file = this.$el.find('input:file');
+            this.$bbox = this.$el.find('#' + this.basename + '-bbox');
+            this.$filename = this.$el.find('#' + this.basename + '-filename');
+            this.$preview = this.$el.find('.image-picker-preview img');
+
+            this.$btn.click(this.f('on_click'));
             this.endpoint = this.$el.data('endpoint');
             this.sizes = $((this.$el.data('sizes') || '100').toString().split(','))
                 .map(function(idx, value) { return parseInt(value); })
@@ -53,22 +60,18 @@ define([
             this.$btn_submit = this.$modal.find('.btn-submit');
             this.$btn_clear = this.$modal.find('.btn-clear');
 
-            var uploader = new Uploader(this.$modal.find('.uploader'), {
+            this.uploader = new Uploader(this.$modal.find('.uploader'), {
                 endpoint: this.endpoint,
-                auto: false,
+                auto: false
             });
-            this.$uploader = $(uploader);
             this.$cropper = this.$modal.find('.image-cropper-container')
 
-            this.$uploader.on('file-picked', $.proxy(function(ev, file, name) {
-                if (HAS_FILE_API) {
-                    this.crop(URL.createObjectURL(file));
-                } else {
-                    log.error('File APIs not supported');
-                }
-            }, this));
+            $(this.uploader)
+                .on('file-picked', this.f('on_file_picked'))
+                .on('complete', this.f('on_upload_complete'));
 
             this.$btn_clear.click(this.f('clear'));
+            this.$btn_submit.click(this.f('on_submit'));
 
             return false;
         },
@@ -90,17 +93,47 @@ define([
         clear: function() {
             this.$modal.find('.image-cropper-container').addClass('hide');
             this.$modal.find('.uploader').removeClass('hide');
-            this.$uploader[0].clear();
+            this.uploader.clear();
         },
 
-        upload: function() {
-            this
+        on_file_picked: function(ev, file, name) {
+            if (HAS_FILE_API) {
+                this.crop(URL.createObjectURL(file));
+            } else {
+                log.warning('File APIs not supported');
+                this.uploader.upload();
+            }
+        },
+
+        on_upload_complete: function(ev, name, response) {
+            this.filename = response.filename;
+            this.tmp_url = response.url;
+            if (HAS_FILE_API) {
+                this.save();
+            } else {
+                this.crop(response.url);
+            }
+        },
+
+        on_submit: function() {
+            if (HAS_FILE_API) {
+                this.uploader.upload();
+            } else {
+                this.save()
+            }
+        },
+
+        save: function() {
+            this.$modal.modal('hide');
+            this.$bbox.val(this.cropper.get_bbox());
+            this.$filename.val(this.filename);
+            this.$preview.attr('src', this.tmp_url);
         }
 
     });
 
 
-    $('.image-picker').each(function() {
-        new ImagePicker(this, $(this).siblings('.image-picker-btn'));
+    $('.image-picker-field').each(function() {
+        new ImagePicker(this);
     });
 });

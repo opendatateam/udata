@@ -10,7 +10,7 @@ from flask.ext.security import UserMixin, RoleMixin, MongoEngineUserDatastore
 from itsdangerous import JSONWebSignatureSerializer
 
 from udata.models import db, WithMetrics, Follow
-from udata.core.storages import avatars
+from udata.core.storages import avatars, default_image_basename
 
 
 __all__ = ('User', 'Role', 'datastore', 'FollowUser')
@@ -19,7 +19,7 @@ __all__ = ('User', 'Role', 'datastore', 'FollowUser')
 # def populate_slug(user):
 #     return ' '.join([user.first_name, user.last_name])
 
-AVATAR_SIZES = [100, 50, 25]
+AVATAR_SIZES = [100, 32, 25]
 
 
 def upload_avatar_to(user):
@@ -42,7 +42,7 @@ class UserSettings(db.EmbeddedDocument):
     prefered_language = db.StringField()
 
 
-class User(db.Document, WithMetrics,UserMixin):
+class User(db.Document, WithMetrics, UserMixin):
     slug = db.SlugField(max_length=255, required=True, populate_from='fullname')
     email = db.StringField(max_length=255, required=True)
     password = db.StringField()
@@ -53,7 +53,7 @@ class User(db.Document, WithMetrics,UserMixin):
     last_name = db.StringField(max_length=255, required=True)
 
     avatar_url = db.URLField()
-    avatar = db.ImageField(fs=avatars, upload_to=upload_avatar_to)
+    avatar = db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES)
     website = db.URLField()
     about = db.StringField()
 

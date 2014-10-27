@@ -92,17 +92,17 @@ def in_url(*args, **kwargs):
 
 
 @front.app_template_filter()
-def placeholder(url, name):
+def placeholder(url, name='default'):
     return url or url_for('static', filename='img/placeholders/{0}.png'.format(name))
 
 
 @front.app_template_filter()
 @front.app_template_global()
 def avatar_url(obj, size):
-    if hasattr(obj, 'avatar') and obj.avatar.url:
-        return obj.avatar.url
-    elif hasattr(obj, 'logo') and obj.logo.url:
-        return obj.logo.url
+    if hasattr(obj, 'avatar') and obj.avatar:
+        return obj.avatar(size)
+    elif hasattr(obj, 'logo') and obj.logo:
+        return obj.logo(size)
     else:
         return placeholder(None, 'user')
 
@@ -111,7 +111,7 @@ def avatar_url(obj, size):
 @front.app_template_filter()
 def owner_avatar_url(obj, size=32):
     if hasattr(obj, 'organization') and obj.organization:
-        return obj.organization.logo.url
+        return obj.organization.logo(size) if obj.organization.logo else placeholder(None, 'orgnization')
     elif hasattr(obj, 'owner') and obj.owner:
         return avatar_url(obj.owner, size)
     return placeholder(None, 'user')

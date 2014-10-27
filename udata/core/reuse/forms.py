@@ -18,9 +18,9 @@ class ReuseForm(UserModelForm):
         description=_('The details about the reuse (build process, specifics, self-critics...).'))
     type = fields.SelectField(_('Type'), choices=REUSE_TYPES.items())
     url = fields.URLField(_('URL'), [validators.required()])
-    image_url = fields.URLField(_('Image URL'),
-        description=_('The reuse thumbnail'))
-    image = fields.ImageField(_('Image'), sizes=IMAGE_SIZES)
+    # image_url = fields.URLField(_('Image URL'),
+    #     description=_('The reuse thumbnail'))
+    image = fields.ImageField(_('Image'), sizes=IMAGE_SIZES, placeholder='reuse')
     tags = fields.TagField(_('Tags'), description=_('Some taxonomy keywords'))
     datasets = fields.DatasetListField(_('Used datasets'))
     private = fields.BooleanField(_('Private'),

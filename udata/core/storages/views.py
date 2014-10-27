@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
+
 from flask import Blueprint, request, jsonify
 
 from flask.ext.security import login_required
@@ -28,9 +30,13 @@ def upload(name):
     file.seek(0)
     sha1 = utils.sha1(file)
 
+    size = os.path.getsize(storage.path(filename)) if storage.root else None
+
     return jsonify({
         'success': True,
-        'url': storage.url(filename),
+        'url': storage.url(filename, True),
         'filename': filename,
-        'sha1': sha1
+        'sha1': sha1,
+        'size': size,
+        'mime': utils.mime(filename),
     })

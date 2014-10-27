@@ -8,7 +8,10 @@ from wtforms import widgets
 from jinja2 import Markup
 from werkzeug.utils import escape
 
-_ = lambda s: s
+from udata.frontend.helpers import placeholder
+from udata.i18n import gettext as _
+
+# _ = lambda s: s
 
 MIN_TAG_LENGTH = 2
 MAX_TAG_LENGTH = 50
@@ -70,7 +73,7 @@ class DatasetAutocompleter(WidgetHelper, widgets.TextInput):
         if field.data:
             kwargs['data-values'] = json.dumps([{
                 'id': str(dataset.id),
-                'title': dataset.title
+                'title': getattr(dataset, 'title', ''),
             } for dataset in field.data])
         return super(DatasetAutocompleter, self).__call__(field, **kwargs)
 
@@ -83,7 +86,7 @@ class ReuseAutocompleter(WidgetHelper, widgets.TextInput):
         if field.data:
             kwargs['data-values'] = json.dumps([{
                 'id': str(reuse.id),
-                'title': reuse.title
+                'title': getattr(reuse, 'title', ''),
             } for reuse in field.data])
         return super(ReuseAutocompleter, self).__call__(field, **kwargs)
 
@@ -130,9 +133,22 @@ class ImageURL(WidgetHelper, widgets.html5.URLInput):
         return super(ImageURL, self).__call__(field, **kwargs)
 
 
-class ImagePicker(WidgetHelper, widgets.HiddenInput):
-    classes = 'image-picker'
-
+class ImagePicker(object):
     def __call__(self, field, **kwargs):
-        kwargs['data-sizes'] = ','.join(str(s) for s in field.sizes)
-        return super(ImagePicker, self).__call__(field, **kwargs)
+        sizes = ','.join(str(s) for s in field.sizes)
+        default_img = placeholder(None, field.placeholder)
+        html = [
+            '<div class="image-picker-field" data-sizes="{0}" data-basename="{1}" data-endpoint="{2}">'.format(
+                sizes, field.name, field.endpoint
+            ),
+            '<div class="image-picker-preview">',
+            '<img src="{0}" data-placeholder="{1}"/>'.format(field.src or default_img, default_img),
+            '</div>',
+            '<span class="image-picker-btn btn btn-default btn-file">',
+            _('Choose a picture'),
+            field.filename(),
+            field.bbox(),
+            '</span>',
+            '</div>'
+        ]
+        return widgets.HTMLString(''.join(html))

@@ -29,7 +29,7 @@
         <div class="panel panel-default" itemscope itemtype="http://schema.org/Person">
             <div class="panel-body">
                 <div class="text-center">
-                    <img src="{{ user.avatar_url|placeholder('user') }}"
+                    <img src="{{ user.avatar|placeholder('user') }}"
                         alt="{{ user.fullname }}" class="scalable" itemprop="image"/>
                 </div>
                 <h2 itemprop="name">{{ user.fullname }}</h2>
@@ -85,7 +85,7 @@
                 <h4>{{ _('Organizations') }}</h4>
                 {% for org in organizations %}
                 <a href="{{ url_for('organizations.show', org=org) }}">
-                    <img src="{{ org.logo|placeholder('organization') }}"
+                    <img src="{{ org.logo(48)|placeholder('organization') }}"
                         class="avatar" width="48" height="48" />
                 </a>
                 {% endfor %}

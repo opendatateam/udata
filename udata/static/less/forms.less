@@ -204,16 +204,27 @@ form {
 .image-picker {
     color: lighten(@gray, 5%);
 
-    // .dropicon {
-    //     margin-top: 10px;
-    // }
-
     .btn-file {
         color: lighten(@gray, 10%);
     }
 
     .modal-body.over & {
         border: 5px dashed @gray-lighter;
+    }
+}
+
+.image-picker-field {
+    .image-picker-preview {
+        .pull-left();
+        width: 100px;
+        height: 100px;
+
+        margin-right: 10px;
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
     }
 }
 

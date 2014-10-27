@@ -30,7 +30,7 @@ MEMBERSHIP_STATUS = {
     'refused': _('Refused'),
 }
 
-LOGO_SIZES = [100, 50, 25]
+LOGO_SIZES = [100, 60, 25]
 
 
 def upload_logo_to(org):
@@ -99,7 +99,7 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
     description = db.StringField(required=True)
     url = db.StringField()
     image_url = db.StringField()
-    logo = db.ImageField(fs=avatars, basename=default_image_basename)
+    logo = db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=LOGO_SIZES)
 
     members = db.ListField(db.EmbeddedDocumentField(Member))
     teams = db.ListField(db.EmbeddedDocumentField(Team))
