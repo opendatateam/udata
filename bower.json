@@ -43,7 +43,7 @@
     "d3": "~3.4.11",
     "typeahead.js": "~0.10.5",
     "typeahead.js-bootstrap3.less": "~0.2.3",
-    "i18next": "~1.7.3",
+    "i18next": "~1.7.4",
     "jquery.microdata": "http://git.macropus.org/jquery-microdata/jquery.microdata.js",
     "bootstrap-datepicker": "~1.3.0",
     "jquery-sortable": "~0.9.12",
