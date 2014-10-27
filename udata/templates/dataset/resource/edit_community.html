@@ -1,5 +1,7 @@
 {% extends theme('dataset/resource/form.html') %}
 
+{% set upload_endpoint = url_for('datasets.upload_new_community_resource', dataset=dataset) %}
+
 {% block breadcrumb %}
 <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
 <li><a href="{{ dataset.display_url }}">{{ dataset.title|truncate(128) }}</a></li>

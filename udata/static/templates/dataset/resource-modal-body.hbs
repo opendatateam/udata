@@ -7,9 +7,13 @@
   <dt>{{_ 'Format'}}</dt>
   <dd>{{encodingFormat}}</dd>
   {{/if}}
-  {{#if size}}
+  {{#if mimetype}}
+  <dt>{{_ 'MimeType'}}</dt>
+  <dd>{{mimetype}}</dd>
+  {{/if}}
+  {{#if contentSize}}
   <dt>{{_ 'Size'}}</dt>
-  <dd>{{size}}</dd>
+  <dd>{{size contentSize}}</dd>
   {{/if}}
   {{#if dateCreated}}
   <dt>{{_ 'Created on'}}</dt>

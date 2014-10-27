@@ -77,7 +77,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
                 'output': organization.name,
                 'payload': {
                     'id': str(organization.id),
-                    'image_url': organization.logo.url,
+                    'image_url': organization.logo(40),
                     'slug': organization.slug,
                 },
             },

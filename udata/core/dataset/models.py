@@ -42,6 +42,8 @@ RESOURCE_TYPES = OrderedDict([
     ('api', _('API')),
 ])
 
+CHECKSUM_TYPES = ('sha1', 'sha256', 'md5', 'crc')
+
 
 class License(db.Document):
     id = db.StringField(primary_key=True)
@@ -71,6 +73,8 @@ class Resource(db.EmbeddedDocument):
     url = db.StringField()
     checksum = db.StringField()
     format = db.StringField()
+    mime = db.StringField()
+    size = db.IntField()
     owner = db.ReferenceField('User')
 
     created_at = db.DateTimeField(default=datetime.datetime.now, required=True)

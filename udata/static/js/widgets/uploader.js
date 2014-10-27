@@ -12,7 +12,12 @@ define([
             endpoint: null,
             dropzones: null,
             auto: true,
-        };
+        },
+        DEBUG = false;
+
+    //>>excludeStart('production', pragmas.production);
+    DEBUG = true;
+    //>>excludeEnd('production');;
 
     var Uploader = Class.extend({
         init: function(el, options) {
@@ -26,13 +31,13 @@ define([
             this.$progress_bar = this.$progress.find('.progress-bar')
 
             this.$uploader = this.$btn.fineUploader({
-                debug: true,
+                debug: DEBUG,
                 multiple: false,
                 uploaderType: 'basic',
                 autoUpload: this.options.auto,
                 button: this.$btn,
                 request: {
-                    endpoint: this.options.endpoint,
+                    endpoint: this.options.endpoint || this.$el.data('endpoint'),
                     inputName: 'file',
                     customHeaders: {
                         'X-CSRFToken': $('meta[name=csrf-token]').attr('content')
@@ -108,7 +113,6 @@ define([
          * Dispatch a "complete" event on upload complete
          */
         on_complete: function(event, id, name, response, xhr) {
-            log.debug('on complete', id, name, response, xhr);
             $(this).trigger('complete', [name, response]);
         },
 
@@ -150,6 +154,7 @@ define([
         clear: function() {
             this.$progress.addClass('hide');
             this.$drop.removeClass('hide');
+            this.$uploader.fineUploader('clearStoredFiles');
         }
 
     });

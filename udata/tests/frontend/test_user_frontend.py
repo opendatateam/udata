@@ -196,25 +196,3 @@ class UserBlueprintTest(FrontTestCase):
         self.login()
         response = self.get(url_for('users.notifications_settings', user=self.user))
         self.assert200(response)
-
-    def test_upload_avatar(self):
-        user = self.login()
-
-        with open(self.data('image.png')) as img:
-            data = {'file': (img, 'test.png')}
-            response = self.post(url_for('users.upload_avatar'), data)
-        self.assert200(response)
-
-        self.assertTrue(response.json['success'])
-        self.assertIn('filename', response.json)
-        self.assertIn('url', response.json)
-        filename = response.json['filename']
-        # self.assertIn(dataset.slug, filename)
-        # self.assertIn(now.strftime('%Y%m%d-%H%M%S'), filename)
-        self.assertTrue(filename.endswith('.png'))
-
-        self.assertIn('thumbnails', response.json)
-        thumbnails = response.json['thumbnails']
-        self.assertEqual(len(thumbnails), thumbnails)
-        for size in AVATAR_SIZES:
-            self.assertIn(size, thumbnails)

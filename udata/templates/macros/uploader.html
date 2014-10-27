@@ -1,5 +1,5 @@
-{% macro uploader() %}
-<div class="uploader">
+{% macro uploader(endpoint) %}
+<div class="uploader" data-endpoint="{{ endpoint }}">
     <div class="row drop-pane">
         <div class="text-center col-xs-12">
             <span class="fa fa-download fa-4x dropicon"></span>

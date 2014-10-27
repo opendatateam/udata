@@ -52,7 +52,6 @@ define(['jquery', 'bootstrap', 'fineuploader'], function($) {
             });
 
         $removeBtn.click(function() {
-            console.log('should delete file');
             $removeBtn.addClass('hide');
             $this.removeClass('hide');
             $progress.find('.progress-bar').width(0).text('0%');

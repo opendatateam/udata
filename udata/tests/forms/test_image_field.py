@@ -90,9 +90,6 @@ class ImageFieldTest(DBTestMixin, TestCase):
     def test_with_unbound_image(self):
         endpoint = url_for('storage.upload', name=tmp.name)
         doc = self.D()
-        # doc.image.filename = 'image.jpg'
-        # doc.thumbnail.filename = 'thumbnail.png'
-        # doc.save()
         form = self.F(None, doc)
         self.assertEqual(form.image.filename.data, None)
         self.assertEqual(form.image.bbox.data, None)
@@ -127,8 +124,8 @@ class ImageFieldTest(DBTestMixin, TestCase):
     def test_with_image(self):
         endpoint = url_for('storage.upload', name=tmp.name)
         doc = self.D()
-        doc.image.filename = 'image.jpg'
-        doc.thumbnail.filename = 'thumbnail.png'
+        with open(self.data('image.png')) as img:
+            doc.image.save(img, 'image.jpg')
         doc.save()
         form = self.F(None, doc)
         self.assertEqual(form.image.filename.data, 'image.jpg')
@@ -136,7 +133,7 @@ class ImageFieldTest(DBTestMixin, TestCase):
         self.assertEqual(form.image(), ''.join((
             '<div class="image-picker-field" data-sizes="100" data-basename="image" data-endpoint="{0}">'.format(endpoint),
             '<div class="image-picker-preview">',
-            '<img src="{0}" data-placeholder="{1}"/>'.format(doc.image.url, placeholder(None, 'default')),
+            '<img src="{0}" data-placeholder="{1}"/>'.format(doc.image(100), placeholder(None, 'default')),
             '</div>',
             '<span class="image-picker-btn btn btn-default btn-file">',
             'Choose a picture',
@@ -146,39 +143,24 @@ class ImageFieldTest(DBTestMixin, TestCase):
             '</div>',
         )))
 
-        self.assertEqual(form.thumbnail.filename.data, 'thumbnail.png')
-        self.assertEqual(form.thumbnail.bbox.data, None)
+    def test_with_image_and_bbox(self):
+        endpoint = url_for('storage.upload', name=tmp.name)
+        doc = self.D()
+        with open(self.data('image.png')) as img:
+            doc.thumbnail.save(img, 'image.jpg', bbox=[10, 10, 100, 100])
+        doc.save()
+        form = self.F(None, doc)
+        self.assertEqual(form.thumbnail.filename.data, 'image.jpg')
+        self.assertEqual(form.thumbnail.bbox.data, [10, 10, 100, 100])
         self.assertEqual(form.thumbnail(), ''.join((
             '<div class="image-picker-field" data-sizes="16,32" data-basename="thumbnail" data-endpoint="{0}">'.format(endpoint),
             '<div class="image-picker-preview">',
-            '<img src="{0}" data-placeholder="{1}"/>'.format(doc.thumbnail.url, placeholder(None, 'default')),
+            '<img src="{0}" data-placeholder="{1}"/>'.format(doc.thumbnail(100), placeholder(None, 'default')),
             '</div>',
             '<span class="image-picker-btn btn btn-default btn-file">',
             'Choose a picture',
             '<input id="thumbnail-filename" name="thumbnail-filename" type="hidden" value="">',
-            '<input id="thumbnail-bbox" name="thumbnail-bbox" type="hidden" value="">',
-            '</span>',
-            '</div>',
-        )))
-
-    def test_with_image_and_bbox(self):
-        endpoint = url_for('storage.upload', name=tmp.name)
-        doc = self.D()
-        doc.image.filename = 'image.jpg'
-        doc.image.bbox = [10, 10, 100, 100]
-        doc.save()
-        form = self.F(None, doc)
-        self.assertEqual(form.image.filename.data, 'image.jpg')
-        self.assertEqual(form.image.bbox.data, [10, 10, 100, 100])
-        self.assertEqual(form.image(), ''.join((
-            '<div class="image-picker-field" data-sizes="100" data-basename="image" data-endpoint="{0}">'.format(endpoint),
-            '<div class="image-picker-preview">',
-            '<img src="{0}" data-placeholder="{1}"/>'.format(doc.image.url, placeholder(None, 'default')),
-            '</div>',
-            '<span class="image-picker-btn btn btn-default btn-file">',
-            'Choose a picture',
-            '<input id="image-filename" name="image-filename" type="hidden" value="">',
-            '<input id="image-bbox" name="image-bbox" type="hidden" value="10,10,100,100">',
+            '<input id="thumbnail-bbox" name="thumbnail-bbox" type="hidden" value="10,10,100,100">',
             '</span>',
             '</div>',
         )))
@@ -186,7 +168,7 @@ class ImageFieldTest(DBTestMixin, TestCase):
     def test_post_new(self):
         tmp_filename = 'xyz/image.png'
         with open(self.data('image.png')) as img:
-            tmp.save(img, tmp_filename)
+            tmp_filename = tmp.save(img, tmp_filename)
 
         form = self.F(PostData({
             'image-filename': tmp_filename,
@@ -206,7 +188,7 @@ class ImageFieldTest(DBTestMixin, TestCase):
     def test_post_new_with_crop(self):
         tmp_filename = 'xyz/image.png'
         with open(self.data('image.png')) as img:
-            tmp.save(img, tmp_filename)
+            tmp_filename = tmp.save(img, tmp_filename)
 
         form = self.F(PostData({
             'thumbnail-filename': tmp_filename,

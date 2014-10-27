@@ -20,6 +20,9 @@ define([
         $checksum_group = $checksum.closest('.form-group'),
         $format = $form.find('#format-id'),
         $type = $form.find('input[type=radio][name=type]'),
+        $size = $form.find('#size-id'),
+        $mime = $form.find('#mime-id'),
+        $btn_delete = $form.find('.btn-url-delete'),
         selectize = $format[0].selectize,
         active_pane = 'file',
         values = {};
@@ -52,15 +55,29 @@ define([
         selectize.setValue(value);
     }
 
+    function set_pane(value) {
+        clear_upload_fields();
+        restore_values(value);
+        switch(value) {
+            case 'file':
+                show_upload();
+                break;
+            case 'remote':
+                show_remote();
+                break;
+            case 'api':
+                show_api();
+                break;
+        }
+        active_pane = value;
+    }
+
     function clear_upload_fields() {
         store_values();
-        $url.val(function() {
-            return this.defaultValue;
-        });
-
-        $checksum.val(function() {
-            return this.defaultValue;
-        });
+        $url.val(undefined);
+        $checksum.val(undefined);
+        $mime.val(undefined);
+        $size.val(undefined);
 
         selectize.clear();
     }
@@ -69,7 +86,9 @@ define([
         values[active_pane] = {
             url: $url.val(),
             checksum: $checksum.val(),
-            format: selectize.getValue()
+            format: selectize.getValue(),
+            size: $size.val(),
+            mime: $mime.val()
         }
     }
 
@@ -78,6 +97,8 @@ define([
             $url.val(values[type].url);
             $checksum.val(values[type].checksum);
             set_format(values[type].format);
+            $size.val(values[type].size);
+            $mime.val(values[type].mime);
         }
     }
 
@@ -90,10 +111,12 @@ define([
             $('.form-upload').removeClass('hide');
         }
         $url.attr('readonly', 'readonly');
-        $url.parent('.input-group').find('.input-group-btn').removeClass('hide').insertAfter($url);
+        $btn_delete.removeClass('hide').insertAfter($url);
         $url.parent('.input-group').find('.input-group-addon').addClass('hide').insertAfter($url);
         $checksum.attr('readonly', 'readonly');
         $checksum_group.removeClass('hide');
+        $size.attr('readonly', 'readonly').closest('.form-group').removeClass('hide');
+        $mime.attr('readonly', 'readonly').closest('.form-group').removeClass('hide');
         selectize.lock();
     }
 
@@ -102,9 +125,11 @@ define([
         $('.form-upload-fields').removeClass('hide');
         $url.removeAttr('readonly');
         $url.parent('.input-group').find('.input-group-addon').removeClass('hide').insertBefore($url);
-        $url.parent('.input-group').find('.input-group-btn').addClass('hide').insertBefore($url);
+        $btn_delete.addClass('hide').insertBefore($url);
         $checksum.removeAttr('readonly');
         $checksum_group.removeClass('hide');
+        $size.removeAttr('readonly').closest('.form-group').removeClass('hide');
+        $mime.removeAttr('readonly').closest('.form-group').removeClass('hide');
         selectize.unlock();
     }
 
@@ -113,8 +138,10 @@ define([
         $('.form-upload-fields').removeClass('hide');
         $url.removeAttr('readonly');
         $url.parent('.input-group').find('.input-group-addon').removeClass('hide').insertBefore($url);
-        $url.parent('.input-group').find('.input-group-btn').addClass('hide').insertBefore($url);
+        $btn_delete.addClass('hide').insertBefore($url);
         $checksum_group.addClass('hide');
+        $size.closest('.form-group').addClass('hide');
+        $mime.closest('.form-group').addClass('hide');
         selectize.unlock();
     }
 
@@ -123,16 +150,16 @@ define([
         start: function() {
             $('.btn-delete').click(on_delete);
 
-            var uploader = new Uploader('.uploader', {
-                endpoint: 'upload'
-            });
+            var uploader = new Uploader('.uploader');
             $uploader = $(uploader);
 
-            $uploader.on('complete', function(ev, id, name, response) {
-                log.debug('complete', id, name, response);
+            $uploader.on('complete', function(ev, name, response) {
+                log.debug('complete', name, response);
 
                 $url.val(response.url);
                 $checksum.val(response.sha1);
+                $size.val(response.size);
+                $mime.val(response.mime);
 
                 if (!$title.val()) {
                     $title.val(name);
@@ -143,22 +170,18 @@ define([
                 show_upload();
             });
 
-            $type.change(function() {
-                clear_upload_fields();
-                restore_values(this.value);
-                switch(this.value) {
-                    case 'file':
-                        show_upload();
-                        break;
-                    case 'remote':
-                        show_remote();
-                        break;
-                    case 'api':
-                        show_api();
-                        break;
-                }
-                active_pane = this.value;
+            $btn_delete.click(function() {
+                uploader.clear();
+                $('.form-upload-fields').addClass('hide');
+                $('.form-upload').removeClass('hide');
             });
+
+            $type.change(function() {
+                set_pane(this.value);
+            });
+
+            store_values();
+            set_pane($type.filter(':checked').val());
 
             log.debug('Resource form loaded');
         }

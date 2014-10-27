@@ -12,11 +12,11 @@ from flask.ext import fs
 from . import utils
 
 
-blueprint = Blueprint('storage', __name__, url_prefix='/s')
+blueprint = Blueprint('storage', __name__)
 
 
 @login_required
-@blueprint.route('/<name>/', methods=['POST'])
+@blueprint.route('/upload/<name>/', methods=['POST'])
 def upload(name):
     '''Handle upload on POST if authorized.'''
     if not 'file' in request.files:

@@ -97,7 +97,7 @@ class StorageUploadViewTest(StorageTestCase):
         self.assertIn('mime', response.json)
         self.assertIn('size', response.json)
         self.assertIn('sha1', response.json)
-        self.assertEqual(response.json['url'], storages.tmp.url(response.json['filename']))
+        self.assertEqual(response.json['url'], storages.tmp.url(response.json['filename'], external=True))
         self.assertEqual(response.json['mime'], 'text/plain')
 
     def test_upload_resource_bad_request(self):

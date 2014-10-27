@@ -9,6 +9,7 @@ from dateutil.parser import parse
 
 from flask import url_for, request
 from flask.ext.mongoengine.wtf import fields as mefields
+from flask.ext.fs.mongo import ImageReference
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 from wtforms import Form as WTForm, Field, validators, fields
@@ -114,7 +115,6 @@ class BBoxField(fields.HiddenField):
     def process_formdata(self, valuelist):
         if valuelist:
             self.data = [int(float(x)) for x in valuelist[0].split(',')]
-            print 'data', self.data
         else:
             self.data = None
 
@@ -133,7 +133,7 @@ class ImageField(FieldHelper, fields.FormField):
         super(ImageField, self).__init__(ImageForm, label, validators, **kwargs)
 
     def process(self, formdata, data=unset_value):
-        self.src = getattr(data, 'url', None)
+        self.src = data(100) if isinstance(data, ImageReference) else None
         super(ImageField, self).process(formdata, data)
 
     def populate_obj(self, obj, name):
@@ -148,14 +148,6 @@ class ImageField(FieldHelper, fields.FormField):
     @property
     def endpoint(self):
         return url_for('storage.upload', name='tmp')
-
-
-class ImageFieldBak(StringField):
-    widget = widgets.ImagePicker()
-
-    def __init__(self, *args, **kwargs):
-        self.sizes = kwargs.pop('sizes', [100])
-        super(ImageField, self).__init__(*args, **kwargs)
 
 
 class UploadableURLField(URLField):
