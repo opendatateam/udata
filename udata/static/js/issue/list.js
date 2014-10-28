@@ -44,7 +44,9 @@ define([
             $form.validate(forms.rules);
 
             $btns.click(function() {
-                Auth.need_user(i18n._('You need to be logged in to submit a comment.'));
+                if (!Auth.need_user(i18n._('You need to be logged in to submit a comment.'))) {
+                    return false;
+                }
 
                 var $form = $modal.find('form'),
                     close = $(this).hasClass('btn-close');

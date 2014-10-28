@@ -47,7 +47,9 @@ define([
             key = $.trim($row.find('a.key').text()),
             $modal = $('#confirm-delete-modal');
 
-        Auth.need_user(i18n._('You need to be authenticated to edit additional informations'));
+        if (!Auth.need_user(i18n._('You need to be authenticated to edit additional informations'))) {
+            return false;
+        }
 
         $modal = modal({
             title: i18n._('Confirm deletion'),
@@ -97,7 +99,9 @@ define([
                 return;
             }
 
-            Auth.need_user(i18n._('You need to be authenticated to edit additional informations'));
+            if (!Auth.need_user(i18n._('You need to be authenticated to edit additional informations'))) {
+                return false;
+            }
 
             $.post(window.location, data, function(data) {
                 var $row = $(row_tpl(data));

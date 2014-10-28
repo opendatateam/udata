@@ -101,7 +101,9 @@ define([
         $newBtn.click(showForm);
 
         $submitBtn.click(function() {
-            Auth.need_user(i18n._('You need to be logged in to submit a new issue.'));
+            if (!Auth.need_user(i18n._('You need to be logged in to submit a new issue.'))) {
+                return false;
+            }
 
             if ($form.valid()) {
                 var data = {
@@ -140,7 +142,9 @@ define([
         });
 
         $commentBtns.click(function() {
-            Auth.need_user(i18n._('You need to be logged in to submit a comment.'));
+            if (!Auth.need_user(i18n._('You need to be logged in to submit a comment.'))) {
+                return false;
+            }
 
             var $form = $modal.find('.tab-pane.active form'),
                 close = $(this).hasClass('btn-close');

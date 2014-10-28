@@ -19,7 +19,9 @@ define(['jquery', 'auth', 'i18n'], function($, Auth, i18n) {
             following_icon = $this.data('following-icon') || DEFAULTS.following_icon,
             has_text = $.trim($this.text()).length > 0;
 
-        Auth.need_user(i18n._('You need to be logged in to follow.'));
+        if (!Auth.need_user(i18n._('You need to be logged in to follow.'))) {
+            return false;
+        }
 
         if ($this.hasClass('active')) {
             $.ajax({

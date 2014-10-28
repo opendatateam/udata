@@ -18,7 +18,9 @@ define([
             var $this = $(this),
                 api_url = $this.data('api');
 
-            Auth.need_user(i18n._('You need to be logged in to request membership to an organization'));
+            if (!Auth.need_user(i18n._('You need to be logged in to request membership to an organization'))) {
+                return false;
+            }
 
             var $modal = modal({
                 title: i18n._("Membership request"),

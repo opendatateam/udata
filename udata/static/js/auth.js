@@ -55,7 +55,9 @@ define(['jquery', 'notify', 'i18n', 'class'], function($, Notify, i18n, Class) {
         need_user: function(message) {
             if (!this.user) {
                 window.location = this.get_auth_url(message)
+                return false;
             }
+            return true;
         },
 
         /**
