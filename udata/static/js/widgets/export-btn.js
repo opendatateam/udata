@@ -22,7 +22,7 @@ define([
             html: true,
             title: i18n._('Export'),
             container: 'body',
-            trigger: 'click focus',
+            trigger: 'focus',
             content: tpl({
                 formats: formats
             })

@@ -24,6 +24,11 @@ define([
     $(function() {
         // Display tooltips and popovers with markup
         $('[rel=tooltip]').tooltip();
-        $('[rel=popover]').popover();
+        $('[rel=popover]').popover().on('click', function(e) {
+            if ($(this).data('trigger').match(/(click|focus)/)) {
+                e.preventDefault();
+                return true;
+            }
+        });
     });
 });

@@ -16,7 +16,7 @@ define([
             title: i18n._('Share'),
             placement: 'top',
             container: 'body',
-            trigger: 'click focus',
+            trigger: 'focus',
             content: tpl({
                 url: $this.data('share-url'),
                 title: $this.data('share-title')
