@@ -7,10 +7,11 @@ from pkg_resources import resource_stream
 from flask import abort, url_for, redirect, json
 
 from udata.frontend import render
+from udata.models import Dataset, Reuse
 from udata.i18n import I18nBlueprint
 
 
-blueprint = I18nBlueprint('gouvfr', __name__, template_folder='templates')
+blueprint = I18nBlueprint('gouvfr', __name__, template_folder='templates', static_folder='static')
 
 
 @blueprint.route('/dataset/<dataset>/')
@@ -55,3 +56,26 @@ def redevances():
 @blueprint.route('/developer')
 def developer():
     return render('developer.html')
+
+
+DATACONNEXIONS_TAG = 'dataconnexions5'
+
+DATACONNEXIONS_CATEGORIES = {
+    'datadmin': 'Datadmin',
+    'data2b': 'Data-2-B',
+    'data2c': 'Data-2-C',
+    'datautile': 'Data-utile',
+    'datajournalisme': 'Data-journalisme',
+}
+
+
+@blueprint.route('/dataconnexions')
+def dataconnexions():
+    reuses = Reuse.objects(tags=DATACONNEXIONS_TAG)
+
+    categories = [{
+        'tag': tag,
+        'label': label,
+        'reuses': reuses(tags=tag),
+    } for tag, label in DATACONNEXIONS_CATEGORIES.items()]
+    return render('dataconnexions.html', categories=categories)

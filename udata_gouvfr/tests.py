@@ -7,8 +7,11 @@ from flask import url_for
 
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.factories import DatasetFactory, ReuseFactory, OrganizationFactory
+from udata.tests.factories import VisibleReuseFactory
 from udata.tests.frontend import FrontTestCase
 from udata.settings import Testing
+
+from.views import DATACONNEXIONS_CATEGORIES
 
 from udata.ext import cow
 
@@ -194,4 +197,18 @@ class SpecificUrlsTest(FrontTestCase):
 
     def test_developer(self):
         response = self.client.get(url_for('gouvfr.developer'))
+        self.assert200(response)
+
+
+class DataconnexionsTest(FrontTestCase):
+    settings = GouvFrSettings
+
+    def test_render_dataconnexions_without_data(self):
+        response = self.client.get(url_for('gouvfr.dataconnexions'))
+        self.assert200(response)
+
+    def test_render_dataconnexions_with_data(self):
+        for tag in DATACONNEXIONS_CATEGORIES:
+            VisibleReuseFactory(tags=['dataconnexions-5', tag])
+        response = self.client.get(url_for('gouvfr.dataconnexions'))
         self.assert200(response)

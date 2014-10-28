@@ -1,0 +1,125 @@
+{% extends theme("base.html") %}
+
+{% set meta = {
+    'title': 'Dataconnexions',
+    'description': "Le concours Dataconnexion, son réglement et ses candidats",
+    'keywords': [
+        'dataconnexions',
+        'concours',
+        'candidats',
+        'lauréats',
+        'innovation',
+        'data',
+        'territoire',
+        'réutilisation',
+    ],
+} %}
+
+{% set body_class="dataconnexions" %}
+
+{# {% block breadcrumb %}
+    <li class="active">Dataconnexions</li>
+{% endblock %} #}
+
+{% block content %}
+<section class="content">
+    <div class="container">
+        <div class="row">
+            <article class="col-xs-12 col-sm-8 col-md-9">
+                <h1>Le concours Dataconnexions 5</h1>
+
+                <p class="lead">
+                Organisé régulièrement par la mission Etalab, le concours Dataconnexions récompense les réutilisations de données publiques les plus innovantes. Startups, associations, chercheurs, journalistes et porteurs de projets sont encouragés à participer. Sa cinquième édition aura lieu le 5 février 2015 au Sénat.
+                </p>
+
+                <h3>Dataconnexions, un « aspirateur à projets »</h3>
+
+                <p>Le concours Dataconnexions a été lancé par Etalab en 2011 et connaîtra le 5 février 2015 sa 5ème édition. En récompensant les meilleurs projets de réutilisations de données publiques, ce concours vise à illustrer le potentiel économique et social de l’open data.
+                </p>
+
+                <p>Sont encouragés à candidater tant les startups que les associations, chercheurs, où porteurs de projets tant que leurs réutilisations s’appuient à minima sur un jeu de donnée publique.</p>
+
+                <p>Les lauréats bénéficient du label « Dataconnexions » et d’une reconnaissance institutionnelle. La mission Etalab les soutient dans l’avancée de leurs projets et les relaie dans les médias.</p>
+
+                <h3>Dataconnexions, un ancrage territorial</h3>
+
+                <p>Chaque année, de nombreuses candidatures proviennent des territoires français. Pour la 5ème édition, cette coloration locale sera renforcée.</p>
+
+                <p>La mission Etalab s’appuiera sur ses écosystèmes et partenaires en régions afin de faire remonter des projets.
+                A l’invitation de la sénatrice Corine BOUCHOUX, la 5ème édition aura lieu au Sénat et des sénateurs seront associés à la remise de prix.
+                </p>
+
+                <h3>Nouveauté de la 5ème édition : le crowdsourcing des meilleures réutilisations sur data.gouv.fr</h3>
+
+                <p>
+                Cette année, le concours Dataconnexions s’articulera davantage avec le portail
+                <a href="{{ url_for('site.home') }}">www.data.gouv.fr</a>.</p>
+
+                <p>Pour candidater, les porteurs de projet devront poster leurs réutilisations sur le portail national. Le public pourra alors voter pour les réutilisations jugées les plus innovantes qui seront regroupées sur une page dédiée. Les mieux notées seront ensuite présentées à un jury et au public lors de la cérémonie de remise des prix.</p>
+
+                <h3>Calendrier</h3>
+
+                <dl class="dl-horizontal">
+                    <dt>1er octobre 2014 :</dt>
+                    <dd>annonce de la tenue de la 5ème édition du concours Dataconnexions</dd>
+                    <dt>Fin octobre 2014 :</dt>
+                    <dd>ouverture des candidatures</dd>
+                    <dt>Janvier 2015 :</dt>
+                    <dd>fermeture des candidatures</dd>
+                    <dt>5 février 2015 :</dt>
+                    <dd>cérémonie de remise des prix du concours Dataconnexions</dd>
+                </dl>
+            </article>
+
+            <aside class="col-xs-12 col-sm-4 col-md-3">
+                <div class="text-center">
+                    <img src="{{ url_for('gouvfr.static', filename='dataconnexions/logo-couleur.png') }}"
+                        alt="Logo du concours Dataconnexions" class="scalable" />
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<section class="content participants">
+
+    <div class="container">
+
+        <div class="row">
+            <div class="col-xs-12">
+                <ul class="nav nav-pills" data-tabs="tabs">
+                    {% for cat in categories %}
+                    <li {% if loop.first %}class="active"{% endif %}>
+                        <a href="#{{cat.tag}}-tab" data-toggle="tab">{{ cat.label }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="tab-content">
+
+                {% for cat in categories  %}
+                <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{cat.tag}}-tab">
+                    {% if cat.reuses %}
+                    <ul class="card-list">
+                        {% for reuse in cat.reuses %}
+                        <li class="col-md-4 col-sm-6">
+                            {% include theme('reuse/card.html') %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-center lead">Aucune réutilisation dans cette catégorie pour l'instant</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+
+    </div>
+
+</section>
+{% endblock %}

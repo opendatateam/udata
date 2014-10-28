@@ -65,7 +65,7 @@
                     _('Datasets'), url_for('datasets.recent_feed'),
                     _('Reuses'), url_for('reuses.recent_feed'),
                 ) %}
-                <a href="#" title="{{ _('Feeds') }}" rel="popover" class="feed-icon"
+                <a href="#" tabindex="-1" title="{{ _('Feeds') }}" rel="popover" class="feed-icon"
                     data-toggle="popover" data-trigger="focus" data-placement="top"
                     data-html="true" data-content="{{rss_popup|e}}">
                     <span class="fa fa-rss-square"></span>
