@@ -106,8 +106,8 @@
                         <small>
                             <a href="{{ url_for('organizations.show', org=dataset.supplier) }}"
                                 title="{{ dataset.supplier.name }}">
-                                {% if dataset.supplier.image_url %}
-                                <img src="{{ dataset.supplier.image_url }}"
+                                {% if dataset.supplier.logo %}
+                                <img src="{{ dataset.supplier.logo }}"
                                     alt="{{ dataset.supplier.name }}" height="16px"/>
                                 {% endif %}
 
@@ -224,7 +224,7 @@
                         {% endif %}
                         <a href="{{ url_for('organizations.show', org=dataset.organization) }}"
                             title="{{ dataset.organization.name }}">
-                            <img src="{{ dataset.organization.image_url|placeholder('organization') }}"
+                            <img src="{{ dataset.organization.logo|placeholder('organization') }}"
                                 alt="{{ dataset.organization.name }}" class="organization-logo producer" />
                         </a>
                         <div class="caption text-left">
@@ -470,7 +470,7 @@
                         <div id="reuse-{{reuse.id}}" class="thumbnail reuse">
                             <a class="preview" href="{{ url_for('reuses.show', reuse=reuse) }}">
                                 <img class="media-object img-responsive" alt="{{ reuse.title }}"
-                                    src="{{ reuse.image_url|placeholder('reuse') }}">
+                                    src="{{ reuse.image|placeholder('reuse') }}">
                             </a>
                             <div class="caption">
                                 <h4 class="ellipsis-dot">

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-10-01 09:53+0200\n"
+"POT-Creation-Date: 2014-10-28 04:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -137,7 +137,8 @@ msgstr ""
 msgid "Data"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:49 udata_gouvfr/theme/templates/metrics.html:28
+#: udata_gouvfr/theme/theme.py:49 udata_gouvfr/theme/templates/footer.html:66
+#: udata_gouvfr/theme/templates/metrics.html:28
 #: udata_gouvfr/theme/templates/dataset/display.html:464
 msgid "Reuses"
 msgstr ""
@@ -176,7 +177,17 @@ msgstr ""
 msgid "Contact"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/footer.html:70
+#: udata_gouvfr/theme/templates/footer.html:65
+#: udata_gouvfr/theme/templates/metrics.html:23
+#: udata_gouvfr/theme/templates/dataset/display.html:20
+msgid "Datasets"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:68
+msgid "Feeds"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:82
 msgid "Back to top"
 msgstr ""
 
@@ -253,11 +264,6 @@ msgstr ""
 
 #: udata_gouvfr/theme/templates/metrics.html:6
 msgid "metrics"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/metrics.html:23
-#: udata_gouvfr/theme/templates/dataset/display.html:20
-msgid "Datasets"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/metrics.html:33
@@ -427,63 +433,6 @@ msgstr ""
 
 #: udata_gouvfr/theme/templates/dataset/display.html:341
 msgid "Spatial coverage"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:351
-msgid "Metadata quality"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:355
-msgid "Go to the report page"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:358
-msgid "Performance"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:366
-#, python-format
-msgid "%(nb)s warning"
-msgid_plural "%(nb)s warnings"
-msgstr[0] ""
-msgstr[1] ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:374
-msgid "No warning"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:382
-#, python-format
-msgid "%(nb)s error"
-msgid_plural "%(nb)s errors"
-msgstr[0] ""
-msgstr[1] ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:390
-msgid "No error"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:398
-#, python-format
-msgid "%(nb)s critical"
-msgid_plural "%(nb)s criticals"
-msgstr[0] ""
-msgstr[1] ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:406
-msgid "No critical"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:412
-msgid "No report available"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:417
-msgid "Improve quality"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:420
-msgid "Improve"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/dataset/display.html:436

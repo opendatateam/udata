@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-10-01 09:53+0200\n"
+"POT-Creation-Date: 2014-10-28 04:13+0100\n"
 "PO-Revision-Date: 2014-09-19 10:58+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/udata-"
@@ -141,7 +141,8 @@ msgstr ""
 msgid "Data"
 msgstr "Datos"
 
-#: udata_gouvfr/theme/theme.py:49 udata_gouvfr/theme/templates/metrics.html:28
+#: udata_gouvfr/theme/theme.py:49 udata_gouvfr/theme/templates/footer.html:66
+#: udata_gouvfr/theme/templates/metrics.html:28
 #: udata_gouvfr/theme/templates/dataset/display.html:464
 msgid "Reuses"
 msgstr "Reutilizaciones"
@@ -180,7 +181,17 @@ msgstr "Vínculo"
 msgid "Contact"
 msgstr "Contacto"
 
-#: udata_gouvfr/theme/templates/footer.html:70
+#: udata_gouvfr/theme/templates/footer.html:65
+#: udata_gouvfr/theme/templates/metrics.html:23
+#: udata_gouvfr/theme/templates/dataset/display.html:20
+msgid "Datasets"
+msgstr "Conjunto de datos"
+
+#: udata_gouvfr/theme/templates/footer.html:68
+msgid "Feeds"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:82
 msgid "Back to top"
 msgstr "Volver arriba"
 
@@ -258,11 +269,6 @@ msgstr "Métricas del sitio"
 #: udata_gouvfr/theme/templates/metrics.html:6
 msgid "metrics"
 msgstr "métricas"
-
-#: udata_gouvfr/theme/templates/metrics.html:23
-#: udata_gouvfr/theme/templates/dataset/display.html:20
-msgid "Datasets"
-msgstr "Conjunto de datos"
 
 #: udata_gouvfr/theme/templates/metrics.html:33
 #: udata_gouvfr/theme/templates/dataset/display.html:135
@@ -441,63 +447,6 @@ msgstr "Cobertura territorial"
 msgid "Spatial coverage"
 msgstr "Cobertura espacial"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:351
-msgid "Metadata quality"
-msgstr "Calidad de los metadatos"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:355
-msgid "Go to the report page"
-msgstr "Ir a la página de reporte"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:358
-msgid "Performance"
-msgstr "Desempeño"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:366
-#, python-format
-msgid "%(nb)s warning"
-msgid_plural "%(nb)s warnings"
-msgstr[0] "%(nb)s advertencia"
-msgstr[1] "%(nb)s advertencias"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:374
-msgid "No warning"
-msgstr "Ninguna advertencia"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:382
-#, python-format
-msgid "%(nb)s error"
-msgid_plural "%(nb)s errors"
-msgstr[0] "%(nb)s error"
-msgstr[1] "%(nb)s errores"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:390
-msgid "No error"
-msgstr "Ningún error"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:398
-#, python-format
-msgid "%(nb)s critical"
-msgid_plural "%(nb)s criticals"
-msgstr[0] "%(nb)s crítica"
-msgstr[1] "%(nb)s críticas"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:406
-msgid "No critical"
-msgstr "Niguna crítica"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:412
-msgid "No report available"
-msgstr "Ningún reporte diponible"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:417
-msgid "Improve quality"
-msgstr "Mejorar la calidad"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:420
-msgid "Improve"
-msgstr "Mejorar"
-
 #: udata_gouvfr/theme/templates/dataset/display.html:436
 msgid "Community contributions"
 msgstr "Contribuciones de la comunidad"
@@ -605,77 +554,122 @@ msgstr "Usted puede crear una nueva organización si la suya no existe aun. "
 #~ msgstr ""
 
 #~ msgid "%(num)d members"
-#~ msgstr "%(num)d conjuntos de datos"
+#~ msgstr ""
 
 #~ msgid "%(num)d follower"
-#~ msgstr "%(num)d miembro"
+#~ msgstr ""
 
 #~ msgid "%(num)d followers"
-#~ msgstr "%(num)d miembros"
+#~ msgstr ""
 
 #~ msgid "%(num)d reuse"
-#~ msgstr "%(num)d seguidor"
+#~ msgstr ""
 
 #~ msgid "%(num)d reuses"
-#~ msgstr "%(num)d seguidores"
+#~ msgstr "%(num)d conjuntos de datos"
 
 #~ msgid "Recent activities"
-#~ msgstr "%(num)d reutilización"
+#~ msgstr "%(num)d miembro"
 
 #~ msgid "I belong to this organization"
-#~ msgstr "%(num)d reutilizaciones"
+#~ msgstr "%(num)d miembros"
 
 #~ msgid "Join"
-#~ msgstr "Actividades recientes"
+#~ msgstr "%(num)d seguidor"
 
 #~ msgid "Waiting for approval"
-#~ msgstr "Yo hago parte de esta organización"
+#~ msgstr "%(num)d seguidores"
 
 #~ msgid "Pending request"
-#~ msgstr "Unase "
+#~ msgstr "%(num)d reutilización"
 
 #~ msgid "You are an administrator of this organization"
-#~ msgstr "A la espera de aprobación"
+#~ msgstr "%(num)d reutilizaciones"
 
 #~ msgid "Administrator"
-#~ msgstr "Solicitud pendiente"
+#~ msgstr "Actividades recientes"
 
 #~ msgid "You are editor in this organization"
-#~ msgstr "Usted es un administrador de esta organización"
+#~ msgstr "Yo hago parte de esta organización"
 
 #~ msgid "Editor"
-#~ msgstr "Administrador"
+#~ msgstr "Unase "
 
 #~ msgid "You are a member of this organization"
-#~ msgstr "Usted es editor de esta organización"
+#~ msgstr "A la espera de aprobación"
 
 #~ msgid "Member"
-#~ msgstr "Editor"
+#~ msgstr "Solicitud pendiente"
 
 #~ msgid "Supplied datasets"
-#~ msgstr "Usted es un miembro de esta organización"
+#~ msgstr "Usted es un administrador de esta organización"
 
 #~ msgid "Private datasets"
-#~ msgstr "Miembro"
+#~ msgstr "Administrador"
 
 #~ msgid "Private reuses"
-#~ msgstr "Conjuntos de datos suministrados"
+#~ msgstr "Usted es editor de esta organización"
 
 #~ msgid "Members"
-#~ msgstr "Conjuntos de datos privados"
+#~ msgstr "Editor"
 
 #~ msgid "Followers"
-#~ msgstr "Reutilizaciones privadas"
+#~ msgstr "Usted es un miembro de esta organización"
 
 #~ msgid "Activity"
-#~ msgstr "Miembros"
+#~ msgstr "Miembro"
 
 #~ msgid "See the %(nb)s datasets"
-#~ msgstr "Seguidores"
+#~ msgstr "Conjuntos de datos suministrados"
 
 #~ msgid "Download as CSV"
-#~ msgstr "Actividad"
+#~ msgstr "Conjuntos de datos privados"
 
 #~ msgid "See the %(nb)s reuses"
-#~ msgstr "Ver los %(nb)s de conjuntos de datos"
+#~ msgstr "Reutilizaciones privadas"
+
+#~ msgid "Metadata quality"
+#~ msgstr "Miembros"
+
+#~ msgid "Go to the report page"
+#~ msgstr "Seguidores"
+
+#~ msgid "Performance"
+#~ msgstr "Actividad"
+
+#~ msgid "%(nb)s warning"
+#~ msgstr "Calidad de los metadatos"
+
+#~ msgid "%(nb)s warnings"
+#~ msgstr "Ir a la página de reporte"
+
+#~ msgid "No warning"
+#~ msgstr "Desempeño"
+
+#~ msgid "%(nb)s error"
+#~ msgstr "%(nb)s advertencia"
+
+#~ msgid "%(nb)s errors"
+#~ msgstr "%(nb)s advertencias"
+
+#~ msgid "No error"
+#~ msgstr "Ninguna advertencia"
+
+#~ msgid "%(nb)s critical"
+#~ msgstr "%(nb)s error"
+
+#~ msgid "%(nb)s criticals"
+#~ msgstr "%(nb)s errores"
+
+#~ msgid "No critical"
+#~ msgstr "Ningún error"
+
+#~ msgid "No report available"
+#~ msgstr "%(nb)s crítica"
+
+#~ msgid "Improve quality"
+#~ msgstr "%(nb)s críticas"
+
+#~ msgid "Improve"
+#~ msgstr "Niguna crítica"
 
