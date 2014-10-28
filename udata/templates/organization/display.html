@@ -117,7 +117,7 @@
                 {% endfor %}
 
             </ul>
-            {% if reuses.total > reuses|length %}
+            {% if reuses.total and reuses.total > reuses|length %}
             <div class="clearfix"></div>
             <p class="text-center">
                 <a class="btn btn-default"
