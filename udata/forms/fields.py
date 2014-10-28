@@ -28,6 +28,7 @@ from udata.models import db, Organization, SpatialCoverage, Territory, SPATIAL_G
 from udata.core.spatial import LEVELS
 from udata.core.storages import tmp
 from udata.i18n import lazy_gettext as _
+from udata.utils import to_iso_date
 
 
 # _ = lambda s: s
@@ -354,7 +355,7 @@ class DateRangeField(FieldHelper, fields.StringField):
 
     def _value(self):
         if self.data:
-            return '{start:%Y-%m-%d} - {end:%Y-%m-%d}'.format(**self.data._data)
+            return ' - '.join([to_iso_date(self.data.start), to_iso_date(self.data.end)])
         else:
             return ''
 

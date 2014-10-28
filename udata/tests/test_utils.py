@@ -3,9 +3,9 @@ from __future__ import unicode_literals
 
 import unittest
 
-from datetime import date
+from datetime import date, datetime
 
-from udata.utils import get_by, daterange_start, daterange_end, to_bool
+from udata.utils import get_by, daterange_start, daterange_end, to_bool, to_iso, to_iso_date, to_iso_datetime
 
 TEST_LIST = [
     {'name': 'aaa', 'other': 'bbb'},
@@ -97,4 +97,36 @@ class ToBoolTest(unittest.TestCase):
         self.assertEqual(to_bool(10), True)
 
 
+class ToIsoTest(unittest.TestCase):
+    def test_to_iso_date_emtpy(self):
+        self.assertEqual(to_iso_date(None), None)
 
+    def test_to_iso_date_with_datetime(self):
+        self.assertEqual(to_iso_date(datetime(1984, 2, 29, 1, 2, 3)), '1984-02-29')
+
+    def test_to_iso_date_with_date(self):
+        self.assertEqual(to_iso_date(date(1984, 2, 29)), '1984-02-29')
+
+    def test_to_iso_date_before_1900(self):
+        self.assertEqual(to_iso_date(date(1884, 2, 29)), '1884-02-29')
+
+    def test_to_iso_datetime_emtpy(self):
+        self.assertEqual(to_iso_datetime(None), None)
+
+    def test_to_iso_datetime_with_datetime(self):
+        self.assertEqual(to_iso_datetime(datetime(1984, 2, 29, 1, 2, 3)), '1984-02-29T01:02:03')
+
+    def test_to_iso_datetime_with_date(self):
+        self.assertEqual(to_iso_datetime(date(1984, 2, 29)), '1984-02-29T00:00:00')
+
+    def test_to_iso_datetime_before_1900(self):
+        self.assertEqual(to_iso_datetime(date(1884, 2, 29)), '1884-02-29T00:00:00')
+
+    def test_to_iso_emtpy(self):
+        self.assertEqual(to_iso(None), None)
+
+    def test_to_iso_with_datetime(self):
+        self.assertEqual(to_iso(datetime(1984, 2, 29, 1, 2, 3)), '1984-02-29T01:02:03')
+
+    def test_to_iso_with_date(self):
+        self.assertEqual(to_iso(date(1984, 2, 29)), '1984-02-29')

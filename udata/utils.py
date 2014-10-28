@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import re
 
-from datetime import date
+from datetime import date, datetime
 from calendar import monthrange
 from math import ceil
 
@@ -110,6 +110,42 @@ def daterange_end(string):
         return date(year, month, end_of_month)
     else:
         return date(int(parts[0]), 12, 31)
+
+
+def to_iso(dt):
+    '''
+    Format a date or datetime into an ISO-8601 string
+
+    Support dates before 1900.
+    '''
+    if isinstance(dt, datetime):
+        return to_iso_datetime(dt)
+    elif isinstance(dt, date):
+        return to_iso_date(dt)
+
+
+def to_iso_date(dt):
+    '''
+    Format a date or datetime into an ISO-8601 date string.
+
+    Support dates before 1900.
+    '''
+    if dt:
+        return '{dt.year:02d}-{dt.month:02d}-{dt.day:02d}'.format(dt=dt)
+
+
+def to_iso_datetime(dt):
+    '''
+    Format a date or datetime into an ISO-8601 datetime string.
+
+    Time is set to 00:00:00 for dates.
+
+    Support dates before 1900.
+    '''
+    if dt:
+        date_str = to_iso_date(dt)
+        time_str = '{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}'.format(dt=dt) if isinstance(dt, datetime) else '00:00:00'
+        return 'T'.join((date_str, time_str))
 
 
 def to_bool(value):
