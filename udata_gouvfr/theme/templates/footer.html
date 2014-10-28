@@ -44,19 +44,31 @@
             <section class="col-xs-6 col-sm-3 col-md-4 col-lg-4 social">
                 <h5>{{ _('Contact') }}</h5>
                 <a href="https://twitter.com/datagouvfr" title="Twitter">
-                    <span class="fa fa-3x fa-twitter-square"></span>
+                    <span class="fa fa-twitter-square"></span>
                 </a>
                 <a href="https://fb.me/etalab" title="Facebook">
-                    <span class="fa fa-3x fa-facebook-square"></span>
+                    <span class="fa fa-facebook-square"></span>
                 </a>
                 <a href="https://plus.google.com/117902389749487955734" title="Google+">
-                    <span class="fa fa-3x fa-google-plus-square"></span>
+                    <span class="fa fa-google-plus-square"></span>
                 </a>
                 <a href="https://github.com/etalab" title="github">
-                    <span class="fa fa-3x fa-github-square"></span>
+                    <span class="fa fa-github-square"></span>
                 </a>
                 <a href="mailto:info@data.gouv.fr" title="M@il">
-                    <span class="fa fa-3x fa-envelope-square"></span>
+                    <span class="fa fa-envelope-square"></span>
+                </a>
+                {% set rss_popup = ('''
+                    <a title="{0}" href="{1}"><span class="fa fa-rss"></span>{0}</a><br/>
+                    <a title="{2}" href="{3}"><span class="fa fa-rss"></span>{2}</a>
+                '''|string).format(
+                    _('Datasets'), url_for('datasets.recent_feed'),
+                    _('Reuses'), url_for('reuses.recent_feed'),
+                ) %}
+                <a href="#" title="{{ _('Feeds') }}" rel="popover" class="feed-icon"
+                    data-toggle="popover" data-trigger="focus" data-placement="top"
+                    data-html="true" data-content="{{rss_popup|e}}">
+                    <span class="fa fa-rss-square"></span>
                 </a>
             </section>
 

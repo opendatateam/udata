@@ -88,6 +88,28 @@ section.footer {
                 color: white;
             }
         }
+
+        .popover {
+            font-size: @font-size-large;
+            a {
+                color: @gray-darker;
+                @rss-color: darken(orange, 5%);
+
+                &:hover {
+                    color: @gray-dark;
+
+                    .fa-rss {
+                        color: lighten(@rss-color, 5%);
+                    }
+                }
+
+                .fa-rss {
+                    color: @rss-color;
+                    font-size: @font-size-large;
+                    opacity: 1;
+                }
+            }
+        }
     }
 }
 
