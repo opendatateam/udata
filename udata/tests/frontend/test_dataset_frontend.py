@@ -305,10 +305,11 @@ class ResourcesTest(FrontTestCase):
 
         self.assertTrue(response.json['success'])
         self.assertIn('filename', response.json)
-        self.assertIn('url', response.json)
         self.assertIn('sha1', response.json)
+        expected_url = storages.resources.url(response.json['filename'], external=True)
+        self.assertEqual(response.json['url'], expected_url)
         self.assertEqual(response.json['format'], 'tar.gz')
-        # self.assertEqual(response.json['size'], 3)
+        self.assertEqual(response.json['size'], 666)
         filename = response.json['filename']
         self.assertIn(dataset.slug, filename)
         self.assertIn(now.strftime('%Y%m%d-%H%M%S'), filename)
@@ -339,7 +340,7 @@ class ResourcesTest(FrontTestCase):
         self.assertIn('url', response.json)
         self.assertIn('sha1', response.json)
         self.assertEqual(response.json['format'], 'txt')
-        # self.assertEqual(response.json['size'], 3)
+        self.assertEqual(response.json['size'], 666)
         filename = response.json['filename']
         self.assertIn('community', filename)
         self.assertIn(dataset.slug, filename)

@@ -21,6 +21,10 @@
             <meta itemprop="datePublished" content="{{resource.published|isoformat}}" />
             <meta itemprop="contentSize" content="{{resource.size or ''}}" />
             <meta itemprop="mimetype" content="{{resource.mime or ''}}" />
+            {% if resource.checksum %}
+            <meta itemprop="checksum" content="{{resource.checksum.value}}" />
+            <meta itemprop="checksumType" content="{{resource.checksum.type or 'sha1'}}" />
+            {% endif %}
         </a>
     </h4>
     <p class="list-group-item-text ellipsis">

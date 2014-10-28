@@ -15,6 +15,10 @@
   <dt>{{_ 'Size'}}</dt>
   <dd>{{size contentSize}}</dd>
   {{/if}}
+  {{#if checksum}}
+  <dt>{{default checksumType 'sha1'}}</dt>
+  <dd>{{checksum}}</dd>
+  {{/if}}
   {{#if dateCreated}}
   <dt>{{_ 'Created on'}}</dt>
   <dd>{{dt dateCreated}}</dd>

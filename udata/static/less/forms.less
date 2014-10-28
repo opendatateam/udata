@@ -42,6 +42,12 @@
             margin-bottom: 20px !important;
         }
     }
+
+    .locked, .locked.input-active {
+        cursor: not-allowed !important;
+        background-color: #DCDCDC !important;
+        opacity: 1;
+    }
 }
 
 
@@ -76,6 +82,10 @@ form {
         cursor: pointer;
 
         &:before { content: @fa-var-info-circle; }
+    }
+
+    select.btn[disabled], select.btn.readonly {
+        background-color: @input-bg-disabled;
     }
 }
 

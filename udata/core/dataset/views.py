@@ -205,7 +205,7 @@ class UploadNewResource(SingleObject, BaseView):
 
         return jsonify({
             'success': True,
-            'url': storage.url(filename),
+            'url': storage.url(filename, external=True),
             'filename': filename,
             'sha1': sha1,
             'format': extension,

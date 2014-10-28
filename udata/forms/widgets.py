@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import json
 
 from wtforms import widgets
+from wtforms.widgets import HTMLString
 
 from jinja2 import Markup
 from werkzeug.utils import escape
@@ -151,4 +152,4 @@ class ImagePicker(object):
             '</span>',
             '</div>'
         ]
-        return widgets.HTMLString(''.join(html))
+        return HTMLString(''.join(html))

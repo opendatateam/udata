@@ -16,8 +16,9 @@ define([
     var $form = $('form'),
         $title = $form.find('#title-id'),
         $url = $form.find('#url-id'),
-        $checksum = $form.find('#checksum-id'),
-        $checksum_group = $checksum.closest('.form-group'),
+        $checksum = $form.find('#checksum-value-id'),
+        $checksum_group = $form.find('.checksum-group'),
+        $checksum_type = $form.find('#checksum-type-id'),
         $format = $form.find('#format-id'),
         $type = $form.find('input[type=radio][name=type]'),
         $size = $form.find('#size-id'),
@@ -76,6 +77,7 @@ define([
         store_values();
         $url.val(undefined);
         $checksum.val(undefined);
+        $checksum_type.val(undefined)
         $mime.val(undefined);
         $size.val(undefined);
 
@@ -86,6 +88,7 @@ define([
         values[active_pane] = {
             url: $url.val(),
             checksum: $checksum.val(),
+            checksum_type: $checksum_type.val(),
             format: selectize.getValue(),
             size: $size.val(),
             mime: $mime.val()
@@ -96,6 +99,7 @@ define([
         if (type in values) {
             $url.val(values[type].url);
             $checksum.val(values[type].checksum);
+            $checksum_type.val(values[type].checksum_type);
             set_format(values[type].format);
             $size.val(values[type].size);
             $mime.val(values[type].mime);
@@ -114,6 +118,7 @@ define([
         $btn_delete.removeClass('hide').insertAfter($url);
         $url.parent('.input-group').find('.input-group-addon').addClass('hide').insertAfter($url);
         $checksum.attr('readonly', 'readonly');
+        $checksum_type.attr('disabled', 'disabled').addClass('readonly');
         $checksum_group.removeClass('hide');
         $size.attr('readonly', 'readonly').closest('.form-group').removeClass('hide');
         $mime.attr('readonly', 'readonly').closest('.form-group').removeClass('hide');
@@ -127,6 +132,7 @@ define([
         $url.parent('.input-group').find('.input-group-addon').removeClass('hide').insertBefore($url);
         $btn_delete.addClass('hide').insertBefore($url);
         $checksum.removeAttr('readonly');
+        $checksum_type.removeAttr('disabled').removeClass('readonly');;
         $checksum_group.removeClass('hide');
         $size.removeAttr('readonly').closest('.form-group').removeClass('hide');
         $mime.removeAttr('readonly').closest('.form-group').removeClass('hide');
@@ -145,6 +151,10 @@ define([
         selectize.unlock();
     }
 
+    function on_submit() {
+        $checksum_type.removeAttr('disabled');
+    }
+
 
     return {
         start: function() {
@@ -160,6 +170,7 @@ define([
                 $checksum.val(response.sha1);
                 $size.val(response.size);
                 $mime.val(response.mime);
+                $checksum_type.val('sha1');
 
                 if (!$title.val()) {
                     $title.val(name);
@@ -175,6 +186,8 @@ define([
                 $('.form-upload-fields').addClass('hide');
                 $('.form-upload').removeClass('hide');
             });
+
+            $form.submit(on_submit);
 
             $type.change(function() {
                 set_pane(this.value);

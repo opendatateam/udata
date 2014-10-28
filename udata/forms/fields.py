@@ -80,6 +80,10 @@ class IntegerField(FieldHelper, fields.IntegerField):
     pass
 
 
+class FormField(FieldHelper, fields.FormField):
+    pass
+
+
 class BooleanField(FieldHelper, fields.BooleanField):
     def __init__(self, *args, **kwargs):
         self.stacked = kwargs.pop('stacked', False)

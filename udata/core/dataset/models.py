@@ -14,7 +14,7 @@ from udata.i18n import lazy_gettext as _
 
 
 __all__ = (
-    'License', 'Resource', 'Dataset',
+    'License', 'Resource', 'Dataset', 'Checksum',
     'DatasetIssue', 'FollowDataset',
     'UPDATE_FREQUENCIES', 'RESOURCE_TYPES',
 )
@@ -42,7 +42,7 @@ RESOURCE_TYPES = OrderedDict([
     ('api', _('API')),
 ])
 
-CHECKSUM_TYPES = ('sha1', 'sha256', 'md5', 'crc')
+CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
 
 
 class License(db.Document):
@@ -65,13 +65,22 @@ class DatasetQuerySet(db.BaseQuerySet):
         return self(private__ne=True, resources__0__exists=True, deleted=None)
 
 
+class Checksum(db.EmbeddedDocument):
+    type = db.StringField(choices=CHECKSUM_TYPES)
+    value = db.StringField()
+
+    def to_mongo(self, *args, **kwargs):
+        if bool(self.value):
+            return super(Checksum, self).to_mongo()
+
+
 class Resource(db.EmbeddedDocument):
     id = db.AutoUUIDField()
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
     type = db.StringField(choices=RESOURCE_TYPES.keys(), default='file', required=True)
     url = db.StringField()
-    checksum = db.StringField()
+    checksum = db.EmbeddedDocumentField(Checksum)
     format = db.StringField()
     mime = db.StringField()
     size = db.IntField()

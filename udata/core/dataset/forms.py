@@ -6,7 +6,7 @@ from udata.i18n import lazy_gettext as _
 
 from udata.core.storages import resources
 
-from .models import Dataset, Resource, License, UPDATE_FREQUENCIES, RESOURCE_TYPES
+from .models import Dataset, Resource, License, Checksum, UPDATE_FREQUENCIES, RESOURCE_TYPES, CHECKSUM_TYPES
 
 __all__ = ('DatasetForm', 'DatasetCreateForm', 'ResourceForm', 'CommunityResourceForm', 'DatasetExtraForm')
 
@@ -39,6 +39,35 @@ class DatasetFullForm(DatasetForm):
     extras = fields.ExtrasField(extras=Dataset.extras)
 
 
+class ChecksumForm(Form):
+    type = fields.SelectField(choices=zip(CHECKSUM_TYPES, CHECKSUM_TYPES), default='sha1')
+    value = fields.StringField()
+
+
+class ChecksumWidget(object):
+    def __call__(self, field, **kwargs):
+        html = [
+            '<div class="input-group checksum-group">',
+            '<div class="input-group-btn">',
+            field.form.type(class_='btn btn-default'),
+            '</div>',
+            field.value(class_='form-control'),
+            '</div>'
+        ]
+        return widgets.HTMLString(''.join(html))
+
+
+class ChecksumField(fields.FormField):
+    widget = ChecksumWidget()
+
+    def __init__(self, label=None, validators=None, **kwargs):
+        super(ChecksumField, self).__init__(ChecksumForm, label, validators, **kwargs)
+
+    def populate_obj(self, obj, name):
+        self._obj = self._obj or Checksum()
+        super(ChecksumField, self).populate_obj(obj, name)
+
+
 class ResourceForm(ModelForm):
     model_class = Resource
 
@@ -49,7 +78,7 @@ class ResourceForm(ModelForm):
         description=_('Whether the resource is an uploaded file, a remote file or an API'))
     url = fields.UploadableURLField(_('URL'), [validators.required()], storage=resources)
     format = fields.StringField(_('Format'), widget=widgets.FormatAutocompleter())
-    checksum = fields.StringField(_('Checksum'))
+    checksum = ChecksumField(_('Checksum'))
     mime = fields.StringField(_('Mime type'), description=_('The mime type associated to the extension'))
     size = fields.IntegerField(_('Size'), description=_('The file size in octets'))
 
