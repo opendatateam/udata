@@ -79,8 +79,9 @@ class ResourceForm(ModelForm):
     url = fields.UploadableURLField(_('URL'), [validators.required()], storage=resources)
     format = fields.StringField(_('Format'), widget=widgets.FormatAutocompleter())
     checksum = ChecksumField(_('Checksum'))
-    mime = fields.StringField(_('Mime type'), description=_('The mime type associated to the extension'))
-    size = fields.IntegerField(_('Size'), description=_('The file size in octets'))
+    mime = fields.StringField(_('Mime type'),
+        description=_('The mime type associated to the extension. (ex: text/plain)'))
+    size = fields.IntegerField(_('Size'), [validators.optional()], description=_('The file size in bytes'))
 
 
 class CommunityResourceForm(UserModelFormMixin, ResourceForm):
