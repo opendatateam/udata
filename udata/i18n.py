@@ -44,6 +44,11 @@ class PluggableDomain(Domain):
 
             # Load plugins translations
             if isinstance(translations, Translations):
+                # Load core extensions translations
+                from wtforms.i18n import messages_path
+                wtforms_translations = Translations.load(messages_path(), locale, domain='wtforms')
+                translations.merge(wtforms_translations)
+
                 for plugin_name in current_app.config['PLUGINS']:
                     module_name = 'udata.ext.{0}'.format(plugin_name)
                     module = import_module(module_name)
