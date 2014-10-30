@@ -58,7 +58,7 @@ def developer():
     return render('developer.html')
 
 
-DATACONNEXIONS_TAG = 'dataconnexions5'
+DATACONNEXIONS_TAG = 'dataconnexions'
 
 DATACONNEXIONS_CATEGORIES = {
     'datadmin': 'Datadmin',

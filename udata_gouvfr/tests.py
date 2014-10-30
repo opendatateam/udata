@@ -11,7 +11,7 @@ from udata.tests.factories import VisibleReuseFactory
 from udata.tests.frontend import FrontTestCase
 from udata.settings import Testing
 
-from.views import DATACONNEXIONS_CATEGORIES
+from.views import DATACONNEXIONS_CATEGORIES, DATACONNEXIONS_TAG
 
 from udata.ext import cow
 
@@ -209,6 +209,6 @@ class DataconnexionsTest(FrontTestCase):
 
     def test_render_dataconnexions_with_data(self):
         for tag in DATACONNEXIONS_CATEGORIES:
-            VisibleReuseFactory(tags=['dataconnexions-5', tag])
+            VisibleReuseFactory(tags=[DATACONNEXIONS_TAG, tag])
         response = self.client.get(url_for('gouvfr.dataconnexions'))
         self.assert200(response)
