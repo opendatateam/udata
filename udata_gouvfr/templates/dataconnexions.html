@@ -24,25 +24,33 @@
             <article class="col-xs-12 col-sm-8 col-md-9">
                 <h1>Le concours Dataconnexions 5</h1>
 
-                <p>
+                <p class="text-justify">
                 Organisé par la mission <a href="http://www.etalab.gouv.fr">Etalab</a>, le concours Dataconnexions récompense les projets les plus innovants réutilisant des données publiques. Nouveauté de cette cinquième édition, les candidats publient leurs réutilisations de données sur <a href="{{ url_for('site.home') }}">www.data.gouv.fr</a> où le public est invité à voter pour sélectionner les projets finalistes. Parmi ces projets finalistes, le Jury distinguera des projets lauréats, récompensés le 5 février 2015 lors de la cérémonie de remise des prix organisée au Palais du Luxembourg.
                 </p>
 
                 <h3>Pour candidater au concours Dataconnexions 5</h3>
 
-                <p>
+                <p class="text-justify">
                 Les porteurs de projets sont invités à soumettre leurs projets d’application, de service ou de data-visualisation réutilisant au moins un jeu de données publiques du 30 octobre 2014 au 14 janvier 2015 en deux étapes :
                 </p>
 
                 <ul>
-                    <li>Publier la réutilisation de données sur <a href="{{ url_for('site.home') }}">www.data.gouv.fr</a> en ajoutant dans la section «<i>tags</i>» le tag «<i>dataconnexions</i>» et le tag correspondant à la catégorie de prix choisie (<i>data2c</i>, <i>data2b</i>, <i>datautile</i>, <i>datadmin</i>, <i>datajournalisme</i>)</li>
+                    <li>Publier la réutilisation de données sur <a href="{{ url_for('site.home') }}">www.data.gouv.fr</a> en ajoutant dans la section «<i>tags</i>» le tag «<i>dataconnexions</i>» et le tag correspondant à la catégorie de prix choisie ({%- for cat in categories -%}
+                        <a href="#" rel="popover" data-toggle="popover" title="{{cat.label}}"
+                            data-content="{{cat.description}}" data-placement="top" data-trigger="hover">
+                            {{- cat.tag -}}
+                        </a>
+                        {%- if not loop.last -%}, {% endif %}
+                    {%- endfor -%})</li>
                     <li>Remplir le <a href="http://www.etalab.gouv.fr/dataconnexions-5/inscription">formulaire de candidature</a></li>
-                    <li>Une explication pas à pas de ces deux étapes de candidature est disponible dans la <a href="http://www.etalab.gouv.fr/dataconnexions-5/faq">FAQ</a>.</li>
                 </ul>
+
+                <p class="text-justify">Une explication pas à pas de ces deux étapes de candidature est disponible dans la <a href="http://www.etalab.gouv.fr/dataconnexions-5/faq">FAQ</a>.
+                </p>
 
                 <h3>Pour voter pour des projets candidats au concours Dataconnexions 5</h3>
 
-                <p>Les votes du public sont pris en compte du 30 octobre 2014 au 14 janvier 2015 pour déterminer les projets finalistes du concours. Une fois inscrit sur <a href="{{ url_for('site.home') }}">www.data.gouv.fr</a>, le public vote pour ses réutilisations préférées parmi celles postées ci-dessous en ouvrant la page correspondant à chaque réutilisation candidate et en cliquant sur le bouton «<strong><span class="fa fa-2x fa-star-o"></span></strong>».</p>
+                <p class="text-justify">Les votes du public sont pris en compte du 30 octobre 2014 au 14 janvier 2015 pour déterminer les projets finalistes du concours. Une fois inscrit sur <a href="{{ url_for('site.home') }}">www.data.gouv.fr</a>, le public vote pour ses réutilisations préférées parmi celles publiées ci-dessous en ouvrant la page correspondant à chaque réutilisation candidate et en cliquant sur le bouton «<strong><span class="fa fa-2x fa-star-o"></span></strong>».</p>
 
                 <h3>Calendrier</h3>
 
@@ -96,6 +104,7 @@
 
                 {% for cat in categories  %}
                 <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{cat.tag}}-tab">
+                    <p class="col-xs-12"><em>{{ cat.description }}</em></p>
                     {% if cat.reuses %}
                     <ul class="card-list">
                         {% for reuse in cat.reuses %}

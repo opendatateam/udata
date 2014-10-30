@@ -208,7 +208,7 @@ class DataconnexionsTest(FrontTestCase):
         self.assert200(response)
 
     def test_render_dataconnexions_with_data(self):
-        for tag in DATACONNEXIONS_CATEGORIES:
+        for tag, label, description in DATACONNEXIONS_CATEGORIES:
             VisibleReuseFactory(tags=[DATACONNEXIONS_TAG, tag])
         response = self.client.get(url_for('gouvfr.dataconnexions'))
         self.assert200(response)
