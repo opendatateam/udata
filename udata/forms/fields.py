@@ -21,7 +21,7 @@ from shapely.ops import cascaded_union
 
 from . import widgets
 
-from .validators import RequiredIf
+from .validators import RequiredIf, optional
 
 from udata.auth import current_user
 from udata.models import db, Organization, SpatialCoverage, Territory, SPATIAL_GRANULARITIES
@@ -126,7 +126,7 @@ class BBoxField(fields.HiddenField):
 
 class ImageForm(WTForm):
     filename = TmpFilename()
-    bbox = BBoxField()
+    bbox = BBoxField(validators=[optional()])
 
 
 class ImageField(FieldHelper, fields.FormField):
