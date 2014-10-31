@@ -3,14 +3,14 @@ from __future__ import unicode_literals
 
 from celery.utils.log import get_task_logger
 
-from udata.tasks import celery
+from udata.tasks import job
 
 from udata.models import Organization, FollowOrg, Activity, Metrics
 
 log = get_task_logger(__name__)
 
 
-@celery.task(name='purge-organizations')
+@job('purge-organizations')
 def purge_organizations():
     for organization in Organization.objects(deleted__ne=None):
         log.info('Purging organization "{0}"'.format(organization))
@@ -21,4 +21,5 @@ def purge_organizations():
         Activity.objects(organization=organization).delete()
         # Remove metrics
         Metrics.objects(object_id=organization.id).delete()
+        # Remove
         organization.delete()

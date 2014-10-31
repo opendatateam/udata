@@ -79,6 +79,13 @@ define(['jquery'], function($) {
         delete: function(url, data, callback) {
             return call('delete', url, data, callback);
         },
+        refs: function(url, callback) {
+            if (callback) {
+                return call('get', '/references/' + url, null, callback);
+            } else {
+                return call('get', url);
+            }
+        },
         sync: {
             get: function(url, data) {
                 return synchronous_call('get', url, data);

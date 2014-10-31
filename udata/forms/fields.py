@@ -165,12 +165,13 @@ class TextAreaField(FieldHelper, EmptyNone, fields.TextAreaField):
 
 
 class FormField(FieldHelper, fields.FormField):
-    def __init__(self, form_class, **kwargs):
-        def wrapper(**kwargs):
+    def __init__(self, form_class, *args, **kwargs):
+        print 'args, kwargs', args, kwargs
+        def wrapper(*args, **kwargs):
             kwargs['csrf_enabled'] = False
-            return form_class(**kwargs)
+            return form_class(*args, **kwargs)
 
-        super(FormField, self).__init__(wrapper, **kwargs)
+        super(FormField, self).__init__(wrapper, *args, **kwargs)
 
 
 def nullable_text(value):

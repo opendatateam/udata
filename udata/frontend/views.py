@@ -162,7 +162,7 @@ class FormView(Templated, BaseView):
         return context
 
     def get_form(self, data, obj=None):
-        return self.form(data, obj)
+        return self.form(data, obj=obj)
 
     def initialize_form(self, form):
         return form

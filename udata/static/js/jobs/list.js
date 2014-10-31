@@ -77,12 +77,12 @@ define([
                     };
                 }
                 if (job) {
-                    promise = API.put('/api/jobs/'+job.id, data, function(job) {
+                    promise = API.put('/jobs/'+job.id, data, function(job) {
                         $('.jobs-table tr[data-id='+job.id+']').replaceWith(itemTpl(job));
                         Notify.success(i18n._('The job has been updated'), $notifBar);
                     });
                 } else {
-                    promise = API.post('/api/jobs/', data, function(job) {
+                    promise = API.post('/jobs/', data, function(job) {
                         $('.jobs-table tbody').append(itemTpl(job));
                         Notify.success(i18n._('The job has been created'), $notifBar);
                     });
@@ -116,7 +116,7 @@ define([
         $('tr.job').each(function() {
             var task_id = $(this).data('task-id');
             if (task_id) {
-                API.get('/api/tasks/'+task_id, function(data) {
+                API.get('/tasks/'+task_id, function(data) {
                     console.log('Task status', task_id, data);
                 });
             }
@@ -131,7 +131,7 @@ define([
 
     $('.jobs-table').on('click', '.job-edit', function() {
         var job_id = $(this).closest('tr.job').data('id');
-        API.get('/api/jobs/'+job_id, function(job) {
+        API.get('/jobs/'+job_id, function(job) {
             display_modal(job);
         });
         return false;
@@ -151,7 +151,7 @@ define([
             });
 
         $modal.find('.modal-footer .btn-primary').click(function() {
-            API.delete('/api/jobs/'+job_id, function() {
+            API.delete('/jobs/'+job_id, function() {
                 $('.jobs-table tr.job[data-id='+job_id+']').remove();
                 Notify.success(i18n._('Job has been deleted'), $notifBar);
             }).error(function(e) {
@@ -169,7 +169,7 @@ define([
 
     return {
         start: function() {
-            API.get('/api/references/jobs', function(data) {
+            API.refs('jobs', function(data) {
                 schedulables = data;
             });
             poll();

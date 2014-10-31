@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from udata.tests import TestCase, WebTestMixin, SearchTestMixin
 
-from udata import frontend, api
+from udata import frontend, api, admin
 
 
 class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
@@ -12,4 +12,5 @@ class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
         app = super(FrontTestCase, self).create_app()
         api.init_app(app)
         frontend.init_app(app)
+        admin.init_app(app)
         return app

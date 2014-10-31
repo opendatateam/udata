@@ -12,7 +12,7 @@ from flask.ext.restplus import Api, Resource, marshal, fields
 from udata import search
 from udata.i18n import I18nBlueprint
 from udata.auth import current_user, login_user, Permission, RoleNeed
-from udata.frontend import render
+from udata.frontend import render, csrf
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
 
