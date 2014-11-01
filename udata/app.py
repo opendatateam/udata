@@ -59,7 +59,6 @@ class UDataApp(Flask):
         return super(UDataApp, self).handle_http_exception(e)
 
 
-
 class Blueprint(BaseBlueprint):
     '''A blueprint allowing to decorate class too'''
     def route(self, rule, **options):
