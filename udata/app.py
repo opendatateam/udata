@@ -9,7 +9,7 @@ import types
 
 from os.path import abspath, join, dirname, isfile, exists
 
-from flask import Flask, abort, send_from_directory, json, Blueprint as BaseBlueprint
+from flask import Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint
 from flask.ext.cache import Cache
 from speaklater import is_lazy_string
 from werkzeug.contrib.fixers import ProxyFix
@@ -51,6 +51,13 @@ class UDataApp(Flask):
                 if isfile(join(directory, real_filename)):
                     return send_from_directory(directory, real_filename, cache_timeout=cache_timeout)
         abort(404)
+
+    def handle_http_exception(self, e):
+        # Make exception/HTTPError available for context processors
+        if 'error' not in g:
+            g.error = e
+        return super(UDataApp, self).handle_http_exception(e)
+
 
 
 class Blueprint(BaseBlueprint):
