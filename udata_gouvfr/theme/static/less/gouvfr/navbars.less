@@ -14,18 +14,6 @@
     position: absolute;
     min-height: 100%;
     min-width: 100%;
-    // overflow:
-
-
-    // &:before {
-    //     content: url('../img/datawatch-bulles.png');
-    //     position: absolute;
-    //     // top
-
-    //     // background-image: url('../img/datawatch-bulles.png');
-    //     // background-size: cover;
-
-    // }
 }
 
 @topic-png:  '../img/arcs.png';
@@ -175,11 +163,6 @@
         }
     }
 
-    .navbar-form {
-        margin: 0px;
-        padding: 0;
-    }
-
     .subnav-collapse { // Copied from bootstrap navbar-collapse
         max-height: 340px;
         overflow-x: visible;
@@ -189,6 +172,7 @@
 
         &.in {
             overflow-y: auto;
+            visibility: visible;
         }
 
         @media (min-width: @grid-float-breakpoint) {
@@ -200,10 +184,12 @@
                 height: auto !important;
                 padding-bottom: 0; // Override default setting
                 overflow: visible !important;
+                visibility: visible;
             }
 
             &.in {
                 overflow-y: visible;
+                visibility: visible;
             }
 
             // Account for first and last children spacing
@@ -238,9 +224,9 @@
             color: @gray-light !important;
         }
 
-        & > * {
-            width: 100%;
-        }
+        // & > * {
+        //     width: 100%;
+        // }
     }
 
 
@@ -265,12 +251,17 @@
             border-radius: 0;
         }
 
-        .input-group-btn .btn {
-            background-color: @bg-light;
-            border-radius: 0px;
-            color: #999;
-            border: 1px solid white;
+        .input-group-btn  {
+            width: none;
+
+            .btn {
+                background-color: @bg-light;
+                border-radius: 0px;
+                color: #999;
+                border: 1px solid white;
+            }
         }
+
     }
 
     /**
@@ -283,6 +274,16 @@
 
 .input-group.collapse {
     display: none;
+
+    &.in {
+        display: block;
+        visibility: visible;
+    }
+
+    @media (min-width: @grid-float-breakpoint) {
+        display: block;
+        visibility: visible;
+    }
 }
 
 .nav-pills {
@@ -384,7 +385,6 @@
         }
     }
 
-
 }
 
 
@@ -445,10 +445,12 @@
         &.sidebg-collapse { // Copied from bootstrap navbar-collapse
             &.in {
                 display: block;
+                visibility: visible;
             }
 
             @media (min-width: @grid-float-breakpoint) {
                 display: block;
+                visibility: visible;
             }
         }
     }
@@ -511,10 +513,11 @@
     @media(max-width: @grid-float-breakpoint) {
         margin-top: 1px;
     }
+
+
 }
 
 .search_bar {
-    padding-left: 0px;
     margin-bottom: 0px;
     margin-top: 34px;
 
@@ -569,12 +572,8 @@
     .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12,
     .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6,
     .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12 {
-        padding-left: 0px;
-        padding-right: 15px;
-
-        @media (max-width: @grid-float-breakpoint) {
-            padding-right: 0;
-        }
+        padding-left: 8px;
+        padding-right: 8px;
     }
 }
 

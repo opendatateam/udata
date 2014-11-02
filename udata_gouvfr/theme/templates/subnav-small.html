@@ -2,10 +2,11 @@
     <div class="container">
         <div class="cover-marianne"></div>
 
-        <div class="search_bar">
+        <div class="search_bar row">
 
-            <form class="navbar-form" role="search" action="{{ url_for('front.search') }}">
-                <div class="form-group col-sm-4 col-md-6 col-lg-6 col-xs-12">
+            <form role="search" action="{{ url_for('front.search') }}"
+                class="col-sm-4 col-md-6 col-lg-6 col-xs-12">
+                <div class="form-group">
                     <div class="input-group">
                         <div class="input-group-btn">
                             <button class="btn" type="submit"><i class="fa fa-search"></i></button>
