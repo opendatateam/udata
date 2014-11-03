@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import hashlib
 import re
 
 from datetime import date, datetime
@@ -165,3 +166,8 @@ def to_bool(value):
         return value > 0
     else:
         return False
+
+
+def hash_url(url):
+    '''Hash an URL to make it indexable'''
+    return hashlib.sha1(url).hexdigest() if url else None

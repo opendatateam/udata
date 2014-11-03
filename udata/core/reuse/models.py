@@ -10,6 +10,7 @@ from mongoengine.signals import pre_save, post_save
 from udata.core.storages import images, default_image_basename
 from udata.i18n import lazy_gettext as _
 from udata.models import db, WithMetrics, Issue, Follow
+from udata.utils import hash_url
 
 __all__ = ('Reuse', 'REUSE_TYPES', 'ReuseIssue', 'FollowReuse')
 
@@ -75,13 +76,7 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     on_delete = Signal()
 
     @classmethod
-    def hash_url(cls, url):
-        return hashlib.sha1(url).hexdigest()
-
-    @classmethod
     def pre_save(cls, sender, document, **kwargs):
-        # auto populate url_sha1 from url
-        document.urlhash = cls.hash_url(document.url)
         # Emit before_save
         cls.before_save.send(document)
 
@@ -100,6 +95,12 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     @property
     def type_label(self):
         return REUSE_TYPES[self.type]
+
+    def clean(self):
+        '''Auto populate urlhash from url'''
+        if not self.urlhash or 'url' in self._get_changed_fields():
+            self.urlhash = hash_url(self.url)
+        super(Reuse, self).clean()
 
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)

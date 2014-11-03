@@ -11,6 +11,7 @@ from mongoengine.signals import pre_save, post_save
 
 from udata.models import db, WithMetrics, Issue, Follow, SpatialCoverage
 from udata.i18n import lazy_gettext as _
+from udata.utils import hash_url
 
 
 __all__ = (
@@ -74,12 +75,13 @@ class Checksum(db.EmbeddedDocument):
             return super(Checksum, self).to_mongo()
 
 
-class Resource(db.EmbeddedDocument):
+class Resource(WithMetrics, db.EmbeddedDocument):
     id = db.AutoUUIDField()
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
     type = db.StringField(choices=RESOURCE_TYPES.keys(), default='file', required=True)
     url = db.StringField()
+    urlhash = db.StringField()
     checksum = db.EmbeddedDocumentField(Checksum)
     format = db.StringField()
     mime = db.StringField()
@@ -93,6 +95,11 @@ class Resource(db.EmbeddedDocument):
 
     on_added = Signal()
     on_deleted = Signal()
+
+    def clean(self):
+        super(Resource, self).clean()
+        if not self.urlhash or 'url' in self._get_changed_fields():
+            self.urlhash = hash_url(self.url)
 
 
 class Dataset(WithMetrics, db.Datetimed, db.Document):
@@ -126,7 +133,14 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
 
     meta = {
         'allow_inheritance': True,
-        'indexes': ['-created_at', 'slug', 'organization', 'supplier'],
+        'indexes': [
+            '-created_at',
+            'slug',
+            'organization',
+            'supplier',
+            'resources.id',
+            'resources.urlhash',
+        ],
         'ordering': ['-created_at'],
         'queryset_class': DatasetQuerySet,
     }
