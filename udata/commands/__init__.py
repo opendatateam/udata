@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 import logging
+import os
+import sys
 
 from os.path import join, dirname, splitext, basename
 from glob import iglob
@@ -59,6 +61,7 @@ def register_commands(manager):
 def run_manager(config='udata.settings.Defaults'):
     app = create_app(config)
     app = standalone(app)
+    set_logging(app)
     manager.app = app
     register_commands(manager)
     manager.run()
@@ -66,3 +69,92 @@ def run_manager(config='udata.settings.Defaults'):
 
 def console_script():
     run_manager()
+
+
+def set_logging(app):
+    if (os.isatty(sys.stdout.fileno()) and not sys.platform.startswith('win')):
+        fmt = ANSIFormatter()
+    else:
+        fmt = TextFormatter()
+
+    log_level = logging.DEBUG if app.debug else logging.INFO
+
+    handler = logging.StreamHandler(stream=sys.stdout)
+    handler.setLevel(log_level)
+    handler.setFormatter(fmt)
+
+    app.logger.setLevel(log_level)
+    app.logger.addHandler(handler)
+
+    for name in app.config['PLUGINS']:
+        logger = logging.getLogger('udata_{0}'.format(name))
+        logger.setLevel(log_level)
+        logger.addHandler(handler)
+
+    return app
+
+
+class BaseFormatter(logging.Formatter):
+    '''
+    Common console formatting behavior
+    '''
+    def __init__(self, fmt=None, datefmt=None):
+        FORMAT = '%(prefix)s %(message)s'
+        super(BaseFormatter, self).__init__(fmt=FORMAT, datefmt=datefmt)
+
+    def format(self, record):
+        '''Customize the line prefix and indent multiline logs'''
+        record.__dict__['prefix'] = self._prefix(record.levelname)
+        record.msg = record.msg.replace('\n', '\n  | ')
+        return super(BaseFormatter, self).format(record)
+
+    def formatException(self, ei):
+        '''Indent traceback info for better readability'''
+        out = super(BaseFormatter, self).formatException(ei)
+        out = str('\n').join(str('  | ') + line for line in out.splitlines())
+        return out
+
+    def _prefix(self, name):
+        '''NOOP: overridden by subclasses'''
+        return name
+
+
+class ANSIFormatter(BaseFormatter):
+    '''
+    A log formatter that use ANSI colors.
+    '''
+    ANSI_CODES = {
+        'red': '\033[1;31m',
+        'yellow': '\033[1;33m',
+        'cyan': '\033[1;36m',
+        'white': '\033[1;37m',
+        'bgred': '\033[1;41m',
+        'bggrey': '\033[1;100m',
+        'reset': '\033[0;m'}
+
+    LEVEL_COLORS = {
+        'INFO': 'cyan',
+        'WARNING': 'yellow',
+        'ERROR': 'red',
+        'CRITICAL': 'bgred',
+        'DEBUG': 'bggrey'}
+
+    def _prefix(self, name):
+        color = self.ANSI_CODES[self.LEVEL_COLORS.get(name, 'white')]
+        if name == 'INFO':
+            fmt = '{0}->{2}'
+        else:
+            fmt = '{0}{1}{2}:'
+        return fmt.format(color, name, self.ANSI_CODES['reset'])
+
+
+class TextFormatter(BaseFormatter):
+    '''
+    A simple text-only formatter
+    '''
+
+    def _prefix(self, name):
+        if name == 'INFO':
+            return '->'
+        else:
+            return name + ':'
