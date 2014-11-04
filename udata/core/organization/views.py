@@ -95,8 +95,8 @@ class OrganizationDetailView(OrgView, DetailView):
         })
         if can_edit:
             context.update({
-                'private_reuses': list(Reuse.objects(organization=self.object, private=True)),
-                'private_datasets': list(Dataset.objects(organization=self.object, private=True)),
+                'private_reuses': list(Reuse.objects(organization=self.object).hidden()),
+                'private_datasets': list(Dataset.objects(organization=self.object).hidden()),
             })
 
         return context

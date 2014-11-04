@@ -34,6 +34,9 @@ class ReuseQuerySet(db.BaseQuerySet):
     def visible(self):
         return self(private__ne=True, datasets__0__exists=True, deleted=None)
 
+    def hidden(self):
+        return self(db.Q(private=True) | db.Q(datasets__0__exists=False) | db.Q(deleted__ne=None))
+
 
 class Reuse(db.Datetimed, WithMetrics, db.Document):
     title = db.StringField(max_length=255, required=True)

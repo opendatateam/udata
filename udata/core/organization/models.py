@@ -92,6 +92,9 @@ class OrganizationQuerySet(db.BaseQuerySet):
     def visible(self):
         return self(deleted=None)
 
+    def hidden(self):
+        return self(deleted__ne=None)
+
 
 class Organization(WithMetrics, db.Datetimed, db.Document):
     name = db.StringField(max_length=255, required=True)

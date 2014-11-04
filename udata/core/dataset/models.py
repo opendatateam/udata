@@ -65,6 +65,9 @@ class DatasetQuerySet(db.BaseQuerySet):
     def visible(self):
         return self(private__ne=True, resources__0__exists=True, deleted=None)
 
+    def hidden(self):
+        return self(db.Q(private=True) | db.Q(resources__0__exists=False) | db.Q(deleted__ne=None))
+
 
 class Checksum(db.EmbeddedDocument):
     type = db.StringField(choices=CHECKSUM_TYPES)
