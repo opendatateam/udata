@@ -12,7 +12,7 @@
     <div class="card side-card text-center col-sm-4 col-md-3 col-lg-2">
         <a href="{{ url_for('users.show', user=user) }}"
             title="{{ user.fullname }}">
-            <img src="{{ user.avatar_url|placeholder('user') }}"
+            <img src="{{ user.avatar(150)|placeholder('user') }}"
                 alt="{{ user.fullname }}" class="scalable" itemprop="image"/>
         </a>
         <h3>{{ user.fullname }}</h3>

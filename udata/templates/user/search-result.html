@@ -2,7 +2,7 @@
     <a href="{{ url_for('users.show', user=user) }}" title="{{ user.fullname }}">
         <div class="result-logo pull-left">
             <img alt="{{ user.fullname }}"
-                src="{{ user.avatar_url|placeholder('user') }}">
+                src="{{ user.avatar(70)|placeholder('user') }}">
         </div>
         <div class="result-body ellipsis-dot">
             <h4 class="result-title">{{ user.fullname }}</h4>
