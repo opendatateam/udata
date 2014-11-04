@@ -23,11 +23,11 @@ def archive_metric(metric):
 
 
 @job('bump-metrics')
-def bump_metrics():
+def bump_metrics(self):
     from .models import Metrics
     today = date.today().isoformat()
     yesterday = (date.today() - timedelta(1)).isoformat()
-    log.info('Bumping metrics from to %s to %s', yesterday, today)
+    self.log.info('Bumping metrics from to %s to %s', yesterday, today)
     script = '''
     function() {
         var processed = 0;

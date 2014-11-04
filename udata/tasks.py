@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import logging
 
 from celery import Celery, Task
+from celery.utils.log import get_task_logger
 from celerybeatmongo.schedulers import MongoScheduler
 
 from udata.models import db
@@ -21,6 +22,14 @@ class ContextTask(Task):
             return super(ContextTask, self).__call__(*args, **kwargs)
 
 
+class JobTask(ContextTask):
+    abstract = True
+
+    @property
+    def log(self):
+        return get_task_logger(self.name)
+
+
 class Scheduler(MongoScheduler):
     def apply_async(self, entry, **kwargs):
         '''A MongoScheduler storing the last task_id'''
@@ -34,20 +43,25 @@ celery = Celery(task_cls=ContextTask)
 
 def job(name, **kwargs):
     '''A shortcut decorator for declaring jobs'''
-    return celery.task(name=name, schedulable=True, **kwargs)
+    return celery.task(name=name, schedulable=True, base=JobTask, bind=True, **kwargs)
+
+
+def get_job_logger(name):
+    logger = get_task_logger(name)
+    return logger
 
 
 @job('log-test')
-def helloworld():
-    log.debug('HelloWorld')
-    log.info('HelloWorld')
-    log.warning('HelloWorld')
-    log.error('HelloWorld')
+def helloworld(self):
+    self.log.debug('This is a DEBUG message')
+    self.log.info('This is an INFO message')
+    self.log.warning('This is a WARNING message')
+    self.log.error('This is a ERROR message')
 
 
 @job('error-test')
-def error_test_task():
-    log.info('There should be an error soon')
+def error_test_task(self):
+    self.log.info('There should be an error soon')
     raise Exception('There is an error')
 
 

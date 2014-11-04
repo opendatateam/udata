@@ -36,12 +36,11 @@ class MetricsQuerySet(db.BaseQuerySet):
 class WithMetrics(object):
     metrics = db.DictField()
 
-    def save(self, **kwargs):
+    def clean(self):
         '''Fill metrics with defaults on create'''
         if not self.metrics:
-            for name, spec in metric_catalog.get(self.__class__, {}).items():
-                self.metrics[name] = spec.default
-        return super(WithMetrics, self).save(**kwargs)
+            self.metrics = dict((name, spec.default) for name, spec in metric_catalog.get(self.__class__, {}).items())
+        return super(WithMetrics, self).clean()
 
 
 class Metrics(db.Document):
