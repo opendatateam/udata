@@ -18,8 +18,8 @@ class Topic(db.Document):
     color = db.IntField()
 
     tags = db.ListField(db.StringField())
-    datasets = db.ListField(db.ReferenceField('Dataset'))
-    reuses = db.ListField(db.ReferenceField('Reuse'))
+    datasets = db.ListField(db.ReferenceField('Dataset', reverse_delete_rule=db.PULL))
+    reuses = db.ListField(db.ReferenceField('Reuse', reverse_delete_rule=db.PULL))
 
     owner = db.ReferenceField('User')
     featured = db.BooleanField()
