@@ -7,7 +7,7 @@
     <div class="card-body">
         <h4>
             <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
-                {{ reuse.title|truncate(250) }}
+                {{ reuse.title|truncate(100) }}
             </a>
         </h4>
     </div>
