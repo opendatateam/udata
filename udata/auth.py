@@ -37,7 +37,9 @@ admin_permission = Permission()
 @bp.before_app_request
 def ensure_https_authenticated_users():
     # Force authenticated users to use https
-    if current_app.config.get('USE_SSL', False) and current_user.is_authenticated() and not request.is_secure:
+    if (not current_app.config.get('TESTING', False)
+        and current_app.config.get('USE_SSL', False)
+        and current_user.is_authenticated() and not request.is_secure):
         return redirect(request.url.replace('http://', 'https://'))
 
 
