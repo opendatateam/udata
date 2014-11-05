@@ -29,7 +29,7 @@ HEADER_API_KEY = 'X-API-KEY'
 
 class UDataApi(Api):
     def __init__(self, **kwargs):
-        kwargs['decorators'] = (kwargs.pop('decorators', []) or []) + [self.authentify]
+        kwargs['decorators'] = [self.authentify] + (kwargs.pop('decorators', []) or [])
         super(UDataApi, self).__init__(**kwargs)
         self.authorizations = {'apikey': {'type': 'apiKey', 'passAs': 'header', 'keyname': HEADER_API_KEY}}
 
@@ -82,8 +82,6 @@ class UDataApi(Api):
                     self.abort(401, 'Inactive user')
             else:
                 oauth2.check_credentials()
-            return func(*args, **kwargs)
-
             return func(*args, **kwargs)
         return wrapper
 

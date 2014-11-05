@@ -166,10 +166,8 @@ class APIAuthTest(APITestCase):
         })
 
         self.assertStatus(response, 302)
-        print response.location
         uri, params = response.location.split('?')
         self.assertEqual(uri, client.default_redirect_uri)
-        raise 'test params'
 
     def test_authorization_accept(self):
         '''Should redirect to the redirect_uri on authorization accepted'''
@@ -187,7 +185,5 @@ class APIAuthTest(APITestCase):
         })
 
         self.assertStatus(response, 302)
-        print response.location
         uri, params = response.location.split('?')
         self.assertEqual(uri, client.default_redirect_uri)
-        raise 'test params'
