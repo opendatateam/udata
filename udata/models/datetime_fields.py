@@ -34,6 +34,13 @@ class DateField(BaseField):
             return None
         return value.isoformat()
 
+    def prepare_query_value(self, op, value):
+        if isinstance(value, date):
+            return value.isoformat()
+        elif isinstance(value, datetime):
+            return value.date.isoformat()
+        return value
+
     def validate(self, value):
         if not isinstance(value, date):
             self.error('DateField only accepts date values')

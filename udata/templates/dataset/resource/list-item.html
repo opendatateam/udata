@@ -21,6 +21,7 @@
             <meta itemprop="datePublished" content="{{resource.published|isoformat}}" />
             <meta itemprop="contentSize" content="{{resource.size or ''}}" />
             <meta itemprop="mimetype" content="{{resource.mime or ''}}" />
+            <meta itemprop="downloads" content="{{resource.metrics.views or ''}}" />
             {% if resource.checksum %}
             <meta itemprop="checksum" content="{{resource.checksum.value}}" />
             <meta itemprop="checksumType" content="{{resource.checksum.type or 'sha1'}}" />

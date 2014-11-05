@@ -109,22 +109,61 @@ class OrganizationDashboardView(OrgView, ActivityView, DetailView):
     def get_context(self):
         context = super(OrganizationDashboardView, self).get_context()
 
-        context['metrics'] = [{
-            # 'title': _('Data'),
+        widgets = []
+
+        if self.organization.metrics.get('datasets', 0) > 0:
+            widgets.append({
+                'title': _('Datasets'),
+                'widgets': [
+                    {
+                        'title': _('Datasets'),
+                        'metric': 'datasets',
+                        'type': 'line',
+                        'endpoint': 'datasets.list',
+                        'args': {'org': self.organization}
+                    },
+                    {
+                        'title': _('Views'),
+                        'metric': 'dataset_views',
+                        'data': 'datasets_nb_uniq_visitors',
+                        'type': 'bar',
+                        'endpoint': 'datasets.list',
+                        'args': {'org': self.organization}
+                    }
+                ]
+            })
+
+        if self.organization.metrics.get('reuses') > 0:
+            widgets.append({
+                'title': _('Reuses'),
+                'widgets': [
+                    {
+                        'title': _('Reuses'),
+                        'metric': 'reuses',
+                        'type': 'line',
+                        'endpoint': 'reuses.list',
+                        'args': {'org': self.organization}
+                    },
+                    {
+                        'title': _('Views'),
+                        'metric': 'reuse_views',
+                        'data': 'reuses_nb_uniq_visitors',
+                        'type': 'bar',
+                        'endpoint': 'reuses.list',
+                        'args': {'org': self.organization}
+                    }
+                ]
+            })
+
+        widgets.append({
+            'title': _('Community'),
             'widgets': [
                 {
-                    'title': _('Datasets'),
-                    'metric': 'datasets',
+                    'title': _('Permitted reuses'),
+                    'metric': 'permitted_reuses',
                     'type': 'line',
-                    'endpoint': 'datasets.list',
-                    'args': {'org': self.organization}
-                },
-                {
-                    'title': _('Reuses'),
-                    'metric': 'reuses',
-                    'type': 'line',
-                    'endpoint': 'reuses.list',
-                    'args': {'org': self.organization}
+                    # 'endpoint': 'reuses.list',
+                    # 'args': {'org': self.organization}
                 },
                 {
                     'title': _('Followers'),
@@ -132,7 +171,9 @@ class OrganizationDashboardView(OrgView, ActivityView, DetailView):
                     'type': 'line',
                 }
             ]
-        }]
+        })
+
+        context['metrics'] = widgets
 
         return context
 

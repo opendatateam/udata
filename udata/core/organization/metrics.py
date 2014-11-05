@@ -38,6 +38,16 @@ class ReusesMetric(Metric):
 ReusesMetric.connect(Reuse.on_create, Reuse.on_update)
 
 
+class PermitedReusesMetric(Metric):
+    model = Organization
+    name = 'permitted_reuses'
+    display_name = _('Permitted reuses')
+
+    def get_value(self):
+        ids = [d.id for d in Dataset.objects(organization=self.target).only('id')]
+        return Reuse.objects(datasets__in=ids).count()
+
+
 class MembersMetric(Metric):
     model = Organization
     name = 'members'

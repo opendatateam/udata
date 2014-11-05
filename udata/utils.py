@@ -170,4 +170,4 @@ def to_bool(value):
 
 def hash_url(url):
     '''Hash an URL to make it indexable'''
-    return hashlib.sha1(url).hexdigest() if url else None
+    return hashlib.sha1(url.encode('utf-8')).hexdigest() if url else None
