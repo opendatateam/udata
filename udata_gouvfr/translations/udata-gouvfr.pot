@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-10-28 04:13+0100\n"
+"POT-Creation-Date: 2014-11-05 02:28+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -152,11 +152,11 @@ msgstr ""
 msgid "Dashboard"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:60
+#: udata_gouvfr/theme/theme.py:61
 msgid "Credits"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:61
+#: udata_gouvfr/theme/theme.py:62
 msgid "Terms of use"
 msgstr ""
 
@@ -165,7 +165,7 @@ msgid "The Open Data"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/footer.html:23
-#: udata_gouvfr/theme/templates/subnav-small.html:23
+#: udata_gouvfr/theme/templates/subnav-small.html:24
 msgid "Topics"
 msgstr ""
 
@@ -281,7 +281,7 @@ msgid "Users"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/subnav-large.html:19
-#: udata_gouvfr/theme/templates/subnav-small.html:14
+#: udata_gouvfr/theme/templates/subnav-small.html:15
 #: udata_gouvfr/theme/templates/topic/subnav.html:19
 msgid "Search"
 msgstr ""
@@ -292,8 +292,8 @@ msgstr ""
 
 #: udata_gouvfr/theme/templates/subnav-large.html:42
 #: udata_gouvfr/theme/templates/subnav-large.html:45
-#: udata_gouvfr/theme/templates/subnav-small.html:40
-#: udata_gouvfr/theme/templates/subnav-small.html:43
+#: udata_gouvfr/theme/templates/subnav-small.html:41
+#: udata_gouvfr/theme/templates/subnav-small.html:44
 #: udata_gouvfr/theme/templates/topic/subnav.html:50
 #: udata_gouvfr/theme/templates/topic/subnav.html:53
 msgid "Contribute !"
