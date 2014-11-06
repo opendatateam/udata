@@ -11,7 +11,7 @@ log = get_task_logger(__name__)
 
 
 @job('purge-reuses')
-def purge_reuses():
+def purge_reuses(self):
     for reuse in Reuse.objects(deleted__ne=None):
         log.info('Purging reuse "{0}"'.format(reuse))
         # Remove followers

@@ -11,7 +11,7 @@ log = get_task_logger(__name__)
 
 
 @job('purge-organizations')
-def purge_organizations():
+def purge_organizations(self):
     for organization in Organization.objects(deleted__ne=None):
         log.info('Purging organization "{0}"'.format(organization))
         # Remove followers

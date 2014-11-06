@@ -11,7 +11,7 @@ log = get_task_logger(__name__)
 
 
 @job('purge-datasets')
-def purge_datasets():
+def purge_datasets(self):
     for dataset in Dataset.objects(deleted__ne=None):
         log.info('Purging dataset "{0}"'.format(dataset))
         # Remove followers
