@@ -51,6 +51,7 @@ def init_app(app):
     import udata.core.post.admin
     import udata.core.issues.admin
     import udata.core.jobs.admin
+    import udata.api.admin
 
     # Import plugins admin views
     for plugin in app.config['PLUGINS']:

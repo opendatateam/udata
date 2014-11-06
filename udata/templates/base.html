@@ -1,75 +1,6 @@
-<!DOCTYPE html>
-<html lang="{{ g.lang_code }}">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends theme('raw.html') %}
 
-    {% set meta = meta or {} %}
-    <meta name="description" content="{{ meta.description or '' }}">
-    <meta name="keywords" content="{{ ', '.join(current_site.keywords + (meta.keywords or [])) }}">
-    {% if config.SITE_AUTHOR %}
-    <meta name="author" content="{{config.SITE_AUTHOR}}">
-    {% endif %}
-    {% if config.SITE_AUTHOR_URL %}
-    <link rel="publisher" href="{{config.SITE_AUTHOR_URL}}"
-    {% if config.SITE_AUTHOR %}title="{{config.SITE_AUTHOR}}"{% endif %}
-    />
-    {% endif %}
-    <meta name="generator" content="uData" />
-
-    <title>{% if meta.title %}{{ meta.title }} - {% endif %}{{ current_site.title }}</title>
-
-    {% set site_css_bundle = site_css_bundle|default('site-css') %}
-    {% assets site_css_bundle %}
-    <link href="{{ ASSET_URL }}" rel="stylesheet">
-    {% endassets %}
-
-    <link rel="theme-static-root" href="{{ theme_static('') }}" />
-    <link rel="static-root" href="{{ static('') }}" />
-    <link rel="api-root" href="{{ url_for('api.root') }}" />
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      {% assets "iecompat" %}
-        <script type="text/javascript" src="{{ ASSET_URL }}"></script>
-      {% endassets %}
-    <![endif]-->
-
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="auth-url" content="{{ url_for('security.login') }}" />
-    {% if current_user.is_authenticated() %}
-    <meta name="current-user" content="{{ current_user.id }}"
-        data-slug="{{ current_user.slug }}"
-        data-first_name="{{ current_user.first_name }}"
-        data-last_name="{{ current_user.last_name }}"
-        data-roles="{{ current_user.roles|join(',') }}"
-    />
-    {% endif %}
-
-    {# ATOM Feeds #}
-    <link href="{{ url_for('datasets.recent_feed') }}"
-        rel="alternate" type="application/atom+xml"
-        title="{{ _('Recent datasets') }}" />
-
-    <link href="{{ url_for('reuses.recent_feed') }}"
-        rel="alternate" type="application/atom+xml"
-        title="{{ _('Recent reuses') }}" />
-
-    {{ i18n_alternate_links() }}
-
-
-
-    {% set base_url = static('js/' if config.ASSETS_DEBUG else 'js-built') %}
-    <script>var require = {baseUrl: "{{ base_url }}"};</script>
-    {% assets "require-js" %}
-    <script type="text/javascript" src="{{ ASSET_URL }}" data-main="app"></script>
-    {% endassets %}
-
-    {% block extra_head %}{% endblock %}
-
-  </head>
-
-  <body class="{{body_class}}">
+{% block body %}
     {% include theme("header.html") with context %}
     {% block subnav %}{% endblock %}
 
@@ -85,14 +16,5 @@
     {% endwith %}
     {% block content %}{% endblock %}
     {% include theme('footer.html') %}
-
-    {% block extra_js %}{% endblock %}
-
     {% block modals %}{% endblock %}
-
-    {% for snippet in footer_snippets %}
-    {{ snippet()|safe }}
-    {% endfor %}
-
-  </body>
-</html>
+{% endblock %}

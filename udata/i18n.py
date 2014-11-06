@@ -146,7 +146,7 @@ class I18nBlueprintSetupState(BlueprintSetupState):
                               view_func, defaults=defaults, redirect_to=self.redirect_to_lang, **options)
 
     def redirect_to_lang(self, adapter, **kwargs):
-        """Redirect non lang-prefixed urls to default language."""
+        '''Redirect non lang-prefixed urls to default language.'''
         path = self.app.config['DEFAULT_LANGUAGE'] + adapter.path_info
         return adapter.make_redirect_url(path, adapter.query_args)
 
