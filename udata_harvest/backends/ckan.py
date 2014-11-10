@@ -11,14 +11,20 @@ from dateutil.parser import parse
 
 from flask.ext.security import current_user
 
-from udata.models import db, Dataset, Resource, Organization, Reuse, User, License, TerritorialCoverage, Member
+from udata.models import db, Dataset, Resource, Organization, Reuse, User, License, Member, SpatialCoverage
 from udata.models import Follow, FollowUser, FollowOrg, FollowDataset
 from udata.utils import get_by, daterange_start, daterange_end
 
 from . import BaseBackend
 
+from udata.ext.gouvfr.models import TerritorialCoverage
+from udata.ext.gouvfr.tasks import territorial_to_spatial
+
 
 log = logging.getLogger(__name__)
+
+# TODO: Transform as a task
+
 
 
 def any_field(data, *args):
@@ -137,14 +143,15 @@ class CkanBackend(BaseBackend):
             dataset.last_modified = parse(details['metadata_modified'])
 
             if any_field(details, 'territorial_coverage', 'territorial_coverage_granularity'):
-                dataset.territorial_coverage = TerritorialCoverage(
+                coverage = TerritorialCoverage(
                     codes=[code.strip() for code in details.get('territorial_coverage', '').split(',') if code.strip()],
                     granularity=self.map('territorial_coverage_granularity', details),
                 )
-                dataset.extras['territorial_coverage'] = TerritorialCoverage(
-                    codes=[code.strip() for code in details.get('territorial_coverage', '').split(',') if code.strip()],
-                    granularity=self.map('territorial_coverage_granularity', details),
-                )
+                dataset.extras['territorial_coverage'] = coverage
+                try:
+                    dataset.spatial = territorial_to_spatial(dataset)
+                except Exception as e:
+                    print 'Error while processing spatial coverage for {0}:'.format(dataset.title), e
 
             if all_field(details, 'temporal_coverage_from', 'temporal_coverage_to'):
                 try:
