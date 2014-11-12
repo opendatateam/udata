@@ -60,8 +60,10 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     featured = db.BooleanField()
     deleted = db.DateTimeField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title or ''
+
+    __unicode__ = __str__
 
     meta = {
         'allow_inheritance': True,
@@ -104,6 +106,11 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
         super(Reuse, self).clean()
+
+    @classmethod
+    def get(cls, id_or_slug):
+        obj = cls.objects(slug=id_or_slug).first()
+        return obj or cls.objects.get_or_404(id=id_or_slug)
 
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)

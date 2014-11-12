@@ -87,8 +87,10 @@ class User(db.Document, WithMetrics, UserMixin):
         'ordering': ['-created_at']
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return self.fullname
+
+    __unicode__ = __str__
 
     @property
     def fullname(self):
@@ -119,6 +121,12 @@ class User(db.Document, WithMetrics, UserMixin):
 
     def clear_api_key(self):
         self.apikey = None
+
+    @classmethod
+    def get(cls, id_or_slug):
+        obj = cls.objects(slug=id_or_slug).first()
+        return obj or cls.objects.get_or_404(id=id_or_slug)
+
 
 datastore = MongoEngineUserDatastore(db, User, Role)
 

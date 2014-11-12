@@ -131,8 +131,10 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
 
     deleted = db.DateTimeField()
 
-    def __unicode__(self):
-        return self.title
+    def __str__(self):
+        return self.title or ''
+
+    __unicode__ = __str__
 
     meta = {
         'allow_inheritance': True,
@@ -182,6 +184,11 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     @property
     def frequency_label(self):
         return UPDATE_FREQUENCIES.get(self.frequency or 'unknown', UPDATE_FREQUENCIES['unknown'])
+
+    @classmethod
+    def get(cls, id_or_slug):
+        obj = cls.objects(slug=id_or_slug).first()
+        return obj or cls.objects.get_or_404(id=id_or_slug)
 
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)

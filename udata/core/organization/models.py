@@ -123,8 +123,10 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
         'queryset_class': OrganizationQuerySet,
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name or ''
+
+    __unicode__ = __str__
 
     before_save = Signal()
     after_save = Signal()
@@ -175,6 +177,11 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
             if request.user == user and request.status == 'pending':
                 return request
         return None
+
+    @classmethod
+    def get(cls, id_or_slug):
+        obj = cls.objects(slug=id_or_slug).first()
+        return obj or cls.objects.get_or_404(id=id_or_slug)
 
 
 pre_save.connect(Organization.pre_save, sender=Organization)
