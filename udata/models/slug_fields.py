@@ -6,7 +6,6 @@ import slugify
 
 from flask.ext.mongoengine import Document
 from mongoengine.fields import StringField
-from mongoengine.signals import pre_save
 
 log = logging.getLogger(__name__)
 
@@ -16,6 +15,8 @@ class SlugField(StringField):
     A field that that produces a slug from the inputs and auto-
     increments the slug if the value already exists.
     '''
+    _auto_gen = True
+
     def __init__(self, populate_from=None, update=False, lower_case=True, separator='-', follow=False, **kwargs):
         kwargs.setdefault('unique', True)
         self.populate_from = populate_from
@@ -24,6 +25,18 @@ class SlugField(StringField):
         self.separator = separator
         self.follow = follow
         super(SlugField, self).__init__(**kwargs)
+
+    def __get__(self, instance, owner):
+        if instance is not None:
+            # Document class being used rather than a document object
+            self.instance = instance
+        return super(SlugField, self).__get__(instance, owner)
+
+    def validate(self, value):
+        populate_slug(self.instance, self)
+
+    def generate(self):
+        return populate_slug(self.instance, self)
 
 
 class SlugFollow(Document):
@@ -61,10 +74,10 @@ def populate_slug(instance, field):
     if not manual and field.populate_from:
         value = getattr(instance, field.populate_from)
         if previous and value == getattr(previous, field.populate_from):
-            return
+            return value
 
     if previous and (getattr(previous, field.db_field) == value or not field.update):
-        return
+        return value
 
     if field.lower_case:
         value = value.lower()
@@ -73,7 +86,7 @@ def populate_slug(instance, field):
     old_slug = getattr(previous, field.db_field, None) # if previous and slug ==
 
     if slug == old_slug:
-        return
+        return slug
 
     # Ensure uniqueness
     if field.unique:
@@ -98,11 +111,4 @@ def populate_slug(instance, field):
         slug_follower.save()
 
     setattr(instance, field.db_field, slug)
-
-
-@pre_save.connect
-def check_slug_fields(sender, document):
-    '''Populate slug fields before saving models'''
-    for name, field in document._fields.items():
-        if isinstance(field, SlugField):
-            populate_slug(document, field)
+    return slug

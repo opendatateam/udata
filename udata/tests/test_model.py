@@ -60,6 +60,12 @@ class AutoUUIDFieldTest(TestCase):
 
 
 class SlugFieldTest(DBTestMixin, TestCase):
+    def test_validate(self):
+        '''SlugField should validate if not set'''
+        obj = SlugTester(title="A Title")
+        self.assertIsNone(obj.slug)
+        obj.validate()
+
     def test_populate(self):
         '''SlugField should populate itself on save if not set'''
         obj = SlugTester(title="A Title")
