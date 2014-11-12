@@ -83,6 +83,23 @@ class TestCase(BaseTestCase):
     def assert204(self, response):
         self.assertStatus(response, 204)
 
+    @contextmanager
+    def assert_emit(self, signal, sender=None):
+        def ensure_emitted(sender, **kwargs):
+            ensure_emitted.emitted = True
+
+        ensure_emitted.emitted = False
+
+        if sender:
+            signal.connect(ensure_emitted, sender=sender)
+        else:
+            signal.connect(ensure_emitted)
+
+        yield
+
+        signal.disconnect(ensure_emitted)
+        self.assertTrue(ensure_emitted.emitted, 'Signal "{0}" should have been emitted'.format(signal.name))
+
 
 class WebTestMixin(object):
     user = None
