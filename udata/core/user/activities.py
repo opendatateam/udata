@@ -52,11 +52,12 @@ class UserFollowedOrganization(FollowActivity, OrgRelatedActivity, Activity):
 
 @on_follow.connect
 def write_activity_on_follow(follow, **kwargs):
-    if isinstance(follow.following, Dataset):
-        write_activity.delay(UserFollowedDataset, current_user._get_current_object(), follow.following)
-    elif isinstance(follow.following, Reuse):
-        write_activity.delay(UserFollowedReuse, current_user._get_current_object(), follow.following)
-    elif isinstance(follow.following, Organization):
-        write_activity.delay(UserFollowedOrganization, current_user._get_current_object(), follow.following)
-    elif isinstance(follow.following, User):
-        write_activity.delay(UserFollowedUser, current_user._get_current_object(), follow.following)
+    if current_user.is_authenticated:
+        if isinstance(follow.following, Dataset):
+            write_activity.delay(UserFollowedDataset, current_user._get_current_object(), follow.following)
+        elif isinstance(follow.following, Reuse):
+            write_activity.delay(UserFollowedReuse, current_user._get_current_object(), follow.following)
+        elif isinstance(follow.following, Organization):
+            write_activity.delay(UserFollowedOrganization, current_user._get_current_object(), follow.following)
+        elif isinstance(follow.following, User):
+            write_activity.delay(UserFollowedUser, current_user._get_current_object(), follow.following)

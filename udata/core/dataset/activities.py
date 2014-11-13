@@ -38,7 +38,7 @@ class UserDeletedDataset(DatasetRelatedActivity, Activity):
 
 @Dataset.on_create.connect
 def on_user_created_dataset(dataset):
-    if not dataset.private:
+    if not dataset.private and current_user.is_authenticated:
         user = current_user._get_current_object()
         organization = dataset.organization
         write_activity.delay(UserCreatedDataset, user, dataset, organization)
@@ -46,7 +46,7 @@ def on_user_created_dataset(dataset):
 
 @Dataset.on_update.connect
 def on_user_updated_dataset(dataset):
-    if not dataset.private:
+    if not dataset.private and current_user.is_authenticated:
         user = current_user._get_current_object()
         organization = dataset.organization
         write_activity.delay(UserUpdatedDataset, user, dataset, organization)
@@ -54,7 +54,7 @@ def on_user_updated_dataset(dataset):
 
 @Dataset.on_delete.connect
 def on_user_deleted_dataset(dataset):
-    if not dataset.private:
+    if not dataset.private and current_user.is_authenticated:
         user = current_user._get_current_object()
         organization = dataset.organization
         write_activity.delay(UserDeletedDataset, user, dataset, organization)
