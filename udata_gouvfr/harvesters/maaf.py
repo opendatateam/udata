@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import os
-import itertools
 import logging
 import re
 
@@ -104,11 +103,10 @@ to_url = wrap_conv(conv.clean_str_to_url(full=True))
 
 
 schema = Schema({
-    '@xsi:noNamespaceSchemaLocation': 'ETALAB_schema_des_meta_donnees.xsd',
     Optional('digest'): All(basestring, Length(min=1)),
     'metadata': {
-        'author': basestring,
-        'author_email': Any(All(basestring, email), None),
+        'author': int,
+        'author_email': Any(All(int, email), None),
         'extras': [{
             'key': basestring,
             'value': basestring
@@ -143,63 +141,20 @@ schema = Schema({
 }, required=True, extra=True)
 
 
-def xml_element_to_python(value):
-    if value is None:
-        return value
-    element = OrderedDict(
-        (u'@' + xml_name_to_python(value.nsmap, attribute_name), attribute_value)
-        for attribute_name, attribute_value in value.attrib.iteritems()
-    )
-    children = list(value)
-    if children:
-        for child in children:
-            if child.tag in (etree.Comment, etree.PI):
-                continue
-            child_tag = xml_name_to_python(child.nsmap, child.tag)
-            if child_tag in element:
-                same_tag_children = element[child_tag]  # either a single child or a list of children
-                if isinstance(same_tag_children, list):
-                    same_tag_children.append(xml_element_to_python(child))
-                else:
-                    element[child_tag] = [
-                        same_tag_children,
-                        xml_element_to_python(child),
-                    ]
-            else:
-                element[child_tag] = xml_element_to_python(child)
-    elif value.text is not None and value.text.strip() and value.tail is not None and value.tail.strip():
-        assert 'text' not in element  # TODO
-        element['^text'] = value.text
-        assert 'tail' not in element  # TODO
-        element['^tail'] = value.tail
-    elif element:
-        if value.text is not None and value.text.strip():
-            assert 'text' not in element  # TODO
-            element['^text'] = value.text
-        if value.tail is not None and value.tail.strip():
-            assert 'tail' not in element  # TODO
-            element['^tail'] = value.tail
-    elif value.text is not None and value.text.strip():
-        element = value.text
-    elif value.tail is not None and value.tail.strip():
-        element = value.tail
-    else:
-        element = None
-    return element
+LIST_KEYS = 'extras', 'resources'
 
 
-def xml_name_to_python(nsmap, value):
-    if value is None:
-        return value
-    match = RE_NAME.match(value)
-    url = match.group('url')
-    for namespace_name, namespace_url in itertools.chain(
-            [('xml', 'http://www.w3.org/XML/1998/namespace')],
-            nsmap.iteritems(),
-            ):
-        if url == namespace_url:
-            return '{}:{}'.format(namespace_name, match.group('name'))
-    return value
+def extract(element):
+    lst = filter(lambda r: isinstance(r[0], basestring), map(dictize, element))
+    for key in LIST_KEYS:
+        values = [v for k, v in filter(lambda r: r[0] == key, lst)]
+        if values:
+            lst = filter(lambda r: r[0] != key, lst) + [(key, values)]
+    return lst
+
+
+def dictize(element):
+    return element.tag, OrderedDict(extract(element)) or element.text
 
 
 @backends.register
@@ -298,24 +253,26 @@ class MaafBackend(backends.BaseBackend):
     def parse_xml(self, xml):
         root = etree.fromstring(xml.encode('utf8'))
         self.xsd.validate(root)
-        dataset_root_element = xml_element_to_python(root)
+        _, tree = dictize(root)
         try:
-            return schema(dataset_root_element)
+            return schema(tree)
         except MultipleInvalid as e:
-            field = '.'.join(str(p) for p in e.path)
-            path = e.path
-            data = dataset_root_element
-            while path:
-                attr = path.pop(0)
+            for error in e.errors:
+                field = '.'.join(str(p) for p in e.path)
+                path = e.path
+                data = tree
+                while path:
+                    attr = path.pop(0)
+                    try:
+                        data = data[attr]
+                    except:
+                        data = None
                 try:
-                    data = data[attr]
+                    data = str(data)
                 except:
-                    data = None
-            try:
-                data = str(data)
-            except Exception as e:
-                pass
-            raise ValueError('Invalid value "{0}" for field {1}'.format(data, field))
+                    pass
+                log.error('[%s] %s: %s', field, str(e), data)
+            raise
 
     @property
     def xsd(self):
