@@ -4,9 +4,8 @@ from __future__ import unicode_literals
 from flask import request, redirect, abort, g
 from flask.views import MethodView
 
-from udata import search, auth
-from udata.frontend import render
-from udata.utils import multi_to_dict, get_by
+from udata import search, auth, theme
+from udata.utils import multi_to_dict
 
 
 class Templated(object):
@@ -21,7 +20,7 @@ class Templated(object):
     def render(self, context=None, **kwargs):
         context = context or self.get_context()
         context.update(kwargs)
-        return render(self.get_template_name(), **context)
+        return theme.render(self.get_template_name(), **context)
 
 
 class BaseView(MethodView):

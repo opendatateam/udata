@@ -6,23 +6,23 @@ import logging
 
 from importlib import import_module
 from os.path import join, dirname, isdir, exists
+from pkg_resources import resource_stream
 
 from flask import current_app, g
 from webassets.filter import get_filter
 from werkzeug.local import LocalProxy
 
-from flask.ext.assets import YAMLLoader, Bundle
+from flask.ext.assets import Bundle, Environment, YAMLLoader
 from flask.ext.themes2 import Themes, Theme, render_theme_template, get_theme, packaged_themes_loader
 
+from udata.app import nav, ROOT_DIR
 from udata.i18n import lazy_gettext as _
-
-from . import assets, nav
-
 
 log = logging.getLogger(__name__)
 
 
 themes = Themes()
+assets = Environment()
 
 
 def get_current_theme():
@@ -185,7 +185,31 @@ def context(name):
 
 
 def init_app(app):
+    assets.init_app(app)
     themes.init_themes(app, app_identifier='udata', loaders=[udata_themes_loader, plugin_themes_loader])
+
+    app.config['STATIC_DIRS'] = app.config.get('STATIC_DIRS', []) + [
+        ('fonts', join(ROOT_DIR, 'static', 'bower', 'bootstrap', 'dist', 'fonts')),
+        ('fonts', join(ROOT_DIR, 'static', 'bower', 'font-awesome', 'fonts')),
+    ]
+
+    app.config['LESS_PATHS'] = app.config.get('LESS_PATHS', []) + [
+        'less',
+        'bower/bootstrap/less',
+        'bower/font-awesome/less',
+        'bower/bootstrap-markdown/less',
+        'bower/selectize/dist/less',
+        'bower/swagger-ui',
+    ]
+
+    # Hook into flask security to user themed auth pages
+    app.config.setdefault('SECURITY_RENDER', 'udata.theme:render')
+
+    # Load bundle from yaml file
+    assets.from_yaml(resource_stream(__name__, 'static/assets.yaml'))
+
+    if app.config['ASSETS_DEBUG']:
+        assets['require-js'].contents += ('js/config.js', 'js/debug.js')
 
     # Load all theme assets
     theme = app.theme_manager.themes[app.config['THEME']]
@@ -198,3 +222,7 @@ def init_app(app):
         bundles = ThemeYAMLLoader(theme).load_bundles()
         for name in bundles:
             assets.register(name, bundles[name])
+
+    @app.context_processor
+    def inject_current_theme():
+        return {'current_theme': current}

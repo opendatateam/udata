@@ -7,8 +7,9 @@ from flask import request, g, jsonify, redirect, url_for
 from flask.ext.security import current_user
 
 from udata import search
+from udata.app import nav
 from udata.forms import OrganizationForm, OrganizationMemberForm, OrganizationExtraForm
-from udata.frontend import nav, csv
+from udata.frontend import csv
 from udata.frontend.views import DetailView, CreateView, EditView, SearchView, BaseView, SingleObject
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import db, Organization, Member, Reuse, Dataset, ORG_ROLES, User, Follow, FollowOrg, Activity, Issue

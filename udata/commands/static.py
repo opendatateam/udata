@@ -17,8 +17,8 @@ from flask.ext.script import prompt_bool
 # from flask.ext.themes2 import get_theme
 from webassets.script import CommandLineEnvironment
 
+from udata import theme
 from udata.commands import manager
-from udata.frontend import assets
 
 log = logging.getLogger(__name__)
 
@@ -35,11 +35,11 @@ def build():
     current_app.config['ASSETS_DEBUG'] = False
     current_app.config['REQUIREJS_RUN_IN_DEBUG'] = True
 
-    cmdenv = CommandLineEnvironment(assets, log)
+    cmdenv = CommandLineEnvironment(theme.assets, log)
     cmdenv.build(production=True)
 
     print('Performing require.js optimization')
-    buildfile = join(assets.directory, 'js', 'app.build.js')
+    buildfile = join(theme.assets.directory, 'js', 'app.build.js')
     # bust = 'pragmas.bust={0}'.format(time.time())
     params = ['r.js', '-o', buildfile]
     subprocess.call(params)
@@ -61,7 +61,7 @@ def collect(path, input):
         shutil.rmtree(path)
 
     print('Copying assets into "{0}"'.format(path))
-    shutil.copytree(assets.directory, path)
+    shutil.copytree(theme.assets.directory, path)
 
     for prefix, source in manager.app.config['STATIC_DIRS']:
         print('Copying %s to %s' % (source, prefix))

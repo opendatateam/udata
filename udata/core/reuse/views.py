@@ -8,8 +8,8 @@ from datetime import datetime
 from flask import abort, request, url_for, redirect, render_template, flash
 from werkzeug.contrib.atom import AtomFeed
 
+from udata.app import nav
 from udata.forms import ReuseForm, ReuseCreateForm, AddDatasetToReuseForm
-from udata.frontend import nav
 from udata.frontend.views import SearchView, DetailView, CreateView, EditView, SingleObject, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Reuse, Issue, FollowReuse, Dataset

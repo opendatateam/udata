@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 
 from flask import g, request
 
-from udata import search
-from udata.frontend import render
+from udata import search, theme
 from udata.i18n import I18nBlueprint
 from udata.models import Topic, Reuse, Dataset
 from udata.utils import multi_to_dict
@@ -40,7 +39,7 @@ def display(topic):
 
     results = search.multiquery(*queries)
 
-    return render('topic/display.html',
+    return theme.render('topic/display.html',
         topic=topic,
         **dict(zip(keys, results))
     )
@@ -51,7 +50,7 @@ def datasets(topic):
     kwargs = multi_to_dict(request.args)
     kwargs.update(topic=topic)
 
-    return render('topic/datasets.html',
+    return theme.render('topic/datasets.html',
         topic=topic,
         datasets=TopicSearchQuery(Dataset, facets=True, **kwargs).execute()
     )
@@ -62,7 +61,7 @@ def reuses(topic):
     kwargs = multi_to_dict(request.args)
     kwargs.update(topic=topic)
 
-    return render('topic/reuses.html',
+    return theme.render('topic/reuses.html',
         topic=topic,
         reuses=TopicSearchQuery(Reuse, facets=True, **kwargs).execute()
     )

@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 
 from flask import request
 
-from udata import search
-from udata.frontend import front, render
+from udata import search, theme
+from udata.frontend import front
 from udata.models import Dataset, Organization, Reuse, User
 from udata.utils import multi_to_dict
 
@@ -19,7 +19,7 @@ def render_search():
         search.SearchQuery(Reuse, **params),
         search.SearchQuery(User, **params),
     )
-    return render('search.html',
+    return theme.render('search.html',
         datasets=datasets,
         organizations=organizations,
         reuses=reuses,

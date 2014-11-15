@@ -5,7 +5,7 @@ import logging
 
 from flask import url_for, g
 
-from udata.frontend import nav
+from udata.app import nav
 from udata.frontend.views import DetailView, EditView, SearchView
 from udata.models import User, Activity, Organization, Dataset, Reuse, Follow
 from udata.i18n import I18nBlueprint, lazy_gettext as _

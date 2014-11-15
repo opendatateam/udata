@@ -9,9 +9,9 @@ from flask.ext.oauthlib.provider import OAuth2Provider
 from werkzeug.security import gen_salt
 from werkzeug.exceptions import Unauthorized
 
+from udata import theme
 from udata.app import Blueprint
 from udata.auth import current_user, login_required, login_user
-from udata.frontend import render
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import db
 from udata.core.storages import images, default_image_basename
@@ -183,7 +183,7 @@ def authorize(*args, **kwargs):
         client_id = kwargs.get('client_id')
         client = OAuth2Client.objects.get(id=ObjectId(client_id))
         kwargs['client'] = client
-        return render('api/oauth_authorize.html', oauth=kwargs)
+        return theme.render('api/oauth_authorize.html', oauth=kwargs)
     elif request.method == 'POST':
         accept = 'accept' in request.form
         decline = 'decline' in request.form
@@ -194,7 +194,7 @@ def authorize(*args, **kwargs):
 
 @i18n.route('/oauth/error')
 def oauth_error():
-    return render('api/oauth_error.html')
+    return theme.render('api/oauth_error.html')
 
 
 def check_credentials():

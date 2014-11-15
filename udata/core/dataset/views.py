@@ -9,9 +9,9 @@ from flask import abort, redirect, request, url_for, g, jsonify, render_template
 from werkzeug.contrib.atom import AtomFeed
 
 from udata import fileutils
+from udata.app import nav
 from udata.auth import login_required
 from udata.forms import DatasetForm, DatasetCreateForm, ResourceForm, CommunityResourceForm, DatasetExtraForm
-from udata.frontend import nav
 from udata.frontend.views import DetailView, CreateView, EditView, NestedEditView, SingleObject, SearchView, BaseView, NestedObject
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Resource, Reuse, Issue, Follow

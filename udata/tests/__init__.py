@@ -17,6 +17,7 @@ from werkzeug.wrappers import Request
 
 from nose.plugins import Plugin
 
+from udata import theme
 from udata.app import create_app
 from udata.models import db
 from udata.search import es
@@ -55,7 +56,7 @@ class TestCase(BaseTestCase):
         app = create_app(self.settings)
         # Override some local config
         app.config['DEBUG_TOOLBAR'] = False
-        app.config['ASSETS_DEBUG'] = True
+        app.config['ASSETS_DEBUG'] = False
         app.config['ASSETS_AUTO_BUILD'] = False
         app.config['ASSETS_VERSIONS'] = False
         app.config['ASSETS_URL_EXPIRE'] = False
@@ -65,6 +66,7 @@ class TestCase(BaseTestCase):
             app.config['PLUGINS'] = []
         if not app.config.get('TEST_WITH_THEME', False):
             app.config['THEME'] = 'default'
+        theme.assets._named_bundles = {}  # Clear webassets bundles
         return app
 
     def login(self, user=None, client=None):

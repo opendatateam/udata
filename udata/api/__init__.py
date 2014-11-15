@@ -9,10 +9,10 @@ from functools import wraps
 from flask import request, url_for, json, make_response, redirect
 from flask.ext.restplus import Api, Resource, marshal
 
-from udata import search
+from udata import search, theme
+from udata.app import csrf
 from udata.i18n import I18nBlueprint
 from udata.auth import current_user, login_user, Permission, RoleNeed
-from udata.frontend import csrf, render
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
 
@@ -121,7 +121,7 @@ def default_api():
 
 @bp.route('/apidoc/')
 def apidoc():
-    return render('apidoc.html', api_endpoint=api.endpoint, specs_url=api.specs_url)
+    return theme.render('apidoc.html', api_endpoint=api.endpoint, specs_url=api.specs_url)
 
 
 @bp.route('/apidoc/images/throbber.gif')

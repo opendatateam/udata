@@ -11,6 +11,9 @@ from os.path import abspath, join, dirname, isfile, exists
 
 from flask import Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint
 from flask.ext.cache import Cache
+
+from flask.ext.wtf.csrf import CsrfProtect
+from flask.ext.navigation import Navigation
 from speaklater import is_lazy_string
 from werkzeug.contrib.fixers import ProxyFix
 
@@ -21,6 +24,8 @@ ROOT_DIR = abspath(join(dirname(__file__)))
 log = logging.getLogger(__name__)
 
 cache = Cache()
+csrf = CsrfProtect()
+nav = Navigation()
 
 
 class UDataApp(Flask):
@@ -147,13 +152,16 @@ def init_logging(app):
 
 
 def register_extensions(app):
-    from udata import models, routing, tasks, mail, i18n, auth
+    from udata import models, routing, tasks, mail, i18n, auth, theme
     i18n.init_app(app)
     models.init_app(app)
     routing.init_app(app)
     auth.init_app(app)
     cache.init_app(app)
     tasks.init_app(app)
+    csrf.init_app(app)
+    nav.init_app(app)
+    theme.init_app(app)
     mail.init_app(app)
 
     from udata import search

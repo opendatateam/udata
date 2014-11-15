@@ -5,9 +5,9 @@ from flask import g, request, current_app
 from werkzeug.contrib.atom import AtomFeed
 from werkzeug.local import LocalProxy
 
-from udata import search
+from udata import search, theme
 from udata.app import cache
-from udata.frontend import render, csv, theme
+from udata.frontend import csv
 from udata.frontend.views import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Activity, Site, Reuse
@@ -77,12 +77,12 @@ def default_home_context_processor(context):
 def home():
     context = {}
     processor = theme.current.get_processor('home', default_home_context_processor)
-    return render('home.html', **processor(context))
+    return theme.render('home.html', **processor(context))
 
 
 @blueprint.route('/map/')
 def map():
-    return render('site/map.html')
+    return theme.render('site/map.html')
 
 
 @blueprint.route('/datasets.csv')

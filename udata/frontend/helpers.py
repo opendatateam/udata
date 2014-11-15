@@ -11,7 +11,7 @@ from flask import url_for, request, current_app, json
 from jinja2 import Markup
 from werkzeug import url_decode, url_encode
 
-from . import front, gravatar
+from . import front
 
 from udata.models import db
 from udata.i18n import format_date, _, pgettext, get_current_locale

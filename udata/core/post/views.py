@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 
-from udata.frontend import render
+from udata import theme
 from udata.i18n import I18nBlueprint
 from udata.frontend.views import CreateView, EditView
 
@@ -29,12 +29,12 @@ class ProtectedPostView(PostView):
 
 @blueprint.route('/', endpoint='list')
 def list_posts():
-    return render('post/list.html', posts=Post.objects.order_by('-created_at'))
+    return theme.render('post/list.html', posts=Post.objects.order_by('-created_at'))
 
 
 @blueprint.route('/<post:post>/')
 def show(post):
-    return render('post/display.html', post=post)
+    return theme.render('post/display.html', post=post)
 
 
 @blueprint.route('/new/', endpoint='new')

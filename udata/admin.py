@@ -5,8 +5,8 @@ import logging
 
 from flask import redirect, url_for
 
+from udata.app import nav
 from udata.core.user.permissions import sysadmin
-from udata.frontend import nav
 from udata.i18n import I18nBlueprint
 
 log = logging.getLogger(__name__)

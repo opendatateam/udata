@@ -8,7 +8,6 @@ from udata import frontend, api, admin
 
 class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
     def create_app(self):
-        frontend.assets._named_bundles = {}  # Clear webassets bundles
         app = super(FrontTestCase, self).create_app()
         api.init_app(app)
         frontend.init_app(app)
