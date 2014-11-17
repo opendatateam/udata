@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from os.path import exists, join, dirname
-
+from contextlib import contextmanager
 from importlib import import_module
+from os.path import exists, join, dirname
 
 from flask import g, request, current_app, abort, redirect, url_for
 from flask.blueprints import BlueprintSetupState, _endpoint_from_view_func
@@ -19,7 +19,11 @@ from flask.ext.babelex import Babel, Domain, refresh
 from flask.ext.babelex import format_date, format_datetime
 from flask.ext.babelex import get_locale as get_current_locale
 
+from werkzeug.local import LocalProxy
+
 from udata.app import Blueprint
+from udata.auth import current_user
+from udata.utils import multi_to_dict
 
 
 class PluggableDomain(Domain):
@@ -95,12 +99,28 @@ def lazy_pgettext(*args, **kwargs):
     return domain.lazy_pgettext(*args, **kwargs)
 
 
+def _default_lang(user=None):
+    user = user or current_user
+    return user.prefered_language if user.is_authenticated() else current_app.config['DEFAULT_LANGUAGE']
+
+default_lang = LocalProxy(lambda: _default_lang())
+
+
+@contextmanager
+def language(lang_code):
+    backup = g.get('lang_code')
+    g.lang_code = lang_code
+    refresh()
+    yield
+    g.lang_code = backup
+    refresh()
+
+
 @babel.localeselector
 def get_locale():
     if hasattr(g, 'lang_code'):
         return g.lang_code
-    return current_app.config['DEFAULT_LANGUAGE']
-    # return request.accept_languages.best_match(current_app.config['LANGUAGES'].keys())
+    return default_lang
 
 
 def init_app(app):
@@ -110,11 +130,10 @@ def init_app(app):
 
 def _add_language_code(endpoint, values):
     if not endpoint.endswith('_redirect'):
-        values.setdefault('lang_code', g.get('lang_code', current_app.config['DEFAULT_LANGUAGE']))
+        values.setdefault('lang_code', g.get('lang_code', default_lang))
 
 
 def _pull_lang_code(endpoint, values):
-    default_lang = current_app.config['DEFAULT_LANGUAGE']
     lang_code = values.pop('lang_code', g.get('lang_code', default_lang))
     if not lang_code in current_app.config['LANGUAGES']:
         try:
@@ -122,6 +141,15 @@ def _pull_lang_code(endpoint, values):
         except:
             abort(redirect(request.url.replace('/{0}/'.format(lang_code), '/{0}/'.format(default_lang))))
     g.lang_code = lang_code
+
+
+def redirect_to_lang(*args, **kwargs):
+    '''Redirect non lang-prefixed urls to default language.'''
+    endpoint = request.endpoint.replace('_redirect', '')
+    kwargs = multi_to_dict(request.args)
+    kwargs.update(request.view_args)
+    kwargs['lang_code'] = default_lang
+    return redirect(url_for(endpoint, **kwargs))
 
 
 class I18nBlueprintSetupState(BlueprintSetupState):
@@ -143,12 +171,7 @@ class I18nBlueprintSetupState(BlueprintSetupState):
                               view_func, defaults=defaults, **options)
 
         self.app.add_url_rule(rule, '%s.%s_redirect' % (self.blueprint.name, endpoint),
-                              view_func, defaults=defaults, redirect_to=self.redirect_to_lang, **options)
-
-    def redirect_to_lang(self, adapter, **kwargs):
-        '''Redirect non lang-prefixed urls to default language.'''
-        path = self.app.config['DEFAULT_LANGUAGE'] + adapter.path_info
-        return adapter.make_redirect_url(path, adapter.query_args)
+                              redirect_to_lang, defaults=defaults, **options)
 
 
 class I18nBlueprint(Blueprint):
