@@ -41,12 +41,16 @@ class Scheduler(MongoScheduler):
 celery = Celery(task_cls=ContextTask)
 
 
+def task(*args, **kwargs):
+    return celery.task(*args, **kwargs)
+
+
 def job(name, **kwargs):
     '''A shortcut decorator for declaring jobs'''
     return celery.task(name=name, schedulable=True, base=JobTask, bind=True, **kwargs)
 
 
-def get_job_logger(name):
+def get_logger(name):
     logger = get_task_logger(name)
     return logger
 
@@ -85,7 +89,7 @@ def init_app(app):
     # Load core tasks
     import udata.core.metrics.tasks
     import udata.core.storages.tasks
-    # import udata.core.search.tasks
+    import udata.core.tags.tasks
     import udata.core.activity.tasks
     import udata.core.dataset.tasks
     import udata.core.reuse.tasks
