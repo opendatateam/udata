@@ -1,0 +1,11 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('Congratulations, you are now a member of the organization "%(org)s"',
+    org=org.name
+) }}.
+
+
+{{ _('You can go on your organization page') }}:
+{{ url_for('organizations.show', org=org, _external=True) }}
+{% endblock %}

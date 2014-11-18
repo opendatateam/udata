@@ -5,13 +5,15 @@ import logging
 
 from flask import url_for, g
 
+from udata import mail
 from udata.app import nav
-from udata.frontend.views import DetailView, EditView, SearchView
+from udata.frontend.views import DetailView, EditView, SearchView, BaseView, SingleObject
 from udata.models import User, Activity, Organization, Dataset, Reuse, Follow
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.forms import UserProfileForm, UserSettingsForm, UserAPIKeyForm, UserNotificationsForm
 
 from .permissions import sysadmin, UserEditPermission
+from .tasks import send_test_mail
 
 
 blueprint = I18nBlueprint('users', __name__, url_prefix='/users')
@@ -111,6 +113,13 @@ class UserNotificationsView(UserEditView, EditView):
 
     def get_success_url(self):
         return url_for('users.show', user=self.object)
+
+
+@blueprint.route('/<user:user>/edit/notifications/testmail', endpoint='notifications_test')
+class UserNotificationsTestView(UserEditView, SingleObject, BaseView):
+    def post(self, user):
+        send_test_mail.delay(user)
+        return ''
 
 
 @blueprint.route('/<user:user>/datasets/', endpoint='datasets')

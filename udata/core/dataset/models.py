@@ -158,6 +158,8 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     after_delete = Signal()
     on_delete = Signal()
 
+    verbose_name = _('dataset')
+
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
@@ -173,6 +175,10 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     @property
     def display_url(self):
         return url_for('datasets.show', dataset=self)
+
+    @property
+    def external_url(self):
+        return url_for('datasets.show', dataset=self, _external=True)
 
     @property
     def image_url(self):

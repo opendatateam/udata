@@ -12,15 +12,20 @@ define(['jquery'], function($) {
     }
 
     function build_url(url) {
-        var path = url[0] === '/' ? url: '/' + url,
-            api_url;
-
-        if (API_ROOT == path.substring(0, API_ROOT.length)) {
-            api_url = path;
+        if (url.substring(0, 4) == 'http') {
+            // Absolute url
+            return url;
         } else {
-            api_url = API_ROOT + path;
+            var path = url[0] === '/' ? url: '/' + url,
+                api_url;
+
+            if (path.substring(0, API_ROOT.length) == API_ROOT) {
+                api_url = path;
+            } else {
+                api_url = API_ROOT + path;
+            }
+            return api_url;
         }
-        return api_url;
     }
 
     function call(method, url, data, callback) {

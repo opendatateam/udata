@@ -183,6 +183,9 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
+    def by_role(self, role):
+        return filter(lambda m: m.role == role, self.members)
+
 
 pre_save.connect(Organization.pre_save, sender=Organization)
 post_save.connect(Organization.post_save, sender=Organization)

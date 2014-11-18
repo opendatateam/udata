@@ -1,0 +1,11 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('Your membership for the organization "%(org)s" has been refused',
+    org=org.name
+) }}.
+
+{{ _('Refusal reason') }}:
+
+{{ request.refusal_comment }}
+{% endblock %}

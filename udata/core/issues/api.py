@@ -13,7 +13,7 @@ from udata.core.user.api_fields import UserReference
 
 from .forms import IssueCreateForm, IssueCommentForm
 from .models import Issue, Message, ISSUE_TYPES
-from .signals import on_new_issue, on_issue_closed
+from .signals import on_new_issue, on_new_issue_comment, on_issue_closed
 
 message_fields = api.model('IssueMessage', {
     'content': fields.String(description='The message body', required=True),
@@ -83,15 +83,18 @@ class IssueAPI(API):
         '''Add comment and optionnaly close an issue given its ID'''
         issue = Issue.objects.get_or_404(id=id)
         form = api.validate(IssueCommentForm)
-        issue.discussion.append(Message(
+        message = Message(
             content=form.comment.data,
             posted_by=current_user.id
-        ))
+        )
+        issue.discussion.append(message)
         close = form.close.data
         if close:
             issue.closed_by = current_user._get_current_object()
             issue.closed = datetime.now()
         issue.save()
         if close:
-            on_issue_closed.send(issue)
+            on_issue_closed.send(issue, message=message)
+        else:
+            on_new_issue_comment.send(issue, message=message)
         return marshal(issue, issue_fields), 200

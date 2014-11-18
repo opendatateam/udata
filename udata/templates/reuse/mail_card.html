@@ -1,0 +1,40 @@
+{% macro reuse_mail_card(reuse) %}
+<a href="{{ url_for('reuses.show', reuse=reuse, _external=True) }}">
+    <table height="94px" cellpadding="0" cellspacing="0" style="margin: 0;padding: 0;width: 100%;border: 1px solid #eee">
+        <tr style="margin: 0;padding: 0;">
+            <td width="94px" style="margin: 0;padding: 0;">
+                <img src="{{ reuse.image(94, external=True) }}" style="margin: 0;padding: 0;width: 94px;height: 94px" width="94px" height="94px">
+            </td>
+            <td style="margin: 0;padding: 0;padding-left:5px;">
+                <table cellpadding="0" cellspacing="0" style="margin: 0;padding: 0;width: 100%;">
+                    <tr style="margin: 0;padding: 0;">
+                        <td colspan="2" style="margin: 0;padding: 0;">
+                            <h6 style="margin: 0;padding: 0;font-family: &quot;HelveticaNeue-Light&quot;, &quot;Helvetica Neue Light&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Lucida Grande&quot;, sans-serif;line-height: 14px;margin-bottom: 10px;color: #444;font-weight: 900;font-size: 14px;">{{ reuse.title }}</h6>
+                        </td>
+                    </tr>
+                    <tr style="margin: 0;padding: 0;">
+                        <td width="26" style="margin: 0;padding: 0;">
+                            {% if reuse.organization %}
+                            <img src="{{reuse.organization.logo(26, external=True)}}" style="margin: 0;padding: 0;width: 26px;height: 26px" width="26px" height="26px" />
+                            {% else %}
+                            <img src="{{reuse.owner.avatar(26, external=True)}}" style="margin: 0;padding: 0;width: 26px;height: 26px" width="26px" height="26px" />
+                            {% endif %}
+                        </td>
+                        <td style="margin: 0;padding: 0;">
+                            <span class="autor" style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;color: #368ac8;text-decoration: none;font-size: 12px;font-weight: bold;">
+                            {%- if reuse.organization -%}
+                            {{ reuse.organization.name }}
+                            {%- else -%}
+                            {{ reuse.owner.fullname }}
+                            {%- endif -%}
+                            <br style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;"/></a>
+                            <span class="date" style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;font-size: 10px;">{{ reuse.created_at|dateformat('long') }}</span>
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+</a>
+{% endmacro %}

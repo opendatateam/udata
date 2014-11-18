@@ -19,6 +19,7 @@ from udata.core.dataset.csv import DatasetCsvAdapter
 from udata.core.activity.views import ActivityView
 
 from .permissions import EditOrganizationPermission
+from .tasks import notify_new_member
 
 
 blueprint = I18nBlueprint('organizations', __name__, url_prefix='/organizations')
@@ -229,6 +230,7 @@ class OrganizationEditMembersView(ProtectedOrgView, EditView):
             member = Member(user=user, role=form.value.data or 'editor')
             self.organization.members.append(member)
         self.organization.save()
+        notify_new_member.delay(self.organization, member)
         return '', 200
 
     def on_form_error(self, form):

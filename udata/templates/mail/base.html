@@ -1,0 +1,22 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+    <!-- If you delete this meta tag, Half Life 3 will never be released. -->
+    <meta name="viewport" content="width=device-width">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>{{config.SITE_TITLE}} - {{subject}}</title>
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+
+    <h1>{{ _('Hi %(user)s', user=recipient.first_name) }}</h1>
+
+    {% block body %}{% endblock %}
+
+    <p>{{ _('See you soon on the platform') }}</p>
+    <p><i>{{ _('The %(site)s team', site=config.SITE_TITLE) }}</i></p>
+
+</body>
+</html>

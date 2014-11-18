@@ -1,0 +1,37 @@
+{% extends theme('mail/base.html') %}
+{% from theme('mail/button.html') import mail_button %}
+{% from theme('reuse/mail_card.html') import reuse_mail_card  with context %}
+
+{% block body %}
+<p style="margin: 0;padding: 0;">{{ _('A new reuse of your dataset "%(dataset)s" as been published',
+    dataset=dataset.name
+) }}.</p>
+<br/>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td align="center">
+            {{ reuse_mail_card(reuse) }}
+        </td>
+    </tr>
+</table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td align="center">
+            {{ mail_button(
+                _('See the reuse'),
+                url_for('reuses.show', reuse=reuse, _external=True)
+            ) }}
+        </td>
+        <td align="center">
+            {{ mail_button(
+                _('See on the dataset page'),
+                (
+                    url_for('datasets.show', dataset=dataset, _external=True)
+                    + '#reuse-'|safe
+                    + reuse.id
+                )
+            ) }}
+        </td>
+    </tr>
+</table>
+{% endblock %}

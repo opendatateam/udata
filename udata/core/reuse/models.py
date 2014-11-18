@@ -80,6 +80,8 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     after_delete = Signal()
     on_delete = Signal()
 
+    verbose_name = _('reuse')
+
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         # Emit before_save
@@ -96,6 +98,10 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     @property
     def display_url(self):
         return url_for('reuses.show', reuse=self)
+
+    @property
+    def external_url(self):
+        return url_for('reuses.show', reuse=self, _external=True)
 
     @property
     def type_label(self):

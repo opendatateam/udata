@@ -53,4 +53,4 @@ class Issue(db.Document):
 
     @property
     def description(self):
-        return self.discussion[0]
+        return self.discussion[0].content

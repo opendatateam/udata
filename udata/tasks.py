@@ -93,7 +93,10 @@ def init_app(app):
     import udata.core.activity.tasks
     import udata.core.dataset.tasks
     import udata.core.reuse.tasks
+    import udata.core.user.tasks
     import udata.core.organization.tasks
+    import udata.core.followers.tasks
+    import udata.core.issues.tasks
 
     # Load plugins tasks
     for plugin in app.config['PLUGINS']:

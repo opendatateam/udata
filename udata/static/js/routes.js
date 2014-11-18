@@ -63,6 +63,7 @@ define(['jquery', 'router', 'logger'], function($, router, log) {
         // User routes
         userSearch: {path: i18n('/users/'), moduleId: 'search'},
         userEdit: {path: i18n('/users/:slug_or_id/edit/'), moduleId: 'user/form'},
+        userNotifications: {path: i18n('/users/:slug_or_id/edit/notifications/'), moduleId: 'user/notifications'},
         userEdit2: {path: i18n('/users/:slug_or_id/edit/*/'), moduleId: 'user/form'},
         userDisplay: {path: i18n('/users/:slug_or_id/'), moduleId: 'user/display'},
         userDisplay2: {path: i18n('/users/:slug_or_id/*/'), moduleId: 'user/display'},

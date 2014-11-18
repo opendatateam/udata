@@ -1,0 +1,6 @@
+{{ _('Hi %(user)s', user=recipient.first_name) }}
+
+{% block body %}{% endblock %}
+
+{{ _('See you soon on the platform') }}
+{{ _('The %(site)s team', site=config.SITE_TITLE) }}

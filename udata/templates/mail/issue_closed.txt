@@ -1,0 +1,17 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('%(user)s closed an issue on your %(type)s %(subject)s',
+    type=issue.subject.verbose_name,
+    user=comment.posted_by.fullname,
+    subject=issue.subject|string
+) }}.
+
+
+{{ _('Type') }}: {{ issue.type_label }}
+{{ _('Details') }}: {{ issue.description }}
+
+
+{{ _('You can see the issue on this page:') }}
+{{ issue.subject.external_url }}
+{% endblock %}

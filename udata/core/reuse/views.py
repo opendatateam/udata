@@ -15,6 +15,7 @@ from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Reuse, Issue, FollowReuse, Dataset
 
 from .permissions import ReuseEditPermission, set_reuse_identity
+from .tasks import notify_new_reuse
 
 blueprint = I18nBlueprint('reuses', __name__, url_prefix='/reuses')
 
@@ -117,6 +118,11 @@ class ReuseCreateView(CreateView):
             except:
                 pass
         return form
+
+    def on_form_valid(self, form):
+        response = super(ReuseCreateView, self).on_form_valid(form)
+        notify_new_reuse.delay(self.object)
+        return response
 
 
 @blueprint.route('/<reuse:reuse>/edit/', endpoint='edit')

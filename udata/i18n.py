@@ -101,7 +101,10 @@ def lazy_pgettext(*args, **kwargs):
 
 def _default_lang(user=None):
     user = user or current_user
-    return user.prefered_language if user.is_authenticated() else current_app.config['DEFAULT_LANGUAGE']
+    if user.is_authenticated() and user.prefered_language:
+        return user.prefered_language
+    else:
+        return current_app.config['DEFAULT_LANGUAGE']
 
 default_lang = LocalProxy(lambda: _default_lang())
 

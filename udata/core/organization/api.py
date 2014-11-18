@@ -10,6 +10,7 @@ from udata.models import Organization, MembershipRequest, Member, FollowOrg
 
 from udata.core.followers.api import FollowAPI
 
+from .tasks import notify_membership_request, notify_membership_response
 from .search import OrganizationSearch
 from .api_fields import org_fields, org_page_fields, request_fields, member_fields
 
@@ -55,6 +56,8 @@ class MembershipRequestAPI(API):
         form.populate_obj(membership_request)
         org.save()
 
+        notify_membership_request.delay(org, membership_request)
+
         return membership_request, code
 
 
@@ -82,6 +85,8 @@ class MembershipAcceptAPI(MembershipAPI):
         org.members.append(member)
         org.save()
 
+        notify_membership_response.delay(org, membership_request)
+
         return member
 
 
@@ -99,6 +104,8 @@ class MembershipRefuseAPI(MembershipAPI):
         membership_request.refusal_comment = form.comment.data
 
         org.save()
+
+        notify_membership_response.delay(org, membership_request)
 
         return {}, 200
 
