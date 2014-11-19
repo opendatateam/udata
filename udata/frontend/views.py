@@ -231,6 +231,10 @@ class NestedEditView(NestedObject, FormView):
         return context
 
     def on_form_valid(self, form):
-        form.populate_obj(self.nested_object)
+        self.populate(form)
         self.object.save()
         return redirect(self.get_success_url())
+
+    def populate(self, form):
+        form.populate_obj(self.nested_object)
+

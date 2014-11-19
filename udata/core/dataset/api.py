@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
+
 from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API
 from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
@@ -88,6 +90,7 @@ class ResourceAPI(API):
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
         form.populate_obj(resource)
+        resource.modified = datetime.now()
         dataset.save()
         return resource
 

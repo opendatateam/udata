@@ -256,6 +256,10 @@ class ResourceEditView(ProtectedDatasetView, NestedEditView):
     def get_success_url(self):
         return url_for('datasets.show', dataset=self.dataset)
 
+    def populate(self, form):
+        super(ResourceEditView, self).populate(form)
+        self.nested_object.modified = datetime.now()
+
 
 @blueprint.route('/<dataset:dataset>/community_resources/<resource>/', endpoint='edit_community_resource')
 class CommunityResourceEditView(DatasetView, NestedEditView):
@@ -271,6 +275,10 @@ class CommunityResourceEditView(DatasetView, NestedEditView):
 
     def get_success_url(self):
         return url_for('datasets.show', dataset=self.dataset)
+
+    def populate(self, form):
+        super(ResourceEditView, self).populate(form)
+        self.nested_object.modified = datetime.now()
 
 
 @blueprint.route('/<dataset:dataset>/resources/<resource>/delete/', endpoint='delete_resource')
