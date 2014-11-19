@@ -43,13 +43,15 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
     )
     nested_fields = (
         'id',
+        'url',
         'title',
         'description',
         'type',
-        'url',
+        'format',
+        'mime',
+        'size',
         ('checksum.type', lambda o: getattr(o.checksum, 'type', None)),
         ('checksum.value', lambda o: getattr(o.checksum, 'value', None)),
-        'format',
         'created_at',
         'modified',
         ('downloads', lambda o: int(o.metrics.get('views', 0))),

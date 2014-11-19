@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from cStringIO import StringIO
 import itertools
-import StringIO
 import unicodecsv
 
 from datetime import datetime
@@ -58,7 +58,7 @@ class Adapter(object):
         '''Convert an object into a flat csv row'''
         row = []
         for name, getter in self.get_fields():
-            row.append(getter(obj))
+            row.append(unicode(getter(obj)))
         return row
 
     def dynamic_fields(self):
@@ -98,7 +98,7 @@ class NestedAdapter(Adapter):
         '''Convert an object into a flat csv row'''
         row = self.to_row(obj)
         for name, getter in self.get_nested_fields():
-            row.append(getter(nested))
+            row.append(unicode(getter(nested)))
         return row
 
     def nested_dynamic_fields(self):
@@ -140,14 +140,14 @@ def get_reader(infile):
 
 def yield_rows(adapter):
     '''Yield a dataset catalog line by line'''
-    csvfile = StringIO.StringIO()
+    csvfile = StringIO()
     writer = get_writer(csvfile)
     # Generate header
     writer.writerow(adapter.header())
     yield csvfile.getvalue()
 
     for row in adapter.rows():
-        csvfile = StringIO.StringIO()
+        csvfile = StringIO()
         writer = get_writer(csvfile)
         writer.writerow(row)
         yield csvfile.getvalue()

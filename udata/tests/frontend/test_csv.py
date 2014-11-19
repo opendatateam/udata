@@ -221,6 +221,24 @@ class CsvTest(FrontTestCase):
             self.assertIn(name, expected.keys())
             self.assertEqual(getter(fake), expected[name])
 
+    def test_unicode(self):
+        @csv.adapter(Fake)
+        class Adapter(csv.Adapter):
+            fields = ['title', 'description']
+
+        objects = [FakeFactory(description='é\xe9') for _ in range(3)]
+        adapter = Adapter(objects)
+
+        header = adapter.header()
+        self.assertEqual(header, ['title', 'description'])
+
+        rows = list(adapter.rows())
+        self.assertEqual(len(rows), len(objects))
+        for obj, row in zip(objects, rows):
+            self.assertEqual(len(row), len(header))
+            self.assertEqual(row[0], obj.title)
+            self.assertEqual(row[1], obj.description)
+
     def assert_stream_csv(self, endpoint):
         return self.assert_csv(endpoint, [FakeFactory() for _ in range(3)])
 
@@ -313,3 +331,21 @@ class CsvTest(FrontTestCase):
             self.assertEqual(row[1], fake.description)
             self.assertEqual(row[2], obj.key)
             self.assertEqual(row[3], str(obj.value))
+
+    def test_stream_unicode(self):
+        fake = FakeFactory(title='é\xe9')
+        response = self.get(url_for('testcsv.from_adapter'))
+
+        self.assert200(response)
+        self.assertEqual(response.mimetype, 'text/csv')
+        self.assertEqual(response.charset, 'utf-8')
+
+        csvfile = StringIO.StringIO(response.data)
+        reader = csv.get_reader(csvfile)
+        header = reader.next()
+        self.assertEqual(header, ['title', 'description'])
+
+        row = reader.next()
+        self.assertEqual(len(row), len(header))
+        self.assertEqual(row[0], fake.title)
+        self.assertEqual(row[1], fake.description)
