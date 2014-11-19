@@ -16,9 +16,10 @@
                     <tr style="margin: 0;padding: 0;">
                         <td width="26" style="margin: 0;padding: 0;">
                             {% if reuse.organization %}
-                            <img src="{{reuse.organization.logo(26, external=True)}}" style="margin: 0;padding: 0;width: 26px;height: 26px" width="26" height="26" />
+                            <img src="{{reuse.organization.logo(26, external=True)|placeholder('organization', True)}}"
+                            style="margin: 0;padding: 0;width: 26px;height: 26px" width="26" height="26" />
                             {% else %}
-                            <img src="{{reuse.owner.avatar(26, external=True)}}" style="margin: 0;padding: 0;width: 26px;height: 26px" width="26" height="26" />
+                            <img src="{{reuse.owner.avatar(26, external=True)|placeholder('user', True)}}" style="margin: 0;padding: 0;width: 26px;height: 26px" width="26" height="26" />
                             {% endif %}
                         </td>
                         <td style="margin: 0;padding: 0;">

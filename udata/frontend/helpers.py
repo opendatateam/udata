@@ -92,8 +92,8 @@ def in_url(*args, **kwargs):
 
 
 @front.app_template_filter()
-def placeholder(url, name='default'):
-    return url or url_for('static', filename='img/placeholders/{0}.png'.format(name))
+def placeholder(url, name='default', external=False):
+    return url or url_for('static', filename='img/placeholders/{0}.png'.format(name), _external=external)
 
 
 @front.app_template_filter()
