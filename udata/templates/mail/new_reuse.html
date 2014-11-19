@@ -3,15 +3,25 @@
 {% from theme('reuse/mail_card.html') import reuse_mail_card  with context %}
 
 {% block body %}
-<p style="margin: 0;padding: 0;">{{ _('A new reuse of your dataset "%(dataset)s" as been published',
-    dataset=dataset.name
-) }}.</p>
+<p style="margin: 0;padding: 0;">{{
+    _('A new reuse of your dataset %(dataset)s as been published',
+        dataset=(
+            '<a href="'|safe
+            + dataset.external_url
+            + '">'|safe
+            + dataset.title
+            + '</a>'|safe
+        )
+    )
+}}.</p>
 <br/>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr>
-        <td align="center">
+        <td width="10%"></td>
+        <td width="80%" align="center">
             {{ reuse_mail_card(reuse) }}
         </td>
+        <td width="10%"></td>
     </tr>
 </table>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -28,7 +38,7 @@
                 (
                     url_for('datasets.show', dataset=dataset, _external=True)
                     + '#reuse-'|safe
-                    + reuse.id
+                    + reuse.id|string
                 )
             ) }}
         </td>
