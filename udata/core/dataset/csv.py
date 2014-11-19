@@ -26,3 +26,32 @@ class DatasetCsvAdapter(csv.Adapter):
 
     def dynamic_fields(self):
         return csv.metric_fields(Dataset)
+
+
+def dataset_field(name):
+    return ('dataset.{0}'.format(name), name)
+
+
+class ResourcesCsvAdapter(csv.NestedAdapter):
+    fields = (
+        dataset_field('id'),
+        dataset_field('title'),
+        dataset_field('slug'),
+        dataset_field('organization'),
+        dataset_field('license'),
+        dataset_field('private'),
+    )
+    nested_fields = (
+        'id',
+        'title',
+        'description',
+        'type',
+        'url',
+        ('checksum.type', lambda o: getattr(o.checksum, 'type', None)),
+        ('checksum.value', lambda o: getattr(o.checksum, 'value', None)),
+        'format',
+        'created_at',
+        'modified',
+        ('downloads', lambda o: int(o.metrics.get('views', 0))),
+    )
+    attribute = 'resources'

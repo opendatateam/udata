@@ -43,8 +43,8 @@ class Adapter(object):
     def getter(self, name, getter=None):
         if not getter:
             method = 'field_{0}'.format(name)
-            return getattr(self, method) if hasattr(self, method) else lambda o: getattr(o, name)
-        return (lambda o: getattr(o, getter)) if isinstance(getter, basestring) else getter
+            return getattr(self, method) if hasattr(self, method) else lambda o: getattr(o, name, None)
+        return (lambda o: getattr(o, getter, None)) if isinstance(getter, basestring) else getter
 
     def header(self):
         '''Generate the CSV header row'''
@@ -62,6 +62,46 @@ class Adapter(object):
         return row
 
     def dynamic_fields(self):
+        return []
+
+
+class NestedAdapter(Adapter):
+    attribute = None
+    nested_fields = None
+
+    def __init__(self, queryset):
+        super(NestedAdapter, self).__init__(queryset)
+        self._nested_fields = None
+
+    def header(self):
+        '''Generate the CSV header row'''
+        return super(NestedAdapter, self).header() + [name for name, getter in self.get_nested_fields()]
+
+    def get_nested_fields(self):
+        if not self._nested_fields:
+            if not isinstance(self.nested_fields, (list, tuple)):
+                raise ValueError('Unsupported nested fields format')
+            self._nested_fields = [
+                (field, self.getter(field)) if isinstance(field, basestring) else (field[0], self.getter(*field))
+                for field in itertools.chain(self.nested_fields, self.nested_dynamic_fields())
+            ]
+        return self._nested_fields
+
+    def get_queryset(self):
+        return ((o, n) for o in self.queryset for n in getattr(o, self.attribute))
+
+    def rows(self):
+        '''Iterate over queryset objects'''
+        return (self.nested_row(o, n) for o in self.queryset for n in getattr(o, self.attribute, []))
+
+    def nested_row(self, obj, nested):
+        '''Convert an object into a flat csv row'''
+        row = self.to_row(obj)
+        for name, getter in self.get_nested_fields():
+            row.append(getter(nested))
+        return row
+
+    def nested_dynamic_fields(self):
         return []
 
 

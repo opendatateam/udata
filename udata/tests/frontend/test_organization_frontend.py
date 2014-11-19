@@ -264,6 +264,49 @@ class OrganizationBlueprintTest(FrontTestCase):
         self.assertNotIn(str(hidden_dataset.id), ids)
         self.assertNotIn(str(not_org_dataset.id), ids)
 
+    def test_resources_csv(self):
+        with self.autoindex():
+            org = OrganizationFactory()
+            datasets = [
+                DatasetFactory(organization=org, resources=[ResourceFactory(), ResourceFactory()])
+                for _ in range(3)
+            ]
+            not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
+            hidden_dataset = DatasetFactory()
+
+        response = self.get(url_for('organizations.datasets_resources_csv', org=org))
+
+        self.assert200(response)
+        self.assertEqual(response.mimetype, 'text/csv')
+        self.assertEqual(response.charset, 'utf-8')
+
+        csvfile = StringIO.StringIO(response.data)
+        reader = reader = csv.get_reader(csvfile)
+        header = reader.next()
+
+        self.assertEqual(header[0], 'dataset.id')
+        self.assertIn('dataset.title', header)
+        self.assertIn('title', header)
+        self.assertIn('type', header)
+        self.assertIn('url', header)
+        self.assertIn('created_at', header)
+        self.assertIn('modified', header)
+        self.assertIn('downloads', header)
+
+        resource_id_index = header.index('id')
+
+        rows = list(reader)
+        ids = [(row[0], row[resource_id_index]) for row in rows]
+
+        self.assertEqual(len(rows), sum(len(d.resources) for d in datasets))
+        for dataset in datasets:
+            for resource in dataset.resources:
+                self.assertIn((str(dataset.id), str(resource.id)), ids)
+
+        dataset_ids = set(row[0] for row in rows)
+        self.assertNotIn(str(hidden_dataset.id), dataset_ids)
+        self.assertNotIn(str(not_org_dataset.id), dataset_ids)
+
     def test_supplied_datasets_csv(self):
         with self.autoindex():
             org = OrganizationFactory()
@@ -297,6 +340,49 @@ class OrganizationBlueprintTest(FrontTestCase):
             self.assertIn(str(dataset.id), ids)
         self.assertNotIn(str(hidden_dataset.id), ids)
         self.assertNotIn(str(not_org_dataset.id), ids)
+
+    def test_supplied_resources_csv(self):
+        with self.autoindex():
+            org = OrganizationFactory()
+            datasets = [
+                DatasetFactory(supplier=org, resources=[ResourceFactory(), ResourceFactory()])
+                for _ in range(3)
+            ]
+            not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
+            hidden_dataset = DatasetFactory()
+
+        response = self.get(url_for('organizations.supplied_datasets_resources_csv', org=org))
+
+        self.assert200(response)
+        self.assertEqual(response.mimetype, 'text/csv')
+        self.assertEqual(response.charset, 'utf-8')
+
+        csvfile = StringIO.StringIO(response.data)
+        reader = reader = csv.get_reader(csvfile)
+        header = reader.next()
+
+        self.assertEqual(header[0], 'dataset.id')
+        self.assertIn('dataset.title', header)
+        self.assertIn('title', header)
+        self.assertIn('type', header)
+        self.assertIn('url', header)
+        self.assertIn('created_at', header)
+        self.assertIn('modified', header)
+        self.assertIn('downloads', header)
+
+        resource_id_index = header.index('id')
+
+        rows = list(reader)
+        ids = [(row[0], row[resource_id_index]) for row in rows]
+
+        self.assertEqual(len(rows), sum(len(d.resources) for d in datasets))
+        for dataset in datasets:
+            for resource in dataset.resources:
+                self.assertIn((str(dataset.id), str(resource.id)), ids)
+
+        dataset_ids = set(row[0] for row in rows)
+        self.assertNotIn(str(hidden_dataset.id), dataset_ids)
+        self.assertNotIn(str(not_org_dataset.id), dataset_ids)
 
     def test_render_dashboard_empty(self):
         org = OrganizationFactory()

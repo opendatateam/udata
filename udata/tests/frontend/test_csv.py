@@ -22,11 +22,17 @@ RE_FILENAME = re.compile(r'^(?P<basename>.*)-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\.csv$
 blueprint = Blueprint('testcsv', __name__)
 
 
+class NestedFake(db.EmbeddedDocument):
+    key = db.StringField()
+    value = db.IntField()
+
+
 class Fake(db.Document):
     title = db.StringField()
     description = db.StringField()
     tags = db.ListField(db.StringField())
     other = db.ListField(db.StringField())
+    nested = db.ListField(db.EmbeddedDocumentField(NestedFake))
     metrics = db.DictField()
 
     def __unicode__(self):
@@ -53,6 +59,18 @@ class FakeFactory(MongoEngineFactory):
     tags = factory.LazyAttribute(lambda o: [faker.word() for _ in range(1, randint(1, 4))])
 
 
+class NestedAdapter(csv.NestedAdapter):
+    attribute = 'nested'
+    fields = (
+        'title',
+        'description',
+    )
+    nested_fields = (
+        'key',
+        ('alias', 'value'),
+    )
+
+
 @blueprint.route('/adapter.csv')
 def from_adapter():
     cls = csv.get_adapter(Fake)
@@ -70,6 +88,12 @@ def from_queryset():
     qs = Fake.objects
     assert isinstance(qs, db.BaseQuerySet)
     return csv.stream(qs)
+
+
+@blueprint.route('/nested.csv')
+def from_nested():
+    qs = Fake.objects
+    return csv.stream(NestedAdapter(qs))
 
 
 @blueprint.route('/with-basename.csv')
@@ -264,3 +288,28 @@ class CsvTest(FrontTestCase):
     def test_empty_stream_from_list(self):
         with self.assertRaises(ValueError):
             self.assert_empty_stream_csv('testcsv.from_list')
+
+    def test_stream_nested_from_adapter(self):
+        fake = FakeFactory.build()
+        for i in range(3):
+            fake.nested.append(NestedFake(key=faker.word(), value=i))
+        fake.save()
+        response = self.get(url_for('testcsv.from_nested'))
+
+        self.assert200(response)
+        self.assertEqual(response.mimetype, 'text/csv')
+        self.assertEqual(response.charset, 'utf-8')
+
+        csvfile = StringIO.StringIO(response.data)
+        reader = csv.get_reader(csvfile)
+        header = reader.next()
+        self.assertEqual(header, ['title', 'description', 'key', 'alias'])
+
+        rows = list(reader)
+        self.assertEqual(len(rows), len(fake.nested))
+        for row, obj in zip(rows, fake.nested):
+            self.assertEqual(len(row), len(header))
+            self.assertEqual(row[0], fake.title)
+            self.assertEqual(row[1], fake.description)
+            self.assertEqual(row[2], obj.key)
+            self.assertEqual(row[3], str(obj.value))

@@ -15,7 +15,7 @@ from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import db, Organization, Member, Reuse, Dataset, ORG_ROLES, User, Follow, FollowOrg, Activity, Issue
 from udata.utils import get_by
 
-from udata.core.dataset.csv import DatasetCsvAdapter
+from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.activity.views import ActivityView
 
 from .permissions import EditOrganizationPermission
@@ -298,8 +298,22 @@ def datasets_csv(org):
     return csv.stream(adapter, '{0}-datasets'.format(org.slug))
 
 
+@blueprint.route('/<org:org>/datasets-resources.csv')
+def datasets_resources_csv(org):
+    datasets = search.iter(Dataset, organization=str(org.id))
+    adapter = ResourcesCsvAdapter(datasets)
+    return csv.stream(adapter, '{0}-datasets-resources'.format(org.slug))
+
+
 @blueprint.route('/<org:org>/supplied-datasets.csv')
 def supplied_datasets_csv(org):
     datasets = search.iter(Dataset, supplier=str(org.id))
     adapter = DatasetCsvAdapter(datasets)
     return csv.stream(adapter, '{0}-supplied-datasets'.format(org.slug))
+
+
+@blueprint.route('/<org:org>/supplied-datasets-resources.csv')
+def supplied_datasets_resources_csv(org):
+    datasets = search.iter(Dataset, supplier=str(org.id))
+    adapter = ResourcesCsvAdapter(datasets)
+    return csv.stream(adapter, '{0}-supplied-datasets-resources'.format(org.slug))

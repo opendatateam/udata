@@ -87,18 +87,32 @@
             </ul>
             {% if datasets.total and datasets.total > datasets|length %}
             <div class="clearfix"></div>
-            <p class="text-center">
+            <div class="text-center card-list-footer">
                 <a class="btn btn-default"
                     href="{{ url_for('datasets.list', sort='-created', **kwargs) }}">
-                    <span class="glyphicon glyphicon-list" ></span>
+                    <span class="glyphicon glyphicon-list"></span>
                     {{ _('See the %(nb)s datasets', nb=datasets.total) }}
                 </a>
-                <a class="btn btn-default"
-                    href="{{ url_for('organizations.{0}_csv'.format(tab_id.replace('-', '_')), org=org) }}">
-                    <span class="fa fa-file-o" ></span>
-                    {{ _('Download as CSV') }}
-                </a>
-            </p>
+                <div class="dropdown">
+                    <button id="{{tab_id}}-download-btn" data-toggle="dropdown"
+                        class="btn btn-default dropdown-toggle" type="button">
+                        <span class="fa fa-file-o"></span>
+                        {{ _('Download as CSV') }}
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="{{tab_id}}-download-btn">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="{{ url_for('organizations.{0}_csv'.format(tab_id.replace('-', '_')), org=org) }}">
+                            {{ _('Datasets list') }}
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="{{ url_for('organizations.{0}_resources_csv'.format(tab_id.replace('-', '_')), org=org) }}">
+                            {{ _('Resources list') }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
             {% endif %}
         </div>
         {% endif %}
