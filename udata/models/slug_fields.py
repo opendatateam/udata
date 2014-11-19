@@ -28,9 +28,13 @@ class SlugField(StringField):
 
     def __get__(self, instance, owner):
         if instance is not None:
-            # Document class being used rather than a document object
             self.instance = instance
         return super(SlugField, self).__get__(instance, owner)
+
+    def __set__(self, instance, value):
+        if instance is not None:
+            self.instance = instance
+        return super(SlugField, self).__set__(instance, value)
 
     def validate(self, value):
         populate_slug(self.instance, self)

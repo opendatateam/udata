@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 map_tags = '''
 function() {
-    this[~tags].forEach(function(tag) {
+    this.tags.forEach(function(tag) {
         emit(tag, 1);
     });
 }
@@ -39,7 +39,7 @@ def count_tags(self):
     '''Count tag occurences by type and update the tag collection'''
     for key, model in TAGGED.items():
         collection = '{0}_tags'.format(key)
-        results = model.objects.map_reduce(map_tags, reduce_tags, collection)
+        results = model.objects(tags__exists=True).map_reduce(map_tags, reduce_tags, collection)
         for result in results:
             tag, created = Tag.objects.get_or_create(name=result.key, auto_save=False)
             tag.counts[key] = int(result.value) if result.value else 0
