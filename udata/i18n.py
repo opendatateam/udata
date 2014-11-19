@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from importlib import import_module
 from os.path import exists, join, dirname
 
-from flask import g, request, current_app, abort, redirect, url_for
+from flask import g, request, current_app, abort, redirect, url_for, has_request_context
 from flask.blueprints import BlueprintSetupState, _endpoint_from_view_func
 try:
     from flask import _app_ctx_stack as stack
@@ -111,11 +111,18 @@ default_lang = LocalProxy(lambda: _default_lang())
 
 @contextmanager
 def language(lang_code):
+    '''Force a given language'''
+    ctx = None
+    if not request:
+        ctx = current_app.test_request_context()
+        ctx.push()
     backup = g.get('lang_code')
     g.lang_code = lang_code
     refresh()
     yield
     g.lang_code = backup
+    if ctx:
+        ctx.pop()
     refresh()
 
 
