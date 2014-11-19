@@ -7,7 +7,7 @@
                 <ul>
                     {% for item in nav.gouvfr_footer %}
                     <li>
-                        <a href="{{ item.url }}">{{ item.label }}</a>
+                        <a href="{{ '' if item.items else item.url }}">{{ item.label }}</a>
                         {% if item.items %}
                         <ul>
                             {% for subitem in item.items %}

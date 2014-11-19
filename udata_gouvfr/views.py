@@ -6,7 +6,7 @@ from pkg_resources import resource_stream
 
 from flask import abort, url_for, redirect, json
 
-from udata.frontend import render
+from udata import theme
 from udata.models import Dataset, Reuse
 from udata.i18n import I18nBlueprint
 
@@ -50,12 +50,12 @@ def redirect_topics(topic):
 
 @blueprint.route('/Redevances')
 def redevances():
-    return render('redevances.html')
+    return theme.render('redevances.html')
 
 
 @blueprint.route('/developer')
 def developer():
-    return render('developer.html')
+    return theme.render('developer.html')
 
 
 DATACONNEXIONS_TAG = 'dataconnexions'
@@ -86,4 +86,4 @@ def dataconnexions():
         'description': description,
         'reuses': reuses(tags=tag),
     } for tag, label, description in DATACONNEXIONS_CATEGORIES]
-    return render('dataconnexions.html', categories=categories)
+    return theme.render('dataconnexions.html', categories=categories)

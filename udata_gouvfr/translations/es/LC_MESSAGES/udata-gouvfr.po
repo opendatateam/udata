@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-11-05 02:28+0100\n"
+"POT-Creation-Date: 2014-11-19 03:46+0100\n"
 "PO-Revision-Date: 2014-09-19 10:58+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/udata-"
@@ -101,25 +101,29 @@ msgstr "Desarrolladores"
 msgid "Coming soon"
 msgstr "Próximamente"
 
-#: udata_gouvfr/theme/theme.py:24
+#: udata_gouvfr/theme/theme.py:23
 msgid "Tab size"
 msgstr "Tamaño de la pestaña"
 
-#: udata_gouvfr/theme/theme.py:24
+#: udata_gouvfr/theme/theme.py:23
 msgid "Home page tab size"
 msgstr "Tamaño de la página de inicio"
 
-#: udata_gouvfr/theme/theme.py:26
+#: udata_gouvfr/theme/theme.py:25
 msgid "ATOM Feed URL"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:27
+#: udata_gouvfr/theme/theme.py:26
 msgid "An optionnal atom feed URL for display blog post in home page"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:42
+#: udata_gouvfr/theme/theme.py:41
 msgid "How it works ?"
 msgstr "¿Cómo funciona?"
+
+#: udata_gouvfr/theme/theme.py:42
+msgid "FAQ"
+msgstr ""
 
 #: udata_gouvfr/theme/theme.py:43
 msgid "Publication guide"
@@ -141,26 +145,32 @@ msgstr ""
 msgid "Data"
 msgstr "Datos"
 
-#: udata_gouvfr/theme/theme.py:49 udata_gouvfr/theme/templates/footer.html:66
+#: udata_gouvfr/theme/theme.py:49 udata_gouvfr/theme/templates/footer.html:65
+#: udata_gouvfr/theme/templates/metrics.html:23
+#: udata_gouvfr/theme/templates/dataset/display.html:20
+msgid "Datasets"
+msgstr "Conjunto de datos"
+
+#: udata_gouvfr/theme/theme.py:50 udata_gouvfr/theme/templates/footer.html:66
 #: udata_gouvfr/theme/templates/metrics.html:28
 #: udata_gouvfr/theme/templates/dataset/display.html:464
 msgid "Reuses"
 msgstr "Reutilizaciones"
 
-#: udata_gouvfr/theme/theme.py:50 udata_gouvfr/theme/templates/header.html:71
+#: udata_gouvfr/theme/theme.py:51 udata_gouvfr/theme/templates/header.html:70
 #: udata_gouvfr/theme/templates/metrics.html:43
 msgid "Organizations"
 msgstr "Organizaciones"
 
-#: udata_gouvfr/theme/theme.py:52
+#: udata_gouvfr/theme/theme.py:53
 msgid "Dashboard"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:61
+#: udata_gouvfr/theme/theme.py:62
 msgid "Credits"
 msgstr "Créditos "
 
-#: udata_gouvfr/theme/theme.py:62
+#: udata_gouvfr/theme/theme.py:63
 msgid "Terms of use"
 msgstr "Términos de uso"
 
@@ -181,12 +191,6 @@ msgstr "Vínculo"
 msgid "Contact"
 msgstr "Contacto"
 
-#: udata_gouvfr/theme/templates/footer.html:65
-#: udata_gouvfr/theme/templates/metrics.html:23
-#: udata_gouvfr/theme/templates/dataset/display.html:20
-msgid "Datasets"
-msgstr "Conjunto de datos"
-
 #: udata_gouvfr/theme/templates/footer.html:68
 msgid "Feeds"
 msgstr ""
@@ -203,24 +207,24 @@ msgstr "Navegador"
 msgid "Open platform for french public data"
 msgstr "Plataforma abierta para los datos públicos franceses "
 
-#: udata_gouvfr/theme/templates/header.html:67
+#: udata_gouvfr/theme/templates/header.html:66
 msgid "My profile"
 msgstr "Mi perfil"
 
-#: udata_gouvfr/theme/templates/header.html:85
+#: udata_gouvfr/theme/templates/header.html:84
 msgid "Settings"
 msgstr "Ajustes"
 
-#: udata_gouvfr/theme/templates/header.html:93
+#: udata_gouvfr/theme/templates/header.html:92
 msgid "Site administration"
 msgstr "Sitio web de la administración"
 
-#: udata_gouvfr/theme/templates/header.html:101
+#: udata_gouvfr/theme/templates/header.html:100
 msgid "Logout"
 msgstr "Cerrar sesión"
 
-#: udata_gouvfr/theme/templates/header.html:108
-#: udata_gouvfr/theme/templates/header.html:111
+#: udata_gouvfr/theme/templates/header.html:107
+#: udata_gouvfr/theme/templates/header.html:110
 msgid "Sign In / Register"
 msgstr "Conexión / Registro"
 
@@ -494,6 +498,29 @@ msgstr ""
 "¡Es hora de darlo a conocer! \n"
 "Referencie su trabajo en tan sólo unos clicks y aumene su visibilidad."
 
+#: udata_gouvfr/theme/templates/mail/base.html:45
+msgid "on your browser."
+msgstr ""
+
+#: udata_gouvfr/theme/templates/mail/base.html:48
+#, python-format
+msgid "View this email %(link)s"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/mail/base.html:81
+#, python-format
+msgid "Hi %(user)s"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/mail/base.html:92
+msgid "See you soon on the platform"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/mail/base.html:93
+#, python-format
+msgid "The %(site)s team"
+msgstr ""
+
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:18
 msgid "Publish a dataset"
 msgstr "Publique un conjunto de datos"
@@ -572,104 +599,104 @@ msgstr "Usted puede crear una nueva organización si la suya no existe aun. "
 #~ msgstr ""
 
 #~ msgid "I belong to this organization"
-#~ msgstr "%(num)d conjuntos de datos"
+#~ msgstr ""
 
 #~ msgid "Join"
-#~ msgstr "%(num)d miembro"
+#~ msgstr "%(num)d conjuntos de datos"
 
 #~ msgid "Waiting for approval"
-#~ msgstr "%(num)d miembros"
+#~ msgstr "%(num)d miembro"
 
 #~ msgid "Pending request"
-#~ msgstr "%(num)d seguidor"
+#~ msgstr "%(num)d miembros"
 
 #~ msgid "You are an administrator of this organization"
-#~ msgstr "%(num)d seguidores"
+#~ msgstr "%(num)d seguidor"
 
 #~ msgid "Administrator"
-#~ msgstr "%(num)d reutilización"
+#~ msgstr "%(num)d seguidores"
 
 #~ msgid "You are editor in this organization"
-#~ msgstr "%(num)d reutilizaciones"
+#~ msgstr "%(num)d reutilización"
 
 #~ msgid "Editor"
-#~ msgstr "Actividades recientes"
+#~ msgstr "%(num)d reutilizaciones"
 
 #~ msgid "You are a member of this organization"
-#~ msgstr "Yo hago parte de esta organización"
+#~ msgstr "Actividades recientes"
 
 #~ msgid "Member"
-#~ msgstr "Unase "
+#~ msgstr "Yo hago parte de esta organización"
 
 #~ msgid "Supplied datasets"
-#~ msgstr "A la espera de aprobación"
+#~ msgstr "Unase "
 
 #~ msgid "Private datasets"
-#~ msgstr "Solicitud pendiente"
+#~ msgstr "A la espera de aprobación"
 
 #~ msgid "Private reuses"
-#~ msgstr "Usted es un administrador de esta organización"
+#~ msgstr "Solicitud pendiente"
 
 #~ msgid "Members"
-#~ msgstr "Administrador"
+#~ msgstr "Usted es un administrador de esta organización"
 
 #~ msgid "Followers"
-#~ msgstr "Usted es editor de esta organización"
+#~ msgstr "Administrador"
 
 #~ msgid "Activity"
-#~ msgstr "Editor"
+#~ msgstr "Usted es editor de esta organización"
 
 #~ msgid "See the %(nb)s datasets"
-#~ msgstr "Usted es un miembro de esta organización"
+#~ msgstr "Editor"
 
 #~ msgid "Download as CSV"
-#~ msgstr "Miembro"
+#~ msgstr "Usted es un miembro de esta organización"
 
 #~ msgid "See the %(nb)s reuses"
-#~ msgstr "Conjuntos de datos suministrados"
+#~ msgstr "Miembro"
 
 #~ msgid "Metadata quality"
-#~ msgstr "Conjuntos de datos privados"
+#~ msgstr "Conjuntos de datos suministrados"
 
 #~ msgid "Go to the report page"
-#~ msgstr "Reutilizaciones privadas"
+#~ msgstr "Conjuntos de datos privados"
 
 #~ msgid "Performance"
-#~ msgstr "Miembros"
+#~ msgstr "Reutilizaciones privadas"
 
 #~ msgid "%(nb)s warning"
-#~ msgstr "Seguidores"
+#~ msgstr "Miembros"
 
 #~ msgid "%(nb)s warnings"
-#~ msgstr "Actividad"
+#~ msgstr "Seguidores"
 
 #~ msgid "No warning"
-#~ msgstr "Calidad de los metadatos"
+#~ msgstr "Actividad"
 
 #~ msgid "%(nb)s error"
-#~ msgstr "Ir a la página de reporte"
+#~ msgstr "Calidad de los metadatos"
 
 #~ msgid "%(nb)s errors"
-#~ msgstr "Desempeño"
+#~ msgstr "Ir a la página de reporte"
 
 #~ msgid "No error"
-#~ msgstr "%(nb)s advertencia"
+#~ msgstr "Desempeño"
 
 #~ msgid "%(nb)s critical"
-#~ msgstr "%(nb)s advertencias"
+#~ msgstr "%(nb)s advertencia"
 
 #~ msgid "%(nb)s criticals"
-#~ msgstr "Ninguna advertencia"
+#~ msgstr "%(nb)s advertencias"
 
 #~ msgid "No critical"
-#~ msgstr "%(nb)s error"
+#~ msgstr "Ninguna advertencia"
 
 #~ msgid "No report available"
-#~ msgstr "%(nb)s errores"
+#~ msgstr "%(nb)s error"
 
 #~ msgid "Improve quality"
-#~ msgstr "Ningún error"
+#~ msgstr "%(nb)s errores"
 
 #~ msgid "Improve"
-#~ msgstr "%(nb)s crítica"
+#~ msgstr "Ningún error"
 

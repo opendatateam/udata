@@ -25,7 +25,6 @@
                     <a href="{{ item.url }}">{{ item.label }}</a>
                     {% if item.items %}
                     <ul class="dropdown-menu" role="menu">
-                        <li><a href="{{ item.url }}">{{ item.label }}</a></li>
                         {% for subitem in item.items %}
                         <li><a href="{{ subitem.url }}">{{ subitem.label }}</a></li>
                         {% endfor %}

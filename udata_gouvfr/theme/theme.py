@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import unicode_literals, absolute_import
 
 import re
 
@@ -8,10 +8,9 @@ import feedparser
 from dateutil.parser import parse
 from flask import g, current_app
 
-from udata import search
-from udata.app import cache
+from udata import search, theme
+from udata.app import cache, nav
 from udata.forms import Form, fields, validators
-from udata.frontend import theme, nav
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, Reuse, Post
 
@@ -40,12 +39,14 @@ class Wikitem(nav.Item):
 
 gouvfr_menu = nav.Bar('gouvfr_menu', [
     Wikitem(_('How it works ?'), 'FAQ', items=[
+        Wikitem(_('FAQ'), 'FAQ'),
         Wikitem(_('Publication guide'), 'Guide_de_publication'),
         Wikitem(_('Tools'), 'Outillage_pour_les_datavisualisations'),
         Wikitem(_('Open Licence'), 'Licence_Ouverte_/_Open_Licence'),
         nav.Item(_('API'), 'api.root')
     ]),
     nav.Item(_('Data'), 'datasets.list', items=[
+        nav.Item(_('Datasets'), 'datasets.list'),
         nav.Item(_('Reuses'), 'reuses.list'),
         nav.Item(_('Organizations'), 'organizations.list'),
     ]),

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-11-05 02:28+0100\n"
+"POT-Creation-Date: 2014-11-19 03:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -97,24 +97,28 @@ msgstr ""
 msgid "Coming soon"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:24
+#: udata_gouvfr/theme/theme.py:23
 msgid "Tab size"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:24
+#: udata_gouvfr/theme/theme.py:23
 msgid "Home page tab size"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:26
+#: udata_gouvfr/theme/theme.py:25
 msgid "ATOM Feed URL"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:27
+#: udata_gouvfr/theme/theme.py:26
 msgid "An optionnal atom feed URL for display blog post in home page"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:42
+#: udata_gouvfr/theme/theme.py:41
 msgid "How it works ?"
+msgstr ""
+
+#: udata_gouvfr/theme/theme.py:42
+msgid "FAQ"
 msgstr ""
 
 #: udata_gouvfr/theme/theme.py:43
@@ -137,26 +141,32 @@ msgstr ""
 msgid "Data"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:49 udata_gouvfr/theme/templates/footer.html:66
+#: udata_gouvfr/theme/theme.py:49 udata_gouvfr/theme/templates/footer.html:65
+#: udata_gouvfr/theme/templates/metrics.html:23
+#: udata_gouvfr/theme/templates/dataset/display.html:20
+msgid "Datasets"
+msgstr ""
+
+#: udata_gouvfr/theme/theme.py:50 udata_gouvfr/theme/templates/footer.html:66
 #: udata_gouvfr/theme/templates/metrics.html:28
 #: udata_gouvfr/theme/templates/dataset/display.html:464
 msgid "Reuses"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:50 udata_gouvfr/theme/templates/header.html:71
+#: udata_gouvfr/theme/theme.py:51 udata_gouvfr/theme/templates/header.html:70
 #: udata_gouvfr/theme/templates/metrics.html:43
 msgid "Organizations"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:52
+#: udata_gouvfr/theme/theme.py:53
 msgid "Dashboard"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:61
+#: udata_gouvfr/theme/theme.py:62
 msgid "Credits"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:62
+#: udata_gouvfr/theme/theme.py:63
 msgid "Terms of use"
 msgstr ""
 
@@ -177,12 +187,6 @@ msgstr ""
 msgid "Contact"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/footer.html:65
-#: udata_gouvfr/theme/templates/metrics.html:23
-#: udata_gouvfr/theme/templates/dataset/display.html:20
-msgid "Datasets"
-msgstr ""
-
 #: udata_gouvfr/theme/templates/footer.html:68
 msgid "Feeds"
 msgstr ""
@@ -199,24 +203,24 @@ msgstr ""
 msgid "Open platform for french public data"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/header.html:67
+#: udata_gouvfr/theme/templates/header.html:66
 msgid "My profile"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/header.html:85
+#: udata_gouvfr/theme/templates/header.html:84
 msgid "Settings"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/header.html:93
+#: udata_gouvfr/theme/templates/header.html:92
 msgid "Site administration"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/header.html:101
+#: udata_gouvfr/theme/templates/header.html:100
 msgid "Logout"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/header.html:108
-#: udata_gouvfr/theme/templates/header.html:111
+#: udata_gouvfr/theme/templates/header.html:107
+#: udata_gouvfr/theme/templates/header.html:110
 msgid "Sign In / Register"
 msgstr ""
 
@@ -474,6 +478,29 @@ msgid ""
 "                It's time to let you know!\n"
 "                Reference your work in just a few clicks and increase your "
 "visibility."
+msgstr ""
+
+#: udata_gouvfr/theme/templates/mail/base.html:45
+msgid "on your browser."
+msgstr ""
+
+#: udata_gouvfr/theme/templates/mail/base.html:48
+#, python-format
+msgid "View this email %(link)s"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/mail/base.html:81
+#, python-format
+msgid "Hi %(user)s"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/mail/base.html:92
+msgid "See you soon on the platform"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/mail/base.html:93
+#, python-format
+msgid "The %(site)s team"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:18
