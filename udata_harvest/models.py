@@ -1,59 +1,64 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from ConfigParser import ConfigParser
+from collections import OrderedDict
 from datetime import datetime
 
 from udata.models import db
 from udata.i18n import lazy_gettext as _
 
 
-HARVEST_FREQUENCIES = (
+HARVEST_FREQUENCIES = OrderedDict((
     ('manual', _('Manual')),
     ('monthly', _('Monthly')),
     ('weekly', _('Weekly')),
     ('daily', _('Daily')),
-)
+))
+
+HARVEST_JOB_STATUS = OrderedDict((
+    ('pending', _('Pending')),
+    ('initializing', _('Initializing')),
+    ('initialized', _('Initialized')),
+    ('processing', _('Processing')),
+    ('done', _('Done')),
+    ('done-errors', _('Done with errors')),
+    ('failed', _('Failed')),
+))
+
+HARVEST_ITEM_STATUS = OrderedDict((
+    ('pending', _('Pending')),
+    ('started', _('Started')),
+    ('done', _('Done')),
+    ('failed', _('Failed')),
+))
 
 DEFAULT_HARVEST_FREQUENCY = 'manual'
-
-def cast(config, section):
-    return dict((k, True if v == 'true' else v) for k, v in config.items(section))
-
-
-class HarvestJob(db.EmbeddedDocument):
-    '''Keep track of harvestings'''
-    created_at = db.DateTimeField(default=datetime.now, required=True)
-    started_at = db.DateTimeField()
-    finished_at = db.DateTimeField()
-    status = db.StringField()
-    errors = db.ListField(db.StringField)
+DEFAULT_HARVEST_JOB_STATUS = 'pending'
+DEFAULT_HARVEST_ITEM_STATUS = 'pending'
 
 
 class HarvestError(db.EmbeddedDocument):
     '''Store harvesting errors'''
     created_at = db.DateTimeField(default=datetime.now, required=True)
     message = db.StringField()
-
-    meta = {
-        'abstract': True,
-    }
+    details = db.StringField()
 
 
-class GatherError(HarvestError):
-    '''Store gathering errors'''
+class HarvestItem(db.EmbeddedDocument):
+    remote_id = db.StringField()
+    status = db.StringField(choices=HARVEST_ITEM_STATUS.keys(), default=DEFAULT_HARVEST_ITEM_STATUS, required=True)
+    started = db.DateTimeField()
+    ended = db.DateTimeField()
+    errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
 
 
-class FetchError(HarvestError):
-    '''Store fetch errors'''
-
-
-class StoreError(HarvestError):
-    '''Store store errors'''
-
-
-class HarvestObjectError(HarvestError):
-    stage = db.StringField()
+class HarvestJob(db.Document):
+    '''Keep track of harvestings'''
+    created = db.DateTimeField(default=datetime.now, required=True)
+    started = db.DateTimeField()
+    finished = db.DateTimeField()
+    status = db.StringField(choices=HARVEST_JOB_STATUS.keys(), default=DEFAULT_HARVEST_JOB_STATUS, required=True)
+    errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
 
 
 class HarvestSource(db.Document):
@@ -63,55 +68,10 @@ class HarvestSource(db.Document):
     url = db.StringField()
     backend = db.StringField()
     config = db.DictField()
-    jobs = db.ListField(db.EmbeddedDocumentField(HarvestJob))
+    jobs = db.ListField(db.ReferenceField(HarvestJob))
     created_at = db.DateTimeField(default=datetime.now, required=True)
-    frequency = db.StringField(choices=HARVEST_FREQUENCIES, default=DEFAULT_HARVEST_FREQUENCY, required=True)
+    frequency = db.StringField(choices=HARVEST_FREQUENCIES.keys(), default=DEFAULT_HARVEST_FREQUENCY, required=True)
     active = db.BooleanField(default=True)
 
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
     organization = db.ReferenceField('Organization', reverse_delete_rule=db.NULLIFY)
-
-
-# class HarvestItem(db.Document):
-#     source = db.ReferenceField(HarvestSource)
-#     job = db.StringField()
-
-
-
-class Harvester(db.Document):
-    name = db.StringField(unique=True)
-    description = db.StringField()
-    backend = db.StringField()
-    jobs = db.ListField(db.EmbeddedDocumentField(HarvestJob))
-    config = db.DictField()
-    mapping = db.DictField()
-
-    @classmethod
-    def from_file(cls, filename):
-        config = ConfigParser()
-        config.read(filename)
-        name = config.get('harvester', 'name')
-
-        harvester, created = cls.objects.get_or_create(name=name)
-        harvester.backend = config.get('harvester', 'backend')
-        harvester.description = config.get('harvester', 'description')
-        if config.has_section('config'):
-            harvester.config = cast(config, 'config')
-        for section in config.sections():
-            if section.startswith('config:'):
-                name = section.split(':')[1]
-                harvester.config[name] = cast(config, section)
-            if section.startswith('mapping:'):
-                name = section.split(':')[1]
-                harvester.mapping[name] = dict(config.items(section))
-        try:
-            harvester.save()
-        except:
-            pass
-        return harvester
-
-
-class HarvestReference(db.EmbeddedDocument):
-    remote_id = db.StringField()
-    harvester = db.ReferenceField(Harvester)
-    last_update = db.DateTimeField(default=datetime.now)

@@ -4,36 +4,28 @@
 # from udata.models import Dataset, Organization, Reuse
 # from udata.tests import TestCase, DBTestMixin, factories
 
-# from .factories import HarvesterFactory
+# from .factories import HarvestSourceFactory
 
-# from ..backends import BaseBackend
-
-
-# class FakeBackend(BaseBackend):
-#     def __init__(self, harvester, orgs=3, datasets=3, reuses=3):
-#         self.nb_orgs = orgs
-#         self.nb_datasets = datasets
-#         self.nb_reuses = reuses
-#         super(FakeBackend, self).__init__(harvester)
-
-#     def remote_organizations(self):
-#         for i in range(self.nb_orgs):
-#             yield factories.OrganizationFactory.build()
-
-#     def remote_datasets(self):
-#         for i in range(self.nb_datasets):
-#             yield factories.DatasetFactory.build()
-
-#     def remote_reuses(self):
-#         for i in range(self.nb_reuses):
-#             yield factories.ReuseFactory.build()
+# from ..harvester import Harvester
 
 
-# class BaseBackendTest(DBTestMixin, TestCase):
+# class TestHarvester(Harvester):
+#     name = 'test'
+
+#     def initialize(self):
+#         pass
+
+#     def process(self, data, *args, **kwargs):
+#         pass
+
+
+# class HarvesterTest(DBTestMixin, TestCase):
 #     def create_app(self):
-#         app = super(BaseBackendTest, self).create_app()
+#         app = super(HarvesterTest, self).create_app()
 #         app.config['PLUGINS'] = ['harvest']
 #         return app
+
+#     def test
 
 #     def test_harvest_all(self):
 #         backend = FakeBackend(HarvesterFactory())
