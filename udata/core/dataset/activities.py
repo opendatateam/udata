@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask.ext.security import current_user
-
+from udata.auth import current_user
 from udata.i18n import lazy_gettext as _
 from udata.models import db, Dataset, Activity
 from udata.core.activity.tasks import write_activity
@@ -38,7 +37,7 @@ class UserDeletedDataset(DatasetRelatedActivity, Activity):
 
 @Dataset.on_create.connect
 def on_user_created_dataset(dataset):
-    if not dataset.private and current_user.is_authenticated:
+    if not dataset.private and current_user and current_user.is_authenticated:
         user = current_user._get_current_object()
         organization = dataset.organization
         write_activity.delay(UserCreatedDataset, user, dataset, organization)
@@ -46,7 +45,7 @@ def on_user_created_dataset(dataset):
 
 @Dataset.on_update.connect
 def on_user_updated_dataset(dataset):
-    if not dataset.private and current_user.is_authenticated:
+    if not dataset.private and current_user and current_user.is_authenticated:
         user = current_user._get_current_object()
         organization = dataset.organization
         write_activity.delay(UserUpdatedDataset, user, dataset, organization)
@@ -54,7 +53,7 @@ def on_user_updated_dataset(dataset):
 
 @Dataset.on_delete.connect
 def on_user_deleted_dataset(dataset):
-    if not dataset.private and current_user.is_authenticated:
+    if not dataset.private and current_user and current_user.is_authenticated:
         user = current_user._get_current_object()
         organization = dataset.organization
         write_activity.delay(UserDeletedDataset, user, dataset, organization)
