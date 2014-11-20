@@ -12,6 +12,7 @@ class DatasetCsvAdapter(csv.Adapter):
         'id',
         'title',
         'slug',
+        ('url', 'external_url'),
         'organization',
         'supplier',
         'description',
@@ -28,8 +29,8 @@ class DatasetCsvAdapter(csv.Adapter):
         return csv.metric_fields(Dataset)
 
 
-def dataset_field(name):
-    return ('dataset.{0}'.format(name), name)
+def dataset_field(name, getter=None):
+    return ('dataset.{0}'.format(name), getter or name)
 
 
 class ResourcesCsvAdapter(csv.NestedAdapter):
@@ -37,6 +38,7 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         dataset_field('id'),
         dataset_field('title'),
         dataset_field('slug'),
+        dataset_field('url', 'external_url'),
         dataset_field('organization'),
         dataset_field('license'),
         dataset_field('private'),

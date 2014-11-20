@@ -14,6 +14,7 @@ from udata.models import Dataset, Activity, Site, Reuse
 from udata.utils import multi_to_dict
 
 from udata.core.activity.views import ActivityView
+from udata.core.dataset.csv import ResourcesCsvAdapter
 
 blueprint = I18nBlueprint('site', __name__)
 
@@ -92,6 +93,14 @@ def datasets_csv():
     datasets = search.iter(Dataset, **params)
     adapter = csv.get_adapter(Dataset)
     return csv.stream(adapter(datasets), 'datasets')
+
+
+@blueprint.route('/resources.csv')
+def resources_csv():
+    params = multi_to_dict(request.args)
+    params['facets'] = False
+    datasets = search.iter(Dataset, **params)
+    return csv.stream(ResourcesCsvAdapter(datasets), 'resources')
 
 
 class SiteView(object):

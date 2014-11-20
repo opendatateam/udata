@@ -5,7 +5,6 @@ define([
     'logger',
     'search/temporal-coverage-facet',
     'widgets/range-picker',
-    'widgets/export-btn'
 ], function(log) {
     'use strict';
 

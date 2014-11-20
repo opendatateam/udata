@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+
 from cStringIO import StringIO
 import itertools
 import unicodecsv
 
-from datetime import datetime
+from datetime import datetime, date
 
 from flask import Response, stream_with_context
 
@@ -20,6 +21,16 @@ CONFIG = {
     'delimiter': b';',
     'quotechar': b'"',
 }
+
+
+def safestr(value):
+    '''Ensure type to string serialization'''
+    if not value or isinstance(value, (int, float, bool, long)):
+        return value
+    elif isinstance(value, (date, datetime)):
+        return value.isoformat()
+    else:
+        return unicode(value)
 
 
 class Adapter(object):
@@ -58,7 +69,7 @@ class Adapter(object):
         '''Convert an object into a flat csv row'''
         row = []
         for name, getter in self.get_fields():
-            row.append(unicode(getter(obj)))
+            row.append(safestr(getter(obj)))
         return row
 
     def dynamic_fields(self):
@@ -98,7 +109,7 @@ class NestedAdapter(Adapter):
         '''Convert an object into a flat csv row'''
         row = self.to_row(obj)
         for name, getter in self.get_nested_fields():
-            row.append(unicode(getter(nested)))
+            row.append(safestr(getter(nested)))
         return row
 
     def nested_dynamic_fields(self):

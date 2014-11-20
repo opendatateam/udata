@@ -17,7 +17,12 @@
 
 {% block toolbar_container %}
 <div class="btn-toolbar search-toolbar" role="toolbar">
-{{ s.breadcrum_toolbar(datasets, 'site.datasets_csv', url=url,
+
+{{ s.breadcrum_toolbar(datasets, url=url,
+    exports=(
+        (_('Datasets'), 'site.datasets_csv', 'csv'),
+        (_('Resources'), 'site.resources_csv', 'csv'),
+    ),
     title=(_('Title'), 'asc'),
     created=(_('Creation date'), 'desc'),
     last_modified=(_('Last modification date'), 'desc'),

@@ -1,4 +1,4 @@
-{% macro breadcrum_toolbar(result, csv_endpoint=None, url=None) %}
+{% macro breadcrum_toolbar(result, url=None, exports=None) %}
 {% if kwargs %}
     {% set to_url = result.query.to_url %}
     {% if in_url('sort') %}
@@ -42,14 +42,25 @@
         <span class="fa fa-sort-amount-{{current_order}}"></span>
     </a>
 {% endif %}
-{% if result.total and csv_endpoint %}
-    <a class="btn btn-xs btn-warning pull-right export-btn" title="{{ _('Export') }}"
-        data-placement="bottom" tabindex="0">
-        <span class="fa fa-download"></span>
-        <link rel="alternate" type="text/csv" title="csv" href="{{ result.query.to_url(
-            url_for(csv_endpoint), facets=None, page=None, page_size=None, replace=true)
-        }}" />
-    </a>
+{% if result.total and exports %}
+    <div class="dropdown pull-right">
+        <button class="btn btn-xs btn-warning export-btn dropdown-toggle" type="button" id="export-btn" data-toggle="dropdown">
+            <span class="fa fa-download"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="export-btn">
+            <li role="presentation" class="dropdown-header">{{ _('Export') }}</li>
+            {% for label, endpoint, type in exports %}
+            <li role="presentation">
+                <a role="menuitem" tabindex="-1" href="{{ result.query.to_url(
+                    url_for(endpoint), facets=None, page=None, page_size=None, replace=true)
+                }}">
+                {{label}}
+                <span class="label label-primary">{{type}}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endif %}
 {% endmacro %}
 

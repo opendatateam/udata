@@ -249,6 +249,7 @@ class OrganizationBlueprintTest(FrontTestCase):
 
         self.assertEqual(header[0], 'id')
         self.assertIn('title', header)
+        self.assertIn('url', header)
         self.assertIn('description', header)
         self.assertIn('created_at', header)
         self.assertIn('last_modified', header)
@@ -286,6 +287,7 @@ class OrganizationBlueprintTest(FrontTestCase):
 
         self.assertEqual(header[0], 'dataset.id')
         self.assertIn('dataset.title', header)
+        self.assertIn('dataset.url', header)
         self.assertIn('title', header)
         self.assertIn('type', header)
         self.assertIn('url', header)
