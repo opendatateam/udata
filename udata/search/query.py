@@ -46,7 +46,13 @@ class SearchQuery(object):
 
     def iter(self):
         try:
-            result = es.scan(index=es.index_name, doc_type=self.adapter.doc_type(), body=self.get_body())
+            body = self.get_body()
+            # Remove facets and aggregations
+            if 'facets' in body:
+                del body['facets']
+            if 'aggs' in body:
+                del body['aggs']
+            result = es.scan(index=es.index_name, doc_type=self.adapter.doc_type(), body=body)
         except:
             log.exception('Unable to execute search query')
             result = None
