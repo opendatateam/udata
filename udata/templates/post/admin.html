@@ -33,4 +33,12 @@
         </table>
     </div>
 </div>
+<div class="row">
+    <div class="col-xs-12">
+        <a class="btn btn-success add-btn pull-right" href="{{ url_for('posts.new') }}">
+            <span class="fa fa-plus-circle"></span>
+            {{ _('Add a post') }}
+        </a>
+    </div>
+</div>
 {% endblock %}
