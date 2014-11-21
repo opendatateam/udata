@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-11-19 03:46+0100\n"
-"PO-Revision-Date: 2014-11-19 03:04+0000\n"
+"POT-Creation-Date: 2014-11-21 13:00+0100\n"
+"PO-Revision-Date: 2014-11-21 12:01+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -23,7 +23,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: udata/theme.py:38 udata/core/site/metrics.py:86
-#: udata/core/site/views.py:137 udata/templates/header.html:48
+#: udata/core/site/views.py:146 udata/templates/header.html:48
 #: udata/templates/search.html:35 udata/templates/dataset/search-panel.html:5
 #: udata/templates/organization/create.html:4
 #: udata/templates/organization/display_base.html:5
@@ -39,13 +39,14 @@ msgstr "Organisations"
 #: udata/theme.py:39 udata/core/organization/metrics.py:16
 #: udata/core/organization/views.py:118 udata/core/organization/views.py:121
 #: udata/core/reuse/metrics.py:20 udata/core/site/metrics.py:38
-#: udata/core/site/views.py:116 udata/core/user/metrics.py:25
-#: udata/templates/search.html:23 udata/templates/search.html:71
-#: udata/templates/search.html:80 udata/templates/dataset/create.html:4
+#: udata/core/site/views.py:125 udata/core/user/metrics.py:25
+#: udata/templates/search.html:23 udata/templates/search.html:53
+#: udata/templates/search.html:75 udata/templates/search.html:84
+#: udata/templates/dataset/create.html:4
 #: udata/templates/dataset/display.html:16
 #: udata/templates/dataset/edit_base.html:4
 #: udata/templates/dataset/followers.html:4
-#: udata/templates/dataset/list.html:9
+#: udata/templates/dataset/list.html:9 udata/templates/dataset/list.html:23
 #: udata/templates/dataset/resource/create.html:6
 #: udata/templates/dataset/resource/display.html:4
 #: udata/templates/dataset/resource/edit.html:6
@@ -68,12 +69,12 @@ msgstr "Jeux de données"
 #: udata/theme.py:40 udata/core/dataset/metrics.py:19
 #: udata/core/organization/metrics.py:33 udata/core/organization/views.py:140
 #: udata/core/organization/views.py:143 udata/core/site/metrics.py:48
-#: udata/core/site/views.py:122 udata/core/user/metrics.py:39
-#: udata/templates/search.html:29 udata/templates/search.html:55
-#: udata/templates/search.html:72 udata/templates/search.html:81
+#: udata/core/site/views.py:131 udata/core/user/metrics.py:39
+#: udata/templates/search.html:29 udata/templates/search.html:59
+#: udata/templates/search.html:76 udata/templates/search.html:85
 #: udata/templates/dataset/card.html:43
 #: udata/templates/dataset/display.html:70
-#: udata/templates/dataset/list.html:24
+#: udata/templates/dataset/list.html:29
 #: udata/templates/dataset/search-labels.html:23
 #: udata/templates/dataset/search-panel.html:16
 #: udata/templates/organization/display.html:49
@@ -142,22 +143,22 @@ msgstr "Bearer Token"
 msgid "Default scope"
 msgstr "Scope par défaut"
 
-#: udata/core/dataset/activities.py:23
+#: udata/core/dataset/activities.py:22
 msgid "created a dataset"
 msgstr "a créé un jeu de données"
 
-#: udata/core/dataset/activities.py:29
+#: udata/core/dataset/activities.py:28
 msgid "updated a dataset"
 msgstr "a mis à jour un jeu de données"
 
-#: udata/core/dataset/activities.py:36
+#: udata/core/dataset/activities.py:35
 msgid "deleted a dataset"
 msgstr "a supprimé un jeu de données"
 
 #: udata/core/dataset/forms.py:17 udata/core/dataset/forms.py:74
 #: udata/core/reuse/forms.py:16 udata/core/site/forms.py:15
-#: udata/templates/search.html:52 udata/templates/search.html:61
-#: udata/templates/dataset/list.html:21
+#: udata/templates/search.html:56 udata/templates/search.html:65
+#: udata/templates/dataset/list.html:26
 #: udata/templates/organization/list.html:22
 #: udata/templates/reuse/list.html:24 udata/templates/topic/datasets.html:26
 #: udata/templates/topic/reuses.html:25
@@ -378,7 +379,9 @@ msgid "Additionnal informations"
 msgstr "Informations additionnelles"
 
 #: udata/core/dataset/views.py:64 udata/core/site/metrics.py:58
-#: udata/core/site/views.py:128 udata/templates/dataset/display.html:58
+#: udata/core/site/views.py:137 udata/templates/search.html:54
+#: udata/templates/dataset/display.html:58
+#: udata/templates/dataset/list.html:24
 msgid "Resources"
 msgstr "Ressources"
 
@@ -393,8 +396,8 @@ msgid "Transfer"
 msgstr "Transferer"
 
 #: udata/core/followers/metrics.py:28 udata/core/organization/views.py:171
-#: udata/core/site/metrics.py:96 udata/templates/search.html:73
-#: udata/templates/search.html:82 udata/templates/dataset/followers.html:6
+#: udata/core/site/metrics.py:96 udata/templates/search.html:77
+#: udata/templates/search.html:86 udata/templates/dataset/followers.html:6
 #: udata/templates/dataset/search-labels.html:26
 #: udata/templates/dataset/search-panel.html:17
 #: udata/templates/dataset/search-result.html:88
@@ -466,7 +469,7 @@ msgstr "Jobs"
 
 #: udata/core/jobs/forms.py:30 udata/core/organization/forms.py:22
 #: udata/core/post/forms.py:16 udata/core/topic/forms.py:16
-#: udata/templates/search.html:70 udata/templates/api/admin.html:10
+#: udata/templates/search.html:74 udata/templates/api/admin.html:10
 #: udata/templates/jobs/admin.html:10 udata/templates/post/admin.html:9
 #: udata/templates/topic/admin.html:9 udata/templates/user/list.html:26
 msgid "Name"
@@ -571,7 +574,7 @@ msgstr "Equipes"
 msgid "Views"
 msgstr "Vues"
 
-#: udata/core/organization/views.py:161 udata/core/site/views.py:134
+#: udata/core/organization/views.py:161 udata/core/site/views.py:143
 msgid "Community"
 msgstr "Communauté"
 
@@ -692,7 +695,7 @@ msgstr "Taille du flux"
 msgid "Number of elements in feeds"
 msgstr "Nombre d'élements dans les flux"
 
-#: udata/core/site/metrics.py:76 udata/core/site/views.py:150
+#: udata/core/site/metrics.py:76 udata/core/site/views.py:159
 #: udata/templates/search.html:41 udata/templates/user/base.html:5
 #: udata/templates/user/edit_base.html:5
 #: udata/templates/user/following.html:18 udata/templates/user/list.html:9
@@ -727,11 +730,11 @@ msgstr "Maximum de réutilisations pour une organisation"
 msgid "Maximum organization datasets"
 msgstr "Maximum de jeux de données pour une organisation"
 
-#: udata/core/site/views.py:113
+#: udata/core/site/views.py:122
 msgid "Data"
 msgstr "Données"
 
-#: udata/core/site/views.py:143
+#: udata/core/site/views.py:152
 msgid "Public services"
 msgstr "Services publics"
 
@@ -911,16 +914,16 @@ msgstr "dd/MM/yyyy"
 msgid "%(start)s to %(end)s"
 msgstr "%(start)s à %(end)s"
 
-#: udata/models/datetime_fields.py:58 udata/templates/search.html:53
-#: udata/templates/search.html:62 udata/templates/dataset/list.html:22
+#: udata/models/datetime_fields.py:58 udata/templates/search.html:57
+#: udata/templates/search.html:66 udata/templates/dataset/list.html:27
 #: udata/templates/organization/list.html:23
 #: udata/templates/reuse/list.html:25 udata/templates/topic/datasets.html:27
 #: udata/templates/topic/reuses.html:26
 msgid "Creation date"
 msgstr "Date de création"
 
-#: udata/models/datetime_fields.py:59 udata/templates/search.html:54
-#: udata/templates/search.html:63 udata/templates/dataset/list.html:23
+#: udata/models/datetime_fields.py:59 udata/templates/search.html:58
+#: udata/templates/search.html:67 udata/templates/dataset/list.html:28
 #: udata/templates/organization/list.html:24
 #: udata/templates/reuse/list.html:26 udata/templates/topic/datasets.html:28
 #: udata/templates/topic/reuses.html:27
@@ -1084,35 +1087,35 @@ msgstr "recherche"
 msgid "Tag"
 msgstr "Tag"
 
-#: udata/templates/search.html:56 udata/templates/search.html:65
-#: udata/templates/dataset/card.html:51 udata/templates/dataset/list.html:25
+#: udata/templates/search.html:60 udata/templates/search.html:69
+#: udata/templates/dataset/card.html:51 udata/templates/dataset/list.html:30
 #: udata/templates/organization/card.html:51
 #: udata/templates/reuse/card.html:50 udata/templates/topic/datasets.html:30
 #: udata/templates/user/card.html:37
 msgid "Stars"
 msgstr "Favoris"
 
-#: udata/templates/search.html:64
+#: udata/templates/search.html:68
 msgid "Datasets used"
 msgstr "Jeux de données utilisés"
 
-#: udata/templates/search.html:78
+#: udata/templates/search.html:82
 msgid "Last Name"
 msgstr "Nom"
 
-#: udata/templates/search.html:79
+#: udata/templates/search.html:83
 msgid "First Name"
 msgstr "Prénom"
 
-#: udata/templates/search.html:102 udata/templates/search.html:129
-#: udata/templates/search.html:156 udata/templates/search.html:183
+#: udata/templates/search.html:106 udata/templates/search.html:133
+#: udata/templates/search.html:160 udata/templates/search.html:187
 #: udata/templates/topic/browse.html:34 udata/templates/topic/browse.html:54
 #, python-format
 msgid "See the %(total)s results"
 msgstr "Voir les %(total)s résultats"
 
-#: udata/templates/search.html:113 udata/templates/search.html:140
-#: udata/templates/search.html:167 udata/templates/search.html:194
+#: udata/templates/search.html:117 udata/templates/search.html:144
+#: udata/templates/search.html:171 udata/templates/search.html:198
 #: udata/templates/topic/browse.html:39 udata/templates/topic/browse.html:59
 msgid "No results found"
 msgstr "Aucun résultat trouvé"
@@ -1578,36 +1581,36 @@ msgstr "Croissant"
 msgid "Descending"
 msgstr "Décroissant"
 
-#: udata/templates/macros/search.html:46
+#: udata/templates/macros/search.html:51
 msgid "Export"
 msgstr "Exporter"
 
-#: udata/templates/macros/search.html:80
+#: udata/templates/macros/search.html:91
 msgid "Clear filter"
 msgstr "Effacer le filter"
 
-#: udata/templates/macros/search.html:135
+#: udata/templates/macros/search.html:146
 msgid "Yes"
 msgstr "Oui"
 
-#: udata/templates/macros/search.html:140
+#: udata/templates/macros/search.html:151
 msgid "No"
 msgstr "Non"
 
-#: udata/templates/macros/search.html:187
+#: udata/templates/macros/search.html:198
 msgid "to"
 msgstr "à"
 
-#: udata/templates/macros/search.html:207
+#: udata/templates/macros/search.html:218
 msgid "Apply"
 msgstr "Appliquer"
 
-#: udata/templates/macros/search.html:218
+#: udata/templates/macros/search.html:229
 #, python-format
 msgid "Results %(start)s to %(end)s on %(total)s found"
 msgstr "Résultats %(start)s à %(end)s sur %(total)s trouvés"
 
-#: udata/templates/macros/search.html:233
+#: udata/templates/macros/search.html:244
 msgid "No result found"
 msgstr "Aucun résultat trouvé"
 
@@ -1656,12 +1659,12 @@ msgstr "%(user)s a cloturé une anomalie sur votre %(type)s %(subject)s"
 msgid "See the issue"
 msgstr "Voir l'anomalie"
 
-#: udata/templates/mail/membership_refused.html:8
+#: udata/templates/mail/membership_refused.html:7
 #, python-format
 msgid "Your membership for the organization \"%(org)s\" has been refused"
 msgstr "Votre demande d'adhésion à l'organisation \"%(org)s\" a été refusée"
 
-#: udata/templates/mail/membership_refused.html:19
+#: udata/templates/mail/membership_refused.html:18
 msgid "Refusal reason"
 msgstr "Motif de refus"
 
@@ -1672,12 +1675,12 @@ msgid ""
 "membership request from %(user)s is pending for validation"
 msgstr "En tant qu'administrateur de \"%(org)s\" vous êtes informé qu'une nouvelle demande d'adhésion de %(user)s est en attente de validation"
 
-#: udata/templates/mail/membership_request.html:38
+#: udata/templates/mail/membership_request.html:40
 msgid "See the request"
 msgstr "Voir la demande"
 
-#: udata/templates/mail/new_follower.html:31
-#: udata/templates/mail/new_follower_org.html:38
+#: udata/templates/mail/new_follower.html:33
+#: udata/templates/mail/new_follower_org.html:40
 msgid "See his profile"
 msgstr "Voir son profil"
 
@@ -1696,26 +1699,26 @@ msgstr "%(user)s a soumis une nouvelle anomalie sur votre %(type)s %(subject)s"
 msgid "%(user)s commented an issue on your %(type)s %(subject)s"
 msgstr "%(user)s a commenté une anomalie sur votre %(type)s %(subject)s"
 
-#: udata/templates/mail/new_member.html:8
+#: udata/templates/mail/new_member.html:7
 #, python-format
 msgid "Congratulations, you are now a member of the organization \"%(org)s\""
 msgstr "Félicitations, vous êtes maintenant membre de l'organisation \"%(org)s\""
 
-#: udata/templates/mail/new_member.html:22
+#: udata/templates/mail/new_member.html:21
 msgid "See the organization page"
 msgstr "Voir la page de l'organisation"
 
-#: udata/templates/mail/new_reuse.html:6
+#: udata/templates/mail/new_reuse.html:7
 #, python-format
-msgid "A new reuse of your dataset \"%(dataset)s\" as been published"
-msgstr "Une nouvelle réutilisation de votre jeu de données \"%(dataset)s\" a été publiée"
+msgid "A new reuse of your dataset %(dataset)s has been published"
+msgstr "Une nouvelle réutilisation de votre jeu de données %(dataset)s a été publiée"
 
-#: udata/templates/mail/new_reuse.html:21
+#: udata/templates/mail/new_reuse.html:31
 #: udata/templates/reuse/display.html:104
 msgid "See the reuse"
 msgstr "Voir la réutilisation"
 
-#: udata/templates/mail/new_reuse.html:27
+#: udata/templates/mail/new_reuse.html:37
 msgid "See on the dataset page"
 msgstr "Voir sur la page du jeu de données"
 
@@ -1825,11 +1828,19 @@ msgstr "Réutilisations privées"
 msgid "See the %(nb)s datasets"
 msgstr "Voir les %(nb)s jeux de données"
 
-#: udata/templates/organization/display.html:99
+#: udata/templates/organization/display.html:100
 msgid "Download as CSV"
 msgstr "Télécharger en CSV"
 
-#: udata/templates/organization/display.html:126
+#: udata/templates/organization/display.html:105
+msgid "Datasets list"
+msgstr "Liste des jeux de données"
+
+#: udata/templates/organization/display.html:110
+msgid "Resources list"
+msgstr "Liste des ressources"
+
+#: udata/templates/organization/display.html:140
 #, python-format
 msgid "See the %(nb)s reuses"
 msgstr "Voir les %(nb)s réutilisations"
@@ -2006,6 +2017,10 @@ msgstr[1] "%(num)s membres"
 #: udata/templates/post/admin.html:10 udata/templates/topic/admin.html:10
 msgid "Last modified"
 msgstr "Dernière modification"
+
+#: udata/templates/post/admin.html:40
+msgid "Add a post"
+msgstr "Ajouter un article"
 
 #: udata/templates/post/display.html:13
 msgid "News"

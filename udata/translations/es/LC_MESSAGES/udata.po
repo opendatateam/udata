@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-11-19 03:46+0100\n"
-"PO-Revision-Date: 2014-11-05 01:29+0000\n"
+"POT-Creation-Date: 2014-11-21 13:00+0100\n"
+"PO-Revision-Date: 2014-11-20 03:42+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: Spanish "
 "(http://www.transifex.com/projects/p/udata/language/es/)\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
 
-#: udata/theme.py:38 udata/core/site/metrics.py:86 udata/core/site/views.py:137
+#: udata/theme.py:38 udata/core/site/metrics.py:86 udata/core/site/views.py:146
 #: udata/templates/header.html:48 udata/templates/search.html:35
 #: udata/templates/dataset/search-panel.html:5
 #: udata/templates/organization/create.html:4
@@ -37,12 +37,14 @@ msgstr "Organizaciones"
 #: udata/theme.py:39 udata/core/organization/metrics.py:16
 #: udata/core/organization/views.py:118 udata/core/organization/views.py:121
 #: udata/core/reuse/metrics.py:20 udata/core/site/metrics.py:38
-#: udata/core/site/views.py:116 udata/core/user/metrics.py:25
-#: udata/templates/search.html:23 udata/templates/search.html:71
-#: udata/templates/search.html:80 udata/templates/dataset/create.html:4
+#: udata/core/site/views.py:125 udata/core/user/metrics.py:25
+#: udata/templates/search.html:23 udata/templates/search.html:53
+#: udata/templates/search.html:75 udata/templates/search.html:84
+#: udata/templates/dataset/create.html:4
 #: udata/templates/dataset/display.html:16
 #: udata/templates/dataset/edit_base.html:4
 #: udata/templates/dataset/followers.html:4 udata/templates/dataset/list.html:9
+#: udata/templates/dataset/list.html:23
 #: udata/templates/dataset/resource/create.html:6
 #: udata/templates/dataset/resource/display.html:4
 #: udata/templates/dataset/resource/edit.html:6
@@ -65,11 +67,11 @@ msgstr "Conjunto de datos"
 #: udata/theme.py:40 udata/core/dataset/metrics.py:19
 #: udata/core/organization/metrics.py:33 udata/core/organization/views.py:140
 #: udata/core/organization/views.py:143 udata/core/site/metrics.py:48
-#: udata/core/site/views.py:122 udata/core/user/metrics.py:39
-#: udata/templates/search.html:29 udata/templates/search.html:55
-#: udata/templates/search.html:72 udata/templates/search.html:81
+#: udata/core/site/views.py:131 udata/core/user/metrics.py:39
+#: udata/templates/search.html:29 udata/templates/search.html:59
+#: udata/templates/search.html:76 udata/templates/search.html:85
 #: udata/templates/dataset/card.html:43 udata/templates/dataset/display.html:70
-#: udata/templates/dataset/list.html:24
+#: udata/templates/dataset/list.html:29
 #: udata/templates/dataset/search-labels.html:23
 #: udata/templates/dataset/search-panel.html:16
 #: udata/templates/organization/display.html:49
@@ -91,10 +93,8 @@ msgid "Map"
 msgstr "Map"
 
 #: udata/api/admin.py:12
-#, fuzzy
-#| msgid "About"
 msgid "OAuth"
-msgstr "Sobre"
+msgstr "OAuth"
 
 #: udata/api/oauth2.py:28
 msgid "Public"
@@ -140,22 +140,22 @@ msgstr ""
 msgid "Default scope"
 msgstr ""
 
-#: udata/core/dataset/activities.py:23
+#: udata/core/dataset/activities.py:22
 msgid "created a dataset"
 msgstr "ha creado un conjunto de datos"
 
-#: udata/core/dataset/activities.py:29
+#: udata/core/dataset/activities.py:28
 msgid "updated a dataset"
 msgstr "ha actualizado un conjunto de datos"
 
-#: udata/core/dataset/activities.py:36
+#: udata/core/dataset/activities.py:35
 msgid "deleted a dataset"
 msgstr "ha eliminado un conjunto de datos"
 
 #: udata/core/dataset/forms.py:17 udata/core/dataset/forms.py:74
 #: udata/core/reuse/forms.py:16 udata/core/site/forms.py:15
-#: udata/templates/search.html:52 udata/templates/search.html:61
-#: udata/templates/dataset/list.html:21
+#: udata/templates/search.html:56 udata/templates/search.html:65
+#: udata/templates/dataset/list.html:26
 #: udata/templates/organization/list.html:22 udata/templates/reuse/list.html:24
 #: udata/templates/topic/datasets.html:26 udata/templates/topic/reuses.html:25
 msgid "Title"
@@ -272,7 +272,7 @@ msgstr ""
 
 #: udata/core/dataset/forms.py:84
 msgid "Size"
-msgstr ""
+msgstr "Tamaño"
 
 #: udata/core/dataset/forms.py:84
 msgid "The file size in bytes"
@@ -378,7 +378,8 @@ msgid "Additionnal informations"
 msgstr "Informaciones adicionales"
 
 #: udata/core/dataset/views.py:64 udata/core/site/metrics.py:58
-#: udata/core/site/views.py:128 udata/templates/dataset/display.html:58
+#: udata/core/site/views.py:137 udata/templates/search.html:54
+#: udata/templates/dataset/display.html:58 udata/templates/dataset/list.html:24
 msgid "Resources"
 msgstr "Recursos"
 
@@ -393,8 +394,8 @@ msgid "Transfer"
 msgstr "Transferir"
 
 #: udata/core/followers/metrics.py:28 udata/core/organization/views.py:171
-#: udata/core/site/metrics.py:96 udata/templates/search.html:73
-#: udata/templates/search.html:82 udata/templates/dataset/followers.html:6
+#: udata/core/site/metrics.py:96 udata/templates/search.html:77
+#: udata/templates/search.html:86 udata/templates/dataset/followers.html:6
 #: udata/templates/dataset/search-labels.html:26
 #: udata/templates/dataset/search-panel.html:17
 #: udata/templates/dataset/search-result.html:88
@@ -413,17 +414,14 @@ msgid "Followers"
 msgstr "Seguidores"
 
 #: udata/core/followers/tasks.py:22 udata/templates/mail/new_follower.html:8
-#, fuzzy, python-format
-#| msgid "%(num)s follower"
-#| msgid_plural "%(num)s followers"
+#, python-format
 msgid "%(user)s followed you"
-msgstr "%(num)s seguidor"
+msgstr ""
 
 #: udata/core/followers/tasks.py:25
-#, fuzzy, python-format
-#| msgid "followed an organization"
+#, python-format
 msgid "%(user)s followed your organization"
-msgstr "ha seguido una organización "
+msgstr ""
 
 #: udata/core/issues/forms.py:13 udata/core/issues/forms.py:18
 #: udata/core/organization/forms.py:48 udata/core/organization/forms.py:52
@@ -468,7 +466,7 @@ msgstr ""
 
 #: udata/core/jobs/forms.py:30 udata/core/organization/forms.py:22
 #: udata/core/post/forms.py:16 udata/core/topic/forms.py:16
-#: udata/templates/search.html:70 udata/templates/api/admin.html:10
+#: udata/templates/search.html:74 udata/templates/api/admin.html:10
 #: udata/templates/jobs/admin.html:10 udata/templates/post/admin.html:9
 #: udata/templates/topic/admin.html:9 udata/templates/user/list.html:26
 msgid "Name"
@@ -549,22 +547,17 @@ msgid "Refused"
 msgstr "Rechazado"
 
 #: udata/core/organization/tasks.py:30
-#, fuzzy
-#| msgid "Membership request"
 msgid "New membership request"
-msgstr "Solicitud de membresía"
+msgstr ""
 
 #: udata/core/organization/tasks.py:36 udata/core/organization/tasks.py:44
-#, fuzzy, python-format
-#| msgid "You are a member of this organization"
+#, python-format
 msgid "You are now a member of the organization \"%(org)s\""
-msgstr "Usted es un miembro de esta organización"
+msgstr ""
 
 #: udata/core/organization/tasks.py:38
-#, fuzzy
-#| msgid "Membership request"
 msgid "Membership refused"
-msgstr "Solicitud de membresía"
+msgstr ""
 
 #: udata/core/organization/views.py:38
 msgid "Membership request"
@@ -578,7 +571,7 @@ msgstr "Equipos"
 msgid "Views"
 msgstr ""
 
-#: udata/core/organization/views.py:161 udata/core/site/views.py:134
+#: udata/core/organization/views.py:161 udata/core/site/views.py:143
 msgid "Community"
 msgstr "Comunidad"
 
@@ -607,7 +600,7 @@ msgstr "Reutilizaciones asociadas"
 
 #: udata/core/post/forms.py:23 udata/core/reuse/forms.py:23
 msgid "Image"
-msgstr ""
+msgstr "Imagen"
 
 #: udata/core/post/forms.py:26
 msgid "Image credits"
@@ -700,7 +693,7 @@ msgstr "Granulometría de entrada"
 msgid "Number of elements in feeds"
 msgstr "Número de elementos de granularidad"
 
-#: udata/core/site/metrics.py:76 udata/core/site/views.py:150
+#: udata/core/site/metrics.py:76 udata/core/site/views.py:159
 #: udata/templates/search.html:41 udata/templates/user/base.html:5
 #: udata/templates/user/edit_base.html:5 udata/templates/user/following.html:18
 #: udata/templates/user/list.html:9
@@ -735,11 +728,11 @@ msgstr ""
 msgid "Maximum organization datasets"
 msgstr ""
 
-#: udata/core/site/views.py:113
+#: udata/core/site/views.py:122
 msgid "Data"
 msgstr "Datos"
 
-#: udata/core/site/views.py:143
+#: udata/core/site/views.py:152
 msgid "Public services"
 msgstr "Servicios públicos"
 
@@ -818,7 +811,7 @@ msgstr "Apellido"
 
 #: udata/core/user/forms.py:22
 msgid "Avatar"
-msgstr ""
+msgstr "Avatar"
 
 #: udata/core/user/forms.py:24
 msgid "About"
@@ -845,10 +838,8 @@ msgid "Site moderator"
 msgstr "Moderador del sitio"
 
 #: udata/core/user/tasks.py:15
-#, fuzzy
-#| msgid "Details"
 msgid "Test mail"
-msgstr "Detalles"
+msgstr ""
 
 #: udata/core/user/views.py:35 udata/templates/header.html:45
 msgid "Profile"
@@ -926,15 +917,15 @@ msgstr ""
 "%(start)s hasta %(end)s\n"
 " "
 
-#: udata/models/datetime_fields.py:58 udata/templates/search.html:53
-#: udata/templates/search.html:62 udata/templates/dataset/list.html:22
+#: udata/models/datetime_fields.py:58 udata/templates/search.html:57
+#: udata/templates/search.html:66 udata/templates/dataset/list.html:27
 #: udata/templates/organization/list.html:23 udata/templates/reuse/list.html:25
 #: udata/templates/topic/datasets.html:27 udata/templates/topic/reuses.html:26
 msgid "Creation date"
 msgstr "Fecha de creación"
 
-#: udata/models/datetime_fields.py:59 udata/templates/search.html:54
-#: udata/templates/search.html:63 udata/templates/dataset/list.html:23
+#: udata/models/datetime_fields.py:59 udata/templates/search.html:58
+#: udata/templates/search.html:67 udata/templates/dataset/list.html:28
 #: udata/templates/organization/list.html:24 udata/templates/reuse/list.html:26
 #: udata/templates/topic/datasets.html:28 udata/templates/topic/reuses.html:27
 msgid "Last modification date"
@@ -1116,34 +1107,34 @@ msgstr "buscar"
 msgid "Tag"
 msgstr "Etiqueta"
 
-#: udata/templates/search.html:56 udata/templates/search.html:65
-#: udata/templates/dataset/card.html:51 udata/templates/dataset/list.html:25
+#: udata/templates/search.html:60 udata/templates/search.html:69
+#: udata/templates/dataset/card.html:51 udata/templates/dataset/list.html:30
 #: udata/templates/organization/card.html:51 udata/templates/reuse/card.html:50
 #: udata/templates/topic/datasets.html:30 udata/templates/user/card.html:37
 msgid "Stars"
 msgstr "Estrellas"
 
-#: udata/templates/search.html:64
+#: udata/templates/search.html:68
 msgid "Datasets used"
 msgstr "Conjuntos de datos usados"
 
-#: udata/templates/search.html:78
+#: udata/templates/search.html:82
 msgid "Last Name"
 msgstr "Apellido"
 
-#: udata/templates/search.html:79
+#: udata/templates/search.html:83
 msgid "First Name"
 msgstr "Nombre"
 
-#: udata/templates/search.html:102 udata/templates/search.html:129
-#: udata/templates/search.html:156 udata/templates/search.html:183
+#: udata/templates/search.html:106 udata/templates/search.html:133
+#: udata/templates/search.html:160 udata/templates/search.html:187
 #: udata/templates/topic/browse.html:34 udata/templates/topic/browse.html:54
 #, python-format
 msgid "See the %(total)s results"
 msgstr "Ver los %(total)s resultados"
 
-#: udata/templates/search.html:113 udata/templates/search.html:140
-#: udata/templates/search.html:167 udata/templates/search.html:194
+#: udata/templates/search.html:117 udata/templates/search.html:144
+#: udata/templates/search.html:171 udata/templates/search.html:198
 #: udata/templates/topic/browse.html:39 udata/templates/topic/browse.html:59
 msgid "No results found"
 msgstr "Resultados no encontrados"
@@ -1153,10 +1144,8 @@ msgid "Administration"
 msgstr "Administración"
 
 #: udata/templates/api/admin.html:11
-#, fuzzy
-#| msgid "Pagination"
 msgid "Maintainer"
-msgstr "Paginación"
+msgstr ""
 
 #: udata/templates/api/admin.html:30 udata/templates/dataset/display.html:25
 #: udata/templates/dataset/resource/display.html:12
@@ -1217,10 +1206,8 @@ msgid "Read your profile, the orgnization you belong to, your publications"
 msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:45
-#, fuzzy
-#| msgid "Publish as"
 msgid "Publish data"
-msgstr "Publicar como"
+msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:46
 msgid "Publish datasets, reuses, follow or unfollow"
@@ -1237,10 +1224,8 @@ msgid "Refuse"
 msgstr "Rechazar"
 
 #: udata/templates/api/oauth_error.html:8
-#, fuzzy
-#| msgid "Authentication"
 msgid "OAuth Authentication Error"
-msgstr "Autentificación "
+msgstr ""
 
 #: udata/templates/dataset/card.html:11
 #: udata/templates/dataset/search-result.html:11
@@ -1619,36 +1604,36 @@ msgstr "Ascendente"
 msgid "Descending"
 msgstr "Descendiente"
 
-#: udata/templates/macros/search.html:46
+#: udata/templates/macros/search.html:51
 msgid "Export"
 msgstr "Exportar"
 
-#: udata/templates/macros/search.html:80
+#: udata/templates/macros/search.html:91
 msgid "Clear filter"
 msgstr "Eliminar filtro"
 
-#: udata/templates/macros/search.html:135
+#: udata/templates/macros/search.html:146
 msgid "Yes"
 msgstr "Sí"
 
-#: udata/templates/macros/search.html:140
+#: udata/templates/macros/search.html:151
 msgid "No"
 msgstr "No"
 
-#: udata/templates/macros/search.html:187
+#: udata/templates/macros/search.html:198
 msgid "to"
 msgstr "hacia"
 
-#: udata/templates/macros/search.html:207
+#: udata/templates/macros/search.html:218
 msgid "Apply"
 msgstr "Aplicar "
 
-#: udata/templates/macros/search.html:218
+#: udata/templates/macros/search.html:229
 #, python-format
 msgid "Results %(start)s to %(end)s on %(total)s found"
 msgstr "Resultados encontrados de %(start)s hasta %(end)s en %(total)s"
 
-#: udata/templates/macros/search.html:233
+#: udata/templates/macros/search.html:244
 msgid "No result found"
 msgstr "Resultado no encontrado"
 
@@ -1682,10 +1667,9 @@ msgid "See you soon on the platform"
 msgstr ""
 
 #: udata/templates/mail/base.html:19
-#, fuzzy, python-format
-#| msgid "%(site)s search"
+#, python-format
 msgid "The %(site)s team"
-msgstr "%(site)s buscar"
+msgstr ""
 
 #: udata/templates/mail/issue_closed.html:6
 #, python-format
@@ -1695,17 +1679,15 @@ msgstr ""
 #: udata/templates/mail/issue_closed.html:44
 #: udata/templates/mail/new_issue.html:36
 #: udata/templates/mail/new_issue_comment.html:44
-#, fuzzy
-#| msgid "See the reuse"
 msgid "See the issue"
-msgstr "Ver esta reutilización"
+msgstr ""
 
-#: udata/templates/mail/membership_refused.html:8
+#: udata/templates/mail/membership_refused.html:7
 #, python-format
 msgid "Your membership for the organization \"%(org)s\" has been refused"
 msgstr ""
 
-#: udata/templates/mail/membership_refused.html:19
+#: udata/templates/mail/membership_refused.html:18
 msgid "Refusal reason"
 msgstr ""
 
@@ -1716,22 +1698,19 @@ msgid ""
 "membership request from %(user)s is pending for validation"
 msgstr ""
 
-#: udata/templates/mail/membership_request.html:38
-#, fuzzy
-#| msgid "See the reuse"
+#: udata/templates/mail/membership_request.html:40
 msgid "See the request"
-msgstr "Ver esta reutilización"
+msgstr "Ver esta solicitud"
 
-#: udata/templates/mail/new_follower.html:31
-#: udata/templates/mail/new_follower_org.html:38
+#: udata/templates/mail/new_follower.html:33
+#: udata/templates/mail/new_follower_org.html:40
 msgid "See his profile"
 msgstr ""
 
 #: udata/templates/mail/new_follower_org.html:8
-#, fuzzy, python-format
-#| msgid "followed an organization"
+#, python-format
 msgid "%(user)s followed your organization %(org)s"
-msgstr "ha seguido una organización "
+msgstr ""
 
 #: udata/templates/mail/new_issue.html:6
 #, python-format
@@ -1743,33 +1722,28 @@ msgstr ""
 msgid "%(user)s commented an issue on your %(type)s %(subject)s"
 msgstr ""
 
-#: udata/templates/mail/new_member.html:8
-#, fuzzy, python-format
-#| msgid "You are a member of this organization"
-msgid "Congratulations, you are now a member of the organization \"%(org)s\""
-msgstr "Usted es un miembro de esta organización"
-
-#: udata/templates/mail/new_member.html:22
-#, fuzzy
-#| msgid "created an organization"
-msgid "See the organization page"
-msgstr "ha creado una organización"
-
-#: udata/templates/mail/new_reuse.html:6
+#: udata/templates/mail/new_member.html:7
 #, python-format
-msgid "A new reuse of your dataset \"%(dataset)s\" as been published"
+msgid "Congratulations, you are now a member of the organization \"%(org)s\""
 msgstr ""
 
-#: udata/templates/mail/new_reuse.html:21
+#: udata/templates/mail/new_member.html:21
+msgid "See the organization page"
+msgstr ""
+
+#: udata/templates/mail/new_reuse.html:7
+#, python-format
+msgid "A new reuse of your dataset %(dataset)s has been published"
+msgstr ""
+
+#: udata/templates/mail/new_reuse.html:31
 #: udata/templates/reuse/display.html:104
 msgid "See the reuse"
 msgstr "Ver esta reutilización"
 
-#: udata/templates/mail/new_reuse.html:27
-#, fuzzy
-#| msgid "Recent datasets"
+#: udata/templates/mail/new_reuse.html:37
 msgid "See on the dataset page"
-msgstr "Conjuntos de datos recientes"
+msgstr ""
 
 #: udata/templates/mail/test.html:4
 msgid "This is a test mail"
@@ -1874,11 +1848,19 @@ msgstr ""
 msgid "See the %(nb)s datasets"
 msgstr ""
 
-#: udata/templates/organization/display.html:99
+#: udata/templates/organization/display.html:100
 msgid "Download as CSV"
 msgstr "Descargar como CSV"
 
-#: udata/templates/organization/display.html:126
+#: udata/templates/organization/display.html:105
+msgid "Datasets list"
+msgstr ""
+
+#: udata/templates/organization/display.html:110
+msgid "Resources list"
+msgstr ""
+
+#: udata/templates/organization/display.html:140
 #, python-format
 msgid "See the %(nb)s reuses"
 msgstr ""
@@ -2066,6 +2048,10 @@ msgstr[1] "%(num)s miembros"
 msgid "Last modified"
 msgstr "Última modificación"
 
+#: udata/templates/post/admin.html:40
+msgid "Add a post"
+msgstr ""
+
 #: udata/templates/post/display.html:13
 msgid "News"
 msgstr "Noticias"
@@ -2215,7 +2201,7 @@ msgstr "Ver más"
 
 #: udata/templates/topic/display_base.html:7
 msgid "topic"
-msgstr ""
+msgstr "tema"
 
 #: udata/templates/topic/display_base.html:19
 msgid "Related tags"
