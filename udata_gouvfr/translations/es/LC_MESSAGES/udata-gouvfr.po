@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-11-19 03:46+0100\n"
+"POT-Creation-Date: 2014-11-21 13:00+0100\n"
 "PO-Revision-Date: 2014-09-19 10:58+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/udata-"
@@ -602,101 +602,101 @@ msgstr "Usted puede crear una nueva organización si la suya no existe aun. "
 #~ msgstr ""
 
 #~ msgid "Join"
-#~ msgstr "%(num)d conjuntos de datos"
+#~ msgstr ""
 
 #~ msgid "Waiting for approval"
-#~ msgstr "%(num)d miembro"
+#~ msgstr ""
 
 #~ msgid "Pending request"
-#~ msgstr "%(num)d miembros"
+#~ msgstr "%(num)d conjuntos de datos"
 
 #~ msgid "You are an administrator of this organization"
-#~ msgstr "%(num)d seguidor"
+#~ msgstr "%(num)d miembro"
 
 #~ msgid "Administrator"
-#~ msgstr "%(num)d seguidores"
+#~ msgstr "%(num)d miembros"
 
 #~ msgid "You are editor in this organization"
-#~ msgstr "%(num)d reutilización"
+#~ msgstr "%(num)d seguidor"
 
 #~ msgid "Editor"
-#~ msgstr "%(num)d reutilizaciones"
+#~ msgstr "%(num)d seguidores"
 
 #~ msgid "You are a member of this organization"
-#~ msgstr "Actividades recientes"
+#~ msgstr "%(num)d reutilización"
 
 #~ msgid "Member"
-#~ msgstr "Yo hago parte de esta organización"
+#~ msgstr "%(num)d reutilizaciones"
 
 #~ msgid "Supplied datasets"
-#~ msgstr "Unase "
+#~ msgstr "Actividades recientes"
 
 #~ msgid "Private datasets"
-#~ msgstr "A la espera de aprobación"
+#~ msgstr "Yo hago parte de esta organización"
 
 #~ msgid "Private reuses"
-#~ msgstr "Solicitud pendiente"
+#~ msgstr "Unase "
 
 #~ msgid "Members"
-#~ msgstr "Usted es un administrador de esta organización"
+#~ msgstr "A la espera de aprobación"
 
 #~ msgid "Followers"
-#~ msgstr "Administrador"
+#~ msgstr "Solicitud pendiente"
 
 #~ msgid "Activity"
-#~ msgstr "Usted es editor de esta organización"
+#~ msgstr "Usted es un administrador de esta organización"
 
 #~ msgid "See the %(nb)s datasets"
-#~ msgstr "Editor"
+#~ msgstr "Administrador"
 
 #~ msgid "Download as CSV"
-#~ msgstr "Usted es un miembro de esta organización"
+#~ msgstr "Usted es editor de esta organización"
 
 #~ msgid "See the %(nb)s reuses"
-#~ msgstr "Miembro"
+#~ msgstr "Editor"
 
 #~ msgid "Metadata quality"
-#~ msgstr "Conjuntos de datos suministrados"
+#~ msgstr "Usted es un miembro de esta organización"
 
 #~ msgid "Go to the report page"
-#~ msgstr "Conjuntos de datos privados"
+#~ msgstr "Miembro"
 
 #~ msgid "Performance"
-#~ msgstr "Reutilizaciones privadas"
+#~ msgstr "Conjuntos de datos suministrados"
 
 #~ msgid "%(nb)s warning"
-#~ msgstr "Miembros"
+#~ msgstr "Conjuntos de datos privados"
 
 #~ msgid "%(nb)s warnings"
-#~ msgstr "Seguidores"
+#~ msgstr "Reutilizaciones privadas"
 
 #~ msgid "No warning"
-#~ msgstr "Actividad"
+#~ msgstr "Miembros"
 
 #~ msgid "%(nb)s error"
-#~ msgstr "Calidad de los metadatos"
+#~ msgstr "Seguidores"
 
 #~ msgid "%(nb)s errors"
-#~ msgstr "Ir a la página de reporte"
+#~ msgstr "Actividad"
 
 #~ msgid "No error"
-#~ msgstr "Desempeño"
+#~ msgstr "Calidad de los metadatos"
 
 #~ msgid "%(nb)s critical"
-#~ msgstr "%(nb)s advertencia"
+#~ msgstr "Ir a la página de reporte"
 
 #~ msgid "%(nb)s criticals"
-#~ msgstr "%(nb)s advertencias"
+#~ msgstr "Desempeño"
 
 #~ msgid "No critical"
-#~ msgstr "Ninguna advertencia"
+#~ msgstr "%(nb)s advertencia"
 
 #~ msgid "No report available"
-#~ msgstr "%(nb)s error"
+#~ msgstr "%(nb)s advertencias"
 
 #~ msgid "Improve quality"
-#~ msgstr "%(nb)s errores"
+#~ msgstr "Ninguna advertencia"
 
 #~ msgid "Improve"
-#~ msgstr "Ningún error"
+#~ msgstr "%(nb)s error"
 
