@@ -25,6 +25,7 @@ class UserSearch(ModelSearchAdapter):
             'organizations': {'type': 'string', 'index_name': 'organization'},
             'visible': {'type': 'boolean'},
             'metrics': metrics_mapping(User),
+            'created': {'type': 'date', 'format': 'date_hour_minute_second'},
             'user_suggest': {
                 'type': 'completion',
                 'index_analyzer': 'simple',
@@ -45,6 +46,7 @@ class UserSearch(ModelSearchAdapter):
         'datasets': Sort('metrics.datasets'),
         'reuses': Sort('metrics.reuses'),
         'followers': Sort('metrics.followers'),
+        'created': Sort('created'),
     }
     facets = {
         'organization': ModelTermFacet('organizations', Organization),
@@ -65,6 +67,7 @@ class UserSearch(ModelSearchAdapter):
             'about': user.about,
             'organizations': [str(o.id) for o in user.organizations],
             'metrics': user.metrics,
+            'created': user.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             'user_suggest': {
                 'input': [user.first_name, user.last_name],
                 'payload': {

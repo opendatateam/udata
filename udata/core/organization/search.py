@@ -27,6 +27,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
         'reuses': search.Sort('metrics.reuses'),
         'datasets': search.Sort('metrics.datasets'),
         'followers': search.Sort('metrics.followers'),
+        'created': search.Sort('created'),
     }
     facets = {
         'reuses': search.RangeFacet('metrics.reuses'),
@@ -45,6 +46,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
             },
             'description': {'type': 'string', 'analyzer': search.i18n_analyzer},
             'url': {'type': 'string'},
+            'created': {'type': 'date', 'format': 'date_hour_minute_second'},
             'metrics': search.metrics_mapping(Organization),
             'org_suggest': {
                 'type': 'completion',
@@ -72,6 +74,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
             'description': organization.description,
             'url': organization.url,
             'metrics': organization.metrics,
+            'created': organization.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             'org_suggest': {
                 'input': cls.completer_tokenize(organization.name),
                 'output': organization.name,
