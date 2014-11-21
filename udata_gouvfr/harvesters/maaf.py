@@ -8,21 +8,18 @@ import re
 from collections import OrderedDict
 from urlparse import urljoin
 
-import dateutil.parser
-import slugify
+import chardet
 
-# from bson import ObjectId
 from lxml import etree, html
-from biryani import baseconv as conv
-from voluptuous import Schema, Required, Optional, All, Any, Lower, In, Length, Invalid, MultipleInvalid
+from voluptuous import Schema, Required, Optional, All, Any, Lower, In, Length, MultipleInvalid
 
 from udata.models import db, Dataset, License, Resource, Checksum, SpatialCoverage, Territory
 from udata.ext.harvest import backends
+from udata.ext.harvest.filters import boolean, email, to_date, taglist, force_list, normalize_string, is_url
 from udata.utils import get_by
 
 
 log = logging.getLogger(__name__)
-
 
 GRANULARITIES = {
     'commune': 'town',
@@ -63,50 +60,11 @@ vous trouverez  la procédure à suivre pour éviter une telle alerte à l'adres
 http://www.ssi.gouv.fr/fr/anssi/services-securises/igc-a/modalites-de-verification-du-certificat-de-l-igc-a-rsa-4096.html
 '''
 
-
-def to_date(value):
-    return dateutil.parser.parse(value).date()
-
-
-def email(value):
-    if not '@' in value:
-        raise Invalid('This email is invalid.')
-    return value
-
-
-def slug(value):
-    return slugify.slugify(value, separator='-')
-
-
-def taglist(value):
-    return [slugify.slugify(t, separator='-') for t in value.split(',')]
-
-
-def force_list(value):
-    if not isinstance(value, (list, tuple)):
-        return [value]
-    return value
-
-
-def wrap_conv(func):
-    def wrapper(value):
-        value, errors = func(value)
-        if errors:
-            raise Invalid(errors)
-        return value
-    return wrapper
-
-
-boolean = wrap_conv(conv.guess_bool)
-cleanup_text = wrap_conv(conv.cleanup_text)
-to_url = wrap_conv(conv.clean_str_to_url(full=True))
-
-
 schema = Schema({
     Optional('digest'): All(basestring, Length(min=1)),
     'metadata': {
-        'author': int,
-        'author_email': Any(All(int, email), None),
+        'author': basestring,
+        'author_email': Any(All(basestring, email), None),
         'extras': [{
             'key': basestring,
             'value': basestring
@@ -117,15 +75,15 @@ schema = Schema({
         'license_id': Any('fr-lo'),
         'maintainer': Any(basestring, None),
         'maintainer_email': Any(All(basestring, email), None),
-        'notes': All(basestring, cleanup_text),
+        'notes': All(basestring, normalize_string),
         'organization': basestring,
         'private': boolean,
         'resources': All(force_list, [{
             'name': basestring,
-            'description': All(basestring, cleanup_text),
+            'description': All(basestring, normalize_string),
             'format': All(basestring, Lower, Any('cle', 'csv', 'pdf', 'txt')),
             Optional('last_modified'): All(basestring, to_date),
-            'url': All(basestring, to_url),
+            'url': All(basestring, is_url(full=True)),
         }]),
         'state': Any(basestring, None),
         'supplier': basestring,
@@ -174,14 +132,15 @@ class MaafBackend(backends.BaseBackend):
                 if href.endswith('/'):
                     directories.append(urljoin(directory, href))
                 elif href.lower().endswith('.xml'):
-                    self.enqueue(urljoin(directory, href))
+                    self.add_item(urljoin(directory, href))
                 else:
                     log.debug('Skip %s', href)
 
-    def process(self, url, *args, **kwargs):
-        log.debug('Processing URL: %s', url)
-        response = self.get(url)
-        xml = self.parse_xml(response.text)
+    def process(self, item):
+        log.debug('Processing URL: %s', item.remote_id)
+        response = self.get(item.remote_id)
+        encoding = chardet.detect(response.content)['encoding']
+        xml = self.parse_xml(response.content.decode(encoding))
         metadata = xml['metadata']
 
         dataset, created = Dataset.objects.get_or_create(extras__remote_id=metadata['id'], auto_save=False)
@@ -227,7 +186,7 @@ class MaafBackend(backends.BaseBackend):
             else:
                 resource = Resource(
                     title=row['name'],
-                    description=row['description'] + '\n' + SSL_COMMENT,
+                    description=(row['description'] + '\n\n' + SSL_COMMENT).strip(),
                     type='remote',
                     url=row['url'],
                     format=row['format']
@@ -238,7 +197,7 @@ class MaafBackend(backends.BaseBackend):
                     resource.modified = row['last_modified']
                 dataset.resources.append(resource)
 
-        dataset.extras.update((r['key'], r['value']) for r in metadata['extras'])
+        dataset.extras['remote_id'] = metadata['id']
         if metadata.get('author'):
             dataset.extras['author'] = metadata['author']
         if metadata.get('author_email'):
@@ -247,6 +206,8 @@ class MaafBackend(backends.BaseBackend):
             dataset.extras['maintainer'] = metadata['maintainer']
         if metadata.get('maintainer_email'):
             dataset.extras['maintainer_email'] = metadata['maintainer_email']
+        for extra in metadata['extras']:
+            dataset.extras[extra['key']] = extra['value']
 
         return dataset
 
