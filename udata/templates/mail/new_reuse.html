@@ -4,11 +4,11 @@
 
 {% block body %}
 <p style="margin: 0;padding: 0;">{{
-    _('A new reuse of your dataset %(dataset)s as been published',
+    _('A new reuse of your dataset %(dataset)s has been published',
         dataset=(
             '<a href="'|safe
             + dataset.external_url
-            + '">'|safe
+            + '" style="text-decoration: none;">'|safe
             + dataset.title
             + '</a>'|safe
         )
