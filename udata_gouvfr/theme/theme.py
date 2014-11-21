@@ -15,7 +15,7 @@ from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, Reuse, Post
 
 
-RE_POST_IMG = re.compile(r'\<img .* src="(?P<src>.+\.(?:png|jpg))" .* />(?P<content>.+)')
+RE_POST_IMG = re.compile(r'\<img .* src="https?:(?P<src>.+\.(?:png|jpg))" .* />(?P<content>.+)')
 
 
 @theme.admin_form
