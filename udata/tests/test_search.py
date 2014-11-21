@@ -982,7 +982,6 @@ class TestTemporalCoverageFacet(TestCase):
             }
         }])
 
-
     def test_labelize(self):
         label = self.facet.labelize('label', '1940-01-01-2014-12-31')
         expected = 'label: {0} - {1}'.format(

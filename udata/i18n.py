@@ -130,7 +130,7 @@ def language(lang_code):
 def get_locale():
     if hasattr(g, 'lang_code'):
         return g.lang_code
-    return default_lang
+    return str(default_lang)
 
 
 def init_app(app):
