@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import logging
 
-from celery import Celery, Task
+from celery import Celery, Task, chord, group
 from celery.utils.log import get_task_logger
 from celerybeatmongo.schedulers import MongoScheduler
 
