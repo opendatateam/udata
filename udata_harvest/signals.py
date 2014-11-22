@@ -15,6 +15,12 @@ harvest_source_created = ns.signal('harvest:source-created')
 #: Sent when a HarvestSource is deleted
 harvest_source_deleted = ns.signal('harvest:source-deleted')
 
+#: Run before each harvest job
+before_harvest_job = ns.signal('harvest:before-job')
+
+#: Run before each harvest job
+after_harvest_job = ns.signal('harvest:after-job')
+
 #: Sent when a new HarvestJob started
 harvest_job_started = ns.signal('harvest:job-started')
 

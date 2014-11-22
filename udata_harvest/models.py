@@ -47,18 +47,22 @@ class HarvestError(db.EmbeddedDocument):
 class HarvestItem(db.EmbeddedDocument):
     remote_id = db.StringField()
     status = db.StringField(choices=HARVEST_ITEM_STATUS.keys(), default=DEFAULT_HARVEST_ITEM_STATUS, required=True)
+    created = db.DateTimeField(default=datetime.now, required=True)
     started = db.DateTimeField()
     ended = db.DateTimeField()
     errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
+    args = db.ListField(db.StringField())
+    kwargs = db.DictField()
 
 
 class HarvestJob(db.Document):
     '''Keep track of harvestings'''
     created = db.DateTimeField(default=datetime.now, required=True)
     started = db.DateTimeField()
-    finished = db.DateTimeField()
+    ended = db.DateTimeField()
     status = db.StringField(choices=HARVEST_JOB_STATUS.keys(), default=DEFAULT_HARVEST_JOB_STATUS, required=True)
     errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
+    items = db.ListField(db.EmbeddedDocumentField(HarvestItem))
 
 
 class HarvestSource(db.Document):
@@ -68,6 +72,7 @@ class HarvestSource(db.Document):
     url = db.StringField()
     backend = db.StringField()
     config = db.DictField()
+    periodic_task = db.ReferenceField('PeriodicTask', reverse_delete_rule=db.NULLIFY)
     jobs = db.ListField(db.ReferenceField(HarvestJob))
     created_at = db.DateTimeField(default=datetime.now, required=True)
     frequency = db.StringField(choices=HARVEST_FREQUENCIES.keys(), default=DEFAULT_HARVEST_FREQUENCY, required=True)
@@ -75,3 +80,7 @@ class HarvestSource(db.Document):
 
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
     organization = db.ReferenceField('Organization', reverse_delete_rule=db.NULLIFY)
+
+    @classmethod
+    def get(cls, ident):
+        return cls.objects(slug=ident).first() or cls.objects.get(id=ident)

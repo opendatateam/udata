@@ -1,29 +1,47 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.tasks import job, get_logger, chord
+from udata.tasks import job, get_logger, chord, task
 
-from . import actions
+from . import backends
+from .models import HarvestSource
 
 log = get_logger(__name__)
 
 
 @job('harvest')
-def initialize_harvest(self, source_id):
-    log.info('Launching harvest job for source "%s"', source_id)
-    actions.launch(source_id)
+def harvest(self, ident):
+    log.info('Launching harvest job for source "%s"', ident)
 
-    items = []
-    finalize = harvest_finalize.subtask(source_id)
-    items = [harvest_item.subtask(source_id, item_id) for item_id in items]
-    flow = chord(items)(finalize)
-
-
-@job('harvest-item')
-def harvest_item(self, source_id, item_id):
-    pass
+    source = HarvestSource.get(ident)
+    Backend = backends.get(source.backend)
+    backend = Backend(source)
+    if backend.perform_initialization():
+        finalize = harvest_finalize.s(ident)
+        items = [harvest_item.s(ident, item.remote_id) for item in backend.job.items]
+        chord(items)(finalize)
 
 
-@job('harvest-finalize')
-def harvest_finalize(self, source_id):
-    pass
+@task
+def harvest_item(source_id, item_id):
+    log.info('Harvesting item %s for source "%s"', item_id, source_id)
+
+    source = HarvestSource.get(source_id)
+    job = source.jobs[-1]
+    Backend = backends.get(source.backend)
+    backend = Backend(source, job)
+
+    item = filter(lambda i: i.remote_id == item_id, job.items)[0]
+
+    result = backend.process_item(item)
+    return (item_id, result)
+
+
+@task
+def harvest_finalize(results, source_id):
+    log.info('Finalize harvesting for source "%s"', source_id)
+    source = HarvestSource.get(source_id)
+    job = source.jobs[-1]
+    Backend = backends.get(source.backend)
+    backend = Backend(source, job)
+    backend.finalize()
