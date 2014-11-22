@@ -69,7 +69,7 @@ class UserSearch(ModelSearchAdapter):
             'metrics': user.metrics,
             'created': user.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             'user_suggest': {
-                'input': cls.completer_tokenizer(user.full_name),
+                'input': cls.completer_tokenize(user.fullname),
                 'payload': {
                     'id': str(user.id),
                     'avatar_url': user.avatar(40),
