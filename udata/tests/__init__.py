@@ -86,21 +86,22 @@ class TestCase(BaseTestCase):
         self.assertStatus(response, 204)
 
     @contextmanager
-    def assert_emit(self, signal, sender=None):
-        def ensure_emitted(sender, **kwargs):
-            ensure_emitted.emitted = True
+    def assert_emit(self, *signals):
+        specs = []
 
-        ensure_emitted.emitted = False
+        def handler(sender, **kwargs):
+            pass
 
-        if sender:
-            signal.connect(ensure_emitted, sender=sender)
-        else:
-            signal.connect(ensure_emitted)
+        for signal in signals:
+            m = mock.Mock(spec=handler)
+            signal.connect(m, weak=False)
+            specs.append((signal, m))
 
         yield
 
-        signal.disconnect(ensure_emitted)
-        self.assertTrue(ensure_emitted.emitted, 'Signal "{0}" should have been emitted'.format(signal.name))
+        for signal, mock_handler in specs:
+            signal.disconnect(mock_handler)
+            self.assertTrue(mock_handler.called, 'Signal "{0}" should have been emitted'.format(signal.name))
 
 
 class WebTestMixin(object):
