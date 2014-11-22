@@ -5,7 +5,7 @@ import logging
 
 from flask.signals import Namespace
 
-from udata.models import Dataset
+from udata.models import Dataset, PeriodicTask
 
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.factories import DatasetFactory
@@ -93,12 +93,45 @@ class HarvestActionsTest(DBTestMixin, TestCase):
             actions.delete_source(source.id)
         self.assertEqual(len(HarvestSource.objects), 0)
 
+    def test_schedule(self):
+        source = HarvestSourceFactory()
+        with self.assert_emit(signals.harvest_source_scheduled):
+            actions.schedule(str(source.id), hour=0)
 
-class HarvestTestMixin(DBTestMixin):
+        source.reload()
+        self.assertEqual(len(PeriodicTask.objects), 1)
+        periodic_task = PeriodicTask.objects.first()
+        self.assertEqual(source.periodic_task, periodic_task)
+        self.assertEqual(periodic_task.args, [str(source.id)])
+        self.assertEqual(periodic_task.crontab.hour, '0')
+        self.assertEqual(periodic_task.crontab.minute, '*')
+        self.assertEqual(periodic_task.crontab.day_of_week, '*')
+        self.assertEqual(periodic_task.crontab.day_of_month, '*')
+        self.assertEqual(periodic_task.crontab.month_of_year, '*')
+        self.assertTrue(periodic_task.enabled)
+        self.assertEqual(periodic_task.name, 'Harvest {0}'.format(source.name))
+
+    def test_unschedule(self):
+        periodic_task = PeriodicTask.objects.create(
+            task='harvest',
+            name=fake.name(),
+            description=fake.sentence(),
+            enabled=True,
+            crontab=PeriodicTask.Crontab()
+        )
+        source = HarvestSourceFactory(periodic_task=periodic_task)
+        with self.assert_emit(signals.harvest_source_unscheduled):
+            actions.unschedule(str(source.id))
+
+        source.reload()
+        self.assertEqual(len(PeriodicTask.objects), 0)
+        self.assertIsNone(source.periodic_task)
+
+
+class ExecutionTestMixin(DBTestMixin):
     def test_default(self):
         source = HarvestSourceFactory(backend='factory')
-        with self.assert_emit(signals.before_harvest_job), \
-            self.assert_emit(signals.after_harvest_job):
+        with self.assert_emit(signals.before_harvest_job, signals.after_harvest_job):
             self.action(source.slug)
 
         source.reload()
@@ -149,10 +182,8 @@ class HarvestTestMixin(DBTestMixin):
                 raise ValueError('test')
 
         source = HarvestSourceFactory(backend='factory')
-        with \
-            self.assert_emit(signals.before_harvest_job), \
-            self.assert_emit(signals.after_harvest_job), \
-            mock_process.connected_to(process):
+        with self.assert_emit(signals.before_harvest_job, signals.after_harvest_job), \
+             mock_process.connected_to(process):
             self.action(source.slug)
 
         source.reload()
@@ -187,11 +218,11 @@ class HarvestTestMixin(DBTestMixin):
         self.assertEqual(len(Dataset.objects), COUNT - 1)
 
 
-class HarvestLaunchTest(HarvestTestMixin, TestCase):
+class HarvestLaunchTest(ExecutionTestMixin, TestCase):
     def action(self, *args, **kwargs):
         return actions.launch(*args, **kwargs)
 
 
-class HarvestRunTest(HarvestTestMixin, TestCase):
+class HarvestRunTest(ExecutionTestMixin, TestCase):
     def action(self, *args, **kwargs):
         return actions.run(*args, **kwargs)

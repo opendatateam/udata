@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 
+from argparse import SUPPRESS
+
 from . import actions
 
 from udata.commands import submanager
@@ -83,18 +85,31 @@ def run(identifier, debug=False):
     actions.run(identifier, debug=debug)
 
 
+@m.option('identifier', help='The Harvest source identifier or slug')
+@m.option('-m', '--minute', help='The crontab expression for minute', default=SUPPRESS)
+@m.option('-h', '--hour', help='The crontab expression for hour', default=SUPPRESS)
+@m.option('-d', '--day', dest='day_of_week', help='The crontab expression for day of week', default=SUPPRESS)
+@m.option('-D', '--day-of-month', dest='day_of_month', help='The crontab expression for day of month', default=SUPPRESS)
+@m.option('-M', '--month-of-year', help='The crontab expression for month of year', default=SUPPRESS)
+def schedule(identifier, **kwargs):
+    log.info('Harvest source "%s"', identifier)
+    source = actions.schedule(identifier, **kwargs)
+    msg = 'Scheduled {source.name} with the following crontab: {cron}'
+    log.info(msg.format(source=source, cron=source.periodic_task.crontab))
 
-# @manager.option('name', help='Ini file name or harvester name')
-# @manager.option('-o', '--organizations', action='store_true', default=False, help='Harvest organizations')
-# @manager.option('-d', '--datasets', action='store_true', default=False, help='Harvest datasets')
-# @manager.option('-r', '--reuses', action='store_true', default=False, help='Harvest reuses')
-# @manager.option('-u', '--users', action='store_true', default=False, help='Harvest users')
-# def harvest(name, organizations=False, users=False, datasets=False, reuses=False):
-#     '''Launch harvesters'''
-#     if exists(name):
-#         harvester = Harvester.from_file(name)
-#     else:
-#         harvester = Harvester.objects.get(name=name)
 
-#     backend = get_backend_for(harvester)
-#     backend.harvest(organizations=organizations, datasets=datasets, reuses=reuses, users=users)
+@m.option('identifier', help='The Harvest source identifier or slug')
+def unschedule(identifier):
+    '''Run an harvester synchronously'''
+    source = actions.unschedule(identifier)
+    log.info('Unscheduled harvest source "%s"', source.name)
+
+
+@m.command
+def scheduled():
+    '''List scheduled harvesting'''
+    log.info('Scheduled harvesters:')
+    for source in actions.list_sources():
+        if source.periodic_task:
+            msg = '{source.name} ({source.backend}): {cron}'
+            log.info(msg.format(source=source, cron=source.periodic_task.schedule_display))

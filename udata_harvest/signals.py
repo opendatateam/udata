@@ -38,3 +38,9 @@ harvest_item_done = ns.signal('harvest:item-done')
 
 #: Sent when a HarvestItem failed
 harvest_item_failed = ns.signal('harvest:item-failed')
+
+#: Sent when a HarvestSource is scheduled
+harvest_source_scheduled = ns.signal('harvest:source-scheduled')
+
+#: Sent when a HarvestSource is unscheduled
+harvest_source_unscheduled = ns.signal('harvest:source-unscheduled')
