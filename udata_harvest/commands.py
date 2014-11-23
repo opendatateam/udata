@@ -45,14 +45,19 @@ def delete(identifier):
     log.info('Deleted source "%s"', identifier)
 
 
-@m.command
-def sources():
+@m.option('-s', '--scheduled', action='store_true', help='list only scheduled source')
+def sources(scheduled=False):
     '''List all harvest sources'''
     sources = actions.list_sources()
+    if scheduled:
+        sources = [s for s in sources if s.periodic_task]
     if sources:
         for source in sources:
-            msg = '{0.name} ({0.backend}): {0.url}'
-            log.info(msg.format(source))
+            msg = '{source.name} ({source.backend}): {cron}'
+            cron = source.periodic_task.schedule_display if source.periodic_task else 'not scheduled'
+            log.info(msg.format(source=source, cron=cron))
+    elif scheduled:
+        log.info('No sources scheduled yet')
     else:
         log.info('No sources defined yet')
 
@@ -103,13 +108,3 @@ def unschedule(identifier):
     '''Run an harvester synchronously'''
     source = actions.unschedule(identifier)
     log.info('Unscheduled harvest source "%s"', source.name)
-
-
-@m.command
-def scheduled():
-    '''List scheduled harvesting'''
-    log.info('Scheduled harvesters:')
-    for source in actions.list_sources():
-        if source.periodic_task:
-            msg = '{source.name} ({source.backend}): {cron}'
-            log.info(msg.format(source=source, cron=source.periodic_task.schedule_display))
