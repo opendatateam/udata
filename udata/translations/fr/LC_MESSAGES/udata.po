@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2014-11-21 13:00+0100\n"
-"PO-Revision-Date: 2014-11-21 15:09+0000\n"
+"PO-Revision-Date: 2014-11-24 08:08+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -2204,30 +2204,30 @@ msgstr "Tester votre email"
 msgid "Follow %(num)d dataset"
 msgid_plural "Follow %(num)d datasets"
 msgstr[0] "Suis %(num)d jeu de données"
-msgstr[1] "Suis %(num)d jeux de données"
+msgstr[1] "Suit %(num)d jeux de données"
 
 #: udata/templates/user/following.html:63
 #, python-format
 msgid "Follow %(num)d reuse"
 msgid_plural "Follow %(num)d reuses"
 msgstr[0] "Suis %(num)d réutilisation"
-msgstr[1] "Suis %(num)d réutilisations"
+msgstr[1] "Suit %(num)d réutilisations"
 
 #: udata/templates/user/following.html:83
 #, python-format
 msgid "Follow %(num)d organization"
 msgid_plural "Follow %(num)d organizations"
 msgstr[0] "Suis %(num)d organisation"
-msgstr[1] "Suis %(num)d organisations"
+msgstr[1] "Suit %(num)d organisations"
 
 #: udata/templates/user/following.html:103
 #, python-format
 msgid "Follow %(num)d user"
 msgid_plural "Follow %(num)d users"
 msgstr[0] "Suis %(num)d utilisateur"
-msgstr[1] "Suis %(num)d utilisateurs"
+msgstr[1] "Suit %(num)d utilisateurs"
 
 #: udata/templates/user/following.html:129
 #, python-format
 msgid "%(user)s is not following anyone"
-msgstr "%(user)s ne suis personne"
+msgstr "%(user)s ne suit personne"
