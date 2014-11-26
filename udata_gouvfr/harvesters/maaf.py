@@ -137,7 +137,6 @@ class MaafBackend(backends.BaseBackend):
                     log.debug('Skip %s', href)
 
     def process(self, item):
-        log.debug('Processing URL: %s', item.remote_id)
         response = self.get(item.remote_id)
         encoding = chardet.detect(response.content)['encoding']
         xml = self.parse_xml(response.content.decode(encoding))

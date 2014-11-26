@@ -84,45 +84,27 @@
 </section>
 
 <section class="content participants">
-
     <div class="container">
 
+        {% for cat in categories  %}
         <div class="row">
-            <div class="col-xs-12">
-                <ul class="nav nav-pills" data-tabs="tabs">
-                    {% for cat in categories %}
-                    <li {% if loop.first %}class="active"{% endif %}>
-                        <a href="#{{cat.tag}}-tab" data-toggle="tab">{{ cat.label }}</a>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="tab-content">
-
-                {% for cat in categories  %}
-                <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{cat.tag}}-tab">
-                    <p class="col-xs-12"><em>{{ cat.description }}</em></p>
-                    {% if cat.reuses %}
-                    <ul class="card-list">
-                        {% for reuse in cat.reuses %}
-                        <li class="col-md-4 col-sm-6">
-                            {% include theme('reuse/card.html') %}
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <p class="text-center lead">Aucune réutilisation dans cette catégorie pour l'instant</p>
-                    {% endif %}
-                </div>
+            <h3 class="col-xs-12">{{ cat.label }}</h3>
+            <p class="col-xs-12"><em>{{ cat.description }}</em></p>
+            {% if cat.reuses %}
+            <ul class="card-list">
+                {% for reuse in cat.reuses %}
+                <li class="col-md-4 col-sm-6">
+                    {% include theme('reuse/card.html') %}
+                </li>
                 {% endfor %}
-
-            </div>
+            </ul>
+            <div class="clearfix"></div>
+            {% else %}
+            <p class="text-center lead">Aucune réutilisation dans cette catégorie pour l'instant</p>
+            {% endif %}
         </div>
+        {% endfor %}
 
     </div>
-
 </section>
 {% endblock %}
