@@ -1,25 +1,25 @@
-# Spanish translations for udata-gouvfr.
+# Translations template for udata-gouvfr.
 # Copyright (C) 2014 ORGANIZATION
-# This file is distributed under the same license as the udata-gouvfr
-# project.
-#
+# This file is distributed under the same license as the udata-gouvfr project.
+# 
 # Translators:
+# AuraCifuentes <aura-maria.cifuentes-gallo@modernisation.gouv.fr>, 2014
 # Axel Haustant, 2014
 # AuraC <cifuentes.aura@gmail.com>, 2014
 msgid ""
 msgstr ""
-"Project-Id-Version:  uData-gouv.fr\n"
+"Project-Id-Version: uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2014-11-21 13:00+0100\n"
-"PO-Revision-Date: 2014-09-19 10:58+0000\n"
-"Last-Translator: Axel Haustant\n"
-"Language-Team: Spanish (http://www.transifex.com/projects/p/udata-"
-"gouvfr/language/es/)\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"PO-Revision-Date: 2014-11-26 16:06+0000\n"
+"Last-Translator: AuraCifuentes <aura-maria.cifuentes-gallo@modernisation.gouv.fr>\n"
+"Language-Team: Spanish (http://www.transifex.com/projects/p/udata-gouvfr/language/es/)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
+"Language: es\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: udata_gouvfr/metrics.py:15 udata_gouvfr/theme/templates/metrics.html:48
 msgid "Public services"
@@ -111,7 +111,7 @@ msgstr "Tamaño de la página de inicio"
 
 #: udata_gouvfr/theme/theme.py:25
 msgid "ATOM Feed URL"
-msgstr ""
+msgstr "ATOM Feed URL"
 
 #: udata_gouvfr/theme/theme.py:26
 msgid "An optionnal atom feed URL for display blog post in home page"
@@ -123,15 +123,15 @@ msgstr "¿Cómo funciona?"
 
 #: udata_gouvfr/theme/theme.py:42
 msgid "FAQ"
-msgstr ""
+msgstr "Preguntas más frecuentes"
 
 #: udata_gouvfr/theme/theme.py:43
 msgid "Publication guide"
-msgstr ""
+msgstr "Guía de publicación"
 
 #: udata_gouvfr/theme/theme.py:44
 msgid "Tools"
-msgstr ""
+msgstr "Herramientas"
 
 #: udata_gouvfr/theme/theme.py:45
 msgid "Open Licence"
@@ -139,7 +139,7 @@ msgstr "Licencia Abierta"
 
 #: udata_gouvfr/theme/theme.py:46
 msgid "API"
-msgstr ""
+msgstr "IPA"
 
 #: udata_gouvfr/theme/theme.py:48 udata_gouvfr/theme/templates/metrics.html:19
 msgid "Data"
@@ -164,7 +164,7 @@ msgstr "Organizaciones"
 
 #: udata_gouvfr/theme/theme.py:53
 msgid "Dashboard"
-msgstr ""
+msgstr "Tablero de mando"
 
 #: udata_gouvfr/theme/theme.py:62
 msgid "Credits"
@@ -193,7 +193,7 @@ msgstr "Contacto"
 
 #: udata_gouvfr/theme/templates/footer.html:68
 msgid "Feeds"
-msgstr ""
+msgstr "Alimentaciones"
 
 #: udata_gouvfr/theme/templates/footer.html:82
 msgid "Back to top"
@@ -239,11 +239,11 @@ msgstr "Ultimas reutilizaciones"
 
 #: udata_gouvfr/theme/templates/home.html:99
 msgid "News in data"
-msgstr ""
+msgstr "Novedades en los datos"
 
 #: udata_gouvfr/theme/templates/home.html:116
 msgid "Featured datasets"
-msgstr ""
+msgstr "Conjuntos de datos destacados"
 
 #: udata_gouvfr/theme/templates/home.html:117
 msgid "Latest datasets"
@@ -331,20 +331,14 @@ msgstr "Este conjunto de datos proviene de un servicio público certificado"
 msgid ""
 "Published on %(date)s by <a href=\"%(url)s\" "
 "title=\"%(author)s\">%(author)s</a>"
-msgstr ""
-"Publicado en %(date)s por <a href=\"%(url)s\" "
-"title=\"%(author)s\">%(author)s</a>"
+msgstr "Publicado en %(date)s por <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:73
 #, python-format
 msgid ""
-"This dataset has been published on %(date)s on the initiative and under "
-"the responsibility of <a href=\"%(url)s\" "
-"title=\"%(author)s\">%(author)s</a>"
-msgstr ""
-"Este conjunto de datos ha sido publicado en %(date)s en la iniciativa y "
-"bajo la responsabilidad de <a href=\"%(url)s\" "
-"title=\"%(author)s\">%(author)s</a>"
+"This dataset has been published on %(date)s on the initiative and under the "
+"responsibility of <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
+msgstr "Este conjunto de datos ha sido publicado en %(date)s en la iniciativa y bajo la responsabilidad de <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:82
 #: udata_gouvfr/theme/templates/dataset/display.html:84
@@ -370,10 +364,9 @@ msgid "Deleted"
 msgstr "Eliminado"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:95
-msgid "This dataset has been deleted. This will be permanent in the next 24 hours"
-msgstr ""
-"Este conjunto de datos se ha eliminado. Esto será permanente durante las "
-"próximas 24 horas"
+msgid ""
+"This dataset has been deleted. This will be permanent in the next 24 hours"
+msgstr "Este conjunto de datos se ha eliminado. Esto será permanente durante las próximas 24 horas"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:104
 msgid "Provided by"
@@ -461,11 +454,9 @@ msgstr "Explore con Datagouv"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:460
 msgid ""
-"You have built a more comprehensive database than those presented here? "
-"This is the time to share it!"
-msgstr ""
-"¿Usted ha constuído un conjunto de datos más comprensible que los que "
-"aparecen aquí? ¡Es momento de compartilo!"
+"You have built a more comprehensive database than those presented here? This"
+" is the time to share it!"
+msgstr "¿Usted ha constuído un conjunto de datos más comprensible que los que aparecen aquí? ¡Es momento de compartilo!"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:497
 msgid "Open in a new window"
@@ -487,39 +478,33 @@ msgstr "Agregar una reutilización"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:540
 msgid ""
-"You reused these data and published an article, a computer graphics, or "
-"an application?\n"
+"You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
-"                Reference your work in just a few clicks and increase "
-"your visibility."
-msgstr ""
-"¿Usted reutiliza estos datos y publica un artículo, una infografía o una "
-"aplicación? \n"
-"¡Es hora de darlo a conocer! \n"
-"Referencie su trabajo en tan sólo unos clicks y aumene su visibilidad."
+"                Reference your work in just a few clicks and increase your visibility."
+msgstr "¿Usted reutiliza estos datos y publica un artículo, una infografía o una aplicación? \n¡Es hora de darlo a conocer! \nReferencie su trabajo en tan sólo unos clicks y aumene su visibilidad."
 
 #: udata_gouvfr/theme/templates/mail/base.html:45
 msgid "on your browser."
-msgstr ""
+msgstr "en su navegador. "
 
 #: udata_gouvfr/theme/templates/mail/base.html:48
 #, python-format
 msgid "View this email %(link)s"
-msgstr ""
+msgstr "Ver este correo %(link)s "
 
 #: udata_gouvfr/theme/templates/mail/base.html:81
 #, python-format
 msgid "Hi %(user)s"
-msgstr ""
+msgstr "Hola %(user)s"
 
 #: udata_gouvfr/theme/templates/mail/base.html:92
 msgid "See you soon on the platform"
-msgstr ""
+msgstr "Hasts pronto en la plataforma "
 
 #: udata_gouvfr/theme/templates/mail/base.html:93
 #, python-format
 msgid "The %(site)s team"
-msgstr ""
+msgstr "El equipo de %(site)s"
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:18
 msgid "Publish a dataset"
@@ -535,9 +520,7 @@ msgstr "Publicar una reutilización "
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:33
 msgid "Contribute and add a new reuse to this site catalog."
-msgstr ""
-"Contribuir y agregar una nueva reutilización para publicar en este "
-"catalogo. "
+msgstr "Contribuir y agregar una nueva reutilización para publicar en este catalogo. "
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:42
 msgid "Find your organization"
@@ -545,9 +528,7 @@ msgstr "Encontrar una organización"
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:45
 msgid "Find and join an existing organization to publish in this name."
-msgstr ""
-"Encuentre y únase a una organización ya existente para publicar en su "
-"nombre. "
+msgstr "Encuentre y únase a una organización ya existente para publicar en su nombre. "
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:54
 msgid "Create an organization"
@@ -556,147 +537,3 @@ msgstr "Crear una organización"
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:57
 msgid "You can create a new organization if yours doesn't exists yet."
 msgstr "Usted puede crear una nueva organización si la suya no existe aun. "
-
-#~ msgid "Publishers"
-#~ msgstr "Editores"
-
-#~ msgid "Nameless resource"
-#~ msgstr "Expedientes sin nombre"
-
-#~ msgid "organization"
-#~ msgstr "organización"
-
-#~ msgid ""
-#~ msgstr ""
-
-#~ msgid "This organization and its datasets are certified by data.gouv.fr"
-#~ msgstr ""
-
-#~ msgid "%(num)d dataset"
-#~ msgid_plural "%(num)d datasets"
-#~ msgstr[0] "%(num)d conjunto de datos"
-#~ msgstr[1] ""
-
-#~ msgid "%(num)d member"
-#~ msgstr ""
-
-#~ msgid "%(num)d members"
-#~ msgstr ""
-
-#~ msgid "%(num)d follower"
-#~ msgstr ""
-
-#~ msgid "%(num)d followers"
-#~ msgstr ""
-
-#~ msgid "%(num)d reuse"
-#~ msgstr ""
-
-#~ msgid "%(num)d reuses"
-#~ msgstr ""
-
-#~ msgid "Recent activities"
-#~ msgstr ""
-
-#~ msgid "I belong to this organization"
-#~ msgstr ""
-
-#~ msgid "Join"
-#~ msgstr ""
-
-#~ msgid "Waiting for approval"
-#~ msgstr ""
-
-#~ msgid "Pending request"
-#~ msgstr "%(num)d conjuntos de datos"
-
-#~ msgid "You are an administrator of this organization"
-#~ msgstr "%(num)d miembro"
-
-#~ msgid "Administrator"
-#~ msgstr "%(num)d miembros"
-
-#~ msgid "You are editor in this organization"
-#~ msgstr "%(num)d seguidor"
-
-#~ msgid "Editor"
-#~ msgstr "%(num)d seguidores"
-
-#~ msgid "You are a member of this organization"
-#~ msgstr "%(num)d reutilización"
-
-#~ msgid "Member"
-#~ msgstr "%(num)d reutilizaciones"
-
-#~ msgid "Supplied datasets"
-#~ msgstr "Actividades recientes"
-
-#~ msgid "Private datasets"
-#~ msgstr "Yo hago parte de esta organización"
-
-#~ msgid "Private reuses"
-#~ msgstr "Unase "
-
-#~ msgid "Members"
-#~ msgstr "A la espera de aprobación"
-
-#~ msgid "Followers"
-#~ msgstr "Solicitud pendiente"
-
-#~ msgid "Activity"
-#~ msgstr "Usted es un administrador de esta organización"
-
-#~ msgid "See the %(nb)s datasets"
-#~ msgstr "Administrador"
-
-#~ msgid "Download as CSV"
-#~ msgstr "Usted es editor de esta organización"
-
-#~ msgid "See the %(nb)s reuses"
-#~ msgstr "Editor"
-
-#~ msgid "Metadata quality"
-#~ msgstr "Usted es un miembro de esta organización"
-
-#~ msgid "Go to the report page"
-#~ msgstr "Miembro"
-
-#~ msgid "Performance"
-#~ msgstr "Conjuntos de datos suministrados"
-
-#~ msgid "%(nb)s warning"
-#~ msgstr "Conjuntos de datos privados"
-
-#~ msgid "%(nb)s warnings"
-#~ msgstr "Reutilizaciones privadas"
-
-#~ msgid "No warning"
-#~ msgstr "Miembros"
-
-#~ msgid "%(nb)s error"
-#~ msgstr "Seguidores"
-
-#~ msgid "%(nb)s errors"
-#~ msgstr "Actividad"
-
-#~ msgid "No error"
-#~ msgstr "Calidad de los metadatos"
-
-#~ msgid "%(nb)s critical"
-#~ msgstr "Ir a la página de reporte"
-
-#~ msgid "%(nb)s criticals"
-#~ msgstr "Desempeño"
-
-#~ msgid "No critical"
-#~ msgstr "%(nb)s advertencia"
-
-#~ msgid "No report available"
-#~ msgstr "%(nb)s advertencias"
-
-#~ msgid "Improve quality"
-#~ msgstr "Ninguna advertencia"
-
-#~ msgid "Improve"
-#~ msgstr "%(nb)s error"
-
