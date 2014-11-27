@@ -1,3 +1,4 @@
+invoke
 -r test.pip
 -r report.pip
 Flask-DebugToolbar==0.9.0
