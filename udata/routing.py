@@ -4,14 +4,19 @@ from __future__ import unicode_literals
 from bson import ObjectId
 from uuid import UUID
 
-from flask import request, abort
+from flask import request
 from werkzeug.routing import BaseConverter, NotFound
 
 from udata import models
 
 
-class LanguagePrefixConverter(BaseConverter):
-    regex = r'\w{2}'
+def lang_converter(app):
+    class LanguagePrefixConverter(BaseConverter):
+        def __init__(self, map):
+            super(LanguagePrefixConverter, self).__init__(map)
+            self.regex = '(?:%s)' % '|'.join(app.config['LANGUAGES'].keys())
+
+    return LanguagePrefixConverter
 
 
 class ListConverter(BaseConverter):
@@ -99,7 +104,7 @@ def lazy_raise_404():
 
 def init_app(app):
     app.before_request(lazy_raise_404)
-    app.url_map.converters['lang'] = LanguagePrefixConverter
+    app.url_map.converters['lang'] = lang_converter(app)
     app.url_map.converters['list'] = ListConverter
     app.url_map.converters['uuid'] = UUIDConverter
     app.url_map.converters['dataset'] = DatasetConverter
