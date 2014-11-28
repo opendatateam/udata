@@ -164,7 +164,7 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertEqual(len(entry.authors), 1)
         author = entry.authors[0]
         self.assertEqual(author.name, owner.fullname)
-        self.assertEqual(author.href, self.full_url('users.show', user=owner))
+        self.assertEqual(author.href, self.full_url('users.show', user=owner.id))
 
     def test_recent_feed_org(self):
         owner = UserFactory()
@@ -182,7 +182,7 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertEqual(len(entry.authors), 1)
         author = entry.authors[0]
         self.assertEqual(author.name, org.name)
-        self.assertEqual(author.href, self.full_url('organizations.show', org=org))
+        self.assertEqual(author.href, self.full_url('organizations.show', org=org.id))
 
     def test_render_issues(self):
         '''It should render the reuse issues page'''

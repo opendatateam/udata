@@ -8,15 +8,13 @@ from flask import request
 from werkzeug.routing import BaseConverter, NotFound
 
 from udata import models
+from udata.i18n import ISO_639_1_CODES
 
 
-def lang_converter(app):
-    class LanguagePrefixConverter(BaseConverter):
-        def __init__(self, map):
-            super(LanguagePrefixConverter, self).__init__(map)
-            self.regex = '(?:%s)' % '|'.join(app.config['LANGUAGES'].keys())
-
-    return LanguagePrefixConverter
+class LanguagePrefixConverter(BaseConverter):
+    def __init__(self, map):
+        super(LanguagePrefixConverter, self).__init__(map)
+        self.regex = '(?:%s)' % '|'.join(ISO_639_1_CODES)
 
 
 class ListConverter(BaseConverter):
@@ -104,7 +102,7 @@ def lazy_raise_404():
 
 def init_app(app):
     app.before_request(lazy_raise_404)
-    app.url_map.converters['lang'] = lang_converter(app)
+    app.url_map.converters['lang'] = LanguagePrefixConverter
     app.url_map.converters['list'] = ListConverter
     app.url_map.converters['uuid'] = UUIDConverter
     app.url_map.converters['dataset'] = DatasetConverter
