@@ -21,7 +21,10 @@
 
     modules: [
         {
-            name: "app"
+            name: "app",
+            include: [
+                'form/widgets'
+            ]
         }, {
             name: 'dataset/display',
             exclude: [
@@ -66,31 +69,26 @@
             name: 'dataset/form',
             exclude: [
                 'app',
-                'form/widgets'
             ],
         }, {
             name: 'dataset/resource-form',
             exclude: [
                 'app',
-                'form/widgets'
             ],
         }, {
             name: 'form/extras',
             exclude: [
                 'app',
-                'form/widgets'
             ],
         }, {
             name: 'organization/form',
             exclude: [
                 'app',
-                'form/widgets'
             ],
         }, {
             name: 'organization/members',
             exclude: [
                 'app',
-                'form/widgets'
             ],
         }, {
             name: 'organization/membership-requests',
@@ -106,13 +104,11 @@
             name: 'reuse/form',
             exclude: [
                 'app',
-                'form/widgets'
             ],
         }, {
             name: 'user/form',
             exclude: [
                 'app',
-                'form/widgets'
             ],
         }, {
             name: 'apidoc',

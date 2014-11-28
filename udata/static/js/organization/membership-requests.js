@@ -9,7 +9,8 @@ define([
     'auth',
     'widgets/modal',
     'hbs!templates/organization/refuse-membership-modal',
-    'form/common'
+    'form/common',
+    'x-editable'
 ], function($, API, i18n, Notify, Auth, modal, refusal_tpl, forms) {
     "use strict";
 

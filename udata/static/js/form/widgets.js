@@ -5,6 +5,5 @@ define([
     'form/common',
     'form/markdown',
     'form/image-field',
-    'selectize',
-    'x-editable'
+    'selectize'
 ], function() {});

@@ -10,7 +10,7 @@ define([
     'hbs!templates/forms/extra-row',
     'hbs!templates/forms/confirm-delete-extra',
     'logger',
-    'form/widgets'
+    'x-editable'
 ], function($, i18n, Auth, Notify, modal, row_tpl, confirm_tpl, Log) {
     "use strict";
 
