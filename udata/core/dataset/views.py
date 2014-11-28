@@ -277,7 +277,7 @@ class CommunityResourceEditView(DatasetView, NestedEditView):
         return url_for('datasets.show', dataset=self.dataset)
 
     def populate(self, form):
-        super(ResourceEditView, self).populate(form)
+        super(CommunityResourceEditView, self).populate(form)
         self.nested_object.modified = datetime.now()
 
 
