@@ -30,18 +30,18 @@ def recent_feed():
         if reuse.organization:
             author = {
                 'name': reuse.organization.name,
-                'uri': url_for('organizations.show', org=reuse.organization, _external=True),
+                'uri': url_for('organizations.show', org=reuse.organization.id, _external=True),
             }
         elif reuse.owner:
             author = {
                 'name': reuse.owner.fullname,
-                'uri': url_for('users.show', user=reuse.owner, _external=True),
+                'uri': url_for('users.show', user=reuse.owner.id, _external=True),
             }
         feed.add(reuse.title,
                 render_template('reuse/feed_item.html', reuse=reuse),
                 content_type='html',
                 author=author,
-                url=url_for('reuses.show', reuse=reuse, _external=True),
+                url=url_for('reuses.show', reuse=reuse.id, _external=True),
                 updated=reuse.created_at,
                 published=reuse.created_at)
     return feed.get_response()

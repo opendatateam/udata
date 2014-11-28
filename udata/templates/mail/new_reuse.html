@@ -29,14 +29,14 @@
         <td align="center">
             {{ mail_button(
                 _('See the reuse'),
-                url_for('reuses.show', reuse=reuse, _external=True)
+                url_for('reuses.show', reuse=reuse.id, _external=True)
             ) }}
         </td>
         <td align="center">
             {{ mail_button(
                 _('See on the dataset page'),
                 (
-                    url_for('datasets.show', dataset=dataset, _external=True)
+                    url_for('datasets.show', dataset=dataset.id, _external=True)
                     + '#reuse-'|safe
                     + reuse.id|string
                 )

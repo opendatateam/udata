@@ -34,18 +34,18 @@ def recent_feed():
         if dataset.organization:
             author = {
                 'name': dataset.organization.name,
-                'uri': url_for('organizations.show', org=dataset.organization, _external=True),
+                'uri': url_for('organizations.show', org=dataset.organization.id, _external=True),
             }
         elif dataset.owner:
             author = {
                 'name': dataset.owner.fullname,
-                'uri': url_for('users.show', user=dataset.owner, _external=True),
+                'uri': url_for('users.show', user=dataset.owner.id, _external=True),
             }
         feed.add(dataset.title,
                 render_template('dataset/feed_item.html', dataset=dataset),
                 content_type='html',
                 author=author,
-                url=url_for('datasets.show', dataset=dataset, _external=True),
+                url=url_for('datasets.show', dataset=dataset.id, _external=True),
                 updated=dataset.last_modified,
                 published=dataset.created_at)
     return feed.get_response()

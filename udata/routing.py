@@ -59,7 +59,7 @@ class ModelConverter(BaseConverter):
 
     def to_url(self, obj):
         if isinstance(obj, (basestring, ObjectId)):
-            return obj
+            return str(obj)
         elif getattr(obj, 'slug', None):
             return obj.slug
         elif getattr(obj, 'id', None):
