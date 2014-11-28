@@ -29,7 +29,9 @@ def register_commands(manager):
     '''Register all core commands'''
     manager.add_command('clean', Clean())
     manager.add_command('urls', ShowUrls())
-    manager.add_command('serve', Server(port=6666, use_debugger=True, use_reloader=True))
+
+    custom_settings = join(os.getcwd(), 'udata.cfg')
+    manager.add_command('serve', Server(port=6666, use_debugger=True, use_reloader=True, extra_files=[custom_settings]))
 
     # Load all commands submodule
     for filename in iglob(join(dirname(__file__), '[!_]*.py')):
