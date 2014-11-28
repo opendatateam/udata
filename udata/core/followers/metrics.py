@@ -18,8 +18,8 @@ class FollowersMetricMetaclass(MetricMetaClass):
             def callback(follow):
                 if isinstance(follow.following, new_class.model):
                     new_class(follow.following).trigger_update()
-            on_follow.connect(callback)
-            on_unfollow.connect(callback)
+            on_follow.connect(callback, weak=False)
+            on_unfollow.connect(callback, weak=False)
         return new_class
 
 
