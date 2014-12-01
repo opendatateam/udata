@@ -224,7 +224,7 @@
                         {% endif %}
                         <a href="{{ url_for('organizations.show', org=dataset.organization) }}"
                             title="{{ dataset.organization.name }}">
-                            <img src="{{ dataset.organization.logo|placeholder('organization') }}"
+                            <img src="{{ dataset.organization.logo(100)|placeholder('organization') }}"
                                 alt="{{ dataset.organization.name }}" class="organization-logo producer" />
                         </a>
                         <div class="caption text-left">
