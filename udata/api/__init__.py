@@ -227,6 +227,7 @@ def init_app(app):
     import udata.core.suggest.api
     import udata.core.followers.api
     import udata.core.jobs.api
+    import udata.core.site.api
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:

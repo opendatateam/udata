@@ -7,6 +7,7 @@ from flask import url_for
 
 from udata.core.jobs.models import PeriodicTask
 from udata.core.site.metrics import SiteMetric
+from udata.core.site.views import current_site
 from udata.models import db, WithMetrics
 from udata.tasks import celery, job
 
@@ -321,3 +322,10 @@ class JobsAPITest(APITestCase):
         response = self.get(url_for('api.task', id=result.id))
         self.assert200(response)
         self.assertEqual(response.json['id'], result.id)
+
+
+class SiteAPITest(APITestCase):
+    def test_get_site(self):
+        response = self.get(url_for('api.site'))
+        self.assert200(response)
+        # self.assertEqual(response.json['id'], result.id)

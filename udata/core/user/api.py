@@ -16,6 +16,7 @@ ns = api.namespace('users', 'User related operations')
 
 
 @api.route('/me/', endpoint='me')
+@api.doc(get={'model': user_fields, 'id': 'get_me'})
 class MeAPI(ModelAPI):
     model = User
     form = UserProfileForm

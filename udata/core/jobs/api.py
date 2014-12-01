@@ -53,6 +53,7 @@ task_fields = api.model('Task', {
 
 @api.route('/jobs/', endpoint='jobs')
 class JobsAPI(API):
+    @api.doc(id='list_jobs')
     @api.marshal_list_with(job_fields)
     def get(self):
         '''List all scheduled jobs'''

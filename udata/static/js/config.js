@@ -129,6 +129,7 @@ require.config({
             deps: [
                 'jquery',
                 'swagger-ui/lib/swagger',
+                'swagger-ui/lib/swagger-client',
                 'swagger-ui/lib/handlebars-1.0.0',
                 'swagger-ui/lib/underscore-min',
                 'swagger-ui/lib/backbone-min',

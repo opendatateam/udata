@@ -17,6 +17,7 @@ user_fields = api.model('User', {
     'website': fields.String(description='The user website'),
     'about': fields.String(description='The user self description'),
     'organizations': fields.List(OrganizationReference, description='The organization the user belongs to'),
+    'metrics': fields.Raw(description='Th last user metrics'),
 })
 
 
