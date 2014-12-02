@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-11-21 13:00+0100\n"
+"POT-Creation-Date: 2014-12-02 02:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -165,7 +165,7 @@ msgstr ""
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr ""
 
-#: udata/core/dataset/forms.py:20 udata/templates/dataset/display.html:206
+#: udata/core/dataset/forms.py:20 udata/templates/dataset/display.html:207
 #: udata/templates/dataset/search-labels.html:10
 msgid "License"
 msgstr ""
@@ -179,7 +179,7 @@ msgid "The frequency at which data are updated."
 msgstr ""
 
 #: udata/core/dataset/forms.py:24 udata/templates/dataset/card.html:73
-#: udata/templates/dataset/display.html:219
+#: udata/templates/dataset/display.html:220
 #: udata/templates/dataset/search-labels.html:13
 #: udata/templates/dataset/search-panel.html:12
 #: udata/templates/dataset/search-result.html:35
@@ -855,7 +855,7 @@ msgid "Tag \"%(tag)s\" must be alphanumeric characters or symbols: -_."
 msgstr ""
 
 #: udata/forms/fields.py:323 udata/templates/dataset/card.html:33
-#: udata/templates/dataset/display.html:253
+#: udata/templates/dataset/display.html:254
 #: udata/templates/dataset/search-labels.html:16
 #: udata/templates/dataset/search-panel.html:13
 #: udata/templates/dataset/search-result.html:58
@@ -894,7 +894,7 @@ msgctxt "day-format"
 msgid "yyyy/MM/dd"
 msgstr ""
 
-#: udata/frontend/helpers.py:268 udata/templates/dataset/display.html:222
+#: udata/frontend/helpers.py:268 udata/templates/dataset/display.html:223
 #, python-format
 msgid "%(start)s to %(end)s"
 msgstr ""
@@ -1206,12 +1206,12 @@ msgstr ""
 msgid "The identity of this public service public is certified by Etalab"
 msgstr ""
 
-#: udata/templates/dataset/card.html:85 udata/templates/dataset/display.html:244
+#: udata/templates/dataset/card.html:85 udata/templates/dataset/display.html:245
 #: udata/templates/dataset/search-result.html:69
 msgid "Territorial coverage granularity"
 msgstr ""
 
-#: udata/templates/dataset/card.html:97 udata/templates/dataset/display.html:232
+#: udata/templates/dataset/card.html:97 udata/templates/dataset/display.html:233
 #: udata/templates/dataset/search-result.html:46
 msgid "Frequency"
 msgstr ""
@@ -1270,27 +1270,27 @@ msgstr ""
 msgid "Producer"
 msgstr ""
 
-#: udata/templates/dataset/display.html:149
-#: udata/templates/dataset/display.html:181 udata/templates/reuse/display.html:170
+#: udata/templates/dataset/display.html:150
+#: udata/templates/dataset/display.html:182 udata/templates/reuse/display.html:170
 #: udata/templates/reuse/display.html:209
 msgid "more"
 msgstr ""
 
-#: udata/templates/dataset/display.html:156
-#: udata/templates/dataset/display.html:158
-#: udata/templates/dataset/display.html:188
-#: udata/templates/dataset/display.html:190 udata/templates/macros/follow.html:11
+#: udata/templates/dataset/display.html:157
+#: udata/templates/dataset/display.html:159
+#: udata/templates/dataset/display.html:189
+#: udata/templates/dataset/display.html:191 udata/templates/macros/follow.html:11
 #: udata/templates/organization/display_base.html:132
 #: udata/templates/reuse/display.html:188 udata/templates/reuse/display.html:227
 msgid "Follow"
 msgstr ""
 
-#: udata/templates/dataset/display.html:168
+#: udata/templates/dataset/display.html:169
 #: udata/templates/dataset/search-labels.html:6
 msgid "Supplier"
 msgstr ""
 
-#: udata/templates/dataset/display.html:198 udata/templates/reuse/display.html:238
+#: udata/templates/dataset/display.html:199 udata/templates/reuse/display.html:238
 msgid "Informations"
 msgstr ""
 

@@ -9,6 +9,7 @@ define([
     'api',
     'leaflet',
     'hbs!templates/dataset/resource-modal-body',
+    'hbs!templates/dataset/extras-modal-body',
     'hbs!templates/dataset/add-reuse-modal-body',
     'form/common',
     'widgets/modal',
@@ -16,7 +17,7 @@ define([
     'widgets/follow-btn',
     'widgets/issues-btn',
     'widgets/share-btn',
-], function($, log, i18n, Auth, API, L, template, addReuseTpl, forms, modal) {
+], function($, log, i18n, Auth, API, L, template, extrasTpl, addReuseTpl, forms, modal) {
     'use strict';
 
     var user_reuses;
@@ -116,13 +117,28 @@ define([
         map.fitBounds(layer.getBounds());
     }
 
+    function display_extras() {
+        var $Dataset = $('body').items('http://schema.org/Dataset').eq(0),
+            data = $Dataset.microdata()[0];
+
+        data['id'] = $Dataset.attr('itemid');
+        if (typeof data['keywords'] == 'string' || data['keywords'] instanceof String) {
+            data['keywords'] = [data['keywords']];
+        }
+        modal({
+            title: i18n._('Details'),
+            content: extrasTpl(data)
+        });
+    }
+
     return {
         start: function() {
             log.debug('Dataset display page');
-            prepare_resources();
-            load_coverage_map();
-            fetch_reuses();
             $('.reuse.add').click(add_reuse);
+            $('.btn-extras').click(display_extras);
+            load_coverage_map();
+            prepare_resources();
+            fetch_reuses();
         }
     }
 });

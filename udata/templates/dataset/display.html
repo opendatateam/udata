@@ -138,8 +138,9 @@
     <div class="panel-body">
         <a href="{{ url_for('organizations.show', org=org) }}"
             title="{{ org.title }}">
-            <img src="{{ org.logo|placeholder('organization') }}"
-                alt="{{ org.title }}" class="organization-logo producer img-responsive" />
+            <img src="{{ org.logo(100)|placeholder('organization') }}"
+                alt="{{ org.title }}" class="organization-logo producer img-responsive"
+                width="100" height="100" />
         </a>
         <div class="caption text-left">
             {% if org.description %}
