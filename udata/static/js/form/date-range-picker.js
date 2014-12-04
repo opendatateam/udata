@@ -35,6 +35,7 @@ define(['jquery', 'moment', 'i18n', 'bootstrap-daterangepicker'], function($, mo
                 showDropdowns: true,
                 startDate: startDate,
                 endDate: endDate,
+                format: 'L',
                 locale: {
                     applyLabel: i18n._('OK'),
                     cancelLabel: i18n._('Cancel'),
