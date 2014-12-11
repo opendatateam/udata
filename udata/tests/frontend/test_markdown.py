@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import html5lib
+
 from flask import render_template_string
 
 from .. import TestCase, WebTestMixin
 
 from udata.frontend.markdown import md, init_app, EXCERPT_TOKEN
+
+parser = html5lib.HTMLParser(tree=html5lib.getTreeBuilder("dom"))
 
 
 class MarkdownTestCase(TestCase, WebTestMixin):
@@ -25,6 +29,29 @@ class MarkdownTestCase(TestCase, WebTestMixin):
             result = render_template_string('{{ text|markdown }}', text=text)
 
         self.assertEqual(result, '')
+
+    def test_markdown_links_nofollow(self):
+        '''Markdown filter should render links as nofollow'''
+        text = '[example](http://example.net/ "Title")'
+        with self.app.test_request_context('/'):
+            result = render_template_string('{{ text|markdown }}', text=text)
+            parsed = parser.parse(result)
+            el = parsed.getElementsByTagName('a')[0]
+            self.assertEqual(el.getAttribute('rel'), 'nofollow')
+            self.assertEqual(el.getAttribute('href'), 'http://example.net/')
+            self.assertEqual(el.getAttribute('title'), 'Title')
+            self.assertEqual(el.firstChild.data, 'example')
+
+    def test_markdown_linkify(self):
+        '''Markdown filter should transform urls to anchors'''
+        text = 'http://example.net/'
+        with self.app.test_request_context('/'):
+            result = render_template_string('{{ text|markdown }}', text=text)
+            parsed = parser.parse(result)
+            el = parsed.getElementsByTagName('a')[0]
+            self.assertEqual(el.getAttribute('rel'), 'nofollow')
+            self.assertEqual(el.getAttribute('href'), 'http://example.net/')
+            self.assertEqual(el.firstChild.data, 'http://example.net/')
 
     def test_mdstrip_filter(self):
         '''mdstrip should truncate the text before rendering'''

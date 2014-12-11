@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from flask.ext.markdown import Markdown
+from mdx_linkify.mdx_linkify import LinkifyExtension
 
 from flask import current_app
 from werkzeug.local import LocalProxy
@@ -18,8 +19,15 @@ class UDataMarkdown(Markdown):
         return super(UDataMarkdown, self).__call__(stream or '')
 
 
+def set_nofollow(attrs, new=False):
+    '''Ensure that Markdown links are 'rel="nofollow"' '''
+    attrs['rel'] = 'nofollow'
+    return attrs
+
+
 def init_app(app):
-    app.extensions['markdown'] = UDataMarkdown(app)
+    linkify = LinkifyExtension(configs={'linkify_callbacks': [[set_nofollow], '']})
+    app.extensions['markdown'] = UDataMarkdown(app, extensions=[linkify])
 
     @app.template_filter()
     def mdstrip(value, length=None):
