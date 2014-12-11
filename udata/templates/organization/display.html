@@ -85,14 +85,16 @@
                 {% endfor %}
 
             </ul>
-            {% if datasets.total and datasets.total > datasets|length %}
+            {% if datasets.total %}
             <div class="clearfix"></div>
             <div class="text-center card-list-footer">
+                {% if datasets.total > datasets|length %}
                 <a class="btn btn-default"
                     href="{{ url_for('datasets.list', sort='-created', **kwargs) }}">
                     <span class="glyphicon glyphicon-list"></span>
                     {{ _('See the %(nb)s datasets', nb=datasets.total) }}
                 </a>
+                {% endif %}
                 <div class="dropdown">
                     <button id="{{tab_id}}-download-btn" data-toggle="dropdown"
                         class="btn btn-default dropdown-toggle" type="button">
