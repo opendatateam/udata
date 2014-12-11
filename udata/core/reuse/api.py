@@ -18,10 +18,13 @@ ns = api.namespace('reuses', 'Reuse related operations')
 common_doc = {
     'params': {'reuse': 'The reuse ID or slug'}
 }
+search_parser = api.search_parser(ReuseSearch)
 
 
 @ns.route('/', endpoint='reuses')
-@api.doc(get={'model': reuse_page_fields}, post={'model': reuse_fields})
+@api.doc(
+    get={'model': reuse_page_fields, 'parser': search_parser},
+    post={'model': reuse_fields})
 class ReuseListAPI(ModelListAPI):
     model = Reuse
     form = ReuseForm

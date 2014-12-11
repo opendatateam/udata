@@ -21,6 +21,8 @@ org_fields = api.model('Organization', {
         description='The organization API URI', required=True),
     'page': fields.UrlFor('organizations.show', lambda o: {'org': o},
         description='The organization page URL', required=True),
+    'logo': fields.ImageField(description='The organization logo URLs'),
+
 })
 
 org_page_fields = api.model('OrganizationPage', pager(org_fields))
@@ -53,4 +55,5 @@ class OrganizationReference(fields.Raw):
             'page': url_for('organizations.show', org=organization, _external=True),
             'image_url': organization.image_url,
             'name': organization.name,
+            'logo': str(organization.logo),
         }

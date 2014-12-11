@@ -31,7 +31,7 @@ class UrlFor(Raw):
         return url_for(self.endpoint, _external=True, **self.mapper(obj))
 
 
-class NextPageUrl(Raw):
+class NextPageUrl(String):
     def output(self, key, obj):
         if not obj.has_next:
             return None
@@ -40,13 +40,22 @@ class NextPageUrl(Raw):
         return url_for(request.endpoint, _external=True, **args)
 
 
-class PreviousPageUrl(Raw):
+class PreviousPageUrl(String):
     def output(self, key, obj):
         if not obj.has_prev:
             return None
         args = request.args.copy()
         args['page'] = obj.page - 1
         return url_for(request.endpoint, _external=True, **args)
+
+
+class ImageField(Raw):
+    def __init__(self, size=None, **kwargs):
+        super(ImageField, self).__init__(**kwargs)
+        self.size = size
+
+    def format(self, field):
+        return field(self.size, external=True) if self.size else field(external=True)
 
 
 def pager(page_fields):

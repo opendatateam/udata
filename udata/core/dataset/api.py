@@ -14,6 +14,7 @@ from .forms import DatasetForm, ResourceForm, DatasetFullForm
 from .search import DatasetSearch
 
 ns = api.namespace('datasets', 'Dataset related operations')
+search_parser = api.search_parser(DatasetSearch)
 
 
 common_doc = {
@@ -22,7 +23,8 @@ common_doc = {
 
 
 @ns.route('/', endpoint='datasets')
-@api.doc(get={'model': dataset_page_fields}, post={'model': dataset_fields})
+@api.doc(get={'id': 'list_datasets', 'model': dataset_page_fields, 'parser': search_parser})
+@api.doc(post={'id': 'create_dataset', 'model': dataset_fields})
 class DatasetListAPI(ModelListAPI):
     model = Dataset
     form = DatasetFullForm
@@ -32,6 +34,8 @@ class DatasetListAPI(ModelListAPI):
 
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)
 @api.doc(model=dataset_fields)
+@api.doc(get={'id': 'get_dataset'})
+@api.doc(put={'id': 'update_dataset'})
 class DatasetAPI(ModelAPI):
     model = Dataset
     form = DatasetForm

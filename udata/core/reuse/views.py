@@ -38,7 +38,7 @@ def recent_feed():
                 'uri': url_for('users.show', user=reuse.owner.id, _external=True),
             }
         feed.add(reuse.title,
-                render_template('reuse/feed_item.html', reuse=reuse),
+                unicode(render_template('reuse/feed_item.html', reuse=reuse)),
                 content_type='html',
                 author=author,
                 url=url_for('reuses.show', reuse=reuse.id, _external=True),

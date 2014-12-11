@@ -31,7 +31,8 @@ class OrganizationListAPI(ModelListAPI):
 
 
 @ns.route('/<org:org>/', endpoint='organization', doc=common_doc)
-@api.doc(model=org_fields)
+@api.doc(model=org_fields, get={'id': 'get_organization'})
+@api.doc(put={'id': 'update_organization', 'body': org_fields})
 class OrganizationAPI(ModelAPI):
     model = Organization
     fields = org_fields

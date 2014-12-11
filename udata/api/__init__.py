@@ -95,6 +95,19 @@ class UDataApi(Api):
     def render_ui(self):
         return redirect(url_for('apii18n.apidoc'))
 
+    def search_parser(self, adapter, paginate=True):
+        parser = self.parser()
+        # Add facets filters arguments
+        for name, facet in adapter.facets.items():
+            parser.add_argument(name, type=str, location='args')
+        # Sort arguments
+        choices = adapter.sorts.keys() + ['-' + k for k in adapter.sorts.keys()]
+        parser.add_argument('sort', type=str, location='args', choices=choices)
+        if paginate:
+            parser.add_argument('page', type=int, location='args', default=0, help='The page to display')
+            parser.add_argument('page_size', type=int, location='args', default=20, help='The page size')
+        return parser
+
 
 api = UDataApi(prefix='/api/1', decorators=[csrf.exempt],
     version='1.0', title='uData API',
@@ -139,6 +152,7 @@ class ModelListAPI(API):
     form = None
     search_adapter = None
 
+    @api.doc(params={})
     def get(self):
         '''List all objects'''
         if self.search_adapter:
