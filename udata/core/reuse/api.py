@@ -22,9 +22,8 @@ search_parser = api.search_parser(ReuseSearch)
 
 
 @ns.route('/', endpoint='reuses')
-@api.doc(
-    get={'model': reuse_page_fields, 'parser': search_parser},
-    post={'model': reuse_fields})
+@api.doc(get={'id': 'list_reuses', 'model': reuse_page_fields, 'parser': search_parser})
+@api.doc(post={'id': 'create_reuse', 'model': reuse_fields})
 class ReuseListAPI(ModelListAPI):
     model = Reuse
     form = ReuseForm
@@ -34,6 +33,8 @@ class ReuseListAPI(ModelListAPI):
 
 @ns.route('/<reuse:reuse>/', endpoint='reuse', doc=common_doc)
 @api.doc(model=reuse_fields)
+@api.doc(get={'id': 'get_reuse'})
+@api.doc(put={'id': 'update_reuse'})
 class ReuseAPI(ModelAPI):
     model = Reuse
     form = ReuseForm
@@ -46,6 +47,7 @@ class ReuseFeaturedAPI(SingleObjectAPI, API):
     model = Reuse
 
     @api.secure
+    @api.doc(id='feature_reuse')
     @api.marshal_with(reuse_fields)
     def post(self, reuse):
         '''Mark a reuse as featured'''
@@ -54,6 +56,7 @@ class ReuseFeaturedAPI(SingleObjectAPI, API):
         return reuse
 
     @api.secure
+    @api.doc(id='unfeature_reuse')
     @api.marshal_with(reuse_fields)
     def delete(self, reuse):
         '''Unmark a reuse as featured'''

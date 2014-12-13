@@ -48,6 +48,7 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
     model = Dataset
 
     @api.secure
+    @api.doc(id='feature_dataset')
     @api.marshal_with(dataset_fields)
     def post(self, dataset):
         '''Mark the dataset as featured'''
@@ -56,6 +57,7 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
         return dataset
 
     @api.secure
+    @api.doc(id='unfeature_reuse')
     @api.marshal_with(dataset_fields)
     def delete(self, dataset):
         '''Unmark the dataset as featured'''
@@ -67,6 +69,7 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources', doc=common_doc)
 class ResourcesAPI(API):
     @api.secure
+    @api.doc(id='create_resource')
     @api.marshal_with(resource_fields)
     def post(self, dataset):
         '''Create a new resource for a given dataset'''
@@ -88,6 +91,7 @@ class ResourceAPI(API):
         return resource
 
     @api.secure
+    @api.doc(id='update_resource')
     @api.marshal_with(resource_fields)
     def put(self, dataset, rid):
         '''Update a given resource on a given dataset'''
@@ -99,6 +103,7 @@ class ResourceAPI(API):
         return resource
 
     @api.secure
+    @api.doc(id='delete_resource')
     def delete(self, dataset, rid):
         '''Delete a given resource on a given dataset'''
         resource = self.get_resource_or_404(dataset, rid)
