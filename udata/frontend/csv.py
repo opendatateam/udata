@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import logging
 
 from cStringIO import StringIO
 import itertools
@@ -13,6 +14,8 @@ from flask import Response, stream_with_context
 from udata.models import db
 from udata.core.metrics import Metric
 
+
+log = logging.getLogger(__name__)
 
 _adapters = {}
 
@@ -158,10 +161,13 @@ def yield_rows(adapter):
     yield csvfile.getvalue()
 
     for row in adapter.rows():
-        csvfile = StringIO()
-        writer = get_writer(csvfile)
-        writer.writerow(row)
-        yield csvfile.getvalue()
+        try:
+            csvfile = StringIO()
+            writer = get_writer(csvfile)
+            writer.writerow(row)
+            yield csvfile.getvalue()
+        except:
+            log.exception('Error serializing CSV row.')
 
 
 def stream(queryset_or_adapter, basename=None):
