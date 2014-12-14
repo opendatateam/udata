@@ -161,13 +161,10 @@ def yield_rows(adapter):
     yield csvfile.getvalue()
 
     for row in adapter.rows():
-        try:
-            csvfile = StringIO()
-            writer = get_writer(csvfile)
-            writer.writerow(row)
-            yield csvfile.getvalue()
-        except:
-            log.exception('Error serializing CSV row.')
+        csvfile = StringIO()
+        writer = get_writer(csvfile)
+        writer.writerow(row)
+        yield csvfile.getvalue()
 
 
 def stream(queryset_or_adapter, basename=None):
