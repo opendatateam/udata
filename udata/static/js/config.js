@@ -1,7 +1,9 @@
 require.config({
+    enforceDefine: true,
     paths: {
         // Libraries
-        'jquery': '../bower/jquery/dist/jquery',
+        'normalizeconsole': '../bower/normalizeconsole/normalizeconsole',
+        'jquery': 'empty:', // Loaded from CDN or locally from app to ensure IE8 compatibility
         'bootstrap': '../bower/bootstrap/dist/js/bootstrap',
         'text': "../bower/requirejs-text/text",
         'moment': '../bower/momentjs/min/moment-with-locales',

@@ -15,6 +15,8 @@
 
     preserveLicenseComments: false,
 
+    wrapShim: true,
+
     pragmas: {
         production:true
     },

@@ -52,14 +52,14 @@ define(['jquery'], function($) {
                 dataType: 'json',
                 async: false,
                 success: function(data) {
-                    result = data
+                    result = data;
                 }
             };
 
         if (method.toLowerCase() != 'get') {
             options.data = JSON.stringify(data||{});
         } else {
-            options.data = data
+            options.data = data;
         }
         $.ajax(options);
         return result;
@@ -81,7 +81,7 @@ define(['jquery'], function($) {
         put: function(url, data, callback) {
             return call('put', url, data, callback);
         },
-        delete: function(url, data, callback) {
+        'delete': function(url, data, callback) {
             return call('delete', url, data, callback);
         },
         refs: function(url, callback) {
@@ -101,7 +101,7 @@ define(['jquery'], function($) {
             put: function(url, data) {
                 return synchronous_call('put', url, data);
             },
-            delete: function(url, data) {
+            'delete': function(url, data) {
                 return synchronous_call('delete', url, data);
             }
         }

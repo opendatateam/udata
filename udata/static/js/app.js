@@ -1,3 +1,10 @@
+require.config({
+    paths: {
+        'jquery': (document.addEventListener) ?
+            '../bower/jquery/dist/jquery.min' : '../bower/jquery-legacy/dist/jquery.min'
+    }
+});
+
 require([
     'logger',
     'routes',
