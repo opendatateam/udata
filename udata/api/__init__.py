@@ -6,7 +6,7 @@ import logging
 from datetime import datetime
 from functools import wraps
 
-from flask import request, url_for, json, make_response, redirect
+from flask import request, url_for, json, make_response, redirect, Blueprint
 from flask.ext.restplus import Api, Resource, marshal
 
 from udata import search, theme
@@ -20,7 +20,8 @@ from . import oauth2
 
 log = logging.getLogger(__name__)
 
-bp = I18nBlueprint('apii18n', __name__)
+apiv1 = Blueprint('api', __name__, url_prefix='/api/1')
+apidoc = I18nBlueprint('apidoc', __name__)
 
 
 DEFAULT_PAGE_SIZE = 50
@@ -28,9 +29,9 @@ HEADER_API_KEY = 'X-API-KEY'
 
 
 class UDataApi(Api):
-    def __init__(self, **kwargs):
+    def __init__(self, app=None, **kwargs):
         kwargs['decorators'] = [self.authentify] + (kwargs.pop('decorators', []) or [])
-        super(UDataApi, self).__init__(**kwargs)
+        super(UDataApi, self).__init__(app, **kwargs)
         self.authorizations = {'apikey': {'type': 'apiKey', 'passAs': 'header', 'keyname': HEADER_API_KEY}}
 
     def secure(self, func):
@@ -109,7 +110,7 @@ class UDataApi(Api):
         return parser
 
 
-api = UDataApi(prefix='/api/1', decorators=[csrf.exempt],
+api = UDataApi(apiv1, decorators=[csrf.exempt], ui=False,
     version='1.0', title='uData API',
     description='uData API', default='site', default_label='Site global namespace'
 )
@@ -127,19 +128,25 @@ def output_json(data, code, headers=None):
     return resp
 
 
-@bp.route('/api/')
+@apidoc.route('/api/')
+@apidoc.route('/api/1/')
 def default_api():
-    return redirect(url_for('apii18n.apidoc'))
+    return redirect(url_for('apidoc.swaggerui'))
 
 
-@bp.route('/apidoc/')
-def apidoc():
-    return theme.render('apidoc.html', api_endpoint=api.endpoint, specs_url=api.specs_url)
+@apidoc.route('/apidoc/')
+def swaggerui():
+    return theme.render('apidoc.html', specs_url=api.specs_url)
 
 
-@bp.route('/apidoc/images/throbber.gif')
+@apidoc.route('/apidoc/images/<path:path>')
+def images(path):
+    return redirect(url_for('static', filename='bower/swagger-ui/dist/images/' + path))
+
+
+@apidoc.route('/static/images/throbber.gif')
 def fix_apidoc_throbber():
-    return redirect(url_for('api.fix_throbber'))
+    return redirect(url_for('static', filename='bower/swagger-ui/dist/images/throbber.gif'))
 
 
 class API(Resource):  # Avoid name collision as resource is a core model
@@ -253,7 +260,8 @@ def init_app(app):
         except Exception as e:
             log.error('Error importing %s: %s', name, e)
 
-    api.init_app(app)
-    app.register_blueprint(bp)
+    # api.init_app(app)
+    app.register_blueprint(apidoc)
+    app.register_blueprint(apiv1)
 
     oauth2.init_app(app)

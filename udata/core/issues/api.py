@@ -15,6 +15,8 @@ from .forms import IssueCreateForm, IssueCommentForm
 from .models import Issue, Message, ISSUE_TYPES
 from .signals import on_new_issue, on_new_issue_comment, on_issue_closed
 
+ns = api.namespace('issues', 'Issue related operations')
+
 message_fields = api.model('IssueMessage', {
     'content': fields.String(description='The message body', required=True),
     'posted_by': UserReference(description='The message author', required=True),
@@ -34,6 +36,7 @@ issue_fields = api.model('Issue', {
 })
 
 
+@ns.route('/for/<id>/', endpoint='issues_for')
 class IssuesAPI(API):
     '''
     Base Issues Model API (Create and list).
@@ -42,6 +45,7 @@ class IssuesAPI(API):
 
     @api.secure
     @api.doc(model=issue_fields)
+    @api.doc(id='create_issue_for')
     def post(self, id):
         '''Create a new Issue for an object given its ID'''
         form = api.validate(IssueCreateForm)
@@ -58,6 +62,7 @@ class IssuesAPI(API):
         return marshal(issue, issue_fields), 201
 
     @api.doc(model=[issue_fields])
+    @api.doc(id='list_issues_for')
     def get(self, id):
         '''List all Issues for an object given its ID'''
         issues = self.model.objects(subject=id)
@@ -66,19 +71,21 @@ class IssuesAPI(API):
         return marshal(list(issues), issue_fields)
 
 
-@api.route('/issues/<id>', endpoint='issue')
+@ns.route('/<id>/', endpoint='issue')
 @api.doc(model=issue_fields)
 class IssueAPI(API):
     '''
     Single Issue Model API (Read and update).
     '''
 
+    @api.doc(id='get_issue')
     def get(self, id):
         '''Get an issue given its ID'''
         issue = Issue.objects.get_or_404(id=id)
         return marshal(issue, issue_fields)
 
     @api.secure
+    @api.doc(id='comment_issue')
     def post(self, id):
         '''Add comment and optionnaly close an issue given its ID'''
         issue = Issue.objects.get_or_404(id=id)
