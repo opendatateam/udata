@@ -72,12 +72,7 @@ class Adapter(object):
         '''Convert an object into a flat csv row'''
         row = []
         for name, getter in self.get_fields():
-            try:
-                row.append(safestr(getter(obj)))
-            except:
-                ref = str(obj.id) if hasattr(obj, 'id') else str(obj)
-                log.exception('Unable to serialize field %s on object %s', name, ref)
-                row.append('Serialization ERROR')
+            row.append(safestr(getter(obj)))
         return row
 
     def dynamic_fields(self):
@@ -117,13 +112,7 @@ class NestedAdapter(Adapter):
         '''Convert an object into a flat csv row'''
         row = self.to_row(obj)
         for name, getter in self.get_nested_fields():
-            try:
-                row.append(safestr(getter(nested)))
-            except:
-                ref = str(obj.id) if hasattr(obj, 'id') else str(obj)
-                nested_ref = str(nested.id) if hasattr(nested, 'id') else str(nested)
-                log.exception('Unable to serialize nested field %s on object %s (%s)', name, ref, nested_ref)
-                row.append('Serialization ERROR')
+            row.append(safestr(getter(nested)))
         return row
 
     def nested_dynamic_fields(self):
