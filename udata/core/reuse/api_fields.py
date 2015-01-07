@@ -9,7 +9,7 @@ from udata.core.dataset.api_fields import DatasetReference
 from .models import REUSE_TYPES
 
 reuse_fields = api.model('Reuse', {
-    'id': fields.String(description='The reuse identifier', required=True),
+    'id': fields.String(description='The reuse identifier'),
     'title': fields.String(description='The reuse title', required=True),
     'slug': fields.String(description='The reuse permalink string', required=True),
     'type': fields.String(description='The reuse type', required=True, enum=REUSE_TYPES.keys()),

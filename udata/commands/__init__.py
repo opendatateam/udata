@@ -49,6 +49,7 @@ def register_commands(manager):
     import udata.core.search.commands
     import udata.core.spatial.commands
     import udata.core.jobs.commands
+    import udata.api.commands
 
     # Dynamic module commands loading
     for plugin in manager.app.config['PLUGINS']:

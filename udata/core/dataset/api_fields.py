@@ -10,7 +10,7 @@ from udata.core.spatial.api import spatial_coverage_fields
 from .models import UPDATE_FREQUENCIES, RESOURCE_TYPES
 
 resource_fields = api.model('Resource', {
-    'id': fields.String(description='The resource unique ID', required=True),
+    'id': fields.String(description='The resource unique ID'),
     'title': fields.String(description='The resource title', required=True),
     'description': fields.String(description='The resource markdown description'),
     'type': fields.String(description='Whether the resource is an uploaded file, a remote file or an API',
@@ -29,7 +29,7 @@ temporal_coverage_fields = api.model('TemporalCoverage', {
 })
 
 dataset_fields = api.model('Dataset', {
-    'id': fields.String(description='The dataset identifier', required=True),
+    'id': fields.String(description='The dataset identifier'),
     'title': fields.String(description='The dataset title', required=True),
     'slug': fields.String(description='The dataset permalink string', required=True),
     'description': fields.String(description='The dataset description in markdown', required=True),

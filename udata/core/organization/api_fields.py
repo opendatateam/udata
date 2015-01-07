@@ -8,38 +8,6 @@ from udata.api import api, pager, fields
 from .models import ORG_ROLES, MEMBERSHIP_STATUS
 
 
-org_fields = api.model('Organization', {
-    'id': fields.String(description='The organization identifier', required=True),
-    'name': fields.String(description='The organization name', required=True),
-    'slug': fields.String(description='The organization string used as permalink', required=True),
-    'description': fields.String(description='The organization description in Markdown', required=True),
-    'created_at': fields.ISODateTime(description='The organization creation date', required=True),
-    'last_modified': fields.ISODateTime(description='The organization last modification date', required=True),
-    'deleted': fields.ISODateTime(description='The organization deletion date if deleted'),
-    'metrics': fields.Raw(description='The organization metrics'),
-    'uri': fields.UrlFor('api.organization', lambda o: {'org': o},
-        description='The organization API URI', required=True),
-    'page': fields.UrlFor('organizations.show', lambda o: {'org': o},
-        description='The organization page URL', required=True),
-    'logo': fields.ImageField(description='The organization logo URLs'),
-
-})
-
-org_page_fields = api.model('OrganizationPage', pager(org_fields))
-
-request_fields = api.model('MembershipRequest', {
-    'status': fields.String(description='The current request status', required=True,
-        enum=MEMBERSHIP_STATUS.keys()),
-    'comment': fields.String(description='A request comment from the user', required=True),
-})
-
-member_fields = api.model('Member', {
-    'user': fields.String,
-    'role': fields.String(description='The member role in the organization', required=True,
-        enum=ORG_ROLES.keys())
-})
-
-
 @api.model(fields={
     'id': fields.String(description='The organization identifier', required=True),
     'name': fields.String(description='The organization name', required=True),
@@ -57,3 +25,38 @@ class OrganizationReference(fields.Raw):
             'name': organization.name,
             'logo': str(organization.logo),
         }
+
+
+from udata.core.user.api_fields import UserReference
+
+request_fields = api.model('MembershipRequest', {
+    'status': fields.String(description='The current request status', required=True,
+        enum=MEMBERSHIP_STATUS.keys()),
+    'comment': fields.String(description='A request comment from the user', required=True),
+})
+
+member_fields = api.model('Member', {
+    'user': UserReference,
+    'role': fields.String(description='The member role in the organization', required=True,
+        enum=ORG_ROLES.keys())
+})
+
+
+org_fields = api.model('Organization', {
+    'id': fields.String(description='The organization identifier', required=True),
+    'name': fields.String(description='The organization name', required=True),
+    'slug': fields.String(description='The organization string used as permalink', required=True),
+    'description': fields.String(description='The organization description in Markdown', required=True),
+    'created_at': fields.ISODateTime(description='The organization creation date', required=True),
+    'last_modified': fields.ISODateTime(description='The organization last modification date', required=True),
+    'deleted': fields.ISODateTime(description='The organization deletion date if deleted'),
+    'metrics': fields.Raw(description='The organization metrics'),
+    'uri': fields.UrlFor('api.organization', lambda o: {'org': o},
+        description='The organization API URI', required=True),
+    'page': fields.UrlFor('organizations.show', lambda o: {'org': o},
+        description='The organization page URL', required=True),
+    'logo': fields.ImageField(description='The organization logo URLs'),
+    'members': api.as_list(fields.Nested(member_fields, description='The organization members')),
+})
+
+org_page_fields = api.model('OrganizationPage', pager(org_fields))
