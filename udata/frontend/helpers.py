@@ -111,7 +111,7 @@ def avatar_url(obj, size):
 @front.app_template_filter()
 def owner_avatar_url(obj, size=32):
     if hasattr(obj, 'organization') and obj.organization:
-        return obj.organization.logo(size) if obj.organization.logo else placeholder(None, 'orgnization')
+        return obj.organization.logo(size) if obj.organization.logo else placeholder(None, 'organization')
     elif hasattr(obj, 'owner') and obj.owner:
         return avatar_url(obj.owner, size)
     return placeholder(None, 'user')
