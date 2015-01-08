@@ -8,6 +8,7 @@ from functools import wraps
 
 from flask import request, url_for, json, make_response, redirect, Blueprint
 from flask.ext.restplus import Api, Resource, marshal
+from flask.ext.restful.utils import cors
 
 from udata import search, theme
 from udata.app import csrf
@@ -110,7 +111,8 @@ class UDataApi(Api):
         return parser
 
 
-api = UDataApi(apiv1, decorators=[csrf.exempt], ui=False,
+api = UDataApi(apiv1, ui=False,
+    decorators=[csrf.exempt, cors.crossdomain(origin='*', credentials=True)],
     version='1.0', title='uData API',
     description='uData API', default='site', default_label='Site global namespace'
 )
