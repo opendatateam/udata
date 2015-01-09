@@ -152,6 +152,10 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
         return url_for('organizations.show', org=self)
 
     @property
+    def external_url(self):
+        return url_for('datasets.show', dataset=self, _external=True)
+
+    @property
     def pending_requests(self):
         return [r for r in self.requests if r.status == 'pending']
 

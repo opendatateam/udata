@@ -10,11 +10,13 @@ from udata.app import cache
 from udata.frontend import csv
 from udata.frontend.views import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Activity, Site, Reuse
+from udata.models import Dataset, Activity, Site, Reuse, Organization
 from udata.utils import multi_to_dict
 
 from udata.core.activity.views import ActivityView
 from udata.core.dataset.csv import ResourcesCsvAdapter
+
+from udata.core.organization.csv import OrganizationCsvAdapter
 
 blueprint = I18nBlueprint('site', __name__)
 
@@ -101,6 +103,14 @@ def resources_csv():
     params['facets'] = False
     datasets = search.iter(Dataset, **params)
     return csv.stream(ResourcesCsvAdapter(datasets), 'resources')
+
+
+@blueprint.route('/organizations.csv')
+def organizations_csv():
+    params = multi_to_dict(request.args)
+    params['facets'] = False
+    organizations = search.iter(Organization, **params)
+    return csv.stream(OrganizationCsvAdapter(organizations), 'organizations')
 
 
 class SiteView(object):

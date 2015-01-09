@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import StringIO
 
+from datetime import datetime
+
 from flask import url_for, g
 
 from udata.frontend import csv
@@ -193,6 +195,72 @@ class SiteViewsTest(FrontTestCase):
         for dataset in filtered_datasets:
             for resource in dataset.resources:
                 self.assertIn((str(dataset.id), str(resource.id)), ids)
+
+    def test_organizations_csv(self):
+        with self.autoindex():
+            orgs = [OrganizationFactory() for _ in range(5)]
+            hidden_org = OrganizationFactory(deleted=datetime.now())
+
+        response = self.get(url_for('site.organizations_csv'))
+
+        self.assert200(response)
+        self.assertEqual(response.mimetype, 'text/csv')
+        self.assertEqual(response.charset, 'utf-8')
+
+        csvfile = StringIO.StringIO(response.data)
+        reader = csv.get_reader(csvfile)
+        header = reader.next()
+
+        self.assertEqual(header[0], 'id')
+        self.assertIn('name', header)
+        self.assertIn('description', header)
+        self.assertIn('created_at', header)
+        self.assertIn('last_modified', header)
+        self.assertIn('metric.datasets', header)
+
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), len(orgs))
+        for org in orgs:
+            self.assertIn(str(org.id), ids)
+        self.assertNotIn(str(hidden_org.id), ids)
+
+    def test_organizations_csv_with_filters(self):
+        '''Should handle filtering but ignore paging or facets'''
+        with self.autoindex():
+            filtered_orgs = [OrganizationFactory(public_service=True) for _ in range(6)]
+            orgs = [OrganizationFactory() for _ in range(3)]
+            hidden_org = OrganizationFactory(deleted=datetime.now())
+
+        response = self.get(url_for('site.organizations_csv', public_services=True, page_size=3, facets=True))
+
+        self.assert200(response)
+        self.assertEqual(response.mimetype, 'text/csv')
+        self.assertEqual(response.charset, 'utf-8')
+
+        csvfile = StringIO.StringIO(response.data)
+        reader = csv.get_reader(csvfile)
+        header = reader.next()
+
+        self.assertEqual(header[0], 'id')
+        self.assertIn('name', header)
+        self.assertIn('description', header)
+        self.assertIn('created_at', header)
+        self.assertIn('last_modified', header)
+        self.assertIn('metric.datasets', header)
+
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        # Should ignore paging
+        self.assertEqual(len(rows), len(filtered_orgs))
+        # SHoulf pass filter
+        for org in filtered_orgs:
+            self.assertIn(str(org.id), ids)
+        for org in orgs:
+            self.assertNotIn(str(org.id), ids)
+        self.assertNotIn(str(hidden_org.id), ids)
 
 
     def test_map_view(self):
