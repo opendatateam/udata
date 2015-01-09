@@ -262,6 +262,73 @@ class SiteViewsTest(FrontTestCase):
             self.assertNotIn(str(org.id), ids)
         self.assertNotIn(str(hidden_org.id), ids)
 
+    def test_reuses_csv(self):
+        with self.autoindex():
+            reuses = [ReuseFactory(datasets=[DatasetFactory()]) for _ in range(5)]
+            hidden_reuse = ReuseFactory()
+
+        response = self.get(url_for('site.reuses_csv'))
+
+        self.assert200(response)
+        self.assertEqual(response.mimetype, 'text/csv')
+        self.assertEqual(response.charset, 'utf-8')
+
+        csvfile = StringIO.StringIO(response.data)
+        reader = csv.get_reader(csvfile)
+        header = reader.next()
+
+        self.assertEqual(header[0], 'id')
+        self.assertIn('title', header)
+        self.assertIn('description', header)
+        self.assertIn('created_at', header)
+        self.assertIn('last_modified', header)
+        self.assertIn('tags', header)
+        self.assertIn('metric.datasets', header)
+
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), len(reuses))
+        for reuse in reuses:
+            self.assertIn(str(reuse.id), ids)
+        self.assertNotIn(str(hidden_reuse.id), ids)
+
+    def test_reuses_csv_with_filters(self):
+        '''Should handle filtering but ignore paging or facets'''
+        with self.autoindex():
+            filtered_reuses = [ReuseFactory(datasets=[DatasetFactory()], tags=['selected']) for _ in range(6)]
+            reuses = [ReuseFactory(datasets=[DatasetFactory()]) for _ in range(3)]
+            hidden_reuse = ReuseFactory()
+
+        response = self.get(url_for('site.reuses_csv', tag='selected', page_size=3, facets=True))
+
+        self.assert200(response)
+        self.assertEqual(response.mimetype, 'text/csv')
+        self.assertEqual(response.charset, 'utf-8')
+
+        csvfile = StringIO.StringIO(response.data)
+        reader = csv.get_reader(csvfile)
+        header = reader.next()
+
+        self.assertEqual(header[0], 'id')
+        self.assertIn('title', header)
+        self.assertIn('description', header)
+        self.assertIn('created_at', header)
+        self.assertIn('last_modified', header)
+        self.assertIn('tags', header)
+        self.assertIn('metric.datasets', header)
+
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        # Should ignore paging
+        self.assertEqual(len(rows), len(filtered_reuses))
+        # SHoulf pass filter
+        for reuse in filtered_reuses:
+            self.assertIn(str(reuse.id), ids)
+        for reuse in reuses:
+            self.assertNotIn(str(reuse.id), ids)
+        self.assertNotIn(str(hidden_reuse.id), ids)
 
     def test_map_view(self):
         response = self.get(url_for('site.map'))

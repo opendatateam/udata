@@ -17,6 +17,7 @@ from udata.core.activity.views import ActivityView
 from udata.core.dataset.csv import ResourcesCsvAdapter
 
 from udata.core.organization.csv import OrganizationCsvAdapter
+from udata.core.reuse.csv import ReuseCsvAdapter
 
 blueprint = I18nBlueprint('site', __name__)
 
@@ -111,6 +112,14 @@ def organizations_csv():
     params['facets'] = False
     organizations = search.iter(Organization, **params)
     return csv.stream(OrganizationCsvAdapter(organizations), 'organizations')
+
+
+@blueprint.route('/reuses.csv')
+def reuses_csv():
+    params = multi_to_dict(request.args)
+    params['facets'] = False
+    reuses = search.iter(Reuse, **params)
+    return csv.stream(ReuseCsvAdapter(reuses), 'reuses')
 
 
 class SiteView(object):
