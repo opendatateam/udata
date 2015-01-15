@@ -21,9 +21,8 @@ class OrganizationReference(fields.Raw):
             'id': str(organization.id),
             'uri': url_for('api.organization', org=organization, _external=True),
             'page': url_for('organizations.show', org=organization, _external=True),
-            'image_url': organization.image_url,
             'name': organization.name,
-            'logo': str(organization.logo),
+            'logo': organization.logo(external=True),
         }
 
 
