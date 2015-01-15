@@ -11,6 +11,8 @@ from mongoengine.signals import pre_save, post_save
 
 from flask.ext.fs.mongo import FileField, ImageField
 
+from udata.utils import Paginable
+
 from .badges_field import BadgesField
 from .datetime_fields import DateField, DateRange, Datetimed
 from .extras_fields import ExtrasField, Extra
@@ -34,7 +36,7 @@ class UDataMongoEngine(MongoEngine):
         self.Document = UDataDocument
         self.DomainModel = DomainModel
         self.DateRange = DateRange
-        self.BaseQuerySet = BaseQuerySet
+        self.BaseQuerySet = UDataQuerySet
         self.BaseDocumentMetaclass = TopLevelDocumentMetaclass
         self.FileField = FileField
         self.ImageField = ImageField
@@ -51,8 +53,39 @@ def serialize(value):
         return value
 
 
+class DBPaginator(Paginable):
+    '''A simple paginable implementation'''
+    def __init__(self, queryset):
+        self.queryset = queryset
+
+    @property
+    def page(self):
+        return self.queryset.page
+
+    @property
+    def page_size(self):
+        return self.queryset.per_page
+
+    @property
+    def total(self):
+        return self.queryset.total
+
+    @property
+    def objects(self):
+        return self.queryset.items
+
+
+class UDataQuerySet(BaseQuerySet):
+    def paginate(self, page, per_page, error_out=True):
+        result = super(UDataQuerySet, self).paginate(page, per_page, error_out)
+        return DBPaginator(result)
+
+
 class UDataDocument(Document):
-    meta = {'abstract': True}
+    meta = {
+        'abstract': True,
+        'queryset_class': UDataQuerySet,
+    }
 
     def to_dict(self, exclude=None):
         excluded_keys = set(exclude or [])
@@ -67,6 +100,7 @@ class UDataDocument(Document):
 class DomainModel(UDataDocument):
     '''Placeholder for inheritance'''
     pass
+
 
 
 db = UDataMongoEngine()
