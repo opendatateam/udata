@@ -19,7 +19,7 @@ class DatasetCsvAdapter(csv.Adapter):
         'frequency',
         'license',
         'private',
-        'featured',
+        ('featured', lambda o: o.featured or False),
         'created_at',
         'last_modified',
         ('tags', lambda o: ','.join(o.tags)),

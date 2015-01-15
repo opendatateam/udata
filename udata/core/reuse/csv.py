@@ -17,8 +17,8 @@ class ReuseCsvAdapter(csv.Adapter):
         'description',
         ('remote_url', 'url'),
         'organization',
-        'image_url'
-        'featured',
+        ('image', lambda o: o.image(external=True)),
+        ('featured', lambda o: o.featured or False),
         'created_at',
         'last_modified',
         ('tags', lambda o: ','.join(o.tags)),
