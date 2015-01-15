@@ -16,13 +16,14 @@ class ReuseCsvAdapter(csv.Adapter):
         'type',
         'description',
         ('remote_url', 'url'),
-        'organization',
-        ('image', lambda o: o.image(external=True)),
-        ('featured', lambda o: o.featured or False),
+        ('organization', lambda r: r.organization.name if r.organization else None),
+        ('organization_id', lambda r: str(r.organization.id) if r.organization else None),
+        ('image', lambda r: r.image(external=True)),
+        ('featured', lambda r: r.featured or False),
         'created_at',
         'last_modified',
-        ('tags', lambda o: ','.join(o.tags)),
-        ('datasets', lambda o: ','.join([str(d.id) for d in o.datasets])),
+        ('tags', lambda r: ','.join(r.tags)),
+        ('datasets', lambda r: ','.join([str(d.id) for d in r.datasets])),
     )
 
     def dynamic_fields(self):
