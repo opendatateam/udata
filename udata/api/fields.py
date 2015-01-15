@@ -36,6 +36,7 @@ class NextPageUrl(String):
         if not obj.has_next:
             return None
         args = request.args.copy()
+        args.update(request.view_args)
         args['page'] = obj.page + 1
         return url_for(request.endpoint, _external=True, **args)
 
