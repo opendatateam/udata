@@ -11,7 +11,7 @@ from udata.api import api, fields
     'first_name': fields.String(description='The user first name', required=True),
     'last_name': fields.String(description='The user larst name', required=True),
     'page': fields.String(description='The user profile page URL', required=True),
-    'avatar_url': fields.String(description='The user avatar URL'),
+    'avatar': fields.String(description='The user avatar URL'),
 })
 class UserReference(fields.Raw):
     def format(self, user):
@@ -21,7 +21,7 @@ class UserReference(fields.Raw):
             'page': url_for('users.show', user=user, _external=True),
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'avatar_url': user.avatar(100),
+            'avatar': user.avatar(100, external=True),
         }
 
 
@@ -33,7 +33,7 @@ user_fields = api.model('User', {
     'email': fields.String(description='The user email', required=True),
     'first_name': fields.String(description='The user first name', required=True),
     'last_name': fields.String(description='The user last name', required=True),
-    'avatar_url': fields.String(description='The user avatar URL'),
+    'avatar': fields.ImageField(description='The user avatar URL'),
     'website': fields.String(description='The user website'),
     'about': fields.String(description='The user self description'),
     'organizations': fields.List(OrganizationReference, description='The organization the user belongs to'),
