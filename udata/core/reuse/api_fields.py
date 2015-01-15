@@ -15,7 +15,7 @@ reuse_fields = api.model('Reuse', {
     'type': fields.String(description='The reuse type', required=True, enum=REUSE_TYPES.keys()),
     'featured': fields.Boolean(description='Is the reuse featured'),
     'description': fields.String(description='The reuse description in Markdown', required=True),
-    'image_url': fields.String(description='The reuse thumbnail'),
+    'image': fields.ImageField(description='The reuse thumbnail'),
     'created_at': fields.ISODateTime(description='The reuse creation date', required=True),
     'last_modified': fields.ISODateTime(description='The reuse last modification date', required=True),
     'deleted': fields.ISODateTime(description='The organization identifier', required=True),
