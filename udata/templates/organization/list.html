@@ -19,6 +19,9 @@
 {% block toolbar_container %}
 <div class="btn-toolbar search-toolbar" role="toolbar">
 {{ s.breadcrum_toolbar(organizations, url=url,
+    exports=(
+        (_('Organizations'), 'site.organizations_csv', 'csv'),
+    ),
     title=(_('Title'), 'asc'),
     created=(_('Creation date'), 'desc'),
     last_modified=(_('Last modification date'), 'desc'),

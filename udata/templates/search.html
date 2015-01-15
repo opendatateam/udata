@@ -62,6 +62,9 @@
 </div>
 <div class="btn-toolbar search-toolbar wrapper hide" data-tab="#reuses">
 {{ s.breadcrum_toolbar(reuses, url=reuses_search_url,
+    exports=(
+        (_('Reuses'), 'site.reuses_csv', 'csv'),
+    ),
     title=(_('Title'), 'asc'),
     created=(_('Creation date'), 'desc'),
     last_modified=(_('Last modification date'), 'desc'),
@@ -71,6 +74,9 @@
 </div>
 <div class="btn-toolbar search-toolbar wrapper hide" data-tab="#organizations">
 {{ s.breadcrum_toolbar(organizations, url=organizations_search_url,
+    exports=(
+        (_('Organizations'), 'site.organizations_csv', 'csv'),
+    ),
     name=( _('Name'), 'asc'),
     datasets=(_('Datasets'), 'desc'),
     reuses=(_('Reuses'), 'desc'),
