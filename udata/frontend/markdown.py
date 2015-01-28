@@ -26,7 +26,7 @@ def set_nofollow(attrs, new=False):
 
 
 def init_app(app):
-    linkify = LinkifyExtension(configs={'linkify_callbacks': [[set_nofollow], '']})
+    linkify = LinkifyExtension(configs={'linkify_callbacks': [set_nofollow]})
     app.extensions['markdown'] = UDataMarkdown(app, extensions=[linkify])
 
     @app.template_filter()
