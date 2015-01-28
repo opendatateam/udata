@@ -51,7 +51,7 @@ class OrgUnit(object):
 
 class Team(db.EmbeddedDocument):
     name = db.StringField(required=True)
-    slug = db.SlugField(max_length=255, required=True, populate_from='name', update=True)
+    slug = db.SlugField(max_length=255, required=True, populate_from='name', update=True, unique=False)
     description = db.StringField()
 
     members = db.ListField(db.ReferenceField('User'))
@@ -153,7 +153,7 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
 
     @property
     def external_url(self):
-        return url_for('datasets.show', dataset=self, _external=True)
+        return url_for('organizations.show', org=self, _external=True)
 
     @property
     def pending_requests(self):
