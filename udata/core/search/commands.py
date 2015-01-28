@@ -33,7 +33,10 @@ def reindex(name=None, doc_type=None):
             es.indices.put_mapping(index=es.index_name, doc_type=adapter.doc_type(), body=adapter.mapping)
             qs = model.objects.visible() if hasattr(model.objects, 'visible') else model.objects
             for obj in qs.timeout(False):
-                es.index(index=es.index_name, doc_type=adapter.doc_type(), id=obj.id, body=adapter.serialize(obj))
+                try:
+                    es.index(index=es.index_name, doc_type=adapter.doc_type(), id=obj.id, body=adapter.serialize(obj))
+                except:
+                    log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
     es.indices.refresh(index=es.index_name)
 
 

@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from udata.core.site.views import current_site
-from udata.models import Reuse, Organization, REUSE_TYPES
+from udata.models import Reuse, Organization, REUSE_TYPES, Dataset
 from udata.search import BoolBooster, GaussDecay
 from udata.search import ModelSearchAdapter, Sort, i18n_analyzer, metrics_mapping
 from udata.search import RangeFacet, BoolFacet, ExtrasFacet
@@ -114,7 +114,7 @@ class ReuseSearch(ModelSearchAdapter):
             'created': reuse.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             'last_modified': reuse.last_modified.strftime('%Y-%m-%dT%H:%M:%S'),
             'datasets': [
-                {'title': d.title} for d in reuse.datasets
+                {'title': d.title} for d in reuse.datasets if isinstance(d, Dataset)
             ],
             'metrics': reuse.metrics,
             'featured': reuse.featured,
