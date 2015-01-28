@@ -1,51 +1,61 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask.ext.script import Command, prompt, prompt_pass
+import logging
+
+from flask.ext.script import prompt, prompt_pass
 from flask.ext.security.forms import RegisterForm
 from flask.ext.security.utils import encrypt_password
 from werkzeug.datastructures import MultiDict
 
 from udata.models import User, datastore
 
-from udata.commands import manager
+from udata.commands import submanager
+
+log = logging.getLogger(__name__)
 
 
-class CreateUserCommand(Command):
+m = submanager('user',
+    help='User related operations',
+    description='Handle all user related operations and maintenance'
+)
+
+
+@m.command
+def create():
     '''Create a new user'''
-    def run(self):
-        data = {
-            'first_name': prompt('First name'),
-            'last_name': prompt('Last name'),
-            'email': prompt('Email'),
-            'password': prompt_pass('Password'),
-            'password_confirm': prompt_pass('Confirm Password'),
-        }
-        form = RegisterForm(MultiDict(data), csrf_enabled=False)
-        if form.validate():
-            data['password'] = encrypt_password(data['password'])
-            user = datastore.create_user(**data)
-            print '\nUser created successfully'
-            print 'User(id=%s email=%s)' % (user.id, user.email)
-            return
-        print '\nError creating user:'
-        for errors in form.errors.values():
-            print '\n'.join(errors)
+    data = {
+        'first_name': prompt('First name'),
+        'last_name': prompt('Last name'),
+        'email': prompt('Email'),
+        'password': prompt_pass('Password'),
+        'password_confirm': prompt_pass('Confirm Password'),
+    }
+    form = RegisterForm(MultiDict(data), csrf_enabled=False)
+    if form.validate():
+        data['password'] = encrypt_password(data['password'])
+        user = datastore.create_user(**data)
+        print '\nUser created successfully'
+        print 'User(id=%s email=%s)' % (user.id, user.email)
+        return
+    print '\nError creating user:'
+    for errors in form.errors.values():
+        print '\n'.join(errors)
 
 
-class DeleteUserCommand(Command):
+@m.command
+def delete():
     '''Delete an existing user'''
-    def run(self):
-        email = prompt('Email')
-        user = User.objects(email=email).first()
-        if not user:
-            print 'Invalid user'
-            return
-        user.delete()
-        print 'User deleted successfully'
+    email = prompt('Email')
+    user = User.objects(email=email).first()
+    if not user:
+        print 'Invalid user'
+        return
+    user.delete()
+    print 'User deleted successfully'
 
 
-@manager.command
+@m.command
 def set_admin(email):
     '''Set an user as administrator'''
     user = datastore.get_user(email)
@@ -55,5 +65,8 @@ def set_admin(email):
     print 'User %s (%s) is now administrator' % (user.fullname, user.email)
 
 
-manager.add_command('create_user', CreateUserCommand())
-manager.add_command('delete_user', DeleteUserCommand())
+@m.command
+def password(email):
+    user = datastore.get_user(email)
+    user.password = encrypt_password(prompt_pass('Enter new password'))
+    user.save()
