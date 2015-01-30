@@ -10,7 +10,7 @@ from werkzeug.security import gen_salt
 from werkzeug.exceptions import Unauthorized
 
 from udata import theme
-from udata.app import Blueprint
+from udata.app import Blueprint, csrf
 from udata.auth import current_user, login_required, login_user
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import db
@@ -169,7 +169,8 @@ def save_token(token, request, *args, **kwargs):
     )
 
 
-@bp.route('/oauth/token')
+@bp.route('/oauth/token', methods=['GET', 'POST'])
+@csrf.exempt
 @oauth.token_handler
 def access_token():
     return None
