@@ -28,7 +28,7 @@ blueprint = I18nBlueprint('organizations', __name__, url_prefix='/organizations'
 @blueprint.before_app_request
 def set_g_user_orgs():
     if current_user.is_authenticated():
-        g.user_organizations = Organization.objects(members__user=current_user.id)
+        g.user_organizations = current_user.organizations
 
 
 navbar = nav.Bar('edit_org', [

@@ -9,6 +9,8 @@ from flask import url_for, g, current_app
 from flask.ext.security import UserMixin, RoleMixin, MongoEngineUserDatastore
 from itsdangerous import JSONWebSignatureSerializer
 
+from werkzeug import cached_property
+
 from udata.models import db, WithMetrics, Follow
 from udata.core.storages import avatars, default_image_basename
 
@@ -96,9 +98,10 @@ class User(db.Document, WithMetrics, UserMixin):
     def fullname(self):
         return ' '.join((self.first_name or '', self.last_name or '')).strip()
 
-    @property
+    @cached_property
     def organizations(self):
-        return getattr(g, 'user_organizations', [])
+        from udata.core.organization.models import Organization
+        return Organization.objects(members__user=self)
 
     @property
     def sysadmin(self):
