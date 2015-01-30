@@ -80,7 +80,9 @@ nav.Bar('gouvfr_network', [nav.Item(label, label, url=url) for label, url in NET
 def get_blog_post(url, lang):
     for code in lang, current_app.config['DEFAULT_LANGUAGE']:
         feed_url = url.format(lang=code)
+        print feed_url
         feed = feedparser.parse(feed_url)
+        # print len(feed['entries']), feed, len(feed['entries'])
         if len(feed['entries']) > 0:
             break
     if len(feed['entries']) <= 0:
