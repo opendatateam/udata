@@ -169,7 +169,7 @@ def save_token(token, request, *args, **kwargs):
     )
 
 
-@bp.route('/oauth/token', methods=['GET', 'POST'])
+@bp.route('/oauth/token', methods=['POST'])
 @csrf.exempt
 @oauth.token_handler
 def access_token():
