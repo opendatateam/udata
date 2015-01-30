@@ -39,7 +39,7 @@ class APIAuthTest(APITestCase):
         owner = UserFactory()
         return OAuth2Client.objects.create(
             name=name,
-            user=owner,
+            owner=owner,
             redirect_uris=['https://test.org/callback']
         )
 

@@ -7,8 +7,6 @@ from celery import Celery, Task, chord, group
 from celery.utils.log import get_task_logger
 from celerybeatmongo.schedulers import MongoScheduler
 
-from udata.models import db
-
 log = logging.getLogger(__name__)
 
 
@@ -79,6 +77,8 @@ def init_app(app):
     default_name = app.config.get('MONGODB_SETTINGS', {}).get('DB', 'celery')
     app.config.setdefault('CELERY_MONGODB_SCHEDULER_DB', default_name)
 
+
+    from udata.models import db
     default_url = 'mongodb://{host}:{port}'.format(host=db.connection.host, port=db.connection.port)
     app.config.setdefault('CELERY_MONGODB_SCHEDULER_URL', default_url)
 

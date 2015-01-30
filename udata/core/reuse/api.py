@@ -31,8 +31,8 @@ class ReuseListAPI(ModelListAPI):
     search_adapter = ReuseSearch
 
 
-@ns.route('/<reuse:reuse>/', endpoint='reuse', doc=common_doc)
-@api.doc(model=reuse_fields)
+@ns.route('/<reuse:reuse>/', endpoint='reuse')
+@api.doc(model=reuse_fields, **common_doc)
 @api.doc(get={'id': 'get_reuse'})
 @api.doc(put={'id': 'update_reuse'})
 class ReuseAPI(ModelAPI):

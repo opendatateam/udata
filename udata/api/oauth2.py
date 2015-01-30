@@ -43,7 +43,7 @@ GRANT_TYPES = {
 }
 
 TOKEN_TYPES = {
-    'bearer': _('Bearer Token'),
+    'Bearer': _('Bearer Token'),
 }
 
 SCOPES = {
@@ -106,7 +106,7 @@ class OAuth2Token(db.Document):
     user = db.ReferenceField('User')
 
     # currently only bearer is supported
-    type = db.StringField(choices=TOKEN_TYPES.keys(), default='bearer')
+    token_type = db.StringField(choices=TOKEN_TYPES.keys(), default='Bearer')
 
     access_token = db.StringField(unique=True)
     refresh_token = db.StringField(unique=True)

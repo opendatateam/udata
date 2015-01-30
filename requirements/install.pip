@@ -34,9 +34,14 @@ requests
 Shapely==1.4.4
 unicodecsv==0.9.4
 webassets==0.10.1
+Werkzeug==0.9.6
 wtforms-json==0.2.8
 wtforms==2.0.1
 
+#git+https://github.com/MongoEngine/mongoengine.git@759f72169aa5426a1b34be8975e85fdd3ed3307b#egg=mongoengine
+
 # Until release of MongoEngine 0.9 with MultiPolygon support
 # mongoengine==0.8.7
-git+https://github.com/MongoEngine/mongoengine.git@759f72169aa5426a1b34be8975e85fdd3ed3307b#egg=mongoengine
+http://github.com/MongoEngine/mongoengine/tarball/759f721
+# Until 0.3.2 or 0.4: fix for empty json request
+http://github.com/flask-restful/flask-restful/tarball/231da4b

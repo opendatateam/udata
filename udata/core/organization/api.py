@@ -13,8 +13,10 @@ from udata.core.followers.api import FollowAPI
 from .tasks import notify_membership_request, notify_membership_response
 from .search import OrganizationSearch
 from .api_fields import org_fields, org_page_fields, request_fields, member_fields
+from .search import OrganizationSearch
 
 ns = api.namespace('organizations', 'Organization related operations')
+search_parser = api.search_parser(OrganizationSearch)
 
 common_doc = {
     'params': {'org': 'The organization ID or slug'}
@@ -22,7 +24,8 @@ common_doc = {
 
 
 @ns.route('/', endpoint='organizations')
-@api.doc(get={'model': org_page_fields}, post={'model': org_fields})
+@api.doc(get={'id': 'list_organizations', 'model': org_page_fields, 'parser': search_parser})
+@api.doc(post={'id': 'create_organization', 'model': org_fields})
 class OrganizationListAPI(ModelListAPI):
     model = Organization
     fields = org_fields

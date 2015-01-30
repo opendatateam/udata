@@ -13,8 +13,8 @@ class FrontEndRootTest(FrontTestCase):
         with self.autoindex():
             for i in range(3):
                 org = OrganizationFactory()
-                DatasetFactory(organzation=org)
-                ReuseFactory(organzation=org)
+                DatasetFactory(organization=org)
+                ReuseFactory(organization=org)
 
         response = self.get(url_for('front.search'))
         self.assert200(response)

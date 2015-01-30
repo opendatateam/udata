@@ -82,10 +82,7 @@ setup(
     entry_points={
         'console_scripts': [
             'udata = udata.commands:console_script',
-        ],
-        'nose.plugins.0.10': [
-            'udata = udata.tests:UDataNosePlugin'
-        ],
+        ]
     },
     license='GNU AGPLv3+',
     # use_2to3=True,

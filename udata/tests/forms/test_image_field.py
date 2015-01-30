@@ -12,7 +12,7 @@ from udata.models import db
 from udata.forms import Form
 from udata.forms.fields import ImageField
 from udata.frontend.helpers import placeholder
-from udata.tests import DBTestMixin, TestCase
+from udata.tests import DBTestMixin, FSTestMixin, TestCase
 from udata.core.storages import tmp
 from udata.core.storages.views import blueprint
 
@@ -31,7 +31,7 @@ class PostData(dict):
         return value
 
 
-class ImageFieldTest(DBTestMixin, TestCase):
+class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
     class D(db.Document):
         image = db.ImageField(fs=storage)
         thumbnail = db.ImageField(fs=storage, thumbnails=SIZES)

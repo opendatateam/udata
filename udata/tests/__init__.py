@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import os
 import logging
+import shutil
+import tempfile
 
 import mock
 
@@ -14,8 +16,6 @@ from flask import request, url_for
 from flask.ext.testing import TestCase as BaseTestCase
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
-
-from nose.plugins import Plugin
 
 from udata import theme
 from udata.app import create_app
@@ -29,24 +29,6 @@ from .factories import UserFactory
 # Suppress debug data for third party libraries
 for logger in ('factory', 'elasticsearch', 'urllib3'):
     logging.getLogger(logger).setLevel(logging.WARNING)
-
-
-class UDataNosePlugin(Plugin):
-    name = 'udata'
-    enabled = True
-
-    def configure(self, options, conf):
-        pass  # always on
-
-    # def begin(self):
-    #     # Ensure GEvent monkey patching is OK
-    #     import sys
-    #     if 'threading' in sys.modules:
-    #         del sys.modules['threading']
-    #     if 'subprocess' in sys.modules:
-    #         del sys.modules['subprocess']
-    #     from gevent import monkey
-    #     monkey.patch_all()
 
 
 class TestCase(BaseTestCase):
@@ -180,6 +162,19 @@ class SearchTestMixin(DBTestMixin):
         super(SearchTestMixin, self).tearDown()
         if self._used_search and es.indices.exists(index=es.index_name):
             es.indices.delete(index=es.index_name)
+
+
+class FSTestMixin(object):
+    def setUp(self):
+        '''Use a temporary FS_ROOT'''
+        super(FSTestMixin, self).setUp()
+        self.fs_root = tempfile.mkdtemp()
+        self.app.config['FS_ROOT'] = self.fs_root
+
+    def tearDown(self):
+        '''Clear the temporary file system'''
+        super(FSTestMixin, self).tearDown()
+        shutil.rmtree(self.fs_root)
 
 
 def mock_task(name, **kwargs):

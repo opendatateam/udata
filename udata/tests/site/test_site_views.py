@@ -29,8 +29,8 @@ class SiteViewsTest(FrontTestCase):
         with self.autoindex():
             for i in range(3):
                 org = OrganizationFactory()
-                DatasetFactory(organzation=org)
-                ReuseFactory(organzation=org)
+                DatasetFactory(organization=org)
+                ReuseFactory(organization=org)
 
         response = self.get(url_for('site.home'))
         self.assert200(response)
@@ -44,8 +44,8 @@ class SiteViewsTest(FrontTestCase):
         '''It should render the search page'''
         for i in range(3):
             org = OrganizationFactory()
-            DatasetFactory(organzation=org)
-            ReuseFactory(organzation=org)
+            DatasetFactory(organization=org)
+            ReuseFactory(organization=org)
         response = self.get(url_for('site.dashboard'))
         self.assert200(response)
 

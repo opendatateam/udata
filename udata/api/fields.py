@@ -46,6 +46,7 @@ class PreviousPageUrl(String):
         if not obj.has_prev:
             return None
         args = request.args.copy()
+        args.update(request.view_args)
         args['page'] = obj.page - 1
         return url_for(request.endpoint, _external=True, **args)
 
@@ -62,7 +63,7 @@ class ImageField(Raw):
 def pager(page_fields):
     pager_fields = {
         'data': api.as_list(Nested(page_fields, attribute='objects', description='The page data')),
-        'page': Integer(description='The current page', required=True, min=0),
+        'page': Integer(description='The current page', required=True, min=1),
         'page_size': Integer(description='The page size used for pagination', required=True, min=0),
         'total': Integer(description='The total paginated items', required=True, min=0),
         'next_page': NextPageUrl(description='The next page URL if exists'),
