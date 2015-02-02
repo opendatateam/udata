@@ -10,17 +10,17 @@ from udata.core.spatial.api import spatial_coverage_fields
 from .models import UPDATE_FREQUENCIES, RESOURCE_TYPES
 
 resource_fields = api.model('Resource', {
-    'id': fields.String(description='The resource unique ID'),
+    'id': fields.String(description='The resource unique ID', readonly=True),
     'title': fields.String(description='The resource title', required=True),
-    'description': fields.String(description='The resource markdown description'),
+    'description': fields.Markdown(description='The resource markdown description'),
     'type': fields.String(description='Whether the resource is an uploaded file, a remote file or an API',
         required=True, enum=RESOURCE_TYPES.keys()),
     'format': fields.String(description='The resource format', required=True),
     'url': fields.String(description='The resource URL', required=True),
     'checksum': fields.String(description='A checksum to validate file validity'),
-    'created_at': fields.ISODateTime(description='The resource creation date', required=True),
+    'created_at': fields.ISODateTime(description='The resource creation date', readonly=True),
     'last_modified': fields.ISODateTime(attribute='modified',
-        description='The resource last modification date', required=True),
+        description='The resource last modification date', readonly=True),
 })
 
 temporal_coverage_fields = api.model('TemporalCoverage', {
@@ -29,10 +29,10 @@ temporal_coverage_fields = api.model('TemporalCoverage', {
 })
 
 dataset_fields = api.model('Dataset', {
-    'id': fields.String(description='The dataset identifier'),
+    'id': fields.String(description='The dataset identifier', readonly=True),
     'title': fields.String(description='The dataset title', required=True),
     'slug': fields.String(description='The dataset permalink string', required=True),
-    'description': fields.String(description='The dataset description in markdown', required=True),
+    'description': fields.Markdown(description='The dataset description in markdown', required=True),
     'created_at': fields.ISODateTime(description='The dataset creation date', required=True),
     'last_modified': fields.ISODateTime(description='The dataset last modification date', required=True),
     'deleted': fields.ISODateTime(description='The deletion date if deleted'),

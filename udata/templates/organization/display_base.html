@@ -121,7 +121,7 @@
                 <button type="button"
                     class="btn btn-primary btn-follow btn-block btn-sm icon-left {% if is_following(org) %}active{% endif %}"
                     rel="tooltip" data-placement="left"
-                    data-api-url="{{ url_for('api.follow_organization', id=org.id|string) }}"
+                    data-api-url="{{ url_for('api.organization_followers', id=org.id|string) }}"
                     {% if is_following(org) %}
                     title="{{ _('Unfollow') }}">
                     <span class="glyphicon glyphicon-eye-close"></span>

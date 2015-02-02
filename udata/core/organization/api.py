@@ -114,6 +114,6 @@ class MembershipRefuseAPI(MembershipAPI):
         return {}, 200
 
 
-@ns.route('/<id>/follow/', endpoint='follow_organization')
+@ns.route('/<id>/followers/', endpoint='organization_followers')
 class FollowOrgAPI(FollowAPI):
     model = FollowOrg

@@ -99,6 +99,8 @@ class UDataApi(Api):
 
     def search_parser(self, adapter, paginate=True):
         parser = self.parser()
+        # q parameter
+        parser.add_argument('q', type=str, location='args', help='The search query')
         # Add facets filters arguments
         for name, facet in adapter.facets.items():
             parser.add_argument(name, type=str, location='args')

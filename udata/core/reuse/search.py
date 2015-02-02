@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from udata.core.site.views import current_site
-from udata.models import Reuse, Organization, REUSE_TYPES, Dataset
+from udata.models import Reuse, Organization, REUSE_TYPES, Dataset, User
 from udata.search import BoolBooster, GaussDecay
 from udata.search import ModelSearchAdapter, Sort, i18n_analyzer, metrics_mapping
 from udata.search import RangeFacet, BoolFacet, ExtrasFacet
@@ -35,6 +35,7 @@ class ReuseSearch(ModelSearchAdapter):
     facets = {
         'tag': TermFacet('tags'),
         'organization': ModelTermFacet('organization', Organization),
+        'owner': ModelTermFacet('owner', User),
         'type': ReuseTypeFacet('type'),
         'datasets': RangeFacet('metrics.datasets'),
         'followers': RangeFacet('metrics.followers'),
@@ -60,6 +61,7 @@ class ReuseSearch(ModelSearchAdapter):
             'description': {'type': 'string', 'analyzer': i18n_analyzer},
             'url': {'type': 'string'},
             'organization': {'type': 'string'},
+            'owner': {'type': 'string'},
             'type': {'type': 'string'},
             'tags': {'type': 'string', 'index_name': 'tag', 'index': 'not_analyzed'},
             'tag_suggest': {
@@ -108,6 +110,7 @@ class ReuseSearch(ModelSearchAdapter):
             'description': reuse.description,
             'url': reuse.url,
             'organization': str(reuse.organization.id) if reuse.organization else None,
+            'owner': str(reuse.owner.id) if reuse.owner else None,
             'type': reuse.type,
             'tags': reuse.tags,
             'tag_suggest': reuse.tags,

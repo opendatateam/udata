@@ -15,7 +15,7 @@ class UserAPITest(APITestCase):
         user = self.login()
         to_follow = UserFactory()
 
-        response = self.post(url_for('api.follow_user', id=to_follow.id))
+        response = self.post(url_for('api.user_followers', id=to_follow.id))
         self.assertStatus(response, 201)
 
         nb_followers = Follow.objects.followers(to_follow).count()
@@ -31,7 +31,7 @@ class UserAPITest(APITestCase):
         '''It should not allow to follow myself'''
         user = self.login()
 
-        response = self.post(url_for('api.follow_user', id=user.id))
+        response = self.post(url_for('api.user_followers', id=user.id))
         self.assertStatus(response, 403)
 
         self.assertEqual(Follow.objects.followers(user).count(), 0)
@@ -42,7 +42,7 @@ class UserAPITest(APITestCase):
         to_follow = UserFactory()
         FollowUser.objects.create(follower=user, following=to_follow)
 
-        response = self.delete(url_for('api.follow_user', id=to_follow.id))
+        response = self.delete(url_for('api.user_followers', id=to_follow.id))
         self.assert200(response)
 
         nb_followers = Follow.objects.followers(to_follow).count()

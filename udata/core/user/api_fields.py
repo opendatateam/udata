@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.api import api, fields
+from udata.api import api, fields, pager
 
 
 @api.model(fields={
@@ -35,8 +35,10 @@ user_fields = api.model('User', {
     'last_name': fields.String(description='The user last name', required=True),
     'avatar': fields.ImageField(description='The user avatar URL'),
     'website': fields.String(description='The user website'),
-    'about': fields.String(description='The user self description'),
+    'about': fields.Markdown(description='The user self description'),
     'organizations': fields.List(OrganizationReference, description='The organization the user belongs to'),
     'metrics': fields.Raw(description='Th last user metrics'),
     'since': fields.ISODateTime(attribute='created_at', description='The registeration date', required=True),
 })
+
+user_page_fields = api.model('UserPage', pager(user_fields))

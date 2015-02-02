@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from udata.core.site.views import current_site
 
-from udata.models import Dataset, Organization, License, Territory, SPATIAL_GRANULARITIES
+from udata.models import Dataset, Organization, License, Territory, User, SPATIAL_GRANULARITIES
 from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
 from udata.search.fields import Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
 from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
@@ -35,6 +35,7 @@ class DatasetSearch(ModelSearchAdapter):
             'license': {'type': 'string', 'index': 'not_analyzed'},
             'frequency': {'type': 'string'},
             'organization': {'type': 'string'},
+            'owner': {'type': 'string'},
             'supplier': {'type': 'string'},
             'tags': {'type': 'string', 'index_name': 'tag', 'index': 'not_analyzed'},
             'tag_suggest': {
@@ -112,6 +113,7 @@ class DatasetSearch(ModelSearchAdapter):
     facets = {
         'tag': TermFacet('tags'),
         'organization': ModelTermFacet('organization', Organization),
+        'owner': ModelTermFacet('owner', User),
         'supplier': ModelTermFacet('supplier', Organization),
         'license': ModelTermFacet('license', License),
         'territory': ModelTermFacet('territories.id', Territory),
@@ -161,6 +163,7 @@ class DatasetSearch(ModelSearchAdapter):
             'format_suggest': [r.format.lower() for r in dataset.resources if r.format],
             'frequency': dataset.frequency,
             'organization': org_id,
+            'owner': str(dataset.owner.id) if dataset.owner else None,
             'supplier': supplier_id,
             'dataset_suggest': {
                 'input': cls.completer_tokenize(dataset.title),

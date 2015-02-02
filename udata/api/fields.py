@@ -18,6 +18,11 @@ class ISODateTime(Raw):
         return value.isoformat()
 
 
+@api.model(type='string', format='markdown')
+class Markdown(String):
+    pass
+
+
 class UrlFor(Raw):
     def __init__(self, endpoint, mapper=None, **kwargs):
         super(UrlFor, self).__init__(**kwargs)

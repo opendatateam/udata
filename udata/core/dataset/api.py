@@ -118,6 +118,6 @@ class DatasetIssuesAPI(IssuesAPI):
     model = DatasetIssue
 
 
-@ns.route('/<id>/follow/', endpoint='follow_dataset')
-class FollowDatasetAPI(FollowAPI):
+@ns.route('/<id>/followers/', endpoint='dataset_followers')
+class DatasetFollowersAPI(FollowAPI):
     model = FollowDataset

@@ -3,16 +3,18 @@ from __future__ import unicode_literals
 
 from flask.ext.security import current_user
 
-from udata.api import api, ModelAPI, API
+from udata.api import api, ModelAPI, ModelListAPI, API
 from udata.models import User, FollowUser, Reuse
 from udata.forms import UserProfileForm
 
 from udata.core.followers.api import FollowAPI
 from udata.core.reuse.api_fields import reuse_fields
 
-from .api_fields import user_fields
+from .api_fields import user_fields, user_page_fields
+from .search import UserSearch
 
 ns = api.namespace('users', 'User related operations')
+search_parser = api.search_parser(UserSearch)
 
 
 @api.route('/me/', endpoint='me')
@@ -39,7 +41,26 @@ class MyReusesAPI(API):
         return list(Reuse.objects(owner=current_user.id))
 
 
-@ns.route('/<id>/follow/', endpoint='follow_user')
+@ns.route('/', endpoint='users')
+@api.doc(get={'id': 'list_users', 'model': user_page_fields, 'parser': search_parser})
+@api.doc(post={'id': 'create_user', 'model': user_fields})
+class UserListAPI(ModelListAPI):
+    model = User
+    fields = user_fields
+    form = UserProfileForm
+    search_adapter = UserSearch
+
+
+@ns.route('/<user:user>/', endpoint='user')
+@api.doc(model=user_fields, get={'id': 'get_user'})
+@api.doc(put={'id': 'update_user', 'body': user_fields})
+class UserAPI(ModelAPI):
+    model = User
+    fields = user_fields
+    form = UserProfileForm
+
+
+@ns.route('/<id>/followers/', endpoint='user_followers')
 class FollowUserAPI(FollowAPI):
     model = FollowUser
 

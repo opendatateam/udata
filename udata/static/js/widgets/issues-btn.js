@@ -72,6 +72,7 @@ define([
         }
 
         API.get($this.data('api-url'), function(data) {
+            data = data.data
             $modal.find('.spinner-container').html(listTpl({issues: data, labels: labels}));
             count = data.length;
             if (!data.length && Auth.user) {

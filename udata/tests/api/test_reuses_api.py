@@ -102,7 +102,7 @@ class ReuseAPITest(APITestCase):
         user = self.login()
         to_follow = ReuseFactory()
 
-        response = self.post(url_for('api.follow_reuse', id=to_follow.id))
+        response = self.post(url_for('api.reuse_followers', id=to_follow.id))
         self.assertStatus(response, 201)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
@@ -117,7 +117,7 @@ class ReuseAPITest(APITestCase):
         to_follow = ReuseFactory()
         FollowReuse.objects.create(follower=user, following=to_follow)
 
-        response = self.delete(url_for('api.follow_reuse', id=to_follow.id))
+        response = self.delete(url_for('api.reuse_followers', id=to_follow.id))
         self.assert200(response)
 
         nb_followers = Follow.objects.followers(to_follow).count()

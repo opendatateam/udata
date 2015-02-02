@@ -70,6 +70,6 @@ class ReuseIssuesAPI(IssuesAPI):
     model = ReuseIssue
 
 
-@ns.route('/<id>/follow/', endpoint='follow_reuse')
+@ns.route('/<id>/followers/', endpoint='reuse_followers')
 class FollowReuseAPI(FollowAPI):
     model = FollowReuse

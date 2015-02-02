@@ -206,7 +206,7 @@ class DatasetResourceAPITest(APITestCase):
         user = self.login()
         to_follow = DatasetFactory()
 
-        response = self.post(url_for('api.follow_dataset', id=to_follow.id))
+        response = self.post(url_for('api.dataset_followers', id=to_follow.id))
         self.assertStatus(response, 201)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
@@ -221,7 +221,7 @@ class DatasetResourceAPITest(APITestCase):
         to_follow = DatasetFactory()
         FollowDataset.objects.create(follower=user, following=to_follow)
 
-        response = self.delete(url_for('api.follow_dataset', id=to_follow.id))
+        response = self.delete(url_for('api.dataset_followers', id=to_follow.id))
         self.assert200(response)
 
         nb_followers = Follow.objects.followers(to_follow).count()

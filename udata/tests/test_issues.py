@@ -124,7 +124,7 @@ class IssuesTest(APITestCase):
         response = self.get(url_for('api.fake_issues', id=fake.id))
         self.assert200(response)
 
-        self.assertEqual(len(response.json), len(open_issues))
+        self.assertEqual(len(response.json['data']), len(open_issues))
 
     def test_list_with_close_issues(self):
         fake = Fake.objects.create()
