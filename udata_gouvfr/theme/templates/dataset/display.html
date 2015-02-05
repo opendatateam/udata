@@ -243,7 +243,7 @@
                             <button type="button"
                                 class="btn btn-primary btn-follow btn-block btn-sm icon-left {% if is_following(dataset.organization) %}active{% endif %}"
                                 rel="tooltip" data-placement="left"
-                                data-api-url="{{ url_for('api.follow_organization', id=dataset.organization.id|string) }}"
+                                data-api-url="{{ url_for('api.organization_followers', id=dataset.organization.id|string) }}"
                                 data-following-label="{{ _('Unfollow') }}"
                                 {% if is_following(dataset.organization) %}
                                 title="{{ _('Unfollow') }}">
