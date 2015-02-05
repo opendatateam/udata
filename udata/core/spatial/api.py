@@ -4,10 +4,14 @@ from __future__ import unicode_literals
 from udata.api import api, API, fields, refs
 
 from . import LEVELS
+from udata import search
 from udata.models import SPATIAL_GRANULARITIES, Territory, Dataset
 
 
 GEOM_TYPES = ('Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon')
+
+
+ns = api.namespace('spatial', 'Spatial references')
 
 
 @api.model(fields={
@@ -55,8 +59,17 @@ spatial_coverage_fields = api.model('SpatialCoverage', {
     'granularity': fields.String(description='The spatial/territorial granularity', enum=SPATIAL_GRANULARITIES.keys()),
 })
 
+territory_suggestion_fields = api.model('TerritorySuggestion', {
+    'id': fields.String(description='The territory identifier', required=True),
+    'name': fields.String(description='The territory name', required=True),
+    'code': fields.String(description='The territory main code', required=True),
+    'level': fields.String(description='The territory administrative level', required=True),
+    'keys': fields.Raw(description='The territory known codes'),
+    'score': fields.Float(description='The internal match score', required=True),
+})
 
-@refs.route('/spatial/levels/', endpoint='territory_levels')
+
+@ns.route('/levels/', endpoint='territory_levels')
 class TerritoryLevelsAPI(API):
     @api.marshal_list_with(level_fields)
     def get(self):
@@ -70,7 +83,7 @@ class TerritoryLevelsAPI(API):
         } for id, level in LEVELS.items()]
 
 
-@refs.route('/spatial/granularities/', endpoint='spatial_granularities')
+@ns.route('/granularities/', endpoint='spatial_granularities')
 class SpatialGranularitiesAPI(API):
     @api.marshal_list_with(granularity_fields)
     def get(self):
@@ -81,7 +94,7 @@ class SpatialGranularitiesAPI(API):
         } for id, label in SPATIAL_GRANULARITIES.items()]
 
 
-@api.route('/spatial/coverage/<string:level>/', endpoint='spatial_coverage')
+@ns.route('/coverage/<string:level>/', endpoint='spatial_coverage')
 class SpatialCoverageAPI(API):
     @api.marshal_list_with(feature_collection_fields)
     def get(self, level):
@@ -111,3 +124,29 @@ class SpatialCoverageAPI(API):
             'type': 'FeatureCollection',
             'features': features
         }
+
+
+
+suggest_parser = api.parser()
+suggest_parser.add_argument('q', type=unicode, help='The string to autocomplete/suggest', location='args', required=True)
+suggest_parser.add_argument('size', type=int, help='The amount of suggestion to fetch', location='args', default=10)
+
+
+@ns.route('/territories/suggest/', endpoint='suggest_territories')
+class SuggestTerritoriesAPI(API):
+    @api.marshal_list_with(territory_suggestion_fields)
+    @api.doc(id='suggest_territories', parser=suggest_parser)
+    def get(self):
+        '''Suggest territories'''
+        args = suggest_parser.parse_args()
+        return [
+            {
+                'id': opt['payload']['id'],
+                'name': opt['payload']['name'],
+                'code': opt['payload']['code'],
+                'level': opt['payload']['level'],
+                'keys': opt['payload']['keys'],
+                'score': opt['score'],
+            }
+            for opt in search.suggest(args['q'], 'territory_suggest', args['size'])
+        ]

@@ -46,6 +46,7 @@ class UserSearch(ModelSearchAdapter):
         'datasets': Sort('metrics.datasets'),
         'reuses': Sort('metrics.reuses'),
         'followers': Sort('metrics.followers'),
+        'views': Sort('metrics.views'),
         'created': Sort('created'),
     }
     facets = {

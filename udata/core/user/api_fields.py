@@ -42,3 +42,11 @@ user_fields = api.model('User', {
 })
 
 user_page_fields = api.model('UserPage', pager(user_fields))
+
+user_suggestion_fields = api.model('UserSuggestion', {
+    'id': fields.String(description='The user identifier', required=True),
+    'fullname': fields.String(description='The user fullname', required=True),
+    'avatar_url': fields.String(description='The user avatar URL'),
+    'slug': fields.String(description='The user permalink string', required=True),
+    'score': fields.Float(description='The internal match score', required=True),
+})

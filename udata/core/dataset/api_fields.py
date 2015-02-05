@@ -59,6 +59,14 @@ dataset_fields = api.model('Dataset', {
 
 dataset_page_fields = api.model('DatasetPage', pager(dataset_fields))
 
+dataset_suggestion_fields = api.model('DatasetSuggestion', {
+    'id': fields.String(description='The dataset identifier', required=True),
+    'title': fields.String(description='The dataset title', required=True),
+    'slug': fields.String(description='The dataset permalink string', required=True),
+    'image_url': fields.String(description='The dataset (organization) logo URL'),
+    'score': fields.Float(description='The internal match score', required=True),
+})
+
 
 @api.model(fields={
     'id': fields.String(description='The dataset unique identifier', required=True),

@@ -16,7 +16,7 @@ define(['jquery', 'form/widgets'], function($) {
             plugins: ['remove_button'],
             load: function(query, callback) {
                 if (!query.length) return callback();
-                API.get('/suggest/users', {
+                API.get('/users/suggest/', {
                     q: query,
                     size: 10
                 }, function(data) {

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-
+from udata import search
 from udata.api import api, API, ModelAPI, ModelListAPI, SingleObjectAPI
 from udata.forms import ReuseForm
 from udata.models import Reuse
@@ -9,7 +9,7 @@ from udata.models import Reuse
 from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
 
-from .api_fields import reuse_fields, reuse_page_fields
+from .api_fields import reuse_fields, reuse_page_fields, reuse_suggestion_fields
 from .models import ReuseIssue, FollowReuse
 from .search import ReuseSearch
 
@@ -73,3 +73,27 @@ class ReuseIssuesAPI(IssuesAPI):
 @ns.route('/<id>/followers/', endpoint='reuse_followers')
 class FollowReuseAPI(FollowAPI):
     model = FollowReuse
+
+
+suggest_parser = api.parser()
+suggest_parser.add_argument('q', type=unicode, help='The string to autocomplete/suggest', location='args', required=True)
+suggest_parser.add_argument('size', type=int, help='The amount of suggestion to fetch', location='args', default=10)
+
+
+@ns.route('/suggest/', endpoint='suggest_reuses')
+class SuggestReusesAPI(API):
+    @api.marshal_list_with(reuse_suggestion_fields)
+    @api.doc(id='suggest_reuses', parser=suggest_parser)
+    def get(self):
+        '''Suggest reuses'''
+        args = suggest_parser.parse_args()
+        return [
+            {
+                'id': opt['payload']['id'],
+                'title': opt['text'],
+                'score': opt['score'],
+                'slug': opt['payload']['slug'],
+                'image_url': opt['payload']['image_url'],
+            }
+            for opt in search.suggest(args['q'], 'reuse_suggest', args['size'])
+        ]

@@ -3,12 +3,13 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
+from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API
 from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by
 
-from .api_fields import resource_fields, dataset_fields, dataset_page_fields
+from .api_fields import resource_fields, dataset_fields, dataset_page_fields, dataset_suggestion_fields
 from .models import Dataset, Resource, DatasetIssue, FollowDataset
 from .forms import DatasetForm, ResourceForm, DatasetFullForm
 from .search import DatasetSearch
@@ -121,3 +122,37 @@ class DatasetIssuesAPI(IssuesAPI):
 @ns.route('/<id>/followers/', endpoint='dataset_followers')
 class DatasetFollowersAPI(FollowAPI):
     model = FollowDataset
+
+
+suggest_parser = api.parser()
+suggest_parser.add_argument('q', type=unicode, help='The string to autocomplete/suggest', location='args', required=True)
+suggest_parser.add_argument('size', type=int, help='The amount of suggestion to fetch', location='args', default=10)
+
+
+@ns.route('/suggest/', endpoint='suggest_datasets')
+class SuggestDatasetsAPI(API):
+    @api.marshal_list_with(dataset_suggestion_fields)
+    @api.doc(id='suggest_datasets', parser=suggest_parser)
+    def get(self):
+        '''Suggest datasets'''
+        args = suggest_parser.parse_args()
+        return [
+            {
+                'id': opt['payload']['id'],
+                'title': opt['text'],
+                'score': opt['score'],
+                'slug': opt['payload']['slug'],
+                'image_url': opt['payload']['image_url'],
+            }
+            for opt in search.suggest(args['q'], 'dataset_suggest', args['size'])
+        ]
+
+
+@ns.route('/suggest/formats/', endpoint='suggest_formats')
+class SuggestFormatsAPI(API):
+    @api.doc(id='suggest_formats', parser=suggest_parser)
+    def get(self):
+        '''Suggest file formats'''
+        args = suggest_parser.parse_args()
+        result = search.suggest(args['q'], 'format_suggest', args['size'])
+        return sorted(result, key=lambda o: len(o['text']))

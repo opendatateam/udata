@@ -6,7 +6,7 @@ from flask import url_for
 from udata.models import Organization, Member, MembershipRequest, Follow, FollowOrg
 
 from . import APITestCase
-from ..factories import OrganizationFactory, UserFactory
+from ..factories import faker, OrganizationFactory, UserFactory
 
 
 class OrganizationAPITest(APITestCase):
@@ -222,3 +222,100 @@ class MembershipAPITest(APITestCase):
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.following(user).count(), 0)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
+
+    def test_suggest_organizations_api(self):
+        '''It should suggest organizations'''
+        with self.autoindex():
+            for i in range(4):
+                OrganizationFactory(name='test-{0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.suggest_organizations'), qs={'q': 'tes', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('name', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertTrue(suggestion['name'].startswith('test'))
+
+    def test_suggest_organizations_with_special_chars(self):
+        '''It should suggest organizations with special caracters'''
+        with self.autoindex():
+            for i in range(4):
+                OrganizationFactory(name='testé-{0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.suggest_organizations'), qs={'q': 'testé', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('name', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertTrue(suggestion['name'].startswith('testé'))
+
+    def test_suggest_organizations_with_multiple_words(self):
+        '''It should suggest organizations with words'''
+        with self.autoindex():
+            for i in range(4):
+                OrganizationFactory(name='mon testé-{0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.suggest_organizations'), qs={'q': 'mon testé', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('name', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertTrue(suggestion['name'].startswith('mon testé'))
+
+    def test_suggest_organizations_with_apostrophe(self):
+        '''It should suggest organizations with words'''
+        with self.autoindex():
+            for i in range(4):
+                OrganizationFactory(name='Ministère de l\'intérieur {0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.suggest_organizations'), qs={'q': 'Ministère intérieur', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('name', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertTrue(suggestion['name'].startswith('Ministère de l\'intérieur'))
+
+    def test_suggest_organizations_api_no_match(self):
+        '''It should not provide organization suggestion if no match'''
+        with self.autoindex():
+            for i in range(3):
+                OrganizationFactory()
+
+        response = self.get(url_for('api.suggest_organizations'), qs={'q': 'xxxxxx', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
+
+    def test_suggest_organizations_api_empty(self):
+        '''It should not provide organization suggestion if no data'''
+        self.init_search()
+        response = self.get(url_for('api.suggest_organizations'), qs={'q': 'xxxxxx', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)

@@ -19,7 +19,7 @@ define([
                 return Bloodhound.tokenizers.whitespace(d.name);
             },
             remote: {
-                url: API.build_url('/suggest/reuses') + '?q=%QUERY&size='+MAX,
+                url: API.build_url('/reuses/suggest/') + '?q=%QUERY&size='+MAX,
                 // Keep until model is uniformised
                 filter: function(response) {
                     return $.map(response, function(row, idx) {

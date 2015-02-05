@@ -16,7 +16,7 @@ define(['jquery', 'api', 'form/widgets'], function($, API) {
             plugins: ['remove_button'],
             load: function(query, callback) {
                 if (!query.length) return callback();
-                API.get('/suggest/territories', {
+                API.get('/spatial/territories/suggest/', {
                     q: query,
                     size: 10
                 }, function(data) {

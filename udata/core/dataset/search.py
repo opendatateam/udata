@@ -109,6 +109,7 @@ class DatasetSearch(ModelSearchAdapter):
         'last_modified': Sort('last_modified'),
         'reuses': Sort('metrics.reuses'),
         'followers': Sort('metrics.followers'),
+        'views': Sort('metrics.views'),
     }
     facets = {
         'tag': TermFacet('tags'),

@@ -138,6 +138,21 @@ def multiquery(*queries):
     ]
 
 
+def suggest(q, field, size=10):
+    result = es.suggest(index=es.index_name, body={
+        'suggestions': {
+            'text': q,
+            'completion': {
+                'field': field,
+                'size': size,
+            }
+        }
+    })
+    if 'suggestions' not in result:
+        return []
+    return result['suggestions'][0]['options']
+
+
 def init_app(app):
     # Register core adapters
     import udata.core.user.search

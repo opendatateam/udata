@@ -27,6 +27,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
         'reuses': search.Sort('metrics.reuses'),
         'datasets': search.Sort('metrics.datasets'),
         'followers': search.Sort('metrics.followers'),
+        'views': search.Sort('metrics.views'),
         'created': search.Sort('created'),
     }
     facets = {

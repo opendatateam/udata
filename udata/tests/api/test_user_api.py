@@ -6,7 +6,7 @@ from flask import url_for
 from udata.models import User, Follow, FollowUser
 
 from . import APITestCase
-from ..factories import UserFactory
+from ..factories import faker, UserFactory
 
 
 class UserAPITest(APITestCase):
@@ -53,3 +53,78 @@ class UserAPITest(APITestCase):
         self.assertEqual(nb_followers, 0)
         self.assertEqual(Follow.objects.following(user).count(), 0)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
+
+    def test_suggest_users_api_first_name(self):
+        '''It should suggest users baed on first name'''
+        with self.autoindex():
+            for i in range(4):
+                UserFactory(first_name='test-{0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.suggest_users'), qs={'q': 'tes', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('fullname', suggestion)
+            self.assertIn('avatar_url', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('test', suggestion['fullname'])
+
+    def test_suggest_users_api_last_name(self):
+        '''It should suggest users based on last'''
+        with self.autoindex():
+            for i in range(4):
+                UserFactory(last_name='test-{0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.suggest_users'), qs={'q': 'tes', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('fullname', suggestion)
+            self.assertIn('avatar_url', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('test', suggestion['fullname'])
+
+    def test_suggest_users_api_unicode(self):
+        '''It should suggest users with special characters'''
+        with self.autoindex():
+            for i in range(4):
+                UserFactory(last_name='testé-{0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.suggest_users'), qs={'q': 'testé', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('fullname', suggestion)
+            self.assertIn('avatar_url', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('test', suggestion['fullname'])
+
+    def test_suggest_users_api_no_match(self):
+        '''It should not provide user suggestion if no match'''
+        with self.autoindex():
+            for i in range(3):
+                UserFactory()
+
+        response = self.get(url_for('api.suggest_users'), qs={'q': 'xxxxxx', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
+
+    def test_suggest_users_api_empty(self):
+        '''It should not provide user suggestion if no data'''
+        self.init_search()
+        response = self.get(url_for('api.suggest_users'), qs={'q': 'xxxxxx', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)

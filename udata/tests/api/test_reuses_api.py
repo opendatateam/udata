@@ -6,7 +6,7 @@ from flask import url_for
 from udata.models import Reuse, FollowReuse, Follow
 
 from . import APITestCase
-from ..factories import ReuseFactory, DatasetFactory
+from ..factories import faker, ReuseFactory, DatasetFactory
 
 
 class ReuseAPITest(APITestCase):
@@ -128,3 +128,60 @@ class ReuseAPITest(APITestCase):
         self.assertEqual(nb_followers, 0)
         self.assertEqual(Follow.objects.following(user).count(), 0)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
+
+    def test_suggest_reuses_api(self):
+        '''It should suggest reuses'''
+        with self.autoindex():
+            for i in range(4):
+                ReuseFactory(title='test-{0}'.format(i) if i % 2 else faker.word(), datasets=[DatasetFactory()])
+
+        response = self.get(url_for('api.suggest_reuses'), qs={'q': 'tes', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('title', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertTrue(suggestion['title'].startswith('test'))
+
+    def test_suggest_reuses_api_unicode(self):
+        '''It should suggest reuses with special characters'''
+        with self.autoindex():
+            for i in range(4):
+                ReuseFactory(title='testé-{0}'.format(i) if i % 2 else faker.word(), datasets=[DatasetFactory()])
+
+        response = self.get(url_for('api.suggest_reuses'), qs={'q': 'testé', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('title', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertTrue(suggestion['title'].startswith('test'))
+
+    def test_suggest_reuses_api_no_match(self):
+        '''It should not provide reuse suggestion if no match'''
+        with self.autoindex():
+            for i in range(3):
+                ReuseFactory(datasets=[DatasetFactory()])
+
+        response = self.get(url_for('api.suggest_reuses'), qs={'q': 'xxxxxx', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
+
+    def test_suggest_reuses_api_empty(self):
+        '''It should not provide reuse suggestion if no data'''
+        self.init_search()
+        response = self.get(url_for('api.suggest_reuses'), qs={'q': 'xxxxxx', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)

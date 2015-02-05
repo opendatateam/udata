@@ -29,3 +29,11 @@ reuse_fields = api.model('Reuse', {
 })
 
 reuse_page_fields = api.model('ReusePage', pager(reuse_fields))
+
+reuse_suggestion_fields = api.model('ReuseSuggestion', {
+    'id': fields.String(description='The reuse identifier', required=True),
+    'title': fields.String(description='The reuse title', required=True),
+    'slug': fields.String(description='The reuse permalink string', required=True),
+    'image_url': fields.String(description='The reuse thumbnail URL'),
+    'score': fields.Float(description='The internal match score', required=True),
+})

@@ -18,7 +18,7 @@ define([
                 return Bloodhound.tokenizers.whitespace(d.name);
             },
             remote: {
-                url: API.build_url('/suggest/organizations') + '?q=%QUERY&size='+MAX
+                url: API.build_url('/organizations/suggest/') + '?q=%QUERY&size='+MAX
             }
         });
 

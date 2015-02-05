@@ -6,7 +6,7 @@ import logging
 from datetime import datetime
 from functools import wraps
 
-from flask import request, url_for, json, make_response, redirect, Blueprint
+from flask import g, request, url_for, json, make_response, redirect, Blueprint
 from flask.ext.restplus import Api, Resource, marshal
 from flask.ext.restful.utils import cors
 
@@ -132,6 +132,12 @@ def output_json(data, code, headers=None):
     return resp
 
 
+@apiv1.before_request
+def set_api_language():
+    if 'lang' in request.args:
+        g.lang_code = request.args['lang']
+
+
 @apidoc.route('/api/')
 @apidoc.route('/api/1/')
 def default_api():
@@ -249,10 +255,10 @@ def init_app(app):
     import udata.core.dataset.api
     import udata.core.reuse.api
     import udata.core.organization.api
-    import udata.core.suggest.api
     import udata.core.followers.api
     import udata.core.jobs.api
     import udata.core.site.api
+    import udata.core.tags.api
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:

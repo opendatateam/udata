@@ -98,6 +98,7 @@ class OrganizationQuerySet(db.BaseQuerySet):
 
 class Organization(WithMetrics, db.Datetimed, db.Document):
     name = db.StringField(max_length=255, required=True)
+    acronym = db.StringField(max_length=128)
     slug = db.SlugField(max_length=255, required=True, populate_from='name', update=True)
     description = db.StringField(required=True)
     url = db.StringField()

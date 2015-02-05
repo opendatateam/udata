@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
+from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, API, marshal
 from udata.auth import current_user
 from udata.forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm
@@ -12,8 +13,7 @@ from udata.core.followers.api import FollowAPI
 
 from .tasks import notify_membership_request, notify_membership_response
 from .search import OrganizationSearch
-from .api_fields import org_fields, org_page_fields, request_fields, member_fields
-from .search import OrganizationSearch
+from .api_fields import org_fields, org_page_fields, org_suggestion_fields, request_fields, member_fields
 
 ns = api.namespace('organizations', 'Organization related operations')
 search_parser = api.search_parser(OrganizationSearch)
@@ -117,3 +117,27 @@ class MembershipRefuseAPI(MembershipAPI):
 @ns.route('/<id>/followers/', endpoint='organization_followers')
 class FollowOrgAPI(FollowAPI):
     model = FollowOrg
+
+
+suggest_parser = api.parser()
+suggest_parser.add_argument('q', type=unicode, help='The string to autocomplete/suggest', location='args', required=True)
+suggest_parser.add_argument('size', type=int, help='The amount of suggestion to fetch', location='args', default=10)
+
+
+@ns.route('/suggest/', endpoint='suggest_organizations')
+class SuggestOrganizationsAPI(API):
+    @api.marshal_list_with(org_suggestion_fields)
+    @api.doc(id='suggest_organizations', parser=suggest_parser)
+    def get(self):
+        '''Suggest organizations'''
+        args = suggest_parser.parse_args()
+        return [
+            {
+                'id': opt['payload']['id'],
+                'name': opt['text'],
+                'score': opt['score'],
+                'slug': opt['payload']['slug'],
+                'image_url': opt['payload']['image_url'],
+            }
+            for opt in search.suggest(args['q'], 'org_suggest', args['size'])
+        ]

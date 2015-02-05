@@ -11,7 +11,6 @@ MODULES = (
     'reuse',
     'organization',
     'search',
-    'suggest',
     'activity',
     'followers',
     'topic',

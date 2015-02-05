@@ -48,6 +48,7 @@ class ReuseSearch(ModelSearchAdapter):
         'last_modified': Sort('last_modified'),
         'datasets': Sort('metrics.datasets'),
         'followers': Sort('metrics.followers'),
+        'views': Sort('metrics.views'),
     }
     mapping = {
         'properties': {

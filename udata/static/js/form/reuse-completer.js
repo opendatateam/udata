@@ -23,7 +23,7 @@ define([
             plugins: ['remove_button'],
             load: function(query, callback) {
                 if (!query.length) return callback();
-                API.get('/suggest/reuses', {
+                API.get('/reuses/suggest/', {
                     q: query,
                     size: 10
                 }, function(data) {

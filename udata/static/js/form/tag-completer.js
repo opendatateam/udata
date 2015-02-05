@@ -22,7 +22,7 @@ define(['jquery', 'api', 'form/widgets'], function($, API) {
             },
             load: function(query, callback) {
                 if (!query.length) return callback();
-                API.get('/suggest/tags', {
+                API.get('/tags/suggest/', {
                     q: query,
                     size: 10
                 }, function(data) {

@@ -44,6 +44,7 @@ member_fields = api.model('Member', {
 org_fields = api.model('Organization', {
     'id': fields.String(description='The organization identifier', required=True),
     'name': fields.String(description='The organization name', required=True),
+    'acronym': fields.String(description='The organization acronym'),
     'slug': fields.String(description='The organization string used as permalink', required=True),
     'description': fields.Markdown(description='The organization description in Markdown', required=True),
     'created_at': fields.ISODateTime(description='The organization creation date', readonly=True),
@@ -59,3 +60,11 @@ org_fields = api.model('Organization', {
 })
 
 org_page_fields = api.model('OrganizationPage', pager(org_fields))
+
+org_suggestion_fields = api.model('OrganizationSuggestion', {
+    'id': fields.String(description='The organization identifier', readonly=True),
+    'name': fields.String(description='The organization name', readonly=True),
+    'slug': fields.String(description='The organization permalink string', readonly=True),
+    'image_url': fields.String(description='The organization logo URL', readonly=True),
+    'score': fields.Float(description='The internal match score', readonly=True),
+})
