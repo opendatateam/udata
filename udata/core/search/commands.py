@@ -41,7 +41,8 @@ def reindex(name=None, doc_type=None):
 
 
 @m.option('-n', '--name', default=None, help='Optionnal index name')
-def initialize(name=None):
+@m.option('-d', '--delete', default=False, action='store_true', help='Delete previously aliased indices')
+def initialize(name=None, delete=False):
     index_name = name or '-'.join([es.index_name, date.today().isoformat()])
     log.info('Initiliazing index "{0}"'.format(index_name))
     if es.indices.exists(index_name):
@@ -74,3 +75,5 @@ def initialize(name=None):
     es.indices.put_alias(index=index_name, name=es.index_name)
     for index in indices:
         es.indices.delete_alias(index=index, name=es.index_name)
+        if delete:
+            es.indices.delete(index=index)

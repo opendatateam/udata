@@ -36,6 +36,7 @@ class ReuseSearch(ModelSearchAdapter):
         'tag': TermFacet('tags'),
         'organization': ModelTermFacet('organization', Organization),
         'owner': ModelTermFacet('owner', User),
+        'dataset': ModelTermFacet('dataset.id', Dataset),
         'type': ReuseTypeFacet('type'),
         'datasets': RangeFacet('metrics.datasets'),
         'followers': RangeFacet('metrics.followers'),
@@ -73,9 +74,10 @@ class ReuseSearch(ModelSearchAdapter):
             },
             'created': {'type': 'date', 'format': 'date_hour_minute_second'},
             'last_modified': {'type': 'date', 'format': 'date_hour_minute_second'},
-            'datasets': {
+            'dataset': {
                 'type': 'object',
                 'properties': {
+                    'id': {'type': 'string'},
                     'title': {'type': 'string'}
                 }
             },
@@ -117,8 +119,10 @@ class ReuseSearch(ModelSearchAdapter):
             'tag_suggest': reuse.tags,
             'created': reuse.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             'last_modified': reuse.last_modified.strftime('%Y-%m-%dT%H:%M:%S'),
-            'datasets': [
-                {'title': d.title} for d in reuse.datasets if isinstance(d, Dataset)
+            'dataset': [{
+                'id': str(d.id),
+                'title': d.title
+                } for d in reuse.datasets if isinstance(d, Dataset)
             ],
             'metrics': reuse.metrics,
             'featured': reuse.featured,

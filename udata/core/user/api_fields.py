@@ -30,12 +30,12 @@ from udata.core.organization.api_fields import OrganizationReference
 user_fields = api.model('User', {
     'id': fields.String(description='The user identifier', required=True),
     'slug': fields.String(description='The user permalink string', required=True),
-    'email': fields.String(description='The user email', required=True),
     'first_name': fields.String(description='The user first name', required=True),
     'last_name': fields.String(description='The user last name', required=True),
     'avatar': fields.ImageField(description='The user avatar URL'),
     'website': fields.String(description='The user website'),
     'about': fields.Markdown(description='The user self description'),
+    'roles': fields.List(fields.String, description='Site wide user roles'),
     'organizations': fields.List(OrganizationReference, description='The organization the user belongs to'),
     'metrics': fields.Raw(description='Th last user metrics'),
     'since': fields.ISODateTime(attribute='created_at', description='The registeration date', required=True),

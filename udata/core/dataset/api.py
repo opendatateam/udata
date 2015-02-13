@@ -3,13 +3,17 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
+from flask import request
+
+from uuid import UUID
+
 from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API
 from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by
 
-from .api_fields import resource_fields, dataset_fields, dataset_page_fields, dataset_suggestion_fields
+from .api_fields import resource_fields, dataset_fields, dataset_page_fields, dataset_suggestion_fields, resources_order
 from .models import Dataset, Resource, DatasetIssue, FollowDataset
 from .forms import DatasetForm, ResourceForm, DatasetFullForm
 from .search import DatasetSearch
@@ -25,7 +29,7 @@ common_doc = {
 
 @ns.route('/', endpoint='datasets')
 @api.doc(get={'id': 'list_datasets', 'model': dataset_page_fields, 'parser': search_parser})
-@api.doc(post={'id': 'create_dataset', 'model': dataset_fields})
+@api.doc(post={'id': 'create_dataset', 'model': dataset_fields, 'body': dataset_fields})
 class DatasetListAPI(ModelListAPI):
     model = Dataset
     form = DatasetFullForm
@@ -80,6 +84,20 @@ class ResourcesAPI(API):
         dataset.resources.append(resource)
         dataset.save()
         return resource, 201
+
+    @api.secure
+    @api.doc(id='update_resources', **common_doc)
+    # @api.doc(body=resources_order)
+    @api.marshal_with(resource_fields)
+    def put(self, dataset):
+        '''Update all ressources the same time'''
+        new_resources = []
+        for rid in request.json:
+            resource = get_by(dataset.resources, 'id', UUID(rid))
+            new_resources.append(resource)
+        dataset.resources = new_resources
+        dataset.save()
+        return dataset.resources, 200
 
 
 @ns.route('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource', doc=common_doc)

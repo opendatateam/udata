@@ -328,4 +328,13 @@ class SiteAPITest(APITestCase):
     def test_get_site(self):
         response = self.get(url_for('api.site'))
         self.assert200(response)
-        # self.assertEqual(response.json['id'], result.id)
+
+    # def test_update_site(self):
+    #     self.login(AdminFactory())
+    #     response = self.put(url_for('api.site'))
+    #     self.assert200(response)
+
+    # def test_get_site_permissions(self):
+    #     response = self.put(url_for('api.site'))
+    #     self.assert403(response)
+    #     # self.assertEqual(response.json['id'], result.id)

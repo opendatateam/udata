@@ -20,6 +20,7 @@ class OrganizationForm(ModelForm):
     model_class = Organization
 
     name = fields.StringField(_('Name'), [validators.required()])
+    acronym = fields.StringField(_('Acronym'), description=_('Shorter organization name'))
     description = fields.MarkdownField(_('Description'), [validators.required()],
         description=_('The details about your organization'))
     url = fields.URLField(_('Website'), description=_('The organization website URL'))

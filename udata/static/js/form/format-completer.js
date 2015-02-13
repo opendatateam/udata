@@ -19,7 +19,7 @@ define(['jquery', 'api', 'form/widgets'], function($, API) {
             },
             load: function(query, callback) {
                 if (!query.length) return callback();
-                API.get('/datasets/suggest/formats', {
+                API.get('/datasets/suggest/formats/', {
                     q: query,
                     size: 10
                 }, function(data) {

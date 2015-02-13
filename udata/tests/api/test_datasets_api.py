@@ -157,6 +157,19 @@ class DatasetResourceAPITest(APITestCase):
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 1)
 
+    def test_reorder(self):
+        self.dataset.resources = [ResourceFactory() for _ in range(3)]
+        self.dataset.save()
+
+        initial_order = [str(r.id) for r in self.dataset.resources]
+        expected_order = list(reversed(initial_order))
+
+        with self.api_user():
+            response = self.put(url_for('api.resources', dataset=self.dataset), expected_order)
+        self.assertStatus(response, 200)
+        self.dataset.reload()
+        self.assertEqual([str(r.id) for r in self.dataset.resources], expected_order)
+
     def test_update(self):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)

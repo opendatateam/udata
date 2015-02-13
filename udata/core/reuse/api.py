@@ -23,7 +23,7 @@ search_parser = api.search_parser(ReuseSearch)
 
 @ns.route('/', endpoint='reuses')
 @api.doc(get={'id': 'list_reuses', 'model': reuse_page_fields, 'parser': search_parser})
-@api.doc(post={'id': 'create_reuse', 'model': reuse_fields})
+@api.doc(post={'id': 'create_reuse', 'model': reuse_fields, 'body': reuse_fields})
 class ReuseListAPI(ModelListAPI):
     model = Reuse
     form = ReuseForm

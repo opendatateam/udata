@@ -23,6 +23,7 @@ class Markdown(String):
     pass
 
 
+@api.model(type='string')
 class UrlFor(Raw):
     def __init__(self, endpoint, mapper=None, **kwargs):
         super(UrlFor, self).__init__(**kwargs)
@@ -36,6 +37,7 @@ class UrlFor(Raw):
         return url_for(self.endpoint, _external=True, **self.mapper(obj))
 
 
+@api.model(type='string')
 class NextPageUrl(String):
     def output(self, key, obj):
         if not obj.has_next:
@@ -46,6 +48,7 @@ class NextPageUrl(String):
         return url_for(request.endpoint, _external=True, **args)
 
 
+@api.model(type='string')
 class PreviousPageUrl(String):
     def output(self, key, obj):
         if not obj.has_prev:

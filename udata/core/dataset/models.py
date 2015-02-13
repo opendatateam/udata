@@ -37,6 +37,8 @@ UPDATE_FREQUENCIES = {
     'unknown': _('Unknown'),
 }
 
+DEFAULT_FREQUENCY = 'unknown'
+
 RESOURCE_TYPES = OrderedDict([
     ('file', _('Uploaded file')),
     ('remote', _('Remote file')),

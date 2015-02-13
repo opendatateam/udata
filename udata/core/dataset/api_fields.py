@@ -7,7 +7,7 @@ from udata.api import api, fields, pager
 from udata.core.organization.api_fields import OrganizationReference
 from udata.core.spatial.api import spatial_coverage_fields
 
-from .models import UPDATE_FREQUENCIES, RESOURCE_TYPES
+from .models import UPDATE_FREQUENCIES, RESOURCE_TYPES, DEFAULT_FREQUENCY
 
 resource_fields = api.model('Resource', {
     'id': fields.String(description='The resource unique ID', readonly=True),
@@ -23,6 +23,8 @@ resource_fields = api.model('Resource', {
         description='The resource last modification date', readonly=True),
 })
 
+resources_order = api.as_list(fields.String(description='Resource ID'))
+
 temporal_coverage_fields = api.model('TemporalCoverage', {
     'start': fields.ISODateTime(description='The temporal coverage start date', required=True),
     'end': fields.ISODateTime(description='The temporal coverage end date', required=True),
@@ -37,11 +39,13 @@ dataset_fields = api.model('Dataset', {
     'last_modified': fields.ISODateTime(description='The dataset last modification date', required=True),
     'deleted': fields.ISODateTime(description='The deletion date if deleted'),
     'featured': fields.Boolean(description='Is the dataset featured'),
+    'private': fields.Boolean(description='Is the dataset private to the owner or the organization'),
     'tags': fields.List(fields.String),
     'resources': api.as_list(fields.Nested(resource_fields, description='The dataset resources')),
     'community_resources': api.as_list(fields.Nested(resource_fields,
         description='The dataset community submitted resources')),
-    'frequency': fields.String(description='The update frequency', required=True, enum=UPDATE_FREQUENCIES.keys()),
+    'frequency': fields.String(description='The update frequency', required=True,
+        enum=UPDATE_FREQUENCIES.keys(), default=DEFAULT_FREQUENCY),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
     'metrics': fields.Raw(description='The dataset metrics'),
     'organization': OrganizationReference(description='The producer organization'),

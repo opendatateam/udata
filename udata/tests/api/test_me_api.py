@@ -16,7 +16,9 @@ class MeAPITest(APITestCase):
         self.login()
         response = self.get(url_for('api.me'))
         self.assert200(response)
-        self.assertEqual(response.json['email'], self.user.email)
+        # self.assertEqual(response.json['email'], self.user.email)
+        self.assertEqual(response.json['first_name'], self.user.first_name)
+        self.assertEqual(response.json['roles'], [])
 
     def test_get_profile_401(self):
         '''It should raise a 401 on GET /me if no user is authenticated'''

@@ -6,7 +6,7 @@ from udata.i18n import lazy_gettext as _
 
 from udata.core.storages import resources
 
-from .models import Dataset, Resource, License, Checksum, UPDATE_FREQUENCIES, RESOURCE_TYPES, CHECKSUM_TYPES
+from .models import Dataset, Resource, License, Checksum, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_TYPES, CHECKSUM_TYPES
 
 __all__ = ('DatasetForm', 'DatasetCreateForm', 'ResourceForm', 'CommunityResourceForm', 'DatasetExtraForm')
 
@@ -19,7 +19,8 @@ class DatasetForm(UserModelForm):
         description=_('The details about the dataset (collection process, specifics...).'))
     license = fields.ModelSelectField(_('License'), model=License, allow_blank=True)
     frequency = fields.SelectField(_('Update frequency'),
-        choices=UPDATE_FREQUENCIES.items(), validators=[validators.optional()],
+        choices=UPDATE_FREQUENCIES.items(), default=DEFAULT_FREQUENCY,
+        validators=[validators.optional()],
         description=_('The frequency at which data are updated.'))
     temporal_coverage = fields.DateRangeField(_('Temporal coverage'),
         description=_('The period covered by the data'))

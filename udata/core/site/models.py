@@ -17,3 +17,4 @@ class Site(WithMetrics, db.Document):
     feed_size = db.IntField(required=True, default=DEFAULT_FEED_SIZE)
     configs = db.DictField()
     themes = db.DictField()
+    settings = db.DictField()

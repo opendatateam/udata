@@ -25,7 +25,7 @@ common_doc = {
 
 @ns.route('/', endpoint='organizations')
 @api.doc(get={'id': 'list_organizations', 'model': org_page_fields, 'parser': search_parser})
-@api.doc(post={'id': 'create_organization', 'model': org_fields})
+@api.doc(post={'id': 'create_organization', 'model': org_fields, 'body': org_fields})
 class OrganizationListAPI(ModelListAPI):
     model = Organization
     fields = org_fields
