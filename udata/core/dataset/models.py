@@ -46,6 +46,7 @@ RESOURCE_TYPES = OrderedDict([
 ])
 
 CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
+DEFAULT_CHECKSUM_TYPE = 'sha1'
 
 
 class License(db.Document):

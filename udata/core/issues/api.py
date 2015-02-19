@@ -9,7 +9,7 @@ from flask.ext.security import current_user
 
 from udata.api import api, API, marshal, fields, pager
 
-from udata.core.user.api_fields import UserReference
+from udata.core.user.api_fields import user_ref_fields
 
 from .forms import IssueCreateForm, IssueCommentForm
 from .models import Issue, Message, ISSUE_TYPES
@@ -19,7 +19,7 @@ ns = api.namespace('issues', 'Issue related operations')
 
 message_fields = api.model('IssueMessage', {
     'content': fields.String(description='The message body', required=True),
-    'posted_by': UserReference(description='The message author', required=True),
+    'posted_by': fields.Nested(user_ref_fields, description='The message author', required=True),
     'posted_on': fields.ISODateTime(description='The message posting date', required=True),
 })
 
@@ -27,7 +27,7 @@ issue_fields = api.model('Issue', {
     'id': fields.String(description='The issue identifier', readonly=True),
     'type': fields.String(description='The issue type', required=True, enum=ISSUE_TYPES.keys()),
     'subject': fields.String(attribute='subject.id', description='The issue target object identifier', required=True),
-    'user': UserReference(description='The issue author', required=True),
+    'user': fields.Nested(user_ref_fields, description='The issue author', required=True),
     'created': fields.ISODateTime(description='The issue creation date', readonly=True),
     'closed': fields.ISODateTime(description='The issue closing date', readonly=True),
     'closed_by': fields.String(attribute='closed_by.id', description='The user who closed the issue', readonly=True),

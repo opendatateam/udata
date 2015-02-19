@@ -179,7 +179,7 @@ class ResourceCreateView(ProtectedDatasetView, SingleObject, CreateView):
     def on_form_valid(self, form):
         resource = Resource()
         form.populate_obj(resource)
-        self.object.resources.append(resource)
+        self.object.resources.insert(0, resource)
         self.object.save()
         return redirect(url_for('datasets.show', dataset=self.object))
 
@@ -240,7 +240,7 @@ class CommunityResourceCreateView(DatasetView, SingleObject, CreateView):
     def on_form_valid(self, form):
         resource = Resource()
         form.populate_obj(resource)
-        self.object.community_resources.append(resource)
+        self.object.community_resources.insert(0, resource)
         self.object.save()
         return redirect(url_for('datasets.show', dataset=self.object))
 

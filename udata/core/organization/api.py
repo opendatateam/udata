@@ -4,13 +4,15 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 from udata import search
-from udata.api import api, ModelAPI, ModelListAPI, API, marshal
+from udata.i18n import lazy_gettext as _
+from udata.api import api, ModelAPI, ModelListAPI, API
 from udata.auth import current_user
 from udata.forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm
 from udata.models import Organization, MembershipRequest, Member, FollowOrg
 
 from udata.core.followers.api import FollowAPI
 
+from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 from .tasks import notify_membership_request, notify_membership_response
 from .search import OrganizationSearch
 from .api_fields import org_fields, org_page_fields, org_suggestion_fields, request_fields, member_fields
@@ -42,8 +44,25 @@ class OrganizationAPI(ModelAPI):
     form = OrganizationForm
 
 
+requests_parser = api.parser()
+requests_parser.add_argument('status', type=unicode,
+    help='If provided, only return requests ith a given status', location='args'
+)
+
+
 @ns.route('/<org:org>/membership/', endpoint='request_membership', doc=common_doc)
 class MembershipRequestAPI(API):
+    @api.secure
+    @api.marshal_list_with(request_fields)
+    @api.doc(id='list_membership_requests', model=request_fields)
+    @api.doc(responses={403: 'Not Authorized'})
+    def get(self, org):
+        '''List membership requests for a given organization'''
+        permission = OrganizationPrivatePermission(org.id)
+        if not permission.can():
+            api.abort(403)
+        return org.requests
+
     @api.secure
     @api.marshal_with(request_fields)
     def post(self, org):

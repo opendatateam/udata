@@ -8,11 +8,11 @@ from flask.ext.security import current_user
 from udata.api import api, API, fields, pager
 from udata.models import Follow
 
-from udata.core.user.api_fields import UserReference
+from udata.core.user.api_fields import user_ref_fields
 
 follow_fields = api.model('Follow', {
     'id': fields.String(description='The follow object technical ID', readonly=True),
-    'follower': UserReference(description='The follower', readonly=True),
+    'follower': fields.Nested(user_ref_fields, description='The follower', readonly=True),
     'since':  fields.ISODateTime(description='The date from which the user started following', readonly=True)
 })
 

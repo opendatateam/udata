@@ -1,20 +1,24 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
+
 from datetime import datetime
 
 from flask import request
 
 from uuid import UUID
+from werkzeug.datastructures import FileStorage
 
-from udata import search
+from udata import fileutils, search
 from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API
+from udata.core import storages
 from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by
 
-from .api_fields import resource_fields, dataset_fields, dataset_page_fields, dataset_suggestion_fields, resources_order
-from .models import Dataset, Resource, DatasetIssue, FollowDataset
+from .api_fields import resource_fields, dataset_fields, dataset_page_fields, dataset_suggestion_fields, resources_order, upload_fields
+from .models import Dataset, Resource, DatasetIssue, FollowDataset, Checksum
 from .forms import DatasetForm, ResourceForm, DatasetFullForm
 from .search import DatasetSearch
 
@@ -81,16 +85,16 @@ class ResourcesAPI(API):
         form = api.validate(ResourceForm)
         resource = Resource()
         form.populate_obj(resource)
-        dataset.resources.append(resource)
+        dataset.resources.insert(0, resource)
         dataset.save()
         return resource, 201
 
     @api.secure
-    @api.doc(id='update_resources', **common_doc)
+    @api.doc(id='reorder_resources', **common_doc)
     # @api.doc(body=resources_order)
     @api.marshal_with(resource_fields)
     def put(self, dataset):
-        '''Update all ressources the same time'''
+        '''Reorder resources'''
         new_resources = []
         for rid in request.json:
             resource = get_by(dataset.resources, 'id', UUID(rid))
@@ -98,6 +102,62 @@ class ResourcesAPI(API):
         dataset.resources = new_resources
         dataset.save()
         return dataset.resources, 200
+
+
+upload_parser = api.parser()
+upload_parser.add_argument('file', type=FileStorage, location='files')
+
+
+@ns.route('/<dataset:dataset>/upload/', endpoint='upload_resource')
+@api.doc(parser=upload_parser, **common_doc)
+class UploadResource(API):
+    @api.secure
+    @api.doc(id='upload_resource')
+    @api.marshal_with(upload_fields)
+    def post(self, dataset):
+        '''Upload a new resource'''
+        args = upload_parser.parse_args()
+
+        storage = storages.resources
+
+        prefix = self.get_prefix(dataset)
+
+        file = args['file']
+        filename = storage.save(file, prefix=prefix)
+
+        extension = fileutils.extension(filename)
+
+        file.seek(0)
+        sha1 = storages.utils.sha1(file)
+
+        size = os.path.getsize(storage.path(filename)) if storage.root else None
+
+        resource = Resource(
+            title=os.path.basename(filename),
+            url=storage.url(filename, external=True),
+            checksum=Checksum(value=sha1),
+            format=extension,
+            mime=storages.utils.mime(filename),
+            size=size
+        )
+        dataset.resources.insert(0, resource)
+        dataset.save()
+        return resource, 201
+
+
+
+        # return {
+        #     'success': True,
+        #     'url': storage.url(filename, external=True),
+        #     'filename': filename,
+        #     'sha1': sha1,
+        #     'format': extension,
+        #     'size': size,
+        #     'mime': storages.utils.mime(filename),
+        # }
+
+    def get_prefix(self, dataset):
+        return '/'.join((dataset.slug, datetime.now().strftime('%Y%m%d-%H%M%S')))
 
 
 @ns.route('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource', doc=common_doc)

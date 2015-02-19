@@ -1,41 +1,33 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import url_for
-
 from udata.api import api, pager, fields
 
 from .models import ORG_ROLES, MEMBERSHIP_STATUS
 
 
-@api.model(fields={
-    'id': fields.String(description='The organization identifier', required=True),
-    'name': fields.String(description='The organization name', required=True),
-    'uri': fields.String(description='The organization API URI', required=True),
-    'page': fields.String(description='The organization web page URL', required=True),
+org_ref_fields = api.model('OrganizationReference', {
+    'id': fields.String(description='The organization identifier', readonly=True),
+    'name': fields.String(description='The organization name', readonly=True),
+    'uri': fields.UrlFor('api.organization', lambda o: {'org': o},
+        description='The organization API URI', readonly=True),
+    'page': fields.UrlFor('organizations.show', lambda o: {'org': o},
+        description='The organization web page URL', readonly=True),
     'image_url': fields.String(description='The organization logo URL'),
 })
-class OrganizationReference(fields.Raw):
-    def format(self, organization):
-        return {
-            'id': str(organization.id),
-            'uri': url_for('api.organization', org=organization, _external=True),
-            'page': url_for('organizations.show', org=organization, _external=True),
-            'name': organization.name,
-            'logo': organization.logo(external=True),
-        }
 
 
-from udata.core.user.api_fields import UserReference
+from udata.core.user.api_fields import user_ref_fields
 
 request_fields = api.model('MembershipRequest', {
+    'user': fields.Nested(user_ref_fields),
     'status': fields.String(description='The current request status', required=True,
         enum=MEMBERSHIP_STATUS.keys()),
     'comment': fields.String(description='A request comment from the user', required=True),
 })
 
 member_fields = api.model('Member', {
-    'user': UserReference,
+    'user': fields.Nested(user_ref_fields),
     'role': fields.String(description='The member role in the organization', required=True,
         enum=ORG_ROLES.keys())
 })

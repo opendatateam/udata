@@ -3,9 +3,9 @@ from __future__ import unicode_literals
 
 from udata.api import api, pager, fields
 
-from udata.core.organization.api_fields import OrganizationReference
-from udata.core.dataset.api_fields import DatasetReference
-from udata.core.user.api_fields import UserReference
+from udata.core.organization.api_fields import org_ref_fields
+from udata.core.dataset.api_fields import dataset_ref_fields
+from udata.core.user.api_fields import user_ref_fields
 
 from .models import REUSE_TYPES
 
@@ -22,9 +22,10 @@ reuse_fields = api.model('Reuse', {
     'created_at': fields.ISODateTime(description='The reuse creation date', readonly=True),
     'last_modified': fields.ISODateTime(description='The reuse last modification date', readonly=True),
     'deleted': fields.ISODateTime(description='The organization identifier', readonly=True),
-    'datasets': fields.List(DatasetReference, description='The reused datasets'),
-    'organization': OrganizationReference(description='The publishing organization', readonly=True),
-    'owner': UserReference(description='The owner user', readonly=True),
+    'datasets': fields.List(fields.Nested(dataset_ref_fields), description='The reused datasets'),
+    'organization': fields.Nested(org_ref_fields, allow_null=True,
+        description='The publishing organization', readonly=True),
+    'owner': fields.Nested(user_ref_fields, description='The owner user', readonly=True, allow_null=True),
     'metrics': fields.Raw(description='The reuse metrics'),
     'uri': fields.UrlFor('api.reuse', lambda o: {'reuse': o},
         description='The reuse API URI', required=True),
