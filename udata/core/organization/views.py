@@ -18,7 +18,7 @@ from udata.utils import get_by
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.activity.views import ActivityView
 
-from .permissions import EditOrganizationPermission
+from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 from .tasks import notify_new_member
 
 
@@ -61,6 +61,7 @@ class OrgView(object):
             item._args = {'org': self.organization}
         context = super(OrgView, self).get_context()
         context['can_edit'] = EditOrganizationPermission(self.organization.id)
+        context['can_view'] = OrganizationPrivatePermission(self.organization.id)
         return context
 
 
@@ -88,14 +89,16 @@ class OrganizationDetailView(OrgView, DetailView):
         followers = FollowOrg.objects.followers(self.organization).order_by('follower.fullname')
 
         can_edit = EditOrganizationPermission(self.organization.id)
+        can_view = OrganizationPrivatePermission(self.organization.id)
         context.update({
             'reuses': reuses,
             'datasets': datasets,
             'supplied_datasets': supplied_datasets,
             'followers': followers[:self.nb_followers],
-            'can_edit': can_edit
+            'can_edit': can_edit,
+            'can_view': can_view
         })
-        if can_edit:
+        if can_view:
             context.update({
                 'private_reuses': list(Reuse.objects(organization=self.object).hidden()),
                 'private_datasets': list(Dataset.objects(organization=self.object).hidden()),
