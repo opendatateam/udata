@@ -7,6 +7,7 @@ from time import time
 from blinker import Signal
 from flask import url_for, g, current_app
 from flask.ext.security import UserMixin, RoleMixin, MongoEngineUserDatastore
+from mongoengine.signals import pre_save, post_save
 from itsdangerous import JSONWebSignatureSerializer
 
 from werkzeug import cached_property
@@ -130,8 +131,24 @@ class User(db.Document, WithMetrics, UserMixin):
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
+    @classmethod
+    def pre_save(cls, sender, document, **kwargs):
+        cls.before_save.send(document)
+
+    @classmethod
+    def post_save(cls, sender, document, **kwargs):
+        cls.after_save.send(document)
+        if kwargs.get('created'):
+            cls.on_create.send(document)
+        else:
+            cls.on_update.send(document)
+
 
 datastore = MongoEngineUserDatastore(db, User, Role)
+
+
+pre_save.connect(User.pre_save, sender=User)
+post_save.connect(User.post_save, sender=User)
 
 
 class FollowUser(Follow):
