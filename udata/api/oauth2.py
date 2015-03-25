@@ -123,12 +123,18 @@ class OAuth2Token(db.Document):
 
 @oauth.clientgetter
 def load_client(client_id):
-    return OAuth2Client.objects.get(id=ObjectId(client_id))
+    try:
+        return OAuth2Client.objects.get(id=ObjectId(client_id))
+    except OAuth2Client.DoesNotExist:
+        pass
 
 
 @oauth.grantgetter
 def load_grant(client_id, code):
-    return OAuth2Grant.objects.get(client=ObjectId(client_id), code=code)
+    try:
+        return OAuth2Grant.objects.get(client=ObjectId(client_id), code=code)
+    except OAuth2Grant.DoesNotExist:
+        pass
 
 
 @oauth.grantsetter
@@ -147,10 +153,13 @@ def save_grant(client_id, code, request, *args, **kwargs):
 
 @oauth.tokengetter
 def load_token(access_token=None, refresh_token=None):
-    if access_token:
-        return OAuth2Token.objects.get(access_token=access_token)
-    elif refresh_token:
-        return OAuth2Token.objects.get(refresh_token=refresh_token)
+    try:
+        if access_token:
+            return OAuth2Token.objects.get(access_token=access_token)
+        elif refresh_token:
+            return OAuth2Token.objects.get(refresh_token=refresh_token)
+    except OAuth2Token.DoesNotExist:
+        pass
 
 
 @oauth.tokensetter
