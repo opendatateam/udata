@@ -78,3 +78,9 @@ def pager(page_fields):
         'previous_page': PreviousPageUrl(description='The previous page URL if exists'),
     }
     return pager_fields
+
+
+base_reference = api.model('BaseReference', {
+    'id': String(description='The object unique identifier', required=True),
+    'class': ClassName(description='The object class', discriminator=True, required=True),
+}, description='Base model for reference field, aka. inline model reference')
