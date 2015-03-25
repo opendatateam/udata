@@ -9,7 +9,15 @@ from udata.frontend import csv
 from udata.models import Organization, Member, FollowOrg
 
 from . import FrontTestCase
-from ..factories import OrganizationFactory, UserFactory, DatasetFactory, ResourceFactory
+from ..factories import (
+    OrganizationFactory,
+    UserFactory,
+    DatasetFactory,
+    VisibleDatasetFactory,
+    ResourceFactory,
+    ReuseFactory,
+    VisibleReuseFactory,
+)
 
 
 class OrganizationBlueprintTest(FrontTestCase):
@@ -52,6 +60,82 @@ class OrganizationBlueprintTest(FrontTestCase):
         organization = OrganizationFactory()
         response = self.get(url_for('organizations.show', org=organization))
         self.assert200(response)
+
+    def test_render_display_with_datasets(self):
+        '''It should render the organization page with some datasets'''
+        organization = OrganizationFactory()
+        datasets = [VisibleDatasetFactory(organization=organization) for _ in range(3)]
+        response = self.get(url_for('organizations.show', org=organization))
+
+        self.assert200(response)
+        rendered_datasets = self.get_context_variable('datasets')
+        self.assertEqual(len(rendered_datasets), len(datasets))
+
+    def test_render_display_with_private_assets_only_member(self):
+        '''It should render the organization page without private assets if not member'''
+        organization = OrganizationFactory()
+        for _ in range(2):
+            DatasetFactory(organization=organization)
+            VisibleDatasetFactory(organization=organization, private=True)
+            ReuseFactory(organization=organization)
+            VisibleReuseFactory(organization=organization, private=True)
+        response = self.get(url_for('organizations.show', org=organization))
+
+        self.assert200(response)
+
+        rendered_datasets = self.get_context_variable('datasets')
+        self.assertEqual(len(rendered_datasets), 0)
+
+        rendered_reuses = self.get_context_variable('reuses')
+        self.assertEqual(len(rendered_reuses), 0)
+
+        rendered_private_datasets = self.get_context_variable('private_datasets')
+        self.assertEqual(len(rendered_private_datasets), 0)
+
+        rendered_private_reuses = self.get_context_variable('private_reuses')
+        self.assertEqual(len(rendered_private_reuses), 0)
+
+    def test_render_display_with_private_datasets(self):
+        '''It should render the organization page with some private datasets'''
+        me = self.login()
+        member = Member(user=me, role='editor')
+        organization = OrganizationFactory(members=[member])
+        datasets = [DatasetFactory(organization=organization) for _ in range(2)]
+        private_datasets = [VisibleDatasetFactory(organization=organization, private=True) for _ in range(2)]
+        response = self.get(url_for('organizations.show', org=organization))
+
+        self.assert200(response)
+        rendered_datasets = self.get_context_variable('datasets')
+        self.assertEqual(len(rendered_datasets), 0)
+
+        rendered_private_datasets = self.get_context_variable('private_datasets')
+        self.assertEqual(len(rendered_private_datasets), len(datasets) + len(private_datasets))
+
+    def test_render_display_with_reuses(self):
+        '''It should render the organization page with some reuses'''
+        organization = OrganizationFactory()
+        reuses = [VisibleReuseFactory(organization=organization) for _ in range(3)]
+        response = self.get(url_for('organizations.show', org=organization))
+
+        self.assert200(response)
+        rendered_reuses = self.get_context_variable('reuses')
+        self.assertEqual(len(rendered_reuses), len(reuses))
+
+    def test_render_display_with_private_reuses(self):
+        '''It should render the organization page with some private reuses'''
+        me = self.login()
+        member = Member(user=me, role='editor')
+        organization = OrganizationFactory(members=[member])
+        reuses = [ReuseFactory(organization=organization) for _ in range(2)]
+        private_reuses = [VisibleReuseFactory(organization=organization, private=True) for _ in range(2)]
+        response = self.get(url_for('organizations.show', org=organization))
+
+        self.assert200(response)
+        rendered_reuses = self.get_context_variable('reuses')
+        self.assertEqual(len(rendered_reuses), 0)
+
+        rendered_private_reuses = self.get_context_variable('private_reuses')
+        self.assertEqual(len(rendered_private_reuses), len(reuses) + len(private_reuses))
 
     def test_render_display_with_followers(self):
         '''It should render the organization page with followers'''

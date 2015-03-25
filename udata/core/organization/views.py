@@ -75,34 +75,28 @@ class ProtectedOrgView(OrgView):
 class OrganizationDetailView(OrgView, DetailView):
     template_name = 'organization/display.html'
     nb_followers = 16
+    page_size = 9
 
     def get_context(self):
         context = super(OrganizationDetailView, self).get_context()
 
-        org_id = str(self.organization.id)
-        datasets, supplied_datasets, reuses = search.multiquery(
-            search.SearchQuery(Dataset, sort='-created', organization=org_id, page_size=9),
-            search.SearchQuery(Dataset, sort='-created', supplier=org_id, page_size=9),
-            search.SearchQuery(Reuse, sort='-created', organization=org_id, page_size=9),
-
-        )
+        datasets = Dataset.objects(organization=self.organization).visible().order_by('-created')
+        supplied_datasets = Dataset.objects(supplier=self.organization).visible().order_by('-created')
+        reuses = Reuse.objects(organization=self.organization).visible().order_by('-created')
         followers = FollowOrg.objects.followers(self.organization).order_by('follower.fullname')
 
         can_edit = EditOrganizationPermission(self.organization.id)
         can_view = OrganizationPrivatePermission(self.organization.id)
         context.update({
-            'reuses': reuses,
-            'datasets': datasets,
-            'supplied_datasets': supplied_datasets,
+            'reuses': reuses[:self.page_size],
+            'datasets': datasets[:self.page_size],
+            'supplied_datasets': supplied_datasets[:self.page_size],
             'followers': followers[:self.nb_followers],
             'can_edit': can_edit,
-            'can_view': can_view
+            'can_view': can_view,
+            'private_reuses': list(Reuse.objects(organization=self.object).hidden()) if can_view else [],
+            'private_datasets': list(Dataset.objects(organization=self.object).hidden()) if can_view else [],
         })
-        if can_view:
-            context.update({
-                'private_reuses': list(Reuse.objects(organization=self.object).hidden()),
-                'private_datasets': list(Dataset.objects(organization=self.object).hidden()),
-            })
 
         return context
 
