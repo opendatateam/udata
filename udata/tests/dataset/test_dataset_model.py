@@ -42,3 +42,27 @@ class DatasetModelTest(TestCase, DBTestMixin):
 
         for dataset in excluded:
             self.assertNotIn(dataset, result)
+
+    def test_add_resource(self):
+        user = UserFactory()
+        dataset = DatasetFactory(owner=user)
+        resource = ResourceFactory()
+
+        dataset.add_resource(ResourceFactory())
+        self.assertEqual(len(dataset.resources), 1)
+
+        dataset.add_resource(resource)
+        self.assertEqual(len(dataset.resources), 2)
+        self.assertEqual(dataset.resources[0].id, resource.id)
+
+    def test_add_community_resource(self):
+        user = UserFactory()
+        dataset = DatasetFactory(owner=user)
+        resource = ResourceFactory()
+
+        dataset.add_community_resource(ResourceFactory())
+        self.assertEqual(len(dataset.community_resources), 1)
+
+        dataset.add_community_resource(resource)
+        self.assertEqual(len(dataset.community_resources), 2)
+        self.assertEqual(dataset.community_resources[0].id, resource.id)

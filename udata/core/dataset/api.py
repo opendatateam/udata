@@ -93,8 +93,7 @@ class ResourcesAPI(API):
         form = api.validate(ResourceForm)
         resource = Resource()
         form.populate_obj(resource)
-        dataset.resources.insert(0, resource)
-        dataset.save()
+        dataset.add_resource(resource)
         return resource, 201
 
     @api.secure
@@ -148,8 +147,7 @@ class UploadResource(API):
             mime=storages.utils.mime(filename),
             size=size
         )
-        dataset.resources.insert(0, resource)
-        dataset.save()
+        dataset.add_resource(resource)
         return resource, 201
 
     def get_prefix(self, dataset):

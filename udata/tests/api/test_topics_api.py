@@ -25,7 +25,6 @@ class TopicsAPITest(APITestCase):
         self.assert200(response)
 
         data = response.json
-        print data
         for dataset, expected in zip(data['datasets'], topic.datasets):
             self.assertEqual(dataset['id'], str(expected.id))
 

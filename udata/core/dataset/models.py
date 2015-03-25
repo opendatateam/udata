@@ -205,6 +205,30 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
+    def add_resource(self, resource):
+        '''Perform an atomic prepend for a new resource'''
+        self.update(__raw__={
+            '$push': {
+                'resources': {
+                    '$each': [resource.to_mongo()],
+                    '$position': 0
+                }
+            }
+        })
+        self.reload()
+
+    def add_community_resource(self, resource):
+        '''Perform an atomic prepend for a new resource'''
+        self.update(__raw__={
+            '$push': {
+                'community_resources': {
+                    '$each': [resource.to_mongo()],
+                    '$position': 0
+                }
+            }
+        })
+        self.reload()
+
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)

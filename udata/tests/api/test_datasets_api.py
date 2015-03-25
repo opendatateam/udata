@@ -168,6 +168,17 @@ class DatasetResourceAPITest(APITestCase):
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 1)
 
+    def test_create_2nd(self):
+        self.dataset.resources.append(ResourceFactory())
+        self.dataset.save()
+
+        data = ResourceFactory.attributes()
+        with self.api_user():
+            response = self.post(url_for('api.resources', dataset=self.dataset), data)
+        self.assertStatus(response, 201)
+        self.dataset.reload()
+        self.assertEqual(len(self.dataset.resources), 2)
+
     def test_reorder(self):
         self.dataset.resources = [ResourceFactory() for _ in range(3)]
         self.dataset.save()

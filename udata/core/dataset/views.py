@@ -179,9 +179,8 @@ class ResourceCreateView(ProtectedDatasetView, SingleObject, CreateView):
     def on_form_valid(self, form):
         resource = Resource()
         form.populate_obj(resource)
-        self.object.resources.insert(0, resource)
-        self.object.save()
-        return redirect(url_for('datasets.show', dataset=self.object))
+        self.dataset.add_resource(resource)
+        return redirect(url_for('datasets.show', dataset=self.dataset))
 
 
 class UploadNewResource(SingleObject, BaseView):
@@ -240,9 +239,8 @@ class CommunityResourceCreateView(DatasetView, SingleObject, CreateView):
     def on_form_valid(self, form):
         resource = Resource()
         form.populate_obj(resource)
-        self.object.community_resources.insert(0, resource)
-        self.object.save()
-        return redirect(url_for('datasets.show', dataset=self.object))
+        self.dataset.add_community_resource(resource)
+        return redirect(url_for('datasets.show', dataset=self.dataset))
 
 
 @blueprint.route('/<dataset:dataset>/resources/<resource>/', endpoint='edit_resource')
