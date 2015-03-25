@@ -22,7 +22,9 @@ bp = Blueprint('oauth', __name__)
 i18n = I18nBlueprint('oauth-i18n', __name__)
 
 
-DEFAULT_EXPIRATION = 100
+GRANT_EXPIRATION = 100  # 100 seconds
+TOKEN_EXPIRATION = 30 * 24 # 30 days
+
 
 CLIENT_TYPES = {
     'public': _('Public'),
@@ -111,7 +113,7 @@ class OAuth2Token(db.Document):
 
     access_token = db.StringField(unique=True)
     refresh_token = db.StringField(unique=True)
-    expires = db.DateTimeField(default=lambda: datetime.utcnow() + timedelta(seconds=DEFAULT_EXPIRATION))
+    expires = db.DateTimeField(default=lambda: datetime.utcnow() + timedelta(hours=TOKEN_EXPIRATION))
     scopes = db.ListField(db.StringField())
 
     meta = {
@@ -132,7 +134,7 @@ def load_grant(client_id, code):
 @oauth.grantsetter
 def save_grant(client_id, code, request, *args, **kwargs):
     # decide the expires time yourself
-    expires = datetime.utcnow() + timedelta(seconds=DEFAULT_EXPIRATION)
+    expires = datetime.utcnow() + timedelta(seconds=GRANT_EXPIRATION)
     return OAuth2Grant.objects.create(
         client=ObjectId(client_id),
         code=code['code'],

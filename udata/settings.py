@@ -35,6 +35,8 @@ class Defaults(object):
     SECURITY_PASSWORD_HASH = b'bcrypt'
     SECURITY_PASSWORD_SALT = b'udata'
 
+    OAUTH2_PROVIDER_TOKEN_EXPIRES_IN = 30 * 24 * 60 * 60  # 30 days
+
     MAIL_DEFAULT_SENDER = 'webmaster@udata'
 
     AUTO_INDEX = True
