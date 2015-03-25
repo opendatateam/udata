@@ -3,7 +3,8 @@
     <div class="media">
         <a class="pull-left" href="{{posted_by.page}}">
             <img class="media-object" width="50px" height="50px"
-                src="{{posted_by.avatar_url}}" alt="{{posted_by.first_name}} {{posted_by.last_name}}">
+                src="{{placeholder posted_by.avatar 'user'}}"
+                alt="{{posted_by.first_name}} {{posted_by.last_name}}">
         </a>
         <div class="media-body">
             <div class="message text-left">{{content}}</div>
