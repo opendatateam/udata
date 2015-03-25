@@ -37,6 +37,12 @@ class ReuseQuerySet(db.BaseQuerySet):
     def hidden(self):
         return self(db.Q(private=True) | db.Q(datasets__0__exists=False) | db.Q(deleted__ne=None))
 
+    def owned_by(self, *owners):
+        Qs = db.Q()
+        for owner in owners:
+            Qs |= db.Q(owner=owner) | db.Q(organization=owner)
+        return self(Qs)
+
 
 class Reuse(db.Datetimed, WithMetrics, db.Document):
     title = db.StringField(max_length=255, required=True)

@@ -80,6 +80,10 @@ class UDataQuerySet(BaseQuerySet):
         result = super(UDataQuerySet, self).paginate(page, per_page, error_out)
         return DBPaginator(result)
 
+    def bulk_list(self, ids):
+        data = self.in_bulk(ids)
+        return [data[id] for id in ids]
+
 
 class UDataDocument(Document):
     meta = {
@@ -121,6 +125,8 @@ from udata.core.activity.models import *
 from udata.core.topic.models import *
 from udata.core.post.models import *
 from udata.core.jobs.models import *
+
+from udata.features.transfer.models import *
 
 
 def init_app(app):

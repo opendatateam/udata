@@ -73,12 +73,13 @@ class ResourceForm(ModelForm):
     model_class = Resource
 
     title = fields.StringField(_('Title'), [validators.required()])
-    description = fields.MarkdownField(_('Description'), [validators.required()])
+    description = fields.MarkdownField(_('Description'))
     type = fields.RadioField(_('Type'), [validators.required()],
         choices=RESOURCE_TYPES.items(), default='file',
         description=_('Whether the resource is an uploaded file, a remote file or an API'))
     url = fields.UploadableURLField(_('URL'), [validators.required()], storage=resources)
     format = fields.StringField(_('Format'), widget=widgets.FormatAutocompleter())
+    # checksum = fields.FormField(ChecksumForm, _('Checksum'))
     checksum = ChecksumField(_('Checksum'))
     mime = fields.StringField(_('Mime type'),
         description=_('The mime type associated to the extension. (ex: text/plain)'))

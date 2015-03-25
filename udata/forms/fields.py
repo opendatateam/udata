@@ -166,7 +166,6 @@ class TextAreaField(FieldHelper, EmptyNone, fields.TextAreaField):
 
 class FormField(FieldHelper, fields.FormField):
     def __init__(self, form_class, *args, **kwargs):
-        print 'args, kwargs', args, kwargs
         def wrapper(*args, **kwargs):
             kwargs['csrf_enabled'] = False
             return form_class(*args, **kwargs)
@@ -231,7 +230,9 @@ class TagField(StringField):
             return u''
 
     def process_formdata(self, valuelist):
-        if valuelist:
+        if valuelist and len(valuelist) > 1:
+            self.data = valuelist
+        elif valuelist:
             self.data = list(set([x.strip().lower() for x in valuelist[0].split(',') if x.strip()]))
         else:
             self.data = []
@@ -249,36 +250,46 @@ class TagField(StringField):
                 raise validators.ValidationError(message)
 
 
-class DatasetListField(StringField):
+def clean_oid(oid):
+    if isinstance(oid, ObjectId):
+        return oid
+    elif (isinstance(oid, basestring)):
+        return ObjectId(oid)
+    elif (isinstance(oid, dict) and 'id' in oid):
+        return clean_oid(oid['id'])
+    else:
+        raise ValueError('Unsupported identifier: ' + oid)
+
+
+class ModelList(object):
+    model = None
+
+    def _value(self):
+        if self.data:
+            return u','.join([str(o.id) for o in self.data])
+        else:
+            return u''
+
+    def process_formdata(self, valuelist):
+        if not valuelist:
+            return []
+        if len(valuelist) > 1:
+            oids = [clean_oid(id) for id in valuelist]
+        elif isinstance(valuelist[0], basestring):
+            oids = [ObjectId(id.strip()) for id in valuelist[0].split(',') if id.strip()]
+        else:
+            raise ValueError('Unsupported form parameter: ' + valuelist)
+        self.data = [DBRef(self.model.lower(), oid) for oid in oids]
+
+
+class DatasetListField(ModelList, StringField):
+    model = 'dataset'
     widget = widgets.DatasetAutocompleter()
 
-    def _value(self):
-        if self.data:
-            return u','.join([str(dataset.id) for dataset in self.data])
-        else:
-            return u''
 
-    def process_formdata(self, valuelist):
-        if valuelist:
-            self.data = [DBRef('dataset', ObjectId(id.strip())) for id in valuelist[0].split(',') if id.strip()]
-        else:
-            self.data = []
-
-
-class ReuseListField(StringField):
+class ReuseListField(ModelList, StringField):
+    model = 'reuse'
     widget = widgets.ReuseAutocompleter()
-
-    def _value(self):
-        if self.data:
-            return u','.join([str(reuse.id) for reuse in self.data])
-        else:
-            return u''
-
-    def process_formdata(self, valuelist):
-        if valuelist:
-            self.data = [DBRef('reuse', ObjectId(id.strip())) for id in valuelist[0].split(',') if id.strip()]
-        else:
-            self.data = []
 
 
 class UserField(StringField):

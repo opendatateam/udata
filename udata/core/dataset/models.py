@@ -71,6 +71,12 @@ class DatasetQuerySet(db.BaseQuerySet):
     def hidden(self):
         return self(db.Q(private=True) | db.Q(resources__0__exists=False) | db.Q(deleted__ne=None))
 
+    def owned_by(self, *owners):
+        Qs = db.Q()
+        for owner in owners:
+            Qs |= db.Q(owner=owner) | db.Q(organization=owner)
+        return self(Qs)
+
 
 class Checksum(db.EmbeddedDocument):
     type = db.StringField(choices=CHECKSUM_TYPES)

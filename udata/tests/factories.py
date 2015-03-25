@@ -185,6 +185,15 @@ class TopicFactory(MongoEngineFactory):
 
     name = factory.LazyAttribute(lambda o: faker.sentence())
     description = factory.LazyAttribute(lambda o: faker.text())
+    tags = factory.LazyAttribute(lambda o: [faker.word() for _ in range(3)])
+
+    @factory.lazy_attribute
+    def datasets(self):
+        return DatasetFactory.create_batch(3)
+
+    @factory.lazy_attribute
+    def reuses(self):
+        return ReuseFactory.create_batch(3)
 
 
 class PostFactory(MongoEngineFactory):
@@ -192,7 +201,16 @@ class PostFactory(MongoEngineFactory):
         model = models.Post
 
     name = factory.LazyAttribute(lambda o: faker.sentence())
+    headline = factory.LazyAttribute(lambda o: faker.sentence())
     content = factory.LazyAttribute(lambda o: faker.text())
+
+    @factory.lazy_attribute
+    def datasets(self):
+        return DatasetFactory.create_batch(3)
+
+    @factory.lazy_attribute
+    def reuses(self):
+        return ReuseFactory.create_batch(3)
 
 
 class TerritoryFactory(MongoEngineFactory):
@@ -210,3 +228,9 @@ class SpatialCoverageFactory(MongoEngineFactory):
         model = models.SpatialCoverage
 
     geom = factory.LazyAttribute(lambda o: faker.multipolygon())
+
+
+class TransferFactory(MongoEngineFactory):
+    class Meta:
+        model = models.Transfer
+    comment = factory.LazyAttribute(lambda o: faker.sentence())
