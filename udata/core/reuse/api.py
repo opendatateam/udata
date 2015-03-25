@@ -34,7 +34,7 @@ class ReuseListAPI(ModelListAPI):
 @ns.route('/<reuse:reuse>/', endpoint='reuse')
 @api.doc(model=reuse_fields, **common_doc)
 @api.doc(get={'id': 'get_reuse'})
-@api.doc(put={'id': 'update_reuse'})
+@api.doc(put={'id': 'update_reuse', 'body': reuse_fields})
 class ReuseAPI(ModelAPI):
     model = Reuse
     form = ReuseForm

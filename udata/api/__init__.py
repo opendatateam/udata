@@ -6,14 +6,14 @@ import logging
 from datetime import datetime
 from functools import wraps
 
-from flask import g, request, url_for, json, make_response, redirect, Blueprint
+from flask import current_app, g, request, url_for, json, make_response, redirect, Blueprint
 from flask.ext.restplus import Api, Resource, marshal
 from flask.ext.restful.utils import cors
 
 from udata import search, theme
 from udata.app import csrf
 from udata.i18n import I18nBlueprint
-from udata.auth import current_user, login_user, Permission, RoleNeed
+from udata.auth import current_user, login_user, Permission, RoleNeed, PermissionDenied
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
 
@@ -112,6 +112,20 @@ class UDataApi(Api):
             parser.add_argument('page_size', type=int, location='args', default=20, help='The page size')
         return parser
 
+    def unauthorized(self, response):
+        '''Override to change the WWW-Authenticate challenge'''
+        realm = current_app.config.get('HTTP_OAUTH_REALM', 'uData')
+        challenge = 'Bearer realm="{0}"'.format(realm)
+
+        response.headers['WWW-Authenticate'] = challenge
+        return response
+
+    def page_parser(self):
+        parser = self.parser()
+        parser.add_argument('page', type=int, default=1, location='args', help='The page to fetch')
+        parser.add_argument('page_size', type=int, default=20, location='args', help='The page size to fetch')
+        return parser
+
 
 api = UDataApi(apiv1, ui=False,
     decorators=[csrf.exempt, cors.crossdomain(origin='*', credentials=True)],
@@ -136,6 +150,22 @@ def output_json(data, code, headers=None):
 def set_api_language():
     if 'lang' in request.args:
         g.lang_code = request.args['lang']
+
+
+@apiv1.errorhandler(PermissionDenied)
+def handle_permission_denied(error):
+    return json.dumps({
+        'message': str(error),
+        'status': 403
+    }), 403
+
+
+@apiv1.errorhandler(ValueError)
+def handle_value_error(error):
+    return json.dumps({
+        'message': str(error),
+        'status': 400
+    }), 400
 
 
 @apidoc.route('/api/')
@@ -259,6 +289,9 @@ def init_app(app):
     import udata.core.jobs.api
     import udata.core.site.api
     import udata.core.tags.api
+    import udata.core.topic.api
+    import udata.core.post.api
+    import udata.features.transfer.api
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:

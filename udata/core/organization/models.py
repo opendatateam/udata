@@ -177,6 +177,10 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
     def is_member(self, user):
         return self.member(user) is not None
 
+    def is_admin(self, user):
+        member = self.member(user)
+        return member is not None and member.role == 'admin'
+
     def pending_request(self, user):
         for request in self.requests:
             if request.user == user and request.status == 'pending':

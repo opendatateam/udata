@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from flask import url_for
 
 
+from udata.auth import PermissionDenied, admin_permission
 from udata.api import api, API
 from udata.api.oauth2 import OAuth2Client, OAuth2Grant, OAuth2Token
 from udata.forms import Form, fields, validators
@@ -187,3 +188,30 @@ class APIAuthTest(APITestCase):
         self.assertStatus(response, 302)
         uri, params = response.location.split('?')
         self.assertEqual(uri, client.default_redirect_uri)
+
+    def test_value_error(self):
+        @ns.route('/exception', endpoint='exception')
+        class ExceptionAPI(API):
+            def get(self):
+                raise ValueError('Not working')
+
+        response = self.get(url_for('api.exception'))
+
+        self.assert400(response)
+        self.assertEqual(response.json, {
+            'message': 'Not working',
+            'status': 400
+        })
+
+    def test_permission_denied(self):
+        @ns.route('/exception', endpoint='exception')
+        class ExceptionAPI(API):
+                raise PermissionDenied('Permission denied')
+
+        response = self.get(url_for('api.exception'))
+
+        self.assert403(response)
+        self.assertEqual(response.json, {
+            'message': 'Permission denied',
+            'status': 403
+        })

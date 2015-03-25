@@ -86,8 +86,8 @@ dataset_suggestion_fields = api.model('DatasetSuggestion', {
     'score': fields.Float(description='The internal match score', required=True),
 })
 
-dataset_ref_fields = api.model('DatasetReference', {
-    'id': fields.String(description='The dataset unique identifier', readonly=True),
+dataset_ref_fields = api.inherit('DatasetReference', fields.base_reference, {
+    # 'id': fields.String(description='The dataset unique identifier', readonly=True),
     'title': fields.String(description='The dataset title', readonly=True),
     'uri': fields.UrlFor('api.dataset', lambda d: {'dataset': d},
         description='The API URI for this dataset', readonly=True),

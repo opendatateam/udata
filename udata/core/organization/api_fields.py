@@ -6,21 +6,22 @@ from udata.api import api, pager, fields
 from .models import ORG_ROLES, MEMBERSHIP_STATUS
 
 
-org_ref_fields = api.model('OrganizationReference', {
-    'id': fields.String(description='The organization identifier', readonly=True),
+org_ref_fields = api.inherit('OrganizationReference', fields.base_reference, {
     'name': fields.String(description='The organization name', readonly=True),
     'uri': fields.UrlFor('api.organization', lambda o: {'org': o},
         description='The organization API URI', readonly=True),
     'page': fields.UrlFor('organizations.show', lambda o: {'org': o},
         description='The organization web page URL', readonly=True),
-    'image_url': fields.String(description='The organization logo URL'),
+    'logo': fields.ImageField(size=100, description='The organization logo URL'),
 })
 
 
 from udata.core.user.api_fields import user_ref_fields
 
 request_fields = api.model('MembershipRequest', {
+    'id': fields.String(readonly=True),
     'user': fields.Nested(user_ref_fields),
+    'created': fields.ISODateTime(description='The request creation date', readonly=True),
     'status': fields.String(description='The current request status', required=True,
         enum=MEMBERSHIP_STATUS.keys()),
     'comment': fields.String(description='A request comment from the user', required=True),

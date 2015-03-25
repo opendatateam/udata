@@ -11,14 +11,22 @@ from uuid import UUID
 from werkzeug.datastructures import FileStorage
 
 from udata import fileutils, search
-from udata.api import api, ModelAPI, ModelListAPI, SingleObjectAPI, API
+from udata.api import api, fields, ModelAPI, ModelListAPI, SingleObjectAPI, API
 from udata.core import storages
 from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by
 
-from .api_fields import resource_fields, dataset_fields, dataset_page_fields, dataset_suggestion_fields, resources_order, upload_fields
+from .api_fields import (
+    resource_fields,
+    dataset_fields,
+    dataset_page_fields,
+    dataset_suggestion_fields,
+    resources_order,
+    upload_fields,
+)
 from .models import Dataset, Resource, DatasetIssue, FollowDataset, Checksum
+from .permissions import DatasetEditPermission
 from .forms import DatasetForm, ResourceForm, DatasetFullForm
 from .search import DatasetSearch
 
@@ -75,10 +83,10 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
         return dataset
 
 
-@ns.route('/<dataset:dataset>/resources/', endpoint='resources', doc=common_doc)
+@ns.route('/<dataset:dataset>/resources/', endpoint='resources')
 class ResourcesAPI(API):
     @api.secure
-    @api.doc(id='create_resource')
+    @api.doc(id='create_resource', body=resource_fields, **common_doc)
     @api.marshal_with(resource_fields)
     def post(self, dataset):
         '''Create a new resource for a given dataset'''
@@ -90,8 +98,8 @@ class ResourcesAPI(API):
         return resource, 201
 
     @api.secure
-    @api.doc(id='reorder_resources', **common_doc)
-    # @api.doc(body=resources_order)
+    @api.doc('reorder_resources', **common_doc)
+    @api.expect([fields.String])
     @api.marshal_with(resource_fields)
     def put(self, dataset):
         '''Reorder resources'''
@@ -144,18 +152,6 @@ class UploadResource(API):
         dataset.save()
         return resource, 201
 
-
-
-        # return {
-        #     'success': True,
-        #     'url': storage.url(filename, external=True),
-        #     'filename': filename,
-        #     'sha1': sha1,
-        #     'format': extension,
-        #     'size': size,
-        #     'mime': storages.utils.mime(filename),
-        # }
-
     def get_prefix(self, dataset):
         return '/'.join((dataset.slug, datetime.now().strftime('%Y%m%d-%H%M%S')))
 
@@ -170,7 +166,7 @@ class ResourceAPI(API):
         return resource
 
     @api.secure
-    @api.doc(id='update_resource')
+    @api.doc(id='update_resource', body=resource_fields)
     @api.marshal_with(resource_fields)
     def put(self, dataset, rid):
         '''Update a given resource on a given dataset'''
@@ -182,7 +178,7 @@ class ResourceAPI(API):
         return resource
 
     @api.secure
-    @api.doc(id='delete_resource')
+    @api.doc('delete_resource')
     def delete(self, dataset, rid):
         '''Delete a given resource on a given dataset'''
         resource = self.get_resource_or_404(dataset, rid)

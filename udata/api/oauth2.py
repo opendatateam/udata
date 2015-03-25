@@ -47,7 +47,8 @@ TOKEN_TYPES = {
 }
 
 SCOPES = {
-    'default': _('Default scope')
+    'default': _('Default scope'),
+    'admin': _('System administrator rights')
 }
 
 

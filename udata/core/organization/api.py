@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 from udata import search
-from udata.i18n import lazy_gettext as _
 from udata.api import api, ModelAPI, ModelListAPI, API
 from udata.auth import current_user
 from udata.forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm
@@ -54,14 +53,16 @@ requests_parser.add_argument('status', type=unicode,
 class MembershipRequestAPI(API):
     @api.secure
     @api.marshal_list_with(request_fields)
-    @api.doc(id='list_membership_requests', model=request_fields)
+    @api.doc('list_membership_requests', parser=requests_parser)
     @api.doc(responses={403: 'Not Authorized'})
     def get(self, org):
         '''List membership requests for a given organization'''
-        permission = OrganizationPrivatePermission(org.id)
-        if not permission.can():
-            api.abort(403)
-        return org.requests
+        OrganizationPrivatePermission(org.id).test()
+        args = requests_parser.parse_args()
+        if args['status']:
+            return [r for r in org.requests if r.status == args['status']]
+        else:
+            return org.requests
 
     @api.secure
     @api.marshal_with(request_fields)
@@ -92,12 +93,14 @@ class MembershipAPI(API):
         api.abort(404, 'Unknown membership request id')
 
 
-@ns.route('/<org:org>/membership/<uuid:id>/accept/', endpoint='accept_membership', doc=common_doc)
+@ns.route('/<org:org>/membership/<uuid:id>/accept/', endpoint='accept_membership')
 class MembershipAcceptAPI(MembershipAPI):
     @api.secure
+    @api.doc('accept_membership', **common_doc)
     @api.marshal_with(member_fields)
     def post(self, org, id):
         '''Accept user membership to a given organization.'''
+        EditOrganizationPermission(org.id).test()
         membership_request = self.get_or_404(org, id)
 
         membership_request.status = 'accepted'
@@ -113,11 +116,19 @@ class MembershipAcceptAPI(MembershipAPI):
         return member
 
 
-@ns.route('/<org:org>/membership/<uuid:id>/refuse/', endpoint='refuse_membership', doc=common_doc)
+refuse_parser = api.parser()
+refuse_parser.add_argument('comment', type=unicode,
+    help='The refusal reason', location='json'
+)
+
+
+@ns.route('/<org:org>/membership/<uuid:id>/refuse/', endpoint='refuse_membership')
 class MembershipRefuseAPI(MembershipAPI):
     @api.secure
+    @api.doc('refuse_membership', parser=refuse_parser, **common_doc)
     def post(self, org, id):
         '''Refuse user membership to a given organization.'''
+        EditOrganizationPermission(org.id).test()
         membership_request = self.get_or_404(org, id)
         form = api.validate(MembershipRefuseForm)
 

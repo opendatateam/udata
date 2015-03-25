@@ -10,7 +10,7 @@ from udata.core.user.api_fields import user_ref_fields
 from .models import REUSE_TYPES
 
 reuse_fields = api.model('Reuse', {
-    'id': fields.String(description='The reuse identifier'),
+    'id': fields.String(description='The reuse identifier', readonly=True),
     'title': fields.String(description='The reuse title', required=True),
     'slug': fields.String(description='The reuse permalink string', readonly=True),
     'type': fields.String(description='The reuse type', required=True, enum=REUSE_TYPES.keys()),
@@ -26,19 +26,29 @@ reuse_fields = api.model('Reuse', {
     'organization': fields.Nested(org_ref_fields, allow_null=True,
         description='The publishing organization', readonly=True),
     'owner': fields.Nested(user_ref_fields, description='The owner user', readonly=True, allow_null=True),
-    'metrics': fields.Raw(description='The reuse metrics'),
+    'metrics': fields.Raw(description='The reuse metrics', readonly=True),
     'uri': fields.UrlFor('api.reuse', lambda o: {'reuse': o},
-        description='The reuse API URI', required=True),
+        description='The reuse API URI', readonly=True),
     'page': fields.UrlFor('reuses.show', lambda o: {'reuse': o},
-        description='The reuse page URL', required=True),
+        description='The reuse page URL', readonly=True),
 })
 
 reuse_page_fields = api.model('ReusePage', pager(reuse_fields))
 
 reuse_suggestion_fields = api.model('ReuseSuggestion', {
-    'id': fields.String(description='The reuse identifier', required=True),
-    'title': fields.String(description='The reuse title', required=True),
-    'slug': fields.String(description='The reuse permalink string', required=True),
+    'id': fields.String(description='The reuse identifier', readonly=True),
+    'title': fields.String(description='The reuse title', readonly=True),
+    'slug': fields.String(description='The reuse permalink string', readonly=True),
     'image_url': fields.String(description='The reuse thumbnail URL'),
-    'score': fields.Float(description='The internal match score', required=True),
+    'score': fields.Float(description='The internal match score', readonly=True),
+})
+
+
+reuse_ref_fields = api.inherit('ReuseReference', fields.base_reference, {
+    'title': fields.String(description='The reuse title', readonly=True),
+    'image': fields.ImageField(description='The reuse thumbnail'),
+    'uri': fields.UrlFor('api.reuse', lambda o: {'reuse': o},
+        description='The reuse API URI', readonly=True),
+    'page': fields.UrlFor('reuses.show', lambda o: {'reuse': o},
+        description='The reuse page URL', readonly=True),
 })

@@ -51,6 +51,17 @@ class DatasetAPITest(APITestCase):
         self.assertStatus(response, 201)
         self.assertEqual(Dataset.objects.count(), 1)
 
+    def test_dataset_api_create_tags(self):
+        '''It should create a dataset from the API'''
+        data = DatasetFactory.attributes()
+        data['tags'] = [faker.word() for _ in range(3)]
+        with self.api_user():
+            response = self.post(url_for('api.datasets'), data)
+        self.assertStatus(response, 201)
+        self.assertEqual(Dataset.objects.count(), 1)
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.tags, data['tags'])
+
     def test_dataset_api_create_with_extras(self):
         '''It should create a dataset with extras from the API'''
         data = DatasetFactory.attributes()

@@ -5,13 +5,15 @@ from flask.ext.security import current_user
 
 from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, API
-from udata.models import User, FollowUser, Reuse
+from udata.models import User, FollowUser, Reuse, Dataset, Issue
 from udata.forms import UserProfileForm
 
 from udata.core.followers.api import FollowAPI
 from udata.core.reuse.api_fields import reuse_fields
 
-from .api_fields import user_fields, user_page_fields, user_suggestion_fields
+from udata.features.transfer.models import Transfer
+
+from .api_fields import user_fields, user_page_fields, user_suggestion_fields, notifications_fields
 from .search import UserSearch
 
 ns = api.namespace('users', 'User related operations')
@@ -40,6 +42,68 @@ class MyReusesAPI(API):
         if not current_user.is_authenticated():
             api.abort(401)
         return list(Reuse.objects(owner=current_user.id))
+
+
+@api.route('/me/notifications/', endpoint='notifications')
+class NotificationsAPI(API):
+    @api.doc('notifications')
+    @api.marshal_list_with(notifications_fields)
+    def get(self):
+        '''List all current user pending notifications'''
+        if not current_user.is_authenticated():
+            api.abort(401)
+
+        user = current_user._get_current_object()
+        notifications = []
+
+        orgs = [o for o in user.organizations if o.is_admin(user)]
+
+        # Fetch user open issues
+        datasets = Dataset.objects.owned_by(user, *orgs)
+        reuses = Reuse.objects.owned_by(user, *orgs)
+        for issue in Issue.objects(subject__in=list(datasets)+list(reuses)):
+            notifications.append({
+                'type': 'issue',
+                'created_on': issue.created,
+                'details': {
+                    'subject': {
+                        'type': issue.subject.__class__.__name__.lower(),
+                        'id': str(issue.subject)
+                    }
+                }
+            })
+
+        # Fetch pending membership requests
+        for org in orgs:
+            for request in org.pending_requests:
+                notifications.append({
+                    'type': 'membership_request',
+                    'created_on': request.created,
+                    'details': {
+                        'organization': org.id,
+                        'user': {
+                            'id': str(request.user.id),
+                            'fullname': request.user.fullname,
+                            'avatar': str(request.user.avatar)
+                        }
+                    }
+                })
+
+        # Fetch pending transfer requests
+        for transfer in Transfer.objects(recipient__in=[user]+orgs, status='pending'):
+            notifications.append({
+                'type': 'transfer_request',
+                'created_on': transfer.created,
+                'details': {
+                    'id': str(transfer.id),
+                    'subject': {
+                        'class': transfer.subject.__class__.__name__.lower(),
+                        'id': str(transfer.subject.id)
+                    }
+                }
+            })
+
+        return notifications
 
 
 @ns.route('/', endpoint='users')

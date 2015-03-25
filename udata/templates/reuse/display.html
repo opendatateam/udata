@@ -215,7 +215,7 @@
                             <button type="button"
                                 class="btn btn-warning btn-follow btn-block btn-sm icon-left {% if is_following(reuse.owner) %}active{% endif %}"
                                 rel="tooltip" data-placement="left"
-                                data-api-url="{{ url_for('api.follow_user', id=reuse.owner.id|string) }}"
+                                data-api-url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"
                                 data-following-label="{{ _('Unfollow') }}"
                                 {% if is_following(reuse.owner) %}
                                 title="{{ _('Unfollow') }}">
