@@ -134,6 +134,11 @@ def standalone(app):
 
     from udata import ext
     ext.init_app(app)
+
+    # from werkzeug.contrib.profiler import ProfilerMiddleware
+    # app.config['PROFILE'] = True
+    # app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
+
     return app
 
 
