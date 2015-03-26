@@ -18,14 +18,15 @@ from udata.core.followers.api import FollowAPI
 from udata.utils import get_by
 
 from .api_fields import (
-    resource_fields,
     dataset_fields,
     dataset_page_fields,
     dataset_suggestion_fields,
+    license_fields,
+    resource_fields,
     resources_order,
     upload_fields,
 )
-from .models import Dataset, Resource, DatasetIssue, FollowDataset, Checksum
+from .models import Dataset, Resource, DatasetIssue, FollowDataset, Checksum, License
 from .permissions import DatasetEditPermission
 from .forms import DatasetForm, ResourceForm, DatasetFullForm
 from .search import DatasetSearch
@@ -228,3 +229,12 @@ class SuggestFormatsAPI(API):
         args = suggest_parser.parse_args()
         result = search.suggest(args['q'], 'format_suggest', args['size'])
         return sorted(result, key=lambda o: len(o['text']))
+
+
+@ns.route('/licenses/', endpoint='licenses')
+class LicensesAPI(API):
+    @api.doc('list_licenses')
+    @api.marshal_list_with(license_fields)
+    def get(self):
+        '''List all available licenses'''
+        return list(License.objects)

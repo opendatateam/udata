@@ -13,6 +13,14 @@ checksum_fields = api.model('Checksum', {
     'value': fields.String(description="The resulting checksum/hash", required=True)
 })
 
+license_fields = api.model('License', {
+    'id': fields.String(description='The license identifier', required=True),
+    'title': fields.String(description='The resource title', required=True),
+    'maintainer': fields.String(description='The license official maintainer'),
+    'url': fields.String(description='The license official URL'),
+    'flags': fields.List(fields.String, description='Some arbitry flags'),
+})
+
 resource_fields = api.model('Resource', {
     'id': fields.String(description='The resource unique ID', readonly=True),
     'title': fields.String(description='The resource title', required=True),
