@@ -3,18 +3,26 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
+from werkzeug.datastructures import FileStorage
+
 from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, API
 from udata.auth import current_user
 from udata.forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm
 from udata.models import Organization, MembershipRequest, Member, FollowOrg
-
 from udata.core.followers.api import FollowAPI
 
 from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 from .tasks import notify_membership_request, notify_membership_response
 from .search import OrganizationSearch
-from .api_fields import org_fields, org_page_fields, org_suggestion_fields, request_fields, member_fields
+from .api_fields import (
+    org_fields,
+    org_page_fields,
+    org_suggestion_fields,
+    request_fields,
+    member_fields,
+    logo_fields,
+)
 
 ns = api.namespace('organizations', 'Organization related operations')
 search_parser = api.search_parser(OrganizationSearch)
@@ -171,3 +179,65 @@ class SuggestOrganizationsAPI(API):
             }
             for opt in search.suggest(args['q'], 'org_suggest', args['size'])
         ]
+
+
+
+logo_parser = api.parser()
+logo_parser.add_argument('file', type=FileStorage, location='files')
+logo_parser.add_argument('bbox', type=str, location='form')
+
+
+@ns.route('/<org:org>/logo', endpoint='organization_logo')
+@api.doc(parser=logo_parser, **common_doc)
+class AvatarAPI(API):
+    @api.secure
+    @api.doc('organization_logo')
+    @api.marshal_with(logo_fields)
+    def post(self, org):
+        '''Upload a new logo'''
+        args = logo_parser.parse_args()
+
+        logo = args['file']
+        bbox = [int(float(c)) for c in args['bbox'].split(',')] if 'bbox' in args else None
+        org.logo.save(logo, bbox=bbox)
+        org.save()
+
+        return org
+
+    @api.secure
+    @api.doc('resize_organization_logo')
+    @api.marshal_with(logo_fields)
+    def put(self, org):
+        '''Set the logo BBox'''
+        args = logo_parser.parse_args()
+
+        print args
+        logo = args['file']
+
+        org.logo.save(logo, bbox=args.get('bbox'))
+
+        return org
+
+        # storage = storages.logo
+
+        # prefix = self.get_prefix(dataset)
+
+        # filename = storage.save(file, prefix=prefix)
+
+        # extension = fileutils.extension(filename)
+
+        # file.seek(0)
+        # sha1 = storages.utils.sha1(file)
+
+        # size = os.path.getsize(storage.path(filename)) if storage.root else None
+
+        # resource = Resource(
+        #     title=os.path.basename(filename),
+        #     url=storage.url(filename, external=True),
+        #     checksum=Checksum(value=sha1),
+        #     format=extension,
+        #     mime=storages.utils.mime(filename),
+        #     size=size
+        # )
+        # dataset.add_resource(resource)
+        # return resource, 201

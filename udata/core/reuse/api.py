@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from werkzeug.datastructures import FileStorage
+
 from udata import search
 from udata.api import api, API, ModelAPI, ModelListAPI, SingleObjectAPI
 from udata.forms import ReuseForm
@@ -9,7 +11,7 @@ from udata.models import Reuse
 from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
 
-from .api_fields import reuse_fields, reuse_page_fields, reuse_suggestion_fields
+from .api_fields import reuse_fields, reuse_page_fields, reuse_suggestion_fields, image_fields
 from .models import ReuseIssue, FollowReuse
 from .search import ReuseSearch
 
@@ -97,3 +99,26 @@ class SuggestReusesAPI(API):
             }
             for opt in search.suggest(args['q'], 'reuse_suggest', args['size'])
         ]
+
+
+image_parser = api.parser()
+image_parser.add_argument('file', type=FileStorage, location='files')
+image_parser.add_argument('bbox', type=str, location='form')
+
+
+@ns.route('/<reuse:reuse>/image', endpoint='reuse_image')
+@api.doc(parser=image_parser, **common_doc)
+class ReuseImageAPI(API):
+    @api.secure
+    @api.doc('reuse_image')
+    @api.marshal_with(image_fields)
+    def post(self, reuse):
+        '''Upload a new reuse image'''
+        args = image_parser.parse_args()
+
+        image = args['file']
+        bbox = [int(float(c)) for c in args['bbox'].split(',')] if 'bbox' in args else None
+        reuse.image.save(image, bbox=bbox)
+        reuse.save()
+
+        return reuse

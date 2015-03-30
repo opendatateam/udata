@@ -53,3 +53,8 @@ notifications_fields = api.model('Notification', {
     'created_on': fields.ISODateTime(description='The notification creation datetime', readonly=True),
     'details': fields.Raw(description='Key-Value details depending on notification type', readonly=True)
 })
+
+avatar_fields = api.model('UploadedAvatar', {
+    'success': fields.Boolean(description='Whether the upload succeeded or not.', readonly=True, default=True),
+    'avatar': fields.ImageField(),
+})

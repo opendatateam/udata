@@ -14,6 +14,8 @@ from udata.tasks import schedulables, celery
 from .forms import CrontabTaskForm, IntervalTaskForm
 from .models import PeriodicTask, PERIODS
 
+ns = api.namespace('workers', 'Asynchronous workers related operations', path='')
+
 crontab_fields = api.model('Crontab', {
     'minute': fields.String(description='Cron expression for minute', required=True, default='*'),
     'hour': fields.String(description='Cron expression for hour', required=True, default='*'),
@@ -28,7 +30,7 @@ interval_fields = api.model('Interval', {
 })
 
 job_fields = api.model('Job', {
-    'id': fields.String(description='The job unique identifier', required=True),
+    'id': fields.String(description='The job unique identifier', readonly=True),
     'name': fields.String(description='The job unique name', required=True),
     'description': fields.String(description='The job description'),
     'task': fields.String(description='The task name', required=True, enum=[job.name for job in schedulables()]),
@@ -36,22 +38,22 @@ job_fields = api.model('Job', {
     'interval': fields.Nested(interval_fields, allow_null=True),
     'args': fields.List(fields.Raw, description='The job execution arguments', default=[]),
     'kwargs': fields.Raw(description='The job execution keyword arguments', default={}),
-    'schedule': fields.String(attribute='schedule_display', description='The schedule display', required=True),
-    'last_run_at': fields.ISODateTime(description='The last job execution date', required=True),
-    'last_run_id': fields.String(description='The last execution task id'),
-    'enabled': fields.Boolean(description='Is this job enabled', required=True, default=False),
+    'schedule': fields.String(attribute='schedule_display', description='The schedule display', readonly=True),
+    'last_run_at': fields.ISODateTime(description='The last job execution date', readonly=True),
+    'last_run_id': fields.String(description='The last execution task id', readonly=True),
+    'enabled': fields.Boolean(description='Is this job enabled', default=False),
 })
 
 task_fields = api.model('Task', {
-    'id': fields.String(description='Tha task execution ID', required=True),
-    'status': fields.String(description='Cron expression for hour', required=True, enum=list(states.ALL_STATES)),
+    'id': fields.String(description='Tha task execution ID', readonly=True),
+    'status': fields.String(description='Cron expression for hour', readonly=True, enum=list(states.ALL_STATES)),
     'result': fields.String(description='The task results if exists'),
     'exc': fields.String(description='The exception thrown during execution'),
     'traceback': fields.String(description='The execution traceback'),
 })
 
 
-@api.route('/jobs/', endpoint='jobs')
+@ns.route('/jobs/', endpoint='jobs')
 class JobsAPI(API):
     @api.doc(id='list_jobs')
     @api.marshal_list_with(job_fields)
@@ -60,6 +62,7 @@ class JobsAPI(API):
         return list(PeriodicTask.objects)
 
     @api.secure(admin_permission)
+    @api.expect(job_fields)
     @api.marshal_with(job_fields)
     def post(self):
         '''Create a new scheduled job'''
@@ -72,7 +75,7 @@ class JobsAPI(API):
         return form.save(), 201
 
 
-@api.route('/jobs/<string:id>', endpoint='job')
+@ns.route('/jobs/<string:id>', endpoint='job')
 @api.doc(params={'id': 'A job ID'})
 class JobAPI(API):
     def get_or_404(self, id):
@@ -110,7 +113,7 @@ class JobAPI(API):
         return '', 204
 
 
-@api.route('/tasks/<string:id>', endpoint='task')
+@ns.route('/tasks/<string:id>', endpoint='task')
 class TaskAPI(API):
     @api.marshal_with(task_fields)
     def get(self, id):

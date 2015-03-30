@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from werkzeug.datastructures import FileStorage
+
 from flask.ext.security import current_user
 
 from udata import search
@@ -8,50 +10,86 @@ from udata.api import api, ModelAPI, ModelListAPI, API
 from udata.models import User, FollowUser, Reuse, Dataset, Issue
 from udata.forms import UserProfileForm
 
+from udata.core.dataset.api_fields import dataset_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.reuse.api_fields import reuse_fields
 
 from udata.features.transfer.models import Transfer
 
-from .api_fields import user_fields, user_page_fields, user_suggestion_fields, notifications_fields
+from .api_fields import (
+    user_fields,
+    user_page_fields,
+    user_suggestion_fields,
+    notifications_fields,
+    avatar_fields
+)
 from .search import UserSearch
 
 ns = api.namespace('users', 'User related operations')
+me = api.namespace('me', 'Connected user related operations')
 search_parser = api.search_parser(UserSearch)
 
 
-@api.route('/me/', endpoint='me')
-@api.doc(get={'model': user_fields, 'id': 'get_me'})
-class MeAPI(ModelAPI):
-    model = User
-    form = UserProfileForm
-    fields = user_fields
-    decorators = [api.secure]
-
-    def get_or_404(self, **kwargs):
-        if not current_user.is_authenticated():
-            api.abort(404)
+@me.route('/', endpoint='me')
+class MeAPI(API):
+    @api.secure
+    @api.doc('get_me')
+    @api.marshal_with(user_fields)
+    def get(self):
+        '''Fetch the current user (me) identity'''
         return current_user._get_current_object()
 
 
-@api.route('/me/reuses/', endpoint='my_reuses')
+avatar_parser = api.parser()
+avatar_parser.add_argument('file', type=FileStorage, location='files')
+avatar_parser.add_argument('bbox', type=str, location='form')
+
+
+@me.route('/avatar', endpoint='my_avatar')
+@api.doc(parser=avatar_parser)
+class AvatarAPI(API):
+    @api.secure
+    @api.doc('my_avatar')
+    @api.marshal_with(avatar_fields)
+    def post(self):
+        '''Upload a new avatar'''
+        args = avatar_parser.parse_args()
+
+        avatar = args['file']
+        bbox = [int(float(c)) for c in args['bbox'].split(',')] if 'bbox' in args else None
+        current_user.avatar.save(avatar, bbox=bbox)
+        current_user.save()
+
+        return current_user
+
+
+@me.route('/reuses/')
 class MyReusesAPI(API):
+    @api.secure
+    @api.doc('my_reuses')
     @api.marshal_list_with(reuse_fields)
     def get(self):
         '''List all my reuses (including private ones)'''
-        if not current_user.is_authenticated():
-            api.abort(401)
-        return list(Reuse.objects(owner=current_user.id))
+        return list(Reuse.objects.owned_by(current_user.id))
 
 
-@api.route('/me/notifications/', endpoint='notifications')
+@me.route('/datasets/')
+class MyDatasetsAPI(API):
+    @api.secure
+    @api.doc('my_datasets')
+    @api.marshal_list_with(dataset_fields)
+    def get(self):
+        '''List all my datasets (including private ones)'''
+        return list(Dataset.objects.owned_by(current_user.id))
+
+
+@me.route('/notifications/', endpoint='notifications')
 class NotificationsAPI(API):
+    @api.secure
     @api.doc('notifications')
     @api.marshal_list_with(notifications_fields)
     def get(self):
         '''List all current user pending notifications'''
-        if not current_user.is_authenticated():
-            api.abort(401)
 
         user = current_user._get_current_object()
         notifications = []

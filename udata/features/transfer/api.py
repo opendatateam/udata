@@ -67,9 +67,10 @@ ns = api.namespace('transfer')
 
 @ns.route('/', endpoint='transfers')
 class TransferRequestAPI(API):
-    @api.doc('List all transfer requests')
+    @api.doc('list_transfers')
     @api.marshal_list_with(transfer_fields)
     def get(self):
+        '''List all transfer requests'''
         pass
 
     @api.doc('request_transfer')

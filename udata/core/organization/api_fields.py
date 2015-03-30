@@ -62,3 +62,9 @@ org_suggestion_fields = api.model('OrganizationSuggestion', {
     'image_url': fields.String(description='The organization logo URL', readonly=True),
     'score': fields.Float(description='The internal match score', readonly=True),
 })
+
+logo_fields = api.model('UploadedLogo', {
+    'success': fields.Boolean(description='Whether the upload succeeded or not.', readonly=True, default=True),
+    'logo': fields.ImageField(),
+    # 'error': fields.String(description='An error message if success is false', readonly=True),
+})

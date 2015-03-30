@@ -52,3 +52,8 @@ reuse_ref_fields = api.inherit('ReuseReference', fields.base_reference, {
     'page': fields.UrlFor('reuses.show', lambda o: {'reuse': o},
         description='The reuse page URL', readonly=True),
 })
+
+image_fields = api.model('UploadedImage', {
+    'success': fields.Boolean(description='Whether the upload succeeded or not.', readonly=True, default=True),
+    'image': fields.ImageField(),
+})
