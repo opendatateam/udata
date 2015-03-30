@@ -58,6 +58,12 @@ class DBPaginator(Paginable):
     def __init__(self, queryset):
         self.queryset = queryset
 
+    def __iter__(self):
+        return iter(self.queryset.items)
+
+    def __len__(self):
+        return len(self.queryset.items)
+
     @property
     def page(self):
         return self.queryset.page
