@@ -124,6 +124,11 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
+    @classmethod
+    def url_exists(cls, url):
+        urlhash = hash_url(url)
+        return cls.objects(urlhash=urlhash).count() > 0
+
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)
 post_save.connect(Reuse.post_save, sender=Reuse)

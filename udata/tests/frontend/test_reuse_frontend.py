@@ -81,6 +81,17 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertIsNone(reuse.owner)
         self.assertEqual(reuse.organization, org)
 
+    def test_create_url_exists(self):
+        '''It should fail create a reuse if URL exists'''
+        reuse = ReuseFactory()
+        data = ReuseFactory.attributes()
+        data['url'] = reuse.url
+        self.login()
+        response = self.post(url_for('reuses.new'), data)
+
+        self.assert200(response)  # Does not redirect on success
+        self.assertEqual(len(Reuse.objects), 1)
+
     def test_render_display(self):
         '''It should render the reuse page'''
         reuse = ReuseFactory()

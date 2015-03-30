@@ -10,6 +10,12 @@ from .models import IMAGE_SIZES
 __all__ = ('ReuseForm', 'ReuseCreateForm', 'AddDatasetToReuseForm')
 
 
+def check_url_does_not_exists(form, field):
+    '''Ensure a reuse URL is not yet registered'''
+    if field.data != field.object_data and Reuse.url_exists(field.data):
+        raise validators.ValidationError(_('This URL is already registered'))
+
+
 class ReuseForm(UserModelForm):
     model_class = Reuse
 
@@ -17,7 +23,7 @@ class ReuseForm(UserModelForm):
     description = fields.MarkdownField(_('Description'), [validators.required()],
         description=_('The details about the reuse (build process, specifics, self-critics...).'))
     type = fields.SelectField(_('Type'), choices=REUSE_TYPES.items())
-    url = fields.URLField(_('URL'), [validators.required()])
+    url = fields.URLField(_('URL'), [validators.required(), check_url_does_not_exists])
     # image_url = fields.URLField(_('Image URL'),
     #     description=_('The reuse thumbnail'))
     image = fields.ImageField(_('Image'), sizes=IMAGE_SIZES, placeholder='reuse')
