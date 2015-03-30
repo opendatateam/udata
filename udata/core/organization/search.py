@@ -20,6 +20,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
     fuzzy = True
     fields = (
         'name^6',
+        'acronym^6',
         'description',
     )
     sorts = {
@@ -44,6 +45,10 @@ class OrganizationSearch(search.ModelSearchAdapter):
                 'fields': {
                     'raw': {'type': 'string', 'index': 'not_analyzed'}
                 }
+            },
+            'acronym': {
+                'type': 'string',
+                'index': 'not_analyzed',
             },
             'description': {'type': 'string', 'analyzer': search.i18n_analyzer},
             'url': {'type': 'string'},
@@ -70,17 +75,22 @@ class OrganizationSearch(search.ModelSearchAdapter):
 
     @classmethod
     def serialize(cls, organization):
+        completions = cls.completer_tokenize(organization.name)
+        if organization.acronym:
+            completions.append(organization.acronym)
         return {
             'name': organization.name,
+            'acronym': organization.acronym,
             'description': organization.description,
             'url': organization.url,
             'metrics': organization.metrics,
             'created': organization.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             'org_suggest': {
-                'input': cls.completer_tokenize(organization.name),
+                'input': completions,
                 'output': organization.name,
                 'payload': {
                     'id': str(organization.id),
+                    'acronym': organization.acronym,
                     'image_url': organization.logo(40),
                     'slug': organization.slug,
                 },
