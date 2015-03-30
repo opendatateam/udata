@@ -87,9 +87,9 @@ class UDataApi(Api):
             return func(*args, **kwargs)
         return wrapper
 
-    def validate(self, form_cls, instance=None):
+    def validate(self, form_cls, obj=None):
         '''Validate a form from the request and handle errors'''
-        form = form_cls.from_json(request.json, instance=instance, csrf_enabled=False)
+        form = form_cls.from_json(request.json, obj=obj, instance=obj, csrf_enabled=False)
         if not form.validate():
             self.abort(400, errors=form.errors)
         return form

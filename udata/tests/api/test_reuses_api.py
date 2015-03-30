@@ -6,7 +6,7 @@ from flask import url_for
 from udata.models import Reuse, FollowReuse, Follow
 
 from . import APITestCase
-from ..factories import faker, ReuseFactory, DatasetFactory
+from ..factories import faker, ReuseFactory, DatasetFactory, AdminFactory
 
 
 class ReuseAPITest(APITestCase):
@@ -57,7 +57,7 @@ class ReuseAPITest(APITestCase):
         '''It should mark the reuse featured on POST'''
         reuse = ReuseFactory(featured=False)
 
-        with self.api_user():
+        with self.api_user(AdminFactory()):
             response = self.post(url_for('api.reuse_featured', reuse=reuse))
         self.assert200(response)
 
@@ -68,7 +68,7 @@ class ReuseAPITest(APITestCase):
         '''It shouldn't do anything to feature an already featured reuse'''
         reuse = ReuseFactory(featured=True)
 
-        with self.api_user():
+        with self.api_user(AdminFactory()):
             response = self.post(url_for('api.reuse_featured', reuse=reuse))
         self.assert200(response)
 
@@ -79,7 +79,7 @@ class ReuseAPITest(APITestCase):
         '''It should mark the reuse featured on POST'''
         reuse = ReuseFactory(featured=True)
 
-        with self.api_user():
+        with self.api_user(AdminFactory()):
             response = self.delete(url_for('api.reuse_featured', reuse=reuse))
         self.assert200(response)
 
@@ -90,7 +90,7 @@ class ReuseAPITest(APITestCase):
         '''It shouldn't do anything to unfeature a not featured reuse'''
         reuse = ReuseFactory(featured=False)
 
-        with self.api_user():
+        with self.api_user(AdminFactory()):
             response = self.delete(url_for('api.reuse_featured', reuse=reuse))
         self.assert200(response)
 

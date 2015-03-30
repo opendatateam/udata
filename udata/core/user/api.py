@@ -39,6 +39,15 @@ class MeAPI(API):
         '''Fetch the current user (me) identity'''
         return current_user._get_current_object()
 
+    @api.secure
+    @api.marshal_with(user_fields)
+    @api.doc('update_me', responses={400: 'Validation error'})
+    def put(self, **kwargs):
+        '''Update my profile'''
+        user = current_user._get_current_object()
+        form = api.validate(UserProfileForm, user)
+        return form.save()
+
 
 avatar_parser = api.parser()
 avatar_parser.add_argument('file', type=FileStorage, location='files')
@@ -63,7 +72,7 @@ class AvatarAPI(API):
         return current_user
 
 
-@me.route('/reuses/')
+@me.route('/reuses/', endpoint='my_reuses')
 class MyReusesAPI(API):
     @api.secure
     @api.doc('my_reuses')
@@ -73,7 +82,7 @@ class MyReusesAPI(API):
         return list(Reuse.objects.owned_by(current_user.id))
 
 
-@me.route('/datasets/')
+@me.route('/datasets/', endpoint='my_datasets')
 class MyDatasetsAPI(API):
     @api.secure
     @api.doc('my_datasets')

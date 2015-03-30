@@ -26,7 +26,7 @@ class MeAPITest(APITestCase):
         self.assert401(response)
 
     def test_update_profile(self):
-        '''It should update a dataset from the API'''
+        '''It should update my profile from the API'''
         self.login()
         data = self.user.to_dict()
         data['about'] = 'new about'

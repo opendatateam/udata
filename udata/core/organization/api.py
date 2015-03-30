@@ -195,6 +195,7 @@ class AvatarAPI(API):
     @api.marshal_with(logo_fields)
     def post(self, org):
         '''Upload a new logo'''
+        EditOrganizationPermission(org.id).test()
         args = logo_parser.parse_args()
 
         logo = args['file']
@@ -209,6 +210,7 @@ class AvatarAPI(API):
     @api.marshal_with(logo_fields)
     def put(self, org):
         '''Set the logo BBox'''
+        EditOrganizationPermission(org.id).test()
         args = logo_parser.parse_args()
 
         print args

@@ -5,6 +5,7 @@ from werkzeug.datastructures import FileStorage
 
 from udata import search
 from udata.api import api, API, ModelAPI, ModelListAPI, SingleObjectAPI
+from udata.auth import admin_permission
 from udata.forms import ReuseForm
 from udata.models import Reuse
 
@@ -13,6 +14,7 @@ from udata.core.followers.api import FollowAPI
 
 from .api_fields import reuse_fields, reuse_page_fields, reuse_suggestion_fields, image_fields
 from .models import ReuseIssue, FollowReuse
+from .permissions import ReuseEditPermission
 from .search import ReuseSearch
 
 ns = api.namespace('reuses', 'Reuse related operations')
@@ -48,8 +50,8 @@ class ReuseAPI(ModelAPI):
 class ReuseFeaturedAPI(SingleObjectAPI, API):
     model = Reuse
 
-    @api.secure
-    @api.doc(id='feature_reuse')
+    @api.doc('feature_reuse')
+    @api.secure(admin_permission)
     @api.marshal_with(reuse_fields)
     def post(self, reuse):
         '''Mark a reuse as featured'''
@@ -57,8 +59,8 @@ class ReuseFeaturedAPI(SingleObjectAPI, API):
         reuse.save()
         return reuse
 
-    @api.secure
-    @api.doc(id='unfeature_reuse')
+    @api.doc('unfeature_reuse')
+    @api.secure(admin_permission)
     @api.marshal_with(reuse_fields)
     def delete(self, reuse):
         '''Unmark a reuse as featured'''
@@ -114,6 +116,7 @@ class ReuseImageAPI(API):
     @api.marshal_with(image_fields)
     def post(self, reuse):
         '''Upload a new reuse image'''
+        ReuseEditPermission(reuse.id).test()
         args = image_parser.parse_args()
 
         image = args['file']
