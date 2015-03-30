@@ -88,8 +88,8 @@ class OrganizationDetailView(OrgView, DetailView):
         can_edit = EditOrganizationPermission(self.organization.id)
         can_view = OrganizationPrivatePermission(self.organization.id)
         context.update({
-            'reuses': reuses[:self.page_size],
-            'datasets': datasets[:self.page_size],
+            'reuses': reuses.paginate(1, self.page_size),
+            'datasets': datasets.paginate(1, self.page_size),
             'supplied_datasets': supplied_datasets[:self.page_size],
             'followers': followers[:self.nb_followers],
             'can_edit': can_edit,
