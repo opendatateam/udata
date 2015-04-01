@@ -86,10 +86,10 @@ class DatasetSearch(ModelSearchAdapter):
                 }
             },
             'granularity': {'type': 'string', 'index': 'not_analyzed'},
-            'geom': {
-                'type': 'geo_shape',
-                'precision': '100m',
-            },
+            # 'geom': {
+            #     'type': 'geo_shape',
+            #     'precision': '100m',
+            # },
             'extras': {
                 'type': 'object',
                 'index_name': 'extra',
@@ -193,7 +193,7 @@ class DatasetSearch(ModelSearchAdapter):
         if dataset.spatial is not None:
             document.update({
                 'territories': [{'id': str(t.id), 'name': t.name, 'code': t.code} for t in dataset.spatial.territories],
-                'geom': dataset.spatial.geom,
+                # 'geom': dataset.spatial.geom,
                 'granularity': dataset.spatial.granularity,
             })
 
