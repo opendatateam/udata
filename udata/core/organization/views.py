@@ -187,12 +187,6 @@ class OrganizationCreateView(CreateView):
     form = OrganizationForm
     template_name = 'organization/create.html'
 
-    def populate(self, form):
-        org = super(OrganizationCreateView, self).populate(form)
-        member = Member(user=current_user._get_current_object(), role='admin')
-        org.members.append(member)
-        return org
-
 
 @blueprint.route('/<org:org>/edit/', endpoint='edit')
 class OrganizationEditView(ProtectedOrgView, EditView):

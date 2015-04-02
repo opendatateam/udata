@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from udata.auth import current_user
 from udata.forms import Form, ModelForm, UserModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
-from udata.models import Organization, MembershipRequest
 
-from .models import LOGO_SIZES
+from .models import Organization, MembershipRequest, Member, LOGO_SIZES
 
 __all__ = (
     'OrganizationForm',
@@ -27,6 +27,20 @@ class OrganizationForm(ModelForm):
     image_url = fields.URLField(_('Logo'),
         description=_('Your organization logo URL'))
     logo = fields.ImageField(_('Logo'), sizes=LOGO_SIZES)
+
+    def save(self, commit=True, **kwargs):
+        '''Register the current user as admin on creation'''
+        org = super(OrganizationForm, self).save(commit=False, **kwargs)
+
+        if not org.id:
+            user = current_user._get_current_object()
+            member = Member(user=user, role='admin')
+            org.members.append(member)
+
+        if commit:
+            org.save()
+
+        return org
 
 
 class OrganizationMemberForm(ModelForm):

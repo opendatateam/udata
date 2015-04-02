@@ -192,14 +192,8 @@ class CreateView(FormView):
     decorators = [auth.login_required]
 
     def on_form_valid(self, form):
-        self.object = self.populate(form)
-        self.object.save()
+        self.object = form.save()
         return redirect(self.get_success_url())
-
-    def populate(self, form):
-        obj = self.model()
-        form.populate_obj(obj)
-        return obj
 
     def get_success_url(self):
         return self.object.display_url

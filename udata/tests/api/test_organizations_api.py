@@ -38,6 +38,11 @@ class OrganizationAPITest(APITestCase):
         self.assertStatus(response, 201)
         self.assertEqual(Organization.objects.count(), 1)
 
+        org = Organization.objects.first()
+        member = org.member(self.user)
+        self.assertIsNotNone(member, 'Current user should be a member')
+        self.assertEqual(member.role, 'admin', 'Current user should be an administrator')
+
     def test_dataset_api_update(self):
         '''It should update an organization from the API'''
         org = OrganizationFactory()
