@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="{{ g.lang_code }}">
   <head>
+    {% block raw_head %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -67,6 +68,8 @@
     {% endassets %}
 
     {% block extra_head %}{% endblock %}
+
+    {% endblock raw_head %}
 
   </head>
 
