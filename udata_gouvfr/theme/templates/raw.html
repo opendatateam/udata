@@ -1,2 +1,7 @@
 {% extends "raw.html" %}
 {% set site_css_bundle = 'gouvfr-css' %}
+
+{% block raw_head %}
+{{ super() }}
+<link rel="shortcut icon" href="{{ theme_static('img/favicon.png') }}">
+{% endblock %}
