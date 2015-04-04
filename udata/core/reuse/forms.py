@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.forms import Form, UserModelForm, fields, validators
+from udata.auth import current_user
+from udata.forms import Form, ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 from udata.models import Reuse, REUSE_TYPES
 
@@ -16,7 +17,7 @@ def check_url_does_not_exists(form, field):
         raise validators.ValidationError(_('This URL is already registered'))
 
 
-class ReuseForm(UserModelForm):
+class ReuseForm(ModelForm):
     model_class = Reuse
 
     title = fields.StringField(_('Title'), [validators.required()])
@@ -35,6 +36,16 @@ class ReuseForm(UserModelForm):
 
 class ReuseCreateForm(ReuseForm):
     organization = fields.PublishAsField(_('Publish as'))
+
+    def save(self, commit=True, **kwargs):
+        reuse = super(ReuseCreateForm, self).save(commit=False, **kwargs)
+        if not reuse.organization:
+            reuse.owner = current_user._get_current_object()
+
+        if commit:
+            reuse.save()
+
+        return reuse
 
 
 class AddDatasetToReuseForm(Form):

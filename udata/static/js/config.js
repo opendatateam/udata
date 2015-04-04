@@ -1,5 +1,5 @@
 require.config({
-    enforceDefine: true,
+    // enforceDefine: true,
     paths: {
         // Libraries
         'normalizeconsole': '../bower/normalizeconsole/normalizeconsole',

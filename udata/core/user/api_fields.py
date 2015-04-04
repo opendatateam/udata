@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.api import api, fields, pager
+from udata.api import api, fields, base_reference
 
 
-user_ref_fields = api.inherit('UserReference', fields.base_reference, {
+user_ref_fields = api.inherit('UserReference', base_reference, {
     'first_name': fields.String(description='The user first name', readonly=True),
     'last_name': fields.String(description='The user larst name', readonly=True),
     'page': fields.UrlFor('users.show', lambda u: {'user': u},
@@ -37,7 +37,7 @@ user_fields = api.model('User', {
         description='The user API URI', required=True),
 })
 
-user_page_fields = api.model('UserPage', pager(user_fields))
+user_page_fields = api.model('UserPage', fields.pager(user_fields))
 
 user_suggestion_fields = api.model('UserSuggestion', {
     'id': fields.String(description='The user identifier', required=True),

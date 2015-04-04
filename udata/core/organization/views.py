@@ -8,16 +8,16 @@ from flask.ext.security import current_user
 
 from udata import search
 from udata.app import nav
-from udata.forms import OrganizationForm, OrganizationMemberForm, OrganizationExtraForm
 from udata.frontend import csv
 from udata.frontend.views import DetailView, CreateView, EditView, SearchView, BaseView, SingleObject
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import db, Organization, Member, Reuse, Dataset, ORG_ROLES, User, Follow, FollowOrg, Activity, Issue
+from udata.models import db, Organization, Member, Reuse, Dataset, ORG_ROLES, User, Issue, FollowOrg
 from udata.utils import get_by
 
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.activity.views import ActivityView
 
+from .forms import OrganizationForm, OrganizationMemberForm, OrganizationExtraForm
 from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 from .tasks import notify_new_member
 

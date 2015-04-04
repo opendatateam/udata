@@ -2,12 +2,11 @@
 from __future__ import unicode_literals
 
 import re
-import tempfile
 
 from bson import ObjectId, DBRef
 from dateutil.parser import parse
 
-from flask import url_for, request
+from flask import url_for
 from flask.ext.mongoengine.wtf import fields as mefields
 from flask.ext.fs.mongo import ImageReference
 from werkzeug.datastructures import FileStorage
@@ -24,7 +23,7 @@ from . import widgets
 from .validators import RequiredIf, optional
 
 from udata.auth import current_user
-from udata.models import db, Organization, SpatialCoverage, Territory, SPATIAL_GRANULARITIES
+from udata.models import db, SpatialCoverage, Territory, SPATIAL_GRANULARITIES
 from udata.core.spatial import LEVELS
 from udata.core.storages import tmp
 from udata.i18n import lazy_gettext as _

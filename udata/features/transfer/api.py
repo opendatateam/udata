@@ -5,7 +5,7 @@ from flask import request
 
 from udata import models
 
-from udata.api import api, fields, API
+from udata.api import api, fields, API, base_reference
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_ref_fields
@@ -20,9 +20,9 @@ RESPONSE_TYPES = ['accept', 'refuse']
 
 
 transfer_request_fields = api.model('TransferRequest', {
-    'subject': fields.Nested(fields.base_reference, required=True,
+    'subject': fields.Nested(base_reference, required=True,
         description='The transfered subject'),
-    'recipient': fields.Nested(fields.base_reference, required=True,
+    'recipient': fields.Nested(base_reference, required=True,
         description='The transfer recipient, either an user or an organization'),
     'comment': fields.String(description='An explanation about the transfer request', required=True),
 })

@@ -7,7 +7,7 @@ from celery.utils import get_full_cls_name
 from celery.utils.encoding import safe_repr
 from flask import request
 
-from udata.api import api, API, refs, fields
+from udata.api import api, API, fields
 from udata.auth import admin_permission
 from udata.tasks import schedulables, celery
 
@@ -131,7 +131,7 @@ class TaskAPI(API):
         return data
 
 
-@refs.route('/jobs', endpoint='schedulable_jobs')
+@ns.route('/jobs/schedulables', endpoint='schedulable_jobs')
 class JobsReferenceAPI(API):
     @api.doc(model=[str])
     def get(self):

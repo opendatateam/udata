@@ -8,7 +8,6 @@ from flask.ext.security import current_user
 from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, API
 from udata.models import User, FollowUser, Reuse, Dataset, Issue
-from udata.forms import UserProfileForm
 
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.followers.api import FollowAPI
@@ -23,6 +22,7 @@ from .api_fields import (
     notifications_fields,
     avatar_fields
 )
+from .forms import UserProfileForm
 from .search import UserSearch
 
 ns = api.namespace('users', 'User related operations')
@@ -115,7 +115,7 @@ class NotificationsAPI(API):
                 'details': {
                     'subject': {
                         'type': issue.subject.__class__.__name__.lower(),
-                        'id': str(issue.subject)
+                        'id': str(issue.subject.id)
                     }
                 }
             })

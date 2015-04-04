@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.api import api, pager, fields
+from udata.api import api, fields, base_reference
 
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.dataset.api_fields import dataset_ref_fields
@@ -33,7 +33,7 @@ reuse_fields = api.model('Reuse', {
         description='The reuse page URL', readonly=True),
 })
 
-reuse_page_fields = api.model('ReusePage', pager(reuse_fields))
+reuse_page_fields = api.model('ReusePage', fields.pager(reuse_fields))
 
 reuse_suggestion_fields = api.model('ReuseSuggestion', {
     'id': fields.String(description='The reuse identifier', readonly=True),
@@ -44,7 +44,7 @@ reuse_suggestion_fields = api.model('ReuseSuggestion', {
 })
 
 
-reuse_ref_fields = api.inherit('ReuseReference', fields.base_reference, {
+reuse_ref_fields = api.inherit('ReuseReference', base_reference, {
     'title': fields.String(description='The reuse title', readonly=True),
     'image': fields.ImageField(description='The reuse thumbnail'),
     'uri': fields.UrlFor('api.reuse', lambda o: {'reuse': o},

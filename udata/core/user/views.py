@@ -10,8 +10,8 @@ from udata.app import nav
 from udata.frontend.views import DetailView, EditView, SearchView, BaseView, SingleObject
 from udata.models import User, Activity, Organization, Dataset, Reuse, Follow
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.forms import UserProfileForm, UserSettingsForm, UserAPIKeyForm, UserNotificationsForm
 
+from .forms import UserProfileForm, UserSettingsForm, UserAPIKeyForm, UserNotificationsForm
 from .permissions import sysadmin, UserEditPermission
 from .tasks import send_test_mail
 

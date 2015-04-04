@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.api import api, fields, pager, API
+from udata.api import api, fields, API
 from udata.auth import admin_permission
 
 
@@ -42,7 +42,7 @@ post_fields = api.model('Post', {
 })
 
 
-post_page_fields = api.model('PostPage', pager(post_fields))
+post_page_fields = api.model('PostPage', fields.pager(post_fields))
 
 parser = api.page_parser()
 

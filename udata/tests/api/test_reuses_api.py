@@ -6,7 +6,7 @@ from flask import url_for
 from udata.models import Reuse, FollowReuse, Follow
 
 from . import APITestCase
-from ..factories import faker, ReuseFactory, DatasetFactory, AdminFactory
+from ..factories import faker, ReuseFactory, DatasetFactory, AdminFactory, OrganizationFactory
 
 
 class ReuseAPITest(APITestCase):
@@ -33,12 +33,30 @@ class ReuseAPITest(APITestCase):
         self.assertStatus(response, 201)
         self.assertEqual(Reuse.objects.count(), 1)
 
+        reuse = Reuse.objects.first()
+        self.assertEqual(reuse.owner, self.user)
+        self.assertIsNone(reuse.organization)
+
+    def test_reuse_api_create_as_org(self):
+        '''It should create a reuse as organization from the API'''
+        self.login()
+        data = ReuseFactory.attributes()
+        org = OrganizationFactory()
+        data['organization'] = str(org.id)
+        response = self.post(url_for('api.reuses'), data)
+        self.assertStatus(response, 201)
+        self.assertEqual(Reuse.objects.count(), 1)
+
+        reuse = Reuse.objects.first()
+        self.assertIsNone(reuse.owner)
+        self.assertEqual(reuse.organization, org)
+
     def test_reuse_api_update(self):
         '''It should update a reuse from the API'''
-        reuse = ReuseFactory()
+        self.login()
+        reuse = ReuseFactory(owner=self.user)
         data = reuse.to_dict()
         data['description'] = 'new description'
-        self.login()
         response = self.put(url_for('api.reuse', reuse=reuse), data)
         self.assert200(response)
         self.assertEqual(Reuse.objects.count(), 1)
@@ -46,7 +64,8 @@ class ReuseAPITest(APITestCase):
 
     def test_reuse_api_delete(self):
         '''It should delete a reuse from the API'''
-        reuse = ReuseFactory()
+        self.login()
+        reuse = ReuseFactory(owner=self.user)
         with self.api_user():
             response = self.delete(url_for('api.reuse', reuse=reuse))
         self.assertStatus(response, 204)

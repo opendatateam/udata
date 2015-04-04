@@ -17,7 +17,7 @@ from udata.auth import current_user, login_user, Permission, RoleNeed, Permissio
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
 
-from . import oauth2
+from . import fields, oauth2
 
 log = logging.getLogger(__name__)
 
@@ -133,10 +133,6 @@ api = UDataApi(apiv1, ui=False,
     description='uData API', default='site', default_label='Site global namespace'
 )
 
-refs = api.namespace('references', 'References lists')
-
-from . import fields  # Needs to be imported after api declaration
-
 
 @api.representation('application/json')
 def output_json(data, code, headers=None):
@@ -152,20 +148,20 @@ def set_api_language():
         g.lang_code = request.args['lang']
 
 
-@apiv1.errorhandler(PermissionDenied)
+@api.errorhandler(PermissionDenied)
 def handle_permission_denied(error):
-    return json.dumps({
+    return {
         'message': str(error),
         'status': 403
-    }), 403
+    }, 403
 
 
-@apiv1.errorhandler(ValueError)
+@api.errorhandler(ValueError)
 def handle_value_error(error):
-    return json.dumps({
+    return {
         'message': str(error),
         'status': 400
-    }), 400
+    }, 400
 
 
 @apidoc.route('/api/')
@@ -257,20 +253,15 @@ class ModelAPI(SingleObjectAPI, API):
         return '', 204
 
 
-def pager(page_fields):
-    pager_fields = {
-        'data': api.as_list(fields.Nested(page_fields, attribute='objects', description='The page data')),
-        'page': fields.Integer(description='The current page', required=True, min=0),
-        'page_size': fields.Integer(description='The page size used for pagination', required=True, min=0),
-        'total': fields.Integer(description='The total paginated items', required=True, min=0),
-        'next_page': fields.NextPageUrl(description='The next page URL if exists'),
-        'previous_page': fields.PreviousPageUrl(description='The previous page URL if exists'),
-    }
-    return pager_fields
+base_reference = api.model('BaseReference', {
+    'id': fields.String(description='The object unique identifier', required=True),
+    'class': fields.ClassName(description='The object class', discriminator=True, required=True),
+}, description='Base model for reference field, aka. inline model reference')
+
 
 
 def marshal_page(page, page_fields):
-    return marshal(page, pager(page_fields))
+    return api.marshal(page, fields.pager(page_fields))
 
 
 def marshal_page_with(func):

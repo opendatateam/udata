@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.api import api, fields, pager
+from udata.api import api, fields, base_reference
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.spatial.api import spatial_coverage_fields
 
@@ -62,8 +62,8 @@ dataset_fields = api.model('Dataset', {
     'featured': fields.Boolean(description='Is the dataset featured'),
     'private': fields.Boolean(description='Is the dataset private to the owner or the organization'),
     'tags': fields.List(fields.String),
-    'resources': api.as_list(fields.Nested(resource_fields, description='The dataset resources')),
-    'community_resources': api.as_list(fields.Nested(resource_fields,
+    'resources': fields.List(fields.Nested(resource_fields, description='The dataset resources')),
+    'community_resources': fields.List(fields.Nested(resource_fields,
         description='The dataset community submitted resources')),
     'frequency': fields.String(description='The update frequency', required=True,
         enum=UPDATE_FREQUENCIES.keys(), default=DEFAULT_FREQUENCY),
@@ -84,7 +84,7 @@ dataset_fields = api.model('Dataset', {
         description='The dataset page URL', required=True),
 })
 
-dataset_page_fields = api.model('DatasetPage', pager(dataset_fields))
+dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields))
 
 dataset_suggestion_fields = api.model('DatasetSuggestion', {
     'id': fields.String(description='The dataset identifier', required=True),
@@ -94,8 +94,7 @@ dataset_suggestion_fields = api.model('DatasetSuggestion', {
     'score': fields.Float(description='The internal match score', required=True),
 })
 
-dataset_ref_fields = api.inherit('DatasetReference', fields.base_reference, {
-    # 'id': fields.String(description='The dataset unique identifier', readonly=True),
+dataset_ref_fields = api.inherit('DatasetReference', base_reference, {
     'title': fields.String(description='The dataset title', readonly=True),
     'uri': fields.UrlFor('api.dataset', lambda d: {'dataset': d},
         description='The API URI for this dataset', readonly=True),

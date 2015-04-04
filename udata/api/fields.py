@@ -6,25 +6,22 @@ import logging
 from flask import request, url_for
 from flask.ext.restplus.fields import *
 
-from . import api
-
 
 log = logging.getLogger(__name__)
 
 
-@api.model(type='string', format='date-time')
-class ISODateTime(Raw):
+class ISODateTime(String):
+    __schema_format__ = 'date-time'
+
     def format(self, value):
         return value.isoformat()
 
 
-@api.model(type='string', format='markdown')
 class Markdown(String):
-    pass
+    __schema_format__ = 'markdown'
 
 
-@api.model(type='string')
-class UrlFor(Raw):
+class UrlFor(String):
     def __init__(self, endpoint, mapper=None, **kwargs):
         super(UrlFor, self).__init__(**kwargs)
         self.endpoint = endpoint
@@ -37,7 +34,6 @@ class UrlFor(Raw):
         return url_for(self.endpoint, _external=True, **self.mapper(obj))
 
 
-@api.model(type='string')
 class NextPageUrl(String):
     def output(self, key, obj):
         if not obj.has_next:
@@ -48,7 +44,6 @@ class NextPageUrl(String):
         return url_for(request.endpoint, _external=True, **args)
 
 
-@api.model(type='string')
 class PreviousPageUrl(String):
     def output(self, key, obj):
         if not obj.has_prev:
@@ -59,7 +54,7 @@ class PreviousPageUrl(String):
         return url_for(request.endpoint, _external=True, **args)
 
 
-class ImageField(Raw):
+class ImageField(String):
     def __init__(self, size=None, **kwargs):
         super(ImageField, self).__init__(**kwargs)
         self.size = size
@@ -70,7 +65,7 @@ class ImageField(Raw):
 
 def pager(page_fields):
     pager_fields = {
-        'data': api.as_list(Nested(page_fields, attribute='objects', description='The page data')),
+        'data': List(Nested(page_fields), attribute='objects', description='The page data'),
         'page': Integer(description='The current page', required=True, min=1),
         'page_size': Integer(description='The page size used for pagination', required=True, min=0),
         'total': Integer(description='The total paginated items', required=True, min=0),
@@ -78,9 +73,3 @@ def pager(page_fields):
         'previous_page': PreviousPageUrl(description='The previous page URL if exists'),
     }
     return pager_fields
-
-
-base_reference = api.model('BaseReference', {
-    'id': String(description='The object unique identifier', required=True),
-    'class': ClassName(description='The object class', discriminator=True, required=True),
-}, description='Base model for reference field, aka. inline model reference')

@@ -51,12 +51,3 @@ class UserModelFormMixin(object):
 
 class UserModelForm(UserModelFormMixin, ModelForm):
     pass
-
-
-# Load core forms
-from udata.core.user.forms import *
-from udata.core.dataset.forms import *
-from udata.core.reuse.forms import *
-from udata.core.organization.forms import *
-from udata.core.topic.forms import *
-from udata.core.post.forms import *

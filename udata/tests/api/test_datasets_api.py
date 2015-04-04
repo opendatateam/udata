@@ -8,7 +8,7 @@ from flask import url_for
 from udata.models import Dataset, Follow, FollowDataset
 
 from . import APITestCase
-from ..factories import DatasetFactory, ResourceFactory, faker
+from ..factories import DatasetFactory, ResourceFactory, OrganizationFactory, faker
 
 
 class DatasetAPITest(APITestCase):
@@ -50,6 +50,25 @@ class DatasetAPITest(APITestCase):
             response = self.post(url_for('api.datasets'), data)
         self.assertStatus(response, 201)
         self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.owner, self.user)
+        self.assertIsNone(dataset.organization)
+
+    def test_dataset_api_create_as_org(self):
+        '''It should create a dataset as organization from the API'''
+        self.login()
+        data = DatasetFactory.attributes()
+        org = OrganizationFactory()
+        data['organization'] = str(org.id)
+        # with self.api_user():
+        response = self.post(url_for('api.datasets'), data)
+        self.assertStatus(response, 201)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.organization, org)
+        self.assertIsNone(dataset.owner)
 
     def test_dataset_api_create_tags(self):
         '''It should create a dataset from the API'''

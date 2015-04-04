@@ -8,10 +8,10 @@ from werkzeug.datastructures import FileStorage
 from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, API
 from udata.auth import current_user
-from udata.forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm
-from udata.models import Organization, MembershipRequest, Member, FollowOrg
 from udata.core.followers.api import FollowAPI
 
+from .forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm
+from .models import Organization, MembershipRequest, Member, FollowOrg
 from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 from .tasks import notify_membership_request, notify_membership_response
 from .search import OrganizationSearch

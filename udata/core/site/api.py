@@ -5,7 +5,7 @@ from bson import ObjectId
 
 from flask import request
 
-from udata.api import api, API, fields, pager
+from udata.api import api, API, fields
 from udata.auth import admin_permission
 from udata.models import Dataset, Reuse, Site, Activity
 
@@ -89,7 +89,7 @@ activity_fields = api.model('Activity', {
     'kwargs': fields.Raw(description='Some action specific context'),
 })
 
-activity_page_fields = api.model('ActivityPage', pager(activity_fields))
+activity_page_fields = api.model('ActivityPage', fields.pager(activity_fields))
 
 activity_parser = api.page_parser()
 

@@ -5,7 +5,7 @@ from datetime import datetime
 
 from flask.ext.security import current_user
 
-from udata.api import api, API, fields, pager
+from udata.api import api, API, fields
 from udata.models import Follow
 
 from udata.core.user.api_fields import user_ref_fields
@@ -16,7 +16,7 @@ follow_fields = api.model('Follow', {
     'since':  fields.ISODateTime(description='The date from which the user started following', readonly=True)
 })
 
-follow_page_fields = api.model('FollowPage', pager(follow_fields))
+follow_page_fields = api.model('FollowPage', fields.pager(follow_fields))
 
 parser = api.parser()
 parser.add_argument('page', type=int, default=1, location='args', help='The page to fetch')

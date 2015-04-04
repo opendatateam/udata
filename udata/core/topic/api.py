@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.api import api, fields, pager, API
+from udata.api import api, fields, API
 from udata.auth import admin_permission
 
 
@@ -35,7 +35,7 @@ topic_fields = api.model('Topic', {
 })
 
 
-topic_page_fields = api.model('TopicPage', pager(topic_fields))
+topic_page_fields = api.model('TopicPage', fields.pager(topic_fields))
 
 parser = api.page_parser()
 

@@ -113,13 +113,14 @@ class SingleObject(object):
 class NestedObject(SingleObject):
     nested_model = None
     nested_object_name = 'nested'
-    nested_object = None
+    _nested_object = None
     nested_attribute = None
     nested_id = None
 
-    def get_object(self):
-        obj = super(NestedObject, self).get_object()
-        if not self.nested_object:
+    @property
+    def nested_object(self):
+        if not self._nested_object:
+            obj = self.get_object()
             if not self.nested_attribute:
                 raise ValueError('nested_attribute should be set')
             if self.nested_object_name in self.kwargs:
@@ -128,11 +129,11 @@ class NestedObject(SingleObject):
             if isinstance(nested, (list, tuple)):
                 for item in nested:
                     if self.is_nested(item):
-                        self.nested_object = item
+                        self._nested_object = item
                         break
             else:
                 self.nested_object = nested
-        return obj
+        return self._nested_object
 
     def is_nested(self, obj):
         return str(obj.id) == self.nested_id

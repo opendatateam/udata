@@ -1,18 +1,23 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
+
 from werkzeug.datastructures import FileStorage
+
+from flask import request
 
 from udata import search
 from udata.api import api, API, ModelAPI, ModelListAPI, SingleObjectAPI
 from udata.auth import admin_permission
-from udata.forms import ReuseForm
 from udata.models import Reuse
+from udata.utils import multi_to_dict
 
 from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
 
 from .api_fields import reuse_fields, reuse_page_fields, reuse_suggestion_fields, image_fields
+from .forms import ReuseForm, ReuseCreateForm
 from .models import ReuseIssue, FollowReuse
 from .permissions import ReuseEditPermission
 from .search import ReuseSearch
@@ -26,23 +31,49 @@ search_parser = api.search_parser(ReuseSearch)
 
 
 @ns.route('/', endpoint='reuses')
-@api.doc(get={'id': 'list_reuses', 'model': reuse_page_fields, 'parser': search_parser})
-@api.doc(post={'id': 'create_reuse', 'model': reuse_fields, 'body': reuse_fields})
 class ReuseListAPI(ModelListAPI):
-    model = Reuse
-    form = ReuseForm
-    fields = reuse_fields
-    search_adapter = ReuseSearch
+    @api.doc('list_reuses', parser=search_parser)
+    @api.marshal_with(reuse_page_fields)
+    def get(self):
+        return search.query(ReuseSearch, **multi_to_dict(request.args))
+
+    @api.secure
+    @api.doc('create_reuse', responses={400: 'Validation error'})
+    @api.expect(reuse_fields)
+    @api.marshal_with(reuse_fields)
+    def post(self):
+        '''Create a new object'''
+        form = api.validate(ReuseCreateForm)
+        return form.save(), 201
 
 
 @ns.route('/<reuse:reuse>/', endpoint='reuse')
-@api.doc(model=reuse_fields, **common_doc)
-@api.doc(get={'id': 'get_reuse'})
-@api.doc(put={'id': 'update_reuse', 'body': reuse_fields})
+@api.doc(responses={404: 'Object not found'}, **common_doc)
 class ReuseAPI(ModelAPI):
-    model = Reuse
-    form = ReuseForm
-    fields = reuse_fields
+    @api.doc('get_reuse')
+    @api.marshal_with(reuse_fields)
+    def get(self, reuse):
+        '''Fetch a given reuse'''
+        return reuse
+
+    @api.secure
+    @api.doc('update_reuse', responses={400: 'Validation error'})
+    @api.expect(reuse_fields)
+    @api.marshal_with(reuse_fields)
+    def put(self, reuse):
+        '''Update a given reuse'''
+        ReuseEditPermission(reuse).test()
+        form = api.validate(ReuseForm, reuse)
+        return form.save()
+
+    @api.secure
+    @api.doc('delete_reuse', responses={204: 'Reuse deleted'})
+    def delete(self, reuse):
+        '''Delete a given reuse'''
+        ReuseEditPermission(reuse).test()
+        reuse.deleted = datetime.now()
+        reuse.save()
+        return '', 204
 
 
 @ns.route('/<reuse:reuse>/featured/', endpoint='reuse_featured')

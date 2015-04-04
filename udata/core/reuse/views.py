@@ -9,12 +9,12 @@ from flask import abort, request, url_for, redirect, render_template, flash
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.app import nav
-from udata.forms import ReuseForm, ReuseCreateForm, AddDatasetToReuseForm
 from udata.frontend.views import SearchView, DetailView, CreateView, EditView, SingleObject, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Reuse, Issue, FollowReuse, Dataset
 
-from .permissions import ReuseEditPermission, set_reuse_identity
+from .forms import ReuseForm, ReuseCreateForm, AddDatasetToReuseForm
+from .permissions import ReuseEditPermission
 from .tasks import notify_new_reuse
 
 blueprint = I18nBlueprint('reuses', __name__, url_prefix='/reuses')
@@ -68,9 +68,6 @@ class ReuseView(object):
     @property
     def reuse(self):
         return self.get_object()
-
-    def set_identity(self, identity):
-        set_reuse_identity(identity, self.reuse)
 
     def get_context(self):
         for item in navbar:

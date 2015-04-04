@@ -11,7 +11,6 @@ from werkzeug.contrib.atom import AtomFeed
 from udata import fileutils
 from udata.app import nav
 from udata.auth import login_required
-from udata.forms import DatasetForm, DatasetCreateForm, ResourceForm, CommunityResourceForm, DatasetExtraForm
 from udata.frontend.views import DetailView, CreateView, EditView, NestedEditView, SingleObject, SearchView, BaseView, NestedObject
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Resource, Reuse, Issue, Follow
@@ -19,7 +18,8 @@ from udata.models import Dataset, Resource, Reuse, Issue, Follow
 from udata.core import storages
 from udata.core.site.views import current_site
 
-from .permissions import CommunityResourceEditPermission, DatasetEditPermission, set_dataset_identity
+from .forms import DatasetForm, DatasetCreateForm, ResourceForm, CommunityResourceForm, DatasetExtraForm
+from .permissions import CommunityResourceEditPermission, DatasetEditPermission
 
 blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
 
@@ -74,9 +74,6 @@ class DatasetView(object):
     @property
     def dataset(self):
         return self.get_object()
-
-    def set_identity(self, identity):
-        set_dataset_identity(identity, self.dataset)
 
     def get_context(self):
         for item in navbar:

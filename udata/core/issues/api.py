@@ -3,11 +3,9 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from flask import request
-
 from flask.ext.security import current_user
 
-from udata.api import api, API, marshal, fields, pager
+from udata.api import api, API, marshal, fields
 
 from udata.core.user.api_fields import user_ref_fields
 
@@ -35,7 +33,7 @@ issue_fields = api.model('Issue', {
     'url': fields.UrlFor('api.issue', description='The issue API URI', readonly=True),
 })
 
-issue_page_fields = api.model('IssuePage', pager(issue_fields))
+issue_page_fields = api.model('IssuePage', fields.pager(issue_fields))
 
 parser = api.parser()
 parser.add_argument('closed', type=bool, default=False, location='args', help='Filter closed issues')

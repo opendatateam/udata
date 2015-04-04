@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.api import api, API, fields, refs
+from udata.api import api, API, fields
 
 from . import LEVELS
 from udata import search

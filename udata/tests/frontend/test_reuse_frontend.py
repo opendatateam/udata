@@ -78,8 +78,8 @@ class ReuseBlueprintTest(FrontTestCase):
 
         reuse = Reuse.objects.first()
         self.assertRedirects(response, reuse.display_url)
-        self.assertIsNone(reuse.owner)
         self.assertEqual(reuse.organization, org)
+        self.assertIsNone(reuse.owner)
 
     def test_create_url_exists(self):
         '''It should fail create a reuse if URL exists'''

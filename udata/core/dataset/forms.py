@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.forms import Form, ModelForm, UserModelForm, UserModelFormMixin, fields, validators, widgets
+from udata.auth import current_user
+from udata.forms import Form, ModelForm, UserModelFormMixin, fields, validators, widgets
 from udata.i18n import lazy_gettext as _
 
 from udata.core.storages import resources
@@ -11,7 +12,7 @@ from .models import Dataset, Resource, License, Checksum, UPDATE_FREQUENCIES, DE
 __all__ = ('DatasetForm', 'DatasetCreateForm', 'ResourceForm', 'CommunityResourceForm', 'DatasetExtraForm')
 
 
-class DatasetForm(UserModelForm):
+class DatasetForm(ModelForm):
     model_class = Dataset
 
     title = fields.StringField(_('Title'), [validators.required()])
@@ -33,6 +34,16 @@ class DatasetForm(UserModelForm):
 
 class DatasetCreateForm(DatasetForm):
     organization = fields.PublishAsField(_('Publish as'))
+
+    def save(self, commit=True, **kwargs):
+        dataset = super(DatasetCreateForm, self).save(commit=False, **kwargs)
+        if not dataset.organization:
+            dataset.owner = current_user._get_current_object()
+
+        if commit:
+            dataset.save()
+
+        return dataset
 
 
 class DatasetFullForm(DatasetForm):

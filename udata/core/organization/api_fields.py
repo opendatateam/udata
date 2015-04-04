@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.api import api, pager, fields
+from udata.api import api, fields, base_reference
 
 from .models import ORG_ROLES, MEMBERSHIP_STATUS
 
 
-org_ref_fields = api.inherit('OrganizationReference', fields.base_reference, {
+org_ref_fields = api.inherit('OrganizationReference', base_reference, {
     'name': fields.String(description='The organization name', readonly=True),
     'uri': fields.UrlFor('api.organization', lambda o: {'org': o},
         description='The organization API URI', readonly=True),
@@ -50,10 +50,10 @@ org_fields = api.model('Organization', {
     'page': fields.UrlFor('organizations.show', lambda o: {'org': o},
         description='The organization page URL', readonly=True),
     'logo': fields.ImageField(description='The organization logo URLs'),
-    'members': api.as_list(fields.Nested(member_fields, description='The organization members')),
+    'members': fields.List(fields.Nested(member_fields, description='The organization members')),
 })
 
-org_page_fields = api.model('OrganizationPage', pager(org_fields))
+org_page_fields = api.model('OrganizationPage', fields.pager(org_fields))
 
 org_suggestion_fields = api.model('OrganizationSuggestion', {
     'id': fields.String(description='The organization identifier', readonly=True),
