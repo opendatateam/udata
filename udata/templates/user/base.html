@@ -1,6 +1,12 @@
 {% extends theme('layouts/1-column.html') %}
 {% from theme('macros/follow.html') import follow_btn with context %}
 
+{% block extra_head %}
+{{ super() }}
+<meta name="robots" content="noindex,follow">
+{% endblock %}
+
+
 {% block breadcrumb %}
     <li><a href="{{ url_for('users.list') }}">{{ _('Users') }}</a></li>
     <li><a href="{{ url_for('users.show', user=user) }}">{{ user.fullname }}</a></li>
