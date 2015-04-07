@@ -16,17 +16,17 @@ OrganizationEditorNeed = partial(OrganizationNeed, 'editor')
 
 class EditOrganizationPermission(Permission):
     '''Permissions to edit organization assets'''
-    def __init__(self, org_id):
-        need = OrganizationAdminNeed(org_id)
+    def __init__(self, org):
+        need = OrganizationAdminNeed(org.id)
         super(EditOrganizationPermission, self).__init__(need)
 
 
 class OrganizationPrivatePermission(Permission):
     '''Permission to see organization private assets'''
-    def __init__(self, org_id):
+    def __init__(self, org):
         super(OrganizationPrivatePermission, self).__init__(
-            OrganizationAdminNeed(org_id),
-            OrganizationEditorNeed(org_id)
+            OrganizationAdminNeed(org.id),
+            OrganizationEditorNeed(org.id)
         )
 
 

@@ -65,7 +65,7 @@ class MembershipRequestAPI(API):
     @api.doc(responses={403: 'Not Authorized'})
     def get(self, org):
         '''List membership requests for a given organization'''
-        OrganizationPrivatePermission(org.id).test()
+        OrganizationPrivatePermission(org).test()
         args = requests_parser.parse_args()
         if args['status']:
             return [r for r in org.requests if r.status == args['status']]
@@ -108,7 +108,7 @@ class MembershipAcceptAPI(MembershipAPI):
     @api.marshal_with(member_fields)
     def post(self, org, id):
         '''Accept user membership to a given organization.'''
-        EditOrganizationPermission(org.id).test()
+        EditOrganizationPermission(org).test()
         membership_request = self.get_or_404(org, id)
 
         membership_request.status = 'accepted'
@@ -136,7 +136,7 @@ class MembershipRefuseAPI(MembershipAPI):
     @api.doc('refuse_membership', parser=refuse_parser, **common_doc)
     def post(self, org, id):
         '''Refuse user membership to a given organization.'''
-        EditOrganizationPermission(org.id).test()
+        EditOrganizationPermission(org).test()
         membership_request = self.get_or_404(org, id)
         form = api.validate(MembershipRefuseForm)
 
@@ -195,7 +195,7 @@ class AvatarAPI(API):
     @api.marshal_with(logo_fields)
     def post(self, org):
         '''Upload a new logo'''
-        EditOrganizationPermission(org.id).test()
+        EditOrganizationPermission(org).test()
         args = logo_parser.parse_args()
 
         logo = args['file']
@@ -210,7 +210,7 @@ class AvatarAPI(API):
     @api.marshal_with(logo_fields)
     def put(self, org):
         '''Set the logo BBox'''
-        EditOrganizationPermission(org.id).test()
+        EditOrganizationPermission(org).test()
         args = logo_parser.parse_args()
 
         print args

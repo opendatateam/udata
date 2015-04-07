@@ -147,7 +147,7 @@ class ReuseImageAPI(API):
     @api.marshal_with(image_fields)
     def post(self, reuse):
         '''Upload a new reuse image'''
-        ReuseEditPermission(reuse.id).test()
+        ReuseEditPermission(reuse).test()
         args = image_parser.parse_args()
 
         image = args['file']

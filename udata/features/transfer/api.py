@@ -29,7 +29,7 @@ transfer_request_fields = api.model('TransferRequest', {
 
 
 transfer_response_fields = api.model('TransferResponse', {
-    'response': fields.String(description='The response', required=True),
+    'response': fields.String(description='The response', required=True, enum=RESPONSE_TYPES),
     'comment': fields.String(description='An optionnal comment about the transfer response'),
 })
 

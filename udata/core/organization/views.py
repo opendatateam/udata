@@ -60,14 +60,14 @@ class OrgView(object):
         for item in navbar.items:
             item._args = {'org': self.organization}
         context = super(OrgView, self).get_context()
-        context['can_edit'] = EditOrganizationPermission(self.organization.id)
-        context['can_view'] = OrganizationPrivatePermission(self.organization.id)
+        context['can_edit'] = EditOrganizationPermission(self.organization)
+        context['can_view'] = OrganizationPrivatePermission(self.organization)
         return context
 
 
 class ProtectedOrgView(OrgView):
     def can(self, *args, **kwargs):
-        permission = EditOrganizationPermission(self.organization.id)
+        permission = EditOrganizationPermission(self.organization)
         return permission.can()
 
 
@@ -85,8 +85,8 @@ class OrganizationDetailView(OrgView, DetailView):
         reuses = Reuse.objects(organization=self.organization).visible().order_by('-created')
         followers = FollowOrg.objects.followers(self.organization).order_by('follower.fullname')
 
-        can_edit = EditOrganizationPermission(self.organization.id)
-        can_view = OrganizationPrivatePermission(self.organization.id)
+        can_edit = EditOrganizationPermission(self.organization)
+        can_view = OrganizationPrivatePermission(self.organization)
         context.update({
             'reuses': reuses.paginate(1, self.page_size),
             'datasets': datasets.paginate(1, self.page_size),
