@@ -163,13 +163,26 @@ class TextAreaField(FieldHelper, EmptyNone, fields.TextAreaField):
     pass
 
 
+class FormWrapper(object):
+    '''
+    Wrap FormField nested form class to handle both
+    JSON provisionning from wtforms-json
+    and CSRF disabled from flask-wtf
+    '''
+    def __init__(self, cls):
+        self.cls = cls
+
+    def __call__(self, *args, **kwargs):
+        kwargs['csrf_enabled'] = False
+        return self.cls(*args, **kwargs)
+
+    def __getattr__(self, name):
+        return getattr(self.cls, name)
+
+
 class FormField(FieldHelper, fields.FormField):
     def __init__(self, form_class, *args, **kwargs):
-        def wrapper(*args, **kwargs):
-            kwargs['csrf_enabled'] = False
-            return form_class(*args, **kwargs)
-
-        super(FormField, self).__init__(wrapper, *args, **kwargs)
+        super(FormField, self).__init__(FormWrapper(form_class), *args, **kwargs)
 
 
 def nullable_text(value):
