@@ -41,6 +41,11 @@ or with easy_install:
 
     $ easy_install udata
 
+Then install npm dependencies with bower:
+
+.. code-block:: console
+
+    $ bower install
 
 ElasticSearch
 =============
@@ -49,6 +54,17 @@ The ICU plugin is required for ElasticSearch.
 
 ICU Analysis: https://github.com/elasticsearch/elasticsearch-analysis-icu
 
+
+Running
+=======
+
+To run the development server:
+
+.. code-block:: console
+
+    $ python manage.py serve
+
+Your instance should be available at http://127.0.0.1:6666/
 
 
 Documentation
