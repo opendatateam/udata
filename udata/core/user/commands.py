@@ -34,6 +34,7 @@ def create():
     form = RegisterForm(MultiDict(data), csrf_enabled=False)
     if form.validate():
         data['password'] = encrypt_password(data['password'])
+        del data['password_confirm']
         user = datastore.create_user(**data)
         print '\nUser created successfully'
         print 'User(id=%s email=%s)' % (user.id, user.email)
