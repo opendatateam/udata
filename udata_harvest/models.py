@@ -55,16 +55,6 @@ class HarvestItem(db.EmbeddedDocument):
     kwargs = db.DictField()
 
 
-class HarvestJob(db.Document):
-    '''Keep track of harvestings'''
-    created = db.DateTimeField(default=datetime.now, required=True)
-    started = db.DateTimeField()
-    ended = db.DateTimeField()
-    status = db.StringField(choices=HARVEST_JOB_STATUS.keys(), default=DEFAULT_HARVEST_JOB_STATUS, required=True)
-    errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
-    items = db.ListField(db.EmbeddedDocumentField(HarvestItem))
-
-
 class HarvestSource(db.Document):
     name = db.StringField(max_length=255)
     slug = db.SlugField(max_length=255, required=True, unique=True, populate_from='name', update=True)
@@ -73,7 +63,6 @@ class HarvestSource(db.Document):
     backend = db.StringField()
     config = db.DictField()
     periodic_task = db.ReferenceField('PeriodicTask', reverse_delete_rule=db.NULLIFY)
-    jobs = db.ListField(db.ReferenceField(HarvestJob))
     created_at = db.DateTimeField(default=datetime.now, required=True)
     frequency = db.StringField(choices=HARVEST_FREQUENCIES.keys(), default=DEFAULT_HARVEST_FREQUENCY, required=True)
     active = db.BooleanField(default=True)
@@ -84,3 +73,17 @@ class HarvestSource(db.Document):
     @classmethod
     def get(cls, ident):
         return cls.objects(slug=ident).first() or cls.objects.get(id=ident)
+
+    def get_last_job(self):
+        return HarvestJob.objects(source=self).order_by('-created')[0]
+
+
+class HarvestJob(db.Document):
+    '''Keep track of harvestings'''
+    created = db.DateTimeField(default=datetime.now, required=True)
+    started = db.DateTimeField()
+    ended = db.DateTimeField()
+    status = db.StringField(choices=HARVEST_JOB_STATUS.keys(), default=DEFAULT_HARVEST_JOB_STATUS, required=True)
+    errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
+    items = db.ListField(db.EmbeddedDocumentField(HarvestItem))
+    source = db.ReferenceField(HarvestSource, reverse_delete_rule=db.NULLIFY)

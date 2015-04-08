@@ -38,7 +38,7 @@ class FactoryBackend(backends.BaseBackend):
 
     def process(self, item):
         mock_process.send(self, item=item)
-        return DatasetFactory.build(name='dataset-{0}'.format(item.remote_id))
+        return DatasetFactory.build(title='dataset-{0}'.format(item.remote_id))
 
 
 class HarvestActionsTest(DBTestMixin, TestCase):
@@ -58,7 +58,6 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         self.assertEqual(source.slug, 'test-source')
         self.assertEqual(source.url, source_url)
         self.assertEqual(source.backend, 'dummy')
-        self.assertEqual(source.jobs, [])
         self.assertEqual(source.frequency, 'manual')
         self.assertIsNone(source.owner)
         self.assertIsNone(source.organization)
@@ -135,9 +134,9 @@ class ExecutionTestMixin(DBTestMixin):
             self.action(source.slug)
 
         source.reload()
-        self.assertEqual(len(source.jobs), 1)
+        self.assertEqual(len(HarvestJob.objects(source=source)), 1)
 
-        job = source.jobs[0]
+        job = source.get_last_job()
         self.assertEqual(job.status, 'done')
         self.assertEqual(job.errors, [])
         self.assertIsNotNone(job.started)
@@ -162,9 +161,9 @@ class ExecutionTestMixin(DBTestMixin):
             self.action(source.slug)
 
         source.reload()
-        self.assertEqual(len(source.jobs), 1)
+        self.assertEqual(len(HarvestJob.objects(source=source)), 1)
 
-        job = source.jobs[0]
+        job = source.get_last_job()
         self.assertEqual(job.status, 'failed')
         self.assertEqual(len(job.errors), 1)
         error = job.errors[0]
@@ -187,9 +186,9 @@ class ExecutionTestMixin(DBTestMixin):
             self.action(source.slug)
 
         source.reload()
-        self.assertEqual(len(source.jobs), 1)
+        self.assertEqual(len(HarvestJob.objects(source=source)), 1)
 
-        job = source.jobs[0]
+        job = source.get_last_job()
         self.assertEqual(job.status, 'done-errors')
         self.assertIsNotNone(job.started)
         self.assertIsNotNone(job.ended)

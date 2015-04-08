@@ -47,9 +47,9 @@ class BaseBackend(object):
     def perform_initialization(self):
         '''Initialize the harvesting for a given job'''
         log.debug('Initializing backend')
-        self.job = HarvestJob.objects.create(status='initializing', started=datetime.now())
-        self.source.jobs.append(self.job)
-        self.source.save()
+        self.job = HarvestJob.objects.create(status='initializing', started=datetime.now(), source=self.source)
+        # self.source.jobs.append(self.job)
+        # self.source.save()
 
         before_harvest_job.send(self)
 

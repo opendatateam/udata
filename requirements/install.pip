@@ -2,3 +2,4 @@ chardet
 requests
 voluptuous
 xmltodict
+lxml

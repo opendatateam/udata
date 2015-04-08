@@ -65,7 +65,7 @@ def run(ident, debug=False):
 
 def launch(ident, debug=False):
     '''Launch or resume an harvesting for a given source if none is running'''
-    harvest.delay(ident)
+    return harvest.delay(ident)
 
 
 def schedule(ident, minute='*', hour='*', day_of_week='*', day_of_month='*', month_of_year='*'):

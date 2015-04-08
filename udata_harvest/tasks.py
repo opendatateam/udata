@@ -27,7 +27,7 @@ def harvest_item(source_id, item_id):
     log.info('Harvesting item %s for source "%s"', item_id, source_id)
 
     source = HarvestSource.get(source_id)
-    job = source.jobs[-1]
+    job = source.get_last_job()
     Backend = backends.get(source.backend)
     backend = Backend(source, job)
 
@@ -41,7 +41,7 @@ def harvest_item(source_id, item_id):
 def harvest_finalize(results, source_id):
     log.info('Finalize harvesting for source "%s"', source_id)
     source = HarvestSource.get(source_id)
-    job = source.jobs[-1]
+    job = source.get_last_job()
     Backend = backends.get(source.backend)
     backend = Backend(source, job)
     backend.finalize()
