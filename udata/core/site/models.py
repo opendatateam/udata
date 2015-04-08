@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from udata.models import db, WithMetrics
 
 
-__all__ = ('Site', )
+__all__ = ('Site', 'SiteSettings')
 
 
 DEFAULT_FEED_SIZE = 20

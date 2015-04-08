@@ -7,6 +7,7 @@ from flask import url_for
 
 from udata.core.site.models import Site
 from udata.core.site.metrics import SiteMetric
+from udata.core.site.views import current_site
 from udata.models import db, WithMetrics
 
 from udata.tests.api import APITestCase
@@ -48,11 +49,11 @@ class SiteAPITest(APITestCase):
         self.assert200(response)
 
     def test_get_home_datasets(self):
-        self.app.config['SITE_ID']
-        site = SiteFactory(
+        site = SiteFactory.create(
             id=self.app.config['SITE_ID'],
             settings__home_datasets=VisibleDatasetFactory.create_batch(3)
         )
+        current_site.reload()
 
         self.login(AdminFactory())
         response = self.get(url_for('api.home_datasets'))
@@ -61,11 +62,11 @@ class SiteAPITest(APITestCase):
         self.assertEqual(len(response.json), len(site.settings.home_datasets))
 
     def test_get_home_reuses(self):
-        self.app.config['SITE_ID']
-        site = SiteFactory(
+        site = SiteFactory.create(
             id=self.app.config['SITE_ID'],
             settings__home_reuses=VisibleReuseFactory.create_batch(3)
         )
+        current_site.reload()
 
         self.login(AdminFactory())
         response = self.get(url_for('api.home_reuses'))
@@ -82,7 +83,6 @@ class SiteAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json), len(ids))
 
-        self.app.config['SITE_ID']
         site = Site.objects.get(id=self.app.config['SITE_ID'])
 
         self.assertEqual([d.id for d in site.settings.home_datasets], ids)
@@ -96,7 +96,6 @@ class SiteAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json), len(ids))
 
-        self.app.config['SITE_ID']
         site = Site.objects.get(id=self.app.config['SITE_ID'])
 
         self.assertEqual([r.id for r in site.settings.home_reuses], ids)

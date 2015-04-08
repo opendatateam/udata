@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.forms import UserModelForm, fields, validators, widgets
+from udata.forms import UserModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
 from .models import Topic
@@ -19,6 +19,5 @@ class TopicForm(UserModelForm):
     datasets = fields.DatasetListField(_('Associated datasets'))
     reuses = fields.ReuseListField(_('Associated reuses'))
 
-    query = fields.StringField(_('Search Query'))
     tags = fields.TagField(_('Tags'), [validators.required()])
     private = fields.BooleanField(_('Private'))

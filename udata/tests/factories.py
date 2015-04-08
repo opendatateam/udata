@@ -94,12 +94,18 @@ class GeoJsonProvider(BaseProvider):
 faker.add_provider(GeoJsonProvider)
 
 
+class SiteSettingsFactory(MongoEngineFactory):
+    class Meta:
+        model = models.SiteSettings
+
+
 class SiteFactory(MongoEngineFactory):
     class Meta:
         model = models.Site
 
     id = factory.LazyAttribute(lambda o: faker.word())
     title = factory.LazyAttribute(lambda o: faker.name())
+    settings = factory.SubFactory(SiteSettingsFactory)
 
 
 class UserFactory(MongoEngineFactory):

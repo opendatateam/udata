@@ -41,7 +41,7 @@ class JobsAPITest(APITestCase):
                 'task': 'a-job'
             }
             if i % 2:
-                params['crontab'] = PeriodicTask.Crontab(minutes=i)
+                params['crontab'] = PeriodicTask.Crontab(minute=str(i))
             else:
                 params['interval'] = PeriodicTask.Interval(every=i, period='minutes')
             PeriodicTask.objects.create(**params)
@@ -153,7 +153,7 @@ class JobsAPITest(APITestCase):
             name=faker.name(),
             description=faker.sentence(),
             task='a-job',
-            crontab=PeriodicTask.Crontab(minutes=5)
+            crontab=PeriodicTask.Crontab(minute='5')
         )
 
         response = self.get(url_for('api.job', id=task.id))
@@ -172,7 +172,7 @@ class JobsAPITest(APITestCase):
             name=faker.name(),
             description=faker.sentence(),
             task='a-job',
-            crontab=PeriodicTask.Crontab(minutes=5)
+            crontab=PeriodicTask.Crontab(minute='5')
         )
 
         self.login()
@@ -193,7 +193,7 @@ class JobsAPITest(APITestCase):
             name=faker.name(),
             description=faker.sentence(),
             task='a-job',
-            crontab=PeriodicTask.Crontab(minutes=5)
+            crontab=PeriodicTask.Crontab(minute='5')
         )
 
         self.login(AdminFactory())
@@ -221,7 +221,7 @@ class JobsAPITest(APITestCase):
             name=faker.name(),
             description=faker.sentence(),
             task='a-job',
-            crontab=PeriodicTask.Crontab(minutes=5)
+            crontab=PeriodicTask.Crontab(minute='5')
         )
 
         self.login(AdminFactory())
@@ -253,7 +253,7 @@ class JobsAPITest(APITestCase):
             name=faker.name(),
             description=faker.sentence(),
             task='a-job',
-            crontab=PeriodicTask.Crontab(minutes=5)
+            crontab=PeriodicTask.Crontab(minute='5')
         )
 
         self.login()
@@ -269,7 +269,7 @@ class JobsAPITest(APITestCase):
             name=faker.name(),
             description=faker.sentence(),
             task='a-job',
-            crontab=PeriodicTask.Crontab(minutes=5)
+            crontab=PeriodicTask.Crontab(minute='5')
         )
 
         self.login(AdminFactory())
