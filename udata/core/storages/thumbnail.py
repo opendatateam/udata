@@ -3,9 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 import os
-import uuid
 
-from PIL import Image, ImageOps
+from PIL import Image
 
 from udata.app import standalone, create_app
 

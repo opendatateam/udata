@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import current_app
 
-from udata.forms import ModelForm, fields, validators, widgets
+from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 from udata.models import User
 

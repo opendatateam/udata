@@ -5,7 +5,7 @@ import os
 
 from datetime import datetime
 
-from flask import abort, redirect, request, url_for, g, jsonify, render_template
+from flask import abort, redirect, request, url_for, jsonify, render_template
 from werkzeug.contrib.atom import AtomFeed
 
 from udata import fileutils

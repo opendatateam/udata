@@ -23,11 +23,9 @@ from .api_fields import (
     dataset_suggestion_fields,
     license_fields,
     resource_fields,
-    resources_order,
     upload_fields,
 )
 from .models import Dataset, Resource, DatasetIssue, FollowDataset, Checksum, License
-from .permissions import DatasetEditPermission
 from .forms import DatasetForm, ResourceForm, DatasetFullForm
 from .search import DatasetSearch
 

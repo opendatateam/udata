@@ -6,9 +6,6 @@ import json
 from wtforms import widgets
 from wtforms.widgets import HTMLString
 
-from jinja2 import Markup
-from werkzeug.utils import escape
-
 from udata.frontend.helpers import placeholder
 from udata.i18n import gettext as _
 

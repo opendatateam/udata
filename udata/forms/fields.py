@@ -9,9 +9,7 @@ from dateutil.parser import parse
 from flask import url_for
 from flask.ext.mongoengine.wtf import fields as mefields
 from flask.ext.fs.mongo import ImageReference
-from werkzeug.datastructures import FileStorage
-from werkzeug.utils import secure_filename
-from wtforms import Form as WTForm, Field, validators, fields
+from wtforms import Form as WTForm, validators, fields
 from wtforms.fields import html5
 from wtforms.utils import unset_value
 
@@ -20,7 +18,7 @@ from shapely.ops import cascaded_union
 
 from . import widgets
 
-from .validators import RequiredIf, optional
+from .validators import optional
 
 from udata.auth import current_user
 from udata.models import db, SpatialCoverage, Territory, SPATIAL_GRANULARITIES
