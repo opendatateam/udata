@@ -4,7 +4,9 @@ from __future__ import unicode_literals
 from collections import namedtuple
 from functools import partial
 
-from udata.auth import current_user, identity_loaded, Permission
+from flask.ext.principal import identity_loaded
+
+from udata.auth import current_user, Permission
 from udata.models import Organization
 from udata.utils import get_by
 

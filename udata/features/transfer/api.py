@@ -2,6 +2,7 @@
 from __future__ import unicode_literals, absolute_import
 
 from flask import request
+from flask.ext.restplus import fields as base_fields
 
 from udata import models
 
@@ -45,11 +46,11 @@ subject_mapping = {
 
 transfer_fields = api.model('Transfer', {
     'id': fields.String(description='The transfer unique identifier', readonly=True),
-    'owner': fields.Polymorph(person_mapping, readonly=True,
+    'owner': base_fields.Polymorph(person_mapping, readonly=True,
         description='The user or organization currently owning the transfered object'),
-    'recipient': fields.Polymorph(person_mapping, readonly=True,
+    'recipient': base_fields.Polymorph(person_mapping, readonly=True,
         description='The user or organization receiving the transfered object'),
-    'subject': fields.Polymorph(subject_mapping, readonly=True,
+    'subject': base_fields.Polymorph(subject_mapping, readonly=True,
         description='The transfered object'),
     'comment': fields.String(readonly=True,
         description='A comment about the transfer request'),

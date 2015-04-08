@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask.ext.restplus import fields as base_fields
+
 from udata.api import api, fields, base_reference
 
 
@@ -28,7 +30,7 @@ user_fields = api.model('User', {
     'roles': fields.List(fields.String, description='Site wide user roles'),
     'organizations': fields.List(fields.Nested(org_ref_fields),
         description='The organization the user belongs to'),
-    'metrics': fields.Raw(description='Th last user metrics'),
+    'metrics': base_fields.Raw(description='Th last user metrics'),
     'since': fields.ISODateTime(attribute='created_at',
         description='The registeration date', required=True),
     'page': fields.UrlFor('users.show', lambda u: {'user': u},
@@ -44,17 +46,17 @@ user_suggestion_fields = api.model('UserSuggestion', {
     'fullname': fields.String(description='The user fullname', required=True),
     'avatar_url': fields.String(description='The user avatar URL'),
     'slug': fields.String(description='The user permalink string', required=True),
-    'score': fields.Float(description='The internal match score', required=True),
+    'score': base_fields.Float(description='The internal match score', required=True),
 })
 
 
 notifications_fields = api.model('Notification', {
     'type': fields.String(description='The notification type', readonly=True),
     'created_on': fields.ISODateTime(description='The notification creation datetime', readonly=True),
-    'details': fields.Raw(description='Key-Value details depending on notification type', readonly=True)
+    'details': base_fields.Raw(description='Key-Value details depending on notification type', readonly=True)
 })
 
 avatar_fields = api.model('UploadedAvatar', {
-    'success': fields.Boolean(description='Whether the upload succeeded or not.', readonly=True, default=True),
+    'success': base_fields.Boolean(description='Whether the upload succeeded or not.', readonly=True, default=True),
     'avatar': fields.ImageField(),
 })

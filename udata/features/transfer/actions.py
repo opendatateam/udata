@@ -5,8 +5,9 @@ import logging
 
 from datetime import datetime
 
+from flask.ext.security import login_required
 
-from udata.auth import login_required, current_user
+from udata.auth import current_user
 from udata.models import Organization, User
 
 from .models import Transfer

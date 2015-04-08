@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-from udata.auth import Permission, UserNeed
+from flask.ext.principal import UserNeed
 
+from udata.auth import Permission
 from udata.models import User, Organization
 
 from udata.core.organization.permissions import OrganizationAdminNeed

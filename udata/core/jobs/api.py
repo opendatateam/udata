@@ -6,6 +6,7 @@ from celery.result import AsyncResult
 from celery.utils import get_full_cls_name
 from celery.utils.encoding import safe_repr
 from flask import request
+from flask.ext.restplus import fields as base_fields
 
 from udata.api import api, API, fields
 from udata.auth import admin_permission
@@ -36,12 +37,12 @@ job_fields = api.model('Job', {
     'task': fields.String(description='The task name', required=True, enum=[job.name for job in schedulables()]),
     'crontab': fields.Nested(crontab_fields, allow_null=True),
     'interval': fields.Nested(interval_fields, allow_null=True),
-    'args': fields.List(fields.Raw, description='The job execution arguments', default=[]),
-    'kwargs': fields.Raw(description='The job execution keyword arguments', default={}),
+    'args': fields.List(base_fields.Raw, description='The job execution arguments', default=[]),
+    'kwargs': base_fields.Raw(description='The job execution keyword arguments', default={}),
     'schedule': fields.String(attribute='schedule_display', description='The schedule display', readonly=True),
     'last_run_at': fields.ISODateTime(description='The last job execution date', readonly=True),
     'last_run_id': fields.String(description='The last execution task id', readonly=True),
-    'enabled': fields.Boolean(description='Is this job enabled', default=False),
+    'enabled': base_fields.Boolean(description='Is this job enabled', default=False),
 })
 
 task_fields = api.model('Task', {

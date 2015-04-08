@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.forms import UserModelForm, fields, validators, widgets
+from wtforms import validators
+
+from udata.forms import UserModelForm, fields, widgets
 from udata.i18n import lazy_gettext as _
 
 from .models import Post, IMAGE_SIZES

@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from bson import ObjectId
 
 from flask import request
+from flask.ext.restplus import fields as base_fields
 
 from udata.api import api, API, fields
 from udata.auth import admin_permission
@@ -19,7 +20,7 @@ from .views import current_site
 site_fields = api.model('Site', {
     'id': fields.String(description='The Site unique identifier', required=True),
     'title': fields.String(description='The site display title', required=True),
-    'metrics': fields.Raw(description='The associated metrics', default={}),
+    'metrics': base_fields.Raw(description='The associated metrics', default={}),
 })
 
 
@@ -86,7 +87,7 @@ activity_fields = api.model('Activity', {
     # 'related_to'
     # related_to = db.ReferenceField(db.DomainModel, required=True)
     'created_at': fields.ISODateTime(description='When the action has been performed', readonly=True),
-    'kwargs': fields.Raw(description='Some action specific context'),
+    'kwargs': base_fields.Raw(description='Some action specific context'),
 })
 
 activity_page_fields = api.model('ActivityPage', fields.pager(activity_fields))

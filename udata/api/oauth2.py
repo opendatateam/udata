@@ -6,12 +6,13 @@ from datetime import datetime, timedelta
 
 from flask import abort, request
 from flask.ext.oauthlib.provider import OAuth2Provider
+from flask.ext.security import login_required, login_user
 from werkzeug.security import gen_salt
 from werkzeug.exceptions import Unauthorized
 
 from udata import theme
 from udata.app import Blueprint, csrf
-from udata.auth import current_user, login_required, login_user
+from udata.auth import current_user
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import db
 from udata.core.storages import images, default_image_basename

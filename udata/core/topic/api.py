@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask.ext.restplus import fields as base_fields
+
 from udata.api import api, fields, API
 from udata.auth import admin_permission
-
-
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.reuse.api_fields import reuse_ref_fields
 from udata.core.user.api_fields import user_ref_fields
@@ -22,8 +22,8 @@ topic_fields = api.model('Topic', {
     'tags': fields.List(fields.String, description='Some keywords to help in search'),
     'datasets': fields.List(fields.Nested(dataset_ref_fields), description='The topic datasets'),
     'reuses': fields.List(fields.Nested(reuse_ref_fields), description='The topic reuses'),
-    'featured': fields.Boolean(description='Is the topic featured'),
-    'private': fields.Boolean(description='Is the topic private'),
+    'featured': base_fields.Boolean(description='Is the topic featured'),
+    'private': base_fields.Boolean(description='Is the topic private'),
     'created_at': fields.ISODateTime(description='The topic creation date', readonly=True),
     'last_modified': fields.ISODateTime(description='The topic last modification date', readonly=True),
     'deleted': fields.ISODateTime(description='The organization identifier', readonly=True),
