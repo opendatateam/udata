@@ -3,7 +3,6 @@ from __future__ import unicode_literals, absolute_import
 
 backends = {}
 
-
 def register(cls):
     '''Register a backend class'''
     if hasattr(cls, 'name'):
@@ -21,3 +20,4 @@ def get_all():
 
 
 from .base import BaseHarvester
+from .ods import OdsHarvester
