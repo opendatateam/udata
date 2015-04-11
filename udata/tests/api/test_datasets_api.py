@@ -5,7 +5,7 @@ import json
 
 from flask import url_for
 
-from udata.models import Dataset, Follow, FollowDataset
+from udata.models import Dataset, Follow, FollowDataset, Member
 
 from . import APITestCase
 from ..factories import DatasetFactory, ResourceFactory, OrganizationFactory, faker
@@ -59,7 +59,8 @@ class DatasetAPITest(APITestCase):
         '''It should create a dataset as organization from the API'''
         self.login()
         data = DatasetFactory.attributes()
-        org = OrganizationFactory()
+        member = Member(user=self.user, role='editor')
+        org = OrganizationFactory(members=[member])
         data['organization'] = str(org.id)
         # with self.api_user():
         response = self.post(url_for('api.datasets'), data)
@@ -69,6 +70,17 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.organization, org)
         self.assertIsNone(dataset.owner)
+
+    def test_dataset_api_create_as_org_permissions(self):
+        '''It should to create a dataset as organization from the API only if the current user is member'''
+        self.login()
+        data = DatasetFactory.attributes()
+        org = OrganizationFactory()
+        data['organization'] = str(org.id)
+        # with self.api_user():
+        response = self.post(url_for('api.datasets'), data)
+        self.assertStatus(response, 403)
+        self.assertEqual(Dataset.objects.count(), 0)
 
     def test_dataset_api_create_tags(self):
         '''It should create a dataset from the API'''

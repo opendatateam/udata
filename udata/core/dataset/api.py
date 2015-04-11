@@ -15,7 +15,7 @@ from udata.api import api, fields, ModelAPI, ModelListAPI, SingleObjectAPI, API
 from udata.core import storages
 from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
-from udata.utils import get_by
+from udata.utils import get_by, multi_to_dict
 
 from .api_fields import (
     dataset_fields,
@@ -41,13 +41,22 @@ common_doc = {
 
 
 @ns.route('/', endpoint='datasets')
-@api.doc(get={'id': 'list_datasets', 'model': dataset_page_fields, 'parser': search_parser})
-@api.doc(post={'id': 'create_dataset', 'model': dataset_fields, 'body': dataset_fields})
 class DatasetListAPI(ModelListAPI):
-    model = Dataset
-    form = DatasetFullForm
-    fields = dataset_fields
-    search_adapter = DatasetSearch
+    '''Datasets collection endpoint'''
+    @api.doc('list_datasets', parser=search_parser)
+    @api.marshal_with(dataset_page_fields)
+    def get(self):
+        '''List or search all datasets'''
+        return search.query(DatasetSearch, **multi_to_dict(request.args))
+
+    @api.secure
+    @api.doc('create_dataset', responses={400: 'Validation error'})
+    @api.expect(dataset_fields)
+    @api.marshal_with(dataset_fields)
+    def post(self):
+        '''Create a new dataset'''
+        form = api.validate(DatasetFullForm)
+        return form.save(), 201
 
 
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)

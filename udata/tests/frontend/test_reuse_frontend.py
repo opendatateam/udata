@@ -5,7 +5,7 @@ import feedparser
 
 from flask import url_for
 
-from udata.models import Reuse
+from udata.models import Reuse, Member
 
 from . import FrontTestCase
 from ..factories import ReuseFactory, UserFactory, AdminFactory, OrganizationFactory, DatasetFactory
@@ -70,16 +70,28 @@ class ReuseBlueprintTest(FrontTestCase):
 
     def test_create_as_org(self):
         '''It should create a reuse and redirect to reuse page'''
-        org = OrganizationFactory()
+        self.login()
+        member = Member(user=self.user, role='editor')
+        org = OrganizationFactory(members=[member])
         data = ReuseFactory.attributes()
         data['organization'] = str(org.id)
-        self.login()
         response = self.post(url_for('reuses.new'), data)
 
         reuse = Reuse.objects.first()
         self.assertRedirects(response, reuse.display_url)
         self.assertEqual(reuse.organization, org)
         self.assertIsNone(reuse.owner)
+
+    def test_create_as_org_permissions(self):
+        '''It should create a reuse and redirect to reuse page'''
+        org = OrganizationFactory()
+        data = ReuseFactory.attributes()
+        data['organization'] = str(org.id)
+        self.login()
+        response = self.post(url_for('reuses.new'), data)
+
+        self.assert403(response)
+        self.assertEqual(Reuse.objects.count(), 0)
 
     def test_create_url_exists(self):
         '''It should fail create a reuse if URL exists'''

@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import Reuse, FollowReuse, Follow
+from udata.models import Reuse, FollowReuse, Follow, Member
 
 from . import APITestCase
 from ..factories import faker, ReuseFactory, DatasetFactory, AdminFactory, OrganizationFactory
@@ -41,7 +41,8 @@ class ReuseAPITest(APITestCase):
         '''It should create a reuse as organization from the API'''
         self.login()
         data = ReuseFactory.attributes()
-        org = OrganizationFactory()
+        member = Member(user=self.user, role='editor')
+        org = OrganizationFactory(members=[member])
         data['organization'] = str(org.id)
         response = self.post(url_for('api.reuses'), data)
         self.assertStatus(response, 201)
@@ -50,6 +51,16 @@ class ReuseAPITest(APITestCase):
         reuse = Reuse.objects.first()
         self.assertIsNone(reuse.owner)
         self.assertEqual(reuse.organization, org)
+
+    def test_reuse_api_create_as_permissions(self):
+        '''It should create a reuse as organization from the API only if user is member'''
+        self.login()
+        data = ReuseFactory.attributes()
+        org = OrganizationFactory()
+        data['organization'] = str(org.id)
+        response = self.post(url_for('api.reuses'), data)
+        self.assertStatus(response, 403)
+        self.assertEqual(Reuse.objects.count(), 0)
 
     def test_reuse_api_update(self):
         '''It should update a reuse from the API'''

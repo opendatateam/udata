@@ -23,9 +23,10 @@ from . import widgets
 from .validators import RequiredIf, optional
 
 from udata.auth import current_user
-from udata.models import db, SpatialCoverage, Territory, SPATIAL_GRANULARITIES
+from udata.models import db, SpatialCoverage, Territory, SPATIAL_GRANULARITIES, Organization
 from udata.core.spatial import LEVELS
 from udata.core.storages import tmp
+from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
 from udata.utils import to_iso_date
 
@@ -406,13 +407,18 @@ class PublishAsField(FieldHelper, fields.HiddenField):
 
     def process_formdata(self, valuelist):
         if valuelist and valuelist[0].strip():
-            self.data = DBRef('organization', ObjectId(valuelist[0].strip()))
+            self.data = Organization.objects.get(id=ObjectId(valuelist[0].strip()))
 
     def populate_obj(self, obj, name):
         ret = super(PublishAsField, self).populate_obj(obj, name)
         if hasattr(obj, 'owner') and obj.owner and getattr(obj, name):
             obj.owner = None
         return ret
+
+    def pre_validate(self, form):
+        if self.data:
+            OrganizationPrivatePermission(self.data).test()
+        return True
 
 
 class ExtrasField(FieldHelper, fields.Field):

@@ -3,9 +3,11 @@ from __future__ import unicode_literals
 
 from udata import theme
 from udata.frontend import front
+from udata.auth import PermissionDenied
 
 
 @front.app_errorhandler(403)
+@front.app_errorhandler(PermissionDenied)
 def forbidden(error):
     return theme.render('errors/403.html', error=error), 403
 

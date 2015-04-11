@@ -13,7 +13,7 @@ from flask import url_for
 from flask.ext import fs
 
 from udata.core import storages
-from udata.models import Dataset, FollowDataset
+from udata.models import Dataset, FollowDataset, Member
 
 from . import FrontTestCase
 from ..factories import ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory
@@ -69,10 +69,11 @@ class DatasetBlueprintTest(FrontTestCase):
 
     def test_create_as_org(self):
         '''It should create a dataset as an organization and redirect to dataset page'''
-        org = OrganizationFactory()
+        self.login()
+        member = Member(user=self.user, role='editor')
+        org = OrganizationFactory(members=[member])
         data = DatasetFactory.attributes()
         data['organization'] = str(org.id)
-        self.login()
         response = self.post(url_for('datasets.new'), data)
 
         dataset = Dataset.objects.first()
@@ -80,6 +81,17 @@ class DatasetBlueprintTest(FrontTestCase):
 
         self.assertIsNone(dataset.owner)
         self.assertEqual(dataset.organization, org)
+
+    def test_create_as_org_permissions(self):
+        '''It should create a dataset as an organization only for members'''
+        org = OrganizationFactory()
+        data = DatasetFactory.attributes()
+        data['organization'] = str(org.id)
+        self.login()
+        response = self.post(url_for('datasets.new'), data)
+
+        self.assert403(response)
+        self.assertEqual(Dataset.objects.count(), 0)
 
     def test_render_display(self):
         '''It should render the dataset page'''
