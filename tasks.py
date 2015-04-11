@@ -69,23 +69,28 @@ def qa():
     '''Run a quality report'''
     run('flake8 {0}/udata'.format(ROOT))
 
+
 @task
 def serve():
+    '''Run a development server'''
     run('cd {0} && python manage.py serve -d -r'.format(ROOT), pty=True)
 
 
 @task
 def work(loglevel='info'):
+    '''Run a development worker'''
     run('celery -A udata.worker worker --purge --autoreload -l %s' % loglevel)
 
 
 @task
 def beat(loglevel='info'):
+    '''Run celery beat process'''
     run('celery -A udata.worker beat -l %s' % loglevel)
 
 
 @task
 def i18n():
+    '''Extract translatable strings'''
     run('python setup.py extract_messages')
     run('python setup.py update_catalog')
     run('udata i18njs -d udata udata/static')
@@ -93,16 +98,12 @@ def i18n():
 
 @task
 def i18nc():
+    '''Compile translations'''
+    print(cyan('Compiling translations'))
     run('cd {0} && python setup.py compile_catalog'.format(ROOT))
 
 
-@task
-def build():
-    print(cyan('Compiling translations'))
-    lrun('python setup.py compile_catalog')
-
-
-@task(build)
+@task(i18nc)
 def dist():
     '''Package for distribution'''
     print(cyan('Building a distribuable package'))
