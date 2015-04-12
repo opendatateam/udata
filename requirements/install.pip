@@ -1,4 +1,4 @@
-awesome-slugify==1.6.2
+awesome-slugify==1.6.4
 blinker==1.3
 celery==3.1.17
 celerybeat-mongo==0.0.8
@@ -34,7 +34,7 @@ PyYAML==3.11
 redis
 requests
 Shapely==1.5.7
-unicodecsv==0.11.0
+unicodecsv==0.11.1
 webassets==0.10.1
 wtforms-json==0.2.10
 wtforms==2.0.2
