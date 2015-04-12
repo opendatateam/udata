@@ -8,7 +8,7 @@ from werkzeug.datastructures import FileStorage
 from flask import request
 
 from udata import search
-from udata.api import api, API, ModelAPI, ModelListAPI, SingleObjectAPI
+from udata.api import api, API, ModelAPI, SingleObjectAPI
 from udata.auth import admin_permission
 from udata.models import Reuse
 from udata.utils import multi_to_dict
@@ -31,7 +31,7 @@ search_parser = api.search_parser(ReuseSearch)
 
 
 @ns.route('/', endpoint='reuses')
-class ReuseListAPI(ModelListAPI):
+class ReuseListAPI(API):
     @api.doc('list_reuses', parser=search_parser)
     @api.marshal_with(reuse_page_fields)
     def get(self):

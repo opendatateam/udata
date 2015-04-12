@@ -11,7 +11,7 @@ from uuid import UUID
 from werkzeug.datastructures import FileStorage
 
 from udata import fileutils, search
-from udata.api import api, fields, ModelAPI, ModelListAPI, SingleObjectAPI, API
+from udata.api import api, fields, ModelAPI, SingleObjectAPI, API
 from udata.core import storages
 from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
@@ -41,7 +41,7 @@ common_doc = {
 
 
 @ns.route('/', endpoint='datasets')
-class DatasetListAPI(ModelListAPI):
+class DatasetListAPI(API):
     '''Datasets collection endpoint'''
     @api.doc('list_datasets', parser=search_parser)
     @api.marshal_with(dataset_page_fields)
