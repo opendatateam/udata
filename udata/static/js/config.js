@@ -6,7 +6,7 @@ require.config({
         'jquery': 'empty:', // Loaded from CDN or locally from app to ensure IE8 compatibility
         'bootstrap': '../bower/bootstrap/dist/js/bootstrap',
         'text': "../bower/requirejs-text/text",
-        'moment': '../bower/momentjs/min/moment-with-locales',
+        'moment': '../bower/moment/min/moment-with-locales',
         'marked': '../bower/marked/lib/marked',
         'bootstrap-markdown': '../bower/bootstrap-markdown/js/bootstrap-markdown',
         'bootstrap-datepicker': '../bower/bootstrap-datepicker/js/bootstrap-datepicker',
