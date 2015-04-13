@@ -125,12 +125,11 @@ def create_app(config='udata.settings.Defaults'):
 
 def standalone(app):
     '''Factory for an all in one application'''
-    from udata import admin, api, core, frontend
+    from udata import api, core, frontend
 
     core.init_app(app)
     frontend.init_app(app)
     api.init_app(app)
-    admin.init_app(app)
 
     from udata import ext
     ext.init_app(app)

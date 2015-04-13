@@ -27,15 +27,6 @@ from .. import theme
 _footer_snippets = []
 
 
-# def render(template, **context):
-#     '''
-#     Render a template with uData frontend specifics
-
-#         * Theme
-#     '''
-#     return theme.render(template, **context)
-
-
 def footer_snippet(func):
     _footer_snippets.append(func)
     return func
@@ -64,34 +55,7 @@ def _load_views(app, module):
 
 
 def init_app(app):
-    # nav.init_app(app)
-    # themes.init_themes(app, app_identifier='udata', loaders=[packaged_themes_loader, plugin_theme_loader])
-
     init_markdown(app)
-    # csrf.init_app(app)
-
-    # app.config['STATIC_DIRS'] = app.config.get('STATIC_DIRS', []) + [
-    #     ('fonts', join(ROOT_DIR, 'static', 'bower', 'bootstrap', 'dist', 'fonts')),
-    #     ('fonts', join(ROOT_DIR, 'static', 'bower', 'font-awesome', 'fonts')),
-    # ]
-
-    # app.config['LESS_PATHS'] = app.config.get('LESS_PATHS', []) + [
-    #     'less',
-    #     'bower/bootstrap/less',
-    #     'bower/font-awesome/less',
-    #     'bower/bootstrap-markdown/less',
-    #     'bower/selectize/dist/less',
-    #     'bower/swagger-ui',
-    # ]
-
-    # # Hook into flask security to user themed auth pages
-    # app.config.setdefault('SECURITY_RENDER', 'udata.frontend.theme:render')
-
-    # # Load bundle from yaml file
-    # assets.from_yaml(resource_stream(__name__, '../static/assets.yaml'))
-
-    # if app.config['ASSETS_DEBUG']:
-    #     assets['require-js'].contents += ('js/config.js', 'js/debug.js')
 
     from . import helpers, error_handlers
 
@@ -124,9 +88,6 @@ def init_app(app):
     for plugin in app.config['PLUGINS']:
         module = 'udata.ext.{0}.views'.format(plugin)
         _load_views(app, module)
-
-    # # Load all theme assets
-    # theme.init_app(app)
 
     # Optionnaly register debug views
     if app.config.get('DEBUG'):

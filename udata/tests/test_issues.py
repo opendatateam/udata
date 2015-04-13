@@ -250,11 +250,3 @@ class IssuesTest(APITestCase):
         self.assertEqual(data['discussion'][1]['content'], 'close bla bla')
         self.assertEqual(data['discussion'][1]['posted_by']['id'], str(closer.id))
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
-
-
-class IssuesAdminTest(FrontTestCase):
-    def test_render_issues_empty(self):
-        '''It should render the issues admin page'''
-        self.login(AdminFactory())
-        response = self.get(url_for('admin.issues'))
-        self.assert200(response)

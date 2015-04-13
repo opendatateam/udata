@@ -39,7 +39,7 @@ class MetricsAPITest(APITestCase):
         data = response.json[0]
         self.assertEqual(data['level'], 'daily')
         self.assertEqual(data['date'], date.today().isoformat())
-        self.assertEqual(len(data['values']), 1)
+        self.assertIn('fake-site-metric', data['values'])
         self.assertEqual(data['values']['fake-site-metric'], 2)
 
 
