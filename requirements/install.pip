@@ -33,7 +33,7 @@ PyYAML==3.11
 redis
 requests
 Shapely==1.5.7
-unicodecsv==0.11.1
+unicodecsv==0.11.2
 webassets==0.10.1
 wtforms-json==0.2.10
 wtforms==2.0.2
