@@ -167,7 +167,7 @@ class DatasetSearch(ModelSearchAdapter):
             'owner': str(dataset.owner.id) if dataset.owner else None,
             'supplier': supplier_id,
             'dataset_suggest': {
-                'input': cls.completer_tokenize(dataset.title),
+                'input': cls.completer_tokenize(dataset.title) + [dataset.id],
                 'output': dataset.title,
                 'payload': {
                     'id': str(dataset.id),
