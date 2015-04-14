@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.forms import Form, fields, validators
+from flask.ext.wtf import Form
+from wtforms import validators
+
+from udata.forms import fields
 from udata.i18n import lazy_gettext as _
 
 from .models import ISSUE_TYPES

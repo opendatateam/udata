@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask.ext.restplus import fields as base_fields
+
 from udata.api import api, fields, base_reference
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.spatial.api import spatial_coverage_fields
@@ -36,11 +38,11 @@ resource_fields = api.model('Resource', {
     'created_at': fields.ISODateTime(description='The resource creation date', readonly=True),
     'last_modified': fields.ISODateTime(attribute='modified',
         description='The resource last modification date', readonly=True),
-    'metrics': fields.Raw(description='The resource metrics', readonly=True),
+    'metrics': base_fields.Raw(description='The resource metrics', readonly=True),
 })
 
 upload_fields = api.extend('UploadedResource', resource_fields, {
-    'success': fields.Boolean(description='Whether the upload succeeded or not.', readonly=True, default=True),
+    'success': base_fields.Boolean(description='Whether the upload succeeded or not.', readonly=True, default=True),
     # 'error': fields.String(description='An error message if success is false', readonly=True),
 })
 
@@ -59,16 +61,16 @@ dataset_fields = api.model('Dataset', {
     'created_at': fields.ISODateTime(description='The dataset creation date', required=True),
     'last_modified': fields.ISODateTime(description='The dataset last modification date', required=True),
     'deleted': fields.ISODateTime(description='The deletion date if deleted'),
-    'featured': fields.Boolean(description='Is the dataset featured'),
-    'private': fields.Boolean(description='Is the dataset private to the owner or the organization'),
+    'featured': base_fields.Boolean(description='Is the dataset featured'),
+    'private': base_fields.Boolean(description='Is the dataset private to the owner or the organization'),
     'tags': fields.List(fields.String),
     'resources': fields.List(fields.Nested(resource_fields, description='The dataset resources')),
     'community_resources': fields.List(fields.Nested(resource_fields,
         description='The dataset community submitted resources')),
     'frequency': fields.String(description='The update frequency', required=True,
         enum=UPDATE_FREQUENCIES.keys(), default=DEFAULT_FREQUENCY),
-    'extras': fields.Raw(description='Extras attributes as key-value pairs'),
-    'metrics': fields.Raw(description='The dataset metrics'),
+    'extras': base_fields.Raw(description='Extras attributes as key-value pairs'),
+    'metrics': base_fields.Raw(description='The dataset metrics'),
     'organization': fields.Nested(org_ref_fields, allow_null=True,
         description='The producer organization'),
     'supplier': fields.Nested(org_ref_fields, allow_null=True,
@@ -91,7 +93,7 @@ dataset_suggestion_fields = api.model('DatasetSuggestion', {
     'title': fields.String(description='The dataset title', required=True),
     'slug': fields.String(description='The dataset permalink string', required=True),
     'image_url': fields.String(description='The dataset (organization) logo URL'),
-    'score': fields.Float(description='The internal match score', required=True),
+    'score': base_fields.Float(description='The internal match score', required=True),
 })
 
 dataset_ref_fields = api.inherit('DatasetReference', base_reference, {

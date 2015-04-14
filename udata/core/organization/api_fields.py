@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask.ext.restplus import fields as base_fields
+
 from udata.api import api, fields, base_reference
 
 from .models import ORG_ROLES, MEMBERSHIP_STATUS
@@ -44,7 +46,7 @@ org_fields = api.model('Organization', {
     'created_at': fields.ISODateTime(description='The organization creation date', readonly=True),
     'last_modified': fields.ISODateTime(description='The organization last modification date', readonly=True),
     'deleted': fields.ISODateTime(description='The organization deletion date if deleted', readonly=True),
-    'metrics': fields.Raw(description='The organization metrics', readonly=True),
+    'metrics': base_fields.Raw(description='The organization metrics', readonly=True),
     'uri': fields.UrlFor('api.organization', lambda o: {'org': o},
         description='The organization API URI', readonly=True),
     'page': fields.UrlFor('organizations.show', lambda o: {'org': o},
@@ -61,11 +63,11 @@ org_suggestion_fields = api.model('OrganizationSuggestion', {
     'acronym': fields.String(description='The organization acronym', readonly=True),
     'slug': fields.String(description='The organization permalink string', readonly=True),
     'image_url': fields.String(description='The organization logo URL', readonly=True),
-    'score': fields.Float(description='The internal match score', readonly=True),
+    'score': base_fields.Float(description='The internal match score', readonly=True),
 })
 
 logo_fields = api.model('UploadedLogo', {
-    'success': fields.Boolean(description='Whether the upload succeeded or not.', readonly=True, default=True),
+    'success': base_fields.Boolean(description='Whether the upload succeeded or not.', readonly=True, default=True),
     'logo': fields.ImageField(),
     # 'error': fields.String(description='An error message if success is false', readonly=True),
 })

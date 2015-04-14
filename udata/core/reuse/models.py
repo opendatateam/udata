@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import hashlib
-
 from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save

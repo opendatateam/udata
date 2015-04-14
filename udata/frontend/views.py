@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from flask import request, redirect, abort, g
 from flask.views import MethodView
+from flask.ext.security import login_required
 
 from udata import search, auth, theme
 from udata.utils import multi_to_dict
@@ -190,7 +191,7 @@ class FormView(Templated, BaseView):
 
 
 class CreateView(FormView):
-    decorators = [auth.login_required]
+    decorators = [login_required]
 
     def on_form_valid(self, form):
         self.object = form.save()
@@ -201,7 +202,7 @@ class CreateView(FormView):
 
 
 class EditView(SingleObject, FormView):
-    decorators = [auth.login_required]
+    decorators = [login_required]
 
     def get_context(self):
         context = super(EditView, self).get_context()
@@ -218,7 +219,7 @@ class EditView(SingleObject, FormView):
 
 
 class NestedEditView(NestedObject, FormView):
-    decorators = [auth.login_required]
+    decorators = [login_required]
 
     def get_context(self):
         context = super(NestedEditView, self).get_context()

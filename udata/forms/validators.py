@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 
 from wtforms import validators
-from wtforms.validators import *
-from wtforms.validators import ValidationError, StopValidation
 
 _ = lambda s: s
 

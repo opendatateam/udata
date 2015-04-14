@@ -8,12 +8,15 @@ from functools import wraps
 
 from flask import current_app, g, request, url_for, json, make_response, redirect, Blueprint
 from flask.ext.restplus import Api, Resource, marshal
+from flask.ext.restplus import fields as base_fields
 from flask.ext.restful.utils import cors
+from flask.ext.principal import PermissionDenied, RoleNeed
+from flask.ext.security import login_user
 
 from udata import search, theme
 from udata.app import csrf
 from udata.i18n import I18nBlueprint
-from udata.auth import current_user, login_user, Permission, RoleNeed, PermissionDenied
+from udata.auth import current_user, Permission
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
 
@@ -255,7 +258,7 @@ class ModelAPI(SingleObjectAPI, API):
 
 base_reference = api.model('BaseReference', {
     'id': fields.String(description='The object unique identifier', required=True),
-    'class': fields.ClassName(description='The object class', discriminator=True, required=True),
+    'class': base_fields.ClassName(description='The object class', discriminator=True, required=True),
 }, description='Base model for reference field, aka. inline model reference')
 
 

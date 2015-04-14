@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask.ext.restplus import fields as base_fields
+
 from udata.api import api, fields, API
 from udata.auth import admin_permission
-
-
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.reuse.api_fields import reuse_ref_fields
 from udata.core.user.api_fields import user_ref_fields
@@ -30,7 +30,7 @@ post_fields = api.model('Post', {
     'reuses': fields.List(fields.Nested(reuse_ref_fields), description='The post reuses'),
 
     'owner': fields.Nested(user_ref_fields, description='The owner user', readonly=True, allow_null=True),
-    'private': fields.Boolean(description='Is the post visible'),
+    'private': base_fields.Boolean(description='Is the post visible'),
 
     'created_at': fields.ISODateTime(description='The post creation date', readonly=True),
     'last_modified': fields.ISODateTime(description='The post last modification date', readonly=True),

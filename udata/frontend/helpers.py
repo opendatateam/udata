@@ -8,13 +8,14 @@ from datetime import date
 from urlparse import urlsplit, urlunsplit
 
 from flask import url_for, request, current_app, json
+from flask.ext.babelex import format_date, get_locale as get_current_locale
 from jinja2 import Markup
 from werkzeug import url_decode, url_encode
 
 from . import front
 
 from udata.models import db
-from udata.i18n import format_date, _, pgettext, get_current_locale
+from udata.i18n import _, pgettext
 from udata.utils import camel_to_lodash
 
 

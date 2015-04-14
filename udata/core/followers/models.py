@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from blinker import Signal
-
 from udata.models import db
 
 from .signals import on_follow, on_unfollow

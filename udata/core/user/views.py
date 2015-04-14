@@ -5,7 +5,6 @@ import logging
 
 from flask import url_for, g
 
-from udata import mail
 from udata.app import nav
 from udata.frontend.views import DetailView, EditView, SearchView, BaseView, SingleObject
 from udata.models import User, Activity, Organization, Dataset, Reuse, Follow

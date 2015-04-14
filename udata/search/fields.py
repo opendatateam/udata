@@ -6,9 +6,10 @@ import logging
 from datetime import date, datetime, timedelta
 
 from bson.objectid import ObjectId
+from flask.ext.babelex import format_date
 
 from udata.models import db
-from udata.i18n import lazy_gettext as _, format_date
+from udata.i18n import lazy_gettext as _
 from udata.utils import to_bool
 
 

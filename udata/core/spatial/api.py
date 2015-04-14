@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask.ext.restplus import fields as base_fields
+
 from udata.api import api, API, fields
 
 from . import LEVELS
@@ -16,16 +18,16 @@ ns = api.namespace('spatial', 'Spatial references')
 
 @api.model(fields={
     'type': fields.String(description='The GeoJSON Type', required=True, enum=GEOM_TYPES),
-    'coordinates': fields.List(fields.Raw(), description='The geometry as coordinates lists', required=True),
+    'coordinates': fields.List(base_fields.Raw(), description='The geometry as coordinates lists', required=True),
 })
-class GeoJSON(fields.Raw):
+class GeoJSON(base_fields.Raw):
     pass
 
 feature_fields = api.model('GeoJSONFeature', {
     'id': fields.String,
     'type': fields.String(required=True, enum=['Feature']),
     'geometry': GeoJSON(required=True),
-    'properties': fields.Raw,
+    'properties': base_fields.Raw,
 })
 
 feature_collection_fields = api.model('GeoJSONFeatureCollection', {
@@ -64,8 +66,8 @@ territory_suggestion_fields = api.model('TerritorySuggestion', {
     'name': fields.String(description='The territory name', required=True),
     'code': fields.String(description='The territory main code', required=True),
     'level': fields.String(description='The territory administrative level', required=True),
-    'keys': fields.Raw(description='The territory known codes'),
-    'score': fields.Float(description='The internal match score', required=True),
+    'keys': base_fields.Raw(description='The territory known codes'),
+    'score': base_fields.Float(description='The internal match score', required=True),
 })
 
 

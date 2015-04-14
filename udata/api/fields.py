@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import logging
 
 from flask import request, url_for
-from flask.ext.restplus.fields import *
+from flask.ext.restplus.fields import Integer, List, Nested, String
 
 
 log = logging.getLogger(__name__)

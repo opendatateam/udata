@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask.ext.wtf import Form
+from wtforms import validators
+
 from udata.auth import current_user
-from udata.forms import Form, ModelForm, UserModelForm, fields, validators
+from udata.forms import ModelForm, UserModelForm, fields
 from udata.i18n import lazy_gettext as _
 
 from .models import Organization, MembershipRequest, Member, LOGO_SIZES
