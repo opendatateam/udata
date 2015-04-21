@@ -11,6 +11,7 @@ from uuid import UUID
 from werkzeug.datastructures import FileStorage
 
 from udata import fileutils, search
+from udata.auth import admin_permission
 from udata.api import api, fields, ModelAPI, SingleObjectAPI, API
 from udata.core import storages
 from udata.core.issues.api import IssuesAPI
@@ -74,8 +75,8 @@ class DatasetAPI(ModelAPI):
 class DatasetFeaturedAPI(SingleObjectAPI, API):
     model = Dataset
 
-    @api.secure
-    @api.doc(id='feature_dataset')
+    @api.secure(admin_permission)
+    @api.doc('feature_dataset')
     @api.marshal_with(dataset_fields)
     def post(self, dataset):
         '''Mark the dataset as featured'''
@@ -83,8 +84,8 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
         dataset.save()
         return dataset
 
-    @api.secure
-    @api.doc(id='unfeature_reuse')
+    @api.secure(admin_permission)
+    @api.doc('unfeature_reuse')
     @api.marshal_with(dataset_fields)
     def delete(self, dataset):
         '''Unmark the dataset as featured'''

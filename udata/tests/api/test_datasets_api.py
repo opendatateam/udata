@@ -8,7 +8,7 @@ from flask import url_for
 from udata.models import Dataset, Follow, FollowDataset, Member
 
 from . import APITestCase
-from ..factories import DatasetFactory, ResourceFactory, OrganizationFactory, faker
+from ..factories import DatasetFactory, ResourceFactory, OrganizationFactory, AdminFactory, faker
 
 
 class DatasetAPITest(APITestCase):
@@ -139,11 +139,10 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_feature(self):
         '''It should mark the dataset featured on POST'''
+        self.login(AdminFactory())
         dataset = DatasetFactory(featured=False)
 
-        with self.api_user():
-            response = self.post(url_for('api.dataset_featured', dataset=dataset))
-
+        response = self.post(url_for('api.dataset_featured', dataset=dataset))
         self.assert200(response)
 
         dataset.reload()
@@ -151,11 +150,10 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_feature_already(self):
         '''It shouldn't do anything to feature an already featured dataset'''
+        self.login(AdminFactory())
         dataset = DatasetFactory(featured=True)
 
-        with self.api_user():
-            response = self.post(url_for('api.dataset_featured', dataset=dataset))
-
+        response = self.post(url_for('api.dataset_featured', dataset=dataset))
         self.assert200(response)
 
         dataset.reload()
@@ -163,11 +161,10 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_unfeature(self):
         '''It should unmark the dataset featured on POST'''
+        self.login(AdminFactory())
         dataset = DatasetFactory(featured=True)
 
-        with self.api_user():
-            response = self.delete(url_for('api.dataset_featured', dataset=dataset))
-
+        response = self.delete(url_for('api.dataset_featured', dataset=dataset))
         self.assert200(response)
 
         dataset.reload()
@@ -175,11 +172,10 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_unfeature_already(self):
         '''It shouldn't do anything to unfeature a not featured dataset'''
+        self.login(AdminFactory())
         dataset = DatasetFactory(featured=False)
 
-        with self.api_user():
-            response = self.delete(url_for('api.dataset_featured', dataset=dataset))
-
+        response = self.delete(url_for('api.dataset_featured', dataset=dataset))
         self.assert200(response)
 
         dataset.reload()
