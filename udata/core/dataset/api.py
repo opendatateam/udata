@@ -100,6 +100,7 @@ class ResourcesAPI(API):
     @api.marshal_with(resource_fields)
     def post(self, dataset):
         '''Create a new resource for a given dataset'''
+        DatasetEditPermission(dataset).test()
         form = api.validate(ResourceForm)
         resource = Resource()
         form.populate_obj(resource)
@@ -112,6 +113,7 @@ class ResourcesAPI(API):
     @api.marshal_with(resource_fields)
     def put(self, dataset):
         '''Reorder resources'''
+        DatasetEditPermission(dataset).test()
         new_resources = []
         for rid in request.json:
             resource = get_by(dataset.resources, 'id', UUID(rid))
@@ -133,6 +135,7 @@ class UploadResource(API):
     @api.marshal_with(upload_fields)
     def post(self, dataset):
         '''Upload a new resource'''
+        DatasetEditPermission(dataset).test()
         args = upload_parser.parse_args()
 
         storage = storages.resources
@@ -178,6 +181,7 @@ class ResourceAPI(API):
     @api.marshal_with(resource_fields)
     def put(self, dataset, rid):
         '''Update a given resource on a given dataset'''
+        DatasetEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
         form.populate_obj(resource)
@@ -189,6 +193,7 @@ class ResourceAPI(API):
     @api.doc('delete_resource')
     def delete(self, dataset, rid):
         '''Delete a given resource on a given dataset'''
+        DatasetEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         dataset.resources.remove(resource)
         dataset.save()

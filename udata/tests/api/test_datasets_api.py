@@ -113,21 +113,21 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_update(self):
         '''It should update a dataset from the API'''
-        dataset = DatasetFactory()
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
         data = dataset.to_dict()
         data['description'] = 'new description'
-        with self.api_user():
-            response = self.put(url_for('api.dataset', dataset=dataset), data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert200(response)
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, 'new description')
 
     def test_dataset_api_delete(self):
         '''It should delete a dataset from the API'''
+        user = self.login()
         with self.autoindex():
-            dataset = DatasetFactory(resources=[ResourceFactory()])
-            with self.api_user():
-                response = self.delete(url_for('api.dataset', dataset=dataset))
+            dataset = DatasetFactory(owner=user, resources=[ResourceFactory()])
+            response = self.delete(url_for('api.dataset', dataset=dataset))
 
         self.assertStatus(response, 204)
         self.assertEqual(Dataset.objects.count(), 1)
@@ -188,8 +188,8 @@ class DatasetAPITest(APITestCase):
 
 class DatasetResourceAPITest(APITestCase):
     def setUp(self):
-        self.dataset = DatasetFactory()
         self.login()
+        self.dataset = DatasetFactory(owner=self.user)
 
     def test_create(self):
         data = ResourceFactory.attributes()
