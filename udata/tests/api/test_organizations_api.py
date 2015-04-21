@@ -196,6 +196,41 @@ class MembershipAPITest(APITestCase):
 
         self.assertEqual(response.json, {'status': 404, 'message': 'Unknown membership request id'})
 
+    def test_update_member(self):
+        user = self.login()
+        updated_user = UserFactory()
+        organization = OrganizationFactory(members=[
+            Member(user=user, role='admin'),
+            Member(user=updated_user, role='editor')
+        ])
+
+        api_url = url_for('api.member', org=organization, user=updated_user)
+        response = self.put(api_url, {'role': 'admin'})
+
+        print response.json
+        self.assert200(response)
+
+        self.assertEqual(response.json['role'], 'admin')
+
+        organization.reload()
+        self.assertTrue(organization.is_member(updated_user))
+        self.assertTrue(organization.is_admin(updated_user))
+
+    def test_delete_member(self):
+        user = self.login()
+        deleted_user = UserFactory()
+        organization = OrganizationFactory(members=[
+            Member(user=user, role='admin'),
+            Member(user=deleted_user, role='editor')
+        ])
+
+        api_url = url_for('api.member', org=organization, user=deleted_user)
+        response = self.delete(api_url)
+        self.assert204(response)
+
+        organization.reload()
+        self.assertFalse(organization.is_member(deleted_user))
+
     def test_follow_org(self):
         '''It should follow an organization on POST'''
         user = self.login()

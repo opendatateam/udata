@@ -5,7 +5,7 @@ from udata.auth import current_user
 from udata.forms import Form, ModelForm, UserModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
-from .models import Organization, MembershipRequest, Member, LOGO_SIZES
+from .models import Organization, MembershipRequest, Member, LOGO_SIZES, ORG_ROLES
 
 __all__ = (
     'OrganizationForm',
@@ -65,3 +65,10 @@ class MembershipRequestForm(UserModelForm):
 
 class MembershipRefuseForm(Form):
     comment = fields.StringField(_('Comment'), [validators.required()])
+
+
+class MemberForm(ModelForm):
+    model_class = Member
+
+    role = fields.SelectField(_('Role'), default='editor', choices=ORG_ROLES.items(),
+        validators=[validators.required()])

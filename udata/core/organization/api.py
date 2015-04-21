@@ -10,7 +10,7 @@ from udata.api import api, ModelAPI, ModelListAPI, API
 from udata.auth import current_user
 from udata.core.followers.api import FollowAPI
 
-from .forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm
+from .forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm, MemberForm
 from .models import Organization, MembershipRequest, Member, FollowOrg
 from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 from .tasks import notify_membership_request, notify_membership_response
@@ -150,6 +150,34 @@ class MembershipRefuseAPI(MembershipAPI):
         notify_membership_response.delay(org, membership_request)
 
         return {}, 200
+
+
+@ns.route('/<org:org>/member/<user:user>', endpoint='member', doc=common_doc)
+class MemberAPI(API):
+    @api.secure
+    @api.marshal_with(member_fields)
+    @api.doc('update_organization_member', responses={403: 'Not Authorized'})
+    def put(self, org, user):
+        '''Update member status into a given organization.'''
+        EditOrganizationPermission(org).test()
+        member = org.member(user)
+        form = api.validate(MemberForm, member)
+        form.populate_obj(member)
+        org.save()
+
+        return member
+
+    @api.secure
+    @api.doc('delete_organization_member', responses={403: 'Not Authorized'})
+    def delete(self, org, user):
+        '''Delete member from an organization'''
+        EditOrganizationPermission(org).test()
+        member = org.member(user)
+        if member:
+            Organization.objects(id=org.id).update_one(pull__members=member)
+            return '', 204
+        else:
+            api.abort(404)
 
 
 @ns.route('/<id>/followers/', endpoint='organization_followers')
