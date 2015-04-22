@@ -3,5 +3,5 @@ honcho
 transifex-client
 -r test.pip
 -r report.pip
-Flask-DebugToolbar==0.9.2
+Flask-DebugToolbar==0.10.0
 wheel
