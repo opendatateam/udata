@@ -196,6 +196,43 @@ class MembershipAPITest(APITestCase):
 
         self.assertEqual(response.json, {'status': 404, 'message': 'Unknown membership request id'})
 
+    def test_create_member(self):
+        user = self.login()
+        added_user = UserFactory()
+        organization = OrganizationFactory(members=[
+            Member(user=user, role='admin'),
+        ])
+
+        api_url = url_for('api.member', org=organization, user=added_user)
+        response = self.post(api_url, {'role': 'admin'})
+
+        self.assert201(response)
+
+        self.assertEqual(response.json['role'], 'admin')
+
+        organization.reload()
+        self.assertTrue(organization.is_member(added_user))
+        self.assertTrue(organization.is_admin(added_user))
+
+    def test_create_member_exists(self):
+        user = self.login()
+        added_user = UserFactory()
+        organization = OrganizationFactory(members=[
+            Member(user=user, role='admin'),
+            Member(user=added_user, role='editor')
+        ])
+
+        api_url = url_for('api.member', org=organization, user=added_user)
+        response = self.post(api_url, {'role': 'admin'})
+
+        self.assertStatus(response, 409)
+
+        self.assertEqual(response.json['role'], 'editor')
+
+        organization.reload()
+        self.assertTrue(organization.is_member(added_user))
+        self.assertFalse(organization.is_admin(added_user))
+
     def test_update_member(self):
         user = self.login()
         updated_user = UserFactory()
@@ -207,7 +244,6 @@ class MembershipAPITest(APITestCase):
         api_url = url_for('api.member', org=organization, user=updated_user)
         response = self.put(api_url, {'role': 'admin'})
 
-        print response.json
         self.assert200(response)
 
         self.assertEqual(response.json['role'], 'admin')

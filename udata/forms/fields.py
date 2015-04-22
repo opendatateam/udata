@@ -406,8 +406,8 @@ class PublishAsField(FieldHelper, fields.HiddenField):
         return len(current_user.organizations) <= 0
 
     def process_formdata(self, valuelist):
-        if valuelist and valuelist[0].strip():
-            self.data = Organization.objects.get(id=ObjectId(valuelist[0].strip()))
+        if valuelist and len(valuelist) == 1:
+            self.data = Organization.objects.get(id=clean_oid(valuelist[0]))
 
     def populate_obj(self, obj, name):
         ret = super(PublishAsField, self).populate_obj(obj, name)

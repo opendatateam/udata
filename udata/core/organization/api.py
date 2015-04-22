@@ -155,6 +155,26 @@ class MembershipRefuseAPI(MembershipAPI):
 @ns.route('/<org:org>/member/<user:user>', endpoint='member', doc=common_doc)
 class MemberAPI(API):
     @api.secure
+    @api.expect(member_fields)
+    @api.marshal_with(member_fields, code=201)
+    @api.doc('create_organization_member')
+    @api.response(403, 'Not Authorized')
+    @api.response(409, 'User is already member', member_fields)
+    def post(self, org, user):
+        '''Add a member into a given organization.'''
+        EditOrganizationPermission(org).test()
+        if org.is_member(user):
+            return org.member(user), 409
+        member = Member(user=user)
+        form = api.validate(MemberForm, member)
+        form.populate_obj(member)
+        org.members.append(member)
+        org.save()
+
+        return member, 201
+
+    @api.secure
+    @api.expect(member_fields)
     @api.marshal_with(member_fields)
     @api.doc('update_organization_member', responses={403: 'Not Authorized'})
     def put(self, org, user):
