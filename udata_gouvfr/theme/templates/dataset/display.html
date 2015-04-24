@@ -353,12 +353,17 @@
                 </div>
 
                 {# Geospatial panel #}
-                {% if dataset.spatial.geom %}
+                {% if dataset.spatial %}
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <h3>{{ _('Spatial coverage') }}</h3>
-                        <div id="coverage-map" class="aside-map"
-                            data-geojson="{{dataset.spatial.geom|to_json}}"></div>
+                        {% if dataset.spatial.zones %}
+                            <div id="coverage-map" class="aside-map"
+                                data-zones="{{ url_for('api.zones', ids=dataset.spatial.zones) }}"></div>
+                        {% elif dataset.spatial.geom %}
+                            <div id="coverage-map" class="aside-map"
+                                data-geojson="{{dataset.spatial.geom|to_json}}"></div>
+                        {% endif %}
                     </div>
                 </div>
                 {% endif %}

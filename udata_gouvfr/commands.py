@@ -6,8 +6,6 @@ from os.path import exists
 from udata.commands import manager
 from udata.models import Organization
 
-from .tasks import geocode_territorial_coverage
-
 
 def certify_org(id_or_slug):
     organization = Organization.objects(slug=id_or_slug).first()
@@ -55,8 +53,3 @@ def uncertify(path_or_id):
                 uncertify_org(id_or_slug.strip())
     else:
         uncertify_org(path_or_id)
-
-
-@manager.command
-def comarquage_to_geo():
-    geocode_territorial_coverage()

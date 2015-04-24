@@ -13,7 +13,7 @@ import chardet
 from lxml import etree, html
 from voluptuous import Schema, Required, Optional, All, Any, Lower, In, Length, MultipleInvalid
 
-from udata.models import db, Dataset, License, Resource, Checksum, SpatialCoverage, Territory
+from udata.models import db, Dataset, License, Resource, Checksum, SpatialCoverage
 from udata.ext.harvest import backends
 from udata.ext.harvest.filters import boolean, email, to_date, taglist, force_list, normalize_string, is_url
 from udata.utils import get_by
@@ -22,16 +22,16 @@ from udata.utils import get_by
 log = logging.getLogger(__name__)
 
 GRANULARITIES = {
-    'commune': 'town',
+    'commune': 'fr/town',
     'france': 'country',
     'pays': 'country',
 }
 
 RE_NAME = re.compile(r'(\{(?P<url>.+)\})?(?P<name>.+)$')
 
-TERRITORIES = {
-    'country/fr': '54031e551efbbe1e260b5b53',
-    'country/monde': '54031fce1efbbe1e260b5d88',
+ZONES = {
+    'country/fr': 'country/fr',
+    'country/monde': 'country-group/world',
 }
 
 
@@ -91,7 +91,7 @@ schema = Schema({
         'temporal_coverage_from': None,
         'temporal_coverage_to': None,
         'territorial_coverage': {
-            'territorial_coverage_code': All(basestring, Lower, In(TERRITORIES.keys())),
+            'territorial_coverage_code': All(basestring, Lower, In(ZONES.keys())),
             'territorial_coverage_granularity': All(basestring, Lower, In(GRANULARITIES.keys())),
         },
         'title': basestring,
@@ -173,9 +173,7 @@ class MaafBackend(backends.BaseBackend):
                 dataset.spatial.granularity = GRANULARITIES.get(metadata['territorial_coverage_granularity'])
 
             if metadata.get('territorial_coverage_code'):
-                territory_id = TERRITORIES[metadata['territorial_coverage_code']]
-                territory = Territory.objects.get(id=territory_id)
-                dataset.spatial.territories = [territory.reference()]
+                dataset.spatial.zones = [ZONES[metadata['territorial_coverage_code']]]
 
         dataset.resources = []
         cle = get_by(metadata['resources'], 'format', 'cle')
