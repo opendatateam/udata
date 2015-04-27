@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import g, request, current_app
+from flask import g, request, current_app, send_from_directory, Blueprint
 from werkzeug.contrib.atom import AtomFeed
 from werkzeug.local import LocalProxy
 
 from udata import search, theme
-from udata.app import cache
 from udata.frontend import csv
 from udata.frontend.views import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
@@ -19,6 +18,7 @@ from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.reuse.csv import ReuseCsvAdapter
 
+noI18n = Blueprint('noI18n', __name__)
 blueprint = I18nBlueprint('site', __name__)
 
 
@@ -82,6 +82,11 @@ def home():
     context = {}
     processor = theme.current.get_processor('home', default_home_context_processor)
     return theme.render('home.html', **processor(context))
+
+
+@noI18n.route('/robots.txt')
+def static_from_root():
+    return send_from_directory(current_app.static_folder, request.path[1:])
 
 
 @blueprint.route('/map/')
