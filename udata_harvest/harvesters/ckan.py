@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import hashlib
 import requests
 import logging
 
@@ -9,10 +8,8 @@ from uuid import UUID
 from urlparse import urljoin
 from dateutil.parser import parse
 
-from flask.ext.security import current_user
-
-from udata.models import db, Dataset, Resource, Organization, Reuse, User, License, Member, SpatialCoverage
-from udata.models import Follow, FollowUser, FollowOrg, FollowDataset
+from udata.models import db, Dataset, Resource, Organization, Reuse, User, License, Member
+from udata.models import FollowOrg, FollowDataset
 from udata.utils import get_by, daterange_start, daterange_end
 
 from . import BaseBackend
@@ -24,7 +21,6 @@ from udata.ext.gouvfr.tasks import territorial_to_spatial
 log = logging.getLogger(__name__)
 
 # TODO: Transform as a task
-
 
 
 def any_field(data, *args):
