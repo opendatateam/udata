@@ -9,11 +9,11 @@ before_install:
   - echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
   - sudo apt-get update -qq
   - sudo apt-get install -y mongodb-org=2.6.7
-  - sudo /usr/share/elasticsearch/bin/plugin install elasticsearch/elasticsearch-analysis-icu/2.4.1
+  - travis_retry sudo /usr/share/elasticsearch/bin/plugin install elasticsearch/elasticsearch-analysis-icu/2.4.1
   - sudo service elasticsearch restart
   - mongo --version
 install:
-  - pip install -r requirements/travis.pip
+  - travis_retry pip install -r requirements/travis.pip
   - pip install --no-deps -e .
 script:
   - nosetests --with-coverage udata_harvest
