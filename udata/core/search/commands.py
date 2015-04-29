@@ -8,12 +8,11 @@ from datetime import date
 from flask import json
 from flask.ext.script import prompt_bool
 
-from udata.commands import manager
+from udata.commands import submanager
 from udata.search import es, adapter_catalog, ANALYSIS_JSON
 
 log = logging.getLogger(__name__)
 
-from udata.commands import submanager
 
 m = submanager('search',
     help='Search/Indexation related operations',
@@ -26,7 +25,7 @@ m = submanager('search',
 def reindex(name=None, doc_type=None):
     '''Reindex models'''
     for model, adapter in adapter_catalog.items():
-        if not doc_type or doc_type == adapter.doc_type():
+        if not doc_type or doc_type.lower() == adapter.doc_type().lower():
             log.info('Reindexing {0} objects'.format(model.__name__))
             if es.indices.exists_type(index=es.index_name, doc_type=adapter.doc_type()):
                 es.indices.delete_mapping(index=es.index_name, doc_type=adapter.doc_type())
@@ -42,11 +41,13 @@ def reindex(name=None, doc_type=None):
 
 @m.option('-n', '--name', default=None, help='Optionnal index name')
 @m.option('-d', '--delete', default=False, action='store_true', help='Delete previously aliased indices')
-def initialize(name=None, delete=False):
+@m.option('-f', '--force', default=False, action='store_true', help='Do not prompt on deletion')
+def init(name=None, delete=False, force=False):
+    '''Initialize or rebuild the search index'''
     index_name = name or '-'.join([es.index_name, date.today().isoformat()])
     log.info('Initiliazing index "{0}"'.format(index_name))
     if es.indices.exists(index_name):
-        if prompt_bool('Index {0} will be deleted, are you sure ?'.format(index_name)):
+        if force or prompt_bool('Index {0} will be deleted, are you sure ?'.format(index_name)):
             es.indices.delete(index_name)
         else:
             exit(-1)
@@ -70,10 +71,16 @@ def initialize(name=None, delete=False):
             except:
                 log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
 
-    log.info('Creating alias "{0}" index "{1}"'.format(es.index_name, index_name))
-    indices = es.indices.get_alias(name=es.index_name).keys()
-    es.indices.put_alias(index=index_name, name=es.index_name)
-    for index in indices:
-        es.indices.delete_alias(index=index, name=es.index_name)
-        if delete:
-            es.indices.delete(index=index)
+    log.info('Creating alias "{0}" on index "{1}"'.format(es.index_name, index_name))
+    if es.indices.exists_alias(name=es.index_name):
+        alias = es.indices.get_alias(name=es.index_name)
+        previous_indices = alias.keys()
+        if index_name not in previous_indices:
+            es.indices.put_alias(index=index_name, name=es.index_name)
+        for index in previous_indices:
+            if index != index_name:
+                es.indices.delete_alias(index=index, name=es.index_name)
+                if delete:
+                    es.indices.delete(index=index)
+    else:
+        es.indices.put_alias(index=index_name, name=es.index_name)
