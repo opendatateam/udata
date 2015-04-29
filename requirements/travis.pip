@@ -1,4 +1,4 @@
 -r https://raw.githubusercontent.com/etalab/udata/master/requirements/install.pip
 -r https://raw.githubusercontent.com/etalab/udata/master/requirements/test.pip
-https://raw.githubusercontent.com/etalab/udata/tarball/master
+https://github.com/etalab/udata/tarball/master
 coveralls
