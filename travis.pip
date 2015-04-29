@@ -1,5 +1,5 @@
 -r https://raw.githubusercontent.com/etalab/udata/master/requirements/install.pip
 -r https://raw.githubusercontent.com/etalab/udata/master/requirements/test.pip
-git+https://github.com/etalab/udata.git#egg=udata
-git+https://github.com/etalab/udata-cow.git#egg=udata-cow
+https://raw.githubusercontent.com/etalab/udata/tarball/master
+https://raw.githubusercontent.com/etalab/udata-harvest/tarball/master
 coveralls
