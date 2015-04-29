@@ -13,7 +13,7 @@ before_install:
   - sudo service elasticsearch restart
   - mongo --version
 install:
-  - pip install -r requirements/travis.pip
+  - travis_retry pip install -r requirements/travis.pip
   - pip install --no-deps -e .
 script:
   - nosetests --with-coverage udata
