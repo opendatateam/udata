@@ -89,11 +89,13 @@ def set_logging(app):
     handler.setFormatter(fmt)
 
     app.logger.setLevel(log_level)
+    app.logger.handlers = []
     app.logger.addHandler(handler)
 
     for name in app.config['PLUGINS']:
         logger = logging.getLogger('udata_{0}'.format(name))
         logger.setLevel(log_level)
+        logger.handlers = []
         logger.addHandler(handler)
 
     return app
