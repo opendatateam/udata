@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-04-22 11:38+0200\n"
+"POT-Creation-Date: 2015-04-28 10:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -190,7 +190,10 @@ msgstr ""
 msgid "The period covered by the data"
 msgstr ""
 
-#: udata/core/dataset/forms.py:28
+#: udata/core/dataset/forms.py:28 udata/forms/fields.py:345
+#: udata/templates/dataset/search-labels.html:16
+#: udata/templates/dataset/search-panel.html:13
+#: udata/templates/dataset/search-result.html:58
 msgid "Spatial coverage"
 msgstr ""
 
@@ -345,7 +348,7 @@ msgstr ""
 msgid "Remote file"
 msgstr ""
 
-#: udata/core/dataset/models.py:45 udata/core/reuse/models.py:19
+#: udata/core/dataset/models.py:45 udata/core/reuse/models.py:17
 msgid "API"
 msgstr ""
 
@@ -431,7 +434,7 @@ msgstr ""
 msgid "Advertising content"
 msgstr ""
 
-#: udata/core/issues/models.py:20 udata/core/spatial/models.py:22
+#: udata/core/issues/models.py:20 udata/core/spatial/models.py:16
 msgid "Other"
 msgstr ""
 
@@ -627,31 +630,35 @@ msgstr ""
 msgid "Used datasets"
 msgstr ""
 
-#: udata/core/reuse/models.py:20
+#: udata/core/reuse/models.py:18
 msgid "Application"
 msgstr ""
 
-#: udata/core/reuse/models.py:21
+#: udata/core/reuse/models.py:19
 msgid "Idea"
 msgstr ""
 
-#: udata/core/reuse/models.py:22
+#: udata/core/reuse/models.py:20
 msgid "News Article"
 msgstr ""
 
-#: udata/core/reuse/models.py:23
+#: udata/core/reuse/models.py:21
 msgid "Paper"
 msgstr ""
 
-#: udata/core/reuse/models.py:24
+#: udata/core/reuse/models.py:22
 msgid "Post"
 msgstr ""
 
-#: udata/core/reuse/models.py:25
+#: udata/core/reuse/models.py:23
 msgid "Visualization"
 msgstr ""
 
-#: udata/core/reuse/models.py:89 udata/templates/reuse/display.html:9
+#: udata/core/reuse/models.py:24
+msgid "Connected device"
+msgstr ""
+
+#: udata/core/reuse/models.py:88 udata/templates/reuse/display.html:9
 msgid "reuse"
 msgstr ""
 
@@ -723,44 +730,8 @@ msgstr ""
 msgid "Public services"
 msgstr ""
 
-#: udata/core/spatial/__init__.py:8
-msgid "Country group"
-msgstr ""
-
-#: udata/core/spatial/__init__.py:9 udata/core/spatial/models.py:21
-msgid "Country"
-msgstr ""
-
-#: udata/core/spatial/__init__.py:10
-msgid "Country subset"
-msgstr ""
-
-#: udata/core/spatial/models.py:14
-msgid "POI"
-msgstr ""
-
 #: udata/core/spatial/models.py:15
-msgid "Iris (Insee districts)"
-msgstr ""
-
-#: udata/core/spatial/models.py:16
-msgid "Town"
-msgstr ""
-
-#: udata/core/spatial/models.py:17
-msgid "Canton"
-msgstr ""
-
-#: udata/core/spatial/models.py:18
-msgid "Intermunicipal (EPCI)"
-msgstr ""
-
-#: udata/core/spatial/models.py:19
-msgid "County"
-msgstr ""
-
-#: udata/core/spatial/models.py:20
-msgid "Region"
+msgid "POI"
 msgstr ""
 
 #: udata/core/user/activities.py:28 udata/core/user/activities.py:50
@@ -835,34 +806,25 @@ msgstr ""
 msgid "Notifications"
 msgstr ""
 
-#: udata/forms/fields.py:258
+#: udata/forms/fields.py:254
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr ""
 
-#: udata/forms/fields.py:262
+#: udata/forms/fields.py:258
 #, python-format
 msgid "Tag \"%(tag)s\" must be alphanumeric characters or symbols: -_."
 msgstr ""
 
-#: udata/forms/fields.py:347 udata/templates/dataset/card.html:33
-#: udata/templates/dataset/display.html:254
-#: udata/templates/dataset/search-labels.html:16
-#: udata/templates/dataset/search-panel.html:13
-#: udata/templates/dataset/search-result.html:58
-msgid "Territorial coverage"
-msgstr ""
-
-#: udata/forms/fields.py:347
+#: udata/forms/fields.py:345
 msgid "A list of covered territories"
 msgstr ""
 
-#: udata/forms/fields.py:348 udata/templates/dataset/search-labels.html:19
-#: udata/templates/dataset/search-panel.html:14
-msgid "Territorial granularity"
+#: udata/forms/fields.py:346 udata/templates/dataset/search-labels.html:19
+msgid "Spatial granularity"
 msgstr ""
 
-#: udata/forms/fields.py:348
+#: udata/forms/fields.py:346
 msgid "The size of the data increment"
 msgstr ""
 
@@ -1189,6 +1151,10 @@ msgstr ""
 msgid "The identity of this public service public is certified by Etalab"
 msgstr ""
 
+#: udata/templates/dataset/card.html:33 udata/templates/dataset/display.html:254
+msgid "Territorial coverage"
+msgstr ""
+
 #: udata/templates/dataset/card.html:85 udata/templates/dataset/display.html:245
 #: udata/templates/dataset/search-result.html:69
 msgid "Territorial coverage granularity"
@@ -1371,6 +1337,10 @@ msgstr ""
 
 #: udata/templates/dataset/search-panel.html:11
 msgid "Licenses"
+msgstr ""
+
+#: udata/templates/dataset/search-panel.html:14
+msgid "Territorial granularity"
 msgstr ""
 
 #: udata/templates/dataset/search-panel.html:15

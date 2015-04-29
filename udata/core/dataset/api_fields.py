@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from udata.api import api, fields, base_reference
 from udata.core.organization.api_fields import org_ref_fields
-from udata.core.spatial.api import spatial_coverage_fields
+from udata.core.spatial.api_fields import spatial_coverage_fields
 
 from .models import UPDATE_FREQUENCIES, RESOURCE_TYPES, DEFAULT_FREQUENCY, CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE
 

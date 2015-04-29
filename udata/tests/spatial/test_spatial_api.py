@@ -1,66 +1,68 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from bson import ObjectId
 from flask import url_for
 
-from udata.core.spatial import register_level
 from udata.utils import get_by
 
-from udata.tests.factories import faker, TerritoryFactory, VisibleDatasetFactory, SpatialCoverageFactory
+from udata.tests.factories import faker, VisibleDatasetFactory, SpatialCoverageFactory, GeoZoneFactory, GeoLevelFactory
 from udata.tests.api import APITestCase
 
 
 class SpatialApiTest(APITestCase):
-    def test_reference_levels(self):
-        register_level('country', 'fake', 'Fake level')
+    def test_zones_api_one(self):
+        zone = GeoZoneFactory()
 
-        response = self.get(url_for('api.territory_levels'))
+        url = url_for('api.zones', ids=[zone.id])
+        response = self.get(url)
         self.assert200(response)
 
-    def test_reference_granularities(self):
-        response = self.get(url_for('api.spatial_granularities'))
+        self.assertEqual(len(response.json['features']), 1)
+
+        feature = response.json['features'][0]
+        self.assertEqual(feature['type'], 'Feature')
+        self.assertEqual(feature['geometry'], zone.geom)
+        self.assertEqual(feature['id'], zone.id)
+
+        properties = feature['properties']
+        self.assertEqual(properties['name'], zone.name)
+        self.assertEqual(properties['code'], zone.code)
+        self.assertEqual(properties['level'], zone.level)
+        self.assertEqual(properties['parents'], zone.parents)
+        self.assertEqual(properties['population'], zone.population)
+        self.assertEqual(properties['area'], zone.area)
+        self.assertEqual(properties['keys'], zone.keys)
+
+    def test_zones_api_many(self):
+        zones = [GeoZoneFactory() for _ in range(3)]
+
+        url = url_for('api.zones', ids=zones)
+        response = self.get(url)
         self.assert200(response)
 
-    def test_coverage_empty(self):
-        response = self.get(url_for('api.spatial_coverage', level='world'))
-        self.assert200(response)
-        self.assertEqual(response.json, {
-            'type': 'FeatureCollection',
-            'features': [],
-        })
+        self.assertEqual(len(response.json['features']), len(zones))
 
-    def test_coverage_for_level(self):
-        register_level('country', 'included', 'Included level')
-        included = [TerritoryFactory(level='included') for _ in range(2)]
-        excluded = [TerritoryFactory(level='country') for _ in range(2)]
-        [VisibleDatasetFactory(spatial=SpatialCoverageFactory(territories=[t.reference()])) for t in included]
-        [VisibleDatasetFactory(spatial=SpatialCoverageFactory(territories=[t.reference()])) for t in excluded]
-
-        response = self.get(url_for('api.spatial_coverage', level='included'))
-        self.assert200(response)
-        self.assertEqual(len(response.json['features']), 2)
-
-        for feature in response.json['features']:
+        for zone, feature in zip(zones, response.json['features']):
             self.assertEqual(feature['type'], 'Feature')
-
-            territory = get_by(included, 'id', ObjectId(feature['id']))
-            self.assertIsNotNone(territory)
-            self.assertEqual(feature['geometry'], territory.geom)
+            self.assertEqual(feature['geometry'], zone.geom)
+            self.assertEqual(feature['id'], zone.id)
 
             properties = feature['properties']
-            self.assertEqual(properties['name'], territory.name)
-            self.assertEqual(properties['code'], territory.code)
-            self.assertEqual(properties['level'], 'included')
-            self.assertEqual(properties['datasets'], 1)
+            self.assertEqual(properties['name'], zone.name)
+            self.assertEqual(properties['code'], zone.code)
+            self.assertEqual(properties['level'], zone.level)
+            self.assertEqual(properties['parents'], zone.parents)
+            self.assertEqual(properties['population'], zone.population)
+            self.assertEqual(properties['area'], zone.area)
+            self.assertEqual(properties['keys'], zone.keys)
 
-    def test_suggest_territory_on_name(self):
-        '''It should suggest territory based on its name'''
+    def test_suggest_zones_on_name(self):
+        '''It should suggest zones based on its name'''
         with self.autoindex():
             for i in range(4):
-                TerritoryFactory(name='test-{0}'.format(i) if i % 2 else faker.word())
+                GeoZoneFactory(name='test-{0}'.format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for('api.suggest_territories'), qs={'q': 'test', 'size': '5'})
+        response = self.get(url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -74,13 +76,13 @@ class SpatialApiTest(APITestCase):
             self.assertIsInstance(suggestion['keys'], dict)
             self.assertTrue(suggestion['name'].startswith('test'))
 
-    def test_suggest_territory_on_code(self):
-        '''It should suggest territory based on its code'''
+    def test_suggest_zones_on_code(self):
+        '''It should suggest zones based on its code'''
         with self.autoindex():
             for i in range(4):
-                TerritoryFactory(code='test-{0}'.format(i) if i % 2 else faker.word())
+                GeoZoneFactory(code='test-{0}'.format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for('api.suggest_territories'), qs={'q': 'test', 'size': '5'})
+        response = self.get(url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -94,16 +96,16 @@ class SpatialApiTest(APITestCase):
             self.assertIsInstance(suggestion['keys'], dict)
             self.assertTrue(suggestion['code'].startswith('test'))
 
-    def test_suggest_territory_on_extra_key(self):
-        '''It should suggest territory based on any key'''
+    def test_suggest_zones_on_extra_key(self):
+        '''It should suggest zones based on any key'''
         with self.autoindex():
             for i in range(4):
-                TerritoryFactory(
+                GeoZoneFactory(
                     name='in' if i % 2 else 'not-in',
                     keys={str(i): 'test-{0}'.format(i) if i % 2 else faker.word()}
                 )
 
-        response = self.get(url_for('api.suggest_territories'), qs={'q': 'test', 'size': '5'})
+        response = self.get(url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -117,19 +119,79 @@ class SpatialApiTest(APITestCase):
             self.assertIsInstance(suggestion['keys'], dict)
             self.assertEqual(suggestion['name'], 'in')
 
-    def test_suggest_territory_no_match(self):
-        '''It should not provide reuse suggestion if no match'''
+    def test_suggest_zones_no_match(self):
+        '''It should not provide zones suggestions if no match'''
         with self.autoindex():
             for i in range(3):
-                TerritoryFactory(name=5 * '{0}'.format(i), code=3 * '{0}'.format(i))
+                GeoZoneFactory(name=5 * '{0}'.format(i), code=3 * '{0}'.format(i))
 
-        response = self.get(url_for('api.suggest_territories'), qs={'q': 'xxxxxx', 'size': '5'})
+        response = self.get(url_for('api.suggest_zones'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
-    def test_suggest_territory_empty(self):
-        '''It should not provide reuse suggestion if no data'''
+    def test_suggest_zones_empty(self):
+        '''It should not provide zones suggestion if no data is present'''
         self.init_search()
-        response = self.get(url_for('api.suggest_territories'), qs={'q': 'xxxxxx', 'size': '5'})
+        response = self.get(url_for('api.suggest_zones'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
+
+    def test_spatial_levels(self):
+        levels = [GeoLevelFactory() for _ in range(3)]
+
+        response = self.get(url_for('api.spatial_levels'))
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(levels))
+
+    def test_spatial_granularities(self):
+        levels = [GeoLevelFactory() for _ in range(3)]
+
+        response = self.get(url_for('api.spatial_granularities'))
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(levels) + 2)
+
+    def test_coverage_empty(self):
+        GeoLevelFactory(id='top')
+        response = self.get(url_for('api.spatial_coverage', level='top'))
+        self.assert200(response)
+        self.assertEqual(response.json, {
+            'type': 'FeatureCollection',
+            'features': [],
+        })
+
+    def test_coverage_for_level(self):
+        GeoLevelFactory(id='top')
+        GeoLevelFactory(id='sub', parents=['top'])
+        GeoLevelFactory(id='child', parents=['sub'])
+
+        topzones, subzones, childzones = [], [], []
+        for _ in range(2):
+            zone = GeoZoneFactory(level='top')
+            topzones.append(zone)
+            for _ in range(2):
+                subzone = GeoZoneFactory(level='sub', parents=[zone.id])
+                subzones.append(subzone)
+                for _ in range(2):
+                    childzone = GeoZoneFactory(level='child', parents=[zone.id, subzone.id])
+                    childzones.append(childzone)
+
+        for zone in topzones + subzones + childzones:
+            VisibleDatasetFactory(spatial=SpatialCoverageFactory(zones=[zone.id]))
+
+        response = self.get(url_for('api.spatial_coverage', level='sub'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['features']), len(subzones))
+
+        for feature in response.json['features']:
+            self.assertEqual(feature['type'], 'Feature')
+
+            zone = get_by(subzones, 'id', feature['id'])
+            self.assertIsNotNone(zone)
+            self.assertEqual(feature['geometry'], zone.geom)
+
+            properties = feature['properties']
+            self.assertEqual(properties['name'], zone.name)
+            self.assertEqual(properties['code'], zone.code)
+            self.assertEqual(properties['level'], 'sub')
+            self.assertEqual(properties['datasets'], 3)  # Nested levels datasets should be counted
+

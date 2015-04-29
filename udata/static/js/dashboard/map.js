@@ -11,8 +11,6 @@ define([
     'use strict';
 
     var DEFAULTS = {
-            levels_url: '/references/spatial/levels/',
-            coverage_url: '/spatial/coverage/{level}/',
             style: {
                 clickable: true,
                 weight: 0.5,
@@ -21,10 +19,19 @@ define([
             },
             hover_style: {
                 fillOpacity: 0.8
-            },
-            attributions: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> / <a href="http://open.mapquest.com/">MapQuest</a>',
-            tilesUrl: 'http://otile{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png'
-        };
+            }
+        },
+        LEVELS_URL = '/spatial/levels',
+        COVERAGE_URL = '/spatial/coverage/{level}',
+        ATTRIBUTIONS = [
+            '&copy;',
+            '<a href="http://openstreetmap.org">OpenStreetMap</a>',
+            '/',
+            '<a href="http://open.mapquest.com/">MapQuest</a>'
+        ].join(' '),
+        TILES_PREFIX = location.protocol === 'https:' ? '//otile{s}-s' : '//otile{s}',
+        TILES_URL = TILES_PREFIX + '.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png',
+        TILES_CONFIG = {subdomains: '1234', attribution: ATTRIBUTIONS};
 
 
     if (!window.Spinner) { // Fix for leaflet.spin
@@ -55,7 +62,7 @@ define([
             log.debug('Loading coverage map');
             this.map = L.map(this.$el[0]);
             this.map.spin(true);
-            API.get(this.opts.levels_url, $.proxy(this.on_levels_loaded, this));
+            API.get(LEVELS_URL, $.proxy(this.on_levels_loaded, this));
         },
 
         on_levels_loaded: function(data) {
@@ -70,14 +77,11 @@ define([
                 level.layer = layer;
 
                 layer.level = level;
-                layers[level.label] = layer;
+                layers[level.name] = layer;
                 return level;
             }, this));
 
-            L.tileLayer(this.opts.tilesUrl, {
-                subdomains: '1234',
-                attribution: this.opts.attributions
-            }).addTo(this.map);
+            L.tileLayer(TILES_URL, TILES_CONFIG).addTo(this.map);
 
             L.control.layers(layers, null, {collapsed: false}).addTo(this.map);
             this.map.on('baselayerchange', $.proxy(function(ev) {
@@ -130,7 +134,7 @@ define([
         },
 
         layer_url: function(level) {
-            return this.opts.coverage_url.replace('{level}', level.id);
+            return COVERAGE_URL.replace('{level}', level.id);
         },
 
         /**

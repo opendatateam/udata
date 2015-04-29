@@ -57,17 +57,40 @@ class DatasetListAPI(API):
     def post(self):
         '''Create a new dataset'''
         form = api.validate(DatasetFullForm)
-        return form.save(), 201
+        dataset = form.save()
+        return dataset, 201
 
 
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)
-@api.doc(model=dataset_fields)
-@api.doc(get={'id': 'get_dataset'})
-@api.doc(put={'id': 'update_dataset'})
-class DatasetAPI(ModelAPI):
-    model = Dataset
-    form = DatasetForm
-    fields = dataset_fields
+@api.response(404, 'Dataset not found')
+class ModelAPI(SingleObjectAPI, API):
+    fields = None
+    form = None
+
+    @api.doc('get_dataset')
+    @api.marshal_with(dataset_fields)
+    def get(self, dataset):
+        '''Get a dataset given its identifier'''
+        return dataset
+
+    @api.secure
+    @api.doc('update_dataset')
+    @api.response(400, 'Validation error')
+    def put(self, dataset):
+        '''Update a dataset given its identifier'''
+        DatasetEditPermission(dataset).test()
+        form = api.validate(DatasetForm, dataset)
+        return form.save()
+
+    @api.secure
+    @api.doc('delete_dataset')
+    @api.response(204, 'Dataset deleted')
+    def delete(self, dataset):
+        '''Delete a dataset given its identifier'''
+        DatasetEditPermission(dataset).test()
+        dataset.deleted = datetime.now()
+        dataset.save()
+        return '', 204
 
 
 @ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')

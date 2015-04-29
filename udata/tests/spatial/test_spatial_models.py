@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.models import SpatialCoverage, TerritoryReference
-from udata.core.spatial import register_level
+from udata.models import SpatialCoverage
 from udata.tests import TestCase
+
+from ..factories import GeoZoneFactory, GeoLevelFactory
 
 
 class SpacialCoverageTest(TestCase):
@@ -12,17 +13,19 @@ class SpacialCoverageTest(TestCase):
         self.assertIsNone(coverage.top_label)
 
     def test_top_label_single(self):
-        territory = TerritoryReference(name='name', level='level', code='code')
-        coverage = SpatialCoverage(territories=[territory])
+        zone = GeoZoneFactory(name='name', level='level', code='code')
+        coverage = SpatialCoverage(zones=[zone])
         self.assertEqual(coverage.top_label, 'name')
 
     def test_geolabel_priority(self):
-        register_level('country', 'fake', 'Fake level')
+        GeoLevelFactory(id='top')
+        GeoLevelFactory(id='middle', parents=['top'])
+        GeoLevelFactory(id='bottom', parents=['middle'])
 
-        coverage = SpatialCoverage(territories=[
-            TerritoryReference(name='France', level='country', code='fr'),
-            TerritoryReference(name='Fake', level='fake', code='fake'),
-            TerritoryReference(name='Union Européenne', level='country-group', code='ue'),
-        ])
+        big = GeoZoneFactory(level='top')
+        medium = GeoZoneFactory(level='middle', parents=[big.id])
+        small = GeoZoneFactory(level='bottom', parents=[big.id, medium.id])
 
-        self.assertEqual(coverage.top_label, 'Union Européenne')
+        coverage = SpatialCoverage(zones=[small, medium, big])
+
+        self.assertEqual(coverage.top_label, big.name)

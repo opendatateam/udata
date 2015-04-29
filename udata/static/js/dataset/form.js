@@ -11,7 +11,7 @@ define([
     'form/widgets',
     'form/date-range-picker',
     'form/tag-completer',
-    'form/territory-completer'
+    'form/zone-completer'
 ], function($, modal, tpl, i18n, log, Forms) {
     "use strict";
 

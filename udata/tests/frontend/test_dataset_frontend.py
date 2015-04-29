@@ -2,8 +2,6 @@
 from __future__ import unicode_literals
 
 import mock
-import shutil
-import tempfile
 import feedparser
 
 from datetime import datetime

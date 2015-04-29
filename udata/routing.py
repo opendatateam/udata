@@ -5,7 +5,7 @@ from bson import ObjectId
 from uuid import UUID
 
 from flask import request
-from werkzeug.routing import BaseConverter, NotFound
+from werkzeug.routing import BaseConverter, NotFound, PathConverter
 
 from udata import models
 from udata.i18n import ISO_639_1_CODES
@@ -23,6 +23,14 @@ class ListConverter(BaseConverter):
 
     def to_url(self, values):
         return ','.join(super(ListConverter, self).to_url(value) for value in values)
+
+
+class PathListConverter(PathConverter):
+    def to_python(self, value):
+        return value.split(',')
+
+    def to_url(self, values):
+        return ','.join(super(PathListConverter, self).to_url(value) for value in values)
 
 
 class UUIDConverter(BaseConverter):
@@ -104,6 +112,7 @@ def init_app(app):
     app.before_request(lazy_raise_404)
     app.url_map.converters['lang'] = LanguagePrefixConverter
     app.url_map.converters['list'] = ListConverter
+    app.url_map.converters['pathlist'] = PathListConverter
     app.url_map.converters['uuid'] = UUIDConverter
     app.url_map.converters['dataset'] = DatasetConverter
     app.url_map.converters['org'] = OrganizationConverter

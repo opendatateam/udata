@@ -91,7 +91,6 @@ define([
     }
 
     function load_coverage_map() {
-        console.log('protocol', location.protocol);
         var $el = $('#coverage-map'),
             ATTRIBUTIONS = [
                 '&copy;',
@@ -109,7 +108,6 @@ define([
         }
 
         map = L.map($el[0], {zoomControl: false});
-        layer = L.geoJson($el.data('geojson'));
 
         // Disable drag and zoom handlers.
         map.dragging.disable();
@@ -121,6 +119,20 @@ define([
         if (map.tap) map.tap.disable();
 
         L.tileLayer(TILES_URL, TILES_CONFIG).addTo(map);
+
+        layer = L.geoJson();
+
+        if ($el.data('geojson')) {
+            loadJson(map, layer, $el.data('geojson'));
+        } else if ($el.data('zones')) {
+            $.get($el.data('zones'), function(data) {
+                loadJson(map, layer, data);
+            })
+        }
+    }
+
+    function loadJson(map, layer, data) {
+        layer.addData(data);
         layer.addTo(map);
         map.fitBounds(layer.getBounds());
     }

@@ -1,7 +1,7 @@
 <div class="territory-popup">
     <b>{{feature.properties.name}}</b>
     <br/>
-    <a href="/datasets?territory={{feature.id}}">
+    <a href="/datasets?geozone={{feature.id}}">
         {{_ 'n_datasets' count=feature.properties.datasets }}
     </a>
     {{#each children}}

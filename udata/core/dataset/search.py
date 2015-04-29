@@ -3,11 +3,14 @@ from __future__ import unicode_literals
 
 from udata.core.site.views import current_site
 
-from udata.models import Dataset, Organization, License, Territory, User, SPATIAL_GRANULARITIES
+
+from udata.models import Dataset, Organization, License, User, GeoZone
 from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
 from udata.search.fields import Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
 from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
 from udata.search.fields import BoolBooster, GaussDecay
+
+from udata.core.spatial.models import spatial_granularities, GeoZone
 
 # Metrics are require for dataset search
 from . import metrics  # noqa
@@ -17,6 +20,16 @@ __all__ = ('DatasetSearch', )
 
 max_reuses = lambda: max(current_site.metrics.get('max_dataset_reuses'), 10)
 max_followers = lambda: max(current_site.metrics.get('max_dataset_followers'), 10)
+
+
+def granularity_labelizer(label, value):
+    return dict(spatial_granularities).get(value, value)
+
+
+def zone_labelizer(label, value):
+    if isinstance(value, basestring):
+        return GeoZone.objects.get(id=value) or value
+    return value
 
 
 class DatasetSearch(ModelSearchAdapter):
@@ -76,11 +89,11 @@ class DatasetSearch(ModelSearchAdapter):
                     'end': {'type': 'long'},
                 }
             },
-            'territories': {
+            'geozones': {
                 'type': 'object',
-                'index_name': 'territories',
+                'index_name': 'geozones',
                 'properties': {
-                    'id': {'type': 'string'},
+                    'id': {'type': 'string', 'index': 'not_analyzed'},
                     'name': {'type': 'string'},
                     'code': {'type': 'string'},
                 }
@@ -99,7 +112,7 @@ class DatasetSearch(ModelSearchAdapter):
     fields = (
         'title^6',
         'tags^3',
-        'territories.name^3',
+        'geozones.name^3',
         'description',
         'code',
     )
@@ -117,8 +130,8 @@ class DatasetSearch(ModelSearchAdapter):
         'owner': ModelTermFacet('owner', User),
         'supplier': ModelTermFacet('supplier', Organization),
         'license': ModelTermFacet('license', License),
-        'territory': ModelTermFacet('territories.id', Territory),
-        'granularity': TermFacet('granularity', lambda l, v: SPATIAL_GRANULARITIES[v]),
+        'geozone': ModelTermFacet('geozones.id', GeoZone, zone_labelizer),
+        'granularity': TermFacet('granularity', granularity_labelizer),
         'format': TermFacet('resources.format'),
         'reuses': RangeFacet('metrics.reuses'),
         'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
@@ -191,8 +204,18 @@ class DatasetSearch(ModelSearchAdapter):
             })
 
         if dataset.spatial is not None:
+            # Index precise zone labels and parents zone identifiers to allow fast filtering
+            zones = GeoZone.objects(id__in=[z.id for z in dataset.spatial.zones])
+            parents = set()
+            geozones = []
+            for zone in zones:
+                geozones.append({'id': zone.id, 'name': zone.name, 'code': zone.code})
+                parents |= set(zone.parents)
+
+            geozones.extend([{'id': p} for p in parents])
+
             document.update({
-                'territories': [{'id': str(t.id), 'name': t.name, 'code': t.code} for t in dataset.spatial.territories],
+                'geozones': geozones,
                 # 'geom': dataset.spatial.geom,
                 'granularity': dataset.spatial.granularity,
             })

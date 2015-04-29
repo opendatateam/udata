@@ -41,7 +41,7 @@
         {{ checkbox(f) }}
         {% elif f.type == 'KeyValueField' %}
         {{ checkbox(f) }}
-        {% elif f.type == 'TagField' or f.type == 'TerritoryField' %}
+        {% elif f.type == 'TagField' or f.type == 'ZoneField' %}
         <div class="tag-container"></div>
         {{ f(class_='form-control') }}
         {% elif f.type == 'UploadableURLField' %}

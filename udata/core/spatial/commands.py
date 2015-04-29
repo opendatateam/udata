@@ -1,143 +1,85 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import re
+import contextlib
+import json
+import logging
+import lzma
+import tempfile
+import tarfile
+import shutil
 
-from glob import iglob
-from os.path import join, basename
+from os.path import join
+from urllib import urlretrieve
 
-import fiona
+from udata.commands import submanager
+from udata.models import GeoLevel, GeoZone
 
-from fiona.crs import to_string
-from shapely.geometry import shape, MultiPolygon
-from shapely.ops import cascaded_union
-
-from udata.commands import manager
-from udata.models import Territory
-
-
-EXTRACTORS = {}
-AGGREGATORS = []
+log = logging.getLogger(__name__)
 
 
-def territory_extractor(level, regex):
-    def wrapper(func):
-        compiled = re.compile(regex)
-        EXTRACTORS[compiled] = (level, func)
-        return func
-    return wrapper
+m = submanager('spatial',
+    help='Geospatial related operations',
+    description='Handle all geospatial related operations and maintenance'
+)
 
 
-def register_aggregate(level, code, name, territories):
-    AGGREGATORS.append((level, code, name, territories))
+@m.command
+def load(filename, drop=False):
+    '''Load a GeoZones Bundle'''
+    log.info('Extracting GeoZone bundle')
+    tmp = tempfile.mkdtemp()
 
+    if filename.startswith('http'):
+        log.info('Downloading GeoZones bundle: %s', filename)
+        filename, _ = urlretrieve(filename, join(tmp, 'geozones.tar.xz'))
 
-@territory_extractor('country', r'^TM_WORLD_BORDERS-')
-def extract_country(polygon):
-    '''
-    Extract a country information from single MultiPolygon.
-    Based on data from http://thematicmapping.org/downloads/world_borders.php
-    '''
-    props = polygon['properties']
-    code = props['ISO2'].lower()
-    name = 'Åland Islands' if code == 'ax' else props['NAME']  # Fix wrong character
-    keys = {
-        'iso2': code,
-        'iso3': props['ISO3'].lower(),
-        'un': props['UN'],
-        'fips': (props.get('FIPS', '') or '').lower() or None,
-    }
-    # return code, name.decode('cp1252'), keys
-    return code, name, keys
+    log.info('Extracting GeoZones bundle')
+    with contextlib.closing(lzma.LZMAFile(filename)) as xz:
+        with tarfile.open(fileobj=xz) as f:
+            f.extractall(tmp)
 
+    log.info('Loading GeoZones levels')
 
-def extract_shapefile(filename, level, extractor):
-    '''Extract territories from a given file for a given level with a given extractor function'''
-    imported = 0
+    if (drop):
+        log.info('Dropping existing levels')
+        GeoLevel.drop_collection()
 
-    with fiona.open('/', vfs='zip://{0}'.format(filename), encoding='utf8') as collection:
-        print 'Extracting {0} elements from {1} ({2} {3})'.format(
-            len(collection), basename(filename), collection.driver, to_string(collection.crs)
-        )
-
-        for polygon in collection:
-            try:
-                code, name, keys = extractor(polygon)
-                geom = shape(polygon['geometry'])
-                if geom.geom_type == 'Polygon':
-                    geom = MultiPolygon([geom])
-                elif geom.geom_type != 'MultiPolygon':
-                    print 'Unsupported geometry type "{0}" for "{1}"'.format(geom.geom_type, name)
-                    continue
-                territory, _ = Territory.objects.get_or_create(level=level, code=code, defaults={
-                    'geom': geom.__geo_interface__,
-                    'name': name,
-                    'keys': keys,
-                })
-                territory.geom = geom.__geo_interface__
-                territory.name = name
-                territory.keys = keys
-                territory.save()
-                imported += 1
-            except Exception as e:
-                print 'Error extracting polygon {0}: {1}'.format(polygon['properties'], e)
-
-    print 'Imported {0} territories for level {1} from file {2}'.format(imported, level, filename)
-    return imported
-
-
-def build_aggregate(level, code, name, territories):
-    print 'Building aggregate "{0}" (level={1}, code={2})'.format(name, level, code)
-    polygons = []
-    for tlevel, tcode in territories:
-        try:
-            territory = Territory.objects.get(level=tlevel, code=tcode)
-        except Territory.DoesNotExist:
-            print 'Territory {0}/{1} not found'.format(tlevel, tcode)
-            continue
-        if not shape(territory.geom).is_valid:
-            print 'Skipping invalid polygon for {0}'.format(territory.name)
-            continue
-        if shape(territory.geom).is_empty:
-            print 'Skipping empty polygon for {0}'.format(territory.name)
-            continue
-        polygons.append(territory.geom)
-
-    geom = cascaded_union([shape(p) for p in polygons])
-    if geom.geom_type == 'Polygon':
-        geom = MultiPolygon([geom])
-    try:
-        territory = Territory.objects.get(level=level, code=code)
-    except Territory.DoesNotExist:
-        territory = Territory(level=level, code=code)
-    territory.name = name
-    territory.geom = geom.__geo_interface__
-    territory.save()
-
-
-@manager.command
-def load_territories(folder, level=None):
-    '''Load territories from a folder of zip files containing shapefiles'''
+    log.info('Loading levels.json')
     total = 0
+    with open(join(tmp, 'levels.json')) as fp:
+        levels = json.load(fp)
 
-    for filename in iglob(join(folder, '*.zip')):
-        for regex, (file_level, extractor) in EXTRACTORS.items():
-            if level and file_level != level:
-                continue
-            if regex.match(basename(filename)):
-                print 'Found matching file for level {0}: {1}'.format(file_level, basename(filename))
-                total += extract_shapefile(filename, file_level, extractor)
-                print '-' * 80
+    for level in levels:
+        GeoLevel.objects.create(id=level['id'], name=level['label'], parents=level['parents'])
+        total += 1
+    log.info('Loaded {0} levels'.format(total))
 
-    if not level or level == 'aggregate':
-        for level, code, name, territories in AGGREGATORS:
-            build_aggregate(level, code, name, territories)
-            total += 1
-            print '-' * 80
+    if (drop):
+        log.info('Dropping existing spatial zones')
+        GeoZone.drop_collection()
 
-        # Special world Aggregate
-        build_aggregate('country-group', 'ww', 'World', [
-            ('country', code) for code in Territory.objects(level='country').distinct('code')
-        ])
+    log.info('Loading zones.json')
+    total = 0
+    with open(join(tmp, 'zones.json')) as fp:
+        geozones = json.load(fp)
 
-    print 'Done: Imported {0} territories'.format(total)
+    for zone in geozones['features']:
+        props = zone['properties']
+        GeoZone.objects.create(
+            id=zone['id'],
+            level=props['level'],
+            code=props['code'],
+            name=props['name'],
+            keys=props['keys'],
+            parents=props['parents'],
+            population=props.get('population'),
+            area=props.get('area'),
+            geom=zone['geometry']
+        )
+        total += 1
+
+    log.info('Loaded {0} zones'.format(total))
+
+    log.info('Cleaning temporary working directory')
+    shutil.rmtree(tmp)

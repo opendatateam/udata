@@ -9,7 +9,6 @@ from faker import Faker
 from faker.providers import BaseProvider
 
 from udata import models
-from udata.core.spatial import LEVELS
 
 faker = Faker()
 
@@ -219,14 +218,8 @@ class PostFactory(MongoEngineFactory):
         return ReuseFactory.create_batch(3)
 
 
-class TerritoryFactory(MongoEngineFactory):
-    class Meta:
-        model = models.Territory
-
-    level = factory.LazyAttribute(lambda o: faker.random_element(LEVELS.keys()))
-    name = factory.LazyAttribute(lambda o: faker.city())
-    code = factory.LazyAttribute(lambda o: faker.postcode())
-    geom = factory.LazyAttribute(lambda o: faker.multipolygon())
+def random_spatial_granularity(*args, **kwargs):
+    return faker.random_element([row[0] for row in models.spatial_granularities])
 
 
 class SpatialCoverageFactory(MongoEngineFactory):
@@ -234,9 +227,29 @@ class SpatialCoverageFactory(MongoEngineFactory):
         model = models.SpatialCoverage
 
     geom = factory.LazyAttribute(lambda o: faker.multipolygon())
+    granularity = factory.LazyAttribute(random_spatial_granularity)
 
 
 class TransferFactory(MongoEngineFactory):
     class Meta:
         model = models.Transfer
     comment = factory.LazyAttribute(lambda o: faker.sentence())
+
+
+class GeoZoneFactory(MongoEngineFactory):
+    class Meta:
+        model = models.GeoZone
+
+    id = factory.LazyAttribute(lambda o: '/'.join((o.level, o.code)))
+    level = factory.LazyAttribute(lambda o: faker.word())
+    name = factory.LazyAttribute(lambda o: faker.city())
+    code = factory.LazyAttribute(lambda o: faker.postcode())
+    geom = factory.LazyAttribute(lambda o: faker.multipolygon())
+
+
+class GeoLevelFactory(MongoEngineFactory):
+    class Meta:
+        model = models.GeoLevel
+
+    id = factory.LazyAttribute(lambda o: faker.word())
+    name = factory.LazyAttribute(lambda o: faker.name())

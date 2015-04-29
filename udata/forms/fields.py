@@ -15,16 +15,12 @@ from wtforms import Form as WTForm, Field, validators, fields
 from wtforms.fields import html5
 from wtforms.utils import unset_value
 
-from shapely.geometry import shape, MultiPolygon
-from shapely.ops import cascaded_union
-
 from . import widgets
 
 from .validators import RequiredIf, optional
 
 from udata.auth import current_user
-from udata.models import db, SpatialCoverage, Territory, SPATIAL_GRANULARITIES, Organization
-from udata.core.spatial import LEVELS
+from udata.models import db, SpatialCoverage, Organization, GeoZone, spatial_granularities
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
@@ -319,24 +315,26 @@ class UserField(StringField):
             self.data = None
 
 
-def level_key(territory):
-    return LEVELS[territory.level]['position']
-
-
-class TerritoriesField(StringField):
-    widget = widgets.TerritoryAutocompleter()
+class ZonesField(StringField):
+    widget = widgets.ZonesAutocompleter()
 
     def _value(self):
         if self.data:
-            return u','.join([str(t.id) for t in self.data])
+            return u','.join([z.id for z in self.data])
         else:
             return u''
 
     def process_formdata(self, valuelist):
         if valuelist:
             try:
-                ids = list(set([ObjectId(x.strip()) for x in valuelist[0].split(',') if x.strip()]))
-                self.data = Territory.objects.in_bulk(ids).values()
+                ids = list(set([x.strip() for x in valuelist[0].split(',') if x.strip()]))
+                zones = GeoZone.objects.in_bulk(ids)
+                if len(zones.keys()) != len(ids):
+                    non_existants = set(ids) - set(zones.keys())
+                    raise ValueError('Unknown zones: ' + ', '.join(non_existants))
+                self.data = zones.values()
+            except ValueError as e:
+                raise
             except Exception as e:
                 raise ValueError(str(e))
         else:
@@ -344,26 +342,9 @@ class TerritoriesField(StringField):
 
 
 class SpatialCoverageForm(WTForm):
-    territories = TerritoriesField(_('Territorial coverage'), description=_('A list of covered territories'))
-    granularity = SelectField(_('Territorial granularity'), description=_('The size of the data increment'),
-        choices=SPATIAL_GRANULARITIES.items(), default='other')
-
-    def populate_obj(self, obj):
-        super(SpatialCoverageForm, self).populate_obj(obj)
-        try:
-            territories = obj.territories
-            polygon = cascaded_union([shape(t.geom) for t in territories])
-            if polygon.geom_type == 'MultiPolygon':
-                geom = polygon.__geo_interface__
-            elif polygon.geom_type == 'Polygon':
-                geom = MultiPolygon([polygon]).__geo_interface__
-            else:
-                geom = None
-                # raise ValueError('Unsupported geometry type "{0}"'.format(polygon.geom_type))
-            obj.territories = [t.reference() for t in sorted(territories, key=level_key)]
-            obj.geom = geom
-        except Exception as e:
-            raise ValueError(str(e))
+    zones = ZonesField(_('Spatial coverage'), description=_('A list of covered territories'))
+    granularity = SelectField(_('Spatial granularity'), description=_('The size of the data increment'),
+        choices=lambda: spatial_granularities, default='other')
 
 
 class SpatialCoverageField(FieldHelper, fields.FormField):
@@ -406,7 +387,7 @@ class PublishAsField(FieldHelper, fields.HiddenField):
         return len(current_user.organizations) <= 0
 
     def process_formdata(self, valuelist):
-        if valuelist and len(valuelist) == 1:
+        if valuelist and len(valuelist) == 1 and valuelist[0]:
             self.data = Organization.objects.get(id=clean_oid(valuelist[0]))
 
     def populate_obj(self, obj, name):
