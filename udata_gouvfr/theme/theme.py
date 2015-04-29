@@ -45,15 +45,8 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
         Wikitem(_('Open Licence'), 'Licence_Ouverte_/_Open_Licence'),
         nav.Item(_('API'), 'api.root')
     ]),
-    nav.Item(_('Data'), 'datasets.list', items=[
-        nav.Item(_('Datasets'), 'datasets.list'),
-        nav.Item(_('Reuses'), 'reuses.list'),
-        nav.Item(_('Organizations'), 'organizations.list'),
-    ]),
-    nav.Item(_('Dashboard'), 'site.dashboard'),
+    nav.Item(_('Datasets'), 'datasets.list'),
     nav.Item('Dataconnexions', 'gouvfr.dataconnexions'),
-    nav.Item('Etalab', 'etalab', url='http://www.etalab.gouv.fr/'),
-    nav.Item('CADA', 'cada', url='http://cada.data.gouv.fr/'),
 ])
 
 theme.menu(gouvfr_menu)
@@ -71,6 +64,7 @@ NETWORK_LINKS = [
     ('Service-public.fr', 'http://www.service-public.fr'),
     ('Opendata France', 'http://opendatafrance.net'),
     ('CADA.fr', 'http://www.cada.fr'),
+    ('Etalab.gouv.fr', 'http://www.etalab.gouv.fr'),
 ]
 
 nav.Bar('gouvfr_network', [nav.Item(label, label, url=url) for label, url in NETWORK_LINKS])
