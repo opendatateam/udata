@@ -23,8 +23,6 @@ Compatibility
 
 udata requires Python 2.7+, MongoDB 2.6+, ElasticSearch 1.0+ and Redis.
 
-Geospatial features requires GDAL 1.8+ and GEOS 3.1+.
-
 
 Installation
 ============

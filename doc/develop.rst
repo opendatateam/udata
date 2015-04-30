@@ -28,7 +28,7 @@ The uData development environment requires the following system dependencies
 
 .. code-block:: shell
 
-    apt-get install build-essential python-dev python-virtualenv libjpeg-dev zlib1g-dev libpng12-dev libtiff5-dev libfreetype6-dev liblcms2-dev libopenjpeg-dev libwebp-dev libpng12-dev libxml2-dev libxslt1-dev
+    apt-get install build-essential python-dev python-virtualenv libjpeg-dev zlib1g-dev libpng12-dev libtiff5-dev libfreetype6-dev liblcms2-dev libopenjpeg-dev libwebp-dev libpng12-dev libxml2-dev libxslt1-dev liblzma-dev
 
 
 Python dependencies
@@ -36,7 +36,7 @@ Python dependencies
 
 It is recommanded to work within a virtualenv to ensure proper dependencies isolation.
 
-It is recommand to have a parent workspace where project are cloned, data stored...
+It is recommanded to have a parent workspace where project are cloned, data stored...
 It will be designated by ``$WORKSPACE`` until the end of the documentation.
 
 .. code-block:: shell
@@ -87,9 +87,9 @@ The docker way
 ~~~~~~~~~~~~~~
 
 This is the prefered method as it does not depends of version provided by your OS.
-You need to have docker installed and working for your user.
+You need to have Docker_ installed and working for your user.
 
-You need to install docker-compose:
+You need to `install docker-compose`_:
 
 .. code-block:: shell
 
@@ -106,7 +106,7 @@ A sample docker-compose.yml is provided in the udata repository.
 
 ElasticSearch requires the elasticsearch-icu-analysis to be able to sort
 on unicode strings.
-You need to look at the compatibility matric to find the corresponding version
+You need to look at the compatibility matrix to find the corresponding version
 on `the official documention <https://github.com/elastic/elasticsearch-analysis-icu>`_.
 At the time this doc is written, we use ElasticSearch 1.4.3 and ElasticSearch ICU Analysis 2.4.2
 
@@ -130,11 +130,12 @@ In case you prefer native packages, you must ensure a sufficient versionning:
 JavaScript dependencies
 -----------------------
 
-JavaScript dependencies are managed by bower and requires both bower and less to be installed globaly.
+JavaScript dependencies are managed by bower and requires
+bower, less and ugilfyjs to be installed globaly.
 
 .. code-block:: shell
 
-    $ sudo npm install -g bower less
+    $ sudo npm install -g bower less uglifyjs
 
 Then, to fetch the udata dependencies:
 
@@ -163,7 +164,7 @@ For developement purpose, you can use the ``manage.py`` launcher which provides 
     $ python udata/manage.py -?
 
 
-You can optionnaly specify a configuration file by eporting the UDATA_SETTINGS environment variable:
+You can optionnaly specify a configuration file by exporting the UDATA_SETTINGS environment variable:
 
 .. code-block:: shell
 
@@ -179,11 +180,10 @@ You need to initialize some data before starting udata.
 
 .. code-block:: shell
 
-    # Database and indexes initialization
-    $ udata initialize
+    # Initialize database, indexes...
+    $ udata init
     # Fetch and load licenses
-    $ wget https://www.data.gouv.fr/api/1/datasets/licenses -O licenses.json
-    $ udata licenses licenses.json
+    $ udata licenses https://www.data.gouv.fr/api/1/datasets/licenses
     $ cd $WORKSPACE/udata
     # Fetch last translations
     $ tx pull
@@ -239,3 +239,6 @@ In the udata directory, you can:
     # Run the tests
     $ inv test
 
+
+.. _Docker: https://www.docker.com/
+.. _install docker-compose: https://docs.docker.com/compose/install/

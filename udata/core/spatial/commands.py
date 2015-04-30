@@ -27,7 +27,6 @@ m = submanager('spatial',
 @m.command
 def load(filename, drop=False):
     '''Load a GeoZones Bundle'''
-    log.info('Extracting GeoZone bundle')
     tmp = tempfile.mkdtemp()
 
     if filename.startswith('http'):
