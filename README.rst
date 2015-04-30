@@ -2,14 +2,13 @@
 udata-harvest
 =============
 
-.. image:: https://secure.travis-ci.org/user/udata-harvest.png
-    :target: http://travis-ci.org/user/udata-harvest
-.. image:: https://coveralls.io/repos/user/udata-harvest/badge.png?branch=master
-    :target: https://coveralls.io/r/user/udata-harvest
-.. image:: https://pypip.in/v/udata-harvest/badge.png
-    :target: https://crate.io/packages/udata-harvest
-.. image:: https://pypip.in/d/udata-harvest/badge.png
-    :target: https://crate.io/packages/udata-harvest
+.. image:: https://secure.travis-ci.org/etalab/udata-harvest.png
+    :target: http://travis-ci.org/etalab/udata-harvest
+.. image:: https://coveralls.io/repos/etalab/udata-harvest/badge.png?branch=master
+    :target: https://coveralls.io/r/etalab/udata-harvest
+.. image:: https://requires.io/github/etalab/udata-harvest/requirements.png?branch=master
+    :target: https://requires.io/github/etalab/udata-harvest/requirements/?branch=master
+    :alt: Python Requirements Status
 
 uData remote repository harvesting support
 
