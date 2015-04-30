@@ -20,16 +20,6 @@ def redirect_datasets(dataset):
     return redirect(url_for('datasets.show', dataset=dataset))
 
 
-@blueprint.route('/DataSet/<legacy_id>')
-def redirect_datasets_v1(legacy_id):
-    '''Route legacy v1 datasets'''
-    with resource_stream(__name__, 'legacy-datasets.json') as f:
-        slug = json.load(f).get(legacy_id)
-    if not slug:
-        abort(404)
-    return redirect(url_for('datasets.show', dataset=slug))
-
-
 @blueprint.route('/organization/')
 def redirect_organizations_list():
     '''Route legacy CKAN organizations listing'''
