@@ -1,2 +1,4 @@
 User-agent: *
-Disallow:
+Disallow: /fr/users/
+Disallow: /en/users/
+Disallow: /es/users/

@@ -27,7 +27,13 @@ class SiteViewsTest(FrontTestCase):
     def test_render_robotstxt(self):
         '''It should render the robots.txt with all pages allowed.'''
         response = self.get('/robots.txt')
-        self.assertEqual(response.data, 'User-agent: *\nDisallow:\n')
+        self.assertEqual(response.data.split('\n'), [
+            u'User-agent: *',
+            u'Disallow: /fr/users/',
+            u'Disallow: /en/users/',
+            u'Disallow: /es/users/',
+            u''
+        ])
 
     def test_render_home(self):
         '''It should render the home page'''
