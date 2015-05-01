@@ -120,7 +120,17 @@ define([
 
         L.tileLayer(TILES_URL, TILES_CONFIG).addTo(map);
 
-        layer = L.geoJson();
+        layer = L.geoJson(null, {
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup(feature.properties.name);
+                layer.on("mouseover", function () {
+                    layer.openPopup();
+                });
+                layer.on("mouseout", function () {
+                    layer.closePopup();
+                });
+            }
+        });
 
         if ($el.data('geojson')) {
             loadJson(map, layer, $el.data('geojson'));
