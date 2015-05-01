@@ -67,7 +67,7 @@ class ReuseAPITest(APITestCase):
         org = OrganizationFactory()
         data['organization'] = str(org.id)
         response = self.post(url_for('api.reuses'), data)
-        self.assertStatus(response, 403)
+        self.assert400(response)
         self.assertEqual(Reuse.objects.count(), 0)
 
     def test_reuse_api_update(self):

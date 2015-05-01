@@ -55,8 +55,8 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_create(self):
         '''It should create a dataset from the API'''
         data = DatasetFactory.attributes()
-        with self.api_user():
-            response = self.post(url_for('api.datasets'), data)
+        self.login()
+        response = self.post(url_for('api.datasets'), data)
         self.assertStatus(response, 201)
         self.assertEqual(Dataset.objects.count(), 1)
 
@@ -71,7 +71,7 @@ class DatasetAPITest(APITestCase):
         member = Member(user=self.user, role='editor')
         org = OrganizationFactory(members=[member])
         data['organization'] = str(org.id)
-        # with self.api_user():
+
         response = self.post(url_for('api.datasets'), data)
         self.assertStatus(response, 201)
         self.assertEqual(Dataset.objects.count(), 1)
@@ -86,9 +86,8 @@ class DatasetAPITest(APITestCase):
         data = DatasetFactory.attributes()
         org = OrganizationFactory()
         data['organization'] = str(org.id)
-        # with self.api_user():
         response = self.post(url_for('api.datasets'), data)
-        self.assertStatus(response, 403)
+        self.assert400(response)
         self.assertEqual(Dataset.objects.count(), 0)
 
     def test_dataset_api_create_tags(self):

@@ -88,7 +88,7 @@ class DatasetBlueprintTest(FrontTestCase):
         self.login()
         response = self.post(url_for('datasets.new'), data)
 
-        self.assert403(response)
+        self.assert200(response)
         self.assertEqual(Dataset.objects.count(), 0)
 
     def test_render_display(self):

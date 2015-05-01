@@ -13,7 +13,7 @@ from udata.frontend.views import SearchView, DetailView, CreateView, EditView, S
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Reuse, Issue, FollowReuse, Dataset
 
-from .forms import ReuseForm, ReuseCreateForm, AddDatasetToReuseForm
+from .forms import ReuseForm, AddDatasetToReuseForm
 from .permissions import ReuseEditPermission
 from .tasks import notify_new_reuse
 
@@ -107,7 +107,7 @@ class ReuseDetailView(ReuseView, DetailView):
 @blueprint.route('/new/', endpoint='new')
 class ReuseCreateView(CreateView):
     model = Reuse
-    form = ReuseCreateForm
+    form = ReuseForm
     template_name = 'reuse/create.html'
 
     def initialize_form(self, form):
