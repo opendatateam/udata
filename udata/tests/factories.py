@@ -143,9 +143,6 @@ class DatasetFactory(MongoEngineFactory):
 
 
 class VisibleDatasetFactory(DatasetFactory):
-    # class Meta:
-    #     model = models.Dataset
-
     @factory.lazy_attribute
     def resources(self):
         return [ResourceFactory()]
@@ -173,7 +170,6 @@ class VisibleReuseFactory(ReuseFactory):
     @factory.lazy_attribute
     def datasets(self):
         return [DatasetFactory()]
-
 
 
 class LicenseFactory(MongoEngineFactory):
