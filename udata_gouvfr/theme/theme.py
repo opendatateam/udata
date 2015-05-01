@@ -21,9 +21,9 @@ RE_POST_IMG = re.compile(r'\<img .* src="https?:(?P<src>.+\.(?:png|jpg))" .* />(
 @theme.admin_form
 class GouvfrThemeForm(Form):
     tab_size = fields.IntegerField(_('Tab size'), description=_('Home page tab size'),
-        validators=[validators.required()])
+                                   validators=[validators.required()])
     atom_url = fields.StringField(_('ATOM Feed URL'),
-        description=_('An optionnal atom feed URL for display blog post in home page'))
+                                  description=_('An optionnal atom feed URL for display blog post in home page'))
 
 theme.defaults({
     'tab_size': 8,
@@ -45,17 +45,30 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
         Wikitem(_('Open Licence'), 'Licence_Ouverte_/_Open_Licence'),
         nav.Item(_('API'), 'api.root')
     ]),
-    nav.Item(_('Datasets'), 'datasets.list'),
+    nav.Item(_('Data'), 'datasets.list', items=[
+        nav.Item(_('Datasets'), 'datasets.list'),
+        nav.Item(_('Reuses'), 'reuses.list'),
+        nav.Item(_('Organizations'), 'organizations.list'),
+    ]),
+    nav.Item(_('Dashboard'), 'site.dashboard'),
     nav.Item('Dataconnexions', 'gouvfr.dataconnexions'),
+    nav.Item('Etalab', 'etalab', url='http://www.etalab.gouv.fr/'),
+    nav.Item('CADA', 'cada', url='http://cada.data.gouv.fr/'),
 ])
 
 theme.menu(gouvfr_menu)
 
-nav.Bar('gouvfr_footer', list(gouvfr_menu.items) + [
+nav.Bar('gouvfr_footer', [
+    Wikitem(_('FAQ'), 'FAQ'),
+    Wikitem(_('Publication guide'), 'Guide_de_publication'),
+    Wikitem(_('Tools'), 'Outillage_pour_les_datavisualisations'),
+    Wikitem(_('Open Licence'), 'Licence_Ouverte_/_Open_Licence'),
+    nav.Item(_('API'), 'api.root'),
+    nav.Item(_('Datasets'), 'datasets.list'),
+    nav.Item('Dataconnexions', 'gouvfr.dataconnexions'),
     nav.Item(_('Credits'), 'credits', url='//wiki.data.gouv.fr/wiki/Crédits'),
     nav.Item(_('Terms of use'), 'terms', url='//wiki.data.gouv.fr/wiki/Conditions_Générales_d\'Utilisation'),
 ])
-
 
 NETWORK_LINKS = [
     ('Gouvernement.fr', 'http://www.gouvernement.fr'),
