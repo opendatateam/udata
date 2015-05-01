@@ -1,5 +1,5 @@
 from functools import wraps
-from flask_sitemap import Sitemap, sitemap_page_needed
+from flask.ext.sitemap import Sitemap, sitemap_page_needed
 from flask.ext.cache import Cache
 
 from core.dataset.models import Dataset
@@ -7,11 +7,10 @@ from core.reuse.models import Reuse
 from core.organization.models import Organization
 from core.topic.models import Topic
 
-cache = Cache()
-sitemap = Sitemap()
-
 
 def init_app(app):
+    cache = Cache()
+    sitemap = Sitemap()
 
     @sitemap_page_needed.connect
     def create_page(app, page, urlset):
