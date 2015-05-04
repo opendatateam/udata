@@ -80,7 +80,215 @@
     "next_page": "http://{{config.SERVER_NAME}}/api/endpoint/?page=2",
     "previous_page": null
 }</code></pre>
-                </p>
+            </div>
+        </div>
+
+        <div class="page-header">
+            <h2>{{ _('Examples') }}</h2>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>{% trans %}All examples use the <a href="http://httpie.org">httpie</a> and <a href="http://stedolan.github.io/jq/">jq</a> utilities for readability purpose. You don't need to use these tools in your code though, they're just helpers to better understand the API.
+                {% endtrans %}</p>
+
+                <h3>{% trans %}Verifying that httpie is working{% endtrans %}</h3>
+
+                <p>{% trans %}Once httpie is installed, you can verify that it works as expected by typing that command in your shell:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http https://www.data.gouv.fr/api/1/organizations/?page_size=1</code></pre>
+
+                <p>{% trans %}It should return something in this vein:
+                {% endtrans %}</p>
+
+<pre><code class="json">
+HTTP/1.1 200 OK
+Access-Control-Allow-Credentials: true
+... LOTS OF HEADERS ...
+
+{
+    "data": [
+        {
+
+            ... LOTS OF DATA ...
+
+            "name": "Premier ministre",
+            "page": "https://www.data.gouv.fr/fr/organizations/premier-ministre/",
+            "slug": "premier-ministre",
+            "uri": "https://www.data.gouv.fr/api/1/organizations/premier-ministre/",
+            "url": null
+        }
+    ],
+    "next_page": "https://www.data.gouv.fr/api/1/organizations/?page=2&page_size=1",
+    "page": 1,
+    "page_size": 1,
+    "previous_page": null,
+    "total": 529
+}
+</code></pre>
+
+                <p>{% trans %}This is very verbose and we don't need all that information yet. That's why we use jq.
+                {% endtrans %}</p>
+
+                <h3>{% trans %}Verifying that jq is working{% endtrans %}</h3>
+
+                <p>{% trans %}Once jq is installed, you can verify that it works as expected by typing that command in your shell:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http https://www.data.gouv.fr/api/1/organizations/?page_size=1 | jq '.data[].name'</code></pre>
+
+                <p>{% trans %}It should return something in this vein:
+                {% endtrans %}</p>
+
+                <pre><code class="json">"Premier ministre"</code></pre>
+
+                <p>{% trans %}That's definitely better! Now that we're sure that it works as expected, let's shorten a bit the command line:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ export API="https://www.data.gouv.fr/api/1/"</code></pre>
+
+                <p>{% trans %}The previous command is now equivalent to the more readable (don't forget the quotes):
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http $API'organizations/?page_size=1' | jq '.data[].name'</code></pre>
+
+                <p>{% trans %}That's a good start, now let's dig into the API itself. We don't know it yet but we already fetched our first organization.
+                {% endtrans %}</p>
+
+
+                <h3>{% trans %}Browsing and retrieving data{% endtrans %}</h3>
+
+                <p>{% trans %}You can retrieve a list of organization (filtered or not) or a unique organization. When you reach an endpoint, the default page size is 20. Let's fetch the first 20 organization from the API:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http $API'organizations/' | jq '.data[].name'</code></pre>
+
+<pre><code class="json">
+"Premier ministre"
+"Eurostat"
+"Institut National de la Statistique et des Etudes Economiques (INSEE)"
+"Ministère de l'Intérieur"
+"Ministère des finances et des comptes publics"
+"Ministère de la Culture et de la Communication"
+"Education Nationale"
+"Institut National de l'Information Géographique et Forestière"
+"Ministère des Affaires sociales, de la Santé et des Droits des femmes"
+"Région Île-de-France"
+"Enseignement supérieur et Recherche"
+"Caisse nationale de l'assurance maladie des travailleurs salariés"
+"Mairie de Paris"
+"La Poste"
+"Etalab"
+"Ministère de l'Ecologie du Développement Durable et de l'Energie"
+"Ministère de l'Agriculture, de l'Agroalimentaire et de la Forêt"
+"Ministère des Affaires Etrangères et du Développement International (MAEDI)"
+"Ministère de la ville, de la jeunesse et des sports"
+"Ministère du travail, de l'emploi et du dialogue social"
+</code></pre>
+
+                <p>{% trans %}That list is great to have but what if we want to walk through returned organizations? Let's fetch the first 5 organizations URIs:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http $API'organizations/?page_size=5' | jq '.data[].uri'</code></pre>
+
+<pre><code class="json">
+"https://www.data.gouv.fr/api/1/organizations/premier-ministre/"
+"https://www.data.gouv.fr/api/1/organizations/eurostat/"
+"https://www.data.gouv.fr/api/1/organizations/institut-national-de-la-statistique-et-des-etudes-economiques-insee/"
+"https://www.data.gouv.fr/api/1/organizations/ministere-de-l-interieur/"
+"https://www.data.gouv.fr/api/1/organizations/ministere-des-finances-et-des-comptes-publics/"
+</code></pre>
+
+                <p>{% trans %}Now we'll be able to retrieve a unique organization thanks to the returned URI:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http $API'organizations/premier-ministre/' | jq '.'</code></pre>
+
+                <p>{% trans %}That's a lot of data to compute. Let's refine these data, if we want only metrics:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http $API'organizations/premier-ministre/' | jq '.metrics'</code></pre>
+
+<pre><code class="json">
+{
+  "dataset_views": 16345,
+  "datasets": 178,
+  "followers": 79,
+  "members": 16,
+  "nb_hits": 0,
+  "nb_uniq_visitors": 0,
+  "nb_visits": 0,
+  "permitted_reuses": 82,
+  "resource_downloads": 4316,
+  "reuse_views": 257,
+  "reuses": 3,
+  "views": 699
+}
+</code></pre>
+
+                <p>{% trans %}Or maybe just the name of the members of that organization:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http $API'organizations/premier-ministre/' | jq '.members[].user.last_name'</code></pre>
+
+<pre><code class="json">
+"Javelle"
+"Pelletier"
+"des victimes de spoliations"
+"Mestre"
+"BENVENUTO"
+""
+"Tales"
+"Saint-Aubin "
+"Biafora"
+"Cottin"
+"ROGER"
+"des retraites (Premier ministre)"
+"Modestine"
+"Roullier"
+"Roullier"
+"Chignard"
+</code></pre>
+
+                <p>{% trans %}It's really up-to-you to retrieve the data that matters to your project. Do not hesitate to go through the <a href="http://stedolan.github.io/jq/tutorial/">jq's tutorial</a> and <a href="http://stedolan.github.io/jq/manual/">manual</a> if you want to browse the API through the command-line in depth.
+                {% endtrans %}</p>
+
+
+                <h3>{% trans %}Modifying and deleting data{% endtrans %}</h3>
+
+                <p>{% trans %}Warning, you're entering a danger zone. Data modifications or deletions with the API are definitive and we don't provide any sandbox to test those prior executing (for now). Be aware of these responsibilities prior to use your great powers.
+                {% endtrans %}</p>
+
+                <p>{% trans %}If you try to modify a resource without an authentication token, a 401 will be returned:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http PUT $API'organizations/premier-ministre/'</code></pre>
+
+<pre><code class="json">
+HTTP/1.1 401 UNAUTHORIZED
+... LOTS OF HEADERS ...
+
+{
+    "message": "Unauthorized",
+    "status": 401
+}
+</code></pre>
+
+                <p>{% trans %}You need to specify your API Key (see above) and use the <code>X-API-KEY</code> HTTP header. If you try to modify a resource that you're not in control of, a 400 will be returned instead:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http PUT $API'organizations/premier-ministre/' X-API-KEY:your.api.key.here</code></pre>
+
+<pre><code class="json">
+HTTP/1.1 400 BAD REQUEST
+... LOTS OF HEADERS ...
+
+{
+    "message": "Bad Request",
+    "status": 400
+}
+</code></pre>
+
             </div>
         </div>
 
