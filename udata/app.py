@@ -97,7 +97,7 @@ class UDataJsonEncoder(json.JSONEncoder):
             return obj.isoformat()
         elif hasattr(obj, 'serialize'):
             return obj.serialize()
-        elif hasattr(obj, '_data'): # Serialize Raw data for Document and EmbeddedDocument
+        elif hasattr(obj, '_data'):  # Serialize Raw data for Document and EmbeddedDocument
             return obj._data
         return super(UDataJsonEncoder, self).default(obj)
 
@@ -156,7 +156,7 @@ def init_logging(app):
 
 
 def register_extensions(app):
-    from udata import models, routing, tasks, mail, i18n, auth, theme
+    from udata import models, routing, tasks, mail, i18n, auth, theme, search, sitemap
     i18n.init_app(app)
     models.init_app(app)
     routing.init_app(app)
@@ -167,7 +167,6 @@ def register_extensions(app):
     nav.init_app(app)
     theme.init_app(app)
     mail.init_app(app)
-
-    from udata import search
     search.init_app(app)
+    sitemap.init_app(app)
     return app
