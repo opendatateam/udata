@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from udata.auth import current_user
-from udata.forms import Form, ModelForm, UserModelForm, fields, validators
+from udata.forms import Form, ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
 from .models import Organization, MembershipRequest, Member, LOGO_SIZES, ORG_ROLES
@@ -56,10 +56,10 @@ class OrganizationExtraForm(Form):
     old_key = fields.StringField(_('Old key'))
 
 
-class MembershipRequestForm(UserModelForm):
+class MembershipRequestForm(ModelForm):
     model_class = MembershipRequest
-    user_field = 'user'
 
+    user = fields.CurrentUserField()
     comment = fields.StringField(_('Comment'), [validators.required()])
 
 

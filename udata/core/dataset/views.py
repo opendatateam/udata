@@ -18,7 +18,7 @@ from udata.models import Dataset, Resource, Reuse, Issue, Follow
 from udata.core import storages
 from udata.core.site.views import current_site
 
-from .forms import DatasetForm, DatasetCreateForm, ResourceForm, CommunityResourceForm, DatasetExtraForm
+from .forms import DatasetForm, ResourceForm, CommunityResourceForm, DatasetExtraForm
 from .permissions import CommunityResourceEditPermission, DatasetEditPermission
 
 blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
@@ -106,7 +106,7 @@ class DatasetDetailView(DatasetView, DetailView):
 @blueprint.route('/new/', endpoint='new')
 class DatasetCreateView(CreateView):
     model = Dataset
-    form = DatasetCreateForm
+    form = DatasetForm
     template_name = 'dataset/create.html'
 
     def get_success_url(self):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.forms import UserModelForm, fields, validators
+from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
 from .models import Topic
@@ -10,8 +10,10 @@ from .models import Topic
 __all__ = ('TopicForm', )
 
 
-class TopicForm(UserModelForm):
+class TopicForm(ModelForm):
     model_class = Topic
+
+    owner = fields.CurrentUserField()
 
     name = fields.StringField(_('Name'), [validators.required()])
     description = fields.MarkdownField(_('Description'), [validators.required()])

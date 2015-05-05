@@ -92,7 +92,7 @@ class ReuseBlueprintTest(FrontTestCase):
         self.login()
         response = self.post(url_for('reuses.new'), data)
 
-        self.assert403(response)
+        self.assert200(response)
         self.assertEqual(Reuse.objects.count(), 0)
 
     def test_create_url_exists(self):

@@ -17,7 +17,7 @@ from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
 
 from .api_fields import reuse_fields, reuse_page_fields, reuse_suggestion_fields, image_fields
-from .forms import ReuseForm, ReuseCreateForm
+from .forms import ReuseForm
 from .models import ReuseIssue, FollowReuse
 from .permissions import ReuseEditPermission
 from .search import ReuseSearch
@@ -43,7 +43,7 @@ class ReuseListAPI(API):
     @api.marshal_with(reuse_fields)
     def post(self):
         '''Create a new object'''
-        form = api.validate(ReuseCreateForm)
+        form = api.validate(ReuseForm)
         return form.save(), 201
 
 

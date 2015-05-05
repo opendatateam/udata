@@ -3,24 +3,19 @@ from __future__ import unicode_literals
 
 import re
 
-from bson import ObjectId, DBRef
 from dateutil.parser import parse
 
 from flask import url_for
 from flask.ext.mongoengine.wtf import fields as mefields
 from flask.ext.fs.mongo import ImageReference
-from werkzeug.datastructures import FileStorage
-from werkzeug.utils import secure_filename
-from wtforms import Form as WTForm, Field, validators, fields
+from wtforms import Form as WTForm, Field as WTField, validators, fields
 from wtforms.fields import html5
 from wtforms.utils import unset_value
 
 from . import widgets
 
-from .validators import RequiredIf, optional
-
-from udata.auth import current_user
-from udata.models import db, SpatialCoverage, Organization, GeoZone, spatial_granularities
+from udata.auth import current_user, admin_permission
+from udata.models import db, User, SpatialCoverage, Organization, GeoZone, spatial_granularities, Dataset, Reuse
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
@@ -56,6 +51,10 @@ class FieldHelper(object):
         if required is True:
             kwargs['required'] = required
         return super(FieldHelper, self).__call__(**kwargs)
+
+
+class Field(FieldHelper, WTField):
+    pass
 
 
 class EmptyNone(object):
@@ -118,7 +117,7 @@ class BBoxField(fields.HiddenField):
 
 class ImageForm(WTForm):
     filename = TmpFilename()
-    bbox = BBoxField(validators=[optional()])
+    bbox = BBoxField(validators=[validators.optional()])
 
 
 class ImageField(FieldHelper, fields.FormField):
@@ -259,15 +258,36 @@ class TagField(StringField):
                 raise validators.ValidationError(message)
 
 
-def clean_oid(oid):
-    if isinstance(oid, ObjectId):
-        return oid
-    elif (isinstance(oid, basestring)):
-        return ObjectId(oid)
-    elif (isinstance(oid, dict) and 'id' in oid):
-        return clean_oid(oid['id'])
+def clean_oid(oid, model):
+    if (isinstance(oid, dict) and 'id' in oid):
+        return clean_oid(oid['id'], model)
     else:
-        raise ValueError('Unsupported identifier: ' + oid)
+        try:
+            return model.id.to_python(oid)
+        except:  # Catch all exceptions as model.type is not predefined
+            raise ValueError('Unsupported identifier: ' + oid)
+
+
+class ModelField(object):
+    model = None
+
+    def __init__(self, *args, **kwargs):
+        self.model = kwargs.pop('model', self.model)
+        super(ModelField, self).__init__(*args, **kwargs)
+
+    def _value(self):
+        if self.data:
+            return unicode(self.data.id)
+        else:
+            return u''
+
+    def process_formdata(self, valuelist):
+        if valuelist and len(valuelist) == 1 and valuelist[0]:
+            try:
+                self.data = self.model.objects.get(id=clean_oid(valuelist[0], self.model))
+            except self.model.DoesNotExist:
+                message = _('{0} does not exists').format(self.model.__name__)
+                raise validators.ValidationError(message)
 
 
 class ModelList(object):
@@ -283,62 +303,37 @@ class ModelList(object):
         if not valuelist:
             return []
         if len(valuelist) > 1:
-            oids = [clean_oid(id) for id in valuelist]
+            oids = [clean_oid(id, self.model) for id in valuelist]
         elif isinstance(valuelist[0], basestring):
-            oids = [ObjectId(id.strip()) for id in valuelist[0].split(',') if id.strip()]
+            oids = [clean_oid(id, self.model) for id in valuelist[0].split(',')]
         else:
-            raise ValueError('Unsupported form parameter: ' + valuelist)
-        self.data = [DBRef(self.model.lower(), oid) for oid in oids]
+            raise validators.ValidationError('Unsupported form parameter: ' + valuelist)
+
+        objects = self.model.objects.in_bulk(oids)
+        if len(objects.keys()) != len(oids):
+            non_existants = set(oids) - set(objects.keys())
+            raise validators.ValidationError('Unknown identifiers: ' + ', '.join(non_existants))
+
+        self.data = [objects[id] for id in oids]
 
 
 class DatasetListField(ModelList, StringField):
-    model = 'dataset'
+    model = Dataset
     widget = widgets.DatasetAutocompleter()
 
 
 class ReuseListField(ModelList, StringField):
-    model = 'reuse'
+    model = Reuse
     widget = widgets.ReuseAutocompleter()
 
 
-class UserField(StringField):
-    def _value(self):
-        if self.data:
-            return unicode(self.data.id)
-        else:
-            return u''
-
-    def process_formdata(self, valuelist):
-        if valuelist:
-            self.data = DBRef('user', ObjectId(valuelist[0].strip()))
-        else:
-            self.data = None
+class UserField(ModelField, StringField):
+    model = User
 
 
-class ZonesField(StringField):
+class ZonesField(ModelList, StringField):
+    model = GeoZone
     widget = widgets.ZonesAutocompleter()
-
-    def _value(self):
-        if self.data:
-            return u','.join([z.id for z in self.data])
-        else:
-            return u''
-
-    def process_formdata(self, valuelist):
-        if valuelist:
-            try:
-                ids = list(set([x.strip() for x in valuelist[0].split(',') if x.strip()]))
-                zones = GeoZone.objects.in_bulk(ids)
-                if len(zones.keys()) != len(ids):
-                    non_existants = set(ids) - set(zones.keys())
-                    raise ValueError('Unknown zones: ' + ', '.join(non_existants))
-                self.data = zones.values()
-            except ValueError as e:
-                raise
-            except Exception as e:
-                raise ValueError(str(e))
-        else:
-            self.data = None
 
 
 class SpatialCoverageForm(WTForm):
@@ -381,24 +376,51 @@ class DateRangeField(FieldHelper, fields.StringField):
             self.data = None
 
 
-class PublishAsField(FieldHelper, fields.HiddenField):
+def default_owner():
+    '''Default to current_user if authenticated'''
+    if current_user.is_authenticated():
+        return current_user._get_current_object()
+
+
+class CurrentUserField(FieldHelper, ModelField, fields.HiddenField):
+    model = User
+
+    def __init__(self, *args, **kwargs):
+        default = kwargs.pop('default', default_owner)
+        super(CurrentUserField, self).__init__(default=default, *args, **kwargs)
+
+    def pre_validate(self, form):
+        if self.data:
+            if current_user.is_anonymous():
+                raise validators.ValidationError(_('You must be authenticated'))
+            elif not admin_permission and current_user.id != self.data.id:
+                raise validators.ValidationError(_('Permission denied you can only set yourself as owner'))
+        return True
+
+
+class PublishAsField(FieldHelper, ModelField, fields.HiddenField):
+    model = Organization
+    owner_field = 'owner'
+
+    def __init__(self, *args, **kwargs):
+        self.owner_field = kwargs.pop('owner_field', self.owner_field)
+        super(PublishAsField, self).__init__(*args, **kwargs)
+
     @property
     def hidden(self):
         return len(current_user.organizations) <= 0
 
-    def process_formdata(self, valuelist):
-        if valuelist and len(valuelist) == 1 and valuelist[0]:
-            self.data = Organization.objects.get(id=clean_oid(valuelist[0]))
-
-    def populate_obj(self, obj, name):
-        ret = super(PublishAsField, self).populate_obj(obj, name)
-        if hasattr(obj, 'owner') and obj.owner and getattr(obj, name):
-            obj.owner = None
-        return ret
-
     def pre_validate(self, form):
         if self.data:
-            OrganizationPrivatePermission(self.data).test()
+            if not current_user.is_authenticated():
+                raise validators.ValidationError(_('You must be authenticated'))
+            elif not OrganizationPrivatePermission(self.data).can():
+                raise validators.ValidationError(_("Permission denied for this organization"))
+            # Ensure either owner field or this field value is unset
+            if self.raw_data:
+                form._fields[self.owner_field].data = None
+            else:
+                self.data = None
         return True
 
 

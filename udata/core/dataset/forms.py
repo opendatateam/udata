@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.auth import current_user
-from udata.forms import Form, ModelForm, UserModelFormMixin, fields, validators, widgets
+from udata.forms import Form, ModelForm, fields, validators, widgets
 from udata.i18n import lazy_gettext as _
 
 from udata.core.storages import resources
 
 from .models import Dataset, Resource, License, Checksum, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_TYPES, CHECKSUM_TYPES
 
-__all__ = ('DatasetForm', 'DatasetCreateForm', 'ResourceForm', 'CommunityResourceForm', 'DatasetExtraForm')
+__all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm', 'DatasetExtraForm')
 
 
 class DatasetForm(ModelForm):
@@ -31,19 +30,8 @@ class DatasetForm(ModelForm):
     private = fields.BooleanField(_('Private'),
         description=_('Restrict the dataset visibility to you or your organization only.'))
 
-
-class DatasetCreateForm(DatasetForm):
+    owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_('Publish as'))
-
-    def save(self, commit=True, **kwargs):
-        dataset = super(DatasetCreateForm, self).save(commit=False, **kwargs)
-        if not dataset.organization:
-            dataset.owner = current_user._get_current_object()
-
-        if commit:
-            dataset.save()
-
-        return dataset
 
 
 class DatasetFullForm(DatasetForm):
@@ -90,15 +78,14 @@ class ResourceForm(ModelForm):
         description=_('Whether the resource is an uploaded file, a remote file or an API'))
     url = fields.UploadableURLField(_('URL'), [validators.required()], storage=resources)
     format = fields.StringField(_('Format'), widget=widgets.FormatAutocompleter())
-    # checksum = fields.FormField(ChecksumForm, _('Checksum'))
     checksum = ChecksumField(_('Checksum'))
     mime = fields.StringField(_('Mime type'),
         description=_('The mime type associated to the extension. (ex: text/plain)'))
     size = fields.IntegerField(_('Size'), [validators.optional()], description=_('The file size in bytes'))
 
 
-class CommunityResourceForm(UserModelFormMixin, ResourceForm):
-    pass
+class CommunityResourceForm(ResourceForm):
+    owner = fields.CurrentUserField()
 
 
 class DatasetExtraForm(Form):
