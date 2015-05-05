@@ -30,18 +30,22 @@
             <span class="badge">{{ reuses.total }}</span>
         </a>
     </li>
-    <li>
-        <a href="#organizations" data-toggle="tab">
-            {{ _('Organizations') }}
-            <span class="badge">{{ organizations.total }}</span>
-        </a>
-    </li>
-    <li>
-        <a href="#users" data-toggle="tab">
-            {{ _('Users') }}
-            <span class="badge">{{ users.total }}</span>
-        </a>
-    </li>
+    {% if organizations %}
+        <li>
+            <a href="#organizations" data-toggle="tab">
+                {{ _('Organizations') }}
+                <span class="badge">{{ organizations.total }}</span>
+            </a>
+        </li>
+    {% endif %}
+    {% if users %}
+        <li>
+            <a href="#users" data-toggle="tab">
+                {{ _('Users') }}
+                <span class="badge">{{ users.total }}</span>
+            </a>
+        </li>
+    {% endif %}
 </ul>
 <div class="label-list">{{ s.filter_label('tag', _('Tag'), ficon('tag')) }}</div>
 {% endblock %}
@@ -72,26 +76,30 @@
     followers=(_('Stars'), 'desc'),
 ) }}
 </div>
-<div class="btn-toolbar search-toolbar wrapper hide" data-tab="#organizations">
-{{ s.breadcrum_toolbar(organizations, url=organizations_search_url,
-    exports=(
-        (_('Organizations'), 'site.organizations_csv', 'csv'),
-    ),
-    name=( _('Name'), 'asc'),
-    datasets=(_('Datasets'), 'desc'),
-    reuses=(_('Reuses'), 'desc'),
-    followers=(_('Followers'), 'desc'),
-) }}
-</div>
-<div class="btn-toolbar search-toolbar wrapper hide" data-tab="#users">
-{{ s.breadcrum_toolbar(users, url=users_search_url,
-    last_name=( _('Last Name'), 'asc'),
-    first_name=( _('First Name'), 'asc'),
-    datasets=(_('Datasets'), 'desc'),
-    reuses=(_('Reuses'), 'desc'),
-    followers=(_('Followers'), 'desc')
-) }}
-</div>
+{% if organizations %}
+    <div class="btn-toolbar search-toolbar wrapper hide" data-tab="#organizations">
+    {{ s.breadcrum_toolbar(organizations, url=organizations_search_url,
+        exports=(
+            (_('Organizations'), 'site.organizations_csv', 'csv'),
+        ),
+        name=( _('Name'), 'asc'),
+        datasets=(_('Datasets'), 'desc'),
+        reuses=(_('Reuses'), 'desc'),
+        followers=(_('Followers'), 'desc'),
+    ) }}
+    </div>
+{% endif %}
+{% if users %}
+    <div class="btn-toolbar search-toolbar wrapper hide" data-tab="#users">
+    {{ s.breadcrum_toolbar(users, url=users_search_url,
+        last_name=( _('Last Name'), 'asc'),
+        first_name=( _('First Name'), 'asc'),
+        datasets=(_('Datasets'), 'desc'),
+        reuses=(_('Reuses'), 'desc'),
+        followers=(_('Followers'), 'desc')
+    ) }}
+    </div>
+{% endif %}
 {% endblock %}
 
 {% block main_content %}
