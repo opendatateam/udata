@@ -264,7 +264,7 @@ def clean_oid(oid, model):
     else:
         try:
             return model.id.to_python(oid)
-        except:
+        except:  # Catch all exceptions as model.type is not predefined
             raise ValueError('Unsupported identifier: ' + oid)
 
 
