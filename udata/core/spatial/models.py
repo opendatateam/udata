@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 from flask import g
 from werkzeug.local import LocalProxy
 
-from udata.i18n import lazy_gettext as _, gettext
+from udata.app import cache
+from udata.i18n import lazy_gettext as _, gettext, get_locale
 from udata.models import db
 
 
@@ -67,10 +68,13 @@ class GeoZone(db.Document):
         }
 
 
+@cache.memoize(timeout=50)
+def get_spatial_granularities_by_lang(lang):
+    return [(l.id, l.name) for l in GeoLevel.objects] + BASE_GRANULARITIES
+
+
 def get_spatial_granularities():
-    if getattr(g, 'spatial_granularities', None) is None:
-        g.spatial_granularities = [(l.id, l.name) for l in GeoLevel.objects] + BASE_GRANULARITIES
-    return g.spatial_granularities
+    return get_spatial_granularities_by_lang(get_locale())
 
 
 spatial_granularities = LocalProxy(get_spatial_granularities)
