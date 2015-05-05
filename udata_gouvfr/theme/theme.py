@@ -21,9 +21,9 @@ RE_POST_IMG = re.compile(r'\<img .* src="https?:(?P<src>.+\.(?:png|jpg))" .* />(
 @theme.admin_form
 class GouvfrThemeForm(Form):
     tab_size = fields.IntegerField(_('Tab size'), description=_('Home page tab size'),
-        validators=[validators.required()])
+                                   validators=[validators.required()])
     atom_url = fields.StringField(_('ATOM Feed URL'),
-        description=_('An optionnal atom feed URL for display blog post in home page'))
+                                  description=_('An optionnal atom feed URL for display blog post in home page'))
 
 theme.defaults({
     'tab_size': 8,
@@ -58,11 +58,17 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
 
 theme.menu(gouvfr_menu)
 
-nav.Bar('gouvfr_footer', list(gouvfr_menu.items) + [
+nav.Bar('gouvfr_footer', [
+    Wikitem(_('FAQ'), 'FAQ'),
+    Wikitem(_('Publication guide'), 'Guide_de_publication'),
+    Wikitem(_('Tools'), 'Outillage_pour_les_datavisualisations'),
+    Wikitem(_('Open Licence'), 'Licence_Ouverte_/_Open_Licence'),
+    nav.Item(_('API'), 'api.root'),
+    nav.Item(_('Datasets'), 'datasets.list'),
+    nav.Item('Dataconnexions', 'gouvfr.dataconnexions'),
     nav.Item(_('Credits'), 'credits', url='//wiki.data.gouv.fr/wiki/Crédits'),
     nav.Item(_('Terms of use'), 'terms', url='//wiki.data.gouv.fr/wiki/Conditions_Générales_d\'Utilisation'),
 ])
-
 
 NETWORK_LINKS = [
     ('Gouvernement.fr', 'http://www.gouvernement.fr'),
@@ -71,6 +77,7 @@ NETWORK_LINKS = [
     ('Service-public.fr', 'http://www.service-public.fr'),
     ('Opendata France', 'http://opendatafrance.net'),
     ('CADA.fr', 'http://www.cada.fr'),
+    ('Etalab.gouv.fr', 'http://www.etalab.gouv.fr'),
 ]
 
 nav.Bar('gouvfr_network', [nav.Item(label, label, url=url) for label, url in NETWORK_LINKS])
