@@ -69,15 +69,11 @@ class GeoZone(db.Document):
 
 
 @cache.memoize(timeout=50)
-def get_spatial_granularities_by_lang(lang):
+def get_spatial_granularities(lang):
     return [(l.id, l.name) for l in GeoLevel.objects] + BASE_GRANULARITIES
 
 
-def get_spatial_granularities():
-    return get_spatial_granularities_by_lang(get_locale())
-
-
-spatial_granularities = LocalProxy(get_spatial_granularities)
+spatial_granularities = LocalProxy(lambda: get_spatial_granularities(get_locale()))
 
 
 class SpatialCoverage(db.EmbeddedDocument):

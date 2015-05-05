@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from uuid import uuid4
+
 import factory
 
 from factory.fuzzy import FuzzyChoice
@@ -11,6 +13,12 @@ from faker.providers import BaseProvider
 from udata import models
 
 faker = Faker()
+
+
+def unique_string(length=None):
+    '''Generate unique string'''
+    string = str(uuid4())
+    return string[:length] if length else string
 
 
 class GeoJsonProvider(BaseProvider):
@@ -237,7 +245,7 @@ class GeoZoneFactory(MongoEngineFactory):
         model = models.GeoZone
 
     id = factory.LazyAttribute(lambda o: '/'.join((o.level, o.code)))
-    level = factory.LazyAttribute(lambda o: faker.word())
+    level = factory.LazyAttribute(lambda o: unique_string())
     name = factory.LazyAttribute(lambda o: faker.city())
     code = factory.LazyAttribute(lambda o: faker.postcode())
     geom = factory.LazyAttribute(lambda o: faker.multipolygon())
@@ -247,5 +255,5 @@ class GeoLevelFactory(MongoEngineFactory):
     class Meta:
         model = models.GeoLevel
 
-    id = factory.LazyAttribute(lambda o: faker.word())
+    id = factory.LazyAttribute(lambda o: unique_string())
     name = factory.LazyAttribute(lambda o: faker.name())
