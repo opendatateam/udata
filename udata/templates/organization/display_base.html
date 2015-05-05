@@ -67,6 +67,14 @@
                         </strong>
                     </p>
                     {% endif %}
+                    {% if org.metrics.permitted_reuses %}
+                    <p class="text-center">
+                        <strong>
+                        <a href="{{url_for('organizations.show', org=org)}}#reuses">
+                            {{ ngettext('%(num)d re-appropriation', '%(num)d re-appropriations', org.metrics.permitted_reuses or 0) }}
+                        </strong>
+                    </p>
+                    {% endif %}
                     <p class="text-center">
                         <strong>
                             <a href="{{url_for('organizations.dashboard', org=org)}}">

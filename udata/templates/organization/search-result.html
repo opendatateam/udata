@@ -36,6 +36,15 @@
                 </a>
             </li>
             {% endif %}
+            {% if organization.metrics.permitted_reuses %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Number of re-appropriations') }}">
+                    <span class="{{ ficon('fa-lightbulb-o') }} fa-fw"></span>
+                    {{ ngettext('%(num)s re-appropriation', '%(num)s re-appropriations', organization.metrics.permitted_reuses or 0) }}
+                </a>
+            </li>
+            {% endif %}
             {% if organization.metrics.stars %}
             <li>
                 <a class="btn btn-xs" rel="tooltip" data-placement="top"
