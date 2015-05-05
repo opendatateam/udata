@@ -13,15 +13,19 @@ from udata.utils import multi_to_dict
 def render_search():
     params = multi_to_dict(request.args)
     params['facets'] = True
-    datasets, organizations, reuses, users = search.multiquery(
+    search_queries = [
         search.SearchQuery(Dataset, **params),
-        search.SearchQuery(Organization, **params),
-        search.SearchQuery(Reuse, **params),
-        search.SearchQuery(User, **params),
-    )
+        search.SearchQuery(Reuse, **params)
+    ]
+    results_labels = ['datasets', 'reuses']
+    # We only fetch orgs and users if this is not a tag-based search
+    # because these resources do not have tags so it's irrelevant.
+    if 'tag' not in params:
+        search_queries += [
+            search.SearchQuery(Organization, **params),
+            search.SearchQuery(User, **params)
+        ]
+        results_labels += ['organizations', 'users']
+    results = search.multiquery(*search_queries)
     return theme.render('search.html',
-        datasets=datasets,
-        organizations=organizations,
-        reuses=reuses,
-        users=users
-    )
+                        **dict(zip(results_labels, results)))
