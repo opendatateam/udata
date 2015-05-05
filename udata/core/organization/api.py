@@ -3,12 +3,14 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
+from flask import request
 from werkzeug.datastructures import FileStorage
 
 from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, API
 from udata.auth import current_user
 from udata.core.followers.api import FollowAPI
+from udata.utils import multi_to_dict
 
 from .forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm, MemberForm
 from .models import Organization, MembershipRequest, Member, FollowOrg
@@ -33,22 +35,59 @@ common_doc = {
 
 
 @ns.route('/', endpoint='organizations')
-@api.doc(get={'id': 'list_organizations', 'model': org_page_fields, 'parser': search_parser})
-@api.doc(post={'id': 'create_organization', 'model': org_fields, 'body': org_fields})
-class OrganizationListAPI(ModelListAPI):
-    model = Organization
-    fields = org_fields
-    form = OrganizationForm
-    search_adapter = OrganizationSearch
+class OrganizationListAPI(API):
+    '''Organizations collection endpoint'''
+    @api.doc('list_organizations', parser=search_parser)
+    @api.marshal_with(org_page_fields)
+    def get(self):
+        '''List or search all organizations'''
+        return search.query(OrganizationSearch, **multi_to_dict(request.args))
+
+    @api.secure
+    @api.doc('create_organization', responses={400: 'Validation error'})
+    @api.expect(org_fields)
+    @api.marshal_with(org_fields)
+    def post(self):
+        '''Create a new organization'''
+        form = api.validate(OrganizationForm)
+        organization = form.save()
+        return organization, 201
 
 
 @ns.route('/<org:org>/', endpoint='organization', doc=common_doc)
-@api.doc(model=org_fields, get={'id': 'get_organization'})
-@api.doc(put={'id': 'update_organization', 'body': org_fields})
-class OrganizationAPI(ModelAPI):
-    model = Organization
-    fields = org_fields
-    form = OrganizationForm
+@api.response(404, 'Organization not found')
+@api.response(410, 'Organization has been deleted')
+class OrganizationAPI(API):
+    @api.doc('get_organization')
+    @api.marshal_with(org_fields)
+    def get(self, org):
+        '''Get a organization given its identifier'''
+        if org.deleted:
+            api.abort(410, 'Organization has been deleted')
+        return org
+
+    @api.secure
+    @api.doc('update_organization')
+    @api.response(400, 'Validation error')
+    def put(self, org):
+        '''Update a organization given its identifier'''
+        if org.deleted:
+            api.abort(410, 'Organization has been deleted')
+        EditOrganizationPermission(org).test()
+        form = api.validate(OrganizationForm, org)
+        return form.save()
+
+    @api.secure
+    @api.doc('delete_organization')
+    @api.response(204, 'Organization deleted')
+    def delete(self, org):
+        '''Delete a organization given its identifier'''
+        if org.deleted:
+            api.abort(410, 'Organization has been deleted')
+        EditOrganizationPermission(org).test()
+        org.deleted = datetime.now()
+        org.save()
+        return '', 204
 
 
 requests_parser = api.parser()

@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import StringIO
 
+from datetime import datetime
+
 from flask import url_for
 
 from udata.frontend import csv
@@ -60,6 +62,12 @@ class OrganizationBlueprintTest(FrontTestCase):
         organization = OrganizationFactory()
         response = self.get(url_for('organizations.show', org=organization))
         self.assert200(response)
+
+    def test_render_display_if_deleted(self):
+        '''It should not render the organization page if deleted'''
+        organization = OrganizationFactory(deleted=datetime.now())
+        response = self.get(url_for('organizations.show', org=organization))
+        self.assertStatus(response, 410)
 
     def test_render_display_with_datasets(self):
         '''It should render the organization page with some datasets'''

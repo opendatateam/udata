@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
+
 from flask import url_for
 
 from udata.models import Reuse, FollowReuse, Follow, Member
@@ -24,6 +26,12 @@ class ReuseAPITest(APITestCase):
         reuse = ReuseFactory()
         response = self.get(url_for('api.reuse', reuse=reuse))
         self.assert200(response)
+
+    def test_reuse_api_get_deleted(self):
+        '''It should not fetch a deleted reuse from the API and raise 410'''
+        reuse = ReuseFactory(deleted=datetime.now())
+        response = self.get(url_for('api.reuse', reuse=reuse))
+        self.assertStatus(response, 410)
 
     def test_reuse_api_create(self):
         '''It should create a reuse from the API'''
@@ -73,15 +81,28 @@ class ReuseAPITest(APITestCase):
         self.assertEqual(Reuse.objects.count(), 1)
         self.assertEqual(Reuse.objects.first().description, 'new description')
 
+    def test_reuse_api_update_deleted(self):
+        '''It should not update a deleted reuse from the API and raise 410'''
+        self.login()
+        reuse = ReuseFactory(deleted=datetime.now())
+        response = self.put(url_for('api.reuse', reuse=reuse), {})
+        self.assertStatus(response, 410)
+
     def test_reuse_api_delete(self):
         '''It should delete a reuse from the API'''
         self.login()
         reuse = ReuseFactory(owner=self.user)
-        with self.api_user():
-            response = self.delete(url_for('api.reuse', reuse=reuse))
+        response = self.delete(url_for('api.reuse', reuse=reuse))
         self.assertStatus(response, 204)
         self.assertEqual(Reuse.objects.count(), 1)
         self.assertIsNotNone(Reuse.objects[0].deleted)
+
+    def test_reuse_api_delete_deleted(self):
+        '''It should not delete a deleted reuse from the API and raise 410'''
+        self.login()
+        reuse = ReuseFactory(deleted=datetime.now())
+        response = self.delete(url_for('api.reuse', reuse=reuse))
+        self.assertStatus(response, 410)
 
     def test_reuse_api_feature(self):
         '''It should mark the reuse featured on POST'''

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
+
 from flask import url_for
 
 from udata.models import Organization, Member, MembershipRequest, Follow, FollowOrg
@@ -30,6 +32,12 @@ class OrganizationAPITest(APITestCase):
         response = self.get(url_for('api.organization', org=organization))
         self.assert200(response)
 
+    def test_organization_api_get_deleted(self):
+        '''It should not fetch a deleted organization from the API'''
+        organization = OrganizationFactory(deleted=datetime.now())
+        response = self.get(url_for('api.organization', org=organization))
+        self.assertStatus(response, 410)
+
     def test_organization_api_create(self):
         '''It should create an organization from the API'''
         data = OrganizationFactory.attributes()
@@ -45,23 +53,73 @@ class OrganizationAPITest(APITestCase):
 
     def test_dataset_api_update(self):
         '''It should update an organization from the API'''
-        org = OrganizationFactory()
+        self.login()
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
         data = org.to_dict()
         data['description'] = 'new description'
-        self.login()
         response = self.put(url_for('api.organization', org=org), data)
         self.assert200(response)
         self.assertEqual(Organization.objects.count(), 1)
         self.assertEqual(Organization.objects.first().description, 'new description')
 
+    def test_dataset_api_update_deleted(self):
+        '''It should not update a deleted organization from the API'''
+        org = OrganizationFactory(deleted=datetime.now())
+        data = org.to_dict()
+        data['description'] = 'new description'
+        self.login()
+        response = self.put(url_for('api.organization', org=org), data)
+        self.assertStatus(response, 410)
+        self.assertEqual(Organization.objects.first().description, org.description)
+
+    def test_dataset_api_update_forbidden(self):
+        '''It should not update an organization from the API if not admin'''
+        org = OrganizationFactory()
+        data = org.to_dict()
+        data['description'] = 'new description'
+        self.login()
+        response = self.put(url_for('api.organization', org=org), data)
+        self.assert403(response)
+        self.assertEqual(Organization.objects.count(), 1)
+        self.assertEqual(Organization.objects.first().description, org.description)
+
     def test_organization_api_delete(self):
         '''It should delete an organization from the API'''
-        organization = OrganizationFactory()
-        with self.api_user():
-            response = self.delete(url_for('api.organization', org=organization))
+        self.login()
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        response = self.delete(url_for('api.organization', org=org))
         self.assertStatus(response, 204)
         self.assertEqual(Organization.objects.count(), 1)
         self.assertIsNotNone(Organization.objects[0].deleted)
+
+    def test_organization_api_delete_deleted(self):
+        '''It should not delete a deleted organization from the API'''
+        self.login()
+        organization = OrganizationFactory(deleted=datetime.now())
+        response = self.delete(url_for('api.organization', org=organization))
+        self.assertStatus(response, 410)
+        self.assertIsNotNone(Organization.objects[0].deleted)
+
+    def test_organization_api_delete_as_editor_forbidden(self):
+        '''It should not delete an organization from the API if not admin'''
+        self.login()
+        member = Member(user=self.user, role='editor')
+        org = OrganizationFactory(members=[member])
+        response = self.delete(url_for('api.organization', org=org))
+        self.assert403(response)
+        self.assertEqual(Organization.objects.count(), 1)
+        self.assertIsNone(Organization.objects[0].deleted)
+
+    def test_organization_api_delete_as_non_member_forbidden(self):
+        '''It should delete an organization from the API if not member'''
+        self.login()
+        org = OrganizationFactory()
+        response = self.delete(url_for('api.organization', org=org))
+        self.assert403(response)
+        self.assertEqual(Organization.objects.count(), 1)
+        self.assertIsNone(Organization.objects[0].deleted)
 
     # def test_organization_api_delete_not_found(self):
     #     '''It should raise a 404 on delete from the API if not found'''

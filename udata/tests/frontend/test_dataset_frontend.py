@@ -103,6 +103,12 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.get(url_for('datasets.show', dataset=dataset))
         self.assert404(response)
 
+    def test_raise_410_if_deleted(self):
+        '''It should raise a 410 if the dataset is deleted'''
+        dataset = DatasetFactory(deleted=datetime.now())
+        response = self.get(url_for('datasets.show', dataset=dataset))
+        self.assertStatus(response, 410)
+
     def test_render_edit(self):
         '''It should render the dataset edit form'''
         user = self.login()

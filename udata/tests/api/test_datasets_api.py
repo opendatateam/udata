@@ -3,12 +3,14 @@ from __future__ import unicode_literals
 
 import json
 
+from datetime import datetime
+
 from flask import url_for
 
 from udata.models import Dataset, Follow, FollowDataset, Member
 
 from . import APITestCase
-from ..factories import DatasetFactory, ResourceFactory, OrganizationFactory, AdminFactory, faker
+from ..factories import DatasetFactory, ResourceFactory, OrganizationFactory, AdminFactory, VisibleDatasetFactory, faker
 
 
 class DatasetAPITest(APITestCase):
@@ -42,6 +44,13 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         data = json.loads(response.data)
         self.assertEqual(len(data['resources']), len(resources))
+
+    def test_dataset_api_get_deleted(self):
+        '''It should not fetch a deleted dataset from the API and raise 410'''
+        dataset = VisibleDatasetFactory(owner=self.user, deleted=datetime.now())
+
+        response = self.get(url_for('api.dataset', dataset=dataset))
+        self.assertStatus(response, 410)
 
     def test_dataset_api_create(self):
         '''It should create a dataset from the API'''
@@ -122,6 +131,17 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, 'new description')
 
+    def test_dataset_api_update_deleted(self):
+        '''It should not update a deleted dataset from the API and raise 401'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user, deleted=datetime.now())
+        data = dataset.to_dict()
+        data['description'] = 'new description'
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assertStatus(response, 410)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().description, dataset.description)
+
     def test_dataset_api_delete(self):
         '''It should delete a dataset from the API'''
         user = self.login()
@@ -136,6 +156,14 @@ class DatasetAPITest(APITestCase):
         response = self.get(url_for('api.datasets'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 0)
+
+    def test_dataset_api_delete_deleted(self):
+        '''It should delete a deleted dataset from the API and raise 410'''
+        user = self.login()
+        dataset = VisibleDatasetFactory(owner=user, deleted=datetime.now())
+        response = self.delete(url_for('api.dataset', dataset=dataset))
+
+        self.assertStatus(response, 410)
 
     def test_dataset_api_feature(self):
         '''It should mark the dataset featured on POST'''

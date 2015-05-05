@@ -17,6 +17,11 @@ def page_not_found(error):
     return theme.render('errors/404.html', error=error), 404
 
 
+@front.app_errorhandler(410)
+def page_deleted(error):
+    return theme.render('errors/410.html', error=error), 410
+
+
 @front.app_errorhandler(500)
 def internal_error(error):
     return theme.render('errors/500.html', error=error), 500

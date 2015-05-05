@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
+
 import feedparser
 
 from flask import url_for
@@ -115,6 +117,12 @@ class ReuseBlueprintTest(FrontTestCase):
         reuse = ReuseFactory(private=True)
         response = self.get(url_for('reuses.show', reuse=reuse))
         self.assert404(response)
+
+    def test_raise_410_if_deleted(self):
+        '''It should raise a 410 if the reuse is deleted'''
+        reuse = ReuseFactory(deleted=datetime.now())
+        response = self.get(url_for('reuses.show', reuse=reuse))
+        self.assertStatus(response, 410)
 
     def test_render_edit(self):
         '''It should render the reuse edit form'''

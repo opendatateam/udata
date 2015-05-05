@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from flask import request, g, jsonify, redirect, url_for
+from flask import request, g, jsonify, redirect, url_for, abort
 from flask.ext.security import current_user
 
 from udata import search
@@ -80,13 +80,16 @@ class OrganizationDetailView(OrgView, DetailView):
     def get_context(self):
         context = super(OrganizationDetailView, self).get_context()
 
+        can_edit = EditOrganizationPermission(self.organization)
+        can_view = OrganizationPrivatePermission(self.organization)
+
+        if self.organization.deleted and not can_view.can():
+            abort(410)
+
         datasets = Dataset.objects(organization=self.organization).visible().order_by('-created')
         supplied_datasets = Dataset.objects(supplier=self.organization).visible().order_by('-created')
         reuses = Reuse.objects(organization=self.organization).visible().order_by('-created')
         followers = FollowOrg.objects.followers(self.organization).order_by('follower.fullname')
-
-        can_edit = EditOrganizationPermission(self.organization)
-        can_view = OrganizationPrivatePermission(self.organization)
         context.update({
             'reuses': reuses.paginate(1, self.page_size),
             'datasets': datasets.paginate(1, self.page_size),

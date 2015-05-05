@@ -91,6 +91,9 @@ class ReuseDetailView(ReuseView, DetailView):
         if self.reuse.private and not ReuseEditPermission(self.reuse).can():
             abort(404)
 
+        if self.reuse.deleted and not ReuseEditPermission(self.reuse).can():
+            abort(410)
+
         followers = FollowReuse.objects.followers(self.reuse).order_by('follower.fullname')
 
         context.update(

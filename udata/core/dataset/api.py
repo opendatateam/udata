@@ -63,14 +63,14 @@ class DatasetListAPI(API):
 
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)
 @api.response(404, 'Dataset not found')
-class ModelAPI(SingleObjectAPI, API):
-    fields = None
-    form = None
-
+@api.response(410, 'Dataset has been deleted')
+class DatasetAPI(API):
     @api.doc('get_dataset')
     @api.marshal_with(dataset_fields)
     def get(self, dataset):
         '''Get a dataset given its identifier'''
+        if dataset.deleted:
+            api.abort(410, 'Dataset has been deleted')
         return dataset
 
     @api.secure
@@ -78,6 +78,8 @@ class ModelAPI(SingleObjectAPI, API):
     @api.response(400, 'Validation error')
     def put(self, dataset):
         '''Update a dataset given its identifier'''
+        if dataset.deleted:
+            api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
         form = api.validate(DatasetForm, dataset)
         return form.save()
@@ -87,6 +89,8 @@ class ModelAPI(SingleObjectAPI, API):
     @api.response(204, 'Dataset deleted')
     def delete(self, dataset):
         '''Delete a dataset given its identifier'''
+        if dataset.deleted:
+            api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
         dataset.deleted = datetime.now()
         dataset.save()

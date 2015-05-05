@@ -47,13 +47,16 @@ class ReuseListAPI(API):
         return form.save(), 201
 
 
-@ns.route('/<reuse:reuse>/', endpoint='reuse')
-@api.doc(responses={404: 'Object not found'}, **common_doc)
+@ns.route('/<reuse:reuse>/', endpoint='reuse', doc=common_doc)
+@api.response(404, 'Reuse not found')
+@api.response(410, 'Reuse has been deleted')
 class ReuseAPI(ModelAPI):
     @api.doc('get_reuse')
     @api.marshal_with(reuse_fields)
     def get(self, reuse):
         '''Fetch a given reuse'''
+        if reuse.deleted and not ReuseEditPermission(reuse).can():
+            api.abort(410, 'This reuse has been deleted')
         return reuse
 
     @api.secure
@@ -62,14 +65,19 @@ class ReuseAPI(ModelAPI):
     @api.marshal_with(reuse_fields)
     def put(self, reuse):
         '''Update a given reuse'''
+        if reuse.deleted:
+            api.abort(410, 'This reuse has been deleted')
         ReuseEditPermission(reuse).test()
         form = api.validate(ReuseForm, reuse)
         return form.save()
 
     @api.secure
-    @api.doc('delete_reuse', responses={204: 'Reuse deleted'})
+    @api.doc('delete_reuse')
+    @api.response(204, 'Reuse deleted')
     def delete(self, reuse):
         '''Delete a given reuse'''
+        if reuse.deleted:
+            api.abort(410, 'This reuse has been deleted')
         ReuseEditPermission(reuse).test()
         reuse.deleted = datetime.now()
         reuse.save()
