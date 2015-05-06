@@ -2,11 +2,11 @@
 udata-admin
 ===========
 
-.. image:: https://secure.travis-ci.org/user/udata-admin.png
-    :target: http://travis-ci.org/user/udata-admin
+.. image:: https://secure.travis-ci.org/etalab/udata-admin.png
+    :target: http://travis-ci.org/etalab/udata-admin
     :alt: Build Status
-.. image:: https://coveralls.io/repos/user/udata-admin/badge.png?branch=master
-    :target: https://coveralls.io/r/user/udata-admin
+.. image:: https://coveralls.io/repos/etalab/udata-admin/badge.png?branch=master
+    :target: https://coveralls.io/r/etalab/udata-admin
     :alt: Coverage report
 .. image:: https://requires.io/github/etalab/udata-admin/requirements.png?branch=master
     :target: https://requires.io/github/etalab/udata-admin/requirements/?branch=master
