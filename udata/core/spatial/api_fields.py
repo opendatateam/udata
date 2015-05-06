@@ -51,7 +51,7 @@ granularity_fields = api.model('GeoGranularity', {
 spatial_coverage_fields = api.model('SpatialCoverage', {
     'geom': fields.Nested(geojson, allow_null=True, description='A multipolygon for the whole coverage'),
     'zones': fields.List(fields.String, description='The covered zones identifiers'),
-    'granularity': fields.String(description='The spatial/territorial granularity', enum=[]),
+    'granularity': fields.String(description='The spatial/territorial granularity'),
 })
 
 zone_suggestion_fields = api.model('TerritorySuggestion', {
