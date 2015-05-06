@@ -1,0 +1,37 @@
+<style lang="less">
+
+</style>
+
+<template>
+<form-horizontal class="resource-form api-resource-form"
+        fields="{{fields}}" model="{{resource}}" v-ref="form">
+</form-horizontal>
+</template>
+
+<script>
+'use strict';
+
+module.exports = {
+    inherit: true,
+    data: function() {
+        return {
+            fields: [{
+                    id: 'title',
+                    label: this._('Title'),
+                    help: this._('The title of the API. The first thing the user will see.')
+                }, {
+                    id: 'url',
+                    label: this._('URL'),
+                    help: this._('The public URL of the API')
+                }, {
+                    id: 'description',
+                    label: this._('Description'),
+                    help: this._('Some details about the API.')
+                }]
+        };
+    },
+    components: {
+        'form-horizontal': require('components/form/horizontal-form.vue')
+    },
+};
+</script>

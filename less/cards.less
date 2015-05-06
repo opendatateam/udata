@@ -1,0 +1,289 @@
+
+@bg-gray: #F0F0F0;
+@title-font: Arial, Arial, Helvetica, sans-serif;
+
+.card {
+    background-color: white;
+    border: 1px solid darken(@gray-lighter, 10%);
+    margin-bottom: 10px;
+
+    @card-font-size: 14px;
+    @logo-size: 60px;
+    @logo-margin: 5px;
+    @card-padding: 8px;
+    @card-footer-size: 24px;
+    @footer-line-height: 25px;
+
+    position: relative;
+    background: white;
+    border: 1px solid @gray-lighter;
+    padding: @card-padding;
+
+    zoom: 1;
+
+    &.selected {
+        background-color: lighten(blue, 45%);
+        border: 1px solid blue;
+    }
+
+    .card-logo {
+        .pull-left();
+        text-align: center;
+        display: table;
+        line-height: @logo-size + 7px;
+        width: @logo-size + 2 * @logo-margin;
+        height: @logo-size + 2 * @logo-margin;
+        border: 1px solid @gray-lighter;
+        background-color: white;
+
+        img {
+            vertical-align: middle;
+            max-width: @logo-size;
+            max-height: @logo-size;
+        }
+    }
+
+    img.certified {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        width: 34px;
+        height: 34px;
+        cursor: pointer;
+    }
+
+    .card-body {
+        overflow: hidden;
+        padding-top: 1px;
+        padding-left: 11px;
+        // padding-left: @card-padding;
+        color: #4f4f4f;
+        font-size: @card-font-size;
+        line-height: 1.3em;
+        height: @logo-size + 2 * @logo-margin;
+    }
+
+    footer {
+        @color: #7E7E7E;
+        width: 100%;
+        position: absolute;
+        // padding-left: @logo-size + 2 * @logo-margin + @card-padding;
+        padding-left: 78px;
+        padding-right: 2 * @logo-margin;
+        // bottom: 0;
+        bottom: -4px;
+        padding-bottom: @card-padding;
+        overflow: hidden;
+
+        > * {
+            height: 100%;
+            max-width: 100%;
+            line-height: @footer-line-height;
+            font-weight: bold;
+            font-size: @card-font-size - 1px;
+            margin: 0;
+            // padding: 0;
+            padding: 0 5px;
+        }
+
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+
+            .btn {
+                color: @color;
+                text-transform: none;
+
+                padding: 1px 5px 1px 0;
+
+                .glyphicon, .fa {
+                    background: none !important;
+                    color: #bababa;
+                }
+            }
+        }
+
+        .label-list .label {
+            margin: 0 5px 0 0;
+            vertical-align: middle;
+        }
+
+        li {
+            display: inline-block;
+            padding: 0;
+        }
+
+        &.rollover {
+            @base-size: 20px;
+            @padding: 1px;
+            @line-height: @base-size - 2 * @padding;
+            @color: lighten(black, 35%);
+            color: lighten(@color, 5%);
+            font-size: @line-height - 4px;
+            background-color: fadeourgba(235, 235, 235, 1);
+            padding: 0;
+            display: none;
+            bottom: 0;
+            line-height: @line-height;
+            z-index: 0;
+            left: 0;
+            right: 0;
+            position: absolute;
+            z-index: 100;
+
+            ul {
+                line-height: @line-height;
+                .btn {
+                    color: #595959;
+                    padding: 2px 5px;
+                    font-size: 11px;
+
+                    .fa, .glyphicon {
+                        color: ligthen(@color, 2%);
+                    }
+                }
+            }
+        }
+
+    }
+
+    h4 {
+        margin: 0 0 8px;
+        line-height: 11px;
+
+        a {
+            font-size: 13px;
+            color: #494949;
+            font-family: @title-font;
+            font-weight: bold;
+        }
+    }
+
+    a.rollover {
+        background: rgba(255, 255, 255, 0.91);
+        font-size: 13px;
+        line-height: 13px;
+        position: absolute;
+        display: none;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        padding: 10px;
+        overflow: hidden;
+        color: #5E5E5E;
+        text-decoration: none;
+        z-index: 10;
+    }
+
+    &:hover .rollover {
+        display: block;
+    }
+
+    &.follower-card {
+        margin-bottom: 10px;
+    }
+
+    &.dataset-card {
+        border-bottom: 2px solid #4FA9E5;
+    }
+
+    &.reuse-card {
+        @full-margin: @card-padding + @logo-margin;
+        @logo-full-size: @logo-size + 2 * @full-margin;
+        @logo-full-size: 86px;
+
+        .card-logo {
+            width: @logo-full-size;
+            height: @logo-full-size;
+            margin: -@card-padding 0 0 -@card-padding;
+            border: none;
+            border-right: 1px solid fadein(@gray-lighter, 40%);
+            line-height: @logo-full-size;
+            background-color: fadein(@gray-lighter, 40%);
+            position: absolute;
+            display: block;
+            overflow: hidden;
+
+            img {
+                min-width: @logo-full-size;
+                min-height: @logo-full-size;
+            }
+        }
+
+        .card-body, footer {
+            // padding-left: @card-padding + @logo-margin;
+            padding-left: 88px;
+        }
+
+        .author {
+            padding: 0;
+            display: block;
+            height: 28px;
+            position: absolute;
+            // bottom: @card-padding;
+            bottom: 9px;
+            left: 88px;
+            line-height: 14px;
+
+            .avatar {
+                .text-center();
+                float: left;
+                width: 25px;
+                height: 25px;
+                // border: 1px solid #7e7e7e;
+                border: 1px solid #BEBEBE;
+                margin-right: @card-padding;
+                z-index: 150; // Fix hover reactivity
+
+                img {
+                    max-width: 100%;
+                    max-height: 100%;
+                }
+            }
+
+            .user {
+                font-size: 12px;
+                font-weight: bold;
+                position: relative;
+            }
+
+            .date {
+                display: block;
+                font-size: 10px;
+                top: -2px;
+                position: relative;
+                white-space: nowrap;
+            }
+        }
+
+        footer {
+            // padding-left: @logo-full-size + @card-padding;
+            padding-left: 78px;
+            // bottom: 0;
+            overflow: visible;
+
+            &.rollover {
+                padding-left: 0;
+            }
+        }
+    }
+}
+
+.card-list {
+    padding-left: 0;
+    list-style: none;
+
+    .card {
+        margin-bottom: 12px;
+        // margin-bottom: 22px;
+    }
+}
+
+.card-list-footer {
+    .dropdown {
+        display: inline-block;
+    }
+}
+

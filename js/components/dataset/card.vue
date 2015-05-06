@@ -1,0 +1,166 @@
+<style lang="less"></style>
+
+<template>
+<div class="card dataset-card">
+    <a v-if="dataset.organization" class="card-logo" href="{{ dataset.page }}">
+        <img alt="{{ dataset.organization.name }}" v-attr="src: logo">
+    </a>
+    <img v-if="dataset.organization && dataset.organization.public_service"
+        v-attr="src: certified" alt="certified"
+        class="certified" rel="popover"
+        data-title="{{ _('Certified public service') }}"
+        data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
+        data-container="body" data-trigger="hover"/>
+    <div class="card-body">
+        <h4>
+            <a href="{{ dataset.page }}" title="{{dataset.title}}">
+                {{ dataset.title | truncate 80 }}
+            </a>
+        </h4>
+    </div>
+    <footer>
+        <ul>
+            <li v-if="dataset.spatial && dataset.spatial.territories.length > 0">
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Territorial coverage') }}">
+                    <span class="fa fa-map-marker fa-fw"></span>
+                    {{ dataset.spatial.territories[0].name }}
+                </a>
+            </li>
+            <li v-if="dataset.metrics">
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Reuses') }}">
+                    <span class="fa fa-retweet fa-fw"></span>
+                    {{ dataset.metrics.reuses || 0 }}
+                </a>
+            </li>
+            <li v-if="dataset.metrics">
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Stars') }}">
+                    <span class="fa fa-star fa-fw"></span>
+                    {{ dataset.metrics.followers || 0 }}
+                </a>
+            </li>
+        </ul>
+    </footer>
+
+    <a class="rollover fade in" href="{{ dataset.page }}"
+        title="{{ dataset.title }}">
+        {{{ dataset.description | markdown 180 }}}
+    </a>
+    <footer class="rollover fade in">
+        <ul>
+            <!-- Temporal coverage -->
+            <li v-if="dataset.temporal_coverage">
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Temporal coverage') }}">
+                    <span class="fa fa-calendar fa-fw"></span>
+                    {{ dataset.temporal_coverage | daterange }}
+                </a>
+            </li>
+
+            <!-- Territorial coverage -->
+            <li v-if="dataset.spatial && dataset.spatial.granularity">
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Territorial coverage granularity') }}">
+                    <span class="fa fa-bullseye fa-fw"></span>
+                    {{ dataset.spatial.granularity }}
+                </a>
+            </li>
+
+            <!-- frequency -->
+            <li v-if="dataset.frequency">
+                <a class="btn btn-xs" rel="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Frequency') }}">
+                    <span class="fa fa-clock-o fa-fw"></span>
+                    {{ dataset.frequency }}
+                </a>
+            </li>
+        </ul>
+
+    </footer>
+</div>
+</template>
+
+<script>
+'use strict';
+
+var Dataset = require('models/dataset'),
+    placeholders = require('helpers/placeholders'),
+    moment = require('moment'),
+    config = require('config');
+
+module.exports = {
+    // replace: true,
+    //
+    data: function() {
+        return {
+            dataset: new Dataset(),
+            datasetid: null,
+            reactive: true
+        };
+    },
+    paramAttributes: ['dataset', 'datasetid', 'reactive'],
+    computed: {
+        logo: function() {
+            if (!this.dataset || !this.dataset.organization || !this.dataset.organization.logo) {
+                return placeholders.organization;
+            }
+            return this.dataset.organization.logo;
+        },
+        certified: function() {
+            return config.theme_static + 'img/certified-stamp.png';
+        },
+        spatial_label: function() {
+
+        }
+    },
+    filters: {
+        /**
+         * Display a date range in the shorter possible maner.
+         */
+        daterange: function(range) {
+            if (!range || !range.start) {
+                return;
+            }
+            var start = moment(range.start),
+                end = range.end ? moment(range.end) : undefined,
+                start_label, end_label;
+
+            start_label = start.format('L');
+            end_label = end.format('L');
+            // delta = start.diff(end)
+            // delta = value.end - value.start
+            // start, end = None, None
+            // if start.clone() is_first_year_day(value.start) and is_last_year_day(value.end):
+            //     start = value.start.year
+            //     if delta.days > 365:
+            //         end = value.end.year
+            // elif is_first_month_day(value.start) and is_last_month_day(value.end):
+            //     start = short_month(value.start)
+            //     if delta.days > 31:
+            //         end = short_month(value.end)
+            // else:
+            //     start = short_day(value.start)
+            //     if value.start != value.end:
+            //         end = short_day(value.end)
+            return end_label
+                ? this._('{start} to {end}', {start:start_label, end:end_label})
+                : start_label;
+        }
+    },
+    watch: {
+        datasetid: function(id) {
+            if (id) {
+                this.dataset.fetch(id);
+            }
+        }
+    }
+};
+</script>
