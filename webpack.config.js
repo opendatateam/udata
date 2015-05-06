@@ -38,6 +38,7 @@ module.exports = {
             'Jcrop': path.join(bower_path, 'jcrop/js/jquery.Jcrop'),
             // 'swaggerjs': path.join(bower_path, 'swagger-js/lib/swagger-client'),
             'fineuploader': path.join(node_path, 'fine-uploader/fine-uploader/fine-uploader'),
+            'jquery-validation': path.join(node_path, 'jquery-validation/src/core'),
             // 'bootstrap-datepicker': path.join(node_path, 'bootstrap-datepicker/js/bootstrap-datepicker'),
             // 'eve': path.join(bower_path, 'eve-adobe/eve')
         }
