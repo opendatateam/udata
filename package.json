@@ -72,7 +72,6 @@
     "sortablejs": "^1.1.1",
     "swagger-client": "^2.1.2-M2",
     "tv4": "^1.1.9",
-    "typeahead.js": "^0.10.5",
     "vue": "^0.11.8"
   }
 }
