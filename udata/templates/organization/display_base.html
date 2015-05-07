@@ -62,16 +62,22 @@
                     {% if org.metrics.reuses %}
                     <p class="text-center">
                         <strong>
-                        <a href="{{url_for('organizations.show', org=org)}}#reuses">
+                        <a href="{{url_for('organizations.show', org=org)}}#reuses"
+                            rel="tooltip" data-placement="left"
+                            title="{{ _('Use of data by that organization for the community') }}">
                             {{ ngettext('%(num)d reuse', '%(num)d reuses', org.metrics.reuses or 0) }}
+                        </a>
                         </strong>
                     </p>
                     {% endif %}
                     {% if org.metrics.permitted_reuses %}
                     <p class="text-center">
                         <strong>
-                        <a href="{{url_for('organizations.show', org=org)}}#reuses">
-                            {{ ngettext('%(num)d re-appropriation', '%(num)d re-appropriations', org.metrics.permitted_reuses or 0) }}
+                        <a href="#"
+                            rel="tooltip" data-placement="left"
+                            title="{{ _('Use of data from that organization by the community') }}">
+                            {{ ngettext('%(num)d reappropriation', '%(num)d reappropriations', org.metrics.permitted_reuses or 0) }}
+                        </a>
                         </strong>
                     </p>
                     {% endif %}
