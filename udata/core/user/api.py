@@ -105,6 +105,8 @@ class NotificationsAPI(API):
 
         orgs = [o for o in user.organizations if o.is_admin(user)]
 
+        # TODO: use polymorph field
+
         # Fetch user open issues
         datasets = Dataset.objects.owned_by(user, *orgs)
         reuses = Reuse.objects.owned_by(user, *orgs)
@@ -113,9 +115,11 @@ class NotificationsAPI(API):
                 'type': 'issue',
                 'created_on': issue.created,
                 'details': {
+                    'id': str(issue.id),
+                    'title': issue.title,
                     'subject': {
+                        'id': str(issue.subject.id),
                         'type': issue.subject.__class__.__name__.lower(),
-                        'id': str(issue.subject.id)
                     }
                 }
             })
