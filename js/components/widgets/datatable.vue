@@ -132,19 +132,26 @@ module.exports = {
             }),
         'date': CellWidget.extend({
                 template: [
-                    '<time datetime="{{value | dt YYYY-MM-DD }}">',
+                    '<time datetime="{{value | dt YYYY-MM-DD }}" v-if="value">',
                     '{{value | dt L }}',
-                    '</time>'
+                    '</time>',
+                    '<span v-if="!value">-</span>'
                 ].join('')
             }),
         'datetime': CellWidget.extend({
-                template: '<time datetime="{{value}}">{{value | dt L LT }}</time>'
+                template: [
+                    '<time datetime="{{value}}" v-if="value">',
+                    '{{value | dt L LT }}',
+                    '</time>',
+                    '<span v-if="!value">-</span>'
+                ].join('')
             }),
         'timeago': CellWidget.extend({
                 template: [
-                    '<time datetime="{{value}}" class="timeago">',
+                    '<time datetime="{{value}}" class="timeago" v-if="value">',
                     '{{value | timeago }}',
-                    '</time>'
+                    '</time>',
+                    '<span v-if="!value">-</span>'
                 ].join('')
             }),
         'since': CellWidget.extend({

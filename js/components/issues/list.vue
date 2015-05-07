@@ -17,16 +17,16 @@ module.exports = {
         return {
             title: this._('Issues'),
             fields: [{
-                label: this._('ID'),
-                key: 'id',
-                type: 'text'
-            }, {
                 label: this._('Title'),
                 key: 'title',
                 type: 'text'
-            },{
+            }, {
                 label: this._('Created on'),
                 key: 'created',
+                type: 'datetime'
+            }, {
+                label: this._('Closed on'),
+                key: 'closed',
                 type: 'datetime'
             }]
         };

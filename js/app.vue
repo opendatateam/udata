@@ -168,7 +168,7 @@ module.exports = {
             var m = this.$modal({data: {
                         issueid: issue_id
                     }},
-                    Vue.extend(require('components/issues/details-modal.vue'))
+                    Vue.extend(require('components/issues/modal.vue'))
                 );
         }
     },

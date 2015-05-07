@@ -34,7 +34,8 @@
             <div class="form-group">
                 <textarea class="form-control" rows="3"
                     placeholder="{{ _('Type your comment') }}"
-                    v-model="comment">
+                    v-model="comment"
+                    required>
                 </textarea>
             </div>
         </form>
@@ -57,6 +58,9 @@ var API = require('api'),
     Vue = require('vue');
 
 module.exports = {
+    name: 'issue-modal',
+    mixins: [require('components/form/base-form')],
+    replace: false,
     components: {
         'w-modal': require('components/modal.vue'),
     },
@@ -77,10 +81,21 @@ module.exports = {
     },
     methods: {
         close_issue: function() {
-            console.log('Comment and close issue', this.comment);
+            this.send_comment(this.comment, true);
         },
         comment_issue: function() {
-            console.log('Comment issue', this.comment);
+            this.send_comment(this.comment);
+        },
+        send_comment: function(comment, close) {
+            if (this.validate()) {
+                API.issues.comment_issue({id: this.issueid, payload: {
+                    comment: comment,
+                    close: close || false
+                }}, function(response) {
+                    this.issue = response.obj;
+                    this.$emit('issue:loaded');
+                }.bind(this));
+            }
         }
     }
 };
