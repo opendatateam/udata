@@ -16,7 +16,7 @@ define([
     'use strict';
 
     // Handle featured button
-    $('.btn-issues').click(function() {
+    $('.btn-issues').click(function(e) {
         var $this = $(this),
             $modal = modal({
                 title: i18n._('Issues'),
@@ -64,11 +64,22 @@ define([
             });
         }
 
+        function showIssue(el) {
+            $('<a href="#tab-'+ el.data('issue-id') +'"/>').tab('show').on('shown.bs.tab', function() {
+                $backBtn.removeClass('hide');
+                $newBtn.addClass('hide');
+                $submitBtn.addClass('hide');
+                $commentBtns.removeClass('hide');
+                $title.text(el.find('h4').text());
+                $modal.find('.tab-pane.active form')[0].reset();
+            });
+        }
+
         API.get($this.data('api-url'), function(data) {
             data = data.data;
             $modal.find('.spinner-container').html(listTpl({issues: data, labels: forms.issues_labels}));
             count = data.length;
-            if (!data.length && Auth.user) {
+            if ((!data.length || $this.data('issue-form')) && Auth.user) {
                 showForm();
             } else {
                 for (var idx in data) {
@@ -78,6 +89,9 @@ define([
                     $tab.append(detailsTpl({issue: issue}));
                     $tab.find('form').validate(forms.rules);
                     $modal.find('.tab-content').append($tab);
+                    if ($this.data('issue-id') === issue.id) {
+                        showIssue($this);
+                    }
                 }
             }
         });
@@ -124,16 +138,7 @@ define([
 
         // Issues details
         $modal.on('click', '.issue-list .issue', function() {
-            var $this = $(this);
-            $('<a href="#tab-'+ $this.data('issue-id') +'"/>').tab('show').on('shown.bs.tab', function() {
-                $backBtn.removeClass('hide');
-                $newBtn.addClass('hide');
-                $submitBtn.addClass('hide');
-                $commentBtns.removeClass('hide');
-                // $closeBtn.removeClass('hide');
-                $title.text($this.find('h4').text());
-                $modal.find('.tab-pane.active form')[0].reset();
-            });
+            showIssue($(this));
         });
 
         $commentBtns.click(function() {
@@ -167,6 +172,7 @@ define([
             }
             return false;
         });
+        e.preventDefault();
     });
 
 });

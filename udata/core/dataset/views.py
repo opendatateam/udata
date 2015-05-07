@@ -5,7 +5,7 @@ import os
 
 from datetime import datetime
 
-from flask import abort, redirect, request, url_for, g, jsonify, render_template
+from flask import abort, redirect, request, url_for, jsonify, render_template
 from werkzeug.contrib.atom import AtomFeed
 
 from udata import fileutils
@@ -42,12 +42,12 @@ def recent_feed():
                 'uri': url_for('users.show', user=dataset.owner.id, _external=True),
             }
         feed.add(dataset.title,
-                render_template('dataset/feed_item.html', dataset=dataset),
-                content_type='html',
-                author=author,
-                url=url_for('datasets.show', dataset=dataset.id, _external=True),
-                updated=dataset.last_modified,
-                published=dataset.created_at)
+                 render_template('dataset/feed_item.html', dataset=dataset),
+                 content_type='html',
+                 author=author,
+                 url=url_for('datasets.show', dataset=dataset.id, _external=True),
+                 updated=dataset.last_modified,
+                 published=dataset.created_at)
     return feed.get_response()
 
 
@@ -100,6 +100,7 @@ class DatasetDetailView(DatasetView, DetailView):
         context['reuses'] = Reuse.objects(datasets=self.dataset)
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = CommunityResourceEditPermission
+        context['issues'] = Issue.objects(subject=self.dataset)
         return context
 
 

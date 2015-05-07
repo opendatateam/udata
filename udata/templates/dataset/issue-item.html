@@ -1,0 +1,17 @@
+<div class="list-group-item btn-issues" data-issue-id="{{issue.id}}" data-api-url="{{url_for('api.dataset_issues', id=dataset.id|string)}}">
+    <div class="format-label pull-left">
+        {{ issue.user|avatar(52) }}
+    </div>
+    <h4 class="list-group-item-heading ellipsis">
+        <a itemprop="url" href="">
+            <span itemprop="name">{{ issue.title }}</span>
+        </a>
+    </h4>
+    <p class="list-group-item-text ellipsis">
+        {{ _('Discussion started on') }} {{ issue.created|dateformat }}
+    </p>
+    <a class="avatar resource-owner" href="">
+        <img class="avatar" width="52" height="52"
+            src="{{issue.subject.image_url}}" alt="{{ _('Subject thumbnail') }}">
+    </a>
+</div>
