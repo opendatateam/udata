@@ -18,10 +18,11 @@ class MetricsQuerySet(db.BaseQuerySet):
         object_id = obj.id if hasattr(obj, 'id') else obj
         days = max(days or 1, 1)
         first_day = (date.today() - timedelta(days)).isoformat()
-        return self(object_id=object_id, level='daily', date__gt=first_day)
+        qs = self(object_id=object_id, level='daily', date__gt=first_day)
+        return qs.order_by('-date')
 
     def last_for(self, obj):
-        return self.get_for(obj=obj).order_by('-date').first()
+        return self.get_for(obj=obj).first()
 
     def update_daily(self, obj, date=None, **kwargs):
         oid = obj.id if hasattr(obj, 'id') else obj

@@ -16,8 +16,7 @@ from udata.core.issues.metrics import IssuesMetric
 from udata.core.issues.api import IssuesAPI
 
 from .api import APITestCase
-from .frontend import FrontTestCase
-from .factories import faker, UserFactory, AdminFactory
+from .factories import faker, UserFactory
 
 
 bp = Blueprint('test_issues', __name__)
@@ -53,6 +52,7 @@ class IssuesTest(APITestCase):
 
         response = self.post(url_for('api.fake_issues', id=fake.id), {
             'type': 'other',
+            'title': 'test title',
             'comment': 'bla bla'
         })
         self.assertStatus(response, 201)
@@ -70,6 +70,7 @@ class IssuesTest(APITestCase):
         self.assertIsNotNone(issue.created)
         self.assertIsNone(issue.closed)
         self.assertIsNone(issue.closed_by)
+        self.assertEqual(issue.title, 'test title')
 
         message = issue.discussion[0]
         self.assertEqual(message.content, 'bla bla')
@@ -81,7 +82,8 @@ class IssuesTest(APITestCase):
         fake = Fake.objects.create(name='Fake')
 
         response = self.post(url_for('api.fake_issues', id=fake.id), {
-            'type': 'other'
+            'type': 'other',
+            'title': 'test title'
         })
         self.assertStatus(response, 400)
 
@@ -90,6 +92,17 @@ class IssuesTest(APITestCase):
         fake = Fake.objects.create(name='Fake')
 
         response = self.post(url_for('api.fake_issues', id=fake.id), {
+            'title': 'test title',
+            'comment': 'bla bla'
+        })
+        self.assertStatus(response, 400)
+
+    def test_new_issue_missing_title(self):
+        self.login()
+        fake = Fake.objects.create(name='Fake')
+
+        response = self.post(url_for('api.fake_issues', id=fake.id), {
+            'type': 'other',
             'comment': 'bla bla'
         })
         self.assertStatus(response, 400)
@@ -97,7 +110,6 @@ class IssuesTest(APITestCase):
     def test_list_issues(self):
         fake = Fake.objects.create()
         open_issues = []
-        # closed_issues = []
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
@@ -105,21 +117,22 @@ class IssuesTest(APITestCase):
                 subject=fake,
                 type=ISSUE_TYPES.keys()[i],
                 user=user,
+                title='test issue {}'.format(i),
                 discussion=[message]
             )
             open_issues.append(issue)
-        for i in range(3):
-            user = UserFactory()
-            message = Message(content=faker.sentence(), posted_by=user)
-            issue = FakeIssue.objects.create(
-                subject=fake,
-                type=ISSUE_TYPES.keys()[i],
-                user=user,
-                discussion=[message],
-                closed=datetime.now(),
-                closed_by=user
-            )
-            # closed_issues.append(issue)
+        # Creating a closed issue that shouldn't show up in response.
+        user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        issue = FakeIssue.objects.create(
+            subject=fake,
+            type=ISSUE_TYPES.keys()[i],
+            user=user,
+            title='test issue {}'.format(i),
+            discussion=[message],
+            closed=datetime.now(),
+            closed_by=user
+        )
 
         response = self.get(url_for('api.fake_issues', id=fake.id))
         self.assert200(response)
@@ -137,6 +150,7 @@ class IssuesTest(APITestCase):
                 subject=fake,
                 type=ISSUE_TYPES.keys()[i],
                 user=user,
+                title='test issue {}'.format(i),
                 discussion=[message]
             )
             open_issues.append(issue)
@@ -147,12 +161,12 @@ class IssuesTest(APITestCase):
                 subject=fake,
                 type=ISSUE_TYPES.keys()[i],
                 user=user,
+                title='test issue {}'.format(i),
                 discussion=[message],
                 closed=datetime.now(),
                 closed_by=user
             )
             closed_issues.append(issue)
-
 
         response = self.get(url_for('api.fake_issues', id=fake.id, closed=True))
         self.assert200(response)
@@ -167,6 +181,7 @@ class IssuesTest(APITestCase):
             subject=fake,
             type='other',
             user=user,
+            title='test issue',
             discussion=[message]
         )
 
@@ -178,6 +193,7 @@ class IssuesTest(APITestCase):
         self.assertEqual(data['type'], 'other')
         self.assertEqual(data['subject'], str(fake.id))
         self.assertEqual(data['user']['id'], str(user.id))
+        self.assertEqual(data['title'], 'test issue')
         self.assertIsNotNone(data['created'])
         self.assertEqual(len(data['discussion']), 1)
         self.assertEqual(data['discussion'][0]['content'], 'bla bla')
@@ -192,6 +208,7 @@ class IssuesTest(APITestCase):
             subject=fake,
             type='other',
             user=user,
+            title='test issue',
             discussion=[message]
         )
 
@@ -209,6 +226,7 @@ class IssuesTest(APITestCase):
         self.assertEqual(data['type'], 'other')
         self.assertEqual(data['subject'], str(fake.id))
         self.assertEqual(data['user']['id'], str(user.id))
+        self.assertEqual(data['title'], 'test issue')
         self.assertIsNotNone(data['created'])
         self.assertIsNone(data['closed'])
         self.assertIsNone(data['closed_by'])
@@ -225,6 +243,7 @@ class IssuesTest(APITestCase):
             subject=fake,
             type='other',
             user=user,
+            title='test issue',
             discussion=[message]
         )
 
@@ -243,6 +262,7 @@ class IssuesTest(APITestCase):
         self.assertEqual(data['type'], 'other')
         self.assertEqual(data['subject'], str(fake.id))
         self.assertEqual(data['user']['id'], str(user.id))
+        self.assertEqual(data['title'], 'test issue')
         self.assertIsNotNone(data['created'])
         self.assertIsNotNone(data['closed'])
         self.assertEqual(data['closed_by'], str(closer.id))

@@ -91,11 +91,20 @@ define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) 
         return false;
     });
 
+    var issues_labels = {
+        tendencious: i18n._('I want to declare a tendencious, illegal or advertising content'),
+        problem: i18n._('I have a problem downloading the data'),
+        question: i18n._('I have a question about the data'),
+        suggestion: i18n._('I have a suggestion about the data'),
+        other: i18n._('Other'),
+    };
+
     return {
         rules: rules,
         build: build,
         csrftoken: csrftoken,
-        handle_postables: handle_postables
+        handle_postables: handle_postables,
+        issues_labels: issues_labels
     };
 
 });

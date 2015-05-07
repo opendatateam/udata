@@ -10,6 +10,7 @@ __all__ = ('IssueCreateForm', 'IssueCommentForm')
 
 
 class IssueCreateForm(Form):
+    title = fields.StringField(_('Title'), [validators.required()])
     comment = fields.StringField(_('Comment'), [validators.required()])
     type = fields.SelectField(_('Type'), [validators.required()], choices=ISSUE_TYPES.items())
 

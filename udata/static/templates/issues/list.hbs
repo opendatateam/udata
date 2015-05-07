@@ -8,8 +8,12 @@
                 alt="{{user.first_name}} {{user.last_name}}">
         </div>
         <div class="media-body">
-            <h4 class="media-heading text-left">{{get ../labels type}} ({{dt created }})</h4>
-            <div class="message text-left">{{discussion.0.content}}</div>
+            <h4 class="media-heading text-left">{{title}} ({{dt created }})</h4>
+            <div class="message text-left">
+                <p>
+                    {{_ 'Category:' }} {{get ../labels type}}
+                </p>
+            </div>
         </div>
     </div>
     {{/each}}

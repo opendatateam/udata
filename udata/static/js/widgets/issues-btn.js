@@ -15,19 +15,12 @@ define([
 ], function($, API, Auth, i18n, Notify, modal, modalTpl, listTpl, detailsTpl, forms) {
     'use strict';
 
-    var labels = {
-        illegal: i18n._('Illegal content'),
-        tendencious: i18n._('Tendencious content'),
-        advertisement: i18n._('Advertising content'),
-        other: i18n._('Other'),
-    };
-
     // Handle featured button
     $('.btn-issues').click(function() {
         var $this = $(this),
             $modal = modal({
                 title: i18n._('Issues'),
-                content: modalTpl(),
+                content: modalTpl({labels: forms.issues_labels}),
                 actions: [{
                     label: i18n._('New issue'),
                     icon: 'fa-plus',
@@ -72,8 +65,8 @@ define([
         }
 
         API.get($this.data('api-url'), function(data) {
-            data = data.data
-            $modal.find('.spinner-container').html(listTpl({issues: data, labels: labels}));
+            data = data.data;
+            $modal.find('.spinner-container').html(listTpl({issues: data, labels: forms.issues_labels}));
             count = data.length;
             if (!data.length && Auth.user) {
                 showForm();
@@ -82,9 +75,9 @@ define([
                     var issue = data[idx],
                         $tab = $('<div class="tab-pane fade" id="tab-'+ issue.id +'"/>');
 
-                    $tab.append(detailsTpl({issue: issue, labels: labels}));
+                    $tab.append(detailsTpl({issue: issue}));
                     $tab.find('form').validate(forms.rules);
-                    $('.tab-content').append($tab)
+                    $modal.find('.tab-content').append($tab);
                 }
             }
         });
@@ -109,6 +102,7 @@ define([
             if ($form.valid()) {
                 var data = {
                     type: $modal.find('input[name="type"]:checked').val(),
+                    title: $modal.find('#title').val(),
                     comment: $modal.find('#comment').val()
                 };
 

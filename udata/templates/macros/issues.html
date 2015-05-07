@@ -9,26 +9,6 @@
 </button>
 {% endmacro %}
 
-{% macro issues_tabs(issues, related=False) %}
-<ul class="nav nav-pills nav-top" role="tablist">
-    <li class="active">
-        <a href="#open-issues" data-toggle="tab">{{ _('Open issues') }}</a>
-    </li>
-    <li>
-        <a href="#closed-issues" data-toggle="tab">{{ _('Closed issues') }}</a>
-    </li>
-</ul>
-
-<div class="tab-content">
-    <div id="open-issues" class="tab-pane active">
-        {{ issues_list(issues, status='open', related=related) }}
-    </div>
-    <div id="closed-issues" class="tab-pane">
-        {{ issues_list(issues, status='closed', related=related) }}
-    </div>
-</div>
-{% endmacro %}
-
 {% macro issues_list(issues, related=False, status='open') %}
 {% if not issues %}
     <p class="text-center">{{ _('No Issues') }}</p>
@@ -69,7 +49,7 @@
             {% if related %}{{ _('on') }} {{issue.subject}}{% endif %}
             ({{ issue.created|dateformat }})
         </h4>
-        <div class="message text-left">{{issue.description}}</div>
+        <div class="message text-left">{{issue.title}}</div>
     </div>
 </div>
 {% endmacro %}

@@ -5,7 +5,7 @@ from datetime import datetime
 
 from flask.ext.security import current_user
 
-from udata.api import api, API, marshal, fields
+from udata.api import api, API, fields
 
 from udata.core.user.api_fields import user_ref_fields
 
@@ -25,6 +25,7 @@ issue_fields = api.model('Issue', {
     'id': fields.String(description='The issue identifier', readonly=True),
     'type': fields.String(description='The issue type', required=True, enum=ISSUE_TYPES.keys()),
     'subject': fields.String(attribute='subject.id', description='The issue target object identifier', required=True),
+    'title': fields.String(description='The issue title', required=True),
     'user': fields.Nested(user_ref_fields, description='The issue author', required=True),
     'created': fields.ISODateTime(description='The issue creation date', readonly=True),
     'closed': fields.ISODateTime(description='The issue closing date', readonly=True),
@@ -50,23 +51,27 @@ class IssuesAPI(API):
 
     @api.secure
     @api.doc(model=issue_fields)
-    @api.doc(id='create_issue')
+    @api.doc('create_issue')
+    @api.marshal_with(issue_fields)
     def post(self, id):
         '''Create a new Issue for an object given its ID'''
         form = api.validate(IssueCreateForm)
 
-        message = Message(content=form.comment.data, posted_by=current_user.id)
+        message = Message(
+            content=form.comment.data,
+            posted_by=current_user.id)
         issue = self.model.objects.create(
             subject=id,
+            title=form.title.data,
             type=form.type.data,
             user=current_user.id,
             discussion=[message]
         )
         on_new_issue.send(issue)
 
-        return marshal(issue, issue_fields), 201
+        return issue, 201
 
-    @api.doc(id='list_issues_for', parser=parser)
+    @api.doc('list_issues_for', parser=parser)
     @api.marshal_with(issue_page_fields)
     def get(self, id):
         '''List all Issues for an object given its ID'''
@@ -84,14 +89,16 @@ class IssueAPI(API):
     Single Issue Model API (Read and update).
     '''
 
-    @api.doc(id='get_issue')
+    @api.doc('get_issue')
+    @api.marshal_with(issue_fields)
     def get(self, id):
         '''Get an issue given its ID'''
         issue = Issue.objects.get_or_404(id=id)
-        return marshal(issue, issue_fields)
+        return issue
 
     @api.secure
-    @api.doc(id='comment_issue')
+    @api.doc('comment_issue')
+    @api.marshal_with(issue_fields)
     def post(self, id):
         '''Add comment and optionnaly close an issue given its ID'''
         issue = Issue.objects.get_or_404(id=id)
@@ -110,7 +117,7 @@ class IssueAPI(API):
             on_issue_closed.send(issue, message=message)
         else:
             on_new_issue_comment.send(issue, message=message)
-        return marshal(issue, issue_fields), 200
+        return issue
 
 
 @ns.route('/', endpoint='all_issues')
@@ -118,7 +125,7 @@ class ListIssuesAPI(API):
     '''
     List all issues.
     '''
-    @api.doc(id='list_issues', parser=parser)
+    @api.doc('list_issues', parser=parser)
     @api.marshal_with(issue_page_fields)
     def get(self):
         '''List all Issues for an object given its ID'''

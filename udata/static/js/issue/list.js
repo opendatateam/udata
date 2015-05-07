@@ -13,21 +13,14 @@ define([
 ], function($, Auth, i18n, API, Notify, modal, detailsTpl, forms) {
     'use strict';
 
-    var labels = {
-        illegal: i18n._('Illegal content'),
-        tendencious: i18n._('Tendencious content'),
-        advertisement: i18n._('Advertising content'),
-        other: i18n._('Other'),
-    };
-
     // Handle featured button
     $('.issue').click(function() {
         var $this = $(this);
 
         API.get($this.data('api-url'), function(issue) {
             var $modal = modal({
-                    title: labels[issue.type],
-                    content: detailsTpl({issue: issue, labels: labels}),
+                    title: forms.issues_[issue.type],
+                    content: detailsTpl({issue: issue, labels: forms.issues_labels}),
                     actions: [{
                         label: i18n._('Comment'),
                         icon: 'fa-comment',
