@@ -21,6 +21,10 @@ module.exports = {
                 key: 'id',
                 type: 'text'
             }, {
+                label: this._('Title'),
+                key: 'title',
+                type: 'text'
+            },{
                 label: this._('Created on'),
                 key: 'created',
                 type: 'datetime'

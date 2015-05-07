@@ -163,6 +163,13 @@ module.exports = {
         },
         '/system/': function() {
             this.loadView('system');
+        },
+        '/issue/:oid/': function(issue_id) {
+            var m = this.$modal({data: {
+                        issueid: issue_id
+                    }},
+                    Vue.extend(require('components/issues/details-modal.vue'))
+                );
         }
     },
     watch: {
