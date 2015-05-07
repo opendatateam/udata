@@ -1,4 +1,4 @@
-define(['vue', 'logger', 'jquery', 'jquery-validation'], function(Vue, log, $) {
+define(['vue', 'logger', 'jquery', 'shims/jquery-validation'], function(Vue, log, $) {
     'use strict';
 
     // jQuery validate
