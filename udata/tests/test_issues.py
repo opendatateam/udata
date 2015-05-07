@@ -25,6 +25,8 @@ ns = api.namespace('test', 'A test namespace')
 
 class Fake(WithMetrics, db.Document):
     name = db.StringField()
+    owner = db.ReferenceField('User')
+    organization = db.ReferenceField('Organization')
 
 
 class FakeIssue(Issue):
@@ -236,8 +238,9 @@ class IssuesTest(APITestCase):
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
     def test_close_issue(self):
-        fake = Fake.objects.create(metrics={'issues': 1})
+        owner = self.login()
         user = UserFactory()
+        fake = Fake.objects.create(metrics={'issues': 1}, owner=owner)
         message = Message(content='bla bla', posted_by=user)
         issue = FakeIssue.objects.create(
             subject=fake,
@@ -247,7 +250,6 @@ class IssuesTest(APITestCase):
             discussion=[message]
         )
 
-        closer = self.login()
         response = self.post(url_for('api.issue', id=issue.id), {
             'comment': 'close bla bla',
             'close': True
@@ -265,8 +267,30 @@ class IssuesTest(APITestCase):
         self.assertEqual(data['title'], 'test issue')
         self.assertIsNotNone(data['created'])
         self.assertIsNotNone(data['closed'])
-        self.assertEqual(data['closed_by'], str(closer.id))
+        self.assertEqual(data['closed_by'], str(owner.id))
         self.assertEqual(len(data['discussion']), 2)
         self.assertEqual(data['discussion'][1]['content'], 'close bla bla')
-        self.assertEqual(data['discussion'][1]['posted_by']['id'], str(closer.id))
+        self.assertEqual(data['discussion'][1]['posted_by']['id'], str(owner.id))
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
+
+    def test_close_issue_permissions(self):
+        fake = Fake.objects.create(metrics={'issues': 1})
+        user = UserFactory()
+        message = Message(content='bla bla', posted_by=user)
+        issue = FakeIssue.objects.create(
+            subject=fake,
+            type='other',
+            user=user,
+            title='test issue',
+            discussion=[message]
+        )
+
+        self.login()
+        response = self.post(url_for('api.issue', id=issue.id), {
+            'comment': 'close bla bla',
+            'close': True
+        })
+        self.assert403(response)
+
+        fake.reload()
+        self.assertEqual(fake.metrics['issues'], 1)

@@ -11,6 +11,7 @@ from udata.core.user.api_fields import user_ref_fields
 
 from .forms import IssueCreateForm, IssueCommentForm
 from .models import Issue, Message, ISSUE_TYPES
+from .permissions import CloseIssuePermission
 from .signals import on_new_issue, on_new_issue_comment, on_issue_closed
 
 ns = api.namespace('issues', 'Issue related operations')
@@ -32,6 +33,11 @@ issue_fields = api.model('Issue', {
     'closed_by': fields.String(attribute='closed_by.id', description='The user who closed the issue', readonly=True),
     'discussion': fields.Nested(message_fields),
     'url': fields.UrlFor('api.issue', description='The issue API URI', readonly=True),
+})
+
+comment_issue_fields = api.model('IssueResponse', {
+    'comment': fields.String(description='The comment to submit', required=True),
+    'close': fields.Boolean(description='Is this a closing response. Only subject owner can close ')
 })
 
 issue_page_fields = api.model('IssuePage', fields.pager(issue_fields))
@@ -98,6 +104,8 @@ class IssueAPI(API):
 
     @api.secure
     @api.doc('comment_issue')
+    @api.expect(comment_issue_fields)
+    @api.response(403, 'Not allowed to close this issue')
     @api.marshal_with(issue_fields)
     def post(self, id):
         '''Add comment and optionnaly close an issue given its ID'''
@@ -110,6 +118,7 @@ class IssueAPI(API):
         issue.discussion.append(message)
         close = form.close.data
         if close:
+            CloseIssuePermission(issue).test()
             issue.closed_by = current_user._get_current_object()
             issue.closed = datetime.now()
         issue.save()
