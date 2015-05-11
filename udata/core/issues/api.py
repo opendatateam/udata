@@ -43,47 +43,9 @@ issue_page_fields = api.model('IssuePage', fields.pager(issue_fields))
 
 parser = api.parser()
 parser.add_argument('closed', type=bool, default=False, location='args', help='Filter closed issues')
+parser.add_argument('for', type=str, location='args', action='append', help='Filter issues for a given subject')
 parser.add_argument('page', type=int, default=1, location='args', help='The page to fetch')
 parser.add_argument('page_size', type=int, default=20, location='args', help='The page size to fetch')
-
-
-@ns.route('/for/<id>/', endpoint='issues_for')
-class IssuesAPI(API):
-    '''
-    Base Issues Model API (Create and list).
-    '''
-    model = Issue
-
-    @api.secure
-    @api.doc(model=issue_fields)
-    @api.doc('create_issue')
-    @api.marshal_with(issue_fields)
-    def post(self, id):
-        '''Create a new Issue for an object given its ID'''
-        form = api.validate(IssueCreateForm)
-
-        message = Message(
-            content=form.comment.data,
-            posted_by=current_user.id)
-        issue = self.model.objects.create(
-            subject=id,
-            title=form.title.data,
-            user=current_user.id,
-            discussion=[message]
-        )
-        on_new_issue.send(issue)
-
-        return issue, 201
-
-    @api.doc('list_issues_for', parser=parser)
-    @api.marshal_with(issue_page_fields)
-    def get(self, id):
-        '''List all Issues for an object given its ID'''
-        args = parser.parse_args()
-        issues = self.model.objects(subject=id)
-        if not args['closed']:
-            issues = issues(closed=None)
-        return issues.paginate(args['page'], args['page_size'])
 
 
 @ns.route('/<id>/', endpoint='issue')
@@ -128,16 +90,42 @@ class IssueAPI(API):
 
 
 @ns.route('/', endpoint='all_issues')
-class ListIssuesAPI(API):
+@api.doc(parser=parser)
+class IssuesAPI(API):
     '''
     List all issues.
     '''
-    @api.doc('list_issues', parser=parser)
+    @api.doc('list_issues')
     @api.marshal_with(issue_page_fields)
     def get(self):
-        '''List all Issues for an object given its ID'''
+        '''List all Issues'''
         args = parser.parse_args()
-        issues = Issue.objects
+        issues = self.model.objects
+        if args['for']:
+            issues = issues(subject__in=args['for'])
         if not args['closed']:
             issues = issues(closed=None)
         return issues.paginate(args['page'], args['page_size'])
+
+    @api.secure
+    @api.doc(model=issue_fields)
+    @api.doc('create_issue')
+    @api.marshal_with(issue_fields)
+    def post(self):
+        '''Create a new Issue for an object given its ID'''
+        args = parser.parse_args()
+        subject = args.get('for', [])[0]
+        form = api.validate(IssueCreateForm)
+
+        message = Message(
+            content=form.comment.data,
+            posted_by=current_user.id)
+        issue = self.model.objects.create(
+            subject=subject,
+            title=form.title.data,
+            user=current_user.id,
+            discussion=[message]
+        )
+        on_new_issue.send(issue)
+
+        return issue, 201

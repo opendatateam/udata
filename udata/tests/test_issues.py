@@ -37,7 +37,7 @@ class FakeIssuesMetric(IssuesMetric):
     model = Fake
 
 
-@ns.route('/<id>/issues/', endpoint='fake_issues')
+@ns.route('/issues/', endpoint='fake_issues')
 class FakeIssuesAPI(IssuesAPI):
     model = FakeIssue
 
@@ -52,7 +52,7 @@ class IssuesTest(APITestCase):
         user = self.login()
         fake = Fake.objects.create(name='Fake')
 
-        response = self.post(url_for('api.fake_issues', id=fake.id), {
+        response = self.post(url_for('api.fake_issues', **{'for': fake.id}), {
             'title': 'test title',
             'comment': 'bla bla'
         })
@@ -81,7 +81,7 @@ class IssuesTest(APITestCase):
         self.login()
         fake = Fake.objects.create(name='Fake')
 
-        response = self.post(url_for('api.fake_issues', id=fake.id), {
+        response = self.post(url_for('api.fake_issues', **{'for': fake.id}), {
             'title': 'test title'
         })
         self.assertStatus(response, 400)
@@ -90,7 +90,7 @@ class IssuesTest(APITestCase):
         self.login()
         fake = Fake.objects.create(name='Fake')
 
-        response = self.post(url_for('api.fake_issues', id=fake.id), {
+        response = self.post(url_for('api.fake_issues', **{'for': fake.id}), {
             'comment': 'bla bla'
         })
         self.assertStatus(response, 400)

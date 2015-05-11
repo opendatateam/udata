@@ -37,7 +37,7 @@ class FakeDiscussionsMetric(DiscussionsMetric):
     model = Fake
 
 
-@ns.route('/<id>/discussions/', endpoint='fake_discussions')
+@ns.route('/discussions/', endpoint='fake_discussions')
 class FakeDiscussionsAPI(DiscussionsAPI):
     model = FakeDiscussion
 
@@ -52,7 +52,7 @@ class DiscussionsTest(APITestCase):
         user = self.login()
         fake = Fake.objects.create(name='Fake')
 
-        response = self.post(url_for('api.fake_discussions', id=fake.id), {
+        response = self.post(url_for('api.fake_discussions', **{'for': fake.id}), {
             'title': 'test title',
             'comment': 'bla bla'
         })
@@ -81,7 +81,7 @@ class DiscussionsTest(APITestCase):
         self.login()
         fake = Fake.objects.create(name='Fake')
 
-        response = self.post(url_for('api.fake_discussions', id=fake.id), {
+        response = self.post(url_for('api.fake_discussions', **{'for': fake.id}), {
             'title': 'test title'
         })
         self.assertStatus(response, 400)
@@ -90,7 +90,7 @@ class DiscussionsTest(APITestCase):
         self.login()
         fake = Fake.objects.create(name='Fake')
 
-        response = self.post(url_for('api.fake_discussions', id=fake.id), {
+        response = self.post(url_for('api.fake_discussions', **{'for': fake.id}), {
             'comment': 'bla bla'
         })
         self.assertStatus(response, 400)

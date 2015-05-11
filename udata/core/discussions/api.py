@@ -43,47 +43,9 @@ discussion_page_fields = api.model('DiscussionPage', fields.pager(discussion_fie
 
 parser = api.parser()
 parser.add_argument('closed', type=bool, default=False, location='args', help='Filter closed discussions')
+parser.add_argument('for', type=str, location='args', action='append', help='Filter issues for a given subject')
 parser.add_argument('page', type=int, default=1, location='args', help='The page to fetch')
 parser.add_argument('page_size', type=int, default=20, location='args', help='The page size to fetch')
-
-
-@ns.route('/for/<id>/', endpoint='discussions_for')
-class DiscussionsAPI(API):
-    '''
-    Base Discussions Model API (Create and list).
-    '''
-    model = Discussion
-
-    @api.secure
-    @api.doc(model=discussion_fields)
-    @api.doc('create_discussion')
-    @api.marshal_with(discussion_fields)
-    def post(self, id):
-        '''Create a new Discussion for an object given its ID'''
-        form = api.validate(DiscussionCreateForm)
-
-        message = Message(
-            content=form.comment.data,
-            posted_by=current_user.id)
-        discussion = self.model.objects.create(
-            subject=id,
-            title=form.title.data,
-            user=current_user.id,
-            discussion=[message]
-        )
-        on_new_discussion.send(discussion)
-
-        return discussion, 201
-
-    @api.doc('list_discussions_for', parser=parser)
-    @api.marshal_with(discussion_page_fields)
-    def get(self, id):
-        '''List all Discussions for an object given its ID'''
-        args = parser.parse_args()
-        discussions = self.model.objects(subject=id)
-        if not args['closed']:
-            discussions = discussions(closed=None)
-        return discussions.paginate(args['page'], args['page_size'])
 
 
 @ns.route('/<id>/', endpoint='discussion')
@@ -128,16 +90,42 @@ class DiscussionAPI(API):
 
 
 @ns.route('/', endpoint='all_discussions')
-class ListIssuesAPI(API):
+@api.doc(parser=parser)
+class DiscussionsAPI(API):
     '''
     List all discussions.
     '''
-    @api.doc('list_discussions', parser=parser)
+    @api.doc('list_discussions')
     @api.marshal_with(discussion_page_fields)
     def get(self):
-        '''List all Discussions for an object given its ID'''
+        '''List all Discussions'''
         args = parser.parse_args()
-        discussions = Discussion.objects
+        discussions = self.model.objects
+        if args['for']:
+            discussions = discussions(subject__in=args['for'])
         if not args['closed']:
             discussions = discussions(closed=None)
         return discussions.paginate(args['page'], args['page_size'])
+
+    @api.secure
+    @api.doc(model=discussion_fields)
+    @api.doc('create_discussion')
+    @api.marshal_with(discussion_fields)
+    def post(self):
+        '''Create a new Discussion for an object given its ID'''
+        args = parser.parse_args()
+        subject = args.get('for', [])[0]
+        form = api.validate(DiscussionCreateForm)
+
+        message = Message(
+            content=form.comment.data,
+            posted_by=current_user.id)
+        discussion = self.model.objects.create(
+            subject=subject,
+            title=form.title.data,
+            user=current_user.id,
+            discussion=[message]
+        )
+        on_new_discussion.send(discussion)
+
+        return discussion, 201

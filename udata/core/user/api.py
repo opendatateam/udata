@@ -189,7 +189,6 @@ class FollowUserAPI(FollowAPI):
         return super(FollowUserAPI, self).post(id)
 
 
-
 suggest_parser = api.parser()
 suggest_parser.add_argument('q', type=unicode, help='The string to autocomplete/suggest', location='args', required=True)
 suggest_parser.add_argument('size', type=int, help='The amount of suggestion to fetch', location='args', default=10)
