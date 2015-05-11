@@ -11,15 +11,15 @@ from udata.models import db
 from udata.core.metrics.models import WithMetrics
 from udata.core.user.views import blueprint as user_bp
 
-from udata.core.issues.models import Issue, Message
-from udata.core.issues.metrics import IssuesMetric
-from udata.core.issues.api import IssuesAPI
+from udata.core.discussions.models import Discussion, Message
+from udata.core.discussions.metrics import DiscussionsMetric
+from udata.core.discussions.api import DiscussionsAPI
 
 from .api import APITestCase
 from .factories import faker, UserFactory
 
 
-bp = Blueprint('test_issues', __name__)
+bp = Blueprint('test_discussions', __name__)
 ns = api.namespace('test', 'A test namespace')
 
 
@@ -29,184 +29,184 @@ class Fake(WithMetrics, db.Document):
     organization = db.ReferenceField('Organization')
 
 
-class FakeIssue(Issue):
+class FakeDiscussion(Discussion):
     subject = db.ReferenceField(Fake)
 
 
-class FakeIssuesMetric(IssuesMetric):
+class FakeDiscussionsMetric(DiscussionsMetric):
     model = Fake
 
 
-@ns.route('/<id>/issues/', endpoint='fake_issues')
-class FakeIssuesAPI(IssuesAPI):
-    model = FakeIssue
+@ns.route('/<id>/discussions/', endpoint='fake_discussions')
+class FakeDiscussionsAPI(DiscussionsAPI):
+    model = FakeDiscussion
 
 
-class IssuesTest(APITestCase):
+class DiscussionsTest(APITestCase):
     def create_app(self):
-        app = super(IssuesTest, self).create_app()
+        app = super(DiscussionsTest, self).create_app()
         app.register_blueprint(user_bp)
         return app
 
-    def test_new_issue(self):
+    def test_new_discussion(self):
         user = self.login()
         fake = Fake.objects.create(name='Fake')
 
-        response = self.post(url_for('api.fake_issues', id=fake.id), {
+        response = self.post(url_for('api.fake_discussions', id=fake.id), {
             'title': 'test title',
             'comment': 'bla bla'
         })
         self.assertStatus(response, 201)
 
         fake.reload()
-        self.assertEqual(fake.metrics['issues'], 1)
+        self.assertEqual(fake.metrics['discussions'], 1)
 
-        issues = Issue.objects(subject=fake)
-        self.assertEqual(len(issues), 1)
+        discussions = Discussion.objects(subject=fake)
+        self.assertEqual(len(discussions), 1)
 
-        issue = issues[0]
-        self.assertEqual(issue.user, user)
-        self.assertEqual(len(issue.discussion), 1)
-        self.assertIsNotNone(issue.created)
-        self.assertIsNone(issue.closed)
-        self.assertIsNone(issue.closed_by)
-        self.assertEqual(issue.title, 'test title')
+        discussion = discussions[0]
+        self.assertEqual(discussion.user, user)
+        self.assertEqual(len(discussion.discussion), 1)
+        self.assertIsNotNone(discussion.created)
+        self.assertIsNone(discussion.closed)
+        self.assertIsNone(discussion.closed_by)
+        self.assertEqual(discussion.title, 'test title')
 
-        message = issue.discussion[0]
+        message = discussion.discussion[0]
         self.assertEqual(message.content, 'bla bla')
         self.assertEqual(message.posted_by, user)
         self.assertIsNotNone(message.posted_on)
 
-    def test_new_issue_missing_comment(self):
+    def test_new_discussion_missing_comment(self):
         self.login()
         fake = Fake.objects.create(name='Fake')
 
-        response = self.post(url_for('api.fake_issues', id=fake.id), {
+        response = self.post(url_for('api.fake_discussions', id=fake.id), {
             'title': 'test title'
         })
         self.assertStatus(response, 400)
 
-    def test_new_issue_missing_title(self):
+    def test_new_discussion_missing_title(self):
         self.login()
         fake = Fake.objects.create(name='Fake')
 
-        response = self.post(url_for('api.fake_issues', id=fake.id), {
+        response = self.post(url_for('api.fake_discussions', id=fake.id), {
             'comment': 'bla bla'
         })
         self.assertStatus(response, 400)
 
-    def test_list_issues(self):
+    def test_list_discussions(self):
         fake = Fake.objects.create()
-        open_issues = []
+        open_discussions = []
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            issue = FakeIssue.objects.create(
+            discussion = FakeDiscussion.objects.create(
                 subject=fake,
                 user=user,
-                title='test issue {}'.format(i),
+                title='test discussion {}'.format(i),
                 discussion=[message]
             )
-            open_issues.append(issue)
-        # Creating a closed issue that shouldn't show up in response.
+            open_discussions.append(discussion)
+        # Creating a closed discussion that shouldn't show up in response.
         user = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)
-        issue = FakeIssue.objects.create(
+        discussion = FakeDiscussion.objects.create(
             subject=fake,
             user=user,
-            title='test issue {}'.format(i),
+            title='test discussion {}'.format(i),
             discussion=[message],
             closed=datetime.now(),
             closed_by=user
         )
 
-        response = self.get(url_for('api.fake_issues', id=fake.id))
+        response = self.get(url_for('api.fake_discussions', id=fake.id))
         self.assert200(response)
 
-        self.assertEqual(len(response.json['data']), len(open_issues))
+        self.assertEqual(len(response.json['data']), len(open_discussions))
 
-    def test_list_with_close_issues(self):
+    def test_list_with_close_discussions(self):
         fake = Fake.objects.create()
-        open_issues = []
-        closed_issues = []
+        open_discussions = []
+        closed_discussions = []
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            issue = FakeIssue.objects.create(
+            discussion = FakeDiscussion.objects.create(
                 subject=fake,
                 user=user,
-                title='test issue {}'.format(i),
+                title='test discussion {}'.format(i),
                 discussion=[message]
             )
-            open_issues.append(issue)
+            open_discussions.append(discussion)
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            issue = FakeIssue.objects.create(
+            discussion = FakeDiscussion.objects.create(
                 subject=fake,
                 user=user,
-                title='test issue {}'.format(i),
+                title='test discussion {}'.format(i),
                 discussion=[message],
                 closed=datetime.now(),
                 closed_by=user
             )
-            closed_issues.append(issue)
+            closed_discussions.append(discussion)
 
-        response = self.get(url_for('api.fake_issues', id=fake.id, closed=True))
+        response = self.get(url_for('api.fake_discussions', id=fake.id, closed=True))
         self.assert200(response)
 
-        self.assertEqual(len(response.json), len(open_issues + closed_issues))
+        self.assertEqual(len(response.json), len(open_discussions + closed_discussions))
 
-    def test_get_issue(self):
+    def test_get_discussion(self):
         fake = Fake.objects.create()
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        issue = FakeIssue.objects.create(
+        discussion = FakeDiscussion.objects.create(
             subject=fake,
             user=user,
-            title='test issue',
+            title='test discussion',
             discussion=[message]
         )
 
-        response = self.get(url_for('api.issue', id=issue.id))
+        response = self.get(url_for('api.discussion', id=discussion.id))
         self.assert200(response)
 
         data = response.json
 
         self.assertEqual(data['subject'], str(fake.id))
         self.assertEqual(data['user']['id'], str(user.id))
-        self.assertEqual(data['title'], 'test issue')
+        self.assertEqual(data['title'], 'test discussion')
         self.assertIsNotNone(data['created'])
         self.assertEqual(len(data['discussion']), 1)
         self.assertEqual(data['discussion'][0]['content'], 'bla bla')
         self.assertEqual(data['discussion'][0]['posted_by']['id'], str(user.id))
         self.assertIsNotNone(data['discussion'][0]['posted_on'])
 
-    def test_add_comment_to_issue(self):
-        fake = Fake.objects.create(metrics={'issues': 1})
+    def test_add_comment_to_discussion(self):
+        fake = Fake.objects.create(metrics={'discussions': 1})
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        issue = FakeIssue.objects.create(
+        discussion = FakeDiscussion.objects.create(
             subject=fake,
             user=user,
-            title='test issue',
+            title='test discussion',
             discussion=[message]
         )
 
         poster = self.login()
-        response = self.post(url_for('api.issue', id=issue.id), {
+        response = self.post(url_for('api.discussion', id=discussion.id), {
             'comment': 'new bla bla'
         })
         self.assert200(response)
 
         fake.reload()
-        self.assertEqual(fake.metrics['issues'], 1)
+        self.assertEqual(fake.metrics['discussions'], 1)
 
         data = response.json
 
         self.assertEqual(data['subject'], str(fake.id))
         self.assertEqual(data['user']['id'], str(user.id))
-        self.assertEqual(data['title'], 'test issue')
+        self.assertEqual(data['title'], 'test discussion')
         self.assertIsNotNone(data['created'])
         self.assertIsNone(data['closed'])
         self.assertIsNone(data['closed_by'])
@@ -215,32 +215,32 @@ class IssuesTest(APITestCase):
         self.assertEqual(data['discussion'][1]['posted_by']['id'], str(poster.id))
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
-    def test_close_issue(self):
+    def test_close_discussion(self):
         owner = self.login()
         user = UserFactory()
-        fake = Fake.objects.create(metrics={'issues': 1}, owner=owner)
+        fake = Fake.objects.create(metrics={'discussions': 1}, owner=owner)
         message = Message(content='bla bla', posted_by=user)
-        issue = FakeIssue.objects.create(
+        discussion = FakeDiscussion.objects.create(
             subject=fake,
             user=user,
-            title='test issue',
+            title='test discussion',
             discussion=[message]
         )
 
-        response = self.post(url_for('api.issue', id=issue.id), {
+        response = self.post(url_for('api.discussion', id=discussion.id), {
             'comment': 'close bla bla',
             'close': True
         })
         self.assert200(response)
 
         fake.reload()
-        self.assertEqual(fake.metrics['issues'], 0)
+        self.assertEqual(fake.metrics['discussions'], 0)
 
         data = response.json
 
         self.assertEqual(data['subject'], str(fake.id))
         self.assertEqual(data['user']['id'], str(user.id))
-        self.assertEqual(data['title'], 'test issue')
+        self.assertEqual(data['title'], 'test discussion')
         self.assertIsNotNone(data['created'])
         self.assertIsNotNone(data['closed'])
         self.assertEqual(data['closed_by'], str(owner.id))
@@ -249,23 +249,23 @@ class IssuesTest(APITestCase):
         self.assertEqual(data['discussion'][1]['posted_by']['id'], str(owner.id))
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
-    def test_close_issue_permissions(self):
-        fake = Fake.objects.create(metrics={'issues': 1})
+    def test_close_discussion_permissions(self):
+        fake = Fake.objects.create(metrics={'discussions': 1})
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        issue = FakeIssue.objects.create(
+        discussion = FakeDiscussion.objects.create(
             subject=fake,
             user=user,
-            title='test issue',
+            title='test discussion',
             discussion=[message]
         )
 
         self.login()
-        response = self.post(url_for('api.issue', id=issue.id), {
+        response = self.post(url_for('api.discussion', id=discussion.id), {
             'comment': 'close bla bla',
             'close': True
         })
         self.assert403(response)
 
         fake.reload()
-        self.assertEqual(fake.metrics['issues'], 1)
+        self.assertEqual(fake.metrics['discussions'], 1)

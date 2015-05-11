@@ -8,7 +8,6 @@
 ) }}.
 
 
-{{ _('Type') }}: {{ issue.type_label }}
 {{ _('Details') }}: {{ issue.title }}
 
 

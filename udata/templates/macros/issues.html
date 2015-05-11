@@ -30,7 +30,6 @@
 {% endif %}
 {% endmacro %}
 
-
 {% macro issue_list_item(issue, related=False) %}
 <div class="issue" data-issue-id="{{issue.id}}" data-api-url="{{url_for('api.issue', id=issue.id)}}">
     <div class="pull-left">
@@ -45,9 +44,8 @@
     {% endif %}
     <div class="media-body">
         <h4 class="media-heading text-left">
-            {{ issue.type_label }}
-            {% if related %}{{ _('on') }} {{issue.subject}}{% endif %}
-            ({{ issue.created|dateformat }})
+            {{ _('On') }}{{ issue.created|dateformat }}
+            {% if related %}{{ _('about') }} {{issue.subject}}{% endif %}
         </h4>
         <div class="message text-left">{{issue.title}}</div>
     </div>

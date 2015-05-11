@@ -10,7 +10,7 @@ from udata.api import api, API, fields
 from udata.core.user.api_fields import user_ref_fields
 
 from .forms import IssueCreateForm, IssueCommentForm
-from .models import Issue, Message, ISSUE_TYPES
+from .models import Issue, Message
 from .permissions import CloseIssuePermission
 from .signals import on_new_issue, on_new_issue_comment, on_issue_closed
 
@@ -24,7 +24,6 @@ message_fields = api.model('IssueMessage', {
 
 issue_fields = api.model('Issue', {
     'id': fields.String(description='The issue identifier', readonly=True),
-    'type': fields.String(description='The issue type', required=True, enum=ISSUE_TYPES.keys()),
     'subject': fields.String(attribute='subject.id', description='The issue target object identifier', required=True),
     'title': fields.String(description='The issue title', required=True),
     'user': fields.Nested(user_ref_fields, description='The issue author', required=True),
@@ -69,7 +68,6 @@ class IssuesAPI(API):
         issue = self.model.objects.create(
             subject=id,
             title=form.title.data,
-            type=form.type.data,
             user=current_user.id,
             discussion=[message]
         )
