@@ -15,7 +15,10 @@
     "tests"
   ],
   "resolutions": {
-    "bootstrap": "~3.3.1"
+    "bootstrap": "~3.3.1",
+    "spin.js": "~2.0.1",
+    "leaflet": "~0.7.3",
+    "moment": "~2.10.2"
   },
   "dependencies": {
     "jquery": "~2.1.3",
