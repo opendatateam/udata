@@ -14,7 +14,7 @@ function($, API, Auth, i18n, Notify) {
         }
 
         function displayNewDiscussionForm(el) {
-            $('.list-group-form').removeClass('hidden');
+            $('.list-group-form-discussion').removeClass('hidden');
         }
 
         function hideNewDiscussionButton(el) {
