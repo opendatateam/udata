@@ -20,7 +20,7 @@ define([
         var $this = $(this),
             $modal = modal({
                 title: i18n._('Issues'),
-                content: modalTpl({labels: forms.issues_labels}),
+                content: modalTpl(),
                 actions: [{
                     label: i18n._('New issue'),
                     icon: 'fa-plus',
@@ -77,9 +77,9 @@ define([
 
         API.get($this.data('api-url'), function(data) {
             data = data.data;
-            $modal.find('.spinner-container').html(listTpl({issues: data, labels: forms.issues_labels}));
+            $modal.find('.spinner-container').html(listTpl({issues: data}));
             count = data.length;
-            if ((!data.length || $this.data('issue-form')) && Auth.user) {
+            if (!data.length && Auth.user) {
                 showForm();
             } else {
                 for (var idx in data) {
@@ -89,9 +89,6 @@ define([
                     $tab.append(detailsTpl({issue: issue}));
                     $tab.find('form').validate(forms.rules);
                     $modal.find('.tab-content').append($tab);
-                    if ($this.data('issue-id') === issue.id) {
-                        showIssue($this);
-                    }
                 }
             }
         });

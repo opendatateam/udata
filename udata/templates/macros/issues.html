@@ -1,7 +1,7 @@
 {% macro issues_btn(obj, icons=None) %}
 {% set basename = obj.__class__.__name__|lower %}
 <button type="button" class="btn btn-danger btn-issues"
-    data-api-url="{{ url_for('api.{0}_issues'.format(basename), id=obj.id|string) }}"
+    data-api-url="{{ url_for('api.all_issues', for=obj.id|string) }}"
     rel="tooltip" title="{{ _('Issues') }}"
     data-placement="right" data-container="body">
     <span class="{{ ficon('fa-warning') }}"></span>
@@ -33,12 +33,12 @@
 {% macro issue_list_item(issue, related=False) %}
 <div class="issue" data-issue-id="{{issue.id}}" data-api-url="{{url_for('api.issue', id=issue.id)}}">
     <div class="pull-left">
-        <img class="media-object" width="50px" height="50px"
+        <img class="media-object" width="50" height="50"
             src="{{issue.user.avatar(50)}}" alt="{{issue.user.fullname}}">
     </div>
     {% if related %}
     <a class="pull-left" href="{{ issue.subject.display_url }}">
-        <img class="media-object" width="50px" height="50px"
+        <img class="media-object" width="50" height="50"
             src="{{issue.subject.image_url}}" alt="{{ _('Subject thumbnail') }}">
     </a>
     {% endif %}

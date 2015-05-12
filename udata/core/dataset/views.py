@@ -13,7 +13,7 @@ from udata.app import nav
 from udata.auth import login_required
 from udata.frontend.views import DetailView, CreateView, EditView, NestedEditView, SingleObject, SearchView, BaseView, NestedObject
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Resource, Reuse, Issue, Follow
+from udata.models import Dataset, Resource, Reuse, Issue, Discussion, Follow
 
 from udata.core import storages
 from udata.core.site.views import current_site
@@ -100,7 +100,7 @@ class DatasetDetailView(DatasetView, DetailView):
         context['reuses'] = Reuse.objects(datasets=self.dataset)
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = CommunityResourceEditPermission
-        context['issues'] = Issue.objects(subject=self.dataset)
+        context['discussions'] = Discussion.objects(subject=self.dataset)
         return context
 
 

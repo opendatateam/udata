@@ -54,7 +54,6 @@ class DiscussionAPI(API):
     '''
     Single Discussion Model API (Read and update).
     '''
-
     @api.doc('get_discussion')
     @api.marshal_with(discussion_fields)
     def get(self, id):
@@ -100,7 +99,7 @@ class DiscussionsAPI(API):
     def get(self):
         '''List all Discussions'''
         args = parser.parse_args()
-        discussions = self.model.objects
+        discussions = Discussion.objects
         if args['for']:
             discussions = discussions(subject__in=args['for'])
         if not args['closed']:
@@ -120,7 +119,7 @@ class DiscussionsAPI(API):
         message = Message(
             content=form.comment.data,
             posted_by=current_user.id)
-        discussion = self.model.objects.create(
+        discussion = Discussion.objects.create(
             subject=subject,
             title=form.title.data,
             user=current_user.id,

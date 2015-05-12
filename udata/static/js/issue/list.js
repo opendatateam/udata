@@ -19,8 +19,7 @@ define([
 
         API.get($this.data('api-url'), function(issue) {
             var $modal = modal({
-                    title: forms.issues_[issue.type],
-                    content: detailsTpl({issue: issue, labels: forms.issues_labels}),
+                    content: detailsTpl({issue: issue}),
                     actions: [{
                         label: i18n._('Comment'),
                         icon: 'fa-comment',

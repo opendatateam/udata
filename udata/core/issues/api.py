@@ -54,7 +54,6 @@ class IssueAPI(API):
     '''
     Single Issue Model API (Read and update).
     '''
-
     @api.doc('get_issue')
     @api.marshal_with(issue_fields)
     def get(self, id):
@@ -100,7 +99,7 @@ class IssuesAPI(API):
     def get(self):
         '''List all Issues'''
         args = parser.parse_args()
-        issues = self.model.objects
+        issues = Issue.objects
         if args['for']:
             issues = issues(subject__in=args['for'])
         if not args['closed']:
@@ -120,7 +119,7 @@ class IssuesAPI(API):
         message = Message(
             content=form.comment.data,
             posted_by=current_user.id)
-        issue = self.model.objects.create(
+        issue = Issue.objects.create(
             subject=subject,
             title=form.title.data,
             user=current_user.id,

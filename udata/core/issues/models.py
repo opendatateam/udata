@@ -8,7 +8,7 @@ from udata.models import db
 
 log = logging.getLogger(__name__)
 
-__all__ = ('Issue', 'Message')
+__all__ = ('Issue',)
 
 
 class Message(db.EmbeddedDocument):

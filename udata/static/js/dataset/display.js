@@ -16,6 +16,7 @@ define([
     'widgets/featured',
     'widgets/follow-btn',
     'widgets/issues-btn',
+    'widgets/discussions-btn',
     'widgets/share-btn',
 ], function($, log, i18n, Auth, API, L, template, extrasTpl, addReuseTpl, forms, modal) {
     'use strict';
@@ -29,12 +30,12 @@ define([
             // Prevent default click on link
             $this.find('a[itemprop="url"]').click(function(e) {
                 e.preventDefault();
-            })
+            });
 
             // Ensure toolbar links does not interfere
             $this.find('.tools a').click(function(e) {
                 e.stopPropagation();
-            })
+            });
 
             // Display detailled informations in a modal
             $this.click(function() {
@@ -137,7 +138,7 @@ define([
         } else if ($el.data('zones')) {
             $.get($el.data('zones'), function(data) {
                 loadJson(map, layer, data);
-            })
+            });
         }
     }
 
@@ -170,5 +171,5 @@ define([
             prepare_resources();
             fetch_reuses();
         }
-    }
+    };
 });

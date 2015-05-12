@@ -176,12 +176,10 @@
         </a>
         <div class="caption text-left">
             {% if org.description %}
-            <p>
                 {{ org.description|markdown }}
                 <a href="{{ url_for('organizations.show', org=org) }}"
                     title="{{ _('more') }}"
                     class="btn btn-grey btn-primary btn-mini">+</a>
-            </p>
             {% else %}
             <br/>
             {% endif %}
