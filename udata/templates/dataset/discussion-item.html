@@ -14,19 +14,19 @@
     {{ discussion.user|avatar(52, 'resource-owner') }}
 </div>
 {% for message in discussion.discussion %}
-    <div class="list-group-item list-group-indent list-group-thread-{{ discussion.id }} hidden" id="discussion-{{ loop_index }}-{{ loop.index }}">
+    <div class="list-group-item list-group-indent list-group-thread-{{ discussion.id }} hidden animated" id="discussion-{{ loop_index }}-{{ loop.index }}">
         <div class="format-label pull-left">
             <span>
                 <a href="#discussion-{{ loop_index }}-{{ loop.index }}">{{ loop_index }}.{{ loop.index }}</a>
             </span>
         </div>
-        <p class="list-group-item-heading ellipsis">
+        <p class="list-group-item-heading">
             {{ message.content }}
         </p>
         {{ message.posted_by|avatar(52, 'resource-owner') }}
     </div>
 {% endfor %}
-<a class="list-group-item add new-comment list-group-indent list-group-thread-{{ discussion.id }} hidden"
+<a class="list-group-item add new-comment list-group-indent list-group-thread-{{ discussion.id }} hidden animated"
     data-discussion-id="{{ discussion.id }}"
     href="#">
     <div class="format-label pull-left">+</div>
@@ -34,11 +34,12 @@
         {{ _('Adding a comment') }}
     </h4>
 </a>
-<div class="list-group-item list-group-form list-group-indent list-group-form-{{ discussion.id }} hidden"
-    data-discussion-id="{{ discussion.id }}">
+<div class="list-group-item list-group-form list-group-indent list-group-form-{{ discussion.id }} hidden animated"
+    data-discussion-id="{{ discussion.id }}"
+    id="discussion-{{ loop_index }}-{{ discussion.discussion|length + 1 }}">
     <div class="format-label pull-left">
         <span>
-            {{ loop_index }}.{{ discussion.discussion|length + 1 }}
+            <a href="#discussion-{{ loop_index }}-{{ discussion.discussion|length + 1 }}">{{ loop_index }}.{{ discussion.discussion|length + 1 }}</a>
         </span>
     </div>
     <h4 class="list-group-item-heading">
@@ -48,7 +49,7 @@
         {{ _("You're about to answer to this particular thread about:") }}<br />
         {{ discussion.title }}
     </p>
-    <form role="form" class="clearfix" data-api-url="{{url_for('api.discussion', for=dataset.id, id=discussion.id)}}">
+    <form role="form" class="clearfix animated" data-api-url="{{url_for('api.discussion', for=dataset.id, id=discussion.id)}}">
         <div class="form-group">
             <label for="comment">{{ _('Comment') }}</label>
             <textarea id="comment" name="comment" class="form-control" rows="3" required></textarea>
