@@ -478,10 +478,11 @@
                         {{ _('Start a new discussion') }}
                     </h4>
                 </a>
-                <div class="list-group-item list-group-form list-group-form-discussion hidden">
+                {% set discussion_length = discussions|rejectattr('closed')|list|length %}
+                <div class="list-group-item list-group-form list-group-form-discussion hidden animated" id="discussion-{{ discussion_length + 1 }}">
                     <div class="format-label pull-left">
                         <span>
-                            {{ discussions|rejectattr('closed')|list|length + 1 }}
+                            <a href="#discussion-{{ discussion_length + 1 }}">{{ discussion_length + 1 }}</a>
                         </span>
                     </div>
                     <h4 class="list-group-item-heading">
@@ -490,7 +491,7 @@
                     <p class="list-group-item-text">
                         {{ _("You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above. If you want to report an anomaly, please use the dedicated button just under the datasets.") }}
                     </p>
-                    <form role="form" class="clearfix" data-api-url="{{url_for('api.all_discussions', for=dataset.id)}}">
+                    <form role="form" class="clearfix animated" data-api-url="{{url_for('api.all_discussions', for=dataset.id)}}">
                         <div class="form-group">
                             <label for="title">{{ _('Title') }}</label>
                             <input type="text" id="title" name="title" class="form-control" required />
@@ -501,7 +502,15 @@
                     </form>
                     {{ current_user|avatar(52, 'resource-owner') }}
                 </div>
-
+                <div class="list-group-item list-group-indent list-group-new-message hidden animated" id="discussion-{{ discussion_length + 1 }}-1">
+                    <div class="format-label pull-left">
+                        <span>
+                            <a href="#discussion-{{ discussion_length + 1 }}-1">{{ discussion_length + 1 }}.1</a>
+                        </span>
+                    </div>
+                    <p class="list-group-item-heading"></p>
+                    {{ current_user|avatar(52, 'resource-owner') }}
+                </div>
             </div>
 
             <div class="col-sm-3 note">
