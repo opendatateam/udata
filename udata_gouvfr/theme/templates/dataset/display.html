@@ -464,6 +464,51 @@
 
     <div class="container">
 
+        <h3>{{ _('Discussions') }}</h3>
+        <div class="row">
+            <div class="col-sm-9 list-group resources-list smaller">
+            {% for discussion in discussions|rejectattr('closed') %}
+                {% set loop_index = loop.index %}
+                {% include theme('dataset/discussion-item.html') with context %}
+            {% endfor %}
+                <a class="list-group-item add new-discussion"
+                    href="#">
+                    <div class="format-label pull-left">+</div>
+                    <h4 class="list-group-item-heading">
+                        {{ _('Start a new discussion') }}
+                    </h4>
+                </a>
+                <div class="list-group-item list-group-form list-group-form-discussion hidden">
+                    <div class="format-label pull-left">
+                        <span>
+                            {{ discussions|rejectattr('closed')|list|length + 1 }}
+                        </span>
+                    </div>
+                    <h4 class="list-group-item-heading">
+                        {{ _('Starting a new discussion thread') }}
+                    </h4>
+                    <p class="list-group-item-text">
+                        {{ _("You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above. If you want to report an anomaly, please use the dedicated button just under the datasets.") }}
+                    </p>
+                    <form role="form" class="clearfix" data-api-url="{{url_for('api.all_discussions', for=dataset.id)}}">
+                        <div class="form-group">
+                            <label for="title">{{ _('Title') }}</label>
+                            <input type="text" id="title" name="title" class="form-control" required />
+                            <label for="comment">{{ _('Comment') }}</label>
+                            <textarea id="comment" name="comment" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <input type="submit" value="{{ _('Start a discussion') }}" class="btn btn-primary btn-block pull-right submit-new-discussion" />
+                    </form>
+                    {{ current_user|avatar(52, 'resource-owner') }}
+                </div>
+
+            </div>
+
+            <div class="col-sm-3 note">
+                <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
+            </div>
+        </div>
+
         <h3>{{ _('Resources') }}</h3>
         <div class="row">
             <div class="col-sm-9 list-group resources-list smaller">
