@@ -54,7 +54,8 @@ class DiscussionsTest(APITestCase):
 
         response = self.post(url_for('api.fake_discussions', **{'for': fake.id}), {
             'title': 'test title',
-            'comment': 'bla bla'
+            'comment': 'bla bla',
+            'subject': fake.id
         })
         self.assertStatus(response, 201)
 
@@ -82,7 +83,8 @@ class DiscussionsTest(APITestCase):
         fake = Fake.objects.create(name='Fake')
 
         response = self.post(url_for('api.fake_discussions', **{'for': fake.id}), {
-            'title': 'test title'
+            'title': 'test title',
+            'subject': fake.id
         })
         self.assertStatus(response, 400)
 
@@ -91,6 +93,17 @@ class DiscussionsTest(APITestCase):
         fake = Fake.objects.create(name='Fake')
 
         response = self.post(url_for('api.fake_discussions', **{'for': fake.id}), {
+            'comment': 'bla bla',
+            'subject': fake.id
+        })
+        self.assertStatus(response, 400)
+
+    def test_new_discussion_missing_subject(self):
+        self.login()
+        fake = Fake.objects.create(name='Fake')
+
+        response = self.post(url_for('api.fake_discussions', **{'for': fake.id}), {
+            'title': 'test title',
             'comment': 'bla bla'
         })
         self.assertStatus(response, 400)

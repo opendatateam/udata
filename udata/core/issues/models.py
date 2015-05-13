@@ -33,4 +33,5 @@ class Issue(db.Document):
             'created'
         ],
         'allow_inheritance': True,
+        'ordering': ['created'],
     }

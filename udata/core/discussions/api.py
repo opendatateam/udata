@@ -88,14 +88,14 @@ class DiscussionAPI(API):
         return discussion
 
 
-@ns.route('/', endpoint='all_discussions')
-@api.doc(parser=parser)
+@ns.route('/', endpoint='discussions')
 class DiscussionsAPI(API):
     '''
     List all discussions.
     '''
     @api.doc('list_discussions')
     @api.marshal_with(discussion_page_fields)
+    @api.doc(parser=parser)
     def get(self):
         '''List all Discussions'''
         args = parser.parse_args()
@@ -107,20 +107,18 @@ class DiscussionsAPI(API):
         return discussions.paginate(args['page'], args['page_size'])
 
     @api.secure
-    @api.doc(model=discussion_fields)
+    @api.expect(discussion_fields)
     @api.doc('create_discussion')
     @api.marshal_with(discussion_fields)
     def post(self):
-        '''Create a new Discussion for an object given its ID'''
-        args = parser.parse_args()
-        subject = args.get('for', [])[0]
+        '''Create a new Discussion'''
         form = api.validate(DiscussionCreateForm)
 
         message = Message(
             content=form.comment.data,
             posted_by=current_user.id)
         discussion = Discussion.objects.create(
-            subject=subject,
+            subject=form.subject.data.id,
             title=form.title.data,
             user=current_user.id,
             discussion=[message]

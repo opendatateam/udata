@@ -19,7 +19,7 @@ class IssuesMetric(Metric):
 @on_new_issue.connect
 @on_issue_closed.connect
 def update_issues_metric(issue, **kwargs):
-    model = issue.subject.__class__
+    model = issue.subject
     for name, cls in Metric.get_for(model).items():
         if issubclass(cls, IssuesMetric):
             cls(target=issue.subject).trigger_update()

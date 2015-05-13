@@ -88,13 +88,13 @@ class IssueAPI(API):
         return issue
 
 
-@ns.route('/', endpoint='all_issues')
-@api.doc(parser=parser)
+@ns.route('/', endpoint='issues')
 class IssuesAPI(API):
     '''
     List all issues.
     '''
     @api.doc('list_issues')
+    @api.doc(parser=parser)
     @api.marshal_with(issue_page_fields)
     def get(self):
         '''List all Issues'''
@@ -107,20 +107,18 @@ class IssuesAPI(API):
         return issues.paginate(args['page'], args['page_size'])
 
     @api.secure
-    @api.doc(model=issue_fields)
+    @api.expect(issue_fields)
     @api.doc('create_issue')
     @api.marshal_with(issue_fields)
     def post(self):
-        '''Create a new Issue for an object given its ID'''
-        args = parser.parse_args()
-        subject = args.get('for', [])[0]
+        '''Create a new Issue'''
         form = api.validate(IssueCreateForm)
 
         message = Message(
             content=form.comment.data,
             posted_by=current_user.id)
         issue = Issue.objects.create(
-            subject=subject,
+            subject=form.subject.data.id,
             title=form.title.data,
             user=current_user.id,
             discussion=[message]

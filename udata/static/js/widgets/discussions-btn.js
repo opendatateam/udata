@@ -89,7 +89,8 @@ function($, API, Auth, i18n, Notify) {
 
         var data = {
             title: $form.find('#title').val(),
-            comment: $form.find('#comment').val()
+            comment: $form.find('#comment').val(),
+            subject: $form.data('subject')
         };
 
         function displayNewDiscussion(el, form, data, newMessage) {
@@ -109,6 +110,7 @@ function($, API, Auth, i18n, Notify) {
         e.preventDefault();
         var $this = $(this);
         var $form = $this.parent();
+        var discussionId = $form.parent().data('discussion-id');
 
         if (!Auth.need_user(i18n._('You need to be logged in to add a comment.')) || !$form.valid()) {
             return false;
@@ -119,7 +121,6 @@ function($, API, Auth, i18n, Notify) {
         };
 
         function displayNewComment(el, form, data) {
-            var discussionId = form.parent().data('discussion-id');
             form.siblings('.list-group-item-heading').text(data.comment);
             form.siblings('.list-group-item-text').remove();
             form.parent().css('min-height', '54px');

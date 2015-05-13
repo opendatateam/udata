@@ -17,6 +17,7 @@ define([
 
     // Handle featured button
     $('.btn-issues').click(function(e) {
+        e.preventDefault();
         var $this = $(this),
             $modal = modal({
                 title: i18n._('Issues'),
@@ -114,7 +115,8 @@ define([
                 var data = {
                     type: $modal.find('input[name="type"]:checked').val(),
                     title: $modal.find('#title').val(),
-                    comment: $modal.find('#comment').val()
+                    comment: $modal.find('#comment').val(),
+                    subject: $this.data('subject')
                 };
 
                 API.post($this.data('api-url'), data, function(data) {
@@ -169,7 +171,6 @@ define([
             }
             return false;
         });
-        e.preventDefault();
     });
 
 });

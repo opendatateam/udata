@@ -290,6 +290,31 @@ class ModelField(object):
                 raise validators.ValidationError(message)
 
 
+class ModelChoiceField(StringField):
+    models = None
+
+    def __init__(self, *args, **kwargs):
+        self.models = kwargs.pop('models', self.models)
+        super(ModelChoiceField, self).__init__(*args, **kwargs)
+
+    def _value(self):
+        if self.data:
+            return unicode(self.data.id)
+        else:
+            return u''
+
+    def process_formdata(self, valuelist):
+        if valuelist and len(valuelist) == 1 and valuelist[0]:
+            for model in self.models:
+                try:
+                    self.data = model.objects.get(id=clean_oid(valuelist[0], model))
+                except model.DoesNotExist:
+                    pass
+            if not self.data:
+                message = _('Model for {0} not found').format(valuelist[0])
+                raise validators.ValidationError(message)
+
+
 class ModelList(object):
     model = None
 
