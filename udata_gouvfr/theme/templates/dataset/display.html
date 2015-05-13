@@ -491,7 +491,9 @@
                     <p class="list-group-item-text">
                         {{ _("You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above. If you want to report an anomaly, please use the dedicated button just under the datasets.") }}
                     </p>
-                    <form role="form" class="clearfix animated" data-api-url="{{url_for('api.all_discussions', for=dataset.id)}}">
+                    <form role="form" class="clearfix animated"
+                        data-api-url="{{ url_for('api.discussions', for=dataset.id) }}"
+                        data-subject="{{ dataset.id }}">
                         <div class="form-group">
                             <label for="title">{{ _('Title') }}</label>
                             <input type="text" id="title" name="title" class="form-control" required />
