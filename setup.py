@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 import re
 
-from os.path import join
+from os.path import join, dirname
 
 from setuptools import setup, find_packages
 
@@ -20,6 +20,8 @@ PYPI_RST_FILTERS = (
     (r'.*coveralls\.io/.*', ''),
 )
 
+ROOT = dirname(__file__)
+
 
 def rst(filename):
     '''
@@ -28,7 +30,7 @@ def rst(filename):
      - code-block directive
      - travis ci build badge
     '''
-    content = open(filename).read()
+    content = open(join(ROOT, filename)).read()
     for regex, replacement in PYPI_RST_FILTERS:
         content = re.sub(regex, replacement, content)
     return content
@@ -37,7 +39,7 @@ def rst(filename):
 def pip(filename):
     '''Parse pip requirement file and transform it to setuptools requirements'''
     requirements = []
-    for line in open(join('requirements', filename)):
+    for line in open(join(ROOT, 'requirements', filename)):
         line = line.strip()
         if not line or '://' in line:
             continue
@@ -50,7 +52,7 @@ def pip(filename):
 
 
 def dependency_links(filename):
-    return [line.strip() for line in open(join('requirements', filename)) if '://' in line]
+    return [line.strip() for line in open(join(ROOT, 'requirements', filename)) if '://' in line]
 
 
 long_description = '\n'.join((

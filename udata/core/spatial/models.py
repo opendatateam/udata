@@ -70,7 +70,8 @@ class GeoZone(db.Document):
 
 @cache.memoize(timeout=50)
 def get_spatial_granularities(lang):
-    return [(l.id, l.name) for l in GeoLevel.objects] + BASE_GRANULARITIES
+    granularities = [(l.id, l.name) for l in GeoLevel.objects] + BASE_GRANULARITIES
+    return [(id, str(name)) for id, name in granularities]
 
 
 spatial_granularities = LocalProxy(lambda: get_spatial_granularities(get_locale()))
