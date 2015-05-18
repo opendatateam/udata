@@ -274,6 +274,7 @@ def init_app(app):
     import udata.core.metrics.api
     import udata.core.user.api
     import udata.core.dataset.api
+    import udata.core.issues.api
     import udata.core.discussions.api
     import udata.core.reuse.api
     import udata.core.organization.api

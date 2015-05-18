@@ -6,11 +6,11 @@ from datetime import datetime
 from flask.ext.security import current_user
 
 from udata.api import api, API, fields
-
+from udata.models import Dataset, DatasetIssue, Reuse, ReuseIssue
 from udata.core.user.api_fields import user_ref_fields
 
-from .forms import IssueCreateForm, IssueCommentForm
-from .models import Issue, Message
+from .forms import IssueCommentForm, IssueCreateForm
+from .models import Message, Issue
 from .permissions import CloseIssuePermission
 from .signals import on_new_issue, on_new_issue_comment, on_issue_closed
 
@@ -117,7 +117,11 @@ class IssuesAPI(API):
         message = Message(
             content=form.comment.data,
             posted_by=current_user.id)
-        issue = Issue.objects.create(
+        if isinstance(form.subject.data, Dataset):
+            model = DatasetIssue
+        elif isinstance(form.subject.data, Reuse):
+            model = ReuseIssue
+        issue = model.objects.create(
             subject=form.subject.data.id,
             title=form.title.data,
             user=current_user.id,

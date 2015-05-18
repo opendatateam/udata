@@ -19,7 +19,7 @@ class DiscussionsMetric(Metric):
 @on_new_discussion.connect
 @on_discussion_closed.connect
 def update_discussions_metric(discussion, **kwargs):
-    model = discussion.subject
+    model = discussion.subject.__class__
     for name, cls in Metric.get_for(model).items():
         if issubclass(cls, DiscussionsMetric):
             cls(target=discussion.subject).trigger_update()

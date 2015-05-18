@@ -19,7 +19,7 @@ class Message(db.EmbeddedDocument):
 
 class Discussion(db.Document):
     user = db.ReferenceField('User')
-    subject = db.ReferenceField(db.DomainModel)
+    subject = db.ReferenceField('Dataset')
     title = db.StringField(required=True)
     discussion = db.ListField(db.EmbeddedDocumentField(Message))
     created = db.DateTimeField(default=datetime.now, required=True)

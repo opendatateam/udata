@@ -10,7 +10,7 @@ from udata.api import api, API, fields
 from udata.core.user.api_fields import user_ref_fields
 
 from .forms import DiscussionCreateForm, DiscussionCommentForm
-from .models import Discussion, Message
+from .models import Message, Discussion
 from .permissions import CloseDiscussionPermission
 from .signals import on_new_discussion, on_new_discussion_comment, on_discussion_closed
 
@@ -52,12 +52,12 @@ parser.add_argument('page_size', type=int, default=20, location='args', help='Th
 @api.doc(model=discussion_fields)
 class DiscussionAPI(API):
     '''
-    Single Discussion Model API (Read and update).
+    Base class for a discussion thread.
     '''
     @api.doc('get_discussion')
     @api.marshal_with(discussion_fields)
     def get(self, id):
-        '''Get an discussion given its ID'''
+        '''Get a discussion given its ID'''
         discussion = Discussion.objects.get_or_404(id=id)
         return discussion
 
@@ -91,7 +91,7 @@ class DiscussionAPI(API):
 @ns.route('/', endpoint='discussions')
 class DiscussionsAPI(API):
     '''
-    List all discussions.
+    Base class for a list of discussions.
     '''
     @api.doc('list_discussions')
     @api.marshal_with(discussion_page_fields)

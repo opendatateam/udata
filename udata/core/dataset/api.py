@@ -12,9 +12,8 @@ from werkzeug.datastructures import FileStorage
 
 from udata import fileutils, search
 from udata.auth import admin_permission
-from udata.api import api, fields, ModelAPI, SingleObjectAPI, API
+from udata.api import api, fields, SingleObjectAPI, API
 from udata.core import storages
-from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by, multi_to_dict
 
@@ -24,10 +23,9 @@ from .api_fields import (
     dataset_suggestion_fields,
     license_fields,
     resource_fields,
-    resources_order,
     upload_fields,
 )
-from .models import Dataset, Resource, DatasetIssue, FollowDataset, Checksum, License
+from .models import Dataset, Resource, FollowDataset, Checksum, License
 from .permissions import DatasetEditPermission
 from .forms import DatasetForm, ResourceForm, DatasetFullForm
 from .search import DatasetSearch
@@ -226,12 +224,6 @@ class ResourceAPI(API):
         dataset.resources.remove(resource)
         dataset.save()
         return '', 204
-
-
-@ns.route('/<id>/issues/', endpoint='dataset_issues')
-@api.doc(params={'id': 'The dataset ID'})
-class DatasetIssuesAPI(IssuesAPI):
-    model = DatasetIssue
 
 
 @ns.route('/<id>/followers/', endpoint='dataset_followers')

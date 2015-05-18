@@ -3,43 +3,15 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from flask import url_for, Blueprint
+from flask import url_for
 
-from udata.api import api
-from udata.models import db
-
-from udata.core.metrics.models import WithMetrics
+from udata.models import Dataset, DatasetIssue
 from udata.core.user.views import blueprint as user_bp
-
 from udata.core.issues.models import Issue, Message
-from udata.core.issues.metrics import IssuesMetric
-from udata.core.issues.api import IssuesAPI
+from udata.core.issues.signals import on_new_issue
 
 from .api import APITestCase
 from .factories import faker, UserFactory
-
-
-bp = Blueprint('test_issues', __name__)
-ns = api.namespace('test', 'A test namespace')
-
-
-class Fake(WithMetrics, db.Document):
-    name = db.StringField()
-    owner = db.ReferenceField('User')
-    organization = db.ReferenceField('Organization')
-
-
-class FakeIssue(Issue):
-    subject = db.ReferenceField(Fake)
-
-
-class FakeIssuesMetric(IssuesMetric):
-    model = Fake
-
-
-@ns.route('/issues/', endpoint='fake_issues')
-class FakeIssuesAPI(IssuesAPI):
-    model = FakeIssue
 
 
 class IssuesTest(APITestCase):
@@ -50,19 +22,19 @@ class IssuesTest(APITestCase):
 
     def test_new_issue(self):
         user = self.login()
-        fake = Fake.objects.create(name='Fake')
+        dataset = Dataset.objects.create(title='Test dataset')
 
-        response = self.post(url_for('api.fake_issues', **{'for': fake.id}), {
+        response = self.post(url_for('api.issues', **{'for': dataset.id}), {
             'title': 'test title',
             'comment': 'bla bla',
-            'subject': fake.id
+            'subject': dataset.id
         })
         self.assertStatus(response, 201)
 
-        fake.reload()
-        self.assertEqual(fake.metrics['issues'], 1)
+        dataset.reload()
+        self.assertEqual(dataset.metrics['issues'], 1)
 
-        issues = Issue.objects(subject=fake)
+        issues = Issue.objects(subject=dataset)
         self.assertEqual(len(issues), 1)
 
         issue = issues[0]
@@ -80,42 +52,42 @@ class IssuesTest(APITestCase):
 
     def test_new_issue_missing_comment(self):
         self.login()
-        fake = Fake.objects.create(name='Fake')
+        dataset = Dataset.objects.create(title='Test dataset')
 
-        response = self.post(url_for('api.fake_issues', **{'for': fake.id}), {
+        response = self.post(url_for('api.issues', **{'for': dataset.id}), {
             'title': 'test title',
-            'subject': fake.id
+            'subject': dataset.id
         })
         self.assertStatus(response, 400)
 
     def test_new_issue_missing_title(self):
         self.login()
-        fake = Fake.objects.create(name='Fake')
+        dataset = Dataset.objects.create(title='Test dataset')
 
-        response = self.post(url_for('api.fake_issues', **{'for': fake.id}), {
+        response = self.post(url_for('api.issues', **{'for': dataset.id}), {
             'comment': 'bla bla',
-            'subject': fake.id
+            'subject': dataset.id
         })
         self.assertStatus(response, 400)
 
     def test_new_issue_missing_subject(self):
         self.login()
-        fake = Fake.objects.create(name='Fake')
+        dataset = Dataset.objects.create(title='Test dataset')
 
-        response = self.post(url_for('api.fake_issues', **{'for': fake.id}), {
+        response = self.post(url_for('api.issues', **{'for': dataset.id}), {
             'title': 'test title',
             'comment': 'bla bla'
         })
         self.assertStatus(response, 400)
 
     def test_list_issues(self):
-        fake = Fake.objects.create()
+        dataset = Dataset.objects.create(title='Test dataset')
         open_issues = []
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            issue = FakeIssue.objects.create(
-                subject=fake,
+            issue = DatasetIssue.objects.create(
+                subject=dataset,
                 user=user,
                 title='test issue {}'.format(i),
                 discussion=[message]
@@ -124,8 +96,8 @@ class IssuesTest(APITestCase):
         # Creating a closed issue that shouldn't show up in response.
         user = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)
-        issue = FakeIssue.objects.create(
-            subject=fake,
+        issue = DatasetIssue.objects.create(
+            subject=dataset,
             user=user,
             title='test issue {}'.format(i),
             discussion=[message],
@@ -133,20 +105,20 @@ class IssuesTest(APITestCase):
             closed_by=user
         )
 
-        response = self.get(url_for('api.fake_issues', id=fake.id))
+        response = self.get(url_for('api.issues', id=dataset.id))
         self.assert200(response)
 
         self.assertEqual(len(response.json['data']), len(open_issues))
 
     def test_list_with_close_issues(self):
-        fake = Fake.objects.create()
+        dataset = Dataset.objects.create(title='Test dataset')
         open_issues = []
         closed_issues = []
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            issue = FakeIssue.objects.create(
-                subject=fake,
+            issue = DatasetIssue.objects.create(
+                subject=dataset,
                 user=user,
                 title='test issue {}'.format(i),
                 discussion=[message]
@@ -155,8 +127,8 @@ class IssuesTest(APITestCase):
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            issue = FakeIssue.objects.create(
-                subject=fake,
+            issue = DatasetIssue.objects.create(
+                subject=dataset,
                 user=user,
                 title='test issue {}'.format(i),
                 discussion=[message],
@@ -165,17 +137,17 @@ class IssuesTest(APITestCase):
             )
             closed_issues.append(issue)
 
-        response = self.get(url_for('api.fake_issues', id=fake.id, closed=True))
+        response = self.get(url_for('api.issues', id=dataset.id, closed=True))
         self.assert200(response)
 
         self.assertEqual(len(response.json), len(open_issues + closed_issues))
 
     def test_get_issue(self):
-        fake = Fake.objects.create()
+        dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        issue = FakeIssue.objects.create(
-            subject=fake,
+        issue = DatasetIssue.objects.create(
+            subject=dataset,
             user=user,
             title='test issue',
             discussion=[message]
@@ -186,7 +158,7 @@ class IssuesTest(APITestCase):
 
         data = response.json
 
-        self.assertEqual(data['subject'], str(fake.id))
+        self.assertEqual(data['subject'], str(dataset.id))
         self.assertEqual(data['user']['id'], str(user.id))
         self.assertEqual(data['title'], 'test issue')
         self.assertIsNotNone(data['created'])
@@ -196,15 +168,16 @@ class IssuesTest(APITestCase):
         self.assertIsNotNone(data['discussion'][0]['posted_on'])
 
     def test_add_comment_to_issue(self):
-        fake = Fake.objects.create(metrics={'issues': 1})
+        dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        issue = FakeIssue.objects.create(
-            subject=fake,
+        issue = DatasetIssue.objects.create(
+            subject=dataset,
             user=user,
             title='test issue',
             discussion=[message]
         )
+        on_new_issue.send(issue)  # Updating metrics.
 
         poster = self.login()
         response = self.post(url_for('api.issue', id=issue.id), {
@@ -212,12 +185,12 @@ class IssuesTest(APITestCase):
         })
         self.assert200(response)
 
-        fake.reload()
-        self.assertEqual(fake.metrics['issues'], 1)
+        dataset.reload()
+        self.assertEqual(dataset.metrics['issues'], 1)
 
         data = response.json
 
-        self.assertEqual(data['subject'], str(fake.id))
+        self.assertEqual(data['subject'], str(dataset.id))
         self.assertEqual(data['user']['id'], str(user.id))
         self.assertEqual(data['title'], 'test issue')
         self.assertIsNotNone(data['created'])
@@ -231,14 +204,15 @@ class IssuesTest(APITestCase):
     def test_close_issue(self):
         owner = self.login()
         user = UserFactory()
-        fake = Fake.objects.create(metrics={'issues': 1}, owner=owner)
+        dataset = Dataset.objects.create(title='Test dataset', owner=owner)
         message = Message(content='bla bla', posted_by=user)
-        issue = FakeIssue.objects.create(
-            subject=fake,
+        issue = DatasetIssue.objects.create(
+            subject=dataset,
             user=user,
             title='test issue',
             discussion=[message]
         )
+        on_new_issue.send(issue)  # Updating metrics.
 
         response = self.post(url_for('api.issue', id=issue.id), {
             'comment': 'close bla bla',
@@ -246,12 +220,12 @@ class IssuesTest(APITestCase):
         })
         self.assert200(response)
 
-        fake.reload()
-        self.assertEqual(fake.metrics['issues'], 0)
+        dataset.reload()
+        self.assertEqual(dataset.metrics['issues'], 0)
 
         data = response.json
 
-        self.assertEqual(data['subject'], str(fake.id))
+        self.assertEqual(data['subject'], str(dataset.id))
         self.assertEqual(data['user']['id'], str(user.id))
         self.assertEqual(data['title'], 'test issue')
         self.assertIsNotNone(data['created'])
@@ -263,15 +237,16 @@ class IssuesTest(APITestCase):
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
     def test_close_issue_permissions(self):
-        fake = Fake.objects.create(metrics={'issues': 1})
+        dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        issue = FakeIssue.objects.create(
-            subject=fake,
+        issue = DatasetIssue.objects.create(
+            subject=dataset,
             user=user,
             title='test issue',
             discussion=[message]
         )
+        on_new_issue.send(issue)  # Updating metrics.
 
         self.login()
         response = self.post(url_for('api.issue', id=issue.id), {
@@ -280,5 +255,6 @@ class IssuesTest(APITestCase):
         })
         self.assert403(response)
 
-        fake.reload()
-        self.assertEqual(fake.metrics['issues'], 1)
+        dataset.reload()
+        # Metrics unchanged after attempt to close the discussion.
+        self.assertEqual(dataset.metrics['issues'], 1)
