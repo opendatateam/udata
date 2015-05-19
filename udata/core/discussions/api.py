@@ -6,7 +6,7 @@ from datetime import datetime
 from flask.ext.security import current_user
 
 from udata.api import api, API, fields
-
+from udata.models import Dataset, DatasetDiscussion, Reuse, ReuseDiscussion
 from udata.core.user.api_fields import user_ref_fields
 
 from .forms import DiscussionCreateForm, DiscussionCommentForm
@@ -117,7 +117,11 @@ class DiscussionsAPI(API):
         message = Message(
             content=form.comment.data,
             posted_by=current_user.id)
-        discussion = Discussion.objects.create(
+        if isinstance(form.subject.data, Dataset):
+            model = DatasetDiscussion
+        elif isinstance(form.subject.data, Reuse):
+            model = ReuseDiscussion
+        discussion = model.objects.create(
             subject=form.subject.data.id,
             title=form.title.data,
             user=current_user.id,

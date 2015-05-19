@@ -116,7 +116,8 @@ class IssuesAPI(API):
 
         message = Message(
             content=form.comment.data,
-            posted_by=current_user.id)
+            posted_by=current_user.id
+        )
         if isinstance(form.subject.data, Dataset):
             model = DatasetIssue
         elif isinstance(form.subject.data, Reuse):

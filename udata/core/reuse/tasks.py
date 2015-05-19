@@ -3,8 +3,10 @@ from __future__ import unicode_literals, absolute_import
 
 from udata import mail
 from udata.i18n import lazy_gettext as _
-from udata.models import Reuse, ReuseIssue, FollowReuse, Activity, Metrics
+from udata.models import Activity, Metrics
 from udata.tasks import get_logger, job, task
+
+from .models import Reuse, ReuseIssue, ReuseDiscussion, FollowReuse
 
 log = get_logger(__name__)
 
@@ -17,6 +19,8 @@ def purge_reuses(self):
         FollowReuse.objects(following=reuse).delete()
         # Remove issues
         ReuseIssue.objects(subject=reuse).delete()
+        # Remove discussions
+        ReuseDiscussion.objects(subject=reuse).delete()
         # Remove activity
         Activity.objects(related_to=reuse).delete()
         # Remove metrics

@@ -31,7 +31,7 @@
     href="#">
     <div class="format-label pull-left">+</div>
     <h4 class="list-group-item-heading">
-        {{ _('Adding a comment') }}
+        {{ _('Add a comment') }}
     </h4>
 </a>
 <div class="list-group-item list-group-form list-group-indent list-group-form-{{ discussion.id }} hidden animated"
@@ -49,7 +49,7 @@
         {{ _("You're about to answer to this particular thread about:") }}<br />
         {{ discussion.title }}
     </p>
-    <form role="form" class="clearfix animated" data-api-url="{{url_for('api.discussion', for=dataset.id, id=discussion.id)}}">
+    <form role="form" class="clearfix animated" data-api-url="{{url_for('api.discussion', for=baseobject.id, id=discussion.id)}}">
         <div class="form-group">
             <label for="comment">{{ _('Comment') }}</label>
             <textarea id="comment" name="comment" class="form-control" rows="3" required></textarea>

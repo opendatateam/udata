@@ -11,9 +11,10 @@ from werkzeug.contrib.atom import AtomFeed
 from udata.app import nav
 from udata.frontend.views import SearchView, DetailView, CreateView, EditView, SingleObject, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Reuse, Issue, FollowReuse, Dataset
+from udata.models import Issue, FollowReuse, Dataset
 
 from .forms import ReuseForm, AddDatasetToReuseForm
+from .models import Reuse, ReuseDiscussion
 from .permissions import ReuseEditPermission
 from .tasks import notify_new_reuse
 
@@ -38,12 +39,12 @@ def recent_feed():
                 'uri': url_for('users.show', user=reuse.owner.id, _external=True),
             }
         feed.add(reuse.title,
-                unicode(render_template('reuse/feed_item.html', reuse=reuse)),
-                content_type='html',
-                author=author,
-                url=url_for('reuses.show', reuse=reuse.id, _external=True),
-                updated=reuse.created_at,
-                published=reuse.created_at)
+                 unicode(render_template('reuse/feed_item.html', reuse=reuse)),
+                 content_type='html',
+                 author=author,
+                 url=url_for('reuses.show', reuse=reuse.id, _external=True),
+                 updated=reuse.created_at,
+                 published=reuse.created_at)
     return feed.get_response()
 
 
@@ -98,7 +99,8 @@ class ReuseDetailView(ReuseView, DetailView):
 
         context.update(
             followers=followers,
-            can_edit=ReuseEditPermission(self.reuse)
+            can_edit=ReuseEditPermission(self.reuse),
+            discussions=ReuseDiscussion.objects(subject=self.reuse)
         )
 
         return context

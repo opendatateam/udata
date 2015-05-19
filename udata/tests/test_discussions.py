@@ -5,10 +5,8 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import Dataset
-
+from udata.models import Dataset, DatasetDiscussion
 from udata.core.user.views import blueprint as user_bp
-
 from udata.core.discussions.models import Message, Discussion
 from udata.core.discussions.signals import on_new_discussion
 
@@ -173,7 +171,7 @@ class DiscussionsTest(APITestCase):
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        discussion = Discussion.objects.create(
+        discussion = DatasetDiscussion.objects.create(
             subject=dataset.id,
             user=user,
             title='test discussion',
@@ -208,7 +206,7 @@ class DiscussionsTest(APITestCase):
         user = UserFactory()
         dataset = Dataset.objects.create(title='Test dataset', owner=owner)
         message = Message(content='bla bla', posted_by=user)
-        discussion = Discussion.objects.create(
+        discussion = DatasetDiscussion.objects.create(
             subject=dataset.id,
             user=user,
             title='test discussion',
@@ -242,7 +240,7 @@ class DiscussionsTest(APITestCase):
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        discussion = Discussion.objects.create(
+        discussion = DatasetDiscussion.objects.create(
             subject=dataset.id,
             user=user,
             title='test discussion',

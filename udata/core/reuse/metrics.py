@@ -8,10 +8,14 @@ from udata.i18n import lazy_gettext as _
 from udata.core.followers.metrics import FollowersMetric
 
 from udata.core.issues.metrics import IssuesMetric
+from udata.core.discussions.metrics import DiscussionsMetric
 
 from .models import Reuse
 
-__all__ = ('DatasetsMetric', 'ReuseFollowers', 'ReuseIssuesMetric')
+__all__ = (
+    'DatasetsMetric', 'ReuseFollowers', 'ReuseIssuesMetric',
+    'ReuseDiscussionsMetric'
+)
 
 
 class DatasetsMetric(Metric):
@@ -30,4 +34,8 @@ class ReuseFollowers(FollowersMetric):
 
 
 class ReuseIssuesMetric(IssuesMetric):
+    model = Reuse
+
+
+class ReuseDiscussionsMetric(DiscussionsMetric):
     model = Reuse

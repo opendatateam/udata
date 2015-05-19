@@ -4,10 +4,9 @@ from __future__ import unicode_literals
 from celery.utils.log import get_task_logger
 
 from udata.tasks import job
+from udata.models import Activity, Metrics
 
-from udata.models import (
-    Dataset, DatasetIssue, Discussion, FollowDataset, Activity, Metrics
-)
+from .models import Dataset, DatasetIssue, DatasetDiscussion, FollowDataset
 
 log = get_task_logger(__name__)
 
@@ -21,7 +20,7 @@ def purge_datasets(self):
         # Remove issues
         DatasetIssue.objects(subject=dataset).delete()
         # Remove discussions
-        Discussion.objects(subject=dataset).delete()
+        DatasetDiscussion.objects(subject=dataset).delete()
         # Remove activity
         Activity.objects(related_to=dataset).delete()
         # Remove metrics
