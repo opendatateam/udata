@@ -469,6 +469,7 @@
             <div class="col-sm-9 list-group resources-list smaller">
             {% for discussion in discussions|rejectattr('closed') %}
                 {% set loop_index = loop.index %}
+                {% set baseobject = dataset %}
                 {% include theme('dataset/discussion-item.html') with context %}
             {% endfor %}
                 <a class="list-group-item add new-discussion"
