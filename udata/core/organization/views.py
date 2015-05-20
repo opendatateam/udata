@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import itertools
 from datetime import datetime
 
 from flask import request, g, jsonify, redirect, url_for, abort
@@ -9,12 +10,19 @@ from flask.ext.security import current_user
 from udata import search
 from udata.app import nav
 from udata.frontend import csv
-from udata.frontend.views import DetailView, CreateView, EditView, SearchView, BaseView, SingleObject
+from udata.frontend.views import (
+    DetailView, CreateView, EditView, SearchView, BaseView, SingleObject
+)
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import db, Organization, Member, Reuse, Dataset, ORG_ROLES, User, Issue, FollowOrg
+from udata.models import (
+    db, Organization, Member, Reuse, Dataset, ORG_ROLES, User, Issue, FollowOrg,
+    DatasetIssue, DatasetDiscussion
+)
 from udata.utils import get_by
 
-from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
+from udata.core.dataset.csv import (
+    DatasetCsvAdapter, IssuesOrDiscussionCsvAdapter, ResourcesCsvAdapter
+)
 from udata.core.activity.views import ActivityView
 
 from .forms import OrganizationForm, OrganizationMemberForm, OrganizationExtraForm
@@ -33,7 +41,6 @@ def set_g_user_orgs():
 
 navbar = nav.Bar('edit_org', [
     nav.Item(_('Descrition'), 'organizations.edit'),
-    # nav.Item(_('Additional informations'), 'organizations.edit_extras'),
     nav.Item(_('Members'), 'organizations.edit_members'),
     nav.Item(_('Membership request'), 'organizations.edit_membership_requests'),
     nav.Item(_('Teams'), 'organizations.edit_teams'),
@@ -164,8 +171,6 @@ class OrganizationDashboardView(OrgView, ActivityView, DetailView):
                     'title': _('Permitted reuses'),
                     'metric': 'permitted_reuses',
                     'type': 'line',
-                    # 'endpoint': 'reuses.list',
-                    # 'args': {'org': self.organization}
                 },
                 {
                     'title': _('Followers'),
@@ -290,6 +295,26 @@ def datasets_csv(org):
     datasets = search.iter(Dataset, organization=str(org.id))
     adapter = DatasetCsvAdapter(datasets)
     return csv.stream(adapter, '{0}-datasets'.format(org.slug))
+
+
+@blueprint.route('/<org:org>/issues.csv')
+def issues_csv(org):
+    datasets = Dataset.objects.filter(organization=str(org.id))
+    issues = [DatasetIssue.objects.filter(subject=dataset)
+              for dataset in datasets]
+    # Turns a list of lists into a flat list.
+    adapter = IssuesOrDiscussionCsvAdapter(itertools.chain(*issues))
+    return csv.stream(adapter, '{0}-issues'.format(org.slug))
+
+
+@blueprint.route('/<org:org>/discussions.csv')
+def discussions_csv(org):
+    datasets = Dataset.objects.filter(organization=str(org.id))
+    discussions = [DatasetDiscussion.objects.filter(subject=dataset)
+                   for dataset in datasets]
+    # Turns a list of lists into a flat list.
+    adapter = IssuesOrDiscussionCsvAdapter(itertools.chain(*discussions))
+    return csv.stream(adapter, '{0}-discussions'.format(org.slug))
 
 
 @blueprint.route('/<org:org>/datasets-resources.csv')

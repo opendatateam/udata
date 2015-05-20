@@ -61,3 +61,17 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         ('downloads', lambda o: int(o.metrics.get('views', 0))),
     )
     attribute = 'resources'
+
+
+class IssuesOrDiscussionCsvAdapter(csv.Adapter):
+    fields = (
+        'id',
+        'user',
+        'subject',
+        'title',
+        ('size', lambda o: len(o.discussion)),
+        ('messages', lambda o: '\n'.join(msg.content for msg in o.discussion)),
+        'created',
+        'closed',
+        'closed_by',
+    )

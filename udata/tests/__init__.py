@@ -67,6 +67,11 @@ class TestCase(BaseTestCase):
     def assert204(self, response):
         self.assertStatus(response, 204)
 
+    def assertStartswith(self, haystack, needle):
+        self.assertEqual(
+            haystack.startswith(needle), True,
+            '{haystack} does not start with {needle}'.format(haystack=haystack, needle=needle))
+
     @contextmanager
     def assert_emit(self, *signals):
         specs = []

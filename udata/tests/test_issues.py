@@ -10,8 +10,12 @@ from udata.core.user.views import blueprint as user_bp
 from udata.core.issues.models import Issue, Message
 from udata.core.issues.signals import on_new_issue
 
+from frontend import FrontTestCase
+
 from .api import APITestCase
-from .factories import faker, UserFactory
+from .factories import (
+    faker, UserFactory, OrganizationFactory, DatasetFactory, DatasetIssueFactory
+)
 
 
 class IssuesTest(APITestCase):
@@ -258,3 +262,27 @@ class IssuesTest(APITestCase):
         dataset.reload()
         # Metrics unchanged after attempt to close the discussion.
         self.assertEqual(dataset.metrics['issues'], 1)
+
+
+class IssueCsvTest(FrontTestCase):
+
+    def test_issues_csv_content_empty(self):
+        organization = OrganizationFactory()
+        response = self.get(url_for('organizations.issues_csv', org=organization))
+        self.assert200(response)
+
+        self.assertEqual(
+            response.data,
+            '"id";"user";"subject";"title";"size";"messages";"created";"closed";"closed_by"\r\n'
+        )
+
+    def test_issues_csv_content_filled(self):
+        organization = OrganizationFactory()
+        dataset = DatasetFactory(organization=organization)
+        user = UserFactory(first_name='John', last_name='Snow')
+        issue = DatasetIssueFactory(subject=dataset, user=user)
+        response = self.get(url_for('organizations.issues_csv', org=organization))
+        self.assert200(response)
+
+        headers, data = response.data.strip().split('\r\n')
+        self.assertStartswith(data, '"{issue.id}";"{issue.user}"'.format(issue=issue))
