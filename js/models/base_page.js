@@ -73,7 +73,7 @@ define(['api', 'models/base', 'jquery'], function(API, Model, $) {
                 }
             },
             go_to_page: function(page) {
-                this.fetch({page: 1});
+                this.fetch({page: page});
             },
             sort: function(field, reversed) {
                 if (this.sorted !== field) {

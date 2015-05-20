@@ -30,7 +30,7 @@
         </div>
     </div>
     <footer class="modal-footer text-center">
-        <form>
+        <form v-if="!issue.closed">
             <div class="form-group">
                 <textarea class="form-control" rows="3"
                     placeholder="{{ _('Type your comment') }}"
@@ -40,12 +40,16 @@
             </div>
         </form>
         <button type="button" class="btn btn-success btn-flat pointer pull-left"
-            v-on="click: comment_issue">
+            v-on="click: comment_issue" v-if="!issue.closed">
             {{ _('Comment the issue') }}
         </button>
-        <button type="button" class="btn btn-danger btn-flat pointer"
-            v-on="click: close_issue">
+        <button type="button" class="btn btn-warning btn-flat pointer pull-left"
+            v-on="click: close_issue" v-if="!issue.closed">
             {{ _('Comment and close issue') }}
+        </button>
+        <button type="button" class="btn btn-danger btn-flat pointer"
+            data-dismiss="modal">
+            {{ _('Close') }}
         </button>
     </footer>
 </w-modal>
