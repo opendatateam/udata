@@ -4,7 +4,6 @@ define(['jquery', 'dotdotdot'], function($) {
     $(function() {
         // Handle ellipsis and more button
         $('.topic-excerpt').dotdotdot({
-            watch: true,
             callback: function( isTruncated, $content ) {
                 var $more = $('.more');
                 if (isTruncated) {
