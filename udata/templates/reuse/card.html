@@ -1,7 +1,8 @@
 <div class="card reuse-card">
     <a class="card-logo" href="{{ url_for('reuses.show', reuse=reuse) }}">
         <img alt="{{ reuse.title }}"
-            src="{{ reuse.image(86)|placeholder('reuse') }}">
+            src="{{ reuse.image(86)|placeholder('reuse') }}"
+            width="86" height="86">
     </a>
 
     <div class="card-body">

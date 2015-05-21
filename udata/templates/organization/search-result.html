@@ -2,7 +2,8 @@
     <a href="{{ url_for('organizations.show', org=organization) }}" title="{{ organization.name }}">
         <div class="result-logo pull-left">
             <img alt="{{ organization.title }}"
-                src="{{ organization.logo(70)|placeholder('organization') }}">
+                src="{{ organization.logo(70)|placeholder('organization') }}"
+                width="70" height="70">
         </div>
         {% if organization.public_service %}
         <img src="{{static('img/certified-stamp.png')}}" alt="certified"
