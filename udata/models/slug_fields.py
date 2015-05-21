@@ -99,7 +99,8 @@ def populate_slug(instance, field):
         qs = instance.__class__.objects
         if previous:
             qs = qs(id__ne=previous.id)
-        exists = lambda s: qs(class_check=False, **{field.db_field: s}).first()
+
+        exists = lambda s: qs(class_check=False, **{field.db_field: s}).count() > 0
         while exists(slug):
             slug = '{0}-{1}'.format(base_slug, index)
             index += 1
