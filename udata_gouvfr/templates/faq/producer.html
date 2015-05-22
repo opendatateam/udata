@@ -1,0 +1,68 @@
+{% extends theme('faq/base.html') %}
+
+{% block faq_content %}
+<h1>Découvrir l’OpenData en tant que producteur</h1>
+<p>Cette page référence les meilleures pratiques pour publier un jeu de données ou une réutilisation.
+Pour rappel, <b>un jeu de données</b> peut contenir <b>plusieurs ressources</b> (fichiers de données, fichiers d'explications, API, lien ..) qui constituent un lot cohérent sur un thème donnée. Par exemple "La Réserve Parlementaire", contiendra plusieurs ressources, typiquement un fichier par année.
+</p><p>Un jeu de données peut être publié simplement avec un titre et une ressource. Pour autant, il sera mieux référencé s'il contient des informations supplémentaires qui le décrivent : période couverte, fréquence de mise à jour, territoire couvert, thématiques ... C'est le sens de la note de performance qui figure au bas de chaque jeu de données. Elle est fonction de la <b>complétude de ces informations</b>, de la <b>profondeur et de la densité spatio-temporelle</b> du jeu de données, et du <b>nombre de réutilisations</b> qu'il a suscité. Pour plus d'informations sur les règles de tri du moteur de recherche.
+</p>
+
+<h3>Titre (obligatoire)</h3>
+<p>Le titre est "l'accroche" éditoriale de votre contenu, son <b>sujet</b>. Pensez-y. Il doit être clair, précis et le plus court possible. Ne pas mettre d'indications temporelles ou de couverture géographique dans le titre, mais dans les champs prévus à cet effet.
+</p><p>Exemples :
+</p>
+<ul><li> Impôts locaux</li>
+<li> Impact environnemental des sociétés minières</li></ul>
+<p><br />
+Contre exemples :
+</p>
+<ul><li> Impôts locaux en Lorraine pour l'année 2012</li>
+<li> Impact environnemental des société minières dans le cadre de la campagne de réactualisation des faits opérés par la DATAR pour le compte de l'Institut ..</li></ul>
+<h3>Description</h3>
+<p>C'est ici qu'il faut mettre en avant le jeu de données, en citant les faits, les mots-clés qu'il recouvre, les sources et la méthodologie utilisée ... Pour écrire une bonne description, il faut raisonner comme un moteur de recherche : quelles questions posées par les Internautes devraient mener à ce jeu de données ?
+Exemple : pour l'impact environnemental, citer les mots-clés tonne-carbone, externalité environnementale, principaux facteurs négatifs et positifs de l'impact des mines sur l'environnement, etc.
+</p>
+<h3>Territoires couverts et granularité</h3>
+<p>C'est dans ce champs qu'il convient de décrire le territoire couvert et permettra d'être correctement géo-référencé.
+Préciser la granularité permet de préciser s'il s'agit d'un jeu de donnée très agrégé (par exemple couverture = France, granularité = France), ou au contraire très détaillé (couverture = région, granularité = commune, voire même point d'intérêt au niveau adresse).
+</p>
+<h3>Période couverte et fréquence</h3>
+<div class="thumb tright"><div class="thumbinner" style="width:202px;"><a href="/wiki/Fichier:Portee-granularite.png" class="image"><img alt="Portee-granularite.png" src="/images/thumb/2/28/Portee-granularite.png/200px-Portee-granularite.png" width="200" height="107" class="thumbimage" srcset="/images/thumb/2/28/Portee-granularite.png/300px-Portee-granularite.png 1.5x, /images/thumb/2/28/Portee-granularite.png/400px-Portee-granularite.png 2x" /></a>  <div class="thumbcaption"><div class="magnify"><a href="/wiki/Fichier:Portee-granularite.png" class="internal" title="Agrandir"></a></div></div></div></div>
+<p>A l'image de la couverture géographique, la couverture temporelle permet de référencer correctement la période couverte. S'il s'agit d'une seule année, indiquer la même année pour le début et la fin. S'il s'agit d'une année scolaire, ne pas hésiter à indiquer 1/9/2013 au 31/6/2014 par exemple.
+</p><p>La fréquence indique le niveau de détail temporel à l'intérieur de cette période : indiquer "mois" si votre fichier détaille des évolutions mois par mois. Si votre flux d'information est mis à jour annuellement, indiquer "année".
+</p>
+<h3>Licence</h3>
+<p>Sélectionner la licence Open Data sous laquelle vous publiez le jeu de données. Dans la plupart des cas, l'Open Licence / Licence Ouverte. Seuls les réutilisations publiées dans un jeu de données peuvent être sous licence fermée. Par exemple, un jeu de données Open Data "Annuaire des associations", et une réutilisation fermée, voire payante, permettant de consulter les adresses des dirigeants des associations.
+</p>
+<h3>Mots clés</h3>
+<p>Les mots-clés permettent des navigations transverses, c'est à dire qu'un Internaute naviguant sur un jeu de données ayant pour mots clés "mines" sera susceptible de cliquer sur ce mot clé et de retrouver un autre jeux de données ayant le même mot clé.
+Si vous remplissez ce champs, la règle est donc d'utiliser des <b>mots clés ayant déjà été utilisés par d'autres jeux de données</b>. Utiliser des mots clés orphelins ne sert à rien.
+</p>
+<h3>Visibilité</h3>
+<p>Sélectionner "publique" si vous souhaitez que votre jeu de donnée soit visible sur le site. Sélectionner "privé" permet de sauvegarder un jeu sans qu'il soit visible. Ce peut être utile lorsque vous souhaitez publier plusieurs jeux à une date donnée, en ayant préparé leur publication en amont.
+</p>
+<h3>Ressources (1 obligatoire)</h3>
+<p>Les ressources de votre jeu de données. Si votre jeu concerne plusieurs départements, plusieurs années, il est possible de publier autant de fichiers que vous le souhaitez. Pour autant, sachez que du point de vue des réutilisateurs, il est <b>toujours préférable de diffuser les fichiers les plus denses possibles</b> : un fichier contenant en colonne 1 le département, en colonne 2 l'année et toutes les données ainsi classées, plutôt que 100 fichiers par département, puis autant par année.
+</p><p>Chaque ressource possède un <b>titre</b>, dans lequel il convient surtout de <b>préciser les critères, les unités, la granularité qui décrit le mieux la ressource</b>, plutôt que de répéter le titre du jeu de donnée auquel il appartient. Par exemple :
+</p>
+<ul><li> Fichier détaillé des personnes morales, par département et par an</li>
+<li> Fichier statistique par département, en k€ et en Tonne/Carbone</li>
+<li> Site web permettant de sélectionner les données par ville et par type de trajet</li></ul>
+<p><br />
+Une <b>description</b> de la ressource peut être ajoutée de manière optionnelle pour exprimer des compléments d'informations sur la méthodologie (sondage, enquête, données fiscales ..), des précisions sur les données en question (colonnes du fichiers ..), ou tout autre information renforçant le titre.
+</p>
+<h4>Télécharger un fichier ou saisir son URL ?</h4>
+<p>Si vous ne possédez pas de site Web et que la fréquence de mise à jour de vos données est faible, data.gouv.fr permet de télécharger des fichiers depuis votre ordinateur. Néanmois, si vous possédez un site Web, il est préférable de référencer vos données, évitant ainsi de devoir les mettre à jour régulièrement sur data.gouv. Par exemple, référencer la ressource http://monsite.fr/jeu_de_donnees_derniere_version.csv vous permet de déclarer une fois pour toutes une donnée avec une fréquence de mise à jour temps réel.
+</p>
+<h3>Bureau, département ou service</h3>
+<p>Préciser ici, de manière optionnelle, les indications sur l'organisation effectivement productrice, par exemple SGMAP/Service X.
+</p>
+<h3>Courriel de contact</h3>
+<p>Préciser ici, de manière optionnelle, l'adresse mail du producteur, par exemple contact@agriculture.fr, si elle est différente de celle de l'utilisateur qui publie. Lorsque vous publiez un jeu de données au nom d'une organisation, tous les membres déclarés seront automatiquement notifiés d'éventuelles réutilisations sur la page du jeu de données (par exemple, la publication d'une visualisation ou d'un commentaire).
+</p>
+<h3>Thématique (groupes)</h3>
+<p>A l'image des mots clés, qui permettent d'accrocher votre jeu de données à d'autres dimensions, des thématiques sont à votre disposition pour ancrer vos jeux dans les grandes catégories éditoriales présentées à côté du moteur de recherche : Agriculture, Culture, Société, Territoires, etc.
+A noter, des thématiques conjoncturelles permettent de raccrocher certains jeux à des sujets d'actualité débattus sur data.gouv.fr : égalité femmes-hommes, Grenelle de l'environnement, etc.
+Un jeu de données peut appartenir à 0, 1 ou 2 thématiques.
+</p>
+{% endblock %}
