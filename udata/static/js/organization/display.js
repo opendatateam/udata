@@ -52,6 +52,15 @@ define([
             return false;
         });
 
+
+        function displayFollowers(e) {
+            e.preventDefault();
+            var $parent = $(this).parent();
+            $parent.siblings('.col-md-4').removeClass('hidden');
+            $parent.remove();
+        }
+        $('.display-followers').click(displayFollowers);
+
     return {
         start: function() {
             log.debug('Organization display page');
@@ -61,8 +70,9 @@ define([
                 $('a[href="' + location.hash + '"]').tab('show');
             }
             $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
-                return location.hash = $(e.target).attr('href').substr(1);
+                e.preventDefault();
+                location.hash = $(e.target).attr('href').substr(1);
             });
         }
-    }
+    };
 });
