@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import re
-import sys
 
 from os.path import join
 
@@ -50,10 +49,6 @@ def pip(filename):
     return requirements
 
 
-# def dependency_links(filename):
-#     return [line.strip() for line in open(join('requirements', filename)) if '://' in line]
-
-
 # long_description = '\n'.join((
 #     rst('README.rst'),
 #     rst('CHANGELOG.rst'),
@@ -63,31 +58,24 @@ def pip(filename):
 # install_requires = pip('install.pip')
 # tests_require = pip('test.pip')
 
-# if sys.version_info[0:2] < (2, 7):
-#     install_requires += ['argparse']
-
 setup(
     name='udata-admin',
-    version='0.1',
+    version='0.1.0.dev',
     description='uData administration',
     long_description='',
     url='https://github.com/etalab/udata-admin',
-    download_url='http://pypi.python.org/pypi/udata-admin',
+    # download_url='http://pypi.python.org/pypi/udata-admin',
     author='Axel Haustant',
     author_email='axel@data.gouv.fr',
     packages=find_packages(),
     include_package_data=True,
-    # install_requires=[
-    #     'feedparser',
-    # ],
     # install_requires=install_requires,
-    # dependency_links=dependency_links('install.pip'),
     # tests_require=tests_require,
     # extras_require={
     #     'test': tests_require,
     # },
     license='LGPL',
-    use_2to3=True,
+    # use_2to3=True,
     keywords='',
     classifiers=[
         "Development Status :: 3 - Alpha",
