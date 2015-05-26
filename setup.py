@@ -68,7 +68,7 @@ install_requires = pip('install.pip')
 
 setup(
     name='udata-harvest',
-    version='0.1',
+    version='0.1.0.dev',
     description='Remote repository harvesting for uData',
     long_description=long_description,
     url='https://github.com/etalab/udata-harvest',
