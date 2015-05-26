@@ -16,7 +16,8 @@
                 {% for client in clients %}
                 <tr class="oauth-client" data-id="{{ client.id }}">
                     <td class="text-center">
-                        <img src="{{ client.image(20)|placeholder }}" width="20px" height="20px">
+                        <img src="{{ client.image(20)|placeholder }}"
+                            width="20" height="20">
                     </td>
                     <td>{{ client.name }}</td>
                     <td class="maintainer">

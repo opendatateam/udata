@@ -160,7 +160,8 @@
                         <a href="{{ url_for('organizations.show', org=reuse.organization) }}"
                             title="{{ reuse.organization.name }}">
                             <img src="{{ reuse.organization.logo(150)|placeholder('organization') }}"
-                                alt="{{ reuse.organization.name }}" class="organization-logo producer" />
+                                alt="{{ reuse.organization.name }}" class="organization-logo producer"
+                                width="150" height="150"/>
                         </a>
                         <div class="caption text-left">
                             {% if reuse.organization.description %}
@@ -198,7 +199,8 @@
                         <a href="{{ url_for('users.show', user=reuse.owner) }}"
                             title="{{ reuse.owner.fullname }}">
                             <img src="{{ reuse.owner.avatar(150)|placeholder('user') }}"
-                                alt="{{ reuse.owner.fullname }}" class="scalable"/>
+                                alt="{{ reuse.owner.fullname }}" class="scalable"
+                                width="150" height="150"/>
                         </a>
                         <h4 class="text-center">{{ reuse.owner.fullname }}</h4>
                         <div class="caption text-left">

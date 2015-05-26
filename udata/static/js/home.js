@@ -4,9 +4,7 @@
 define(['logger', 'jquery'], function(Logger, $) {
     return {
         start: function() {
-            $('.carousel').carousel({
-                interval: 5000
-            });
+            $('.carousel').carousel();
             Logger.debug('Home page started');
         }
     };
