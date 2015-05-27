@@ -156,7 +156,9 @@ def init_logging(app):
 
 
 def register_extensions(app):
-    from udata import models, routing, tasks, mail, i18n, auth, theme, search, sitemap
+    from udata import (
+        models, routing, tasks, mail, i18n, auth, theme, search, sitemap
+    )
     i18n.init_app(app)
     models.init_app(app)
     routing.init_app(app)

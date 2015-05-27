@@ -15,15 +15,9 @@ define([
 ], function($, API, Auth, i18n, Notify, modal, modalTpl, listTpl, detailsTpl, forms) {
     'use strict';
 
-    var labels = {
-        illegal: i18n._('Illegal content'),
-        tendencious: i18n._('Tendencious content'),
-        advertisement: i18n._('Advertising content'),
-        other: i18n._('Other'),
-    };
-
     // Handle featured button
-    $('.btn-issues').click(function() {
+    $('.btn-issues').click(function(e) {
+        e.preventDefault();
         var $this = $(this),
             $modal = modal({
                 title: i18n._('Issues'),
@@ -71,9 +65,20 @@ define([
             });
         }
 
+        function showIssue(el) {
+            $('<a href="#tab-'+ el.data('issue-id') +'"/>').tab('show').on('shown.bs.tab', function() {
+                $backBtn.removeClass('hide');
+                $newBtn.addClass('hide');
+                $submitBtn.addClass('hide');
+                $commentBtns.removeClass('hide');
+                $title.text(el.find('h4').text());
+                $modal.find('.tab-pane.active form')[0].reset();
+            });
+        }
+
         API.get($this.data('api-url'), function(data) {
-            data = data.data
-            $modal.find('.spinner-container').html(listTpl({issues: data, labels: labels}));
+            data = data.data;
+            $modal.find('.spinner-container').html(listTpl({issues: data}));
             count = data.length;
             if (!data.length && Auth.user) {
                 showForm();
@@ -82,9 +87,9 @@ define([
                     var issue = data[idx],
                         $tab = $('<div class="tab-pane fade" id="tab-'+ issue.id +'"/>');
 
-                    $tab.append(detailsTpl({issue: issue, labels: labels}));
+                    $tab.append(detailsTpl({issue: issue}));
                     $tab.find('form').validate(forms.rules);
-                    $('.tab-content').append($tab)
+                    $modal.find('.tab-content').append($tab);
                 }
             }
         });
@@ -109,7 +114,9 @@ define([
             if ($form.valid()) {
                 var data = {
                     type: $modal.find('input[name="type"]:checked').val(),
-                    comment: $modal.find('#comment').val()
+                    title: $modal.find('#title').val(),
+                    comment: $modal.find('#comment').val(),
+                    subject: $this.data('subject')
                 };
 
                 API.post($this.data('api-url'), data, function(data) {
@@ -130,16 +137,7 @@ define([
 
         // Issues details
         $modal.on('click', '.issue-list .issue', function() {
-            var $this = $(this);
-            $('<a href="#tab-'+ $this.data('issue-id') +'"/>').tab('show').on('shown.bs.tab', function() {
-                $backBtn.removeClass('hide');
-                $newBtn.addClass('hide');
-                $submitBtn.addClass('hide');
-                $commentBtns.removeClass('hide');
-                // $closeBtn.removeClass('hide');
-                $title.text($this.find('h4').text());
-                $modal.find('.tab-pane.active form')[0].reset();
-            });
+            showIssue($(this));
         });
 
         $commentBtns.click(function() {

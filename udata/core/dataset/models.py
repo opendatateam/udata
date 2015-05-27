@@ -9,14 +9,16 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
-from udata.models import db, WithMetrics, Issue, Follow, SpatialCoverage
+from udata.models import (
+    db, WithMetrics, Issue, Discussion, Follow, SpatialCoverage
+)
 from udata.i18n import lazy_gettext as _
 from udata.utils import hash_url
 
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum',
-    'DatasetIssue', 'FollowDataset',
+    'DatasetIssue', 'DatasetDiscussion', 'FollowDataset',
     'UPDATE_FREQUENCIES', 'RESOURCE_TYPES',
 )
 
@@ -235,6 +237,10 @@ post_save.connect(Dataset.post_save, sender=Dataset)
 
 
 class DatasetIssue(Issue):
+    subject = db.ReferenceField(Dataset)
+
+
+class DatasetDiscussion(Discussion):
     subject = db.ReferenceField(Dataset)
 
 

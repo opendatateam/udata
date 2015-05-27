@@ -7,7 +7,7 @@ from flask import request
 from werkzeug.datastructures import FileStorage
 
 from udata import search
-from udata.api import api, ModelAPI, ModelListAPI, API
+from udata.api import api, API
 from udata.auth import current_user
 from udata.core.followers.api import FollowAPI
 from udata.utils import multi_to_dict

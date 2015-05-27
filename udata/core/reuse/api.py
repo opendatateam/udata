@@ -13,12 +13,11 @@ from udata.auth import admin_permission
 from udata.models import Reuse
 from udata.utils import multi_to_dict
 
-from udata.core.issues.api import IssuesAPI
 from udata.core.followers.api import FollowAPI
 
 from .api_fields import reuse_fields, reuse_page_fields, reuse_suggestion_fields, image_fields
 from .forms import ReuseForm
-from .models import ReuseIssue, FollowReuse
+from .models import FollowReuse
 from .permissions import ReuseEditPermission
 from .search import ReuseSearch
 
@@ -106,11 +105,6 @@ class ReuseFeaturedAPI(SingleObjectAPI, API):
         reuse.featured = False
         reuse.save()
         return reuse
-
-
-@ns.route('/<id>/issues/', endpoint='reuse_issues')
-class ReuseIssuesAPI(IssuesAPI):
-    model = ReuseIssue
 
 
 @ns.route('/<id>/followers/', endpoint='reuse_followers')

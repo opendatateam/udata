@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import logging
 
-from celery import Celery, Task, chord, group
+from celery import Celery, Task
 from celery.utils.log import get_task_logger
 from celerybeatmongo.schedulers import MongoScheduler
 
@@ -97,6 +97,7 @@ def init_app(app):
     import udata.core.organization.tasks
     import udata.core.followers.tasks
     import udata.core.issues.tasks
+    import udata.core.discussions.tasks
 
     # Load plugins tasks
     for plugin in app.config['PLUGINS']:

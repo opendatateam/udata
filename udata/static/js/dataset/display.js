@@ -16,6 +16,7 @@ define([
     'widgets/featured',
     'widgets/follow-btn',
     'widgets/issues-btn',
+    'widgets/discussions-btn',
     'widgets/share-btn',
 ], function($, log, i18n, Auth, API, L, template, extrasTpl, addReuseTpl, forms, modal) {
     'use strict';

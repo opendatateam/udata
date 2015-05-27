@@ -8,7 +8,7 @@ from udata.models import db
 
 log = logging.getLogger(__name__)
 
-__all__ = ('Issue',)
+__all__ = ('Discussion',)
 
 
 class Message(db.EmbeddedDocument):
@@ -17,7 +17,7 @@ class Message(db.EmbeddedDocument):
     posted_by = db.ReferenceField('User')
 
 
-class Issue(db.Document):
+class Discussion(db.Document):
     user = db.ReferenceField('User')
     subject = db.ReferenceField(db.DomainModel)
     title = db.StringField(required=True)

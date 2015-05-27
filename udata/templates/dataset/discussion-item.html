@@ -1,0 +1,60 @@
+<div class="list-group-item" id="discussion-{{ loop_index }}" data-discussion-id="{{ discussion.id }}">
+    <div class="format-label pull-left">
+        <span>
+            <a href="#discussion-{{ loop_index }}">{{ loop_index }}</a>
+        </span>
+    </div>
+    <h4 class="list-group-item-heading ellipsis open-discussion-thread">
+        <span itemprop="name">{{ discussion.title }}</span>
+    </h4>
+    <p class="list-group-item-text ellipsis open-discussion-thread list-group-message-number-{{ discussion.id }}">
+        {{ _('Discussion started on') }} {{ discussion.created|dateformat }} {{ _('with') }}
+        {% trans nb=discussion.discussion|length %}{{nb}} message{% pluralize %}{{nb}} messages{% endtrans %}
+    </p>
+    {{ discussion.user|avatar(52, 'resource-owner') }}
+</div>
+{% for message in discussion.discussion %}
+    <div class="list-group-item list-group-indent list-group-thread-{{ discussion.id }} hidden animated" id="discussion-{{ loop_index }}-{{ loop.index }}">
+        <div class="format-label pull-left">
+            <span>
+                <a href="#discussion-{{ loop_index }}-{{ loop.index }}">{{ loop_index }}.{{ loop.index }}</a>
+            </span>
+        </div>
+        <p class="list-group-item-heading">
+            {{ message.content }}
+        </p>
+        {{ message.posted_by|avatar(52, 'resource-owner') }}
+    </div>
+{% endfor %}
+<a class="list-group-item add new-comment list-group-indent list-group-thread-{{ discussion.id }} hidden animated"
+    data-discussion-id="{{ discussion.id }}"
+    href="#">
+    <div class="format-label pull-left">+</div>
+    <h4 class="list-group-item-heading">
+        {{ _('Add a comment') }}
+    </h4>
+</a>
+<div class="list-group-item list-group-form list-group-indent list-group-form-{{ discussion.id }} hidden animated"
+    data-discussion-id="{{ discussion.id }}"
+    id="discussion-{{ loop_index }}-{{ discussion.discussion|length + 1 }}">
+    <div class="format-label pull-left">
+        <span>
+            <a href="#discussion-{{ loop_index }}-{{ discussion.discussion|length + 1 }}">{{ loop_index }}.{{ discussion.discussion|length + 1 }}</a>
+        </span>
+    </div>
+    <h4 class="list-group-item-heading">
+        {{ _('Commenting on this thread') }}
+    </h4>
+    <p class="list-group-item-text">
+        {{ _("You're about to answer to this particular thread about:") }}<br />
+        {{ discussion.title }}
+    </p>
+    <form role="form" class="clearfix animated" data-api-url="{{url_for('api.discussion', for=baseobject.id, id=discussion.id)}}">
+        <div class="form-group">
+            <label for="comment">{{ _('Comment') }}</label>
+            <textarea id="comment" name="comment" class="form-control" rows="3" required></textarea>
+        </div>
+        <input type="submit" value="{{ _('Submit your comment') }}" class="btn btn-primary btn-block pull-right submit-new-comment" />
+    </form>
+    {{ current_user|avatar(52, 'resource-owner') }}
+</div>

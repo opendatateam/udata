@@ -1,0 +1,64 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, absolute_import
+
+from udata import mail
+from udata.i18n import lazy_gettext as _
+from udata.models import Dataset, Reuse
+from udata.tasks import task, get_logger
+
+from .signals import on_new_discussion, on_new_discussion_comment, on_discussion_closed
+
+log = get_logger(__name__)
+
+
+def connect(signal):
+    def wrapper(func):
+        t = task(func)
+
+        def call_task(discussion, **kwargs):
+            t.delay(discussion, **kwargs)
+
+        signal.connect(call_task, weak=False)
+        return t
+    return wrapper
+
+
+def owner_recipients(discussion):
+    if discussion.subject.organization:
+        return [m.user for m in discussion.subject.organization.members]
+    else:
+        return [discussion.subject.owner]
+
+
+@connect(on_new_discussion)
+def notify_new_discussion(discussion):
+    if isinstance(discussion.subject, (Dataset, Reuse)):
+        recipients = owner_recipients(discussion)
+        subject = _('Your %(type)s have a new discussion', type=discussion.subject.verbose_name)
+        mail.send(subject, recipients, 'new_discussion', discussion=discussion)
+    else:
+        log.warning('Unrecognized discussion subject type %s', type(discussion.subject))
+
+
+@connect(on_new_discussion_comment)
+def notify_new_discussion_comment(discussion, **kwargs):
+    if isinstance(discussion.subject, (Dataset, Reuse)):
+        comment = kwargs['message']
+        recipients = owner_recipients(discussion) + [m.posted_by for m in discussion.discussion]
+        recipients = filter(lambda u: u != comment.posted_by, set(recipients))
+        subject = _('%(user)s commented your discussion', user=comment.posted_by.fullname)
+        mail.send(subject, recipients, 'new_discussion_comment', discussion=discussion, comment=comment)
+    else:
+        log.warning('Unrecognized discussion subject type %s', type(discussion.subject))
+
+
+@connect(on_discussion_closed)
+def notify_discussion_closed(discussion, **kwargs):
+    if isinstance(discussion.subject, (Dataset, Reuse)):
+        comment = kwargs['message']
+        recipients = owner_recipients(discussion) + [m.posted_by for m in discussion.discussion]
+        recipients = filter(lambda u: u != comment.posted_by, set(recipients))
+        subject = _('A discussion has been closed')
+        mail.send(subject, recipients, 'discussion_closed', discussion=discussion, comment=comment)
+    else:
+        log.warning('Unrecognized discussion subject type %s', type(discussion.subject))
