@@ -74,7 +74,7 @@ def schedulables():
 def init_app(app):
     celery.main = app.import_name
 
-    default_name = app.config.get('MONGODB_SETTINGS', {}).get('DB', 'celery')
+    default_name = app.config.get('MONGODB_DB', 'celery')
     app.config.setdefault('CELERY_MONGODB_SCHEDULER_DB', default_name)
 
 

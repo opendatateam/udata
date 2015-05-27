@@ -13,7 +13,10 @@ class Defaults(object):
     }
     DEFAULT_LANGUAGE = 'en'
     SECRET_KEY = 'Default uData secret key'
-    MONGODB_SETTINGS = {'DB': 'udata'}
+
+    MONGODB_HOST = 'localhost'
+    MONGODB_PORT = 27017
+    MONGODB_DB = 'udata'
 
     # BROKER_TRANSPORT = 'redis'
     BROKER_URL = 'redis://localhost:6379'
@@ -56,7 +59,7 @@ class Defaults(object):
 
 class Testing(Defaults):
     TESTING = True
-    MONGODB_SETTINGS = {'DB': 'udata-test'}
+    MONGODB_DB = 'udata-test'
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_ALWAYS_EAGER = True
