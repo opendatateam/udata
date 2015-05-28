@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.tasks import job, get_logger, chord, task
+from celery import chord
+
+from udata.tasks import job, get_logger, task
 
 from . import backends
 from .models import HarvestSource
