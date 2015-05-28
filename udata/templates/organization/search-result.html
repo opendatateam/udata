@@ -31,9 +31,18 @@
             {% if organization.metrics.reuses %}
             <li>
                 <a class="btn btn-xs" rel="tooltip" data-placement="top"
-                    title="{{ _('Number of reuses') }}">
+                    title="{{ _('Number of reuses by the organization') }}">
                     <span class="{{ ficon('fa-retweet') }} fa-fw"></span>
                     {{ ngettext('%(num)s reuse', '%(num)s reuses', organization.metrics.reuses or 0) }}
+                </a>
+            </li>
+            {% endif %}
+            {% if organization.metrics.permitted_reuses %}
+            <li>
+                <a class="btn btn-xs" rel="tooltip" data-placement="top"
+                    title="{{ _('Number of reappropriations by the community') }}">
+                    <span class="{{ ficon('fa-lightbulb-o') }} fa-fw"></span>
+                    {{ ngettext('%(num)s reappropriation', '%(num)s reappropriations', organization.metrics.permitted_reuses or 0) }}
                 </a>
             </li>
             {% endif %}

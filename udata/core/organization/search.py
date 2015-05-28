@@ -33,6 +33,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
     }
     facets = {
         'reuses': search.RangeFacet('metrics.reuses'),
+        'permitted_reuses': search.RangeFacet('metrics.permitted_reuses'),
         'datasets': search.RangeFacet('metrics.datasets'),
         'followers': search.RangeFacet('metrics.followers'),
         'public_services': search.BoolFacet('public_service'),
