@@ -428,7 +428,7 @@ class CurrentUserField(FieldHelper, ModelField, fields.HiddenField):
             if current_user.is_anonymous():
                 raise validators.ValidationError(_('You must be authenticated'))
             elif not admin_permission and current_user.id != self.data.id:
-                raise validators.ValidationError(_('Permission denied you can only set yourself as owner'))
+                raise validators.ValidationError(_('You can only set yourself as owner'))
         return True
 
 
