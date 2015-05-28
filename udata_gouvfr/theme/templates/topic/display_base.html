@@ -2,7 +2,7 @@
 
 {% block subnav %}{% include theme('topic/subnav.html') %}{% endblock %}
 
-{% block extra_head %}
+{% block extra_css %}
 {{ super() }}
 {% assets "gouvfr-topic-css" %}
 <link href="{{ ASSET_URL }}" rel="stylesheet">

@@ -38,14 +38,17 @@
                 {% if g.lang_code and request.url %}
                 <li class="dropdown language">
                     <button class="btn btn-link dropdown-toggle" data-toggle="dropdown">
-                        <img src="{{ theme_static('img/flags/{0}.png'.format(g.lang_code)) }}" alt="Current locale flag" />
+                        <img src="{{ theme_static('img/flags/{0}.png'.format(g.lang_code)) }}"
+                            alt="Current locale flag"
+                            width="16" height="16" />
                     </button>
                     <ul class="dropdown-menu">
                         {% for code, name in config['LANGUAGES'].items() %}
                         <li>
                             <a href="{{ request.url.replace('/{0}/'.format(g.lang_code),'/{0}/'.format(code)) }}">
                                 <img src="{{ theme_static('img/flags/{0}.png'.format(code)) }}"
-                                    alt="{{name}} flag" />
+                                    alt="{{name}} flag"
+                                    width="16" height="16" />
                                 {{name}}
                             </a>
                         </li>
@@ -71,7 +74,8 @@
                         {% for org in current_user.organizations %}
                         <li>
                             <a href="{{ url_for('organizations.show', org=org) }}">
-                                <img src="{{ org.logo(20)|placeholder('organization') }}" width="20px" height="20px"/>
+                                <img src="{{ org.logo(20)|placeholder('organization') }}"
+                                    width="20" height="20"/>
                                 {{ org.name }}
                             </a>
                         </li>
