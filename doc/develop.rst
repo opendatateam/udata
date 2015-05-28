@@ -12,6 +12,7 @@ The uData development environment requires the following system dependencies
 (on an Debian/APT based system):
 
 - build-essential
+- pkg-config
 - python-dev
 - python-virtualenv
 - libjpeg-dev
@@ -25,10 +26,11 @@ The uData development environment requires the following system dependencies
 - libpng12-dev
 - libxml2-dev
 - libxslt1-dev
+- liblzma-dev
 
 .. code-block:: shell
 
-    apt-get install build-essential python-dev python-virtualenv libjpeg-dev zlib1g-dev libpng12-dev libtiff5-dev libfreetype6-dev liblcms2-dev libopenjpeg-dev libwebp-dev libpng12-dev libxml2-dev libxslt1-dev liblzma-dev
+    apt-get install build-essential pkg-config python-dev python-virtualenv libjpeg-dev zlib1g-dev libpng12-dev libtiff5-dev libfreetype6-dev liblcms2-dev libopenjpeg-dev libwebp-dev libpng12-dev libxml2-dev libxslt1-dev liblzma-dev
 
 
 Python dependencies
@@ -131,11 +133,11 @@ JavaScript dependencies
 -----------------------
 
 JavaScript dependencies are managed by bower and requires
-bower, less and ugilfyjs to be installed globaly.
+bower, less, ugilfyjs and requirejs to be installed globaly.
 
 .. code-block:: shell
 
-    $ sudo npm install -g bower less uglifyjs
+    $ sudo npm install -g bower less uglifyjs requirejs
 
 Then, to fetch the udata dependencies:
 
@@ -201,7 +203,7 @@ uData requires at least 3 processes:
 - a beat process (for scheduled tasks)
 
 A Procfile is provided to ease the task.
-You can use Honcho (or whatever Procfile manager) to run the 3 processes
+You can use `Honcho`_ (or whatever Procfile manager) to run the 3 processes
 in your development environement.
 
 .. code-block:: shell
@@ -242,3 +244,4 @@ In the udata directory, you can:
 
 .. _Docker: https://www.docker.com/
 .. _install docker-compose: https://docs.docker.com/compose/install/
+.. _Honcho: https://github.com/nickstenning/honcho
