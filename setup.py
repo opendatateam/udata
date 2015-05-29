@@ -80,6 +80,7 @@ setup(
     tests_require=tests_require,
     extras_require={
         'test': tests_require,
+        'sentry': ['raven[flask]>=5.3.0'],
     },
     entry_points={
         'console_scripts': [
