@@ -3,14 +3,20 @@ from __future__ import unicode_literals
 
 import logging
 
-from raven.contrib.flask import Sentry
 from werkzeug.exceptions import HTTPException
 
-sentry = Sentry()
+log = logging.getLogger(__name__)
 
 
 def init_app(app):
     if 'SENTRY_DSN' in app.config:
+        try:
+            from raven.contrib.flask import Sentry
+        except:
+            log.error('raven[flask] is required to use sentry')
+            return
+
+        sentry = Sentry()
 
         app.config.setdefault('SENTRY_USER_ATTRS', ['slug', 'email', 'fullname'])
         app.config.setdefault('SENTRY_LOGGING',  'WARNING')
