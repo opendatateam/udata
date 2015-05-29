@@ -42,6 +42,22 @@ class ZoneFieldTest(TestCase):
         form = FakeForm(None, fake)
         self.assertEqual(form.spatial.zones._value(), ','.join([z.id for z in zones]))
 
+    def test_with_zone_empty_string(self):
+        Fake, FakeForm = self.factory()
+
+        fake = Fake()
+        form = FakeForm(MultiDict({
+            'spatial-zones': '',
+            'spatial-granularity': random_spatial_granularity()
+        }))
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.spatial.zones), 0)
+
     def test_with_valid_zone(self):
         Fake, FakeForm = self.factory()
         zone = GeoZoneFactory()
