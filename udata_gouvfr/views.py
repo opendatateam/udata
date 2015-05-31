@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from pkg_resources import resource_stream
-
-
-from flask import abort, url_for, redirect, json
+from flask import url_for, redirect
 
 from udata import theme
-from udata.models import Dataset, Reuse
+from udata.models import Reuse
 from udata.i18n import I18nBlueprint
 
 
@@ -77,3 +74,28 @@ def dataconnexions():
         'reuses': reuses(tags=tag),
     } for tag, label, description in DATACONNEXIONS_CATEGORIES]
     return theme.render('dataconnexions.html', categories=categories)
+
+
+@blueprint.route('/faq/', endpoint='faq_home')
+def faq_home():
+    return theme.render('faq/home.html')
+
+
+@blueprint.route('/faq/citizen/', endpoint='faq_citizen')
+def faq_citizen():
+    return theme.render('faq/citizen.html')
+
+
+@blueprint.route('/faq/producer/', endpoint='faq_producer')
+def faq_producer():
+    return theme.render('faq/producer.html')
+
+
+@blueprint.route('/faq/developer/', endpoint='faq_developer')
+def faq_developer():
+    return theme.render('faq/developer.html')
+
+
+@blueprint.route('/faq/jurist/', endpoint='faq_jurist')
+def faq_jurist():
+    return theme.render('faq/jurist.html')

@@ -1,0 +1,54 @@
+{% extends theme('faq/base.html') %}
+
+{% block faq_content %}
+<h1>Découvrir l’OpenData en tant que citoyen</h1>
+<p>La plateforme “data.gouv.fr” permet aux <b>services publics</b> de publier des données publiques et à la <b>société civile</b> de les enrichir, modifier, interpréter en vue de coproduire des informations d’intérêt général.
+</p><p>Qui peut partager des données sur la plateforme “data.gouv.fr” ?
+Tout le monde ! Citoyens, services publics ou toute organisation enregistrée sous son identité de personne physique ou de personne morale. L’inscription et l’utilisation de la plateforme sont gratuites.
+</p>
+<h3>Qu’appelle-t-on service public ?</h3>
+<p>Il s’agit de <b>l’Etat</b> (administrations centrales, services déconcentrés et autorités administratives indépendantes : direction du Budget, préfecture du Finistère, Conseil Supérieur de l’Audiovisuel par exemple), des <b>collectivités territoriales</b> (Ville de Rennes, Conseil général d’Aquitaine, Conseil Régional Rhône-Alpes, ...) et au sens large des <b>entités de droit privé ou de droit public poursuivant une mission de service public</b> (Pôle Emploi, SNCF, RATP, Caisse des Dépôts, etc.).
+</p>
+<h3>Quelles données peuvent-être mises en ligne ?</h3>
+<p>Des <b>données publiques produites ou reçues dans le cadre d’une mission de service public</b> : impôts, budgets, subventions, dépenses, aménagement du territoire, chômage, rénovation de logements, mesures de qualité de l'air, adresses des services publics, délinquance et criminalité, statistiques du tourisme, résultats électoraux, dépenses de la Sécurité sociale, effectifs des fonctions publiques, aides de la politique agricole commune, rejets de polluants dans l'air par les installations industrielles ...
+</p><p>“Data.gouv.fr” poursuit également l’ambition d’être un outil à la disposition des <b>citoyens</b> pour leur permettre de <b>produire, d’enrichir ou de compléter ces données</b> ou de <b>partager des données d'intérêt public</b>, qu’il s’agisse par exemple de l’inventaire d’une bibliothèque communale, de l’état de la voirie, de la composition nutritionnelle de produits alimentaires ou du bilan environnemental d’une entreprise.
+</p><p>Les données à caractère personnel (données fiscales ou patrimoniales, données médicales, etc.) et celles dont la publication contrevient à la loi (secret médical, secret de la défense nationale, secret statistique, secret des affaires, etc.) ne sont pas acceptées sur la plateforme “data.gouv.fr”.
+</p><p>Pour plus d'informations sur les meilleures pratiques en matière de publication, consultez le <a href="{{ url_for('gouvfr.faq_producer') }}" title="Guide de publication">Guide de publication</a>.
+</p>
+<h3>Pourquoi enrichir ou compléter des données ?</h3>
+<p>Lorsque se crée une série de données continue, temporelle et géographique, des usages inédits et créateurs de valeur se produisent. Enrichir ou compléter des données publiques contribue à améliorer leur qualité et à éviter qu'elles n'apparaissent partielles, fragmentées ou difficilement exploitables. Publier les marchés publics de plus de 30 000€ en Aquitaine est intéressant mais insuffisant. Proposer tous les marchés publics, au premier euro, sur la France entière, permet d’imaginer des usages innovants.
+</p>
+<h3>Que signifient les réutilisations dans les séries de données ?</h3>
+<p>Qu'il s'agissent d'<b>interprétations</b> (graphique, carte, animation, article de blog ..) ou d'<b>applications</b> (site Web, logiciel professionnel ..), les réutilisations sont référencées par le public sur les séries de données qu’elles exploitent et qu’elles viennent enrichir.
+</p>
+<h3>Pourquoi publier et partager des données ?</h3>
+<p>Pour un service public : l’ouverture et le partage de données publiques contribuent à rendre des comptes sur le fonctionnement des institutions et à encourager l’innovation. Data.gouv.fr renforce la visibilité des données par leur référencement national et fournit des outils qui facilitent les conversations avec chaque communauté gravitant autour du service public (associations, journalistes, chercheurs, étudiants, citoyens...).
+</p><p>Pour un individu, une entreprise, un chercheur, une association : produire des données d’intérêt public, les publier en Open Data et en partager les interprétations avec le public permet d’enrichir le débat public et de renforcer la liberté d’information.
+</p>
+<h3>Je représente une personne morale (entreprise, association, EPIC ..). Comment puis-je contribuer à “data.gouv.fr” ?</h3>
+<p>Comme tout autre utilisateur de la plateforme, vous pouvez contribuer dans les pages des autres producteurs, en enrichissant leurs données. Vous pouvez aussi proposer vos propres jeux de données sous le nom de votre organisation, et animer vos propres pages en y attirant des contributions.
+</p>
+<h3>Quels sont le rôle et la responsabilité d’Etalab ?</h3>
+<p>Etalab édite une plateforme ouverte qui héberge les contributions de tous. Sa responsabilité est celle d’un hébergeur.
+“Data.gouv.fr” promeut la documentation, la fiabilisation et l'enrichissement de données ainsi que la mise en évidence de corrélations inédites plutôt que des interprétations définitives ou partisanes. Il appartient à la communauté des membres de veiller à la qualité du contenu qu'elle partage. La plateforme propose donc des outils de modération (vote, signalement) et de certification des contenus.
+</p>
+<h3>Qu’est-ce qu’un service public certifié ?</h3>
+<p>Les organisations inscrites sur le site “data.gouv.fr” estimant assurer une mission de service public peuvent effectuer une demande en ligne pour être reconnue comme tel. Une organisation certifiée bénéficie d’un meilleur référencement.
+</p>
+<h3>Comment devenir un service public certifié ?</h3>
+<p>Inscrivez-vous sur le site en tant qu’organisation, puis effectuez la demande en envoyant un mail à l'adresse suivante: <b>certification@data.gouv.fr</b>. Une vérification par eMail ou courrier vous sera demandée. Vous pouvez néanmoins commencer à publier vos jeux de données avant d’obtenir la certification.
+</p>
+<h3>Quel statut juridique pour les données publiées ?</h3>
+<p>Les administrations de l’Etat et ses établissements publics administratifs publient systématiquement les données publiques en Open Data sous Licence Ouverte (permettant de reproduire, diffuser, adapter, et exploiter, y compris à titre commercial, sous réserve de mentionner la paternité).
+</p><p>Les établissements publics à caractère industriel et commercial (EPIC) et les collectivités territoriales, choisissent par eux-mêmes une licence Open Data : Licence Ouverte ou ODbL (l’Etat recommande l’usage de la Licence Ouverte).
+</p><p>Les individus, les associations et les entreprises publient des données en Licence Ouverte et des réutilisations (applications, visualisations, services Web …) dans la licence de leur choix, y compris pour permettre des usages commerciaux.
+</p>
+<h3>J’ai observé une inexactitude, un commentaire tendancieux, un contenu publicitaire que faire ?</h3>
+<p>Vous pouvez signaler sur data.gouv.fr tout contenu qui vous semble contraire à l’éthique de la plateforme, cliquant sur le bouton signaler et en précisant la raison qui justifie ce signalement : contenu illégal, contenu en dehors du champ de la plateforme, contenu publicitaire ..
+</p><p>Le signalement d’un contenu est notifié au producteur et à sa communauté. Le contenu peut être retiré automatiquement si le nombre de signalements est élevé ou si l'objectif manifeste de la publication est d'optimiser le référencement d'un site tiers (SEO) sans apport de données de qualité. L'éditeur de la plateforme "data.gouv.fr" se réserve le droit de modérer à tout moment un contenu qui contreviendrait aux règles de publication et/ou à l'éthique de la plateforme.
+</p>
+<h3>J’ai publié une ressource (fichier ou datavisualisation par exemple) dans un jeu de données d’une organisation, mais elle a disparu ?</h3>
+<p>Data.gouv.fr permet de publier des réutilisations simplement, sans contrôle a priori, grâce à l'<a href="{{ url_for('gouvfr.faq_developer') }}" title="Outillage pour les datavisualisations">outillage pour les datavisualisations</a> que nous supportons.
+Votre contenu associé à un jeu de données a pu être signalé par la communauté et/ou le producteur. Ce dernier a pu décider unilatéralement de le retirer. Vous êtes alors prévenu par eMail du motif du signalement. Vous pouvez tenter de le republier si vous remédiez au problème.
+</p>
+{% endblock %}

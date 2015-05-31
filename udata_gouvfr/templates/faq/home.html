@@ -1,0 +1,44 @@
+{% extends theme('faq/base.html') %}
+
+{% block main_content %}
+<div class="container faq-home">
+    <div class="row text-center">
+        <h1>Découvrir l’OpenData</h1>
+        <div class="col-lg-3">
+            <h2><a href="{{ url_for('gouvfr.faq_citizen') }}">En tant que citoyen</a></h2>
+        </div>
+        <div class="col-lg-3">
+            <h2><a href="{{ url_for('gouvfr.faq_producer') }}">En tant que producteur</a></h2>
+        </div>
+        <div class="col-lg-3">
+            <h2><a href="{{ url_for('gouvfr.faq_developer') }}">En tant que développeur</a></h2>
+        </div>
+        <div class="col-lg-3">
+            <h2><a href="{{ url_for('gouvfr.faq_jurist') }}">En tant que juriste</a></h2>
+        </div>
+    </div>
+</div>
+<div class="faq-content">
+    <p>Ce site est avant tout votre site, vous citoyens, producteurs, développeurs, juristes…
+    </p>
+    <h3>Participer à la résolution de problèmes par l’OpenData</h3>
+    <p>Notamment dans le cadre de l'initiative territoire.data.gouv, visant à décloisonner les différents échelons territoriaux et les administrations déconcrentrées.
+    </p>
+    <ul>
+        <li>partager un problème récurrent
+         lié au "mille feuille territorial" : description de l'irritant (pour l'usager, pour l'agent public), volume d'occurences annuelles, actions possibles pour le résoudre</li>
+        <li>désigner des données utiles a publier</a>, voire les publier directement sur data.gouv.fr (pour rappel tout le monde peut créer une organisation, comme la <a class="external text" href="https://www.data.gouv.fr/fr/organization/direction-departementale-des-territoires-du-haut-rhin-68">DDT 68</a>)</li>
+    </ul>
+    <h3>Participer à l'évolution de la plate-forme datagouv</h3>
+    <p>Si vous souhaitez contribuer, n'hésitez pas. Nos projets sont open-source, disponibles en ligne et ouverts à la contribution :
+    </p>
+    <ul>
+        <li><a class="external text" href="http://github.com/etalab">code source sur github</a></li>
+        <li><a class="external text" href="https://www.transifex.com/organization/etalab">traductions sur transifex</a></li>
+        <li><a class="external text" href="https://github.com/etalab/etalab-support">bug tracker / boite à idée sur github</a></li></ul>
+    <h3>Participer à nos hackathons ou évènements partenaires</h3>
+    <ul>
+        <li>En consultant <a href="http://www.etalab.gouv.fr/">le blog de la mission Etalab</a></li>
+    </ul>
+</div>
+{% endblock %}

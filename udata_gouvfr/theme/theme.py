@@ -38,12 +38,11 @@ class Wikitem(nav.Item):
 
 
 gouvfr_menu = nav.Bar('gouvfr_menu', [
-    Wikitem(_('How it works ?'), 'FAQ', items=[
-        Wikitem(_('FAQ'), 'FAQ'),
-        Wikitem(_('Publication guide'), 'Guide_de_publication'),
-        Wikitem(_('Tools'), 'Outillage_pour_les_datavisualisations'),
-        Wikitem(_('Open Licence'), 'Licence_Ouverte_/_Open_Licence'),
-        nav.Item(_('API'), 'api.root')
+    nav.Item(_('Discover OpenData'), 'gouvfr.faq_home', items=[
+        nav.Item(_('As a citizen'), 'gouvfr.faq_citizen'),
+        nav.Item(_('As a producer'), 'gouvfr.faq_producer'),
+        nav.Item(_('As a developer'), 'gouvfr.faq_developer'),
+        nav.Item(_('As a jurist'), 'gouvfr.faq_jurist'),
     ]),
     nav.Item(_('Data'), 'datasets.list', items=[
         nav.Item(_('Datasets'), 'datasets.list'),
@@ -59,15 +58,10 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
 theme.menu(gouvfr_menu)
 
 nav.Bar('gouvfr_footer', [
-    Wikitem(_('FAQ'), 'FAQ'),
-    Wikitem(_('Publication guide'), 'Guide_de_publication'),
-    Wikitem(_('Tools'), 'Outillage_pour_les_datavisualisations'),
-    Wikitem(_('Open Licence'), 'Licence_Ouverte_/_Open_Licence'),
-    nav.Item(_('API'), 'api.root'),
-    nav.Item(_('Datasets'), 'datasets.list'),
-    nav.Item('Dataconnexions', 'gouvfr.dataconnexions'),
-    nav.Item(_('Credits'), 'credits', url='//wiki.data.gouv.fr/wiki/Crédits'),
-    nav.Item(_('Terms of use'), 'terms', url='//wiki.data.gouv.fr/wiki/Conditions_Générales_d\'Utilisation'),
+    nav.Item(_('As a citizen'), 'gouvfr.faq_citizen'),
+    nav.Item(_('As a producer'), 'gouvfr.faq_producer'),
+    nav.Item(_('As a developer'), 'gouvfr.faq_developer'),
+    nav.Item(_('As a jurist'), 'gouvfr.faq_jurist'),
 ])
 
 NETWORK_LINKS = [
