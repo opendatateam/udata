@@ -9,7 +9,7 @@ from udata import search, theme
 from udata.frontend import csv
 from udata.frontend.views import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Activity, Site, Reuse, Organization
+from udata.models import Dataset, Activity, Site, Reuse, Organization, Post
 from udata.utils import multi_to_dict
 
 from udata.core.activity.views import ActivityView
@@ -68,20 +68,16 @@ def activity_feed():
     return feed.get_response()
 
 
-def default_home_context_processor(context):
-    recent_datasets, recent_reuses = search.multiquery(
-        search.SearchQuery(Dataset, sort='-created', page_size=12),
-        search.SearchQuery(Reuse, sort='-created', page_size=12),
-    )
-    context.update(recent_datasets=recent_datasets, recent_reuses=recent_reuses)
-    return context
-
-
 @blueprint.route('/')
 def home():
-    context = {}
-    processor = theme.current.get_processor('home', default_home_context_processor)
-    return theme.render('home.html', **processor(context))
+    context = {
+        'recent_datasets': Dataset.objects.visible().order_by('-created_at'),
+        'recent_reuses': Reuse.objects(featured=True).visible().order_by('-created_at'),
+        'last_post': Post.objects(private=False).order_by('-created_at').first(),
+    }
+    processor = theme.current.get_processor('home')
+    context = processor(context)
+    return theme.render('home.html', **context)
 
 
 @noI18n.route('/robots.txt')
