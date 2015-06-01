@@ -1,6 +1,6 @@
 <template>
-    <datatable-widget title="{{ title }}" icon="warning" boxclass="issues-widget"
-        fields="{{ fields }}" p="{{ issues }}">
+    <datatable-widget title="{{ title }}" icon="comment" boxclass="discussions-widget"
+        fields="{{ fields }}" p="{{ discussions }}">
     </datatable-widget>
 </template>
 
@@ -9,13 +9,13 @@
 'use strict';
 
 module.exports = {
-    name: 'issues-widget',
+    name: 'discussions-widget',
     components: {
          'datatable-widget': require('components/widgets/datatable.vue')
     },
     data: function() {
         return {
-            title: this._('Issues'),
+            title: this._('Discussions'),
             fields: [{
                 label: this._('Title'),
                 key: 'title',
@@ -32,10 +32,10 @@ module.exports = {
         };
     },
     events: {
-        'datatable:item:click': function(issue) {
-            this.$go('/issue/' + issue.id + '/');
+        'datatable:item:click': function(discussion) {
+            this.$go('/discussion/' + discussion.id + '/');
         }
     },
-    paramAttributes: ['issues']
+    paramAttributes: ['discussions']
 };
 </script>

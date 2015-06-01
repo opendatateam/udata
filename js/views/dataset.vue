@@ -20,6 +20,10 @@
     </div>
 
     <div class="row">
+        <issues-widget id="issues-widget" class="col-md-12" issues="{{issues}}"></issues-widget>
+    </div>
+
+    <div class="row">
         <followers-widget id="followers-widget" class="col-md-6" followers="{{followers}}"></followers-widget>
     </div>
 
@@ -34,6 +38,7 @@ var Vue = require('vue'),
     Dataset = require('models/dataset'),
     Reuses = require('models/reuses'),
     Followers = require('models/followers').extend({ns: 'datasets'}),
+    Issues = require('models/issues'),
     Metrics = require('models/metrics');
 
 module.exports = {
@@ -48,6 +53,7 @@ module.exports = {
             }}),
             reuses: new Reuses({query: {sort: '-created', page_size: 10}}),
             followers: new Followers({query: {page_size: 10}}),
+            issues: new Issues({query: {sort: '-created', page_size: 10}}),
             meta: {
                 title: null,
                 page: null,
@@ -125,6 +131,7 @@ module.exports = {
         'reuses-widget': require('components/reuse/list.vue'),
         'followers-widget': require('components/follow/list.vue'),
         'map-widget': require('components/widgets/map.vue'),
+        'issues-widget': require('components/issues/list.vue'),
     },
     methods: {
         confirm_delete: function() {
@@ -172,6 +179,7 @@ module.exports = {
                 this.metrics.fetch({id: id});
                 this.reuses.clear().fetch({dataset: id});
                 this.followers.fetch({id: id});
+                this.issues.fetch({'for': id});
             } else {
                 this.reuses.clear();
                 this.followers.clear();
