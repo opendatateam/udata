@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-05-28 19:19+0200\n"
+"POT-Creation-Date: 2015-06-01 20:02+0200\n"
 "PO-Revision-Date: 2015-05-05 14:01+0000\n"
 "Last-Translator: Larlet David <david@larlet.fr>\n"
 "Language-Team: Spanish "
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
 
-#: udata/theme.py:38 udata/core/site/metrics.py:86 udata/core/site/views.py:170
+#: udata/theme.py:38 udata/core/site/metrics.py:86 udata/core/site/views.py:166
 #: udata/templates/header.html:49 udata/templates/search.html:36
 #: udata/templates/search.html:83 udata/templates/dataset/search-panel.html:5
 #: udata/templates/organization/create.html:4
@@ -37,9 +37,9 @@ msgid "Organizations"
 msgstr "Organizaciones"
 
 #: udata/theme.py:39 udata/core/organization/metrics.py:16
-#: udata/core/organization/views.py:117 udata/core/organization/views.py:120
+#: udata/core/organization/views.py:124 udata/core/organization/views.py:127
 #: udata/core/reuse/metrics.py:24 udata/core/site/metrics.py:38
-#: udata/core/site/views.py:149 udata/core/user/metrics.py:25
+#: udata/core/site/views.py:145 udata/core/user/metrics.py:25
 #: udata/templates/search.html:23 udata/templates/search.html:57
 #: udata/templates/search.html:86 udata/templates/search.html:97
 #: udata/templates/dataset/create.html:4
@@ -67,9 +67,9 @@ msgid "Datasets"
 msgstr "Conjunto de datos"
 
 #: udata/theme.py:40 udata/core/dataset/metrics.py:20
-#: udata/core/organization/metrics.py:33 udata/core/organization/views.py:139
-#: udata/core/organization/views.py:142 udata/core/site/metrics.py:48
-#: udata/core/site/views.py:155 udata/core/user/metrics.py:39
+#: udata/core/organization/metrics.py:33 udata/core/organization/views.py:146
+#: udata/core/organization/views.py:149 udata/core/site/metrics.py:48
+#: udata/core/site/views.py:151 udata/core/user/metrics.py:39
 #: udata/templates/search.html:29 udata/templates/search.html:63
 #: udata/templates/search.html:70 udata/templates/search.html:87
 #: udata/templates/search.html:98 udata/templates/dataset/card.html:44
@@ -366,11 +366,11 @@ msgstr "IPA"
 msgid "dataset"
 msgstr "conjunto de datos"
 
-#: udata/core/dataset/views.py:29 udata/templates/home.html:129
+#: udata/core/dataset/views.py:29 udata/templates/home.html:126
 msgid "Last datasets"
 msgstr "Ultimos conjuntos de datos "
 
-#: udata/core/dataset/views.py:62 udata/core/organization/views.py:35
+#: udata/core/dataset/views.py:62 udata/core/organization/views.py:43
 #: udata/core/reuse/views.py:59
 msgid "Descrition"
 msgstr "Descripción"
@@ -380,13 +380,13 @@ msgid "Additionnal informations"
 msgstr "Informaciones adicionales"
 
 #: udata/core/dataset/views.py:64 udata/core/site/metrics.py:58
-#: udata/core/site/views.py:161 udata/templates/search.html:58
+#: udata/core/site/views.py:157 udata/templates/search.html:58
 #: udata/templates/dataset/display.html:58 udata/templates/dataset/list.html:24
 msgid "Resources"
 msgstr "Recursos"
 
 #: udata/core/dataset/views.py:65 udata/core/issues/metrics.py:13
-#: udata/core/organization/views.py:40 udata/core/reuse/views.py:60
+#: udata/core/organization/views.py:47 udata/core/reuse/views.py:60
 #: udata/templates/macros/issues.html:6
 msgid "Issues"
 msgstr "Anomalías"
@@ -398,7 +398,7 @@ msgstr "Transferir"
 #: udata/core/discussions/forms.py:12 udata/core/discussions/forms.py:17
 #: udata/core/issues/forms.py:12 udata/core/issues/forms.py:17
 #: udata/core/organization/forms.py:63 udata/core/organization/forms.py:67
-#: udata/templates/dataset/discussion-item.html:54
+#: udata/templates/dataset/discussion-item.html:55
 #: udata/templates/mail/issue_closed.html:31
 #: udata/templates/mail/new_issue_comment.html:31
 msgid "Comment"
@@ -427,7 +427,7 @@ msgstr "%(user)s comentaron su problema"
 msgid "A discussion has been closed"
 msgstr "Un problema ha sido cerrado"
 
-#: udata/core/followers/metrics.py:28 udata/core/organization/views.py:170
+#: udata/core/followers/metrics.py:28 udata/core/organization/views.py:175
 #: udata/core/site/metrics.py:96 udata/templates/search.html:88
 #: udata/templates/search.html:99 udata/templates/dataset/followers.html:6
 #: udata/templates/dataset/search-labels.html:26
@@ -536,11 +536,11 @@ msgstr "Su URL del logotipo de la organización"
 msgid "Role"
 msgstr "Rol"
 
-#: udata/core/organization/metrics.py:44 udata/core/organization/views.py:163
+#: udata/core/organization/metrics.py:44 udata/core/organization/views.py:170
 msgid "Permitted reuses"
 msgstr "Reutilizaciones permitidas"
 
-#: udata/core/organization/metrics.py:54 udata/core/organization/views.py:37
+#: udata/core/organization/metrics.py:54 udata/core/organization/views.py:44
 #: udata/templates/organization/display.html:53
 msgid "Members"
 msgstr "Miembros"
@@ -579,19 +579,19 @@ msgstr "Usted es ahora miembro de la organización \"%(org)s\""
 msgid "Membership refused"
 msgstr "Membresía rechazada"
 
-#: udata/core/organization/views.py:38
+#: udata/core/organization/views.py:45
 msgid "Membership request"
 msgstr "Solicitud de membresía"
 
-#: udata/core/organization/views.py:39
+#: udata/core/organization/views.py:46
 msgid "Teams"
 msgstr "Equipos"
 
-#: udata/core/organization/views.py:127 udata/core/organization/views.py:149
+#: udata/core/organization/views.py:134 udata/core/organization/views.py:156
 msgid "Views"
 msgstr "Vistas"
 
-#: udata/core/organization/views.py:160 udata/core/site/views.py:167
+#: udata/core/organization/views.py:167 udata/core/site/views.py:163
 msgid "Community"
 msgstr "Comunidad"
 
@@ -647,7 +647,8 @@ msgstr ""
 "Los detalles sobre la reutilización (construcción de procesos, "
 "específicos, críticas propias...). "
 
-#: udata/core/reuse/forms.py:29 udata/templates/reuse/display.html:291
+#: udata/core/reuse/forms.py:29 udata/templates/home.html:96
+#: udata/templates/reuse/display.html:291
 msgid "Used datasets"
 msgstr "Conjunto de datos revisado"
 
@@ -687,7 +688,7 @@ msgstr "reutilización"
 msgid "New reuse"
 msgstr "Nueva reutilización"
 
-#: udata/core/reuse/views.py:26 udata/templates/home.html:146
+#: udata/core/reuse/views.py:26 udata/templates/home.html:143
 msgid "Last reuses"
 msgstr "Ultimas reutilizaciones"
 
@@ -708,7 +709,7 @@ msgstr "Granulometría de entrada"
 msgid "Number of elements in feeds"
 msgstr "Número de elementos de granularidad"
 
-#: udata/core/site/metrics.py:76 udata/core/site/views.py:183
+#: udata/core/site/metrics.py:76 udata/core/site/views.py:179
 #: udata/templates/search.html:44 udata/templates/user/base.html:11
 #: udata/templates/user/edit_base.html:5 udata/templates/user/following.html:18
 #: udata/templates/user/list.html:9
@@ -743,11 +744,11 @@ msgstr ""
 msgid "Maximum organization datasets"
 msgstr ""
 
-#: udata/core/site/views.py:146
+#: udata/core/site/views.py:142
 msgid "Data"
 msgstr "Datos"
 
-#: udata/core/site/views.py:176
+#: udata/core/site/views.py:172
 msgid "Public services"
 msgstr "Servicios públicos"
 
@@ -1203,6 +1204,15 @@ msgstr "%(site)s inicio"
 msgid "home"
 msgstr "inicio"
 
+#: udata/templates/home.html:57 udata/templates/topic/display.html:81
+msgid "Featured datasets"
+msgstr "Conjuntos de datos destacados"
+
+#: udata/templates/home.html:82
+#, fuzzy
+msgid "Reuse"
+msgstr "reutilización"
+
 #: udata/templates/metrics.html:4 udata/templates/metrics.html:10
 msgid "Metrics"
 msgstr "Métricas "
@@ -1418,15 +1428,15 @@ msgstr "Crear"
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: udata/templates/dataset/discussion-item.html:11
+#: udata/templates/dataset/discussion-item.html:12
 msgid "Discussion started on"
 msgstr ""
 
-#: udata/templates/dataset/discussion-item.html:11
+#: udata/templates/dataset/discussion-item.html:12
 msgid "with"
 msgstr ""
 
-#: udata/templates/dataset/discussion-item.html:12
+#: udata/templates/dataset/discussion-item.html:13
 #, fuzzy, python-format
 msgid "%(nb)s message"
 msgid_plural "%(nb)s messages"
@@ -1438,15 +1448,15 @@ msgstr[1] "%(num)s reutilizaciones"
 msgid "Add a comment"
 msgstr "Comentar"
 
-#: udata/templates/dataset/discussion-item.html:46
+#: udata/templates/dataset/discussion-item.html:47
 msgid "Commenting on this thread"
 msgstr ""
 
-#: udata/templates/dataset/discussion-item.html:49
+#: udata/templates/dataset/discussion-item.html:50
 msgid "You're about to answer to this particular thread about:"
 msgstr ""
 
-#: udata/templates/dataset/discussion-item.html:57
+#: udata/templates/dataset/discussion-item.html:58
 msgid "Submit your comment"
 msgstr ""
 
@@ -1686,6 +1696,10 @@ msgid ""
 msgstr ""
 "El servidor encontró un error interno y no pudo completar su solicitud. O"
 " bien el servidor está sobrecargado o hay un error en la aplicación."
+
+#: udata/templates/errors/500.html:8
+msgid "The error identifier is {id}"
+msgstr ""
 
 #: udata/templates/errors/base.html:11
 #, python-format
@@ -2023,12 +2037,21 @@ msgstr ""
 msgid "Resources list"
 msgstr ""
 
-#: udata/templates/organization/display.html:142
+#: udata/templates/organization/display.html:117
+msgid "Issues list"
+msgstr ""
+
+#: udata/templates/organization/display.html:122
+#, fuzzy
+msgid "Discussions list"
+msgstr "Un problema ha sido cerrado"
+
+#: udata/templates/organization/display.html:152
 #, python-format
 msgid "See the %(nb)s reuses"
 msgstr ""
 
-#: udata/templates/organization/display.html:176
+#: udata/templates/organization/display.html:186
 msgid "Display all followers"
 msgstr ""
 
@@ -2389,10 +2412,6 @@ msgstr "Temas"
 #: udata/templates/topic/display.html:17
 msgid "Best reuse cases"
 msgstr "Los mejores casos de reutilización "
-
-#: udata/templates/topic/display.html:81
-msgid "Featured datasets"
-msgstr "Conjuntos de datos destacados"
 
 #: udata/templates/topic/display.html:82
 msgid "Latest datasets"
