@@ -483,10 +483,11 @@
                 {% set discussion_length = discussions|rejectattr('closed')|list|length %}
                 <div class="list-group-item list-group-form list-group-form-discussion hidden animated" id="discussion-{{ discussion_length + 1 }}">
                     <div class="format-label pull-left">
-                        <span>
-                            <a href="#discussion-{{ discussion_length + 1 }}">{{ discussion_length + 1 }}</a>
-                        </span>
+                        {{ current_user|avatar(52) }}
                     </div>
+                    <span class="list-group-item-link">
+                        <a href="#discussion-{{ discussion_length + 1 }}"><span class="glyphicon glyphicon-link"></span></a>
+                    </span>
                     <h4 class="list-group-item-heading">
                         {{ _('Starting a new discussion thread') }}
                     </h4>
@@ -504,7 +505,6 @@
                         </div>
                         <input type="submit" value="{{ _('Start a discussion') }}" class="btn btn-primary btn-block pull-right submit-new-discussion" />
                     </form>
-                    {{ current_user|avatar(52, 'resource-owner') }}
                 </div>
                 <div class="list-group-item list-group-indent list-group-new-message hidden animated" id="discussion-{{ discussion_length + 1 }}-1">
                     <div class="format-label pull-left">
