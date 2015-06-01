@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-05-28 19:13+0200\n"
+"POT-Creation-Date: 2015-06-01 20:02+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -62,61 +62,48 @@ msgid "An optionnal atom feed URL for display blog post in home page"
 msgstr ""
 
 #: udata_gouvfr/theme/theme.py:41
-msgid "How it works ?"
+msgid "Discover OpenData"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:42 udata_gouvfr/theme/theme.py:62
-msgid "FAQ"
+#: udata_gouvfr/theme/theme.py:42 udata_gouvfr/theme/theme.py:61
+msgid "As a citizen"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:43 udata_gouvfr/theme/theme.py:63
-msgid "Publication guide"
+#: udata_gouvfr/theme/theme.py:43 udata_gouvfr/theme/theme.py:62
+msgid "As a producer"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:44 udata_gouvfr/theme/theme.py:64
-msgid "Tools"
+#: udata_gouvfr/theme/theme.py:44 udata_gouvfr/theme/theme.py:63
+msgid "As a developer"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:45 udata_gouvfr/theme/theme.py:65
-msgid "Open Licence"
+#: udata_gouvfr/theme/theme.py:45 udata_gouvfr/theme/theme.py:64
+msgid "As a jurist"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:46 udata_gouvfr/theme/theme.py:66
-msgid "API"
-msgstr ""
-
-#: udata_gouvfr/theme/theme.py:48 udata_gouvfr/theme/templates/metrics.html:19
+#: udata_gouvfr/theme/theme.py:47 udata_gouvfr/theme/templates/metrics.html:19
 msgid "Data"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:49 udata_gouvfr/theme/theme.py:67
-#: udata_gouvfr/theme/templates/footer.html:65
+#: udata_gouvfr/theme/theme.py:48 udata_gouvfr/theme/templates/footer.html:65
 #: udata_gouvfr/theme/templates/metrics.html:23
 #: udata_gouvfr/theme/templates/dataset/display.html:20
 msgid "Datasets"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:50 udata_gouvfr/theme/templates/footer.html:66
+#: udata_gouvfr/theme/theme.py:49 udata_gouvfr/theme/templates/footer.html:66
 #: udata_gouvfr/theme/templates/metrics.html:28
 #: udata_gouvfr/theme/templates/dataset/display.html:545
 msgid "Reuses"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:51 udata_gouvfr/theme/templates/header.html:73
+#: udata_gouvfr/theme/theme.py:50 udata_gouvfr/theme/templates/header.html:73
 #: udata_gouvfr/theme/templates/metrics.html:43
 msgid "Organizations"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:53
+#: udata_gouvfr/theme/theme.py:52
 msgid "Dashboard"
-msgstr ""
-
-#: udata_gouvfr/theme/theme.py:69
-msgid "Credits"
-msgstr ""
-
-#: udata_gouvfr/theme/theme.py:70
-msgid "Terms of use"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/footer.html:6
@@ -409,29 +396,29 @@ msgstr ""
 msgid "Start a new discussion"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/dataset/display.html:491
+#: udata_gouvfr/theme/templates/dataset/display.html:492
 #: udata_gouvfr/theme/templates/reuse/display.html:52
 msgid "Starting a new discussion thread"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/dataset/display.html:494
+#: udata_gouvfr/theme/templates/dataset/display.html:495
 msgid ""
 "You're about to start a new discussion thread. Make sure that a thread about "
 "the same topic doesn't exist yet just above. If you want to report an "
 "anomaly, please use the dedicated button just under the datasets."
 msgstr ""
 
-#: udata_gouvfr/theme/templates/dataset/display.html:500
+#: udata_gouvfr/theme/templates/dataset/display.html:501
 #: udata_gouvfr/theme/templates/reuse/display.html:61
 msgid "Title"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/dataset/display.html:502
+#: udata_gouvfr/theme/templates/dataset/display.html:503
 #: udata_gouvfr/theme/templates/reuse/display.html:63
 msgid "Comment"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/dataset/display.html:505
+#: udata_gouvfr/theme/templates/dataset/display.html:506
 #: udata_gouvfr/theme/templates/reuse/display.html:66
 msgid "Start a discussion"
 msgstr ""
