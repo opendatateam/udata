@@ -170,6 +170,13 @@ module.exports = {
                     }},
                     Vue.extend(require('components/issues/modal.vue'))
                 );
+        },
+        '/discussion/:oid/': function(discussion_id) {
+            var m = this.$modal({data: {
+                        discussionid: discussion_id
+                    }},
+                    Vue.extend(require('components/discussions/modal.vue'))
+                );
         }
     },
     watch: {

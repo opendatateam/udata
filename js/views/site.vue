@@ -22,6 +22,9 @@
     <div class="row">
         <issues-widget id="issues-widget" class="col-md-12" issues="{{issues}}"></issues-widget>
     </div>
+    <div class="row">
+        <discussions-widget id="discussions-widget" class="col-md-12" discussions="{{discussions}}"></discussions-widget>
+    </div>
 </template>
 
 <script>
@@ -32,6 +35,7 @@ var moment = require('moment'),
     Datasets = require('models/datasets'),
     Metrics = require('models/metrics'),
     Issues = require('models/issues'),
+    Discussions = require('models/discussions'),
     Users = require('models/users'),
     Organizations = require('models/organizations');
 
@@ -53,6 +57,7 @@ module.exports = {
             organizations: new Organizations({query: {sort: '-created', page_size: 10}}),
             users: new Users({query: {sort: '-created', page_size: 10}}),
             issues: new Issues({query: {sort: '-created', page_size: 10}}),
+            discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
             y: [{
                 id: 'datasets',
                 label: this._('Datasets'),
@@ -117,6 +122,7 @@ module.exports = {
         'organizations-widget': require('components/organization/list.vue'),
         'users-widget': require('components/user/list.vue'),
         'issues-widget': require('components/issues/list.vue'),
+        'discussions-widget': require('components/discussions/list.vue'),
         'posts-widget': require('components/post/list.vue'),
         'topics-widget': require('components/topic/list.vue')
     },
@@ -133,6 +139,7 @@ module.exports = {
         this.reuses.fetch();
         this.users.fetch();
         this.issues.fetch();
+        this.discussions.fetch();
         this.organizations.fetch();
     },
     watch: {
