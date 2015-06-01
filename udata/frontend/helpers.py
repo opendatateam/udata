@@ -135,8 +135,8 @@ def avatar(user, size, classes=''):
         <img src="{avatar_url}" class="avatar" width="{size}" height="{size}"/>
         </a>
     '''.format(
-        title=user.fullname,
-        url=url_for('users.show', user=user),
+        title=getattr(user, 'fullname', _('Anonymous user')),
+        url=url_for('users.show', user=user) if user and getattr(user, 'id', None) else '#',
         size=size,
         avatar_url=avatar_url(user, size),
         classes=classes

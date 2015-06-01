@@ -13,7 +13,8 @@
         <a href="{{ url_for('users.show', user=user) }}"
             title="{{ user.fullname }}">
             <img src="{{ user.avatar(150)|placeholder('user') }}"
-                alt="{{ user.fullname }}" class="scalable" itemprop="image"/>
+                alt="{{ user.fullname }}" class="scalable" itemprop="image"
+                width="150" height="150"/>
         </a>
         <h3>{{ user.fullname }}</h3>
         {% if user.about %}

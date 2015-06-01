@@ -1,7 +1,8 @@
 {% set user_url = url_for('users.show', user=user) %}
 <div class="card">
     <a class="card-logo" href="{{ user_url }}">
-        <img src="{{ user|avatar_url(48) }}" alt="{{ user.fullname }}">
+        <img src="{{ user|avatar_url(48) }}" alt="{{ user.fullname }}"
+            width="48" height="48">
     </a>
 
     <div class="card-body">

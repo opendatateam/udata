@@ -39,4 +39,5 @@ def init_app(app):
             yield 'topics.display_redirect', {'topic': item}, None, "weekly", 0.8
 
     app.config['SITEMAP_VIEW_DECORATORS'] = [load_page]
+    app.config['SITEMAP_URL_METHOD'] = 'https'
     sitemap.init_app(app)

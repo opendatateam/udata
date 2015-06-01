@@ -1,7 +1,8 @@
 <div class="card organization-card">
     <a class="card-logo" href="{{ url_for('organizations.show', org=organization) }}">
         <img alt="{{ organization.title }}"
-            src="{{ organization.logo(60)|placeholder('organization') }}">
+            src="{{ organization.logo(60)|placeholder('organization') }}"
+            width="60" height="60">
     </a>
     {% if organization.public_service %}
     <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"

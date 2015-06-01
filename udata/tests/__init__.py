@@ -140,10 +140,11 @@ class WebTestMixin(object):
 
 
 class DBTestMixin(object):
+
     def tearDown(self):
         '''Clear the database'''
         super(DBTestMixin, self).tearDown()
-        db_name = self.app.config['MONGODB_SETTINGS']['DB']
+        db_name = self.app.config['MONGODB_DB']
         db.connection.drop_database(db_name)
 
 

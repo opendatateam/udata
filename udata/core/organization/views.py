@@ -81,7 +81,6 @@ class ProtectedOrgView(OrgView):
 @blueprint.route('/<org:org>/', endpoint='show')
 class OrganizationDetailView(OrgView, DetailView):
     template_name = 'organization/display.html'
-    nb_followers = 16
     page_size = 9
 
     def get_context(self):
@@ -101,7 +100,7 @@ class OrganizationDetailView(OrgView, DetailView):
             'reuses': reuses.paginate(1, self.page_size),
             'datasets': datasets.paginate(1, self.page_size),
             'supplied_datasets': supplied_datasets[:self.page_size],
-            'followers': followers[:self.nb_followers],
+            'followers': followers,
             'can_edit': can_edit,
             'can_view': can_view,
             'private_reuses': list(Reuse.objects(organization=self.object).hidden()) if can_view else [],

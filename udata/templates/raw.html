@@ -24,6 +24,7 @@
     {% assets site_css_bundle %}
     <link href="{{ ASSET_URL }}" rel="stylesheet">
     {% endassets %}
+    {% block extra_css %}{% endblock %}
 
     <link rel="theme-static-root" href="{{ theme_static('') }}" />
     <link rel="static-root" href="{{ static('') }}" />
@@ -58,8 +59,6 @@
         title="{{ _('Recent reuses') }}" />
 
     {{ i18n_alternate_links() }}
-
-
 
     {% set base_url = static('js/' if config.ASSETS_DEBUG else 'js-built') %}
     <script>var require = {baseUrl: "{{ base_url }}"};</script>

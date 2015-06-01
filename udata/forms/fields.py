@@ -330,7 +330,7 @@ class ModelList(object):
         if len(valuelist) > 1:
             oids = [clean_oid(id, self.model) for id in valuelist]
         elif isinstance(valuelist[0], basestring):
-            oids = [clean_oid(id, self.model) for id in valuelist[0].split(',')]
+            oids = [clean_oid(id, self.model) for id in valuelist[0].split(',') if id]
         else:
             raise validators.ValidationError('Unsupported form parameter: ' + valuelist)
 
@@ -428,7 +428,7 @@ class CurrentUserField(FieldHelper, ModelField, fields.HiddenField):
             if current_user.is_anonymous():
                 raise validators.ValidationError(_('You must be authenticated'))
             elif not admin_permission and current_user.id != self.data.id:
-                raise validators.ValidationError(_('Permission denied you can only set yourself as owner'))
+                raise validators.ValidationError(_('You can only set yourself as owner'))
         return True
 
 

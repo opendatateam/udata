@@ -143,19 +143,28 @@ The elasticsearch server url used for search indexing.
 Mongoengine/Flask-Mongoengine options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MONGODB_SETTINGS
-****************
+MONGODB_HOST
+************
 
-**default**: ``{'DB': 'udata'}``
+**default**: ``localhost``
 
-A dictionnary containing MongoDB access configuration.
+The mongodb hostname used by udata.
 
-.. code-block:: python
 
-    MONGODB_SETTINGS = {
-        'DB': 'udata',
-        'HOST': 'somemongo.com',
-    }
+MONGODB_PORT
+************
+
+**default**: ``27017``
+
+The mongodb post used by udata.
+
+MONGODB_DB
+**********
+
+**default**: ``udata``
+
+The mongodb database used by udata. When testing, the test database will use the same name suffixed by ``-test``
+
 
 See `the official Flask-MongoEngine documentation <https://flask-mongoengine.readthedocs.org/en/latest/>`_ for more details.
 
