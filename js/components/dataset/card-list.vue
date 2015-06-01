@@ -133,7 +133,9 @@ module.exports = {
         edit: function() {
             this.$sortable.option('disabled', false);
             this._initial_order = this.$sortable.toArray();
-            this.sorted = this.datasets.slice();
+            this.sorted = this.datasets.map(function(dataset) {
+                return dataset.id;
+            });
             this.editing = true;
         },
         submit: function() {
