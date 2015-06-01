@@ -37,11 +37,13 @@ class SiteViewsTest(FrontTestCase):
 
     def test_render_home(self):
         '''It should render the home page'''
-        with self.autoindex():
-            for i in range(3):
-                org = OrganizationFactory()
-                DatasetFactory(organization=org)
-                ReuseFactory(organization=org)
+        for i in range(3):
+            org = OrganizationFactory()
+            DatasetFactory(organization=org)
+            ReuseFactory(organization=org)
+
+        current_site.settings.home_datasets = [DatasetFactory() for _ in range(3)]
+        current_site.settings.home_reuses = [ReuseFactory() for _ in range(3)]
 
         response = self.get(url_for('site.home'))
         self.assert200(response)
