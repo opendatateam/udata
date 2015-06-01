@@ -81,9 +81,7 @@ nav.Bar('gouvfr_network', [nav.Item(label, label, url=url) for label, url in NET
 def get_blog_post(url, lang):
     for code in lang, current_app.config['DEFAULT_LANGUAGE']:
         feed_url = url.format(lang=code)
-        print feed_url
         feed = feedparser.parse(feed_url)
-        # print len(feed['entries']), feed, len(feed['entries'])
         if len(feed['entries']) > 0:
             break
     if len(feed['entries']) <= 0:
@@ -103,22 +101,9 @@ def get_blog_post(url, lang):
     return blogpost
 
 
-# @cache.memoize(50)
 @theme.context('home')
 def home_context(context):
     config = theme.current.config
-    specs = {
-        'recent_datasets': search.SearchQuery(Dataset, sort='-created', page_size=config['tab_size']),
-        'featured_reuses': search.SearchQuery(Reuse, featured=True, page_size=9),
-        'popular_datasets': search.SearchQuery(Dataset, page_size=config['tab_size']),
-    }
-    keys, queries = zip(*specs.items())
-
-    results = search.multiquery(*queries)
-
-    context.update(zip(keys, results))
-    context['recent_reuses'] = Reuse.objects(featured=True).visible().order_by('-created_at').limit(3)
-    context['last_post'] = Post.objects(private=False).order_by('-created_at').first()
     if 'atom_url' in config:
         context['blogpost'] = get_blog_post(config['atom_url'], g.lang_code)
     return context
