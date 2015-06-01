@@ -1,9 +1,10 @@
 <div class="list-group-item" id="discussion-{{ loop_index }}" data-discussion-id="{{ discussion.id }}">
     <div class="format-label pull-left">
-        <span>
-            <a href="#discussion-{{ loop_index }}">{{ loop_index }}</a>
-        </span>
+        {{ discussion.user|avatar(52) }}
     </div>
+    <span class="list-group-item-link">
+        <a href="#discussion-{{ loop_index }}"><span class="glyphicon glyphicon-link"></span></a>
+    </span>
     <h4 class="list-group-item-heading ellipsis open-discussion-thread">
         <span itemprop="name">{{ discussion.title }}</span>
     </h4>
@@ -11,19 +12,18 @@
         {{ _('Discussion started on') }} {{ discussion.created|dateformat }} {{ _('with') }}
         {% trans nb=discussion.discussion|length %}{{nb}} message{% pluralize %}{{nb}} messages{% endtrans %}
     </p>
-    {{ discussion.user|avatar(52, 'resource-owner') }}
 </div>
 {% for message in discussion.discussion %}
     <div class="list-group-item list-group-indent list-group-thread-{{ discussion.id }} hidden animated" id="discussion-{{ loop_index }}-{{ loop.index }}">
         <div class="format-label pull-left">
-            <span>
-                <a href="#discussion-{{ loop_index }}-{{ loop.index }}">{{ loop_index }}.{{ loop.index }}</a>
-            </span>
+            {{ message.posted_by|avatar(52) }}
         </div>
+        <span class="list-group-item-link">
+            <a href="#discussion-{{ loop_index }}-{{ loop.index }}"><span class="glyphicon glyphicon-link"></span></a>
+        </span>
         <p class="list-group-item-heading">
             {{ message.content }}
         </p>
-        {{ message.posted_by|avatar(52, 'resource-owner') }}
     </div>
 {% endfor %}
 <a class="list-group-item add new-comment list-group-indent list-group-thread-{{ discussion.id }} hidden animated"
@@ -38,10 +38,11 @@
     data-discussion-id="{{ discussion.id }}"
     id="discussion-{{ loop_index }}-{{ discussion.discussion|length + 1 }}">
     <div class="format-label pull-left">
-        <span>
-            <a href="#discussion-{{ loop_index }}-{{ discussion.discussion|length + 1 }}">{{ loop_index }}.{{ discussion.discussion|length + 1 }}</a>
-        </span>
+        {{ current_user|avatar(52) }}
     </div>
+    <span class="list-group-item-link">
+        <a href="#discussion-{{ loop_index }}-{{ discussion.discussion|length + 1 }}"><span class="glyphicon glyphicon-link"></span></a>
+    </span>
     <h4 class="list-group-item-heading">
         {{ _('Commenting on this thread') }}
     </h4>
@@ -56,5 +57,4 @@
         </div>
         <input type="submit" value="{{ _('Submit your comment') }}" class="btn btn-primary btn-block pull-right submit-new-comment" />
     </form>
-    {{ current_user|avatar(52, 'resource-owner') }}
 </div>
