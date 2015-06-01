@@ -112,6 +112,16 @@
                             {{ _('Resources list') }}
                             </a>
                         </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="{{ url_for('organizations.issues_csv', org=org) }}">
+                            {{ _('Issues list') }}
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="{{ url_for('organizations.discussions_csv', org=org) }}">
+                            {{ _('Discussions list') }}
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
