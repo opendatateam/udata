@@ -68,6 +68,7 @@ class OrganizationAPI(API):
 
     @api.secure
     @api.doc('update_organization')
+    @api.marshal_with(org_fields)
     @api.response(400, 'Validation error')
     def put(self, org):
         '''Update a organization given its identifier'''
@@ -91,8 +92,11 @@ class OrganizationAPI(API):
 
 
 requests_parser = api.parser()
-requests_parser.add_argument('status', type=unicode,
-    help='If provided, only return requests ith a given status', location='args'
+requests_parser.add_argument(
+    'status',
+    type=unicode,
+    help='If provided, only return requests ith a given status',
+    location='args'
 )
 
 
@@ -164,8 +168,8 @@ class MembershipAcceptAPI(MembershipAPI):
 
 
 refuse_parser = api.parser()
-refuse_parser.add_argument('comment', type=unicode,
-    help='The refusal reason', location='json'
+refuse_parser.add_argument(
+    'comment', type=unicode, help='The refusal reason', location='json'
 )
 
 
@@ -268,7 +272,6 @@ class SuggestOrganizationsAPI(API):
         ]
 
 
-
 logo_parser = api.parser()
 logo_parser.add_argument('file', type=FileStorage, location='files')
 logo_parser.add_argument('bbox', type=str, location='form')
@@ -299,34 +302,6 @@ class AvatarAPI(API):
         '''Set the logo BBox'''
         EditOrganizationPermission(org).test()
         args = logo_parser.parse_args()
-
-        print args
         logo = args['file']
-
         org.logo.save(logo, bbox=args.get('bbox'))
-
         return org
-
-        # storage = storages.logo
-
-        # prefix = self.get_prefix(dataset)
-
-        # filename = storage.save(file, prefix=prefix)
-
-        # extension = fileutils.extension(filename)
-
-        # file.seek(0)
-        # sha1 = storages.utils.sha1(file)
-
-        # size = os.path.getsize(storage.path(filename)) if storage.root else None
-
-        # resource = Resource(
-        #     title=os.path.basename(filename),
-        #     url=storage.url(filename, external=True),
-        #     checksum=Checksum(value=sha1),
-        #     format=extension,
-        #     mime=storages.utils.mime(filename),
-        #     size=size
-        # )
-        # dataset.add_resource(resource)
-        # return resource, 201

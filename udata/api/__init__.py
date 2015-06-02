@@ -127,7 +127,8 @@ class UDataApi(Api):
         return parser
 
 
-api = UDataApi(apiv1, ui=False,
+api = UDataApi(
+    apiv1, ui=False,
     decorators=[csrf.exempt, cors.crossdomain(origin='*', credentials=True)],
     version='1.0', title='uData API',
     description='uData API', default='site', default_label='Site global namespace'
@@ -150,8 +151,9 @@ def set_api_language():
 
 @api.errorhandler(PermissionDenied)
 def handle_permission_denied(error):
+    message = 'You do not have the permission to modify that object.'
     return {
-        'message': str(error),
+        'message': message,
         'status': 403
     }, 403
 
@@ -257,7 +259,6 @@ base_reference = api.model('BaseReference', {
     'id': fields.String(description='The object unique identifier', required=True),
     'class': fields.ClassName(description='The object class', discriminator=True, required=True),
 }, description='Base model for reference field, aka. inline model reference')
-
 
 
 def marshal_page(page, page_fields):

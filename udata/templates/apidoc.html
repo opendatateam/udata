@@ -280,14 +280,84 @@ HTTP/1.1 401 UNAUTHORIZED
                 <pre><code class="json">$ http PUT $API'organizations/premier-ministre/' X-API-KEY:your.api.key.here</code></pre>
 
 <pre><code class="json">
-HTTP/1.1 400 BAD REQUEST
+HTTP/1.1 401 UNAUTHORIZED
 ... LOTS OF HEADERS ...
 
 {
-    "message": "Bad Request",
-    "status": 400
+    "message": "Invalid API Key",
+    "status": 401
 }
 </code></pre>
+
+                <p>{% trans %}This is the message you will end up with if you specified the wrong API Key. There is another potential error message that you can encounter:
+                {% endtrans %}</p>
+
+<pre><code class="json">
+HTTP/1.1 403 FORBIDDEN
+... LOTS OF HEADERS ...
+
+{
+    "message": "You do not have the permission to modify that object.",
+    "status": 403
+}
+</code></pre>
+
+                <p>{% trans %}It occurs if you try to access a resource that you cannot edit with your credentials. If your Key is valid you should have something like this:
+                {% endtrans %}</p>
+
+
+<pre><code class="json">
+HTTP/1.1 200 OK
+... LOTS OF HEADERS ...
+
+{
+    ...
+}
+</code></pre>
+
+                <p>{% trans %}But it didn't change anything! This is perfectly normal, we forgot to specify the right data to send to the server.
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http PUT $API'organizations/premier-ministre/' X-API-KEY:your.api.key.here name="Premier ministre fr" description="Administration du Premier ministre." | jq '{name: .name, description: .description}'</code></pre>
+
+<pre><code class="json">
+{
+  "name": "Premier ministre fr",
+  "description": "Administration du Premier ministre."
+}
+</code></pre>
+
+                <p>{% trans %}The resource has been modified with your new values. Finally, you can delete a resource with the appropriated HTTP verb (beware, no rollback is possible using the API at the moment):
+                {% endtrans %}</p>
+
+
+                <pre><code class="json">$ http DELETE $API'organizations/premier-ministre/' X-API-KEY:your.api.key.here</code></pre>
+
+<pre><code class="json">
+HTTP/1.0 204 NO CONTENT
+... LOTS OF HEADERS ...
+
+</code></pre>
+
+                <p>{% trans %}Once you did it, you can verify that it's effective issuing a GET against the previous URI:
+                {% endtrans %}</p>
+
+
+                <pre><code class="json">$ http GET $API'organizations/premier-ministre/'</code></pre>
+
+<pre><code class="json">
+HTTP/1.0 410 GONE
+... LOTS OF HEADERS ...
+
+{
+    "message": "Organization has been deleted",
+    "status": 410
+}
+
+</code></pre>
+
+                <p>{% trans %}Please consult the reference documentation below for further interactions with the API or ask us for questions related to it!
+                {% endtrans %}</p>
 
             </div>
         </div>
