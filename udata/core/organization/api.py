@@ -68,6 +68,7 @@ class OrganizationAPI(API):
 
     @api.secure
     @api.doc('update_organization')
+    @api.expect(org_fields)
     @api.marshal_with(org_fields)
     @api.response(400, 'Validation error')
     def put(self, org):

@@ -59,9 +59,10 @@ class ReuseAPI(ModelAPI):
         return reuse
 
     @api.secure
-    @api.doc('update_reuse', responses={400: 'Validation error'})
+    @api.doc('update_reuse')
     @api.expect(reuse_fields)
     @api.marshal_with(reuse_fields)
+    @api.response(400, 'Validation error')
     def put(self, reuse):
         '''Update a given reuse'''
         if reuse.deleted:

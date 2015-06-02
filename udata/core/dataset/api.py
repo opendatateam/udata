@@ -73,6 +73,8 @@ class DatasetAPI(API):
 
     @api.secure
     @api.doc('update_dataset')
+    @api.expect(dataset_fields)
+    @api.marshal_with(dataset_fields)
     @api.response(400, 'Validation error')
     def put(self, dataset):
         '''Update a dataset given its identifier'''
