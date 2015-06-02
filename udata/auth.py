@@ -31,14 +31,6 @@ class Permission(BasePermission):
         '''Let administrator bypass all permissions'''
         super(Permission, self).__init__(RoleNeed('admin'), *needs)
 
-    # def require(self, http_exception=403):
-    #     '''Set the default status code to 403 Forbidden'''
-    #     return super(Permission, self).require(http_exception)
-
-    # def test(self, http_exception=403):
-    #     '''Set the default status code to 403 Forbidden'''
-    #     return super(Permission, self).test(http_exception)
-
 admin_permission = Permission()
 
 
@@ -46,8 +38,9 @@ admin_permission = Permission()
 def ensure_https_authenticated_users():
     # Force authenticated users to use https
     if (not current_app.config.get('TESTING', False)
-        and current_app.config.get('USE_SSL', False)
-        and current_user.is_authenticated() and not request.is_secure):
+            and current_app.config.get('USE_SSL', False)
+            and current_user.is_authenticated()
+            and not request.is_secure):
         return redirect(request.url.replace('http://', 'https://'))
 
 
