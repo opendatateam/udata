@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from udata.api import api, fields, base_reference
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.spatial.api_fields import spatial_coverage_fields
+from udata.core.user.api_fields import user_ref_fields
 
 from .models import UPDATE_FREQUENCIES, RESOURCE_TYPES, DEFAULT_FREQUENCY, CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE
 
@@ -71,6 +72,8 @@ dataset_fields = api.model('Dataset', {
     'metrics': fields.Raw(description='The dataset metrics'),
     'organization': fields.Nested(org_ref_fields, allow_null=True,
         description='The producer organization'),
+    'owner': fields.Nested(user_ref_fields, allow_null=True,
+        description='The user information'),
     'supplier': fields.Nested(org_ref_fields, allow_null=True,
         description='The supplyer organization (if different from the producer)'),
     'temporal_coverage': fields.Nested(temporal_coverage_fields, allow_null=True,
