@@ -8,7 +8,7 @@ define([
     'organization/typeahead',
     // 'user/typeahead',
     'typeahead'
-], function($, datasets, reuses, organizations, users) {
+], function($, datasets, reuses, organizations) {
     'use strict';
 
     var SEARCH_FOCUS_CLASS = 'col-sm-7 col-lg-8',
