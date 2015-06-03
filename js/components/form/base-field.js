@@ -12,6 +12,7 @@ define(['logger'], function(log) {
         },
         components: {
             'text-input': require('components/form/text-input.vue'),
+            'hidden-input': require('components/form/hidden-input.vue'),
             'select-input': require('components/form/select-input.vue'),
             'markdown-editor': require('components/form/markdown.vue'),
             'tag-completer': require('components/form/tag-completer'),
@@ -45,7 +46,7 @@ define(['logger'], function(log) {
                 }
                 if (prop.type === 'string' && prop.format === 'markdown') {
                     return 'markdown';
-                };
+                }
             },
             is_input: function() {
                 return !this.field_type;
