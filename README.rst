@@ -37,3 +37,13 @@ or with easy_install:
 .. code-block:: console
 
     $ easy_install udata-admin
+
+Development
+===========
+
+You can launch your development instance with:
+
+.. code-block:: console
+
+    $ inv watch
+

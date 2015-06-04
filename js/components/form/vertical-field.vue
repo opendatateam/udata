@@ -22,15 +22,17 @@
         radio: field_type == 'radio',
         ">
         <span v-show="property.description" class="form-help"
-            v-attr="data-content: property.description"></span>
-        <label for="{{field.id}}" v-class="required: required">
-            <input v-if="is_bool" v-attr="
-                id: field.id,
-                name: field.id,
-                type: field_type,
-                value: value"></input>
+            v-attr="data-content: property.description"
+            v-if="field.type!=='hidden'"></span>
+        <label for="{{field.id}}" v-class="required: required"
+            v-if="field.type!=='hidden'">
             {{ field.label }}
         </label>
+        <input v-if="is_bool" v-attr="
+            id: field.id,
+            name: field.id,
+            type: field_type,
+            value: value"></input>
         <div v-component="{{widget}}"></div>
         <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
         <div class="{{type}}" v-if="is_bool">

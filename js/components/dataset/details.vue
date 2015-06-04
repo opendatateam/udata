@@ -36,6 +36,14 @@ module.exports = {
                 id: 'tags',
                 label: this._('Tags'),
                 widget: 'tag-completer'
+            }, {
+                id: 'organization',
+                widget: 'hidden-input',
+                type: 'hidden'
+            }, {
+                id: 'owner',
+                widget: 'hidden-input',
+                type: 'hidden'
             }]
         };
     },

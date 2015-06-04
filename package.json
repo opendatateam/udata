@@ -46,7 +46,7 @@
     "sinon-chai": "^2.6.0",
     "style-loader": "^0.12.2",
     "vue-loader": "^1.1.4",
-    "webpack": "^1.8.4",
+    "webpack": "^1.9.10",
     "webpack-dev-server": "^1.7.0"
   },
   "dependencies": {
