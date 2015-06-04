@@ -67,6 +67,8 @@ class Testing(Defaults):
     TEST_WITH_THEME = False
     ASSETS_AUTO_BUILD = False
     ASSETS_DEBUG = True
+    CACHE_TYPE = 'null'
+    CACHE_NO_NULL_WARNING = True
 
 
 class Debug(Defaults):
