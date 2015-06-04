@@ -223,3 +223,24 @@ class DataconnexionsTest(FrontTestCase):
             VisibleReuseFactory(tags=[DATACONNEXIONS_TAG, tag])
         response = self.client.get(url_for('gouvfr.dataconnexions'))
         self.assert200(response)
+
+
+class SitemapTest(FrontTestCase):
+    settings = GouvFrSettings
+
+    def test_urls_within_sitemap(self):
+        '''It should add gouvfr pages to sitemap.'''
+        response = self.get('sitemap.xml')
+        self.assert200(response)
+
+        urls = [
+            url_for('gouvfr.credits_redirect', _external=True),
+            url_for('gouvfr.terms_redirect', _external=True),
+            url_for('gouvfr.redevances_redirect', _external=True),
+            url_for('gouvfr.faq_redirect', _external=True),
+        ]
+        for section in ('citizen', 'producer', 'reuser', 'developer'):
+            urls.append(url_for('gouvfr.faq_redirect', section='citizen', _external=True))
+
+        for url in urls:
+            self.assertIn('<loc>{url}</loc>'.format(url=url), response.data)
