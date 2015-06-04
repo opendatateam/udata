@@ -76,26 +76,17 @@ def dataconnexions():
     return theme.render('dataconnexions.html', categories=categories)
 
 
-@blueprint.route('/faq/', endpoint='faq_home')
-def faq_home():
-    return theme.render('faq/home.html')
+@blueprint.route('/faq/', defaults={'section': 'home'})
+@blueprint.route('/faq/<string:section>/')
+def faq(section):
+    return theme.render('faq/{0}.html'.format(section))
 
 
-@blueprint.route('/faq/citizen/', endpoint='faq_citizen')
-def faq_citizen():
-    return theme.render('faq/citizen.html')
+@blueprint.route('/credits/')
+def credits():
+    return theme.render('credits.html')
 
 
-@blueprint.route('/faq/producer/', endpoint='faq_producer')
-def faq_producer():
-    return theme.render('faq/producer.html')
-
-
-@blueprint.route('/faq/developer/', endpoint='faq_developer')
-def faq_developer():
-    return theme.render('faq/developer.html')
-
-
-@blueprint.route('/faq/jurist/', endpoint='faq_jurist')
-def faq_jurist():
-    return theme.render('faq/jurist.html')
+@blueprint.route('/terms/')
+def terms():
+    return theme.render('terms.html')
