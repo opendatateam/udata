@@ -17,6 +17,7 @@ from udata.models import Dataset, Resource, Reuse, Issue, DatasetDiscussion, Fol
 
 from udata.core import storages
 from udata.core.site.views import current_site
+from udata.sitemap import sitemap
 
 from .forms import DatasetForm, ResourceForm, CommunityResourceForm, DatasetExtraForm
 from .permissions import CommunityResourceEditPermission, DatasetEditPermission
@@ -315,3 +316,9 @@ class DatasetFollowersView(DatasetView, DetailView):
         context = super(DatasetFollowersView, self).get_context()
         context['followers'] = Follow.objects.followers(self.dataset).order_by('follower.fullname')
         return context
+
+
+@sitemap.register_generator
+def sitemap_urls():
+    for dataset in Dataset.objects.visible():
+        yield 'datasets.show_redirect', {'dataset': dataset.id}, None, "weekly", 1

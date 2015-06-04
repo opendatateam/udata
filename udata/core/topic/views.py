@@ -4,10 +4,11 @@ from __future__ import unicode_literals
 from flask import g, request
 
 from udata import search, theme
+from udata.frontend.views import CreateView, EditView
 from udata.i18n import I18nBlueprint
 from udata.models import Topic, Reuse, Dataset
+from udata.sitemap import sitemap
 from udata.utils import multi_to_dict
-from udata.frontend.views import CreateView, EditView
 
 from .forms import TopicForm
 from .permissions import TopicEditPermission
@@ -96,3 +97,9 @@ class TopicEditView(ProtectedTopicView, EditView):
 @blueprint.before_app_request
 def store_featured_topics():
     g.featured_topics = sorted(Topic.objects(featured=True), key=lambda t: t.slug)
+
+
+@sitemap.register_generator
+def sitemap_urls():
+    for topic in Topic.objects:
+        yield 'topics.display_redirect', {'topic': topic}, None, "weekly", 0.8
