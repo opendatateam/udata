@@ -177,8 +177,37 @@ class SpecificUrlsTest(FrontTestCase):
         response = self.client.get(url_for('gouvfr.redevances'))
         self.assert200(response)
 
-    def test_developer(self):
-        response = self.client.get(url_for('gouvfr.developer'))
+    def test_faq_home(self):
+        response = self.client.get(url_for('gouvfr.faq'))
+        self.assert200(response)
+        self.assert_template_used('faq/home.html')
+
+    def test_citizen_faq(self):
+        response = self.client.get(url_for('gouvfr.faq', section='citizen'))
+        self.assert200(response)
+        self.assert_template_used('faq/citizen.html')
+
+    def test_producer_faq(self):
+        response = self.client.get(url_for('gouvfr.faq', section='producer'))
+        self.assert200(response)
+        self.assert_template_used('faq/producer.html')
+
+    def test_reuser_faq(self):
+        response = self.client.get(url_for('gouvfr.faq', section='reuser'))
+        self.assert200(response)
+        self.assert_template_used('faq/reuser.html')
+
+    def test_developer_faq(self):
+        response = self.client.get(url_for('gouvfr.faq', section='developer'))
+        self.assert200(response)
+        self.assert_template_used('faq/developer.html')
+
+    def test_terms(self):
+        response = self.client.get(url_for('gouvfr.terms'))
+        self.assert200(response)
+
+    def test_credits(self):
+        response = self.client.get(url_for('gouvfr.credits'))
         self.assert200(response)
 
 

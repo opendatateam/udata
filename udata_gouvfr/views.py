@@ -40,11 +40,6 @@ def redevances():
     return theme.render('redevances.html')
 
 
-@blueprint.route('/developer')
-def developer():
-    return theme.render('developer.html')
-
-
 DATACONNEXIONS_TAG = 'dataconnexions'
 
 DATACONNEXIONS_CATEGORIES = [
