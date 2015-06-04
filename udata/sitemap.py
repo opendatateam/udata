@@ -11,18 +11,14 @@ sitemap = Sitemap()
 
 @sitemap_page_needed.connect
 def create_page(app, page, urlset):
-    cache[page] = sitemap.render_page(urlset=urlset)
+    cache.set(page, sitemap.render_page(urlset=urlset))
 
 
 def load_page(fn):
     @wraps(fn)
     def loader(*args, **kwargs):
         page = kwargs.get('page')
-        try:
-            data = cache.get(page)
-        except KeyError:
-            data = None
-        return data if data else fn(*args, **kwargs)
+        return cache.get(page) or fn(*args, **kwargs)
     return loader
 
 
