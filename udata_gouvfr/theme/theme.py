@@ -38,11 +38,11 @@ class Wikitem(nav.Item):
 
 
 gouvfr_menu = nav.Bar('gouvfr_menu', [
-    nav.Item(_('Discover OpenData'), 'gouvfr.faq_home', items=[
-        nav.Item(_('As a citizen'), 'gouvfr.faq_citizen'),
-        nav.Item(_('As a producer'), 'gouvfr.faq_producer'),
-        nav.Item(_('As a developer'), 'gouvfr.faq_developer'),
-        nav.Item(_('As a jurist'), 'gouvfr.faq_jurist'),
+    nav.Item(_('Discover OpenData'), 'gouvfr.faq', items=[
+        nav.Item(_('As a citizen'), 'gouvfr.faq', {'section': 'citizen'}),
+        nav.Item(_('As a producer'), 'gouvfr.faq', {'section': 'producer'}),
+        nav.Item(_('As a reuser'), 'gouvfr.faq', {'section': 'reuser'}),
+        nav.Item(_('As a developer'), 'gouvfr.faq', {'section': 'developer'}),
     ]),
     nav.Item(_('Data'), 'datasets.list', items=[
         nav.Item(_('Datasets'), 'datasets.list'),
@@ -58,10 +58,12 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
 theme.menu(gouvfr_menu)
 
 nav.Bar('gouvfr_footer', [
-    nav.Item(_('As a citizen'), 'gouvfr.faq_citizen'),
-    nav.Item(_('As a producer'), 'gouvfr.faq_producer'),
-    nav.Item(_('As a developer'), 'gouvfr.faq_developer'),
-    nav.Item(_('As a jurist'), 'gouvfr.faq_jurist'),
+    nav.Item(_('As a citizen'), 'gouvfr.faq', {'section': 'citizen'}),
+    nav.Item(_('As a producer'), 'gouvfr.faq', {'section': 'producer'}),
+    nav.Item(_('As a reuser'), 'gouvfr.faq', {'section': 'reuser'}),
+    nav.Item(_('As a developer'), 'gouvfr.faq', {'section': 'developer'}),
+    nav.Item(_('Credits'), 'gouvfr.credits'),
+    nav.Item(_('Terms of use'), 'gouvfr.terms'),
 ])
 
 NETWORK_LINKS = [

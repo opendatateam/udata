@@ -7,6 +7,8 @@ Pour rappel, <b>un jeu de données</b> peut contenir <b>plusieurs ressources</b>
 </p><p>Un jeu de données peut être publié simplement avec un titre et une ressource. Pour autant, il sera mieux référencé s'il contient des informations supplémentaires qui le décrivent : période couverte, fréquence de mise à jour, territoire couvert, thématiques ... C'est le sens de la note de performance qui figure au bas de chaque jeu de données. Elle est fonction de la <b>complétude de ces informations</b>, de la <b>profondeur et de la densité spatio-temporelle</b> du jeu de données, et du <b>nombre de réutilisations</b> qu'il a suscité. Pour plus d'informations sur les règles de tri du moteur de recherche.
 </p>
 
+<h2>Que signifie les différents champs d'une fiche de jeu de données ?</h2>
+
 <h3>Titre (obligatoire)</h3>
 <p>Le titre est "l'accroche" éditoriale de votre contenu, son <b>sujet</b>. Pensez-y. Il doit être clair, précis et le plus court possible. Ne pas mettre d'indications temporelles ou de couverture géographique dans le titre, mais dans les champs prévus à cet effet.
 </p><p>Exemples :
@@ -59,9 +61,35 @@ Une <b>description</b> de la ressource peut être ajoutée de manière optionnel
 <h3>Courriel de contact</h3>
 <p>Préciser ici, de manière optionnelle, l'adresse mail du producteur, par exemple contact@agriculture.fr, si elle est différente de celle de l'utilisateur qui publie. Lorsque vous publiez un jeu de données au nom d'une organisation, tous les membres déclarés seront automatiquement notifiés d'éventuelles réutilisations sur la page du jeu de données (par exemple, la publication d'une visualisation ou d'un commentaire).
 </p>
-<h3>Thématique (groupes)</h3>
+<h3>Thématique (groupes)</h2>
 <p>A l'image des mots clés, qui permettent d'accrocher votre jeu de données à d'autres dimensions, des thématiques sont à votre disposition pour ancrer vos jeux dans les grandes catégories éditoriales présentées à côté du moteur de recherche : Agriculture, Culture, Société, Territoires, etc.
 A noter, des thématiques conjoncturelles permettent de raccrocher certains jeux à des sujets d'actualité débattus sur data.gouv.fr : égalité femmes-hommes, Grenelle de l'environnement, etc.
 Un jeu de données peut appartenir à 0, 1 ou 2 thématiques.
 </p>
+
+<h2 id="inspire-gateway">Qu'est-ce que la passerelle Inspire</h2>
+<p>La <a href="https://inspire.data.gouv.fr">passerelle Inspire-Open Data</a> permet à data.gouv de référencer automatiquement les jeux de données Inspire sur le réseau social.</p>
+<p>La circulaire du 26 mai 2011 relative à la création du portail unique des informations publiques de l'Etat « data.gouv.fr » par la mission Etalab et l'application des dispositions régissant le droit de réutilisation des informations publiques stipulent que les données produites par les services de l'État (central et déconcentré) sont ouvertes par défaut sauf restrictions (dans notre cas les restrictions d’accès public au sens d’INSPIRE, tableau 2).<p>
+<p>Pour que la passerelle fonctionne :</p>
+<ol>
+    <li>Adoptez le plan de nommage suivant pour les producteurs de l'administration déconcentrée :
+        <ul>
+            <li>
+                <code>DR[xxx]</code>
+                [Nom de la région accents respectés, trait-d'union partout] :
+                DRAC Bourgogne, DREAL Nord-Pas-de-Calais, DIRECCTE Bretagne...
+            </li>
+            <li>
+                <code>DD[xxx]</code>
+                [Numéro département] :
+                DDT 77, DDPP 34, DDTM 22 ...
+            </li>
+            <li>
+                <code>Préfecture de [DOM/Nom Région/Nom Département]</code> :
+                Préfecture de Mayotte, Préfecture de Poitou-Charentes, Préfecture de Saône et Loire ..
+            </li>
+        </ul>
+    </li>
+    <li>Rendez vos jeux de données INSPIRE accessibles depuis Internet Si vous ne disposez pas de serveurs où les déposer, vous pourrez utiliser ceux de data.gouv.fr.</li>
+</ol>
 {% endblock %}

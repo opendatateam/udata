@@ -4,20 +4,45 @@
 <div class="container faq-home">
     <div class="row text-center">
         <h1>Découvrir l’OpenData</h1>
-        <div class="col-lg-3">
-            <h2><a href="{{ url_for('gouvfr.faq_citizen') }}">En tant que citoyen</a></h2>
+
+        <div class="col-md-3">
+            <a class="thumbnail" href="{{ url_for('gouvfr.faq', section='citizen') }}">
+              <div class="caption">
+                <h3>Citoyen</h3>
+                <p>Les fondamentaux de l'opendata pour les citoyens</p>
+              </div>
+            </a>
         </div>
-        <div class="col-lg-3">
-            <h2><a href="{{ url_for('gouvfr.faq_producer') }}">En tant que producteur</a></h2>
+
+        <div class="col-md-3">
+            <a class="thumbnail" href="{{ url_for('gouvfr.faq', section='producer') }}">
+              <div class="caption">
+                <h3>Producteur</h3>
+                <p>Que faut-il savoir avant de publier des données ?</p>
+              </div>
+            </a>
         </div>
-        <div class="col-lg-3">
-            <h2><a href="{{ url_for('gouvfr.faq_developer') }}">En tant que développeur</a></h2>
+
+        <div class="col-md-3">
+            <a class="thumbnail" href="{{ url_for('gouvfr.faq', section='reuser') }}">
+              <div class="caption">
+                <h3>Réutilisateur</h3>
+                <p>Que faire avec les données ? Avec quels outils ?</p>
+              </div>
+            </a>
         </div>
-        <div class="col-lg-3">
-            <h2><a href="{{ url_for('gouvfr.faq_jurist') }}">En tant que juriste</a></h2>
+
+        <div class="col-md-3">
+            <a class="thumbnail" href="{{ url_for('gouvfr.faq', section='developer') }}">
+              <div class="caption">
+                <h3>Développeur</h3>
+                <p>Quelles sont les intégrations possibles avec la plateforme ?</p>
+              </div>
+            </a>
         </div>
     </div>
 </div>
+
 <div class="faq-content">
     <p>Ce site est avant tout votre site, vous citoyens, producteurs, développeurs, juristes…
     </p>
