@@ -9,10 +9,10 @@
 # noirbizarre, 2014
 msgid ""
 msgstr ""
-"Project-Id-Version: uData-gouv.fr\n"
+"Project-Id-Version: udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-06-01 20:02+0200\n"
-"PO-Revision-Date: 2015-06-01 18:08+0000\n"
+"POT-Creation-Date: 2015-06-04 18:19+0200\n"
+"PO-Revision-Date: 2015-06-04 16:28+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata-gouvfr/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -26,29 +26,13 @@ msgstr ""
 msgid "Public services"
 msgstr "Services publics"
 
-#: udata_gouvfr/templates/developer.html:4
-msgid "Developer documentation"
-msgstr "Documentation de développement"
+#: udata_gouvfr/templates/terms.html:4 udata_gouvfr/templates/terms.html:5
+msgid "Terms"
+msgstr "Conditions générales d'utilisations"
 
-#: udata_gouvfr/templates/developer.html:5
-msgid "Developer documentation and contribution guidelines"
-msgstr "Documentation de développement et guide de contribution"
-
-#: udata_gouvfr/templates/developer.html:6
-msgid "developer"
-msgstr "developpeur"
-
-#: udata_gouvfr/templates/developer.html:6
-msgid "documentation"
-msgstr "documentation"
-
-#: udata_gouvfr/templates/developer.html:10
-msgid "Developers"
-msgstr "Développeurs"
-
-#: udata_gouvfr/templates/developer.html:17
-msgid "Coming soon"
-msgstr "Bientôt"
+#: udata_gouvfr/templates/terms.html:7
+msgid "terms"
+msgstr "conditions générales d'utilisations"
 
 #: udata_gouvfr/theme/theme.py:23
 msgid "Tab size"
@@ -79,12 +63,12 @@ msgid "As a producer"
 msgstr "En tant que producteur"
 
 #: udata_gouvfr/theme/theme.py:44 udata_gouvfr/theme/theme.py:63
-msgid "As a developer"
-msgstr "En tant que développeur"
+msgid "As a reuser"
+msgstr "En tant que réutilisateur"
 
 #: udata_gouvfr/theme/theme.py:45 udata_gouvfr/theme/theme.py:64
-msgid "As a jurist"
-msgstr "En tant que juriste"
+msgid "As a developer"
+msgstr "En tant que développeur"
 
 #: udata_gouvfr/theme/theme.py:47 udata_gouvfr/theme/templates/metrics.html:19
 msgid "Data"
@@ -110,6 +94,14 @@ msgstr "Organisations"
 #: udata_gouvfr/theme/theme.py:52
 msgid "Dashboard"
 msgstr "Tableau de bord"
+
+#: udata_gouvfr/theme/theme.py:65
+msgid "Credits"
+msgstr "Crédits"
+
+#: udata_gouvfr/theme/theme.py:66
+msgid "Terms of use"
+msgstr "Conditions générales d'utilisation"
 
 #: udata_gouvfr/theme/templates/footer.html:6
 msgid "The Open Data"

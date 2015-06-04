@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-06-01 20:02+0200\n"
+"POT-Creation-Date: 2015-06-04 18:19+0200\n"
 "PO-Revision-Date: 2015-05-28 13:51+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/udata-"
@@ -26,29 +26,17 @@ msgstr ""
 msgid "Public services"
 msgstr "Sevicios públicos"
 
-#: udata_gouvfr/templates/developer.html:4
-msgid "Developer documentation"
-msgstr "Desarrollador de documentación"
+#: udata_gouvfr/templates/terms.html:4 udata_gouvfr/templates/terms.html:5
+#, fuzzy
+#| msgid "Users"
+msgid "Terms"
+msgstr "Usuarios"
 
-#: udata_gouvfr/templates/developer.html:5
-msgid "Developer documentation and contribution guidelines"
-msgstr "Desarrollador de documentación y directriz de contribución "
-
-#: udata_gouvfr/templates/developer.html:6
-msgid "developer"
-msgstr "desarrollador"
-
-#: udata_gouvfr/templates/developer.html:6
-msgid "documentation"
-msgstr "documentación"
-
-#: udata_gouvfr/templates/developer.html:10
-msgid "Developers"
-msgstr "Desarrolladores"
-
-#: udata_gouvfr/templates/developer.html:17
-msgid "Coming soon"
-msgstr "Próximamente"
+#: udata_gouvfr/templates/terms.html:7
+#, fuzzy
+#| msgid "Users"
+msgid "terms"
+msgstr "Usuarios"
 
 #: udata_gouvfr/theme/theme.py:23
 msgid "Tab size"
@@ -76,19 +64,19 @@ msgstr ""
 
 #: udata_gouvfr/theme/theme.py:43 udata_gouvfr/theme/theme.py:62
 #, fuzzy
-#| msgid "Producer"
 msgid "As a producer"
 msgstr "Productor"
 
 #: udata_gouvfr/theme/theme.py:44 udata_gouvfr/theme/theme.py:63
 #, fuzzy
-#| msgid "developer"
-msgid "As a developer"
-msgstr "desarrollador"
+#| msgid "Add a reuse"
+msgid "As a reuser"
+msgstr "Agregar una reutilización"
 
 #: udata_gouvfr/theme/theme.py:45 udata_gouvfr/theme/theme.py:64
-msgid "As a jurist"
-msgstr ""
+#, fuzzy
+msgid "As a developer"
+msgstr "desarrollador"
 
 #: udata_gouvfr/theme/theme.py:47 udata_gouvfr/theme/templates/metrics.html:19
 msgid "Data"
@@ -114,6 +102,14 @@ msgstr "Organizaciones"
 #: udata_gouvfr/theme/theme.py:52
 msgid "Dashboard"
 msgstr "Tablero de mando"
+
+#: udata_gouvfr/theme/theme.py:65
+msgid "Credits"
+msgstr ""
+
+#: udata_gouvfr/theme/theme.py:66
+msgid "Terms of use"
+msgstr ""
 
 #: udata_gouvfr/theme/templates/footer.html:6
 msgid "The Open Data"
@@ -576,4 +572,25 @@ msgstr "Usted puede crear una nueva organización si la suya no existe aun. "
 
 #~ msgid "Terms of use"
 #~ msgstr "Términos de uso"
+
+#~ msgid "Developer documentation"
+#~ msgstr "Desarrollador de documentación"
+
+#~ msgid "Developer documentation and contribution guidelines"
+#~ msgstr "Desarrollador de documentación y directriz de contribución "
+
+#~ msgid "developer"
+#~ msgstr "desarrollador"
+
+#~ msgid "documentation"
+#~ msgstr "documentación"
+
+#~ msgid "Developers"
+#~ msgstr "Desarrolladores"
+
+#~ msgid "Coming soon"
+#~ msgstr "Próximamente"
+
+#~ msgid "As a jurist"
+#~ msgstr ""
 

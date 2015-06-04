@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-06-01 20:02+0200\n"
+"POT-Creation-Date: 2015-06-04 18:19+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,28 +21,12 @@ msgstr ""
 msgid "Public services"
 msgstr ""
 
-#: udata_gouvfr/templates/developer.html:4
-msgid "Developer documentation"
+#: udata_gouvfr/templates/terms.html:4 udata_gouvfr/templates/terms.html:5
+msgid "Terms"
 msgstr ""
 
-#: udata_gouvfr/templates/developer.html:5
-msgid "Developer documentation and contribution guidelines"
-msgstr ""
-
-#: udata_gouvfr/templates/developer.html:6
-msgid "developer"
-msgstr ""
-
-#: udata_gouvfr/templates/developer.html:6
-msgid "documentation"
-msgstr ""
-
-#: udata_gouvfr/templates/developer.html:10
-msgid "Developers"
-msgstr ""
-
-#: udata_gouvfr/templates/developer.html:17
-msgid "Coming soon"
+#: udata_gouvfr/templates/terms.html:7
+msgid "terms"
 msgstr ""
 
 #: udata_gouvfr/theme/theme.py:23
@@ -74,11 +58,11 @@ msgid "As a producer"
 msgstr ""
 
 #: udata_gouvfr/theme/theme.py:44 udata_gouvfr/theme/theme.py:63
-msgid "As a developer"
+msgid "As a reuser"
 msgstr ""
 
 #: udata_gouvfr/theme/theme.py:45 udata_gouvfr/theme/theme.py:64
-msgid "As a jurist"
+msgid "As a developer"
 msgstr ""
 
 #: udata_gouvfr/theme/theme.py:47 udata_gouvfr/theme/templates/metrics.html:19
@@ -104,6 +88,14 @@ msgstr ""
 
 #: udata_gouvfr/theme/theme.py:52
 msgid "Dashboard"
+msgstr ""
+
+#: udata_gouvfr/theme/theme.py:65
+msgid "Credits"
+msgstr ""
+
+#: udata_gouvfr/theme/theme.py:66
+msgid "Terms of use"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/footer.html:6
