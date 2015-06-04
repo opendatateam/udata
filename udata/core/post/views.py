@@ -8,6 +8,8 @@ from udata.frontend.views import CreateView, EditView
 
 from udata.models import Post
 
+from udata.sitemap import sitemap
+
 from .forms import PostForm
 from .permissions import PostEditPermission
 
@@ -48,3 +50,9 @@ class PostCreateView(ProtectedPostView, CreateView):
 class PostEditView(ProtectedPostView, EditView):
     form = PostForm
     template_name = 'post/edit.html'
+
+
+@sitemap.register_generator
+def sitemap_urls():
+    for post in Post.objects(private=False):
+        yield 'posts.show_redirect', {'post': post.slug}, None, "weekly", 0.5

@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from udata import frontend
 from udata.tests import TestCase, WebTestMixin, SearchTestMixin
 
-from .factories import TopicFactory, OrganizationFactory, VisibleReuseFactory, VisibleDatasetFactory
+from .factories import TopicFactory, PostFactory, OrganizationFactory, VisibleReuseFactory, VisibleDatasetFactory
 
 
 class SitemapTestCase(WebTestMixin, SearchTestMixin, TestCase):
@@ -63,4 +63,16 @@ class SitemapTest(SitemapTestCase):
         self.assertIn('<changefreq>weekly</changefreq>', response.data)
         self.assertIn(
             '<loc>http://localhost/datasets/{dataset}/</loc>'.format(dataset=datasets[0].id),
+            response.data)
+
+    def test_posts_within_sitemap(self):
+        '''It should return a post list from the sitemap.'''
+        posts = PostFactory.create_batch(3)
+        response = self.get('sitemap.xml')
+        self.assert200(response)
+        self.assertEqual(response.data.count('<loc>'), 3, response.data)
+        self.assertIn('<priority>0.5</priority>', response.data)
+        self.assertIn('<changefreq>weekly</changefreq>', response.data)
+        self.assertIn(
+            '<loc>http://localhost/posts/{post}/</loc>'.format(post=posts[0].slug),
             response.data)

@@ -226,6 +226,7 @@ class PostFactory(MongoEngineFactory):
     name = factory.LazyAttribute(lambda o: faker.sentence())
     headline = factory.LazyAttribute(lambda o: faker.sentence())
     content = factory.LazyAttribute(lambda o: faker.text())
+    private = factory.LazyAttribute(lambda o: False)
 
     @factory.lazy_attribute
     def datasets(self):
