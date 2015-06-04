@@ -24,5 +24,5 @@ def load_page(fn):
 
 def init_app(app):
     app.config['SITEMAP_VIEW_DECORATORS'] = [load_page]
-    app.config['SITEMAP_URL_METHOD'] = 'https'
+    app.config['SITEMAP_URL_METHOD'] = 'https' if app.config['USE_SSL'] else 'http'
     sitemap.init_app(app)
