@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
+import json
 import os
-
+import time
 from datetime import datetime
 
-from flask import request
+import requests
+from flask import request, current_app
 
 from uuid import UUID
 from werkzeug.datastructures import FileStorage
@@ -274,3 +275,40 @@ class LicensesAPI(API):
     def get(self):
         '''List all available licenses'''
         return list(License.objects)
+
+
+checkurl_parser = api.parser()
+checkurl_parser.add_argument('url', type=unicode, help='The URL to check',
+                             location='args', required=True)
+
+
+@ns.route('/checkurl/', endpoint='checkurl')
+class CheckUrlAPI(API):
+
+    @api.doc(id='checkurl', parser=checkurl_parser)
+    def get(self):
+        '''Checks that a URL exists and returns metadata.'''
+        args = checkurl_parser.parse_args()
+        CROQUEMORT_URL = current_app.config.get('CROQUEMORT_URL')
+        if CROQUEMORT_URL is None:
+            return {'error': 'Check server not configured.'}, 500
+        check_url = '{CROQUEMORT_URL}/check/one'.format(
+            CROQUEMORT_URL=CROQUEMORT_URL)
+        response = requests.post(check_url, data=json.dumps({'url': args['url']}))
+        url_hash = response.json()['url-hash']
+        retrieve_url = '{CROQUEMORT_URL}/url/{url_hash}'.format(
+            CROQUEMORT_URL=CROQUEMORT_URL, url_hash=url_hash)
+        response = requests.get(retrieve_url, params={'url': args['url']})
+        attempts = 0
+        while response.status_code == 404 or 'status' not in response.json():
+            if attempts >= 10:
+                msg = ('We were unable to retrieve the URL after'
+                       ' {attempts} attempts.').format(attempts=attempts)
+                return {'error': msg}, 502
+            response = requests.get(retrieve_url, params={'url': args['url']})
+            time.sleep(0.5)
+            attempts += 1
+        result = response.json()
+        if int(result['status']) > 500:
+            return result, 500
+        return result

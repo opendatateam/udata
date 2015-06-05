@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 from werkzeug.datastructures import FileStorage
-
 from flask.ext.security import current_user
 
 from udata import search
