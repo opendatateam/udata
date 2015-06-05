@@ -6,9 +6,9 @@ from unittest import skip
 from flask import url_for
 
 
-from udata.auth import PermissionDenied, admin_permission
+from udata.auth import PermissionDenied
 from udata.api import api, API
-from udata.api.oauth2 import OAuth2Client, OAuth2Grant, OAuth2Token
+from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.forms import Form, fields, validators
 
 from . import APITestCase

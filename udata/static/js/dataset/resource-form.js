@@ -77,7 +77,7 @@ define([
         store_values();
         $url.val(undefined);
         $checksum.val(undefined);
-        $checksum_type.val(undefined)
+        $checksum_type.val(undefined);
         $mime.val(undefined);
         $size.val(undefined);
 
@@ -92,7 +92,7 @@ define([
             format: selectize.getValue(),
             size: $size.val(),
             mime: $mime.val()
-        }
+        };
     }
 
     function restore_values(type) {
@@ -132,7 +132,7 @@ define([
         $url.parent('.input-group').find('.input-group-addon').removeClass('hide').insertBefore($url);
         $btn_delete.addClass('hide').insertBefore($url);
         $checksum.removeAttr('readonly');
-        $checksum_type.removeAttr('disabled').removeClass('readonly');;
+        $checksum_type.removeAttr('disabled').removeClass('readonly');
         $checksum_group.removeClass('hide');
         $size.removeAttr('readonly').closest('.form-group').removeClass('hide');
         $mime.removeAttr('readonly').closest('.form-group').removeClass('hide');
@@ -153,6 +153,29 @@ define([
 
     function on_submit() {
         $checksum_type.removeAttr('disabled');
+    }
+
+    function checkUrl(e) {
+        var $this = $(this);
+        $this.addClass('warning');
+        function populateFields(data) {
+            $format.val(data['content-encoding'] || '');
+            $mime.val(data['content-type'] || '');
+            $size.val(data['content-length'] || '');
+        }
+        $.get($this.data('checkurl'), {'url': $(this).val()}
+            ).done(function(data) {
+                if (data.status === '200') {
+                    $this.removeClass('warning danger').addClass('success');
+                    populateFields(data);
+                } else if (data.status == '404') {
+                    $this.removeClass('success danger').addClass('warning');
+                    populateFields({});
+                }
+            }).fail(function() {
+                $this.removeClass('warning success').addClass('danger');
+                populateFields({});
+            });
     }
 
 
@@ -181,6 +204,8 @@ define([
                 show_upload();
             });
 
+            $url.blur(checkUrl);
+
             $btn_delete.click(function() {
                 uploader.clear();
                 $('.form-upload-fields').addClass('hide');
@@ -198,5 +223,5 @@ define([
 
             log.debug('Resource form loaded');
         }
-    }
+    };
 });
