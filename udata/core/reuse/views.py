@@ -12,6 +12,7 @@ from udata.app import nav
 from udata.frontend.views import SearchView, DetailView, CreateView, EditView, SingleObject, BaseView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Issue, FollowReuse, Dataset
+from udata.sitemap import sitemap
 
 from .forms import ReuseForm, AddDatasetToReuseForm
 from .models import Reuse, ReuseDiscussion
@@ -172,3 +173,9 @@ class ReuseIssuesView(ProtectedReuseView, DetailView):
 class ReuseTransferView(ProtectedReuseView, EditView):
     form = ReuseForm
     template_name = 'reuse/transfer.html'
+
+
+@sitemap.register_generator
+def sitemap_urls():
+    for reuse in Reuse.objects.visible():
+        yield 'reuses.show_redirect', {'reuse': reuse}, None, "weekly", 0.8

@@ -18,6 +18,7 @@ from udata.models import (
     db, Organization, Member, Reuse, Dataset, ORG_ROLES, User, Issue, FollowOrg,
     DatasetIssue, DatasetDiscussion
 )
+from udata.sitemap import sitemap
 from udata.utils import get_by
 
 from udata.core.dataset.csv import (
@@ -335,3 +336,9 @@ def supplied_datasets_resources_csv(org):
     datasets = search.iter(Dataset, supplier=str(org.id))
     adapter = ResourcesCsvAdapter(datasets)
     return csv.stream(adapter, '{0}-supplied-datasets-resources'.format(org.slug))
+
+
+@sitemap.register_generator
+def sitemap_urls():
+    for org in Organization.objects.visible():
+        yield 'organizations.show_redirect', {'org': org}, None, "weekly", 0.8
