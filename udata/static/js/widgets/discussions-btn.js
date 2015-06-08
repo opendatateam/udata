@@ -23,20 +23,20 @@ function($, API, Auth, i18n, Notify) {
         });
     }
 
+    function displayNewDiscussionForm(el) {
+        $('.list-group-form-discussion').removeClass('hidden').addClass('fadeInDown');
+    }
+
+    function hideNewDiscussionButton(el) {
+        el.addClass('hidden');
+    }
+
     $('.new-discussion').click(function(e) {
         e.preventDefault();
         var $this = $(this);
 
         if (!Auth.need_user(i18n._('You need to be logged in to discuss.'))) {
             return false;
-        }
-
-        function displayNewDiscussionForm(el) {
-            $('.list-group-form-discussion').removeClass('hidden').addClass('fadeInDown');
-        }
-
-        function hideNewDiscussionButton(el) {
-            el.addClass('hidden');
         }
 
         displayNewDiscussionForm($this);
@@ -52,7 +52,7 @@ function($, API, Auth, i18n, Notify) {
         }
 
         function displayNewCommentForm(el) {
-            var discussionId = $this.data('discussion-id');
+            var discussionId = el.data('discussion-id');
             $('.list-group-form-' + discussionId).removeClass('hidden').addClass('fadeInDown');
         }
 
@@ -130,6 +130,34 @@ function($, API, Auth, i18n, Notify) {
         hideNewForm($this, $form);
         displayNewComment($this, $form, data);
         submitNewComment($this, $form, data);
+    });
+
+    $('.suggest-tag').click(function(e) {
+        console.log('clicked');
+        e.preventDefault();
+        var $newDiscussion = $('.new-discussion');
+
+        // Otherwise the scrollTop is not effective if the form is already
+        // displayed (hence the new discussion button is hidden)
+        $newDiscussion.removeClass('hidden');
+
+        // Scroll to the new discussion thread form
+        $('html, body').animate({
+            scrollTop : $newDiscussion.offset().top
+        }, 400);
+
+        if (!Auth.need_user(i18n._('You need to be logged in to propose a tag.'))) {
+            return false;
+        }
+
+        displayNewDiscussionForm($newDiscussion);
+        hideNewDiscussionButton($newDiscussion);
+
+        // Prefill the new discussion thread form
+        $newDiscussion.parent().find('#title').val(
+            i18n._('New tag suggestion to improve metadata'));
+        $newDiscussion.parent().find('#comment').val(
+            i18n._('Hello,\n\nI propose this new tag: '));
     });
 
 });
