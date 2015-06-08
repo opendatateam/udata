@@ -334,6 +334,12 @@
                                 <meta itemprop="keywords" content="{{tag}}" />
                             </a>
                             {% endfor %}
+                            <a href="#"
+                                class="btn btn-primary btn-dark btn-xs suggest-tag"
+                                title="{{ _('Suggest a tag with a new discussion thread') }}"
+                                rel="tooltip" data-placement="right auto">
+                                {{ _('Suggest a tag') }}
+                            </a>
                         </div>
 
                         {% for key, value in dataset.extras.items() %}
