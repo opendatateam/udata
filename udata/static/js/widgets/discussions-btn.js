@@ -133,7 +133,6 @@ function($, API, Auth, i18n, Notify) {
     });
 
     $('.suggest-tag').click(function(e) {
-        console.log('clicked');
         e.preventDefault();
         var $newDiscussion = $('.new-discussion');
 
