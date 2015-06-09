@@ -29,8 +29,8 @@ define([
 
     function addTooltip($element, content) {
         $element.attr('rel', 'tooltip');
-        $element.attr('data-placement', 'left');
-        $element.attr('data-original-title', i18n._(content));
+        $element.attr('data-placement', 'top');
+        $element.attr('data-original-title', content);
         $element.tooltip('show');
     }
 
@@ -61,11 +61,11 @@ define([
                             $self.addClass('format-label-success');
                         } else if (data.status == '404') {
                             $self.addClass('format-label-warning');
-                            addTooltip($self, 'The resource cannot be found.');
+                            addTooltip($self, i18n._('The resource cannot be found.'));
                         }
                     }).fail(function() {
                         $self.addClass('format-label-danger');
-                        addTooltip($self, 'The server cannot be found.');
+                        addTooltip($self, i18n._('The server cannot be found.'));
                     });
                 }
 

@@ -9,11 +9,18 @@
 {% endblock %}
 
 {% block form_controls %}
-<button type="submit" class="btn btn-default">{{ _('Save') }}</button>
-<a href="{{ dataset.display_url }}" class="btn btn-warning">{{ _('Cancel') }}</a>
-<button class="btn btn-danger pull-right btn-delete"
+<a href="{{ dataset.display_url }}" class="btn pull-left btn-xs">
+    <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+    {{ _('Back') }}
+</a>
+<button type="submit" class="btn btn-primary col-sm-offset-3 col-sm-6">
+    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+    {{ _('Save') }}
+</button>
+<button class="btn btn-danger btn-delete btn-xs pull-right"
     title="{{ _('Delete') }}"
     data-url="{{ url_for('datasets.delete_resource', dataset=dataset, resource=resource.id) }}">
+    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
     {{ _('Delete') }}
 </button>
 {% endblock %}
