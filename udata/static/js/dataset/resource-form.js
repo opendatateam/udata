@@ -157,7 +157,8 @@ define([
 
     function checkUrl(e) {
         var $this = $(this);
-        $this.addClass('warning');
+        var $parent = $this.parent();
+        var $sign = $('<span class="glyphicon form-control-feedback" aria-hidden="true"></span>');
         function populateFields(data) {
             $format.val(data['content-encoding'] || '');
             $mime.val(data['content-type'] || '');
@@ -166,14 +167,20 @@ define([
         $.get($this.data('checkurl'), {'url': $(this).val()}
             ).done(function(data) {
                 if (data.status === '200') {
-                    $this.removeClass('warning danger').addClass('success');
+                    $parent.removeClass('has-warning has-errror').addClass('has-success');
+                    $parent.find('.glyphicon').remove();
+                    $parent.append($sign.addClass('glyphicon-ok'));
                     populateFields(data);
                 } else if (data.status == '404') {
-                    $this.removeClass('success danger').addClass('warning');
+                    $parent.removeClass('has-success has-error').addClass('has-warning');
+                    $parent.find('.glyphicon').remove();
+                    $parent.append($sign.addClass('glyphicon-warning-sign'));
                     populateFields({});
                 }
             }).fail(function() {
-                $this.removeClass('warning success').addClass('danger');
+                $parent.removeClass('has-warning has-success').addClass('has-error');
+                $parent.find('.glyphicon').remove();
+                $parent.append($sign.addClass('glyphicon-remove'));
                 populateFields({});
             });
     }

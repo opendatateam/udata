@@ -10,11 +10,12 @@ from . import APITestCase
 class CheckUrlAPITest(APITestCase):
 
     def setUp(self):
+        super(CheckUrlAPITest, self).setUp()
         # If you set up a Croquemort URL, don't forget to clean up the
         # Redis database after each test. Otherwise the test against the
         # delayed URL will not pass (existing entry already fetched).
-        self.CROQUEMORT_URL = self.create_app().config.get('CROQUEMORT_URL')
-        if self.CROQUEMORT_URL is None:
+        self.CROQUEMORT = self.app.config.get('CROQUEMORT')
+        if self.CROQUEMORT is None:
             raise unittest.SkipTest
 
     def test_returned_metadata(self):
