@@ -19,9 +19,7 @@
             {{ forms.required_disclaimer() }}
 
             <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    {% block form_controls %}{% endblock %}
-                </div>
+                {% block form_controls %}{% endblock %}
             </div>
         </form>
     </div>
