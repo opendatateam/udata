@@ -123,6 +123,7 @@ class UploadableURL(WidgetHelper, widgets.html5.URLInput):
 
     def __call__(self, field, **kwargs):
         kwargs['data-endpoint'] = field.endpoint
+        kwargs['data-checkurl'] = field.checkurl
         return super(UploadableURL, self).__call__(field, **kwargs)
 
 

@@ -56,6 +56,12 @@ class Defaults(object):
 
     OAUTH2_PROVIDER_ERROR_ENDPOINT = 'oauth-i18n.oauth_error'
 
+    # CROQUEMORT = {
+    #     'url': 'http://localhost:8000',
+    #     'delay': 1,
+    #     'retry': 10,
+    # }
+
 
 class Testing(Defaults):
     TESTING = True

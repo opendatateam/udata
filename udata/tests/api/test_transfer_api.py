@@ -5,17 +5,11 @@ from mock import patch
 
 from flask import url_for
 
-from udata.api import api
-from udata.auth import PermissionDenied
-from udata.models import db, Transfer
-
 from . import APITestCase
 from ..factories import (
     faker,
     DatasetFactory,
-    ReuseFactory,
     UserFactory,
-    OrganizationFactory,
     TransferFactory,
 )
 
