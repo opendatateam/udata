@@ -289,24 +289,24 @@ class CheckUrlAPI(API):
     def get(self):
         '''Checks that a URL exists and returns metadata.'''
         args = checkurl_parser.parse_args()
-        CROQUEMORT_URL = current_app.config.get('CROQUEMORT_URL')
-        if CROQUEMORT_URL is None:
+        CROQUEMORT = current_app.config.get('CROQUEMORT')
+        if CROQUEMORT is None:
             return {'error': 'Check server not configured.'}, 500
-        check_url = '{CROQUEMORT_URL}/check/one'.format(
-            CROQUEMORT_URL=CROQUEMORT_URL)
-        response = requests.post(check_url, data=json.dumps({'url': args['url']}))
+        check_url = '{url}/check/one'.format(url=CROQUEMORT['url'])
+        response = requests.post(check_url,
+                                 data=json.dumps({'url': args['url']}))
         url_hash = response.json()['url-hash']
-        retrieve_url = '{CROQUEMORT_URL}/url/{url_hash}'.format(
-            CROQUEMORT_URL=CROQUEMORT_URL, url_hash=url_hash)
+        retrieve_url = '{url}/url/{url_hash}'.format(
+            url=CROQUEMORT['url'], url_hash=url_hash)
         response = requests.get(retrieve_url, params={'url': args['url']})
         attempts = 0
         while response.status_code == 404 or 'status' not in response.json():
-            if attempts >= 10:
+            if attempts >= CROQUEMORT['retry']:
                 msg = ('We were unable to retrieve the URL after'
                        ' {attempts} attempts.').format(attempts=attempts)
                 return {'error': msg}, 502
             response = requests.get(retrieve_url, params={'url': args['url']})
-            time.sleep(0.5)
+            time.sleep(CROQUEMORT['delay'])
             attempts += 1
         result = response.json()
         if int(result['status']) > 500:
