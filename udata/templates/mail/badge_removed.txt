@@ -1,0 +1,15 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('%(user)s removed a badge on your %(type)s %(subject)s',
+        type=badge.subject.verbose_name,
+        user=badge.removed_by.fullname,
+        subject=badge.subject|string
+) }}.
+
+
+{{ _('Details') }}: {{ badge.title }}
+
+{{ _('You can note the removal on this page:') }}
+{{ badge.subject.external_url }}
+{% endblock %}

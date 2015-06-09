@@ -10,7 +10,7 @@ from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
 from udata.models import (
-    db, WithMetrics, Issue, Discussion, Follow, SpatialCoverage
+    db, WithMetrics, Badge, Discussion, Follow, Issue, SpatialCoverage
 )
 from udata.i18n import lazy_gettext as _
 from udata.utils import hash_url
@@ -18,7 +18,7 @@ from udata.utils import hash_url
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum',
-    'DatasetIssue', 'DatasetDiscussion', 'FollowDataset',
+    'DatasetIssue', 'DatasetDiscussion', 'DatasetBadge', 'FollowDataset',
     'UPDATE_FREQUENCIES', 'RESOURCE_TYPES',
 )
 
@@ -246,3 +246,7 @@ class DatasetDiscussion(Discussion):
 
 class FollowDataset(Follow):
     following = db.ReferenceField(Dataset)
+
+
+class DatasetBadge(Badge):
+    subject = db.ReferenceField(Dataset)

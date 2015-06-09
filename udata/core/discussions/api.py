@@ -43,7 +43,7 @@ discussion_page_fields = api.model('DiscussionPage', fields.pager(discussion_fie
 
 parser = api.parser()
 parser.add_argument('closed', type=bool, default=False, location='args', help='Filter closed discussions')
-parser.add_argument('for', type=str, location='args', action='append', help='Filter issues for a given subject')
+parser.add_argument('for', type=str, location='args', action='append', help='Filter discussions for a given subject')
 parser.add_argument('page', type=int, default=1, location='args', help='The page to fetch')
 parser.add_argument('page_size', type=int, default=20, location='args', help='The page size to fetch')
 

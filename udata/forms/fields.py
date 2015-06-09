@@ -360,6 +360,10 @@ class DatasetOrReuseField(ModelChoiceField, StringField):
     models = [Dataset, Reuse]
 
 
+class DatasetOrOrganizationField(ModelChoiceField, StringField):
+    models = [Dataset, Organization]
+
+
 class DatasetField(ModelField, StringField):
     model = Dataset
 

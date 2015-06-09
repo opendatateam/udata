@@ -9,9 +9,13 @@ from udata.models import Dataset, Reuse
 from udata.core.issues.metrics import IssuesMetric
 from udata.core.discussions.metrics import DiscussionsMetric
 from udata.core.followers.metrics import FollowersMetric
+from udata.core.badges.metrics import BadgesMetric
 
 
-__all__ = ('DatasetReuses', 'DatasetIssuesMetric', 'DatasetFollowers')
+__all__ = (
+    'DatasetReuses', 'DatasetIssuesMetric', 'DatasetFollowers',
+    'DatasetDiscussionsMetric', 'DatasetBadgesMetric'
+)
 
 
 class DatasetReuses(Metric):
@@ -40,4 +44,8 @@ class DatasetDiscussionsMetric(DiscussionsMetric):
 
 
 class DatasetFollowers(FollowersMetric):
+    model = Dataset
+
+
+class DatasetBadgesMetric(BadgesMetric):
     model = Dataset
