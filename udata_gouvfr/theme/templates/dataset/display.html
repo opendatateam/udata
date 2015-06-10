@@ -79,11 +79,15 @@
                                     %}This dataset has been published on {{date}} on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
                                 </small>
                             {% endif %}
-                            {% if not dataset.organization.public_service %}
-                            <small class="not-certified" rel="popover"
-                                data-title="{{ _('Not certified') }}" data-trigger="hover" data-placement="top"
-                                data-content="{{ _('This dataset is not provided by a certified public service') }}"
-                                >{{ _('Not certified') }}</small>
+                            {% if badges %}
+                                {% for badge in badges %}
+                                    <small class="small-badge">
+                                        <a href="{{ url_for('front.search', badge=badge) }}"
+                                            title="{{ _('See all datasets with that badge.') }}">
+                                            <span class="glyphicon glyphicon-bookmark"></span>
+                                            {{ badge }}</a>
+                                    </small>
+                                {% endfor %}
                             {% endif %}
                             {% if dataset.private %}
                             <small class="private"rel="popover"
