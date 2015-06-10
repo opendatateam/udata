@@ -7,6 +7,7 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
+from udata.core.badges.models import CERTIFIED, PUBLIC_SERVICE
 from udata.core.storages import avatars, default_image_basename
 from udata.models import db, Badge, WithMetrics, Follow
 from udata.i18n import lazy_gettext as _
@@ -114,9 +115,6 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
 
     deleted = db.DateTimeField()
 
-    # TODO: Extract into extension
-    public_service = db.BooleanField()
-
     meta = {
         'allow_inheritance': True,
         'indexes': ['-created_at', 'slug'],
@@ -167,6 +165,13 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
     @property
     def accepted_requests(self):
         return [r for r in self.requests if r.status == 'accepted']
+
+    @property
+    def public_service(self):
+        return (OrganizationBadge.objects.filter(kind=PUBLIC_SERVICE,
+                                                 subject=self.id)
+                and OrganizationBadge.objects.filter(kind=CERTIFIED,
+                                                     subject=self.id))
 
     def member(self, user):
         for member in self.members:

@@ -15,7 +15,6 @@ class OrganizationCsvAdapter(csv.Adapter):
         ('url', 'external_url'),
         'description',
         ('logo', lambda o: o.logo(external=True)),
-        ('public_service', lambda o: o.public_service or False),
         'created_at',
         'last_modified',
     )

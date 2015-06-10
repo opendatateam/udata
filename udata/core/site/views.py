@@ -169,13 +169,6 @@ class SiteDashboard(SiteView, ActivityView, DetailView):
                     'endpoint': 'organizations.list',
                 },
                 {
-                    'title': _('Public services'),
-                    'metric': 'public_services',
-                    'type': 'bar',
-                    'endpoint': 'organizations.list',
-                    'args': {'public_services': True}
-                },
-                {
                     'title': _('Users'),
                     'metric': 'users',
                     'type': 'bar',

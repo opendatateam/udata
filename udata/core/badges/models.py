@@ -12,9 +12,11 @@ log = logging.getLogger(__name__)
 __all__ = ('Badge',)
 
 PUBLIC_SERVICE = 'public-service'
+CERTIFIED = 'certified'
 PIVOTAL_DATA = 'pivotal-data'
 BADGE_KINDS = {
     PUBLIC_SERVICE: _('Public Service'),
+    CERTIFIED: _('Certified'),
     'authenticated-organization': _('Authenticated organization'),
     'dataconnexions-laureate': _('Dataconnexions laureate'),
     'dataconnexions-candidate': _('Dataconnexions candidate'),

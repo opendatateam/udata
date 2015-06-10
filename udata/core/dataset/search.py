@@ -145,7 +145,6 @@ class DatasetSearch(ModelSearchAdapter):
     }
     boosters = [
         BoolBooster('featured', 1.1),
-        BoolBooster('from_public_service', 1.3),
         GaussDecay('metrics.reuses', max_reuses, decay=0.8),
         GaussDecay('metrics.followers', max_followers, max_followers, decay=0.8),
     ]
@@ -199,7 +198,6 @@ class DatasetSearch(ModelSearchAdapter):
             'metrics': dataset.metrics,
             'extras': dataset.extras,
             'featured': dataset.featured,
-            'from_public_service': dataset.organization.public_service if dataset.organization else False,  # TODO: extract tis into plugin
         }
         if dataset.temporal_coverage is not None and dataset.temporal_coverage.start and dataset.temporal_coverage.end:
             document.update({

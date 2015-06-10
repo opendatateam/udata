@@ -38,7 +38,6 @@ class OrganizationSearch(search.ModelSearchAdapter):
         'permitted_reuses': search.RangeFacet('metrics.permitted_reuses'),
         'datasets': search.RangeFacet('metrics.datasets'),
         'followers': search.RangeFacet('metrics.followers'),
-        'public_services': search.BoolFacet('public_service'),
     }
     mapping = {
         'properties': {
@@ -67,7 +66,6 @@ class OrganizationSearch(search.ModelSearchAdapter):
         }
     }
     boosters = [
-        search.BoolBooster('public_service', 1.5),
         search.GaussDecay('metrics.followers', max_followers, decay=0.8),
         search.GaussDecay('metrics.reuses', max_reuses, decay=0.9),
         search.GaussDecay('metrics.datasets', max_datasets, decay=0.9),
@@ -99,6 +97,5 @@ class OrganizationSearch(search.ModelSearchAdapter):
                     'image_url': organization.logo(40),
                     'slug': organization.slug,
                 },
-            },
-            'public_service': organization.public_service or False,  # TODO: extract tis into plugin
+            }
         }

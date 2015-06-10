@@ -35,10 +35,13 @@
                     {# Badges #}
                     {% if badges %}
                     <p class="text-center">
-                        {{ _('Badges:') }}
                         {% for badge in badges %}
-                            <a href="{{ url_for('front.search', badge=badge) }}">
-                                {{ badge }}</a>{% if not loop.last %}, {% endif %}
+                            <small class="small-badge">
+                                <a href="{{ url_for('front.search', badge=badge) }}"
+                                    title="{{ _('See all organizations with that badge.') }}">
+                                    <span class="glyphicon glyphicon-bookmark"></span>
+                                    {{ badge }}</a>
+                            </small><br/>
                         {% endfor %}
                     </p>
                     {% endif %}
