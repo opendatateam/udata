@@ -16,7 +16,7 @@ from udata.frontend.views import (
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import (
     db, Organization, Member, Reuse, Dataset, ORG_ROLES, User, Issue, FollowOrg,
-    DatasetIssue, DatasetDiscussion
+    DatasetIssue, DatasetDiscussion, OrganizationBadge
 )
 from udata.sitemap import sitemap
 from udata.utils import get_by
@@ -93,9 +93,9 @@ class OrganizationDetailView(OrgView, DetailView):
         if self.organization.deleted and not can_view.can():
             abort(410)
 
-        datasets = Dataset.objects(organization=self.organization).visible().order_by('-created')
-        supplied_datasets = Dataset.objects(supplier=self.organization).visible().order_by('-created')
-        reuses = Reuse.objects(organization=self.organization).visible().order_by('-created')
+        datasets = Dataset.objects(organization=self.organization).visible()
+        supplied_datasets = Dataset.objects(supplier=self.organization).visible()
+        reuses = Reuse.objects(organization=self.organization).visible()
         followers = FollowOrg.objects.followers(self.organization).order_by('follower.fullname')
         context.update({
             'reuses': reuses.paginate(1, self.page_size),
@@ -106,8 +106,8 @@ class OrganizationDetailView(OrgView, DetailView):
             'can_view': can_view,
             'private_reuses': list(Reuse.objects(organization=self.object).hidden()) if can_view else [],
             'private_datasets': list(Dataset.objects(organization=self.object).hidden()) if can_view else [],
+            'badges': OrganizationBadge.objects(subject=self.organization).visible()
         })
-
         return context
 
 

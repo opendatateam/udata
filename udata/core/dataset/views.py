@@ -11,10 +11,14 @@ from werkzeug.contrib.atom import AtomFeed
 from udata import fileutils
 from udata.app import nav
 from udata.auth import login_required
-from udata.frontend.views import DetailView, CreateView, EditView, NestedEditView, SingleObject, SearchView, BaseView, NestedObject
+from udata.frontend.views import (
+    DetailView, CreateView, EditView, NestedEditView, SingleObject, SearchView,
+    BaseView, NestedObject
+)
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Resource, Reuse, Issue, DatasetDiscussion, Follow
-
+from udata.models import (
+    Dataset, DatasetBadge, DatasetDiscussion, Follow, Issue, Resource, Reuse
+)
 from udata.core import storages
 from udata.core.site.views import current_site
 from udata.sitemap import sitemap
@@ -102,6 +106,7 @@ class DatasetDetailView(DatasetView, DetailView):
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = CommunityResourceEditPermission
         context['discussions'] = DatasetDiscussion.objects(subject=self.dataset)
+        context['badges'] = DatasetBadge.objects(subject=self.dataset).visible()
         return context
 
 

@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from udata import search
-from udata.models import Organization
+from udata.models import Organization, OrganizationBadge
 from udata.core.site.views import current_site
 
 from . import metrics  # Metrics are need for the mapping
@@ -21,6 +21,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
     fields = (
         'name^6',
         'acronym^6',
+        'badges^3',
         'description',
     )
     sorts = {
@@ -33,6 +34,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
     }
     facets = {
         'reuses': search.RangeFacet('metrics.reuses'),
+        'badge': search.ModelTermFacet('badge', OrganizationBadge, field_name='kind'),
         'permitted_reuses': search.RangeFacet('metrics.permitted_reuses'),
         'datasets': search.RangeFacet('metrics.datasets'),
         'followers': search.RangeFacet('metrics.followers'),
@@ -52,6 +54,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
                 'index': 'not_analyzed',
             },
             'description': {'type': 'string', 'analyzer': search.i18n_analyzer},
+            'badges': {'type': 'string', 'index_name': 'badge', 'index': 'not_analyzed'},
             'url': {'type': 'string'},
             'created': {'type': 'date', 'format': 'date_hour_minute_second'},
             'metrics': search.metrics_mapping(Organization),
@@ -85,6 +88,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
             'description': organization.description,
             'url': organization.url,
             'metrics': organization.metrics,
+            'badges': [badge.kind for badge in OrganizationBadge.objects(subject=organization)],
             'created': organization.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             'org_suggest': {
                 'input': completions,

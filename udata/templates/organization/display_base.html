@@ -32,6 +32,17 @@
                 </div>
                 <br/>
                 <div class="tab-links">
+                    {# Badges #}
+                    {% if badges %}
+                    <p class="text-center">
+                        {{ _('Badges:') }}
+                        {% for badge in badges %}
+                            <a href="{{ url_for('front.search', badge=badge) }}">
+                                {{ badge }}</a>{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    {% endif %}
+
                     {% if org.metrics.datasets %}
                     <p class="text-center">
                         <strong>

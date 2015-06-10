@@ -24,12 +24,14 @@
             <span class="badge">{{ datasets.total }}</span>
         </a>
     </li>
-    <li>
-        <a href="#reuses" data-toggle="tab">
-            {{ _('Reuses') }}
-            <span class="badge">{{ reuses.total }}</span>
-        </a>
-    </li>
+    {% if reuses %}
+        <li>
+            <a href="#reuses" data-toggle="tab">
+                {{ _('Reuses') }}
+                <span class="badge">{{ reuses.total }}</span>
+            </a>
+        </li>
+    {% endif %}
     {% if organizations %}
         <li>
             <a href="#organizations" data-toggle="tab">
@@ -64,6 +66,7 @@
     followers=(_('Stars'), 'desc')
 ) }}
 </div>
+{% if reuses %}
 <div class="btn-toolbar search-toolbar wrapper hide" data-tab="#reuses">
 {{ s.breadcrum_toolbar(reuses, url=reuses_search_url,
     exports=(
@@ -76,6 +79,7 @@
     followers=(_('Stars'), 'desc'),
 ) }}
 </div>
+{% endif %}
 {% if organizations %}
     <div class="btn-toolbar search-toolbar wrapper hide" data-tab="#organizations">
     {{ s.breadcrum_toolbar(organizations, url=organizations_search_url,

@@ -3,12 +3,11 @@ from __future__ import unicode_literals
 
 from udata.auth import Permission
 
-from udata.core.organization.permissions import (
-    OrganizationAdminNeed, OrganizationEditorNeed
-)
+from udata.core.organization.permissions import OrganizationAdminNeed
 
 
 class BadgePermission(Permission):
+
     def __init__(self, badge):
         needs = []
         subject = badge.subject
@@ -17,6 +16,5 @@ class BadgePermission(Permission):
         else:  # This is an Organization.
             organization_id = subject.id
         needs.append(OrganizationAdminNeed(organization_id))
-        needs.append(OrganizationEditorNeed(organization_id))
 
         super(BadgePermission, self).__init__(*needs)

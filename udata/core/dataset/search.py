@@ -4,13 +4,15 @@ from __future__ import unicode_literals
 from udata.core.site.views import current_site
 
 
-from udata.models import Dataset, Organization, License, User, GeoZone
+from udata.models import (
+    Dataset, DatasetBadge, Organization, License, User, GeoZone
+)
 from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
 from udata.search.fields import Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
 from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
 from udata.search.fields import BoolBooster, GaussDecay
 
-from udata.core.spatial.models import spatial_granularities, GeoZone
+from udata.core.spatial.models import spatial_granularities
 
 # Metrics are require for dataset search
 from . import metrics  # noqa
@@ -51,6 +53,7 @@ class DatasetSearch(ModelSearchAdapter):
             'owner': {'type': 'string'},
             'supplier': {'type': 'string'},
             'tags': {'type': 'string', 'index_name': 'tag', 'index': 'not_analyzed'},
+            'badges': {'type': 'string', 'index_name': 'badge', 'index': 'not_analyzed'},
             'tag_suggest': {
                 'type': 'completion',
                 'index_analyzer': 'simple',
@@ -112,6 +115,7 @@ class DatasetSearch(ModelSearchAdapter):
     fields = (
         'title^6',
         'tags^3',
+        'badges^3',
         'geozones.name^3',
         'description',
         'code',
@@ -126,6 +130,7 @@ class DatasetSearch(ModelSearchAdapter):
     }
     facets = {
         'tag': TermFacet('tags'),
+        'badge': ModelTermFacet('badge', DatasetBadge, field_name='kind'),
         'organization': ModelTermFacet('organization', Organization),
         'owner': ModelTermFacet('owner', User),
         'supplier': ModelTermFacet('supplier', Organization),
@@ -166,6 +171,7 @@ class DatasetSearch(ModelSearchAdapter):
             'description': dataset.description,
             'license': dataset.license.id if dataset.license is not None else None,
             'tags': dataset.tags,
+            'badges': [badge.kind for badge in DatasetBadge.objects(subject=dataset)],
             'tag_suggest': dataset.tags,
             'resources': [
                 {

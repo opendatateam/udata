@@ -22,6 +22,12 @@ BADGE_KINDS = {
 }
 
 
+class BadgeQuerySet(db.BaseQuerySet):
+
+    def visible(self):
+        return self(removed=None)
+
+
 class Badge(db.Document):
     subject = db.ReferenceField(db.DomainModel)
     kind = db.StringField(choices=BADGE_KINDS.keys(), required=True)
@@ -38,4 +44,13 @@ class Badge(db.Document):
         ],
         'allow_inheritance': True,
         'ordering': ['created'],
+        'queryset_class': BadgeQuerySet,
     }
+
+    def __unicode__(self):
+        return self.kind
+
+    __str__ = __unicode__
+
+    def __html__(self):
+        return unicode(BADGE_KINDS[self.kind])
