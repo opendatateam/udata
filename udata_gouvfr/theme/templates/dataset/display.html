@@ -268,6 +268,20 @@
 
                         <ul class="list-unstyled infos-list">
 
+                            {# Badges #}
+                            {% if badges %}
+                            <li>
+                                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="right auto"
+                                    title="{{ _('Badges') }}">
+                                    <span class="glyphicon glyphicon-bookmark"></span>
+                                </a>
+                                {% for badge in badges %}
+                                    <a href="{{ url_for('front.search', badge=badge) }}">
+                                        {{ badge }}</a>{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </li>
+                            {% endif %}
+
                             {# License #}
                             {% if dataset.license %}
                             <li>
