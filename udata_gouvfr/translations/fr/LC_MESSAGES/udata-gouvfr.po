@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-06-04 18:19+0200\n"
-"PO-Revision-Date: 2015-06-04 16:28+0000\n"
+"POT-Creation-Date: 2015-06-10 11:10+0200\n"
+"PO-Revision-Date: 2015-06-10 09:58+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/projects/p/udata-gouvfr/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -82,7 +82,7 @@ msgstr "Jeux de données"
 
 #: udata_gouvfr/theme/theme.py:49 udata_gouvfr/theme/templates/footer.html:66
 #: udata_gouvfr/theme/templates/metrics.html:28
-#: udata_gouvfr/theme/templates/dataset/display.html:545
+#: udata_gouvfr/theme/templates/dataset/display.html:551
 msgid "Reuses"
 msgstr "Réutilisations"
 
@@ -201,7 +201,7 @@ msgstr "métriques"
 
 #: udata_gouvfr/theme/templates/metrics.html:33
 #: udata_gouvfr/theme/templates/dataset/display.html:137
-#: udata_gouvfr/theme/templates/dataset/display.html:525
+#: udata_gouvfr/theme/templates/dataset/display.html:531
 msgid "Resources"
 msgstr "Ressources"
 
@@ -238,7 +238,7 @@ msgstr "jeu de données"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:29
 #: udata_gouvfr/theme/templates/dataset/display.html:182
-#: udata_gouvfr/theme/templates/dataset/display.html:582
+#: udata_gouvfr/theme/templates/dataset/display.html:588
 msgid "Edit"
 msgstr "Editer"
 
@@ -311,7 +311,7 @@ msgid "See the %(nb)d resources"
 msgstr "Voir les %(nb)d ressources"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:167
-#: udata_gouvfr/theme/templates/dataset/display.html:535
+#: udata_gouvfr/theme/templates/dataset/display.html:541
 msgid "Add a resource"
 msgstr "Ajouter une ressource"
 
@@ -365,92 +365,100 @@ msgstr "Granularité de la couverture territoriale"
 msgid "Territorial coverage"
 msgstr "Couverture territoriale"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:348
-#: udata_gouvfr/theme/templates/dataset/display.html:350
+#: udata_gouvfr/theme/templates/dataset/display.html:339
+msgid "Suggest a tag with a new discussion thread"
+msgstr "Suggérer un mot-clé avec un nouveau fil de discussion"
+
+#: udata_gouvfr/theme/templates/dataset/display.html:341
+msgid "Suggest a tag"
+msgstr "Suggérer un mot-clé"
+
+#: udata_gouvfr/theme/templates/dataset/display.html:354
+#: udata_gouvfr/theme/templates/dataset/display.html:356
 msgid "Details"
 msgstr "Détails"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:360
+#: udata_gouvfr/theme/templates/dataset/display.html:366
 msgid "Spatial coverage"
 msgstr "Couverture spatiale"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:460
+#: udata_gouvfr/theme/templates/dataset/display.html:466
 #: udata_gouvfr/theme/templates/reuse/display.html:21
 msgid "Community contributions"
 msgstr "Contributions communautaires"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:461
+#: udata_gouvfr/theme/templates/dataset/display.html:467
 #: udata_gouvfr/theme/templates/reuse/display.html:22
 msgid "Explore with Datagouv"
 msgstr "Explorer avec Datagouv"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:468
+#: udata_gouvfr/theme/templates/dataset/display.html:474
 #: udata_gouvfr/theme/templates/reuse/display.html:29
 msgid "Discussions"
 msgstr "Discussions"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:480
+#: udata_gouvfr/theme/templates/dataset/display.html:486
 #: udata_gouvfr/theme/templates/reuse/display.html:41
 msgid "Start a new discussion"
 msgstr "Démarrer une nouvelle discussion"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:492
+#: udata_gouvfr/theme/templates/dataset/display.html:498
 #: udata_gouvfr/theme/templates/reuse/display.html:52
 msgid "Starting a new discussion thread"
 msgstr "Démarrer une nouvelle discussion"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:495
+#: udata_gouvfr/theme/templates/dataset/display.html:501
 msgid ""
 "You're about to start a new discussion thread. Make sure that a thread about"
 " the same topic doesn't exist yet just above. If you want to report an "
 "anomaly, please use the dedicated button just under the datasets."
-msgstr ""
+msgstr "Vous êtes sur le point de démarrer un nouveau fil de discussion. Vérifiez qu'une discussion sur le même sujet n'existe pas déjà. Si vous voulez soumettre une anomalie, veuillez utiliser le bouton dédié juste sous les jeux de données."
 
-#: udata_gouvfr/theme/templates/dataset/display.html:501
+#: udata_gouvfr/theme/templates/dataset/display.html:507
 #: udata_gouvfr/theme/templates/reuse/display.html:61
 msgid "Title"
 msgstr "Titre"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:503
+#: udata_gouvfr/theme/templates/dataset/display.html:509
 #: udata_gouvfr/theme/templates/reuse/display.html:63
 msgid "Comment"
 msgstr "Commentaire"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:506
+#: udata_gouvfr/theme/templates/dataset/display.html:512
 #: udata_gouvfr/theme/templates/reuse/display.html:66
 msgid "Start a discussion"
 msgstr "Démarrer une discussion"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:521
+#: udata_gouvfr/theme/templates/dataset/display.html:527
 msgid ""
 "Discussion between the organization and the community about this dataset."
 msgstr "Discussion entre l'organisation et la communauté à propos de ce jeu de données."
 
-#: udata_gouvfr/theme/templates/dataset/display.html:541
+#: udata_gouvfr/theme/templates/dataset/display.html:547
 msgid ""
 "You have built a more comprehensive database than those presented here? This"
 " is the time to share it!"
 msgstr "Vous avez construit une base de données plus complète que celles présentées ici ? C'est le moment de la partager !"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:578
+#: udata_gouvfr/theme/templates/dataset/display.html:584
 msgid "Open in a new window"
 msgstr "Ouvrir dans une nouvelle fenêtre"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:593
-#: udata_gouvfr/theme/templates/dataset/display.html:597
+#: udata_gouvfr/theme/templates/dataset/display.html:599
+#: udata_gouvfr/theme/templates/dataset/display.html:603
 msgid "Unmark as featured"
 msgstr "Ne plus mettre en avant"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:595
-#: udata_gouvfr/theme/templates/dataset/display.html:598
+#: udata_gouvfr/theme/templates/dataset/display.html:601
+#: udata_gouvfr/theme/templates/dataset/display.html:604
 msgid "Mark as featured"
 msgstr "Mettre en avant"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:613
+#: udata_gouvfr/theme/templates/dataset/display.html:619
 msgid "Add a reuse"
 msgstr "Ajouter une réutilisation"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:621
+#: udata_gouvfr/theme/templates/dataset/display.html:627
 msgid ""
 "You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
@@ -485,7 +493,7 @@ msgid ""
 "You're about to start a new discussion thread. Make sure that a thread about"
 " the same topic doesn't exist yet just above. If you want to report an "
 "anomaly, please use the dedicated button just under the reuses."
-msgstr ""
+msgstr "Vous êtes sur le point de démarrer un nouveau fil de discussion. Vérifiez qu'une discussion sur le même sujet n'existe pas déjà. Si vous voulez soumettre une anomalie, veuillez utiliser le bouton dédié juste sous les réutilisations."
 
 #: udata_gouvfr/theme/templates/reuse/display.html:82
 msgid "Discussion between the reusers and the community about this reuse."
