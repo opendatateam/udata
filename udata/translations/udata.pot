@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-06-01 20:02+0200\n"
+"POT-Creation-Date: 2015-06-10 11:08+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,7 +32,7 @@ msgid "Organizations"
 msgstr ""
 
 #: udata/theme.py:39 udata/core/organization/metrics.py:16
-#: udata/core/organization/views.py:124 udata/core/organization/views.py:127
+#: udata/core/organization/views.py:125 udata/core/organization/views.py:128
 #: udata/core/reuse/metrics.py:24 udata/core/site/metrics.py:38
 #: udata/core/site/views.py:145 udata/core/user/metrics.py:25
 #: udata/templates/search.html:23 udata/templates/search.html:57
@@ -59,8 +59,8 @@ msgid "Datasets"
 msgstr ""
 
 #: udata/theme.py:40 udata/core/dataset/metrics.py:20
-#: udata/core/organization/metrics.py:33 udata/core/organization/views.py:146
-#: udata/core/organization/views.py:149 udata/core/site/metrics.py:48
+#: udata/core/organization/metrics.py:33 udata/core/organization/views.py:147
+#: udata/core/organization/views.py:150 udata/core/site/metrics.py:48
 #: udata/core/site/views.py:151 udata/core/user/metrics.py:39
 #: udata/templates/search.html:29 udata/templates/search.html:63
 #: udata/templates/search.html:70 udata/templates/search.html:87
@@ -191,7 +191,7 @@ msgstr ""
 msgid "The period covered by the data"
 msgstr ""
 
-#: udata/core/dataset/forms.py:27 udata/forms/fields.py:373
+#: udata/core/dataset/forms.py:27 udata/forms/fields.py:374
 #: udata/templates/dataset/search-labels.html:16
 #: udata/templates/dataset/search-panel.html:13
 #: udata/templates/dataset/search-result.html:59
@@ -354,32 +354,32 @@ msgstr ""
 msgid "dataset"
 msgstr ""
 
-#: udata/core/dataset/views.py:29 udata/templates/home.html:126
+#: udata/core/dataset/views.py:30 udata/templates/home.html:126
 msgid "Last datasets"
 msgstr ""
 
-#: udata/core/dataset/views.py:62 udata/core/organization/views.py:43
-#: udata/core/reuse/views.py:59
+#: udata/core/dataset/views.py:63 udata/core/organization/views.py:44
+#: udata/core/reuse/views.py:60
 msgid "Descrition"
 msgstr ""
 
-#: udata/core/dataset/views.py:63
+#: udata/core/dataset/views.py:64
 msgid "Additionnal informations"
 msgstr ""
 
-#: udata/core/dataset/views.py:64 udata/core/site/metrics.py:58
+#: udata/core/dataset/views.py:65 udata/core/site/metrics.py:58
 #: udata/core/site/views.py:157 udata/templates/search.html:58
 #: udata/templates/dataset/display.html:58 udata/templates/dataset/list.html:24
 msgid "Resources"
 msgstr ""
 
-#: udata/core/dataset/views.py:65 udata/core/issues/metrics.py:13
-#: udata/core/organization/views.py:47 udata/core/reuse/views.py:60
+#: udata/core/dataset/views.py:66 udata/core/issues/metrics.py:13
+#: udata/core/organization/views.py:48 udata/core/reuse/views.py:61
 #: udata/templates/macros/issues.html:6
 msgid "Issues"
 msgstr ""
 
-#: udata/core/dataset/views.py:66 udata/core/reuse/views.py:61
+#: udata/core/dataset/views.py:67 udata/core/reuse/views.py:62
 msgid "Transfer"
 msgstr ""
 
@@ -387,7 +387,9 @@ msgstr ""
 #: udata/core/issues/forms.py:12 udata/core/issues/forms.py:17
 #: udata/core/organization/forms.py:63 udata/core/organization/forms.py:67
 #: udata/templates/dataset/discussion-item.html:55
+#: udata/templates/mail/discussion_closed.html:31
 #: udata/templates/mail/issue_closed.html:31
+#: udata/templates/mail/new_discussion_comment.html:31
 #: udata/templates/mail/new_issue_comment.html:31
 msgid "Comment"
 msgstr ""
@@ -414,7 +416,7 @@ msgstr ""
 msgid "A discussion has been closed"
 msgstr ""
 
-#: udata/core/followers/metrics.py:28 udata/core/organization/views.py:175
+#: udata/core/followers/metrics.py:28 udata/core/organization/views.py:176
 #: udata/core/site/metrics.py:96 udata/templates/search.html:88
 #: udata/templates/search.html:99 udata/templates/dataset/followers.html:6
 #: udata/templates/dataset/search-labels.html:26
@@ -523,11 +525,11 @@ msgstr ""
 msgid "Role"
 msgstr ""
 
-#: udata/core/organization/metrics.py:44 udata/core/organization/views.py:170
+#: udata/core/organization/metrics.py:44 udata/core/organization/views.py:171
 msgid "Permitted reuses"
 msgstr ""
 
-#: udata/core/organization/metrics.py:54 udata/core/organization/views.py:44
+#: udata/core/organization/metrics.py:54 udata/core/organization/views.py:45
 #: udata/templates/organization/display.html:53
 msgid "Members"
 msgstr ""
@@ -566,19 +568,19 @@ msgstr ""
 msgid "Membership refused"
 msgstr ""
 
-#: udata/core/organization/views.py:45
+#: udata/core/organization/views.py:46
 msgid "Membership request"
 msgstr ""
 
-#: udata/core/organization/views.py:46
+#: udata/core/organization/views.py:47
 msgid "Teams"
 msgstr ""
 
-#: udata/core/organization/views.py:134 udata/core/organization/views.py:156
+#: udata/core/organization/views.py:135 udata/core/organization/views.py:157
 msgid "Views"
 msgstr ""
 
-#: udata/core/organization/views.py:167 udata/core/site/views.py:163
+#: udata/core/organization/views.py:168 udata/core/site/views.py:163
 msgid "Community"
 msgstr ""
 
@@ -673,11 +675,11 @@ msgstr ""
 msgid "New reuse"
 msgstr ""
 
-#: udata/core/reuse/views.py:26 udata/templates/home.html:143
+#: udata/core/reuse/views.py:27 udata/templates/home.html:143
 msgid "Last reuses"
 msgstr ""
 
-#: udata/core/reuse/views.py:146
+#: udata/core/reuse/views.py:147
 #, python-format
 msgid "The dataset \"%(title)s\" has been added to the reuse"
 msgstr ""
@@ -817,45 +819,45 @@ msgstr ""
 msgid "Notifications"
 msgstr ""
 
-#: udata/forms/fields.py:253
+#: udata/forms/fields.py:254
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr ""
 
-#: udata/forms/fields.py:257
+#: udata/forms/fields.py:258
 #, python-format
 msgid "Tag \"%(tag)s\" must be alphanumeric characters or symbols: -_."
 msgstr ""
 
-#: udata/forms/fields.py:289
+#: udata/forms/fields.py:290
 msgid "{0} does not exists"
 msgstr ""
 
-#: udata/forms/fields.py:314
+#: udata/forms/fields.py:315
 msgid "Model for {0} not found"
 msgstr ""
 
-#: udata/forms/fields.py:373
+#: udata/forms/fields.py:374
 msgid "A list of covered territories"
 msgstr ""
 
-#: udata/forms/fields.py:374 udata/templates/dataset/search-labels.html:19
+#: udata/forms/fields.py:375 udata/templates/dataset/search-labels.html:19
 msgid "Spatial granularity"
 msgstr ""
 
-#: udata/forms/fields.py:375
+#: udata/forms/fields.py:376
 msgid "The size of the data increment"
 msgstr ""
 
-#: udata/forms/fields.py:429 udata/forms/fields.py:450
+#: udata/forms/fields.py:430 udata/forms/fields.py:451
 msgid "You must be authenticated"
 msgstr ""
 
-#: udata/forms/fields.py:431
+#: udata/forms/fields.py:432
 msgid "You can only set yourself as owner"
 msgstr ""
 
-#: udata/forms/fields.py:452
+#: udata/forms/fields.py:453
 msgid "Permission denied for this organization"
 msgstr ""
 
@@ -864,7 +866,7 @@ msgstr ""
 msgid "This field requires \"%(name)s\" to be set"
 msgstr ""
 
-#: udata/forms/widgets.py:149 udata/templates/macros/forms.html:207
+#: udata/forms/widgets.py:150 udata/templates/macros/forms.html:207
 msgid "Choose a picture"
 msgstr ""
 
@@ -1136,7 +1138,50 @@ msgid ""
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:296
+#: udata/templates/apidoc.html:292
+msgid ""
+"This is the message you will end up with if you specified the wrong API Key. "
+"There is another potential error message that you can encounter:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:305
+msgid ""
+"It occurs if you try to access a resource that you cannot edit with your "
+"credentials. If your Key is valid you should have something like this:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:318
+msgid ""
+"But it didn't change anything! This is perfectly normal, we forgot to specify"
+" the right data to send to the server.\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:330
+msgid ""
+"The resource has been modified with your new values. Finally, you can delete "
+"a resource with the appropriated HTTP verb (beware, no rollback is possible "
+"using the API at the moment):\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:342
+msgid ""
+"Once you did it, you can verify that it's effective issuing a GET against the"
+" previous URI:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:359
+msgid ""
+"Please consult the reference documentation below for further interactions "
+"with the API or ask us for questions related to it!\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:366
 msgid "Reference"
 msgstr ""
 
@@ -1244,8 +1289,8 @@ msgstr ""
 
 #: udata/templates/api/admin.html:31 udata/templates/dataset/display.html:25
 #: udata/templates/dataset/resource/display.html:12
-#: udata/templates/dataset/resource/list-item.html:42
-#: udata/templates/dataset/resource/list-item.html:49
+#: udata/templates/dataset/resource/list-item.html:41
+#: udata/templates/dataset/resource/list-item.html:48
 #: udata/templates/organization/display.html:22
 #: udata/templates/organization/followers.html:15
 #: udata/templates/post/display.html:112 udata/templates/post/edit.html:5
@@ -1256,10 +1301,10 @@ msgstr ""
 
 #: udata/templates/api/admin.html:34 udata/templates/dataset/edit.html:17
 #: udata/templates/dataset/edit.html:19
-#: udata/templates/dataset/resource/edit.html:15
-#: udata/templates/dataset/resource/edit.html:17
-#: udata/templates/dataset/resource/edit_community.html:15
-#: udata/templates/dataset/resource/edit_community.html:17
+#: udata/templates/dataset/resource/edit.html:21
+#: udata/templates/dataset/resource/edit.html:24
+#: udata/templates/dataset/resource/edit_community.html:21
+#: udata/templates/dataset/resource/edit_community.html:24
 #: udata/templates/organization/edit.html:17
 #: udata/templates/organization/edit.html:19 udata/templates/reuse/edit.html:16
 #: udata/templates/reuse/edit.html:18
@@ -1284,7 +1329,11 @@ msgid "%(app)s want to access your %(site)s account."
 msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:26
-#: udata/templates/mail/issue_closed.html:26 udata/templates/mail/new_issue.html:25
+#: udata/templates/mail/discussion_closed.html:26
+#: udata/templates/mail/issue_closed.html:26
+#: udata/templates/mail/new_discussion.html:25
+#: udata/templates/mail/new_discussion_comment.html:26
+#: udata/templates/mail/new_issue.html:25
 #: udata/templates/mail/new_issue_comment.html:26
 #: udata/templates/organization/edit_membership_requests.html:13
 msgid "Details"
@@ -1360,24 +1409,21 @@ msgstr ""
 msgid "New"
 msgstr ""
 
-#: udata/templates/dataset/create.html:9
-#: udata/templates/dataset/resource/create.html:12
-#: udata/templates/organization/create.html:9 udata/templates/post/create.html:9
-#: udata/templates/reuse/create.html:9 udata/templates/topic/create.html:9
-msgid "Create"
+#: udata/templates/dataset/create.html:11
+#: udata/templates/dataset/resource/create.html:14
+#: udata/templates/dataset/resource/edit.html:14
+#: udata/templates/dataset/resource/edit_community.html:14
+#: udata/templates/organization/create.html:11 udata/templates/post/create.html:11
+#: udata/templates/post/edit.html:11 udata/templates/reuse/create.html:11
+#: udata/templates/topic/create.html:11 udata/templates/topic/edit.html:11
+msgid "Back"
 msgstr ""
 
-#: udata/templates/dataset/create.html:10 udata/templates/dataset/edit.html:15
-#: udata/templates/dataset/resource/create.html:13
-#: udata/templates/dataset/resource/edit.html:13
-#: udata/templates/dataset/resource/edit_community.html:13
-#: udata/templates/organization/create.html:10
-#: udata/templates/organization/edit.html:15 udata/templates/post/create.html:10
-#: udata/templates/post/edit.html:10 udata/templates/reuse/create.html:10
-#: udata/templates/reuse/edit.html:14 udata/templates/topic/create.html:10
-#: udata/templates/topic/edit.html:10 udata/templates/user/edit.html:13
-#: udata/templates/user/edit_settings.html:13
-msgid "Cancel"
+#: udata/templates/dataset/create.html:15
+#: udata/templates/dataset/resource/create.html:18
+#: udata/templates/organization/create.html:15 udata/templates/post/create.html:15
+#: udata/templates/reuse/create.html:15 udata/templates/topic/create.html:15
+msgid "Create"
 msgstr ""
 
 #: udata/templates/dataset/discussion-item.html:12
@@ -1468,13 +1514,19 @@ msgid "Edit dataset"
 msgstr ""
 
 #: udata/templates/dataset/edit.html:14
-#: udata/templates/dataset/resource/edit.html:12
-#: udata/templates/dataset/resource/edit_community.html:12
-#: udata/templates/organization/edit.html:13 udata/templates/post/edit.html:9
+#: udata/templates/dataset/resource/edit.html:18
+#: udata/templates/dataset/resource/edit_community.html:18
+#: udata/templates/organization/edit.html:13 udata/templates/post/edit.html:15
 #: udata/templates/reuse/edit.html:13 udata/templates/site/config.html:14
-#: udata/templates/site/theme.html:15 udata/templates/topic/edit.html:9
+#: udata/templates/site/theme.html:15 udata/templates/topic/edit.html:15
 #: udata/templates/user/edit.html:12 udata/templates/user/edit_settings.html:12
 msgid "Save"
+msgstr ""
+
+#: udata/templates/dataset/edit.html:15 udata/templates/organization/edit.html:15
+#: udata/templates/reuse/edit.html:14 udata/templates/user/edit.html:13
+#: udata/templates/user/edit_settings.html:13
+msgid "Cancel"
 msgstr ""
 
 #: udata/templates/dataset/edit_base.html:6
@@ -1585,11 +1637,11 @@ msgstr ""
 msgid "Edit community resource"
 msgstr ""
 
-#: udata/templates/dataset/resource/list-item.html:13
+#: udata/templates/dataset/resource/list-item.html:12
 msgid "Nameless resource"
 msgstr ""
 
-#: udata/templates/dataset/resource/list-item.html:32
+#: udata/templates/dataset/resource/list-item.html:31
 #, python-format
 msgid "Last modified on %(date)s at %(time)s"
 msgstr ""
@@ -1775,6 +1827,17 @@ msgstr ""
 msgid "The %(site)s team"
 msgstr ""
 
+#: udata/templates/mail/discussion_closed.html:6
+#, python-format
+msgid "%(user)s closed an discussion on your %(type)s %(subject)s"
+msgstr ""
+
+#: udata/templates/mail/discussion_closed.html:40
+#: udata/templates/mail/new_discussion.html:32
+#: udata/templates/mail/new_discussion_comment.html:40
+msgid "See the discussion"
+msgstr ""
+
 #: udata/templates/mail/issue_closed.html:6
 #, python-format
 msgid "%(user)s closed an issue on your %(type)s %(subject)s"
@@ -1803,6 +1866,16 @@ msgstr ""
 
 #: udata/templates/mail/membership_request.html:40
 msgid "See the request"
+msgstr ""
+
+#: udata/templates/mail/new_discussion.html:6
+#, python-format
+msgid "%(user)s submitted a new discussion on your %(type)s %(subject)s"
+msgstr ""
+
+#: udata/templates/mail/new_discussion_comment.html:6
+#, python-format
+msgid "%(user)s commented an discussion on your %(type)s %(subject)s"
 msgstr ""
 
 #: udata/templates/mail/new_follower.html:33
