@@ -69,7 +69,7 @@
         <small v-if="badge" class="badge pull-right bg-{{badge-color}}">{{badge.label}}</small>
     </a>
     <ul v-if="is_tree" v-show="open" class="treeview-menu">
-        <li v-repeat="children" v-component="sidebar-menu-item"></li>
+        <sidebar-menu-item v-repeat="children"></sidebar-menu-item>
     </ul>
 </li>
 </template>

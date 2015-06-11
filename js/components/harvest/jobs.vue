@@ -49,6 +49,6 @@ module.exports = {
             this.$dispatch('harvest:job:selected', item);
         }
     },
-    paramAttributes: ['jobs', 'current']
+    props: ['jobs', 'current']
 };
 </script>

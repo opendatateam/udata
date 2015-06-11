@@ -56,7 +56,7 @@ module.exports = {
             completions: []
         };
     },
-    paramAttributes: ['cardclass'],
+    props: ['cardclass'],
     computed: {
         users: function() {
             return this.completions.map(function(user) {

@@ -24,7 +24,7 @@
 
 module.exports = {
     name: 'post-content',
-    paramAttributes: ['post'],
+    props: ['post'],
     data: function() {
         return {
             toggled: false

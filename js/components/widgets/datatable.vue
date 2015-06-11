@@ -62,11 +62,11 @@
                     <tr class="pointer"
                         v-repeat="item:p.data" track-by="id"
                         v-on="click: item_click(item)">
-                        <td v-repeat="field: fields" track-by="key"
-                            v-component="{{field.type || 'text'}}"
-                            v-with="item:item"
-                            field="{{field}}"
-                            >
+                        <td v-repeat="field: fields" track-by="key">
+                            <component is="{{field.type || 'text'}}"
+                                item="{{item}}" field="{{field}}">
+                            </component>
+
                         </td>
                     </tr>
                 </tbody>
@@ -91,6 +91,7 @@ var Vue = require('vue'),
 
 var CellWidget = Vue.extend({
     default: '',
+    props: ['field', 'item'],
     data: function() {
         return {
             item: {},
@@ -203,7 +204,7 @@ module.exports = {
             return this.p && (this.p.serverside == true);
         }
     },
-    paramAttributes: ['p', 'title', 'icon', 'fields', 'boxclass', 'downloads'],
+    props: ['p', 'title', 'icon', 'fields', 'boxclass', 'downloads'],
     methods: {
         search: function() {
             this.p.search(this.search_query);

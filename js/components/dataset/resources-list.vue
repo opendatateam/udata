@@ -147,7 +147,7 @@ module.exports = {
             return this.dropping ? Vue._('Drop resource') : Vue._('Resources');
         }
     },
-    paramAttributes: ['dataset'],
+    props: ['dataset'],
     events: {
         'uploader:progress': function(id, uploaded, total) {
             this.$find('#progress-' + id)

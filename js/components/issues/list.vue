@@ -36,6 +36,6 @@ module.exports = {
             this.$go('/issue/' + issue.id + '/');
         }
     },
-    paramAttributes: ['issues']
+    props: ['issues']
 };
 </script>

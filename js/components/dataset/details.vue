@@ -21,7 +21,7 @@
 
 module.exports = {
     name: 'dataset-details',
-    paramAttributes: ['dataset'],
+    props: ['dataset'],
     data: function() {
         return {
             title: this._('Details'),

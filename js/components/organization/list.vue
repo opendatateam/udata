@@ -79,6 +79,6 @@ module.exports = {
             this.$go('/organization/' + org.id + '/');
         }
     },
-    paramAttributes: ['organizations']
+    props: ['organizations']
 };
 </script>

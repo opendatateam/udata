@@ -38,8 +38,8 @@
         </div>
     </div>
     <create-form v-ref="form" v-if="toggled" organization="{{org}}"></create-form>
-    <box-footer v-if="toggled">
-        <button type="submit" class="btn btn-primary"
+    <box-footer>
+        <button type="submit" class="btn btn-primary" v-if="toggled"
             v-on="click: save($event)" v-i18n="Save"></button>
     </box-footer>
 </box-container>
@@ -52,7 +52,7 @@ var API = require('api');
 
 module.exports = {
     name: 'org-profile',
-    paramAttributes: ['org'],
+    props: ['org'],
     data: function() {
         return {
             toggled: false,

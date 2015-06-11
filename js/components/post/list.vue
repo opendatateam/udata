@@ -51,6 +51,6 @@ module.exports = {
             this.$go('/post/' + post.id + '/');
         }
     },
-    paramAttributes: ['posts']
+    props: ['posts']
 };
 </script>

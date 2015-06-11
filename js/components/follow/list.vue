@@ -41,6 +41,6 @@ module.exports = {
             this.$go('/user/' + item.follower.id + '/');
         }
     },
-    paramAttributes: ['followers']
+    props: ['followers']
 };
 </script>

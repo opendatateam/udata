@@ -58,6 +58,6 @@ module.exports = {
             this.$root.me.fetch();
         }
     },
-    paramAttributes: ['user']
+    props: ['user']
 };
 </script>

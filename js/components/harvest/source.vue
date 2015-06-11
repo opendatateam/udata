@@ -25,7 +25,7 @@
 
 module.exports = {
     name: 'source-details',
-    paramAttributes: ['source'],
+    props: ['source'],
     data: function() {
         return {
             title: this._('Parameters'),

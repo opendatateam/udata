@@ -50,7 +50,7 @@ module.exports = {
             }]
          };
     },
-    // paramAttributes: ['orgid'],
+    // props: ['orgid'],
     components: {
         'wizard-component': require('components/widgets/wizard.vue'),
         'post-form': require('components/post/form.vue'),

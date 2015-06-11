@@ -7,7 +7,7 @@
 
 module.exports = {
     name: 'DashboardView',
-    paramAttributes: ['layout', 'editable', 'widgets'],
+    props: ['layout', 'editable', 'widgets'],
     data: function() {
         return {
             layout: []

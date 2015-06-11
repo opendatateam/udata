@@ -76,7 +76,7 @@ module.exports = {
             comment: null
         };
     },
-    paramAttributes: ['issueid'],
+    props: ['issueid'],
     ready: function() {
         API.issues.get_issue({id: this.issueid}, function(response) {
             this.issue = response.obj;

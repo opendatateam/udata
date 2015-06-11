@@ -89,7 +89,7 @@ module.exports = {
         'reuse-card': require('components/reuse/card.vue'),
         'reuse-completer': require('components/form/reuse-completer')
     },
-    paramAttributes: ['reuses'],
+    props: ['reuses'],
     data: function() {
         return {
             reuses: []

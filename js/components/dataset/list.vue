@@ -74,6 +74,6 @@ module.exports = {
             this.$go('/dataset/' + dataset.id + '/');
         }
     },
-    paramAttributes: ['datasets', 'downloads']
+    props: ['datasets', 'downloads']
 };
 </script>

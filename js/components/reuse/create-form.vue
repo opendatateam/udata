@@ -12,7 +12,7 @@
 var Reuse = require('models/reuse');
 
 module.exports = {
-    paramAttributes: ['reuse'],
+    props: ['reuse'],
     data: function() {
         return {
             reuse: new Reuse(),

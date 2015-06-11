@@ -114,7 +114,7 @@ module.exports = {
         'reuse-card': require('components/reuse/card.vue'),
         'reuse-completer': require('components/form/reuse-completer')
     },
-    paramAttributes: ['title', 'reuses'],
+    props: ['title', 'reuses'],
     data: function() {
         return {
             title: this._('Reuses'),

@@ -17,8 +17,8 @@
 <template>
     <!-- header logo: style can be found in header.less -->
     <div v-el="modal"></div>
-    <header class="main-header" v-component="header"></header>
-    <aside class="main-sidebar sidebar-offcanvas" v-component="sidebar"></aside>
+    <app-header class="main-header"></app-header>
+    <sidebar class="main-sidebar sidebar-offcanvas"></sidebar>
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <content-header meta="{{meta}}"></content-header>
@@ -27,7 +27,8 @@
             <alert-box v-repeat="notifications"></alert-box>
         </div>
         <!-- Main content -->
-        <section v-ref="content" class="content" v-component="{{view}}">
+        <section class="content">
+            <component v-ref="content" is="{{view}}"></component>
         </section>
     </div>
 </template>
@@ -60,7 +61,7 @@ module.exports = {
         };
     },
     components: {
-        'header': require('components/header.vue'),
+        'app-header': require('components/header.vue'),
         'sidebar': require('components/sidebar.vue'),
         'content-header': require('components/content-header.vue'),
         'alert-box': require('components/alert.vue'),
@@ -243,20 +244,20 @@ module.exports = {
 
             var self = this,
                 cb = function() {
-                    callback.apply(this, [self.$.content]);
+                    callback.apply(this, [this.$.content]);
                 }.bind(this);
 
             if (this.$options.components.hasOwnProperty(name)) {
                 this.view = name;
                 if (callback) {
-                    Vue.nextTick(cb);
+                    this.$nextTick(cb);
                 }
             } else {
                 require(['./views/' + name + '.vue'], function(options) {
                     self.$options.components[name] = Vue.extend(options);
                     self.view = name;
                     if (callback) {
-                        Vue.nextTick(cb);
+                        self.$nextTick(cb);
                     }
                 });
             }

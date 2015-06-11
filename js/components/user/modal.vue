@@ -125,7 +125,7 @@ module.exports = {
     mixins: [
         require('mixins/modal')
     ],
-    paramAttributes: ['user'],
+    props: ['user'],
     data: function() {
         return {
             placeholder: require('helpers/placeholders').user

@@ -90,6 +90,6 @@ module.exports = {
             return $(this.$el).find('.box-footer > *').length > 0;
         }
     },
-    paramAttributes: ['title', 'icon', 'boxclass', 'bodyclass', 'footerclass', 'loading']
+    props: ['title', 'icon', 'boxclass', 'bodyclass', 'footerclass', 'loading']
 };
 </script>

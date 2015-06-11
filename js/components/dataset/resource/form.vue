@@ -77,7 +77,7 @@ var Dataset = require('models/dataset'),
     Resource = require('models/resource');
 
 module.exports = {
-    paramAttributes: ['dataset', 'resource'],
+    props: ['dataset', 'resource'],
     data: function() {
         return {
             dataset: new Dataset(),

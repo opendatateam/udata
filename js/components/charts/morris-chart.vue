@@ -52,7 +52,7 @@ module.exports = {
             }
         };
     },
-    paramAttributes: [
+    props: [
         'title',
         'icon',
         'default',

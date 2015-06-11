@@ -51,7 +51,7 @@ var API = require('api');
 
 module.exports = {
     name: 'reuse-details',
-    paramAttributes: ['reuse'],
+    props: ['reuse'],
     data: function() {
         return {
             title: this._('Details'),

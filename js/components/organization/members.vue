@@ -144,7 +144,7 @@ module.exports = {
         'pagination-widget': require('components/pagination.vue'),
         'user-completer': require('components/form/user-completer'),
     },
-    paramAttributes: ['org'],
+    props: ['org'],
     data: function() {
         return {
             title: this._('Members'),

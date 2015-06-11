@@ -88,7 +88,7 @@ module.exports = {
             endpoint: null
         };
     },
-    paramAttributes: ['endpoint', 'sizes'],
+    props: ['endpoint', 'sizes'],
     components: {
         'thumbnailer-widget': require('components/widgets/thumbnailer.vue')
     },

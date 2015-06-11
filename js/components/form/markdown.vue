@@ -80,7 +80,7 @@ module.exports = {
     name: 'markdown-editor',
     inherit: true,
     replace: true,
-    paramAttributes: ['rows'],
+    props: ['rows'],
     ready: function() {
         $(this.$el).markdown({
             language: Vue.lang,

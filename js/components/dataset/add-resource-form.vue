@@ -11,7 +11,7 @@
 'use strict';
 
 module.exports = {
-    paramAttributes: ['dataset'],
+    props: ['dataset'],
     data: function() {
         return {
             fields: ['title', 'description']

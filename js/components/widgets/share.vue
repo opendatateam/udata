@@ -31,6 +31,6 @@
 'use strict';
 
 module.exports = {
-    paramAttributes: ['title', 'url']
+    props: ['title', 'url']
 };
 </script>

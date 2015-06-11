@@ -76,7 +76,7 @@ module.exports = {
             comment: null
         };
     },
-    paramAttributes: ['discussionid'],
+    props: ['discussionid'],
     ready: function() {
         API.discussions.get_discussion({id: this.discussionid}, function(response) {
             this.discussion = response.obj;

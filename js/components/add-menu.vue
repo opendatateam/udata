@@ -3,29 +3,32 @@
 </style>
 
 <template>
-<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-    <i class="fa fa-plus"></i>
-</a>
-<ul class="dropdown-menu">
-    <li class="header text-center" v-i18n="Add"></li>
-    <li>
-        <!-- inner menu: contains the actual data -->
-        <ul class="menu">
-            <li v-repeat="actions">
-                <a v-route="{{route}}" class="pointer">
-                    <span class="fa fa-fw {{icon}} text-{{color}}"></span>
-                    <span>{{ label }}</span>
-                </a>
-            </li>
-        </ul>
-    </li>
-</ul>
+<li class="dropdown add-menu notifications-menu">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        <i class="fa fa-plus"></i>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="header text-center" v-i18n="Add"></li>
+        <li>
+            <!-- inner menu: contains the actual data -->
+            <ul class="menu">
+                <li v-repeat="actions">
+                    <a v-route="{{route}}" class="pointer">
+                        <span class="fa fa-fw {{icon}} text-{{color}}"></span>
+                        <span>{{ label }}</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
 </template>
 
 <script>
 'use strict';
 
 module.exports = {
+    replace: true,
     computed: {
         actions: function() {
             var actions = [{

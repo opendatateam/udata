@@ -78,6 +78,6 @@ module.exports = {
             this.$go('/reuse/' + reuse.id + '/');
         }
     },
-    paramAttributes: ['reuses', 'downloads']
+    props: ['reuses', 'downloads']
 };
 </script>

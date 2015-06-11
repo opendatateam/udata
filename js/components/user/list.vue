@@ -75,6 +75,6 @@ module.exports = {
             this.$go('/user/' + user.id + '/');
         }
     },
-    paramAttributes: ['users']
+    props: ['users']
 };
 </script>
