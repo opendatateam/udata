@@ -57,7 +57,7 @@
         <header class="box-header" v-show="title || icon">
             <i v-show="icon" class="fa fa-{{icon}}"></i>
             <h3 class="box-title">{{title}}</h3>
-            <div class="box-tools">
+            <div class="box-tools" v-el="tools">
                 <content v-ref="tools" select="aside"></content>
             </div>
         </header>
@@ -67,8 +67,8 @@
         <div class="overlay" v-show="loading">
             <span class="fa fa-refresh fa-spin"></span>
         </div>
-        <div class="box-footer clearfix {{footerclass || ''}}" v-show="has_footer">
-            <content select="box-footer"></content>
+        <div class="box-footer clearfix {{footerclass || ''}}" v-el="footer" v-show="has_footer">
+            <content select="footer"></content>
         </div>
     </div>
 </template>
@@ -81,13 +81,9 @@ var $ = require('jquery');
 module.exports = {
     name: 'box-container',
     replace: true,
-    // inherit: true,
     computed: {
-        has_header: function() {
-            return $(this.$el).find('.box-header > *').length > 0;
-        },
         has_footer: function() {
-            return $(this.$el).find('.box-footer > *').length > 0;
+            return $(this.$$.footer).find('footer > *').length > 0;
         }
     },
     props: ['title', 'icon', 'boxclass', 'bodyclass', 'footerclass', 'loading']

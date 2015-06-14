@@ -27,7 +27,7 @@
                 </button>
             </div>
         </aside>
-        <div class="chart" v-style="height: height || '300 px'"></div>
+        <div v-el="chart" class="chart" v-style="height: height || '300 px'"></div>
     </box-container>
 </template>
 
@@ -62,9 +62,6 @@ module.exports = {
         'metrics'
     ],
     computed: {
-        chart_el: function() {
-            return $(this.$el).find('.chart')[0];
-        },
         fields: function() {
             return $.map(this.y, function(item) {
                 return item.id;
@@ -123,7 +120,7 @@ module.exports = {
 
             this.clean_chart();
             this.chart = new Morris[this.charttype]({
-                element: this.chart_el,
+                element: this.$$.chart,
                 resize: false,
                 data: this.metrics.series,
                 xkey: this.x,
@@ -143,7 +140,7 @@ module.exports = {
             if (this.chart) {
                 delete this.chart.handlers.click;
                 delete this.chart.handlers.gridclick;
-                $(this.chart_el).empty();
+                $(this.$$.chart).empty();
             }
         }
     }
