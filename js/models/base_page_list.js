@@ -28,45 +28,35 @@ define(['api', 'models/base_list', 'jquery'], function(API, List, $) {
              */
             pages: function() {
                 return Math.ceil(this.items.length / this.page_size);
-            },
-            // data: function() {
-            //     return this.items
-            //         .sort(function(a, b) {
-            //             var valA = getattr(a, this.sorted),
-            //                 valB = getattr(b, this.sorted);
-
-            //             if (valA > valB) {
-            //                 return this.reversed ? -1 : 1;
-            //             } else if (valA < valB) {
-            //                 return this.reversed ? 1 : -1;
-            //             } else {
-            //                 return 0;
-            //             }
-            //         }.bind(this))
-            //         .slice(
-            //             Math.max(this.page - 1, 0) * this.page_size,
-            //             this.page * this.page_size
-            //         );
-            // }
+            }
+        },
+        events: {
+            updated: function() {
+                this.data = this.build_page();
+            }
         },
         methods: {
             next: function() {
                 if (this.page && this.page < this.pages) {
                     this.page = this.page + 1;
                 }
+                this.data = this.build_page();
             },
             previous: function() {
                 if (this.page && this.page > 1) {
                     this.page = this.page - 1;
                 }
+                this.data = this.build_page();
             },
             go_to_page: function(page) {
                 this.page = page;
+                this.data = this.build_page();
             },
             sort: function(field, reversed) {
                 this.sorted = field;
                 this.reversed = reversed !== undefined ? reversed : !this.reversed;
                 this.page = 1;
+                this.data = this.build_page();
             },
             search: function(query) {
                 console.log('search', query);
@@ -89,14 +79,6 @@ define(['api', 'models/base_list', 'jquery'], function(API, List, $) {
                         Math.max(this.page - 1, 0) * this.page_size,
                         this.page * this.page_size
                     );
-            }
-        },
-        watch: {
-            page: function() {
-                this.data = this.build_page();
-            },
-            items: function() {
-                this.data = this.build_page();
             }
         }
     });

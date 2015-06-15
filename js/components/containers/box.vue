@@ -49,6 +49,15 @@
             }
         }
     }
+
+    .btn-box-tool {
+        font-size: 14px;
+        padding: 6px 8px;
+    }
+
+    .btn-group {
+        vertical-align: inherit;
+    }
 }
 
 </style>
@@ -67,7 +76,8 @@
         <div class="overlay" v-show="loading">
             <span class="fa fa-refresh fa-spin"></span>
         </div>
-        <div class="box-footer clearfix {{footerclass || ''}}" v-el="footer" v-show="has_footer">
+        <div class="box-footer clearfix {{footerclass || ''}}"
+            v-el="footer" v-show="has_footer">
             <content select="footer"></content>
         </div>
     </div>
@@ -83,9 +93,13 @@ module.exports = {
     replace: true,
     computed: {
         has_footer: function() {
-            return $(this.$$.footer).find('footer > *').length > 0;
+            if (this.footer !== undefined) {
+                return this.footer;
+            } else {
+                return $(this.$$.footer).find('footer > *').length > 0;
+            }
         }
     },
-    props: ['title', 'icon', 'boxclass', 'bodyclass', 'footerclass', 'loading']
+    props: ['title', 'icon', 'boxclass', 'bodyclass', 'footerclass', 'loading', 'footer']
 };
 </script>

@@ -1,9 +1,10 @@
 <template>
-    <datatable-widget title="{{ title }}" icon="users"
+    <datatable title="{{ title }}" icon="users"
         boxclass="followers-widget"
         fields="{{ fields }}"
-        p="{{ followers }}">
-    </datatable-widget>
+        p="{{ followers }}"
+        empty="{{ _('No follower') }}">
+    </datatable>
 </template>
 
 <script>
@@ -12,7 +13,7 @@
 module.exports = {
     name: 'followers-widget',
     components: {
-        'datatable-widget': require('components/widgets/datatable.vue')
+        'datatable': require('components/widgets/datatable.vue')
     },
     data: function() {
         return {

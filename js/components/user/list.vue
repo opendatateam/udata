@@ -1,17 +1,10 @@
 <template>
-    <datatable-widget title="{{ title }}" icon="users"
+    <datatable title="{{ title }}" icon="users"
         boxclass="users-widget"
         fields="{{ fields }}"
-        p="{{ users }}">
-        <footer>
-            <button type="button" class="btn btn-primary btn-sm"
-                v-class="pull-right: users.pages > 1"
-                v-route="/user/new/">
-                <span class="fa fa-fw fa-plus"></span>
-                <span v-i18n="New"></span>
-            </button>
-        </footer>
-    </datatable-widget>
+        p="{{ users }}"
+        empty="{{ _('No user') }}">
+    </datatable>
 </template>
 
 <script>
@@ -20,7 +13,7 @@
 module.exports = {
     name: 'users-widget',
     components: {
-        'datatable-widget': require('components/widgets/datatable.vue')
+        'datatable': require('components/widgets/datatable.vue')
     },
     data: function() {
         return {

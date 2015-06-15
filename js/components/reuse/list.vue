@@ -1,17 +1,10 @@
 <template>
-    <datatable-widget title="{{ title }}" icon="retweet"
+    <datatable title="{{ title }}" icon="retweet"
         boxclass="reuses-widget"
         fields="{{ fields }}" p="{{ reuses }}"
-        downloads="{{downloads}}">
-        <footer>
-            <button type="button" class="btn btn-primary btn-sm"
-                v-class="pull-right: reuses.pages > 1"
-                v-route="/reuse/new/">
-                <span class="fa fa-fw fa-plus"></span>
-                <span v-i18n="New"></span>
-            </button>
-        </footer>
-    </datatable-widget>
+        downloads="{{downloads}}"
+        empty="{{ _('No reuse') }}">
+    </datatable>
 </template>
 
 
@@ -21,7 +14,7 @@
 module.exports = {
     name: 'reuses-widget',
     components: {
-         'datatable-widget': require('components/widgets/datatable.vue')
+         'datatable': require('components/widgets/datatable.vue')
     },
     data: function() {
         return {

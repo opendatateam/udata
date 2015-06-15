@@ -1,7 +1,10 @@
 <template>
-    <datatable-widget title="{{ title }}" icon="warning" boxclass="issues-widget"
-        fields="{{ fields }}" p="{{ issues }}">
-    </datatable-widget>
+    <datatable title="{{ title }}" icon="warning"
+        boxclass="issues-widget"
+        fields="{{ fields }}"
+        p="{{ issues }}"
+        empty="{{ _('No issues') }}">
+    </datatable>
 </template>
 
 
@@ -11,7 +14,7 @@
 module.exports = {
     name: 'issues-widget',
     components: {
-         'datatable-widget': require('components/widgets/datatable.vue')
+         'datatable': require('components/widgets/datatable.vue')
     },
     data: function() {
         return {

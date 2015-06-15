@@ -31,10 +31,11 @@
 </style>
 
 <template>
-    <box-container title="{{ title }}" icon="file"
+    <box title="{{ title }}" icon="file"
         boxclass="box-solid resources-widget"
         bodyclass="table-responsive no-padding"
-        footerClass="text-center">
+        footerclass="text-center"
+        footer="true" empty="{{ _('No resources') }}">
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -84,7 +85,7 @@
         <div class="overlay dropzone" v-if="dropping">
             <span class="fa fa-download fa-2x"></span>
         </div>
-        <box-footer>
+        <footer>
             <button type="button"
                 class="btn btn-primary btn-sm btn-flat pointer"
                 v-show="!reordering"
@@ -111,8 +112,8 @@
                 <span class="fa fa-fw fa-times"></span>
                 <span v-i18n="Cancel"></span>
             </button>
-        </box-footer>
-    </box-container>
+        </footer>
+    </box>
 </template>
 
 <script>
@@ -129,7 +130,7 @@ module.exports = {
     name: 'resources-list',
     mixins: [Uploader, Sorter],
     components: {
-        'box-container': require('components/containers/box.vue'),
+        'box': require('components/containers/box.vue'),
         'pagination-widget': require('components/pagination.vue'),
         'bs-modal': require('components/modal.vue')
     },
