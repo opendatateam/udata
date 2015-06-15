@@ -1,7 +1,10 @@
 <template>
-    <datatable-widget title="{{ title }}" icon="comment" boxclass="discussions-widget"
-        fields="{{ fields }}" p="{{ discussions }}">
-    </datatable-widget>
+    <datatable title="{{ title }}" icon="comment"
+        boxclass="discussions-widget"
+        fields="{{ fields }}"
+        p="{{ discussions }}"
+        empty="{{ _('No discussion') }}">
+    </datatable>
 </template>
 
 
@@ -11,7 +14,7 @@
 module.exports = {
     name: 'discussions-widget',
     components: {
-         'datatable-widget': require('components/widgets/datatable.vue')
+         'datatable': require('components/widgets/datatable.vue')
     },
     data: function() {
         return {
@@ -36,6 +39,6 @@ module.exports = {
             this.$go('/discussion/' + discussion.id + '/');
         }
     },
-    paramAttributes: ['discussions']
+    props: ['discussions']
 };
 </script>

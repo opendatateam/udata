@@ -82,7 +82,7 @@ module.exports = {
             footer: true
         };
     },
-    paramAttributes: ['title', 'icon', 'boxclass', 'bodyclass', 'footerclass'],
+    props: ['title', 'icon', 'boxclass', 'bodyclass', 'footerclass'],
     attached: function() {
         this.footer = $(this.$el).find('.box-body > footer').length > 0;
     }

@@ -28,7 +28,7 @@ module.exports = {
             title: this._('Reused datasets')
         };
     },
-    paramAttributes: ['reuse'],
+    props: ['reuse'],
     filters: {
         ids: function(list) {
             return list ? list.map(function(item) {

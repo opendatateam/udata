@@ -28,7 +28,7 @@ define(['vue', 'logger', 'jquery', 'shims/jquery-validation'], function(Vue, log
     return {
         name: 'base-form',
         replace: true,
-        paramAttributes: ['fields', 'model', 'defs', 'readonly', 'fill'],
+        props: ['fields', 'model', 'defs', 'readonly', 'fill'],
         computed: {
             schema: function() {
                 if (!this.fields || !(this.model || this.defs)) {

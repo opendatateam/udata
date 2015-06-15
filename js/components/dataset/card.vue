@@ -106,7 +106,7 @@ module.exports = {
             reactive: true
         };
     },
-    paramAttributes: ['dataset', 'datasetid', 'reactive'],
+    props: ['dataset', 'datasetid', 'reactive'],
     computed: {
         logo: function() {
             if (!this.dataset || !this.dataset.organization || !this.dataset.organization.logo) {

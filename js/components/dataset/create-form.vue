@@ -12,7 +12,7 @@
 var Dataset = require('models/dataset');
 
 module.exports = {
-    paramAttributes: ['dataset'],
+    props: ['dataset'],
     data: function() {
         return {
             dataset: new Dataset(),

@@ -23,7 +23,7 @@
 
 module.exports = {
     name: 'topic-content',
-    paramAttributes: ['topic'],
+    props: ['topic'],
     data: function() {
         return {
             toggled: false

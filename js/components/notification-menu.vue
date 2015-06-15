@@ -3,19 +3,23 @@
 </style>
 
 <template>
-<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-    <i class="fa fa-envelope-o"></i>
-    <span v-if="notifications.length > 0"
-        class="label label-warning">{{notifications.length}}</span>
-</a>
-<ul class="dropdown-menu">
-    <li class="header text-center" v-i18n="Notifications"></li>
-    <li>
-        <ul class="menu">
-            <li v-repeat="notifications" v-component="{{ type }}"></li>
-        </ul>
-    </li>
-</ul>
+<li class="dropdown notifications-menu">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        <i class="fa fa-envelope-o"></i>
+        <span v-if="notifications.length > 0"
+            class="label label-warning">{{notifications.length}}</span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="header text-center" v-i18n="Notifications"></li>
+        <li>
+            <ul class="menu">
+                <li v-repeat="notifications">
+                    <component is="{{type}}"></component>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
 </template>
 
 <script>
@@ -26,6 +30,7 @@ var API = require('api'),
     POLL_INTERVAL = 30 * 1000;
 
 module.exports = {
+    replace: true,
     data: function() {
         return {
             notifications: []

@@ -3,83 +3,79 @@
     td.avatar-cell {
         padding: 3px;
     }
-
-    .btn-box-tool {
-        font-size: 14px;
-        padding: 6px 8px;
-    }
 }
 </style>
 
 <template>
-    <div class="box box-solid datatable-widget {{boxclass}}">
-        <header class="box-header" v-show="title || icon">
-            <i v-show="icon" class="fa fa-{{icon}}"></i>
-            <h3 class="box-title">{{title}}</h3>
-            <div class="box-tools">
-                <div class="box-search" v-if="p.has_search">
-                    <div class="input-group">
-                        <input type="text" class="form-control input-sm pull-right"
-                            style="width: 150px;" placeholder="{{'Search'|i18n}}"
-                            v-model="search_query" v-on="keyup:search | key enter">
-                        <div class="input-group-btn">
-                            <button class="btn btn-sm btn-flat">
-                                <i class="fa fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="btn-group pull-right" v-if="downloads.length">
-                    <button type="button" class="btn btn-box-tool dropdown-toggle"
-                        data-toggle="dropdown" aria-expanded="false">
-                        <span class="fa fa-download"></span>
+<box title="{{ title }}" icon="{{ icon }}"
+    boxclass="box-solid datatable-widget {{boxclass}}"
+    bodyclass="table-responsive no-padding"
+    footerclass="text-center clearfix"
+    footer="{{ show_footer }}"
+    loading="{{ p.loading }}">
+    <aside>
+        <div class="btn-group" v-show="downloads.length">
+            <button type="button" class="btn btn-box-tool dropdown-toggle"
+                data-toggle="dropdown" aria-expanded="false">
+                <span class="fa fa-download"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li v-repeat="downloads">
+                    <a href="{{url}}">{{label}}</a>
+                </li>
+            </ul>
+        </div>
+        <div class="box-search" v-if="p.has_search">
+            <div class="input-group">
+                <input type="text" class="form-control input-sm pull-right"
+                    style="width: 150px;" placeholder="{{'Search'|i18n}}"
+                    v-model="search_query" v-on="keyup:search | key enter">
+                <div class="input-group-btn">
+                    <button class="btn btn-sm btn-flat">
+                        <i class="fa fa-search"></i>
                     </button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li v-repeat="downloads">
-                            <a href="{{url}}">{{label}}</a>
-                        </li>
-                    </ul>
                 </div>
             </div>
-        </header>
-        <div class="box-body table-responsive no-padding">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th class="pointer text-{{align || 'left'}}"
-                            v-repeat="fields" v-on="click: p.sort(remote ? sort : key)"
-                            v-attr="width: width + 5">
-                            {{label}}
-                            <span class="fa fa-fw" v-if="sort" v-class="
-                                fa-sort: p.sorted != (remote ? sort : key),
-                                fa-sort-asc: p.sorted == (remote ? sort : key) && !p.reversed,
-                                fa-sort-desc: p.sorted == (remote ? sort : key) && p.reversed
-                            "></span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="pointer"
-                        v-repeat="item:p.data" track-by="id"
-                        v-on="click: item_click(item)">
-                        <td v-repeat="field: fields" track-by="key"
-                            v-component="{{field.type || 'text'}}"
-                            v-with="item:item"
-                            field="{{field}}"
-                            >
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
-        <div class="overlay" v-show="!p || p.loading">
-            <span class="fa fa-refresh fa-spin"></span>
-        </div>
-        <div class="box-footer text-center clearfix">
-            <content select="footer > *"></content>
-            <pagination-widget p="{{p}}"></pagination-widget>
-        </div>
+    </aside>
+    <table class="table table-hover" v-if="has_data">
+        <thead>
+            <tr>
+                <th class="pointer text-{{align || 'left'}}"
+                    v-repeat="fields" v-on="click: p.sort(remote ? sort : key)"
+                    v-attr="width: width + 5">
+                    {{label}}
+                    <span class="fa fa-fw" v-if="sort" v-class="
+                        fa-sort: p.sorted != (remote ? sort : key),
+                        fa-sort-asc: p.sorted == (remote ? sort : key) && !p.reversed,
+                        fa-sort-desc: p.sorted == (remote ? sort : key) && p.reversed
+                    "></span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="pointer"
+                v-repeat="item:p.data" track-by="id"
+                v-on="click: item_click(item)">
+                <td v-repeat="field: fields" track-by="key">
+                    <component is="{{field.type || 'text'}}"
+                        item="{{item}}" field="{{field}}">
+                    </component>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="text-center lead" v-if="!has_data">
+    {{ empty || _('No data')}}
     </div>
+    <footer>
+        <div v-class="pull-right: p.pages > 1" v-el="footer_container">
+            <content select="footer"></content>
+        </div>
+        <pagination-widget p="{{p}}"></pagination-widget>
+    </footer>
+</box>
 </template>
 
 <script>
@@ -91,6 +87,7 @@ var Vue = require('vue'),
 
 var CellWidget = Vue.extend({
     default: '',
+    props: ['field', 'item'],
     data: function() {
         return {
             item: {},
@@ -123,8 +120,8 @@ var CellWidget = Vue.extend({
 
 module.exports = {
     name: 'datatable-widget',
-    replace: true,
     components: {
+        'box': require('components/containers/box.vue'),
         'pagination-widget': require('components/pagination.vue'),
         'text': CellWidget.extend({
                 default: '',
@@ -195,15 +192,23 @@ module.exports = {
     data: function() {
         return {
             search_query: null,
-            downloads: []
+            downloads: [],
+            p: {}
         };
     },
     computed: {
         remote: function() {
             return this.p && (this.p.serverside == true);
+        },
+        show_footer: function() {
+            return (this.p && this.p.pages > 1)
+                || $(this.$$.footer_container).find('footer > *').length;
+        },
+        has_data: function() {
+            return this.p.data && this.p.data.length;
         }
     },
-    paramAttributes: ['p', 'title', 'icon', 'fields', 'boxclass', 'downloads'],
+    props: ['p', 'title', 'icon', 'fields', 'boxclass', 'downloads', 'empty'],
     methods: {
         search: function() {
             this.p.search(this.search_query);

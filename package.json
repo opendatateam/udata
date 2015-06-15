@@ -45,7 +45,7 @@
     "sinon": "^1.12.2",
     "sinon-chai": "^2.6.0",
     "style-loader": "^0.12.2",
-    "vue-loader": "^1.1.4",
+    "vue-multi-loader": "0.0.5",
     "webpack": "^1.9.10",
     "webpack-dev-server": "^1.7.0"
   },
@@ -72,6 +72,6 @@
     "sortablejs": "^1.1.1",
     "swagger-client": "^2.1.2-M2",
     "tv4": "^1.1.9",
-    "vue": "^0.11.6"
+    "vue": "^0.12.1"
   }
 }

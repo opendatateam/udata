@@ -114,7 +114,7 @@ module.exports = {
         'dataset-card': require('components/dataset/card.vue'),
         'dataset-completer': require('components/form/dataset-completer')
     },
-    paramAttributes: ['title', 'datasets'],
+    props: ['title', 'datasets'],
     data: function() {
         return {
             title: this._('Datasets'),

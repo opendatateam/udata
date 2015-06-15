@@ -40,7 +40,7 @@
     <div class="row">
         <div class="col-xs-12">
             <box-container boxclass="box-solid">
-                <div v-component="{{active_step.component}}" v-ref="content"></div>
+                <component is="{{active_step.component}}" v-ref="content"></component>
                 <box-footer>
                     <div class="col-xs-12">
                         <button v-if="previous_step"
@@ -72,7 +72,7 @@ module.exports = {
             step_index: 0
         };
     },
-    paramAttributes: ['steps', 'finish'],
+    props: ['steps', 'finish'],
     computed: {
         active_step: function() {
             if (!this.steps) {

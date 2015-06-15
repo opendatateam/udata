@@ -1,17 +1,10 @@
 <template>
-    <datatable-widget title="{{ title }}" icon="cubes"
+    <datatable title="{{ title }}" icon="cubes"
         boxclass="datasets-widget"
         fields="{{ fields }}" p="{{ datasets }}"
-        downloads="{{downloads}}">
-        <footer>
-            <button type="button" class="btn btn-primary btn-sm btn-flat"
-                v-class="pull-right: datasets.pages > 1"
-                v-route="/dataset/new/">
-                <span class="fa fa-fw fa-plus"></span>
-                <span v-i18n="New"></span>
-            </button>
-        </footer>
-    </datatable-widget>
+        downloads="{{downloads}}"
+        empty="{{ _('No dataset') }}">
+    </datatable>
 </template>
 
 <script>
@@ -20,7 +13,7 @@
 module.exports = {
     name: 'datasets-widget',
     components: {
-        'datatable-widget': require('components/widgets/datatable.vue')
+        'datatable': require('components/widgets/datatable.vue')
     },
     data: function() {
         return {
@@ -74,6 +67,6 @@ module.exports = {
             this.$go('/dataset/' + dataset.id + '/');
         }
     },
-    paramAttributes: ['datasets', 'downloads']
+    props: ['datasets', 'downloads']
 };
 </script>

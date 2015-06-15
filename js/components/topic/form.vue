@@ -12,7 +12,7 @@
 var Topic = require('models/topic');
 
 module.exports = {
-    paramAttributes: ['topic'],
+    props: ['topic'],
     data: function() {
         return {
             topic: new Topic(),

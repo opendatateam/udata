@@ -34,7 +34,7 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-                    <div v-component="transfer-card" v-with="cardparams"></div>
+                    <transfer-card v-with="cardparams"></transfer-card>
                 </div>
             </div>
             <div class="row text-center">

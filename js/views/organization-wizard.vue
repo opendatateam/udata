@@ -60,7 +60,7 @@ module.exports = {
             }],
          };
     },
-    paramAttributes: ['orgid'],
+    props: ['orgid'],
     components: {
         'wizard-component': require('components/widgets/wizard.vue'),
         'pre-create': require('components/organization/pre-create.vue'),

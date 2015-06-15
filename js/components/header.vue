@@ -19,11 +19,9 @@ a.sidebar-toggle {
         </a>
       <div class="navbar-custom-menu">
           <ul class="nav navbar-nav">
-              <li class="dropdown notifications-menu" v-component="notification-menu"></li>
-              <!-- New actions: style can be found in dropdown.less -->
-              <li class="dropdown add-menu notifications-menu" v-component="add-menu"></li>
-              <!-- User Account: style can be found in dropdown.less -->
-              <li class="dropdown user user-menu" v-component="user-menu"></li>
+            <notification-menu></notification-menu>
+            <add-menu></add-menu>
+            <user-menu></user-menu>
           </ul>
         </div>
     </nav>

@@ -12,7 +12,7 @@ var Dataset = require('models/dataset'),
     Vue = require('vue');
 
 module.exports = {
-    paramAttributes: ['dataset'],
+    props: ['dataset'],
     data: function() {
         return {
             meta: {

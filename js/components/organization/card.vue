@@ -67,7 +67,7 @@ module.exports = {
             selected: false
         };
     },
-    paramAttributes: ['organization', 'orgid', 'clickable', 'selected'],
+    props: ['organization', 'orgid', 'clickable', 'selected'],
     computed: {
         logo: function() {
             if (!this.organization ||  !this.organization.logo) {

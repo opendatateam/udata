@@ -24,7 +24,7 @@ var $ = require('jquery');
 module.exports = {
     replace: true,
     name: 'modal',
-    paramAttributes: ['title', 'size', 'modalclass'],
+    props: ['title', 'size', 'modalclass'],
     events: {
         'modal:close': function() {
             this.close();

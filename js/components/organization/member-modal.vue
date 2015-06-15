@@ -75,7 +75,7 @@ module.exports = {
             return this.org.is_member(this.user);
         }
     },
-    paramAttributes: ['member'],
+    props: ['member'],
     components: {
         'user-modal': require('components/user/modal.vue'),
         'role-form': require('components/form/horizontal-form.vue')

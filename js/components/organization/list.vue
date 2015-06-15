@@ -1,17 +1,10 @@
 <template>
-    <datatable-widget title="{{ title }}" icon="building"
+    <datatable title="{{ title }}" icon="building"
         boxclass="organizations-widget"
         fields="{{ fields }}"
-        p="{{ organizations }}">
-        <footer>
-            <button type="button" class="btn btn-primary btn-sm"
-                v-class="pull-right: organizations.pages > 1"
-                v-route="/organization/new/">
-                <span class="fa fa-fw fa-plus"></span>
-                <span v-i18n="New"></span>
-            </button>
-        </footer>
-    </datatable-widget>
+        p="{{ organizations }}"
+        empty="{{ _('No organization') }}">
+    </datatable>
 </template>
 
 <script>
@@ -20,7 +13,7 @@
 module.exports = {
     name: 'organizations-widget',
     components: {
-        'datatable-widget': require('components/widgets/datatable.vue')
+        'datatable': require('components/widgets/datatable.vue')
     },
     data: function() {
         return {
@@ -79,6 +72,6 @@ module.exports = {
             this.$go('/organization/' + org.id + '/');
         }
     },
-    paramAttributes: ['organizations']
+    props: ['organizations']
 };
 </script>

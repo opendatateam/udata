@@ -1,17 +1,18 @@
 <template>
-    <datatable-widget title="{{ title }}" icon="book" boxclass="topics-widget"
-        fields="{{ fields }}" p="{{ topics }}">
+    <datatable title="{{ title }}" icon="book"
+        boxclass="topics-widget"
+        fields="{{ fields }}"
+        p="{{ topics }}"
+        empty="{{ _('No topic') }}">
         <footer>
             <button type="button" class="btn btn-primary btn-flat btn-sm"
-                v-class="pull-right: topics.pages > 1"
                 v-route="/topic/new/">
                 <span class="fa fa-fw fa-plus"></span>
                 <span v-i18n="New"></span>
             </button>
         </footer>
-    </datatable-widget>
+    </datatable>
 </template>
-
 
 
 <script>
@@ -20,7 +21,7 @@
 module.exports = {
     name: 'topics-widget',
     components: {
-         'datatable-widget': require('components/widgets/datatable.vue')
+         'datatable': require('components/widgets/datatable.vue')
     },
     data: function() {
         return {
@@ -30,20 +31,6 @@ module.exports = {
                 key: 'name',
                 sort: 'name',
                 type: 'text'
-            // },{
-            //     label: this._('Creation'),
-            //     key: 'created_at',
-            //     sort: 'created',
-            //     align: 'left',
-            //     type: 'timeago',
-            //     width: 120
-            // }, {
-            //     label: this._('Modification'),
-            //     key: 'last_modified',
-            //     sort: 'last_modified',
-            //     align: 'left',
-            //     type: 'timeago',
-            //     width: 120
             }]
         };
     },
@@ -52,6 +39,6 @@ module.exports = {
             this.$go('/topic/' + topic.id + '/');
         }
     },
-    paramAttributes: ['topics']
+    props: ['topics']
 };
 </script>

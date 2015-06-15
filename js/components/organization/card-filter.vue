@@ -59,7 +59,7 @@ module.exports = {
             selected: null
         };
     },
-    paramAttributes: ['cardclass', 'placeholder', 'selected'],
+    props: ['cardclass', 'placeholder', 'selected'],
     computed: {
         organizations: function() {
             return this.completions.map(function(org) {

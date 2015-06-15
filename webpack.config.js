@@ -1,10 +1,14 @@
-var path = require("path");
-var webpack = require("webpack");
+var path = require('path');
+var webpack = require('webpack');
 
-var ExtractTextPlugin = require("extract-text-webpack-plugin");
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var BowerWebpackPlugin = require('bower-webpack-plugin');
-var bower_path = path.join(__dirname, "bower_components");
-var node_path = path.join(__dirname, "node_modules");
+var bower_path = path.join(__dirname, 'bower_components');
+var node_path = path.join(__dirname, 'node_modules');
+
+var vue = require('vue-multi-loader'),
+    css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap'),
+    less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline');
 
 var languages = ['en', 'fr'];
 
@@ -33,14 +37,9 @@ module.exports = {
             bower_path,
         ],
         alias: {
-            // 'jquery': path.join(bower_path, 'jquery/dist/jquery'),
-            // 'bootstrapjs': path.join(bower_path, 'bootstrap/dist/js/bootstrap'),
             'Jcrop': path.join(bower_path, 'jcrop/js/jquery.Jcrop'),
-            // 'swaggerjs': path.join(bower_path, 'swagger-js/lib/swagger-client'),
             'fineuploader': path.join(node_path, 'fine-uploader/fine-uploader/fine-uploader'),
             'jquery-validation': path.join(node_path, 'jquery-validation/src/'),
-            // 'bootstrap-datepicker': path.join(node_path, 'bootstrap-datepicker/js/bootstrap-datepicker'),
-            // 'eve': path.join(bower_path, 'eve-adobe/eve')
         }
     },
     // devtools: 'source-map',
@@ -48,9 +47,9 @@ module.exports = {
     module: {
         loaders: [
             {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file'},
-            {test: /\.css$/, loader: ExtractTextPlugin.extract("style", "css?sourceMap")},
-            {test: /\.less$/, loader: ExtractTextPlugin.extract("style", "css?sourceMap!less?sourceMap=source-map-less-inline")},
-            {test: /\.vue$/, loader: "vue"},
+            {test: /\.css$/, loader: css_loader},
+            {test: /\.less$/, loader: less_loader},
+            {test: /\.vue$/, loader: vue.withLoaders({css: css_loader, less: less_loader})},
             {test: /\.json$/, loader: "json"},
             {test: /\.html$/, loader: "html"},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, loader: "file-loader?name=[name].[ext]"},
@@ -87,8 +86,6 @@ module.exports = {
         }),
         new ExtractTextPlugin('[name].css'),
         new webpack.IgnorePlugin(/^(\.\/)?shred/),
-        // new webpack.IgnorePlugin(/btoa/),
-        // new webpack.IgnorePlugin(/shred/),
         new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp(languages.join('|')))
     ]
 };

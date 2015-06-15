@@ -12,7 +12,7 @@
 var Post = require('models/post');
 
 module.exports = {
-    paramAttributes: ['post'],
+    props: ['post'],
     data: function() {
         return {
             post: new Post(),

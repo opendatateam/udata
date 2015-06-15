@@ -12,7 +12,7 @@
 var Organization = require('models/organization');
 
 module.exports = {
-    paramAttributes: ['organization'],
+    props: ['organization'],
     data: function() {
         return {
             organization: new Organization(),

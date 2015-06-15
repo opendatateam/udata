@@ -29,13 +29,13 @@
 // }
 </style>
 <template>
-    <a class="small-box bg-{{color}} pointer" v-on="click: click">
+    <a class="small-box pointer" v-class="bgcolor" v-on="click: click">
         <div class="inner">
             <h3>{{value || 0}}</h3>
             <p>{{label}}</p>
         </div>
         <div class="icon">
-            <i class="fa fa-{{icon}}"></i>
+            <i class="fa" v-class="faicon"></i>
         </div>
         <div class="small-box-footer">
             <span v-i18n="More infos"></span>
@@ -54,8 +54,17 @@ module.exports = {
             value: 0,
             label: '',
             color: 'aqua',
+            icon: '',
             target: null
         };
+    },
+    computed:  {
+        bgcolor: function() {
+            return 'bg-' + this.color;
+        },
+        faicon: function() {
+            return 'fa-' + this.icon;
+        }
     },
     methods: {
         click: function() {

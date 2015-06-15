@@ -12,7 +12,7 @@
 module.exports = {
     name: 'DashboardRow',
     inherit: true,
-    paramAttributes: ['row'],
+    props: ['row'],
     data: function() {
         return {
             row: []

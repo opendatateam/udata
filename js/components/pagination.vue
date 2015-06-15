@@ -42,7 +42,7 @@ module.exports = {
             p: {}
         }
     },
-    paramAttributes: ['p'],
+    props: ['p'],
     computed: {
         start: function() {
             if (!this.p) {

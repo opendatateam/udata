@@ -60,7 +60,7 @@ module.exports = {
             selected: false
         };
     },
-    paramAttributes: ['user', 'userid', 'selected'],
+    props: ['user', 'userid', 'selected'],
     computed: {
         avatar: function() {
             if (!this.user || !this.user.avatar) {

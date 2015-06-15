@@ -68,7 +68,7 @@ var Reuse = require('models/reuse'),
     config = require('config');
 
 module.exports = {
-    paramAttributes: ['reuse', 'reuseid'],
+    props: ['reuse', 'reuseid'],
     data: function() {
         return {
             reuse: new Reuse(),

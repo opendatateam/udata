@@ -19,7 +19,7 @@
 </style>
 <template>
 <box-container title="{{ _('Profile') }}" icon="building"
-    boxclass="box-solid org-profile-widget">
+    boxclass="box-solid org-profile-widget" footer="{{ toggled }}">
     <aside>
         <a class="text-muted pointer" v-on="click: toggle">
             <i class="fa fa-gear"></i>
@@ -38,10 +38,10 @@
         </div>
     </div>
     <create-form v-ref="form" v-if="toggled" organization="{{org}}"></create-form>
-    <box-footer v-if="toggled">
-        <button type="submit" class="btn btn-primary"
+    <footer>
+        <button type="submit" class="btn btn-primary" v-if="toggled"
             v-on="click: save($event)" v-i18n="Save"></button>
-    </box-footer>
+    </footer>
 </box-container>
 </template>
 
@@ -52,7 +52,7 @@ var API = require('api');
 
 module.exports = {
     name: 'org-profile',
-    paramAttributes: ['org'],
+    props: ['org'],
     data: function() {
         return {
             toggled: false,

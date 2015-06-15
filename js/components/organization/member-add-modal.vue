@@ -36,7 +36,7 @@ module.exports = {
             defs: API.definitions.Member
         };
     },
-    paramAttributes: ['member'],
+    props: ['member'],
     components: {
         'user-modal': require('components/user/modal.vue'),
         'role-form': require('components/form/horizontal-form.vue')

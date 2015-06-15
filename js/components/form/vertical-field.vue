@@ -33,7 +33,7 @@
             name: field.id,
             type: field_type,
             value: value"></input>
-        <div v-component="{{widget}}"></div>
+        <component is="{{widget}}"></component>
         <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
         <div class="{{type}}" v-if="is_bool">
             <label>

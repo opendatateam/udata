@@ -42,7 +42,7 @@ module.exports = {
             icon: 'globe'
         };
     },
-    paramAttributes: ['title', 'icon', 'geojson'],
+    props: ['title', 'icon', 'geojson'],
     ready: function() {
         this.map = L.map(this.$$.container, INITIAL_SETTINGS);
 

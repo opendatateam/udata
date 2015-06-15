@@ -50,7 +50,6 @@ module.exports = {
             }]
          };
     },
-    // paramAttributes: ['orgid'],
     components: {
         'wizard-component': require('components/widgets/wizard.vue'),
         'post-form': require('components/post/form.vue'),
@@ -71,27 +70,5 @@ module.exports = {
             this.$go('/post/' + this.post.id);
         }
     }
-    // created: function() {
-    //     console.log('created', this.$router, this.$options.routes);
-    // },
-    // routes: {
-    //     '/': function() {
-    //         this.step_index = 0;
-    //         // this.loadView('organization-wizard');
-    //     },
-    //     '/:oid': {
-    //         on: function(oid) {
-    //             if (oid != this.organization.id) {
-    //                 this.organization.fetch(oid);
-    //             }
-    //         },
-    //         '/': function() {
-    //             this.step_index = 1;
-    //         },
-    //         '/publish': function(oid) {
-    //             this.step_index = 2;
-    //         }
-    //     }
-    // }
 };
 </script>

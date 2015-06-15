@@ -104,7 +104,7 @@ module.exports = {
             types: ['Area', 'Bar', 'Line']
         };
     },
-    paramAttributes: [
+    props: [
         'title',
         'icon',
         'default',

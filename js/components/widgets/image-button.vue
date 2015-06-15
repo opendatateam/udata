@@ -58,7 +58,7 @@ module.exports = {
             sizes: [100]
         };
     },
-    paramAttributes: ['src', 'size', 'sizes', 'endpoint'],
+    props: ['src', 'size', 'sizes', 'endpoint'],
     methods: {
         click: function() {
             this.$root.$modal(

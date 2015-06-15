@@ -34,7 +34,7 @@ module.exports = {
     data: function() {
         return {dataset: {}};
     },
-    paramAttributes: ['dataset'],
+    props: ['dataset'],
     components: {
         'share-widget': require('components/widgets/share.vue')
     }
