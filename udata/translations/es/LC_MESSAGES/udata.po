@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-06-10 11:08+0200\n"
+"POT-Creation-Date: 2015-06-15 15:59+0200\n"
 "PO-Revision-Date: 2015-06-01 18:02+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: Spanish "
@@ -1905,7 +1905,6 @@ msgstr ""
 #: udata/templates/mail/new_discussion.html:32
 #: udata/templates/mail/new_discussion_comment.html:40
 #, fuzzy
-#| msgid "See the issue"
 msgid "See the discussion"
 msgstr "Ver el problema"
 
@@ -1947,7 +1946,6 @@ msgstr ""
 
 #: udata/templates/mail/new_discussion_comment.html:6
 #, fuzzy, python-format
-#| msgid "%(user)s commented your issue"
 msgid "%(user)s commented an discussion on your %(type)s %(subject)s"
 msgstr "%(user)s comentaron su problema"
 
