@@ -39,6 +39,11 @@ define(['api', 'vue', 'jquery'], function(API, Vue, $) {
                     return item.hasOwnProperty('id') && item.id === id;
                 });
                 return filtered.length === 1 ? filtered[0] : null;
+            },
+            clear: function() {
+                this.items = [];
+                this.$emit('updated');
+                return this;
             }
         }
     });

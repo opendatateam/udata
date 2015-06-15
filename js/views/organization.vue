@@ -36,6 +36,7 @@
 
 var moment = require('moment'),
     URLs = require('urls'),
+    List = require('models/base_page_list'),
     Organization = require('models/organization'),
     Datasets = require('models/datasets'),
     Reuses = require('models/reuses'),
@@ -52,8 +53,14 @@ module.exports = {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')
             }}),
-            reuses: new Reuses({query: {sort: '-created', page_size: 10}}),
-            datasets: new Datasets({query: {sort: '-created', page_size: 10}}),
+            reuses: new List({
+                ns: 'organizations',
+                fetch: 'list_organization_reuses',
+            }),
+            datasets: new List({
+                ns: 'organizations',
+                fetch: 'list_organization_datasets'
+            }),
             followers: new Followers({query: {page_size: 10}}),
             meta: {
                 title: null,
@@ -178,8 +185,8 @@ module.exports = {
         'org.id': function(id) {
             if (id) {
                 this.metrics.fetch({id: id});
-                this.reuses.clear().fetch({organization: id});
-                this.datasets.clear().fetch({organization: id});
+                this.reuses.clear().fetch({org: id});
+                this.datasets.clear().fetch({org: id});
                 this.followers.fetch({id: id});
             } else {
                 this.datasets.clear();
