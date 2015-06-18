@@ -173,14 +173,19 @@ def set_api_language():
 
 
 def extract_name_from_path(path):
+    """Return a readable name from a URL path.
+
+    Useful to log requests on Piwik with categories tree structure.
+    See: http://piwik.org/faq/how-to/#faq_62
+    """
     base_path, query_string = path.split('?')
     infos = base_path.strip('/').split('/')[2:]  # Removes api/version.
-    if len(infos) > 1:
+    if len(infos) > 1:  # This is an object.
         name = '{category} / {name}'.format(
             category=infos[0].title(),
             name=infos[1].replace('-', ' ').title()
         )
-    else:
+    else:  # This is a collection.
         name = '{category}'.format(category=infos[0].title())
     return name
 
