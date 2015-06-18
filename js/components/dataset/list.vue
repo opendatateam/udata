@@ -10,6 +10,22 @@
 <script>
 'use strict';
 
+var Vue = require('vue'),
+    LABELS = {
+        deleted: {
+            label: Vue._('Deleted'),
+            type: 'error'
+        },
+        private: {
+            label: Vue._('Private'),
+            type: 'warning'
+        },
+        public: {
+            label: Vue._('Public'),
+            type: 'info'
+        }
+    };
+
 module.exports = {
     name: 'datasets-widget',
     components: {
@@ -58,6 +74,11 @@ module.exports = {
                 sort: 'views',
                 align: 'center',
                 type: 'metric',
+                width: 95
+            }, {
+                label: this._('Status'),
+                align: 'center',
+                type: 'visibility',
                 width: 95
             }]
         };

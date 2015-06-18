@@ -41,8 +41,9 @@
     <table class="table table-hover" v-if="has_data">
         <thead>
             <tr>
-                <th class="pointer text-{{align || 'left'}}"
-                    v-repeat="fields" v-on="click: p.sort(remote ? sort : key)"
+                <th class="text-{{align || 'left'}}"
+                    v-class="pointer: sort"
+                    v-repeat="fields" v-on="click: sort ? p.sort(remote ? sort : key) : null"
                     v-attr="width: width + 5">
                     {{label}}
                     <span class="fa fa-fw" v-if="sort" v-class="
@@ -83,7 +84,21 @@
 
 var Vue = require('vue'),
     $ = require('jquery'),
-    placeholders = require('helpers/placeholders');
+    placeholders = require('helpers/placeholders'),
+    VISIBILITIES = {
+        deleted: {
+            label: Vue._('Deleted'),
+            type: 'error'
+        },
+        private: {
+            label: Vue._('Private'),
+            type: 'warning'
+        },
+        public: {
+            label: Vue._('Public'),
+            type: 'info'
+        }
+    };
 
 var CellWidget = Vue.extend({
     default: '',
@@ -99,12 +114,17 @@ var CellWidget = Vue.extend({
             if (!this.field || !this.item) {
                 return this.$options.default;
             }
-            var parts = this.field.key.split('.'),
-                result = this.item;
 
-            for (var i=0; i < parts.length; i++) {
-                var key = parts[i];
-                result = result[key];
+            if (Vue.util.isFunction(this.field.key)) {
+                result = this.field.key(this.item);
+            } else {
+                var parts = this.field.key.split('.'),
+                    result = this.item;
+
+                for (var i=0; i < parts.length; i++) {
+                    var key = parts[i];
+                    result = result[key];
+                }
             }
 
             return result || this.$options.default;
@@ -181,13 +201,36 @@ module.exports = {
             }
         }),
         'metric': CellWidget.extend({
-                default: 0,
-                template: [
-                    '<span class="badge" v-class="bg-green: value > 0, bg-red: value == 0">',
-                    '{{value}}',
-                    '</span>'
-                ].join(''),
-            })
+            default: 0,
+            template: [
+                '<span class="badge" v-class="bg-green: value > 0, bg-red: value == 0">',
+                '{{value}}',
+                '</span>'
+            ].join(''),
+        }),
+        'visibility': CellWidget.extend({
+            template: '<span class="label label-{{type}}">{{text}}</span>',
+            computed: {
+                type: function() {
+                    if (this.item.deleted) {
+                        return VISIBILITIES.deleted.type;
+                    } else if (this.item.private) {
+                        return VISIBILITIES.private.type;
+                    } else {
+                        return VISIBILITIES.public.type;
+                    }
+                },
+                text: function() {
+                    if (this.item.deleted) {
+                        return VISIBILITIES.deleted.label;
+                    } else if (this.item.private) {
+                        return VISIBILITIES.private.label;
+                    } else {
+                        return VISIBILITIES.public.label;
+                    }
+                }
+            }
+        })
     },
     data: function() {
         return {

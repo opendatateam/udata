@@ -63,6 +63,11 @@ module.exports = {
                 align: 'center',
                 type: 'metric',
                 width: 95
+            }, {
+                label: this._('Status'),
+                align: 'center',
+                type: 'visibility',
+                width: 95
             }]
         };
     },
