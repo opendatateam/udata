@@ -2,8 +2,6 @@ var path = require('path');
 var webpack = require('webpack');
 
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var BowerWebpackPlugin = require('bower-webpack-plugin');
-var bower_path = path.join(__dirname, 'bower_components');
 var node_path = path.join(__dirname, 'node_modules');
 
 var vue = require('vue-multi-loader'),
@@ -34,10 +32,9 @@ module.exports = {
         root: [
             __dirname,
             path.join(__dirname, 'js'),
-            bower_path,
         ],
         alias: {
-            'Jcrop': path.join(bower_path, 'jcrop/js/jquery.Jcrop'),
+            'jquery-slimscroll': path.join(node_path, 'jquery-slimscroll/jquery.slimscroll'),
             'fineuploader': path.join(node_path, 'fine-uploader/fine-uploader/fine-uploader'),
         }
     },
@@ -55,21 +52,6 @@ module.exports = {
         ]
     },
     plugins: [
-        new BowerWebpackPlugin({
-            modulesDirectories: ['bower_components'],
-            excludes: [/.*\.less/, 'jquery']
-        }),
-        new webpack.ResolverPlugin(
-            new webpack.ResolverPlugin.DirectoryDescriptionFilePlugin("bower.json", ["main"])
-        ),
-        new webpack.NormalModuleReplacementPlugin(
-            /iCheck\/minimal\/minimal\.png$/,
-            'iCheck/skins/minimal/minimal.png'
-        ),
-        new webpack.NormalModuleReplacementPlugin(
-            /iCheck\/minimal\/minimal@2x\.png$/,
-            'iCheck/skins/minimal/minimal@2x.png'
-        ),
         // Fix AdminLTE packaging
         new webpack.NormalModuleReplacementPlugin(
             /AdminLTE\/build\/img\/boxed-bg\.jpg$/,
