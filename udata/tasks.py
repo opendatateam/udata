@@ -87,6 +87,7 @@ def init_app(app):
     ContextTask.current_app = app
 
     # Load core tasks
+    import udata.api.tasks
     import udata.core.metrics.tasks
     import udata.core.storages.tasks
     import udata.core.tags.tasks
