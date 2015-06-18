@@ -7,30 +7,6 @@
         <chart title="{{ _('Data')}}" metrics="{{metrics}}" class="col-md-12"
             x="date" y="{{y}}"></chart>
     </div>
-
-    <div class="row">
-        <morris-chart title="{{ _('Data')}}" metrics="{{metrics}}" class="col-md-12"
-            x="date" y="{{y}}"></morris-chart>
-    </div>
-    <!--div class="row">
-        <morris-chart class="col-md-6"
-            title="{{charts.data.title}}" charttype="Area"
-            metrics="{{metrics}}"
-            x="date" y="{{charts.data.y}}"
-            >
-        </morris-chart>
-        <morris-chart class="col-md-6"
-            title="{{charts.community.title}}" charttype="Bar"
-            metrics="{{metrics}}"
-            x="date" y="{{charts.community.y}}"
-            >
-        </morris-chart>
-    </div>
-    <div class="row">
-        <div class="col-xs-12 box box-solid">
-            <w-cal></w-cal>
-        </div>
-    </div-->
 </template>
 
 <script>
@@ -144,8 +120,7 @@ module.exports = {
         }
     },
     components: {
-        'morris-chart': require('components/charts/morris-chart.vue'),
-        'chart': require('components/charts/chartjs-chart.vue'),
+        'chart': require('components/charts/widget.vue'),
         'small-box': require('components/containers/small-box.vue'),
         'w-cal': require('components/calendar.vue')
     },

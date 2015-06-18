@@ -34,21 +34,24 @@ define(['api', 'models/base_list', 'vue', 'moment', 'jquery'], function(API, Mod
                     return [];
                 }
 
-                var first_item = this.items[0],
-                    last_item = this.items[this.items.length -1],
-                    start = moment(first_item.date),
-                    end = moment(last_item.date),
-                    days = start.diff(end, 'days'),
-                    names = series || Object.keys(last_item.values),
+                var names = series || Object.keys(last_item.values),
                     data = [],
                     values = {},
-                    previous;
+                    previous= {};
 
                 // Extract values
                 for (var i=0; i < this.items.length; i++) {
                     var item = this.items[i];
                     values[item.date] = item.values;
                 }
+
+                var sorted = Object.keys(values).sort(),
+                    first_date = sorted[0],
+                    last_date = sorted[sorted.length -1],
+                    start = moment(first_date),
+                    end = moment(last_date),
+                    days = end.diff(start, 'days');
+
 
                 for (i=0; i <= days; i++) {
                     var date = start.clone().add(i, 'days'),

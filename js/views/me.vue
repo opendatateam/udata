@@ -1,8 +1,8 @@
 <template>
     <div class="row">
         <user-profile user="{{$root.me}}" class="col-md-6"></user-profile>
-        <morris-chart title="Traffic" metrics="{{metrics}}" class="col-md-6"
-            x="date" y="{{y}}"></morris-chart>
+        <chart title="Traffic" metrics="{{metrics}}" class="col-md-6"
+            x="date" y="{{y}}"></chart>
     </div>
 
     <div class="row">
@@ -56,7 +56,7 @@ module.exports = {
     },
     components: {
         'user-profile': require('components/user/profile.vue'),
-        'morris-chart': require('components/charts/morris-chart.vue'),
+        'chart': require('components/charts/widget.vue'),
         'datasets-widget': require('components/dataset/list.vue'),
         'reuses-widget': require('components/reuse/list.vue')
     },

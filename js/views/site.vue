@@ -3,8 +3,8 @@
         <small-box class="col-lg-3 col-xs-6" v-repeat="boxes"></small-box>
     </div>
     <div class="row">
-        <morris-chart title="Traffic" metrics="{{metrics}}" class="col-md-12"
-            x="date" y="{{y}}"></morris-chart>
+        <chart title="Traffic" metrics="{{metrics}}" class="col-md-12"
+            x="date" y="{{y}}"></chart>
     </div>
 
     <div class="row">
@@ -116,7 +116,7 @@ module.exports = {
     },
     components: {
         'small-box': require('components/containers/small-box.vue'),
-        'morris-chart': require('components/charts/morris-chart.vue'),
+        'chart': require('components/charts/widget.vue'),
         'datasets-widget': require('components/dataset/list.vue'),
         'reuses-widget': require('components/reuse/list.vue'),
         'organizations-widget': require('components/organization/list.vue'),
