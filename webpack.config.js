@@ -39,7 +39,6 @@ module.exports = {
         alias: {
             'Jcrop': path.join(bower_path, 'jcrop/js/jquery.Jcrop'),
             'fineuploader': path.join(node_path, 'fine-uploader/fine-uploader/fine-uploader'),
-            'jquery-validation': path.join(node_path, 'jquery-validation/src/'),
         }
     },
     // devtools: 'source-map',
