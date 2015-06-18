@@ -58,7 +58,7 @@ module.exports = {
     plugins: [
         new BowerWebpackPlugin({
             modulesDirectories: ['bower_components'],
-            excludes: [/.*\.less/, 'raphael', 'jquery']
+            excludes: [/.*\.less/, 'jquery']
         }),
         new webpack.ResolverPlugin(
             new webpack.ResolverPlugin.DirectoryDescriptionFilePlugin("bower.json", ["main"])
@@ -81,8 +81,6 @@ module.exports = {
             $: 'jquery',
             jQuery: 'jquery',
             'window.jQuery': 'jquery',
-            'window.Raphael': 'raphael-browserify',
-            Raphael: 'raphael-browserify'
         }),
         new ExtractTextPlugin('[name].css'),
         new webpack.IgnorePlugin(/^(\.\/)?shred/),

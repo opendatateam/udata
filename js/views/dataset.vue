@@ -11,8 +11,8 @@
         <resources-list dataset="{{dataset}}" class="col-xs-12"></resources-list>
     </div>
     <div class="row">
-        <morris-chart id="trafic-widget" class="col-xs-12" title="{{ _('Audience') }}"
-            metrics="{{metrics}}" x="date" y="{{y}}"></morris-chart>
+        <chart id="trafic-widget" class="col-xs-12" title="{{ _('Audience') }}"
+            metrics="{{metrics}}" x="date" y="{{y}}"></chart>
     </div>
 
     <div class="row">
@@ -126,7 +126,7 @@ module.exports = {
     components: {
         'small-box': require('components/containers/small-box.vue'),
         'dataset-details': require('components/dataset/details.vue'),
-        'morris-chart': require('components/charts/morris-chart.vue'),
+        'chart': require('components/charts/widget.vue'),
         'resources-list': require('components/dataset/resources-list.vue'),
         'reuses-widget': require('components/reuse/list.vue'),
         'followers-widget': require('components/follow/list.vue'),

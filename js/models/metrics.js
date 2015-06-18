@@ -5,64 +5,50 @@ define(['api', 'models/base_list', 'vue', 'moment', 'jquery'], function(API, Mod
         name: 'Metrics',
         ns: 'site',
         fetch: 'metrics_for',
-        data: function() {
-            return {
-                start: null,
-                end: null
-            };
-        },
-        computed: {
-            /**
-             * Consolidate data
-             */
-            series: function() {
-                if (!this.items) {
-                    return [];
-                }
-
-                return this.items.map(function(item) {
-                    return $.extend({date: item.date}, item.values);
-                });
-            }
-        },
         methods: {
             /**
              * Consolidate data
              */
-            timeserie: function() {
-                if (!this.items || !this.start || !this.end) {
+            timeserie: function(series) {
+                if (!this.items || !this.items.length) {
                     return [];
                 }
 
-                var names = arguments,
-                    start = moment(this.start),
-                    end = moment(this.end),
-                    days = end.diff(start, 'days'),
-                    // previous = {},
+                var names = series || Object.keys(last_item.values),
                     data = [],
-                    dict = {};
+                    values = {},
+                    previous= {};
 
                 // Extract values
                 for (var i=0; i < this.items.length; i++) {
                     var item = this.items[i];
-                    dict[item.date] = item.values;
+                    values[item.date] = item.values;
                 }
+
+                var sorted = Object.keys(values).sort(),
+                    first_date = sorted[0],
+                    last_date = sorted[sorted.length -1],
+                    start = moment(first_date),
+                    end = moment(last_date),
+                    days = end.diff(start, 'days');
+
 
                 for (i=0; i <= days; i++) {
                     var date = start.clone().add(i, 'days'),
                         key = date.format('YYYY-MM-DD'),
-                        row = {date: key};
+                        row = {date: date, key: key};
 
-                    for (var j=0; j <= names.length; j++) {
-                        var name = names[j];
-
-                        if (dict.hasOwnProperty(key) && dict[key].hasOwnProperty(name)) {
-                            row[name] = dict[key][name];
+                    names.forEach(function(name) {
+                        if (values.hasOwnProperty(key) && values[key].hasOwnProperty(name)) {
+                            row[name] = values[key][name];
+                        } else if (previous.hasOwnProperty(name)) {
+                            row[name] = previous[name];
                         } else {
-                            row[name] = 0; // TODO provide more fallback mecanisms
+                            row[name] = 0;
                         }
-                    }
+                    });
 
+                    previous = row;
                     data.push(row);
                 }
 

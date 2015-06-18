@@ -8,8 +8,8 @@
     </div>
 
     <div class="row">
-        <morris-chart title="Traffic" metrics="{{metrics}}" class="col-md-12"
-            x="date" y="{{y}}"></morris-chart>
+        <chart title="Traffic" metrics="{{metrics}}" class="col-md-12"
+            x="date" y="{{y}}"></chart>
     </div>
 
     <div class="row">
@@ -89,7 +89,7 @@ module.exports = {
     components: {
         'small-box': require('components/containers/small-box.vue'),
         'reuse-details': require('components/reuse/details.vue'),
-        'morris-chart': require('components/charts/morris-chart.vue'),
+        'chart': require('components/charts/widget.vue'),
         'datasets-list': require('components/dataset/card-list.vue'),
         'followers-widget': require('components/follow/list.vue')
     },

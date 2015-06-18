@@ -8,12 +8,12 @@
     </div>
 
     <div class="row">
-        <morris-chart id="trafic-widget" class="col-xs-12"
+        <chart id="trafic-widget" class="col-xs-12"
             title="{{charts.traffic.title}}" default="{{charts.traffic.default}}"
             metrics="{{metrics}}"
             x="date" y="{{charts.traffic.y}}"
             >
-        </morris-chart>
+        </chart>
     </div>
 
     <div class="row">
@@ -159,7 +159,7 @@ module.exports = {
         'small-box': require('components/containers/small-box.vue'),
         'org-profile': require('components/organization/profile.vue'),
         'org-members': require('components/organization/members.vue'),
-        'morris-chart': require('components/charts/morris-chart.vue'),
+        'chart': require('components/charts/widget.vue'),
         'datasets-widget': require('components/dataset/list.vue'),
         'reuses-widget': require('components/reuse/list.vue'),
         'followers-widget': require('components/follow/list.vue')
