@@ -26,6 +26,12 @@ from .api_fields import (
     logo_fields,
 )
 
+from udata.core.dataset.api_fields import dataset_fields
+from udata.core.dataset.models import Dataset
+from udata.core.reuse.api_fields import reuse_fields
+from udata.core.reuse.models import Reuse
+
+
 ns = api.namespace('organizations', 'Organization related operations')
 search_parser = api.search_parser(OrganizationSearch)
 
@@ -306,3 +312,27 @@ class AvatarAPI(API):
         logo = args['file']
         org.logo.save(logo, bbox=args.get('bbox'))
         return org
+
+
+@ns.route('/<org:org>/datasets/', endpoint='org_datasets')
+class OrgDatasetsAPI(API):
+    @api.doc('list_organization_datasets')
+    @api.marshal_list_with(dataset_fields)
+    def get(self, org):
+        '''List organization datasets (including private ones when member)'''
+        qs = Dataset.objects.owned_by(org)
+        if not OrganizationPrivatePermission(org).can():
+            qs = qs(private__ne=True)
+        return list(qs)
+
+
+@ns.route('/<org:org>/reuses/', endpoint='org_reuses')
+class OrgReusesAPI(API):
+    @api.doc('list_organization_reuses')
+    @api.marshal_list_with(reuse_fields)
+    def get(self, org):
+        '''List organization reuses (including private ones when member)'''
+        qs = Reuse.objects.owned_by(org)
+        if not OrganizationPrivatePermission(org).can():
+            qs = qs(private__ne=True)
+        return list(qs)
