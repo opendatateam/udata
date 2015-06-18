@@ -4,7 +4,7 @@ var webpack = require('webpack');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var node_path = path.join(__dirname, 'node_modules');
 
-var vue = require('vue-multi-loader'),
+var vue = require('vue-loader'),
     css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap'),
     less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline');
 
