@@ -51,9 +51,11 @@
   },
   "dependencies": {
     "AdminLTE": "https://github.com/almasaeed2010/AdminLTE/tarball/v2.1.0-alpha-1",
+    "Chart.StackedBar.js": "regaddi/Chart.StackedBar.js#1.0.3",
     "bootstrap": "^3.3.2",
     "bootstrap-datepicker": "^1.4.0",
     "bootstrap-markdown": "^2.8.0",
+    "chart.js": "^1.0.2",
     "debounce": "^1.0.0",
     "director": "^1.2.8",
     "fine-uploader": "^5.2.1",

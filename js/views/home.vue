@@ -4,6 +4,11 @@
     </div>
 
     <div class="row">
+        <chart title="{{ _('Data')}}" metrics="{{metrics}}" class="col-md-12"
+            x="date" y="{{y}}"></chart>
+    </div>
+
+    <div class="row">
         <morris-chart title="{{ _('Data')}}" metrics="{{metrics}}" class="col-md-12"
             x="date" y="{{y}}"></morris-chart>
     </div>
@@ -58,11 +63,11 @@ module.exports = {
             }, {
                 id: 'users',
                 label: this._('Users'),
-                color: '#aaa'
+                color: '#4da74d'
             }, {
                 id: 'organizations',
                 label: this._('Organizations'),
-                color: '#3c8dbc'
+                color: '#ffb311'
             }]
             // charts: {
             //     data: {
@@ -140,6 +145,7 @@ module.exports = {
     },
     components: {
         'morris-chart': require('components/charts/morris-chart.vue'),
+        'chart': require('components/charts/chartjs-chart.vue'),
         'small-box': require('components/containers/small-box.vue'),
         'w-cal': require('components/calendar.vue')
     },
