@@ -5,26 +5,6 @@ define(['api', 'models/base_list', 'vue', 'moment', 'jquery'], function(API, Mod
         name: 'Metrics',
         ns: 'site',
         fetch: 'metrics_for',
-        data: function() {
-            return {
-                start: null,
-                end: null
-            };
-        },
-        computed: {
-            /**
-             * Consolidate data
-             */
-            series: function() {
-                if (!this.items) {
-                    return [];
-                }
-
-                return this.items.map(function(item) {
-                    return $.extend({date: item.date}, item.values);
-                });
-            }
-        },
         methods: {
             /**
              * Consolidate data
