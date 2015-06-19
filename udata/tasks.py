@@ -57,8 +57,8 @@ def connect(signal):
     def wrapper(func):
         t = task(func)
 
-        def call_task(issue, **kwargs):
-            t.delay(issue, **kwargs)
+        def call_task(item, **kwargs):
+            t.delay(item, **kwargs)
 
         signal.connect(call_task, weak=False)
         return t

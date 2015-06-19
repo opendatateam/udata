@@ -21,6 +21,7 @@ from udata.auth import (
 )
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
+from udata.core.metrics.utils import send_piwik_signal
 
 from . import fields, oauth2
 from .signals import on_api_call
@@ -194,14 +195,11 @@ def extract_name_from_path(path):
 @apiv1.after_request
 def collect_stats(response):
     action_name = extract_name_from_path(request.full_path)
-    params = {
-        'action_name': urllib.quote(action_name),
-        'user_ip': request.remote_addr
-    }
-    if current_user.is_authenticated():
-        params['_id'] = str(hash(current_user.email)).strip('-')
     if not current_app.config['TESTING']:
-        on_api_call.send(request.url, **params)
+        extras = {
+            'action_name': urllib.quote(action_name),
+        }
+        send_piwik_signal(on_api_call, request, current_user, **extras)
     return response
 
 

@@ -24,6 +24,7 @@ from udata.models import (
 
 from udata.core import storages
 from udata.core.site.views import current_site
+from udata.core.metrics.utils import send_piwik_signal
 from udata.sitemap import sitemap
 
 from .forms import (
@@ -130,14 +131,8 @@ class DatasetCreateView(CreateView):
 
     def on_form_valid(self, form):
         response = super(DatasetCreateView, self).on_form_valid(form)
-        params = {
-            'action_name': 'Publish a dataset',
-            'user_ip': request.remote_addr,
-        }
-        if current_user.is_authenticated():
-            params['_id'] = str(hash(current_user.email)).strip('-')
         if not current_app.config['TESTING']:
-            on_dataset_published.send(request.url, **params)
+            send_piwik_signal(on_dataset_published, request, current_user)
         return response
 
 

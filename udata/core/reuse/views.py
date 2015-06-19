@@ -18,6 +18,7 @@ from udata.frontend.views import (
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Issue, FollowReuse, Dataset
 from udata.sitemap import sitemap
+from udata.core.metrics.utils import send_piwik_signal
 
 from .forms import ReuseForm, AddDatasetToReuseForm
 from .models import Reuse, ReuseDiscussion
@@ -134,14 +135,8 @@ class ReuseCreateView(CreateView):
     def on_form_valid(self, form):
         response = super(ReuseCreateView, self).on_form_valid(form)
         notify_new_reuse.delay(self.object)
-        params = {
-            'action_name': 'Publish a reuse',
-            'user_ip': request.remote_addr,
-        }
-        if current_user.is_authenticated():
-            params['_id'] = str(hash(current_user.email)).strip('-')
         if not current_app.config['TESTING']:
-            on_reuse_published.send(request.url, **params)
+            send_piwik_signal(on_reuse_published, request, current_user)
         return response
 
 

@@ -3,12 +3,16 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
+from flask import current_app, request
 from flask.ext.security import current_user
 
 from udata.api import api, API, fields
 from udata.models import Follow
-
 from udata.core.user.api_fields import user_ref_fields
+from udata.core.metrics.utils import send_piwik_signal
+
+from .signals import on_new_follow
+
 
 follow_fields = api.model('Follow', {
     'id': fields.String(description='The follow object technical ID', readonly=True),
@@ -44,7 +48,8 @@ class FollowAPI(API):
         '''Follow an object given its ID'''
         follow, created = self.model.objects.get_or_create(follower=current_user.id, following=id, until=None)
         count = self.model.objects.followers(id).count()
-
+        if not current_app.config['TESTING']:
+            send_piwik_signal(on_new_follow, request, current_user)
         return {'followers': count}, 201 if created else 200
 
     @api.secure
