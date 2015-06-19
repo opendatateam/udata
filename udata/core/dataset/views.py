@@ -5,22 +5,32 @@ import os
 
 from datetime import datetime
 
-from flask import abort, redirect, request, url_for, jsonify, render_template
+from flask import (
+    abort, current_app, redirect, request, url_for, jsonify, render_template
+)
 from werkzeug.contrib.atom import AtomFeed
 
 from udata import fileutils
 from udata.app import nav
-from udata.auth import login_required
-from udata.frontend.views import DetailView, CreateView, EditView, NestedEditView, SingleObject, SearchView, BaseView, NestedObject
+from udata.auth import current_user, login_required
+from udata.frontend.views import (
+    DetailView, CreateView, EditView, NestedEditView, SingleObject, SearchView,
+    BaseView, NestedObject
+)
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Resource, Reuse, Issue, DatasetDiscussion, Follow
+from udata.models import (
+    Dataset, Resource, Reuse, Issue, DatasetDiscussion, Follow
+)
 
 from udata.core import storages
 from udata.core.site.views import current_site
 from udata.sitemap import sitemap
 
-from .forms import DatasetForm, ResourceForm, CommunityResourceForm, DatasetExtraForm
+from .forms import (
+    DatasetForm, ResourceForm, CommunityResourceForm, DatasetExtraForm
+)
 from .permissions import CommunityResourceEditPermission, DatasetEditPermission
+from .signals import on_dataset_published
 
 blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
 
@@ -29,24 +39,28 @@ blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
 def recent_feed():
     feed = AtomFeed(_('Last datasets'),
                     feed_url=request.url, url=request.url_root)
-    datasets = Dataset.objects.visible().order_by('-created_at').limit(current_site.feed_size)
+    datasets = (Dataset.objects.visible().order_by('-created_at')
+                .limit(current_site.feed_size))
     for dataset in datasets:
         author = None
         if dataset.organization:
             author = {
                 'name': dataset.organization.name,
-                'uri': url_for('organizations.show', org=dataset.organization.id, _external=True),
+                'uri': url_for('organizations.show',
+                               org=dataset.organization.id, _external=True),
             }
         elif dataset.owner:
             author = {
                 'name': dataset.owner.fullname,
-                'uri': url_for('users.show', user=dataset.owner.id, _external=True),
+                'uri': url_for('users.show',
+                               user=dataset.owner.id, _external=True),
             }
         feed.add(dataset.title,
                  render_template('dataset/feed_item.html', dataset=dataset),
                  content_type='html',
                  author=author,
-                 url=url_for('datasets.show', dataset=dataset.id, _external=True),
+                 url=url_for('datasets.show',
+                             dataset=dataset.id, _external=True),
                  updated=dataset.last_modified,
                  published=dataset.created_at)
     return feed.get_response()
@@ -113,6 +127,18 @@ class DatasetCreateView(CreateView):
 
     def get_success_url(self):
         return url_for('datasets.new_resource', dataset=self.object)
+
+    def on_form_valid(self, form):
+        response = super(DatasetCreateView, self).on_form_valid(form)
+        params = {
+            'action_name': 'Publish a dataset',
+            'user_ip': request.remote_addr,
+        }
+        if current_user.is_authenticated():
+            params['_id'] = str(hash(current_user.email)).strip('-')
+        if not current_app.config['TESTING']:
+            on_dataset_published.send(request.url, **params)
+        return response
 
 
 @blueprint.route('/<dataset:dataset>/edit/', endpoint='edit')
