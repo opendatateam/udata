@@ -132,7 +132,6 @@ def watch():
 def update():
     print('Installing required dependencies')
     lrun('npm install')
-    lrun('bower install')
     print('Fetching last translations')
     lrun('tx pull')
 

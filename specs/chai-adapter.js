@@ -1,31 +1,20 @@
-
-// window.assert = chai.assert;
-
-// var should;
 (function(window) {
-"use strict";
+    "use strict";
 
-var chai = require('chai'),
-    sinon = require("sinon"),
-    sinonChai = require("sinon-chai"),
-    chaiJQuery = require("chai-jquery"),
-    chaiThings = require("chai-things"),
-    expect = chai.expect;
-    // assert = chai.assert;
+    var $ = require('jquery'),
+        chai = require('chai'),
+        sinon = require("sinon"),
+        sinonChai = require("sinon-chai"),
+        chaiJQuery = require("chai-jquery"),
+        chaiThings = require("chai-things");
 
-console.log(chai, sinon, expect);
+    chai.use(sinonChai);
+    chai.use(chaiThings);
+    chai.use(chaiJQuery);
 
-chai.use(sinonChai);
-chai.use(chaiThings);
-chai.use(chaiJQuery);
+    global.expect = window.expect = chai.expect;
+    global.assert = window.assert = chai.assert;
+    global.sinon = window.sinon = sinon;
+    global.expect = window.$ = $;
 
-window.expect = expect;
-window.sinon = sinon;
-
-  // window.should = window.chai.should();
-  // window.expect = window.chai.expect;
-  // window.assert = window.chai.assert;
 })(window);
-
-
-module.exports = {};
