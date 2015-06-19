@@ -53,6 +53,18 @@ def get_logger(name):
     return logger
 
 
+def connect(signal):
+    def wrapper(func):
+        t = task(func)
+
+        def call_task(issue, **kwargs):
+            t.delay(issue, **kwargs)
+
+        signal.connect(call_task, weak=False)
+        return t
+    return wrapper
+
+
 @job('log-test')
 def helloworld(self):
     self.log.debug('This is a DEBUG message')
@@ -87,7 +99,6 @@ def init_app(app):
     ContextTask.current_app = app
 
     # Load core tasks
-    import udata.api.tasks
     import udata.core.metrics.tasks
     import udata.core.storages.tasks
     import udata.core.tags.tasks

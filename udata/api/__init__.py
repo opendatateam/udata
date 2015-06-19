@@ -23,7 +23,8 @@ from udata.utils import multi_to_dict
 from udata.core.user.models import User
 
 from . import fields, oauth2
-from .tasks import send_to_piwik
+from .signals import on_api_call
+
 
 log = logging.getLogger(__name__)
 
@@ -200,7 +201,7 @@ def collect_stats(response):
     if current_user.is_authenticated():
         params['_id'] = str(hash(current_user.email)).strip('-')
     if not current_app.config['TESTING']:
-        send_to_piwik.delay(request.url, **params)
+        on_api_call.send(request.url, **params)
     return response
 
 
