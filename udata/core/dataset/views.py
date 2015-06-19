@@ -10,7 +10,7 @@ from flask import (
 )
 from werkzeug.contrib.atom import AtomFeed
 
-from udata import fileutils
+from udata import fileutils, tracking
 from udata.app import nav
 from udata.auth import current_user, login_required
 from udata.frontend.views import (
@@ -24,7 +24,6 @@ from udata.models import (
 
 from udata.core import storages
 from udata.core.site.views import current_site
-from udata.core.metrics.utils import send_piwik_signal
 from udata.sitemap import sitemap
 
 from .forms import (
@@ -132,7 +131,7 @@ class DatasetCreateView(CreateView):
     def on_form_valid(self, form):
         response = super(DatasetCreateView, self).on_form_valid(form)
         if not current_app.config['TESTING']:
-            send_piwik_signal(on_dataset_published, request, current_user)
+            tracking.send_signal(on_dataset_published, request, current_user)
         return response
 
 

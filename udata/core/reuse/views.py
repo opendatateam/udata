@@ -10,6 +10,7 @@ from flask import (
 )
 from werkzeug.contrib.atom import AtomFeed
 
+from udata import tracking
 from udata.app import nav
 from udata.auth import current_user
 from udata.frontend.views import (
@@ -18,7 +19,6 @@ from udata.frontend.views import (
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Issue, FollowReuse, Dataset
 from udata.sitemap import sitemap
-from udata.core.metrics.utils import send_piwik_signal
 
 from .forms import ReuseForm, AddDatasetToReuseForm
 from .models import Reuse, ReuseDiscussion
@@ -136,7 +136,7 @@ class ReuseCreateView(CreateView):
         response = super(ReuseCreateView, self).on_form_valid(form)
         notify_new_reuse.delay(self.object)
         if not current_app.config['TESTING']:
-            send_piwik_signal(on_reuse_published, request, current_user)
+            tracking.send_signal(on_reuse_published, request, current_user)
         return response
 
 

@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 
-def send_piwik_signal(signal, request, user, **kwargs):
+def send_signal(signal, request, user, **kwargs):
     '''Generic method to send signals to Piwik
 
     given that we always have to compute IP and UID for instance.

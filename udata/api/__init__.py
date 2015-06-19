@@ -13,7 +13,7 @@ from flask import (
 from flask.ext.restplus import Api, Resource, marshal
 from flask.ext.restful.utils import cors
 
-from udata import search, theme
+from udata import search, theme, tracking
 from udata.app import csrf
 from udata.i18n import I18nBlueprint
 from udata.auth import (
@@ -21,7 +21,6 @@ from udata.auth import (
 )
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
-from udata.core.metrics.utils import send_piwik_signal
 
 from . import fields, oauth2
 from .signals import on_api_call
@@ -199,7 +198,7 @@ def collect_stats(response):
         extras = {
             'action_name': urllib.quote(action_name),
         }
-        send_piwik_signal(on_api_call, request, current_user, **extras)
+        tracking.send_signal(on_api_call, request, current_user, **extras)
     return response
 
 
