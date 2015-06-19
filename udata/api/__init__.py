@@ -2,22 +2,29 @@
 from __future__ import unicode_literals
 
 import logging
+import urllib
 
 from datetime import datetime
 from functools import wraps
 
-from flask import current_app, g, request, url_for, json, make_response, redirect, Blueprint
+from flask import (
+    current_app, g, request, url_for, json, make_response, redirect, Blueprint
+)
 from flask.ext.restplus import Api, Resource, marshal
 from flask.ext.restful.utils import cors
 
-from udata import search, theme
+from udata import search, theme, tracking
 from udata.app import csrf
 from udata.i18n import I18nBlueprint
-from udata.auth import current_user, login_user, Permission, RoleNeed, PermissionDenied
+from udata.auth import (
+    current_user, login_user, Permission, RoleNeed, PermissionDenied
+)
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
 
 from . import fields, oauth2
+from .signals import on_api_call
+
 
 log = logging.getLogger(__name__)
 
@@ -31,12 +38,21 @@ HEADER_API_KEY = 'X-API-KEY'
 
 class UDataApi(Api):
     def __init__(self, app=None, **kwargs):
-        kwargs['decorators'] = [self.authentify] + (kwargs.pop('decorators', []) or [])
+        kwargs['decorators'] = ([self.authentify]
+                                + (kwargs.pop('decorators', []) or []))
         super(UDataApi, self).__init__(app, **kwargs)
-        self.authorizations = {'apikey': {'type': 'apiKey', 'passAs': 'header', 'keyname': HEADER_API_KEY}}
+        self.authorizations = {
+            'apikey': {
+                'type': 'apiKey',
+                'passAs': 'header',
+                'keyname': HEADER_API_KEY
+            }
+        }
 
     def secure(self, func):
-        '''Enforce authentication on a given method/verb and optionnaly check a given permission'''
+        '''Enforce authentication on a given method/verb
+        and optionnaly check a given permission
+        '''
         if isinstance(func, basestring):
             return self._apply_permission(Permission(RoleNeed(func)))
         elif isinstance(func, Permission):
@@ -89,7 +105,8 @@ class UDataApi(Api):
 
     def validate(self, form_cls, obj=None):
         '''Validate a form from the request and handle errors'''
-        form = form_cls.from_json(request.json, obj=obj, instance=obj, csrf_enabled=False)
+        form = form_cls.from_json(request.json, obj=obj, instance=obj,
+                                  csrf_enabled=False)
         if not form.validate():
             self.abort(400, errors=form.errors)
         return form
@@ -100,16 +117,20 @@ class UDataApi(Api):
     def search_parser(self, adapter, paginate=True):
         parser = self.parser()
         # q parameter
-        parser.add_argument('q', type=str, location='args', help='The search query')
+        parser.add_argument('q', type=str, location='args',
+                            help='The search query')
         # Add facets filters arguments
         for name, facet in adapter.facets.items():
             parser.add_argument(name, type=str, location='args')
         # Sort arguments
-        choices = adapter.sorts.keys() + ['-' + k for k in adapter.sorts.keys()]
+        choices = (adapter.sorts.keys()
+                   + ['-' + k for k in adapter.sorts.keys()])
         parser.add_argument('sort', type=str, location='args', choices=choices)
         if paginate:
-            parser.add_argument('page', type=int, location='args', default=0, help='The page to display')
-            parser.add_argument('page_size', type=int, location='args', default=20, help='The page size')
+            parser.add_argument('page', type=int, location='args',
+                                default=0, help='The page to display')
+            parser.add_argument('page_size', type=int, location='args',
+                                default=20, help='The page size')
         return parser
 
     def unauthorized(self, response):
@@ -122,8 +143,10 @@ class UDataApi(Api):
 
     def page_parser(self):
         parser = self.parser()
-        parser.add_argument('page', type=int, default=1, location='args', help='The page to fetch')
-        parser.add_argument('page_size', type=int, default=20, location='args', help='The page size to fetch')
+        parser.add_argument('page', type=int, default=1, location='args',
+                            help='The page to fetch')
+        parser.add_argument('page_size', type=int, default=20, location='args',
+                            help='The page size to fetch')
         return parser
 
 
@@ -131,7 +154,8 @@ api = UDataApi(
     apiv1, ui=False,
     decorators=[csrf.exempt, cors.crossdomain(origin='*', credentials=True)],
     version='1.0', title='uData API',
-    description='uData API', default='site', default_label='Site global namespace'
+    description='uData API', default='site',
+    default_label='Site global namespace'
 )
 
 
@@ -147,6 +171,35 @@ def output_json(data, code, headers=None):
 def set_api_language():
     if 'lang' in request.args:
         g.lang_code = request.args['lang']
+
+
+def extract_name_from_path(path):
+    """Return a readable name from a URL path.
+
+    Useful to log requests on Piwik with categories tree structure.
+    See: http://piwik.org/faq/how-to/#faq_62
+    """
+    base_path, query_string = path.split('?')
+    infos = base_path.strip('/').split('/')[2:]  # Removes api/version.
+    if len(infos) > 1:  # This is an object.
+        name = '{category} / {name}'.format(
+            category=infos[0].title(),
+            name=infos[1].replace('-', ' ').title()
+        )
+    else:  # This is a collection.
+        name = '{category}'.format(category=infos[0].title())
+    return name
+
+
+@apiv1.after_request
+def collect_stats(response):
+    action_name = extract_name_from_path(request.full_path)
+    if not current_app.config['TESTING']:
+        extras = {
+            'action_name': urllib.quote(action_name),
+        }
+        tracking.send_signal(on_api_call, request, current_user, **extras)
+    return response
 
 
 @api.errorhandler(PermissionDenied)
@@ -179,12 +232,14 @@ def swaggerui():
 
 @apidoc.route('/apidoc/images/<path:path>')
 def images(path):
-    return redirect(url_for('static', filename='bower/swagger-ui/dist/images/' + path))
+    return redirect(url_for('static',
+                    filename='bower/swagger-ui/dist/images/' + path))
 
 
 @apidoc.route('/static/images/throbber.gif')
 def fix_apidoc_throbber():
-    return redirect(url_for('static', filename='bower/swagger-ui/dist/images/throbber.gif'))
+    return redirect(url_for('static',
+                    filename='bower/swagger-ui/dist/images/throbber.gif'))
 
 
 class API(Resource):  # Avoid name collision as resource is a core model
@@ -201,7 +256,8 @@ class ModelListAPI(API):
     def get(self):
         '''List all objects'''
         if self.search_adapter:
-            objects = search.query(self.search_adapter, **multi_to_dict(request.args))
+            objects = search.query(self.search_adapter,
+                                   **multi_to_dict(request.args))
         else:
             objects = list(self.model.objects)
         return marshal_page(objects, self.fields)
@@ -256,8 +312,10 @@ class ModelAPI(SingleObjectAPI, API):
 
 
 base_reference = api.model('BaseReference', {
-    'id': fields.String(description='The object unique identifier', required=True),
-    'class': fields.ClassName(description='The object class', discriminator=True, required=True),
+    'id': fields.String(description='The object unique identifier',
+                        required=True),
+    'class': fields.ClassName(description='The object class',
+                              discriminator=True, required=True),
 }, description='Base model for reference field, aka. inline model reference')
 
 

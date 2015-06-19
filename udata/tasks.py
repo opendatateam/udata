@@ -53,6 +53,18 @@ def get_logger(name):
     return logger
 
 
+def connect(signal):
+    def wrapper(func):
+        t = task(func)
+
+        def call_task(item, **kwargs):
+            t.delay(item, **kwargs)
+
+        signal.connect(call_task, weak=False)
+        return t
+    return wrapper
+
+
 @job('log-test')
 def helloworld(self):
     self.log.debug('This is a DEBUG message')

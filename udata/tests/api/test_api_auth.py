@@ -209,6 +209,7 @@ class APIAuthTest(APITestCase):
     def test_permission_denied(self):
         @ns.route('/exception', endpoint='exception')
         class ExceptionAPI(API):
+            def get(self):
                 raise PermissionDenied('Permission denied')
 
         response = self.get(url_for('api.exception'))
