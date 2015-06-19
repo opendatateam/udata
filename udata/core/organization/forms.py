@@ -24,8 +24,6 @@ class OrganizationForm(ModelForm):
     description = fields.MarkdownField(_('Description'), [validators.required()],
         description=_('The details about your organization'))
     url = fields.URLField(_('Website'), description=_('The organization website URL'))
-    image_url = fields.URLField(_('Logo'),
-        description=_('Your organization logo URL'))
     logo = fields.ImageField(_('Logo'), sizes=LOGO_SIZES)
 
     def save(self, commit=True, **kwargs):
