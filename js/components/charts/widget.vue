@@ -142,7 +142,7 @@ module.exports = {
 
                     datasets: this.y.map(function(serie) {
                         var dataset = {label: serie.label};
-                        dataset.fillColor = serie.color;
+                        dataset.fillColor = this.toRGBA(serie.color, .5);
                         dataset.strokeColor = serie.color;
                         dataset.pointColor = serie.color;
                         // datasetpointStrokeColor: "#c1c7d1",
@@ -152,7 +152,7 @@ module.exports = {
                             return item[serie.id];
                         });
                         return dataset;
-                    })
+                    }.bind(this))
                 };
 
             return data;
@@ -211,7 +211,7 @@ module.exports = {
                 this.chart = null;
             }
         },
-        hex_to_rgb: function(hex, opacity) {
+        toRGBA: function(hex, opacity) {
             // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
             var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
             hex = hex.replace(shorthandRegex, function(m, r, g, b) {
@@ -219,11 +219,13 @@ module.exports = {
             });
 
             var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : null;
+            return result ?
+                'rgba('
+                    + parseInt(result[1], 16) + ','
+                    + parseInt(result[2], 16) + ','
+                    + parseInt(result[3], 16) + ','
+                    + opacity + ')'
+                : hex;
         }
     }
 };
