@@ -100,7 +100,15 @@ var AREA_OPTIONS = {
         barValueSpacing: 5,
         barDatasetSpacing: 1,
         datasetFill: false
-    };
+    },
+    COLORS = [
+        '#a0d0e0',
+        '#3c8dbc',
+        '#4da74d',
+        '#ffb311',
+        '#8612ee',
+        '#aaa',
+    ];
 
 
 module.exports = {
@@ -140,14 +148,15 @@ module.exports = {
                         return moment(item.date).format('L');
                     }),
 
-                    datasets: this.y.map(function(serie) {
-                        var dataset = {label: serie.label};
-                        dataset.fillColor = this.toRGBA(serie.color, .5);
-                        dataset.strokeColor = serie.color;
-                        dataset.pointColor = serie.color;
+                    datasets: this.y.map(function(serie, idx) {
+                        var dataset = {label: serie.label},
+                            color = serie.color || COLORS[idx];
+                        dataset.fillColor = this.toRGBA(color, .5);
+                        dataset.strokeColor = color;
+                        dataset.pointColor = color;
                         // datasetpointStrokeColor: "#c1c7d1",
                         dataset.pointHighlightFill = '#fff';
-                        dataset.pointHighlightStroke = serie.color;
+                        dataset.pointHighlightStroke = color;
                         dataset.data = raw.map(function(item) {
                             return item[serie.id];
                         });

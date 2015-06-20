@@ -78,16 +78,13 @@ module.exports = {
                     default: 'Area',
                     y: [{
                         id: 'nb_uniq_visitors',
-                        label: this._('Organization'),
-                        color: '#3c8dbc'
+                        label: this._('Organization')
                     }, {
                         id: 'datasets_nb_uniq_visitors',
-                        label: this._('Datasets'),
-                        color: '#a0d0e0'
+                        label: this._('Datasets')
                     }, {
                         id: 'reuses_nb_uniq_visitors',
-                        label: this._('Reuses'),
-                        color: '#8612EE'
+                        label: this._('Reuses')
                     }]
                 },
                 data: {
@@ -95,21 +92,11 @@ module.exports = {
                     default: 'Bar',
                     y: [{
                         id: 'datasets',
-                        label: this._('Datasets'),
-                        color: '#3c8dbc'
+                        label: this._('Datasets')
                     }, {
                         id: 'reuses',
-                        label: this._('Reuses'),
-                        color: '#a0d0e0'
+                        label: this._('Reuses')
                     }]
-                // }, {
-                //     title: this._('Downloads'),
-                //     type: 'Line',
-                //     y: [{
-                //         id: 'resources_downloads',
-                //         label: this._('Resources'),
-                //         color: '#3c8dbc'
-                //     }]
                 }
             }
         };

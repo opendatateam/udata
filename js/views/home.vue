@@ -30,56 +30,17 @@ module.exports = {
             }),
             y: [{
                 id: 'datasets',
-                label: this._('Datasets'),
-                color: '#a0d0e0'
+                label: this._('Datasets')
             }, {
                 id: 'reuses',
-                label: this._('Reuses'),
-                color: '#3c8dbc'
+                label: this._('Reuses')
             }, {
                 id: 'users',
-                label: this._('Users'),
-                color: '#4da74d'
+                label: this._('Users')
             }, {
                 id: 'organizations',
-                label: this._('Organizations'),
-                color: '#ffb311'
+                label: this._('Organizations')
             }]
-            // charts: {
-            //     data: {
-            //         title: this._('Data'),
-            //         y: [{
-            //             id: 'datasets',
-            //             label: this._('Datasets'),
-            //             color: '#3c8dbc'
-            //         }, {
-            //             id: 'reuses',
-            //             label: this._('Reuses'),
-            //             color: '#a0d0e0'
-            //         }]
-            //     },
-            //     community: {
-            //         title: this._('Community'),
-            //         y: [{
-            //             id: 'users',
-            //             label: this._('Users'),
-            //             color: '#3c8dbc'
-            //         }, {
-            //             id: 'organizations',
-            //             label: this._('Organizations'),
-            //             color: '#a0d0e0'
-            //         }]
-            //     },
-            //     all: {
-            //         title: this._('Metrics'),
-            //         series: {
-            //             datasets: this._('Datasets'),
-            //             reuses: this._('Reuses'),
-            //             users: this._('Users'),
-            //             organizations: this._('Organizations'),
-            //         }
-            //     }
-            // }
         };
     },
     computed: {
