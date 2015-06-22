@@ -54,10 +54,10 @@ module.exports = {
     plugins: [
         // Fix AdminLTE packaging
         new webpack.NormalModuleReplacementPlugin(
-            /AdminLTE\/build\/img\/boxed-bg\.jpg$/,
-            'AdminLTE/dist/img/boxed-bg.jpg'
+            /admin-lte\/build\/img\/boxed-bg\.jpg$/,
+            'admin-lte/dist/img/boxed-bg.jpg'
         ),
-        // new webpack.ContextReplacementPlugin(/AdminLTE\/build\/img\/.*$/, 'AdminLTE/dist/img/$1'),
+        // new webpack.ContextReplacementPlugin(/admin-lte\/build\/img\/.*$/, 'admin-lte/dist/img/$1'),
         new webpack.ProvidePlugin({
             $: 'jquery',
             jQuery: 'jquery',

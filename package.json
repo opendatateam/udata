@@ -41,7 +41,7 @@
     "webpack": "^1.9.11"
   },
   "dependencies": {
-    "AdminLTE": "https://github.com/almasaeed2010/AdminLTE/tarball/v2.1.0-alpha-1",
+    "admin-lte": "^2.1.0-alpha-1",
     "Chart.StackedBar.js": "regaddi/Chart.StackedBar.js#1.0.3",
     "bootstrap": "^3.3.2",
     "bootstrap-datepicker": "^1.4.0",
