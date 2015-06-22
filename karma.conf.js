@@ -30,7 +30,7 @@ module.exports = function(config) {
         // frameworks: ['mocha', 'chai', 'chai-things', 'jquery-chai', 'chai-sinon', 'fixture'],
         frameworks: ['mocha', 'fixture'],
 
-        files: [,
+        files: [
             'specs/loader.js',
         ],
         preprocessors: {
