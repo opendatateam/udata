@@ -100,7 +100,15 @@ var AREA_OPTIONS = {
         barValueSpacing: 5,
         barDatasetSpacing: 1,
         datasetFill: false
-    };
+    },
+    COLORS = [
+        '#a0d0e0',
+        '#3c8dbc',
+        '#4da74d',
+        '#ffb311',
+        '#8612ee',
+        '#aaa',
+    ];
 
 
 module.exports = {
@@ -140,19 +148,20 @@ module.exports = {
                         return moment(item.date).format('L');
                     }),
 
-                    datasets: this.y.map(function(serie) {
-                        var dataset = {label: serie.label};
-                        dataset.fillColor = serie.color;
-                        dataset.strokeColor = serie.color;
-                        dataset.pointColor = serie.color;
+                    datasets: this.y.map(function(serie, idx) {
+                        var dataset = {label: serie.label},
+                            color = serie.color || COLORS[idx];
+                        dataset.fillColor = this.toRGBA(color, .5);
+                        dataset.strokeColor = color;
+                        dataset.pointColor = color;
                         // datasetpointStrokeColor: "#c1c7d1",
                         dataset.pointHighlightFill = '#fff';
-                        dataset.pointHighlightStroke = serie.color;
+                        dataset.pointHighlightStroke = color;
                         dataset.data = raw.map(function(item) {
                             return item[serie.id];
                         });
                         return dataset;
-                    })
+                    }.bind(this))
                 };
 
             return data;
@@ -211,7 +220,7 @@ module.exports = {
                 this.chart = null;
             }
         },
-        hex_to_rgb: function(hex, opacity) {
+        toRGBA: function(hex, opacity) {
             // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
             var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
             hex = hex.replace(shorthandRegex, function(m, r, g, b) {
@@ -219,11 +228,13 @@ module.exports = {
             });
 
             var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : null;
+            return result ?
+                'rgba('
+                    + parseInt(result[1], 16) + ','
+                    + parseInt(result[2], 16) + ','
+                    + parseInt(result[3], 16) + ','
+                    + opacity + ')'
+                : hex;
         }
     }
 };

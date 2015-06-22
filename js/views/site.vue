@@ -60,20 +60,16 @@ module.exports = {
             discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
             y: [{
                 id: 'datasets',
-                label: this._('Datasets'),
-                color: '#a0d0e0'
+                label: this._('Datasets')
             }, {
                 id: 'reuses',
-                label: this._('Reuses'),
-                color: '#3c8dbc'
+                label: this._('Reuses')
             }, {
                 id: 'users',
                 label: this._('Users'),
-                color: '#aaa'
             }, {
                 id: 'organizations',
-                label: this._('Organizations'),
-                color: '#3c8dbc'
+                label: this._('Organizations')
             }]
         };
     },

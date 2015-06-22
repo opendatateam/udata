@@ -53,12 +53,10 @@ module.exports = {
             },
             y: [{
                 id: 'views',
-                label: this._('Views'),
-                color: '#a0d0e0'
+                label: this._('Views')
             }, {
                 id: 'followers',
-                label: this._('Followers'),
-                color: '#3c8dbc'
+                label: this._('Followers')
             }]
         };
     },
