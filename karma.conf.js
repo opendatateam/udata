@@ -11,10 +11,18 @@ webpack_config.devtool = 'inline-source-map';
 
 webpack_config.watch = true;
 
+// Fix SinonJS until proper 2.0
 webpack_config.module.noParse = [/\/sinon.js/];
 webpack_config.plugins.push(
     new webpack.NormalModuleReplacementPlugin(/^sinon$/, __dirname + '/node_modules/sinon/pkg/sinon.js')
 );
+
+// Instrument code for verage
+webpack_config.module.postLoaders = [{
+    test: /\.(js|vue)$/,
+    exclude: /(test|node_modules|bower_components)\//,
+    loader: 'istanbul-instrumenter'
+}];
 
 
 module.exports = function(config) {
@@ -26,8 +34,6 @@ module.exports = function(config) {
 
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-        // frameworks: ['mocha', 'chai', 'sinon-chai', 'chai-jquery', 'chai-things', 'fixture'],
-        // frameworks: ['mocha', 'chai', 'chai-things', 'jquery-chai', 'chai-sinon', 'fixture'],
         frameworks: ['mocha', 'fixture'],
 
         files: [
@@ -62,6 +68,13 @@ module.exports = function(config) {
         coverageReporter: {
             type: 'lcov',
             dir: 'coverage/'
+        },
+        coverageReporter: {
+            dir: 'coverage/',
+            reporters: [
+                {type: 'html', subdir: 'html'},
+                {type: 'cobertura', subdir: '.', file: 'cobertura.xml'}
+            ]
         },
 
 
