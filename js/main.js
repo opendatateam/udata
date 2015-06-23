@@ -3,7 +3,7 @@
 /**
  * Styles
  */
-require('../less/dashboard.less');
+require('../less/admin.less');
 
 var $ = require('jquery');
 require('bootstrap');

@@ -1,8 +1,9 @@
 /**
  * Webpack spec loader
  */
+'use strict';
 
-var SPECS_PATTERN = /\.specs\.js$/;
+require('./chai-adapter');
 
-var context = require.context('.', true, SPECS_PATTERN);
+var context = require.context('.', true, /\.specs\.js$/);
 context.keys().forEach(context);

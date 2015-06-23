@@ -96,7 +96,7 @@
 <script>
 'use strict';
 
-var JCrop = require('Jcrop'),
+var JCrop = require('jquery-jcrop'),
     $ = require('jquery');
 
 module.exports = {

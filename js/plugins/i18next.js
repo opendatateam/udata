@@ -1,4 +1,4 @@
-define(['config', 'i18next', 'moment', 'logger'], function(config, i18next, moment, log) {
+define(['config', 'i18next-client', 'moment', 'logger'], function(config, i18next, moment, log) {
     'use strict';
 
     return function(Vue, options) {

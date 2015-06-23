@@ -15,7 +15,7 @@ define([
 
     var API = require('api');
 
-    requests[0].respond(200, {'Content-Type': 'application/json'}, JSON.stringify({}));
+    requests[0].respond(200, {'Content-Type': 'application/json'}, JSON.stringify(raw_specs));
 
     xhr.restore();
 
@@ -25,7 +25,6 @@ define([
      */
     API.constructor.prototype.mock_specs = function(specs) {
         this.isBuilt = false;
-        debugger;
         this.buildFromSpec(specs);
     };
 
@@ -40,5 +39,5 @@ define([
         this.mock_specs(specs);
     };
 
-    return API
+    return API;
 });

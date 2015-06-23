@@ -107,7 +107,7 @@ define(['director', 'logger'], function(director, log) {
 
                 mount: function(obj) {
                     // Bind routes
-                    if (Object.getOwnPropertyNames(obj.$options.routes).length > 0) {
+                    if (Object.getOwnPropertyNames(obj.$options.routes || {}).length > 0) {
                         var routes = this.bind(obj.$options.routes, obj);
                         this.router.mount(routes, this.prefix);
                     }

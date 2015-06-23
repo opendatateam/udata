@@ -25,7 +25,7 @@ describe("Markdown plugin", function() {
 
         function el(text) {
             var vm = new Tester({
-                    el: fixture.set('<div/>')[0][0],
+                    el: fixture.set('<div/>')[0],
                     data: {
                         text: text
                     }
@@ -34,9 +34,9 @@ describe("Markdown plugin", function() {
         }
 
         it('should render falsy values as ""', function() {
-            expect(el('').is(':empty')).to.be.true();
-            expect(el(null).is(':empty')).to.be.true();
-            expect(el(undefined).is(':empty')).to.be.true();
+            expect(el('').is(':empty')).to.be.true;
+            expect(el(null).is(':empty')).to.be.true;
+            expect(el(undefined).is(':empty')).to.be.true;
         });
 
         it('should markdown content', function() {
@@ -53,9 +53,9 @@ describe("Markdown plugin", function() {
 
         function el(text) {
             var vm = new Tester({
-                    el: fixture.set('<div/>')[0][0],
+                    el: fixture.set('<div/>')[0],
                     data: {
-                        text: text
+                        'text': text
                     }
                 }),
                 div = $(vm.$el).find('#markdown')[0];
@@ -63,9 +63,9 @@ describe("Markdown plugin", function() {
         }
 
         it('should render falsy values as ""', function() {
-            expect(el('').is(':empty')).to.be.true();
-            expect(el(null).is(':empty')).to.be.true();
-            expect(el(undefined).is(':empty')).to.be.true();
+            expect(el('').is(':empty')).to.be.true;
+            expect(el(null).is(':empty')).to.be.true;
+            expect(el(undefined).is(':empty')).to.be.true;
         });
 
         it('should markdown content', function() {
