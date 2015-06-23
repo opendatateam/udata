@@ -39,5 +39,5 @@ define([
         this.mock_specs(specs);
     };
 
-    return API
+    return API;
 });

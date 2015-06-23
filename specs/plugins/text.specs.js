@@ -15,7 +15,7 @@ describe("Text plugin", function() {
 
     function tester(text, filter) {
         return new Tester({
-            el: fixture.set('<div/>')[0][0],
+            el: fixture.set('<div/>')[0],
             data: {
                 text: text
             },
