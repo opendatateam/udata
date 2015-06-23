@@ -193,8 +193,11 @@ def extract_name_from_path(path):
 
 @apiv1.after_request
 def collect_stats(response):
-    action_name = extract_name_from_path(request.full_path)
-    if not current_app.config['TESTING']:
+    path = request.full_path
+    action_name = extract_name_from_path(path)
+    blacklist = current_app.config.get('PIWIK_BLACKLIST', [])
+    if (not current_app.config['TESTING'] and
+            not any(path.startswith(url) for url in blacklist)):
         extras = {
             'action_name': urllib.quote(action_name),
         }

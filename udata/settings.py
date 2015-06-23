@@ -71,6 +71,7 @@ class Defaults(object):
     #     'NEW_REUSE': # Demo = 2, Prod = 6
     #     'NEW_FOLLOW': # Demo = 3, Prod = 3
     # }
+    # PIWIK_BLACKLIST = ['/api/1/me/notifications/']  # Default: []
 
 
 class Testing(Defaults):
