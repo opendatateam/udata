@@ -73,6 +73,7 @@ class Defaults(object):
     #     'RESOURCE_DOWNLOAD': , # Demo = 5, Prod = ?
     #     'RESOURCE_REDIRECT': , # Demo = 6, Prod = ?
     # }
+    # TRACKING_BLACKLIST = ['api.notifications', 'api.checkurl']  # Default: []
 
 
 class Testing(Defaults):
