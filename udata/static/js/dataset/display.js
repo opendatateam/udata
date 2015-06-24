@@ -85,14 +85,13 @@ define([
                 });
                 // Click on a download link
                 $modal.find('.resource-click').click(function(e) {
-                    e.preventDefault(); // TODO: remove
                     var eventName = '';
                     if (startsWith(this.href, window.location.origin)) {
                         eventName = 'resource-download';
                     } else {
                         eventName = 'resource-redirect';
                     }
-                    pubsub.events.publish(eventName);
+                    pubsub.publish(eventName);
                 });
             });
 
