@@ -4,6 +4,7 @@ define(['jquery'], function($) {
     return {
         root: $('link[rel=admin-root]').attr('href'),
         api: $('link[rel=api-specs]').attr('href'),
+        sentry_dsn: $('link[rel=sentry-dsn]').attr('href'),
         title: $('meta[name=site-title]').attr('content'),
         lang: $('html').attr('lang'),
         debug: DEBUG,

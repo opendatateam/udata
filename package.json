@@ -43,8 +43,8 @@
     "webpack": "^1.9.11"
   },
   "dependencies": {
-    "admin-lte": "^2.1.0-alpha-1",
     "Chart.StackedBar.js": "regaddi/Chart.StackedBar.js#1.0.3",
+    "admin-lte": "^2.1.0-alpha-1",
     "bootstrap": "^3.3.5",
     "bootstrap-datepicker": "^1.4.0",
     "bootstrap-markdown": "^2.9.0",
@@ -64,6 +64,7 @@
     "leaflet": "^0.7.3",
     "marked": "^0.3.3",
     "moment": "^2.10.3",
+    "raven-js": "^1.1.18",
     "respond.js": "^1.4.2",
     "selectize": "^0.12.1",
     "sifter": "^0.4.1",
