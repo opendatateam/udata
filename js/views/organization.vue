@@ -27,6 +27,14 @@
     </div>
 
     <div class="row">
+        <issues id="issues-widget" class="col-md-12" issues="{{issues}}"></issues>
+    </div>
+
+    <div class="row">
+        <discussions id="discussions-widget" class="col-md-12" discussions="{{discussions}}"></discussions>
+    </div>
+
+    <div class="row">
         <followers-widget id="followers-widget" class="col-xs-12" followers="{{followers}}"></followers-widget>
     </div>
 </template>
@@ -60,6 +68,14 @@ module.exports = {
             datasets: new List({
                 ns: 'organizations',
                 fetch: 'list_organization_datasets'
+            }),
+            issues: new List({
+                ns: 'organizations',
+                fetch: 'list_organization_issues',
+            }),
+            discussions: new List({
+                ns: 'organizations',
+                fetch: 'list_organization_discussions'
             }),
             followers: new Followers({query: {page_size: 10}}),
             meta: {
@@ -149,7 +165,9 @@ module.exports = {
         'chart': require('components/charts/widget.vue'),
         'datasets-widget': require('components/dataset/list.vue'),
         'reuses-widget': require('components/reuse/list.vue'),
-        'followers-widget': require('components/follow/list.vue')
+        'followers-widget': require('components/follow/list.vue'),
+        'issues': require('components/issues/list.vue'),
+        'discussions': require('components/discussions/list.vue')
     },
     events: {
         'image:saved': function() {
@@ -174,6 +192,8 @@ module.exports = {
                 this.metrics.fetch({id: id});
                 this.reuses.clear().fetch({org: id});
                 this.datasets.clear().fetch({org: id});
+                this.issues.clear().fetch({org: id});
+                this.discussions.clear().fetch({org: id});
                 this.followers.fetch({id: id});
             } else {
                 this.datasets.clear();
