@@ -6,6 +6,8 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import Organization, Member, MembershipRequest, Follow, FollowOrg
+from udata.core.dataset.models import DatasetIssue, DatasetDiscussion
+from udata.core.reuse.models import ReuseIssue, ReuseDiscussion
 
 from . import APITestCase
 from ..factories import faker, OrganizationFactory, UserFactory, DatasetFactory, ReuseFactory
@@ -523,3 +525,55 @@ class OrganizationReusesAPITest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(len(response.json), len(reuses))
+
+
+class OrganizationIssuesAPITest(APITestCase):
+    def test_list_org_issues(self):
+        '''Should list organization issues'''
+        user = UserFactory()
+        org = OrganizationFactory()
+        reuse = ReuseFactory(organization=org)
+        dataset = DatasetFactory(organization=org)
+        issues = [
+            DatasetIssue.objects.create(subject=dataset, title='', user=user),
+            ReuseIssue.objects.create(subject=reuse, title='', user=user)
+        ]
+
+        # Should not be listed
+        DatasetIssue.objects.create(subject=DatasetFactory(), title='', user=user)
+        ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=user)
+
+        response = self.get(url_for('api.org_issues', org=org))
+
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(issues))
+
+        issues_ids = [str(i.id) for i in issues]
+        for issue in response.json:
+            self.assertIn(issue['id'], issues_ids)
+
+
+class OrganizationDiscussionsAPITest(APITestCase):
+    def test_list_org_discussions(self):
+        '''Should list organization discussions'''
+        user = UserFactory()
+        org = OrganizationFactory()
+        reuse = ReuseFactory(organization=org)
+        dataset = DatasetFactory(organization=org)
+        discussions = [
+            DatasetDiscussion.objects.create(subject=dataset, title='', user=user),
+            ReuseDiscussion.objects.create(subject=reuse, title='', user=user)
+        ]
+
+        # Should not be listed
+        DatasetIssue.objects.create(subject=DatasetFactory(), title='', user=user)
+        ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=user)
+
+        response = self.get(url_for('api.org_discussions', org=org))
+
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(discussions))
+
+        discussions_ids = [str(d.id) for d in discussions]
+        for discussion in response.json:
+            self.assertIn(discussion['id'], discussions_ids)
