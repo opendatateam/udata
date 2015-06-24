@@ -28,9 +28,12 @@ from .api_fields import (
 
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.models import Dataset
+from udata.core.discussions.api import discussion_fields
+from udata.core.discussions.models import Discussion
+from udata.core.issues.api import issue_fields
+from udata.core.issues.models import Issue
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.reuse.models import Reuse
-
 
 ns = api.namespace('organizations', 'Organization related operations')
 search_parser = api.search_parser(OrganizationSearch)
@@ -335,4 +338,30 @@ class OrgReusesAPI(API):
         qs = Reuse.objects.owned_by(org)
         if not OrganizationPrivatePermission(org).can():
             qs = qs(private__ne=True)
+        return list(qs)
+
+
+@ns.route('/<org:org>/issues/', endpoint='org_issues')
+class OrgIssuesAPI(API):
+    @api.doc('list_organization_issues')
+    @api.marshal_list_with(issue_fields)
+    def get(self, org):
+        '''List organization issues'''
+        reuses_ids = [r.id for r in Reuse.objects(organization=org).only('id')]
+        datasets_ids = [d.id for d in Dataset.objects(organization=org).only('id')]
+        ids = reuses_ids + datasets_ids
+        qs = Issue.objects(subject__in=ids).order_by('-created')
+        return list(qs)
+
+
+@ns.route('/<org:org>/discussions/', endpoint='org_discussions')
+class OrgDiscussionsAPI(API):
+    @api.doc('list_organization_discussions')
+    @api.marshal_list_with(discussion_fields)
+    def get(self, org):
+        '''List organization discussions'''
+        reuses_ids = [r.id for r in Reuse.objects(organization=org).only('id')]
+        datasets_ids = [d.id for d in Dataset.objects(organization=org).only('id')]
+        ids = reuses_ids + datasets_ids
+        qs = Discussion.objects(subject__in=ids).order_by('-created')
         return list(qs)
