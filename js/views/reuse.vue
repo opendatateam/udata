@@ -13,6 +13,14 @@
     </div>
 
     <div class="row">
+        <issues id="issues-widget" class="col-md-12" issues="{{issues}}"></issues>
+    </div>
+
+    <div class="row">
+        <discussions id="discussions-widget" class="col-md-12" discussions="{{discussions}}"></discussions>
+    </div>
+
+    <div class="row">
         <followers-widget id="followers-widget" class="col-xs-12" followers="{{followers}}"></followers-widget>
     </div>
 </template>
@@ -23,6 +31,8 @@
 var Vue = require('vue'),
     moment = require('moment'),
     Reuse = require('models/reuse'),
+    Issues = require('models/issues'),
+    Discussions = require('models/discussions'),
     Followers = require('models/followers').extend({ns: 'reuses'}),
     Metrics = require('models/metrics');
 
@@ -37,6 +47,8 @@ module.exports = {
                 end: moment().format('YYYY-MM-DD')
             }}),
             followers: new Followers({query: {page_size: 10}}),
+            issues: new Issues({query: {sort: '-created', page_size: 10}}),
+            discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
             meta: {
                 title: null,
                 page: null,
@@ -89,7 +101,9 @@ module.exports = {
         'reuse-details': require('components/reuse/details.vue'),
         'chart': require('components/charts/widget.vue'),
         'datasets-list': require('components/dataset/card-list.vue'),
-        'followers-widget': require('components/follow/list.vue')
+        'followers-widget': require('components/follow/list.vue'),
+        'issues': require('components/issues/list.vue'),
+        'discussions': require('components/discussions/list.vue')
     },
     events: {
         'dataset-card-list:submit': function(ids) {
@@ -142,6 +156,8 @@ module.exports = {
             if (id) {
                 this.metrics.fetch({id: id});
                 this.followers.fetch({id: id});
+                this.issues.fetch({'for': id});
+                this.discussions.fetch({'for': id});
             }
         }
     }
