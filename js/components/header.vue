@@ -4,7 +4,7 @@ a.sidebar-toggle {
 }
 </style>
 <template>
-    <a v-route="/" class="logo">
+    <a href="/" class="logo">
       <!-- Add the class icon to your logo image or logo icon to add the margining -->
       {{$root.site.title}}
     </a>
