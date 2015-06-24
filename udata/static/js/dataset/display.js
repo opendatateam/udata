@@ -8,6 +8,7 @@ define([
     'auth',
     'api',
     'leaflet',
+    'pubsub',
     'hbs!templates/dataset/resource-modal-body',
     'hbs!templates/dataset/extras-modal-body',
     'hbs!templates/dataset/add-reuse-modal-body',
@@ -18,7 +19,7 @@ define([
     'widgets/issues-btn',
     'widgets/discussions-btn',
     'widgets/share-btn',
-], function($, log, i18n, Auth, API, L, template, extrasTpl, addReuseTpl, forms, modal) {
+], function($, log, i18n, Auth, API, L, pubsub, template, extrasTpl, addReuseTpl, forms, modal) {
     'use strict';
 
     var user_reuses;
@@ -73,14 +74,25 @@ define([
 
             // Display detailled informations in a modal
             $this.click(function() {
-                modal({
+                var $modal = modal({
                     title: $this.property('name').value(),
                     content: template($this.microdata()[0]),
                     actions: [{
                         label: i18n._('Download'),
                         url: $this.property('url').value(),
-                        classes: 'btn-success'
+                        classes: 'btn-success resource-click'
                     }]
+                });
+                // Click on a download link
+                $modal.find('.resource-click').click(function(e) {
+                    e.preventDefault(); // TODO: remove
+                    var eventName = '';
+                    if (startsWith(this.href, window.location.origin)) {
+                        eventName = 'resource-download';
+                    } else {
+                        eventName = 'resource-redirect';
+                    }
+                    pubsub.events.publish(eventName);
                 });
             });
 
@@ -92,6 +104,7 @@ define([
                 $(this).remove();
             });
         });
+
     }
 
     function fetch_reuses() {

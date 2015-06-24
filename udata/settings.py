@@ -70,6 +70,8 @@ class Defaults(object):
     #     'NEW_DATASET': # Demo = 1, Prod = 7
     #     'NEW_REUSE': # Demo = 2, Prod = 6
     #     'NEW_FOLLOW': # Demo = 3, Prod = 3
+    #     'RESOURCE_DOWNLOAD': , # Demo = 5, Prod = ?
+    #     'RESOURCE_REDIRECT': , # Demo = 6, Prod = ?
     # }
 
 
