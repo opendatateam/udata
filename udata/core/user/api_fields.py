@@ -37,6 +37,10 @@ user_fields = api.model('User', {
         description='The user API URI', required=True),
 })
 
+me_fields = api.inherit('Me', user_fields, {
+    'email': fields.String(description='The user email', required=True)
+})
+
 user_page_fields = api.model('UserPage', fields.pager(user_fields))
 
 user_suggestion_fields = api.model('UserSuggestion', {

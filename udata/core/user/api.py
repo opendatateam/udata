@@ -15,6 +15,7 @@ from udata.core.reuse.api_fields import reuse_fields
 from udata.features.transfer.models import Transfer
 
 from .api_fields import (
+    me_fields,
     user_fields,
     user_page_fields,
     user_suggestion_fields,
@@ -33,7 +34,7 @@ search_parser = api.search_parser(UserSearch)
 class MeAPI(API):
     @api.secure
     @api.doc('get_me')
-    @api.marshal_with(user_fields)
+    @api.marshal_with(me_fields)
     def get(self):
         '''Fetch the current user (me) identity'''
         return current_user._get_current_object()
