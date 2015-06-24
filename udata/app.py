@@ -9,7 +9,10 @@ import types
 
 from os.path import abspath, join, dirname, isfile, exists
 
-from flask import Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint
+from flask import (
+    Flask, abort, g, redirect, send_from_directory, json,
+    Blueprint as BaseBlueprint
+)
 from flask.ext.cache import Cache
 
 from flask.ext.wtf.csrf import CsrfProtect
@@ -45,7 +48,15 @@ class UDataApp(Flask):
 
         # Default behavior
         if isfile(join(self.static_folder, filename)):
-            return send_from_directory(self.static_folder, filename, cache_timeout=cache_timeout)
+            # Allows statics to be served by another domain/server,
+            # note that you have to enable CORS for that server.
+            FS_URL = self.config.get('FS_URL')
+            if FS_URL:
+                return redirect('{url}/static/{name}'.format(url=FS_URL,
+                                                             name=filename))
+            else:
+                return send_from_directory(self.static_folder, filename,
+                                           cache_timeout=cache_timeout)
 
         # Handle aliases
         for prefix, directory in self.config.get('STATIC_DIRS', tuple()):
@@ -54,7 +65,8 @@ class UDataApp(Flask):
                 if real_filename.startswith('/'):
                     real_filename = real_filename[1:]
                 if isfile(join(directory, real_filename)):
-                    return send_from_directory(directory, real_filename, cache_timeout=cache_timeout)
+                    return send_from_directory(directory, real_filename,
+                                               cache_timeout=cache_timeout)
         abort(404)
 
     def handle_http_exception(self, e):
