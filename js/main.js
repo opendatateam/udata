@@ -5,6 +5,9 @@
  */
 require('../less/admin.less');
 
+// Catch all errors
+require('raven');
+
 var $ = require('jquery');
 require('bootstrap');
 

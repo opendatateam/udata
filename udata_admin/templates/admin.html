@@ -8,6 +8,7 @@
         <link rel="admin-root" href="{{ url_for('admin.index') }}">
         <link rel="theme-static" href="{{ theme_static('') }}">
         <link rel="api-specs" href="{{ url_for('api.specs', _external=True) }}">
+        {% if config.SENTRY_PUBLIC_DSN %}<link rel="sentry-dsn" href="{{config.SENTRY_PUBLIC_DSN}}">{% endif %}
         <meta name="site-title" content="{{config.SITE_TITLE}}">
         <meta name="generator" content="uData" />
         <link rel="stylesheet" href="{{ url_for('admin.static', filename='admin.css') }}"></script>
