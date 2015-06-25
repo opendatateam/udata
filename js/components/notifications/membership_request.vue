@@ -13,9 +13,7 @@
 'use strict';
 
 module.exports = {
-    data: function() {
-        return {};
-    },
+    mixins: [require('components/notifications/base')],
     methods: {
         click: function() {
             this.$go('/organization/' + this.details.organization + '#membership-requests');
