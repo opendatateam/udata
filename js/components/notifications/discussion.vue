@@ -4,7 +4,7 @@
 
 <template>
 <a class="pointer" v-on="click: click">
-    <span class="fa fa-fw fa-warning text-yellow"></span>
+    <span class="fa fa-fw fa-comment text-purple"></span>
     {{ details.title }}
 </a>
 </template>
@@ -16,7 +16,7 @@ module.exports = {
     mixins: [require('components/notifications/base')],
     methods: {
         click: function() {
-            this.$go('/issue/' + this.details.id + '/');
+            this.$go('/discussion/' + this.details.id + '/');
         }
     }
 };
