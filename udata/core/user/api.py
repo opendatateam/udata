@@ -6,7 +6,7 @@ from flask.ext.security import current_user
 
 from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, API
-from udata.models import User, FollowUser, Reuse, Dataset, Issue
+from udata.models import User, FollowUser, Reuse, Dataset, Issue, Discussion
 
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.followers.api import FollowAPI
@@ -103,13 +103,13 @@ class NotificationsAPI(API):
         user = current_user._get_current_object()
         notifications = []
 
-        orgs = [o for o in user.organizations if o.is_admin(user)]
+        orgs = [o for o in user.organizations if o.is_member(user)]
+        datasets = Dataset.objects.owned_by(user, *orgs)
+        reuses = Reuse.objects.owned_by(user, *orgs)
 
         # TODO: use polymorph field
 
         # Fetch user open issues
-        datasets = Dataset.objects.owned_by(user, *orgs)
-        reuses = Reuse.objects.owned_by(user, *orgs)
         for issue in Issue.objects(subject__in=list(datasets)+list(reuses)):
             notifications.append({
                 'type': 'issue',
@@ -120,6 +120,21 @@ class NotificationsAPI(API):
                     'subject': {
                         'id': str(issue.subject.id),
                         'type': issue.subject.__class__.__name__.lower(),
+                    }
+                }
+            })
+
+        # Fetch user open discussions
+        for discussion in Discussion.objects(subject__in=list(datasets)+list(reuses)):
+            notifications.append({
+                'type': 'discussion',
+                'created_on': discussion.created,
+                'details': {
+                    'id': str(discussion.id),
+                    'title': discussion.title,
+                    'subject': {
+                        'id': str(discussion.subject.id),
+                        'type': discussion.subject.__class__.__name__.lower(),
                     }
                 }
             })
