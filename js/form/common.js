@@ -1,7 +1,7 @@
 /**
  * Common form features
  */
-define(['jquery', 'i18n', 'jquery.validation', 'bootstrap' ], function($, i18n) {
+define(['jquery', 'i18n', 'jquery-validation-dist', 'bootstrap' ], function($, i18n) {
     'use strict';
 
     var csrftoken = $('meta[name=csrf-token]').attr('content'),

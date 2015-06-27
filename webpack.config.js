@@ -12,9 +12,10 @@ var languages = ['en', 'es', 'fr'];
 
 module.exports = {
     entry: {
-        site: "./js/site.js",
-        home: "./js/home.js",
-        search: "./js/search.js"
+        site: './js/site.js',
+        home: './js/home.js',
+        search: './js/search.js',
+        'dataset/display': './js/dataset/display',
     },
     output: {
         path: path.join(__dirname, 'udata', 'static'),

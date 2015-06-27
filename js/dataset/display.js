@@ -9,9 +9,9 @@ define([
     'api',
     'leaflet',
     'pubsub',
-    'hbs!templates/dataset/resource-modal-body',
-    'hbs!templates/dataset/extras-modal-body',
-    'hbs!templates/dataset/add-reuse-modal-body',
+    'templates/dataset/resource-modal-body.hbs',
+    'templates/dataset/extras-modal-body.hbs',
+    'templates/dataset/add-reuse-modal-body.hbs',
     'form/common',
     'widgets/modal',
     'widgets/featured',
@@ -179,6 +179,7 @@ define([
                     layer.openPopup();
                 });
                 layer.on("mouseout", function () {
+                    console.log('l', layer, layer.closePopup)
                     layer.closePopup();
                 });
             }
@@ -213,14 +214,13 @@ define([
         });
     }
 
-    return {
-        start: function() {
-            log.debug('Dataset display page');
-            $('.reuse.add').click(add_reuse);
-            $('.btn-extras').click(display_extras);
-            load_coverage_map();
-            prepare_resources();
-            fetch_reuses();
-        }
-    };
+    $(function() {
+        log.debug('Dataset display page');
+        $('.reuse.add').click(add_reuse);
+        $('.btn-extras').click(display_extras);
+        load_coverage_map();
+        prepare_resources();
+        fetch_reuses();
+    });
+
 });

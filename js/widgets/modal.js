@@ -3,7 +3,7 @@
  */
 define([
     'jquery',
-    'hbs!templates/bs-modal',
+    'templates/bs-modal.hbs',
     'i18n'
 ], function($, template, i18n) {
 

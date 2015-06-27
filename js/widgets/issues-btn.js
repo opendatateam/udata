@@ -8,9 +8,9 @@ define([
     'i18n',
     'notify',
     'widgets/modal',
-    'hbs!templates/issues/modal',
-    'hbs!templates/issues/list',
-    'hbs!templates/issues/details',
+    'templates/issues/modal.hbs',
+    'templates/issues/list.hbs',
+    'templates/issues/details.hbs',
     'form/common'
 ], function($, API, Auth, i18n, Notify, modal, modalTpl, listTpl, detailsTpl, forms) {
     'use strict';
