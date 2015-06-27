@@ -16,6 +16,7 @@ module.exports = {
         home: './js/home.js',
         search: './js/search.js',
         'dataset/display': './js/dataset/display',
+        'reuse/display': './js/reuse/display',
     },
     output: {
         path: path.join(__dirname, 'udata', 'static'),

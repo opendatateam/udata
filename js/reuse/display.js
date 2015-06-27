@@ -1,6 +1,7 @@
 /**
  * Default JS module
  */
+
 define([
     'logger',
     'widgets/featured',
@@ -9,9 +10,7 @@ define([
     'widgets/share-btn',
     'widgets/discussions-btn'
 ], function(log) {
-    return {
-        start: function() {
-            log.debug('Reuse display page');
-        }
-    };
+    $(function() {
+        log.debug('Reuse display page');
+    });
 });
