@@ -32,6 +32,12 @@ bower
 *.min.js
 /instance/
 /static/
+node_modules
+udata_gouvfr/theme/static/*.js
+udata_gouvfr/theme/static/*.js.map
+udata_gouvfr/theme/static/*.css
+udata_gouvfr/theme/static/*.css.map
+udata_gouvfr/theme/static/img
 
 # Installer logs
 pip-log.txt
