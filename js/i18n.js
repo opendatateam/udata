@@ -1,9 +1,15 @@
 /**
  * i18n handling
  */
-define(['jquery', 'i18next', 'moment'], function($, i18next, moment) {
+define(['jquery', 'i18next-client', 'moment'], function($, i18next, moment) {
     // Fetch the language once from the html lang attribute
-    var lang = $('html').attr('lang');
+    var lang = $('html').attr('lang'),
+        resource = require('locales/udata.' + lang + '.json'),
+        store = {};
+
+    store[lang] = {
+        udata: resource
+    };
 
     // Initialize required modules
     moment.locale(lang);
@@ -15,7 +21,7 @@ define(['jquery', 'i18next', 'moment'], function($, i18next, moment) {
         getAsync: false,
         nsseparator: '::', // Allow to use real sentences as keys
         keyseparator: '$$', // Allow to use real sentences as keys
-        resGetPath: require.toUrl('../locales/__ns__.__lng__.json')
+        resStore: store
     });
 
     return {
