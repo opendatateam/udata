@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from flask import request
+from flask import request, url_for
 from werkzeug.datastructures import FileStorage
 
 from udata import search

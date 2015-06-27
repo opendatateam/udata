@@ -103,6 +103,8 @@ dataset_suggestion_fields = api.model('DatasetSuggestion', {
     'title': fields.String(description='The dataset title', required=True),
     'slug': fields.String(description='The dataset permalink string', required=True),
     'image_url': fields.String(description='The dataset (organization) logo URL'),
+    'page': fields.UrlFor('datasets.show_redirect', lambda d: {'dataset': d['slug']},
+        description='The web page URL for this dataset', readonly=True),
     'score': fields.Float(description='The internal match score', required=True),
 })
 
