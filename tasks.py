@@ -108,3 +108,8 @@ def dist():
     '''Package for distribution'''
     print(cyan('Building a distribuable package'))
     lrun('python setup.py bdist_wheel', pty=True)
+
+
+@task
+def watch():
+    lrun('webpack -d -c --progress --watch', pty=True)
