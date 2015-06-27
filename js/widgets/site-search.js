@@ -12,7 +12,13 @@ define([
     'use strict';
 
     var SEARCH_FOCUS_CLASS = 'col-sm-7 col-lg-8',
-        SEARCH_UNFOCUS_CLASS = 'col-sm-2 col-lg-3';
+        SEARCH_UNFOCUS_CLASS = 'col-sm-2 col-lg-3',
+        options = {
+            highlight: true,
+            classNames: {
+                menu: 'tt-dropdown-menu'
+            }
+        };
 
     // Expandable main search bar
     $('#main-search')
@@ -32,9 +38,9 @@ define([
 
     // Typeahead
     $('#main-search')
-        .typeahead({highlight: true}, organizations, datasets, reuses)
-        .on('typeahead:selected', function(e, data, datatype) {
-            window.location = '/' + datatype + '/' + data.slug
+        .typeahead(options, organizations, datasets, reuses)
+        .on('typeahead:select', function(e, data, datatype) {
+            window.location = data.page
         });
 
 });

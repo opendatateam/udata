@@ -7,7 +7,7 @@ define([
     'bootstrap',
     'widgets/site-search',
     'utils/ellipsis',
-    'jquery.microdata',
+    'vendor/jquery.microdata',
     'i18n'
 ], function($) {
 

@@ -1,4 +1,4 @@
-define(['normalizeconsole'], function() {
+define(['vendor/normalizeconsole'], function() {
     var DEBUG = false,
         Logger = {};
     //>>excludeStart('production', pragmas.production);

@@ -4,8 +4,8 @@
 define([
     'api',
     'bloodhound',
-    'hbs!templates/search/header',
-    'hbs!templates/search/suggestion',
+    'templates/search/header.hbs',
+    'templates/search/suggestion.hbs',
     'i18n',
     'logger'
 ], function(API, Bloodhound, header, suggestion, i18n, log) {
@@ -17,17 +17,19 @@ define([
             datumTokenizer: function(d) {
                 return Bloodhound.tokenizers.whitespace(d.name);
             },
+            identify: function(d) {
+                return d.id;
+            },
             remote: {
-                url: API.build_url('/organizations/suggest/') + '?q=%QUERY&size='+MAX
+                url: API.build_url('/organizations/suggest/') + '?q=%QUERY&size='+MAX,
+                wildcard: '%QUERY'
             }
         });
 
-    engine.initialize();
-
     return {
         name: 'organizations',
-        source: engine.ttAdapter(),
-        displayKey: 'name',
+        source: engine,
+        display: 'name',
         limit: MAX,
         templates: {
             header: header({title: i18n._('Organizations')}),

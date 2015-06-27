@@ -6,7 +6,7 @@ define([
     'jquery',
     'moment',
     'i18n',
-    'bootstrap-datepicker'
+    'bootstrap-datepicker/dist/js/bootstrap-datepicker.js'
 ], function(log, $, moment, i18n) {
     'use strict';
 
