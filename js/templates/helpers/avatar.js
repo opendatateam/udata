@@ -1,10 +1,10 @@
 define([
-    'hbs/handlebars',
+    'handlebars',
     'utils/placeholder',
-    'hbs!templates/avatar'
+    'templates/avatar.hbs'
 ], function(Handlebars, placeholder, tpl) {
 
-    Handlebars.registerHelper('avatar', function(object, size, options) {
+    return function(object, size, options) {
         var avatar_url,
             type = options.hash['type'] || 'user';
 
@@ -19,9 +19,9 @@ define([
         return new Handlebars.SafeString(tpl({
             href: options.hash['url'] || undefined,
             avatar_url: avatar_url || placeholder(type),
-            size: size || 32
+            avatar_size: size || 32
         }));
 
-    });
+    };
 
 });

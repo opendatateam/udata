@@ -1,6 +1,6 @@
-define(['hbs/handlebars'], function(Handlebars) {
+define(['handlebars'], function(Handlebars) {
 
-    Handlebars.registerHelper('icon', function(value, options) {
+    return function(value, options) {
         var cls = value.indexOf('fa-') == 0 ? 'fa '+ value : 'glyphicon glyphicon-' + value;
 
         if ($.inArray('cls', options.hash)) {
@@ -8,6 +8,6 @@ define(['hbs/handlebars'], function(Handlebars) {
         }
 
         return new Handlebars.SafeString('<span class="' + cls + '"></span>');
-    });
+    };
 
 });

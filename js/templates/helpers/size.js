@@ -1,7 +1,7 @@
 /**
  * Display a file size in human-readable way
  */
-define(['hbs/handlebars'], function(Handlebars) {
+define([], function() {
 
     function bytesToSize(bytes) {
         var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -11,7 +11,7 @@ define(['hbs/handlebars'], function(Handlebars) {
         return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
     };
 
-    Handlebars.registerHelper('size', function(value, options) {
+    return function(value, options) {
         return bytesToSize(value);
-    });
+    };
 });

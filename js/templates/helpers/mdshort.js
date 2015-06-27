@@ -1,9 +1,9 @@
-define(['hbs/handlebars', 'marked'], function(Handlebars, marked) {
+define(['handlebars', 'marked'], function(Handlebars, marked) {
 
     var EXCERPT_TOKEN = '<!--- --- -->',
         DEFAULT_LENGTH = 128;
 
-    Handlebars.registerHelper('mdshort', function(value, length) {
+    return function(value, length) {
         if (!value) {
             return;
         }
@@ -16,6 +16,6 @@ define(['hbs/handlebars', 'marked'], function(Handlebars, marked) {
         text = marked(value.substring(0, length) + ellipsis);
         text = text.replace('<a ', '<span ').replace('</a>', '</span>');
         return new Handlebars.SafeString(text);
-    });
+    };
 
 });
