@@ -1,19 +1,28 @@
 /**
  *  Etalab/Data.gouv.fr customization
  */
-@import "site.less";
-@import "gouvfr/variables.less";
-@import "gouvfr/mixins.less";
-@import "gouvfr/navbars.less";
-@import "gouvfr/buttons.less";
-@import "gouvfr/modals.less";
-@import "gouvfr/typeahead.less";
-@import "gouvfr/dataconnexions.less";
-@import "gouvfr/faq.less";
-@import "gouvfr/resources.less";
-@import "gouvfr/community.less";
+// @import "site.less";
+@import "gouvfr/variables";
+@import "gouvfr/mixins";
+@import "gouvfr/navbars";
+@import "gouvfr/buttons";
+@import "gouvfr/modals";
+@import "gouvfr/typeahead";
+@import "gouvfr/dataconnexions";
+@import "gouvfr/faq";
+@import "gouvfr/resources";
+@import "gouvfr/community";
 
 // @import url(//fonts.googleapis.com/css?family=Raleway:400,700,500);
+
+
+
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 
 body {
     padding-top: 0;
@@ -540,7 +549,7 @@ ul.search-results {
     top:0;
     left: -38px;
     position: absolute;
-    background: url('../img/communaute_cover.png') no-repeat 0px 5px;
+    background: url('/img/communaute_cover.png') no-repeat 0px 5px;
     opacity: 0.5;
 }
 
