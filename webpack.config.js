@@ -25,7 +25,7 @@ module.exports = {
     devtools: 'eval-source-map',
     module: {
         loaders: [
-            {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file?name=[path][name].[ext]'},
+            {test: /img\/.*\.(jpg|jpeg|png|gif|svg)$/, loader: 'file?name=[path][name].[ext]'},
             {test: /\.css$/, loader: css_loader},
             {test: /\.less$/, loader: less_loader},
             {test: /\.json$/, loader: "json"},

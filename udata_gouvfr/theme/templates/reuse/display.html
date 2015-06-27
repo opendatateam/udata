@@ -4,13 +4,6 @@
     {% include theme('subnav-community.html') with context %}
 {% endblock %}
 
-{% block extra_css %}
-{{ super() }}
-{% assets 'gouvfr-reuse-css' %}
-<link href="{{ ASSET_URL }}" rel="stylesheet">
-{% endassets %}
-{% endblock %}
-
 {% block content %}
 {{ super() }}
 <section class="community_container">
