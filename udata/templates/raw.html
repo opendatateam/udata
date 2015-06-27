@@ -20,10 +20,9 @@
 
     <title>{% if meta.title %}{{ meta.title }} - {% endif %}{{ current_site.title }}</title>
 
-    {% set site_css_bundle = site_css_bundle|default('site-css') %}
-    {% assets site_css_bundle %}
-    <link href="{{ ASSET_URL }}" rel="stylesheet">
-    {% endassets %}
+
+    <link href="{{ static('site.css') }}" rel="stylesheet">
+    <link href="{{ theme_static('theme.css') }}" rel="stylesheet">
     {% block extra_css %}{% endblock %}
 
     <link rel="theme-static-root" href="{{ theme_static('') }}" />
@@ -60,12 +59,6 @@
 
     {{ i18n_alternate_links() }}
 
-    {% set base_url = static('js/' if config.ASSETS_DEBUG else 'js-built') %}
-    <script>var require = {baseUrl: "{{ base_url }}"};</script>
-    {% assets "require-js" %}
-    <script type="text/javascript" src="{{ ASSET_URL }}" data-main="app"></script>
-    {% endassets %}
-
     {% block extra_head %}{% endblock %}
 
     {% endblock raw_head %}
@@ -75,6 +68,8 @@
   <body class="{{body_class}}">
     {% block body %}{% endblock %}
 
+    <script type="text/javascript" src="{{ static('common.js') }}"></script>
+    <script type="text/javascript" src="{{ static('site.js') }}"></script>
     {% block extra_js %}{% endblock %}
 
     {% for snippet in footer_snippets %}

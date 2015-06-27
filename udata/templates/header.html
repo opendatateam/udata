@@ -75,9 +75,7 @@
         </li>
         {% endif %}
         {% if g.lang_code and request.url %}
-        <li class="dropdown language">{#
-            <button class="btn btn-link dropdown-toggle" data-toggle="dropdown">
-            </button> #}
+        <li class="dropdown language">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                 <img src="{{ theme_static('img/flags/{0}.png'.format(g.lang_code)) }}"
                   alt="Current locale flag"
