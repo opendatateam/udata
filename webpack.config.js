@@ -3,6 +3,7 @@ var webpack = require('webpack');
 
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var node_path = path.join(__dirname, 'node_modules');
+var node_path = path.join(__dirname, 'js', 'vendor');
 
 var vue = require('vue-loader'),
     css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap'),
@@ -20,6 +21,7 @@ module.exports = {
         'organization/display': './js/organization/display',
         'dashboard/site': './js/dashboard/site',
         'dashboard/organization': './js/dashboard/organization',
+        'site/map': './js/site/map',
     },
     output: {
         path: path.join(__dirname, 'udata', 'static'),

@@ -8,6 +8,10 @@
 
 {% set section_class = 'big-map' %}
 
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('site/map.js') }}"></script>
+{% endblock %}
+
 {% block breadcrumb %}
     <li class="active">{{ _('Coverage map') }}</li>
 {% endblock %}

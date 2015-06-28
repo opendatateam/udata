@@ -7,11 +7,9 @@ define([
 
     var map = new Map('.big-map');
 
-    return {
-        start: function() {
-            map.load();
-        }
-    };
+    $(function() {
+        map.load();
+    });
 });
 
 

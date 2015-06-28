@@ -3,10 +3,10 @@ define([
     'api',
     'logger',
     'class',
-    'hbs!templates/map/coverage-popup',
+    'templates/map/coverage-popup.hbs',
     'leaflet',
-    'spin',
-    'leaflet.spin'
+    'spin.js',
+    'vendor/leaflet.spin'
 ], function($, API, log, Class, popupTpl, L, Spinner) {
     'use strict';
 
