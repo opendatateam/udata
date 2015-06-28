@@ -18,6 +18,8 @@ module.exports = {
         'dataset/display': './js/dataset/display',
         'reuse/display': './js/reuse/display',
         'organization/display': './js/organization/display',
+        'dashboard/site': './js/dashboard/site',
+        'dashboard/organization': './js/dashboard/organization',
     },
     output: {
         path: path.join(__dirname, 'udata', 'static'),

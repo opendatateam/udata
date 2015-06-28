@@ -39,12 +39,10 @@ define([
         });
     }
 
-    return {
-        start: function() {
-            log.debug('Start organization dashboard view');
-            load_metrics();
-        }
-    };
+    $(function() {
+        log.debug('Start organization dashboard view');
+        load_metrics();
+    });
 });
 
 

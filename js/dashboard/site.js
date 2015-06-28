@@ -37,11 +37,7 @@ define([
         });
     }
 
-    return {
-        start: function() {
-            load_metrics();
-        }
-    };
+    $(load_metrics);
 });
 
 
