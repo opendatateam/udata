@@ -6,6 +6,10 @@
     'keywords': [_('organization')],
 } %}
 
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('organization/display.js') }}"></script>
+{% endblock %}
+
 {% block breadcrumb %}
     {{ super() }}
     <li class="active">{{ org.name }}</li>
