@@ -1,46 +1,45 @@
-@import "gouvfr.less";
+body.dashboard {
+    section.community {
+        background-color: #354651;
+        padding-bottom: 20px;
 
-section.community {
-    background-color: #354651;
-    padding-bottom: 20px;
+        header {
+            background-color: #28343d;
+            margin-top: 0;
+            min-height: 80px;
+            margin-bottom: 20px;
 
-    header {
-        background-color: #28343d;
-        margin-top: 0;
-        min-height: 80px;
-        margin-bottom: 20px;
+            h2 {
+                font-family: @title-font;
+                margin-bottom: -4px;
+                font-size: 25px;
 
-        h2 {
-            font-family: @title-font;
-            margin-bottom: -4px;
-            font-size: 25px;
+                @media(min-width: @screen-sm-min) {
+                    margin-top: 30px;
+                    font-size: 30px;
+                }
+            }
 
-            @media(min-width: @screen-sm-min) {
-                margin-top: 30px;
-                font-size: 30px;
+            small {
+                margin-top: 5px;
             }
         }
 
-        small {
-            margin-top: 5px;
+        .page-header {
+            color: white;
+            border: 0px;
+            margin: 0;
+
+            @media(max-width: @screen-xs-max) {
+                margin-bottom: 0;
+            }
         }
-    }
 
-    .page-header {
-        color: white;
-        border: 0px;
-        margin: 0;
-
-        @media(max-width: @screen-xs-max) {
-            margin-bottom: 0;
-        }
-    }
-
-    ul.timeline {
-        & > li > .timeline-panel {
-            -webkit-box-shadow: 0 1px 6px rgba(200, 200, 255, 0.2);
-            box-shadow: 0 1px 6px rgba(200, 200, 255, 0.2);
+        ul.timeline {
+            & > li > .timeline-panel {
+                -webkit-box-shadow: 0 1px 6px rgba(200, 200, 255, 0.2);
+                box-shadow: 0 1px 6px rgba(200, 200, 255, 0.2);
+            }
         }
     }
 }
-
