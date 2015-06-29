@@ -30,9 +30,10 @@ def register_commands(manager):
     manager.add_command('clean', Clean())
     manager.add_command('urls', ShowUrls())
 
-    custom_settings = join(os.getcwd(), 'udata.cfg')
-    manager.add_command('serve', Server(port=6666, use_debugger=True, use_reloader=True))
-    # manager.add_command('serve', Server(port=6666, use_debugger=True, use_reloader=True, extra_files=[custom_settings]))
+    settings = os.environ.get('UDATA_SETTINGS', join(os.getcwd(), 'udata.cfg'))
+    manager.add_command('serve', Server(port=6666, use_debugger=True,
+                                        use_reloader=True, threaded=True,
+                                        extra_files=[settings]))
 
     # Load all commands submodule
     for filename in iglob(join(dirname(__file__), '[!_]*.py')):

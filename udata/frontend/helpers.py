@@ -306,7 +306,7 @@ def i18n_alternate_links():
 @front.app_template_filter()
 @front.app_template_global()
 def to_json(data):
-    '''Display the biggest territory and labelize code'''
+    '''Convert data to JSON, you may have to use |safe after it.'''
     if not data:
         return Markup('')
     return json.dumps(data)
