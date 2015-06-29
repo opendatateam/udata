@@ -1,11 +1,12 @@
 /**
- * Follow button
+ * Share button
  */
 define([
     'jquery',
     'i18n',
+    'pubsub',
     'hbs!templates/widgets/share-popover'
-], function($, i18n, tpl) {
+], function($, i18n, pubsub, tpl) {
     'use strict';
 
     // Handle featured button
@@ -16,11 +17,17 @@ define([
             title: i18n._('Share'),
             placement: 'top',
             container: 'body',
-            trigger: 'focus',
+            // trigger: 'focus', // Doesn't work on OSX+FF/iOS+Safari
             content: tpl({
                 url: $this.data('share-url'),
                 title: $this.data('share-title')
             })
+        }).on('shown.bs.popover', function() {
+            $(document.body).find('.share-click').each(function() {
+                $(this).on('click', function(e) {
+                    pubsub.publish('share');
+                });
+            });
         });
     });
 
