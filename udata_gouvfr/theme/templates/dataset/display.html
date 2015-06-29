@@ -66,17 +66,19 @@
                                     {% endif %}
                                     {% trans
                                         date=dataset.created_at|dateformat(format='long'),
+                                        update=dataset.last_update|dateformat(format='long'),
                                         author=dataset.organization.name,
                                         url=url_for('organizations.show', org=dataset.organization)
-                                    %}Published on {{date}} by <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
+                                    %}Published on {{date}} and updated on {{update}} by <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
                                 </small>
                             {% elif dataset.owner %}
                                 <small>
                                     {% trans
                                         date=dataset.created_at|dateformat(format='long'),
+                                        update=dataset.last_update|dateformat(format='long'),
                                         author=dataset.owner.fullname,
                                         url=url_for('users.show', user=dataset.owner)
-                                    %}This dataset has been published on {{date}} on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
+                                    %}This dataset has been published on {{date}} and updated on {{update}} on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
                                 </small>
                             {% endif %}
                             {% if not dataset.organization.public_service %}
