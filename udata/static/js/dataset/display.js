@@ -87,9 +87,9 @@ define([
                 $modal.find('.resource-click').click(function(e) {
                     var eventName = '';
                     if (startsWith(this.href, window.location.origin)) {
-                        eventName = 'resource-download';
+                        eventName = 'RESOURCE_DOWNLOAD';
                     } else {
-                        eventName = 'resource-redirect';
+                        eventName = 'RESOURCE_REDIRECT';
                     }
                     pubsub.publish(eventName);
                 });
