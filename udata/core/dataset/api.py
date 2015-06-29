@@ -82,7 +82,7 @@ class DatasetAPI(API):
         if dataset.deleted:
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
-        form = api.validate(DatasetForm, dataset)
+        form = api.validate(DatasetFullForm, dataset)
         return form.save()
 
     @api.secure
