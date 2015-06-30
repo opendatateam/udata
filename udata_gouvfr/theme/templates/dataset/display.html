@@ -504,10 +504,10 @@
                         data-api-url="{{ url_for('api.discussions', for=dataset.id) }}"
                         data-subject="{{ dataset.id }}">
                         <div class="form-group">
-                            <label for="title">{{ _('Title') }}</label>
-                            <input type="text" id="title" name="title" class="form-control" required />
-                            <label for="comment">{{ _('Comment') }}</label>
-                            <textarea id="comment" name="comment" class="form-control" rows="3" required></textarea>
+                            <label for="title-new-discussion">{{ _('Title') }}</label>
+                            <input type="text" id="title-new-discussion" name="title" class="form-control" required />
+                            <label for="comment-new-discussion">{{ _('Comment') }}</label>
+                            <textarea id="comment-new-discussion" name="comment" class="form-control" rows="3" required></textarea>
                         </div>
                         <input type="submit" value="{{ _('Start a discussion') }}" class="btn btn-primary btn-block pull-right submit-new-discussion" />
                     </form>
