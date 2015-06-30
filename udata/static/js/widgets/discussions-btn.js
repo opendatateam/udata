@@ -88,8 +88,8 @@ function($, API, Auth, i18n, Notify) {
         }
 
         var data = {
-            title: $form.find('#title').val(),
-            comment: $form.find('#comment').val(),
+            title: $form.find('#title-new-discussion').val(),
+            comment: $form.find('#comment-new-discussion').val(),
             subject: $form.data('subject')
         };
 
@@ -106,7 +106,7 @@ function($, API, Auth, i18n, Notify) {
         submitNewComment($this, $form, data);
     });
 
-    $('.submit-new-comment').click(function(e) {
+    $('.submit-new-message').click(function(e) {
         e.preventDefault();
         var $this = $(this);
         var $form = $this.parent();
@@ -117,7 +117,7 @@ function($, API, Auth, i18n, Notify) {
         }
 
         var data = {
-            comment: $form.find('#comment').val()
+            comment: $form.find('#comment-new-message').val()
         };
 
         function displayNewComment(el, form, data) {
@@ -135,6 +135,7 @@ function($, API, Auth, i18n, Notify) {
     $('.suggest-tag').click(function(e) {
         e.preventDefault();
         var $newDiscussion = $('.new-discussion');
+        var $form = $newDiscussion.parent();
 
         // Otherwise the scrollTop is not effective if the form is already
         // displayed (hence the new discussion button is hidden)
@@ -153,9 +154,9 @@ function($, API, Auth, i18n, Notify) {
         hideNewDiscussionButton($newDiscussion);
 
         // Prefill the new discussion thread form
-        $newDiscussion.parent().find('#title').val(
+        $form.find('#title-new-discussion').val(
             i18n._('New tag suggestion to improve metadata'));
-        $newDiscussion.parent().find('#comment').val(
+        $form.find('#comment-new-discussion').val(
             i18n._('Hello,\n\nI propose this new tag: '));
     });
 
