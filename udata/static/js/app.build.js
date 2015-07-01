@@ -28,6 +28,11 @@
                 'form/widgets'
             ]
         }, {
+            name: "udata",
+            exclude: [
+                'app'
+            ]
+        }, {
             name: 'dataset/display',
             exclude: [
                 'app'
