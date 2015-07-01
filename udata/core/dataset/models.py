@@ -204,7 +204,10 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
 
     @property
     def last_update(self):
-        return max(resource.published for resource in self.resources)
+        if self.resources:
+            return max(resource.published for resource in self.resources)
+        else:
+            return self.last_modified
 
     @classmethod
     def get(cls, id_or_slug):

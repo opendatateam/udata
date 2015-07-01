@@ -67,6 +67,11 @@ class TestCase(BaseTestCase):
     def assert204(self, response):
         self.assertStatus(response, 204)
 
+    def assertEqualDates(self, datetime1, datetime2):
+        """Avoid comparing milliseconds."""
+        self.assertEqual(datetime1.strftime('%Y%m%d%H%M%S'),
+                         datetime2.strftime('%Y%m%d%H%M%S'))
+
     def assertStartswith(self, haystack, needle):
         self.assertEqual(
             haystack.startswith(needle), True,
