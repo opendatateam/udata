@@ -94,19 +94,17 @@ i18n_analyzer = make_lazy_string(get_i18n_analyzer)
 @celery.task
 def reindex(obj):
     adapter = adapter_catalog.get(obj.__class__)
-    log.info('Indexing %s (%s)', adapter.doc_type(), obj.id)
-    es.index(index=es.index_name, doc_type=adapter.doc_type(), id=obj.id, body=adapter.serialize(obj))
+    doctype = adapter.doc_type()
+    if adapter.is_indexable(obj):
+        log.info('Indexing %s (%s)', doctype, obj.id)
+        es.index(index=es.index_name, doc_type=doctype, id=obj.id, body=adapter.serialize(obj))
+    elif es.exists(index=es.index_name, doc_type=doctype, id=obj.id):
+        log.info('Unindexing %s (%s)', doctype, obj.id)
+        es.delete(index=es.index_name, doc_type=doctype, id=obj.id, refresh=True)
+    else:
+        log.info('Nothing to do for %s (%s)', doctype, obj.id)
 
 
-@celery.task
-def unindex(obj):
-    adapter = adapter_catalog.get(obj.__class__)
-    if es.exists(index=es.index_name, doc_type=adapter.doc_type(), id=obj.id):
-        log.info('Unindexing %s (%s)', adapter.doc_type(), obj.id)
-        es.delete(index=es.index_name, doc_type=adapter.doc_type(), id=obj.id, refresh=True)
-
-
-# from . import fields
 from .adapter import ModelSearchAdapter, metrics_mapping
 from .query import SearchQuery
 from .result import SearchResult, SearchIterator

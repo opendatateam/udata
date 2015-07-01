@@ -2,10 +2,22 @@
 from __future__ import unicode_literals
 
 import logging
+import re
 
 from werkzeug.exceptions import HTTPException
 
 log = logging.getLogger(__name__)
+
+RE_DSN = re.compile(r'(?P<scheme>https?)://(?P<client_id>[0-9a-f]+):[0-9a-f]+@(?P<domain>.+)/(?P<site_id>\d+)')
+
+
+def public_dsn(dsn):
+    '''Transform a standard Sentry DSN into a public one'''
+    m = RE_DSN.match(dsn)
+    if not m:
+        log.error('Unable to parse Sentry DSN')
+    public = '{scheme}://{client_id}@{domain}/{site_id}'.format(**m.groupdict())
+    return public
 
 
 def init_app(app):
@@ -33,5 +45,7 @@ def init_app(app):
         if HTTPException not in exceptions:
             exceptions.append(HTTPException)
         app.config['RAVEN_IGNORE_EXCEPTIONS'] = exceptions
+
+        app.config['SENTRY_PUBLIC_DSN'] = public_dsn(app.config['SENTRY_DSN'])
 
         sentry.init_app(app)

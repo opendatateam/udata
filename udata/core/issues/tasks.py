@@ -4,23 +4,11 @@ from __future__ import unicode_literals, absolute_import
 from udata import mail
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, Reuse
-from udata.tasks import task, get_logger
+from udata.tasks import connect, get_logger
 
 from .signals import on_new_issue, on_new_issue_comment, on_issue_closed
 
 log = get_logger(__name__)
-
-
-def connect(signal):
-    def wrapper(func):
-        t = task(func)
-
-        def call_task(issue, **kwargs):
-            t.delay(issue, **kwargs)
-
-        signal.connect(call_task, weak=False)
-        return t
-    return wrapper
 
 
 def owner_recipients(issue):

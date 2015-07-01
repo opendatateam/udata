@@ -6,9 +6,11 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import Organization, Member, MembershipRequest, Follow, FollowOrg
+from udata.core.dataset.models import DatasetIssue, DatasetDiscussion
+from udata.core.reuse.models import ReuseIssue, ReuseDiscussion
 
 from . import APITestCase
-from ..factories import faker, OrganizationFactory, UserFactory
+from ..factories import faker, OrganizationFactory, UserFactory, DatasetFactory, ReuseFactory
 
 
 class OrganizationAPITest(APITestCase):
@@ -453,3 +455,125 @@ class MembershipAPITest(APITestCase):
         response = self.get(url_for('api.suggest_organizations'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
+
+
+class OrganizationDatasetsAPITest(APITestCase):
+    def test_list_org_datasets(self):
+        '''Should list organization datasets'''
+        org = OrganizationFactory()
+        datasets = DatasetFactory.create_batch(3, organization=org)
+
+        response = self.get(url_for('api.org_datasets', org=org))
+
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(datasets))
+
+    def test_list_org_datasets_private(self):
+        '''Should include private datasets when member'''
+        self.login()
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        datasets = DatasetFactory.create_batch(3, organization=org, private=True)
+
+        response = self.get(url_for('api.org_datasets', org=org))
+
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(datasets))
+
+    def test_list_org_datasets_hide_private(self):
+        '''Should not include private datasets when not member'''
+        org = OrganizationFactory()
+        datasets = DatasetFactory.create_batch(3, organization=org)
+        DatasetFactory.create_batch(2, organization=org, private=True)
+
+        response = self.get(url_for('api.org_datasets', org=org))
+
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(datasets))
+
+
+class OrganizationReusesAPITest(APITestCase):
+    def test_list_org_reuses(self):
+        '''Should list organization reuses'''
+        org = OrganizationFactory()
+        reuses = ReuseFactory.create_batch(3, organization=org)
+
+        response = self.get(url_for('api.org_reuses', org=org))
+
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(reuses))
+
+    def test_list_org_reuses_private(self):
+        '''Should include private reuses when member'''
+        self.login()
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        reuses = ReuseFactory.create_batch(3, organization=org, private=True)
+
+        response = self.get(url_for('api.org_reuses', org=org))
+
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(reuses))
+
+    def test_list_org_reuses_hide_private(self):
+        '''Should not include private reuses when not member'''
+        org = OrganizationFactory()
+        reuses = ReuseFactory.create_batch(3, organization=org)
+        ReuseFactory.create_batch(2, organization=org, private=True)
+
+        response = self.get(url_for('api.org_reuses', org=org))
+
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(reuses))
+
+
+class OrganizationIssuesAPITest(APITestCase):
+    def test_list_org_issues(self):
+        '''Should list organization issues'''
+        user = UserFactory()
+        org = OrganizationFactory()
+        reuse = ReuseFactory(organization=org)
+        dataset = DatasetFactory(organization=org)
+        issues = [
+            DatasetIssue.objects.create(subject=dataset, title='', user=user),
+            ReuseIssue.objects.create(subject=reuse, title='', user=user)
+        ]
+
+        # Should not be listed
+        DatasetIssue.objects.create(subject=DatasetFactory(), title='', user=user)
+        ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=user)
+
+        response = self.get(url_for('api.org_issues', org=org))
+
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(issues))
+
+        issues_ids = [str(i.id) for i in issues]
+        for issue in response.json:
+            self.assertIn(issue['id'], issues_ids)
+
+
+class OrganizationDiscussionsAPITest(APITestCase):
+    def test_list_org_discussions(self):
+        '''Should list organization discussions'''
+        user = UserFactory()
+        org = OrganizationFactory()
+        reuse = ReuseFactory(organization=org)
+        dataset = DatasetFactory(organization=org)
+        discussions = [
+            DatasetDiscussion.objects.create(subject=dataset, title='', user=user),
+            ReuseDiscussion.objects.create(subject=reuse, title='', user=user)
+        ]
+
+        # Should not be listed
+        DatasetIssue.objects.create(subject=DatasetFactory(), title='', user=user)
+        ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=user)
+
+        response = self.get(url_for('api.org_discussions', org=org))
+
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(discussions))
+
+        discussions_ids = [str(d.id) for d in discussions]
+        for discussion in response.json:
+            self.assertIn(discussion['id'], discussions_ids)

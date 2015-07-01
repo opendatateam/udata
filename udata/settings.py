@@ -56,6 +56,26 @@ class Defaults(object):
 
     OAUTH2_PROVIDER_ERROR_ENDPOINT = 'oauth-i18n.oauth_error'
 
+    # CROQUEMORT = {
+    #     'url': 'http://localhost:8000',
+    #     'delay': 1,
+    #     'retry': 10,
+    # }
+
+    # PIWIK_ID = # Demo = 11, Prod = 1
+    # PIWIK_URL = 'stats.data.gouv.fr'
+    # PIWIK_AUTH = '<32-chars-auth-token-from-piwik>'
+    # # All keys are required.
+    # PIWIK_GOALS = {
+    #     'NEW_DATASET': # Demo = 1, Prod = 7
+    #     'NEW_REUSE': # Demo = 2, Prod = 6
+    #     'NEW_FOLLOW': # Demo = 3, Prod = 3
+    #     'SHARE': , # Demo = 4, Prod = ?
+    #     'RESOURCE_DOWNLOAD': , # Demo = 5, Prod = ?
+    #     'RESOURCE_REDIRECT': , # Demo = 6, Prod = ?
+    # }
+    # TRACKING_BLACKLIST = ['api.notifications', 'api.checkurl']  # Default: []
+
 
 class Testing(Defaults):
     TESTING = True

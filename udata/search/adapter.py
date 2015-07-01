@@ -7,20 +7,16 @@ import logging
 from flask import current_app
 from mongoengine.signals import post_save
 
-from udata.search import adapter_catalog, reindex, unindex
+from udata.search import adapter_catalog, reindex
 from udata.core.metrics import Metric
 
 log = logging.getLogger(__name__)
 
 
 def reindex_model_on_save(sender, document, **kwargs):
-    '''(Re)Index Mongo document on post_save'''
-    adapter = adapter_catalog.get(document.__class__)
-    if current_app.config.get('AUTO_INDEX') and adapter:
-        if adapter.is_indexable(document):
-            reindex.delay(document)
-        else:
-            unindex.delay(document)
+    '''(Re/Un)Index Mongo document on post_save'''
+    if current_app.config.get('AUTO_INDEX'):
+        reindex.delay(document)
 
 
 class SearchAdapterMetaClass(type):

@@ -23,20 +23,20 @@ function($, API, Auth, i18n, Notify) {
         });
     }
 
+    function displayNewDiscussionForm(el) {
+        $('.list-group-form-discussion').removeClass('hidden').addClass('fadeInDown');
+    }
+
+    function hideNewDiscussionButton(el) {
+        el.addClass('hidden');
+    }
+
     $('.new-discussion').click(function(e) {
         e.preventDefault();
         var $this = $(this);
 
         if (!Auth.need_user(i18n._('You need to be logged in to discuss.'))) {
             return false;
-        }
-
-        function displayNewDiscussionForm(el) {
-            $('.list-group-form-discussion').removeClass('hidden').addClass('fadeInDown');
-        }
-
-        function hideNewDiscussionButton(el) {
-            el.addClass('hidden');
         }
 
         displayNewDiscussionForm($this);
@@ -52,7 +52,7 @@ function($, API, Auth, i18n, Notify) {
         }
 
         function displayNewCommentForm(el) {
-            var discussionId = $this.data('discussion-id');
+            var discussionId = el.data('discussion-id');
             $('.list-group-form-' + discussionId).removeClass('hidden').addClass('fadeInDown');
         }
 
@@ -88,8 +88,8 @@ function($, API, Auth, i18n, Notify) {
         }
 
         var data = {
-            title: $form.find('#title').val(),
-            comment: $form.find('#comment').val(),
+            title: $form.find('#title-new-discussion').val(),
+            comment: $form.find('#comment-new-discussion').val(),
             subject: $form.data('subject')
         };
 
@@ -106,7 +106,7 @@ function($, API, Auth, i18n, Notify) {
         submitNewComment($this, $form, data);
     });
 
-    $('.submit-new-comment').click(function(e) {
+    $('.submit-new-message').click(function(e) {
         e.preventDefault();
         var $this = $(this);
         var $form = $this.parent();
@@ -117,7 +117,7 @@ function($, API, Auth, i18n, Notify) {
         }
 
         var data = {
-            comment: $form.find('#comment').val()
+            comment: $form.find('#comment-new-message').val()
         };
 
         function displayNewComment(el, form, data) {
@@ -130,6 +130,34 @@ function($, API, Auth, i18n, Notify) {
         hideNewForm($this, $form);
         displayNewComment($this, $form, data);
         submitNewComment($this, $form, data);
+    });
+
+    $('.suggest-tag').click(function(e) {
+        e.preventDefault();
+        var $newDiscussion = $('.new-discussion');
+        var $form = $newDiscussion.parent();
+
+        // Otherwise the scrollTop is not effective if the form is already
+        // displayed (hence the new discussion button is hidden)
+        $newDiscussion.removeClass('hidden');
+
+        // Scroll to the new discussion thread form
+        $('html, body').animate({
+            scrollTop : $newDiscussion.offset().top
+        }, 400);
+
+        if (!Auth.need_user(i18n._('You need to be logged in to propose a tag.'))) {
+            return false;
+        }
+
+        displayNewDiscussionForm($newDiscussion);
+        hideNewDiscussionButton($newDiscussion);
+
+        // Prefill the new discussion thread form
+        $form.find('#title-new-discussion').val(
+            i18n._('New tag suggestion to improve metadata'));
+        $form.find('#comment-new-discussion').val(
+            i18n._('Hello,\n\nI propose this new tag: '));
     });
 
 });

@@ -5,11 +5,17 @@ from bson import ObjectId
 
 from datetime import datetime
 
-from flask import abort, request, url_for, redirect, render_template, flash
+from flask import (
+    abort, current_app, request, url_for, redirect, render_template, flash
+)
 from werkzeug.contrib.atom import AtomFeed
 
+from udata import tracking
 from udata.app import nav
-from udata.frontend.views import SearchView, DetailView, CreateView, EditView, SingleObject, BaseView
+from udata.auth import current_user
+from udata.frontend.views import (
+    SearchView, DetailView, CreateView, EditView, SingleObject, BaseView
+)
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Issue, FollowReuse, Dataset
 from udata.sitemap import sitemap
@@ -17,6 +23,7 @@ from udata.sitemap import sitemap
 from .forms import ReuseForm, AddDatasetToReuseForm
 from .models import Reuse, ReuseDiscussion
 from .permissions import ReuseEditPermission
+from .signals import on_reuse_published
 from .tasks import notify_new_reuse
 
 blueprint = I18nBlueprint('reuses', __name__, url_prefix='/reuses')
@@ -32,12 +39,14 @@ def recent_feed():
         if reuse.organization:
             author = {
                 'name': reuse.organization.name,
-                'uri': url_for('organizations.show', org=reuse.organization.id, _external=True),
+                'uri': url_for('organizations.show',
+                               org=reuse.organization.id, _external=True),
             }
         elif reuse.owner:
             author = {
                 'name': reuse.owner.fullname,
-                'uri': url_for('users.show', user=reuse.owner.id, _external=True),
+                'uri': url_for('users.show',
+                               user=reuse.owner.id, _external=True),
             }
         feed.add(reuse.title,
                  unicode(render_template('reuse/feed_item.html', reuse=reuse)),
@@ -96,7 +105,8 @@ class ReuseDetailView(ReuseView, DetailView):
         if self.reuse.deleted and not ReuseEditPermission(self.reuse).can():
             abort(410)
 
-        followers = FollowReuse.objects.followers(self.reuse).order_by('follower.fullname')
+        followers = (FollowReuse.objects.followers(self.reuse)
+                     .order_by('follower.fullname'))
 
         context.update(
             followers=followers,
@@ -125,6 +135,8 @@ class ReuseCreateView(CreateView):
     def on_form_valid(self, form):
         response = super(ReuseCreateView, self).on_form_valid(form)
         notify_new_reuse.delay(self.object)
+        if not current_app.config['TESTING']:
+            tracking.send_signal(on_reuse_published, request, current_user)
         return response
 
 

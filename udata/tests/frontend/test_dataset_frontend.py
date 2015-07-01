@@ -308,13 +308,15 @@ class ResourcesTest(FrontTestCase):
         self.assert200(response)
 
     @mock.patch('os.path.getsize')
-    def test_upload_new_resource(self, getsize):
+    @mock.patch('udata.core.dataset.views.datetime')
+    def test_upload_new_resource(self, dt, getsize):
         user = self.login()
         dataset = DatasetFactory(owner=user)
         data = {'file': (StringIO(b'aaa'), 'test.tar.gz')}
         now = datetime.now()
 
         getsize.return_value = 666
+        dt.now.return_value = now
 
         response = self.post(url_for('datasets.upload_new_resource', dataset=dataset), data)
         self.assert200(response)
@@ -340,13 +342,15 @@ class ResourcesTest(FrontTestCase):
         self.assert200(response)
 
     @mock.patch('os.path.getsize')
-    def test_upload_new_community_resource(self, getsize):
+    @mock.patch('udata.core.dataset.views.datetime')
+    def test_upload_new_community_resource(self, dt, getsize):
         self.login()
         dataset = DatasetFactory(owner=UserFactory())
         data = {'file': (StringIO(b'aaa'), 'test.txt')}
         now = datetime.now()
 
         getsize.return_value = 666
+        dt.now.return_value = now
 
         response = self.post(url_for('datasets.upload_new_community_resource', dataset=dataset), data)
         self.assert200(response)

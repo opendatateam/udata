@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
+import json
 import os
-
+import time
 from datetime import datetime
 
-from flask import request
+import requests
+from flask import request, current_app
 
 from uuid import UUID
 from werkzeug.datastructures import FileStorage
@@ -81,7 +82,7 @@ class DatasetAPI(API):
         if dataset.deleted:
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
-        form = api.validate(DatasetForm, dataset)
+        form = api.validate(DatasetFullForm, dataset)
         return form.save()
 
     @api.secure
@@ -274,3 +275,40 @@ class LicensesAPI(API):
     def get(self):
         '''List all available licenses'''
         return list(License.objects)
+
+
+checkurl_parser = api.parser()
+checkurl_parser.add_argument('url', type=unicode, help='The URL to check',
+                             location='args', required=True)
+
+
+@ns.route('/checkurl/', endpoint='checkurl')
+class CheckUrlAPI(API):
+
+    @api.doc(id='checkurl', parser=checkurl_parser)
+    def get(self):
+        '''Checks that a URL exists and returns metadata.'''
+        args = checkurl_parser.parse_args()
+        CROQUEMORT = current_app.config.get('CROQUEMORT')
+        if CROQUEMORT is None:
+            return {'error': 'Check server not configured.'}, 500
+        check_url = '{url}/check/one'.format(url=CROQUEMORT['url'])
+        response = requests.post(check_url,
+                                 data=json.dumps({'url': args['url']}))
+        url_hash = response.json()['url-hash']
+        retrieve_url = '{url}/url/{url_hash}'.format(
+            url=CROQUEMORT['url'], url_hash=url_hash)
+        response = requests.get(retrieve_url, params={'url': args['url']})
+        attempts = 0
+        while response.status_code == 404 or 'status' not in response.json():
+            if attempts >= CROQUEMORT['retry']:
+                msg = ('We were unable to retrieve the URL after'
+                       ' {attempts} attempts.').format(attempts=attempts)
+                return {'error': msg}, 502
+            response = requests.get(retrieve_url, params={'url': args['url']})
+            time.sleep(CROQUEMORT['delay'])
+            attempts += 1
+        result = response.json()
+        if int(result['status']) > 500:
+            return result, 500
+        return result

@@ -8,6 +8,7 @@ define([
     'auth',
     'api',
     'leaflet',
+    'pubsub',
     'hbs!templates/dataset/resource-modal-body',
     'hbs!templates/dataset/extras-modal-body',
     'hbs!templates/dataset/add-reuse-modal-body',
@@ -18,12 +19,24 @@ define([
     'widgets/issues-btn',
     'widgets/discussions-btn',
     'widgets/share-btn',
-], function($, log, i18n, Auth, API, L, template, extrasTpl, addReuseTpl, forms, modal) {
+], function($, log, i18n, Auth, API, L, pubsub, template, extrasTpl, addReuseTpl, forms, modal) {
     'use strict';
 
     var user_reuses;
 
+    function startsWith(data, input) {
+        return (data.substring(0, input.length) === input);
+    }
+
+    function addTooltip($element, content) {
+        $element.attr('rel', 'tooltip');
+        $element.attr('data-placement', 'top');
+        $element.attr('data-original-title', content);
+        $element.tooltip('show');
+    }
+
     function prepare_resources() {
+
         $('.resources-list').items('http://schema.org/DataDownload').each(function() {
             var $this = $(this);
 
@@ -37,16 +50,48 @@ define([
                 e.stopPropagation();
             });
 
+            // Check asynchronuously the status of displayed resources
+            $this.find('.format-label').each(function() {
+                var $self = $(this);
+                var url = $self.parent().property('url').first().attr('href');
+
+                if (!startsWith(url, window.location.origin)) {
+                    $.get($this.data('checkurl'), {'url': url}
+                    ).done(function(data) {
+                        if (data.status === '200') {
+                            $self.addClass('format-label-success');
+                        } else if (data.status == '404') {
+                            $self.addClass('format-label-warning');
+                            addTooltip($self, i18n._('The resource cannot be found.'));
+                        }
+                    }).fail(function() {
+                        $self.addClass('format-label-danger');
+                        addTooltip($self, i18n._('The server cannot be found.'));
+                    });
+                }
+
+            });
+
             // Display detailled informations in a modal
             $this.click(function() {
-                modal({
+                var $modal = modal({
                     title: $this.property('name').value(),
                     content: template($this.microdata()[0]),
                     actions: [{
                         label: i18n._('Download'),
                         url: $this.property('url').value(),
-                        classes: 'btn-success'
+                        classes: 'btn-success resource-click'
                     }]
+                });
+                // Click on a download link
+                $modal.find('.resource-click').click(function(e) {
+                    var eventName = '';
+                    if (startsWith(this.href, window.location.origin)) {
+                        eventName = 'RESOURCE_DOWNLOAD';
+                    } else {
+                        eventName = 'RESOURCE_REDIRECT';
+                    }
+                    pubsub.publish(eventName);
                 });
             });
 
@@ -58,6 +103,7 @@ define([
                 $(this).remove();
             });
         });
+
     }
 
     function fetch_reuses() {

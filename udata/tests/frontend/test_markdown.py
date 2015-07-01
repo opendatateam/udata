@@ -20,7 +20,7 @@ class MarkdownTestCase(TestCase, WebTestMixin):
 
     def test_excerpt_is_not_removed(self):
         with self.app.test_request_context('/'):
-            self.assertEqual(md(EXCERPT_TOKEN), EXCERPT_TOKEN)
+            self.assertEqual(md(EXCERPT_TOKEN).strip(), EXCERPT_TOKEN)
 
     def test_markdown_filter_with_none(self):
         '''Markdown filter should not fails with None'''
@@ -52,6 +52,14 @@ class MarkdownTestCase(TestCase, WebTestMixin):
             self.assertEqual(el.getAttribute('rel'), 'nofollow')
             self.assertEqual(el.getAttribute('href'), 'http://example.net/')
             self.assertEqual(el.firstChild.data, 'http://example.net/')
+
+    def test_bleach_sanitize(self):
+        '''Markdown filter should sanitize evil code'''
+        text = 'an <script>evil()</script>'
+        with self.app.test_request_context('/'):
+            result = render_template_string('{{ text|markdown }}', text=text)
+            self.assertEqual(result.strip(),
+                             '<p>an &lt;script&gt;evil()&lt;/script&gt;</p>')
 
     def test_mdstrip_filter(self):
         '''mdstrip should truncate the text before rendering'''

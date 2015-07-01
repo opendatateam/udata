@@ -106,10 +106,9 @@ def create_app(config='udata.settings.Defaults'):
     '''Factory for a minimal application'''
     app = UDataApp(APP_NAME)
     app.config.from_object(config)
-    app.config.from_envvar('UDATA_SETTINGS', silent=True)
-    custom_settings = join(os.getcwd(), 'udata.cfg')
-    if exists(custom_settings):
-        app.config.from_pyfile(custom_settings)
+    settings = os.environ.get('UDATA_SETTINGS', join(os.getcwd(), 'udata.cfg'))
+    if exists(settings):
+        app.config.from_pyfile(settings)
 
     app.json_encoder = UDataJsonEncoder
 

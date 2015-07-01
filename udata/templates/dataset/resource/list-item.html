@@ -1,8 +1,7 @@
 {% set resource_format = resource.format|trim|lower or 'data' %}
 <div id="resource-{{resource.id}}" class="list-group-item"
-    itemprop="distribution" itemscope="itemscope"
-    itemtype="http://schema.org/DataDownload"
-    >
+    itemscope="itemscope" itemtype="http://schema.org/DataDownload"
+    data-checkurl="{{ url_for('api.checkurl') }}">
     <div class="format-label pull-left ellipsis-dot">
         <span data-format="{{ resource_format }}">
             {{ resource_format }}
