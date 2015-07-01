@@ -60,12 +60,12 @@ class DatasetModelTest(TestCase, DBTestMixin):
         dataset = DatasetFactory(owner=user)
         resource = ResourceFactory()
         dataset.add_resource(resource)
-        self.assertDateTimes(dataset.last_update, resource.published)
+        self.assertEqualDates(dataset.last_update, resource.published)
 
     def test_last_update_without_resource(self):
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
-        self.assertDateTimes(dataset.last_update, dataset.last_modified)
+        self.assertEqualDates(dataset.last_update, dataset.last_modified)
 
     def test_add_community_resource(self):
         user = UserFactory()
