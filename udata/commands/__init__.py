@@ -31,7 +31,7 @@ def register_commands(manager):
     manager.add_command('urls', ShowUrls())
 
     settings = os.environ.get('UDATA_SETTINGS', join(os.getcwd(), 'udata.cfg'))
-    manager.add_command('serve', Server(port=6666, use_debugger=True,
+    manager.add_command('serve', Server(port=7000, use_debugger=True,
                                         use_reloader=True, threaded=True,
                                         extra_files=[settings]))
 
