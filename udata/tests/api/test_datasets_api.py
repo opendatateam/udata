@@ -149,6 +149,56 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.extras['float'], 42.0)
         self.assertEqual(dataset.extras['string'], 'value')
 
+    def test_dataset_api_update_with_no_extras(self):
+        '''It should update a dataset from the API with no extras
+
+        In that case the extras parameters are kept.
+        '''
+        data = DatasetFactory.attributes()
+        data['extras'] = {
+            'integer': 42,
+            'float': 42.0,
+            'string': 'value',
+        }
+        with self.api_user():
+            response = self.post(url_for('api.datasets'), data)
+
+        dataset = Dataset.objects.first()
+        data = dataset.to_dict()
+        del data['extras']
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.extras['integer'], 42)
+        self.assertEqual(dataset.extras['float'], 42.0)
+        self.assertEqual(dataset.extras['string'], 'value')
+
+    def test_dataset_api_update_with_empty_extras(self):
+        '''It should update a dataset from the API with empty extras
+
+        In that case the extras parameters are set to an empty dict.
+        '''
+        data = DatasetFactory.attributes()
+        data['extras'] = {
+            'integer': 42,
+            'float': 42.0,
+            'string': 'value',
+        }
+        with self.api_user():
+            response = self.post(url_for('api.datasets'), data)
+
+        dataset = Dataset.objects.first()
+        data = dataset.to_dict()
+        data['extras'] = {}
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.extras, {})
+
     def test_dataset_api_update_deleted(self):
         '''It should not update a deleted dataset from the API and raise 401'''
         user = self.login()
