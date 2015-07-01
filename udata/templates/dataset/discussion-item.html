@@ -52,9 +52,9 @@
     </p>
     <form role="form" class="clearfix animated" data-api-url="{{url_for('api.discussion', for=baseobject.id, id=discussion.id)}}">
         <div class="form-group">
-            <label for="comment">{{ _('Comment') }}</label>
-            <textarea id="comment" name="comment" class="form-control" rows="3" required></textarea>
+            <label for="comment-new-message">{{ _('Comment') }}</label>
+            <textarea id="comment-new-message" name="comment" class="form-control" rows="3" required></textarea>
         </div>
-        <input type="submit" value="{{ _('Submit your comment') }}" class="btn btn-primary btn-block pull-right submit-new-comment" />
+        <input type="submit" value="{{ _('Submit your comment') }}" class="btn btn-primary btn-block pull-right submit-new-message" />
     </form>
 </div>
