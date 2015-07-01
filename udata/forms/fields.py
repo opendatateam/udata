@@ -474,7 +474,7 @@ class ExtrasField(FieldHelper, fields.Field):
             else:
                 raise 'Unsupported datatype'
         else:
-            self.data = {}
+            self.data = self.data or {}
 
     def pre_validate(self, form):
         if self.data:
