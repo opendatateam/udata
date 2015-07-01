@@ -25,12 +25,8 @@
         {
             name: "app",
             include: [
-                'form/widgets'
-            ]
-        }, {
-            name: "udata",
-            exclude: [
-                'app'
+                'form/widgets',
+                'pubsub'
             ]
         }, {
             name: 'dataset/display',
