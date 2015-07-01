@@ -202,6 +202,10 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     def frequency_label(self):
         return UPDATE_FREQUENCIES.get(self.frequency or 'unknown', UPDATE_FREQUENCIES['unknown'])
 
+    @property
+    def last_update(self):
+        return max(resource.published for resource in self.resources)
+
     @classmethod
     def get(cls, id_or_slug):
         obj = cls.objects(slug=id_or_slug).first()
