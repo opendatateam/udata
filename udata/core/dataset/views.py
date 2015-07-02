@@ -12,25 +12,15 @@ from werkzeug.contrib.atom import AtomFeed
 
 from udata import fileutils, tracking
 from udata.app import nav
-<<<<<<< HEAD
-from udata.auth import login_required
-=======
 from udata.auth import current_user, login_required
->>>>>>> master
 from udata.frontend.views import (
     DetailView, CreateView, EditView, NestedEditView, SingleObject, SearchView,
     BaseView, NestedObject
 )
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import (
-<<<<<<< HEAD
     Dataset, DatasetBadge, DatasetDiscussion, Follow, Issue, Resource, Reuse
 )
-=======
-    Dataset, Resource, Reuse, Issue, DatasetDiscussion, Follow
-)
-
->>>>>>> master
 from udata.core import storages
 from udata.core.site.views import current_site
 from udata.sitemap import sitemap
