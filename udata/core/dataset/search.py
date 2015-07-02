@@ -5,7 +5,8 @@ from udata.core.site.views import current_site
 
 
 from udata.models import (
-    Dataset, DatasetBadge, Organization, License, User, GeoZone
+    Dataset, DatasetBadge, Organization, License, User, GeoZone,
+    DATASET_BADGE_KINDS
 )
 from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
 from udata.search.fields import Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
@@ -34,6 +35,10 @@ def zone_labelizer(label, value):
     return value
 
 
+def dataset_badge_labelizer(label, kind):
+    return DATASET_BADGE_KINDS[kind]
+
+
 class DatasetSearch(ModelSearchAdapter):
     model = Dataset
     fuzzy = True
@@ -53,7 +58,7 @@ class DatasetSearch(ModelSearchAdapter):
             'owner': {'type': 'string'},
             'supplier': {'type': 'string'},
             'tags': {'type': 'string', 'index_name': 'tag', 'index': 'not_analyzed'},
-            'badges': {'type': 'string', 'index_name': 'badge', 'index': 'not_analyzed'},
+            'badges': {'type': 'string', 'index_name': 'badges', 'index': 'not_analyzed'},
             'tag_suggest': {
                 'type': 'completion',
                 'index_analyzer': 'simple',
@@ -115,7 +120,6 @@ class DatasetSearch(ModelSearchAdapter):
     fields = (
         'title^6',
         'tags^3',
-        'badges^3',
         'geozones.name^3',
         'description',
         'code',
@@ -130,7 +134,7 @@ class DatasetSearch(ModelSearchAdapter):
     }
     facets = {
         'tag': TermFacet('tags'),
-        'badge': ModelTermFacet('badge', DatasetBadge, field_name='kind'),
+        'badge': TermFacet('badges', labelizer=dataset_badge_labelizer),
         'organization': ModelTermFacet('organization', Organization),
         'owner': ModelTermFacet('owner', User),
         'supplier': ModelTermFacet('supplier', Organization),
@@ -170,7 +174,7 @@ class DatasetSearch(ModelSearchAdapter):
             'description': dataset.description,
             'license': dataset.license.id if dataset.license is not None else None,
             'tags': dataset.tags,
-            'badges': [badge.kind for badge in DatasetBadge.objects(subject=dataset)],
+            'badges': [badge.kind for badge in dataset.badges],
             'tag_suggest': dataset.tags,
             'resources': [
                 {

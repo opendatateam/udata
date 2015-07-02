@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from udata.core.metrics import Metric
 from udata.i18n import lazy_gettext as _
-from udata.models import Dataset, Reuse
+from udata.models import Dataset, DatasetBadge, Reuse
 
 from udata.core.issues.metrics import IssuesMetric
 from udata.core.discussions.metrics import DiscussionsMetric
@@ -49,3 +49,4 @@ class DatasetFollowers(FollowersMetric):
 
 class DatasetBadgesMetric(BadgesMetric):
     model = Dataset
+    badge_model = DatasetBadge

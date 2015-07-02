@@ -1,25 +1,25 @@
 var organizations = db.organization.find();
 var etalab = db.user.find({first_name: 'Etalab', last_name: 'Bot'})[0];
+var counter = 0;
 
 organizations.map(function(organization) {
     if (organization.public_service === true) {
-        // Create two badges from the previous boolean field.
-        db.badge.save({
-            _cls: 'Badge.OrganizationBadge',
-            subject: organization._id,
+        var ps_badge = {
+            _cls: 'OrganizationBadge',
             kind: 'public-service',
             created: new Date(),
             created_by: etalab._id
-        });
-        db.badge.save({
-            _cls: 'Badge.OrganizationBadge',
-            subject: organization._id,
+        };
+        var certified_badge = {
+            _cls: 'OrganizationBadge',
             kind: 'certified',
             created: new Date(),
             created_by: etalab._id
-        });
+        };
+        var result = db.organization.update({_id: organization._id},
+                               {$set: {badges: [ps_badge, certified_badge]},
+                                $unset: {public_service: true}});
+        counter += result.nModified;
     }
-    // Delete the now useless boolean field.
-    db.organization.update({_id: organization._id},
-                           {$unset: {public_service: true}});
 });
+print(counter, 'organizations modified.');

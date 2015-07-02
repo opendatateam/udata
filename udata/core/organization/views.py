@@ -16,7 +16,7 @@ from udata.frontend.views import (
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import (
     db, Organization, Member, Reuse, Dataset, ORG_ROLES, User, Issue, FollowOrg,
-    DatasetIssue, DatasetDiscussion, OrganizationBadge
+    DatasetIssue, DatasetDiscussion
 )
 from udata.sitemap import sitemap
 from udata.utils import get_by
@@ -106,7 +106,6 @@ class OrganizationDetailView(OrgView, DetailView):
             'can_view': can_view,
             'private_reuses': list(Reuse.objects(organization=self.object).hidden()) if can_view else [],
             'private_datasets': list(Dataset.objects(organization=self.object).hidden()) if can_view else [],
-            'badges': OrganizationBadge.objects(subject=self.organization).visible()
         })
         return context
 

@@ -33,9 +33,9 @@
                 <br/>
                 <div class="tab-links">
                     {# Badges #}
-                    {% if badges %}
+                    {% if org.badges %}
                     <p class="text-center">
-                        {% for badge in badges %}
+                        {% for badge in org.badges %}
                             <small class="small-badge">
                                 <a href="{{ url_for('front.search', badge=badge) }}"
                                     title="{{ _('See all organizations with that badge.') }}">

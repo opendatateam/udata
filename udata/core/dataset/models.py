@@ -19,7 +19,7 @@ from udata.utils import hash_url
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum',
     'DatasetIssue', 'DatasetDiscussion', 'DatasetBadge', 'FollowDataset',
-    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES',
+    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES', 'DATASET_BADGE_KINDS'
 )
 
 UPDATE_FREQUENCIES = {
@@ -49,6 +49,20 @@ RESOURCE_TYPES = OrderedDict([
 
 CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
 DEFAULT_CHECKSUM_TYPE = 'sha1'
+
+PIVOTAL_DATA = 'pivotal-data'
+DATASET_BADGE_KINDS = {
+    PIVOTAL_DATA: _('Pivotal data'),
+    'dataconnexions-laureate': _('Dataconnexions laureate'),
+    'dataconnexions-candidate': _('Dataconnexions candidate'),
+}
+
+
+class DatasetBadge(Badge):
+    kind = db.StringField(choices=DATASET_BADGE_KINDS.keys(), required=True)
+
+    def __html__(self):
+        return unicode(DATASET_BADGE_KINDS[self.kind])
 
 
 class License(db.Document):
@@ -125,6 +139,7 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     tags = db.ListField(db.StringField())
     resources = db.ListField(db.EmbeddedDocumentField(Resource))
     community_resources = db.ListField(db.EmbeddedDocumentField(Resource))
+    badges = db.ListField(db.EmbeddedDocumentField(DatasetBadge))
 
     private = db.BooleanField()
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
@@ -253,7 +268,3 @@ class DatasetDiscussion(Discussion):
 
 class FollowDataset(Follow):
     following = db.ReferenceField(Dataset)
-
-
-class DatasetBadge(Badge):
-    subject = db.ReferenceField(Dataset)

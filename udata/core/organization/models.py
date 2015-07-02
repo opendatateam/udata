@@ -7,15 +7,15 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
-from udata.core.badges.models import CERTIFIED, PUBLIC_SERVICE
 from udata.core.storages import avatars, default_image_basename
 from udata.models import db, Badge, WithMetrics, Follow
 from udata.i18n import lazy_gettext as _
 
 
 __all__ = (
-    'Organization', 'Team', 'Member', 'MembershipRequest',
-    'ORG_ROLES', 'MEMBERSHIP_STATUS', 'FollowOrg', 'OrganizationBadge'
+    'Organization', 'Team', 'Member', 'MembershipRequest', 'FollowOrg',
+    'ORG_ROLES', 'MEMBERSHIP_STATUS', 'ORG_BADGE_KINDS', 'PUBLIC_SERVICE',
+    'OrganizationBadge', 'CERTIFIED'
 )
 
 
@@ -32,6 +32,21 @@ MEMBERSHIP_STATUS = {
 }
 
 LOGO_SIZES = [100, 60, 25]
+
+PUBLIC_SERVICE = 'public-service'
+CERTIFIED = 'certified'
+ORG_BADGE_KINDS = {
+    PUBLIC_SERVICE: _('Public Service'),
+    CERTIFIED: _('Certified'),
+    'authenticated-organization': _('Authenticated organization'),
+}
+
+
+class OrganizationBadge(Badge):
+    kind = db.StringField(choices=ORG_BADGE_KINDS.keys(), required=True)
+
+    def __html__(self):
+        return unicode(ORG_BADGE_KINDS[self.kind])
 
 
 def upload_logo_to(org):
@@ -96,6 +111,9 @@ class OrganizationQuerySet(db.BaseQuerySet):
     def hidden(self):
         return self(deleted__ne=None)
 
+    def get_by_id_or_slug(self, id_or_slug):
+        return self(slug=id_or_slug).first() or self(id=id_or_slug).first()
+
 
 class Organization(WithMetrics, db.Datetimed, db.Document):
     name = db.StringField(max_length=255, required=True)
@@ -109,6 +127,7 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
     members = db.ListField(db.EmbeddedDocumentField(Member))
     teams = db.ListField(db.EmbeddedDocumentField(Team))
     requests = db.ListField(db.EmbeddedDocumentField(MembershipRequest))
+    badges = db.ListField(db.EmbeddedDocumentField(OrganizationBadge))
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
@@ -168,10 +187,8 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
 
     @property
     def public_service(self):
-        return (OrganizationBadge.objects.filter(kind=PUBLIC_SERVICE,
-                                                 subject=self.id)
-                and OrganizationBadge.objects.filter(kind=CERTIFIED,
-                                                     subject=self.id))
+        badges_kind = [badge.kind for badge in self.badges]
+        return PUBLIC_SERVICE in badges_kind and CERTIFIED in badges_kind
 
     def member(self, user):
         for member in self.members:
@@ -207,7 +224,3 @@ post_save.connect(Organization.post_save, sender=Organization)
 
 class FollowOrg(Follow):
     following = db.ReferenceField(Organization)
-
-
-class OrganizationBadge(Badge):
-    subject = db.ReferenceField(Organization)

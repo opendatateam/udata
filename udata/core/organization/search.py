@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from udata import search
-from udata.models import Organization, OrganizationBadge
+from udata.models import Organization, ORG_BADGE_KINDS
 from udata.core.site.views import current_site
 
 from . import metrics  # Metrics are need for the mapping
@@ -15,13 +15,16 @@ max_datasets = lambda: max(current_site.metrics.get('max_org_datasets'), 10)
 max_followers = lambda: max(current_site.metrics.get('max_org_followers'), 10)
 
 
+def organization_badge_labelizer(label, kind):
+    return ORG_BADGE_KINDS[kind]
+
+
 class OrganizationSearch(search.ModelSearchAdapter):
     model = Organization
     fuzzy = True
     fields = (
         'name^6',
         'acronym^6',
-        'badges^3',
         'description',
     )
     sorts = {
@@ -34,7 +37,8 @@ class OrganizationSearch(search.ModelSearchAdapter):
     }
     facets = {
         'reuses': search.RangeFacet('metrics.reuses'),
-        'badge': search.ModelTermFacet('badge', OrganizationBadge, field_name='kind'),
+        'badge': search.TermFacet('badges',
+                                  labelizer=organization_badge_labelizer),
         'permitted_reuses': search.RangeFacet('metrics.permitted_reuses'),
         'datasets': search.RangeFacet('metrics.datasets'),
         'followers': search.RangeFacet('metrics.followers'),
@@ -53,7 +57,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
                 'index': 'not_analyzed',
             },
             'description': {'type': 'string', 'analyzer': search.i18n_analyzer},
-            'badges': {'type': 'string', 'index_name': 'badge', 'index': 'not_analyzed'},
+            'badges': {'type': 'string', 'index_name': 'badges', 'index': 'not_analyzed'},
             'url': {'type': 'string'},
             'created': {'type': 'date', 'format': 'date_hour_minute_second'},
             'metrics': search.metrics_mapping(Organization),
@@ -86,7 +90,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
             'description': organization.description,
             'url': organization.url,
             'metrics': organization.metrics,
-            'badges': [badge.kind for badge in OrganizationBadge.objects(subject=organization)],
+            'badges': [badge.kind for badge in organization.badges],
             'created': organization.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             'org_suggest': {
                 'input': completions,

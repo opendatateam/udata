@@ -152,18 +152,7 @@ class ModelTermFacet(TermFacet):
         ids = [term['term'] for term in facet['terms']]
         if is_objectid:
             ids = map(ObjectId, ids)
-
-        if self.field_name == 'id':
-            objects = self.model.objects.in_bulk(ids)
-        else:
-            # Less performant but we need to filter on 'kind' for badges.
-            objects = {
-                getattr(o, self.field_name): o
-                for o in self.model.objects.filter(**{
-                    '{name}__in'.format(name=self.field_name): ids
-                })
-            }
-
+        objects = self.model.objects.in_bulk(ids)
         return {
             'type': 'models',
             'models': [

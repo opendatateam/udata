@@ -6,7 +6,7 @@ from udata.i18n import lazy_gettext as _
 from udata.models import Organization
 from udata.tasks import task, get_logger
 
-from .signals import on_badge_added, on_badge_removed
+from .signals import on_badge_added
 
 log = get_logger(__name__)
 
@@ -37,16 +37,5 @@ def notify_badge_added(badge):
         recipients = owner_recipients(badge)
         subject = _('Your %(type)s gain a new badge', type=badge.subject.verbose_name)
         mail.send(subject, recipients, 'badge_added', badge=badge)
-    else:
-        log.warning('Unrecognized badge subject type %s', type(badge.subject))
-
-
-@connect(on_badge_removed)
-def notify_badge_removed(badge, **kwargs):
-    if isinstance(badge.subject, Organization):
-        # TODO: do we really want to notify users in case of a badge loss?
-        recipients = owner_recipients(badge)
-        subject = _('Your %(type)s lost a badge', type=badge.subject.verbose_name)
-        mail.send(subject, recipients, 'badge_removed', badge=badge)
     else:
         log.warning('Unrecognized badge subject type %s', type(badge.subject))

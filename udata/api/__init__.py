@@ -337,7 +337,6 @@ def init_app(app):
     import udata.core.dataset.api
     import udata.core.issues.api
     import udata.core.discussions.api
-    import udata.core.badges.api
     import udata.core.reuse.api
     import udata.core.organization.api
     import udata.core.followers.api

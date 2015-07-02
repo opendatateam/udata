@@ -115,7 +115,6 @@ class DatasetDetailView(DatasetView, DetailView):
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = CommunityResourceEditPermission
         context['discussions'] = DatasetDiscussion.objects(subject=self.dataset)
-        context['badges'] = DatasetBadge.objects(subject=self.dataset).visible()
         return context
 
 
