@@ -1,15 +1,15 @@
 'use strict';
 
 import Model from 'models/model';
-import API from 'api';
 import log from 'logger';
 
 
 export default class Dataset extends Model {
-    constructor(options) {
-        super('Dataset', options);
-    }
-
+    /**
+     * Fetch a dataset given its identifier, either an ID or a slug.
+     * @param  {String} ident The dataset identifier to fetch.
+     * @return {Dataset}      The current object itself.
+     */
     fetch(ident) {
         ident = ident || this.id || this.slug;
         if (ident) {
@@ -20,6 +20,9 @@ export default class Dataset extends Model {
         return this;
     }
 
+    /**
+     * Create or update the given dataset.
+     */
     save() {
         var ep = this.id ? 'datasets.update_dataset' : 'datasets.create_dataset';
         this.$api(ep, {payload: this}, this.on_fetched);

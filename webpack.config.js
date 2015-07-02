@@ -37,7 +37,12 @@ module.exports = {
             {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file'},
             {test: /\.css$/, loader: css_loader},
             {test: /\.less$/, loader: less_loader},
-            {test: /\.vue$/, loader: vue.withLoaders({html: html_loader, css: css_loader, less: less_loader})},
+            {test: /\.vue$/, loader: vue.withLoaders({
+                html: html_loader,
+                css: css_loader,
+                less: less_loader,
+                js: 'babel'
+            })},
             {test: /\.json$/, loader: "json"},
             {test: /\.html$/, loader: html_loader},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, loader: "file-loader?name=[name].[ext]"},

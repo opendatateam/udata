@@ -3,6 +3,8 @@
 import API from 'api';
 import validator from 'models/validator';
 import Vue from 'vue';
+import {pubsub, PubSub} from 'pubsub';
+
 
 function empty_schema() {
     return {properties: {}, required: []};
@@ -10,9 +12,9 @@ function empty_schema() {
 
 export default class Model {
 
-    constructor(name, options) {
-        this.__name = name;
-        this.__options = options || {};
+    constructor(options) {
+        this._options = options || {};
+        this._pubsub = new PubSub();
         this.empty();
     }
 
@@ -20,12 +22,8 @@ export default class Model {
      * The class name
      * @return {[type]} [description]
      */
-    get __name__() {
-        var constructor = this.constructor;
-        while (constructor.name == 'VueComponent') {
-            constructor = constructor.super;
-        }
-        return constructor.name
+    get __class__() {
+        return this.constructor.name
     }
 
     /**
@@ -34,7 +32,7 @@ export default class Model {
      * @return {Object} A JSON schema
      */
     get __schema__() {
-        return API.definitions[this.__name__] || {};
+        return API.definitions[this.__class__] || {};
     }
 
     /**
@@ -51,6 +49,19 @@ export default class Model {
             }
         }
         return this;
+    }
+
+    /**
+     * Property setter which handle vue.js $set method if object is binded.
+     * @param {String} name  The name of the object proprty to set.
+     * @param {Object} value The property value to set.
+     */
+    _set(name, value) {
+        if (this.hasOwnProperty('$set')) {
+            this.$set(name, value);
+        } else {
+            this[name] = value;
+        }
     }
 
     /**
@@ -76,26 +87,35 @@ export default class Model {
      * @param  {String} name    The event unique name
      * @param  {Object} options An optionnal options object
      */
-    $emit(name, options) {
-        console.log('$emit', name, this, options);
+    $emit(name, ...args) {
+        var prefix = this.__class__.toLowerCase(),
+            topic = prefix + ':' + name;
+        pubsub.publish(topic, this, ...args);
+        this._pubsub.publish(name, this, args)
+    }
+
+    $on(name, hanler) {
+        return this._pubsub.subscribe(name, hanler);
+    }
+
+    $off(name, hanler) {
+        return this._pubsub.unsubscribe(name, hanler);
     }
 
     on_fetched(data) {
-        console.log('on fetched');
-        var schema = this.schema,
-            prop, value;
+        console.log('on fetched', data);
+        // var schema = this.schema;
 
-        for (prop in data.obj) {
-            value = data.obj[prop];
-            console.log(prop, value);
-            this[prop] = value;
-            // this.$set(prop, value)
+        for (let prop in data.obj) {
+            let value = data.obj[prop];
+            this._set(prop, value);
         }
         console.log('validate', this.validate());
         // this.modelize(data.obj);
         // $.extend(true, this.$data, data.obj);
         this.$emit('updated');
         this.loading = false;
+        console.log(this);
     }
 
     validate() {
