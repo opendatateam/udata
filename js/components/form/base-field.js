@@ -22,6 +22,7 @@ define(['logger'], function(log) {
             'territory-completer': require('components/form/territory-completer'),
             'zone-completer': require('components/form/zone-completer.vue'),
             'format-completer': require('components/form/format-completer'),
+            'date-picker': require('components/form/date-picker.vue'),
             'checksum': require('components/form/checksum.vue')
         },
         computed: {

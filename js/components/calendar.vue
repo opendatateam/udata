@@ -25,8 +25,13 @@
                 <tr v-repeat="week:currentMonthDays">
                     <td class="day"
                         v-repeat="day:week"
-                        v-class="old: isOld(day), new: isNew(day)"
-                        v-on="click: pickDay(day)">{{ day.date() }}</td>
+                        v-on="click: pickDay(day)"
+                        v-class="
+                            old: isOld(day),
+                            new: isNew(day),
+                            today: day.isSame(today, 'day'),
+                            active: day.isSame(selected, 'day')
+                        ">{{ day.date() }}</td>
                 </tr>
             </tbody>
             <tbody v-show="view == 'months'">
@@ -48,10 +53,10 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <th colspan="7" class="today" style="display: none;">Today</th>
+                    <th colspan="7" v-on="click: pickDay(today)">Today</th>
                 </tr>
                 <tr>
-                    <th colspan="7" class="clear" style="display: none;">Clear</th>
+                    <th colspan="7" v-on="click: clear">Clear</th>
                 </tr>
             </tfoot>
         </table>
@@ -81,11 +86,17 @@ module.exports = {
             return moment.monthsShort();
         },
         monthDisplay: function() {
-            return moment().month(this.currentMonth).year(this.currentYear).format('MMMM YYYY');
+            return moment()
+                .month(this.currentMonth)
+                .year(this.currentYear)
+                .format('MMMM YYYY');
         },
         rangeDisplay: function() {
             if (this.view == 'days') {
-                return moment().month(this.currentMonth).year(this.currentYear).format('MMMM YYYY');
+                return moment()
+                    .month(this.currentMonth)
+                    .year(this.currentYear)
+                    .format('MMMM YYYY');
             } else if (this.view == 'months') {
                 return this.currentYear;
             } else if (this.view == 'years') {
@@ -124,7 +135,7 @@ module.exports = {
             currentMonth: moment().month(),
             currentYear: moment().year(),
             today: moment(),
-            selected: moment(),
+            selected: null,
             view: 'days'
         };
     },
@@ -179,6 +190,14 @@ module.exports = {
 
         isNew: function(date) {
             return date.isAfter(moment().month(this.currentMonth).year(this.currentYear).endOf('month'));
+        },
+
+        clear: function() {
+            this.selected = null;
+            this.currentYear = this.today.year();
+            this.currentMonth = this.today.month();
+            this.view = 'days';
+            this.$dispatch('calendar:date:cleared');
         }
     }
 };
