@@ -1,6 +1,12 @@
 <style lang="less">
-.calendar > * {
-    display: block;
+.calendar {
+    > * {
+        display: block;
+    }
+
+    .fa-remove {
+        color: red;
+    }
 }
 </style>
 
@@ -53,10 +59,14 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <th colspan="7" v-on="click: pickDay(today)">Today</th>
-                </tr>
-                <tr>
-                    <th colspan="7" v-on="click: clear">Clear</th>
+                    <th colspan="5" v-on="click: pickDay(today)">
+                        <span class="fa fa-dot-circle-o"></span>
+                        {{ _('Today') }}
+                    </th>
+                    <th colspan="2" v-on="click: clear">
+                        <span class="fa fa-remove"></span>
+                        {{ _('Clear') }}
+                    </th>
                 </tr>
             </tfoot>
         </table>

@@ -1,4 +1,4 @@
-define(['logger'], function(log) {
+define(['logger', 'api', 'jquery'], function(log, API, $) {
     'use strict';
 
     return {
@@ -23,6 +23,7 @@ define(['logger'], function(log) {
             'zone-completer': require('components/form/zone-completer.vue'),
             'format-completer': require('components/form/format-completer'),
             'date-picker': require('components/form/date-picker.vue'),
+            'daterange-picker': require('components/form/daterange-picker.vue'),
             'checksum': require('components/form/checksum.vue')
         },
         computed: {
@@ -32,7 +33,25 @@ define(['logger'], function(log) {
                     log.error('Field "' + this.field.id + '" not found in schema');
                     return {};
                 }
-                return this.schema.properties[this.field.id];
+
+                var prop = this.schema.properties[this.field.id];
+
+                // Resolve $ref ou items.$ref
+                if (prop.hasOwnProperty('$ref')) {
+                    var $ref = prop.$ref.replace('#/definitions/', '');
+                    if (API.definitions.hasOwnProperty($ref)) {
+                        prop = $.extend({}, prop, API.definitions[$ref]);
+                        delete prop.$ref;
+                    }
+                } else if (prop.hasOwnProperty('items') && prop.items.hasOwnProperty('$ref')) {
+                    var $ref = prop.items.$ref.replace('#/definitions/', '');
+                    if (API.definitions.hasOwnProperty($ref)) {
+                        prop.items = $.extend({}, prop.items, API.definitions[$ref]);
+                        delete prop.items.$ref;
+                    }
+                }
+
+                return prop;
             },
             required: function() {
                 if (!this.field) {

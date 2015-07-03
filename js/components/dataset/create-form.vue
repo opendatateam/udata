@@ -35,6 +35,10 @@ module.exports = {
                     label: this._('Tags'),
                     widget: 'tag-completer'
                 }, {
+                    id: 'temporal_coverage',
+                    label: this._('Temporal coverage'),
+                    widget: 'daterange-picker'
+                }, {
                     id: 'spatial.zones',
                     label: this._('Spatial coverage'),
                     widget: 'zone-completer'
