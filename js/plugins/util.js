@@ -1,6 +1,8 @@
 define(['jquery'], function($) {
     'use strict';
 
+    var reNestedField = /([\w-]+)\[([\w-]+)\]/
+
     return function(Vue, options) {  // jshint ignore:line
 
         /**
@@ -25,7 +27,9 @@ define(['jquery'], function($) {
 
 
         /**
-         * Serialize Form into an Object
+         * Serialize Form into an Object following the W3C specs:
+         * http://www.w3.org/TR/html-json-forms/
+         *
          * @param  {DOM} form the Form object to sserialize
          * @return {Object}
          */
@@ -35,7 +39,17 @@ define(['jquery'], function($) {
 
             $.each(array, function() {
                 if (this.value) {
-                    json[this.name] = this.value;
+                    if (reNestedField.test(this.name)) {
+                        var matchs = reNestedField.exec(this.name),
+                            outer = matchs[1],
+                            inner = matchs[2];
+                        if (!json.hasOwnProperty(outer)) {
+                            json[outer] = {};
+                        }
+                        json[outer][inner] = this.value;
+                    } else {
+                        json[this.name] = this.value;
+                    }
                 }
             });
 
