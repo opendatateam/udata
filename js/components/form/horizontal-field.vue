@@ -14,28 +14,23 @@
     <div class="horizontal-field" v-class="
         form-group: !is_bool,
         has-error: errors.length,
-        checkbox: field_type == 'checkbox',
-        radio: field_type == 'radio'
+        checkbox: is_bool
         ">
-        <label for="{{field.id}}" v-class="required: required"
+        <label v-if="!is_bool" for="{{field.id}}" v-class="required: required"
             class="col-sm-3 control-label">
-            <input v-if="is_bool" v-attr="
-                id: field.id,
-                name: field.id,
-                type: field_type,
-                value: value"></input>
             <i v-if="errors.length" class="fa fa-times-circle-o"></i>
             {{ field.label }}
             <span v-show="property.description" class="form-help"
                 v-attr="data-content: property.description"></span>
         </label>
-        <div class="col-sm-9">
-            <component is="{{widget}}"></component>
+        <div class="col-sm-9" v-class="col-sm-offset-3: is_bool">
+            <component is="{{widget}}" v-if="!is_bool"></component>
+            <input type="checkbox" v-if="is_bool" v-attr="
+                id: field.id,
+                name: field.id,
+                value: value"></input>
+            {{ is_bool ? field.label : '' }}
             <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
-        </div>
-        <div class="{{type}}" v-if="is_bool">
-            <label>
-            </label>
         </div>
     </div>
 </template>

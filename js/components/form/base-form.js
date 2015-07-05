@@ -59,6 +59,7 @@ define(['config', 'vue', 'logger', 'moment', 'jquery', 'jquery-validation-dist']
                 this.fields.forEach(function(field) {
                     if (!schema.properties.hasOwnProperty(field.id)) {
                         log.error('Property "'+ field.id +'" not found in schema');
+                        return;
                     }
                     s.properties[field.id] = schema.properties[field.id];
                     if (schema.required.indexOf(field.id) > 0) {

@@ -10,7 +10,8 @@
 <template>
 <div class="input-group dropdown daterange-picker" v-class="open: picking">
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
-    <input type="text" class="input-sm form-control" v-el="startInput"
+    <input type="text" class="input-sm form-control"
+        v-el="startInput" placeholder="{{ _('Start') }}"
         v-on="focus: onFocus, blur: onBlur"
         v-attr="
             required: required,
@@ -18,7 +19,8 @@
             readonly: readonly || false
         ">
     <span class="input-group-addon">à</span>
-    <input type="text" class="input-sm form-control"  v-el="endInput"
+    <input type="text" class="input-sm form-control"
+        v-el="endInput" placeholder="{{ _('End') }}"
         v-on="focus: onFocus, blur: onBlur"
         v-attr="
             required: required,

@@ -42,6 +42,9 @@ module.exports = {
                     id: 'spatial.zones',
                     label: this._('Spatial coverage'),
                     widget: 'zone-completer'
+                }, {
+                    id: 'private',
+                    label: this._('Private')
                 }]
         };
     },

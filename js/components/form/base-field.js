@@ -28,30 +28,12 @@ define(['logger', 'api', 'jquery'], function(log, API, $) {
         },
         computed: {
             property: function() {
-                // console.log('prop', this.field.id, this.schema, this.schema.properties.hasOwnProperty(this.field.id))
                 if (!this.schema.properties.hasOwnProperty(this.field.id)) {
                     log.error('Field "' + this.field.id + '" not found in schema');
                     return {};
                 }
 
-                var prop = this.schema.properties[this.field.id];
-
-                // Resolve $ref ou items.$ref
-                if (prop.hasOwnProperty('$ref')) {
-                    var $ref = prop.$ref.replace('#/definitions/', '');
-                    if (API.definitions.hasOwnProperty($ref)) {
-                        prop = $.extend({}, prop, API.definitions[$ref]);
-                        delete prop.$ref;
-                    }
-                } else if (prop.hasOwnProperty('items') && prop.items.hasOwnProperty('$ref')) {
-                    var $ref = prop.items.$ref.replace('#/definitions/', '');
-                    if (API.definitions.hasOwnProperty($ref)) {
-                        prop.items = $.extend({}, prop.items, API.definitions[$ref]);
-                        delete prop.items.$ref;
-                    }
-                }
-
-                return prop;
+                return this.schema.properties[this.field.id];
             },
             required: function() {
                 if (!this.field) {
@@ -59,20 +41,8 @@ define(['logger', 'api', 'jquery'], function(log, API, $) {
                 }
                 return this.schema.required.indexOf(this.field.id) >= 0;
             },
-            field_type: function() {
-                var prop = this.property;
-                if (!prop) {
-                    return;
-                }
-                if (prop.type === 'string' && prop.format === 'markdown') {
-                    return 'markdown';
-                }
-            },
-            is_input: function() {
-                return !this.field_type;
-            },
             is_bool: function() {
-                return this.field_type === 'checkbox' || this.field_type === 'radio';
+                return this.property.type === 'boolean';
             },
             value: function() {
                 if (this.model && this.field) {
