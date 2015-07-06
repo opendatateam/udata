@@ -18,6 +18,7 @@ reuse_fields = api.model('Reuse', {
     'description': fields.Markdown(description='The reuse description in Markdown', required=True),
     'tags': fields.List(fields.String, description='Some keywords to help in search'),
     'featured': fields.Boolean(description='Is the reuse featured', readonly=True),
+    'private': fields.Boolean(description='Is the reuse private to the owner or the organization'),
     'image': fields.ImageField(description='The reuse thumbnail'),
     'created_at': fields.ISODateTime(description='The reuse creation date', readonly=True),
     'last_modified': fields.ISODateTime(description='The reuse last modification date', readonly=True),
