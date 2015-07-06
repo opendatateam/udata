@@ -33,6 +33,14 @@ module.exports = {
     },
     components: {
         'form-vertical': require('components/form/vertical-form.vue')
+    },
+    methods: {
+        serialize: function() {
+            return this.$.form.serialize();
+        },
+        validate: function() {
+            return this.$.form.validate();
+        }
     }
 };
 </script>

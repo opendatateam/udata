@@ -35,9 +35,24 @@ module.exports = {
                     label: this._('Tags'),
                     widget: 'tag-completer'
                 }, {
+                    id: 'temporal_coverage',
+                    label: this._('Temporal coverage'),
+                    widget: 'daterange-picker'
+                }, {
                     id: 'spatial.zones',
                     label: this._('Spatial coverage'),
                     widget: 'zone-completer'
+                }, {
+                    id: 'private',
+                    label: this._('Private')
+                }, {
+                    id: 'organization',
+                    widget: 'hidden-input',
+                    type: 'hidden'
+                }, {
+                    id: 'owner',
+                    widget: 'hidden-input',
+                    type: 'hidden'
                 }]
         };
     },
@@ -54,6 +69,9 @@ module.exports = {
             delete data['spatial.zones'];
             // delete data['spatial.granularity'];
             return data;
+        },
+        validate: function() {
+            return this.$.form.validate();
         }
     }
 };

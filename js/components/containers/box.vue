@@ -1,62 +1,68 @@
 <style lang="less">
-.box-tools {
-    > * {
-        float: right;
-    }
-
-    .text-muted {
-        color: #777 !important;
-    }
-
-    .box-search {
-        // float: right;
-        width: 180px;
-        display: inline-block;
-
-        input:focus {
-            -webkit-box-shadow: none;
-            -moz-box-shadow: none;
-            box-shadow: none;
-            border-color: transparent!important;
+.box {
+    .box-tools {
+        > * {
+            float: right;
         }
 
-        input[type="text"], .btn {
-            box-shadow: none;
-            background-color: #fbfbfb;
-            border: 1px solid #fbfbfb;
+        .text-muted {
+            color: #777 !important;
+        }
 
-            &:focus {
-                background-color: #fff;
-                color: #666;
+        .box-search {
+            // float: right;
+            width: 180px;
+            display: inline-block;
 
-                & + .input-group-btn .btn {
+            input:focus {
+                -webkit-box-shadow: none;
+                -moz-box-shadow: none;
+                box-shadow: none;
+                border-color: transparent!important;
+            }
+
+            input[type="text"], .btn {
+                box-shadow: none;
+                background-color: #fbfbfb;
+                border: 1px solid #fbfbfb;
+
+                &:focus {
                     background-color: #fff;
-                    border-left-color: #fff;
                     color: #666;
+
+                    & + .input-group-btn .btn {
+                        background-color: #fff;
+                        border-left-color: #fff;
+                        color: #666;
+                    }
+                }
+            }
+
+            > * {
+                border-top: 1px solid #eee;
+                border-bottom: 1px solid #eee;
+                &:first-child {
+                    border-left: 1px solid #eee;
+                }
+
+                &:last-child {
+                    border-right: 1px solid #eee;
                 }
             }
         }
 
-        > * {
-            border-top: 1px solid #eee;
-            border-bottom: 1px solid #eee;
-            &:first-child {
-                border-left: 1px solid #eee;
-            }
+        .btn-box-tool {
+            font-size: 14px;
+            padding: 6px 8px;
+        }
 
-            &:last-child {
-                border-right: 1px solid #eee;
-            }
+        .btn-group {
+            vertical-align: inherit;
         }
     }
 
-    .btn-box-tool {
-        font-size: 14px;
-        padding: 6px 8px;
-    }
-
-    .btn-group {
-        vertical-align: inherit;
+    form {
+        margin: 10px;
     }
 }
 

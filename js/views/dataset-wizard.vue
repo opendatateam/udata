@@ -78,7 +78,7 @@ module.exports = {
     components: {
         'wizard-component': require('components/widgets/wizard.vue'),
         'publish-as': require('components/widgets/publish-as.vue'),
-        'create-form': require('components/dataset/create-form.vue'),
+        'create-form': require('components/dataset/form.vue'),
         'add-resource-form': require('components/dataset/add-resource-form.vue'),
         'resource-form': require('components/dataset/resource/form.vue'),
         'dataset-created': require('components/dataset/created.vue')

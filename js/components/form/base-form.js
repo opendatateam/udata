@@ -1,4 +1,4 @@
-define(['vue', 'logger', 'jquery', 'jquery-validation-dist'], function(Vue, log, $) {
+define(['config', 'vue', 'logger', 'moment', 'jquery', 'jquery-validation-dist'], function(config, Vue, log, moment, $) {
     'use strict';
 
     // jQuery validate
@@ -20,6 +20,16 @@ define(['vue', 'logger', 'jquery', 'jquery-validation-dist'], function(Vue, log,
         max: $.validator.format(Vue._('valid-max')),
         min: $.validator.format(Vue._('valid-min'))
     });
+
+
+    /**
+     *  Rule for depend dates, should be greater that param.
+     */
+    $.validator.addMethod('dateGreaterThan', function(value, element, param) {
+        var start = moment($(param).val());
+        return this.optional(element) || moment(value).isAfter(start);
+    }, $.validator.format(Vue._('Date should be after start date')));
+
 
     function empty_schema() {
         return {properties: {}, required: []};
@@ -49,9 +59,10 @@ define(['vue', 'logger', 'jquery', 'jquery-validation-dist'], function(Vue, log,
                 this.fields.forEach(function(field) {
                     if (!schema.properties.hasOwnProperty(field.id)) {
                         log.error('Property "'+ field.id +'" not found in schema');
+                        return;
                     }
                     s.properties[field.id] = schema.properties[field.id];
-                    if (schema.required.indexOf(field.id) > 0) {
+                    if (schema.required.indexOf(field.id) >= 0) {
                         s.required.push(field.id);
                     }
                 }.bind(this));
@@ -67,6 +78,7 @@ define(['vue', 'logger', 'jquery', 'jquery-validation-dist'], function(Vue, log,
         },
         attached: function() {
             this.$form.validate({
+                ignore: '',
                 errorClass: "help-block",
                 highlight: function(element) {
                     $(element).closest('.form-group').removeClass('has-success').addClass('has-error');

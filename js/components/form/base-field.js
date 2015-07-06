@@ -1,4 +1,4 @@
-define(['logger'], function(log) {
+define(['logger', 'jquery'], function(log, $) {
     'use strict';
 
     return {
@@ -22,15 +22,17 @@ define(['logger'], function(log) {
             'territory-completer': require('components/form/territory-completer'),
             'zone-completer': require('components/form/zone-completer.vue'),
             'format-completer': require('components/form/format-completer'),
+            'date-picker': require('components/form/date-picker.vue'),
+            'daterange-picker': require('components/form/daterange-picker.vue'),
             'checksum': require('components/form/checksum.vue')
         },
         computed: {
             property: function() {
-                // console.log('prop', this.field.id, this.schema, this.schema.properties.hasOwnProperty(this.field.id))
                 if (!this.schema.properties.hasOwnProperty(this.field.id)) {
                     log.error('Field "' + this.field.id + '" not found in schema');
                     return {};
                 }
+
                 return this.schema.properties[this.field.id];
             },
             required: function() {
@@ -39,20 +41,8 @@ define(['logger'], function(log) {
                 }
                 return this.schema.required.indexOf(this.field.id) >= 0;
             },
-            field_type: function() {
-                var prop = this.property;
-                if (!prop) {
-                    return;
-                }
-                if (prop.type === 'string' && prop.format === 'markdown') {
-                    return 'markdown';
-                }
-            },
-            is_input: function() {
-                return !this.field_type;
-            },
             is_bool: function() {
-                return this.field_type === 'checkbox' || this.field_type === 'radio';
+                return this.property.type === 'boolean';
             },
             value: function() {
                 if (this.model && this.field) {

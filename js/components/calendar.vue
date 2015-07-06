@@ -1,6 +1,12 @@
 <style lang="less">
-.calendar > * {
-    display: block;
+.calendar {
+    > * {
+        display: block;
+    }
+
+    .fa-remove {
+        color: red;
+    }
 }
 </style>
 
@@ -22,161 +28,50 @@
                 </tr>
             </thead>
             <tbody v-show="view == 'days'">
-                <tr>
-                    <td class="old day">25</td>
-                    <td class="old day">26</td>
-                    <td class="old day">27</td>
-                    <td class="old day">28</td>
-                    <td class="old day">29</td>
-                    <td class="old day">30</td>
-                    <td class="old day">31</td>
-                </tr>
-                <tr>
-                    <td class="day">1</td>
-                    <td class="day">2</td>
-                    <td class="day">3</td>
-                    <td class="day">4</td>
-                    <td class="day">5</td>
-                    <td class="day">6</td>
-                    <td class="day">7</td>
-                </tr>
-                <tr>
-                    <td class="day">8</td>
-                    <td class="day">9</td>
-                    <td class="day">10</td>
-                    <td class="day">11</td>
-                    <td class="day">12</td>
-                    <td class="day">13</td>
-                    <td class="day">14</td>
-                </tr>
-                <tr>
-                    <td class="day">15</td>
-                    <td class="day">16</td>
-                    <td class="day">17</td>
-                    <td class="day">18</td>
-                    <td class="day">19</td>
-                    <td class="day">20</td>
-                    <td class="day">21</td>
-                </tr>
-                <tr>
-                    <td class="day">22</td>
-                    <td class="day">23</td>
-                    <td class="day">24</td>
-                    <td class="day">25</td>
-                    <td class="day">26</td>
-                    <td class="day">27</td>
-                    <td class="day">28</td>
-                </tr>
-                <tr>
-                    <td class="new day">1</td>
-                    <td class="new day">2</td>
-                    <td class="new day">3</td>
-                    <td class="new day">4</td>
-                    <td class="new day">5</td>
-                    <td class="new day">6</td>
-                    <td class="new day">7</td>
+                <tr v-repeat="week:currentMonthDays">
+                    <td class="day"
+                        v-repeat="day:week"
+                        v-on="click: pickDay(day)"
+                        v-class="
+                            old: isOld(day),
+                            new: isNew(day),
+                            today: day.isSame(today, 'day'),
+                            active: day.isSame(selected, 'day')
+                        ">{{ day.date() }}</td>
                 </tr>
             </tbody>
             <tbody v-show="view == 'months'">
                 <tr>
                     <td colspan="7">
-                        <span class="month" v-repeat="months">{{$value}}</span>
+                        <span class="month" v-repeat="months" v-on="click: pickMonth($index)">{{$value}}
+                        </span>
                     </td>
                 </tr>
             </tbody>
             <tbody v-show="view == 'years'">
                 <tr>
                     <td colspan="7">
-                        <span class="year" v-repeat="yearsRange">{{$value}}</span>
-                        <!--span class="year old">2009</span>
-                        <span class="year">2010</span>
-                        <span class="year">2011</span>
-                        <span class="year">2012</span>
-                        <span class="year">2013</span>
-                        <span class="year">2014</span>
-                        <span class="year">2015</span>
-                        <span class="year">2016</span>
-                        <span class="year">2017</span>
-                        <span class="year">2018</span>
-                        <span class="year">2019</span>
-                        <span class="year new">2020</span-->
+                        <span class="year" v-repeat="yearsRange" v-on="click: pickYear($value)">
+                        {{$value}}
+                        </span>
                     </td>
                 </tr>
             </tbody>
             <tfoot>
                 <tr>
-                    <th colspan="7" class="today" style="display: none;">Today</th>
-                </tr>
-                <tr>
-                    <th colspan="7" class="clear" style="display: none;">Clear</th>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-    <!--div class="datepicker-months" v-show="view === 'months'">
-        <table class="table table-condensed">
-            <thead>
-                <tr>
-                    <th class="prev" style="visibility: visible;">«</th>
-                    <th colspan="5" class="datepicker-switch">2015</th>
-                    <th class="next" style="visibility: visible;">»</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="7">
-                        <span class="month" v-repeat="months">{{$value}}</span>
-                    </td>
-                </tr>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <th colspan="7" class="today" style="display: none;">Today</th>
-                </tr>
-                <tr>
-                    <th colspan="7" class="clear" style="display: none;">Clear</th>
+                    <th colspan="5" v-on="click: pickDay(today)">
+                        <span class="fa fa-dot-circle-o"></span>
+                        {{ _('Today') }}
+                    </th>
+                    <th colspan="2" v-on="click: clear">
+                        <span class="fa fa-remove"></span>
+                        {{ _('Clear') }}
+                    </th>
                 </tr>
             </tfoot>
         </table>
     </div>
-    <div class="datepicker-years" v-show="view === 'years'">
-        <table class="table table-condensed">
-            <thead>
-                <tr>
-                    <th class="prev" style="visibility: visible;">«</th>
-                    <th colspan="5" class="datepicker-switch">2010-2019</th>
-                    <th class="next" style="visibility: visible;">»</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="7">
-                        <span class="year old">2009</span>
-                        <span class="year">2010</span>
-                        <span class="year">2011</span>
-                        <span class="year">2012</span>
-                        <span class="year">2013</span>
-                        <span class="year">2014</span>
-                        <span class="year">2015</span>
-                        <span class="year">2016</span>
-                        <span class="year">2017</span>
-                        <span class="year">2018</span>
-                        <span class="year">2019</span>
-                        <span class="year new">2020</span>
-                    </td>
-                </tr>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <th colspan="7" class="today" style="display: none;">Today</th>
-                </tr>
-                <tr>
-                    <th colspan="7" class="clear" style="display: none;">Clear</th>
-                </tr>
-            </tfoot>
-        </table>
-        </div-->
-    </div>
+</div>
 </template>
 
 <script>
@@ -186,22 +81,34 @@ var moment = require('moment'),
     VIEWS = ['days', 'months', 'years'];
 
 module.exports = {
+    props: ['selected', 'view'],
     computed: {
         days: function() {
-            return moment.weekdaysShort();
+            var days = [],
+                weekdays = moment.weekdaysShort(),
+                first = moment.localeData().firstDayOfWeek();
+            for (var i = 0; i < 7; i++) {
+                days.push(weekdays[(i + first) % 7]);
+            }
+            return days;
         },
         months: function() {
             return moment.monthsShort();
         },
         monthDisplay: function() {
-            return moment().month(this.currentMonth).year(this.currentYear).format('MMMM YYYY');
+            return moment()
+                .month(this.currentMonth)
+                .year(this.currentYear)
+                .format('MMMM YYYY');
         },
         rangeDisplay: function() {
             if (this.view == 'days') {
-                return moment().month(this.currentMonth).year(this.currentYear).format('MMMM YYYY');
+                return moment()
+                    .month(this.currentMonth)
+                    .year(this.currentYear)
+                    .format('MMMM YYYY');
             } else if (this.view == 'months') {
                 return this.currentYear;
-                // moment().month(this.currentMonth).year(this.currentYear).format('YYYY');
             } else if (this.view == 'years') {
                 var start = moment().year(this.currentYear).subtract(5, 'years'),
                     end = moment().year(this.currentYear).add(6, 'years');
@@ -209,7 +116,19 @@ module.exports = {
             }
         },
         currentMonthDays: function() {
+            var month = moment().month(this.currentMonth).year(this.currentYear),
+                start = month.clone().startOf('month').startOf('week'),
+                end = month.clone().endOf('month').endOf('week'),
+                days = [], row;
 
+            for (var i=0; i <= end.diff(start, 'days'); i++) {
+                if (i % 7 === 0) {
+                    row = [];
+                    days.push(row);
+                }
+                row.push(start.clone().add(i, 'days'));
+            }
+            return days;
         },
         yearsRange: function() {
             var start = moment().year(this.currentYear).subtract(5, 'years'),
@@ -226,12 +145,9 @@ module.exports = {
             currentMonth: moment().month(),
             currentYear: moment().year(),
             today: moment(),
-            selected: moment(),
+            selected: null,
             view: 'days'
         };
-    },
-    ready: function() {
-        // debugger;
     },
     methods: {
         next: function() {
@@ -259,19 +175,39 @@ module.exports = {
             this.currentYear = current.year();
         },
         zoomOut: function() {
-            console.log('zoomout', this.view, VIEWS.indexOf(this.view), VIEWS.length);
-            if (VIEWS.indexOf(this.view) <= VIEWS.length) {
+            if (VIEWS.indexOf(this.view) + 1 < VIEWS.length) {
                 this.view = VIEWS[VIEWS.indexOf(this.view) + 1];
             }
         },
         pickDay: function(day) {
-
+            this.selected = day;
+            this.$dispatch('calendar:date:selected', day);
         },
         pickMonth: function(month) {
-
+            this.currentMonth = month;
+            this.view = 'days';
+            this.$dispatch('calendar:month:selected', month);
         },
         pickYear: function(year) {
+            this.currentYear = year;
+            this.view = 'months';
+            this.$dispatch('calendar:year:selected', year);
+        },
 
+        isOld: function(date) {
+            return date.isBefore(moment().month(this.currentMonth).year(this.currentYear).startOf('month'));
+        },
+
+        isNew: function(date) {
+            return date.isAfter(moment().month(this.currentMonth).year(this.currentYear).endOf('month'));
+        },
+
+        clear: function() {
+            this.selected = null;
+            this.currentYear = this.today.year();
+            this.currentMonth = this.today.month();
+            this.view = 'days';
+            this.$dispatch('calendar:date:cleared');
         }
     }
 };

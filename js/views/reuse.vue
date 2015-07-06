@@ -119,17 +119,8 @@ module.exports = {
             );
         },
         transfer_request: function() {
-            this.$root.$modal({
-                    components: {
-                        'transfer-card': require('components/reuse/card.vue')
-                    },
-                    data: {
-                        cardparams: {
-                            reuse: this.reuse
-                        },
-                        subject: this.reuse
-                    }
-                },
+            this.$root.$modal(
+                {data: {subject: this.reuse}},
                 Vue.extend(require('components/transfer/request-modal.vue'))
             );
         }

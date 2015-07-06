@@ -144,17 +144,8 @@ module.exports = {
             );
         },
         transfer_request: function() {
-            this.$root.$modal({
-                    components: {
-                        'transfer-card': require('components/dataset/card.vue')
-                    },
-                    data: {
-                        cardparams: {
-                            dataset: this.dataset
-                        },
-                        subject: this.dataset
-                    }
-                },
+            this.$root.$modal(
+                {data: {subject: this.dataset}},
                 Vue.extend(require('components/transfer/request-modal.vue'))
             );
         }

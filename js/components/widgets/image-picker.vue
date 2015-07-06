@@ -64,7 +64,7 @@
         </div>
     </div>
     <thumbnailer-widget v-ref="thumbnailer"
-        v-if="resizing" v-with="src: src, sizes:sizes">
+        v-if="resizing" src="{{src}}" sizes="{{sizes}}">
     </thumbnailer-widget>
 </div>
 </template>

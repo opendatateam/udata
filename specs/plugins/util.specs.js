@@ -49,6 +49,19 @@ describe("Util plugin", function() {
                 'textarea': 'b'
             });
         });
+
+        it('should handle nested values', function() {
+            $(form)
+                .append('<input name="nested[a]" value="aa"/>')
+                .append('<input name="nested[b]" value="bb"/>');
+
+            expect(Vue.util.serialize_form(form)).to.eql({
+                nested: {
+                    a: 'aa',
+                    b: 'bb'
+                }
+            });
+        });
     });
 
 });
