@@ -7,7 +7,7 @@
 </style>
 
 <template>
-<w-modal title="{{ title }}" modalclass="image-picker-modal modal-info"
+<modal title="{{ title }}" modalclass="image-picker-modal modal-info"
     v-ref="modal">
     <div class="modal-body">
         <image-picker v-ref="picker" endpoint="{{endpoint}}" sizes="{{sizes}}">
@@ -22,7 +22,7 @@
             {{ _('Cancel') }}
         </button>
     </footer>
-</w-modal>
+</modal>
 </template>
 
 <script>
@@ -37,13 +37,13 @@ module.exports = {
     },
     computed: {
         title: function() {
-            return this.$.picker.resizing
+            return this.$.picker && this.$.picker.resizing
                 ? this._('Resize your thumbnail')
                 : this._('Upload an image');
         }
     },
     components: {
-        'w-modal': require('components/modal.vue'),
+        'modal': require('components/modal.vue'),
         'image-picker': require('components/widgets/image-picker.vue')
     },
     events: {

@@ -101,6 +101,7 @@ var JCrop = require('jquery-jcrop'),
 
 module.exports = {
     mixins: [require('mixins/uploader')],
+    props: ['src', 'sizes'],
     data: function() {
         return {
             centered: false,
@@ -108,6 +109,7 @@ module.exports = {
             src: null
         };
     },
+
     computed: {
         /**
          * Get the current crop Bounding Box (realsize) if any.
@@ -142,28 +144,8 @@ module.exports = {
                     marginTop: '-' + Math.round(ry * coords.y) + 'px'
                 });
             });
-        }
-    },
-    watch: {
-        /**
-         * Toggle centering
-         */
-        centered: function(centered) {
-            if (centered) {
-                var bounds = this.Jcrop.getBounds(),
-                    attr = bounds[0] > bounds[1] ? 'width' : 'height';
-
-                this.Jcrop.disable();
-
-                $(this.$$.preview_containers)
-                    .find('.preview')
-                    .removeAttr('style')
-                    .css(attr, '100%');
-            } else {
-                this.Jcrop.enable();
-            }
         },
-        src: function(src) {
+        setImage: function(src) {
             if (!src) return;
 
             var that = this,
@@ -187,6 +169,32 @@ module.exports = {
                     this.setSelect([0, 0, size, size]);
                 });
         }
+    },
+    watch: {
+        /**
+         * Toggle centering
+         */
+        centered: function(centered) {
+            if (centered) {
+                var bounds = this.Jcrop.getBounds(),
+                    attr = bounds[0] > bounds[1] ? 'width' : 'height';
+
+                this.Jcrop.disable();
+
+                $(this.$$.preview_containers)
+                    .find('.preview')
+                    .removeAttr('style')
+                    .css(attr, '100%');
+            } else {
+                this.Jcrop.enable();
+            }
+        },
+        src: function(src) {
+            return this.setImage(src);
+        }
+    },
+    ready: function() {
+        this.setImage(this.src);
     }
 };
 </script>
