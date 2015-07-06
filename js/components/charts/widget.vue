@@ -42,19 +42,11 @@
                     <span class="fa fa-fw fa-{{$value}}"></span>
                 </button>
             </div>
-            <div class="btn-group">
-                <button type="button" class="btn btn-primary btn-xs"
-                    v-class="active: legendToggled"
-                    aria-pressed="{{legendToggled}}"
-                    v-on="click: legendToggled = !legendToggled">
-                    <span class="fa fa-fw fa-question"></span>
-                </button>
-            </div>
         </aside>
         <div class="chart" v-style="height: height" v-el="container">
             <canvas v-el="canvas" height="100%"></canvas>
         </div>
-        <div class="chart-legend" v-el="legend" v-show="legendToggled"></div>
+        <div class="chart-legend" v-el="legend"></div>
     </box>
 </template>
 
@@ -117,7 +109,6 @@ module.exports = {
         return {
             chart: null,
             charttype: 'Area',
-            legendToggled: false,
             canvasHeight: null,
             height: '300px',
             types: {
