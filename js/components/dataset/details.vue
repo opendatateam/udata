@@ -37,12 +37,14 @@ module.exports = {
             this.toggled = !this.toggled;
         },
         save: function(e) {
-            var data = this.$.form.serialize();
+            if (this.$.form.validate()) {
+                var data = this.$.form.serialize();
 
-            this.dataset.update(data);
-            e.preventDefault();
+                this.dataset.update(data);
+                e.preventDefault();
 
-            this.toggled = false;
+                this.toggled = false;
+            }
         }
     }
 };

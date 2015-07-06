@@ -81,12 +81,14 @@ module.exports = {
             this.toggled = !this.toggled;
         },
         save: function(e) {
-            var data = this.$.form.serialize();
+            if (this.$.form.validate()) {
+                var data = this.$.form.serialize();
 
-            this.reuse.update(data);
-            e.preventDefault();
+                this.reuse.update(data);
+                e.preventDefault();
 
-            this.toggled = false;
+                this.toggled = false;
+            }
         }
     }
 };

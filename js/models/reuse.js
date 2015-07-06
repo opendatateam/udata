@@ -26,6 +26,12 @@ define(['api', 'models/base', 'logger'], function(API, Model, log) {
                     },
                     this.on_fetched.bind(this));
                 }
+            },
+            update: function(data) {
+                API.reuses.update_reuse({
+                    reuse: this.id,
+                    payload: data
+                }, this.on_fetched.bind(this));
             }
         }
     });

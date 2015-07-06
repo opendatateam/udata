@@ -64,7 +64,7 @@ module.exports = {
     components: {
         'wizard-component': require('components/widgets/wizard.vue'),
         'pre-create': require('components/organization/pre-create.vue'),
-        'create-form': require('components/organization/create-form.vue'),
+        'create-form': require('components/organization/form.vue'),
         'post-create': require('components/organization/post-create.vue'),
         'image-picker': require('components/widgets/image-picker.vue')
     },

@@ -69,6 +69,9 @@ module.exports = {
             delete data['spatial.zones'];
             // delete data['spatial.granularity'];
             return data;
+        },
+        validate: function() {
+            return this.$.form.validate();
         }
     }
 };

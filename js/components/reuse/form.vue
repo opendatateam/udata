@@ -53,6 +53,9 @@ module.exports = {
     methods: {
         serialize: function() {
             return this.$.form.serialize();
+        },
+        validate: function() {
+            return this.$.form.validate();
         }
     }
 };

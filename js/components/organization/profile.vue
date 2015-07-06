@@ -37,7 +37,7 @@
             <div v-markdown="{{org.description}}"></div>
         </div>
     </div>
-    <create-form v-ref="form" v-if="toggled" organization="{{org}}"></create-form>
+    <org-form v-ref="form" v-if="toggled" organization="{{org}}"></org-form>
     <footer>
         <button type="submit" class="btn btn-primary" v-if="toggled"
             v-on="click: save($event)" v-i18n="Save"></button>
@@ -62,7 +62,7 @@ module.exports = {
     components: {
         'box-container': require('components/containers/box.vue'),
         'image-button': require('components/widgets/image-button.vue'),
-        'create-form': require('components/organization/create-form.vue')
+        'org-form': require('components/organization/form.vue')
     },
     computed: {
         endpoint: function() {
@@ -82,8 +82,8 @@ module.exports = {
             this.toggled = !this.toggled;
         },
         save: function(e) {
-            if (this.$.form.$.form.validate()) {
-                var data = this.$.form.$.form.serialize();
+            if (this.$.form.validate()) {
+                var data = this.$.form.serialize();
 
                 this.org.update(data);
                 e.preventDefault();
