@@ -109,7 +109,6 @@ class OrganizationAPI(API):
 
 @ns.route('/<org:org>/badges/', endpoint='organization_badges')
 class OrganizationBadgesAPI(API):
-    @api.secure
     @api.doc(id='create_badge', body=badge_fields, **common_doc)
     @api.marshal_with(badge_fields)
     @api.secure(admin_permission)
@@ -125,7 +124,6 @@ class OrganizationBadgesAPI(API):
 
 @ns.route('/<org:org>/badges/<badge_kind>/', endpoint='organization_badge')
 class OrganizationBadgeAPI(API):
-    @api.secure
     @api.doc(id='delete_badge', **common_doc)
     @api.secure(admin_permission)
     def delete(self, org, badge_kind):

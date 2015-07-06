@@ -128,7 +128,6 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
 
 @ns.route('/<dataset:dataset>/badges/', endpoint='dataset_badges')
 class DatasetBadgesAPI(API):
-    @api.secure
     @api.doc(id='create_badge', body=badge_fields, **common_doc)
     @api.marshal_with(badge_fields)
     @api.secure(admin_permission)
@@ -144,7 +143,6 @@ class DatasetBadgesAPI(API):
 
 @ns.route('/<dataset:dataset>/badges/<badge_kind>/', endpoint='dataset_badge')
 class DatasetBadgeAPI(API):
-    @api.secure
     @api.doc(id='delete_badge', **common_doc)
     @api.secure(admin_permission)
     def delete(self, dataset, badge_kind):
