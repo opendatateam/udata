@@ -402,11 +402,20 @@ class DateRangeField(FieldHelper, fields.StringField):
 
     def process_formdata(self, valuelist):
         if valuelist and valuelist[0]:
-            start, end = valuelist[0].split(' - ')
-            self.data = db.DateRange(
-                start=parse(start, yearfirst=True).date(),
-                end=parse(end, yearfirst=True).date(),
-            )
+            value = valuelist[0]
+            if isinstance(value, basestring):
+                start, end = value.split(' - ')
+                self.data = db.DateRange(
+                    start=parse(start, yearfirst=True).date(),
+                    end=parse(end, yearfirst=True).date(),
+                )
+            elif 'start' in value and 'end' in value:
+                self.data = db.DateRange(
+                    start=parse(value['start'], yearfirst=True).date(),
+                    end=parse(value['end'], yearfirst=True).date(),
+                )
+            else:
+                raise validators.ValidationError(_('Unable to parse date range'))
         else:
             self.data = None
 
