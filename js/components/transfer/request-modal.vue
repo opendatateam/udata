@@ -34,7 +34,8 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-                    <transfer-card v-with="cardparams"></transfer-card>
+                    <dataset-card v-if="subject.classname == 'Dataset'" dataset="{{subject}}"></dataset-card>
+                    <reuse-card v-if="subject.classname == 'Reuse'" reuse="{{subject}}"></reuse-card>
                 </div>
             </div>
             <div class="row text-center">
@@ -82,7 +83,9 @@ module.exports = {
         'org-filter': require('components/organization/card-filter.vue'),
         'user-filter': require('components/user/card-filter.vue'),
         'org-card': require('components/organization/card.vue'),
-        'user-card': require('components/user/card.vue')
+        'user-card': require('components/user/card.vue'),
+        'dataset-card': require('components/dataset/card.vue'),
+        'reuse-card': require('components/reuse/card.vue')
     },
     data: function() {
         return {

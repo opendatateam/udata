@@ -20,7 +20,7 @@
     </div>
     <footer>
         <ul>
-            <li v-if="dataset.spatial && dataset.spatial.territories.length > 0">
+            <li v-if="dataset.spatial && dataset.spatial.territories && dataset.spatial.territories.length > 0">
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Territorial coverage') }}">
