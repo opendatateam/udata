@@ -55,6 +55,7 @@ DATASET_BADGE_KINDS = {
     PIVOTAL_DATA: _('Pivotal data'),
     'dataconnexions-laureate': _('Dataconnexions laureate'),
     'dataconnexions-candidate': _('Dataconnexions candidate'),
+    'c3': _('C³'),
 }
 
 
