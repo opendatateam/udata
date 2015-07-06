@@ -79,10 +79,12 @@ C3_PARTNERS = (
     'ministere-de-l-ecologie-du-developpement-durable-et-de-l-energie',
 )
 
+
 @blueprint.route('/c3')
 def c3():
     partners = Organization.objects(slug__in=C3_PARTNERS)
-    return theme.render('c3.html', partners=partners)
+    datasets = []
+    return theme.render('c3.html', partners=partners, datasets=datasets)
 
 
 @blueprint.route('/faq/', defaults={'section': 'home'})

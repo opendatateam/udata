@@ -14,7 +14,7 @@
     ],
 } %}
 
-{% set body_class="c3" %}
+{% set body_class="c3 dataconnexions" %}
 
 {% block content %}
 <section class="content">
@@ -115,28 +115,22 @@
     </div>
 </section>
 
+{% if datasets %}
 <section class="content participants">
     <div class="container">
 
-        {#% for cat in categories  %}
         <div class="row">
-            <h3 class="col-xs-12">{{ cat.label }}</h3>
-            <p class="col-xs-12"><em>{{ cat.description }}</em></p>
-            {% if cat.reuses %}
+            <h3 class="col-xs-12">Les jeux de données remarquables</h3>
             <ul class="card-list">
-                {% for reuse in cat.reuses %}
+                {% for dataset in datasets %}
                 <li class="col-md-4 col-sm-6">
-                    {% include theme('reuse/card.html') %}
+                    {% include theme('dataset/card.html') %}
                 </li>
                 {% endfor %}
             </ul>
             <div class="clearfix"></div>
-            {% else %}
-            <p class="text-center lead">Aucune réutilisation dans cette catégorie pour l'instant</p>
-            {% endif %}
         </div>
-        {% endfor %#}
-
     </div>
 </section>
+{% endif %}
 {% endblock %}
