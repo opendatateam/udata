@@ -26,6 +26,7 @@ describe("Markdown plugin", function() {
         function el(text) {
             var vm = new Tester({
                     el: fixture.set('<div/>')[0],
+                    replace: false,
                     data: {
                         text: text
                     }
@@ -54,6 +55,7 @@ describe("Markdown plugin", function() {
         function el(text) {
             var vm = new Tester({
                     el: fixture.set('<div/>')[0],
+                    replace: false,
                     data: {
                         'text': text
                     }
