@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from flask import url_for, redirect
 
 from udata import theme
-from udata.models import Reuse, Organization
+from udata.models import Reuse, Organization, Dataset, DATASET_BADGE_KINDS
 from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
 
@@ -83,7 +83,7 @@ C3_PARTNERS = (
 @blueprint.route('/c3')
 def c3():
     partners = Organization.objects(slug__in=C3_PARTNERS)
-    datasets = []
+    datasets = Dataset.objects(badges__kind=DATASET_BADGE_KINDS['c3'])
     return theme.render('c3.html', partners=partners, datasets=datasets)
 
 
