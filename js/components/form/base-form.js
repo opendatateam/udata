@@ -62,7 +62,7 @@ define(['config', 'vue', 'logger', 'moment', 'jquery', 'jquery-validation-dist']
                         return;
                     }
                     s.properties[field.id] = schema.properties[field.id];
-                    if (schema.required.indexOf(field.id) > 0) {
+                    if (schema.required.indexOf(field.id) >= 0) {
                         s.required.push(field.id);
                     }
                 }.bind(this));

@@ -1,4 +1,4 @@
-define(['logger', 'api', 'jquery'], function(log, API, $) {
+define(['logger', 'jquery'], function(log, $) {
     'use strict';
 
     return {
