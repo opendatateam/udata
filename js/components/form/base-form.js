@@ -28,7 +28,16 @@ define(['vue', 'logger', 'jquery', 'jquery-validation-dist'], function(Vue, log,
     return {
         name: 'base-form',
         replace: true,
-        props: ['fields', 'model', 'defs', 'readonly', 'fill'],
+        props: {
+            fields: Array,
+            model: Object,
+            defs: Object,
+            readonly: {
+                type: Boolean,
+                default: false
+            },
+            fill: Boolean
+        },
         computed: {
             schema: function() {
                 if (!this.fields || !(this.model || this.defs)) {

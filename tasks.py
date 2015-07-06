@@ -139,7 +139,7 @@ def update():
 @task
 def build():
     print(cyan('Building static assets'))
-    lrun('webpack -c --progress -p --config webpack.config.prod.js', pty=True)
+    lrun('webpack -c --progress --config webpack.config.prod.js', pty=True)
     print(cyan('Compiling translations'))
     lrun('python setup.py compile_catalog')
 

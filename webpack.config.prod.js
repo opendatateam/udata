@@ -9,6 +9,9 @@ config.plugins.push(new webpack.optimize.UglifyJsPlugin({
     }
 }));
 
+config.plugins.push(new webpack.optimize.DedupePlugin());
+config.plugins.push(new webpack.optimize.OccurenceOrderPlugin(true));
+
 /**
  * Image optimization.
  * Not working yet

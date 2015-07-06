@@ -6,22 +6,14 @@ var node_path = path.join(__dirname, 'node_modules');
 
 var vue = require('vue-loader'),
     css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap'),
-    less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline');
+    less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline'),
+    html_loader = 'html?collapseBooleanAttributes=false&collapseWhitespace=false"';
 
 var languages = ['en', 'fr'];
 
 module.exports = {
     entry: {
         admin: "./js/main.js",
-        // iecompat: [
-        //     'es5-shim',
-        //     'es5-shim/es5-sham',
-        //     'es6-shim',
-        //     'es6-shim/es6-sham',
-        //     'html5shiv/dist/html5shiv',
-        //     // 'html5shiv/dist/html5shiv-printshiv.js',
-        //     'imports?this=>window!respond.js/dest/respond.src'
-        // ]
     },
     output: {
         path: path.join(__dirname, 'udata_admin', 'static'),
@@ -45,9 +37,9 @@ module.exports = {
             {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file'},
             {test: /\.css$/, loader: css_loader},
             {test: /\.less$/, loader: less_loader},
-            {test: /\.vue$/, loader: vue.withLoaders({css: css_loader, less: less_loader})},
+            {test: /\.vue$/, loader: vue.withLoaders({html: html_loader, css: css_loader, less: less_loader})},
             {test: /\.json$/, loader: "json"},
-            {test: /\.html$/, loader: "html"},
+            {test: /\.html$/, loader: html_loader},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, loader: "file-loader?name=[name].[ext]"},
         ]
     },
