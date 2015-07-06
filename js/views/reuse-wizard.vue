@@ -33,7 +33,7 @@ module.exports = {
             }, {
                 label: this._('New reuse'),
                 subtitle: this._('Describe your reuse'),
-                component: 'create-form',
+                component: 'reuse-form',
                 next: function(component) {
                     if (component.$.form.validate()) {
                         this.reuse.$data = component.$.form.serialize();
@@ -82,7 +82,7 @@ module.exports = {
          };
     },
     components: {
-        'create-form': require('components/reuse/create-form.vue'),
+        'reuse-form': require('components/reuse/form.vue'),
         'dataset-cards-form': require('components/dataset/cards-form.vue'),
         'image-picker': require('components/widgets/image-picker.vue'),
         'post-create': require('components/reuse/post-create.vue'),

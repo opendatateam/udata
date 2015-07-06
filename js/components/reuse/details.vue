@@ -55,14 +55,7 @@ module.exports = {
     data: function() {
         return {
             title: this._('Details'),
-            toggled: false,
-            fields: [{
-                id: 'title',
-                label: this._('Name')
-            }, {
-                id: 'description',
-                label: this._('Description'),
-            }]
+            toggled: false
         };
     },
     computed: {
@@ -81,7 +74,7 @@ module.exports = {
     components: {
         'box-container': require('components/containers/box.vue'),
         'image-button': require('components/widgets/image-button.vue'),
-        'reuse-form': require('components/reuse/create-form.vue')
+        'reuse-form': require('components/reuse/form.vue')
     },
     methods: {
         toggle: function() {

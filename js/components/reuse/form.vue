@@ -33,11 +33,27 @@ module.exports = {
                     id: 'tags',
                     label: this._('Tags'),
                     widget: 'tag-completer'
+                }, {
+                    id: 'private',
+                    label: this._('Private')
+                }, {
+                    id: 'organization',
+                    widget: 'hidden-input',
+                    type: 'hidden'
+                }, {
+                    id: 'owner',
+                    widget: 'hidden-input',
+                    type: 'hidden'
                 }]
         };
     },
     components: {
         'form-vertical': require('components/form/vertical-form.vue')
+    },
+    methods: {
+        serialize: function() {
+            return this.$.form.serialize();
+        }
     }
 };
 </script>
