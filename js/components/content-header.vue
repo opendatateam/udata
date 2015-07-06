@@ -30,13 +30,6 @@
     <section class="content-header">
         <h1>
             {{$root.meta.title}}
-            <small v-if="$root.meta.subtitle">{{$root.meta.subtitle}}</small>
-        </h1>
-        <div class="btn-group  btn-group-sm btn-actions pull-right clearfix">
-            <a v-if="$root.meta.page" class="btn btn-link" href="{{$root.meta.page}}"
-                title="{{ _('See on the site') }}">
-                <span class="fa fa-fw fa-bookmark"></span>
-            </a>
             <div v-if="$root.meta.actions && $root.meta.actions.length"
                 class="btn-group" role="group">
                 <a class="btn btn-link btn-sm dropdown-toggle"
@@ -52,6 +45,13 @@
                     </li>
                 </ul>
             </div>
+            <small v-if="$root.meta.subtitle">{{$root.meta.subtitle}}</small>
+        </h1>
+        <div class="btn-group  btn-group-sm btn-actions pull-right clearfix">
+            <a v-if="$root.meta.page" class="btn btn-link" href="{{$root.meta.page}}"
+                title="{{ _('See it as viewed by visitors') }}">
+                {{ _('See on the site') }} →
+            </a>
         </div>
     </section>
 </template>
