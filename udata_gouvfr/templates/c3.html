@@ -1,0 +1,138 @@
+{% extends theme("base.html") %}
+
+{% set meta = {
+    'title': 'C³',
+    'description': "L'évènement Climate Change Challenge",
+    'keywords': [
+        'c3',
+        'climat',
+        'climate change challenge',
+        'cop21',
+        'environement',
+        'hackathon',
+        'évènement',
+    ],
+} %}
+
+{% set body_class="c3" %}
+
+{% block content %}
+<section class="content">
+    <div class="container">
+        <div class="row">
+            <article class="col-xs-12 col-sm-8 col-md-9">
+                <h1>C³, le tour de France de l’innovation ouverte face aux défis climatiques est lancé !</h1>
+
+                <p class="text-justify lead">
+                Porté par le Secrétariat Général pour la Modernisation de l'Action Publique et par le Ministère de l'Écologie, du Développement Durable et de l'Énergie, le C³ (Climate Change Challenge) est une initiative développée par Météo-France, La Mêlée, l'IGN, le CNES, Etalab et le MNHN. Toulouse, Nantes, Lyon et Paris se mobilisent pour ce challenge fédérateur qui permettra de faire un tour de France de l’innovation ouverte face aux grands défis climatiques.
+                </p>
+
+                <p class="text-justify">
+                Placée sous le signe du climat et du développement durable, 2015 est l’année où les négociations internationales devraient aboutir à un accord mondial de lutte contre le dérèglement climatique (COP 21) en décembre à Paris.
+                </p>
+
+                <p class="text-justify">
+                Née de la volonté d’acteurs publics et privés, l’initiative C³ (Climate Change Challenge) est une démarche d’innovation ouverte pour mieux servir un besoin sociétal de réflexion et d’actions collaboratives sur le sujet du changement climatique. Ce Challenge mobilisera l’intelligence collective et les données ouvertes pour imaginer des solutions innovantes à la sensibilisation, la prévention, la lutte et l’adaptation au changement climatique.
+                </p>
+
+                <h3>Sous le signe de la démocratie participative !</h3>
+
+                <p class="text-justify">
+                La question du développement durable est trop souvent confiée aux experts du domaine. Or, la préservation du bien commun est l’affaire de tous. Pour mobiliser l’intelligence collective et pour encourager une démocratie participative, le C³ est ouvert à tous les publics (citoyens, acteurs publics, entreprises, experts, étudiants, start-ups).  La participation de profils diversifiés permet d’apporter une richesse créative, une vision plus juste et une accélération de la sensibilisation et de l’implication de tous dans la recherche de solutions face au dérèglement climatique.
+                </p>
+
+                <h3>Les 8 thématiques !</h3>
+
+                <p class="text-justify">
+                Pédagogie/sensibilisation, aménagement du territoire, transition énergétique, gestion de ressources, impact sur l’économie, impact sur la santé, accès à la connaissance et à l’information, biodiversité.
+                </p>
+
+
+                <h3>4 métropoles mobilisées !</h3>
+
+                <p class="text-justify">
+                C³ implique les territoires avec la participation de 4 métropoles :
+                </p>
+
+                <ul>
+                    <li><strong>Toulouse</strong>, labellisée Métropole French Tech, très impliquée dans son projet Smart City. C’est aussi là que siègent La Mêlée et Météo France.</li>
+                    <li><strong>Paris</strong>, capitale internationale 2015 du Changement Climatique,</li>
+                    <li><strong>Nantes</strong>, labellisée ville européenne verte en 2013,</li>
+                    <li><strong>Lyon</strong>, pour la place particulière qu’elle occupe sur le territoire en raison de sa culture industrielle et de développement durable.</li>
+                </ul>
+
+                <h3>C³, un programme en 3 phases !</h3>
+
+                <p class="text-justify">
+                La démarche se déroulera tout au long de l’année 2015 et s’organise en 3 phases :
+                </p>
+
+                <ul>
+                    <li><strong>1ère phase, le 5 mai à Toulouse, le 12 à Lyon, le 22 à Nantes et le 26 à Paris</strong></li>
+                    <li><strong>2ème phase : le 7 juillet à Toulouse, et le 9 à Paris : le « Challenge Workshop »</strong> un atelier qui vise à définir et enrichir les défis auxquels répondre</li>
+                    <li><strong>3ème phase : du 6 au 9 novembre dans les 4 villes participantes : l’« Innovation Jam »</strong>, un marathon de l’innovation de 36h à 48h pour imaginer et développer des solutions innovantes aux défis posés.</li>
+                </ul>
+
+                <p class="text-justify">
+                Les groupes sont animés par une équipe de facilitatrices spécialisées dans l'animation de groupes avec des méthodes collaboratives et créatives.
+                </p>
+
+                <h3>Open Data !</h3>
+
+                <p class="text-justify">
+                Pour stimuler la créativité collective et garantir la pertinence des solutions, les partenaires de C³ mettent à la disposition des participants des centaines de jeux de données en open data (données ouvertes). C’est la plateforme https://www.data.gouv.fr/fr/ qui référencera les données fournies et ouvertes aux travaux collaboratifs du C³. Chaque partenaire met également à disposition ses spécialistes pour apporter appuis et conseils aux participants quant à l’utilisation des données.
+                </p>
+
+                <h3>Des lauréats à la COP21 !</h3>
+
+                <p class="text-justify">
+                Trois lauréats seront sélectionnés dans chaque ville. Puis un concours inter-ville sélectionnera les 4 meilleurs projets et le  prix spécial du jury qui seront présentés à Paris lors de la COP21 en décembre.
+                </p>
+
+                <p class="lead text-center">
+                Pour s’inscrire :<br/>
+                <a href="http://www.C³challenge.com">www.c3challenge.com</a>
+                </p>
+
+            </article>
+
+            <aside class="col-xs-12 col-sm-4 col-md-3">
+                <div class="text-center">
+                    <img src="{{ url_for('gouvfr.static', filename='c3/logo-c3.png') }}"
+                        alt="Logo de l'événement C³" class="scalable" />
+                </div>
+                <h4>Resources</h4>
+                <ul class="list-unstyled">
+                    <li><a href="http://c3challenge.com/">Site officiel du C³</a></li>
+                    <li><a href="http://www.developpement-durable.gouv.fr/Climate-Change-Challenge-C3.html">Page C³ du Ministère de l'Écologie, du Développement Durable et de l'Énergie</a></li>
+                </ul>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<section class="content participants">
+    <div class="container">
+
+        {#% for cat in categories  %}
+        <div class="row">
+            <h3 class="col-xs-12">{{ cat.label }}</h3>
+            <p class="col-xs-12"><em>{{ cat.description }}</em></p>
+            {% if cat.reuses %}
+            <ul class="card-list">
+                {% for reuse in cat.reuses %}
+                <li class="col-md-4 col-sm-6">
+                    {% include theme('reuse/card.html') %}
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="clearfix"></div>
+            {% else %}
+            <p class="text-center lead">Aucune réutilisation dans cette catégorie pour l'instant</p>
+            {% endif %}
+        </div>
+        {% endfor %#}
+
+    </div>
+</section>
+{% endblock %}

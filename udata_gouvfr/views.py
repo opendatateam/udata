@@ -72,6 +72,11 @@ def dataconnexions():
     return theme.render('dataconnexions.html', categories=categories)
 
 
+@blueprint.route('/c3')
+def c3():
+    return theme.render('c3.html')
+
+
 @blueprint.route('/faq/', defaults={'section': 'home'})
 @blueprint.route('/faq/<string:section>/')
 def faq(section):
