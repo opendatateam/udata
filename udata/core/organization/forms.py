@@ -5,9 +5,13 @@ from udata.auth import current_user
 from udata.forms import Form, ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
-from .models import Organization, MembershipRequest, Member, LOGO_SIZES, ORG_ROLES
+from .models import (
+    OrganizationBadge, Organization, MembershipRequest, Member,
+    ORG_BADGE_KINDS, LOGO_SIZES, ORG_ROLES
+)
 
 __all__ = (
+    'BadgeForm',
     'OrganizationForm',
     'OrganizationMemberForm',
     'OrganizationExtraForm',
@@ -39,6 +43,15 @@ class OrganizationForm(ModelForm):
             org.save()
 
         return org
+
+
+class BadgeForm(ModelForm):
+    model_class = OrganizationBadge
+
+    kind = fields.RadioField(
+        _('Kind'), [validators.required()],
+        choices=ORG_BADGE_KINDS.items(),
+        description=_('Kind of badge (public-service, etc)'))
 
 
 class OrganizationMemberForm(ModelForm):

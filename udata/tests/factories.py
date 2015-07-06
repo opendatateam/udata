@@ -141,6 +141,20 @@ class ResourceFactory(MongoEngineFactory):
     url = factory.LazyAttribute(lambda o: faker.url())
 
 
+class DatasetBadgeFactory(MongoEngineFactory):
+    class Meta:
+        model = models.DatasetBadge
+
+    kind = FuzzyChoice(models.DATASET_BADGE_KINDS.keys())
+
+
+class OrganizationBadgeFactory(MongoEngineFactory):
+    class Meta:
+        model = models.OrganizationBadge
+
+    kind = FuzzyChoice(models.ORG_BADGE_KINDS.keys())
+
+
 class DatasetFactory(MongoEngineFactory):
     class Meta:
         model = models.Dataset

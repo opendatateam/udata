@@ -10,7 +10,10 @@ from flask import url_for
 from udata.models import Dataset, Follow, FollowDataset, Member
 
 from . import APITestCase
-from ..factories import DatasetFactory, ResourceFactory, OrganizationFactory, AdminFactory, VisibleDatasetFactory, faker
+from ..factories import (
+    DatasetBadgeFactory, DatasetFactory, ResourceFactory, OrganizationFactory,
+    AdminFactory, VisibleDatasetFactory, UserFactory, faker
+)
 
 
 class DatasetAPITest(APITestCase):
@@ -276,6 +279,51 @@ class DatasetAPITest(APITestCase):
 
         dataset.reload()
         self.assertFalse(dataset.featured)
+
+
+class DatasetBadgeAPITest(APITestCase):
+    def setUp(self):
+        self.login(AdminFactory())
+        self.dataset = DatasetFactory(owner=UserFactory())
+
+    def test_create(self):
+        data = DatasetBadgeFactory.attributes()
+        with self.api_user():
+            response = self.post(
+                url_for('api.dataset_badges', dataset=self.dataset), data)
+        self.assertStatus(response, 201)
+        self.dataset.reload()
+        self.assertEqual(len(self.dataset.badges), 1)
+
+    def test_create_2nd(self):
+        self.dataset.badges.append(DatasetBadgeFactory())
+        self.dataset.save()
+        data = DatasetBadgeFactory.attributes()
+        with self.api_user():
+            response = self.post(
+                url_for('api.dataset_badges', dataset=self.dataset), data)
+        self.assertStatus(response, 201)
+        self.dataset.reload()
+        self.assertEqual(len(self.dataset.badges), 2)
+
+    def test_delete(self):
+        badge = DatasetBadgeFactory()
+        self.dataset.badges.append(badge)
+        self.dataset.save()
+        with self.api_user():
+            response = self.delete(
+                url_for('api.dataset_badge', dataset=self.dataset,
+                        badge_kind=str(badge.kind)))
+        self.assertStatus(response, 204)
+        self.dataset.reload()
+        self.assertEqual(len(self.dataset.badges), 0)
+
+    def test_delete_404(self):
+        with self.api_user():
+            response = self.delete(
+                url_for('api.dataset_badge', dataset=self.dataset,
+                        badge_kind=str(DatasetBadgeFactory().kind)))
+        self.assert404(response)
 
 
 class DatasetResourceAPITest(APITestCase):

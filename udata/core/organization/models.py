@@ -217,6 +217,27 @@ class Organization(WithMetrics, db.Datetimed, db.Document):
     def by_role(self, role):
         return filter(lambda m: m.role == role, self.members)
 
+    def add_badge(self, badge):
+        '''Perform an atomic prepend for a new badge'''
+        self.update(__raw__={
+            '$push': {
+                'badges': {
+                    '$each': [badge.to_mongo()],
+                    '$position': 0
+                    }
+                }
+            })
+        self.reload()
+
+    def remove_badge(self, badge):
+        '''Perform an atomic removal for a given badge'''
+        self.update(__raw__={
+            '$pull': {
+                'badges': badge.to_mongo()
+            }
+        })
+        self.reload()
+
 
 pre_save.connect(Organization.pre_save, sender=Organization)
 post_save.connect(Organization.post_save, sender=Organization)

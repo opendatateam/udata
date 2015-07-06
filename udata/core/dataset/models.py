@@ -229,6 +229,27 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
+    def add_badge(self, badge):
+        '''Perform an atomic prepend for a new badge'''
+        self.update(__raw__={
+            '$push': {
+                'badges': {
+                    '$each': [badge.to_mongo()],
+                    '$position': 0
+                    }
+                }
+            })
+        self.reload()
+
+    def remove_badge(self, badge):
+        '''Perform an atomic removal for a given badge'''
+        self.update(__raw__={
+            '$pull': {
+                'badges': badge.to_mongo()
+            }
+        })
+        self.reload()
+
     def add_resource(self, resource):
         '''Perform an atomic prepend for a new resource'''
         self.update(__raw__={
@@ -236,9 +257,9 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
                 'resources': {
                     '$each': [resource.to_mongo()],
                     '$position': 0
+                    }
                 }
-            }
-        })
+            })
         self.reload()
 
     def add_community_resource(self, resource):
@@ -248,9 +269,9 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
                 'community_resources': {
                     '$each': [resource.to_mongo()],
                     '$position': 0
+                    }
                 }
-            }
-        })
+            })
         self.reload()
 
 

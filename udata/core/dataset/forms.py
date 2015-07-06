@@ -6,9 +6,16 @@ from udata.i18n import lazy_gettext as _
 
 from udata.core.storages import resources
 
-from .models import Dataset, Resource, License, Checksum, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_TYPES, CHECKSUM_TYPES
+from .models import (
+    Dataset, DatasetBadge, Resource, License, Checksum,
+    UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_TYPES, CHECKSUM_TYPES,
+    DATASET_BADGE_KINDS
+)
 
-__all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm', 'DatasetExtraForm')
+__all__ = (
+    'BadgeForm', 'DatasetForm', 'ResourceForm', 'CommunityResourceForm',
+    'DatasetExtraForm'
+)
 
 
 class DatasetForm(ModelForm):
@@ -66,6 +73,15 @@ class ChecksumField(fields.FormField):
     def populate_obj(self, obj, name):
         self._obj = self._obj or Checksum()
         super(ChecksumField, self).populate_obj(obj, name)
+
+
+class BadgeForm(ModelForm):
+    model_class = DatasetBadge
+
+    kind = fields.RadioField(
+        _('Kind'), [validators.required()],
+        choices=DATASET_BADGE_KINDS.items(),
+        description=_('Kind of badge (pivotal-data, etc)'))
 
 
 class ResourceForm(ModelForm):

@@ -8,16 +8,22 @@ from werkzeug.datastructures import FileStorage
 
 from udata import search
 from udata.api import api, API
-from udata.auth import current_user
+from udata.auth import admin_permission, current_user
 from udata.core.followers.api import FollowAPI
 from udata.utils import multi_to_dict
 
-from .forms import OrganizationForm, MembershipRequestForm, MembershipRefuseForm, MemberForm
-from .models import Organization, MembershipRequest, Member, FollowOrg
+from .forms import (
+    BadgeForm, OrganizationForm, MembershipRequestForm, MembershipRefuseForm,
+    MemberForm
+)
+from .models import (
+    OrganizationBadge, Organization, MembershipRequest, Member, FollowOrg
+)
 from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 from .tasks import notify_membership_request, notify_membership_response
 from .search import OrganizationSearch
 from .api_fields import (
+    badge_fields,
     org_fields,
     org_page_fields,
     org_suggestion_fields,
@@ -98,6 +104,39 @@ class OrganizationAPI(API):
         EditOrganizationPermission(org).test()
         org.deleted = datetime.now()
         org.save()
+        return '', 204
+
+
+@ns.route('/<org:org>/badges/', endpoint='organization_badges')
+class OrganizationBadgesAPI(API):
+    @api.secure
+    @api.doc(id='create_badge', body=badge_fields, **common_doc)
+    @api.marshal_with(badge_fields)
+    @api.secure(admin_permission)
+    def post(self, org):
+        '''Create a new badge for a given organization'''
+        form = api.validate(BadgeForm)
+        badge = OrganizationBadge(created=datetime.now(),
+                                  created_by=current_user.id)
+        form.populate_obj(badge)
+        org.add_badge(badge)
+        return badge, 201
+
+
+@ns.route('/<org:org>/badges/<badge_kind>/', endpoint='organization_badge')
+class OrganizationBadgeAPI(API):
+    @api.secure
+    @api.doc(id='delete_badge', **common_doc)
+    @api.secure(admin_permission)
+    def delete(self, org, badge_kind):
+        '''Delete a badge for a given organization'''
+        badge = None
+        for badge in org.badges:
+            if badge.kind == badge_kind:
+                break
+        if badge is None:
+            api.abort(404, 'Badge does not exists')
+        org.remove_badge(badge)
         return '', 204
 
 

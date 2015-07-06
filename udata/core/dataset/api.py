@@ -7,6 +7,7 @@ from datetime import datetime
 
 import requests
 from flask import request, current_app
+from flask.ext.security import current_user
 
 from uuid import UUID
 from werkzeug.datastructures import FileStorage
@@ -19,6 +20,7 @@ from udata.core.followers.api import FollowAPI
 from udata.utils import get_by, multi_to_dict
 
 from .api_fields import (
+    badge_fields,
     dataset_fields,
     dataset_page_fields,
     dataset_suggestion_fields,
@@ -26,9 +28,11 @@ from .api_fields import (
     resource_fields,
     upload_fields,
 )
-from .models import Dataset, Resource, FollowDataset, Checksum, License
+from .models import (
+    Dataset, DatasetBadge, Resource, FollowDataset, Checksum, License
+)
 from .permissions import DatasetEditPermission
-from .forms import DatasetForm, ResourceForm, DatasetFullForm
+from .forms import BadgeForm, ResourceForm, DatasetFullForm
 from .search import DatasetSearch
 
 ns = api.namespace('datasets', 'Dataset related operations')
@@ -120,6 +124,39 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
         dataset.featured = False
         dataset.save()
         return dataset
+
+
+@ns.route('/<dataset:dataset>/badges/', endpoint='dataset_badges')
+class DatasetBadgesAPI(API):
+    @api.secure
+    @api.doc(id='create_badge', body=badge_fields, **common_doc)
+    @api.marshal_with(badge_fields)
+    @api.secure(admin_permission)
+    def post(self, dataset):
+        '''Create a new badge for a given dataset'''
+        form = api.validate(BadgeForm)
+        badge = DatasetBadge(created=datetime.now(),
+                             created_by=current_user.id)
+        form.populate_obj(badge)
+        dataset.add_badge(badge)
+        return badge, 201
+
+
+@ns.route('/<dataset:dataset>/badges/<badge_kind>/', endpoint='dataset_badge')
+class DatasetBadgeAPI(API):
+    @api.secure
+    @api.doc(id='delete_badge', **common_doc)
+    @api.secure(admin_permission)
+    def delete(self, dataset, badge_kind):
+        '''Delete a badge for a given dataset'''
+        badge = None
+        for badge in dataset.badges:
+            if badge.kind == badge_kind:
+                break
+        if badge is None:
+            api.abort(404, 'Badge does not exists')
+        dataset.remove_badge(badge)
+        return '', 204
 
 
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources')
