@@ -225,6 +225,14 @@ class DataconnexionsTest(FrontTestCase):
         self.assert200(response)
 
 
+class C3Test(FrontTestCase):
+    settings = GouvFrSettings
+
+    def test_render_c3_without_data(self):
+        response = self.client.get(url_for('gouvfr.c3'))
+        self.assert200(response)
+
+
 class SitemapTest(FrontTestCase):
     settings = GouvFrSettings
 

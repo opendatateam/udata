@@ -106,6 +106,10 @@
                     <li><a href="http://c3challenge.com/">Site officiel du C³</a></li>
                     <li><a href="http://www.developpement-durable.gouv.fr/Climate-Change-Challenge-C3.html">Page C³ du Ministère de l'Écologie, du Développement Durable et de l'Énergie</a></li>
                 </ul>
+                <h4>Les partenaires</h4>
+                {% for organization in partners %}
+                {% include theme('organization/card.html') %}
+                {% endfor %}
             </aside>
         </div>
     </div>

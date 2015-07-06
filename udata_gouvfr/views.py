@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from flask import url_for, redirect
 
 from udata import theme
-from udata.models import Reuse
+from udata.models import Reuse, Organization
 from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
 
@@ -72,9 +72,17 @@ def dataconnexions():
     return theme.render('dataconnexions.html', categories=categories)
 
 
+C3_PARTNERS = (
+    'institut-national-de-l-information-geographique-et-forestiere',
+    'meteo-france',
+    'etalab',
+    'ministere-de-l-ecologie-du-developpement-durable-et-de-l-energie',
+)
+
 @blueprint.route('/c3')
 def c3():
-    return theme.render('c3.html')
+    partners = Organization.objects(slug__in=C3_PARTNERS)
+    return theme.render('c3.html', partners=partners)
 
 
 @blueprint.route('/faq/', defaults={'section': 'home'})
