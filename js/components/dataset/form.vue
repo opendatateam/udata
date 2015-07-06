@@ -45,6 +45,14 @@ module.exports = {
                 }, {
                     id: 'private',
                     label: this._('Private')
+                }, {
+                    id: 'organization',
+                    widget: 'hidden-input',
+                    type: 'hidden'
+                }, {
+                    id: 'owner',
+                    widget: 'hidden-input',
+                    type: 'hidden'
                 }]
         };
     },
