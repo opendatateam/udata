@@ -36,7 +36,7 @@ def zone_labelizer(label, value):
 
 
 def dataset_badge_labelizer(label, kind):
-    return DATASET_BADGE_KINDS[kind]
+    return DATASET_BADGE_KINDS.get(kind, '')
 
 
 class DatasetSearch(ModelSearchAdapter):

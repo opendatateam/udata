@@ -16,7 +16,7 @@ max_followers = lambda: max(current_site.metrics.get('max_org_followers'), 10)
 
 
 def organization_badge_labelizer(label, kind):
-    return ORG_BADGE_KINDS[kind]
+    return ORG_BADGE_KINDS.get(kind, '')
 
 
 class OrganizationSearch(search.ModelSearchAdapter):

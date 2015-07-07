@@ -51,11 +51,10 @@ CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
 DEFAULT_CHECKSUM_TYPE = 'sha1'
 
 PIVOTAL_DATA = 'pivotal-data'
+C3 = 'c3'
 DATASET_BADGE_KINDS = {
     PIVOTAL_DATA: _('Pivotal data'),
-    'dataconnexions-laureate': _('Dataconnexions laureate'),
-    'dataconnexions-candidate': _('Dataconnexions candidate'),
-    'c3': _('C³'),
+    C3: _('C³'),
 }
 
 
