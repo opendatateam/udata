@@ -5,6 +5,7 @@ from tempfile import NamedTemporaryFile
 
 from flask import url_for
 
+from udata.models import OrganizationBadge, CERTIFIED, PUBLIC_SERVICE
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.factories import DatasetFactory, ReuseFactory, OrganizationFactory
 from udata.tests.factories import VisibleReuseFactory
@@ -13,7 +14,7 @@ from udata.settings import Testing
 
 from.views import DATACONNEXIONS_CATEGORIES, DATACONNEXIONS_TAG
 
-from .commands import certify
+from .commands import toggle_badge
 from .metrics import PublicServicesMetric
 
 
@@ -107,9 +108,12 @@ class GouvFrMetricsTest(DBTestMixin, TestCase):
     settings = GouvFrSettings
 
     def test_public_services(self):
-        public_services = [OrganizationFactory(public_service=True) for _ in range(2)]
+        ps_badge = OrganizationBadge(kind=PUBLIC_SERVICE)
+        public_services = [
+            OrganizationFactory(badges=[ps_badge]) for _ in range(2)
+        ]
         for _ in range(3):
-            OrganizationFactory(public_service=False)
+            OrganizationFactory()
 
         self.assertEqual(PublicServicesMetric().get_value(), len(public_services))
 
@@ -117,26 +121,32 @@ class GouvFrMetricsTest(DBTestMixin, TestCase):
 class CertifyCommandTest(DBTestMixin, TestCase):
     settings = GouvFrSettings
 
-    def test_certify_by_id(self):
+    def test_toggle_badge_on(self):
         org = OrganizationFactory()
-
-        certify(str(org.id))
-
+        toggle_badge(str(org.id), PUBLIC_SERVICE)
         org.reload()
-        self.assertTrue(org.public_service)
+        self.assertEqual(org.badges[0].kind, PUBLIC_SERVICE)
 
-    def test_certify_from_file(self):
+    def test_toggle_badge_off(self):
+        ps_badge = OrganizationBadge(kind=PUBLIC_SERVICE)
+        certified_badge = OrganizationBadge(kind=CERTIFIED)
+        org = OrganizationFactory(badges=[ps_badge, certified_badge])
+        toggle_badge(str(org.id), PUBLIC_SERVICE)
+        org.reload()
+        self.assertEqual(org.badges[0].kind, CERTIFIED)
+
+    def test_toggle_badge_on_from_file(self):
         orgs = [OrganizationFactory() for _ in range(2)]
 
         with NamedTemporaryFile() as temp:
             temp.write('\n'.join((str(org.id) for org in orgs)))
             temp.flush()
 
-            certify(temp.name)
+            toggle_badge(temp.name, PUBLIC_SERVICE)
 
         for org in orgs:
             org.reload()
-            self.assertTrue(org.public_service)
+            self.assertEqual(org.badges[0].kind, PUBLIC_SERVICE)
 
 
 class LegacyUrlsTest(FrontTestCase):

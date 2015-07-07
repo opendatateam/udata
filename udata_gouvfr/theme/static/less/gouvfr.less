@@ -369,8 +369,12 @@ section.blog {
 }
 
 
-small.not-certified {
-    .square-stamp(#ff9d02);
+.small-badge {
+    .square-stamp(@bg-dark);
+
+    a {
+        color: @bg-dark !important;
+    }
 }
 
 section.error {
