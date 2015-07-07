@@ -77,6 +77,7 @@ C3_PARTNERS = (
     'meteo-france',
     'etalab',
     'ministere-de-l-ecologie-du-developpement-durable-et-de-l-energie',
+    'museum-national-dhistoire-naturelle',
 )
 
 
