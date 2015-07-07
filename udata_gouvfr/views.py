@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 from flask import url_for, redirect
 
 from udata import theme
-from udata.models import Reuse, Organization
+from udata.models import Reuse, Organization, Dataset
+from udata.core.dataset.models import C3
 from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
 
@@ -77,13 +78,14 @@ C3_PARTNERS = (
     'meteo-france',
     'etalab',
     'ministere-de-l-ecologie-du-developpement-durable-et-de-l-energie',
+    'museum-national-dhistoire-naturelle',
 )
 
 
 @blueprint.route('/c3')
 def c3():
     partners = Organization.objects(slug__in=C3_PARTNERS)
-    datasets = []
+    datasets = Dataset.objects(badges__kind=C3)
     return theme.render('c3.html', partners=partners, datasets=datasets)
 
 
