@@ -105,6 +105,13 @@ module.exports = {
             }
         }
     },
+    methods: {
+        fetch: function() {
+            if (this.reuseid) {
+                this.reuse.fetch(this.reuseid);
+            }
+        }
+    },
     // created: function() {
     //     if (!this.reuse && this.reuseid) {
     //         this.reuse = new Reuse().fetch(this.reuseid);
@@ -112,10 +119,11 @@ module.exports = {
     // },
     watch: {
         'reuseid': function(id) {
-            if (id) {
-                this.reuse.fetch(id);
-            }
+            this.fetch();
         }
+    },
+    ready: function() {
+        this.fetch();
     }
 };
 </script>

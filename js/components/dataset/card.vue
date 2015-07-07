@@ -155,12 +155,20 @@ module.exports = {
                 : start_label;
         }
     },
-    watch: {
-        datasetid: function(id) {
-            if (id) {
-                this.dataset.fetch(id);
+    methods: {
+        fetch: function() {
+            if (this.datasetid) {
+                this.dataset.fetch(this.datasetid);
             }
         }
+    },
+    watch: {
+        datasetid: function(id) {
+            this.fetch();
+        }
+    },
+    ready: function() {
+        this.fetch();
     }
 };
 </script>
