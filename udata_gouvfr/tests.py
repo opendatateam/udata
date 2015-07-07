@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from tempfile import NamedTemporaryFile
-
 from flask import url_for
 
-from udata.models import OrganizationBadge, CERTIFIED, PUBLIC_SERVICE
+from udata.models import OrganizationBadge, PUBLIC_SERVICE
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.factories import DatasetFactory, ReuseFactory, OrganizationFactory
 from udata.tests.factories import VisibleReuseFactory
 from udata.tests.frontend import FrontTestCase
 from udata.settings import Testing
 
-from.views import DATACONNEXIONS_CATEGORIES, DATACONNEXIONS_TAG
+from .views import DATACONNEXIONS_CATEGORIES, DATACONNEXIONS_TAG
 
-from .commands import toggle_badge
 from .metrics import PublicServicesMetric
 
 
@@ -116,37 +113,6 @@ class GouvFrMetricsTest(DBTestMixin, TestCase):
             OrganizationFactory()
 
         self.assertEqual(PublicServicesMetric().get_value(), len(public_services))
-
-
-class CertifyCommandTest(DBTestMixin, TestCase):
-    settings = GouvFrSettings
-
-    def test_toggle_badge_on(self):
-        org = OrganizationFactory()
-        toggle_badge(str(org.id), PUBLIC_SERVICE)
-        org.reload()
-        self.assertEqual(org.badges[0].kind, PUBLIC_SERVICE)
-
-    def test_toggle_badge_off(self):
-        ps_badge = OrganizationBadge(kind=PUBLIC_SERVICE)
-        certified_badge = OrganizationBadge(kind=CERTIFIED)
-        org = OrganizationFactory(badges=[ps_badge, certified_badge])
-        toggle_badge(str(org.id), PUBLIC_SERVICE)
-        org.reload()
-        self.assertEqual(org.badges[0].kind, CERTIFIED)
-
-    def test_toggle_badge_on_from_file(self):
-        orgs = [OrganizationFactory() for _ in range(2)]
-
-        with NamedTemporaryFile() as temp:
-            temp.write('\n'.join((str(org.id) for org in orgs)))
-            temp.flush()
-
-            toggle_badge(temp.name, PUBLIC_SERVICE)
-
-        for org in orgs:
-            org.reload()
-            self.assertEqual(org.badges[0].kind, PUBLIC_SERVICE)
 
 
 class LegacyUrlsTest(FrontTestCase):
