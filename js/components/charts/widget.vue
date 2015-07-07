@@ -35,9 +35,9 @@
             <div class="btn-group" data-toggle="btn-toggle">
                 <button type="button" class="btn btn-primary btn-xs"
                     v-repeat="types"
-                    v-class="active: charttype == $key"
-                    aria-pressed="{{charttype == $key}}"
-                    v-on="click: charttype = $key"
+                    v-class="active: $parent.$parent.charttype == $key"
+                    aria-pressed="{{$parent.$parent.charttype == $key}}"
+                    v-on="click: $parent.$parent.charttype = $key"
                     >
                     <span class="fa fa-fw fa-{{$value}}"></span>
                 </button>
