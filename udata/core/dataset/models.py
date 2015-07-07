@@ -19,7 +19,8 @@ from udata.utils import hash_url
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum',
     'DatasetIssue', 'DatasetDiscussion', 'DatasetBadge', 'FollowDataset',
-    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES', 'DATASET_BADGE_KINDS'
+    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES', 'DATASET_BADGE_KINDS', 'C3',
+    'PIVOTAL_DATA'
 )
 
 UPDATE_FREQUENCIES = {
