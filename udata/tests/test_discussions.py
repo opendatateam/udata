@@ -28,7 +28,7 @@ class DiscussionsTest(APITestCase):
         user = self.login()
         dataset = Dataset.objects.create(title='Test dataset')
 
-        response = self.post(url_for('api.discussions', **{'for': dataset.id}), {
+        response = self.post(url_for('api.discussions'), {
             'title': 'test title',
             'comment': 'bla bla',
             'subject': dataset.id
@@ -58,7 +58,7 @@ class DiscussionsTest(APITestCase):
         self.login()
         dataset = Dataset.objects.create(title='Test dataset')
 
-        response = self.post(url_for('api.discussions', **{'for': dataset.id}), {
+        response = self.post(url_for('api.discussions'), {
             'title': 'test title',
             'subject': dataset.id
         })
@@ -68,7 +68,7 @@ class DiscussionsTest(APITestCase):
         self.login()
         dataset = Dataset.objects.create(title='Test dataset')
 
-        response = self.post(url_for('api.discussions', **{'for': dataset.id}), {
+        response = self.post(url_for('api.discussions'), {
             'comment': 'bla bla',
             'subject': dataset.id
         })
@@ -76,9 +76,7 @@ class DiscussionsTest(APITestCase):
 
     def test_new_discussion_missing_subject(self):
         self.login()
-        dataset = Dataset.objects.create(title='Test dataset')
-
-        response = self.post(url_for('api.discussions', **{'for': dataset.id}), {
+        response = self.post(url_for('api.discussions'), {
             'title': 'test title',
             'comment': 'bla bla'
         })
@@ -109,7 +107,7 @@ class DiscussionsTest(APITestCase):
             closed_by=user
         )
 
-        response = self.get(url_for('api.discussions', id=dataset.id))
+        response = self.get(url_for('api.discussions'))
         self.assert200(response)
 
         self.assertEqual(len(response.json['data']), len(open_discussions))
@@ -141,7 +139,7 @@ class DiscussionsTest(APITestCase):
             )
             closed_discussions.append(discussion)
 
-        response = self.get(url_for('api.discussions', id=dataset.id, closed=True))
+        response = self.get(url_for('api.discussions', closed=True))
         self.assert200(response)
 
         self.assertEqual(len(response.json), len(open_discussions + closed_discussions))
@@ -157,7 +155,7 @@ class DiscussionsTest(APITestCase):
             discussion=[message]
         )
 
-        response = self.get(url_for('api.discussion', **{'for': dataset.id, 'id': discussion.id}))
+        response = self.get(url_for('api.discussion', **{'id': discussion.id}))
         self.assert200(response)
 
         data = response.json

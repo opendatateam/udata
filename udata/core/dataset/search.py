@@ -4,13 +4,16 @@ from __future__ import unicode_literals
 from udata.core.site.views import current_site
 
 
-from udata.models import Dataset, Organization, License, User, GeoZone
+from udata.models import (
+    Dataset, DatasetBadge, Organization, License, User, GeoZone,
+    DATASET_BADGE_KINDS
+)
 from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
 from udata.search.fields import Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
 from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
 from udata.search.fields import BoolBooster, GaussDecay
 
-from udata.core.spatial.models import spatial_granularities, GeoZone
+from udata.core.spatial.models import spatial_granularities
 
 # Metrics are require for dataset search
 from . import metrics  # noqa
@@ -32,6 +35,10 @@ def zone_labelizer(label, value):
     return value
 
 
+def dataset_badge_labelizer(label, kind):
+    return DATASET_BADGE_KINDS.get(kind, '')
+
+
 class DatasetSearch(ModelSearchAdapter):
     model = Dataset
     fuzzy = True
@@ -51,6 +58,7 @@ class DatasetSearch(ModelSearchAdapter):
             'owner': {'type': 'string'},
             'supplier': {'type': 'string'},
             'tags': {'type': 'string', 'index_name': 'tag', 'index': 'not_analyzed'},
+            'badges': {'type': 'string', 'index_name': 'badges', 'index': 'not_analyzed'},
             'tag_suggest': {
                 'type': 'completion',
                 'index_analyzer': 'simple',
@@ -126,6 +134,7 @@ class DatasetSearch(ModelSearchAdapter):
     }
     facets = {
         'tag': TermFacet('tags'),
+        'badge': TermFacet('badges', labelizer=dataset_badge_labelizer),
         'organization': ModelTermFacet('organization', Organization),
         'owner': ModelTermFacet('owner', User),
         'supplier': ModelTermFacet('supplier', Organization),
@@ -140,7 +149,6 @@ class DatasetSearch(ModelSearchAdapter):
     }
     boosters = [
         BoolBooster('featured', 1.1),
-        BoolBooster('from_public_service', 1.3),
         GaussDecay('metrics.reuses', max_reuses, decay=0.8),
         GaussDecay('metrics.followers', max_followers, max_followers, decay=0.8),
     ]
@@ -166,6 +174,7 @@ class DatasetSearch(ModelSearchAdapter):
             'description': dataset.description,
             'license': dataset.license.id if dataset.license is not None else None,
             'tags': dataset.tags,
+            'badges': [badge.kind for badge in dataset.badges],
             'tag_suggest': dataset.tags,
             'resources': [
                 {
@@ -193,7 +202,6 @@ class DatasetSearch(ModelSearchAdapter):
             'metrics': dataset.metrics,
             'extras': dataset.extras,
             'featured': dataset.featured,
-            'from_public_service': dataset.organization.public_service if dataset.organization else False,  # TODO: extract tis into plugin
         }
         if dataset.temporal_coverage is not None and dataset.temporal_coverage.start and dataset.temporal_coverage.end:
             document.update({

@@ -9,9 +9,10 @@ from udata import search, theme
 from udata.frontend import csv
 from udata.frontend.views import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Activity, Site, Reuse, Organization, Post
+from udata.models import (
+    Dataset, Activity, Site, Reuse, Organization, Post
+)
 from udata.utils import multi_to_dict
-
 from udata.core.activity.views import ActivityView
 from udata.core.dataset.csv import ResourcesCsvAdapter
 
@@ -167,13 +168,6 @@ class SiteDashboard(SiteView, ActivityView, DetailView):
                     'metric': 'organizations',
                     'type': 'bar',
                     'endpoint': 'organizations.list',
-                },
-                {
-                    'title': _('Public services'),
-                    'metric': 'public_services',
-                    'type': 'bar',
-                    'endpoint': 'organizations.list',
-                    'args': {'public_services': True}
                 },
                 {
                     'title': _('Users'),

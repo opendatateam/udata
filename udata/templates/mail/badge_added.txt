@@ -1,0 +1,15 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('%(user)s added a new badge on your %(type)s %(subject)s',
+        type=badge.subject.verbose_name,
+        user=badge.created_by.fullname,
+        subject=badge.subject|string
+) }}.
+
+
+{{ _('Details') }}: {{ badge.title }}
+
+{{ _('You can see the badge on this page:') }}
+{{ badge.subject.external_url }}
+{% endblock %}

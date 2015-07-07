@@ -8,10 +8,9 @@ from datetime import datetime
 from flask import url_for
 
 from udata.frontend import csv
-from udata.models import Site
+from udata.models import OrganizationBadge, Site, PUBLIC_SERVICE
 
 from udata.core.site.views import current_site
-
 from udata.tests.frontend import FrontTestCase
 from udata.tests.factories import DatasetFactory, ReuseFactory, OrganizationFactory, ResourceFactory
 
@@ -241,12 +240,19 @@ class SiteViewsTest(FrontTestCase):
 
     def test_organizations_csv_with_filters(self):
         '''Should handle filtering but ignore paging or facets'''
+        user = self.login()
         with self.autoindex():
-            filtered_orgs = [OrganizationFactory(public_service=True) for _ in range(6)]
+            public_service_badge = OrganizationBadge(
+                kind=PUBLIC_SERVICE,
+                created=datetime.now(),
+                created_by=user
+            )
+            filtered_orgs = [OrganizationFactory(badges=[public_service_badge]) for _ in range(6)]
             orgs = [OrganizationFactory() for _ in range(3)]
             hidden_org = OrganizationFactory(deleted=datetime.now())
 
-        response = self.get(url_for('site.organizations_csv', public_services=True, page_size=3, facets=True))
+        response = self.get(url_for('site.organizations_csv',
+                            badge=PUBLIC_SERVICE, page_size=3, facets=True))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')

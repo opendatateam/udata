@@ -32,6 +32,20 @@
                 </div>
                 <br/>
                 <div class="tab-links">
+                    {# Badges #}
+                    {% if org.badges %}
+                    <p class="text-center">
+                        {% for badge in org.badges %}
+                            <small class="small-badge">
+                                <a href="{{ url_for('front.search', badge=badge) }}"
+                                    title="{{ _('See all organizations with that badge.') }}">
+                                    <span class="glyphicon glyphicon-bookmark"></span>
+                                    {{ badge }}</a>
+                            </small><br/>
+                        {% endfor %}
+                    </p>
+                    {% endif %}
+
                     {% if org.metrics.datasets %}
                     <p class="text-center">
                         <strong>

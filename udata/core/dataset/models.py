@@ -10,7 +10,7 @@ from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
 from udata.models import (
-    db, WithMetrics, Issue, Discussion, Follow, SpatialCoverage
+    db, WithMetrics, Badge, Discussion, Follow, Issue, SpatialCoverage
 )
 from udata.i18n import lazy_gettext as _
 from udata.utils import hash_url
@@ -18,8 +18,8 @@ from udata.utils import hash_url
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum',
-    'DatasetIssue', 'DatasetDiscussion', 'FollowDataset',
-    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES',
+    'DatasetIssue', 'DatasetDiscussion', 'DatasetBadge', 'FollowDataset',
+    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES', 'DATASET_BADGE_KINDS'
 )
 
 UPDATE_FREQUENCIES = {
@@ -49,6 +49,20 @@ RESOURCE_TYPES = OrderedDict([
 
 CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
 DEFAULT_CHECKSUM_TYPE = 'sha1'
+
+PIVOTAL_DATA = 'pivotal-data'
+C3 = 'c3'
+DATASET_BADGE_KINDS = {
+    PIVOTAL_DATA: _('Pivotal data'),
+    C3: _('C³'),
+}
+
+
+class DatasetBadge(Badge):
+    kind = db.StringField(choices=DATASET_BADGE_KINDS.keys(), required=True)
+
+    def __html__(self):
+        return unicode(DATASET_BADGE_KINDS[self.kind])
 
 
 class License(db.Document):
@@ -125,6 +139,7 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     tags = db.ListField(db.StringField())
     resources = db.ListField(db.EmbeddedDocumentField(Resource))
     community_resources = db.ListField(db.EmbeddedDocumentField(Resource))
+    badges = db.ListField(db.EmbeddedDocumentField(DatasetBadge))
 
     private = db.BooleanField()
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
@@ -214,6 +229,27 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
+    def add_badge(self, badge):
+        '''Perform an atomic prepend for a new badge'''
+        self.update(__raw__={
+            '$push': {
+                'badges': {
+                    '$each': [badge.to_mongo()],
+                    '$position': 0
+                    }
+                }
+            })
+        self.reload()
+
+    def remove_badge(self, badge):
+        '''Perform an atomic removal for a given badge'''
+        self.update(__raw__={
+            '$pull': {
+                'badges': badge.to_mongo()
+            }
+        })
+        self.reload()
+
     def add_resource(self, resource):
         '''Perform an atomic prepend for a new resource'''
         self.update(__raw__={
@@ -221,9 +257,9 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
                 'resources': {
                     '$each': [resource.to_mongo()],
                     '$position': 0
+                    }
                 }
-            }
-        })
+            })
         self.reload()
 
     def add_community_resource(self, resource):
@@ -233,9 +269,9 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
                 'community_resources': {
                     '$each': [resource.to_mongo()],
                     '$position': 0
+                    }
                 }
-            }
-        })
+            })
         self.reload()
 
 

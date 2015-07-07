@@ -10,7 +10,10 @@ from udata.core.dataset.models import DatasetIssue, DatasetDiscussion
 from udata.core.reuse.models import ReuseIssue, ReuseDiscussion
 
 from . import APITestCase
-from ..factories import faker, OrganizationFactory, UserFactory, DatasetFactory, ReuseFactory
+from ..factories import (
+    faker, OrganizationBadgeFactory, OrganizationFactory, UserFactory,
+    DatasetFactory, ReuseFactory, AdminFactory
+)
 
 
 class OrganizationAPITest(APITestCase):
@@ -577,3 +580,48 @@ class OrganizationDiscussionsAPITest(APITestCase):
         discussions_ids = [str(d.id) for d in discussions]
         for discussion in response.json:
             self.assertIn(discussion['id'], discussions_ids)
+
+
+class OrganizationBadgeAPITest(APITestCase):
+    def setUp(self):
+        self.login(AdminFactory())
+        self.organization = OrganizationFactory()
+
+    def test_create(self):
+        data = OrganizationBadgeFactory.attributes()
+        with self.api_user():
+            response = self.post(
+                url_for('api.organization_badges', org=self.organization), data)
+        self.assertStatus(response, 201)
+        self.organization.reload()
+        self.assertEqual(len(self.organization.badges), 1)
+
+    def test_create_2nd(self):
+        self.organization.badges.append(OrganizationBadgeFactory())
+        self.organization.save()
+        data = OrganizationBadgeFactory.attributes()
+        with self.api_user():
+            response = self.post(
+                url_for('api.organization_badges', org=self.organization), data)
+        self.assertStatus(response, 201)
+        self.organization.reload()
+        self.assertEqual(len(self.organization.badges), 2)
+
+    def test_delete(self):
+        badge = OrganizationBadgeFactory()
+        self.organization.badges.append(badge)
+        self.organization.save()
+        with self.api_user():
+            response = self.delete(
+                url_for('api.organization_badge', org=self.organization,
+                        badge_kind=str(badge.kind)))
+        self.assertStatus(response, 204)
+        self.organization.reload()
+        self.assertEqual(len(self.organization.badges), 0)
+
+    def test_delete_404(self):
+        with self.api_user():
+            response = self.delete(
+                url_for('api.organization_badge', org=self.organization,
+                        badge_kind=str(OrganizationBadgeFactory().kind)))
+        self.assert404(response)

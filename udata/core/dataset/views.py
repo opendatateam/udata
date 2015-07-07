@@ -19,9 +19,8 @@ from udata.frontend.views import (
 )
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import (
-    Dataset, Resource, Reuse, Issue, DatasetDiscussion, Follow
+    Dataset, DatasetBadge, DatasetDiscussion, Follow, Issue, Resource, Reuse
 )
-
 from udata.core import storages
 from udata.core.site.views import current_site
 from udata.sitemap import sitemap

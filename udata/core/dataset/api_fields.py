@@ -6,7 +6,10 @@ from udata.core.organization.api_fields import org_ref_fields
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
 
-from .models import UPDATE_FREQUENCIES, RESOURCE_TYPES, DEFAULT_FREQUENCY, CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE
+from .models import (
+    DATASET_BADGE_KINDS, UPDATE_FREQUENCIES, RESOURCE_TYPES, DEFAULT_FREQUENCY,
+    CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE
+)
 
 checksum_fields = api.model('Checksum', {
     'type': fields.String(description='The hashing algorithm used to compute the checksum',
@@ -20,6 +23,11 @@ license_fields = api.model('License', {
     'maintainer': fields.String(description='The license official maintainer'),
     'url': fields.String(description='The license official URL'),
     'flags': fields.List(fields.String, description='Some arbitry flags'),
+})
+
+badge_fields = api.model('DatasetBadge', {
+    'kind': fields.String(description='Kind of badge (pivotal-data, etc)',
+                          required=True, enum=DATASET_BADGE_KINDS.keys()),
 })
 
 resource_fields = api.model('Resource', {

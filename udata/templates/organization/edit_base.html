@@ -12,7 +12,7 @@
 {% block main_content %}
 <div class="row">
     <div class="card side-card text-center col-sm-4 col-md-3 col-lg-2">
-        {% if org.certified_public_service %}
+        {% if org.public_service %}
         <img src="{{static('/img/certified-stamp.png')}}" alt="certified"
             class="certified" rel="popover"
             data-title="{{ _('Certified public service') }}"

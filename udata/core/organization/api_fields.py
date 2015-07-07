@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from udata.api import api, fields, base_reference
 
-from .models import ORG_ROLES, MEMBERSHIP_STATUS
+from .models import ORG_BADGE_KINDS, ORG_ROLES, MEMBERSHIP_STATUS
 
 
 org_ref_fields = api.inherit('OrganizationReference', base_reference, {
@@ -33,6 +33,10 @@ member_fields = api.model('Member', {
         enum=ORG_ROLES.keys())
 })
 
+badge_fields = api.model('DatasetBadge', {
+    'kind': fields.String(description='Kind of badge (public-service, etc)',
+                          required=True, enum=ORG_BADGE_KINDS.keys()),
+})
 
 org_fields = api.model('Organization', {
     'id': fields.String(description='The organization identifier', required=True),

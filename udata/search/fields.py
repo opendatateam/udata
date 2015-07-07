@@ -137,12 +137,13 @@ class TermFacet(Facet):
 
 
 class ModelTermFacet(TermFacet):
-    def __init__(self, field, model, labelizer=None):
+    def __init__(self, field, model, labelizer=None, field_name='id'):
         super(ModelTermFacet, self).__init__(field, labelizer)
         self.model = model
+        self.field_name = field_name
 
     def from_response(self, name, response):
-        is_objectid = isinstance(self.model.id, db.ObjectIdField)
+        is_objectid = isinstance(getattr(self.model, self.field_name), db.ObjectIdField)
         cast = lambda o: ObjectId(o) if is_objectid else o
 
         facet = response.get('facets', {}).get(name)
@@ -151,9 +152,7 @@ class ModelTermFacet(TermFacet):
         ids = [term['term'] for term in facet['terms']]
         if is_objectid:
             ids = map(ObjectId, ids)
-
         objects = self.model.objects.in_bulk(ids)
-
         return {
             'type': 'models',
             'models': [

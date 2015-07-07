@@ -134,6 +134,7 @@ def init_app(app):
     import udata.core.user.metrics
     import udata.core.issues.metrics
     import udata.core.discussions.metrics
+    import udata.core.badges.metrics
     import udata.core.dataset.metrics
     import udata.core.reuse.metrics
     import udata.core.organization.metrics
