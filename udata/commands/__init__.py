@@ -51,6 +51,7 @@ def register_commands(manager):
     import udata.core.search.commands
     import udata.core.spatial.commands
     import udata.core.jobs.commands
+    import udata.core.badges.commands
     import udata.api.commands
 
     # Dynamic module commands loading
