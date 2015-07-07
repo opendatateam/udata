@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import logging
 import slugify
 from os.path import exists
 
 from udata.models import Dataset, DatasetBadge, User, C3
 from udata.commands import manager
 from udata.models import Organization, OrganizationBadge
+
+log = logging.getLogger(__name__)
 
 
 def toggle(id_or_slug, badge_kind):
@@ -58,7 +61,8 @@ def add_c3_badges(filename):
             dataset = (Dataset.objects(title=title).first()
                        or Dataset.objects(slug=slug).first())
             if dataset is None:
-                print(title)
+                log.info(u'{title} not found'.format(title=title))
             else:
                 dataset.badges.append(badge)
                 dataset.save()
+    log.info('Done')
