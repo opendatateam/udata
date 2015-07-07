@@ -50,7 +50,7 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
         nav.Item(_('Organizations'), 'organizations.list'),
     ]),
     nav.Item(_('Dashboard'), 'site.dashboard'),
-    nav.Item(_('Événements'), '#', url='#', items=[
+    nav.Item(_('Events'), '#', url='#', items=[
         nav.Item('Climate Change Challenge (C³)', 'gouvfr.c3'),
         nav.Item('Dataconnexions', 'gouvfr.dataconnexions'),
     ]),
