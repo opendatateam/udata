@@ -49,7 +49,10 @@
         </li>
     {% endif %}
 </ul>
-<div class="label-list">{{ s.filter_label('tag', _('Tag'), ficon('tag')) }}</div>
+<div class="label-list">
+    {{ s.filter_label('tag', _('Tag'), ficon('tag')) }}
+    {{ s.filter_label('badge', _('Badge'), ficon('bookmark')) }}
+</div>
 {% endblock %}
 
 {% block toolbar_container %}
