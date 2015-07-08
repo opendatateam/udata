@@ -1,163 +1,104 @@
-@import "gouvfr.less";
+body.post-display {
+    .post-container {
+        padding-bottom: 20px;
 
-.post-container {
-    padding-bottom: 20px;
-
-    .page-header {
-        margin-top: 0px;
-        border: none;
-        margin-bottom: 0px;
-
-        h1 {
-            font-family: @title-font;
-            margin-bottom: 5px;
+        .page-header {
             margin-top: 0px;
+            border: none;
+            margin-bottom: 0px;
 
-            @media (max-width: @screen-sm-max) {
-                font-size: 2em;
+            h1 {
+                font-family: @title-font;
+                margin-bottom: 5px;
+                margin-top: 0px;
+
+                @media (max-width: @screen-sm-max) {
+                    font-size: 2em;
+                }
             }
-        }
 
-        small {
-            a {
-                font-weight: bold;
-                color: white;
+            small {
+                a {
+                    font-weight: bold;
+                    color: white;
+                }
+
+                a.btn {
+                    vertical-align: text-top;
+                    font-weight: bold;
+                }
             }
 
-            a.btn {
-                vertical-align: text-top;
-                font-weight: bold;
+            aside {
+                a:hover .thumbnail, a:active .thumbnail {
+                    text-decoration: none;
+                }
             }
         }
 
         aside {
-            a:hover .thumbnail, a:active .thumbnail {
-                text-decoration: none;
+            margin-top: 20px;
+
+            > * {
+                margin-bottom: 10px;
+            }
+
+            a.btn {
+                margin-bottom: 5px;
             }
         }
     }
 
-    aside {
-        margin-top: 20px;
-
-        > * {
-            margin-bottom: 10px;
-        }
-
-        a.btn {
-            margin-bottom: 5px;
+    // correcting main column width
+    @media (min-width: @screen-sm-min) {
+        .smaller {
+            padding-right: @grid-gutter-width * 2.5;
         }
     }
-}
 
-// correcting main column width
-@media (min-width: @screen-sm-min) {
-    .smaller {
-        padding-right: @grid-gutter-width * 2.5;
-    }
-}
-
-//Action toolbar
-.main-toolbar {
-    .btn-toolbar {
-        .pull-right();
-        margin-right: 8px;
-    }
-
-    margin-bottom: 20px
-}
-
-.post-section {
-
-    .post-headline {
-        font-weight: bold;
-    }
-
-    .post-image {
-        .text-center();
-        margin: 10px;
-
-        position: relative;
-        display: inline-block;
-        max-width: 100%;
-
-        img {
-            background-color: white;
-            border: 1px solid @gray-lighter;
-        }
-
-        .credit-link {
-            color: white;
-
+    //Action toolbar
+    .main-toolbar {
+        .btn-toolbar {
             .pull-right();
-            margin-top: 5px;
+            margin-right: 8px;
         }
 
+        margin-bottom: 20px
     }
 
-    //     .btn-toolbar {
-    //         .btn-follow {
-    //             background: #2267af;
-    //             border: 1px solid #2267af;
-    //         }
-    //         .btn-share {
-    //             background: white;
-    //             color: rgb(163, 163, 163);
-    //             border: 1px solid #C9C9C9;
-    //             border-right: white;
-    //             border-left: white;
+    .post-section {
 
-    //             &:hover {
-    //                 background: rgb(221, 221, 221);
-    //                 color: rgb(129, 129, 129);
-    //             }
-    //         }
-    //         .btn-danger {
-    //             border: 1px solid #ea1f36 !important;
-    //         }
-    //     }
-    // }
+        .post-headline {
+            font-weight: bold;
+        }
 
-    // &.source-section {
-    //     header {
-    //         color: white;
-    //         background-color: @bg-dark;
-    //         margin-top: 0;
-    //         margin-bottom: 20px;
-    //         min-height: 64px;
+        .post-image {
+            .text-center();
+            margin: 10px;
 
-    //         h2 {
-    //             font-family: @title-font;
-    //             margin-bottom: -4px;
-    //             font-size: 25px;
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
 
-    //             @media(min-width: @screen-sm-min) {
-    //                 margin-top: 16px;
-    //                 font-size: 30px;
-    //             }
+            img {
+                background-color: white;
+                border: 1px solid @gray-lighter;
+            }
 
-    //             .header-logo {
-    //                 color: rgba(255, 255, 255, 0.32);
-    //             }
-    //         }
-    //     }
+            .credit-link {
+                color: white;
 
-    //     .page-header {
-    //         color: white;
-    //         border: 0px;
-    //         margin: 0;
+                .pull-right();
+                margin-top: 5px;
+            }
 
-    //         @media(max-width: @screen-xs-max) {
-    //             margin-bottom: 0;
-    //         }
-    //     }
+        }
+    }
 
-    //     margin-bottom: 20px;
-    // }
+    .history-section {
+        min-height: 200px;
+        background-color: @gray-lighter;
+    }
 
 }
 
-.history-section {
-    min-height: 200px;
-    background-color: @gray-lighter;
-}
