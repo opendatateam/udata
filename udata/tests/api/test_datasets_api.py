@@ -7,7 +7,7 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import Dataset, Follow, FollowDataset, Member
+from udata.models import Dataset, Follow, FollowDataset, Member, DATASET_BADGE_KINDS
 
 from . import APITestCase
 from ..factories import (
@@ -285,6 +285,14 @@ class DatasetBadgeAPITest(APITestCase):
     def setUp(self):
         self.login(AdminFactory())
         self.dataset = DatasetFactory(owner=UserFactory())
+
+    def test_list(self):
+        response = self.get(url_for('api.available_dataset_badges'))
+        self.assertStatus(response, 200)
+        self.assertEqual(len(response.json), len(DATASET_BADGE_KINDS))
+        for kind, label in DATASET_BADGE_KINDS.items():
+            self.assertIn(kind, response.json)
+            self.assertEqual(response.json[kind], label)
 
     def test_create(self):
         data = DatasetBadgeFactory.attributes()

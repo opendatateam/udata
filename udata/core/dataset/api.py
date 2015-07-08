@@ -29,7 +29,7 @@ from .api_fields import (
     upload_fields,
 )
 from .models import (
-    Dataset, DatasetBadge, Resource, FollowDataset, Checksum, License
+    Dataset, DatasetBadge, Resource, FollowDataset, Checksum, License, DATASET_BADGE_KINDS
 )
 from .permissions import DatasetEditPermission
 from .forms import BadgeForm, ResourceForm, DatasetFullForm
@@ -126,9 +126,18 @@ class DatasetFeaturedAPI(SingleObjectAPI, API):
         return dataset
 
 
+@ns.route('/badges/', endpoint='available_dataset_badges')
+class AvailableDatasetBadgesAPI(API):
+    @api.doc('available_dataset_badges')
+    def get(self):
+        '''List all available dataset badges and their labels'''
+        return DATASET_BADGE_KINDS
+
+
 @ns.route('/<dataset:dataset>/badges/', endpoint='dataset_badges')
 class DatasetBadgesAPI(API):
-    @api.doc(id='create_badge', body=badge_fields, **common_doc)
+    @api.doc('add_dataset_badge', **common_doc)
+    @api.expect(badge_fields)
     @api.marshal_with(badge_fields)
     @api.secure(admin_permission)
     def post(self, dataset):
@@ -143,7 +152,7 @@ class DatasetBadgesAPI(API):
 
 @ns.route('/<dataset:dataset>/badges/<badge_kind>/', endpoint='dataset_badge')
 class DatasetBadgeAPI(API):
-    @api.doc(id='delete_badge', **common_doc)
+    @api.doc('delete_dataset_badge', **common_doc)
     @api.secure(admin_permission)
     def delete(self, dataset, badge_kind):
         '''Delete a badge for a given dataset'''

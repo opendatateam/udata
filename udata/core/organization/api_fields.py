@@ -55,6 +55,7 @@ org_fields = api.model('Organization', {
         description='The organization page URL', readonly=True),
     'logo': fields.ImageField(description='The organization logo URLs'),
     'members': fields.List(fields.Nested(member_fields, description='The organization members')),
+    'badges': fields.List(fields.Nested(badge_fields, description='The organization badges'), readonly=True),
 })
 
 org_page_fields = api.model('OrganizationPage', fields.pager(org_fields))

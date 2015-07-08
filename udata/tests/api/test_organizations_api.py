@@ -5,7 +5,10 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import Organization, Member, MembershipRequest, Follow, FollowOrg
+from udata.models import (
+    Organization, Member, MembershipRequest, Follow, FollowOrg,
+    ORG_BADGE_KINDS
+)
 from udata.core.dataset.models import DatasetIssue, DatasetDiscussion
 from udata.core.reuse.models import ReuseIssue, ReuseDiscussion
 
@@ -586,6 +589,14 @@ class OrganizationBadgeAPITest(APITestCase):
     def setUp(self):
         self.login(AdminFactory())
         self.organization = OrganizationFactory()
+
+    def test_list(self):
+        response = self.get(url_for('api.available_organization_badges'))
+        self.assertStatus(response, 200)
+        self.assertEqual(len(response.json), len(ORG_BADGE_KINDS))
+        for kind, label in ORG_BADGE_KINDS.items():
+            self.assertIn(kind, response.json)
+            self.assertEqual(response.json[kind], label)
 
     def test_create(self):
         data = OrganizationBadgeFactory.attributes()
