@@ -1,4 +1,4 @@
-define(['jquery', 'dotdotdot'], function($) {
+define(['jquery', 'jQuery.dotdotdot'], function($) {
     "use strict";
 
     $(function() {

@@ -22,6 +22,7 @@ module.exports = {
         'dashboard/site': './js/dashboard/site',
         'dashboard/organization': './js/dashboard/organization',
         'site/map': './js/site/map',
+        'topic/display': './js/topic/display',
         'apidoc': './js/apidoc',
     },
     output: {
