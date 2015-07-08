@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  uData\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-07-07 14:53+0200\n"
+"POT-Creation-Date: 2015-07-08 16:36+0200\n"
 "PO-Revision-Date: 2015-06-01 18:02+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: Spanish "
@@ -23,7 +23,7 @@ msgstr ""
 
 #: udata/theme.py:38 udata/core/site/metrics.py:86 udata/core/site/views.py:167
 #: udata/templates/header.html:49 udata/templates/search.html:38
-#: udata/templates/search.html:87 udata/templates/dataset/search-panel.html:5
+#: udata/templates/search.html:90 udata/templates/dataset/search-panel.html:5
 #: udata/templates/organization/create.html:4
 #: udata/templates/organization/display_base.html:5
 #: udata/templates/organization/edit_base.html:7
@@ -40,8 +40,8 @@ msgstr "Organizaciones"
 #: udata/core/organization/views.py:124 udata/core/organization/views.py:127
 #: udata/core/reuse/metrics.py:24 udata/core/site/metrics.py:38
 #: udata/core/site/views.py:146 udata/core/user/metrics.py:25
-#: udata/templates/search.html:23 udata/templates/search.html:59
-#: udata/templates/search.html:90 udata/templates/search.html:101
+#: udata/templates/search.html:23 udata/templates/search.html:62
+#: udata/templates/search.html:93 udata/templates/search.html:104
 #: udata/templates/dataset/create.html:4
 #: udata/templates/dataset/display.html:16
 #: udata/templates/dataset/edit_base.html:4
@@ -70,9 +70,9 @@ msgstr "Conjunto de datos"
 #: udata/core/organization/metrics.py:36 udata/core/organization/views.py:146
 #: udata/core/organization/views.py:149 udata/core/site/metrics.py:48
 #: udata/core/site/views.py:152 udata/core/user/metrics.py:39
-#: udata/templates/search.html:30 udata/templates/search.html:65
-#: udata/templates/search.html:73 udata/templates/search.html:91
-#: udata/templates/search.html:102 udata/templates/dataset/card.html:44
+#: udata/templates/search.html:30 udata/templates/search.html:68
+#: udata/templates/search.html:76 udata/templates/search.html:94
+#: udata/templates/search.html:105 udata/templates/dataset/card.html:44
 #: udata/templates/dataset/display.html:70 udata/templates/dataset/list.html:29
 #: udata/templates/dataset/search-labels.html:23
 #: udata/templates/dataset/search-panel.html:16
@@ -144,13 +144,11 @@ msgstr ""
 
 #: udata/core/badges/metrics.py:12 udata/templates/dataset/search-panel.html:8
 #, fuzzy
-#| msgid "Tags"
 msgid "Badges"
 msgstr "Etiquetas"
 
 #: udata/core/badges/tasks.py:38
 #, fuzzy, python-format
-#| msgid "Your %(type)s have a new issue"
 msgid "Your %(type)s gain a new badge"
 msgstr "Su %(type)s tiene un problema nuevo "
 
@@ -169,7 +167,7 @@ msgstr "ha eliminado un conjunto de datos"
 #: udata/core/dataset/forms.py:24 udata/core/dataset/forms.py:90
 #: udata/core/discussions/forms.py:11 udata/core/issues/forms.py:11
 #: udata/core/reuse/forms.py:22 udata/core/site/forms.py:15
-#: udata/templates/search.html:62 udata/templates/search.html:75
+#: udata/templates/search.html:65 udata/templates/search.html:78
 #: udata/templates/dataset/list.html:26
 #: udata/templates/organization/list.html:25 udata/templates/reuse/list.html:27
 #: udata/templates/topic/datasets.html:26 udata/templates/topic/reuses.html:25
@@ -314,83 +312,83 @@ msgstr "Valor"
 msgid "Old key"
 msgstr "Clave anterior"
 
-#: udata/core/dataset/models.py:26
+#: udata/core/dataset/models.py:27
 msgid "Punctual"
 msgstr "Puntual"
 
-#: udata/core/dataset/models.py:27
+#: udata/core/dataset/models.py:28
 msgid "Real time"
 msgstr "Tiempo real"
 
-#: udata/core/dataset/models.py:28
+#: udata/core/dataset/models.py:29
 msgid "Daily"
 msgstr "Diario"
 
-#: udata/core/dataset/models.py:29
+#: udata/core/dataset/models.py:30
 msgid "Weekly"
 msgstr "Semanal"
 
-#: udata/core/dataset/models.py:30
+#: udata/core/dataset/models.py:31
 msgid "Fortnighly"
 msgstr "Quincenal"
 
-#: udata/core/dataset/models.py:31
+#: udata/core/dataset/models.py:32
 msgid "Monthly"
 msgstr "Mensual"
 
-#: udata/core/dataset/models.py:32
+#: udata/core/dataset/models.py:33
 msgid "Bimonthly"
 msgstr "Bimensual"
 
-#: udata/core/dataset/models.py:33
+#: udata/core/dataset/models.py:34
 msgid "Quarterly"
 msgstr "Trimestral"
 
-#: udata/core/dataset/models.py:34
+#: udata/core/dataset/models.py:35
 msgid "Biannual"
 msgstr "Bianual"
 
-#: udata/core/dataset/models.py:35
+#: udata/core/dataset/models.py:36
 msgid "Annual"
 msgstr "Anual"
 
-#: udata/core/dataset/models.py:36
+#: udata/core/dataset/models.py:37
 msgid "Biennial"
 msgstr "Bienal"
 
-#: udata/core/dataset/models.py:37
+#: udata/core/dataset/models.py:38
 msgid "Triennial"
 msgstr "Trienal"
 
-#: udata/core/dataset/models.py:38
+#: udata/core/dataset/models.py:39
 msgid "Quinquennial"
 msgstr "Quinquenal"
 
-#: udata/core/dataset/models.py:39
+#: udata/core/dataset/models.py:40
 msgid "Unknown"
 msgstr "Desconocido"
 
-#: udata/core/dataset/models.py:45
+#: udata/core/dataset/models.py:46
 msgid "Uploaded file"
 msgstr "Archivo cargado"
 
-#: udata/core/dataset/models.py:46
+#: udata/core/dataset/models.py:47
 msgid "Remote file"
 msgstr "Archivo eliminado"
 
-#: udata/core/dataset/models.py:47 udata/core/reuse/models.py:19
+#: udata/core/dataset/models.py:48 udata/core/reuse/models.py:19
 msgid "API"
 msgstr "IPA"
 
-#: udata/core/dataset/models.py:56
+#: udata/core/dataset/models.py:57
 msgid "Pivotal data"
 msgstr ""
 
-#: udata/core/dataset/models.py:57
+#: udata/core/dataset/models.py:58
 msgid "C³"
 msgstr ""
 
-#: udata/core/dataset/models.py:187 udata/templates/dataset/display.html:8
+#: udata/core/dataset/models.py:188 udata/templates/dataset/display.html:8
 msgid "dataset"
 msgstr "conjunto de datos"
 
@@ -408,7 +406,7 @@ msgid "Additionnal informations"
 msgstr "Informaciones adicionales"
 
 #: udata/core/dataset/views.py:78 udata/core/site/metrics.py:58
-#: udata/core/site/views.py:158 udata/templates/search.html:60
+#: udata/core/site/views.py:158 udata/templates/search.html:63
 #: udata/templates/dataset/display.html:58 udata/templates/dataset/list.html:24
 msgid "Resources"
 msgstr "Recursos"
@@ -457,8 +455,8 @@ msgid "A discussion has been closed"
 msgstr ""
 
 #: udata/core/followers/metrics.py:28 udata/core/organization/views.py:175
-#: udata/core/site/metrics.py:96 udata/templates/search.html:92
-#: udata/templates/search.html:103 udata/templates/dataset/followers.html:6
+#: udata/core/site/metrics.py:96 udata/templates/search.html:95
+#: udata/templates/search.html:106 udata/templates/dataset/followers.html:6
 #: udata/templates/dataset/search-labels.html:26
 #: udata/templates/dataset/search-panel.html:17
 #: udata/templates/dataset/search-result.html:89
@@ -502,7 +500,7 @@ msgstr "Un problema ha sido cerrado"
 
 #: udata/core/jobs/forms.py:30 udata/core/organization/forms.py:26
 #: udata/core/post/forms.py:18 udata/core/topic/forms.py:18
-#: udata/templates/search.html:89 udata/templates/api/admin.html:10
+#: udata/templates/search.html:92 udata/templates/api/admin.html:10
 #: udata/templates/user/list.html:26
 msgid "Name"
 msgstr "Nombre"
@@ -597,7 +595,6 @@ msgstr "Rechazado"
 
 #: udata/core/organization/models.py:39
 #, fuzzy
-#| msgid "Public service"
 msgid "Public Service"
 msgstr "Servicio público"
 
@@ -607,7 +604,6 @@ msgstr ""
 
 #: udata/core/organization/models.py:41
 #, fuzzy
-#| msgid "updated an organization"
 msgid "Authenticated organization"
 msgstr "ha actualizado una organización"
 
@@ -952,15 +948,15 @@ msgstr ""
 "%(start)s hasta %(end)s\n"
 " "
 
-#: udata/models/datetime_fields.py:58 udata/templates/search.html:63
-#: udata/templates/search.html:76 udata/templates/dataset/list.html:27
+#: udata/models/datetime_fields.py:58 udata/templates/search.html:66
+#: udata/templates/search.html:79 udata/templates/dataset/list.html:27
 #: udata/templates/organization/list.html:26 udata/templates/reuse/list.html:28
 #: udata/templates/topic/datasets.html:27 udata/templates/topic/reuses.html:26
 msgid "Creation date"
 msgstr "Fecha de creación"
 
-#: udata/models/datetime_fields.py:59 udata/templates/search.html:64
-#: udata/templates/search.html:77 udata/templates/dataset/list.html:28
+#: udata/models/datetime_fields.py:59 udata/templates/search.html:67
+#: udata/templates/search.html:80 udata/templates/dataset/list.html:28
 #: udata/templates/organization/list.html:27 udata/templates/reuse/list.html:29
 #: udata/templates/topic/datasets.html:28 udata/templates/topic/reuses.html:27
 msgid "Last modification date"
@@ -1330,39 +1326,45 @@ msgstr "%(site)s buscar"
 msgid "search"
 msgstr "buscar"
 
-#: udata/templates/search.html:52 udata/templates/dataset/search-labels.html:9
+#: udata/templates/search.html:53 udata/templates/dataset/search-labels.html:9
 #: udata/templates/reuse/search-labels.html:9
 msgid "Tag"
 msgstr "Etiqueta"
 
-#: udata/templates/search.html:66 udata/templates/search.html:79
+#: udata/templates/search.html:54
+#, fuzzy
+#| msgid "Badges"
+msgid "Badge"
+msgstr "Etiquetas"
+
+#: udata/templates/search.html:69 udata/templates/search.html:82
 #: udata/templates/dataset/card.html:52 udata/templates/dataset/list.html:30
 #: udata/templates/organization/card.html:52 udata/templates/reuse/card.html:51
 #: udata/templates/topic/datasets.html:30 udata/templates/user/card.html:38
 msgid "Stars"
 msgstr "Estrellas"
 
-#: udata/templates/search.html:78
+#: udata/templates/search.html:81
 msgid "Datasets used"
 msgstr "Conjuntos de datos usados"
 
-#: udata/templates/search.html:99
+#: udata/templates/search.html:102
 msgid "Last Name"
 msgstr "Apellido"
 
-#: udata/templates/search.html:100
+#: udata/templates/search.html:103
 msgid "First Name"
 msgstr "Nombre"
 
-#: udata/templates/search.html:124 udata/templates/search.html:151
-#: udata/templates/search.html:178 udata/templates/search.html:205
+#: udata/templates/search.html:127 udata/templates/search.html:154
+#: udata/templates/search.html:181 udata/templates/search.html:208
 #: udata/templates/topic/browse.html:34 udata/templates/topic/browse.html:54
 #, python-format
 msgid "See the %(total)s results"
 msgstr "Ver los %(total)s resultados"
 
-#: udata/templates/search.html:135 udata/templates/search.html:162
-#: udata/templates/search.html:189 udata/templates/search.html:216
+#: udata/templates/search.html:138 udata/templates/search.html:165
+#: udata/templates/search.html:192 udata/templates/search.html:219
 #: udata/templates/topic/browse.html:39 udata/templates/topic/browse.html:59
 msgid "No results found"
 msgstr "Resultados no encontrados"
@@ -1924,13 +1926,11 @@ msgstr "Seleccione un archivo desde su computador"
 
 #: udata/templates/mail/badge_added.html:6
 #, fuzzy, python-format
-#| msgid "%(user)s commented an discussion on your %(type)s %(subject)s"
 msgid "%(user)s added a new badge on your %(type)s %(subject)s"
 msgstr "%(user)s comentaron su problema"
 
 #: udata/templates/mail/badge_added.html:32
 #, fuzzy
-#| msgid "See the reuse"
 msgid "See the badge"
 msgstr "Ver esta reutilización"
 
