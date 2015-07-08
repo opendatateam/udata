@@ -37,8 +37,12 @@
                     <span class="fa fa-fw fa-gear"></span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                    <li v-repeat="action:$root.meta.actions">
-                        <a v-on="click: action_click(action)" class="pointer">
+                    <li v-repeat="action:$root.meta.actions"
+                         v-attr="role: action.divider ? 'separator' : false"
+                         v-class="divider: action.divider">
+                        <a class="pointer"
+                            v-if="!action.divider"
+                            v-on="click: action_click(action)" >
                             <span v-if="action.icon" class="fa fa-fw fa-{{action.icon}}"></span>
                             {{action.label}}
                         </a>

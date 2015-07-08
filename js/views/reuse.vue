@@ -39,6 +39,25 @@ var Vue = require('vue'),
 module.exports = {
     name: 'DatasetView',
     data: function() {
+        var actions = [{
+                label: this._('Transfer'),
+                icon: 'send',
+                method: 'transfer_request'
+            },{
+                label: this._('Delete'),
+                icon: 'trash',
+                method: 'confirm_delete'
+            }];
+
+        if (this.$root.me.is_admin) {
+            actions.push({divider: true});
+            actions.push({
+                label: this._('Badge'),
+                icon: 'bookmark',
+                method: 'setBadges'
+            });
+        }
+
         return {
             reuse_id: null,
             reuse: new Reuse(),
@@ -53,15 +72,7 @@ module.exports = {
                 title: null,
                 page: null,
                 subtitle: this._('Reuse'),
-                actions: [{
-                    label: this._('Transfer'),
-                    icon: 'send',
-                    method: 'transfer_request'
-                },{
-                    label: this._('Delete'),
-                    icon: 'trash',
-                    method: 'confirm_delete'
-                }]
+                actions: actions
             },
             y: [{
                 id: 'views',
@@ -122,6 +133,12 @@ module.exports = {
             this.$root.$modal(
                 {data: {subject: this.reuse}},
                 Vue.extend(require('components/transfer/request-modal.vue'))
+            );
+        },
+        setBadges: function() {
+            this.$root.$modal(
+                {data: {subject: this.reuse}},
+                Vue.extend(require('components/badges/modal.vue'))
             );
         }
     },

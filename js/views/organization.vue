@@ -54,6 +54,21 @@ var moment = require('moment'),
 module.exports = {
     name: 'OrganizationView',
     data: function() {
+        var actions = [{
+                label: this._('Delete'),
+                icon: 'trash',
+                method: 'confirm_delete'
+            }];
+
+        if (this.$root.me.is_admin) {
+            actions.push({divider: true});
+            actions.push({
+                label: this._('Badges'),
+                icon: 'bookmark',
+                method: 'setBadges'
+            });
+        }
+
         return {
             org_id: null,
             org: new Organization(),
@@ -82,11 +97,7 @@ module.exports = {
                 title: null,
                 page: null,
                 subtitle: this._('Organization'),
-                actions: [{
-                    label: this._('Delete'),
-                    icon: 'trash',
-                    method: 'confirm_delete'
-                }]
+                actions: actions
             },
             charts: {
                 traffic: {
@@ -172,6 +183,14 @@ module.exports = {
     events: {
         'image:saved': function() {
             this.org.fetch();
+        }
+    },
+    methods: {
+        setBadges: function() {
+            this.$root.$modal(
+                {data: {subject: this.organization}},
+                Vue.extend(require('components/badges/modal.vue'))
+            );
         }
     },
     watch: {

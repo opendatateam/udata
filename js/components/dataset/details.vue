@@ -8,6 +8,10 @@
     <div v-if="!toggled">
         <h3>{{dataset.title}}</h3>
         <div v-markdown="{{dataset.description}}"></div>
+        <span v-repeat="badge:dataset.badges" class="label label-primary">
+            <span class="fa fa-bookmark"></span>
+            {{badge.kind}}
+        </span>
     </div>
     <dataset-form v-ref="form" v-if="toggled" dataset="{{dataset}}"></dataset-form>
     <box-footer v-if="toggled">
