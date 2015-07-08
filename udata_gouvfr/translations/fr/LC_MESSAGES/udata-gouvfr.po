@@ -1,7 +1,8 @@
-# Translations template for udata-gouvfr.
+# French translations for udata-gouvfr.
 # Copyright (C) 2015 ORGANIZATION
-# This file is distributed under the same license as the udata-gouvfr project.
-# 
+# This file is distributed under the same license as the udata-gouvfr
+# project.
+#
 # Translators:
 # Axel Haustant, 2014
 # Axel Haustant, 2014-2015
@@ -9,18 +10,18 @@
 # noirbizarre, 2014
 msgid ""
 msgstr ""
-"Project-Id-Version: udata-gouv.fr\n"
+"Project-Id-Version:  udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-07-07 16:11+0200\n"
+"POT-Creation-Date: 2015-07-08 16:37+0200\n"
 "PO-Revision-Date: 2015-07-07 14:13+0000\n"
 "Last-Translator: Axel Haustant\n"
-"Language-Team: French (http://www.transifex.com/projects/p/udata-gouvfr/language/fr/)\n"
+"Language-Team: French (http://www.transifex.com/projects/p/udata-"
+"gouvfr/language/fr/)\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
-"Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: udata_gouvfr/metrics.py:14 udata_gouvfr/theme/templates/metrics.html:48
 msgid "Public services"
@@ -48,7 +49,9 @@ msgstr "URL du flux ATOM"
 
 #: udata_gouvfr/theme/theme.py:26
 msgid "An optionnal atom feed URL for display blog post in home page"
-msgstr "Une URL de flux ATOM optionnelle pour afficher un article de blog en page d'accueil"
+msgstr ""
+"Une URL de flux ATOM optionnelle pour afficher un article de blog en page"
+" d'accueil"
 
 #: udata_gouvfr/theme/theme.py:41
 msgid "Discover OpenData"
@@ -260,15 +263,20 @@ msgstr "Ce jeu de données provient d'un service public certifié"
 msgid ""
 "Published on %(date)s and updated on %(update)s by <a href=\"%(url)s\" "
 "title=\"%(author)s\">%(author)s</a>"
-msgstr "Publié le %(date)s et mis à jour le %(update)s par <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
+msgstr ""
+"Publié le %(date)s et mis à jour le %(update)s par <a href=\"%(url)s\" "
+"title=\"%(author)s\">%(author)s</a>"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:76
 #, python-format
 msgid ""
-"This dataset has been published on %(date)s and updated on %(update)s on the"
-" initiative and under the responsibility of <a href=\"%(url)s\" "
+"This dataset has been published on %(date)s and updated on %(update)s on "
+"the initiative and under the responsibility of <a href=\"%(url)s\" "
 "title=\"%(author)s\">%(author)s</a>"
-msgstr "Ce jeu de données a été publié le %(date)set mis à jours le %(update)s à l'initiative et sous la responsabilité de <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
+msgstr ""
+"Ce jeu de données a été publié le %(date)set mis à jours le %(update)s à "
+"l'initiative et sous la responsabilité de <a href=\"%(url)s\" "
+"title=\"%(author)s\">%(author)s</a>"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:88
 msgid "See all datasets with that badge."
@@ -289,9 +297,10 @@ msgid "Deleted"
 msgstr "Supprimé"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:103
-msgid ""
-"This dataset has been deleted. This will be permanent in the next 24 hours"
-msgstr "Ce jeu de données a été supprimé. Cela deviendra permanent dans les prochaines 24 heures."
+msgid "This dataset has been deleted. This will be permanent in the next 24 hours"
+msgstr ""
+"Ce jeu de données a été supprimé. Cela deviendra permanent dans les "
+"prochaines 24 heures."
 
 #: udata_gouvfr/theme/templates/dataset/display.html:112
 msgid "Provided by"
@@ -413,10 +422,14 @@ msgstr "Démarrer une nouvelle discussion"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:521
 msgid ""
-"You're about to start a new discussion thread. Make sure that a thread about"
-" the same topic doesn't exist yet just above. If you want to report an "
-"anomaly, please use the dedicated button just under the datasets."
-msgstr "Vous êtes sur le point de démarrer un nouveau fil de discussion. Vérifiez qu'une discussion sur le même sujet n'existe pas déjà. Si vous voulez soumettre une anomalie, veuillez utiliser le bouton dédié juste sous les jeux de données."
+"You're about to start a new discussion thread. Make sure that a thread "
+"about the same topic doesn't exist yet just above. If you want to report "
+"an anomaly, please use the dedicated button just under the datasets."
+msgstr ""
+"Vous êtes sur le point de démarrer un nouveau fil de discussion. Vérifiez"
+" qu'une discussion sur le même sujet n'existe pas déjà. Si vous voulez "
+"soumettre une anomalie, veuillez utiliser le bouton dédié juste sous les "
+"jeux de données."
 
 #: udata_gouvfr/theme/templates/dataset/display.html:527
 #: udata_gouvfr/theme/templates/reuse/display.html:61
@@ -434,15 +447,18 @@ msgid "Start a discussion"
 msgstr "Démarrer une discussion"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:547
-msgid ""
-"Discussion between the organization and the community about this dataset."
-msgstr "Discussion entre l'organisation et la communauté à propos de ce jeu de données."
+msgid "Discussion between the organization and the community about this dataset."
+msgstr ""
+"Discussion entre l'organisation et la communauté à propos de ce jeu de "
+"données."
 
 #: udata_gouvfr/theme/templates/dataset/display.html:567
 msgid ""
-"You have built a more comprehensive database than those presented here? This"
-" is the time to share it!"
-msgstr "Vous avez construit une base de données plus complète que celles présentées ici ? C'est le moment de la partager !"
+"You have built a more comprehensive database than those presented here? "
+"This is the time to share it!"
+msgstr ""
+"Vous avez construit une base de données plus complète que celles "
+"présentées ici ? C'est le moment de la partager !"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:604
 msgid "Open in a new window"
@@ -464,10 +480,16 @@ msgstr "Ajouter une réutilisation"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:647
 msgid ""
-"You reused these data and published an article, a computer graphics, or an application?\n"
+"You reused these data and published an article, a computer graphics, or "
+"an application?\n"
 "                It's time to let you know!\n"
-"                Reference your work in just a few clicks and increase your visibility."
-msgstr "Vous avez réutilisé ces données et publié un article, une infographie, ou une application ?\nC'est le moment de vous faire connaître !\nRéférencez votre travail en quelques clics et augmentez votre visibilité."
+"                Reference your work in just a few clicks and increase "
+"your visibility."
+msgstr ""
+"Vous avez réutilisé ces données et publié un article, une infographie, ou"
+" une application ?\n"
+"C'est le moment de vous faire connaître !\n"
+"Référencez votre travail en quelques clics et augmentez votre visibilité."
 
 #: udata_gouvfr/theme/templates/mail/base.html:45
 msgid "on your browser."
@@ -494,14 +516,20 @@ msgstr "L'équipe de %(site)s"
 
 #: udata_gouvfr/theme/templates/reuse/display.html:55
 msgid ""
-"You're about to start a new discussion thread. Make sure that a thread about"
-" the same topic doesn't exist yet just above. If you want to report an "
-"anomaly, please use the dedicated button just under the reuses."
-msgstr "Vous êtes sur le point de démarrer un nouveau fil de discussion. Vérifiez qu'une discussion sur le même sujet n'existe pas déjà. Si vous voulez soumettre une anomalie, veuillez utiliser le bouton dédié juste sous les réutilisations."
+"You're about to start a new discussion thread. Make sure that a thread "
+"about the same topic doesn't exist yet just above. If you want to report "
+"an anomaly, please use the dedicated button just under the reuses."
+msgstr ""
+"Vous êtes sur le point de démarrer un nouveau fil de discussion. Vérifiez"
+" qu'une discussion sur le même sujet n'existe pas déjà. Si vous voulez "
+"soumettre une anomalie, veuillez utiliser le bouton dédié juste sous les "
+"réutilisations."
 
 #: udata_gouvfr/theme/templates/reuse/display.html:82
 msgid "Discussion between the reusers and the community about this reuse."
-msgstr "Discussion entre les réutilisateurs et la communauté sur cette réutilisation."
+msgstr ""
+"Discussion entre les réutilisateurs et la communauté sur cette "
+"réutilisation."
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:18
 msgid "Publish a dataset"
@@ -534,3 +562,4 @@ msgstr "Créez une organisation"
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:57
 msgid "You can create a new organization if yours doesn't exists yet."
 msgstr "Vous pouvez créer votre organisation si la votre n'existe pas."
+

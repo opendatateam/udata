@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  uData-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-07-07 16:11+0200\n"
+"POT-Creation-Date: 2015-07-08 16:37+0200\n"
 "PO-Revision-Date: 2015-05-28 13:51+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/udata-"
@@ -262,8 +262,6 @@ msgstr "Este conjunto de datos proviene de un servicio público certificado"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:67
 #, fuzzy, python-format
-#| msgid "" "Published on %(date)s by <a href=\"%(url)s\" "
-#| "title=\"%(author)s\">%(author)s</a>"
 msgid ""
 "Published on %(date)s and updated on %(update)s by <a href=\"%(url)s\" "
 "title=\"%(author)s\">%(author)s</a>"
@@ -273,9 +271,6 @@ msgstr ""
 
 #: udata_gouvfr/theme/templates/dataset/display.html:76
 #, fuzzy, python-format
-#| msgid "" "This dataset has been published on %(date)s on the initiative and
-#| under " "the responsibility of <a href=\"%(url)s\" "
-#| "title=\"%(author)s\">%(author)s</a>"
 msgid ""
 "This dataset has been published on %(date)s and updated on %(update)s on "
 "the initiative and under the responsibility of <a href=\"%(url)s\" "
@@ -612,7 +607,4 @@ msgstr "Usted puede crear una nueva organización si la suya no existe aun. "
 
 #~ msgid "This dataset is not provided by a certified public service"
 #~ msgstr ""
-#~ "El conjunto de datos no está "
-#~ "provisto por un servicio público "
-#~ "certificado "
 
