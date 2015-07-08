@@ -71,6 +71,7 @@ dataset_fields = api.model('Dataset', {
     'featured': fields.Boolean(description='Is the dataset featured'),
     'private': fields.Boolean(description='Is the dataset private to the owner or the organization'),
     'tags': fields.List(fields.String),
+    'badges': fields.List(fields.Nested(badge_fields, description='The dataset badges'), readonly=True),
     'resources': fields.List(fields.Nested(resource_fields, description='The dataset resources')),
     'community_resources': fields.List(fields.Nested(resource_fields,
         description='The dataset community submitted resources')),

@@ -17,7 +17,8 @@ from .forms import (
     MemberForm
 )
 from .models import (
-    OrganizationBadge, Organization, MembershipRequest, Member, FollowOrg
+    OrganizationBadge, Organization, MembershipRequest, Member, FollowOrg,
+    ORG_BADGE_KINDS
 )
 from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 from .tasks import notify_membership_request, notify_membership_response
@@ -107,9 +108,18 @@ class OrganizationAPI(API):
         return '', 204
 
 
+@ns.route('/badges/', endpoint='available_organization_badges')
+class AvailableOrganizationBadgesAPI(API):
+    @api.doc('available_organization_badges')
+    def get(self):
+        '''List all available organization badges and their labels'''
+        return ORG_BADGE_KINDS
+
+
 @ns.route('/<org:org>/badges/', endpoint='organization_badges')
 class OrganizationBadgesAPI(API):
-    @api.doc(id='create_badge', body=badge_fields, **common_doc)
+    @api.doc('add_organization_badge', **common_doc)
+    @api.expect(badge_fields)
     @api.marshal_with(badge_fields)
     @api.secure(admin_permission)
     def post(self, org):
@@ -124,7 +134,7 @@ class OrganizationBadgesAPI(API):
 
 @ns.route('/<org:org>/badges/<badge_kind>/', endpoint='organization_badge')
 class OrganizationBadgeAPI(API):
-    @api.doc(id='delete_badge', **common_doc)
+    @api.doc('delete_organization_badge', **common_doc)
     @api.secure(admin_permission)
     def delete(self, org, badge_kind):
         '''Delete a badge for a given organization'''
