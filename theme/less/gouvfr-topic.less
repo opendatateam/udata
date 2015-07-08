@@ -1,68 +1,67 @@
-@import "variables.less";
-@import "gouvfr/variables.less";
+body.topic-display {
+    .topic-excerpt {
+        @media(min-width: @screen-md-min) {
+            padding-top: 30px;
+            padding-left: 30px;
+        }
 
-.topic-excerpt {
-    @media(min-width: @screen-md-min) {
-        padding-top: 30px;
-        padding-left: 30px;
-    }
+        margin-bottom: 10px;
+        color: white;
+        font-size: 14px;
+        line-height: 1.6em;
+        max-height: 270px;
 
-    margin-bottom: 10px;
-    color: white;
-    font-size: 14px;
-    line-height: 1.6em;
-    max-height: 270px;
-
-    h3 {
-        font-family: @title-font;
-        font-size: 32px;
-    }
-
-}
-
-.topic-toolbar {
-    margin: 10px 8px 10px 0;
-}
-
-section.related-tags-section {
-
-    background-color: @gray-lighter;
-
-    header {
-        // color: white;
-        // background-color: @bg-dark;
-        margin-top: 0;
-        margin-bottom: 15px;
-        min-height: 64px;
-
-        h2 {
+        h3 {
             font-family: @title-font;
-            margin-bottom: -4px;
-            font-size: 25px;
-            color: @gray-dark;
-
-            @media(min-width: @screen-sm-min) {
-                margin-top: 16px;
-                font-size: 30px;
-            }
-
-            .header-logo {
-                color: @gray-light;
-                // color: rgba(255, 255, 255, 0.32);
-            }
+            font-size: 32px;
         }
+
     }
 
-    .page-header {
-        // color: @gray-dark;
-        border: 0px;
-        margin: 0;
-
-        @media(max-width: @screen-xs-max) {
-            margin-bottom: 0;
-        }
+    .topic-toolbar {
+        margin: 10px 8px 10px 0;
     }
 
-    padding-bottom: 20px;
-    margin-bottom: 0;
+    section.related-tags-section {
+
+        background-color: @gray-lighter;
+
+        header {
+            // color: white;
+            // background-color: @bg-dark;
+            margin-top: 0;
+            margin-bottom: 15px;
+            min-height: 64px;
+
+            h2 {
+                font-family: @title-font;
+                margin-bottom: -4px;
+                font-size: 25px;
+                color: @gray-dark;
+
+                @media(min-width: @screen-sm-min) {
+                    margin-top: 16px;
+                    font-size: 30px;
+                }
+
+                .header-logo {
+                    color: @gray-light;
+                    // color: rgba(255, 255, 255, 0.32);
+                }
+            }
+        }
+
+        .page-header {
+            // color: @gray-dark;
+            border: 0px;
+            margin: 0;
+
+            @media(max-width: @screen-xs-max) {
+                margin-bottom: 0;
+            }
+        }
+
+        padding-bottom: 20px;
+        margin-bottom: 0;
+    }
 }
