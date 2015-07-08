@@ -10,6 +10,16 @@
 <meta name="swagger-specs" content="{{ specs_url }}" />
 {% endblock %}
 
+
+{% block extra_css %}
+<link href="{{ static('apidoc.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('apidoc.js') }}"></script>
+{% endblock %}
+
+
 {% block content %}
 <section class="default">
     <div class="container">
