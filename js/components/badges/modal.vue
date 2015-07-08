@@ -1,4 +1,5 @@
 <style lang="less">
+
 </style>
 
 <template>
@@ -7,8 +8,9 @@
     v-ref="modal">
 
     <div class="modal-body">
-        <div class="text-center row" v-if="!type">
-            <p class="lead col-xs-12">{{ _('Pick the active badges') }}</p>
+        <div class="text-center row">
+            <p class="lead col-xs-12" v-if="hasBadges">{{ _('Pick the active badges') }}</p>
+            <p class="lead col-xs-12" v-if="!hasBadges">{{ _('No badge available') }}</p>
         </div>
         <div class="text-center row">
             <div class="badges col-xs-6 col-xs-offset-3">
@@ -16,7 +18,10 @@
                     v-repeat="badges"
                     v-on="click: toggle($key)"
                     v-class="active: selected.indexOf($key) >= 0">
-                    <span class="fa fa-bookmark"></span>
+                    <span class="fa pull-left" v-class="
+                        fa-bookmark: selected.indexOf($key) >= 0,
+                        fa-bookmark-o: selected.indexOf($key) < 0
+                        "></span>
                     {{ $value }}
                 </button>
             </div>
@@ -24,7 +29,7 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button v-attr="disabled: !selected" type="button"
+        <button v-attr="disabled: !hasModifications" type="button"
             class="btn btn-success btn-flat pointer pull-left"
             v-on="click: confirm">
             {{ _('Confirm') }}
@@ -52,7 +57,7 @@ module.exports = {
             selected: [],
             initial: [],
             subject: null,
-            badges: [],
+            badges: {},
             added: {},
             removed: {}
         };
@@ -63,20 +68,32 @@ module.exports = {
         },
         namespace: function() {
             return this.basename + 's';
+        },
+        hasBadges: function() {
+            return Object.keys(this.badges).length > 0;
+        },
+        hasModifications: function() {
+            return (this.selected.length !== this.initial.length)
+                || this.selected.some(function(badge) {
+                    return this.initial.indexOf(badge) < 0;
+                }.bind(this));
         }
     },
     compiled: function() {
         var operation = 'available_' + this.basename + '_badges';
 
-        this.selected = this.subject.badges.map(function(badge) {
-            return badge.kind;
-        });
+        if (this.subject.hasOwnProperty('badges')) {
+            this.selected = this.subject.badges.map(function(badge) {
+                return badge.kind;
+            });
 
-        this.initial = this.selected.slice(0);
+            this.initial = this.selected.slice(0);
 
-        API[this.namespace][operation]({}, function(response) {
-            this.badges = response.obj;
-        }.bind(this));
+            API[this.namespace][operation]({}, function(response) {
+                this.badges = response.obj;
+            }.bind(this));
+        }
+
     },
     methods: {
         confirm: function() {
@@ -105,14 +122,17 @@ module.exports = {
             }.bind(this));
 
             to_remove.forEach(function(badge) {
-                var data = {payload: {kind: badge}},
+                var data = {badge_kind: badge},
                     key = this.basename === 'organization' ? 'org' : this.basename;
 
                 data[key] = this.subject.id;
                 this.removed[badge] = false;
 
                 API[this.namespace][remove_operation](data, function(response) {
-                    this.subject.badges.push(response.obj);
+                    var badgeObj = this.subject.badges.filter(function(o) {
+                            return o.kind === badge;
+                        })[0];
+                    this.subject.badges.$remove(badgeObj);
                     this.removed[badge] = true;
                     this.checkAllDone();
                 }.bind(this));
@@ -124,7 +144,7 @@ module.exports = {
                 }.bind(this)),
                 allRemoved = Object.keys(this.removed).every(function(key) {
                     return this.removed[key];
-                });
+                }.bind(this));
 
             if (allAdded && allRemoved) {
                 this.$.modal.close();

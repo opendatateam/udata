@@ -34,6 +34,20 @@
                 endpoint="{{endpoint}}">
             </image-button>
             <div v-markdown="{{reuse.description}}"></div>
+            <div v-if="reuse.tags" class="label-list">
+                <strong>
+                    <span class="fa fa-fw fa-tags"></span>
+                    {{ _('Tags') }}:
+                </strong>
+                <span v-repeat="reuse.tags" class="label label-default">{{$value}}</span>
+            </div>
+            <div v-if="reuse.badges" class="label-list">
+                <strong>
+                    <span class="fa fa-fw fa-bookmark"></span>
+                    {{ _('Badges') }}:
+                </strong>
+                <span v-repeat="reuse.badges" class="label label-primary">{{kind}}</span>
+            </div>
         </div>
     </div>
     <reuse-form v-ref="form" v-if="toggled" reuse="{{reuse}}"></reuse-form>

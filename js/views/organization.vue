@@ -49,7 +49,8 @@ var moment = require('moment'),
     Datasets = require('models/datasets'),
     Reuses = require('models/reuses'),
     Followers = require('models/followers').extend({ns: 'organizations'}),
-    Metrics = require('models/metrics');
+    Metrics = require('models/metrics'),
+    Vue = require('vue');
 
 module.exports = {
     name: 'OrganizationView',
@@ -188,7 +189,7 @@ module.exports = {
     methods: {
         setBadges: function() {
             this.$root.$modal(
-                {data: {subject: this.organization}},
+                {data: {subject: this.org}},
                 Vue.extend(require('components/badges/modal.vue'))
             );
         }

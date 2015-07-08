@@ -35,10 +35,13 @@
                 endpoint="{{endpoint}}">
             </image-button>
             <div v-markdown="{{org.description}}"></div>
-            <span v-repeat="badge:org.badges" class="label label-primary">
-                <span class="fa fa-bookmark"></span>
-                {{badge.kind}}
-            </span>
+            <div v-if="org.badges" class="label-list">
+                <strong>
+                    <span class="fa fa-fw fa-bookmark"></span>
+                    {{ _('Badges') }}:
+                </strong>
+                <span v-repeat="org.badges" class="label label-primary">{{kind}}</span>
+            </div>
         </div>
     </div>
     <org-form v-ref="form" v-if="toggled" organization="{{org}}"></org-form>

@@ -52,7 +52,7 @@ module.exports = {
         if (this.$root.me.is_admin) {
             actions.push({divider: true});
             actions.push({
-                label: this._('Badge'),
+                label: this._('Badges'),
                 icon: 'bookmark',
                 method: 'setBadges'
             });

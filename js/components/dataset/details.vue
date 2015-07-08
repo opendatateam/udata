@@ -8,10 +8,20 @@
     <div v-if="!toggled">
         <h3>{{dataset.title}}</h3>
         <div v-markdown="{{dataset.description}}"></div>
-        <span v-repeat="badge:dataset.badges" class="label label-primary">
-            <span class="fa fa-bookmark"></span>
-            {{badge.kind}}
-        </span>
+        <div v-if="dataset.tags" class="label-list">
+            <strong>
+                <span class="fa fa-fw fa-tags"></span>
+                {{ _('Tags') }}:
+            </strong>
+            <span v-repeat="dataset.tags" class="label label-default">{{$value}}</span>
+        </div>
+        <div v-if="dataset.badges" class="label-list">
+            <strong>
+                <span class="fa fa-fw fa-bookmark"></span>
+                {{ _('Badges') }}:
+            </strong>
+            <span v-repeat="dataset.badges" class="label label-primary">{{kind}}</span>
+        </div>
     </div>
     <dataset-form v-ref="form" v-if="toggled" dataset="{{dataset}}"></dataset-form>
     <box-footer v-if="toggled">
@@ -20,6 +30,7 @@
     </box-footer>
 </box-container>
 </template>
+
 <script>
 'use strict';
 
