@@ -179,7 +179,6 @@ define([
                     layer.openPopup();
                 });
                 layer.on("mouseout", function () {
-                    console.log('l', layer, layer.closePopup)
                     layer.closePopup();
                 });
             }

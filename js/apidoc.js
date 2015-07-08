@@ -36,15 +36,6 @@ $(function() {
         onComplete: function(swaggerApi, swaggerUi){
             log.debug("Loaded SwaggerUI");
 
-            // if(typeof initOAuth == "function") {
-
-            //     initOAuth({
-            //       clientId: "your-client-id",
-            //       realm: "your-realms",
-            //       appName: "your-app-name"
-            //     });
-
-            // }
             $('#swagger-ui-container pre code').each(function(i, e) {
                 hljs.highlightBlock(e);
             });
