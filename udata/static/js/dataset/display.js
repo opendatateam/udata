@@ -65,8 +65,13 @@ define([
                             addTooltip($self, i18n._('The resource cannot be found.'));
                         }
                     }).fail(function() {
-                        $self.addClass('format-label-danger');
-                        addTooltip($self, i18n._('The server cannot be found.'));
+                        if (startsWith(url, 'ftp')) {
+                            $self.addClass('format-label-warning');
+                            addTooltip($self, i18n._('The server may be hard to reach (FTP).'));
+                        } else {
+                            $self.addClass('format-label-danger');
+                            addTooltip($self, i18n._('The server cannot be found.'));
+                        }
                     });
                 }
 
