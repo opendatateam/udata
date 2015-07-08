@@ -21,11 +21,11 @@ define([
         if (value && $el.length > 0) {
             var dataset = new Dataset().fetch(value),
                 card = new Vue({
+                    el:$el[0],
                     mixins: [DatasetCard],
                     data: {dataset: dataset}
                 }),
                 $btn = $el.find('.remove');
-            card.$mount($el[0]);
             $el.append($btn);
         }
     }

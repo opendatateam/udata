@@ -61,22 +61,24 @@
 </style>
 
 <template>
-    <box-container title="{{ title }}" icon="cubes"
+    <box title="{{ title }}" icon="cubes"
         boxclass="box-solid datasets-cards-widget"
-        footerClass="text-center">
+        footerClass="text-center" footer="true">
         <div class="row" v-el="sortable">
             <div class="col-md-6 dataset-card-container"
                 v-repeat="datasetid: editing ? sorted : datasets |ids"
                 data-id="{{datasetid}}"
             >
-                <button type="button" class="close" v-if="editing" v-on="click: on_remove(datasetid)">
+                <button type="button" class="close"
+                    v-if="editing"
+                    v-on="click: on_remove(datasetid)">
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only" v-i18n="Close"></span>
                 </button>
                 <dataset-card datasetid="{{datasetid}}"></dataset-card>
             </div>
         </div>
-        <box-footer>
+        <footer>
             <a v-show="!editing" class="text-uppercase footer-btn pointer"
                 v-on="click: edit">
                 {{ _('Edit') }}
@@ -97,8 +99,8 @@
                     </button>
                 </span>
             </div>
-        </box-footer>
-    </box-container>
+        </footer>
+    </box>
 </template>
 
 <script>
@@ -110,7 +112,7 @@ module.exports = {
     name: 'datasets-card-list',
     mixins: [Sorter],
     components: {
-        'box-container': require('components/containers/box.vue'),
+        'box': require('components/containers/box.vue'),
         'dataset-card': require('components/dataset/card.vue'),
         'dataset-completer': require('components/form/dataset-completer')
     },

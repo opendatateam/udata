@@ -61,22 +61,24 @@
 </style>
 
 <template>
-    <box-container title="{{ title }}" icon="retwett"
+    <box title="{{ title }}" icon="retwett"
         boxclass="box-solid reuses-cards-widget"
-        footerClass="text-center">
+        footerClass="text-center" footer="true">
         <div class="row" v-el="sortable">
             <div class="col-md-6 reuse-card-container"
                 v-repeat="reuseid: editing ? sorted : reuses |ids"
                 data-id="{{reuseid}}"
             >
-                <button type="button" class="close" v-if="editing" v-on="click: on_remove(reuseid)">
+                <button type="button" class="close"
+                    v-if="editing"
+                    v-on="click: on_remove(reuseid)">
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only" v-i18n="Close"></span>
                 </button>
                 <reuse-card reuseid="{{reuseid}}"></reuse-card>
             </div>
         </div>
-        <box-footer>
+        <footer>
             <a v-show="!editing" class="text-uppercase footer-btn pointer"
                 v-on="click: edit">
                 {{ _('Edit') }}
@@ -97,8 +99,8 @@
                     </button>
                 </span>
             </div>
-        </box-footer>
-    </box-container>
+        </footer>
+    </box>
 </template>
 
 <script>
@@ -110,7 +112,7 @@ module.exports = {
     name: 'reuses-card-list',
     mixins: [Sorter],
     components: {
-        'box-container': require('components/containers/box.vue'),
+        'box': require('components/containers/box.vue'),
         'reuse-card': require('components/reuse/card.vue'),
         'reuse-completer': require('components/form/reuse-completer')
     },

@@ -19,11 +19,11 @@ define([
     function cardify(value, $el) {
         var reuse = new Reuse().fetch(value),
             card = new Vue({
+                el: $el[0],
                 mixins: [ReuseCard],
                 data: {reuse: reuse}
             }),
             $btn = $el.find('.remove');
-        card.$mount($el[0]);
         $el.append($btn);
     }
 
