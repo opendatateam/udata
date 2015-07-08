@@ -23,6 +23,7 @@ module.exports = {
         'dashboard/organization': './js/dashboard/organization',
         'site/map': './js/site/map',
         'topic/display': './js/topic/display',
+        'post/display': './js/post/display',
         'apidoc': './js/apidoc',
     },
     output: {
