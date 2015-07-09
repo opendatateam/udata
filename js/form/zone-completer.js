@@ -7,7 +7,6 @@ define(['jquery', 'api', 'form/widgets'], function($, API) {
     var levels = {};
 
     API.get('spatial/levels', function(data) {
-        console.log(data)
         levels = data;
     });
 

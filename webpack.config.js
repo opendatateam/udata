@@ -17,6 +17,7 @@ module.exports = {
         home: './js/home.js',
         search: './js/search.js',
         forms: './less/forms.less',
+        'form/extras': './js/form/extras',
         'dataset/display': './js/dataset/display',
         'dataset/form': './js/dataset/form',
         'dataset/resource-form': './js/dataset/resource-form',
@@ -45,6 +46,7 @@ module.exports = {
             'jqfineuploader': path.join(node_path, 'fine-uploader/jquery.fine-uploader/jquery.fine-uploader'),
             'bloodhound': path.join(node_path, 'typeahead.js/dist/bloodhound'),
             'typeahead': path.join(node_path, 'typeahead.js/dist/typeahead.jquery'),
+            'x-editable': path.join(node_path, 'X-editable/dist/bootstrap3-editable/js/bootstrap-editable'),
             'handlebars': 'handlebars/runtime.js',
             'swaggerui': 'swagger-ui/dist',
             'jquery': require.resolve('jquery')

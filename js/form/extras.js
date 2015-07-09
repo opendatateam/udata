@@ -7,8 +7,8 @@ define([
     'auth',
     'notify',
     'widgets/modal',
-    'hbs!templates/forms/extra-row',
-    'hbs!templates/forms/confirm-delete-extra',
+    'templates/forms/extra-row.hbs',
+    'templates/forms/confirm-delete-extra.hbs',
     'logger',
     'x-editable'
 ], function($, i18n, Auth, Notify, modal, row_tpl, confirm_tpl, Log) {
