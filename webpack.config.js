@@ -19,6 +19,7 @@ module.exports = {
         forms: './less/forms.less',
         'dataset/display': './js/dataset/display',
         'dataset/form': './js/dataset/form',
+        'dataset/resource-form': './js/dataset/resource-form',
         'reuse/display': './js/reuse/display',
         'organization/display': './js/organization/display',
         'dashboard/site': './js/dashboard/site',
@@ -41,6 +42,7 @@ module.exports = {
         alias: {
             'jquery-slimscroll': path.join(node_path, 'jquery-slimscroll/jquery.slimscroll'),
             'fineuploader': path.join(node_path, 'fine-uploader/fine-uploader/fine-uploader'),
+            'jqfineuploader': path.join(node_path, 'fine-uploader/jquery.fine-uploader/jquery.fine-uploader'),
             'bloodhound': path.join(node_path, 'typeahead.js/dist/bloodhound'),
             'typeahead': path.join(node_path, 'typeahead.js/dist/typeahead.jquery'),
             'handlebars': 'handlebars/runtime.js',

@@ -4,7 +4,7 @@
 define([
     'jquery',
     'widgets/modal',
-    'hbs!templates/dataset/delete-resource-modal',
+    'templates/dataset/delete-resource-modal.hbs',
     'i18n',
     'logger',
     'form/common',
@@ -186,49 +186,47 @@ define([
     }
 
 
-    return {
-        start: function() {
-            $('.btn-delete').click(on_delete);
+    $(function() {
+        $('.btn-delete').click(on_delete);
 
-            var uploader = new Uploader('.uploader');
-            $uploader = $(uploader);
+        var uploader = new Uploader('.uploader');
+        $uploader = $(uploader);
 
-            $uploader.on('complete', function(ev, name, response) {
-                log.debug('complete', name, response);
+        $uploader.on('complete', function(ev, name, response) {
+            log.debug('complete', name, response);
 
-                $url.val(response.url);
-                $checksum.val(response.sha1);
-                $size.val(response.size);
-                $mime.val(response.mime);
-                $checksum_type.val('sha1');
+            $url.val(response.url);
+            $checksum.val(response.sha1);
+            $size.val(response.size);
+            $mime.val(response.mime);
+            $checksum_type.val('sha1');
 
-                if (!$title.val()) {
-                    $title.val(name);
-                }
+            if (!$title.val()) {
+                $title.val(name);
+            }
 
-                set_format(response.format);
-                store_values();
-                show_upload();
-            });
-
-            $url.blur(checkUrl);
-
-            $btn_delete.click(function() {
-                uploader.clear();
-                $('.form-upload-fields').addClass('hide');
-                $('.form-upload').removeClass('hide');
-            });
-
-            $form.submit(on_submit);
-
-            $type.change(function() {
-                set_pane(this.value);
-            });
-
+            set_format(response.format);
             store_values();
-            set_pane($type.filter(':checked').val());
+            show_upload();
+        });
 
-            log.debug('Resource form loaded');
-        }
-    };
+        $url.blur(checkUrl);
+
+        $btn_delete.click(function() {
+            uploader.clear();
+            $('.form-upload-fields').addClass('hide');
+            $('.form-upload').removeClass('hide');
+        });
+
+        $form.submit(on_submit);
+
+        $type.change(function() {
+            set_pane(this.value);
+        });
+
+        store_values();
+        set_pane($type.filter(':checked').val());
+
+        log.debug('Resource form loaded');
+    });
 });

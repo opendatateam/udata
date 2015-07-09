@@ -3,7 +3,7 @@ define([
     'class',
     'logger',
     'i18n',
-    'fineuploader'
+    'jqfineuploader'
 ], function($, Class, log, i18n) {
     'use strict';
 

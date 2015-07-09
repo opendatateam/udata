@@ -8,8 +8,8 @@
       <div class="modal-body">{{{ content }}}</div>
       <div class="modal-footer">
         {{#each actions}}
-          {{#if url}}
-          <a href="{{url}}" class="btn {{classes}}">
+          {{#if this.url}}
+          <a href="{{this.url}}" class="btn {{classes}}">
             {{#if icon}}{{icon icon}}{{/if}}
             {{label}}
           </a>
