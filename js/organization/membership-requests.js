@@ -8,7 +8,7 @@ define([
     'notify',
     'auth',
     'widgets/modal',
-    'hbs!templates/organization/refuse-membership-modal',
+    'templates/organization/refuse-membership-modal.hbs',
     'form/common',
     'x-editable'
 ], function($, API, i18n, Notify, Auth, modal, refusal_tpl, forms) {

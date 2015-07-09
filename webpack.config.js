@@ -25,6 +25,7 @@ module.exports = {
         'organization/display': './js/organization/display',
         'organization/form': './js/organization/form',
         'organization/members': './js/organization/members',
+        'organization/membership-requests': './js/organization/membership-requests',
         'dashboard/site': './js/dashboard/site',
         'dashboard/organization': './js/dashboard/organization',
         'site/map': './js/site/map',
