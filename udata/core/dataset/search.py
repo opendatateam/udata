@@ -5,7 +5,7 @@ from udata.core.site.views import current_site
 
 
 from udata.models import (
-    Dataset, DatasetBadge, Organization, License, User, GeoZone,
+    Dataset, Organization, License, User, GeoZone,
     DATASET_BADGE_KINDS
 )
 from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping

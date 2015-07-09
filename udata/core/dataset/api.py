@@ -146,6 +146,9 @@ class DatasetBadgesAPI(API):
         badge = DatasetBadge(created=datetime.now(),
                              created_by=current_user.id)
         form.populate_obj(badge)
+        for existing_badge in dataset.badges:
+            if existing_badge.kind == badge.kind:
+                return existing_badge
         dataset.add_badge(badge)
         return badge, 201
 

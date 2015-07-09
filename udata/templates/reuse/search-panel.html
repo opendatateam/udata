@@ -2,6 +2,7 @@
 {% set url = search_url %}
 <div class="panel panel-default advanced-search-panel">
     {{ s.facet_panel(reuses, 'organization', _('Organizations'), ficon('fa-building-o'), url=url) }}
+    {{ s.facet_panel(reuses, 'badge', _('Badges'), ficon('fa-bookmark'), url=url) }}
     {{ s.facet_panel(reuses, 'type', _('Type'), ficon('fa-file'), url=url) }}
     {{ s.facet_panel(reuses, 'tag', _('Tags'), ficon('fa-tags'), url=url) }}
     {{ s.facet_panel(reuses, 'datasets', _('Datasets'), ficon('fa-cubes'), url=url) }}

@@ -7,11 +7,14 @@ from mongoengine.signals import pre_save, post_save
 
 from udata.core.storages import images, default_image_basename
 from udata.i18n import lazy_gettext as _
-from udata.models import db, WithMetrics, Issue, Discussion, Follow
+from udata.models import (
+    db, Badge, BadgeMixin, WithMetrics, Issue, Discussion, Follow
+)
 from udata.utils import hash_url
 
 __all__ = (
-    'Reuse', 'REUSE_TYPES', 'ReuseIssue', 'ReuseDiscussion', 'FollowReuse'
+    'Reuse', 'ReuseBadge', 'ReuseIssue', 'ReuseDiscussion', 'FollowReuse',
+    'REUSE_BADGE_KINDS', 'REUSE_TYPES'
 )
 
 
@@ -30,6 +33,20 @@ REUSE_TYPES = {
 IMAGE_SIZES = [100, 50, 25]
 IMAGE_MAX_SIZE = 800
 
+DATACONNEXIONS_CANDIDATE = 'dataconnexions-candidate'
+DATACONNEXIONS_LAUREATE = 'dataconnexions-laureate'
+REUSE_BADGE_KINDS = {
+    DATACONNEXIONS_CANDIDATE: _('Dataconnexions candidate'),
+    DATACONNEXIONS_LAUREATE: _('Dataconnexions laureate'),
+}
+
+
+class ReuseBadge(Badge):
+    kind = db.StringField(choices=REUSE_BADGE_KINDS.keys(), required=True)
+
+    def __html__(self):
+        return unicode(REUSE_BADGE_KINDS[self.kind])
+
 
 class ReuseQuerySet(db.BaseQuerySet):
     def visible(self):
@@ -45,7 +62,7 @@ class ReuseQuerySet(db.BaseQuerySet):
         return self(Qs)
 
 
-class Reuse(db.Datetimed, WithMetrics, db.Document):
+class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
     title = db.StringField(max_length=255, required=True)
     slug = db.SlugField(max_length=255, required=True, populate_from='title', update=True)
     description = db.StringField(required=True)
@@ -56,6 +73,7 @@ class Reuse(db.Datetimed, WithMetrics, db.Document):
     image = db.ImageField(fs=images, basename=default_image_basename, max_size=IMAGE_MAX_SIZE, thumbnails=IMAGE_SIZES)
     datasets = db.ListField(db.ReferenceField('Dataset', reverse_delete_rule=db.PULL))
     tags = db.ListField(db.StringField())
+    badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
 
     private = db.BooleanField()
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)

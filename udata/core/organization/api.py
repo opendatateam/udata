@@ -128,6 +128,9 @@ class OrganizationBadgesAPI(API):
         badge = OrganizationBadge(created=datetime.now(),
                                   created_by=current_user.id)
         form.populate_obj(badge)
+        for existing_badge in org.badges:
+            if existing_badge.kind == badge.kind:
+                return existing_badge
         org.add_badge(badge)
         return badge, 201
 
