@@ -619,9 +619,14 @@ class OrganizationBadgeAPITest(APITestCase):
         self.assertEqual(len(self.organization.badges), 1)
 
     def test_create_2nd(self):
-        self.organization.badges.append(OrganizationBadgeFactory())
+        # Explicitely setting the kind to avoid collisions given the
+        # small number of choices for kinds.
+        kinds_keys = ORG_BADGE_KINDS.keys()
+        self.organization.badges.append(
+            OrganizationBadgeFactory(kind=kinds_keys[0]))
         self.organization.save()
         data = OrganizationBadgeFactory.attributes()
+        data['kind'] = kinds_keys[1]
         with self.api_user():
             response = self.post(
                 url_for('api.organization_badges', org=self.organization), data)

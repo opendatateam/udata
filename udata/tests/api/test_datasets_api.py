@@ -315,9 +315,13 @@ class DatasetBadgeAPITest(APITestCase):
         self.assertEqual(len(self.dataset.badges), 1)
 
     def test_create_2nd(self):
-        self.dataset.badges.append(DatasetBadgeFactory())
+        # Explicitely setting the kind to avoid collisions given the
+        # small number of choices for kinds.
+        kinds_keys = DATASET_BADGE_KINDS.keys()
+        self.dataset.badges.append(DatasetBadgeFactory(kind=kinds_keys[0]))
         self.dataset.save()
         data = DatasetBadgeFactory.attributes()
+        data['kind'] = kinds_keys[1]
         with self.api_user():
             response = self.post(
                 url_for('api.dataset_badges', dataset=self.dataset), data)

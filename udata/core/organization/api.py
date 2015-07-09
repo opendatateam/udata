@@ -130,7 +130,7 @@ class OrganizationBadgesAPI(API):
         form.populate_obj(badge)
         for existing_badge in org.badges:
             if existing_badge.kind == badge.kind:
-                return badge
+                return existing_badge
         org.add_badge(badge)
         return badge, 201
 
