@@ -155,6 +155,13 @@ class OrganizationBadgeFactory(MongoEngineFactory):
     kind = FuzzyChoice(models.ORG_BADGE_KINDS.keys())
 
 
+class ReuseBadgeFactory(MongoEngineFactory):
+    class Meta:
+        model = models.ReuseBadge
+
+    kind = FuzzyChoice(models.REUSE_BADGE_KINDS.keys())
+
+
 class DatasetFactory(MongoEngineFactory):
     class Meta:
         model = models.Dataset

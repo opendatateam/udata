@@ -6,17 +6,21 @@ from datetime import datetime
 from werkzeug.datastructures import FileStorage
 
 from flask import request
+from flask.ext.security import current_user
 
 from udata import search
 from udata.api import api, API, ModelAPI, SingleObjectAPI
 from udata.auth import admin_permission
-from udata.models import Reuse
+from udata.models import Reuse, ReuseBadge, REUSE_BADGE_KINDS
 from udata.utils import multi_to_dict
 
 from udata.core.followers.api import FollowAPI
 
-from .api_fields import reuse_fields, reuse_page_fields, reuse_suggestion_fields, image_fields
-from .forms import ReuseForm
+from .api_fields import (
+    badge_fields, reuse_fields, reuse_page_fields, reuse_suggestion_fields,
+    image_fields
+)
+from .forms import BadgeForm, ReuseForm
 from .models import FollowReuse
 from .permissions import ReuseEditPermission
 from .search import ReuseSearch
@@ -81,6 +85,49 @@ class ReuseAPI(ModelAPI):
         ReuseEditPermission(reuse).test()
         reuse.deleted = datetime.now()
         reuse.save()
+        return '', 204
+
+
+@ns.route('/badges/', endpoint='available_reuse_badges')
+class AvailableDatasetBadgesAPI(API):
+    @api.doc('available_reuse_badges')
+    def get(self):
+        '''List all available reuse badges and their labels'''
+        return REUSE_BADGE_KINDS
+
+
+@ns.route('/<reuse:reuse>/badges/', endpoint='reuse_badges')
+class DatasetBadgesAPI(API):
+    @api.doc('add_reuse_badge', **common_doc)
+    @api.expect(badge_fields)
+    @api.marshal_with(badge_fields)
+    @api.secure(admin_permission)
+    def post(self, reuse):
+        '''Create a new badge for a given reuse'''
+        form = api.validate(BadgeForm)
+        badge = ReuseBadge(created=datetime.now(),
+                           created_by=current_user.id)
+        form.populate_obj(badge)
+        for existing_badge in reuse.badges:
+            if existing_badge.kind == badge.kind:
+                return existing_badge
+        reuse.add_badge(badge)
+        return badge, 201
+
+
+@ns.route('/<reuse:reuse>/badges/<badge_kind>/', endpoint='reuse_badge')
+class DatasetBadgeAPI(API):
+    @api.doc('delete_reuse_badge', **common_doc)
+    @api.secure(admin_permission)
+    def delete(self, reuse, badge_kind):
+        '''Delete a badge for a given reuse'''
+        badge = None
+        for badge in reuse.badges:
+            if badge.kind == badge_kind:
+                break
+        if badge is None:
+            api.abort(404, 'Badge does not exists')
+        reuse.remove_badge(badge)
         return '', 204
 
 

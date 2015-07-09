@@ -2,7 +2,9 @@
 from __future__ import unicode_literals
 
 from udata.core.site.views import current_site
-from udata.models import Reuse, Organization, REUSE_TYPES, Dataset, User
+from udata.models import (
+    Reuse, Organization, Dataset, User, REUSE_TYPES, REUSE_BADGE_KINDS
+)
 from udata.search import BoolBooster, GaussDecay
 from udata.search import ModelSearchAdapter, Sort, i18n_analyzer, metrics_mapping
 from udata.search import RangeFacet, BoolFacet, ExtrasFacet
@@ -24,6 +26,10 @@ class ReuseTypeFacet(TermFacet):
         return REUSE_TYPES[value]
 
 
+def reuse_badge_labelizer(label, kind):
+    return REUSE_BADGE_KINDS.get(kind, '')
+
+
 class ReuseSearch(ModelSearchAdapter):
     model = Reuse
     fuzzy = True
@@ -42,6 +48,7 @@ class ReuseSearch(ModelSearchAdapter):
         'followers': RangeFacet('metrics.followers'),
         'featured': BoolFacet('featured'),
         'extra': ExtrasFacet('extras'),
+        'badge': TermFacet('badges', labelizer=reuse_badge_labelizer),
     }
     sorts = {
         'title': Sort('title.raw'),
@@ -72,6 +79,7 @@ class ReuseSearch(ModelSearchAdapter):
                 'search_analyzer': 'simple',
                 'payloads': False,
             },
+            'badges': {'type': 'string', 'index_name': 'badges', 'index': 'not_analyzed'},
             'created': {'type': 'date', 'format': 'date_hour_minute_second'},
             'last_modified': {'type': 'date', 'format': 'date_hour_minute_second'},
             'dataset': {
@@ -117,6 +125,7 @@ class ReuseSearch(ModelSearchAdapter):
             'type': reuse.type,
             'tags': reuse.tags,
             'tag_suggest': reuse.tags,
+            'badges': [badge.kind for badge in reuse.badges],
             'created': reuse.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             'last_modified': reuse.last_modified.strftime('%Y-%m-%dT%H:%M:%S'),
             'dataset': [{

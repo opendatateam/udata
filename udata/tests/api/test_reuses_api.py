@@ -5,10 +5,13 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import Reuse, FollowReuse, Follow, Member
+from udata.models import Reuse, FollowReuse, Follow, Member, REUSE_BADGE_KINDS
 
 from . import APITestCase
-from ..factories import faker, ReuseFactory, DatasetFactory, AdminFactory, OrganizationFactory
+from ..factories import (
+    faker, ReuseFactory, ReuseBadgeFactory, DatasetFactory, AdminFactory,
+    OrganizationFactory
+)
 
 
 class ReuseAPITest(APITestCase):
@@ -236,3 +239,72 @@ class ReuseAPITest(APITestCase):
         response = self.get(url_for('api.suggest_reuses'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
+
+
+class ReuseBadgeAPITest(APITestCase):
+    def setUp(self):
+        self.login(AdminFactory())
+        self.reuse = ReuseFactory()
+
+    def test_list(self):
+        response = self.get(url_for('api.available_reuse_badges'))
+        self.assertStatus(response, 200)
+        self.assertEqual(len(response.json), len(REUSE_BADGE_KINDS))
+        for kind, label in REUSE_BADGE_KINDS.items():
+            self.assertIn(kind, response.json)
+            self.assertEqual(response.json[kind], label)
+
+    def test_create(self):
+        data = ReuseBadgeFactory.attributes()
+        with self.api_user():
+            response = self.post(
+                url_for('api.reuse_badges', reuse=self.reuse), data)
+        self.assertStatus(response, 201)
+        self.reuse.reload()
+        self.assertEqual(len(self.reuse.badges), 1)
+
+    def test_create_same(self):
+        data = ReuseBadgeFactory.attributes()
+        with self.api_user():
+            self.post(
+                url_for('api.reuse_badges', reuse=self.reuse), data)
+            response = self.post(
+                url_for('api.reuse_badges', reuse=self.reuse), data)
+        self.assertStatus(response, 200)
+        self.reuse.reload()
+        self.assertEqual(len(self.reuse.badges), 1)
+
+    def test_create_2nd(self):
+        # Explicitely setting the kind to avoid collisions given the
+        # small number of choices for kinds.
+        kinds_keys = REUSE_BADGE_KINDS.keys()
+        self.reuse.badges.append(
+            ReuseBadgeFactory(kind=kinds_keys[0]))
+        self.reuse.save()
+        data = ReuseBadgeFactory.attributes()
+        data['kind'] = kinds_keys[1]
+        with self.api_user():
+            response = self.post(
+                url_for('api.reuse_badges', reuse=self.reuse), data)
+        self.assertStatus(response, 201)
+        self.reuse.reload()
+        self.assertEqual(len(self.reuse.badges), 2)
+
+    def test_delete(self):
+        badge = ReuseBadgeFactory()
+        self.reuse.badges.append(badge)
+        self.reuse.save()
+        with self.api_user():
+            response = self.delete(
+                url_for('api.reuse_badge', reuse=self.reuse,
+                        badge_kind=str(badge.kind)))
+        self.assertStatus(response, 204)
+        self.reuse.reload()
+        self.assertEqual(len(self.reuse.badges), 0)
+
+    def test_delete_404(self):
+        with self.api_user():
+            response = self.delete(
+                url_for('api.reuse_badge', reuse=self.reuse,
+                        badge_kind=str(ReuseBadgeFactory().kind)))
+        self.assert404(response)

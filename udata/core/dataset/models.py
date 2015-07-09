@@ -10,7 +10,8 @@ from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
 from udata.models import (
-    db, WithMetrics, Badge, Discussion, Follow, Issue, SpatialCoverage
+    db, WithMetrics, Badge, BadgeMixin, Discussion, Follow, Issue,
+    SpatialCoverage
 )
 from udata.i18n import lazy_gettext as _
 from udata.utils import hash_url
@@ -131,7 +132,7 @@ class Resource(WithMetrics, db.EmbeddedDocument):
             self.urlhash = hash_url(self.url)
 
 
-class Dataset(WithMetrics, db.Datetimed, db.Document):
+class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     title = db.StringField(max_length=255, required=True)
     slug = db.SlugField(max_length=255, required=True, populate_from='title', update=True)
     description = db.StringField(required=True, default='')
@@ -229,27 +230,6 @@ class Dataset(WithMetrics, db.Datetimed, db.Document):
     def get(cls, id_or_slug):
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
-
-    def add_badge(self, badge):
-        '''Perform an atomic prepend for a new badge'''
-        self.update(__raw__={
-            '$push': {
-                'badges': {
-                    '$each': [badge.to_mongo()],
-                    '$position': 0
-                    }
-                }
-            })
-        self.reload()
-
-    def remove_badge(self, badge):
-        '''Perform an atomic removal for a given badge'''
-        self.update(__raw__={
-            '$pull': {
-                'badges': badge.to_mongo()
-            }
-        })
-        self.reload()
 
     def add_resource(self, resource):
         '''Perform an atomic prepend for a new resource'''
