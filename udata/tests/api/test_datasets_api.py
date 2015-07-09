@@ -303,6 +303,17 @@ class DatasetBadgeAPITest(APITestCase):
         self.dataset.reload()
         self.assertEqual(len(self.dataset.badges), 1)
 
+    def test_create_same(self):
+        data = DatasetBadgeFactory.attributes()
+        with self.api_user():
+            self.post(
+                url_for('api.dataset_badges', dataset=self.dataset), data)
+            response = self.post(
+                url_for('api.dataset_badges', dataset=self.dataset), data)
+        self.assertStatus(response, 200)
+        self.dataset.reload()
+        self.assertEqual(len(self.dataset.badges), 1)
+
     def test_create_2nd(self):
         self.dataset.badges.append(DatasetBadgeFactory())
         self.dataset.save()

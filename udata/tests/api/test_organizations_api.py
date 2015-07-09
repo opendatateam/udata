@@ -607,6 +607,17 @@ class OrganizationBadgeAPITest(APITestCase):
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 1)
 
+    def test_create_same(self):
+        data = OrganizationBadgeFactory.attributes()
+        with self.api_user():
+            self.post(
+                url_for('api.organization_badges', org=self.organization), data)
+            response = self.post(
+                url_for('api.organization_badges', org=self.organization), data)
+        self.assertStatus(response, 200)
+        self.organization.reload()
+        self.assertEqual(len(self.organization.badges), 1)
+
     def test_create_2nd(self):
         self.organization.badges.append(OrganizationBadgeFactory())
         self.organization.save()
