@@ -1,7 +1,12 @@
 /**
  * Markdown editor widget
  */
-define(['jquery', 'i18n', 'marked', 'bootstrap-markdown'], function($, i18n, md) {
+define([
+    'jquery',
+    'i18n',
+    'marked',
+    'bootstrap-markdown/js/bootstrap-markdown'
+], function($, i18n, md) {
     'use strict';
 
     var EXCERPT_TOKEN = '<!--- excerpt -->';

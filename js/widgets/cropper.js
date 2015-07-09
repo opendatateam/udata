@@ -3,8 +3,8 @@ define([
     'class',
     'logger',
     'i18n',
-    'hbs!templates/widgets/cropper',
-    'jcrop'
+    'templates/widgets/cropper.hbs',
+    'jquery-jcrop'
 ], function($, Class, log, i18n, tpl) {
     'use strict';
 

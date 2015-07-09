@@ -49,6 +49,7 @@
     "backbone": "^1.2.0",
     "bootstrap": "^3.3.5",
     "bootstrap-datepicker": "^1.4.0",
+    "bootstrap-daterangepicker": "dangrossman/bootstrap-daterangepicker#v1.3.22",
     "bootstrap-markdown": "^2.9.0",
     "bootstrap-slider": "~4.8.1",
     "chart.js": "^1.0.2",

@@ -16,7 +16,9 @@ module.exports = {
         site: './js/site.js',
         home: './js/home.js',
         search: './js/search.js',
+        forms: './less/forms.less',
         'dataset/display': './js/dataset/display',
+        'dataset/form': './js/dataset/form',
         'reuse/display': './js/reuse/display',
         'organization/display': './js/organization/display',
         'dashboard/site': './js/dashboard/site',
@@ -43,6 +45,7 @@ module.exports = {
             'typeahead': path.join(node_path, 'typeahead.js/dist/typeahead.jquery'),
             'handlebars': 'handlebars/runtime.js',
             'swaggerui': 'swagger-ui/dist',
+            'jquery': require.resolve('jquery')
         }
     },
     devtools: 'eval-source-map',

@@ -12,12 +12,7 @@ define([
             endpoint: null,
             dropzones: null,
             auto: true,
-        },
-        DEBUG = false;
-
-    //>>excludeStart('production', pragmas.production);
-    DEBUG = true;
-    //>>excludeEnd('production');;
+        };
 
     var Uploader = Class.extend({
         init: function(el, options) {

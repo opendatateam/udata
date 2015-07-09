@@ -6,8 +6,8 @@ define([
     'widgets/cropper',
     'widgets/uploader',
     'widgets/modal',
-    'hbs!templates/forms/image-picker-modal',
-    'jcrop'
+    'templates/forms/image-picker-modal.hbs',
+    'jquery-jcrop'
 ], function($, Class, log, i18n, Cropper, Uploader, modal, tpl) {
     'use strict';
 

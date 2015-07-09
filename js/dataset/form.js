@@ -4,7 +4,7 @@
 define([
     'jquery',
     'widgets/modal',
-    'hbs!templates/dataset/delete-modal',
+    'templates/dataset/delete-modal.hbs',
     'i18n',
     'logger',
     'form/common',
@@ -35,10 +35,8 @@ define([
         return false;
     }
 
-    return {
-        start: function() {
-            log.debug('Dataset form page');
-            $('.btn-delete').click(on_delete);
-        }
-    }
+    $(function() {
+        log.debug('Dataset form page');
+        $('.btn-delete').click(on_delete);
+    })
 });

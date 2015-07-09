@@ -1,7 +1,12 @@
 /**
  * Date range picker widget
  */
-define(['jquery', 'moment', 'i18n', 'bootstrap-daterangepicker'], function($, moment, i18n) {
+define([
+    'jquery',
+    'moment',
+    'i18n',
+    'bootstrap-daterangepicker'
+], function($, moment, i18n) {
     'use strict';
 
     $('.dtpicker').each(function() {
