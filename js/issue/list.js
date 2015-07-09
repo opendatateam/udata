@@ -8,7 +8,7 @@ define([
     'api',
     'notify',
     'widgets/modal',
-    'hbs!templates/issues/details',
+    'templates/issues/details.hbs',
     'form/common'
 ], function($, Auth, i18n, API, Notify, modal, detailsTpl, forms) {
     'use strict';

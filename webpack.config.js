@@ -31,6 +31,7 @@ module.exports = {
         'site/map': './js/site/map',
         'topic/display': './js/topic/display',
         'post/display': './js/post/display',
+        'issue/list': './js/issue/list',
         'apidoc': './js/apidoc',
     },
     output: {
