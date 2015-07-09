@@ -4,7 +4,7 @@
 define([
     'jquery',
     'widgets/modal',
-    'hbs!templates/organization/delete-modal',
+    'templates/organization/delete-modal.hbs',
     'i18n',
     'logger',
     'form/common',
@@ -32,10 +32,8 @@ define([
         return false;
     }
 
-    return {
-        start: function() {
-            log.debug('Organization form page');
-            $('.btn-delete').click(on_delete);
-        }
-    }
+    $(function() {
+        log.debug('Organization form page');
+        $('.btn-delete').click(on_delete);
+    });
 });
