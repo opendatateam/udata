@@ -13,10 +13,8 @@ define([
         return false;
     }
 
-    return {
-        start: function() {
-            log.debug('loaded');
-            $('.btn-test-mail').click(send_mail);
-        }
-    };
+    $(function() {
+        log.debug('loaded');
+        $('.btn-test-mail').click(send_mail);
+    });
 });

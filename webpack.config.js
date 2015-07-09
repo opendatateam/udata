@@ -33,6 +33,9 @@ module.exports = {
         'topic/display': './js/topic/display',
         'post/display': './js/post/display',
         'issue/list': './js/issue/list',
+        'user/display': './js/user/display',
+        'user/form': './js/user/form',
+        'user/notifications': './js/user/notifications',
         'apidoc': './js/apidoc',
     },
     output: {
