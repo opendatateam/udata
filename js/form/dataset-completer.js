@@ -4,8 +4,8 @@
 define([
     'jquery',
     'api',
-    'hbs!templates/dataset/dropdown-item',
-    'hbs!templates/dataset/card',
+    'templates/dataset/dropdown-item.hbs',
+    'templates/dataset/card.hbs',
     'form/widgets'
 ], function($, API, itemTpl, cardTpl) {
     'use strict';

@@ -22,6 +22,7 @@ module.exports = {
         'dataset/form': './js/dataset/form',
         'dataset/resource-form': './js/dataset/resource-form',
         'reuse/display': './js/reuse/display',
+        'reuse/form': './js/reuse/form',
         'organization/display': './js/organization/display',
         'organization/form': './js/organization/form',
         'organization/members': './js/organization/members',

@@ -4,7 +4,7 @@
 define([
     'jquery',
     'widgets/modal',
-    'hbs!templates/reuse/delete-modal',
+    'templates/reuse/delete-modal.hbs',
     'i18n',
     'logger',
     'form/common',

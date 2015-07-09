@@ -1,5 +1,9 @@
 {% extends theme('reuse/form.html') %}
 
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('reuse/form.js') }}"></script>
+{% endblock %}
+
 {% block breadcrumb %}
 <li><a href="{{ url_for('reuses.list') }}">{{ _('Reuses') }}</a></li>
 <li class="active">{{ _('New') }}</li>
