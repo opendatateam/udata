@@ -204,8 +204,12 @@ class DataconnexionsTest(FrontTestCase):
 class C3Test(FrontTestCase):
     settings = GouvFrSettings
 
-    def test_render_c3_without_data(self):
+    def test_redirect_c3(self):
         response = self.client.get(url_for('gouvfr.c3'))
+        self.assertRedirects(response, '/en/climate-change-challenge')
+
+    def test_render_c3_without_data(self):
+        response = self.client.get(url_for('gouvfr.climate_change_challenge'))
         self.assert200(response)
 
 

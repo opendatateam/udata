@@ -84,6 +84,11 @@ C3_PARTNERS = (
 
 @blueprint.route('/c3')
 def c3():
+    return redirect(url_for('gouvfr.climate_change_challenge'))
+
+
+@blueprint.route('/climate-change-challenge')
+def climate_change_challenge():
     partners = Organization.objects(slug__in=C3_PARTNERS)
     datasets = Dataset.objects(badges__kind=C3)
     return theme.render('c3.html', partners=partners, datasets=datasets)
