@@ -39,6 +39,10 @@
                 </textarea>
             </div>
         </form>
+        <button type="button" class="btn btn-danger btn-flat pointer pull-left"
+            v-if="$root.me.is_admin" v-on="click: confirm_delete">
+            {{ _('Delete') }}
+        </button>
         <button type="button" class="btn btn-success btn-flat pointer pull-left"
             v-on="click: comment_discussion" v-if="!discussion.closed">
             {{ _('Comment the discussion') }}
@@ -47,7 +51,7 @@
             v-on="click: close_discussion" v-if="!discussion.closed">
             {{ _('Comment and close discussion') }}
         </button>
-        <button type="button" class="btn btn-danger btn-flat pointer"
+        <button type="button" class="btn btn-primary btn-flat pointer"
             data-dismiss="modal">
             {{ _('Close') }}
         </button>
@@ -84,6 +88,13 @@ module.exports = {
         }.bind(this));
     },
     methods: {
+        confirm_delete: function() {
+            this.$.modal.close();
+            var m = this.$root.$modal(
+                {data: {discussionid: this.discussion.id}},
+                Vue.extend(require('components/discussions/delete-modal.vue'))
+            );
+        },
         close_discussion: function() {
             this.send_comment(this.comment, true);
         },

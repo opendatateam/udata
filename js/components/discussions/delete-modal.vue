@@ -2,12 +2,12 @@
 
 <template>
 <w-modal title="{{ _('Confirm deletion') }}"
-    modalclass="modal-danger dataset-delete-modal"
+    modalclass="modal-danger discussion-delete-modal"
     v-ref="modal">
 
     <div class="modal-body">
         <p class="lead text-center">
-            {{ _('You are about to delete this dataset') }}
+            {{ _('You are about to delete this discussion') }}
         </p>
         <p class="lead text-center">
             {{ _('Are you sure?') }}
@@ -19,7 +19,7 @@
             v-on="click: confirm">
             {{ _('Confirm') }}
         </button>
-        <button v-show="confirm" type="button" class="btn btn-danger btn-flat pointer"
+        <button v-show="cancel" type="button" class="btn btn-danger btn-flat pointer"
             data-dismiss="modal">
             {{ _('Cancel') }}
         </button>
@@ -30,21 +30,25 @@
 <script>
 'use strict';
 
+var API = require('api');
+
 module.exports = {
     components: {
         'modal': require('components/modal.vue')
     },
     data: function() {
         return {
-            edit: false,
-            confirm: false,
-            dataset: {},
-            // resource: {}
+            cancel: true,
+            discussionid: null
         };
     },
     methods: {
         confirm: function() {
-            this.$.modal.close();
+            API.discussions.delete_discussion({id: this.discussionid},
+                function(response) {
+                    this.$.modal.close();
+                }.bind(this)
+            );
         }
     }
 };
