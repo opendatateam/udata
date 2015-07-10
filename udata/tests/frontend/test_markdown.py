@@ -63,14 +63,14 @@ class MarkdownTestCase(TestCase, WebTestMixin):
             self.assertEqual(el.getAttribute('href'), 'mailto:coucou@cmoi.fr')
             self.assertEqual(el.firstChild.data, 'coucou@cmoi.fr')
 
-    def test_markdown_linkify_wihtin_pre(self):
+    def test_markdown_linkify_within_pre(self):
         '''Markdown filter should not transform urls into <pre> anchors'''
         text = '<pre>http://example.net/</pre>'
         with self.app.test_request_context('/'):
             result = render_template_string('{{ text|markdown }}', text=text)
             self.assertEqual(result.strip(), '<pre>http://example.net/</pre>')
 
-    def test_markdown_linkify_email_wihtin_pre(self):
+    def test_markdown_linkify_email_within_pre(self):
         '''Markdown filter should not transform emails into <pre> anchors'''
         text = '<pre>coucou@cmoi.fr</pre>'
         with self.app.test_request_context('/'):
