@@ -6,23 +6,19 @@ import logging
 
 from importlib import import_module
 from os.path import join, dirname, isdir, exists
-from pkg_resources import resource_stream
 
 from flask import current_app, g
-from webassets.filter import get_filter
 from werkzeug.local import LocalProxy
 
-from flask.ext.assets import Bundle, Environment, YAMLLoader
 from flask.ext.themes2 import Themes, Theme, render_theme_template, get_theme, packaged_themes_loader
 
-from udata.app import nav, ROOT_DIR
+from udata.app import nav
 from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
 
 
 themes = Themes()
-assets = Environment()
 
 
 def get_current_theme():
@@ -88,58 +84,6 @@ class ConfigurableTheme(Theme):
         return self.context_processors.get(context_name, default)
 
 
-class ThemeYAMLLoader(YAMLLoader):
-    '''
-    YAML theme assets loaders
-
-    Loads assets from theme assets.yaml file if present
-    and handle path rewriting
-    '''
-    def __init__(self, theme):
-        super(ThemeYAMLLoader, self).__init__(join(theme.path, 'assets.yaml'))
-        self.theme = theme
-
-    def _yield_bundle_contents(self, data):
-        for content in super(ThemeYAMLLoader, self)._yield_bundle_contents(data):
-            if isinstance(content, basestring):
-                theme_content = join(self.theme.static_path, content)
-                if exists(theme_content):
-                    yield theme_content
-                    continue
-            yield content
-
-    def _dependencies_from_theme(self, dependencies):
-        if not dependencies:
-            return None
-
-        deps = []
-        for dependency in dependencies:
-            deps.append(dependency)
-            deps.append(join(self.theme.static_path, dependency))
-        return deps
-
-    def _get_bundle(self, data):
-        """Return a bundle initialised by the given dict."""
-        filters = data.get('filters', None)
-        if filters and 'cssrewrite' in filters:
-            filters = [self.cssrewrite() if f == 'cssrewrite' else f for f in filters.split(',')]
-
-        kwargs = dict(
-            filters=filters,
-            output=data.get('output', None),
-            debug=data.get('debug', None),
-            extra=data.get('extra', {}),
-            depends=self._dependencies_from_theme(data.get('depends', None))
-        )
-        return Bundle(*list(self._yield_bundle_contents(data)), **kwargs)
-
-    def cssrewrite(self):
-        return get_filter('cssrewrite', replace={
-            # self.theme.path: '',
-            self.theme.static_path: '_themes/{0}'.format(self.theme.name),
-        })
-
-
 def udata_themes_loader(app):
     for theme in packaged_themes_loader(app):
         yield ConfigurableTheme(theme.path)
@@ -163,11 +107,6 @@ def render(template, **context):
     return render_theme_template(get_theme(theme), template, **context)
 
 
-def admin_form(cls):
-    g.theme.admin_form = cls
-    return cls
-
-
 def defaults(values):
     g.theme.defaults = values
 
@@ -185,43 +124,10 @@ def context(name):
 
 
 def init_app(app):
-    assets.init_app(app)
     themes.init_themes(app, app_identifier='udata', loaders=[udata_themes_loader, plugin_themes_loader])
-
-    app.config['STATIC_DIRS'] = app.config.get('STATIC_DIRS', []) + [
-        ('fonts', join(ROOT_DIR, 'static', 'bower', 'bootstrap', 'dist', 'fonts')),
-        ('fonts', join(ROOT_DIR, 'static', 'bower', 'font-awesome', 'fonts')),
-    ]
-
-    app.config['LESS_PATHS'] = app.config.get('LESS_PATHS', []) + [
-        'less',
-        'bower/bootstrap/less',
-        'bower/font-awesome/less',
-        'bower/bootstrap-markdown/less',
-        'bower/selectize/dist/less',
-        'bower/swagger-ui',
-    ]
 
     # Hook into flask security to user themed auth pages
     app.config.setdefault('SECURITY_RENDER', 'udata.theme:render')
-
-    # Load bundle from yaml file
-    assets.from_yaml(resource_stream(__name__, 'static/assets.yaml'))
-
-    if app.config['ASSETS_DEBUG']:
-        assets['require-js'].contents += ('js/config.js', 'js/debug.js')
-
-    # Load all theme assets
-    theme = app.theme_manager.themes[app.config['THEME']]
-    app.config['STATIC_DIRS'].append(('', theme.static_path))
-
-    if isdir(join(theme.static_path, 'less')):
-        app.config['LESS_PATHS'].append(join(theme.static_path, 'less'))
-
-    if exists(join(theme.path, 'assets.yaml')):
-        bundles = ThemeYAMLLoader(theme).load_bundles()
-        for name in bundles:
-            assets.register(name, bundles[name])
 
     @app.context_processor
     def inject_current_theme():
