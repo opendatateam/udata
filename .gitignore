@@ -33,11 +33,7 @@ bower
 /instance/
 /static/
 node_modules
-udata_gouvfr/theme/static/*.js
-udata_gouvfr/theme/static/*.js.map
-udata_gouvfr/theme/static/*.css
-udata_gouvfr/theme/static/*.css.map
-udata_gouvfr/theme/static/img
+/udata_gouvfr/theme/static/
 
 # Installer logs
 pip-log.txt
