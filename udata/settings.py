@@ -56,6 +56,34 @@ class Defaults(object):
 
     OAUTH2_PROVIDER_ERROR_ENDPOINT = 'oauth-i18n.oauth_error'
 
+    MD_ALLOWED_TAGS = [
+        'a',
+        'abbr',
+        'acronym',
+        'b',
+        'br',
+        'blockquote',
+        'code',
+        'dl',
+        'dt',
+        'em',
+        'i',
+        'li',
+        'ol',
+        'pre',
+        'small',
+        'strong',
+        'ul',
+    ]
+
+    MD_ALLOWED_ATTRIBUTES = {
+        'a': ['href', 'title'],
+        'abbr': ['title'],
+        'acronym': ['title'],
+    }
+
+    MD_ALLOWED_STYLES = []
+
     # CROQUEMORT = {
     #     'url': 'http://localhost:8000',
     #     'delay': 1,
