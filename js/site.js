@@ -12,3 +12,4 @@ var $ = require('jquery');
 require('bootstrap');
 
 require('common');
+require('expose?uData!udata');
