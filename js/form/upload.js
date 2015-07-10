@@ -1,7 +1,7 @@
 /**
  * File uploader widget
  */
-define(['jquery', 'bootstrap', 'fineuploader'], function($) {
+define(['jquery', 'bootstrap', 'jqfineuploader'], function($) {
     'use strict';
 
     $('.upload-btn').each(function() {

@@ -30,6 +30,7 @@ module.exports = {
         'dashboard/site': './js/dashboard/site',
         'dashboard/organization': './js/dashboard/organization',
         'site/map': './js/site/map',
+        'site/form': './js/site/form',
         'topic/display': './js/topic/display',
         'post/display': './js/post/display',
         'issue/list': './js/issue/list',
