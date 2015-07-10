@@ -40,7 +40,7 @@
             </div>
         </form>
         <button type="button" class="btn btn-danger btn-flat pointer pull-left"
-            v-if="$root.me.is_admin" v-on="click: delete_discussion">
+            v-if="$root.me.is_admin" v-on="click: confirm_delete">
             {{ _('Delete') }}
         </button>
         <button type="button" class="btn btn-success btn-flat pointer pull-left"
@@ -88,11 +88,11 @@ module.exports = {
         }.bind(this));
     },
     methods: {
-        delete_discussion: function() {
-            API.discussions.delete_discussion({id: this.discussionid},
-                function(response) {
-                    this.$.modal.close();
-                }.bind(this)
+        confirm_delete: function() {
+            this.$.modal.close();
+            var m = this.$root.$modal(
+                {data: {discussionid: this.discussion.id}},
+                Vue.extend(require('components/discussions/delete-modal.vue'))
             );
         },
         close_discussion: function() {
