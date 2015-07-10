@@ -3,14 +3,16 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import OrganizationBadge, PUBLIC_SERVICE
+from udata.models import (
+    OrganizationBadge, ReuseBadge, PUBLIC_SERVICE, DATACONNEXIONS_CANDIDATE
+)
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.factories import DatasetFactory, ReuseFactory, OrganizationFactory
 from udata.tests.factories import VisibleReuseFactory
 from udata.tests.frontend import FrontTestCase
 from udata.settings import Testing
 
-from .views import DATACONNEXIONS_CATEGORIES, DATACONNEXIONS_TAG
+from .views import DATACONNEXIONS_CATEGORIES
 
 from .metrics import PublicServicesMetric
 
@@ -196,7 +198,8 @@ class DataconnexionsTest(FrontTestCase):
 
     def test_render_dataconnexions_with_data(self):
         for tag, label, description in DATACONNEXIONS_CATEGORIES:
-            VisibleReuseFactory(tags=[DATACONNEXIONS_TAG, tag])
+            badge = ReuseBadge(kind=DATACONNEXIONS_CANDIDATE)
+            VisibleReuseFactory(tags=[tag], badges=[badge])
         response = self.client.get(url_for('gouvfr.dataconnexions'))
         self.assert200(response)
 
