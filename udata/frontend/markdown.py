@@ -42,7 +42,8 @@ class UDataMarkdown(object):
         ast = self.parser.parse(stream)
         html = self.renderer.render(ast)
         # Turn string links into HTML ones *after* markdown transformation.
-        html = bleach.linkify(html, tokenizer=KeepTokenSanitizer, skip_pre=True)
+        html = bleach.linkify(html, tokenizer=KeepTokenSanitizer,
+                              skip_pre=True, parse_email=True)
         # Return a `Markup` element considered as safe by Jinja.
         return Markup(html)
 
