@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from flask import url_for, redirect
 
 from udata import theme
-from udata.models import Reuse, Organization, Dataset
+from udata.models import Reuse, Organization, Dataset, DATACONNEXIONS_CANDIDATE
 from udata.core.dataset.models import C3
 from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
@@ -42,8 +42,6 @@ def redevances():
     return theme.render('redevances.html')
 
 
-DATACONNEXIONS_TAG = 'dataconnexions'
-
 DATACONNEXIONS_CATEGORIES = [
     ('datadmin', 'Datadmin', (
         'Projets portés par un acteur public (administration centrale ou déconcentrée, collectivité...) '
@@ -62,7 +60,7 @@ DATACONNEXIONS_CATEGORIES = [
 
 @blueprint.route('/dataconnexions')
 def dataconnexions():
-    reuses = Reuse.objects(tags=DATACONNEXIONS_TAG)
+    reuses = Reuse.objects(badges__kind=DATACONNEXIONS_CANDIDATE)
 
     categories = [{
         'tag': tag,
