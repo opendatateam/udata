@@ -17,7 +17,6 @@ from flask.ext.testing import TestCase as BaseTestCase
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
-from udata import theme
 from udata.app import create_app
 from udata.models import db
 from udata.search import es
@@ -38,17 +37,12 @@ class TestCase(BaseTestCase):
         app = create_app(self.settings)
         # Override some local config
         app.config['DEBUG_TOOLBAR'] = False
-        app.config['ASSETS_DEBUG'] = False
-        app.config['ASSETS_AUTO_BUILD'] = False
-        app.config['ASSETS_VERSIONS'] = False
-        app.config['ASSETS_URL_EXPIRE'] = False
         app.config['SERVER_NAME'] = 'localhost'
         app.config['DEFAULT_LANGUAGE'] = 'en'
         if not app.config.get('TEST_WITH_PLUGINS', False):
             app.config['PLUGINS'] = []
         if not app.config.get('TEST_WITH_THEME', False):
             app.config['THEME'] = 'default'
-        theme.assets._named_bundles = {}  # Clear webassets bundles
         return app
 
     def login(self, user=None, client=None):
