@@ -5,7 +5,9 @@ from udata.core.metrics import Metric
 from udata.i18n import lazy_gettext as _
 
 from .models import Discussion
-from .signals import on_new_discussion, on_discussion_closed
+from .signals import (
+    on_new_discussion, on_discussion_closed, on_discussion_deleted
+)
 
 
 class DiscussionsMetric(Metric):
@@ -18,6 +20,7 @@ class DiscussionsMetric(Metric):
 
 @on_new_discussion.connect
 @on_discussion_closed.connect
+@on_discussion_deleted.connect
 def update_discussions_metric(discussion, **kwargs):
     model = discussion.subject.__class__
     for name, cls in Metric.get_for(model).items():
