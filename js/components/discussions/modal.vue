@@ -39,6 +39,10 @@
                 </textarea>
             </div>
         </form>
+        <button type="button" class="btn btn-danger btn-flat pointer pull-left"
+            v-if="$root.me.is_admin" v-on="click: delete_discussion">
+            {{ _('Delete') }}
+        </button>
         <button type="button" class="btn btn-success btn-flat pointer pull-left"
             v-on="click: comment_discussion" v-if="!discussion.closed">
             {{ _('Comment the discussion') }}
@@ -47,7 +51,7 @@
             v-on="click: close_discussion" v-if="!discussion.closed">
             {{ _('Comment and close discussion') }}
         </button>
-        <button type="button" class="btn btn-danger btn-flat pointer"
+        <button type="button" class="btn btn-primary btn-flat pointer"
             data-dismiss="modal">
             {{ _('Close') }}
         </button>
@@ -84,6 +88,13 @@ module.exports = {
         }.bind(this));
     },
     methods: {
+        delete_discussion: function() {
+            API.discussions.delete_discussion({id: this.discussionid},
+                function(response) {
+                    this.$.modal.close();
+                }.bind(this)
+            );
+        },
         close_discussion: function() {
             this.send_comment(this.comment, true);
         },
