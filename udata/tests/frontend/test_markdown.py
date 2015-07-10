@@ -53,6 +53,13 @@ class MarkdownTestCase(TestCase, WebTestMixin):
             self.assertEqual(el.getAttribute('href'), 'http://example.net/')
             self.assertEqual(el.firstChild.data, 'http://example.net/')
 
+    def test_markdown_linkify_wihtin_pre(self):
+        '''Markdown filter should not transform urls into <pre> anchors'''
+        text = '<pre>http://example.net/</pre>'
+        with self.app.test_request_context('/'):
+            result = render_template_string('{{ text|markdown }}', text=text)
+            self.assertEqual(result.strip(), '<pre>http://example.net/</pre>')
+
     def test_bleach_sanitize(self):
         '''Markdown filter should sanitize evil code'''
         text = 'an <script>evil()</script>'
