@@ -126,6 +126,10 @@ def context(name):
 def init_app(app):
     themes.init_themes(app, app_identifier='udata', loaders=[udata_themes_loader, plugin_themes_loader])
 
+    # Load all theme assets
+    theme = app.theme_manager.themes[app.config['THEME']]
+    app.config['STATIC_DIRS'].append(('', theme.static_path))
+
     # Hook into flask security to user themed auth pages
     app.config.setdefault('SECURITY_RENDER', 'udata.theme:render')
 
