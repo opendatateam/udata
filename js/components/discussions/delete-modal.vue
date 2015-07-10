@@ -34,7 +34,7 @@ var API = require('api');
 
 module.exports = {
     components: {
-        'w-modal': require('components/modal.vue')
+        'modal': require('components/modal.vue')
     },
     data: function() {
         return {
