@@ -14,7 +14,8 @@ from frontend import FrontTestCase
 
 from .api import APITestCase
 from .factories import (
-    faker, UserFactory, OrganizationFactory, DatasetFactory, DatasetDiscussionFactory
+    faker, AdminFactory, UserFactory, OrganizationFactory, DatasetFactory,
+    DatasetDiscussionFactory
 )
 
 
@@ -259,6 +260,50 @@ class DiscussionsTest(APITestCase):
 
         dataset.reload()
         # Metrics unchanged after attempt to close the discussion.
+        self.assertEqual(dataset.metrics['discussions'], 1)
+
+    def test_delete_discussion(self):
+        owner = self.login(AdminFactory())
+        user = UserFactory()
+        dataset = Dataset.objects.create(title='Test dataset', owner=owner)
+        message = Message(content='bla bla', posted_by=user)
+        discussion = DatasetDiscussion.objects.create(
+            subject=dataset.id,
+            user=user,
+            title='test discussion',
+            discussion=[message]
+        )
+        on_new_discussion.send(discussion)  # Updating metrics.
+        self.assertEqual(DatasetDiscussion.objects(subject=dataset.id).count(),
+                         1)
+
+        response = self.delete(url_for('api.discussion', id=discussion.id))
+        self.assertStatus(response, 204)
+
+        dataset.reload()
+        self.assertEqual(dataset.metrics['discussions'], 0)
+        self.assertEqual(DatasetDiscussion.objects(subject=dataset.id).count(),
+                         0)
+
+    def test_delete_discussion_permissions(self):
+        owner = self.login()
+        dataset = Dataset.objects.create(title='Test dataset', owner=owner)
+        user = UserFactory()
+        message = Message(content='bla bla', posted_by=user)
+        discussion = DatasetDiscussion.objects.create(
+            subject=dataset.id,
+            user=user,
+            title='test discussion',
+            discussion=[message]
+        )
+        on_new_discussion.send(discussion)  # Updating metrics.
+
+        self.login()
+        response = self.delete(url_for('api.discussion', id=discussion.id))
+        self.assert403(response)
+
+        dataset.reload()
+        # Metrics unchanged after attempt to delete the discussion.
         self.assertEqual(dataset.metrics['discussions'], 1)
 
 

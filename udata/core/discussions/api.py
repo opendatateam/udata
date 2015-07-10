@@ -5,6 +5,7 @@ from datetime import datetime
 
 from flask.ext.security import current_user
 
+from udata.auth import admin_permission
 from udata.api import api, API, fields
 from udata.models import Dataset, DatasetDiscussion, Reuse, ReuseDiscussion
 from udata.core.user.api_fields import user_ref_fields
@@ -12,7 +13,10 @@ from udata.core.user.api_fields import user_ref_fields
 from .forms import DiscussionCreateForm, DiscussionCommentForm
 from .models import Message, Discussion
 from .permissions import CloseDiscussionPermission
-from .signals import on_new_discussion, on_new_discussion_comment, on_discussion_closed
+from .signals import (
+    on_new_discussion, on_new_discussion_comment, on_discussion_closed,
+    on_discussion_deleted
+)
 
 ns = api.namespace('discussions', 'Discussion related operations')
 
@@ -67,7 +71,7 @@ class DiscussionAPI(API):
     @api.response(403, 'Not allowed to close this discussion')
     @api.marshal_with(discussion_fields)
     def post(self, id):
-        '''Add comment and optionnaly close an discussion given its ID'''
+        '''Add comment and optionnaly close a discussion given its ID'''
         discussion = Discussion.objects.get_or_404(id=id)
         form = api.validate(DiscussionCommentForm)
         message = Message(
@@ -86,6 +90,16 @@ class DiscussionAPI(API):
         else:
             on_new_discussion_comment.send(discussion, message=message)
         return discussion
+
+    @api.secure(admin_permission)
+    @api.doc('delete_discussion')
+    @api.response(403, 'Not allowed to delete this discussion')
+    def delete(self, id):
+        '''Delete a discussion given its ID'''
+        discussion = Discussion.objects.get_or_404(id=id)
+        discussion.delete()
+        on_discussion_deleted.send(discussion)
+        return '', 204
 
 
 @ns.route('/', endpoint='discussions')
