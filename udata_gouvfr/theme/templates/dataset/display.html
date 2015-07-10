@@ -15,10 +15,7 @@
 <script type="text/javascript" src="{{ static('dataset/display.js') }}"></script>
 {% endblock %}
 
-{% block extra_css %}
-{#% assets 'gouvfr-dataset-css' %}
-<link href="{{ ASSET_URL }}" rel="stylesheet">
-{% endassets %#}
+{% block extra_head %}
 <link rel="canonical" href="{{ url_for('datasets.show', dataset=dataset) }}" />
 {% endblock %}
 
