@@ -13,7 +13,6 @@ from sys import exit
 from flask import current_app
 from flask.ext.script import prompt_bool
 
-from udata import theme
 from udata.commands import manager
 
 log = logging.getLogger(__name__)
@@ -21,7 +20,7 @@ log = logging.getLogger(__name__)
 
 @manager.option('path', nargs='?', default='static', help='target path')
 @manager.option('-ni', '--no-input', dest="input",
-    action='store_false', help="Disable input prompts")
+                action='store_false', help="Disable input prompts")
 def collect(path, input):
     '''Collect static files'''
     if exists(path):
@@ -32,8 +31,8 @@ def collect(path, input):
         print('Deleting static directory {0}'.format(path))
         shutil.rmtree(path)
 
-    # print('Copying assets into "{0}"'.format(path))
-    # shutil.copytree(theme.assets.directory, path)
+    print('Copying assets into "{0}"'.format(path))
+    shutil.copytree(current_app.static_folder, path)
 
     for prefix, source in manager.app.config['STATIC_DIRS']:
         print('Copying %s to %s' % (source, prefix))
