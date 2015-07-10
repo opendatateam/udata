@@ -23,6 +23,7 @@ def public_dsn(dsn):
 def init_app(app):
     if 'SENTRY_DSN' in app.config:
         try:
+            from raven.contrib.celery import register_signal, register_logger_signal
             from raven.contrib.flask import Sentry
         except:
             log.error('raven[flask] is required to use sentry')
@@ -49,3 +50,9 @@ def init_app(app):
         app.config['SENTRY_PUBLIC_DSN'] = public_dsn(app.config['SENTRY_DSN'])
 
         sentry.init_app(app)
+
+        # register a custom filter to filter out duplicate logs
+        register_logger_signal(sentry.client, loglevel=sentry.level)
+
+        # hook into the Celery error handler
+        register_signal(sentry.client)
