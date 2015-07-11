@@ -1,7 +1,7 @@
 <style lang="less"></style>
 
 <template>
-<w-modal title="{{ _('Confirm deletion') }}"
+<modal title="{{ _('Confirm deletion') }}"
     modalclass="modal-danger dataset-delete-modal"
     v-ref="modal">
 
@@ -24,7 +24,7 @@
             {{ _('Cancel') }}
         </button>
     </footer>
-</w-modal>
+</modal>
 </template>
 
 <script>

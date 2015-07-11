@@ -11,7 +11,7 @@
 </style>
 
 <template>
-<w-modal title="{{ _('Discussion') }}"
+<modal title="{{ _('Discussion') }}"
     modalclass="discussion-modal"
     v-ref="modal">
     <div class="modal-body">
@@ -56,7 +56,7 @@
             {{ _('Close') }}
         </button>
     </footer>
-</w-modal>
+</modal>
 </template>
 
 <script>
@@ -70,7 +70,7 @@ module.exports = {
     mixins: [require('components/form/base-form')],
     replace: false,
     components: {
-        'w-modal': require('components/modal.vue'),
+        'modal': require('components/modal.vue'),
     },
     data: function() {
         return {
