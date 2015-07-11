@@ -19,7 +19,7 @@
             v-on="click: confirm">
             {{ _('Confirm') }}
         </button>
-        <button v-show="confirm" type="button" class="btn btn-danger btn-flat pointer"
+        <button type="button" class="btn btn-danger btn-flat pointer"
             data-dismiss="modal">
             {{ _('Cancel') }}
         </button>
@@ -30,21 +30,24 @@
 <script>
 'use strict';
 
+var API = require('api');
+
 module.exports = {
     components: {
         'modal': require('components/modal.vue')
     },
     data: function() {
         return {
-            edit: false,
-            confirm: false,
             dataset: {},
-            // resource: {}
         };
     },
     methods: {
         confirm: function() {
-            this.$.modal.close();
+            API.datasets.delete_dataset({dataset: this.dataset.id},
+                function(response) {
+                    this.$.modal.close();
+                }.bind(this)
+            );
         }
     }
 };

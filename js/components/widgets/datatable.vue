@@ -14,7 +14,7 @@
     footer="{{ show_footer }}"
     loading="{{ p.loading }}">
     <aside>
-        <div class="btn-group" v-show="downloads.length">
+        <div class="btn-group" v-show="downloads && downloads.length">
             <button type="button" class="btn btn-box-tool dropdown-toggle"
                 data-toggle="dropdown" aria-expanded="false">
                 <span class="fa fa-download"></span>

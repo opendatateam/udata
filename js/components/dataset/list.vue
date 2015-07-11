@@ -80,7 +80,8 @@ module.exports = {
                 align: 'center',
                 type: 'visibility',
                 width: 95
-            }]
+            }],
+            downloads: []
         };
     },
     events: {

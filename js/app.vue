@@ -230,7 +230,8 @@ module.exports = {
          * @return {[type]}             [description]
          */
         $modal: function(options, constructor) {
-            return this.$addChild(options, constructor).$mount().$prependTo(this.$el);
+            options.el = this.$$.modal;
+            return this.$addChild(options, constructor);
         },
 
         /**

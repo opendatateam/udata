@@ -95,7 +95,7 @@
             </button>
             <button type="button"
                 class="btn btn-primary btn-sm btn-flat pointer"
-                v-show="!reordering && dataset.resources | length > 1"
+                v-show="!reordering && dataset.resources && dataset.resources.length > 1"
                 v-on="click: reorder">
                 <span class="fa fa-fw fa-sort"></span>
                 <span v-i18n="Reorder"></span>
@@ -132,7 +132,6 @@ module.exports = {
     components: {
         'box': require('components/containers/box.vue'),
         'pagination-widget': require('components/pagination.vue'),
-        'bs-modal': require('components/modal.vue')
     },
     data: function() {
         return {
