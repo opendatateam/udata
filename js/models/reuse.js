@@ -1,40 +1,42 @@
-define(['api', 'models/base', 'logger'], function(API, Model, log) {
-    'use strict';
+import Model from 'models/model';
+import log from 'logger';
 
-    var Reuse = Model.extend({
-        name: 'Reuse',
-        methods: {
-            fetch: function(ident) {
-                ident = ident || this.id || this.slug;
-                if (ident) {
-                    API.reuses.get_reuse({reuse: ident}, this.on_fetched.bind(this));
-                } else {
-                    log.error('Unable to fetch Reuse: no identifier specified');
-                }
-                return this;
-            },
-            save: function() {
-                if (this.id) {
-                    API.reuses.update_reuse({
-                        reuse: this.id,
-                        payload: this.$data
-                    },
-                    this.on_fetched.bind(this));
-                } else {
-                    API.reuses.create_reuse({
-                        payload: this.$data
-                    },
-                    this.on_fetched.bind(this));
-                }
-            },
-            update: function(data) {
-                API.reuses.update_reuse({
-                    reuse: this.id,
-                    payload: data
-                }, this.on_fetched.bind(this));
-            }
+
+export default class Reuse extends Model {
+    /**
+     * Fetch a reuse given its identifier, either an ID or a slug.
+     * @param  {String} ident The reuse identifier to fetch.
+     * @return {Dataset}      The current object itself.
+     */
+    fetch(ident) {
+        ident = ident || this.id || this.slug;
+        if (ident) {
+            this.$api('reuses.get_reuse', {reuse: ident}, this.on_fetched);
+        } else {
+            log.error('Unable to fetch Reuse: no identifier specified');
         }
-    });
+        return this;
+    }
 
-    return Reuse;
-});
+    save() {
+        if (this.id) {
+            this.$api('reuses.update_reuse', {
+                reuse: this.id,
+                payload: this
+            },
+            this.on_fetched);
+        } else {
+            this.$api('reuses.create_reuse', {
+                payload: this.$data
+            },
+            this.on_fetched);
+        }
+    }
+
+    update(data) {
+        this.$api('reuses.update_reuse', {
+            reuse: this.id,
+            payload: data
+        }, this.on_fetched);
+    }
+};

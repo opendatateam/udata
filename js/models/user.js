@@ -7,7 +7,7 @@ import Model from 'models/model';
 export default class User extends Model {
 
     get fullname() {
-        return this.$data.fullname ? this.$data.fullname : this.first_name + ' ' + this.last_name;
+        return this.first_name + ' ' + this.last_name;
     }
 
     get is_admin() {

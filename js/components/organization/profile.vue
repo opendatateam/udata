@@ -35,7 +35,7 @@
                 endpoint="{{endpoint}}">
             </image-button>
             <div v-markdown="{{org.description}}"></div>
-            <div v-if="org.badges" class="label-list">
+            <div v-if="org.badges | length" class="label-list">
                 <strong>
                     <span class="fa fa-fw fa-bookmark"></span>
                     {{ _('Badges') }}:

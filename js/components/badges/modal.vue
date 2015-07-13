@@ -65,7 +65,7 @@ module.exports = {
     },
     computed: {
         basename: function() {
-            return this.subject.classname.toLowerCase();
+            return this.subject.__class__.toLowerCase();
         },
         namespace: function() {
             return this.basename + 's';

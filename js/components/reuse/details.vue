@@ -41,7 +41,7 @@
                 </strong>
                 <span v-repeat="reuse.tags" class="label label-default">{{$value}}</span>
             </div>
-            <div v-if="reuse.badges" class="label-list">
+            <div v-if="reuse.badges | length" class="label-list">
                 <strong>
                     <span class="fa fa-fw fa-bookmark"></span>
                     {{ _('Badges') }}:
