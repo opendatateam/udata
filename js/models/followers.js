@@ -1,10 +1,11 @@
-define(['api', 'models/base_page'], function(API, ModelPage) {
-    'use strict';
+import {ModelPage} from 'models/base';
+import log from 'logger';
 
-    var Followers = ModelPage.extend({
-        name: 'FollowPage',
-        fetch: 'list_followers'
-    });
 
-    return Followers;
-});
+export default class FollowPage extends ModelPage {
+    constructor(options) {
+        super(options);
+        // this.$options.ns = 'datasets';
+        this.$options.fetch = 'list_followers';
+    }
+};

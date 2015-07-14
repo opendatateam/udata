@@ -1,11 +1,11 @@
-define(['api', 'models/base_page'], function(API, ModelPage) {
-    'use strict';
+import {ModelPage} from 'models/base';
+import log from 'logger';
 
-    var HarvestJobs = ModelPage.extend({
-        name: 'HarvestJobPage',
-        ns: 'harvest',
-        fetch: 'list_harvest_jobs'
-    });
 
-    return HarvestJobs;
-});
+export default class HarvestJobPage extends ModelPage {
+    constructor(options) {
+        super(options);
+        this.$options.ns = 'harvest';
+        this.$options.fetch = 'list_harvest_jobs';
+    }
+};

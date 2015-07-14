@@ -1,11 +1,14 @@
-define(['api', 'models/base_list'], function(API, List) {
-    'use strict';
+import {List} from 'models/base';
+import log from 'logger';
 
-    var Levels = List.extend({
-        name: 'GeoLevels',
-        ns: 'spatial',
-        fetch: 'spatial_levels'
-    });
 
-    return new Levels().fetch();
-});
+export class GeoLevels extends List {
+    constructor(options) {
+        super(options);
+        this.$options.ns = 'spatial';
+        this.$options.fetch = 'spatial_levels';
+    }
+};
+
+export var levels = new GeoLevels().fetch();
+export default levels;

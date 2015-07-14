@@ -40,19 +40,17 @@
 </template>
 
 <script>
-'use strict';
+import moment from 'moment';
+import URLs from 'urls';
+import {List} from 'models/base';
+import Organization from 'models/organization';
+import Datasets from 'models/datasets';
+import Reuses from 'models/reuses';
+import Followers from 'models/followers';
+import Metrics from 'models/metrics';
+import Vue from 'vue';
 
-var moment = require('moment'),
-    URLs = require('urls'),
-    List = require('models/base_page_list'),
-    Organization = require('models/organization'),
-    Datasets = require('models/datasets'),
-    Reuses = require('models/reuses'),
-    Followers = require('models/followers').extend({ns: 'organizations'}),
-    Metrics = require('models/metrics'),
-    Vue = require('vue');
-
-module.exports = {
+export default {
     name: 'OrganizationView',
     data: function() {
         var actions = [{
@@ -93,7 +91,7 @@ module.exports = {
                 ns: 'organizations',
                 fetch: 'list_organization_discussions'
             }),
-            followers: new Followers({query: {page_size: 10}}),
+            followers: new Followers({ns: 'organizations', query: {page_size: 10}}),
             meta: {
                 title: null,
                 page: null,

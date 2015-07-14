@@ -1,8 +1,5 @@
-'use strict';
-
 import log from 'logger';
-import Model from 'models/model';
-
+import {Model} from 'models/base';
 
 export default class User extends Model {
 
@@ -27,4 +24,4 @@ export default class User extends Model {
     has_role(name) {
         return this.roles && this.roles.indexOf(name) >= 0;
     }
-}
+};

@@ -15,14 +15,12 @@
 </template>
 
 <script>
-'use strict';
+import moment from 'moment';
+import API from 'api';
+import List from 'models/base';
+import Metrics from 'models/metrics';
 
-var moment = require('moment'),
-    API = require('api'),
-    List = require('models/base_page_list'),
-    Metrics = require('models/metrics');
-
-module.exports = {
+export default  {
     name: 'MeView',
     data: function() {
         return {

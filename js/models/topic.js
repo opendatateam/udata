@@ -1,34 +1,30 @@
-define(['api', 'models/base', 'jquery', 'logger'], function(API, Model, $, log) {
-    'use strict';
+import {Model} from 'models/base';
+import log from 'logger';
 
-    var Topic = Model.extend({
-        name: 'Topic',
-        methods: {
-            fetch: function(ident) {
-                ident = ident || this.id || this.slug;
-                if (ident) {
-                    API.topics.get_topic({topic: ident}, this.on_fetched.bind(this));
-                } else {
-                    log.error('Unable to fetch Topic: no identifier specified');
-                }
-                return this;
-            },
-            save: function() {
-                if (this.id) {
-                    API.topics.update_topic({
-                        topic: this.id,
-                        payload: this.$data
-                    },
-                    this.on_fetched.bind(this));
-                } else {
-                    API.topics.create_topic({
-                        payload: this.$data
-                    },
-                    this.on_fetched.bind(this));
-                }
-            }
+
+export default class Topic extends Model {
+    fetch(ident) {
+        ident = ident || this.id || this.slug;
+        if (ident) {
+            this.$api('topics.get_topic', {topic: ident}, this.on_fetched);
+        } else {
+            log.error('Unable to fetch Topic: no identifier specified');
         }
-    });
+        return this;
+    }
 
-    return Topic;
-});
+    save() {
+        if (this.id) {
+            this.$api('topics.update_topic', {
+                topic: this.id,
+                payload: this
+            },
+            this.on_fetched);
+        } else {
+            this.$api('topics.create_topic', {
+                payload: this
+            },
+            this.on_fetched);
+        }
+    }
+};

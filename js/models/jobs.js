@@ -1,17 +1,14 @@
-define(['api', 'models/base_list'], function(API, ModelList) {
-    'use strict';
+import {List} from 'models/base';
+import log from 'logger';
 
-    var Jobs = ModelList.extend({
-        name: 'Jobs',
-        created: function() {
-            this.fetch();
-        },
-        methods: {
-            fetch: function() {
-                API.workers.list_jobs({}, this.on_fetched.bind(this));
-            }
-        }
-    });
 
-    return new Jobs();
-});
+export class Jobs extends List {
+    constructor(options) {
+        super(options);
+        this.$options.ns = 'workers';
+        this.$options.fetch = 'lis_jobs';
+    }
+};
+
+export var jobs = new Jobs().fetch();
+export default jobs;

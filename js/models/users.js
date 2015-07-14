@@ -1,11 +1,11 @@
-define(['api', 'models/base_page'], function(API, ModelPage) {
-    'use strict';
+import {ModelPage} from 'models/base';
+import log from 'logger';
 
-    var Users = ModelPage.extend({
-        name: 'UserPage',
-        ns: 'users',
-        fetch: 'list_users'
-    });
 
-    return Users;
-});
+export default class UserPage extends ModelPage {
+    constructor(options) {
+        super(options);
+        this.$options.ns = 'users';
+        this.$options.fetch = 'list_users';
+    }
+};

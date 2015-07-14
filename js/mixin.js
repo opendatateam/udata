@@ -1,6 +1,3 @@
-'use strict';
-
-
 export default function mixin(Parent, ...mixins) {
   class Mixed extends Parent {}
 

@@ -1,9 +1,6 @@
-'use strict';
-
 import log from 'logger';
 import User from 'models/user';
 import Raven from 'raven';
-
 
 class Me extends User {
     fetch() {

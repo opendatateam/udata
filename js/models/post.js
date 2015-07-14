@@ -1,34 +1,26 @@
-define(['api', 'models/base', 'logger'], function(API, Model, log) {
-    'use strict';
+import {Model} from 'models/base';
+import log from 'logger';
 
-    var Post = Model.extend({
-        name: 'Post',
-        methods: {
-            fetch: function(ident) {
-                ident = ident || this.id || this.slug;
-                if (ident) {
-                    API.posts.get_post({post: ident}, this.on_fetched.bind(this));
-                } else {
-                    log.error('Unable to fetch Post: no identifier specified');
-                }
-                return this;
-            },
-            save: function() {
-                if (this.id) {
-                    API.posts.update_post({
-                        post: this.id,
-                        payload: this.$data
-                    },
-                    this.on_fetched.bind(this));
-                } else {
-                    API.posts.create_post({
-                        payload: this.$data
-                    },
-                    this.on_fetched.bind(this));
-                }
-            }
+
+export default class Post extends Model {
+    fetch(ident) {
+        ident = ident || this.id || this.slug;
+        if (ident) {
+            this.$api('posts.get_post', {post: ident}, this.on_fetched);
+        } else {
+            log.error('Unable to fetch Post: no identifier specified');
         }
-    });
+        return this;
+    }
 
-    return Post;
-});
+    save() {
+        let data = {payload: this},
+            endpoint = 'posts.create_post';
+
+        if (this.id) {
+            endpoint = 'posts.update_post';
+            data.post = this.id;
+        }
+        this.$api(endpoint, data, this.on_fetched);
+    }
+};

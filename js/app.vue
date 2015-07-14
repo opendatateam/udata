@@ -39,6 +39,7 @@
 import $ from 'jquery';
 import Vue from 'vue';
 import me from 'models/me';
+import site from 'models/site';
 
 import 'jquery-slimscroll';
 
@@ -48,7 +49,7 @@ export default {
         return {
             view: null,
             me: me,
-            site: require('models/site'),
+            site: site,
             config: require('config'),
             meta: {
                 title: null,

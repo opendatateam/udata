@@ -1,26 +1,36 @@
-define(['api', 'models/validator', 'vue'], function(API, validator, Vue) {
-    'use strict';
+import API from 'api';
+import validator from 'models/validator';
+import Vue from 'vue';
+import {pubsub, PubSub} from 'pubsub';
 
-    /**
-     * Fetch the class name for given Vue object instance
-     * @param  {Object} cls a Vue instance
-     * @return {string}     The class name, declared or inherited
-     */
-    function classname(cls) {
-        var constructor = cls.constructor;
-        while (constructor.name == 'VueComponent') {
-            constructor = constructor.super;
-        }
-        return constructor.name
+
+function empty_schema() {
+    return {properties: {}, required: []};
+}
+
+export class Model {
+
+    constructor(options) {
+        this.$options = options || {};
+        this.$pubsub = new PubSub();
+        this.empty();
     }
 
     /**
-    * Get the Swagger schema for a given Class.
-    * @param  {Vue} cls A model Class with a declared name.
-    * @return {Object} A JSON schema
-    */
-    function schema_for(cls) {
-        return API.definitions[classname(cls)] || {};
+     * The class name
+     * @return {[type]} [description]
+     */
+    get __class__() {
+        return this.constructor.name
+    }
+
+    /**
+     * Get the JSON schema for a given Class from Swagger definitions.
+     * @param  {Vue} cls A model Class with a declared name.
+     * @return {Object} A JSON schema
+     */
+    get __schema__() {
+        return API.definitions[this.__class__] || {};
     }
 
     /**
@@ -29,90 +39,294 @@ define(['api', 'models/validator', 'vue'], function(API, validator, Vue) {
      * @param  {Object} schema the schema to based empty values
      * @return {Object}        the updated data object
      */
-    function empty(obj, schema) {
+    empty() {
+        var schema = this.__schema__
         for (var key in schema.properties) {
             if (schema.properties.hasOwnProperty(key)) {
-                obj[key] = schema.required.indexOf(key) >= 0 ? null : undefined;
+                this[key] = schema.required.indexOf(key) >= 0 ? null : undefined;
             }
         }
-        return obj;
+        return this;
     }
 
+    /**
+     * Property setter which handle vue.js $set method if object is binded.
+     * @param {String} name  The name of the object proprty to set.
+     * @param {Object} value The property value to set.
+     */
+    _set(name, value) {
+        if (this.hasOwnProperty('$set')) {
+            this.$set(name, value);
+        } else {
+            this[name] = value;
+        }
+    }
 
     /**
-     * A Swagger model base class
+     * Call an API endpoint.
+     * Callbacks are scoped to the model instance.
+     *
+     * @param  {String}   endpoint The API endpoint to call
+     * @param  {Object}   data     The data object to submit
+     * @param  {Function} callback The callback function to call on success.
+     * @return {[type]}            [description]
      */
-    var Model = Vue.extend({
-        /**
-         * Declare bindable attributes from Swagger Specifications
-         */
-        data: function() {
-            return empty({loading: false}, schema_for(this));
-        },
-        computed: {
-            classname: function() {
-                return classname(this);
-            },
-            schema: function() {
-                return schema_for(this);
-            }
-        },
-        methods: {
-            on_fetched: function(data) {
-                var schema = this.schema,
-                    prop, value;
+    $api(endpoint, data, callback) {
+        var parts = endpoint.split('.'),
+            namespace = parts[0],
+            method = parts[1],
+            operation = API[namespace][method];
 
-                for (prop in data.obj) {
-                    value = data.obj[prop];
-                    this.$set(prop, value)
-                }
-                // this.modelize(data.obj);
-                // $.extend(true, this.$data, data.obj);
-                this.$emit('updated', this);
-                this.$dispatch(this.constructor.name.toLowerCase() + ':updated', this);
-                this.loading = false;
-            },
-            validate: function() {
-                return validator.validateMultiple(this.$data, this.schema);
-            },
-            clear: function() {
-                empty(this.$data, this.schema);
-                return this;
-            },
-            /**
-             * Set values from a Raw object given the schema.
-             * @param  {Object} raw    The raw object
-             */
-            modelize: function(raw) {
-                var schema = this.schema,
-                    prop, value, def;
+        return operation(data, callback.bind(this));
+    }
 
-                for (prop in raw) {
-                    value = raw[prop];
-                    def = schema.properties[prop];
-                    // Nested object
-                    if (def.hasOwnProperty('$ref')) {
-                        var classname = def.$ref.replace('#/definitions/', '');
+    /**
+     * Emit an event on this model instance
+     * @param  {String} name    The event unique name
+     * @param  {Object} options An optionnal options object
+     */
+    $emit(name, ...args) {
+        var prefix = this.__class__.toLowerCase(),
+            topic = prefix + ':' + name;
+        pubsub.publish(topic, this, ...args);
+        this.$pubsub.publish(name, this, args)
+    }
 
-                            // Model =
-                        console.log('$ref', def.$ref);
-                        console.log(classname);
-                    }
-                    // Array of models
-                    else if (def.type == 'array' && def.items.hasOwnProperty('$ref')) {
-                        console.log('items.$ref', def.items.$ref);
-                        var classname = def.items.$ref.replace('#/definitions/', '');
-                        console.log(classname);
-                    }
-                    // Default: affectation is enough
-                    else {
-                        this.$set(prop, value);
-                    }
-                }
-            }
+    $on(name, hanler) {
+        return this.$pubsub.subscribe(name, hanler);
+    }
+
+    $off(name, hanler) {
+        return this.$pubsub.unsubscribe(name, hanler);
+    }
+
+    on_fetched(data) {
+        for (let prop in data.obj) {
+            let value = data.obj[prop];
+            this._set(prop, value);
         }
-    });
+        this.$emit('updated');
+        this.loading = false;
+    }
 
-    return Model;
+    validate() {
+        return validator.validateMultiple(this, this.__schema__);
+    }
 
-});
+    clear() {
+        empty(this.$data, this.schema);
+        return this;
+    }
+};
+
+
+export class List extends Model {
+    constructor(options) {
+        super(options);
+        this.items = [];
+        this.query = this.$options.query || {};
+        this.loading = false;
+    }
+
+    /**
+     * Fetch a paginated list.
+     * @param  {[type]} options [description]
+     * @return {[type]}         [description]
+     */
+    fetch(options) {
+        options = Object.assign(this.query, options);
+        this.loading = true;
+        this.$api(this.$options.ns + '.' + this.$options.fetch, options, this.on_fetched);
+        return this;
+    }
+
+    on_fetched(data) {
+        while (this.items.length > 0) {
+            this.items.pop();
+        }
+        for (var i=0; i < data.obj.length; i++) {
+            this.items.push(data.obj[i]);
+        }
+        this.$emit('updated', this);
+        this.loading = false;
+    }
+
+    by_id(id) {
+        var filtered = this.items.filter(function(item) {
+            return item.hasOwnProperty('id') && item.id === id;
+        });
+        return filtered.length === 1 ? filtered[0] : null;
+    }
+
+    clear() {
+        this.items = [];
+        this.$emit('updated');
+        return this;
+    }
+};
+
+
+export class ModelPage extends Model {
+    constructor(options) {
+        super(options);
+        this.query = this.$options.query || {};
+        this.loading = true;
+        this.serverside = true;
+    }
+
+    /**
+     * Total amount of pages
+     * @return {int}
+     */
+    get pages() {
+        return Math.ceil(this.total / this.page_size);
+    }
+
+    /**
+     * Field name used for sorting
+     * @return {string}
+     */
+    get sorted() {
+        if (!this.query.sort) {
+            return;
+        }
+        return this.query.sort[0] == '-'
+            ? this.query.sort.substring(1, this.query.sort.length)
+            : this.query.sort;
+    }
+
+    /**
+     * Wether the sort is reversed (descending) or not (ascending)
+     * @return {boolean}
+     */
+    get reversed() {
+        if (!this.query.sort) {
+            return;
+        }
+        return this.query.sort[0] == '-';
+    }
+
+    get has_search() {
+        var op = API[this.$options.ns].operations[this.$options.fetch];
+
+        return op.parameters.filter(function(p) {
+            return p.name == 'q';
+        }).length > 0;
+    }
+
+    /**
+     * Fetch page from server.
+     * @param  {[type]} options [description]
+     * @return {[type]}         [description]
+     */
+    fetch(options) {
+        this.query = Object.assign(this.query, options || {});
+        this.loading = true;
+        this.$api(this.$options.ns + '.' + this.$options.fetch, this.query, this.on_fetched);
+        return this;
+    }
+
+    next() {
+        if (this.page && this.page < this.pages) {
+            this.query.page = this.page + 1;
+            this.fetch();
+        }
+    }
+
+    previous() {
+        if (this.page && this.page > 1) {
+            this.query.page = this.page - 1;
+            this.fetch();
+        }
+    }
+
+    go_to_page(page) {
+        this.fetch({page: page});
+    }
+
+    sort(field, reversed) {
+        if (this.sorted !== field) {
+            this.query.sort = '-' + field;
+        } else {
+            reversed = reversed || (this.sorted == field ? !this.reversed : false);
+            this.query.sort = reversed ? '-' + field : field;
+        }
+        this.fetch({page: 1}); // Clear the pagination
+    }
+
+    search(query) {
+        this.query.q = query;
+        this.fetch({page: 1}); // Clear the pagination
+    }
+};
+
+
+export class PageList extends List {
+
+    constructor(options) {
+        super(options);
+        this.page = 1;
+        this.page_size = 10;
+        this.sorted = null;
+        this.reversed = false;
+        this.data = [];
+    }
+
+    /**
+     * Total amount of pages
+     * @return {int}
+     */
+    get pages() {
+        return Math.ceil(this.items.length / this.page_size);
+    }
+
+    next() {
+        if (this.page && this.page < this.pages) {
+            this.page = this.page + 1;
+        }
+        this.data = this.build_page();
+    }
+
+    previous() {
+        if (this.page && this.page > 1) {
+            this.page = this.page - 1;
+        }
+        this.data = this.build_page();
+    }
+
+    go_to_page(page) {
+        this.page = page;
+        this.data = this.build_page();
+    }
+
+    sort(field, reversed) {
+        this.sorted = field;
+        this.reversed = reversed !== undefined ? reversed : !this.reversed;
+        this.page = 1;
+        this.data = this.build_page();
+    }
+
+    search(query) {
+        console.log('search', query);
+    }
+
+    build_page() {
+        return this.items
+            .sort(function(a, b) {
+                var valA = getattr(a, this.sorted),
+                    valB = getattr(b, this.sorted);
+
+                if (valA > valB) {
+                    return this.reversed ? -1 : 1;
+                } else if (valA < valB) {
+                    return this.reversed ? 1 : -1;
+                } else {
+                    return 0;
+                }
+            }.bind(this))
+            .slice(
+                Math.max(this.page - 1, 0) * this.page_size,
+                this.page * this.page_size
+            );
+    }
+};

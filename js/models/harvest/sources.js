@@ -1,17 +1,14 @@
-define(['api', 'models/base_list'], function(API, ModelList) {
-    'use strict';
+import {List} from 'models/base';
+import log from 'logger';
 
-    var HarvestSources = ModelList.extend({
-        name: 'HarvestSources',
-        created: function() {
-            this.fetch();
-        },
-        methods: {
-            fetch: function() {
-                API.harvest.list_harvest_sources({}, this.on_fetched.bind(this));
-            }
-        }
-    });
 
-    return new HarvestSources();
-});
+export class HarvestSources extends List {
+    constructor(options) {
+        super(options);
+        this.$options.ns = 'harvest';
+        this.$options.fetch = 'list_harvest_sources';
+    }
+};
+
+export var sources = new HarvestSources().fetch();
+export default sources;
