@@ -1,5 +1,3 @@
-'use strict';
-
 import API from 'api';
 import BaseError from 'models/error';
 

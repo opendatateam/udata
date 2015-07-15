@@ -1,5 +1,3 @@
-'use strict';
-
 import API from 'api';
 import moment from 'moment'
 import tv4 from 'tv4';

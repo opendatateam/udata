@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Base extendable class for errors
  */

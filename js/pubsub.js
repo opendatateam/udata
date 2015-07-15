@@ -3,10 +3,6 @@
  *
  * Source: http://davidwalsh.name/pubsub-javascript
  */
-
-// var topics = {};
-// var hOP = topics.hasOwnProperty;
-
 export class PubSub {
     constructor() {
         this.topics = {};
