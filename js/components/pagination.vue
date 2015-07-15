@@ -57,7 +57,7 @@ module.exports = {
             return this.p.page + nb > this.p.pages ? this.p.pages : this.p.page + nb;
         },
         range: function() {
-            if (this.start >= this.end) return [];
+            if (isNaN(this.start) || isNaN(this.end) || this.start >= this.end) return [];
             return Array
                 .apply(0, Array(this.end + 1 - this.start))
                 .map(function (element, index) {

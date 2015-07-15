@@ -23,7 +23,7 @@
         name: field.id,
         placeholder: placeholder,
         required: required,
-        value: value.value,
+        value: value ? value.value : '',
         readonly: field.readonly || false"></input>
 </div>
 </template>

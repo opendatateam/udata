@@ -6,7 +6,7 @@ export class Jobs extends List {
     constructor(options) {
         super(options);
         this.$options.ns = 'workers';
-        this.$options.fetch = 'lis_jobs';
+        this.$options.fetch = 'list_jobs';
     }
 };
 

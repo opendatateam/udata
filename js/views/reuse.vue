@@ -26,17 +26,15 @@
 </template>
 
 <script>
-'use strict';
+import moment from 'moment';
+import Reuse from 'models/reuse';
+import Followers from 'models/followers';
+import Metrics from 'models/metrics';
+import Vue from 'vue';
+import Issues from 'models/issues';
+import Discussions from 'models/discussions';
 
-var Vue = require('vue'),
-    moment = require('moment'),
-    Reuse = require('models/reuse'),
-    Issues = require('models/issues'),
-    Discussions = require('models/discussions'),
-    Followers = require('models/followers').extend({ns: 'reuses'}),
-    Metrics = require('models/metrics');
-
-module.exports = {
+export default {
     name: 'DatasetView',
     data: function() {
         var actions = [{
@@ -65,7 +63,7 @@ module.exports = {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')
             }}),
-            followers: new Followers({query: {page_size: 10}}),
+            followers: new Followers({ns: 'reuses', query: {page_size: 10}}),
             issues: new Issues({query: {sort: '-created', page_size: 10}}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
             meta: {

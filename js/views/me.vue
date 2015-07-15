@@ -17,7 +17,7 @@
 <script>
 import moment from 'moment';
 import API from 'api';
-import List from 'models/base';
+import {PageList} from 'models/base';
 import Metrics from 'models/metrics';
 
 export default  {
@@ -25,11 +25,11 @@ export default  {
     data: function() {
         return {
             metrics: new Metrics(),
-            reuses: new List({
+            reuses: new PageList({
                 ns: 'me',
                 fetch: 'my_reuses'
             }),
-            datasets: new List({
+            datasets: new PageList({
                 ns: 'me',
                 fetch: 'my_datasets'
             }),

@@ -40,15 +40,15 @@
 </template>
 
 <script>
-import moment from 'moment';
-import URLs from 'urls';
-import {List} from 'models/base';
-import Organization from 'models/organization';
 import Datasets from 'models/datasets';
-import Reuses from 'models/reuses';
 import Followers from 'models/followers';
 import Metrics from 'models/metrics';
+import moment from 'moment';
+import Organization from 'models/organization';
+import Reuses from 'models/reuses';
+import URLs from 'urls';
 import Vue from 'vue';
+import {PageList} from 'models/base';
 
 export default {
     name: 'OrganizationView',
@@ -75,19 +75,19 @@ export default {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')
             }}),
-            reuses: new List({
+            reuses: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_reuses',
             }),
-            datasets: new List({
+            datasets: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_datasets'
             }),
-            issues: new List({
+            issues: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_issues',
             }),
-            discussions: new List({
+            discussions: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_discussions'
             }),

@@ -3,17 +3,38 @@ import validator from 'models/validator';
 import Vue from 'vue';
 import {pubsub, PubSub} from 'pubsub';
 
-
+/**
+ * An empty JSON schema factory
+ * @return {Object} An empty JSON schema
+ */
 function empty_schema() {
     return {properties: {}, required: []};
 }
 
-export class Model {
+/**
+ * A property getter resolving dot-notation
+ * @param  {Object} obj  The root object to fetch property on
+ * @param  {String} name The optionnaly dotted property name to fetch
+ * @return {Object}      The resolved property value
+ */
+function getattr(obj, name) {
+    if (!obj || !name) return;
+    var names = name.split(".");
+    while(names.length && (obj = obj[names.shift()]));
+    return obj;
+}
 
-    constructor(options) {
-        this.$options = options || {};
+/**
+ * Common class behaviors.
+ *
+ * Provide:
+ *     - PubSub
+ *     - Scoped API access
+ *     - Vue.js compatible setter
+ */
+export class Base {
+    constructor() {
         this.$pubsub = new PubSub();
-        this.empty();
     }
 
     /**
@@ -22,6 +43,82 @@ export class Model {
      */
     get __class__() {
         return this.constructor.name
+    }
+
+    /**
+     * Property setter which handle vue.js $set method if object is binded.
+     * @param {String} name  The name of the object proprty to set.
+     * @param {Object} value The property value to set.
+     */
+    _set(name, value) {
+        if (this.hasOwnProperty('$set')) {
+            this.$set(name, value);
+        } else {
+            this[name] = value;
+        }
+    }
+
+    /**
+     * Emit an event on this model instance
+     * @param  {String} name    The event unique name
+     * @param  {Object} options An optionnal options object
+     */
+    $emit(name, ...args) {
+        var prefix = this.__class__.toLowerCase(),
+            topic = prefix + ':' + name;
+        pubsub.publish(topic, this, ...args);
+        this.$pubsub.publish(name, this, args)
+    }
+
+    /**
+     * Register a listener on an event.
+     * @param  {String}   name   The event name to subscribe
+     * @param  {Function} hanler The callback to register
+     * @return {Object}   An object with a single method remove
+     *                       allowing to unregister the callback
+     */
+    $on(name, hanler) {
+        return this.$pubsub.subscribe(name, hanler);
+    }
+
+    /**
+     * Unregister a listener on an event.
+     * @param  {String}   name   The event name to subscribe
+     * @param  {Function} hanler The callback to register
+     */
+    $off(name, hanler) {
+        return this.$pubsub.unsubscribe(name, hanler);
+    }
+
+    /**
+     * Call an API endpoint.
+     * Callbacks are scoped to the model instance.
+     *
+     * @param  {String}   endpoint The API endpoint to call
+     * @param  {Object}   data     The data object to submit
+     * @param  {Function} callback The callback function to call on success.
+     */
+    $api(endpoint, data, callback) {
+        var parts = endpoint.split('.'),
+            namespace = parts[0],
+            method = parts[1],
+            operation = API[namespace][method];
+
+        return operation(data, callback.bind(this));
+    }
+};
+
+/**
+ * A base class for schema based models.
+ */
+export class Model extends Base {
+    constructor(options) {
+        super();
+        this.$options = options || {};
+        this.empty();
+        if (this.$options.data) {
+            Object.assign(this, this.$options.data);
+        }
     }
 
     /**
@@ -49,57 +146,6 @@ export class Model {
         return this;
     }
 
-    /**
-     * Property setter which handle vue.js $set method if object is binded.
-     * @param {String} name  The name of the object proprty to set.
-     * @param {Object} value The property value to set.
-     */
-    _set(name, value) {
-        if (this.hasOwnProperty('$set')) {
-            this.$set(name, value);
-        } else {
-            this[name] = value;
-        }
-    }
-
-    /**
-     * Call an API endpoint.
-     * Callbacks are scoped to the model instance.
-     *
-     * @param  {String}   endpoint The API endpoint to call
-     * @param  {Object}   data     The data object to submit
-     * @param  {Function} callback The callback function to call on success.
-     * @return {[type]}            [description]
-     */
-    $api(endpoint, data, callback) {
-        var parts = endpoint.split('.'),
-            namespace = parts[0],
-            method = parts[1],
-            operation = API[namespace][method];
-
-        return operation(data, callback.bind(this));
-    }
-
-    /**
-     * Emit an event on this model instance
-     * @param  {String} name    The event unique name
-     * @param  {Object} options An optionnal options object
-     */
-    $emit(name, ...args) {
-        var prefix = this.__class__.toLowerCase(),
-            topic = prefix + ':' + name;
-        pubsub.publish(topic, this, ...args);
-        this.$pubsub.publish(name, this, args)
-    }
-
-    $on(name, hanler) {
-        return this.$pubsub.subscribe(name, hanler);
-    }
-
-    $off(name, hanler) {
-        return this.$pubsub.unsubscribe(name, hanler);
-    }
-
     on_fetched(data) {
         for (let prop in data.obj) {
             let value = data.obj[prop];
@@ -109,23 +155,48 @@ export class Model {
         this.loading = false;
     }
 
+    /**
+     * Perform a model validation given its schema
+     * @return {Object} A TV4 validation descriptor.
+     */
     validate() {
         return validator.validateMultiple(this, this.__schema__);
     }
 
+    /**
+     * Empty the model
+     * @return {Object} Return itself allowing to chain methods.
+     */
     clear() {
-        empty(this.$data, this.schema);
+        this.empty();
         return this;
     }
 };
 
 
-export class List extends Model {
+/**
+ * A base class for unpaginated list
+ */
+export class List extends Base {
     constructor(options) {
-        super(options);
+        super();
+        this.$options = options || {};
+
         this.items = [];
         this.query = this.$options.query || {};
         this.loading = false;
+    }
+
+    get data() {
+        return this.items;
+    }
+
+    /**
+     * The class name
+     * @return {[type]} [description]
+     */
+    get __class__() {
+        return this.constructor.name
     }
 
     /**
@@ -151,6 +222,9 @@ export class List extends Model {
         this.loading = false;
     }
 
+    /**
+     * Get an item given its ID
+     */
     by_id(id) {
         var filtered = this.items.filter(function(item) {
             return item.hasOwnProperty('id') && item.id === id;
@@ -158,6 +232,10 @@ export class List extends Model {
         return filtered.length === 1 ? filtered[0] : null;
     }
 
+    /**
+     * Empty the list
+     * @return {Object} Return itself allowing to chain methods.
+     */
     clear() {
         this.items = [];
         this.$emit('updated');
@@ -165,7 +243,9 @@ export class List extends Model {
     }
 };
 
-
+/**
+ * A base class for server-side paginted list.
+ */
 export class ModelPage extends Model {
     constructor(options) {
         super(options);
@@ -260,16 +340,21 @@ export class ModelPage extends Model {
     }
 };
 
-
+/**
+ * A client-side pager wrapper for list.
+ */
 export class PageList extends List {
-
     constructor(options) {
         super(options);
         this.page = 1;
         this.page_size = 10;
         this.sorted = null;
         this.reversed = false;
-        this.data = [];
+        this.pager = [];
+
+        this.$on('updated', () => {
+            this.data = this.build_page();
+        });
     }
 
     /**
@@ -278,6 +363,14 @@ export class PageList extends List {
      */
     get pages() {
         return Math.ceil(this.items.length / this.page_size);
+    }
+
+    get data() {
+        return this.pager;
+    }
+
+    set data(value) {
+        this._set('pager', value);
     }
 
     next() {

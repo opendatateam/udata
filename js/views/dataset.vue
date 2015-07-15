@@ -34,19 +34,17 @@
 </template>
 
 <script>
-'use strict';
+import API from 'api';
+import Dataset from 'models/dataset';
+import Discussions from 'models/discussions';
+import Followers from 'models/followers';
+import Issues from 'models/issues';
+import Metrics from 'models/metrics';
+import moment from 'moment';
+import Reuses from 'models/reuses';
+import Vue from 'vue';
 
-var Vue = require('vue'),
-    API = require('api'),
-    moment = require('moment'),
-    Dataset = require('models/dataset'),
-    Reuses = require('models/reuses'),
-    Followers = require('models/followers').extend({ns: 'datasets'}),
-    Issues = require('models/issues'),
-    Discussions = require('models/discussions'),
-    Metrics = require('models/metrics');
-
-module.exports = {
+export default {
     name: 'DatasetView',
     data: function() {
         var actions = [{
@@ -76,7 +74,7 @@ module.exports = {
                 end: moment().format('YYYY-MM-DD')
             }}),
             reuses: new Reuses({query: {sort: '-created', page_size: 10}}),
-            followers: new Followers({query: {page_size: 10}}),
+            followers: new Followers({ns: 'datasets', query: {page_size: 10}}),
             issues: new Issues({query: {sort: '-created', page_size: 10}}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
             meta: {
