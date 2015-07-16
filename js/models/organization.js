@@ -39,7 +39,7 @@ export default class Organization extends Model {
     role_for(obj) {
         var user_id = obj.hasOwnProperty('id') ? obj.id : obj,
             members = this.members.filter(function(member) {
-                return member.user.id == user_id;
+                return member.user.id === user_id;
             });
         return members.length ? members[0] : null;
     }

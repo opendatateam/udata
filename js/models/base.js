@@ -226,7 +226,7 @@ export class List extends Base {
      * Get an item given its ID
      */
     by_id(id) {
-        var filtered = this.items.filter(function(item) {
+        var filtered = this.items.filter((item) => {
             return item.hasOwnProperty('id') && item.id === id;
         });
         return filtered.length === 1 ? filtered[0] : null;
@@ -289,7 +289,7 @@ export class ModelPage extends Model {
     get has_search() {
         var op = API[this.$options.ns].operations[this.$options.fetch];
 
-        return op.parameters.filter(function(p) {
+        return op.parameters.filter((p) => {
             return p.name == 'q';
         }).length > 0;
     }
@@ -405,7 +405,7 @@ export class PageList extends List {
 
     build_page() {
         return this.items
-            .sort(function(a, b) {
+            .sort((a, b) => {
                 var valA = getattr(a, this.sorted),
                     valB = getattr(b, this.sorted);
 
@@ -416,7 +416,7 @@ export class PageList extends List {
                 } else {
                     return 0;
                 }
-            }.bind(this))
+            })
             .slice(
                 Math.max(this.page - 1, 0) * this.page_size,
                 this.page * this.page_size
