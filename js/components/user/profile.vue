@@ -19,15 +19,27 @@
 </style>
 <template>
 <box-container title="{{title}}" icon="user" boxclass="user-profile-widget">
-    <h3>
-        {{user.fullname}}
-    </h3>
-    <div class="profile-body">
-        <image-button src="{{user.avatar}}" size="100" class="avatar-button"
-            endpoint="{{endpoint}}">
-        </image-button>
-        <div v-markdown="{{user.about}}"></div>
+    <aside>
+        <a class="text-muted pointer" v-on="click: toggle">
+            <i class="fa fa-gear"></i>
+        </a>
+    </aside>
+    <div v-if="!toggled">
+        <h3>
+            {{user.fullname}}
+        </h3>
+        <div class="profile-body">
+            <image-button src="{{user.avatar}}" size="100" class="avatar-button"
+                endpoint="{{endpoint}}">
+            </image-button>
+            <div v-markdown="{{user.about}}"></div>
+        </div>
     </div>
+    <user-form v-ref="form" v-if="toggled" user="{{user}}"></user-form>
+    <box-footer v-if="toggled">
+        <button type="submit" class="btn btn-primary"
+            v-on="click: save($event)" v-i18n="Save"></button>
+    </box-footer>
 </box-container>
 </template>
 <script>
@@ -39,7 +51,8 @@ module.exports = {
     name: 'user-profile',
     data: function() {
         return {
-            title: this._('Profile')
+            title: this._('Profile'),
+            toggled: false
         };
     },
     computed: {
@@ -50,7 +63,8 @@ module.exports = {
     },
     components: {
         'box-container': require('components/containers/box.vue'),
-        'image-button': require('components/widgets/image-button.vue')
+        'image-button': require('components/widgets/image-button.vue'),
+        'user-form': require('components/user/form.vue')
     },
     events: {
         'image:saved': function() {
@@ -58,6 +72,21 @@ module.exports = {
             this.$root.me.fetch();
         }
     },
-    props: ['user']
+    props: ['user'],
+    methods: {
+        toggle: function() {
+            this.toggled = !this.toggled;
+        },
+        save: function(e) {
+            if (this.$.form.validate()) {
+                var data = this.$.form.serialize();
+
+                this.user.update(data);
+                e.preventDefault();
+
+                this.toggled = false;
+            }
+        }
+    }
 };
 </script>
