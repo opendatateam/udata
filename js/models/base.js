@@ -306,14 +306,14 @@ export class ModelPage extends Model {
         return this;
     }
 
-    next() {
+    nextPage() {
         if (this.page && this.page < this.pages) {
             this.query.page = this.page + 1;
             this.fetch();
         }
     }
 
-    previous() {
+    previousPage() {
         if (this.page && this.page > 1) {
             this.query.page = this.page - 1;
             this.fetch();
@@ -373,14 +373,14 @@ export class PageList extends List {
         this._set('pager', value);
     }
 
-    next() {
+    nextPage() {
         if (this.page && this.page < this.pages) {
             this.page = this.page + 1;
         }
         this.data = this.build_page();
     }
 
-    previous() {
+    previousPage() {
         if (this.page && this.page > 1) {
             this.page = this.page - 1;
         }

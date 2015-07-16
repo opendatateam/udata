@@ -8,7 +8,7 @@
         </li>
         <li v-class="disabled: !p || p.page == 1">
             <a title="{{'Previous page'|i18n}}" class="pointer"
-                v-on="click: p.previous()">
+                v-on="click: p.previousPage()">
                 &lsaquo;
             </a>
         </li>
@@ -17,7 +17,7 @@
         </li>
         <li v-class="disabled: !p || p.page == p.pages">
             <a title="{{'Next page'|i18n}}" class="pointer"
-                v-on="click: p.next()">
+                v-on="click: p.nextPage()">
                 &rsaquo;
             </a>
         </li>
