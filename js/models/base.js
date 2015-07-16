@@ -296,8 +296,8 @@ export class ModelPage extends Model {
 
     /**
      * Fetch page from server.
-     * @param  {[type]} options [description]
-     * @return {[type]}         [description]
+     * @param  {Object} options An optionnal query object
+     * @return {Object} Return itself allowing to chain methods.
      */
     fetch(options) {
         this.query = Object.assign(this.query, options || {});
@@ -306,24 +306,46 @@ export class ModelPage extends Model {
         return this;
     }
 
+    /**
+     * Fetch the next page.
+     * @return {Object} Return itself allowing to chain methods.
+     */
     nextPage() {
         if (this.page && this.page < this.pages) {
             this.query.page = this.page + 1;
             this.fetch();
         }
+        return this;
     }
 
+    /**
+     * Fetch the previous page.
+     * @return {Object} Return itself allowing to chain methods.
+     */
     previousPage() {
         if (this.page && this.page > 1) {
             this.query.page = this.page - 1;
             this.fetch();
         }
+        return this;
     }
 
+    /**
+     * Fetch a page given its index.
+     * @param {Number} page The page index to fetch.
+     * @return {Object} Return itself allowing to chain methods.
+     */
     go_to_page(page) {
         this.fetch({page: page});
+        return this;
     }
 
+    /**
+     * Perform a server-side sort
+     * @param {String} field The object attribute to sort on.
+     * @param {Boolean} reversed If true, sort is descending.
+     * @return {Object} Return itself allowing to chain methods.
+     */
     sort(field, reversed) {
         if (this.sorted !== field) {
             this.query.sort = '-' + field;
@@ -332,11 +354,18 @@ export class ModelPage extends Model {
             this.query.sort = reversed ? '-' + field : field;
         }
         this.fetch({page: 1}); // Clear the pagination
+        return this;
     }
 
+    /**
+     * Perform a server-side search
+     * @param  {String} query The query string to perform the search on.
+     * @return {Object} Return itself allowing to chain methods.
+     */
     search(query) {
         this.query.q = query;
         this.fetch({page: 1}); // Clear the pagination
+        return this;
     }
 };
 
@@ -373,34 +402,63 @@ export class PageList extends List {
         this._set('pager', value);
     }
 
+    /**
+     * Display the next page.
+     * @return {Object} Return itself allowing to chain methods.
+     */
     nextPage() {
         if (this.page && this.page < this.pages) {
             this.page = this.page + 1;
         }
         this.data = this.build_page();
+        return this;
     }
 
+    /**
+     * Display the previous page.
+     * @return {Object} Return itself allowing to chain methods.
+     */
     previousPage() {
         if (this.page && this.page > 1) {
             this.page = this.page - 1;
         }
         this.data = this.build_page();
+        return this;
     }
 
+    /**
+     * Display a page given its index.
+     * @param {Number} page The page index to fetch.
+     * @return {Object} Return itself allowing to chain methods.
+     */
     go_to_page(page) {
         this.page = page;
         this.data = this.build_page();
+        return this;
     }
 
+    /**
+     * Perform a client-side sort
+     * @param {String} field The object attribute to sort on.
+     * @param {Boolean} reversed If true, sort is descending.
+     * @return {Object} Return itself allowing to chain methods.
+     */
     sort(field, reversed) {
         this.sorted = field;
         this.reversed = reversed !== undefined ? reversed : !this.reversed;
         this.page = 1;
         this.data = this.build_page();
+        return this;
     }
 
+    /**
+     * Perform a client-side search
+     * @param  {String} query The query string to perform the search on.
+     * @return {Object} Return itself allowing to chain methods.
+     */
     search(query) {
         console.log('search', query);
+        return this;
     }
 
     build_page() {
