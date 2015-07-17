@@ -108,7 +108,6 @@ class Defaults(object):
 
 class Testing(Defaults):
     TESTING = True
-    MONGODB_DB = 'udata-test'
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_ALWAYS_EAGER = True
