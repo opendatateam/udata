@@ -1,15 +1,13 @@
-define(['api', 'models/base'], function(API, Model) {
-    'use strict';
+import {Model} from 'models/base';
+import log from 'logger';
 
-    var Site = Model.extend({
-        name: 'Site',
-        methods: {
-            fetch: function() {
-                API.site.get_site({}, this.on_fetched.bind(this));
-                return this;
-            }
-        }
-    });
 
-    return new Site().fetch();
-});
+export class Site extends Model {
+    fetch() {
+        this.$api('site.get_site', {}, this.on_fetched);
+        return this;
+    }
+};
+
+export var site = new Site().fetch();
+export default site;

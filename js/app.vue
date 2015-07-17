@@ -36,18 +36,20 @@
 <script>
 'use strict';
 
-var $ = require('jquery'),
-    Vue = require('vue');
+import $ from 'jquery';
+import Vue from 'vue';
+import me from 'models/me';
+import site from 'models/site';
 
-require('jquery-slimscroll');
+import 'jquery-slimscroll';
 
-module.exports = {
+export default {
     name: 'App',
     data: function() {
         return {
             view: null,
-            me: require('models/me'),
-            site: require('models/site'),
+            me: me,
+            site: site,
             config: require('config'),
             meta: {
                 title: null,

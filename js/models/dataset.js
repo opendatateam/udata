@@ -1,54 +1,59 @@
-define(['api', 'models/base', 'logger'], function(API, Model, log) {
-    'use strict';
+import {Model} from 'models/base';
+import log from 'logger';
 
-    var Dataset = Model.extend({
-        name: 'Dataset',
-        methods: {
-            fetch: function(ident) {
-                ident = ident || this.id || this.slug;
-                if (ident) {
-                    API.datasets.get_dataset({dataset: ident}, this.on_fetched.bind(this));
-                } else {
-                    log.error('Unable to fetch Dataset: no identifier specified');
-                }
-                return this;
-            },
-            save: function() {
-                var method = this.id ? API.datasets.update_dataset : API.datasets.create_dataset;
-                method({payload: this.$data}, this.on_fetched.bind(this));
-            },
-            update: function(data) {
-                API.datasets.update_dataset({
-                    dataset: this.id,
-                    payload: data
-                }, this.on_fetched.bind(this));
-            },
-            delete_resource: function(id) {
-                API.datasets.delete_resource({dataset: this.id, rid: id}, function(response) {
-                    this.fetch();
-                }.bind(this));
-            },
-            save_resource: function(resource) {
-                var method = resource.id ? API.datasets.update_resource : API.datasets.create_resource,
-                    payload = resource.hasOwnProperty('$data') ? resource.$data : resource;
-                method({
-                    dataset: this.id,
-                    rid: resource.id,
-                    payload: payload
-                }, function(response) {
-                    this.fetch();
-                }.bind(this));
-            },
-            reorder: function(new_order) {
-                API.datasets.reorder_resources({
-                    dataset: this.id,
-                    payload: new_order
-                }, function(response) {
-                    this.$set('resources', response.obj);
-                }.bind(this));
-            }
+
+export default class Dataset extends Model {
+    /**
+     * Fetch a dataset given its identifier, either an ID or a slug.
+     * @param  {String} ident The dataset identifier to fetch.
+     * @return {Dataset}      The current object itself.
+     */
+    fetch(ident) {
+        ident = ident || this.id || this.slug;
+        if (ident) {
+            this.$api('datasets.get_dataset', {dataset: ident}, this.on_fetched);
+        } else {
+            log.error('Unable to fetch Dataset: no identifier specified');
         }
-    });
+        return this;
+    }
 
-    return Dataset;
-});
+    /**
+     * Create or update the given dataset.
+     */
+    save() {
+        var ep = this.id ? 'datasets.update_dataset' : 'datasets.create_dataset';
+        this.$api(ep, {payload: this}, this.on_fetched);
+    }
+
+    update(data) {
+        this.$api('datasets.update_dataset', {
+            dataset: this.id,
+            payload: data
+        }, this.on_fetched);
+    }
+
+    delete_resource(id) {
+        this.$api('datasets.delete_resource', {dataset: this.id, rid: id}, this.fetch);
+    }
+
+    save_resource(resource) {
+        var endpoint = resource.id ? 'datasets.update_resource' : 'datasets.create_resource',
+            payload = resource.hasOwnProperty('$data') ? resource.$data : resource;
+
+        this.$api(endpoint, {
+            dataset: this.id,
+            rid: resource.id,
+            payload: payload
+        }, this.fetch);
+    }
+
+    reorder(new_order) {
+        this.$api('datasets.reorder_resources', {
+            dataset: this.id,
+            payload: new_order
+        }, function(response) {
+            this.resources = response.obj;
+        });
+    }
+}

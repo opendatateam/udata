@@ -40,19 +40,17 @@
 </template>
 
 <script>
-'use strict';
+import Datasets from 'models/datasets';
+import Followers from 'models/followers';
+import Metrics from 'models/metrics';
+import moment from 'moment';
+import Organization from 'models/organization';
+import Reuses from 'models/reuses';
+import URLs from 'urls';
+import Vue from 'vue';
+import {PageList} from 'models/base';
 
-var moment = require('moment'),
-    URLs = require('urls'),
-    List = require('models/base_page_list'),
-    Organization = require('models/organization'),
-    Datasets = require('models/datasets'),
-    Reuses = require('models/reuses'),
-    Followers = require('models/followers').extend({ns: 'organizations'}),
-    Metrics = require('models/metrics'),
-    Vue = require('vue');
-
-module.exports = {
+export default {
     name: 'OrganizationView',
     data: function() {
         var actions = [{
@@ -77,23 +75,23 @@ module.exports = {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')
             }}),
-            reuses: new List({
+            reuses: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_reuses',
             }),
-            datasets: new List({
+            datasets: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_datasets'
             }),
-            issues: new List({
+            issues: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_issues',
             }),
-            discussions: new List({
+            discussions: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_discussions'
             }),
-            followers: new Followers({query: {page_size: 10}}),
+            followers: new Followers({ns: 'organizations', query: {page_size: 10}}),
             meta: {
                 title: null,
                 page: null,

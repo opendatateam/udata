@@ -7,7 +7,8 @@ var node_path = path.join(__dirname, 'node_modules');
 var vue = require('vue-loader'),
     css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap'),
     less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline'),
-    html_loader = 'html?collapseBooleanAttributes=false&collapseWhitespace=false"';
+    html_loader = 'html?collapseBooleanAttributes=false&collapseWhitespace=false"',
+    js_loader = 'babel?optional[]=runtime';
 
 var languages = ['en', 'fr'];
 
@@ -37,10 +38,16 @@ module.exports = {
             {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file'},
             {test: /\.css$/, loader: css_loader},
             {test: /\.less$/, loader: less_loader},
-            {test: /\.vue$/, loader: vue.withLoaders({html: html_loader, css: css_loader, less: less_loader})},
+            {test: /\.vue$/, loader: vue.withLoaders({
+                html: html_loader,
+                css: css_loader,
+                less: less_loader,
+                js: js_loader
+            })},
             {test: /\.json$/, loader: "json"},
             {test: /\.html$/, loader: html_loader},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, loader: "file-loader?name=[name].[ext]"},
+            {test: /\.js$/, loader: js_loader, exclude: /(node_modules)/},
         ]
     },
     plugins: [

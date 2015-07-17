@@ -1,33 +1,27 @@
-define(['api', 'models/base', 'logger'], function(API, Model, log) {
-    'use strict';
+import log from 'logger';
+import {Model} from 'models/base';
 
-    var User = Model.extend({
-        name: 'User',
-        computed: {
-            fullname: function() {
-                return this.$data.fullname ? this.$data.fullname : this.first_name + ' ' + this.last_name;
-            },
-            is_admin: function() {
-                return this.has_role('admin');
-            }
-        },
-        methods: {
-            fetch: function(ident) {
-                ident = ident || this.id || this.slug;
-                if (ident) {
-                    API.users.get_user({
-                        user: ident
-                    }, this.on_fetched.bind(this));
-                } else {
-                    log.error('Unable to fetch User: no identifier specified');
-                }
-                return this;
-            },
-            has_role: function(name) {
-                return this.roles && this.roles.indexOf(name) >= 0;
-            }
+export default class User extends Model {
+
+    get fullname() {
+        return this.first_name + ' ' + this.last_name;
+    }
+
+    get is_admin() {
+        return this.has_role('admin');
+    }
+
+    fetch(ident) {
+        ident = ident || this.id || this.slug;
+        if (ident) {
+            this.$api('users.get_user', {user: ident}, this.on_fetched);
+        } else {
+            log.error('Unable to fetch User: no identifier specified');
         }
-    });
+        return this;
+    }
 
-    return User;
-});
+    has_role(name) {
+        return this.roles && this.roles.indexOf(name) >= 0;
+    }
+};

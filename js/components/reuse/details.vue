@@ -41,12 +41,12 @@
                 </strong>
                 <span v-repeat="reuse.tags" class="label label-default">{{$value}}</span>
             </div>
-            <div v-if="reuse.badges" class="label-list">
+            <div v-if="reuse.badges | length" class="label-list">
                 <strong>
                     <span class="fa fa-fw fa-bookmark"></span>
                     {{ _('Badges') }}:
                 </strong>
-                <span v-repeat="reuse.badges" class="label label-primary">{{kind}}</span>
+                <span v-repeat="reuse.badges" class="label label-primary">{{badges[kind]}}</span>
             </div>
         </div>
     </div>
@@ -69,7 +69,8 @@ module.exports = {
     data: function() {
         return {
             title: this._('Details'),
-            toggled: false
+            toggled: false,
+            badges: require('models/badges').badges.reuse
         };
     },
     computed: {

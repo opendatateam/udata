@@ -19,14 +19,12 @@
 </template>
 
 <script>
-'use strict';
+import Posts from 'models/posts';
+import Topics from 'models/topics';
+import {List} from 'models/base';
+import API from 'api';
 
-var Posts = require('models/posts'),
-    Topics = require('models/topics'),
-    List = require('models/base_list'),
-    API = require('api');
-
-module.exports = {
+export default {
     name: 'EditorialView',
     data: function() {
         return {

@@ -230,6 +230,10 @@ module.exports = {
                     }
                 }
             }
+        }),
+        'playpause': CellWidget.extend({
+            default: false,
+            template: `<i class="fa fa-fw fa-{{value ? 'play' : 'stop'}} text-{{value ? 'green' : 'red'}}"></i>`,
         })
     },
     data: function() {

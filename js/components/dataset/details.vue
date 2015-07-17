@@ -20,7 +20,7 @@
                 <span class="fa fa-fw fa-bookmark"></span>
                 {{ _('Badges') }}:
             </strong>
-            <span v-repeat="dataset.badges" class="label label-primary">{{kind}}</span>
+            <span v-repeat="dataset.badges" class="label label-primary">{{badges[kind]}}</span>
         </div>
     </div>
     <dataset-form v-ref="form" v-if="toggled" dataset="{{dataset}}"></dataset-form>
@@ -40,7 +40,8 @@ module.exports = {
     data: function() {
         return {
             title: this._('Details'),
-            toggled: false
+            toggled: false,
+            badges: require('models/badges').badges.dataset
         };
     },
     components: {

@@ -1,11 +1,11 @@
-define(['api', 'models/base_page'], function(API, ModelPage) {
-    'use strict';
+import {ModelPage} from 'models/base';
+import log from 'logger';
 
-    var Reuses = ModelPage.extend({
-        name: 'ReusePage',
-        ns: 'reuses',
-        fetch: 'list_reuses'
-    });
 
-    return Reuses;
-});
+export default class ReusePage extends ModelPage {
+    constructor(options) {
+        super(options);
+        this.$options.ns = 'reuses';
+        this.$options.fetch = 'list_reuses';
+    }
+};

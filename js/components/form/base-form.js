@@ -54,7 +54,7 @@ define(['config', 'vue', 'logger', 'moment', 'jquery', 'jquery-validation-dist']
                     return empty_schema();
                 }
                 var s = empty_schema(),
-                    schema = this.defs || this.model.schema || empty_schema();
+                    schema = this.defs || this.model.__schema__ || empty_schema();
 
                 this.fields.forEach(function(field) {
                     if (!schema.properties.hasOwnProperty(field.id)) {

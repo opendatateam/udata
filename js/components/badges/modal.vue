@@ -45,7 +45,8 @@
 <script>
 'use strict';
 
-var API = require('api');
+var API = require('api'),
+    badges = require('models/badges').badges;
 
 module.exports = {
     name: 'BadgesModal',
@@ -64,7 +65,7 @@ module.exports = {
     },
     computed: {
         basename: function() {
-            return this.subject.classname.toLowerCase();
+            return this.subject.__class__.toLowerCase();
         },
         namespace: function() {
             return this.basename + 's';
@@ -80,7 +81,7 @@ module.exports = {
         }
     },
     compiled: function() {
-        var operation = 'available_' + this.basename + '_badges';
+        this.badges = badges[this.basename];
 
         if (this.subject.hasOwnProperty('badges')) {
             this.selected = this.subject.badges.map(function(badge) {
@@ -88,12 +89,7 @@ module.exports = {
             });
 
             this.initial = this.selected.slice(0);
-
-            API[this.namespace][operation]({}, function(response) {
-                this.badges = response.obj;
-            }.bind(this));
         }
-
     },
     methods: {
         confirm: function() {

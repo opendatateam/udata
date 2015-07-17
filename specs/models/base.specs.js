@@ -82,7 +82,7 @@ describe('Base model', function() {
                         }
                     });
 
-                result = pet.validate();
+                var result = pet.validate();
 
                 expect(result.valid).to.be.true;
                 expect(result.errors.length).to.equal(0);
@@ -98,7 +98,7 @@ describe('Base model', function() {
                         }
                     });
 
-                result = pet.validate();
+                var result = pet.validate();
 
                 expect(result.valid).to.be.true;
                 expect(result.errors.length).to.equal(0);
@@ -114,7 +114,7 @@ describe('Base model', function() {
                         }
                     });
 
-                result = pet.validate();
+                var result = pet.validate();
 
                 expect(result.valid).to.be.true;
                 expect(result.errors.length).to.equal(0);

@@ -35,12 +35,12 @@
                 endpoint="{{endpoint}}">
             </image-button>
             <div v-markdown="{{org.description}}"></div>
-            <div v-if="org.badges" class="label-list">
+            <div v-if="org.badges | length" class="label-list">
                 <strong>
                     <span class="fa fa-fw fa-bookmark"></span>
                     {{ _('Badges') }}:
                 </strong>
-                <span v-repeat="org.badges" class="label label-primary">{{kind}}</span>
+                <span v-repeat="org.badges" class="label label-primary">{{badges[kind]}}</span>
             </div>
         </div>
     </div>
@@ -63,7 +63,8 @@ module.exports = {
     data: function() {
         return {
             toggled: false,
-            org: undefined
+            org: undefined,
+            badges: require('models/badges').badges.organization
         }
     },
     components: {

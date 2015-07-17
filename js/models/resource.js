@@ -1,9 +1,5 @@
-define(['api', 'models/base', 'logger'], function(API, Model, log) {
-    'use strict';
+import {Model} from 'models/base';
+import log from 'logger';
 
-    var Resource = Model.extend({
-        name: 'Resource'
-    });
 
-    return Resource;
-});
+export default class Resource extends Model {};

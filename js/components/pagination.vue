@@ -8,7 +8,7 @@
         </li>
         <li v-class="disabled: !p || p.page == 1">
             <a title="{{'Previous page'|i18n}}" class="pointer"
-                v-on="click: p.previous()">
+                v-on="click: p.previousPage()">
                 &lsaquo;
             </a>
         </li>
@@ -17,7 +17,7 @@
         </li>
         <li v-class="disabled: !p || p.page == p.pages">
             <a title="{{'Next page'|i18n}}" class="pointer"
-                v-on="click: p.next()">
+                v-on="click: p.nextPage()">
                 &rsaquo;
             </a>
         </li>
@@ -57,7 +57,7 @@ module.exports = {
             return this.p.page + nb > this.p.pages ? this.p.pages : this.p.page + nb;
         },
         range: function() {
-            if (this.start >= this.end) return [];
+            if (isNaN(this.start) || isNaN(this.end) || this.start >= this.end) return [];
             return Array
                 .apply(0, Array(this.end + 1 - this.start))
                 .map(function (element, index) {
