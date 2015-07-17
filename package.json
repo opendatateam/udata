@@ -76,6 +76,7 @@
     "moment": "^2.10.3",
     "raven-js": "^1.1.18",
     "respond.js": "^1.4.2",
+    "script-loader": "^0.6.1",
     "selectize": "^0.12.1",
     "sifter": "^0.4.1",
     "sortablejs": "^1.2.0",
