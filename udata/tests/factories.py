@@ -128,7 +128,10 @@ class UserFactory(MongoEngineFactory):
 class AdminFactory(UserFactory):
     @factory.lazy_attribute
     def roles(self):
-        admin_role, _ = models.Role.objects.get_or_create(name='admin')
+        try:
+            admin_role = models.Role.objects.get(name='admin')
+        except models.Role.DoesNotExist:
+            admin_role = models.Role.objects.create(name='admin')
         return [admin_role]
 
 

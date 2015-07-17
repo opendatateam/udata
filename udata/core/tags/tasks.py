@@ -41,6 +41,9 @@ def count_tags(self):
         collection = '{0}_tags'.format(key)
         results = model.objects(tags__exists=True).map_reduce(map_tags, reduce_tags, collection)
         for result in results:
-            tag, created = Tag.objects.get_or_create(name=result.key, auto_save=False)
+            try:
+                tag = Tag.objects.get(name=result.key)
+            except Tag.DoesNotExist:
+                tag = Tag.objects.create(name=result.key)
             tag.counts[key] = int(result.value) if result.value else 0
             tag.save()
