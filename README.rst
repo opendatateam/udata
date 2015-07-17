@@ -11,9 +11,9 @@ uData
 .. image:: https://requires.io/github/etalab/udata/requirements.png?branch=master
     :target: https://requires.io/github/etalab/udata/requirements/?branch=master
     :alt: Python Requirements Status
-.. image:: https://www.versioneye.com/user/projects/5415870a9e1622cff80001cc/badge.svg?style=flat
-    :target: https://www.versioneye.com/user/projects/5415870a9e1622cff80001cc/
-    :alt: Javascript dependencies status
+.. image:: https://david-dm.org/etalab/udata.svg
+    :target: https://david-dm.org/etalab/udata
+    :alt: JavaScript Dependencies Status
 
 uData is an open and social data hub.
 This currently a work in progress and API is subject to change until the first official release.
