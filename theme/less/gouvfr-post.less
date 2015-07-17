@@ -1,0 +1,104 @@
+body.post-display {
+    .post-container {
+        padding-bottom: 20px;
+
+        .page-header {
+            margin-top: 0px;
+            border: none;
+            margin-bottom: 0px;
+
+            h1 {
+                font-family: @title-font;
+                margin-bottom: 5px;
+                margin-top: 0px;
+
+                @media (max-width: @screen-sm-max) {
+                    font-size: 2em;
+                }
+            }
+
+            small {
+                a {
+                    font-weight: bold;
+                    color: white;
+                }
+
+                a.btn {
+                    vertical-align: text-top;
+                    font-weight: bold;
+                }
+            }
+
+            aside {
+                a:hover .thumbnail, a:active .thumbnail {
+                    text-decoration: none;
+                }
+            }
+        }
+
+        aside {
+            margin-top: 20px;
+
+            > * {
+                margin-bottom: 10px;
+            }
+
+            a.btn {
+                margin-bottom: 5px;
+            }
+        }
+    }
+
+    // correcting main column width
+    @media (min-width: @screen-sm-min) {
+        .smaller {
+            padding-right: @grid-gutter-width * 2.5;
+        }
+    }
+
+    //Action toolbar
+    .main-toolbar {
+        .btn-toolbar {
+            .pull-right();
+            margin-right: 8px;
+        }
+
+        margin-bottom: 20px
+    }
+
+    .post-section {
+
+        .post-headline {
+            font-weight: bold;
+        }
+
+        .post-image {
+            .text-center();
+            margin: 10px;
+
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+
+            img {
+                background-color: white;
+                border: 1px solid @gray-lighter;
+            }
+
+            .credit-link {
+                color: white;
+
+                .pull-right();
+                margin-top: 5px;
+            }
+
+        }
+    }
+
+    .history-section {
+        min-height: 200px;
+        background-color: @gray-lighter;
+    }
+
+}
+

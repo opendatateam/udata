@@ -1,22 +1,23 @@
+@import "~bootstrap/less/mixins";
+@import "variables";
+
 /**
  * Navbar styles.
  */
 .cover {
-    background-image: url('../img/datacover.png');
+    background-image: url('/img/datacover.png');
     background-size: cover;
 }
 
 
 .cover-default {
     // .colored-cover();
-    background-image: url('../img/datawatch-bulles.png');
+    background-image: url('/img/datawatch-bulles.png');
     background-size: cover;
     position: absolute;
     min-height: 100%;
     min-width: 100%;
 }
-
-@topic-png:  '../img/arcs.png';
 
 .subnav-gradient(@color: #1b71af) {
     @end: lighten(@color, 22%);
@@ -40,7 +41,7 @@
     left: -78px;
     position: absolute;
     z-index: -10;
-    background: url('../img/marianne_cover.png') no-repeat;
+    background: url('/img/marianne_cover.png') no-repeat;
 }
 
 .navbar {
@@ -102,6 +103,7 @@
 
 .navbar-default {
     margin-bottom: 0;
+    background-color: white;
 
     .navbar-brand   {
         text-indent: -1000em;
@@ -113,7 +115,7 @@
         line-height: 47px;
         font-weight: bold;
         color: #373c42;
-        background-image: url('../img/logo.png');
+        background-image: url('/img/logo.png');
         background-repeat: no-repeat;
         font-family: @title-font;
 
@@ -131,6 +133,10 @@
 
     .links > li > a {
         padding-left: 0;
+    }
+
+    .navbar-nav > li > a {
+        color: @navbar-default-color;
     }
 }
 
@@ -666,7 +672,7 @@
 }
 
 .cover-topic {
-    background-image: url(@topic-png);
+    background-image: url('/img/arcs.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: bottom right;

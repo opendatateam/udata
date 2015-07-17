@@ -8,22 +8,13 @@ import feedparser
 from dateutil.parser import parse
 from flask import g, current_app
 
-from udata import search, theme
+from udata import theme
 from udata.app import cache, nav
-from udata.forms import Form, fields, validators
 from udata.i18n import lazy_gettext as _
-from udata.models import Dataset, Reuse, Post
 
 
 RE_POST_IMG = re.compile(r'\<img .* src="https?:(?P<src>.+\.(?:png|jpg))" .* />(?P<content>.+)')
 
-
-@theme.admin_form
-class GouvfrThemeForm(Form):
-    tab_size = fields.IntegerField(_('Tab size'), description=_('Home page tab size'),
-                                   validators=[validators.required()])
-    atom_url = fields.StringField(_('ATOM Feed URL'),
-                                  description=_('An optionnal atom feed URL for display blog post in home page'))
 
 theme.defaults({
     'tab_size': 8,
