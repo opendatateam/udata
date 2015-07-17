@@ -4,25 +4,19 @@ from __future__ import unicode_literals
 import logging
 
 from importlib import import_module
-# from os.path import join
-# from pkg_resources import resource_stream
 
 from flask import abort
 
-# from udata.app import ROOT_DIR
 from udata.i18n import I18nBlueprint
 
 from .markdown import md, init_app as init_markdown
+
+from .. import theme
 
 
 log = logging.getLogger(__name__)
 
 front = I18nBlueprint('front', __name__)
-
-
-# Important: import after assets declaration
-from .. import theme
-
 
 _footer_snippets = []
 

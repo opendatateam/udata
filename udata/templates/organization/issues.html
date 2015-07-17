@@ -1,6 +1,10 @@
 {% extends theme('organization/edit_base.html') %}
 {% from theme('macros/issues.html') import issues_list with context %}
 
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('issue/list.js') }}"></script>
+{% endblock %}
+
 {% block tab_content %}
 <div class="row">
     <div class="col-xs-12">

@@ -4,6 +4,10 @@
 
 {% set toolbar_class='search-toolbar' %}
 
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('search.js') }}"></script>
+{% endblock %}
+
 {% block breadcrumb %}
     <li class="active">
         {{ _('Organizations') }}

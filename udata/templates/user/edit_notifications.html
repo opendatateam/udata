@@ -1,6 +1,10 @@
 {% extends theme('user/edit_base.html') %}
 {% import 'macros/forms.html' as forms with context %}
 
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('user/notification.js') }}"></script>
+{% endblock %}
+
 {% block tab_content %}
 <p class="text-center">
 <button class="btn btn-default btn-test-mail">{{ _('Test your email')}}</button>

@@ -1,6 +1,8 @@
 {% extends theme("layouts/1-column.html") %}
 {% from theme('macros/follow.html') import follow_btn with context %}
 
+{% set body_class = 'org-display' %}
+
 {% block breadcrumb %}
     <li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
 {% endblock %}

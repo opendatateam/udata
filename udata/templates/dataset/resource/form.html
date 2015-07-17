@@ -4,6 +4,11 @@
 
 {% set upload_endpoint = upload_endpoint|default('upload') %}
 
+{% block extra_js %}
+{{ super() }}
+<script type="text/javascript" src="{{ static('dataset/resource-form.js') }}"></script>
+{% endblock %}
+
 {% block main_content %}
 <div class="form-bg">
     <div class="row">

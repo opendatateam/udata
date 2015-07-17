@@ -1,6 +1,9 @@
 {% extends theme('organization/edit_base.html') %}
 {% import 'macros/forms.html' as forms with context %}
-{# {% set tab = 'members' %} #}
+
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('organization/members.js') }}"></script>
+{% endblock %}
 
 {% block tab_content %}
 <table class="table table-stripped members-table">

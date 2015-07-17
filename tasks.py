@@ -103,8 +103,20 @@ def i18nc():
     run('cd {0} && python setup.py compile_catalog'.format(ROOT))
 
 
-@task(i18nc)
+@task
+def assets():
+    '''Install and compile assets'''
+    print(cyan('Building static assets'))
+    lrun('cd {0} && webpack -c --progress --config webpack.config.prod.js'.format(ROOT), pty=True)
+
+
+@task(i18nc, assets)
 def dist():
     '''Package for distribution'''
     print(cyan('Building a distribuable package'))
     lrun('python setup.py bdist_wheel', pty=True)
+
+
+@task
+def watch():
+    lrun('webpack -d -c --progress --watch', pty=True)

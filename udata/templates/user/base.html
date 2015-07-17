@@ -1,6 +1,10 @@
 {% extends theme('layouts/1-column.html') %}
 {% from theme('macros/follow.html') import follow_btn with context %}
 
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('user/display.js') }}"></script>
+{% endblock %}
+
 {% block extra_head %}
 {{ super() }}
 <meta name="robots" content="noindex,follow">

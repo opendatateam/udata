@@ -2,7 +2,5 @@
 {% set section_class = 'form' %}
 
 {% block extra_css %}
-{% assets "forms-css" %}
-<link href="{{ ASSET_URL }}" rel="stylesheet">
-{% endassets %}
+<link href="{{ static('forms.css') }}" rel="stylesheet">
 {% endblock %}

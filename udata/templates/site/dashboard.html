@@ -8,6 +8,12 @@
     'keywords': [_('metrics'), _('activity')],
 } %}
 
+{% set body_class = 'dashboard' %}
+
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('dashboard/site.js') }}"></script>
+{% endblock %}
+
 {% block breadcrumb %}
     <li class="active">{{ _('Dashboard') }}</li>
 {% endblock %}

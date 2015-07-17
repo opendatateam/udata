@@ -1,0 +1,38 @@
+{{{ description }}}
+
+<dl class="dl-horizontal dl-wide">
+  <dt>{{_ 'URL'}}</dt>
+  <dd><a href="{{this.url}}" class="resource-click">{{this.url}}</a></dd>
+  {{#if encodingFormat}}
+  <dt>{{_ 'Format'}}</dt>
+  <dd>{{encodingFormat}}</dd>
+  {{/if}}
+  {{#if mimetype}}
+  <dt>{{_ 'MimeType'}}</dt>
+  <dd>{{mimetype}}</dd>
+  {{/if}}
+  {{#if contentSize}}
+  <dt>{{_ 'Size'}}</dt>
+  <dd>{{size contentSize}}</dd>
+  {{/if}}
+  {{#if checksum}}
+  <dt>{{default checksumType 'sha1'}}</dt>
+  <dd>{{checksum}}</dd>
+  {{/if}}
+  {{#if dateCreated}}
+  <dt>{{_ 'Created on'}}</dt>
+  <dd>{{dt dateCreated}}</dd>
+  {{/if}}
+  {{#if dateModified}}
+  <dt>{{_ 'Modified on'}}</dt>
+  <dd>{{dt dateModified}}</dd>
+  {{/if}}
+  {{#if datePublished}}
+  <dt>{{_ 'Published on'}}</dt>
+  <dd>{{dt datePublished}}</dd>
+  {{/if}}
+  {{#if downloads}}
+  <dt>{{_ 'Downloads'}}</dt>
+  <dd>{{downloads}}</dd>
+  {{/if}}
+</dl>

@@ -1,6 +1,10 @@
 {% extends theme('reuse/edit_base.html') %}
 {% import theme('macros/forms.html') as forms with context %}
 
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('reuse/form.js') }}"></script>
+{% endblock %}
+
 {% block tab_content %}
 <div class="row">
     <div class="col-xs-12">
