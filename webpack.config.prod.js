@@ -4,6 +4,7 @@ var webpack = require("webpack"),
 config.plugins.push(new webpack.optimize.UglifyJsPlugin({
     minimize: true,
     output: {comments: false},
+    mangle: false,
     compress: {
         warnings: false
     }
