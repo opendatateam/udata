@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+import itertools
+import json
+import os
+import re
+
+from glob import iglob
+from os.path import join, exists
 from sys import exit
 
 from invoke import run, task
-from invoke.exceptions import Exit
 
-from tasks_helpers import ROOT, info, header, lrun, nrun
+from tasks_helpers import ROOT, info, header, lrun, nrun, green
 
-I18N_DOMAIN = 'udata-admin'
+I18N_DOMAIN = 'udata'
 
 
 @task
@@ -84,11 +90,41 @@ def beat(loglevel='info'):
 def i18n():
     '''Extract translatable strings'''
     header('Extract translatable strings')
+
     info('Extract Python strings')
     lrun('python setup.py extract_messages')
     lrun('python setup.py update_catalog')
+
     info('Extract JavaScript strings')
-    lrun('udata i18njs -d udata udata/static')
+    catalog = {}
+    catalog_filename = join(ROOT, 'js', 'locales', '{}.en.json'.format(I18N_DOMAIN))
+    if exists(catalog_filename):
+        with open(catalog_filename) as f:
+            catalog = json.load(f)
+
+    globs = '*.js', '*.vue', '*.hbs'
+    regexps = [
+        re.compile(r'(?:|\.|\s|\{)_\(\s*(?:"|\')(.*?)(?:"|\')\s*(?:\)|,)'),
+        # re.compile(r'this\._\(\s*(?:"|\')(.*?)(?:"|\')\s*\)'),
+        re.compile(r'v-i18n="(.*?)"'),
+        re.compile(r'"\{\{\{?\s*\'(.*?)\'\s*\|\s*i18n\}\}\}?"'),
+        re.compile(r'{{_\s*"(.*?)"\s*}}'),
+        re.compile(r'{{_\s*\'(.*?)\'\s*}}'),
+    ]
+
+    for directory, _, _ in os.walk(join(ROOT, 'js')):
+        glob_patterns = (iglob(join(directory, g)) for g in globs)
+        for filename in itertools.chain(*glob_patterns):
+            print('Extracting messages from {0}'.format(green(filename)))
+            content = open(filename, 'r').read()
+            for regexp in regexps:
+                for match in regexp.finditer(content):
+                    key = match.group(1)
+                    if key not in catalog:
+                        catalog[key] = key
+
+    with open(catalog_filename, 'wb') as f:
+        json.dump(catalog, f, sort_keys=True, indent=4, ensure_ascii=False)
 
 
 @task
