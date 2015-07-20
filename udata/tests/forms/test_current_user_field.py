@@ -145,7 +145,7 @@ class CurrentUserFieldTest(TestCase):
         login_user(user)
 
         form = OwnableForm(MultiDict({
-            'owner': str('wrongwith12c')
+            'owner': 'wrong'
         }))
 
         form.validate()

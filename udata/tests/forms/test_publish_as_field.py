@@ -190,7 +190,7 @@ class PublishFieldTest(TestCase):
         Ownable, OwnableForm = self.factory()
 
         form = OwnableForm(MultiDict({
-            'organization': str('wrongwith12c')
+            'organization': 'wrong'
         }))
 
         form.validate()

@@ -1,3 +1,5 @@
+{% set nb_displayed_facets = 5 %}
+
 {% macro breadcrum_toolbar(result, url=None, exports=None) %}
 {% if kwargs %}
     {% set to_url = result.query.to_url %}
@@ -115,26 +117,56 @@
 
 {% macro term_facet(name, facet, query, url=None) %}
 <div id="collapse-{{name}}" class="list-group collapse in">
-{% for term, count in facet.terms %}
+{% for term, count in facet.terms[:nb_displayed_facets] %}
     <a href="{{ query.to_url(url, **{name: term}) }}"
         class="list-group-item">
         {{ query.adapter.facets[name].labelize('', term) }}
         <span class="badge pull-right">{{ count }}</span>
     </a>
 {% endfor %}
+{% if facet.terms|length > nb_displayed_facets %}
+    <button class="list-group-item"
+        data-toggle="collapse" data-target="#collapse-{{name}}-more">
+        {{ _('More results…') }}
+    </button>
+    <div id="collapse-{{name}}-more" class="list-group collapse list-group-more">
+    {% for term, count in facet.terms[nb_displayed_facets:] %}
+        <a href="{{ query.to_url(url, **{name: term}) }}"
+            class="list-group-item">
+            {{ query.adapter.facets[name].labelize('', term) }}
+            <span class="badge pull-right">{{ count }}</span>
+        </a>
+    {% endfor %}
+    </div>
+{% endif %}
 </div>
 {% endmacro %}
 
 
 {% macro model_facet(name, facet, query, url=None) %}
 <div id="collapse-{{name}}" class="list-group collapse in">
-    {% for obj, count in facet.models %}
+{% for obj, count in facet.models[:nb_displayed_facets] %}
+    <a href="{{ query.to_url(url, **{name: obj.id|string}) }}"
+        class="list-group-item">
+        {{ obj }}
+        <span class="badge pull-right">{{ count }}</span>
+    </a>
+{% endfor %}
+{% if facet.models|length > nb_displayed_facets %}
+    <button class="list-group-item list-group-more"
+        data-toggle="collapse" data-target="#collapse-{{name}}-more">
+        {{ _('More results…') }}
+    </button>
+    <div id="collapse-{{name}}-more" class="list-group collapse list-group-more">
+    {% for obj, count in facet.models[nb_displayed_facets:] %}
         <a href="{{ query.to_url(url, **{name: obj.id|string}) }}"
             class="list-group-item">
             {{ obj }}
             <span class="badge pull-right">{{ count }}</span>
         </a>
     {% endfor %}
+    </div>
+{% endif %}
 </div>
 {% endmacro %}
 

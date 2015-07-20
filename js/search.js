@@ -23,7 +23,11 @@ define([
                     $this.addClass('hide');
                 }
             });
-        })
+        });
+
+        $('.advanced-search-panel .list-group-more').on('shown.bs.collapse', function () {
+            $('button[data-target="#'+this.id+'"]').hide();
+        });
 
     });
 });
