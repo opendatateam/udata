@@ -18,7 +18,7 @@
 }
 </style>
 <template>
-<box-container title="{{title}}" icon="user" boxclass="user-profile-widget">
+<box-container footer="toggled" title="{{title}}" icon="user" boxclass="user-profile-widget">
     <aside>
         <a class="text-muted pointer" v-on="click: toggle">
             <i class="fa fa-gear"></i>
@@ -36,10 +36,10 @@
         </div>
     </div>
     <user-form v-ref="form" v-if="toggled" user="{{user}}"></user-form>
-    <box-footer v-if="toggled">
+    <footer v-if="toggled">
         <button type="submit" class="btn btn-primary"
             v-on="click: save($event)" v-i18n="Save"></button>
-    </box-footer>
+    </footer>
 </box-container>
 </template>
 <script>
