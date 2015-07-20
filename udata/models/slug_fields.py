@@ -107,10 +107,16 @@ def populate_slug(instance, field):
 
     # Track old slugs for this class
     if field.follow and slug != old_slug:
-        slug_follower, created = SlugFollow.get_or_create(
-            namespace=instance.__class__.__name__,
-            old_slug=old_slug
-        )
+        try:
+            slug_follower = SlugFollow.objects.get(
+                namespace=instance.__class__.__name__,
+                old_slug=old_slug
+            )
+        except SlugFollow.DoesNotExist:
+            slug_follower = SlugFollow.objects.create(
+                namespace=instance.__class__.__name__,
+                old_slug=old_slug
+            )
 
         slug_follower.new_slug = slug
         slug_follower.save()
