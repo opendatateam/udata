@@ -102,10 +102,7 @@ class UDataQuerySet(BaseQuerySet):
 
         https://github.com/MongoEngine/mongoengine/pull/1029/files#diff-05c70acbd0634d6d05e4a6e3a9b7d66b
         """
-        defaults = query.get('defaults', {})
-        if 'defaults' in query:
-            del query['defaults']
-
+        defaults = query.pop('defaults', {})
         try:
             doc = self.get(*q_objs, **query)
             return doc, False
