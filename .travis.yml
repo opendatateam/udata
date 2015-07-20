@@ -16,6 +16,6 @@ install:
   - travis_retry pip install -r requirements/travis.pip
   - pip install --no-deps -e .
 script:
-  - nosetests --with-coverage udata
+  - nosetests --immediate --with-coverage udata
 after_success:
   - coveralls --rcfile=coverage.rc
