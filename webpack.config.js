@@ -19,7 +19,8 @@ module.exports = {
     output: {
         path: path.join(__dirname, 'udata_admin', 'static'),
         publicPath: "/admin/static/",
-        filename: "[name].js"
+        filename: "[name].js",
+        chunkFilename: "[id].[hash].js"
     },
     resolve: {
         root: [
