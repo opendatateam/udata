@@ -138,6 +138,8 @@ from udata.features.transfer.models import *
 
 
 def init_app(app):
+    if app.config['TESTING']:
+        app.config['MONGODB_DB'] = '{MONGODB_DB}-test'.format(**app.config)
     db.init_app(app)
     for plugin in app.config['PLUGINS']:
         name = 'udata.ext.{0}.models'.format(plugin)
