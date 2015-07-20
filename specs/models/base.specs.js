@@ -1,9 +1,10 @@
-describe('Base model', function() {
-    var Vue = require('vue'),
-        API = require('specs/mocks/api'),
-        Model = require('models/base');
+import API from 'specs/mocks/api';
+import {Model} from 'models/base';
+import Vue from 'vue';
 
-    Vue.config.async = false;
+Vue.config.async = false;
+
+describe('Base model', function() {
 
     var PetSchema = {
         required: ['id', 'name'],
@@ -15,27 +16,25 @@ describe('Base model', function() {
     };
 
     describe('Flat model', function() {
-        var Pet;
+        class Pet extends Model {};
 
         before(function() {
             API.mock_defs({
                 Pet: PetSchema
             });
-            Pet = Model.extend({name: 'Pet'});
         });
 
 
         it("should use the specs schema", function() {
             var pet = new Pet();
 
-            expect(pet.schema).not.to.be.undefined;
-            expect(pet.schema).to.deep.equals(PetSchema);
+            expect(pet.__schema__).not.to.be.undefined;
+            expect(pet.__schema__).to.deep.equals(PetSchema);
         });
 
         it("should populate required data with the schema", function() {
             var pet = new Pet();
 
-            expect(pet.$data).not.to.be.undefined;
             expect(pet.id).to.be.null;
             expect(pet.name).to.be.null;
             expect(pet.tag).to.be.undefined;
@@ -55,22 +54,28 @@ describe('Base model', function() {
             expect(pet.tag).to.equal('tag');
         });
 
-        it('allow to watch undefined properties', function(done) {
-            var pet = new Pet({
+        describe("Vue.js integration", function() {
+
+            it('allows to watch undefined properties', function(done) {
+                var vm = new Vue({
+                    data: {
+                        pet: new Pet()
+                    },
                     watch: {
-                        'tag': function(value, old) {
+                        'pet.tag': function(value, old) {
                             done();
                         }
                     }
                 });
 
+                expect(vm.pet.id).to.be.null;
+                expect(vm.pet.name).to.be.null;
+                expect(vm.pet.tag).to.be.undefined;
 
-            expect(pet.id).to.be.null;
-            expect(pet.name).to.be.null;
-            expect(pet.tag).to.be.undefined;
-
-            pet.tag = 'test';
+                vm.pet.tag = 'test';
+            });
         });
+
 
         describe('Validation', function() {
             it("should validate complete valid models", function() {
@@ -125,8 +130,7 @@ describe('Base model', function() {
 
 
     describe("Nested models", function() {
-
-        var Person;
+        class Person extends Model {};
 
         before(function() {
             API.mock_defs({
@@ -141,13 +145,11 @@ describe('Base model', function() {
                     }
                 }
             });
-            Person = Model.extend({name: 'Person'});
         });
 
         it("should populate required data with the schema", function() {
             var person = new Person();
 
-            expect(person.$data).not.to.be.undefined;
             expect(person.id).to.be.null;
             expect(person.name).to.be.null;
             expect(person.age).to.be.undefined;
@@ -176,21 +178,28 @@ describe('Base model', function() {
             expect(person.pet.name).to.equal('Rex');
         });
 
-        it('allow to watch undefined properties', function(done) {
-            var person = new Person({
-                    watch: {
-                        'pet.name': function(value, old) {
-                            expect(value).to.equal('Rex');
-                            done();
+        describe("Vue.js integration", function() {
+
+            it('allows to watch undefined properties', function(done) {
+                var vm = new Vue({
+                        data: {
+                            person = new Person()
+                        },
+                        watch: {
+                            'person.pet.name': function(value, old) {
+                                expect(value).to.equal('Rex');
+                                done();
+                            }
                         }
-                    }
-                });
+                    });
 
 
-            expect(person.pet).to.be.undefined;
+                expect(vm.person.pet).to.be.undefined;
 
-            person.pet = {id: 1, name: 'Rex'};
-            expect(person.pet.name).to.equal('Rex');
+                vm.person.pet = {id: 1, name: 'Rex'};
+                expect(vm.person.pet.name).to.equal('Rex');
+            });
+
         });
     });
 

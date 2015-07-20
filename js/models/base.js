@@ -1,7 +1,8 @@
 import API from 'api';
 import validator from 'models/validator';
-import Vue from 'vue';
 import {pubsub, PubSub} from 'pubsub';
+
+
 
 /**
  * An empty JSON schema factory
