@@ -125,12 +125,11 @@
     </a>
 {% endfor %}
 {% if facet.terms|length > nb_displayed_facets %}
-    <a href=""
-        class="list-group-item"
+    <button class="list-group-item"
         data-toggle="collapse" data-target="#collapse-{{name}}-more">
-        {{ _('More facets…') }}
-    </a>
-    <div id="collapse-{{name}}-more" class="list-group collapse">
+        {{ _('More results…') }}
+    </button>
+    <div id="collapse-{{name}}-more" class="list-group collapse list-group-more">
     {% for term, count in facet.terms[nb_displayed_facets:] %}
         <a href="{{ query.to_url(url, **{name: term}) }}"
             class="list-group-item">
@@ -154,12 +153,11 @@
     </a>
 {% endfor %}
 {% if facet.models|length > nb_displayed_facets %}
-    <a href=""
-        class="list-group-item"
+    <button class="list-group-item list-group-more"
         data-toggle="collapse" data-target="#collapse-{{name}}-more">
-        {{ _('More facets…') }}
-    </a>
-    <div id="collapse-{{name}}-more" class="list-group collapse">
+        {{ _('More results…') }}
+    </button>
+    <div id="collapse-{{name}}-more" class="list-group collapse list-group-more">
     {% for obj, count in facet.models[nb_displayed_facets:] %}
         <a href="{{ query.to_url(url, **{name: obj.id|string}) }}"
             class="list-group-item">

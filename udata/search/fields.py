@@ -108,7 +108,7 @@ class BoolFacet(Facet):
 
 
 class TermFacet(Facet):
-    def to_query(self, size=10, args=None, **kwargs):
+    def to_query(self, size=20, args=None, **kwargs):
         query = {
             'terms': {
                 'field': self.field,
