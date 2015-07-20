@@ -46,12 +46,7 @@ class FollowAPI(API):
     @api.doc(id='follow', description=NOTE)
     def post(self, id):
         '''Follow an object given its ID'''
-        try:
-            follow = self.model.objects.get(follower=current_user.id, following=id, until=None)
-            created = False
-        except self.model.DoesNotExist:
-            follow = self.model.objects.create(follower=current_user.id, following=id, until=None)
-            created = True
+        follow, created = self.model.objects.get_or_create(follower=current_user.id, following=id, until=None)
         count = self.model.objects.followers(id).count()
         if not current_app.config['TESTING']:
             tracking.send_signal(on_new_follow, request, current_user)

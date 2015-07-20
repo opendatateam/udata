@@ -51,8 +51,8 @@ class SiteHomeDatasetsAPI(API):
         if not isinstance(request.json, list):
             api.abort(400, 'Expect a list of dataset IDs')
         ids = [ObjectId(id) for id in request.json]
-        current_site.settings.home_datasets = Dataset.objects.bulk_list(ids)
-        current_site.save()
+        Site.objects(id=current_site.id).update(set__settings__home_datasets=ids)
+        current_site.reload()
         return current_site.settings.home_datasets
 
 

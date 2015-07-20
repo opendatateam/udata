@@ -26,14 +26,10 @@ blueprint = I18nBlueprint('site', __name__)
 def get_current_site():
     if getattr(g, 'site', None) is None:
         site_id = current_app.config['SITE_ID']
-        try:
-            g.site = Site.objects.get(id=site_id)
-        except Site.DoesNotExist:
-            g.site = Site.objects.create(
-                id = site_id,
-                title = current_app.config.get('SITE_TITLE'),
-                keywords = current_app.config.get('SITE_KEYWORDS', []),
-            )
+        g.site, _ = Site.objects.get_or_create(id=site_id, defaults={
+            'title': current_app.config.get('SITE_TITLE'),
+            'keywords': current_app.config.get('SITE_KEYWORDS', []),
+        })
     return g.site
 
 
