@@ -1,6 +1,10 @@
 {% extends theme('layouts/form.html') %}
 {% import 'macros/forms.html' as forms with context %}
 
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('site/form.js') }}"></script>
+{% endblock %}
+
 {% block main_content %}
 <div class="row form-bg">
     <div class="col-xs-12">

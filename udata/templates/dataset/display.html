@@ -8,6 +8,12 @@
     'keywords': [_('dataset')] + dataset.tags,
 } %}
 
+{% set body_class = 'dataset-display' %}
+
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('dataset/display.js') }}"></script>
+{% endblock %}
+
 {% block extra_head %}
 <link rel="canonical" href="{{ url_for('datasets.show', dataset=dataset) }}" />
 {% endblock %}

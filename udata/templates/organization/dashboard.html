@@ -8,6 +8,10 @@
     'keywords': [_('metrics'), _('activity')],
 } %}
 
+{% block extra_js %}
+<script type="text/javascript" src="{{ static('dashboard/organization.js') }}"></script>
+{% endblock %}
+
 {% block breadcrumb %}
     {{ super() }}
     <li><a href="{{ url_for('organizations.list') }}">{{ org.name }}</a></li>

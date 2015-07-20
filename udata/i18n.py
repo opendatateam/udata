@@ -139,7 +139,7 @@ def init_app(app):
 
 
 def _add_language_code(endpoint, values):
-    if not endpoint.endswith('_redirect'):
+    if not (endpoint.endswith('.static') or endpoint.endswith('_redirect')):
         values.setdefault('lang_code', g.get('lang_code', default_lang))
 
 
@@ -169,6 +169,9 @@ class I18nBlueprintSetupState(BlueprintSetupState):
         blueprint's name.
         The URL rule is registered twice.
         """
+        # Static assets are not localized
+        if endpoint == 'static':
+            return super(I18nBlueprintSetupState, self).add_url_rule(rule, endpoint=endpoint, view_func=view_func, **options)
         if self.url_prefix:
             rule = self.url_prefix + rule
         options.setdefault('subdomain', self.subdomain)

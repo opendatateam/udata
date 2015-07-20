@@ -132,19 +132,32 @@ In case you prefer native packages, you must ensure a sufficient versionning:
 JavaScript dependencies
 -----------------------
 
-JavaScript dependencies are managed by bower and requires
-bower, less, ugilfyjs and requirejs to be installed globaly.
+JavaScript dependencies are managed by npm and requires
+webpack to be installed globaly.
 
 .. code-block:: shell
 
-    $ sudo npm install -g bower less uglifyjs requirejs
+    $ sudo npm install -g webpack
 
 Then, to fetch the udata dependencies:
 
 .. code-block:: shell
 
     $ cd $WORKSPACE/udata
-    $ bower install
+    $ npm install
+
+From here you can build the assets in production mode once and for all:
+
+.. code-block:: shell
+
+    $ inv assets
+
+or use the watch process which will trigger a build each time a javascript file
+or a less file is touched:
+
+.. code-block:: shell
+
+    $ inv watch
 
 
 Working

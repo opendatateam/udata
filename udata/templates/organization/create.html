@@ -1,5 +1,10 @@
 {% extends theme('organization/form.html') %}
 
+{% block extra_js %}
+{{ super() }}
+<script type="text/javascript" src="{{ static('organization/form.js') }}"></script>
+{% endblock %}
+
 {% block breadcrumb %}
 <li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
 <li class="active">{{ _('New') }}</li>

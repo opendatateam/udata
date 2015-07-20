@@ -14,7 +14,7 @@ from udata.utils import hash_url
 
 __all__ = (
     'Reuse', 'ReuseBadge', 'ReuseIssue', 'ReuseDiscussion', 'FollowReuse',
-    'REUSE_BADGE_KINDS', 'REUSE_TYPES'
+    'REUSE_BADGE_KINDS', 'REUSE_TYPES', 'DATACONNEXIONS_CANDIDATE'
 )
 
 

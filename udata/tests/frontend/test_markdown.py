@@ -53,6 +53,30 @@ class MarkdownTestCase(TestCase, WebTestMixin):
             self.assertEqual(el.getAttribute('href'), 'http://example.net/')
             self.assertEqual(el.firstChild.data, 'http://example.net/')
 
+    def test_markdown_linkify_mails(self):
+        '''Markdown filter should transform emails to anchors'''
+        text = 'coucou@cmoi.fr'
+        with self.app.test_request_context('/'):
+            result = render_template_string('{{ text|markdown }}', text=text)
+            parsed = parser.parse(result)
+            el = parsed.getElementsByTagName('a')[0]
+            self.assertEqual(el.getAttribute('href'), 'mailto:coucou@cmoi.fr')
+            self.assertEqual(el.firstChild.data, 'coucou@cmoi.fr')
+
+    def test_markdown_linkify_within_pre(self):
+        '''Markdown filter should not transform urls into <pre> anchors'''
+        text = '<pre>http://example.net/</pre>'
+        with self.app.test_request_context('/'):
+            result = render_template_string('{{ text|markdown }}', text=text)
+            self.assertEqual(result.strip(), '<pre>http://example.net/</pre>')
+
+    def test_markdown_linkify_email_within_pre(self):
+        '''Markdown filter should not transform emails into <pre> anchors'''
+        text = '<pre>coucou@cmoi.fr</pre>'
+        with self.app.test_request_context('/'):
+            result = render_template_string('{{ text|markdown }}', text=text)
+            self.assertEqual(result.strip(), '<pre>coucou@cmoi.fr</pre>')
+
     def test_bleach_sanitize(self):
         '''Markdown filter should sanitize evil code'''
         text = 'an <script>evil()</script>'

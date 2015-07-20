@@ -36,6 +36,7 @@ js-built
 /static/
 /doc/_build/
 /node_modules/
+/udata/static/
 
 # Installer logs
 pip-log.txt

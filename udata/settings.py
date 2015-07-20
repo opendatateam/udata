@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 class Defaults(object):
     DEBUG = False
-    ASSETS_DEBUG = False
     TESTING = False
     LANGUAGES = {
         'en': 'English',
@@ -54,7 +53,37 @@ class Defaults(object):
     PLUGINS = []
     THEME = 'default'
 
+    STATIC_DIRS = []
+
     OAUTH2_PROVIDER_ERROR_ENDPOINT = 'oauth-i18n.oauth_error'
+
+    MD_ALLOWED_TAGS = [
+        'a',
+        'abbr',
+        'acronym',
+        'b',
+        'br',
+        'blockquote',
+        'code',
+        'dl',
+        'dt',
+        'em',
+        'i',
+        'li',
+        'ol',
+        'pre',
+        'small',
+        'strong',
+        'ul',
+    ]
+
+    MD_ALLOWED_ATTRIBUTES = {
+        'a': ['href', 'title'],
+        'abbr': ['title'],
+        'acronym': ['title'],
+    }
+
+    MD_ALLOWED_STYLES = []
 
     # CROQUEMORT = {
     #     'url': 'http://localhost:8000',
@@ -79,21 +108,17 @@ class Defaults(object):
 
 class Testing(Defaults):
     TESTING = True
-    MONGODB_DB = 'udata-test'
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_ALWAYS_EAGER = True
     TEST_WITH_PLUGINS = False
     TEST_WITH_THEME = False
-    ASSETS_AUTO_BUILD = False
-    ASSETS_DEBUG = True
     CACHE_TYPE = 'null'
     CACHE_NO_NULL_WARNING = True
 
 
 class Debug(Defaults):
     DEBUG = True
-    ASSETS_DEBUG = True
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     DEBUG_TB_PANELS = (
         'flask.ext.debugtoolbar.panels.versions.VersionDebugPanel',

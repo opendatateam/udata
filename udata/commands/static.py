@@ -4,8 +4,6 @@ from __future__ import unicode_literals
 import logging
 import os
 import shutil
-import subprocess
-# import time
 
 from glob import iglob
 from os import makedirs
@@ -14,42 +12,15 @@ from sys import exit
 
 from flask import current_app
 from flask.ext.script import prompt_bool
-# from flask.ext.themes2 import get_theme
-from webassets.script import CommandLineEnvironment
 
-from udata import theme
 from udata.commands import manager
 
 log = logging.getLogger(__name__)
 
 
-@manager.command
-def build():
-    '''Compile static files'''
-    log = logging.getLogger('webassets')
-    log.addHandler(logging.StreamHandler())
-    log.setLevel(logging.DEBUG)
-
-    # Override some local config
-    current_app.config['DEBUG'] = False
-    current_app.config['ASSETS_DEBUG'] = False
-    current_app.config['REQUIREJS_RUN_IN_DEBUG'] = True
-
-    cmdenv = CommandLineEnvironment(theme.assets, log)
-    cmdenv.build(production=True)
-
-    print('Performing require.js optimization')
-    buildfile = join(theme.assets.directory, 'js', 'app.build.js')
-    # bust = 'pragmas.bust={0}'.format(time.time())
-    params = ['r.js', '-o', buildfile]
-    subprocess.call(params)
-
-    print('Done')
-
-
 @manager.option('path', nargs='?', default='static', help='target path')
 @manager.option('-ni', '--no-input', dest="input",
-    action='store_false', help="Disable input prompts")
+                action='store_false', help="Disable input prompts")
 def collect(path, input):
     '''Collect static files'''
     if exists(path):
@@ -61,7 +32,7 @@ def collect(path, input):
         shutil.rmtree(path)
 
     print('Copying assets into "{0}"'.format(path))
-    shutil.copytree(theme.assets.directory, path)
+    shutil.copytree(current_app.static_folder, path)
 
     for prefix, source in manager.app.config['STATIC_DIRS']:
         print('Copying %s to %s' % (source, prefix))
