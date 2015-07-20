@@ -90,6 +90,30 @@ class UDataQuerySet(BaseQuerySet):
         data = self.in_bulk(ids)
         return [data[id] for id in ids]
 
+    def get_or_create(self, write_concern=None, auto_save=True,
+                      *q_objs, **query):
+        """Retrieve unique object or create, if it doesn't exist.
+
+        Returns a tuple of ``(object, created)``, where ``object`` is
+        the retrieved or created object and ``created`` is a boolean
+        specifying whether a new object was created.
+
+        Taken back from:
+
+        https://github.com/MongoEngine/mongoengine/pull/1029/files#diff-05c70acbd0634d6d05e4a6e3a9b7d66b
+        """
+        defaults = query.pop('defaults', {})
+        try:
+            doc = self.get(*q_objs, **query)
+            return doc, False
+        except self._document.DoesNotExist:
+            query.update(defaults)
+            doc = self._document(**query)
+
+            if auto_save:
+                doc.save(write_concern=write_concern)
+            return doc, True
+
 
 class UDataDocument(Document):
     meta = {
