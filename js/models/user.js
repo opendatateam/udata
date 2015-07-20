@@ -21,7 +21,14 @@ export default class User extends Model {
         return this;
     }
 
+    update(data) {
+        this.$api('users.update_user', {
+            user: this.id,
+            payload: JSON.stringify(data)
+        }, this.on_fetched);
+    }
+
     has_role(name) {
         return this.roles && this.roles.indexOf(name) >= 0;
     }
-};
+}
