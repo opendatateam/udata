@@ -27,7 +27,7 @@ def i18njs(path, domain='udata'):
     * Handlebars templates (*.hbs) {_ ""} helper calls
     '''
     catalog = {}
-    path = path or os.getcwd()
+    path = path or join(os.getcwd(), 'js')
     catalog_filename = join(path, 'locales', '{}.en.json'.format(domain))
     if exists(catalog_filename):
         with open(catalog_filename) as f:
