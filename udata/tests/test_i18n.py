@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from flask import g, url_for
+from werkzeug.routing import BuildError
 
 from udata.i18n import I18nBlueprint, language
 
@@ -9,7 +10,7 @@ from . import DBTestMixin, WebTestMixin, TestCase
 from .factories import UserFactory
 
 
-bp = I18nBlueprint('i18nbp', __name__)
+bp = I18nBlueprint('i18nbp', __name__, static_folder='static')
 
 
 @bp.route('/lang/<msg>/')
@@ -41,6 +42,11 @@ class I18nBlueprintTest(WebTestMixin, DBTestMixin, TestCase):
 
     def test_redirect_url_for(self):
         self.assertEqual(url_for('i18nbp.lang_redirect', msg='test'), '/lang/test/')
+
+    def test_lang_ignored_for_static(self):
+        self.assertEqual(url_for('i18nbp.static', filename='test.jpg'), '/static/test.jpg')
+        with self.assertRaises(BuildError):
+            url_for('i18nbp.static_redirect', filename='test.jpg')
 
     def test_redirect_on_missing_lang(self):
         response = self.get('/lang/test/?q=test')
