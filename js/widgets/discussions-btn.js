@@ -157,7 +157,7 @@ function($, API, Auth, i18n, Notify) {
         $form.find('#title-new-discussion').val(
             i18n._('New tag suggestion to improve metadata'));
         $form.find('#comment-new-discussion').val(
-            i18n._('Hello,\n\nI propose this new tag: '));
+            i18n._('Hello,') + '\n\n' + i18n._('I propose this new tag: '));
     });
 
 });
