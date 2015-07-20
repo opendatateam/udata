@@ -715,7 +715,7 @@ class TestTermFacet(TestCase):
         self.assertEqual(self.facet.to_query(), {
             'terms': {
                 'field': 'tags',
-                'size': 10,
+                'size': 20,
             }
         })
 
@@ -723,7 +723,7 @@ class TestTermFacet(TestCase):
         self.assertEqual(self.facet.to_query(args=['tag1', 'tag2']), {
             'terms': {
                 'field': 'tags',
-                'size': 10,
+                'size': 20,
                 'exclude': ['tag1', 'tag2']
             }
         })
@@ -774,7 +774,7 @@ class TestModelTermFacet(TestCase, DBTestMixin):
         self.assertEqual(self.facet.to_query(), {
             'terms': {
                 'field': 'fakes',
-                'size': 10,
+                'size': 20,
             }
         })
 
@@ -782,7 +782,7 @@ class TestModelTermFacet(TestCase, DBTestMixin):
         self.assertEqual(self.facet.to_query(args=['id1', 'id2']), {
             'terms': {
                 'field': 'fakes',
-                'size': 10,
+                'size': 20,
                 'exclude': ['id1', 'id2']
             }
         })

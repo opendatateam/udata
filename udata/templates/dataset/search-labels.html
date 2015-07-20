@@ -3,9 +3,6 @@
     {{ s.filter_label('organization', _('Organization'), ficon('fa-building-o'),
         labelize=datasets.label_func('organization')
     ) }}
-    {{ s.filter_label('supplier', _('Supplier'), ficon('fa-building-o'),
-        labelize=datasets.label_func('supplier')
-    ) }}
     {{ s.filter_label('tag', _('Tag'), ficon('fa-tag')) }}
     {{ s.filter_label('license', _('License'), ficon('copyright-mark'),
         labelize=datasets.label_func('license')

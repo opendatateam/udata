@@ -137,7 +137,6 @@ class DatasetSearch(ModelSearchAdapter):
         'badge': TermFacet('badges', labelizer=dataset_badge_labelizer),
         'organization': ModelTermFacet('organization', Organization),
         'owner': ModelTermFacet('owner', User),
-        'supplier': ModelTermFacet('supplier', Organization),
         'license': ModelTermFacet('license', License),
         'geozone': ModelTermFacet('geozones.id', GeoZone, zone_labelizer),
         'granularity': TermFacet('granularity', granularity_labelizer),
