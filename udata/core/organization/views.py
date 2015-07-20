@@ -325,14 +325,14 @@ def datasets_resources_csv(org):
 
 @blueprint.route('/<org:org>/supplied-datasets.csv')
 def supplied_datasets_csv(org):
-    datasets = search.iter(Dataset, supplier=str(org.id))
+    datasets = Dataset.objects.filter(supplier=str(org.id))
     adapter = DatasetCsvAdapter(datasets)
     return csv.stream(adapter, '{0}-supplied-datasets'.format(org.slug))
 
 
 @blueprint.route('/<org:org>/supplied-datasets-resources.csv')
 def supplied_datasets_resources_csv(org):
-    datasets = search.iter(Dataset, supplier=str(org.id))
+    datasets = Dataset.objects.filter(supplier=str(org.id))
     adapter = ResourcesCsvAdapter(datasets)
     return csv.stream(adapter, '{0}-supplied-datasets-resources'.format(org.slug))
 
