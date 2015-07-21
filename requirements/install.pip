@@ -38,3 +38,6 @@ wtforms==2.0.2
 
 # Pin until https://github.com/MongoEngine/mongoengine/issues/935 is fixed
 pymongo<3.0
+
+# Pin this until flask-restplus works with 0.3.4
+Flask-RESTful==0.3.3
