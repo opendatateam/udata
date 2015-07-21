@@ -35,3 +35,6 @@ unicodecsv==0.13.0
 webassets==0.10.1
 wtforms-json==0.2.10
 wtforms==2.0.2
+
+# Pin this until flask-restplus works with 0.3.4
+Flask-RESTful==0.3.3

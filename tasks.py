@@ -1,37 +1,26 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-from os.path import join, abspath, dirname, exists
+import itertools
+import json
+import os
+import re
+
+from glob import iglob
+from os.path import join, exists
+from sys import exit
 
 from invoke import run, task
 
-ROOT = abspath(join(dirname(__file__)))
-I18N_DOMAIN = 'udata-admin'
+from tasks_helpers import ROOT, info, header, lrun, nrun, green
 
-
-def green(text):
-    return '\033[1;32m{0}\033[0;m'.format(text)
-
-
-def red(text):
-    return '\033[1;31m{0}\033[0;m'.format(text)
-
-
-def cyan(text):
-    return '\033[1;36m{0}\033[0;m'.format(text)
-
-
-def lrun(command, *args, **kwargs):
-    run('cd {0} && {1}'.format(ROOT, command), *args, **kwargs)
-
-
-def nrun(command, *args, **kwargs):
-    lrun('node_modules/.bin/{0}'.format(command), *args, **kwargs)
+I18N_DOMAIN = 'udata'
 
 
 @task
 def clean(bower=False, node=False):
     '''Cleanup all build artifacts'''
+    header('Clean all build artifacts')
     patterns = [
         'build', 'dist', 'cover', 'docs/_build',
         '**/*.pyc', '*.egg-info', '.tox'
@@ -41,39 +30,48 @@ def clean(bower=False, node=False):
     if node:
         patterns.append('node_modules')
     for pattern in patterns:
-        print('Removing {0}'.format(pattern))
+        info('Removing {0}'.format(pattern))
         run('cd {0} && rm -rf {1}'.format(ROOT, pattern))
 
 
 @task
 def test():
     '''Run tests suite'''
-    run('cd {0} && nosetests --rednose --force-color udata'.format(ROOT), pty=True)
+    header('Run tests suite')
+    lrun('nosetests --rednose --force-color udata', pty=True)
 
 
 @task
 def cover():
     '''Run tests suite with coverage'''
-    run('cd {0} && nosetests --rednose --force-color \
-        --with-coverage --cover-html --cover-package=udata'.format(ROOT), pty=True)
+    header('Run tests suite with coverage')
+    lrun('nosetests --rednose --force-color \
+        --with-coverage --cover-html --cover-package=udata', pty=True)
 
 
 @task
 def doc():
     '''Build the documentation'''
-    run('cd {0}/doc && make html'.format(ROOT), pty=True)
+    header('Building documentation')
+    lrun('cd doc && make html', pty=True)
 
 
 @task
 def qa():
     '''Run a quality report'''
-    run('flake8 {0}/udata'.format(ROOT))
+    header('Performing static analysis')
+    info('Python static analysis')
+    flake8_results = lrun('flake8 udata', warn=True)
+    info('JavaScript static analysis')
+    jshint_results = nrun('jshint js', warn=True)
+    if flake8_results.failed or jshint_results.failed:
+        exit(flake8_results.return_code or jshint_results.return_code)
 
 
 @task
 def serve():
     '''Run a development server'''
-    run('cd {0} && python manage.py serve -d -r'.format(ROOT), pty=True)
+    lrun('python manage.py serve -d -r', pty=True)
 
 
 @task
@@ -91,29 +89,62 @@ def beat(loglevel='info'):
 @task
 def i18n():
     '''Extract translatable strings'''
-    run('python setup.py extract_messages')
-    run('python setup.py update_catalog')
-    run('udata i18njs -d udata udata/static')
+    header('Extract translatable strings')
+
+    info('Extract Python strings')
+    lrun('python setup.py extract_messages')
+    lrun('python setup.py update_catalog')
+
+    info('Extract JavaScript strings')
+    catalog = {}
+    catalog_filename = join(ROOT, 'js', 'locales', '{}.en.json'.format(I18N_DOMAIN))
+    if exists(catalog_filename):
+        with open(catalog_filename) as f:
+            catalog = json.load(f)
+
+    globs = '*.js', '*.vue', '*.hbs'
+    regexps = [
+        re.compile(r'(?:|\.|\s|\{)_\(\s*(?:"|\')(.*?)(?:"|\')\s*(?:\)|,)'),
+        # re.compile(r'this\._\(\s*(?:"|\')(.*?)(?:"|\')\s*\)'),
+        re.compile(r'v-i18n="(.*?)"'),
+        re.compile(r'"\{\{\{?\s*\'(.*?)\'\s*\|\s*i18n\}\}\}?"'),
+        re.compile(r'{{_\s*"(.*?)"\s*}}'),
+        re.compile(r'{{_\s*\'(.*?)\'\s*}}'),
+    ]
+
+    for directory, _, _ in os.walk(join(ROOT, 'js')):
+        glob_patterns = (iglob(join(directory, g)) for g in globs)
+        for filename in itertools.chain(*glob_patterns):
+            print('Extracting messages from {0}'.format(green(filename)))
+            content = open(filename, 'r').read()
+            for regexp in regexps:
+                for match in regexp.finditer(content):
+                    key = match.group(1)
+                    if key not in catalog:
+                        catalog[key] = key
+
+    with open(catalog_filename, 'wb') as f:
+        json.dump(catalog, f, sort_keys=True, indent=4, ensure_ascii=False)
 
 
 @task
 def i18nc():
     '''Compile translations'''
-    print(cyan('Compiling translations'))
-    run('cd {0} && python setup.py compile_catalog'.format(ROOT))
+    header('Compiling translations')
+    lrun('python setup.py compile_catalog')
 
 
 @task
 def assets():
     '''Install and compile assets'''
-    print(cyan('Building static assets'))
-    lrun('cd {0} && webpack -c --progress --config webpack.config.prod.js'.format(ROOT), pty=True)
+    header('Building static assets')
+    lrun('webpack -c --progress --config webpack.config.prod.js', pty=True)
 
 
 @task(i18nc, assets)
 def dist():
     '''Package for distribution'''
-    print(cyan('Building a distribuable package'))
+    header('Building a distribuable package')
     lrun('python setup.py bdist_wheel', pty=True)
 
 
