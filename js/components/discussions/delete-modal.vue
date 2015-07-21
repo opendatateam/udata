@@ -2,7 +2,7 @@
 
 <template>
 <modal title="{{ _('Confirm deletion') }}"
-    modalclass="modal-danger discussion-delete-modal"
+    class="modal-danger discussion-delete-modal"
     v-ref="modal">
 
     <div class="modal-body">

@@ -7,7 +7,7 @@
 </style>
 
 <template>
-<w-modal title="{{ resource.title }}" modalclass="resource-modal"
+<modal title="{{ resource.title }}" class="resource-modal"
     v-class="modal-danger: confirm, modal-primary: !confirm"
     v-ref="modal">
     <div class="modal-body">
@@ -16,7 +16,7 @@
 
             <dl class="dl-horizontal dl-wide">
                 <dt>{{ _('URL') }}</dt>
-                <dd><a href="{{url}}">{{resource.url}}</a></dd>
+                <dd><a href="{{resource.url}}">{{resource.url}}</a></dd>
                 <dt v-if="resource.format">{{ _('Format') }}</dt>
                 <dd v-if="resource.format">{{ resource.format }}</dd>
                 <dt v-if="resource.mime">{{ _('Mime Type') }}</dt>
@@ -74,7 +74,7 @@
             {{ _('Cancel') }}
         </button>
     </footer>
-</w-modal>
+</modal>
 </template>
 
 <script>
@@ -84,15 +84,14 @@ var $ = require('jquery');
 
 module.exports = {
     components: {
-        'w-modal': require('components/modal.vue'),
+        'modal': require('components/modal.vue'),
         'resource-form': require('components/dataset/resource/form.vue')
     },
     data: function() {
         return {
             edit: false,
             confirm: false,
-            dataset: {},
-            // resource: {}
+            dataset: {}
         };
     },
     methods: {

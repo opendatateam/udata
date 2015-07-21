@@ -4,7 +4,7 @@
 
 <template>
 <modal title="{{ _('Badges') }}"
-    modalclass="modal-info badges-modal"
+    class="modal-info badges-modal"
     v-ref="modal">
 
     <div class="modal-body">

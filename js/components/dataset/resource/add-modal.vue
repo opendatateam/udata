@@ -1,7 +1,7 @@
 <style lang="less"></style>
 
 <template>
-<w-modal modalclass="modal-primary add-resource-modal"
+<modal class="modal-primary add-resource-modal"
     title="{{ _('Add a resource') }}">
 
     <div class="modal-body">
@@ -19,7 +19,7 @@
             {{ _('Cancel') }}
         </button>
     </footer>
-</w-modal>
+</modal>
 </template>
 
 <script>
@@ -32,7 +32,7 @@ module.exports = {
         };
     },
     components: {
-        'w-modal': require('components/modal.vue'),
+        'modal': require('components/modal.vue'),
         'resource-form': require('components/dataset/resource/form.vue')
     },
     methods: {

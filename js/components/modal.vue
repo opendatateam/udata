@@ -1,5 +1,5 @@
 <template>
-<div class="modal fade {{modalclass}}" tabindex="-1" role="dialog"
+<div class="modal fade" tabindex="-1" role="dialog"
     aria-labelledby="modal-title" aria-hidden="true">
     <div class="modal-dialog" v-class="modal-sm: size == 'sm', modal-lg: size == 'lg'">
         <div class="modal-content">
@@ -24,7 +24,7 @@ var $ = require('jquery');
 module.exports = {
     replace: true,
     name: 'modal',
-    props: ['title', 'size', 'modalclass'],
+    props: ['title', 'size'],
     events: {
         'modal:close': function() {
             this.close();

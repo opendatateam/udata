@@ -1,8 +1,8 @@
 <style lang="less"></style>
 
 <template>
-<w-modal title="{{ _('Transfer request') }}"
-    modalclass="modal-info transfer-request-modal"
+<modal title="{{ _('Transfer request') }}"
+    class="modal-info transfer-request-modal"
     v-ref="modal">
 
     <div class="modal-body">
@@ -69,7 +69,7 @@
             {{ _('Cancel') }}
         </button>
     </footer>
-</w-modal>
+</modal>
 </template>
 
 <script>
@@ -79,7 +79,7 @@ var API = require('api');
 
 module.exports = {
     components: {
-        'w-modal': require('components/modal.vue'),
+        'modal': require('components/modal.vue'),
         'org-filter': require('components/organization/card-filter.vue'),
         'user-filter': require('components/user/card-filter.vue'),
         'org-card': require('components/organization/card.vue'),

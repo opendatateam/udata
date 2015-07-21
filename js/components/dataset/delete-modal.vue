@@ -2,7 +2,7 @@
 
 <template>
 <modal title="{{ _('Confirm deletion') }}"
-    modalclass="modal-danger dataset-delete-modal"
+    class="modal-danger dataset-delete-modal"
     v-ref="modal">
 
     <div class="modal-body">
@@ -38,7 +38,7 @@ module.exports = {
     },
     data: function() {
         return {
-            dataset: {},
+            dataset: {}
         };
     },
     methods: {
