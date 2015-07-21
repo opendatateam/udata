@@ -116,6 +116,9 @@ class ResourceForm(ModelForm):
     size = fields.IntegerField(
         _('Size'), [validators.optional()],
         description=_('The file size in bytes'))
+    published = fields.DateTimeField(
+        _('Publication date'),
+        description=_('The publication date of the resource'))
 
 
 class CommunityResourceForm(ResourceForm):
