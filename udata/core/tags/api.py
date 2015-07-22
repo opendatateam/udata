@@ -9,8 +9,12 @@ DEFAULT_SIZE = 8
 ns = api.namespace('tags', 'Tags related operations')
 
 parser = api.parser()
-parser.add_argument('q', type=unicode, help='The string to autocomplete/suggest', location='args', required=True)
-parser.add_argument('size', type=int, help='The amount of suggestion to fetch', location='args', default=DEFAULT_SIZE)
+parser.add_argument(
+    'q', type=unicode, help='The string to autocomplete/suggest',
+    location='args', required=True)
+parser.add_argument(
+    'size', type=int, help='The amount of suggestion to fetch',
+    location='args', default=DEFAULT_SIZE)
 
 
 @ns.route('/suggest/', endpoint='suggest_tags')

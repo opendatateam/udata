@@ -26,21 +26,25 @@ class TopicSearchQuery(search.SearchQuery):
 
     def build_text_query(self):
         query = super(TopicSearchQuery, self).build_text_query()
-        self._update_bool_query(query, {'should': [{'term': {'tags': tag}} for tag in self.topic.tags]})
+        self._update_bool_query(query, {
+            'should': [{'term': {'tags': tag}} for tag in self.topic.tags]})
         return query
 
 
 @blueprint.route('/<topic:topic>/')
 def display(topic):
     specs = {
-        'recent_datasets': TopicSearchQuery(Dataset, sort='-created', page_size=9, topic=topic),
-        'featured_reuses': TopicSearchQuery(Reuse, featured=True, page_size=6, topic=topic),
+        'recent_datasets': TopicSearchQuery(
+            Dataset, sort='-created', page_size=9, topic=topic),
+        'featured_reuses': TopicSearchQuery(
+            Reuse, featured=True, page_size=6, topic=topic),
     }
     keys, queries = zip(*specs.items())
 
     results = search.multiquery(*queries)
 
-    return theme.render('topic/display.html',
+    return theme.render(
+        'topic/display.html',
         topic=topic,
         **dict(zip(keys, results))
     )
@@ -51,7 +55,8 @@ def datasets(topic):
     kwargs = multi_to_dict(request.args)
     kwargs.update(topic=topic)
 
-    return theme.render('topic/datasets.html',
+    return theme.render(
+        'topic/datasets.html',
         topic=topic,
         datasets=TopicSearchQuery(Dataset, facets=True, **kwargs).execute()
     )
@@ -62,7 +67,8 @@ def reuses(topic):
     kwargs = multi_to_dict(request.args)
     kwargs.update(topic=topic)
 
-    return theme.render('topic/reuses.html',
+    return theme.render(
+        'topic/reuses.html',
         topic=topic,
         reuses=TopicSearchQuery(Reuse, facets=True, **kwargs).execute()
     )
@@ -96,7 +102,8 @@ class TopicEditView(ProtectedTopicView, EditView):
 
 @blueprint.before_app_request
 def store_featured_topics():
-    g.featured_topics = sorted(Topic.objects(featured=True), key=lambda t: t.slug)
+    g.featured_topics = sorted(Topic.objects(featured=True),
+                               key=lambda t: t.slug)
 
 
 @sitemap.register_generator

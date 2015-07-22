@@ -23,7 +23,8 @@ class UserAPITest(APITestCase):
         self.assertEqual(response.json['followers'], nb_followers)
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(nb_followers, 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(), Follow)
+        self.assertIsInstance(Follow.objects.followers(to_follow).first(),
+                              Follow)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
@@ -58,9 +59,11 @@ class UserAPITest(APITestCase):
         '''It should suggest users baed on first name'''
         with self.autoindex():
             for i in range(4):
-                UserFactory(first_name='test-{0}'.format(i) if i % 2 else faker.word())
+                UserFactory(
+                    first_name='test-{0}'.format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for('api.suggest_users'), qs={'q': 'tes', 'size': '5'})
+        response = self.get(url_for('api.suggest_users'),
+                            qs={'q': 'tes', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -78,9 +81,11 @@ class UserAPITest(APITestCase):
         '''It should suggest users based on last'''
         with self.autoindex():
             for i in range(4):
-                UserFactory(last_name='test-{0}'.format(i) if i % 2 else faker.word())
+                UserFactory(
+                    last_name='test-{0}'.format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for('api.suggest_users'), qs={'q': 'tes', 'size': '5'})
+        response = self.get(url_for('api.suggest_users'),
+                            qs={'q': 'tes', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -97,9 +102,11 @@ class UserAPITest(APITestCase):
         '''It should suggest users with special characters'''
         with self.autoindex():
             for i in range(4):
-                UserFactory(last_name='testé-{0}'.format(i) if i % 2 else faker.word())
+                UserFactory(
+                    last_name='testé-{0}'.format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for('api.suggest_users'), qs={'q': 'testé', 'size': '5'})
+        response = self.get(url_for('api.suggest_users'),
+                            qs={'q': 'testé', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -118,13 +125,15 @@ class UserAPITest(APITestCase):
             for i in range(3):
                 UserFactory()
 
-        response = self.get(url_for('api.suggest_users'), qs={'q': 'xxxxxx', 'size': '5'})
+        response = self.get(url_for('api.suggest_users'),
+                            qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_users_api_empty(self):
         '''It should not provide user suggestion if no data'''
         self.init_search()
-        response = self.get(url_for('api.suggest_users'), qs={'q': 'xxxxxx', 'size': '5'})
+        response = self.get(url_for('api.suggest_users'),
+                            qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)

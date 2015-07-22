@@ -67,7 +67,8 @@ class APIAuthTest(APITestCase):
     def test_header_auth(self):
         '''Should handle header API Key authentication'''
         user = UserFactory(apikey='apikey')
-        response = self.post(url_for('api.fake'), headers={'X-API-KEY': user.apikey})
+        response = self.post(url_for('api.fake'),
+                             headers={'X-API-KEY': user.apikey})
 
         self.assert200(response)
         self.assertEqual(response.content_type, 'application/json')
@@ -77,7 +78,6 @@ class APIAuthTest(APITestCase):
         '''Should handle  OAuth header authentication'''
         user = UserFactory()
         client = self.oauth_app()
-        # grant = OAuth2Grant.objects.create(user=user, client=client, code='test-code')
         token = OAuth2Token.objects.create(
             client=client,
             user=user,
@@ -99,24 +99,29 @@ class APIAuthTest(APITestCase):
 
         self.assert401(response)
         self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json, {'status': 401, 'message': 'Unauthorized'})
+        self.assertEqual(response.json,
+                         {'status': 401, 'message': 'Unauthorized'})
 
     def test_invalid_apikey(self):
         '''Should raise a HTTP 401 if an invalid API Key is provided'''
-        response = self.post(url_for('api.fake'), headers={'X-API-KEY': 'fake'})
+        response = self.post(url_for('api.fake'),
+                             headers={'X-API-KEY': 'fake'})
 
         self.assert401(response)
         self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json, {'status': 401, 'message': 'Invalid API Key'})
+        self.assertEqual(response.json,
+                         {'status': 401, 'message': 'Invalid API Key'})
 
     def test_inactive_user(self):
         '''Should raise a HTTP 401 if the user is inactive'''
         user = UserFactory(apikey='apikey', active=False)
-        response = self.post(url_for('api.fake'), headers={'X-API-KEY': user.apikey})
+        response = self.post(url_for('api.fake'),
+                             headers={'X-API-KEY': user.apikey})
 
         self.assert401(response)
         self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json, {'status': 401, 'message': 'Inactive user'})
+        self.assertEqual(response.json,
+                         {'status': 401, 'message': 'Inactive user'})
 
     def test_validation_errors(self):
         '''Should raise a HTTP 400 and returns errors on validation error'''
@@ -146,7 +151,8 @@ class APIAuthTest(APITestCase):
         self.login()
 
         client = self.oauth_app()
-        response = self.get(url_for('oauth-i18n.authorize',
+        response = self.get(url_for(
+            'oauth-i18n.authorize',
             response_type='code',
             client_id=client.client_id,
             redirect_uri=client.default_redirect_uri
@@ -159,7 +165,8 @@ class APIAuthTest(APITestCase):
         self.login()
 
         client = self.oauth_app()
-        response = self.post(url_for('oauth-i18n.authorize',
+        response = self.post(url_for(
+            'oauth-i18n.authorize',
             response_type='code',
             client_id=client.client_id,
             redirect_uri=client.default_redirect_uri
@@ -178,7 +185,8 @@ class APIAuthTest(APITestCase):
 
         client = self.oauth_app()
 
-        response = self.post(url_for('oauth-i18n.authorize',
+        response = self.post(url_for(
+            'oauth-i18n.authorize',
             response_type='code',
             client_id=client.client_id,
             redirect_uri=client.default_redirect_uri

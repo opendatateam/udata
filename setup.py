@@ -11,7 +11,7 @@ RE_REQUIREMENT = re.compile(r'^\s*-r\s*(?P<filename>.*)$')
 
 PYPI_RST_FILTERS = (
     # Replace code-blocks
-    (r'\.\.\s? code-block::\s*(\w|\+)+',  '::'),
+    (r'\.\.\s? code-block::\s*(\w|\+)+', '::'),
     # Remove travis ci badge
     (r'.*travis-ci\.org/.*', ''),
     # Remove pypip.in badges
@@ -24,12 +24,12 @@ ROOT = dirname(__file__)
 
 
 def rst(filename):
-    '''
-    Load rst file and sanitize it for PyPI.
+    """Load rst file and sanitize it for PyPI.
+
     Remove unsupported github tags:
      - code-block directive
      - travis ci build badge
-    '''
+    """
     content = open(join(ROOT, filename)).read()
     for regex, replacement in PYPI_RST_FILTERS:
         content = re.sub(regex, replacement, content)
@@ -37,7 +37,7 @@ def rst(filename):
 
 
 def pip(filename):
-    '''Parse pip requirement file and transform it to setuptools requirements'''
+    """Parse pip reqs file and transform it to setuptools requirements."""
     requirements = []
     for line in open(join(ROOT, 'requirements', filename)):
         line = line.strip()
@@ -52,7 +52,9 @@ def pip(filename):
 
 
 def dependency_links(filename):
-    return [line.strip() for line in open(join(ROOT, 'requirements', filename)) if '://' in line]
+    return [line.strip()
+            for line in open(join(ROOT, 'requirements', filename))
+            if '://' in line]
 
 
 long_description = '\n'.join((
@@ -101,6 +103,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
+        ('License :: OSI Approved :: GNU Affero General Public License v3'
+         ' or later (AGPLv3+)'),
     ],
 )

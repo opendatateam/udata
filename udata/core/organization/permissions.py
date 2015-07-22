@@ -34,5 +34,6 @@ class OrganizationPrivatePermission(Permission):
 def inject_organization_needs(sender, identity):
     if current_user.is_authenticated():
         for org in Organization.objects(members__user=current_user.id):
-            membership = get_by(org.members, 'user', current_user._get_current_object())
+            membership = get_by(org.members, 'user',
+                                current_user._get_current_object())
             identity.provides.add(OrganizationNeed(membership.role, org.id))

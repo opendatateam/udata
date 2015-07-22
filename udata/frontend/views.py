@@ -99,9 +99,11 @@ class SingleObject(object):
             if self.object_name in self.kwargs:
                 self.object = self.kwargs[self.object_name]
             if 'slug' in self.kwargs:
-                self.object = self.model.objects.get_or_404(slug=self.kwargs.get('slug'))
+                self.object = self.model.objects.get_or_404(
+                    slug=self.kwargs.get('slug'))
             elif 'id' in self.kwargs:
-                self.object = self.model.objects.get_or_404(self.kwargs.get('id'))
+                self.object = self.model.objects.get_or_404(
+                    self.kwargs.get('id'))
         return self.object
 
     def get_context(self):
@@ -232,4 +234,3 @@ class NestedEditView(NestedObject, FormView):
 
     def populate(self, form):
         form.populate_obj(self.nested_object)
-

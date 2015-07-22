@@ -18,7 +18,8 @@ class ReuseAPITest(APITestCase):
     def test_reuse_api_list(self):
         '''It should fetch a reuse list from the API'''
         with self.autoindex():
-            reuses = [ReuseFactory(datasets=[DatasetFactory()]) for i in range(3)]
+            reuses = [ReuseFactory(
+                datasets=[DatasetFactory()]) for i in range(3)]
 
         response = self.get(url_for('api.reuses'))
         self.assert200(response)
@@ -64,7 +65,10 @@ class ReuseAPITest(APITestCase):
         self.assertEqual(reuse.organization, org)
 
     def test_reuse_api_create_as_permissions(self):
-        '''It should create a reuse as organization from the API only if user is member'''
+        """It should create a reuse as organization from the API
+
+        only if user is member.
+        """
         self.login()
         data = ReuseFactory.attributes()
         org = OrganizationFactory()
@@ -161,7 +165,8 @@ class ReuseAPITest(APITestCase):
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(), FollowReuse)
+        self.assertIsInstance(Follow.objects.followers(to_follow).first(),
+                              FollowReuse)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
@@ -187,9 +192,12 @@ class ReuseAPITest(APITestCase):
         '''It should suggest reuses'''
         with self.autoindex():
             for i in range(4):
-                ReuseFactory(title='test-{0}'.format(i) if i % 2 else faker.word(), datasets=[DatasetFactory()])
+                ReuseFactory(
+                    title='test-{0}'.format(i) if i % 2 else faker.word(),
+                    datasets=[DatasetFactory()])
 
-        response = self.get(url_for('api.suggest_reuses'), qs={'q': 'tes', 'size': '5'})
+        response = self.get(url_for('api.suggest_reuses'),
+                            qs={'q': 'tes', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -207,9 +215,12 @@ class ReuseAPITest(APITestCase):
         '''It should suggest reuses with special characters'''
         with self.autoindex():
             for i in range(4):
-                ReuseFactory(title='testé-{0}'.format(i) if i % 2 else faker.word(), datasets=[DatasetFactory()])
+                ReuseFactory(
+                    title='testé-{0}'.format(i) if i % 2 else faker.word(),
+                    datasets=[DatasetFactory()])
 
-        response = self.get(url_for('api.suggest_reuses'), qs={'q': 'testé', 'size': '5'})
+        response = self.get(url_for('api.suggest_reuses'),
+                            qs={'q': 'testé', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -229,14 +240,16 @@ class ReuseAPITest(APITestCase):
             for i in range(3):
                 ReuseFactory(datasets=[DatasetFactory()])
 
-        response = self.get(url_for('api.suggest_reuses'), qs={'q': 'xxxxxx', 'size': '5'})
+        response = self.get(url_for('api.suggest_reuses'),
+                            qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_reuses_api_empty(self):
         '''It should not provide reuse suggestion if no data'''
         self.init_search()
-        response = self.get(url_for('api.suggest_reuses'), qs={'q': 'xxxxxx', 'size': '5'})
+        response = self.get(url_for('api.suggest_reuses'),
+                            qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 

@@ -29,11 +29,6 @@ class OrganizationAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json['data']), len(organizations))
 
-    # def test_organization_api_get_not_found(self):
-    #     '''It should raise 404 on API fetch if not found'''
-    #     response = self.w.get(url_for('api.organization', slug='not-found'))
-    #     self.assertEqual(response.status_code, 404)
-
     def test_organization_api_get(self):
         '''It should fetch an organization from the API'''
         organization = OrganizationFactory()
@@ -57,7 +52,8 @@ class OrganizationAPITest(APITestCase):
         org = Organization.objects.first()
         member = org.member(self.user)
         self.assertIsNotNone(member, 'Current user should be a member')
-        self.assertEqual(member.role, 'admin', 'Current user should be an administrator')
+        self.assertEqual(member.role, 'admin',
+                         'Current user should be an administrator')
 
     def test_dataset_api_update(self):
         '''It should update an organization from the API'''
@@ -69,7 +65,8 @@ class OrganizationAPITest(APITestCase):
         response = self.put(url_for('api.organization', org=org), data)
         self.assert200(response)
         self.assertEqual(Organization.objects.count(), 1)
-        self.assertEqual(Organization.objects.first().description, 'new description')
+        self.assertEqual(Organization.objects.first().description,
+                         'new description')
 
     def test_dataset_api_update_deleted(self):
         '''It should not update a deleted organization from the API'''
@@ -79,7 +76,8 @@ class OrganizationAPITest(APITestCase):
         self.login()
         response = self.put(url_for('api.organization', org=org), data)
         self.assertStatus(response, 410)
-        self.assertEqual(Organization.objects.first().description, org.description)
+        self.assertEqual(Organization.objects.first().description,
+                         org.description)
 
     def test_dataset_api_update_forbidden(self):
         '''It should not update an organization from the API if not admin'''
@@ -90,7 +88,8 @@ class OrganizationAPITest(APITestCase):
         response = self.put(url_for('api.organization', org=org), data)
         self.assert403(response)
         self.assertEqual(Organization.objects.count(), 1)
-        self.assertEqual(Organization.objects.first().description, org.description)
+        self.assertEqual(Organization.objects.first().description,
+                         org.description)
 
     def test_organization_api_delete(self):
         '''It should delete an organization from the API'''
@@ -128,13 +127,6 @@ class OrganizationAPITest(APITestCase):
         self.assert403(response)
         self.assertEqual(Organization.objects.count(), 1)
         self.assertIsNone(Organization.objects[0].deleted)
-
-    # def test_organization_api_delete_not_found(self):
-    #     '''It should raise a 404 on delete from the API if not found'''
-    #     OrganizationFactory()
-    #     response = self.w.delete(url_for('api.organization', slug='not-found'))
-    #     self.assertEqual(response.status_code, 404)
-    #     self.assertEqual(Organization.objects.count(), 1)
 
 
 class MembershipAPITest(APITestCase):
@@ -190,9 +182,13 @@ class MembershipAPITest(APITestCase):
         applicant = UserFactory()
         membership_request = MembershipRequest(user=applicant, comment='test')
         member = Member(user=user, role='admin')
-        organization = OrganizationFactory(members=[member], requests=[membership_request])
+        organization = OrganizationFactory(
+            members=[member], requests=[membership_request])
 
-        api_url = url_for('api.accept_membership', org=organization, id=membership_request.id)
+        api_url = url_for(
+            'api.accept_membership',
+            org=organization,
+            id=membership_request.id)
         response = self.post(api_url)
         self.assert200(response)
 
@@ -218,21 +214,29 @@ class MembershipAPITest(APITestCase):
         member = Member(user=user, role='admin')
         organization = OrganizationFactory(members=[member])
 
-        api_url = url_for('api.accept_membership', org=organization, id=MembershipRequest().id)
+        api_url = url_for(
+            'api.accept_membership',
+            org=organization,
+            id=MembershipRequest().id)
         response = self.post(api_url)
         self.assert404(response)
 
-        self.assertEqual(response.json, {'status': 404, 'message': 'Unknown membership request id'})
+        self.assertEqual(response.json, {
+            'status': 404, 'message': 'Unknown membership request id'})
 
     def test_refuse_membership(self):
         user = self.login()
         applicant = UserFactory()
         membership_request = MembershipRequest(user=applicant, comment='test')
         member = Member(user=user, role='admin')
-        organization = OrganizationFactory(members=[member], requests=[membership_request])
+        organization = OrganizationFactory(
+            members=[member], requests=[membership_request])
         data = {'comment': 'no'}
 
-        api_url = url_for('api.refuse_membership', org=organization, id=membership_request.id)
+        api_url = url_for(
+            'api.refuse_membership',
+            org=organization,
+            id=membership_request.id)
         response = self.post(api_url, data)
         self.assert200(response)
 
@@ -256,11 +260,15 @@ class MembershipAPITest(APITestCase):
         member = Member(user=user, role='admin')
         organization = OrganizationFactory(members=[member])
 
-        api_url = url_for('api.refuse_membership', org=organization, id=MembershipRequest().id)
+        api_url = url_for(
+            'api.refuse_membership',
+            org=organization,
+            id=MembershipRequest().id)
         response = self.post(api_url)
         self.assert404(response)
 
-        self.assertEqual(response.json, {'status': 404, 'message': 'Unknown membership request id'})
+        self.assertEqual(response.json, {
+            'status': 404, 'message': 'Unknown membership request id'})
 
     def test_create_member(self):
         user = self.login()
@@ -338,12 +346,14 @@ class MembershipAPITest(APITestCase):
         user = self.login()
         to_follow = OrganizationFactory()
 
-        response = self.post(url_for('api.organization_followers', id=to_follow.id))
+        response = self.post(
+            url_for('api.organization_followers', id=to_follow.id))
         self.assertStatus(response, 201)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(), FollowOrg)
+        self.assertIsInstance(Follow.objects.followers(to_follow).first(),
+                              FollowOrg)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
@@ -353,7 +363,8 @@ class MembershipAPITest(APITestCase):
         to_follow = OrganizationFactory()
         FollowOrg.objects.create(follower=user, following=to_follow)
 
-        response = self.delete(url_for('api.organization_followers', id=to_follow.id))
+        response = self.delete(
+            url_for('api.organization_followers', id=to_follow.id))
         self.assert200(response)
 
         nb_followers = Follow.objects.followers(to_follow).count()
@@ -369,9 +380,11 @@ class MembershipAPITest(APITestCase):
         '''It should suggest organizations'''
         with self.autoindex():
             for i in range(4):
-                OrganizationFactory(name='test-{0}'.format(i) if i % 2 else faker.word())
+                OrganizationFactory(
+                    name='test-{0}'.format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for('api.suggest_organizations'), qs={'q': 'tes', 'size': '5'})
+        response = self.get(url_for('api.suggest_organizations'),
+                            qs={'q': 'tes', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -389,9 +402,11 @@ class MembershipAPITest(APITestCase):
         '''It should suggest organizations with special caracters'''
         with self.autoindex():
             for i in range(4):
-                OrganizationFactory(name='testé-{0}'.format(i) if i % 2 else faker.word())
+                OrganizationFactory(
+                    name='testé-{0}'.format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for('api.suggest_organizations'), qs={'q': 'testé', 'size': '5'})
+        response = self.get(url_for('api.suggest_organizations'),
+                            qs={'q': 'testé', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -409,9 +424,11 @@ class MembershipAPITest(APITestCase):
         '''It should suggest organizations with words'''
         with self.autoindex():
             for i in range(4):
-                OrganizationFactory(name='mon testé-{0}'.format(i) if i % 2 else faker.word())
+                OrganizationFactory(
+                    name='mon testé-{0}'.format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for('api.suggest_organizations'), qs={'q': 'mon testé', 'size': '5'})
+        response = self.get(url_for('api.suggest_organizations'),
+                            qs={'q': 'mon testé', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -429,9 +446,12 @@ class MembershipAPITest(APITestCase):
         '''It should suggest organizations with words'''
         with self.autoindex():
             for i in range(4):
-                OrganizationFactory(name='Ministère de l\'intérieur {0}'.format(i) if i % 2 else faker.word())
+                OrganizationFactory(
+                    name='Ministère de l\'intérieur {0}'.format(i)
+                    if i % 2 else faker.word())
 
-        response = self.get(url_for('api.suggest_organizations'), qs={'q': 'Ministère intérieur', 'size': '5'})
+        response = self.get(url_for('api.suggest_organizations'),
+                            qs={'q': 'Ministère intérieur', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -443,7 +463,8 @@ class MembershipAPITest(APITestCase):
             self.assertIn('name', suggestion)
             self.assertIn('score', suggestion)
             self.assertIn('image_url', suggestion)
-            self.assertTrue(suggestion['name'].startswith('Ministère de l\'intérieur'))
+            self.assertTrue(
+                suggestion['name'].startswith('Ministère de l\'intérieur'))
 
     def test_suggest_organizations_api_no_match(self):
         '''It should not provide organization suggestion if no match'''
@@ -451,14 +472,16 @@ class MembershipAPITest(APITestCase):
             for i in range(3):
                 OrganizationFactory()
 
-        response = self.get(url_for('api.suggest_organizations'), qs={'q': 'xxxxxx', 'size': '5'})
+        response = self.get(url_for('api.suggest_organizations'),
+                            qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_organizations_api_empty(self):
         '''It should not provide organization suggestion if no data'''
         self.init_search()
-        response = self.get(url_for('api.suggest_organizations'), qs={'q': 'xxxxxx', 'size': '5'})
+        response = self.get(url_for('api.suggest_organizations'),
+                            qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
@@ -479,7 +502,8 @@ class OrganizationDatasetsAPITest(APITestCase):
         self.login()
         member = Member(user=self.user, role='admin')
         org = OrganizationFactory(members=[member])
-        datasets = DatasetFactory.create_batch(3, organization=org, private=True)
+        datasets = DatasetFactory.create_batch(3, organization=org,
+                                               private=True)
 
         response = self.get(url_for('api.org_datasets', org=org))
 
@@ -546,7 +570,8 @@ class OrganizationIssuesAPITest(APITestCase):
         ]
 
         # Should not be listed
-        DatasetIssue.objects.create(subject=DatasetFactory(), title='', user=user)
+        DatasetIssue.objects.create(
+            subject=DatasetFactory(), title='', user=user)
         ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=user)
 
         response = self.get(url_for('api.org_issues', org=org))
@@ -567,12 +592,14 @@ class OrganizationDiscussionsAPITest(APITestCase):
         reuse = ReuseFactory(organization=org)
         dataset = DatasetFactory(organization=org)
         discussions = [
-            DatasetDiscussion.objects.create(subject=dataset, title='', user=user),
+            DatasetDiscussion.objects.create(
+                subject=dataset, title='', user=user),
             ReuseDiscussion.objects.create(subject=reuse, title='', user=user)
         ]
 
         # Should not be listed
-        DatasetIssue.objects.create(subject=DatasetFactory(), title='', user=user)
+        DatasetIssue.objects.create(
+            subject=DatasetFactory(), title='', user=user)
         ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=user)
 
         response = self.get(url_for('api.org_discussions', org=org))
@@ -602,7 +629,8 @@ class OrganizationBadgeAPITest(APITestCase):
         data = OrganizationBadgeFactory.attributes()
         with self.api_user():
             response = self.post(
-                url_for('api.organization_badges', org=self.organization), data)
+                url_for('api.organization_badges', org=self.organization),
+                data)
         self.assertStatus(response, 201)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 1)
@@ -611,9 +639,11 @@ class OrganizationBadgeAPITest(APITestCase):
         data = OrganizationBadgeFactory.attributes()
         with self.api_user():
             self.post(
-                url_for('api.organization_badges', org=self.organization), data)
+                url_for('api.organization_badges', org=self.organization),
+                data)
             response = self.post(
-                url_for('api.organization_badges', org=self.organization), data)
+                url_for('api.organization_badges', org=self.organization),
+                data)
         self.assertStatus(response, 200)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 1)
@@ -629,7 +659,8 @@ class OrganizationBadgeAPITest(APITestCase):
         data['kind'] = kinds_keys[1]
         with self.api_user():
             response = self.post(
-                url_for('api.organization_badges', org=self.organization), data)
+                url_for('api.organization_badges', org=self.organization),
+                data)
         self.assertStatus(response, 201)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 2)

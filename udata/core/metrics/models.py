@@ -30,8 +30,10 @@ class MetricsQuerySet(db.BaseQuerySet):
             day = date
         else:
             day = (date or self._today()).isoformat()
-        commands = dict(('set__values__{0}'.format(k), v) for k, v in kwargs.items())
-        return Metrics.objects(object_id=oid, level='daily', date=day).update_one(upsert=True, **commands)
+        commands = dict(('set__values__{0}'.format(k), v)
+                        for k, v in kwargs.items())
+        return (Metrics.objects(object_id=oid, level='daily', date=day)
+                       .update_one(upsert=True, **commands))
 
 
 class WithMetrics(object):
@@ -40,14 +42,19 @@ class WithMetrics(object):
     def clean(self):
         '''Fill metrics with defaults on create'''
         if not self.metrics:
-            self.metrics = dict((name, spec.default) for name, spec in metric_catalog.get(self.__class__, {}).items())
+            self.metrics = dict(
+                (name, spec.default)
+                for name, spec in (metric_catalog.get(self.__class__, {})
+                                                 .items()))
         return super(WithMetrics, self).clean()
 
 
 class Metrics(db.Document):
     object_id = db.DynamicField(required=True)
     date = db.StringField(required=True)
-    level = db.StringField(required=True, default='daily', choices=('hourly', 'daily', 'monthly', 'yearly'))
+    level = db.StringField(
+        required=True, default='daily',
+        choices=('hourly', 'daily', 'monthly', 'yearly'))
     values = db.DictField()
 
     meta = {

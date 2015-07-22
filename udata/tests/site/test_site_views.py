@@ -12,7 +12,9 @@ from udata.models import OrganizationBadge, Site, PUBLIC_SERVICE
 
 from udata.core.site.views import current_site
 from udata.tests.frontend import FrontTestCase
-from udata.tests.factories import DatasetFactory, ReuseFactory, OrganizationFactory, ResourceFactory
+from udata.tests.factories import (
+    DatasetFactory, ReuseFactory, OrganizationFactory, ResourceFactory
+)
 
 
 class SiteViewsTest(FrontTestCase):
@@ -41,8 +43,10 @@ class SiteViewsTest(FrontTestCase):
             DatasetFactory(organization=org)
             ReuseFactory(organization=org)
 
-        current_site.settings.home_datasets = [DatasetFactory() for _ in range(3)]
-        current_site.settings.home_reuses = [ReuseFactory() for _ in range(3)]
+        current_site.settings.home_datasets = [
+            DatasetFactory() for _ in range(3)]
+        current_site.settings.home_reuses = [
+            ReuseFactory() for _ in range(3)]
 
         response = self.get(url_for('site.home'))
         self.assert200(response)
@@ -68,7 +72,8 @@ class SiteViewsTest(FrontTestCase):
 
     def test_datasets_csv(self):
         with self.autoindex():
-            datasets = [DatasetFactory(resources=[ResourceFactory()]) for _ in range(5)]
+            datasets = [DatasetFactory(resources=[ResourceFactory()])
+                        for _ in range(5)]
             hidden_dataset = DatasetFactory()
 
         response = self.get(url_for('site.datasets_csv'))
@@ -100,11 +105,17 @@ class SiteViewsTest(FrontTestCase):
     def test_datasets_csv_with_filters(self):
         '''Should handle filtering but ignore paging or facets'''
         with self.autoindex():
-            filtered_datasets = [DatasetFactory(resources=[ResourceFactory()], tags=['selected']) for _ in range(6)]
-            datasets = [DatasetFactory(resources=[ResourceFactory()]) for _ in range(3)]
+            filtered_datasets = [
+                DatasetFactory(resources=[ResourceFactory()],
+                               tags=['selected'])
+                for _ in range(6)]
+            datasets = [DatasetFactory(resources=[ResourceFactory()])
+                        for _ in range(3)]
             hidden_dataset = DatasetFactory()
 
-        response = self.get(url_for('site.datasets_csv', tag='selected', page_size=3, facets=True))
+        response = self.get(
+            url_for(
+                'site.datasets_csv', tag='selected', page_size=3, facets=True))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')
@@ -136,8 +147,11 @@ class SiteViewsTest(FrontTestCase):
 
     def test_resources_csv(self):
         with self.autoindex():
-            datasets = [DatasetFactory(resources=[ResourceFactory(), ResourceFactory()]) for _ in range(3)]
-            hidden_dataset = DatasetFactory()
+            datasets = [
+                DatasetFactory(resources=[ResourceFactory(),
+                                          ResourceFactory()])
+                for _ in range(3)]
+            DatasetFactory()
 
         response = self.get(url_for('site.resources_csv'))
 
@@ -173,11 +187,16 @@ class SiteViewsTest(FrontTestCase):
     def test_resources_csv_with_filters(self):
         '''Should handle filtering but ignore paging or facets'''
         with self.autoindex():
-            filtered_datasets = [DatasetFactory(resources=[ResourceFactory(), ResourceFactory()], tags=['selected']) for _ in range(6)]
+            filtered_datasets = [DatasetFactory(resources=[ResourceFactory(),
+                                                           ResourceFactory()],
+                                                tags=['selected'])
+                                 for _ in range(6)]
             [DatasetFactory(resources=[ResourceFactory()]) for _ in range(3)]
             DatasetFactory()
 
-        response = self.get(url_for('site.resources_csv', tag='selected', page_size=3, facets=True))
+        response = self.get(
+            url_for('site.resources_csv', tag='selected', page_size=3,
+                    facets=True))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')
@@ -203,7 +222,8 @@ class SiteViewsTest(FrontTestCase):
         rows = list(reader)
         ids = [(row[0], row[resource_id_index]) for row in rows]
 
-        self.assertEqual(len(rows), sum(len(d.resources) for d in filtered_datasets))
+        self.assertEqual(len(rows),
+                         sum(len(d.resources) for d in filtered_datasets))
         for dataset in filtered_datasets:
             for resource in dataset.resources:
                 self.assertIn((str(dataset.id), str(resource.id)), ids)
@@ -247,7 +267,9 @@ class SiteViewsTest(FrontTestCase):
                 created=datetime.now(),
                 created_by=user
             )
-            filtered_orgs = [OrganizationFactory(badges=[public_service_badge]) for _ in range(6)]
+            filtered_orgs = [
+                OrganizationFactory(badges=[public_service_badge])
+                for _ in range(6)]
             orgs = [OrganizationFactory() for _ in range(3)]
             hidden_org = OrganizationFactory(deleted=datetime.now())
 
@@ -283,7 +305,8 @@ class SiteViewsTest(FrontTestCase):
 
     def test_reuses_csv(self):
         with self.autoindex():
-            reuses = [ReuseFactory(datasets=[DatasetFactory()]) for _ in range(5)]
+            reuses = [ReuseFactory(datasets=[DatasetFactory()])
+                      for _ in range(5)]
             hidden_reuse = ReuseFactory()
 
         response = self.get(url_for('site.reuses_csv'))
@@ -315,11 +338,16 @@ class SiteViewsTest(FrontTestCase):
     def test_reuses_csv_with_filters(self):
         '''Should handle filtering but ignore paging or facets'''
         with self.autoindex():
-            filtered_reuses = [ReuseFactory(datasets=[DatasetFactory()], tags=['selected']) for _ in range(6)]
-            reuses = [ReuseFactory(datasets=[DatasetFactory()]) for _ in range(3)]
+            filtered_reuses = [
+                ReuseFactory(datasets=[DatasetFactory()], tags=['selected'])
+                for _ in range(6)]
+            reuses = [ReuseFactory(datasets=[DatasetFactory()])
+                      for _ in range(3)]
             hidden_reuse = ReuseFactory()
 
-        response = self.get(url_for('site.reuses_csv', tag='selected', page_size=3, facets=True))
+        response = self.get(
+            url_for(
+                'site.reuses_csv', tag='selected', page_size=3, facets=True))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')

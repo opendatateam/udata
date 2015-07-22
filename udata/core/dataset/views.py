@@ -107,14 +107,16 @@ class DatasetDetailView(DatasetView, DetailView):
 
     def get_context(self):
         context = super(DatasetDetailView, self).get_context()
-        if self.dataset.private and not DatasetEditPermission(self.dataset).can():
+        if (self.dataset.private
+                and not DatasetEditPermission(self.dataset).can()):
             abort(404)
         elif self.dataset.deleted:
             abort(410)
         context['reuses'] = Reuse.objects(datasets=self.dataset)
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = CommunityResourceEditPermission
-        context['discussions'] = DatasetDiscussion.objects(subject=self.dataset)
+        context['discussions'] = DatasetDiscussion.objects(
+            subject=self.dataset)
         return context
 
 
@@ -161,7 +163,8 @@ class DatasetExtrasEditView(ProtectedDatasetView, EditView):
         return jsonify({'key': form.key.data, 'value': form.value.data})
 
 
-@blueprint.route('/<dataset:dataset>/edit/extras/<string:extra>/', endpoint='delete_extra')
+@blueprint.route('/<dataset:dataset>/edit/extras/<string:extra>/',
+                 endpoint='delete_extra')
 class DatasetExtraDeleteView(ProtectedDatasetView, SingleObject, BaseView):
     def delete(self, dataset, extra, **kwargs):
         del dataset.extras[extra]
@@ -169,7 +172,8 @@ class DatasetExtraDeleteView(ProtectedDatasetView, SingleObject, BaseView):
         return ''
 
 
-@blueprint.route('/<dataset:dataset>/edit/resources/', endpoint='edit_resources')
+@blueprint.route('/<dataset:dataset>/edit/resources/',
+                 endpoint='edit_resources')
 class DatasetResourcesEditView(ProtectedDatasetView, EditView):
     form = DatasetForm
     template_name = 'dataset/edit_resources.html'
@@ -205,8 +209,9 @@ class ResourceCreateView(ProtectedDatasetView, SingleObject, CreateView):
 
 class UploadNewResource(SingleObject, BaseView):
     def post(self, dataset):
-        if not 'file' in request.files:
-            return jsonify({'success': False, 'error': '"file" should be set'}), 400
+        if 'file' not in request.files:
+            return jsonify({
+                'success': False, 'error': '"file" should be set'}), 400
 
         storage = storages.resources
 
@@ -220,7 +225,8 @@ class UploadNewResource(SingleObject, BaseView):
         file.seek(0)
         sha1 = storages.utils.sha1(file)
 
-        size = os.path.getsize(storage.path(filename)) if storage.root else None
+        size = (os.path.getsize(storage.path(filename))
+                if storage.root else None)
 
         return jsonify({
             'success': True,
@@ -233,25 +239,31 @@ class UploadNewResource(SingleObject, BaseView):
         })
 
     def get_prefix(self, dataset):
-        return '/'.join((dataset.slug, datetime.now().strftime('%Y%m%d-%H%M%S')))
+        return '/'.join((dataset.slug,
+                         datetime.now().strftime('%Y%m%d-%H%M%S')))
 
 
-@blueprint.route('/<dataset:dataset>/resources/new/upload', endpoint='upload_new_resource')
+@blueprint.route('/<dataset:dataset>/resources/new/upload',
+                 endpoint='upload_new_resource')
 class UploadNewResourceView(ProtectedDatasetView, UploadNewResource):
     '''Handle upload on POST if authorized.'''
     pass
 
 
-@blueprint.route('/<dataset:dataset>/community_resources/new/upload', endpoint='upload_new_community_resource')
+@blueprint.route('/<dataset:dataset>/community_resources/new/upload',
+                 endpoint='upload_new_community_resource')
 class UploadNewCommunityResourceView(DatasetView, UploadNewResource):
     '''Handle upload on POST if authorized.'''
     decorators = [login_required]
 
     def get_prefix(self, dataset):
-        return '/'.join((dataset.slug, 'community', datetime.now().strftime('%Y%m%d-%H%M%S')))
+        return '/'.join((dataset.slug,
+                         'community',
+                         datetime.now().strftime('%Y%m%d-%H%M%S')))
 
 
-@blueprint.route('/<dataset:dataset>/community_resources/new/', endpoint='new_community_resource')
+@blueprint.route('/<dataset:dataset>/community_resources/new/',
+                 endpoint='new_community_resource')
 class CommunityResourceCreateView(DatasetView, SingleObject, CreateView):
     form = CommunityResourceForm
     template_name = 'dataset/resource/create.html'
@@ -263,7 +275,8 @@ class CommunityResourceCreateView(DatasetView, SingleObject, CreateView):
         return redirect(url_for('datasets.show', dataset=self.dataset))
 
 
-@blueprint.route('/<dataset:dataset>/resources/<resource>/', endpoint='edit_resource')
+@blueprint.route('/<dataset:dataset>/resources/<resource>/',
+                 endpoint='edit_resource')
 class ResourceEditView(ProtectedDatasetView, NestedEditView):
     nested_model = Resource
     form = ResourceForm
@@ -279,7 +292,8 @@ class ResourceEditView(ProtectedDatasetView, NestedEditView):
         self.nested_object.modified = datetime.now()
 
 
-@blueprint.route('/<dataset:dataset>/community_resources/<resource>/', endpoint='edit_community_resource')
+@blueprint.route('/<dataset:dataset>/community_resources/<resource>/',
+                 endpoint='edit_community_resource')
 class CommunityResourceEditView(DatasetView, NestedEditView):
     form = CommunityResourceForm
     nested_model = Resource
@@ -299,7 +313,8 @@ class CommunityResourceEditView(DatasetView, NestedEditView):
         self.nested_object.modified = datetime.now()
 
 
-@blueprint.route('/<dataset:dataset>/resources/<resource>/delete/', endpoint='delete_resource')
+@blueprint.route('/<dataset:dataset>/resources/<resource>/delete/',
+                 endpoint='delete_resource')
 class ResourceDeleteView(ProtectedDatasetView, NestedObject, BaseView):
     nested_model = Resource
     nested_object_name = 'resource'
@@ -311,8 +326,10 @@ class ResourceDeleteView(ProtectedDatasetView, NestedObject, BaseView):
         return redirect(url_for('datasets.show', dataset=self.dataset))
 
 
-@blueprint.route('/<dataset:dataset>/community_resources/<resource>/delete/', endpoint='delete_community_resource')
-class CommunityResourceDeleteView(ProtectedDatasetView, NestedObject, BaseView):
+@blueprint.route('/<dataset:dataset>/community_resources/<resource>/delete/',
+                 endpoint='delete_community_resource')
+class CommunityResourceDeleteView(
+        ProtectedDatasetView, NestedObject, BaseView):
     nested_model = Resource
     nested_object_name = 'resource'
     nested_attribute = 'community_resources'
@@ -333,11 +350,13 @@ class DatasetFollowersView(DatasetView, DetailView):
 
     def get_context(self):
         context = super(DatasetFollowersView, self).get_context()
-        context['followers'] = Follow.objects.followers(self.dataset).order_by('follower.fullname')
+        context['followers'] = (Follow.objects.followers(self.dataset)
+                                              .order_by('follower.fullname'))
         return context
 
 
 @sitemap.register_generator
 def sitemap_urls():
     for dataset in Dataset.objects.visible():
-        yield 'datasets.show_redirect', {'dataset': dataset.id}, None, "weekly", 1
+        yield ('datasets.show_redirect', {'dataset': dataset.id},
+               None, "weekly", 1)

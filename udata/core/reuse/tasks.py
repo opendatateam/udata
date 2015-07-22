@@ -38,4 +38,5 @@ def notify_new_reuse(reuse):
         else:
             recipients = None
         if recipients:
-            mail.send(_('New reuse'), recipients, 'new_reuse', reuse=reuse, dataset=dataset)
+            mail.send(_('New reuse'), recipients, 'new_reuse', reuse=reuse,
+                      dataset=dataset)

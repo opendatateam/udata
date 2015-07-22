@@ -41,4 +41,5 @@ def lrun(command, *args, **kwargs):
 
 def nrun(command, *args, **kwargs):
     '''Run node.js command from project root'''
-    return lrun('cd {0} && node_modules/.bin/{1}'.format(ROOT, command), *args, **kwargs)
+    return lrun('cd {0} && node_modules/.bin/{1}'.format(ROOT, command),
+                *args, **kwargs)

@@ -14,14 +14,17 @@ from udata.core import storages
 from udata.models import Dataset, FollowDataset, Member
 
 from . import FrontTestCase
-from ..factories import ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory
+from ..factories import (
+    ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory
+)
 
 
 class DatasetBlueprintTest(FrontTestCase):
     def test_render_list(self):
         '''It should render the dataset list page'''
         with self.autoindex():
-            datasets = [DatasetFactory(resources=[ResourceFactory()]) for i in range(3)]
+            datasets = [DatasetFactory(
+                resources=[ResourceFactory()]) for i in range(3)]
 
         response = self.get(url_for('datasets.list'))
 
@@ -32,11 +35,14 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_render_list_with_query(self):
         '''It should render the dataset list page with a query string'''
         with self.autoindex():
-            datasets = [DatasetFactory(resources=[ResourceFactory()]) for i in range(3)]
-            expected_dataset = DatasetFactory(title='test for query', resources=[ResourceFactory()])
+            datasets = [DatasetFactory(
+                resources=[ResourceFactory()]) for i in range(3)]
+            expected_dataset = DatasetFactory(
+                title='test for query', resources=[ResourceFactory()])
             datasets.append(expected_dataset)
 
-        response = self.get(url_for('datasets.list'), qs={'q': 'test for query'})
+        response = self.get(url_for('datasets.list'),
+                            qs={'q': 'test for query'})
 
         self.assert200(response)
         rendered_datasets = self.get_context_variable('datasets')
@@ -60,13 +66,14 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.post(url_for('datasets.new'), data)
 
         dataset = Dataset.objects.first()
-        self.assertRedirects(response, url_for('datasets.new_resource', dataset=dataset))
+        self.assertRedirects(response,
+                             url_for('datasets.new_resource', dataset=dataset))
 
         self.assertEqual(dataset.owner, self.user)
         self.assertIsNone(dataset.organization)
 
     def test_create_as_org(self):
-        '''It should create a dataset as an organization and redirect to dataset page'''
+        '''It should create a dataset as an organization and redirect'''
         self.login()
         member = Member(user=self.user, role='editor')
         org = OrganizationFactory(members=[member])
@@ -75,7 +82,8 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.post(url_for('datasets.new'), data)
 
         dataset = Dataset.objects.first()
-        self.assertRedirects(response, url_for('datasets.new_resource', dataset=dataset))
+        self.assertRedirects(
+            response, url_for('datasets.new_resource', dataset=dataset))
 
         self.assertIsNone(dataset.owner)
         self.assertEqual(dataset.organization, org)
@@ -129,7 +137,7 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertEqual(dataset.description, 'new description')
 
     def test_delete(self):
-        '''It should handle deletion from form submit and redirect on dataset page'''
+        '''It should handle deletion from form submit and redirect'''
         user = self.login()
         dataset = DatasetFactory(owner=user)
         response = self.post(url_for('datasets.delete', dataset=dataset))
@@ -150,7 +158,8 @@ class DatasetBlueprintTest(FrontTestCase):
         dataset = DatasetFactory(owner=user)
         data = {'key': 'a_key', 'value': 'a_value'}
 
-        response = self.post(url_for('datasets.edit_extras', dataset=dataset), data)
+        response = self.post(url_for('datasets.edit_extras', dataset=dataset),
+                             data)
 
         self.assert200(response)
         dataset.reload()
@@ -162,7 +171,8 @@ class DatasetBlueprintTest(FrontTestCase):
         dataset = DatasetFactory(owner=user, extras={'a_key': 'a_value'})
         data = {'key': 'a_key', 'value': 'new_value'}
 
-        response = self.post(url_for('datasets.edit_extras', dataset=dataset), data)
+        response = self.post(url_for('datasets.edit_extras', dataset=dataset),
+                             data)
 
         self.assert200(response)
         dataset.reload()
@@ -174,7 +184,8 @@ class DatasetBlueprintTest(FrontTestCase):
         dataset = DatasetFactory(owner=user, extras={'a_key': 'a_value'})
         data = {'key': 'new_key', 'value': 'a_value', 'old_key': 'a_key'}
 
-        response = self.post(url_for('datasets.edit_extras', dataset=dataset), data)
+        response = self.post(url_for('datasets.edit_extras', dataset=dataset),
+                             data)
 
         self.assert200(response)
         dataset.reload()
@@ -186,7 +197,8 @@ class DatasetBlueprintTest(FrontTestCase):
         user = self.login()
         dataset = DatasetFactory(owner=user, extras={'a_key': 'a_value'})
 
-        response = self.delete(url_for('datasets.delete_extra', dataset=dataset, extra='a_key'))
+        response = self.delete(
+            url_for('datasets.delete_extra', dataset=dataset, extra='a_key'))
 
         self.assert200(response)
         dataset.reload()
@@ -195,8 +207,10 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_render_edit_resources(self):
         '''It should render the dataset resources edit form'''
         user = self.login()
-        dataset = DatasetFactory(owner=user, resources=[ResourceFactory() for _ in range(3)])
-        response = self.get(url_for('datasets.edit_resources', dataset=dataset))
+        dataset = DatasetFactory(
+            owner=user, resources=[ResourceFactory() for _ in range(3)])
+        response = self.get(
+            url_for('datasets.edit_resources', dataset=dataset))
         self.assert200(response)
 
     def test_render_transfer(self):
@@ -219,7 +233,8 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assert404(response)
 
     def test_recent_feed(self):
-        datasets = [DatasetFactory(resources=[ResourceFactory()]) for i in range(3)]
+        datasets = [DatasetFactory(
+            resources=[ResourceFactory()]) for i in range(3)]
 
         response = self.get(url_for('datasets.recent_feed'))
 
@@ -248,12 +263,14 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertEqual(len(entry.authors), 1)
         author = entry.authors[0]
         self.assertEqual(author.name, owner.fullname)
-        self.assertEqual(author.href, self.full_url('users.show', user=owner.id))
+        self.assertEqual(author.href,
+                         self.full_url('users.show', user=owner.id))
 
     def test_recent_feed_org(self):
         owner = UserFactory()
         org = OrganizationFactory()
-        DatasetFactory(owner=owner, organization=org, resources=[ResourceFactory()])
+        DatasetFactory(
+            owner=owner, organization=org, resources=[ResourceFactory()])
 
         response = self.get(url_for('datasets.recent_feed'))
 
@@ -266,12 +283,15 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertEqual(len(entry.authors), 1)
         author = entry.authors[0]
         self.assertEqual(author.name, org.name)
-        self.assertEqual(author.href, self.full_url('organizations.show', org=org.id))
+        self.assertEqual(author.href,
+                         self.full_url('organizations.show', org=org.id))
 
     def test_dataset_followers(self):
         '''It should render the dataset followers list page'''
         dataset = DatasetFactory()
-        followers = [FollowDataset.objects.create(follower=UserFactory(), following=dataset) for _ in range(3)]
+        followers = [
+            FollowDataset.objects.create(follower=UserFactory(),
+                                         following=dataset) for _ in range(3)]
 
         response = self.get(url_for('datasets.followers', dataset=dataset))
 
@@ -318,13 +338,15 @@ class ResourcesTest(FrontTestCase):
         getsize.return_value = 666
         dt.now.return_value = now
 
-        response = self.post(url_for('datasets.upload_new_resource', dataset=dataset), data)
+        response = self.post(
+            url_for('datasets.upload_new_resource', dataset=dataset), data)
         self.assert200(response)
 
         self.assertTrue(response.json['success'])
         self.assertIn('filename', response.json)
         self.assertIn('sha1', response.json)
-        expected_url = storages.resources.url(response.json['filename'], external=True)
+        expected_url = storages.resources.url(response.json['filename'],
+                                              external=True)
         self.assertEqual(response.json['url'], expected_url)
         self.assertEqual(response.json['format'], 'tar.gz')
         self.assertEqual(response.json['size'], 666)
@@ -338,7 +360,8 @@ class ResourcesTest(FrontTestCase):
         '''It should render the dataset new community resource page'''
         user = self.login()
         dataset = DatasetFactory(owner=user)
-        response = self.get(url_for('datasets.new_community_resource', dataset=dataset))
+        response = self.get(
+            url_for('datasets.new_community_resource', dataset=dataset))
         self.assert200(response)
 
     @mock.patch('os.path.getsize')
@@ -352,7 +375,9 @@ class ResourcesTest(FrontTestCase):
         getsize.return_value = 666
         dt.now.return_value = now
 
-        response = self.post(url_for('datasets.upload_new_community_resource', dataset=dataset), data)
+        response = self.post(
+            url_for('datasets.upload_new_community_resource', dataset=dataset),
+            data)
         self.assert200(response)
 
         self.assertTrue(response.json['success'])
@@ -372,23 +397,34 @@ class ResourcesTest(FrontTestCase):
         user = self.login()
         resource = ResourceFactory()
         dataset = DatasetFactory(owner=user, resources=[resource])
-        response = self.get(url_for('datasets.edit_resource', dataset=dataset, resource=resource.id))
+        response = self.get(
+            url_for('datasets.edit_resource',
+                    dataset=dataset,
+                    resource=resource.id))
         self.assert200(response)
 
     def test_render_edit_community_resource(self):
         '''It should render the dataset new community resource page'''
         user = self.login()
         resource = ResourceFactory(owner=user)
-        dataset = DatasetFactory(owner=UserFactory(), community_resources=[resource])
-        response = self.get(url_for('datasets.edit_community_resource', dataset=dataset, resource=resource.id))
+        dataset = DatasetFactory(owner=UserFactory(),
+                                 community_resources=[resource])
+        response = self.get(
+            url_for('datasets.edit_community_resource',
+                    dataset=dataset,
+                    resource=resource.id))
         self.assert200(response)
 
     def test_delete_resource(self):
-        '''It should handle deletion from form submit and redirect on dataset page'''
+        '''It should handle deletion from form submit and redirect'''
         user = self.login()
         resource = ResourceFactory()
-        dataset = DatasetFactory(owner=user, resources=[resource, ResourceFactory()])
-        response = self.post(url_for('datasets.delete_resource', dataset=dataset, resource=resource.id))
+        dataset = DatasetFactory(owner=user,
+                                 resources=[resource, ResourceFactory()])
+        response = self.post(
+            url_for('datasets.delete_resource',
+                    dataset=dataset,
+                    resource=resource.id))
 
         dataset.reload()
         self.assertRedirects(response, dataset.display_url)
@@ -397,7 +433,7 @@ class ResourcesTest(FrontTestCase):
         self.assertNotEqual(dataset.resources[0].id, resource.id)
 
     def test_delete_community_resource(self):
-        '''It should handle deletion from form submit and redirect on dataset page'''
+        '''It should handle deletion from form submit and redirect'''
         user = self.login()
         resource = ResourceFactory(owner=user)
         dataset = DatasetFactory(
@@ -405,7 +441,10 @@ class ResourcesTest(FrontTestCase):
             resources=[ResourceFactory()],
             community_resources=[resource, ResourceFactory()]
         )
-        response = self.post(url_for('datasets.delete_community_resource', dataset=dataset, resource=resource.id))
+        response = self.post(
+            url_for('datasets.delete_community_resource',
+                    dataset=dataset,
+                    resource=resource.id))
 
         dataset.reload()
         self.assertRedirects(response, dataset.display_url)

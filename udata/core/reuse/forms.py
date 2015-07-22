@@ -20,15 +20,21 @@ class ReuseForm(ModelForm):
     model_class = Reuse
 
     title = fields.StringField(_('Title'), [validators.required()])
-    description = fields.MarkdownField(_('Description'), [validators.required()],
-        description=_('The details about the reuse (build process, specifics, self-critics...).'))
+    description = fields.MarkdownField(
+        _('Description'), [validators.required()],
+        description=_('The details about the reuse (build process, specifics, '
+                      'self-critics...).'))
     type = fields.SelectField(_('Type'), choices=REUSE_TYPES.items())
-    url = fields.URLField(_('URL'), [validators.required(), check_url_does_not_exists])
-    image = fields.ImageField(_('Image'), sizes=IMAGE_SIZES, placeholder='reuse')
+    url = fields.URLField(
+        _('URL'), [validators.required(), check_url_does_not_exists])
+    image = fields.ImageField(
+        _('Image'), sizes=IMAGE_SIZES, placeholder='reuse')
     tags = fields.TagField(_('Tags'), description=_('Some taxonomy keywords'))
     datasets = fields.DatasetListField(_('Used datasets'))
-    private = fields.BooleanField(_('Private'),
-        description=_('Restrict the dataset visibility to you or your organization only.'))
+    private = fields.BooleanField(
+        _('Private'),
+        description=_('Restrict the dataset visibility to you or '
+                      'your organization only.'))
 
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_('Publish as'))

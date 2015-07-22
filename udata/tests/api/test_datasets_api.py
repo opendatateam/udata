@@ -7,7 +7,9 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import Dataset, Follow, FollowDataset, Member, DATASET_BADGE_KINDS
+from udata.models import (
+    Dataset, Follow, FollowDataset, Member, DATASET_BADGE_KINDS
+)
 
 from . import APITestCase
 from ..factories import (
@@ -20,17 +22,19 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_list(self):
         '''It should fetch a dataset list from the API'''
         with self.autoindex():
-            datasets = [DatasetFactory(resources=[ResourceFactory()]) for i in range(3)]
+            datasets = [DatasetFactory(resources=[ResourceFactory()])
+                        for i in range(3)]
 
         response = self.get(url_for('api.datasets'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), len(datasets))
 
     def test_dataset_api_list_with_extra_filter(self):
-        '''It should allow tofetch a dataset list from the API filtering on extras'''
+        '''It should fetch a dataset list from the API filtering on extras'''
         with self.autoindex():
             for i in range(3):
-                DatasetFactory(resources=[ResourceFactory()], extras={'key': i})
+                DatasetFactory(resources=[ResourceFactory()],
+                               extras={'key': i})
 
         response = self.get(url_for('api.datasets', **{'extra.key': 1}))
         self.assert200(response)
@@ -50,7 +54,8 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_get_deleted(self):
         '''It should not fetch a deleted dataset from the API and raise 410'''
-        dataset = VisibleDatasetFactory(owner=self.user, deleted=datetime.now())
+        dataset = VisibleDatasetFactory(owner=self.user,
+                                        deleted=datetime.now())
 
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assertStatus(response, 410)
@@ -84,7 +89,10 @@ class DatasetAPITest(APITestCase):
         self.assertIsNone(dataset.owner)
 
     def test_dataset_api_create_as_org_permissions(self):
-        '''It should to create a dataset as organization from the API only if the current user is member'''
+        """It should create a dataset as organization from the API
+
+        only if the current user is member.
+        """
         self.login()
         data = DatasetFactory.attributes()
         org = OrganizationFactory()
@@ -131,7 +139,8 @@ class DatasetAPITest(APITestCase):
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert200(response)
         self.assertEqual(Dataset.objects.count(), 1)
-        self.assertEqual(Dataset.objects.first().description, 'new description')
+        self.assertEqual(Dataset.objects.first().description,
+                         'new description')
 
     def test_dataset_api_update_with_extras(self):
         '''It should update a dataset from the API with extras parameters'''
@@ -211,7 +220,8 @@ class DatasetAPITest(APITestCase):
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assertStatus(response, 410)
         self.assertEqual(Dataset.objects.count(), 1)
-        self.assertEqual(Dataset.objects.first().description, dataset.description)
+        self.assertEqual(Dataset.objects.first().description,
+                         dataset.description)
 
     def test_dataset_api_delete(self):
         '''It should delete a dataset from the API'''
@@ -263,7 +273,8 @@ class DatasetAPITest(APITestCase):
         self.login(AdminFactory())
         dataset = DatasetFactory(featured=True)
 
-        response = self.delete(url_for('api.dataset_featured', dataset=dataset))
+        response = self.delete(url_for('api.dataset_featured',
+                                       dataset=dataset))
         self.assert200(response)
 
         dataset.reload()
@@ -274,7 +285,8 @@ class DatasetAPITest(APITestCase):
         self.login(AdminFactory())
         dataset = DatasetFactory(featured=False)
 
-        response = self.delete(url_for('api.dataset_featured', dataset=dataset))
+        response = self.delete(url_for('api.dataset_featured',
+                                       dataset=dataset))
         self.assert200(response)
 
         dataset.reload()
@@ -357,7 +369,8 @@ class DatasetResourceAPITest(APITestCase):
     def test_create(self):
         data = ResourceFactory.attributes()
         with self.api_user():
-            response = self.post(url_for('api.resources', dataset=self.dataset), data)
+            response = self.post(url_for('api.resources',
+                                         dataset=self.dataset), data)
         self.assertStatus(response, 201)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 1)
@@ -368,7 +381,8 @@ class DatasetResourceAPITest(APITestCase):
 
         data = ResourceFactory.attributes()
         with self.api_user():
-            response = self.post(url_for('api.resources', dataset=self.dataset), data)
+            response = self.post(url_for('api.resources',
+                                         dataset=self.dataset), data)
         self.assertStatus(response, 201)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 2)
@@ -381,10 +395,12 @@ class DatasetResourceAPITest(APITestCase):
         expected_order = list(reversed(initial_order))
 
         with self.api_user():
-            response = self.put(url_for('api.resources', dataset=self.dataset), expected_order)
+            response = self.put(url_for('api.resources',
+                                        dataset=self.dataset), expected_order)
         self.assertStatus(response, 200)
         self.dataset.reload()
-        self.assertEqual([str(r.id) for r in self.dataset.resources], expected_order)
+        self.assertEqual([str(r.id) for r in self.dataset.resources],
+                         expected_order)
 
     def test_update(self):
         resource = ResourceFactory()
@@ -396,7 +412,9 @@ class DatasetResourceAPITest(APITestCase):
             'url': faker.url(),
         }
         with self.api_user():
-            response = self.put(url_for('api.resource', dataset=self.dataset, rid=str(resource.id)), data)
+            response = self.put(url_for('api.resource',
+                                        dataset=self.dataset,
+                                        rid=str(resource.id)), data)
         self.assert200(response)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 1)
@@ -412,7 +430,9 @@ class DatasetResourceAPITest(APITestCase):
             'url': faker.url(),
         }
         with self.api_user():
-            response = self.put(url_for('api.resource', dataset=self.dataset, rid=str(ResourceFactory().id)), data)
+            response = self.put(url_for('api.resource',
+                                        dataset=self.dataset,
+                                        rid=str(ResourceFactory().id)), data)
         self.assert404(response)
 
     def test_delete(self):
@@ -420,14 +440,18 @@ class DatasetResourceAPITest(APITestCase):
         self.dataset.resources.append(resource)
         self.dataset.save()
         with self.api_user():
-            response = self.delete(url_for('api.resource', dataset=self.dataset, rid=str(resource.id)))
+            response = self.delete(url_for('api.resource',
+                                           dataset=self.dataset,
+                                           rid=str(resource.id)))
         self.assertStatus(response, 204)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 0)
 
     def test_delete_404(self):
         with self.api_user():
-            response = self.delete(url_for('api.resource', dataset=self.dataset, rid=str(ResourceFactory().id)))
+            response = self.delete(url_for('api.resource',
+                                           dataset=self.dataset,
+                                           rid=str(ResourceFactory().id)))
         self.assert404(response)
 
     def test_follow_dataset(self):
@@ -440,7 +464,8 @@ class DatasetResourceAPITest(APITestCase):
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(), FollowDataset)
+        self.assertIsInstance(Follow.objects.followers(to_follow).first(),
+                              FollowDataset)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
@@ -450,7 +475,8 @@ class DatasetResourceAPITest(APITestCase):
         to_follow = DatasetFactory()
         FollowDataset.objects.create(follower=user, following=to_follow)
 
-        response = self.delete(url_for('api.dataset_followers', id=to_follow.id))
+        response = self.delete(url_for('api.dataset_followers',
+                                       id=to_follow.id))
         self.assert200(response)
 
         nb_followers = Follow.objects.followers(to_follow).count()
@@ -466,15 +492,18 @@ class DatasetResourceAPITest(APITestCase):
         '''It should suggest formats'''
         with self.autoindex():
             DatasetFactory(resources=[
-                ResourceFactory(format=f) for f in (faker.word(), faker.word(), 'test', 'test-1')
+                ResourceFactory(format=f)
+                for f in (faker.word(), faker.word(), 'test', 'test-1')
             ])
 
-        response = self.get(url_for('api.suggest_formats'), qs={'q': 'test', 'size': '5'})
+        response = self.get(url_for('api.suggest_formats'),
+                            qs={'q': 'test', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
         self.assertGreater(len(response.json), 1)
-        self.assertEqual(response.json[0]['text'], 'test') # Shortest match first
+        # Shortest match first.
+        self.assertEqual(response.json[0]['text'], 'test')
 
         for suggestion in response.json:
             self.assertIn('text', suggestion)
@@ -488,14 +517,16 @@ class DatasetResourceAPITest(APITestCase):
                 ResourceFactory(format=faker.word()) for _ in range(3)
             ])
 
-        response = self.get(url_for('api.suggest_formats'), qs={'q': 'test', 'size': '5'})
+        response = self.get(url_for('api.suggest_formats'),
+                            qs={'q': 'test', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_format_api_empty(self):
         '''It should not provide format suggestion if no data'''
         self.init_search()
-        response = self.get(url_for('api.suggest_formats'), qs={'q': 'test', 'size': '5'})
+        response = self.get(url_for('api.suggest_formats'),
+                            qs={'q': 'test', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
@@ -503,9 +534,12 @@ class DatasetResourceAPITest(APITestCase):
         '''It should suggest datasets'''
         with self.autoindex():
             for i in range(4):
-                DatasetFactory(title='test-{0}'.format(i) if i % 2 else faker.word(), resources=[ResourceFactory()])
+                DatasetFactory(
+                    title='test-{0}'.format(i) if i % 2 else faker.word(),
+                    resources=[ResourceFactory()])
 
-        response = self.get(url_for('api.suggest_datasets'), qs={'q': 'tes', 'size': '5'})
+        response = self.get(url_for('api.suggest_datasets'),
+                            qs={'q': 'tes', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -523,9 +557,12 @@ class DatasetResourceAPITest(APITestCase):
         '''It should suggest datasets withspecial characters'''
         with self.autoindex():
             for i in range(4):
-                DatasetFactory(title='testé-{0}'.format(i) if i % 2 else faker.word(), resources=[ResourceFactory()])
+                DatasetFactory(
+                    title='testé-{0}'.format(i) if i % 2 else faker.word(),
+                    resources=[ResourceFactory()])
 
-        response = self.get(url_for('api.suggest_datasets'), qs={'q': 'testé', 'size': '5'})
+        response = self.get(url_for('api.suggest_datasets'),
+                            qs={'q': 'testé', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -545,13 +582,15 @@ class DatasetResourceAPITest(APITestCase):
             for i in range(3):
                 DatasetFactory(resources=[ResourceFactory()])
 
-        response = self.get(url_for('api.suggest_datasets'), qs={'q': 'xxxxxx', 'size': '5'})
+        response = self.get(url_for('api.suggest_datasets'),
+                            qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_datasets_api_empty(self):
         '''It should not provide dataset suggestion if no data'''
         self.init_search()
-        response = self.get(url_for('api.suggest_datasets'), qs={'q': 'xxxxxx', 'size': '5'})
+        response = self.get(url_for('api.suggest_datasets'),
+                            qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)

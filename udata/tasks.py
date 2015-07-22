@@ -45,7 +45,8 @@ def task(*args, **kwargs):
 
 def job(name, **kwargs):
     '''A shortcut decorator for declaring jobs'''
-    return celery.task(name=name, schedulable=True, base=JobTask, bind=True, **kwargs)
+    return celery.task(name=name, schedulable=True, base=JobTask,
+                       bind=True, **kwargs)
 
 
 def get_logger(name):
@@ -89,9 +90,9 @@ def init_app(app):
     default_name = app.config.get('MONGODB_DB', 'celery')
     app.config.setdefault('CELERY_MONGODB_SCHEDULER_DB', default_name)
 
-
     from udata.models import db
-    default_url = 'mongodb://{host}:{port}'.format(host=db.connection.host, port=db.connection.port)
+    default_url = 'mongodb://{host}:{port}'.format(
+        host=db.connection.host, port=db.connection.port)
     app.config.setdefault('CELERY_MONGODB_SCHEDULER_URL', default_url)
 
     celery.conf.update(app.config)

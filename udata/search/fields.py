@@ -14,7 +14,8 @@ from udata.utils import to_bool
 
 log = logging.getLogger(__name__)
 
-__all__ = ('Sort',
+__all__ = (
+    'Sort',
     'BoolFacet', 'TermFacet', 'ModelTermFacet', 'ExtrasFacet',
     'RangeFacet', 'DateRangeFacet', 'TemporalCoverageFacet',
     'BoolBooster', 'FunctionBooster',
@@ -74,7 +75,7 @@ class BoolFacet(Facet):
         return query
 
     def filter_from_kwargs(self, name, kwargs):
-        if not name in kwargs:
+        if name not in kwargs:
             return
         value = kwargs[name]
         boolean = to_bool(value)
@@ -104,7 +105,8 @@ class BoolFacet(Facet):
         return data
 
     def labelize(self, label, value):
-        return ': '.join([label, unicode(_('yes') if to_bool(value) else _('no'))])
+        return ': '.join([label,
+                          unicode(_('yes') if to_bool(value) else _('no'))])
 
 
 class TermFacet(Facet):
@@ -116,7 +118,8 @@ class TermFacet(Facet):
             }
         }
         if args:
-            query['terms']['exclude'] = [args] if isinstance(args, basestring) else args
+            query['terms']['exclude'] = (
+                [args] if isinstance(args, basestring) else args)
         return query
 
     def to_filter(self, value):
@@ -143,7 +146,8 @@ class ModelTermFacet(TermFacet):
         self.field_name = field_name
 
     def from_response(self, name, response):
-        is_objectid = isinstance(getattr(self.model, self.field_name), db.ObjectIdField)
+        is_objectid = isinstance(getattr(self.model, self.field_name),
+                                 db.ObjectIdField)
         cast = lambda o: ObjectId(o) if is_objectid else o
 
         facet = response.get('facets', {}).get(name)
@@ -163,7 +167,9 @@ class ModelTermFacet(TermFacet):
         }
 
     def labelize(self, label, value):
-        return self.labelizer(label, value) if self.labelizer else unicode(self.model.objects.get(id=value))
+        return (self.labelizer(label, value)
+                if self.labelizer
+                else unicode(self.model.objects.get(id=value)))
 
 
 class ExtrasFacet(Facet):
@@ -175,7 +181,8 @@ class ExtrasFacet(Facet):
         filters = []
         for key, value in kwargs.items():
             if key.startswith(prefix):
-                filters.append({'term': {key.replace(name, self.field): value}})
+                filters.append({
+                    'term': {key.replace(name, self.field): value}})
         return {'must': filters}
 
     def from_response(self, name, response):
@@ -209,7 +216,8 @@ class RangeFacet(Facet):
         facet = response.get('facets', {}).get(name)
         if not facet:
             return
-        failure = facet['min'] in ES_NUM_FAILURES or facet['max'] in ES_NUM_FAILURES
+        failure = (facet['min'] in ES_NUM_FAILURES
+                   or facet['max'] in ES_NUM_FAILURES)
         return {
             'type': 'range',
             'min': None if failure else self.cast(facet['min']),
@@ -218,7 +226,8 @@ class RangeFacet(Facet):
         }
 
     def labelize(self, label, value):
-        return self.labelizer(label, value) if self.labelizer else ': '.join([label, value])
+        return (self.labelizer(label, value)
+                if self.labelizer else ': '.join([label, value]))
 
 
 def ts_to_dt(value):
@@ -283,8 +292,10 @@ class TemporalCoverageFacet(Facet):
 
     def from_response(self, name, response):
         aggregations = response.get('aggregations', {})
-        min_value = aggregations.get('{0}_min'.format(self.field), {}).get('value')
-        max_value = aggregations.get('{0}_max'.format(self.field), {}).get('value')
+        min_value = aggregations.get(
+            '{0}_min'.format(self.field), {}).get('value')
+        max_value = aggregations.get(
+            '{0}_max'.format(self.field), {}).get('value')
 
         if not (min_value and max_value):
             return None
@@ -315,7 +326,8 @@ class TemporalCoverageFacet(Facet):
 
     def labelize(self, label, value):
         start, end = self.parse_value(value)
-        return '{0}: {1} - {2}'.format(label, format_date(start, 'short'), format_date(end, 'short'))
+        return '{0}: {1} - {2}'.format(label, format_date(start, 'short'),
+                                       format_date(end, 'short'))
 
 
 class BoolBooster(object):

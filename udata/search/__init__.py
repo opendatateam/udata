@@ -39,17 +39,20 @@ class ElasticSearch(object):
         # do we register on? app.extensions looks a little hackish (I don't
         # know flask well enough to be sure), but that's how it's done in
         # flask-pymongo so let's use it for now.
-        app.extensions['elasticsearch'] = Elasticsearch([app.config['ELASTICSEARCH_URL']], serializer=EsJSONSerializer())
+        app.extensions['elasticsearch'] = Elasticsearch(
+            [app.config['ELASTICSEARCH_URL']], serializer=EsJSONSerializer())
 
     def __getattr__(self, item):
-        if not 'elasticsearch' in current_app.extensions.keys():
-            raise Exception('not initialised, did you forget to call init_app?')
+        if 'elasticsearch' not in current_app.extensions.keys():
+            raise Exception(
+                'Not initialized, did you forget to call init_app?')
         return getattr(current_app.extensions['elasticsearch'], item)
 
     @property
     def client(self):
-        if not 'elasticsearch' in current_app.extensions.keys():
-            raise Exception('not initialised, did you forget to call init_app?')
+        if 'elasticsearch' not in current_app.extensions.keys():
+            raise Exception(
+                'Not initialized, did you forget to call init_app?')
         return current_app.extensions['elasticsearch']
 
     @property
@@ -71,9 +74,12 @@ class ElasticSearch(object):
 
         if es.indices.exists(self.index_name):
             for doc_type, mapping in mappings:
-                if es.indices.exists_type(index=self.index_name, doc_type=doc_type):
-                    es.indices.delete_mapping(index=self.index_name, doc_type=doc_type)
-                es.indices.put_mapping(index=self.index_name, doc_type=doc_type, body=mapping)
+                if es.indices.exists_type(index=self.index_name,
+                                          doc_type=doc_type):
+                    es.indices.delete_mapping(index=self.index_name,
+                                              doc_type=doc_type)
+                es.indices.put_mapping(index=self.index_name,
+                                       doc_type=doc_type, body=mapping)
         else:
             with open(ANALYSIS_JSON) as analysis:
                 es.indices.create(self.index_name, {
@@ -97,10 +103,12 @@ def reindex(obj):
     doctype = adapter.doc_type()
     if adapter.is_indexable(obj):
         log.info('Indexing %s (%s)', doctype, obj.id)
-        es.index(index=es.index_name, doc_type=doctype, id=obj.id, body=adapter.serialize(obj))
+        es.index(index=es.index_name, doc_type=doctype,
+                 id=obj.id, body=adapter.serialize(obj))
     elif es.exists(index=es.index_name, doc_type=doctype, id=obj.id):
         log.info('Unindexing %s (%s)', doctype, obj.id)
-        es.delete(index=es.index_name, doc_type=doctype, id=obj.id, refresh=True)
+        es.delete(index=es.index_name, doc_type=doctype,
+                  id=obj.id, refresh=True)
     else:
         log.info('Nothing to do for %s (%s)', doctype, obj.id)
 

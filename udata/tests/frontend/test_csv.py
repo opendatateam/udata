@@ -16,7 +16,8 @@ from . import FrontTestCase
 from ..factories import faker, factory, MongoEngineFactory
 
 RE_ATTACHMENT = re.compile(r'^attachment; filename=(?P<filename>.*)$')
-RE_FILENAME = re.compile(r'^(?P<basename>.*)-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\.csv$')
+RE_FILENAME = re.compile(
+    r'^(?P<basename>.*)-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\.csv$')
 
 
 blueprint = Blueprint('testcsv', __name__)
@@ -56,7 +57,8 @@ class FakeFactory(MongoEngineFactory):
 
     title = factory.LazyAttribute(lambda o: faker.sentence())
     description = factory.LazyAttribute(lambda o: faker.paragraph())
-    tags = factory.LazyAttribute(lambda o: [faker.word() for _ in range(1, randint(1, 4))])
+    tags = factory.LazyAttribute(
+        lambda o: [faker.word() for _ in range(1, randint(1, 4))])
 
 
 class NestedAdapter(csv.NestedAdapter):
@@ -213,7 +215,8 @@ class CsvTest(FrontTestCase):
             'metric.fake-metric-int': 5,
             'metric.fake-metric-float': 0.5,
         }
-        fake = FakeFactory(metrics={'fake-metric-int': 5, 'fake-metric-float': 0.5})
+        fake = FakeFactory(
+            metrics={'fake-metric-int': 5, 'fake-metric-float': 0.5})
 
         fields = csv.metric_fields(Fake)
         self.assertEqual(len(fields), len(expected))
@@ -273,7 +276,9 @@ class CsvTest(FrontTestCase):
     def assert_filename(self, response, basename):
         header = response.headers['Content-Disposition']
         m = RE_ATTACHMENT.match(header)
-        self.assertIsNotNone(m, 'Content-Disposition header should specify a filename attachment')
+        self.assertIsNotNone(
+            m,
+            'Content-Disposition header should specify a filename attachment')
         filename = m.group('filename')
         m = RE_FILENAME.match(filename)
         self.assertIsNotNone(m, 'filename should have the right pattern')

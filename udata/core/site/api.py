@@ -17,8 +17,10 @@ from udata.core.organization.api_fields import org_ref_fields
 from .views import current_site
 
 site_fields = api.model('Site', {
-    'id': fields.String(description='The Site unique identifier', required=True),
-    'title': fields.String(description='The site display title', required=True),
+    'id': fields.String(
+        description='The Site unique identifier', required=True),
+    'title': fields.String(
+        description='The site display title', required=True),
     'metrics': fields.Raw(description='The associated metrics', default={}),
 })
 
@@ -80,12 +82,16 @@ class SiteHomeReusesAPI(API):
 
 
 activity_fields = api.model('Activity', {
-    'actor': fields.Nested(user_ref_fields, description='The user who performed the action', readonly=True),
-    'organization': fields.Nested(org_ref_fields, allow_null=True, readonly=True,
+    'actor': fields.Nested(
+        user_ref_fields,
+        description='The user who performed the action', readonly=True),
+    'organization': fields.Nested(
+        org_ref_fields, allow_null=True, readonly=True,
         description='The organization who performed the action'),
     # 'related_to'
     # related_to = db.ReferenceField(db.DomainModel, required=True)
-    'created_at': fields.ISODateTime(description='When the action has been performed', readonly=True),
+    'created_at': fields.ISODateTime(
+        description='When the action has been performed', readonly=True),
     'kwargs': fields.Raw(description='Some action specific context'),
 })
 
@@ -101,4 +107,5 @@ class SiteActivityAPI(API):
     def get(self):
         '''Fetch site activity'''
         args = activity_parser.parse_args()
-        return Activity.objects.order_by('-created').paginate(args['page'], args['page_size'])
+        return (Activity.objects.order_by('-created')
+                                .paginate(args['page'], args['page_size']))

@@ -32,7 +32,8 @@ class ReuseModelTest(TestCase, DBTestMixin):
         user = UserFactory()
         org = OrganizationFactory()
         reuses = [ReuseFactory(owner=user), ReuseFactory(organization=org)]
-        excluded = [ReuseFactory(owner=UserFactory()), ReuseFactory(organization=OrganizationFactory())]
+        excluded = [ReuseFactory(owner=UserFactory()),
+                    ReuseFactory(organization=OrganizationFactory())]
 
         result = Reuse.objects.owned_by(org, user)
 

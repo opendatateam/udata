@@ -4,7 +4,9 @@ from __future__ import unicode_literals
 from flask import url_for
 
 from . import FrontTestCase
-from udata.tests.factories import DatasetFactory, ReuseFactory, OrganizationFactory
+from udata.tests.factories import (
+    DatasetFactory, ReuseFactory, OrganizationFactory
+)
 
 
 class FrontEndRootTest(FrontTestCase):

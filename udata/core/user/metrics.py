@@ -9,7 +9,10 @@ from udata.core.followers.metrics import FollowersMetric
 from udata.core.followers.signals import on_follow, on_unfollow
 
 
-__all__ = ('DatasetsMetric', 'ReusesMetric', 'UserFollowersMetric', 'UserFollowingMetric')
+__all__ = (
+    'DatasetsMetric', 'ReusesMetric', 'UserFollowersMetric',
+    'UserFollowingMetric'
+)
 
 
 class UserMetric(Metric):

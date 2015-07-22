@@ -9,7 +9,10 @@ from udata.core.followers.signals import on_follow, on_unfollow
 from .models import Site
 from .views import current_site
 
-__all__ = ('DatasetsMetric', 'ReusesMetric', 'ResourcesMetric', 'UsersMetric', 'OrganizationsMetric')
+__all__ = (
+    'DatasetsMetric', 'ReusesMetric', 'ResourcesMetric', 'UsersMetric',
+    'OrganizationsMetric'
+)
 
 
 class SiteMetric(Metric):
@@ -18,7 +21,8 @@ class SiteMetric(Metric):
     def __init__(self, value=None):
         if current_site is None:
             raise ValueError('Need to be inside app context')
-        super(SiteMetric, self).__init__(current_site._get_current_object(), value)
+        super(SiteMetric, self).__init__(current_site._get_current_object(),
+                                         value)
 
     @classmethod
     def update(cls):
@@ -68,7 +72,8 @@ class ResourcesMetric(SiteMetric):
         }
         '''))
 
-ResourcesMetric.connect(Dataset.on_create, Dataset.on_update, Resource.on_added, Resource.on_deleted)
+ResourcesMetric.connect(Dataset.on_create, Dataset.on_update,
+                        Resource.on_added, Resource.on_deleted)
 
 
 class UsersMetric(SiteMetric):
@@ -107,7 +112,8 @@ class MaxDatasetFollowersMetric(SiteMetric):
     archived = False
 
     def get_value(self):
-        dataset = Dataset.objects(metrics__followers__gt=0).visible().order_by('-metrics.followers').first()
+        dataset = (Dataset.objects(metrics__followers__gt=0).visible()
+                          .order_by('-metrics.followers').first())
         return dataset.metrics.get('followers', 0)
 
 MaxDatasetFollowersMetric.connect(Dataset.on_create, Dataset.on_update)
@@ -119,7 +125,8 @@ class MaxDatasetReusesMetric(SiteMetric):
     archived = False
 
     def get_value(self):
-        dataset = Dataset.objects(metrics__reuses__gt=0).visible().order_by('-metrics.reuses').first()
+        dataset = (Dataset.objects(metrics__reuses__gt=0).visible()
+                   .order_by('-metrics.reuses').first())
         return dataset.metrics.get('reuses', 0)
 
 MaxDatasetReusesMetric.connect(Dataset.on_create, Dataset.on_update)
@@ -131,7 +138,8 @@ class MaxReuseDatasetsMetric(SiteMetric):
     archived = False
 
     def get_value(self):
-        reuse = Reuse.objects(metrics__datasets__gt=0).visible().order_by('-metrics.datasets').first()
+        reuse = (Reuse.objects(metrics__datasets__gt=0).visible()
+                 .order_by('-metrics.datasets').first())
         return reuse.metrics.get('datasets', 0)
 
 MaxReuseDatasetsMetric.connect(Reuse.on_create, Reuse.on_update)
@@ -143,7 +151,8 @@ class MaxReuseFollowersMetric(SiteMetric):
     archived = False
 
     def get_value(self):
-        reuse = Reuse.objects(metrics__followers__gt=0).visible().order_by('-metrics.followers').first()
+        reuse = (Reuse.objects(metrics__followers__gt=0).visible()
+                 .order_by('-metrics.followers').first())
         return reuse.metrics.get('followers', 0)
 
 MaxReuseFollowersMetric.connect(on_follow, on_unfollow)
@@ -155,10 +164,12 @@ class MaxOrgFollowersMetric(SiteMetric):
     archived = False
 
     def get_value(self):
-        org = Organization.objects(metrics__followers__gt=0).visible().order_by('-metrics.followers').first()
+        org = (Organization.objects(metrics__followers__gt=0).visible()
+               .order_by('-metrics.followers').first())
         return org.metrics.get('followers', 0)
 
-MaxOrgFollowersMetric.connect(Organization.on_create, Organization.on_update, on_follow, on_unfollow)
+MaxOrgFollowersMetric.connect(Organization.on_create, Organization.on_update,
+                              on_follow, on_unfollow)
 
 
 class MaxOrgReusesMetric(SiteMetric):
@@ -167,7 +178,8 @@ class MaxOrgReusesMetric(SiteMetric):
     archived = False
 
     def get_value(self):
-        org = Organization.objects(metrics__reuses__gt=0).visible().order_by('-metrics.reuses').first()
+        org = (Organization.objects(metrics__reuses__gt=0).visible()
+               .order_by('-metrics.reuses').first())
         if org:
             return org.metrics.get('reuses', 0)
         else:
@@ -182,7 +194,9 @@ class MaxOrgDatasetsMetric(SiteMetric):
     archived = False
 
     def get_value(self):
-        org = Organization.objects(metrics__datasets__gt=0).visible().order_by('-metrics.datasets').first()
+        org = (Organization.objects(metrics__datasets__gt=0).visible()
+               .order_by('-metrics.datasets').first())
         return org.metrics.get('datasets', 0)
 
-MaxOrgDatasetsMetric.connect(Organization.on_create, Organization.on_update, Reuse.on_create, Reuse.on_update)
+MaxOrgDatasetsMetric.connect(Organization.on_create, Organization.on_update,
+                             Reuse.on_create, Reuse.on_update)

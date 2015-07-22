@@ -3,11 +3,12 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.core.user.models import AVATAR_SIZES
-
 from . import FrontTestCase
 from udata.models import FollowDataset, FollowOrg, FollowReuse, FollowUser
-from ..factories import UserFactory, DatasetFactory, ReuseFactory, ResourceFactory, OrganizationFactory
+from ..factories import (
+    UserFactory, DatasetFactory, ReuseFactory, ResourceFactory,
+    OrganizationFactory
+)
 
 
 class UserBlueprintTest(FrontTestCase):
@@ -55,7 +56,8 @@ class UserBlueprintTest(FrontTestCase):
     def test_render_profile_datasets(self):
         '''It should render the user profile datasets page'''
         user = UserFactory()
-        datasets = [DatasetFactory(owner=user, resources=[ResourceFactory()]) for _ in range(3)]
+        datasets = [DatasetFactory(owner=user, resources=[ResourceFactory()])
+                    for _ in range(3)]
         for _ in range(2):
             DatasetFactory(resources=[ResourceFactory()])
         response = self.get(url_for('users.datasets', user=user))
@@ -66,7 +68,8 @@ class UserBlueprintTest(FrontTestCase):
     def test_render_profile_reuses(self):
         '''It should render the user profile reuses page'''
         user = UserFactory()
-        reuses = [ReuseFactory(owner=user, datasets=[DatasetFactory()]) for _ in range(3)]
+        reuses = [ReuseFactory(owner=user, datasets=[DatasetFactory()])
+                  for _ in range(3)]
         for _ in range(2):
             ReuseFactory(datasets=[DatasetFactory()])
         response = self.get(url_for('users.reuses', user=user))
@@ -95,7 +98,9 @@ class UserBlueprintTest(FrontTestCase):
     def test_render_profile_followers(self):
         '''It should render the user profile followers page'''
         user = UserFactory()
-        followers = [FollowUser.objects.create(follower=UserFactory(), following=user) for _ in range(3)]
+        followers = [FollowUser.objects.create(follower=UserFactory(),
+                                               following=user)
+                     for _ in range(3)]
         response = self.get(url_for('users.followers', user=user))
 
         self.assert200(response)
@@ -121,14 +126,14 @@ class UserBlueprintTest(FrontTestCase):
         self.assert200(response)
 
     def test_user_profile_form_is_protected(self):
-        '''It should raise a 403 if an user try to access another user profile form'''
+        '''It should 403 if an user try to access another user profile form'''
         user = UserFactory()
         self.login()
         response = self.get(url_for('users.edit', user=user))
         self.assert403(response)
 
     def test_edit(self):
-        '''It should handle edit form submit and redirect on user profile page'''
+        '''It should handle edit form submit and redirect'''
         self.login()
         data = self.user.to_dict()
         data['about'] = 'bla bla bla'
@@ -150,7 +155,9 @@ class UserBlueprintTest(FrontTestCase):
 
         self.assertIsNone(user.apikey)
 
-        response = self.post(url_for('users.apikey_settings', user=self.user), {'action': 'generate'})
+        response = self.post(
+            url_for('users.apikey_settings', user=self.user),
+            {'action': 'generate'})
         self.assert200(response)
 
         user.reload()
@@ -165,7 +172,9 @@ class UserBlueprintTest(FrontTestCase):
 
         old_key = user.apikey
 
-        response = self.post(url_for('users.apikey_settings', user=self.user), {'action': 'generate'})
+        response = self.post(
+            url_for('users.apikey_settings', user=self.user),
+            {'action': 'generate'})
         self.assert200(response)
 
         user.reload()
@@ -179,7 +188,9 @@ class UserBlueprintTest(FrontTestCase):
         user.save()
         self.assertIsNotNone(user.apikey)
 
-        response = self.post(url_for('users.apikey_settings', user=self.user), {'action': 'clear'})
+        response = self.post(
+            url_for('users.apikey_settings', user=self.user),
+            {'action': 'clear'})
         self.assert200(response)
 
         user.reload()
@@ -194,5 +205,6 @@ class UserBlueprintTest(FrontTestCase):
     def test_render_user_notifications_settings(self):
         '''It should render the user notifications settings page'''
         self.login()
-        response = self.get(url_for('users.notifications_settings', user=self.user))
+        response = self.get(
+            url_for('users.notifications_settings', user=self.user))
         self.assert200(response)

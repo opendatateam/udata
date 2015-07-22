@@ -97,7 +97,8 @@ def i18n():
 
     info('Extract JavaScript strings')
     catalog = {}
-    catalog_filename = join(ROOT, 'js', 'locales', '{}.en.json'.format(I18N_DOMAIN))
+    catalog_filename = join(ROOT, 'js', 'locales',
+                            '{}.en.json'.format(I18N_DOMAIN))
     if exists(catalog_filename):
         with open(catalog_filename) as f:
             catalog = json.load(f)

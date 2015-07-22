@@ -8,7 +8,8 @@ namespace = Namespace()
 #: Trigerred when an discussion is created
 on_new_discussion = namespace.signal('on-new-discussion')
 
-#: Trigerred when a new comment is posted on an discussion (excluding creation and closing)
+#: Trigerred when a new comment is posted on an discussion
+# (excluding creation and closing)
 on_new_discussion_comment = namespace.signal('on-new-discussion-comment')
 
 #: Trigerred when an discussion is closed

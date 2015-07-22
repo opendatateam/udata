@@ -49,13 +49,14 @@ class FollowAPITest(APITestCase):
         self.assertEqual(response.json['followers'], nb_followers)
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(nb_followers, 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(), Follow)
+        self.assertIsInstance(Follow.objects.followers(to_follow).first(),
+                              Follow)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
         self.assertTrue(self.signal_emitted)
 
     def test_follow_already_followed(self):
-        '''It shouldn't do anything when following an already followed object'''
+        '''It should do nothing when following an already followed object'''
         user = self.login()
         to_follow = Fake.objects.create()
         FollowFake.objects.create(follower=user, following=to_follow)

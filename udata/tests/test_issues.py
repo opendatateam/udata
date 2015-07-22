@@ -14,7 +14,8 @@ from frontend import FrontTestCase
 
 from .api import APITestCase
 from .factories import (
-    faker, UserFactory, OrganizationFactory, DatasetFactory, DatasetIssueFactory
+    faker, UserFactory, OrganizationFactory, DatasetFactory,
+    DatasetIssueFactory
 )
 
 
@@ -168,7 +169,8 @@ class IssuesTest(APITestCase):
         self.assertIsNotNone(data['created'])
         self.assertEqual(len(data['discussion']), 1)
         self.assertEqual(data['discussion'][0]['content'], 'bla bla')
-        self.assertEqual(data['discussion'][0]['posted_by']['id'], str(user.id))
+        self.assertEqual(data['discussion'][0]['posted_by']['id'],
+                         str(user.id))
         self.assertIsNotNone(data['discussion'][0]['posted_on'])
 
     def test_add_comment_to_issue(self):
@@ -202,7 +204,8 @@ class IssuesTest(APITestCase):
         self.assertIsNone(data['closed_by'])
         self.assertEqual(len(data['discussion']), 2)
         self.assertEqual(data['discussion'][1]['content'], 'new bla bla')
-        self.assertEqual(data['discussion'][1]['posted_by']['id'], str(poster.id))
+        self.assertEqual(data['discussion'][1]['posted_by']['id'],
+                         str(poster.id))
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
     def test_close_issue(self):
@@ -237,7 +240,8 @@ class IssuesTest(APITestCase):
         self.assertEqual(data['closed_by'], str(owner.id))
         self.assertEqual(len(data['discussion']), 2)
         self.assertEqual(data['discussion'][1]['content'], 'close bla bla')
-        self.assertEqual(data['discussion'][1]['posted_by']['id'], str(owner.id))
+        self.assertEqual(data['discussion'][1]['posted_by']['id'],
+                         str(owner.id))
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
     def test_close_issue_permissions(self):
@@ -268,12 +272,14 @@ class IssueCsvTest(FrontTestCase):
 
     def test_issues_csv_content_empty(self):
         organization = OrganizationFactory()
-        response = self.get(url_for('organizations.issues_csv', org=organization))
+        response = self.get(
+            url_for('organizations.issues_csv', org=organization))
         self.assert200(response)
 
         self.assertEqual(
             response.data,
-            '"id";"user";"subject";"title";"size";"messages";"created";"closed";"closed_by"\r\n'
+            ('"id";"user";"subject";"title";"size";"messages";"created";'
+             '"closed";"closed_by"\r\n')
         )
 
     def test_issues_csv_content_filled(self):
@@ -281,8 +287,10 @@ class IssueCsvTest(FrontTestCase):
         dataset = DatasetFactory(organization=organization)
         user = UserFactory(first_name='John', last_name='Snow')
         issue = DatasetIssueFactory(subject=dataset, user=user)
-        response = self.get(url_for('organizations.issues_csv', org=organization))
+        response = self.get(
+            url_for('organizations.issues_csv', org=organization))
         self.assert200(response)
 
         headers, data = response.data.strip().split('\r\n')
-        self.assertStartswith(data, '"{issue.id}";"{issue.user}"'.format(issue=issue))
+        self.assertStartswith(
+            data, '"{issue.id}";"{issue.user}"'.format(issue=issue))

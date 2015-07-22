@@ -58,3 +58,4 @@ coverage.xml
 
 # Force .gitignore files
 !.gitignore
+.noseids

@@ -11,7 +11,9 @@ from udata.core.site.views import current_site
 from udata.models import db, WithMetrics
 
 from udata.tests.api import APITestCase
-from udata.tests.factories import AdminFactory, VisibleDatasetFactory, VisibleReuseFactory, SiteFactory
+from udata.tests.factories import (
+    AdminFactory, VisibleDatasetFactory, VisibleReuseFactory, SiteFactory
+)
 
 
 class FakeModel(db.Document, WithMetrics):
@@ -99,13 +101,3 @@ class SiteAPITest(APITestCase):
         site = Site.objects.get(id=self.app.config['SITE_ID'])
 
         self.assertEqual([r.id for r in site.settings.home_reuses], ids)
-
-    # def test_update_site(self):
-    #     self.login(AdminFactory())
-    #     response = self.put(url_for('api.site'))
-    #     self.assert200(response)
-
-    # def test_get_site_permissions(self):
-    #     response = self.put(url_for('api.site'))
-    #     self.assert403(response)
-    #     # self.assertEqual(response.json['id'], result.id)

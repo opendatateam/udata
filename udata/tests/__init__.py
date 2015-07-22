@@ -69,7 +69,8 @@ class TestCase(BaseTestCase):
     def assertStartswith(self, haystack, needle):
         self.assertEqual(
             haystack.startswith(needle), True,
-            '{haystack} does not start with {needle}'.format(haystack=haystack, needle=needle))
+            '{haystack} does not start with {needle}'.format(
+                haystack=haystack, needle=needle))
 
     @contextmanager
     def assert_emit(self, *signals):
@@ -87,14 +88,16 @@ class TestCase(BaseTestCase):
 
         for signal, mock_handler in specs:
             signal.disconnect(mock_handler)
-            self.assertTrue(mock_handler.called, 'Signal "{0}" should have been emitted'.format(signal.name))
+            self.assertTrue(
+                mock_handler.called,
+                'Signal "{0}" should have been emitted'.format(signal.name))
 
 
 class WebTestMixin(object):
     user = None
 
     def _build_url(self, url, kwargs):
-        if not 'qs' in kwargs:
+        if 'qs' not in kwargs:
             return url
         qs = kwargs.pop('qs')
         return '?'.join([url, url_encode(qs)])
@@ -131,10 +134,12 @@ class WebTestMixin(object):
     def assert_not_flash(self):
         with self.client.session_transaction() as session:
             flashes = session.get('_flashes', [])
-            self.assertNotIn('_flashes', session,
+            self.assertNotIn(
+                '_flashes', session,
                 'There is {0} unexpected flashed message(s): {1}'.format(
                     len(flashes),
-                    ', '.join('"{0} ({1})"'.format(msg, cat) for cat, msg in flashes)
+                    ', '.join('"{0} ({1})"'.format(msg, cat)
+                              for cat, msg in flashes)
                 ))
 
 
@@ -189,7 +194,8 @@ def mock_task(name, **kwargs):
 
 
 def filestorage(filename, content):
-    data = StringIO(str(content)) if isinstance(content, basestring) else content
+    data = (StringIO(str(content))
+            if isinstance(content, basestring) else content)
     builder = EnvironBuilder(method='POST', data={
         'file': (data, filename)
     })

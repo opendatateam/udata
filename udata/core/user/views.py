@@ -5,13 +5,16 @@ import logging
 
 from flask import url_for, g
 
-from udata import mail
 from udata.app import nav
-from udata.frontend.views import DetailView, EditView, SearchView, BaseView, SingleObject
+from udata.frontend.views import (
+    DetailView, EditView, SearchView, BaseView, SingleObject
+)
 from udata.models import User, Activity, Organization, Dataset, Reuse, Follow
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 
-from .forms import UserProfileForm, UserSettingsForm, UserAPIKeyForm, UserNotificationsForm
+from .forms import (
+    UserProfileForm, UserSettingsForm, UserAPIKeyForm, UserNotificationsForm
+)
 from .permissions import sysadmin, UserEditPermission
 from .tasks import send_test_mail
 
@@ -57,7 +60,8 @@ class UserView(object):
 
     def get_context(self):
         context = super(UserView, self).get_context()
-        context['organizations'] = Organization.objects(members__user=self.user)
+        context['organizations'] = Organization.objects(
+            members__user=self.user)
         for item in navbar.items:
             item._args = {'user': self.user}
         return context
@@ -106,7 +110,8 @@ class UserAPIKeySettingsView(UserEditView, EditView):
         return self.render()
 
 
-@blueprint.route('/<user:user>/edit/notifications/', endpoint='notifications_settings')
+@blueprint.route('/<user:user>/edit/notifications/',
+                 endpoint='notifications_settings')
 class UserNotificationsView(UserEditView, EditView):
     form = UserNotificationsForm
     template_name = 'user/edit_notifications.html'
@@ -115,7 +120,8 @@ class UserNotificationsView(UserEditView, EditView):
         return url_for('users.show', user=self.object)
 
 
-@blueprint.route('/<user:user>/edit/notifications/testmail', endpoint='notifications_test')
+@blueprint.route('/<user:user>/edit/notifications/testmail',
+                 endpoint='notifications_test')
 class UserNotificationsTestView(UserEditView, SingleObject, BaseView):
     def post(self, user):
         send_test_mail.delay(user)
@@ -148,7 +154,8 @@ class UserActivityView(UserView, DetailView):
 
     def get_context(self):
         context = super(UserActivityView, self).get_context()
-        context['activities'] = Activity.objects(actor=self.object).order_by('-created_at').limit(15)
+        context['activities'] = (Activity.objects(actor=self.object)
+                                         .order_by('-created_at').limit(15))
         return context
 
 
@@ -170,12 +177,15 @@ class UserFollowingView(UserView, DetailView):
             elif isinstance(follow.following, User):
                 users.append(follow.following)
             else:
-                log.warning('Follow object %s has not dereferenced %s', follow.id, follow.following)
+                log.warning(
+                    'Follow object %s has not dereferenced %s',
+                    follow.id, follow.following)
 
         context.update({
             'followed_datasets': sorted(datasets, key=lambda d: d.title),
             'followed_reuses': sorted(reuses, key=lambda r: r.title),
-            'followed_organizations': sorted(organizations, key=lambda o: o.name),
+            'followed_organizations': sorted(organizations,
+                                             key=lambda o: o.name),
             'followed_users': sorted(users, key=lambda u: u.fullname),
         })
 
@@ -188,5 +198,6 @@ class UserFollowersView(UserView, DetailView):
 
     def get_context(self):
         context = super(UserFollowersView, self).get_context()
-        context['followers'] = Follow.objects.followers(self.user).order_by('follower.fullname')
+        context['followers'] = (Follow.objects.followers(self.user)
+                                              .order_by('follower.fullname'))
         return context

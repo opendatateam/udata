@@ -10,7 +10,9 @@ from os.path import join, dirname, isdir, exists
 from flask import current_app, g
 from werkzeug.local import LocalProxy
 
-from flask.ext.themes2 import Themes, Theme, render_theme_template, get_theme, packaged_themes_loader
+from flask.ext.themes2 import (
+    Themes, Theme, render_theme_template, get_theme, packaged_themes_loader
+)
 
 from udata.app import nav
 from udata.i18n import lazy_gettext as _
@@ -71,7 +73,8 @@ class ConfigurableTheme(Theme):
             return
         config_path = join(self.path, 'theme.py')
         if exists(config_path):
-            imp.load_source('udata.frontend.theme.{0}'.format(self.identifier), config_path)
+            imp.load_source('udata.frontend.theme.{0}'.format(self.identifier),
+                            config_path)
         if self.defaults and self.identifier not in self.site.themes:
             self.site.themes[self.identifier] = self.defaults
             try:
@@ -124,7 +127,8 @@ def context(name):
 
 
 def init_app(app):
-    themes.init_themes(app, app_identifier='udata', loaders=[udata_themes_loader, plugin_themes_loader])
+    themes.init_themes(app, app_identifier='udata',
+                       loaders=[udata_themes_loader, plugin_themes_loader])
 
     # Load all theme assets
     theme = app.theme_manager.themes[app.config['THEME']]

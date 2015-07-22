@@ -3,9 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 import os
-import uuid
 
-from PIL import Image, ImageOps
+from PIL import Image
 
 from udata.app import standalone, create_app
 
@@ -14,7 +13,7 @@ log = logging.getLogger(__name__)
 app = standalone(create_app())
 
 
-DEFAULT_SIZES = [128] #, 25]
+DEFAULT_SIZES = [128]  # , 25]
 MAX = 10
 
 

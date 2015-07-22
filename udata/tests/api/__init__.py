@@ -38,7 +38,8 @@ class APITestCase(FrontTestCase):
             kwargs['data'] = data
 
         if getattr(self, '_api_user', None):
-            headers['X-API-KEY'] = kwargs.get('X-API-KEY', self._api_user.apikey)
+            headers['X-API-KEY'] = kwargs.get('X-API-KEY',
+                                              self._api_user.apikey)
 
         kwargs['headers'] = headers
         method = getattr(super(APITestCase, self), verb)
@@ -48,10 +49,13 @@ class APITestCase(FrontTestCase):
         return self.perform('get', url, client=client, *args, **kwargs)
 
     def post(self, url, data=None, client=None, *args, **kwargs):
-        return self.perform('post', url, data=data or {}, client=client, *args, **kwargs)
+        return self.perform('post', url, data=data or {}, client=client,
+                            *args, **kwargs)
 
     def put(self, url, data=None, client=None, *args, **kwargs):
-        return self.perform('put', url, data=data or {}, client=client, *args, **kwargs)
+        return self.perform('put', url, data=data or {}, client=client,
+                            *args, **kwargs)
 
     def delete(self, url, data=None, client=None, *args, **kwargs):
-        return self.perform('delete', url, data=data or {}, client=client, *args, **kwargs)
+        return self.perform('delete', url, data=data or {}, client=client,
+                            *args, **kwargs)

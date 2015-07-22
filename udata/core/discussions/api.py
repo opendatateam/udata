@@ -22,34 +22,55 @@ ns = api.namespace('discussions', 'Discussion related operations')
 
 message_fields = api.model('DiscussionMessage', {
     'content': fields.String(description='The message body', required=True),
-    'posted_by': fields.Nested(user_ref_fields, description='The message author', required=True),
-    'posted_on': fields.ISODateTime(description='The message posting date', required=True),
+    'posted_by': fields.Nested(
+        user_ref_fields, description='The message author', required=True),
+    'posted_on': fields.ISODateTime(
+        description='The message posting date', required=True),
 })
 
 discussion_fields = api.model('Discussion', {
-    'id': fields.String(description='The discussion identifier', readonly=True),
-    'subject': fields.String(attribute='subject.id', description='The discussion target object identifier', required=True),
+    'id': fields.String(
+        description='The discussion identifier', readonly=True),
+    'subject': fields.String(
+        attribute='subject.id',
+        description='The discussion target object identifier', required=True),
     'title': fields.String(description='The discussion title', required=True),
-    'user': fields.Nested(user_ref_fields, description='The discussion author', required=True),
-    'created': fields.ISODateTime(description='The discussion creation date', readonly=True),
-    'closed': fields.ISODateTime(description='The discussion closing date', readonly=True),
-    'closed_by': fields.String(attribute='closed_by.id', description='The user who closed the discussion', readonly=True),
+    'user': fields.Nested(
+        user_ref_fields, description='The discussion author', required=True),
+    'created': fields.ISODateTime(
+        description='The discussion creation date', readonly=True),
+    'closed': fields.ISODateTime(
+        description='The discussion closing date', readonly=True),
+    'closed_by': fields.String(
+        attribute='closed_by.id',
+        description='The user who closed the discussion', readonly=True),
     'discussion': fields.Nested(message_fields),
-    'url': fields.UrlFor('api.discussion', description='The discussion API URI', readonly=True),
+    'url': fields.UrlFor(
+        'api.discussion', description='The discussion API URI', readonly=True),
 })
 
 comment_discussion_fields = api.model('DiscussionResponse', {
-    'comment': fields.String(description='The comment to submit', required=True),
-    'close': fields.Boolean(description='Is this a closing response. Only subject owner can close')
+    'comment': fields.String(
+        description='The comment to submit', required=True),
+    'close': fields.Boolean(
+        description='Is this a closing response. Only subject owner can close')
 })
 
-discussion_page_fields = api.model('DiscussionPage', fields.pager(discussion_fields))
+discussion_page_fields = api.model('DiscussionPage',
+                                   fields.pager(discussion_fields))
 
 parser = api.parser()
-parser.add_argument('closed', type=bool, default=False, location='args', help='Filter closed discussions')
-parser.add_argument('for', type=str, location='args', action='append', help='Filter discussions for a given subject')
-parser.add_argument('page', type=int, default=1, location='args', help='The page to fetch')
-parser.add_argument('page_size', type=int, default=20, location='args', help='The page size to fetch')
+parser.add_argument(
+    'closed', type=bool, default=False, location='args',
+    help='Filter closed discussions')
+parser.add_argument(
+    'for', type=str, location='args', action='append',
+    help='Filter discussions for a given subject')
+parser.add_argument(
+    'page', type=int, default=1, location='args', help='The page to fetch')
+parser.add_argument(
+    'page_size', type=int, default=20, location='args',
+    help='The page size to fetch')
 
 
 @ns.route('/<id>/', endpoint='discussion')

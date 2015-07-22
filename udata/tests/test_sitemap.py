@@ -4,7 +4,10 @@ from __future__ import unicode_literals
 from udata import frontend
 from udata.tests import TestCase, WebTestMixin, SearchTestMixin
 
-from .factories import TopicFactory, PostFactory, OrganizationFactory, VisibleReuseFactory, VisibleDatasetFactory
+from .factories import (
+    TopicFactory, PostFactory, OrganizationFactory, VisibleReuseFactory,
+    VisibleDatasetFactory
+)
 
 
 class SitemapTestCase(WebTestMixin, SearchTestMixin, TestCase):
@@ -26,7 +29,8 @@ class SitemapTest(SitemapTestCase):
         self.assertIn('<priority>0.8</priority>', response.data)
         self.assertIn('<changefreq>weekly</changefreq>', response.data)
         self.assertIn(
-            '<loc>http://localhost/topics/{topic}/</loc>'.format(topic=topics[0].slug),
+            '<loc>http://localhost/topics/{topic}/</loc>'.format(
+                topic=topics[0].slug),
             response.data)
 
     def test_organizations_within_sitemap(self):
@@ -38,7 +42,8 @@ class SitemapTest(SitemapTestCase):
         self.assertIn('<priority>0.8</priority>', response.data)
         self.assertIn('<changefreq>weekly</changefreq>', response.data)
         self.assertIn(
-            '<loc>http://localhost/organizations/{organization}/</loc>'.format(organization=organizations[0].slug),
+            '<loc>http://localhost/organizations/{organization}/</loc>'.format(
+                organization=organizations[0].slug),
             response.data)
 
     def test_reuses_within_sitemap(self):
@@ -50,7 +55,8 @@ class SitemapTest(SitemapTestCase):
         self.assertIn('<priority>0.8</priority>', response.data)
         self.assertIn('<changefreq>weekly</changefreq>', response.data)
         self.assertIn(
-            '<loc>http://localhost/reuses/{reuse}/</loc>'.format(reuse=reuses[0].slug),
+            '<loc>http://localhost/reuses/{reuse}/</loc>'.format(
+                reuse=reuses[0].slug),
             response.data)
 
     def test_datasets_within_sitemap(self):
@@ -62,7 +68,8 @@ class SitemapTest(SitemapTestCase):
         self.assertIn('<priority>1</priority>', response.data)
         self.assertIn('<changefreq>weekly</changefreq>', response.data)
         self.assertIn(
-            '<loc>http://localhost/datasets/{dataset}/</loc>'.format(dataset=datasets[0].id),
+            '<loc>http://localhost/datasets/{dataset}/</loc>'.format(
+                dataset=datasets[0].id),
             response.data)
 
     def test_posts_within_sitemap(self):
@@ -74,5 +81,6 @@ class SitemapTest(SitemapTestCase):
         self.assertIn('<priority>0.5</priority>', response.data)
         self.assertIn('<changefreq>weekly</changefreq>', response.data)
         self.assertIn(
-            '<loc>http://localhost/posts/{post}/</loc>'.format(post=posts[0].slug),
+            '<loc>http://localhost/posts/{post}/</loc>'.format(
+                post=posts[0].slug),
             response.data)

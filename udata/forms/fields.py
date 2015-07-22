@@ -15,7 +15,10 @@ from wtforms.utils import unset_value
 from . import widgets
 
 from udata.auth import current_user, admin_permission
-from udata.models import db, User, SpatialCoverage, Organization, GeoZone, spatial_granularities, Dataset, Reuse
+from udata.models import (
+    db, User, SpatialCoverage, Organization, GeoZone, spatial_granularities,
+    Dataset, Reuse
+)
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
@@ -126,7 +129,8 @@ class ImageField(FieldHelper, fields.FormField):
     def __init__(self, label=None, validators=None, **kwargs):
         self.sizes = kwargs.pop('sizes', [100])
         self.placeholder = kwargs.pop('placeholder', 'default')
-        super(ImageField, self).__init__(ImageForm, label, validators, **kwargs)
+        super(ImageField, self).__init__(ImageForm, label, validators,
+                                         **kwargs)
 
     def process(self, formdata, data=unset_value):
         self.src = data(100) if isinstance(data, ImageReference) else None
@@ -179,7 +183,8 @@ class FormWrapper(object):
 
 class FormField(FieldHelper, fields.FormField):
     def __init__(self, form_class, *args, **kwargs):
-        super(FormField, self).__init__(FormWrapper(form_class), *args, **kwargs)
+        super(FormField, self).__init__(FormWrapper(form_class),
+                                        *args, **kwargs)
 
 
 def nullable_text(value):
@@ -189,16 +194,19 @@ def nullable_text(value):
 class SelectField(FieldHelper, fields.SelectField):
     # widget = widgets.SelectPicker()
 
-    def __init__(self, label=None, validators=None, coerce=nullable_text, **kwargs):
+    def __init__(self, label=None, validators=None, coerce=nullable_text,
+                 **kwargs):
         # self._choices = kwargs.pop('choices')
         super(SelectField, self).__init__(label, validators, coerce, **kwargs)
 
     def iter_choices(self):
         localized_choices = [
             (value, _(label) if label else '', selected)
-            for value, label, selected in super(SelectField, self).iter_choices()
+            for value, label, selected
+            in super(SelectField, self).iter_choices()
         ]
-        for value, label, selected in sorted(localized_choices, key=lambda c: c[1]):
+        for value, label, selected in sorted(localized_choices,
+                                             key=lambda c: c[1]):
             yield (value, label, selected)
 
     @property
@@ -223,9 +231,11 @@ class SelectMultipleField(FieldHelper, fields.SelectMultipleField):
     def iter_choices(self):
         localized_choices = [
             (value, self._(label) if label else '', selected)
-            for value, label, selected in super(SelectMultipleField, self).iter_choices()
+            for value, label, selected
+            in super(SelectMultipleField, self).iter_choices()
         ]
-        for value, label, selected in sorted(localized_choices, key=lambda c: c[1]):
+        for value, label, selected in sorted(localized_choices,
+                                             key=lambda c: c[1]):
             yield (value, label, selected)
 
 
@@ -242,7 +252,9 @@ class TagField(StringField):
         if valuelist and len(valuelist) > 1:
             self.data = valuelist
         elif valuelist:
-            self.data = list(set([x.strip().lower() for x in valuelist[0].split(',') if x.strip()]))
+            self.data = list(set([
+                x.strip().lower()
+                for x in valuelist[0].split(',') if x.strip()]))
         else:
             self.data = []
 
@@ -251,11 +263,14 @@ class TagField(StringField):
             return
         for tag in self.data:
             if not MIN_TAG_LENGTH <= len(tag) <= MAX_TAG_LENGTH:
-                message = _('Tag "%(tag)s" must be between %(min)d and %(max)d characters long.',
+                message = _(
+                    'Tag "%(tag)s" must be between %(min)d '
+                    'and %(max)d characters long.',
                     min=MIN_TAG_LENGTH, max=MAX_TAG_LENGTH, tag=tag)
                 raise validators.ValidationError(message)
             if not RE_TAG.match(tag):
-                message = _('Tag "%(tag)s" must be alphanumeric characters or symbols: -_.', tag=tag)
+                message = _('Tag "%(tag)s" must be alphanumeric characters '
+                            'or symbols: -_.', tag=tag)
                 raise validators.ValidationError(message)
 
 
@@ -285,7 +300,8 @@ class ModelField(object):
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) == 1 and valuelist[0]:
             try:
-                self.data = self.model.objects.get(id=clean_oid(valuelist[0], self.model))
+                self.data = self.model.objects.get(id=clean_oid(valuelist[0],
+                                                                self.model))
             except self.model.DoesNotExist:
                 message = _('{0} does not exists').format(self.model.__name__)
                 raise validators.ValidationError(message)
@@ -308,7 +324,8 @@ class ModelChoiceField(StringField):
         if valuelist and len(valuelist) == 1 and valuelist[0]:
             for model in self.models:
                 try:
-                    self.data = model.objects.get(id=clean_oid(valuelist[0], model))
+                    self.data = model.objects.get(id=clean_oid(valuelist[0],
+                                                               model))
                 except model.DoesNotExist:
                     pass
             if not self.data:
@@ -331,14 +348,18 @@ class ModelList(object):
         if len(valuelist) > 1:
             oids = [clean_oid(id, self.model) for id in valuelist]
         elif isinstance(valuelist[0], basestring):
-            oids = [clean_oid(id, self.model) for id in valuelist[0].split(',') if id]
+            oids = [
+                clean_oid(id, self.model)
+                for id in valuelist[0].split(',') if id]
         else:
-            raise validators.ValidationError('Unsupported form parameter: ' + valuelist)
+            raise validators.ValidationError(
+                'Unsupported form parameter: ' + valuelist)
 
         objects = self.model.objects.in_bulk(oids)
         if len(objects.keys()) != len(oids):
             non_existants = set(oids) - set(objects.keys())
-            raise validators.ValidationError('Unknown identifiers: ' + ', '.join(non_existants))
+            raise validators.ValidationError(
+                'Unknown identifiers: ' + ', '.join(non_existants))
 
         self.data = [objects[id] for id in oids]
 
@@ -375,16 +396,19 @@ class ZonesField(ModelList, StringField):
 
 
 class SpatialCoverageForm(WTForm):
-    zones = ZonesField(_('Spatial coverage'), description=_('A list of covered territories'))
+    zones = ZonesField(_('Spatial coverage'),
+                       description=_('A list of covered territories'))
     granularity = SelectField(_('Spatial granularity'),
                               description=_('The size of the data increment'),
-                              choices=lambda: spatial_granularities, default='other')
+                              choices=lambda: spatial_granularities,
+                              default='other')
 
 
 class SpatialCoverageField(FieldHelper, fields.FormField):
     def __init__(self, label=None, validators=None, **kwargs):
         default = kwargs.pop('default', lambda: SpatialCoverage())
-        super(SpatialCoverageField, self).__init__(SpatialCoverageForm, label, validators, default=default, **kwargs)
+        super(SpatialCoverageField, self).__init__(
+            SpatialCoverageForm, label, validators, default=default, **kwargs)
 
     def populate_obj(self, obj, name):
         self._obj = self._obj or SpatialCoverage()
@@ -400,7 +424,8 @@ class DateRangeField(FieldHelper, fields.StringField):
 
     def _value(self):
         if self.data:
-            return ' - '.join([to_iso_date(self.data.start), to_iso_date(self.data.end)])
+            return ' - '.join([to_iso_date(self.data.start),
+                               to_iso_date(self.data.end)])
         else:
             return ''
 
@@ -419,7 +444,8 @@ class DateRangeField(FieldHelper, fields.StringField):
                     end=parse(value['end'], yearfirst=True).date(),
                 )
             else:
-                raise validators.ValidationError(_('Unable to parse date range'))
+                raise validators.ValidationError(
+                    _('Unable to parse date range'))
         else:
             self.data = None
 
@@ -435,14 +461,17 @@ class CurrentUserField(FieldHelper, ModelField, fields.HiddenField):
 
     def __init__(self, *args, **kwargs):
         default = kwargs.pop('default', default_owner)
-        super(CurrentUserField, self).__init__(default=default, *args, **kwargs)
+        super(CurrentUserField, self).__init__(default=default,
+                                               *args, **kwargs)
 
     def pre_validate(self, form):
         if self.data:
             if current_user.is_anonymous():
-                raise validators.ValidationError(_('You must be authenticated'))
+                raise validators.ValidationError(
+                    _('You must be authenticated'))
             elif not admin_permission and current_user.id != self.data.id:
-                raise validators.ValidationError(_('You can only set yourself as owner'))
+                raise validators.ValidationError(
+                    _('You can only set yourself as owner'))
         return True
 
 
@@ -461,9 +490,11 @@ class PublishAsField(FieldHelper, ModelField, fields.HiddenField):
     def pre_validate(self, form):
         if self.data:
             if not current_user.is_authenticated():
-                raise validators.ValidationError(_('You must be authenticated'))
+                raise validators.ValidationError(
+                    _('You must be authenticated'))
             elif not OrganizationPrivatePermission(self.data).can():
-                raise validators.ValidationError(_("Permission denied for this organization"))
+                raise validators.ValidationError(
+                    _("Permission denied for this organization"))
             # Ensure either owner field or this field value is unset
             if self.raw_data:
                 form._fields[self.owner_field].data = None
@@ -474,7 +505,7 @@ class PublishAsField(FieldHelper, ModelField, fields.HiddenField):
 
 class ExtrasField(FieldHelper, fields.Field):
     def __init__(self, *args, **kwargs):
-        if not 'extras' in kwargs:
+        if 'extras' not in kwargs:
             raise ValueError('extras parameter should be specified')
         self.extras = kwargs.pop('extras')
         super(ExtrasField, self).__init__(*args, **kwargs)
@@ -495,6 +526,7 @@ class ExtrasField(FieldHelper, fields.Field):
                 self.extras.validate(self.data)
             except db.ValidationError as e:
                 if e.errors:
-                    self.errors.extend([': '.join((k, v)) for k, v in e.errors.items()])
+                    self.errors.extend([': '.join((k, v))
+                                        for k, v in e.errors.items()])
                 else:
                     self.errors.append(e.message)

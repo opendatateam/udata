@@ -35,7 +35,8 @@ def owner_recipients(badge):
 def notify_badge_added(badge):
     if isinstance(badge.subject, Organization):
         recipients = owner_recipients(badge)
-        subject = _('Your %(type)s gain a new badge', type=badge.subject.verbose_name)
+        subject = _('Your %(type)s gain a new badge',
+                    type=badge.subject.verbose_name)
         mail.send(subject, recipients, 'badge_added', badge=badge)
     else:
         log.warning('Unrecognized badge subject type %s', type(badge.subject))

@@ -87,7 +87,9 @@ class DatasetQuerySet(db.BaseQuerySet):
         return self(private__ne=True, resources__0__exists=True, deleted=None)
 
     def hidden(self):
-        return self(db.Q(private=True) | db.Q(resources__0__exists=False) | db.Q(deleted__ne=None))
+        return self(db.Q(private=True)
+                    | db.Q(resources__0__exists=False)
+                    | db.Q(deleted__ne=None))
 
     def owned_by(self, *owners):
         Qs = db.Q()
@@ -109,7 +111,8 @@ class Resource(WithMetrics, db.EmbeddedDocument):
     id = db.AutoUUIDField()
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
-    type = db.StringField(choices=RESOURCE_TYPES.keys(), default='file', required=True)
+    type = db.StringField(
+        choices=RESOURCE_TYPES.keys(), default='file', required=True)
     url = db.StringField()
     urlhash = db.StringField()
     checksum = db.EmbeddedDocumentField(Checksum)
@@ -134,7 +137,8 @@ class Resource(WithMetrics, db.EmbeddedDocument):
 
 class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     title = db.StringField(max_length=255, required=True)
-    slug = db.SlugField(max_length=255, required=True, populate_from='title', update=True)
+    slug = db.SlugField(
+        max_length=255, required=True, populate_from='title', update=True)
     description = db.StringField(required=True, default='')
     license = db.ReferenceField('License')
 
@@ -145,8 +149,10 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     private = db.BooleanField()
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
-    organization = db.ReferenceField('Organization', reverse_delete_rule=db.NULLIFY)
-    supplier = db.ReferenceField('Organization', reverse_delete_rule=db.NULLIFY)
+    organization = db.ReferenceField('Organization',
+                                     reverse_delete_rule=db.NULLIFY)
+    supplier = db.ReferenceField('Organization',
+                                 reverse_delete_rule=db.NULLIFY)
 
     frequency = db.StringField(choices=UPDATE_FREQUENCIES.keys())
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
@@ -217,7 +223,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     @property
     def frequency_label(self):
-        return UPDATE_FREQUENCIES.get(self.frequency or 'unknown', UPDATE_FREQUENCIES['unknown'])
+        return UPDATE_FREQUENCIES.get(self.frequency or 'unknown',
+                                      UPDATE_FREQUENCIES['unknown'])
 
     @property
     def last_update(self):
@@ -238,9 +245,9 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
                 'resources': {
                     '$each': [resource.to_mongo()],
                     '$position': 0
-                    }
                 }
-            })
+            }
+        })
         self.reload()
 
     def add_community_resource(self, resource):
@@ -250,9 +257,9 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
                 'community_resources': {
                     '$each': [resource.to_mongo()],
                     '$position': 0
-                    }
                 }
-            })
+            }
+        })
         self.reload()
 
 

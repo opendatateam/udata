@@ -13,8 +13,10 @@ class DatasetCsvAdapter(csv.Adapter):
         'title',
         'slug',
         ('url', 'external_url'),
-        ('organization', lambda r: r.organization.name if r.organization else None),
-        ('organization_id', lambda r: str(r.organization.id) if r.organization else None),
+        ('organization',
+         lambda r: r.organization.name if r.organization else None),
+        ('organization_id',
+         lambda r: str(r.organization.id) if r.organization else None),
         'supplier',
         'description',
         'frequency',
@@ -40,8 +42,12 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         dataset_field('title'),
         dataset_field('slug'),
         dataset_field('url', 'external_url'),
-        dataset_field('organization', lambda r: r.organization.name if r.organization else None),
-        dataset_field('organization_id', lambda r: str(r.organization.id) if r.organization else None),
+        dataset_field(
+            'organization',
+            lambda r: r.organization.name if r.organization else None),
+        dataset_field(
+            'organization_id',
+            lambda r: str(r.organization.id) if r.organization else None),
         dataset_field('license'),
         dataset_field('private'),
     )

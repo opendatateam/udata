@@ -10,14 +10,18 @@ from flask import url_for
 from udata.models import Reuse, Member
 
 from . import FrontTestCase
-from ..factories import ReuseFactory, UserFactory, AdminFactory, OrganizationFactory, DatasetFactory
+from ..factories import (
+    ReuseFactory, UserFactory, AdminFactory, OrganizationFactory,
+    DatasetFactory
+)
 
 
 class ReuseBlueprintTest(FrontTestCase):
     def test_render_list(self):
         '''It should render the reuse list page'''
         with self.autoindex():
-            reuses = [ReuseFactory(datasets=[DatasetFactory()]) for i in range(3)]
+            reuses = [
+                ReuseFactory(datasets=[DatasetFactory()]) for i in range(3)]
 
         response = self.get(url_for('reuses.list'))
 
@@ -28,7 +32,9 @@ class ReuseBlueprintTest(FrontTestCase):
     def test_render_list_with_query(self):
         '''It should render the reuse list page with a query'''
         with self.autoindex():
-            [ReuseFactory(title='Reuse {0}'.format(i), datasets=[DatasetFactory()]) for i in range(3)]
+            [ReuseFactory(
+                title='Reuse {0}'.format(i), datasets=[DatasetFactory()])
+             for i in range(3)]
 
         response = self.get(url_for('reuses.list'), qs={'q': '2'})
 
@@ -55,7 +61,7 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertEqual(form.datasets.data, [dataset])
 
     def test_render_create_with_dataset_does_not_fails(self):
-        '''It should render the reuse create form without failing with an unknown dataset'''
+        '''It should render the reuse create form with an unknown dataset'''
         response = self.get(url_for('reuses.new', dataset='not-found'))
         self.assert200(response)
 
@@ -144,7 +150,7 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertEqual(reuse.description, 'new description')
 
     def test_delete(self):
-        '''It should handle deletion from form submit and redirect on reuse page'''
+        '''It should handle deletion from form submit and redirect'''
         self.login(AdminFactory())
         reuse = ReuseFactory()
         response = self.post(url_for('reuses.delete', reuse=reuse))
@@ -166,7 +172,8 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assert404(response)
 
     def test_recent_feed(self):
-        datasets = [ReuseFactory(datasets=[DatasetFactory()]) for i in range(3)]
+        datasets = [ReuseFactory(
+                    datasets=[DatasetFactory()]) for i in range(3)]
 
         response = self.get(url_for('reuses.recent_feed'))
 
@@ -195,12 +202,14 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertEqual(len(entry.authors), 1)
         author = entry.authors[0]
         self.assertEqual(author.name, owner.fullname)
-        self.assertEqual(author.href, self.full_url('users.show', user=owner.id))
+        self.assertEqual(author.href,
+                         self.full_url('users.show', user=owner.id))
 
     def test_recent_feed_org(self):
         owner = UserFactory()
         org = OrganizationFactory()
-        ReuseFactory(owner=owner, organization=org, datasets=[DatasetFactory()])
+        ReuseFactory(owner=owner,
+                     organization=org, datasets=[DatasetFactory()])
 
         response = self.get(url_for('reuses.recent_feed'))
 
@@ -213,7 +222,8 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertEqual(len(entry.authors), 1)
         author = entry.authors[0]
         self.assertEqual(author.name, org.name)
-        self.assertEqual(author.href, self.full_url('organizations.show', org=org.id))
+        self.assertEqual(author.href,
+                         self.full_url('organizations.show', org=org.id))
 
     def test_render_issues(self):
         '''It should render the reuse issues page'''
@@ -235,7 +245,7 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertIn(dataset, reuse.datasets)
 
     def test_add_non_existant_dataset_to_reuse(self):
-        '''It should not add a non existant dataset to the reuse and redirect its edit page'''
+        '''It shouldn't add a non existent dataset to the reuse and redirect'''
         self.login(AdminFactory())
         reuse = ReuseFactory()
         data = {'dataset': 'not-found'}

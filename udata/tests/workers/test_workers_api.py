@@ -45,7 +45,8 @@ class JobsAPITest(APITestCase):
             if i % 2:
                 params['crontab'] = PeriodicTask.Crontab(minute=str(i))
             else:
-                params['interval'] = PeriodicTask.Interval(every=i, period='minutes')
+                params['interval'] = PeriodicTask.Interval(every=i,
+                                                           period='minutes')
             PeriodicTask.objects.create(**params)
 
         response = self.get(url_for('api.jobs'))

@@ -31,7 +31,8 @@ class ProtectedPostView(PostView):
 
 @blueprint.route('/', endpoint='list')
 def list_posts():
-    return theme.render('post/list.html', posts=Post.objects.order_by('-created_at'))
+    return theme.render('post/list.html',
+                        posts=Post.objects.order_by('-created_at'))
 
 
 @blueprint.route('/<post:post>/')

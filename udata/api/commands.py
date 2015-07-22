@@ -13,13 +13,15 @@ from flask.ext.restplus.swagger import Swagger
 log = logging.getLogger(__name__)
 
 
-m = submanager('api',
+m = submanager(
+    'api',
     help='API related operations',
     description='Handle all API related operations and maintenance'
 )
 
 
-@m.option('-p', '--pretty', action='store_true', default=False, help='Pretty print (sort')
+@m.option('-p', '--pretty', action='store_true', default=False,
+          help='Pretty print (sort')
 def swagger(pretty):
     '''Dump the swagger specifications'''
     data = Swagger(api).as_dict()

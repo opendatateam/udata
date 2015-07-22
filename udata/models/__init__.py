@@ -5,7 +5,9 @@ import logging
 
 from collections import Iterable
 
-from flask.ext.mongoengine import MongoEngine, MongoEngineSessionInterface, Document, BaseQuerySet
+from flask.ext.mongoengine import (
+    MongoEngine, MongoEngineSessionInterface, Document, BaseQuerySet
+)
 from mongoengine.base import TopLevelDocumentMetaclass
 from mongoengine.signals import pre_save, post_save
 
@@ -100,7 +102,8 @@ class UDataQuerySet(BaseQuerySet):
 
         Taken back from:
 
-        https://github.com/MongoEngine/mongoengine/pull/1029/files#diff-05c70acbd0634d6d05e4a6e3a9b7d66b
+        https://github.com/MongoEngine/mongoengine/
+        pull/1029/files#diff-05c70acbd0634d6d05e4a6e3a9b7d66b
         """
         defaults = query.pop('defaults', {})
         try:
@@ -134,7 +137,6 @@ class UDataDocument(Document):
 class DomainModel(UDataDocument):
     '''Placeholder for inheritance'''
     pass
-
 
 
 db = UDataMongoEngine()

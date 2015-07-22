@@ -41,10 +41,12 @@ class I18nBlueprintTest(WebTestMixin, DBTestMixin, TestCase):
         self.assertEqual(url_for('i18nbp.lang', msg='test'), '/en/lang/test/')
 
     def test_redirect_url_for(self):
-        self.assertEqual(url_for('i18nbp.lang_redirect', msg='test'), '/lang/test/')
+        self.assertEqual(
+            url_for('i18nbp.lang_redirect', msg='test'), '/lang/test/')
 
     def test_lang_ignored_for_static(self):
-        self.assertEqual(url_for('i18nbp.static', filename='test.jpg'), '/static/test.jpg')
+        self.assertEqual(url_for('i18nbp.static', filename='test.jpg'),
+                         '/static/test.jpg')
         with self.assertRaises(BuildError):
             url_for('i18nbp.static_redirect', filename='test.jpg')
 

@@ -69,13 +69,13 @@ class FuzzySearch(FakeSearch):
 
 class SearchQueryTest(TestCase):
     def test_execute_search_result(self):
-        '''SearchQuery execution should return a SearchResult with the right model'''
+        '''Should return a SearchResult with the right model'''
         result = search.query(FakeSearch)
         self.assertIsInstance(result, search.SearchResult)
         self.assertEqual(result.query.adapter, FakeSearch)
 
     def test_execute_search_result_with_model(self):
-        '''SearchQuery execution from a model should return a SearchResult with the right model'''
+        '''Should return a SearchResult with the right model'''
         result = search.query(Fake)
         self.assertIsInstance(result, search.SearchResult)
         self.assertEqual(result.query.adapter, FakeSearch)
@@ -111,7 +111,8 @@ class SearchQueryTest(TestCase):
 
     def test_multi_sorted_search(self):
         '''Search should sort'''
-        search_query = search.SearchQuery(FakeSearch, sort=['-title', 'description'])
+        search_query = search.SearchQuery(FakeSearch,
+                                          sort=['-title', 'description'])
         body = search_query.get_body()
         self.assertEqual(body['sort'], [
             {'title.raw': 'desc'},
@@ -179,7 +180,8 @@ class SearchQueryTest(TestCase):
         class FakeBoostedSearch(FakeSearch):
             boosters = [
                 search.GaussDecay('a_num_field', 10, 20, offset=5, decay=0.5),
-                search.ExpDecay('another_field', 20, scale=30, offset=5, decay=0.5),
+                search.ExpDecay(
+                    'another_field', 20, scale=30, offset=5, decay=0.5),
                 search.LinearDecay('last_field', 30, 40, offset=5, decay=0.5),
             ]
 
@@ -229,9 +231,12 @@ class SearchQueryTest(TestCase):
 
         class FakeBoostedSearch(FakeSearch):
             boosters = [
-                search.GaussDecay('a_num_field', get_10, get_20, offset=get_5, decay=get_dot5),
-                search.ExpDecay('another_field', get_20, scale=get_30, offset=get_5, decay=get_dot5),
-                search.LinearDecay('last_field', get_30, get_40, offset=get_5, decay=get_dot5),
+                search.GaussDecay('a_num_field', get_10,
+                                  get_20, offset=get_5, decay=get_dot5),
+                search.ExpDecay('another_field', get_20,
+                                scale=get_30, offset=get_5, decay=get_dot5),
+                search.LinearDecay('last_field', get_30,
+                                   get_40, offset=get_5, decay=get_dot5),
             ]
 
         query = search.SearchQuery(FakeBoostedSearch)
@@ -358,7 +363,7 @@ class SearchQueryTest(TestCase):
         self.assertEqual(search_query.get_query(), expected)
 
     def test_query_with_both_including_and_excluding_terms(self):
-        '''A simple query should detect negation on each term in query_string'''
+        '''A query should detect negation on each term in query_string'''
         search_query = search.SearchQuery(FakeSearch, q='test -negated')
         expected = {
             'bool': {
@@ -402,7 +407,7 @@ class SearchQueryTest(TestCase):
         self.assertEqual(search_query.get_query(), expected)
 
     def test_simple_query_flatten(self):
-        '''A simple query should use query_string with specified fields and should flatten'''
+        '''A query uses query_string with specified fields and flattens'''
         search_query = search.SearchQuery(FakeSearch, q='test')
         expected = {
             'bool': {
@@ -454,7 +459,8 @@ class SearchQueryTest(TestCase):
             self.assertIn(expected, query['bool']['must'])
 
     def test_facet_filter_extras(self):
-        search_query = search.SearchQuery(FakeSearch, **{'q': 'test', 'extra.key': 'value'})
+        search_query = search.SearchQuery(
+            FakeSearch, **{'q': 'test', 'extra.key': 'value'})
         expectations = [
             {'multi_match': {
                 'query': 'test',
@@ -471,7 +477,9 @@ class SearchQueryTest(TestCase):
             self.assertIn(expected, query['bool']['must'])
 
     def test_facet_filter_multi(self):
-        search_query = search.SearchQuery(FakeSearch, q='test',
+        search_query = search.SearchQuery(
+            FakeSearch,
+            q='test',
             tag=['value-1', 'value-2'],
             other='value',
             range='3-8',
@@ -689,22 +697,28 @@ class TestBoolFacet(TestCase):
         for value in True, 'True', 'true':
             kwargs = {'boolean': value}
             expected = {'must': [{'term': {'boolean': True}}]}
-            self.assertEqual(self.facet.filter_from_kwargs('boolean', kwargs), expected)
+            self.assertEqual(self.facet.filter_from_kwargs('boolean', kwargs),
+                             expected)
 
         for value in False, 'False', 'false':
             kwargs = {'boolean': value}
             expected = {'must_not': [{'term': {'boolean': True}}]}
-            self.assertEqual(self.facet.filter_from_kwargs('boolean', kwargs), expected)
+            self.assertEqual(self.facet.filter_from_kwargs('boolean', kwargs),
+                             expected)
 
     def test_aggregations(self):
         self.assertEqual(self.facet.to_aggregations(), {})
 
     def test_labelize(self):
-        self.assertEqual(self.facet.labelize('label', True), 'label: {0}'.format(_('yes')))
-        self.assertEqual(self.facet.labelize('label', False), 'label: {0}'.format(_('no')))
+        self.assertEqual(self.facet.labelize('label', True),
+                         'label: {0}'.format(_('yes')))
+        self.assertEqual(self.facet.labelize('label', False),
+                         'label: {0}'.format(_('no')))
 
-        self.assertEqual(self.facet.labelize('label', 'true'), 'label: {0}'.format(_('yes')))
-        self.assertEqual(self.facet.labelize('label', 'false'), 'label: {0}'.format(_('no')))
+        self.assertEqual(self.facet.labelize('label', 'true'),
+                         'label: {0}'.format(_('yes')))
+        self.assertEqual(self.facet.labelize('label', 'false'),
+                         'label: {0}'.format(_('no')))
 
 
 class TestTermFacet(TestCase):
@@ -736,7 +750,10 @@ class TestTermFacet(TestCase):
                 'total': 229,
                 'other': 33,
                 'missing': 2,
-                'terms': [{'term': faker.word(), 'count': faker.random_number(2)} for _ in range(10)],
+                'terms': [{
+                    'term': faker.word(),
+                    'count': faker.random_number(2)
+                } for _ in range(10)],
             }
         }
 
@@ -800,7 +817,10 @@ class TestModelTermFacet(TestCase, DBTestMixin):
                 'total': 229,
                 'other': 33,
                 'missing': 2,
-                'terms': [{'term': str(f.id), 'count': faker.random_number(2)} for f in fakes],
+                'terms': [{
+                    'term': str(f.id),
+                    'count': faker.random_number(2)
+                } for f in fakes],
             }
         }
 
@@ -813,7 +833,8 @@ class TestModelTermFacet(TestCase, DBTestMixin):
             self.assertEqual(fake.id, row[0].id)
 
     def test_to_filter(self):
-        self.assertEqual(self.facet.to_filter('value'), {'term': {'fakes': 'value'}})
+        self.assertEqual(self.facet.to_filter('value'),
+                         {'term': {'fakes': 'value'}})
 
     def test_aggregations(self):
         self.assertEqual(self.facet.to_aggregations(), {})
@@ -950,8 +971,10 @@ class TestTemporalCoverageFacet(TestCase):
 
     def test_to_aggregations(self):
         aggregations = self.facet.to_aggregations()
-        self.assertEqual(aggregations['some_field_min'], {'min': {'field': 'some_field.start'}})
-        self.assertEqual(aggregations['some_field_max'], {'max': {'field': 'some_field.end'}})
+        self.assertEqual(aggregations['some_field_min'],
+                         {'min': {'field': 'some_field.start'}})
+        self.assertEqual(aggregations['some_field_max'],
+                         {'max': {'field': 'some_field.end'}})
 
     def test_from_response(self):
         today = date.today()
@@ -1063,10 +1086,16 @@ class SearchIteratorTest(SearchTestMixin, TestCase):
 
 class SearchAdaptorTest(SearchTestMixin, TestCase):
     def assert_tokens(self, input, output):
-        self.assertEqual(set(search.ModelSearchAdapter.completer_tokenize(input)), set(output))
+        self.assertEqual(
+            set(search.ModelSearchAdapter.completer_tokenize(input)),
+            set(output))
 
     def test_completer_tokenizer(self):
         self.assert_tokens('test', ['test'])
-        self.assert_tokens('test square', ['test square', 'test', 'square'])
-        self.assert_tokens('test\'s square', ['test\'s square', 'test square', 'test', 'square'])
-        self.assert_tokens('test l\'apostrophe', ['test l\'apostrophe', 'test apostrophe', 'test', 'apostrophe'])
+        self.assert_tokens('test square',
+                           ['test square', 'test', 'square'])
+        self.assert_tokens('test\'s square',
+                           ['test\'s square', 'test square', 'test', 'square'])
+        self.assert_tokens(
+            'test l\'apostrophe',
+            ['test l\'apostrophe', 'test apostrophe', 'test', 'apostrophe'])

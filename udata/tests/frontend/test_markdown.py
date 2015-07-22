@@ -113,6 +113,7 @@ class MarkdownTestCase(TestCase, WebTestMixin):
         '''mdstrip should truncate on token if shorter than required size'''
         text = ''.join(['excerpt', EXCERPT_TOKEN, 'aaaa ' * 10])
         with self.app.test_request_context('/'):
-            result = render_template_string('{{ text|mdstrip(20) }}', text=text)
+            result = render_template_string(
+                '{{ text|mdstrip(20) }}', text=text)
 
         self.assertEqual(result, 'excerpt')

@@ -14,7 +14,8 @@ from udata.core.organization.activities import OrgRelatedActivity
 
 
 __all__ = (
-    'UserFollowedDataset', 'UserFollowedReuse', 'UserFollowedOrganization', 'UserFollowedUser',
+    'UserFollowedDataset', 'UserFollowedReuse', 'UserFollowedOrganization',
+    'UserFollowedUser'
 )
 
 
@@ -54,10 +55,18 @@ class UserFollowedOrganization(FollowActivity, OrgRelatedActivity, Activity):
 def write_activity_on_follow(follow, **kwargs):
     if current_user.is_authenticated:
         if isinstance(follow.following, Dataset):
-            write_activity.delay(UserFollowedDataset, current_user._get_current_object(), follow.following)
+            write_activity.delay(
+                UserFollowedDataset, current_user._get_current_object(),
+                follow.following)
         elif isinstance(follow.following, Reuse):
-            write_activity.delay(UserFollowedReuse, current_user._get_current_object(), follow.following)
+            write_activity.delay(
+                UserFollowedReuse, current_user._get_current_object(),
+                follow.following)
         elif isinstance(follow.following, Organization):
-            write_activity.delay(UserFollowedOrganization, current_user._get_current_object(), follow.following)
+            write_activity.delay(
+                UserFollowedOrganization, current_user._get_current_object(),
+                follow.following)
         elif isinstance(follow.following, User):
-            write_activity.delay(UserFollowedUser, current_user._get_current_object(), follow.following)
+            write_activity.delay(
+                UserFollowedUser, current_user._get_current_object(),
+                follow.following)

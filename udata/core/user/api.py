@@ -65,7 +65,8 @@ class AvatarAPI(API):
         args = avatar_parser.parse_args()
 
         avatar = args['file']
-        bbox = [int(float(c)) for c in args['bbox'].split(',')] if 'bbox' in args else None
+        bbox = ([int(float(c)) for c in args['bbox'].split(',')]
+                if 'bbox' in args else None)
         current_user.avatar.save(avatar, bbox=bbox)
         current_user.save()
 
@@ -110,7 +111,7 @@ class NotificationsAPI(API):
         # TODO: use polymorph field
 
         # Fetch user open issues
-        for issue in Issue.objects(subject__in=list(datasets)+list(reuses)):
+        for issue in Issue.objects(subject__in=list(datasets) + list(reuses)):
             notifications.append({
                 'type': 'issue',
                 'created_on': issue.created,
@@ -125,7 +126,8 @@ class NotificationsAPI(API):
             })
 
         # Fetch user open discussions
-        for discussion in Discussion.objects(subject__in=list(datasets)+list(reuses)):
+        for discussion in Discussion.objects(
+                subject__in=list(datasets) + list(reuses)):
             notifications.append({
                 'type': 'discussion',
                 'created_on': discussion.created,
@@ -156,7 +158,8 @@ class NotificationsAPI(API):
                 })
 
         # Fetch pending transfer requests
-        for transfer in Transfer.objects(recipient__in=[user]+orgs, status='pending'):
+        for transfer in Transfer.objects(
+                recipient__in=[user] + orgs, status='pending'):
             notifications.append({
                 'type': 'transfer_request',
                 'created_on': transfer.created,
@@ -173,7 +176,10 @@ class NotificationsAPI(API):
 
 
 @ns.route('/', endpoint='users')
-@api.doc(get={'id': 'list_users', 'model': user_page_fields, 'parser': search_parser})
+@api.doc(get={
+    'id': 'list_users',
+    'model': user_page_fields,
+    'parser': search_parser})
 @api.doc(post={'id': 'create_user', 'model': user_fields})
 class UserListAPI(ModelListAPI):
     model = User
@@ -196,7 +202,8 @@ class FollowUserAPI(FollowAPI):
     model = FollowUser
 
     @api.secure
-    @api.doc(notes="You can't follow yourself.", response={403: 'When tring to follow yourself'})
+    @api.doc(notes="You can't follow yourself.",
+             response={403: 'When tring to follow yourself'})
     def post(self, id):
         '''Follow an user given its ID'''
         if id == str(current_user.id):
@@ -205,8 +212,12 @@ class FollowUserAPI(FollowAPI):
 
 
 suggest_parser = api.parser()
-suggest_parser.add_argument('q', type=unicode, help='The string to autocomplete/suggest', location='args', required=True)
-suggest_parser.add_argument('size', type=int, help='The amount of suggestion to fetch', location='args', default=10)
+suggest_parser.add_argument(
+    'q', type=unicode, help='The string to autocomplete/suggest',
+    location='args', required=True)
+suggest_parser.add_argument(
+    'size', type=int, help='The amount of suggestion to fetch',
+    location='args', default=10)
 
 
 @ns.route('/suggest/', endpoint='suggest_users')

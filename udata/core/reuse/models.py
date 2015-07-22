@@ -53,7 +53,9 @@ class ReuseQuerySet(db.BaseQuerySet):
         return self(private__ne=True, datasets__0__exists=True, deleted=None)
 
     def hidden(self):
-        return self(db.Q(private=True) | db.Q(datasets__0__exists=False) | db.Q(deleted__ne=None))
+        return self(db.Q(private=True)
+                    | db.Q(datasets__0__exists=False)
+                    | db.Q(deleted__ne=None))
 
     def owned_by(self, *owners):
         Qs = db.Q()
@@ -64,20 +66,25 @@ class ReuseQuerySet(db.BaseQuerySet):
 
 class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
     title = db.StringField(max_length=255, required=True)
-    slug = db.SlugField(max_length=255, required=True, populate_from='title', update=True)
+    slug = db.SlugField(
+        max_length=255, required=True, populate_from='title', update=True)
     description = db.StringField(required=True)
     type = db.StringField(required=True, choices=REUSE_TYPES.keys())
     url = db.StringField(required=True)
     urlhash = db.StringField(required=True, unique=True)
     image_url = db.StringField()
-    image = db.ImageField(fs=images, basename=default_image_basename, max_size=IMAGE_MAX_SIZE, thumbnails=IMAGE_SIZES)
-    datasets = db.ListField(db.ReferenceField('Dataset', reverse_delete_rule=db.PULL))
+    image = db.ImageField(
+        fs=images, basename=default_image_basename, max_size=IMAGE_MAX_SIZE,
+        thumbnails=IMAGE_SIZES)
+    datasets = db.ListField(
+        db.ReferenceField('Dataset', reverse_delete_rule=db.PULL))
     tags = db.ListField(db.StringField())
     badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
 
     private = db.BooleanField()
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
-    organization = db.ReferenceField('Organization', reverse_delete_rule=db.NULLIFY)
+    organization = db.ReferenceField(
+        'Organization', reverse_delete_rule=db.NULLIFY)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()

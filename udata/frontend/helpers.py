@@ -50,8 +50,10 @@ def url_rewrite(url=None, **kwargs):
     scheme, netloc, path, query, fragments = urlsplit(url or request.url)
     params = url_decode(query)
     for key, value in kwargs.items():
-        params.setlist(key, value if isinstance(value, (list, tuple)) else [value])
-    return Markup(urlunsplit((scheme, netloc, path, url_encode(params), fragments)))
+        params.setlist(key,
+                       value if isinstance(value, (list, tuple)) else [value])
+    return Markup(urlunsplit((scheme, netloc, path, url_encode(params),
+                  fragments)))
 
 
 @front.app_template_global()
@@ -60,9 +62,10 @@ def url_add(url=None, **kwargs):
     scheme, netloc, path, query, fragments = urlsplit(url or request.url)
     params = url_decode(query)
     for key, value in kwargs.items():
-        if not value in params.getlist(key):
+        if value not in params.getlist(key):
             params.add(key, value)
-    return Markup(urlunsplit((scheme, netloc, path, url_encode(params), fragments)))
+    return Markup(urlunsplit((scheme, netloc, path, url_encode(params),
+                              fragments)))
 
 
 @front.app_template_global()
@@ -77,7 +80,8 @@ def url_del(url=None, *args, **kwargs):
         if unicode(value) in lst:
             lst.remove(unicode(value))
         params.setlist(key, lst)
-    return Markup(urlunsplit((scheme, netloc, path, url_encode(params), fragments)))
+    return Markup(urlunsplit((scheme, netloc, path, url_encode(params),
+                              fragments)))
 
 
 @front.app_template_global()
@@ -87,13 +91,17 @@ def in_url(*args, **kwargs):
     return (
         all(arg in params for arg in args)
         and
-        all(key in params and params[key] == value for key, value in kwargs.items())
+        all(key in params and params[key] == value
+            for key, value in kwargs.items())
     )
 
 
 @front.app_template_filter()
 def placeholder(url, name='default', external=False):
-    return url or url_for('static', filename='img/placeholders/{0}.png'.format(name), _external=external)
+    return url or url_for(
+        'static',
+        filename='img/placeholders/{0}.png'.format(name),
+        _external=external)
 
 
 @front.app_template_filter()
@@ -111,7 +119,9 @@ def avatar_url(obj, size):
 @front.app_template_filter()
 def owner_avatar_url(obj, size=32):
     if hasattr(obj, 'organization') and obj.organization:
-        return obj.organization.logo(size) if obj.organization.logo else placeholder(None, 'organization')
+        return (obj.organization.logo(size)
+                if obj.organization.logo
+                else placeholder(None, 'organization'))
     elif hasattr(obj, 'owner') and obj.owner:
         return avatar_url(obj.owner, size)
     return placeholder(None, 'user')
@@ -136,7 +146,8 @@ def avatar(user, size, classes=''):
         </a>
     '''.format(
         title=getattr(user, 'fullname', _('Anonymous user')),
-        url=url_for('users.show', user=user) if user and getattr(user, 'id', None) else '#',
+        url=(url_for('users.show', user=user)
+             if user and getattr(user, 'id', None) else '#'),
         size=size,
         avatar_url=avatar_url(user, size),
         classes=classes
@@ -214,8 +225,10 @@ def tooltip_ellipsis(source, length=0):
         length = int(length)
     except ValueError:  # invalid literal for int()
         return source  # Fail silently.
-    ellipsis = '<a href rel="tooltip" data-container="body" title="{0}">...</a>'.format(source)
-    return Markup((source[:length] + ellipsis) if len(source) > length and length > 0 else source)
+    ellipsis = ('<a href rel="tooltip" data-container="body" '
+                'title="{0}">...</a>').format(source)
+    return Markup((source[:length] + ellipsis)
+                  if len(source) > length and length > 0 else source)
 
 
 @front.app_template_global()
@@ -272,18 +285,26 @@ def daterange(value):
 @front.app_template_global()
 def ficon(value):
     '''A simple helper for font icon class'''
-    return 'fa {0}'.format(value) if value.startswith('fa') else 'glyphicon glyphicon-{0}'.format(value)
+    return ('fa {0}'.format(value)
+            if value.startswith('fa')
+            else 'glyphicon glyphicon-{0}'.format(value))
 
 
 @front.app_template_filter()
 @front.app_template_global()
 def i18n_alternate_links():
-    '''Render the <link rel="alternate" hreflang /> if page is in a I18nBlueprint'''
-    if not request.endpoint or not current_app.url_map.is_endpoint_expecting(request.endpoint, 'lang_code'):
+    """Render the <link rel="alternate" hreflang />
+
+    if page is in a I18nBlueprint
+    """
+    if (not request.endpoint
+        or not current_app.url_map.is_endpoint_expecting(request.endpoint,
+                                                         'lang_code')):
         return Markup('')
 
     try:
-        LINK_PATTERN = '<link rel="alternate" href="{url}" hreflang="{lang}" />'
+        LINK_PATTERN = (
+            '<link rel="alternate" href="{url}" hreflang="{lang}" />')
         links = []
         current_lang = get_current_locale().language
 

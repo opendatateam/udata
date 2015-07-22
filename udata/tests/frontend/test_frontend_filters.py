@@ -19,7 +19,8 @@ class FrontEndRootTest(FrontTestCase):
         expected = self.full_url('site.home', one='other-value', two=2)
 
         with self.app.test_request_context(url):
-            result = render_template_string("{{ url_rewrite(one='other-value', two=2) }}")
+            result = render_template_string(
+                "{{ url_rewrite(one='other-value', two=2) }}")
 
         self.assertEqual(result, expected)
 
@@ -37,16 +38,19 @@ class FrontEndRootTest(FrontTestCase):
         '''url_add should add a parameter to the URL'''
         url = url_for('site.home', one='value')
 
-        result = render_template_string("{{ url|url_add(two='other') }}", url=url)
+        result = render_template_string(
+            "{{ url|url_add(two='other') }}", url=url)
 
-        self.assertEqual(result, url_for('site.home', one='value', two='other'))
+        self.assertEqual(result,
+                         url_for('site.home', one='value', two='other'))
 
     def test_url_add_append(self):
         '''url_add should add a parameter to the URL even if exists'''
         url = url_for('site.home', one='value')
         expected = url_for('site.home', one=['value', 'other-value'])
 
-        result = render_template_string("{{ url|url_add(one='other-value') }}", url=url)
+        result = render_template_string(
+            "{{ url|url_add(one='other-value') }}", url=url)
 
         self.assertEqual(result, expected)
 
@@ -64,7 +68,8 @@ class FrontEndRootTest(FrontTestCase):
         url = url_for('site.home', one=['value', 'other-value'], two='other')
         expected = url_for('site.home', one='value', two='other')
 
-        result = render_template_string("{{ url|url_del(one='other-value') }}", url=url)
+        result = render_template_string(
+            "{{ url|url_del(one='other-value') }}", url=url)
 
         self.assertEqual(result, expected)
 
@@ -105,11 +110,13 @@ class FrontEndRootTest(FrontTestCase):
         url = url_for('site.home', one='value')
 
         self.assertEqual(
-            render_template_string("{{ url|url_rewrite(one='other-value') }}", url=url),
+            render_template_string(
+                "{{ url|url_rewrite(one='other-value') }}", url=url),
             url_for('site.home', one='other-value')
         )
         self.assertEqual(
-            render_template_string("{{ url|url_add(two='other-value') }}", url=url),
+            render_template_string(
+                "{{ url|url_add(two='other-value') }}", url=url),
             url_for('site.home', one='value', two='other-value')
         )
         self.assertEqual(
@@ -122,11 +129,13 @@ class FrontEndRootTest(FrontTestCase):
         url = url_for('site.home', one='value')
 
         self.assertEqual(
-            render_template_string("{{ url_rewrite(url, one='other-value') }}", url=url),
+            render_template_string(
+                "{{ url_rewrite(url, one='other-value') }}", url=url),
             url_for('site.home', one='other-value')
         )
         self.assertEqual(
-            render_template_string("{{ url_add(url, two='other-value') }}", url=url),
+            render_template_string(
+                "{{ url_add(url, two='other-value') }}", url=url),
             url_for('site.home', one='value', two='other-value')
         )
         self.assertEqual(
@@ -135,7 +144,7 @@ class FrontEndRootTest(FrontTestCase):
         )
 
     def test_as_global_default(self):
-        '''URL helpers should exists as global function without url parameter'''
+        '''URL helpers should exists as global function without url param'''
         url = url_for('site.home', one='value')
 
         with self.app.test_request_context(url):
@@ -215,8 +224,10 @@ class FrontEndRootTest(FrontTestCase):
 
     def test_ficon(self):
         '''Should choose a font icon between glyphicon and font-awesome'''
-        self.assertEqual(render_template_string('{{ficon("icon")}}'), 'glyphicon glyphicon-icon')
-        self.assertEqual(render_template_string('{{ficon("fa-icon")}}'), 'fa fa-icon')
+        self.assertEqual(render_template_string('{{ficon("icon")}}'),
+                         'glyphicon glyphicon-icon')
+        self.assertEqual(render_template_string('{{ficon("fa-icon")}}'),
+                         'fa fa-icon')
 
     def test_i18n_alternate_links(self):
         test = I18nBlueprint('test', __name__)
@@ -234,10 +245,12 @@ class FrontEndRootTest(FrontTestCase):
         }
 
         response = self.get(url_for('test.i18n', key='value', param='other'))
-        self.assertEqual(response.data, ''.join([
-            '<link rel="alternate" href="/fr/i18n/value/?param=other" hreflang="fr" />',
-            '<link rel="alternate" href="/de/i18n/value/?param=other" hreflang="de" />',
-        ]))
+        link = ('<link rel="alternate" '
+                'href="/{lang}/i18n/value/?param=other" '
+                'hreflang="{lang}" />')
+        self.assertEqual(
+            response.data,
+            ''.join([link.format(lang='fr'), link.format(lang='de'),]))
 
     def test_i18n_alternate_links_outside_i18n_blueprint(self):
         test = Blueprint('test', __name__)

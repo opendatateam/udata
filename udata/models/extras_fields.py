@@ -27,7 +27,9 @@ class ExtrasField(DictField):
 
             try:
                 if issubclass(extra_cls, EmbeddedDocument):
-                    value.validate() if isinstance(value, extra_cls) else extra_cls(**value).validate()
+                    (value.validate()
+                     if isinstance(value, extra_cls)
+                     else extra_cls(**value).validate())
                 else:
                     extra_cls().validate(value)
             except ValidationError as e:
@@ -56,4 +58,5 @@ class Extra(object):
 class DefaultExtra(Extra):
     def validate(self, value):
         if not isinstance(value, (basestring, int, float)):
-            raise ValidationError('Value should be an instance of string, integer or float')
+            raise ValidationError(
+                'Value should be an instance of string, integer or float')

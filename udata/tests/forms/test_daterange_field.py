@@ -34,7 +34,8 @@ class DateRangeFieldTest(TestCase):
 
     def test_initial_values(self):
         Fake, FakeForm = self.factory()
-        dr = db.DateRange(start=date.today() - timedelta(days=1), end=date.today())
+        dr = db.DateRange(start=date.today() - timedelta(days=1),
+                          end=date.today())
 
         fake = Fake(daterange=dr)
         form = FakeForm(None, fake)

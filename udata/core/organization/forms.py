@@ -24,10 +24,13 @@ class OrganizationForm(ModelForm):
     model_class = Organization
 
     name = fields.StringField(_('Name'), [validators.required()])
-    acronym = fields.StringField(_('Acronym'), description=_('Shorter organization name'))
-    description = fields.MarkdownField(_('Description'), [validators.required()],
+    acronym = fields.StringField(
+        _('Acronym'), description=_('Shorter organization name'))
+    description = fields.MarkdownField(
+        _('Description'), [validators.required()],
         description=_('The details about your organization'))
-    url = fields.URLField(_('Website'), description=_('The organization website URL'))
+    url = fields.URLField(
+        _('Website'), description=_('The organization website URL'))
     logo = fields.ImageField(_('Logo'), sizes=LOGO_SIZES)
 
     def save(self, commit=True, **kwargs):
@@ -81,5 +84,6 @@ class MembershipRefuseForm(Form):
 class MemberForm(ModelForm):
     model_class = Member
 
-    role = fields.SelectField(_('Role'), default='editor', choices=ORG_ROLES.items(),
+    role = fields.SelectField(
+        _('Role'), default='editor', choices=ORG_ROLES.items(),
         validators=[validators.required()])

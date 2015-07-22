@@ -9,7 +9,8 @@ from udata.tasks import schedulables, celery
 log = logging.getLogger(__name__)
 
 
-m = submanager('job',
+m = submanager(
+    'job',
     help='Jobs related operations',
     description='Handle all jobs related operations and maintenance'
 )
@@ -17,7 +18,7 @@ m = submanager('job',
 
 @m.option('name', help='The job name')
 @m.option('-d', '--delay', action='store_true', default=False,
-    help='Run the job asynchronously on a worker')
+          help='Run the job asynchronously on a worker')
 @m.option('-a', '--args', nargs='*', help='job arguments')
 @m.option('-k', '--kwargs', nargs='*', help='job keyword arguments')
 def run(name, delay, args, kwargs):

@@ -8,7 +8,10 @@ from udata.models import db, Reuse, Activity
 from udata.core.activity.tasks import write_activity
 
 
-__all__ = ('UserCreatedReuse', 'UserUpdatedReuse', 'UserDeletedReuse', 'ReuseRelatedActivity')
+__all__ = (
+    'UserCreatedReuse', 'UserUpdatedReuse', 'UserDeletedReuse',
+    'ReuseRelatedActivity'
+)
 
 
 class ReuseRelatedActivity(object):

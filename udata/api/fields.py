@@ -60,16 +60,21 @@ class ImageField(String):
         self.size = size
 
     def format(self, field):
-        return field(self.size, external=True) if self.size else field(external=True)
+        return (field(self.size, external=True)
+                if self.size else field(external=True))
 
 
 def pager(page_fields):
     pager_fields = {
-        'data': List(Nested(page_fields), attribute='objects', description='The page data'),
+        'data': List(Nested(page_fields), attribute='objects',
+                     description='The page data'),
         'page': Integer(description='The current page', required=True, min=1),
-        'page_size': Integer(description='The page size used for pagination', required=True, min=0),
-        'total': Integer(description='The total paginated items', required=True, min=0),
+        'page_size': Integer(description='The page size used for pagination',
+                             required=True, min=0),
+        'total': Integer(description='The total paginated items',
+                         required=True, min=0),
         'next_page': NextPageUrl(description='The next page URL if exists'),
-        'previous_page': PreviousPageUrl(description='The previous page URL if exists'),
+        'previous_page': PreviousPageUrl(
+            description='The previous page URL if exists'),
     }
     return pager_fields

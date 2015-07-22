@@ -53,7 +53,7 @@ class AutoUUIDFieldTest(TestCase):
         self.assertIsNotNone(obj.uuid)
 
     def test_do_not_overwrite(self):
-        '''AutoUUIDField should not populate itself if a value is already set'''
+        '''AutoUUIDField shouldn't populate itself if a value is already set'''
         uuid = uuid4()
         obj = UUIDTester(uuid=uuid)
         self.assertEqual(obj.uuid, uuid)
@@ -94,7 +94,7 @@ class SlugFieldTest(DBTestMixin, TestCase):
         self.assertEqual(obj.slug, 'a-slug')
 
     def test_populate_update(self):
-        '''SlugField should populate itself on save and update if update=True'''
+        '''SlugField should populate itself on save and update'''
         obj = SlugUpdateTester(title="A Title")
         obj.save()
         self.assertEqual(obj.slug, 'a-title')
@@ -103,7 +103,7 @@ class SlugFieldTest(DBTestMixin, TestCase):
         self.assertEqual(obj.slug, 'title')
 
     def test_no_populate_update(self):
-        '''SlugField should not populate itself if update=True and a value is set'''
+        '''SlugField should not populate itself if a value is set'''
         obj = SlugUpdateTester(title="A Title")
         obj.save()
         self.assertEqual(obj.slug, 'a-title')
@@ -202,7 +202,8 @@ class DatetimedTest(DBTestMixin, TestCase):
     def test_save_last_modified_instance(self):
         now = datetime.now()
         earlier = now - timedelta(days=1)
-        datetimed = DatetimedTester.objects.create(created_at=earlier, last_modified=earlier)
+        datetimed = DatetimedTester.objects.create(
+            created_at=earlier, last_modified=earlier)
 
         datetimed.save()
 
@@ -217,7 +218,8 @@ class ExtrasField(DBTestMixin, TestCase):
         class Tester(db.Document):
             extras = db.ExtrasField()
 
-        tester = Tester(extras={'string': 'string', 'integer': 5, 'float': 5.5})
+        tester = Tester(
+            extras={'string': 'string', 'integer': 5, 'float': 5.5})
         tester.validate()
 
     def test_validate_unregistered_type(self):

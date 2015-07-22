@@ -55,8 +55,10 @@ class DateRange(EmbeddedDocument):
 
 
 class Datetimed(object):
-    created_at = DateTimeField(verbose_name=_('Creation date'), default=datetime.now, required=True)
-    last_modified = DateTimeField(verbose_name=_('Last modification date'), default=datetime.now, required=True)
+    created_at = DateTimeField(verbose_name=_('Creation date'),
+                               default=datetime.now, required=True)
+    last_modified = DateTimeField(verbose_name=_('Last modification date'),
+                                  default=datetime.now, required=True)
 
 
 @pre_save.connect

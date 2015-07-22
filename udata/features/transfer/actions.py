@@ -20,7 +20,8 @@ def request_transfer(subject, recipient, comment):
     '''Initiate a transfer request'''
     TransferPermission(subject).test()
     if recipient == (subject.organization or subject.owner):
-        raise ValueError('Recipient should be different than the current owner')
+        raise ValueError(
+            'Recipient should be different than the current owner')
     transfer = Transfer.objects.create(
         owner=subject.organization or subject.owner,
         recipient=recipient,

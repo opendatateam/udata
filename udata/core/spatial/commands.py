@@ -18,7 +18,8 @@ from udata.models import GeoLevel, GeoZone
 log = logging.getLogger(__name__)
 
 
-m = submanager('spatial',
+m = submanager(
+    'spatial',
     help='Geospatial related operations',
     description='Handle all geospatial related operations and maintenance'
 )
@@ -50,7 +51,8 @@ def load(filename, drop=False):
         levels = json.load(fp)
 
     for level in levels:
-        GeoLevel.objects.create(id=level['id'], name=level['label'], parents=level['parents'])
+        GeoLevel.objects.create(id=level['id'], name=level['label'],
+                                parents=level['parents'])
         total += 1
     log.info('Loaded {0} levels'.format(total))
 

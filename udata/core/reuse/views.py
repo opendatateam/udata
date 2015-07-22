@@ -156,7 +156,8 @@ class ReuseAddDatasetView(ProtectedReuseView, SingleObject, BaseView):
                 if dataset not in self.reuse.datasets:
                     self.reuse.datasets.append(dataset)
                     self.reuse.save()
-                    flash(_('The dataset "%(title)s" has been added to the reuse', title=dataset.title), 'success')
+                    flash(_('The dataset "%(title)s" has been added '
+                            'to the reuse', title=dataset.title), 'success')
                 return redirect(url_for('reuses.show', reuse=self.reuse))
             except:
                 pass

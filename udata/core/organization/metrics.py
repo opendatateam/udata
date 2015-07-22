@@ -20,7 +20,8 @@ class DatasetsMetric(Metric):
 
     def get_value(self):
         org = self.target
-        return Dataset.objects(db.Q(organization=org) | db.Q(supplier=org)).visible().count()
+        return (Dataset.objects(db.Q(organization=org)
+                | db.Q(supplier=org)).visible().count())
 
 
 @Dataset.on_create.connect
@@ -47,7 +48,8 @@ class PermitedReusesMetric(Metric):
     display_name = _('Permitted reuses')
 
     def get_value(self):
-        ids = [d.id for d in Dataset.objects(organization=self.target).only('id')]
+        ids = [d.id
+               for d in Dataset.objects(organization=self.target).only('id')]
         return Reuse.objects(datasets__in=ids).count()
 
 

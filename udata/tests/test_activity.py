@@ -33,7 +33,8 @@ class ActivityTest(WebTestMixin, DBTestMixin, TestCase):
 
     def test_create_and_retrieve_for_org(self):
         org = OrganizationFactory()
-        FakeActivity.objects.create(actor=self.user, related_to=self.fake, organization=org)
+        FakeActivity.objects.create(
+            actor=self.user, related_to=self.fake, organization=org)
 
         activities = Activity.objects(organization=org)
 
@@ -42,7 +43,8 @@ class ActivityTest(WebTestMixin, DBTestMixin, TestCase):
 
     def test_create_and_retrieve_for_related(self):
         org = OrganizationFactory()
-        FakeActivity.objects.create(actor=self.user, related_to=self.fake, organization=org)
+        FakeActivity.objects.create(
+            actor=self.user, related_to=self.fake, organization=org)
         FakeActivity.objects.create(actor=UserFactory(), related_to=self.fake)
 
         activities = Activity.objects(related_to=self.fake)

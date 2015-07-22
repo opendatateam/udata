@@ -9,7 +9,8 @@ from udata.app import cache
 log = logging.getLogger(__name__)
 
 
-m = submanager('cache',
+m = submanager(
+    'cache',
     help='Cache related operations',
     description='Handle all cache related operations and maintenance'
 )

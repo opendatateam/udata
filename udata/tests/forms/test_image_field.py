@@ -60,13 +60,16 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
         self.assertEqual(form.image.filename.data, None)
         self.assertEqual(form.image.bbox.data, None)
         self.assertEqual(form.image(), ''.join((
-            '<div class="image-picker-field" data-sizes="100" data-basename="image" data-endpoint="{0}">'.format(endpoint),
+            '<div class="image-picker-field" data-sizes="100" ',
+            'data-basename="image" data-endpoint="{0}">'.format(endpoint),
             '<div class="image-picker-preview">',
-            '<img src="{0}" data-placeholder="{0}"/>'.format(placeholder(None, 'default')),
+            '<img src="{0}" '.format(placeholder(None, 'default')),
+            'data-placeholder="{0}"/>'.format(placeholder(None, 'default')),
             '</div>',
             '<span class="image-picker-btn btn btn-default btn-file">',
             'Choose a picture',
-            '<input id="image-filename" name="image-filename" type="hidden" value="">',
+            '<input id="image-filename" name="image-filename" ',
+            'type="hidden" value="">',
             '<input id="image-bbox" name="image-bbox" type="hidden" value="">',
             '</span>',
             '</div>',
@@ -75,14 +78,18 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
         self.assertEqual(form.thumbnail.filename.data, None)
         self.assertEqual(form.thumbnail.bbox.data, None)
         self.assertEqual(form.thumbnail(), ''.join((
-            '<div class="image-picker-field" data-sizes="16,32" data-basename="thumbnail" data-endpoint="{0}">'.format(endpoint),
+            '<div class="image-picker-field" data-sizes="16,32" ',
+            'data-basename="thumbnail" data-endpoint="{0}">'.format(endpoint),
             '<div class="image-picker-preview">',
-            '<img src="{0}" data-placeholder="{0}"/>'.format(placeholder(None, 'default')),
+            '<img src="{0}" '.format(placeholder(None, 'default')),
+            'data-placeholder="{0}"/>'.format(placeholder(None, 'default')),
             '</div>',
             '<span class="image-picker-btn btn btn-default btn-file">',
             'Choose a picture',
-            '<input id="thumbnail-filename" name="thumbnail-filename" type="hidden" value="">',
-            '<input id="thumbnail-bbox" name="thumbnail-bbox" type="hidden" value="">',
+            '<input id="thumbnail-filename" name="thumbnail-filename" ',
+            'type="hidden" value="">',
+            '<input id="thumbnail-bbox" name="thumbnail-bbox" ',
+            'type="hidden" value="">',
             '</span>',
             '</div>',
         )))
@@ -94,13 +101,16 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
         self.assertEqual(form.image.filename.data, None)
         self.assertEqual(form.image.bbox.data, None)
         self.assertEqual(form.image(), ''.join((
-            '<div class="image-picker-field" data-sizes="100" data-basename="image" data-endpoint="{0}">'.format(endpoint),
+            '<div class="image-picker-field" data-sizes="100" ',
+            'data-basename="image" data-endpoint="{0}">'.format(endpoint),
             '<div class="image-picker-preview">',
-            '<img src="{0}" data-placeholder="{0}"/>'.format(placeholder(None, 'default')),
+            '<img src="{0}" '.format(placeholder(None, 'default')),
+            'data-placeholder="{0}"/>'.format(placeholder(None, 'default')),
             '</div>',
             '<span class="image-picker-btn btn btn-default btn-file">',
             'Choose a picture',
-            '<input id="image-filename" name="image-filename" type="hidden" value="">',
+            '<input id="image-filename" name="image-filename" ',
+            'type="hidden" value="">',
             '<input id="image-bbox" name="image-bbox" type="hidden" value="">',
             '</span>',
             '</div>'
@@ -109,14 +119,18 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
         self.assertEqual(form.thumbnail.filename.data, None)
         self.assertEqual(form.thumbnail.bbox.data, None)
         self.assertEqual(form.thumbnail(), ''.join((
-            '<div class="image-picker-field" data-sizes="16,32" data-basename="thumbnail" data-endpoint="{0}">'.format(endpoint),
+            '<div class="image-picker-field" data-sizes="16,32" ',
+            'data-basename="thumbnail" data-endpoint="{0}">'.format(endpoint),
             '<div class="image-picker-preview">',
-            '<img src="{0}" data-placeholder="{0}"/>'.format(placeholder(None, 'default')),
+            '<img src="{0}" '.format(placeholder(None, 'default')),
+            'data-placeholder="{0}"/>'.format(placeholder(None, 'default')),
             '</div>',
             '<span class="image-picker-btn btn btn-default btn-file">',
             'Choose a picture',
-            '<input id="thumbnail-filename" name="thumbnail-filename" type="hidden" value="">',
-            '<input id="thumbnail-bbox" name="thumbnail-bbox" type="hidden" value="">',
+            '<input id="thumbnail-filename" name="thumbnail-filename" ',
+            'type="hidden" value="">',
+            '<input id="thumbnail-bbox" name="thumbnail-bbox" ',
+            'type="hidden" value="">',
             '</span>',
             '</div>',
         )))
@@ -131,13 +145,16 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
         self.assertEqual(form.image.filename.data, 'image.jpg')
         self.assertEqual(form.image.bbox.data, None)
         self.assertEqual(form.image(), ''.join((
-            '<div class="image-picker-field" data-sizes="100" data-basename="image" data-endpoint="{0}">'.format(endpoint),
+            '<div class="image-picker-field" data-sizes="100" ',
+            'data-basename="image" data-endpoint="{0}">'.format(endpoint),
             '<div class="image-picker-preview">',
-            '<img src="{0}" data-placeholder="{1}"/>'.format(doc.image(100), placeholder(None, 'default')),
+            '<img src="{0}" '.format(doc.image(100)),
+            'data-placeholder="{0}"/>'.format(placeholder(None, 'default')),
             '</div>',
             '<span class="image-picker-btn btn btn-default btn-file">',
             'Choose a picture',
-            '<input id="image-filename" name="image-filename" type="hidden" value="">',
+            '<input id="image-filename" name="image-filename" ',
+            'type="hidden" value="">',
             '<input id="image-bbox" name="image-bbox" type="hidden" value="">',
             '</span>',
             '</div>',
@@ -153,14 +170,18 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
         self.assertEqual(form.thumbnail.filename.data, 'image.jpg')
         self.assertEqual(form.thumbnail.bbox.data, [10, 10, 100, 100])
         self.assertEqual(form.thumbnail(), ''.join((
-            '<div class="image-picker-field" data-sizes="16,32" data-basename="thumbnail" data-endpoint="{0}">'.format(endpoint),
+            '<div class="image-picker-field" data-sizes="16,32" ',
+            'data-basename="thumbnail" data-endpoint="{0}">'.format(endpoint),
             '<div class="image-picker-preview">',
-            '<img src="{0}" data-placeholder="{1}"/>'.format(doc.thumbnail(100), placeholder(None, 'default')),
+            '<img src="{0}" '.format(doc.thumbnail(100)),
+            'data-placeholder="{0}"/>'.format(placeholder(None, 'default')),
             '</div>',
             '<span class="image-picker-btn btn btn-default btn-file">',
             'Choose a picture',
-            '<input id="thumbnail-filename" name="thumbnail-filename" type="hidden" value="">',
-            '<input id="thumbnail-bbox" name="thumbnail-bbox" type="hidden" value="10,10,100,100">',
+            '<input id="thumbnail-filename" name="thumbnail-filename" ',
+            'type="hidden" value="">',
+            '<input id="thumbnail-bbox" name="thumbnail-bbox" ',
+            'type="hidden" value="10,10,100,100">',
             '</span>',
             '</div>',
         )))
