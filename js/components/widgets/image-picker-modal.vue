@@ -7,7 +7,7 @@
 </style>
 
 <template>
-<modal title="{{ title }}" modalclass="image-picker-modal modal-info"
+<modal title="{{ title }}" class="image-picker-modal modal-info"
     v-ref="modal">
     <div class="modal-body">
         <image-picker v-ref="picker" endpoint="{{endpoint}}" sizes="{{sizes}}">

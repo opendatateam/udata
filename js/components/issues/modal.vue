@@ -11,8 +11,8 @@
 </style>
 
 <template>
-<w-modal title="{{ _('Issue') }}"
-    modalclass="issue-modal"
+<modal title="{{ _('Issue') }}"
+    class="issue-modal"
     v-ref="modal">
     <div class="modal-body">
         <h3>{{ issue.title }}</h3>
@@ -52,7 +52,7 @@
             {{ _('Close') }}
         </button>
     </footer>
-</w-modal>
+</modal>
 </template>
 
 <script>

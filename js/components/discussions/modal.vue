@@ -12,7 +12,7 @@
 
 <template>
 <modal title="{{ _('Discussion') }}"
-    modalclass="discussion-modal"
+    class="discussion-modal"
     v-ref="modal">
     <div class="modal-body">
         <h3>{{ discussion.title }}</h3>
