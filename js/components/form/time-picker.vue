@@ -1,25 +1,26 @@
 <style lang="less">
-.date-picker {
+.time-picker {
     .dropdown-menu {
         min-width:100%;
         width:auto;
+        margin: 0;
     }
 }
 </style>
 
 <template>
-<div class="input-group dropdown date-picker" v-class="open: picking">
-    <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
+<div class="input-group dropdown time-picker" v-class="open: picking">
+    <span class="input-group-addon"><span class="fa fa-clock-o"></span></span>
     <input type="text" class="form-control" v-el="input"
         v-on="focus: onFocus, blur: onBlur"
         v-attr="
             placeholder: placeholder,
             required: required,
-            value: value|dateFormatted,
+            value: value|timeFormatted,
             readonly: readonly || false
         "></input>
     <div class="dropdown-menu dropdown-menu-right">
-        <calendar selected="{{value}}"></calendar>
+        <time-widget selected="{{value}}"></time-widget>
     </div>
     <input type="hidden" v-el="hidden"
         v-attr="
@@ -33,38 +34,35 @@
 <script>
 import moment from 'moment';
 
-const DEFAULT_FORMAT = 'L';
+const DEFAULT_FORMAT = 'HH:mm';
 const ISO_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 
 export default {
-    name: 'date-picker',
+    name: 'time-picker',
     inherit: true,
     replace: true,
     props: ['serializable'],
     components: {
-        calendar: require('components/calendar.vue')
+        'time-widget': require('components/time-widget.vue')
     },
     data: function() {
         return {
-            picking: false,
-            serializable: true
+            picking: false
         };
     },
     filters: {
-        dateFormatted: function(value) {
-            // Will default to current day if value is null.
-            return moment(value).format(this.field.format || DEFAULT_FORMAT);
+        timeFormatted: function(value) {
+            return value ? moment(value).format(this.field.format || DEFAULT_FORMAT) : '';
         }
     },
     events: {
-        'calendar:date:selected': function(date) {
+        'calendar:time:selected': function(date) {
             this.$$.input.value = date.format(this.field.format || DEFAULT_FORMAT);
             this.$$.hidden.value = date.format(ISO_FORMAT);
-            this.picking = false;
+            this.picking = true;
         },
-        'calendar:date:cleared': function() {
-            this.$$.input.value = '';
-            this.$$.hidden.value = '';
+
+        'calendar:time:close': function() {
             this.picking = false;
         }
     },

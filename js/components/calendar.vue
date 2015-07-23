@@ -1,5 +1,7 @@
 <style lang="less">
 .calendar {
+    color: black;
+
     > * {
         display: block;
     }
@@ -60,7 +62,6 @@
             <tfoot>
                 <tr>
                     <th colspan="5" v-on="click: pickDay(today)">
-                        <span class="fa fa-dot-circle-o"></span>
                         {{ _('Today') }}
                     </th>
                     <th colspan="2" v-on="click: clear">
@@ -75,19 +76,18 @@
 </template>
 
 <script>
-'use strict';
+import moment from 'moment';
 
-var moment = require('moment'),
-    VIEWS = ['days', 'months', 'years'];
+const VIEWS = ['days', 'months', 'years'];
 
-module.exports = {
+export default {
     props: ['selected', 'view'],
     computed: {
         days: function() {
-            var days = [],
+            let days = [],
                 weekdays = moment.weekdaysShort(),
                 first = moment.localeData().firstDayOfWeek();
-            for (var i = 0; i < 7; i++) {
+            for (let i = 0; i < 7; i++) {
                 days.push(weekdays[(i + first) % 7]);
             }
             return days;
@@ -110,18 +110,18 @@ module.exports = {
             } else if (this.view == 'months') {
                 return this.currentYear;
             } else if (this.view == 'years') {
-                var start = moment().year(this.currentYear).subtract(5, 'years'),
+                let start = moment().year(this.currentYear).subtract(5, 'years'),
                     end = moment().year(this.currentYear).add(6, 'years');
                 return start.year() + '-' + end.year();
             }
         },
         currentMonthDays: function() {
-            var month = moment().month(this.currentMonth).year(this.currentYear),
+            let month = moment().month(this.currentMonth).year(this.currentYear),
                 start = month.clone().startOf('month').startOf('week'),
                 end = month.clone().endOf('month').endOf('week'),
                 days = [], row;
 
-            for (var i=0; i <= end.diff(start, 'days'); i++) {
+            for (let i=0; i <= end.diff(start, 'days'); i++) {
                 if (i % 7 === 0) {
                     row = [];
                     days.push(row);
@@ -131,10 +131,10 @@ module.exports = {
             return days;
         },
         yearsRange: function() {
-            var start = moment().year(this.currentYear).subtract(5, 'years'),
+            let start = moment().year(this.currentYear).subtract(5, 'years'),
                 years = [];
 
-            for (var i=0; i < 12; i++) {
+            for (let i=0; i < 12; i++) {
                 years.push(start.clone().add(i, 'years').year());
             }
             return years;
@@ -151,7 +151,7 @@ module.exports = {
     },
     methods: {
         next: function() {
-            var current = moment().month(this.currentMonth).year(this.currentYear);
+            let current = moment().month(this.currentMonth).year(this.currentYear);
             if (this.view === 'days') {
                 current.add(1, 'months');
             } else if (this.view === 'months') {
@@ -163,7 +163,7 @@ module.exports = {
             this.currentYear = current.year();
         },
         previous: function() {
-            var current = moment().month(this.currentMonth).year(this.currentYear);
+            let current = moment().month(this.currentMonth).year(this.currentYear);
             if (this.view === 'days') {
                 current.subtract(1, 'months');
             } else if (this.view === 'months') {

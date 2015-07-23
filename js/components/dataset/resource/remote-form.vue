@@ -38,6 +38,10 @@ module.exports = {
                     id: 'checksum',
                     label: this._('Checksum'),
                     widget: 'checksum'
+                }, {
+                    id: 'published',
+                    label: this._('Publication date'),
+                    widget: 'date-picker'
                 }]
         };
     },
