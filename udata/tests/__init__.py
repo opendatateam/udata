@@ -88,9 +88,11 @@ class TestCase(BaseTestCase):
 
         for signal, mock_handler in specs:
             signal.disconnect(mock_handler)
+            signal_name = getattr(signal, 'name', str(signal))
             self.assertTrue(
                 mock_handler.called,
-                'Signal "{0}" should have been emitted'.format(signal.name))
+                'Signal "{0}" should have been emitted'.format(signal_name)
+            )
 
 
 class WebTestMixin(object):
