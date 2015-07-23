@@ -1,8 +1,9 @@
 import API from 'api';
 import validator from 'models/validator';
 import {pubsub, PubSub} from 'pubsub';
+import Sifter from 'sifter';
 
-
+export const DEFAULT_PAGE_SIZE = 10;
 
 /**
  * An empty JSON schema factory
@@ -183,25 +184,55 @@ export class List extends Base {
         super();
         this.$options = options || {};
 
-        this.items = [];
+        this.items = this.$options.data || [];
         this.query = this.$options.query || {};
         this.loading = false;
+
+        this.sorted = null;
+        this.reversed = false;
+        this.filtered = [];
+        this._search = '';
+        this._sifter = new Sifter(this.items);
+        this.populate();
+    }
+
+    get has_search() {
+        return this.$options.search !== undefined;
     }
 
     get data() {
-        return this.items;
+        return this.filtered;
+    }
+
+    set data(value) {
+        this._set('filtered', value);
     }
 
     /**
-     * The class name
-     * @return {[type]} [description]
+     * Populate the data view (filtered and sorted)
      */
-    get __class__() {
-        return this.constructor.name
+    populate() {
+        let options = {};
+
+        if (this.$options.search) {
+            options.fields = Array.isArray(this.$options.search) ? this.$options.search: [this.$options.search];
+        } else {
+            options.fields = [];
+        }
+
+        if (this.sorted) {
+            options.sort = [{
+                field: this.sorted,
+                direction: this.reversed ? 'desc' : 'asc'
+            }];
+        }
+        this.data =  this._sifter.search(this._search, options).items.map((result) => {
+            return this.items[result.id];
+        });
     }
 
     /**
-     * Fetch a paginated list.
+     * Fetch an unpaginated list.
      * @param  {[type]} options [description]
      * @return {[type]}         [description]
      */
@@ -213,12 +244,9 @@ export class List extends Base {
     }
 
     on_fetched(data) {
-        while (this.items.length > 0) {
-            this.items.pop();
-        }
-        for (var i=0; i < data.obj.length; i++) {
-            this.items.push(data.obj[i]);
-        }
+        this.items = data.obj;
+        this._sifter = new Sifter(this.items);
+        this.populate();
         this.$emit('updated', this);
         this.loading = false;
     }
@@ -239,7 +267,34 @@ export class List extends Base {
      */
     clear() {
         this.items = [];
-        this.$emit('updated');
+        this.populate();
+        this.$emit('updated', this);
+        return this;
+    }
+
+
+    /**
+     * Perform a client-side sort
+     * @param {String} field The object attribute to sort on.
+     * @param {Boolean} reversed If true, sort is descending.
+     * @return {Object} Return itself allowing to chain methods.
+     */
+    sort(field, reversed) {
+        this.sorted = field;
+        this.reversed = reversed !== undefined ? reversed : !this.reversed;
+        this.page = 1;
+        this.populate();
+        return this;
+    }
+
+    /**
+     * Perform a client-side search
+     * @param  {String} query The query string to perform the search on.
+     * @return {Object} Return itself allowing to chain methods.
+     */
+    search(query) {
+        this._search = query;
+        this.populate();
         return this;
     }
 };
@@ -377,14 +432,18 @@ export class PageList extends List {
     constructor(options) {
         super(options);
         this.page = 1;
-        this.page_size = 10;
-        this.sorted = null;
-        this.reversed = false;
-        this.pager = [];
+        this.page_size = this.$options.page_size || DEFAULT_PAGE_SIZE;
+    }
 
-        this.$on('updated', () => {
-            this.data = this.build_page();
-        });
+    get data() {
+        return super.data.slice(
+            Math.max(this.page - 1, 0) * this.page_size,
+            this.page * this.page_size
+        );
+    }
+
+    set data(value) {
+        super.data = value;
     }
 
     /**
@@ -392,15 +451,7 @@ export class PageList extends List {
      * @return {int}
      */
     get pages() {
-        return Math.ceil(this.items.length / this.page_size);
-    }
-
-    get data() {
-        return this.pager;
-    }
-
-    set data(value) {
-        this._set('pager', value);
+        return Math.ceil(super.data.length / this.page_size);
     }
 
     /**
@@ -411,7 +462,7 @@ export class PageList extends List {
         if (this.page && this.page < this.pages) {
             this.page = this.page + 1;
         }
-        this.data = this.build_page();
+        this.populate();
         return this;
     }
 
@@ -423,7 +474,7 @@ export class PageList extends List {
         if (this.page && this.page > 1) {
             this.page = this.page - 1;
         }
-        this.data = this.build_page();
+        this.populate();
         return this;
     }
 
@@ -434,51 +485,7 @@ export class PageList extends List {
      */
     go_to_page(page) {
         this.page = page;
-        this.data = this.build_page();
+        this.populate();
         return this;
-    }
-
-    /**
-     * Perform a client-side sort
-     * @param {String} field The object attribute to sort on.
-     * @param {Boolean} reversed If true, sort is descending.
-     * @return {Object} Return itself allowing to chain methods.
-     */
-    sort(field, reversed) {
-        this.sorted = field;
-        this.reversed = reversed !== undefined ? reversed : !this.reversed;
-        this.page = 1;
-        this.data = this.build_page();
-        return this;
-    }
-
-    /**
-     * Perform a client-side search
-     * @param  {String} query The query string to perform the search on.
-     * @return {Object} Return itself allowing to chain methods.
-     */
-    search(query) {
-        console.log('search', query);
-        return this;
-    }
-
-    build_page() {
-        return this.items
-            .sort((a, b) => {
-                var valA = getattr(a, this.sorted),
-                    valB = getattr(b, this.sorted);
-
-                if (valA > valB) {
-                    return this.reversed ? -1 : 1;
-                } else if (valA < valB) {
-                    return this.reversed ? 1 : -1;
-                } else {
-                    return 0;
-                }
-            })
-            .slice(
-                Math.max(this.page - 1, 0) * this.page_size,
-                this.page * this.page_size
-            );
     }
 };

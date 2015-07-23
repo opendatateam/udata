@@ -1,12 +1,12 @@
 import API from 'specs/mocks/api';
-import {Model} from 'models/base';
+import {Model, PageList} from 'models/base';
 import Vue from 'vue';
 
 Vue.config.async = false;
 
 describe('Base model', function() {
 
-    var PetSchema = {
+    const PetSchema = {
         required: ['id', 'name'],
         properties: {
             id: {type: 'integer', format: 'int64'},
@@ -26,14 +26,14 @@ describe('Base model', function() {
 
 
         it("should use the specs schema", function() {
-            var pet = new Pet();
+            let pet = new Pet();
 
             expect(pet.__schema__).not.to.be.undefined;
             expect(pet.__schema__).to.deep.equals(PetSchema);
         });
 
         it("should populate required data with the schema", function() {
-            var pet = new Pet();
+            let pet = new Pet();
 
             expect(pet.id).to.be.null;
             expect(pet.name).to.be.null;
@@ -41,7 +41,7 @@ describe('Base model', function() {
         });
 
         it('can be populated with the data', function() {
-            var pet = new Pet({
+            let pet = new Pet({
                     data: {
                         id: 1,
                         name: 'Rex',
@@ -57,7 +57,7 @@ describe('Base model', function() {
         describe("Vue.js integration", function() {
 
             it('allows to watch undefined properties', function(done) {
-                var vm = new Vue({
+                let vm = new Vue({
                     data: {
                         pet: new Pet()
                     },
@@ -79,7 +79,7 @@ describe('Base model', function() {
 
         describe('Validation', function() {
             it("should validate complete valid models", function() {
-                var pet = new Pet({
+                let pet = new Pet({
                         data: {
                             id: 1,
                             name: 'Rex',
@@ -87,7 +87,7 @@ describe('Base model', function() {
                         }
                     });
 
-                var result = pet.validate();
+                let result = pet.validate();
 
                 expect(result.valid).to.be.true;
                 expect(result.errors.length).to.equal(0);
@@ -95,7 +95,7 @@ describe('Base model', function() {
             });
 
             it("should validate complete valid nested models", function() {
-                var pet = new Pet({
+                let pet = new Pet({
                         data: {
                             id: 1,
                             name: 'Rex',
@@ -103,7 +103,7 @@ describe('Base model', function() {
                         }
                     });
 
-                var result = pet.validate();
+                let result = pet.validate();
 
                 expect(result.valid).to.be.true;
                 expect(result.errors.length).to.equal(0);
@@ -112,14 +112,14 @@ describe('Base model', function() {
 
             xit("should validate partial valid models", function() {
                 // Need https://github.com/geraintluff/tv4/pull/175
-                var pet = new Pet({
+                let pet = new Pet({
                         data: {
                             id: 1,
                             name: 'Rex'
                         }
                     });
 
-                var result = pet.validate();
+                let result = pet.validate();
 
                 expect(result.valid).to.be.true;
                 expect(result.errors.length).to.equal(0);
@@ -147,8 +147,8 @@ describe('Base model', function() {
             });
         });
 
-        it("should populate required data with the schema", function() {
-            var person = new Person();
+        it('should populate required data with the schema', function() {
+            let person = new Person();
 
             expect(person.id).to.be.null;
             expect(person.name).to.be.null;
@@ -157,7 +157,7 @@ describe('Base model', function() {
         });
 
         it('can be populated with the data', function() {
-            var person = new Person({
+            let person = new Person({
                     data: {
                         id: 1,
                         name: 'Axel',
@@ -178,12 +178,12 @@ describe('Base model', function() {
             expect(person.pet.name).to.equal('Rex');
         });
 
-        describe("Vue.js integration", function() {
+        describe('Vue.js integration', function() {
 
             it('allows to watch undefined properties', function(done) {
-                var vm = new Vue({
+                let vm = new Vue({
                         data: {
-                            person = new Person()
+                            person: new Person()
                         },
                         watch: {
                             'person.pet.name': function(value, old) {

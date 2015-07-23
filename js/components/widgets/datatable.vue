@@ -31,7 +31,7 @@
                     style="width: 150px;" placeholder="{{'Search'|i18n}}"
                     v-model="search_query" v-on="keyup:search | key enter">
                 <div class="input-group-btn">
-                    <button class="btn btn-sm btn-flat">
+                    <button class="btn btn-sm btn-flat" v-on="click: search">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>
