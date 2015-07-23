@@ -22,7 +22,7 @@ class BadgesField(ListField):
         errors = {}
 
         for key in value:
-            if not key in self.registered:
+            if key not in self.registered:
                 errors[key] = 'Badge {0} is not registered'.format(key)
 
         if errors:

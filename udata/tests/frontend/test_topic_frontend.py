@@ -4,16 +4,21 @@ from __future__ import unicode_literals
 from flask import url_for
 
 from udata.tests.frontend import FrontTestCase
-from udata.tests.factories import VisibleDatasetFactory, VisibleReuseFactory, TopicFactory
+from udata.tests.factories import (
+    VisibleDatasetFactory, VisibleReuseFactory, TopicFactory
+)
 
 
 class TopicsBlueprintTest(FrontTestCase):
     def test_render_display(self):
         '''It should render a topic page'''
         with self.autoindex():
-            reuses = [VisibleReuseFactory(tags=['tag-{0}'.format(i)]) for i in range(3)]
-            datasets = [VisibleDatasetFactory(tags=['tag-{0}'.format(i)]) for i in range(3)]
-        topic = TopicFactory(tags=['tag-0', 'tag-2'], datasets=datasets, reuses=reuses)
+            reuses = [VisibleReuseFactory(tags=['tag-{0}'.format(i)])
+                      for i in range(3)]
+            datasets = [VisibleDatasetFactory(tags=['tag-{0}'.format(i)])
+                        for i in range(3)]
+        topic = TopicFactory(
+            tags=['tag-0', 'tag-2'], datasets=datasets, reuses=reuses)
 
         response = self.get(url_for('topics.display', topic=topic))
         self.assert200(response)
@@ -28,7 +33,8 @@ class TopicsBlueprintTest(FrontTestCase):
     def test_render_datasets(self):
         '''It should render a topic datasets page'''
         with self.autoindex():
-            [VisibleDatasetFactory(tags=['tag-{0}'.format(i)]) for i in range(3)]
+            [VisibleDatasetFactory(tags=['tag-{0}'.format(i)])
+             for i in range(3)]
         topic = TopicFactory(tags=['tag-0', 'tag-2'])
 
         response = self.get(url_for('topics.datasets', topic=topic))

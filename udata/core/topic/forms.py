@@ -16,7 +16,8 @@ class TopicForm(ModelForm):
     owner = fields.CurrentUserField()
 
     name = fields.StringField(_('Name'), [validators.required()])
-    description = fields.MarkdownField(_('Description'), [validators.required()])
+    description = fields.MarkdownField(
+        _('Description'), [validators.required()])
 
     datasets = fields.DatasetListField(_('Associated datasets'))
     reuses = fields.ReuseListField(_('Associated reuses'))

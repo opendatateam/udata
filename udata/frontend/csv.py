@@ -49,16 +49,22 @@ class Adapter(object):
             if not isinstance(self.fields, (list, tuple)):
                 raise ValueError('Unsupported fields format')
             self._fields = [
-                (field, self.getter(field)) if isinstance(field, basestring) else (field[0], self.getter(*field))
-                for field in itertools.chain(self.fields, self.dynamic_fields())
+                (field, self.getter(field))
+                if isinstance(field, basestring)
+                else (field[0], self.getter(*field))
+                for field
+                in itertools.chain(self.fields, self.dynamic_fields())
             ]
         return self._fields
 
     def getter(self, name, getter=None):
         if not getter:
             method = 'field_{0}'.format(name)
-            return getattr(self, method) if hasattr(self, method) else lambda o: getattr(o, name, None)
-        return (lambda o: getattr(o, getter, None)) if isinstance(getter, basestring) else getter
+            return (getattr(self, method)
+                    if hasattr(self, method)
+                    else lambda o: getattr(o, name, None))
+        return ((lambda o: getattr(o, getter, None))
+                if isinstance(getter, basestring) else getter)
 
     def header(self):
         '''Generate the CSV header row'''
@@ -89,24 +95,33 @@ class NestedAdapter(Adapter):
 
     def header(self):
         '''Generate the CSV header row'''
-        return super(NestedAdapter, self).header() + [name for name, getter in self.get_nested_fields()]
+        return (super(NestedAdapter, self).header() +
+                [name for name, getter in self.get_nested_fields()])
 
     def get_nested_fields(self):
         if not self._nested_fields:
             if not isinstance(self.nested_fields, (list, tuple)):
                 raise ValueError('Unsupported nested fields format')
             self._nested_fields = [
-                (field, self.getter(field)) if isinstance(field, basestring) else (field[0], self.getter(*field))
-                for field in itertools.chain(self.nested_fields, self.nested_dynamic_fields())
+                (field, self.getter(field))
+                if isinstance(field, basestring)
+                else (field[0], self.getter(*field))
+                for field
+                in itertools.chain(self.nested_fields,
+                                   self.nested_dynamic_fields())
             ]
         return self._nested_fields
 
     def get_queryset(self):
-        return ((o, n) for o in self.queryset for n in getattr(o, self.attribute))
+        return ((o, n)
+                for o in self.queryset
+                for n in getattr(o, self.attribute))
 
     def rows(self):
         '''Iterate over queryset objects'''
-        return (self.nested_row(o, n) for o in self.queryset for n in getattr(o, self.attribute, []))
+        return (self.nested_row(o, n)
+                for o in self.queryset
+                for n in getattr(o, self.attribute, []))
 
     def nested_row(self, obj, nested):
         '''Convert an object into a flat csv row'''
@@ -144,7 +159,8 @@ def metric_fields(cls):
 
 def get_writer(out):
     '''Get a preconfigured CSV writer for a given output file'''
-    return unicodecsv.writer(out, quoting=unicodecsv.QUOTE_NONNUMERIC, **CONFIG)
+    return unicodecsv.writer(out, quoting=unicodecsv.QUOTE_NONNUMERIC,
+                             **CONFIG)
 
 
 def get_reader(infile):
@@ -168,12 +184,16 @@ def yield_rows(adapter):
 
 
 def stream(queryset_or_adapter, basename=None):
-    '''Stream a csv file from an object list, a queryset or an instanciated adapter'''
+    """Stream a csv file from an object list,
+
+    a queryset or an instanciated adapter.
+    """
     if isinstance(queryset_or_adapter, Adapter):
         adapter = queryset_or_adapter
     elif isinstance(queryset_or_adapter, (list, tuple)):
         if not queryset_or_adapter:
-            raise ValueError('Type detection is not possible with an empty list')
+            raise ValueError(
+                'Type detection is not possible with an empty list')
         cls = _adapters.get(queryset_or_adapter[0].__class__)
         adapter = cls(queryset_or_adapter)
     elif isinstance(queryset_or_adapter, db.BaseQuerySet):
@@ -184,7 +204,8 @@ def stream(queryset_or_adapter, basename=None):
 
     timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M')
     headers = {
-        b'Content-Disposition': 'attachment; filename={0}-{1}.csv'.format(basename or 'export', timestamp),
+        b'Content-Disposition': 'attachment; filename={0}-{1}.csv'.format(
+            basename or 'export', timestamp),
     }
     streamer = stream_with_context(yield_rows(adapter))
     return Response(streamer, mimetype="text/csv", headers=headers)

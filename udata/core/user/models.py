@@ -46,7 +46,8 @@ class UserSettings(db.EmbeddedDocument):
 
 
 class User(db.Document, WithMetrics, UserMixin):
-    slug = db.SlugField(max_length=255, required=True, populate_from='fullname')
+    slug = db.SlugField(
+        max_length=255, required=True, populate_from='fullname')
     email = db.StringField(max_length=255, required=True)
     password = db.StringField()
     active = db.BooleanField()
@@ -56,7 +57,8 @@ class User(db.Document, WithMetrics, UserMixin):
     last_name = db.StringField(max_length=255, required=True)
 
     avatar_url = db.URLField()
-    avatar = db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES)
+    avatar = db.ImageField(
+        fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES)
     website = db.URLField()
     about = db.StringField()
 
@@ -114,7 +116,8 @@ class User(db.Document, WithMetrics, UserMixin):
 
     @property
     def visible(self):
-        return self.metrics.get('datasets', 0) + self.metrics.get('reuses', 0) > 0
+        return (self.metrics.get('datasets', 0)
+                + self.metrics.get('reuses', 0)) > 0
 
     def generate_api_key(self):
         s = JSONWebSignatureSerializer(current_app.config['SECRET_KEY'])

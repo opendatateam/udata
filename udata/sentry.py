@@ -8,7 +8,9 @@ from werkzeug.exceptions import HTTPException
 
 log = logging.getLogger(__name__)
 
-RE_DSN = re.compile(r'(?P<scheme>https?)://(?P<client_id>[0-9a-f]+):[0-9a-f]+@(?P<domain>.+)/(?P<site_id>\d+)')
+RE_DSN = re.compile(
+    r'(?P<scheme>https?)://(?P<client_id>[0-9a-f]+):[0-9a-f]+'
+    '@(?P<domain>.+)/(?P<site_id>\d+)')
 
 
 def public_dsn(dsn):
@@ -16,14 +18,17 @@ def public_dsn(dsn):
     m = RE_DSN.match(dsn)
     if not m:
         log.error('Unable to parse Sentry DSN')
-    public = '{scheme}://{client_id}@{domain}/{site_id}'.format(**m.groupdict())
+    public = '{scheme}://{client_id}@{domain}/{site_id}'.format(
+        **m.groupdict())
     return public
 
 
 def init_app(app):
     if 'SENTRY_DSN' in app.config:
         try:
-            from raven.contrib.celery import register_signal, register_logger_signal
+            from raven.contrib.celery import (
+                register_signal, register_logger_signal
+            )
             from raven.contrib.flask import Sentry
         except:
             log.error('raven[flask] is required to use sentry')
@@ -31,8 +36,9 @@ def init_app(app):
 
         sentry = Sentry()
 
-        app.config.setdefault('SENTRY_USER_ATTRS', ['slug', 'email', 'fullname'])
-        app.config.setdefault('SENTRY_LOGGING',  'WARNING')
+        app.config.setdefault('SENTRY_USER_ATTRS',
+                              ['slug', 'email', 'fullname'])
+        app.config.setdefault('SENTRY_LOGGING', 'WARNING')
 
         log_level_name = app.config.get('SENTRY_LOGGING')
         if log_level_name:

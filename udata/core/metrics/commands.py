@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import calendar
 import logging
 
 
@@ -16,7 +15,8 @@ from .tasks import update_metrics_for, update_site_metrics
 log = logging.getLogger(__name__)
 
 
-m = submanager('metrics',
+m = submanager(
+    'metrics',
     help='Metrics related operations',
     description='Handle all metrics related operations and maintenance'
 )
@@ -28,18 +28,23 @@ def iter_catalog(*models):
             yield (model, metrics)
 
 
-def iter_months(since):
-    year, month = (int(t) for t in since.split('-'))
-    _, end = calendar.monthrange(year, month)
-    dt = date(year, month, 1)
-
-
-@m.option('-s', '--site', action='store_true', default=False, help='Update site metrics')
-@m.option('-o', '--organizations', action='store_true', default=False, help='Compute organizations metrics')
-@m.option('-d', '--datasets', action='store_true', default=False, help='Compute datasets metrics')
-@m.option('-r', '--reuses', action='store_true', default=False, help='Compute reuses metrics')
-@m.option('-u', '--users', action='store_true', default=False, help='Compute users metrics')
-def update(site=False, organizations=False, users=False, datasets=False, reuses=False):
+@m.option(
+    '-s', '--site', action='store_true', default=False,
+    help='Update site metrics')
+@m.option(
+    '-o', '--organizations', action='store_true', default=False,
+    help='Compute organizations metrics')
+@m.option(
+    '-d', '--datasets', action='store_true', default=False,
+    help='Compute datasets metrics')
+@m.option(
+    '-r', '--reuses', action='store_true', default=False,
+    help='Compute reuses metrics')
+@m.option(
+    '-u', '--users', action='store_true', default=False,
+    help='Compute users metrics')
+def update(site=False, organizations=False, users=False, datasets=False,
+           reuses=False):
     '''Update all metrics for the current date'''
     do_all = not any((site, organizations, users, datasets, reuses))
 
@@ -68,8 +73,12 @@ def update(site=False, organizations=False, users=False, datasets=False, reuses=
             update_metrics_for(user)
 
 
-@m.option('-s', '--since', dest='since', default=None, help='Aggregate data since the given month (YYYY-MM)')
-@m.option('-m', '--model', dest='models', action='append', default=[], help='Only process given models')
+@m.option(
+    '-s', '--since', dest='since', default=None,
+    help='Aggregate data since the given month (YYYY-MM)')
+@m.option(
+    '-m', '--model', dest='models', action='append', default=[],
+    help='Only process given models')
 def monthly(since, models):
     '''Aggregate metrics monthly'''
     for model, metrics in iter_catalog(*models):

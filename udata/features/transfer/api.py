@@ -20,17 +20,24 @@ RESPONSE_TYPES = ['accept', 'refuse']
 
 
 transfer_request_fields = api.model('TransferRequest', {
-    'subject': fields.Nested(base_reference, required=True,
+    'subject': fields.Nested(
+        base_reference, required=True,
         description='The transfered subject'),
-    'recipient': fields.Nested(base_reference, required=True,
-        description='The transfer recipient, either an user or an organization'),
-    'comment': fields.String(description='An explanation about the transfer request', required=True),
+    'recipient': fields.Nested(
+        base_reference, required=True,
+        description=('The transfer recipient, '
+                     'either an user or an organization')),
+    'comment': fields.String(
+        description='An explanation about the transfer request',
+        required=True),
 })
 
 
 transfer_response_fields = api.model('TransferResponse', {
-    'response': fields.String(description='The response', required=True, enum=RESPONSE_TYPES),
-    'comment': fields.String(description='An optionnal comment about the transfer response'),
+    'response': fields.String(description='The response', required=True,
+                              enum=RESPONSE_TYPES),
+    'comment': fields.String(
+        description='An optionnal comment about the transfer response'),
 })
 
 person_mapping = {
@@ -44,21 +51,29 @@ subject_mapping = {
 }
 
 transfer_fields = api.model('Transfer', {
-    'id': fields.String(description='The transfer unique identifier', readonly=True),
-    'owner': fields.Polymorph(person_mapping, readonly=True,
-        description='The user or organization currently owning the transfered object'),
-    'recipient': fields.Polymorph(person_mapping, readonly=True,
-        description='The user or organization receiving the transfered object'),
-    'subject': fields.Polymorph(subject_mapping, readonly=True,
-        description='The transfered object'),
-    'comment': fields.String(readonly=True,
-        description='A comment about the transfer request'),
-    'created': fields.ISODateTime(description='The transfer request date', readonly=True),
-    'status': fields.String(enum=TRANSFER_STATUS.keys(),
+    'id': fields.String(
+        readonly=True, description='The transfer unique identifier'),
+    'owner': fields.Polymorph(
+        person_mapping, readonly=True,
+        description=('The user or organization currently owning '
+                     'the transfered object')),
+    'recipient': fields.Polymorph(
+        person_mapping, readonly=True,
+        description=('The user or organization receiving '
+                     'the transfered object')),
+    'subject': fields.Polymorph(
+        subject_mapping, readonly=True, description='The transfered object'),
+    'comment': fields.String(
+        readonly=True, description='A comment about the transfer request'),
+    'created': fields.ISODateTime(
+        description='The transfer request date', readonly=True),
+    'status': fields.String(
+        enum=TRANSFER_STATUS.keys(),
         description='The current transfer request status'),
-    'responded': fields.ISODateTime(description='The transfer response date', readonly=True),
-    'reponse_comment': fields.String(readonly=True,
-        description='A comment about the transfer response'),
+    'responded': fields.ISODateTime(
+        description='The transfer response date', readonly=True),
+    'reponse_comment': fields.String(
+        readonly=True, description='A comment about the transfer response'),
 })
 
 

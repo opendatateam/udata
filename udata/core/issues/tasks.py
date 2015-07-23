@@ -22,7 +22,8 @@ def owner_recipients(issue):
 def notify_new_issue(issue):
     if isinstance(issue.subject, (Dataset, Reuse)):
         recipients = owner_recipients(issue)
-        subject = _('Your %(type)s have a new issue', type=issue.subject.verbose_name)
+        subject = _('Your %(type)s have a new issue',
+                    type=issue.subject.verbose_name)
         mail.send(subject, recipients, 'new_issue', issue=issue)
     else:
         log.warning('Unrecognized issue subject type %s', type(issue.subject))
@@ -32,10 +33,13 @@ def notify_new_issue(issue):
 def notify_new_issue_comment(issue, **kwargs):
     if isinstance(issue.subject, (Dataset, Reuse)):
         comment = kwargs['message']
-        recipients = owner_recipients(issue) + [m.posted_by for m in issue.discussion]
+        recipients = owner_recipients(issue) + [
+            m.posted_by for m in issue.discussion]
         recipients = filter(lambda u: u != comment.posted_by, set(recipients))
-        subject = _('%(user)s commented your issue', user=comment.posted_by.fullname)
-        mail.send(subject, recipients, 'new_issue_comment', issue=issue, comment=comment)
+        subject = _('%(user)s commented your issue',
+                    user=comment.posted_by.fullname)
+        mail.send(subject, recipients, 'new_issue_comment',
+                  issue=issue, comment=comment)
     else:
         log.warning('Unrecognized issue subject type %s', type(issue.subject))
 
@@ -44,9 +48,11 @@ def notify_new_issue_comment(issue, **kwargs):
 def notify_issue_closed(issue, **kwargs):
     if isinstance(issue.subject, (Dataset, Reuse)):
         comment = kwargs['message']
-        recipients = owner_recipients(issue) + [m.posted_by for m in issue.discussion]
+        recipients = owner_recipients(issue) + [
+            m.posted_by for m in issue.discussion]
         recipients = filter(lambda u: u != comment.posted_by, set(recipients))
         subject = _('An issue has been closed')
-        mail.send(subject, recipients, 'issue_closed', issue=issue, comment=comment)
+        mail.send(subject, recipients, 'issue_closed',
+                  issue=issue, comment=comment)
     else:
         log.warning('Unrecognized issue subject type %s', type(issue.subject))

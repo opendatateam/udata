@@ -161,8 +161,12 @@ class FollowReuseAPI(FollowAPI):
 
 
 suggest_parser = api.parser()
-suggest_parser.add_argument('q', type=unicode, help='The string to autocomplete/suggest', location='args', required=True)
-suggest_parser.add_argument('size', type=int, help='The amount of suggestion to fetch', location='args', default=10)
+suggest_parser.add_argument(
+    'q', type=unicode, help='The string to autocomplete/suggest',
+    location='args', required=True)
+suggest_parser.add_argument(
+    'size', type=int, help='The amount of suggestion to fetch',
+    location='args', default=10)
 
 
 @ns.route('/suggest/', endpoint='suggest_reuses')
@@ -201,7 +205,8 @@ class ReuseImageAPI(API):
         args = image_parser.parse_args()
 
         image = args['file']
-        bbox = [int(float(c)) for c in args['bbox'].split(',')] if 'bbox' in args else None
+        bbox = ([int(float(c)) for c in args['bbox'].split(',')]
+                if 'bbox' in args else None)
         reuse.image.save(image, bbox=bbox)
         reuse.save()
 

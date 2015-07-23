@@ -20,9 +20,9 @@ class BadgeMixin(object):
                 'badges': {
                     '$each': [badge.to_mongo()],
                     '$position': 0
-                    }
                 }
-            })
+            }
+        })
         self.reload()
 
     def remove_badge(self, badge):

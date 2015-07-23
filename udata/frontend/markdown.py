@@ -33,11 +33,12 @@ class UDataMarkdown(object):
             return ''
         # Sanitize malicious attempts but keep the `EXCERPT_TOKEN`.
         # By default, only keeps `bleach.ALLOWED_TAGS`.
-        stream = bleach.clean(stream,
-                              tags=current_app.config['MD_ALLOWED_TAGS'],
-                              attributes=current_app.config['MD_ALLOWED_ATTRIBUTES'],
-                              styles=current_app.config['MD_ALLOWED_STYLES'],
-                              strip_comments=False)
+        stream = bleach.clean(
+            stream,
+            tags=current_app.config['MD_ALLOWED_TAGS'],
+            attributes=current_app.config['MD_ALLOWED_ATTRIBUTES'],
+            styles=current_app.config['MD_ALLOWED_STYLES'],
+            strip_comments=False)
         # Turn markdown to HTML.
         ast = self.parser.parse(stream)
         html = self.renderer.render(ast)

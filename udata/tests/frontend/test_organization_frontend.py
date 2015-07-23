@@ -55,7 +55,8 @@ class OrganizationBlueprintTest(FrontTestCase):
 
         member = organization.member(self.user)
         self.assertIsNotNone(member, 'Current user should be a member')
-        self.assertEqual(member.role, 'admin', 'Current user should be an administrator')
+        self.assertEqual(
+            member.role, 'admin', 'Current user should be an administrator')
 
     def test_render_display(self):
         '''It should render the organization page'''
@@ -72,7 +73,8 @@ class OrganizationBlueprintTest(FrontTestCase):
     def test_render_display_with_datasets(self):
         '''It should render the organization page with some datasets'''
         organization = OrganizationFactory()
-        datasets = [VisibleDatasetFactory(organization=organization) for _ in range(3)]
+        datasets = [
+            VisibleDatasetFactory(organization=organization) for _ in range(3)]
         response = self.get(url_for('organizations.show', org=organization))
 
         self.assert200(response)
@@ -80,7 +82,7 @@ class OrganizationBlueprintTest(FrontTestCase):
         self.assertEqual(len(rendered_datasets), len(datasets))
 
     def test_render_display_with_private_assets_only_member(self):
-        '''It should render the organization page without private assets if not member'''
+        '''It should render the organization page without private assets'''
         organization = OrganizationFactory()
         for _ in range(2):
             DatasetFactory(organization=organization)
@@ -97,7 +99,8 @@ class OrganizationBlueprintTest(FrontTestCase):
         rendered_reuses = self.get_context_variable('reuses')
         self.assertEqual(len(rendered_reuses), 0)
 
-        rendered_private_datasets = self.get_context_variable('private_datasets')
+        rendered_private_datasets = self.get_context_variable(
+            'private_datasets')
         self.assertEqual(len(rendered_private_datasets), 0)
 
         rendered_private_reuses = self.get_context_variable('private_reuses')
@@ -108,21 +111,27 @@ class OrganizationBlueprintTest(FrontTestCase):
         me = self.login()
         member = Member(user=me, role='editor')
         organization = OrganizationFactory(members=[member])
-        datasets = [DatasetFactory(organization=organization) for _ in range(2)]
-        private_datasets = [VisibleDatasetFactory(organization=organization, private=True) for _ in range(2)]
+        datasets = [
+            DatasetFactory(organization=organization) for _ in range(2)]
+        private_datasets = [
+            VisibleDatasetFactory(organization=organization, private=True)
+            for _ in range(2)]
         response = self.get(url_for('organizations.show', org=organization))
 
         self.assert200(response)
         rendered_datasets = self.get_context_variable('datasets')
         self.assertEqual(len(rendered_datasets), 0)
 
-        rendered_private_datasets = self.get_context_variable('private_datasets')
-        self.assertEqual(len(rendered_private_datasets), len(datasets) + len(private_datasets))
+        rendered_private_datasets = self.get_context_variable(
+            'private_datasets')
+        self.assertEqual(len(rendered_private_datasets),
+                         len(datasets) + len(private_datasets))
 
     def test_render_display_with_reuses(self):
         '''It should render the organization page with some reuses'''
         organization = OrganizationFactory()
-        reuses = [VisibleReuseFactory(organization=organization) for _ in range(3)]
+        reuses = [
+            VisibleReuseFactory(organization=organization) for _ in range(3)]
         response = self.get(url_for('organizations.show', org=organization))
 
         self.assert200(response)
@@ -135,7 +144,9 @@ class OrganizationBlueprintTest(FrontTestCase):
         member = Member(user=me, role='editor')
         organization = OrganizationFactory(members=[member])
         reuses = [ReuseFactory(organization=organization) for _ in range(2)]
-        private_reuses = [VisibleReuseFactory(organization=organization, private=True) for _ in range(2)]
+        private_reuses = [
+            VisibleReuseFactory(organization=organization, private=True)
+            for _ in range(2)]
         response = self.get(url_for('organizations.show', org=organization))
 
         self.assert200(response)
@@ -143,12 +154,15 @@ class OrganizationBlueprintTest(FrontTestCase):
         self.assertEqual(len(rendered_reuses), 0)
 
         rendered_private_reuses = self.get_context_variable('private_reuses')
-        self.assertEqual(len(rendered_private_reuses), len(reuses) + len(private_reuses))
+        self.assertEqual(len(rendered_private_reuses),
+                         len(reuses) + len(private_reuses))
 
     def test_render_display_with_followers(self):
         '''It should render the organization page with followers'''
         org = OrganizationFactory()
-        followers = [FollowOrg.objects.create(follower=UserFactory(), following=org) for _ in range(3)]
+        followers = [
+            FollowOrg.objects.create(follower=UserFactory(), following=org)
+            for _ in range(3)]
 
         response = self.get(url_for('organizations.show', org=org))
         self.assert200(response)
@@ -159,30 +173,34 @@ class OrganizationBlueprintTest(FrontTestCase):
     def test_render_edit(self):
         '''It should render the organization edit form'''
         user = self.login()
-        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
+        organization = OrganizationFactory(
+            members=[Member(user=user, role='admin')])
 
         response = self.get(url_for('organizations.edit', org=organization))
         self.assert200(response)
 
     def test_edit(self):
-        '''It should handle edit form submit and redirect on organization page'''
+        '''It should handle edit form submit and redirect on org page'''
         user = self.login()
 
-        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
+        organization = OrganizationFactory(
+            members=[Member(user=user, role='admin')])
         data = organization.to_dict()
         del data['members']
         data['description'] = 'new description'
-        response = self.post(url_for('organizations.edit', org=organization), data)
+        response = self.post(
+            url_for('organizations.edit', org=organization), data)
 
         organization.reload()
         self.assertRedirects(response, organization.display_url)
         self.assertEqual(organization.description, 'new description')
 
     def test_delete(self):
-        '''It should handle deletion from form submit and redirect on organization page'''
+        '''It should handle deletion from form submit and redirect'''
         user = self.login()
 
-        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
+        organization = OrganizationFactory(
+            members=[Member(user=user, role='admin')])
         response = self.post(url_for('organizations.delete', org=organization))
 
         organization.reload()
@@ -192,16 +210,20 @@ class OrganizationBlueprintTest(FrontTestCase):
     def test_render_edit_extras(self):
         '''It should render the organization extras edit form'''
         user = self.login()
-        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
-        response = self.get(url_for('organizations.edit_extras', org=organization))
+        organization = OrganizationFactory(
+            members=[Member(user=user, role='admin')])
+        response = self.get(
+            url_for('organizations.edit_extras', org=organization))
         self.assert200(response)
 
     def test_add_extras(self):
         user = self.login()
-        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
+        organization = OrganizationFactory(
+            members=[Member(user=user, role='admin')])
         data = {'key': 'a_key', 'value': 'a_value'}
 
-        response = self.post(url_for('organizations.edit_extras', org=organization), data)
+        response = self.post(
+            url_for('organizations.edit_extras', org=organization), data)
 
         self.assert200(response)
         organization.reload()
@@ -210,10 +232,13 @@ class OrganizationBlueprintTest(FrontTestCase):
 
     def test_update_extras(self):
         user = self.login()
-        organization = OrganizationFactory(members=[Member(user=user, role='admin')], extras={'a_key': 'a_value'})
+        organization = OrganizationFactory(
+            members=[Member(user=user, role='admin')],
+            extras={'a_key': 'a_value'})
         data = {'key': 'a_key', 'value': 'new_value'}
 
-        response = self.post(url_for('organizations.edit_extras', org=organization), data)
+        response = self.post(
+            url_for('organizations.edit_extras', org=organization), data)
 
         self.assert200(response)
         organization.reload()
@@ -222,10 +247,13 @@ class OrganizationBlueprintTest(FrontTestCase):
 
     def test_rename_extras(self):
         user = self.login()
-        organization = OrganizationFactory(members=[Member(user=user, role='admin')], extras={'a_key': 'a_value'})
+        organization = OrganizationFactory(
+            members=[Member(user=user, role='admin')],
+            extras={'a_key': 'a_value'})
         data = {'key': 'new_key', 'value': 'a_value', 'old_key': 'a_key'}
 
-        response = self.post(url_for('organizations.edit_extras', org=organization), data)
+        response = self.post(
+            url_for('organizations.edit_extras', org=organization), data)
 
         self.assert200(response)
         organization.reload()
@@ -235,9 +263,14 @@ class OrganizationBlueprintTest(FrontTestCase):
 
     def test_delete_extras(self):
         user = self.login()
-        organization = OrganizationFactory(members=[Member(user=user, role='admin')], extras={'a_key': 'a_value'})
+        organization = OrganizationFactory(
+            members=[Member(user=user, role='admin')],
+            extras={'a_key': 'a_value'})
 
-        response = self.delete(url_for('organizations.delete_extra', org=organization, extra='a_key'))
+        response = self.delete(
+            url_for('organizations.delete_extra',
+                    org=organization,
+                    extra='a_key'))
 
         self.assert200(response)
         organization.reload()
@@ -246,17 +279,21 @@ class OrganizationBlueprintTest(FrontTestCase):
     def test_render_edit_members(self):
         '''It should render the organization member edit page'''
         user = self.login()
-        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
-        response = self.get(url_for('organizations.edit_members', org=organization))
+        organization = OrganizationFactory(
+            members=[Member(user=user, role='admin')])
+        response = self.get(
+            url_for('organizations.edit_members', org=organization))
         self.assert200(response)
 
     def test_add_member(self):
         '''It should add a member to the organization'''
         user = self.login()
         new_user = UserFactory()
-        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
+        organization = OrganizationFactory(
+            members=[Member(user=user, role='admin')])
         data = {'pk': str(new_user.id)}
-        response = self.post(url_for('organizations.edit_members', org=organization), data)
+        response = self.post(
+            url_for('organizations.edit_members', org=organization), data)
         self.assert200(response)
 
         organization.reload()
@@ -275,7 +312,8 @@ class OrganizationBlueprintTest(FrontTestCase):
             Member(user=user_modified, role='editor'),
         ])
         data = {'pk': str(user_modified.id), 'value': 'admin'}
-        response = self.post(url_for('organizations.edit_members', org=organization), data)
+        response = self.post(
+            url_for('organizations.edit_members', org=organization), data)
         self.assert200(response)
 
         organization.reload()
@@ -294,7 +332,10 @@ class OrganizationBlueprintTest(FrontTestCase):
             Member(user=deleted, role='editor'),
         ])
         data = {'user_id': str(deleted.id)}
-        response = self.delete(url_for('organizations.edit_members', org=organization), data, content_type='multipart/form-data')
+        response = self.delete(
+            url_for('organizations.edit_members', org=organization),
+            data,
+            content_type='multipart/form-data')
         self.assertStatus(response, 204)
 
         organization.reload()
@@ -305,9 +346,11 @@ class OrganizationBlueprintTest(FrontTestCase):
     def test_render_edit_teams(self):
         '''It should render the organization team edit form'''
         user = self.login()
-        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
+        organization = OrganizationFactory(
+            members=[Member(user=user, role='admin')])
 
-        response = self.get(url_for('organizations.edit_teams', org=organization))
+        response = self.get(
+            url_for('organizations.edit_teams', org=organization))
         self.assert200(response)
 
     def test_not_found(self):
@@ -318,14 +361,17 @@ class OrganizationBlueprintTest(FrontTestCase):
     def test_render_issues(self):
         '''It should render the organization issues page'''
         user = self.login()
-        organization = OrganizationFactory(members=[Member(user=user, role='admin')])
+        organization = OrganizationFactory(
+            members=[Member(user=user, role='admin')])
         response = self.get(url_for('organizations.issues', org=organization))
         self.assert200(response)
 
     def test_datasets_csv(self):
         with self.autoindex():
             org = OrganizationFactory()
-            datasets = [DatasetFactory(organization=org, resources=[ResourceFactory()]) for _ in range(3)]
+            datasets = [
+                DatasetFactory(organization=org, resources=[ResourceFactory()])
+                for _ in range(3)]
             not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
             hidden_dataset = DatasetFactory()
 
@@ -361,13 +407,16 @@ class OrganizationBlueprintTest(FrontTestCase):
         with self.autoindex():
             org = OrganizationFactory()
             datasets = [
-                DatasetFactory(organization=org, resources=[ResourceFactory(), ResourceFactory()])
+                DatasetFactory(
+                    organization=org,
+                    resources=[ResourceFactory(), ResourceFactory()])
                 for _ in range(3)
             ]
             not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
             hidden_dataset = DatasetFactory()
 
-        response = self.get(url_for('organizations.datasets_resources_csv', org=org))
+        response = self.get(
+            url_for('organizations.datasets_resources_csv', org=org))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')
@@ -404,11 +453,14 @@ class OrganizationBlueprintTest(FrontTestCase):
     def test_supplied_datasets_csv(self):
         with self.autoindex():
             org = OrganizationFactory()
-            datasets = [DatasetFactory(supplier=org, resources=[ResourceFactory()]) for _ in range(3)]
+            datasets = [
+                DatasetFactory(supplier=org, resources=[ResourceFactory()])
+                for _ in range(3)]
             not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
             hidden_dataset = DatasetFactory()
 
-        response = self.get(url_for('organizations.supplied_datasets_csv', org=org))
+        response = self.get(
+            url_for('organizations.supplied_datasets_csv', org=org))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')
@@ -439,13 +491,16 @@ class OrganizationBlueprintTest(FrontTestCase):
         with self.autoindex():
             org = OrganizationFactory()
             datasets = [
-                DatasetFactory(supplier=org, resources=[ResourceFactory(), ResourceFactory()])
+                DatasetFactory(
+                    supplier=org,
+                    resources=[ResourceFactory(), ResourceFactory()])
                 for _ in range(3)
             ]
             not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
             hidden_dataset = DatasetFactory()
 
-        response = self.get(url_for('organizations.supplied_datasets_resources_csv', org=org))
+        response = self.get(
+            url_for('organizations.supplied_datasets_resources_csv', org=org))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')

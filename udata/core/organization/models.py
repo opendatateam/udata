@@ -58,7 +58,8 @@ class OrgUnit(object):
     Simple mixin holding common fields for all organization units.
     '''
     name = db.StringField(max_length=255, required=True)
-    slug = db.SlugField(max_length=255, required=True, populate_from='name', update=True)
+    slug = db.SlugField(
+        max_length=255, required=True, populate_from='name', update=True)
     description = db.StringField(required=True)
     url = db.URLField(max_length=255)
     image_url = db.URLField(max_length=255)
@@ -67,7 +68,9 @@ class OrgUnit(object):
 
 class Team(db.EmbeddedDocument):
     name = db.StringField(required=True)
-    slug = db.SlugField(max_length=255, required=True, populate_from='name', update=True, unique=False)
+    slug = db.SlugField(
+        max_length=255, required=True, populate_from='name', update=True,
+        unique=False)
     description = db.StringField()
 
     members = db.ListField(db.ReferenceField('User'))
@@ -89,7 +92,8 @@ class MembershipRequest(db.EmbeddedDocument):
     '''
     id = db.AutoUUIDField()
     user = db.ReferenceField('User')
-    status = db.StringField(choices=MEMBERSHIP_STATUS.keys(), default='pending')
+    status = db.StringField(
+        choices=MEMBERSHIP_STATUS.keys(), default='pending')
 
     created = db.DateTimeField(default=datetime.now, required=True)
 
@@ -118,11 +122,13 @@ class OrganizationQuerySet(db.BaseQuerySet):
 class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     name = db.StringField(max_length=255, required=True)
     acronym = db.StringField(max_length=128)
-    slug = db.SlugField(max_length=255, required=True, populate_from='name', update=True)
+    slug = db.SlugField(
+        max_length=255, required=True, populate_from='name', update=True)
     description = db.StringField(required=True)
     url = db.StringField()
     image_url = db.StringField()
-    logo = db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=LOGO_SIZES)
+    logo = db.ImageField(
+        fs=avatars, basename=default_image_basename, thumbnails=LOGO_SIZES)
 
     members = db.ListField(db.EmbeddedDocumentField(Member))
     teams = db.ListField(db.EmbeddedDocumentField(Team))

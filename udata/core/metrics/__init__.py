@@ -32,14 +32,15 @@ class MetricMetaClass(type):
     def __new__(cls, name, bases, attrs):
 
         # Ensure any child class dispatch the signals
-        new_class = super(MetricMetaClass, cls).__new__(cls, name, bases, attrs)
+        new_class = super(MetricMetaClass, cls).__new__(
+            cls, name, bases, attrs)
         if new_class.model and new_class.name:
             new_class.need_update = Signal()
             new_class.need_update.connect(update_on_demand)
             new_class.updated = Signal()
             new_class.updated.connect(archive_on_updated)
             # register the class in the catalog
-            if not new_class.model in metric_catalog:
+            if new_class.model not in metric_catalog:
                 metric_catalog[new_class.model] = {}
             metric_catalog[new_class.model][new_class.name] = new_class
         return new_class
@@ -93,7 +94,9 @@ class Metric(object):
         Override this method when you inherit this class.
         By default, it takes the last value.
         '''
-        last = self.objects(level='daily', date__lte=self.iso(end), date__gte=self.iso(start)).order_by('-date').first()
+        last = self.objects(
+            level='daily', date__lte=self.iso(end),
+            date__gte=self.iso(start)).order_by('-date').first()
         return last.values[self.name]
 
     def iso(self, value):
@@ -104,7 +107,8 @@ class Metric(object):
         elif isinstance(value, date):
             return value.isoformat()
         else:
-            raise ValueError('Unsupported format: {0} ({1})'.format(value, type(value)))
+            raise ValueError(
+                'Unsupported format: {0} ({1})'.format(value, type(value)))
 
     def trigger_update(self):
         self.need_update.send(self)

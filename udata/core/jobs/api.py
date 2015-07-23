@@ -14,39 +14,62 @@ from udata.tasks import schedulables, celery
 from .forms import CrontabTaskForm, IntervalTaskForm
 from .models import PeriodicTask, PERIODS
 
-ns = api.namespace('workers', 'Asynchronous workers related operations', path='')
+ns = api.namespace(
+    'workers', 'Asynchronous workers related operations', path='')
 
 crontab_fields = api.model('Crontab', {
-    'minute': fields.String(description='Cron expression for minute', required=True, default='*'),
-    'hour': fields.String(description='Cron expression for hour', required=True, default='*'),
-    'day_of_week': fields.String(description='Cron expression for day of week', required=True, default='*'),
-    'day_of_month': fields.String(description='Cron expression for day of month', required=True, default='*'),
-    'month_of_year': fields.String(description='Cron expression for month of year', required=True, default='*'),
+    'minute': fields.String(
+        description='Cron expression for minute', required=True, default='*'),
+    'hour': fields.String(
+        description='Cron expression for hour', required=True, default='*'),
+    'day_of_week': fields.String(
+        description='Cron expression for day of week', required=True,
+        default='*'),
+    'day_of_month': fields.String(
+        description='Cron expression for day of month', required=True,
+        default='*'),
+    'month_of_year': fields.String(
+        description='Cron expression for month of year', required=True,
+        default='*'),
 })
 
 interval_fields = api.model('Interval', {
-    'every': fields.Integer(description='The interval without unit', required=True),
-    'period': fields.String(description='The period/interval type', required=True, enum=PERIODS),
+    'every': fields.Integer(
+        description='The interval without unit', required=True),
+    'period': fields.String(
+        description='The period/interval type', required=True, enum=PERIODS),
 })
 
 job_fields = api.model('Job', {
-    'id': fields.String(description='The job unique identifier', readonly=True),
+    'id': fields.String(
+        description='The job unique identifier', readonly=True),
     'name': fields.String(description='The job unique name', required=True),
     'description': fields.String(description='The job description'),
-    'task': fields.String(description='The task name', required=True, enum=[job.name for job in schedulables()]),
+    'task': fields.String(
+        description='The task name', required=True,
+        enum=[job.name for job in schedulables()]),
     'crontab': fields.Nested(crontab_fields, allow_null=True),
     'interval': fields.Nested(interval_fields, allow_null=True),
-    'args': fields.List(fields.Raw, description='The job execution arguments', default=[]),
-    'kwargs': fields.Raw(description='The job execution keyword arguments', default={}),
-    'schedule': fields.String(attribute='schedule_display', description='The schedule display', readonly=True),
-    'last_run_at': fields.ISODateTime(description='The last job execution date', readonly=True),
-    'last_run_id': fields.String(description='The last execution task id', readonly=True),
-    'enabled': fields.Boolean(description='Is this job enabled', default=False),
+    'args': fields.List(
+        fields.Raw, description='The job execution arguments', default=[]),
+    'kwargs': fields.Raw(
+        description='The job execution keyword arguments', default={}),
+    'schedule': fields.String(
+        attribute='schedule_display',
+        description='The schedule display', readonly=True),
+    'last_run_at': fields.ISODateTime(
+        description='The last job execution date', readonly=True),
+    'last_run_id': fields.String(
+        description='The last execution task id', readonly=True),
+    'enabled': fields.Boolean(
+        description='Is this job enabled', default=False),
 })
 
 task_fields = api.model('Task', {
     'id': fields.String(description='Tha task execution ID', readonly=True),
-    'status': fields.String(description='Cron expression for hour', readonly=True, enum=list(states.ALL_STATES)),
+    'status': fields.String(
+        description='Cron expression for hour', readonly=True,
+        enum=list(states.ALL_STATES)),
     'result': fields.String(description='The task results if exists'),
     'exc': fields.String(description='The exception thrown during execution'),
     'traceback': fields.String(description='The execution traceback'),

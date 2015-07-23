@@ -23,7 +23,8 @@ class SearchAdapterMetaClass(type):
     '''Ensure any child class dispatch the signals'''
     def __new__(cls, name, bases, attrs):
         # Ensure any child class dispatch the signals
-        adapter = super(SearchAdapterMetaClass, cls).__new__(cls, name, bases, attrs)
+        adapter = super(SearchAdapterMetaClass, cls).__new__(
+            cls, name, bases, attrs)
         # register the class in the catalog
         if adapter.model and adapter.model not in adapter_catalog:
             adapter_catalog[adapter.model] = adapter
@@ -33,7 +34,7 @@ class SearchAdapterMetaClass(type):
 
 
 class ModelSearchAdapter(object):
-    '''This class allow to describe and customize the search behavior for a given model'''
+    """This class allow to describe and customize the search behavior."""
     model = None
     analyzer = None
     fields = None
@@ -56,7 +57,10 @@ class ModelSearchAdapter(object):
 
     @classmethod
     def serialize(cls, document):
-        '''By default use the ``to_dict`` method and exclude ``_id``, ``_cls`` and ``owner`` fields'''
+        """By default use the ``to_dict`` method
+
+        and exclude ``_id``, ``_cls`` and ``owner`` fields
+        """
         return document.to_dict(exclude=('_id', '_cls', 'owner'))
 
     @classmethod
@@ -82,5 +86,6 @@ def metrics_mapping(cls):
         'properties': {}
     }
     for name, metric in Metric.get_for(cls).items():
-        mapping['properties'][metric.name] = {'type': metrics_types[metric.value_type]}
+        mapping['properties'][metric.name] = {
+            'type': metrics_types[metric.value_type]}
     return mapping

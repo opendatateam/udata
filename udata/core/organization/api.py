@@ -20,7 +20,9 @@ from .models import (
     OrganizationBadge, Organization, MembershipRequest, Member, FollowOrg,
     ORG_BADGE_KINDS
 )
-from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
+from .permissions import (
+    EditOrganizationPermission, OrganizationPrivatePermission
+)
 from .tasks import notify_membership_request, notify_membership_response
 from .search import OrganizationSearch
 from .api_fields import (
@@ -160,7 +162,8 @@ requests_parser.add_argument(
 )
 
 
-@ns.route('/<org:org>/membership/', endpoint='request_membership', doc=common_doc)
+@ns.route('/<org:org>/membership/', endpoint='request_membership',
+          doc=common_doc)
 class MembershipRequestAPI(API):
     @api.secure
     @api.marshal_list_with(request_fields)
@@ -179,7 +182,8 @@ class MembershipRequestAPI(API):
     @api.marshal_with(request_fields)
     def post(self, org):
         '''Apply for membership to a given organization.'''
-        membership_request = org.pending_request(current_user._get_current_object())
+        membership_request = org.pending_request(
+            current_user._get_current_object())
         code = 200 if membership_request else 201
 
         form = api.validate(MembershipRequestForm, membership_request)
@@ -204,7 +208,8 @@ class MembershipAPI(API):
         api.abort(404, 'Unknown membership request id')
 
 
-@ns.route('/<org:org>/membership/<uuid:id>/accept/', endpoint='accept_membership')
+@ns.route('/<org:org>/membership/<uuid:id>/accept/',
+          endpoint='accept_membership')
 class MembershipAcceptAPI(MembershipAPI):
     @api.secure
     @api.doc('accept_membership', **common_doc)
@@ -233,7 +238,8 @@ refuse_parser.add_argument(
 )
 
 
-@ns.route('/<org:org>/membership/<uuid:id>/refuse/', endpoint='refuse_membership')
+@ns.route('/<org:org>/membership/<uuid:id>/refuse/',
+          endpoint='refuse_membership')
 class MembershipRefuseAPI(MembershipAPI):
     @api.secure
     @api.doc('refuse_membership', parser=refuse_parser, **common_doc)
@@ -309,8 +315,12 @@ class FollowOrgAPI(FollowAPI):
 
 
 suggest_parser = api.parser()
-suggest_parser.add_argument('q', type=unicode, help='The string to autocomplete/suggest', location='args', required=True)
-suggest_parser.add_argument('size', type=int, help='The amount of suggestion to fetch', location='args', default=10)
+suggest_parser.add_argument(
+    'q', type=unicode,
+    help='The string to autocomplete/suggest', location='args', required=True)
+suggest_parser.add_argument(
+    'size', type=int, help='The amount of suggestion to fetch',
+    location='args', default=10)
 
 
 @ns.route('/suggest/', endpoint='suggest_organizations')
@@ -349,7 +359,8 @@ class AvatarAPI(API):
         args = logo_parser.parse_args()
 
         logo = args['file']
-        bbox = [int(float(c)) for c in args['bbox'].split(',')] if 'bbox' in args else None
+        bbox = ([int(float(c)) for c in args['bbox'].split(',')]
+                if 'bbox' in args else None)
         org.logo.save(logo, bbox=bbox)
         org.save()
 
@@ -398,7 +409,8 @@ class OrgIssuesAPI(API):
     def get(self, org):
         '''List organization issues'''
         reuses_ids = [r.id for r in Reuse.objects(organization=org).only('id')]
-        datasets_ids = [d.id for d in Dataset.objects(organization=org).only('id')]
+        datasets_ids = [d.id
+                        for d in Dataset.objects(organization=org).only('id')]
         ids = reuses_ids + datasets_ids
         qs = Issue.objects(subject__in=ids).order_by('-created')
         return list(qs)
@@ -411,7 +423,8 @@ class OrgDiscussionsAPI(API):
     def get(self, org):
         '''List organization discussions'''
         reuses_ids = [r.id for r in Reuse.objects(organization=org).only('id')]
-        datasets_ids = [d.id for d in Dataset.objects(organization=org).only('id')]
+        datasets_ids = [d.id
+                        for d in Dataset.objects(organization=org).only('id')]
         ids = reuses_ids + datasets_ids
         qs = Discussion.objects(subject__in=ids).order_by('-created')
         return list(qs)

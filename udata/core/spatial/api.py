@@ -15,19 +15,27 @@ from .api_fields import (
 from .models import GeoZone, GeoLevel, spatial_granularities
 
 
-GEOM_TYPES = ('Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon')
+GEOM_TYPES = (
+    'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString',
+    'MultiPolygon'
+)
 
 
 ns = api.namespace('spatial', 'Spatial references')
 
 suggest_parser = api.parser()
-suggest_parser.add_argument('q', type=unicode, help='The string to autocomplete/suggest', location='args', required=True)
-suggest_parser.add_argument('size', type=int, help='The amount of suggestion to fetch', location='args', default=10)
+suggest_parser.add_argument(
+    'q', type=unicode, help='The string to autocomplete/suggest',
+    location='args', required=True)
+suggest_parser.add_argument(
+    'size', type=int, help='The amount of suggestion to fetch',
+    location='args', default=10)
 
 
 @ns.route('/zones/<pathlist:ids>', endpoint='zones')
 class ZonesAPI(API):
-    @api.doc('spatial_zones', params={'ids': 'A zone identifiers list (comma separated)'})
+    @api.doc('spatial_zones',
+             params={'ids': 'A zone identifiers list (comma separated)'})
     @api.marshal_with(feature_collection_fields)
     def get(self, ids):
         '''Fetch a zone list as GeoJSON'''

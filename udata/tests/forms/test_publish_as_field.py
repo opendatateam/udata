@@ -9,7 +9,9 @@ from udata.auth import login_user
 from udata.forms import ModelForm, fields
 from udata.models import db, User, Organization, Member
 from udata.tests import TestCase
-from udata.tests.factories import UserFactory, OrganizationFactory, AdminFactory
+from udata.tests.factories import (
+    UserFactory, OrganizationFactory, AdminFactory
+)
 
 
 class PublishFieldTest(TestCase):
@@ -212,7 +214,8 @@ class PublishFieldTest(TestCase):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()
         org = OrganizationFactory(members=[Member(user=user, role='editor')])
-        neworg = OrganizationFactory(members=[Member(user=user, role='editor')])
+        neworg = OrganizationFactory(
+            members=[Member(user=user, role='editor')])
         ownable = Ownable(organization=org)
 
         form = OwnableForm(MultiDict({

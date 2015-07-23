@@ -12,7 +12,8 @@ from math import ceil
 def get_by(lst, field, value):
     '''Find an object in a list given a field value'''
     for row in lst:
-        if (isinstance(row, dict) and row.get(field) == value) or (getattr(row, field, None) == value):
+        if ((isinstance(row, dict) and row.get(field) == value)
+                or (getattr(row, field, None) == value)):
             return row
 
 
@@ -63,12 +64,14 @@ class Paginable(object):
     def page_end(self):
         return min(self.total, self.page_size * self.page)
 
-    def iter_pages(self, left_edge=2, left_current=2, right_current=5, right_edge=2):
+    def iter_pages(self, left_edge=2, left_current=2, right_current=5,
+                   right_edge=2):
         last = 0
         for num in xrange(1, self.pages + 1):
-            if num <= left_edge or \
-                (num > self.page - left_current - 1 and num < self.page + right_current) or \
-                num > self.pages - right_edge:
+            if (num <= left_edge or
+                    (num > self.page - left_current - 1
+                     and num < self.page + right_current) or
+                    num > self.pages - right_edge):
                 if last + 1 != num:
                     yield None
                 yield num
@@ -145,7 +148,8 @@ def to_iso_datetime(dt):
     '''
     if dt:
         date_str = to_iso_date(dt)
-        time_str = '{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}'.format(dt=dt) if isinstance(dt, datetime) else '00:00:00'
+        time_str = '{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}'.format(
+            dt=dt) if isinstance(dt, datetime) else '00:00:00'
         return 'T'.join((date_str, time_str))
 
 

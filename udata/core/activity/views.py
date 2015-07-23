@@ -11,7 +11,8 @@ class ActivityView(object):
         context = super(ActivityView, self).get_context()
 
         qs = self.filter_activities(Activity.objects)
-        context['activities'] = qs.order_by('-created_at').limit(self.max_activities)
+        context['activities'] = (qs.order_by('-created_at')
+                                   .limit(self.max_activities))
 
         return context
 

@@ -9,7 +9,9 @@ import types
 
 from os.path import abspath, join, dirname, isfile, exists
 
-from flask import Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint
+from flask import (
+    Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint
+)
 from flask.ext.cache import Cache
 
 from flask.ext.wtf.csrf import CsrfProtect
@@ -45,7 +47,8 @@ class UDataApp(Flask):
 
         # Default behavior
         if isfile(join(self.static_folder, filename)):
-            return send_from_directory(self.static_folder, filename, cache_timeout=cache_timeout)
+            return send_from_directory(self.static_folder, filename,
+                                       cache_timeout=cache_timeout)
 
         # Handle aliases
         for prefix, directory in self.config.get('STATIC_DIRS', tuple()):
@@ -54,7 +57,8 @@ class UDataApp(Flask):
                 if real_filename.startswith('/'):
                     real_filename = real_filename[1:]
                 if isfile(join(directory, real_filename)):
-                    return send_from_directory(directory, real_filename, cache_timeout=cache_timeout)
+                    return send_from_directory(directory, real_filename,
+                                               cache_timeout=cache_timeout)
         abort(404)
 
     def handle_http_exception(self, e):
@@ -72,7 +76,9 @@ class Blueprint(BaseBlueprint):
             if isinstance(func_or_cls, types.FunctionType):
                 self.add_url_rule(rule, endpoint, func_or_cls, **options)
             else:
-                self.add_url_rule(rule, view_func=func_or_cls.as_view(endpoint), **options)
+                self.add_url_rule(rule,
+                                  view_func=func_or_cls.as_view(endpoint),
+                                  **options)
             return func_or_cls
         return wrapper
 
@@ -97,7 +103,8 @@ class UDataJsonEncoder(json.JSONEncoder):
             return obj.isoformat()
         elif hasattr(obj, 'serialize'):
             return obj.serialize()
-        elif hasattr(obj, '_data'):  # Serialize Raw data for Document and EmbeddedDocument
+        # Serialize Raw data for Document and EmbeddedDocument.
+        elif hasattr(obj, '_data'):
             return obj._data
         return super(UDataJsonEncoder, self).default(obj)
 
@@ -156,7 +163,8 @@ def init_logging(app):
 
 def register_extensions(app):
     from udata import (
-        models, routing, tasks, mail, i18n, auth, theme, search, sitemap, sentry
+        models, routing, tasks, mail, i18n, auth, theme, search, sitemap,
+        sentry
     )
     i18n.init_app(app)
     models.init_app(app)

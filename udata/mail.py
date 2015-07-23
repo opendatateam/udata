@@ -32,10 +32,14 @@ def send(subject, recipients, template_base, **kwargs):
         for recipient in recipients:
             lang = i18n._default_lang(recipient)
             with i18n.language(lang):
-                log.debug('Sending mail "%s" to recipient "%s"', subject, recipient)
-                msg = Message(subject, sender=sender, recipients=[recipient.email])
-                msg.body = theme.render('mail/{0}.txt'.format(template_base),
-                    subject=subject, sender=sender, recipient=recipient, **kwargs)
-                msg.html = theme.render('mail/{0}.html'.format(template_base),
-                    subject=subject, sender=sender, recipient=recipient, **kwargs)
+                log.debug(
+                    'Sending mail "%s" to recipient "%s"', subject, recipient)
+                msg = Message(subject, sender=sender,
+                              recipients=[recipient.email])
+                msg.body = theme.render(
+                    'mail/{0}.txt'.format(template_base), subject=subject,
+                    sender=sender, recipient=recipient, **kwargs)
+                msg.html = theme.render(
+                    'mail/{0}.html'.format(template_base), subject=subject,
+                    sender=sender, recipient=recipient, **kwargs)
                 conn.send(msg)

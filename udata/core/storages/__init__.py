@@ -27,6 +27,6 @@ def default_image_basename(*args, **kwargs):
 
 
 def init_app(app):
-    if not 'BUCKETS_PREFIX' in app.config:
+    if 'BUCKETS_PREFIX' not in app.config:
         app.config['BUCKETS_PREFIX'] = '/s'
     fs.init_app(app, resources, avatars, images, chunks, tmp)

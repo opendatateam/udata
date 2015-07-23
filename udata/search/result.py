@@ -35,7 +35,8 @@ class SearchResult(Paginable):
         return self.query.page_size
 
     def get_ids(self):
-        return [hit['_id'] for hit in self.result.get('hits', {}).get('hits', [])]
+        return [hit['_id']
+                for hit in self.result.get('hits', {}).get('hits', [])]
 
     def get_objects(self):
         if not self._objects:
@@ -59,17 +60,17 @@ class SearchResult(Paginable):
         return self.get_objects()[index]
 
     def get_facet(self, name):
-        if not name in self.query.adapter.facets:
+        if name not in self.query.adapter.facets:
             return None
         return self.query.adapter.facets[name].from_response(name, self.result)
 
     def get_range(self, name):
         min_name = '{0}_min'.format(name)
         max_name = '{0}_max'.format(name)
-        if not name in self.query.adapter.filters:
+        if name not in self.query.adapter.filters:
             return None
         aggs = self.result.get('aggregations', {})
-        if not aggs or not min_name in aggs or not max_name in aggs:
+        if not aggs or min_name not in aggs or max_name not in aggs:
             return None
         spec = self.query.adapter.filters[name]
         min_value = aggs[min_name]['value'] or 0
@@ -82,7 +83,7 @@ class SearchResult(Paginable):
         }
 
     def label_func(self, name):
-        if not name in self.query.adapter.facets:
+        if name not in self.query.adapter.facets:
             return None
         return self.query.adapter.facets[name].labelize
 
@@ -92,7 +93,10 @@ class SearchResult(Paginable):
 
 
 class SearchIterator(object):
-    '''An ElasticSearch scroll result iterator that fetch objects on each hit'''
+    """An ElasticSearch scroll result iterator
+
+    that fetch objects on each hit.
+    """
     def __init__(self, query, result):
         self.result = result or self._empty()
         self.query = query

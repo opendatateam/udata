@@ -17,7 +17,8 @@ class SlugField(StringField):
     '''
     _auto_gen = True
 
-    def __init__(self, populate_from=None, update=False, lower_case=True, separator='-', follow=False, **kwargs):
+    def __init__(self, populate_from=None, update=False, lower_case=True,
+                 separator='-', follow=False, **kwargs):
         kwargs.setdefault('unique', True)
         self.populate_from = populate_from
         self.update = update
@@ -47,13 +48,14 @@ class SlugFollow(Document):
     '''
     Keeps track of slug changes for a given namespace/class.
     Fields are:
-        * namespace - A namespace under which this slug falls (e.g. match, team, user etc)
+        * namespace - A namespace under which this slug falls
+            (e.g. match, team, user etc)
         * old_slug - Before change slug.
         * new_slug - After change slug
     '''
     namespace = StringField()
     old_slug = StringField()
-    new_slug = StringField()            # In case slug was changed after a name change.
+    new_slug = StringField()  # In case slug was changed after a name change.
 
     meta = {
         "indexes": [
@@ -73,21 +75,25 @@ def populate_slug(instance, field):
     except:
         previous = None
 
-    manual = not previous and value or field.db_field in instance._get_changed_fields()
+    manual = (not previous and value
+              or field.db_field in instance._get_changed_fields())
 
     if not manual and field.populate_from:
         value = getattr(instance, field.populate_from)
         if previous and value == getattr(previous, field.populate_from):
             return value
 
-    if previous and (getattr(previous, field.db_field) == value or not field.update):
+    if previous and (getattr(previous, field.db_field) == value
+                     or not field.update):
         return value
 
     if field.lower_case:
         value = value.lower()
 
-    slug = slugify.slugify(value, max_length=field.max_length, separator=field.separator)
-    old_slug = getattr(previous, field.db_field, None) # if previous and slug ==
+    slug = slugify.slugify(value, max_length=field.max_length,
+                           separator=field.separator)
+    # If previous and slug ==
+    old_slug = getattr(previous, field.db_field, None)
 
     if slug == old_slug:
         return slug
@@ -100,7 +106,8 @@ def populate_slug(instance, field):
         if previous:
             qs = qs(id__ne=previous.id)
 
-        exists = lambda s: qs(class_check=False, **{field.db_field: s}).limit(1).count(True) > 0
+        exists = lambda s: qs(
+            class_check=False, **{field.db_field: s}).limit(1).count(True) > 0
         while exists(slug):
             slug = '{0}-{1}'.format(base_slug, index)
             index += 1

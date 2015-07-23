@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import g
 from werkzeug.local import LocalProxy
 
 from udata.app import cache
@@ -9,7 +8,10 @@ from udata.i18n import lazy_gettext as _, gettext, get_locale
 from udata.models import db
 
 
-__all__ = ('GeoLevel', 'GeoZone', 'SpatialCoverage', 'BASE_GRANULARITIES', 'spatial_granularities')
+__all__ = (
+    'GeoLevel', 'GeoZone', 'SpatialCoverage', 'BASE_GRANULARITIES',
+    'spatial_granularities'
+)
 
 
 BASE_GRANULARITIES = [
@@ -70,15 +72,18 @@ class GeoZone(db.Document):
 
 @cache.memoize(timeout=50)
 def get_spatial_granularities(lang):
-    granularities = [(l.id, l.name) for l in GeoLevel.objects] + BASE_GRANULARITIES
+    granularities = [(l.id, l.name)
+                     for l in GeoLevel.objects] + BASE_GRANULARITIES
     return [(id, str(name)) for id, name in granularities]
 
 
-spatial_granularities = LocalProxy(lambda: get_spatial_granularities(get_locale()))
+spatial_granularities = LocalProxy(
+    lambda: get_spatial_granularities(get_locale()))
 
 
 class SpatialCoverage(db.EmbeddedDocument):
-    '''Represent a spatial coverage as a list of territories and/or a geometry'''
+    """Represent a spatial coverage as a list of territories and/or a geometry.
+    """
     geom = db.MultiPolygonField()
     zones = db.ListField(db.ReferenceField(GeoZone))
     granularity = db.StringField(default='other')

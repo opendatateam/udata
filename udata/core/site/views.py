@@ -43,38 +43,21 @@ def inject_site():
 
 @blueprint.route('/activity.atom')
 def activity_feed():
-    feed = AtomFeed('Site activity', feed_url=request.url, url=request.url_root)
-    activities = Activity.objects.order_by('-created_at').limit(current_site.feed_size)
+    feed = AtomFeed(
+        'Site activity', feed_url=request.url, url=request.url_root)
+    activities = (Activity.objects.order_by('-created_at')
+                                  .limit(current_site.feed_size))
     for activity in activities:
         feed.add('Activity', 'Description')
-    # datasets = Dataset.objects.visible().order_by('-date').limit(15)
-    # for dataset in datasets:
-    #     author = None
-    #     if dataset.organization:
-    #         author = {
-    #             'name': dataset.organization.name,
-    #             'uri': url_for('organizations.show', org=dataset.organization, _external=True),
-    #         }
-    #     elif dataset.owner:
-    #         author = {
-    #             'name': dataset.owner.fullname,
-    #             'uri': url_for('users.show', user=dataset.owner, _external=True),
-    #         }
-    #     feed.add(dataset.title, dataset.description,
-    #              content_type='html',
-    #              author=author,
-    #              url=url_for('datasets.show', dataset=dataset, _external=True),
-    #              updated=dataset.last_modified,
-    #              published=dataset.created_at)
     return feed.get_response()
 
 
 @blueprint.route('/')
 def home():
     context = {
-        'recent_datasets': Dataset.objects.visible().order_by('-created_at'),
-        'recent_reuses': Reuse.objects(featured=True).visible().order_by('-created_at'),
-        'last_post': Post.objects(private=False).order_by('-created_at').first(),
+        'recent_datasets': Dataset.objects.visible(),
+        'recent_reuses': Reuse.objects(featured=True).visible(),
+        'last_post': Post.objects(private=False).first(),
     }
     processor = theme.current.get_processor('home')
     context = processor(context)

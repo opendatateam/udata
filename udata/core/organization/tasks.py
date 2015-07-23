@@ -27,13 +27,17 @@ def purge_organizations(self):
 @task
 def notify_membership_request(org, request):
     recipients = [m.user for m in org.by_role('admin')]
-    mail.send(_('New membership request'), recipients, 'membership_request', org=org, request=request)
+    mail.send(
+        _('New membership request'), recipients, 'membership_request',
+        org=org, request=request)
 
 
 @task
 def notify_membership_response(org, request):
     if request.status == 'accepted':
-        subject, template = _('You are now a member of the organization "%(org)s"', org=org), 'new_member'
+        subject, template = _(
+            'You are now a member of the organization "%(org)s"', org=org),
+        'new_member'
     else:
         subject, template = _('Membership refused'), 'membership_refused'
     mail.send(subject, request.user, template, org=org, request=request)

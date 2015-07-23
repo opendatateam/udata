@@ -13,7 +13,8 @@ __all__ = ('FollowersMetric', )
 class FollowersMetricMetaclass(MetricMetaClass):
     def __new__(cls, name, bases, attrs):
         # Ensure any child class compute itself on follow/unfollow
-        new_class = super(FollowersMetricMetaclass, cls).__new__(cls, name, bases, attrs)
+        new_class = super(FollowersMetricMetaclass, cls).__new__(
+            cls, name, bases, attrs)
         if new_class.model:
             def callback(follow):
                 if isinstance(follow.following, new_class.model):

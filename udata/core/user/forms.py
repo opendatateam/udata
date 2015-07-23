@@ -10,7 +10,10 @@ from udata.models import User
 from .models import AVATAR_SIZES
 
 
-__all__ = ('UserProfileForm', 'UserSettingsForm', 'UserAPIKeyForm', 'UserNotificationsForm')
+__all__ = (
+    'UserProfileForm', 'UserSettingsForm', 'UserAPIKeyForm',
+    'UserNotificationsForm'
+)
 
 
 class UserProfileForm(ModelForm):
@@ -26,14 +29,16 @@ class UserProfileForm(ModelForm):
 class UserSettingsForm(ModelForm):
     model_class = User
 
-    prefered_language = fields.SelectField(_('Prefered language'),
+    prefered_language = fields.SelectField(
+        _('Prefered language'),
         choices=lambda: current_app.config['LANGUAGES'].items())
 
 
 class UserAPIKeyForm(ModelForm):
     model_class = User
 
-    action = fields.SelectField(choices=(('generate',''), ('clear', '')), validators=[validators.required()])
+    action = fields.SelectField(choices=(('generate', ''), ('clear', '')),
+                                validators=[validators.required()])
 
 
 class UserNotificationsForm(ModelForm):

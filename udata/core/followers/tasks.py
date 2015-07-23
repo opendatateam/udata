@@ -19,10 +19,11 @@ def notify_on_follow(follow):
 @task
 def notify_new_follower(follow):
     if isinstance(follow.following, User):
-        subject =_('%(user)s followed you', user=follow.follower)
+        subject = _('%(user)s followed you', user=follow.follower)
         mail.send(subject, follow.following, 'new_follower', follow=follow)
     elif isinstance(follow.following, Organization):
-        subject = _('%(user)s followed your organization', user=follow.follower)
+        subject = _('%(user)s followed your organization',
+                    user=follow.follower)
         recipients = [m.user for m in follow.following.members]
         mail.send(subject, recipients, 'new_follower_org', follow=follow)
     elif isinstance(follow.following, Dataset):

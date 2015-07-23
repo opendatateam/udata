@@ -56,8 +56,15 @@ class OrganizationSearch(search.ModelSearchAdapter):
                 'type': 'string',
                 'index': 'not_analyzed',
             },
-            'description': {'type': 'string', 'analyzer': search.i18n_analyzer},
-            'badges': {'type': 'string', 'index_name': 'badges', 'index': 'not_analyzed'},
+            'description': {
+                'type': 'string',
+                'analyzer': search.i18n_analyzer
+            },
+            'badges': {
+                'type': 'string',
+                'index_name': 'badges',
+                'index': 'not_analyzed'
+            },
             'url': {'type': 'string'},
             'created': {'type': 'date', 'format': 'date_hour_minute_second'},
             'metrics': search.metrics_mapping(Organization),

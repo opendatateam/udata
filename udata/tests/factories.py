@@ -205,7 +205,8 @@ class ReuseFactory(MongoEngineFactory):
 
     title = factory.LazyAttribute(lambda o: faker.sentence())
     description = factory.LazyAttribute(lambda o: faker.text())
-    url = factory.LazyAttribute(lambda o: '/'.join([faker.url(), unique_string()]))
+    url = factory.LazyAttribute(
+        lambda o: '/'.join([faker.url(), unique_string()]))
     type = FuzzyChoice(models.REUSE_TYPES.keys())
 
 
@@ -259,7 +260,8 @@ class PostFactory(MongoEngineFactory):
 
 
 def random_spatial_granularity(*args, **kwargs):
-    return faker.random_element([row[0] for row in models.spatial_granularities])
+    return faker.random_element(
+        [row[0] for row in models.spatial_granularities])
 
 
 class SpatialCoverageFactory(MongoEngineFactory):

@@ -29,7 +29,8 @@ from .api_fields import (
     upload_fields,
 )
 from .models import (
-    Dataset, DatasetBadge, Resource, FollowDataset, Checksum, License, DATASET_BADGE_KINDS
+    Dataset, DatasetBadge, Resource, FollowDataset, Checksum, License,
+    DATASET_BADGE_KINDS
 )
 from .permissions import DatasetEditPermission
 from .forms import BadgeForm, ResourceForm, DatasetFullForm
@@ -226,7 +227,8 @@ class UploadResource(API):
         file.seek(0)
         sha1 = storages.utils.sha1(file)
 
-        size = os.path.getsize(storage.path(filename)) if storage.root else None
+        size = (os.path.getsize(storage.path(filename))
+                if storage.root else None)
 
         resource = Resource(
             title=os.path.basename(filename),
@@ -240,10 +242,12 @@ class UploadResource(API):
         return resource, 201
 
     def get_prefix(self, dataset):
-        return '/'.join((dataset.slug, datetime.now().strftime('%Y%m%d-%H%M%S')))
+        return '/'.join((dataset.slug,
+                         datetime.now().strftime('%Y%m%d-%H%M%S')))
 
 
-@ns.route('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource', doc=common_doc)
+@ns.route('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource',
+          doc=common_doc)
 @api.doc(params={'rid': 'The resource unique identifier'})
 class ResourceAPI(API):
     def get_resource_or_404(self, dataset, id):
@@ -282,8 +286,12 @@ class DatasetFollowersAPI(FollowAPI):
 
 
 suggest_parser = api.parser()
-suggest_parser.add_argument('q', type=unicode, help='The string to autocomplete/suggest', location='args', required=True)
-suggest_parser.add_argument('size', type=int, help='The amount of suggestion to fetch', location='args', default=10)
+suggest_parser.add_argument(
+    'q', type=unicode, help='The string to autocomplete/suggest',
+    location='args', required=True)
+suggest_parser.add_argument(
+    'size', type=int, help='The amount of suggestion to fetch',
+    location='args', default=10)
 
 
 @ns.route('/suggest/', endpoint='suggest_datasets')
@@ -301,7 +309,8 @@ class SuggestDatasetsAPI(API):
                 'slug': opt['payload']['slug'],
                 'image_url': opt['payload']['image_url'],
             }
-            for opt in search.suggest(args['q'], 'dataset_suggest', args['size'])
+            for opt in search.suggest(args['q'], 'dataset_suggest',
+                                      args['size'])
         ]
 
 

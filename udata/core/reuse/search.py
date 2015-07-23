@@ -6,7 +6,9 @@ from udata.models import (
     Reuse, Organization, Dataset, User, REUSE_TYPES, REUSE_BADGE_KINDS
 )
 from udata.search import BoolBooster, GaussDecay
-from udata.search import ModelSearchAdapter, Sort, i18n_analyzer, metrics_mapping
+from udata.search import (
+    ModelSearchAdapter, Sort, i18n_analyzer, metrics_mapping
+)
 from udata.search import RangeFacet, BoolFacet, ExtrasFacet
 from udata.search import TermFacet, ModelTermFacet
 
@@ -18,7 +20,8 @@ __all__ = ('ReuseSearch', )
 
 
 max_datasets = lambda: max(current_site.metrics.get('max_reuse_datasets'), 5)
-max_followers = lambda: max(current_site.metrics.get('max_reuse_followers'), 10)
+max_followers = lambda: max(current_site.metrics.get('max_reuse_followers'),
+                            10)
 
 
 class ReuseTypeFacet(TermFacet):
@@ -72,16 +75,27 @@ class ReuseSearch(ModelSearchAdapter):
             'organization': {'type': 'string'},
             'owner': {'type': 'string'},
             'type': {'type': 'string'},
-            'tags': {'type': 'string', 'index_name': 'tag', 'index': 'not_analyzed'},
+            'tags': {
+                'type': 'string',
+                'index_name': 'tag',
+                'index': 'not_analyzed'
+            },
             'tag_suggest': {
                 'type': 'completion',
                 'index_analyzer': 'simple',
                 'search_analyzer': 'simple',
                 'payloads': False,
             },
-            'badges': {'type': 'string', 'index_name': 'badges', 'index': 'not_analyzed'},
+            'badges': {
+                'type': 'string',
+                'index_name': 'badges',
+                'index': 'not_analyzed'
+            },
             'created': {'type': 'date', 'format': 'date_hour_minute_second'},
-            'last_modified': {'type': 'date', 'format': 'date_hour_minute_second'},
+            'last_modified': {
+                'type': 'date',
+                'format': 'date_hour_minute_second'
+            },
             'dataset': {
                 'type': 'object',
                 'properties': {
@@ -111,16 +125,22 @@ class ReuseSearch(ModelSearchAdapter):
 
     @classmethod
     def is_indexable(cls, reuse):
-        return reuse.deleted is None and len(reuse.datasets) > 0 and not reuse.private
+        return (reuse.deleted is None
+                and len(reuse.datasets) > 0
+                and not reuse.private)
 
     @classmethod
     def serialize(cls, reuse):
-        '''By default use the ``to_dict`` method and exclude ``_id``, ``_cls`` and ``owner`` fields'''
+        """By default use the ``to_dict`` method
+
+        and exclude ``_id``, ``_cls`` and ``owner`` fields.
+        """
         return {
             'title': reuse.title,
             'description': reuse.description,
             'url': reuse.url,
-            'organization': str(reuse.organization.id) if reuse.organization else None,
+            'organization': (str(reuse.organization.id)
+                             if reuse.organization else None),
             'owner': str(reuse.owner.id) if reuse.owner else None,
             'type': reuse.type,
             'tags': reuse.tags,
@@ -131,8 +151,7 @@ class ReuseSearch(ModelSearchAdapter):
             'dataset': [{
                 'id': str(d.id),
                 'title': d.title
-                } for d in reuse.datasets if isinstance(d, Dataset)
-            ],
+            } for d in reuse.datasets if isinstance(d, Dataset)],
             'metrics': reuse.metrics,
             'featured': reuse.featured,
             'extras': reuse.extras,

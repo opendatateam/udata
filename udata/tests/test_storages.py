@@ -49,7 +49,8 @@ class TestStorageUtils(TestCase):
         os.remove(self.filename)
 
     def test_sha1(self):
-        expected = 'ce5653590804baa9369f72d483ed9eba72f04d29'  # Output of sha1sum
+        # Output of sha1sum
+        expected = 'ce5653590804baa9369f72d483ed9eba72f04d29'
         self.assertEqual(utils.sha1(self.file), expected)
 
     def test_md5(self):
@@ -88,7 +89,9 @@ class StorageTestCase(StorageTestMixin, WebTestMixin, TestCase):
 class StorageUploadViewTest(StorageTestCase):
     def test_upload(self):
         self.login()
-        response = self.post(url_for('storage.upload', name='tmp'), {'file': (StringIO(b'aaa'), 'test.txt')})
+        response = self.post(
+            url_for('storage.upload', name='tmp'),
+            {'file': (StringIO(b'aaa'), 'test.txt')})
 
         self.assert200(response)
         self.assertTrue(response.json['success'])
@@ -97,12 +100,16 @@ class StorageUploadViewTest(StorageTestCase):
         self.assertIn('mime', response.json)
         self.assertIn('size', response.json)
         self.assertIn('sha1', response.json)
-        self.assertEqual(response.json['url'], storages.tmp.url(response.json['filename'], external=True))
+        self.assertEqual(response.json['url'],
+                         storages.tmp.url(response.json['filename'],
+                                          external=True))
         self.assertEqual(response.json['mime'], 'text/plain')
 
     def test_upload_resource_bad_request(self):
         self.login()
-        response = self.post(url_for('storage.upload', name='tmp'), {'bad': (StringIO(b'aaa'), 'test.txt')})
+        response = self.post(
+            url_for('storage.upload', name='tmp'),
+            {'bad': (StringIO(b'aaa'), 'test.txt')})
 
         self.assert400(response)
         self.assertFalse(response.json['success'])

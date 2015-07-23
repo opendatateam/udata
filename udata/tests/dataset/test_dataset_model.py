@@ -4,7 +4,9 @@ from __future__ import unicode_literals, absolute_import
 from udata.models import Dataset
 
 from .. import TestCase, DBTestMixin
-from ..factories import ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory
+from ..factories import (
+    ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory
+)
 
 
 class DatasetModelTest(TestCase, DBTestMixin):
@@ -31,8 +33,10 @@ class DatasetModelTest(TestCase, DBTestMixin):
     def test_owned_by_org_or_user(self):
         user = UserFactory()
         org = OrganizationFactory()
-        datasets = [DatasetFactory(owner=user), DatasetFactory(organization=org)]
-        excluded = [DatasetFactory(owner=UserFactory()), DatasetFactory(organization=OrganizationFactory())]
+        datasets = [DatasetFactory(owner=user),
+                    DatasetFactory(organization=org)]
+        excluded = [DatasetFactory(owner=UserFactory()),
+                    DatasetFactory(organization=OrganizationFactory())]
 
         result = Dataset.objects.owned_by(org, user)
 

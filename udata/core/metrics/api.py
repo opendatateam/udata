@@ -11,18 +11,28 @@ from udata.core.site.views import current_site
 
 
 metrics_fields = api.model('Metric', {
-    'object_id': fields.String(description='The object identifier which metrics belongs to', required=True),
-    'date': fields.String(description='The metrics sampling date', required=True),
-    'level': fields.String(description='The metrics granularity level', required=True, enum=['daily', 'monthly']),
-    'values': fields.Raw(description='The metrics as key-value pairs', required=True),
+    'object_id': fields.String(
+        description='The object identifier which metrics belongs to',
+        required=True),
+    'date': fields.String(
+        description='The metrics sampling date', required=True),
+    'level': fields.String(
+        description='The metrics granularity level', required=True,
+        enum=['daily', 'monthly']),
+    'values': fields.Raw(
+        description='The metrics as key-value pairs', required=True),
 })
 
 isodate = lambda v: date(*(int(p) for p in v.split('-'))).isoformat()
 
 parser = api.parser()
-parser.add_argument('start', type=isodate, help='Start of the period to fetch', location='args')
-parser.add_argument('end', type=isodate, help='End of the period to fetch', location='args')
-parser.add_argument('day', type=isodate, help='Specific day date to fetch', location='args')
+parser.add_argument(
+    'start', type=isodate, help='Start of the period to fetch',
+    location='args')
+parser.add_argument(
+    'end', type=isodate, help='End of the period to fetch', location='args')
+parser.add_argument(
+    'day', type=isodate, help='Specific day date to fetch', location='args')
 
 
 @api.route('/metrics/<id>', endpoint='metrics')

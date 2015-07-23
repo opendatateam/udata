@@ -143,7 +143,8 @@ class DiscussionsTest(APITestCase):
         response = self.get(url_for('api.discussions', closed=True))
         self.assert200(response)
 
-        self.assertEqual(len(response.json), len(open_discussions + closed_discussions))
+        self.assertEqual(len(response.json),
+                         len(open_discussions + closed_discussions))
 
     def test_get_discussion(self):
         dataset = Dataset.objects.create(title='Test dataset')
@@ -167,7 +168,8 @@ class DiscussionsTest(APITestCase):
         self.assertIsNotNone(data['created'])
         self.assertEqual(len(data['discussion']), 1)
         self.assertEqual(data['discussion'][0]['content'], 'bla bla')
-        self.assertEqual(data['discussion'][0]['posted_by']['id'], str(user.id))
+        self.assertEqual(
+            data['discussion'][0]['posted_by']['id'], str(user.id))
         self.assertIsNotNone(data['discussion'][0]['posted_on'])
 
     def test_add_comment_to_discussion(self):
@@ -201,7 +203,8 @@ class DiscussionsTest(APITestCase):
         self.assertIsNone(data['closed_by'])
         self.assertEqual(len(data['discussion']), 2)
         self.assertEqual(data['discussion'][1]['content'], 'new bla bla')
-        self.assertEqual(data['discussion'][1]['posted_by']['id'], str(poster.id))
+        self.assertEqual(
+            data['discussion'][1]['posted_by']['id'], str(poster.id))
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
     def test_close_discussion(self):
@@ -236,7 +239,8 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(data['closed_by'], str(owner.id))
         self.assertEqual(len(data['discussion']), 2)
         self.assertEqual(data['discussion'][1]['content'], 'close bla bla')
-        self.assertEqual(data['discussion'][1]['posted_by']['id'], str(owner.id))
+        self.assertEqual(
+            data['discussion'][1]['posted_by']['id'], str(owner.id))
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
     def test_close_discussion_permissions(self):
@@ -311,12 +315,14 @@ class DiscussionCsvTest(FrontTestCase):
 
     def test_discussions_csv_content_empty(self):
         organization = OrganizationFactory()
-        response = self.get(url_for('organizations.discussions_csv', org=organization))
+        response = self.get(
+            url_for('organizations.discussions_csv', org=organization))
         self.assert200(response)
 
         self.assertEqual(
             response.data,
-            '"id";"user";"subject";"title";"size";"messages";"created";"closed";"closed_by"\r\n'
+            ('"id";"user";"subject";"title";"size";"messages";"created";'
+             '"closed";"closed_by"\r\n')
         )
 
     def test_discussions_csv_content_filled(self):
@@ -324,8 +330,12 @@ class DiscussionCsvTest(FrontTestCase):
         dataset = DatasetFactory(organization=organization)
         user = UserFactory(first_name='John', last_name='Snow')
         discussion = DatasetDiscussionFactory(subject=dataset, user=user)
-        response = self.get(url_for('organizations.discussions_csv', org=organization))
+        response = self.get(
+            url_for('organizations.discussions_csv', org=organization))
         self.assert200(response)
 
         headers, data = response.data.strip().split('\r\n')
-        self.assertStartswith(data, '"{discussion.id}";"{discussion.user}"'.format(discussion=discussion))
+        self.assertStartswith(
+            data,
+            '"{discussion.id}";"{discussion.user}"'.format(
+                discussion=discussion))

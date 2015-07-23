@@ -73,7 +73,6 @@ class ExtrasFieldTest(TestCase):
                 if not isinstance(value, dict):
                     raise db.ValidationError('Should be a dict instance')
 
-
         fake = Fake()
         form = FakeForm(MultiDict({'extras': {
             'dict': {

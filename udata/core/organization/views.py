@@ -15,8 +15,8 @@ from udata.frontend.views import (
 )
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import (
-    db, Organization, Member, Reuse, Dataset, ORG_ROLES, User, Issue, FollowOrg,
-    DatasetIssue, DatasetDiscussion
+    db, Organization, Member, Reuse, Dataset, User, Issue, FollowOrg,
+    DatasetIssue, DatasetDiscussion, ORG_ROLES
 )
 from udata.sitemap import sitemap
 from udata.utils import get_by
@@ -26,12 +26,17 @@ from udata.core.dataset.csv import (
 )
 from udata.core.activity.views import ActivityView
 
-from .forms import OrganizationForm, OrganizationMemberForm, OrganizationExtraForm
-from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
+from .forms import (
+    OrganizationForm, OrganizationMemberForm, OrganizationExtraForm
+)
+from .permissions import (
+    EditOrganizationPermission, OrganizationPrivatePermission
+)
 from .tasks import notify_new_member
 
 
-blueprint = I18nBlueprint('organizations', __name__, url_prefix='/organizations')
+blueprint = I18nBlueprint('organizations', __name__,
+                          url_prefix='/organizations')
 
 
 @blueprint.before_app_request
@@ -43,7 +48,8 @@ def set_g_user_orgs():
 navbar = nav.Bar('edit_org', [
     nav.Item(_('Descrition'), 'organizations.edit'),
     nav.Item(_('Members'), 'organizations.edit_members'),
-    nav.Item(_('Membership request'), 'organizations.edit_membership_requests'),
+    nav.Item(_('Membership request'),
+             'organizations.edit_membership_requests'),
     nav.Item(_('Teams'), 'organizations.edit_teams'),
     nav.Item(_('Issues'), 'organizations.issues')
 ])
@@ -94,9 +100,11 @@ class OrganizationDetailView(OrgView, DetailView):
             abort(410)
 
         datasets = Dataset.objects(organization=self.organization).visible()
-        supplied_datasets = Dataset.objects(supplier=self.organization).visible()
+        supplied_datasets = (Dataset.objects(supplier=self.organization)
+                                    .visible())
         reuses = Reuse.objects(organization=self.organization).visible()
-        followers = FollowOrg.objects.followers(self.organization).order_by('follower.fullname')
+        followers = (FollowOrg.objects.followers(self.organization)
+                                      .order_by('follower.fullname'))
         context.update({
             'reuses': reuses.paginate(1, self.page_size),
             'datasets': datasets.paginate(1, self.page_size),
@@ -104,8 +112,12 @@ class OrganizationDetailView(OrgView, DetailView):
             'followers': followers,
             'can_edit': can_edit,
             'can_view': can_view,
-            'private_reuses': list(Reuse.objects(organization=self.object).hidden()) if can_view else [],
-            'private_datasets': list(Dataset.objects(organization=self.object).hidden()) if can_view else [],
+            'private_reuses': (
+                list(Reuse.objects(organization=self.object).hidden())
+                if can_view else []),
+            'private_datasets': (
+                list(Dataset.objects(organization=self.object).hidden())
+                if can_view else []),
         })
         return context
 
@@ -184,7 +196,8 @@ class OrganizationDashboardView(OrgView, ActivityView, DetailView):
         return context
 
     def filter_activities(self, qs):
-        predicate = db.Q(organization=self.organization) | db.Q(related_to=self.organization)
+        predicate = (db.Q(organization=self.organization)
+                     | db.Q(related_to=self.organization))
         return qs(predicate)
 
 
@@ -243,7 +256,8 @@ class OrganizationEditMembersView(ProtectedOrgView, EditView):
         return '', 204
 
 
-@blueprint.route('/<org:org>/edit/requests/', endpoint='edit_membership_requests')
+@blueprint.route('/<org:org>/edit/requests/',
+                 endpoint='edit_membership_requests')
 class OrganizationMembershipRequestsView(ProtectedOrgView, EditView):
     form = OrganizationForm
     template_name = 'organization/edit_membership_requests.html'
@@ -262,7 +276,8 @@ class OrganizationExtrasEditView(ProtectedOrgView, EditView):
         return jsonify({'key': form.key.data, 'value': form.value.data})
 
 
-@blueprint.route('/<org:org>/edit/extras/<string:extra>/', endpoint='delete_extra')
+@blueprint.route('/<org:org>/edit/extras/<string:extra>/',
+                 endpoint='delete_extra')
 class OrganizationExtraDeleteView(ProtectedOrgView, SingleObject, BaseView):
     def delete(self, org, extra, **kwargs):
         del org.extras[extra]
@@ -334,7 +349,8 @@ def supplied_datasets_csv(org):
 def supplied_datasets_resources_csv(org):
     datasets = Dataset.objects.filter(supplier=str(org.id))
     adapter = ResourcesCsvAdapter(datasets)
-    return csv.stream(adapter, '{0}-supplied-datasets-resources'.format(org.slug))
+    return csv.stream(adapter,
+                      '{0}-supplied-datasets-resources'.format(org.slug))
 
 
 @sitemap.register_generator

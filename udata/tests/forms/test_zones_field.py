@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form, fields
-from udata.models import db, SpatialCoverage, spatial_granularities
+from udata.models import db, SpatialCoverage
 from udata.tests import TestCase
 from udata.tests.factories import GeoZoneFactory, random_spatial_granularity
 
@@ -28,7 +28,8 @@ class ZoneFieldTest(TestCase):
         # self.assertEqual(form.spatial.granularity._value(), '')
         self.assertEqual(form.spatial.granularity.data, 'other')
 
-        self.assertEqual(form.spatial.data, {'zones': [], 'granularity': 'other'})
+        self.assertEqual(form.spatial.data,
+                         {'zones': [], 'granularity': 'other'})
 
         fake = Fake()
         form.populate_obj(fake)
@@ -40,7 +41,8 @@ class ZoneFieldTest(TestCase):
 
         fake = Fake(spatial=SpatialCoverage(zones=zones))
         form = FakeForm(None, fake)
-        self.assertEqual(form.spatial.zones._value(), ','.join([z.id for z in zones]))
+        self.assertEqual(
+            form.spatial.zones._value(), ','.join([z.id for z in zones]))
 
     def test_with_zone_empty_string(self):
         Fake, FakeForm = self.factory()
@@ -143,7 +145,8 @@ class ZoneFieldTest(TestCase):
     def test_with_invalid_data(self):
         Fake, FakeForm = self.factory()
 
-        form = FakeForm(MultiDict({'spatial-zones': 'wrong-data', 'spatial-granularity': 'wrong'}))
+        form = FakeForm(MultiDict({
+            'spatial-zones': 'wrong-data', 'spatial-granularity': 'wrong'}))
 
         form.validate()
         self.assertIn('spatial', form.errors)

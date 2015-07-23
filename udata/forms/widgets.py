@@ -25,7 +25,11 @@ class WidgetHelper(object):
     def __call__(self, field, **kwargs):
         # Handle extra classes
         classes = (kwargs.pop('class', '') or kwargs.pop('class_', '')).split()
-        extra_classes = self.classes if isinstance(self.classes, (list, tuple)) else [self.classes]
+        extra_classes = (
+            self.classes
+            if isinstance(self.classes, (list, tuple))
+            else [self.classes]
+        )
         classes.extend([cls for cls in extra_classes if cls not in classes])
         kwargs['class'] = ' '.join(classes)
 
@@ -140,11 +144,13 @@ class ImagePicker(object):
         sizes = ','.join(str(s) for s in field.sizes)
         default_img = placeholder(None, field.placeholder)
         html = [
-            '<div class="image-picker-field" data-sizes="{0}" data-basename="{1}" data-endpoint="{2}">'.format(
+            ('<div class="image-picker-field" data-sizes="{0}" '
+             'data-basename="{1}" data-endpoint="{2}">').format(
                 sizes, field.name, field.endpoint
             ),
             '<div class="image-picker-preview">',
-            '<img src="{0}" data-placeholder="{1}"/>'.format(field.src or default_img, default_img),
+            '<img src="{0}" data-placeholder="{1}"/>'.format(
+                field.src or default_img, default_img),
             '</div>',
             '<span class="image-picker-btn btn btn-default btn-file">',
             _('Choose a picture'),

@@ -11,7 +11,8 @@ from udata.models import Organization, OrganizationBadge
 log = logging.getLogger(__name__)
 
 
-m = submanager('badges',
+m = submanager(
+    'badges',
     help='Badges related operations',
     description='Handle all badges related operations and maintenance'
 )

@@ -5,7 +5,9 @@ from contextlib import contextmanager
 from importlib import import_module
 from os.path import exists, join, dirname
 
-from flask import g, request, current_app, abort, redirect, url_for, has_request_context
+from flask import (
+    g, request, current_app, abort, redirect, url_for, has_request_context
+)
 from flask.blueprints import BlueprintSetupState, _endpoint_from_view_func
 try:
     from flask import _app_ctx_stack as stack
@@ -44,22 +46,27 @@ class PluggableDomain(Domain):
         translations = cache.get(str(locale))
         if translations is None:
             translations_dir = self.get_translations_path(ctx)
-            translations = Translations.load(translations_dir, locale, domain=self.domain)
+            translations = Translations.load(translations_dir, locale,
+                                             domain=self.domain)
 
             # Load plugins translations
             if isinstance(translations, Translations):
                 # Load core extensions translations
                 from wtforms.i18n import messages_path
-                wtforms_translations = Translations.load(messages_path(), locale, domain='wtforms')
+                wtforms_translations = Translations.load(messages_path(),
+                                                         locale,
+                                                         domain='wtforms')
                 translations.merge(wtforms_translations)
 
                 for plugin_name in current_app.config['PLUGINS']:
                     module_name = 'udata.ext.{0}'.format(plugin_name)
                     module = import_module(module_name)
-                    translations_dir = join(dirname(module.__file__), 'translations')
+                    translations_dir = join(dirname(module.__file__),
+                                            'translations')
                     if exists(translations_dir):
                         domain = '-'.join((self.domain, plugin_name))
-                        plugins_translations = Translations.load(translations_dir, locale, domain=domain)
+                        plugins_translations = Translations.load(
+                            translations_dir, locale, domain=domain)
                         translations.merge(plugins_translations)
 
                 cache[str(locale)] = translations
@@ -134,7 +141,8 @@ def get_locale():
 
 
 def init_app(app):
-    app.config.setdefault('BABEL_DEFAULT_LOCALE', app.config['DEFAULT_LANGUAGE'])
+    app.config.setdefault('BABEL_DEFAULT_LOCALE',
+                          app.config['DEFAULT_LANGUAGE'])
     babel.init_app(app)
 
 
@@ -145,11 +153,14 @@ def _add_language_code(endpoint, values):
 
 def _pull_lang_code(endpoint, values):
     lang_code = values.pop('lang_code', g.get('lang_code', default_lang))
-    if not lang_code in current_app.config['LANGUAGES']:
+    if lang_code not in current_app.config['LANGUAGES']:
         try:
-            abort(redirect(url_for(endpoint, lang_code=default_lang, **values)))
+            abort(redirect(
+                url_for(endpoint, lang_code=default_lang, **values)))
         except:
-            abort(redirect(request.url.replace('/{0}/'.format(lang_code), '/{0}/'.format(default_lang))))
+            abort(redirect(
+                request.url.replace('/{0}/'.format(lang_code),
+                                    '/{0}/'.format(default_lang))))
     g.lang_code = lang_code
 
 
@@ -171,7 +182,8 @@ class I18nBlueprintSetupState(BlueprintSetupState):
         """
         # Static assets are not localized
         if endpoint == 'static':
-            return super(I18nBlueprintSetupState, self).add_url_rule(rule, endpoint=endpoint, view_func=view_func, **options)
+            return super(I18nBlueprintSetupState, self).add_url_rule(
+                rule, endpoint=endpoint, view_func=view_func, **options)
         if self.url_prefix:
             rule = self.url_prefix + rule
         options.setdefault('subdomain', self.subdomain)
@@ -180,11 +192,13 @@ class I18nBlueprintSetupState(BlueprintSetupState):
         defaults = self.url_defaults
         if 'defaults' in options:
             defaults = dict(defaults, **options.pop('defaults'))
-        self.app.add_url_rule('/<lang:lang_code>' + rule, '%s.%s' % (self.blueprint.name, endpoint),
+        self.app.add_url_rule('/<lang:lang_code>' + rule,
+                              '%s.%s' % (self.blueprint.name, endpoint),
                               view_func, defaults=defaults, **options)
 
-        self.app.add_url_rule(rule, '%s.%s_redirect' % (self.blueprint.name, endpoint),
-                              redirect_to_lang, defaults=defaults, **options)
+        self.app.add_url_rule(
+            rule, '%s.%s_redirect' % (self.blueprint.name, endpoint),
+            redirect_to_lang, defaults=defaults, **options)
 
 
 class I18nBlueprint(Blueprint):
@@ -198,13 +212,17 @@ class I18nBlueprint(Blueprint):
 
 
 ISO_639_1_CODES = (
-    'aa', 'ab', 'af', 'am', 'an', 'ar', 'as', 'ay', 'az', 'ba', 'be', 'bg', 'bh', 'bi', 'bn', 'bo', 'br',
-    'ca', 'co', 'cs', 'cy', 'da', 'de', 'dz', 'el', 'en', 'eo', 'es', 'et', 'eu', 'fa', 'fi', 'fj', 'fo',
-    'fr', 'fy', 'ga', 'gd', 'gl', 'gn', 'gu', 'gv', 'ha', 'he', 'hi', 'hr', 'ht', 'hu', 'hy', 'ia', 'id',
-    'ie', 'ii', 'ik', 'in', 'io', 'is', 'it', 'iu', 'iw', 'ja', 'ji', 'jv', 'ka', 'kk', 'kl', 'km', 'kn',
-    'ko', 'ks', 'ku', 'ky', 'la', 'li', 'ln', 'lo', 'lt', 'lv', 'mg', 'mi', 'mk', 'ml', 'mn', 'mo', 'mr',
-    'ms', 'mt', 'my', 'na', 'ne', 'nl', 'no', 'oc', 'om', 'or', 'pa', 'pl', 'ps', 'pt', 'qu', 'rm', 'rn',
-    'ro', 'ru', 'rw', 'sa', 'sd', 'sg', 'sh', 'si', 'sk', 'sl', 'sm', 'sn', 'so', 'sq', 'sr', 'ss', 'st',
-    'su', 'sv', 'sw', 'ta', 'te', 'tg', 'th', 'ti', 'tk', 'tl', 'tn', 'to', 'tr', 'ts', 'tt', 'tw', 'ug',
-    'uk', 'ur', 'uz', 'vi', 'vo', 'wa', 'wo', 'xh', 'yi', 'yo', 'zh', 'zh-Hans', 'zh-Hant', 'zu'
+    'aa', 'ab', 'af', 'am', 'an', 'ar', 'as', 'ay', 'az', 'ba', 'be', 'bg',
+    'bh', 'bi', 'bn', 'bo', 'br', 'ca', 'co', 'cs', 'cy', 'da', 'de', 'dz',
+    'el', 'en', 'eo', 'es', 'et', 'eu', 'fa', 'fi', 'fj', 'fo', 'fr', 'fy',
+    'ga', 'gd', 'gl', 'gn', 'gu', 'gv', 'ha', 'he', 'hi', 'hr', 'ht', 'hu',
+    'hy', 'ia', 'id', 'ie', 'ii', 'ik', 'in', 'io', 'is', 'it', 'iu', 'iw',
+    'ja', 'ji', 'jv', 'ka', 'kk', 'kl', 'km', 'kn', 'ko', 'ks', 'ku', 'ky',
+    'la', 'li', 'ln', 'lo', 'lt', 'lv', 'mg', 'mi', 'mk', 'ml', 'mn', 'mo',
+    'mr', 'ms', 'mt', 'my', 'na', 'ne', 'nl', 'no', 'oc', 'om', 'or', 'pa',
+    'pl', 'ps', 'pt', 'qu', 'rm', 'rn', 'ro', 'ru', 'rw', 'sa', 'sd', 'sg',
+    'sh', 'si', 'sk', 'sl', 'sm', 'sn', 'so', 'sq', 'sr', 'ss', 'st', 'su',
+    'sv', 'sw', 'ta', 'te', 'tg', 'th', 'ti', 'tk', 'tl', 'tn', 'to', 'tr',
+    'ts', 'tt', 'tw', 'ug', 'uk', 'ur', 'uz', 'vi', 'vo', 'wa', 'wo', 'xh',
+    'yi', 'yo', 'zh', 'zh-Hans', 'zh-Hant', 'zu'
 )

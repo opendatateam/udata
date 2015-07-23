@@ -23,7 +23,7 @@ i18n = I18nBlueprint('oauth-i18n', __name__)
 
 
 GRANT_EXPIRATION = 100  # 100 seconds
-TOKEN_EXPIRATION = 30 * 24 # 30 days
+TOKEN_EXPIRATION = 30 * 24  # 30 days
 
 
 CLIENT_TYPES = {
@@ -57,16 +57,20 @@ SCOPES = {
 class OAuth2Client(db.Datetimed, db.Document):
     secret = db.StringField(default=lambda: gen_salt(50), required=True)
 
-    type = db.StringField(choices=CLIENT_TYPES.keys(), default='public', required=True)
-    profile = db.StringField(choices=CLIENT_PROFILES.keys(), default='web', required=True)
-    grant_type = db.StringField(choices=GRANT_TYPES.keys(), default='code', required=True)
+    type = db.StringField(choices=CLIENT_TYPES.keys(), default='public',
+                          required=True)
+    profile = db.StringField(choices=CLIENT_PROFILES.keys(), default='web',
+                             required=True)
+    grant_type = db.StringField(choices=GRANT_TYPES.keys(), default='code',
+                                required=True)
 
     name = db.StringField(required=True)
     description = db.StringField()
 
     owner = db.ReferenceField('User')
     organization = db.ReferenceField('Organization')
-    image = db.ImageField(fs=images, basename=default_image_basename, thumbnails=[150, 25])
+    image = db.ImageField(fs=images, basename=default_image_basename,
+                          thumbnails=[150, 25])
 
     redirect_uris = db.ListField(db.StringField())
     default_scopes = db.ListField(db.StringField(), default=SCOPES.keys())
@@ -113,7 +117,8 @@ class OAuth2Token(db.Document):
 
     access_token = db.StringField(unique=True)
     refresh_token = db.StringField(unique=True)
-    expires = db.DateTimeField(default=lambda: datetime.utcnow() + timedelta(hours=TOKEN_EXPIRATION))
+    expires = db.DateTimeField(
+        default=lambda: datetime.utcnow() + timedelta(hours=TOKEN_EXPIRATION))
     scopes = db.ListField(db.StringField())
 
     meta = {

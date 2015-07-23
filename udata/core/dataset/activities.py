@@ -7,7 +7,10 @@ from udata.models import db, Dataset, Activity
 from udata.core.activity.tasks import write_activity
 
 
-__all__ = ('UserCreatedDataset', 'UserUpdatedDataset', 'UserDeletedDataset', 'DatasetRelatedActivity')
+__all__ = (
+    'UserCreatedDataset', 'UserUpdatedDataset', 'UserDeletedDataset',
+    'DatasetRelatedActivity'
+)
 
 
 class DatasetRelatedActivity(object):

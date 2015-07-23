@@ -15,7 +15,8 @@ from udata.commands import submanager
 log = logging.getLogger(__name__)
 
 
-m = submanager('user',
+m = submanager(
+    'user',
     help='User related operations',
     description='Handle all user related operations and maintenance'
 )

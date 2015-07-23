@@ -14,40 +14,56 @@ from udata.search import es, adapter_catalog, ANALYSIS_JSON
 log = logging.getLogger(__name__)
 
 
-m = submanager('search',
+m = submanager(
+    'search',
     help='Search/Indexation related operations',
     description='Handle search and indexation related operations'
 )
 
 
-@m.option('-t', '--type', dest='doc_type', default=None, help='Only reindex a given type')
+@m.option(
+    '-t', '--type', dest='doc_type', default=None,
+    help='Only reindex a given type')
 @m.option('-n', '--name', default=None, help='Optionnal index name')
 def reindex(name=None, doc_type=None):
     '''Reindex models'''
     for model, adapter in adapter_catalog.items():
         if not doc_type or doc_type.lower() == adapter.doc_type().lower():
             log.info('Reindexing {0} objects'.format(model.__name__))
-            if es.indices.exists_type(index=es.index_name, doc_type=adapter.doc_type()):
-                es.indices.delete_mapping(index=es.index_name, doc_type=adapter.doc_type())
-            es.indices.put_mapping(index=es.index_name, doc_type=adapter.doc_type(), body=adapter.mapping)
-            qs = model.objects.visible() if hasattr(model.objects, 'visible') else model.objects
+            if es.indices.exists_type(index=es.index_name,
+                                      doc_type=adapter.doc_type()):
+                es.indices.delete_mapping(index=es.index_name,
+                                          doc_type=adapter.doc_type())
+            es.indices.put_mapping(index=es.index_name,
+                                   doc_type=adapter.doc_type(),
+                                   body=adapter.mapping)
+            qs = model.objects
+            if hasattr(model.objects, 'visible'):
+                qs = model.objects.visible()
             for obj in qs.timeout(False):
                 try:
-                    es.index(index=es.index_name, doc_type=adapter.doc_type(), id=obj.id, body=adapter.serialize(obj))
+                    es.index(index=es.index_name, doc_type=adapter.doc_type(),
+                             id=obj.id, body=adapter.serialize(obj))
                 except:
-                    log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
+                    log.exception(
+                        'Unable to index %s "%s"', model.__name__, str(obj.id))
     es.indices.refresh(index=es.index_name)
 
 
 @m.option('-n', '--name', default=None, help='Optionnal index name')
-@m.option('-d', '--delete', default=False, action='store_true', help='Delete previously aliased indices')
-@m.option('-f', '--force', default=False, action='store_true', help='Do not prompt on deletion')
+@m.option(
+    '-d', '--delete', default=False, action='store_true',
+    help='Delete previously aliased indices')
+@m.option(
+    '-f', '--force', default=False, action='store_true',
+    help='Do not prompt on deletion')
 def init(name=None, delete=False, force=False):
     '''Initialize or rebuild the search index'''
     index_name = name or '-'.join([es.index_name, date.today().isoformat()])
     log.info('Initiliazing index "{0}"'.format(index_name))
     if es.indices.exists(index_name):
-        if force or prompt_bool('Index {0} will be deleted, are you sure ?'.format(index_name)):
+        if force or prompt_bool(('Index {0} will be deleted, are you sure ?'
+                                 .format(index_name))):
             es.indices.delete(index_name)
         else:
             exit(-1)
@@ -64,14 +80,19 @@ def init(name=None, delete=False, force=False):
 
     for model, adapter in adapter_catalog.items():
         log.info('Indexing {0} objects'.format(model.__name__))
-        qs = model.objects.visible() if hasattr(model.objects, 'visible') else model.objects
+        qs = model.objects
+        if hasattr(model.objects, 'visible'):
+            qs = model.objects.visible()
         for obj in qs.timeout(False):
             try:
-                es.index(index=index_name, doc_type=adapter.doc_type(), id=obj.id, body=adapter.serialize(obj))
+                es.index(index=index_name, doc_type=adapter.doc_type(),
+                         id=obj.id, body=adapter.serialize(obj))
             except:
-                log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
+                log.exception('Unable to index %s "%s"',
+                              model.__name__, str(obj.id))
 
-    log.info('Creating alias "{0}" on index "{1}"'.format(es.index_name, index_name))
+    log.info('Creating alias "{0}" on index "{1}"'.format(
+        es.index_name, index_name))
     if es.indices.exists_alias(name=es.index_name):
         alias = es.indices.get_alias(name=es.index_name)
         previous_indices = alias.keys()

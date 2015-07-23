@@ -32,13 +32,17 @@ class SearchQuery(object):
         except:
             self.page = 1
         try:
-            self.page_size = int(self.kwargs.get('page_size', DEFAULT_PAGE_SIZE) or DEFAULT_PAGE_SIZE)
+            self.page_size = int(
+                self.kwargs.get('page_size', DEFAULT_PAGE_SIZE)
+                or DEFAULT_PAGE_SIZE)
         except:
             self.page_size = DEFAULT_PAGE_SIZE
 
     def execute(self):
         try:
-            result = es.search(index=es.index_name, doc_type=self.adapter.doc_type(), body=self.get_body())
+            result = es.search(index=es.index_name,
+                               doc_type=self.adapter.doc_type(),
+                               body=self.get_body())
         except:
             log.exception('Unable to execute search query')
             result = {}
@@ -52,7 +56,9 @@ class SearchQuery(object):
                 del body['facets']
             if 'aggs' in body:
                 del body['aggs']
-            result = es.scan(index=es.index_name, doc_type=self.adapter.doc_type(), body=body)
+            result = es.scan(index=es.index_name,
+                             doc_type=self.adapter.doc_type(),
+                             body=body)
         except:
             log.exception('Unable to execute search query')
             result = None
@@ -88,7 +94,9 @@ class SearchQuery(object):
         '''Build sort query paramter from kwargs'''
         sorts = self.kwargs.get('sort', [])
         sorts = [sorts] if isinstance(sorts, basestring) else sorts
-        sorts = [(s[1:], 'desc') if s.startswith('-') else  (s, 'asc') for s in sorts]
+        sorts = [(s[1:], 'desc')
+                 if s.startswith('-') else (s, 'asc')
+                 for s in sorts]
         return [
             {self.adapter.sorts[s].field: d}
             for s, d in sorts if s in self.adapter.sorts
