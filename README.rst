@@ -32,3 +32,12 @@ or with easy_install:
 .. code-block:: console
 
     $ easy_install udata-harvest
+
+
+Development
+===========
+
+To use it within your udata local instance, put udata_harvest within
+your PYTHON_PATH and then alter your udata settings.py file with this value::
+
+    PLUGINS = ['harvest']
