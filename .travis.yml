@@ -19,3 +19,6 @@ script:
   - nosetests --immediate --with-coverage udata
 after_success:
   - coveralls --rcfile=coverage.rc
+branches:
+  only:
+    - master
