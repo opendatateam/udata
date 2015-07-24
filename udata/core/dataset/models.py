@@ -5,7 +5,7 @@ import datetime
 
 from collections import OrderedDict
 
-from blinker import Signal
+from blinker import signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
@@ -126,8 +126,8 @@ class Resource(WithMetrics, db.EmbeddedDocument):
     published = db.DateTimeField(default=datetime.datetime.now, required=True)
     deleted = db.DateTimeField()
 
-    on_added = Signal()
-    on_deleted = Signal()
+    on_added = signal('Resource.on_added')
+    on_deleted = signal('Resource.on_deleted')
 
     def clean(self):
         super(Resource, self).clean()
@@ -184,13 +184,13 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         'queryset_class': DatasetQuerySet,
     }
 
-    before_save = Signal()
-    after_save = Signal()
-    on_create = Signal()
-    on_update = Signal()
-    before_delete = Signal()
-    after_delete = Signal()
-    on_delete = Signal()
+    before_save = signal('Dataset.before_save')
+    after_save = signal('Dataset.after_save')
+    on_create = signal('Dataset.on_create')
+    on_update = signal('Dataset.on_update')
+    before_delete = signal('Dataset.before_delete')
+    after_delete = signal('Dataset.after_delete')
+    on_delete = signal('Dataset.on_delete')
 
     verbose_name = _('dataset')
 
@@ -249,6 +249,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
             }
         })
         self.reload()
+        post_save.send(self.__class__, document=self)
 
     def add_community_resource(self, resource):
         '''Perform an atomic prepend for a new resource'''
@@ -261,6 +262,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
             }
         })
         self.reload()
+        post_save.send(self.__class__, document=self)
 
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)

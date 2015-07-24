@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+from mongoengine import post_save
+
 from udata.models import Dataset
 
 from .. import TestCase, DBTestMixin
@@ -51,11 +53,14 @@ class DatasetModelTest(TestCase, DBTestMixin):
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
         resource = ResourceFactory()
+        expected_signals = post_save, Dataset.after_save, Dataset.on_update
 
-        dataset.add_resource(ResourceFactory())
+        with self.assert_emit(*expected_signals):
+            dataset.add_resource(ResourceFactory())
         self.assertEqual(len(dataset.resources), 1)
 
-        dataset.add_resource(resource)
+        with self.assert_emit(*expected_signals):
+            dataset.add_resource(resource)
         self.assertEqual(len(dataset.resources), 2)
         self.assertEqual(dataset.resources[0].id, resource.id)
 
@@ -75,10 +80,13 @@ class DatasetModelTest(TestCase, DBTestMixin):
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
         resource = ResourceFactory()
+        expected_signals = post_save, Dataset.after_save, Dataset.on_update
 
-        dataset.add_community_resource(ResourceFactory())
+        with self.assert_emit(*expected_signals):
+            dataset.add_community_resource(ResourceFactory())
         self.assertEqual(len(dataset.community_resources), 1)
 
-        dataset.add_community_resource(resource)
+        with self.assert_emit(*expected_signals):
+            dataset.add_community_resource(resource)
         self.assertEqual(len(dataset.community_resources), 2)
         self.assertEqual(dataset.community_resources[0].id, resource.id)
