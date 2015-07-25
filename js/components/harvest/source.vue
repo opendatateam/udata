@@ -1,5 +1,5 @@
 <template>
-<box-container title="{{source.name}}" icon="cogs" boxclass="box-solid">
+<box title="{{source.name}}" icon="cogs" class="box-solid" footer="{{toggled}}">
     <aside>
         <a class="text-muted pointer" v-on="click: toggle">
             <i class="fa fa-gear"></i>
@@ -12,18 +12,16 @@
         </h3>
         <div v-markdown="{{source.description}}"></div>
     </div>
-    <form-vertical v-ref="form" v-if="toggled" fields="{{fields}}" object="{{source}}"></form-vertical>
-    <box-footer v-if="toggled">
+    <vform v-ref="form" v-if="toggled" fields="{{fields}}" object="{{source}}"></vform>
+    <footer>
         <button type="submit" class="btn btn-primary"
             v-on="click: save($event)" v-i18n="Save"></button>
-    </box-footer>
-</box-container>
+    </footer>
+</box>
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'source-details',
     props: ['source'],
     data: function() {
@@ -49,8 +47,8 @@ module.exports = {
         };
     },
     components: {
-        'box-container': require('components/containers/box.vue'),
-        'form-vertical': require('components/form/vertical-form.vue')
+        'box': require('components/containers/box.vue'),
+        'vform': require('components/form/vertical-form.vue')
     },
     methods: {
         toggle: function() {

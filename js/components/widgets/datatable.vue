@@ -56,7 +56,7 @@
         </thead>
         <tbody>
             <tr class="pointer"
-                v-repeat="item:p.data" track-by="id"
+                v-repeat="item:p.data"
                 v-on="click: item_click(item)">
                 <td v-repeat="field: fields" track-by="key">
                     <component is="{{field.type || 'text'}}"
@@ -240,7 +240,8 @@ module.exports = {
         return {
             search_query: null,
             downloads: [],
-            p: {}
+            p: {},
+            track: 'id',
         };
     },
     computed: {
@@ -253,9 +254,13 @@ module.exports = {
         },
         has_data: function() {
             return this.p.data && this.p.data.length;
+        },
+        trackBy: function() {
+            console.log('track by', this.track)
+            return this.track || '';
         }
     },
-    props: ['p', 'title', 'icon', 'fields', 'boxclass', 'downloads', 'empty'],
+    props: ['p', 'title', 'icon', 'fields', 'boxclass', 'downloads', 'empty', 'track'],
     methods: {
         search: function() {
             this.p.search(this.search_query);
