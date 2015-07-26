@@ -125,13 +125,24 @@ parser.add_argument('page_size', type=int, default=20, location='args', help='Th
 
 @ns.route('/source/<string:ident>/jobs/', endpoint='harvest_jobs')
 class JobsAPI(API):
-    @api.doc(id='list_harvest_jobs', parser=parser)
+    @api.doc('list_harvest_jobs', parser=parser)
     @api.marshal_with(job_page_fields)
     def get(self, ident):
         '''List all jobs for a given source'''
         args = parser.parse_args()
         source = actions.get_source(ident)
         return HarvestJob.objects(source=source).order_by('-created').paginate(args['page'], args['page_size'])
+
+
+@ns.route('/job/<string:ident>/', endpoint='harvest_job')
+class JobAPI(API):
+    @api.doc('get_harvest_job', parser=parser)
+    @api.marshal_with(job_fields)
+    def get(self, ident):
+        '''List all jobs for a given source'''
+        return actions.get_job(ident)
+        # args = parser.parse_args()
+        # return HarvestJob.objects(source=source).order_by('-created').paginate(args['page'], args['page_size'])
 
 
 @ns.route('/backends', endpoint='harvest_backends')

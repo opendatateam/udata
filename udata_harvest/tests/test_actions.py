@@ -10,7 +10,7 @@ from udata.models import Dataset, PeriodicTask
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.factories import DatasetFactory
 
-from .factories import fake, HarvestSourceFactory
+from .factories import fake, HarvestSourceFactory, HarvestJobFactory
 from ..models import HarvestSource, HarvestJob, HarvestError
 from .. import actions, signals
 
@@ -31,7 +31,6 @@ class FactoryBackend(backends.BaseBackend):
     name = 'factory'
 
     def initialize(self):
-        '''Parse the index pages HTML to find link to dataset descriptors'''
         mock_initialize.send(self)
         for i in range(self.config.get('count', COUNT)):
             self.add_item(i)
@@ -92,6 +91,14 @@ class HarvestActionsTest(DBTestMixin, TestCase):
             actions.delete_source(source.id)
         self.assertEqual(len(HarvestSource.objects), 0)
 
+    def test_get_job_by_id(self):
+        job = HarvestJobFactory()
+        self.assertEqual(actions.get_job(str(job.id)), job)
+
+    def test_get_job_by_objectid(self):
+        job = HarvestJobFactory()
+        self.assertEqual(actions.get_job(job.id), job)
+
     def test_schedule(self):
         source = HarvestSourceFactory()
         with self.assert_emit(signals.harvest_source_scheduled):
@@ -148,6 +155,8 @@ class ExecutionTestMixin(DBTestMixin):
             self.assertEqual(item.errors, [])
             self.assertIsNotNone(item.started)
             self.assertIsNotNone(item.ended)
+            self.assertIsNotNone(item.dataset)
+            self.assertIsNotNone(Dataset.objects(id=item.dataset.id).first())
 
         self.assertEqual(len(HarvestJob.objects), 1)
         self.assertEqual(len(Dataset.objects), COUNT)

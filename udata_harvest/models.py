@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from collections import OrderedDict
 from datetime import datetime
 
-from udata.models import db
+from udata.models import db, Dataset
 from udata.i18n import lazy_gettext as _
 
 
@@ -46,6 +46,7 @@ class HarvestError(db.EmbeddedDocument):
 
 class HarvestItem(db.EmbeddedDocument):
     remote_id = db.StringField()
+    dataset = db.ReferenceField(Dataset)
     status = db.StringField(choices=HARVEST_ITEM_STATUS.keys(), default=DEFAULT_HARVEST_ITEM_STATUS, required=True)
     created = db.DateTimeField(default=datetime.now, required=True)
     started = db.DateTimeField()

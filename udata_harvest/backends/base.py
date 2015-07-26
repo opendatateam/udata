@@ -91,6 +91,7 @@ class BaseBackend(object):
                 obj.validate()
             else:
                 obj.save()
+                item.dataset = obj
             item.status = 'done'
         except Exception as e:
             log.error("Error while processing %s : %s" % (item.remote_id, str(e)))
