@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from udata.api import api, API, fields
 from udata.auth import admin_permission
 
+from udata.core.dataset.api_fields import dataset_ref_fields
+
 from . import actions
 from .models import HARVEST_JOB_STATUS, HARVEST_ITEM_STATUS, HarvestJob
 
@@ -17,6 +19,7 @@ error_fields = api.model('HarvestError', {
 
 item_fields = api.model('HarvestItem', {
     'remote_id': fields.String(description='The item remote ID to process', required=True),
+    'dataset': fields.Nested(dataset_ref_fields, description='The processed dataset'),
     'status': fields.String(description='The item status', required=True, enum=HARVEST_ITEM_STATUS.keys()),
     'created': fields.ISODateTime(description='The item creation date', required=True),
     'started': fields.ISODateTime(description='The item start date'),

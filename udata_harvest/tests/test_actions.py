@@ -156,7 +156,12 @@ class ExecutionTestMixin(DBTestMixin):
             self.assertIsNotNone(item.started)
             self.assertIsNotNone(item.ended)
             self.assertIsNotNone(item.dataset)
-            self.assertIsNotNone(Dataset.objects(id=item.dataset.id).first())
+
+            dataset = item.dataset
+            self.assertIsNotNone(Dataset.objects(id=dataset.id).first())
+            self.assertIn('harvest:remote_id', dataset.extras)
+            self.assertIn('harvest:last_update', dataset.extras)
+            self.assertIn('harvest:source_id', dataset.extras)
 
         self.assertEqual(len(HarvestJob.objects), 1)
         self.assertEqual(len(Dataset.objects), COUNT)

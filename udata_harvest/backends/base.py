@@ -86,12 +86,16 @@ class BaseBackend(object):
         self.job.save()
 
         try:
-            obj = self.process(item)
+            dataset = self.process(item)
+            dataset.extras['harvest:source_id'] = str(self.source.id)
+            dataset.extras['harvest:remote_id'] = item.remote_id
+            dataset.extras['harvest:last_update'] = datetime.now().isoformat()
+
             if self.debug:
-                obj.validate()
+                dataset.validate()
             else:
-                obj.save()
-                item.dataset = obj
+                dataset.save()
+                item.dataset = dataset
             item.status = 'done'
         except Exception as e:
             log.error("Error while processing %s : %s" % (item.remote_id, str(e)))
