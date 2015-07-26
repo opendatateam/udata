@@ -60,12 +60,10 @@
 </template>
 
 <script>
-'use strict';
+import API  from 'api';
+import Vue from 'vue';
 
-var API = require('api'),
-    Vue = require('vue');
-
-module.exports = {
+export default {
     name: 'discussion-modal',
     mixins: [require('components/form/base-form')],
     replace: false,

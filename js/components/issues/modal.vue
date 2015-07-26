@@ -66,7 +66,7 @@ module.exports = {
     mixins: [require('components/form/base-form')],
     replace: false,
     components: {
-        'w-modal': require('components/modal.vue'),
+        'modal': require('components/modal.vue'),
     },
     data: function() {
         return {
