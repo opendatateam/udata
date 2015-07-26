@@ -213,7 +213,6 @@ class MaafBackend(backends.BaseBackend):
                     resource.modified = row['last_modified']
                 dataset.resources.append(resource)
 
-        dataset.extras['remote_id'] = metadata['id']
         if metadata.get('author'):
             dataset.extras['author'] = metadata['author']
         if metadata.get('author_email'):
