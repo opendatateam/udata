@@ -17,7 +17,7 @@
             <meta itemprop="encodingFormat" content="{{resource.format or ''}}" />
             <meta itemprop="dateCreated" content="{{resource.created_at|isoformat}}" />
             <meta itemprop="dateModified" content="{{resource.modified|isoformat}}" />
-            <meta itemprop="datePublished" content="{{resource.published|isoformat}}" />
+            <meta itemprop="datePublished" content="{{resource.published|dateformat('long')}}" />
             <meta itemprop="contentSize" content="{{resource.size or ''}}" />
             <meta itemprop="mimetype" content="{{resource.mime or ''}}" />
             <meta itemprop="downloads" content="{{resource.metrics.views or ''}}" />
@@ -28,9 +28,8 @@
         </a>
     </h4>
     <p class="list-group-item-text ellipsis">
-        {{ _('Last modified on %(date)s at %(time)s',
+        {{ _('Last modified on %(date)s',
             date=resource.modified|dateformat('full'),
-            time=resource.modified|timeformat('short'),
         ) }}
     </p>
     {% if resource.owner %}
