@@ -45,7 +45,9 @@ export default class Dataset extends Model {
             dataset: this.id,
             rid: resource.id,
             payload: payload
-        }, this.fetch);
+        }, function() {
+            this.fetch(this.id);
+        });
     }
 
     reorder(new_order) {

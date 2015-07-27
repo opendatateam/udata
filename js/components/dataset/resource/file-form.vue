@@ -54,13 +54,9 @@
 </template>
 
 <script>
-'use strict';
+import API from 'api';
 
-var API = require('api'),
-    $ = require('jquery'),
-    endpoint = API.datasets.operations.upload_resource;
-
-module.exports = {
+export default {
     inherit: true,
     mixins: [require('mixins/uploader')],
     data: function() {
@@ -71,6 +67,10 @@ module.exports = {
                 }, {
                     id: 'description',
                     label: this._('Description'),
+                }, {
+                    id: 'published',
+                    label: this._('Publication date'),
+                    widget: 'date-picker'
                 }],
             file_fields: [{
                     id: 'url',
@@ -101,7 +101,7 @@ module.exports = {
     },
     computed: {
         upload_endpoint: function() {
-            return endpoint.urlify({dataset: this.dataset.id});
+            return API.datasets.operations.upload_resource.urlify({dataset: this.dataset.id});
         }
     },
     components: {
@@ -123,8 +123,8 @@ module.exports = {
             return this.$.form.validate();
         },
         serialize: function() {
-            return $.extend(this.resource.$data, this.$.form.serialize());
-            // var data = this.$.form.serialize();
+            // Required because of file_fields integration.
+            return Object.assign({}, this.resource, this.$.form.serialize());
         }
     }
 };

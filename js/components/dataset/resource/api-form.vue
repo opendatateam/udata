@@ -27,6 +27,10 @@ module.exports = {
                     id: 'description',
                     label: this._('Description'),
                     help: this._('Some details about the API.')
+                }, {
+                    id: 'published',
+                    label: this._('Publication date'),
+                    widget: 'date-picker'
                 }]
         };
     },

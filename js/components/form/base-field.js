@@ -22,6 +22,8 @@ define(['logger', 'jquery'], function(log, $) {
             'territory-completer': require('components/form/territory-completer'),
             'zone-completer': require('components/form/zone-completer.vue'),
             'format-completer': require('components/form/format-completer'),
+            'datetime-picker': require('components/form/datetime-picker.vue'),
+            'time-picker': require('components/form/time-picker.vue'),
             'date-picker': require('components/form/date-picker.vue'),
             'daterange-picker': require('components/form/daterange-picker.vue'),
             'checksum': require('components/form/checksum.vue')
