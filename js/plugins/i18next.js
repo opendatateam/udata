@@ -10,15 +10,15 @@ export default function(Vue, options) {
     });
 
     Vue.filter('dt', function(value, format) {
-        return moment(value).format(format || 'LLL');
+        return value ? moment(value).format(format || 'LLL') : '-';
     });
 
     Vue.filter('timeago', function(value) {
-        return moment(value).fromNow();
+        return value ? moment(value).fromNow() : '-';
     });
 
     Vue.filter('since', function(value) {
-        return moment(value).fromNow(true);
+        return value ? moment(value).fromNow(true) : '-';
     });
 
     Vue.directive('i18n', {
