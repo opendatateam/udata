@@ -34,6 +34,8 @@ discussion_fields = api.model('Discussion', {
     'subject': fields.String(
         attribute='subject.id',
         description='The discussion target object identifier', required=True),
+    'class': fields.ClassName(description='The object class',
+                              discriminator=True, required=True),
     'title': fields.String(description='The discussion title', required=True),
     'user': fields.Nested(
         user_ref_fields, description='The discussion author', required=True),
