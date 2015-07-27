@@ -96,6 +96,7 @@
             {% endif %}
             <span class="{{icon or 'glyphicon glyphicon-filter'}} fa-fw"></span>
             {{ label or name }}
+            <span class="fa fa-chevron-down pull-right chevrons"></span>
         </h3>
     </div>
     {% if facet.type == 'terms' %}
@@ -128,6 +129,7 @@
     <button class="list-group-item"
         data-toggle="collapse" data-target="#collapse-{{name}}-more">
         {{ _('More results…') }}
+        <span class="fa fa-chevron-right pull-right"></span>
     </button>
     <div id="collapse-{{name}}-more" class="list-group collapse list-group-more">
     {% for term, count in facet.terms[nb_displayed_facets:] %}
@@ -156,6 +158,7 @@
     <button class="list-group-item list-group-more"
         data-toggle="collapse" data-target="#collapse-{{name}}-more">
         {{ _('More results…') }}
+        <span class="fa fa-chevron-right pull-right"></span>
     </button>
     <div id="collapse-{{name}}-more" class="list-group collapse list-group-more">
     {% for obj, count in facet.models[nb_displayed_facets:] %}

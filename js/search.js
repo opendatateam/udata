@@ -26,7 +26,12 @@ define([
         });
 
         $('.advanced-search-panel .list-group-more').on('shown.bs.collapse', function () {
-            $('button[data-target="#'+this.id+'"]').hide();
+            $('button[data-target="#' + this.id + '"]').hide();
+        });
+
+        $('.advanced-search-panel .list-group').on('hidden.bs.collapse shown.bs.collapse', function () {
+            $('div[data-target="#' + this.id + '"] .chevrons').first()
+                .toggleClass('fa-chevron-down fa-chevron-up');
         });
 
     });
