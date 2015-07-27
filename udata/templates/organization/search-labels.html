@@ -1,5 +1,8 @@
 {% import theme('macros/search.html') as s %}
 <div class="label-list">
+    {{ s.filter_label('badge', _('Badge'), ficon('bookmark'),
+        labelize=organizations.label_func('badge')
+    ) }}
     {{ s.filter_label('datasets', _('Datasets'), ficon('fa-cubes'),
         labelize=organizations.label_func('datasets')
     ) }}
