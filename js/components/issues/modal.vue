@@ -15,6 +15,10 @@
     class="issue-modal"
     v-ref="modal">
     <div class="modal-body">
+        <dataset-card v-if="issue.class | is_dataset"
+            datasetid="{{issue.subject}}"></dataset-card>
+        <reuse-card v-if="issue.class | is_reuse"
+            reuseid="{{issue.subject}}"></reuse-card>
         <h3>{{ issue.title }}</h3>
         <div class="direct-chat-messages">
             <div class="direct-chat-msg"
@@ -67,6 +71,8 @@ module.exports = {
     replace: false,
     components: {
         'modal': require('components/modal.vue'),
+        'dataset-card': require('components/dataset/card.vue'),
+        'reuse-card': require('components/reuse/card.vue'),
     },
     data: function() {
         return {
@@ -75,6 +81,16 @@ module.exports = {
             avatar_placeholder: require('helpers/placeholders').user,
             comment: null
         };
+    },
+    filters: {
+        is_dataset: function(kind) {
+            if (!kind) return;
+            return kind.startsWith('Dataset');
+        },
+        is_reuse: function(kind) {
+            if (!kind) return;
+            return kind.startsWith('Reuse');
+        }
     },
     props: ['issueid'],
     ready: function() {
