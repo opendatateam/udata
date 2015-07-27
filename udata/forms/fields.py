@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 import re
-
+from datetime import datetime
 from dateutil.parser import parse
 
 from flask import url_for
@@ -77,6 +77,13 @@ class StringField(FieldHelper, EmptyNone, fields.StringField):
 
 class IntegerField(FieldHelper, fields.IntegerField):
     pass
+
+
+class DateTimeField(Field):
+
+    def process_formdata(self, valuelist):
+        if valuelist:
+            self.data = parse(valuelist[0])
 
 
 class BooleanField(FieldHelper, fields.BooleanField):

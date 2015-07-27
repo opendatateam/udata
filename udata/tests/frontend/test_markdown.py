@@ -89,7 +89,7 @@ class MarkdownTestCase(TestCase, WebTestMixin):
         '''mdstrip should truncate the text before rendering'''
         text = '1 2 3 4 5 6 7 8 9 0'
         with self.app.test_request_context('/'):
-            result = render_template_string('{{ text|mdstrip(5) }}', text=text)
+            result = render_template_string('{{ text|mdstrip(7) }}', text=text)
 
         self.assertEqual(result, '1 2 ...')
 

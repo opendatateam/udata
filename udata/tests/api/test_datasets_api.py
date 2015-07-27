@@ -406,10 +406,12 @@ class DatasetResourceAPITest(APITestCase):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
         self.dataset.save()
+        now = datetime.now()
         data = {
             'title': faker.sentence(),
             'description': faker.text(),
             'url': faker.url(),
+            'published': now.isoformat(),
         }
         with self.api_user():
             response = self.put(url_for('api.resource',
@@ -422,6 +424,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(updated.title, data['title'])
         self.assertEqual(updated.description, data['description'])
         self.assertEqual(updated.url, data['url'])
+        self.assertEqualDates(updated.published, now)
 
     def test_update_404(self):
         data = {
