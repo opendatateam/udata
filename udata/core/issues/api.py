@@ -29,6 +29,8 @@ issue_fields = api.model('Issue', {
     'subject': fields.String(
         attribute='subject.id',
         description='The issue target object identifier', required=True),
+    'class': fields.ClassName(description='The object class',
+                              discriminator=True, required=True),
     'title': fields.String(description='The issue title', required=True),
     'user': fields.Nested(
         user_ref_fields, description='The issue author', required=True),
