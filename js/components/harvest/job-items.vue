@@ -28,27 +28,20 @@ export default {
             fields: [{
                 label: this._('Remote Id'),
                 key: 'remote_id',
-                sort: 'remote_id'
+                sort: 'remote_id',
+                ellipsis: true
             }, {
                 label: this._('Status'),
                 key: 'status',
+                sort: 'status',
                 type: 'label',
+                width: 100,
                 label_type: function(status) {
                     return STATUS_CLASSES[status];
                 },
                 label_func: function(status) {
                     return STATUS_I18N[status];
                 }
-            }, {
-                label: this._('Started at'),
-                key: 'started',
-                sort: 'started',
-                type: 'datetime'
-            }, {
-                label: this._('Ended'),
-                key: 'ended',
-                sort: 'ended',
-                type: 'datetime'
             }]
         };
     },

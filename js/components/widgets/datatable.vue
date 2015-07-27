@@ -4,6 +4,10 @@
         padding: 3px;
     }
 
+    th {
+        white-space: nowrap;
+    }
+
     td.ellipsis {
         white-space: nowrap;
         overflow: hidden;
@@ -51,7 +55,7 @@
                 <th class="text-{{align || 'left'}}"
                     v-class="pointer: sort"
                     v-repeat="fields" v-on="click: sort ? p.sort(remote ? sort : key) : null"
-                    v-attr="width: width + 5">
+                    v-attr="width: width | thwidth">
                     {{label}}
                     <span class="fa fa-fw" v-if="sort" v-class="
                         fa-sort: p.sorted != (remote ? sort : key),
@@ -65,7 +69,13 @@
             <tr class="pointer"
                 v-repeat="item:p.data"
                 v-on="click: item_click(item)">
-                <td v-repeat="field: fields" track-by="key">
+                <td v-repeat="field: fields" track-by="key"
+                    v-class="
+                        text-center: field.align === 'center',
+                        text-left: field.align === 'left',
+                        text-right: field.align === 'right',
+                        ellipsis: field.ellipsis
+                    ">
                     <component is="{{field.type || 'text'}}"
                         item="{{item}}" field="{{field}}">
                     </component>
@@ -136,15 +146,6 @@ var CellWidget = Vue.extend({
 
             return result || this.$options.default;
         }
-    },
-    attached: function() {
-        // Dirty hack to fix class on field/td iteration
-        if (this.field.align) {
-            $(this.$el).closest('td').addClass('text-'+this.field.align);
-        }
-        if (this.field.ellipsis) {
-            $(this.$el).closest('td').addClass('ellipsis');
-        }
     }
 })
 
@@ -155,7 +156,7 @@ module.exports = {
         'pagination-widget': require('components/pagination.vue'),
         'text': CellWidget.extend({
                 default: '',
-                template: '{{value | truncate 100}}'
+                template: '{{value}}'
             }),
         'date': CellWidget.extend({
                 template: [
@@ -227,6 +228,7 @@ module.exports = {
             template: '<span class="label label-{{type}}">{{text}}</span>',
             computed: {
                 type: function() {
+                    if (!this.item) return;
                     if (this.item.deleted) {
                         return VISIBILITIES.deleted.type;
                     } else if (this.item.private) {
@@ -236,6 +238,7 @@ module.exports = {
                     }
                 },
                 text: function() {
+                    if (!this.item) return;
                     if (this.item.deleted) {
                         return VISIBILITIES.deleted.label;
                     } else if (this.item.private) {
@@ -271,7 +274,6 @@ module.exports = {
             return this.p.data && this.p.data.length;
         },
         trackBy: function() {
-            console.log('track by', this.track)
             return this.track || '';
         }
     },
@@ -282,6 +284,18 @@ module.exports = {
         },
         item_click: function(item) {
             this.$dispatch('datatable:item:click', item);
+        }
+    },
+    filters: {
+        thwidth: function(value) {
+            switch(value) {
+                case undefined:
+                    return '';
+                case 0:
+                    return 0;
+                default:
+                    return value + 5;
+            }
         }
     }
 };
