@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 import logging
 from datetime import datetime
 
+from mongoengine.signals import post_save
+
 from udata.models import db
 
 log = logging.getLogger(__name__)
@@ -24,6 +26,7 @@ class BadgeMixin(object):
             }
         })
         self.reload()
+        post_save.send(self.__class__, document=self)
 
     def remove_badge(self, badge):
         '''Perform an atomic removal for a given badge'''
@@ -33,6 +36,7 @@ class BadgeMixin(object):
             }
         })
         self.reload()
+        post_save.send(self.__class__, document=self)
 
 
 class Badge(db.EmbeddedDocument):
