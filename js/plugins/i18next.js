@@ -1,60 +1,35 @@
-define(['config', 'i18next-client', 'moment', 'logger'], function(config, i18next, moment, log) {
-    'use strict';
+import * as i18n from 'i18n';
+import moment from 'moment';
+import log from 'logger';
 
-    return function(Vue, options) {
-        options = options || {};
+export default function(Vue, options) {
 
-        var namespace = options.ns || 'udata-admin',
-            lang = config.lang,
-            resources = {};
+    // Register the i18n filter
+    Vue.filter('i18n', function(value, options) {
+        return i18n._(value, options);
+    });
 
-        resources[lang] = {};
-        resources[lang][namespace] = require('locales/' + namespace + '.' + lang + '.json');
+    Vue.filter('dt', function(value, format) {
+        return moment(value).format(format || 'LLL');
+    });
 
-        moment.locale(lang);
-        i18next.init({
-            debug: DEBUG,
-            lng: lang,
-            load: 'unspecific',
-            interpolationPrefix: '{',
-            interpolationSuffix: '}',
-            ns: namespace,
-            fallbackLng: false,
-            fallbackOnEmpty: true,
-            fallbackOnNull: true,
-            nsseparator: '::', // Allow to use real sentences as keys
-            keyseparator: '$$', // Allow to use real sentences as keys
-            resStore: resources
-        });
+    Vue.filter('timeago', function(value) {
+        return moment(value).fromNow();
+    });
 
-        // Register the i18n filter
-        Vue.filter('i18n', function(value, options) {
-            return i18next.t(value, options);
-        });
+    Vue.filter('since', function(value) {
+        return moment(value).fromNow(true);
+    });
 
-        Vue.filter('dt', function(value, format) {
-            return moment(value).format(format || 'LLL');
-        });
+    Vue.directive('i18n', {
+        bind: function() {
+            this.el.innerHTML = i18n._(this.expression);
+        }
+    });
 
-        Vue.filter('timeago', function(value) {
-            return moment(value).fromNow();
-        });
+    // Make translations accesible globally and on instance
+    Vue._ = Vue.prototype._ = i18n._;
+    Vue.lang = Vue.prototype.lang = i18n.lang;
 
-        Vue.filter('since', function(value) {
-            return moment(value).fromNow(true);
-        });
-
-        Vue.directive('i18n', {
-            bind: function() {
-                this.el.innerHTML = i18next.t(this.expression);
-            }
-        });
-
-        // Make translations accesible globally and on instance
-        Vue._ = Vue.prototype._ = i18next.t;
-        Vue.lang = Vue.prototype.lang = lang;
-
-        log.debug('Plugin i18next loaded');
-    };
-
-});
+    log.debug('Plugin i18next loaded');
+};
