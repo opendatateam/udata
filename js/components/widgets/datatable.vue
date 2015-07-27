@@ -175,10 +175,15 @@ module.exports = {
                 template: '<time datetime="{{value}}">{{value | since }}</time>'
             }),
         'label': CellWidget.extend({
-            template: '<span class="label label-{{color}}">{{value}}</span>',
+            template: '<span class="label label-{{color}}">{{label}}</span>',
             computed: {
                 color: function() {
-                    return this.field.label_type(this.value)
+                    return this.field.label_type(this.value);
+                },
+                label: function() {
+                    return this.field.hasOwnProperty('label_func')
+                        ? this.field.label_func(this.value)
+                        : this.value;
                 }
             }
         }),
