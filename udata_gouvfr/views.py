@@ -77,6 +77,7 @@ C3_PARTNERS = (
     'etalab',
     'ministere-de-l-ecologie-du-developpement-durable-et-de-l-energie',
     'museum-national-dhistoire-naturelle',
+    'irstea',
 )
 
 
@@ -88,7 +89,8 @@ def c3():
 @blueprint.route('/climate-change-challenge')
 def climate_change_challenge():
     partners = Organization.objects(slug__in=C3_PARTNERS)
-    datasets = Dataset.objects(badges__kind=C3)
+    datasets = (Dataset.objects(badges__kind=C3)
+                       .order_by('-metrics.followers')[:30])
     return theme.render('c3.html', partners=partners, datasets=datasets)
 
 
