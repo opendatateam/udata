@@ -3,6 +3,13 @@
     td.avatar-cell {
         padding: 3px;
     }
+
+    td.ellipsis {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow:ellipsis;
+        max-width: 0;
+    }
 }
 </style>
 
@@ -134,6 +141,9 @@ var CellWidget = Vue.extend({
         // Dirty hack to fix class on field/td iteration
         if (this.field.align) {
             $(this.$el).closest('td').addClass('text-'+this.field.align);
+        }
+        if (this.field.ellipsis) {
+            $(this.$el).closest('td').addClass('ellipsis');
         }
     }
 })
