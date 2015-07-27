@@ -78,10 +78,12 @@ export default {
             reuses: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_reuses',
+                search: 'title'
             }),
             datasets: new PageList({
                 ns: 'organizations',
-                fetch: 'list_organization_datasets'
+                fetch: 'list_organization_datasets',
+                search: 'title'
             }),
             issues: new PageList({
                 ns: 'organizations',
