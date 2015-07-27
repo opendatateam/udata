@@ -7,28 +7,16 @@
 </template>
 
 <script>
-'use strict';
+import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
 
-var Vue = require('vue');
-
-var LABELS_TYPE = {
-    'pending': 'default',
-    'initializing': 'primary',
-    'initialized': 'info',
-    'processing': 'info',
-    'done': 'success',
-    'done-errors': 'warning',
-    'failed': 'danger'
-};
-
-module.exports = {
+export default {
     name: 'harvest-jobs-widget',
     components: {
         'datatable-widget': require('components/widgets/datatable.vue')
     },
     data: function() {
         return {
-            title: Vue._('Jobs'),
+            title: this._('Jobs'),
             fields: [{
                 label: this._('Date'),
                 key: 'created',
@@ -39,7 +27,10 @@ module.exports = {
                 key: 'status',
                 type: 'label',
                 label_type: function(status) {
-                    return LABELS_TYPE[status];
+                    return STATUS_CLASSES[status];
+                },
+                label_func: function(status) {
+                    return STATUS_I18N[status];
                 }
             }]
         };

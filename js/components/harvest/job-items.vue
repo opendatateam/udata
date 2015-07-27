@@ -12,15 +12,9 @@
 </template>
 
 <script>
-import HarvestJob from 'models/harvest/job';
+import {HarvestJob} from 'models/harvest/job';
+import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/item';
 import {PageList} from 'models/base';
-
-const LABELS_TYPE = {
-    'pending': 'default',
-    'started': 'info',
-    'done': 'success',
-    'failed': 'danger'
-};
 
 export default {
     name: 'JobDetails',
@@ -40,7 +34,10 @@ export default {
                 key: 'status',
                 type: 'label',
                 label_type: function(status) {
-                    return LABELS_TYPE[status];
+                    return STATUS_CLASSES[status];
+                },
+                label_func: function(status) {
+                    return STATUS_I18N[status];
                 }
             }, {
                 label: this._('Started at'),
@@ -62,8 +59,6 @@ export default {
     },
     events: {
         'datatable:item:click': function(item) {
-            console.log(item);
-            console.log(item.errors);
             this.$dispatch('harvest:job:item:selected', item);
         }
     }

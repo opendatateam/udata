@@ -6,9 +6,9 @@
         <dt>{{ _('Remote ID') }}</dt>
         <dd>{{ item.remote_id }}</dd>
         <dt>{{ _('Started at') }}</dt>
-        <dd>{{ item.started | datetime }}</dd>
+        <dd>{{ item.started | dt }}</dd>
         <dt>{{ _('Ended at') }}</dt>
-        <dd>{{ item.ended | datetime }}</dd>
+        <dd>{{ item.ended | dt }}</dd>
         <dt>{{ _('Status') }}</dt>
         <dd>{{ item.status }}</dd>
         <dt v-if="item.dataset">{{ _('Dataset') }}</dt>
@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import {STATUS_I18N} from 'models/harvest/item';
 
 export default {
     name: 'JobItemView',

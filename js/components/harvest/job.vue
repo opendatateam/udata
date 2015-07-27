@@ -9,11 +9,11 @@
         <dt>{{ _('Created at') }}</dt>
         <dd>{{ job.created }}</dd>
         <dt>{{ _('Started at') }}</dt>
-        <dd>{{ job.started }}</dd>
+        <dd>{{ job.started | dt }}</dd>
         <dt>{{ _('Ended at') }}</dt>
-        <dd>{{ job.ended }}</dd>
+        <dd>{{ job.ended | dt }}</dd>
         <dt>{{ _('Status') }}</dt>
-        <dd>{{ job.status }}</dd>
+        <dd><span class="label label-{{ job.status | statusClass }}">{{ job.status | statusI18n }}</span></dd>
     </dl>
     <ul>
         <li v-repeat="error:job.errors">
@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import HarvestJob from 'models/harvest/job';
+import {STATUS_CLASSES, STATUS_I18N, HarvestJob} from 'models/harvest/job';
 
 export default {
     name: 'JobDetails',
@@ -38,6 +38,14 @@ export default {
         return {
             job: new HarvestJob()
         };
+    },
+    filters: {
+        statusClass: function(value) {
+            return STATUS_CLASSES[value];
+        },
+        statusI18n: function(value) {
+            return STATUS_I18N[value];
+        }
     }
 };
 </script>
