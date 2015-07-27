@@ -55,7 +55,9 @@
 </ul>
 <div class="label-list">
     {{ s.filter_label('tag', _('Tag'), ficon('tag')) }}
-    {{ s.filter_label('badge', _('Badge'), ficon('bookmark')) }}
+    {{ s.filter_label('badge', _('Badge'), ficon('bookmark'),
+        labelize=datasets.label_func('badge')
+    ) }}
 </div>
 {% endblock %}
 

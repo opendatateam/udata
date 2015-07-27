@@ -7,6 +7,9 @@
     {{ s.filter_label('license', _('License'), ficon('copyright-mark'),
         labelize=datasets.label_func('license')
     ) }}
+    {{ s.filter_label('badge', _('Badge'), ficon('bookmark'),
+        labelize=datasets.label_func('badge')
+    ) }}
     {{ s.filter_label('temporal_coverage', _('Temporal coverage'), ficon('fa-calendar'),
         labelize=datasets.label_func('temporal_coverage')
     ) }}
