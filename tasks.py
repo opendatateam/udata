@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-from os.path import join, abspath, dirname, exists
+from os.path import join, abspath, dirname
 
 from invoke import run, task
 
@@ -44,14 +44,15 @@ def clean(bower=False, node=False):
 @task
 def test():
     '''Run tests suite'''
-    run('cd {0} && nosetests --rednose --force-color udata_gouvfr'.format(ROOT), pty=True)
+    run('cd {0} && nosetests --rednose --force-color udata_gouvfr'.format(
+        ROOT), pty=True)
 
 
 @task
 def cover():
     '''Run tests suite with coverage'''
-    run('cd {0} && nosetests --rednose --force-color \
-        --with-coverage --cover-html --cover-package=udata_gouvfr'.format(ROOT), pty=True)
+    run(('cd {0} && nosetests --rednose --force-color --with-coverage '
+         '--cover-html --cover-package=udata_gouvfr').format(ROOT), pty=True)
 
 
 @task
@@ -83,7 +84,8 @@ def watch():
 def assets():
     '''Install and compile assets'''
     print(cyan('Building static assets'))
-    lrun('cd {0} && webpack -c --progress --config webpack.config.prod.js'.format(ROOT), pty=True)
+    lrun(('cd {0} && webpack -c --progress '
+          '--config webpack.config.prod.js').format(ROOT), pty=True)
 
 
 @task(assets, i18nc)

@@ -12,7 +12,7 @@ RE_REQUIREMENT = re.compile(r'^\s*-r\s*(?P<filename>.*)$')
 
 PYPI_RST_FILTERS = (
     # Replace code-blocks
-    (r'\.\.\s? code-block::\s*(\w|\+)+',  '::'),
+    (r'\.\.\s? code-block::\s*(\w|\+)+', '::'),
     # Remove travis ci badge
     (r'.*travis-ci\.org/.*', ''),
     # Remove pypip.in badges
@@ -36,7 +36,7 @@ def rst(filename):
 
 
 def pip(filename):
-    '''Parse pip requirement file and transform it to setuptools requirements'''
+    """Parse pip requirement file and transform it to setuptools reqs."""
     requirements = []
     for line in open(join('requirements', filename)):
         line = line.strip()
@@ -51,7 +51,9 @@ def pip(filename):
 
 
 def dependency_links(filename):
-    return [line.strip() for line in open(join('requirements', filename)) if '://' in line]
+    return [line.strip()
+            for line in open(join('requirements', filename))
+            if '://' in line]
 
 
 long_description = '\n'.join((
@@ -59,12 +61,6 @@ long_description = '\n'.join((
     rst('CHANGELOG.rst'),
     ''
 ))
-
-# install_requires = pip('install.pip')
-# tests_require = pip('test.pip')
-
-# if sys.version_info[0:2] < (2, 7):
-#     install_requires += ['argparse']
 
 setup(
     name='udata-gouvfr',
@@ -80,12 +76,6 @@ setup(
     install_requires=[
         'feedparser',
     ],
-    # install_requires=install_requires,
-    # dependency_links=dependency_links('install.pip'),
-    # tests_require=tests_require,
-    # extras_require={
-    #     'test': tests_require,
-    # },
     license='LGPL',
     use_2to3=True,
     keywords='',
@@ -104,6 +94,7 @@ setup(
         "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
         "Topic :: Software Development :: Libraries :: Python Modules",
-        'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+        ('License :: OSI Approved :: GNU Library or Lesser General Public '
+         'License (LGPL)'),
     ],
 )

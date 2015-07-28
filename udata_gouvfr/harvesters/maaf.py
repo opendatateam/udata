@@ -11,11 +11,17 @@ from urlparse import urljoin
 import chardet
 
 from lxml import etree, html
-from voluptuous import Schema, Required, Optional, All, Any, Lower, In, Length, MultipleInvalid
+from voluptuous import (
+    Schema, Optional, All, Any, Lower, In, Length, MultipleInvalid
+)
 
-from udata.models import db, Dataset, License, Resource, Checksum, SpatialCoverage
+from udata.models import (
+    db, Dataset, License, Resource, Checksum, SpatialCoverage
+)
 from udata.ext.harvest import backends
-from udata.ext.harvest.filters import boolean, email, to_date, taglist, force_list, normalize_string, is_url
+from udata.ext.harvest.filters import (
+    boolean, email, to_date, taglist, force_list, normalize_string, is_url
+)
 from udata.utils import get_by
 
 
@@ -54,10 +60,14 @@ FREQUENCIES = {
 XSD_PATH = os.path.join(os.path.dirname(__file__), 'maaf.xsd')
 
 SSL_COMMENT = '''
-Le site exposant les données est protégé par un certificat délivré par l'IGC/A (IGC officielle de l'État).
-Une exception de sécurité peut apparaître si votre navigateur ne reconnait pas cette autorité :
-vous trouverez  la procédure à suivre pour éviter une telle alerte à l'adresse :
-http://www.ssi.gouv.fr/fr/anssi/services-securises/igc-a/modalites-de-verification-du-certificat-de-l-igc-a-rsa-4096.html
+Le site exposant les données est protégé par un certificat délivré par
+l'IGC/A (IGC officielle de l'État).
+Une exception de sécurité peut apparaître si votre navigateur ne reconnait
+pas cette autorité :
+vous trouverez  la procédure à suivre pour éviter une telle alerte
+à l'adresse :
+http://www.ssi.gouv.fr/fr/anssi/services-securises/igc-a/\
+modalites-de-verification-du-certificat-de-l-igc-a-rsa-4096.html
 '''
 
 schema = Schema({
@@ -91,8 +101,10 @@ schema = Schema({
         'temporal_coverage_from': None,
         'temporal_coverage_to': None,
         'territorial_coverage': {
-            'territorial_coverage_code': All(basestring, Lower, In(ZONES.keys())),
-            'territorial_coverage_granularity': All(basestring, Lower, In(GRANULARITIES.keys())),
+            'territorial_coverage_code':
+            All(basestring, Lower, In(ZONES.keys())),
+            'territorial_coverage_granularity':
+            All(basestring, Lower, In(GRANULARITIES.keys())),
         },
         'title': basestring,
     },
@@ -142,7 +154,8 @@ class MaafBackend(backends.BaseBackend):
         xml = self.parse_xml(response.content.decode(encoding))
         metadata = xml['metadata']
 
-        dataset, created = Dataset.objects.get_or_create(extras__remote_id=metadata['id'], auto_save=False)
+        dataset, created = Dataset.objects.get_or_create(
+            extras__remote_id=metadata['id'], auto_save=False)
 
         dataset.title = metadata['title']
         dataset.frequency = FREQUENCIES.get(metadata['frequency'], 'unknown')
@@ -160,20 +173,24 @@ class MaafBackend(backends.BaseBackend):
             dataset.organization = self.source.organization
             dataset.supplier = self.source.organization
 
-        if metadata.get('temporal_coverage_from') and metadata.get('temporal_coverage_to'):
+        if (metadata.get('temporal_coverage_from')
+                and metadata.get('temporal_coverage_to')):
             dataset.temporal_coverage = db.DateRange(
                 start=metadata['temporal_coverage_from'],
                 end=metadata['temporal_coverage_to']
             )
 
-        if metadata.get('territorial_coverage_code') or metadata.get('territorial_coverage_granularity'):
+        if (metadata.get('territorial_coverage_code')
+                or metadata.get('territorial_coverage_granularity')):
             dataset.spatial = SpatialCoverage()
 
             if metadata.get('territorial_coverage_granularity'):
-                dataset.spatial.granularity = GRANULARITIES.get(metadata['territorial_coverage_granularity'])
+                dataset.spatial.granularity = GRANULARITIES.get(
+                    metadata['territorial_coverage_granularity'])
 
             if metadata.get('territorial_coverage_code'):
-                dataset.spatial.zones = [ZONES[metadata['territorial_coverage_code']]]
+                dataset.spatial.zones = [
+                    ZONES[metadata['territorial_coverage_code']]]
 
         dataset.resources = []
         cle = get_by(metadata['resources'], 'format', 'cle')
@@ -183,13 +200,15 @@ class MaafBackend(backends.BaseBackend):
             else:
                 resource = Resource(
                     title=row['name'],
-                    description=(row['description'] + '\n\n' + SSL_COMMENT).strip(),
+                    description=(
+                        row['description'] + '\n\n' + SSL_COMMENT).strip(),
                     type='remote',
                     url=row['url'],
                     format=row['format']
                 )
                 if resource.format == 'csv' and cle:
-                    resource.checksum = Checksum(type='sha256', value=self.get(cle['url']).text)
+                    resource.checksum = Checksum(
+                        type='sha256', value=self.get(cle['url']).text)
                 if row.get('last_modified'):
                     resource.modified = row['last_modified']
                 dataset.resources.append(resource)
