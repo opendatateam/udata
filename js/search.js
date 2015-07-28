@@ -29,7 +29,9 @@ define([
             $('button[data-target="#' + this.id + '"]').hide();
         });
 
-        $('.advanced-search-panel .list-group').on('hidden.bs.collapse shown.bs.collapse', function () {
+        $('.advanced-search-panel .list-group').on('hidden.bs.collapse shown.bs.collapse', function (e) {
+            // Do not flip chevrons if the "More results" link is clicked.
+            if (e.target.id.endsWith('-more')) return;
             $('div[data-target="#' + this.id + '"] .chevrons').first()
                 .toggleClass('fa-chevron-down fa-chevron-up');
         });
