@@ -13,7 +13,8 @@ from udata.app import cache, nav
 from udata.i18n import lazy_gettext as _
 
 
-RE_POST_IMG = re.compile(r'\<img .* src="https?:(?P<src>.+\.(?:png|jpg))" .* />(?P<content>.+)')
+RE_POST_IMG = re.compile(
+    r'\<img .* src="https?:(?P<src>.+\.(?:png|jpg))" .* />(?P<content>.+)')
 
 
 theme.defaults({
@@ -25,7 +26,9 @@ theme.defaults({
 
 class Wikitem(nav.Item):
     def __init__(self, label, page, **kwargs):
-        super(Wikitem, self).__init__(label, page.lower(), url='//wiki.data.gouv.fr/wiki/{0}'.format(page), **kwargs)
+        super(Wikitem, self).__init__(
+            label, page.lower(),
+            url='//wiki.data.gouv.fr/wiki/{0}'.format(page), **kwargs)
 
 
 gouvfr_menu = nav.Bar('gouvfr_menu', [
@@ -42,7 +45,8 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
     ]),
     nav.Item(_('Dashboard'), 'site.dashboard'),
     nav.Item(_('Events'), '#', url='#', items=[
-        nav.Item('Climate Change Challenge (C³)', 'gouvfr.climate_change_challenge'),
+        nav.Item('Climate Change Challenge (C³)',
+                 'gouvfr.climate_change_challenge'),
         nav.Item('Dataconnexions', 'gouvfr.dataconnexions'),
     ]),
     # nav.Item('Dataconnexions', 'gouvfr.dataconnexions'),
@@ -71,7 +75,10 @@ NETWORK_LINKS = [
     ('Etalab.gouv.fr', 'http://www.etalab.gouv.fr'),
 ]
 
-nav.Bar('gouvfr_network', [nav.Item(label, label, url=url) for label, url in NETWORK_LINKS])
+nav.Bar(
+    'gouvfr_network',
+    [nav.Item(label, label, url=url) for label, url in NETWORK_LINKS]
+)
 
 
 @cache.memoize(50)
@@ -92,7 +99,8 @@ def get_blog_post(url, lang):
     }
     match = RE_POST_IMG.match(post.content[0].value)
     if match:
-        blogpost.update(image_url=match.group('src'), summary=match.group('content'))
+        blogpost.update(image_url=match.group('src'),
+                        summary=match.group('content'))
     else:
         blogpost['summary'] = post.summary
     return blogpost

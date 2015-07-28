@@ -7,7 +7,9 @@ from udata.models import (
     OrganizationBadge, ReuseBadge, PUBLIC_SERVICE, DATACONNEXIONS_CANDIDATE
 )
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import DatasetFactory, ReuseFactory, OrganizationFactory
+from udata.tests.factories import (
+    DatasetFactory, ReuseFactory, OrganizationFactory
+)
 from udata.tests.factories import VisibleReuseFactory
 from udata.tests.frontend import FrontTestCase
 from udata.settings import Testing
@@ -87,7 +89,8 @@ class GouvFrThemeTest(FrontTestCase):
         '''It should render the organization page'''
         org = OrganizationFactory()
         datasets = [DatasetFactory(organization=org) for _ in range(3)]
-        reuses = [ReuseFactory(organization=org, datasets=[d]) for d in datasets]
+        reuses = [ReuseFactory(organization=org, datasets=[d])
+                  for d in datasets]
 
         response = self.get(url_for('organizations.show', org=org))
         self.assert200(response)
@@ -114,7 +117,8 @@ class GouvFrMetricsTest(DBTestMixin, TestCase):
         for _ in range(3):
             OrganizationFactory()
 
-        self.assertEqual(PublicServicesMetric().get_value(), len(public_services))
+        self.assertEqual(PublicServicesMetric().get_value(),
+                         len(public_services))
 
 
 class LegacyUrlsTest(FrontTestCase):
@@ -128,7 +132,8 @@ class LegacyUrlsTest(FrontTestCase):
     def test_redirect_datasets(self):
         dataset = DatasetFactory()
         response = self.client.get('/en/dataset/%s/' % dataset.slug)
-        self.assertRedirects(response, url_for('datasets.show', dataset=dataset))
+        self.assertRedirects(
+            response, url_for('datasets.show', dataset=dataset))
 
     def test_redirect_datasets_not_found(self):
         response = self.client.get('/en/DataSet/wtf')
@@ -145,7 +150,8 @@ class LegacyUrlsTest(FrontTestCase):
 
     def test_redirect_topics(self):
         response = self.client.get('/en/group/societe/')
-        self.assertRedirects(response, url_for('topics.display', topic='societe'))
+        self.assertRedirects(
+            response, url_for('topics.display', topic='societe'))
 
 
 class SpecificUrlsTest(FrontTestCase):
@@ -231,7 +237,8 @@ class SitemapTest(FrontTestCase):
             url_for('gouvfr.faq_redirect', _external=True),
         ]
         for section in ('citizen', 'producer', 'reuser', 'developer'):
-            urls.append(url_for('gouvfr.faq_redirect', section='citizen', _external=True))
+            urls.append(url_for('gouvfr.faq_redirect',
+                                section='citizen', _external=True))
 
         for url in urls:
             self.assertIn('<loc>{url}</loc>'.format(url=url), response.data)

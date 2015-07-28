@@ -10,7 +10,8 @@ from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
 
 
-blueprint = I18nBlueprint('gouvfr', __name__, template_folder='templates', static_folder='static')
+blueprint = I18nBlueprint(
+    'gouvfr', __name__, template_folder='templates', static_folder='static')
 
 
 @blueprint.route('/dataset/<dataset>/')
@@ -44,17 +45,20 @@ def redevances():
 
 DATACONNEXIONS_CATEGORIES = [
     ('datadmin', 'Datadmin', (
-        'Projets portés par un acteur public (administration centrale ou déconcentrée, collectivité...) '
-        'qui a utilisé l’open data pour améliorer son action, pour résoudre un problème...'
+        'Projets portés par un acteur public (administration centrale ou '
+        'déconcentrée, collectivité...) qui a utilisé l’open data pour '
+        'améliorer son action, pour résoudre un problème…'
     )),
     ('data2b', 'Data-2-B', 'Projets destinés à un usage professionnel'),
     ('data2c', 'Data-2-C', 'Projets destinés au grand public'),
     ('datautile', 'Data-utile', (
-        'Projets d’intérêt général, engagés par exemple dans les champs de la solidarité, '
-        'du développement durable ou de la lutte contre les discriminations, '
-        'ou portés par une association, une ONG, une entreprise sociale, un entrepreneur social ou un citoyen.'
+        'Projets d’intérêt général, engagés par exemple dans les champs de '
+        'la solidarité, du développement durable ou de la lutte contre '
+        'les discriminations, ou portés par une association, une ONG, '
+        'une entreprise sociale, un entrepreneur social ou un citoyen.'
     )),
-    ('datajournalisme', 'Data-journalisme', 'Projets s’inscrivants dans la thématique du journalisme de données.'),
+    ('datajournalisme', 'Data-journalisme',
+     'Projets s’inscrivants dans la thématique du journalisme de données.'),
 ]
 
 
