@@ -83,6 +83,7 @@ C3_PARTNERS = (
     'museum-national-dhistoire-naturelle',
     'irstea',
 )
+NB_DISPLAYED_DATASETS = 18
 
 
 @blueprint.route('/c3')
@@ -93,9 +94,9 @@ def c3():
 @blueprint.route('/climate-change-challenge')
 def climate_change_challenge():
     partners = Organization.objects(slug__in=C3_PARTNERS)
-    datasets = (Dataset.objects(badges__kind=C3)
-                       .order_by('-metrics.followers')[:30])
-    return theme.render('c3.html', partners=partners, datasets=datasets)
+    datasets = Dataset.objects(badges__kind=C3).order_by('-metrics.followers')
+    return theme.render('c3.html', partners=partners, datasets=datasets,
+                        nb_displayed_datasets=NB_DISPLAYED_DATASETS)
 
 
 @blueprint.route('/faq/', defaults={'section': 'home'})

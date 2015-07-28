@@ -123,7 +123,7 @@
         <div class="row">
             <h3 class="col-xs-12">Les jeux de données remarquables</h3>
             <ul class="card-list">
-                {% for dataset in datasets %}
+                {% for dataset in datasets[:nb_displayed_datasets] %}
                 <li class="col-md-4 col-sm-6">
                     {% include theme('dataset/card.html') %}
                 </li>
