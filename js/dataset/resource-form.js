@@ -57,6 +57,7 @@ define([
     }
 
     function set_pane(value) {
+        active_pane = value;
         clear_upload_fields();
         restore_values(value);
         switch(value) {
@@ -70,7 +71,6 @@ define([
                 show_api();
                 break;
         }
-        active_pane = value;
     }
 
     function clear_upload_fields() {
