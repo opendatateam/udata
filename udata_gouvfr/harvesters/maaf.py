@@ -166,13 +166,6 @@ class MaafBackend(backends.BaseBackend):
         if metadata.get('license_id'):
             dataset.license = License.objects.get(id=metadata['license_id'])
 
-        if self.source.owner:
-            dataset.owner = self.source.owner
-
-        if self.source.organization:
-            dataset.organization = self.source.organization
-            dataset.supplier = self.source.organization
-
         if (metadata.get('temporal_coverage_from')
                 and metadata.get('temporal_coverage_to')):
             dataset.temporal_coverage = db.DateRange(
