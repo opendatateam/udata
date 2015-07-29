@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+import codecs
+import itertools
 import json
 import os
 import re
-import itertools
 
 
 from glob import iglob
@@ -97,7 +98,7 @@ def i18n():
     catalog = {}
     catalog_filename = join(ROOT, 'locales', '{}.en.json'.format(I18N_DOMAIN))
     if exists(catalog_filename):
-        with open(catalog_filename) as f:
+        with codecs.open(catalog_filename, encoding='utf8') as f:
             catalog = json.load(f)
 
     globs = '*.js', '*.vue'
@@ -112,15 +113,16 @@ def i18n():
         glob_patterns = (iglob(join(directory, g)) for g in globs)
         for filename in itertools.chain(*glob_patterns):
             print('Extracting messages from {0}'.format(green(filename)))
-            content = open(filename, 'r').read()
+            content = codecs.open(filename, encoding='utf8').read()
             for regexp in regexps:
                 for match in regexp.finditer(content):
                     key = match.group(1)
-                    if not key in catalog:
+                    if key not in catalog:
                         catalog[key] = key
 
-    with open(catalog_filename, 'wb') as f:
-        json.dump(catalog, f, sort_keys=True, indent=4, ensure_ascii=False)
+    with codecs.open(catalog_filename, 'w', encoding='utf8') as f:
+        json.dump(catalog, f, sort_keys=True, indent=4, ensure_ascii=False,
+                  encoding='utf8', separators=(',', ': '))
 
 
 @task
