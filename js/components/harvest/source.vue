@@ -1,67 +1,65 @@
 <template>
-<box title="{{source.name}}" icon="cogs" class="box-solid" footer="{{toggled}}">
-    <aside>
-        <a class="text-muted pointer" v-on="click: toggle">
-            <i class="fa fa-gear"></i>
-        </a>
-    </aside>
-    <div v-if="!toggled">
-        <h3>
-            {{source.name}}
-            <small>{{source.backend}}</small>
-        </h3>
-        <div v-markdown="{{source.description}}"></div>
-    </div>
-    <vform v-ref="form" v-if="toggled" fields="{{fields}}" object="{{source}}"></vform>
-    <footer>
-        <button type="submit" class="btn btn-primary"
-            v-on="click: save($event)" v-i18n="Save"></button>
-    </footer>
-</box>
+    <datatable-widget title="{{source.name}}" icon="tasks"
+        boxclass="harvest-jobs-widget"
+        fields="{{ fields }}"
+        p="{{ jobs }}">
+        <header>
+            <h3>
+                {{source.name}}
+                <small>{{source.backend}}</small>
+            </h3>
+            {{ source.description | markdown }}
+            <dl>
+                <dt>{{ _('Jobs') }}</dt>
+                <dd>{{ jobs.total }}</dd>
+            </dl>
+        </header>
+    </datatable-widget>
 </template>
 
 <script>
+import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
+import HarvestJobs from 'models/harvest/jobs';
+
 export default {
-    name: 'source-details',
-    props: ['source'],
+    name: 'harvest-jobs-widget',
+    components: {
+        'datatable-widget': require('components/widgets/datatable.vue')
+    },
     data: function() {
         return {
-            title: this._('Parameters'),
-            toggled: false,
+            title: this._('Jobs'),
+            source: {},
+            jobs: new HarvestJobs({query: {page_size: 10}}),
             fields: [{
-                id: 'name',
-                label: this._('Name')
+                label: this._('Date'),
+                key: 'created',
+                sort: 'created',
+                type: 'datetime'
             }, {
-                id: 'backend',
-                label: this._('Backend')
-            }, {
-                id: 'url',
-                label: this._('URL')
-            }, {
-                id: 'description',
-                label: this._('Description'),
-            }, {
-                id: 'active',
-                label: this._('Active')
+                label: this._('Status'),
+                key: 'status',
+                type: 'label',
+                label_type: function(status) {
+                    return STATUS_CLASSES[status];
+                },
+                label_func: function(status) {
+                    return STATUS_I18N[status];
+                }
             }]
         };
     },
-    components: {
-        'box': require('components/containers/box.vue'),
-        'vform': require('components/form/vertical-form.vue')
+    events: {
+        'datatable:item:click': function(item) {
+            this.$dispatch('harvest:job:selected', item);
+        }
     },
-    methods: {
-        toggle: function() {
-            this.toggled = !this.toggled;
-        },
-        save: function(e) {
-            var data = this.$.form.serialize();
-
-            console.log(data);
-            this.source.update(data);
-            e.preventDefault();
-
-            this.toggled = false;
+    props: ['source', 'current'],
+    watch: {
+        'source.id': function(id) {
+            if (id) {
+                this.jobs.fetch({ident: id});
+            }
         }
     }
 };

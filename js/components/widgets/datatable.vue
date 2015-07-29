@@ -14,6 +14,11 @@
         text-overflow:ellipsis;
         max-width: 0;
     }
+
+    header.datatable-header > header{
+        width: 100%;
+        padding: 10px;
+    }
 }
 </style>
 
@@ -40,7 +45,7 @@
             <div class="input-group">
                 <input type="text" class="form-control input-sm pull-right"
                     style="width: 150px;" placeholder="{{'Search'|i18n}}"
-                    v-model="search_query" v-on="keyup:search | key enter">
+                    v-model="search_query" debounce="500" v-on="keyup:search | key enter">
                 <div class="input-group-btn">
                     <button class="btn btn-sm btn-flat" v-on="click: search">
                         <i class="fa fa-search"></i>
@@ -49,6 +54,9 @@
             </div>
         </div>
     </aside>
+    <header class="datatable-header">
+        <content select="header"></content>
+    </header>
     <table class="table table-hover" v-if="has_data">
         <thead>
             <tr>
@@ -68,6 +76,7 @@
         <tbody>
             <tr class="pointer"
                 v-repeat="item:p.data"
+                v-class="active: selected == item"
                 v-on="click: item_click(item)">
                 <td v-repeat="field: fields" track-by="key"
                     v-class="
@@ -260,6 +269,7 @@ module.exports = {
             downloads: [],
             p: {},
             track: 'id',
+            selected: null
         };
     },
     computed: {
@@ -283,6 +293,7 @@ module.exports = {
             this.p.search(this.search_query);
         },
         item_click: function(item) {
+            this.selected = item;
             this.$dispatch('datatable:item:click', item);
         }
     },
@@ -296,6 +307,11 @@ module.exports = {
                 default:
                     return value + 5;
             }
+        }
+    },
+    watch: {
+        search_query: function(query) {
+            this.p.search(query);
         }
     }
 };
