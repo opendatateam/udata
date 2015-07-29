@@ -29,6 +29,9 @@ module.exports = {
                     id: 'tags',
                     label: this._('Tags'),
                     widget: 'tag-completer'
+                }, {
+                    id: 'private',
+                    label: this._('Draft')
                 }]
         };
     },
