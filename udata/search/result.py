@@ -34,6 +34,10 @@ class SearchResult(Paginable):
     def page_size(self):
         return self.query.page_size
 
+    @property
+    def class_name(self):
+        return self.query.adapter.model.__name__
+
     def get_ids(self):
         return [hit['_id']
                 for hit in self.result.get('hits', {}).get('hits', [])]

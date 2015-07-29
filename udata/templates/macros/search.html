@@ -86,7 +86,7 @@
 {% set facet = result.get_facet(name) %}
 {% if facet.visible %}
     <div class="panel-heading clickable"
-        data-toggle="collapse" data-target="#collapse-{{name}}">
+        data-toggle="collapse" data-target="#collapse-{{result.class_name}}-{{name}}">
         <h3 class="panel-title">
             {% if in_url(name) %}
             <a href="{{ url_del(None, name, 'page') }}"
@@ -100,9 +100,9 @@
         </h3>
     </div>
     {% if facet.type == 'terms' %}
-        {{ term_facet(name, facet, result.query, url=url) }}
+        {{ term_facet(name, facet, result.query, url=url, class_name=result.class_name) }}
     {% elif facet.type == 'models' %}
-        {{ model_facet(name, facet, result.query, url=url) }}
+        {{ model_facet(name, facet, result.query, url=url, class_name=result.class_name) }}
     {% elif facet.type == 'bool' %}
         {{ bool_facet(name, facet, result.query, url=url) }}
     {% elif facet.type == 'range' %}
@@ -116,8 +116,8 @@
 {% endmacro %}
 
 
-{% macro term_facet(name, facet, query, url=None) %}
-<div id="collapse-{{name}}" class="list-group collapse in">
+{% macro term_facet(name, facet, query, url=None, class_name=None) %}
+<div id="collapse-{{class_name}}-{{name}}" class="list-group collapse in">
 {% for term, count in facet.terms[:nb_displayed_facets] %}
     <a href="{{ query.to_url(url, **{name: term}) }}"
         class="list-group-item">
@@ -127,11 +127,11 @@
 {% endfor %}
 {% if facet.terms|length > nb_displayed_facets %}
     <button class="list-group-item"
-        data-toggle="collapse" data-target="#collapse-{{name}}-more">
+        data-toggle="collapse" data-target="#collapse-{{class_name}}-{{name}}-more">
         {{ _('More results…') }}
         <span class="fa fa-chevron-right pull-right"></span>
     </button>
-    <div id="collapse-{{name}}-more" class="list-group collapse list-group-more">
+    <div id="collapse-{{class_name}}-{{name}}-more" class="list-group collapse list-group-more">
     {% for term, count in facet.terms[nb_displayed_facets:] %}
         <a href="{{ query.to_url(url, **{name: term}) }}"
             class="list-group-item">
@@ -145,8 +145,8 @@
 {% endmacro %}
 
 
-{% macro model_facet(name, facet, query, url=None) %}
-<div id="collapse-{{name}}" class="list-group collapse in">
+{% macro model_facet(name, facet, query, url=None, class_name=None) %}
+<div id="collapse-{{class_name}}-{{name}}" class="list-group collapse in">
 {% for obj, count in facet.models[:nb_displayed_facets] %}
     <a href="{{ query.to_url(url, **{name: obj.id|string}) }}"
         class="list-group-item">
@@ -156,11 +156,11 @@
 {% endfor %}
 {% if facet.models|length > nb_displayed_facets %}
     <button class="list-group-item list-group-more"
-        data-toggle="collapse" data-target="#collapse-{{name}}-more">
+        data-toggle="collapse" data-target="#collapse-{{class_name}}-{{name}}-more">
         {{ _('More results…') }}
         <span class="fa fa-chevron-right pull-right"></span>
     </button>
-    <div id="collapse-{{name}}-more" class="list-group collapse list-group-more">
+    <div id="collapse-{{class_name}}-{{name}}-more" class="list-group collapse list-group-more">
     {% for obj, count in facet.models[nb_displayed_facets:] %}
         <a href="{{ query.to_url(url, **{name: obj.id|string}) }}"
             class="list-group-item">
