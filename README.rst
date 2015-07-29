@@ -69,3 +69,12 @@ Documentation
 =============
 
 The documentation is hosted `on Read the Docs <http://udata.readthedocs.org/en/latest/>`_
+
+Translations
+============
+
+.. code-block:: console
+
+    $ inv i18n && tx push -s && tx pull -f && inv i18nc
+
+You have to set a `~/.transifexrc <http://docs.transifex.com/client/config/>`_ first.
