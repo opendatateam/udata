@@ -45,6 +45,13 @@ module.exports = {
                 align: 'left',
                 type: 'timeago',
                 width: 120
+            }, {
+                label: this._('Access'),
+                key: 'private',
+                sort: 'private',
+                align: 'left',
+                type: 'visibility',
+                width: 120
             }]
         };
     },

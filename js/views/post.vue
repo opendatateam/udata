@@ -22,6 +22,7 @@ module.exports = {
             post: new Post(),
             meta: {
                 title: null,
+                page: null,
                 subtitle: this._('Post')
             }
         };
@@ -46,6 +47,12 @@ module.exports = {
         post_id: function(id) {
             if (id) {
                 this.post.fetch(id);
+            }
+        },
+        'post.page': function(page) {
+            if (page) {
+                this.meta.page = page;
+                this.$dispatch('meta:updated', this.meta);
             }
         },
         'post.name': function(name) {

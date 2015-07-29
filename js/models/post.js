@@ -13,6 +13,13 @@ export default class Post extends Model {
         return this;
     }
 
+    update(data) {
+        this.$api('posts.update_post', {
+            post: this.id,
+            payload: data
+        }, this.on_fetched);
+    }
+
     save() {
         let data = {payload: this},
             endpoint = 'posts.create_post';
