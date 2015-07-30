@@ -223,25 +223,7 @@ class MaafBackend(backends.BaseBackend):
         root = etree.fromstring(xml.encode('utf8'))
         self.xsd.validate(root)
         _, tree = dictize(root)
-        try:
-            return schema(tree)
-        except MultipleInvalid as e:
-            for error in e.errors:
-                field = '.'.join(str(p) for p in e.path)
-                path = e.path
-                data = tree
-                while path:
-                    attr = path.pop(0)
-                    try:
-                        data = data[attr]
-                    except:
-                        data = None
-                try:
-                    data = str(data)
-                except:
-                    pass
-                log.error('[%s] %s: %s', field, str(e), data)
-            raise
+        return self.validate(tree, schema)
 
     @property
     def xsd(self):
