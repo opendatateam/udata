@@ -33,6 +33,9 @@ nav = Navigation()
 class UDataApp(Flask):
     debug_log_format = '[%(levelname)s][%(name)s:%(lineno)d] %(message)s'
 
+    # Keep track of static dirs given as register_blueprint argument
+    static_prefixes = {}
+
     def send_static_file(self, filename):
         '''
         Override default static handling:
@@ -66,6 +69,11 @@ class UDataApp(Flask):
         if 'error' not in g:
             g.error = e
         return super(UDataApp, self).handle_http_exception(e)
+
+    def register_blueprint(self, blueprint, **kwargs):
+        if blueprint.has_static_folder and 'url_prefix' in kwargs:
+            self.static_prefixes[blueprint.name] = kwargs['url_prefix']
+        return super(UDataApp, self).register_blueprint(blueprint, **kwargs)
 
 
 class Blueprint(BaseBlueprint):
