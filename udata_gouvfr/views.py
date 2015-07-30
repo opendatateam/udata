@@ -10,8 +10,10 @@ from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
 
 
-blueprint = I18nBlueprint(
-    'gouvfr', __name__, template_folder='templates', static_folder='static')
+blueprint = I18nBlueprint('gouvfr', __name__,
+                          template_folder='templates',
+                          static_folder='static',
+                          static_url_path='/static/gouvfr')
 
 
 @blueprint.route('/dataset/<dataset>/')
