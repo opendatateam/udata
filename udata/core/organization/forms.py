@@ -13,8 +13,7 @@ from .models import (
 __all__ = (
     'BadgeForm',
     'OrganizationForm',
-    'OrganizationMemberForm',
-    'OrganizationExtraForm',
+    'MemberForm',
     'MembershipRequestForm',
     'MembershipRefuseForm',
 )
@@ -55,19 +54,6 @@ class BadgeForm(ModelForm):
         _('Kind'), [validators.required()],
         choices=ORG_BADGE_KINDS.items(),
         description=_('Kind of badge (public-service, etc)'))
-
-
-class OrganizationMemberForm(ModelForm):
-    model_class = Organization
-
-    pk = fields.StringField(validators=[validators.required()])
-    value = fields.StringField(default='editor')
-
-
-class OrganizationExtraForm(Form):
-    key = fields.StringField(_('Key'), [validators.required()])
-    value = fields.StringField(_('Value'), [validators.required()])
-    old_key = fields.StringField(_('Old key'))
 
 
 class MembershipRequestForm(ModelForm):

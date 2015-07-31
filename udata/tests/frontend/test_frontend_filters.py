@@ -250,7 +250,7 @@ class FrontEndRootTest(FrontTestCase):
                 'hreflang="{lang}" />')
         self.assertEqual(
             response.data,
-            ''.join([link.format(lang='fr'), link.format(lang='de'),]))
+            ''.join([link.format(lang='fr'), link.format(lang='de')]))
 
     def test_i18n_alternate_links_outside_i18n_blueprint(self):
         test = Blueprint('test', __name__)

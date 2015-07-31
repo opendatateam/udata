@@ -34,7 +34,7 @@ from .models import (
     DATASET_BADGE_KINDS, UPDATE_FREQUENCIES
 )
 from .permissions import DatasetEditPermission
-from .forms import BadgeForm, ResourceForm, DatasetFullForm
+from .forms import BadgeForm, ResourceForm, DatasetForm
 from .search import DatasetSearch
 
 ns = api.namespace('datasets', 'Dataset related operations')
@@ -61,7 +61,7 @@ class DatasetListAPI(API):
     @api.marshal_with(dataset_fields)
     def post(self):
         '''Create a new dataset'''
-        form = api.validate(DatasetFullForm)
+        form = api.validate(DatasetForm)
         dataset = form.save()
         return dataset, 201
 
@@ -88,7 +88,7 @@ class DatasetAPI(API):
         if dataset.deleted:
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
-        form = api.validate(DatasetFullForm, dataset)
+        form = api.validate(DatasetForm, dataset)
         return form.save()
 
     @api.secure

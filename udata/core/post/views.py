@@ -4,13 +4,11 @@ from __future__ import unicode_literals
 
 from udata import theme
 from udata.i18n import I18nBlueprint
-from udata.frontend.views import CreateView, EditView
 
 from udata.models import Post
 
 from udata.sitemap import sitemap
 
-from .forms import PostForm
 from .permissions import PostEditPermission
 
 blueprint = I18nBlueprint('posts', __name__, url_prefix='/posts')
@@ -38,19 +36,6 @@ def list_posts():
 @blueprint.route('/<post:post>/')
 def show(post):
     return theme.render('post/display.html', post=post)
-
-
-@blueprint.route('/new/', endpoint='new')
-class PostCreateView(ProtectedPostView, CreateView):
-    model = Post
-    form = PostForm
-    template_name = 'post/create.html'
-
-
-@blueprint.route('/<post:post>/edit/', endpoint='edit')
-class PostEditView(ProtectedPostView, EditView):
-    form = PostForm
-    template_name = 'post/edit.html'
 
 
 @sitemap.register_generator

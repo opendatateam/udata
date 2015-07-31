@@ -7,8 +7,6 @@ import feedparser
 
 from flask import url_for
 
-from udata.models import Reuse, Member
-
 from . import FrontTestCase
 from ..factories import (
     ReuseFactory, UserFactory, AdminFactory, OrganizationFactory,
@@ -47,71 +45,6 @@ class ReuseBlueprintTest(FrontTestCase):
         response = self.get(url_for('reuses.list'))
         self.assert200(response)
 
-    def test_render_create(self):
-        '''It should render the reuse create form'''
-        response = self.get(url_for('reuses.new'))
-        self.assert200(response)
-
-    def test_render_create_with_dataset(self):
-        '''It should render the reuse create form with preentered dataset'''
-        dataset = DatasetFactory()
-        response = self.get(url_for('reuses.new', dataset=str(dataset.id)))
-        self.assert200(response)
-        form = self.get_context_variable('form')
-        self.assertEqual(form.datasets.data, [dataset])
-
-    def test_render_create_with_dataset_does_not_fails(self):
-        '''It should render the reuse create form with an unknown dataset'''
-        response = self.get(url_for('reuses.new', dataset='not-found'))
-        self.assert200(response)
-
-    def test_create(self):
-        '''It should create a reuse and redirect to reuse page'''
-        data = ReuseFactory.attributes()
-        self.login()
-        response = self.post(url_for('reuses.new'), data)
-
-        reuse = Reuse.objects.first()
-        self.assertRedirects(response, reuse.display_url)
-        self.assertEqual(reuse.owner, self.user)
-        self.assertIsNone(reuse.organization)
-
-    def test_create_as_org(self):
-        '''It should create a reuse and redirect to reuse page'''
-        self.login()
-        member = Member(user=self.user, role='editor')
-        org = OrganizationFactory(members=[member])
-        data = ReuseFactory.attributes()
-        data['organization'] = str(org.id)
-        response = self.post(url_for('reuses.new'), data)
-
-        reuse = Reuse.objects.first()
-        self.assertRedirects(response, reuse.display_url)
-        self.assertEqual(reuse.organization, org)
-        self.assertIsNone(reuse.owner)
-
-    def test_create_as_org_permissions(self):
-        '''It should create a reuse and redirect to reuse page'''
-        org = OrganizationFactory()
-        data = ReuseFactory.attributes()
-        data['organization'] = str(org.id)
-        self.login()
-        response = self.post(url_for('reuses.new'), data)
-
-        self.assert200(response)
-        self.assertEqual(Reuse.objects.count(), 0)
-
-    def test_create_url_exists(self):
-        '''It should fail create a reuse if URL exists'''
-        reuse = ReuseFactory()
-        data = ReuseFactory.attributes()
-        data['url'] = reuse.url
-        self.login()
-        response = self.post(url_for('reuses.new'), data)
-
-        self.assert200(response)  # Does not redirect on success
-        self.assertEqual(len(Reuse.objects), 1)
-
     def test_render_display(self):
         '''It should render the reuse page'''
         reuse = ReuseFactory()
@@ -129,42 +62,6 @@ class ReuseBlueprintTest(FrontTestCase):
         reuse = ReuseFactory(deleted=datetime.now())
         response = self.get(url_for('reuses.show', reuse=reuse))
         self.assertStatus(response, 410)
-
-    def test_render_edit(self):
-        '''It should render the reuse edit form'''
-        self.login(AdminFactory())
-        reuse = ReuseFactory()
-        response = self.get(url_for('reuses.edit', reuse=reuse))
-        self.assert200(response)
-
-    def test_edit(self):
-        '''It should handle edit form submit and redirect on reuse page'''
-        self.login(AdminFactory())
-        reuse = ReuseFactory()
-        data = reuse.to_dict()
-        data['description'] = 'new description'
-        response = self.post(url_for('reuses.edit', reuse=reuse), data)
-
-        reuse.reload()
-        self.assertRedirects(response, reuse.display_url)
-        self.assertEqual(reuse.description, 'new description')
-
-    def test_delete(self):
-        '''It should handle deletion from form submit and redirect'''
-        self.login(AdminFactory())
-        reuse = ReuseFactory()
-        response = self.post(url_for('reuses.delete', reuse=reuse))
-
-        reuse.reload()
-        self.assertRedirects(response, reuse.display_url)
-        self.assertIsNotNone(reuse.deleted)
-
-    def test_render_transfer(self):
-        '''It should render the reuse transfer form'''
-        user = self.login()
-        reuse = ReuseFactory(owner=user)
-        response = self.get(url_for('reuses.transfer', reuse=reuse))
-        self.assert200(response)
 
     def test_not_found(self):
         '''It should render the reuse page'''
@@ -224,32 +121,3 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertEqual(author.name, org.name)
         self.assertEqual(author.href,
                          self.full_url('organizations.show', org=org.id))
-
-    def test_render_issues(self):
-        '''It should render the reuse issues page'''
-        self.login(AdminFactory())
-        reuse = ReuseFactory()
-        response = self.get(url_for('reuses.issues', reuse=reuse))
-        self.assert200(response)
-
-    def test_add_dataset_to_reuse(self):
-        '''It should add the dataset to the reuse and redirect its page'''
-        self.login(AdminFactory())
-        reuse = ReuseFactory()
-        dataset = DatasetFactory()
-        data = {'dataset': str(dataset.id)}
-        response = self.post(url_for('reuses.add_dataset', reuse=reuse), data)
-
-        reuse.reload()
-        self.assertRedirects(response, reuse.display_url)
-        self.assertIn(dataset, reuse.datasets)
-
-    def test_add_non_existant_dataset_to_reuse(self):
-        '''It shouldn't add a non existent dataset to the reuse and redirect'''
-        self.login(AdminFactory())
-        reuse = ReuseFactory()
-        data = {'dataset': 'not-found'}
-        response = self.post(url_for('reuses.add_dataset', reuse=reuse), data)
-
-        reuse.reload()
-        self.assertRedirects(response, url_for('reuses.edit', reuse=reuse))

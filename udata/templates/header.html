@@ -59,7 +59,7 @@
             {% endif %}
             <li class="divider"></li>
             <li>
-              <a href="{{ url_for('users.edit', user=current_user) }}">{{ _('Settings') }}</a>
+              <a href="{{ url_for('admin.index', path='me/') }}">{{ _('Settings') }}</a>
             </li>
             <li class="divider"></li>
             <li><a href="{{ url_for('security.logout') }}">Logout</a></li>
