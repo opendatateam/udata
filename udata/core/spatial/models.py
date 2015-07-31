@@ -70,7 +70,7 @@ class GeoZone(db.Document):
         }
 
 
-@cache.memoize(timeout=50)
+@cache.memoize()
 def get_spatial_granularities(lang):
     granularities = [(l.id, l.name)
                      for l in GeoLevel.objects] + BASE_GRANULARITIES
