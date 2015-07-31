@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block content %}
+{% cache cache_duration, 'home', g.lang_code %}
 {# Carousels section #}
 <section class="default">
     <div class="container">
@@ -198,4 +199,5 @@
 </section>
 {% endif %}
 {# End blog section #}
+{% endcache %}
 {% endblock %}

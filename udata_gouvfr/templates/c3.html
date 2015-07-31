@@ -17,6 +17,7 @@
 {% set body_class="c3 dataconnexions" %}
 
 {% block content %}
+{% cache cache_duration, 'c3', g.lang_code %}
 <section class="content">
     <div class="container">
         <div class="row">
@@ -140,4 +141,5 @@
     </div>
 </section>
 {% endif %}
+{% endcache %}
 {% endblock %}
