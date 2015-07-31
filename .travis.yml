@@ -19,3 +19,6 @@ script:
   - nosetests --with-coverage udata_gouvfr
 after_success:
   - coveralls --rcfile=coverage.rc
+branches:
+  only:
+    - master
