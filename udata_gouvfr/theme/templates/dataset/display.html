@@ -27,7 +27,7 @@
 {% block toolbar %}
 {% if can_edit %}
 <div class="btn-group btn-group-xs">
-    <a href="{{ url_for('datasets.edit', dataset=dataset) }}" class="btn btn-success">
+    <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}" class="btn btn-success">
         <span class="glyphicon glyphicon-pencil"></span>
         {{ _('Edit') }}
     </a>
@@ -170,7 +170,7 @@
 
                     {% if can_edit %}
                     <a class="list-group-item add"
-                        href="{{ url_for('datasets.new_resource', dataset=dataset) }}">
+                        href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
                         <div class="format-label pull-left">+</div>
                         <h4 class="list-group-item-heading">
                             {{ _('Add a resource') }}
@@ -186,7 +186,7 @@
                     <div class="btn-toolbar">
                         {% if can_edit %}
                         <div class="btn-group btn-group-sm">
-                            <a href="{{ url_for('datasets.edit', dataset=dataset) }}" class="btn btn-success">
+                            <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}" class="btn btn-success">
                                 <span class="glyphicon glyphicon-pencil"></span>
                                 {{ _('Edit') }}
                             </a>
@@ -558,7 +558,7 @@
                 {% include theme('dataset/resource/list-item.html') %}
             {% endfor %}
                 <a class="list-group-item add"
-                    href="{{ url_for('datasets.new_community_resource', dataset=dataset) }}">
+                    href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
                     <div class="format-label pull-left">+</div>
                     <h4 class="list-group-item-heading">
                         {{ _('Add a resource') }}
@@ -609,7 +609,7 @@
                                 </a>
                                 {% if current_user.sysadmin or reuse.owner == current_user %}
                                 <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
-                                    href="{{ url_for('reuses.edit', reuse=reuse) }}"
+                                    href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}"
                                     data-containter="body">
                                     <span class="glyphicon glyphicon-edit"></span>
                                 </a>
@@ -635,8 +635,7 @@
                     {% endfor %}
                     <div class="col-sm-6 col-md-4">
                         <a class="thumbnail reuse add"
-                            href="{{ url_for('reuses.new', dataset=dataset.id) }}"
-                            data-add-url="{{ url_for('reuses.add_dataset', reuse='{placeholder}') }}">
+                            href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}">
                             <div class="preview">+</div>
                             <div class="caption">
                                 <h4>{{ _('Add a reuse') }}</h4>
