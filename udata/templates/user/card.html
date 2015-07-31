@@ -1,3 +1,4 @@
+{% cache cache_duration, 'user-card', user.id|string, g.lang_code %}
 {% set user_url = url_for('users.show', user=user) %}
 <div class="card">
     <a class="card-logo" href="{{ user_url }}">
@@ -54,3 +55,4 @@
     </footer>
     {% endif %}
 </div>
+{% endcache %}

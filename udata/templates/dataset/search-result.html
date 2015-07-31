@@ -1,3 +1,4 @@
+{% cache cache_duration, 'dataset-search-result', dataset.id|string, g.lang_code %}
 <li class="search-result dataset-result">
     <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}">
         {% if dataset.organization %}
@@ -95,3 +96,4 @@
         </ul>
     </a>
 </li>
+{% endcache %}

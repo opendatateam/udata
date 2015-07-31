@@ -114,6 +114,14 @@ THEME
 The enabled theme name.
 
 
+TEMPLATE_CACHE_DURATION
+***********************
+
+**default**: ``5``
+
+The duration used for templates cache, in minutes.
+
+
 Flask-Assets options
 ~~~~~~~~~~~~~~~~~~~~
 

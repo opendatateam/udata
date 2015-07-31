@@ -1,3 +1,4 @@
+{% cache cache_duration, 'org-card', organization.id|string, g.lang_code %}
 <div class="card organization-card">
     <a class="card-logo" href="{{ url_for('organizations.show', org=organization) }}">
         <img alt="{{ organization.title }}"

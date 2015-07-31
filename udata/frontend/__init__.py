@@ -5,7 +5,7 @@ import logging
 
 from importlib import import_module
 
-from flask import abort
+from flask import abort, current_app
 
 from udata.i18n import I18nBlueprint
 
@@ -34,6 +34,13 @@ def inject_footer_snippets():
 @front.app_context_processor
 def inject_current_theme():
     return {'current_theme': theme.current}
+
+
+@front.app_context_processor
+def inject_cache_duration():
+    return {
+        'cache_duration': 60 * current_app.config['TEMPLATE_CACHE_DURATION']
+    }
 
 
 def _load_views(app, module):

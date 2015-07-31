@@ -85,6 +85,9 @@ class Defaults(object):
 
     MD_ALLOWED_STYLES = []
 
+    # Cache duration dor template in minutes
+    TEMPLATE_CACHE_DURATION = 5
+
     # CROQUEMORT = {
     #     'url': 'http://localhost:8000',
     #     'delay': 1,
