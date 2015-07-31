@@ -119,29 +119,6 @@ define([
         }
     }
 
-    function add_reuse() {
-        var $this = $(this);
-        if (user_reuses) {
-            var url_pattern = $this.data('add-url'),
-                $modal = modal({
-                    title: i18n._('Add a reuse'),
-                    content: addReuseTpl({
-                        reuses: $.map(user_reuses, function(reuse) {
-                            reuse.add_url = url_pattern.replace('{placeholder}', reuse.id);
-                            return reuse;
-                        }),
-                        new_reuse_url: $this.attr('href'),
-                        csrf_token: forms.csrftoken,
-                        dataset: $('.dataset-container').attr('itemid')
-                    })
-                });
-            $modal.on('shown.bs.modal', function() {
-                forms.handle_postables($modal.find('a.reuse.postable'));
-            });
-            return false;
-        }
-    }
-
     function load_coverage_map() {
         var $el = $('#coverage-map'),
             ATTRIBUTIONS = [
@@ -215,7 +192,6 @@ define([
 
     $(function() {
         log.debug('Dataset display page');
-        $('.reuse.add').click(add_reuse);
         $('.btn-extras').click(display_extras);
         load_coverage_map();
         prepare_resources();

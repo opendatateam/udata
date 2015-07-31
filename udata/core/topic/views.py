@@ -4,13 +4,11 @@ from __future__ import unicode_literals
 from flask import g, request
 
 from udata import search, theme
-from udata.frontend.views import CreateView, EditView
 from udata.i18n import I18nBlueprint
 from udata.models import Topic, Reuse, Dataset
 from udata.sitemap import sitemap
 from udata.utils import multi_to_dict
 
-from .forms import TopicForm
 from .permissions import TopicEditPermission
 
 blueprint = I18nBlueprint('topics', __name__, url_prefix='/topics')
@@ -85,19 +83,6 @@ class TopicView(object):
 
 class ProtectedTopicView(TopicView):
     require = TopicEditPermission()
-
-
-@blueprint.route('/new/', endpoint='new')
-class TopicCreateView(ProtectedTopicView, CreateView):
-    model = Topic
-    form = TopicForm
-    template_name = 'topic/create.html'
-
-
-@blueprint.route('/<topic:topic>/edit/', endpoint='edit')
-class TopicEditView(ProtectedTopicView, EditView):
-    form = TopicForm
-    template_name = 'topic/edit.html'
 
 
 @blueprint.before_app_request

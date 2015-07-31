@@ -12,10 +12,7 @@ from .models import (
     DATASET_BADGE_KINDS
 )
 
-__all__ = (
-    'BadgeForm', 'DatasetForm', 'ResourceForm', 'CommunityResourceForm',
-    'DatasetExtraForm'
-)
+__all__ = ('BadgeForm', 'DatasetForm', 'ResourceForm')
 
 
 class DatasetForm(ModelForm):
@@ -47,10 +44,6 @@ class DatasetForm(ModelForm):
 
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_('Publish as'))
-
-
-class DatasetFullForm(DatasetForm):
-    organization = fields.PublishAsField()
     extras = fields.ExtrasField(extras=Dataset.extras)
 
 
@@ -119,13 +112,3 @@ class ResourceForm(ModelForm):
     published = fields.DateTimeField(
         _('Publication date'),
         description=_('The publication date of the resource'))
-
-
-class CommunityResourceForm(ResourceForm):
-    owner = fields.CurrentUserField()
-
-
-class DatasetExtraForm(Form):
-    key = fields.StringField(_('Key'), [validators.required()])
-    value = fields.StringField(_('Value'), [validators.required()])
-    old_key = fields.StringField(_('Old key'))
