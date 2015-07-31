@@ -1,4 +1,4 @@
-{% cache 60*5, 'reuse-card', reuse.id|string, g.lang_code %}
+{% cache cache_duration, 'reuse-card', reuse.id|string, g.lang_code %}
 <div class="card reuse-card">
     <a class="card-logo" href="{{ url_for('reuses.show', reuse=reuse) }}">
         <img alt="{{ reuse.title }}"

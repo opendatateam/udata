@@ -1,4 +1,4 @@
-{% cache 60*5, 'reuse-search-result', reuse.id|string, g.lang_code %}
+{% cache cache_duration, 'reuse-search-result', reuse.id|string, g.lang_code %}
 <li class="search-result reuse-result">
     <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
         <div class="result-logo pull-left">

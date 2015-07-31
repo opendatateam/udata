@@ -1,4 +1,4 @@
-{% cache 60*5, 'user-search-result', user.id|string, g.lang_code %}
+{% cache cache_duration, 'user-search-result', user.id|string, g.lang_code %}
 <li class="search-result user-result">
     <a href="{{ url_for('users.show', user=user) }}" title="{{ user.fullname }}">
         <div class="result-logo pull-left">
