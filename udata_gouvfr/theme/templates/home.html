@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-{% cache 60*5, 'home', g.lang_code %}
+{% cache cache_duration, 'home', g.lang_code %}
 {# Carousels section #}
 <section class="default">
     <div class="container">
