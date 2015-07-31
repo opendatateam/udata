@@ -1,3 +1,4 @@
+{% cache 60*5, 'subnav-large', g.lang_code %}
 <nav class="navbar navbar-static-top navbar-subnav subnav-large">
     <div class="cover-default"></div>
     <div class="container">
@@ -50,4 +51,4 @@
     </div>
 
 </nav>
-
+{% endcache %}
