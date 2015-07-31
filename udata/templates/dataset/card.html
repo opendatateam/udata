@@ -1,3 +1,4 @@
+{% cache 60*5, 'dataset-card', dataset.id|string, g.lang_code %}
 {% set dataset_url = url_for('datasets.show', dataset=dataset) %}
 <div class="card dataset-card">
     {% if dataset.organization %}
@@ -105,3 +106,4 @@
 
     </footer>
 </div>
+{% endcache %}

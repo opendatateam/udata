@@ -1,3 +1,4 @@
+{% cache 60*5, 'org-search-result', organization.id|string, g.lang_code %}
 <li class="search-result organization-result">
     <a href="{{ url_for('organizations.show', org=organization) }}" title="{{ organization.name }}">
         <div class="result-logo pull-left">
@@ -74,3 +75,4 @@
         </ul>
     </a>
 </li>
+{% endcache %}
