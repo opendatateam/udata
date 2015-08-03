@@ -32,19 +32,6 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
         for license_id in OdsHarvester.LICENSES.values():
             License.objects.create(id=license_id, title=license_id)
 
-    def test_create_ods_url(self):
-        values = {
-            "http://public.opendatasoft.com/api/datasets/1.0/search/?rows=10":
-                "http://public.opendatasoft.com",
-            "https://public.opendatasoft.com/api/datasets/1.0/search/?rows=10":
-                "https://public.opendatasoft.com",
-            "http://public.opendatasoft.com/explore/":
-                "http://public.opendatasoft.com",
-            "http://public.opendatasoft.com": "http://public.opendatasoft.com",
-        }
-        for value, expected in values.items():
-            self.assertEqual(OdsHarvester.create_ods_base_url(value), expected)
-
     @patch.object(OdsHarvester, 'get')
     def test_simple(self, mock):
         org = OrganizationFactory()
@@ -64,51 +51,68 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
         job = source.get_last_job()
         self.assertEqual(len(job.items), 3)
 
-        datasets = {d.extras["remote_id"]: d for d in Dataset.objects.all()}
-        self.assertEqual(len(datasets), 3)
+        datasets = {d.extras["harvest:remote_id"]: d for d in Dataset.objects}
+        self.assertEqual(len(datasets), 2)
 
-        self.assertTrue("test-a@etalab-sandbox" in datasets)
-        d = datasets["test-a@etalab-sandbox"]
+        self.assertIn("test-a", datasets)
+        d = datasets["test-a"]
         self.assertEqual(d.title, "test-a")
         self.assertEqual(d.description, "<p>test-a-description</p>")
-        self.assertEqual(",".join(d.tags),
-                         "environment,keyword2,keyword1,heritage,culture")
+        self.assertEqual(d.tags, ['environment',
+                                  'keyword2',
+                                  'keyword1',
+                                  'heritage',
+                                  'culture'])
         self.assertEqual(d.extras["references"], "http://example.com")
         self.assertEqual(d.extras["has_records"], True)
-        self.assertEqual(d.extras["remote_id"], "test-a@etalab-sandbox")
+        self.assertEqual(d.extras["harvest:remote_id"], "test-a")
+        self.assertEqual(d.extras["harvest:domain"],
+                         "etalab-sandbox.opendatasoft.com")
         self.assertEqual(d.extras["ods_url"],
                          ("http://etalab-sandbox.opendatasoft.com"
                           "/explore/dataset/test-a/"))
         self.assertEqual(d.license.id, "fr-lo")
 
-        self.assertEqual(len(d.resources), 1)
+        self.assertEqual(len(d.resources), 2)
         resource = d.resources[0]
-        self.assertEqual(resource.title, d.title)
+        self.assertEqual(resource.title, '{0} (CSV)'.format(d.title))
         self.assertEqual(resource.description, d.description)
+        self.assertEqual(resource.format, 'csv')
         self.assertEqual(resource.url,
                          ("http://etalab-sandbox.opendatasoft.com/"
-                          "explore/dataset/test-a/?tab=export"))
-        resp = requests.get(resource.url)
-        resp.raise_for_status()
+                          "explore/dataset/test-a/download"
+                          "?format=csv&timezone=Europe/Berlin"
+                          "&use_labels_for_header=true"))
 
-        self.assertTrue("test-b@etalab-sandbox" in datasets)
-        test_b = datasets["test-b@etalab-sandbox"]
-        self.assertEqual(",".join(test_b.tags),
-                         ("buildings,housing,equipment,town planning,"
-                          "keyword1,spatial planning"))
-        self.assertEqual(len(test_b.resources), 1)
-        resource = test_b.resources[0]
-        self.assertEqual(resource.title, test_b.title)
+        resource = d.resources[1]
+        self.assertEqual(resource.title, '{0} (JSON)'.format(d.title))
+        self.assertEqual(resource.description, d.description)
+        self.assertEqual(resource.format, 'json')
         self.assertEqual(resource.url,
                          ("http://etalab-sandbox.opendatasoft.com/"
-                          "explore/dataset/test-b/?tab=export"))
-        resp = requests.get(resource.url)
-        resp.raise_for_status()
+                          "explore/dataset/test-a/download"
+                          "?format=json&timezone=Europe/Berlin"
+                          "&use_labels_for_header=true"))
 
-        test_c = datasets["test-c@etalab-sandbox"]
-        self.assertEqual(len(test_c.resources), 1)
-        resource = test_c.resources[0]
-        self.assertEqual(resource.format, "html")
+        # test-b has geo feature
+        self.assertIn("test-b", datasets)
+        test_b = datasets["test-b"]
+        self.assertEqual(test_b.tags, ['buildings',
+                                       'housing',
+                                       'equipment',
+                                       'town planning',
+                                       'keyword1',
+                                       'spatial planning'])
+        self.assertEqual(len(test_b.resources), 3)
+        resource = test_b.resources[2]
+        self.assertEqual(resource.title, '{0} (GeoJSON)'.format(test_b.title))
+        self.assertEqual(resource.description, test_b.description)
+        self.assertEqual(resource.format, 'json')
         self.assertEqual(resource.url,
-                         ("http://etalab-sandbox.opendatasoft.com"
-                          "/explore/dataset/test-c/?tab=export"))
+                         ("http://etalab-sandbox.opendatasoft.com/"
+                          "explore/dataset/test-b/download"
+                          "?format=geojson&timezone=Europe/Berlin"
+                          "&use_labels_for_header=true"))
+
+        # test-c has no data
+        self.assertNotIn('test-c', datasets)

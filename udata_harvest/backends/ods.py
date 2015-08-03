@@ -5,13 +5,14 @@ import logging
 import re
 
 from udata.models import Dataset, License, Resource
-from udata.ext.harvest import backends
+from . import BaseBackend, register
+from ..exceptions import HarvestException
 
 log = logging.getLogger(__name__)
 
 
-@backends.register
-class OdsHarvester(backends.BaseBackend):
+@register
+class OdsHarvester(BaseBackend):
     name = 'ods'
     verify_ssl = False
 
@@ -22,66 +23,48 @@ class OdsHarvester(backends.BaseBackend):
         "Public Domain": "other-pd"
     }
 
-    @staticmethod
-    def create_ods_base_url(url):
-        p = r'(?P<scheme>https?)?(://)?(?P<domain>[^/]*)'
-        pattern = re.compile(p, re.UNICODE)
-
-        match = pattern.search(url)
-        if match:
-            groups = match.groupdict()
-            scheme = groups["scheme"]
-            if scheme is None:
-                scheme = 'http'
-            domain = groups["domain"]
-
-            if scheme is not None and domain is not None:
-                return "%s://%s" % (scheme, domain)
-
-        raise Exception("Invalid OpenDataSoft url : %s" % url)
-
-    def _get_api_url(self, url):
-        return "%s/api/datasets/1.0/search/" % self.ods_base_url
+    @property
+    def api_url(self):
+        return "{0}/api/datasets/1.0/search/".format(self.source.url)
 
     def _get_download_url(self, dataset_id, format):
-        return ("%s/explore/dataset/%s/download/"
+        return ("%s/explore/dataset/%s/download"
                 "?format=%s&timezone=Europe/Berlin"
-                "&use_labels_for_header=true") % (self.ods_base_url,
+                "&use_labels_for_header=true") % (self.source.url,
                                                   dataset_id,
                                                   format)
 
     def _get_explore_url(self, dataset_id):
-        return "%s/explore/dataset/%s/" % (self.ods_base_url, dataset_id)
+        return "%s/explore/dataset/%s/" % (self.source.url, dataset_id)
 
     def _get_export_url(self, dataset_id):
-        return "%s/explore/dataset/%s/?tab=export" % (self.ods_base_url,
+        return "%s/explore/dataset/%s/?tab=export" % (self.source.url,
                                                       dataset_id)
 
     def initialize(self):
-        self.ods_base_url = OdsHarvester.create_ods_base_url(self.source.url)
         count = 0
         nhits = None
         while nhits is None or count < nhits:
-            response = self.get(self._get_api_url(self.source.url),
+            response = self.get(self.api_url,
                                 params={"start": count, "rows": 50})
             response.raise_for_status()
             data = response.json()
             nhits = data["nhits"]
             for dataset in data["datasets"]:
                 count += 1
-                remote_id = "%s@%s" % (dataset["datasetid"],
-                                       dataset["metas"]["domain"])
-                self.add_item(remote_id, dataset=dataset,
-                              ods_base_url=self.ods_base_url)
+                self.add_item(dataset["datasetid"], dataset=dataset)
 
     def process(self, item):
-        self.ods_base_url = item.kwargs["ods_base_url"]
         ods_dataset = item.kwargs["dataset"]
         dataset_id = ods_dataset["datasetid"]
         ods_metadata = ods_dataset["metas"]
         remote_id = item.remote_id
-        dataset, created = Dataset.objects.get_or_create(title=remote_id,
-                                                         auto_save=False)
+
+        if not ods_dataset.get('has_records'):
+            msg = 'Dataset {datasetid} has no record'.format(**ods_dataset)
+            raise HarvestException(msg)
+
+        dataset = self.get_dataset(item.remote_id)
 
         dataset.title = ods_metadata['title']
         dataset.frequency = "unknown"
@@ -110,23 +93,28 @@ class OdsHarvester(backends.BaseBackend):
             license_id = self.LICENSES[ods_license_id]
             dataset.license = License.objects.get(id=license_id)
 
-        if self.source.owner:
-            dataset.owner = self.source.owner
-
-        if self.source.organization:
-            dataset.organization = self.source.organization
-            dataset.supplier = self.source.organization
-
         dataset.resources = []
 
-        resource = Resource(
-            title=ods_metadata["title"],
-            description=ods_metadata.get("description"),
-            type='remote',
-            url=self._get_export_url(dataset_id),
-            format="html")
-        resource.modified = ods_metadata["modified"]
-        dataset.resources.append(resource)
+        for format in 'csv', 'json':
+            resource = Resource(
+                title='{0} ({1})'.format(ods_metadata["title"],
+                                         format.upper()),
+                description=ods_metadata.get("description") or '',
+                type='remote',
+                url=self._get_download_url(dataset_id, format),
+                format=format)
+            resource.modified = ods_metadata["modified"]
+            dataset.resources.append(resource)
+
+        if 'geo' in ods_dataset['features']:
+            resource = Resource(
+                title='{0} ({1})'.format(ods_metadata["title"], 'GeoJSON'),
+                description=ods_metadata.get("description") or '',
+                type='remote',
+                url=self._get_download_url(dataset_id, 'geojson'),
+                format='json')
+            resource.modified = ods_metadata["modified"]
+            dataset.resources.append(resource)
 
         dataset.extras["remote_id"] = remote_id
         dataset.extras["ods_url"] = self._get_explore_url(dataset_id)
