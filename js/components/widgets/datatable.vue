@@ -149,6 +149,10 @@ var CellWidget = Vue.extend({
 
                 for (var i=0; i < parts.length; i++) {
                     var key = parts[i];
+                    if (!result || !result.hasOwnProperty(key)) {
+                        result = null;
+                        break;
+                    }
                     result = result[key];
                 }
             }
