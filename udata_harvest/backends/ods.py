@@ -116,10 +116,9 @@ class OdsHarvester(BaseBackend):
             resource.modified = ods_metadata["modified"]
             dataset.resources.append(resource)
 
-        dataset.extras["remote_id"] = remote_id
-        dataset.extras["ods_url"] = self._get_explore_url(dataset_id)
+        dataset.extras["ods:url"] = self._get_explore_url(dataset_id)
         if "references" in ods_metadata:
-            dataset.extras["references"] = ods_metadata["references"]
-        dataset.extras["has_records"] = ods_dataset["has_records"]
+            dataset.extras["ods:references"] = ods_metadata["references"]
+        dataset.extras["ods:has_records"] = ods_dataset["has_records"]
 
         return dataset
