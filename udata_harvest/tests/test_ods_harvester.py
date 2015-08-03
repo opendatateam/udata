@@ -57,7 +57,7 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
         self.assertIn("test-a", datasets)
         d = datasets["test-a"]
         self.assertEqual(d.title, "test-a")
-        self.assertEqual(d.description, "<p>test-a-description</p>")
+        self.assertStartswith(d.description, "<p>test-a-description</p>")
         self.assertEqual(d.tags, ['environment',
                                   'keyword2',
                                   'keyword1',
@@ -76,7 +76,7 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
         self.assertEqual(len(d.resources), 2)
         resource = d.resources[0]
         self.assertEqual(resource.title, 'Export au format CSV')
-        self.assertIsNone(resource.description)
+        self.assertIsNotNone(resource.description)
         self.assertEqual(resource.format, 'csv')
         self.assertEqual(resource.mime, 'text/csv')
         self.assertIsInstance(resource.modified, datetime)
@@ -88,7 +88,7 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
 
         resource = d.resources[1]
         self.assertEqual(resource.title, 'Export au format JSON')
-        self.assertIsNone(resource.description)
+        self.assertIsNotNone(resource.description)
         self.assertEqual(resource.format, 'json')
         self.assertEqual(resource.mime, 'application/json')
         self.assertIsInstance(resource.modified, datetime)
@@ -110,7 +110,7 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
         self.assertEqual(len(test_b.resources), 4)
         resource = test_b.resources[2]
         self.assertEqual(resource.title, 'Export au format GeoJSON')
-        self.assertIsNone(resource.description)
+        self.assertIsNotNone(resource.description)
         self.assertEqual(resource.format, 'json')
         self.assertEqual(resource.mime, 'application/vnd.geo+json')
         self.assertEqual(resource.url,
@@ -120,7 +120,7 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
                           "&use_labels_for_header=true"))
         resource = test_b.resources[3]
         self.assertEqual(resource.title, 'Export au format Shapefile')
-        self.assertIsNone(resource.description)
+        self.assertIsNotNone(resource.description)
         self.assertEqual(resource.format, 'shp')
         self.assertIsNone(resource.mime)
         self.assertEqual(resource.url,

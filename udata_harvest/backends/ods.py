@@ -115,13 +115,28 @@ class OdsHarvester(BaseBackend):
     def process_resources(self, dataset, data, formats):
         dataset_id = data["datasetid"]
         ods_metadata = data["metas"]
+        description = self.description_from_fields(data['fields'])
         for format in formats:
             label, udata_format, mime = self.FORMATS[format]
             resource = Resource(
                 title='Export au format {0}'.format(label),
+                description=description,
                 type='remote',
                 url=self._get_download_url(dataset_id, format),
                 format=udata_format,
                 mime=mime)
             resource.modified = ods_metadata["modified"]
             dataset.resources.append(resource)
+
+    def description_from_fields(self, fields):
+        '''Build a resource description/schema from ODS API fields'''
+        if not fields:
+            return
+
+        out = ''
+        for field in fields:
+            out += '- *{label}*: {name}[{type}]'.format(**field)
+            if field.get('description'):
+                out += ' {description}'.format(**field)
+            out += '\n'
+        return out
