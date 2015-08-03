@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
-import requests
 import json
 import logging
 
+from datetime import datetime
 from os.path import join, dirname
 
 from mock import patch
@@ -63,21 +63,23 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
                                   'keyword1',
                                   'heritage',
                                   'culture'])
-        self.assertEqual(d.extras["references"], "http://example.com")
-        self.assertEqual(d.extras["has_records"], True)
+        self.assertEqual(d.extras["ods:references"], "http://example.com")
+        self.assertEqual(d.extras["ods:has_records"], True)
         self.assertEqual(d.extras["harvest:remote_id"], "test-a")
         self.assertEqual(d.extras["harvest:domain"],
                          "etalab-sandbox.opendatasoft.com")
-        self.assertEqual(d.extras["ods_url"],
+        self.assertEqual(d.extras["ods:url"],
                          ("http://etalab-sandbox.opendatasoft.com"
                           "/explore/dataset/test-a/"))
         self.assertEqual(d.license.id, "fr-lo")
 
         self.assertEqual(len(d.resources), 2)
         resource = d.resources[0]
-        self.assertEqual(resource.title, '{0} (CSV)'.format(d.title))
-        self.assertEqual(resource.description, d.description)
+        self.assertEqual(resource.title, 'Export au format CSV')
+        self.assertIsNone(resource.description)
         self.assertEqual(resource.format, 'csv')
+        self.assertEqual(resource.mime, 'text/csv')
+        self.assertIsInstance(resource.modified, datetime)
         self.assertEqual(resource.url,
                          ("http://etalab-sandbox.opendatasoft.com/"
                           "explore/dataset/test-a/download"
@@ -85,9 +87,11 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
                           "&use_labels_for_header=true"))
 
         resource = d.resources[1]
-        self.assertEqual(resource.title, '{0} (JSON)'.format(d.title))
-        self.assertEqual(resource.description, d.description)
+        self.assertEqual(resource.title, 'Export au format JSON')
+        self.assertIsNone(resource.description)
         self.assertEqual(resource.format, 'json')
+        self.assertEqual(resource.mime, 'application/json')
+        self.assertIsInstance(resource.modified, datetime)
         self.assertEqual(resource.url,
                          ("http://etalab-sandbox.opendatasoft.com/"
                           "explore/dataset/test-a/download"
@@ -103,15 +107,26 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
                                        'town planning',
                                        'keyword1',
                                        'spatial planning'])
-        self.assertEqual(len(test_b.resources), 3)
+        self.assertEqual(len(test_b.resources), 4)
         resource = test_b.resources[2]
-        self.assertEqual(resource.title, '{0} (GeoJSON)'.format(test_b.title))
-        self.assertEqual(resource.description, test_b.description)
+        self.assertEqual(resource.title, 'Export au format GeoJSON')
+        self.assertIsNone(resource.description)
         self.assertEqual(resource.format, 'json')
+        self.assertEqual(resource.mime, 'application/vnd.geo+json')
         self.assertEqual(resource.url,
                          ("http://etalab-sandbox.opendatasoft.com/"
                           "explore/dataset/test-b/download"
                           "?format=geojson&timezone=Europe/Berlin"
+                          "&use_labels_for_header=true"))
+        resource = test_b.resources[3]
+        self.assertEqual(resource.title, 'Export au format Shapefile')
+        self.assertIsNone(resource.description)
+        self.assertEqual(resource.format, 'shp')
+        self.assertIsNone(resource.mime)
+        self.assertEqual(resource.url,
+                         ("http://etalab-sandbox.opendatasoft.com/"
+                          "explore/dataset/test-b/download"
+                          "?format=shp&timezone=Europe/Berlin"
                           "&use_labels_for_header=true"))
 
         # test-c has no data

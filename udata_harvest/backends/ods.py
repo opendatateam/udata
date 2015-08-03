@@ -2,9 +2,8 @@
 from __future__ import unicode_literals
 
 import logging
-import re
 
-from udata.models import Dataset, License, Resource
+from udata.models import License, Resource
 from . import BaseBackend, register
 from ..exceptions import HarvestException
 
@@ -21,6 +20,13 @@ class OdsHarvester(BaseBackend):
         "Licence Ouverte (Etalab)": "fr-lo",
         "CC BY-SA": "cc-by-sa",
         "Public Domain": "other-pd"
+    }
+
+    FORMATS = {
+        'csv': ('CSV', 'csv', 'text/csv'),
+        'geojson': ('GeoJSON', 'json', 'application/vnd.geo+json'),
+        'json': ('JSON', 'json', 'application/json'),
+        'shp': ('Shapefile', 'shp', None),
     }
 
     @property
@@ -58,7 +64,6 @@ class OdsHarvester(BaseBackend):
         ods_dataset = item.kwargs["dataset"]
         dataset_id = ods_dataset["datasetid"]
         ods_metadata = ods_dataset["metas"]
-        remote_id = item.remote_id
 
         if not ods_dataset.get('has_records'):
             msg = 'Dataset {datasetid} has no record'.format(**ods_dataset)
@@ -68,13 +73,13 @@ class OdsHarvester(BaseBackend):
 
         dataset.title = ods_metadata['title']
         dataset.frequency = "unknown"
-        if "description" in ods_metadata:
-            dataset.description = ods_metadata["description"]
+        dataset.description = ods_metadata.get("description", '')
         dataset.private = False
+
         tags = set()
         if "keyword" in ods_metadata:
             if isinstance(ods_metadata['keyword'], list):
-                tags = set(ods_metadata['keyword'])
+                tags |= set(ods_metadata['keyword'])
             else:
                 tags.add(ods_metadata['keyword'])
 
@@ -95,26 +100,10 @@ class OdsHarvester(BaseBackend):
 
         dataset.resources = []
 
-        for format in 'csv', 'json':
-            resource = Resource(
-                title='{0} ({1})'.format(ods_metadata["title"],
-                                         format.upper()),
-                description=ods_metadata.get("description") or '',
-                type='remote',
-                url=self._get_download_url(dataset_id, format),
-                format=format)
-            resource.modified = ods_metadata["modified"]
-            dataset.resources.append(resource)
+        self.process_resources(dataset, ods_dataset, ('csv', 'json'))
 
         if 'geo' in ods_dataset['features']:
-            resource = Resource(
-                title='{0} ({1})'.format(ods_metadata["title"], 'GeoJSON'),
-                description=ods_metadata.get("description") or '',
-                type='remote',
-                url=self._get_download_url(dataset_id, 'geojson'),
-                format='json')
-            resource.modified = ods_metadata["modified"]
-            dataset.resources.append(resource)
+            self.process_resources(dataset, ods_dataset, ('geojson', 'shp'))
 
         dataset.extras["ods:url"] = self._get_explore_url(dataset_id)
         if "references" in ods_metadata:
@@ -122,3 +111,17 @@ class OdsHarvester(BaseBackend):
         dataset.extras["ods:has_records"] = ods_dataset["has_records"]
 
         return dataset
+
+    def process_resources(self, dataset, data, formats):
+        dataset_id = data["datasetid"]
+        ods_metadata = data["metas"]
+        for format in formats:
+            label, udata_format, mime = self.FORMATS[format]
+            resource = Resource(
+                title='Export au format {0}'.format(label),
+                type='remote',
+                url=self._get_download_url(dataset_id, format),
+                format=udata_format,
+                mime=mime)
+            resource.modified = ods_metadata["modified"]
+            dataset.resources.append(resource)
