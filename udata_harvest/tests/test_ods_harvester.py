@@ -1,29 +1,36 @@
 from __future__ import unicode_literals
 
 import requests
+import json
 import logging
 
-from ..backends.ods import OdsHarvester
-from udata.tests import TestCase, DBTestMixin
+from os.path import join, dirname
+
+from mock import patch
+
 from udata.models import Dataset, License
+from udata.tests import TestCase, DBTestMixin
+from udata.tests.factories import OrganizationFactory
+
+from .factories import HarvestSourceFactory
+from .. import actions
+from ..backends.ods import OdsHarvester
 
 log = logging.getLogger(__name__)
 
 
+ODS_URL = 'http://etalab-sandbox.opendatasoft.com'
+
+json_filename = join(dirname(__file__), 'search-ods.json')
+with open(json_filename) as f:
+    ODS_RESPONSE = json.load(f)
+
+
 class OdsHarvesterTest(DBTestMixin, TestCase):
-
-    class Source(object):
-        def __init__(self, url):
-            self.url = url
-            self.owner = None
-            self.organization = None
-
-    class Job(object):
-        def __init__(self):
-            self.items = []
-
-        def save(self):
-            pass
+    def setUp(self):
+        # Create fake licenses
+        for license_id in OdsHarvester.LICENSES.values():
+            License.objects.create(id=license_id, title=license_id)
 
     def test_create_ods_url(self):
         values = {
@@ -38,18 +45,25 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
         for value, expected in values.items():
             self.assertEqual(OdsHarvester.create_ods_base_url(value), expected)
 
-    def test_simple(self):
-        # Create fake licenses
-        for license_id in OdsHarvester.LICENSES.values():
-            License.objects.create(id=license_id, title=license_id)
-        self.assertEqual(len(Dataset.objects.all()), 0)
-        source = self.Source("http://etalab-sandbox.opendatasoft.com")
-        job = self.Job()
-        harvester = OdsHarvester(source, job)
-        harvester.initialize()
+    @patch.object(OdsHarvester, 'get')
+    def test_simple(self, mock):
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='ods',
+                                      url=ODS_URL,
+                                      organization=org)
+        mock.return_value.json.return_value = ODS_RESPONSE
 
-        self.assertEqual(len(harvester.job.items), 3)
-        harvester.process_items()
+        actions.run(source.slug)
+
+        api_url = ''.join((ODS_URL, '/api/datasets/1.0/search/'))
+        params = {'start': 0, 'rows': 50}
+        mock.assert_called_once_with(api_url, params=params)
+
+        source.reload()
+
+        job = source.get_last_job()
+        self.assertEqual(len(job.items), 3)
+
         datasets = {d.extras["remote_id"]: d for d in Dataset.objects.all()}
         self.assertEqual(len(datasets), 3)
 
