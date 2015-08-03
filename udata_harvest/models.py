@@ -5,6 +5,8 @@ from collections import OrderedDict
 from datetime import datetime
 from urlparse import urlparse
 
+from werkzeug import cached_property
+
 from udata.models import db, Dataset
 from udata.i18n import lazy_gettext as _
 
@@ -88,7 +90,11 @@ class HarvestSource(db.Document):
         return cls.objects(slug=ident).first() or cls.objects.get(id=ident)
 
     def get_last_job(self):
-        return HarvestJob.objects(source=self).order_by('-created')[0]
+        return HarvestJob.objects(source=self).order_by('-created').first()
+
+    @cached_property
+    def last_job(self):
+        return self.get_last_job()
 
 
 class HarvestJob(db.Document):

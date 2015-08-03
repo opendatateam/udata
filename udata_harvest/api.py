@@ -41,25 +41,6 @@ item_fields = api.model('HarvestItem', {
                          default={}),
 })
 
-source_fields = api.model('HarvestSource', {
-    'id': fields.String(description='The source unique identifier',
-                        readonly=True),
-    'name': fields.String(description='The source display name',
-                          required=True),
-    'description': fields.String(description='The source description'),
-    'url': fields.String(description='The source base URL',
-                         required=True),
-    'backend': fields.String(description='The source backend',
-                             required=True, enum=actions.list_backends()),
-    'config': fields.Raw(description='The configuration as key-value pairs'),
-    'created_at': fields.ISODateTime(description='The source creation date',
-                                     required=True),
-    'active': fields.Boolean(description='Is this source active',
-                             required=True, default=False),
-    'config': fields.Raw(description='The source specific configuration',
-                         default={}),
-})
-
 job_fields = api.model('HarvestJob', {
     'id': fields.String(description='The job execution ID', required=True),
     'created': fields.ISODateTime(description='The job creation date',
@@ -77,6 +58,28 @@ job_fields = api.model('HarvestJob', {
 })
 
 job_page_fields = api.model('HarvestJobPage', fields.pager(job_fields))
+
+source_fields = api.model('HarvestSource', {
+    'id': fields.String(description='The source unique identifier',
+                        readonly=True),
+    'name': fields.String(description='The source display name',
+                          required=True),
+    'description': fields.String(description='The source description'),
+    'url': fields.String(description='The source base URL',
+                         required=True),
+    'backend': fields.String(description='The source backend',
+                             required=True, enum=actions.list_backends()),
+    'config': fields.Raw(description='The configuration as key-value pairs'),
+    'created_at': fields.ISODateTime(description='The source creation date',
+                                     required=True),
+    'active': fields.Boolean(description='Is this source active',
+                             required=True, default=False),
+    'config': fields.Raw(description='The source specific configuration',
+                         default={}),
+    'last_job': fields.Nested(job_fields,
+                              description='The last job for this source',
+                              allow_null=True)
+})
 
 
 @ns.route('/sources/', endpoint='harvest_sources')
