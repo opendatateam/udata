@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from collections import OrderedDict
 from datetime import datetime
+from urlparse import urlparse
 
 from udata.models import db, Dataset
 from udata.i18n import lazy_gettext as _
@@ -47,7 +48,8 @@ class HarvestError(db.EmbeddedDocument):
 class HarvestItem(db.EmbeddedDocument):
     remote_id = db.StringField()
     dataset = db.ReferenceField(Dataset)
-    status = db.StringField(choices=HARVEST_ITEM_STATUS.keys(), default=DEFAULT_HARVEST_ITEM_STATUS, required=True)
+    status = db.StringField(choices=HARVEST_ITEM_STATUS.keys(),
+                            default=DEFAULT_HARVEST_ITEM_STATUS, required=True)
     created = db.DateTimeField(default=datetime.now, required=True)
     started = db.DateTimeField()
     ended = db.DateTimeField()
@@ -58,18 +60,28 @@ class HarvestItem(db.EmbeddedDocument):
 
 class HarvestSource(db.Document):
     name = db.StringField(max_length=255)
-    slug = db.SlugField(max_length=255, required=True, unique=True, populate_from='name', update=True)
+    slug = db.SlugField(max_length=255, required=True, unique=True,
+                        populate_from='name', update=True)
     description = db.StringField()
-    url = db.StringField()
+    url = db.StringField(required=True)
     backend = db.StringField()
     config = db.DictField()
-    periodic_task = db.ReferenceField('PeriodicTask', reverse_delete_rule=db.NULLIFY)
+    periodic_task = db.ReferenceField('PeriodicTask',
+                                      reverse_delete_rule=db.NULLIFY)
     created_at = db.DateTimeField(default=datetime.now, required=True)
-    frequency = db.StringField(choices=HARVEST_FREQUENCIES.keys(), default=DEFAULT_HARVEST_FREQUENCY, required=True)
+    frequency = db.StringField(choices=HARVEST_FREQUENCIES.keys(),
+                               default=DEFAULT_HARVEST_FREQUENCY,
+                               required=True)
     active = db.BooleanField(default=True)
 
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
-    organization = db.ReferenceField('Organization', reverse_delete_rule=db.NULLIFY)
+    organization = db.ReferenceField('Organization',
+                                     reverse_delete_rule=db.NULLIFY)
+
+    @property
+    def domain(self):
+        parsed = urlparse(self.url)
+        return parsed.netloc.split(':')[0]
 
     @classmethod
     def get(cls, ident):
@@ -84,7 +96,8 @@ class HarvestJob(db.Document):
     created = db.DateTimeField(default=datetime.now, required=True)
     started = db.DateTimeField()
     ended = db.DateTimeField()
-    status = db.StringField(choices=HARVEST_JOB_STATUS.keys(), default=DEFAULT_HARVEST_JOB_STATUS, required=True)
+    status = db.StringField(choices=HARVEST_JOB_STATUS.keys(),
+                            default=DEFAULT_HARVEST_JOB_STATUS, required=True)
     errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
     items = db.ListField(db.EmbeddedDocumentField(HarvestItem))
     source = db.ReferenceField(HarvestSource, reverse_delete_rule=db.NULLIFY)

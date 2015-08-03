@@ -8,7 +8,7 @@ from flask.signals import Namespace
 from udata.models import Dataset, PeriodicTask
 
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import DatasetFactory
+from udata.tests.factories import DatasetFactory, OrganizationFactory
 
 from .factories import fake, HarvestSourceFactory, HarvestJobFactory
 from ..models import HarvestSource, HarvestJob, HarvestError
@@ -136,7 +136,8 @@ class HarvestActionsTest(DBTestMixin, TestCase):
 
 class ExecutionTestMixin(DBTestMixin):
     def test_default(self):
-        source = HarvestSourceFactory(backend='factory')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='factory', organization=org)
         with self.assert_emit(signals.before_harvest_job, signals.after_harvest_job):
             self.action(source.slug)
 
@@ -144,6 +145,10 @@ class ExecutionTestMixin(DBTestMixin):
         self.assertEqual(len(HarvestJob.objects(source=source)), 1)
 
         job = source.get_last_job()
+        print job.errors
+        for item in job.items:
+            for error in item.errors:
+                print error.message, error.details
         self.assertEqual(job.status, 'done')
         self.assertEqual(job.errors, [])
         self.assertIsNotNone(job.started)
@@ -159,6 +164,7 @@ class ExecutionTestMixin(DBTestMixin):
 
             dataset = item.dataset
             self.assertIsNotNone(Dataset.objects(id=dataset.id).first())
+            self.assertEqual(dataset.organization, org)
             self.assertIn('harvest:remote_id', dataset.extras)
             self.assertIn('harvest:last_update', dataset.extras)
             self.assertIn('harvest:source_id', dataset.extras)

@@ -21,6 +21,7 @@ class HarvestSourceFactory(MongoEngineFactory):
         model = HarvestSource
 
     name = factory.LazyAttribute(lambda o: fake.name())
+    url = factory.LazyAttribute(lambda o: fake.url())
     description = factory.LazyAttribute(lambda o: fake.text())
 
 

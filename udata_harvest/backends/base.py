@@ -8,17 +8,26 @@ from datetime import datetime
 
 import requests
 
+from voluptuous import MultipleInvalid
+
+from udata.models import Dataset
+
+from ..exceptions import HarvestException
 from ..models import HarvestItem, HarvestJob, HarvestError
 from ..signals import before_harvest_job, after_harvest_job
 
 log = logging.getLogger(__name__)
 
+# Disable those annoying warnings
+requests.packages.urllib3.disable_warnings()
+
 
 class BaseBackend(object):
+    '''Base class for Harvester implementations'''
+
     name = None
     verify_ssl = True
 
-    '''Base class for Harvester implementations'''
     def __init__(self, source, job=None, debug=False):
         self.source = source
         self.job = job
@@ -33,9 +42,15 @@ class BaseBackend(object):
         kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
         return requests.get(url, headers=headers, **kwargs)
 
+    def post(self, url, data, **kwargs):
+        headers = self.get_headers()
+        kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
+        return requests.post(url, data=data, headers=headers, **kwargs)
+
     def get_headers(self):
         return {
-            'User-Agent': 'uData/0.1 {0.name}'.format(self),  # TODO: extract site title and version
+            # TODO: extract site title and version
+            'User-Agent': 'uData/0.1 {0.name}'.format(self),
         }
 
     def harvest(self):
@@ -47,9 +62,9 @@ class BaseBackend(object):
     def perform_initialization(self):
         '''Initialize the harvesting for a given job'''
         log.debug('Initializing backend')
-        self.job = HarvestJob.objects.create(status='initializing', started=datetime.now(), source=self.source)
-        # self.source.jobs.append(self.job)
-        # self.source.save()
+        self.job = HarvestJob.objects.create(status='initializing',
+                                             started=datetime.now(),
+                                             source=self.source)
 
         before_harvest_job.send(self)
 
@@ -61,9 +76,11 @@ class BaseBackend(object):
             log.error("Error in initialization : %s" % (str(e)))
             log.exception(e)
             self.job.status = 'failed'
-            error = HarvestError(message=str(e))
+            error = HarvestError(message=str(e), details=traceback.format_exc())
             self.job.errors.append(error)
             self.end()
+            msg = 'Initialization failed for "{0.name}" ({0.backend})'
+            log.exception(msg.format(self.source))
             return
 
         if self.job.items:
@@ -89,7 +106,15 @@ class BaseBackend(object):
             dataset = self.process(item)
             dataset.extras['harvest:source_id'] = str(self.source.id)
             dataset.extras['harvest:remote_id'] = item.remote_id
+            dataset.extras['harvest:domain'] = self.source.domain
             dataset.extras['harvest:last_update'] = datetime.now().isoformat()
+
+            # TODO permissions checking
+            if not dataset.organization and not dataset.owner:
+                if self.source.organization:
+                    dataset.organization = self.source.organization
+                elif self.source.owner:
+                    dataset.owner = self.source.owner
 
             if self.debug:
                 dataset.validate()
@@ -103,6 +128,8 @@ class BaseBackend(object):
             error = HarvestError(message=str(e), details=traceback.format_exc())
             item.errors.append(error)
             item.status = 'failed'
+            msg = 'Failed to process item "{0.remote_id}": {1}'
+            log.error(msg.format(item, str(e)))
 
         item.ended = datetime.now()
         self.job.save()
@@ -124,3 +151,43 @@ class BaseBackend(object):
         self.job.ended = datetime.now()
         self.job.save()
         after_harvest_job.send(self)
+
+    def get_dataset(self, remote_id):
+        '''Get or create a dataset given its remote ID (and its source)'''
+        dataset = Dataset.objects(__raw__={
+            'extras.harvest:remote_id': remote_id,
+            'extras.harvest:domain': self.source.domain
+        }).first()
+        return dataset or Dataset()
+
+    def validate(self, data, schema):
+        '''Perform a data validation against a given schema.
+
+        :param data: an object to validate
+        :param schema: a Voluptous schema to validate against
+        '''
+        try:
+            return schema(data)
+        except MultipleInvalid as e:
+            errors = []
+            for error in e.errors:
+                if e.path:
+                    field = '.'.join(str(p) for p in e.path)
+                    path = e.path
+                    value = data
+                    while path:
+                        attr = path.pop(0)
+                        try:
+                            value = value[attr]
+                        except:
+                            value = None
+                    try:
+                        msg = '[{0}] {1}: {2}'.format(field, e, str(value))
+                    except:
+                        msg = '[{0}] {1}'.format(field, e)
+
+                else:
+                    msg = str(e)
+                errors.append(msg)
+            msg = '\n- '.join(['Validation error:'] + errors)
+            raise HarvestException(msg)
