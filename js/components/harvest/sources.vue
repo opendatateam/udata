@@ -8,6 +8,7 @@
 
 <script>
 import sources from 'models/harvest/sources';
+import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
 
 export default {
     name: 'harvesters-widget',
@@ -25,18 +26,19 @@ export default {
                 align: 'left',
                 type: 'text'
             }, {
-                label: this._('Description'),
-                key: 'description',
-                sort: 'description',
-                align: 'left',
-                type: 'text'
-            }, {
-                label: '',
-                key: 'enabled',
-                // sort: 'name',
-                // align: 'left',
-                type: 'playpause',
-                width: '20px'
+                label: this._('Status'),
+                key: 'last_job.status',
+                sort: 'last_job.status',
+                type: 'label',
+                width: 100,
+                label_type: function(status) {
+                    if (!status) return 'default';
+                    return STATUS_CLASSES[status];
+                },
+                label_func: (status) => {
+                    if (!status) return this._('No job yet');
+                    return STATUS_I18N[status];
+                }
             }]
         };
     },
