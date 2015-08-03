@@ -7,11 +7,11 @@ from uuid import UUID
 from urlparse import urljoin
 
 from voluptuous import (
-    Schema, Required, Optional, All, Any, Lower, In, Length, Coerce, DefaultTo
+    Schema, All, Any, Lower, Coerce, DefaultTo
 )
 
 
-from udata.models import db, Resource, License, SpatialCoverage
+from udata.models import db, Resource, License
 from udata.utils import get_by, daterange_start, daterange_end
 
 from . import BaseBackend, register

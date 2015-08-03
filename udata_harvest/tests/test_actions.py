@@ -201,8 +201,9 @@ class ExecutionTestMixin(DBTestMixin):
                 raise ValueError('test')
 
         source = HarvestSourceFactory(backend='factory')
-        with self.assert_emit(signals.before_harvest_job, signals.after_harvest_job), \
-             mock_process.connected_to(process):
+        with self.assert_emit(signals.before_harvest_job,
+                              signals.after_harvest_job), \
+                mock_process.connected_to(process):
             self.action(source.slug)
 
         source.reload()

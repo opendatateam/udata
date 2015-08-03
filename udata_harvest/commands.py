@@ -12,9 +12,9 @@ from udata.commands import submanager
 log = logging.getLogger(__name__)
 
 m = submanager('harvest',
-    help='Remote repositories harvesting operations',
-    description='Handle remote repositories harvesting operations'
-)
+               help='Remote repositories harvesting operations',
+               description='Handle remote repositories harvesting operations'
+               )
 
 
 @m.option('backend')

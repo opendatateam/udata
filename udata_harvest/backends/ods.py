@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os
 import logging
 import re
 
-from udata.models import db, Dataset, License, Resource
+from udata.models import Dataset, License, Resource
 from udata.ext.harvest import backends
 
 log = logging.getLogger(__name__)
+
 
 @backends.register
 class OdsHarvester(backends.BaseBackend):
@@ -34,7 +34,7 @@ class OdsHarvester(backends.BaseBackend):
             if scheme is None:
                 scheme = 'http'
             domain = groups["domain"]
-            
+
             if scheme is not None and domain is not None:
                 return "%s://%s" % (scheme, domain)
 
@@ -44,27 +44,35 @@ class OdsHarvester(backends.BaseBackend):
         return "%s/api/datasets/1.0/search/" % self.ods_base_url
 
     def _get_download_url(self, dataset_id, format):
-        return "%s/explore/dataset/%s/download/?format=%s&timezone=Europe/Berlin&use_labels_for_header=true" % (self.ods_base_url, dataset_id, format)
+        return ("%s/explore/dataset/%s/download/"
+                "?format=%s&timezone=Europe/Berlin"
+                "&use_labels_for_header=true") % (self.ods_base_url,
+                                                  dataset_id,
+                                                  format)
 
     def _get_explore_url(self, dataset_id):
         return "%s/explore/dataset/%s/" % (self.ods_base_url, dataset_id)
 
     def _get_export_url(self, dataset_id):
-        return "%s/explore/dataset/%s/?tab=export" % (self.ods_base_url, dataset_id)
+        return "%s/explore/dataset/%s/?tab=export" % (self.ods_base_url,
+                                                      dataset_id)
 
     def initialize(self):
         self.ods_base_url = OdsHarvester.create_ods_base_url(self.source.url)
         count = 0
         nhits = None
         while nhits is None or count < nhits:
-            response = self.get(self._get_api_url(self.source.url), params={"start": count, "rows": 50})
+            response = self.get(self._get_api_url(self.source.url),
+                                params={"start": count, "rows": 50})
             response.raise_for_status()
             data = response.json()
             nhits = data["nhits"]
             for dataset in data["datasets"]:
                 count += 1
-                remote_id = "%s@%s" % (dataset["datasetid"], dataset["metas"]["domain"])
-                self.add_item(remote_id, dataset=dataset, ods_base_url=self.ods_base_url)
+                remote_id = "%s@%s" % (dataset["datasetid"],
+                                       dataset["metas"]["domain"])
+                self.add_item(remote_id, dataset=dataset,
+                              ods_base_url=self.ods_base_url)
 
     def process(self, item):
         self.ods_base_url = item.kwargs["ods_base_url"]
@@ -72,9 +80,9 @@ class OdsHarvester(backends.BaseBackend):
         dataset_id = ods_dataset["datasetid"]
         ods_metadata = ods_dataset["metas"]
         remote_id = item.remote_id
-        dataset, created = Dataset.objects.get_or_create(title=remote_id, auto_save=False)
-        # dataset, created = Dataset.objects.get_or_create(extras_remote_id=remote_id, auto_save=False)
-        
+        dataset, created = Dataset.objects.get_or_create(title=remote_id,
+                                                         auto_save=False)
+
         dataset.title = ods_metadata['title']
         dataset.frequency = "unknown"
         if "description" in ods_metadata:
@@ -92,12 +100,15 @@ class OdsHarvester(backends.BaseBackend):
                 for theme in ods_metadata["theme"]:
                     tags.update([t.strip().lower() for t in theme.split(",")])
             else:
-                tags.update([t.strip().lower() for t in ods_metadata["theme"].split(",")])
+                themes = ods_metadata["theme"].split(",")
+                tags.update([t.strip().lower() for t in themes])
 
         dataset.tags = list(tags)
 
-        if ods_metadata.get('license') and OdsHarvester.LICENSES.get(ods_metadata['license']):
-            dataset.license = License.objects.get(id=OdsHarvester.LICENSES.get(ods_metadata['license']))
+        ods_license_id = ods_metadata.get('license')
+        if ods_license_id and ods_license_id in self.LICENSES:
+            license_id = self.LICENSES[ods_license_id]
+            dataset.license = License.objects.get(id=license_id)
 
         if self.source.owner:
             dataset.owner = self.source.owner
@@ -124,4 +135,3 @@ class OdsHarvester(backends.BaseBackend):
         dataset.extras["has_records"] = ods_dataset["has_records"]
 
         return dataset
-

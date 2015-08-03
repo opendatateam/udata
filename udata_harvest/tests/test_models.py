@@ -3,13 +3,11 @@ from __future__ import unicode_literals
 
 import logging
 
-from udata.models import Dataset, PeriodicTask
 
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import DatasetFactory, OrganizationFactory
 
-from .factories import fake, HarvestSourceFactory, HarvestJobFactory
-from ..models import HarvestSource, HarvestJob, HarvestError
+from .factories import fake
+from ..models import HarvestSource
 
 
 log = logging.getLogger(__name__)

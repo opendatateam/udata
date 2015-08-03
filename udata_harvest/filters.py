@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+import urlparse
+
 import dateutil.parser
 import slugify
 
-from voluptuous import Invalid, MultipleInvalid
+from voluptuous import Invalid
 
 
 def boolean(value):
@@ -12,7 +14,8 @@ def boolean(value):
     Convert the content of a string (or a number) to a boolean.
     Do nothing when input value is already a boolean.
 
-    This filter accepts usual values for ``True`` and ``False``: "0", "f", "false", "n", etc.
+    This filter accepts usual values for ``True`` and ``False``:
+    "0", "f", "false", "n", etc.
     '''
     if value is None or isinstance(value, bool):
         return value
@@ -37,7 +40,7 @@ def to_date(value):
 
 def email(value):
     '''Validate an email'''
-    if not '@' in value:
+    if '@' not in value:
         raise Invalid('This email is invalid.')
     return value
 
@@ -60,46 +63,18 @@ def taglist(value):
 
 
 def empty_none(value):
-    '''Replace falsy values with None
-
-    >>> cleanup_empty(0)
-    None
-    >>> cleanup_empty('')
-    None
-    >>> cleanup_empty([])
-    None
-    >>> cleanup_empty({})
-    None
-    >>> cleanup_empty(u'hello world')
-    (u'hello world', None)
-    >>> cleanup_empty(u'   hello world   ')
-    (u'   hello world   ', None)
-    '''
+    '''Replace falsy values with None'''
     return value if value else None
 
 
 def strip(value):
-    '''Strip spaces from a string and remove it when empty.
-
-    >>> cleanup_line(u'   Hello world!   ')
-    (u'Hello world!', None)
-    >>> cleanup_line('   ')
-    (None, None)
-    >>> cleanup_line(None)
-    (None, None)
-    '''
+    '''Strip spaces from a string and remove it when empty.'''
     return empty_none(value.strip())
 
 
 def line_endings(value):
-    """Replaces CR + LF or CR to LF in a string, then strip spaces and remove it when empty.
-
-    >>> cleanup_text(u'   Hello\\r\\n world!\\r   ')
-    (u'Hello\\n world!', None)
-    >>> cleanup_text('   ')
-    (None, None)
-    >>> cleanup_text(None)
-    (None, None)
+    """Replaces CR + LF or CR to LF in a string,
+    then strip spaces and remove it when empty.
     """
     return value.replace(u'\r\n', u'\n').replace(u'\r', u'\n')
 
@@ -108,28 +83,15 @@ def normalize_string(value):
     return strip(line_endings(value))
 
 
-def is_url(add_prefix='http://', full=False, remove_fragment=False, schemes=(u'http', u'https')):
-    """Return a converter that converts a clean string to an URL.
-
-    .. note:: For a converter that doesn't require a clean string, see :func:`str_to_url`.
-
-    >>> i_url()(u'http://packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> clean_str_to_url(full = True)(u'packages.python.org/Biryani/')
-    (u'http://packages.python.org/Biryani/', None)
-    >>> clean_str_to_url()(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', None)
-    >>> clean_str_to_url(full = True)(u'/Biryani/presentation.html#tutorial')
-    (u'/Biryani/presentation.html#tutorial', u'URL must be complete')
-    >>> clean_str_to_url(remove_fragment = True)(u'http://packages.python.org/Biryani/presentation.html#tutorial')
-    (u'http://packages.python.org/Biryani/presentation.html', None)
-    """
+def is_url(add_prefix='http://', full=False, remove_fragment=False,
+           schemes=(u'http', u'https')):
+    """Return a converter that converts a clean string to an URL."""
     def converter(value):
         if value is None:
             return value
-        import urlparse
         split_url = list(urlparse.urlsplit(value))
-        if full and add_prefix and not split_url[0] and not split_url[1] and split_url[2] \
+        if full and add_prefix \
+                and not all(split_url[0], split_url[1], split_url[2]) \
                 and not split_url[2].startswith(u'/'):
             split_url = list(urlparse.urlsplit(add_prefix + value))
         scheme = split_url[0]
@@ -143,7 +105,8 @@ def is_url(add_prefix='http://', full=False, remove_fragment=False, schemes=(u'h
         if network_location != network_location.lower():
             split_url[1] = network_location = network_location.lower()
         if scheme in ('http', 'https') and not split_url[2]:
-            # By convention a full HTTP URL must always have at least a "/" in its path.
+            # By convention a full HTTP URL must always have
+            # at least a "/" in its path.
             split_url[2] = '/'
         if remove_fragment and split_url[4]:
             split_url[4] = ''

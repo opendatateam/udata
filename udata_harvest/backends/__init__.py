@@ -20,7 +20,7 @@ def get_all():
     return _registered_backends
 
 
-from .base import BaseBackend
-from .dummy import DummyBackend
-from .ods import OdsHarvester
-from .ckan import CkanBackend
+from .base import BaseBackend  # flake8: noqa
+from .dummy import DummyBackend  # flake8: noqa
+from .ods import OdsHarvester  # flake8: noqa
+from .ckan import CkanBackend  # flake8: noqa
