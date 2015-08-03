@@ -154,8 +154,7 @@ class MaafBackend(backends.BaseBackend):
         xml = self.parse_xml(response.content.decode(encoding))
         metadata = xml['metadata']
 
-        dataset, created = Dataset.objects.get_or_create(
-            extras__remote_id=metadata['id'], auto_save=False)
+        dataset = self.get_dataset(metadata['id'])
 
         dataset.title = metadata['title']
         dataset.frequency = FREQUENCIES.get(metadata['frequency'], 'unknown')
