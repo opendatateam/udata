@@ -22,3 +22,4 @@ def get_all():
 
 from .base import BaseBackend
 from .dummy import DummyBackend
+from ..harvesters import OdsHarvester

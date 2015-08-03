@@ -58,6 +58,8 @@ class BaseBackend(object):
             self.job.status = 'initialized'
             self.job.save()
         except Exception as e:
+            log.error("Error in initialization : %s" % (str(e)))
+            log.exception(e)
             self.job.status = 'failed'
             error = HarvestError(message=str(e))
             self.job.errors.append(error)
@@ -91,6 +93,8 @@ class BaseBackend(object):
                 obj.save()
             item.status = 'done'
         except Exception as e:
+            log.error("Error while processing %s : %s" % (item.remote_id, str(e)))
+            log.exception(e)
             error = HarvestError(message=str(e), details=traceback.format_exc())
             item.errors.append(error)
             item.status = 'failed'
