@@ -57,7 +57,7 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
         self.assertIn("test-a", datasets)
         d = datasets["test-a"]
         self.assertEqual(d.title, "test-a")
-        self.assertStartswith(d.description, "<p>test-a-description</p>")
+        self.assertEqual(d.description, "test-a-description")
         self.assertEqual(d.tags, ['environment',
                                   'keyword2',
                                   'keyword1',

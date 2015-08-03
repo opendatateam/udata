@@ -3,9 +3,12 @@ from __future__ import unicode_literals
 
 import logging
 
+import html2text
+
 from udata.models import License, Resource
 from . import BaseBackend, register
 from ..exceptions import HarvestException
+
 
 log = logging.getLogger(__name__)
 
@@ -73,7 +76,9 @@ class OdsHarvester(BaseBackend):
 
         dataset.title = ods_metadata['title']
         dataset.frequency = "unknown"
-        dataset.description = ods_metadata.get("description", '')
+        description = ods_metadata.get("description", '').strip()
+        description = html2text.html2text(description.strip('\n').strip())
+        dataset.description = html2text.html2text(description).strip('\n')
         dataset.private = False
 
         tags = set()
