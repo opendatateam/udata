@@ -1,12 +1,11 @@
 from __future__ import unicode_literals
 
-import json
 import logging
 
 from datetime import datetime
 from os.path import join, dirname
 
-from mock import patch
+import httpretty
 
 from udata.models import Dataset, License
 from udata.tests import TestCase, DBTestMixin
@@ -23,7 +22,7 @@ ODS_URL = 'http://etalab-sandbox.opendatasoft.com'
 
 json_filename = join(dirname(__file__), 'search-ods.json')
 with open(json_filename) as f:
-    ODS_RESPONSE = json.load(f)
+    ODS_RESPONSE = f.read()
 
 
 class OdsHarvesterTest(DBTestMixin, TestCase):
@@ -32,19 +31,24 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
         for license_id in OdsHarvester.LICENSES.values():
             License.objects.create(id=license_id, title=license_id)
 
-    @patch.object(OdsHarvester, 'get')
-    def test_simple(self, mock):
+    @httpretty.activate
+    def test_simple(self):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend='ods',
                                       url=ODS_URL,
                                       organization=org)
-        mock.return_value.json.return_value = ODS_RESPONSE
+
+        api_url = ''.join((ODS_URL, '/api/datasets/1.0/search/'))
+        httpretty.register_uri(httpretty.GET, api_url,
+                               body=ODS_RESPONSE,
+                               content_type='application/json')
 
         actions.run(source.slug)
 
-        api_url = ''.join((ODS_URL, '/api/datasets/1.0/search/'))
-        params = {'start': 0, 'rows': 50}
-        mock.assert_called_once_with(api_url, params=params)
+        self.assertEqual(
+            httpretty.last_request().querystring,
+            {'start': ['0'], 'rows': ['50']}
+        )
 
         source.reload()
 
