@@ -4,12 +4,10 @@
         fields="{{ fields }}"
         p="{{ jobs }}">
         <header>
-            <h3>
-                {{source.name}}
-                <small>{{source.backend}}</small>
-            </h3>
             {{ source.description | markdown }}
-            <dl>
+            <dl class="dl-horizontal">
+                <dt>{{ _('Backend') }}</dt>
+                <dd>{{ source.backend }}</dd>
                 <dt>{{ _('Jobs') }}</dt>
                 <dd>{{ jobs.total }}</dd>
             </dl>

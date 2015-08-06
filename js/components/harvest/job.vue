@@ -3,19 +3,16 @@
 
 <template>
 <datatable icon="cog"
+    title="Job {{job.id}}"
     bodyclass="table-responsive no-padding"
     p="{{ p }}" track="false"
     loading="{{job.loading}}"
     fields="{{ fields }}"
     track="remote_id">
     <header>
-        <dl>
-            <dt>ID</dt>
-            <dd>{{ job.id }}</dd>
+        <dl class="dl-horizontal">
             <dt>{{ _('Created at') }}</dt>
-            <dd>{{ job.created }}</dd>
-            <dt>{{ _('Started at') }}</dt>
-            <dd>{{ job.started | dt }}</dd>
+            <dd>{{ job.created | dt }}</dd>
             <dt>{{ _('Ended at') }}</dt>
             <dd>{{ job.ended | dt }}</dd>
             <dt>{{ _('Status') }}</dt>
@@ -31,7 +28,22 @@
             </dd>
             <dt v-if="job.items.length">{{ _('Items') }}</dt>
             <dd v-if="job.items.length">
-                <span>0<span>/<span>0<span>/<strong>{{job.items.length}}</strong>
+                <span class="text-warning"
+                    data-toggle="tooltip" data-placement="top"
+                    title="{{ _('Number of skipped items') }}"
+                    >{{job.items | count 'skipped'}}</span>
+                /
+                <span class="text-danger"
+                    data-toggle="tooltip" data-placement="top"
+                    title="{{ _('Number of failed items') }}"
+                    >{{job.items | count 'failed'}}</span>
+                /
+                <span class="text-green"
+                    data-toggle="tooltip" data-placement="top"
+                    title="{{ _('Number of succeed items') }}"
+                    >{{job.items | count 'done'}}</span>
+                /
+                <strong>{{job.items.length}}</strong>
             </dd>
         </dl>
     </header>
@@ -46,6 +58,7 @@ import {
 } from 'models/harvest/job';
 import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/item';
 import {PageList} from 'models/base';
+import $ from 'jquery';
 
 export default {
     name: 'JobDetails',
@@ -92,7 +105,15 @@ export default {
         },
         statusI18n: function(value) {
             return JOB_STATUS_I18N[value];
+        },
+        count: function(value, status) {
+            return value.filter(function(item) {
+                return item.status === status;
+            }).length;
         }
+    },
+    ready: function() {
+         $('[data-toggle="tooltip"]').tooltip();
     }
 };
 </script>

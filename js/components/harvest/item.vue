@@ -11,6 +11,7 @@
     v-class="
         modal-success: item.status === 'done',
         modal-danger: item.status === 'failed',
+        modal-warning: item.status === 'skipped'
     ">
     <div class="modal-body">
         <dl class="clearfix">
