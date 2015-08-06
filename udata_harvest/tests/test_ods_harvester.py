@@ -54,6 +54,7 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
 
         job = source.get_last_job()
         self.assertEqual(len(job.items), 3)
+        self.assertEqual(job.status, 'done')
 
         datasets = {d.extras["harvest:remote_id"]: d for d in Dataset.objects}
         self.assertEqual(len(datasets), 2)

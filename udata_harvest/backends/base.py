@@ -12,7 +12,7 @@ from voluptuous import MultipleInvalid
 
 from udata.models import Dataset
 
-from ..exceptions import HarvestException
+from ..exceptions import HarvestException, HarvestSkipException
 from ..models import HarvestItem, HarvestJob, HarvestError
 from ..signals import before_harvest_job, after_harvest_job
 
@@ -122,14 +122,18 @@ class BaseBackend(object):
                 dataset.save()
                 item.dataset = dataset
             item.status = 'done'
+        except HarvestSkipException as e:
+            log.info("SKipped item %s : %s" % (item.remote_id, str(e)))
+            item.status = 'skipped'
+            item.errors.append(HarvestError(message=str(e)))
         except Exception as e:
-            log.error("Error while processing %s : %s" % (item.remote_id, str(e)))
-            log.exception(e)
-            error = HarvestError(message=str(e), details=traceback.format_exc())
+            log.exception('Error while processing %s : %s',
+                          item.remote_id,
+                          str(e))
+            error = HarvestError(message=str(e),
+                                 details=traceback.format_exc())
             item.errors.append(error)
             item.status = 'failed'
-            msg = 'Failed to process item "{0.remote_id}": {1}'
-            log.error(msg.format(item, str(e)))
 
         item.ended = datetime.now()
         self.job.save()
@@ -143,7 +147,7 @@ class BaseBackend(object):
 
     def finalize(self):
         self.job.status = 'done'
-        if any(i.errors for i in self.job.items):
+        if any(i.status == 'failed' for i in self.job.items):
             self.job.status += '-errors'
         self.end()
 

@@ -55,11 +55,11 @@ def force_list(value):
 
 
 def slug(value):
-    return slugify.slugify(value, separator='-')
+    return slugify.slugify(value.lower(), separator='-')
 
 
 def taglist(value):
-    return [slugify.slugify(t, separator='-') for t in value.split(',')]
+    return [slug(t) for t in value.split(',')]
 
 
 def empty_none(value):
@@ -91,7 +91,7 @@ def is_url(add_prefix='http://', full=False, remove_fragment=False,
             return value
         split_url = list(urlparse.urlsplit(value))
         if full and add_prefix \
-                and not all(split_url[0], split_url[1], split_url[2]) \
+                and not all((split_url[0], split_url[1], split_url[2])) \
                 and not split_url[2].startswith(u'/'):
             split_url = list(urlparse.urlsplit(add_prefix + value))
         scheme = split_url[0]
@@ -112,3 +112,16 @@ def is_url(add_prefix='http://', full=False, remove_fragment=False,
             split_url[4] = ''
         return unicode(urlparse.urlunsplit(split_url))
     return converter
+
+
+def hash(value):
+    '''Detect an hash type'''
+    if len(value) == 32:
+        type = 'md5'
+    elif len(value) == 40:
+        type = 'sha1'
+    elif len(value) == 64:
+        type = 'sha256'
+    else:
+        raise Invalid('Unrecognized hash algorithm')
+    return {'type': type, 'value': value}

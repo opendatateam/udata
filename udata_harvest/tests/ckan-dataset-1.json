@@ -1,0 +1,139 @@
+{
+    "help": "Return the metadata of a dataset (package) and its resources.\\\n\\\n    :param id: the id or name of the dataset\\\n    :type id: string\\\n\\\n    :rtype: dictionary\\\n\\\n    ",
+    "success": true,
+    "result": {
+        "license_title": "Licence ouverte / Open license (Etalab)",
+        "maintainer": null,
+        "relationships_as_object": [],
+        "private": false,
+        "maintainer_email": null,
+        "revision_timestamp": "2013-08-01T07:43:31.110424",
+        "id": "f9f07d12-f810-4cb5-b3c0-52d7b1130c2e",
+        "metadata_created": "2013-08-01T07:41:11.023152",
+        "owner_org": "da10a970-916c-4ad3-ab6c-6adbccfb6a69",
+        "metadata_modified": "2013-10-01T15:59:56.322481",
+        "author": null,
+        "author_email": null,
+        "state": "active",
+        "version": null,
+        "license_id": "lool",
+        "type": "dataset",
+        "resources": [
+            {
+                "resource_group_id": "384bef8c-9d25-4491-af2c-532f8b2738f8",
+                "cache_last_updated": null,
+                "revision_timestamp": "2013-10-01T15:59:56.322481",
+                "webstore_last_updated": "2013-10-01T17:59:56.238951",
+                "id": "f5fc0640-3b10-4866-8f7b-05fc2c25fdd3",
+                "size": "1375",
+                "state": "active",
+                "hash": "689afc083c6316259955f499580bdf41bfc5e495",
+                "description": "Resource description 1",
+                "format": "CSV",
+                "tracking_summary": {
+                    "total": 0,
+                    "recent": 0
+                },
+                "mimetype_inner": null,
+                "mimetype": "text/csv",
+                "cache_url": null,
+                "name": "Resource 1",
+                "created": "2013-08-01T09:43:09.031465",
+                "url": "http://ckan.test.org/storage/f/2013-10-01T15%3A59%3A32.755Z/resource.csv",
+                "webstore_url": "active",
+                "last_modified": "2013-10-01T17:59:55.552785",
+                "position": 0,
+                "revision_id": "011e4e7a-115b-433b-8656-8bb3d29d0c8e",
+                "resource_type": "file.upload"
+            }
+        ],
+        "num_resources": 1,
+        "tags": [
+            {
+                "vocabulary_id": "721c0574-3be4-4b1f-bafa-17637c80c542",
+                "display_name": "Economie",
+                "name": "Economie",
+                "revision_timestamp": "2013-08-01T07:41:11.023152",
+                "state": "active",
+                "id": "9acbee4a-8f74-4000-806b-c107018df783"
+            },
+            {
+                "vocabulary_id": null,
+                "display_name": "correspondant",
+                "name": "correspondant",
+                "revision_timestamp": "2013-08-01T07:41:11.023152",
+                "state": "active",
+                "id": "16b9586d-96ad-491a-85fb-1e77073de835"
+            },
+            {
+                "vocabulary_id": null,
+                "display_name": "excellence",
+                "name": "excellence",
+                "revision_timestamp": "2013-08-01T07:41:11.023152",
+                "state": "active",
+                "id": "3cb7d210-4be5-4b10-ad12-bdda42ff2dcb"
+            },
+            {
+                "vocabulary_id": null,
+                "display_name": "pôle",
+                "name": "pôle",
+                "revision_timestamp": "2013-08-01T07:41:11.023152",
+                "state": "active",
+                "id": "47f995c6-85ca-4cf0-9af9-13521d24da85"
+            }
+        ],
+        "tracking_summary": {
+            "total": 0,
+            "recent": 0
+        },
+        "groups": [
+            {
+                "title": " Actions Région",
+                "description": "Les actions régionales, l'agriculture, l'aménagement du territoire...",
+                "name": "actions-region",
+                "id": "7859d498-316e-4a31-8487-f7f26df0929e"
+            }
+        ],
+        "relationships_as_subject": [],
+        "num_tags": 4,
+        "name": "dataset-1",
+        "isopen": false,
+        "url": null,
+        "notes": "Description 1",
+        "title": "Dataset 1",
+        "extras": [
+            {
+                "value": "01/08/2013",
+                "key": "date",
+                "__extras": {
+                    "package_id": "f9f07d12-f810-4cb5-b3c0-52d7b1130c2e",
+                    "revision_id": "e108a7c6-0e5f-4714-a8e6-68162c69ae68"
+                }
+            },
+            {
+                "value": "Annuelle",
+                "key": "freqMAJ",
+                "__extras": {
+                    "revision_id": "e108a7c6-0e5f-4714-a8e6-68162c69ae68",
+                    "package_id": "f9f07d12-f810-4cb5-b3c0-52d7b1130c2e"
+                }
+            }
+        ],
+        "license_url": "http://www.etalab.gouv.fr/pages/Licence_ouverte_Open_licence-5899923.html",
+        "organization": {
+            "description": "",
+            "created": "2013-07-18T11:25:15.969631",
+            "title": "Conseil Régional Nord-Pas de Calais",
+            "name": "conseil-regional-nord-pas-de-calais",
+            "revision_timestamp": "2013-07-29T15:25:28.634142",
+            "is_organization": true,
+            "state": "active",
+            "image_url": "/images/npdc-icon.png",
+            "revision_id": "96f29d53-d188-481c-9923-ea7d35045b2e",
+            "type": "organization",
+            "id": "da10a970-916c-4ad3-ab6c-6adbccfb6a69",
+            "approval_status": "approved"
+        },
+        "revision_id": "e108a7c6-0e5f-4714-a8e6-68162c69ae68"
+    }
+}

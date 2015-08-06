@@ -49,3 +49,16 @@ class FiltersTest(TestCase):
     def test_line_endings(self):
         self.assertEqual(filters.line_endings('hello\r\nworld!\r '),
                          'hello\nworld!\n ')
+
+    def test_hash(self):
+        hashes = {
+            'md5': 'bd8668597bfba2d1843441d7199bea65',
+            'sha1': 'f2f0249827f501286b4713683e526d541d2cc7e2',
+            'sha256': ('c4373e1d81eb44882bf9ff539d0e5f'
+                       'faf03a114abf9306591117d781966268f9')
+        }
+
+        for type, value in hashes.items():
+            self.assertEqual(filters.hash(value),
+                             {'type': type, 'value': value})
+

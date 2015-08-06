@@ -33,6 +33,7 @@ HARVEST_ITEM_STATUS = OrderedDict((
     ('started', _('Started')),
     ('done', _('Done')),
     ('failed', _('Failed')),
+    ('skipped', _('Skipped')),
 ))
 
 DEFAULT_HARVEST_FREQUENCY = 'manual'

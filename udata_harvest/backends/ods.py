@@ -7,7 +7,7 @@ import html2text
 
 from udata.models import License, Resource
 from . import BaseBackend, register
-from ..exceptions import HarvestException
+from ..exceptions import HarvestException, HarvestSkipException
 
 
 log = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ class OdsHarvester(BaseBackend):
 
         if not ods_dataset.get('has_records'):
             msg = 'Dataset {datasetid} has no record'.format(**ods_dataset)
-            raise HarvestException(msg)
+            raise HarvestSkipException(msg)
 
         dataset = self.get_dataset(item.remote_id)
 

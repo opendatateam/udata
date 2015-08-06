@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
 import logging
 
 from uuid import UUID
@@ -11,13 +12,13 @@ from voluptuous import (
 )
 
 
-from udata.models import db, Resource, License
+from udata.models import db, Resource, License, SpatialCoverage
 from udata.utils import get_by, daterange_start, daterange_end
 
 from . import BaseBackend, register
-from ..exceptions import HarvestException
+from ..exceptions import HarvestException, HarvestSkipException
 from ..filters import (
-    boolean, email, to_date, slug, normalize_string, is_url, empty_none
+    boolean, email, to_date, slug, normalize_string, is_url, empty_none, hash
 )
 
 log = logging.getLogger(__name__)
@@ -35,9 +36,8 @@ resource = {
     'format': All(basestring, Lower),
     'mimetype': Any(basestring, None),
     'size': Any(Coerce(int), None),
-    'hash': All(basestring),
+    'hash': Any(All(basestring, hash), None),
     'created': All(basestring, to_date),
-    'revision_timestamp': All(basestring, to_date),
     'last_modified': Any(All(basestring, to_date), None),
     'url': All(basestring, is_url(full=True)),
     'resource_type': All(empty_none,
@@ -52,7 +52,6 @@ tag = {
     'vocabulary_id': Any(basestring, None),
     'display_name': basestring,
     'name': All(basestring, slug),
-    'revision_timestamp': All(basestring, to_date),
     'state': basestring,
 }
 
@@ -131,8 +130,9 @@ class CkanBackend(BaseBackend):
 
     def initialize(self):
         '''List all datasets for a given ...'''
-        status = self.get_status()
-        fix = status['ckan_version'] < '1.8'
+        # status = self.get_status()
+        # fix = status['ckan_version'] < '1.8'
+        fix = False
         response = self.get_action('package_list', fix=fix)
         for name in response['result']:
             self.add_item(name)
@@ -140,6 +140,15 @@ class CkanBackend(BaseBackend):
     def process(self, item):
         response = self.get_action('package_show', id=item.remote_id)
         data = self.validate(response['result'], schema)
+
+        # Fix the remote_id: use real ID instead of not stable name
+        item.remote_id = data['id']
+
+        # Skip if no resource
+        if not len(data.get('resources', [])):
+            msg = 'Dataset {0} has no record'.format(item.remote_id)
+            raise HarvestSkipException(msg)
+
         dataset = self.get_dataset(item.remote_id)
 
         # Core attributes
@@ -147,24 +156,29 @@ class CkanBackend(BaseBackend):
             dataset.slug = data['name']
         dataset.title = data['title']
         dataset.description = data['notes']
-        license = License.objects(id=data['license_id']).first()
-        dataset.license = license or License.objects.get(id='notspecified')
+        dataset.license = License.objects(id=data['license_id']).first()
+        # dataset.license = license or License.objects.get(id='notspecified')
         dataset.tags = [t['name'] for t in data['tags']]
 
         dataset.created_at = data['metadata_created']
         dataset.last_modified = data['metadata_modified']
 
+        dataset.extras['ckan:name'] = data['name']
+
         temporal_start, temporal_end = None, None
+        spatial_geom = None
 
         for extra in data['extras']:
             # GeoJSON representation (Polygon or Point)
             if extra['key'] == 'spatial':
-                print 'spatial', extra['value']
+                spatial_geom = json.loads(extra['value'])
             #  Textual representation of the extent / location
             elif extra['key'] == 'spatial-text':
+                log.debug('spatial-text value not handled')
                 print 'spatial-text', extra['value']
             # Linked Data URI representing the place name
             elif extra['key'] == 'spatial-uri':
+                log.debug('spatial-uri value not handled')
                 print 'spatial-uri', extra['value']
             # Update frequency
             elif extra['key'] == 'frequency':
@@ -182,6 +196,19 @@ class CkanBackend(BaseBackend):
             # else:
             #     print extra['key'], extra['value']
             dataset.extras[extra['key']] = extra['value']
+
+        if spatial_geom:
+            dataset.spatial = SpatialCoverage()
+            if spatial_geom['type'] == 'Polygon':
+                coordinates = [spatial_geom['coordinates']]
+            elif spatial_geom['type'] == 'MultiPolygon':
+                coordinates = spatial_geom['coordinates']
+            else:
+                HarvestException('Unsupported spatial geometry')
+            dataset.spatial.geom = {
+                'type': 'MultiPolygon',
+                'coordinates': coordinates
+            }
 
         if temporal_start and temporal_end:
             dataset.temporal_coverage = db.DateRange(
@@ -209,10 +236,11 @@ class CkanBackend(BaseBackend):
             resource.description = res.get('description')
             resource.url = res['url']
             resource.type = 'api' if res['resource_type'] == 'api' else 'remote'
-            resource.format = res.get('format')
+            resource.format = res.get('format', '').lower() or None
+            resource.mime = res.get('mimetype', '').lower() or None
             resource.hash = res.get('hash')
             resource.created = res['created']
-            resource.modified = res['revision_timestamp']
+            resource.modified = res['last_modified']
             resource.published = resource.published or resource.created
 
         return dataset
