@@ -61,7 +61,7 @@ long_description = '\n'.join((
 ))
 
 install_requires = pip('install.pip')
-# tests_require = pip('test.pip')
+tests_require = pip('test.pip')
 
 # if sys.version_info[0:2] < (2, 7):
 #     install_requires += ['argparse']
@@ -79,10 +79,10 @@ setup(
     include_package_data=True,
     install_requires=install_requires,
     # dependency_links=dependency_links('install.pip'),
-    # tests_require=tests_require,
-    # extras_require={
-    #     'test': tests_require,
-    # },
+    tests_require=tests_require,
+    extras_require={
+        'test': tests_require,
+    },
     license='LGPL',
     use_2to3=True,
     keywords='',
