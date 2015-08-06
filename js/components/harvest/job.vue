@@ -71,7 +71,7 @@ export default {
         return {
             job: new HarvestJob(),
             fields: [{
-                label: this._('Remote Id'),
+                label: this._('Remote ID'),
                 key: 'remote_id',
                 sort: 'remote_id',
                 ellipsis: true

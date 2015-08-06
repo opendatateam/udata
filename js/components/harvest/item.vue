@@ -22,7 +22,7 @@
             <dt>{{ _('Ended at') }}</dt>
             <dd>{{ item.ended | dt }}</dd>
             <dt>{{ _('Status') }}</dt>
-            <dd>{{ item.status }}</dd>
+            <dd><span class="label label-{{ item.status | statusClass }}">{{ item.status | statusI18n }}</span></dd>
             <dt v-if="item.dataset">{{ _('Dataset') }}</dt>
             <dd v-if="item.dataset">
                 <dataset-card class="col-xs-12"
@@ -60,5 +60,13 @@ export default {
     data: function() {
         return {};
     },
+    filters: {
+        statusClass: function(value) {
+            return STATUS_CLASSES[value];
+        },
+        statusI18n: function(value) {
+            return STATUS_I18N[value];
+        }
+    }
 };
 </script>
