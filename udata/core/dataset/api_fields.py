@@ -27,6 +27,11 @@ license_fields = api.model('License', {
     'flags': fields.List(fields.String, description='Some arbitry flags'),
 })
 
+frequency_fields = api.model('Frequency', {
+    'id': fields.String(description='The frequency identifier'),
+    'label': fields.String(description='The frequency display name')
+})
+
 badge_fields = api.model('DatasetBadge', {
     'kind': fields.String(description='Kind of badge (pivotal-data, etc)',
                           required=True, enum=DATASET_BADGE_KINDS.keys()),
