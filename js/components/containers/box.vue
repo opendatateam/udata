@@ -106,6 +106,16 @@ module.exports = {
             }
         }
     },
-    props: ['title', 'icon', 'boxclass', 'bodyclass', 'footerclass', 'loading', 'footer']
+    props: [
+        'title',
+        'icon',
+        'boxclass',
+        'bodyclass',
+        'footerclass',
+        'loading',
+        'footer',
+        'actions',
+        'collapsable'
+    ]
 };
 </script>

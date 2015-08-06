@@ -22,15 +22,18 @@ module.exports = {
             fields: [{
                 label: this._('Title'),
                 key: 'title',
-                type: 'text'
+                type: 'text',
+                ellipsis: true
             }, {
                 label: this._('Created on'),
                 key: 'created',
-                type: 'datetime'
+                type: 'datetime',
+                width: 200
             }, {
                 label: this._('Closed on'),
                 key: 'closed',
-                type: 'datetime'
+                type: 'datetime',
+                width: 200
             }]
         };
     },

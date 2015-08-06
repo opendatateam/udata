@@ -3,12 +3,28 @@
     td.avatar-cell {
         padding: 3px;
     }
+
+    th {
+        white-space: nowrap;
+    }
+
+    td.ellipsis {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow:ellipsis;
+        max-width: 0;
+    }
+
+    header.datatable-header > header{
+        width: 100%;
+        padding: 10px;
+    }
 }
 </style>
 
 <template>
 <box title="{{ title }}" icon="{{ icon }}"
-    boxclass="box-solid datatable-widget {{boxclass}}"
+    boxclass="datatable-widget {{tint ? 'box-' + tint : 'box-solid'}} {{boxclass}}"
     bodyclass="table-responsive no-padding"
     footerclass="text-center clearfix"
     footer="{{ show_footer }}"
@@ -29,7 +45,7 @@
             <div class="input-group">
                 <input type="text" class="form-control input-sm pull-right"
                     style="width: 150px;" placeholder="{{'Search'|i18n}}"
-                    v-model="search_query" v-on="keyup:search | key enter">
+                    v-model="search_query" debounce="500" v-on="keyup:search | key enter">
                 <div class="input-group-btn">
                     <button class="btn btn-sm btn-flat" v-on="click: search">
                         <i class="fa fa-search"></i>
@@ -38,13 +54,16 @@
             </div>
         </div>
     </aside>
+    <header class="datatable-header">
+        <content select="header"></content>
+    </header>
     <table class="table table-hover" v-if="has_data">
         <thead>
             <tr>
                 <th class="text-{{align || 'left'}}"
                     v-class="pointer: sort"
                     v-repeat="fields" v-on="click: sort ? p.sort(remote ? sort : key) : null"
-                    v-attr="width: width + 5">
+                    v-attr="width: width | thwidth">
                     {{label}}
                     <span class="fa fa-fw" v-if="sort" v-class="
                         fa-sort: p.sorted != (remote ? sort : key),
@@ -56,9 +75,16 @@
         </thead>
         <tbody>
             <tr class="pointer"
-                v-repeat="item:p.data" track-by="id"
+                v-repeat="item:p.data"
+                v-class="active: selected == item"
                 v-on="click: item_click(item)">
-                <td v-repeat="field: fields" track-by="key">
+                <td v-repeat="field: fields" track-by="key"
+                    v-class="
+                        text-center: field.align === 'center',
+                        text-left: field.align === 'left',
+                        text-right: field.align === 'right',
+                        ellipsis: field.ellipsis
+                    ">
                     <component is="{{field.type || 'text'}}"
                         item="{{item}}" field="{{field}}">
                     </component>
@@ -123,17 +149,15 @@ var CellWidget = Vue.extend({
 
                 for (var i=0; i < parts.length; i++) {
                     var key = parts[i];
+                    if (!result || !result.hasOwnProperty(key)) {
+                        result = null;
+                        break;
+                    }
                     result = result[key];
                 }
             }
 
             return result || this.$options.default;
-        }
-    },
-    attached: function() {
-        // Dirty hack to fix class on field/td iteration
-        if (this.field.align) {
-            $(this.$el).closest('td').addClass('text-'+this.field.align);
         }
     }
 })
@@ -145,7 +169,7 @@ module.exports = {
         'pagination-widget': require('components/pagination.vue'),
         'text': CellWidget.extend({
                 default: '',
-                template: '{{value | truncate 100}}'
+                template: '{{value}}'
             }),
         'date': CellWidget.extend({
                 template: [
@@ -175,10 +199,15 @@ module.exports = {
                 template: '<time datetime="{{value}}">{{value | since }}</time>'
             }),
         'label': CellWidget.extend({
-            template: '<span class="label label-{{color}}">{{value}}</span>',
+            template: '<span class="label label-{{color}}">{{label}}</span>',
             computed: {
                 color: function() {
-                    return this.field.label_type(this.value)
+                    return this.field.label_type(this.value);
+                },
+                label: function() {
+                    return this.field.hasOwnProperty('label_func')
+                        ? this.field.label_func(this.value)
+                        : this.value;
                 }
             }
         }),
@@ -212,6 +241,7 @@ module.exports = {
             template: '<span class="label label-{{type}}">{{text}}</span>',
             computed: {
                 type: function() {
+                    if (!this.item) return;
                     if (this.item.deleted) {
                         return VISIBILITIES.deleted.type;
                     } else if (this.item.private) {
@@ -221,6 +251,7 @@ module.exports = {
                     }
                 },
                 text: function() {
+                    if (!this.item) return;
                     if (this.item.deleted) {
                         return VISIBILITIES.deleted.label;
                     } else if (this.item.private) {
@@ -240,7 +271,9 @@ module.exports = {
         return {
             search_query: null,
             downloads: [],
-            p: {}
+            p: {},
+            track: 'id',
+            selected: null
         };
     },
     computed: {
@@ -253,15 +286,36 @@ module.exports = {
         },
         has_data: function() {
             return this.p.data && this.p.data.length;
+        },
+        trackBy: function() {
+            return this.track || '';
         }
     },
-    props: ['p', 'title', 'icon', 'fields', 'boxclass', 'downloads', 'empty'],
+    props: ['p', 'title', 'icon', 'fields', 'boxclass', 'tint', 'downloads', 'empty', 'track'],
     methods: {
         search: function() {
             this.p.search(this.search_query);
         },
         item_click: function(item) {
+            this.selected = item;
             this.$dispatch('datatable:item:click', item);
+        }
+    },
+    filters: {
+        thwidth: function(value) {
+            switch(value) {
+                case undefined:
+                    return '';
+                case 0:
+                    return 0;
+                default:
+                    return value + 5;
+            }
+        }
+    },
+    watch: {
+        search_query: function(query) {
+            this.p.search(query);
         }
     }
 };

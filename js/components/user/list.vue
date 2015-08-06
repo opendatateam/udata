@@ -34,8 +34,8 @@ module.exports = {
                 type: 'text'
             }, {
                 label: this._('Member since'),
-                key: 'created_at',
-                sort: 'created',
+                key: 'since',
+                sort: 'since',
                 align: 'left',
                 type: 'since',
                 width: 135

@@ -1,26 +1,33 @@
 <template>
     <div class="row">
-        <harvest-source-widget source="{{source}}" class="col-md-6"></harvest-source-widget>
-        <harvest-jobs-widget jobs="{{jobs}}" current="{{current_job}}" class="col-md-6"></harvest-jobs-widget>
+        <source-widget source="{{source}}"
+            v-class="
+                col-xs-12: !current_job,
+                col-md-4: current_job,
+            ">
+        </source-widget>
+        <job-widget
+            v-if="current_job"
+            job="{{current_job}}"
+            class="col-md-8">
+        </job-widget>
     </div>
     <div class="row"></div>
 </template>
 
 <script>
-'use strict';
+import HarvestSource from 'models/harvest/source';
+import ItemModal from 'components/harvest/item.vue';
+import Vue from 'vue';
 
-var HarvestJobs = require('models/harvest/jobs'),
-    HarvestJob = require('models/harvest/job'),
-    HarvestSource = require('models/harvest/source');
-
-module.exports = {
+export default {
     name: 'HarvestSourceView',
     data: function() {
         return {
             source_id: null,
             source: new HarvestSource(),
-            jobs: new HarvestJobs({query: {page_size: 10}}),
-            current_job: new HarvestJob(),
+            current_job: null,
+            current_item: null,
             meta: {
                 title: null,
                 subtitle: null
@@ -30,17 +37,19 @@ module.exports = {
     events: {
         'harvest:job:selected': function(job) {
             this.current_job = job;
+        },
+        'harvest:job:item:selected': function(item) {
+            this.current_item = item;
+            this.$root.$modal(
+                {data: {item: item}},
+                Vue.extend(ItemModal)
+            );
         }
     },
     watch: {
         source_id: function(id) {
             if (id) {
                 this.source.fetch(id);
-            }
-        },
-        'source.id': function(id) {
-            if (id) {
-                this.jobs.fetch({ident: id});
             }
         },
         'source.name': function(name) {
@@ -57,8 +66,8 @@ module.exports = {
         }
     },
     components: {
-        'harvest-source-widget': require('components/harvest/source.vue'),
-        'harvest-jobs-widget': require('components/harvest/jobs.vue')
+        'source-widget': require('components/harvest/source.vue'),
+        'job-widget': require('components/harvest/job.vue'),
     }
 };
 </script>
