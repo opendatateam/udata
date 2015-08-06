@@ -29,6 +29,12 @@ define(['logger', 'jquery'], function(log, $) {
             'checksum': require('components/form/checksum.vue')
         },
         computed: {
+            description: function() {
+                let property = this.property;
+                return property && property.hasOwnProperty('description')
+                    ? property.description
+                    : undefined;
+            },
             property: function() {
                 if (!this.schema.properties.hasOwnProperty(this.field.id)) {
                     log.error('Field "' + this.field.id + '" not found in schema');
@@ -44,12 +50,13 @@ define(['logger', 'jquery'], function(log, $) {
                 return this.schema.required.indexOf(this.field.id) >= 0;
             },
             is_bool: function() {
-                return this.property.type === 'boolean';
+                return this.property && this.property.type === 'boolean';
             },
             value: function() {
                 if (this.model && this.field) {
                     return this.model[this.field.id];
                 }
+                return '';
             },
             placeholder: function() {
                 return this.field.placeholder || this.field.label;

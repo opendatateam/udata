@@ -20,8 +20,8 @@
         has-error: errors.length,
         checkbox: is_bool
         ">
-        <span v-show="property.description" class="form-help"
-            v-attr="data-content: property.description"
+        <span v-show="description" class="form-help"
+            v-attr="data-content: description"
             v-if="field.type!=='hidden'"></span>
         <label for="{{field.id}}" v-class="required: required"
             v-if="field.type!=='hidden'">
@@ -37,12 +37,10 @@
 </template>
 
 <script>
-'use strict';
+import BaseField from 'components/form/base-field';
 
-var BaseField = require('components/form/base-field');
-
-module.exports = {
+export default {
     name: 'vertical-form-field',
-    mixins: [BaseField]
+    mixins: [BaseField],
 };
 </script>

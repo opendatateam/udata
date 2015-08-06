@@ -56,18 +56,16 @@
 </style>
 
 <script>
-'use strict';
-
-var Vue = require('vue'),
-    API = require('api'),
-    BaseCompleter = require('components/form/base-completer.vue'),
-    levels = require('models/geolevels');
+import Vue from 'vue';
+import API from 'api';
+import BaseCompleter from 'components/form/base-completer.vue';
+import levels from 'models/geolevels';
 
 function levelLabel(zone) {
     return levels.by_id(zone.level).name;
 }
 
-module.exports = {
+export default {
     name: 'zone-completer',
     mixins: [BaseCompleter],
     ns: 'spatial',
@@ -101,7 +99,7 @@ module.exports = {
                         opt.push('</span>: <span class="value">');
                         opt.push(escape(data.keys[key]));
                         opt.push('</span></li>');
-                    })
+                    });
                     opt.push('</ul>');
                 }
                 opt.push('</div>');

@@ -1,6 +1,8 @@
-describe("Common Form features", function() {
+import API from 'specs/mocks/api';
+import {Model} from 'models/base';
+import Vue from 'vue';
 
-    var Vue = require('vue');
+describe("Common Form features", function() {
 
     Vue.config.async = false;
     Vue.use(require('plugins/i18next'));
@@ -79,5 +81,85 @@ describe("Common Form features", function() {
             });
         });
     });
+
+    describe('Form with model', function () {
+
+        const PetSchema = {
+            required: ['id', 'name'],
+            properties: {
+                id: {type: 'integer', format: 'int64'},
+                name: {type: 'string'},
+                tag: {type: 'string'}
+            }
+        };
+
+        const PersonSchema = {
+            required: ['id', 'name'],
+            properties: {
+                id: {type: 'integer', format: 'int64'},
+                name: {type: 'string'},
+                age: {type: 'integer'},
+                pet: {$ref: '#/definitions/Pet'}
+            }
+        };
+
+        class Pet extends Model {};
+        class Person extends Model {};
+
+        before(function() {
+            API.mock_defs({
+                Pet: PetSchema,
+                Person: PersonSchema
+            });
+        });
+
+        it('Should handle schema for flat models', function() {
+            var vm = new Vue({
+                el: fixture.set('<form/>')[0],
+                mixins: [BaseForm],
+                data: {
+                    model: new Pet(),
+                    fields: [{
+                        id: 'id'
+                    }, {
+                        id: 'name'
+                    }]
+                }
+            });
+
+            expect(vm).to.have.property('schema').to.eql({
+                required: ['id', 'name'],
+                properties: {
+                    id: {type: 'integer', format: 'int64'},
+                    name: {type: 'string'}
+                }
+            });
+        });
+
+        it('Should handle schema for nested models', function() {
+            var vm = new Vue({
+                el: fixture.set('<form/>')[0],
+                mixins: [BaseForm],
+                data: {
+                    model: new Person(),
+                    fields: [{
+                        id: 'id'
+                    }, {
+                        id: 'pet.name'
+                    }]
+                }
+            });
+
+            expect(vm).to.have.property('schema').to.eql({
+                required: ['id'],
+                properties: {
+                    id: {type: 'integer', format: 'int64'},
+                    'pet.name': {type: 'string'}
+                }
+            });
+        });
+
+    });
+
 
 });

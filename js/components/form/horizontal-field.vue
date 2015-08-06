@@ -20,8 +20,8 @@
             class="col-sm-3 control-label">
             <i v-if="errors.length" class="fa fa-times-circle-o"></i>
             {{ field.label }}
-            <span v-show="property.description" class="form-help"
-                v-attr="data-content: property.description"></span>
+            <span v-show="description" class="form-help"
+                v-attr="data-content: description"></span>
         </label>
         <div class="col-sm-9" v-class="col-sm-offset-3: is_bool">
             <component is="{{widget}}" v-if="!is_bool"></component>

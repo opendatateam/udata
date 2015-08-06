@@ -3,14 +3,12 @@
 </style>
 
 <template>
-<select class="form-control" v-attr="
+<select class="form-control" v-model="value" options="options" v-attr="
     id: field.id,
     name: field.id,
     placeholder: placeholder,
     required: required,
     disabled: readonly">
-    <option v-repeat="o:options"
-        v-attr="selected: value == o.value">{{ o.label }}</option>
 </select>
 </template>
 
@@ -38,22 +36,6 @@ module.exports = {
             }
 
             return [];
-        }
-    },
-    filters: {
-        label: function(value) {
-            if (this.field.labels) {
-                return this.field.labels[value];
-            }
-            return value
-        },
-        is_selected: function(value) {
-            if (this.value != undefined) {
-                return value == this.value;
-            } else if (this.field && this.field.hasOwnProperty('default')) {
-                return value == this.filed.default;
-            }
-            return false;
         }
     }
 };
