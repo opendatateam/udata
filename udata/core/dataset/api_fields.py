@@ -8,7 +8,7 @@ from udata.core.user.api_fields import user_ref_fields
 
 from .models import (
     DATASET_BADGE_KINDS, UPDATE_FREQUENCIES, RESOURCE_TYPES, DEFAULT_FREQUENCY,
-    CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE
+    CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE, DEFAULT_LICENSE
 )
 
 checksum_fields = api.model('Checksum', {
@@ -118,9 +118,9 @@ dataset_fields = api.model('Dataset', {
     'spatial': fields.Nested(
         spatial_coverage_fields, allow_null=True,
         description='The spatial coverage'),
-    'license': fields.String(
-        attribute='license.id', description='The dataset license'),
-
+    'license': fields.String(attribute='license.id',
+                             default=DEFAULT_LICENSE['id'],
+                             description='The dataset license'),
     'uri': fields.UrlFor(
         'api.dataset', lambda o: {'dataset': o},
         description='The dataset API URI', required=True),
