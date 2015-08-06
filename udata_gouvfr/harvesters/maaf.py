@@ -154,8 +154,7 @@ class MaafBackend(backends.BaseBackend):
         xml = self.parse_xml(response.content.decode(encoding))
         metadata = xml['metadata']
 
-        dataset, created = Dataset.objects.get_or_create(
-            extras__remote_id=metadata['id'], auto_save=False)
+        dataset = self.get_dataset(metadata['id'])
 
         dataset.title = metadata['title']
         dataset.frequency = FREQUENCIES.get(metadata['frequency'], 'unknown')
@@ -165,13 +164,6 @@ class MaafBackend(backends.BaseBackend):
 
         if metadata.get('license_id'):
             dataset.license = License.objects.get(id=metadata['license_id'])
-
-        if self.source.owner:
-            dataset.owner = self.source.owner
-
-        if self.source.organization:
-            dataset.organization = self.source.organization
-            dataset.supplier = self.source.organization
 
         if (metadata.get('temporal_coverage_from')
                 and metadata.get('temporal_coverage_to')):
@@ -213,7 +205,6 @@ class MaafBackend(backends.BaseBackend):
                     resource.modified = row['last_modified']
                 dataset.resources.append(resource)
 
-        dataset.extras['remote_id'] = metadata['id']
         if metadata.get('author'):
             dataset.extras['author'] = metadata['author']
         if metadata.get('author_email'):
@@ -231,25 +222,7 @@ class MaafBackend(backends.BaseBackend):
         root = etree.fromstring(xml.encode('utf8'))
         self.xsd.validate(root)
         _, tree = dictize(root)
-        try:
-            return schema(tree)
-        except MultipleInvalid as e:
-            for error in e.errors:
-                field = '.'.join(str(p) for p in e.path)
-                path = e.path
-                data = tree
-                while path:
-                    attr = path.pop(0)
-                    try:
-                        data = data[attr]
-                    except:
-                        data = None
-                try:
-                    data = str(data)
-                except:
-                    pass
-                log.error('[%s] %s: %s', field, str(e), data)
-            raise
+        return self.validate(tree, schema)
 
     @property
     def xsd(self):
