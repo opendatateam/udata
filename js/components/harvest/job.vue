@@ -8,7 +8,8 @@
     p="{{ p }}" track="false"
     loading="{{job.loading}}"
     fields="{{ fields }}"
-    track="remote_id">
+    track="remote_id"
+    tint="{{job.status | statusClass}}">
     <header>
         <dl class="dl-horizontal">
             <dt>{{ _('Created at') }}</dt>

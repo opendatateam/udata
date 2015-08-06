@@ -24,7 +24,7 @@
 
 <template>
 <box title="{{ title }}" icon="{{ icon }}"
-    boxclass="box-solid datatable-widget {{boxclass}}"
+    boxclass="datatable-widget {{tint ? 'box-' + tint : 'box-solid'}} {{boxclass}}"
     bodyclass="table-responsive no-padding"
     footerclass="text-center clearfix"
     footer="{{ show_footer }}"
@@ -291,7 +291,7 @@ module.exports = {
             return this.track || '';
         }
     },
-    props: ['p', 'title', 'icon', 'fields', 'boxclass', 'downloads', 'empty', 'track'],
+    props: ['p', 'title', 'icon', 'fields', 'boxclass', 'tint', 'downloads', 'empty', 'track'],
     methods: {
         search: function() {
             this.p.search(this.search_query);
