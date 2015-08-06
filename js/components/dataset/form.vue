@@ -9,6 +9,7 @@
 <script>
 import Dataset from 'models/dataset';
 import licenses from 'models/licenses';
+import frequencies from 'models/frequencies';
 
 module.exports = {
     props: ['dataset'],
@@ -31,7 +32,10 @@ module.exports = {
                 }, {
                     id: 'frequency',
                     label: this._('Update frequency'),
-                    widget: 'select-input'
+                    widget: 'select-input',
+                    values: frequencies.items.map(function(item) {
+                        return {value: item.id, text: item.label};
+                    })
                 }, {
                     id: 'tags',
                     label: this._('Tags'),

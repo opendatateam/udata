@@ -23,7 +23,9 @@ module.exports = {
         options: function() {
             if (!this.property) return [];
 
-            if (this.property.enum && this.field.labels)  {
+            if (this.field.values) {
+                return this.field.values;
+            } else if (this.property.enum && this.field.labels)  {
                 return this.property.enum.map(function(value) {
                     return {value: value, text: this.field.labels[value]};
                 });
@@ -31,8 +33,6 @@ module.exports = {
                 return this.property.enum.map(function(value) {
                     return {value: value, text: value};
                 });
-            } else if (this.field.values) {
-                return this.field.values;
             }
 
             return [];
