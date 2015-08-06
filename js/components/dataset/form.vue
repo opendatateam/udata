@@ -7,9 +7,8 @@
 </template>
 
 <script>
-'use strict';
-
-var Dataset = require('models/dataset');
+import Dataset from 'models/dataset';
+import licenses from 'models/licenses';
 
 module.exports = {
     props: ['dataset'],
@@ -25,7 +24,10 @@ module.exports = {
                 }, {
                     id: 'license',
                     label: this._('License'),
-                    widget: 'license-completer'
+                    widget: 'select-input',
+                    values: licenses.items.map(function(item) {
+                        return {value: item.id, text: item.title};
+                    })
                 }, {
                     id: 'frequency',
                     label: this._('Update frequency'),

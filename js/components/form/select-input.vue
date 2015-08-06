@@ -25,11 +25,11 @@ module.exports = {
 
             if (this.property.enum && this.field.labels)  {
                 return this.property.enum.map(function(value) {
-                    return {value: value, label: this.field.labels[value]};
+                    return {value: value, text: this.field.labels[value]};
                 });
             } else if (this.property.enum)  {
                 return this.property.enum.map(function(value) {
-                    return {value: value, label: value};
+                    return {value: value, text: value};
                 });
             } else if (this.field.values) {
                 return this.field.values;

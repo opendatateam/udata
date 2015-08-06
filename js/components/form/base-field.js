@@ -18,7 +18,6 @@ define(['logger', 'jquery'], function(log, $) {
             'tag-completer': require('components/form/tag-completer'),
             'dataset-completer': require('components/form/dataset-completer'),
             'reuse-completer': require('components/form/reuse-completer'),
-            'license-completer': require('components/form/license-completer'),
             'territory-completer': require('components/form/territory-completer'),
             'zone-completer': require('components/form/zone-completer.vue'),
             'format-completer': require('components/form/format-completer'),
@@ -53,10 +52,14 @@ define(['logger', 'jquery'], function(log, $) {
                 return this.property && this.property.type === 'boolean';
             },
             value: function() {
+                let value = '';
                 if (this.model && this.field) {
-                    return this.model[this.field.id];
+                    value = this.model[this.field.id];
+                    if (!value && this.property && this.property.hasOwnProperty('default')) {
+                        value = this.property.default;
+                    }
                 }
-                return '';
+                return value || '';
             },
             placeholder: function() {
                 return this.field.placeholder || this.field.label;
