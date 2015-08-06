@@ -12,9 +12,9 @@ from udata.commands import submanager
 log = logging.getLogger(__name__)
 
 m = submanager('harvest',
-    help='Remote repositories harvesting operations',
-    description='Handle remote repositories harvesting operations'
-)
+               help='Remote repositories harvesting operations',
+               description='Handle remote repositories harvesting operations'
+               )
 
 
 @m.option('backend')
@@ -26,7 +26,10 @@ m = submanager('harvest',
 def create(name, url, backend, frequency=None, owner=None, org=None):
     '''Create a new harvest source'''
     log.info('Creating a new Harvest source "%s"', name)
-    source = actions.create_source(name, url, backend, frequency=frequency, owner=owner, org=org)
+    source = actions.create_source(name, url, backend,
+                                   frequency=frequency,
+                                   owner=owner,
+                                   org=org)
     log.info('''Created a new Harvest source:
     name: {0.name},
     slug: {0.slug},

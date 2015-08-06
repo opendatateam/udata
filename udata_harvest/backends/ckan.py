@@ -1,253 +1,246 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import hashlib
-import requests
+import json
 import logging
 
 from uuid import UUID
 from urlparse import urljoin
-from dateutil.parser import parse
 
-from flask.ext.security import current_user
+from voluptuous import (
+    Schema, All, Any, Lower, Coerce, DefaultTo
+)
 
-from udata.models import db, Dataset, Resource, Organization, Reuse, User, License, Member, SpatialCoverage
-from udata.models import Follow, FollowUser, FollowOrg, FollowDataset
+
+from udata.models import db, Resource, License, SpatialCoverage
 from udata.utils import get_by, daterange_start, daterange_end
 
-from . import BaseBackend
-
-from udata.ext.gouvfr.models import TerritorialCoverage
-from udata.ext.gouvfr.tasks import territorial_to_spatial
-
+from . import BaseBackend, register
+from ..exceptions import HarvestException, HarvestSkipException
+from ..filters import (
+    boolean, email, to_date, slug, normalize_string, is_url, empty_none, hash
+)
 
 log = logging.getLogger(__name__)
 
-# TODO: Transform as a task
+RESOURCE_TYPES = ('file', 'file.upload', 'api', 'documentation',
+                  'image', 'visualization')
+
+ALLOWED_RESOURCE_TYPES = ('file', 'file.upload', 'api')
+
+resource = {
+    'id': basestring,
+    'position': int,
+    'name': All(DefaultTo(''), basestring),
+    'description': All(basestring, normalize_string),
+    'format': All(basestring, Lower),
+    'mimetype': Any(basestring, None),
+    'size': Any(Coerce(int), None),
+    'hash': Any(All(basestring, hash), None),
+    'created': All(basestring, to_date),
+    'last_modified': Any(All(basestring, to_date), None),
+    'url': All(basestring, is_url(full=True)),
+    'resource_type': All(empty_none,
+                         DefaultTo('file'),
+                         basestring,
+                         Any(*RESOURCE_TYPES)
+                         ),
+}
+
+tag = {
+    'id': basestring,
+    'vocabulary_id': Any(basestring, None),
+    'display_name': basestring,
+    'name': All(basestring, slug),
+    'state': basestring,
+}
+
+organization = {
+    'id': basestring,
+    'description': basestring,
+    'created': All(basestring, to_date),
+    'title': basestring,
+    'name': All(basestring, slug),
+    'revision_timestamp': All(basestring, to_date),
+    'is_organization': boolean,
+    'state': basestring,
+    'image_url': basestring,
+    'revision_id': basestring,
+    'type': 'organization',
+    'approval_status': 'approved'
+}
+
+schema = Schema({
+    'id': basestring,
+    'name': basestring,
+    'title': basestring,
+    'notes': All(basestring, normalize_string),
+    'license_id': All(DefaultTo('not-specified'), basestring),
+    'tags': [tag],
+
+    'metadata_created': All(basestring, to_date),
+    'metadata_modified': All(basestring, to_date),
+    'organization': Any(organization, None),
+    'resources': [resource],
+    'revision_id': basestring,
+    'extras': [{
+        'key': basestring,
+        'value': Any(basestring, int, float, boolean, {}, []),
+    }],
+    'private': boolean,
+    'type': 'dataset',
+    'author': Any(basestring, None),
+    'author_email': All(empty_none, Any(All(basestring, email), None)),
+    'maintainer': Any(basestring, None),
+    'maintainer_email': All(empty_none, Any(All(basestring, email), None)),
+    'state': Any(basestring, None),
+}, required=True, extra=True)
 
 
-
-def any_field(data, *args):
-    return any(map(lambda f: data.get(f), args))
-
-
-def all_field(data, *args):
-    return all(map(lambda f: data.get(f), args))
-
-
+@register
 class CkanBackend(BaseBackend):
     name = 'ckan'
-    page_size = 20
+
+    def get_headers(self):
+        headers = super(CkanBackend, self).get_headers()
+        headers['content-type'] = 'application/json'
+        if self.config.get('apikey'):
+            headers['Authorization'] = self.config['apikey']
+        return headers
+
+    def action_url(self, endpoint):
+        path = '/'.join(['api/3/action', endpoint])
+        return urljoin(self.source.url, path)
+
+    def get_action(self, endpoint, fix=False, **kwargs):
+        url = self.action_url(endpoint)
+        if fix:
+            response = self.post(url, '{}', params=kwargs)
+        else:
+            response = self.get(url, params=kwargs)
+        if response.status_code != 200:
+            msg = response.text.strip('"')
+            raise HarvestException(msg)
+        return response.json()
+
+    def get_status(self):
+        url = urljoin(self.source.url, '/api/util/status')
+        response = self.get(url)
+        return response.json()
 
     def initialize(self):
-        self.headers = {
-            'content-type': 'application/json',
-        }
-        if self.config.get('apikey'):
-            self.headers['Authorization'] = self.harvester.config['apikey']
-
-    def url(self, endpoint):
-        path = '/'.join(['api/3/action', endpoint])
-        return urljoin(self.harvester.config['url'], path)
-
-    def get(self, url, params=None):
-        return requests.get(self.url(url), params=params or {}, headers=self.headers).json()
-
-    def post(self, url, payload=None, params=None):
-        return requests.post(self.url(url), payload=payload, params=params or {}, headers=self.headers).json()
-
-    def remote_users(self):
-        if self.config.get('users') is None:
-            return
-        response = self.get('user_list')
-        for data in response['result']:
-            # if self.config['users'].get('match_by_email'):
-            if not data.get('email'):
-                continue
-            user = self.get_harvested(User, data['id'])
-            user.email = data['email']
-            user.slug = data['name']
-            name = data['display_name']
-            user.first_name = name.split(' ', 1)[0] if ' ' in name else name
-            user.last_name = name.split(' ', 1)[1] if ' ' in name else name
-            user.about = data['about']
-
-            yield user
-
-            # followers = self.get('user_follower_list', {'id': name})['result']
-            # for follower in followers:
-            #     user_follower = self.get_harvested(User, follower['id'])
-            #     follow, created = FollowDataset.objects.get_or_create(follower=user_follower, following=user)
-
-            # {
-            #     "openid": null,
-            #     "about": null,
-            #     "apikey": "9c1772bd-8b61-44cb-b749-2ae24b8ae63b",
-            #     "display_name": "Aaron Micallef",
-            #     "name": "aaron-micallef",
-            #     "created": "2014-01-11T19:07:11.780066",
-            #     "reset_key": null,
-            #     "email": "micallefaaron@gmail.com",
-            #     "sysadmin": false,
-            #     "activity_streams_email_notifications": false,
-            #     "email_hash": "75afe777d01ad7f5b8360b095dee33e7",
-            #     "number_of_edits": 0,
-            #     "number_administered_packages": 0,
-            #     "fullname": "Aaron Micallef",
-            #     "id": "4ed271c4-4d6e-4b5f-85c6-741739d55928"
-            # }
-
-    def remote_organizations(self):
-        response = self.get('organization_list')
+        '''List all datasets for a given ...'''
+        # status = self.get_status()
+        # fix = status['ckan_version'] < '1.8'
+        fix = False
+        response = self.get_action('package_list', fix=fix)
         for name in response['result']:
-            details = self.get('organization_show', {'id': name})['result']
-            organization = self.get_harvested(Organization, details['id'])
-            organization.name = details['title']
-            organization.slug = details['name']
-            organization.description = details['description']
-            organization.image_url = details['image_url'] or None
+            self.add_item(name)
 
-            if self.config.get('users') is not None:
-                for member in details['users']:
-                    user = self.get_harvested(User, member['id'], create=False)
-                    if user and not get_by(organization.members, 'user', user):
-                        role = 'admin' if member['capacity'] == 'admin' else 'editor'
-                        organization.members.append(Member(role=role, user=user))
+    def process(self, item):
+        response = self.get_action('package_show', id=item.remote_id)
+        data = self.validate(response['result'], schema)
 
-            yield organization
+        # Fix the remote_id: use real ID instead of not stable name
+        item.remote_id = data['id']
 
-            if not organization.id:
+        # Skip if no resource
+        if not len(data.get('resources', [])):
+            msg = 'Dataset {0} has no record'.format(item.remote_id)
+            raise HarvestSkipException(msg)
+
+        dataset = self.get_dataset(item.remote_id)
+
+        # Core attributes
+        if not dataset.slug:
+            dataset.slug = data['name']
+        dataset.title = data['title']
+        dataset.description = data['notes']
+        dataset.license = License.objects(id=data['license_id']).first()
+        # dataset.license = license or License.objects.get(id='notspecified')
+        dataset.tags = [t['name'] for t in data['tags']]
+
+        dataset.created_at = data['metadata_created']
+        dataset.last_modified = data['metadata_modified']
+
+        dataset.extras['ckan:name'] = data['name']
+
+        temporal_start, temporal_end = None, None
+        spatial_geom = None
+
+        for extra in data['extras']:
+            # GeoJSON representation (Polygon or Point)
+            if extra['key'] == 'spatial':
+                spatial_geom = json.loads(extra['value'])
+            #  Textual representation of the extent / location
+            elif extra['key'] == 'spatial-text':
+                log.debug('spatial-text value not handled')
+                print 'spatial-text', extra['value']
+            # Linked Data URI representing the place name
+            elif extra['key'] == 'spatial-uri':
+                log.debug('spatial-uri value not handled')
+                print 'spatial-uri', extra['value']
+            # Update frequency
+            elif extra['key'] == 'frequency':
+                print 'frequency', extra['value']
+            # Temporal coverage start
+            elif extra['key'] == 'temporal_start':
+                print 'temporal_start', extra['value']
+                temporal_start = daterange_start(extra['value'])
                 continue
+            # Temporal coverage end
+            elif extra['key'] == 'temporal_end':
+                print 'temporal_end', extra['value']
+                temporal_end = daterange_end(extra['value'])
+                continue
+            # else:
+            #     print extra['key'], extra['value']
+            dataset.extras[extra['key']] = extra['value']
 
-            followers = self.get('group_follower_list', {'id': name})['result']
-            for follower in followers:
-                user = self.get_harvested(User, follower['id'], create=False)
-                if user:
-                    follow, created = FollowOrg.objects.get_or_create(follower=user, following=organization)
-
-    def remote_datasets(self):
-        response = self.get('package_list')
-        for name in response['result']:
-            details = self.get('package_show', {'id': name})['result']
-            dataset = self.get_harvested(Dataset, details['id'])
-
-            # Core attributes
-            dataset.slug = details['name']
-            dataset.title = details['title']
-            dataset.description = details.get('notes', 'No description')
-            dataset.license = License.objects(id=details['license_id']).first() or License.objects.get(id='notspecified')
-            dataset.tags = [tag['name'].lower() for tag in details['tags']]
-
-            dataset.frequency = self.map('frequency', details) or 'unknown'
-            dataset.created_at = parse(details['metadata_created'])
-            dataset.last_modified = parse(details['metadata_modified'])
-
-            if any_field(details, 'territorial_coverage', 'territorial_coverage_granularity'):
-                coverage = TerritorialCoverage(
-                    codes=[code.strip() for code in details.get('territorial_coverage', '').split(',') if code.strip()],
-                    granularity=self.map('territorial_coverage_granularity', details),
-                )
-                dataset.extras['territorial_coverage'] = coverage
-                try:
-                    dataset.spatial = territorial_to_spatial(dataset)
-                except Exception as e:
-                    print 'Error while processing spatial coverage for {0}:'.format(dataset.title), e
-
-            if all_field(details, 'temporal_coverage_from', 'temporal_coverage_to'):
-                try:
-                    dataset.temporal_coverage = db.DateRange(
-                        start=daterange_start(details.get('temporal_coverage_from')),
-                        end=daterange_end(details.get('temporal_coverage_to')),
-                    )
-                except:
-                    log.error('Unable to parse temporal coverage for dataset %s', details['id'])
-
-            # Organization
-            if details.get('organization'):
-                dataset.organization = self.get_harvested(Organization, details['organization']['id'], False)
+        if spatial_geom:
+            dataset.spatial = SpatialCoverage()
+            if spatial_geom['type'] == 'Polygon':
+                coordinates = [spatial_geom['coordinates']]
+            elif spatial_geom['type'] == 'MultiPolygon':
+                coordinates = spatial_geom['coordinates']
             else:
-                # Need to fetch user from roles
-                roles = self.get('roles_show', {'domain_object': name})['result']['roles']
-                for role in roles:
-                    if role['role'] == 'admin' and role['context'] == 'Package':
-                        dataset.owner = self.get_harvested(User, role['user_id'])
-                        break
+                HarvestException('Unsupported spatial geometry')
+            dataset.spatial.geom = {
+                'type': 'MultiPolygon',
+                'coordinates': coordinates
+            }
 
-            # Supplier
-            if details.get('supplier_id'):
-                dataset.supplier = self.get_harvested(Organization, details['supplier_id'], False)
+        if temporal_start and temporal_end:
+            dataset.temporal_coverage = db.DateRange(
+                start=temporal_start,
+                end=temporal_end,
+            )
 
-            # Remote URL
-            if details.get('url'):
-                dataset.extras['remote_url'] = details['url']
+        # Remote URL
+        if data.get('url'):
+            dataset.extras['remote_url'] = data['url']
 
-            # Extras
-            if 'extras' in details:
-                extra_mapping = self.harvester.mapping.get('from_extras', {})
-                for extra in details['extras']:
-                    if extra['key'] in self.harvester.mapping:
-                        value = self.harvester.mapping[extra['key']].get(extra['value'])
-                    else:
-                        value = extra['value']
-                    if extra['key'] in extra_mapping:
-                        setattr(dataset, extra_mapping[extra['key']], value)
-                    else:
-                        dataset.extras[extra['key']] = value
-
-            # Resources
-            for res in details['resources']:
-                try:
-                    resource = get_by(dataset.resources, 'id', UUID(res['id']))
-                except:
-                    log.error('Unable to parse resource %s', res['id'])
-                    continue
-                if not resource:
-                    resource = Resource(id=res['id'])
-                    dataset.resources.append(resource)
-                resource.title = res.get('name', '') or ''
-                resource.url = res['url']
-                resource.description = res.get('description')
-                resource.format = res.get('format')
-                resource.hash = res.get('hash')
-                resource.created = parse(res['created'])
-                resource.modified = parse(res['revision_timestamp'])
-                resource.published = resource.published or resource.created
-            yield dataset
-
-            if dataset.id:
-                followers = self.get('dataset_follower_list', {'id': name})['result']
-                for follower in followers:
-                    user = self.get_harvested(User, follower['id'], False)
-                    if user:
-                        follow, created = FollowDataset.objects.get_or_create(follower=user, following=dataset)
-
-    def remote_reuses(self):
-        # dataset_ids = (d.ext['harvest'].remote_id for d in Dataset.objects(ext__harvest__harvester=self.harvester.id))
-        # response = self.get('package_list')
-        # for dataset_id in response['result']:
-        for dataset in Dataset.objects(ext__harvest__harvester=self.harvester.id).timeout(False):
-            try:
-                resp = self.get('related_list', {'id': dataset.ext['harvest'].remote_id})
-            except:
-                log.error('Unable to parse reuse for dataset %s', dataset.id)
+        # Resources
+        for res in data['resources']:
+            if res['resource_type'] not in ALLOWED_RESOURCE_TYPES:
                 continue
-            for details in resp['result']:
-                reuse_url = details['url']
-                urlhash = Reuse.hash_url(reuse_url)
-                reuse, _ = Reuse.objects.get_or_create(urlhash=urlhash, auto_save=False)
-                reuse.url = reuse_url
-                reuse.title = details['title']
-                reuse.description = details['description']
-                reuse.type = details['type']
-                # reuse.url = details['url']
-                reuse.image_url = details.get('image_url')
-                reuse.featured = bool(details.get('featured', False))
-                reuse.created_at = parse(details['created'])
-                if details.get('owner_id'):
-                    reuse.owner = self.get_harvested(User, details['owner_id'])
-                if not dataset in reuse.datasets:
-                    reuse.datasets.append(dataset)
-                    for tag in dataset.tags:
-                        if not tag in reuse.tags:
-                            reuse.tags.append(tag)
-                yield reuse
+            try:
+                resource = get_by(dataset.resources, 'id', UUID(res['id']))
+            except:
+                log.error('Unable to parse resource ID %s', res['id'])
+                continue
+            if not resource:
+                resource = Resource(id=res['id'])
+                dataset.resources.append(resource)
+            resource.title = res.get('name', '') or ''
+            resource.description = res.get('description')
+            resource.url = res['url']
+            resource.type = 'api' if res['resource_type'] == 'api' else 'remote'
+            resource.format = res.get('format', '').lower() or None
+            resource.mime = res.get('mimetype', '').lower() or None
+            resource.hash = res.get('hash')
+            resource.created = res['created']
+            resource.modified = res['last_modified']
+            resource.published = resource.published or resource.created
+
+        return dataset

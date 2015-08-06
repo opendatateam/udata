@@ -6,7 +6,7 @@ import logging
 from udata.models import User, Organization, PeriodicTask
 
 from . import backends, signals
-from .models import HarvestSource, DEFAULT_HARVEST_FREQUENCY
+from .models import HarvestSource, HarvestJob, DEFAULT_HARVEST_FREQUENCY
 from .tasks import harvest
 
 log = logging.getLogger(__name__)
@@ -25,6 +25,11 @@ def list_sources():
 def get_source(ident):
     '''Get an harvest source given its ID or its slug'''
     return HarvestSource.get(ident)
+
+
+def get_job(ident):
+    '''Get an harvest job given its ID'''
+    return HarvestJob.objects.get(id=ident)
 
 
 def create_source(name, url, backend, frequency=DEFAULT_HARVEST_FREQUENCY, owner=None, org=None):

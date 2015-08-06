@@ -8,9 +8,9 @@ from flask.signals import Namespace
 from udata.models import Dataset, PeriodicTask
 
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import DatasetFactory
+from udata.tests.factories import DatasetFactory, OrganizationFactory
 
-from .factories import fake, HarvestSourceFactory
+from .factories import fake, HarvestSourceFactory, HarvestJobFactory
 from ..models import HarvestSource, HarvestJob, HarvestError
 from .. import actions, signals
 
@@ -31,7 +31,6 @@ class FactoryBackend(backends.BaseBackend):
     name = 'factory'
 
     def initialize(self):
-        '''Parse the index pages HTML to find link to dataset descriptors'''
         mock_initialize.send(self)
         for i in range(self.config.get('count', COUNT)):
             self.add_item(i)
@@ -92,6 +91,14 @@ class HarvestActionsTest(DBTestMixin, TestCase):
             actions.delete_source(source.id)
         self.assertEqual(len(HarvestSource.objects), 0)
 
+    def test_get_job_by_id(self):
+        job = HarvestJobFactory()
+        self.assertEqual(actions.get_job(str(job.id)), job)
+
+    def test_get_job_by_objectid(self):
+        job = HarvestJobFactory()
+        self.assertEqual(actions.get_job(job.id), job)
+
     def test_schedule(self):
         source = HarvestSourceFactory()
         with self.assert_emit(signals.harvest_source_scheduled):
@@ -129,7 +136,8 @@ class HarvestActionsTest(DBTestMixin, TestCase):
 
 class ExecutionTestMixin(DBTestMixin):
     def test_default(self):
-        source = HarvestSourceFactory(backend='factory')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='factory', organization=org)
         with self.assert_emit(signals.before_harvest_job, signals.after_harvest_job):
             self.action(source.slug)
 
@@ -137,6 +145,10 @@ class ExecutionTestMixin(DBTestMixin):
         self.assertEqual(len(HarvestJob.objects(source=source)), 1)
 
         job = source.get_last_job()
+        print job.errors
+        for item in job.items:
+            for error in item.errors:
+                print error.message, error.details
         self.assertEqual(job.status, 'done')
         self.assertEqual(job.errors, [])
         self.assertIsNotNone(job.started)
@@ -148,6 +160,14 @@ class ExecutionTestMixin(DBTestMixin):
             self.assertEqual(item.errors, [])
             self.assertIsNotNone(item.started)
             self.assertIsNotNone(item.ended)
+            self.assertIsNotNone(item.dataset)
+
+            dataset = item.dataset
+            self.assertIsNotNone(Dataset.objects(id=dataset.id).first())
+            self.assertEqual(dataset.organization, org)
+            self.assertIn('harvest:remote_id', dataset.extras)
+            self.assertIn('harvest:last_update', dataset.extras)
+            self.assertIn('harvest:source_id', dataset.extras)
 
         self.assertEqual(len(HarvestJob.objects), 1)
         self.assertEqual(len(Dataset.objects), COUNT)
@@ -181,8 +201,9 @@ class ExecutionTestMixin(DBTestMixin):
                 raise ValueError('test')
 
         source = HarvestSourceFactory(backend='factory')
-        with self.assert_emit(signals.before_harvest_job, signals.after_harvest_job), \
-             mock_process.connected_to(process):
+        with self.assert_emit(signals.before_harvest_job,
+                              signals.after_harvest_job), \
+                mock_process.connected_to(process):
             self.action(source.slug)
 
         source.reload()

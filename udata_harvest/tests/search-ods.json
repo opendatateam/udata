@@ -1,0 +1,84 @@
+{
+    "nhits": 3,
+    "parameters": {
+        "timezone": "UTC",
+        "rows": 10,
+        "format": "json",
+        "staged": false
+    },
+    "datasets": [{
+        "datasetid": "test-b",
+        "metas": {
+            "domain": "etalab-sandbox",
+            "keyword": "keyword1",
+            "language": "en",
+            "title": "test-b",
+            "records_count": 1,
+            "modified": "2015-04-09T10:29:11+00:00",
+            "visibility": "domain",
+            "theme": "Spatial planning, Town planning, Buildings, Equipment, Housing"
+        },
+        "has_records": true,
+        "features": ["geo"],
+        "attachments": [],
+        "fields": [{
+            "label": "test",
+            "type": "text",
+            "name": "test"
+        }, {
+            "label": "geo",
+            "type": "geo_point_2d",
+            "name": "geo"
+        }, {
+            "label": "value",
+            "type": "text",
+            "name": "value"
+        }]
+    }, {
+        "datasetid": "test-c",
+        "metas": {
+            "domain": "etalab-sandbox",
+            "language": "en",
+            "title": "test-c",
+            "records_count": 0,
+            "modified": "2015-04-10T09:39:13+00:00",
+            "visibility": "domain"
+        },
+        "has_records": false,
+        "features": [],
+        "attachments": [],
+        "fields": []
+    }, {
+        "datasetid": "test-a",
+        "metas": {
+            "publisher": "test",
+            "domain": "etalab-sandbox",
+            "description": "<p>test-a-description</p>",
+            "license": "Licence Ouverte (Etalab)",
+            "title": "test-a",
+            "records_count": 2,
+            "modified": "2015-04-09T10:28:45+00:00",
+            "visibility": "domain",
+            "language": "en",
+            "theme": ["Culture, Heritage", "Environment"],
+            "metadata_processed": "2015-08-03T12:55:00+00:00",
+            "keyword": ["keyword1", "keyword2"],
+            "data_processed": "2015-06-01T05:30:01+00:00",
+            "references": "http://example.com"
+        },
+        "has_records": true,
+        "features": [],
+        "attachments": [],
+        "fields": [{
+            "name": "toto",
+            "label": "toto",
+            "type": "text",
+            "description": null
+        }, {
+            "name": "titi",
+            "label": "titi",
+            "type": "text",
+            "description": null
+        }]
+    }]
+}
