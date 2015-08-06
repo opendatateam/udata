@@ -32,8 +32,7 @@ module.exports = {
             'fineuploader': path.join(node_path, 'fine-uploader/fine-uploader/fine-uploader'),
         }
     },
-    // devtools: 'source-map',
-    devtools: 'eval-source-map',
+    devtool: 'eval-source-map',
     module: {
         loaders: [
             {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file'},
