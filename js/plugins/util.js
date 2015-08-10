@@ -1,4 +1,4 @@
-define(['jquery'], function($) {
+define(['jquery', 'utils'], function($, u) {
     'use strict';
 
     var reNestedField = /([\w-]+)\[([\w-]+)\]/
@@ -8,9 +8,7 @@ define(['jquery'], function($) {
         /**
          * Check if an object is a function
          */
-        Vue.util.isFunction = function(obj) {
-            return obj && Object.prototype.toString.call(obj) === '[object Function]';
-        };
+        Vue.util.isFunction = u.isFunction;
 
         /**
          * Fetch the class name for given Vue object instance

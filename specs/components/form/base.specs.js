@@ -84,32 +84,28 @@ describe("Common Form features", function() {
 
     describe('Form with model', function () {
 
-        const PetSchema = {
-            required: ['id', 'name'],
-            properties: {
-                id: {type: 'integer', format: 'int64'},
-                name: {type: 'string'},
-                tag: {type: 'string'}
-            }
-        };
-
-        const PersonSchema = {
-            required: ['id', 'name'],
-            properties: {
-                id: {type: 'integer', format: 'int64'},
-                name: {type: 'string'},
-                age: {type: 'integer'},
-                pet: {$ref: '#/definitions/Pet'}
-            }
-        };
-
         class Pet extends Model {};
         class Person extends Model {};
 
         before(function() {
             API.mock_defs({
-                Pet: PetSchema,
-                Person: PersonSchema
+                Pet: {
+                    required: ['id', 'name'],
+                    properties: {
+                        id: {type: 'integer', format: 'int64'},
+                        name: {type: 'string'},
+                        tag: {type: 'string'}
+                    }
+                },
+                Person: {
+                    required: ['id', 'name'],
+                    properties: {
+                        id: {type: 'integer', format: 'int64'},
+                        name: {type: 'string'},
+                        age: {type: 'integer'},
+                        pet: {$ref: '#/definitions/Pet'}
+                    }
+                }
             });
         });
 

@@ -14,19 +14,6 @@ function empty_schema() {
 }
 
 /**
- * A property getter resolving dot-notation
- * @param  {Object} obj  The root object to fetch property on
- * @param  {String} name The optionnaly dotted property name to fetch
- * @return {Object}      The resolved property value
- */
-function getattr(obj, name) {
-    if (!obj || !name) return;
-    var names = name.split(".");
-    while(names.length && (obj = obj[names.shift()]));
-    return obj;
-}
-
-/**
  * Common class behaviors.
  *
  * Provide:

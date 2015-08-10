@@ -1,0 +1,41 @@
+[{
+    "id": "country",
+    "name": "Country",
+    "parents": ["country-group"]
+}, {
+    "id": "country-group",
+    "name": "Country group",
+    "parents": []
+}, {
+    "id": "country-subset",
+    "name": "Country subset",
+    "parents": ["country"]
+}, {
+    "id": "fr/canton",
+    "name": "French canton",
+    "parents": ["fr/county"]
+}, {
+    "id": "fr/county",
+    "name": "French county",
+    "parents": ["fr/region"]
+}, {
+    "id": "fr/district",
+    "name": "French district",
+    "parents": ["fr/county"]
+}, {
+    "id": "fr/epci",
+    "name": "French intermunicipal (EPCI)",
+    "parents": ["fr/region"]
+}, {
+    "id": "fr/iris",
+    "name": "Iris (Insee districts)",
+    "parents": ["fr/town"]
+}, {
+    "id": "fr/region",
+    "name": "French region",
+    "parents": ["country"]
+}, {
+    "id": "fr/town",
+    "name": "French town",
+    "parents": ["fr/district", "fr/epci"]
+}]

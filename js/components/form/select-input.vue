@@ -13,9 +13,7 @@
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'select-input',
     inherit: true,
     replace: true,

@@ -8,7 +8,7 @@ var vue = require('vue-loader'),
     css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap'),
     less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline'),
     html_loader = 'html?collapseBooleanAttributes=false&collapseWhitespace=false"',
-    js_loader = 'babel?optional[]=runtime';
+    js_loader = 'babel';
 
 var languages = ['en', 'fr'];
 

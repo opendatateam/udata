@@ -62,28 +62,38 @@ export default {
             var s = empty_schema(),
                 schema = this.defs || this.model.__schema__ || empty_schema();
 
-            if (!s.hasOwnProperty('required')) {
-                s.required = [];
-            }
-
             this.fields.forEach((field) => {
+                if (schema.hasOwnProperty('properties') && schema.properties.hasOwnProperty(field.id)) {
+                    s.properties[field.id] = schema.properties[field.id];
+                    if (schema.required.indexOf(field.id) >= 0) {
+                        s.required.push(field.id);
+                    }
+                    return;
+                }
+
                 let properties = field.id.split('.'),
                     currentSchema = schema,
                     required = true,
                     prop;
 
                 for (prop of properties) {
-                    if (!currentSchema.properties.hasOwnProperty(prop)) {
+                    // Handle root level $ref
+                    if (currentSchema.hasOwnProperty('$ref')) {
+                        let def = currentSchema.$ref.replace('#/definitions/', '');
+                        currentSchema = API.definitions[def];
+                    }
+
+                    if (!currentSchema.properties || !currentSchema.properties.hasOwnProperty(prop)) {
                         log.error('Property "'+ prop +'" not found in schema');
                         return;
                     }
 
                     required &= currentSchema.required && currentSchema.required.indexOf(prop) >= 0;
 
+                    // Handle property level $ref
                     if (currentSchema.properties[prop].hasOwnProperty('$ref')) {
-                        let $ref = currentSchema.properties[prop].$ref;
-                        $ref = $ref.replace('#/definitions/', '');
-                        currentSchema = API.definitions[$ref];
+                        let def = currentSchema.properties[prop].$ref.replace('#/definitions/', '');
+                        currentSchema = API.definitions[def];
                     }
                 }
 
