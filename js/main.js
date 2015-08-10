@@ -5,6 +5,10 @@
  */
 require('../less/admin.less');
 
+
+// Ensure Babel/ES6 polyfills are loaded
+require('babel-core/polyfill');
+
 // Catch all errors
 require('raven');
 
