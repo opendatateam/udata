@@ -66,8 +66,8 @@ export class Base {
      * @return {Object}   An object with a single method remove
      *                       allowing to unregister the callback
      */
-    $on(name, hanler) {
-        return this.$pubsub.subscribe(name, hanler);
+    $on(name, handler) {
+        return this.$pubsub.subscribe(name, handler);
     }
 
     /**
@@ -75,8 +75,17 @@ export class Base {
      * @param  {String}   name   The event name to subscribe
      * @param  {Function} hanler The callback to register
      */
-    $off(name, hanler) {
-        return this.$pubsub.unsubscribe(name, hanler);
+    $off(name, handler) {
+        return this.$pubsub.unsubscribe(name, handler);
+    }
+
+    /**
+     * Register once a listener on an event.
+     * @param  {String}   name   The event name to subscribe
+     * @param  {Function} hanler The callback to register
+     */
+    $once(name, handler) {
+        return this.$pubsub.once(name, handler);
     }
 
     /**
