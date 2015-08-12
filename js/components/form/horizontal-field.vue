@@ -3,44 +3,33 @@
     .form-control {
         color: #555;
     }
-
-    &.checkbox label {
-        font-weight: bold;
-    }
 }
 </style>
 
 <template>
     <div class="horizontal-field" v-class="
-        form-group: !is_bool,
-        has-error: errors.length,
-        checkbox: is_bool
+        form-group: !is_hidden,
+        has-error: errors.length
         ">
-        <label v-if="!is_bool" for="{{field.id}}" v-class="required: required"
+        <label v-if="!is_hidden" for="{{field.id}}"
+            v-class="required: required && !is_bool"
             class="col-sm-3 control-label">
             <i v-if="errors.length" class="fa fa-times-circle-o"></i>
-            {{ field.label }}
+            {{ is_bool ? '' : field.label }}
             <span v-show="description" class="form-help"
                 v-attr="data-content: description"></span>
         </label>
-        <div class="col-sm-9" v-class="col-sm-offset-3: is_bool">
-            <component is="{{widget}}" v-if="!is_bool"></component>
-            <input type="checkbox" v-if="is_bool" v-attr="
-                id: field.id,
-                name: field.id,
-                value: value"></input>
-            {{ is_bool ? field.label : '' }}
+        <div class="col-sm-9">
+            <component is="{{widget}}"></component>
             <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
         </div>
     </div>
 </template>
 
 <script>
-'use strict';
+import BaseField from 'components/form/base-field';
 
-var BaseField = require('components/form/base-field');
-
-module.exports = {
+export default {
     name: 'horizontal-form-field',
     mixins: [BaseField]
 };

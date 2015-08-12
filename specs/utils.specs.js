@@ -29,5 +29,25 @@ describe("Utils", function() {
         });
     });
 
+    describe('setattr', function() {
+        it('should set a root property', function() {
+            let o = {};
+            u.setattr(o, 'attr', 'value');
+            expect(o).to.have.property('attr', 'value');
+        });
+
+        it('should set a nested property with dot-syntax', function() {
+            let o = {nested: {}};
+            u.setattr(o, 'nested.attr', 'value');
+            expect(o.nested).to.have.property('attr', 'value');
+        });
+
+        it('should set intermediate properties if needed', function() {
+            let o = {};
+            u.setattr(o, 'nested.attr', 'value');
+            expect(o).to.have.property('nested')
+                .to.have.property('attr', 'value');
+        });
+    });
 
 });

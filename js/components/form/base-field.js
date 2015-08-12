@@ -29,7 +29,8 @@ export default {
         'time-picker': require('components/form/time-picker.vue'),
         'date-picker': require('components/form/date-picker.vue'),
         'daterange-picker': require('components/form/daterange-picker.vue'),
-        'checksum': require('components/form/checksum.vue')
+        'checksum': require('components/form/checksum.vue'),
+        'checkbox': require('components/form/checkbox.vue')
     },
     computed: {
         description: function() {
@@ -40,7 +41,7 @@ export default {
         },
         property: function() {
             if (!this.schema.properties.hasOwnProperty(this.field.id)) {
-                log.error('Field "' + this.field.id + '" not found in schema');
+                log.warn('Field "' + this.field.id + '" not found in schema');
                 return {};
             }
 
@@ -55,6 +56,9 @@ export default {
         is_bool: function() {
             return this.property && this.property.type === 'boolean';
         },
+        is_hidden: function() {
+            return this.field && this.field.type === 'hidden';
+        },
         value: function() {
             let value = '';
             if (this.model && this.field) {
@@ -66,18 +70,22 @@ export default {
             return value || '';
         },
         placeholder: function() {
-            return this.field.placeholder || this.field.label;
+            return this.field.placeholder || this.field.label || '';
         },
         widget: function() {
             if (this.field.widget) {
                 return this.field.widget;
             }
-            if (this.property.type === 'string') {
-                if (this.property.format === 'markdown') {
-                    return 'markdown-editor';
-                }
+            switch(this.property.type) {
+                case 'boolean':
+                    return 'checkbox';
+                case 'string':
+                    if (this.property.format === 'markdown') {
+                        return 'markdown-editor';
+                    }
+                default:
+                    return 'text-input';
             }
-            return 'text-input';
         }
     },
     ready: function() {

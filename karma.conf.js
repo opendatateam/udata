@@ -60,6 +60,7 @@ module.exports = function(config) {
         reporters: ['mocha', 'coverage'],
 
         client: {
+            captureConsole: true,
             mocha: {
                 reporter: 'html', // change Karma's debug.html to the mocha web reporter
             }

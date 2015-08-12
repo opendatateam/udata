@@ -1,29 +1,30 @@
 import config from 'config';
 import API from 'api';
-import Vue from 'vue';
+import {_} from 'i18n';
+import {setattr} from 'utils';
 import log from 'logger';
 import moment from 'moment';
-import $ from 'jquery';
+import $ from 'jquery'
 import 'jquery-validation-dist';
 
 // jQuery validate
 $.extend($.validator.messages, {
-    required: Vue._('valid-required'),
-    remote: Vue._('valid-remote'),
-    email: Vue._('valid-email'),
-    url: Vue._('valid-url'),
-    date: Vue._('valid-date'),
-    dateISO: Vue._('valid-date-iso'),
-    number: Vue._('valid-number'),
-    digits: Vue._('valid-digits'),
-    creditcard: Vue._('valid-creditcard'),
-    equalTo: Vue._('valid-equal-to'),
-    maxlength: $.validator.format(Vue._('valid-maxlength')),
-    minlength: $.validator.format(Vue._('valid-minlength')),
-    rangelength: $.validator.format(Vue._('valid-range-length')),
-    range: $.validator.format(Vue._('valid-range')),
-    max: $.validator.format(Vue._('valid-max')),
-    min: $.validator.format(Vue._('valid-min'))
+    required: _('valid-required'),
+    remote: _('valid-remote'),
+    email: _('valid-email'),
+    url: _('valid-url'),
+    date: _('valid-date'),
+    dateISO: _('valid-date-iso'),
+    number: _('valid-number'),
+    digits: _('valid-digits'),
+    creditcard: _('valid-creditcard'),
+    equalTo: _('valid-equal-to'),
+    maxlength: $.validator.format(_('valid-maxlength')),
+    minlength: $.validator.format(_('valid-minlength')),
+    rangelength: $.validator.format(_('valid-range-length')),
+    range: $.validator.format(_('valid-range')),
+    max: $.validator.format(_('valid-max')),
+    min: $.validator.format(_('valid-min'))
 });
 
 
@@ -33,7 +34,7 @@ $.extend($.validator.messages, {
 $.validator.addMethod('dateGreaterThan', function(value, element, param) {
     var start = moment($(param).val());
     return this.optional(element) || moment(value).isAfter(start);
-}, $.validator.format(Vue._('Date should be after start date')));
+}, $.validator.format(_('Date should be after start date')));
 
 
 function empty_schema() {
@@ -65,7 +66,7 @@ export default {
             this.fields.forEach((field) => {
                 if (schema.hasOwnProperty('properties') && schema.properties.hasOwnProperty(field.id)) {
                     s.properties[field.id] = schema.properties[field.id];
-                    if (schema.required.indexOf(field.id) >= 0) {
+                    if (schema.required && schema.required.indexOf(field.id) >= 0) {
                         s.required.push(field.id);
                     }
                     return;
@@ -84,7 +85,7 @@ export default {
                     }
 
                     if (!currentSchema.properties || !currentSchema.properties.hasOwnProperty(prop)) {
-                        log.error('Property "'+ prop +'" not found in schema');
+                        log.warn('Property "'+ prop +'" not found in schema');
                         return;
                     }
 
@@ -104,9 +105,6 @@ export default {
             });
 
             return s;
-        },
-        form_data: function() {
-            return Vue.util.serialize_form(this.$el);
         },
         $form: function() {
             return $(this.$el).is('form') ? $(this.$el) : this.$find('form');
@@ -140,8 +138,30 @@ export default {
         validate: function() {
             return this.$form.valid();
         },
+        /**
+         * Serialize Form into an Object following the W3C specs:
+         * http://www.w3.org/TR/html-json-forms/
+         *
+         * @return {Object}
+         */
         serialize: function() {
-            return Vue.util.serialize_form(this.$el);
+            let array = this.$form.serializeArray(),
+                json = {};
+
+            array.forEach((item) => {
+                if (item.value) {
+                    if ((item.name) in this.schema.properties
+                        && 'type' in this.schema.properties[item.name]
+                        && this.schema.properties[item.name].type ==='boolean')
+                    {
+                        setattr(json, item.name, true);
+                    } else {
+                        setattr(json, item.name, item.value);
+                    }
+                }
+            });
+
+            return json;
         }
     }
 };

@@ -5,6 +5,7 @@ import Vue from 'vue';
 describe("Common Form features", function() {
 
     Vue.config.async = false;
+
     Vue.use(require('plugins/i18next'));
     Vue.use(require('plugins/util'));
 
@@ -157,5 +158,106 @@ describe("Common Form features", function() {
 
     });
 
+
+    describe('serialization', function() {
+
+        var BaseField = require('components/form/base-field');
+
+        beforeEach(function() {
+            this.vm = new Vue({
+                el: fixture.set(`
+                    <form role="form" v-el="form">
+                        <field v-repeat="field:fields" v-ref="fields"></field>
+                    </form>`)[0],
+                mixins: [BaseForm],
+                components: {
+                    field: {
+                        template: `<component is="{{widget}}"></component>`,
+                        mixins: [BaseField]
+                    }
+                },
+                data: function() {
+                    return {
+                        fields: []
+                    };
+                }
+            });
+        });
+
+        it('should be an empty object for empty form', function() {
+            expect(this.vm.serialize()).to.eql({});
+        });
+
+        it('should not serialize empty inputs', function() {
+            this.vm.model = {};
+            this.vm.defs = {properties: {
+                checkbox: {
+                    type: 'boolean'
+                },
+                textarea: {
+                    type: 'string',
+                    format: 'markdown'
+                }
+            }};
+            this.vm.fields = [{
+                    id: 'input'
+                }, {
+                    id: 'checkbox'
+                }, {
+                    id: 'textarea'
+                }]
+
+            expect(this.vm.serialize()).to.eql({});
+        });
+
+        it('should serialize input values', function() {
+            this.vm.model = {};
+            this.vm.defs = {properties: {
+                checkbox: {
+                    type: 'boolean'
+                },
+                textarea: {
+                    type: 'string',
+                    format: 'markdown'
+                }
+            }};
+            this.vm.fields = [{
+                id: 'input'
+            }, {
+                id: 'checkbox'
+            }, {
+                id: 'textarea'
+            }];
+
+            this.vm.$$.form.querySelector('#input').value = 'a';
+            this.vm.$$.form.querySelector('#checkbox').checked = true;
+            this.vm.$$.form.querySelector('#textarea').value = 'b';
+
+            expect(this.vm.serialize()).to.eql({
+                'input': 'a',
+                'checkbox': true,
+                'textarea': 'b'
+            });
+        });
+
+        it('should handle nested values', function() {
+            this.vm.model = {};
+            this.vm.fields = [{
+                id: 'nested.a'
+            }, {
+                id: 'nested.b'
+            }];
+
+            this.vm.$$.form.querySelector('#nested\\.a').value = 'aa';
+            this.vm.$$.form.querySelector('#nested\\.b').value = 'bb';
+
+            expect(this.vm.serialize()).to.eql({
+                nested: {
+                    a: 'aa',
+                    b: 'bb'
+                }
+            });
+        });
+    });
 
 });

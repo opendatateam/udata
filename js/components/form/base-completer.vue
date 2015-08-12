@@ -26,7 +26,7 @@ export default {
             var opts = this.$options.selectize;
 
             return $.extend({},
-                Vue.util.isFunction(opts) ? opts() : opts,
+                Vue.util.isFunction(opts) ? opts.apply(this, []) : opts,
                 {
                     persist: false,
                     closeAfterSelect: true,

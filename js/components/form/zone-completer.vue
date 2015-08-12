@@ -59,62 +59,66 @@
 import Vue from 'vue';
 import API from 'api';
 import BaseCompleter from 'components/form/base-completer.vue';
-import levels from 'models/geolevels';
+import GeoLevels from 'models/geolevels';
 
-function levelLabel(zone) {
-    return levels.by_id(zone.level).name;
-}
 
 export default {
     name: 'zone-completer',
     mixins: [BaseCompleter],
     ns: 'spatial',
     endpoint: 'suggest_zones',
-    selectize: {
-        valueField: 'id',
-        labelField: 'name',
-        searchField: ['name', 'code', 'extraKeys'],
-        plugins: ['remove_button'],
-        render: {
-            option: function(data, escape) {
-                var opt = [
-                        '<div class="selectize-zone">',
-                        '<span class="title">',
-                        '<span class="name">',
-                        escape(data.name),
-                        '</span>',
-                        '<span class="code">',
-                        escape(data.code),
-                        '</span>',
-                        '</span>',
-                        '<span class="level">',
-                        levelLabel(data),
-                        '</span>'
-                    ];
-                if (data.keys) {
-                    opt.push('<ul>');
-                    Object.keys(data.keys).map(function(key) {
-                        opt.push('<li><span class="text-uppercase">');
-                        opt.push(escape(key));
-                        opt.push('</span>: <span class="value">');
-                        opt.push(escape(data.keys[key]));
-                        opt.push('</span></li>');
-                    });
-                    opt.push('</ul>');
-                }
-                opt.push('</div>');
-                return opt.join('');
-            },
-            item: function(data, escape) {
-                return [
-                    '<div class="selectize-zone-item">',
-                    escape(data.name),
-                    ' <span class="code">(',
-                    escape(data.code),
-                    ')</span></div>'
-                ].join('');
-            }
+    data: function() {
+        return {
+            levels: new GeoLevels()
         }
+    },
+    selectize: function() {
+        return {
+            valueField: 'id',
+            labelField: 'name',
+            searchField: ['name', 'code', 'extraKeys'],
+            plugins: ['remove_button'],
+            render: {
+                option: (data, escape) => {
+                    var opt = [
+                            '<div class="selectize-zone">',
+                            '<span class="title">',
+                            '<span class="name">',
+                            escape(data.name),
+                            '</span>',
+                            '<span class="code">',
+                            escape(data.code),
+                            '</span>',
+                            '</span>',
+                            '<span class="level">',
+                            this.levelLabel(data),
+                            '</span>'
+                        ];
+                    if (data.keys) {
+                        opt.push('<ul>');
+                        Object.keys(data.keys).map(function(key) {
+                            opt.push('<li><span class="text-uppercase">');
+                            opt.push(escape(key));
+                            opt.push('</span>: <span class="value">');
+                            opt.push(escape(data.keys[key]));
+                            opt.push('</span></li>');
+                        });
+                        opt.push('</ul>');
+                    }
+                    opt.push('</div>');
+                    return opt.join('');
+                },
+                item: function(data, escape) {
+                    return [
+                        '<div class="selectize-zone-item">',
+                        escape(data.name),
+                        ' <span class="code">(',
+                        escape(data.code),
+                        ')</span></div>'
+                    ].join('');
+                }
+            }
+        };
     },
     dataLoaded: function(data) {
         return data.map(function(item) {
@@ -123,6 +127,14 @@ export default {
             });
             return item;
         });
+    },
+    ready: function() {
+        this.levels.fetch();
+    },
+    methods: {
+        levelLabel: function(zone) {
+            return this.levels.by_id(zone.level).name;
+        }
     }
 };
 </script>

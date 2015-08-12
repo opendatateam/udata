@@ -6,12 +6,10 @@
 </template>
 
 <script>
-'use strict';
+import Dataset from 'models/dataset';
+import Vue from 'vue';
 
-var Dataset = require('models/dataset'),
-    Vue = require('vue');
-
-module.exports = {
+export default {
     props: ['dataset'],
     data: function() {
         return {
@@ -25,53 +23,54 @@ module.exports = {
                 label: this._('Publish as'),
                 subtitle: this._('Choose who is publishing'),
                 component: 'publish-as',
-                next: function(component) {
+                next: (component) => {
                     if (component.selected) {
                         this.publish_as = component.selected;
                     }
                     return true;
-                }.bind(this)
+                }
             }, {
                 label: this._('New dataset'),
                 subtitle: this._('Describe your dataset'),
                 component: 'create-form',
-                next: function(component) {
+                next: (component) => {
                     if (component.$.form.validate()) {
-                        this.dataset.$data = component.serialize();
+                        let data = component.serialize();
                         if (this.publish_as) {
-                            this.dataset.$data.organization = this.publish_as;
+                            data.organization = this.publish_as;
                         }
+                        Object.assign(this.dataset, data);
                         this.dataset.save();
-                        this.dataset.$once('updated', function() {
+                        this.dataset.$once('updated', () => {
                             this.$.wizard.go_next();
-                        }.bind(this));
+                        });
                         return false;
                     }
-                }.bind(this)
+                }
             }, {
                 label: this._('Resources'),
                 subtitle: this._('Add your firsts resources'),
                 component: 'resource-form',
-                init: function(component) {
+                init: (component) => {
                     component.dataset = this.dataset;
-                }.bind(this),
-                next: function(component) {
+                },
+                next: (component) => {
                     if (component.validate()) {
                         var resource = component.serialize();
                         this.dataset.save_resource(resource);
-                        this.dataset.$once('updated', function() {
+                        this.dataset.$once('updated', () => {
                             this.$.wizard.go_next();
-                        }.bind(this));
+                        });
                         return false;
                     }
-                }.bind(this)
+                }
             }, {
                 label: this._('Share'),
                 subtitle: this._('Communicate about your publication'),
                 component: 'dataset-created',
-                init: function(component) {
+                init: (component) => {
                     component.dataset = this.dataset;
-                }.bind(this)
+                }
             }],
          };
     },

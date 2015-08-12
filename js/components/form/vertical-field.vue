@@ -2,9 +2,6 @@
 .form-control {
     color: #555;
 }
-.checkbox label {
-    font-weight: bold;
-}
 
 .vertical-field {
     .form-help {
@@ -16,22 +13,17 @@
 
 <template>
     <div class="vertical-field" v-class="
-        form-group: !is_bool,
-        has-error: errors.length,
-        checkbox: is_bool
+        form-group: !is_bool && !is_hidden,
+        has-error: errors.length
         ">
         <span v-show="description" class="form-help"
             v-attr="data-content: description"
-            v-if="field.type!=='hidden'"></span>
+            v-if="!is_hidden"></span>
         <label for="{{field.id}}" v-class="required: required"
-            v-if="field.type!=='hidden'">
-            <input type="checkbox" v-if="is_bool" v-attr="
-                id: field.id,
-                name: field.id,
-                checked: value"></input>
+            v-if="!is_hidden && !is_bool">
             {{ field.label }}
         </label>
-        <component is="{{widget}}" v-if="!is_bool"></component>
+        <component is="{{widget}}"></component>
         <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
     </div>
 </template>

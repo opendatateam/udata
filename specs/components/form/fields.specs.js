@@ -10,26 +10,8 @@ describe("Common Fields features", function() {
 
     require('bootstrap');
 
-    var xhr = sinon.useFakeXMLHttpRequest(),
-        requests = [];
-
-    xhr.onCreate = function(req) {
-        requests.push(req);
-    };
-
-    API.mock_specs(require('specs/mocks/udata-swagger.json'));
-
     var BaseForm = require('components/form/base-form'),
-        BaseField = require('components/form/base-field'),
-        geolevels = require('specs/mocks/geolevels.json');
-
-
-    // Needed by zone-completer
-    requests[0].respond(200, {
-        'Content-Type': 'application/json'
-    }, JSON.stringify(geolevels));
-
-    xhr.restore();
+        BaseField = require('components/form/base-field');
 
     beforeEach(function() {
         this.vm = new Vue({
@@ -66,7 +48,7 @@ describe("Common Fields features", function() {
             expect(vm.description).to.be.undefined;
             expect(vm.property).to.eql({});
             expect(vm.is_bool).to.be.false;
-            expect(vm.placeholder).to.be.undefined;;
+            expect(vm.placeholder).to.equal('');
             expect(vm.widget).to.equal('text-input');
         });
 
@@ -111,7 +93,7 @@ describe("Common Fields features", function() {
             expect(vm.description).to.be.undefined;
             expect(vm.property).to.eql({});
             expect(vm.is_bool).to.be.false;
-            expect(vm.placeholder).to.be.undefined;;
+            expect(vm.placeholder).to.equal('');
             expect(vm.widget).to.equal('text-input');
         });
 
@@ -168,7 +150,7 @@ describe("Common Fields features", function() {
             expect(vm.description).to.be.undefined;
             expect(vm.property).to.eql({type: 'integer', format: 'int64'});
             expect(vm.is_bool).to.be.false;
-            expect(vm.placeholder).to.be.undefined;;
+            expect(vm.placeholder).to.equal('');
             expect(vm.widget).to.equal('text-input');
         });
 

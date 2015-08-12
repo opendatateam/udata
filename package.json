@@ -77,7 +77,7 @@
     "sifter": "^0.4.1",
     "sortablejs": "^1.2.0",
     "source-sans-pro": "^2.0.10",
-    "swagger-client": "^2.1.7-M2",
+    "swagger-client": "^2.1.2",
     "tv4": "^1.1.12",
     "vue": "0.12.8"
   }

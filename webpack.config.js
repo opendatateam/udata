@@ -47,7 +47,7 @@ module.exports = {
             {test: /\.json$/, loader: "json"},
             {test: /\.html$/, loader: html_loader},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, loader: "file-loader?name=[name].[ext]"},
-            {test: /\.js$/, loader: js_loader, exclude: /(node_modules)/},
+            {test: /\.js$/, loader: js_loader, exclude: /node_modules/},
         ]
     },
     plugins: [
