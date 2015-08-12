@@ -107,11 +107,14 @@ export default {
             return s;
         },
         $form: function() {
-            return $(this.$el).is('form') ? $(this.$el) : this.$find('form');
+            return this.$el.tagName.toLowerCase() === 'form'
+                ? this.$el
+                : this.$el.querySelector('form');
+            // return $(this.$el).is('form') ? $(this.$el) : this.$find('form');
         }
     },
     attached: function() {
-        this.$form.validate({
+        $(this.$form).validate({
             ignore: '',
             errorClass: "help-block",
             highlight: function(element) {
@@ -132,33 +135,39 @@ export default {
         });
     },
     detached: function() {
-        this.$form.data('validator', null);
+        $(this.$form).data('validator', null);
     },
     methods: {
         validate: function() {
-            return this.$form.valid();
+            return $(this.$form).valid();
         },
         /**
          * Serialize Form into an Object following the W3C specs:
          * http://www.w3.org/TR/html-json-forms/
          *
+         * @param  {Boolean} changed Ony serialize changed values if true
          * @return {Object}
          */
-        serialize: function() {
-            let array = this.$form.serializeArray(),
+        serialize: function(changed) {
+            let elements = this.$form.querySelectorAll('input, textarea'),
+                array = Array.prototype.filter.call(elements, function(el) {
+                    if (!changed) {
+                        return true;
+                    } else if (el.type === 'checkbox') {
+                        return el.checked !== el.defaultChecked;
+                    } else {
+                        return el.value !== el.defaultValue;
+                    }
+                }).map(function(el) {
+                    return {
+                        name: el.name,
+                        value: el.type === 'checkbox' ? el.checked : el.value
+                    };
+                }),
                 json = {};
 
-            array.forEach((item) => {
-                if (item.value) {
-                    if ((item.name) in this.schema.properties
-                        && 'type' in this.schema.properties[item.name]
-                        && this.schema.properties[item.name].type ==='boolean')
-                    {
-                        setattr(json, item.name, true);
-                    } else {
-                        setattr(json, item.name, item.value);
-                    }
-                }
+            array.forEach(function(item) {
+                setattr(json, item.name, item.value);
             });
 
             return json;

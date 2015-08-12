@@ -10,8 +10,7 @@
         <input type="checkbox" v-attr="
             id: field.id,
             name: field.id,
-            checked: value,
-            value: true"></input>
+            checked: value"></input>
         {{ field.label }}
     </label>
 </div>

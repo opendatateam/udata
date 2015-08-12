@@ -186,9 +186,10 @@ describe("Common Form features", function() {
 
         it('should be an empty object for empty form', function() {
             expect(this.vm.serialize()).to.eql({});
+            expect(this.vm.serialize(true)).to.eql({});
         });
 
-        it('should not serialize empty inputs', function() {
+        it('should serialize all values', function() {
             this.vm.model = {};
             this.vm.defs = {properties: {
                 checkbox: {
@@ -207,10 +208,37 @@ describe("Common Form features", function() {
                     id: 'textarea'
                 }]
 
-            expect(this.vm.serialize()).to.eql({});
+            expect(this.vm.serialize()).to.eql({
+                input: '',
+                checkbox: false,
+                textarea: ''
+            });
         });
 
-        it('should serialize input values', function() {
+        it('should serialize an empty object when no value changed', function() {
+            this.vm.model = {};
+            this.vm.defs = {properties: {
+                checkbox: {
+                    type: 'boolean'
+                },
+                textarea: {
+                    type: 'string',
+                    format: 'markdown'
+                }
+            }};
+            this.vm.fields = [{
+                    id: 'input'
+                }, {
+                    id: 'checkbox'
+                }, {
+                    id: 'textarea'
+                }]
+
+            expect(this.vm.serialize(true)).to.eql({});
+        });
+
+
+        it('should serialize changed input values', function() {
             this.vm.model = {};
             this.vm.defs = {properties: {
                 checkbox: {
@@ -227,13 +255,15 @@ describe("Common Form features", function() {
                 id: 'checkbox'
             }, {
                 id: 'textarea'
+            }, {
+                id: 'untouched'
             }];
 
             this.vm.$$.form.querySelector('#input').value = 'a';
             this.vm.$$.form.querySelector('#checkbox').checked = true;
             this.vm.$$.form.querySelector('#textarea').value = 'b';
 
-            expect(this.vm.serialize()).to.eql({
+            expect(this.vm.serialize(true)).to.eql({
                 'input': 'a',
                 'checkbox': true,
                 'textarea': 'b'
