@@ -5,7 +5,7 @@ var webpack_config = require('./webpack.config.js'),
     webpack = require('webpack'),
     path = require('path');
 
-webpack_config.debug = false;
+// webpack_config.debug = false;
 
 webpack_config.devtool = 'inline-source-map';
 
@@ -17,10 +17,10 @@ webpack_config.plugins.push(
     new webpack.NormalModuleReplacementPlugin(/^sinon$/, __dirname + '/node_modules/sinon/pkg/sinon.js')
 );
 
-// Instrument code for verage
+// Instrument code for coverage
 webpack_config.module.postLoaders = [{
     test: /\.(js|vue)$/,
-    exclude: /(test|node_modules|bower_components)\//,
+    exclude: /(specs|test|node_modules|bower_components)\//,
     loader: 'istanbul-instrumenter'
 }];
 
@@ -93,7 +93,7 @@ module.exports = function(config) {
 
 
         // enable / disable watching file and executing tests whenever any file changes
-        autoWatch: true,
+        // autoWatch: true,
 
 
         // start these browsers
