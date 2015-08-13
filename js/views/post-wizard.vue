@@ -25,6 +25,7 @@ module.exports = {
                 next: function(component) {
                     if (component.$.form.validate()) {
                         Object.assign(this.post, component.$.form.serialize());
+                        this.post.save();
                         return true;
                     }
                 }.bind(this)

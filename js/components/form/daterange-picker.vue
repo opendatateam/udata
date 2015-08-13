@@ -15,7 +15,7 @@
         v-on="focus: onFocus, blur: onBlur"
         v-attr="
             required: required,
-            value: value.start,
+            value: start_value,
             readonly: readonly || false
         ">
     <span class="input-group-addon">à</span>
@@ -24,7 +24,7 @@
         v-on="focus: onFocus, blur: onBlur"
         v-attr="
             required: required,
-            value: value.end,
+            value: end_value,
             readonly: readonly || false
         ">
     <div class="dropdown-menu dropdown-menu-right">
@@ -33,25 +33,24 @@
     <input type="hidden" v-el="startHidden"
         v-attr="
             id: field.id + '-start',
-            name: field.id + '[start]',
-            value: value.start
+            name: field.id + '.start',
+            value: start_value
         "></input>
     <input type="hidden" v-el="endHidden"
         v-attr="
             id: field.id + '-end',
-            name: field.id + '[end]',
-            value: value.end
+            name: field.id + '.end',
+            value: end_value
         "></input>
 </div>
 </template>
 
 <script>
-'use strict';
+const DEFAULT_FORMAT = 'L',
+      ISO_FORMAT = 'YYYY-MM-DD';
 
-var DEFAULT_FORMAT = 'L',
-    ISO_FORMAT = 'YYYY-MM-DD';
 
-module.exports = {
+export default {
     name: 'daterange-picker',
     inherit: true,
     replace: true,
@@ -64,6 +63,18 @@ module.exports = {
             pickedField: null,
             hiddenField: null
         };
+    },
+    computed: {
+        start_value: function() {
+            return this.value && this.value.hasOwnProperty('start')
+                ? this.value.start
+                : '';
+        },
+        end_value: function() {
+            return this.value && this.value.hasOwnProperty('end')
+                ? this.value.end
+                : '';
+        }
     },
     events: {
         'calendar:date:selected': function(date) {

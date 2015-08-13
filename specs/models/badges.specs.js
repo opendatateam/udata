@@ -1,38 +1,64 @@
 import API from 'specs/mocks/api';
 import {Badges, BadgeError} from 'models/badges';
 
-describe('Badges cache', function() {
+describe('Badges', function() {
 
-    var BadgeableSchema = {
-            required: ['id', 'name'],
-            properties: {
-                id: {type: 'integer', format: 'int64'},
-                name: {type: 'string'},
-                tag: {type: 'string'},
-                badges: {}
-            }
-        },
-        NonBadgeableSchema = {
-            required: ['id', 'name'],
-            properties: {
-                id: {type: 'integer', format: 'int64'},
-                name: {type: 'string'},
-                tag: {type: 'string'}
-            }
-        },
-        badges;
+    let badges;
 
     before(function() {
         API.mock_specs({
             definitions: {
-                Badgeable: BadgeableSchema,
-                NonBadgeable: NonBadgeableSchema
+                Badgeable: {
+                    required: ['id', 'name'],
+                    properties: {
+                        id: {type: 'integer', format: 'int64'},
+                        name: {type: 'string'},
+                        tag: {type: 'string'},
+                        badges: {}
+                    }
+                },
+                NonBadgeable: {
+                    required: ['id', 'name'],
+                    properties: {
+                        id: {type: 'integer', format: 'int64'},
+                        name: {type: 'string'},
+                        tag: {type: 'string'}
+                    }
+                },
+                BadgeableByAllOf: {
+                    allOf: [
+                        {$ref: '#/definitions/Badgeable'},
+                        {properties: {
+                            description: {type: 'string'}
+                        }}
+                    ]
+                },
+                BadgeableInAllOf: {
+                    allOf: [
+                        {$ref: '#/definitions/NonBadgeable'},
+                        {properties: {
+                            badges: {}
+                        }}
+                    ]
+                }
             },
             paths: {
                 '/badgeable': {
                     get: {
                         operationId: 'available_badgeable_badges',
                         tags: ['badgeables']
+                    }
+                },
+                '/badgeable2': {
+                    get: {
+                        operationId: 'available_badgeablebyallof_badges',
+                        tags: ['badgeablebyallofs']
+                    }
+                },
+                '/badgeable3': {
+                    get: {
+                        operationId: 'available_badgeableinallof_badges',
+                        tags: ['badgeableinallofs']
                     }
                 }
             }
@@ -52,6 +78,11 @@ describe('Badges cache', function() {
 
     it('should allow access to existing badgeable models', function() {
         expect(badges.badgeable).not.to.be.undefined;
+    });
+
+    it('should handle to badgeable models with allOf', function() {
+        expect(badges.badgeablebyallof).not.to.be.undefined;
+        expect(badges.badgeableinallof).not.to.be.undefined;
     });
 
     it('should raise a BadgeError when trying to access a non badgeable model', function() {

@@ -1,15 +1,12 @@
-<style lang="less">
-
-</style>
-
 <template>
 <form-vertical v-ref="form" fields="{{fields}}" model="{{dataset}}"></form-vertical>
 </template>
 
 <script>
-'use strict';
-
-var Dataset = require('models/dataset');
+import Dataset from 'models/dataset';
+import licenses from 'models/licenses';
+import granularities from 'models/geogranularities';
+import frequencies from 'models/frequencies';
 
 module.exports = {
     props: ['dataset'],
@@ -25,11 +22,17 @@ module.exports = {
                 }, {
                     id: 'license',
                     label: this._('License'),
-                    widget: 'license-completer'
+                    widget: 'select-input',
+                    values: licenses.items.map(function(item) {
+                        return {value: item.id, text: item.title};
+                    })
                 }, {
                     id: 'frequency',
                     label: this._('Update frequency'),
-                    widget: 'select-input'
+                    widget: 'select-input',
+                    values: frequencies.items.map(function(item) {
+                        return {value: item.id, text: item.label};
+                    })
                 }, {
                     id: 'tags',
                     label: this._('Tags'),
@@ -43,16 +46,15 @@ module.exports = {
                     label: this._('Spatial coverage'),
                     widget: 'zone-completer'
                 }, {
+                    id: 'spatial.granularity',
+                    label: this._('Spatial granularity'),
+                    widget: 'select-input',
+                    values: granularities.items.map(function(item) {
+                        return {value: item.id, text: item.name};
+                    })
+                }, {
                     id: 'private',
                     label: this._('Private')
-                }, {
-                    id: 'organization',
-                    widget: 'hidden-input',
-                    type: 'hidden'
-                }, {
-                    id: 'owner',
-                    widget: 'hidden-input',
-                    type: 'hidden'
                 }]
         };
     },
@@ -61,14 +63,7 @@ module.exports = {
     },
     methods: {
         serialize: function() {
-            var data = this.$.form.serialize();
-            data['spatial'] = {
-                zones: data['spatial.zones'],
-                // granularity: data['spatial.granularity']
-            }
-            delete data['spatial.zones'];
-            // delete data['spatial.granularity'];
-            return data;
+            return this.$.form.serialize();
         },
         validate: function() {
             return this.$.form.validate();

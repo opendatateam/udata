@@ -8,7 +8,7 @@ var vue = require('vue-loader'),
     css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap'),
     less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline'),
     html_loader = 'html?collapseBooleanAttributes=false&collapseWhitespace=false"',
-    js_loader = 'babel?optional[]=runtime';
+    js_loader = 'babel';
 
 var languages = ['en', 'fr'];
 
@@ -47,7 +47,13 @@ module.exports = {
             {test: /\.json$/, loader: "json"},
             {test: /\.html$/, loader: html_loader},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, loader: "file-loader?name=[name].[ext]"},
-            {test: /\.js$/, loader: js_loader, exclude: /(node_modules)/},
+            {test: /\.js$/, loader: js_loader,
+                include: [
+                    path.resolve(__dirname, 'js'),
+                    path.resolve(__dirname, 'specs'),
+                ],
+                exclude: path.resolve(__dirname, 'specs', 'loader.js')
+            },
         ]
     },
     plugins: [

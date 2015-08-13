@@ -14,19 +14,6 @@ function empty_schema() {
 }
 
 /**
- * A property getter resolving dot-notation
- * @param  {Object} obj  The root object to fetch property on
- * @param  {String} name The optionnaly dotted property name to fetch
- * @return {Object}      The resolved property value
- */
-function getattr(obj, name) {
-    if (!obj || !name) return;
-    var names = name.split(".");
-    while(names.length && (obj = obj[names.shift()]));
-    return obj;
-}
-
-/**
  * Common class behaviors.
  *
  * Provide:
@@ -79,8 +66,8 @@ export class Base {
      * @return {Object}   An object with a single method remove
      *                       allowing to unregister the callback
      */
-    $on(name, hanler) {
-        return this.$pubsub.subscribe(name, hanler);
+    $on(name, handler) {
+        return this.$pubsub.subscribe(name, handler);
     }
 
     /**
@@ -88,8 +75,17 @@ export class Base {
      * @param  {String}   name   The event name to subscribe
      * @param  {Function} hanler The callback to register
      */
-    $off(name, hanler) {
-        return this.$pubsub.unsubscribe(name, hanler);
+    $off(name, handler) {
+        return this.$pubsub.unsubscribe(name, handler);
+    }
+
+    /**
+     * Register once a listener on an event.
+     * @param  {String}   name   The event name to subscribe
+     * @param  {Function} hanler The callback to register
+     */
+    $once(name, handler) {
+        return this.$pubsub.once(name, handler);
     }
 
     /**

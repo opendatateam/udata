@@ -35,6 +35,11 @@ define([
         mixins: [BaseCompleter],
         ns: 'datasets',
         endpoint: 'suggest_datasets',
+        data: function() {
+            return {
+                placeholder: this._('Find your dataset')
+            };
+        },
         selectize: {
             valueField: 'id',
             labelField: 'title',

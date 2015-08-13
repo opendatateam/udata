@@ -17,28 +17,38 @@ export class PubSub {
         return this.topics.hasOwnProperty(topic);
     }
 
+    /**
+     * Subscribe to a given topic
+     * @param  {String}   topic    The topic identifier to subscribe to
+     * @param  {Function} listener The callback executed on topic publication
+     * @return {Object}            A subscription handle with a single remove method.
+     */
     subscribe(topic, listener) {
         // // Create the topic's object if not yet created
         if (!this.has(topic)) {
             this.topics[topic] = [];
         }
-        // if(!hOP.call(topics, topic)) topics[topic] = [];
 
         // Add the listener to queue
         var index = this.topics[topic].push(listener) -1;
 
         // Provide handle back for removal of topic
         return {
-            remove: function() {
+            remove: () => {
                 delete this.topics[topic][index];
             }
         };
     }
 
+    /**
+     * Unsubscribe to a given topic
+     * @param  {String}   topic    The topic identifier to unsubscribe to
+     * @param  {Function} listener The callback to unregister
+     */
     unsubscribe(topic, listener) {
         if (!this.has(topic)) return;
 
-        this.topics[topic].some(function(handler, index) {
+        this.topics[topic].some((handler, index) => {
             if (handler === listener) {
                 delete this.topics[topic][index];
                 return true;
@@ -46,6 +56,24 @@ export class PubSub {
         });
     }
 
+    /**
+     * Subscribe once to a given topic
+     * @param  {String}   topic    The topic identifier to subscribe to
+     * @param  {Function} listener The callback executed on topic publication
+     */
+    once(topic, listener) {
+        let subscription;
+        subscription = this.subscribe(topic, () => {
+            subscription.remove();
+            listener.apply(this, arguments);
+        });
+    }
+
+    /**
+     * Publish some data on a topic
+     * @param  {String}    topic The topic identifier
+     * @param  {...[type]} args  A vriable list of arguments to pass to the listeners
+     */
     publish(topic, ...args) {
         // If the topic doesn't exist, or there's no listeners in queue, just leave
         if(!this.has(topic)) return;
@@ -56,6 +84,10 @@ export class PubSub {
         });
     }
 
+    /**
+     * Remove a topic (and all its listeners)
+     * @param  {String} topic The topic identifier to remove
+     */
     remove(topic) {
         if (this.has(topic)) {
             delete this.topics[topic];

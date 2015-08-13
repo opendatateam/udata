@@ -7,13 +7,11 @@
     id: field.id,
     name: field.id,
     required: required,
-    value: value.id"></input>
+    value: value"></input>
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'hidden-input',
     inherit: true,
     replace: true

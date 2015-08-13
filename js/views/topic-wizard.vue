@@ -24,7 +24,7 @@ module.exports = {
                 component: 'topic-form',
                 next: function(component) {
                     if (component.$.form.validate()) {
-                        this.topic.$data = component.$.form.serialize();
+                        Object.assign(this.topic, component.$.form.serialize());
                         this.topic.save();
                         return true;
                     }
