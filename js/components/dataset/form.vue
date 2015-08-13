@@ -55,14 +55,6 @@ module.exports = {
                 }, {
                     id: 'private',
                     label: this._('Private')
-                }, {
-                    id: 'organization',
-                    widget: 'hidden-input',
-                    type: 'hidden'
-                }, {
-                    id: 'owner',
-                    widget: 'hidden-input',
-                    type: 'hidden'
                 }]
         };
     },
@@ -71,15 +63,7 @@ module.exports = {
     },
     methods: {
         serialize: function() {
-            var data = this.$.form.serialize();
-            console.log(data);
-            // data['spatial'] = {
-            //     zones: data['spatial.zones'],
-            //     // granularity: data['spatial.granularity']
-            // }
-            // delete data['spatial.zones'];
-            // delete data['spatial.granularity'];
-            return data;
+            return this.$.form.serialize();
         },
         validate: function() {
             return this.$.form.validate();
