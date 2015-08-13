@@ -1,9 +1,9 @@
 <template>
 <input type="text" class="form-control"
     v-attr="
-        id: field && field.id,
-        name: field && field.id,
-        placeholder: placeholder,
+        id: field && field.id || '',
+        name: field && field.id || '',
+        placeholder: placeholder || '',
         required: required,
         value: value | lst2str,
         readonly: readonly || false"

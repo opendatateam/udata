@@ -32,6 +32,11 @@ define([
         mixins: [BaseCompleter],
         ns: 'reuses',
         endpoint: 'suggest_reuses',
+        data: function() {
+            return {
+                placeholder: this._('Find your reuse')
+            };
+        },
         selectize: {
             plugins: ['remove_button'],
             valueField: 'id',
