@@ -19,7 +19,7 @@ export default {
     replace: true,
     computed: {
         options: function() {
-            if (!this.property) return [];
+            if (!this.property && !this.field) return [];
 
             if (this.field.values) {
                 return this.field.values;

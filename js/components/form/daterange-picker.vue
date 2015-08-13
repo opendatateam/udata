@@ -33,13 +33,13 @@
     <input type="hidden" v-el="startHidden"
         v-attr="
             id: field.id + '-start',
-            name: field.id + '[start]',
+            name: field.id + '.start',
             value: start_value
         "></input>
     <input type="hidden" v-el="endHidden"
         v-attr="
             id: field.id + '-end',
-            name: field.id + '[end]',
+            name: field.id + '.end',
             value: end_value
         "></input>
 </div>

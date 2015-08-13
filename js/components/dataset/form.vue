@@ -1,7 +1,3 @@
-<style lang="less">
-
-</style>
-
 <template>
 <form-vertical v-ref="form" fields="{{fields}}" model="{{dataset}}"></form-vertical>
 </template>
@@ -9,6 +5,7 @@
 <script>
 import Dataset from 'models/dataset';
 import licenses from 'models/licenses';
+import granularities from 'models/geogranularities';
 import frequencies from 'models/frequencies';
 
 module.exports = {
@@ -49,6 +46,13 @@ module.exports = {
                     label: this._('Spatial coverage'),
                     widget: 'zone-completer'
                 }, {
+                    id: 'spatial.granularity',
+                    label: this._('Spatial granularity'),
+                    widget: 'select-input',
+                    values: granularities.items.map(function(item) {
+                        return {value: item.id, text: item.name};
+                    })
+                }, {
                     id: 'private',
                     label: this._('Private')
                 }, {
@@ -68,11 +72,12 @@ module.exports = {
     methods: {
         serialize: function() {
             var data = this.$.form.serialize();
-            data['spatial'] = {
-                zones: data['spatial.zones'],
-                // granularity: data['spatial.granularity']
-            }
-            delete data['spatial.zones'];
+            console.log(data);
+            // data['spatial'] = {
+            //     zones: data['spatial.zones'],
+            //     // granularity: data['spatial.granularity']
+            // }
+            // delete data['spatial.zones'];
             // delete data['spatial.granularity'];
             return data;
         },

@@ -186,67 +186,25 @@ describe("Common Form features", function() {
 
         it('should be an empty object for empty form', function() {
             expect(this.vm.serialize()).to.eql({});
-            expect(this.vm.serialize(true)).to.eql({});
         });
 
         it('should serialize all values', function() {
             this.vm.model = {};
             this.vm.defs = {properties: {
+                // Input is optionnal, just to avoid console warnings
+                input: {
+                    type: 'string'
+                },
                 checkbox: {
                     type: 'boolean'
                 },
                 textarea: {
                     type: 'string',
                     format: 'markdown'
-                }
-            }};
-            this.vm.fields = [{
-                    id: 'input'
-                }, {
-                    id: 'checkbox'
-                }, {
-                    id: 'textarea'
-                }]
-
-            expect(this.vm.serialize()).to.eql({
-                input: '',
-                checkbox: false,
-                textarea: ''
-            });
-        });
-
-        it('should serialize an empty object when no value changed', function() {
-            this.vm.model = {};
-            this.vm.defs = {properties: {
-                checkbox: {
-                    type: 'boolean'
                 },
-                textarea: {
+                select: {
                     type: 'string',
-                    format: 'markdown'
-                }
-            }};
-            this.vm.fields = [{
-                    id: 'input'
-                }, {
-                    id: 'checkbox'
-                }, {
-                    id: 'textarea'
-                }]
-
-            expect(this.vm.serialize(true)).to.eql({});
-        });
-
-
-        it('should serialize changed input values', function() {
-            this.vm.model = {};
-            this.vm.defs = {properties: {
-                checkbox: {
-                    type: 'boolean'
-                },
-                textarea: {
-                    type: 'string',
-                    format: 'markdown'
+                    enum: ['a', 'b']
                 }
             }};
             this.vm.fields = [{
@@ -256,38 +214,139 @@ describe("Common Form features", function() {
             }, {
                 id: 'textarea'
             }, {
-                id: 'untouched'
+                id: 'select',
+            }];
+
+            expect(this.vm.serialize()).to.eql({
+                input: '',
+                checkbox: false,
+                textarea: '',
+                select: undefined,
+            });
+        });
+
+        it('should serialize updated values', function() {
+            this.vm.model = {};
+            this.vm.defs = {properties: {
+                // Input is optionnal, just to avoid console warnings
+                input: {
+                    type: 'string'
+                },
+                checkbox: {
+                    type: 'boolean'
+                },
+                textarea: {
+                    type: 'string',
+                    format: 'markdown'
+                },
+                select: {
+                    type: 'string',
+                    enum: ['a', 'b']
+                }
+            }};
+            this.vm.fields = [{
+                id: 'input'
+            }, {
+                id: 'checkbox'
+            }, {
+                id: 'textarea'
+            }, {
+                id: 'select',
             }];
 
             this.vm.$$.form.querySelector('#input').value = 'a';
             this.vm.$$.form.querySelector('#checkbox').checked = true;
-            this.vm.$$.form.querySelector('#textarea').value = 'b';
-
-            expect(this.vm.serialize(true)).to.eql({
-                'input': 'a',
-                'checkbox': true,
-                'textarea': 'b'
-            });
-        });
-
-        it('should handle nested values', function() {
-            this.vm.model = {};
-            this.vm.fields = [{
-                id: 'nested.a'
-            }, {
-                id: 'nested.b'
-            }];
-
-            this.vm.$$.form.querySelector('#nested\\.a').value = 'aa';
-            this.vm.$$.form.querySelector('#nested\\.b').value = 'bb';
+            this.vm.$$.form.querySelector('#textarea').value = 'aa';
+            this.vm.$$.form.querySelector('#select').value = 'b';
 
             expect(this.vm.serialize()).to.eql({
-                nested: {
-                    a: 'aa',
-                    b: 'bb'
-                }
+                input: 'a',
+                checkbox: true,
+                textarea: 'aa',
+                select: 'b',
             });
         });
+
+        describe('Nested values', function () {
+            it('should handle nested values', function() {
+                this.vm.model = {};
+                // Defs are optionnal, just here to avoid console warnings
+                this.vm.defs = {properties: {
+                    'nested.a': {
+                        type: 'string'
+                    },
+                    'nested.b': {
+                        type: 'string'
+                    }
+                }};
+                this.vm.fields = [{
+                    id: 'nested.a'
+                }, {
+                    id: 'nested.b'
+                }];
+
+                this.vm.$$.form.querySelector('#nested\\.a').value = 'aa';
+                this.vm.$$.form.querySelector('#nested\\.b').value = 'bb';
+
+                expect(this.vm.serialize()).to.eql({
+                    nested: {
+                        a: 'aa',
+                        b: 'bb'
+                    }
+                });
+            });
+
+            it('should not serialize empty nested nested object', function() {
+                this.vm.model = {};
+                // Defs are optionnal, just here to avoid console warnings
+                this.vm.defs = {properties: {
+                    'nested.a': {
+                        type: 'string'
+                    },
+                    'nested.b': {
+                        type: 'string'
+                    }
+                }};
+                this.vm.fields = [{
+                    id: 'nested.a'
+                }, {
+                    id: 'nested.b'
+                }];
+
+                expect(this.vm.serialize()).to.eql({});
+            });
+
+            it('should serialize empty nested object if required', function() {
+                API.mock_defs({
+                    Nested: {properties: {
+                        a: {type: 'string'},
+                        b: {type: 'string'}
+                    }}
+                });
+                this.vm.model = {};
+                this.vm.defs = {
+                    properties: {
+                        'nested': {
+                            $ref: '#/definitions/Nested'
+                        }
+                    },
+                    required: ['nested']
+                };
+                this.vm.fields = [{
+                    id: 'nested.a'
+                }, {
+                    id: 'nested.b'
+                }];
+
+                expect(this.vm.serialize()).to.eql({
+                    nested: {
+                        a: '',
+                        b: ''
+                    }
+                });
+            });
+        });
+
     });
 
 });

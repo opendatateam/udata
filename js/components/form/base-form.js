@@ -1,7 +1,7 @@
 import config from 'config';
 import API from 'api';
 import {_} from 'i18n';
-import {setattr} from 'utils';
+import {setattr, isObject} from 'utils';
 import log from 'logger';
 import moment from 'moment';
 import $ from 'jquery'
@@ -75,9 +75,12 @@ export default {
                 let properties = field.id.split('.'),
                     currentSchema = schema,
                     required = true,
+                    path = '',
                     prop;
 
                 for (prop of properties) {
+                    path += path === '' ? prop : ('.' + prop);
+
                     // Handle root level $ref
                     if (currentSchema.hasOwnProperty('$ref')) {
                         let def = currentSchema.$ref.replace('#/definitions/', '');
@@ -89,7 +92,15 @@ export default {
                         return;
                     }
 
-                    required &= currentSchema.required && currentSchema.required.indexOf(prop) >= 0;
+                    required = (
+                        required
+                        && currentSchema.hasOwnProperty('required')
+                        && currentSchema.required.indexOf(prop) >= 0
+                    );
+
+                    if (required && s.required.indexOf(path) < 0) {
+                        s.required.push(path);
+                    }
 
                     // Handle property level $ref
                     if (currentSchema.properties[prop].hasOwnProperty('$ref')) {
@@ -99,7 +110,7 @@ export default {
                 }
 
                 s.properties[field.id] = currentSchema.properties[prop];
-                if (required) {
+                if (required && !field.id in s.required) {
                     s.required.push(field.id);
                 }
             });
@@ -110,7 +121,6 @@ export default {
             return this.$el.tagName.toLowerCase() === 'form'
                 ? this.$el
                 : this.$el.querySelector('form');
-            // return $(this.$el).is('form') ? $(this.$el) : this.$find('form');
         }
     },
     attached: function() {
@@ -138,39 +148,50 @@ export default {
         $(this.$form).data('validator', null);
     },
     methods: {
+        /**
+         * Trigger a form validation
+         */
         validate: function() {
             return $(this.$form).valid();
         },
         /**
-         * Serialize Form into an Object following the W3C specs:
-         * http://www.w3.org/TR/html-json-forms/
+         * Serialize Form into an Object
          *
-         * @param  {Boolean} changed Ony serialize changed values if true
          * @return {Object}
          */
-        serialize: function(changed) {
-            let elements = this.$form.querySelectorAll('input, textarea'),
-                array = Array.prototype.filter.call(elements, function(el) {
-                    if (!changed) {
-                        return true;
-                    } else if (el.type === 'checkbox') {
-                        return el.checked !== el.defaultChecked;
-                    } else {
-                        return el.value !== el.defaultValue;
-                    }
-                }).map(function(el) {
-                    return {
-                        name: el.name,
-                        value: el.type === 'checkbox' ? el.checked : el.value
-                    };
-                }),
-                json = {};
+        serialize: function() {
+            let elements = this.$form.querySelectorAll('input,textarea,select'),
+                out = {};
 
-            array.forEach(function(item) {
-                setattr(json, item.name, item.value);
+            Array.prototype.map.call(elements, function(el) {
+                let value;
+                if (el.tagName.toLowerCase() === 'select') {
+                    value = el.value || undefined;
+                } else if (el.type === 'checkbox') {
+                    value = el.checked;
+                } else {
+                    value = el.value;
+                }
+                return {name: el.name, value: value};
+            }).forEach(function(item) {
+                setattr(out, item.name, item.value);
             });
 
-            return json;
+            // Filter out empty optionnal objects
+            // TODO: handle recursion
+            for (let prop in out) {
+                if (isObject(out[prop]) && this.schema.required.indexOf(prop) < 0) {
+                    let falsy = true;
+                    for (let attr in out[prop]) {
+                        falsy &= !out[prop][attr];
+                    }
+                    if (falsy) {
+                        delete out[prop];
+                    }
+                }
+            }
+
+            return out;
         }
     }
 };

@@ -82,6 +82,8 @@ export default {
                 case 'string':
                     if (this.property.format === 'markdown') {
                         return 'markdown-editor';
+                    } else if (this.property.enum) {
+                        return 'select-input';
                     }
                 default:
                     return 'text-input';

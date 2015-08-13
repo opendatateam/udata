@@ -124,7 +124,7 @@ module.exports = {
             return this.$form.serialize();
         },
         validate: function() {
-            return this.$form.validate();
+            return this.$form ? this.$form.validate() : true;
         }
     }
 };

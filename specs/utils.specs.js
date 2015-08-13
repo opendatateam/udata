@@ -12,6 +12,23 @@ describe("Utils", function() {
         });
     });
 
+    describe('isObject', function() {
+        class Test {};
+
+        it('should be true if is an Object', function() {
+            expect(u.isObject({})).to.be.true;
+            expect(u.isObject(new Test())).to.be.true;
+        });
+
+        it('should be false if is not an Object', function() {
+            expect(u.isObject(42)).to.be.false;
+            expect(u.isObject('42')).to.be.false;
+            expect(u.isObject(true)).to.be.false;
+            expect(u.isObject(null)).to.be.false;
+            expect(u.isObject(undefined)).to.be.false;
+        });
+    });
+
     describe('getattr', function() {
         it('should fetch a root property', function() {
             let o = {attr: 'value'};
