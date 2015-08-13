@@ -351,3 +351,38 @@ class PublishFieldTest(TestCase):
         form.populate_obj(ownable)
         self.assertIsNone(ownable.owner)
         self.assertEqual(ownable.organization, org)
+
+    def test_with_initial_org_and_no_data_provided(self):
+        Ownable, OwnableForm = self.factory()
+        user = UserFactory()
+        org = OrganizationFactory(members=[Member(user=user, role='editor')])
+        ownable = Ownable(organization=org)
+
+        form = OwnableForm(MultiDict({}), ownable)
+
+        self.assertEqual(form.organization.data, org)
+
+        login_user(user)
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(ownable)
+        self.assertIsNone(ownable.owner)
+        self.assertEqual(ownable.organization, org)
+
+    def test_with_initial_owner_and_no_data_provided(self):
+        Ownable, OwnableForm = self.factory()
+        user = UserFactory()
+        ownable = Ownable(owner=user)
+
+        form = OwnableForm(MultiDict({}), ownable)
+
+        self.assertEqual(form.owner.data, user)
+
+        login_user(user)
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(ownable)
+        self.assertEqual(ownable.owner, user)
+        self.assertIsNone(ownable.organization)
