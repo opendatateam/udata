@@ -13,6 +13,7 @@ module.exports = {
     context: source_path,
     entry: {
         theme: "theme",
+        admin: "admin",
     },
     output: {
         path: static_path,
