@@ -24,10 +24,9 @@
 </template>
 
 <script>
-'use strict';
+import Vue from 'vue';
 
-var Vue = require('vue'),
-    MENU = [{
+const MENU = [{
         'label': Vue._('Dashboard'),
         'icon': 'dashboard',
         'route': '/'
@@ -49,25 +48,8 @@ var Vue = require('vue'),
         'icon': 'cogs',
         'route': '/system/'
     }];
-    // 'children': [{
-    //     'label': 'Home page',
-    //     'icon': 'home',
-    //     'route': '/homepage/'
-    // }, {
-    //     'label': 'Thème',
-    //     'icon': 'eyedropper',
-    //     'route': '/theme/'
-    // }, {
-    //     'label': 'Thématiques',
-    //     'icon': 'book',
-    //     'route': '/topics/'
-    // }, {
-    //     'label': 'Articles',
-    //     'icon': 'newspaper-o',
-    //     'route': '/posts/'
-    // }]
 
-module.exports = {
+export default {
     components: {
         'sidebar-menu-item': require('components/sidebar-menu-item.vue')
     },
@@ -75,9 +57,6 @@ module.exports = {
         menu: function() {
             var menu = MENU.concat(this.organizations_menus);
             return this.$root.me.has_role('admin') ? menu.concat(bottom_menu) : menu;
-        },
-        user_menu: function() {
-            return ;
         },
         organizations_menus: function() {
             if (!this.$root.me.organizations) {

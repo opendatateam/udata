@@ -12,6 +12,7 @@
         <meta name="site-title" content="{{config.SITE_TITLE}}">
         <meta name="generator" content="uData" />
         <link rel="stylesheet" href="{{ url_for('admin.static', filename='admin.css') }}"></script>
+        <link href="{{ theme_static('admin.css') }}" rel="stylesheet">
 
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -20,7 +21,7 @@
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <![endif]-->
     </head>
-    <body class="skin-blue fixed" id="app">
+    <body class="skin-blue fixed sidebar-mini" id="app">
         <script src="{{ url_for('admin.static', filename='admin.js') }}"></script>
     </body>
 </html>

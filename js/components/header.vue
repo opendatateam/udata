@@ -6,12 +6,15 @@ a.sidebar-toggle {
 <template>
     <a href="/" class="logo">
       <!-- Add the class icon to your logo image or logo icon to add the margining -->
-      {{$root.site.title}}
+      <!-- mini logo for sidebar mini 50x50 pixels -->
+      <span class="logo-mini"><b>{{$root.site.title ? $root.site.title[0] : ''}}</b></span>
+      <!-- logo for regular state and mobile devices -->
+      <span class="logo-lg">{{$root.site.title}}</span>
     </a>
     <!-- Header Navbar: style can be found in header.less -->
     <nav class="navbar navbar-static-top" role="navigation">
         <!-- Sidebar toggle button-->
-        <a class="sidebar-toggle" data-toggle="offcanvas" role="button" v-on="click: click($event)">
+        <a class="sidebar-toggle" role="button" v-on="click: click($event)">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>

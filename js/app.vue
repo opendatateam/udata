@@ -12,13 +12,24 @@
         }
     }
 }
+
+// Fix slimscroll overflow
+.main-sidebar:hover {
+    .slimScrollDiv {
+        overflow: visible!important;
+        > .sidebar {
+            overflow: visible!important;
+        }
+    }
+
+}
 </style>
 
 <template>
     <!-- header logo: style can be found in header.less -->
     <div v-el="modal"></div>
     <app-header class="main-header"></app-header>
-    <sidebar class="main-sidebar sidebar-offcanvas"></sidebar>
+    <sidebar class="main-sidebar"></sidebar>
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <content-header meta="{{meta}}"></content-header>
