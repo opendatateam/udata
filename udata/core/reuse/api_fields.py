@@ -91,3 +91,9 @@ image_fields = api.model('UploadedImage', {
         default=True),
     'image': fields.ImageField(),
 })
+
+
+reuse_type_fields = api.model('ReuseType', {
+    'id': fields.String(description='The reuse type identifier'),
+    'label': fields.String(description='The reuse type display name')
+})

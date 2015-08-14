@@ -11,14 +11,14 @@ from flask.ext.security import current_user
 from udata import search
 from udata.api import api, API, ModelAPI, SingleObjectAPI
 from udata.auth import admin_permission
-from udata.models import Reuse, ReuseBadge, REUSE_BADGE_KINDS
+from udata.models import Reuse, ReuseBadge, REUSE_BADGE_KINDS, REUSE_TYPES
 from udata.utils import multi_to_dict
 
 from udata.core.followers.api import FollowAPI
 
 from .api_fields import (
     badge_fields, reuse_fields, reuse_page_fields, reuse_suggestion_fields,
-    image_fields
+    image_fields, reuse_type_fields
 )
 from .forms import BadgeForm, ReuseForm
 from .models import FollowReuse
@@ -97,7 +97,7 @@ class AvailableDatasetBadgesAPI(API):
 
 
 @ns.route('/<reuse:reuse>/badges/', endpoint='reuse_badges')
-class DatasetBadgesAPI(API):
+class ReuseBadgesAPI(API):
     @api.doc('add_reuse_badge', **common_doc)
     @api.expect(badge_fields)
     @api.marshal_with(badge_fields)
@@ -116,7 +116,7 @@ class DatasetBadgesAPI(API):
 
 
 @ns.route('/<reuse:reuse>/badges/<badge_kind>/', endpoint='reuse_badge')
-class DatasetBadgeAPI(API):
+class ReuseBadgeAPI(API):
     @api.doc('delete_reuse_badge', **common_doc)
     @api.secure(admin_permission)
     def delete(self, reuse, badge_kind):
@@ -211,3 +211,13 @@ class ReuseImageAPI(API):
         reuse.save()
 
         return reuse
+
+
+@ns.route('/types/', endpoint='reuse_types')
+class ReuseTypesAPI(API):
+    @api.doc('reuse_types')
+    @api.marshal_list_with(reuse_type_fields)
+    def get(self):
+        '''List all reuse types'''
+        return [{'id': id, 'label': label}
+                for id, label in REUSE_TYPES.items()]
