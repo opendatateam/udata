@@ -151,6 +151,9 @@ export default {
                 view.user_id = user_id;
             });
         },
+        '/harvester/new/': function() {
+            this.loadView('harvester-wizard');
+        },
         '/harvester/:oid/': function(source_id) {
             this.loadView('harvester', function(view) {
                 view.source_id = source_id;
