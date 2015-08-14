@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 def list_backends():
     '''List all available backends'''
-    return backends.get_all().keys()
+    return backends.get_all().values()
 
 
 def list_sources():

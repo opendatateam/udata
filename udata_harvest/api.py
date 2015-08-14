@@ -11,6 +11,8 @@ from .models import HARVEST_JOB_STATUS, HARVEST_ITEM_STATUS, HarvestJob
 
 ns = api.namespace('harvest', 'Harvest related operations')
 
+backends_ids = [b.name for b in actions.list_backends()]
+
 error_fields = api.model('HarvestError', {
     'created_at': fields.ISODateTime(description='The error creation date',
                                      required=True),
@@ -68,7 +70,8 @@ source_fields = api.model('HarvestSource', {
     'url': fields.String(description='The source base URL',
                          required=True),
     'backend': fields.String(description='The source backend',
-                             required=True, enum=actions.list_backends()),
+                             enum=backends_ids,
+                             required=True),
     'config': fields.Raw(description='The configuration as key-value pairs'),
     'created_at': fields.ISODateTime(description='The source creation date',
                                      required=True),
@@ -79,6 +82,11 @@ source_fields = api.model('HarvestSource', {
     'last_job': fields.Nested(job_fields,
                               description='The last job for this source',
                               allow_null=True)
+})
+
+backend_fields = api.model('HarvestBackend', {
+    'id': fields.String(description='The backend identifier'),
+    'label': fields.String(description='The backend display name')
 })
 
 
@@ -142,11 +150,15 @@ class JobAPI(API):
 
 
 @ns.route('/backends', endpoint='harvest_backends')
-class ListBackendAPI(API):
-    @api.doc(model=[str])
+class ListBackendsAPI(API):
+    @api.doc('harvest_backends')
+    @api.marshal_with(backend_fields)
     def get(self):
-        '''List all available harvesters'''
-        return actions.list_backends()
+        '''List all available harvest backends'''
+        return [
+            {'id': b.name, 'label': b.display_name}
+            for b in actions.list_backends()
+        ]
 
 
 @ns.route('/job_status', endpoint='havest_job_status')

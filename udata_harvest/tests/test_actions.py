@@ -12,6 +12,7 @@ from udata.tests.factories import DatasetFactory, OrganizationFactory
 
 from .factories import fake, HarvestSourceFactory, HarvestJobFactory
 from ..models import HarvestSource, HarvestJob, HarvestError
+from ..backends import BaseBackend
 from .. import actions, signals
 
 from udata.ext.harvest import backends
@@ -41,6 +42,10 @@ class FactoryBackend(backends.BaseBackend):
 
 
 class HarvestActionsTest(DBTestMixin, TestCase):
+    def test_list_backends(self):
+        for backend in actions.list_backends():
+            self.assertTrue(issubclass(backend, BaseBackend))
+
     def test_list_sources(self):
         self.assertEqual(actions.list_sources(), [])
 

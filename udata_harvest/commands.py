@@ -69,8 +69,8 @@ def sources(scheduled=False):
 def backends():
     '''List available backends'''
     log.info('Available backends:')
-    for name in actions.list_backends():
-        log.info(name)
+    for backend in actions.list_backends():
+        log.info('%s (%s)', backend.name, backend.display_name or backend.name)
 
 
 @m.command

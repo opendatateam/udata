@@ -26,6 +26,7 @@ class BaseBackend(object):
     '''Base class for Harvester implementations'''
 
     name = None
+    display_name = None
     verify_ssl = True
 
     def __init__(self, source, job=None, debug=False):

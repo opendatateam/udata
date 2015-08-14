@@ -13,6 +13,7 @@ log = logging.getLogger(__name__)
 class DummyBackend(BaseBackend):
     '''A backend doing nothing, mainly for testing purpose'''
     name = 'dummy'
+    display_name = 'Dummy'
 
     def initialize(self, job):
         pass

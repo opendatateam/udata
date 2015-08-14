@@ -16,6 +16,7 @@ log = logging.getLogger(__name__)
 @register
 class OdsHarvester(BaseBackend):
     name = 'ods'
+    display_name = 'OpenDataSoft'
     verify_ssl = False
 
     LICENSES = {
