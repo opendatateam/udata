@@ -1,5 +1,3 @@
-<style lang="less"></style>
-
 <template>
 <div class="card dataset-card">
     <a v-if="dataset.organization" class="card-logo" href="{{ dataset.page }}">
@@ -69,7 +67,7 @@
                     data-placement="top" data-container="body"
                     title="{{ _('Territorial coverage granularity') }}">
                     <span class="fa fa-bullseye fa-fw"></span>
-                    {{ dataset.spatial.granularity }}
+                    {{ dataset | granularity_label }}
                 </a>
             </li>
 
@@ -79,7 +77,7 @@
                     data-placement="top" data-container="body"
                     title="{{ _('Frequency') }}">
                     <span class="fa fa-clock-o fa-fw"></span>
-                    {{ dataset.frequency }}
+                    {{ dataset | frequency_label }}
                 </a>
             </li>
         </ul>
@@ -89,16 +87,14 @@
 </template>
 
 <script>
-'use strict';
+import Dataset from 'models/dataset';
+import placeholders from 'helpers/placeholders';
+import moment from 'moment';
+import config from 'config';
+import granularities from 'models/geogranularities';
+import frequencies from 'models/frequencies';
 
-var Dataset = require('models/dataset'),
-    placeholders = require('helpers/placeholders'),
-    moment = require('moment'),
-    config = require('config');
-
-module.exports = {
-    // replace: true,
-    //
+export default {
     data: function() {
         return {
             dataset: new Dataset(),
@@ -153,6 +149,16 @@ module.exports = {
             return end_label
                 ? this._('{start} to {end}', {start:start_label, end:end_label})
                 : start_label;
+        },
+        frequency_label: function(dataset) {
+            if (dataset && dataset.frequency) {
+                return frequencies.by_id(dataset.frequency).label;
+            }
+        },
+        granularity_label: function(dataset) {
+            if (dataset && dataset.spatial && dataset.spatial.granularity) {
+                return granularities.by_id(dataset.spatial.granularity).name;
+            }
         }
     },
     methods: {

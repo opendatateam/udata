@@ -1,5 +1,3 @@
-<style lang="less"></style>
-
 <template>
 <div class="card reuse-card">
     <a class="card-logo" href="{{ reuse.page }}">
@@ -34,7 +32,7 @@
                 <a class="btn btn-xs" rel="tooltip" data-placement="top"
                     title="{{ _('Type') }}">
                     <span class="fa fa-file fa-fw"></span>
-                    {{ reuse.type }}
+                    {{ reuse | reusetype }}
                 </a>
             </li>
             <li>
@@ -60,14 +58,13 @@
 </template>
 
 <script>
-'use strict';
+import Reuse from 'models/reuse';
+import reuse_types from 'models/reuse_types';
+import placeholders from 'helpers/placeholders';
+import moment from 'moment';
+import config from 'config';
 
-var Reuse = require('models/reuse'),
-    placeholders = require('helpers/placeholders'),
-    moment = require('moment'),
-    config = require('config');
-
-module.exports = {
+export default {
     props: ['reuse', 'reuseid'],
     data: function() {
         return {
@@ -105,6 +102,13 @@ module.exports = {
             }
         }
     },
+    filters: {
+        reusetype: function(reuse) {
+            if (reuse && reuse.type) {
+                return reuse_types.by_id(reuse.type).label;
+            }
+        }
+    },
     methods: {
         fetch: function() {
             if (this.reuseid) {
@@ -112,11 +116,6 @@ module.exports = {
             }
         }
     },
-    // created: function() {
-    //     if (!this.reuse && this.reuseid) {
-    //         this.reuse = new Reuse().fetch(this.reuseid);
-    //     }
-    // },
     watch: {
         'reuseid': function(id) {
             this.fetch();
