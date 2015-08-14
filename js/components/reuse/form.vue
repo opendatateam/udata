@@ -1,17 +1,12 @@
-<style lang="less">
-
-</style>
-
 <template>
 <form-vertical v-ref="form" fields="{{fields}}" model="{{reuse}}"></form-vertical>
 </template>
 
 <script>
-'use strict';
+import Reuse from 'models/reuse';
+import reuse_types from 'models/reuse_types';
 
-var Reuse = require('models/reuse');
-
-module.exports = {
+export default {
     props: ['reuse'],
     data: function() {
         return {
@@ -25,7 +20,10 @@ module.exports = {
                 }, {
                     id: 'type',
                     label: this._('Type'),
-                    widget: 'select-input'
+                    widget: 'select-input',
+                    values: reuse_types.items.map(function(item) {
+                        return {value: item.id, text: item.label};
+                    })
                 }, {
                     id: 'description',
                     label: this._('Description'),
