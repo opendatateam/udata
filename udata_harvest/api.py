@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from udata.api import api, API, fields
 from udata.auth import admin_permission
 
-from udata.core.dataset.api_fields import dataset_ref_fields
+from udata.core.dataset.api_fields import dataset_ref_fields, dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.permissions import EditOrganizationPermission
 from udata.core.user.api_fields import user_ref_fields
@@ -104,6 +104,26 @@ validation_fields = api.model('HarvestSourceValidation', {
     'comment': fields.String(description='A comment about the validation. Required on rejection')
 })
 
+preview_dataset_fields = api.extend('DatasetPreview', dataset_fields, {
+    'uri': fields.UrlFor(
+        'api.dataset', lambda o: {'dataset': 'not-available'},
+        description='The dataset API URI (fake)'),
+    'page': fields.UrlFor(
+        'datasets.show', lambda o: {'dataset': 'not-available'},
+        description='The dataset page URL (fake)'),
+})
+
+preview_item_fields = api.extend('HarvestItemPreview', item_fields, {
+    'dataset': fields.Nested(preview_dataset_fields,
+                             description='The processed dataset',
+                             allow_null=True),
+})
+
+preview_job_fields = api.extend('HarvestJobPreview', job_fields, {
+    'items': fields.List(fields.Nested(preview_item_fields),
+                         description='The job collected items'),
+})
+
 
 @ns.route('/sources/', endpoint='harvest_sources')
 class SourcesAPI(API):
@@ -151,6 +171,16 @@ class ValidateSourceAPI(API):
             return actions.validate_source(ident, form.comment.data)
         else:
             return actions.reject_source(ident, form.comment.data)
+
+
+@ns.route('/source/<string:ident>/preview', endpoint='preview_harvest_source')
+@api.doc(params={'ident': 'A source ID or slug'})
+class PreviewSourceAPI(API):
+    @api.doc('preview_harvest_source')
+    @api.marshal_with(preview_job_fields)
+    def get(self, ident):
+        '''Preview a single harvest source given an ID or a slug'''
+        return actions.preview(ident)
 
 
 parser = api.parser()

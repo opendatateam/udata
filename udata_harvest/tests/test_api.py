@@ -14,6 +14,10 @@ from udata.tests.factories import faker, OrganizationFactory, AdminFactory
 
 from .factories import HarvestSourceFactory
 
+from .factories import (
+    HarvestSourceFactory, DEFAULT_COUNT as COUNT
+)
+
 
 log = logging.getLogger(__name__)
 
@@ -123,3 +127,17 @@ class HarvestAPITest(APITestCase):
         url = url_for('api.validate_harvest_source', ident=str(source.id))
         response = self.post(url, data)
         self.assert403(response)
+
+    def test_get_source(self):
+        source = HarvestSourceFactory()
+
+        url = url_for('api.harvest_source', ident=str(source.id))
+        response = self.get(url)
+        self.assert200(response)
+
+    def test_source_preview(self):
+        source = HarvestSourceFactory(backend='factory')
+
+        url = url_for('api.preview_harvest_source', ident=str(source.id))
+        response = self.get(url)
+        self.assert200(response)

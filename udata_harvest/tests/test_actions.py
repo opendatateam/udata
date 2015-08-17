@@ -3,42 +3,21 @@ from __future__ import unicode_literals
 
 import logging
 
-from flask.signals import Namespace
-
 from udata.models import Dataset, PeriodicTask
 
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import DatasetFactory, OrganizationFactory
+from udata.tests.factories import OrganizationFactory
 
-from .factories import fake, HarvestSourceFactory, HarvestJobFactory
+from .factories import (
+    fake, HarvestSourceFactory, HarvestJobFactory,
+    mock_initialize, mock_process, DEFAULT_COUNT as COUNT
+)
 from ..models import HarvestSource, HarvestJob, HarvestError
 from ..backends import BaseBackend
 from .. import actions, signals
 
-from udata.ext.harvest import backends
 
 log = logging.getLogger(__name__)
-
-COUNT = 3
-
-ns = Namespace()
-
-mock_initialize = ns.signal('backend:initialize')
-mock_process = ns.signal('backend:process')
-
-
-@backends.register
-class FactoryBackend(backends.BaseBackend):
-    name = 'factory'
-
-    def initialize(self):
-        mock_initialize.send(self)
-        for i in range(self.config.get('count', COUNT)):
-            self.add_item(i)
-
-    def process(self, item):
-        mock_process.send(self, item=item)
-        return DatasetFactory.build(title='dataset-{0}'.format(item.remote_id))
 
 
 class HarvestActionsTest(DBTestMixin, TestCase):
