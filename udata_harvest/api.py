@@ -10,7 +10,7 @@ from udata.core.organization.permissions import EditOrganizationPermission
 from udata.core.user.api_fields import user_ref_fields
 
 from . import actions
-from .forms import HarvestSourceForm
+from .forms import HarvestSourceForm, HarvestSourceValidationForm
 from .models import HARVEST_JOB_STATUS, HARVEST_ITEM_STATUS, HarvestJob
 
 ns = api.namespace('harvest', 'Harvest related operations')
@@ -99,6 +99,11 @@ backend_fields = api.model('HarvestBackend', {
     'label': fields.String(description='The backend display name')
 })
 
+validation_fields = api.model('HarvestSourceValidation', {
+    'validate': fields.Boolean(description='Validate the source or not', required=True),
+    'comment': fields.String(description='A comment about the validation. Required on rejection')
+})
+
 
 @ns.route('/sources/', endpoint='harvest_sources')
 class SourcesAPI(API):
@@ -129,6 +134,24 @@ class SourceAPI(API):
     def get(self, ident):
         '''Get a single source given an ID or a slug'''
         return actions.get_source(ident)
+
+
+@ns.route('/source/<string:ident>/validate',
+          endpoint='validate_harvest_source')
+@api.doc(params={'ident': 'A source ID or slug'})
+class ValidateSourceAPI(API):
+    @api.doc('validate_harvest_source')
+    @api.secure(admin_permission)
+    @api.expect(validation_fields)
+    @api.marshal_with(source_fields)
+    def post(self, ident):
+        '''Validate or reject an harvest source'''
+        form = api.validate(HarvestSourceValidationForm)
+        if form.validate.data:
+            return actions.validate_source(ident, form.comment.data)
+        else:
+            return actions.reject_source(ident, form.comment.data)
+
 
 parser = api.parser()
 parser.add_argument('page', type=int, default=1, location='args',

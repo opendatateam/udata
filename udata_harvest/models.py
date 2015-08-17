@@ -77,6 +77,7 @@ class HarvestSource(db.Document):
                                required=True)
     active = db.BooleanField(default=True)
     validated = db.BooleanField(default=False)
+    validation_comment = db.StringField()
 
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
     organization = db.ReferenceField('Organization',

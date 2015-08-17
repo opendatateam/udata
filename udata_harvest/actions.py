@@ -57,10 +57,20 @@ def create_source(name, url, backend,
     return source
 
 
-def validate_source(ident):
+def validate_source(ident, comment=None):
     '''Validate a source for automatic harvesting'''
     source = get_source(ident)
     source.validated = True
+    source.validation_comment = comment
+    source.save()
+    return source
+
+
+def reject_source(ident, comment):
+    '''Reject a source for automatic harvesting'''
+    source = get_source(ident)
+    source.validated = False
+    source.validation_comment = comment
     source.save()
     return source
 

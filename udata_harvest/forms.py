@@ -7,7 +7,7 @@ from udata.i18n import lazy_gettext as _
 
 from .actions import list_backends
 
-__all__ = 'HarvestSourceForm',
+__all__ = 'HarvestSourceForm', 'HarvestSourceValidationForm'
 
 
 backends = [(b.name, b.display_name) for b in list_backends()]
@@ -21,3 +21,9 @@ class HarvestSourceForm(Form):
     backend = fields.SelectField(_('Backend'), choices=backends)
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_('Publish as'))
+
+
+class HarvestSourceValidationForm(Form):
+    validate = fields.BooleanField(default=False)
+    comment = fields.StringField(_('Comment'),
+                                 [validators.RequiredIfVal('validate', False)])

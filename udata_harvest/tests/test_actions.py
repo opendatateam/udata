@@ -76,6 +76,27 @@ class HarvestActionsTest(DBTestMixin, TestCase):
 
         source.reload()
         self.assertTrue(source.validated)
+        self.assertIsNone(source.validation_comment)
+
+    def test_validate_source_with_comment(self):
+        source = HarvestSourceFactory()
+        self.assertFalse(source.validated)
+
+        actions.validate_source(source.id, 'comment')
+
+        source.reload()
+        self.assertTrue(source.validated)
+        self.assertEqual(source.validation_comment, 'comment')
+
+    def test_reject_source(self):
+        source = HarvestSourceFactory()
+        self.assertFalse(source.validated)
+
+        actions.reject_source(source.id, 'comment')
+
+        source.reload()
+        self.assertFalse(source.validated)
+        self.assertEqual(source.validation_comment, 'comment')
 
     def test_get_source_by_slug(self):
         source = HarvestSourceFactory()

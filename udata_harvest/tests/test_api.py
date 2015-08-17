@@ -10,7 +10,9 @@ from .. import actions
 from udata.models import Member
 from udata.settings import Testing
 from udata.tests.api import APITestCase
-from udata.tests.factories import faker, OrganizationFactory
+from udata.tests.factories import faker, OrganizationFactory, AdminFactory
+
+from .factories import HarvestSourceFactory
 
 
 log = logging.getLogger(__name__)
@@ -83,4 +85,41 @@ class HarvestAPITest(APITestCase):
         }
         response = self.post(url_for('api.harvest_sources'), data)
 
+        self.assert403(response)
+
+    def test_validate_source(self):
+        '''It should allow to validate a source if admin'''
+        self.login(AdminFactory())
+        source = HarvestSourceFactory()
+
+        data = {'validate': True}
+        url = url_for('api.validate_harvest_source', ident=str(source.id))
+        response = self.post(url, data)
+        self.assert200(response)
+
+        source.reload()
+        self.assertTrue(source.validated)
+
+    def test_reject_source(self):
+        '''It should allow to reject a source if admin'''
+        self.login(AdminFactory())
+        source = HarvestSourceFactory()
+
+        data = {'validate': False, 'comment': 'Not valid'}
+        url = url_for('api.validate_harvest_source', ident=str(source.id))
+        response = self.post(url, data)
+        self.assert200(response)
+
+        source.reload()
+        self.assertFalse(source.validated)
+        self.assertEqual(source.validation_comment, 'Not valid')
+
+    def test_validate_source_is_admin_only(self):
+        '''It should allow to validate a source if admin'''
+        self.login()
+        source = HarvestSourceFactory()
+
+        data = {'validate': True}
+        url = url_for('api.validate_harvest_source', ident=str(source.id))
+        response = self.post(url, data)
         self.assert403(response)
