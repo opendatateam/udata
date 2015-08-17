@@ -154,17 +154,15 @@ class ExecutionTestMixin(DBTestMixin):
     def test_default(self):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend='factory', organization=org)
-        with self.assert_emit(signals.before_harvest_job, signals.after_harvest_job):
+        with self.assert_emit(signals.before_harvest_job,
+                              signals.after_harvest_job):
             self.action(source.slug)
 
         source.reload()
         self.assertEqual(len(HarvestJob.objects(source=source)), 1)
 
         job = source.get_last_job()
-        print job.errors
-        for item in job.items:
-            for error in item.errors:
-                print error.message, error.details
+
         self.assertEqual(job.status, 'done')
         self.assertEqual(job.errors, [])
         self.assertIsNotNone(job.started)
@@ -193,7 +191,8 @@ class ExecutionTestMixin(DBTestMixin):
             raise ValueError('test')
 
         source = HarvestSourceFactory(backend='factory')
-        with self.assert_emit(signals.before_harvest_job), mock_initialize.connected_to(init):
+        with self.assert_emit(signals.before_harvest_job),\
+             mock_initialize.connected_to(init):
             self.action(source.slug)
 
         source.reload()
@@ -262,3 +261,90 @@ class HarvestLaunchTest(ExecutionTestMixin, TestCase):
 class HarvestRunTest(ExecutionTestMixin, TestCase):
     def action(self, *args, **kwargs):
         return actions.run(*args, **kwargs)
+
+
+class HarvestPreviewTest(DBTestMixin, TestCase):
+    def test_preview(self):
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='factory', organization=org)
+
+        job = actions.preview(source.slug)
+
+        self.assertEqual(job.status, 'done')
+        self.assertEqual(job.errors, [])
+        self.assertIsNotNone(job.started)
+        self.assertIsNotNone(job.ended)
+        self.assertEqual(len(job.items), COUNT)
+
+        for item in job.items:
+            self.assertEqual(item.status, 'done')
+            self.assertEqual(item.errors, [])
+            self.assertIsNotNone(item.started)
+            self.assertIsNotNone(item.ended)
+            self.assertIsNotNone(item.dataset)
+
+            dataset = item.dataset
+            self.assertEqual(dataset.organization, org)
+            self.assertIn('harvest:remote_id', dataset.extras)
+            self.assertIn('harvest:last_update', dataset.extras)
+            self.assertIn('harvest:source_id', dataset.extras)
+
+        self.assertEqual(len(HarvestJob.objects), 0)
+        self.assertEqual(len(Dataset.objects), 0)
+
+    def test_preview_with_error_on_initialize(self):
+        def init(self):
+            raise ValueError('test')
+
+        source = HarvestSourceFactory(backend='factory')
+
+        with mock_initialize.connected_to(init):
+            job = actions.preview(source.slug)
+
+        self.assertEqual(job.status, 'failed')
+        self.assertEqual(len(job.errors), 1)
+        error = job.errors[0]
+        self.assertIsInstance(error, HarvestError)
+        self.assertIsNotNone(job.started)
+        self.assertIsNotNone(job.ended)
+        self.assertEqual(len(job.items), 0)
+
+        self.assertEqual(len(HarvestJob.objects), 0)
+        self.assertEqual(len(Dataset.objects), 0)
+
+    def test_preview_with_error_on_item(self):
+        def process(self, item):
+            if item.remote_id == '1':
+                raise ValueError('test')
+
+        source = HarvestSourceFactory(backend='factory')
+
+        with mock_process.connected_to(process):
+            job = actions.preview(source.slug)
+
+        self.assertEqual(job.status, 'done-errors')
+        self.assertIsNotNone(job.started)
+        self.assertIsNotNone(job.ended)
+        self.assertEqual(len(job.errors), 0)
+        self.assertEqual(len(job.items), COUNT)
+
+        items_ok = filter(lambda i: not len(i.errors), job.items)
+        self.assertEqual(len(items_ok), COUNT - 1)
+
+        for item in items_ok:
+            self.assertIsNotNone(item.started)
+            self.assertIsNotNone(item.ended)
+            self.assertEqual(item.status, 'done')
+            self.assertEqual(item.errors, [])
+
+        item_ko = filter(lambda i: len(i.errors), job.items)[0]
+        self.assertIsNotNone(item_ko.started)
+        self.assertIsNotNone(item_ko.ended)
+        self.assertEqual(item_ko.status, 'failed')
+        self.assertEqual(len(item_ko.errors), 1)
+
+        error = item_ko.errors[0]
+        self.assertIsInstance(error, HarvestError)
+
+        self.assertEqual(len(HarvestJob.objects), 0)
+        self.assertEqual(len(Dataset.objects), 0)

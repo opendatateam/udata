@@ -29,10 +29,10 @@ class BaseBackend(object):
     display_name = None
     verify_ssl = True
 
-    def __init__(self, source, job=None, debug=False):
+    def __init__(self, source, job=None, dryrun=False):
         self.source = source
         self.job = job
-        self.debug = debug
+        self.dryrun = dryrun
 
     @property
     def config(self):
@@ -59,20 +59,23 @@ class BaseBackend(object):
         if self.perform_initialization():
             self.process_items()
             self.finalize()
+        return self.job
 
     def perform_initialization(self):
         '''Initialize the harvesting for a given job'''
         log.debug('Initializing backend')
-        self.job = HarvestJob.objects.create(status='initializing',
-                                             started=datetime.now(),
-                                             source=self.source)
+        factory = HarvestJob if self.dryrun else HarvestJob.objects.create
+        self.job = factory(status='initializing',
+                           started=datetime.now(),
+                           source=self.source)
 
         before_harvest_job.send(self)
 
         try:
             self.initialize()
             self.job.status = 'initialized'
-            self.job.save()
+            if not self.dryrun:
+                self.job.save()
         except Exception as e:
             log.error("Error in initialization : %s" % (str(e)))
             log.exception(e)
@@ -101,7 +104,8 @@ class BaseBackend(object):
         log.debug('Processing: %s', item.remote_id)
         item.status = 'started'
         item.started = datetime.now()
-        self.job.save()
+        if not self.dryrun:
+            self.job.save()
 
         try:
             dataset = self.process(item)
@@ -117,11 +121,11 @@ class BaseBackend(object):
                 elif self.source.owner:
                     dataset.owner = self.source.owner
 
-            if self.debug:
+            if self.dryrun:
                 dataset.validate()
             else:
                 dataset.save()
-                item.dataset = dataset
+            item.dataset = dataset
             item.status = 'done'
         except HarvestSkipException as e:
             log.info("SKipped item %s : %s" % (item.remote_id, str(e)))
@@ -137,7 +141,8 @@ class BaseBackend(object):
             item.status = 'failed'
 
         item.ended = datetime.now()
-        self.job.save()
+        if not self.dryrun:
+            self.job.save()
 
     def process(self, item):
         raise NotImplementedError
@@ -154,7 +159,8 @@ class BaseBackend(object):
 
     def end(self):
         self.job.ended = datetime.now()
-        self.job.save()
+        if not self.dryrun:
+            self.job.save()
         after_harvest_job.send(self)
 
     def get_dataset(self, remote_id):

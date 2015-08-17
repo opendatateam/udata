@@ -73,17 +73,25 @@ def delete_source(ident):
     # return source
 
 
-def run(ident, debug=False):
+def run(ident):
     '''Launch or resume an harvesting for a given source if none is running'''
     source = get_source(ident)
     cls = backends.get(source.backend)
-    backend = cls(source, debug=debug)
+    backend = cls(source)
     backend.harvest()
 
 
-def launch(ident, debug=False):
+def launch(ident):
     '''Launch or resume an harvesting for a given source if none is running'''
     return harvest.delay(ident)
+
+
+def preview(ident):
+    '''Launch or resume an harvesting for a given source if none is running'''
+    source = get_source(ident)
+    cls = backends.get(source.backend)
+    backend = cls(source, dryrun=True)
+    return backend.harvest()
 
 
 def schedule(ident, minute='*', hour='*', day_of_week='*', day_of_month='*', month_of_year='*'):
