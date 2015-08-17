@@ -13,6 +13,7 @@ export default {
                 // subtitle: this._('reuse')
             },
             source: new HarvestSource(),
+            publish_as: null,
             steps: [{
                 label: this._('Harvest as'),
                 subtitle: this._('Choose who is harvesting'),
@@ -40,12 +41,35 @@ export default {
                         return false;
                     }
                 }
+            }, {
+                label: this._('Mappings'),
+                subtitle: this._('Adjust some values mapping'),
+                component: 'mapping-form',
+                next: (component) => {
+                    if (component.$.form.validate()) {
+                        Object.assign(this.source, component.serialize());
+                        this.source.save();
+                        this.source.$once('updated', () => {
+                            this.$.wizard.go_next();
+                        });
+                        return false;
+                    }
+                }
+            }, {
+                label: this._('Done'),
+                subtitle: this._('Your harvester is ready'),
+                component: 'created',
+                init: (component) => {
+                    component.source = this.source;
+                }
             }],
          };
     },
     components: {
         'harvest-form': require('components/harvest/form.vue'),
+        'mappings-form': require('components/harvest/mappings-form.vue'),
         'publish-as': require('components/widgets/publish-as.vue'),
+        'created': require('components/harvest/created.vue'),
         'wizard': require('components/widgets/wizard.vue'),
     },
     events: {
