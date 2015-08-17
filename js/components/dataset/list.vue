@@ -8,25 +8,7 @@
 </template>
 
 <script>
-'use strict';
-
-var Vue = require('vue'),
-    LABELS = {
-        deleted: {
-            label: Vue._('Deleted'),
-            type: 'error'
-        },
-        private: {
-            label: Vue._('Private'),
-            type: 'warning'
-        },
-        public: {
-            label: Vue._('Public'),
-            type: 'info'
-        }
-    };
-
-module.exports = {
+export default {
     name: 'datasets-widget',
     components: {
         'datatable': require('components/widgets/datatable.vue')
