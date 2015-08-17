@@ -5,8 +5,12 @@ from udata.api import api, API, fields
 from udata.auth import admin_permission
 
 from udata.core.dataset.api_fields import dataset_ref_fields
+from udata.core.organization.api_fields import org_ref_fields
+from udata.core.organization.permissions import EditOrganizationPermission
+from udata.core.user.api_fields import user_ref_fields
 
 from . import actions
+from .forms import HarvestSourceForm
 from .models import HARVEST_JOB_STATUS, HARVEST_ITEM_STATUS, HarvestJob
 
 ns = api.namespace('harvest', 'Harvest related operations')
@@ -77,11 +81,17 @@ source_fields = api.model('HarvestSource', {
                                      required=True),
     'active': fields.Boolean(description='Is this source active',
                              required=True, default=False),
+    'validated': fields.Boolean(description='Has the source been validated',
+                                readonly=True),
     'config': fields.Raw(description='The source specific configuration',
                          default={}),
     'last_job': fields.Nested(job_fields,
                               description='The last job for this source',
-                              allow_null=True)
+                              allow_null=True, readonly=True),
+    'owner': fields.Nested(user_ref_fields, allow_null=True,
+                           description='The owner information'),
+    'organization': fields.Nested(org_ref_fields, allow_null=True,
+                                  description='The producer organization'),
 })
 
 backend_fields = api.model('HarvestBackend', {
@@ -99,17 +109,16 @@ class SourcesAPI(API):
         return actions.list_sources()
 
     @api.doc('create_harvest_source')
-    @api.secure(admin_permission)
+    @api.secure
+    @api.expect(source_fields)
     @api.marshal_with(source_fields)
     def post(self):
         '''Create a new harvests source'''
-        # if 'crontab' in request.json and 'interval' in request.json:
-        #     api.abort(400, 'Cannot define both interval and crontab schedule')
-        # if 'crontab' in request.json:
-        #     form = api.validate(CrontabTaskForm)
-        # else:
-        #     form = api.validate(IntervalTaskForm)
-        # return form.save(), 201
+        form = api.validate(HarvestSourceForm)
+        if form.organization.data:
+            EditOrganizationPermission(form.organization.data).test()
+        source = actions.create_source(**form.data)
+        return source, 201
 
 
 @ns.route('/source/<string:ident>', endpoint='harvest_source')

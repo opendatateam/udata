@@ -32,21 +32,26 @@ def get_job(ident):
     return HarvestJob.objects.get(id=ident)
 
 
-def create_source(name, url, backend, frequency=DEFAULT_HARVEST_FREQUENCY, owner=None, org=None):
+def create_source(name, url, backend,
+                  description=None,
+                  frequency=DEFAULT_HARVEST_FREQUENCY,
+                  owner=None,
+                  organization=None):
     '''Create a new harvest source'''
     if owner and not isinstance(owner, User):
         owner = User.get(owner)
 
-    if org and not isinstance(org, Organization):
-        org = Organization.get(org)
+    if organization and not isinstance(organization, Organization):
+        organization = Organization.get(organization)
 
     source = HarvestSource.objects.create(
         name=name,
         url=url,
         backend=backend,
+        description=description,
         frequency=frequency or DEFAULT_HARVEST_FREQUENCY,
         owner=owner,
-        organization=org
+        organization=organization
     )
     signals.harvest_source_created.send(source)
     return source

@@ -29,7 +29,7 @@ def create(name, url, backend, frequency=None, owner=None, org=None):
     source = actions.create_source(name, url, backend,
                                    frequency=frequency,
                                    owner=owner,
-                                   org=org)
+                                   organization=org)
     log.info('''Created a new Harvest source:
     name: {0.name},
     slug: {0.slug},
