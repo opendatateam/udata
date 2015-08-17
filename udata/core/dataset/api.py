@@ -24,13 +24,14 @@ from .api_fields import (
     dataset_fields,
     dataset_page_fields,
     dataset_suggestion_fields,
+    frequency_fields,
     license_fields,
     resource_fields,
     upload_fields,
 )
 from .models import (
     Dataset, DatasetBadge, Resource, FollowDataset, Checksum, License,
-    DATASET_BADGE_KINDS
+    DATASET_BADGE_KINDS, UPDATE_FREQUENCIES
 )
 from .permissions import DatasetEditPermission
 from .forms import BadgeForm, ResourceForm, DatasetForm
@@ -331,6 +332,16 @@ class LicensesAPI(API):
     def get(self):
         '''List all available licenses'''
         return list(License.objects)
+
+
+@ns.route('/frequencies/', endpoint='dataset_frequencies')
+class FrequenciesAPI(API):
+    @api.doc('list_frequencies')
+    @api.marshal_list_with(frequency_fields)
+    def get(self):
+        '''List all available frequencies'''
+        return [{'id': id, 'label': label}
+                for id, label in UPDATE_FREQUENCIES.items()]
 
 
 checkurl_parser = api.parser()

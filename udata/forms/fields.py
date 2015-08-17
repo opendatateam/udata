@@ -503,8 +503,11 @@ class PublishAsField(FieldHelper, ModelField, fields.HiddenField):
                 raise validators.ValidationError(
                     _("Permission denied for this organization"))
             # Ensure either owner field or this field value is unset
+            owner_field = form._fields[self.owner_field]
             if self.raw_data:
-                form._fields[self.owner_field].data = None
+                owner_field.data = None
+            elif getattr(form._obj, self.short_name) and not owner_field.data:
+                pass
             else:
                 self.data = None
         return True

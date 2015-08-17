@@ -76,20 +76,20 @@ class SpatialLevelsAPI(API):
         return [{
             'id': level.id,
             'name': level.name,
-            'parents': level.parents,
+            'parents': [p.id for p in level.parents],
         } for level in GeoLevel.objects]
 
 
 @ns.route('/granularities', endpoint='spatial_granularities')
 class SpatialGranularitiesAPI(API):
-    @api.doc('spacial_granularities')
+    @api.doc('spatial_granularities')
     @api.marshal_list_with(granularity_fields)
     def get(self):
         '''List all known spatial granularities'''
         return [{
             'id': id,
-            'label': label,
-        } for id, label in spatial_granularities]
+            'name': name,
+        } for id, name in spatial_granularities]
 
 
 @ns.route('/coverage/<path:level>', endpoint='spatial_coverage')

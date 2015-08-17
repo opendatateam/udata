@@ -5,7 +5,9 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import Reuse, FollowReuse, Follow, Member, REUSE_BADGE_KINDS
+from udata.models import (
+    Reuse, FollowReuse, Follow, Member, REUSE_BADGE_KINDS, REUSE_TYPES
+)
 
 from . import APITestCase
 from ..factories import (
@@ -321,3 +323,11 @@ class ReuseBadgeAPITest(APITestCase):
                 url_for('api.reuse_badge', reuse=self.reuse,
                         badge_kind=str(ReuseBadgeFactory().kind)))
         self.assert404(response)
+
+
+class ReuseReferencesAPITest(APITestCase):
+    def test_reuse_types_list(self):
+        '''It should fetch the reuse types list from the API'''
+        response = self.get(url_for('api.reuse_types'))
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(REUSE_TYPES))

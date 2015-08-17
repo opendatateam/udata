@@ -8,13 +8,14 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import (
-    Dataset, Follow, FollowDataset, Member, DATASET_BADGE_KINDS
+    Dataset, Follow, FollowDataset, Member, DATASET_BADGE_KINDS,
+    UPDATE_FREQUENCIES
 )
 
 from . import APITestCase
 from ..factories import (
     DatasetBadgeFactory, DatasetFactory, ResourceFactory, OrganizationFactory,
-    AdminFactory, VisibleDatasetFactory, UserFactory, faker
+    AdminFactory, VisibleDatasetFactory, UserFactory, LicenseFactory, faker
 )
 
 
@@ -597,3 +598,19 @@ class DatasetResourceAPITest(APITestCase):
                             qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
+
+
+class DatasetReferencesAPITest(APITestCase):
+    def test_dataset_licenses_list(self):
+        '''It should fetch the dataset licenses list from the API'''
+        licenses = LicenseFactory.create_batch(4)
+
+        response = self.get(url_for('api.licenses'))
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(licenses))
+
+    def test_dataset_frequencies_list(self):
+        '''It should fetch the dataset frequencies list from the API'''
+        response = self.get(url_for('api.dataset_frequencies'))
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(UPDATE_FREQUENCIES))

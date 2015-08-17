@@ -21,7 +21,7 @@ __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum',
     'DatasetIssue', 'DatasetDiscussion', 'DatasetBadge', 'FollowDataset',
     'UPDATE_FREQUENCIES', 'RESOURCE_TYPES', 'DATASET_BADGE_KINDS', 'C3',
-    'PIVOTAL_DATA'
+    'PIVOTAL_DATA', 'DEFAULT_LICENSE'
 )
 
 UPDATE_FREQUENCIES = {
@@ -42,6 +42,15 @@ UPDATE_FREQUENCIES = {
 }
 
 DEFAULT_FREQUENCY = 'unknown'
+
+DEFAULT_LICENSE = {
+    'id': 'notspecified',
+    'title': "License Not Specified",
+    'flags': ["generic"],
+    'maintainer': None,
+    'url': None,
+    'active': True,
+}
 
 RESOURCE_TYPES = OrderedDict([
     ('file', _('Uploaded file')),

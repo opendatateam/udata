@@ -6,7 +6,7 @@ import logging
 import requests
 
 from udata.commands import manager
-from udata.models import License
+from udata.models import License, DEFAULT_LICENSE
 
 log = logging.getLogger(__name__)
 
@@ -48,4 +48,9 @@ def licenses(filename):
             active=json_license.get('active', False),
         )
         log.info('Added license "%s"', license.title)
+    try:
+        License.objects.get(id=DEFAULT_LICENSE['id'])
+    except License.DoesNotExist:
+        License.objects.create(**DEFAULT_LICENSE)
+        log.info('Added license "%s"', DEFAULT_LICENSE['title'])
     log.info('Done')
