@@ -114,7 +114,7 @@
 
 {% macro publish_as(field) %}
 {% if current_user.organizations %}
-<input id="{{ field.id }}" name="{{ field.name }}" type="hidden" {% if field.data %}value="{{ field.data }}"{% endif %}/>
+<input id="{{ field.id }}" name="{{ field.name }}" type="hidden" {% if field.data %}value="{{ field.data.id }}"{% endif %}/>
 <ul class="card-list">
     <li class="col-xs-4 col-sm-3">
         <div class="publisher-card {% if not field.data %}active{% endif %}">
