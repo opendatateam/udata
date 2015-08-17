@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 
+from dateutil.parser import parse
+
 from flask import request, url_for
 from flask.ext.restplus.fields import *
 
@@ -14,6 +16,8 @@ class ISODateTime(String):
     __schema_format__ = 'date-time'
 
     def format(self, value):
+        if isinstance(value, basestring):
+            value = parse(value)
         return value.isoformat()
 
 

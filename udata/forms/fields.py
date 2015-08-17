@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import re
-from datetime import datetime
 from dateutil.parser import parse
 
 from flask import url_for
