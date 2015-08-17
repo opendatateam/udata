@@ -58,7 +58,7 @@ class RequiredIfVal(validators.DataRequired):
         self.expected_values = (
             expected_value
             if isinstance(expected_value, (list, tuple))
-            else tuple(expected_value)
+            else (expected_value,)
         )
         super(RequiredIfVal, self).__init__(*args, **kwargs)
 
