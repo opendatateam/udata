@@ -91,8 +91,20 @@ module.exports = {
     },
     props: ['datasets'],
     data: function() {
+        /* Prefill the datasets with optional ids contained in
+           `dataset_id` GET parameter. */
+        let datasets = [];
+        if ("dataset_id" in this.$router.parameters) {
+            // There might be a single id or a list.
+            let datasetIds = this.$router.parameters.dataset_id;
+            if (typeof datasetIds === "string") {
+                datasets.push(datasetIds);
+            } else {
+                datasets = datasets.concat(datasetIds);
+            }
+        }
         return {
-            datasets: []
+            datasets: datasets
         };
     },
     events: {

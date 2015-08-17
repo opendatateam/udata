@@ -32,6 +32,27 @@ define(['director', 'logger'], function(director, log) {
                     if (this.current_path) {
                         return this.current_path.replace(this.prefix, '/').replace('//', '/');
                     }
+                },
+                parameters: function() {
+                    /* Load GET parameters if any once and for all.
+                       Inspired by http://stackoverflow.com/a/979995 */
+                    let parameters = {};
+                    if (window.location.search) {
+                        for (let param of window.location.search.substring(1).split("&")) {
+                            let [name, value] = param.split("=");
+                            value = decodeURIComponent(value);
+                            if (typeof parameters[name] === "undefined") {
+                                parameters[name] = value;
+                            } else if (typeof parameters[name] === "string") {
+                                // If second entry with this name
+                                parameters[name] = [parameters[name], value];
+                            } else {
+                                // If third or later entry with this name
+                                parameters[name].push(value);
+                            }
+                        }
+                    }
+                    return parameters;
                 }
             },
             methods: {
