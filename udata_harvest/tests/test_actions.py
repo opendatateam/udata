@@ -63,8 +63,19 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         self.assertEqual(source.url, source_url)
         self.assertEqual(source.backend, 'dummy')
         self.assertEqual(source.frequency, 'manual')
+        self.assertTrue(source.active)
+        self.assertFalse(source.validated)
         self.assertIsNone(source.owner)
         self.assertIsNone(source.organization)
+
+    def test_validate_source(self):
+        source = HarvestSourceFactory()
+        self.assertFalse(source.validated)
+
+        actions.validate_source(source.id)
+
+        source.reload()
+        self.assertTrue(source.validated)
 
     def test_get_source_by_slug(self):
         source = HarvestSourceFactory()

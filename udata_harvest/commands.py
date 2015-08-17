@@ -40,6 +40,13 @@ def create(name, url, backend, frequency=None, owner=None, org=None):
     organization: {0.organization}'''.format(source))
 
 
+@m.option('identifier')
+def validate(identifier):
+    '''Validate a source given its identifier'''
+    source = actions.validate_source(identifier)
+    log.info('Source %s (%s) has been validated', source.slug, str(source.id))
+
+
 @m.command
 def delete(identifier):
     '''Delete an harvest source'''

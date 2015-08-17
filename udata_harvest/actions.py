@@ -52,6 +52,14 @@ def create_source(name, url, backend, frequency=DEFAULT_HARVEST_FREQUENCY, owner
     return source
 
 
+def validate_source(ident):
+    '''Validate a source for automatic harvesting'''
+    source = get_source(ident)
+    source.validated = True
+    source.save()
+    return source
+
+
 def delete_source(ident):
     '''Delete an harvest source'''
     source = get_source(ident)
