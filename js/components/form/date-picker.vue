@@ -40,7 +40,7 @@ export default {
     name: 'date-picker',
     inherit: true,
     replace: true,
-    props: ['serializable'],
+    props: ['serializable', 'field', 'value'],
     components: {
         calendar: require('components/calendar.vue')
     },
@@ -52,8 +52,10 @@ export default {
     },
     filters: {
         dateFormatted: function(value) {
-            // Will default to current day if value is null.
-            return moment(value).format(this.field.format || DEFAULT_FORMAT);
+            // Will default to current day if value is null or empty.
+            return value
+                   ? moment(value).format(this.field.format || DEFAULT_FORMAT)
+                   : '';
         }
     },
     events: {
