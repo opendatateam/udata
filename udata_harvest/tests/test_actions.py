@@ -92,20 +92,32 @@ class HarvestActionsTest(DBTestMixin, TestCase):
     def test_delete_source_by_slug(self):
         source = HarvestSourceFactory()
         with self.assert_emit(signals.harvest_source_deleted):
-            actions.delete_source(source.slug)
-        self.assertEqual(len(HarvestSource.objects), 0)
+            deleted_source = actions.delete_source(source.slug)
+
+        self.assertIsNotNone(deleted_source.deleted)
+        self.assertEqual(deleted_source.id, source.id)
+        deleted_sources = HarvestSource.objects(deleted__exists=True)
+        self.assertEqual(len(deleted_sources), 1)
 
     def test_delete_source_by_id(self):
         source = HarvestSourceFactory()
         with self.assert_emit(signals.harvest_source_deleted):
-            actions.delete_source(str(source.id))
-        self.assertEqual(len(HarvestSource.objects), 0)
+            deleted_source = actions.delete_source(str(source.id))
+
+        self.assertIsNotNone(deleted_source.deleted)
+        self.assertEqual(deleted_source.id, source.id)
+        deleted_sources = HarvestSource.objects(deleted__exists=True)
+        self.assertEqual(len(deleted_sources), 1)
 
     def test_delete_source_by_objectid(self):
         source = HarvestSourceFactory()
         with self.assert_emit(signals.harvest_source_deleted):
-            actions.delete_source(source.id)
-        self.assertEqual(len(HarvestSource.objects), 0)
+            deleted_source = actions.delete_source(source.id)
+
+        self.assertIsNotNone(deleted_source.deleted)
+        self.assertEqual(deleted_source.id, source.id)
+        deleted_sources = HarvestSource.objects(deleted__exists=True)
+        self.assertEqual(len(deleted_sources), 1)
 
     def test_get_job_by_id(self):
         job = HarvestJobFactory()

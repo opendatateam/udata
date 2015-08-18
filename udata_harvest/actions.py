@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 
+from datetime import datetime
+
 from udata.models import User, Organization, PeriodicTask
 
 from . import backends, signals
@@ -78,9 +80,10 @@ def reject_source(ident, comment):
 def delete_source(ident):
     '''Delete an harvest source'''
     source = get_source(ident)
-    source.delete()
+    source.deleted = datetime.now()
+    source.save()
     signals.harvest_source_deleted.send(source)
-    # return source
+    return source
 
 
 def run(ident):

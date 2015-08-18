@@ -12,8 +12,7 @@ from udata.settings import Testing
 from udata.tests.api import APITestCase
 from udata.tests.factories import faker, OrganizationFactory, AdminFactory
 
-from .factories import HarvestSourceFactory
-
+from ..models import HarvestSource
 from .factories import (
     HarvestSourceFactory, DEFAULT_COUNT as COUNT
 )
@@ -141,3 +140,14 @@ class HarvestAPITest(APITestCase):
         url = url_for('api.preview_harvest_source', ident=str(source.id))
         response = self.get(url)
         self.assert200(response)
+
+    def test_delete_source(self):
+        user = self.login()
+        source = HarvestSourceFactory(owner=user)
+
+        url = url_for('api.harvest_source', ident=str(source.id))
+        response = self.delete(url)
+        self.assert204(response)
+
+        deleted_sources = HarvestSource.objects(deleted__exists=True)
+        self.assertEqual(len(deleted_sources), 1)

@@ -92,6 +92,7 @@ source_fields = api.model('HarvestSource', {
                            description='The owner information'),
     'organization': fields.Nested(org_ref_fields, allow_null=True,
                                   description='The producer organization'),
+    'deleted': fields.ISODateTime(description='The source deletion date'),
 })
 
 backend_fields = api.model('HarvestBackend', {
@@ -154,6 +155,13 @@ class SourceAPI(API):
     def get(self, ident):
         '''Get a single source given an ID or a slug'''
         return actions.get_source(ident)
+
+    @api.secure
+    @api.doc('delete_harvest_source')
+    @api.marshal_with(source_fields)
+    def delete(self, ident):
+        return actions.delete_source(ident), 204
+
 
 
 @ns.route('/source/<string:ident>/validate',
