@@ -86,6 +86,11 @@ def delete_source(ident):
     return source
 
 
+def purge_sources():
+    '''Permanently remove sources flagged as deleted'''
+    return HarvestSource.objects(deleted__exists=True).delete()
+
+
 def run(ident):
     '''Launch or resume an harvesting for a given source if none is running'''
     source = get_source(ident)

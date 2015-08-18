@@ -118,3 +118,11 @@ def unschedule(identifier):
     '''Run an harvester synchronously'''
     source = actions.unschedule(identifier)
     log.info('Unscheduled harvest source "%s"', source.name)
+
+
+@m.command
+def purge():
+    '''Permanently remove deleted harvest sources'''
+    log.info('Purging deleted harvest sources')
+    count = actions.purge_sources()
+    log.info('Purged %s source(s)', count)

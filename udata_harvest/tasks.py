@@ -47,3 +47,10 @@ def harvest_finalize(results, source_id):
     Backend = backends.get(source.backend)
     backend = Backend(source, job)
     backend.finalize()
+
+
+@task
+def purge_harvest_sources():
+    log.info('Purging HarvestSources flagged as deleted')
+    from .actions import purge_sources
+    purge_sources()

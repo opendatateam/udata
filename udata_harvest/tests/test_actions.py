@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 
+from datetime import datetime
+
 from udata.models import Dataset, PeriodicTask
 
 from udata.tests import TestCase, DBTestMixin
@@ -160,6 +162,15 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         source.reload()
         self.assertEqual(len(PeriodicTask.objects), 0)
         self.assertIsNone(source.periodic_task)
+
+    def test_purge_sources(self):
+        to_delete = HarvestSourceFactory.create_batch(3, deleted=datetime.now())
+        to_keep = HarvestSourceFactory.create_batch(2)
+
+        result = actions.purge_sources()
+
+        self.assertEqual(result, len(to_delete))
+        self.assertEqual(len(HarvestSource.objects), len(to_keep))
 
 
 class ExecutionTestMixin(DBTestMixin):
