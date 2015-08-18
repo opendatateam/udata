@@ -159,6 +159,11 @@ export default {
                 view.source_id = source_id;
             });
         },
+        '/harvester/:oid/edit': function(source_id) {
+            this.loadView('harvester-edit', function(view) {
+                view.source_id = source_id;
+            });
+        },
         '/post/new/': function() {
             this.loadView('post-wizard');
         },
@@ -260,9 +265,9 @@ export default {
         loadView: function(name, callback) {
 
             var self = this,
-                cb = function() {
+                cb = () => {
                     callback.apply(this, [this.$.content]);
-                }.bind(this);
+                };
 
             if (this.$options.components.hasOwnProperty(name)) {
                 this.view = name;

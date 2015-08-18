@@ -44,7 +44,6 @@ export default {
             return this.$.form.validate();
         },
         preview: function() {
-            console.log(this.source);
             API.harvest.preview_harvest_source(
                 {ident: this.source.id},
                 (response) => {

@@ -56,7 +56,7 @@ export default {
     },
     methods: {
         edit: function() {
-
+            this.$go('/harvester/' + this.source.id + '/edit');
         },
         confirm_delete: function() {
             this.$root.$modal(
