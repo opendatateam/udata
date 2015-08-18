@@ -44,7 +44,7 @@ export default {
             }, {
                 label: this._('Mappings'),
                 subtitle: this._('Adjust some values mapping'),
-                component: 'mapping-form',
+                component: 'mappings-form',
                 next: (component) => {
                     if (component.$.form.validate()) {
                         Object.assign(this.source, component.serialize());

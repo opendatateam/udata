@@ -1,40 +1,40 @@
 <template>
 <form-vertical v-ref="form" fields="{{fields}}" model="{{source}}"></form-vertical>
+<div class="row">
+    <div class="clox-xs-12 text-center">
+        <button class="btn btn-primary" v-on="click: preview">
+            <span class="fa fa-cog"></span>
+            {{ _('Preview') }}
+        </button>
+    </div>
+</div>
+<div class="row" v-if="preview_job">
+    <job-widget
+        job="{{preview_job}}"
+        class="col-xs-12">
+    </job-widget>
+</div>
 </template>
 
 <script>
-import HarvestSource from 'models/harvest/source';
+import API from 'api';
 import backends from 'models/harvest/backends';
+import HarvestJob from 'models/harvest/job';
+import HarvestSource from 'models/harvest/source';
 
-module.exports = {
+export default {
+    name: 'HarvestMappingView',
     props: ['source'],
     data: function() {
         return {
             source: new HarvestSource(),
-            fields: [{
-                    id: 'name',
-                    label: this._('Nom')
-                }, {
-                    id: 'description',
-                    label: this._('Description'),
-                }, {
-                    id: 'url',
-                    label: this._('URL'),
-                }, {
-                    id: 'backend',
-                    label: this._('Backend'),
-                    widget: 'select-input',
-                    values: backends.items.map(function(item) {
-                        return {value: item.id, text: item.label};
-                    })
-                }, {
-                    id: 'active',
-                    label: this._('Active')
-                }]
+            fields: [],
+            preview_job: null
         };
     },
     components: {
-        'form-vertical': require('components/form/vertical-form.vue')
+        'form-vertical': require('components/form/vertical-form.vue'),
+        'job-widget': require('components/harvest/job.vue')
     },
     methods: {
         serialize: function() {
@@ -42,6 +42,15 @@ module.exports = {
         },
         validate: function() {
             return this.$.form.validate();
+        },
+        preview: function() {
+            console.log(this.source);
+            API.harvest.preview_harvest_source(
+                {ident: this.source.id},
+                (response) => {
+                    this.$set('preview_job', new HarvestJob({data: response.obj}));
+                }
+            );
         }
     }
 };

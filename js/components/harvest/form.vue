@@ -6,7 +6,8 @@
 import HarvestSource from 'models/harvest/source';
 import backends from 'models/harvest/backends';
 
-module.exports = {
+export default {
+    name: 'HarvestSourceForm',
     props: ['source'],
     data: function() {
         return {
