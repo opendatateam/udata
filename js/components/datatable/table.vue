@@ -7,11 +7,11 @@
 </style>
 
 <template>
-<table class="table table-hover datatable" v-if="has_data">
+<table class="table table-hover datatable">
     <thead>
         <tr>
             <th class="text-{{field.align || 'left'}}"
-                v-class="pointer: sort"
+                v-class="pointer: field.sort"
                 v-repeat="field in fields"
                 v-on="click: header_click(field)"
                 v-attr="width: field.width | thwidth">
@@ -25,10 +25,11 @@
         </tr>
     </thead>
     <tbody>
-        <row v-repeat="item in p.data"
+        <tr v-repeat="item in p.data" track-by="{{trackBy}}"
+            v-component="row"
             fields="{{fields}}"
             selected="{{item === selected}}">
-        </row>
+        </tr>
     </tbody>
 </table>
 </template>
@@ -36,8 +37,9 @@
 <script>
 export default {
     name: 'datatable',
+    replace: true,
     components: {
-        'row': require('components/datatable/row.vue'),
+        'row': require('./row.vue'),
     },
     props: ['p', 'fields', 'track'],
     data: function() {
