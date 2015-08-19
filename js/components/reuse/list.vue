@@ -14,7 +14,7 @@
 module.exports = {
     name: 'reuses-widget',
     components: {
-         'datatable': require('components/widgets/datatable.vue')
+         'datatable': require('components/datatable/widget.vue')
     },
     data: function() {
         return {

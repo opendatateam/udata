@@ -13,7 +13,7 @@ import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
 export default {
     name: 'harvesters-widget',
     components: {
-        datatable: require('components/widgets/datatable.vue')
+        'datatable': require('components/datatable/widget.vue')
     },
     data: function() {
         return {

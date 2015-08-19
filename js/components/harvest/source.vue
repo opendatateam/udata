@@ -1,5 +1,5 @@
 <template>
-    <datatable-widget title="{{source.name}}" icon="tasks"
+    <datatable title="{{source.name}}" icon="tasks"
         boxclass="harvest-jobs-widget"
         fields="{{ fields }}"
         p="{{ jobs }}">
@@ -12,7 +12,7 @@
                 <dd>{{ jobs.total }}</dd>
             </dl>
         </header>
-    </datatable-widget>
+    </datatable>
 </template>
 
 <script>
@@ -22,7 +22,7 @@ import HarvestJobs from 'models/harvest/jobs';
 export default {
     name: 'harvest-jobs-widget',
     components: {
-        'datatable-widget': require('components/widgets/datatable.vue')
+        'datatable': require('components/datatable/widget.vue')
     },
     data: function() {
         return {

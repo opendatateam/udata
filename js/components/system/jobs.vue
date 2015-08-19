@@ -12,7 +12,7 @@ import jobs from 'models/jobs';
 export default {
     name: 'jobs-widget',
     components: {
-        datatable: require('components/widgets/datatable.vue')
+        'datatable': require('components/datatable/widget.vue')
     },
     data: function() {
         return {

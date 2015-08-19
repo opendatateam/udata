@@ -74,11 +74,11 @@
     "raven-js": "^1.1.19",
     "respond.js": "^1.4.2",
     "selectize": "^0.12.1",
-    "sifter": "^0.4.1",
+    "sifter": "noirbizarre/sifter.js#nested-properties-built",
     "sortablejs": "^1.2.0",
     "source-sans-pro": "^2.0.10",
     "swagger-client": "^2.1.2",
     "tv4": "^1.1.12",
-    "vue": "0.12.8"
+    "vue": "0.12.10"
   }
 }

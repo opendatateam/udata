@@ -290,6 +290,7 @@ export class List extends Base {
      */
     search(query) {
         this._search = query;
+        this.sorted = null;
         this.populate();
         return this;
     }
@@ -416,6 +417,7 @@ export class ModelPage extends Model {
      */
     search(query) {
         this.query.q = query;
+        this.query.sort = undefined;
         this.fetch({page: 1}); // Clear the pagination
         return this;
     }
