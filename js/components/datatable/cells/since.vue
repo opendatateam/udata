@@ -1,5 +1,5 @@
 <template>
-<time datetime="{{value}}">{{ value | since }}</time>
+<time datetime="{{value}}">{{value | since}}</time>
 </template>
 
 <script>

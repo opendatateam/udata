@@ -1,5 +1,5 @@
 <template>
-<time datetime="{{value | dt YYYY-MM-DD }}">{{value | dt L }}</time>
+<time datetime="{{value | dt YYYY-MM-DD}}">{{value | dt L}}</time>
 </template>
 
 <script>

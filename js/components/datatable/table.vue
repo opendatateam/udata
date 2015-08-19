@@ -52,7 +52,7 @@ export default {
     },
     computed: {
         remote: function() {
-            return this.p && (this.p.serverside == true);
+            return this.p && this.p.serverside;
         },
         show_footer: function() {
             return (this.p && this.p.pages > 1)
@@ -73,7 +73,7 @@ export default {
     methods: {
         header_click: function(field) {
             if (field.sort) {
-                this.p.sort(this.remote ? field.sort : field.key);
+                this.p.sort(this.sort_for(field));
             }
         },
         sort_for: function(field) {
