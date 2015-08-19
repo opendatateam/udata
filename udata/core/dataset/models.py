@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import datetime
+from datetime import datetime, timedelta
 
 from collections import OrderedDict
 
@@ -78,7 +78,7 @@ class DatasetBadge(Badge):
 
 class License(db.Document):
     id = db.StringField(primary_key=True)
-    created_at = db.DateTimeField(default=datetime.datetime.now, required=True)
+    created_at = db.DateTimeField(default=datetime.now, required=True)
     title = db.StringField(required=True)
     slug = db.SlugField(required=True, populate_from='title')
     url = db.URLField()
@@ -130,9 +130,9 @@ class Resource(WithMetrics, db.EmbeddedDocument):
     size = db.IntField()
     owner = db.ReferenceField('User')
 
-    created_at = db.DateTimeField(default=datetime.datetime.now, required=True)
-    modified = db.DateTimeField(default=datetime.datetime.now, required=True)
-    published = db.DateTimeField(default=datetime.datetime.now, required=True)
+    created_at = db.DateTimeField(default=datetime.now, required=True)
+    modified = db.DateTimeField(default=datetime.now, required=True)
+    published = db.DateTimeField(default=datetime.now, required=True)
     deleted = db.DateTimeField()
 
     on_added = signal('Resource.on_added')
@@ -241,6 +241,36 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
             return max(resource.published for resource in self.resources)
         else:
             return self.last_modified
+
+    @property
+    def next_update(self):
+        """Compute the next expected update date,
+
+        given the frequency and last_update.
+        """
+        if self.frequency == 'daily':
+            delta = timedelta(days=1)
+        elif self.frequency == 'weekly':
+            delta = timedelta(weeks=1)
+        elif self.frequency == 'fortnighly':
+            delta = timedelta(weeks=2)
+        elif self.frequency == 'monthly':
+            delta = timedelta(weeks=4)
+        elif self.frequency == 'bimonthly':
+            delta = timedelta(weeks=4 * 2)
+        elif self.frequency == 'quarterly':
+            delta = timedelta(weeks=52 / 4)
+        elif self.frequency == 'biannual':
+            delta = timedelta(weeks=52 / 2)
+        elif self.frequency == 'annual':
+            delta = timedelta(weeks=52)
+        elif self.frequency == 'biennial':
+            delta = timedelta(weeks=52 * 2)
+        elif self.frequency == 'triennial':
+            delta = timedelta(weeks=52 * 3)
+        elif self.frequency == 'quinquennial':
+            delta = timedelta(weeks=52 * 5)
+        return self.last_update + delta
 
     @classmethod
     def get(cls, id_or_slug):

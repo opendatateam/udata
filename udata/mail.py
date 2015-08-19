@@ -2,7 +2,9 @@
 from __future__ import unicode_literals
 
 import logging
+from contextlib import contextmanager
 
+from flask import current_app
 from flask.ext.mail import Mail, Message
 
 from udata import theme, i18n
@@ -11,6 +13,12 @@ from udata import theme, i18n
 log = logging.getLogger(__name__)
 
 mail = Mail()
+
+
+@contextmanager
+def dummyconnection(*args, **kw):
+    """Allow to test email templates rendering without actually send emails."""
+    yield
 
 
 def init_app(app):
@@ -28,7 +36,10 @@ def send(subject, recipients, template_base, **kwargs):
     if not isinstance(recipients, (list, tuple)):
         recipients = [recipients]
 
-    with mail.connect() as conn:
+    debug = current_app.config.get('DEBUG')
+    connection = debug and dummyconnection or mail.connect
+
+    with connection() as conn:
         for recipient in recipients:
             lang = i18n._default_lang(recipient)
             with i18n.language(lang):
@@ -42,4 +53,8 @@ def send(subject, recipients, template_base, **kwargs):
                 msg.html = theme.render(
                     'mail/{0}.html'.format(template_base), subject=subject,
                     sender=sender, recipient=recipient, **kwargs)
-                conn.send(msg)
+                if debug:
+                    log.debug(msg.body)
+                    log.debug(msg.html)
+                else:
+                    conn.send(msg)
