@@ -29,7 +29,8 @@ module.exports = {
                 }, {
                     id: 'frequency',
                     label: this._('Update frequency'),
-                    widget: 'select-input',
+                    widget: 'frequency-field',
+                    frequency_date_id: 'frequency_date',
                     values: frequencies.items.map(function(item) {
                         return {value: item.id, text: item.label};
                     })

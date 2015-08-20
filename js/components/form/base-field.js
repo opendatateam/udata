@@ -29,6 +29,7 @@ export default {
         'time-picker': require('components/form/time-picker.vue'),
         'date-picker': require('components/form/date-picker.vue'),
         'daterange-picker': require('components/form/daterange-picker.vue'),
+        'frequency-field': require('components/form/frequency-field.vue'),
         'checksum': require('components/form/checksum.vue'),
         'checkbox': require('components/form/checkbox.vue')
     },
