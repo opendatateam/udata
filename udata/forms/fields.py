@@ -78,7 +78,7 @@ class IntegerField(FieldHelper, fields.IntegerField):
     pass
 
 
-class DateTimeField(Field):
+class DateTimeField(Field, fields.DateTimeField):
 
     def process_formdata(self, valuelist):
         if valuelist:

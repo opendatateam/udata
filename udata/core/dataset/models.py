@@ -164,6 +164,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
                                  reverse_delete_rule=db.NULLIFY)
 
     frequency = db.StringField(choices=UPDATE_FREQUENCIES.keys())
+    frequency_date = db.DateTimeField(verbose_name=_('Future date of update'))
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
     spatial = db.EmbeddedDocumentField(SpatialCoverage)
 

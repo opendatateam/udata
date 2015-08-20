@@ -106,6 +106,9 @@ dataset_fields = api.model('Dataset', {
     'frequency': fields.String(
         description='The update frequency', required=True,
         enum=UPDATE_FREQUENCIES.keys(), default=DEFAULT_FREQUENCY),
+    'frequency_date': fields.ISODateTime(
+        description=('Next expected update date, you will be notified '
+                     'once that date is reached.')),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
     'metrics': fields.Raw(description='The dataset metrics'),
     'organization': fields.Nested(
