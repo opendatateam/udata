@@ -20,7 +20,6 @@ var Vue = require('vue'),
 
 // Ensure retrocompatibily for 0.12.2 replace behavior
 Vue.options.replace = false;
-Vue.config.strict = true;
 Vue.config.debug = config.debug;
 
 Vue.use(require('plugins/util'));
