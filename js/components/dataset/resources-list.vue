@@ -159,6 +159,13 @@ module.exports = {
             this.dataset.resources.unshift(response);
         }
     },
+    ready: function() {
+        /* In case of a new resource, we display the appropriated popin
+           on load. */
+        if ("new_resource" in this.$router.parameters) {
+            this.on_new();
+        }
+    },
     methods: {
         on_new: function() {
             this.$root.$modal(
@@ -172,11 +179,11 @@ module.exports = {
             this.reordering = true;
             this._initial_order = this.$sortable.toArray();
         },
-        reorder_done: function(apply) {
+        reorder_done: function(toReorder) {
             this.$sortable.option('disabled', true);
             this.reordering = false;
             this.$dnd.setupExtraDropzone(this.$el);
-            if (apply) {
+            if (toReorder) {
                 this.dataset.reorder(this.$sortable.toArray());
             } else {
                 this.$sortable.sort(this._initial_order);
@@ -203,6 +210,19 @@ module.exports = {
         'dataset.id': function(id) {
             if (id) {
                 this.upload_endpoint = endpoint.urlify({dataset: id});
+            }
+        },
+        "dataset.resources": function(resources) {
+            /* If a `resource_id` is in the GET parameters we display the popin
+               with the appropriated resource loaded. */
+            if ("resource_id" in this.$router.parameters) {
+                let resourceId = this.$router.parameters.resource_id;
+                for (let resource of resources) {
+                    if (resource.id === resourceId) {
+                        this.display(resource);
+                        break;
+                    }
+                }
             }
         }
     }
