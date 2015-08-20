@@ -3,8 +3,8 @@
         <small-box class="col-lg-3 col-xs-6" v-repeat="boxes"></small-box>
     </div>
     <div class="row">
-        <org-profile org="{{org}}" class="col-md-6"></org-profile>
-        <org-members org="{{org}}" class="col-md-6"></org-members>
+        <org-profile org="{{org}}" class="col-xs-12 col-md-6"></org-profile>
+        <org-members org="{{org}}" class="col-xs-12 col-md-6"></org-members>
     </div>
 
     <div class="row">
@@ -17,21 +17,21 @@
     </div>
 
     <div class="row">
-        <datasets-widget id="datasets-widget" class="col-md-12" datasets="{{datasets}}"
+        <datasets-widget id="datasets-widget" class="col-xs-12" datasets="{{datasets}}"
          downloads="{{downloads}}">
         </datasets-widget>
     </div>
 
     <div class="row">
-        <reuses-widget id="reuses-widget" class="col-md-12" reuses="{{reuses}}"></reuses-widget>
+        <reuses-widget id="reuses-widget" class="col-xs-12" reuses="{{reuses}}"></reuses-widget>
     </div>
 
     <div class="row">
-        <issues id="issues-widget" class="col-md-12" issues="{{issues}}"></issues>
+        <issues id="issues-widget" class="col-xs-12" issues="{{issues}}"></issues>
     </div>
 
     <div class="row">
-        <discussions id="discussions-widget" class="col-md-12" discussions="{{discussions}}"></discussions>
+        <discussions id="discussions-widget" class="col-xs-12" discussions="{{discussions}}"></discussions>
     </div>
 
     <div class="row">

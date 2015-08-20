@@ -1,7 +1,7 @@
 <template>
     <div class="row">
-        <user-profile user="{{$root.me}}" class="col-md-6"></user-profile>
-        <chart title="Traffic" metrics="{{metrics}}" class="col-md-6"
+        <user-profile user="{{$root.me}}" class="col-xs-12 col-md-6"></user-profile>
+        <chart title="Traffic" metrics="{{metrics}}" class="col-xs-12 col-md-6"
             x="date" y="{{y}}"></chart>
     </div>
 

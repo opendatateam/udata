@@ -3,27 +3,27 @@
         <small-box class="col-lg-3 col-xs-6" v-repeat="boxes"></small-box>
     </div>
     <div class="row">
-        <chart title="Traffic" metrics="{{metrics}}" class="col-md-12"
+        <chart title="Traffic" metrics="{{metrics}}" class="col-xs-12"
             x="date" y="{{y}}"></chart>
     </div>
 
     <div class="row">
-        <datasets-widget id="datasets-widget" class="col-md-12" datasets="{{datasets}}"></datasets-widget>
+        <datasets-widget id="datasets-widget" class="col-xs-12" datasets="{{datasets}}"></datasets-widget>
     </div>
     <div class="row">
-        <reuses-widget id="reuses-widget" class="col-md-12" reuses="{{reuses}}"></reuses-widget>
+        <reuses-widget id="reuses-widget" class="col-xs-12" reuses="{{reuses}}"></reuses-widget>
     </div>
     <div class="row">
-        <organizations-widget id="organizations-widget" class="col-md-12" organizations="{{organizations}}"></organizations-widget>
+        <organizations-widget id="organizations-widget" class="col-xs-12" organizations="{{organizations}}"></organizations-widget>
     </div>
     <div class="row">
-        <users-widget id="users-widget" class="col-md-12" users="{{users}}"></users-widget>
+        <users-widget id="users-widget" class="col-xs-12" users="{{users}}"></users-widget>
     </div>
     <div class="row">
-        <issues-widget id="issues-widget" class="col-md-12" issues="{{issues}}"></issues-widget>
+        <issues-widget id="issues-widget" class="col-xs-12" issues="{{issues}}"></issues-widget>
     </div>
     <div class="row">
-        <discussions-widget id="discussions-widget" class="col-md-12" discussions="{{discussions}}"></discussions-widget>
+        <discussions-widget id="discussions-widget" class="col-xs-12" discussions="{{discussions}}"></discussions-widget>
     </div>
 </template>
 

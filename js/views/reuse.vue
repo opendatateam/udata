@@ -3,21 +3,21 @@
         <small-box class="col-lg-4 col-xs-6" v-repeat="boxes"></small-box>
     </div>
     <div class="row">
-        <reuse-details reuse="{{reuse}}" class="col-md-6"></reuse-details>
-        <datasets-list datasets="{{reuse.datasets}}" class="col-md-6"></datasets-list>
+        <reuse-details reuse="{{reuse}}" class="col-xs-12 col-md-6"></reuse-details>
+        <datasets-list datasets="{{reuse.datasets}}" class="col-xs-12 col-md-6"></datasets-list>
     </div>
 
     <div class="row">
-        <chart title="Traffic" metrics="{{metrics}}" class="col-md-12"
+        <chart title="Traffic" metrics="{{metrics}}" class="col-xs-12"
             x="date" y="{{y}}"></chart>
     </div>
 
     <div class="row">
-        <issues id="issues-widget" class="col-md-12" issues="{{issues}}"></issues>
+        <issues id="issues-widget" class="col-xs-12" issues="{{issues}}"></issues>
     </div>
 
     <div class="row">
-        <discussions id="discussions-widget" class="col-md-12" discussions="{{discussions}}"></discussions>
+        <discussions id="discussions-widget" class="col-xs-12" discussions="{{discussions}}"></discussions>
     </div>
 
     <div class="row">

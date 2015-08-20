@@ -3,9 +3,9 @@
         <small-box class="col-lg-4 col-xs-6" v-repeat="boxes"></small-box>
     </div>
     <div class="row">
-        <dataset-details dataset="{{dataset}}" class="col-md-6"></dataset-details>
+        <dataset-details dataset="{{dataset}}" class="col-xs-12 col-md-6"></dataset-details>
         <map-widget title="{{ _('Spatial coverage') }}"
-            geojson="{{geojson}}" class="col-md-6"></map-widget>
+            geojson="{{geojson}}" class="col-xs-12 col-md-6"></map-widget>
     </div>
     <div class="row">
         <resources-list dataset="{{dataset}}" class="col-xs-12"></resources-list>
@@ -20,15 +20,15 @@
     </div>
 
     <div class="row">
-        <issues-widget id="issues-widget" class="col-md-12" issues="{{issues}}"></issues-widget>
+        <issues-widget id="issues-widget" class="col-xs-12" issues="{{issues}}"></issues-widget>
     </div>
 
     <div class="row">
-        <discussions id="discussions-widget" class="col-md-12" discussions="{{discussions}}"></discussions>
+        <discussions id="discussions-widget" class="col-xs-12" discussions="{{discussions}}"></discussions>
     </div>
 
     <div class="row">
-        <followers-widget id="followers-widget" class="col-md-6" followers="{{followers}}"></followers-widget>
+        <followers-widget id="followers-widget" class="col-xs-12 col-md-6" followers="{{followers}}"></followers-widget>
     </div>
 
 </template>

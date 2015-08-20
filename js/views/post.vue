@@ -1,10 +1,10 @@
 <template>
     <div class="row">
-        <post-content post="{{post}}" class="col-md-12"></post-details>
+        <post-content post="{{post}}" class="col-xs-12"></post-details>
     </div>
     <div class="row">
-        <datasets-list datasets="{{post.datasets}}" class="col-md-6"></datasets-list>
-        <reuses-list reuses="{{post.reuses}}" class="col-md-6"></reuses-list>
+        <datasets-list datasets="{{post.datasets}}" class="col-xs-12 col-md-6"></datasets-list>
+        <reuses-list reuses="{{post.reuses}}" class="col-xs-12 col-md-6"></reuses-list>
     </div>
 </template>
 

@@ -4,7 +4,7 @@
     </div>
 
     <div class="row">
-        <chart title="{{ _('Data')}}" metrics="{{metrics}}" class="col-md-12"
+        <chart title="{{ _('Data')}}" metrics="{{metrics}}" class="col-xs-12"
             x="date" y="{{y}}"></chart>
     </div>
 </template>

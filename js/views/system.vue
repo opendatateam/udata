@@ -1,8 +1,8 @@
 <template>
     <div class="row">
-        <harvesters-widget class="col-md-6"></harvesters-widget>
-        <jobs-widget class="col-md-6"></jobs-widget>
-        <oauth-widget class="col-md-6" />
+        <harvesters-widget class="col-xs-12 col-md-6"></harvesters-widget>
+        <jobs-widget class="col-xs-12 col-md-6"></jobs-widget>
+        <oauth-widget class="col-xs-12 col-md-6" />
     </div>
 </template>
 
