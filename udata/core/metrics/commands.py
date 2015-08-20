@@ -71,16 +71,3 @@ def update(site=False, organizations=False, users=False, datasets=False,
         print 'Update user metrics'
         for user in User.objects.timeout(False):
             update_metrics_for(user)
-
-
-@m.option(
-    '-s', '--since', dest='since', default=None,
-    help='Aggregate data since the given month (YYYY-MM)')
-@m.option(
-    '-m', '--model', dest='models', action='append', default=[],
-    help='Only process given models')
-def monthly(since, models):
-    '''Aggregate metrics monthly'''
-    for model, metrics in iter_catalog(*models):
-        for start, end in iter_months(since):
-            pass

@@ -85,8 +85,10 @@ class Defaults(object):
 
     MD_ALLOWED_STYLES = []
 
-    # Cache duration dor template in minutes
-    TEMPLATE_CACHE_DURATION = 5
+    # Cache duration for templates.
+    TEMPLATE_CACHE_DURATION = 5  # Minutes.
+
+    DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
     # CROQUEMORT = {
     #     'url': 'http://localhost:8000',
