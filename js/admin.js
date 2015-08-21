@@ -31,7 +31,7 @@ Vue.use(require('plugins/scroll-to'));
 Vue.use(require('plugins/router'), {prefix: config.root});
 
 $(require('api')).on('built', function() {
-    var app = new Vue(require('app.vue'));
+    var app = new Vue(require('admin.vue'));
     app.$mount('#app');
 });
 

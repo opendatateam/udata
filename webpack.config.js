@@ -15,7 +15,7 @@ var languages = ['en', 'es', 'fr'];
 
 module.exports = {
     entry: {
-        admin: "./js-admin/main.js",
+        admin: "./js/admin.js",
         site: './js/site.js',
         home: './js/home.js',
         search: './js/search.js',
