@@ -4,7 +4,7 @@
 define(['jquery', 'i18next-client', 'moment'], function($, i18next, moment) {
     // Fetch the language once from the html lang attribute
     var lang = $('html').attr('lang'),
-        resource = require('locales/udata.' + lang + '.json'),
+        resource = require('js/locales/udata.' + lang + '.json'),
         store = {};
 
     store[lang] = {

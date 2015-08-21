@@ -7,12 +7,15 @@ var vendor_path = path.join(__dirname, 'js', 'vendor');
 
 var vue = require('vue-loader'),
     css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap'),
-    less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline');
+    less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline'),
+    html_loader = 'html?collapseBooleanAttributes=false&collapseWhitespace=false"',
+    js_loader = 'babel';
 
 var languages = ['en', 'es', 'fr'];
 
 module.exports = {
     entry: {
+        admin: "./js-admin/main.js",
         site: './js/site.js',
         home: './js/home.js',
         search: './js/search.js',
@@ -49,6 +52,7 @@ module.exports = {
         root: [
             __dirname,
             path.join(__dirname, 'js'),
+            path.join(__dirname, 'js-admin'),
         ],
         alias: {
             'jquery-slimscroll': path.join(node_path, 'jquery-slimscroll/jquery.slimscroll'),
@@ -62,17 +66,29 @@ module.exports = {
             'jquery': require.resolve('jquery')
         }
     },
-    devtools: 'eval-source-map',
+    devtool: 'eval-source-map',
     module: {
         loaders: [
             {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file'},
             {test: /\.css$/, loader: css_loader},
             {test: /\.less$/, loader: less_loader},
-            {test: /\.vue$/, loader: vue.withLoaders({css: css_loader, less: less_loader})},
+            {test: /\.vue$/, loader: vue.withLoaders({
+                html: html_loader,
+                css: css_loader,
+                less: less_loader,
+                js: js_loader
+            })},
             {test: /\.json$/, loader: "json"},
             {test: /\.hbs$/, loader: 'handlebars?debug=true&helperDirs[]=' + path.join(__dirname, 'js', 'templates', 'helpers')},
-            {test: /\.html$/, loader: 'html'},
+            {test: /\.html$/, loader: html_loader},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, loader: "file-loader?name=[name].[ext]"},
+            {test: /\.js$/, loader: js_loader,
+                include: [
+                    path.resolve(__dirname, 'js'),
+                    path.resolve(__dirname, 'specs'),
+                ],
+                exclude: path.resolve(__dirname, 'specs', 'loader.js')
+            },
         ]
     },
     plugins: [

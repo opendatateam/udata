@@ -4,10 +4,16 @@ var webpack = require("webpack"),
 config.plugins.push(new webpack.optimize.UglifyJsPlugin({
     minimize: true,
     output: {comments: false},
+    mangle: false,
     compress: {
         warnings: false
     }
 }));
+
+config.devtool = 'source-map';
+
+config.plugins.push(new webpack.optimize.DedupePlugin());
+config.plugins.push(new webpack.optimize.OccurenceOrderPlugin(true));
 
 /**
  * Image optimization.

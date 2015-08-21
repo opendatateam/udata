@@ -8,7 +8,7 @@ export let lang = config.lang;
 let resources = {};
 
 resources[lang] = {};
-resources[lang][NAMESPACE] = require('locales/' + NAMESPACE + '.' + lang + '.json');
+resources[lang][NAMESPACE] = require('js-admin/locales/' + NAMESPACE + '.' + lang + '.json');
 
 moment.locale(lang);
 i18next.init({
