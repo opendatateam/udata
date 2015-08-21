@@ -5,7 +5,7 @@ define([
     'jquery',
     'auth',
     'i18n',
-    'api',
+    'api.light',
     'notify',
     'widgets/modal',
     'templates/issues/details.hbs',

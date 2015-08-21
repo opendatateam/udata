@@ -6,7 +6,7 @@ define([
     'logger',
     'auth',
     'i18n',
-    'api',
+    'api.light',
     'notify',
     'widgets/modal',
     'templates/organization/request-membership-modal.hbs',

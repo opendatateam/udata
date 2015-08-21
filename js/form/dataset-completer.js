@@ -3,7 +3,7 @@
  */
 define([
     'jquery',
-    'api',
+    'api.light',
     'templates/dataset/dropdown-item.hbs',
     'templates/dataset/card.hbs',
     'form/widgets'

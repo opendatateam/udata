@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'api',
+    'api.light',
     'logger',
     'moment',
     'chart/bar',

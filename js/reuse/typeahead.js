@@ -3,7 +3,7 @@
  */
 define([
     'jquery',
-    'api',
+    'api.light',
     'bloodhound',
     'templates/search/header.hbs',
     'templates/search/suggestion.hbs',

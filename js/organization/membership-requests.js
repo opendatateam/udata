@@ -3,7 +3,7 @@
  */
 define([
     'jquery',
-    'api',
+    'api.light',
     'i18n',
     'notify',
     'auth',
