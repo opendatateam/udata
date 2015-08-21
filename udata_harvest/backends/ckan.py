@@ -100,6 +100,7 @@ schema = Schema({
 @register
 class CkanBackend(BaseBackend):
     name = 'ckan'
+    display_name = 'CKAN'
 
     def get_headers(self):
         headers = super(CkanBackend, self).get_headers()

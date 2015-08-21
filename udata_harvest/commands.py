@@ -29,7 +29,7 @@ def create(name, url, backend, frequency=None, owner=None, org=None):
     source = actions.create_source(name, url, backend,
                                    frequency=frequency,
                                    owner=owner,
-                                   org=org)
+                                   organization=org)
     log.info('''Created a new Harvest source:
     name: {0.name},
     slug: {0.slug},
@@ -38,6 +38,13 @@ def create(name, url, backend, frequency=None, owner=None, org=None):
     frequency: {0.frequency},
     owner: {0.owner},
     organization: {0.organization}'''.format(source))
+
+
+@m.option('identifier')
+def validate(identifier):
+    '''Validate a source given its identifier'''
+    source = actions.validate_source(identifier)
+    log.info('Source %s (%s) has been validated', source.slug, str(source.id))
 
 
 @m.command
@@ -69,8 +76,8 @@ def sources(scheduled=False):
 def backends():
     '''List available backends'''
     log.info('Available backends:')
-    for name in actions.list_backends():
-        log.info(name)
+    for backend in actions.list_backends():
+        log.info('%s (%s)', backend.name, backend.display_name or backend.name)
 
 
 @m.command
@@ -111,3 +118,11 @@ def unschedule(identifier):
     '''Run an harvester synchronously'''
     source = actions.unschedule(identifier)
     log.info('Unscheduled harvest source "%s"', source.name)
+
+
+@m.command
+def purge():
+    '''Permanently remove deleted harvest sources'''
+    log.info('Purging deleted harvest sources')
+    count = actions.purge_sources()
+    log.info('Purged %s source(s)', count)

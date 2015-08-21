@@ -76,6 +76,10 @@ class HarvestSource(db.Document):
                                default=DEFAULT_HARVEST_FREQUENCY,
                                required=True)
     active = db.BooleanField(default=True)
+    validated = db.BooleanField(default=False)
+    validation_comment = db.StringField()
+
+    deleted = db.DateTimeField()
 
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
     organization = db.ReferenceField('Organization',

@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 
+from datetime import datetime
+
 from udata.models import User, Organization, PeriodicTask
 
 from . import backends, signals
@@ -14,7 +16,7 @@ log = logging.getLogger(__name__)
 
 def list_backends():
     '''List all available backends'''
-    return backends.get_all().keys()
+    return backends.get_all().values()
 
 
 def list_sources():
@@ -32,45 +34,82 @@ def get_job(ident):
     return HarvestJob.objects.get(id=ident)
 
 
-def create_source(name, url, backend, frequency=DEFAULT_HARVEST_FREQUENCY, owner=None, org=None):
+def create_source(name, url, backend,
+                  description=None,
+                  frequency=DEFAULT_HARVEST_FREQUENCY,
+                  owner=None,
+                  organization=None):
     '''Create a new harvest source'''
     if owner and not isinstance(owner, User):
         owner = User.get(owner)
 
-    if org and not isinstance(org, Organization):
-        org = Organization.get(org)
+    if organization and not isinstance(organization, Organization):
+        organization = Organization.get(organization)
 
     source = HarvestSource.objects.create(
         name=name,
         url=url,
         backend=backend,
+        description=description,
         frequency=frequency or DEFAULT_HARVEST_FREQUENCY,
         owner=owner,
-        organization=org
+        organization=organization
     )
     signals.harvest_source_created.send(source)
+    return source
+
+
+def validate_source(ident, comment=None):
+    '''Validate a source for automatic harvesting'''
+    source = get_source(ident)
+    source.validated = True
+    source.validation_comment = comment
+    source.save()
+    return source
+
+
+def reject_source(ident, comment):
+    '''Reject a source for automatic harvesting'''
+    source = get_source(ident)
+    source.validated = False
+    source.validation_comment = comment
+    source.save()
     return source
 
 
 def delete_source(ident):
     '''Delete an harvest source'''
     source = get_source(ident)
-    source.delete()
+    source.deleted = datetime.now()
+    source.save()
     signals.harvest_source_deleted.send(source)
-    # return source
+    return source
 
 
-def run(ident, debug=False):
+def purge_sources():
+    '''Permanently remove sources flagged as deleted'''
+    return HarvestSource.objects(deleted__exists=True).delete()
+
+
+def run(ident):
     '''Launch or resume an harvesting for a given source if none is running'''
     source = get_source(ident)
     cls = backends.get(source.backend)
-    backend = cls(source, debug=debug)
+    backend = cls(source)
     backend.harvest()
 
 
-def launch(ident, debug=False):
+def launch(ident):
     '''Launch or resume an harvesting for a given source if none is running'''
     return harvest.delay(ident)
+
+
+def preview(ident):
+    '''Launch or resume an harvesting for a given source if none is running'''
+    source = get_source(ident)
+    cls = backends.get(source.backend)
+    backend = cls(source, dryrun=True)
+    return backend.harvest()
 
 
 def schedule(ident, minute='*', hour='*', day_of_week='*', day_of_month='*', month_of_year='*'):
