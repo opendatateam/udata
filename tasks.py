@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+import codecs
 import itertools
 import json
 import os
@@ -50,6 +51,12 @@ def cover():
 
 
 @task
+def karma():
+    '''Continuous Karma test'''
+    lrun('karma start --browsers=PhantomJS', pty=True)
+
+
+@task
 def doc():
     '''Build the documentation'''
     header('Building documentation')
@@ -63,9 +70,10 @@ def qa():
     info('Python static analysis')
     flake8_results = lrun('flake8 udata', warn=True)
     info('JavaScript static analysis')
-    jshint_results = nrun('jshint js', warn=True)
+    jshint_results = nrun('jshint js --extra-ext=.vue --extract=auto', warn=True)
     if flake8_results.failed or jshint_results.failed:
         exit(flake8_results.return_code or jshint_results.return_code)
+    print(green('OK'))
 
 
 @task
@@ -100,7 +108,7 @@ def i18n():
     catalog_filename = join(ROOT, 'js', 'locales',
                             '{}.en.json'.format(I18N_DOMAIN))
     if exists(catalog_filename):
-        with open(catalog_filename) as f:
+        with codecs.open(catalog_filename, encoding='utf8') as f:
             catalog = json.load(f)
 
     globs = '*.js', '*.vue', '*.hbs'
@@ -124,8 +132,9 @@ def i18n():
                     if key not in catalog:
                         catalog[key] = key
 
-    with open(catalog_filename, 'wb') as f:
-        json.dump(catalog, f, sort_keys=True, indent=4, ensure_ascii=False)
+    with codecs.open(catalog_filename, 'w', encoding='utf8') as f:
+        json.dump(catalog, f, sort_keys=True, indent=4, ensure_ascii=False,
+                  encoding='utf8', separators=(',', ': '))
 
 
 @task

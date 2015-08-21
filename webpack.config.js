@@ -52,7 +52,6 @@ module.exports = {
         root: [
             __dirname,
             path.join(__dirname, 'js'),
-            path.join(__dirname, 'js-admin'),
         ],
         alias: {
             'jquery-slimscroll': path.join(node_path, 'jquery-slimscroll/jquery.slimscroll'),
