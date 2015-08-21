@@ -96,7 +96,7 @@ define([
                     } else {
                         eventName = 'RESOURCE_REDIRECT';
                     }
-                    pubsub.publish(eventName);
+                    pubsub.pubsub.publish(eventName);
                 });
             });
 
