@@ -1,0 +1,58 @@
+{
+    "help": "Return the metadata of a dataset (package) and its resources.\\\n\\\n    :param id: the id or name of the dataset\\\n    :type id: string\\\n    :param use_default_schema: use default package schema instead of\\\n        a custom schema defined with an IDatasetForm plugin (default: False)\\\n    :type use_default_schema: bool\\\n\\\n    :rtype: dictionary\\\n\\\n    ",
+    "success": true,
+    "result": {
+        "license_title": "License not specified",
+        "maintainer": "",
+        "relationships_as_object": [],
+        "private": false,
+        "maintainer_email": "",
+        "revision_timestamp": "2015-06-12T14:07:44.895581",
+        "id": "accc72af-077d-40d8-b280-9112a5d5cf4d",
+        "metadata_created": "2015-06-12T14:03:27.746864",
+        "metadata_modified": "2015-06-12T14:07:44.896656",
+        "author": "Jerome Herneaux",
+        "author_email": "",
+        "state": "active",
+        "version": "",
+        "creator_user_id": null,
+        "type": "dataset",
+        "resources": [],
+        "num_resources": 0,
+        "tags": [
+            {
+                "vocabulary_id": null,
+                "display_name": "intermittent du spectacle",
+                "name": "intermittent du spectacle",
+                "revision_timestamp": "2015-06-12T14:03:27.746864",
+                "state": "active",
+                "id": "e2ba214c-3c9c-41a2-8663-2187685496c0"
+            },
+            {
+                "vocabulary_id": null,
+                "display_name": "économie",
+                "name": "économie",
+                "revision_timestamp": "2015-06-12T14:03:27.746864",
+                "state": "active",
+                "id": "0816b930-df41-4a17-ad2e-5ac5ddcf600d"
+            }
+        ],
+        "tracking_summary": {
+            "total": 0,
+            "recent": 0
+        },
+        "groups": [],
+        "license_id": "notspecified",
+        "relationships_as_subject": [],
+        "num_tags": 2,
+        "organization": null,
+        "name": "dataset-3",
+        "isopen": false,
+        "url": "http://www.mescachets.com/",
+        "notes": "Outil pour calculer le rémunération d'un intermittent du spectacle ainsi que les indemnités chômage",
+        "owner_org": null,
+        "extras": [],
+        "title": "Dataset 3",
+        "revision_id": "9d6cb6ab-32c4-42a0-b990-291cadfcd7a6"
+    }
+}
