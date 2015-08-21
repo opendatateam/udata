@@ -7,7 +7,7 @@
 
 {% block main_content %}
 <div class="page-header">
-    <a href="{{ url_for('datasets.edit', slug=dataset.slug) }}" class="btn btn-primary pull-right">
+    <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}" class="btn btn-primary pull-right">
         <span class="glyphicon glyphicon-plus-sign"></span>
         {{ _('Edit') }}
     </a>

@@ -38,14 +38,14 @@
     {% if resource.owner and can_edit_resource(resource) %}
     <div class="btn-group btn-group-xs tools">
         <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
-            href="{{ url_for('datasets.edit_community_resource', dataset=dataset, resource=resource.id) }}">
+            href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'resource_id': resource.id}) }}">
             <span class="glyphicon glyphicon-edit"></span>
         </a>
     </div>
     {% elif not resource.owner and can_edit %}
     <div class="btn-group btn-group-xs tools">
         <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
-            href="{{ url_for('datasets.edit_resource', dataset=dataset, resource=resource.id) }}">
+            href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'resource_id': resource.id}) }}">
             <span class="glyphicon glyphicon-edit"></span>
         </a>
     </div>
