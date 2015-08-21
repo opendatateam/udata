@@ -1,34 +1,100 @@
 /**
  * Pubsub for tracking events.
+ *
+ * Source: http://davidwalsh.name/pubsub-javascript
  */
-define([], function() {
-    // Source: http://davidwalsh.name/pubsub-javascript
-    var topics = {};
-    var hOP = topics.hasOwnProperty;
+export class PubSub {
+    constructor() {
+        this.topics = {};
+    }
 
-    return {
-        subscribe: function(topic, listener) {
-            // Create the topic's object if not yet created
-            if(!hOP.call(topics, topic)) topics[topic] = [];
+    /**
+     * Check if topic exists
+     * @param  {String}  topic The topic name
+     * @return {Boolean}       True if the topic exists
+     */
+    has(topic) {
+        return this.topics.hasOwnProperty(topic);
+    }
 
-            // Add the listener to queue
-            var index = topics[topic].push(listener) -1;
-
-            // Provide handle back for removal of topic
-            return {
-                remove: function() {
-                    delete topics[topic][index];
-                }
-            };
-        },
-        publish: function(topic, info) {
-            // If the topic doesn't exist, or there's no listeners in queue, just leave
-            if(!hOP.call(topics, topic)) return;
-
-            // Cycle through topics queue, fire!
-            topics[topic].forEach(function(item) {
-                item(info !== undefined ? info : {});
-            });
+    /**
+     * Subscribe to a given topic
+     * @param  {String}   topic    The topic identifier to subscribe to
+     * @param  {Function} listener The callback executed on topic publication
+     * @return {Object}            A subscription handle with a single remove method.
+     */
+    subscribe(topic, listener) {
+        // // Create the topic's object if not yet created
+        if (!this.has(topic)) {
+            this.topics[topic] = [];
         }
-    };
-});
+
+        // Add the listener to queue
+        var index = this.topics[topic].push(listener) -1;
+
+        // Provide handle back for removal of topic
+        return {
+            remove: () => {
+                delete this.topics[topic][index];
+            }
+        };
+    }
+
+    /**
+     * Unsubscribe to a given topic
+     * @param  {String}   topic    The topic identifier to unsubscribe to
+     * @param  {Function} listener The callback to unregister
+     */
+    unsubscribe(topic, listener) {
+        if (!this.has(topic)) return;
+
+        this.topics[topic].some((handler, index) => {
+            if (handler === listener) {
+                delete this.topics[topic][index];
+                return true;
+            }
+        });
+    }
+
+    /**
+     * Subscribe once to a given topic
+     * @param  {String}   topic    The topic identifier to subscribe to
+     * @param  {Function} listener The callback executed on topic publication
+     */
+    once(topic, listener) {
+        let subscription;
+        subscription = this.subscribe(topic, () => {
+            subscription.remove();
+            listener.apply(this, arguments);
+        });
+    }
+
+    /**
+     * Publish some data on a topic
+     * @param  {String}    topic The topic identifier
+     * @param  {...[type]} args  A vriable list of arguments to pass to the listeners
+     */
+    publish(topic, ...args) {
+        // If the topic doesn't exist, or there's no listeners in queue, just leave
+        if(!this.has(topic)) return;
+
+        // Cycle through topics queue, fire!
+        this.topics[topic].forEach(function(handler) {
+            handler(...args);
+        });
+    }
+
+    /**
+     * Remove a topic (and all its listeners)
+     * @param  {String} topic The topic identifier to remove
+     */
+    remove(topic) {
+        if (this.has(topic)) {
+            delete this.topics[topic];
+        }
+    }
+};
+
+export var pubsub = new PubSub();
+
+export default pubsub;

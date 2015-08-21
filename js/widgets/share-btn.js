@@ -25,7 +25,7 @@ define([
         }).on('shown.bs.popover', function() {
             $(document.body).find('.share-click').each(function() {
                 $(this).on('click', function(e) {
-                    pubsub.publish('SHARE');
+                    pubsub.pubsub.publish('SHARE');
                 });
             });
         });
