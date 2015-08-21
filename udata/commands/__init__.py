@@ -53,6 +53,7 @@ def register_commands(manager):
     import udata.core.jobs.commands
     import udata.core.badges.commands
     import udata.api.commands
+    import udata.harvest.commands
 
     # Dynamic module commands loading
     for plugin in manager.app.config['PLUGINS']:

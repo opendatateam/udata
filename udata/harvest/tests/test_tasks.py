@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 
 class HarvestActionsTest(DBTestMixin, TestCase):
-    @patch('udata_harvest.actions.purge_sources')
+    @patch('udata.harvest.actions.purge_sources')
     def test_purge(self, mock):
         '''It should purge from DB sources flagged as deleted'''
         purge_harvest_sources()

@@ -8,7 +8,6 @@ from flask import url_for
 from .. import actions
 
 from udata.models import Member
-from udata.settings import Testing
 from udata.tests.api import APITestCase
 from udata.tests.factories import faker, OrganizationFactory, AdminFactory
 
@@ -21,14 +20,7 @@ from .factories import (
 log = logging.getLogger(__name__)
 
 
-class HarvestSettings(Testing):
-    TEST_WITH_PLUGINS = True
-    PLUGINS = ['harvest']
-
-
 class HarvestAPITest(APITestCase):
-    settings = HarvestSettings
-
     def test_list_backends(self):
         '''It should fetch the harvest backends list from the API'''
         response = self.get(url_for('api.harvest_backends'))

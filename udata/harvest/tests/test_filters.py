@@ -7,7 +7,7 @@ from unittest import TestCase
 
 from voluptuous import Invalid
 
-from udata.ext.harvest import filters
+from udata.harvest import filters
 
 log = logging.getLogger(__name__)
 
