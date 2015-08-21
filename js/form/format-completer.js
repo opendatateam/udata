@@ -1,7 +1,7 @@
 /**
  * File format autocompleter widget
  */
-define(['jquery', 'api', 'form/widgets'], function($, API) {
+define(['jquery', 'api.light', 'form/widgets'], function($, API) {
     'use strict';
 
     $('.format-completer').each(function() {
