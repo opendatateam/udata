@@ -3,23 +3,27 @@
 
 <template>
 <datatable icon="cog"
-    title="Job {{job.id}}"
+    title="{{title}}"
     bodyclass="table-responsive no-padding"
     p="{{ p }}" track="false"
-    loading="{{job.loading}}"
+    loading="{{loading !== undefined ? loading : p.loading}}"
     fields="{{ fields }}"
     track="remote_id"
+    empty="{{ empty }}"
     tint="{{job.status | statusClass}}">
-    <header>
-        <dl class="dl-horizontal">
+    <header class="row">
+        <div class="col-xs-12" v-class="col-md-6: job.created, col-md-12: job.created">
+            <content></content>
+        </div>
+        <dl class="dl-horizontal col-xs-12 col-md-6" v-show="job.created">
             <dt>{{ _('Created at') }}</dt>
             <dd>{{ job.created | dt }}</dd>
             <dt>{{ _('Ended at') }}</dt>
             <dd>{{ job.ended | dt }}</dd>
             <dt>{{ _('Status') }}</dt>
             <dd><span class="label label-{{ job.status | statusClass }}">{{ job.status | statusI18n }}</span></dd>
-            <dt v-if="job.errors.length">{{ _('Errors') }}</dt>
-            <dd v-if="job.errors.length">
+            <dt v-if="job.errors && job.errors.length">{{ _('Errors') }}</dt>
+            <dd v-if="job.errors && job.errors.length">
                 <div v-repeat="error:job.errors">
                     <p><strong>{{{error.message | markdown}}}</strong></p>
                     <div v-if="error.details">
@@ -27,8 +31,8 @@
                     </div>
                 </div>
             </dd>
-            <dt v-if="job.items.length">{{ _('Items') }}</dt>
-            <dd v-if="job.items.length">
+            <dt v-if="job.items && job.items.length">{{ _('Items') }}</dt>
+            <dd v-if="job.items && job.items.length">
                 <span class="text-warning"
                     data-toggle="tooltip" data-placement="top"
                     title="{{ _('Number of skipped items') }}"
@@ -63,7 +67,7 @@ import $ from 'jquery';
 
 export default {
     name: 'JobDetails',
-    props: ['job'],
+    props: ['job', 'loading', 'empty'],
     components: {
         'datatable': require('components/datatable/widget.vue')
     },
@@ -91,6 +95,9 @@ export default {
         };
     },
     computed: {
+        title: function() {
+            return this.job.id ? ('Job ' + this.job.id) : 'Job';
+        },
         p: function() {
             return new PageList({data: this.job.items});
         }
@@ -108,6 +115,7 @@ export default {
             return JOB_STATUS_I18N[value];
         },
         count: function(value, status) {
+            if (!value) return '-';
             return value.filter(function(item) {
                 return item.status === status;
             }).length;

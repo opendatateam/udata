@@ -182,7 +182,7 @@ export class List extends Base {
 
         this.items = this.$options.data || [];
         this.query = this.$options.query || {};
-        this.loading = false;
+        this.loading = this.$options.loading || false;
 
         this.sorted = null;
         this.reversed = false;

@@ -17,7 +17,7 @@ export default {
                     label: this._('Nom')
                 }, {
                     id: 'description',
-                    label: this._('Description'),
+                    label: this._('Description')
                 }, {
                     id: 'url',
                     label: this._('URL'),

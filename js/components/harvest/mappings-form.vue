@@ -1,19 +1,17 @@
 <template>
 <form-vertical v-ref="form" fields="{{fields}}" model="{{source}}"></form-vertical>
-<div class="row">
-    <div class="clox-xs-12 text-center">
+<!--div class="row">
+    <div class="col-xs-12 text-center" v-class="col-md-6: preview_job">
         <button class="btn btn-primary" v-on="click: preview">
             <span class="fa fa-cog"></span>
             {{ _('Preview') }}
         </button>
     </div>
-</div>
-<div class="row" v-if="preview_job">
-    <job-widget
+    <job-widget v-if="preview_job"
         job="{{preview_job}}"
-        class="col-xs-12">
+        class="col-xs-12 col-md-6">
     </job-widget>
-</div>
+</div-->
 </template>
 
 <script>
@@ -44,11 +42,11 @@ export default {
             return this.$.form.validate();
         },
         preview: function() {
+            let job = new HarvestJob();
+            this.$set('preview_job', job);
             API.harvest.preview_harvest_source(
                 {ident: this.source.id},
-                (response) => {
-                    this.$set('preview_job', new HarvestJob({data: response.obj}));
-                }
+                job.on_fetched.bind(job)
             );
         }
     }
