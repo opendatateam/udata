@@ -22,6 +22,12 @@ log = logging.getLogger(__name__)
 requests.packages.urllib3.disable_warnings()
 
 
+MAPPABLE = (
+    'tags',
+    'license',
+)
+
+
 class BaseBackend(object):
     '''Base class for Harvester implementations'''
 
@@ -120,6 +126,8 @@ class BaseBackend(object):
                     dataset.organization = self.source.organization
                 elif self.source.owner:
                     dataset.owner = self.source.owner
+
+            # TODO: Apply editble mappings
 
             if self.dryrun:
                 dataset.validate()
