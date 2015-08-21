@@ -11,33 +11,12 @@ from udata.tests.factories import (
     DatasetFactory, ReuseFactory, OrganizationFactory
 )
 from udata.tests.factories import VisibleReuseFactory
-from udata.tests.frontend import FrontTestCase as BaseFrontTestCase
+from udata.tests.frontend import FrontTestCase
 from udata.settings import Testing
-from udata.i18n import I18nBlueprint
 
 from .views import DATACONNEXIONS_CATEGORIES
 
 from .metrics import PublicServicesMetric
-
-
-# Temporary fix to have the admin blueprint in context before we integrate
-# it directly within the udata core.
-admin = I18nBlueprint('admin', __name__)
-
-
-@admin.route('/admin/', defaults={'path': ''})
-@admin.route('/admin/<path:path>')
-def index(path):
-    pass
-
-
-class FrontTestCase(BaseFrontTestCase):
-
-    def create_app(self):
-        app = super(FrontTestCase, self).create_app()
-        app.register_blueprint(admin)
-        return app
-# End of fix, don't forget useless imports.
 
 
 class GouvFrSettings(Testing):
