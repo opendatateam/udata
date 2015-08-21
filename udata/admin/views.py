@@ -6,7 +6,7 @@ from udata.auth import login_required
 from udata.i18n import I18nBlueprint
 
 
-admin = I18nBlueprint('admin', __name__, template_folder='templates', static_folder='static')
+admin = I18nBlueprint('admin', __name__, url_prefix='/admin')
 
 
 @admin.route('/', defaults={'path': ''})
