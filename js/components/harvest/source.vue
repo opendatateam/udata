@@ -2,7 +2,8 @@
     <datatable title="{{source.name}}" icon="tasks"
         boxclass="harvest-jobs-widget"
         fields="{{ fields }}"
-        p="{{ jobs }}">
+        p="{{ jobs }}"
+        empty="{{ _('No job yet') }}">
         <header>
             {{ source.description | markdown }}
             <dl class="dl-horizontal">

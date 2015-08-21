@@ -13,7 +13,7 @@
     bodyclass="table-responsive no-padding"
     footerclass="text-center clearfix"
     footer="{{ show_footer }}"
-    loading="{{ p.loading }}">
+    loading="{{ loading === undefined ? p.loading : loading }}">
     <aside>
         <div class="btn-group" v-show="downloads && downloads.length">
             <button type="button" class="btn btn-box-tool dropdown-toggle"
@@ -71,7 +71,8 @@ export default {
             p: {},
             track: 'id',
             selected: null,
-            fields: []
+            fields: [],
+            loading: undefined
         };
     },
     computed: {
@@ -83,7 +84,18 @@ export default {
             return this.p.data && this.p.data.length;
         }
     },
-    props: ['p', 'title', 'icon', 'fields', 'boxclass', 'tint', 'downloads', 'empty', 'track'],
+    props: [
+        'p',
+        'title',
+        'icon',
+        'fields',
+        'boxclass',
+        'tint',
+        'downloads',
+        'empty',
+        'track',
+        'loading'
+    ],
     methods: {
         search: function() {
             this.p.search(this.search_query);

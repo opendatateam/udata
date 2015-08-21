@@ -120,15 +120,19 @@ module.exports = {
         go_next: function() {
             if (this.next_step) {
                 this.step_index++;
-                Vue.nextTick(this.init_step.bind(this));
-                this.$dispatch('wizard:step-changed');
+                Vue.nextTick(() => {
+                    this.$dispatch('wizard:step-changed');
+                    this.init_step();
+                });
             }
         },
         go_previous: function() {
             if (this.previous_step) {
                 this.step_index--;
-                Vue.nextTick(this.init_step.bind(this));
-                this.$dispatch('wizard:step-changed');
+                Vue.nextTick(() => {
+                    this.init_step();
+                    this.$dispatch('wizard:step-changed');
+                });
             }
         },
         init_step: function() {

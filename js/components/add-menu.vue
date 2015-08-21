@@ -46,6 +46,11 @@ module.exports = {
                     icon: 'fa-building',
                     route: '/organization/new/',
                     color: 'warning'
+                }, {
+                    label: this._('An harvester'),
+                    icon: 'fa-tasks',
+                    route: '/harvester/new/',
+                    color: 'navy'
                 }];
             if (this.$root.me.has_role('admin')) {
                 actions.push({

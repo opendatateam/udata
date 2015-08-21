@@ -12,7 +12,6 @@
             class="col-md-8">
         </job-widget>
     </div>
-    <div class="row"></div>
 </template>
 
 <script>
@@ -30,7 +29,16 @@ export default {
             current_item: null,
             meta: {
                 title: null,
-                subtitle: null
+                subtitle: null,
+                actions: [{
+                    label: this._('Edit'),
+                    icon: 'pencil',
+                    method: 'edit'
+                },{
+                    label: this._('Delete'),
+                    icon: 'trash',
+                    method: 'confirm_delete'
+                }]
             }
         };
     },
@@ -43,6 +51,17 @@ export default {
             this.$root.$modal(
                 {data: {item: item}},
                 Vue.extend(ItemModal)
+            );
+        }
+    },
+    methods: {
+        edit: function() {
+            this.$go('/harvester/' + this.source.id + '/edit');
+        },
+        confirm_delete: function() {
+            this.$root.$modal(
+                {data: {source: this.source}},
+                Vue.extend(require('components/harvest/delete-modal.vue'))
             );
         }
     },
