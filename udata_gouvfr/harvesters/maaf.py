@@ -18,8 +18,8 @@ from voluptuous import (
 from udata.models import (
     db, Dataset, License, Resource, Checksum, SpatialCoverage
 )
-from udata.ext.harvest import backends
-from udata.ext.harvest.filters import (
+from udata.harvest import backends
+from udata.harvest.filters import (
     boolean, email, to_date, taglist, force_list, normalize_string, is_url
 )
 from udata.utils import get_by
