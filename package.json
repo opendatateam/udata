@@ -95,7 +95,6 @@
     "tv4": "^1.1.12",
     "typeahead.js": "^0.11.1",
     "typeahead.js-bootstrap3.less": "hyspace/typeahead.js-bootstrap3.less#v0.2.3",
-    "vue": "0.12.10",
-    "x-editable": "noirbizarre/x-editable#1.5.1-nbz"
+    "vue": "0.12.10"
   }
 }
