@@ -1,4 +1,4 @@
-define(['jquery', 'api.light', 'events'], function($, API, ev) {
+define(['jquery', 'api', 'events'], function($, API, ev) {
     'use strict';
 
     var menu = new ev.EventEmitter();

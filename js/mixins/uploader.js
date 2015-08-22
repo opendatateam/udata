@@ -1,4 +1,4 @@
-define(['api.light', 'exports?qq!fineuploader'], function(API, qq) {
+define(['api', 'exports?qq!fineuploader'], function(API, qq) {
     'use strict';
 
     var HAS_FILE_API = window.File && window.FileReader && window.FileList && window.Blob,
