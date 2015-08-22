@@ -1,39 +1,37 @@
-define(['jquery', 'd3', 'class'], function($, d3, Class) {
+import $ from 'jquery';
+import d3 from 'd3';
 
-    var BaseChart = Class.extend({
-        init: function(el) {
-            this.$el = $(el);
-            this.el = this.$el[0];
-            this.$chart = this.$el.find('.chart');
-            this._build();
-        },
+export default class BaseChart {
+    constructor(el) {
+        this.$el = $(el);
+        this.el = this.$el[0];
+        this.$chart = this.$el.find('.chart');
+        this._build();
+    }
 
-        _build: function() {
-            this.$infobox = $('<div class="infobox"/>');
+    _build() {
+        this.$infobox = $('<div class="infobox"/>');
 
-            this.$infobox.append($('<span class="value" />'));
-            this.$infobox.append($('<span class="diff" />'));
-            this.$infobox.append($('<span class="label" />'));
+        this.$infobox.append($('<span class="value" />'));
+        this.$infobox.append($('<span class="diff" />'));
+        this.$infobox.append($('<span class="label" />'));
 
-            this.$chart.empty().append(this.$infobox);
+        this.$chart.empty().append(this.$infobox);
 
-            this.d3 = d3.select(this.$chart[0]);
-            this.svg = this.d3.append("svg:svg");
-        },
+        this.d3 = d3.select(this.$chart[0]);
+        this.svg = this.d3.append("svg:svg");
+    }
 
-        bbox: function() {
-            return this.$chart[0].getBoundingClientRect();
-        },
+    bbox() {
+        return this.$chart[0].getBoundingClientRect();
+    }
 
-        _setInfobox: function(value, diff, label, css) {
-            this.$infobox.find('span.value').html(value);
-            this.$infobox.find('span.diff').html(diff);
-            this.$infobox.find('span.label').html(label);
-            this.$infobox.css(css);
-            this.$infobox.addClass('selected');
-        }
-    });
+    _setInfobox(value, diff, label, css) {
+        this.$infobox.find('span.value').html(value);
+        this.$infobox.find('span.diff').html(diff);
+        this.$infobox.find('span.label').html(label);
+        this.$infobox.css(css);
+        this.$infobox.addClass('selected');
+    }
 
-    return BaseChart;
-
-});
+};
