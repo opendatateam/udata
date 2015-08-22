@@ -3,7 +3,7 @@
 /**
  * Styles
  */
-require('../less-admin/admin.less');
+require('../less/admin.less');
 
 
 // Ensure Babel/ES6 polyfills are loaded
