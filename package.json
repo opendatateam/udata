@@ -24,7 +24,7 @@
     "extract-text-webpack-plugin": "^0.8.2",
     "faker": "^3.0.1",
     "file-loader": "^0.8.4",
-    "handlebars-loader": "^1.0.2",
+    "handlebars-loader": "1.0.2",
     "html-loader": "^0.3.0",
     "image-webpack-loader": "^1.6.1",
     "imagemin": "^3.1.0",
