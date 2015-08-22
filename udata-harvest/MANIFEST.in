@@ -1,6 +1,0 @@
-include LICENSE MANIFEST.in README.rst CHANGELOG.rst
-
-recursive-include udata_harvest *
-recursive-include requirements *
-
-global-exclude *~ *.egg *.pyc

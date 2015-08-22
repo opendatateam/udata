@@ -1,4 +1,0 @@
-https://github.com/etalab/udata/tarball/master
--r install.pip
--r test.pip
-coveralls
