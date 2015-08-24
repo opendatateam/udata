@@ -8,6 +8,7 @@ from collections import OrderedDict
 from blinker import signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
+from werkzeug import cached_property
 
 from udata.models import (
     db, WithMetrics, Badge, BadgeMixin, Discussion, Follow, Issue,
@@ -67,6 +68,8 @@ DATASET_BADGE_KINDS = {
     PIVOTAL_DATA: _('Pivotal data'),
     C3: _('C³'),
 }
+
+CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
 
 
 class DatasetBadge(Badge):
@@ -142,6 +145,11 @@ class Resource(WithMetrics, db.EmbeddedDocument):
         super(Resource, self).clean()
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
+
+    @property
+    def closed_format(self):
+        """Return True if the specified format is in CLOSED_FORMATS."""
+        return self.format.lower() in CLOSED_FORMATS
 
 
 class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
@@ -248,7 +256,9 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         """Compute the next expected update date,
 
         given the frequency and last_update.
+        Return None if the frequency is not handled.
         """
+        delta = None
         if self.frequency == 'daily':
             delta = timedelta(days=1)
         elif self.frequency == 'weekly':
@@ -271,7 +281,37 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
             delta = timedelta(weeks=52 * 3)
         elif self.frequency == 'quinquennial':
             delta = timedelta(weeks=52 * 5)
-        return self.last_update + delta
+        if delta is None:
+            return
+        else:
+            return self.last_update + delta
+
+    @cached_property
+    def quality(self):
+        """Return a dict filled with metrics related to the inner
+
+        quality of the dataset:
+
+            * number of tags
+            * description length
+            * and so on
+        """
+        result = {}
+        if self.next_update:
+            result['next_update'] = self.next_update
+        if self.tags:
+            result['tags_count'] = len(self.tags)
+        if self.description:
+            result['description_length'] = len(self.description)
+        if self.resources:
+            result['has_only_closed_formats'] = all(
+                resource.closed_format for resource in self.resources)
+        discussions = DatasetDiscussion.objects(subject=self)
+        if discussions:
+            result['has_untreated_discussions'] = not all(
+                discussion.person_involved(self.owner)
+                for discussion in discussions)
+        return result
 
     @classmethod
     def get(cls, id_or_slug):

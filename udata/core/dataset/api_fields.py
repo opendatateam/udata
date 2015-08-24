@@ -111,6 +111,7 @@ dataset_fields = api.model('Dataset', {
                      'once that date is reached.')),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
     'metrics': fields.Raw(description='The dataset metrics'),
+    'quality': fields.Raw(description='The dataset quality', readonly=True),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,
         description='The producer organization'),
