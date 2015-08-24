@@ -15,7 +15,6 @@ from udata.models import (
 from udata.utils import multi_to_dict
 from udata.core.activity.views import ActivityView
 from udata.core.dataset.csv import ResourcesCsvAdapter
-
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.reuse.csv import ReuseCsvAdapter
 

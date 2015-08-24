@@ -1,32 +1,39 @@
 /**
  * i18n handling
  */
-define(['jquery', 'i18next-client', 'moment'], function($, i18next, moment) {
-    // Fetch the language once from the html lang attribute
-    var lang = $('html').attr('lang'),
-        resource = require('locales/udata.' + lang + '.json'),
-        store = {};
+import config from 'config';
+import i18next from 'i18next-client';
+import moment from 'moment';
 
-    store[lang] = {
-        udata: resource
-    };
+export const NAMESPACE = 'udata';
+export let lang = config.lang;
 
-    // Initialize required modules
-    moment.locale(lang);
-    i18next.init({
-        lng: lang,
-        load: 'unspecific',
-        ns: 'udata',
-        fallbackLng: false,
-        getAsync: false,
-        nsseparator: '::', // Allow to use real sentences as keys
-        keyseparator: '$$', // Allow to use real sentences as keys
-        resStore: store
-    });
+let resources = {};
 
-    return {
-        lang: lang,
-        t: i18next.t,
-        _: i18next.t
-    }
+resources[lang] = {};
+resources[lang][NAMESPACE] = require('locales/' + NAMESPACE + '.' + lang + '.json');
+
+moment.locale(lang);
+i18next.init({
+    debug: DEBUG,
+    lng: lang,
+    load: 'unspecific',
+    interpolationPrefix: '{',
+    interpolationSuffix: '}',
+    ns: NAMESPACE,
+    fallbackLng: false,
+    fallbackOnEmpty: true,
+    fallbackOnNull: true,
+    nsseparator: '::', // Allow to use real sentences as keys
+    keyseparator: '$$', // Allow to use real sentences as keys
+    resStore: resources
 });
+
+export let t = i18next.t;
+export let _ = i18next.t;
+
+export default {
+    lang,
+    _,
+    t
+}

@@ -27,7 +27,7 @@
 {% block toolbar %}
 {# Owner actions #}
 <div class="btn-group btn-group-xs">
-    <a href="{{ url_for('reuses.edit', reuse=reuse) }}" class="btn btn-success">
+    <a href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}" class="btn btn-success">
         <span class="glyphicon glyphicon-pencil"></span>
         {{ _('Edit') }}
     </a>
@@ -125,7 +125,7 @@
                         </div>
                         {% if can_edit %}
                         <div class="btn-group btn-group-sm">
-                            <a href="{{ url_for('reuses.edit', reuse=reuse) }}" class="btn btn-success">
+                            <a href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}" class="btn btn-success">
                                 <span class="glyphicon glyphicon-pencil"></span>
                                 {{ _('Edit') }}
                             </a>

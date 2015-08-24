@@ -19,7 +19,7 @@
 {% block toolbar %}
 {% if can_edit %}
 <div class="btn-group btn-group-xs">
-    <a href="{{ url_for('users.edit', user=user) }}" class="btn btn-success">
+    <a href="{{ url_for('admin.index', path='users/{id}/'.format(id=user.id)) }}" class="btn btn-success">
         <span class="glyphicon glyphicon-pencil"></span>
         {{ _('Edit') }}
     </a>

@@ -1,9 +1,9 @@
-define(['site/config', 'pubsub', 'logger'], function(config, pubsub, log) {
-    'use strict';
+import config from 'site/config';
+import pubsub from 'pubsub';
+import log from 'logger';
 
-    return {
-        pubsub: pubsub,
-        log: log,
-        config: config
-    };
-});
+export default {
+    pubsub,
+    log,
+    config
+};

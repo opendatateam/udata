@@ -1,13 +1,12 @@
 define([
     'jquery',
-    'api',
+    'api.light',
     'logger',
     'moment',
     'chart/bar',
     'chart/line',
     'chart/timeserie',
-    'chart/radar'
-], function($, API, log, moment, BarChart, LineChart, TimeSerie, RadarChart) {
+], function($, API, log, moment, BarChart, LineChart, TimeSerie) {
     'use strict';
 
     var today = moment(),

@@ -1,0 +1,14 @@
+[main]
+host = https://www.transifex.com
+
+[udata-admin.python]
+file_filter = udata_admin/translations/<lang>/LC_MESSAGES/udata-admin.po
+source_file = udata_admin/translations/udata-admin.pot
+source_lang = en
+type = PO
+
+[udata-admin.javascript]
+file_filter = locales/udata-admin.<lang>.json
+source_file = locales/udata-admin.en.json
+source_lang = en
+type = KEYVALUEJSON

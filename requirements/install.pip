@@ -3,6 +3,7 @@ bleach==1.4.1
 blinker==1.3
 celery==3.1.18
 celerybeat-mongo==0.0.8
+chardet
 CommonMark==0.5.4
 elasticsearch==1.5.0
 Flask-BabelEx==0.9.2
@@ -16,12 +17,14 @@ Flask-Navigation==0.2.0
 Flask-OAuthlib==0.9.1
 flask-restplus==0.7.2
 Flask-Script==2.0.5
-Flask-Sitemap==0.1.0
 Flask-Security==1.7.4
+Flask-Sitemap==0.1.0
 Flask-Themes2==0.1.4
 Flask-Uploads==0.1.3
 Flask-WTF==0.11.0
 Flask==0.10.1
+html2text
+lxml
 mongoengine==0.10.0
 pillow
 py-bcrypt==0.4
@@ -32,9 +35,11 @@ PyYAML==3.11
 redis
 requests
 unicodecsv==0.13.0
+voluptuous
 webassets==0.10.1
 wtforms-json==0.2.10
 wtforms==2.0.2
+xmltodict
 
 # Pin this until flask-restplus works with 0.3.4
 Flask-RESTful==0.3.3

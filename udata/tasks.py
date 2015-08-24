@@ -112,6 +112,7 @@ def init_app(app):
     import udata.core.issues.tasks
     import udata.core.discussions.tasks
     import udata.core.badges.tasks
+    import udata.harvest.tasks
 
     # Load plugins tasks
     for plugin in app.config['PLUGINS']:

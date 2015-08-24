@@ -21,7 +21,7 @@
     {% if can_edit %}
     <small>
         <a class="btn btn-xs btn-default"
-            href="{{ url_for('organizations.edit', org=org) }}">
+            href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}">
             <span class="glyphicon glyphicon-edit" ></span>
             {{ _('Edit') }}
         </a>

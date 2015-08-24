@@ -2,7 +2,7 @@
  * Typeahead.js/Bloodhound completion definition for organizations
  */
 define([
-    'api',
+    'api.light',
     'bloodhound',
     'templates/search/header.hbs',
     'templates/search/suggestion.hbs',

@@ -1,7 +1,7 @@
 /**
  * Follow button
  */
-define(['jquery', 'api', 'auth', 'i18n', 'notify'],
+define(['jquery', 'api.light', 'auth', 'i18n', 'notify'],
 function($, API, Auth, i18n, Notify) {
     'use strict';
 

@@ -3,10 +3,8 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import Post
-
 from . import FrontTestCase
-from ..factories import PostFactory, AdminFactory
+from ..factories import PostFactory
 
 
 class OrganizationBlueprintTest(FrontTestCase):
@@ -30,17 +28,4 @@ class OrganizationBlueprintTest(FrontTestCase):
         '''It should render the post page'''
         post = PostFactory()
         response = self.get(url_for('posts.show', post=post))
-        self.assert200(response)
-
-    def test_render_create(self):
-        '''It should render the post creation page'''
-        self.login(AdminFactory())
-        response = self.get(url_for('posts.new'))
-        self.assert200(response)
-
-    def test_render_edit(self):
-        '''It should render the post edition page'''
-        self.login(AdminFactory())
-        post = PostFactory()
-        response = self.get(url_for('posts.edit', post=post))
         self.assert200(response)

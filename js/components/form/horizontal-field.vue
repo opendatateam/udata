@@ -1,0 +1,36 @@
+<style lang="less">
+.horizontal-field {
+    .form-control {
+        color: #555;
+    }
+}
+</style>
+
+<template>
+    <div class="horizontal-field" v-class="
+        form-group: !is_hidden,
+        has-error: errors.length
+        ">
+        <label v-if="!is_hidden" for="{{field.id}}"
+            v-class="required: required && !is_bool"
+            class="col-sm-3 control-label">
+            <i v-if="errors.length" class="fa fa-times-circle-o"></i>
+            {{ is_bool ? '' : field.label }}
+            <span v-show="description" class="form-help"
+                v-attr="data-content: description"></span>
+        </label>
+        <div class="col-sm-9">
+            <component is="{{widget}}"></component>
+            <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
+        </div>
+    </div>
+</template>
+
+<script>
+import BaseField from 'components/form/base-field';
+
+export default {
+    name: 'horizontal-form-field',
+    mixins: [BaseField]
+};
+</script>

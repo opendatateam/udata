@@ -1,14 +1,4 @@
-@import "~bootstrap/less/variables";
-@import "~bootstrap/less/mixins";
-@import '~font-awesome/less/font-awesome';
-@import "udata/variables";
-@import "~bootstrap-markdown/less/bootstrap-markdown";
-@import "~selectize/src/less/selectize.bootstrap3";
-@import "~bootstrap-daterangepicker/daterangepicker-bs3.css";
-@import "~bootstrap-datepicker/dist/css/bootstrap-datepicker3.css";
-@import "~X-editable/dist/bootstrap3-editable/css/bootstrap-editable.css";
-@import "~fine-uploader/fine-uploader/fine-uploader.css";
-@import "~jquery-jcrop/css/jquery.Jcrop.css";
+@import "~selectize/src/less/selectize.bootstrap3.less";
 
 @selectize-color-item: @label-primary-bg;
 @selectize-color-item-text: @label-color;
@@ -17,8 +7,33 @@
 @selectize-padding-item-y: 2px;
 
 .selectize-control {
-    .selectize-input .card {
-        margin: 0;
+    .selectize-input {
+        border-radius: 0;
+
+        // Tags
+        .multi& > div {
+            -webkit-border-radius: 0;
+               -moz-border-radius: 0;
+                    border-radius: 0;
+        }
+
+        .card {
+            margin: 0;
+        }
+
+        &.focus {
+            border-color: #3c8dbc;
+            -webkit-box-shadow: none;
+                    box-shadow: none;
+        }
+
+        .form-group.has-error & {
+            border-color: @red;
+        }
+
+        .form-group.has-success & {
+            border-color: @green;
+        }
     }
 
     .selectize-dropdown .selectize-option {
@@ -35,18 +50,36 @@
         }
     }
 
+    &.plugin-remove_button .card-input {
+        position: relative;
+        .card {
+            margin-right: 10px;
+        }
+
+        a.remove {
+            position: absolute;
+            top: 0;
+            right: 4px;
+        }
+    }
+
     .card-input {
         display: block;
-
-        &:hover {
-            margin-bottom: 20px !important;
-        }
     }
 
     .locked, .locked.input-active {
         cursor: not-allowed !important;
         background-color: #DCDCDC !important;
         opacity: 1;
+    }
+
+    a.remove {
+        color: white;
+        margin-left: 4px;
+
+        &:hover {
+            color: red;
+        }
     }
 }
 
@@ -78,10 +111,12 @@ form {
     .form-help {
         .fa();
         .fa-fw();
+        display: inline;
+        margin-left: 2px;
         width: 1em;
         cursor: pointer;
 
-        &:before { content: @fa-var-info-circle; }
+        &:before { content: @fa-var-question-circle; }
     }
 
     select.btn[disabled], select.btn.readonly {
@@ -90,230 +125,172 @@ form {
 }
 
 
-.publisher-card {
-    border: 1px solid lighten(gray, 30%);
-    padding: 4px;
-    margin-right: 10px;
-    cursor: pointer;
-    height: 180px;
-    width: 100%;
-    text-align: center;
+// .publisher-card {
+//     border: 1px solid lighten(gray, 30%);
+//     padding: 4px;
+//     margin-right: 10px;
+//     cursor: pointer;
+//     height: 180px;
+//     width: 100%;
+//     text-align: center;
 
-    &.active, &:hover, &:active, &:focus {
-        color: white;
-        background-color: @highlight;
-    }
+//     &.active, &:hover, &:active, &:focus {
+//         color: white;
+//         background-color: @highlight;
+//     }
 
-    img {
-        background-color: white;
-    }
+//     img {
+//         background-color: white;
+//     }
 
-    .caption {
-        display: block;
-        height: 65px;
-        max-height: 65px;
-        width: 100%;
-        font-weight: bold;
+//     .caption {
+//         display: block;
+//         height: 65px;
+//         max-height: 65px;
+//         width: 100%;
+//         font-weight: bold;
 
-        .wrapper {
-            display: table;
-            width: 100%;
-            height: 100%;
-            max-height: 100%;
-            p {
-                display: table-cell;
-                vertical-align: middle;
-                text-align: center;
-            }
-        }
+//         .wrapper {
+//             display: table;
+//             width: 100%;
+//             height: 100%;
+//             max-height: 100%;
+//             p {
+//                 display: table-cell;
+//                 vertical-align: middle;
+//                 text-align: center;
+//             }
+//         }
 
-    }
-}
+//     }
+// }
 
 /**
  * Image picker and jCrop styling
  */
-.image-cropper {
-    img {
-        max-width: none !important;
-    }
+// .image-cropper {
+//     img {
+//         max-width: none !important;
+//     }
 
-    .crop-pane {
-        min-height: 200px;
-        max-height: 600px;
+//     .crop-pane {
+//         min-height: 200px;
+//         max-height: 600px;
 
-        .jcrop-holder {
-            margin: auto;
+//         .jcrop-holder {
+//             margin: auto;
 
-            border: 1px solid black;
+//             border: 1px solid black;
 
-            -webkit-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
-               -moz-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
-                    box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
-        }
+//             -webkit-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+//                -moz-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+//                     box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+//         }
 
-        &.centered .jcrop-holder {
-            :not(.cropper) {
-                display: none;
-            }
+//         &.centered .jcrop-holder {
+//             :not(.cropper) {
+//                 display: none;
+//             }
 
-            .cropper {
-                opacity: 1 !important;
-            }
-        }
-    }
+//             .cropper {
+//                 opacity: 1 !important;
+//             }
+//         }
+//     }
 
-    .preview-pane {
+//     .preview-pane {
 
-        /* The Javascript code will set the aspect ratio of the crop
-           area based on the size of the thumbnail preview,
-           specified here */
-        .preview-container {
-            overflow: hidden;
-            border: 1px solid black;
-            margin-bottom: 15px;
+//         /* The Javascript code will set the aspect ratio of the crop
+//            area based on the size of the thumbnail preview,
+//            specified here */
+//         .preview-container {
+//             overflow: hidden;
+//             border: 1px solid black;
+//             margin-bottom: 15px;
 
-            -webkit-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
-               -moz-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
-                    box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+//             -webkit-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+//                -moz-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+//                     box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
 
-            &.centered {
-                vertical-align: middle;
-                text-align: center;
+//             &.centered {
+//                 vertical-align: middle;
+//                 text-align: center;
 
-                > img {
-                    max-width: 100%;
-                    max-height: 100%;
-                }
-            }
-        }
-    }
-}
+//                 > img {
+//                     max-width: 100%;
+//                     max-height: 100%;
+//                 }
+//             }
+//         }
+//     }
+// }
 
-.uploader {
-    .drop-pane {
-        padding: 15px;
-        margin: 15px 0;
-        border: 5px dashed @gray-light; // lighten(@gray, 10%);
+// .uploader {
+//     .drop-pane {
+//         padding: 15px;
+//         margin: 15px 0;
+//         border: 5px dashed @gray-light; // lighten(@gray, 10%);
 
-        &.drop-active {
-            border-color: blue;
-        }
-    }
-}
+//         &.drop-active {
+//             border-color: blue;
+//         }
+//     }
+// }
 
-.form-upload {
-    color: lighten(@gray, 5%);
+// .form-upload {
+//     color: lighten(@gray, 5%);
 
-    .btn-file {
-        color: lighten(@gray, 10%);
-    }
-}
-
-.image-picker {
-    color: lighten(@gray, 5%);
-
-    .btn-file {
-        color: lighten(@gray, 10%);
-    }
-
-    .modal-body.over & {
-        border: 5px dashed @gray-lighter;
-    }
-}
-
-.image-picker-field {
-    .image-picker-preview {
-        .pull-left();
-        width: 100px;
-        height: 100px;
-
-        margin-right: 10px;
-
-        img {
-            max-width: 100%;
-            max-height: 100%;
-        }
-    }
-}
+//     .btn-file {
+//         color: lighten(@gray, 10%);
+//     }
+// }
 
 
-.btn-file {
-    position: relative;
-    overflow: hidden;
+// .image-picker {
+//     color: lighten(@gray, 5%);
 
-    input[type=file] {
-        position: absolute;
-        top: 0;
-        right: 0;
-        min-width: 100%;
-        min-height: 100%;
-        font-size: 100px;
-        text-align: right;
-        filter: alpha(opacity=0);
-        opacity: 0;
-        outline: none;
-        background: white;
-        cursor: inherit;
-        display: block;
-    }
-}
+//     .btn-file {
+//         color: lighten(@gray, 10%);
+//     }
+
+//     .modal-body.over & {
+//         border: 5px dashed @gray-lighter;
+//     }
+// }
+
+// .image-picker-field {
+//     .image-picker-preview {
+//         .pull-left();
+//         width: 100px;
+//         height: 100px;
+
+//         margin-right: 10px;
+
+//         img {
+//             max-width: 100%;
+//             max-height: 100%;
+//         }
+//     }
+// }
 
 
-/**
- * Spatial zone completer
- */
-.selectize-zone {
-    [data-selectable] {
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
+// .btn-file {
+//     position: relative;
+//     overflow: hidden;
 
-    .title {
-        display: block;
-    }
-
-    .code {
-        font-size: 11px;
-        opacity: 0.8;
-        margin-left: 2px;
-    }
-
-    .name {
-        font-weight: bold;
-        margin-right: 5px;
-    }
-
-    .level {
-        font-size: 12px;
-        display: block;
-        opacity: 0.5;
-        white-space: nowrap;
-        width: 100%;
-        text-overflow: ellipsis;
-        overflow: hidden;
-    }
-
-    ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        font-size: 10px;
-
-        li {
-            margin: 0;
-            padding: 0;
-            display: inline;
-            margin-right: 10px;
-
-            span.value {
-                font-weight: bold;
-            }
-        }
-    }
-}
-
-.selectize-zone-item {
-    .code {
-        font-style: italic;
-    }
-}
+//     input[type=file] {
+//         position: absolute;
+//         top: 0;
+//         right: 0;
+//         min-width: 100%;
+//         min-height: 100%;
+//         font-size: 100px;
+//         text-align: right;
+//         filter: alpha(opacity=0);
+//         opacity: 0;
+//         outline: none;
+//         background: white;
+//         cursor: inherit;
+//         display: block;
+//     }
+// }
