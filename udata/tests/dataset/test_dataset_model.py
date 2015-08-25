@@ -104,56 +104,66 @@ class DatasetModelTest(TestCase, DBTestMixin):
 
     def test_quality_default(self):
         dataset = DatasetFactory(description='')
-        self.assertEqual(dataset.quality, {})
+        self.assertEqual(dataset.quality, {'score': 0})
 
     def test_quality_next_update(self):
-        dataset = DatasetFactory(frequency='weekly')
-        self.assertEqualDates(dataset.next_update,
-                              dataset.quality['next_update'])
+        dataset = DatasetFactory(description='', frequency='weekly')
+        self.assertEqual(-6, dataset.quality['update_in'])
+        self.assertEqual(dataset.quality['frequency'], 'weekly')
+        self.assertEqual(dataset.quality['score'], 2)
 
     def test_quality_tags_count(self):
-        dataset = DatasetFactory(tags=['foo', 'bar'])
+        dataset = DatasetFactory(description='', tags=['foo', 'bar'])
         self.assertEqual(dataset.quality['tags_count'], 2)
+        self.assertEqual(dataset.quality['score'], 0)
+        dataset = DatasetFactory(description='',
+                                 tags=['foo', 'bar', 'baz', 'quux'])
+        self.assertEqual(dataset.quality['score'], 2)
 
     def test_quality_description_length(self):
         dataset = DatasetFactory(description='a' * 42)
         self.assertEqual(dataset.quality['description_length'], 42)
+        self.assertEqual(dataset.quality['score'], 0)
+        dataset = DatasetFactory(description='a' * 420)
+        self.assertEqual(dataset.quality['score'], 2)
 
     def test_quality_has_only_closed_formats(self):
-        dataset = DatasetFactory()
+        dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
-        self.assertEqual(dataset.quality['has_only_closed_formats'],
-                         True)
+        self.assertEqual(dataset.quality['has_only_closed_formats'], True)
+        self.assertEqual(dataset.quality['score'], -2)
 
     def test_quality_has_opened_formats(self):
-        dataset = DatasetFactory()
+        dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
         dataset.add_resource(ResourceFactory(format='csv'))
-        self.assertEqual(dataset.quality['has_only_closed_formats'],
-                         False)
+        self.assertEqual(dataset.quality['has_only_closed_formats'], False)
+        self.assertEqual(dataset.quality['score'], 2)
 
     def test_quality_has_untreated_discussions(self):
         user = UserFactory()
         visitor = UserFactory()
-        dataset = DatasetFactory(owner=user)
+        dataset = DatasetFactory(description='', owner=user)
         DatasetDiscussionFactory(
             subject=dataset, user=visitor,
             discussion=[MessageDiscussionFactory(posted_by=visitor)
                         for i in range(2)])
-        self.assertEqual(dataset.quality['has_untreated_discussions'],
-                         True)
+        self.assertEqual(dataset.quality['discussions'], 1)
+        self.assertEqual(dataset.quality['has_untreated_discussions'], True)
+        self.assertEqual(dataset.quality['score'], -2)
 
     def test_quality_has_treated_discussions(self):
         user = UserFactory()
         visitor = UserFactory()
-        dataset = DatasetFactory(owner=user)
+        dataset = DatasetFactory(description='', owner=user)
         DatasetDiscussionFactory(
             subject=dataset, user=visitor,
             discussion=[MessageDiscussionFactory(posted_by=visitor)
                         for i in range(2)]
             + [MessageDiscussionFactory(posted_by=user)])
-        self.assertEqual(dataset.quality['has_untreated_discussions'],
-                         False)
+        self.assertEqual(dataset.quality['discussions'], 1)
+        self.assertEqual(dataset.quality['has_untreated_discussions'], False)
+        self.assertEqual(dataset.quality['score'], 2)
 
     def test_quality_all(self):
         user = UserFactory()
@@ -164,12 +174,16 @@ class DatasetModelTest(TestCase, DBTestMixin):
         DatasetDiscussionFactory(
             subject=dataset, user=visitor,
             discussion=[MessageDiscussionFactory(posted_by=visitor)])
+        self.assertEqual(dataset.quality['score'], -2)
         self.assertEqual(
             sorted(dataset.quality.keys()),
             [
                 'description_length',
+                'discussions',
+                'frequency',
                 'has_only_closed_formats',
                 'has_untreated_discussions',
-                'next_update',
-                'tags_count'
+                'score',
+                'tags_count',
+                'update_in'
             ])

@@ -137,11 +137,14 @@ class DatasetAPITest(APITestCase):
         dataset = DatasetFactory(owner=user, description='')
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert200(response)
-        self.assertEqual(response.json['quality'], {})
+        self.assertEqual(response.json['quality'], {'score': 0})
         dataset.description = 'b' * 42
         dataset.save()
         response = self.get(url_for('api.dataset', dataset=dataset))
-        self.assertEqual(response.json['quality'], {'description_length': 42})
+        self.assertEqual(response.json['quality'], {
+            'score': 0,
+            'description_length': 42
+        })
 
     def test_dataset_api_update(self):
         '''It should update a dataset from the API'''

@@ -297,20 +297,42 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
             * and so on
         """
         result = {}
+        score = 0
         if self.next_update:
-            result['next_update'] = self.next_update
+            result['frequency'] = self.frequency
+            result['update_in'] = -(self.next_update - datetime.now()).days
+            # TODO: should be related to frequency.
+            if result['update_in'] < 0:
+                score += 2
+            else:
+                score -= 2
         if self.tags:
             result['tags_count'] = len(self.tags)
+            if result['tags_count'] > 3:
+                score += 2
         if self.description:
             result['description_length'] = len(self.description)
+            if result['description_length'] > 100:
+                score += 2
         if self.resources:
             result['has_only_closed_formats'] = all(
                 resource.closed_format for resource in self.resources)
+            if result['has_only_closed_formats']:
+                score -= 2
+            else:
+                score += 2
         discussions = DatasetDiscussion.objects(subject=self)
         if discussions:
+            result['discussions'] = len(discussions)
             result['has_untreated_discussions'] = not all(
                 discussion.person_involved(self.owner)
                 for discussion in discussions)
+            if result['has_untreated_discussions']:
+                score -= 2
+            else:
+                score += 2
+        result['score'] = score
+        print(result)
         return result
 
     @classmethod

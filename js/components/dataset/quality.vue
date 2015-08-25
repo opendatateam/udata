@@ -1,0 +1,53 @@
+<template>
+<box-container title="{{title}} ({{ _('score:') }} {{quality.score}})" icon="thumbs-up" boxclass="box-solid">
+    <doughnut score="{{quality.score}}"></doughnut>
+    <h4>{{ _('The aim of that box is to help you improve the quality of the (meta)data associated to your dataset.') }}</h4>
+    <p>{{ _('It gives you an overview of what will be useful for contributors to find and reuse your data.') }}</p>
+
+    <h3>{{ _('Description') }}</h3>
+    <p>{{ _('Try to be as descriptive as you can for your resources (how you use it yourself, which edge cases you solved, what data is missing and so on).') }}</p>
+    <p>{{ _('Your description has currently {description_length} caracters.', {description_length: quality.description_length}) }}</p>
+    <p v-if="quality.description_length > 300" class="text-success fa-check-circle"><strong>{{ _('That is great!') }}</strong></p>
+    <p v-if="quality.description_length <= 300" class="text-warning fa-exclamation-circle"><strong>{{ _('Why not improve it?') }}</strong></p>
+
+    <h3>{{ _('Tags') }}</h3>
+    <p>{{ _('Tags helps your reusers to find your resources, that is very important to make your dataset popular.') }}</p>
+    <p>{{ _('You currently set {tags_count} tags for that dataset.', {tags_count: quality.tags_count}) }}</p>
+    <p v-if="quality.tags_count > 3" class="text-success fa-check-circle"><strong>{{ _('That is great!') }}</strong></p>
+    <p v-if="quality.tags_count <= 3" class="text-warning fa-exclamation-circle"><strong>{{ _('Why not add some more?') }}</strong></p>
+
+    <h3>{{ _('Open formats') }}</h3>
+    <p>{{ _('The open data community enjoy using files in open formats that can be manipulated easily through open software and tools. Make sure you publish your data at least in formats different from XLS, DOC and PDF.') }}</p>
+    <p v-if="!quality.has_only_closed_formats" class="text-success fa-check-circle"><strong>{{ _('You currently have other formats!') }}</strong></p>
+    <p v-if="quality.has_only_closed_formats" class="text-warning fa-exclamation-circle"><strong>{{ _('You only have closed formats. Cannot you export some in open ones?') }}</strong></p>
+
+    <h3>{{ _('Discussions') }}</h3>
+    <p>{{ _('Discussing with the community about your datasets is key to involve developers and hackers in your open process. The feedback from reusers of your data is unvaluable and should be answered rather quickly.') }}</p>
+    <p v-if="quality.discussions && !quality.has_untreated_discussions" class="text-success fa-check-circle"><strong>{{ _('You are currently involved in all discussions!') }}</strong></p>
+    <p v-if="quality.discussions && quality.has_untreated_discussions" class="text-warning fa-exclamation-circle"><strong>{{ _('You have some untreated discussion threads. Why do not you give it a look below?') }}</strong></p>
+    <p v-if="!quality.discussions" class="text-info fa-question-circle"><strong>{{ _('No discussion yet? Try to involve users via social networks and/or by email.') }}</strong></p>
+
+    <h3>{{ _('Up-to-date') }}</h3>
+    <p>{{ _('Proposing up-to-date and incremental data makes it possible for reusers to establish datavisualisations on the long term.') }}</p>
+    <p v-if="quality.frequency">{{ _('You currently set your frequency to {frequency}.', {frequency: quality.frequency}) }}</p>
+    <p v-if="!quality.frequency">{{ _('You currently have no frequency for that dataset, is that pertinent?') }}</p>
+    <p v-if="quality.update_in <= 0" class="text-success fa-check-circle"><strong>{{ _('That is great!') }}</strong></p>
+    <p v-if="quality.update_in > 0" class="text-warning fa-exclamation-circle"><strong>{{ _('Need an update since {days} days.', {days:quality.update_in}) }}</strong></p>
+</box-container>
+</template>
+
+<script>
+module.exports = {
+    name: 'dataset-quality',
+    props: ['quality'],
+    data: function() {
+        return {
+            title: this._('Quality')
+        };
+    },
+    components: {
+        'box-container': require('components/containers/box.vue'),
+        'doughnut': require('components/charts/doughnut.vue')
+    }
+};
+</script>
