@@ -36,7 +36,6 @@ redis
 requests
 unicodecsv==0.13.0
 voluptuous
-webassets==0.10.1
 wtforms-json==0.2.10
 wtforms==2.0.2
 xmltodict
