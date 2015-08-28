@@ -52,6 +52,7 @@
 {% block content %}
 <section class="content {% if not dataset.organization.public_service %}non{% endif %}certified">
     <div class="container dataset-container"  itemscope="itemscope" itemtype="http://schema.org/Dataset" itemid="{{dataset.id}}">
+        <meta itemprop="alternateName" content="{{dataset.slug}}" />
         <meta itemprop="dateCreated" content="{{dataset.created_at|isoformat}}" />
         <meta itemprop="dateModified" content="{{dataset.last_modified|isoformat}}" />
         <div class="row">
