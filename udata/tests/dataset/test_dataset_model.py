@@ -131,14 +131,14 @@ class DatasetModelTest(TestCase, DBTestMixin):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
         self.assertEqual(dataset.quality['has_only_closed_formats'], True)
-        self.assertEqual(dataset.quality['score'], -2)
+        self.assertEqual(dataset.quality['score'], 0)
 
     def test_quality_has_opened_formats(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
         dataset.add_resource(ResourceFactory(format='csv'))
         self.assertEqual(dataset.quality['has_only_closed_formats'], False)
-        self.assertEqual(dataset.quality['score'], 2)
+        self.assertEqual(dataset.quality['score'], 4)
 
     def test_quality_has_untreated_discussions(self):
         user = UserFactory()
@@ -150,7 +150,7 @@ class DatasetModelTest(TestCase, DBTestMixin):
                         for i in range(2)])
         self.assertEqual(dataset.quality['discussions'], 1)
         self.assertEqual(dataset.quality['has_untreated_discussions'], True)
-        self.assertEqual(dataset.quality['score'], -2)
+        self.assertEqual(dataset.quality['score'], 0)
 
     def test_quality_has_treated_discussions(self):
         user = UserFactory()
@@ -174,7 +174,7 @@ class DatasetModelTest(TestCase, DBTestMixin):
         DatasetDiscussionFactory(
             subject=dataset, user=visitor,
             discussion=[MessageDiscussionFactory(posted_by=visitor)])
-        self.assertEqual(dataset.quality['score'], -2)
+        self.assertEqual(dataset.quality['score'], 0)
         self.assertEqual(
             sorted(dataset.quality.keys()),
             [
@@ -182,6 +182,8 @@ class DatasetModelTest(TestCase, DBTestMixin):
                 'discussions',
                 'frequency',
                 'has_only_closed_formats',
+                'has_resources',
+                'has_unavailable_resources',
                 'has_untreated_discussions',
                 'score',
                 'tags_count',

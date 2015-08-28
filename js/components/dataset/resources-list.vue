@@ -44,6 +44,7 @@
                     <th width="120" v-i18n="Format"></th>
                     <th width="100" v-i18n="Size"></th>
                     <th width="130" v-i18n="Downloads"></th>
+                    <th width="100" v-i18n="Availability"></th>
                 </tr>
             </thead>
             <tbody v-el="sortable">
@@ -75,6 +76,10 @@
                             ">
                             {{ resource.metrics.views || 0 }}
                         </span>
+                    </td>
+                    <td class="text-center">
+                        <span v-if="resource.is_available" class="badge bg-green">✓</span>
+                        <span v-if="!resource.is_available" class="badge bg-red">×</span>
                     </td>
                 </tr>
                 <tr v-if="!(dataset && dataset.resources)" class="text-center lead">

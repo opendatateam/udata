@@ -51,7 +51,7 @@
 {% endblock %}
 
 {% block main_content %}
-<div itemscope="itemscope" itemtype="http://schema.org/Dataset" itemid="{{dataset.id}}">
+<div itemscope="itemscope" itemtype="http://schema.org/Dataset" itemid="{{dataset.id}}" itemslug="{{dataset.slug}}">
 <h2 itemprop="name">{{ dataset.title }}</h2>
 <div itemprop="description">
     {{ dataset.description|markdown }}

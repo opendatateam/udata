@@ -17,6 +17,8 @@ from udata.models import (
 from udata.i18n import lazy_gettext as _
 from udata.utils import hash_url
 
+from .actions import check_url_from_cache, check_url_from_group
+
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum',
@@ -151,6 +153,21 @@ class Resource(WithMetrics, db.EmbeddedDocument):
         """Return True if the specified format is in CLOSED_FORMATS."""
         return self.format.lower() in CLOSED_FORMATS
 
+    def check_availability(self, group):
+        """Check if a resource is reachable against a Croquemort server.
+
+        Return a boolean.
+        """
+        if self.type == 'remote':
+            # We perform a quick check for performances matters.
+            error, response = check_url_from_cache(self.url, group)
+            if error or int(response.get('status', 500)) >= 500:
+                return False
+            else:
+                return True
+        else:
+            return True  # We consider that API cases (types) are OK.
+
 
 class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     title = db.StringField(max_length=255, required=True)
@@ -244,6 +261,21 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         return UPDATE_FREQUENCIES.get(self.frequency or 'unknown',
                                       UPDATE_FREQUENCIES['unknown'])
 
+    def check_availability(self):
+        """Check if resources from that dataset are available.
+
+        Return a list of booleans.
+        """
+        # First, we try to retrieve all data from the group (slug).
+        error, response = check_url_from_group(self.slug)
+        if error:
+            # The group is unknown, the check will be performed by resource.
+            return [resource.check_availability(self.slug)
+                    for resource in self.resources]
+        else:
+            return [int(url_infos['status']) == 200
+                    for url_infos in response['urls']]
+
     @property
     def last_update(self):
         if self.resources:
@@ -297,43 +329,61 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
             * and so on
         """
         result = {}
-        score = 0
         if self.next_update:
             result['frequency'] = self.frequency
             result['update_in'] = -(self.next_update - datetime.now()).days
-            # TODO: should be related to frequency.
-            if result['update_in'] < 0:
-                score += 2
-            else:
-                score -= 2
         if self.tags:
             result['tags_count'] = len(self.tags)
-            if result['tags_count'] > 3:
-                score += 2
         if self.description:
             result['description_length'] = len(self.description)
-            if result['description_length'] > 100:
-                score += 2
         if self.resources:
+            result['has_resources'] = True
             result['has_only_closed_formats'] = all(
                 resource.closed_format for resource in self.resources)
-            if result['has_only_closed_formats']:
-                score -= 2
-            else:
-                score += 2
-        discussions = DatasetDiscussion.objects(subject=self)
+            result['has_unavailable_resources'] = not all(
+                self.check_availability())
+        discussions = DatasetDiscussion.objects(subject=self.id)
         if discussions:
             result['discussions'] = len(discussions)
             result['has_untreated_discussions'] = not all(
                 discussion.person_involved(self.owner)
                 for discussion in discussions)
-            if result['has_untreated_discussions']:
-                score -= 2
-            else:
-                score += 2
-        result['score'] = score
-        print(result)
+        result['score'] = self.compute_quality_score(result)
         return result
+
+    def compute_quality_score(self, quality):
+        """Compute the score related to the quality of that dataset."""
+        score = 0
+        UNIT = 2
+        if 'frequency' in quality:
+            # TODO: should be related to frequency.
+            if quality['update_in'] < 0:
+                score += UNIT
+            else:
+                score -= UNIT
+        if 'tags_count' in quality:
+            if quality['tags_count'] > 3:
+                score += UNIT
+        if 'description_length' in quality:
+            if quality['description_length'] > 100:
+                score += UNIT
+        if 'has_resources' in quality:
+            if quality['has_only_closed_formats']:
+                score -= UNIT
+            else:
+                score += UNIT
+            if quality['has_unavailable_resources']:
+                score -= UNIT
+            else:
+                score += UNIT
+        if 'discussions' in quality:
+            if quality['has_untreated_discussions']:
+                score -= UNIT
+            else:
+                score += UNIT
+        if score < 0:
+            return 0
+        return score
 
     @classmethod
     def get(cls, id_or_slug):
