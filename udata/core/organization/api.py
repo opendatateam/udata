@@ -332,8 +332,8 @@ class SuggestOrganizationsAPI(API):
         args = suggest_parser.parse_args()
         return [
             {
-                'id': opt['payload']['id'],
-                'name': opt['text'],
+                'id': opt['text'],
+                'name': opt['payload']['name'],
                 'score': opt['score'],
                 'slug': opt['payload']['slug'],
                 'image_url': opt['payload']['image_url'],
