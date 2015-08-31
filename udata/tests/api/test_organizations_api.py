@@ -396,6 +396,7 @@ class MembershipAPITest(APITestCase):
             self.assertIn('name', suggestion)
             self.assertIn('score', suggestion)
             self.assertIn('image_url', suggestion)
+            self.assertIn('acronym', suggestion)
             self.assertTrue(suggestion['name'].startswith('test'))
 
     def test_suggest_organizations_with_special_chars(self):

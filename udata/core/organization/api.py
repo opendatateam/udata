@@ -326,7 +326,7 @@ suggest_parser.add_argument(
 @ns.route('/suggest/', endpoint='suggest_organizations')
 class SuggestOrganizationsAPI(API):
     @api.marshal_list_with(org_suggestion_fields)
-    @api.doc(id='suggest_organizations', parser=suggest_parser)
+    @api.doc('suggest_organizations', parser=suggest_parser)
     def get(self):
         '''Suggest organizations'''
         args = suggest_parser.parse_args()
@@ -336,6 +336,7 @@ class SuggestOrganizationsAPI(API):
                 'name': opt['payload']['name'],
                 'score': opt['score'],
                 'slug': opt['payload']['slug'],
+                'acronym': opt['payload']['acronym'],
                 'image_url': opt['payload']['image_url'],
             }
             for opt in search.suggest(args['q'], 'org_suggest', args['size'])
