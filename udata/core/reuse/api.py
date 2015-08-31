@@ -178,8 +178,8 @@ class SuggestReusesAPI(API):
         args = suggest_parser.parse_args()
         return [
             {
-                'id': opt['payload']['id'],
-                'title': opt['text'],
+                'id': opt['text'],
+                'title': opt['payload']['title'],
                 'score': opt['score'],
                 'slug': opt['payload']['slug'],
                 'image_url': opt['payload']['image_url'],
