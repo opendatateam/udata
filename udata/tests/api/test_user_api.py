@@ -161,7 +161,7 @@ class UserAPITest(APITestCase):
                             qs={'q': str(user.id), 'size': '5'})
         self.assert200(response)
 
-        self.assertEqual(len(response.json), 1)
+        self.assertGreaterEqual(len(response.json), 1)
 
         suggestion = response.json[0]
         self.assertEqual(suggestion['id'], str(user.id))

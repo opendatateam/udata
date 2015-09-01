@@ -151,9 +151,6 @@ def suggest(q, field, size=10):
             'completion': {
                 'field': field,
                 'size': size,
-                'fuzzy': {
-                    'fuzziness': 0
-                }
             }
         }
     })
