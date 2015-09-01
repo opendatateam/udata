@@ -156,10 +156,10 @@ class ReuseSearch(ModelSearchAdapter):
             'featured': reuse.featured,
             'extras': reuse.extras,
             'reuse_suggest': {
-                'input': cls.completer_tokenize(reuse.title),
-                'output': reuse.title,
+                'input': cls.completer_tokenize(reuse.title) + [reuse.id],
+                'output': str(reuse.id),
                 'payload': {
-                    'id': str(reuse.id),
+                    'title': reuse.title,
                     'slug': reuse.slug,
                     'image_url': reuse.image(40),
                 },
