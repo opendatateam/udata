@@ -1,6 +1,6 @@
 <template>
-<box-container title="{{title}}" icon="thumbs-up" boxclass="box-solid">
-    <doughnut score="{{quality.score}}"></doughnut>
+<box-container title="{{title}}" icon="thumbs-up" boxclass="box-solid" v-if="quality">
+    <doughnut score="{{ quality.score + 1 }}"></doughnut>
     <h4>{{ _('The aim of that box is to help you improve the quality of the (meta)data associated to your dataset.') }}</h4>
     <p>{{ _('It gives you an overview of what will be useful for contributors to find and reuse your data.') }}</p>
 

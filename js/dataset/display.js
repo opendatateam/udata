@@ -52,7 +52,7 @@ function prepare_resources() {
             let $self = $(this);
             let url = $self.parent().property('url').first().attr('href');
             let $Dataset = $('body').items('http://schema.org/Dataset').eq(0);
-            let group = $Dataset.attr('itemslug');
+            let group = $Dataset.attr('alternateName'); // This is the slug.
 
             if (!startsWith(url, window.location.origin)) {
                 $.get($this.data('checkurl'), {'url': url, 'group': group}
