@@ -396,6 +396,7 @@ class MembershipAPITest(APITestCase):
             self.assertIn('name', suggestion)
             self.assertIn('score', suggestion)
             self.assertIn('image_url', suggestion)
+            self.assertIn('acronym', suggestion)
             self.assertTrue(suggestion['name'].startswith('test'))
 
     def test_suggest_organizations_with_special_chars(self):
@@ -484,6 +485,35 @@ class MembershipAPITest(APITestCase):
                             qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
+
+    def test_suggest_organizations_homonyms(self):
+        '''It should suggest organizations and not deduplicate homonyms'''
+        with self.autoindex():
+            OrganizationFactory.create_batch(2, name='homonym')
+
+        response = self.get(url_for('api.suggest_organizations'),
+                            qs={'q': 'homonym', 'size': '5'})
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), 2)
+
+        for suggestion in response.json:
+            self.assertEqual(suggestion['name'], 'homonym')
+
+    def test_suggest_organizations_by_id(self):
+        '''It should suggest an organization by its ID'''
+        with self.autoindex():
+            orgs = OrganizationFactory.create_batch(3)
+
+        org = orgs[0]
+        response = self.get(url_for('api.suggest_organizations'),
+                            qs={'q': str(org.id), 'size': '5'})
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), 1)
+
+        suggestion = response.json[0]
+        self.assertEqual(suggestion['id'], str(org.id))
 
 
 class OrganizationDatasetsAPITest(APITestCase):

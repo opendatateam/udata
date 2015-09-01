@@ -221,15 +221,15 @@ suggest_parser.add_argument(
 
 
 @ns.route('/suggest/', endpoint='suggest_users')
-class SuggestReusesAPI(API):
+class SuggestUsersAPI(API):
     @api.marshal_list_with(user_suggestion_fields)
-    @api.doc(id='suggest_users', parser=suggest_parser)
+    @api.doc('suggest_users', parser=suggest_parser)
     def get(self):
         '''Suggest users'''
         args = suggest_parser.parse_args()
         return [
             {
-                'id': opt['payload']['id'],
+                'id': opt['text'],
                 'fullname': opt['payload']['fullname'],
                 'avatar_url': opt['payload']['avatar_url'],
                 'slug': opt['payload']['slug'],

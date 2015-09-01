@@ -89,6 +89,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
     @classmethod
     def serialize(cls, organization):
         completions = cls.completer_tokenize(organization.name)
+        completions.append(organization.id)
         if organization.acronym:
             completions.append(organization.acronym)
         return {
@@ -101,9 +102,9 @@ class OrganizationSearch(search.ModelSearchAdapter):
             'created': organization.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             'org_suggest': {
                 'input': completions,
-                'output': organization.name,
+                'output': str(organization.id),
                 'payload': {
-                    'id': str(organization.id),
+                    'name': organization.name,
                     'acronym': organization.acronym,
                     'image_url': organization.logo(40),
                     'slug': organization.slug,

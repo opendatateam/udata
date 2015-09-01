@@ -56,7 +56,7 @@ class UserAPITest(APITestCase):
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
     def test_suggest_users_api_first_name(self):
-        '''It should suggest users baed on first name'''
+        '''It should suggest users based on first name'''
         with self.autoindex():
             for i in range(4):
                 UserFactory(
@@ -78,7 +78,7 @@ class UserAPITest(APITestCase):
             self.assertIn('test', suggestion['fullname'])
 
     def test_suggest_users_api_last_name(self):
-        '''It should suggest users based on last'''
+        '''It should suggest users based on last name'''
         with self.autoindex():
             for i in range(4):
                 UserFactory(
@@ -122,8 +122,7 @@ class UserAPITest(APITestCase):
     def test_suggest_users_api_no_match(self):
         '''It should not provide user suggestion if no match'''
         with self.autoindex():
-            for i in range(3):
-                UserFactory()
+            UserFactory.create_batch(3)
 
         response = self.get(url_for('api.suggest_users'),
                             qs={'q': 'xxxxxx', 'size': '5'})
@@ -137,3 +136,32 @@ class UserAPITest(APITestCase):
                             qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
+
+    def test_suggest_users_api_no_dedup(self):
+        '''It should suggest users without deduplicating homonyms'''
+        with self.autoindex():
+            UserFactory.create_batch(2, first_name='test', last_name='homonym')
+
+        response = self.get(url_for('api.suggest_users'),
+                            qs={'q': 'homonym', 'size': '5'})
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), 2)
+
+        for suggestion in response.json:
+            self.assertEqual(suggestion['fullname'], 'test homonym')
+
+    def test_suggest_users_api_by_id(self):
+        '''It should suggest an user based on its ID'''
+        with self.autoindex():
+            users = UserFactory.create_batch(4)
+
+        user = users[0]
+        response = self.get(url_for('api.suggest_users'),
+                            qs={'q': str(user.id), 'size': '5'})
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), 1)
+
+        suggestion = response.json[0]
+        self.assertEqual(suggestion['id'], str(user.id))
