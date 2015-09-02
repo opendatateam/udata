@@ -125,7 +125,7 @@ def i18n():
         glob_patterns = (iglob(join(directory, g)) for g in globs)
         for filename in itertools.chain(*glob_patterns):
             print('Extracting messages from {0}'.format(green(filename)))
-            content = open(filename, 'r').read()
+            content = codecs.open(filename, encoding='utf8').read()
             for regexp in regexps:
                 for match in regexp.finditer(content):
                     key = match.group(1)
