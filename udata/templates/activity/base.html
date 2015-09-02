@@ -1,22 +1,25 @@
 {% set user = activity.actor %}
 {% set organization = activity.organization %}
 <li>
-    <div class="timeline-badge {{activity.badge_type}}">
-        <span class="{{activity.icon}}"></span>
-    </div>
-    <div class="timeline-panel">
-        <div class="timeline-heading">
-            {% if organization %}
-            <a class="avatar" title="{{ organization.name }}"
-                href="{{ url_for('organizations.show', org=organization) }}">
-                <img src="{{organization.logo(32)|placeholder('organization') }}"
-                    alt="{{ organization.name }}" class="scalable"
-                    width="32" height="32" />
-            </a>
-            {% else %}
-            {{ user|avatar(32) }}
-            {% endif %}
-            <h4 class="timeline-title">
+    {% if organization %}
+    <a class="avatar" title="{{ organization.name }}"
+        href="{{ url_for('organizations.show', org=organization) }}">
+        <img src="{{organization.logo(32)|placeholder('organization') }}"
+            alt="{{ organization.name }}" class="scalable avatar"
+            width="32" height="32" />
+    </a>
+    {% else %}
+    {{ user|avatar(32) }}
+    {% endif %}
+    <div class="timeline-item">
+        <span class="time">
+            <i class="fa fa-clock-o"></i>
+            <time datetime="{{ activity.created_at.isoformat() }}">
+                <span>{{ activity.created_at|datetimeformat }}</span>
+            </time>
+        </span>
+        <div class="timeline-header">
+            <h5>
                 {% if organization %}
                 <a href="{{ url_for('organizations.show', org=organization) }}">{{organization.name}}</a>
                 {% else %}
@@ -26,18 +29,12 @@
                 {{activity.label}}
                 <a href="{{activity.related_to.display_url}}">{{activity.related_to}}</a>
                 {% endblock %}
-            </h4>
-            <small class="text-muted timeline-date">
-                <span class="fa fa-clock-o"></span>
-                <time datetime="{{ activity.created_at.isoformat() }}">
-                    <span>{{ activity.created_at|datetimeformat }}</span>
-                </time>
-            </small>
+            </h5>
         </div>
+        {% if self.body() %}
+        <div class="timeline-body">
+            {% block body %}{% endblock %}
+        </div>
+        {% endif %}
     </div>
-    {% if self.body() %}
-    <div class="timeline-panel timeline-content">
-        {% block body %}{% endblock %}
-    </div>
-    {% endif %}
 </li>

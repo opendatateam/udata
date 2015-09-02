@@ -7,7 +7,7 @@ from flask import request
 
 from udata.api import api, API, fields
 from udata.auth import admin_permission
-from udata.models import Dataset, Reuse, Site, Activity
+from udata.models import Dataset, Reuse, Activity
 
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.reuse.api_fields import reuse_ref_fields
@@ -107,5 +107,5 @@ class SiteActivityAPI(API):
     def get(self):
         '''Fetch site activity'''
         args = activity_parser.parse_args()
-        return (Activity.objects.order_by('-created')
+        return (Activity.objects.order_by('-created_at')
                                 .paginate(args['page'], args['page_size']))
