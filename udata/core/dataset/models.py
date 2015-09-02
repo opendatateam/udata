@@ -17,7 +17,7 @@ from udata.models import (
 from udata.i18n import lazy_gettext as _
 from udata.utils import hash_url
 
-from .actions import check_url_from_cache, check_url_from_group
+from .croquemort import check_url_from_cache, check_url_from_group
 
 
 __all__ = (

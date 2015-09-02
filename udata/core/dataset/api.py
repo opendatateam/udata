@@ -16,7 +16,7 @@ from udata.core import storages
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by, multi_to_dict
 
-from .actions import check_url
+from .croquemort import check_url
 from .api_fields import (
     badge_fields,
     dataset_fields,
