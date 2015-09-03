@@ -4,7 +4,7 @@
         <div class="timeline-item">
             <div class="timeline-header">
                 <h5>
-                    {{activity.actoer.first_name}} {{activity.actoer.last_name}}
+                    {{activity.actor.first_name}} {{activity.actor.last_name}}
                 </h5>
             </div>
         </div>
