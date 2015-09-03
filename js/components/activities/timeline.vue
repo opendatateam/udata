@@ -1,32 +1,26 @@
 <template>
-<div>
-    <ul class="timeline">
-        <li v-repeat="activities">
-            <div class="timeline-item">
-                <div class="timeline-header">
-                    <h5>
-                        {{$key}} : {{$value}}
-                    </h5>
-                </div>
+<ul class="timeline">
+    <li v-repeat="activity in activities.data">
+        <div class="timeline-item">
+            <div class="timeline-header">
+                <h5>
+                    {{activity.actor.first_name}} {{activity.actor.last_name}}
+                </h5>
             </div>
-        </li>
-    </ul>
-</div>
+        </div>
+    </li>
+</ul>
 </template>
 
 <script>
-import activities from 'models/activities';
+import SiteActivityPage from 'models/activities';
 
 export default {
-    props: ['activities'],
+    el: '#activities',
     data: function() {
         return {
-            activities: []
+            activities: new SiteActivityPage().fetch()
         };
-    },
-    ready: function() {
-        this.activities = activities;
-    },
-    el: '#activities'
+    }
 };
 </script>
