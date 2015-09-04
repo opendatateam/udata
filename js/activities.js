@@ -15,6 +15,11 @@ var Vue = require('vue'),
 Vue.options.replace = false;
 Vue.config.debug = config.debug;
 
+Vue.use(require('plugins/util'));
+Vue.use(require('plugins/text'));
+Vue.use(require('plugins/i18next'));
+Vue.use(require('plugins/markdown'));
+
 $(require('api')).on('built', function() {
     new Vue(require('components/activities/timeline.vue'));
 });

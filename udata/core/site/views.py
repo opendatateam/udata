@@ -13,7 +13,6 @@ from udata.models import (
     Dataset, Activity, Site, Reuse, Organization, Post
 )
 from udata.utils import multi_to_dict
-from udata.core.activity.views import ActivityView
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.reuse.csv import ReuseCsvAdapter
@@ -115,7 +114,7 @@ class SiteView(object):
 
 
 @blueprint.route('/dashboard/', endpoint='dashboard')
-class SiteDashboard(SiteView, ActivityView, DetailView):
+class SiteDashboard(SiteView, DetailView):
     template_name = 'site/dashboard.html'
 
     def get_context(self):

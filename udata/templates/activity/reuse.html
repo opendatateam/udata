@@ -1,8 +1,0 @@
-{% extends theme('activity/base.html') %}
-
-{% block label %}{{activity.label}}{% endblock %}
-
-{% block body %}
-{% set reuse = activity.related_to %}
-{% include theme('reuse/card.html') %}
-{% endblock %}
