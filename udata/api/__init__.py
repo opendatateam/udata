@@ -45,8 +45,8 @@ class UDataApi(Api):
         self.authorizations = {
             'apikey': {
                 'type': 'apiKey',
-                'passAs': 'header',
-                'keyname': HEADER_API_KEY
+                'in': 'header',
+                'name': HEADER_API_KEY
             }
         }
 
@@ -68,7 +68,7 @@ class UDataApi(Api):
 
     def _apply_secure(self, func, permission=None):
         '''Enforce authentication on a given method/verb'''
-        self._handle_api_doc(func, {'authorizations': 'apikey'})
+        self._handle_api_doc(func, {'security': 'apikey'})
 
         @wraps(func)
         def wrapper(*args, **kwargs):
