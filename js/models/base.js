@@ -307,8 +307,6 @@ export class ModelPage extends Model {
         this.loading = true;
         this.serverside = true;
         this._data = [];
-        this.clickedElement = {};
-        this.clickCallback = null;
     }
 
     /**

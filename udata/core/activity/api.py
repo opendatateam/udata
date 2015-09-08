@@ -31,6 +31,8 @@ activity_fields = api.model('Activity', {
         description='When the action has been performed', readonly=True),
     'label': fields.String(
         description='The label of the activity', required=True),
+    'key': fields.String(
+        description='The key of the activity', required=True),
     'icon': fields.String(
         description='The icon of the activity', required=True),
     'kwargs': fields.Raw(description='Some action specific context'),
