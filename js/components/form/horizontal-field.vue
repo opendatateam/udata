@@ -20,7 +20,7 @@
                 v-attr="data-content: description"></span>
         </label>
         <div class="col-sm-9">
-            <component is="{{widget}}"></component>
+            <component is="{{widget}}" field="{{field}}"></component>
             <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
         </div>
     </div>

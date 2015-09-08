@@ -23,7 +23,7 @@
             v-if="!is_hidden && !is_bool">
             {{ field.label }}
         </label>
-        <component is="{{widget}}"></component>
+        <component is="{{widget}}" field="{{field}}"></component>
         <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
     </div>
 </template>
