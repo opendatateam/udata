@@ -51,6 +51,16 @@ def cover():
 
 
 @task
+def jstest(hot=False):
+    '''Run JS tests suite'''
+    header('Run client tests suite')
+    cmd = 'webpack-dev-server --config webpack.config.test.js'
+    if hot:
+        cmd += ' --hot --inline'
+    nrun(cmd, pty=True)
+
+
+@task
 def karma():
     '''Continuous Karma test'''
     lrun('karma start --browsers=PhantomJS', pty=True)

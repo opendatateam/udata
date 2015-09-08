@@ -193,8 +193,8 @@ describe('Base lists', function() {
 
             it('allows to watch changes', function() {
                 let vm = new Vue({
-                        el: fixture.set('<div/>')[0],
-                        template: `<ul v-el="list">
+                        el: fixture.set('<div/>'),
+                        template: `<ul>
                                         <li v-repeat=things.data>{{name}}</li>
                                     </ul>`,
                         data: {
@@ -206,11 +206,11 @@ describe('Base lists', function() {
                     }),
                     response = JSON.stringify(thingFactory(3));
 
-                expect(vm.$$.list.children).to.have.length(0);
+                expect(vm.$el.children).to.have.length(0);
                 vm.things.fetch({id: 'abc'});
                 this.requests[0].respond(200, {'Content-Type': 'application/json'}, response);
 
-                expect(vm.$$.list.children).to.have.length(3);
+                expect(vm.$el.children).to.have.length(3);
             });
 
         });
@@ -434,8 +434,8 @@ describe('Base lists', function() {
 
             it('allows to watch changes', function() {
                 let vm = new Vue({
-                        el: fixture.set('<div/>')[0],
-                        template: `<ul v-el="list">
+                        el: fixture.set('<div/>'),
+                        template: `<ul>
                                         <li v-repeat=things.data>{{name}}</li>
                                     </ul>`,
                         data: {
@@ -443,15 +443,23 @@ describe('Base lists', function() {
                                 ns: 'things',
                                 fetch: 'list_things'
                             })
+                        },
+                        attached: function() {
+                            console.log('attached');
+                        },
+                        ready: function() {
+                            console.log('ready');
                         }
                     }),
                     response = JSON.stringify(thingFactory(3));
 
-                expect(vm.$$.list.children).to.have.length(0);
+                expect(vm.$el.children).to.have.length(0);
                 vm.things.fetch({id: 'abc'});
-                this.requests[0].respond(200, {'Content-Type': 'application/json'}, response);
-
-                expect(vm.$$.list.children).to.have.length(3);
+                this.requests[0].respond(200,
+                    {'Content-Type': 'application/json'},
+                    response
+                );
+                expect(vm.$el.children).to.have.length(3);
             });
 
         });

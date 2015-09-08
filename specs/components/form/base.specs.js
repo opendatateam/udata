@@ -17,7 +17,7 @@ describe("Common Form features", function() {
 
     describe("Empty form", function() {
         var vm = new Vue({
-            el: fixture.set('<form/>')[0],
+            el: fixture.set('<form />'),
             mixins: [BaseForm]
         });
 
@@ -44,7 +44,7 @@ describe("Common Form features", function() {
 
     describe("Forms with fields and defs", function() {
         var vm = new Vue({
-            el: fixture.set('<form/>')[0],
+            el: fixture.set('<form/>'),
             mixins: [BaseForm],
             data: {
                 fields: [{
@@ -112,7 +112,7 @@ describe("Common Form features", function() {
 
         it('Should handle schema for flat models', function() {
             var vm = new Vue({
-                el: fixture.set('<form/>')[0],
+                el: fixture.set('<form/>'),
                 mixins: [BaseForm],
                 data: {
                     model: new Pet(),
@@ -135,7 +135,7 @@ describe("Common Form features", function() {
 
         it('Should handle schema for nested models', function() {
             var vm = new Vue({
-                el: fixture.set('<form/>')[0],
+                el: fixture.set('<form/>'),
                 mixins: [BaseForm],
                 data: {
                     model: new Person(),
@@ -161,19 +161,27 @@ describe("Common Form features", function() {
 
     describe('serialization', function() {
 
-        var BaseField = require('components/form/base-field');
+        before(function () {
+            // Need to mock reference lists
+            API.mock_specs(require('specs/mocks/udata-swagger.json'));
+        });
 
         beforeEach(function() {
+            this.xhr = sinon.useFakeXMLHttpRequest();
+            let requests = this.requests = [];
+            this.xhr.onCreate = function (req) { requests.push(req); };
+
             this.vm = new Vue({
                 el: fixture.set(`
                     <form role="form" v-el="form">
                         <field v-repeat="field:fields" v-ref="fields"></field>
-                    </form>`)[0],
+                    </form>
+                `),
                 mixins: [BaseForm],
                 components: {
                     field: {
                         template: `<component is="{{widget}}"></component>`,
-                        mixins: [BaseField]
+                        mixins: [require('components/form/base-field')]
                     }
                 },
                 data: function() {
@@ -182,6 +190,14 @@ describe("Common Form features", function() {
                     };
                 }
             });
+
+            // requests[0].respond(200, {'Content-Type': 'application/json'}, JSON.stringify(raw_specs));
+
+
+        });
+
+        afterEach(function() {
+            this.xhr.restore();
         });
 
         it('should be an empty object for empty form', function() {
@@ -204,7 +220,8 @@ describe("Common Form features", function() {
                 },
                 select: {
                     type: 'string',
-                    enum: ['a', 'b']
+                    enum: ['a', 'b'],
+                    default: 'b'
                 }
             }};
             this.vm.fields = [{
@@ -221,7 +238,7 @@ describe("Common Form features", function() {
                 input: '',
                 checkbox: false,
                 textarea: '',
-                select: undefined,
+                select: 'b',
             });
         });
 

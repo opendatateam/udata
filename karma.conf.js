@@ -1,7 +1,7 @@
 // Karma configuration
 // Generated on Tue Dec 23 2014 19:11:34 GMT+0100 (CET)
 
-var webpack_config = require('./webpack.config.js'),
+var webpack_config = require('./webpack.config.test.js'),
     webpack = require('webpack'),
     path = require('path');
 
@@ -11,11 +11,8 @@ webpack_config.devtool = 'inline-source-map';
 
 webpack_config.watch = true;
 
-// Fix SinonJS until proper 2.0
-webpack_config.module.noParse = [/\/sinon.js/];
-webpack_config.plugins.push(
-    new webpack.NormalModuleReplacementPlugin(/^sinon$/, __dirname + '/node_modules/sinon/pkg/sinon.js')
-);
+webpack_config.entry = {};
+webpack_config.output = {};
 
 // Instrument code for coverage
 webpack_config.module.postLoaders = [{
@@ -50,7 +47,7 @@ module.exports = function(config) {
         webpack: webpack_config,
 
         webpackServer : {
-            quiet: true
+            quiet: false
         },
 
 
