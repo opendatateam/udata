@@ -114,7 +114,7 @@ module.exports = {
     components: {
         'box': require('components/containers/box.vue'),
         'dataset-card': require('components/dataset/card.vue'),
-        'dataset-completer': require('components/form/dataset-completer')
+        'dataset-completer': require('components/form/dataset-completer.vue')
     },
     props: ['title', 'datasets'],
     data: function() {

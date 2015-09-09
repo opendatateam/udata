@@ -74,21 +74,27 @@ export default {
             return this.field.placeholder || this.field.label || '';
         },
         widget: function() {
+            let widget;
             if (this.field.widget) {
-                return this.field.widget;
+                widget = this.field.widget;
+            } else if (this.property.type == 'boolean') {
+                widget = 'checkbox';
+            } else if (this.property.type == 'string') {
+                if (this.property.format === 'markdown') {
+                    widget = 'markdown-editor';
+                } else if (this.property.enum) {
+                    widget = 'select-input';
+                }
             }
-            switch(this.property.type) {
-                case 'boolean':
-                    return 'checkbox';
-                case 'string':
-                    if (this.property.format === 'markdown') {
-                        return 'markdown-editor';
-                    } else if (this.property.enum) {
-                        return 'select-input';
-                    }
-                default:
-                    return 'text-input';
+            widget = widget || 'text-input';
+
+            // Lazy load component if needed
+            if (!this.$options.components.hasOwnProperty(widget)) {
+                this.$options.components[widget] = function(resolve, reject) {
+                    require(['./' + widget + '.vue'], resolve);
+                };
             }
+            return widget;
         }
     },
     ready: function() {

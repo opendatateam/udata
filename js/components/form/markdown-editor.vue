@@ -78,9 +78,9 @@ $.fn.markdown.messages[Vue.lang] = {
 
 module.exports = {
     name: 'markdown-editor',
-    inherit: true,
     replace: true,
     props: ['rows'],
+    mixins: [require('components/form/base-field').FieldComponentMixin],
     ready: function() {
         $(this.$el).markdown({
             language: Vue.lang,

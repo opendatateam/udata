@@ -87,7 +87,7 @@ module.exports = {
     mixins: [Sorter],
     components: {
         'reuse-card': require('components/reuse/card.vue'),
-        'reuse-completer': require('components/form/reuse-completer')
+        'reuse-completer': require('components/form/reuse-completer.vue')
     },
     props: ['reuses'],
     data: function() {
