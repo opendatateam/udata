@@ -13,8 +13,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-09-09 10:45+0200\n"
-"PO-Revision-Date: 2015-09-09 08:55+0000\n"
+"POT-Creation-Date: 2015-09-09 10:58+0200\n"
+"PO-Revision-Date: 2015-09-09 08:58+0000\n"
 "Last-Translator: Larlet David <david@larlet.fr>\n"
 "Language-Team: French (http://www.transifex.com/etalab/udata/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -25,7 +25,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: udata/theme.py:36 udata/core/site/metrics.py:91
-#: udata/core/site/views.py:149 udata/templates/header.html:49
+#: udata/core/site/views.py:148 udata/templates/header.html:49
 #: udata/templates/search.html:42 udata/templates/search.html:96
 #: udata/templates/dataset/search-panel.html:5
 #: udata/templates/organization/display_base.html:7
@@ -40,9 +40,9 @@ msgid "Organizations"
 msgstr "Organisations"
 
 #: udata/theme.py:37 udata/core/organization/metrics.py:19
-#: udata/core/organization/views.py:115 udata/core/organization/views.py:118
+#: udata/core/organization/views.py:114 udata/core/organization/views.py:117
 #: udata/core/reuse/metrics.py:24 udata/core/site/metrics.py:42
-#: udata/core/site/views.py:128 udata/core/user/metrics.py:28
+#: udata/core/site/views.py:127 udata/core/user/metrics.py:28
 #: udata/templates/search.html:27 udata/templates/search.html:68
 #: udata/templates/search.html:99 udata/templates/search.html:110
 #: udata/templates/dataset/display.html:22
@@ -66,9 +66,9 @@ msgid "Datasets"
 msgstr "Jeux de données"
 
 #: udata/theme.py:38 udata/core/dataset/metrics.py:24
-#: udata/core/organization/metrics.py:37 udata/core/organization/views.py:137
-#: udata/core/organization/views.py:140 udata/core/site/metrics.py:52
-#: udata/core/site/views.py:134 udata/core/user/metrics.py:42
+#: udata/core/organization/metrics.py:37 udata/core/organization/views.py:136
+#: udata/core/organization/views.py:139 udata/core/site/metrics.py:52
+#: udata/core/site/views.py:133 udata/core/user/metrics.py:42
 #: udata/templates/search.html:34 udata/templates/search.html:74
 #: udata/templates/search.html:82 udata/templates/search.html:100
 #: udata/templates/search.html:111 udata/templates/dataset/display.html:76
@@ -434,7 +434,7 @@ msgstr "%(user)s a commenté votre discussion"
 msgid "A discussion has been closed"
 msgstr "Une discussion a été cloturée"
 
-#: udata/core/followers/metrics.py:29 udata/core/organization/views.py:166
+#: udata/core/followers/metrics.py:29 udata/core/organization/views.py:165
 #: udata/core/site/metrics.py:101 udata/templates/search.html:101
 #: udata/templates/search.html:112 udata/templates/dataset/followers.html:6
 #: udata/templates/dataset/search-labels.html:26
@@ -546,7 +546,7 @@ msgstr "Type de badge (public-service, etc)"
 msgid "Role"
 msgstr "Rôle"
 
-#: udata/core/organization/metrics.py:48 udata/core/organization/views.py:161
+#: udata/core/organization/metrics.py:48 udata/core/organization/views.py:160
 msgid "Permitted reuses"
 msgstr "Réutilisations permises"
 
@@ -602,11 +602,11 @@ msgstr "Vous êtes maintenant membre de l'organisation \"%(org)s\""
 msgid "Membership refused"
 msgstr "Demande d'adhésion refusée"
 
-#: udata/core/organization/views.py:125 udata/core/organization/views.py:147
+#: udata/core/organization/views.py:124 udata/core/organization/views.py:146
 msgid "Views"
 msgstr "Vues"
 
-#: udata/core/organization/views.py:158 udata/core/site/views.py:146
+#: udata/core/organization/views.py:157 udata/core/site/views.py:145
 msgid "Community"
 msgstr "Communauté"
 
@@ -734,13 +734,13 @@ msgstr "Taille du flux"
 msgid "Number of elements in feeds"
 msgstr "Nombre d'élements dans les flux"
 
-#: udata/core/site/metrics.py:62 udata/core/site/views.py:140
+#: udata/core/site/metrics.py:62 udata/core/site/views.py:139
 #: udata/templates/search.html:69 udata/templates/dataset/display.html:64
 #: udata/templates/dataset/list.html:28
 msgid "Resources"
 msgstr "Ressources"
 
-#: udata/core/site/metrics.py:81 udata/core/site/views.py:155
+#: udata/core/site/metrics.py:81 udata/core/site/views.py:154
 #: udata/templates/search.html:50 udata/templates/user/base.html:15
 #: udata/templates/user/edit_base.html:9
 #: udata/templates/user/following.html:18 udata/templates/user/list.html:13
@@ -775,7 +775,7 @@ msgstr "Maximum de réutilisations pour une organisation"
 msgid "Maximum organization datasets"
 msgstr "Maximum de jeux de données pour une organisation"
 
-#: udata/core/site/views.py:125
+#: udata/core/site/views.py:124
 msgid "Data"
 msgstr "Données"
 
@@ -1277,16 +1277,16 @@ msgid "Site metrics"
 msgstr "Métriques du site"
 
 #: udata/templates/metrics.html:6
-#: udata/templates/organization/dashboard.html:8
-#: udata/templates/site/dashboard.html:8
+#: udata/templates/organization/dashboard.html:7
+#: udata/templates/site/dashboard.html:7
 msgid "metrics"
 msgstr "métriques"
 
-#: udata/templates/raw.html:46
+#: udata/templates/raw.html:47
 msgid "Recent datasets"
 msgstr "Jeux de données recents"
 
-#: udata/templates/raw.html:50
+#: udata/templates/raw.html:51
 msgid "Recent reuses"
 msgstr "Réutilisations récentes"
 
@@ -1732,10 +1732,6 @@ msgstr "Aucun résultat trouvé"
 msgid "Share"
 msgstr "Partagez"
 
-#: udata/templates/macros/timeline.html:19
-msgid "No recent activity"
-msgstr "Aucune activité récente"
-
 #: udata/templates/macros/uploader.html:8
 msgid "Drag a file here"
 msgstr "Glisser un fichier ici"
@@ -1895,27 +1891,21 @@ msgstr "Ceci est un mail de test"
 msgid "If you read this, your mail configuration is working"
 msgstr "Si vous lisez ceci, votre configuration fonctionne"
 
-#: udata/templates/organization/activity.html:6
-#: udata/templates/site/activity.html:6 udata/templates/user/activity.html:6
-#: udata/templates/user/base.html:65
-msgid "Activity"
-msgstr "Activité"
-
-#: udata/templates/organization/dashboard.html:6
+#: udata/templates/organization/dashboard.html:5
 #: udata/templates/organization/dashboard.html:18
 #: udata/templates/organization/display_base.html:103
-#: udata/templates/site/dashboard.html:6
+#: udata/templates/site/dashboard.html:5
 #: udata/templates/site/dashboard.html:18
 msgid "Dashboard"
 msgstr "Tableau de bord"
 
-#: udata/templates/organization/dashboard.html:7
-#: udata/templates/site/dashboard.html:7
+#: udata/templates/organization/dashboard.html:6
+#: udata/templates/site/dashboard.html:6
 msgid "Site metrics and activity"
 msgstr "Métriques et activité du site"
 
-#: udata/templates/organization/dashboard.html:8
-#: udata/templates/site/dashboard.html:8
+#: udata/templates/organization/dashboard.html:7
+#: udata/templates/site/dashboard.html:7
 msgid "activity"
 msgstr "activité"
 
@@ -2213,6 +2203,10 @@ msgstr "thématique"
 #: udata/templates/topic/display_base.html:25
 msgid "Related tags"
 msgstr "Tags associés"
+
+#: udata/templates/user/activity.html:5 udata/templates/user/base.html:65
+msgid "Activity"
+msgstr "Activité"
 
 #: udata/templates/user/base.html:76
 #, python-format
