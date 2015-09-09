@@ -36,7 +36,7 @@ export class Base {
 
     /**
      * Property setter which handle vue.js $set method if object is binded.
-     * @param {String} name  The name of the object proprty to set.
+     * @param {String} name  The name of the object property to set.
      * @param {Object} value The property value to set.
      */
     _set(name, value) {
@@ -297,14 +297,16 @@ export class List extends Base {
 };
 
 /**
- * A base class for server-side paginted list.
+ * A base class for server-side paginated list.
  */
 export class ModelPage extends Model {
     constructor(options) {
         super(options);
         this.query = this.$options.query || {};
+        this.cumulative = this.$options.cumulative || false;
         this.loading = true;
         this.serverside = true;
+        this._data = [];
     }
 
     /**
@@ -359,14 +361,24 @@ export class ModelPage extends Model {
         return this;
     }
 
+    on_fetched(data) {
+        if (this.cumulative && this._data.length) {
+            data.obj.data = this._data.concat(data.obj.data);
+        }
+        super.on_fetched(data);
+        this._data = data.obj.data;
+        this.$emit('updated', this);
+    }
+
     /**
      * Fetch the next page.
+     * @param {Object} options An optionnal query object for fetch.
      * @return {Object} Return itself allowing to chain methods.
      */
-    nextPage() {
+    nextPage(options) {
         if (this.page && this.page < this.pages) {
             this.query.page = this.page + 1;
-            this.fetch();
+            this.fetch(options);
         }
         return this;
     }

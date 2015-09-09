@@ -7,12 +7,10 @@ from flask import request
 
 from udata.api import api, API, fields
 from udata.auth import admin_permission
-from udata.models import Dataset, Reuse, Site, Activity
+from udata.models import Dataset, Reuse
 
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.reuse.api_fields import reuse_ref_fields
-from udata.core.user.api_fields import user_ref_fields
-from udata.core.organization.api_fields import org_ref_fields
 
 from .views import current_site
 
@@ -79,33 +77,3 @@ class SiteHomeReusesAPI(API):
         current_site.settings.home_reuses = Reuse.objects.bulk_list(ids)
         current_site.save()
         return current_site.settings.home_reuses
-
-
-activity_fields = api.model('Activity', {
-    'actor': fields.Nested(
-        user_ref_fields,
-        description='The user who performed the action', readonly=True),
-    'organization': fields.Nested(
-        org_ref_fields, allow_null=True, readonly=True,
-        description='The organization who performed the action'),
-    # 'related_to'
-    # related_to = db.ReferenceField(db.DomainModel, required=True)
-    'created_at': fields.ISODateTime(
-        description='When the action has been performed', readonly=True),
-    'kwargs': fields.Raw(description='Some action specific context'),
-})
-
-activity_page_fields = api.model('ActivityPage', fields.pager(activity_fields))
-
-activity_parser = api.page_parser()
-
-
-@api.route('/site/activity', endpoint='site_activity')
-class SiteActivityAPI(API):
-    @api.doc('site_activity', parser=activity_parser)
-    @api.marshal_list_with(activity_page_fields)
-    def get(self):
-        '''Fetch site activity'''
-        args = activity_parser.parse_args()
-        return (Activity.objects.order_by('-created')
-                                .paginate(args['page'], args['page_size']))

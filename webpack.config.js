@@ -19,6 +19,7 @@ module.exports = {
         site: './js/site.js',
         home: './js/home.js',
         search: './js/search.js',
+        activities: './js/activities.js',
         'dataset/display': './js/dataset/display',
         'reuse/display': './js/reuse/display',
         'organization/display': './js/organization/display',

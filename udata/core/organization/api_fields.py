@@ -11,6 +11,9 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
     'uri': fields.UrlFor(
         'api.organization', lambda o: {'org': o},
         description='The organization API URI', readonly=True),
+    'slug': fields.String(
+        description='The organization string used as permalink',
+        required=True),
     'page': fields.UrlFor(
         'organizations.show', lambda o: {'org': o},
         description='The organization web page URL', readonly=True),

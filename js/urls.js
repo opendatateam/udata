@@ -1,12 +1,14 @@
 /**
- * Build extenral URLs
+ * Build external URLs
  */
 define(['jquery'], function($) {
     'use strict';
 
     var URLS = {
         'organization.datasets_csv': '/organizations/{org}/datasets.csv',
-        'organization.datasets_resources_csv': '/organizations/{org}/datasets-resources.csv'
+        'organization.datasets_resources_csv': '/organizations/{org}/datasets-resources.csv',
+        'organizations.show': '/organizations/{org}/',
+        'users.show': '/users/{user}/'
     };
 
     function UrlBuildError(msg) {
@@ -17,8 +19,13 @@ define(['jquery'], function($) {
      * Replace objects by their ID if present
      */
     function urlize(obj) {
-        if (obj && obj instanceof Object && obj.hasOwnProperty('id')) {
-            return obj.id;
+        if (obj && obj instanceof Object) {
+            // Gives priority to slug, might be fragile.
+            if (obj.hasOwnProperty('slug')) {
+                return obj.slug;
+            } else if (obj.hasOwnProperty('id')) {
+                return obj.id;
+            }
         }
         return obj;
     }
