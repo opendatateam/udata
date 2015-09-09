@@ -14,7 +14,7 @@ export default {
             source: new HarvestSource(),
             fields: [{
                     id: 'name',
-                    label: this._('Nom')
+                    label: this._('Name')
                 }, {
                     id: 'description',
                     label: this._('Description')

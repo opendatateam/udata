@@ -9,6 +9,8 @@ user_ref_fields = api.inherit('UserReference', base_reference, {
         description='The user first name', readonly=True),
     'last_name': fields.String(
         description='The user larst name', readonly=True),
+    'slug': fields.String(
+        description='The user permalink string', required=True),
     'page': fields.UrlFor(
         'users.show', lambda u: {'user': u},
         description='The user profile page URL', readonly=True),

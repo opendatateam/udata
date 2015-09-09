@@ -19,7 +19,6 @@ from udata.sitemap import sitemap
 from udata.core.dataset.csv import (
     DatasetCsvAdapter, IssuesOrDiscussionCsvAdapter, ResourcesCsvAdapter
 )
-from udata.core.activity.views import ActivityView
 
 from .permissions import (
     EditOrganizationPermission, OrganizationPrivatePermission
@@ -102,7 +101,7 @@ class OrganizationDetailView(OrgView, DetailView):
 
 
 @blueprint.route('/<org:org>/dashboard/', endpoint='dashboard')
-class OrganizationDashboardView(OrgView, ActivityView, DetailView):
+class OrganizationDashboardView(OrgView, DetailView):
     template_name = 'organization/dashboard.html'
 
     def get_context(self):
@@ -173,11 +172,6 @@ class OrganizationDashboardView(OrgView, ActivityView, DetailView):
         context['metrics'] = widgets
 
         return context
-
-    def filter_activities(self, qs):
-        predicate = (db.Q(organization=self.organization)
-                     | db.Q(related_to=self.organization))
-        return qs(predicate)
 
 
 @blueprint.route('/<org:org>/datasets.csv')
