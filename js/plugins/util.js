@@ -4,9 +4,14 @@ import u from 'utils';
 export default function(Vue, options) {  // jshint ignore:line
 
     /**
-     * Check if an object is a function
+     * Check if an object is a Function
      */
     Vue.util.isFunction = u.isFunction;
+
+    /**
+     * Check if an object is a String
+     */
+    Vue.util.isString = u.isString;
 
     /**
      * Fetch the class name for given Vue object instance

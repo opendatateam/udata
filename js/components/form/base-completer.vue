@@ -15,8 +15,29 @@ import API from 'api';
 import Vue from 'vue';
 import $ from 'jquery';
 import logger from 'logger';
+import BaseError from 'models/error';
 
 import 'selectize';
+
+class CompleterError extends BaseError {};
+
+function lst2str(value) {
+    if (Vue.util.isArray(value)) {
+        return value.join(',');
+    }
+    return value || '';
+}
+
+function forceLst(value) {
+    if (Vue.util.isArray(value)) {
+        return value
+    } else if (Vue.util.isString(value)) {
+        return value.split(',');
+    } else if (value === undefined || value === null) {
+        return [];
+    }
+    throw new CompleterError(`Expect String or Array, not ${value}`);
+}
 
 export default {
     replace: true,
@@ -42,12 +63,7 @@ export default {
         }
     },
     filters: {
-        lst2str: function(value) {
-            if (Vue.util.isArray(value)) {
-                return value.join(',');
-            }
-            return value || '';
-        }
+        lst2str
     },
     methods: {
         load_suggestions: function(query, callback) {
@@ -68,6 +84,16 @@ export default {
             });
         }
     },
+    watch: {
+        value: function(values) {
+            if (this.selectize) {
+                this.selectize.clear(true);
+                forceLst(values).forEach((value) => {
+                    this.selectize.createItem(value);
+                });
+            }
+        }
+    },
     ready: function() {
         if (!this.field || !this.field.readonly) {
             this.selectize = $(this.$el).selectize(this.selectize_options)[0].selectize;
@@ -76,6 +102,7 @@ export default {
     beforeDestroy: function() {
         if (this.selectize) {
             this.selectize.destroy();
+            this.selectize = undefined;
         }
     }
 };
