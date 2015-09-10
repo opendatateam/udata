@@ -106,9 +106,9 @@ export default {
         // Perform all validations on end field because performing on start field unhighlight.
         $(this.$$.endHidden).rules('add', {
             dateGreaterThan: '#' + this.$$.startHidden.id,
-            required: function(el) {
+            required: (el) => {
                 return (this.$$.startHidden.value && !this.$$.endHidden.value) || (this.$$.endHidden.value && !this.$$.startHidden.value);
-            }.bind(this),
+            },
             messages: {
                 dateGreaterThan: this._('End date should be after start date'),
                 required: this._('Both dates are required')
