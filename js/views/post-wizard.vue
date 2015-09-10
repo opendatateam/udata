@@ -1,17 +1,11 @@
-<style lang="less">
-
-</style>
-
 <template>
 <wizard-component v-ref="wizard" steps="{{steps}}" finish="true"></wizard-component>
 </template>
 
 <script>
-'use strict';
+import Post from 'models/post';
 
-var Post = require('models/post');
-
-module.exports = {
+export default {
     data: function() {
         return {
             meta: {
@@ -22,31 +16,31 @@ module.exports = {
                 label: this._('Writing'),
                 subtitle: this._('Write your post'),
                 component: 'post-form',
-                next: function(component) {
+                next: (component) => {
                     if (component.$.form.validate()) {
                         Object.assign(this.post, component.$.form.serialize());
                         this.post.save();
                         return true;
                     }
-                }.bind(this)
+                }
             }, {
                 label: this._('Datasets'),
                 subtitle: this._('Add some related datasets'),
                 component: 'dataset-cards-form',
-                next: function(component) {
+                next: (component) => {
                     this.post.datasets = component.datasets;
                     this.post.save();
                     return true;
-                }.bind(this)
+                }
             }, {
                 label: this._('Reuses'),
                 subtitle: this._('Add some related reuses'),
                 component: 'reuse-cards-form',
-                next: function(component) {
+                next: (component) => {
                     this.post.reuses = component.reuses;
                     this.post.save();
                     return true;
-                }.bind(this)
+                }
             }]
          };
     },

@@ -6,11 +6,9 @@
 </template>
 
 <script>
-'use strict';
+import BaseForm from 'components/form/base-form';
 
-var BaseForm = require('components/form/base-form');
-
-module.exports = {
+export default {
     name: 'form-horizontal',
     mixins: [BaseForm],
     components: {

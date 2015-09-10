@@ -18,6 +18,9 @@ export default class Reuse extends Model {
         return this;
     }
 
+    /**
+     * Create or update the given reuse
+     */
     save() {
         if (this.id) {
             this.$api('reuses.update_reuse', {
@@ -27,7 +30,7 @@ export default class Reuse extends Model {
             this.on_fetched);
         } else {
             this.$api('reuses.create_reuse', {
-                payload: this.$data
+                payload: this
             },
             this.on_fetched);
         }

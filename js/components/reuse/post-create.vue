@@ -1,10 +1,6 @@
-<style lang="less">
-
-</style>
-
 <template>
 <div class="page-header">
-  <h1>{{ _('Your reuse has been created') }}</h1>
+<h1>{{ _('Your reuse has been created') }}</h1>
 </div>
 <div class="row">
     <div class="col-xs-12 lead text-center">
@@ -28,25 +24,15 @@
 </template>
 
 <script>
-'use strict';
+import Reuse from 'models/reuse';
 
-var Reuse = require('models/reuse');
-
-module.exports = {
+export default {
     props: ['reuse'],
     data: function() {
         return {reuse: {}};
     },
     components: {
         'share-widget': require('components/widgets/share.vue')
-    },
-    // watch: {
-    //     'reuse.id': function(id, old_id) {
-    //         console.log(id, old_id);
-    //         if (id !== old_id) {
-    //             this.$emit('reuse:updated');
-    //         }
-    //     }
-    // }
+    }
 };
 </script>

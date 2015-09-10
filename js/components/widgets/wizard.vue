@@ -39,9 +39,9 @@
     </div>
     <div class="row">
         <div class="col-xs-12">
-            <box-container boxclass="box-solid">
+            <box boxclass="box-solid" footer="{{true}}">
                 <component is="{{active_step.component}}" v-ref="content"></component>
-                <box-footer>
+                <footer>
                     <div class="col-xs-12">
                         <button v-if="previous_step"
                             class="btn btn-warning btn-flat pointer"
@@ -54,8 +54,8 @@
                             {{ this.step_index + 1 === this.steps.length ? _('Finish') : _('Next') }}
                         </button>
                     </div>
-                <box-footer>
-            </box-container>
+                <footer>
+            </box>
         </div>
     </div>
 </div>
@@ -99,7 +99,7 @@ module.exports = {
         }
     },
     components: {
-        'box-container': require('components/containers/box.vue')
+        'box': require('components/containers/box.vue')
     },
     methods: {
         click_next: function() {
