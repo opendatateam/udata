@@ -1,14 +1,19 @@
 <template>
-<select class="form-control" v-model="value" options="options" v-attr="
-    id: field.id,
-    name: field.id,
-    placeholder: placeholder,
-    required: required,
-    disabled: readonly">
+<select class="form-control" v-model="value"
+    options="options | extract"
+    v-attr="
+        id: field.id,
+        name: field.id,
+        placeholder: placeholder,
+        required: required,
+        disabled: readonly
+">
 </select>
 </template>
 
 <script>
+import {List} from 'models/base';
+
 export default {
     name: 'select-input',
     mixins: [require('components/form/base-field').FieldComponentMixin],
@@ -18,6 +23,9 @@ export default {
             if (!this.property && !this.field) return [];
 
             if (this.field.values) {
+                if (this.field.values instanceof List) {
+                    return this.field.values.items;
+                }
                 return this.field.values;
             } else if (this.property.enum && this.field.labels)  {
                 return this.property.enum.map(function(value) {
@@ -30,6 +38,14 @@ export default {
             }
 
             return [];
+        }
+    },
+    filters: {
+        extract: function(items) {
+            if (this.field.map) {
+                return items.map(this.field.map);
+            }
+            return items;
         }
     }
 };

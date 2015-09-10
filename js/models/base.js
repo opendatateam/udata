@@ -56,7 +56,7 @@ export class Base {
         var prefix = this.__class__.toLowerCase(),
             topic = prefix + ':' + name;
         pubsub.publish(topic, this, ...args);
-        this.$pubsub.publish(name, this, args)
+        this.$pubsub.publish(name, this, ...args);
     }
 
     /**
@@ -243,7 +243,7 @@ export class List extends Base {
         this.items = data.obj;
         this._sifter = new Sifter(this.items);
         this.populate();
-        this.$emit('updated', this);
+        this.$emit('updated');
         this.loading = false;
     }
 
@@ -264,7 +264,7 @@ export class List extends Base {
     clear() {
         this.items = [];
         this.populate();
-        this.$emit('updated', this);
+        this.$emit('updated');
         return this;
     }
 
@@ -367,7 +367,7 @@ export class ModelPage extends Model {
         }
         super.on_fetched(data);
         this._data = data.obj.data;
-        this.$emit('updated', this);
+        this.$emit('updated');
     }
 
     /**
