@@ -1,7 +1,3 @@
-<style lang="less">
-
-</style>
-
 <template>
 <select class="form-control" v-model="value" options="options" v-attr="
     id: field.id,
@@ -15,7 +11,7 @@
 <script>
 export default {
     name: 'select-input',
-    inherit: true,
+    mixins: [require('components/form/base-field').FieldComponentMixin],
     replace: true,
     computed: {
         options: function() {

@@ -17,7 +17,7 @@
 
 module.exports = {
     name: 'text-input',
-    inherit: true,
-    replace: true
+    replace: true,
+    mixins: [require('components/form/base-field').FieldComponentMixin]
 };
 </script>

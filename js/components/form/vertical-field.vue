@@ -23,13 +23,17 @@
             v-if="!is_hidden && !is_bool">
             {{ field.label }}
         </label>
-        <component is="{{widget}}" field="{{field}}"></component>
+        <component is="{{widget}}"
+            field="{{field}}" model="{{model}}" value="{{value}}"
+            description="{{description}}" property="{{property}}"
+            placeholder="{{placeholder}}" required="{{required}}">
+        </component>
         <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
     </div>
 </template>
 
 <script>
-import BaseField from 'components/form/base-field';
+import {BaseField} from 'components/form/base-field';
 
 export default {
     name: 'vertical-form-field',

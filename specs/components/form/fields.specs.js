@@ -10,21 +10,17 @@ describe("Common Fields features", function() {
 
     require('bootstrap');
 
-    before(function () {
-        // Need to mock reference lists
-        // API.mock_specs(require('specs/mocks/udata-swagger.json'));
-    });
-
     beforeEach(function() {
         this.vm = new Vue({
             el: fixture.set(`
                 <form role="form" v-el="form">
-                    <field v-repeat="field:fields" v-ref="field"></field>
+                    <field v-repeat="field:fields" v-ref="field" field="{{field}}"
+                        schema="{{schema}}" model="{{model}}"></field>
                 </form>`),
             mixins: [require('components/form/base-form')],
             components: {
                 field: {
-                    mixins: [require('components/form/base-field')]
+                    mixins: [require('components/form/base-field').BaseField]
                 }
             }
         });

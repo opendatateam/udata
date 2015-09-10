@@ -29,13 +29,12 @@
 </template>
 
 <script>
-'use strict';
+import API from 'api';
+import {FieldComponentMixin} from 'components/form/base-field';
 
-var API = require('api');
-
-module.exports = {
+export default {
     name: 'text-input',
-    inherit: true,
+    mixins: [FieldComponentMixin],
     replace: true,
     data: function() {
         return {

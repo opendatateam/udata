@@ -48,11 +48,10 @@
 </template>
 
 <script>
-'use strict';
+import $ from 'jquery';
+import Vue from 'vue';
 
-var $ = require('jquery'),
-    Vue = require('vue'),
-    EXCERPT_TOKEN = '<!--- excerpt -->';
+const EXCERPT_TOKEN = '<!--- excerpt -->';
 
 window.marked = require('marked');
 require('bootstrap-markdown/js/bootstrap-markdown');
@@ -76,7 +75,7 @@ $.fn.markdown.messages[Vue.lang] = {
     'list text here': Vue._('list text here')
 };
 
-module.exports = {
+export default {
     name: 'markdown-editor',
     replace: true,
     props: ['rows'],

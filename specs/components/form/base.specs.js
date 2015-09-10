@@ -161,43 +161,34 @@ describe("Common Form features", function() {
 
     describe('serialization', function() {
 
-        before(function () {
-            // Need to mock reference lists
-            API.mock_specs(require('specs/mocks/udata-swagger.json'));
-        });
-
         beforeEach(function() {
-            this.xhr = sinon.useFakeXMLHttpRequest();
-            let requests = this.requests = [];
-            this.xhr.onCreate = function (req) { requests.push(req); };
-
             this.vm = new Vue({
                 el: fixture.set(`
                     <form role="form" v-el="form">
-                        <field v-repeat="field:fields" v-ref="fields"></field>
+                        <field v-repeat="field in fields" field="{{field}}"
+                            schema="{{schema}}" model="{{model}}"></field>
                     </form>
                 `),
                 mixins: [BaseForm],
                 components: {
                     field: {
-                        template: `<component is="{{widget}}"></component>`,
-                        mixins: [require('components/form/base-field')]
+                        template: `<component is="{{widget}}" model="{{model}}"
+                                    field="{{field}}" value="{{value}}"
+                                    description="{{description}}" property="{{property}}"
+                                    placeholder="{{placeholder}}" required="{{required}}">
+                                    </component>`,
+                        mixins: [require('components/form/base-field').BaseField]
                     }
                 },
                 data: function() {
                     return {
-                        fields: []
+                        fields: [],
+                        model: {},
+                        defs: {}
                     };
                 }
             });
 
-            // requests[0].respond(200, {'Content-Type': 'application/json'}, JSON.stringify(raw_specs));
-
-
-        });
-
-        afterEach(function() {
-            this.xhr.restore();
         });
 
         it('should be an empty object for empty form', function() {
@@ -205,7 +196,7 @@ describe("Common Form features", function() {
         });
 
         it('should serialize all values', function() {
-            this.vm.model = {};
+            // this.vm.model = {};
             this.vm.defs = {properties: {
                 // Input is optionnal, just to avoid console warnings
                 input: {

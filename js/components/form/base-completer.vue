@@ -19,8 +19,8 @@ import logger from 'logger';
 import 'selectize';
 
 export default {
-    inherit: true,
     replace: true,
+    mixins: [require('components/form/base-field').FieldComponentMixin],
     computed: {
         selectize_options: function() {
             var opts = this.$options.selectize;

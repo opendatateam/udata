@@ -38,9 +38,9 @@ const ISO_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 
 export default {
     name: 'date-picker',
-    inherit: true,
     replace: true,
-    props: ['serializable', 'field', 'value'],
+    mixins: [require('components/form/base-field').FieldComponentMixin],
+    props: ['serializable'],
     components: {
         calendar: require('components/calendar.vue')
     },
