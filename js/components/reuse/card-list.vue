@@ -114,7 +114,7 @@ module.exports = {
     components: {
         'box': require('components/containers/box.vue'),
         'reuse-card': require('components/reuse/card.vue'),
-        'reuse-completer': require('components/form/reuse-completer')
+        'reuse-completer': require('components/form/reuse-completer.vue')
     },
     props: ['title', 'reuses'],
     data: function() {

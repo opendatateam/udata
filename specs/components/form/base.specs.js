@@ -17,7 +17,7 @@ describe("Common Form features", function() {
 
     describe("Empty form", function() {
         var vm = new Vue({
-            el: fixture.set('<form/>')[0],
+            el: fixture.set('<form />'),
             mixins: [BaseForm]
         });
 
@@ -44,7 +44,7 @@ describe("Common Form features", function() {
 
     describe("Forms with fields and defs", function() {
         var vm = new Vue({
-            el: fixture.set('<form/>')[0],
+            el: fixture.set('<form/>'),
             mixins: [BaseForm],
             data: {
                 fields: [{
@@ -112,7 +112,7 @@ describe("Common Form features", function() {
 
         it('Should handle schema for flat models', function() {
             var vm = new Vue({
-                el: fixture.set('<form/>')[0],
+                el: fixture.set('<form/>'),
                 mixins: [BaseForm],
                 data: {
                     model: new Pet(),
@@ -135,7 +135,7 @@ describe("Common Form features", function() {
 
         it('Should handle schema for nested models', function() {
             var vm = new Vue({
-                el: fixture.set('<form/>')[0],
+                el: fixture.set('<form/>'),
                 mixins: [BaseForm],
                 data: {
                     model: new Person(),
@@ -161,27 +161,34 @@ describe("Common Form features", function() {
 
     describe('serialization', function() {
 
-        var BaseField = require('components/form/base-field');
-
         beforeEach(function() {
             this.vm = new Vue({
                 el: fixture.set(`
                     <form role="form" v-el="form">
-                        <field v-repeat="field:fields" v-ref="fields"></field>
-                    </form>`)[0],
+                        <field v-repeat="field in fields" field="{{field}}"
+                            schema="{{schema}}" model="{{model}}"></field>
+                    </form>
+                `),
                 mixins: [BaseForm],
                 components: {
                     field: {
-                        template: `<component is="{{widget}}"></component>`,
-                        mixins: [BaseField]
+                        template: `<component is="{{widget}}" model="{{model}}"
+                                    field="{{field}}" value="{{value}}"
+                                    description="{{description}}" property="{{property}}"
+                                    placeholder="{{placeholder}}" required="{{required}}">
+                                    </component>`,
+                        mixins: [require('components/form/base-field').BaseField]
                     }
                 },
                 data: function() {
                     return {
-                        fields: []
+                        fields: [],
+                        model: {},
+                        defs: {}
                     };
                 }
             });
+
         });
 
         it('should be an empty object for empty form', function() {
@@ -189,7 +196,7 @@ describe("Common Form features", function() {
         });
 
         it('should serialize all values', function() {
-            this.vm.model = {};
+            // this.vm.model = {};
             this.vm.defs = {properties: {
                 // Input is optionnal, just to avoid console warnings
                 input: {
@@ -204,7 +211,8 @@ describe("Common Form features", function() {
                 },
                 select: {
                     type: 'string',
-                    enum: ['a', 'b']
+                    enum: ['a', 'b'],
+                    default: 'b'
                 }
             }};
             this.vm.fields = [{
@@ -221,7 +229,7 @@ describe("Common Form features", function() {
                 input: '',
                 checkbox: false,
                 textarea: '',
-                select: undefined,
+                select: 'b',
             });
         });
 

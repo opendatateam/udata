@@ -23,17 +23,19 @@ module.exports = {
                     id: 'license',
                     label: this._('License'),
                     widget: 'select-input',
-                    values: licenses.items.map(function(item) {
+                    values: licenses,
+                    map: function(item) {
                         return {value: item.id, text: item.title};
-                    })
+                    }
                 }, {
                     id: 'frequency',
                     label: this._('Update frequency'),
                     widget: 'frequency-field',
                     frequency_date_id: 'frequency_date',
-                    values: frequencies.items.map(function(item) {
+                    values: frequencies,
+                    map: function(item) {
                         return {value: item.id, text: item.label};
-                    })
+                    }
                 }, {
                     id: 'tags',
                     label: this._('Tags'),
@@ -50,9 +52,10 @@ module.exports = {
                     id: 'spatial.granularity',
                     label: this._('Spatial granularity'),
                     widget: 'select-input',
-                    values: granularities.items.map(function(item) {
+                    values: granularities,
+                    map: function(item) {
                         return {value: item.id, text: item.name};
-                    })
+                    }
                 }, {
                     id: 'private',
                     label: this._('Private')

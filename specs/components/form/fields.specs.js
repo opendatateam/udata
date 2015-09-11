@@ -10,19 +10,17 @@ describe("Common Fields features", function() {
 
     require('bootstrap');
 
-    var BaseForm = require('components/form/base-form'),
-        BaseField = require('components/form/base-field');
-
     beforeEach(function() {
         this.vm = new Vue({
             el: fixture.set(`
                 <form role="form" v-el="form">
-                    <field v-repeat="field:fields" v-ref="field"></field>
-                </form>`)[0],
-            mixins: [BaseForm],
+                    <field v-repeat="field:fields" v-ref="field" field="{{field}}"
+                        schema="{{schema}}" model="{{model}}"></field>
+                </form>`),
+            mixins: [require('components/form/base-form')],
             components: {
                 field: {
-                    mixins: [BaseField]
+                    mixins: [require('components/form/base-field').BaseField]
                 }
             }
         });

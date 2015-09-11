@@ -24,7 +24,7 @@
             <i class="fa fa-gear"></i>
         </a>
     </aside>
-    <div v-if="!toggled">
+    <div v-show="!toggled">
         <h3>
             {{user.fullname}}
         </h3>
@@ -35,7 +35,7 @@
             <div v-markdown="{{user.about}}"></div>
         </div>
     </div>
-    <user-form v-ref="form" v-if="toggled" user="{{user}}"></user-form>
+    <user-form v-ref="form" v-show="toggled" user="{{user}}"></user-form>
     <footer>
         <button type="submit" class="btn btn-primary"
             v-on="click: save($event)" v-i18n="Save"></button>

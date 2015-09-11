@@ -1,18 +1,12 @@
-<style lang="less">
-
-</style>
-
 <template>
 <wizard-component v-ref="wizard" steps="{{steps}}"></wizard-component>
 </template>
 
 <script>
-'use strict';
+import Organization from 'models/organization';
+import API from 'api';
 
-var Organization = require('models/organization'),
-    API = require('api');
-
-module.exports = {
+export default {
     data: function() {
         return {
             meta: {
@@ -28,13 +22,14 @@ module.exports = {
                 label: this._('Description'),
                 subtitle: this._('Describe your organization'),
                 component: 'create-form',
-                next: function(component) {
-                    if (component.$.form.validate()) {
-                        this.organization.$data = component.$.form.serialize();
+                next: (component) => {
+                    if (component.validate()) {
+                        let data = component.serialize();
+                        Object.assign(this.organization, data);
                         this.organization.save();
-                        this.organization.$once('updated', function() {
+                        this.organization.$once('updated', () => {
                             this.$.wizard.go_next();
-                        }.bind(this));
+                        });
                         return false;
                     }
                 }.bind(this)
@@ -42,21 +37,21 @@ module.exports = {
                 label: this._('Logo'),
                 subtitle: this._('Upload your organization logo'),
                 component: 'image-picker',
-                init: function(component) {
+                init: (component) => {
                     var endpoint = API.organizations.operations.organization_logo;
                     component.endpoint = endpoint.urlify({org: this.organization.id});
-                }.bind(this),
-                next: function(component) {
+                },
+                next: (component) => {
                     component.save();
                     return false;
-                }.bind(this)
+                }
             }, {
                 label: this._('Publish'),
                 subtitle: this._('Publish some content'),
                 component: 'post-create',
-                init: function(component) {
-                    component.dataset = this.dataset;
-                }.bind(this)
+                init: (component) => {
+                    component.organization = this.organization;
+                }
             }],
          };
     },
@@ -83,28 +78,6 @@ module.exports = {
             this.$.wizard.go_next();
             return false;
         }
-    },
-    // created: function() {
-    //     console.log('created', this.$router, this.$options.routes);
-    // },
-    // routes: {
-    //     '/': function() {
-    //         this.step_index = 0;
-    //         // this.loadView('organization-wizard');
-    //     },
-    //     '/:oid': {
-    //         on: function(oid) {
-    //             if (oid != this.organization.id) {
-    //                 this.organization.fetch(oid);
-    //             }
-    //         },
-    //         '/': function() {
-    //             this.step_index = 1;
-    //         },
-    //         '/publish': function(oid) {
-    //             this.step_index = 2;
-    //         }
-    //     }
-    // }
+    }
 };
 </script>

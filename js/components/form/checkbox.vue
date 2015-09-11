@@ -17,9 +17,11 @@
 </template>
 
 <script>
+import {FieldComponentMixin} from 'components/form/base-field';
+
 export default {
     name: 'Checkbox',
-    inherit: true,
-    replace: true
+    replace: true,
+    mixins: [FieldComponentMixin]
 };
 </script>

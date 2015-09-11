@@ -1,17 +1,11 @@
-<style lang="less">
-
-</style>
-
 <template>
-<form-vertical v-ref="form" fields="{{fields}}" model="{{organization}}"></form-vertical>
+<vform v-ref="form" fields="{{fields}}" model="{{organization}}"></vform>
 </template>
 
 <script>
-'use strict';
+import Organization from 'models/organization';
 
-var Organization = require('models/organization');
-
-module.exports = {
+export default {
     props: ['organization'],
     data: function() {
         return {
@@ -32,7 +26,7 @@ module.exports = {
         };
     },
     components: {
-        'form-vertical': require('components/form/vertical-form.vue')
+        'vform': require('components/form/vertical-form.vue')
     },
     methods: {
         serialize: function() {
