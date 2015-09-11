@@ -74,7 +74,7 @@ class DatasetAPI(API):
     @api.marshal_with(dataset_fields)
     def get(self, dataset):
         '''Get a dataset given its identifier'''
-        if dataset.deleted:
+        if dataset.deleted and not DatasetEditPermission(dataset).can():
             api.abort(410, 'Dataset has been deleted')
         return dataset
 

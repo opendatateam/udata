@@ -41,6 +41,15 @@ class OrganizationAPITest(APITestCase):
         response = self.get(url_for('api.organization', org=organization))
         self.assertStatus(response, 410)
 
+    def test_organization_api_get_deleted_but_authorized(self):
+        '''It should fetch a deleted organization from the API if authorized'''
+        self.login()
+        member = Member(user=self.user, role='editor')
+        organization = OrganizationFactory(deleted=datetime.now(),
+                                           members=[member])
+        response = self.get(url_for('api.organization', org=organization))
+        self.assert200(response)
+
     def test_organization_api_create(self):
         '''It should create an organization from the API'''
         data = OrganizationFactory.attributes()

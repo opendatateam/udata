@@ -39,6 +39,13 @@ class ReuseAPITest(APITestCase):
         response = self.get(url_for('api.reuse', reuse=reuse))
         self.assertStatus(response, 410)
 
+    def test_reuse_api_get_deleted_but_authorized(self):
+        '''It should fetch a deleted reuse from the API if authorized'''
+        self.login()
+        reuse = ReuseFactory(deleted=datetime.now(), owner=self.user)
+        response = self.get(url_for('api.reuse', reuse=reuse))
+        self.assert200(response)
+
     def test_reuse_api_create(self):
         '''It should create a reuse from the API'''
         data = ReuseFactory.attributes()
