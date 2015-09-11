@@ -1,29 +1,27 @@
 <template>
     <div class="row">
-        <user-profile user="{{user}}" class="col-xs-12 col-md-6"></user-profile>
+        <profile user="{{user}}" class="col-xs-12 col-md-6"></profile>
         <chart title="Traffic" metrics="{{metrics}}" class="col-xs-12 col-md-6"
             x="date" y="{{y}}"></chart>
     </div>
 
     <div class="row">
-        <datasets-widget class="col-xs-12" datasets="{{datasets}}"></datasets-widget>
+        <datasets class="col-xs-12" datasets="{{datasets}}"></datasets>
     </div>
 
     <div class="row">
-        <reuses-widget class="col-xs-12" reuses="{{reuses}}"></reuses-widget>
+        <reuses class="col-xs-12" reuses="{{reuses}}"></reuses>
     </div>
 </template>
 
 <script>
-'use strict';
+import moment from 'moment';
+import User from 'models/user';
+import Reuses from 'models/reuses';
+import Datasets from 'models/datasets';
+import Metrics from 'models/metrics';
 
-var moment = require('moment'),
-    User = require('models/user'),
-    Reuses = require('models/reuses'),
-    Datasets = require('models/datasets'),
-    Metrics = require('models/metrics');
-
-module.exports = {
+export default {
     name: 'user-view',
     data: function() {
         return {
@@ -51,10 +49,10 @@ module.exports = {
         };
     },
     components: {
-        'user-profile': require('components/user/profile.vue'),
-        'chart': require('components/charts/widget.vue'),
-        'datasets-widget': require('components/dataset/list.vue'),
-        'reuses-widget': require('components/reuse/list.vue')
+        profile: require('components/user/profile.vue'),
+        chart: require('components/charts/widget.vue'),
+        datasets: require('components/dataset/list.vue'),
+        reuses: require('components/reuse/list.vue')
     },
     watch: {
         user_id: function(id) {

@@ -1,16 +1,19 @@
 <template>
     <div class="row">
-        <user-profile user="{{$root.me}}" class="col-xs-12 col-md-6"></user-profile>
+        <profile user="{{$root.me}}" class="col-xs-12 col-md-6"></profile>
         <chart title="Traffic" metrics="{{metrics}}" class="col-xs-12 col-md-6"
             x="date" y="{{y}}"></chart>
     </div>
 
     <div class="row">
-        <datasets-widget class="col-xs-12" datasets="{{datasets}}"></datasets-widget>
+        <datasets class="col-xs-12" datasets="{{datasets}}"></datasets>
     </div>
 
     <div class="row">
-        <reuses-widget class="col-xs-12" reuses="{{reuses}}"></reuses-widget>
+        <reuses class="col-xs-12" reuses="{{reuses}}"></reuses>
+    </div>
+    <div class="row">
+        <apikey class="col-xs-12" user="{{$root.me}}"></apikey>
     </div>
 </template>
 
@@ -53,10 +56,11 @@ export default  {
         }
     },
     components: {
-        'user-profile': require('components/user/profile.vue'),
-        'chart': require('components/charts/widget.vue'),
-        'datasets-widget': require('components/dataset/list.vue'),
-        'reuses-widget': require('components/reuse/list.vue')
+        profile: require('components/user/profile.vue'),
+        chart: require('components/charts/widget.vue'),
+        datasets: require('components/dataset/list.vue'),
+        reuses: require('components/reuse/list.vue'),
+        apikey: require('components/user/apikey.vue')
     },
     attached: function() {
         this.update();
