@@ -80,7 +80,7 @@ class OrganizationAPI(API):
     @api.marshal_with(org_fields)
     def get(self, org):
         '''Get a organization given its identifier'''
-        if org.deleted:
+        if org.deleted and not OrganizationPrivatePermission(org).can():
             api.abort(410, 'Organization has been deleted')
         return org
 

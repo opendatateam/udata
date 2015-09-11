@@ -55,11 +55,19 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_get_deleted(self):
         '''It should not fetch a deleted dataset from the API and raise 410'''
+        dataset = VisibleDatasetFactory(deleted=datetime.now())
+
+        response = self.get(url_for('api.dataset', dataset=dataset))
+        self.assertStatus(response, 410)
+
+    def test_dataset_api_get_deleted_but_authorized(self):
+        '''It should a deleted dataset from the API if user is authorized'''
+        self.login()
         dataset = VisibleDatasetFactory(owner=self.user,
                                         deleted=datetime.now())
 
         response = self.get(url_for('api.dataset', dataset=dataset))
-        self.assertStatus(response, 410)
+        self.assert200(response)
 
     def test_dataset_api_create(self):
         '''It should create a dataset from the API'''

@@ -66,6 +66,13 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.get(url_for('datasets.show', dataset=dataset))
         self.assertStatus(response, 410)
 
+    def test_200_if_deleted_but_authorized(self):
+        '''It should not raise a 410 if the can view it'''
+        self.login()
+        dataset = DatasetFactory(deleted=datetime.now(), owner=self.user)
+        response = self.get(url_for('datasets.show', dataset=dataset))
+        self.assert200(response)
+
     def test_not_found(self):
         '''It should render the dataset page'''
         response = self.get(url_for('datasets.show', dataset='not-found'))
