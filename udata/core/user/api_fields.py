@@ -52,7 +52,12 @@ user_fields = api.model('User', {
 })
 
 me_fields = api.inherit('Me', user_fields, {
-    'email': fields.String(description='The user email', required=True)
+    'email': fields.String(description='The user email', required=True),
+    'apikey': fields.String(description='The user API Key', readonly=True),
+})
+
+apikey_fields = api.model('ApiKey', {
+    'apikey': fields.String(description='The user API Key', readonly=True),
 })
 
 user_page_fields = api.model('UserPage', fields.pager(user_fields))
