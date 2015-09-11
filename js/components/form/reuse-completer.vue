@@ -50,7 +50,7 @@ export default {
                 return new Vue({data: data}).$interpolate(template);
             },
             item: function(data, escape) {
-                return '<div class="card-input">'+data.title+'</div>';
+                return `<div class="card-input">${data.title}</div>`;
             }
         }
     }

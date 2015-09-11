@@ -14,7 +14,7 @@
 import API from 'api';
 import Vue from 'vue';
 import $ from 'jquery';
-import logger from 'logger';
+import log from 'logger';
 import BaseError from 'models/error';
 
 import 'selectize';
@@ -28,7 +28,7 @@ function lst2str(value) {
     return value || '';
 }
 
-function forceLst(value) {
+function forceList(value) {
     if (Vue.util.isArray(value)) {
         return value
     } else if (Vue.util.isString(value)) {
@@ -88,7 +88,7 @@ export default {
         value: function(values) {
             if (this.selectize) {
                 this.selectize.clear(true);
-                forceLst(values).forEach((value) => {
+                forceList(values).forEach((value) => {
                     this.selectize.createItem(value);
                 });
             }
