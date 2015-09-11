@@ -26,7 +26,6 @@
                 <reuse-card v-if="activity.related_to_kind === 'Reuse'" reuseid="{{ activity.related_to_id }}"></reuse-card>
                 <user-card v-if="activity.related_to_kind === 'User'" userid="{{ activity.related_to_id }}"></user-card>
             </div>
-            <div class="timeline-footer"></div>
         </div>
     </li>
     <li v-if="hasMore"><i v-on="click: more" v-el="more" class="fa fa-chevron-down timeline-icon timeline-icon-more"></i></li>
