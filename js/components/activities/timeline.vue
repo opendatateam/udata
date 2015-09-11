@@ -8,14 +8,13 @@
                 <h5>
                     <span v-if="activity.aggregatedFollowing">
                         <span v-repeat="actor in activity.aggregaterActors">
-                            <a href="{{ actor.url }}">{{actor.first_name}} {{actor.last_name}}</a><span v-if="$index < activity.aggregaterActors.length - 2">,</span>
+                            <a href="{{ actor.url }}">{{actor | displayName}}</a><span v-if="$index < activity.aggregaterActors.length - 2">,</span>
                             <span v-if="$index === activity.aggregaterActors.length - 2">{{ _('and') }}</span>
                         </span>
                         {{ activity.aggregatedLabel }}
                     </span>
                     <span v-if="!activity.aggregatedFollowing">
-                        <a v-if="activity.organization" href="{{ activity.organization.url }}">{{ activity.organization.name }}</a>
-                        <a v-if="!activity.organization" href="{{ activity.actor.url }}">{{activity.actor.first_name}} {{activity.actor.last_name}}</a>
+                        <a href="{{ actor(activity).url }}">{{ actor(activity) | displayName }}</a>
                         {{ activity.label }}
                     </span>
                     <a href="{{ activity.related_to_url }}">{{ activity.related_to }}</a>
@@ -111,7 +110,13 @@ export default {
             return this.activities.total > this.activities.page * this.activities.page_size;
         }
     },
+    filters: {
+        displayName: function(actor) {
+            return actor.name || actor.fullname || (actor.first_name + ' ' + actor.last_name);
+        }
+    },
     methods: {
+        actor,
         more: function() {
             let moreElement = this.$$.more
             moreElement.classList.remove("fa-chevron-down");
