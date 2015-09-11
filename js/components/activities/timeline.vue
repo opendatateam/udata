@@ -39,6 +39,10 @@ import moment from 'moment';
 import ActivityPage from 'models/activities';
 import URLs from 'urls';
 
+function actor(activity) {
+    return activity.organization || activity.actor;
+}
+
 export default {
     el: '#activities',
     props: ['organizationId', 'userId'],
@@ -123,17 +127,16 @@ export default {
         },
         isADuplicate: function(activity, previousActivity) {
             return previousActivity.label === activity.label
-                && (activity.actor && previousActivity.actor.id === activity.actor.id)
-                && (activity.organization && previousActivity.organization.id === activity.organization.id);
+                && actor(previousActivity).id === actor(activity).id;
         },
         updateOrgTheSameDay: function(activity, previousActivity) {
             return activity.key === 'organization:updated'
-                && previousActivity.organization.id === activity.organization.id
+                && actor(previousActivity).id === actor(activity).id
                 && this.withinSameDay(previousActivity.created_at, activity.created_at);
         },
         updateDatasetTheSameDay: function(activity, previousActivity) {
             return activity.key === 'dataset:updated'
-                && previousActivity.organization.id === activity.organization.id
+                && actor(previousActivity).id === actor(activity).id
                 && this.withinSameDay(previousActivity.created_at, activity.created_at);
         },
         updateOrCreateTheSameDay: function(activity, previousActivity) {
