@@ -20,7 +20,7 @@ from udata.utils import hash_url
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum',
     'DatasetIssue', 'DatasetDiscussion', 'DatasetBadge', 'FollowDataset',
-    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES', 'DATASET_BADGE_KINDS', 'C3',
+    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES', 'DATASET_BADGE_KINDS',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE'
 )
 
@@ -62,15 +62,19 @@ CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
 DEFAULT_CHECKSUM_TYPE = 'sha1'
 
 PIVOTAL_DATA = 'pivotal-data'
-C3 = 'c3'
 DATASET_BADGE_KINDS = {
     PIVOTAL_DATA: _('Pivotal data'),
-    C3: _('C³'),
 }
 
 
+def validate_badge(value):
+    if value not in DATASET_BADGE_KINDS.keys():
+        raise db.ValidationError('Unknown badge type')
+    return True
+
+
 class DatasetBadge(Badge):
-    kind = db.StringField(choices=DATASET_BADGE_KINDS.keys(), required=True)
+    kind = db.StringField(validation=validate_badge, required=True)
 
     def __html__(self):
         return unicode(DATASET_BADGE_KINDS[self.kind])

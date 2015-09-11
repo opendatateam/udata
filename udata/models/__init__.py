@@ -9,6 +9,7 @@ from flask.ext.mongoengine import (
     MongoEngine, MongoEngineSessionInterface, Document, BaseQuerySet
 )
 from mongoengine.base import TopLevelDocumentMetaclass
+from mongoengine.errors import ValidationError
 from mongoengine.signals import pre_save, post_save
 
 from flask.ext.fs.mongo import FileField, ImageField
@@ -42,6 +43,7 @@ class UDataMongoEngine(MongoEngine):
         self.BaseDocumentMetaclass = TopLevelDocumentMetaclass
         self.FileField = FileField
         self.ImageField = ImageField
+        self.ValidationError = ValidationError
         self.post_save = post_save
         self.pre_save = pre_save
 

@@ -14,7 +14,7 @@ from udata.utils import hash_url
 
 __all__ = (
     'Reuse', 'ReuseBadge', 'ReuseIssue', 'ReuseDiscussion', 'FollowReuse',
-    'REUSE_BADGE_KINDS', 'REUSE_TYPES', 'DATACONNEXIONS_CANDIDATE'
+    'REUSE_BADGE_KINDS', 'REUSE_TYPES'
 )
 
 
@@ -33,16 +33,17 @@ REUSE_TYPES = {
 IMAGE_SIZES = [100, 50, 25]
 IMAGE_MAX_SIZE = 800
 
-DATACONNEXIONS_CANDIDATE = 'dataconnexions-candidate'
-DATACONNEXIONS_LAUREATE = 'dataconnexions-laureate'
-REUSE_BADGE_KINDS = {
-    DATACONNEXIONS_CANDIDATE: _('Dataconnexions candidate'),
-    DATACONNEXIONS_LAUREATE: _('Dataconnexions laureate'),
-}
+REUSE_BADGE_KINDS = {}
+
+
+def validate_badge(value):
+    if value not in REUSE_BADGE_KINDS.keys():
+        raise db.ValidationError('Unknown badge type')
+    return True
 
 
 class ReuseBadge(Badge):
-    kind = db.StringField(choices=REUSE_BADGE_KINDS.keys(), required=True)
+    kind = db.StringField(validation=validate_badge, required=True)
 
     def __html__(self):
         return unicode(REUSE_BADGE_KINDS[self.kind])

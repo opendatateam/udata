@@ -42,8 +42,14 @@ ORG_BADGE_KINDS = {
 }
 
 
+def validate_badge(value):
+    if value not in ORG_BADGE_KINDS.keys():
+        raise db.ValidationError('Unknown badge type')
+    return True
+
+
 class OrganizationBadge(Badge):
-    kind = db.StringField(choices=ORG_BADGE_KINDS.keys(), required=True)
+    kind = db.StringField(validation=validate_badge, required=True)
 
     def __html__(self):
         return unicode(ORG_BADGE_KINDS[self.kind])
