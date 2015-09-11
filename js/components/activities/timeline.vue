@@ -8,14 +8,13 @@
                 <h5>
                     <span v-if="activity.aggregatedFollowing">
                         <span v-repeat="actor in activity.aggregaterActors">
-                            <a href="{{ actor.url }}">{{actor.first_name}} {{actor.last_name}}</a><span v-if="$index < activity.aggregaterActors.length - 2">,</span>
+                            <a href="{{ actor.url }}">{{actor | displayName}}</a><span v-if="$index < activity.aggregaterActors.length - 2">,</span>
                             <span v-if="$index === activity.aggregaterActors.length - 2">{{ _('and') }}</span>
                         </span>
                         {{ activity.aggregatedLabel }}
                     </span>
                     <span v-if="!activity.aggregatedFollowing">
-                        <a v-if="activity.organization" href="{{ activity.organization.url }}">{{ activity.organization.name }}</a>
-                        <a v-if="!activity.organization" href="{{ activity.actor.url }}">{{activity.actor.first_name}} {{activity.actor.last_name}}</a>
+                        <a href="{{ actor(activity).url }}">{{ actor(activity) | displayName }}</a>
                         {{ activity.label }}
                     </span>
                     <a href="{{ activity.related_to_url }}">{{ activity.related_to }}</a>
@@ -27,7 +26,6 @@
                 <reuse-card v-if="activity.related_to_kind === 'Reuse'" reuseid="{{ activity.related_to_id }}"></reuse-card>
                 <user-card v-if="activity.related_to_kind === 'User'" userid="{{ activity.related_to_id }}"></user-card>
             </div>
-            <div class="timeline-footer"></div>
         </div>
     </li>
     <li v-if="hasMore"><i v-on="click: more" v-el="more" class="fa fa-chevron-down timeline-icon timeline-icon-more"></i></li>
@@ -38,6 +36,10 @@
 import moment from 'moment';
 import ActivityPage from 'models/activities';
 import URLs from 'urls';
+
+function actor(activity) {
+    return activity.organization || activity.actor;
+}
 
 export default {
     el: '#activities',
@@ -107,7 +109,13 @@ export default {
             return this.activities.total > this.activities.page * this.activities.page_size;
         }
     },
+    filters: {
+        displayName: function(actor) {
+            return actor.name || actor.fullname || (actor.first_name + ' ' + actor.last_name);
+        }
+    },
     methods: {
+        actor,
         more: function() {
             let moreElement = this.$$.more
             moreElement.classList.remove("fa-chevron-down");
@@ -123,17 +131,16 @@ export default {
         },
         isADuplicate: function(activity, previousActivity) {
             return previousActivity.label === activity.label
-                && (activity.actor && previousActivity.actor.id === activity.actor.id)
-                && (activity.organization && previousActivity.organization.id === activity.organization.id);
+                && actor(previousActivity).id === actor(activity).id;
         },
         updateOrgTheSameDay: function(activity, previousActivity) {
             return activity.key === 'organization:updated'
-                && previousActivity.organization.id === activity.organization.id
+                && actor(previousActivity).id === actor(activity).id
                 && this.withinSameDay(previousActivity.created_at, activity.created_at);
         },
         updateDatasetTheSameDay: function(activity, previousActivity) {
             return activity.key === 'dataset:updated'
-                && previousActivity.organization.id === activity.organization.id
+                && actor(previousActivity).id === actor(activity).id
                 && this.withinSameDay(previousActivity.created_at, activity.created_at);
         },
         updateOrCreateTheSameDay: function(activity, previousActivity) {
