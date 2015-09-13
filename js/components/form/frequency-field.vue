@@ -52,7 +52,7 @@ export default {
             };
         },
         frequency_date_value: function() {
-            return this.model[this.field.frequency_date_id];
+            return this.model[this.field.frequency_date_id] || '';
         }
     },
     methods: {
