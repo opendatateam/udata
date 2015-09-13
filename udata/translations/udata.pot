@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-09-13 13:17+0200\n"
+"POT-Creation-Date: 2015-09-13 13:42+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,8 +59,8 @@ msgstr ""
 #: udata/core/site/views.py:133 udata/core/user/metrics.py:42
 #: udata/templates/search.html:34 udata/templates/search.html:74
 #: udata/templates/search.html:82 udata/templates/search.html:100
-#: udata/templates/search.html:111 udata/templates/dataset/display.html:76
-#: udata/templates/dataset/list.html:33
+#: udata/templates/search.html:111 udata/templates/dataset/card.html:45
+#: udata/templates/dataset/display.html:76 udata/templates/dataset/list.html:33
 #: udata/templates/dataset/search-labels.html:23
 #: udata/templates/dataset/search-panel.html:16
 #: udata/templates/organization/display.html:53
@@ -190,9 +190,11 @@ msgstr ""
 msgid "Expected frequency date"
 msgstr ""
 
-#: udata/core/dataset/forms.py:35 udata/templates/dataset/display.html:224
+#: udata/core/dataset/forms.py:35 udata/templates/dataset/card.html:75
+#: udata/templates/dataset/display.html:224
 #: udata/templates/dataset/search-labels.html:13
 #: udata/templates/dataset/search-panel.html:12
+#: udata/templates/dataset/search-result.html:37
 msgid "Temporal coverage"
 msgstr ""
 
@@ -203,6 +205,7 @@ msgstr ""
 #: udata/core/dataset/forms.py:38 udata/forms/fields.py:405
 #: udata/templates/dataset/search-labels.html:16
 #: udata/templates/dataset/search-panel.html:13
+#: udata/templates/dataset/search-result.html:60
 msgid "Spatial coverage"
 msgstr ""
 
@@ -247,9 +250,10 @@ msgid "Kind of badge (pivotal-data, etc)"
 msgstr ""
 
 #: udata/core/dataset/forms.py:97 udata/core/reuse/forms.py:27
-#: udata/templates/reuse/display.html:252
+#: udata/templates/reuse/card.html:35 udata/templates/reuse/display.html:252
 #: udata/templates/reuse/search-labels.html:6
 #: udata/templates/reuse/search-panel.html:6
+#: udata/templates/reuse/search-result.html:18
 msgid "Type"
 msgstr ""
 
@@ -424,6 +428,7 @@ msgstr ""
 #: udata/templates/search.html:112 udata/templates/dataset/followers.html:6
 #: udata/templates/dataset/search-labels.html:26
 #: udata/templates/dataset/search-panel.html:17
+#: udata/templates/dataset/search-result.html:90
 #: udata/templates/organization/display.html:58
 #: udata/templates/organization/followers.html:7
 #: udata/templates/organization/list.html:34
@@ -1320,7 +1325,9 @@ msgid "Badge"
 msgstr ""
 
 #: udata/templates/search.html:75 udata/templates/search.html:88
-#: udata/templates/dataset/list.html:34 udata/templates/topic/datasets.html:30
+#: udata/templates/dataset/card.html:53 udata/templates/dataset/list.html:34
+#: udata/templates/organization/card.html:53 udata/templates/reuse/card.html:52
+#: udata/templates/topic/datasets.html:30 udata/templates/user/card.html:39
 msgid "Stars"
 msgstr ""
 
@@ -1424,6 +1431,39 @@ msgstr ""
 msgid "OAuth Authentication Error"
 msgstr ""
 
+#: udata/templates/dataset/card.html:13
+#: udata/templates/dataset/search-result.html:13
+#: udata/templates/organization/card.html:11
+#: udata/templates/organization/display_base.html:27
+#: udata/templates/organization/edit_base.html:18
+#: udata/templates/organization/search-result.html:12
+#: udata/templates/reuse/display.html:162
+msgid "Certified public service"
+msgstr ""
+
+#: udata/templates/dataset/card.html:14
+#: udata/templates/dataset/search-result.html:14
+#: udata/templates/organization/card.html:12
+#: udata/templates/organization/edit_base.html:19
+#: udata/templates/organization/search-result.html:13
+#: udata/templates/reuse/display.html:163
+msgid "The identity of this public service public is certified by Etalab"
+msgstr ""
+
+#: udata/templates/dataset/card.html:35 udata/templates/dataset/display.html:258
+msgid "Territorial coverage"
+msgstr ""
+
+#: udata/templates/dataset/card.html:87 udata/templates/dataset/display.html:249
+#: udata/templates/dataset/search-result.html:71
+msgid "Territorial coverage granularity"
+msgstr ""
+
+#: udata/templates/dataset/card.html:99 udata/templates/dataset/display.html:237
+#: udata/templates/dataset/search-result.html:48
+msgid "Frequency"
+msgstr ""
+
 #: udata/templates/dataset/discussion-item.html:12
 msgid "Discussion started on"
 msgstr ""
@@ -1503,18 +1543,6 @@ msgstr ""
 msgid "Informations"
 msgstr ""
 
-#: udata/templates/dataset/display.html:237
-msgid "Frequency"
-msgstr ""
-
-#: udata/templates/dataset/display.html:249
-msgid "Territorial coverage granularity"
-msgstr ""
-
-#: udata/templates/dataset/display.html:258
-msgid "Territorial coverage"
-msgstr ""
-
 #: udata/templates/dataset/edit_base.html:6
 #: udata/templates/organization/edit_base.html:9
 #: udata/templates/reuse/edit_base.html:6 udata/templates/user/edit_base.html:11
@@ -1554,6 +1582,10 @@ msgstr ""
 
 #: udata/templates/dataset/search-panel.html:15
 msgid "Formats"
+msgstr ""
+
+#: udata/templates/dataset/search-result.html:81
+msgid "Reuse number"
 msgstr ""
 
 #: udata/templates/dataset/resource/list-item.html:12
@@ -1887,6 +1919,36 @@ msgstr ""
 msgid "If you read this, your mail configuration is working"
 msgstr ""
 
+#: udata/templates/organization/card.html:29
+#: udata/templates/organization/search-result.html:26
+#: udata/templates/user/card.html:22 udata/templates/user/search-result.html:19
+msgid "Number of datasets"
+msgstr ""
+
+#: udata/templates/organization/card.html:31
+#: udata/templates/organization/search-result.html:28
+#: udata/templates/reuse/search-result.html:27 udata/templates/user/card.html:24
+#: udata/templates/user/search-result.html:21
+#, python-format
+msgid "%(num)s dataset"
+msgid_plural "%(num)s datasets"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata/templates/organization/card.html:38 udata/templates/user/card.html:31
+#: udata/templates/user/search-result.html:28
+msgid "Number of reuses"
+msgstr ""
+
+#: udata/templates/organization/card.html:40
+#: udata/templates/organization/search-result.html:37
+#: udata/templates/user/card.html:33 udata/templates/user/search-result.html:30
+#, python-format
+msgid "%(num)s reuse"
+msgid_plural "%(num)s reuses"
+msgstr[0] ""
+msgstr[1] ""
+
 #: udata/templates/organization/dashboard.html:5
 #: udata/templates/organization/dashboard.html:18
 #: udata/templates/organization/display_base.html:103
@@ -1970,12 +2032,6 @@ msgstr ""
 
 #: udata/templates/organization/display.html:190
 msgid "Display all followers"
-msgstr ""
-
-#: udata/templates/organization/display_base.html:27
-#: udata/templates/organization/edit_base.html:18
-#: udata/templates/reuse/display.html:162
-msgid "Certified public service"
 msgstr ""
 
 #: udata/templates/organization/display_base.html:28
@@ -2073,14 +2129,61 @@ msgstr ""
 msgid "I'll be informed about this organization news"
 msgstr ""
 
-#: udata/templates/organization/edit_base.html:19
-#: udata/templates/reuse/display.html:163
-msgid "The identity of this public service public is certified by Etalab"
-msgstr ""
-
 #: udata/templates/organization/search-panel.html:7
 msgid "Reappropriations"
 msgstr ""
+
+#: udata/templates/organization/search-result.html:35
+msgid "Number of reuses by the organization"
+msgstr ""
+
+#: udata/templates/organization/search-result.html:44
+msgid "Number of reappropriations by the community"
+msgstr ""
+
+#: udata/templates/organization/search-result.html:46
+#, python-format
+msgid "%(num)s reappropriation"
+msgid_plural "%(num)s reappropriations"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata/templates/organization/search-result.html:53
+#: udata/templates/reuse/search-result.html:32
+msgid "Number of stars"
+msgstr ""
+
+#: udata/templates/organization/search-result.html:55
+#: udata/templates/reuse/search-result.html:34
+#, python-format
+msgid "%(num)s star"
+msgid_plural "%(num)s stars"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata/templates/organization/search-result.html:62
+#: udata/templates/user/search-result.html:37
+msgid "Number of followers"
+msgstr ""
+
+#: udata/templates/organization/search-result.html:64
+#: udata/templates/user/search-result.html:39
+#, python-format
+msgid "%(num)s follower"
+msgid_plural "%(num)s followers"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata/templates/organization/search-result.html:70
+msgid "Number of members"
+msgstr ""
+
+#: udata/templates/organization/search-result.html:72
+#, python-format
+msgid "%(num)s members"
+msgid_plural "%(num)s members"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/post/display.html:19
 msgid "News"
@@ -2107,6 +2210,10 @@ msgstr ""
 msgid "Read more"
 msgstr ""
 
+#: udata/templates/reuse/card.html:43
+msgid "Number of datasets used"
+msgstr ""
+
 #: udata/templates/reuse/display.html:75
 #, python-format
 msgid "Published on %(date)s by %(user)s"
@@ -2130,6 +2237,10 @@ msgstr ""
 
 #: udata/templates/reuse/display.html:280
 msgid "No followers yet"
+msgstr ""
+
+#: udata/templates/reuse/search-result.html:25
+msgid "Number of dataset"
 msgstr ""
 
 #: udata/templates/security/login_user.html:13
