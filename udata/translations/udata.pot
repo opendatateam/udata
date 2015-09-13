@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-09-09 10:58+0200\n"
+"POT-Creation-Date: 2015-09-13 13:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2206,34 +2206,6 @@ msgstr[1] ""
 
 #: udata/templates/user/edit.html:13 udata/templates/user/edit_settings.html:13
 msgid "Cancel"
-msgstr ""
-
-#: udata/templates/user/edit_apikey.html:5
-msgid "This page allows you to generate or regenerate your API Key."
-msgstr ""
-
-#: udata/templates/user/edit_apikey.html:6
-msgid "This key is needed if you want to use the API."
-msgstr ""
-
-#: udata/templates/user/edit_apikey.html:10
-msgid "API KEY"
-msgstr ""
-
-#: udata/templates/user/edit_apikey.html:15
-msgid "You don't have generated an API KEY yet."
-msgstr ""
-
-#: udata/templates/user/edit_apikey.html:23
-msgid "Regenerate"
-msgstr ""
-
-#: udata/templates/user/edit_apikey.html:25
-msgid "Clear"
-msgstr ""
-
-#: udata/templates/user/edit_apikey.html:31
-msgid "Generate an API KEY"
 msgstr ""
 
 #: udata/templates/user/edit_notifications.html:10
