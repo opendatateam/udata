@@ -1,5 +1,3 @@
-<style lang="less"></style>
-
 <template>
 <modal title="{{ _('Transfer request') }}"
     class="modal-info transfer-response-modal"
@@ -73,19 +71,16 @@
 </template>
 
 <script>
-'use strict';
+import API from 'api';
+import Vue from 'vue';
 
-var API = require('api'),
-    Vue = require('vue');
-
-module.exports = {
+export default {
     components: {
         'modal': require('components/modal.vue'),
         'org-card': require('components/organization/card.vue'),
         'user-card': require('components/user/card.vue'),
         'dataset-card': require('components/dataset/card.vue'),
-        'reuse-card': require('components/reuse/card.vue'),
-        'id-card': require('components/identity.vue')
+        'reuse-card': require('components/reuse/card.vue')
     },
     data: function() {
         return {
@@ -97,11 +92,11 @@ module.exports = {
     filters: {
         is_dataset: function(obj) {
             if (!obj) return;
-            return (obj.class || obj.classname) === 'Dataset';
+            return obj.__class__ === 'Dataset';
         },
         is_reuse: function(obj) {
             if (!obj) return;
-            return (obj.class || obj.classname) === 'Reuse';
+            return obj.__class__ === 'Reuse';
         }
     },
     methods: {
@@ -112,21 +107,21 @@ module.exports = {
                     response: response,
                     comment: this.comment || undefined
                 }
-            }, function(response) {
+            }, (response) => {
                 this.$dispatch('notify', {
                     title: this._('Response sent'),
                     details: this._('The response has been sent to the requester.')
                 });
                 this.$.modal.close();
                 this.$emit('transfer:responded', response.obj);
-            }.bind(this));
+            });
         }
     },
     ready: function() {
-        API.transfer.get_transfer({id: this.transferid}, function(response) {
+        API.transfer.get_transfer({id: this.transferid}, (response) => {
             this.transfer = response.obj;
             this.$emit('transfer:loaded');
-        }.bind(this));
+        });
     }
 };
 </script>
