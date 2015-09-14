@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from udata import search
-from udata.models import Organization, ORG_BADGE_KINDS
+from udata.models import Organization
 from udata.core.site.views import current_site
 
 from . import metrics  # Metrics are need for the mapping
@@ -16,7 +16,7 @@ max_followers = lambda: max(current_site.metrics.get('max_org_followers'), 10)
 
 
 def organization_badge_labelizer(label, kind):
-    return ORG_BADGE_KINDS.get(kind, '')
+    return Organization.__badges__.get(kind, '')
 
 
 class OrganizationSearch(search.ModelSearchAdapter):

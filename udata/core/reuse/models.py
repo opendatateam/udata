@@ -13,8 +13,7 @@ from udata.models import (
 from udata.utils import hash_url
 
 __all__ = (
-    'Reuse', 'ReuseBadge', 'ReuseIssue', 'ReuseDiscussion', 'FollowReuse',
-    'REUSE_BADGE_KINDS', 'REUSE_TYPES'
+    'Reuse', 'ReuseIssue', 'ReuseDiscussion', 'FollowReuse', 'REUSE_TYPES'
 )
 
 
@@ -32,21 +31,6 @@ REUSE_TYPES = {
 
 IMAGE_SIZES = [100, 50, 25]
 IMAGE_MAX_SIZE = 800
-
-REUSE_BADGE_KINDS = {}
-
-
-def validate_badge(value):
-    if value not in REUSE_BADGE_KINDS.keys():
-        raise db.ValidationError('Unknown badge type')
-    return True
-
-
-class ReuseBadge(Badge):
-    kind = db.StringField(validation=validate_badge, required=True)
-
-    def __html__(self):
-        return unicode(REUSE_BADGE_KINDS[self.kind])
 
 
 class ReuseQuerySet(db.BaseQuerySet):
@@ -80,7 +64,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
     datasets = db.ListField(
         db.ReferenceField('Dataset', reverse_delete_rule=db.PULL))
     tags = db.ListField(db.StringField())
-    badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
+    # badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
 
     private = db.BooleanField()
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
@@ -97,6 +81,8 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
         return self.title or ''
 
     __unicode__ = __str__
+
+    __badges__ = {}
 
     meta = {
         'allow_inheritance': True,

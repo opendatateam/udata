@@ -6,16 +6,13 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import (
-    Reuse, FollowReuse, Follow, Member, REUSE_BADGE_KINDS, REUSE_TYPES,
-    ReuseBadge
+    Reuse, FollowReuse, Follow, Member, REUSE_TYPES, Badge
 )
-
-from factory.fuzzy import FuzzyChoice
-from factory.mongoengine import MongoEngineFactory
 
 from . import APITestCase
 from ..factories import (
-    faker, ReuseFactory, DatasetFactory, AdminFactory, OrganizationFactory
+    faker, badge_factory,
+    ReuseFactory, DatasetFactory, AdminFactory, OrganizationFactory
 )
 
 
@@ -270,16 +267,10 @@ class ReuseBadgeAPITest(APITestCase):
     @classmethod
     def setUpClass(cls):
         # Register at least two badges
-        REUSE_BADGE_KINDS['test-1'] = 'Test 1'
-        REUSE_BADGE_KINDS['test-2'] = 'Test 2'
+        Reuse.__badges__['test-1'] = 'Test 1'
+        Reuse.__badges__['test-2'] = 'Test 2'
 
-        class ReuseBadgeFactory(MongoEngineFactory):
-            class Meta:
-                model = ReuseBadge
-
-            kind = FuzzyChoice(REUSE_BADGE_KINDS.keys())
-
-        cls.factory = ReuseBadgeFactory
+        cls.factory = badge_factory(Reuse)
 
     def setUp(self):
         self.login(AdminFactory())
@@ -288,8 +279,8 @@ class ReuseBadgeAPITest(APITestCase):
     def test_list(self):
         response = self.get(url_for('api.available_reuse_badges'))
         self.assertStatus(response, 200)
-        self.assertEqual(len(response.json), len(REUSE_BADGE_KINDS))
-        for kind, label in REUSE_BADGE_KINDS.items():
+        self.assertEqual(len(response.json), len(Reuse.__badges__))
+        for kind, label in Reuse.__badges__.items():
             self.assertIn(kind, response.json)
             self.assertEqual(response.json[kind], label)
 
@@ -316,7 +307,7 @@ class ReuseBadgeAPITest(APITestCase):
     def test_create_2nd(self):
         # Explicitely setting the kind to avoid collisions given the
         # small number of choices for kinds.
-        kinds_keys = REUSE_BADGE_KINDS.keys()
+        kinds_keys = Reuse.__badges__.keys()
         self.reuse.badges.append(
             self.factory(kind=kinds_keys[0]))
         self.reuse.save()

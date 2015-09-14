@@ -10,7 +10,7 @@ from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
 from udata.models import (
-    db, WithMetrics, Badge, BadgeMixin, Discussion, Follow, Issue,
+    db, WithMetrics, BadgeMixin, Discussion, Follow, Issue,
     SpatialCoverage
 )
 from udata.i18n import lazy_gettext as _
@@ -19,8 +19,8 @@ from udata.utils import hash_url
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum',
-    'DatasetIssue', 'DatasetDiscussion', 'DatasetBadge', 'FollowDataset',
-    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES', 'DATASET_BADGE_KINDS',
+    'DatasetIssue', 'DatasetDiscussion', 'FollowDataset',
+    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE'
 )
 
@@ -62,22 +62,6 @@ CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
 DEFAULT_CHECKSUM_TYPE = 'sha1'
 
 PIVOTAL_DATA = 'pivotal-data'
-DATASET_BADGE_KINDS = {
-    PIVOTAL_DATA: _('Pivotal data'),
-}
-
-
-def validate_badge(value):
-    if value not in DATASET_BADGE_KINDS.keys():
-        raise db.ValidationError('Unknown badge type')
-    return True
-
-
-class DatasetBadge(Badge):
-    kind = db.StringField(validation=validate_badge, required=True)
-
-    def __html__(self):
-        return unicode(DATASET_BADGE_KINDS[self.kind])
 
 
 class License(db.Document):
@@ -158,7 +142,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     tags = db.ListField(db.StringField())
     resources = db.ListField(db.EmbeddedDocumentField(Resource))
     community_resources = db.ListField(db.EmbeddedDocumentField(Resource))
-    badges = db.ListField(db.EmbeddedDocumentField(DatasetBadge))
 
     private = db.BooleanField()
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
@@ -183,6 +166,10 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         return self.title or ''
 
     __unicode__ = __str__
+
+    __badges__ = {
+        PIVOTAL_DATA: _('Pivotal data'),
+    }
 
     meta = {
         'allow_inheritance': True,

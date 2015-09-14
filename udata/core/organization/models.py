@@ -8,14 +8,13 @@ from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
 from udata.core.storages import avatars, default_image_basename
-from udata.models import db, Badge, BadgeMixin, WithMetrics, Follow
+from udata.models import db, BadgeMixin, WithMetrics, Follow
 from udata.i18n import lazy_gettext as _
 
 
 __all__ = (
     'Organization', 'Team', 'Member', 'MembershipRequest', 'FollowOrg',
-    'ORG_ROLES', 'MEMBERSHIP_STATUS', 'ORG_BADGE_KINDS', 'PUBLIC_SERVICE',
-    'OrganizationBadge', 'CERTIFIED'
+    'ORG_ROLES', 'MEMBERSHIP_STATUS', 'PUBLIC_SERVICE', 'CERTIFIED'
 )
 
 
@@ -35,24 +34,6 @@ LOGO_SIZES = [100, 60, 25]
 
 PUBLIC_SERVICE = 'public-service'
 CERTIFIED = 'certified'
-ORG_BADGE_KINDS = {
-    PUBLIC_SERVICE: _('Public Service'),
-    CERTIFIED: _('Certified'),
-    'authenticated-organization': _('Authenticated organization'),
-}
-
-
-def validate_badge(value):
-    if value not in ORG_BADGE_KINDS.keys():
-        raise db.ValidationError('Unknown badge type')
-    return True
-
-
-class OrganizationBadge(Badge):
-    kind = db.StringField(validation=validate_badge, required=True)
-
-    def __html__(self):
-        return unicode(ORG_BADGE_KINDS[self.kind])
 
 
 def upload_logo_to(org):
@@ -139,7 +120,6 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     members = db.ListField(db.EmbeddedDocumentField(Member))
     teams = db.ListField(db.EmbeddedDocumentField(Team))
     requests = db.ListField(db.EmbeddedDocumentField(MembershipRequest))
-    badges = db.ListField(db.EmbeddedDocumentField(OrganizationBadge))
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
@@ -157,6 +137,11 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         return self.name or ''
 
     __unicode__ = __str__
+
+    __badges__ = {
+        PUBLIC_SERVICE: _('Public Service'),
+        CERTIFIED: _('Certified'),
+    }
 
     before_save = Signal()
     after_save = Signal()

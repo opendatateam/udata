@@ -8,7 +8,7 @@ from datetime import datetime
 from flask import url_for
 
 from udata.frontend import csv
-from udata.models import OrganizationBadge, Site, PUBLIC_SERVICE
+from udata.models import Badge, Site, PUBLIC_SERVICE
 
 from udata.core.site.views import current_site
 from udata.tests.frontend import FrontTestCase
@@ -262,9 +262,8 @@ class SiteViewsTest(FrontTestCase):
         '''Should handle filtering but ignore paging or facets'''
         user = self.login()
         with self.autoindex():
-            public_service_badge = OrganizationBadge(
+            public_service_badge = Badge(
                 kind=PUBLIC_SERVICE,
-                created=datetime.now(),
                 created_by=user
             )
             filtered_orgs = [

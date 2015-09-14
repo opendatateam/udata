@@ -6,13 +6,10 @@ from udata.api import api, fields, base_reference
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.user.api_fields import user_ref_fields
+from udata.core.badges.api import badge_fields
 
-from .models import REUSE_TYPES, REUSE_BADGE_KINDS
+from .models import REUSE_TYPES
 
-badge_fields = api.model('ReuseBadge', {
-    'kind': fields.String(description='Kind of badge (dataconnexions, etc)',
-                          required=True, enum=REUSE_BADGE_KINDS.keys()),
-})
 
 reuse_fields = api.model('Reuse', {
     'id': fields.String(description='The reuse identifier', readonly=True),

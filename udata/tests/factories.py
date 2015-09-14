@@ -141,20 +141,6 @@ class ResourceFactory(MongoEngineFactory):
     url = factory.LazyAttribute(lambda o: faker.url())
 
 
-class DatasetBadgeFactory(MongoEngineFactory):
-    class Meta:
-        model = models.DatasetBadge
-
-    kind = FuzzyChoice(models.DATASET_BADGE_KINDS.keys())
-
-
-class OrganizationBadgeFactory(MongoEngineFactory):
-    class Meta:
-        model = models.OrganizationBadge
-
-    kind = FuzzyChoice(models.ORG_BADGE_KINDS.keys())
-
-
 class DatasetFactory(MongoEngineFactory):
     class Meta:
         model = models.Dataset
@@ -288,3 +274,13 @@ class GeoLevelFactory(MongoEngineFactory):
 
     id = factory.LazyAttribute(lambda o: unique_string())
     name = factory.LazyAttribute(lambda o: faker.name())
+
+
+def badge_factory(model):
+    class BadgeFactory(MongoEngineFactory):
+        class Meta:
+            model = models.Badge
+
+        kind = FuzzyChoice(model.__badges__.keys())
+
+    return BadgeFactory
