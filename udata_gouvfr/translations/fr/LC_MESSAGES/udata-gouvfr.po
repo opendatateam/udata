@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-09-13 13:46+0200\n"
-"PO-Revision-Date: 2015-09-13 11:47+0000\n"
+"POT-Creation-Date: 2015-09-14 22:50+0200\n"
+"PO-Revision-Date: 2015-09-14 20:51+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/etalab/udata-gouvfr/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -26,6 +26,26 @@ msgstr ""
 #: udata_gouvfr/metrics.py:14
 msgid "Public services"
 msgstr "Services publics"
+
+#: udata_gouvfr/models.py:22
+msgid "Dataconnexions 5 candidate"
+msgstr "Candidat Dataconnexions 5"
+
+#: udata_gouvfr/models.py:23
+msgid "Dataconnexions 5 laureate"
+msgstr "Lauréat Dataconnexions 5"
+
+#: udata_gouvfr/models.py:24
+msgid "Dataconnexions 6 candidate"
+msgstr "Candidat Dataconnexions 6"
+
+#: udata_gouvfr/models.py:25
+msgid "Dataconnexions 6 laureate"
+msgstr "Lauréat Dataconnexions 6"
+
+#: udata_gouvfr/models.py:30
+msgid "C³"
+msgstr "C³"
 
 #: udata_gouvfr/templates/c3.html:138
 #, python-format

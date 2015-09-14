@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-09-13 13:46+0200\n"
+"POT-Creation-Date: 2015-09-14 22:50+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,6 +19,26 @@ msgstr ""
 
 #: udata_gouvfr/metrics.py:14
 msgid "Public services"
+msgstr ""
+
+#: udata_gouvfr/models.py:22
+msgid "Dataconnexions 5 candidate"
+msgstr ""
+
+#: udata_gouvfr/models.py:23
+msgid "Dataconnexions 5 laureate"
+msgstr ""
+
+#: udata_gouvfr/models.py:24
+msgid "Dataconnexions 6 candidate"
+msgstr ""
+
+#: udata_gouvfr/models.py:25
+msgid "Dataconnexions 6 laureate"
+msgstr ""
+
+#: udata_gouvfr/models.py:30
+msgid "C³"
 msgstr ""
 
 #: udata_gouvfr/templates/c3.html:138
