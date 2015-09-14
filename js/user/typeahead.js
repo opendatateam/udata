@@ -23,7 +23,7 @@ define([
                 // Keep until model is uniformised
                 filter: function(response) {
                     return $.map(response, function(row, idx) {
-                        row.name = row.fullname;
+                        row.name = row.first_name + ' ' + row.last_name;
                         return row;
                     })
                 }

@@ -253,7 +253,8 @@ class SuggestUsersAPI(API):
         return [
             {
                 'id': opt['text'],
-                'fullname': opt['payload']['fullname'],
+                'first_name': opt['payload']['first_name'],
+                'last_name': opt['payload']['last_name'],
                 'avatar_url': opt['payload']['avatar_url'],
                 'slug': opt['payload']['slug'],
                 'score': opt['score'],

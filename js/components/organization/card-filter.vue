@@ -22,34 +22,30 @@
 </div>
 <div class="row org-card-filter-cardlist" v-if="completions">
     <div class="{{cardclass}}" v-repeat="organization:organizations">
-        <organization-card organization="{{organization}}"
-            selected="{{ selected == organization }}">
-        </organization-card>
+        <card organization="{{organization}}" selected="{{ selected == organization }}">
+        </card>
     </div>
-
 </div>
 <div class="row" v-if="!search_query">
     <p class="col-xs-12 lead text-center">
-        {{ placeholder || _('Start typing to find your organization.') }}
+    {{ placeholder || _('Start typing to find your organization.') }}
     </p>
 </div>
 <div class="row" v-if="search_query && !organizations.length">
     <p class="col-xs-12 lead text-center">
-        {{ _('No organization found. You can go to the next step to create your own one.') }}
+    {{ _('No organization found. You can go to the next step to create your own one.') }}
     </p>
 </div>
 </template>
 
 <script>
-'use strict';
+import API from 'api';
+import log from 'logger';
+import Organization from 'models/organization';
 
-var API = require('api'),
-    log = require('logger'),
-    Organization = require('models/organization');
-
-module.exports = {
+export default {
     components: {
-        'organization-card': require('components/organization/card.vue')
+        card: require('components/organization/card.vue')
     },
     data: function() {
         return {

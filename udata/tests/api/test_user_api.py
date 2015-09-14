@@ -71,11 +71,12 @@ class UserAPITest(APITestCase):
 
         for suggestion in response.json:
             self.assertIn('id', suggestion)
-            self.assertIn('fullname', suggestion)
+            self.assertIn('first_name', suggestion)
+            self.assertIn('last_name', suggestion)
             self.assertIn('avatar_url', suggestion)
             self.assertIn('slug', suggestion)
             self.assertIn('score', suggestion)
-            self.assertIn('test', suggestion['fullname'])
+            self.assertIn('test', suggestion['first_name'])
 
     def test_suggest_users_api_last_name(self):
         '''It should suggest users based on last name'''
@@ -93,10 +94,11 @@ class UserAPITest(APITestCase):
 
         for suggestion in response.json:
             self.assertIn('id', suggestion)
-            self.assertIn('fullname', suggestion)
+            self.assertIn('first_name', suggestion)
+            self.assertIn('last_name', suggestion)
             self.assertIn('avatar_url', suggestion)
             self.assertIn('score', suggestion)
-            self.assertIn('test', suggestion['fullname'])
+            self.assertIn('test', suggestion['last_name'])
 
     def test_suggest_users_api_unicode(self):
         '''It should suggest users with special characters'''
@@ -114,10 +116,11 @@ class UserAPITest(APITestCase):
 
         for suggestion in response.json:
             self.assertIn('id', suggestion)
-            self.assertIn('fullname', suggestion)
+            self.assertIn('first_name', suggestion)
+            self.assertIn('last_name', suggestion)
             self.assertIn('avatar_url', suggestion)
             self.assertIn('score', suggestion)
-            self.assertIn('test', suggestion['fullname'])
+            self.assertIn('test', suggestion['last_name'])
 
     def test_suggest_users_api_no_match(self):
         '''It should not provide user suggestion if no match'''
@@ -149,7 +152,8 @@ class UserAPITest(APITestCase):
         self.assertEqual(len(response.json), 2)
 
         for suggestion in response.json:
-            self.assertEqual(suggestion['fullname'], 'test homonym')
+            self.assertEqual(suggestion['first_name'], 'test')
+            self.assertEqual(suggestion['last_name'], 'homonym')
 
     def test_suggest_users_api_by_id(self):
         '''It should suggest an user based on its ID'''
