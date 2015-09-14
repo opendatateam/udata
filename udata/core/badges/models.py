@@ -41,7 +41,11 @@ class BadgesList(db.EmbeddedDocumentListField):
         return super(BadgesList, self).__init__(Badge, *args, **kwargs)
 
     def validate(self, value):
-        print 'validate badges', value, len(value)
+        kinds = [b.kind for b in value]
+        if len(kinds) > len(set(kinds)):
+            raise db.ValidationError(
+                'Duplicate badges for a given kind is not allowed'
+            )
         return True
 
 
