@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from tempfile import NamedTemporaryFile
 
-from udata.models import OrganizationBadge, CERTIFIED, PUBLIC_SERVICE
+from udata.models import Badge, CERTIFIED, PUBLIC_SERVICE
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.factories import OrganizationFactory
 
@@ -19,8 +19,8 @@ class BadgeCommandTest(DBTestMixin, TestCase):
         self.assertEqual(org.badges[0].kind, PUBLIC_SERVICE)
 
     def test_toggle_badge_off(self):
-        ps_badge = OrganizationBadge(kind=PUBLIC_SERVICE)
-        certified_badge = OrganizationBadge(kind=CERTIFIED)
+        ps_badge = Badge(kind=PUBLIC_SERVICE)
+        certified_badge = Badge(kind=CERTIFIED)
         org = OrganizationFactory(badges=[ps_badge, certified_badge])
         toggle(str(org.id), PUBLIC_SERVICE)
         org.reload()

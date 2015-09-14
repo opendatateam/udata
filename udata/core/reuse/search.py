@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from udata.core.site.views import current_site
 from udata.models import (
-    Reuse, Organization, Dataset, User, REUSE_TYPES, REUSE_BADGE_KINDS
+    Reuse, Organization, Dataset, User, REUSE_TYPES
 )
 from udata.search import BoolBooster, GaussDecay
 from udata.search import (
@@ -30,7 +30,7 @@ class ReuseTypeFacet(TermFacet):
 
 
 def reuse_badge_labelizer(label, kind):
-    return REUSE_BADGE_KINDS.get(kind, '')
+    return Reuse.__badges__.get(kind, '')
 
 
 class ReuseSearch(ModelSearchAdapter):

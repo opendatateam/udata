@@ -11,16 +11,17 @@ from flask.ext.security import current_user
 from udata import search
 from udata.api import api, API, ModelAPI, SingleObjectAPI
 from udata.auth import admin_permission
-from udata.models import Reuse, ReuseBadge, REUSE_BADGE_KINDS, REUSE_TYPES
+from udata.models import Reuse, REUSE_TYPES, Badge
 from udata.utils import multi_to_dict
 
+from udata.core.badges.forms import badge_form
 from udata.core.followers.api import FollowAPI
 
 from .api_fields import (
     badge_fields, reuse_fields, reuse_page_fields, reuse_suggestion_fields,
     image_fields, reuse_type_fields
 )
-from .forms import BadgeForm, ReuseForm
+from .forms import ReuseForm
 from .models import FollowReuse
 from .permissions import ReuseEditPermission
 from .search import ReuseSearch
@@ -93,7 +94,7 @@ class AvailableDatasetBadgesAPI(API):
     @api.doc('available_reuse_badges')
     def get(self):
         '''List all available reuse badges and their labels'''
-        return REUSE_BADGE_KINDS
+        return Reuse.__badges__
 
 
 @ns.route('/<reuse:reuse>/badges/', endpoint='reuse_badges')
@@ -104,9 +105,9 @@ class ReuseBadgesAPI(API):
     @api.secure(admin_permission)
     def post(self, reuse):
         '''Create a new badge for a given reuse'''
-        form = api.validate(BadgeForm)
-        badge = ReuseBadge(created=datetime.now(),
-                           created_by=current_user.id)
+        Form = badge_form(Reuse)
+        form = api.validate(Form)
+        badge = Badge(created_by=current_user.id)
         form.populate_obj(badge)
         for existing_badge in reuse.badges:
             if existing_badge.kind == badge.kind:
