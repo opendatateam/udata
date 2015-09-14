@@ -63,13 +63,15 @@ apikey_fields = api.model('ApiKey', {
 user_page_fields = api.model('UserPage', fields.pager(user_fields))
 
 user_suggestion_fields = api.model('UserSuggestion', {
-    'id': fields.String(description='The user identifier', required=True),
-    'fullname': fields.String(description='The user fullname', required=True),
+    'id': fields.String(description='The user identifier', readonly=True),
+    'first_name': fields.String(description='The user first name',
+                                readonly=True),
+    'last_name': fields.String(description='The user last name', readonly=True),
     'avatar_url': fields.String(description='The user avatar URL'),
     'slug': fields.String(
-        description='The user permalink string', required=True),
+        description='The user permalink string', readonly=True),
     'score': fields.Float(
-        description='The internal match score', required=True),
+        description='The internal match score', readonly=True),
 })
 
 
