@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from udata.i18n import lazy_gettext as _
 from udata.models import (
     db, Dataset, User, Organization, Reuse,
-    REUSE_BADGE_KINDS, DATASET_BADGE_KINDS
 )
 
 # Dataset.extras.register('territorial_coverage', TerritorialCoverage)
@@ -19,7 +18,7 @@ DATACONNEXIONS_5_CANDIDATE = 'dataconnexions-5-candidate'
 DATACONNEXIONS_5_LAUREATE = 'dataconnexions-5-laureate'
 DATACONNEXIONS_6_CANDIDATE = 'dataconnexions-6-candidate'
 DATACONNEXIONS_6_LAUREATE = 'dataconnexions-6-laureate'
-REUSE_BADGE_KINDS.update({
+Reuse.__badges__.update({
     DATACONNEXIONS_5_CANDIDATE: _('Dataconnexions 5 candidate'),
     DATACONNEXIONS_5_LAUREATE: _('Dataconnexions 5 laureate'),
     DATACONNEXIONS_6_CANDIDATE: _('Dataconnexions 6 candidate'),
@@ -28,4 +27,4 @@ REUSE_BADGE_KINDS.update({
 
 # Datasets
 C3 = 'c3'
-DATASET_BADGE_KINDS[C3] = _('C³')
+Dataset.__badges__[C3] = _('C³')
