@@ -71,19 +71,18 @@ DATACONNEXIONS_5_CATEGORIES = [
 
 
 DATACONNEXIONS_6_CATEGORIES = [
-    ('impact-democratique', 'Impact démocratique', (
+    ('impact-demo', 'Impact démocratique', (
         'Projets destinés à renforcer la transparence et la participation '
         'dans une logique de co-production pour un gouvernement ouvert.')),
-    ('impact-social-et-environnemental', 'Impact social et environnemental', (
+    ('impact-soc', 'Impact social et environnemental', (
         'Projets qui contribuent à la résolution de problématiques sociales '
         '(éducation, santé, emploi, pauvreté, exclusion) '
         '- ou environnementales.')),
-    ('impact-economique-et-scientifique', 'Impact économique et scientifique', (
+    ('impact-eco', 'Impact économique et scientifique', (
         'Projets créateurs de valeur économique ou scientifique à travers des '
         'nouveaux produits ou services qui visent le grand public, '
         'le monde professionnel ou la recherche.')),
-    ('impact-administratif-et-territorial',
-     'Impact administratif et territorial', (
+    ('impact-adm', 'Impact administratif et territorial', (
         'Projets destinés à renforcer l’efficacité, la visibilité '
         'et la mise en réseau des administrations, des collectivités et '
         'des communautés territoriales.')),
