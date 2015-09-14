@@ -3,9 +3,7 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import (
-    OrganizationBadge, ReuseBadge, PUBLIC_SERVICE
-)
+from udata.models import Badge, PUBLIC_SERVICE
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.factories import (
     DatasetFactory, ReuseFactory, OrganizationFactory
@@ -110,7 +108,7 @@ class GouvFrMetricsTest(DBTestMixin, TestCase):
     settings = GouvFrSettings
 
     def test_public_services(self):
-        ps_badge = OrganizationBadge(kind=PUBLIC_SERVICE)
+        ps_badge = Badge(kind=PUBLIC_SERVICE)
         public_services = [
             OrganizationFactory(badges=[ps_badge]) for _ in range(2)
         ]
@@ -208,7 +206,7 @@ class DataconnexionsTest(FrontTestCase):
 
     def test_render_dataconnexions_5_with_data(self):
         for tag, label, description in DATACONNEXIONS_5_CATEGORIES:
-            badge = ReuseBadge(kind=DATACONNEXIONS_5_CANDIDATE)
+            badge = Badge(kind=DATACONNEXIONS_5_CANDIDATE)
             VisibleReuseFactory(tags=[tag], badges=[badge])
         response = self.client.get(url_for('gouvfr.dataconnexions5'))
         self.assert200(response)
@@ -220,7 +218,7 @@ class DataconnexionsTest(FrontTestCase):
     def test_render_dataconnexions_6_with_data(self):
         # Use tags until we are sure all reuse are correctly labeled
         for tag, label, description in DATACONNEXIONS_6_CATEGORIES:
-            badge = ReuseBadge(kind=DATACONNEXIONS_6_CANDIDATE)
+            badge = Badge(kind=DATACONNEXIONS_6_CANDIDATE)
             VisibleReuseFactory(tags=['dataconnexions-6', tag], badges=[badge])
         response = self.client.get(url_for('gouvfr.dataconnexions6'))
         self.assert200(response)
