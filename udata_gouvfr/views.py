@@ -4,11 +4,11 @@ from __future__ import unicode_literals
 from flask import url_for, redirect
 
 from udata import theme
-from udata.models import Reuse, Organization, Dataset, DATACONNEXIONS_CANDIDATE
-from udata.core.dataset.models import C3
+from udata.models import Reuse, Organization, Dataset
 from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
 
+from .models import DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE, C3
 
 blueprint = I18nBlueprint('gouvfr', __name__,
                           template_folder='templates',
@@ -45,7 +45,13 @@ def redevances():
     return theme.render('redevances.html')
 
 
-DATACONNEXIONS_CATEGORIES = [
+@blueprint.route('/dataconnexions/')
+def dataconnexions():
+    '''Redirect to latest dataconnexions edition page'''
+    return redirect(url_for('gouvfr.dataconnexions6'))
+
+
+DATACONNEXIONS_5_CATEGORIES = [
     ('datadmin', 'Datadmin', (
         'Projets portés par un acteur public (administration centrale ou '
         'déconcentrée, collectivité...) qui a utilisé l’open data pour '
@@ -64,17 +70,51 @@ DATACONNEXIONS_CATEGORIES = [
 ]
 
 
-@blueprint.route('/dataconnexions')
-def dataconnexions():
-    reuses = Reuse.objects(badges__kind=DATACONNEXIONS_CANDIDATE)
+DATACONNEXIONS_6_CATEGORIES = [
+    ('impact-demo', 'Impact démocratique', (
+        'Projets destinés à renforcer la transparence et la participation '
+        'dans une logique de co-production pour un gouvernement ouvert.')),
+    ('impact-soc', 'Impact social et environnemental', (
+        'Projets qui contribuent à la résolution de problématiques sociales '
+        '(éducation, santé, emploi, pauvreté, exclusion) '
+        '- ou environnementales.')),
+    ('impact-eco', 'Impact économique et scientifique', (
+        'Projets créateurs de valeur économique ou scientifique à travers des '
+        'nouveaux produits ou services qui visent le grand public, '
+        'le monde professionnel ou la recherche.')),
+    ('impact-adm', 'Impact administratif et territorial', (
+        'Projets destinés à renforcer l’efficacité, la visibilité '
+        'et la mise en réseau des administrations, des collectivités et '
+        'des communautés territoriales.')),
+]
+
+
+@blueprint.route('/dataconnexions-5')
+def dataconnexions5():
+    reuses = Reuse.objects(badges__kind=DATACONNEXIONS_5_CANDIDATE)
 
     categories = [{
         'tag': tag,
         'label': label,
         'description': description,
         'reuses': reuses(tags=tag),
-    } for tag, label, description in DATACONNEXIONS_CATEGORIES]
-    return theme.render('dataconnexions.html', categories=categories)
+    } for tag, label, description in DATACONNEXIONS_5_CATEGORIES]
+    return theme.render('dataconnexions-5.html', categories=categories)
+
+
+@blueprint.route('/dataconnexions-6')
+def dataconnexions6():
+    # Use tags until we are sure all reuse are correctly labeled
+    # reuses = Reuse.objects(badges__kind=DATACONNEXIONS_6_CANDIDATE)
+    reuses = Reuse.objects(tags='dataconnexions-6')
+
+    categories = [{
+        'tag': tag,
+        'label': label,
+        'description': description,
+        'reuses': reuses(tags=tag),
+    } for tag, label, description in DATACONNEXIONS_6_CATEGORIES]
+    return theme.render('dataconnexions-6.html', categories=categories)
 
 
 C3_PARTNERS = (
