@@ -8,7 +8,7 @@ from udata.models import Reuse, Organization, Dataset
 from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
 
-from .models import DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_5_CANDIDATE, C3
+from .models import DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE, C3
 
 blueprint = I18nBlueprint('gouvfr', __name__,
                           template_folder='templates',
@@ -105,7 +105,7 @@ def dataconnexions5():
 @blueprint.route('/dataconnexions-6')
 def dataconnexions6():
     # Use tags until we are sure all reuse are correctly labeled
-    # reuses = Reuse.objects(badges__kind=DATACONNEXIONS_5_CANDIDATE)
+    # reuses = Reuse.objects(badges__kind=DATACONNEXIONS_6_CANDIDATE)
     reuses = Reuse.objects(tags='dataconnexions-6')
 
     categories = [{
