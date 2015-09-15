@@ -6,7 +6,7 @@ scenario: [
     // Login.
     NavigationWidget.home(),
     LoginWidget.clickRegister(),
-    LoginWidget.login(email, password),
+    LoginWidget.login(config.email, config.password),
     // Open the appropriate page in the admin.
     NavigationWidget.contribute(),
     CreateReuseWidget.publishReuse(),

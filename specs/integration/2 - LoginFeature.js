@@ -8,9 +8,9 @@ scenario: [
     {
         "LoginWidget.email": true
     },
-    LoginWidget.login(email, password),
+    LoginWidget.login(config.email, config.password),
     {
-        "LoginWidget.username": username
+        "LoginWidget.username": config.username
     },
     LoginWidget.profile(),
     LoginWidget.logout(),
