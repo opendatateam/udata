@@ -8,5 +8,5 @@
 
 
 {{ _('You can go on your organization backoffice to accept or refuse the request') }}:
-{{ url_for('organizations.edit_membership_requests', org=org, _external=True) }}
+{{ url_for('admin.index', path='organization/{id}/#membership-requests'.format(id=org.id), _external=True) }}
 {% endblock %}
