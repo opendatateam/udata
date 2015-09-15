@@ -51,6 +51,15 @@ class OrganizationBlueprintTest(FrontTestCase):
         response = self.get(url_for('organizations.show', org=organization))
         self.assertStatus(response, 410)
 
+    def test_render_display_if_deleted_but_authorized(self):
+        '''It should render the organization page if deleted but user can'''
+        self.login()
+        member = Member(user=self.user, role='editor')
+        organization = OrganizationFactory(deleted=datetime.now(),
+                                           members=[member])
+        response = self.get(url_for('organizations.show', org=organization))
+        self.assert200(response)
+
     def test_render_display_with_datasets(self):
         '''It should render the organization page with some datasets'''
         organization = OrganizationFactory()

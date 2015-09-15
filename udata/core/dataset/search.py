@@ -6,7 +6,6 @@ from udata.core.site.views import current_site
 
 from udata.models import (
     Dataset, Organization, License, User, GeoZone,
-    DATASET_BADGE_KINDS
 )
 from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
 from udata.search.fields import (
@@ -39,7 +38,7 @@ def zone_labelizer(label, value):
 
 
 def dataset_badge_labelizer(label, kind):
-    return DATASET_BADGE_KINDS.get(kind, '')
+    return Dataset.__badges__.get(kind, '')
 
 
 class DatasetSearch(ModelSearchAdapter):

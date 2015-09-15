@@ -3,8 +3,10 @@ from __future__ import unicode_literals
 
 import calendar
 import logging
+import pkg_resources
 
 from datetime import date
+from time import time
 from urlparse import urlsplit, urlunsplit
 
 from flask import url_for, request, current_app, json
@@ -23,7 +25,11 @@ log = logging.getLogger(__name__)
 
 @front.app_template_global(name='static')
 def static_global(filename):
-    return url_for('static', filename=filename)
+    if current_app.config['DEBUG']:
+        burst = time()
+    else:
+        burst = pkg_resources.get_distribution('udata').version
+    return url_for('static', filename=filename, _=burst)
 
 
 @front.app_template_global(name='form_grid')

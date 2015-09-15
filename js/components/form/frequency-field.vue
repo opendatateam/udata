@@ -14,8 +14,15 @@
 
 <template>
 <div class="input-group dropdown frequency-field">
-    <date-picker field="{{ frequency_date_field }}" value="" v-ref="picker"></date-picker>
-    <select-input choices="{{ choices }}" v-on="change: onSelect()" class="select-input" v-ref="select"></select-input>
+    <date-picker  v-ref="picker" field="{{ frequency_date_field }}"
+        value="{{frequency_date_value}}">
+    </date-picker>
+    <select-input v-ref="select" choices="{{ choices }}" v-on="change: onSelect()"
+        class="select-input" field="{{field}}" model="{{model}}"
+        schema="{{schema}}" property="{{property}}" value="{{value}}"
+        description="{{description}}" placeholder="{{placeholder}}"
+        required="{{required}}">
+    </select-input>
 </div>
 </template>
 
@@ -27,18 +34,25 @@ const ISO_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 
 export default {
     name: 'frequency-field',
-    inherit: true,
     replace: true,
+    mixins: [require('components/form/base-field').FieldComponentMixin],
     data: function() {
         return {
             placeholder: this._('Expected update')
         };
+    },
+    components: {
+        'date-picker': require('components/form/date-picker.vue'),
+        'select-input': require('components/form/select-input.vue')
     },
     computed: {
         frequency_date_field: function() {
             return {
                 id: this.field.frequency_date_id
             };
+        },
+        frequency_date_value: function() {
+            return this.model[this.field.frequency_date_id] || '';
         }
     },
     methods: {

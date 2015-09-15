@@ -1,7 +1,3 @@
-<style lang="less">
-
-</style>
-
 <template>
 <input type="hidden" v-attr="
     id: field.id,
@@ -13,7 +9,7 @@
 <script>
 export default {
     name: 'hidden-input',
-    inherit: true,
-    replace: true
+    replace: true,
+    mixins: [require('components/form/base-field').FieldComponentMixin]
 };
 </script>

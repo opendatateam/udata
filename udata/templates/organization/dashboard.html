@@ -1,5 +1,4 @@
 {% extends theme("organization/display_base.html") %}
-{% from theme('macros/timeline.html') import timeline with context %}
 {% from theme('macros/metrics.html') import metric_widgets %}
 
 {% set meta = {
@@ -10,6 +9,7 @@
 
 {% block extra_js %}
 <script type="text/javascript" src="{{ static('dashboard/organization.js') }}"></script>
+<script type="text/javascript" src="{{ static('activities.js') }}"></script>
 {% endblock %}
 
 {% block breadcrumb %}
@@ -36,8 +36,8 @@
     </header>
     <div class="container">
         <div class="row">
-            <div class="col-sm-12">
-                {{ timeline(activities) }}
+            <div class="col-sm-12" id="activities" data-organization-id="{{ org.id }}">
+                <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
             </div>
         </div>
     </div>

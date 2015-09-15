@@ -87,7 +87,7 @@ module.exports = {
     mixins: [Sorter],
     components: {
         'dataset-card': require('components/dataset/card.vue'),
-        'dataset-completer': require('components/form/dataset-completer')
+        'dataset-completer': require('components/form/dataset-completer.vue')
     },
     props: ['datasets'],
     data: function() {

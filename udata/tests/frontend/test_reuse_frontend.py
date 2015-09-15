@@ -63,6 +63,13 @@ class ReuseBlueprintTest(FrontTestCase):
         response = self.get(url_for('reuses.show', reuse=reuse))
         self.assertStatus(response, 410)
 
+    def test_do_not_raise_410_if_deleted_but_authorized(self):
+        '''It should display a dalated reuse if authorized'''
+        self.login()
+        reuse = ReuseFactory(deleted=datetime.now(), owner=self.user)
+        response = self.get(url_for('reuses.show', reuse=reuse))
+        self.assert200(response)
+
     def test_not_found(self):
         '''It should render the reuse page'''
         response = self.get(url_for('reuses.show', reuse='not-found'))

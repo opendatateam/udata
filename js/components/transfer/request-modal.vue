@@ -1,5 +1,3 @@
-<style lang="less"></style>
-
 <template>
 <modal title="{{ _('Transfer request') }}"
     class="modal-info transfer-request-modal"
@@ -34,8 +32,8 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-                    <dataset-card v-if="subject.classname == 'Dataset'" dataset="{{subject}}"></dataset-card>
-                    <reuse-card v-if="subject.classname == 'Reuse'" reuse="{{subject}}"></reuse-card>
+                    <dataset-card v-if="subject.__class__ == 'Dataset'" dataset="{{subject}}"></dataset-card>
+                    <reuse-card v-if="subject.__class__ == 'Reuse'" reuse="{{subject}}"></reuse-card>
                 </div>
             </div>
             <div class="row text-center">
@@ -73,11 +71,9 @@
 </template>
 
 <script>
-'use strict';
+import API from 'api';
 
-var API = require('api');
-
-module.exports = {
+export default {
     components: {
         'modal': require('components/modal.vue'),
         'org-filter': require('components/organization/card-filter.vue'),
@@ -109,22 +105,22 @@ module.exports = {
                 payload: {
                     subject: {
                         id: this.subject.id,
-                        class: this.subject.class || this.subject.classname
+                        class: this.subject.__class__
                     },
                     recipient: {
                         id: this.recipient.id,
-                        class: this.recipient.class || this.recipient.classname,
+                        class: this.recipient.__class__,
                     },
                     comment: this.comment || undefined
                 }
-            }, function(response) {
+            }, (response) => {
                 this.$dispatch('notify', {
                     title: this._('Transfer requested'),
                     details: this._('The recipient need to accept the transfer in order to complete it.')
                 });
                 this.$.modal.close();
                 this.$emit('transfer:requested', response.obj);
-            }.bind(this));
+            });
         }
     }
 };

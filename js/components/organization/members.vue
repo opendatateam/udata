@@ -142,7 +142,7 @@ module.exports = {
     components: {
         'box-container': require('components/containers/box.vue'),
         'pagination-widget': require('components/pagination.vue'),
-        'user-completer': require('components/form/user-completer'),
+        'user-completer': require('components/form/user-completer.vue'),
     },
     props: ['org'],
     data: function() {

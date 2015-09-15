@@ -3,22 +3,22 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from flask import request, url_for
+from flask import request
 from werkzeug.datastructures import FileStorage
 
 from udata import search
 from udata.api import api, API
 from udata.auth import admin_permission, current_user
 from udata.core.followers.api import FollowAPI
+from udata.core.badges.forms import badge_form
+from udata.core.badges.models import Badge
 from udata.utils import multi_to_dict
 
 from .forms import (
-    BadgeForm, OrganizationForm, MembershipRequestForm, MembershipRefuseForm,
-    MemberForm
+    OrganizationForm, MembershipRequestForm, MembershipRefuseForm, MemberForm
 )
 from .models import (
-    OrganizationBadge, Organization, MembershipRequest, Member, FollowOrg,
-    ORG_BADGE_KINDS
+    Organization, MembershipRequest, Member, FollowOrg
 )
 from .permissions import (
     EditOrganizationPermission, OrganizationPrivatePermission
@@ -80,7 +80,7 @@ class OrganizationAPI(API):
     @api.marshal_with(org_fields)
     def get(self, org):
         '''Get a organization given its identifier'''
-        if org.deleted:
+        if org.deleted and not OrganizationPrivatePermission(org).can():
             api.abort(410, 'Organization has been deleted')
         return org
 
@@ -115,7 +115,7 @@ class AvailableOrganizationBadgesAPI(API):
     @api.doc('available_organization_badges')
     def get(self):
         '''List all available organization badges and their labels'''
-        return ORG_BADGE_KINDS
+        return Organization.__badges__
 
 
 @ns.route('/<org:org>/badges/', endpoint='organization_badges')
@@ -126,9 +126,10 @@ class OrganizationBadgesAPI(API):
     @api.secure(admin_permission)
     def post(self, org):
         '''Create a new badge for a given organization'''
-        form = api.validate(BadgeForm)
-        badge = OrganizationBadge(created=datetime.now(),
-                                  created_by=current_user.id)
+        Form = badge_form(Organization)
+        form = api.validate(Form)
+        badge = Badge(created=datetime.now(),
+                      created_by=current_user.id)
         form.populate_obj(badge)
         for existing_badge in org.badges:
             if existing_badge.kind == badge.kind:

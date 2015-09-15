@@ -24,7 +24,7 @@
             <i class="fa fa-gear"></i>
         </a>
     </aside>
-    <div v-if="!toggled">
+    <div v-show="!toggled">
         <h3>
             {{reuse.title}}
             <!--small v-if="org.acronym">{{org.acronym}}</small-->
@@ -50,7 +50,7 @@
             </div>
         </div>
     </div>
-    <reuse-form v-ref="form" v-if="toggled" reuse="{{reuse}}"></reuse-form>
+    <reuse-form v-ref="form" v-show="toggled" reuse="{{reuse}}"></reuse-form>
     <box-footer v-if="toggled">
         <button type="submit" class="btn btn-primary"
             v-on="click: save($event)" v-i18n="Save"></button>

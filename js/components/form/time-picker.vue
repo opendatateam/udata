@@ -39,9 +39,9 @@ const ISO_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 
 export default {
     name: 'time-picker',
-    inherit: true,
     replace: true,
     props: ['serializable'],
+    mixins: [require('components/form/base-field').FieldComponentMixin],
     components: {
         'time-widget': require('components/time-widget.vue')
     },

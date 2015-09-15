@@ -21,9 +21,10 @@ export default {
                     id: 'type',
                     label: this._('Type'),
                     widget: 'select-input',
-                    values: reuse_types.items.map(function(item) {
+                    values: reuse_types,
+                    map: function(item) {
                         return {value: item.id, text: item.label};
-                    })
+                    }
                 }, {
                     id: 'description',
                     label: this._('Description'),

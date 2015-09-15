@@ -78,6 +78,17 @@ export default {
             labelField: 'name',
             searchField: ['name', 'code', 'extraKeys'],
             plugins: ['remove_button'],
+            create: function(input, callback) {
+                if (Vue.util.isString(input)) {
+                    // Need to fetch the real zone
+                    // TODO: expose direct full acces to zone by ID
+                    API.spatial.spatial_zone({id: input}, (response) => {
+                        callback(response.obj);
+                    });
+                } else {
+                    callback(input)
+                };
+            },
             render: {
                 option: (data, escape) => {
                     var opt = [

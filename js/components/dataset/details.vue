@@ -5,7 +5,7 @@
             <i class="fa fa-gear"></i>
         </a>
     </aside>
-    <div v-if="!toggled">
+    <div v-show="!toggled">
         <h3>{{dataset.title}}</h3>
         <div v-markdown="{{dataset.description}}"></div>
         <div v-if="dataset.tags | length" class="label-list">
@@ -23,7 +23,7 @@
             <span v-repeat="dataset.badges" class="label label-primary">{{badges[kind]}}</span>
         </div>
     </div>
-    <dataset-form v-ref="form" v-if="toggled" dataset="{{dataset}}"></dataset-form>
+    <dataset-form v-ref="form" v-show="toggled" dataset="{{dataset}}"></dataset-form>
     <box-footer v-if="toggled">
         <button type="submit" class="btn btn-primary"
             v-on="click: save($event)" v-i18n="Save"></button>

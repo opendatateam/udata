@@ -29,6 +29,23 @@ describe("Utils", function() {
         });
     });
 
+    describe('isString', function() {
+        it('should be true if is a String', function() {
+            expect(u.isString('')).to.be.true;
+            expect(u.isString('')).to.be.true;
+        });
+
+        it('should be false if is not a String', function() {
+            expect(u.isString(null)).to.be.false;
+            expect(u.isString(undefined)).to.be.false;
+            expect(u.isString(45)).to.be.false;
+            expect(u.isString(false)).to.be.false;
+            expect(u.isString(true)).to.be.false;
+            expect(u.isString({})).to.be.false;
+            expect(u.isString([])).to.be.false;
+        });
+    });
+
     describe('getattr', function() {
         it('should fetch a root property', function() {
             let o = {attr: 'value'};

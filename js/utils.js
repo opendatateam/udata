@@ -13,6 +13,13 @@ export function isObject(obj) {
 };
 
 /**
+ * Check if an object is a String
+ */
+export function isString(obj) {
+    return typeof obj === 'string' || obj instanceof String;
+};
+
+/**
  * A property getter resolving dot-notation
  * @param  {Object} obj  The root object to fetch property on
  * @param  {String} name The optionnaly dotted property name to fetch
@@ -45,6 +52,7 @@ export function setattr(obj, name, value) {
 export default {
     isFunction,
     isObject,
+    isString,
     getattr,
     setattr
 };

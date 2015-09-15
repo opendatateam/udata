@@ -5,9 +5,10 @@ from udata.api import api, fields, base_reference
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
+from udata.core.badges.api import badge_fields
 
 from .models import (
-    DATASET_BADGE_KINDS, UPDATE_FREQUENCIES, RESOURCE_TYPES, DEFAULT_FREQUENCY,
+    UPDATE_FREQUENCIES, RESOURCE_TYPES, DEFAULT_FREQUENCY,
     CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE, DEFAULT_LICENSE
 )
 
@@ -30,11 +31,6 @@ license_fields = api.model('License', {
 frequency_fields = api.model('Frequency', {
     'id': fields.String(description='The frequency identifier'),
     'label': fields.String(description='The frequency display name')
-})
-
-badge_fields = api.model('DatasetBadge', {
-    'kind': fields.String(description='Kind of badge (pivotal-data, etc)',
-                          required=True, enum=DATASET_BADGE_KINDS.keys()),
 })
 
 resource_fields = api.model('Resource', {

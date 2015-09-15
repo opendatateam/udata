@@ -47,6 +47,16 @@ class ZonesAPI(API):
         }
 
 
+@ns.route('/zone/<path:id>', endpoint='zone')
+class ZoneAPI(API):
+    @api.doc('spatial_zone', params={'id': 'A zone identifier'})
+    @api.marshal_with(zone_suggestion_fields)
+    def get(self, id):
+        '''Fetch a zone'''
+        zone = GeoZone.objects.get_or_404(id=id)
+        return zone
+
+
 @ns.route('/zones/suggest', endpoint='suggest_zones')
 class SuggestZonesAPI(API):
     @api.marshal_list_with(zone_suggestion_fields)

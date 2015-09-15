@@ -1,19 +1,18 @@
 <template>
     <form role="form" v-class="form-horizontal: 1">
-        <form-field v-repeat="field:fields"></form-field>
+        <field v-repeat="field in fields"
+            schema="{{schema}}" model="{{model}}"></field>
     </form>
 </template>
 
 <script>
-'use strict';
+import BaseForm from 'components/form/base-form';
 
-var BaseForm = require('components/form/base-form');
-
-module.exports = {
+export default {
     name: 'form-horizontal',
     mixins: [BaseForm],
     components: {
-        'form-field': require('components/form/horizontal-field.vue')
+        field: require('components/form/horizontal-field.vue')
     }
 };
 </script>

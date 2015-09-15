@@ -20,14 +20,18 @@
                 v-attr="data-content: description"></span>
         </label>
         <div class="col-sm-9">
-            <component is="{{widget}}"></component>
+            <component is="{{widget}}"
+                field="{{field}}" value="{{value}}" model="{{model}}"
+                description="{{description}}" property="{{property}}"
+                placeholder="{{placeholder}}" required="{{required}}">
+            </component>
             <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
         </div>
     </div>
 </template>
 
 <script>
-import BaseField from 'components/form/base-field';
+import {BaseField} from 'components/form/base-field';
 
 export default {
     name: 'horizontal-form-field',

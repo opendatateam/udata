@@ -3,11 +3,11 @@ from __future__ import unicode_literals
 
 from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
-from udata.models import Reuse, ReuseBadge, REUSE_BADGE_KINDS, REUSE_TYPES
+from udata.models import Reuse, REUSE_TYPES
 
 from .models import IMAGE_SIZES
 
-__all__ = ('BadgeForm', 'ReuseForm')
+__all__ = ('ReuseForm', )
 
 
 def check_url_does_not_exists(form, field):
@@ -38,12 +38,3 @@ class ReuseForm(ModelForm):
 
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_('Publish as'))
-
-
-class BadgeForm(ModelForm):
-    model_class = ReuseBadge
-
-    kind = fields.RadioField(
-        _('Kind'), [validators.required()],
-        choices=REUSE_BADGE_KINDS.items(),
-        description=_('Kind of badge (dataconnexions, etc)'))

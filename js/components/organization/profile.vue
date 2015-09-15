@@ -25,7 +25,7 @@
             <i class="fa fa-gear"></i>
         </a>
     </aside>
-    <div v-if="!toggled">
+    <div v-show="!toggled">
         <h3>
             {{org.name}}
             <small v-if="org.acronym">{{org.acronym}}</small>
@@ -44,7 +44,7 @@
             </div>
         </div>
     </div>
-    <org-form v-ref="form" v-if="toggled" organization="{{org}}"></org-form>
+    <org-form v-ref="form" v-show="toggled" organization="{{org}}"></org-form>
     <footer>
         <button type="submit" class="btn btn-primary" v-if="toggled"
             v-on="click: save($event)" v-i18n="Save"></button>

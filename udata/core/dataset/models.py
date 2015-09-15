@@ -11,7 +11,7 @@ from mongoengine.signals import pre_save, post_save
 from werkzeug import cached_property
 
 from udata.models import (
-    db, WithMetrics, Badge, BadgeMixin, Discussion, Follow, Issue,
+    db, WithMetrics, BadgeMixin, Discussion, Follow, Issue,
     SpatialCoverage
 )
 from udata.i18n import lazy_gettext as _
@@ -22,8 +22,8 @@ from .croquemort import check_url_from_cache, check_url_from_group
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum',
-    'DatasetIssue', 'DatasetDiscussion', 'DatasetBadge', 'FollowDataset',
-    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES', 'DATASET_BADGE_KINDS', 'C3',
+    'DatasetIssue', 'DatasetDiscussion', 'FollowDataset',
+    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE'
 )
 
@@ -65,20 +65,7 @@ CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
 DEFAULT_CHECKSUM_TYPE = 'sha1'
 
 PIVOTAL_DATA = 'pivotal-data'
-C3 = 'c3'
-DATASET_BADGE_KINDS = {
-    PIVOTAL_DATA: _('Pivotal data'),
-    C3: _('C³'),
-}
-
 CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
-
-
-class DatasetBadge(Badge):
-    kind = db.StringField(choices=DATASET_BADGE_KINDS.keys(), required=True)
-
-    def __html__(self):
-        return unicode(DATASET_BADGE_KINDS[self.kind])
 
 
 class License(db.Document):
@@ -179,7 +166,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     tags = db.ListField(db.StringField())
     resources = db.ListField(db.EmbeddedDocumentField(Resource))
     community_resources = db.ListField(db.EmbeddedDocumentField(Resource))
-    badges = db.ListField(db.EmbeddedDocumentField(DatasetBadge))
 
     private = db.BooleanField()
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
@@ -204,6 +190,10 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         return self.title or ''
 
     __unicode__ = __str__
+
+    __badges__ = {
+        PIVOTAL_DATA: _('Pivotal data'),
+    }
 
     meta = {
         'allow_inheritance': True,

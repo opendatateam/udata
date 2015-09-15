@@ -8,13 +8,12 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import (
-    Dataset, Follow, FollowDataset, Member, DATASET_BADGE_KINDS,
-    UPDATE_FREQUENCIES
+    Dataset, Follow, FollowDataset, Member, UPDATE_FREQUENCIES
 )
 
 from . import APITestCase
 from ..factories import (
-    DatasetBadgeFactory, DatasetFactory, ResourceFactory, OrganizationFactory,
+    badge_factory, DatasetFactory, ResourceFactory, OrganizationFactory,
     AdminFactory, VisibleDatasetFactory, UserFactory, LicenseFactory, faker
 )
 
@@ -55,11 +54,19 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_get_deleted(self):
         '''It should not fetch a deleted dataset from the API and raise 410'''
+        dataset = VisibleDatasetFactory(deleted=datetime.now())
+
+        response = self.get(url_for('api.dataset', dataset=dataset))
+        self.assertStatus(response, 410)
+
+    def test_dataset_api_get_deleted_but_authorized(self):
+        '''It should a deleted dataset from the API if user is authorized'''
+        self.login()
         dataset = VisibleDatasetFactory(owner=self.user,
                                         deleted=datetime.now())
 
         response = self.get(url_for('api.dataset', dataset=dataset))
-        self.assertStatus(response, 410)
+        self.assert200(response)
 
     def test_dataset_api_create(self):
         '''It should create a dataset from the API'''
@@ -310,6 +317,14 @@ class DatasetAPITest(APITestCase):
 
 
 class DatasetBadgeAPITest(APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Register at least two badges
+        Dataset.__badges__['test-1'] = 'Test 1'
+        Dataset.__badges__['test-2'] = 'Test 2'
+
+        cls.factory = badge_factory(Dataset)
+
     def setUp(self):
         self.login(AdminFactory())
         self.dataset = DatasetFactory(owner=UserFactory())
@@ -317,13 +332,13 @@ class DatasetBadgeAPITest(APITestCase):
     def test_list(self):
         response = self.get(url_for('api.available_dataset_badges'))
         self.assertStatus(response, 200)
-        self.assertEqual(len(response.json), len(DATASET_BADGE_KINDS))
-        for kind, label in DATASET_BADGE_KINDS.items():
+        self.assertEqual(len(response.json), len(Dataset.__badges__))
+        for kind, label in Dataset.__badges__.items():
             self.assertIn(kind, response.json)
             self.assertEqual(response.json[kind], label)
 
     def test_create(self):
-        data = DatasetBadgeFactory.attributes()
+        data = self.factory.attributes()
         with self.api_user():
             response = self.post(
                 url_for('api.dataset_badges', dataset=self.dataset), data)
@@ -332,7 +347,7 @@ class DatasetBadgeAPITest(APITestCase):
         self.assertEqual(len(self.dataset.badges), 1)
 
     def test_create_same(self):
-        data = DatasetBadgeFactory.attributes()
+        data = self.factory.attributes()
         with self.api_user():
             self.post(
                 url_for('api.dataset_badges', dataset=self.dataset), data)
@@ -345,10 +360,10 @@ class DatasetBadgeAPITest(APITestCase):
     def test_create_2nd(self):
         # Explicitely setting the kind to avoid collisions given the
         # small number of choices for kinds.
-        kinds_keys = DATASET_BADGE_KINDS.keys()
-        self.dataset.badges.append(DatasetBadgeFactory(kind=kinds_keys[0]))
+        kinds_keys = Dataset.__badges__.keys()
+        self.dataset.badges.append(self.factory(kind=kinds_keys[0]))
         self.dataset.save()
-        data = DatasetBadgeFactory.attributes()
+        data = self.factory.attributes()
         data['kind'] = kinds_keys[1]
         with self.api_user():
             response = self.post(
@@ -358,7 +373,7 @@ class DatasetBadgeAPITest(APITestCase):
         self.assertEqual(len(self.dataset.badges), 2)
 
     def test_delete(self):
-        badge = DatasetBadgeFactory()
+        badge = self.factory()
         self.dataset.badges.append(badge)
         self.dataset.save()
         with self.api_user():
@@ -373,7 +388,7 @@ class DatasetBadgeAPITest(APITestCase):
         with self.api_user():
             response = self.delete(
                 url_for('api.dataset_badge', dataset=self.dataset,
-                        badge_kind=str(DatasetBadgeFactory().kind)))
+                        badge_kind=str(self.factory().kind)))
         self.assert404(response)
 
 

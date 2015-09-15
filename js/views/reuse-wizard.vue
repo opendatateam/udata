@@ -1,18 +1,12 @@
-<style lang="less">
-
-</style>
-
 <template>
 <wizard-component v-ref="wizard" steps="{{steps}}"></wizard-component>
 </template>
 
 <script>
-'use strict';
+import Reuse from 'models/reuse';
+import API from 'api';
 
-var Reuse = require('models/reuse'),
-    API = require('api');
-
-module.exports = {
+export default {
     data: function() {
         return {
             meta: {
@@ -24,60 +18,61 @@ module.exports = {
                 label: this._('Publish as'),
                 subtitle: this._('Choose who is publishing'),
                 component: 'publish-as',
-                next: function(component) {
+                next: (component) => {
                     if (component.selected) {
                         this.publish_as = component.selected;
                     }
                     return true;
-                }.bind(this)
+                }
             }, {
                 label: this._('New reuse'),
                 subtitle: this._('Describe your reuse'),
                 component: 'reuse-form',
-                next: function(component) {
-                    if (component.$.form.validate()) {
-                        this.reuse.$data = component.$.form.serialize();
+                next: (component) => {
+                    if (component.validate()) {
+                        let data = component.serialize();
                         if (this.publish_as) {
-                            this.reuse.$data.organization = this.publish_as;
+                            data.organization = this.publish_as;
                         }
+                        Object.assign(this.reuse, data);
                         this.reuse.save();
-                        this.reuse.$once('updated', function() {
+                        this.reuse.$once('updated', () => {
                             this.$.wizard.go_next();
-                        }.bind(this));
+                        });
                         return false;
                     }
-                }.bind(this)
+                }
             }, {
                 label: this._('Datasets'),
                 subtitle: this._('Add some related datasets'),
                 component: 'dataset-cards-form',
-                next: function(component) {
+                next: (component) => {
                     this.reuse.datasets = component.datasets;
                     this.reuse.save();
-                        this.reuse.$once('updated', function() {
-                            this.$.wizard.go_next();
-                        }.bind(this));
-                        return false;
-                }.bind(this)
+                    this.reuse.$once('updated', () => {
+                        this.$.wizard.go_next();
+                    });
+                    return false;
+                }
             }, {
                 label: this._('Image'),
                 subtitle: this._('Upload your reuse thumbnail'),
                 component: 'image-picker',
-                init: function(component) {
+                init: (component) => {
                     var endpoint = API.reuses.operations.reuse_image;
                     component.endpoint = endpoint.urlify({reuse: this.reuse.id});
-                }.bind(this),
-                next: function(component) {
+                },
+                next: (component) => {
                     component.save();
                     return false;
-                }.bind(this)
+                }
             }, {
                 label: this._('Share'),
                 subtitle: this._('Communicate about your publication'),
                 component: 'post-create',
-                init: function(component) {
+                init: (component) => {
                     component.reuse = this.reuse;
-                }.bind(this)
+                }
             }],
          };
     },

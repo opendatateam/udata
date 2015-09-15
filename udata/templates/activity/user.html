@@ -1,8 +1,0 @@
-{% extends theme('activity/base.html') %}
-
-{% block label %}{{activity.label}}{% endblock %}
-
-{% block body %}
-{% set user = activity.related_to %}
-{% include theme('user/card.html') %}
-{% endblock %}

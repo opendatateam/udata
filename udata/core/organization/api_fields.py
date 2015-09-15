@@ -2,8 +2,9 @@
 from __future__ import unicode_literals
 
 from udata.api import api, fields, base_reference
+from udata.core.badges.api import badge_fields
 
-from .models import ORG_BADGE_KINDS, ORG_ROLES, MEMBERSHIP_STATUS
+from .models import ORG_ROLES, MEMBERSHIP_STATUS
 
 
 org_ref_fields = api.inherit('OrganizationReference', base_reference, {
@@ -11,6 +12,9 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
     'uri': fields.UrlFor(
         'api.organization', lambda o: {'org': o},
         description='The organization API URI', readonly=True),
+    'slug': fields.String(
+        description='The organization string used as permalink',
+        required=True),
     'page': fields.UrlFor(
         'organizations.show', lambda o: {'org': o},
         description='The organization web page URL', readonly=True),
@@ -38,11 +42,6 @@ member_fields = api.model('Member', {
     'role': fields.String(
         description='The member role in the organization', required=True,
         enum=ORG_ROLES.keys())
-})
-
-badge_fields = api.model('DatasetBadge', {
-    'kind': fields.String(description='Kind of badge (public-service, etc)',
-                          required=True, enum=ORG_BADGE_KINDS.keys()),
 })
 
 org_fields = api.model('Organization', {

@@ -15,7 +15,10 @@ define([
 
     var API = require('api');
 
-    requests[0].respond(200, {'Content-Type': 'application/json'}, JSON.stringify(raw_specs));
+    requests[0].respond(200,
+        {'Content-Type': 'application/json'},
+        JSON.stringify(raw_specs)
+    );
 
     xhr.restore();
 

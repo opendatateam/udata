@@ -1,6 +1,3 @@
-<style lang="less">
-</style>
-
 <template>
 <wizard-component v-ref="wizard" steps="{{steps}}"></wizard-component>
 </template>
@@ -34,7 +31,7 @@ export default {
                 subtitle: this._('Describe your dataset'),
                 component: 'create-form',
                 next: (component) => {
-                    if (component.$.form.validate()) {
+                    if (component.validate()) {
                         let data = component.serialize();
                         if (this.publish_as) {
                             data.organization = this.publish_as;
