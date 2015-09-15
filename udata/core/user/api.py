@@ -15,6 +15,7 @@ from udata.core.reuse.api_fields import reuse_fields
 from udata.features.transfer.models import Transfer
 
 from .api_fields import (
+    apikey_fields,
     me_fields,
     user_fields,
     user_page_fields,
@@ -175,6 +176,28 @@ class NotificationsAPI(API):
         return notifications
 
 
+@me.route('/apikey', endpoint='my_apikey')
+class ApiKeyAPI(API):
+    @api.secure
+    @api.doc('generate_apikey')
+    @api.marshal_with(apikey_fields)
+    @api.response(201, 'API Key generated')
+    def post(self):
+        '''(Re)Generate my API Key'''
+        current_user.generate_api_key()
+        current_user.save()
+        return current_user, 201
+
+    @api.secure
+    @api.doc('clear_apikey')
+    @api.response(204, 'API Key deleted/cleared')
+    def delete(self):
+        '''Clear/destroy an apikey'''
+        current_user.apikey = None
+        current_user.save()
+        return '', 204
+
+
 @ns.route('/', endpoint='users')
 @api.doc(get={
     'id': 'list_users',
@@ -230,7 +253,8 @@ class SuggestUsersAPI(API):
         return [
             {
                 'id': opt['text'],
-                'fullname': opt['payload']['fullname'],
+                'first_name': opt['payload']['first_name'],
+                'last_name': opt['payload']['last_name'],
                 'avatar_url': opt['payload']['avatar_url'],
                 'slug': opt['payload']['slug'],
                 'score': opt['score'],

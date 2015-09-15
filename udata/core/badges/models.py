@@ -13,7 +13,44 @@ log = logging.getLogger(__name__)
 __all__ = ('Badge', 'BadgeMixin')
 
 
+class Badge(db.EmbeddedDocument):
+    kind = db.StringField(choices=[], required=True)
+    created = db.DateTimeField(default=datetime.now, required=True)
+    created_by = db.ReferenceField('User')
+    removed = db.DateTimeField()
+    removed_by = db.ReferenceField('User')
+
+    meta = {
+        'ordering': ['created'],
+    }
+
+    def __unicode__(self):
+        return self.kind
+
+    __str__ = __unicode__
+
+    def validate(self, clean=True):
+        badges = getattr(self._instance, '__badges__', {})
+        if self.kind not in badges.keys():
+            raise db.ValidationError('Unknown badge type: %s' % self.kind)
+        return super(Badge, self).validate(clean=clean)
+
+
+class BadgesList(db.EmbeddedDocumentListField):
+    def __init__(self, *args, **kwargs):
+        return super(BadgesList, self).__init__(Badge, *args, **kwargs)
+
+    def validate(self, value):
+        kinds = [b.kind for b in value]
+        if len(kinds) > len(set(kinds)):
+            raise db.ValidationError(
+                'Duplicate badges for a given kind is not allowed'
+            )
+        return True
+
+
 class BadgeMixin(object):
+    badges = BadgesList()
 
     def add_badge(self, badge):
         '''Perform an atomic prepend for a new badge'''
@@ -37,21 +74,3 @@ class BadgeMixin(object):
         })
         self.reload()
         post_save.send(self.__class__, document=self)
-
-
-class Badge(db.EmbeddedDocument):
-    kind = db.StringField(choices=[], required=True)
-    created = db.DateTimeField(default=datetime.now, required=True)
-    created_by = db.ReferenceField('User')
-    removed = db.DateTimeField()
-    removed_by = db.ReferenceField('User')
-
-    meta = {
-        'allow_inheritance': True,
-        'ordering': ['created'],
-    }
-
-    def __unicode__(self):
-        return self.kind
-
-    __str__ = __unicode__

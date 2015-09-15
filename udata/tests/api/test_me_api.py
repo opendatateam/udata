@@ -48,3 +48,42 @@ class MeAPITest(APITestCase):
     def test_my_reuses_401(self):
         response = self.get(url_for('api.my_reuses'))
         self.assert401(response)
+
+    def test_generate_apikey(self):
+        '''It should generate an API Key on POST'''
+        self.login()
+        response = self.post(url_for('api.my_apikey'))
+        self.assert201(response)
+        self.assertIsNotNone(response.json['apikey'])
+
+        self.user.reload()
+        self.assertIsNotNone(self.user.apikey)
+        self.assertEqual(self.user.apikey, response.json['apikey'])
+
+    def test_regenerate_apikey(self):
+        '''It should regenerate an API Key on POST'''
+        self.login()
+        self.user.generate_api_key()
+        self.user.save()
+
+        apikey = self.user.apikey
+        response = self.post(url_for('api.my_apikey'))
+        self.assert201(response)
+        self.assertIsNotNone(response.json['apikey'])
+
+        self.user.reload()
+        self.assertIsNotNone(self.user.apikey)
+        self.assertNotEqual(self.user.apikey, apikey)
+        self.assertEqual(self.user.apikey, response.json['apikey'])
+
+    def test_clear_apikey(self):
+        '''It should clear an API Key on DELETE'''
+        self.login()
+        self.user.generate_api_key()
+        self.user.save()
+
+        response = self.delete(url_for('api.my_apikey'))
+        self.assert204(response)
+
+        self.user.reload()
+        self.assertIsNone(self.user.apikey)

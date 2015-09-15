@@ -43,8 +43,8 @@
                     {% if current_user.is_authenticated() %}
                         {{ _(
                             'you first need to obtain an %(apikey)s in your profile settings.',
-                            apikey='<a href="%s">%s</a>'|format(
-                                url_for('users.apikey_settings', user=current_user),
+                            apikey='<a href="%s#apikey">%s</a>'|format(
+                                url_for('admin.index', path='me/'),
                                 _('API Key')
                         )|safe) }}
                     {% else %}

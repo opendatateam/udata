@@ -7,14 +7,13 @@ from flask import url_for
 
 from udata.models import (
     Organization, Member, MembershipRequest, Follow, FollowOrg,
-    ORG_BADGE_KINDS
 )
 from udata.core.dataset.models import DatasetIssue, DatasetDiscussion
 from udata.core.reuse.models import ReuseIssue, ReuseDiscussion
 
 from . import APITestCase
 from ..factories import (
-    faker, OrganizationBadgeFactory, OrganizationFactory, UserFactory,
+    faker, badge_factory, OrganizationFactory, UserFactory,
     DatasetFactory, ReuseFactory, AdminFactory
 )
 
@@ -40,6 +39,15 @@ class OrganizationAPITest(APITestCase):
         organization = OrganizationFactory(deleted=datetime.now())
         response = self.get(url_for('api.organization', org=organization))
         self.assertStatus(response, 410)
+
+    def test_organization_api_get_deleted_but_authorized(self):
+        '''It should fetch a deleted organization from the API if authorized'''
+        self.login()
+        member = Member(user=self.user, role='editor')
+        organization = OrganizationFactory(deleted=datetime.now(),
+                                           members=[member])
+        response = self.get(url_for('api.organization', org=organization))
+        self.assert200(response)
 
     def test_organization_api_create(self):
         '''It should create an organization from the API'''
@@ -643,6 +651,14 @@ class OrganizationDiscussionsAPITest(APITestCase):
 
 
 class OrganizationBadgeAPITest(APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Register at least two badges
+        Organization.__badges__['test-1'] = 'Test 1'
+        Organization.__badges__['test-2'] = 'Test 2'
+
+        cls.factory = badge_factory(Organization)
+
     def setUp(self):
         self.login(AdminFactory())
         self.organization = OrganizationFactory()
@@ -650,13 +666,13 @@ class OrganizationBadgeAPITest(APITestCase):
     def test_list(self):
         response = self.get(url_for('api.available_organization_badges'))
         self.assertStatus(response, 200)
-        self.assertEqual(len(response.json), len(ORG_BADGE_KINDS))
-        for kind, label in ORG_BADGE_KINDS.items():
+        self.assertEqual(len(response.json), len(Organization.__badges__))
+        for kind, label in Organization.__badges__.items():
             self.assertIn(kind, response.json)
             self.assertEqual(response.json[kind], label)
 
     def test_create(self):
-        data = OrganizationBadgeFactory.attributes()
+        data = self.factory.attributes()
         with self.api_user():
             response = self.post(
                 url_for('api.organization_badges', org=self.organization),
@@ -666,7 +682,7 @@ class OrganizationBadgeAPITest(APITestCase):
         self.assertEqual(len(self.organization.badges), 1)
 
     def test_create_same(self):
-        data = OrganizationBadgeFactory.attributes()
+        data = self.factory.attributes()
         with self.api_user():
             self.post(
                 url_for('api.organization_badges', org=self.organization),
@@ -681,11 +697,11 @@ class OrganizationBadgeAPITest(APITestCase):
     def test_create_2nd(self):
         # Explicitely setting the kind to avoid collisions given the
         # small number of choices for kinds.
-        kinds_keys = ORG_BADGE_KINDS.keys()
+        kinds_keys = Organization.__badges__.keys()
         self.organization.badges.append(
-            OrganizationBadgeFactory(kind=kinds_keys[0]))
+            self.factory(kind=kinds_keys[0]))
         self.organization.save()
-        data = OrganizationBadgeFactory.attributes()
+        data = self.factory.attributes()
         data['kind'] = kinds_keys[1]
         with self.api_user():
             response = self.post(
@@ -696,7 +712,7 @@ class OrganizationBadgeAPITest(APITestCase):
         self.assertEqual(len(self.organization.badges), 2)
 
     def test_delete(self):
-        badge = OrganizationBadgeFactory()
+        badge = self.factory()
         self.organization.badges.append(badge)
         self.organization.save()
         with self.api_user():
@@ -711,5 +727,5 @@ class OrganizationBadgeAPITest(APITestCase):
         with self.api_user():
             response = self.delete(
                 url_for('api.organization_badge', org=self.organization,
-                        badge_kind=str(OrganizationBadgeFactory().kind)))
+                        badge_kind=str(self.factory().kind)))
         self.assert404(response)

@@ -5,7 +5,7 @@ from udata.core.metrics import Metric
 from udata.i18n import lazy_gettext as _
 from udata.core.followers.metrics import FollowersMetric
 from udata.core.badges.metrics import BadgesMetric
-from udata.models import db, Dataset, Reuse, Organization, OrganizationBadge
+from udata.models import db, Dataset, Reuse, Organization
 
 __all__ = (
     'DatasetsMetric', 'ReusesMetric', 'MembersMetric', 'OrgFollowersMetric',
@@ -70,4 +70,3 @@ class OrgFollowersMetric(FollowersMetric):
 
 class OrgBadgesMetric(BadgesMetric):
     model = Organization
-    badge_model = OrganizationBadge

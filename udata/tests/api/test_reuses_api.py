@@ -6,13 +6,13 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import (
-    Reuse, FollowReuse, Follow, Member, REUSE_BADGE_KINDS, REUSE_TYPES
+    Reuse, FollowReuse, Follow, Member, REUSE_TYPES, Badge
 )
 
 from . import APITestCase
 from ..factories import (
-    faker, ReuseFactory, ReuseBadgeFactory, DatasetFactory, AdminFactory,
-    OrganizationFactory
+    faker, badge_factory,
+    ReuseFactory, DatasetFactory, AdminFactory, OrganizationFactory
 )
 
 
@@ -38,6 +38,13 @@ class ReuseAPITest(APITestCase):
         reuse = ReuseFactory(deleted=datetime.now())
         response = self.get(url_for('api.reuse', reuse=reuse))
         self.assertStatus(response, 410)
+
+    def test_reuse_api_get_deleted_but_authorized(self):
+        '''It should fetch a deleted reuse from the API if authorized'''
+        self.login()
+        reuse = ReuseFactory(deleted=datetime.now(), owner=self.user)
+        response = self.get(url_for('api.reuse', reuse=reuse))
+        self.assert200(response)
 
     def test_reuse_api_create(self):
         '''It should create a reuse from the API'''
@@ -257,6 +264,14 @@ class ReuseAPITest(APITestCase):
 
 
 class ReuseBadgeAPITest(APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Register at least two badges
+        Reuse.__badges__['test-1'] = 'Test 1'
+        Reuse.__badges__['test-2'] = 'Test 2'
+
+        cls.factory = badge_factory(Reuse)
+
     def setUp(self):
         self.login(AdminFactory())
         self.reuse = ReuseFactory()
@@ -264,13 +279,13 @@ class ReuseBadgeAPITest(APITestCase):
     def test_list(self):
         response = self.get(url_for('api.available_reuse_badges'))
         self.assertStatus(response, 200)
-        self.assertEqual(len(response.json), len(REUSE_BADGE_KINDS))
-        for kind, label in REUSE_BADGE_KINDS.items():
+        self.assertEqual(len(response.json), len(Reuse.__badges__))
+        for kind, label in Reuse.__badges__.items():
             self.assertIn(kind, response.json)
             self.assertEqual(response.json[kind], label)
 
     def test_create(self):
-        data = ReuseBadgeFactory.attributes()
+        data = self.factory.attributes()
         with self.api_user():
             response = self.post(
                 url_for('api.reuse_badges', reuse=self.reuse), data)
@@ -279,7 +294,7 @@ class ReuseBadgeAPITest(APITestCase):
         self.assertEqual(len(self.reuse.badges), 1)
 
     def test_create_same(self):
-        data = ReuseBadgeFactory.attributes()
+        data = self.factory.attributes()
         with self.api_user():
             self.post(
                 url_for('api.reuse_badges', reuse=self.reuse), data)
@@ -292,11 +307,11 @@ class ReuseBadgeAPITest(APITestCase):
     def test_create_2nd(self):
         # Explicitely setting the kind to avoid collisions given the
         # small number of choices for kinds.
-        kinds_keys = REUSE_BADGE_KINDS.keys()
+        kinds_keys = Reuse.__badges__.keys()
         self.reuse.badges.append(
-            ReuseBadgeFactory(kind=kinds_keys[0]))
+            self.factory(kind=kinds_keys[0]))
         self.reuse.save()
-        data = ReuseBadgeFactory.attributes()
+        data = self.factory.attributes()
         data['kind'] = kinds_keys[1]
         with self.api_user():
             response = self.post(
@@ -306,7 +321,7 @@ class ReuseBadgeAPITest(APITestCase):
         self.assertEqual(len(self.reuse.badges), 2)
 
     def test_delete(self):
-        badge = ReuseBadgeFactory()
+        badge = self.factory()
         self.reuse.badges.append(badge)
         self.reuse.save()
         with self.api_user():
@@ -321,7 +336,7 @@ class ReuseBadgeAPITest(APITestCase):
         with self.api_user():
             response = self.delete(
                 url_for('api.reuse_badge', reuse=self.reuse,
-                        badge_kind=str(ReuseBadgeFactory().kind)))
+                        badge_kind=str(self.factory().kind)))
         self.assert404(response)
 
 

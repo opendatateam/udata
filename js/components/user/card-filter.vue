@@ -21,33 +21,28 @@
     </div>
 </div>
 <div class="row user-card-filter-cardlist" v-if="completions">
-    <user-card class="{{cardclass}}"
-        v-repeat="user:users"
-        >
-    </user-card>
+    <card class="{{cardclass}}" v-repeat="user:users"></card>
 </div>
 <div class="row" v-if="!search_query">
     <p class="col-xs-12 lead text-center">
-        {{ _('Start typing to find your user.') }}
+    {{ _('Start typing to find your user.') }}
     </p>
 </div>
 <div class="row" v-if="search_query && !users.length">
     <p class="col-xs-12 lead text-center">
-        {{ _('No user found.') }}
+    {{ _('No user found.') }}
     </p>
 </div>
 </template>
 
 <script>
-'use strict';
+import API from 'api';
+import log from 'logger';
+import User from 'models/user';
 
-var API = require('api'),
-    log = require('logger'),
-    User = require('models/user');
-
-module.exports = {
+export default {
     components: {
-        'user-card': require('components/user/card.vue')
+        card: require('components/user/card.vue')
     },
     data: function() {
         return {
@@ -63,7 +58,8 @@ module.exports = {
                 return new User({data: {
                     id: user.id,
                     avatar: user.avatar_url,
-                    fullname: user.fullname,
+                    first_name: user.first_name,
+                    last_name: user.last_name,
                     page: '/user/' + user.slug + '/'
                 }});
             });
@@ -74,9 +70,9 @@ module.exports = {
             API.users.suggest_users({
                 q: query,
                 size: 9
-            }, function(data) {
+            }, (data) => {
                 this.completions = data.obj;
-            }.bind(this), function(message) {
+            }, function(message) {
                 log.error('Unable to fetch users', message);
             });
         }

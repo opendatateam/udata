@@ -16,6 +16,8 @@ from udata import fileutils, search
 from udata.auth import admin_permission
 from udata.api import api, fields, SingleObjectAPI, API
 from udata.core import storages
+from udata.core.badges.forms import badge_form
+from udata.core.badges.models import Badge
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by, multi_to_dict
 
@@ -30,11 +32,10 @@ from .api_fields import (
     upload_fields,
 )
 from .models import (
-    Dataset, DatasetBadge, Resource, FollowDataset, Checksum, License,
-    DATASET_BADGE_KINDS, UPDATE_FREQUENCIES
+    Dataset, Resource, FollowDataset, Checksum, License, UPDATE_FREQUENCIES
 )
 from .permissions import DatasetEditPermission
-from .forms import BadgeForm, ResourceForm, DatasetForm
+from .forms import ResourceForm, DatasetForm
 from .search import DatasetSearch
 
 ns = api.namespace('datasets', 'Dataset related operations')
@@ -74,7 +75,7 @@ class DatasetAPI(API):
     @api.marshal_with(dataset_fields)
     def get(self, dataset):
         '''Get a dataset given its identifier'''
-        if dataset.deleted:
+        if dataset.deleted and not DatasetEditPermission(dataset).can():
             api.abort(410, 'Dataset has been deleted')
         return dataset
 
@@ -133,7 +134,7 @@ class AvailableDatasetBadgesAPI(API):
     @api.doc('available_dataset_badges')
     def get(self):
         '''List all available dataset badges and their labels'''
-        return DATASET_BADGE_KINDS
+        return Dataset.__badges__
 
 
 @ns.route('/<dataset:dataset>/badges/', endpoint='dataset_badges')
@@ -144,9 +145,10 @@ class DatasetBadgesAPI(API):
     @api.secure(admin_permission)
     def post(self, dataset):
         '''Create a new badge for a given dataset'''
-        form = api.validate(BadgeForm)
-        badge = DatasetBadge(created=datetime.now(),
-                             created_by=current_user.id)
+        Form = badge_form(Dataset)
+        form = api.validate(Form)
+        badge = Badge(created=datetime.now(),
+                      created_by=current_user.id)
         form.populate_obj(badge)
         for existing_badge in dataset.badges:
             if existing_badge.kind == badge.kind:
