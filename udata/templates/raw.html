@@ -61,8 +61,8 @@
   <body class="{{body_class}}">
     {% block body %}{% endblock %}
 
-    <script type="text/javascript" src="{{ static('common.js') }}"></script>
-    <script type="text/javascript" src="{{ static('site.js') }}"></script>
+    <script src="{{ static('common.js') }}"></script>
+    <script src="{{ static('site.js') }}"></script>
     {% block extra_js %}{% endblock %}
 
     {% for snippet in footer_snippets %}

@@ -93,6 +93,7 @@ module.exports = {
         new webpack.IgnorePlugin(/^(\.\/)?shred/),
         new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp(languages.join('|'))),
         new webpack.ContextReplacementPlugin(/locales$/, new RegExp(languages.join('|'))),
+        new webpack.optimize.CommonsChunkPlugin("vue-common.js", ["admin", "activities"]),
         new webpack.optimize.CommonsChunkPlugin('common.js')
     ]
 };
