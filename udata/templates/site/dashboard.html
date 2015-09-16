@@ -10,8 +10,9 @@
 {% set body_class = 'dashboard' %}
 
 {% block extra_js %}
-<script type="text/javascript" src="{{ static('dashboard/site.js') }}"></script>
-<script type="text/javascript" src="{{ static('activities.js') }}"></script>
+<script src="{{ static('dashboard/site.js') }}"></script>
+<script src="{{ static('vue-common.js') }}"></script>
+<script src="{{ static('activities.js') }}"></script>
 {% endblock %}
 
 {% block breadcrumb %}
