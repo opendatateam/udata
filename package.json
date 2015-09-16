@@ -64,7 +64,6 @@
     "bootstrap-slider": "~5.1.0",
     "chart.js": "^1.0.2",
     "Chart.StackedBar.js": "regaddi/Chart.StackedBar.js#1.0.3",
-    "d3": "^3.5.5",
     "debounce": "^1.0.0",
     "director": "^1.2.8",
     "dotdotdot": "BeSite/jQuery.dotdotdot#v1.7.3",

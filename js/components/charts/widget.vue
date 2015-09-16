@@ -27,22 +27,10 @@
 </style>
 
 <template>
-    <box title="{{title}}" icon="{{ icon || 'line-chart' }}"
+    <box title="{{ title }}" icon="{{ icon || 'line-chart' }}"
         boxclass="box-solid"
         bodyclass="chart-responsive"
-        loading="{{metrics.loading}}">
-        <aside>
-            <div class="btn-group" data-toggle="btn-toggle">
-                <button type="button" class="btn btn-primary btn-xs"
-                    v-repeat="types"
-                    v-class="active: charttype == $key"
-                    aria-pressed="{{charttype == $key}}"
-                    v-on="click: charttype = $key"
-                    >
-                    <span class="fa fa-fw fa-{{$value}}"></span>
-                </button>
-            </div>
-        </aside>
+        loading="{{ metrics.loading }}">
         <div class="chart" v-style="height: height" v-el="container">
             <canvas v-el="canvas" height="100%"></canvas>
         </div>
@@ -51,14 +39,11 @@
 </template>
 
 <script>
-'use strict';
-
-var $ = require('jquery'),
-    moment = require('moment'),
-    debounce = require('debounce'),
-    Chart = require('chart.js');
-
-require('Chart.StackedBar.js');
+import $ from 'jquery';
+import moment from 'moment';
+import debounce from 'debounce';
+import Chart from 'chart.js';
+import 'Chart.StackedBar.js';
 
 /*
  * Set common global chart options
@@ -103,20 +88,14 @@ var AREA_OPTIONS = {
     ];
 
 
-module.exports = {
+export default {
     name: 'chartjs-chart',
     data: function() {
         return {
             chart: null,
-            charttype: 'Area',
+            chartType: 'Area',
             canvasHeight: null,
-            height: '300px',
-            types: {
-                Area: 'area-chart',
-                Bar: 'bar-chart',
-                StackedBar: 'bar-chart',
-                Line: 'line-chart'
-            }
+            height: '300px'
         };
     },
     props: [
@@ -126,34 +105,35 @@ module.exports = {
         'height',
         'x',
         'y',
-        'metrics'
+        'metrics',
+        'chartType'
     ],
     computed: {
         series: function() {
-            var series = this.y.map(function(item) {
-                    return item.id;
+            let series = this.y.map((item) => {
+                return item.id;
+            });
+            let raw = this.metrics.timeserie(series);
+            let data = {
+                labels: raw.map((item) => {
+                    return moment(item.date).format('L');
                 }),
-                raw = this.metrics.timeserie(series),
-                data = {
-                    labels: raw.map(function(item) {
-                        return moment(item.date).format('L');
-                    }),
 
-                    datasets: this.y.map(function(serie, idx) {
-                        var dataset = {label: serie.label},
-                            color = serie.color || COLORS[idx];
-                        dataset.fillColor = this.toRGBA(color, .5);
-                        dataset.strokeColor = color;
-                        dataset.pointColor = color;
-                        // datasetpointStrokeColor: "#c1c7d1",
-                        dataset.pointHighlightFill = '#fff';
-                        dataset.pointHighlightStroke = color;
-                        dataset.data = raw.map(function(item) {
-                            return item[serie.id];
-                        });
-                        return dataset;
-                    }.bind(this))
-                };
+                datasets: this.y.map((serie, idx) => {
+                    let dataset = {label: serie.label};
+                    let color = serie.color || COLORS[idx];
+                    dataset.fillColor = this.toRGBA(color, .5);
+                    dataset.strokeColor = color;
+                    dataset.pointColor = color;
+                    // datasetpointStrokeColor: "#c1c7d1",
+                    dataset.pointHighlightFill = '#fff';
+                    dataset.pointHighlightStroke = color;
+                    dataset.data = raw.map((item) => {
+                        return item[serie.id];
+                    });
+                    return dataset;
+                })
+            };
 
             return data;
         }
@@ -163,32 +143,27 @@ module.exports = {
     },
     ready: function() {
         this.canvasHeight = this.$$.container.clientHeight;
-        this.build_chart();
-        this.metrics.$on('updated', this.build_chart.bind(this));
+        this.buildChart();
+        this.metrics.$on('updated', this.buildChart.bind(this));
     },
     beforeDestroy: function() {
-        this.clean_chart();
+        this.cleanChart();
     },
     watch: {
         'y': function(new_value, old_value) {
             if (new_value != old_value) {
-                this.build_chart();
+                this.buildChart();
             }
-        },
-        'charttype': function() {
-            this.build_chart();
         }
     },
     methods: {
-        build_chart: function() {
-            if (!this.y || !this.metrics || !this.charttype) {
+        buildChart: function() {
+            if (!this.y || !this.metrics || !this.chartType) {
                 return;
             }
-
-            var factory = this['build' + this.charttype],
-                ctx = this.$$.canvas.getContext('2d');
-
-            this.clean_chart();
+            let factory = this['build' + this.chartType];
+            let ctx = this.$$.canvas.getContext('2d');
+            this.cleanChart();
             ctx.canvas.height = this.canvasHeight;
             this.chart = factory(ctx);
             this.$$.legend.innerHTML = this.chart.generateLegend();
@@ -205,7 +180,7 @@ module.exports = {
         buildLine: function(ctx) {
             return new Chart(ctx).Line(this.series, LINE_OPTIONS);
         },
-        clean_chart: function() {
+        cleanChart: function() {
             if (this.chart) {
                 this.chart.destroy();
                 this.chart = null;
@@ -213,12 +188,12 @@ module.exports = {
         },
         toRGBA: function(hex, opacity) {
             // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-            var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+            let shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
             hex = hex.replace(shorthandRegex, function(m, r, g, b) {
                 return r + r + g + g + b + b;
             });
 
-            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return result ?
                 'rgba('
                     + parseInt(result[1], 16) + ','

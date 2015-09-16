@@ -19,12 +19,10 @@ module.exports = {
         site: './js/site.js',
         home: './js/home.js',
         search: './js/search.js',
-        activities: './js/activities.js',
+        dashboard: './js/dashboard.js',
         'dataset/display': './js/dataset/display',
         'reuse/display': './js/reuse/display',
         'organization/display': './js/organization/display',
-        'dashboard/site': './js/dashboard/site',
-        'dashboard/organization': './js/dashboard/organization',
         'site/map': './js/site/map',
         'topic/display': './js/topic/display',
         'post/display': './js/post/display',
@@ -89,11 +87,13 @@ module.exports = {
             jQuery: 'jquery',
             'window.jQuery': 'jquery',
         }),
-        new ExtractTextPlugin('[name].css'),
+        new ExtractTextPlugin('[name].css', {
+            allChunks: true
+        }),
         new webpack.IgnorePlugin(/^(\.\/)?shred/),
         new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp(languages.join('|'))),
         new webpack.ContextReplacementPlugin(/locales$/, new RegExp(languages.join('|'))),
-        new webpack.optimize.CommonsChunkPlugin("vue-common.js", ["admin", "activities"]),
+        new webpack.optimize.CommonsChunkPlugin("vue-common.js", ["admin", "dashboard"]),
         new webpack.optimize.CommonsChunkPlugin('common.js')
     ]
 };
