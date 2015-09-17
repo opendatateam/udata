@@ -17,6 +17,7 @@ from flask.ext.testing import TestCase as BaseTestCase
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
+from udata import settings
 from udata.app import create_app
 from udata.models import db
 from udata.search import es
@@ -31,18 +32,22 @@ for logger in ('factory', 'elasticsearch', 'urllib3'):
 
 
 class TestCase(BaseTestCase):
-    settings = 'udata.settings.Testing'
+    settings = settings.Testing
 
     def create_app(self):
-        app = create_app(self.settings)
-        # Override some local config
-        app.config['DEBUG_TOOLBAR'] = False
-        app.config['SERVER_NAME'] = 'localhost'
-        app.config['DEFAULT_LANGUAGE'] = 'en'
-        if not app.config.get('TEST_WITH_PLUGINS', False):
-            app.config['PLUGINS'] = []
-        if not app.config.get('TEST_WITH_THEME', False):
-            app.config['THEME'] = 'default'
+        '''Create an application a test application.
+
+        - load settings in this order: Default > local > Testing
+        - create a minimal application
+        - plugins and themes are disabled
+        - server name is forced to localhost
+        - defaut language is set to EN
+        - cache is disabled
+        - celery is synchronous
+        - CSRF is disabled
+        - automatic indexing is disabled
+        '''
+        app = create_app(settings.Defaults, override=self.settings)
         return app
 
     def login(self, user=None, client=None):
