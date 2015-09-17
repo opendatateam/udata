@@ -11,6 +11,7 @@ from faker import Faker
 from faker.providers import BaseProvider
 
 from udata import models
+from udata.core.discussions.models import Message
 
 faker = Faker()
 
@@ -168,6 +169,13 @@ class DatasetDiscussionFactory(MongoEngineFactory):
         model = models.DatasetDiscussion
 
     title = factory.LazyAttribute(lambda o: faker.sentence())
+
+
+class MessageDiscussionFactory(MongoEngineFactory):
+    class Meta:
+        model = Message
+
+    content = factory.LazyAttribute(lambda o: faker.sentence())
 
 
 class OrganizationFactory(MongoEngineFactory):

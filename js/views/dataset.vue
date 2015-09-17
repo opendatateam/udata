@@ -6,6 +6,7 @@
         <dataset-details dataset="{{dataset}}" class="col-xs-12 col-md-6"></dataset-details>
         <map-widget title="{{ _('Spatial coverage') }}"
             geojson="{{geojson}}" class="col-xs-12 col-md-6"></map-widget>
+        <dataset-quality quality="{{ dataset.quality }}" class="col-xs-12 col-md-6"></dataset-quality>
     </div>
     <div class="row">
         <resources-list dataset="{{dataset}}" class="col-xs-12"></resources-list>
@@ -137,6 +138,7 @@ export default {
     components: {
         'small-box': require('components/containers/small-box.vue'),
         'dataset-details': require('components/dataset/details.vue'),
+        'dataset-quality': require('components/dataset/quality.vue'),
         'chart': require('components/charts/widget.vue'),
         'resources-list': require('components/dataset/resources-list.vue'),
         'reuses-widget': require('components/reuse/list.vue'),

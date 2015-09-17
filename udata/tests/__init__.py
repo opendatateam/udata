@@ -5,6 +5,7 @@ import os
 import logging
 import shutil
 import tempfile
+from datetime import timedelta
 
 import mock
 
@@ -61,10 +62,11 @@ class TestCase(BaseTestCase):
     def assert204(self, response):
         self.assertStatus(response, 204)
 
-    def assertEqualDates(self, datetime1, datetime2):
-        """Avoid comparing milliseconds."""
-        self.assertEqual(datetime1.strftime('%Y%m%d%H%M%S'),
-                         datetime2.strftime('%Y%m%d%H%M%S'))
+    def assertEqualDates(self, datetime1, datetime2, limit=1):  # Seconds.
+        """Lax date comparison, avoid comparing milliseconds and seconds."""
+        delta = (datetime1 - datetime2)
+        self.assertTrue(
+            timedelta(seconds=-limit) <= delta <= timedelta(seconds=limit))
 
     def assertStartswith(self, haystack, needle):
         self.assertEqual(

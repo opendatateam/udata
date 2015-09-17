@@ -35,7 +35,7 @@ function addTooltip($element, content) {
 function prepare_resources() {
 
     $('.resources-list').items('http://schema.org/DataDownload').each(function() {
-        var $this = $(this);
+        let $this = $(this);
 
         // Prevent default click on link
         $this.find('a[itemprop="url"]').click(function(e) {
@@ -49,11 +49,13 @@ function prepare_resources() {
 
         // Check asynchronuously the status of displayed resources
         $this.find('.format-label').each(function() {
-            var $self = $(this);
-            var url = $self.parent().property('url').first().attr('href');
+            let $self = $(this);
+            let url = $self.parent().property('url').first().attr('href');
+            let $Dataset = $('body').items('http://schema.org/Dataset').eq(0);
+            let group = $Dataset.attr('alternateName'); // This is the slug.
 
             if (!startsWith(url, window.location.origin)) {
-                $.get($this.data('checkurl'), {'url': url}
+                $.get($this.data('checkurl'), {'url': url, 'group': group}
                 ).done(function(data) {
                     if (data.status === '200') {
                         $self.addClass('format-label-success');
@@ -76,7 +78,7 @@ function prepare_resources() {
 
         // Display detailled informations in a modal
         $this.click(function() {
-            var $modal = modal({
+            let $modal = modal({
                 title: $this.property('name').value(),
                 content: template($this.microdata()[0]),
                 actions: [{
@@ -87,7 +89,7 @@ function prepare_resources() {
             });
             // Click on a download link
             $modal.find('.resource-click').click(function(e) {
-                var eventName = '';
+                let eventName = '';
                 if (startsWith(this.href, window.location.origin)) {
                     eventName = 'RESOURCE_DOWNLOAD';
                 } else {
@@ -117,7 +119,7 @@ function fetch_reuses() {
 }
 
 function load_coverage_map() {
-    var $el = $('#coverage-map'),
+    let $el = $('#coverage-map'),
         ATTRIBUTIONS = [
             '&copy;',
             '<a href="http://openstreetmap.org">OpenStreetMap</a>',
@@ -174,7 +176,7 @@ function loadJson(map, layer, data) {
 }
 
 function display_extras() {
-    var $Dataset = $('body').items('http://schema.org/Dataset').eq(0),
+    let $Dataset = $('body').items('http://schema.org/Dataset').eq(0),
         data = $Dataset.microdata()[0];
 
     data['id'] = $Dataset.attr('itemid');

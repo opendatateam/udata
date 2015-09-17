@@ -62,6 +62,12 @@ export default {
                 align: 'center',
                 type: 'visibility',
                 width: 95
+            }, {
+                label: this._('Quality'),
+                key: 'quality.score',
+                align: 'center',
+                type: 'progress-bars',
+                width: 125
             }],
             downloads: []
         };

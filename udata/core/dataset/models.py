@@ -8,6 +8,7 @@ from collections import OrderedDict
 from blinker import signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
+from werkzeug import cached_property
 
 from udata.models import (
     db, WithMetrics, BadgeMixin, Discussion, Follow, Issue,
@@ -15,6 +16,8 @@ from udata.models import (
 )
 from udata.i18n import lazy_gettext as _
 from udata.utils import hash_url
+
+from .croquemort import check_url_from_cache, check_url_from_group
 
 
 __all__ = (
@@ -62,6 +65,7 @@ CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
 DEFAULT_CHECKSUM_TYPE = 'sha1'
 
 PIVOTAL_DATA = 'pivotal-data'
+CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
 
 
 class License(db.Document):
@@ -130,6 +134,26 @@ class Resource(WithMetrics, db.EmbeddedDocument):
         super(Resource, self).clean()
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
+
+    @property
+    def closed_format(self):
+        """Return True if the specified format is in CLOSED_FORMATS."""
+        return self.format.lower() in CLOSED_FORMATS
+
+    def check_availability(self, group):
+        """Check if a resource is reachable against a Croquemort server.
+
+        Return a boolean.
+        """
+        if self.type == 'remote':
+            # We perform a quick check for performances matters.
+            error, response = check_url_from_cache(self.url, group)
+            if error or int(response.get('status', 500)) >= 500:
+                return False
+            else:
+                return True
+        else:
+            return True  # We consider that API cases (types) are OK.
 
 
 class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
@@ -227,6 +251,21 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         return UPDATE_FREQUENCIES.get(self.frequency or 'unknown',
                                       UPDATE_FREQUENCIES['unknown'])
 
+    def check_availability(self):
+        """Check if resources from that dataset are available.
+
+        Return a list of booleans.
+        """
+        # First, we try to retrieve all data from the group (slug).
+        error, response = check_url_from_group(self.slug)
+        if error:
+            # The group is unknown, the check will be performed by resource.
+            return [resource.check_availability(self.slug)
+                    for resource in self.resources]
+        else:
+            return [int(url_infos['status']) == 200
+                    for url_infos in response['urls']]
+
     @property
     def last_update(self):
         if self.resources:
@@ -239,7 +278,9 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         """Compute the next expected update date,
 
         given the frequency and last_update.
+        Return None if the frequency is not handled.
         """
+        delta = None
         if self.frequency == 'daily':
             delta = timedelta(days=1)
         elif self.frequency == 'weekly':
@@ -262,7 +303,77 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
             delta = timedelta(weeks=52 * 3)
         elif self.frequency == 'quinquennial':
             delta = timedelta(weeks=52 * 5)
-        return self.last_update + delta
+        if delta is None:
+            return
+        else:
+            return self.last_update + delta
+
+    @cached_property
+    def quality(self):
+        """Return a dict filled with metrics related to the inner
+
+        quality of the dataset:
+
+            * number of tags
+            * description length
+            * and so on
+        """
+        result = {}
+        if self.next_update:
+            result['frequency'] = self.frequency
+            result['update_in'] = -(self.next_update - datetime.now()).days
+        if self.tags:
+            result['tags_count'] = len(self.tags)
+        if self.description:
+            result['description_length'] = len(self.description)
+        if self.resources:
+            result['has_resources'] = True
+            result['has_only_closed_formats'] = all(
+                resource.closed_format for resource in self.resources)
+            result['has_unavailable_resources'] = not all(
+                self.check_availability())
+        discussions = DatasetDiscussion.objects(subject=self.id)
+        if discussions:
+            result['discussions'] = len(discussions)
+            result['has_untreated_discussions'] = not all(
+                discussion.person_involved(self.owner)
+                for discussion in discussions)
+        result['score'] = self.compute_quality_score(result)
+        return result
+
+    def compute_quality_score(self, quality):
+        """Compute the score related to the quality of that dataset."""
+        score = 0
+        UNIT = 2
+        if 'frequency' in quality:
+            # TODO: should be related to frequency.
+            if quality['update_in'] < 0:
+                score += UNIT
+            else:
+                score -= UNIT
+        if 'tags_count' in quality:
+            if quality['tags_count'] > 3:
+                score += UNIT
+        if 'description_length' in quality:
+            if quality['description_length'] > 100:
+                score += UNIT
+        if 'has_resources' in quality:
+            if quality['has_only_closed_formats']:
+                score -= UNIT
+            else:
+                score += UNIT
+            if quality['has_unavailable_resources']:
+                score -= UNIT
+            else:
+                score += UNIT
+        if 'discussions' in quality:
+            if quality['has_untreated_discussions']:
+                score -= UNIT
+            else:
+                score += UNIT
+        if score < 0:
+            return 0
+        return score
 
     @classmethod
     def get(cls, id_or_slug):
