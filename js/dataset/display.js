@@ -22,7 +22,10 @@ import 'widgets/share-btn';
 let user_reuses;
 
 function startsWith(data, input) {
-    return (data.substring(0, input.length) === input);
+    return data.substring(0, input.length) === input;
+}
+function endsWith(data, input) {
+    return data.indexOf(input, data.length - input.length) !== -1;
 }
 
 function addTooltip($element, content) {
@@ -52,24 +55,29 @@ function prepare_resources() {
             var $self = $(this);
             var url = $self.parent().property('url').first().attr('href');
 
-            if (!startsWith(url, window.location.origin)) {
-                $.get($this.data('checkurl'), {'url': url}
-                ).done(function(data) {
-                    if (data.status === '200') {
-                        $self.addClass('format-label-success');
-                    } else if (data.status == '404') {
-                        $self.addClass('format-label-warning');
-                        addTooltip($self, i18n._('The resource cannot be found.'));
-                    }
-                }).fail(function() {
-                    if (startsWith(url, 'ftp')) {
-                        $self.addClass('format-label-warning');
-                        addTooltip($self, i18n._('The server may be hard to reach (FTP).'));
-                    } else {
-                        $self.addClass('format-label-danger');
-                        addTooltip($self, i18n._('The server cannot be found.'));
-                    }
-                });
+            if (!startsWith(url, window.location.origin)
+                    // TODO: temporary fix before we move all statics on the same server
+                    && !endsWith(url.match(/:\/\/(.[^/]+)/)[1], 'data.gouv.fr')) {
+                if (startsWith(url, 'ftp')) {
+                    $self.addClass('format-label-warning');
+                    addTooltip($self, i18n._('The server may be hard to reach (FTP).'));
+                } else {
+                    $.get($this.data('checkurl'), {'url': url}
+                    ).done(function(data) {
+                        if (data.status === '200') {
+                            $self.addClass('format-label-success');
+                        } else if (data.status == '404') {
+                            $self.addClass('format-label-warning');
+                            addTooltip($self, i18n._('The resource cannot be found.'));
+                        }
+                    }).fail(function() {
+                        // The API check returns a 503 if the croquemort server itself is unreachable
+                        if (data.status !== '503') {
+                            $self.addClass('format-label-danger');
+                            addTooltip($self, i18n._('The server cannot be found.'));
+                        }
+                    });
+                }
             }
 
         });
