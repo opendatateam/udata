@@ -70,9 +70,9 @@ function prepare_resources() {
                             $self.addClass('format-label-warning');
                             addTooltip($self, i18n._('The resource cannot be found.'));
                         }
-                    }).fail(function() {
+                    }).fail(function(jqXHR) {
                         // The API check returns a 503 if the croquemort server itself is unreachable
-                        if (data.status !== '503') {
+                        if (jqXHR.status !== 503) {
                             $self.addClass('format-label-danger');
                             addTooltip($self, i18n._('The server cannot be found.'));
                         }
