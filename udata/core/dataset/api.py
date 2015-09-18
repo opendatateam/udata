@@ -362,19 +362,36 @@ class CheckUrlAPI(API):
         if CROQUEMORT is None:
             return {'error': 'Check server not configured.'}, 500
         check_url = '{url}/check/one'.format(url=CROQUEMORT['url'])
-        response = requests.post(check_url,
-                                 data=json.dumps({'url': args['url']}))
+        # See http://docs.python-requests.org/en/latest/user/advanced/#timeouts
+        # We are waiting 3 sec for the connexion and 9 for the response.
+        timeout = (3.1, 9.1)
+        try:
+            response = requests.post(check_url,
+                                     data=json.dumps({'url': args['url']}),
+                                     timeout=timeout)
+        except requests.ConnectionError:
+            return {}, 503
         url_hash = response.json()['url-hash']
         retrieve_url = '{url}/url/{url_hash}'.format(
             url=CROQUEMORT['url'], url_hash=url_hash)
-        response = requests.get(retrieve_url, params={'url': args['url']})
+        try:
+            response = requests.get(retrieve_url,
+                                    params={'url': args['url']},
+                                    timeout=timeout)
+        except requests.ConnectionError:
+            return {}, 503
         attempts = 0
         while response.status_code == 404 or 'status' not in response.json():
             if attempts >= CROQUEMORT['retry']:
                 msg = ('We were unable to retrieve the URL after'
                        ' {attempts} attempts.').format(attempts=attempts)
                 return {'error': msg}, 502
-            response = requests.get(retrieve_url, params={'url': args['url']})
+            try:
+                response = requests.get(retrieve_url,
+                                        params={'url': args['url']},
+                                        timeout=timeout)
+            except requests.ConnectionError:
+                return {}, 503
             time.sleep(CROQUEMORT['delay'])
             attempts += 1
         result = response.json()
