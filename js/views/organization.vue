@@ -53,7 +53,7 @@ import {PageList} from 'models/base';
 export default {
     name: 'OrganizationView',
     data: function() {
-        var actions = [{
+        let actions = [{
                 label: this._('Delete'),
                 icon: 'trash',
                 method: 'confirm_delete'
@@ -98,7 +98,8 @@ export default {
                 title: null,
                 page: null,
                 subtitle: this._('Organization'),
-                actions: actions
+                actions: actions,
+                badges: []
             },
             charts: {
                 traffic: {
@@ -187,6 +188,12 @@ export default {
         }
     },
     methods: {
+        confirm_delete: function() {
+            this.$root.$modal(
+                {data: {organization: this.org}},
+                Vue.extend(require('components/organization/delete-modal.vue'))
+            );
+        },
         setBadges: function() {
             this.$root.$modal(
                 {data: {subject: this.org}},
@@ -204,7 +211,6 @@ export default {
             if (name) {
                 this.meta.title = name;
                 this.$dispatch('meta:updated', this.meta);
-
             }
         },
         'org.id': function(id) {
@@ -225,6 +231,14 @@ export default {
             if (page) {
                 this.meta.page = page;
                 this.$dispatch('meta:updated', this.meta);
+            }
+        },
+        'org.deleted': function(deleted) {
+            if (deleted) {
+                this.meta.badges = [{
+                    class: 'danger',
+                    label: this._('Deleted')
+                }];
             }
         }
     }

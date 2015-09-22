@@ -82,7 +82,8 @@ export default {
                 title: null,
                 page: null,
                 subtitle: this._('Dataset'),
-                actions: actions
+                actions: actions,
+                badges:  []
             },
             y: [{
                 id: 'views',
@@ -208,6 +209,14 @@ export default {
                 API.spatial.spatial_zones({ids: coverage.zones}, function(response) {
                     this.geojson = response.obj;
                 }.bind(this));
+            }
+        },
+        'dataset.deleted': function(deleted) {
+            if (deleted) {
+                this.meta.badges = [{
+                    class: 'danger',
+                    label: this._('Deleted')
+                }];
             }
         }
     }

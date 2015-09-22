@@ -50,9 +50,14 @@
                 </ul>
             </div>
             <small v-if="$root.meta.subtitle">{{$root.meta.subtitle}}</small>
+            <small v-if="$root.meta.badges">
+                <span v-repeat="badge in $root.meta.badges"
+                    class="label label-{{badge.class}}">{{badge.label}}</span>
+            </small>
         </h1>
-        <div class="btn-group  btn-group-sm btn-actions pull-right clearfix">
-            <a v-if="$root.meta.page" class="btn btn-link" href="{{$root.meta.page}}"
+        <div class="btn-group btn-group-sm btn-actions pull-right clearfix"
+            v-if="$root.meta.page">
+            <a class="btn btn-link" href="{{$root.meta.page}}"
                 title="{{ _('See it as viewed by visitors') }}">
                 {{ _('See on the site') }} →
             </a>
@@ -61,9 +66,7 @@
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'content-header',
     replace: true,
     methods: {
