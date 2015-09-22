@@ -21,6 +21,7 @@ Vue.use(require('plugins/i18next'));
 Vue.use(require('plugins/markdown'));
 
 $(require('api')).on('built', function() {
+    new Vue(require('components/dashboard/graphs.vue'));
     new Vue(require('components/activities/timeline.vue'));
 });
 
