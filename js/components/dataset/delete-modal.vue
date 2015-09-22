@@ -1,5 +1,3 @@
-<style lang="less"></style>
-
 <template>
 <modal title="{{ _('Confirm deletion') }}"
     class="modal-danger dataset-delete-modal"
@@ -28,13 +26,11 @@
 </template>
 
 <script>
-'use strict';
+import API from 'api';
 
-var API = require('api');
-
-module.exports = {
+export default {
     components: {
-        'modal': require('components/modal.vue')
+        modal: require('components/modal.vue')
     },
     data: function() {
         return {
@@ -44,9 +40,10 @@ module.exports = {
     methods: {
         confirm: function() {
             API.datasets.delete_dataset({dataset: this.dataset.id},
-                function(response) {
+                (response) => {
+                    this.dataset.fetch();
                     this.$.modal.close();
-                }.bind(this)
+                }
             );
         }
     }

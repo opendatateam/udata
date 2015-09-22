@@ -40,7 +40,7 @@ export default {
     methods: {
         confirm: function() {
             API.organizations.delete_organization(
-                {organization: this.organization.id},
+                {org: this.organization.id},
                 (response) => {
                     this.organization.fetch();
                     this.$.modal.close();
