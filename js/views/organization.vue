@@ -187,6 +187,12 @@ export default {
         }
     },
     methods: {
+        confirm_delete: function() {
+            this.$root.$modal(
+                {data: {organization: this.org}},
+                Vue.extend(require('components/organization/delete-modal.vue'))
+            );
+        },
         setBadges: function() {
             this.$root.$modal(
                 {data: {subject: this.org}},
