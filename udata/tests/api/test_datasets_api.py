@@ -138,6 +138,21 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.extras['float'], 42.0)
         self.assertEqual(dataset.extras['string'], 'value')
 
+    def test_dataset_api_retrieve_quality(self):
+        '''It should retrieve a dataset and its quality from the API.'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user, description='')
+        response = self.get(url_for('api.dataset', dataset=dataset))
+        self.assert200(response)
+        self.assertEqual(response.json['quality'], {'score': 0})
+        dataset.description = 'b' * 42
+        dataset.save()
+        response = self.get(url_for('api.dataset', dataset=dataset))
+        self.assertEqual(response.json['quality'], {
+            'score': 0,
+            'description_length': 42
+        })
+
     def test_dataset_api_update(self):
         '''It should update a dataset from the API'''
         user = self.login()
