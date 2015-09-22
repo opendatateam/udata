@@ -4,6 +4,10 @@ import time
 import requests
 from flask import current_app
 
+# See http://docs.python-requests.org/en/latest/user/advanced/#timeouts
+# We are waiting 3 sec for the connexion and 9 for the response.
+TIMEOUT = (3.1, 9.1)
+
 
 def check_url(url, group=None):
     """Check the given URL against a Croquemort server.
@@ -16,19 +20,32 @@ def check_url(url, group=None):
     check_url = '{url}/check/one'.format(url=CROQUEMORT['url'])
     delay = CROQUEMORT['delay']
     retry = CROQUEMORT['retry']
-    response = requests.post(check_url,
-                             data=json.dumps({'url': url, 'group': group}))
+    params = {'url': url, 'group': group}
+    try:
+        response = requests.post(check_url,
+                                 data=json.dumps(params),
+                                 timeout=TIMEOUT)
+    except requests.ConnectionError:
+        return {}, 503
     url_hash = response.json()['url-hash']
     retrieve_url = '{url}/url/{url_hash}'.format(
         url=CROQUEMORT['url'], url_hash=url_hash)
-    response = requests.get(retrieve_url, params={'url': url, 'group': group})
+    try:
+        response = requests.get(retrieve_url, params=params, timeout=TIMEOUT)
+    except requests.ConnectionError:
+        return {}, 503
     attempts = 0
     while response.status_code == 404 or 'status' not in response.json():
         if attempts >= retry:
             msg = ('We were unable to retrieve the URL after'
                    ' {attempts} attempts.').format(attempts=attempts)
             return {'error': msg}, {}
-        response = requests.get(retrieve_url, params={'url': url})
+        try:
+            response = requests.get(retrieve_url,
+                                    params=params,
+                                    timeout=TIMEOUT)
+        except requests.ConnectionError:
+            return {}, 503
         time.sleep(delay)
         attempts += 1
     return {}, response.json()
@@ -43,7 +60,12 @@ def check_url_from_cache(url, group=None):
     if CROQUEMORT is None:
         return {'error': 'Check server not configured.'}, {}
     retrieve_url = '{url}/url'.format(url=CROQUEMORT['url'])
-    response = requests.get(retrieve_url, params={'url': url, 'group': group})
+    try:
+        response = requests.get(retrieve_url,
+                                params={'url': url, 'group': group},
+                                timeout=TIMEOUT)
+    except requests.ConnectionError:
+        return {'error': 'URL checker not found'}, {}
     if response.status_code == 404:
         return {'error': 'URL {url} not found'.format(url=url)}, {}
     else:
@@ -59,7 +81,12 @@ def check_url_from_group(group):
     if CROQUEMORT is None:
         return {'error': 'Check server not configured.'}, {}
     retrieve_url = '{url}/group'.format(url=CROQUEMORT['url'])
-    response = requests.get(retrieve_url, params={'group': group})
+    try:
+        response = requests.get(retrieve_url,
+                                params={'group': group},
+                                timeout=TIMEOUT)
+    except requests.ConnectionError:
+        return {'error': 'URL checker not found'}, {}
     if response.status_code == 404:
         return {'error': 'Group {group} not found'.format(group=group)}, {}
     else:

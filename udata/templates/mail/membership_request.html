@@ -38,7 +38,7 @@
         <td align="center">
             {{ mail_button(
                 _('See the request'),
-                url_for('organizations.edit_membership_requests', org=org, _external=True)
+                url_for('admin.index', path='organization/{id}/#membership-requests'.format(id=org.id), _external=True)
             ) }}
         </td>
     </tr>

@@ -360,7 +360,9 @@ class CheckUrlAPI(API):
         '''Checks that a URL exists and returns metadata.'''
         args = checkurl_parser.parse_args()
         error, response = check_url(args['url'], args['group'])
-        if error or int(response.get('status', 500)) >= 500:
-            return error, 500
+        status = int(response.get('status', 500))
+        if error or status >= 500:
+            # We keep 503 which means the URL checker is unreachable.
+            return error, status == 503 and status or 500
         else:
             return response

@@ -111,15 +111,22 @@ class Defaults(object):
     # TRACKING_BLACKLIST = ['api.notifications', 'api.checkurl']  # Default: []
 
 
-class Testing(Defaults):
+class Testing(object):
+    '''Sane values for testing. Should be applied as ovveride'''
     TESTING = True
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_ALWAYS_EAGER = True
     TEST_WITH_PLUGINS = False
+    PLUGINS = []
     TEST_WITH_THEME = False
+    THEME = 'default'
     CACHE_TYPE = 'null'
     CACHE_NO_NULL_WARNING = True
+    DEBUG_TOOLBAR = False
+    SERVER_NAME = 'localhost'
+    DEFAULT_LANGUAGE = 'en'
+
 
 
 class Debug(Defaults):

@@ -117,13 +117,16 @@ class UDataJsonEncoder(json.JSONEncoder):
         return super(UDataJsonEncoder, self).default(obj)
 
 
-def create_app(config='udata.settings.Defaults'):
+def create_app(config='udata.settings.Defaults', override=None):
     '''Factory for a minimal application'''
     app = UDataApp(APP_NAME)
     app.config.from_object(config)
     settings = os.environ.get('UDATA_SETTINGS', join(os.getcwd(), 'udata.cfg'))
     if exists(settings):
         app.config.from_pyfile(settings)
+
+    if override:
+        app.config.from_object(override)
 
     app.json_encoder = UDataJsonEncoder
 
