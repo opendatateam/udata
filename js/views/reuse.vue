@@ -35,9 +35,9 @@ import Issues from 'models/issues';
 import Discussions from 'models/discussions';
 
 export default {
-    name: 'DatasetView',
+    name: 'ReuseView',
     data: function() {
-        var actions = [{
+        let actions = [{
                 label: this._('Transfer'),
                 icon: 'send',
                 method: 'transfer_request'
@@ -70,7 +70,8 @@ export default {
                 title: null,
                 page: null,
                 subtitle: this._('Reuse'),
-                actions: actions
+                actions: actions,
+                badges: []
             },
             y: [{
                 id: 'views',
@@ -122,9 +123,9 @@ export default {
     },
     methods: {
         confirm_delete: function() {
-            var m = this.$root.$modal(
-                {data: {dataset: this.dataset}},
-                Vue.extend(require('components/dataset/delete-modal.vue'))
+            this.$root.$modal(
+                {data: {reuse: this.reuse}},
+                Vue.extend(require('components/reuse/delete-modal.vue'))
             );
         },
         transfer_request: function() {
@@ -164,6 +165,14 @@ export default {
                 this.followers.fetch({id: id});
                 this.issues.fetch({'for': id});
                 this.discussions.fetch({'for': id});
+            }
+        },
+        'reuse.deleted': function(deleted) {
+            if (deleted) {
+                this.meta.badges = [{
+                    class: 'danger',
+                    label: this._('Deleted')
+                }];
             }
         }
     }

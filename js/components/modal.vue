@@ -17,11 +17,9 @@
 </template>
 
 <script>
-'use strict';
+import $ from 'jquery';
 
-var $ = require('jquery');
-
-module.exports = {
+export default {
     replace: true,
     name: 'modal',
     props: ['title', 'size'],
@@ -31,9 +29,9 @@ module.exports = {
         }
     },
     ready: function() {
-        $(this.$el).modal().on('hidden.bs.modal', function() {
+        $(this.$el).modal().on('hidden.bs.modal', () => {
             this.$destroy(true);
-        }.bind(this));
+        });
     },
     methods: {
         close: function() {

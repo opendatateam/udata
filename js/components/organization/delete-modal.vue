@@ -1,11 +1,11 @@
 <template>
 <modal title="{{ _('Confirm deletion') }}"
-    class="modal-danger dataset-delete-modal"
+    class="modal-danger organization-delete-modal"
     v-ref="modal">
 
     <div class="modal-body">
         <p class="lead text-center">
-            {{ _('You are about to delete this dataset') }}
+            {{ _('You are about to delete this organization') }}
         </p>
         <p class="lead text-center">
             {{ _('Are you sure?') }}
@@ -34,14 +34,15 @@ export default {
     },
     data: function() {
         return {
-            dataset: {}
+            organization: {}
         };
     },
     methods: {
         confirm: function() {
-            API.datasets.delete_dataset({dataset: this.dataset.id},
+            API.organizations.delete_organization(
+                {org: this.organization.id},
                 (response) => {
-                    this.dataset.fetch();
+                    this.organization.fetch();
                     this.$.modal.close();
                 }
             );
