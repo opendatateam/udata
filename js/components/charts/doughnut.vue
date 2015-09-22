@@ -1,7 +1,3 @@
-<style lang="less">
-
-</style>
-
 <template>
     <div class="chart" v-style="height: height" v-el="container">
         <canvas v-el="canvas" height="100%"></canvas>

@@ -155,6 +155,10 @@ class Resource(WithMetrics, db.EmbeddedDocument):
         else:
             return True  # We consider that API cases (types) are OK.
 
+    @property
+    def is_available(self):
+        return self.check_availability(group=None)
+
 
 class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     title = db.StringField(max_length=255, required=True)

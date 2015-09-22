@@ -44,7 +44,7 @@
 </template>
 
 <script>
-module.exports = {
+export default {
     name: 'dataset-quality',
     props: ['quality'],
     data: function() {
