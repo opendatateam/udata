@@ -132,6 +132,15 @@ class AdminFactory(UserFactory):
         return [admin_role]
 
 
+class CommunityResourceFactory(MongoEngineFactory):
+    class Meta:
+        model = models.CommunityResource
+
+    title = factory.LazyAttribute(lambda o: faker.sentence())
+    description = factory.LazyAttribute(lambda o: faker.text())
+    url = factory.LazyAttribute(lambda o: faker.url())
+
+
 class ResourceFactory(MongoEngineFactory):
     class Meta:
         model = models.Resource

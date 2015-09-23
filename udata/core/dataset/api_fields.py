@@ -59,6 +59,34 @@ resource_fields = api.model('Resource', {
     'metrics': fields.Raw(description='The resource metrics', readonly=True),
 })
 
+community_resource_fields = api.model('CommunityResource', {
+    'id': fields.String(description='The resource unique ID', readonly=True),
+    'title': fields.String(description='The resource title', required=True),
+    'description': fields.Markdown(
+        description='The resource markdown description'),
+    'type': fields.String(
+        description=('Whether the resource is an uploaded file, '
+                     'a remote file or an API'),
+        required=True, enum=RESOURCE_TYPES.keys()),
+    'format': fields.String(description='The resource format', required=True),
+    'url': fields.String(description='The resource URL', required=True),
+    'checksum': fields.Nested(
+        checksum_fields, allow_null=True,
+        description='A checksum to validate file validity'),
+    'size': fields.Integer(description='The resource file size in bytes'),
+    'mime': fields.String(description='The resource mime type'),
+    'created_at': fields.ISODateTime(
+        readonly=True, description='The resource creation date'),
+    'published': fields.ISODateTime(
+        description='The resource publication date'),
+    'last_modified': fields.ISODateTime(
+        attribute='modified', readonly=True,
+        description='The resource last modification date'),
+    'metrics': fields.Raw(description='The resource metrics', readonly=True),
+    'dataset': fields.String(
+        description='Reference to the associated dataset')
+})
+
 upload_fields = api.extend('UploadedResource', resource_fields, {
     'success': fields.Boolean(
         description='Whether the upload succeeded or not.',
@@ -97,7 +125,7 @@ dataset_fields = api.model('Dataset', {
         fields.Nested(resource_fields, description='The dataset resources')),
     'community_resources': fields.List(
         fields.Nested(
-            resource_fields,
+            community_resource_fields,
             description='The dataset community submitted resources')),
     'frequency': fields.String(
         description='The update frequency', required=True,
