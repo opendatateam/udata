@@ -35,7 +35,8 @@ export default {
             ];
             let ctx = this.$$.canvas.getContext('2d');
             new Chart(ctx).Doughnut(data, {
-                segmentShowStroke : false
+                segmentShowStroke : false,
+                tooltipTemplate: "",
             });
         },
     }
