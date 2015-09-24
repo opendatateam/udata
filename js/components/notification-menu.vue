@@ -1,7 +1,3 @@
-<style lang="less">
-
-</style>
-
 <template>
 <li class="dropdown notifications-menu">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -23,13 +19,12 @@
 </template>
 
 <script>
-'use strict';
+import API from 'api';
 
-var API = require('api'),
-    INITIAL_FETCH = 5 * 1000,
-    POLL_INTERVAL = 30 * 1000;
+const INITIAL_FETCH = 5 * 1000,
+      POLL_INTERVAL = 30 * 1000;
 
-module.exports = {
+export default {
     replace: true,
     data: function() {
         return {
@@ -50,9 +45,9 @@ module.exports = {
     },
     methods: {
         fetch: function() {
-            API.me.notifications({}, function(response) {
+            API.notifications.get_notifications({}, (response) => {
                 this.notifications = response.obj;
-            }.bind(this));
+            });
         }
     }
 };
