@@ -3,29 +3,36 @@ from __future__ import unicode_literals, absolute_import
 
 from datetime import datetime
 
-from udata.features.notifications.actions import (
-    register_provider, list_providers, notifier, get_notifications
-)
+from flask import url_for
+
+from udata.features.notifications import actions
 
 from . import TestCase, DBTestMixin
+from .api import APITestCase
 from .factories import UserFactory
 
 
-class NotificationsTest(TestCase, DBTestMixin):
+class NotificationsMixin(object):
+    def setUp(self):
+        super(NotificationsMixin, self).setUp()
+        actions._providers = {}
+
+
+class NotificationsActionsTest(NotificationsMixin, TestCase, DBTestMixin):
     def test_registered_provider_is_listed(self):
         def fake_provider(user):
-            pass
+            return []
 
-        register_provider('fake', fake_provider)
+        actions.register_provider('fake', fake_provider)
 
-        self.assertIn('fake', list_providers())
+        self.assertIn('fake', actions.list_providers())
 
     def test_registered_provider_with_decorator_is_listed(self):
-        @notifier('fake')
+        @actions.notifier('fake')
         def fake_provider(user):
-            pass
+            return []
 
-        self.assertIn('fake', list_providers())
+        self.assertIn('fake', actions.list_providers())
 
     def test_registered_provider_provide_values(self):
         dt = datetime.now()
@@ -33,16 +40,40 @@ class NotificationsTest(TestCase, DBTestMixin):
         def fake_provider(user):
             return [(dt, {'some': 'value'})]
 
-        register_provider('fake', fake_provider)
+        actions.register_provider('fake', fake_provider)
 
         user = UserFactory()
-        notifs = get_notifications(user)
+        notifs = actions.get_notifications(user)
 
-        self.assertEqual(notifs, [{
-            'type': 'fake',
-            'created_on': dt,
-            'details': {
-                'some': 'value'
-            }
-        }])
+        self.assertEqual(len(notifs), 1)
+        self.assertEqual(notifs[0]['type'], 'fake')
+        self.assertEqual(notifs[0]['details'], {'some': 'value'})
+        self.assertEqualDates(notifs[0]['created_on'], dt)
 
+
+class NotificationsAPITest(NotificationsMixin, APITestCase):
+    def test_no_notifications(self):
+        self.login()
+        response = self.get(url_for('api.notifications'))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), 0)
+
+    def test_has_notifications(self):
+        self.login()
+        dt = datetime.now()
+
+        @actions.notifier('fake')
+        def fake_notifier(user):
+            return [(dt, {'some': 'value'}), (dt, {'another': 'value'})]
+
+        response = self.get(url_for('api.notifications'))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), 2)
+
+        for notification in response.json:
+            self.assertEqual(notification['created_on'], dt.isoformat())
+            self.assertEqual(notification['type'], 'fake')
+        self.assertEqual(response.json[0]['details'], {'some': 'value'})
+        self.assertEqual(response.json[1]['details'], {'another': 'value'})

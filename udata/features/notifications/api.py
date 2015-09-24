@@ -21,7 +21,7 @@ notifications_fields = api.model('Notification', {
 @notifs.route('/', endpoint='notifications')
 class NotificationsAPI(API):
     @api.secure
-    @api.doc('notifications')
+    @api.doc('get_notifications')
     @api.marshal_list_with(notifications_fields)
     def get(self):
         '''List all current user pending notifications'''
