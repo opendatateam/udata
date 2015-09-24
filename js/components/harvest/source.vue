@@ -5,7 +5,7 @@
         p="{{ jobs }}"
         empty="{{ _('No job yet') }}">
         <header>
-            {{ source.description | markdown }}
+            {{{ source.description | markdown }}}
             <dl class="dl-horizontal">
                 <dt>{{ _('Backend') }}</dt>
                 <dd>{{ source.backend }}</dd>
