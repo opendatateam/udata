@@ -108,7 +108,7 @@
             {% endfor %}
         </div>
         <div>
-            <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}"
+            <a href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}"
                 class="btn btn-primary btn-block">
                 <span class="glyphicon glyphicon-plus-sign"></span>
                 {{ _('New community resource') }}

@@ -71,13 +71,11 @@
 </template>
 
 <script>
-'use strict';
+import Dataset from 'models/dataset';
+import Resource from 'models/resource';
 
-var Dataset = require('models/dataset'),
-    Resource = require('models/resource');
-
-module.exports = {
-    props: ['dataset', 'resource'],
+export default {
+    props: ['dataset', 'resource', 'community'],
     data: function() {
         return {
             dataset: new Dataset(),

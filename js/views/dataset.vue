@@ -30,20 +30,22 @@
 
     <div class="row">
         <followers-widget id="followers-widget" class="col-xs-12 col-md-6" followers="{{followers}}"></followers-widget>
+        <community-widget class="col-xs-12 col-md-6" communities="{{communities}}" without-dataset="{{true}}"></community-widget>
     </div>
 
 </template>
 
 <script>
+import moment from 'moment';
 import API from 'api';
+import Vue from 'vue';
 import Dataset from 'models/dataset';
 import Discussions from 'models/discussions';
 import Followers from 'models/followers';
 import Issues from 'models/issues';
 import Metrics from 'models/metrics';
-import moment from 'moment';
 import Reuses from 'models/reuses';
-import Vue from 'vue';
+import CommunityResources from 'models/communityresources';
 
 export default {
     name: 'DatasetView',
@@ -78,6 +80,7 @@ export default {
             followers: new Followers({ns: 'datasets', query: {page_size: 10}}),
             issues: new Issues({query: {sort: '-created', page_size: 10}}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
+            communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
             meta: {
                 title: null,
                 page: null,
@@ -147,6 +150,7 @@ export default {
         'map-widget': require('components/widgets/map.vue'),
         'issues-widget': require('components/issues/list.vue'),
         'discussions': require('components/discussions/list.vue'),
+        'community-widget': require('components/communityresource/list.vue')
     },
     methods: {
         confirm_delete: function() {
@@ -193,9 +197,11 @@ export default {
                 this.followers.fetch({id: id});
                 this.issues.fetch({'for': id});
                 this.discussions.fetch({'for': id});
+                this.communities.clear().fetch({dataset: id});
             } else {
                 this.reuses.clear();
                 this.followers.clear();
+                this.communities.clear();
             }
         },
         'dataset.spatial': function(coverage) {

@@ -1,7 +1,3 @@
-<style lang="less">
-
-</style>
-
 <template>
 <div class="row">
     <div class="col-xs-12 text-center">
@@ -28,9 +24,7 @@
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     props: ['title', 'url']
 };
 </script>

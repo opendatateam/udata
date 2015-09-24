@@ -21,6 +21,8 @@ from udata.utils import get_by, multi_to_dict
 from .croquemort import check_url
 from .api_fields import (
     badge_fields,
+    community_resource_fields,
+    community_resource_page_fields,
     dataset_fields,
     dataset_page_fields,
     dataset_suggestion_fields,
@@ -30,15 +32,36 @@ from .api_fields import (
     upload_fields,
 )
 from .models import (
-    Dataset, Resource, FollowDataset, Checksum, License, UPDATE_FREQUENCIES
+    Dataset, Resource, FollowDataset, Checksum, License, UPDATE_FREQUENCIES,
+    CommunityResource
 )
 from .permissions import DatasetEditPermission
-from .forms import ResourceForm, DatasetForm
+from .forms import ResourceForm, DatasetForm, CommunityResourceForm
 from .search import DatasetSearch
 
 ns = api.namespace('datasets', 'Dataset related operations')
 search_parser = api.search_parser(DatasetSearch)
-
+community_parser = api.parser()
+community_parser.add_argument(
+    'sort', type=str, default='-created', location='args',
+    help='The sorting attribute')
+community_parser.add_argument(
+    'page', type=int, default=1, location='args', help='The page to fetch')
+community_parser.add_argument(
+    'page_size', type=int, default=20, location='args',
+    help='The page size to fetch')
+community_parser.add_argument(
+    'organization', type=unicode,
+    help='Filter activities for that particular organization',
+    location='args')
+community_parser.add_argument(
+    'dataset', type=unicode,
+    help='Filter activities for that particular dataset',
+    location='args')
+community_parser.add_argument(
+    'owner', type=unicode,
+    help='Filter activities for that particular user',
+    location='args')
 
 common_doc = {
     'params': {'dataset': 'The dataset ID or slug'}
@@ -205,46 +228,58 @@ upload_parser = api.parser()
 upload_parser.add_argument('file', type=FileStorage, location='files')
 
 
-@ns.route('/<dataset:dataset>/upload/', endpoint='upload_resource')
-@api.doc(parser=upload_parser, **common_doc)
-class UploadResource(API):
-    @api.secure
-    @api.doc(id='upload_resource')
-    @api.marshal_with(upload_fields)
-    def post(self, dataset):
-        '''Upload a new resource'''
-        DatasetEditPermission(dataset).test()
-        args = upload_parser.parse_args()
+class UploadMixin(object):
 
+    def extract_infos_from_args(self, args, dataset):
+        prefix = '/'.join((dataset.slug,
+                           datetime.now().strftime('%Y%m%d-%H%M%S')))
         storage = storages.resources
-
-        prefix = self.get_prefix(dataset)
-
-        file = args['file']
-        filename = storage.save(file, prefix=prefix)
-
+        uploaded_file = args['file']
+        filename = storage.save(uploaded_file, prefix=prefix)
         extension = fileutils.extension(filename)
-
-        file.seek(0)
-        sha1 = storages.utils.sha1(file)
-
+        uploaded_file.seek(0)
+        sha1 = storages.utils.sha1(uploaded_file)
         size = (os.path.getsize(storage.path(filename))
                 if storage.root else None)
+        return {
+            'title': os.path.basename(filename),
+            'url': storage.url(filename, external=True),
+            'checksum': Checksum(value=sha1),
+            'format': extension,
+            'mime': storages.utils.mime(filename),
+            'size': size
+        }
 
-        resource = Resource(
-            title=os.path.basename(filename),
-            url=storage.url(filename, external=True),
-            checksum=Checksum(value=sha1),
-            format=extension,
-            mime=storages.utils.mime(filename),
-            size=size
-        )
+
+@ns.route('/<dataset:dataset>/upload/', endpoint='upload_dataset_resource')
+@api.doc(parser=upload_parser, **common_doc)
+class UploadDatasetResource(UploadMixin, API):
+    @api.secure
+    @api.doc(id='upload_dataset_resource')
+    @api.marshal_with(upload_fields)
+    def post(self, dataset):
+        '''Upload a new dataset resource'''
+        DatasetEditPermission(dataset).test()
+        args = upload_parser.parse_args()
+        infos = self.extract_infos_from_args(args, dataset)
+        resource = Resource(**infos)
         dataset.add_resource(resource)
         return resource, 201
 
-    def get_prefix(self, dataset):
-        return '/'.join((dataset.slug,
-                         datetime.now().strftime('%Y%m%d-%H%M%S')))
+
+@ns.route('/<dataset:dataset>/upload/community/',
+          endpoint='upload_community_resource')
+@api.doc(parser=upload_parser, **common_doc)
+class UploadCommunityResource(UploadMixin, API):
+    @api.secure
+    @api.doc(id='upload_community_resource')
+    @api.marshal_with(upload_fields)
+    def post(self, dataset):
+        '''Upload a new community resource'''
+        args = upload_parser.parse_args()
+        infos = self.extract_infos_from_args(args, dataset)
+        community_resource = CommunityResource.objects.create(**infos)
+        return community_resource, 201
 
 
 @ns.route('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource',
@@ -278,6 +313,63 @@ class ResourceAPI(API):
         resource = self.get_resource_or_404(dataset, rid)
         dataset.resources.remove(resource)
         dataset.save()
+        return '', 204
+
+
+@ns.route('/community_resources/', endpoint='community_resources')
+class CommunityResourcesAPI(API):
+    @api.doc('list_community_resources')
+    @api.marshal_with(community_resource_page_fields)
+    @api.doc(parser=community_parser)
+    def get(self):
+        '''List all community resources'''
+        args = community_parser.parse_args()
+        community_resources = CommunityResource.objects
+        if args['owner']:
+            community_resources = community_resources(owner=args['owner'])
+        if args['dataset']:
+            community_resources = community_resources(dataset=args['dataset'])
+        if args['organization']:
+            community_resources = community_resources(
+                organization=args['organization'])
+        return (community_resources.order_by(args['sort'])
+                                   .paginate(args['page'], args['page_size']))
+
+
+@ns.route('/community_resources/<community_resource:community_resource>/',
+          endpoint='community_resource',
+          doc=common_doc)
+@api.doc(params={
+    'community_resource': 'The community resource unique identifier'})
+class CommunityResourceAPI(SingleObjectAPI, API):
+    model = CommunityResource
+
+    @api.doc('retrieve_community_resource')
+    @api.marshal_with(community_resource_fields)
+    def get(self, community_resource):
+        '''Retrieve a community resource given its identifier'''
+        return community_resource
+
+    @api.secure
+    @api.doc(id='update_community_resource',
+             body=community_resource_fields)
+    @api.marshal_with(community_resource_fields)
+    def put(self, community_resource):
+        '''Update a given community resource'''
+        form = api.validate(CommunityResourceForm, community_resource)
+        form.populate_obj(community_resource)
+        if not community_resource.organization:
+            community_resource.owner = current_user._get_current_object()
+        community_resource.modified = datetime.now()
+        community_resource.save()
+        return community_resource
+
+    @api.secure
+    @api.doc('delete_community_resource')
+    @api.marshal_with(community_resource_fields)
+    def delete(self, community_resource):
+        '''Delete a given community resource'''
+        community_resource.delete()
         return '', 204
 
 

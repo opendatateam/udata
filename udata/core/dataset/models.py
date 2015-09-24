@@ -119,7 +119,6 @@ class ResourceMixin(object):
     format = db.StringField()
     mime = db.StringField()
     size = db.IntField()
-    owner = db.ReferenceField('User')
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)
@@ -401,7 +400,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     @property
     def community_resources(self):
-        return CommunityResource.objects.filter(dataset=self)
+        return self.id and CommunityResource.objects.filter(dataset=self) or []
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
@@ -409,6 +408,13 @@ post_save.connect(Dataset.post_save, sender=Dataset)
 
 class CommunityResource(ResourceMixin, WithMetrics, db.Document):
     dataset = db.ReferenceField(Dataset)
+    owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
+    organization = db.ReferenceField(
+        'Organization', reverse_delete_rule=db.NULLIFY)
+
+    @property
+    def from_community(self):
+        return True
 
 
 class DatasetIssue(Issue):

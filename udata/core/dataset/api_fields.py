@@ -61,34 +61,6 @@ resource_fields = api.model('Resource', {
         description='The resource availability', readonly=True),
 })
 
-community_resource_fields = api.model('CommunityResource', {
-    'id': fields.String(description='The resource unique ID', readonly=True),
-    'title': fields.String(description='The resource title', required=True),
-    'description': fields.Markdown(
-        description='The resource markdown description'),
-    'type': fields.String(
-        description=('Whether the resource is an uploaded file, '
-                     'a remote file or an API'),
-        required=True, enum=RESOURCE_TYPES.keys()),
-    'format': fields.String(description='The resource format', required=True),
-    'url': fields.String(description='The resource URL', required=True),
-    'checksum': fields.Nested(
-        checksum_fields, allow_null=True,
-        description='A checksum to validate file validity'),
-    'size': fields.Integer(description='The resource file size in bytes'),
-    'mime': fields.String(description='The resource mime type'),
-    'created_at': fields.ISODateTime(
-        readonly=True, description='The resource creation date'),
-    'published': fields.ISODateTime(
-        description='The resource publication date'),
-    'last_modified': fields.ISODateTime(
-        attribute='modified', readonly=True,
-        description='The resource last modification date'),
-    'metrics': fields.Raw(description='The resource metrics', readonly=True),
-    'dataset': fields.String(
-        description='Reference to the associated dataset')
-})
-
 upload_fields = api.extend('UploadedResource', resource_fields, {
     'success': fields.Boolean(
         description='Whether the upload succeeded or not.',
@@ -103,6 +75,31 @@ temporal_coverage_fields = api.model('TemporalCoverage', {
     'end': fields.ISODateTime(description='The temporal coverage end date',
                               required=True),
 })
+
+dataset_ref_fields = api.inherit('DatasetReference', base_reference, {
+    'title': fields.String(description='The dataset title', readonly=True),
+    'uri': fields.UrlFor(
+        'api.dataset', lambda d: {'dataset': d},
+        description='The API URI for this dataset', readonly=True),
+    'page': fields.UrlFor(
+        'datasets.show', lambda d: {'dataset': d},
+        description='The web page URL for this dataset', readonly=True),
+})
+
+community_resource_fields = api.inherit('CommunityResource', resource_fields, {
+    'dataset': fields.Nested(
+        dataset_ref_fields, allow_null=True,
+        description='Reference to the associated dataset'),
+    'organization': fields.Nested(
+        org_ref_fields, allow_null=True,
+        description='The producer organization'),
+    'owner': fields.Nested(
+        user_ref_fields, allow_null=True,
+        description='The user information')
+})
+
+community_resource_page_fields = api.model(
+    'CommunityResourcePage', fields.pager(community_resource_fields))
 
 dataset_fields = api.model('Dataset', {
     'id': fields.String(description='The dataset identifier', readonly=True),
@@ -178,14 +175,4 @@ dataset_suggestion_fields = api.model('DatasetSuggestion', {
         description='The web page URL for this dataset', readonly=True),
     'score': fields.Float(
         description='The internal match score', required=True),
-})
-
-dataset_ref_fields = api.inherit('DatasetReference', base_reference, {
-    'title': fields.String(description='The dataset title', readonly=True),
-    'uri': fields.UrlFor(
-        'api.dataset', lambda d: {'dataset': d},
-        description='The API URI for this dataset', readonly=True),
-    'page': fields.UrlFor(
-        'datasets.show', lambda d: {'dataset': d},
-        description='The web page URL for this dataset', readonly=True),
 })

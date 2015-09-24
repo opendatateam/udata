@@ -37,17 +37,20 @@
     <div class="row">
         <followers-widget id="followers-widget" class="col-xs-12" followers="{{followers}}"></followers-widget>
     </div>
+
+    <div class="row">
+        <community-widget class="col-xs-12" communities="{{communities}}"></community-widget>
+    </div>
 </template>
 
 <script>
-import Datasets from 'models/datasets';
+import moment from 'moment';
+import Vue from 'vue';
+import URLs from 'urls';
 import Followers from 'models/followers';
 import Metrics from 'models/metrics';
-import moment from 'moment';
 import Organization from 'models/organization';
-import Reuses from 'models/reuses';
-import URLs from 'urls';
-import Vue from 'vue';
+import CommunityResources from 'models/communityresources';
 import {PageList} from 'models/base';
 
 export default {
@@ -93,6 +96,7 @@ export default {
                 ns: 'organizations',
                 fetch: 'list_organization_discussions'
             }),
+            communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
             followers: new Followers({ns: 'organizations', query: {page_size: 10}}),
             meta: {
                 title: null,
@@ -180,7 +184,8 @@ export default {
         'reuses-widget': require('components/reuse/list.vue'),
         'followers-widget': require('components/follow/list.vue'),
         'issues': require('components/issues/list.vue'),
-        'discussions': require('components/discussions/list.vue')
+        'discussions': require('components/discussions/list.vue'),
+        'community-widget': require('components/communityresource/list.vue')
     },
     events: {
         'image:saved': function() {
@@ -221,10 +226,12 @@ export default {
                 this.issues.clear().fetch({org: id});
                 this.discussions.clear().fetch({org: id});
                 this.followers.fetch({id: id});
+                this.communities.clear().fetch({organization: id});
             } else {
                 this.datasets.clear();
                 this.reuses.clear();
                 this.followers.clear();
+                this.communities.clear();
             }
         },
         'org.page': function(page) {

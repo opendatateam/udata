@@ -5,6 +5,7 @@ from bson import ObjectId
 from uuid import UUID
 
 from flask import request
+from mongoengine.errors import InvalidQueryError
 from werkzeug.routing import BaseConverter, NotFound, PathConverter
 
 from udata import models
@@ -59,7 +60,10 @@ class ModelConverter(BaseConverter):
     model = None
 
     def to_python(self, value):
-        obj = self.model.objects(slug=value).first()
+        try:
+            obj = self.model.objects(slug=value).first()
+        except InvalidQueryError:  # If the model doesn't have a slug.
+            obj = None
         try:
             return obj or self.model.objects.get_or_404(id=value)
         except NotFound as e:
@@ -78,6 +82,10 @@ class ModelConverter(BaseConverter):
 
 class DatasetConverter(ModelConverter):
     model = models.Dataset
+
+
+class CommunityResourceConverter(ModelConverter):
+    model = models.CommunityResource
 
 
 class OrganizationConverter(ModelConverter):
@@ -117,6 +125,7 @@ def init_app(app):
     app.url_map.converters['pathlist'] = PathListConverter
     app.url_map.converters['uuid'] = UUIDConverter
     app.url_map.converters['dataset'] = DatasetConverter
+    app.url_map.converters['community_resource'] = CommunityResourceConverter
     app.url_map.converters['org'] = OrganizationConverter
     app.url_map.converters['reuse'] = ReuseConverter
     app.url_map.converters['user'] = UserConverter

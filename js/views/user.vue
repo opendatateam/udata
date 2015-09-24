@@ -12,6 +12,10 @@
     <div class="row">
         <reuses class="col-xs-12" reuses="{{reuses}}"></reuses>
     </div>
+
+    <div class="row">
+        <community-widget class="col-xs-12" communities="{{communities}}"></community-widget>
+    </div>
 </template>
 
 <script>
@@ -20,6 +24,7 @@ import User from 'models/user';
 import Reuses from 'models/reuses';
 import Datasets from 'models/datasets';
 import Metrics from 'models/metrics';
+import CommunityResources from 'models/communityresources';
 
 export default {
     name: 'user-view',
@@ -35,6 +40,7 @@ export default {
             }),
             reuses: new Reuses({query: {sort: '-created', page_size: 10}}),
             datasets: new Datasets({query: {sort: '-created', page_size: 10}}),
+            communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
             meta: {
                 title: null,
                 subtitle: this._('User')
@@ -52,7 +58,8 @@ export default {
         profile: require('components/user/profile.vue'),
         chart: require('components/charts/widget.vue'),
         datasets: require('components/dataset/list.vue'),
-        reuses: require('components/reuse/list.vue')
+        reuses: require('components/reuse/list.vue'),
+        'community-widget': require('components/communityresource/list.vue')
     },
     watch: {
         user_id: function(id) {
@@ -65,9 +72,11 @@ export default {
                 this.metrics.fetch({id: id});
                 this.reuses.clear().fetch({owner: id});
                 this.datasets.clear().fetch({owner: id});
+                this.communities.clear().fetch({owner: id});
             } else {
                 this.datasets.clear();
                 this.reuses.clear();
+                this.communities.clear();
             }
         },
         'user.fullname': function(fullname) {

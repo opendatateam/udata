@@ -122,16 +122,13 @@
 </template>
 
 <script>
-'use strict';
+import Vue from 'vue';
+import API from 'api';
+import Sorter from 'mixins/sorter';
+import Uploader from 'mixins/uploader';
+import Resource from 'models/resource';
 
-var Vue = require('vue'),
-    API = require('api'),
-    endpoint = API.datasets.operations.upload_resource,
-    Sorter = require('mixins/sorter'),
-    Uploader = require('mixins/uploader'),
-    Resource = require('models/resource');
-
-module.exports = {
+export default {
     name: 'resources-list',
     mixins: [Uploader, Sorter],
     components: {
@@ -214,7 +211,7 @@ module.exports = {
     watch: {
         'dataset.id': function(id) {
             if (id) {
-                this.upload_endpoint = endpoint.urlify({dataset: id});
+                this.upload_endpoint = API.datasets.operations.upload_dataset_resource.urlify({dataset: id});
             }
         },
         "dataset.resources": function(resources) {

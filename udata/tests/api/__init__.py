@@ -64,11 +64,17 @@ class APITestCase(FrontTestCase):
     def get(self, url, client=None, *args, **kwargs):
         return self.perform('get', url, client=client, *args, **kwargs)
 
-    def post(self, url, data=None, client=None, *args, **kwargs):
+    def post(self, url, data=None, client=None, json=True, *args, **kwargs):
+        if not json:
+            return super(APITestCase, self).post(
+                url, data or {}, client=client, *args, **kwargs)
         return self.perform('post', url, data=data or {}, client=client,
                             *args, **kwargs)
 
-    def put(self, url, data=None, client=None, *args, **kwargs):
+    def put(self, url, data=None, client=None, json=True, *args, **kwargs):
+        if not json:
+            return super(APITestCase, self).put(
+                url, data or {}, client=client, *args, **kwargs)
         return self.perform('put', url, data=data or {}, client=client,
                             *args, **kwargs)
 

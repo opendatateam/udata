@@ -9,9 +9,7 @@
 
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'discussions-widget',
     components: {
          'datatable': require('components/datatable/widget.vue')

@@ -2,19 +2,22 @@
 from __future__ import unicode_literals
 
 import json
+from StringIO import StringIO
 
 from datetime import datetime
 
 from flask import url_for
 
 from udata.models import (
-    Dataset, Follow, FollowDataset, Member, UPDATE_FREQUENCIES
+    CommunityResource, Dataset, Follow, FollowDataset, Member,
+    UPDATE_FREQUENCIES
 )
 
 from . import APITestCase
 from ..factories import (
-    badge_factory, DatasetFactory, ResourceFactory, OrganizationFactory,
-    AdminFactory, VisibleDatasetFactory, UserFactory, LicenseFactory, faker
+    badge_factory, faker, DatasetFactory, VisibleDatasetFactory,
+    CommunityResourceFactory, ResourceFactory, OrganizationFactory,
+    AdminFactory, UserFactory, LicenseFactory
 )
 
 
@@ -644,3 +647,80 @@ class DatasetReferencesAPITest(APITestCase):
         response = self.get(url_for('api.dataset_frequencies'))
         self.assert200(response)
         self.assertEqual(len(response.json), len(UPDATE_FREQUENCIES))
+
+
+class CommunityResourceAPITest(APITestCase):
+
+    def test_community_resource_api_get(self):
+        '''It should fetch a community resource from the API'''
+        with self.autoindex():
+            community_resource = CommunityResourceFactory()
+
+        response = self.get(url_for('api.community_resource',
+                                    community_resource=community_resource))
+        self.assert200(response)
+        data = json.loads(response.data)
+        self.assertEqual(data['id'], str(community_resource.id))
+
+    def test_community_resource_api_create(self):
+        '''It should create a community resource from the API'''
+        self.login()
+        with self.autoindex():
+            resource = ResourceFactory()
+            dataset = DatasetFactory(resources=[resource])
+        response = self.post(
+            url_for('api.upload_community_resource', dataset=dataset),
+            {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
+        self.assertStatus(response, 201)
+        data = json.loads(response.data)
+        resource_id = data['id']
+        self.assertEqual(data['title'], 'test.txt')
+        response = self.put(
+            url_for('api.community_resource', community_resource=resource_id),
+            data)
+        self.assertStatus(response, 200)
+        self.assertEqual(CommunityResource.objects.count(), 1)
+        community_resource = CommunityResource.objects.first()
+        self.assertEqual(community_resource.owner, self.user)
+        self.assertIsNone(community_resource.organization)
+
+    def test_community_resource_api_create_as_org(self):
+        '''It should create a community resource as org from the API'''
+        user = self.login()
+        with self.autoindex():
+            resource = ResourceFactory()
+            org = OrganizationFactory(members=[
+                Member(user=user, role='admin')
+            ])
+            dataset = DatasetFactory(resources=[resource])
+        response = self.post(
+            url_for('api.upload_community_resource', dataset=dataset),
+            {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
+        self.assertStatus(response, 201)
+        data = json.loads(response.data)
+        self.assertEqual(data['title'], 'test.txt')
+        resource_id = data['id']
+        data['organization'] = str(org.id)
+        response = self.put(
+            url_for('api.community_resource', community_resource=resource_id),
+            data)
+        self.assertStatus(response, 200)
+        self.assertEqual(CommunityResource.objects.count(), 1)
+        community_resource = CommunityResource.objects.first()
+        self.assertEqual(community_resource.organization, org)
+        self.assertIsNone(community_resource.owner)
+
+    def test_community_resource_api_update(self):
+        '''It should update a community resource from the API'''
+        self.login()
+        with self.autoindex():
+            community_resource = CommunityResourceFactory()
+        data = community_resource.to_dict()
+        data['description'] = 'new description'
+        response = self.put(url_for('api.community_resource',
+                                    community_resource=community_resource),
+                            data)
+        self.assert200(response)
+        self.assertEqual(CommunityResource.objects.count(), 1)
+        self.assertEqual(CommunityResource.objects.first().description,
+                         'new description')

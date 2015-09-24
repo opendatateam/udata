@@ -59,11 +59,10 @@
 </template>
 
 <script>
-'use strict';
+import API from 'api';
 
-var API = require('api');
 
-module.exports = {
+export default {
     name: 'reuse-details',
     props: ['reuse'],
     data: function() {
