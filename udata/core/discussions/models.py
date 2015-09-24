@@ -35,3 +35,10 @@ class Discussion(db.Document):
         'allow_inheritance': True,
         'ordering': ['created'],
     }
+
+    def person_involved(self, person):
+        """Return True if the given person has been involved in the
+
+        discussion, False otherwise.
+        """
+        return any(message.posted_by == person for message in self.discussion)

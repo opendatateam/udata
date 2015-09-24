@@ -11,7 +11,7 @@
 {% set body_class = 'dataset-display' %}
 
 {% block extra_js %}
-<script type="text/javascript" src="{{ static('dataset/display.js') }}"></script>
+<script src="{{ static('dataset/display.js') }}"></script>
 {% endblock %}
 
 {% block extra_head %}
@@ -52,6 +52,7 @@
 
 {% block main_content %}
 <div itemscope="itemscope" itemtype="http://schema.org/Dataset" itemid="{{dataset.id}}">
+<meta itemprop="alternateName" content="{{dataset.slug}}" />
 <h2 itemprop="name">{{ dataset.title }}</h2>
 <div itemprop="description">
     {{ dataset.description|markdown }}

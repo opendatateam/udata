@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import json
 import os
-import time
 from datetime import datetime
 
-import requests
-from flask import request, current_app
+from flask import request
 from flask.ext.security import current_user
 
 from uuid import UUID
@@ -21,6 +18,7 @@ from udata.core.badges.models import Badge
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by, multi_to_dict
 
+from .croquemort import check_url
 from .api_fields import (
     badge_fields,
     dataset_fields,
@@ -349,6 +347,9 @@ class FrequenciesAPI(API):
 checkurl_parser = api.parser()
 checkurl_parser.add_argument('url', type=unicode, help='The URL to check',
                              location='args', required=True)
+checkurl_parser.add_argument('group', type=unicode,
+                             help='The dataset related to the URL',
+                             location='args', required=True)
 
 
 @ns.route('/checkurl/', endpoint='checkurl')
@@ -358,43 +359,10 @@ class CheckUrlAPI(API):
     def get(self):
         '''Checks that a URL exists and returns metadata.'''
         args = checkurl_parser.parse_args()
-        CROQUEMORT = current_app.config.get('CROQUEMORT')
-        if CROQUEMORT is None:
-            return {'error': 'Check server not configured.'}, 500
-        check_url = '{url}/check/one'.format(url=CROQUEMORT['url'])
-        # See http://docs.python-requests.org/en/latest/user/advanced/#timeouts
-        # We are waiting 3 sec for the connexion and 9 for the response.
-        timeout = (3.1, 9.1)
-        try:
-            response = requests.post(check_url,
-                                     data=json.dumps({'url': args['url']}),
-                                     timeout=timeout)
-        except requests.ConnectionError:
-            return {}, 503
-        url_hash = response.json()['url-hash']
-        retrieve_url = '{url}/url/{url_hash}'.format(
-            url=CROQUEMORT['url'], url_hash=url_hash)
-        try:
-            response = requests.get(retrieve_url,
-                                    params={'url': args['url']},
-                                    timeout=timeout)
-        except requests.ConnectionError:
-            return {}, 503
-        attempts = 0
-        while response.status_code == 404 or 'status' not in response.json():
-            if attempts >= CROQUEMORT['retry']:
-                msg = ('We were unable to retrieve the URL after'
-                       ' {attempts} attempts.').format(attempts=attempts)
-                return {'error': msg}, 502
-            try:
-                response = requests.get(retrieve_url,
-                                        params={'url': args['url']},
-                                        timeout=timeout)
-            except requests.ConnectionError:
-                return {}, 503
-            time.sleep(CROQUEMORT['delay'])
-            attempts += 1
-        result = response.json()
-        if int(result['status']) > 500:
-            return result, 500
-        return result
+        error, response = check_url(args['url'], args['group'])
+        status = int(response.get('status', 500))
+        if error or status >= 500:
+            # We keep 503 which means the URL checker is unreachable.
+            return error, status == 503 and status or 500
+        else:
+            return response

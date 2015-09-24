@@ -1,5 +1,4 @@
 {% extends theme("organization/display_base.html") %}
-{% from theme('macros/metrics.html') import metric_widgets %}
 
 {% set meta = {
     'title': _('Dashboard'),
@@ -8,8 +7,13 @@
 } %}
 
 {% block extra_js %}
-<script type="text/javascript" src="{{ static('dashboard/organization.js') }}"></script>
-<script type="text/javascript" src="{{ static('activities.js') }}"></script>
+<script src="{{ static('vue-common.js') }}"></script>
+<script src="{{ static('dashboard.js') }}"></script>
+{% endblock %}
+
+{% block extra_css %}
+<link href="{{ static('vue-common.js.css') }}" rel="stylesheet">
+<link href="{{ static('dashboard.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block breadcrumb %}
@@ -19,9 +23,13 @@
 {% endblock %}
 
 {% block main_content %}
-<div class="metrics">
-    {{ metric_widgets(org.metrics, metrics, 'col-md-6') }}
-</div>
+<section>
+    <div class="container">
+        <div class="col-sm-9" id="graphs" object-id="{{ org.id }}">
+            <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+        </div>
+    </div>
+</section>
 {% endblock %}
 
 {% block after_content %}

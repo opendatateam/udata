@@ -45,8 +45,6 @@
 </template>
 
 <script>
-'use strict';
-
 import $ from 'jquery';
 import Vue from 'vue';
 import me from 'models/me';

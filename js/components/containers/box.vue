@@ -90,11 +90,9 @@
 </template>
 
 <script>
-'use strict';
+import $ from 'jquery';
 
-var $ = require('jquery');
-
-module.exports = {
+export default {
     name: 'box-container',
     replace: true,
     computed: {

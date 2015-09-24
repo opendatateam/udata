@@ -10,12 +10,14 @@
         <link rel="api-specs" href="{{ url_for('api.specs', _external=True) }}">
         {% if config.SENTRY_PUBLIC_DSN %}<link rel="sentry-dsn" href="{{config.SENTRY_PUBLIC_DSN}}">{% endif %}
         <meta name="site-title" content="{{config.SITE_TITLE}}">
-        <meta name="generator" content="uData" />
-        <link rel="stylesheet" href="{{ static('admin.css') }}"></script>
+        <meta name="generator" content="uData">
+        <link href="{{ static('admin.css') }}" rel="stylesheet">
+        <link href="{{ static('vue-common.js.css') }}" rel="stylesheet">
         <link href="{{ theme_static('admin.css') }}" rel="stylesheet">
     </head>
     <body class="skin-blue fixed sidebar-mini" id="app">
         <script src="{{ static('common.js') }}"></script>
+        <script src="{{ static('vue-common.js') }}"></script>
         <script src="{{ static('admin.js') }}"></script>
     </body>
 </html>

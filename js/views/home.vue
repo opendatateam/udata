@@ -1,40 +1,47 @@
 <template>
     <div class="row">
-        <small-box class="col-lg-3 col-xs-6" v-repeat="boxes"></small-box>
+        <small-box class="col-lg-4 col-xs-6" v-repeat="dataBoxes"></small-box>
     </div>
 
     <div class="row">
-        <chart title="{{ _('Data')}}" metrics="{{metrics}}" class="col-xs-12"
-            x="date" y="{{y}}"></chart>
+        <chart title="{{ _('Data') }}" metrics="{{ metrics }}" class="col-xs-12"
+            x="date" y="{{ dataY }}"></chart>
+    </div>
+
+    <div class="row">
+        <small-box class="col-lg-4 col-xs-6" v-repeat="communityBoxes"></small-box>
+    </div>
+
+    <div class="row">
+        <chart title="{{ _('Community') }}" metrics="{{ metrics }}" class="col-xs-12"
+            x="date" y="{{ communityY }}" icon="users"></chart>
     </div>
 </template>
 
 <script>
-'use strict';
+import moment from 'moment';
+import Metrics from 'models/metrics';
 
-var moment = require('moment'),
-    Metrics = require('models/metrics');
-
-module.exports = {
+export default {
     name: 'Home',
     data: function() {
         return {
             metrics: new Metrics({
                 data: {
                     loading: true,
-                },
-                query: {
-                    start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
-                    end: moment().format('YYYY-MM-DD')
                 }
             }),
-            y: [{
+            dataY: [{
                 id: 'datasets',
                 label: this._('Datasets')
             }, {
                 id: 'reuses',
                 label: this._('Reuses')
             }, {
+                id: 'resources',
+                label: this._('Resources')
+            }],
+            communityY: [{
                 id: 'users',
                 label: this._('Users')
             }, {
@@ -49,7 +56,7 @@ module.exports = {
                 title: this._('Dashboard')
             };
         },
-        boxes: function() {
+        dataBoxes: function() {
             if (!this.$root.site.metrics) {
                 return [];
             }
@@ -66,6 +73,18 @@ module.exports = {
                 color: 'green',
                 target: '#reuses-widget'
             }, {
+                value: this.$root.site.metrics.resources || 0,
+                label: this._('Resources'),
+                icon: 'file-text-o',
+                color: 'red',
+                target: '#resources-widget'
+            }];
+        },
+        communityBoxes: function() {
+            if (!this.$root.site.metrics) {
+                return [];
+            }
+            return [{
                 value: this.$root.site.metrics.users || 0,
                 label: this._('Users'),
                 icon: 'users',
@@ -82,24 +101,23 @@ module.exports = {
     },
     components: {
         'chart': require('components/charts/widget.vue'),
-        'small-box': require('components/containers/small-box.vue'),
-        'w-cal': require('components/calendar.vue')
+        'small-box': require('components/containers/small-box.vue')
     },
     watch: {
         '$root.site.id': function(id) {
-            this.fetch_metrics();
+            this.fetchMetrics();
         }
     },
     attached: function() {
-        this.fetch_metrics();
+        this.fetchMetrics();
     },
     methods: {
-        fetch_metrics: function() {
+        fetchMetrics: function() {
             if (this.$root.site.id) {
                 this.metrics.fetch({
                     id: this.$root.site.id,
-                    // start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
-                    // end: moment().format('YYYY-MM-DD')
+                    start: moment().subtract(20, 'days').format('YYYY-MM-DD'),
+                    end: moment().format('YYYY-MM-DD')
                 });
             }
         }

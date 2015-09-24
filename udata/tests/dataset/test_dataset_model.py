@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
+from datetime import datetime, timedelta
 
 from mongoengine import post_save
 
-from udata.models import Dataset, CommunityResource
+from udata.models import Dataset
 
 from .. import TestCase, DBTestMixin
 from ..factories import (
     ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory,
+    DatasetDiscussionFactory, MessageDiscussionFactory,
     CommunityResourceFactory
 )
 
@@ -93,3 +95,100 @@ class DatasetModelTest(TestCase, DBTestMixin):
                          community_resource1.id)
         self.assertEqual(dataset.community_resources[1].id,
                          community_resource2.id)
+
+    def test_next_update_empty(self):
+        dataset = DatasetFactory()
+        self.assertEqual(dataset.next_update, None)
+
+    def test_next_update_weekly(self):
+        dataset = DatasetFactory(frequency='weekly')
+        self.assertEqualDates(dataset.next_update,
+                              datetime.now() + timedelta(days=7))
+
+    def test_quality_default(self):
+        dataset = DatasetFactory(description='')
+        self.assertEqual(dataset.quality, {'score': 0})
+
+    def test_quality_next_update(self):
+        dataset = DatasetFactory(description='', frequency='weekly')
+        self.assertEqual(-6, dataset.quality['update_in'])
+        self.assertEqual(dataset.quality['frequency'], 'weekly')
+        self.assertEqual(dataset.quality['score'], 2)
+
+    def test_quality_tags_count(self):
+        dataset = DatasetFactory(description='', tags=['foo', 'bar'])
+        self.assertEqual(dataset.quality['tags_count'], 2)
+        self.assertEqual(dataset.quality['score'], 0)
+        dataset = DatasetFactory(description='',
+                                 tags=['foo', 'bar', 'baz', 'quux'])
+        self.assertEqual(dataset.quality['score'], 2)
+
+    def test_quality_description_length(self):
+        dataset = DatasetFactory(description='a' * 42)
+        self.assertEqual(dataset.quality['description_length'], 42)
+        self.assertEqual(dataset.quality['score'], 0)
+        dataset = DatasetFactory(description='a' * 420)
+        self.assertEqual(dataset.quality['score'], 2)
+
+    def test_quality_has_only_closed_formats(self):
+        dataset = DatasetFactory(description='', )
+        dataset.add_resource(ResourceFactory(format='pdf'))
+        self.assertEqual(dataset.quality['has_only_closed_formats'], True)
+        self.assertEqual(dataset.quality['score'], 0)
+
+    def test_quality_has_opened_formats(self):
+        dataset = DatasetFactory(description='', )
+        dataset.add_resource(ResourceFactory(format='pdf'))
+        dataset.add_resource(ResourceFactory(format='csv'))
+        self.assertEqual(dataset.quality['has_only_closed_formats'], False)
+        self.assertEqual(dataset.quality['score'], 4)
+
+    def test_quality_has_untreated_discussions(self):
+        user = UserFactory()
+        visitor = UserFactory()
+        dataset = DatasetFactory(description='', owner=user)
+        DatasetDiscussionFactory(
+            subject=dataset, user=visitor,
+            discussion=[MessageDiscussionFactory(posted_by=visitor)
+                        for i in range(2)])
+        self.assertEqual(dataset.quality['discussions'], 1)
+        self.assertEqual(dataset.quality['has_untreated_discussions'], True)
+        self.assertEqual(dataset.quality['score'], 0)
+
+    def test_quality_has_treated_discussions(self):
+        user = UserFactory()
+        visitor = UserFactory()
+        dataset = DatasetFactory(description='', owner=user)
+        DatasetDiscussionFactory(
+            subject=dataset, user=visitor,
+            discussion=[MessageDiscussionFactory(posted_by=visitor)
+                        for i in range(2)]
+            + [MessageDiscussionFactory(posted_by=user)])
+        self.assertEqual(dataset.quality['discussions'], 1)
+        self.assertEqual(dataset.quality['has_untreated_discussions'], False)
+        self.assertEqual(dataset.quality['score'], 2)
+
+    def test_quality_all(self):
+        user = UserFactory()
+        visitor = UserFactory()
+        dataset = DatasetFactory(owner=user, frequency='weekly',
+                                 tags=['foo', 'bar'], description='a' * 42)
+        dataset.add_resource(ResourceFactory(format='pdf'))
+        DatasetDiscussionFactory(
+            subject=dataset, user=visitor,
+            discussion=[MessageDiscussionFactory(posted_by=visitor)])
+        self.assertEqual(dataset.quality['score'], 0)
+        self.assertEqual(
+            sorted(dataset.quality.keys()),
+            [
+                'description_length',
+                'discussions',
+                'frequency',
+                'has_only_closed_formats',
+                'has_resources',
+                'has_unavailable_resources',
+                'has_untreated_discussions',
+                'score',
+                'tags_count',
+                'update_in'
+            ])

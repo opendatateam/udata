@@ -57,6 +57,8 @@ resource_fields = api.model('Resource', {
         attribute='modified', readonly=True,
         description='The resource last modification date'),
     'metrics': fields.Raw(description='The resource metrics', readonly=True),
+    'is_available': fields.Raw(
+        description='The resource availability', readonly=True),
 })
 
 community_resource_fields = api.model('CommunityResource', {
@@ -135,6 +137,7 @@ dataset_fields = api.model('Dataset', {
                      'once that date is reached.')),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
     'metrics': fields.Raw(description='The dataset metrics'),
+    'quality': fields.Raw(description='The dataset quality', readonly=True),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,
         description='The producer organization'),
