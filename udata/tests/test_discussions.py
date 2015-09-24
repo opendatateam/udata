@@ -5,13 +5,15 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import Dataset, DatasetDiscussion
+from udata.models import Dataset, DatasetDiscussion, Member
 from udata.core.user.views import blueprint as user_bp
 from udata.core.discussions.models import Message, Discussion
+from udata.core.discussions.notifications import discussions_notifications
 from udata.core.discussions.signals import on_new_discussion
 
 from frontend import FrontTestCase
 
+from . import TestCase, DBTestMixin
 from .api import APITestCase
 from .factories import (
     faker, AdminFactory, UserFactory, OrganizationFactory, DatasetFactory,
@@ -339,3 +341,81 @@ class DiscussionCsvTest(FrontTestCase):
             data,
             '"{discussion.id}";"{discussion.user}"'.format(
                 discussion=discussion))
+
+
+class DiscussionsNotificationsTest(TestCase, DBTestMixin):
+    def test_notify_user_discussions(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+
+        open_discussions = {}
+        for i in range(3):
+            user = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=user)
+            discussion = DatasetDiscussion.objects.create(
+                subject=dataset,
+                user=user,
+                title=faker.sentence(),
+                discussion=[message]
+            )
+            open_discussions[discussion.id] = discussion
+        # Creating a closed discussion that shouldn't show up in response.
+        user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        discussion = DatasetDiscussion.objects.create(
+            subject=dataset,
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+            closed=datetime.now(),
+            closed_by=user
+        )
+
+        notifications = discussions_notifications(owner)
+
+        self.assertEqual(len(notifications), len(open_discussions))
+
+        for dt, details in notifications:
+            discussion = open_discussions[details['id']]
+            self.assertEqual(details['title'], discussion.title)
+            self.assertEqual(details['subject']['id'], discussion.subject.id)
+            self.assertEqual(details['subject']['type'], 'dataset')
+
+    def test_notify_org_discussions(self):
+        recipient = UserFactory()
+        member = Member(user=recipient, role='editor')
+        org = OrganizationFactory(members=[member])
+        dataset = DatasetFactory(organization=org)
+
+        open_discussions = {}
+        for i in range(3):
+            user = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=user)
+            discussion = DatasetDiscussion.objects.create(
+                subject=dataset,
+                user=user,
+                title=faker.sentence(),
+                discussion=[message]
+            )
+            open_discussions[discussion.id] = discussion
+        # Creating a closed discussion that shouldn't show up in response.
+        user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        discussion = DatasetDiscussion.objects.create(
+            subject=dataset,
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+            closed=datetime.now(),
+            closed_by=user
+        )
+
+        notifications = discussions_notifications(recipient)
+
+        self.assertEqual(len(notifications), len(open_discussions))
+
+        for dt, details in notifications:
+            discussion = open_discussions[details['id']]
+            self.assertEqual(details['title'], discussion.title)
+            self.assertEqual(details['subject']['id'], discussion.subject.id)
+            self.assertEqual(details['subject']['type'], 'dataset')
