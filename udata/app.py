@@ -148,6 +148,8 @@ def standalone(app):
     frontend.init_app(app)
     api.init_app(app)
 
+    register_features(app)
+
     from udata import ext
     ext.init_app(app)
 
@@ -191,3 +193,9 @@ def register_extensions(app):
     sitemap.init_app(app)
     sentry.init_app(app)
     return app
+
+
+def register_features(app):
+    from udata.features import notifications
+
+    notifications.init_app(app)

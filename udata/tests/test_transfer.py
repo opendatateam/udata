@@ -3,6 +3,7 @@ from __future__ import unicode_literals, absolute_import
 
 from udata.auth import login_user, PermissionDenied
 from udata.features.transfer.actions import request_transfer
+from udata.features.transfer.notifications import transfer_request_notifications
 from udata.models import Member
 
 from . import TestCase, DBTestMixin
@@ -90,3 +91,49 @@ class TransferTest(TestCase, DBTestMixin):
 
         with self.assertRaises(ValueError):
             self.assert_transfer_started(dataset, org, org, comment)
+
+
+class TransferNotificationsTest(TestCase, DBTestMixin):
+    def test_pending_transfer_request_for_user(self):
+        user = UserFactory()
+        datasets = DatasetFactory.create_batch(2, owner=user)
+        recipient = UserFactory()
+        comment = faker.sentence()
+        transfers = {}
+
+        login_user(user)
+        for dataset in datasets:
+            transfer = request_transfer(dataset, recipient, comment)
+            transfers[transfer.id] = transfer
+
+        self.assertEqual(len(transfer_request_notifications(user)), 0)
+
+        notifications = transfer_request_notifications(recipient)
+        self.assertEqual(len(notifications), len(datasets))
+        for dt, details in notifications:
+            transfer = transfers[details['id']]
+            self.assertEqual(details['subject']['class'], 'dataset')
+            self.assertEqual(details['subject']['id'], transfer.subject.id)
+
+    def test_pending_transfer_request_for_org(self):
+        user = UserFactory()
+        datasets = DatasetFactory.create_batch(2, owner=user)
+        recipient = UserFactory()
+        member = Member(user=recipient, role='editor')
+        org = OrganizationFactory(members=[member])
+        comment = faker.sentence()
+        transfers = {}
+
+        login_user(user)
+        for dataset in datasets:
+            transfer = request_transfer(dataset, org, comment)
+            transfers[transfer.id] = transfer
+
+        self.assertEqual(len(transfer_request_notifications(user)), 0)
+
+        notifications = transfer_request_notifications(recipient)
+        self.assertEqual(len(notifications), len(datasets))
+        for dt, details in notifications:
+            transfer = transfers[details['id']]
+            self.assertEqual(details['subject']['class'], 'dataset')
+            self.assertEqual(details['subject']['id'], transfer.subject.id)

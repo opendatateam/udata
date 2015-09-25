@@ -5,13 +5,15 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import Dataset, DatasetIssue
+from udata.models import Dataset, DatasetIssue, Member
 from udata.core.user.views import blueprint as user_bp
 from udata.core.issues.models import Issue, Message
+from udata.core.issues.notifications import issues_notifications
 from udata.core.issues.signals import on_new_issue
 
 from frontend import FrontTestCase
 
+from . import TestCase, DBTestMixin
 from .api import APITestCase
 from .factories import (
     faker, UserFactory, OrganizationFactory, DatasetFactory,
@@ -294,3 +296,81 @@ class IssueCsvTest(FrontTestCase):
         headers, data = response.data.strip().split('\r\n')
         self.assertStartswith(
             data, '"{issue.id}";"{issue.user}"'.format(issue=issue))
+
+
+class IssuesNotificationsTest(TestCase, DBTestMixin):
+    def test_notify_user_issues(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+
+        open_issues = {}
+        for i in range(3):
+            user = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=user)
+            issue = DatasetIssue.objects.create(
+                subject=dataset,
+                user=user,
+                title=faker.sentence(),
+                discussion=[message]
+            )
+            open_issues[issue.id] = issue
+        # Creating a closed issue that shouldn't show up in response.
+        user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        DatasetIssue.objects.create(
+            subject=dataset,
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+            closed=datetime.now(),
+            closed_by=user
+        )
+
+        notifications = issues_notifications(owner)
+
+        self.assertEqual(len(notifications), len(open_issues))
+
+        for dt, details in notifications:
+            issue = open_issues[details['id']]
+            self.assertEqual(details['title'], issue.title)
+            self.assertEqual(details['subject']['id'], issue.subject.id)
+            self.assertEqual(details['subject']['type'], 'dataset')
+
+    def test_notify_org_issues(self):
+        recipient = UserFactory()
+        member = Member(user=recipient, role='editor')
+        org = OrganizationFactory(members=[member])
+        dataset = DatasetFactory(organization=org)
+
+        open_issues = {}
+        for i in range(3):
+            user = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=user)
+            issue = DatasetIssue.objects.create(
+                subject=dataset,
+                user=user,
+                title=faker.sentence(),
+                discussion=[message]
+            )
+            open_issues[issue.id] = issue
+        # Creating a closed issue that shouldn't show up in response.
+        user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        DatasetIssue.objects.create(
+            subject=dataset,
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+            closed=datetime.now(),
+            closed_by=user
+        )
+
+        notifications = issues_notifications(recipient)
+
+        self.assertEqual(len(notifications), len(open_issues))
+
+        for dt, details in notifications:
+            issue = open_issues[details['id']]
+            self.assertEqual(details['title'], issue.title)
+            self.assertEqual(details['subject']['id'], issue.subject.id)
+            self.assertEqual(details['subject']['type'], 'dataset')

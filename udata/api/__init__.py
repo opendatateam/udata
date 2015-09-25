@@ -347,6 +347,7 @@ def init_app(app):
     import udata.core.topic.api
     import udata.core.post.api
     import udata.features.transfer.api
+    import udata.features.notifications.api
     import udata.harvest.api
 
     # Load plugins API
