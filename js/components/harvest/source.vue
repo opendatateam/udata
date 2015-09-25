@@ -23,7 +23,7 @@ import HarvestJobs from 'models/harvest/jobs';
 export default {
     name: 'harvest-jobs-widget',
     components: {
-        'datatable': require('components/datatable/widget.vue')
+        datatable: require('components/datatable/widget.vue')
     },
     data: function() {
         return {

@@ -11,7 +11,10 @@ from udata.core.user.api_fields import user_ref_fields
 
 from . import actions
 from .forms import HarvestSourceForm, HarvestSourceValidationForm
-from .models import HARVEST_JOB_STATUS, HARVEST_ITEM_STATUS, HarvestJob
+from .models import (
+    HARVEST_JOB_STATUS, HARVEST_ITEM_STATUS, HarvestJob,
+    VALIDATION_STATES, VALIDATION_ACCEPTED
+)
 
 ns = api.namespace('harvest', 'Harvest related operations')
 
@@ -65,6 +68,19 @@ job_fields = api.model('HarvestJob', {
 
 job_page_fields = api.model('HarvestJobPage', fields.pager(job_fields))
 
+validation_fields = api.model('HarvestSourceValidation', {
+    'state': fields.String(description='Is it validated or not',
+                           enum=VALIDATION_STATES.keys(),
+                           required=True),
+    'by': fields.Nested(user_ref_fields, allow_null=True, readonly=True,
+                        description='Who performed the validation'),
+    'on': fields.ISODateTime(readonly=True,
+            description='Date date on which validation was performed'),
+    'comment': fields.String(
+        description='A comment about the validation. Required on rejection'
+    )
+})
+
 source_fields = api.model('HarvestSource', {
     'id': fields.String(description='The source unique identifier',
                         readonly=True),
@@ -81,8 +97,8 @@ source_fields = api.model('HarvestSource', {
                                      required=True),
     'active': fields.Boolean(description='Is this source active',
                              required=True, default=False),
-    'validated': fields.Boolean(description='Has the source been validated',
-                                readonly=True),
+    'validation': fields.Nested(validation_fields, readonly=True,
+                                description='Has the source been validated'),
     'config': fields.Raw(description='The source specific configuration',
                          default={}),
     'last_job': fields.Nested(job_fields,
@@ -98,11 +114,6 @@ source_fields = api.model('HarvestSource', {
 backend_fields = api.model('HarvestBackend', {
     'id': fields.String(description='The backend identifier'),
     'label': fields.String(description='The backend display name')
-})
-
-validation_fields = api.model('HarvestSourceValidation', {
-    'validate': fields.Boolean(description='Validate the source or not', required=True),
-    'comment': fields.String(description='A comment about the validation. Required on rejection')
 })
 
 preview_dataset_fields = api.extend('DatasetPreview', dataset_fields, {
@@ -175,7 +186,7 @@ class ValidateSourceAPI(API):
     def post(self, ident):
         '''Validate or reject an harvest source'''
         form = api.validate(HarvestSourceValidationForm)
-        if form.validate.data:
+        if form.state.data == VALIDATION_ACCEPTED:
             return actions.validate_source(ident, form.comment.data)
         else:
             return actions.reject_source(ident, form.comment.data)

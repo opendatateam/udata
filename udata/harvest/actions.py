@@ -5,10 +5,14 @@ import logging
 
 from datetime import datetime
 
+from udata.auth import current_user
 from udata.models import User, Organization, PeriodicTask
 
 from . import backends, signals
-from .models import HarvestSource, HarvestJob, DEFAULT_HARVEST_FREQUENCY
+from .models import (
+    HarvestSource, HarvestJob, DEFAULT_HARVEST_FREQUENCY,
+    VALIDATION_ACCEPTED, VALIDATION_REFUSED
+)
 from .tasks import harvest
 
 log = logging.getLogger(__name__)
@@ -62,8 +66,11 @@ def create_source(name, url, backend,
 def validate_source(ident, comment=None):
     '''Validate a source for automatic harvesting'''
     source = get_source(ident)
-    source.validated = True
-    source.validation_comment = comment
+    source.validation.on = datetime.now()
+    source.validation.comment = comment
+    source.validation.state = VALIDATION_ACCEPTED
+    if current_user.is_authenticated():
+        source.validation.by = current_user._get_current_object()
     source.save()
     return source
 
@@ -71,8 +78,11 @@ def validate_source(ident, comment=None):
 def reject_source(ident, comment):
     '''Reject a source for automatic harvesting'''
     source = get_source(ident)
-    source.validated = False
-    source.validation_comment = comment
+    source.validation.on = datetime.now()
+    source.validation.comment = comment
+    source.validation.state = VALIDATION_REFUSED
+    if current_user.is_authenticated():
+        source.validation.by = current_user._get_current_object()
     source.save()
     return source
 

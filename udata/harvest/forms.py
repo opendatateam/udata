@@ -6,6 +6,7 @@ from udata.i18n import lazy_gettext as _
 
 
 from .actions import list_backends
+from .models import VALIDATION_STATES, VALIDATION_REFUSED
 
 __all__ = 'HarvestSourceForm', 'HarvestSourceValidationForm'
 
@@ -25,6 +26,8 @@ class HarvestSourceForm(Form):
 
 
 class HarvestSourceValidationForm(Form):
-    validate = fields.BooleanField(default=False)
+    state = fields.SelectField(choices=VALIDATION_STATES.items())
     comment = fields.StringField(_('Comment'),
-                                 [validators.RequiredIfVal('validate', False)])
+                                 [validators.RequiredIfVal('state',
+                                                           VALIDATION_REFUSED
+                                                           )])

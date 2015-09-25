@@ -1,4 +1,17 @@
 <template>
+    <div class="alert alert-info" v-if="should_validate">
+        <div class="btn-toolbar pull-right">
+            <div class="btn-group">
+                <button class="pull-right btn btn-success btn-xs"
+                    v-on="click:validate_source">{{ _('Validate') }}</button>
+            </div>
+            <div class="btn-group">
+                <button class="pull-right btn btn-danger btn-xs"
+                    v-on="click:reject_source">{{ _('Reject') }}</button>
+            </div>
+        </div>
+        {{ _('This harvest source has not been validated') }}
+    </div>
     <div class="row">
         <source-widget source="{{source}}"
             v-class="
@@ -42,6 +55,13 @@ export default {
             }
         };
     },
+    computed: {
+        should_validate: function() {
+            return this.source && this.source.validation
+                && this.source.validation.state === 'pending'
+                && this.$root.me.is_admin;
+        }
+    },
     events: {
         'harvest:job:selected': function(job) {
             this.current_job = job;
@@ -63,7 +83,19 @@ export default {
                 {data: {source: this.source}},
                 Vue.extend(require('components/harvest/delete-modal.vue'))
             );
-        }
+        },
+        validate_source: function() {
+            this.$root.$modal(
+                {data: {source: this.source}},
+                Vue.extend(require('components/harvest/delete-modal.vue'))
+            );
+        },
+        reject_source: function() {
+            this.$root.$modal(
+                {data: {source: this.source}},
+                Vue.extend(require('components/harvest/delete-modal.vue'))
+            );
+        },
     },
     watch: {
         source_id: function(id) {

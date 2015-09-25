@@ -14,7 +14,10 @@ from .factories import (
     fake, HarvestSourceFactory, HarvestJobFactory,
     mock_initialize, mock_process, DEFAULT_COUNT as COUNT
 )
-from ..models import HarvestSource, HarvestJob, HarvestError
+from ..models import (
+    HarvestSource, HarvestJob, HarvestError,
+    VALIDATION_PENDING, VALIDATION_ACCEPTED, VALIDATION_REFUSED
+)
 from ..backends import BaseBackend
 from .. import actions, signals
 
@@ -45,39 +48,47 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         self.assertEqual(source.backend, 'dummy')
         self.assertEqual(source.frequency, 'manual')
         self.assertTrue(source.active)
-        self.assertFalse(source.validated)
         self.assertIsNone(source.owner)
         self.assertIsNone(source.organization)
 
+        self.assertEqual(source.validation.state, VALIDATION_PENDING)
+        self.assertIsNone(source.validation.on)
+        self.assertIsNone(source.validation.by)
+        self.assertIsNone(source.validation.comment)
+
     def test_validate_source(self):
         source = HarvestSourceFactory()
-        self.assertFalse(source.validated)
 
         actions.validate_source(source.id)
 
         source.reload()
-        self.assertTrue(source.validated)
-        self.assertIsNone(source.validation_comment)
+        self.assertEqual(source.validation.state, VALIDATION_ACCEPTED)
+        self.assertIsNotNone(source.validation.on)
+        self.assertIsNone(source.validation.by)
+        self.assertIsNone(source.validation.comment)
 
     def test_validate_source_with_comment(self):
         source = HarvestSourceFactory()
-        self.assertFalse(source.validated)
 
         actions.validate_source(source.id, 'comment')
 
         source.reload()
-        self.assertTrue(source.validated)
-        self.assertEqual(source.validation_comment, 'comment')
+
+        self.assertEqual(source.validation.state, VALIDATION_ACCEPTED)
+        self.assertIsNotNone(source.validation.on)
+        self.assertIsNone(source.validation.by)
+        self.assertEqual(source.validation.comment, 'comment')
 
     def test_reject_source(self):
         source = HarvestSourceFactory()
-        self.assertFalse(source.validated)
 
         actions.reject_source(source.id, 'comment')
 
         source.reload()
-        self.assertFalse(source.validated)
-        self.assertEqual(source.validation_comment, 'comment')
+        self.assertEqual(source.validation.state, VALIDATION_REFUSED)
+        self.assertIsNotNone(source.validation.on)
+        self.assertIsNone(source.validation.by)
+        self.assertEqual(source.validation.comment, 'comment')
 
     def test_get_source_by_slug(self):
         source = HarvestSourceFactory()

@@ -3,7 +3,7 @@ from __future__ import unicode_literals, absolute_import
 
 from udata.features.notifications.actions import notifier
 
-from .models import HarvestSource
+from .models import HarvestSource, VALIDATION_PENDING
 
 import logging
 
@@ -18,7 +18,7 @@ def validate_harvester_notifications(user):
 
     notifications = []
 
-    for source in HarvestSource.objects(validated=False):
+    for source in HarvestSource.objects(validation__state=VALIDATION_PENDING):
         notifications.append((source.created_at, {
             'id': source.id,
             'name': source.name,

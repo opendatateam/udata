@@ -61,6 +61,28 @@ class HarvestItem(db.EmbeddedDocument):
     kwargs = db.DictField()
 
 
+
+VALIDATION_ACCEPTED = 'accepted'
+VALIDATION_REFUSED = 'refused'
+VALIDATION_PENDING = 'pending'
+
+VALIDATION_STATES = {
+    VALIDATION_PENDING: _('Pending'),
+    VALIDATION_ACCEPTED: _('Accepted'),
+    VALIDATION_REFUSED: _('Refused'),
+}
+
+
+class HarvestSourceValidation(db.EmbeddedDocument):
+    '''Store harvest source validation details'''
+    state = db.StringField(choices=VALIDATION_STATES.keys(),
+                           default=VALIDATION_PENDING,
+                           required=True)
+    by = db.ReferenceField('User')
+    on = db.DateTimeField()
+    comment = db.StringField()
+
+
 class HarvestSource(db.Document):
     name = db.StringField(max_length=255)
     slug = db.SlugField(max_length=255, required=True, unique=True,
@@ -76,8 +98,8 @@ class HarvestSource(db.Document):
                                default=DEFAULT_HARVEST_FREQUENCY,
                                required=True)
     active = db.BooleanField(default=True)
-    validated = db.BooleanField(default=False)
-    validation_comment = db.StringField()
+    validation = db.EmbeddedDocumentField(HarvestSourceValidation,
+                                          default=HarvestSourceValidation)
 
     deleted = db.DateTimeField()
 
