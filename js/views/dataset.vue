@@ -3,9 +3,11 @@
         <small-box class="col-lg-4 col-xs-6" v-repeat="boxes"></small-box>
     </div>
     <div class="row">
-        <dataset-details dataset="{{dataset}}" class="col-xs-12 col-md-6"></dataset-details>
-        <map-widget title="{{ _('Spatial coverage') }}"
-            geojson="{{geojson}}" class="col-xs-12 col-md-6"></map-widget>
+        <div class="col-xs-12 col-md-6">
+            <dataset-details dataset="{{dataset}}"></dataset-details>
+            <map-widget title="{{ _('Spatial coverage') }}"
+                geojson="{{geojson}}"></map-widget>
+        </div>
         <dataset-quality quality="{{ dataset.quality }}" class="col-xs-12 col-md-6"></dataset-quality>
     </div>
     <div class="row">
