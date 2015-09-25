@@ -1,15 +1,7 @@
 <template>
     <div class="alert alert-info" v-if="should_validate">
-        <div class="btn-toolbar pull-right">
-            <div class="btn-group">
-                <button class="pull-right btn btn-success btn-xs"
-                    v-on="click:validate_source">{{ _('Validate') }}</button>
-            </div>
-            <div class="btn-group">
-                <button class="pull-right btn btn-danger btn-xs"
-                    v-on="click:reject_source">{{ _('Reject') }}</button>
-            </div>
-        </div>
+        <button class="pull-right btn btn-primary btn-xs"
+            v-on="click:validate_source">{{ _('Validate') }}</button>
         {{ _('This harvest source has not been validated') }}
     </div>
     <div class="row">
@@ -87,15 +79,9 @@ export default {
         validate_source: function() {
             this.$root.$modal(
                 {data: {source: this.source}},
-                Vue.extend(require('components/harvest/delete-modal.vue'))
+                Vue.extend(require('components/harvest/validation-modal.vue'))
             );
-        },
-        reject_source: function() {
-            this.$root.$modal(
-                {data: {source: this.source}},
-                Vue.extend(require('components/harvest/delete-modal.vue'))
-            );
-        },
+        }
     },
     watch: {
         source_id: function(id) {
