@@ -82,7 +82,7 @@ class DatasetDetailView(DatasetView, DetailView):
                 abort(404)
             elif self.dataset.deleted:
                 abort(410)
-        context['reuses'] = Reuse.objects(datasets=self.dataset)
+        context['reuses'] = Reuse.objects(datasets=self.dataset).visible()
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = CommunityResourceEditPermission
         context['discussions'] = DatasetDiscussion.objects(
