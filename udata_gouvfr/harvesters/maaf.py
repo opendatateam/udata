@@ -154,6 +154,8 @@ class MaafBackend(backends.BaseBackend):
         xml = self.parse_xml(response.content.decode(encoding))
         metadata = xml['metadata']
 
+        # Resolve and remote id from metadata
+        item.remote_id = metadata['id']
         dataset = self.get_dataset(metadata['id'])
 
         dataset.title = metadata['title']
