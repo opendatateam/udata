@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-09-14 22:53+0200\n"
+"POT-Creation-Date: 2015-09-28 12:55+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -857,21 +857,21 @@ msgstr ""
 msgid "Choose a picture"
 msgstr ""
 
-#: udata/frontend/helpers.py:148
+#: udata/frontend/helpers.py:154
 msgid "Anonymous user"
 msgstr ""
 
-#: udata/frontend/helpers.py:257
+#: udata/frontend/helpers.py:263
 msgctxt "month-format"
 msgid "yyyy/MM"
 msgstr ""
 
-#: udata/frontend/helpers.py:258
+#: udata/frontend/helpers.py:264
 msgctxt "day-format"
 msgid "yyyy/MM/dd"
 msgstr ""
 
-#: udata/frontend/helpers.py:281 udata/templates/dataset/display.html:227
+#: udata/frontend/helpers.py:287 udata/templates/dataset/display.html:227
 #, python-format
 msgid "%(start)s to %(end)s"
 msgstr ""
