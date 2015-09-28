@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-09-14 22:50+0200\n"
+"POT-Creation-Date: 2015-09-28 12:55+0200\n"
 "PO-Revision-Date: 2015-09-13 11:47+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: Spanish (http://www.transifex.com/etalab/udata-"
@@ -94,7 +94,7 @@ msgstr "Conjunto de datos"
 msgid "Reuses"
 msgstr "Reutilizaciones"
 
-#: udata_gouvfr/theme/theme.py:44 udata_gouvfr/theme/templates/header.html:73
+#: udata_gouvfr/theme/theme.py:44 udata_gouvfr/theme/templates/header.html:78
 msgid "Organizations"
 msgstr "Organizaciones"
 
@@ -107,10 +107,14 @@ msgid "Events"
 msgstr ""
 
 #: udata_gouvfr/theme/theme.py:64
+msgid "API"
+msgstr ""
+
+#: udata_gouvfr/theme/theme.py:65
 msgid "Credits"
 msgstr "Créditos"
 
-#: udata_gouvfr/theme/theme.py:65
+#: udata_gouvfr/theme/theme.py:66
 msgid "Terms of use"
 msgstr "Términos de uso"
 
@@ -139,28 +143,40 @@ msgstr "Alimentaciones"
 msgid "Back to top"
 msgstr "Volver arriba"
 
-#: udata_gouvfr/theme/templates/header.html:7
+#: udata_gouvfr/theme/templates/header.html:4
+msgid ""
+"Internet Explorer 8 and below are not anymore supported. Please upgrade "
+"or change your browser to access the website."
+msgstr ""
+
+#: udata_gouvfr/theme/templates/header.html:4
+#, fuzzy
+#| msgid "Informations"
+msgid "More information →"
+msgstr "Informaciones"
+
+#: udata_gouvfr/theme/templates/header.html:12
 msgid "Toggle navigation"
 msgstr "Navegador"
 
-#: udata_gouvfr/theme/templates/header.html:13
+#: udata_gouvfr/theme/templates/header.html:18
 msgid "Open platform for french public data"
 msgstr "Plataforma abierta para los datos públicos franceses "
 
-#: udata_gouvfr/theme/templates/header.html:69
+#: udata_gouvfr/theme/templates/header.html:74
 msgid "My profile"
 msgstr "Mi perfil"
 
-#: udata_gouvfr/theme/templates/header.html:88
+#: udata_gouvfr/theme/templates/header.html:93
 msgid "Administration"
 msgstr "Administración"
 
-#: udata_gouvfr/theme/templates/header.html:95
+#: udata_gouvfr/theme/templates/header.html:100
 msgid "Logout"
 msgstr "Cerrar sesión"
 
-#: udata_gouvfr/theme/templates/header.html:102
-#: udata_gouvfr/theme/templates/header.html:105
+#: udata_gouvfr/theme/templates/header.html:107
+#: udata_gouvfr/theme/templates/header.html:110
 msgid "Sign In / Register"
 msgstr "Conexión / Registro"
 
