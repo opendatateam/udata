@@ -24,7 +24,7 @@ class DatasetReuses(Metric):
     display_name = _('Reuses')
 
     def get_value(self):
-        return Reuse.objects(datasets=self.target).count()
+        return Reuse.objects(datasets=self.target).visible().count()
 
 
 @Reuse.on_update.connect
