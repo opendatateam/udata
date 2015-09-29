@@ -130,6 +130,7 @@ def dictize(element):
 @backends.register
 class MaafBackend(backends.BaseBackend):
     name = 'maaf'
+    display_name = 'MAAF'
     verify_ssl = False
 
     def initialize(self):
