@@ -40,12 +40,12 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         source_url = fake.url()
 
         with self.assert_emit(signals.harvest_source_created):
-            source = actions.create_source('Test source', source_url, 'dummy')
+            source = actions.create_source('Test source', source_url, 'factory')
 
         self.assertEqual(source.name, 'Test source')
         self.assertEqual(source.slug, 'test-source')
         self.assertEqual(source.url, source_url)
-        self.assertEqual(source.backend, 'dummy')
+        self.assertEqual(source.backend, 'factory')
         self.assertEqual(source.frequency, 'manual')
         self.assertTrue(source.active)
         self.assertIsNone(source.owner)

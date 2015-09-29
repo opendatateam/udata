@@ -38,7 +38,7 @@ class HarvestAPITest(APITestCase):
         data = {
             'name': faker.word(),
             'url': faker.url(),
-            'backend': 'dummy'
+            'backend': 'factory'
         }
         response = self.post(url_for('api.harvest_sources'), data)
 
@@ -57,7 +57,7 @@ class HarvestAPITest(APITestCase):
         data = {
             'name': faker.word(),
             'url': faker.url(),
-            'backend': 'dummy',
+            'backend': 'factory',
             'organization': str(org.id)
         }
         response = self.post(url_for('api.harvest_sources'), data)
@@ -77,7 +77,7 @@ class HarvestAPITest(APITestCase):
         data = {
             'name': faker.word(),
             'url': faker.url(),
-            'backend': 'dummy',
+            'backend': 'factory',
             'organization': str(org.id)
         }
         response = self.post(url_for('api.harvest_sources'), data)
