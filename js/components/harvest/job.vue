@@ -69,7 +69,7 @@ export default {
     name: 'JobDetails',
     props: ['job', 'loading', 'empty'],
     components: {
-        'datatable': require('components/datatable/widget.vue')
+        datatable: require('components/datatable/widget.vue')
     },
     data: function() {
         return {

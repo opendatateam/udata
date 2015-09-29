@@ -34,7 +34,7 @@ resource = {
     'name': All(DefaultTo(''), basestring),
     'description': All(basestring, normalize_string),
     'format': All(basestring, Lower),
-    'mimetype': Any(basestring, None),
+    'mimetype': Any(All(basestring, Lower), None),
     'size': Any(Coerce(int), None),
     'hash': Any(All(basestring, hash), None),
     'created': All(basestring, to_date),
@@ -237,8 +237,8 @@ class CkanBackend(BaseBackend):
             resource.description = res.get('description')
             resource.url = res['url']
             resource.type = 'api' if res['resource_type'] == 'api' else 'remote'
-            resource.format = res.get('format', '').lower() or None
-            resource.mime = res.get('mimetype', '').lower() or None
+            resource.format = res.get('format')
+            resource.mime = res.get('mimetype')
             resource.hash = res.get('hash')
             resource.created = res['created']
             resource.modified = res['last_modified']

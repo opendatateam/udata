@@ -4,6 +4,9 @@
             v-on="click:validate_source">{{ _('Validate') }}</button>
         {{ _('This harvest source has not been validated') }}
     </div>
+    <div class="alert alert-warning" v-if="display_warning">
+        {{ _('This harvest source has not been validated') }}
+    </div>
     <div class="row">
         <source-widget source="{{source}}"
             v-class="
@@ -16,6 +19,9 @@
             job="{{current_job}}"
             class="col-md-8">
         </job-widget>
+    </div>
+    <div class="row" v-if="should_validate">
+        <preview class="col-xs-12" source="{{source}}"></preview>
     </div>
 </template>
 
@@ -48,10 +54,15 @@ export default {
         };
     },
     computed: {
-        should_validate: function() {
+        is_validation_pending: function() {
             return this.source && this.source.validation
-                && this.source.validation.state === 'pending'
-                && this.$root.me.is_admin;
+                && this.source.validation.state === 'pending';
+        },
+        should_validate: function() {
+            return this.is_validation_pending && this.$root.me.is_admin;
+        },
+        display_warning: function() {
+            return this.is_validation_pending && !this.$root.me.is_admin;
         }
     },
     events: {
@@ -103,6 +114,7 @@ export default {
         }
     },
     components: {
+        preview: require('components/harvest/preview.vue'),
         'source-widget': require('components/harvest/source.vue'),
         'job-widget': require('components/harvest/job.vue'),
     }

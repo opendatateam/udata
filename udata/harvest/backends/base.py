@@ -197,12 +197,14 @@ class BaseBackend(object):
                     while path:
                         attr = path.pop(0)
                         try:
+                            if isinstance(value, (list, tuple)):
+                                attr = int(attr)
                             value = value[attr]
                         except:
                             value = None
                     try:
                         msg = '[{0}] {1}: {2}'.format(field, e, str(value))
-                    except:
+                    except Exception as e:
                         msg = '[{0}] {1}'.format(field, e)
 
                 else:
