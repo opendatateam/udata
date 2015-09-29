@@ -35,10 +35,11 @@ class BaseBackend(object):
     display_name = None
     verify_ssl = True
 
-    def __init__(self, source, job=None, dryrun=False):
+    def __init__(self, source, job=None, dryrun=False, max_items=None):
         self.source = source
         self.job = job
         self.dryrun = dryrun
+        self.max_items = max_items
 
     @property
     def config(self):
@@ -92,6 +93,9 @@ class BaseBackend(object):
             msg = 'Initialization failed for "{0.name}" ({0.backend})'
             log.exception(msg.format(self.source))
             return
+
+        if self.max_items:
+            self.job.items = self.job.items[:self.max_items]
 
         if self.job.items:
             log.debug('Queued %s items', len(self.job.items))

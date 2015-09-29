@@ -135,7 +135,10 @@ class CkanBackend(BaseBackend):
         # fix = status['ckan_version'] < '1.8'
         fix = False
         response = self.get_action('package_list', fix=fix)
-        for name in response['result']:
+        names = response['result']
+        if self.max_items:
+            names = names[:self.max_items]
+        for name in names:
             self.add_item(name)
 
     def process(self, item):

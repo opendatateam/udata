@@ -326,6 +326,18 @@ class HarvestPreviewTest(DBTestMixin, TestCase):
         self.assertEqual(len(HarvestJob.objects), 0)
         self.assertEqual(len(Dataset.objects), 0)
 
+    def test_preview_max_items(self):
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='factory',
+                                      organization=org,
+                                      config={'count': 10})
+
+        self.app.config['HARVEST_PREVIEW_MAX_ITEMS'] = 5
+
+        job = actions.preview(source.slug)
+
+        self.assertEqual(len(job.items), 5)
+
     def test_preview_with_error_on_initialize(self):
         def init(self):
             raise ValueError('test')

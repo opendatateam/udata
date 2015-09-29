@@ -90,6 +90,8 @@ class Defaults(object):
 
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
+    HARVEST_PREVIEW_MAX_ITEMS = 20
+
     # CROQUEMORT = {
     #     'url': 'http://localhost:8000',
     #     'delay': 1,

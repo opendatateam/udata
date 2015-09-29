@@ -54,7 +54,14 @@ class OdsHarvester(BaseBackend):
     def initialize(self):
         count = 0
         nhits = None
-        while nhits is None or count < nhits:
+
+        def should_fetch():
+            if nhits is None:
+                return True
+            max_value = min(nhits, self.max_items) if self.max_items else nhits
+            return count < max_value
+
+        while should_fetch():
             response = self.get(self.api_url,
                                 params={"start": count, "rows": 50})
             response.raise_for_status()

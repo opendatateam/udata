@@ -5,6 +5,8 @@ import logging
 
 from datetime import datetime
 
+from flask import current_app
+
 from udata.auth import current_user
 from udata.models import User, Organization, PeriodicTask
 
@@ -118,7 +120,8 @@ def preview(ident):
     '''Launch or resume an harvesting for a given source if none is running'''
     source = get_source(ident)
     cls = backends.get(source.backend)
-    backend = cls(source, dryrun=True)
+    max_items = current_app.config['HARVEST_PREVIEW_MAX_ITEMS']
+    backend = cls(source, dryrun=True, max_items=max_items)
     return backend.harvest()
 
 
