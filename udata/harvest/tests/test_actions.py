@@ -5,16 +5,21 @@ import logging
 
 from datetime import datetime
 
+from mock import patch
+
 from udata.models import Dataset, PeriodicTask
 
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import OrganizationFactory
+from udata.tests.factories import OrganizationFactory, UserFactory
 
 from .factories import (
     fake, HarvestSourceFactory, HarvestJobFactory,
     mock_initialize, mock_process, DEFAULT_COUNT as COUNT
 )
-from ..models import HarvestSource, HarvestJob, HarvestError
+from ..models import (
+    HarvestSource, HarvestJob, HarvestError,
+    VALIDATION_PENDING, VALIDATION_ACCEPTED, VALIDATION_REFUSED
+)
 from ..backends import BaseBackend
 from .. import actions, signals
 
@@ -30,54 +35,97 @@ class HarvestActionsTest(DBTestMixin, TestCase):
     def test_list_sources(self):
         self.assertEqual(actions.list_sources(), [])
 
-        sources = [HarvestSourceFactory() for _ in range(3)]
-        self.assertEqual(actions.list_sources(), sources)
+        sources = HarvestSourceFactory.create_batch(3)
+
+        result = actions.list_sources()
+        self.assertEqual(len(result), len(sources))
+
+        for source in sources:
+            self.assertIn(source, result)
+
+    def test_list_sources_for_owner(self):
+        owner = UserFactory()
+        self.assertEqual(actions.list_sources(owner), [])
+
+        sources = HarvestSourceFactory.create_batch(3, owner=owner)
+        HarvestSourceFactory()
+
+        result = actions.list_sources(owner)
+        self.assertEqual(len(result), len(sources))
+
+        for source in sources:
+            self.assertIn(source, result)
+
+    def test_list_sources_for_org(self):
+        org = OrganizationFactory()
+        self.assertEqual(actions.list_sources(org), [])
+
+        sources = HarvestSourceFactory.create_batch(3, organization=org)
+        HarvestSourceFactory()
+
+        result = actions.list_sources(org)
+        self.assertEqual(len(result), len(sources))
+
+        for source in sources:
+            self.assertIn(source, result)
 
     def test_create_source(self):
         source_url = fake.url()
 
         with self.assert_emit(signals.harvest_source_created):
-            source = actions.create_source('Test source', source_url, 'dummy')
+            source = actions.create_source('Test source', source_url, 'factory')
 
         self.assertEqual(source.name, 'Test source')
         self.assertEqual(source.slug, 'test-source')
         self.assertEqual(source.url, source_url)
-        self.assertEqual(source.backend, 'dummy')
+        self.assertEqual(source.backend, 'factory')
         self.assertEqual(source.frequency, 'manual')
         self.assertTrue(source.active)
-        self.assertFalse(source.validated)
         self.assertIsNone(source.owner)
         self.assertIsNone(source.organization)
 
-    def test_validate_source(self):
+        self.assertEqual(source.validation.state, VALIDATION_PENDING)
+        self.assertIsNone(source.validation.on)
+        self.assertIsNone(source.validation.by)
+        self.assertIsNone(source.validation.comment)
+
+    @patch('udata.harvest.actions.launch')
+    def test_validate_source(self, mock):
         source = HarvestSourceFactory()
-        self.assertFalse(source.validated)
 
         actions.validate_source(source.id)
 
         source.reload()
-        self.assertTrue(source.validated)
-        self.assertIsNone(source.validation_comment)
+        self.assertEqual(source.validation.state, VALIDATION_ACCEPTED)
+        self.assertIsNotNone(source.validation.on)
+        self.assertIsNone(source.validation.by)
+        self.assertIsNone(source.validation.comment)
+        mock.assert_called_once_with(source.id)
 
-    def test_validate_source_with_comment(self):
+    @patch('udata.harvest.actions.launch')
+    def test_validate_source_with_comment(self, mock):
         source = HarvestSourceFactory()
-        self.assertFalse(source.validated)
 
         actions.validate_source(source.id, 'comment')
 
         source.reload()
-        self.assertTrue(source.validated)
-        self.assertEqual(source.validation_comment, 'comment')
+
+        self.assertEqual(source.validation.state, VALIDATION_ACCEPTED)
+        self.assertIsNotNone(source.validation.on)
+        self.assertIsNone(source.validation.by)
+        self.assertEqual(source.validation.comment, 'comment')
+        mock.assert_called_once_with(source.id)
 
     def test_reject_source(self):
         source = HarvestSourceFactory()
-        self.assertFalse(source.validated)
 
         actions.reject_source(source.id, 'comment')
 
         source.reload()
-        self.assertFalse(source.validated)
-        self.assertEqual(source.validation_comment, 'comment')
+        self.assertEqual(source.validation.state, VALIDATION_REFUSED)
+        self.assertIsNotNone(source.validation.on)
+        self.assertIsNone(source.validation.by)
+        self.assertEqual(source.validation.comment, 'comment')
 
     def test_get_source_by_slug(self):
         source = HarvestSourceFactory()
@@ -314,6 +362,18 @@ class HarvestPreviewTest(DBTestMixin, TestCase):
 
         self.assertEqual(len(HarvestJob.objects), 0)
         self.assertEqual(len(Dataset.objects), 0)
+
+    def test_preview_max_items(self):
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='factory',
+                                      organization=org,
+                                      config={'count': 10})
+
+        self.app.config['HARVEST_PREVIEW_MAX_ITEMS'] = 5
+
+        job = actions.preview(source.slug)
+
+        self.assertEqual(len(job.items), 5)
 
     def test_preview_with_error_on_initialize(self):
         def init(self):

@@ -14,7 +14,11 @@
     </div>
 
     <div class="row">
-        <community-widget class="col-xs-12" communities="{{communities}}"></community-widget>
+        <communities class="col-xs-12" communities="{{communities}}"></communities>
+    </div>
+
+    <div class="row">
+        <harvesters id="harvesters-widget" class="col-xs-12" owner="{{user}}"></harvesters>
     </div>
 </template>
 
@@ -59,7 +63,8 @@ export default {
         chart: require('components/charts/widget.vue'),
         datasets: require('components/dataset/list.vue'),
         reuses: require('components/reuse/list.vue'),
-        'community-widget': require('components/communityresource/list.vue')
+        harvesters: require('components/harvest/sources.vue'),
+        communities: require('components/communityresource/list.vue')
     },
     watch: {
         user_id: function(id) {

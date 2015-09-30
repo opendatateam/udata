@@ -1,7 +1,3 @@
-<style lang="less">
-
-</style>
-
 <template>
 <li class="dropdown notifications-menu">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -23,13 +19,12 @@
 </template>
 
 <script>
-'use strict';
+import API from 'api';
 
-var API = require('api'),
-    INITIAL_FETCH = 5 * 1000,
-    POLL_INTERVAL = 30 * 1000;
+const INITIAL_FETCH = 5 * 1000,
+      POLL_INTERVAL = 30 * 1000;
 
-module.exports = {
+export default {
     replace: true,
     data: function() {
         return {
@@ -40,7 +35,8 @@ module.exports = {
         'issue': require('components/notifications/issue.vue'),
         'discussion': require('components/notifications/discussion.vue'),
         'membership_request': require('components/notifications/membership_request.vue'),
-        'transfer_request': require('components/notifications/transfer.vue')
+        'transfer_request': require('components/notifications/transfer.vue'),
+        'validate_harvester': require('components/notifications/validate-harvester.vue'),
     },
     created: function() {
         // Trigger an initial fetch (don't wait for poll interval)
@@ -50,9 +46,9 @@ module.exports = {
     },
     methods: {
         fetch: function() {
-            API.me.notifications({}, function(response) {
+            API.notifications.get_notifications({}, (response) => {
                 this.notifications = response.obj;
-            }.bind(this));
+            });
         }
     }
 };

@@ -7,11 +7,7 @@
 </template>
 
 <script>
-'use strict';
-
-var Vue = require('vue');
-
-module.exports = {
+export default {
     name: 'SystemView',
     components: {
         'harvesters-widget': require('components/harvest/sources.vue'),
@@ -21,7 +17,7 @@ module.exports = {
     data: function() {
         return {
             meta: {
-                title: Vue._('System')
+                title: this._('System')
             }
         };
     }

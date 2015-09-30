@@ -5,10 +5,16 @@ import logging
 
 from datetime import datetime
 
+from flask import current_app
+
+from udata.auth import current_user
 from udata.models import User, Organization, PeriodicTask
 
 from . import backends, signals
-from .models import HarvestSource, HarvestJob, DEFAULT_HARVEST_FREQUENCY
+from .models import (
+    HarvestSource, HarvestJob, DEFAULT_HARVEST_FREQUENCY,
+    VALIDATION_ACCEPTED, VALIDATION_REFUSED
+)
 from .tasks import harvest
 
 log = logging.getLogger(__name__)
@@ -19,8 +25,10 @@ def list_backends():
     return backends.get_all().values()
 
 
-def list_sources():
+def list_sources(owner=None):
     '''List all harvest sources'''
+    if owner:
+        return list(HarvestSource.objects.owned_by(owner))
     return list(HarvestSource.objects)
 
 
@@ -62,17 +70,24 @@ def create_source(name, url, backend,
 def validate_source(ident, comment=None):
     '''Validate a source for automatic harvesting'''
     source = get_source(ident)
-    source.validated = True
-    source.validation_comment = comment
+    source.validation.on = datetime.now()
+    source.validation.comment = comment
+    source.validation.state = VALIDATION_ACCEPTED
+    if current_user.is_authenticated():
+        source.validation.by = current_user._get_current_object()
     source.save()
+    launch(ident)
     return source
 
 
 def reject_source(ident, comment):
     '''Reject a source for automatic harvesting'''
     source = get_source(ident)
-    source.validated = False
-    source.validation_comment = comment
+    source.validation.on = datetime.now()
+    source.validation.comment = comment
+    source.validation.state = VALIDATION_REFUSED
+    if current_user.is_authenticated():
+        source.validation.by = current_user._get_current_object()
     source.save()
     return source
 
@@ -108,7 +123,8 @@ def preview(ident):
     '''Launch or resume an harvesting for a given source if none is running'''
     source = get_source(ident)
     cls = backends.get(source.backend)
-    backend = cls(source, dryrun=True)
+    max_items = current_app.config['HARVEST_PREVIEW_MAX_ITEMS']
+    backend = cls(source, dryrun=True, max_items=max_items)
     return backend.harvest()
 
 

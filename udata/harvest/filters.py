@@ -116,12 +116,14 @@ def is_url(add_prefix='http://', full=False, remove_fragment=False,
 
 def hash(value):
     '''Detect an hash type'''
-    if len(value) == 32:
+    if not value:
+        return
+    elif len(value) == 32:
         type = 'md5'
     elif len(value) == 40:
         type = 'sha1'
     elif len(value) == 64:
         type = 'sha256'
     else:
-        raise Invalid('Unrecognized hash algorithm')
+        return None
     return {'type': type, 'value': value}

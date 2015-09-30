@@ -1,7 +1,3 @@
-<style lang="less">
-
-</style>
-
 <template>
 <li class="dropdown add-menu notifications-menu">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -25,9 +21,7 @@
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     replace: true,
     computed: {
         actions: function() {
@@ -46,11 +40,11 @@ module.exports = {
                     icon: 'fa-building',
                     route: '/organization/new/',
                     color: 'warning'
-                // }, {
-                //     label: this._('An harvester'),
-                //     icon: 'fa-tasks',
-                //     route: '/harvester/new/',
-                //     color: 'navy'
+                }, {
+                    label: this._('An harvester'),
+                    icon: 'fa-tasks',
+                    route: '/harvester/new/',
+                    color: 'navy'
                 }];
             if (this.$root.me.has_role('admin')) {
                 actions.push({

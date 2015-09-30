@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-09-14 22:53+0200\n"
+"POT-Creation-Date: 2015-09-28 12:55+0200\n"
 "PO-Revision-Date: 2015-09-09 08:58+0000\n"
 "Last-Translator: Larlet David <david@larlet.fr>\n"
 "Language-Team: Spanish "
@@ -876,21 +876,21 @@ msgstr "Este campo requiere de \"%(name)s\"  que deben ser ajustados"
 msgid "Choose a picture"
 msgstr "Escoger una imagen"
 
-#: udata/frontend/helpers.py:148
+#: udata/frontend/helpers.py:154
 msgid "Anonymous user"
 msgstr "Usuario anónimo"
 
-#: udata/frontend/helpers.py:257
+#: udata/frontend/helpers.py:263
 msgctxt "month-format"
 msgid "yyyy/MM"
 msgstr "MM/yyyy"
 
-#: udata/frontend/helpers.py:258
+#: udata/frontend/helpers.py:264
 msgctxt "day-format"
 msgid "yyyy/MM/dd"
 msgstr "dd/MM/yyyy"
 
-#: udata/frontend/helpers.py:281 udata/templates/dataset/display.html:227
+#: udata/frontend/helpers.py:287 udata/templates/dataset/display.html:227
 #, python-format
 msgid "%(start)s to %(end)s"
 msgstr ""

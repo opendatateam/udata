@@ -1,10 +1,10 @@
 <template>
     <div class="row">
-        <small-box class="col-lg-3 col-xs-6" v-repeat="boxes"></small-box>
+        <sbox class="col-lg-3 col-xs-6" v-repeat="boxes"></sbox>
     </div>
     <div class="row">
-        <org-profile org="{{org}}" class="col-xs-12 col-md-6"></org-profile>
-        <org-members org="{{org}}" class="col-xs-12 col-md-6"></org-members>
+        <profile org="{{org}}" class="col-xs-12 col-md-6"></profile>
+        <members org="{{org}}" class="col-xs-12 col-md-6"></members>
     </div>
 
     <div class="row">
@@ -17,29 +17,27 @@
     </div>
 
     <div class="row">
-        <datasets-widget id="datasets-widget" class="col-xs-12" datasets="{{datasets}}"
+        <datasets id="datasets-widget" class="col-xs-12" datasets="{{datasets}}"
          downloads="{{downloads}}">
-        </datasets-widget>
+        </datasets>
     </div>
 
     <div class="row">
-        <reuses-widget id="reuses-widget" class="col-xs-12" reuses="{{reuses}}"></reuses-widget>
+        <reuses id="reuses-widget" class="col-xs-12" reuses="{{reuses}}"></reuses>
     </div>
 
     <div class="row">
-        <issues id="issues-widget" class="col-xs-12" issues="{{issues}}"></issues>
+        <issues id="issues-widget" class="col-xs-12 col-md-6" issues="{{issues}}"></issues>
+        <discussions id="discussions-widget" class="col-xs-12 col-md-6" discussions="{{discussions}}"></discussions>
     </div>
 
     <div class="row">
-        <discussions id="discussions-widget" class="col-xs-12" discussions="{{discussions}}"></discussions>
+        <followers id="followers-widget" class="col-xs-12 col-md-6" followers="{{followers}}"></followers>
+        <harvesters id="harvesters-widget" class="col-xs-12 col-md-6" owner="{{org}}"></harvesters>
     </div>
 
     <div class="row">
-        <followers-widget id="followers-widget" class="col-xs-12" followers="{{followers}}"></followers-widget>
-    </div>
-
-    <div class="row">
-        <community-widget class="col-xs-12" communities="{{communities}}"></community-widget>
+        <communities class="col-xs-12" communities="{{communities}}"></communities>
     </div>
 </template>
 
@@ -176,16 +174,17 @@ export default {
         }
     },
     components: {
-        'small-box': require('components/containers/small-box.vue'),
-        'org-profile': require('components/organization/profile.vue'),
-        'org-members': require('components/organization/members.vue'),
-        'chart': require('components/charts/widget.vue'),
-        'datasets-widget': require('components/dataset/list.vue'),
-        'reuses-widget': require('components/reuse/list.vue'),
-        'followers-widget': require('components/follow/list.vue'),
-        'issues': require('components/issues/list.vue'),
-        'discussions': require('components/discussions/list.vue'),
-        'community-widget': require('components/communityresource/list.vue')
+        sbox: require('components/containers/small-box.vue'),
+        profile: require('components/organization/profile.vue'),
+        members: require('components/organization/members.vue'),
+        chart: require('components/charts/widget.vue'),
+        datasets: require('components/dataset/list.vue'),
+        reuses: require('components/reuse/list.vue'),
+        followers: require('components/follow/list.vue'),
+        issues: require('components/issues/list.vue'),
+        discussions: require('components/discussions/list.vue'),
+        harvesters: require('components/harvest/sources.vue'),
+        communities: require('components/communityresource/list.vue')
     },
     events: {
         'image:saved': function() {

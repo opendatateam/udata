@@ -1,7 +1,7 @@
 <template>
 <a class="pointer" v-on="click: click">
-    <span class="fa fa-fw fa-users text-aqua"></span>
-    {{ _('Pending membership request') }}
+    <span class="fa fa-fw fa-tasks text-aqua"></span>
+    {{ _('Pending harvester validation for __name__', details) }}
 </a>
 </template>
 
@@ -10,7 +10,7 @@ export default {
     mixins: [require('components/notifications/base')],
     methods: {
         click: function() {
-            this.$go('/organization/' + this.details.organization + '#membership-requests');
+            this.$go('/harvester/' + this.details.id + '/');
         }
     }
 };
