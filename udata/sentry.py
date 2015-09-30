@@ -5,6 +5,7 @@ import logging
 import re
 
 from werkzeug.exceptions import HTTPException
+from .auth import PermissionDenied
 
 log = logging.getLogger(__name__)
 
@@ -51,6 +52,8 @@ def init_app(app):
         exceptions = app.config.get('RAVEN_IGNORE_EXCEPTIONS', [])
         if HTTPException not in exceptions:
             exceptions.append(HTTPException)
+        if PermissionDenied not in exceptions:
+            exceptions.append(PermissionDenied)
         app.config['RAVEN_IGNORE_EXCEPTIONS'] = exceptions
 
         app.config['SENTRY_PUBLIC_DSN'] = public_dsn(app.config['SENTRY_DSN'])
