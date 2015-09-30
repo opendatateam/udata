@@ -9,7 +9,9 @@ from .. import actions
 
 from udata.models import Member
 from udata.tests.api import APITestCase
-from udata.tests.factories import faker, OrganizationFactory, AdminFactory
+from udata.tests.factories import (
+    faker, OrganizationFactory, AdminFactory, UserFactory
+)
 
 from ..models import (
     HarvestSource, VALIDATION_ACCEPTED, VALIDATION_REFUSED, VALIDATION_PENDING
@@ -31,6 +33,33 @@ class HarvestAPITest(APITestCase):
         for data in response.json:
             self.assertIn('id', data)
             self.assertIn('label', data)
+
+    def test_list_sources(self):
+        sources = HarvestSourceFactory.create_batch(3)
+
+        response = self.get(url_for('api.harvest_sources'))
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(sources))
+
+    def test_list_sources_for_owner(self):
+        owner = UserFactory()
+        sources = HarvestSourceFactory.create_batch(3, owner=owner)
+        HarvestSourceFactory()
+
+        response = self.get(url_for('api.harvest_sources', owner=str(owner.id)))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), len(sources))
+
+    def test_list_sources_for_org(self):
+        org = OrganizationFactory()
+        sources = HarvestSourceFactory.create_batch(3, organization=org)
+        HarvestSourceFactory()
+
+        response = self.get(url_for('api.harvest_sources', owner=str(org.id)))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), len(sources))
 
     def test_create_source_with_owner(self):
         '''It should create and attach a new source to an owner'''

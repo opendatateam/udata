@@ -25,8 +25,10 @@ def list_backends():
     return backends.get_all().values()
 
 
-def list_sources():
+def list_sources(owner=None):
     '''List all harvest sources'''
+    if owner:
+        return list(HarvestSource.objects.owned_by(owner))
     return list(HarvestSource.objects)
 
 

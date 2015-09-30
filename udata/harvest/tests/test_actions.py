@@ -8,7 +8,7 @@ from datetime import datetime
 from udata.models import Dataset, PeriodicTask
 
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import OrganizationFactory
+from udata.tests.factories import OrganizationFactory, UserFactory
 
 from .factories import (
     fake, HarvestSourceFactory, HarvestJobFactory,
@@ -33,8 +33,40 @@ class HarvestActionsTest(DBTestMixin, TestCase):
     def test_list_sources(self):
         self.assertEqual(actions.list_sources(), [])
 
-        sources = [HarvestSourceFactory() for _ in range(3)]
-        self.assertEqual(actions.list_sources(), sources)
+        sources = HarvestSourceFactory.create_batch(3)
+
+        result = actions.list_sources()
+        self.assertEqual(len(result), len(sources))
+
+        for source in sources:
+            self.assertIn(source, result)
+
+    def test_list_sources_for_owner(self):
+        owner = UserFactory()
+        self.assertEqual(actions.list_sources(owner), [])
+
+        sources = HarvestSourceFactory.create_batch(3, owner=owner)
+        HarvestSourceFactory()
+
+        result = actions.list_sources(owner)
+        self.assertEqual(len(result), len(sources))
+
+        for source in sources:
+            self.assertIn(source, result)
+
+    def test_list_sources_for_org(self):
+        org = OrganizationFactory()
+        self.assertEqual(actions.list_sources(org), [])
+
+        sources = HarvestSourceFactory.create_batch(3, organization=org)
+        HarvestSourceFactory()
+
+        result = actions.list_sources(org)
+        self.assertEqual(len(result), len(sources))
+
+        for source in sources:
+            self.assertIn(source, result)
+
 
     def test_create_source(self):
         source_url = fake.url()

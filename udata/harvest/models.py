@@ -83,6 +83,14 @@ class HarvestSourceValidation(db.EmbeddedDocument):
     comment = db.StringField()
 
 
+class HarvestSourceQuerySet(db.BaseQuerySet):
+    def owned_by(self, *owners):
+        Qs = db.Q()
+        for owner in owners:
+            Qs |= db.Q(owner=owner) | db.Q(organization=owner)
+        return self(Qs)
+
+
 class HarvestSource(db.Document):
     name = db.StringField(max_length=255)
     slug = db.SlugField(max_length=255, required=True, unique=True,
@@ -122,6 +130,17 @@ class HarvestSource(db.Document):
     @cached_property
     def last_job(self):
         return self.get_last_job()
+
+    meta = {
+        'indexes': [
+            '-created_at',
+            'slug',
+            'organization',
+            'owner',
+        ],
+        'ordering': ['-created_at'],
+        'queryset_class': HarvestSourceQuerySet,
+    }
 
 
 class HarvestJob(db.Document):

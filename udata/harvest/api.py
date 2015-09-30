@@ -136,14 +136,19 @@ preview_job_fields = api.extend('HarvestJobPreview', job_fields, {
                          description='The job collected items'),
 })
 
+source_parser = api.parser()
+source_parser.add_argument('owner', type=str, location='args',
+                           help='The organization or user ID to filter on')
+
 
 @ns.route('/sources/', endpoint='harvest_sources')
 class SourcesAPI(API):
-    @api.doc('list_harvest_sources')
+    @api.doc('list_harvest_sources', parser=source_parser)
     @api.marshal_list_with(source_fields)
     def get(self):
         '''List all harvest sources'''
-        return actions.list_sources()
+        args = source_parser.parse_args()
+        return actions.list_sources(args.get('owner'))
 
     @api.doc('create_harvest_source')
     @api.secure
