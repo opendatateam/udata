@@ -10,7 +10,6 @@ export default {
         return {
             meta: {
                 title:this._('New harvester'),
-                // subtitle: this._('reuse')
             },
             source: new HarvestSource(),
             publish_as: null,
@@ -41,20 +40,6 @@ export default {
                         return false;
                     }
                 }
-            // }, {
-            //     label: this._('Filters'),
-            //     subtitle: this._('Filter some data'),
-            //     component: 'mappings-form',
-            //     next: (component) => {
-            //         if (component.$.form.validate()) {
-            //             Object.assign(this.source, component.serialize());
-            //             this.source.save();
-            //             this.source.$once('updated', () => {
-            //                 this.$.wizard.go_next();
-            //             });
-            //             return false;
-            //         }
-            //     }
             }, {
                 label: this._('Done'),
                 subtitle: this._('Your harvester is ready'),
@@ -67,7 +52,6 @@ export default {
     },
     components: {
         'harvest-form': require('components/harvest/form.vue'),
-        // 'mappings-form': require('components/harvest/mappings-form.vue'),
         publishas: require('components/widgets/publish-as.vue'),
         created: require('components/harvest/created.vue'),
         wizard: require('components/widgets/wizard.vue'),
