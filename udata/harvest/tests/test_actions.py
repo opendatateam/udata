@@ -5,6 +5,8 @@ import logging
 
 from datetime import datetime
 
+from mock import patch
+
 from udata.models import Dataset, PeriodicTask
 
 from udata.tests import TestCase, DBTestMixin
@@ -67,7 +69,6 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         for source in sources:
             self.assertIn(source, result)
 
-
     def test_create_source(self):
         source_url = fake.url()
 
@@ -88,7 +89,8 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         self.assertIsNone(source.validation.by)
         self.assertIsNone(source.validation.comment)
 
-    def test_validate_source(self):
+    @patch('udata.harvest.actions.launch')
+    def test_validate_source(self, mock):
         source = HarvestSourceFactory()
 
         actions.validate_source(source.id)
@@ -98,8 +100,10 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         self.assertIsNotNone(source.validation.on)
         self.assertIsNone(source.validation.by)
         self.assertIsNone(source.validation.comment)
+        mock.assert_called_once_with(source.id)
 
-    def test_validate_source_with_comment(self):
+    @patch('udata.harvest.actions.launch')
+    def test_validate_source_with_comment(self, mock):
         source = HarvestSourceFactory()
 
         actions.validate_source(source.id, 'comment')
@@ -110,6 +114,7 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         self.assertIsNotNone(source.validation.on)
         self.assertIsNone(source.validation.by)
         self.assertEqual(source.validation.comment, 'comment')
+        mock.assert_called_once_with(source.id)
 
     def test_reject_source(self):
         source = HarvestSourceFactory()

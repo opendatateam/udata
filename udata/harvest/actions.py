@@ -76,6 +76,7 @@ def validate_source(ident, comment=None):
     if current_user.is_authenticated():
         source.validation.by = current_user._get_current_object()
     source.save()
+    launch(ident)
     return source
 
 
