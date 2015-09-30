@@ -17,7 +17,7 @@ export default {
             steps: [{
                 label: this._('Harvest as'),
                 subtitle: this._('Choose who is harvesting'),
-                component: 'publish-as',
+                component: 'publishas',
                 next: (component) => {
                     if (component.selected) {
                         this.publish_as = component.selected;
@@ -41,20 +41,20 @@ export default {
                         return false;
                     }
                 }
-            }, {
-                label: this._('Mappings'),
-                subtitle: this._('Adjust some values mapping'),
-                component: 'mappings-form',
-                next: (component) => {
-                    if (component.$.form.validate()) {
-                        Object.assign(this.source, component.serialize());
-                        this.source.save();
-                        this.source.$once('updated', () => {
-                            this.$.wizard.go_next();
-                        });
-                        return false;
-                    }
-                }
+            // }, {
+            //     label: this._('Filters'),
+            //     subtitle: this._('Filter some data'),
+            //     component: 'mappings-form',
+            //     next: (component) => {
+            //         if (component.$.form.validate()) {
+            //             Object.assign(this.source, component.serialize());
+            //             this.source.save();
+            //             this.source.$once('updated', () => {
+            //                 this.$.wizard.go_next();
+            //             });
+            //             return false;
+            //         }
+            //     }
             }, {
                 label: this._('Done'),
                 subtitle: this._('Your harvester is ready'),
@@ -67,10 +67,10 @@ export default {
     },
     components: {
         'harvest-form': require('components/harvest/form.vue'),
-        'mappings-form': require('components/harvest/mappings-form.vue'),
-        'publish-as': require('components/widgets/publish-as.vue'),
-        'created': require('components/harvest/created.vue'),
-        'wizard': require('components/widgets/wizard.vue'),
+        // 'mappings-form': require('components/harvest/mappings-form.vue'),
+        publishas: require('components/widgets/publish-as.vue'),
+        created: require('components/harvest/created.vue'),
+        wizard: require('components/widgets/wizard.vue'),
     },
     events: {
         'wizard:next-step': function() {
