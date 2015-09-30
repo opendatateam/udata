@@ -5,7 +5,7 @@ sources.forEach(function(source) {
     source.validation = {
         state: source.validated ? 'accepted' : 'pending',
         comment: source.validation_comment,
-        on: source.create_at
+        on: source.created_at
     };
     delete source.validated;
     db.harvest_source.save(source);

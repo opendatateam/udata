@@ -10,7 +10,7 @@ export default {
     mixins: [require('components/notifications/base')],
     methods: {
         click: function() {
-            this.$go('/harvester/' + this.details.id + '#validate');
+            this.$go('/harvester/' + this.details.id + '/');
         }
     }
 };

@@ -85,10 +85,10 @@ class HarvestSourceValidation(db.EmbeddedDocument):
 
 class HarvestSourceQuerySet(db.BaseQuerySet):
     def owned_by(self, *owners):
-        Qs = db.Q()
+        qs = db.Q()
         for owner in owners:
-            Qs |= db.Q(owner=owner) | db.Q(organization=owner)
-        return self(Qs)
+            qs |= db.Q(owner=owner) | db.Q(organization=owner)
+        return self(qs)
 
 
 class HarvestSource(db.Document):
