@@ -13,7 +13,8 @@
         <reuses class="col-xs-12" reuses="{{reuses}}"></reuses>
     </div>
     <div class="row">
-        <apikey class="col-xs-12" user="{{$root.me}}"></apikey>
+        <apikey class="col-xs-12 col-md-6" user="{{$root.me}}"></apikey>
+        <harvesters class="col-xs-12 col-md-6" owner="{{$root.me}}"></harvesters>
     </div>
 </template>
 
@@ -60,7 +61,8 @@ export default  {
         chart: require('components/charts/widget.vue'),
         datasets: require('components/dataset/list.vue'),
         reuses: require('components/reuse/list.vue'),
-        apikey: require('components/user/apikey.vue')
+        apikey: require('components/user/apikey.vue'),
+        harvesters: require('components/harvest/sources.vue')
     },
     attached: function() {
         this.update();
