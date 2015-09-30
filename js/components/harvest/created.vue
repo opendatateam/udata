@@ -5,7 +5,7 @@
 <div class="row">
     <div class="col-xs-12 lead text-center">
         <p>{{ _('Your harvester is now pending for team review.') }}</p>
-        <p>{{ _('You'll be notified on approval (or refusal)') }}</p>
+        <p>{{ _("You'll be notified on approval (or refusal)") }}</p>
     </div>
 </div>
 
