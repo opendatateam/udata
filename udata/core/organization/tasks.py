@@ -35,9 +35,9 @@ def notify_membership_request(org, request):
 @task
 def notify_membership_response(org, request):
     if request.status == 'accepted':
-        subject, template = _(
-            'You are now a member of the organization "%(org)s"', org=org),
-        'new_member'
+        subject = _('You are now a member of the organization "%(org)s"',
+                    org=org)
+        template = 'new_member'
     else:
         subject, template = _('Membership refused'), 'membership_refused'
     mail.send(subject, request.user, template, org=org, request=request)
