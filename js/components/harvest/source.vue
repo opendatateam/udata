@@ -5,7 +5,7 @@
         p="{{ jobs }}"
         empty="{{ _('No job yet') }}">
         <header>
-            {{ source.description | markdown }}
+            {{{ source.description | markdown }}}
             <dl class="dl-horizontal">
                 <dt>{{ _('Backend') }}</dt>
                 <dd>{{ source.backend }}</dd>
@@ -23,7 +23,7 @@ import HarvestJobs from 'models/harvest/jobs';
 export default {
     name: 'harvest-jobs-widget',
     components: {
-        'datatable': require('components/datatable/widget.vue')
+        datatable: require('components/datatable/widget.vue')
     },
     data: function() {
         return {

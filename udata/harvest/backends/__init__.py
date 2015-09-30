@@ -21,6 +21,5 @@ def get_all():
 
 
 from .base import BaseBackend  # flake8: noqa
-from .dummy import DummyBackend  # flake8: noqa
 from .ods import OdsHarvester  # flake8: noqa
 from .ckan import CkanBackend  # flake8: noqa

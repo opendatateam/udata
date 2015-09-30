@@ -7,18 +7,19 @@
 </template>
 
 <script>
-import sources from 'models/harvest/sources';
+import HarvestSources from 'models/harvest/sources';
 import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
 
 export default {
     name: 'harvesters-widget',
     components: {
-        'datatable': require('components/datatable/widget.vue')
+        datatable: require('components/datatable/widget.vue')
     },
+    props: ['owner'],
     data: function() {
         return {
             title: this._('Harvesters'),
-            sources: sources,
+            sources: new HarvestSources(),
             fields: [{
                 label: this._('Name'),
                 key: 'name',
@@ -45,6 +46,18 @@ export default {
     events: {
         'datatable:item:click': function(harvester) {
             this.$go('/harvester/' + harvester.id + '/');
+        }
+    },
+    ready: function() {
+        if (!this.owner) {
+            this.sources.fetch();
+        } else if (this.owner && this.owner.id) {
+            this.sources.fetch({owner: this.owner.id});
+        }
+    },
+    watch: {
+        'owner.id': function(ownerid) {
+            this.sources.fetch({owner: ownerid});
         }
     }
 };

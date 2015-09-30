@@ -9,9 +9,13 @@ from .. import actions
 
 from udata.models import Member
 from udata.tests.api import APITestCase
-from udata.tests.factories import faker, OrganizationFactory, AdminFactory
+from udata.tests.factories import (
+    faker, OrganizationFactory, AdminFactory, UserFactory
+)
 
-from ..models import HarvestSource
+from ..models import (
+    HarvestSource, VALIDATION_ACCEPTED, VALIDATION_REFUSED, VALIDATION_PENDING
+)
 from .factories import (
     HarvestSourceFactory, DEFAULT_COUNT as COUNT
 )
@@ -30,20 +34,47 @@ class HarvestAPITest(APITestCase):
             self.assertIn('id', data)
             self.assertIn('label', data)
 
+    def test_list_sources(self):
+        sources = HarvestSourceFactory.create_batch(3)
+
+        response = self.get(url_for('api.harvest_sources'))
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(sources))
+
+    def test_list_sources_for_owner(self):
+        owner = UserFactory()
+        sources = HarvestSourceFactory.create_batch(3, owner=owner)
+        HarvestSourceFactory()
+
+        response = self.get(url_for('api.harvest_sources', owner=str(owner.id)))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), len(sources))
+
+    def test_list_sources_for_org(self):
+        org = OrganizationFactory()
+        sources = HarvestSourceFactory.create_batch(3, organization=org)
+        HarvestSourceFactory()
+
+        response = self.get(url_for('api.harvest_sources', owner=str(org.id)))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), len(sources))
+
     def test_create_source_with_owner(self):
         '''It should create and attach a new source to an owner'''
         user = self.login()
         data = {
             'name': faker.word(),
             'url': faker.url(),
-            'backend': 'dummy'
+            'backend': 'factory'
         }
         response = self.post(url_for('api.harvest_sources'), data)
 
         self.assert201(response)
 
         source = response.json
-        self.assertFalse(source['validated'])
+        self.assertEqual(source['validation']['state'], VALIDATION_PENDING)
         self.assertEqual(source['owner']['id'], str(user.id))
         self.assertIsNone(source['organization'])
 
@@ -55,7 +86,7 @@ class HarvestAPITest(APITestCase):
         data = {
             'name': faker.word(),
             'url': faker.url(),
-            'backend': 'dummy',
+            'backend': 'factory',
             'organization': str(org.id)
         }
         response = self.post(url_for('api.harvest_sources'), data)
@@ -63,7 +94,7 @@ class HarvestAPITest(APITestCase):
         self.assert201(response)
 
         source = response.json
-        self.assertFalse(source['validated'])
+        self.assertEqual(source['validation']['state'], VALIDATION_PENDING)
         self.assertIsNone(source['owner'])
         self.assertEqual(source['organization']['id'], str(org.id))
 
@@ -75,7 +106,7 @@ class HarvestAPITest(APITestCase):
         data = {
             'name': faker.word(),
             'url': faker.url(),
-            'backend': 'dummy',
+            'backend': 'factory',
             'organization': str(org.id)
         }
         response = self.post(url_for('api.harvest_sources'), data)
@@ -87,27 +118,29 @@ class HarvestAPITest(APITestCase):
         self.login(AdminFactory())
         source = HarvestSourceFactory()
 
-        data = {'validate': True}
+        data = {'state': VALIDATION_ACCEPTED}
         url = url_for('api.validate_harvest_source', ident=str(source.id))
         response = self.post(url, data)
         self.assert200(response)
 
         source.reload()
-        self.assertTrue(source.validated)
+        self.assertEqual(source.validation.state, VALIDATION_ACCEPTED)
+        self.assertEqual(source.validation.by, self.user)
 
     def test_reject_source(self):
         '''It should allow to reject a source if admin'''
         self.login(AdminFactory())
         source = HarvestSourceFactory()
 
-        data = {'validate': False, 'comment': 'Not valid'}
+        data = {'state': VALIDATION_REFUSED, 'comment': 'Not valid'}
         url = url_for('api.validate_harvest_source', ident=str(source.id))
         response = self.post(url, data)
         self.assert200(response)
 
         source.reload()
-        self.assertFalse(source.validated)
-        self.assertEqual(source.validation_comment, 'Not valid')
+        self.assertEqual(source.validation.state, VALIDATION_REFUSED)
+        self.assertEqual(source.validation.comment, 'Not valid')
+        self.assertEqual(source.validation.by, self.user)
 
     def test_validate_source_is_admin_only(self):
         '''It should allow to validate a source if admin'''

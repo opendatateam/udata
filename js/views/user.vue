@@ -12,6 +12,11 @@
     <div class="row">
         <reuses class="col-xs-12" reuses="{{reuses}}"></reuses>
     </div>
+
+
+    <div class="row">
+        <harvesters id="harvesters-widget" class="col-xs-12" owner="{{user}}"></harvesters>
+    </div>
 </template>
 
 <script>
@@ -52,7 +57,8 @@ export default {
         profile: require('components/user/profile.vue'),
         chart: require('components/charts/widget.vue'),
         datasets: require('components/dataset/list.vue'),
-        reuses: require('components/reuse/list.vue')
+        reuses: require('components/reuse/list.vue'),
+        harvesters: require('components/harvest/sources.vue')
     },
     watch: {
         user_id: function(id) {

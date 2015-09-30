@@ -35,7 +35,8 @@ export default {
         'issue': require('components/notifications/issue.vue'),
         'discussion': require('components/notifications/discussion.vue'),
         'membership_request': require('components/notifications/membership_request.vue'),
-        'transfer_request': require('components/notifications/transfer.vue')
+        'transfer_request': require('components/notifications/transfer.vue'),
+        'validate_harvester': require('components/notifications/validate-harvester.vue'),
     },
     created: function() {
         // Trigger an initial fetch (don't wait for poll interval)

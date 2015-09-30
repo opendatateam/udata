@@ -62,3 +62,7 @@ class FiltersTest(TestCase):
             self.assertEqual(filters.hash(value),
                              {'type': type, 'value': value})
 
+    def test_unknown_hash(self):
+        self.assertEqual(filters.hash('xxxx'), None)
+        self.assertEqual(filters.hash(None), None)
+

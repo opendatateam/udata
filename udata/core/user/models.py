@@ -108,7 +108,7 @@ class User(db.Document, WithMetrics, UserMixin):
 
     @property
     def sysadmin(self):
-        return bool(getattr(g, 'sysadmin'))
+        return self.has_role('admin')
 
     @property
     def display_url(self):
