@@ -49,7 +49,6 @@ import $ from 'jquery';
 import Vue from 'vue';
 import me from 'models/me';
 import site from 'models/site';
-
 import 'jquery-slimscroll';
 
 export default {
@@ -120,6 +119,9 @@ export default {
             this.loadView('dataset', function(view) {
                 view.dataset_id = dataset_id;
             });
+        },
+        '/community-resource/new/': function() {
+            this.loadView('community-resource-wizard');
         },
         '/reuse/new/': function() {
             this.loadView('reuse-wizard');
@@ -262,10 +264,9 @@ export default {
          */
         loadView: function(name, callback) {
 
-            var self = this,
-                cb = () => {
-                    callback.apply(this, [this.$.content]);
-                };
+            let cb = () => {
+                callback.apply(this, [this.$.content]);
+            };
 
             if (this.$options.components.hasOwnProperty(name)) {
                 this.view = name;
@@ -273,11 +274,11 @@ export default {
                     this.$nextTick(cb);
                 }
             } else {
-                require(['./views/' + name + '.vue'], function(options) {
-                    self.$options.components[name] = Vue.extend(options);
-                    self.view = name;
+                require(['./views/' + name + '.vue'], (options) => {
+                    this.$options.components[name] = Vue.extend(options);
+                    this.view = name;
                     if (callback) {
-                        self.$nextTick(cb);
+                        this.$nextTick(cb);
                     }
                 });
             }

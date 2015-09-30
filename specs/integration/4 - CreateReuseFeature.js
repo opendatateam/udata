@@ -16,8 +16,7 @@ scenario: [
     CreateReuseWidget.setType(),
     NavigationWidget.next(),
     // Choose the related dataset.
-    CreateReuseWidget.setChooser("geozones"),
-    CreateReuseWidget.datasetChooser(),
+    CreateReuseWidget.chooseDataset("geozones"),
     NavigationWidget.next(),
     CreateReuseWidget.openFileUploader(),
     {

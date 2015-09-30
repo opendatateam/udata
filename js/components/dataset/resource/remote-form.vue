@@ -1,7 +1,3 @@
-<style lang="less">
-
-</style>
-
 <template>
 <form-horizontal class="resource-form remote-resource-form"
         fields="{{fields}}" model="{{resource}}" v-ref="form">
@@ -9,9 +5,7 @@
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     inherit: true,
     data: function() {
         return {

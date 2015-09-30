@@ -21,10 +21,18 @@ class DatasetEditPermission(Permission):
         super(DatasetEditPermission, self).__init__(*needs)
 
 
-class CommunityResourceEditPermission(Permission):
-    def __init__(self, resource):
+class ResourceEditPermission(Permission):
+    def __init__(self, resource, dataset):
         needs = []
-        if resource.owner:
-            needs.append(UserNeed(resource.owner.id))
+        if hasattr(resource, 'organization') or hasattr(resource, 'owner'):
+            # This is a community resource.
+            if resource.organization:
+                needs.append(OrganizationAdminNeed(resource.organization.id))
+                needs.append(OrganizationEditorNeed(resource.organization.id))
+            elif resource.owner:
+                needs.append(UserNeed(resource.owner.id))
+        else:
+            needs.append(OrganizationAdminNeed(dataset.organization.id))
+            needs.append(OrganizationEditorNeed(dataset.organization.id))
 
-        super(CommunityResourceEditPermission, self).__init__(*needs)
+        super(ResourceEditPermission, self).__init__(*needs)

@@ -55,6 +55,7 @@
 
 <script>
 import API from 'api';
+import Dataset from 'models/dataset';
 
 export default {
     inherit: true,
@@ -96,12 +97,16 @@ export default {
                     readonly: true
                 }],
             upload_multiple: false,
-            progress: 0
+            progress: 0,
         };
     },
     computed: {
         upload_endpoint: function() {
-            return API.datasets.operations.upload_resource.urlify({dataset: this.dataset.id});
+            let endpoint = API.datasets.operations.upload_dataset_resource;
+            if (this.community) {
+                endpoint = API.datasets.operations.upload_community_resource;
+            }
+            return endpoint.urlify({dataset: this.dataset.id});
         }
     },
     components: {
@@ -112,9 +117,9 @@ export default {
             this.progress = Math.round(uploaded * 100 / total);
         },
         'uploader:complete': function(id, response) {
-            // var file = this.$uploader.getFile(id);
-            // this.files.$remove(this.files.indexOf(file));
-            this.dataset.resources.unshift(response);
+            if (!this.community) {
+                this.dataset.resources.unshift(response);
+            }
             this.resource.on_fetched({obj: response});
         }
     },

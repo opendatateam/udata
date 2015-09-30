@@ -63,6 +63,9 @@ discussion_page_fields = api.model('DiscussionPage',
 
 parser = api.parser()
 parser.add_argument(
+    'sort', type=str, default='-created', location='args',
+    help='The sorting attribute')
+parser.add_argument(
     'closed', type=bool, default=False, location='args',
     help='Filter closed discussions')
 parser.add_argument(
@@ -141,7 +144,8 @@ class DiscussionsAPI(API):
             discussions = discussions(subject__in=args['for'])
         if not args['closed']:
             discussions = discussions(closed=None)
-        return discussions.paginate(args['page'], args['page_size'])
+        return (discussions.order_by(args['sort'])
+                           .paginate(args['page'], args['page_size']))
 
     @api.secure
     @api.expect(discussion_fields)

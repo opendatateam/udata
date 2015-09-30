@@ -35,20 +35,23 @@
     {% if resource.owner %}
     {{ resource.owner|avatar(52, 'resource-owner') }}
     {% endif %}
-    {% if resource.owner and can_edit_resource(resource) %}
-    <div class="btn-group btn-group-xs tools">
-        <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
-            href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'resource_id': resource.id}) }}">
-            <span class="glyphicon glyphicon-edit"></span>
-        </a>
-    </div>
-    {% elif not resource.owner and can_edit %}
-    <div class="btn-group btn-group-xs tools">
-        <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
-            href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'resource_id': resource.id}) }}">
-            <span class="glyphicon glyphicon-edit"></span>
-        </a>
-    </div>
+
+    {% if can_edit_resource(resource, dataset) %}
+        {% if resource.from_community %}
+            {% if resource.owner %}
+                {% set edit_url = url_for('admin.index', path='user/{id}/'.format(id=resource.owner.id), **{'community_id': resource.id}) %}
+            {% else %}
+                {% set edit_url = url_for('admin.index', path='organization/{id}/'.format(id=resource.organization.id), **{'community_id': resource.id}) %}
+            {% endif %}
+        {% else %}
+            {% set edit_url = url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'resource_id': resource.id}) %}
+        {% endif %}
+        <div class="btn-group btn-group-xs tools">
+            <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
+                href="{{ edit_url }}">
+                <span class="glyphicon glyphicon-edit"></span>
+            </a>
+        </div>
     {% endif %}
 
 </div>

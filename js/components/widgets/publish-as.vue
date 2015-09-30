@@ -1,11 +1,7 @@
-<style lang="less">
-
-</style>
-
 <template>
 <div class="row">
     <p class="col-xs-12 text-center lead">
-        {{ _('Chosse under which identity you want to publish') }}
+        {{ _('Choose under which identity you want to publish') }}
     </p>
 </div>
 <div class="row">
@@ -36,9 +32,7 @@
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     data: function() {
         return {
             selected: null

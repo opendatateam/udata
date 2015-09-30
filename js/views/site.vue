@@ -25,19 +25,22 @@
     <div class="row">
         <discussions-widget id="discussions-widget" class="col-xs-12" discussions="{{discussions}}"></discussions-widget>
     </div>
+    <div class="row">
+        <community-widget id="community-widget" class="col-xs-12" communities="{{communities}}"></community-widget>
+    </div>
 </template>
 
 <script>
-'use strict';
+import moment from 'moment';
 
-var moment = require('moment'),
-    Reuses = require('models/reuses'),
-    Datasets = require('models/datasets'),
-    Metrics = require('models/metrics'),
-    Issues = require('models/issues'),
-    Discussions = require('models/discussions'),
-    Users = require('models/users'),
-    Organizations = require('models/organizations');
+import Reuses from 'models/reuses';
+import Datasets from 'models/datasets';
+import Metrics from 'models/metrics';
+import Issues from 'models/issues';
+import Discussions from 'models/discussions';
+import Users from 'models/users';
+import Organizations from 'models/organizations';
+import CommunityResources from 'models/communityresources';
 
 module.exports = {
     name: 'SiteView',
@@ -58,6 +61,7 @@ module.exports = {
             users: new Users({query: {sort: '-created', page_size: 10}}),
             issues: new Issues({query: {sort: '-created', page_size: 10}}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
+            communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
             y: [{
                 id: 'datasets',
                 label: this._('Datasets')
@@ -119,6 +123,7 @@ module.exports = {
         'users-widget': require('components/user/list.vue'),
         'issues-widget': require('components/issues/list.vue'),
         'discussions-widget': require('components/discussions/list.vue'),
+        'community-widget': require('components/communityresource/list.vue'),
         'posts-widget': require('components/post/list.vue'),
         'topics-widget': require('components/topic/list.vue')
     },
@@ -137,6 +142,7 @@ module.exports = {
         this.issues.fetch();
         this.discussions.fetch();
         this.organizations.fetch();
+        this.communities.fetch();
     },
     watch: {
         '$root.site.id': function() {

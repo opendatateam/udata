@@ -21,7 +21,7 @@ from .croquemort import check_url_from_cache, check_url_from_group
 
 
 __all__ = (
-    'License', 'Resource', 'Dataset', 'Checksum',
+    'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
     'DatasetIssue', 'DatasetDiscussion', 'FollowDataset',
     'UPDATE_FREQUENCIES', 'RESOURCE_TYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE'
@@ -108,8 +108,7 @@ class Checksum(db.EmbeddedDocument):
             return super(Checksum, self).to_mongo()
 
 
-class Resource(WithMetrics, db.EmbeddedDocument):
-    id = db.AutoUUIDField()
+class ResourceMixin(object):
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
     type = db.StringField(
@@ -120,18 +119,14 @@ class Resource(WithMetrics, db.EmbeddedDocument):
     format = db.StringField()
     mime = db.StringField()
     size = db.IntField()
-    owner = db.ReferenceField('User')
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)
     published = db.DateTimeField(default=datetime.now, required=True)
     deleted = db.DateTimeField()
 
-    on_added = signal('Resource.on_added')
-    on_deleted = signal('Resource.on_deleted')
-
     def clean(self):
-        super(Resource, self).clean()
+        super(ResourceMixin, self).clean()
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
 
@@ -160,6 +155,13 @@ class Resource(WithMetrics, db.EmbeddedDocument):
         return self.check_availability(group=None)
 
 
+class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
+    id = db.AutoUUIDField()
+
+    on_added = signal('Resource.on_added')
+    on_deleted = signal('Resource.on_deleted')
+
+
 class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     title = db.StringField(max_length=255, required=True)
     slug = db.SlugField(
@@ -169,7 +171,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     tags = db.ListField(db.StringField())
     resources = db.ListField(db.EmbeddedDocumentField(Resource))
-    community_resources = db.ListField(db.EmbeddedDocumentField(Resource))
 
     private = db.BooleanField()
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
@@ -397,22 +398,23 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         self.reload()
         post_save.send(self.__class__, document=self)
 
-    def add_community_resource(self, resource):
-        '''Perform an atomic prepend for a new resource'''
-        self.update(__raw__={
-            '$push': {
-                'community_resources': {
-                    '$each': [resource.to_mongo()],
-                    '$position': 0
-                }
-            }
-        })
-        self.reload()
-        post_save.send(self.__class__, document=self)
-
+    @property
+    def community_resources(self):
+        return self.id and CommunityResource.objects.filter(dataset=self) or []
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
+
+
+class CommunityResource(ResourceMixin, WithMetrics, db.Document):
+    dataset = db.ReferenceField(Dataset)
+    owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
+    organization = db.ReferenceField(
+        'Organization', reverse_delete_rule=db.NULLIFY)
+
+    @property
+    def from_community(self):
+        return True
 
 
 class DatasetIssue(Issue):

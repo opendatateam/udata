@@ -76,6 +76,31 @@ temporal_coverage_fields = api.model('TemporalCoverage', {
                               required=True),
 })
 
+dataset_ref_fields = api.inherit('DatasetReference', base_reference, {
+    'title': fields.String(description='The dataset title', readonly=True),
+    'uri': fields.UrlFor(
+        'api.dataset', lambda d: {'dataset': d},
+        description='The API URI for this dataset', readonly=True),
+    'page': fields.UrlFor(
+        'datasets.show', lambda d: {'dataset': d},
+        description='The web page URL for this dataset', readonly=True),
+})
+
+community_resource_fields = api.inherit('CommunityResource', resource_fields, {
+    'dataset': fields.Nested(
+        dataset_ref_fields, allow_null=True,
+        description='Reference to the associated dataset'),
+    'organization': fields.Nested(
+        org_ref_fields, allow_null=True,
+        description='The producer organization'),
+    'owner': fields.Nested(
+        user_ref_fields, allow_null=True,
+        description='The user information')
+})
+
+community_resource_page_fields = api.model(
+    'CommunityResourcePage', fields.pager(community_resource_fields))
+
 dataset_fields = api.model('Dataset', {
     'id': fields.String(description='The dataset identifier', readonly=True),
     'title': fields.String(description='The dataset title', required=True),
@@ -99,7 +124,7 @@ dataset_fields = api.model('Dataset', {
         fields.Nested(resource_fields, description='The dataset resources')),
     'community_resources': fields.List(
         fields.Nested(
-            resource_fields,
+            community_resource_fields,
             description='The dataset community submitted resources')),
     'frequency': fields.String(
         description='The update frequency', required=True,
@@ -150,14 +175,4 @@ dataset_suggestion_fields = api.model('DatasetSuggestion', {
         description='The web page URL for this dataset', readonly=True),
     'score': fields.Float(
         description='The internal match score', required=True),
-})
-
-dataset_ref_fields = api.inherit('DatasetReference', base_reference, {
-    'title': fields.String(description='The dataset title', readonly=True),
-    'uri': fields.UrlFor(
-        'api.dataset', lambda d: {'dataset': d},
-        description='The API URI for this dataset', readonly=True),
-    'page': fields.UrlFor(
-        'datasets.show', lambda d: {'dataset': d},
-        description='The web page URL for this dataset', readonly=True),
 })

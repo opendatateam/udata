@@ -10,6 +10,10 @@ successTitle: '.page-header h1',
 chooser: ".selectize-input input",
 datasetChooserLink: ".selectize-dropdown-content .selectize-option:first-child",
 
+chooseDataset: function chooseDataset(name) {
+    return  this.setChooser(name)()
+                .then(this.datasetChooser());
+},
 fill: function fill(name, url, description) {
     return  this.setTitleField(name)()
                 .then(this.setUrlField(url))

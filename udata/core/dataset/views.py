@@ -10,7 +10,7 @@ from udata.models import Dataset, DatasetDiscussion, Follow, Reuse
 from udata.core.site.views import current_site
 from udata.sitemap import sitemap
 
-from .permissions import CommunityResourceEditPermission, DatasetEditPermission
+from .permissions import ResourceEditPermission, DatasetEditPermission
 
 blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
 
@@ -84,7 +84,7 @@ class DatasetDetailView(DatasetView, DetailView):
                 abort(410)
         context['reuses'] = Reuse.objects(datasets=self.dataset)
         context['can_edit'] = DatasetEditPermission(self.dataset)
-        context['can_edit_resource'] = CommunityResourceEditPermission
+        context['can_edit_resource'] = ResourceEditPermission
         context['discussions'] = DatasetDiscussion.objects(
             subject=self.dataset)
         return context

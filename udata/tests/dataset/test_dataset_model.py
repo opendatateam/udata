@@ -9,7 +9,8 @@ from udata.models import Dataset
 from .. import TestCase, DBTestMixin
 from ..factories import (
     ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory,
-    DatasetDiscussionFactory, MessageDiscussionFactory
+    DatasetDiscussionFactory, MessageDiscussionFactory,
+    CommunityResourceFactory
 )
 
 
@@ -78,20 +79,22 @@ class DatasetModelTest(TestCase, DBTestMixin):
         dataset = DatasetFactory(owner=user)
         self.assertEqualDates(dataset.last_update, dataset.last_modified)
 
-    def test_add_community_resource(self):
+    def test_community_resource(self):
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
-        resource = ResourceFactory()
-        expected_signals = post_save, Dataset.after_save, Dataset.on_update
-
-        with self.assert_emit(*expected_signals):
-            dataset.add_community_resource(ResourceFactory())
+        community_resource1 = CommunityResourceFactory()
+        community_resource1.dataset = dataset
+        community_resource1.save()
         self.assertEqual(len(dataset.community_resources), 1)
 
-        with self.assert_emit(*expected_signals):
-            dataset.add_community_resource(resource)
+        community_resource2 = CommunityResourceFactory()
+        community_resource2.dataset = dataset
+        community_resource2.save()
         self.assertEqual(len(dataset.community_resources), 2)
-        self.assertEqual(dataset.community_resources[0].id, resource.id)
+        self.assertEqual(dataset.community_resources[0].id,
+                         community_resource1.id)
+        self.assertEqual(dataset.community_resources[1].id,
+                         community_resource2.id)
 
     def test_next_update_empty(self):
         dataset = DatasetFactory()

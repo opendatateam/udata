@@ -78,11 +78,7 @@
 </template>
 
 <script>
-'use strict';
-
-var $ = require('jquery');
-
-module.exports = {
+export default {
     components: {
         'modal': require('components/modal.vue'),
         'resource-form': require('components/dataset/resource/form.vue')
@@ -97,8 +93,6 @@ module.exports = {
     methods: {
         save: function() {
             if (this.$.form.validate()) {
-                // $.extend(this.resource, this.$.form.serialize());
-                // this.dataset.$data = component.$.form.serialize();
                 this.dataset.save_resource(this.$.form.serialize());
                 this.$.modal.close();
                 return true;

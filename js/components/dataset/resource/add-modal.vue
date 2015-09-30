@@ -1,5 +1,3 @@
-<style lang="less"></style>
-
 <template>
 <modal class="modal-primary add-resource-modal"
     title="{{ _('Add a resource') }}">
@@ -23,12 +21,12 @@
 </template>
 
 <script>
-'use strict';
+import Dataset from 'models/dataset';
 
-module.exports = {
+export default {
     data: function() {
         return {
-            dataset: {}
+            dataset: new Dataset()
         };
     },
     components: {

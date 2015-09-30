@@ -7,7 +7,7 @@ from udata.i18n import lazy_gettext as _
 from udata.core.storages import resources
 
 from .models import (
-    Dataset, Resource, License, Checksum,
+    Dataset, Resource, License, Checksum, CommunityResource,
     UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_TYPES, CHECKSUM_TYPES,
 )
 
@@ -103,3 +103,11 @@ class ResourceForm(ModelForm):
     published = fields.DateTimeField(
         _('Publication date'),
         description=_('The publication date of the resource'))
+
+
+class CommunityResourceForm(ResourceForm):
+    model_class = CommunityResource
+
+    dataset = fields.DatasetField(_('Related dataset'))
+    owner = fields.CurrentUserField()
+    organization = fields.PublishAsField(_('Publish as'))
