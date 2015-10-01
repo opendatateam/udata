@@ -263,7 +263,7 @@
     "Other": "Otro",
     "Parameters": "Parámetros",
     "Pending": "Pendiente",
-    "Pending harvester validation for __name__": "Pending harvester validation for __name__",
+    "Pending harvester validation for {name}": "Pending harvester validation for {name}",
     "Pending membership request": "Solicitud de membresía pendiente de aprobación",
     "Pending transfer request": "Solicitud de transferencia pendiente de aprobación",
     "Period": "Período",

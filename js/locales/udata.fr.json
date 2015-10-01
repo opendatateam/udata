@@ -263,7 +263,7 @@
     "Other": "Autre",
     "Parameters": "Paramètres",
     "Pending": "En attente",
-    "Pending harvester validation for __name__": "Validation de moissonneur en attente pour __name__",
+    "Pending harvester validation for {name}": "Validation de moissonneur en attente pour {name}",
     "Pending membership request": "Demande d'adhésion en attente",
     "Pending transfer request": "Demande de transfert en attente",
     "Period": "Période",
