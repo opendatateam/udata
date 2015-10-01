@@ -76,7 +76,7 @@ class UDataApi(Api):
                 self.abort(401)
 
             if permission is not None:
-                with permission.require(403):
+                with permission.require():
                     return func(*args, **kwargs)
             else:
                 return func(*args, **kwargs)
@@ -185,8 +185,7 @@ class UDataApi(Api):
         return resolved
 
 
-api = UDataApi(
-    apiv1, ui=False,
+api = UDataApi(apiv1,
     decorators=[csrf.exempt, cors.crossdomain(origin='*', credentials=True)],
     version='1.0', title='uData API',
     description='uData API', default='site',
@@ -239,25 +238,29 @@ def collect_stats(response):
     return response
 
 
+default_error = api.model('Error', {
+    'message': fields.String
+})
+
+
 @api.errorhandler(PermissionDenied)
+@api.marshal_with(default_error, code=403)
 def handle_permission_denied(error):
+    '''Error occuring when the user does not have the required permissions'''
     message = 'You do not have the permission to modify that object.'
-    return {
-        'message': message,
-        'status': 403
-    }, 403
+    return {'message': message}, 403
 
 
 @api.errorhandler(ValueError)
+@api.marshal_with(default_error, code=400)
 def handle_value_error(error):
-    return {
-        'message': str(error),
-        'status': 400
-    }, 400
+    '''A generic value error'''
+    return {'message': str(error)}, 400
 
 
 @apidoc.route('/api/')
 @apidoc.route('/api/1/')
+@api.documentation
 def default_api():
     return redirect(url_for('apidoc.swaggerui'))
 
