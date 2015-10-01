@@ -83,8 +83,7 @@ export default {
 
                     // Handle root level $ref
                     if (currentSchema.hasOwnProperty('$ref')) {
-                        let def = currentSchema.$ref.replace('#/definitions/', '');
-                        currentSchema = API.definitions[def];
+                        currentSchema = API.resolve(currentSchema.$ref);
                     }
 
                     if (!currentSchema.properties || !currentSchema.properties.hasOwnProperty(prop)) {
@@ -104,8 +103,7 @@ export default {
 
                     // Handle property level $ref
                     if (currentSchema.properties[prop].hasOwnProperty('$ref')) {
-                        let def = currentSchema.properties[prop].$ref.replace('#/definitions/', '');
-                        currentSchema = API.definitions[def];
+                        currentSchema = API.resolve(currentSchema.properties[prop].$ref);
                     }
                 }
 
