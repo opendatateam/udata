@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <small-box class="col-lg-3 col-xs-6" v-repeat="boxes"></small-box>
+        <sbox class="col-lg-3 col-xs-6" v-repeat="boxes"></sbox>
     </div>
     <div class="row">
         <chart title="Traffic" metrics="{{metrics}}" class="col-xs-12"
@@ -8,25 +8,25 @@
     </div>
 
     <div class="row">
-        <datasets-widget id="datasets-widget" class="col-xs-12" datasets="{{datasets}}"></datasets-widget>
+        <datasets id="datasets" class="col-xs-12" datasets="{{datasets}}"></datasets>
     </div>
     <div class="row">
-        <reuses-widget id="reuses-widget" class="col-xs-12" reuses="{{reuses}}"></reuses-widget>
+        <reuses id="reuses" class="col-xs-12" reuses="{{reuses}}"></reuses>
     </div>
     <div class="row">
-        <organizations-widget id="organizations-widget" class="col-xs-12" organizations="{{organizations}}"></organizations-widget>
+        <organizations id="organizations" class="col-xs-12" organizations="{{organizations}}"></organizations>
     </div>
     <div class="row">
-        <users-widget id="users-widget" class="col-xs-12" users="{{users}}"></users-widget>
+        <users id="users" class="col-xs-12" users="{{users}}"></users>
     </div>
     <div class="row">
-        <issues-widget id="issues-widget" class="col-xs-12" issues="{{issues}}"></issues-widget>
+        <issues class="col-xs-12" issues="{{issues}}"></issues>
     </div>
     <div class="row">
-        <discussions-widget id="discussions-widget" class="col-xs-12" discussions="{{discussions}}"></discussions-widget>
+        <discussions class="col-xs-12" discussions="{{discussions}}"></discussions>
     </div>
     <div class="row">
-        <community-widget id="community-widget" class="col-xs-12" communities="{{communities}}"></community-widget>
+        <community class="col-xs-12" communities="{{communities}}"></community>
     </div>
 </template>
 
@@ -34,7 +34,7 @@
 import moment from 'moment';
 
 import Reuses from 'models/reuses';
-import Datasets from 'models/datasets';
+import DatasetsFull from 'models/datasets_full';
 import Metrics from 'models/metrics';
 import Issues from 'models/issues';
 import Discussions from 'models/discussions';
@@ -56,7 +56,7 @@ module.exports = {
                 }
             }),
             reuses: new Reuses({query: {sort: '-created', page_size: 10}}),
-            datasets: new Datasets({query: {sort: '-created', page_size: 10}}),
+            datasets: new DatasetsFull({query: {sort: '-created', page_size: 10}}),
             organizations: new Organizations({query: {sort: '-created', page_size: 10}}),
             users: new Users({query: {sort: '-created', page_size: 10}}),
             issues: new Issues({query: {sort: '-created', page_size: 10}}),
@@ -92,40 +92,40 @@ module.exports = {
                 label: this._('Datasets'),
                 icon: 'cubes',
                 color: 'aqua',
-                target: '#datasets-widget'
+                target: '#datasets'
             }, {
                 value: this.$root.site.metrics.reuses || 0,
                 label: this._('Reuses'),
                 icon: 'retweet',
                 color: 'green',
-                target: '#reuses-widget'
+                target: '#reuses'
             }, {
                 value: this.$root.site.metrics.users || 0,
                 label: this._('Users'),
                 icon: 'users',
                 color: 'yellow',
-                target: '#users-widget'
+                target: '#users'
             }, {
                 value: this.$root.site.metrics.organizations || 0,
                 label: this._('Organizations'),
                 icon: 'building',
                 color: 'purple',
-                target: '#organizations-widget'
+                target: '#organizations'
             }];
         }
     },
     components: {
-        'small-box': require('components/containers/small-box.vue'),
-        'chart': require('components/charts/widget.vue'),
-        'datasets-widget': require('components/dataset/list.vue'),
-        'reuses-widget': require('components/reuse/list.vue'),
-        'organizations-widget': require('components/organization/list.vue'),
-        'users-widget': require('components/user/list.vue'),
-        'issues-widget': require('components/issues/list.vue'),
-        'discussions-widget': require('components/discussions/list.vue'),
-        'community-widget': require('components/communityresource/list.vue'),
-        'posts-widget': require('components/post/list.vue'),
-        'topics-widget': require('components/topic/list.vue')
+        sbox: require('components/containers/small-box.vue'),
+        chart: require('components/charts/widget.vue'),
+        datasets: require('components/dataset/list.vue'),
+        reuses: require('components/reuse/list.vue'),
+        organizations: require('components/organization/list.vue'),
+        users: require('components/user/list.vue'),
+        issues: require('components/issues/list.vue'),
+        discussions: require('components/discussions/list.vue'),
+        community: require('components/communityresource/list.vue'),
+        posts: require('components/post/list.vue'),
+        topics: require('components/topic/list.vue')
     },
     methods: {
         fetch_metrics: function() {

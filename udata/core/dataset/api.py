@@ -24,7 +24,9 @@ from .api_fields import (
     community_resource_fields,
     community_resource_page_fields,
     dataset_fields,
+    dataset_full_fields,
     dataset_page_fields,
+    dataset_full_page_fields,
     dataset_suggestion_fields,
     frequency_fields,
     license_fields,
@@ -88,6 +90,15 @@ class DatasetListAPI(API):
         return dataset, 201
 
 
+@ns.route('/full/', endpoint='datasets_full')
+class DatasetFullListAPI(API):
+    '''Datasets collection endpoint with all infos (quality).'''
+    @api.doc('list_datasets_full', parser=search_parser)
+    @api.marshal_with(dataset_full_page_fields)
+    def get(self):
+        return search.query(DatasetSearch, **multi_to_dict(request.args))
+
+
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)
 @api.response(404, 'Dataset not found')
 @api.response(410, 'Dataset has been deleted')
@@ -124,6 +135,19 @@ class DatasetAPI(API):
         dataset.deleted = datetime.now()
         dataset.save()
         return '', 204
+
+
+@ns.route('/<dataset:dataset>/full/', endpoint='dataset_full', doc=common_doc)
+@api.response(404, 'Dataset not found')
+@api.response(410, 'Dataset has been deleted')
+class DatasetFullAPI(API):
+    @api.doc('get_dataset_full')
+    @api.marshal_with(dataset_full_fields)
+    def get(self, dataset):
+        '''Get a dataset given its identifier'''
+        if dataset.deleted and not DatasetEditPermission(dataset).can():
+            api.abort(410, 'Dataset has been deleted')
+        return dataset
 
 
 @ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')
