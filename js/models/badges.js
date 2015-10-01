@@ -27,8 +27,7 @@ export class Badges {
         if ('allOf' in definition) {
             for (let nested of definition.allOf) {
                 if ('$ref' in nested) {
-                    let $ref = nested.$ref.replace('#/definitions/', ''),
-                        resolved = API.definitions[$ref];
+                    let resolved = API.resolve(nested.$ref);
                     this._checkDefinition(resolved, model);
                 } else {
                     this._checkDefinition(nested, model)

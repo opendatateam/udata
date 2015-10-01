@@ -18,5 +18,15 @@ define([
         }
     });
 
+    /**
+     * Resolve a definition from a $ref
+     * @param  {String} $ref The reference string
+     * @return {Object}      The resolved schema
+     */
+    API.resolve = function($ref) {
+        let def = $ref.replace(config.api, '').replace('#/definitions/', '');
+        return this.definitions[def];
+    };
+
     return API;
 });
