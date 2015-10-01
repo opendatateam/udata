@@ -88,8 +88,8 @@ export default {
                 return [];
             }
             return [{
-                value: this.reuse.metrics.reuses || 0,
-                label: this.reuse.metrics.reuses ? this._('Reuses') : this._('Reuse'),
+                value: this.reuse.metrics.datasets || 0,
+                label: this.reuse.metrics.datasets ? this._('Datasets') : this._('Dataset'),
                 icon: 'retweet',
                 color: 'green'
             }, {
