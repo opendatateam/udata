@@ -134,7 +134,6 @@ dataset_fields = api.model('Dataset', {
                      'once that date is reached.')),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
     'metrics': fields.Raw(description='The dataset metrics'),
-    'quality': fields.Raw(description='The dataset quality', readonly=True),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,
         description='The producer organization'),
@@ -162,6 +161,13 @@ dataset_fields = api.model('Dataset', {
 })
 
 dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields))
+
+dataset_full_fields = api.inherit('DatasetFull', dataset_fields, {
+    'quality': fields.Raw(description='The dataset quality', readonly=True),
+})
+
+dataset_full_page_fields = api.model(
+    'DatasetFullPage', fields.pager(dataset_full_fields))
 
 dataset_suggestion_fields = api.model('DatasetSuggestion', {
     'id': fields.String(description='The dataset identifier', required=True),

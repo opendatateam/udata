@@ -4,35 +4,35 @@
     </div>
     <div class="row">
         <div class="col-xs-12 col-md-6">
-            <dataset-details dataset="{{dataset}}"></dataset-details>
-            <map-widget title="{{ _('Spatial coverage') }}"
-                geojson="{{geojson}}"></map-widget>
+            <dataset dataset="{{dataset}}"></dataset>
+            <wmap title="{{ _('Spatial coverage') }}"
+                geojson="{{geojson}}"></wmap>
         </div>
-        <dataset-quality quality="{{ dataset.quality }}" class="col-xs-12 col-md-6"></dataset-quality>
+        <quality quality="{{ dataset.quality }}" class="col-xs-12 col-md-6"></quality>
     </div>
     <div class="row">
-        <resources-list dataset="{{dataset}}" class="col-xs-12"></resources-list>
+        <resources dataset="{{dataset}}" class="col-xs-12"></resources>
     </div>
     <div class="row">
-        <chart id="trafic-widget" class="col-xs-12" title="{{ _('Audience') }}"
+        <chart id="trafic" class="col-xs-12" title="{{ _('Audience') }}"
             metrics="{{metrics}}" x="date" y="{{y}}"></chart>
     </div>
 
     <div class="row">
-        <reuses-widget id="reuses-widget" class="col-xs-12" reuses="{{reuses}}"></reuses-widget>
+        <reuses id="reuses" class="col-xs-12" reuses="{{reuses}}"></reuses>
     </div>
 
     <div class="row">
-        <issues-widget id="issues-widget" class="col-xs-12" issues="{{issues}}"></issues-widget>
+        <issues class="col-xs-12" issues="{{issues}}"></issues>
     </div>
 
     <div class="row">
-        <discussions id="discussions-widget" class="col-xs-12" discussions="{{discussions}}"></discussions>
+        <discussions class="col-xs-12" discussions="{{discussions}}"></discussions>
     </div>
 
     <div class="row">
-        <followers-widget id="followers-widget" class="col-xs-12 col-md-6" followers="{{followers}}"></followers-widget>
-        <community-widget class="col-xs-12 col-md-6" communities="{{communities}}" without-dataset="{{true}}"></community-widget>
+        <followers id="followers" class="col-xs-12 col-md-6" followers="{{followers}}"></followers>
+        <community class="col-xs-12 col-md-6" communities="{{communities}}" without-dataset="{{true}}"></community>
     </div>
 
 </template>
@@ -41,7 +41,7 @@
 import moment from 'moment';
 import API from 'api';
 import Vue from 'vue';
-import Dataset from 'models/dataset';
+import DatasetFull from 'models/dataset_full';
 import Discussions from 'models/discussions';
 import Followers from 'models/followers';
 import Issues from 'models/issues';
@@ -73,7 +73,7 @@ export default {
 
         return {
             dataset_id: null,
-            dataset: new Dataset(),
+            dataset: new DatasetFull(),
             metrics: new Metrics({query: {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')
@@ -118,20 +118,20 @@ export default {
                 label: this.dataset.metrics.reuses ? this._('Reuses') : this._('Reuse'),
                 icon: 'retweet',
                 color: 'green',
-                target: '#reuses-widget'
+                target: '#reuses'
             }, {
                 value: this.dataset.metrics.followers || 0,
                 label: this.dataset.metrics.followers ? this._('Followers') : this._('Follower'),
                 icon: 'users',
                 color: 'yellow',
-                target: '#followers-widget'
+                target: '#followers'
 
             }, {
                 value: this.dataset.metrics.views || 0,
                 label: this._('Views'),
                 icon: 'eye',
                 color: 'purple',
-                target: '#trafic-widget'
+                target: '#trafic'
             }];
         }
         // coverage: function() {
@@ -142,17 +142,17 @@ export default {
         // }
     },
     components: {
-        'small-box': require('components/containers/small-box.vue'),
-        'dataset-details': require('components/dataset/details.vue'),
-        'dataset-quality': require('components/dataset/quality.vue'),
-        'chart': require('components/charts/widget.vue'),
-        'resources-list': require('components/dataset/resources-list.vue'),
-        'reuses-widget': require('components/reuse/list.vue'),
-        'followers-widget': require('components/follow/list.vue'),
-        'map-widget': require('components/widgets/map.vue'),
-        'issues-widget': require('components/issues/list.vue'),
-        'discussions': require('components/discussions/list.vue'),
-        'community-widget': require('components/communityresource/list.vue')
+        sbox: require('components/containers/small-box.vue'),
+        dataset: require('components/dataset/details.vue'),
+        quality: require('components/dataset/quality.vue'),
+        chart: require('components/charts/widget.vue'),
+        resources: require('components/dataset/resources-list.vue'),
+        reuses: require('components/reuse/list.vue'),
+        followers: require('components/follow/list.vue'),
+        wmap: require('components/widgets/map.vue'),
+        issues: require('components/issues/list.vue'),
+        discussions: require('components/discussions/list.vue'),
+        community: require('components/communityresource/list.vue')
     },
     methods: {
         confirm_delete: function() {

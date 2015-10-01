@@ -26,16 +26,28 @@ class DatasetAPITest(APITestCase):
         '''It should fetch a dataset list from the API'''
         with self.autoindex():
             datasets = [DatasetFactory(resources=[ResourceFactory()])
-                        for i in range(3)]
+                        for i in range(2)]
 
         response = self.get(url_for('api.datasets'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), len(datasets))
+        self.assertFalse('quality' in response.json['data'][0])
+
+    def test_dataset_full_api_list(self):
+        '''It should fetch a dataset list from the API'''
+        with self.autoindex():
+            datasets = [DatasetFactory(resources=[ResourceFactory()])
+                        for i in range(2)]
+
+        response = self.get(url_for('api.datasets_full'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), len(datasets))
+        self.assertTrue('quality' in response.json['data'][0])
 
     def test_dataset_api_list_with_extra_filter(self):
         '''It should fetch a dataset list from the API filtering on extras'''
         with self.autoindex():
-            for i in range(3):
+            for i in range(2):
                 DatasetFactory(resources=[ResourceFactory()],
                                extras={'key': i})
 
@@ -47,13 +59,14 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_get(self):
         '''It should fetch a dataset from the API'''
         with self.autoindex():
-            resources = [ResourceFactory() for _ in range(3)]
+            resources = [ResourceFactory() for _ in range(2)]
             dataset = DatasetFactory(resources=resources)
 
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert200(response)
         data = json.loads(response.data)
         self.assertEqual(len(data['resources']), len(resources))
+        self.assertFalse('quality' in data)
 
     def test_dataset_api_get_deleted(self):
         '''It should not fetch a deleted dataset from the API and raise 410'''
@@ -141,16 +154,16 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.extras['float'], 42.0)
         self.assertEqual(dataset.extras['string'], 'value')
 
-    def test_dataset_api_retrieve_quality(self):
-        '''It should retrieve a dataset and its quality from the API.'''
+    def test_dataset_api_retrieve_full(self):
+        '''It should retrieve a full dataset (quality) from the API.'''
         user = self.login()
         dataset = DatasetFactory(owner=user, description='')
-        response = self.get(url_for('api.dataset', dataset=dataset))
+        response = self.get(url_for('api.dataset_full', dataset=dataset))
         self.assert200(response)
         self.assertEqual(response.json['quality'], {'score': 0})
         dataset.description = 'b' * 42
         dataset.save()
-        response = self.get(url_for('api.dataset', dataset=dataset))
+        response = self.get(url_for('api.dataset_full', dataset=dataset))
         self.assertEqual(response.json['quality'], {
             'score': 0,
             'description_length': 42

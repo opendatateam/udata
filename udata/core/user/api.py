@@ -6,13 +6,11 @@ from flask.ext.security import current_user
 
 from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, API
-from udata.models import User, FollowUser, Reuse, Dataset, Issue, Discussion
+from udata.models import User, FollowUser, Reuse, Dataset
 
-from udata.core.dataset.api_fields import dataset_fields
+from udata.core.dataset.api_fields import dataset_full_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.reuse.api_fields import reuse_fields
-
-from udata.features.transfer.models import Transfer
 
 from .api_fields import (
     apikey_fields,
@@ -88,7 +86,7 @@ class MyReusesAPI(API):
 class MyDatasetsAPI(API):
     @api.secure
     @api.doc('my_datasets')
-    @api.marshal_list_with(dataset_fields)
+    @api.marshal_list_with(dataset_full_fields)
     def get(self):
         '''List all my datasets (including private ones)'''
         return list(Dataset.objects.owned_by(current_user.id))
