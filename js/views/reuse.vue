@@ -13,11 +13,8 @@
     </div>
 
     <div class="row">
-        <issues id="issues-widget" class="col-xs-12" issues="{{issues}}"></issues>
-    </div>
-
-    <div class="row">
-        <discussions id="discussions-widget" class="col-xs-12" discussions="{{discussions}}"></discussions>
+        <issues id="issues-widget" class="col-xs-12 col-md-6" issues="{{issues}}"></issues>
+        <discussions id="discussions-widget" class="col-xs-12 col-md-6" discussions="{{discussions}}"></discussions>
     </div>
 
     <div class="row">
