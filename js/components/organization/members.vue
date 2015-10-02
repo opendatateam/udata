@@ -182,11 +182,7 @@ module.exports = {
             })
         },
         refuse_request: function(request) {
-
-            // this.org.refuse_membership(request, comment, function(member) {
-            //     console.log('accepted', member);
-            // })
-            console.log('refuse', request);
+            this.org.refuse_membership(request, request.comment);
         },
         toggle_validation: function() {
             this.validating = !this.validating;
