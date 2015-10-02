@@ -9,7 +9,7 @@ const template = `<div class="selectize-option">
     <div class="logo pull-left">
         <img src="{{user.avatar || user.avatar_url || placeholder}}"/>
     </div>
-    {{user.fullname}}
+    {{user.first_name}} {{user.last_name}}
 </div>`;
 
 
@@ -24,7 +24,7 @@ export default {
     endpoint: 'suggest_users',
     selectize: {
         valueField: 'id',
-        searchField: ['fullname'],
+        searchField: ['first_name', 'last_name'],
         options: [],
         plugins: ['remove_button'],
         render: {
