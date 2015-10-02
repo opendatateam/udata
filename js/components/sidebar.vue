@@ -64,7 +64,7 @@ export default {
             }
             return this.$root.me.organizations.map(function(org) {
                 return {
-                    'label': org.name,
+                    'label': org.acronym || org.name,
                     'image': org.logo,
                     'route': '/organization/' + org.id + '/'
                 };
