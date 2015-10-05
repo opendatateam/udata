@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 import re
+import uuid
+
 from dateutil.parser import parse
 
 from flask import url_for
@@ -83,6 +85,16 @@ class DateTimeField(Field, fields.DateTimeField):
     def process_formdata(self, valuelist):
         if valuelist:
             self.data = parse(valuelist[0])
+
+
+class UUIDField(Field, fields.HiddenField):
+    def process_formdata(self, valuelist):
+        if valuelist:
+            try:
+                self.data = uuid.UUID(valuelist[0])
+            except ValueError:
+                self.data = None
+                raise ValueError(self.gettext('Not a valid UUID'))
 
 
 class BooleanField(FieldHelper, fields.BooleanField):
