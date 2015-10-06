@@ -63,11 +63,13 @@ export default class Organization extends Model {
         });
     }
 
-    refuse_membership(request, comment) {
+    refuse_membership(request, comment, callback) {
         this.$api('organizations.refuse_membership', {
             org: this.id,
             id: request.id,
-            payload: JSON.stringify({comment: comment})
+            payload: {comment: comment}
+        }, function(response) {
+            callback(response);
         });
     }
 };

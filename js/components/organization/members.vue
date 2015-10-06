@@ -104,6 +104,18 @@
                     </button>
                 </div>
             </div>
+            <div v-if="request.refused">
+                <form>
+                    <textarea v-el="{{request.id}}" class="form-control" rows="3" required></textarea>
+                </form>
+                <div class="input-group-btn">
+                    <button class="btn btn-danger btn-flat btn-xs pull-right"
+                    v-on="click: confirm_refusal(request, $index)">
+                        <span class="fa fa-close"></span>
+                        {{ _('Confirm refusal') }}
+                    </button>
+                </div>
+            </div>
         </div>
         <div v-if="!requests.items" class="col-xs-12 text-center lead">
              {{ _('No membership requests') }}
@@ -130,14 +142,12 @@
 </template>
 
 <script>
-'use strict';
+import Vue from 'vue';
+import log from 'logger';
+import User from 'models/user';
+import Requests from 'models/requests';
 
-var Vue = require('vue'),
-    $ = require('jquery'),
-    User = require('models/user'),
-    Requests = require('models/requests');
-
-module.exports = {
+export default {
     name: 'members-list',
     components: {
         'box-container': require('components/containers/box.vue'),
@@ -178,11 +188,22 @@ module.exports = {
         },
         accept_request: function(request) {
             this.org.accept_membership(request, function(member) {
-                console.log('accepted', member);
+                log.debug('accepted', member);
+                this.requests.fetch();
+                this.validating = Boolean(this.requests.length);
             })
         },
         refuse_request: function(request) {
-            this.org.refuse_membership(request, request.comment);
+            request.$set('refused', true);
+        },
+        confirm_refusal: function(request, index) {
+            let comment = this.$children[index].$$[request.id].value;
+            this.org.refuse_membership(request, comment, (response) => {
+                log.debug('refused', response);
+                request.$set('refused', false);
+                this.requests.fetch();
+                this.validating = Boolean(this.requests.length);
+            });
         },
         toggle_validation: function() {
             this.validating = !this.validating;

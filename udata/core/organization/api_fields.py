@@ -103,3 +103,8 @@ logo_fields = api.model('UploadedLogo', {
         readonly=True, default=True),
     'logo': fields.ImageField(),
 })
+
+refuse_membership_fields = api.model('RefuseMembership', {
+    'comment': fields.String(
+        description='The refusal comment.'),
+})
