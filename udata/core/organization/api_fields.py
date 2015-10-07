@@ -9,6 +9,7 @@ from .models import ORG_ROLES, MEMBERSHIP_STATUS
 
 org_ref_fields = api.inherit('OrganizationReference', base_reference, {
     'name': fields.String(description='The organization name', readonly=True),
+    'acronym': fields.String(description='The organization acronym'),
     'uri': fields.UrlFor(
         'api.organization', lambda o: {'org': o},
         description='The organization API URI', readonly=True),
