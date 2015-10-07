@@ -23,7 +23,7 @@ from udata.models import (
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
-from udata.utils import to_iso_date
+from udata.utils import to_iso_date, get_by
 
 
 # _ = lambda s: s
@@ -380,6 +380,56 @@ class ModelList(object):
                 'Unknown identifiers: ' + ', '.join(non_existants))
 
         self.data = [objects[id] for id in oids]
+
+
+class NestedModelList(fields.FieldList):
+    def __init__(self, model_form, *args, **kwargs):
+        super(NestedModelList, self).__init__(FormField(model_form),
+                                              *args,
+                                              **kwargs)
+        self.nested_form = model_form
+        self.nested_model = model_form.model_class
+        self.data_submitted = False
+        self.initial_data = []
+
+    def process(self, formdata, data=unset_value):
+        self.initial_data = data
+        prefix = '{0}-'.format(self.name)
+        if formdata and any(k.startswith(prefix) for k in formdata):
+            super(NestedModelList, self).process(formdata, data)
+        else:
+            super(NestedModelList, self).process(None, data)
+
+    def populate_obj(self, obj, name):
+        new_values = []
+
+        class Holder(object):
+            pass
+
+        holder = Holder()
+
+        for idx, field in enumerate(self):
+            holder.nested = self.nested_model()
+            field.populate_obj(holder, 'nested')
+            new_values.append(holder.nested)
+
+        setattr(obj, name, new_values)
+
+    def _add_entry(self, formdata=None, data=unset_value, index=None):
+        if formdata:
+            basekey = '-'.join((self.name, str(index), '{0}'))
+            idkey = basekey.format('id')
+            if hasattr(self.nested_model, 'id') and idkey in formdata:
+                id = self.nested_model.id.to_python(formdata[idkey])
+                data = get_by(self.initial_data, 'id', id)
+                for field in self.nested_form():
+                    key = basekey.format(field.short_name)
+                    if key not in formdata and hasattr(data, field.short_name):
+                        formdata[key] = getattr(data, field.short_name)
+            else:
+                data = None
+
+        return super(NestedModelList, self)._add_entry(formdata, data, index)
 
 
 class DatasetListField(ModelList, StringField):
