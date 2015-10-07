@@ -1,0 +1,200 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from werkzeug.datastructures import MultiDict
+
+from udata.forms import ModelForm, fields
+from udata.models import db
+from udata.tests import TestCase
+from udata.tests.factories import faker
+
+
+class Nested(db.EmbeddedDocument):
+    id = db.AutoUUIDField()
+    name = db.StringField()
+
+
+class Fake(db.Document):
+    name = db.StringField()
+    nested = db.ListField(db.EmbeddedDocumentField(Nested))
+
+
+class NestedForm(ModelForm):
+    model_class = Nested
+    name = fields.StringField(validators=[fields.validators.required()])
+
+
+class NestedFormWithId(NestedForm):
+    id = fields.UUIDField()
+
+
+class NestedModelListFieldTest(TestCase):
+    def factory(self, data=None, instance=None, id=True, **kwargs):
+        nested_form = NestedFormWithId if id else NestedForm
+
+        class FakeForm(ModelForm):
+            model_class = Fake
+            name = fields.StringField()
+            nested = fields.NestedModelList(nested_form, **kwargs)
+
+        if isinstance(data, MultiDict):
+            return FakeForm(data, obj=instance, instance=instance)
+        else:
+            return FakeForm.from_json(data, obj=instance, instance=instance)
+
+    def test_empty_data(self):
+        fake = Fake()
+        form = self.factory()
+        form.populate_obj(fake)
+
+        self.assertEqual(fake.nested, [])
+
+    def test_with_one_valid_data(self):
+        fake = Fake()
+        form = self.factory(MultiDict({'nested-0-name': 'John Doe'}))
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), 1)
+        self.assertIsInstance(fake.nested[0], Nested)
+        self.assertEqual(fake.nested[0].name, 'John Doe')
+
+    def test_with_one_valid_json(self):
+        fake = Fake()
+        form = self.factory({'nested': [{'name': 'John Doe'}]})
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), 1)
+        self.assertIsInstance(fake.nested[0], Nested)
+        self.assertEqual(fake.nested[0].name, 'John Doe')
+
+    def test_with_multiple_valid_data(self):
+        fake = Fake()
+        form = self.factory(MultiDict([
+            ('nested-0-name', faker.name()),
+            ('nested-1-name', faker.name()),
+            ('nested-2-name', faker.name()),
+        ]))
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), 3)
+        for nested in fake.nested:
+            self.assertIsInstance(nested, Nested)
+
+    def test_with_multiple_valid_json(self):
+        fake = Fake()
+        form = self.factory({'nested': [
+            {'name': faker.name()},
+            {'name': faker.name()},
+            {'name': faker.name()},
+        ]})
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), 3)
+        for nested in fake.nested:
+            self.assertIsInstance(nested, Nested)
+
+    def test_with_initial_elements(self):
+        fake = Fake.objects.create(nested=[
+            Nested(name=faker.name()),
+            Nested(name=faker.name()),
+        ])
+        order = [n.id for n in fake.nested]
+        form = self.factory({'nested': [
+            {'id': str(fake.nested[0].id)},
+            {'id': str(fake.nested[1].id)},
+            {'name': faker.name()},
+        ]}, fake)
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), 3)
+        for idx, id in enumerate(order):
+            self.assertEqual(fake.nested[idx].id, id)
+        self.assertIsNotNone(fake.nested[2].id)
+
+    def test_with_non_submitted_initial_elements(self):
+        fake = Fake.objects.create(nested=[
+            Nested(name=faker.name()),
+            Nested(name=faker.name()),
+        ])
+        initial = [(n.id, n.name) for n in fake.nested]
+        form = self.factory({'name': faker.word()}, fake)
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), len(initial))
+        for idx, (id, name) in enumerate(initial):
+            nested = fake.nested[idx]
+            self.assertEqual(nested.id, id)
+            self.assertEqual(nested.name, name)
+
+    def test_update_initial_elements(self):
+        fake = Fake.objects.create(nested=[
+            Nested(name=faker.name()),
+            Nested(name=faker.name()),
+        ])
+        initial = [n.id for n in fake.nested]
+        form = self.factory({'nested': [
+            {'id': str(fake.nested[0].id), 'name': faker.name()},
+            {'id': str(fake.nested[1].id), 'name': faker.name()},
+            {'name': faker.name()},
+        ]}, fake)
+        names = [n['name'] for n in form.data['nested']]
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), 3)
+        for idx, id in enumerate(initial):
+            nested = fake.nested[idx]
+            self.assertEqual(nested.id, id)
+            self.assertEqual(nested.name, names[idx])
+        self.assertIsNotNone(fake.nested[2].id)
+
+    def test_reorder_initial_elements(self):
+        fake = Fake.objects.create(nested=[
+            Nested(name=faker.name()),
+            Nested(name=faker.name()),
+            Nested(name=faker.name()),
+            Nested(name=faker.name()),
+        ])
+        initial = [(n.id, n.name) for n in fake.nested]
+        new_order = [1, 2, 3, 0]
+        form = self.factory({'nested': [
+            {'id': str(fake.nested[i].id)} for i in new_order
+        ]}, fake)
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), len(initial))
+        for nested, old_idx in zip(fake.nested, new_order):
+            id, name = initial[old_idx]
+            self.assertEqual(nested.id, id)
+            self.assertEqual(nested.name, name)
