@@ -216,7 +216,7 @@ class LicenseFactory(MongoEngineFactory):
     class Meta:
         model = models.License
 
-    id = factory.LazyAttribute(lambda o: faker.word())
+    id = factory.Sequence(lambda n: '{0}-{1}'.format(faker.word(), n))
     title = factory.LazyAttribute(lambda o: faker.sentence())
 
 
