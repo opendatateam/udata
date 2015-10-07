@@ -36,7 +36,8 @@
 
     img {
         width: 76%;
-        max-width: 100px;
+        max-width: 60px;
+        max-height: 60px;
     }
 
     strong {
