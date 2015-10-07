@@ -154,6 +154,19 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.extras['float'], 42.0)
         self.assertEqual(dataset.extras['string'], 'value')
 
+    def test_dataset_api_create_with_resources(self):
+        '''It should create a dataset with resources from the API'''
+        data = DatasetFactory.attributes()
+        data['resources'] = [ResourceFactory.attributes() for _ in range(3)]
+
+        with self.api_user():
+            response = self.post(url_for('api.datasets'), data)
+        self.assertStatus(response, 201)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(len(dataset.resources), 3)
+
     def test_dataset_api_retrieve_full(self):
         '''It should retrieve a full dataset (quality) from the API.'''
         user = self.login()
@@ -180,6 +193,35 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description,
                          'new description')
+
+    def test_dataset_api_update_with_resources(self):
+        '''It should update a dataset from the API with resources parameters'''
+        user = self.login()
+        dataset = VisibleDatasetFactory(owner=user)
+        initial_length = len(dataset.resources)
+        data = dataset.to_dict()
+        data['resources'].append(ResourceFactory.attributes())
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(len(dataset.resources), initial_length + 1)
+
+    def test_dataset_api_update_without_resources(self):
+        '''It should update a dataset from the API without resources'''
+        user = self.login()
+        dataset = VisibleDatasetFactory(owner=user)
+        initial_length = len(dataset.resources)
+        data = dataset.to_dict()
+        del data['resources']
+        data['description'] = faker.sentence()
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(len(dataset.resources), initial_length)
 
     def test_dataset_api_update_with_extras(self):
         '''It should update a dataset from the API with extras parameters'''
