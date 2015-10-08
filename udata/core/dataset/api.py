@@ -235,7 +235,7 @@ class ResourcesAPI(API):
         return resource, 201
 
     @api.secure
-    @api.doc('bulk_resources_update', **common_doc)
+    @api.doc('update_resources', **common_doc)
     @api.expect([resource_fields])
     @api.marshal_with(resource_fields)
     def put(self, dataset):
