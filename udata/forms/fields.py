@@ -417,18 +417,25 @@ class NestedModelList(fields.FieldList):
 
     def _add_entry(self, formdata=None, data=unset_value, index=None):
         if formdata:
-            basekey = '-'.join((self.name, str(index), '{0}'))
+            prefix = '-'.join((self.name, str(index)))
+            basekey = '-'.join((prefix, '{0}'))
             idkey = basekey.format('id')
+            if prefix in formdata:
+                formdata[idkey] = formdata.pop(prefix)
             if hasattr(self.nested_model, 'id') and idkey in formdata:
                 id = self.nested_model.id.to_python(formdata[idkey])
                 data = get_by(self.initial_data, 'id', id)
                 for field in self.nested_form():
                     key = basekey.format(field.short_name)
                     if key not in formdata and hasattr(data, field.short_name):
-                        formdata[key] = getattr(data, field.short_name)
+                        try:
+                            value = getattr(data, field.short_name)
+                            field.process_data(value)
+                            formdata[key] = field._value()
+                        except:
+                            pass
             else:
                 data = None
-
         return super(NestedModelList, self)._add_entry(formdata, data, index)
 
 
