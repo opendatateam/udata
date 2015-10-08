@@ -263,23 +263,23 @@ class UploadMixin(object):
         extension = fileutils.extension(filename)
         uploaded_file.seek(0)
         sha1 = storages.utils.sha1(uploaded_file)
-        size = (os.path.getsize(storage.path(filename))
-                if storage.root else None)
+        filesize = (os.path.getsize(storage.path(filename))
+                    if storage.root else None)
         return {
             'title': os.path.basename(filename),
             'url': storage.url(filename, external=True),
             'checksum': Checksum(value=sha1),
             'format': extension,
             'mime': storages.utils.mime(filename),
-            'size': size
+            'filesize': filesize
         }
 
 
-@ns.route('/<dataset:dataset>/upload/', endpoint='upload_dataset_resource')
+@ns.route('/<dataset:dataset>/upload/', endpoint='upload_dataset_resources')
 @api.doc(parser=upload_parser, **common_doc)
-class UploadDatasetResource(UploadMixin, API):
+class UploadDatasetResources(UploadMixin, API):
     @api.secure
-    @api.doc(id='upload_dataset_resource')
+    @api.doc(id='upload_dataset_resources')
     @api.marshal_with(upload_fields)
     def post(self, dataset):
         '''Upload a new dataset resource'''
@@ -292,11 +292,11 @@ class UploadDatasetResource(UploadMixin, API):
 
 
 @ns.route('/<dataset:dataset>/upload/community/',
-          endpoint='upload_community_resource')
+          endpoint='upload_community_resources')
 @api.doc(parser=upload_parser, **common_doc)
-class UploadCommunityResource(UploadMixin, API):
+class UploadCommunityResources(UploadMixin, API):
     @api.secure
-    @api.doc(id='upload_community_resource')
+    @api.doc(id='upload_community_resources')
     @api.marshal_with(upload_fields)
     def post(self, dataset):
         '''Upload a new community resource'''
@@ -306,16 +306,55 @@ class UploadCommunityResource(UploadMixin, API):
         return community_resource, 201
 
 
-@ns.route('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource',
-          doc=common_doc)
-@api.doc(params={'rid': 'The resource unique identifier'})
-class ResourceAPI(API):
+class ResourceMixin(object):
+
     def get_resource_or_404(self, dataset, id):
         resource = get_by(dataset.resources, 'id', id)
         if not resource:
             api.abort(404, 'Ressource does not exists')
         return resource
 
+
+@ns.route('/<dataset:dataset>/resources/<uuid:rid>/upload/',
+          endpoint='upload_dataset_resource', doc=common_doc)
+@api.doc(params={'rid': 'The resource unique identifier'})
+class UploadDatasetResource(ResourceMixin, UploadMixin, API):
+    @api.secure
+    @api.doc(id='upload_dataset_resource')
+    @api.marshal_with(upload_fields)
+    def post(self, dataset, rid):
+        '''Upload a file related to a given resource on a given dataset'''
+        DatasetEditPermission(dataset).test()
+        resource = self.get_resource_or_404(dataset, rid)
+        args = upload_parser.parse_args()
+        infos = self.extract_infos_from_args(args, dataset)
+        for k, v in infos.items():
+            resource[k] = v
+        dataset.update_resource(resource)
+        return resource
+
+
+@ns.route('/community_resources/<crid:community>/upload/',
+          endpoint='upload_community_resource', doc=common_doc)
+@api.doc(params={'community': 'The community resource unique identifier'})
+class UploadCommunityResource(ResourceMixin, UploadMixin, API):
+    @api.secure
+    @api.doc(id='upload_community_resource')
+    @api.marshal_with(upload_fields)
+    def post(self, community):
+        '''Upload a file related to a given resource on a given dataset'''
+        DatasetEditPermission(community.dataset).test()
+        args = upload_parser.parse_args()
+        infos = self.extract_infos_from_args(args, community.dataset)
+        community.update(**infos)
+        community.reload()
+        return community
+
+
+@ns.route('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource',
+          doc=common_doc)
+@api.doc(params={'rid': 'The resource unique identifier'})
+class ResourceAPI(ResourceMixin, API):
     @api.secure
     @api.doc(id='update_resource', body=resource_fields)
     @api.marshal_with(resource_fields)
@@ -360,40 +399,38 @@ class CommunityResourcesAPI(API):
                                    .paginate(args['page'], args['page_size']))
 
 
-@ns.route('/community_resources/<community_resource:community_resource>/',
-          endpoint='community_resource',
-          doc=common_doc)
-@api.doc(params={
-    'community_resource': 'The community resource unique identifier'})
+@ns.route('/community_resources/<crid:community>/',
+          endpoint='community_resource', doc=common_doc)
+@api.doc(params={'community': 'The community resource unique identifier'})
 class CommunityResourceAPI(SingleObjectAPI, API):
     model = CommunityResource
 
     @api.doc('retrieve_community_resource')
     @api.marshal_with(community_resource_fields)
-    def get(self, community_resource):
+    def get(self, community):
         '''Retrieve a community resource given its identifier'''
-        return community_resource
+        return community
 
     @api.secure
     @api.doc(id='update_community_resource',
              body=community_resource_fields)
     @api.marshal_with(community_resource_fields)
-    def put(self, community_resource):
+    def put(self, community):
         '''Update a given community resource'''
-        form = api.validate(CommunityResourceForm, community_resource)
-        form.populate_obj(community_resource)
-        if not community_resource.organization:
-            community_resource.owner = current_user._get_current_object()
-        community_resource.modified = datetime.now()
-        community_resource.save()
-        return community_resource
+        form = api.validate(CommunityResourceForm, community)
+        form.populate_obj(community)
+        if not community.organization:
+            community.owner = current_user._get_current_object()
+        community.modified = datetime.now()
+        community.save()
+        return community
 
     @api.secure
     @api.doc('delete_community_resource')
     @api.marshal_with(community_resource_fields)
-    def delete(self, community_resource):
+    def delete(self, community):
         '''Delete a given community resource'''
-        community_resource.delete()
+        community.delete()
         return '', 204
 
 

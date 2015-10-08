@@ -68,7 +68,7 @@
                     </td>
                     <td class="ellipsis">{{ resource.title }}</td>
                     <td>{{ resource.format }}</td>
-                    <td>{{ resource.size | filesize }}</td>
+                    <td>{{ resource.filesize | filesize }}</td>
                     <td class="text-center">
                         <span class="badge" v-class="
                             bg-green: resource.metrics.views > 0,

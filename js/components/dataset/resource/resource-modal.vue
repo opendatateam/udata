@@ -21,8 +21,8 @@
                 <dd v-if="resource.format">{{ resource.format }}</dd>
                 <dt v-if="resource.mime">{{ _('Mime Type') }}</dt>
                 <dd v-if="resource.mime">{{ resource.mime }}</dd>
-                <dt v-if="resource.size">{{ _('Size') }}</dt>
-                <dd v-if="resource.size">{{ resource.size }}</dd>
+                <dt v-if="resource.filesize">{{ _('Size') }}</dt>
+                <dd v-if="resource.filesize">{{ resource.filesize }}</dd>
                 <dt v-if="resource.checksum">{{ resource.checksum.type }}</dt>
                 <dd v-if="resource.checksum">{{ resource.checksum.value }}</dd>
                 <dt v-if="resource.created_at">{{ _('Created on') }}</dt>

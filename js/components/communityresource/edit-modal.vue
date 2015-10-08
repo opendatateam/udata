@@ -113,7 +113,7 @@ export default {
             }
         },
         delete_confirmed: function() {
-            API.datasets.delete_community_resource({community_resource: this.community.id},
+            API.datasets.delete_community_resource({community: this.community.id},
                 (response) => {
                     if (this.callback) {
                         this.callback();

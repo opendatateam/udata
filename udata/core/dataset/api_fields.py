@@ -38,7 +38,7 @@ resource_fields = api.model('Resource', {
     'title': fields.String(description='The resource title', required=True),
     'description': fields.Markdown(
         description='The resource markdown description'),
-    'type': fields.String(
+    'filetype': fields.String(
         description=('Whether the resource is an uploaded file, '
                      'a remote file or an API'),
         required=True, enum=RESOURCE_TYPES.keys()),
@@ -47,7 +47,7 @@ resource_fields = api.model('Resource', {
     'checksum': fields.Nested(
         checksum_fields, allow_null=True,
         description='A checksum to validate file validity'),
-    'size': fields.Integer(description='The resource file size in bytes'),
+    'filesize': fields.Integer(description='The resource file size in bytes'),
     'mime': fields.String(description='The resource mime type'),
     'created_at': fields.ISODateTime(
         readonly=True, description='The resource creation date'),

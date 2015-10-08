@@ -19,7 +19,7 @@ export default {
                     id: 'url',
                     label: this._('URL'),
                 }, {
-                    id: 'size',
+                    id: 'filesize',
                     label: this._('Size'),
                 }, {
                     id: 'format',

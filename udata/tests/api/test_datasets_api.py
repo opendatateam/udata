@@ -434,6 +434,28 @@ class DatasetResourceAPITest(APITestCase):
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 2)
 
+    def test_create_with_file(self):
+        '''It should create a resource from the API with a file'''
+        user = self.login()
+        with self.autoindex():
+            org = OrganizationFactory(members=[
+                Member(user=user, role='admin')
+            ])
+            dataset = DatasetFactory(organization=org)
+        response = self.post(
+            url_for('api.upload_dataset_resources', dataset=dataset),
+            {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
+        self.assertStatus(response, 201)
+        data = json.loads(response.data)
+        self.assertEqual(data['title'], 'test.txt')
+        response = self.put(
+            url_for('api.resource', dataset=dataset, rid=data['id']), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual(len(dataset.resources), 1)
+        self.assertTrue(
+            dataset.resources[0].url.endswith('test.txt'))
+
     def test_reorder(self):
         self.dataset.resources = [ResourceFactory() for _ in range(3)]
         self.dataset.save()
@@ -484,6 +506,30 @@ class DatasetResourceAPITest(APITestCase):
                                         dataset=self.dataset,
                                         rid=str(ResourceFactory().id)), data)
         self.assert404(response)
+
+    def test_update_with_file(self):
+        '''It should update a resource from the API with a file'''
+        user = self.login()
+        with self.autoindex():
+            resource = ResourceFactory()
+            org = OrganizationFactory(members=[
+                Member(user=user, role='admin')
+            ])
+            dataset = DatasetFactory(resources=[resource], organization=org)
+        response = self.post(
+            url_for('api.upload_dataset_resource',
+                    dataset=dataset, rid=resource.id),
+            {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
+        self.assert200(response)
+        data = json.loads(response.data)
+        self.assertEqual(data['title'], 'test.txt')
+        response = self.put(
+            url_for('api.resource', dataset=dataset, rid=data['id']), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual(len(dataset.resources), 1)
+        self.assertTrue(
+            dataset.resources[0].url.endswith('test.txt'))
 
     def test_delete(self):
         resource = ResourceFactory()
@@ -670,7 +716,7 @@ class CommunityResourceAPITest(APITestCase):
             community_resource = CommunityResourceFactory()
 
         response = self.get(url_for('api.community_resource',
-                                    community_resource=community_resource))
+                                    community=community_resource))
         self.assert200(response)
         data = json.loads(response.data)
         self.assertEqual(data['id'], str(community_resource.id))
@@ -682,14 +728,14 @@ class CommunityResourceAPITest(APITestCase):
             resource = ResourceFactory()
             dataset = DatasetFactory(resources=[resource])
         response = self.post(
-            url_for('api.upload_community_resource', dataset=dataset),
+            url_for('api.upload_community_resources', dataset=dataset),
             {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
         self.assertStatus(response, 201)
         data = json.loads(response.data)
         resource_id = data['id']
         self.assertEqual(data['title'], 'test.txt')
         response = self.put(
-            url_for('api.community_resource', community_resource=resource_id),
+            url_for('api.community_resource', community=resource_id),
             data)
         self.assertStatus(response, 200)
         self.assertEqual(CommunityResource.objects.count(), 1)
@@ -707,7 +753,7 @@ class CommunityResourceAPITest(APITestCase):
             ])
             dataset = DatasetFactory(resources=[resource])
         response = self.post(
-            url_for('api.upload_community_resource', dataset=dataset),
+            url_for('api.upload_community_resources', dataset=dataset),
             {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
         self.assertStatus(response, 201)
         data = json.loads(response.data)
@@ -715,7 +761,7 @@ class CommunityResourceAPITest(APITestCase):
         resource_id = data['id']
         data['organization'] = str(org.id)
         response = self.put(
-            url_for('api.community_resource', community_resource=resource_id),
+            url_for('api.community_resource', community=resource_id),
             data)
         self.assertStatus(response, 200)
         self.assertEqual(CommunityResource.objects.count(), 1)
@@ -731,9 +777,38 @@ class CommunityResourceAPITest(APITestCase):
         data = community_resource.to_dict()
         data['description'] = 'new description'
         response = self.put(url_for('api.community_resource',
-                                    community_resource=community_resource),
+                                    community=community_resource),
                             data)
         self.assert200(response)
         self.assertEqual(CommunityResource.objects.count(), 1)
         self.assertEqual(CommunityResource.objects.first().description,
                          'new description')
+
+    def test_community_resource_api_update_with_file(self):
+        '''It should update a community resource file from the API'''
+        user = self.login()
+        with self.autoindex():
+            resource = ResourceFactory()
+            org = OrganizationFactory(members=[
+                Member(user=user, role='admin')
+            ])
+            dataset = DatasetFactory(resources=[resource], organization=org)
+            community_resource = CommunityResourceFactory(dataset=dataset)
+        response = self.post(
+            url_for('api.upload_community_resource',
+                    community=community_resource),
+            {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
+        self.assert200(response)
+        data = json.loads(response.data)
+        self.assertEqual(data['id'], str(community_resource.id))
+        self.assertEqual(data['title'], 'test.txt')
+        data['description'] = 'new description'
+        response = self.put(url_for('api.community_resource',
+                                    community=community_resource),
+                            data)
+        self.assert200(response)
+        self.assertEqual(CommunityResource.objects.count(), 1)
+        self.assertEqual(CommunityResource.objects.first().description,
+                         'new description')
+        self.assertTrue(
+            CommunityResource.objects.first().url.endswith('test.txt'))

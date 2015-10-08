@@ -83,7 +83,7 @@ class ResourceForm(ModelForm):
 
     title = fields.StringField(_('Title'), [validators.required()])
     description = fields.MarkdownField(_('Description'))
-    type = fields.RadioField(
+    filetype = fields.RadioField(
         _('Type'), [validators.required()],
         choices=RESOURCE_TYPES.items(), default='file',
         description=_('Whether the resource is an uploaded file, '
@@ -97,7 +97,7 @@ class ResourceForm(ModelForm):
         _('Mime type'),
         description=_('The mime type associated to the extension. '
                       '(ex: text/plain)'))
-    size = fields.IntegerField(
+    filesize = fields.IntegerField(
         _('Size'), [validators.optional()],
         description=_('The file size in bytes'))
     published = fields.DateTimeField(

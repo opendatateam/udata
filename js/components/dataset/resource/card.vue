@@ -6,7 +6,7 @@
     </span>
     <div class="info-box-content">
         <span class="info-box-text">{{resource.name}}</span>
-        <span class="info-box-number">{{resource.size | filesize}}</span>
+        <span class="info-box-number">{{resource.filesize | filesize}}</span>
     </div>
 </div>
 </template>
