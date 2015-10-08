@@ -59,7 +59,7 @@ export default class Organization extends Model {
             org: this.id,
             id: request.id
         }, function(response) {
-            callback(response.obj)
+            callback(response.obj);
         });
     }
 
@@ -67,9 +67,9 @@ export default class Organization extends Model {
         this.$api('organizations.refuse_membership', {
             org: this.id,
             id: request.id,
-            payload: JSON.stringify({comment: comment})
+            payload: {comment: comment}
         }, function(response) {
-            callback(response.obj)
+            callback(response);
         });
     }
 };

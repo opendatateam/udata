@@ -33,6 +33,7 @@ from .api_fields import (
     request_fields,
     member_fields,
     logo_fields,
+    refuse_membership_fields,
 )
 
 from udata.core.dataset.api_fields import dataset_full_fields
@@ -243,13 +244,13 @@ refuse_parser.add_argument(
           endpoint='refuse_membership')
 class MembershipRefuseAPI(MembershipAPI):
     @api.secure
+    @api.expect(refuse_membership_fields)
     @api.doc('refuse_membership', parser=refuse_parser, **common_doc)
     def post(self, org, id):
         '''Refuse user membership to a given organization.'''
         EditOrganizationPermission(org).test()
         membership_request = self.get_or_404(org, id)
         form = api.validate(MembershipRefuseForm)
-
         membership_request.status = 'refused'
         membership_request.handled_by = current_user._get_current_object()
         membership_request.handled_on = datetime.now()
