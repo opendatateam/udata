@@ -45,9 +45,7 @@ class ChecksumField(fields.FormField):
         super(ChecksumField, self).populate_obj(obj, name)
 
 
-class ResourceForm(ModelForm):
-    model_class = Resource
-
+class BaseResourceForm(ModelForm):
     title = fields.StringField(_('Title'), [validators.required()])
     description = fields.MarkdownField(_('Description'))
     type = fields.RadioField(
@@ -72,7 +70,13 @@ class ResourceForm(ModelForm):
         description=_('The publication date of the resource'))
 
 
-class CommunityResourceForm(ResourceForm):
+class ResourceForm(BaseResourceForm):
+    model_class = Resource
+
+    id = fields.UUIDField()
+
+
+class CommunityResourceForm(BaseResourceForm):
     model_class = CommunityResource
 
     dataset = fields.DatasetField(_('Related dataset'))
@@ -111,4 +115,10 @@ class DatasetForm(ModelForm):
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_('Publish as'))
     extras = fields.ExtrasField(extras=Dataset.extras)
+    resources = fields.NestedModelList(ResourceForm)
+
+
+class ResourcesListForm(ModelForm):
+    model_class = Dataset
+
     resources = fields.NestedModelList(ResourceForm)

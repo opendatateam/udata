@@ -131,6 +131,28 @@ class NestedModelListFieldTest(TestCase):
             self.assertEqual(fake.nested[idx].id, id)
         self.assertIsNotNone(fake.nested[2].id)
 
+    def test_with_initial_elements_as_ids(self):
+        fake = Fake.objects.create(nested=[
+            Nested(name=faker.name()),
+            Nested(name=faker.name()),
+        ])
+        order = [n.id for n in fake.nested]
+        form = self.factory({'nested': [
+            str(fake.nested[0].id),
+            str(fake.nested[1].id),
+            {'name': faker.name()},
+        ]}, fake)
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), 3)
+        for idx, id in enumerate(order):
+            self.assertEqual(fake.nested[idx].id, id)
+        self.assertIsNotNone(fake.nested[2].id)
+
     def test_with_non_submitted_initial_elements(self):
         fake = Fake.objects.create(nested=[
             Nested(name=faker.name()),

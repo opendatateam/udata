@@ -477,19 +477,20 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(self.dataset.resources), 2)
 
     def test_reorder(self):
-        self.dataset.resources = [ResourceFactory() for _ in range(3)]
+        self.dataset.resources = ResourceFactory.build_batch(3)
         self.dataset.save()
 
-        initial_order = [str(r.id) for r in self.dataset.resources]
-        expected_order = list(reversed(initial_order))
+        initial_order = [r.id for r in self.dataset.resources]
+        expected_order = [{'id': str(id)} for id in reversed(initial_order)]
 
         with self.api_user():
-            response = self.put(url_for('api.resources',
-                                        dataset=self.dataset), expected_order)
+            response = self.put(url_for('api.resources', dataset=self.dataset),
+                                expected_order)
         self.assertStatus(response, 200)
+
         self.dataset.reload()
         self.assertEqual([str(r.id) for r in self.dataset.resources],
-                         expected_order)
+                         [str(r['id']) for r in expected_order])
 
     def test_update(self):
         resource = ResourceFactory()
@@ -514,6 +515,38 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(updated.description, data['description'])
         self.assertEqual(updated.url, data['url'])
         self.assertEqualDates(updated.published, now)
+
+    def test_bulk_update(self):
+        resources = ResourceFactory.build_batch(2)
+        self.dataset.resources.extend(resources)
+        self.dataset.save()
+        now = datetime.now()
+        ids = [r.id for r in self.dataset.resources]
+        data = [{
+            'id': str(id),
+            'title': faker.sentence(),
+            'description': faker.text(),
+        } for id in ids]
+        data.append({
+            'title': faker.sentence(),
+            'description': faker.text(),
+            'url': faker.url(),
+        })
+        with self.api_user():
+            response = self.put(url_for('api.resources', dataset=self.dataset),
+                                data)
+        self.assert200(response)
+        self.dataset.reload()
+        self.assertEqual(len(self.dataset.resources), 3)
+        for idx, id in enumerate(ids):
+            resource = self.dataset.resources[idx]
+            rdata = data[idx]
+            self.assertEqual(str(resource.id), rdata['id'])
+            self.assertEqual(resource.title, rdata['title'])
+            self.assertEqual(resource.description, rdata['description'])
+            self.assertIsNotNone(resource.url)
+        new_resource = self.dataset.resources[-1]
+        self.assertEqualDates(new_resource.published, now)
 
     def test_update_404(self):
         data = {
