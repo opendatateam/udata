@@ -13,12 +13,11 @@ steps: [
     NavigationComponent.next(),
     // Add the dedicated community resource file.
     CreateDatasetComponent.chooseLocalFile(),
+    CreateResourceComponent.setTitle(resourceName),
     CreateResourceComponent.openFileUploader(),
     {
         "CreateResourceComponent.checksumInput": true // Waiting for manual upload.
     },
-    // TMP fix, we should be allowed to do that before the upload.
-    CreateResourceComponent.setTitle(resourceName),
     NavigationComponent.next(),
     {
         "CreateDatasetComponent.successTitle": true

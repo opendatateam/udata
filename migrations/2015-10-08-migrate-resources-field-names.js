@@ -6,7 +6,7 @@ var communityResourceCounter = 0;
 
 datasets.map(function(dataset) {
     if (dataset.resources) {
-        var resources = (dataset.resources).map(function(resource) {
+        var resources = dataset.resources.map(function(resource) {
             resource.filetype = resource.type;
             delete resource.type;
             if (typeof resource.size !== undefined) {

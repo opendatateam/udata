@@ -400,7 +400,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     def update_resource(self, resource):
         '''Perform an atomic update for an existing resource'''
-        index = [r.id for r in self.resources].index(resource.id)
+        index = self.resources.index(resource)
         data = {
             'resources__{index}'.format(index=index): resource
         }
