@@ -14,7 +14,8 @@ from .models import (
 __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')
 
 
-class ChecksumForm(Form):
+class ChecksumForm(ModelForm):
+    model_class = Checksum
     type = fields.SelectField(choices=zip(CHECKSUM_TYPES, CHECKSUM_TYPES),
                               default='sha1')
     value = fields.StringField()
@@ -39,10 +40,6 @@ class ChecksumField(fields.FormField):
     def __init__(self, label=None, validators=None, **kwargs):
         super(ChecksumField, self).__init__(ChecksumForm, label, validators,
                                             **kwargs)
-
-    def populate_obj(self, obj, name):
-        self._obj = self._obj or Checksum()
-        super(ChecksumField, self).populate_obj(obj, name)
 
 
 class BaseResourceForm(ModelForm):

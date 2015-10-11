@@ -12,6 +12,7 @@ from flask.ext.fs.mongo import ImageReference
 from wtforms import Form as WTForm, Field as WTField, validators, fields
 from wtforms.fields import html5
 from wtforms.utils import unset_value
+from wtforms_json import flatten_json
 
 from . import widgets
 
@@ -84,7 +85,8 @@ class DateTimeField(Field, fields.DateTimeField):
 
     def process_formdata(self, valuelist):
         if valuelist:
-            self.data = parse(valuelist[0])
+            value = valuelist[0]
+            self.data = parse(value) if isinstance(value, basestring) else value
 
 
 class UUIDField(Field, fields.HiddenField):
@@ -203,6 +205,11 @@ class FormField(FieldHelper, fields.FormField):
     def __init__(self, form_class, *args, **kwargs):
         super(FormField, self).__init__(FormWrapper(form_class),
                                         *args, **kwargs)
+
+    def populate_obj(self, obj, name):
+        if getattr(self.form_class, 'model_class', None) and not self._obj:
+            self._obj = self.form_class.model_class()
+        super(FormField, self).populate_obj(obj, name)
 
 
 def nullable_text(value):
@@ -416,6 +423,9 @@ class NestedModelList(fields.FieldList):
         setattr(obj, name, new_values)
 
     def _add_entry(self, formdata=None, data=unset_value, index=None):
+        '''
+        Fill the form with previous data if necessary to handle partiel update
+        '''
         if formdata:
             prefix = '-'.join((self.name, str(index)))
             basekey = '-'.join((prefix, '{0}'))
@@ -425,15 +435,14 @@ class NestedModelList(fields.FieldList):
             if hasattr(self.nested_model, 'id') and idkey in formdata:
                 id = self.nested_model.id.to_python(formdata[idkey])
                 data = get_by(self.initial_data, 'id', id)
-                for field in self.nested_form():
-                    key = basekey.format(field.short_name)
-                    if key not in formdata and hasattr(data, field.short_name):
-                        try:
-                            value = getattr(data, field.short_name)
-                            field.process_data(value)
-                            formdata[key] = field._value()
-                        except:
-                            pass
+
+                initial = flatten_json(self.nested_form,
+                                       data.to_mongo(),
+                                       prefix)
+
+                for key, value in initial.items():
+                    if key not in formdata:
+                        formdata[key] = value
             else:
                 data = None
         return super(NestedModelList, self)._add_entry(formdata, data, index)
