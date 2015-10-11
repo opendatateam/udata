@@ -3,10 +3,12 @@ from __future__ import unicode_literals
 
 from werkzeug.datastructures import MultiDict
 
-from udata.forms import Form, fields
+from udata.forms import Form
 from udata.models import db, SpatialCoverage
 from udata.tests import TestCase
 from udata.tests.factories import GeoZoneFactory, random_spatial_granularity
+
+from udata.core.spatial.forms import ZonesField, SpatialCoverageField
 
 
 class ZoneFieldTest(TestCase):
@@ -15,7 +17,7 @@ class ZoneFieldTest(TestCase):
             spatial = db.EmbeddedDocumentField(SpatialCoverage)
 
         class FakeForm(Form):
-            spatial = fields.SpatialCoverageField()
+            spatial = SpatialCoverageField()
 
         return Fake, FakeForm
 
