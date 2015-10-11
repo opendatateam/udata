@@ -3,6 +3,7 @@ source = udata
 branch = True
 omit =
     udata/tests/*
+    */tests/*
 
 [report]
 # Regexes for lines to exclude from consideration
