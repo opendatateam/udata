@@ -6,7 +6,8 @@ from werkzeug.datastructures import MultiDict
 from udata.forms import Form
 from udata.models import db
 from udata.tests import TestCase
-from udata.tests.factories import GeoZoneFactory, random_spatial_granularity
+
+from .factories import GeoZoneFactory, random_spatial_granularity
 
 from ..models import SpatialCoverage
 from ..forms import SpatialCoverageField
