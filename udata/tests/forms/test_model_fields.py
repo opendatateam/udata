@@ -9,14 +9,24 @@ from udata.tests import TestCase
 from udata.tests.factories import faker
 
 
+class SubNested(db.EmbeddedDocument):
+    name = db.StringField()
+
+
 class Nested(db.EmbeddedDocument):
     id = db.AutoUUIDField()
     name = db.StringField()
+    sub = db.EmbeddedDocumentField(SubNested)
 
 
 class Fake(db.Document):
     name = db.StringField()
     nested = db.ListField(db.EmbeddedDocumentField(Nested))
+
+
+class SubNestedForm(ModelForm):
+    model_class = SubNested
+    name = fields.StringField(validators=[fields.validators.required()])
 
 
 class NestedForm(ModelForm):
@@ -28,9 +38,18 @@ class NestedFormWithId(NestedForm):
     id = fields.UUIDField()
 
 
+class NestedFormWithSub(NestedFormWithId):
+    sub = fields.FormField(SubNestedForm)
+
+
 class NestedModelListFieldTest(TestCase):
-    def factory(self, data=None, instance=None, id=True, **kwargs):
-        nested_form = NestedFormWithId if id else NestedForm
+    def factory(self, data=None, instance=None, id=True, sub=False, **kwargs):
+        if sub:
+            nested_form = NestedFormWithSub
+        elif id:
+            nested_form = NestedFormWithId
+        else:
+            nested_form = NestedForm
 
         class FakeForm(ModelForm):
             model_class = Fake
@@ -130,6 +149,33 @@ class NestedModelListFieldTest(TestCase):
         for idx, id in enumerate(order):
             self.assertEqual(fake.nested[idx].id, id)
         self.assertIsNotNone(fake.nested[2].id)
+
+    def test_with_nested_initial_elements(self):
+        fake = Fake.objects.create(nested=[
+            Nested(name=faker.name(), sub=SubNested(name=faker.word())),
+            Nested(name=faker.name(), sub=SubNested(name=faker.word())),
+        ])
+        order = [n.id for n in fake.nested]
+        data = [
+            {'id': str(fake.nested[0].id)},
+            {'id': str(fake.nested[1].id)},
+            {'name': faker.name(), 'sub': {'name': faker.name()}},
+        ]
+        form = self.factory({'nested': data}, fake, sub=True)
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), 3)
+        for idx, id in enumerate(order):
+            nested = fake.nested[idx]
+            self.assertEqual(nested.id, id)
+            self.assertIsNotNone(nested.sub)
+            self.assertIsNotNone(nested.sub.name)
+        self.assertIsNotNone(fake.nested[2].id)
+        self.assertEqual(fake.nested[2].sub.name, data[2]['sub']['name'])
 
     def test_with_initial_elements_as_ids(self):
         fake = Fake.objects.create(nested=[
