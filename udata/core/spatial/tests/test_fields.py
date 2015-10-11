@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import unicode_literals, absolute_import
 
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form
-from udata.models import db, SpatialCoverage
+from udata.models import db
 from udata.tests import TestCase
 from udata.tests.factories import GeoZoneFactory, random_spatial_granularity
 
-from udata.core.spatial.forms import ZonesField, SpatialCoverageField
+from ..models import SpatialCoverage
+from ..forms import SpatialCoverageField
 
 
-class ZoneFieldTest(TestCase):
+class SpatialCoverageFieldTest(TestCase):
     def factory(self):
         class Fake(db.Document):
             spatial = db.EmbeddedDocumentField(SpatialCoverage)

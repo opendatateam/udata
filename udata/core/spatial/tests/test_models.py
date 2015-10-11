@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.models import SpatialCoverage
 from udata.tests import TestCase
+from udata.tests.factories import GeoZoneFactory, GeoLevelFactory
 
-from ..factories import GeoZoneFactory, GeoLevelFactory
+from ..models import SpatialCoverage
 
 
 class SpacialCoverageTest(TestCase):
