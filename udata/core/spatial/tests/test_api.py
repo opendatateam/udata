@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
+
 from flask import url_for
 
 from udata.utils import get_by
@@ -13,6 +15,11 @@ from .factories import SpatialCoverageFactory, GeoZoneFactory, GeoLevelFactory
 
 
 class SpatialApiTest(APITestCase):
+    def assertJsonEqual(self, first, second):
+        json1 = json.loads(json.dumps(first))
+        json2 = json.loads(json.dumps(second))
+        self.assertEqual(json1, json2)
+
     def test_zones_api_one(self):
         zone = GeoZoneFactory()
 
@@ -24,7 +31,7 @@ class SpatialApiTest(APITestCase):
 
         feature = response.json['features'][0]
         self.assertEqual(feature['type'], 'Feature')
-        self.assertEqual(feature['geometry'], zone.geom)
+        self.assertJsonEqual(feature['geometry'], zone.geom)
         self.assertEqual(feature['id'], zone.id)
 
         properties = feature['properties']
@@ -47,7 +54,7 @@ class SpatialApiTest(APITestCase):
 
         for zone, feature in zip(zones, response.json['features']):
             self.assertEqual(feature['type'], 'Feature')
-            self.assertEqual(feature['geometry'], zone.geom)
+            self.assertJsonEqual(feature['geometry'], zone.geom)
             self.assertEqual(feature['id'], zone.id)
 
             properties = feature['properties']
@@ -201,7 +208,7 @@ class SpatialApiTest(APITestCase):
 
             zone = get_by(subzones, 'id', feature['id'])
             self.assertIsNotNone(zone)
-            self.assertEqual(feature['geometry'], zone.geom)
+            self.assertJsonEqual(feature['geometry'], zone.geom)
 
             properties = feature['properties']
             self.assertEqual(properties['name'], zone.name)

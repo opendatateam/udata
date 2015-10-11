@@ -12,7 +12,10 @@ from faker import Faker
 from udata import models
 from udata.core.discussions.models import Message
 
+from .geojson_provider import GeoJsonProvider
+
 faker = Faker()
+faker.add_provider(GeoJsonProvider)
 
 
 def unique_string(length=None):

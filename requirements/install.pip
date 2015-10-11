@@ -39,6 +39,7 @@ voluptuous
 wtforms-json==0.2.10
 wtforms==2.0.2
 xmltodict
+geojson
 
 # Pin this until flask-restplus works with 0.3.4
 Flask-RESTful==0.3.3
