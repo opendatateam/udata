@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.forms import Form, ModelForm, fields, validators, widgets
+from udata.forms import ModelForm, fields, validators, widgets
 from udata.i18n import lazy_gettext as _
 
 from udata.core.storages import resources
+from udata.core.spatial.forms import SpatialCoverageField
 
 from .models import (
     Dataset, Resource, License, Checksum, CommunityResource,
@@ -100,8 +101,7 @@ class DatasetForm(ModelForm):
     temporal_coverage = fields.DateRangeField(
         _('Temporal coverage'),
         description=_('The period covered by the data'))
-    spatial = fields.SpatialCoverageField(
-        _('Spatial coverage'),
+    spatial = SpatialCoverageField(_('Spatial coverage'),
         description=_('The geographical area covered by the data.'))
     tags = fields.TagField(_('Tags'), description=_('Some taxonomy keywords'))
     private = fields.BooleanField(

@@ -40,6 +40,10 @@ class WidgetHelper(object):
         return super(WidgetHelper, self).__call__(field, **kwargs)
 
 
+class TextInput(WidgetHelper, widgets.TextInput):
+    pass
+
+
 class TextArea(WidgetHelper, widgets.TextArea):
     pass
 
@@ -55,19 +59,6 @@ class MarkdownEditor(WidgetHelper, widgets.TextArea):
 
 class FormatAutocompleter(WidgetHelper, widgets.TextInput):
     classes = 'format-completer'
-
-
-class ZonesAutocompleter(WidgetHelper, widgets.TextInput):
-    classes = 'zone-completer'
-
-    def __call__(self, field, **kwargs):
-        '''Store the values as JSON to prefeed selectize'''
-        if field.data:
-            kwargs['data-values'] = json.dumps([{
-                'id': zone.id,
-                'name': zone.name
-            } for zone in field.data])
-        return super(ZonesAutocompleter, self).__call__(field, **kwargs)
 
 
 class DatasetAutocompleter(WidgetHelper, widgets.TextInput):

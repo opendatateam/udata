@@ -474,31 +474,6 @@ class DatasetField(ModelField, StringField):
     model = Dataset
 
 
-class ZonesField(ModelList, StringField):
-    model = GeoZone
-    widget = widgets.ZonesAutocompleter()
-
-
-class SpatialCoverageForm(WTForm):
-    zones = ZonesField(_('Spatial coverage'),
-                       description=_('A list of covered territories'))
-    granularity = SelectField(_('Spatial granularity'),
-                              description=_('The size of the data increment'),
-                              choices=lambda: spatial_granularities,
-                              default='other')
-
-
-class SpatialCoverageField(FieldHelper, fields.FormField):
-    def __init__(self, label=None, validators=None, **kwargs):
-        default = kwargs.pop('default', lambda: SpatialCoverage())
-        super(SpatialCoverageField, self).__init__(
-            SpatialCoverageForm, label, validators, default=default, **kwargs)
-
-    def populate_obj(self, obj, name):
-        self._obj = self._obj or SpatialCoverage()
-        super(SpatialCoverageField, self).populate_obj(obj, name)
-
-
 class MarkdownField(FieldHelper, fields.TextAreaField):
     widget = widgets.MarkdownEditor()
 
