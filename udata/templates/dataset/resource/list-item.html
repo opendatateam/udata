@@ -18,7 +18,7 @@
             <meta itemprop="dateCreated" content="{{resource.created_at|isoformat}}" />
             <meta itemprop="dateModified" content="{{resource.modified|isoformat}}" />
             <meta itemprop="datePublished" content="{{resource.published|dateformat('long')}}" />
-            <meta itemprop="contentSize" content="{{resource.size or ''}}" />
+            <meta itemprop="contentSize" content="{{resource.filesize or ''}}" />
             <meta itemprop="mimetype" content="{{resource.mime or ''}}" />
             <meta itemprop="downloads" content="{{resource.metrics.views or ''}}" />
             {% if resource.checksum %}

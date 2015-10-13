@@ -11,7 +11,9 @@ export default class CommunityResource extends Model {
     fetch(ident) {
         ident = ident || this.id;
         if (ident) {
-            this.$api('datasets.retrieve_community_resource', {community_resource: ident}, this.on_fetched);
+            this.$api('datasets.retrieve_community_resource', {
+                community: ident
+            }, this.on_fetched);
         } else {
             log.error('Unable to fetch CommunityResource: no identifier specified');
         }
@@ -23,11 +25,7 @@ export default class CommunityResource extends Model {
      */
     save() {
         if (this.id) {
-            this.$api('datasets.update_community_resource', {
-                community_resource: this.id,
-                payload: this
-            },
-            this.on_fetched);
+            this.update(this);
         } else {
             this.$api('datasets.create_community_resource', {
                 payload: this
@@ -38,8 +36,10 @@ export default class CommunityResource extends Model {
 
     update(data) {
         this.$api('datasets.update_community_resource', {
-            community_resource: this.id,
+            community: this.id,
             payload: data
-        }, this.on_fetched);
+        }, () => {
+            this.fetch(this.id);
+        });
     }
 };

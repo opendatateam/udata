@@ -134,7 +134,7 @@ class OdsHarvester(BaseBackend):
             resource = Resource(
                 title='Export au format {0}'.format(label),
                 description=description,
-                type='remote',
+                filetype='remote',
                 url=self._get_download_url(dataset_id, format),
                 format=udata_format,
                 mime=mime)

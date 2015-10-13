@@ -111,14 +111,14 @@ class Checksum(db.EmbeddedDocument):
 class ResourceMixin(object):
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
-    type = db.StringField(
+    filetype = db.StringField(
         choices=RESOURCE_TYPES.keys(), default='file', required=True)
     url = db.StringField()
     urlhash = db.StringField()
     checksum = db.EmbeddedDocumentField(Checksum)
     format = db.StringField()
     mime = db.StringField()
-    size = db.IntField()
+    filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)
@@ -140,7 +140,7 @@ class ResourceMixin(object):
 
         Return a boolean.
         """
-        if self.type == 'remote':
+        if self.filetype == 'remote':
             # We perform a quick check for performances matters.
             error, response = check_url_from_cache(self.url, group)
             if error or int(response.get('status', 500)) >= 500:
@@ -395,6 +395,16 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
                 }
             }
         })
+        self.reload()
+        post_save.send(self.__class__, document=self)
+
+    def update_resource(self, resource):
+        '''Perform an atomic update for an existing resource'''
+        index = self.resources.index(resource)
+        data = {
+            'resources__{index}'.format(index=index): resource
+        }
+        self.update(**data)
         self.reload()
         post_save.send(self.__class__, document=self)
 

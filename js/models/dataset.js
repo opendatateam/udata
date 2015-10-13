@@ -34,7 +34,12 @@ export default class Dataset extends Model {
     }
 
     delete_resource(id) {
-        this.$api('datasets.delete_resource', {dataset: this.id, rid: id}, this.fetch);
+        this.$api('datasets.delete_resource', {
+            dataset: this.id,
+            rid: id
+        }, () => {
+            this.fetch(this.id);
+        });
     }
 
     save_resource(resource) {
@@ -45,7 +50,7 @@ export default class Dataset extends Model {
             dataset: this.id,
             rid: resource.id,
             payload: payload
-        }, function() {
+        }, () => {
             this.fetch(this.id);
         });
     }
@@ -54,7 +59,7 @@ export default class Dataset extends Model {
         this.$api('datasets.reorder_resources', {
             dataset: this.id,
             payload: new_order
-        }, function(response) {
+        }, (response) => {
             this.resources = response.obj;
         });
     }

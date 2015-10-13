@@ -35,7 +35,7 @@ resource = {
     'description': All(basestring, normalize_string),
     'format': All(basestring, Lower),
     'mimetype': Any(All(basestring, Lower), None),
-    'size': Any(Coerce(int), None),
+    'filesize': Any(Coerce(int), None),
     'hash': Any(All(basestring, hash), None),
     'created': All(basestring, to_date),
     'last_modified': Any(All(basestring, to_date), None),
@@ -239,7 +239,8 @@ class CkanBackend(BaseBackend):
             resource.title = res.get('name', '') or ''
             resource.description = res.get('description')
             resource.url = res['url']
-            resource.type = 'api' if res['resource_type'] == 'api' else 'remote'
+            resource.filetype = ('api' if res['resource_type'] == 'api'
+                                 else 'remote')
             resource.format = res.get('format')
             resource.mime = res.get('mimetype')
             resource.hash = res.get('hash')

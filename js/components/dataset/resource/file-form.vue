@@ -15,7 +15,25 @@
 <form-horizontal class="resource-form file-resource-form"
     fields="{{fields}}" model="{{resource}}" v-ref="form">
 </form-horizontal>
-<div v-if="!resource.url && !files.length" class="resource-upload-dropzone">
+<div v-show="!resource.url && files.length" v-repeat="file:files" class="info-box bg-aqua">
+    <span class="info-box-icon">
+        <span class="fa fa-cloud-upload"></span>
+    </span>
+    <div class="info-box-content">
+        <span class="info-box-text">{{file.name}}</span>
+        <span class="info-box-number">{{file.filesize | filesize}}</span>
+        <div class="progress">
+            <div class="progress-bar" style="width: {{progress}}%"></div>
+        </div>
+        <span class="progress-description">
+        {{progress}}%
+        </span>
+    </div>
+</div>
+<form-horizontal v-if="resource.url"
+    fields="{{file_fields}}" model="{{resource}}" readonly="true">
+</form-horizontal>
+<div v-if="!files.length" class="resource-upload-dropzone">
     <div class="row">
         <div class="text-center col-xs-12">
             <span class="fa fa-download fa-4x dropicon"></span>
@@ -33,24 +51,6 @@
         </div>
     </div>
 </div>
-<div v-show="!resource.url && files.length" v-repeat="file:files" class="info-box bg-aqua">
-    <span class="info-box-icon">
-        <span class="fa fa-cloud-upload"></span>
-    </span>
-    <div class="info-box-content">
-        <span class="info-box-text">{{file.name}}</span>
-        <span class="info-box-number">{{file.size | filesize}}</span>
-        <div class="progress">
-            <div class="progress-bar" style="width: {{progress}}%"></div>
-        </div>
-        <span class="progress-description">
-        {{progress}}%
-        </span>
-    </div>
-</div>
-<form-horizontal v-if="resource.url"
-    fields="{{file_fields}}" model="{{resource}}" readonly="true">
-</form-horizontal>
 </template>
 
 <script>
@@ -78,7 +78,7 @@ export default {
                     label: this._('URL'),
                     readonly: true
                 }, {
-                    id: 'size',
+                    id: 'filesize',
                     label: this._('Size'),
                     readonly: true
                 }, {
@@ -102,11 +102,25 @@ export default {
     },
     computed: {
         upload_endpoint: function() {
-            let endpoint = API.datasets.operations.upload_dataset_resource;
-            if (this.community) {
-                endpoint = API.datasets.operations.upload_community_resource;
+            let operations = API.datasets.operations;
+            let params = {};
+            let endpoint = 'upload_';
+            if (typeof this.dataset !== 'undefined') {
+                params = {dataset: this.dataset.id};
             }
-            return endpoint.urlify({dataset: this.dataset.id});
+            if (this.community) {
+                endpoint += 'community_';
+                params.community = this.resource.id;
+            } else {
+                endpoint += 'dataset_';
+            }
+            if (this.resource.id) {
+                endpoint += 'resource';
+                params.rid = this.resource.id;
+            } else {
+                endpoint += 'resources';
+            }
+            return operations[endpoint].urlify(params);
         }
     },
     components: {
@@ -119,6 +133,10 @@ export default {
         'uploader:complete': function(id, response) {
             if (!this.community) {
                 this.dataset.resources.unshift(response);
+            }
+            // Do not override an existing typed or registered title.
+            if (this.$.form.serialize().title || this.resource.title) {
+                response.title = this.resource.title;
             }
             this.resource.on_fetched({obj: response});
         }

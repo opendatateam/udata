@@ -125,7 +125,7 @@ def init_app(app):
     app.url_map.converters['pathlist'] = PathListConverter
     app.url_map.converters['uuid'] = UUIDConverter
     app.url_map.converters['dataset'] = DatasetConverter
-    app.url_map.converters['community_resource'] = CommunityResourceConverter
+    app.url_map.converters['crid'] = CommunityResourceConverter
     app.url_map.converters['org'] = OrganizationConverter
     app.url_map.converters['reuse'] = ReuseConverter
     app.url_map.converters['user'] = UserConverter

@@ -9,7 +9,7 @@
     <footer class="modal-footer text-center">
         <button type="button" class="btn btn-primary btn-flat pointer pull-left"
             data-dismiss="modal"
-            v-show="$.form.resource.type">
+            v-show="$.form.resource.filetype">
             {{ _('Save') }}
         </button>
         <button type="button" class="btn btn-outline btn-flat pointer"

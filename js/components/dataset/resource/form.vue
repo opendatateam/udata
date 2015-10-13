@@ -52,8 +52,8 @@
 </style>
 
 <template>
-<div class="list-group actions-list" v-if="!resource.type">
-    <a v-repeat="actions" class="list-group-item pointer" v-on="click: set_type(type)">
+<div class="list-group actions-list" v-if="!resource.filetype">
+    <a v-repeat="actions" class="list-group-item pointer" v-on="click: set_filetype(filetype)">
         <div class="action-icon">
             <span class="fa fa-3x fa-{{icon}}"></span>
         </div>
@@ -65,9 +65,9 @@
         </p>
     </a>
 </div>
-<file-form v-if="resource.type == 'file'" v-ref="fileform"></file-form>
-<remote-form v-if="resource.type == 'remote'" v-ref="remoteform"></remote-form>
-<api-form v-if="resource.type == 'api'" v-ref="apiform"></api-form>
+<file-form v-if="resource.filetype == 'file'" v-ref="fileform"></file-form>
+<remote-form v-if="resource.filetype == 'remote'" v-ref="remoteform"></remote-form>
+<api-form v-if="resource.filetype == 'api'" v-ref="apiform"></api-form>
 </template>
 
 <script>
@@ -84,27 +84,27 @@ export default {
                 label: this._('Local file'),
                 details: this._('Send a file from your computer'),
                 icon: 'cloud-upload',
-                type: 'file'
+                filetype: 'file'
             }, {
                 label: this._('Online file'),
                 details: this._('Register an already online file'),
                 icon: 'cloud',
-                type: 'remote'
+                filetype: 'remote'
             }, {
                 label: this._('API'),
                 details: this._('Register an API to access data'),
                 icon: 'puzzle-piece',
-                type: 'api'
+                filetype: 'api'
             }],
         };
     },
     computed: {
         $form: function() {
-            if (this.resource.type === 'file') {
+            if (this.resource.filetype === 'file') {
                 return this.$.fileform;
-            } else if (this.resource.type === 'remote') {
+            } else if (this.resource.filetype === 'remote') {
                 return this.$.remoteform.$.form;
-            } else if (this.resource.type === 'api') {
+            } else if (this.resource.filetype === 'api') {
                 return this.$.apiform.$.form;
             }
         }
@@ -115,8 +115,8 @@ export default {
         'api-form': require('components/dataset/resource/api-form.vue')
     },
     methods: {
-        set_type: function(type) {
-            this.resource.type = type;
+        set_filetype: function(filetype) {
+            this.resource.filetype = filetype;
         },
         serialize: function() {
             return this.$form.serialize();

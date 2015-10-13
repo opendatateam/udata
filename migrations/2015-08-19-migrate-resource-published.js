@@ -4,7 +4,7 @@ var commonDate = new ISODate("2014-09-04");
 
 datasets.map(function(dataset) {
     if (dataset.resources) {
-        var resources = (dataset.resources).map(function(resource) {
+        var resources = dataset.resources.map(function(resource) {
             // Some published date are undefined.
             var published = resource.published || commonDate;
             if (published.toDateString() === commonDate.toDateString()) {
