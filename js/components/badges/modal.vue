@@ -100,7 +100,7 @@ export default {
             to_remove.forEach((kind) => {
                 this.removed[kind] = false;
                 badges.delete(this.subject, kind, () => {
-                    this.removed[badge] = true;
+                    this.removed[kind] = true;
                     this.checkAllDone();
                 });
             });
