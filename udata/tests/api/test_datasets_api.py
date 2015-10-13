@@ -20,6 +20,15 @@ from ..factories import (
     AdminFactory, UserFactory, LicenseFactory
 )
 
+SAMPLE_GEOM = {
+    "type": "MultiPolygon",
+    "coordinates": [
+      [[[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]],
+      [[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+       [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]]
+    ]
+}
+
 
 class DatasetAPITest(APITestCase):
     def test_dataset_api_list(self):
@@ -166,6 +175,19 @@ class DatasetAPITest(APITestCase):
 
         dataset = Dataset.objects.first()
         self.assertEqual(len(dataset.resources), 3)
+
+    def test_dataset_api_create_with_geom(self):
+        '''It should create a dataset with resources from the API'''
+        data = DatasetFactory.attributes()
+        data['spatial'] = {'geom': SAMPLE_GEOM}
+
+        with self.api_user():
+            response = self.post(url_for('api.datasets'), data)
+        self.assertStatus(response, 201)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.spatial.geom, SAMPLE_GEOM)
 
     def test_dataset_api_retrieve_full(self):
         '''It should retrieve a full dataset (quality) from the API.'''
