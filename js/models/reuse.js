@@ -43,3 +43,5 @@ export default class Reuse extends Model {
         }, this.on_fetched);
     }
 };
+
+Reuse.__badges_type__ = 'reuse';

@@ -4,69 +4,77 @@ import {Badges, BadgeError} from 'models/badges';
 describe('Badges', function() {
 
     let badges;
+    const TYPES = {
+        badgeable: 'badgeables',
+        notfound: 'not_found'
+    };
+
+    class Badgeable {
+        constructor() {
+            this.id = 'identifier';
+            this.badges = [];
+        }
+    }
+    Badgeable.__badges_type__ = 'badgeable';
 
     before(function() {
+        // Mock a full badge schema for badgeable
         API.mock_specs({
             definitions: {
-                Badgeable: {
-                    required: ['id', 'name'],
-                    properties: {
-                        id: {type: 'integer', format: 'int64'},
-                        name: {type: 'string'},
-                        tag: {type: 'string'},
-                        badges: {}
-                    }
-                },
-                NonBadgeable: {
-                    required: ['id', 'name'],
-                    properties: {
-                        id: {type: 'integer', format: 'int64'},
-                        name: {type: 'string'},
-                        tag: {type: 'string'}
-                    }
-                },
-                BadgeableByAllOf: {
-                    allOf: [
-                        {$ref: '#/definitions/Badgeable'},
-                        {properties: {
-                            description: {type: 'string'}
-                        }}
-                    ]
-                },
-                BadgeableInAllOf: {
-                    allOf: [
-                        {$ref: '#/definitions/NonBadgeable'},
-                        {properties: {
-                            badges: {}
-                        }}
-                    ]
+                Badge: {
+                    required: ['kind'],
+                    properties: {kind: {type: 'string'}}
                 }
             },
             paths: {
-                '/badgeable': {
+                '/': {
                     get: {
                         operationId: 'available_badgeable_badges',
                         tags: ['badgeables']
                     }
                 },
-                '/badgeable2': {
-                    get: {
-                        operationId: 'available_badgeablebyallof_badges',
-                        tags: ['badgeablebyallofs']
+                '/{badgeable}/': {
+                    post: {
+                        operationId: 'add_badgeable_badge',
+                        parameters: [{
+                            in: 'body',
+                            name: 'payload',
+                            required: true,
+                            schema: {$ref: '#/definitions/Badge'}
+                        }, {
+                            in: 'path',
+                            name: 'badgeable',
+                            required: true,
+                            type: 'string'
+                        }],
+                        tags: ['badgeables']
                     }
                 },
-                '/badgeable3': {
-                    get: {
-                        operationId: 'available_badgeableinallof_badges',
-                        tags: ['badgeableinallofs']
+                '/{badgeable}/{badge_kind}/': {
+                    delete: {
+                        operationId: 'delete_badgeable_badge',
+                        parameters: [{
+                            in: 'path',
+                            name: 'badge_kind',
+                            required: true,
+                            type: 'string'
+                        }, {
+                            in: 'path',
+                            name: 'badgeable',
+                            required: true,
+                            type: 'string'
+                        }],
+                        tags: ['badgeables']
                     }
                 }
+                        // ,
+                        // "responses": {"200": {"description": "Success"}}, "tags": ["datasets"]}},
             }
         });
     });
 
     beforeEach(function() {
-        badges = new Badges();
+        badges = new Badges(TYPES);
         this.xhr = sinon.useFakeXMLHttpRequest();
         let requests = this.requests = [];
         this.xhr.onCreate = function (req) { requests.push(req); };
@@ -80,17 +88,13 @@ describe('Badges', function() {
         expect(badges.badgeable).not.to.be.undefined;
     });
 
-    it('should handle to badgeable models with allOf', function() {
-        expect(badges.badgeablebyallof).not.to.be.undefined;
-        expect(badges.badgeableinallof).not.to.be.undefined;
-    });
-
-    it('should raise a BadgeError when trying to access a non badgeable model', function() {
+    it('should not have attribute for a non badgeable model', function() {
         expect(badges.nonbadgeable).to.be.undefined;
     });
 
     it('should raise a BadgeError when trying to access a non-existant model', function() {
-        expect(badges.notfound).to.be.undefined;
+        function test() {badges.notfound;}
+        expect(test).to.throw(BadgeError);
     });
 
     it('should fetch values on first access', function() {
@@ -125,6 +129,60 @@ describe('Badges', function() {
 
         expect(badges.badgeable.badge2).to.equal('Badge 2');
         expect(this.requests).to.have.length(1);
+    });
+
+    it('should list available badges for a given object', function() {
+        let obj = new Badgeable();
+
+        let result = badges.badgeable,
+            response = JSON.stringify({
+                badge1: 'Badge 1',
+                badge2: 'Badge 2'
+            });
+
+        this.requests[0].respond(200, {'Content-Type': 'application/json'}, response);
+
+        expect(badges.available(obj)).to.equal(badges.badgeable);
+    });
+
+    it('should add a badge for a given object', function(done) {
+        let obj = new Badgeable();
+
+        badges.add(obj, 'badge-1', function(badge) {
+            expect(obj.badges).to.have.length(1).to.contain(badge);
+            expect(badge.kind).to.equal('badge-1');
+            done();
+        });
+
+        expect(this.requests).to.have.length(1);
+
+        let payload = JSON.stringify({kind: 'badge-1'});
+        let request = this.requests[0];
+
+        expect(request.url).to.equal('http://localhost/identifier/');
+        expect(request.method).to.equal('POST');
+        expect(request.requestBody).to.equal(payload);
+
+        request.respond(200, {'Content-Type': 'application/json'}, payload);
+    });
+
+    it('should delete a badge for a given object', function(done) {
+        let obj = new Badgeable();
+        obj.badges.push({kind: 'badge-1'});
+
+        badges.remove(obj, 'badge-1', function() {
+            expect(obj.badges).to.be.empty;
+            done();
+        });
+
+        expect(this.requests).to.have.length(1);
+
+        let request = this.requests[0];
+
+        expect(request.url).to.equal('http://localhost/identifier/badge-1/');
+        expect(request.method).to.equal('DELETE');
+
+        request.respond(204, {'Content-Type': 'application/json'}, '');
     });
 
 });
