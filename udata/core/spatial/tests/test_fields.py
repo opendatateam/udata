@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+import json
+
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form
 from udata.models import db
 from udata.tests import TestCase
 
-from .factories import GeoZoneFactory, random_spatial_granularity
+from .factories import faker, GeoZoneFactory, random_spatial_granularity
 
 from ..models import SpatialCoverage
 from ..forms import SpatialCoverageField
@@ -31,15 +33,25 @@ class SpatialCoverageFieldTest(TestCase):
         self.assertEqual(form.spatial.zones.data, [])
         # self.assertEqual(form.spatial.granularity._value(), '')
         self.assertEqual(form.spatial.granularity.data, 'other')
+        self.assertIsNone(form.spatial.geom.data)
 
-        self.assertEqual(form.spatial.data,
-                         {'zones': [], 'granularity': 'other'})
+        self.assertEqual(form.spatial.data, {
+            'zones': [], 'granularity': 'other', 'geom': None
+        })
 
         fake = Fake()
         form.populate_obj(fake)
         self.assertIsInstance(fake.spatial, SpatialCoverage)
 
-    def test_initial_values(self):
+    def test_initial_geom(self):
+        Fake, FakeForm = self.factory()
+        geom = faker.multipolygon()
+
+        fake = Fake(spatial=SpatialCoverage(geom=geom))
+        form = FakeForm(None, fake)
+        self.assertEqual(form.spatial.geom.data, geom)
+
+    def test_initial_zones(self):
         Fake, FakeForm = self.factory()
         zones = [GeoZoneFactory() for _ in range(3)]
 
@@ -146,6 +158,51 @@ class SpatialCoverageFieldTest(TestCase):
             self.assertIn(zone.id, expected_zones)
             self.assertEqual(zone, expected_zones[zone.id])
 
+    def test_with_valid_geom(self):
+        Fake, FakeForm = self.factory()
+        geom = faker.multipolygon()
+
+        fake = Fake()
+        form = FakeForm(MultiDict({'spatial-geom': json.dumps(geom)}))
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertJsonEqual(fake.spatial.geom, geom)
+
+    def test_with_valid_geom_from_json(self):
+        Fake, FakeForm = self.factory()
+        geom = faker.multipolygon()
+
+        fake = Fake()
+        form = FakeForm.from_json({'spatial': {'geom': geom}})
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertJsonEqual(fake.spatial.geom, geom)
+
+    def test_with_invalid_geom_from_json(self):
+        Fake, FakeForm = self.factory()
+        geom = {'type': 'InvalidGeoJSON', 'coordinates': []}
+
+        form = FakeForm.from_json({
+            'spatial': {
+                'geom': geom,
+            }
+        })
+
+        form.validate()
+        self.assertIn('spatial', form.errors)
+        self.assertEqual(len(form.errors['spatial']), 1)
+
+        self.assertIn('geom', form.errors['spatial'])
+        self.assertEqual(len(form.errors['spatial']['geom']), 1)
+
     def test_with_invalid_data(self):
         Fake, FakeForm = self.factory()
 
@@ -161,20 +218,14 @@ class SpatialCoverageFieldTest(TestCase):
         self.assertIn('zones', form.errors['spatial'])
         self.assertEqual(len(form.errors['spatial']['zones']), 1)
 
-    def test_with_initial(self):
+    def test_with_initial_zones(self):
         Fake, FakeForm = self.factory()
         zones = [GeoZoneFactory() for _ in range(3)]
 
-        fake = Fake(spatial=SpatialCoverage(
-            zones=zones,
-            granularity=random_spatial_granularity()
-        ))
+        fake = Fake(spatial=SpatialCoverage(zones=zones))
 
         zone = GeoZoneFactory()
-        data = MultiDict({
-            'spatial-zones': zone.id,
-            'spatial-granularity': random_spatial_granularity()
-        })
+        data = MultiDict({'spatial-zones': zone.id})
 
         form = FakeForm(data, fake)
 
@@ -185,6 +236,43 @@ class SpatialCoverageFieldTest(TestCase):
 
         self.assertEqual(len(fake.spatial.zones), 1)
         self.assertEqual(fake.spatial.zones[0], zone)
+
+    def test_with_initial_granularity(self):
+        Fake, FakeForm = self.factory()
+
+        fake = Fake(spatial=SpatialCoverage(
+            granularity=random_spatial_granularity()
+        ))
+
+        granularity = random_spatial_granularity()
+
+        data = MultiDict({'spatial-granularity': granularity})
+
+        form = FakeForm(data, fake)
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(fake.spatial.granularity, granularity)
+
+    def test_with_initial_geom(self):
+        Fake, FakeForm = self.factory()
+        geom = faker.multipolygon()
+
+        fake = Fake(spatial=SpatialCoverage(geom=geom))
+
+        data = {'spatial': {'geom': geom}}
+
+        form = FakeForm.from_json(data, fake)
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertJsonEqual(fake.spatial.geom, geom)
 
     def test_with_initial_none(self):
         Fake, FakeForm = self.factory()

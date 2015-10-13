@@ -2,8 +2,9 @@
 from __future__ import unicode_literals
 
 import json
+import geojson
 
-from udata.forms import widgets, ModelForm
+from udata.forms import widgets, ModelForm, validators
 from udata.forms.fields import ModelList, StringField, SelectField, FormField
 from udata.i18n import lazy_gettext as _
 
@@ -28,6 +29,27 @@ class ZonesField(ModelList, StringField):
     widget = ZonesAutocompleter()
 
 
+class GeomField(StringField):
+    def process_formdata(self, valuelist):
+        if valuelist:
+            value = valuelist[0]
+            try:
+                if isinstance(value, basestring):
+                    self.data = geojson.loads(value)
+                else:
+                    self.data = geojson.GeoJSON.to_instance(value)
+            except:
+                self.data = None
+                raise ValueError(self.gettext('Not a valid GeoJSON'))
+
+    def pre_validate(self, form):
+        if self.data:
+            result = geojson.is_valid(self.data)
+            if result['valid'] == 'no':
+                raise validators.ValidationError(result['message'])
+        return True
+
+
 class SpatialCoverageForm(ModelForm):
     model_class = SpatialCoverage
 
@@ -38,6 +60,7 @@ class SpatialCoverageForm(ModelForm):
                               description=_('The size of the data increment'),
                               choices=lambda: spatial_granularities,
                               default='other')
+    geom = GeomField()
 
 
 class SpatialCoverageField(FormField):

@@ -7,8 +7,8 @@ from geojson.utils import generate_random
 
 class GeoJsonProvider(BaseProvider):
     '''A Fake GeoJSON provider'''
-    def random_range(self, min=1, max=5):
-        return range(self.random_int(1, max))
+    def random_range(self, min=2, max=5):
+        return range(self.random_int(min, max))
 
     def point(self):
         return generate_random('Point')

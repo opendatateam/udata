@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
-
 from flask import url_for
 
 from udata.utils import get_by
@@ -15,11 +13,6 @@ from .factories import SpatialCoverageFactory, GeoZoneFactory, GeoLevelFactory
 
 
 class SpatialApiTest(APITestCase):
-    def assertJsonEqual(self, first, second):
-        json1 = json.loads(json.dumps(first))
-        json2 = json.loads(json.dumps(second))
-        self.assertEqual(json1, json2)
-
     def test_zones_api_one(self):
         zone = GeoZoneFactory()
 
