@@ -1,7 +1,3 @@
-<style lang="less">
-
-</style>
-
 <template>
 <modal title="{{ _('Badges') }}"
     class="modal-info badges-modal"
@@ -43,12 +39,10 @@
 </template>
 
 <script>
-'use strict';
+import API from 'api';
+import {badges} from 'models/badges';
 
-var API = require('api'),
-    badges = require('models/badges').badges;
-
-module.exports = {
+export default {
     name: 'BadgesModal',
     components: {
         'modal': require('components/modal.vue')
@@ -64,12 +58,6 @@ module.exports = {
         };
     },
     computed: {
-        basename: function() {
-            return this.subject.__class__.toLowerCase();
-        },
-        namespace: function() {
-            return this.basename + 's';
-        },
         hasBadges: function() {
             return Object.keys(this.badges).length > 0;
         },
@@ -81,7 +69,7 @@ module.exports = {
         }
     },
     compiled: function() {
-        this.badges = badges[this.basename];
+        this.badges = badges.available(this.subject);
 
         if (this.subject.hasOwnProperty('badges')) {
             this.selected = this.subject.badges.map(function(badge) {
@@ -93,54 +81,37 @@ module.exports = {
     },
     methods: {
         confirm: function() {
-            var add_operation = 'add_' + this.basename + '_badge',
-                remove_operation = 'delete_' + this.basename + '_badge',
-                to_add = this.selected.filter(function(badge) {
+            let to_add = this.selected.filter((badge) => {
                         return this.initial.indexOf(badge) < 0;
-                    }.bind(this)),
-                to_remove = this.initial.filter(function(badge) {
+                    }),
+                to_remove = this.initial.filter((badge) => {
                         return this.selected.indexOf(badge) < 0;
-                    }.bind(this));
+                    });
 
 
-            to_add.forEach(function(badge) {
-                var data = {payload: {kind: badge}},
-                    key = this.basename === 'organization' ? 'org' :this.basename;
-
-                data[key] = this.subject.id;
-                this.added[badge] = false;
-
-                API[this.namespace][add_operation](data, function(response) {
-                    this.subject.badges.push(response.obj);
-                    this.added[badge] = true;
+            to_add.forEach((kind) => {
+                this.added[kind] = false;
+                badges.add(this.subject, kind, (badge) => {
+                    this.added[badge.kind] = true;
                     this.checkAllDone();
-                }.bind(this));
-            }.bind(this));
+                })
+            });
 
-            to_remove.forEach(function(badge) {
-                var data = {badge_kind: badge},
-                    key = this.basename === 'organization' ? 'org' : this.basename;
-
-                data[key] = this.subject.id;
-                this.removed[badge] = false;
-
-                API[this.namespace][remove_operation](data, function(response) {
-                    var badgeObj = this.subject.badges.filter(function(o) {
-                            return o.kind === badge;
-                        })[0];
-                    this.subject.badges.$remove(badgeObj);
-                    this.removed[badge] = true;
+            to_remove.forEach((kind) => {
+                this.removed[kind] = false;
+                badges.remove(this.subject, kind, () => {
+                    this.removed[kind] = true;
                     this.checkAllDone();
-                }.bind(this));
-            }.bind(this));
+                });
+            });
         },
         checkAllDone: function() {
-            var allAdded = Object.keys(this.added).every(function(key) {
+            let allAdded = Object.keys(this.added).every((key) => {
                     return this.added[key];
-                }.bind(this)),
-                allRemoved = Object.keys(this.removed).every(function(key) {
+                }),
+                allRemoved = Object.keys(this.removed).every((key) => {
                     return this.removed[key];
-                }.bind(this));
+                });
 
             if (allAdded && allRemoved) {
                 this.$.modal.close();

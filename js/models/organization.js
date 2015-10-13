@@ -73,3 +73,6 @@ export default class Organization extends Model {
         });
     }
 };
+
+Organization.__badges_type__ =  'organization';
+Organization.__key__ =  'org';
