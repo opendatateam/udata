@@ -5,11 +5,11 @@ from flask import url_for
 
 from udata.utils import get_by
 
-from udata.tests.factories import (
-    faker, VisibleDatasetFactory, SpatialCoverageFactory, GeoZoneFactory,
-    GeoLevelFactory
-)
+from udata.tests.factories import faker, VisibleDatasetFactory
+
 from udata.tests.api import APITestCase
+
+from .factories import SpatialCoverageFactory, GeoZoneFactory, GeoLevelFactory
 
 
 class SpatialApiTest(APITestCase):
@@ -24,7 +24,7 @@ class SpatialApiTest(APITestCase):
 
         feature = response.json['features'][0]
         self.assertEqual(feature['type'], 'Feature')
-        self.assertEqual(feature['geometry'], zone.geom)
+        self.assertJsonEqual(feature['geometry'], zone.geom)
         self.assertEqual(feature['id'], zone.id)
 
         properties = feature['properties']
@@ -47,7 +47,7 @@ class SpatialApiTest(APITestCase):
 
         for zone, feature in zip(zones, response.json['features']):
             self.assertEqual(feature['type'], 'Feature')
-            self.assertEqual(feature['geometry'], zone.geom)
+            self.assertJsonEqual(feature['geometry'], zone.geom)
             self.assertEqual(feature['id'], zone.id)
 
             properties = feature['properties']
@@ -201,7 +201,7 @@ class SpatialApiTest(APITestCase):
 
             zone = get_by(subzones, 'id', feature['id'])
             self.assertIsNotNone(zone)
-            self.assertEqual(feature['geometry'], zone.geom)
+            self.assertJsonEqual(feature['geometry'], zone.geom)
 
             properties = feature['properties']
             self.assertEqual(properties['name'], zone.name)

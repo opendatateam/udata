@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
 import os
 import logging
 import shutil
@@ -78,6 +79,12 @@ class TestCase(BaseTestCase):
             haystack.startswith(needle), True,
             '{haystack} does not start with {needle}'.format(
                 haystack=haystack, needle=needle))
+
+    def assertJsonEqual(self, first, second):
+        '''Ensure two dict produce the same JSON'''
+        json1 = json.loads(json.dumps(first))
+        json2 = json.loads(json.dumps(second))
+        self.assertEqual(json1, json2)
 
     @contextmanager
     def assert_emit(self, *signals):
