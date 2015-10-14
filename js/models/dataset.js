@@ -64,3 +64,5 @@ export default class Dataset extends Model {
         });
     }
 }
+
+Dataset.__badges_type__ = 'dataset';

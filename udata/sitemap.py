@@ -8,17 +8,21 @@ from udata.app import cache
 
 sitemap = Sitemap()
 
+CACHE_KEY = 'sitemap-page-{0}'
+
 
 @sitemap_page_needed.connect
 def create_page(app, page, urlset):
-    cache.set(page, sitemap.render_page(urlset=urlset))
+    key = CACHE_KEY.format(page)
+    cache.set(key, sitemap.render_page(urlset=urlset))
 
 
 def load_page(fn):
     @wraps(fn)
     def loader(*args, **kwargs):
         page = kwargs.get('page')
-        return cache.get(page) or fn(*args, **kwargs)
+        key = CACHE_KEY.format(page)
+        return cache.get(key) or fn(*args, **kwargs)
     return loader
 
 

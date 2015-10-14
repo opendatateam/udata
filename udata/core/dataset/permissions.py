@@ -32,7 +32,10 @@ class ResourceEditPermission(Permission):
             elif resource.owner:
                 needs.append(UserNeed(resource.owner.id))
         else:
-            needs.append(OrganizationAdminNeed(dataset.organization.id))
-            needs.append(OrganizationEditorNeed(dataset.organization.id))
+            if dataset.organization:
+                needs.append(OrganizationAdminNeed(dataset.organization.id))
+                needs.append(OrganizationEditorNeed(dataset.organization.id))
+            elif dataset.owner:
+                needs.append(UserNeed(dataset.owner.id))
 
         super(ResourceEditPermission, self).__init__(*needs)

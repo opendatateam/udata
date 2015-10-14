@@ -93,11 +93,10 @@ def launch(identifier):
 
 
 @m.option('identifier', help='The Harvest source identifier or slug')
-@m.option('-d', '--debug', action='store_true', default=False, help='Debug/dry_run')
-def run(identifier, debug=False):
+def run(identifier):
     '''Run an harvester synchronously'''
     log.info('Harvest source "%s"', identifier)
-    actions.run(identifier, debug=debug)
+    actions.run(identifier)
 
 
 @m.option('identifier', help='The Harvest source identifier or slug')
