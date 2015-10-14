@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
 import geojson
+import json
+import logging
 
 from udata.forms import widgets, ModelForm, validators
 from udata.forms.fields import ModelList, StringField, SelectField, FormField
 from udata.i18n import lazy_gettext as _
 
 from .models import GeoZone, SpatialCoverage, spatial_granularities
+
+log = logging.getLogger(__name__)
 
 
 class ZonesAutocompleter(widgets.TextInput):
@@ -40,6 +43,7 @@ class GeomField(StringField):
                     self.data = geojson.GeoJSON.to_instance(value)
             except:
                 self.data = None
+                log.exception('Unable to parse GeoJSON')
                 raise ValueError(self.gettext('Not a valid GeoJSON'))
 
     def pre_validate(self, form):
