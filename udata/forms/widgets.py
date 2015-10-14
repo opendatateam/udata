@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import unicode_literals, absolute_import
 
 import json
 
 from wtforms import widgets
-from wtforms.widgets import HTMLString
+from wtforms.widgets import HTMLString, html5
 
 from jinja2 import Markup
 from werkzeug.utils import escape
@@ -40,6 +40,10 @@ class WidgetHelper(object):
         return super(WidgetHelper, self).__call__(field, **kwargs)
 
 
+class TextInput(WidgetHelper, widgets.TextInput):
+    pass
+
+
 class TextArea(WidgetHelper, widgets.TextArea):
     pass
 
@@ -55,19 +59,6 @@ class MarkdownEditor(WidgetHelper, widgets.TextArea):
 
 class FormatAutocompleter(WidgetHelper, widgets.TextInput):
     classes = 'format-completer'
-
-
-class ZonesAutocompleter(WidgetHelper, widgets.TextInput):
-    classes = 'zone-completer'
-
-    def __call__(self, field, **kwargs):
-        '''Store the values as JSON to prefeed selectize'''
-        if field.data:
-            kwargs['data-values'] = json.dumps([{
-                'id': zone.id,
-                'name': zone.name
-            } for zone in field.data])
-        return super(ZonesAutocompleter, self).__call__(field, **kwargs)
 
 
 class DatasetAutocompleter(WidgetHelper, widgets.TextInput):
@@ -122,7 +113,7 @@ class DateRangePicker(WidgetHelper, widgets.HiddenInput):
         return super(DateRangePicker, self).__call__(field, **kwargs)
 
 
-class UploadableURL(WidgetHelper, widgets.html5.URLInput):
+class UploadableURL(WidgetHelper, html5.URLInput):
     # classes = 'uploadable-url'
 
     def __call__(self, field, **kwargs):
@@ -131,7 +122,7 @@ class UploadableURL(WidgetHelper, widgets.html5.URLInput):
         return super(UploadableURL, self).__call__(field, **kwargs)
 
 
-class ImageURL(WidgetHelper, widgets.html5.URLInput):
+class ImageURL(WidgetHelper, html5.URLInput):
     # classes = 'uploadable-url'
 
     def __call__(self, field, **kwargs):

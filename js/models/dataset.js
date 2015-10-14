@@ -56,7 +56,7 @@ export default class Dataset extends Model {
     }
 
     reorder(new_order) {
-        this.$api('datasets.reorder_resources', {
+        this.$api('datasets.update_resources', {
             dataset: this.id,
             payload: new_order
         }, (response) => {

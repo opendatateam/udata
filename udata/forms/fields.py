@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 import re
+import uuid
+
 from dateutil.parser import parse
 
 from flask import url_for
@@ -10,6 +12,7 @@ from flask.ext.fs.mongo import ImageReference
 from wtforms import Form as WTForm, Field as WTField, validators, fields
 from wtforms.fields import html5
 from wtforms.utils import unset_value
+from wtforms_json import flatten_json
 
 from . import widgets
 
@@ -21,7 +24,7 @@ from udata.models import (
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
-from udata.utils import to_iso_date
+from udata.utils import to_iso_date, get_by
 
 
 # _ = lambda s: s
@@ -82,7 +85,18 @@ class DateTimeField(Field, fields.DateTimeField):
 
     def process_formdata(self, valuelist):
         if valuelist:
-            self.data = parse(valuelist[0])
+            value = valuelist[0]
+            self.data = parse(value) if isinstance(value, basestring) else value
+
+
+class UUIDField(Field, fields.HiddenField):
+    def process_formdata(self, valuelist):
+        if valuelist:
+            try:
+                self.data = uuid.UUID(valuelist[0])
+            except ValueError:
+                self.data = None
+                raise ValueError(self.gettext('Not a valid UUID'))
 
 
 class BooleanField(FieldHelper, fields.BooleanField):
@@ -191,6 +205,11 @@ class FormField(FieldHelper, fields.FormField):
     def __init__(self, form_class, *args, **kwargs):
         super(FormField, self).__init__(FormWrapper(form_class),
                                         *args, **kwargs)
+
+    def populate_obj(self, obj, name):
+        if getattr(self.form_class, 'model_class', None) and not self._obj:
+            self._obj = self.form_class.model_class()
+        super(FormField, self).populate_obj(obj, name)
 
 
 def nullable_text(value):
@@ -370,6 +389,65 @@ class ModelList(object):
         self.data = [objects[id] for id in oids]
 
 
+class NestedModelList(fields.FieldList):
+    def __init__(self, model_form, *args, **kwargs):
+        super(NestedModelList, self).__init__(FormField(model_form),
+                                              *args,
+                                              **kwargs)
+        self.nested_form = model_form
+        self.nested_model = model_form.model_class
+        self.data_submitted = False
+        self.initial_data = []
+
+    def process(self, formdata, data=unset_value):
+        self.initial_data = data
+        prefix = '{0}-'.format(self.name)
+        if formdata and any(k.startswith(prefix) for k in formdata):
+            super(NestedModelList, self).process(formdata, data)
+        else:
+            super(NestedModelList, self).process(None, data)
+
+    def populate_obj(self, obj, name):
+        new_values = []
+
+        class Holder(object):
+            pass
+
+        holder = Holder()
+
+        for idx, field in enumerate(self):
+            holder.nested = self.nested_model()
+            field.populate_obj(holder, 'nested')
+            new_values.append(holder.nested)
+
+        setattr(obj, name, new_values)
+
+    def _add_entry(self, formdata=None, data=unset_value, index=None):
+        '''
+        Fill the form with previous data if necessary to handle partiel update
+        '''
+        if formdata:
+            prefix = '-'.join((self.name, str(index)))
+            basekey = '-'.join((prefix, '{0}'))
+            idkey = basekey.format('id')
+            if prefix in formdata:
+                formdata[idkey] = formdata.pop(prefix)
+            if hasattr(self.nested_model, 'id') and idkey in formdata:
+                id = self.nested_model.id.to_python(formdata[idkey])
+                data = get_by(self.initial_data, 'id', id)
+
+                initial = flatten_json(self.nested_form,
+                                       data.to_mongo(),
+                                       prefix)
+
+                for key, value in initial.items():
+                    if key not in formdata:
+                        formdata[key] = value
+            else:
+                data = None
+        return super(NestedModelList, self)._add_entry(formdata, data, index)
+
+
 class DatasetListField(ModelList, StringField):
     model = Dataset
     widget = widgets.DatasetAutocompleter()
@@ -394,31 +472,6 @@ class DatasetOrOrganizationField(ModelChoiceField, StringField):
 
 class DatasetField(ModelField, StringField):
     model = Dataset
-
-
-class ZonesField(ModelList, StringField):
-    model = GeoZone
-    widget = widgets.ZonesAutocompleter()
-
-
-class SpatialCoverageForm(WTForm):
-    zones = ZonesField(_('Spatial coverage'),
-                       description=_('A list of covered territories'))
-    granularity = SelectField(_('Spatial granularity'),
-                              description=_('The size of the data increment'),
-                              choices=lambda: spatial_granularities,
-                              default='other')
-
-
-class SpatialCoverageField(FieldHelper, fields.FormField):
-    def __init__(self, label=None, validators=None, **kwargs):
-        default = kwargs.pop('default', lambda: SpatialCoverage())
-        super(SpatialCoverageField, self).__init__(
-            SpatialCoverageForm, label, validators, default=default, **kwargs)
-
-    def populate_obj(self, obj, name):
-        self._obj = self._obj or SpatialCoverage()
-        super(SpatialCoverageField, self).populate_obj(obj, name)
 
 
 class MarkdownField(FieldHelper, fields.TextAreaField):

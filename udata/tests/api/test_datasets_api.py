@@ -20,6 +20,15 @@ from ..factories import (
     AdminFactory, UserFactory, LicenseFactory
 )
 
+SAMPLE_GEOM = {
+    "type": "MultiPolygon",
+    "coordinates": [
+      [[[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]],
+      [[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+       [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]]
+    ]
+}
+
 
 class DatasetAPITest(APITestCase):
     def test_dataset_api_list(self):
@@ -154,6 +163,32 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.extras['float'], 42.0)
         self.assertEqual(dataset.extras['string'], 'value')
 
+    def test_dataset_api_create_with_resources(self):
+        '''It should create a dataset with resources from the API'''
+        data = DatasetFactory.attributes()
+        data['resources'] = [ResourceFactory.attributes() for _ in range(3)]
+
+        with self.api_user():
+            response = self.post(url_for('api.datasets'), data)
+        self.assertStatus(response, 201)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(len(dataset.resources), 3)
+
+    def test_dataset_api_create_with_geom(self):
+        '''It should create a dataset with resources from the API'''
+        data = DatasetFactory.attributes()
+        data['spatial'] = {'geom': SAMPLE_GEOM}
+
+        with self.api_user():
+            response = self.post(url_for('api.datasets'), data)
+        self.assertStatus(response, 201)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.spatial.geom, SAMPLE_GEOM)
+
     def test_dataset_api_retrieve_full(self):
         '''It should retrieve a full dataset (quality) from the API.'''
         user = self.login()
@@ -180,6 +215,35 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description,
                          'new description')
+
+    def test_dataset_api_update_with_resources(self):
+        '''It should update a dataset from the API with resources parameters'''
+        user = self.login()
+        dataset = VisibleDatasetFactory(owner=user)
+        initial_length = len(dataset.resources)
+        data = dataset.to_dict()
+        data['resources'].append(ResourceFactory.attributes())
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(len(dataset.resources), initial_length + 1)
+
+    def test_dataset_api_update_without_resources(self):
+        '''It should update a dataset from the API without resources'''
+        user = self.login()
+        dataset = VisibleDatasetFactory(owner=user)
+        initial_length = len(dataset.resources)
+        data = dataset.to_dict()
+        del data['resources']
+        data['description'] = faker.sentence()
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(len(dataset.resources), initial_length)
 
     def test_dataset_api_update_with_extras(self):
         '''It should update a dataset from the API with extras parameters'''
@@ -457,19 +521,20 @@ class DatasetResourceAPITest(APITestCase):
             dataset.resources[0].url.endswith('test.txt'))
 
     def test_reorder(self):
-        self.dataset.resources = [ResourceFactory() for _ in range(3)]
+        self.dataset.resources = ResourceFactory.build_batch(3)
         self.dataset.save()
 
-        initial_order = [str(r.id) for r in self.dataset.resources]
-        expected_order = list(reversed(initial_order))
+        initial_order = [r.id for r in self.dataset.resources]
+        expected_order = [{'id': str(id)} for id in reversed(initial_order)]
 
         with self.api_user():
-            response = self.put(url_for('api.resources',
-                                        dataset=self.dataset), expected_order)
+            response = self.put(url_for('api.resources', dataset=self.dataset),
+                                expected_order)
         self.assertStatus(response, 200)
+
         self.dataset.reload()
         self.assertEqual([str(r.id) for r in self.dataset.resources],
-                         expected_order)
+                         [str(r['id']) for r in expected_order])
 
     def test_update(self):
         resource = ResourceFactory()
@@ -494,6 +559,38 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(updated.description, data['description'])
         self.assertEqual(updated.url, data['url'])
         self.assertEqualDates(updated.published, now)
+
+    def test_bulk_update(self):
+        resources = ResourceFactory.build_batch(2)
+        self.dataset.resources.extend(resources)
+        self.dataset.save()
+        now = datetime.now()
+        ids = [r.id for r in self.dataset.resources]
+        data = [{
+            'id': str(id),
+            'title': faker.sentence(),
+            'description': faker.text(),
+        } for id in ids]
+        data.append({
+            'title': faker.sentence(),
+            'description': faker.text(),
+            'url': faker.url(),
+        })
+        with self.api_user():
+            response = self.put(url_for('api.resources', dataset=self.dataset),
+                                data)
+        self.assert200(response)
+        self.dataset.reload()
+        self.assertEqual(len(self.dataset.resources), 3)
+        for idx, id in enumerate(ids):
+            resource = self.dataset.resources[idx]
+            rdata = data[idx]
+            self.assertEqual(str(resource.id), rdata['id'])
+            self.assertEqual(resource.title, rdata['title'])
+            self.assertEqual(resource.description, rdata['description'])
+            self.assertIsNotNone(resource.url)
+        new_resource = self.dataset.resources[-1]
+        self.assertEqualDates(new_resource.published, now)
 
     def test_update_404(self):
         data = {

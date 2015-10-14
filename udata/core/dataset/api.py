@@ -38,7 +38,9 @@ from .models import (
     CommunityResource
 )
 from .permissions import DatasetEditPermission
-from .forms import ResourceForm, DatasetForm, CommunityResourceForm
+from .forms import (
+    ResourceForm, DatasetForm, CommunityResourceForm, ResourcesListForm
+)
 from .search import DatasetSearch
 
 ns = api.namespace('datasets', 'Dataset related operations')
@@ -233,18 +235,19 @@ class ResourcesAPI(API):
         return resource, 201
 
     @api.secure
-    @api.doc('reorder_resources', **common_doc)
-    @api.expect([fields.String])
+    @api.doc('update_resources', **common_doc)
+    @api.expect([resource_fields])
     @api.marshal_with(resource_fields)
     def put(self, dataset):
         '''Reorder resources'''
         DatasetEditPermission(dataset).test()
-        new_resources = []
-        for rid in request.json:
-            resource = get_by(dataset.resources, 'id', UUID(rid))
-            new_resources.append(resource)
-        dataset.resources = new_resources
-        dataset.save()
+        data = {'resources': request.json}
+        form = ResourcesListForm.from_json(data, obj=dataset, instance=dataset,
+                                           csrf_enabled=False)
+        if not form.validate():
+            api.abort(400, errors=form.errors['resources'])
+
+        dataset = form.save()
         return dataset.resources, 200
 
 
