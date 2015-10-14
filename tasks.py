@@ -74,6 +74,13 @@ def doc():
 
 
 @task
+def jsdoc():
+    '''Build the JS documentation'''
+    header('Build the JS documentation')
+    nrun('esdoc -c esdoc.json', pty=True)
+
+
+@task
 def qa():
     '''Run a quality report'''
     header('Performing static analysis')
