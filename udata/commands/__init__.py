@@ -129,33 +129,39 @@ class BaseFormatter(logging.Formatter):
         return name
 
 
+def color(code):
+    '''A simple ANSI color wrapper factory'''
+    return lambda t: '\033[{0}{1}\033[0;m'.format(code, t)
+
+
+green = color('1;32m')
+red = color('1;31m')
+cyan = color('1;36m')
+purple = color('1;35m')
+yellow = color('1;33m')
+white = color('1;37m')
+bgred = color('1;41m')
+bggrey = color('1;100m')
+
+
 class ANSIFormatter(BaseFormatter):
     '''
     A log formatter that use ANSI colors.
     '''
-    ANSI_CODES = {
-        'red': '\033[1;31m',
-        'yellow': '\033[1;33m',
-        'cyan': '\033[1;36m',
-        'white': '\033[1;37m',
-        'bgred': '\033[1;41m',
-        'bggrey': '\033[1;100m',
-        'reset': '\033[0;m'}
-
     LEVEL_COLORS = {
-        'INFO': 'cyan',
-        'WARNING': 'yellow',
-        'ERROR': 'red',
-        'CRITICAL': 'bgred',
-        'DEBUG': 'bggrey'}
+        'INFO': cyan,
+        'WARNING': yellow,
+        'ERROR': red,
+        'CRITICAL': bgred,
+        'DEBUG': bggrey
+    }
 
     def _prefix(self, name):
-        color = self.ANSI_CODES[self.LEVEL_COLORS.get(name, 'white')]
+        level_color = self.LEVEL_COLORS.get(name, white)
         if name == 'INFO':
-            fmt = '{0}->{2}'
+            return level_color('->')
         else:
-            fmt = '{0}{1}{2}:'
-        return fmt.format(color, name, self.ANSI_CODES['reset'])
+            return '{0}:'.format(level_color(name))
 
 
 class TextFormatter(BaseFormatter):
