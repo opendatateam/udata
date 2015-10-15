@@ -5,8 +5,10 @@ import logging
 
 # from flask.ext.script import Command, Option
 
-from udata.commands import manager
+from udata.commands import manager, yellow
 from udata.search import es
+
+from .db import migrate
 
 log = logging.getLogger(__name__)
 
@@ -14,9 +16,11 @@ log = logging.getLogger(__name__)
 @manager.command
 def init():
     '''Initialize or update data and indexes'''
-    print 'Initialize or update ElasticSearch mappings'
+    log.info('Apply DB migrations if needed')
+    migrate(record=True)
+
+    log.info('Initialize or update ElasticSearch mappings')
     es.initialize()
 
-    print 'TODO: Apply DB migrations if needed'
-    print 'TODO: Feed initial data if needed'
-    print 'TODO: create an user if needed'
+    log.info('%s: Feed initial data if needed', yellow('TODO'))
+    log.info('%s: Create an administrator', yellow('TODO'))
