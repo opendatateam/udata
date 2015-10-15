@@ -37,7 +37,7 @@ function(plugin, filename, script) {{
         filename: filename,
         date: ISODate(),
         script: script,
-        output: stdout
+        output: stdout.join('\n')
     }});
 
     return stdout;
@@ -52,7 +52,7 @@ function(plugin, filename, script) {{
         filename: filename,
         date: ISODate(),
         script: script,
-        output: 'Marked only'
+        output: 'Recorded only'
     }});
 }}
 '''
