@@ -37,6 +37,7 @@ js-built
 /doc/_build/
 /node_modules/
 /udata/static/
+/jsdoc/
 
 # Installer logs
 pip-log.txt
@@ -47,6 +48,7 @@ pip-log.txt
 cover
 nosetests.xml
 coverage.xml
+/coverage/
 
 # Translations
 *.mo

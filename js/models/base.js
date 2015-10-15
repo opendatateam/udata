@@ -50,7 +50,7 @@ export class Base {
     /**
      * Emit an event on this model instance
      * @param  {String} name    The event unique name
-     * @param  {Object} options An optionnal options object
+     * @param  {Array}  args    A variable number of parameters
      */
     $emit(name, ...args) {
         var prefix = this.__class__.toLowerCase(),
@@ -62,7 +62,7 @@ export class Base {
     /**
      * Register a listener on an event.
      * @param  {String}   name   The event name to subscribe
-     * @param  {Function} hanler The callback to register
+     * @param  {Function} handler The callback to register
      * @return {Object}   An object with a single method remove
      *                       allowing to unregister the callback
      */
@@ -73,7 +73,7 @@ export class Base {
     /**
      * Unregister a listener on an event.
      * @param  {String}   name   The event name to subscribe
-     * @param  {Function} hanler The callback to register
+     * @param  {Function} handler The callback to register
      */
     $off(name, handler) {
         return this.$pubsub.unsubscribe(name, handler);
@@ -82,7 +82,7 @@ export class Base {
     /**
      * Register once a listener on an event.
      * @param  {String}   name   The event name to subscribe
-     * @param  {Function} hanler The callback to register
+     * @param  {Function} handler The callback to register
      */
     $once(name, handler) {
         return this.$pubsub.once(name, handler);
@@ -130,9 +130,7 @@ export class Model extends Base {
 
     /**
      * Empty or clear a data object based on a schema.
-     * @param  {Object} obj    the object to empty.
-     * @param  {Object} schema the schema to based empty values
-     * @return {Object}        the updated data object
+     * @return {Object}     The instance
      */
     empty() {
         var schema = this.__schema__

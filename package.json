@@ -20,6 +20,7 @@
     "chai-jquery": "^2.0.0",
     "chai-things": "^0.2.0",
     "css-loader": "^0.16.0",
+    "esdoc": "^0.4.0",
     "exports-loader": "^0.6.2",
     "extract-text-webpack-plugin": "^0.8.2",
     "faker": "^3.0.1",
