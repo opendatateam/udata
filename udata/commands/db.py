@@ -46,14 +46,21 @@ function(plugin, filename, script) {{
 
 # Only record a migration script
 RECORD_WRAPPER = '''
-function(plugin, filename, script) {{
-    db.migrations.insert({{
+function(plugin, filename, script) {
+    db.migrations.insert({
         plugin: plugin,
         filename: filename,
         date: ISODate(),
         script: script,
         output: 'Recorded only'
-    }});
+    });
+}
+'''
+
+# Only record a migration script
+UNRECORD_WRAPPER = '''
+function(oid) {{
+    db.migrations.remove({_id: oid});
 }}
 '''
 
@@ -82,8 +89,7 @@ def execute_migration(plugin, filename, script):
 def record_migration(plugin, filename, script):
     '''Only record a migration without applying it'''
     db = get_db(DEFAULT_CONNECTION_NAME)
-    js = RECORD_WRAPPER.format(script)
-    db.eval(js, plugin, filename, script)
+    db.eval(RECORD_WRAPPER, plugin, filename, script)
 
 
 def available_migrations():
@@ -140,3 +146,15 @@ def migrate(record):
             log_status(plugin, filename, status)
             script = resource_string(package, join('migrations', filename))
             handler(plugin, filename, script)
+
+
+@m.command
+def unrecord(plugin, filename):
+    '''Remove a database migration record'''
+    migration = get_migration(plugin, filename)
+    if migration:
+        log.info('Removing migration %s:%s', plugin, filename)
+        db = get_db(DEFAULT_CONNECTION_NAME)
+        db.eval(UNRECORD_WRAPPER, migration['_id'])
+    else:
+        log.error('Migration not found %s:%s', plugin, filename)
