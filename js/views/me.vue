@@ -78,18 +78,8 @@ export default  {
                     start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                     end: moment().format('YYYY-MM-DD')
                 });
-                var options = {
-                    owner: this.$root.me.id,
-                    sort: '-created',
-                    page_size: 10
-                };
                 this.datasets.fetch();
                 this.reuses.fetch();
-                // this.reuses.clear().fetch(options);
-                // this.datasets.clear().fetch(options);
-            } else {
-                // this.reuses.clear();
-                // this.datasets.clear();
             }
         }
     }
