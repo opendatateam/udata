@@ -35,6 +35,13 @@ define(['helpers/text'], function(text) {
             return (value || '').toLowerCase();
         });
 
+        /**
+         * More readable numbers
+         */
+        Vue.filter('numbers', function(value) {
+            return (value || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        });
+
     };
 
 });

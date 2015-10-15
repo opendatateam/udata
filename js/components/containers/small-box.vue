@@ -1,37 +1,7 @@
-<style lang="less">
-// .small-box {
-//     .icon {
-//         bottom: 10px;
-//         font-size: 70px;
-
-//         .fa {
-//             line-height: 1;
-//             text-transform: none;
-//         }
-//     }
-// }
-
-// @keyframes tansformAnimation {
-//     from {
-//         font-size: 70px;
-//     }
-//     to {
-//         font-size: 80px;
-//     }
-// }
-// @-webkit-keyframes tansformAnimation {
-//     from {
-//         font-size: 70px;
-//     }
-//     to {
-//         font-size: 80px;
-//     }
-// }
-</style>
 <template>
     <a class="small-box pointer" v-class="bgcolor" v-on="click: click">
         <div class="inner">
-            <h3>{{value || 0}}</h3>
+            <h3>{{value | numbers}}</h3>
             <p>{{label}}</p>
         </div>
         <div class="icon">
@@ -45,9 +15,7 @@
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'small-box',
     data: function() {
         return {
@@ -72,7 +40,11 @@ module.exports = {
                 if (this.target[0] === '#') {
                     this.$scrollTo(this.target);
                 } else {
-                    this.$go(this.target);
+                    if (this.$go) {
+                        this.$go(this.target);
+                    } else {
+                        window.location = this.target;
+                    }
                 }
             }
             this.$dispatch('small-box:click', this);

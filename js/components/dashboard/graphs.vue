@@ -1,18 +1,25 @@
 <style lang="less">
-.box {
-    border: none;
+.small-boxes {
+    margin: 1em 0 0;
+}
+.graphs-chart .box-title {
+    margin-top: 0;
 }
 </style>
 <template>
-    <div class="row">
-        <chart class="col-xs-12" title="{{ _('Data') }}"
-            metrics="{{ metrics }}" icon="null"
-            y="{{ dataY }}"></chart>
+    <div class="row small-boxes">
+        <small-box class="col-lg-4 col-xs-6" v-repeat="dataBoxes"></small-box>
     </div>
-    <div class="row" v-if="communityY">
-        <chart class="col-xs-12" title="{{ _('Community') }}"
-            metrics="{{ metrics }}" icon="null"
-            y="{{ communityY }}"></chart>
+    <div class="row small-boxes">
+        <small-box class="col-lg-4 col-xs-6" v-repeat="communityBoxes"></small-box>
+    </div>
+    <div class="row graphs-chart">
+        <chart class="col-xs-6" title="{{ _('Latest dataset uploads') }}"
+                metrics="{{ metrics }}" icon="null"
+                y="{{ dataDatasets }}" chart-type="Line"></chart>
+        <chart class="col-xs-6" title="{{ _('Latest reuse uploads') }}"
+                metrics="{{ metrics }}" icon="null"
+                y="{{ dataReuses }}" chart-type="Line"></chart>
     </div>
 </template>
 
@@ -26,37 +33,6 @@ export default {
     name: 'GraphView',
     props: ['objectId'],
     data: function() {
-        var dataY, communityY;
-        if (this.objectId) {
-            dataY = [{
-                id: 'datasets',
-                label: this._('Datasets')
-            }, {
-                id: 'dataset_views',
-                label: this._('Views')
-            }, {
-                id: 'resource_downloads',
-                label: this._('Downloads')
-            }];
-        } else {
-            dataY = [{
-                id: 'datasets',
-                label: this._('Datasets')
-            }, {
-                id: 'reuses',
-                label: this._('Reuses')
-            }, {
-                id: 'resources',
-                label: this._('Resources')
-            }];
-            communityY = [{
-                id: 'users',
-                label: this._('Users')
-            }, {
-                id: 'organizations',
-                label: this._('Organizations')
-            }];
-        }
         return {
             site: site,
             metrics: new Metrics({
@@ -64,11 +40,68 @@ export default {
                     loading: true,
                 }
             }),
-            dataY: dataY,
-            communityY: communityY
+            dataDatasets: [{
+                id: 'datasets',
+                label: this._('Datasets')
+            }],
+            dataReuses: [{
+                id: 'reuses',
+                label: this._('Reuses')
+            }]
         };
     },
+    computed: {
+        dataBoxes: function() {
+            if (!this.$root.site.metrics) {
+                return [];
+            }
+            return [{
+                value: this.$root.site.metrics.datasets || 0,
+                label: this._('Datasets'),
+                icon: 'cubes',
+                color: 'aqua',
+                target: '/datasets/'
+            }, {
+                value: this.$root.site.metrics.resources || 0,
+                label: this._('Resources'),
+                icon: 'file-text-o',
+                color: 'maroon',
+                target: '#'
+            }, {
+                value: this.$root.site.metrics.reuses || 0,
+                label: this._('Reuses'),
+                icon: 'retweet',
+                color: 'green',
+                target: '/reuses/'
+            }];
+        },
+        communityBoxes: function() {
+            if (!this.$root.site.metrics) {
+                return [];
+            }
+            return [{
+                value: this.$root.site.metrics.users || 0,
+                label: this._('Users'),
+                icon: 'users',
+                color: 'yellow',
+                target: '#users-widget'
+            }, {
+                value: this.$root.site.metrics.organizations || 0,
+                label: this._('Organizations'),
+                icon: 'building',
+                color: 'purple',
+                target: '/organizations/'
+            }, {
+                value: this.$root.site.metrics.discussions || 0,
+                label: this._('Discussions'),
+                icon: 'comments',
+                color: 'teal',
+                target: '#'
+            }];
+        }
+    },
     components: {
+        'small-box': require('components/containers/small-box.vue'),
         'chart': require('components/charts/widget.vue')
     },
     watch: {
@@ -84,10 +117,12 @@ export default {
             if (this.objectId || this.site.id) {
                 this.metrics.fetch({
                     id: this.objectId || this.site.id,
-                    start: moment().subtract(30, 'days').format('YYYY-MM-DD'),
-                    end: moment().format('YYYY-MM-DD')
+                    start: moment().subtract(12, 'days').format('YYYY-MM-DD'),
+                    end: moment().format('YYYY-MM-DD'),
+                    cumulative: '' // false
                 });
             }
         }
-    }};
+    }
+};
 </script>

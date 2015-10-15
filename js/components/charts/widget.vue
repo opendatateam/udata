@@ -56,36 +56,37 @@ Chart.defaults.global.maintainAspectRatio = false;
 Chart.defaults.global.multiTooltipTemplate = '<%=datasetLabel%>: <%= value %>';
 
 
-var AREA_OPTIONS = {
-        // scaleShowGridLines: false,
-        scaleShowHorizontalLines: true,
-        scaleShowVerticalLines: true,
-        bezierCurveTension: 0.3,
-    },
-
-    LINE_OPTIONS = $.extend({}, AREA_OPTIONS, {
-        datasetFill: false
-    }),
-
-    BAR_OPTIONS = {
-        scaleBeginAtZero: true,
-        scaleShowGridLines: true,
-        scaleShowHorizontalLines: true,
-        scaleShowVerticalLines: true,
-        barShowStroke: true,
-        barStrokeWidth: 2,
-        barValueSpacing: 5,
-        barDatasetSpacing: 1,
-        datasetFill: false
-    },
-    COLORS = [
-        '#a0d0e0',
-        '#3c8dbc',
-        '#4da74d',
-        '#ffb311',
-        '#8612ee',
-        '#aaa',
-    ];
+const AREA_OPTIONS = {
+    // scaleShowGridLines: false,
+    scaleShowHorizontalLines: true,
+    scaleShowVerticalLines: true,
+    bezierCurveTension: 0.3,
+};
+const LINE_OPTIONS = $.extend({}, AREA_OPTIONS, {
+    datasetFill: false,
+});
+const BAR_OPTIONS = {
+    scaleBeginAtZero: true,
+    scaleShowGridLines: true,
+    scaleShowHorizontalLines: true,
+    scaleShowVerticalLines: true,
+    barShowStroke: true,
+    barStrokeWidth: 2,
+    barValueSpacing: 5,
+    barDatasetSpacing: 1,
+    datasetFill: false,
+};
+const STACKEDBAR_OPTIONS = $.extend({}, BAR_OPTIONS, {
+    scaleShowVerticalLines: false,
+});
+const COLORS = [
+    '#a0d0e0',
+    '#3c8dbc',
+    '#4da74d',
+    '#ffb311',
+    '#8612ee',
+    '#aaa',
+];
 
 
 export default {
@@ -175,7 +176,7 @@ export default {
             return new Chart(ctx).Bar(this.series, BAR_OPTIONS);
         },
         buildStackedBar: function(ctx) {
-            return new Chart(ctx).StackedBar(this.series, BAR_OPTIONS);
+            return new Chart(ctx).StackedBar(this.series, STACKEDBAR_OPTIONS);
         },
         buildLine: function(ctx) {
             return new Chart(ctx).Line(this.series, LINE_OPTIONS);

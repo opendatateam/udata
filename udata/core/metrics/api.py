@@ -32,6 +32,9 @@ parser.add_argument(
 parser.add_argument(
     'end', type=isodate, help='End of the period to fetch', location='args')
 parser.add_argument(
+    'cumulative', type=bool, help='Either cumulative metrics or not',
+    default=True, location='args')
+parser.add_argument(
     'day', type=isodate, help='Specific day date to fetch', location='args')
 
 
@@ -52,10 +55,22 @@ class MetricsAPI(API):
         queryset = Metrics.objects(object_id=object_id).order_by('-date')
         args = parser.parse_args()
         if args.get('day'):
-            result = [queryset(date=args['day']).first_or_404()]
+            metrics = [queryset(date=args['day']).first_or_404()]
         elif args.get('start'):
             end = args.get('end', date.today().isoformat())
-            result = list(queryset(date__gte=args['start'], date__lte=end))
+            metrics = list(queryset(date__gte=args['start'], date__lte=end))
         else:
-            result = [queryset.first_or_404()]
-        return marshal(result, metrics_fields)
+            metrics = [queryset.first_or_404()]
+        if not args.get('cumulative') and metrics:
+            # Turn cumulative data into daily counts based on the first
+            # result. Might return negative values if there is a drop.
+            reference_values = metrics[-1].values.copy()
+            for metric in reversed(metrics):
+                current_values = metric.values.copy()
+                metric.values = {
+                    name: count - reference_values[name]
+                    for name, count in current_values.iteritems()
+                    if name in reference_values
+                }
+                reference_values = current_values
+        return marshal(metrics, metrics_fields)
