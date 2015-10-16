@@ -14,6 +14,9 @@ uData
 .. image:: https://david-dm.org/etalab/udata.svg
     :target: https://david-dm.org/etalab/udata
     :alt: JavaScript Dependencies Status
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/etalab/udata
+   :target: https://gitter.im/etalab/udata?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 uData is an open and social data hub.
 This currently a work in progress and API is subject to change until the first official release.
@@ -21,7 +24,7 @@ This currently a work in progress and API is subject to change until the first o
 Compatibility
 =============
 
-udata requires Python 2.7+, MongoDB 2.6+, ElasticSearch 1.0+ and Redis.
+udata requires Python 2.7+, MongoDB 2.6+, ElasticSearch 1.3+ and Redis.
 
 
 Installation
