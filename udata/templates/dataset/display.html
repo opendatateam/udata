@@ -386,17 +386,17 @@
             {% include theme('discussion/threads.html') %}
         {% endwith %}
 
-        <h3>{{ _('Resources') }}</h3>
+        <h3>{{ _('Community resources') }}</h3>
         <div class="row">
             <div class="col-sm-9 list-group resources-list smaller">
             {% for resource in dataset.community_resources %}
                 {% include theme('dataset/resource/list-item.html') %}
             {% endfor %}
                 <a class="list-group-item add"
-                    href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
+                    href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
                     <div class="format-label pull-left">+</div>
                     <h4 class="list-group-item-heading">
-                        {{ _('Add a resource') }}
+                        {{ _('New community resource') }}
                     </h4>
                 </a>
             </div>
