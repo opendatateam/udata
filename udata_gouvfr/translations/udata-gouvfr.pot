@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-09-30 17:05+0200\n"
+"POT-Creation-Date: 2015-10-16 19:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -79,12 +79,10 @@ msgid "Data"
 msgstr ""
 
 #: udata_gouvfr/theme/theme.py:42 udata_gouvfr/theme/templates/footer.html:66
-#: udata_gouvfr/theme/templates/dataset/display.html:23
 msgid "Datasets"
 msgstr ""
 
 #: udata_gouvfr/theme/theme.py:43 udata_gouvfr/theme/templates/footer.html:67
-#: udata_gouvfr/theme/templates/dataset/display.html:575
 msgid "Reuses"
 msgstr ""
 
@@ -202,7 +200,6 @@ msgid "The blog"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/home.html:192
-#: udata_gouvfr/theme/templates/dataset/display.html:248
 msgid "more"
 msgstr ""
 
@@ -225,242 +222,9 @@ msgstr ""
 msgid "Contribute!"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/dataset/display.html:9
-msgid "dataset"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:32
-#: udata_gouvfr/theme/templates/dataset/display.html:192
-#: udata_gouvfr/theme/templates/dataset/display.html:612
-msgid "Edit"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:42
-#: udata_gouvfr/theme/templates/dataset/display.html:202
-msgid "Featured"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:69
-msgid "This dataset comes from a certified public service"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:71
-#, python-format
-msgid ""
-"Published on %(date)s and updated on %(update)s by <a href=\"%(url)s\" "
-"title=\"%(author)s\">%(author)s</a>"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:80
-#, python-format
-msgid ""
-"This dataset has been published on %(date)s and updated on %(update)s on the "
-"initiative and under the responsibility of <a href=\"%(url)s\" "
-"title=\"%(author)s\">%(author)s</a>"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:92
-msgid "See all datasets with that badge."
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:100
-#: udata_gouvfr/theme/templates/dataset/display.html:102
-msgid "Private"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:101
-msgid "This dataset is private and will not be visible by other users"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:106
-#: udata_gouvfr/theme/templates/dataset/display.html:108
-msgid "Deleted"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:107
-msgid "This dataset has been deleted. This will be permanent in the next 24 hours"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:116
-msgid "Provided by"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:132
-msgid "See the original website"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:147
-#: udata_gouvfr/theme/templates/dataset/display.html:555
-msgid "Resources"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:157
-msgid "No resources"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:167
-#, python-format
-msgid "See the %(nb)d resources"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:177
-#: udata_gouvfr/theme/templates/dataset/display.html:565
-msgid "Add a resource"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:229
-msgid "Producer"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:233
-msgid "Certified public service"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:234
-msgid "The identity of this public service public is certified by Etalab"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:258
-#: udata_gouvfr/theme/templates/dataset/display.html:260
-#: udata_gouvfr/theme/templates/dataset/display.html:262
-msgid "Unfollow"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:264
-msgid "I'll be informed about this organization news"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:266
-msgid "Follow"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:277
-msgid "Informations"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:285
-msgid "Badges"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:299
-msgid "License"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:312
-msgid "Temporal coverage"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:322
-msgid "Frequency"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:334
-msgid "Territorial coverage granularity"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:343
-msgid "Territorial coverage"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:363
-msgid "Suggest a tag with a new discussion thread"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:365
-msgid "Suggest a tag"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:378
-#: udata_gouvfr/theme/templates/dataset/display.html:380
-msgid "Details"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:390
-msgid "Spatial coverage"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:490
-#: udata_gouvfr/theme/templates/reuse/display.html:14
-msgid "Community contributions"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:491
-#: udata_gouvfr/theme/templates/reuse/display.html:15
+#: udata_gouvfr/theme/templates/dataset/display.html:3
+#: udata_gouvfr/theme/templates/reuse/display.html:3
 msgid "Explore with Datagouv"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:498
-#: udata_gouvfr/theme/templates/reuse/display.html:22
-msgid "Discussions"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:510
-#: udata_gouvfr/theme/templates/reuse/display.html:34
-msgid "Start a new discussion"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:522
-#: udata_gouvfr/theme/templates/reuse/display.html:45
-msgid "Starting a new discussion thread"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:525
-msgid ""
-"You're about to start a new discussion thread. Make sure that a thread about "
-"the same topic doesn't exist yet just above. If you want to report an "
-"anomaly, please use the dedicated button just under the datasets."
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:531
-#: udata_gouvfr/theme/templates/reuse/display.html:54
-msgid "Title"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:533
-#: udata_gouvfr/theme/templates/reuse/display.html:56
-msgid "Comment"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:536
-#: udata_gouvfr/theme/templates/reuse/display.html:59
-msgid "Start a discussion"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:551
-msgid "Discussion between the organization and the community about this dataset."
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:571
-msgid ""
-"You have built a more comprehensive database than those presented here? This "
-"is the time to share it!"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:608
-msgid "Open in a new window"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:623
-#: udata_gouvfr/theme/templates/dataset/display.html:627
-msgid "Unmark as featured"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:625
-#: udata_gouvfr/theme/templates/dataset/display.html:628
-msgid "Mark as featured"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:642
-msgid "Add a reuse"
-msgstr ""
-
-#: udata_gouvfr/theme/templates/dataset/display.html:650
-msgid ""
-"You reused these data and published an article, a computer graphics, or an "
-"application?\n"
-"                It's time to let you know!\n"
-"                Reference your work in just a few clicks and increase your "
-"visibility."
 msgstr ""
 
 #: udata_gouvfr/theme/templates/mail/base.html:45
@@ -486,15 +250,12 @@ msgstr ""
 msgid "The %(site)s team"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/reuse/display.html:48
-msgid ""
-"You're about to start a new discussion thread. Make sure that a thread about "
-"the same topic doesn't exist yet just above. If you want to report an "
-"anomaly, please use the dedicated button just under the reuses."
+#: udata_gouvfr/theme/templates/organization/sidebar-producer.html:4
+msgid "Certified public service"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/reuse/display.html:75
-msgid "Discussion between the reusers and the community about this reuse."
+#: udata_gouvfr/theme/templates/organization/sidebar-producer.html:5
+msgid "The identity of this public service public is certified by Etalab"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:18

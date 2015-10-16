@@ -1,7 +1,8 @@
-# Translations template for udata-gouvfr.
+# French translations for udata-gouvfr.
 # Copyright (C) 2015 ORGANIZATION
-# This file is distributed under the same license as the udata-gouvfr project.
-# 
+# This file is distributed under the same license as the udata-gouvfr
+# project.
+#
 # Translators:
 # Axel Haustant, 2014
 # Axel Haustant, 2014-2015
@@ -10,18 +11,18 @@
 # noirbizarre, 2014
 msgid ""
 msgstr ""
-"Project-Id-Version: udata-gouv.fr\n"
+"Project-Id-Version:  udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-09-30 17:05+0200\n"
+"POT-Creation-Date: 2015-10-16 19:05+0200\n"
 "PO-Revision-Date: 2015-09-30 15:06+0000\n"
 "Last-Translator: Larlet David <david@larlet.fr>\n"
-"Language-Team: French (http://www.transifex.com/etalab/udata-gouvfr/language/fr/)\n"
+"Language-Team: French (http://www.transifex.com/etalab/udata-"
+"gouvfr/language/fr/)\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
-"Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: udata_gouvfr/metrics.py:14
 msgid "Public services"
@@ -85,12 +86,10 @@ msgid "Data"
 msgstr "Données"
 
 #: udata_gouvfr/theme/theme.py:42 udata_gouvfr/theme/templates/footer.html:66
-#: udata_gouvfr/theme/templates/dataset/display.html:23
 msgid "Datasets"
 msgstr "Jeux de données"
 
 #: udata_gouvfr/theme/theme.py:43 udata_gouvfr/theme/templates/footer.html:67
-#: udata_gouvfr/theme/templates/dataset/display.html:575
 msgid "Reuses"
 msgstr "Réutilisations"
 
@@ -145,9 +144,11 @@ msgstr "Haut de page"
 
 #: udata_gouvfr/theme/templates/header.html:4
 msgid ""
-"Internet Explorer 8 and below are not anymore supported. Please upgrade or "
-"change your browser to access the website."
-msgstr "Internet Explorer 8 et en dessous ne sont plus supportés. Mettez à jour ou changez de navigateur pour accéder à ce site."
+"Internet Explorer 8 and below are not anymore supported. Please upgrade "
+"or change your browser to access the website."
+msgstr ""
+"Internet Explorer 8 et en dessous ne sont plus supportés. Mettez à jour "
+"ou changez de navigateur pour accéder à ce site."
 
 #: udata_gouvfr/theme/templates/header.html:4
 msgid "More information →"
@@ -208,7 +209,6 @@ msgid "The blog"
 msgstr "Le blog"
 
 #: udata_gouvfr/theme/templates/home.html:192
-#: udata_gouvfr/theme/templates/dataset/display.html:248
 msgid "more"
 msgstr "plus"
 
@@ -231,243 +231,10 @@ msgstr "Partagez, améliorez et réutilisez les données publiques"
 msgid "Contribute!"
 msgstr "Contribuez !"
 
-#: udata_gouvfr/theme/templates/dataset/display.html:9
-msgid "dataset"
-msgstr "jeu de données"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:32
-#: udata_gouvfr/theme/templates/dataset/display.html:192
-#: udata_gouvfr/theme/templates/dataset/display.html:612
-msgid "Edit"
-msgstr "Editer"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:42
-#: udata_gouvfr/theme/templates/dataset/display.html:202
-msgid "Featured"
-msgstr "Mis en avant"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:69
-msgid "This dataset comes from a certified public service"
-msgstr "Ce jeu de données provient d'un service public certifié"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:71
-#, python-format
-msgid ""
-"Published on %(date)s and updated on %(update)s by <a href=\"%(url)s\" "
-"title=\"%(author)s\">%(author)s</a>"
-msgstr "Publié le %(date)s et mis à jour le %(update)s par <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:80
-#, python-format
-msgid ""
-"This dataset has been published on %(date)s and updated on %(update)s on the"
-" initiative and under the responsibility of <a href=\"%(url)s\" "
-"title=\"%(author)s\">%(author)s</a>"
-msgstr "Ce jeu de données a été publié le %(date)s et mis à jours le %(update)s à l'initiative et sous la responsabilité de <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:92
-msgid "See all datasets with that badge."
-msgstr "Voir tous les jeux de données avec ce badge."
-
-#: udata_gouvfr/theme/templates/dataset/display.html:100
-#: udata_gouvfr/theme/templates/dataset/display.html:102
-msgid "Private"
-msgstr "Privé"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:101
-msgid "This dataset is private and will not be visible by other users"
-msgstr "Ce jeu de données est privé et ne sera pas visible des autres utilisateurs"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:106
-#: udata_gouvfr/theme/templates/dataset/display.html:108
-msgid "Deleted"
-msgstr "Supprimé"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:107
-msgid ""
-"This dataset has been deleted. This will be permanent in the next 24 hours"
-msgstr "Ce jeu de données a été supprimé. Cela deviendra permanent dans les prochaines 24 heures."
-
-#: udata_gouvfr/theme/templates/dataset/display.html:116
-msgid "Provided by"
-msgstr "Fourni par"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:132
-msgid "See the original website"
-msgstr "Voir le site original"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:147
-#: udata_gouvfr/theme/templates/dataset/display.html:555
-msgid "Resources"
-msgstr "Ressources"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:157
-msgid "No resources"
-msgstr "Aucune ressource"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:167
-#, python-format
-msgid "See the %(nb)d resources"
-msgstr "Voir les %(nb)d ressources"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:177
-#: udata_gouvfr/theme/templates/dataset/display.html:565
-msgid "Add a resource"
-msgstr "Ajouter une ressource"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:229
-msgid "Producer"
-msgstr "Producteur"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:233
-msgid "Certified public service"
-msgstr "Service public certifié"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:234
-msgid "The identity of this public service public is certified by Etalab"
-msgstr "L'identité de ce service public est certifiée par Etalab"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:258
-#: udata_gouvfr/theme/templates/dataset/display.html:260
-#: udata_gouvfr/theme/templates/dataset/display.html:262
-msgid "Unfollow"
-msgstr "Ne plus suivre"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:264
-msgid "I'll be informed about this organization news"
-msgstr "Je serai informé des actualités de cette organisation"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:266
-msgid "Follow"
-msgstr "Suivre"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:277
-msgid "Informations"
-msgstr "Informations"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:285
-msgid "Badges"
-msgstr "Badges"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:299
-msgid "License"
-msgstr "Licence"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:312
-msgid "Temporal coverage"
-msgstr "Couverture temporelle"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:322
-msgid "Frequency"
-msgstr "Fréquence"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:334
-msgid "Territorial coverage granularity"
-msgstr "Granularité de la couverture territoriale"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:343
-msgid "Territorial coverage"
-msgstr "Couverture territoriale"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:363
-msgid "Suggest a tag with a new discussion thread"
-msgstr "Suggérer un mot-clé avec un nouveau fil de discussion"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:365
-msgid "Suggest a tag"
-msgstr "Suggérer un mot-clé"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:378
-#: udata_gouvfr/theme/templates/dataset/display.html:380
-msgid "Details"
-msgstr "Détails"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:390
-msgid "Spatial coverage"
-msgstr "Couverture spatiale"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:490
-#: udata_gouvfr/theme/templates/reuse/display.html:14
-msgid "Community contributions"
-msgstr "Contributions communautaires"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:491
-#: udata_gouvfr/theme/templates/reuse/display.html:15
+#: udata_gouvfr/theme/templates/dataset/display.html:3
+#: udata_gouvfr/theme/templates/reuse/display.html:3
 msgid "Explore with Datagouv"
 msgstr "Explorer avec Datagouv"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:498
-#: udata_gouvfr/theme/templates/reuse/display.html:22
-msgid "Discussions"
-msgstr "Discussions"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:510
-#: udata_gouvfr/theme/templates/reuse/display.html:34
-msgid "Start a new discussion"
-msgstr "Démarrer une nouvelle discussion"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:522
-#: udata_gouvfr/theme/templates/reuse/display.html:45
-msgid "Starting a new discussion thread"
-msgstr "Démarrer une nouvelle discussion"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:525
-msgid ""
-"You're about to start a new discussion thread. Make sure that a thread about"
-" the same topic doesn't exist yet just above. If you want to report an "
-"anomaly, please use the dedicated button just under the datasets."
-msgstr "Vous êtes sur le point de démarrer un nouveau fil de discussion. Vérifiez qu'une discussion sur le même sujet n'existe pas déjà. Si vous voulez soumettre une anomalie, veuillez utiliser le bouton dédié juste sous les jeux de données."
-
-#: udata_gouvfr/theme/templates/dataset/display.html:531
-#: udata_gouvfr/theme/templates/reuse/display.html:54
-msgid "Title"
-msgstr "Titre"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:533
-#: udata_gouvfr/theme/templates/reuse/display.html:56
-msgid "Comment"
-msgstr "Commentaire"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:536
-#: udata_gouvfr/theme/templates/reuse/display.html:59
-msgid "Start a discussion"
-msgstr "Démarrer une discussion"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:551
-msgid ""
-"Discussion between the organization and the community about this dataset."
-msgstr "Discussion entre l'organisation et la communauté à propos de ce jeu de données."
-
-#: udata_gouvfr/theme/templates/dataset/display.html:571
-msgid ""
-"You have built a more comprehensive database than those presented here? This"
-" is the time to share it!"
-msgstr "Vous avez construit une base de données plus complète que celles présentées ici ? C'est le moment de la partager !"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:608
-msgid "Open in a new window"
-msgstr "Ouvrir dans une nouvelle fenêtre"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:623
-#: udata_gouvfr/theme/templates/dataset/display.html:627
-msgid "Unmark as featured"
-msgstr "Ne plus mettre en avant"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:625
-#: udata_gouvfr/theme/templates/dataset/display.html:628
-msgid "Mark as featured"
-msgstr "Mettre en avant"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:642
-msgid "Add a reuse"
-msgstr "Ajouter une réutilisation"
-
-#: udata_gouvfr/theme/templates/dataset/display.html:650
-msgid ""
-"You reused these data and published an article, a computer graphics, or an application?\n"
-"                It's time to let you know!\n"
-"                Reference your work in just a few clicks and increase your visibility."
-msgstr "Vous avez réutilisé ces données et publié un article, une infographie, ou une application ?\nC'est le moment de vous faire connaître !\nRéférencez votre travail en quelques clics et augmentez votre visibilité."
 
 #: udata_gouvfr/theme/templates/mail/base.html:45
 msgid "on your browser."
@@ -492,16 +259,13 @@ msgstr "A bientôt sur la plateforme"
 msgid "The %(site)s team"
 msgstr "L'équipe de %(site)s"
 
-#: udata_gouvfr/theme/templates/reuse/display.html:48
-msgid ""
-"You're about to start a new discussion thread. Make sure that a thread about"
-" the same topic doesn't exist yet just above. If you want to report an "
-"anomaly, please use the dedicated button just under the reuses."
-msgstr "Vous êtes sur le point de démarrer un nouveau fil de discussion. Vérifiez qu'une discussion sur le même sujet n'existe pas déjà. Si vous voulez soumettre une anomalie, veuillez utiliser le bouton dédié juste sous les réutilisations."
+#: udata_gouvfr/theme/templates/organization/sidebar-producer.html:4
+msgid "Certified public service"
+msgstr "Service public certifié"
 
-#: udata_gouvfr/theme/templates/reuse/display.html:75
-msgid "Discussion between the reusers and the community about this reuse."
-msgstr "Discussion entre les réutilisateurs et la communauté sur cette réutilisation."
+#: udata_gouvfr/theme/templates/organization/sidebar-producer.html:5
+msgid "The identity of this public service public is certified by Etalab"
+msgstr "L'identité de ce service public est certifiée par Etalab"
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:18
 msgid "Publish a dataset"
@@ -526,3 +290,231 @@ msgstr "Créez ou trouvez votre organisation"
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:45
 msgid "You can create a new organization or find yours."
 msgstr "Vous pouvez créer une nouvelle organisation ou trouver la vôtre"
+
+#~ msgid "dataset"
+#~ msgstr "jeu de données"
+
+#~ msgid "Edit"
+#~ msgstr "Editer"
+
+#~ msgid "Featured"
+#~ msgstr "Mis en avant"
+
+#~ msgid "This dataset comes from a certified public service"
+#~ msgstr "Ce jeu de données provient d'un service public certifié"
+
+#~ msgid ""
+#~ "Published on %(date)s and updated on "
+#~ "%(update)s by <a href=\"%(url)s\" "
+#~ "title=\"%(author)s\">%(author)s</a>"
+#~ msgstr ""
+#~ "Publié le %(date)s et mis à jour"
+#~ " le %(update)s par <a href=\"%(url)s\" "
+#~ "title=\"%(author)s\">%(author)s</a>"
+
+#~ msgid ""
+#~ "This dataset has been published on "
+#~ "%(date)s and updated on %(update)s on"
+#~ " the initiative and under the "
+#~ "responsibility of <a href=\"%(url)s\" "
+#~ "title=\"%(author)s\">%(author)s</a>"
+#~ msgstr ""
+#~ "Ce jeu de données a été publié "
+#~ "le %(date)s et mis à jours le "
+#~ "%(update)s à l'initiative et sous la "
+#~ "responsabilité de <a href=\"%(url)s\" "
+#~ "title=\"%(author)s\">%(author)s</a>"
+
+#~ msgid "See all datasets with that badge."
+#~ msgstr "Voir tous les jeux de données avec ce badge."
+
+#~ msgid "Private"
+#~ msgstr "Privé"
+
+#~ msgid "This dataset is private and will not be visible by other users"
+#~ msgstr ""
+#~ "Ce jeu de données est privé et "
+#~ "ne sera pas visible des autres "
+#~ "utilisateurs"
+
+#~ msgid "Deleted"
+#~ msgstr "Supprimé"
+
+#~ msgid ""
+#~ "This dataset has been deleted. This "
+#~ "will be permanent in the next 24"
+#~ " hours"
+#~ msgstr ""
+#~ "Ce jeu de données a été supprimé."
+#~ " Cela deviendra permanent dans les "
+#~ "prochaines 24 heures."
+
+#~ msgid "Provided by"
+#~ msgstr "Fourni par"
+
+#~ msgid "See the original website"
+#~ msgstr "Voir le site original"
+
+#~ msgid "Resources"
+#~ msgstr "Ressources"
+
+#~ msgid "No resources"
+#~ msgstr "Aucune ressource"
+
+#~ msgid "See the %(nb)d resources"
+#~ msgstr "Voir les %(nb)d ressources"
+
+#~ msgid "Add a resource"
+#~ msgstr "Ajouter une ressource"
+
+#~ msgid "Producer"
+#~ msgstr "Producteur"
+
+#~ msgid "Unfollow"
+#~ msgstr "Ne plus suivre"
+
+#~ msgid "I'll be informed about this organization news"
+#~ msgstr "Je serai informé des actualités de cette organisation"
+
+#~ msgid "Follow"
+#~ msgstr "Suivre"
+
+#~ msgid "Informations"
+#~ msgstr "Informations"
+
+#~ msgid "Badges"
+#~ msgstr "Badges"
+
+#~ msgid "License"
+#~ msgstr "Licence"
+
+#~ msgid "Temporal coverage"
+#~ msgstr "Couverture temporelle"
+
+#~ msgid "Frequency"
+#~ msgstr "Fréquence"
+
+#~ msgid "Territorial coverage granularity"
+#~ msgstr "Granularité de la couverture territoriale"
+
+#~ msgid "Territorial coverage"
+#~ msgstr "Couverture territoriale"
+
+#~ msgid "Suggest a tag with a new discussion thread"
+#~ msgstr "Suggérer un mot-clé avec un nouveau fil de discussion"
+
+#~ msgid "Suggest a tag"
+#~ msgstr "Suggérer un mot-clé"
+
+#~ msgid "Details"
+#~ msgstr "Détails"
+
+#~ msgid "Spatial coverage"
+#~ msgstr "Couverture spatiale"
+
+#~ msgid "Community contributions"
+#~ msgstr "Contributions communautaires"
+
+#~ msgid "Discussions"
+#~ msgstr "Discussions"
+
+#~ msgid "Start a new discussion"
+#~ msgstr "Démarrer une nouvelle discussion"
+
+#~ msgid "Starting a new discussion thread"
+#~ msgstr "Démarrer une nouvelle discussion"
+
+#~ msgid ""
+#~ "You're about to start a new "
+#~ "discussion thread. Make sure that a "
+#~ "thread about the same topic doesn't "
+#~ "exist yet just above. If you want"
+#~ " to report an anomaly, please use "
+#~ "the dedicated button just under the "
+#~ "datasets."
+#~ msgstr ""
+#~ "Vous êtes sur le point de démarrer"
+#~ " un nouveau fil de discussion. "
+#~ "Vérifiez qu'une discussion sur le même"
+#~ " sujet n'existe pas déjà. Si vous "
+#~ "voulez soumettre une anomalie, veuillez "
+#~ "utiliser le bouton dédié juste sous "
+#~ "les jeux de données."
+
+#~ msgid "Title"
+#~ msgstr "Titre"
+
+#~ msgid "Comment"
+#~ msgstr "Commentaire"
+
+#~ msgid "Start a discussion"
+#~ msgstr "Démarrer une discussion"
+
+#~ msgid ""
+#~ "Discussion between the organization and "
+#~ "the community about this dataset."
+#~ msgstr ""
+#~ "Discussion entre l'organisation et la "
+#~ "communauté à propos de ce jeu de"
+#~ " données."
+
+#~ msgid ""
+#~ "You have built a more comprehensive "
+#~ "database than those presented here? This"
+#~ " is the time to share it!"
+#~ msgstr ""
+#~ "Vous avez construit une base de "
+#~ "données plus complète que celles "
+#~ "présentées ici ? C'est le moment "
+#~ "de la partager !"
+
+#~ msgid "Open in a new window"
+#~ msgstr "Ouvrir dans une nouvelle fenêtre"
+
+#~ msgid "Unmark as featured"
+#~ msgstr "Ne plus mettre en avant"
+
+#~ msgid "Mark as featured"
+#~ msgstr "Mettre en avant"
+
+#~ msgid "Add a reuse"
+#~ msgstr "Ajouter une réutilisation"
+
+#~ msgid ""
+#~ "You reused these data and published "
+#~ "an article, a computer graphics, or "
+#~ "an application?\n"
+#~ "                It's time to let you know!\n"
+#~ "                Reference your work in "
+#~ "just a few clicks and increase "
+#~ "your visibility."
+#~ msgstr ""
+#~ "Vous avez réutilisé ces données et "
+#~ "publié un article, une infographie, ou"
+#~ " une application ?\n"
+#~ "C'est le moment de vous faire connaître !\n"
+#~ "Référencez votre travail en quelques "
+#~ "clics et augmentez votre visibilité."
+
+#~ msgid ""
+#~ "You're about to start a new "
+#~ "discussion thread. Make sure that a "
+#~ "thread about the same topic doesn't "
+#~ "exist yet just above. If you want"
+#~ " to report an anomaly, please use "
+#~ "the dedicated button just under the "
+#~ "reuses."
+#~ msgstr ""
+#~ "Vous êtes sur le point de démarrer"
+#~ " un nouveau fil de discussion. "
+#~ "Vérifiez qu'une discussion sur le même"
+#~ " sujet n'existe pas déjà. Si vous "
+#~ "voulez soumettre une anomalie, veuillez "
+#~ "utiliser le bouton dédié juste sous "
+#~ "les réutilisations."
+
+#~ msgid "Discussion between the reusers and the community about this reuse."
+#~ msgstr ""
+#~ "Discussion entre les réutilisateurs et "
+#~ "la communauté sur cette réutilisation."
+
