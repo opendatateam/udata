@@ -370,15 +370,11 @@ class ModelList(object):
     def process_formdata(self, valuelist):
         if not valuelist:
             return []
-        if len(valuelist) > 1:
-            oids = [clean_oid(id, self.model) for id in valuelist]
-        elif isinstance(valuelist[0], basestring):
-            oids = [
-                clean_oid(id, self.model)
-                for id in valuelist[0].split(',') if id]
+        if len(valuelist) == 1 and isinstance(valuelist[0], basestring):
+            oids = [clean_oid(id, self.model)
+                    for id in valuelist[0].split(',') if id]
         else:
-            raise validators.ValidationError(
-                'Unsupported form parameter: ' + valuelist)
+            oids = [clean_oid(id, self.model) for id in valuelist]
 
         objects = self.model.objects.in_bulk(oids)
         if len(objects.keys()) != len(oids):
