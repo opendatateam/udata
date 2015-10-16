@@ -1,163 +1,168 @@
 /**
- * Follow button
+ * Discussion button
  */
-define(['jquery', 'api.light', 'auth', 'i18n', 'notify'],
-function($, API, Auth, i18n, Notify) {
-    'use strict';
+import $ from 'jquery';
+import log from 'logger';
+import i18n from 'i18n';
+import Auth from 'auth';
+import API from 'api.light';
+import Notify from 'notify';
 
-    function hideNewForm(el, form) {
-        form.addClass('fadeOutDown');
-        setTimeout(function() {
-            form.addClass('hidden');
-        }, 1000);
+function hideNewForm(el, form) {
+    form.addClass('fadeOutDown');
+    setTimeout(function() {
+        form.addClass('hidden');
+    }, 1000);
+}
+
+function submitNewComment(el, form, data) {
+    API.post(form.data('api-url'), data, function(data) {
+        var msg = i18n._('Your comment has been sent to the server');
+        Notify.success(msg);
+    }).error(function(e) {
+        var msg = i18n._('An error occured while submitting your comment');
+        Notify.error(msg);
+        console.error(e.responseJSON);
+    });
+}
+
+function displayNewDiscussionForm(el) {
+    $('.list-group-form-discussion').removeClass('hidden').addClass('fadeInDown');
+}
+
+function hideNewDiscussionButton(el) {
+    el.addClass('hidden');
+}
+
+$('.new-discussion').click(function(e) {
+    e.preventDefault();
+    var $this = $(this);
+
+    if (!Auth.need_user(i18n._('You need to be logged in to discuss.'))) {
+        return false;
     }
 
-    function submitNewComment(el, form, data) {
-        API.post(form.data('api-url'), data, function(data) {
-            var msg = i18n._('Your comment has been sent to the server');
-            Notify.success(msg);
-        }).error(function(e) {
-            var msg = i18n._('An error occured while submitting your comment');
-            Notify.error(msg);
-            console.error(e.responseJSON);
-        });
+    displayNewDiscussionForm($this);
+    hideNewDiscussionButton($this);
+});
+
+$('.new-comment').click(function(e) {
+    e.preventDefault();
+    var $this = $(this);
+
+    if (!Auth.need_user(i18n._('You need to be logged in to comment.'))) {
+        return false;
     }
 
-    function displayNewDiscussionForm(el) {
-        $('.list-group-form-discussion').removeClass('hidden').addClass('fadeInDown');
+    function displayNewCommentForm(el) {
+        var discussionId = el.data('discussion-id');
+        $('.list-group-form-' + discussionId).removeClass('hidden').addClass('fadeInDown');
     }
 
-    function hideNewDiscussionButton(el) {
+    function hideNewCommentButton(el) {
         el.addClass('hidden');
     }
 
-    $('.new-discussion').click(function(e) {
-        e.preventDefault();
-        var $this = $(this);
+    displayNewCommentForm($this);
+    hideNewCommentButton($this);
+});
 
-        if (!Auth.need_user(i18n._('You need to be logged in to discuss.'))) {
-            return false;
-        }
+$('.open-discussion-thread').click(function(e) {
+    e.preventDefault();
+    var $this = $(this);
 
-        displayNewDiscussionForm($this);
-        hideNewDiscussionButton($this);
-    });
+    function openDiscussionThread(el) {
+        var discussionId = el.parent().data('discussion-id');
+        $('.list-group-thread-' + discussionId).removeClass('hidden').addClass('fadeInDown');
+        $('.list-group-form-' + discussionId).addClass('hidden');
+    }
 
-    $('.new-comment').click(function(e) {
-        e.preventDefault();
-        var $this = $(this);
+    openDiscussionThread($this);
+});
 
-        if (!Auth.need_user(i18n._('You need to be logged in to comment.'))) {
-            return false;
-        }
+$('.submit-new-discussion').click(function(e) {
+    e.preventDefault();
+    var $this = $(this);
+    var $form = $this.parent();
+    var $newMessage = $('.list-group-new-message');
 
-        function displayNewCommentForm(el) {
-            var discussionId = el.data('discussion-id');
-            $('.list-group-form-' + discussionId).removeClass('hidden').addClass('fadeInDown');
-        }
+    if (!Auth.need_user(i18n._('You need to be logged in to add a discussion.')) || !$form.valid()) {
+        return false;
+    }
 
-        function hideNewCommentButton(el) {
-            el.addClass('hidden');
-        }
+    log.debug('$form', $form);
 
-        displayNewCommentForm($this);
-        hideNewCommentButton($this);
-    });
+    var data = {
+        title: $form.find('#title-new-discussion').val(),
+        comment: $form.find('#comment-new-discussion').val(),
+        subject: $form.data('subject')
+    };
 
-    $('.open-discussion-thread').click(function(e) {
-        e.preventDefault();
-        var $this = $(this);
+    log.debug('data', data)
 
-        function openDiscussionThread(el) {
-            var discussionId = el.parent().data('discussion-id');
-            $('.list-group-thread-' + discussionId).removeClass('hidden').addClass('fadeInDown');
-            $('.list-group-form-' + discussionId).addClass('hidden');
-        }
+    function displayNewDiscussion(el, form, data, newMessage) {
+        form.siblings('.list-group-item-heading').text(data.title);
+        form.siblings('.list-group-item-text').text(i18n._('Discussion started today with your message.'));
+        form.parent().css('height', '54px');
+        newMessage.addClass('fadeInDown').removeClass('hidden');
+        newMessage.children('.list-group-item-heading').text(data.comment);
+    }
 
-        openDiscussionThread($this);
-    });
+    hideNewForm($this, $form);
+    displayNewDiscussion($this, $form, data, $newMessage);
+    submitNewComment($this, $form, data);
+});
 
-    $('.submit-new-discussion').click(function(e) {
-        e.preventDefault();
-        var $this = $(this);
-        var $form = $this.parent();
-        var $newMessage = $('.list-group-new-message');
+$('.submit-new-message').click(function(e) {
+    e.preventDefault();
+    var $this = $(this);
+    var $form = $this.parent();
+    var discussionId = $form.parent().data('discussion-id');
 
-        if (!Auth.need_user(i18n._('You need to be logged in to add a discussion.')) || !$form.valid()) {
-            return false;
-        }
+    if (!Auth.need_user(i18n._('You need to be logged in to add a comment.')) || !$form.valid()) {
+        return false;
+    }
 
-        var data = {
-            title: $form.find('#title-new-discussion').val(),
-            comment: $form.find('#comment-new-discussion').val(),
-            subject: $form.data('subject')
-        };
+    var data = {
+        comment: $form.find('#comment-new-message').val()
+    };
 
-        function displayNewDiscussion(el, form, data, newMessage) {
-            form.siblings('.list-group-item-heading').text(data.title);
-            form.siblings('.list-group-item-text').text(i18n._('Discussion started today with your message.'));
-            form.parent().css('height', '54px');
-            newMessage.addClass('fadeInDown').removeClass('hidden');
-            newMessage.children('.list-group-item-heading').text(data.comment);
-        }
+    function displayNewComment(el, form, data) {
+        form.siblings('.list-group-item-heading').text(data.comment);
+        form.siblings('.list-group-item-text').remove();
+        form.parent().css('min-height', '54px');
+        $('.list-group-message-number-' + discussionId).append(i18n._('and your comment!'));
+    }
 
-        hideNewForm($this, $form);
-        displayNewDiscussion($this, $form, data, $newMessage);
-        submitNewComment($this, $form, data);
-    });
+    hideNewForm($this, $form);
+    displayNewComment($this, $form, data);
+    submitNewComment($this, $form, data);
+});
 
-    $('.submit-new-message').click(function(e) {
-        e.preventDefault();
-        var $this = $(this);
-        var $form = $this.parent();
-        var discussionId = $form.parent().data('discussion-id');
+$('.suggest-tag').click(function(e) {
+    e.preventDefault();
+    var $newDiscussion = $('.new-discussion');
+    var $form = $newDiscussion.parent();
 
-        if (!Auth.need_user(i18n._('You need to be logged in to add a comment.')) || !$form.valid()) {
-            return false;
-        }
+    // Otherwise the scrollTop is not effective if the form is already
+    // displayed (hence the new discussion button is hidden)
+    $newDiscussion.removeClass('hidden');
 
-        var data = {
-            comment: $form.find('#comment-new-message').val()
-        };
+    // Scroll to the new discussion thread form
+    $('html, body').animate({
+        scrollTop : $newDiscussion.offset().top
+    }, 400);
 
-        function displayNewComment(el, form, data) {
-            form.siblings('.list-group-item-heading').text(data.comment);
-            form.siblings('.list-group-item-text').remove();
-            form.parent().css('min-height', '54px');
-            $('.list-group-message-number-' + discussionId).append(i18n._('and your comment!'));
-        }
+    if (!Auth.need_user(i18n._('You need to be logged in to propose a tag.'))) {
+        return false;
+    }
 
-        hideNewForm($this, $form);
-        displayNewComment($this, $form, data);
-        submitNewComment($this, $form, data);
-    });
+    displayNewDiscussionForm($newDiscussion);
+    hideNewDiscussionButton($newDiscussion);
 
-    $('.suggest-tag').click(function(e) {
-        e.preventDefault();
-        var $newDiscussion = $('.new-discussion');
-        var $form = $newDiscussion.parent();
-
-        // Otherwise the scrollTop is not effective if the form is already
-        // displayed (hence the new discussion button is hidden)
-        $newDiscussion.removeClass('hidden');
-
-        // Scroll to the new discussion thread form
-        $('html, body').animate({
-            scrollTop : $newDiscussion.offset().top
-        }, 400);
-
-        if (!Auth.need_user(i18n._('You need to be logged in to propose a tag.'))) {
-            return false;
-        }
-
-        displayNewDiscussionForm($newDiscussion);
-        hideNewDiscussionButton($newDiscussion);
-
-        // Prefill the new discussion thread form
-        $form.find('#title-new-discussion').val(
-            i18n._('New tag suggestion to improve metadata'));
-        $form.find('#comment-new-discussion').val(
-            i18n._('Hello,') + '\n\n' + i18n._('I propose this new tag: '));
-    });
-
+    // Prefill the new discussion thread form
+    $form.find('#title-new-discussion').val(
+        i18n._('New tag suggestion to improve metadata'));
+    $form.find('#comment-new-discussion').val(
+        i18n._('Hello,') + '\n\n' + i18n._('I propose this new tag: '));
 });

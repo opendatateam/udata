@@ -1,0 +1,33 @@
+<a href="{{ url_for('organizations.show', org=organization) }}"
+    title="{{ organization.name }}">
+    <img src="{{ organization.logo(150)|placeholder('organization') }}"
+        alt="{{ organization.name }}" class="organization-logo producer"
+        width="150" height="150"/>
+</a>
+<div class="caption text-left">
+{% if organization.description %}
+<p>
+    {{ organization.description|mdstrip(180) }}
+    <a href="{{ url_for('organizations.show', org=organization) }}"
+        title="{{ _('more') }}"
+        class="btn btn-grey btn-primary btn-mini">+</a>
+</p>
+{% else %}
+<br/>
+{% endif %}
+<button type="button"
+    class="btn btn-warning btn-follow btn-block btn-sm icon-left {% if is_following(organization) %}active{% endif %}"
+    rel="tooltip" data-placement="left"
+    data-api-url="{{ url_for('api.organization_followers', id=organization.id|string) }}"
+    data-following-label="{{ _('Unfollow') }}"
+    {% if is_following(organization) %}
+    title="{{ _('Unfollow') }}">
+    <span class="glyphicon glyphicon-eye-close"></span>
+    {{ _('Unfollow') }}
+    {% else %}
+    title="{{ _("I'll be informed about this organization news") }}">
+    <span class="glyphicon glyphicon-eye-open"></span>
+    {{ _('Follow') }}
+    {% endif %}
+</button>
+</div>

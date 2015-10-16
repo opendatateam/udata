@@ -156,46 +156,9 @@
                 <div class="panel panel-transparent text-center">
                     <div class="panel-body">
                         <h3 class="text-left">{{ _('Producer') }}</h3>
-                        {% if reuse.organization.public_service %}
-                        <img src="{{ theme_static('img/certified-stamp.png')}}" alt="certified"
-                            class="certified" rel="popover"
-                            data-title="{{ _('Certified public service') }}"
-                            data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
-                            data-container="body" data-placement="left" data-trigger="hover"/>
-                        {% endif %}
-                        <a href="{{ url_for('organizations.show', org=reuse.organization) }}"
-                            title="{{ reuse.organization.name }}">
-                            <img src="{{ reuse.organization.logo(150)|placeholder('organization') }}"
-                                alt="{{ reuse.organization.name }}" class="organization-logo producer"
-                                width="150" height="150"/>
-                        </a>
-                        <div class="caption text-left">
-                            {% if reuse.organization.description %}
-                            <p>
-                                {{ reuse.organization.description|mdstrip(180) }}
-                                <a href="{{ url_for('organizations.show', org=reuse.organization) }}"
-                                    title="{{ _('more') }}"
-                                    class="btn btn-grey btn-primary btn-mini">+</a>
-                            </p>
-                            {% else %}
-                            <br/>
-                            {% endif %}
-                            <button type="button"
-                                class="btn btn-warning btn-follow btn-block btn-sm icon-left {% if is_following(reuse.organization) %}active{% endif %}"
-                                rel="tooltip" data-placement="left"
-                                data-api-url="{{ url_for('api.organization_followers', id=reuse.organization.id|string) }}"
-                                data-following-label="{{ _('Unfollow') }}"
-                                {% if is_following(reuse.organization) %}
-                                title="{{ _('Unfollow') }}">
-                                <span class="glyphicon glyphicon-eye-close"></span>
-                                {{ _('Unfollow') }}
-                                {% else %}
-                                title="{{ _("I'll be informed about this organization news") }}">
-                                <span class="glyphicon glyphicon-eye-open"></span>
-                                {{ _('Follow') }}
-                                {% endif %}
-                            </button>
-                        </div>
+                        {% with organization=reuse.organization %}
+                        {% include theme('organization/sidebar-producer.html') %}
+                        {% endwith %}
                     </div>
                 </div>
                 {% elif reuse.owner %}
@@ -310,6 +273,78 @@
                     </li>
                     {% endfor %}
                 </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="community_container">
+    <header>
+        <div class="container">
+            <div class="cover-communaute"></div>
+            <div class="page-header">
+                <h2>{{ _('Community contributions') }}</h2>
+                {% if community_subtitle %}<small>{{ community_subtitle }}</small>{% endif %}
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <h3>{{ _('Discussions') }}</h3>
+        <div class="row">
+            <div class="col-sm-9 list-group resources-list smaller">
+            {% for discussion in discussions|rejectattr('closed') %}
+                {% set loop_index = loop.index %}
+                {% set baseobject = reuse %}
+                {% include theme('dataset/discussion-item.html') with context %}
+            {% endfor %}
+                <a class="list-group-item add new-discussion"
+                    href="#">
+                    <div class="format-label pull-left">+</div>
+                    <h4 class="list-group-item-heading">
+                        {{ _('Start a new discussion') }}
+                    </h4>
+                </a>
+                {% set discussion_length = discussions|rejectattr('closed')|list|length %}
+                <div class="list-group-item list-group-form list-group-form-discussion hidden animated" id="discussion-{{ discussion_length + 1 }}">
+                    <div class="format-label pull-left">
+                        <span>
+                            <a href="#discussion-{{ discussion_length + 1 }}">{{ discussion_length + 1 }}</a>
+                        </span>
+                    </div>
+                    <h4 class="list-group-item-heading">
+                        {{ _('Starting a new discussion thread') }}
+                    </h4>
+                    <p class="list-group-item-text">
+                        {{ _("You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above. If you want to report an anomaly, please use the dedicated button just under the reuses.") }}
+                    </p>
+                    <form role="form" class="clearfix animated"
+                        data-api-url="{{ url_for('api.discussions', for=reuse.id) }}"
+                        data-subject="{{ reuse.id }}">
+                        <div class="form-group">
+                            <label for="title">{{ _('Title') }}</label>
+                            <input type="text" id="title" name="title" class="form-control" required />
+                            <label for="comment">{{ _('Comment') }}</label>
+                            <textarea id="comment" name="comment" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <input type="submit" value="{{ _('Start a discussion') }}" class="btn btn-primary btn-block pull-right submit-new-discussion" />
+                    </form>
+                    {{ current_user|avatar(52, 'resource-owner') }}
+                </div>
+                <div class="list-group-item list-group-indent list-group-new-message hidden animated" id="discussion-{{ discussion_length + 1 }}-1">
+                    <div class="format-label pull-left">
+                        <span>
+                            <a href="#discussion-{{ discussion_length + 1 }}-1">{{ discussion_length + 1 }}.1</a>
+                        </span>
+                    </div>
+                    <p class="list-group-item-heading"></p>
+                    {{ current_user|avatar(52, 'resource-owner') }}
+                </div>
+            </div>
+
+            <div class="col-sm-3 note">
+                <p>{{ _('Discussion between the reusers and the community about this reuse.') }}</p>
             </div>
         </div>
     </div>
