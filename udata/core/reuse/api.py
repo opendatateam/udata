@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from werkzeug.datastructures import FileStorage
-
 from flask import request
 from flask.ext.security import current_user
 
@@ -16,10 +14,13 @@ from udata.utils import multi_to_dict
 
 from udata.core.badges.forms import badge_form
 from udata.core.followers.api import FollowAPI
+from udata.core.storages.api import (
+    uploaded_image_fields, image_parser, parse_uploaded_image
+)
 
 from .api_fields import (
     badge_fields, reuse_fields, reuse_page_fields, reuse_suggestion_fields,
-    image_fields, reuse_type_fields
+    reuse_type_fields
 )
 from .forms import ReuseForm
 from .models import FollowReuse
@@ -189,26 +190,16 @@ class SuggestReusesAPI(API):
         ]
 
 
-image_parser = api.parser()
-image_parser.add_argument('file', type=FileStorage, location='files')
-image_parser.add_argument('bbox', type=str, location='form')
-
-
 @ns.route('/<reuse:reuse>/image', endpoint='reuse_image')
 @api.doc(parser=image_parser, **common_doc)
 class ReuseImageAPI(API):
     @api.secure
     @api.doc('reuse_image')
-    @api.marshal_with(image_fields)
+    @api.marshal_with(uploaded_image_fields)
     def post(self, reuse):
         '''Upload a new reuse image'''
         ReuseEditPermission(reuse).test()
-        args = image_parser.parse_args()
-
-        image = args['file']
-        bbox = ([int(float(c)) for c in args['bbox'].split(',')]
-                if 'bbox' in args else None)
-        reuse.image.save(image, bbox=bbox)
+        parse_uploaded_image(reuse.image)
         reuse.save()
 
         return reuse

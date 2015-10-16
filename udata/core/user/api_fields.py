@@ -84,10 +84,3 @@ notifications_fields = api.model('Notification', {
         description='Key-Value details depending on notification type',
         readonly=True)
 })
-
-avatar_fields = api.model('UploadedAvatar', {
-    'success': fields.Boolean(
-        description='Whether the upload succeeded or not.',
-        readonly=True, default=True),
-    'avatar': fields.ImageField(),
-})

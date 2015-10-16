@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from werkzeug.datastructures import FileStorage
 from flask.ext.security import current_user
 
 from udata import search
@@ -11,6 +10,9 @@ from udata.models import User, FollowUser, Reuse, Dataset
 from udata.core.dataset.api_fields import dataset_full_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.reuse.api_fields import reuse_fields
+from udata.core.storages.api import (
+    uploaded_image_fields, image_parser, parse_uploaded_image
+)
 
 from .api_fields import (
     apikey_fields,
@@ -19,7 +21,6 @@ from .api_fields import (
     user_page_fields,
     user_suggestion_fields,
     notifications_fields,
-    avatar_fields
 )
 from .forms import UserProfileForm
 from .search import UserSearch
@@ -48,28 +49,17 @@ class MeAPI(API):
         return form.save()
 
 
-avatar_parser = api.parser()
-avatar_parser.add_argument('file', type=FileStorage, location='files')
-avatar_parser.add_argument('bbox', type=str, location='form')
-
-
 @me.route('/avatar', endpoint='my_avatar')
-@api.doc(parser=avatar_parser)
+@api.doc(parser=image_parser)
 class AvatarAPI(API):
     @api.secure
     @api.doc('my_avatar')
-    @api.marshal_with(avatar_fields)
+    @api.marshal_with(uploaded_image_fields)
     def post(self):
         '''Upload a new avatar'''
-        args = avatar_parser.parse_args()
-
-        avatar = args['file']
-        bbox = ([int(float(c)) for c in args['bbox'].split(',')]
-                if 'bbox' in args else None)
-        current_user.avatar.save(avatar, bbox=bbox)
+        parse_uploaded_image(current_user.avatar)
         current_user.save()
-
-        return current_user
+        return {'image': current_user.avatar}
 
 
 @me.route('/reuses/', endpoint='my_reuses')
