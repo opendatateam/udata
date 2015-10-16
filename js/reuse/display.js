@@ -1,16 +1,15 @@
 /**
- * Default JS module
+ * Reuse display page JS module
  */
+import $ from 'jquery';
+import log from 'logger';
 
-define([
-    'logger',
-    'widgets/featured',
-    'widgets/follow-btn',
-    'widgets/issues-btn',
-    'widgets/share-btn',
-    'widgets/discussions-btn'
-], function(log) {
-    $(function() {
-        log.debug('Reuse display page');
-    });
+import 'widgets/featured';
+import 'widgets/follow-btn';
+import 'widgets/issues-btn';
+import 'widgets/discussions-btn';
+import 'widgets/share-btn';
+
+$(function() {
+    log.debug('Reuse display page');
 });
