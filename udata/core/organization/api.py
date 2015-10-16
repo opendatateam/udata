@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 from flask import request
-from werkzeug.datastructures import FileStorage
 
 from udata import search
 from udata.api import api, API
@@ -32,7 +31,6 @@ from .api_fields import (
     org_suggestion_fields,
     request_fields,
     member_fields,
-    logo_fields,
     refuse_membership_fields,
 )
 
@@ -44,6 +42,9 @@ from udata.core.issues.api import issue_fields
 from udata.core.issues.models import Issue
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.reuse.models import Reuse
+from udata.core.storages.api import (
+    uploaded_image_fields, image_parser, parse_uploaded_image
+)
 
 ns = api.namespace('organizations', 'Organization related operations')
 search_parser = api.search_parser(OrganizationSearch)
@@ -345,40 +346,27 @@ class SuggestOrganizationsAPI(API):
         ]
 
 
-logo_parser = api.parser()
-logo_parser.add_argument('file', type=FileStorage, location='files')
-logo_parser.add_argument('bbox', type=str, location='form')
-
-
 @ns.route('/<org:org>/logo', endpoint='organization_logo')
-@api.doc(parser=logo_parser, **common_doc)
+@api.doc(parser=image_parser, **common_doc)
 class AvatarAPI(API):
     @api.secure
     @api.doc('organization_logo')
-    @api.marshal_with(logo_fields)
+    @api.marshal_with(uploaded_image_fields)
     def post(self, org):
         '''Upload a new logo'''
         EditOrganizationPermission(org).test()
-        args = logo_parser.parse_args()
-
-        logo = args['file']
-        bbox = ([int(float(c)) for c in args['bbox'].split(',')]
-                if 'bbox' in args else None)
-        org.logo.save(logo, bbox=bbox)
+        parse_uploaded_image(org.logo)
         org.save()
-
-        return org
+        return {'image': org.logo}
 
     @api.secure
     @api.doc('resize_organization_logo')
-    @api.marshal_with(logo_fields)
+    @api.marshal_with(uploaded_image_fields)
     def put(self, org):
         '''Set the logo BBox'''
         EditOrganizationPermission(org).test()
-        args = logo_parser.parse_args()
-        logo = args['file']
-        org.logo.save(logo, bbox=args.get('bbox'))
-        return org
+        parse_uploaded_image(org.logo)
+        return {'image': org.logo}
 
 
 @ns.route('/<org:org>/datasets/', endpoint='org_datasets')

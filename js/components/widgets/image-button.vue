@@ -45,11 +45,9 @@
 </template>
 
 <script>
-'use strict';
+import Vue from 'vue';
 
-var Vue = require('vue');
-
-module.exports = {
+export default {
     data: function() {
         return {
             src: null,
@@ -64,9 +62,9 @@ module.exports = {
             this.$root.$modal(
                 {data: {endpoint: this.endpoint, sizes: this.sizes}},
                 Vue.extend(require('components/widgets/image-picker-modal.vue'))
-            ).$once('image:saved', function() {
+            ).$once('image:saved', () => {
                 this.$dispatch('image:saved');
-            }.bind(this));
+            });
         }
     }
 };

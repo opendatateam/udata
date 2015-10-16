@@ -98,13 +98,6 @@ org_suggestion_fields = api.model('OrganizationSuggestion', {
         description='The internal match score', readonly=True),
 })
 
-logo_fields = api.model('UploadedLogo', {
-    'success': fields.Boolean(
-        description='Whether the upload succeeded or not.',
-        readonly=True, default=True),
-    'logo': fields.ImageField(),
-})
-
 refuse_membership_fields = api.model('RefuseMembership', {
     'comment': fields.String(
         description='The refusal comment.'),

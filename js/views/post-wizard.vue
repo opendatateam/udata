@@ -3,6 +3,7 @@
 </template>
 
 <script>
+import API from 'api';
 import Post from 'models/post';
 
 export default {
@@ -41,12 +42,25 @@ export default {
                     this.post.save();
                     return true;
                 }
+            }, {
+                label: this._('Image'),
+                subtitle: this._('Upload your post image'),
+                component: 'image-picker',
+                init: (component) => {
+                    var endpoint = API.posts.operations.post_image;
+                    component.endpoint = endpoint.urlify({post: this.post.id});
+                },
+                next: (component) => {
+                    component.save();
+                    return true;
+                }
             }]
          };
     },
     components: {
         'wizard-component': require('components/widgets/wizard.vue'),
         'post-form': require('components/post/form.vue'),
+        'image-picker': require('components/widgets/image-picker.vue'),
         'dataset-cards-form': require('components/dataset/cards-form.vue'),
         'reuse-cards-form': require('components/reuse/cards-form.vue')
     },

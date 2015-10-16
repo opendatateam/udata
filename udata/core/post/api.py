@@ -8,6 +8,9 @@ from udata.auth import admin_permission
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.reuse.api_fields import reuse_ref_fields
 from udata.core.user.api_fields import user_ref_fields
+from udata.core.storages.api import (
+    uploaded_image_fields, image_parser, parse_uploaded_image
+)
 
 from .models import Post
 from .forms import PostForm
@@ -23,7 +26,7 @@ post_fields = api.model('Post', {
     'content': fields.Markdown(
         description='The post content in Markdown', required=True),
 
-    'image': fields.ImageField(description='The post image'),
+    'image': fields.ImageField(description='The post image', readonly=True),
     'credit_to': fields.String(
         description='An optionnal credit line (associated to the image)'),
     'credit_url': fields.String(
@@ -53,7 +56,6 @@ post_fields = api.model('Post', {
         'posts.show', lambda o: {'post': o},
         description='The post page URL', readonly=True),
 })
-
 
 post_page_fields = api.model('PostPage', fields.pager(post_fields))
 
@@ -106,3 +108,24 @@ class PostAPI(API):
         '''Delete a given post'''
         post.delete()
         return '', 204
+
+
+@ns.route('/<post:post>/image', endpoint='post_image')
+@api.doc(parser=image_parser)
+class PostImageAPI(API):
+    @api.secure(admin_permission)
+    @api.doc('post_image')
+    @api.marshal_with(uploaded_image_fields)
+    def post(self, post):
+        '''Upload a new image'''
+        parse_uploaded_image(post.image)
+        post.save()
+        return post
+
+    @api.secure(admin_permission)
+    @api.doc('resize_post_image')
+    @api.marshal_with(uploaded_image_fields)
+    def put(self, post):
+        '''Set the image BBox'''
+        parse_uploaded_image(post.image)
+        return post
