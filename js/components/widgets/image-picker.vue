@@ -70,13 +70,11 @@
 </template>
 
 <script>
-'use strict';
+import $ from 'jquery';
+import API from 'api';
+import log from 'logger';
 
-var $ = require('jquery'),
-    API = require('api'),
-    log = require('logger');
-
-module.exports = {
+export default {
     autoUpload: false,
     mixins: [require('mixins/uploader')],
     data: function() {
@@ -127,7 +125,11 @@ module.exports = {
     methods: {
         save: function() {
             if (this.HAS_FILE_API) {
-                this.upload({bbox: this.$.thumbnailer.bbox});
+                let data = {};
+                if (this.$.thumbnailer.bbox) {
+                    data.bbox = this.$.thumbnailer.bbox;
+                }
+                this.upload(data);
             } else {
                 this.$dispatch('image:saved');
             }

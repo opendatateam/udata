@@ -1,11 +1,30 @@
+<style lang="less">
+.post-content-widget {
+    .image-button {
+        border: 1px solid darken(white, 20%);
+        float: left;
+        margin: 0 10px 5px 0;
+    }
+
+    .box-body {
+        h3 {
+            margin-top: 0;
+        }
+    }
+}
+</style>
 <template>
-<box-container title="{{post.name}}" icon="building" boxclass="box-solid">
+<box-container title="{{post.name}}" icon="building"
+    boxclass="box-solid post-content-widget">
     <aside>
         <a class="text-muted pointer" v-on="click: toggle">
             <i class="fa fa-gear"></i>
         </a>
     </aside>
     <div v-if="!toggled">
+        <image-button src="{{post.image}}" size="150"
+            endpoint="{{endpoint}}">
+        </image-button>
         <p v-if="post.headline" class="lead">{{post.headline}}</p>
         <div v-markdown="{{post.content}}"></div>
     </div>
@@ -20,9 +39,9 @@
 </template>
 
 <script>
-'use strict';
+import API from 'api';
 
-module.exports = {
+export default {
     name: 'post-content',
     props: ['post'],
     data: function() {
@@ -32,7 +51,21 @@ module.exports = {
     },
     components: {
         'box-container': require('components/containers/box.vue'),
+        'image-button': require('components/widgets/image-button.vue'),
         'post-form': require('components/post/form.vue')
+    },
+    computed: {
+        endpoint: function() {
+            if (this.post.id) {
+                var operation = API.posts.operations.post_image;
+                return operation.urlify({post: this.post.id});
+            }
+        }
+    },
+    events: {
+        'image:saved': function() {
+            this.post.fetch();
+        }
     },
     methods: {
         toggle: function() {
