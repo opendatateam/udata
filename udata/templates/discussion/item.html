@@ -50,7 +50,7 @@
         {{ _("You're about to answer to this particular thread about:") }}<br />
         {{ discussion.title }}
     </p>
-    <form role="form" class="clearfix animated" data-api-url="{{url_for('api.discussion', for=baseobject.id, id=discussion.id)}}">
+    <form role="form" class="clearfix animated" data-api-url="{{url_for('api.discussion', for=subject.id, id=discussion.id)}}">
         <div class="form-group">
             <label for="comment-new-message">{{ _('Comment') }}</label>
             <textarea id="comment-new-message" name="comment" class="form-control" rows="3" required></textarea>
