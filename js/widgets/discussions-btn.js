@@ -22,7 +22,7 @@ function submitNewComment(el, form, data) {
     }).error(function(e) {
         var msg = i18n._('An error occured while submitting your comment');
         Notify.error(msg);
-        console.error(e.responseJSON);
+        log.error(e.responseJSON);
     });
 }
 
@@ -90,15 +90,11 @@ $('.submit-new-discussion').click(function(e) {
         return false;
     }
 
-    log.debug('$form', $form);
-
     var data = {
         title: $form.find('#title-new-discussion').val(),
         comment: $form.find('#comment-new-discussion').val(),
         subject: $form.data('subject')
     };
-
-    log.debug('data', data)
 
     function displayNewDiscussion(el, form, data, newMessage) {
         form.siblings('.list-group-item-heading').text(data.title);

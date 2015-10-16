@@ -32,7 +32,7 @@
         {{ _('Edit') }}
     </a>
 </div>
-{% endif%}
+{% endif %}
 {% if sysadmin %}
 <div class="btn-group btn-group-xs">
     <button type="button"
@@ -228,7 +228,7 @@
                     <div class="panel-body">
                         <h3 class="text-left">{{ _('Producer') }}</h3>
                         {% with organization=dataset.organization %}
-                        {% include theme('organization/sidebar-producer.html') %}
+                            {% include theme('organization/sidebar-producer.html') %}
                         {% endwith %}
                     </div>
                 </div>
