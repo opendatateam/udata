@@ -12,7 +12,7 @@
     <div class="{{ threadclass }} list-group resources-list smaller">
     {% for discussion in discussions|rejectattr('closed') %}
         {% set loop_index = loop.index %}
-        {% include theme('discussion/item.html') with context %}
+        {% include theme('discussion/item.html') %}
     {% endfor %}
         <a class="list-group-item add new-discussion"
             href="#">
@@ -27,7 +27,7 @@
                 {{ current_user|avatar(52) }}
             </div>
             <span class="list-group-item-link">
-                <a href="#discussion-{{ discussion_length + 1 }}"><span class="glyphicon glyphicon-link"></span></a>
+                <a href="#discussion-{{ discussion_length + 1 }}"><span class="fa fa-link"></span></a>
             </span>
             <h4 class="list-group-item-heading">
                 {{ _('Starting a new discussion thread') }}

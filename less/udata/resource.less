@@ -2,11 +2,12 @@
     margin: 0;
 
     .list-group-item {
+        @vspacing: 10px;
         @base-color: #eaeaea;
         height: 54px;
         cursor: pointer;
         background-color: @base-color;
-        margin: 0px 0px 10px;
+        margin: 0px 0px @vspacing;
         border-color: @base-color;
         border-radius: 0px;
         padding: 0;
@@ -51,6 +52,19 @@
             &:not(:first-child) {
                 margin-top: 13px;
             }
+        }
+
+        &.body-only {
+            margin-top: -@vspacing;
+            border-color: #fafafa;
+
+            .list-group-item-heading {
+                margin: 5px;
+            }
+        }
+
+        &.discussion-messages-list .list-group-item-heading{
+            font-weight: normal;
         }
     }
 
