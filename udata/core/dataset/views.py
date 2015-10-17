@@ -104,4 +104,5 @@ class DatasetFollowersView(DatasetView, DetailView):
 @sitemap.register_generator
 def sitemap_urls():
     for dataset in Dataset.objects.visible().only('id', 'slug'):
-        yield 'datasets.show_redirect', {'dataset': dataset}, None, "weekly", 1
+        yield ('datasets.show_redirect', {'dataset': dataset},
+               None, "weekly", 0.8)

@@ -21,6 +21,7 @@ from udata.auth import (
 )
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
+from udata.sitemap import sitemap
 
 from . import fields, oauth2
 from .signals import on_api_call
@@ -230,6 +231,11 @@ def default_api():
 @apidoc.route('/apidoc/')
 def swaggerui():
     return theme.render('apidoc.html', specs_url=api.specs_url)
+
+
+@sitemap.register_generator
+def api_sitemap_urls():
+    yield 'apidoc.swaggerui', {}, None, 'weekly', 0.9
 
 
 @apidoc.route('/apidoc/images/<path:path>')

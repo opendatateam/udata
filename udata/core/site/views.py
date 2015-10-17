@@ -16,6 +16,7 @@ from udata.utils import multi_to_dict
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.reuse.csv import ReuseCsvAdapter
+from udata.sitemap import sitemap
 
 noI18n = Blueprint('noI18n', __name__)
 blueprint = I18nBlueprint('site', __name__)
@@ -160,3 +161,9 @@ class SiteDashboard(SiteView, DetailView):
         })
 
         return context
+
+
+@sitemap.register_generator
+def site_sitemap_urls():
+    yield 'site.home', {}, None, 'daily', 1
+    yield 'site.dashboard', {}, None, 'weekly', 0.6
