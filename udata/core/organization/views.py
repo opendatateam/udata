@@ -225,5 +225,5 @@ def supplied_datasets_resources_csv(org):
 
 @sitemap.register_generator
 def sitemap_urls():
-    for org in Organization.objects.visible():
+    for org in Organization.objects.visible().only('id', 'slug'):
         yield 'organizations.show_redirect', {'org': org}, None, "weekly", 0.8

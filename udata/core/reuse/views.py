@@ -105,5 +105,5 @@ class ReuseDetailView(ReuseView, DetailView):
 
 @sitemap.register_generator
 def sitemap_urls():
-    for reuse in Reuse.objects.visible():
+    for reuse in Reuse.objects.visible().only('id', 'slug'):
         yield 'reuses.show_redirect', {'reuse': reuse}, None, "weekly", 0.8

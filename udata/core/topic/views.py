@@ -93,5 +93,5 @@ def store_featured_topics():
 
 @sitemap.register_generator
 def sitemap_urls():
-    for topic in Topic.objects:
+    for topic in Topic.objects.only('id', 'slug'):
         yield 'topics.display_redirect', {'topic': topic}, None, "weekly", 0.8
