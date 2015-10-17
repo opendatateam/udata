@@ -40,5 +40,5 @@ def show(post):
 
 @sitemap.register_generator
 def sitemap_urls():
-    for post in Post.objects(private=False):
-        yield 'posts.show_redirect', {'post': post.slug}, None, "weekly", 0.5
+    for post in Post.objects(private=False).only('id', 'slug'):
+        yield 'posts.show_redirect', {'post': post}, None, "weekly", 0.6
