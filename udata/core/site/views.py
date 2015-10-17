@@ -165,5 +165,5 @@ class SiteDashboard(SiteView, DetailView):
 
 @sitemap.register_generator
 def site_sitemap_urls():
-    yield 'site.home', {}, None, 'daily', 1
-    yield 'site.dashboard', {}, None, 'weekly', 0.6
+    yield 'site.home_redirect', {}, None, 'daily', 1
+    yield 'site.dashboard_redirect', {}, None, 'weekly', 0.6

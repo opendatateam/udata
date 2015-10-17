@@ -235,7 +235,7 @@ def swaggerui():
 
 @sitemap.register_generator
 def api_sitemap_urls():
-    yield 'apidoc.swaggerui', {}, None, 'weekly', 0.9
+    yield 'apidoc.swaggerui_redirect', {}, None, 'weekly', 0.9
 
 
 @apidoc.route('/apidoc/images/<path:path>')
