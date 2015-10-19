@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import logging
+import weakref
 
 from datetime import datetime
 
@@ -16,7 +17,7 @@ __all__ = ('Badge', 'BadgeMixin')
 
 
 class Badge(db.EmbeddedDocument):
-    kind = db.StringField(choices=[], required=True)
+    kind = db.StringField(required=True)
     created = db.DateTimeField(default=datetime.now, required=True)
     created_by = db.ReferenceField('User')
 
@@ -28,7 +29,7 @@ class Badge(db.EmbeddedDocument):
     def validate(self, clean=True):
         badges = getattr(self._instance, '__badges__', {})
         if self.kind not in badges.keys():
-            raise db.ValidationError('Unknown badge type: %s' % self.kind)
+            raise db.ValidationError('Unknown badge type %s' % self.kind)
         return super(Badge, self).validate(clean=clean)
 
 
@@ -42,7 +43,14 @@ class BadgesList(db.EmbeddedDocumentListField):
             raise db.ValidationError(
                 'Duplicate badges for a given kind is not allowed'
             )
-        return True
+        return super(BadgesList, self).validate(value)
+
+    def __set__(self, instance, value):
+        super(BadgesList, self).__set__(instance, value)
+        # Fix until fix is released.
+        # See: https://github.com/MongoEngine/mongoengine/pull/1131
+        for value in instance._data[self.name]:
+            value._instance = weakref.proxy(instance)
 
 
 class BadgeMixin(object):

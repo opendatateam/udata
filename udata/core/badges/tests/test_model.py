@@ -134,3 +134,25 @@ class BadgeMixinTest(DBTestMixin, TestCase):
         fake.toggle_badge(TEST)
 
         self.assertEqual(len(fake.badges), 0)
+
+    def test_create_with_badges(self):
+        '''It should allow object creation with badges'''
+        fake = Fake.objects.create(badges=[
+            Badge(kind=TEST),
+            Badge(kind=OTHER)
+        ])
+
+        self.assertEqual(len(fake.badges), 2)
+        for badge, kind in zip(fake.badges, (TEST, OTHER)):
+            self.assertEqual(badge.kind, kind)
+            self.assertIsNotNone(badge.created)
+
+    def test_create_disallow_duplicate_badges(self):
+        '''It should not allow object creation with duplicate badges'''
+        with self.assertRaises(db.ValidationError):
+            Fake.objects.create(badges=[Badge(kind=TEST), Badge(kind=TEST)])
+
+    def test_create_disallow_unknown_badges(self):
+        '''It should not allow object creation with unknown badges'''
+        with self.assertRaises(db.ValidationError):
+            Fake.objects.create(badges=[Badge(kind='unknown')])
