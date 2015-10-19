@@ -49,6 +49,7 @@ class BadgeMixin(object):
     badges = BadgesList()
 
     def get_badge(self, kind):
+        ''' Get a badge given its kind if present'''
         candidates = [b for b in self.badges if b.kind == kind]
         return candidates[0] if candidates else None
 
@@ -86,3 +87,11 @@ class BadgeMixin(object):
         })
         self.reload()
         post_save.send(self.__class__, document=self)
+
+    def toggle_badge(self, kind):
+        '''Toggle a bdage given its kind'''
+        badge = self.get_badge(kind)
+        if badge:
+            return self.remove_badge(kind)
+        else:
+            return self.add_badge(kind)

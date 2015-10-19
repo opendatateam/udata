@@ -42,7 +42,7 @@ class BadgeMixinTest(DBTestMixin, TestCase):
         self.assertIsNone(badge)
 
     def test_add_badge(self):
-        '''It should a badge of a given kind'''
+        '''It should add a badge of a given kind'''
         fake = Fake.objects.create()
 
         result = fake.add_badge(TEST)
@@ -92,7 +92,7 @@ class BadgeMixinTest(DBTestMixin, TestCase):
         self.assertEqual(len(fake.badges), 0)
 
     def test_remove_badge(self):
-        '''It should remove a badge from its kind'''
+        '''It should remove a badge given its kind'''
         badge = Badge(kind=TEST)
         fake = Fake.objects.create(badges=[badge])
 
@@ -113,3 +113,24 @@ class BadgeMixinTest(DBTestMixin, TestCase):
         self.assertEqual(badge.kind, TEST)
         self.assertIsNotNone(badge.created)
         self.assertIsNone(badge.created_by)
+
+    def test_toggle_add_badge(self):
+        '''Toggle should add a badge of a given kind if absent'''
+        fake = Fake.objects.create()
+
+        result = fake.toggle_badge(TEST)
+
+        self.assertEqual(len(fake.badges), 1)
+        badge = fake.badges[0]
+        self.assertEqual(result, badge)
+        self.assertEqual(badge.kind, TEST)
+        self.assertIsNotNone(badge.created)
+
+    def test_toggle_remove_badge(self):
+        '''Toggle should remove a badge given its kind if present'''
+        badge = Badge(kind=TEST)
+        fake = Fake.objects.create(badges=[badge])
+
+        fake.toggle_badge(TEST)
+
+        self.assertEqual(len(fake.badges), 0)
