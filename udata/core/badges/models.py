@@ -2,10 +2,12 @@
 from __future__ import unicode_literals
 
 import logging
+
 from datetime import datetime
 
 from mongoengine.signals import post_save
 
+from udata.auth import current_user
 from udata.models import db
 
 log = logging.getLogger(__name__)
@@ -17,12 +19,6 @@ class Badge(db.EmbeddedDocument):
     kind = db.StringField(choices=[], required=True)
     created = db.DateTimeField(default=datetime.now, required=True)
     created_by = db.ReferenceField('User')
-    removed = db.DateTimeField()
-    removed_by = db.ReferenceField('User')
-
-    meta = {
-        'ordering': ['created'],
-    }
 
     def __unicode__(self):
         return self.kind
@@ -52,8 +48,23 @@ class BadgesList(db.EmbeddedDocumentListField):
 class BadgeMixin(object):
     badges = BadgesList()
 
-    def add_badge(self, badge):
+    def get_badge(self, kind):
+        candidates = [b for b in self.badges if b.kind == kind]
+        return candidates[0] if candidates else None
+
+    def add_badge(self, kind):
         '''Perform an atomic prepend for a new badge'''
+        badge = self.get_badge(kind)
+        if badge:
+            return badge
+        if kind not in getattr(self, '__badges__', {}):
+            msg = 'Unknown badge type for {model}: {kind}'
+            raise db.ValidationError(msg.format(model=self.__class__.__name__,
+                                                kind=kind))
+        badge = Badge(kind=kind)
+        if current_user.is_authenticated():
+            badge.created_by = current_user.id
+
         self.update(__raw__={
             '$push': {
                 'badges': {
@@ -64,12 +75,13 @@ class BadgeMixin(object):
         })
         self.reload()
         post_save.send(self.__class__, document=self)
+        return self.get_badge(kind)
 
-    def remove_badge(self, badge):
+    def remove_badge(self, kind):
         '''Perform an atomic removal for a given badge'''
         self.update(__raw__={
             '$pull': {
-                'badges': badge.to_mongo()
+                'badges': {'kind': kind}
             }
         })
         self.reload()
