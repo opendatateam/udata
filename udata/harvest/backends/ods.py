@@ -22,6 +22,7 @@ class OdsHarvester(BaseBackend):
     LICENSES = {
         "Open Database License (ODbL)": "odc-odbl",
         "Licence Ouverte (Etalab)": "fr-lo",
+        "Licence ouverte / Open Licence": "fr-lo",
         "CC BY-SA": "cc-by-sa",
         "Public Domain": "other-pd"
     }
