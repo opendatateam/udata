@@ -6,7 +6,7 @@ import logging
 from os.path import exists
 
 from udata.commands import submanager
-from udata.models import Organization, Badge
+from udata.models import Organization
 
 log = logging.getLogger(__name__)
 

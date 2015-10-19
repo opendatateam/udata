@@ -6,21 +6,18 @@ from datetime import datetime
 from flask import request
 from flask.ext.security import current_user
 
-from uuid import UUID
 from werkzeug.datastructures import FileStorage
 
 from udata import fileutils, search
 from udata.auth import admin_permission
-from udata.api import api, fields, SingleObjectAPI, API
+from udata.api import api, SingleObjectAPI, API
 from udata.core import storages
-from udata.core.badges.forms import badge_form
-from udata.core.badges.models import Badge
+from udata.core.badges.api import badge_fields, add_badge_api, remove_badge_api
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by, multi_to_dict
 
 from .croquemort import check_url
 from .api_fields import (
-    badge_fields,
     community_resource_fields,
     community_resource_page_fields,
     dataset_fields,
@@ -192,16 +189,7 @@ class DatasetBadgesAPI(API):
     @api.secure(admin_permission)
     def post(self, dataset):
         '''Create a new badge for a given dataset'''
-        Form = badge_form(Dataset)
-        form = api.validate(Form)
-        badge = Badge(created=datetime.now(),
-                      created_by=current_user.id)
-        form.populate_obj(badge)
-        for existing_badge in dataset.badges:
-            if existing_badge.kind == badge.kind:
-                return existing_badge
-        dataset.add_badge(badge)
-        return badge, 201
+        return add_badge_api(dataset)
 
 
 @ns.route('/<dataset:dataset>/badges/<badge_kind>/', endpoint='dataset_badge')
@@ -210,14 +198,7 @@ class DatasetBadgeAPI(API):
     @api.secure(admin_permission)
     def delete(self, dataset, badge_kind):
         '''Delete a badge for a given dataset'''
-        badge = None
-        for badge in dataset.badges:
-            if badge.kind == badge_kind:
-                break
-        if badge is None:
-            api.abort(404, 'Badge does not exists')
-        dataset.remove_badge(badge)
-        return '', 204
+        return remove_badge_api(dataset, badge_kind)
 
 
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources')
