@@ -11,8 +11,11 @@ from glob import iglob
 from flask.ext.script import Manager
 from flask.ext.script.commands import Clean, ShowUrls, Server
 
-
 from udata.app import create_app, standalone
+
+# Expect an utf8 compatible terminal
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 log = logging.getLogger(__name__)
 
