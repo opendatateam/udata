@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import unicode_literals, absolute_import
 
 from udata.api import api, fields
 
@@ -13,7 +13,7 @@ badge_fields = api.model('Badge', {
 })
 
 
-def add_badge_api(obj):
+def add(obj):
     '''
     Handle a badge add API.
 
@@ -32,7 +32,7 @@ def add_badge_api(obj):
         return obj.add_badge(kind), 201
 
 
-def remove_badge_api(obj, kind):
+def remove(obj, kind):
     '''
     Handle badge removal API
 

@@ -2,10 +2,10 @@
 from __future__ import unicode_literals
 
 from udata.api import api, fields, base_reference
+from udata.core.badges.api import badge_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
-from udata.core.badges.api import badge_fields
 
 from .models import (
     UPDATE_FREQUENCIES, RESOURCE_TYPES, DEFAULT_FREQUENCY,
@@ -117,9 +117,9 @@ dataset_fields = api.model('Dataset', {
     'private': fields.Boolean(
         description='Is the dataset private to the owner or the organization'),
     'tags': fields.List(fields.String),
-    'badges': fields.List(
-        fields.Nested(badge_fields, description='The dataset badges'),
-        readonly=True),
+    'badges': fields.List(fields.Nested(badge_fields),
+                          description='The dataset badges',
+                          readonly=True),
     'resources': fields.List(
         fields.Nested(resource_fields, description='The dataset resources')),
     'community_resources': fields.List(

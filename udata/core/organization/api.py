@@ -8,8 +8,8 @@ from flask import request
 from udata import search
 from udata.api import api, API
 from udata.auth import admin_permission, current_user
+from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
-from udata.core.badges.api import badge_fields, add_badge_api, remove_badge_api
 from udata.utils import multi_to_dict
 
 from .forms import (
@@ -121,12 +121,12 @@ class AvailableOrganizationBadgesAPI(API):
 @ns.route('/<org:org>/badges/', endpoint='organization_badges')
 class OrganizationBadgesAPI(API):
     @api.doc('add_organization_badge', **common_doc)
-    @api.expect(badge_fields)
-    @api.marshal_with(badge_fields)
+    @api.expect(badges_api.badge_fields)
+    @api.marshal_with(badges_api.badge_fields)
     @api.secure(admin_permission)
     def post(self, org):
         '''Create a new badge for a given organization'''
-        return add_badge_api(org)
+        return badges_api.add(org)
 
 
 @ns.route('/<org:org>/badges/<badge_kind>/', endpoint='organization_badge')
@@ -135,7 +135,7 @@ class OrganizationBadgeAPI(API):
     @api.secure(admin_permission)
     def delete(self, org, badge_kind):
         '''Delete a badge for a given organization'''
-        return remove_badge_api(org, badge_kind)
+        return badges_api.remove(org, badge_kind)
 
 
 requests_parser = api.parser()

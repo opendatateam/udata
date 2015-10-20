@@ -12,7 +12,7 @@ from udata import fileutils, search
 from udata.auth import admin_permission
 from udata.api import api, SingleObjectAPI, API
 from udata.core import storages
-from udata.core.badges.api import badge_fields, add_badge_api, remove_badge_api
+from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by, multi_to_dict
 
@@ -184,12 +184,12 @@ class AvailableDatasetBadgesAPI(API):
 @ns.route('/<dataset:dataset>/badges/', endpoint='dataset_badges')
 class DatasetBadgesAPI(API):
     @api.doc('add_dataset_badge', **common_doc)
-    @api.expect(badge_fields)
-    @api.marshal_with(badge_fields)
+    @api.expect(badges_api.badge_fields)
+    @api.marshal_with(badges_api.badge_fields)
     @api.secure(admin_permission)
     def post(self, dataset):
         '''Create a new badge for a given dataset'''
-        return add_badge_api(dataset)
+        return badges_api.add(dataset)
 
 
 @ns.route('/<dataset:dataset>/badges/<badge_kind>/', endpoint='dataset_badge')
@@ -198,7 +198,7 @@ class DatasetBadgeAPI(API):
     @api.secure(admin_permission)
     def delete(self, dataset, badge_kind):
         '''Delete a badge for a given dataset'''
-        return remove_badge_api(dataset, badge_kind)
+        return badges_api.remove(dataset, badge_kind)
 
 
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources')

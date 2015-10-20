@@ -4,15 +4,14 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 from flask import request
-from flask.ext.security import current_user
 
 from udata import search
 from udata.api import api, API, ModelAPI, SingleObjectAPI
 from udata.auth import admin_permission
-from udata.models import Reuse, REUSE_TYPES, Badge
+from udata.models import Reuse, REUSE_TYPES
 from udata.utils import multi_to_dict
 
-from udata.core.badges.api import badge_fields, add_badge_api, remove_badge_api
+from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
@@ -100,12 +99,12 @@ class AvailableDatasetBadgesAPI(API):
 @ns.route('/<reuse:reuse>/badges/', endpoint='reuse_badges')
 class ReuseBadgesAPI(API):
     @api.doc('add_reuse_badge', **common_doc)
-    @api.expect(badge_fields)
-    @api.marshal_with(badge_fields)
+    @api.expect(badges_api.badge_fields)
+    @api.marshal_with(badges_api.badge_fields)
     @api.secure(admin_permission)
     def post(self, reuse):
         '''Create a new badge for a given reuse'''
-        return add_badge_api(reuse)
+        return badges_api.add(reuse)
 
 
 @ns.route('/<reuse:reuse>/badges/<badge_kind>/', endpoint='reuse_badge')
@@ -114,7 +113,7 @@ class ReuseBadgeAPI(API):
     @api.secure(admin_permission)
     def delete(self, reuse, badge_kind):
         '''Delete a badge for a given reuse'''
-        return remove_badge_api(reuse, badge_kind)
+        return badges_api.remove(reuse, badge_kind)
 
 
 @ns.route('/<reuse:reuse>/featured/', endpoint='reuse_featured')
