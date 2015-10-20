@@ -6,7 +6,7 @@ import logging
 from os.path import exists
 
 from udata.commands import submanager
-from udata.models import Organization, Badge
+from udata.models import Organization
 
 log = logging.getLogger(__name__)
 
@@ -27,16 +27,7 @@ def toggle_badge(id_or_slug, badge_kind):
         kind=badge_kind,
         org=organization.name
     ))
-    existed = False
-    for badge in organization.badges:
-        if badge.kind == badge_kind:
-            organization.badges.remove(badge)
-            existed = True
-            break
-    if not existed:
-        badge = Badge(kind=badge_kind)
-        organization.badges.append(badge)
-    organization.save()
+    organization.toggle_badge(badge_kind)
 
 
 @m.command

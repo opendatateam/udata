@@ -8,9 +8,10 @@ from pkg_resources import resource_isdir, resource_listdir, resource_string
 
 from flask import current_app
 
+from pymongo.errors import PyMongoError, OperationFailure
 from mongoengine.connection import get_db, DEFAULT_CONNECTION_NAME
 
-from udata.commands import submanager, green, yellow, cyan, purple
+from udata.commands import submanager, green, yellow, cyan, purple, red
 
 log = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ function(plugin, filename, script) {{
         filename: filename,
         date: ISODate(),
         script: script,
-        output: stdout.join('\n')
+        output: stdout.join('\\n')
     }});
 
     return stdout;
@@ -74,16 +75,28 @@ def get_migration(plugin, filename):
     return db.migrations.find_one({'plugin': plugin, 'filename': filename})
 
 
-def execute_migration(plugin, filename, script):
+def execute_migration(plugin, filename, script, dryrun=False):
     '''Execute and record a migration'''
     db = get_db(DEFAULT_CONNECTION_NAME)
     js = SCRIPT_WRAPPER.format(script)
+    lines = script.splitlines()
+    success = True
+    if not dryrun:
+        try:
+            lines = db.eval(js, plugin, filename, script)
+        except OperationFailure as e:
+            log.error(e.details['errmsg'].replace('\n', '\\n'))
+            success = False
+        except PyMongoError as e:
+            log.error('Unable to apply migration: %s', str(e))
+            success = False
     print('│')
-    for line in db.eval(js, plugin, filename, script):
+    for line in lines:
         print('│ {0}'.format(line))
     print('│')
-    print('└──[{0}]'.format(green('OK')))
+    print('└──[{0}]'.format(green('OK') if success else red('KO')))
     print('')
+    return success
 
 
 def record_migration(plugin, filename, script):
@@ -134,18 +147,21 @@ def status():
 
 @m.option('-r', '--record', action='store_true',
           help='Only records the migrations')
-def migrate(record):
+@m.option('-d', '--dry-run', action='store_true', dest='dryrun',
+          help='Only print migrations to be applied')
+def migrate(record, dryrun):
     '''Perform database migrations'''
     handler = record_migration if record else execute_migration
+    success = True
     for plugin, package, filename in available_migrations():
         migration = get_migration(plugin, filename)
-        if migration:
+        if migration or not success:
             log_status(plugin, filename, cyan('Skipped'))
         else:
             status = purple('Recorded') if record else yellow('Apply')
             log_status(plugin, filename, status)
             script = resource_string(package, join('migrations', filename))
-            handler(plugin, filename, script)
+            success &= handler(plugin, filename, script, dryrun=dryrun)
 
 
 @m.command

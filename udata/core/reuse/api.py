@@ -4,23 +4,21 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 from flask import request
-from flask.ext.security import current_user
 
 from udata import search
 from udata.api import api, API, ModelAPI, SingleObjectAPI
 from udata.auth import admin_permission
-from udata.models import Reuse, REUSE_TYPES, Badge
+from udata.models import Reuse, REUSE_TYPES
 from udata.utils import multi_to_dict
 
-from udata.core.badges.forms import badge_form
+from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
 )
 
 from .api_fields import (
-    badge_fields, reuse_fields, reuse_page_fields, reuse_suggestion_fields,
-    reuse_type_fields
+    reuse_fields, reuse_page_fields, reuse_suggestion_fields, reuse_type_fields
 )
 from .forms import ReuseForm
 from .models import FollowReuse
@@ -101,20 +99,12 @@ class AvailableDatasetBadgesAPI(API):
 @ns.route('/<reuse:reuse>/badges/', endpoint='reuse_badges')
 class ReuseBadgesAPI(API):
     @api.doc('add_reuse_badge', **common_doc)
-    @api.expect(badge_fields)
-    @api.marshal_with(badge_fields)
+    @api.expect(badges_api.badge_fields)
+    @api.marshal_with(badges_api.badge_fields)
     @api.secure(admin_permission)
     def post(self, reuse):
         '''Create a new badge for a given reuse'''
-        Form = badge_form(Reuse)
-        form = api.validate(Form)
-        badge = Badge(created_by=current_user.id)
-        form.populate_obj(badge)
-        for existing_badge in reuse.badges:
-            if existing_badge.kind == badge.kind:
-                return existing_badge
-        reuse.add_badge(badge)
-        return badge, 201
+        return badges_api.add(reuse)
 
 
 @ns.route('/<reuse:reuse>/badges/<badge_kind>/', endpoint='reuse_badge')
@@ -123,14 +113,7 @@ class ReuseBadgeAPI(API):
     @api.secure(admin_permission)
     def delete(self, reuse, badge_kind):
         '''Delete a badge for a given reuse'''
-        badge = None
-        for badge in reuse.badges:
-            if badge.kind == badge_kind:
-                break
-        if badge is None:
-            api.abort(404, 'Badge does not exists')
-        reuse.remove_badge(badge)
-        return '', 204
+        return badges_api.remove(reuse, badge_kind)
 
 
 @ns.route('/<reuse:reuse>/featured/', endpoint='reuse_featured')

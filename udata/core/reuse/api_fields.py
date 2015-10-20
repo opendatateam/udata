@@ -3,10 +3,10 @@ from __future__ import unicode_literals
 
 from udata.api import api, fields, base_reference
 
-from udata.core.organization.api_fields import org_ref_fields
-from udata.core.dataset.api_fields import dataset_ref_fields
-from udata.core.user.api_fields import user_ref_fields
 from udata.core.badges.api import badge_fields
+from udata.core.dataset.api_fields import dataset_ref_fields
+from udata.core.organization.api_fields import org_ref_fields
+from udata.core.user.api_fields import user_ref_fields
 
 from .models import REUSE_TYPES
 
@@ -24,9 +24,9 @@ reuse_fields = api.model('Reuse', {
         description='The reuse description in Markdown', required=True),
     'tags': fields.List(
         fields.String, description='Some keywords to help in search'),
-    'badges': fields.List(
-        fields.Nested(badge_fields, description='The reuse badges'),
-        readonly=True),
+    'badges': fields.List(fields.Nested(badge_fields),
+                          description='The reuse badges',
+                          readonly=True),
     'featured': fields.Boolean(
         description='Is the reuse featured', readonly=True),
     'private': fields.Boolean(
