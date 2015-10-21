@@ -51,6 +51,21 @@ import me from 'models/me';
 import site from 'models/site';
 import 'jquery-slimscroll';
 
+/**
+ * An empty page metadata factory
+ * @return {Object} An empty but complete meta object.
+ */
+function emptyMeta() {
+    return {
+        title: null,
+        subtitle: null,
+        page: null,
+        breadcrum: [],
+        actions: [],
+        badges: []
+    };
+}
+
 export default {
     name: 'App',
     data: function() {
@@ -59,13 +74,7 @@ export default {
             me: me,
             site: site,
             config: require('config'),
-            meta: {
-                title: null,
-                subtitle: null,
-                page: null,
-                breadcrum: [],
-                actions: []
-            },
+            meta: emptyMeta(),
             toggled: false,
             notifications: []
         };
@@ -202,10 +211,13 @@ export default {
         }
     },
     watch: {
-        'view': function() {
-            Vue.nextTick(function() {
-                this.meta = this.$.content.meta;
-            }.bind(this));
+        'view': function(view, old) {
+            this.meta = emptyMeta();
+            Vue.nextTick(() => {
+                if (this.$.content.meta) {
+                    Object.assign(this.meta, this.$.content.meta);
+                }
+            });
         }
     },
     attached: function() {
