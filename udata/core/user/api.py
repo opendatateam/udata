@@ -5,10 +5,12 @@ from flask.ext.security import current_user
 
 from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, API
-from udata.models import User, FollowUser, Reuse, Dataset
+from udata.models import Dataset, Discussion, FollowUser, Issue, Reuse, User
 
 from udata.core.dataset.api_fields import dataset_full_fields
 from udata.core.followers.api import FollowAPI
+from udata.core.issues.api import issue_fields
+from udata.core.discussions.api import discussion_fields
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
@@ -17,10 +19,10 @@ from udata.core.storages.api import (
 from .api_fields import (
     apikey_fields,
     me_fields,
+    me_metrics_fields,
     user_fields,
     user_page_fields,
     user_suggestion_fields,
-    notifications_fields,
 )
 from .forms import UserProfileForm
 from .search import UserSearch
@@ -80,6 +82,51 @@ class MyDatasetsAPI(API):
     def get(self):
         '''List all my datasets (including private ones)'''
         return list(Dataset.objects.owned_by(current_user.id))
+
+
+@me.route('/metrics/', endpoint='my_metrics')
+class MyMetricsAPI(API):
+    @api.secure
+    @api.doc('my_metrics')
+    @api.marshal_list_with(me_metrics_fields)
+    def get(self):
+        '''Fetch the current user (me) metrics'''
+        return current_user._get_current_object()
+
+
+@me.route('/org_reuses/', endpoint='my_org_reuses')
+class MyOrgReusesAPI(API):
+    @api.secure
+    @api.doc('my_org_reuses')
+    @api.marshal_list_with(reuse_fields)
+    def get(self):
+        '''List all reuses related to me and my organizations.'''
+        owners = list(current_user.organizations) + [current_user.id]
+        return list(Reuse.objects.owned_by(*owners).order_by('-last_modified'))
+
+
+@me.route('/org_issues/', endpoint='my_org_issues')
+class MyOrgIssuesAPI(API):
+    @api.secure
+    @api.doc('my_org_issues')
+    @api.marshal_list_with(issue_fields)
+    def get(self):
+        '''List all issues related to my organizations.'''
+        issues = Issue.objects.from_organizations(
+            current_user._get_current_object(), *current_user.organizations)
+        return list(issues.order_by('-created'))
+
+
+@me.route('/org_discussions/', endpoint='my_org_discussions')
+class MyOrgDiscussionsAPI(API):
+    @api.secure
+    @api.doc('my_org_discussions')
+    @api.marshal_list_with(discussion_fields)
+    def get(self):
+        '''List all discussions related to my organizations.'''
+        discussions = Discussion.objects.from_organizations(
+            current_user._get_current_object(), *current_user.organizations)
+        return list(discussions.order_by('-created'))
 
 
 @me.route('/apikey', endpoint='my_apikey')

@@ -7,7 +7,7 @@
         <div class="icon">
             <i class="fa" v-class="faicon"></i>
         </div>
-        <div class="small-box-footer">
+        <div v-if="target" class="small-box-footer">
             <span v-i18n="More infos"></span>
             <i class="fa fa-arrow-circle-right"></i>
         </div>

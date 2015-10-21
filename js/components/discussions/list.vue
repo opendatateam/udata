@@ -16,7 +16,7 @@ export default {
     },
     data: function() {
         return {
-            title: this._('Discussions'),
+            title: this.title || this._('Discussions'),
             fields: [{
                 label: this._('Title'),
                 key: 'title',
@@ -40,6 +40,6 @@ export default {
             this.$go('/discussion/' + discussion.id + '/');
         }
     },
-    props: ['discussions']
+    props: ['discussions', 'title']
 };
 </script>

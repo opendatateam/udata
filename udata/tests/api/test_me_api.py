@@ -3,9 +3,13 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import User
+from udata.models import (
+    DatasetIssue, DatasetDiscussion, ReuseIssue, ReuseDiscussion, Member, User
+)
 
-from udata.tests.factories import ReuseFactory
+from udata.tests.factories import (
+    VisibleDatasetFactory, OrganizationFactory, ReuseFactory
+)
 
 from . import APITestCase
 
@@ -36,14 +40,91 @@ class MeAPITest(APITestCase):
         self.user.reload()
         self.assertEqual(self.user.about, 'new about')
 
+    def test_my_metrics(self):
+        self.login()
+        response = self.get(url_for('api.my_metrics'))
+        self.assert200(response)
+        self.assertEqual(response.json['resources_availability'], 0)
+        self.assertEqual(response.json['datasets_org_count'], 0)
+        self.assertEqual(response.json['followers_org_count'], 0)
+        self.assertEqual(response.json['datasets_count'], 0)
+        self.assertEqual(response.json['followers_count'], 0)
+
     def test_my_reuses(self):
         user = self.login()
-        reuses = [ReuseFactory(owner=user) for _ in range(3)]
+        reuses = [ReuseFactory(owner=user) for _ in range(2)]
 
         response = self.get(url_for('api.my_reuses'))
         self.assert200(response)
 
         self.assertEqual(len(response.json), len(reuses))
+
+    def test_my_org_reuses(self):
+        user = self.login()
+        member = Member(user=user, role='editor')
+        organization = OrganizationFactory(members=[member])
+        reuses = [ReuseFactory(owner=user) for _ in range(2)]
+        org_reuses = [ReuseFactory(organization=organization)
+                      for _ in range(2)]
+
+        response = self.get(url_for('api.my_org_reuses'))
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(reuses) + len(org_reuses))
+
+    def test_my_org_issues(self):
+        user = self.login()
+        member = Member(user=user, role='editor')
+        organization = OrganizationFactory(members=[member])
+        reuse = ReuseFactory(owner=user)
+        org_reuse = ReuseFactory(organization=organization)
+        dataset = VisibleDatasetFactory(owner=user)
+        org_dataset = VisibleDatasetFactory(organization=organization)
+
+        issues = [
+            DatasetIssue.objects.create(subject=dataset, title='', user=user),
+            DatasetIssue.objects.create(
+                subject=org_dataset, title='', user=user),
+            ReuseIssue.objects.create(subject=reuse, title='', user=user),
+            ReuseIssue.objects.create(subject=org_reuse, title='', user=user),
+        ]
+
+        # Should not be listed
+        DatasetIssue.objects.create(
+            subject=VisibleDatasetFactory(), title='', user=user)
+        ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=user)
+
+        response = self.get(url_for('api.my_org_issues'))
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(issues))
+
+    def test_my_org_discussions(self):
+        user = self.login()
+        member = Member(user=user, role='editor')
+        organization = OrganizationFactory(members=[member])
+        reuse = ReuseFactory(owner=user)
+        org_reuse = ReuseFactory(organization=organization)
+        dataset = VisibleDatasetFactory(owner=user)
+        org_dataset = VisibleDatasetFactory(organization=organization)
+
+        discussions = [
+            DatasetDiscussion.objects.create(
+                subject=dataset, title='', user=user),
+            DatasetDiscussion.objects.create(
+                subject=org_dataset, title='', user=user),
+            ReuseDiscussion.objects.create(subject=reuse, title='', user=user),
+            ReuseDiscussion.objects.create(
+                subject=org_reuse, title='', user=user),
+        ]
+
+        # Should not be listed
+        DatasetDiscussion.objects.create(
+            subject=VisibleDatasetFactory(), title='', user=user)
+        ReuseDiscussion.objects.create(
+            subject=ReuseFactory(), title='', user=user)
+
+        response = self.get(url_for('api.my_org_discussions'))
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(discussions))
 
     def test_my_reuses_401(self):
         response = self.get(url_for('api.my_reuses'))

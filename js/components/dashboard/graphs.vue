@@ -60,19 +60,16 @@ export default {
                 label: this._('Datasets'),
                 icon: 'cubes',
                 color: 'aqua',
-                target: '/datasets/'
             }, {
                 value: this.$root.site.metrics.resources || 0,
                 label: this._('Resources'),
                 icon: 'file-text-o',
                 color: 'maroon',
-                target: '#'
             }, {
                 value: this.$root.site.metrics.reuses || 0,
                 label: this._('Reuses'),
                 icon: 'retweet',
                 color: 'green',
-                target: '/reuses/'
             }];
         },
         communityBoxes: function() {
@@ -84,19 +81,16 @@ export default {
                 label: this._('Users'),
                 icon: 'users',
                 color: 'yellow',
-                target: '#users-widget'
             }, {
                 value: this.$root.site.metrics.organizations || 0,
                 label: this._('Organizations'),
                 icon: 'building',
                 color: 'purple',
-                target: '/organizations/'
             }, {
                 value: this.$root.site.metrics.discussions || 0,
                 label: this._('Discussions'),
                 icon: 'comments',
                 color: 'teal',
-                target: '#'
             }];
         }
     },

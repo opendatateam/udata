@@ -66,7 +66,10 @@ export default  {
     },
     attached: function() {
         this.update();
-        this.$root.me.$on('updated', this.update.bind(this));
+        this._handler = this.$root.me.$on('updated', this.update.bind(this));
+    },
+    detached: function() {
+        this._handler.remove();
     },
     methods: {
         update: function() {
