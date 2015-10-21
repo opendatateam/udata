@@ -186,7 +186,6 @@ export class List extends Base {
         this.reversed = false;
         this.filtered = [];
         this._search = '';
-        this._sifter = new Sifter(this.items);
         this.populate();
     }
 
@@ -206,7 +205,8 @@ export class List extends Base {
      * Populate the data view (filtered and sorted)
      */
     populate() {
-        let options = {};
+        let options = {},
+            sifter = new Sifter(this.items);
 
         if (this.$options.search) {
             options.fields = Array.isArray(this.$options.search) ? this.$options.search: [this.$options.search];
@@ -220,7 +220,7 @@ export class List extends Base {
                 direction: this.reversed ? 'desc' : 'asc'
             }];
         }
-        this.data =  this._sifter.search(this._search, options).items.map((result) => {
+        this.data = sifter.search(this._search, options).items.map((result) => {
             return this.items[result.id];
         });
     }
@@ -239,7 +239,6 @@ export class List extends Base {
 
     on_fetched(data) {
         this.items = data.obj;
-        this._sifter = new Sifter(this.items);
         this.populate();
         this.$emit('updated');
         this.loading = false;
