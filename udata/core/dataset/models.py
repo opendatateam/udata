@@ -261,12 +261,18 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
         Return a list of booleans.
         """
+        # Only check remote resources.
+        remote_resources = [resource
+                            for resource in self.resources
+                            if resource.filetype == 'remote']
+        if not remote_resources:
+            return []
         # First, we try to retrieve all data from the group (slug).
         error, response = check_url_from_group(self.slug)
         if error:
             # The group is unknown, the check will be performed by resource.
             return [resource.check_availability(self.slug)
-                    for resource in self.resources]
+                    for resource in remote_resources]
         else:
             return [int(url_infos['status']) == 200
                     for url_infos in response['urls']]

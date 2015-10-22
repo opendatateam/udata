@@ -39,7 +39,6 @@ user_fields = api.model('User', {
     'organizations': fields.List(
         fields.Nested(org_ref_fields),
         description='The organization the user belongs to'),
-    'metrics': fields.Raw(description='Th last user metrics'),
     'since': fields.ISODateTime(
         attribute='created_at',
         description='The registeration date', required=True),
@@ -54,6 +53,22 @@ user_fields = api.model('User', {
 me_fields = api.inherit('Me', user_fields, {
     'email': fields.String(description='The user email', required=True),
     'apikey': fields.String(description='The user API Key', readonly=True),
+})
+
+me_metrics_fields = api.model('MyMetrics', {
+    'id': fields.String(
+        description='The user identifier', required=True),
+    'resources_availability': fields.Float(
+        description="The user's resources availability percentage",
+        readonly=True),
+    'datasets_org_count': fields.Integer(
+        description="The user's orgs datasets number", readonly=True),
+    'followers_org_count': fields.Integer(
+        description="The user's orgs followers number", readonly=True),
+    'datasets_count': fields.Integer(
+        description="The user's datasets number", readonly=True),
+    'followers_count': fields.Integer(
+        description="The user's followers number", readonly=True),
 })
 
 apikey_fields = api.model('ApiKey', {

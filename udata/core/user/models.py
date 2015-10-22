@@ -2,10 +2,11 @@
 from __future__ import unicode_literals
 
 from datetime import datetime
+from itertools import chain
 from time import time
 
 from blinker import Signal
-from flask import url_for, g, current_app
+from flask import url_for, current_app
 from flask.ext.security import UserMixin, RoleMixin, MongoEngineUserDatastore
 from mongoengine.signals import pre_save, post_save
 from itsdangerous import JSONWebSignatureSerializer
@@ -118,6 +119,45 @@ class User(db.Document, WithMetrics, UserMixin):
     def visible(self):
         return (self.metrics.get('datasets', 0)
                 + self.metrics.get('reuses', 0)) > 0
+
+    @cached_property
+    def resources_availability(self):
+        """Return the percentage of availability for resources."""
+        # Flatten the list.
+        availabilities = list(
+            chain(
+                *[org.check_availability() for org in self.organizations]
+            )
+        )
+        if availabilities:
+            # Trick will work because it's a sum() of booleans.
+            return round(100. * sum(availabilities) / len(availabilities), 2)
+        else:
+            return 0
+
+    @cached_property
+    def datasets_org_count(self):
+        """Return the number of datasets of user's organizations."""
+        from udata.models import Dataset  # Circular imports.
+        return sum(Dataset.objects(organization=org).visible().count()
+                   for org in self.organizations)
+
+    @cached_property
+    def followers_org_count(self):
+        """Return the number of followers of user's organizations."""
+        from udata.models import FollowOrg  # Circular imports.
+        return sum(FollowOrg.objects(following=org).count()
+                   for org in self.organizations)
+
+    @property
+    def datasets_count(self):
+        """Return the number of datasets of the user."""
+        return self.metrics.get('datasets', 0)
+
+    @property
+    def followers_count(self):
+        """Return the number of followers of the user."""
+        return self.metrics.get('followers', 0)
 
     def generate_api_key(self):
         s = JSONWebSignatureSerializer(current_app.config['SECRET_KEY'])

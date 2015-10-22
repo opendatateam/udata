@@ -96,14 +96,14 @@ class OrganizationsMetric(SiteMetric):
 OrganizationsMetric.connect(Organization.on_update)
 
 
-class FollowersMetric(SiteMetric):
+class SiteFollowersMetric(SiteMetric):
     name = 'followers'
     display_name = _('Followers')
 
     def get_value(self):
         return Follow.objects(until=None).count()
 
-FollowersMetric.connect(on_follow, on_unfollow)
+SiteFollowersMetric.connect(on_follow, on_unfollow)
 
 
 class MaxDatasetFollowersMetric(SiteMetric):

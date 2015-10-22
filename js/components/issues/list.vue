@@ -9,16 +9,14 @@
 
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'issues-widget',
     components: {
          'datatable': require('components/datatable/widget.vue')
     },
     data: function() {
         return {
-            title: this._('Issues'),
+            title: this.title || this._('Issues'),
             fields: [{
                 label: this._('Title'),
                 key: 'title',
@@ -42,6 +40,6 @@ module.exports = {
             this.$go('/issue/' + issue.id + '/');
         }
     },
-    props: ['issues']
+    props: ['issues', 'title']
 };
 </script>

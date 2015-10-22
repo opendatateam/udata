@@ -9,16 +9,14 @@
 
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'reuses-widget',
     components: {
          'datatable': require('components/datatable/widget.vue')
     },
     data: function() {
         return {
-            title: this._('Reuses'),
+            title: this.title || this._('Reuses'),
             fields: [{
                 key: 'image',
                 type: 'avatar',
@@ -76,6 +74,6 @@ module.exports = {
             this.$go('/reuse/' + reuse.id + '/');
         }
     },
-    props: ['reuses', 'downloads']
+    props: ['reuses', 'downloads', 'title']
 };
 </script>

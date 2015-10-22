@@ -1,53 +1,44 @@
 <template>
     <div class="row">
-        <small-box class="col-lg-4 col-xs-6" v-repeat="dataBoxes"></small-box>
+        <sbox class="col-lg-4 col-xs-6" v-repeat="dataBoxes"></sbox>
     </div>
 
     <div class="row">
-        <chart title="{{ _('Data') }}" metrics="{{ metrics }}" class="col-xs-12"
-            x="date" y="{{ dataY }}"></chart>
+        <reuses class="col-xs-12" reuses="{{ reuses }}" title="{{ _('Reuses about your data (including your organizations)') }}"></reuses>
     </div>
 
     <div class="row">
-        <small-box class="col-lg-4 col-xs-6" v-repeat="communityBoxes"></small-box>
+        <issues id="issues-widget" class="col-xs-12" issues="{{ issues }}" title="{{ _('Issues about your data (including your organizations)') }}"></issues>
     </div>
 
     <div class="row">
-        <chart title="{{ _('Community') }}" metrics="{{ metrics }}" class="col-xs-12"
-            x="date" y="{{ communityY }}" icon="users"></chart>
+        <discussions id="discussions-widget" class="col-xs-12" discussions="{{ discussions }}" title="{{ _('Discussions about your data (including your organizations)') }}"></discussions>
     </div>
+
 </template>
 
 <script>
 import moment from 'moment';
-import Metrics from 'models/metrics';
+import {PageList} from 'models/base';
+import MyMetrics from 'models/mymetrics';
 
 export default {
     name: 'Home',
     data: function() {
         return {
-            metrics: new Metrics({
-                data: {
-                    loading: true,
-                }
+            metrics: new MyMetrics(),
+            reuses: new PageList({
+                ns: 'me',
+                fetch: 'my_org_reuses'
             }),
-            dataY: [{
-                id: 'datasets',
-                label: this._('Datasets')
-            }, {
-                id: 'reuses',
-                label: this._('Reuses')
-            }, {
-                id: 'resources',
-                label: this._('Resources')
-            }],
-            communityY: [{
-                id: 'users',
-                label: this._('Users')
-            }, {
-                id: 'organizations',
-                label: this._('Organizations')
-            }]
+            issues: new PageList({
+                ns: 'me',
+                fetch: 'my_org_issues',
+            }),
+            discussions: new PageList({
+                ns: 'me',
+                fetch: 'my_org_discussions'
+            }),
         };
     },
     computed: {
@@ -57,70 +48,54 @@ export default {
             };
         },
         dataBoxes: function() {
-            if (!this.$root.site.metrics) {
-                return [];
+            if (!this.metrics.id) {
+                return []
             }
+            let userDatasetsCount = this.metrics.datasets_count || 0;
+            let orgDatasetsCount = this.metrics.datasets_org_count || 0;
+            let userFollowersCount = this.metrics.followers_count || 0;
+            let orgFollowersCount = this.metrics.followers_org_count || 0;
+            let isGoodAvailability = this.metrics.resources_availability >= 80;
             return [{
-                value: this.$root.site.metrics.datasets || 0,
-                label: this._('Datasets'),
+                value: `${orgDatasetsCount} (${userDatasetsCount})`,
+                label: this._('Datasets (only yours)'),
                 icon: 'cubes',
                 color: 'aqua',
-                target: '#datasets-widget'
             }, {
-                value: this.$root.site.metrics.reuses || 0,
-                label: this._('Reuses'),
-                icon: 'retweet',
-                color: 'green',
-                target: '#reuses-widget'
+                value: (this.metrics.resources_availability || 0) + ' %',
+                label: this._('Availability of your latest datasets'),
+                icon: isGoodAvailability ? 'thumbs-up' : 'thumbs-down',
+                color: isGoodAvailability ? 'green' : 'red',
             }, {
-                value: this.$root.site.metrics.resources || 0,
-                label: this._('Resources'),
-                icon: 'file-text-o',
-                color: 'red',
-                target: '#resources-widget'
-            }];
-        },
-        communityBoxes: function() {
-            if (!this.$root.site.metrics) {
-                return [];
-            }
-            return [{
-                value: this.$root.site.metrics.users || 0,
-                label: this._('Users'),
-                icon: 'users',
-                color: 'yellow',
-                target: '#users-widget'
-            }, {
-                value: this.$root.site.metrics.organizations || 0,
-                label: this._('Organizations'),
-                icon: 'building',
+                value: `${orgFollowersCount} (${userFollowersCount})`,
+                label: this._('Followers (only yours)'),
+                icon: 'heart',
                 color: 'purple',
-                target: '#organizations-widget'
             }];
         }
     },
     components: {
-        'chart': require('components/charts/widget.vue'),
-        'small-box': require('components/containers/small-box.vue')
-    },
-    watch: {
-        '$root.site.id': function(id) {
-            this.fetchMetrics();
-        }
+        sbox: require('components/containers/small-box.vue'),
+        reuses: require('components/reuse/list.vue'),
+        issues: require('components/issues/list.vue'),
+        discussions: require('components/discussions/list.vue'),
     },
     attached: function() {
-        this.fetchMetrics();
+        this.update();
+        this._handler = this.$root.me.$on('updated', this.update.bind(this));
+    },
+    detached: function() {
+        this._handler.remove();
     },
     methods: {
-        fetchMetrics: function() {
-            if (this.$root.site.id) {
-                this.metrics.fetch({
-                    id: this.$root.site.id,
-                    start: moment().subtract(20, 'days').format('YYYY-MM-DD'),
-                    end: moment().format('YYYY-MM-DD')
-                });
+        update: function() {
+            if (this.$root.me.id) {
+                this.metrics.fetch();
+                this.reuses.fetch();
+                this.issues.fetch();
+                this.discussions.fetch();
             }
         }
-    }
+    },
 };
 </script>
