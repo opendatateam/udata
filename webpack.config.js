@@ -8,7 +8,7 @@ var vendor_path = path.join(__dirname, 'js', 'vendor');
 var vue = require('vue-loader'),
     css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap'),
     less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline'),
-    html_loader = 'html?collapseBooleanAttributes=false&collapseWhitespace=false"',
+    html_loader = 'vue-html?collapseBooleanAttributes=false&collapseWhitespace=false"',
     js_loader = 'babel';
 
 var languages = ['en', 'es', 'fr'];
