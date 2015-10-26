@@ -15,6 +15,16 @@
             {{{ resource.description | markdown }}}
 
             <dl class="dl-horizontal dl-wide">
+                <dt>{{ _('Type') }}</dt>
+                <dd v-if="resource.filetype == 'file'">
+                    {{ _('This resource is hosted on our servers') }}
+                </dd>
+                <dd v-if="resource.filetype == 'remote'">
+                    {{ _('This resource is hosted on an external server') }}
+                </dd>
+                <dd v-if="resource.filetype == 'api'">
+                    {{ _('This resource is an API') }}
+                </dd>
                 <dt>{{ _('URL') }}</dt>
                 <dd><a href="{{resource.url}}">{{resource.url}}</a></dd>
                 <dt v-if="resource.format">{{ _('Format') }}</dt>
@@ -49,29 +59,40 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button type="button" class="btn btn-outline btn-flat pointer"
-            v-show="!edit && !confirm" v-on="click: edit = true">
-            {{ _('Edit') }}
+        <button type="button" v-show="!edit && !confirm"
+                class="btn btn-primary btn-sm btn-flat pointer pull-left"
+                data-dismiss="modal">
+            {{ _('Close') }}
         </button>
-        <button type="button" class="btn btn-danger btn-sm btn-flat pointer pull-left"
-            v-show="!edit && !confirm" v-on="click: confirm = true">
+        <button type="button" v-show="confirm"
+                class="btn btn-warning btn-sm btn-flat pointer pull-left"
+                v-on="click: confirm = false">
+            {{ _('Cancel') }}
+        </button>
+        <button type="button" v-show="edit"
+                class="btn btn-primary btn-sm btn-flat pointer pull-left"
+                v-on="click: edit = false">
+            {{ _('Cancel') }}
+        </button>
+        <button type="button" v-show="!edit && !confirm"
+                class="btn btn-danger btn-xs btn-flat pointer"
+                v-on="click: confirm = true">
             {{ _('Delete') }}
         </button>
-        <button type="button" class="btn btn-danger btn-outline btn-flat pointer"
-            v-show="confirm" v-on="click: delete_confirmed">
+        <button type="button" v-show="!edit && !confirm"
+                class="btn btn-outline btn-flat pointer"
+                v-on="click: edit = true">
+            {{ _('Edit') }}
+        </button>
+        <button type="button" v-show="confirm"
+                class="btn btn-danger btn-outline btn-flat pointer"
+                v-on="click: delete_confirmed">
             {{ _('Confirm') }}
         </button>
-        <button v-show="confirm" type="button" class="btn btn-warning btn-sm btn-flat pointer pull-left"
-          v-on="click: confirm = false">
-            {{ _('Cancel') }}
-        </button>
-        <button type="button" class="btn btn-outline btn-flat pointer"
-            v-show="edit" v-on="click: save">
+        <button type="button" v-show="edit"
+                class="btn btn-outline btn-flat pointer"
+                v-on="click: save">
             {{ _('Save') }}
-        </button>
-        <button v-show="edit" type="button" class="btn btn-primary btn-sm btn-flat pointer pull-left"
-            v-on="click: edit = false">
-            {{ _('Cancel') }}
         </button>
     </footer>
 </modal>

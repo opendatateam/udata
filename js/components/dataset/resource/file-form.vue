@@ -135,8 +135,9 @@ export default {
                 this.dataset.resources.unshift(response);
             }
             // Do not override an existing typed or registered title.
-            if (this.$.form.serialize().title || this.resource.title) {
-                response.title = this.resource.title;
+            let title = this.$.form.serialize().title || this.resource.title;
+            if (title) {
+                response.title = title;
             }
             this.resource.on_fetched({obj: response});
         }
@@ -146,8 +147,7 @@ export default {
             return this.$.form.validate();
         },
         serialize: function() {
-            // Required because of file_fields integration.
-            return Object.assign({}, this.resource, this.$.form.serialize());
+            return this.$.form.serialize();
         }
     }
 };

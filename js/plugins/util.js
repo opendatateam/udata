@@ -65,10 +65,18 @@ export default function(Vue, options) {  // jshint ignore:line
         }
     });
 
+    /**
+     * Test that object is a given domain model class
+     */
     Vue.filter('is', function(obj, cls) {
-        if (!obj) return;
+        if (!obj || !cls) return;
 
-        var classname = obj.class || obj.classname || Vue.util.classname(obj);
+        let classname = obj.__class__ || obj.class || obj.classname || Vue.util.classname(obj);
+
+        // Resolve known conventions
+        if (classname.endsWith('Full')) {
+            classname = classname.substring(0, classname.length - 4);
+        }
 
         return classname.toLowerCase() == cls.toLowerCase();
     })

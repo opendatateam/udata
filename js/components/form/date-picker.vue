@@ -16,7 +16,7 @@
             placeholder: placeholder,
             required: required,
             value: value|dateFormatted,
-            readonly: readonly || false
+            readonly: readonly
         "></input>
     <div class="dropdown-menu dropdown-menu-right">
         <calendar selected="{{value}}"></calendar>

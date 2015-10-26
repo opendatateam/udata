@@ -3,8 +3,6 @@ from __future__ import unicode_literals, absolute_import
 
 from flask import request
 
-from udata import models
-
 from udata.api import api, fields, API, base_reference
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
@@ -95,11 +93,11 @@ class TransferRequestAPI(API):
         '''Initiate transfer request'''
         data = request.json
 
-        subject_model = getattr(models, data['subject']['class'])
+        subject_model = api.resolve_model(data['subject'])
         subject_id = data['subject']['id']
         subject = subject_model.objects.get(id=subject_id)
 
-        recipient_model = getattr(models, data['recipient']['class'])
+        recipient_model = api.resolve_model(data['recipient'])
         recipient_id = data['recipient']['id']
         recipient = recipient_model.objects.get(id=recipient_id)
 

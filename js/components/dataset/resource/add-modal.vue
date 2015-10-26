@@ -1,5 +1,5 @@
 <template>
-<modal class="modal-primary add-resource-modal"
+<modal class="modal-primary add-resource-modal" v-ref="modal"
     title="{{ _('Add a resource') }}">
 
     <div class="modal-body">
@@ -7,9 +7,10 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button type="button" class="btn btn-primary btn-flat pointer pull-left"
-            data-dismiss="modal"
-            v-show="$.form.resource.filetype">
+        <button type="button"
+            class="btn btn-primary btn-flat pointer pull-left"
+            v-show="$.form.resource.filetype"
+            v-on="click: save">
             {{ _('Save') }}
         </button>
         <button type="button" class="btn btn-outline btn-flat pointer"

@@ -63,7 +63,7 @@ def jstest(hot=False):
 @task
 def karma():
     '''Continuous Karma test'''
-    lrun('karma start --browsers=PhantomJS', pty=True)
+    nrun('karma start --browsers=PhantomJS', pty=True)
 
 
 @task
@@ -178,7 +178,7 @@ def i18nc():
 def assets():
     '''Install and compile assets'''
     header('Building static assets')
-    lrun('webpack -c --progress --config webpack.config.prod.js', pty=True)
+    nrun('webpack -c --progress --config webpack.config.prod.js', pty=True)
 
 
 @task(i18nc, assets)
@@ -190,4 +190,4 @@ def dist():
 
 @task
 def watch():
-    lrun('webpack -d -c --progress --watch', pty=True)
+    nrun('webpack -d -c --progress --watch', pty=True)

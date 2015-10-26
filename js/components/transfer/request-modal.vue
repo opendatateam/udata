@@ -32,8 +32,8 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-                    <dataset-card v-if="subject.__class__ == 'Dataset'" dataset="{{subject}}"></dataset-card>
-                    <reuse-card v-if="subject.__class__ == 'Reuse'" reuse="{{subject}}"></reuse-card>
+                    <dataset-card v-if="subject|is 'Dataset'" dataset="{{subject}}"></dataset-card>
+                    <reuse-card v-if="subject|is 'Reuse'" reuse="{{subject}}"></reuse-card>
                 </div>
             </div>
             <div class="row text-center">
@@ -41,8 +41,8 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-                    <user-card v-if="type == 'user'" user="{{recipient}}"></user-card>
-                    <org-card v-if="type == 'organization'" organization="{{recipient}}"></org-card>
+                    <user-card v-if="recipient|is 'user'" user="{{recipient}}"></user-card>
+                    <org-card v-if="recipient|is 'organization'" organization="{{recipient}}"></org-card>
                 </div>
             </div>
             <form role="form">

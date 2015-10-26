@@ -18,7 +18,8 @@ export const FieldComponentMixin = {
         description: null,
         property: Object,
         required: Boolean,
-        placeholder: String
+        placeholder: String,
+        readonly: Boolean
     }
 };
 
@@ -98,6 +99,9 @@ export const BaseField = {
         },
         placeholder: function() {
             return this.field.placeholder || this.field.label || '';
+        },
+        readonly: function() {
+            return this.field.readonly || false;
         },
         widget: function() {
             let widget;

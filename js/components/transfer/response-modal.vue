@@ -12,9 +12,9 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-                    <dataset-card v-if="transfer.subject | is_dataset"
+                    <dataset-card v-if="transfer.subject|is 'dataset'"
                         datasetid="{{transfer.subject.id}}"></dataset-card>
-                    <reuse-card v-if="transfer.subject | is_reuse"
+                    <reuse-card v-if="transfer.subject|is 'reuse'"
                         reuseid="{{transfer.subject.id}}"></reuse-card>
                 </div>
             </div>
@@ -25,10 +25,10 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-sm-5">
-                    <user-card v-if="transfer.owner | is user"
+                    <user-card v-if="transfer.owner|is 'user'"
                         user="{{transfer.owner}}">
                     </user-card>
-                    <org-card v-if="transfer.owner | is organization"
+                    <org-card v-if="transfer.owner|is 'organization'"
                         organization="{{transfer.owner}}">
                     </org-card>
                 </div>
@@ -37,8 +37,8 @@
                     <span class="fa fa-long-arrow-right fa-2x"></span>
                 </div>
                 <div class="col-xs-12 col-sm-5">
-                    <user-card v-if="transfer.recipient | is user" user="{{transfer.recipient}}"></user-card>
-                    <org-card v-if="transfer.recipient | is organization" organization="{{transfer.recipient}}"></org-card>
+                    <user-card v-if="transfer.recipient|is 'user'" user="{{transfer.recipient}}"></user-card>
+                    <org-card v-if="transfer.recipient|is 'organization'" organization="{{transfer.recipient}}"></org-card>
                 </div>
             </div>
             <div v-if="transfer.comment" class="row">
@@ -88,16 +88,6 @@ export default {
             transfer: {},
             comment: null
         };
-    },
-    filters: {
-        is_dataset: function(obj) {
-            if (!obj) return;
-            return obj.__class__ === 'Dataset';
-        },
-        is_reuse: function(obj) {
-            if (!obj) return;
-            return obj.__class__ === 'Reuse';
-        }
     },
     methods: {
         respond: function(response) {
