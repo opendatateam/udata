@@ -101,7 +101,7 @@ export default {
         }
     },
     events: {
-        'uploder:file-submit': function(id, file) {
+        'uploader:file-submit': function(id, file) {
             if (this.HAS_FILE_API) {
                 this.src = URL.createObjectURL(file);
                 this.resizing = true;

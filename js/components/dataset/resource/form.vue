@@ -103,9 +103,9 @@ export default {
             if (this.resource.filetype === 'file') {
                 return this.$.fileform;
             } else if (this.resource.filetype === 'remote') {
-                return this.$.remoteform.$.form;
+                return this.$.remoteform;
             } else if (this.resource.filetype === 'api') {
-                return this.$.apiform.$.form;
+                return this.$.apiform;
             }
         }
     },
@@ -119,10 +119,11 @@ export default {
             this.resource.filetype = filetype;
         },
         serialize: function() {
-            return this.$form.serialize();
+            // Required because of readonly fields and filetype.
+            return Object.assign({} , this.resource, this.$form.serialize());
         },
         validate: function() {
-            return this.$form ? this.$form.validate() : true;
+            return this.$form.validate();
         }
     }
 };

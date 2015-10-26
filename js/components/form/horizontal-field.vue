@@ -23,7 +23,8 @@
             <component is="{{widget}}"
                 field="{{field}}" value="{{value}}" model="{{model}}"
                 description="{{description}}" property="{{property}}"
-                placeholder="{{placeholder}}" required="{{required}}">
+                placeholder="{{placeholder}}" required="{{required}}"
+                readonly="{{readonly}}">
             </component>
             <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
         </div>

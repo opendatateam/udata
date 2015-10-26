@@ -31,5 +31,13 @@ export default {
     components: {
         'form-horizontal': require('components/form/horizontal-form.vue')
     },
+    methods: {
+        validate: function() {
+            return this.$.form.validate();
+        },
+        serialize: function() {
+            return this.$.form.serialize();
+        }
+    }
 };
 </script>
