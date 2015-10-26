@@ -5,11 +5,10 @@ from flask import json
 
 from uuid import uuid4
 from datetime import date, datetime, timedelta
-from flask.ext import fs
 
 from mongoengine.errors import ValidationError
 
-from udata.models import db, resolve, Dataset
+from udata.models import db
 from udata.tests import TestCase, DBTestMixin
 
 
@@ -291,30 +290,3 @@ class ExtrasField(DBTestMixin, TestCase):
             'integer': 5,
             'float': 5.5,
         }))
-
-
-class ModelResolutionTest(DBTestMixin, TestCase):
-    def test_resolve_exact_match(self):
-        self.assertEqual(resolve('Dataset'), Dataset)
-
-    def test_resolve_convention_full(self):
-        self.assertEqual(resolve('DatasetFull'), Dataset)
-
-    def test_resolve_from_dict(self):
-        self.assertEqual(resolve({'class': 'Dataset'}), Dataset)
-
-    def test_raise_if_not_found(self):
-        with self.assertRaises(ValueError):
-            resolve('NotFound')
-
-    def test_raise_if_not_a_document(self):
-        with self.assertRaises(ValueError):
-            resolve('UDataMongoEngine')
-
-    def test_raise_if_none(self):
-        with self.assertRaises(ValueError):
-            resolve(None)
-
-    def test_raise_if_missing_class_entry(self):
-        with self.assertRaises(ValueError):
-            resolve({'field': 'value'})
