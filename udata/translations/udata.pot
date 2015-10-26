@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 0.1.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-10-16 19:05+0200\n"
+"POT-Creation-Date: 2015-10-26 20:37+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
 
-#: udata/theme.py:36 udata/core/site/metrics.py:91 udata/core/site/views.py:148
+#: udata/theme.py:36 udata/core/site/metrics.py:91 udata/core/site/views.py:149
 #: udata/templates/header.html:49 udata/templates/search.html:42
 #: udata/templates/search.html:96 udata/templates/dataset/search-panel.html:5
 #: udata/templates/organization/display_base.html:7
@@ -33,7 +33,7 @@ msgstr ""
 #: udata/theme.py:37 udata/core/organization/metrics.py:19
 #: udata/core/organization/views.py:114 udata/core/organization/views.py:117
 #: udata/core/reuse/metrics.py:24 udata/core/site/metrics.py:42
-#: udata/core/site/views.py:127 udata/core/user/metrics.py:28
+#: udata/core/site/views.py:128 udata/core/user/metrics.py:28
 #: udata/templates/search.html:27 udata/templates/search.html:68
 #: udata/templates/search.html:99 udata/templates/search.html:110
 #: udata/templates/dataset/display.html:23 udata/templates/dataset/edit_base.html:4
@@ -56,7 +56,7 @@ msgstr ""
 #: udata/theme.py:38 udata/core/dataset/metrics.py:24
 #: udata/core/organization/metrics.py:37 udata/core/organization/views.py:136
 #: udata/core/organization/views.py:139 udata/core/site/metrics.py:52
-#: udata/core/site/views.py:133 udata/core/user/metrics.py:42
+#: udata/core/site/views.py:134 udata/core/user/metrics.py:42
 #: udata/templates/search.html:34 udata/templates/search.html:74
 #: udata/templates/search.html:82 udata/templates/search.html:100
 #: udata/templates/search.html:111 udata/templates/dataset/card.html:45
@@ -594,7 +594,7 @@ msgstr ""
 msgid "Views"
 msgstr ""
 
-#: udata/core/organization/views.py:157 udata/core/site/views.py:145
+#: udata/core/organization/views.py:157 udata/core/site/views.py:146
 msgid "Community"
 msgstr ""
 
@@ -709,13 +709,13 @@ msgstr ""
 msgid "Number of elements in feeds"
 msgstr ""
 
-#: udata/core/site/metrics.py:62 udata/core/site/views.py:139
+#: udata/core/site/metrics.py:62 udata/core/site/views.py:140
 #: udata/templates/search.html:69 udata/templates/dataset/display.html:147
 #: udata/templates/dataset/list.html:28
 msgid "Resources"
 msgstr ""
 
-#: udata/core/site/metrics.py:81 udata/core/site/views.py:154
+#: udata/core/site/metrics.py:81 udata/core/site/views.py:155
 #: udata/templates/search.html:50 udata/templates/user/base.html:15
 #: udata/templates/user/edit_base.html:9 udata/templates/user/following.html:18
 #: udata/templates/user/list.html:13
@@ -750,7 +750,7 @@ msgstr ""
 msgid "Maximum organization datasets"
 msgstr ""
 
-#: udata/core/site/views.py:124
+#: udata/core/site/views.py:125
 msgid "Data"
 msgstr ""
 
