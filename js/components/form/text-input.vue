@@ -1,7 +1,3 @@
-<style lang="less">
-
-</style>
-
 <template>
 <input type="text" class="form-control" v-attr="
     id: field.id,
@@ -9,15 +5,15 @@
     placeholder: placeholder,
     required: required,
     value: value,
-    readonly: readonly || false"></input>
+    readonly: readonly"></input>
 </template>
 
 <script>
-'use strict';
+import {FieldComponentMixin} from 'components/form/base-field';
 
-module.exports = {
+export default {
     name: 'text-input',
     replace: true,
-    mixins: [require('components/form/base-field').FieldComponentMixin]
+    mixins: [FieldComponentMixin]
 };
 </script>

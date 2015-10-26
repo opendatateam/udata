@@ -16,7 +16,7 @@
         v-attr="
             required: required,
             value: start_value,
-            readonly: readonly || false
+            readonly: readonly
         ">
     <span class="input-group-addon">à</span>
     <input type="text" class="input-sm form-control"
@@ -25,7 +25,7 @@
         v-attr="
             required: required,
             value: end_value,
-            readonly: readonly || false
+            readonly: readonly
         ">
     <div class="dropdown-menu dropdown-menu-right">
         <calendar selected="{{value}}"></calendar>
