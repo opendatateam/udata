@@ -15,6 +15,16 @@
             {{{ resource.description | markdown }}}
 
             <dl class="dl-horizontal dl-wide">
+                <dt>{{ _('Type') }}</dt>
+                <dd v-if="resource.filetype == 'file'">
+                    {{ _('This resource is hosted on our servers') }}
+                </dd>
+                <dd v-if="resource.filetype == 'remote'">
+                    {{ _('This resource is hosted on an external server') }}
+                </dd>
+                <dd v-if="resource.filetype == 'api'">
+                    {{ _('This resource is an API') }}
+                </dd>
                 <dt>{{ _('URL') }}</dt>
                 <dd><a href="{{resource.url}}">{{resource.url}}</a></dd>
                 <dt v-if="resource.format">{{ _('Format') }}</dt>
