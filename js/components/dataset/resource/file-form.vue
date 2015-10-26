@@ -147,8 +147,7 @@ export default {
             return this.$.form.validate();
         },
         serialize: function() {
-            // Required because of file_fields integration.
-            return Object.assign({}, this.resource, this.$.form.serialize());
+            return this.$.form.serialize();
         }
     }
 };
