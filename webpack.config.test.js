@@ -4,7 +4,7 @@ var webpack = require("webpack"),
     languages = ['en', 'es', 'fr'];
 
 var vue = require('vue-loader'),
-    html_loader = 'html?collapseBooleanAttributes=false&collapseWhitespace=false"',
+    html_loader = 'vue-html?collapseBooleanAttributes=false&collapseWhitespace=false"',
     js_loader = 'babel';
 
 
