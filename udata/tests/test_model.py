@@ -5,7 +5,6 @@ from flask import json
 
 from uuid import uuid4
 from datetime import date, datetime, timedelta
-from flask.ext import fs
 
 from mongoengine.errors import ValidationError
 
