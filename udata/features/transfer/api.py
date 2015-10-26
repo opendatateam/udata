@@ -95,11 +95,11 @@ class TransferRequestAPI(API):
         '''Initiate transfer request'''
         data = request.json
 
-        subject_model = getattr(models, data['subject']['class'])
+        subject_model = models.resolve(data['subject'])
         subject_id = data['subject']['id']
         subject = subject_model.objects.get(id=subject_id)
 
-        recipient_model = getattr(models, data['recipient']['class'])
+        recipient_model = models.resolve(data['recipient'])
         recipient_id = data['recipient']['id']
         recipient = recipient_model.objects.get(id=recipient_id)
 
