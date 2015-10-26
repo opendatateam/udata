@@ -13,7 +13,7 @@ from flask import (
 from flask.ext.restplus import Api, Resource, marshal
 from flask.ext.restful.utils import cors
 
-from udata import search, theme, tracking
+from udata import search, theme, tracking, models
 from udata.app import csrf
 from udata.i18n import I18nBlueprint
 from udata.auth import (
@@ -149,6 +149,30 @@ class UDataApi(Api):
         parser.add_argument('page_size', type=int, default=20, location='args',
                             help='The page size to fetch')
         return parser
+
+    def resolve_model(self, model):
+        '''
+        Resolve a model given a name or dict with `class` entry.
+
+        Conventions are resolved too: DatasetFull will resolve as Dataset
+        '''
+        if not model:
+            raise ValueError('Unsupported model specifications')
+        if isinstance(model, basestring):
+            classname = model
+        elif isinstance(model, dict) and 'class' in model:
+            classname = model['class']
+        else:
+            raise ValueError('Unsupported model specifications')
+
+        # Handle Full convention until fields masks make it in
+        if classname.endswith('Full'):
+            classname = classname[:-4]
+
+        resolved = getattr(models, classname, None)
+        if not resolved or not issubclass(resolved, models.db.Document):
+            raise ValueError('Model not found')
+        return resolved
 
 
 api = UDataApi(

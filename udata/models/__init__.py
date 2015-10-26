@@ -165,31 +165,6 @@ from udata.core.jobs.models import *
 from udata.features.transfer.models import *
 
 
-def resolve(model):
-    '''
-    Resolve a model given a name or dict with `class` entry.
-
-    Conventions are resolved too: DatasetFull will resolve as Dataset
-    '''
-    if not model:
-        raise ValueError('Unsupported model specifications')
-    if isinstance(model, basestring):
-        classname = model
-    elif isinstance(model, dict) and 'class' in model:
-        classname = model['class']
-    else:
-        raise ValueError('Unsupported model specifications')
-
-    # Handle Full convention
-    if classname.endswith('Full'):
-        classname = classname[:-4]
-
-    resolved = globals().get(classname)
-    if not resolved or not issubclass(resolved, db.Document):
-        raise ValueError('Model not found')
-    return resolved
-
-
 def init_app(app):
     if app.config['TESTING']:
         app.config['MONGODB_DB'] = '{MONGODB_DB}-test'.format(**app.config)
