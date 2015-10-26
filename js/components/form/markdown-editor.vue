@@ -44,12 +44,14 @@
     id: field.id,
     name: field.id,
     required: required,
-    placeholder: placeholder">{{value || ''}}</textarea>
+    placeholder: placeholder,
+    readonly: readonly">{{value || ''}}</textarea>
 </template>
 
 <script>
 import $ from 'jquery';
 import Vue from 'vue';
+import {FieldComponentMixin} from 'components/form/base-field';
 
 const EXCERPT_TOKEN = '<!--- excerpt -->';
 
@@ -79,7 +81,7 @@ export default {
     name: 'markdown-editor',
     replace: true,
     props: ['rows'],
-    mixins: [require('components/form/base-field').FieldComponentMixin],
+    mixins: [FieldComponentMixin],
     ready: function() {
         $(this.$el).markdown({
             language: Vue.lang,
