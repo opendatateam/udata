@@ -94,7 +94,7 @@ define(['api', 'exports?qq!fineuploader'], function(API, qq) {
                     file.id = id;
                     file.progress = 0;
                     this.files.push(file);
-                    this.$emit('uploder:file-submit', id, file);
+                    this.$emit('uploader:file-submit', id, file);
                 }
             },
 
