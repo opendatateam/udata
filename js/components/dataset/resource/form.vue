@@ -122,7 +122,7 @@ export default {
             return this.$form.serialize();
         },
         validate: function() {
-            return this.$form ? this.$form.validate() : true;
+            return this.$form.validate();
         }
     }
 };
