@@ -81,7 +81,7 @@
                             <a href="{{ url_for('organizations.show', org=org) }}">
                                 <img src="{{ org.logo(20)|placeholder('organization') }}"
                                     width="20" height="20"/>
-                                {{ org }}
+                                {{ org.acronym or org.name }}
                             </a>
                         </li>
                         {% endfor %}
