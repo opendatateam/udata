@@ -134,9 +134,11 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     }
 
     def __str__(self):
-        return self.name or ''
+        return self.acronym or self.name or ''
 
     __unicode__ = __str__
+
+    __repr__ = __unicode__
 
     __badges__ = {
         PUBLIC_SERVICE: _('Public Service'),
