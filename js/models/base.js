@@ -94,15 +94,16 @@ export class Base {
      *
      * @param  {String}   endpoint The API endpoint to call
      * @param  {Object}   data     The data object to submit
-     * @param  {Function} callback The callback function to call on success.
+     * @param  {Function} on_success The callback function to call on success.
+     * @param  {Function} on_error The callback function to call on error.
      */
-    $api(endpoint, data, callback) {
-        var parts = endpoint.split('.'),
-            namespace = parts[0],
-            method = parts[1],
-            operation = API[namespace][method];
+    $api(endpoint, data, on_success, on_error=()=>{}) {
+        let parts = endpoint.split('.');
+        let namespace = parts[0];
+        let method = parts[1];
+        let operation = API[namespace][method];
 
-        return operation(data, callback.bind(this));
+        return operation(data, on_success.bind(this), on_error.bind(this));
     }
 };
 

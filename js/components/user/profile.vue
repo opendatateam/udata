@@ -78,13 +78,13 @@ module.exports = {
             this.toggled = !this.toggled;
         },
         save: function(e) {
-            if (this.$.form.validate()) {
-                var data = this.$.form.serialize();
-
-                this.user.update(data);
-                e.preventDefault();
-
-                this.toggled = false;
+            e.preventDefault();
+            let form = this.$.form;
+            if (form.validate()) {
+                this.user.update(form.serialize(), (response) => {
+                    this.user.on_fetched(response);
+                    this.toggled = false;
+                }, form.on_error);
             }
         }
     }

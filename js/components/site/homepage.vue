@@ -106,13 +106,13 @@ module.exports = {
             this.toggled = !this.toggled;
         },
         save: function(e) {
-            if (this.$.form.$.form.validate()) {
-                var data = this.$.form.$.form.serialize();
-
-                this.org.update(data);
-                e.preventDefault();
-
-                this.toggled = false;
+            e.preventDefault();
+            let form = this.$.form.$.form;
+            if (form.validate()) {
+                this.org.update(form.serialize(), (response) => {
+                    this.org.on_fetched(response);
+                    this.toggled = false;
+                }, form.on_error);
             }
         }
     }
