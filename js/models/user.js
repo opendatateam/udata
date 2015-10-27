@@ -21,11 +21,11 @@ export default class User extends Model {
         return this;
     }
 
-    update(data) {
+    update(data, on_success, on_error) {
         this.$api('users.update_user', {
             user: this.id,
             payload: JSON.stringify(data)
-        }, this.on_fetched);
+        }, on_success, on_error);
     }
 
     has_role(name) {

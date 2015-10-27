@@ -190,6 +190,32 @@ export default {
             }
 
             return out;
-        }
+        },
+        on_error: function (response) {
+            if ('data' in response) {
+                let data = {};
+                try {
+                    data = JSON.parse(response.data);
+                } catch (e) {
+                    console.log('Parsing error:', e);
+                    return;
+                }
+                if ('errors' in data) {
+                    this.fill_errors(data.errors);
+                } else {
+                    console.log('Unknown error:', e);
+                }
+            }
+        },
+        fill_errors: function(errors) {
+            [...this.$form.querySelectorAll('input,textarea,select')].forEach((element) => {
+                if (element.name in errors) {
+                    let name = element.name;
+                    let error = errors[element.name][0];
+                    let errorElement = `<label for="${name}" class="help-block" id="${name}-error">${error}</label>`;
+                    $(element).closest('.form-group,.field-wrapper').removeClass('has-success').addClass('has-error').append(errorElement);
+                }
+            });
+        },
     }
 };

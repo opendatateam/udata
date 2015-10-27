@@ -47,7 +47,10 @@ export default {
         },
         validate: function() {
             return this.$.form.validate();
-        }
+        },
+        on_error: function(response) {
+            return this.$.form.on_error(response);
+        },
     }
 };
 </script>
