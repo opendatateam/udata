@@ -95,13 +95,13 @@ export default {
             this.toggled = !this.toggled;
         },
         save: function(e) {
-            if (this.$.form.validate()) {
-                var data = this.$.form.serialize();
-
-                this.reuse.update(data);
-                e.preventDefault();
-
-                this.toggled = false;
+            e.preventDefault();
+            let form = this.$.form;
+            if (form.validate()) {
+                this.reuse.update(form.serialize(), (response) => {
+                    this.reuse.on_fetched(response);
+                    this.toggled = false;
+                }, form.on_error);
             }
         }
     }
