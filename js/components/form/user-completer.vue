@@ -35,6 +35,11 @@ export default {
                 return render(data);
             }
         },
-    }
+    },
+    dataLoaded: function(data) {
+        return data.filter((datum) => {
+            return this.userIds.indexOf(datum.id) <= 0;
+        });
+    },
 };
 </script>
