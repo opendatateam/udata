@@ -218,6 +218,7 @@ export default {
         },
         adding: function(adding) {
             if (adding) {
+                this.$.completer.$options.userIds = this.org.members.map((member) => { return member.user.id; });
                 this.$.completer.selectize.focus();
             }
         }
