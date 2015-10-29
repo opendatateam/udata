@@ -74,7 +74,7 @@
             <a class="pointer"
                 @click="member_click(member)">
                 <img class="img-circle" alt="{{ _('User Image') }}"
-                    v-attr="src:member.user.avatar || avatar_placeholder"/>
+                    :src="member.user.avatar || avatar_placeholder"/>
                 <strong>{{member.user | display}}</strong>
                 <small class="text-muted">{{member.role}}</small>
             </a>
@@ -91,7 +91,7 @@
                 <span class="direct-chat-timestamp pull-right">{{request.created_at | dt}}</span>
             </div>
             <img class="direct-chat-img"  alt="{{ _('User Image') }}"
-                v-attr="src:request.user.avatar || avatar_placeholder"/>
+                :src="request.user.avatar || avatar_placeholder"/>
             <div class="direct-chat-text">
                 {{ request.comment }}
                 <div class="btn-group btn-group-xs pull-right">

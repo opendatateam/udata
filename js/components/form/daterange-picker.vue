@@ -14,36 +14,28 @@
         v-el:start-input placeholder="{{ _('Start') }}"
         @focus="onFocus"
         @blur="onBlur"
-        v-attr="
-            required: required,
-            value: start_value,
-            readonly: readonly
-        ">
+        :required="required"
+        :value="start_value"
+        :readonly="readonly">
     <span class="input-group-addon">à</span>
     <input type="text" class="input-sm form-control"
         v-el:end-input placeholder="{{ _('End') }}"
         @focus="onFocus"
         @blur="onBlur"
-        v-attr="
-            required: required,
-            value: end_value,
-            readonly: readonly
-        ">
+        :required="required"
+        :value="end_value"
+        :readonly="readonly">
     <div class="dropdown-menu dropdown-menu-right">
         <calendar selected="{{value}}"></calendar>
     </div>
     <input type="hidden" v-el:start-hidden
-        v-attr="
-            id: field.id + '-start',
-            name: field.id + '.start',
-            value: start_value
-        "></input>
+        :id="field.id + '-start'"
+        :name="field.id + '-start'"
+        :value="start_value"></input>
     <input type="hidden" v-el:end-hidden
-        v-attr="
-            id: field.id + '-end',
-            name: field.id + '.end',
-            value: end_value
-        "></input>
+        :id="field.id + '-end'"
+        :name="field.id + '-end'"
+        :value="end_value"></input>
 </div>
 </template>
 

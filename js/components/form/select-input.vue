@@ -1,13 +1,11 @@
 <template>
 <select class="form-control" v-model="value"
     options="options | extract"
-    v-attr="
-        id: field.id,
-        name: field.id,
-        placeholder: placeholder,
-        required: required,
-        disabled: readonly
-">
+    :id="field.id"
+    :name="field.id"
+    :placeholder="placeholder"
+    :required="required"
+    :disabled="readonly">
 </select>
 </template>
 

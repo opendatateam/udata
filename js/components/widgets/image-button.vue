@@ -39,7 +39,7 @@
 <div class="image-button pointer"
     v-style="width:size+'px', height:size+'px'"
     @click="click">
-    <img v-attr="src:src" />
+    <img :src="src" />
     <small class="change-overlay">{{ _('change') }}</small>
 </div>
 </template>

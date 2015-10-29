@@ -14,21 +14,17 @@
     <input type="text" class="form-control" v-el:input
         @focus="onFocus"
         @blur="onBlur"
-        v-attr="
-            placeholder: placeholder,
-            required: required,
-            value: value|timeFormatted,
-            readonly: readonly || false
-        "></input>
+        :placeholder="placeholder"
+        :required="required"
+        :value="value|timeFormatted"
+        :readonly="readonly || false"></input>
     <div class="dropdown-menu dropdown-menu-right">
         <time-widget selected="{{value}}"></time-widget>
     </div>
     <input type="hidden" v-el:hidden
-        v-attr="
-            id: field.id,
-            name: serializable ? field.id : '',
-            value: value
-        "></input>
+        :id="field.id"
+        :name="serializable ? field.id : ''"
+        :value="value"></input>
 </div>
 </template>
 

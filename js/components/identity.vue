@@ -9,7 +9,7 @@
 
 <template>
 <a class="identity" @click="click">
-    <img v-attr="src: avatar" alt="{{ name }}">
+    <img :src="avatar" alt="{{ name }}">
     {{name}}
 </a>
 </template>

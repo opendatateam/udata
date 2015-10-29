@@ -14,7 +14,7 @@
                 :class="{ 'pointer': field.sort }"
                 v-repeat="field in fields"
                 @click="header_click(field)"
-                v-attr="width: field.width | thwidth">
+                :width="field.width | thwidth">
                 {{field.label}}
                 <span class="fa fa-fw" v-if="field.sort" :class="{
                     'fa-sort': p.sorted != sort_for(field),

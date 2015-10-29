@@ -25,7 +25,7 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button v-attr="disabled: !hasModifications" type="button"
+        <button :disabled="!hasModifications" type="button"
             class="btn btn-success btn-flat pointer pull-left"
             @click="confirm">
             {{ _('Confirm') }}

@@ -38,7 +38,7 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                     <li v-repeat="action:$root.meta.actions"
-                         v-attr="role: action.divider ? 'separator' : false"
+                         :role="action.divider ? 'separator' : false"
                          :class="{ 'divider': action.divider }">
                         <a class="pointer"
                             v-if="!action.divider"

@@ -40,12 +40,12 @@
 </style>
 
 <template>
-<textarea class="form-control" rows="{{rows || 6}}" v-attr="
-    id: field.id,
-    name: field.id,
-    required: required,
-    placeholder: placeholder,
-    readonly: readonly">{{value || ''}}</textarea>
+<textarea class="form-control" rows="{{rows || 6}}"
+    :id="field.id"
+    :name="field.id"
+    :placeholder="placeholder"
+    :required="required"
+    :readonly="readonly">{{value || ''}}</textarea>
 </template>
 
 <script>

@@ -1,7 +1,7 @@
 <template>
 <div class="card reuse-card">
     <a class="card-logo" href="{{ reuse.page }}">
-        <img alt="{{ reuse.title }}" v-attr="src: reuse.image">
+        <img alt="{{ reuse.title }}" :src="reuse.image">
     </a>
     <div class="card-body">
         <h4>
@@ -13,7 +13,7 @@
     <footer>
         <div class="author">
             <a class="avatar" href="{{owner_url}}" title="{{reuse.title}}">
-            <img v-attr="src: owner_avatar" class="avatar" width="20" height="20"/>
+            <img :src="owner_avatar" class="avatar" width="20" height="20"/>
             </a>
             <a class="user" href="{{ owner_url }}" title="{{ owner_name }}">
             {{ owner_name }}

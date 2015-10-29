@@ -2,7 +2,7 @@
 <div class="card user-card"
     :class="{ 'pointer': clickable, 'selected': selected }" @click="click">
     <a class="card-logo">
-        <img alt="{{ user | display }}" v-attr="src: avatar">
+        <img alt="{{ user | display }}" :src="avatar">
     </a>
     <div class="card-body">
         <h4>

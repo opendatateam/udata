@@ -13,21 +13,17 @@
     <input type="text" class="form-control" v-el:input
         @focus="onFocus"
         @blur="onBlur"
-        v-attr="
-            placeholder: placeholder,
-            required: required,
-            value: value|dateFormatted,
-            readonly: readonly
-        "></input>
+        :placeholder="placeholder"
+        :required="required"
+        :value="value|dateFormatted"
+        :readonly="readonly"></input>
     <div class="dropdown-menu dropdown-menu-right">
         <calendar selected="{{value}}"></calendar>
     </div>
     <input type="hidden" v-el:hidden
-        v-attr="
-            id: field.id,
-            name: serializable ? field.id : '',
-            value: value
-        "></input>
+        :id="field.id"
+        :name="serializable ? field.id : ''"
+        :value="value"></input>
 </div>
 </template>
 

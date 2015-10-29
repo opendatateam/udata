@@ -24,10 +24,6 @@
     </div>
 </div>
 <div class="row" v-if="completions">
-    <!--div class="col-xs-12 col-md-6" v-repeat="org:completions">
-        <img v-attr="src: org.image_url || placeholder" width="30" height="30" />
-        {{org.name}}
-    </div-->
     <organization-card class="col-xs-12 col-md-4 col-lg-3" v-repeat="organization:organizations"></organization-card>
 </div>
 <div class="row" v-if="search_query && !organizations.length">

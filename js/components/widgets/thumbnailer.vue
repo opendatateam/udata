@@ -86,7 +86,7 @@
             <div class="preview-container" v-repeat="size: sizes"
                 v-el:preview_containers
                 style="width: {{size}}px; height: {{size}}px;">
-                <img class="preview" alt="{{ _('Preview') }}" v-el:previews v-attr="src: src"/>
+                <img class="preview" alt="{{ _('Preview') }}" v-el:previews :src="src"/>
             </div>
         </div>
     </div>

@@ -2,10 +2,10 @@
 <div class="card organization-card"
     :class="{ 'pointer': clickable, 'selected': selected }" @click="click">
     <a class="card-logo">
-        <img alt="{{ organization.name }}" v-attr="src: logo">
+        <img alt="{{ organization.name }}" :src="logo">
     </a>
     <img v-if="organization.public_service"
-        v-attr="src: certified_stamp" alt="certified"
+        :src="certified_stamp" alt="certified"
         class="certified" rel="popover"
         data-title="{{ _('Certified public service') }}"
         data-content="{{ _('The identity of this public service public is certified by Etalab') }}"

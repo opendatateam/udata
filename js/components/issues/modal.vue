@@ -28,7 +28,7 @@
                     <span class="direct-chat-timestamp pull-right">{{message.posted_on | dt}}</span>
                 </div>
                 <img class="direct-chat-img"  alt="{{ _('User Image') }}"
-                    v-attr="src:message.posted_by.avatar || avatar_placeholder"/>
+                    :src="message.posted_by.avatar || avatar_placeholder"/>
                 <div class="direct-chat-text" v-markdown="{{message.content}}"></div>
             </div>
         </div>

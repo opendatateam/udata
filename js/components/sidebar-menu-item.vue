@@ -19,7 +19,7 @@
 <li :class="{ 'treeview': children, 'active': active }">
     <a @click="click">
         <i v-if="icon" class="fa fa-fw fa-{{icon}}"></i>
-        <img v-if="image" v-attr="src:image" />
+        <img v-if="image" :src="image" />
         <span>{{ label | truncate 25 }}</span>
         <i v-if="is_tree" class="fa fa-angle-{{open ? 'down' : 'left'}} pull-right"></i>
         <small v-if="badge" class="badge pull-right bg-{{badge-color}}">{{badge.label}}</small>

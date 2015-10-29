@@ -80,11 +80,10 @@
 <div class="modal fade user-modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="user-details">
-            <img class="img-circle" v-attr="
-                src: user.avatar || placeholder,
-                alt: user.fullname,
-                title: user.fullname
-                "/>
+            <img class="img-circle"
+                :src="user.avatar || placeholder"
+                :alt="user.fullname"
+                :title="user.fullname"/>
             </div-->
             <div class="user-info-block">
                 <button type="button" class="close" data-dismiss="modal">

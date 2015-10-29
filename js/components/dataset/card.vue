@@ -1,10 +1,10 @@
 <template>
 <div class="card dataset-card">
     <a v-if="dataset.organization" class="card-logo" href="{{ dataset.page }}">
-        <img alt="{{ dataset.organization.name }}" v-attr="src: logo">
+        <img alt="{{ dataset.organization.name }}" :src="logo">
     </a>
     <img v-if="dataset.organization && dataset.organization.public_service"
-        v-attr="src: certified" alt="certified"
+        :src="certified" alt="certified"
         class="certified" rel="popover"
         data-title="{{ _('Certified public service') }}"
         data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
