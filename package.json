@@ -19,14 +19,13 @@
     "chai": "^3.4.0",
     "chai-jquery": "^2.0.0",
     "chai-things": "^0.2.0",
-    "css-loader": "^0.20.2",
+    "css-loader": "^0.21.0",
     "esdoc": "^1.0.0",
     "exports-loader": "^0.6.2",
     "extract-text-webpack-plugin": "^0.8.2",
     "faker": "^3.0.1",
     "file-loader": "^0.8.4",
     "handlebars-loader": "1.0.2",
-    "vue-html-loader": "^1.0.0",
     "image-webpack-loader": "^1.6.2",
     "imagemin": "^3.2.2",
     "imports-loader": "^0.6.5",
@@ -51,7 +50,9 @@
     "sinon": "^1.17.1",
     "sinon-chai": "^2.8.0",
     "style-loader": "^0.13.0",
-    "vue-loader": "4.0.5",
+    "vue-hot-reload-api": "^1.2.0",
+    "vue-html-loader": "^1.0.0",
+    "vue-loader": "5.0.0",
     "watai": "0.7.0-alpha.1",
     "webpack": "1.12.2"
   },
@@ -98,6 +99,6 @@
     "tv4": "^1.2.7",
     "typeahead.js": "^0.11.1",
     "typeahead.js-bootstrap3.less": "hyspace/typeahead.js-bootstrap3.less#v0.2.3",
-    "vue": "0.12.16"
+    "vue": "1.0.0-migration"
   }
 }
