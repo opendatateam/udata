@@ -2,28 +2,28 @@
     <ul class="pagination pagination-sm no-margin" v-show="p && p.pages > 1">
         <li v-class="disabled: !p || p.page == 1">
             <a title="{{ 'First page'|i18n }}" class="pointer"
-                v-on="click: p.go_to_page(1)">
+                @click="p.go_to_page(1)">
                 &laquo;
             </a>
         </li>
         <li v-class="disabled: !p || p.page == 1">
             <a title="{{'Previous page'|i18n}}" class="pointer"
-                v-on="click: p.previousPage()">
+                @click="p.previousPage()">
                 &lsaquo;
             </a>
         </li>
         <li v-repeat="current:range" v-class="active: current == p.page">
-            <a v-on="click: p.go_to_page(current)" class="pointer">{{ current }}</a>
+            <a @click="p.go_to_page(current)" class="pointer">{{ current }}</a>
         </li>
         <li v-class="disabled: !p || p.page == p.pages">
             <a title="{{'Next page'|i18n}}" class="pointer"
-                v-on="click: p.nextPage()">
+                @click="p.nextPage()">
                 &rsaquo;
             </a>
         </li>
         <li v-class="disabled: !p || p.page == p.pages">
             <a title="{{'Last page'|i18n}}" class="pointer"
-                v-on="click: p.go_to_page(p.pages)">
+                @click="p.go_to_page(p.pages)">
                 &raquo;
             </a>
         </li>

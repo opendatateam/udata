@@ -21,7 +21,7 @@
 <box-container title="{{ _('Profile') }}" icon="building"
     boxclass="box-solid org-profile-widget" footer="{{ toggled }}">
     <aside>
-        <a class="text-muted pointer" v-on="click: toggle">
+        <a class="text-muted pointer" @click="toggle">
             <i class="fa fa-gear"></i>
         </a>
     </aside>
@@ -47,7 +47,7 @@
     <org-form v-ref="form" v-show="toggled" organization="{{org}}"></org-form>
     <footer>
         <button type="submit" class="btn btn-primary" v-if="toggled"
-            v-on="click: save($event)" v-i18n="Save"></button>
+            @click="save($event)" v-i18n="Save"></button>
     </footer>
 </box-container>
 </template>

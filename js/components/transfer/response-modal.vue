@@ -59,11 +59,11 @@
 
     <footer class="modal-footer text-center">
         <button type="button" class="btn btn-success btn-flat pointer pull-left"
-            v-on="click: respond('accept')">
+            @click="respond('accept')">
             {{ _('Accept') }}
         </button>
         <button type="button" class="btn btn-danger btn-flat pointer"
-            v-on="click: respond('refuse')">
+            @click="respond('refuse')">
             {{ _('Refuse') }}
         </button>
     </footer>

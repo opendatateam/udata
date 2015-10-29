@@ -8,7 +8,7 @@
 </style>
 
 <template>
-<a class="identity" v-on="click: click">
+<a class="identity" @click="click">
     <img v-attr="src: avatar" alt="{{ name }}">
     {{name}}
 </a>

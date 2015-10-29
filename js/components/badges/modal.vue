@@ -12,7 +12,7 @@
             <div class="badges col-xs-6 col-xs-offset-3">
                 <button class="btn btn-primary btn-flat btn-block"
                     v-repeat="badges"
-                    v-on="click: toggle($key)"
+                    @click="toggle($key)"
                     v-class="active: selected.indexOf($key) >= 0">
                     <span class="fa pull-left" v-class="
                         fa-bookmark: selected.indexOf($key) >= 0,
@@ -27,7 +27,7 @@
     <footer class="modal-footer text-center">
         <button v-attr="disabled: !hasModifications" type="button"
             class="btn btn-success btn-flat pointer pull-left"
-            v-on="click: confirm">
+            @click="confirm">
             {{ _('Confirm') }}
         </button>
         <button v-if="confirm" type="button" class="btn btn-danger btn-flat pointer"

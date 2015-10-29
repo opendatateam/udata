@@ -1,5 +1,5 @@
 <template>
-<a class="pointer" v-on="click: click">
+<a class="pointer" @click="click">
     <span class="fa fa-fw fa-warning text-yellow"></span>
     {{ details.title }}
 </a>

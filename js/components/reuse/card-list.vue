@@ -71,7 +71,7 @@
             >
                 <button type="button" class="close"
                     v-if="editing"
-                    v-on="click: on_remove(reuseid)">
+                    @click="on_remove(reuseid)">
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only" v-i18n="Close"></span>
                 </button>
@@ -80,7 +80,7 @@
         </div>
         <footer>
             <a v-show="!editing" class="text-uppercase footer-btn pointer"
-                v-on="click: edit">
+                @click="edit">
                 {{ _('Edit') }}
             </a>
             <div v-show="editing" class="input-group input-group-sm text-left">
@@ -90,11 +90,11 @@
                 <reuse-completer v-ref="completer"></reuse-completer>
                 <span class="input-group-btn">
                     <button class="btn btn-success" type="button"
-                        v-on="click: submit">
+                        @click="submit">
                         <span class="fa fa-check"></span>
                     </button>
                     <button class="btn btn-warning" type="button"
-                        v-on="click: cancel">
+                        @click="cancel">
                         <span class="fa fa-close"></span>
                     </button>
                 </span>

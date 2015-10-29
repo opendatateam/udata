@@ -38,7 +38,7 @@
 <template>
 <div class="image-button pointer"
     v-style="width:size+'px', height:size+'px'"
-    v-on="click: click">
+    @click="click">
     <img v-attr="src:src" />
     <small class="change-overlay">{{ _('change') }}</small>
 </div>

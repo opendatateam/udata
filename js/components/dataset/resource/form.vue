@@ -53,7 +53,7 @@
 
 <template>
 <div class="list-group actions-list" v-if="!resource.filetype">
-    <a v-repeat="actions" class="list-group-item pointer" v-on="click: set_filetype(filetype)">
+    <a v-repeat="actions" class="list-group-item pointer" @click="set_filetype(filetype)">
         <div class="action-icon">
             <span class="fa fa-3x fa-{{icon}}"></span>
         </div>

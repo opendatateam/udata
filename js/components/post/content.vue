@@ -17,7 +17,7 @@
 <box-container title="{{post.name}}" icon="building"
     boxclass="box-solid post-content-widget">
     <aside>
-        <a class="text-muted pointer" v-on="click: toggle">
+        <a class="text-muted pointer" @click="toggle">
             <i class="fa fa-gear"></i>
         </a>
     </aside>
@@ -31,9 +31,9 @@
     <post-form v-ref="form" v-if="toggled" post="{{post}}"></post-form>
     <box-footer v-if="toggled">
         <button type="submit" class="btn btn-flat btn-primary"
-            v-on="click: save($event)" v-i18n="Save"></button>
+            @click="save($event)" v-i18n="Save"></button>
         <button type="button" class="btn btn-flat btn-warning"
-            v-on="click: cancel($event)" v-i18n="Cancel"></button>
+            @click="cancel($event)" v-i18n="Cancel"></button>
     </box-footer>
 </box-container>
 </template>

@@ -1,7 +1,7 @@
 <template>
     <div class="alert alert-info" v-if="should_validate">
         <button class="pull-right btn btn-primary btn-xs"
-            v-on="click:validate_source">{{ _('Validate') }}</button>
+            @click="validate_source">{{ _('Validate') }}</button>
         {{ _('This harvest source has not been validated') }}
     </div>
     <div class="alert alert-warning" v-if="display_warning">

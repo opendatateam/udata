@@ -45,12 +45,12 @@
                     <div class="col-xs-12">
                         <button v-if="previous_step"
                             class="btn btn-warning btn-flat pointer"
-                            v-on="click: click_previous">
+                            @click="click_previous">
                             {{ _('Previous') }}
                         </button>
                         <button v-if="next_step || finish"
                             class="btn btn-primary btn-flat pull-right pointer"
-                            v-on="click: click_next">
+                            @click="click_next">
                             {{ this.step_index + 1 === this.steps.length ? _('Finish') : _('Next') }}
                         </button>
                     </div>

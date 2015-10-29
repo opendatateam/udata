@@ -1,7 +1,7 @@
 <template>
 <tr class="pointer"
     v-class="active: selected"
-    v-on="click: item_click(item)">
+    @click="item_click(item)">
     <td v-repeat="field in fields" track-by="key"
         v-class="
             text-center: field.align === 'center',

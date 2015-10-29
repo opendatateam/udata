@@ -68,7 +68,7 @@
             v-repeat="reuseid : reuses | ids"
             data-id="{{reuseid}}"
         >
-            <button type="button" class="close" v-on="click: on_remove(reuseid)">
+            <button type="button" class="close" @click="on_remove(reuseid)">
                 <span aria-hidden="true">&times;</span>
                 <span class="sr-only" v-i18n="Remove"></span>
             </button>

@@ -44,11 +44,11 @@
             </div>
         </form>
         <button type="button" class="btn btn-success btn-flat pointer pull-left"
-            v-on="click: comment_issue" v-if="!issue.closed">
+            @click="comment_issue" v-if="!issue.closed">
             {{ _('Comment the issue') }}
         </button>
         <button type="button" class="btn btn-warning btn-flat pointer pull-left"
-            v-on="click: close_issue" v-if="!issue.closed">
+            @click="close_issue" v-if="!issue.closed">
             {{ _('Comment and close issue') }}
         </button>
         <button type="button" class="btn btn-danger btn-flat pointer"

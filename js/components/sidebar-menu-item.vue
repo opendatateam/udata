@@ -17,7 +17,7 @@
 
 <template>
 <li v-class="treeview:children, active: active">
-    <a v-on="click: click">
+    <a @click="click">
         <i v-if="icon" class="fa fa-fw fa-{{icon}}"></i>
         <img v-if="image" v-attr="src:image" />
         <span>{{ label | truncate 25 }}</span>

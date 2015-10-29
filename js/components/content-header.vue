@@ -42,7 +42,7 @@
                          v-class="divider: action.divider">
                         <a class="pointer"
                             v-if="!action.divider"
-                            v-on="click: action_click(action)" >
+                            @click="action_click(action)" >
                             <span v-if="action.icon" class="fa fa-fw fa-{{action.icon}}"></span>
                             {{action.label}}
                         </a>

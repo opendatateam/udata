@@ -10,7 +10,7 @@
         <button type="button"
             class="btn btn-primary btn-flat pointer pull-left"
             v-show="$.form.resource.filetype"
-            v-on="click: save">
+            @click="save">
             {{ _('Save') }}
         </button>
         <button type="button" class="btn btn-outline btn-flat pointer"

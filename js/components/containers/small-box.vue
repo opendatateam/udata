@@ -1,5 +1,5 @@
 <template>
-    <a class="small-box pointer" v-class="bgcolor" v-on="click: click">
+    <a class="small-box pointer" v-class="bgcolor" @click="click">
         <div class="inner">
             <h3>{{value | numbers}}</h3>
             <p>{{label}}</p>

@@ -1,6 +1,6 @@
 <template>
 <div class="card organization-card"
-    v-class="pointer: clickable, selected:selected" v-on="click: click">
+    v-class="pointer: clickable, selected:selected" @click="click">
     <a class="card-logo">
         <img alt="{{ organization.name }}" v-attr="src: logo">
     </a>

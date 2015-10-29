@@ -1,7 +1,7 @@
 <template>
 <job-widget job="{{job}}" loading="{{loading}}" empty="{{empty}}">
     <div class="text-center">
-        <button class="btn btn-primary btn-flat" v-on="click: preview">
+        <button class="btn btn-primary btn-flat" @click="preview">
             <span class="fa fa-cog"></span>
             {{ _('Preview') }}
         </button>

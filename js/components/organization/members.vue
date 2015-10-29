@@ -63,7 +63,7 @@
     <div class="box-header with-border">
         <h3 class="box-title">{{ _('Members') }}</h3>
         <div class="box-tools pull-right" v-if="requests.items.length > 0">
-            <a class="pointer" v-on="click: toggle_validation">
+            <a class="pointer" @click="toggle_validation">
                 <span class="label label-danger">{{ _('{count} New Requests', {count: requests.items.length}) }}</span>
             </a>
         </div>
@@ -72,7 +72,7 @@
         <div class="col-xs-3 col-lg-2 text-center user-face"
              v-repeat="member:org.members">
             <a class="pointer"
-                 v-on="click: member_click(member)">
+                @click="member_click(member)">
                 <img class="img-circle" alt="{{ _('User Image') }}"
                     v-attr="src:member.user.avatar || avatar_placeholder"/>
                 <strong>{{member.user | display}}</strong>
@@ -96,11 +96,11 @@
                 {{ request.comment }}
                 <div class="btn-group btn-group-xs pull-right">
                     <button type="button" class="btn btn-success"
-                        v-on="click: accept_request(request)">
+                        @click="accept_request(request)">
                         <span class="fa fa-fw fa-check"></span>
                     </button>
                     <button type="button" class="btn btn-danger"
-                        v-on="click: refuse_request(request)">
+                        @click="refuse_request(request)">
                         <span class="fa fa-fw fa-remove"></span>
                     </button>
                 </div>
@@ -111,7 +111,7 @@
                 </form>
                 <div class="input-group-btn">
                     <button class="btn btn-danger btn-flat btn-xs pull-right"
-                    v-on="click: confirm_refusal(request, $index)">
+                    @click="confirm_refusal(request, $index)">
                         <span class="fa fa-close"></span>
                         {{ _('Confirm refusal') }}
                     </button>
@@ -125,7 +125,7 @@
     <div class="box-footer" v-if="!validating"
         v-class="text-center: !adding, search: adding">
         <a v-if="!adding" class="text-uppercase footer-btn pointer"
-            v-on="click: adding = true">{{ _('Add') }}</a>
+            @click="adding = true">{{ _('Add') }}</a>
         <div v-if="adding" class="input-group input-group-sm">
             <span class="input-group-addon">
                 <span class="fa fa-user"></span>
@@ -133,7 +133,7 @@
             <user-completer v-ref="completer"></user-completer>
             <span class="input-group-btn">
                 <button class="btn btn-warning" type="button"
-                    v-on="click: adding = false;">
+                    @click="adding = false;">
                     <span class="fa fa-close"></span>
                 </button>
             </span>

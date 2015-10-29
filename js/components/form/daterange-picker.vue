@@ -12,7 +12,8 @@
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
     <input type="text" class="input-sm form-control"
         v-el="startInput" placeholder="{{ _('Start') }}"
-        v-on="focus: onFocus, blur: onBlur"
+        @focus="onFocus"
+        @blur="onBlur"
         v-attr="
             required: required,
             value: start_value,
@@ -21,7 +22,8 @@
     <span class="input-group-addon">à</span>
     <input type="text" class="input-sm form-control"
         v-el="endInput" placeholder="{{ _('End') }}"
-        v-on="focus: onFocus, blur: onBlur"
+        @focus="onFocus"
+        @blur="onBlur"
         v-attr="
             required: required,
             value: end_value,

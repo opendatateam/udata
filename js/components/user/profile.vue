@@ -20,7 +20,7 @@
 <template>
 <box-container footer="{{ toggled }}" title="{{title}}" icon="user" boxclass="user-profile-widget">
     <aside>
-        <a class="text-muted pointer" v-on="click: toggle">
+        <a class="text-muted pointer" @click="toggle">
             <i class="fa fa-gear"></i>
         </a>
     </aside>
@@ -38,7 +38,7 @@
     <user-form v-ref="form" v-show="toggled" user="{{user}}"></user-form>
     <footer>
         <button type="submit" class="btn btn-primary"
-            v-on="click: save($event)" v-i18n="Save"></button>
+            @click="save($event)" v-i18n="Save"></button>
     </footer>
 </box-container>
 </template>

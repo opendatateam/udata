@@ -28,7 +28,7 @@
             </div>
         </div>
     </li>
-    <li v-if="hasMore"><i v-on="click: more" v-el="more" class="fa fa-chevron-down timeline-icon timeline-icon-more"></i></li>
+    <li v-if="hasMore"><i @click="more" v-el="more" class="fa fa-chevron-down timeline-icon timeline-icon-more"></i></li>
 </ul>
 </template>
 

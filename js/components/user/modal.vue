@@ -103,7 +103,7 @@
                         </a>
                     </li>
                     <li>
-                        <a class="text-center pointer" v-on="click: to_dashboard"
+                        <a class="text-center pointer" @click="to_dashboard"
                              title="{{ _('Dashboard') }}">
                             <span class="fa fa-2x fa-dashboard"></span>
                         </a>

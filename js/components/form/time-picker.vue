@@ -12,7 +12,8 @@
 <div class="input-group dropdown time-picker" v-class="open: picking">
     <span class="input-group-addon"><span class="fa fa-clock-o"></span></span>
     <input type="text" class="form-control" v-el="input"
-        v-on="focus: onFocus, blur: onBlur"
+        @focus="onFocus"
+        @blur="onBlur"
         v-attr="
             placeholder: placeholder,
             required: required,

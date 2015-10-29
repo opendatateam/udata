@@ -11,7 +11,8 @@
 <div class="input-group dropdown date-picker" v-class="open: picking">
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
     <input type="text" class="form-control" v-el="input"
-        v-on="focus: onFocus, blur: onBlur"
+        @focus="onFocus"
+        @blur="onBlur"
         v-attr="
             placeholder: placeholder,
             required: required,

@@ -15,7 +15,7 @@
     </div>
     <footer class="modal-footer">
         <button type="button" class="btn btn-primary btn-flat pointer pull-left"
-             v-if="$.picker.resizing" v-on="click: click">
+             v-if="$.picker.resizing" @click="click">
             {{ _('Validate') }}
         </button>
         <button type="button" class="btn btn-warning btn-flat pointer" data-dismiss="modal">

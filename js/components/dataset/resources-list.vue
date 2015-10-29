@@ -60,7 +60,7 @@
                     <td>{{ file.type }}</td>
                     <td>{{ file.size | filesize }}</td>
                 </tr>
-                <tr v-repeat="resource:dataset.resources" v-on="click: display(resource)"
+                <tr v-repeat="resource:dataset.resources" @click="display(resource)"
                     v-class="pointer: !reodering, move: reordering"
                     data-id="{{resource.id}}">
                     <td v-if="reordering" class="handle">
@@ -94,26 +94,26 @@
             <button type="button"
                 class="btn btn-primary btn-sm btn-flat pointer"
                 v-show="!reordering"
-                v-on="click: on_new">
+                @click="on_new">
                 <span class="fa fa-fw fa-plus"></span>
                 <span v-i18n="Add"></span>
             </button>
             <button type="button"
                 class="btn btn-primary btn-sm btn-flat pointer"
                 v-show="!reordering && dataset.resources && dataset.resources.length > 1"
-                v-on="click: reorder">
+                @click="reorder">
                 <span class="fa fa-fw fa-sort"></span>
                 <span v-i18n="Reorder"></span>
             </button>
             <button type="button" class="btn btn-success btn-sm btn-flat pointer"
                 v-show="reordering"
-                v-on="click: reorder_done(true)">
+                @click="reorder_done(true)">
                 <span class="fa fa-fw fa-check"></span>
                 <span v-i18n="Apply"></span>
             </button>
             <button type="button" class="btn btn-warning btn-sm btn-flat pointer"
                 v-show="reordering"
-                v-on="click: reorder_done(false)">
+                @click="reorder_done(false)">
                 <span class="fa fa-fw fa-times"></span>
                 <span v-i18n="Cancel"></span>
             </button>

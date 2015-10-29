@@ -1,7 +1,7 @@
 <template>
 <box-container title="{{title}}" icon="cubes" boxclass="box-solid">
     <aside>
-        <a class="text-muted pointer" v-on="click: toggle">
+        <a class="text-muted pointer" @click="toggle">
             <i class="fa fa-gear"></i>
         </a>
     </aside>
@@ -26,7 +26,7 @@
     <dataset-form v-ref="form" v-show="toggled" dataset="{{dataset}}"></dataset-form>
     <box-footer v-if="toggled">
         <button type="submit" class="btn btn-primary"
-            v-on="click: save($event)" v-i18n="Save"></button>
+            @click="save($event)" v-i18n="Save"></button>
     </box-footer>
 </box-container>
 </template>

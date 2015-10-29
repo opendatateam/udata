@@ -14,7 +14,7 @@
 
     <footer class="modal-footer text-center">
         <button type="button" class="btn btn-warning btn-flat pointer pull-left"
-            v-on="click: confirm">
+            @click="confirm">
             {{ _('Confirm') }}
         </button>
         <button type="button" class="btn btn-danger btn-flat pointer"

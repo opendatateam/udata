@@ -48,27 +48,27 @@
 
     <footer class="modal-footer text-center">
         <button type="button" class="btn btn-outline btn-flat pointer"
-            v-show="!edit && !confirm" v-on="click: edit = true">
+            v-show="!edit && !confirm" @click="edit = true">
             {{ _('Edit') }}
         </button>
         <button type="button" class="btn btn-danger btn-sm btn-flat pointer pull-left"
-            v-show="!edit && !confirm" v-on="click: confirm = true">
+            v-show="!edit && !confirm" @click="confirm = true">
             {{ _('Delete') }}
         </button>
         <button type="button" class="btn btn-danger btn-outline btn-flat pointer"
-            v-show="confirm" v-on="click: delete_confirmed">
+            v-show="confirm" @click="delete_confirmed">
             {{ _('Confirm') }}
         </button>
         <button v-show="confirm" type="button" class="btn btn-warning btn-sm btn-flat pointer pull-left"
-          v-on="click: confirm = false">
+          @click="confirm = false">
             {{ _('Cancel') }}
         </button>
         <button type="button" class="btn btn-outline btn-flat pointer"
-            v-show="edit" v-on="click: save">
+            v-show="edit" @click="save">
             {{ _('Save') }}
         </button>
         <button v-show="edit" type="button" class="btn btn-primary btn-sm btn-flat pointer pull-left"
-            v-on="click: edit = false">
+            @click="edit = false">
             {{ _('Cancel') }}
         </button>
     </footer>

@@ -13,7 +13,7 @@
             <th class="text-{{field.align || 'left'}}"
                 v-class="pointer: field.sort"
                 v-repeat="field in fields"
-                v-on="click: header_click(field)"
+                @click="header_click(field)"
                 v-attr="width: field.width | thwidth">
                 {{field.label}}
                 <span class="fa fa-fw" v-if="field.sort" v-class="

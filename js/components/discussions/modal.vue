@@ -44,15 +44,15 @@
             </div>
         </form>
         <button type="button" class="btn btn-danger btn-flat pointer pull-left"
-            v-if="$root.me.is_admin" v-on="click: confirm_delete">
+            v-if="$root.me.is_admin" @click="confirm_delete">
             {{ _('Delete') }}
         </button>
         <button type="button" class="btn btn-success btn-flat pointer pull-left"
-            v-on="click: comment_discussion" v-if="!discussion.closed">
+            @click="comment_discussion" v-if="!discussion.closed">
             {{ _('Comment the discussion') }}
         </button>
         <button type="button" class="btn btn-warning btn-flat pointer pull-left"
-            v-on="click: close_discussion" v-if="!discussion.closed">
+            @click="close_discussion" v-if="!discussion.closed">
             {{ _('Comment and close discussion') }}
         </button>
         <button type="button" class="btn btn-primary btn-flat pointer"

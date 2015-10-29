@@ -30,9 +30,9 @@
             <div class="input-group">
                 <input type="text" class="form-control input-sm pull-right"
                     style="width: 150px;" placeholder="{{'Search'|i18n}}"
-                    v-model="search_query" debounce="500" v-on="keyup:search | key enter">
+                    v-model="search_query" debounce="500" @keyup="search | key enter">
                 <div class="input-group-btn">
-                    <button class="btn btn-sm btn-flat" v-on="click: search">
+                    <button class="btn btn-sm btn-flat" @click="search">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>

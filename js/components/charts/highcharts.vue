@@ -21,7 +21,7 @@
                     v-repeat="types"
                     v-class="active: charttype == $value"
                     aria-pressed="{{charttype == $value}}"
-                    v-on="click: charttype = $value"
+                    @click="charttype = $value"
                     >{{$value}}</button>
             </div>
         </aside>

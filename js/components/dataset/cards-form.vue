@@ -68,7 +68,7 @@
             v-repeat="datasetid : datasets | ids"
             data-id="{{datasetid}}"
         >
-            <button type="button" class="close" v-on="click: on_remove(datasetid)">
+            <button type="button" class="close" @click="on_remove(datasetid)">
                 <span aria-hidden="true">&times;</span>
                 <span class="sr-only" v-i18n="Remove"></span>
             </button>

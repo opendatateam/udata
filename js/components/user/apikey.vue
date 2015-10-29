@@ -8,11 +8,11 @@
     </div>
     <footer>
         <button v-if="user.apikey" class="btn btn-default"
-            v-on="click: generate">{{ _('Regenerate') }}</button>
+            @click="generate">{{ _('Regenerate') }}</button>
         <button v-if="user.apikey" class="btn btn-warning"
-            v-on="click: clear">{{ _('Clear') }}</button>
+            @click="clear">{{ _('Clear') }}</button>
         <button v-if="!user.apikey" class="btn btn-default"
-            v-on="click: generate">{{ _('Generate an API KEY') }}</button>
+            @click="generate">{{ _('Generate an API KEY') }}</button>
     </footer>
 </box>
 </template>

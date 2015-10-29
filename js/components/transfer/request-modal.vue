@@ -7,12 +7,12 @@
         <div class="text-center row" v-if="!type">
             <p class="lead col-xs-12">{{ _('Transfer to') }}</p>
 
-            <div class="col-xs-6 pointer" v-on="click: type = 'user'">
+            <div class="col-xs-6 pointer" @click="type = 'user'">
                 <span class="fa fa-3x fa-user"></span>
                 <p>{{ _('An user') }}</p>
             </div>
 
-            <div class="col-xs-6 pointer" v-on="click: type = 'organization'">
+            <div class="col-xs-6 pointer" @click="type = 'organization'">
                 <span class="fa fa-3x fa-building"></span>
                 <p>{{ _('An organization') }}</p>
             </div>
@@ -59,7 +59,7 @@
 
     <footer class="modal-footer text-center">
         <button v-if="recipient" type="button" class="btn btn-success btn-flat pointer pull-left"
-            v-on="click: confirm">
+            @click="confirm">
             {{ _('Confirm') }}
         </button>
         <button v-if="confirm" type="button" class="btn btn-danger btn-flat pointer"

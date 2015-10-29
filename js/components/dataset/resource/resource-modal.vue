@@ -66,32 +66,32 @@
         </button>
         <button type="button" v-show="confirm"
                 class="btn btn-warning btn-sm btn-flat pointer pull-left"
-                v-on="click: confirm = false">
+                @click="confirm = false">
             {{ _('Cancel') }}
         </button>
         <button type="button" v-show="edit"
                 class="btn btn-primary btn-sm btn-flat pointer pull-left"
-                v-on="click: edit = false">
+                @click="edit = false">
             {{ _('Cancel') }}
         </button>
         <button type="button" v-show="!edit && !confirm"
                 class="btn btn-danger btn-xs btn-flat pointer"
-                v-on="click: confirm = true">
+                @click="confirm = true">
             {{ _('Delete') }}
         </button>
         <button type="button" v-show="!edit && !confirm"
                 class="btn btn-outline btn-flat pointer"
-                v-on="click: edit = true">
+                @click="edit = true">
             {{ _('Edit') }}
         </button>
         <button type="button" v-show="confirm"
                 class="btn btn-danger btn-outline btn-flat pointer"
-                v-on="click: delete_confirmed">
+                @click="delete_confirmed">
             {{ _('Confirm') }}
         </button>
         <button type="button" v-show="edit"
                 class="btn btn-outline btn-flat pointer"
-                v-on="click: save">
+                @click="save">
             {{ _('Save') }}
         </button>
     </footer>

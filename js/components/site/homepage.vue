@@ -7,13 +7,13 @@
                 {{title}}
             </li>
             <li v-class="active: tab == 'datasets'">
-                <a class="pointer" v-i18n="Datasets" v-on="click: tab = 'datasets'"></a>
+                <a class="pointer" v-i18n="Datasets" @click="tab = 'datasets'"></a>
             </li>
             <li v-class="active: tab == 'reuses'">
-                <a class="pointer" v-i18n="Reuses" v-on="click: tab = 'reuses'"></a>
+                <a class="pointer" v-i18n="Reuses" @click="tab = 'reuses'"></a>
             </li>
             <li class="pull-right">
-                <a class="text-muted pointer" v-on="click: toggle">
+                <a class="text-muted pointer" @click="toggle">
                     <i class="fa fa-gear"></i>
                 </a>
             </li>
@@ -47,13 +47,13 @@
             <div class="btn-toolbar">
                 <div class="btn-group">
                     <button type="submit" class="btn btn-success btn-flat"
-                        v-on="click: save($event)" v-i18n="Save">
+                        @click="save($event)" v-i18n="Save">
                         {{ _('Save') }}
                     </button>
                 </div>
                 <div class="btn-group">
                     <button type="button" class="btn btn-warning btn-flat pull-right"
-                        v-on="click: toggled = false">
+                        @click="toggled = false">
                         {{ _('Cancel') }}
                     </button>
                 </div>

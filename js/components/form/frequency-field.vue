@@ -17,7 +17,7 @@
     <date-picker  v-ref="picker" field="{{ frequency_date_field }}"
         value="{{frequency_date_value}}">
     </date-picker>
-    <select-input v-ref="select" choices="{{ choices }}" v-on="change: onSelect()"
+    <select-input v-ref="select" choices="{{ choices }}" @change="onSelect()"
         class="select-input" field="{{field}}" model="{{model}}"
         schema="{{schema}}" property="{{property}}" value="{{value}}"
         description="{{description}}" placeholder="{{placeholder}}"

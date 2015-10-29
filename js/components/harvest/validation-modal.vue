@@ -21,11 +21,11 @@
 
     <footer class="modal-footer text-center">
         <button type="button" class="btn btn-success btn-flat pointer pull-left"
-            v-on="click: validate">
+            @click="validate">
             {{ _('Validate') }}
         </button>
         <button type="button" class="btn btn-danger btn-flat pointer"
-            v-on="click: reject">
+            @click="reject">
             {{ _('Reject') }}
         </button>
     </footer>

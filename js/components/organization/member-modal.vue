@@ -22,7 +22,7 @@
     <div v-if="is_admin"  class="btn-group btn-group-justified">
         <div class="btn-group">
             <button type="button" class="btn btn-success btn-flat"
-                 v-on="click:submit">
+                @click="submit">
                 <span class="fa fa-check"></span>
                 {{ _('Validate') }}
             </button>
@@ -36,7 +36,7 @@
     </div>
     <div v-if="is_admin && member_exists" class="btn-group btn-group-justified">
         <div class="btn-group">
-            <button type="button" class="btn btn-danger btn-flat" v-on="click:delete">
+            <button type="button" class="btn btn-danger btn-flat" @click="delete">
                 <span class="fa fa-user-times"></span>
                 {{ _('Delete') }}
             </button>

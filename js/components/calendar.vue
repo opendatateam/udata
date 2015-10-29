@@ -19,11 +19,11 @@
             <thead>
                 <tr>
                     <th class="prev" style="visibility: visible;"
-                        v-on="click: previous">«</th>
+                        @click="previous">«</th>
                     <th colspan="5" class="datepicker-switch"
-                        v-on="click: zoomOut">{{rangeDisplay}}</th>
+                        @click="zoomOut">{{rangeDisplay}}</th>
                     <th class="next" style="visibility: visible;"
-                        v-on="click: next">»</th>
+                        @click="next">»</th>
                 </tr>
                 <tr v-if="view == 'days'">
                     <th class="dow" v-repeat="days">{{$value}}</th>
@@ -33,7 +33,7 @@
                 <tr v-repeat="week:currentMonthDays">
                     <td class="day"
                         v-repeat="day:week"
-                        v-on="click: pickDay(day)"
+                        @click="pickDay(day)"
                         v-class="
                             old: isOld(day),
                             new: isNew(day),
@@ -45,7 +45,7 @@
             <tbody v-show="view == 'months'">
                 <tr>
                     <td colspan="7">
-                        <span class="month" v-repeat="months" v-on="click: pickMonth($index)">{{$value}}
+                        <span class="month" v-repeat="months" @click="pickMonth($index)">{{$value}}
                         </span>
                     </td>
                 </tr>
@@ -53,7 +53,7 @@
             <tbody v-show="view == 'years'">
                 <tr>
                     <td colspan="7">
-                        <span class="year" v-repeat="yearsRange" v-on="click: pickYear($value)">
+                        <span class="year" v-repeat="yearsRange" @click="pickYear($value)">
                         {{$value}}
                         </span>
                     </td>
@@ -61,10 +61,10 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <th colspan="5" v-on="click: pickDay(today)">
+                    <th colspan="5" @click="pickDay(today)">
                         {{ _('Today') }}
                     </th>
-                    <th colspan="2" v-on="click: clear">
+                    <th colspan="2" @click="clear">
                         <span class="fa fa-remove"></span>
                         {{ _('Clear') }}
                     </th>
