@@ -109,7 +109,7 @@
                     </li>
                 </ul>
                 <div class="user-body" v-show="$options._content">
-                    <content></content>
+                    <slot></slot>
                 </div>
             </div>
         </div>

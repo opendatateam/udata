@@ -92,10 +92,10 @@
                 <i class="fa fa-ellipsis-v"></i>
                 <i class="fa fa-ellipsis-v"></i>
             </span>
-            <content></content>
+            <slot></slot>
             <!-- General tools such as edit or delete-->
             <div class="tools">
-                <content v-ref:tools select="aside > *"></content>
+                <slot v-ref:tools select="aside > *"></slot>
             </div>
         </li>
         <li>

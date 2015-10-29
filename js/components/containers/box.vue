@@ -73,18 +73,18 @@
             <i v-show="icon" class="fa fa-{{icon}}"></i>
             <h3 class="box-title">{{title}}</h3>
             <div class="box-tools" v-el:tools>
-                <content v-ref:tools select="aside"></content>
+                <slot v-ref:tools select="aside"></slot>
             </div>
         </header>
         <div class="box-body {{bodyclass || ''}}">
-            <content></content>
+            <slot></slot>
         </div>
         <div class="overlay" v-show="loading">
             <span class="fa fa-refresh fa-spin"></span>
         </div>
         <div class="box-footer clearfix {{footerclass || ''}}"
             v-el:footer v-show="has_footer">
-            <content select="footer"></content>
+            <slot select="footer"></slot>
         </div>
     </div>
 </template>

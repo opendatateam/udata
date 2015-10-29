@@ -10,7 +10,7 @@
                 </button>
                 <h4 class="modal-title" id="modal-title">{{title}}</h4>
             </div>
-            <content></content>
+            <slot></slot>
         </div>
     </div>
 </div>

@@ -40,7 +40,7 @@
         </div>
     </aside>
     <header class="datatable-header">
-        <content select="header"></content>
+        <slot select="header"></slot>
     </header>
     <datatable v-if="has_data" p="{{p}}" fields="{{fields}}" track="{{track}}">
     </datatable>
@@ -49,7 +49,7 @@
     </div>
     <footer>
         <div :class="{ 'pull-right': p.pages > 1 }" v-el:footer_container>
-            <content select="footer"></content>
+            <slot select="footer"></slot>
         </div>
         <pagination-widget p="{{p}}"></pagination-widget>
     </footer>
