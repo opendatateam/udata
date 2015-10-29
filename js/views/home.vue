@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <sbox class="col-lg-4 col-xs-6" v-repeat="dataBoxes"></sbox>
+        <sbox class="col-lg-3 col-xs-6" v-repeat="dataBoxes"></sbox>
     </div>
 
     <div class="row">
@@ -48,13 +48,14 @@ export default {
             };
         },
         dataBoxes: function() {
-            if (!this.metrics.id) {
+            if (!this.metrics.id || !this.reuses) {
                 return []
             }
             let userDatasetsCount = this.metrics.datasets_count || 0;
             let orgDatasetsCount = this.metrics.datasets_org_count || 0;
             let userFollowersCount = this.metrics.followers_count || 0;
             let orgFollowersCount = this.metrics.followers_org_count || 0;
+            let orgReusesCount = this.reuses.items.length || 0;
             let isGoodAvailability = this.metrics.resources_availability >= 80;
             return [{
                 value: `${orgDatasetsCount} (${userDatasetsCount})`,
@@ -63,7 +64,7 @@ export default {
                 color: 'aqua',
             }, {
                 value: (this.metrics.resources_availability || 0) + ' %',
-                label: this._('Availability of your latest datasets'),
+                label: this._('Availability of your datasets'),
                 icon: isGoodAvailability ? 'thumbs-up' : 'thumbs-down',
                 color: isGoodAvailability ? 'green' : 'red',
             }, {
@@ -71,6 +72,11 @@ export default {
                 label: this._('Followers (only yours)'),
                 icon: 'heart',
                 color: 'purple',
+            }, {
+                value: orgReusesCount,
+                label: this._('Reuses'),
+                icon: 'retweet',
+                color: 'teal',
             }];
         }
     },
