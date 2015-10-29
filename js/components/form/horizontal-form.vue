@@ -1,7 +1,7 @@
 <template>
     <form role="form" :class="{ 'form-horizontal': 1 }">
-        <field v-repeat="field in fields"
-            schema="{{schema}}" model="{{model}}"></field>
+        <field v-for="field in fields" :field="field"
+            :schema="schema" :model="model"></field>
     </form>
 </template>
 

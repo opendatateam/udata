@@ -8,7 +8,7 @@
     <user-card user="{{$root.me}}" selected="{{ !selected }}"
         class="col-xs-12 col-sm-6 col-md-4 col-lg-3"></user-card>
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3"
-        v-repeat="organization:$root.me.organizations">
+        v-for="organization in $root.me.organizations">
         <org-card organization="{{organization}}"
             selected="{{ selected == organization }}"
             ></org-card>

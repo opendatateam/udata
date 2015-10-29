@@ -17,6 +17,7 @@
 <script>
 export default {
     name: 'small-box',
+    props: ['value', 'label', 'color', 'icon', 'target'],
     data: function() {
         return {
             value: 0,

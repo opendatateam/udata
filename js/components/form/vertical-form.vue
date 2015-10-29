@@ -6,8 +6,8 @@
 
 <template>
     <form role="form">
-        <field v-repeat="field in fields"
-            schema="{{schema}}" model="{{model}}">
+        <field v-for="field in fields" :field="field"
+            :schema="schema" :model="model">
         </field>
     </form>
 </template>

@@ -53,15 +53,16 @@
 
 <template>
 <div class="list-group actions-list" v-if="!resource.filetype">
-    <a v-repeat="actions" class="list-group-item pointer" @click="set_filetype(filetype)">
+    <a v-for="action in actions" class="list-group-item pointer"
+        @click="set_filetype(action.filetype)">
         <div class="action-icon">
-            <span class="fa fa-3x fa-{{icon}}"></span>
+            <span class="fa fa-3x fa-{{action.icon}}"></span>
         </div>
         <h4 class="list-group-item-heading">
-            {{ label }}
+            {{ action.label }}
         </h4>
          <p class="list-group-item-text ellipsis">
-        {{ details }}
+        {{ action.details }}
         </p>
     </a>
 </div>

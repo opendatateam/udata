@@ -65,7 +65,7 @@
     </div>
     <div class="row" v-el:sortable v-show="datasets.length">
         <div class="col-md-6 dataset-card-container"
-            v-repeat="datasetid : datasets | ids"
+            v-for="datasetid in datasets | ids"
             data-id="{{datasetid}}"
         >
             <button type="button" class="close" @click="on_remove(datasetid)">

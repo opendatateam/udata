@@ -21,8 +21,8 @@
                 <span class="fa fa-download"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
-                <li v-repeat="downloads">
-                    <a href="{{url}}">{{label}}</a>
+                <li v-for="donwload in downloads">
+                    <a href="{{download.url}}">{{download.label}}</a>
                 </li>
             </ul>
         </div>

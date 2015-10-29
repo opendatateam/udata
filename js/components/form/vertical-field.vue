@@ -29,7 +29,8 @@
             :placeholder="placeholder" :required="required"
             :readonly="readonly">
         </component>
-        <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
+        <label for="{{field.id}}" class="help-block"
+            v-for="error in errors">{{error}}</label>
     </div>
 </template>
 

@@ -15,7 +15,7 @@
 <form-horizontal class="resource-form file-resource-form"
     fields="{{fields}}" model="{{resource}}" v-ref:form>
 </form-horizontal>
-<div v-show="!resource.url && files.length" v-repeat="file:files" class="info-box bg-aqua">
+<div v-show="!resource.url && files.length" v-for="file in files" class="info-box bg-aqua">
     <span class="info-box-icon">
         <span class="fa fa-cloud-upload"></span>
     </span>

@@ -1,6 +1,9 @@
 <template>
     <div class="row">
-        <small-box class="col-lg-4 col-xs-6" v-repeat="boxes"></small-box>
+        <small-box class="col-lg-4 col-xs-6" v-for="b in boxes"
+            :value="b.value" :label="b.label" :color="b.color"
+            :icon="b.icon" :target="b.target">
+        </small-box>
     </div>
     <div class="row">
         <div class="col-xs-12 col-md-6">

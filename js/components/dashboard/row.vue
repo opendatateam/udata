@@ -1,6 +1,6 @@
 <template>
     <div class="row dashboard-row">
-        <div class="col-lg-3 col-xs-6" v-repeat="widget:row">
+        <div class="col-lg-3 col-xs-6" v-for="widget in row">
             {{widget}}
         </div>
     </div>

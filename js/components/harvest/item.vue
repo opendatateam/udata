@@ -36,7 +36,7 @@
             </dd>
             <dt v-if="item.errors.length">{{ _('Errors') }}</dt>
             <dd v-if="item.errors.length">
-                <div v-repeat="error:item.errors">
+                <div v-for="error in item.errors">
                     {{{error.message | markdown}}}
                     <pre>{{error.details}}</pre>
                 </div>

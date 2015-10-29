@@ -13,14 +13,14 @@
                 <span class="fa fa-fw fa-tags"></span>
                 {{ _('Tags') }}:
             </strong>
-            <span v-repeat="dataset.tags" class="label label-default">{{$value}}</span>
+            <span v-for="tag in dataset.tags" class="label label-default">{{tag}}</span>
         </div>
         <div v-if="dataset.badges | length" class="label-list">
             <strong>
                 <span class="fa fa-fw fa-bookmark"></span>
                 {{ _('Badges') }}:
             </strong>
-            <span v-repeat="dataset.badges" class="label label-primary">{{badges[kind]}}</span>
+            <span v-for="b in dataset.badges" class="label label-primary">{{badges[b.kind]}}</span>
         </div>
     </div>
     <dataset-form v-ref:form v-show="toggled" dataset="{{dataset}}"></dataset-form>

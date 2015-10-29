@@ -22,7 +22,7 @@
         <h3>{{ issue.title }}</h3>
         <div class="direct-chat-messages">
             <div class="direct-chat-msg"
-                v-repeat="message:issue.discussion">
+                v-for="message in issue.discussion">
                 <div class="direct-chat-info clearfix">
                     <span class="direct-chat-name pull-left">{{message.posted_by | display}}</span>
                     <span class="direct-chat-timestamp pull-right">{{message.posted_on | dt}}</span>

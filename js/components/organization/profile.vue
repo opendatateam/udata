@@ -40,7 +40,7 @@
                     <span class="fa fa-fw fa-bookmark"></span>
                     {{ _('Badges') }}:
                 </strong>
-                <span v-repeat="org.badges" class="label label-primary">{{badges[kind]}}</span>
+                <span v-for="b in org.badges" class="label label-primary">{{badges[b.kind]}}</span>
             </div>
         </div>
     </div>

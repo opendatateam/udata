@@ -4,7 +4,7 @@
         footerClass="text-center">
         <div class="row">
             <dataset-card class="col-md-6"
-                v-repeat="datasetid: reuse.datasets | ids"
+                v-for="id in reuse.datasets | ids" :datasetid="id"
             ></dataset-card>
 
         </div>

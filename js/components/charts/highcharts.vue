@@ -18,11 +18,11 @@
         <aside>
             <div class="btn-group" data-toggle="btn-toggle">
                 <button type="button" class="btn btn-primary btn-xs"
-                    v-repeat="types"
-                    :class="{ 'active': charttype == $value }"
-                    aria-pressed="{{charttype == $value}}"
-                    @click="charttype = $value"
-                    >{{$value}}</button>
+                    v-for="type in types"
+                    :class="{ 'active': charttype == type }"
+                    aria-pressed="{{charttype == type}}"
+                    @click="charttype = type"
+                    >{{type}}</button>
             </div>
         </aside>
         <div class="chart" v-style="height: height || '300 px'"></div>

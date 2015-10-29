@@ -83,7 +83,7 @@
                 </label>
             </div>
             <h5>{{ _('Preview') }}</h5>
-            <div class="preview-container" v-repeat="size: sizes"
+            <div class="preview-container" v-for="size in sizes"
                 v-el:preview_containers
                 style="width: {{size}}px; height: {{size}}px;">
                 <img class="preview" alt="{{ _('Preview') }}" v-el:previews :src="src"/>

@@ -17,7 +17,14 @@
         <!-- End form -->
 
         <ul class="sidebar-menu">
-            <sidebar-menu-item v-repeat="menu"></sidebar-menu-item>
+            <sidebar-menu-item v-for="item in menu"
+                :label="item.label"
+                :icon="item.icon"
+                :image="item.image"
+                :route="item.route"
+                :badge="item.badge"
+                :children="item.children">
+            </sidebar-menu-item>
         </ul>
 
     </section>

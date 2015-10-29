@@ -70,7 +70,7 @@
     </div><!-- /.box-header -->
     <div v-if="!validating" class="box-body row">
         <div class="col-xs-3 col-lg-2 text-center user-face"
-             v-repeat="member:org.members">
+             v-for="member in org.members">
             <a class="pointer"
                 @click="member_click(member)">
                 <img class="img-circle" alt="{{ _('User Image') }}"
@@ -85,7 +85,7 @@
     </div><!-- /.box-body -->
     <div v-if="validating" class="box-body">
         <div class="direct-chat-msg"
-            v-repeat="request:requests.items">
+            v-for="request in requests.items">
             <div class="direct-chat-info clearfix">
                 <span class="direct-chat-name pull-left">{{request.user | display}}</span>
                 <span class="direct-chat-timestamp pull-right">{{request.created_at | dt}}</span>

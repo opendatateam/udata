@@ -26,13 +26,13 @@
                         @click="next">»</th>
                 </tr>
                 <tr v-if="view == 'days'">
-                    <th class="dow" v-repeat="days">{{$value}}</th>
+                    <th class="dow" v-for="day in days">{{day}}</th>
                 </tr>
             </thead>
             <tbody v-show="view == 'days'">
-                <tr v-repeat="week:currentMonthDays">
+                <tr v-for="week in currentMonthDays">
                     <td class="day"
-                        v-repeat="day:week"
+                        v-for="day in week"
                         @click="pickDay(day)"
                         :class="{
                             'old': isOld(day),
@@ -45,7 +45,7 @@
             <tbody v-show="view == 'months'">
                 <tr>
                     <td colspan="7">
-                        <span class="month" v-repeat="months" @click="pickMonth($index)">{{$value}}
+                        <span class="month" v-for="month in months" @click="pickMonth($index)">{{month}}
                         </span>
                     </td>
                 </tr>
@@ -53,8 +53,8 @@
             <tbody v-show="view == 'years'">
                 <tr>
                     <td colspan="7">
-                        <span class="year" v-repeat="yearsRange" @click="pickYear($value)">
-                        {{$value}}
+                        <span class="year" v-for="year in yearsRange" @click="pickYear($value)">
+                        {{year}}
                         </span>
                     </td>
                 </tr>

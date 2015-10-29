@@ -25,7 +25,14 @@
         <small v-if="badge" class="badge pull-right bg-{{badge-color}}">{{badge.label}}</small>
     </a>
     <ul v-if="is_tree" v-show="open" class="treeview-menu">
-        <sidebar-menu-item v-repeat="children"></sidebar-menu-item>
+        <sidebar-menu-item v-for="item in children"
+            :label="item.label"
+            :icon="item.icon"
+            :image="item.image"
+            :route="item.route"
+            :badge="item.badge"
+            :children="item.children">
+        </sidebar-menu-item>
     </ul>
 </li>
 </template>
@@ -34,6 +41,7 @@
 export default {
     name: 'sidebar-menu-item',
     replace: true,
+    props: ['label', 'icon','image', 'route', 'children', 'badge'],
     data: function() {
         return {
             open: false,

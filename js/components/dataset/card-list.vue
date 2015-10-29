@@ -66,7 +66,7 @@
         footerClass="text-center" footer="true">
         <div class="row" v-el:sortable>
             <div class="col-md-6 dataset-card-container"
-                v-repeat="datasetid: editing ? sorted : datasets |ids"
+                v-for="datasetid in (editing ? sorted : datasets)|ids"
                 data-id="{{datasetid}}"
             >
                 <button type="button" class="close"

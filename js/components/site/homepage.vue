@@ -22,14 +22,14 @@
             <div class="tab-pane" :class="{ 'active': tab == 'datasets' }">
                 <div class="row">
                     <dataset-card class="col-md-6"
-                        v-repeat="datasetid:settings.datasets"
+                        v-for="id in settings.datasets" :datasetid="id"
                     ></dataset-card>
                 </div>
             </div>
             <div class="tab-pane" :class="{ 'active': tab == 'reuses' }">
                 <div class="row">
                     <reuse-card class="col-md-6"
-                        v-repeat="reuseid:settings.reuses"
+                        v-for="id in settings.reuses" :reuseid="id"
                     ></reuse-card>
                 </div>
             </div>

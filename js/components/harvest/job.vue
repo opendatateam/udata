@@ -24,7 +24,7 @@
             <dd><span class="label label-{{ job.status | statusClass }}">{{ job.status | statusI18n }}</span></dd>
             <dt v-if="job.errors && job.errors.length">{{ _('Errors') }}</dt>
             <dd v-if="job.errors && job.errors.length">
-                <div v-repeat="error:job.errors">
+                <div v-for="error in job.errors">
                     <p><strong>{{{error.message | markdown}}}</strong></p>
                     <div v-if="error.details">
                     <code><pre>{{error.details}}</pre></code>

@@ -48,7 +48,7 @@
                 </tr>
             </thead>
             <tbody v-el:sortable>
-                <tr v-repeat="file:files" track-by="id">
+                <tr v-for="file in files" track-by="id">
                     <td v-if="reordering"></td>
                     <td>
                         <div class="ellipsis">{{ file.name }}</div>
@@ -60,7 +60,7 @@
                     <td>{{ file.type }}</td>
                     <td>{{ file.size | filesize }}</td>
                 </tr>
-                <tr v-repeat="resource:dataset.resources" @click="display(resource)"
+                <tr v-for="resource in dataset.resources" @click="display(resource)"
                     :class="{ 'pointer': !reodering, 'move': reordering }"
                     data-id="{{resource.id}}">
                     <td v-if="reordering" class="handle">

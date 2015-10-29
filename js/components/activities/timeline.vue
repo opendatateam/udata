@@ -1,13 +1,13 @@
 <template>
 <ul class="timeline">
-    <li v-repeat="activity in enhancedActivities">
+    <li v-for="activity in enhancedActivities">
         <i class="{{ activity.icon }} timeline-icon"></i>
         <div class="timeline-item">
             <span class="time" title="{{ activity.created_at }}"><i class="fa fa-clock-o"></i> {{ activity.created_at | timeago }}</span>
             <div class="timeline-header">
                 <h5>
                     <span v-if="activity.aggregatedFollowing">
-                        <span v-repeat="actor in activity.aggregaterActors">
+                        <span v-for="actor in activity.aggregaterActors">
                             <a href="{{ actor.url }}">{{actor | displayName}}</a><span v-if="$index < activity.aggregaterActors.length - 2">,</span>
                             <span v-if="$index === activity.aggregaterActors.length - 2">{{ _('and') }}</span>
                         </span>

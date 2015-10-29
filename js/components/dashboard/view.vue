@@ -1,5 +1,5 @@
 <template>
-    <dashboard-row v-repeat="row:layout" ></dashboard-row>
+    <dashboard-row v-for="row in layout"></dashboard-row>
 </template>
 
 <script>

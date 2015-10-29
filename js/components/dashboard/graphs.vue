@@ -8,10 +8,16 @@
 </style>
 <template>
     <div class="row small-boxes">
-        <small-box class="col-lg-4 col-xs-6" v-repeat="dataBoxes"></small-box>
+        <small-box class="col-lg-4 col-xs-6" v-for="b in dataBoxes"
+            :value="b.value" :label="b.label" :color="b.color"
+            :icon="b.icon" :target="b.target">
+        </small-box>
     </div>
     <div class="row small-boxes">
-        <small-box class="col-lg-4 col-xs-6" v-repeat="communityBoxes"></small-box>
+        <small-box class="col-lg-4 col-xs-6" v-for="b in communityBoxes"
+            :value="b.value" :label="b.label" :color="b.color"
+            :icon="b.icon" :target="b.target">
+        </small-box>
     </div>
     <div class="row graphs-chart">
         <chart class="col-xs-6" title="{{ _('Latest dataset uploads') }}"

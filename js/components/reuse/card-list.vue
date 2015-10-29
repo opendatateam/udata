@@ -66,7 +66,7 @@
         footerClass="text-center" footer="true">
         <div class="row" v-el:sortable>
             <div class="col-md-6 reuse-card-container"
-                v-repeat="reuseid: editing ? sorted : reuses |ids"
+                v-for="reuseid in (editing ? sorted : reuses) |ids"
                 data-id="{{reuseid}}"
             >
                 <button type="button" class="close"

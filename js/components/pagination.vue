@@ -12,7 +12,7 @@
                 &lsaquo;
             </a>
         </li>
-        <li v-repeat="current:range" :class="{ 'active': current == p.page }">
+        <li v-for="current in range" :class="{ 'active': current == p.page }">
             <a @click="p.go_to_page(current)" class="pointer">{{ current }}</a>
         </li>
         <li :class="{ 'disabled': !p || p.page == p.pages }">

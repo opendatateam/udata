@@ -1,5 +1,3 @@
-<style lang="less"></style>
-
 <template>
     <div class="alert alert-{{type}}"
         :class="{ 'alert-dismissable': closable }">
@@ -13,11 +11,10 @@
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'alert-box',
     replace: true,
+    props: ['type', 'icon', 'closable'],
     data: function() {
         return {
             type: 'success',

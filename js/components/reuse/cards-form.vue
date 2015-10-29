@@ -65,7 +65,7 @@
     </div>
     <div class="row" v-el:sortable v-show="reuses.length">
         <div class="col-md-6 reuse-card-container"
-            v-repeat="reuseid : reuses | ids"
+            v-for="reuseid in reuses | ids"
             data-id="{{reuseid}}"
         >
             <button type="button" class="close" @click="on_remove(reuseid)">

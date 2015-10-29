@@ -1,6 +1,9 @@
 <template>
     <div class="row">
-        <sbox class="col-lg-3 col-xs-6" v-repeat="boxes"></sbox>
+        <sbox class="col-lg-3 col-xs-6" v-for="b in boxes"
+            :value="b.value" :label="b.label" :color="b.color"
+            :icon="b.icon" :target="b.target">
+        </sbox>
     </div>
     <div class="row">
         <chart title="Traffic" metrics="{{metrics}}" class="col-xs-12"

@@ -35,7 +35,9 @@
         <content-header meta="{{meta}}"></content-header>
         <!-- Notifications -->
         <div v-if="notifications.length > 0" class="notification-zone">
-            <alert-box v-repeat="notifications"></alert-box>
+            <alert-box v-for="n in notifications"
+                :type="n.type" :icon="n.icon" :closable="n.closable">
+            </alert-box>
         </div>
         <!-- Main content -->
         <section class="content">

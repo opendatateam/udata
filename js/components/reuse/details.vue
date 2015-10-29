@@ -39,14 +39,14 @@
                     <span class="fa fa-fw fa-tags"></span>
                     {{ _('Tags') }}:
                 </strong>
-                <span v-repeat="reuse.tags" class="label label-default">{{$value}}</span>
+                <span v-for="tag reuse.tags" class="label label-default">{{tag}}</span>
             </div>
             <div v-if="reuse.badges | length" class="label-list">
                 <strong>
                     <span class="fa fa-fw fa-bookmark"></span>
                     {{ _('Badges') }}:
                 </strong>
-                <span v-repeat="reuse.badges" class="label label-primary">{{badges[kind]}}</span>
+                <span v-for="b in reuse.badges" class="label label-primary">{{badges[b.kind]}}</span>
             </div>
         </div>
     </div>

@@ -11,11 +11,12 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-repeat="clients" v-route="/oauth/clients/{{id}}/">
-                    <td>{{name}}</td>
-                    <td>{{description}}</td>
+                <tr v-for="client in clients"
+                    v-route="/oauth/clients/{{client.id}}/">
+                    <td>{{client.name}}</td>
+                    <td>{{client.description}}</td>
                     <td>
-                        <i class="fa fa-fw fa-{{enabled ? 'play' : 'stop'}} text-{{enabled ? 'green' : 'red'}}"></i>
+                        <i class="fa fa-fw fa-{{client.enabled ? 'play' : 'stop'}} text-{{client.enabled ? 'green' : 'red'}}"></i>
                     </td>
                 </tr>
             </tbody>

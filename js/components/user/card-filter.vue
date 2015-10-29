@@ -21,7 +21,7 @@
     </div>
 </div>
 <div class="row user-card-filter-cardlist" v-if="completions">
-    <card class="{{cardclass}}" v-repeat="user:users"></card>
+    <card class="{{cardclass}}" v-for="user in users"></card>
 </div>
 <div class="row" v-if="!search_query">
     <p class="col-xs-12 lead text-center">

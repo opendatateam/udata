@@ -24,7 +24,7 @@
     </div>
 </div>
 <div class="row" v-if="completions">
-    <organization-card class="col-xs-12 col-md-4 col-lg-3" v-repeat="organization:organizations"></organization-card>
+    <organization-card class="col-xs-12 col-md-4 col-lg-3" v-for="organization in organizations"></organization-card>
 </div>
 <div class="row" v-if="search_query && !organizations.length">
     <p class="col-xs-12 lead text-center">

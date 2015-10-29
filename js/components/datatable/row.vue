@@ -2,7 +2,7 @@
 <tr class="pointer"
     :class="{ 'active': selected }"
     @click="item_click(item)">
-    <td v-repeat="field in fields" track-by="key"
+    <td v-for="field in fields" track-by="key"
         :class="{
             'text-center': field.align === 'center',
             'text-left': field.align === 'left',

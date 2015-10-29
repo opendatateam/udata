@@ -12,7 +12,7 @@
         <tr>
             <th class="text-{{field.align || 'left'}}"
                 :class="{ 'pointer': field.sort }"
-                v-repeat="field in fields"
+                v-for="field in fields"
                 @click="header_click(field)"
                 :width="field.width | thwidth">
                 {{field.label}}
@@ -25,10 +25,8 @@
         </tr>
     </thead>
     <tbody>
-        <tr v-repeat="item in p.data" track-by="{{trackBy}}"
-            is="row"
-            fields="{{fields}}"
-            selected="{{item === selected}}">
+        <tr v-for="item in p.data" track-by="{{trackBy}}" is="row"
+            :item="item" :fields="fields" :selected="item === selected">
         </tr>
     </tbody>
 </table>

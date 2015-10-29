@@ -25,13 +25,14 @@
     <div class="row form-group wizard-steps">
         <div class="col-xs-12">
             <ul class="nav nav-pills nav-justified thumbnail setup-panel">
-                <li :class="{ 'active': step_index === $index }" v-repeat="steps">
+                <li :class="{ 'active': step_index === $index }"
+                    v-for="step in steps">
                     <a>
                         <h4 class="list-group-item-heading">
                             {{ $index + 1 }}.
-                            {{ label }}
+                            {{ step.label }}
                         </h4>
-                        <p class="list-group-item-text">{{subtitle}}</p>
+                        <p class="list-group-item-text">{{step.subtitle}}</p>
                     </a>
                 </li>
             </ul>

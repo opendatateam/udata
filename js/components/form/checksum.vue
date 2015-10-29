@@ -15,7 +15,7 @@
             <span class="caret"></span>
         </button>
         <ul class="dropdown-menu" role="menu">
-            <li v-repeat="specs.type.enum"><a href="#">{{$value}}</a></li>
+            <li v-for="algo in specs.type.enum"><a href="#">{{algo}}</a></li>
         </ul>
     </div>
     <input type="text" class="form-control"

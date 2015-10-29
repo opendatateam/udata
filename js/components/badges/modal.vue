@@ -11,14 +11,14 @@
         <div class="text-center row">
             <div class="badges col-xs-6 col-xs-offset-3">
                 <button class="btn btn-primary btn-flat btn-block"
-                    v-repeat="badges"
+                    v-for="value in badges"
                     @click="toggle($key)"
                     :class="{ 'active': selected.indexOf($key) >= 0 }">
                     <span class="fa pull-left" :class="{
                         'fa-bookmark': selected.indexOf($key) >= 0,
                         'fa-bookmark-o': selected.indexOf($key) < 0
                         }"></span>
-                    {{ $value }}
+                    {{ value }}
                 </button>
             </div>
         </div>

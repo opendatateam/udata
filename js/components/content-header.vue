@@ -37,7 +37,7 @@
                     <span class="fa fa-fw fa-gear"></span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                    <li v-repeat="action:$root.meta.actions"
+                    <li v-for="action in $root.meta.actions"
                          :role="action.divider ? 'separator' : false"
                          :class="{ 'divider': action.divider }">
                         <a class="pointer"
@@ -51,7 +51,7 @@
             </div>
             <small v-if="$root.meta.subtitle">{{$root.meta.subtitle}}</small>
             <small v-if="$root.meta.badges">
-                <span v-repeat="badge in $root.meta.badges"
+                <span v-for="badge in $root.meta.badges"
                     class="label label-{{badge.class}}">{{badge.label}}</span>
             </small>
         </h1>
