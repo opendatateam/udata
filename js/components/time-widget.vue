@@ -13,7 +13,7 @@
 </style>
 
 <template>
-<div class="calendar datepicker" v-class="view">
+<div class="calendar datepicker" :class="[ 'view' ]">
     <div class="btn-group btn-group-sm btn-group-justified" role="group">
       <div class="btn-group" role="group">
         <button @click="pickBefore" type="button" class="btn btn-default">{{ _('- 1h') }}</button>

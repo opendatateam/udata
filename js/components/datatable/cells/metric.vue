@@ -1,8 +1,8 @@
 <template>
-<span class="badge" v-class="
-    bg-green: value > 0,
-    bg-red: value == 0
-    ">{{value}}</span>
+<span class="badge" :class="{
+    'bg-green': value > 0,
+    'bg-red': value == 0
+    }">{{value}}</span>
 </template>
 
 <script>

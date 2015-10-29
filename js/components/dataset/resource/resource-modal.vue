@@ -8,7 +8,7 @@
 
 <template>
 <modal title="{{ resource.title }}" class="resource-modal"
-    v-class="modal-danger: confirm, modal-primary: !confirm"
+    :class="{ 'modal-danger': confirm, 'modal-primary': !confirm }"
     v-ref="modal">
     <div class="modal-body">
         <div v-show="!edit && !confirm">

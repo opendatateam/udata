@@ -9,7 +9,7 @@
 </style>
 
 <template>
-<div class="input-group dropdown time-picker" v-class="open: picking">
+<div class="input-group dropdown time-picker" :class="{ 'open': picking }">
     <span class="input-group-addon"><span class="fa fa-clock-o"></span></span>
     <input type="text" class="form-control" v-el="input"
         @focus="onFocus"

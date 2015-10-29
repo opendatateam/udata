@@ -11,16 +11,16 @@
     <thead>
         <tr>
             <th class="text-{{field.align || 'left'}}"
-                v-class="pointer: field.sort"
+                :class="{ 'pointer': field.sort }"
                 v-repeat="field in fields"
                 @click="header_click(field)"
                 v-attr="width: field.width | thwidth">
                 {{field.label}}
-                <span class="fa fa-fw" v-if="field.sort" v-class="
-                    fa-sort: p.sorted != sort_for(field),
-                    fa-sort-asc: p.sorted == sort_for(field) && !p.reversed,
-                    fa-sort-desc: p.sorted == sort_for(field) && p.reversed
-                "></span>
+                <span class="fa fa-fw" v-if="field.sort" :class="{
+                    'fa-sort': p.sorted != sort_for(field),
+                    'fa-sort-asc': p.sorted == sort_for(field) && !p.reversed,
+                    'fa-sort-desc': p.sorted == sort_for(field) && p.reversed
+                }"></span>
             </th>
         </tr>
     </thead>

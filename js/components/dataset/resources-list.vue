@@ -61,7 +61,7 @@
                     <td>{{ file.size | filesize }}</td>
                 </tr>
                 <tr v-repeat="resource:dataset.resources" @click="display(resource)"
-                    v-class="pointer: !reodering, move: reordering"
+                    :class="{ 'pointer': !reodering, 'move': reordering }"
                     data-id="{{resource.id}}">
                     <td v-if="reordering" class="handle">
                         <span class="fa fa-bars"></span>
@@ -70,10 +70,10 @@
                     <td>{{ resource.format }}</td>
                     <td>{{ resource.filesize | filesize }}</td>
                     <td class="text-center">
-                        <span class="badge" v-class="
-                            bg-green: resource.metrics.views > 0,
-                            bg-red: (resource.metrics.views || 0) === 0
-                            ">
+                        <span class="badge" :class="{
+                            'bg-green': resource.metrics.views > 0,
+                            'bg-red': (resource.metrics.views || 0) === 0
+                            }">
                             {{ resource.metrics.views || 0 }}
                         </span>
                     </td>

@@ -1,14 +1,14 @@
 <template>
 <tr class="pointer"
-    v-class="active: selected"
+    :class="{ 'active': selected }"
     @click="item_click(item)">
     <td v-repeat="field in fields" track-by="key"
-        v-class="
-            text-center: field.align === 'center',
-            text-left: field.align === 'left',
-            text-right: field.align === 'right',
-            ellipsis: field.ellipsis
-        ">
+        :class="{
+            'text-center': field.align === 'center',
+            'text-left': field.align === 'left',
+            'text-right': field.align === 'right',
+            'ellipsis': field.ellipsis
+        }">
         <component :is="field.type || 'text'" :item="item" :field="field">
         </component>
     </td>

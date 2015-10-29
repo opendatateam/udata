@@ -8,7 +8,7 @@
 </style>
 
 <template>
-<div class="input-group dropdown date-picker" v-class="open: picking">
+<div class="input-group dropdown date-picker" :class="{ 'open': picking }">
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
     <input type="text" class="form-control" v-el="input"
         @focus="onFocus"

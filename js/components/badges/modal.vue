@@ -13,11 +13,11 @@
                 <button class="btn btn-primary btn-flat btn-block"
                     v-repeat="badges"
                     @click="toggle($key)"
-                    v-class="active: selected.indexOf($key) >= 0">
-                    <span class="fa pull-left" v-class="
-                        fa-bookmark: selected.indexOf($key) >= 0,
-                        fa-bookmark-o: selected.indexOf($key) < 0
-                        "></span>
+                    :class="{ 'active': selected.indexOf($key) >= 0 }">
+                    <span class="fa pull-left" :class="{
+                        'fa-bookmark': selected.indexOf($key) >= 0,
+                        'fa-bookmark-o': selected.indexOf($key) < 0
+                        }"></span>
                     {{ $value }}
                 </button>
             </div>

@@ -6,10 +6,10 @@
                 <i class="fa fa-home"></i>
                 {{title}}
             </li>
-            <li v-class="active: tab == 'datasets'">
+            <li :class="{ 'active': tab == 'datasets' }">
                 <a class="pointer" v-i18n="Datasets" @click="tab = 'datasets'"></a>
             </li>
-            <li v-class="active: tab == 'reuses'">
+            <li :class="{ 'active': tab == 'reuses' }">
                 <a class="pointer" v-i18n="Reuses" @click="tab = 'reuses'"></a>
             </li>
             <li class="pull-right">
@@ -19,14 +19,14 @@
             </li>
         </ul>
         <div class="tab-content">
-            <div class="tab-pane" v-class="active: tab == 'datasets'">
+            <div class="tab-pane" :class="{ 'active': tab == 'datasets' }">
                 <div class="row">
                     <dataset-card class="col-md-6"
                         v-repeat="datasetid:settings.datasets"
                     ></dataset-card>
                 </div>
             </div>
-            <div class="tab-pane"  v-class="active: tab == 'reuses'">
+            <div class="tab-pane" :class="{ 'active': tab == 'reuses' }">
                 <div class="row">
                     <reuse-card class="col-md-6"
                         v-repeat="reuseid:settings.reuses"

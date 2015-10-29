@@ -12,14 +12,14 @@
 </style>
 
 <template>
-    <div class="vertical-field" v-class="
-        form-group: !is_bool && !is_hidden,
-        has-error: errors.length
-        ">
+    <div class="vertical-field" :class="{
+        'form-group': !is_bool && !is_hidden,
+        'has-error': errors.length
+        }">
         <span v-show="description" class="form-help"
             v-attr="data-content: description"
             v-if="!is_hidden"></span>
-        <label for="{{field.id}}" v-class="required: required"
+        <label for="{{field.id}}" :class="{ 'required': required }"
             v-if="!is_hidden && !is_bool">
             {{ field.label }}
         </label>

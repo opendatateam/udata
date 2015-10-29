@@ -1,5 +1,5 @@
 <template>
-    <form role="form" v-class="form-horizontal: 1">
+    <form role="form" :class="{ 'form-horizontal': 1 }">
         <field v-repeat="field in fields"
             schema="{{schema}}" model="{{model}}"></field>
     </form>

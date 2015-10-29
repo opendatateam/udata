@@ -48,7 +48,7 @@
     {{ empty || _('No data')}}
     </div>
     <footer>
-        <div v-class="pull-right: p.pages > 1" v-el="footer_container">
+        <div :class="{ 'pull-right': p.pages > 1 }" v-el="footer_container">
             <content select="footer"></content>
         </div>
         <pagination-widget p="{{p}}"></pagination-widget>

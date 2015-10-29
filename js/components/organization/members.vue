@@ -59,7 +59,7 @@
 </style>
 
 <template>
-<div class="box box-danger members-widget" v-class="box-danger: requests">
+<div class="box box-danger members-widget" :class="{ 'box-danger': requests }">
     <div class="box-header with-border">
         <h3 class="box-title">{{ _('Members') }}</h3>
         <div class="box-tools pull-right" v-if="requests.items.length > 0">
@@ -123,7 +123,7 @@
         </div>
     </div><!-- /.box-body -->
     <div class="box-footer" v-if="!validating"
-        v-class="text-center: !adding, search: adding">
+        :class="{ 'text-center': !adding, 'search': adding }">
         <a v-if="!adding" class="text-uppercase footer-btn pointer"
             @click="adding = true">{{ _('Add') }}</a>
         <div v-if="adding" class="input-group input-group-sm">

@@ -1,11 +1,11 @@
 <template>
-    <a class="small-box pointer" v-class="bgcolor" @click="click">
+    <a class="small-box pointer" :class="[ bgcolor ]" @click="click">
         <div class="inner">
             <h3>{{value | numbers}}</h3>
             <p>{{label}}</p>
         </div>
         <div class="icon">
-            <i class="fa" v-class="faicon"></i>
+            <i class="fa" :class="[ faicon ]"></i>
         </div>
         <div v-if="target" class="small-box-footer">
             <span v-i18n="More infos"></span>

@@ -13,7 +13,7 @@
 </style>
 
 <template>
-<div class="calendar datepicker" v-class="view">
+<div class="calendar datepicker" :class="[ 'view' ]">
     <div class="datepicker-{{view}}">
         <table class="table table-condensed">
             <thead>
@@ -34,12 +34,12 @@
                     <td class="day"
                         v-repeat="day:week"
                         @click="pickDay(day)"
-                        v-class="
-                            old: isOld(day),
-                            new: isNew(day),
-                            today: day.isSame(today, 'day'),
-                            active: day.isSame(selected, 'day')
-                        ">{{ day.date() }}</td>
+                        :class="{
+                            'old': isOld(day),
+                            'new': isNew(day),
+                            'today': day.isSame(today, 'day'),
+                            'active': day.isSame(selected, 'day')
+                        }">{{ day.date() }}</td>
                 </tr>
             </tbody>
             <tbody v-show="view == 'months'">

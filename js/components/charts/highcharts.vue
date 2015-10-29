@@ -19,7 +19,7 @@
             <div class="btn-group" data-toggle="btn-toggle">
                 <button type="button" class="btn btn-primary btn-xs"
                     v-repeat="types"
-                    v-class="active: charttype == $value"
+                    :class="{ 'active': charttype == $value }"
                     aria-pressed="{{charttype == $value}}"
                     @click="charttype = $value"
                     >{{$value}}</button>

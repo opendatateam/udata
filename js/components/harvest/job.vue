@@ -12,7 +12,7 @@
     empty="{{ empty }}"
     tint="{{job.status | statusClass}}">
     <header class="row">
-        <div class="col-xs-12" v-class="col-md-6: job.created, col-md-12: job.created">
+        <div class="col-xs-12" :class="{ 'col-md-6': job.created, 'col-md-12': job.created }">
             <content></content>
         </div>
         <dl class="dl-horizontal col-xs-12 col-md-6" v-show="job.created">

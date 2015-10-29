@@ -70,7 +70,7 @@
 </style>
 
 <template>
-<div class="thumbnailer" v-if="preview" v-class="centered: centered">
+<div class="thumbnailer" v-if="preview" :class="{ 'centered': centered }">
     <div class="row">
         <div class="col-xs-12 col-sm-8 crop-pane" v-el="crop_pane">
             <img class="cropper" v-el="cropper"/>

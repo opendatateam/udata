@@ -1,6 +1,6 @@
 <template>
 <div class="card user-card"
-    v-class="pointer: clickable, selected:selected" @click="click">
+    :class="{ 'pointer': clickable, 'selected': selected }" @click="click">
     <a class="card-logo">
         <img alt="{{ user | display }}" v-attr="src: avatar">
     </a>

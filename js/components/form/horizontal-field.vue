@@ -7,12 +7,12 @@
 </style>
 
 <template>
-    <div class="horizontal-field" v-class="
-        form-group: !is_hidden,
-        has-error: errors.length
-        ">
+    <div class="horizontal-field" :class="{
+        'form-group': !is_hidden,
+        'has-error': errors.length
+        }">
         <label v-if="!is_hidden" for="{{field.id}}"
-            v-class="required: required && !is_bool"
+            :class="{ 'required': required && !is_bool }"
             class="col-sm-3 control-label">
             <i v-if="errors.length" class="fa fa-times-circle-o"></i>
             {{ is_bool ? '' : field.label }}

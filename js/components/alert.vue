@@ -2,7 +2,7 @@
 
 <template>
     <div class="alert alert-{{type}}"
-        v-class="alert-dismissable: closable">
+        :class="{ 'alert-dismissable': closable }">
         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
         <h4>
             <span class="icon fa fa-{{icon}}"></span>

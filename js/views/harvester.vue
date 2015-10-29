@@ -9,10 +9,10 @@
     </div>
     <div class="row">
         <source-widget source="{{source}}"
-            v-class="
-                col-xs-12: !current_job,
-                col-md-4: current_job,
-            ">
+            :class="{
+                'col-xs-12': !current_job,
+                'col-md-4': current_job,
+            }">
         </source-widget>
         <job-widget
             v-if="current_job"
