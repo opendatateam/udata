@@ -40,7 +40,7 @@
     <div class="row">
         <div class="col-xs-12">
             <box boxclass="box-solid" footer="{{true}}">
-                <component is="{{active_step.component}}" v-ref="content"></component>
+                <component :is="active_step.component" v-ref="content"></component>
                 <footer>
                     <div class="col-xs-12">
                         <button v-if="previous_step"

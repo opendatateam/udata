@@ -39,7 +39,7 @@
         </div>
         <!-- Main content -->
         <section class="content">
-            <component v-ref="content" is="{{view}}"></component>
+            <component v-ref="content" :is="view"></component>
         </section>
     </div>
 </template>

@@ -9,8 +9,7 @@
             text-right: field.align === 'right',
             ellipsis: field.ellipsis
         ">
-        <component is="{{field.type || 'text'}}"
-            item="{{item}}" field="{{field}}">
+        <component :is="field.type || 'text'" :item="item" :field="field">
         </component>
     </td>
 </tr>

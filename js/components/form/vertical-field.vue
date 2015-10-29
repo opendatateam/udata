@@ -23,11 +23,11 @@
             v-if="!is_hidden && !is_bool">
             {{ field.label }}
         </label>
-        <component is="{{widget}}"
-            field="{{field}}" model="{{model}}" value="{{value}}"
-            description="{{description}}" property="{{property}}"
-            placeholder="{{placeholder}}" required="{{required}}"
-            readonly="{{readonly}}">
+        <component  :is="widget"
+            :field="field" :value="value" :model="model"
+            :description="description" :property="property"
+            :placeholder="placeholder" :required="required"
+            :readonly="readonly">
         </component>
         <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
     </div>

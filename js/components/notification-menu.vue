@@ -10,7 +10,7 @@
         <li>
             <ul class="menu">
                 <li v-repeat="notifications">
-                    <component is="{{type}}"></component>
+                    <component :is="type"></component>
                 </li>
             </ul>
         </li>
