@@ -31,10 +31,10 @@
         boxclass="box-solid"
         bodyclass="chart-responsive"
         loading="{{ metrics.loading }}">
-        <div class="chart" v-style="height: height" v-el="container">
-            <canvas v-el="canvas" height="100%"></canvas>
+        <div class="chart" v-style="height: height" v-el:container>
+            <canvas v-el:canvas height="100%"></canvas>
         </div>
-        <div class="chart-legend" v-el="legend"></div>
+        <div class="chart-legend" v-el:legend></div>
     </box>
 </template>
 
@@ -143,7 +143,7 @@ export default {
         'box': require('components/containers/box.vue')
     },
     ready: function() {
-        this.canvasHeight = this.$$.container.clientHeight;
+        this.canvasHeight = this.$els.container.clientHeight;
         this.buildChart();
         this.metrics.$on('updated', this.buildChart.bind(this));
     },
@@ -163,11 +163,11 @@ export default {
                 return;
             }
             let factory = this['build' + this.chartType];
-            let ctx = this.$$.canvas.getContext('2d');
+            let ctx = this.$els.canvas.getContext('2d');
             this.cleanChart();
             ctx.canvas.height = this.canvasHeight;
             this.chart = factory(ctx);
-            this.$$.legend.innerHTML = this.chart.generateLegend();
+            this.$els.legend.innerHTML = this.chart.generateLegend();
         },
         buildArea: function(ctx) {
             return new Chart(ctx).Line(this.series, AREA_OPTIONS);

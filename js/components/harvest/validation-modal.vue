@@ -9,9 +9,9 @@
             {{ _('It means that this source will be harvested regulary.') }}
         </p>
         <form role="form">
-            <div class="form-group" v-el="group">
+            <div class="form-group" v-el:group>
                 <label>{{ _('Reason') }}</label>
-                <textarea class="form-control" rows="3" v-el="comment"
+                <textarea class="form-control" rows="3" v-el:comment
                     placeholder="{{ _('Explain your validation') }}"
                     v-model="comment">
                 </textarea>
@@ -54,15 +54,15 @@ export default {
         },
         perform_validation: function(state) {
             if (state === 'refused' && !this.comment) {
-                this.$$.group.className.replace('has-success', '');
-                if (!this.$$.group.className.indexOf('has-error') >= 0) {
-                    this.$$.group.className += ' has-error';
+                this.$els.group.className.replace('has-success', '');
+                if (!this.$els.group.className.indexOf('has-error') >= 0) {
+                    this.$els.group.className += ' has-error';
                 }
                 return;
             } else {
-                this.$$.group.className.replace('has-error', '');
-                if (!this.$$.group.className.indexOf('has-success') >= 0) {
-                    this.$$.group.className += ' has-success';
+                this.$els.group.className.replace('has-error', '');
+                if (!this.$els.group.className.indexOf('has-success') >= 0) {
+                    this.$els.group.className += ' has-success';
                 }
             }
             API.harvest.validate_harvest_source(

@@ -72,21 +72,21 @@
 <template>
 <div class="thumbnailer" v-if="preview" :class="{ 'centered': centered }">
     <div class="row">
-        <div class="col-xs-12 col-sm-8 crop-pane" v-el="crop_pane">
-            <img class="cropper" v-el="cropper"/>
+        <div class="col-xs-12 col-sm-8 crop-pane" v-el:crop_pane>
+            <img class="cropper" v-el:cropper/>
         </div>
-        <div class="col-xs-12 col-sm-4 preview-pane" v-el="preview_pane">
+        <div class="col-xs-12 col-sm-4 preview-pane" v-el:preview_pane>
             <div class="checkbox">
                 <label>
-                    <input type="checkbox" v-el="checkbox" v-model="centered">
+                    <input type="checkbox" v-el:checkbox v-model="centered">
                     {{ _('Center the full picture') }}
                 </label>
             </div>
             <h5>{{ _('Preview') }}</h5>
             <div class="preview-container" v-repeat="size: sizes"
-                v-el="preview_containers"
+                v-el:preview_containers
                 style="width: {{size}}px; height: {{size}}px;">
-                <img class="preview" alt="{{ _('Preview') }}" v-el="previews" v-attr="src: src"/>
+                <img class="preview" alt="{{ _('Preview') }}" v-el:previews v-attr="src: src"/>
             </div>
         </div>
     </div>
@@ -115,7 +115,7 @@ module.exports = {
          * Get the current crop Bounding Box (realsize) if any.
          */
         bbox: function() {
-            if (!this.$$.checkbox.checked) {
+            if (!this.$els.checkbox.checked) {
                 var selection = this.Jcrop.tellSelect();
                 return [selection.x, selection.y, selection.x2, selection.y2];
             }
@@ -130,7 +130,7 @@ module.exports = {
                 w = bounds[0],
                 h = bounds[1];
 
-            this.$$.preview_containers.forEach(function(el) {
+            this.$els.preview_containers.forEach(function(el) {
                 var $el = $(el),
                     px = $el.width(),
                     py = $el.height(),
@@ -149,11 +149,11 @@ module.exports = {
             if (!src) return;
 
             var that = this,
-                $pane = $(this.$$.crop_pane),
+                $pane = $(this.$els.crop_pane),
                 max_width = $pane.width(),
                 max_height = parseInt($pane.css('max-height').replace('px', ''));
 
-            $(this.$$.cropper)
+            $(this.$els.cropper)
                 .attr('src', src)
                 .Jcrop({
                     onChange: this.preview.bind(this),
@@ -181,7 +181,7 @@ module.exports = {
 
                 this.Jcrop.disable();
 
-                $(this.$$.preview_containers)
+                $(this.$els.preview_containers)
                     .find('.preview')
                     .removeAttr('style')
                     .css(attr, '100%');

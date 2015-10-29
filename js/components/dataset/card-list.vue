@@ -64,7 +64,7 @@
     <box title="{{ title }}" icon="cubes"
         boxclass="box-solid datasets-cards-widget"
         footerClass="text-center" footer="true">
-        <div class="row" v-el="sortable">
+        <div class="row" v-el:sortable>
             <div class="col-md-6 dataset-card-container"
                 v-repeat="datasetid: editing ? sorted : datasets |ids"
                 data-id="{{datasetid}}"

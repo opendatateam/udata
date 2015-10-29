@@ -63,7 +63,7 @@
     <div class="row" v-show="!reuses.length">
         <p class="lead text-center">{{ _('No related reuses') }}</p>
     </div>
-    <div class="row" v-el="sortable" v-show="reuses.length">
+    <div class="row" v-el:sortable v-show="reuses.length">
         <div class="col-md-6 reuse-card-container"
             v-repeat="reuseid : reuses | ids"
             data-id="{{reuseid}}"

@@ -17,7 +17,7 @@
             <h3 class="box-title">{{title}}</h3>
             <div class="box-tools"></div>
         </header>
-        <div class="box-body no-padding" v-el="container"></div>
+        <div class="box-body no-padding" v-el:container></div>
     </div>
 </template>
 
@@ -44,7 +44,7 @@ module.exports = {
     },
     props: ['title', 'icon', 'geojson'],
     ready: function() {
-        this.map = L.map(this.$$.container, INITIAL_SETTINGS);
+        this.map = L.map(this.$els.container, INITIAL_SETTINGS);
 
         // Disable drag and zoom handlers.
         // this.map.dragging.disable();

@@ -11,7 +11,7 @@
 <template>
 <div class="input-group dropdown time-picker" :class="{ 'open': picking }">
     <span class="input-group-addon"><span class="fa fa-clock-o"></span></span>
-    <input type="text" class="form-control" v-el="input"
+    <input type="text" class="form-control" v-el:input
         @focus="onFocus"
         @blur="onBlur"
         v-attr="
@@ -23,7 +23,7 @@
     <div class="dropdown-menu dropdown-menu-right">
         <time-widget selected="{{value}}"></time-widget>
     </div>
-    <input type="hidden" v-el="hidden"
+    <input type="hidden" v-el:hidden
         v-attr="
             id: field.id,
             name: serializable ? field.id : '',
@@ -58,8 +58,8 @@ export default {
     },
     events: {
         'calendar:time:selected': function(date) {
-            this.$$.input.value = date.format(this.field.format || DEFAULT_FORMAT);
-            this.$$.hidden.value = date.format(ISO_FORMAT);
+            this.$els.input.value = date.format(this.field.format || DEFAULT_FORMAT);
+            this.$els.hidden.value = date.format(ISO_FORMAT);
             this.picking = true;
         },
 

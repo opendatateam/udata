@@ -10,7 +10,7 @@
 <template>
 <div class="input-group dropdown date-picker" :class="{ 'open': picking }">
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
-    <input type="text" class="form-control" v-el="input"
+    <input type="text" class="form-control" v-el:input
         @focus="onFocus"
         @blur="onBlur"
         v-attr="
@@ -22,7 +22,7 @@
     <div class="dropdown-menu dropdown-menu-right">
         <calendar selected="{{value}}"></calendar>
     </div>
-    <input type="hidden" v-el="hidden"
+    <input type="hidden" v-el:hidden
         v-attr="
             id: field.id,
             name: serializable ? field.id : '',
@@ -61,13 +61,13 @@ export default {
     },
     events: {
         'calendar:date:selected': function(date) {
-            this.$$.input.value = date.format(this.field.format || DEFAULT_FORMAT);
-            this.$$.hidden.value = date.format(ISO_FORMAT);
+            this.$els.input.value = date.format(this.field.format || DEFAULT_FORMAT);
+            this.$els.hidden.value = date.format(ISO_FORMAT);
             this.picking = false;
         },
         'calendar:date:cleared': function() {
-            this.$$.input.value = '';
-            this.$$.hidden.value = '';
+            this.$els.input.value = '';
+            this.$els.hidden.value = '';
             this.picking = false;
         }
     },

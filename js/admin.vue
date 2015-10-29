@@ -27,7 +27,7 @@
 
 <template>
     <!-- header logo: style can be found in header.less -->
-    <div v-el="modal"></div>
+    <div v-el:modal></div>
     <app-header class="main-header"></app-header>
     <sidebar class="main-sidebar"></sidebar>
     <div class="content-wrapper">
@@ -263,7 +263,7 @@ export default {
          * @return {[type]}             [description]
          */
         $modal: function(options, constructor) {
-            options.el = this.$$.modal;
+            options.el = this.$els.modal;
             return this.$addChild(options, constructor);
         },
 

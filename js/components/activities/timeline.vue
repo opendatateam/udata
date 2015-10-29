@@ -28,7 +28,7 @@
             </div>
         </div>
     </li>
-    <li v-if="hasMore"><i @click="more" v-el="more" class="fa fa-chevron-down timeline-icon timeline-icon-more"></i></li>
+    <li v-if="hasMore"><i @click="more" v-el:more class="fa fa-chevron-down timeline-icon timeline-icon-more"></i></li>
 </ul>
 </template>
 
@@ -117,7 +117,7 @@ export default {
     methods: {
         actor,
         more: function() {
-            let moreElement = this.$$.more
+            let moreElement = this.$els.more
             moreElement.classList.remove("fa-chevron-down");
             moreElement.classList.add("fa-spinner", "fa-spin");
             this.activities.nextPage(this.options);

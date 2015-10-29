@@ -21,7 +21,7 @@ define(['api', 'exports?qq!fineuploader'], function(API, qq) {
                 multiple: this.$options.hasOwnProperty('upload_multiple') ? this.$options.upload_multiple : true,
                 uploaderType: 'basic',
                 autoUpload: this.$options.hasOwnProperty('autoUpload') ? this.$options.autoUpload : true,
-                button: this.$$.uploadBtn,
+                button: this.$els.uploadBtn,
                 request: {
                     endpoint: this.upload_endpoint,
                     inputName: 'file'

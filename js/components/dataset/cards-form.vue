@@ -63,7 +63,7 @@
     <div class="row" v-show="!datasets.length">
         <p class="lead text-center">{{ _('No related datasets') }}</p>
     </div>
-    <div class="row" v-el="sortable" v-show="datasets.length">
+    <div class="row" v-el:sortable v-show="datasets.length">
         <div class="col-md-6 dataset-card-container"
             v-repeat="datasetid : datasets | ids"
             data-id="{{datasetid}}"

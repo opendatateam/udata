@@ -11,7 +11,7 @@
 <div class="input-group dropdown daterange-picker" :class="{ 'open': picking }">
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
     <input type="text" class="input-sm form-control"
-        v-el="startInput" placeholder="{{ _('Start') }}"
+        v-el:start-input placeholder="{{ _('Start') }}"
         @focus="onFocus"
         @blur="onBlur"
         v-attr="
@@ -21,7 +21,7 @@
         ">
     <span class="input-group-addon">à</span>
     <input type="text" class="input-sm form-control"
-        v-el="endInput" placeholder="{{ _('End') }}"
+        v-el:end-input placeholder="{{ _('End') }}"
         @focus="onFocus"
         @blur="onBlur"
         v-attr="
@@ -32,13 +32,13 @@
     <div class="dropdown-menu dropdown-menu-right">
         <calendar selected="{{value}}"></calendar>
     </div>
-    <input type="hidden" v-el="startHidden"
+    <input type="hidden" v-el:start-hidden
         v-attr="
             id: field.id + '-start',
             name: field.id + '.start',
             value: start_value
         "></input>
-    <input type="hidden" v-el="endHidden"
+    <input type="hidden" v-el:end-hidden
         v-attr="
             id: field.id + '-end',
             name: field.id + '.end',
@@ -94,9 +94,9 @@ export default {
         onFocus: function(e) {
             this.picking = true;
             this.pickedField = e.target;
-            this.hiddenField = e.target == this.$$.startInput
-                ? this.$$.startHidden
-                : this.$$.endHidden;
+            this.hiddenField = e.target == this.$els.startInput
+                ? this.$els.startHidden
+                : this.$els.endHidden;
         },
         onBlur: function(e) {
             if (e.targetVM !== this) {
@@ -106,10 +106,10 @@ export default {
     },
     ready: function() {
         // Perform all validations on end field because performing on start field unhighlight.
-        $(this.$$.endHidden).rules('add', {
-            dateGreaterThan: '#' + this.$$.startHidden.id,
+        $(this.$els.endHidden).rules('add', {
+            dateGreaterThan: '#' + this.$els.startHidden.id,
             required: (el) => {
-                return (this.$$.startHidden.value && !this.$$.endHidden.value) || (this.$$.endHidden.value && !this.$$.startHidden.value);
+                return (this.$els.startHidden.value && !this.$els.endHidden.value) || (this.$els.endHidden.value && !this.$els.startHidden.value);
             },
             messages: {
                 dateGreaterThan: this._('End date should be after start date'),

@@ -47,7 +47,7 @@
                     <th width="100" v-i18n="Availability"></th>
                 </tr>
             </thead>
-            <tbody v-el="sortable">
+            <tbody v-el:sortable>
                 <tr v-repeat="file:files" track-by="id">
                     <td v-if="reordering"></td>
                     <td>

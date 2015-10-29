@@ -32,7 +32,7 @@
                 <p>{{ _('or') }}</p>
             </div>
             <div class="text-center col-xs-12">
-                <span class="btn btn-outline btn-flat" v-el="uploadBtn">
+                <span class="btn btn-outline btn-flat" v-el:upload-btn>
                     {{ _('Select a file from your computer') }}
                 </span>
             </div>

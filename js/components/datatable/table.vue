@@ -56,7 +56,7 @@ export default {
         },
         show_footer: function() {
             return (this.p && this.p.pages > 1)
-                || $(this.$$.footer_container).find('footer > *').length;
+                || $(this.$els.footer_container).find('footer > *').length;
         },
         has_data: function() {
             return this.p.data && this.p.data.length;
