@@ -7,7 +7,7 @@
     </aside>
     <div v-show="!toggled">
         <h3>{{dataset.title}}</h3>
-        <div v-markdown="{{dataset.description}}"></div>
+        <div :v-markdown="dataset.description"></div>
         <div v-if="dataset.tags | length" class="label-list">
             <strong>
                 <span class="fa fa-fw fa-tags"></span>

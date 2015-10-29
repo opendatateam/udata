@@ -20,7 +20,7 @@
         </li>
         <!-- Menu Body -->
         <li v-if="$root.me.about || roles" class="user-body text-center">
-            <div v-markdown="{{$root.me.about}}"></div>
+            <div :v-markdown="$root.me.about"></div>
             <span class="label label-primary" v-repeat="role:$root.me.roles">{{role}}</span>
         </li>
         <!-- Menu Footer-->

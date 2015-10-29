@@ -32,7 +32,7 @@
             <image-button src="{{user.avatar}}" size="100" class="avatar-button"
                 endpoint="{{endpoint}}">
             </image-button>
-            <div v-markdown="{{user.about}}"></div>
+            <div :v-markdown="user.about"></div>
         </div>
     </div>
     <user-form v-ref:form v-show="toggled" user="{{user}}"></user-form>

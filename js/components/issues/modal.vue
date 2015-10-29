@@ -29,7 +29,7 @@
                 </div>
                 <img class="direct-chat-img"  alt="{{ _('User Image') }}"
                     :src="message.posted_by.avatar || avatar_placeholder"/>
-                <div class="direct-chat-text" v-markdown="{{message.content}}"></div>
+                <div class="direct-chat-text" :v-markdown="message.content"></div>
             </div>
         </div>
     </div>
