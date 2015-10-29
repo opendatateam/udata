@@ -4,9 +4,17 @@
         <div class="cover-marianne"></div>
 
         <div class="search_bar row">
-
-            <form role="search" action="{{ url_for('front.search') }}"
+            {% if in_url('sort') and in_url('organization') %}
+                {% set action = url_for('datasets.list') %}
+            {% else %}
+                {% set action = url_for('front.search') %}
+            {% endif %}
+            <form role="search" action="{{ action }}"
                 class="col-sm-4 col-md-6 col-lg-6 col-xs-12">
+                {% if in_url('sort') and in_url('organization') %}
+                    <input type="hidden" name="sort" value="{{ request.args.sort }}">
+                    <input type="hidden" name="organization" value="{{ request.args.organization }}">
+                {% endif %}
                 <div class="form-group">
                     <div class="input-group">
                         <div class="input-group-btn">
