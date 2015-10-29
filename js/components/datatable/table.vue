@@ -26,7 +26,7 @@
     </thead>
     <tbody>
         <tr v-repeat="item in p.data" track-by="{{trackBy}}"
-            v-component="row"
+            is="row"
             fields="{{fields}}"
             selected="{{item === selected}}">
         </tr>
