@@ -44,7 +44,7 @@
             </div>
         </div>
     </div>
-    <org-form v-ref="form" v-show="toggled" organization="{{org}}"></org-form>
+    <org-form v-ref:form v-show="toggled" organization="{{org}}"></org-form>
     <footer>
         <button type="submit" class="btn btn-primary" v-if="toggled"
             @click="save($event)" v-i18n="Save"></button>
@@ -91,7 +91,7 @@ module.exports = {
         },
         save: function(e) {
             e.preventDefault();
-            let form = this.$.form;
+            let form = this.$refs.form;
             if (form.validate()) {
                 this.org.update(form.serialize(), (response) => {
                     this.org.on_fetched(response);

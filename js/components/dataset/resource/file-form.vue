@@ -13,7 +13,7 @@
 
 <template>
 <form-horizontal class="resource-form file-resource-form"
-    fields="{{fields}}" model="{{resource}}" v-ref="form">
+    fields="{{fields}}" model="{{resource}}" v-ref:form>
 </form-horizontal>
 <div v-show="!resource.url && files.length" v-repeat="file:files" class="info-box bg-aqua">
     <span class="info-box-icon">
@@ -135,7 +135,7 @@ export default {
                 this.dataset.resources.unshift(response);
             }
             // Do not override an existing typed or registered title.
-            let title = this.$.form.serialize().title || this.resource.title;
+            let title = this.$refs.form.serialize().title || this.resource.title;
             if (title) {
                 response.title = title;
             }
@@ -144,10 +144,10 @@ export default {
     },
     methods: {
         validate: function() {
-            return this.$.form.validate();
+            return this.$refs.form.validate();
         },
         serialize: function() {
-            return this.$.form.serialize();
+            return this.$refs.form.serialize();
         }
     }
 };

@@ -13,7 +13,7 @@
 <template>
 <modal title="{{ _('Discussion') }}"
     class="discussion-modal"
-    v-ref="modal">
+    v-ref:modal>
     <div class="modal-body">
         <dataset-card v-if="discussion.class | is_dataset"
             datasetid="{{discussion.subject}}"></dataset-card>
@@ -103,7 +103,7 @@ export default {
     },
     methods: {
         confirm_delete: function() {
-            this.$.modal.close();
+            this.$refs.modal.close();
             var m = this.$root.$modal(
                 {data: {discussionid: this.discussion.id}},
                 Vue.extend(require('components/discussions/delete-modal.vue'))

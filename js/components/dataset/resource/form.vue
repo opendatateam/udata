@@ -65,9 +65,9 @@
         </p>
     </a>
 </div>
-<file-form v-if="resource.filetype == 'file'" v-ref="fileform"></file-form>
-<remote-form v-if="resource.filetype == 'remote'" v-ref="remoteform"></remote-form>
-<api-form v-if="resource.filetype == 'api'" v-ref="apiform"></api-form>
+<file-form v-if="resource.filetype == 'file'" v-ref:fileform></file-form>
+<remote-form v-if="resource.filetype == 'remote'" v-ref:remoteform></remote-form>
+<api-form v-if="resource.filetype == 'api'" v-ref:apiform></api-form>
 </template>
 
 <script>
@@ -101,11 +101,11 @@ export default {
     computed: {
         $form: function() {
             if (this.resource.filetype === 'file') {
-                return this.$.fileform;
+                return this.$refs.fileform;
             } else if (this.resource.filetype === 'remote') {
-                return this.$.remoteform;
+                return this.$refs.remoteform;
             } else if (this.resource.filetype === 'api') {
-                return this.$.apiform;
+                return this.$refs.apiform;
             }
         }
     },

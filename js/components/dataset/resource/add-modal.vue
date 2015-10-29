@@ -1,9 +1,9 @@
 <template>
-<modal class="modal-primary add-resource-modal" v-ref="modal"
+<modal class="modal-primary add-resource-modal" v-ref:modal
     title="{{ _('Add a resource') }}">
 
     <div class="modal-body">
-        <resource-form v-ref="form" dataset="{{dataset}}"></resource-form>
+        <resource-form v-ref:form dataset="{{dataset}}"></resource-form>
     </div>
 
     <footer class="modal-footer text-center">
@@ -36,9 +36,9 @@ export default {
     },
     methods: {
         save: function() {
-            if (this.$.form.validate()) {
-                this.dataset.save_resource(this.$.form.serialize());
-                this.$.modal.close();
+            if (this.$refs.form.validate()) {
+                this.dataset.save_resource(this.$refs.form.serialize());
+                this.$refs.modal.close();
                 return true;
             }
         }

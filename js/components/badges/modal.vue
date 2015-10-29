@@ -1,7 +1,7 @@
 <template>
 <modal title="{{ _('Badges') }}"
     class="modal-info badges-modal"
-    v-ref="modal">
+    v-ref:modal>
 
     <div class="modal-body">
         <div class="text-center row">
@@ -114,7 +114,7 @@ export default {
                 });
 
             if (allAdded && allRemoved) {
-                this.$.modal.close();
+                this.$refs.modal.close();
                 this.$emit('badges:modified');
             }
         },

@@ -4,7 +4,7 @@
 
 <template>
 <!--div v-form="dataset" v-fields="fields"></div-->
-<form-vertical v-ref="form" fields="{{fields}}" model="{{dataset}}"></form-vertical>
+<form-vertical v-ref:form fields="{{fields}}" model="{{dataset}}"></form-vertical>
 </template>
 
 <script>

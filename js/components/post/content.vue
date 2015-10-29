@@ -28,7 +28,7 @@
         <p v-if="post.headline" class="lead">{{post.headline}}</p>
         <div v-markdown="{{post.content}}"></div>
     </div>
-    <post-form v-ref="form" v-if="toggled" post="{{post}}"></post-form>
+    <post-form v-ref:form v-if="toggled" post="{{post}}"></post-form>
     <box-footer v-if="toggled">
         <button type="submit" class="btn btn-flat btn-primary"
             @click="save($event)" v-i18n="Save"></button>
@@ -73,7 +73,7 @@ export default {
         },
         save: function(e) {
             e.preventDefault();
-            let form = this.$.form.$.form;
+            let form = this.$refs.form.$.form;
             if (form.validate()) {
                 this.post.update(form.serialize(), (response) => {
                     this.post.on_fetched(response);

@@ -57,14 +57,14 @@
             <i v-if="icon" class="fa fa-{{icon}}"></i>
             <h3 class="box-title">{{title}}</h3>
             <div class="box-tools">
-                <content v-ref="tools" select="aside > *"></content>
+                <content v-ref:tools select="aside > *"></content>
             </div>
         </header>
         <div class="box-body {{bodyclass || ''}}">
             <content></content>
         </div>
         <div class="box-footer {{footerclass || ''}}" v-if="footer">
-            <content v-ref="footer" select="footer > *"></content>
+            <content v-ref:footer select="footer > *"></content>
         </div>
     </div>
 </template>

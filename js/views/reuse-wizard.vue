@@ -1,5 +1,5 @@
 <template>
-<wizard-component v-ref="wizard" steps="{{steps}}"></wizard-component>
+<wizard-component v-ref:wizard steps="{{steps}}"></wizard-component>
 </template>
 
 <script>
@@ -37,7 +37,7 @@ export default {
                         Object.assign(this.reuse, data);
                         this.reuse.save();
                         this.reuse.$once('updated', () => {
-                            this.$.wizard.go_next();
+                            this.$refs.wizard.go_next();
                         });
                         return false;
                     }
@@ -50,7 +50,7 @@ export default {
                     this.reuse.datasets = component.datasets;
                     this.reuse.save();
                     this.reuse.$once('updated', () => {
-                        this.$.wizard.go_next();
+                        this.$refs.wizard.go_next();
                     });
                     return false;
                 }
@@ -86,17 +86,17 @@ export default {
     },
     events: {
         'wizard:next-step': function() {
-            this.$.wizard.go_next();
+            this.$refs.wizard.go_next();
         },
         'wizard:previous-step': function() {
-            this.$.wizard.go_previous();
+            this.$refs.wizard.go_previous();
         },
         'wizard:step-changed': function() {
-            this.$.wizard.$.content.reuse = this.reuse;
+            this.$refs.wizard.$.content.reuse = this.reuse;
         },
         'image:saved': function() {
             this.reuse.fetch();
-            this.$.wizard.go_next();
+            this.$refs.wizard.go_next();
             return false;
         }
     }

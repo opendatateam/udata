@@ -13,8 +13,8 @@
 </style>
 
 <template>
-<user-modal user="{{user}}" v-ref="modal">
-    <role-form class="member-form" v-ref="form"
+<user-modal user="{{user}}" v-ref:modal>
+    <role-form class="member-form" v-ref:form
         fields="{{fields}}" model="{{member}}" defs="{{defs}}"
         readonly="{{!is_admin}}" fill="true">
     </role-form>
@@ -103,7 +103,7 @@ module.exports = {
             var data = {
                 org: this.org.id,
                 user: this.user.id,
-                payload: this.$.form.serialize()
+                payload: this.$refs.form.serialize()
             };
             if (this.member_exists) {
                 API.organizations.update_organization_member(data, this.on_updated.bind(this));

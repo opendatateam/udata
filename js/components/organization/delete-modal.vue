@@ -1,7 +1,7 @@
 <template>
 <modal title="{{ _('Confirm deletion') }}"
     class="modal-danger organization-delete-modal"
-    v-ref="modal">
+    v-ref:modal>
 
     <div class="modal-body">
         <p class="lead text-center">
@@ -43,7 +43,7 @@ export default {
                 {org: this.organization.id},
                 (response) => {
                     this.organization.fetch();
-                    this.$.modal.close();
+                    this.$refs.modal.close();
                 }
             );
         }

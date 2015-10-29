@@ -1,5 +1,5 @@
 <template>
-<wizard-component v-ref="wizard" steps="{{steps}}" finish="true"></wizard-component>
+<wizard-component v-ref:wizard steps="{{steps}}" finish="true"></wizard-component>
 </template>
 
 <script>
@@ -66,13 +66,13 @@ export default {
     },
     events: {
         'wizard:next-step': function() {
-            this.$.wizard.go_next();
+            this.$refs.wizard.go_next();
         },
         'wizard:previous-step': function() {
-            this.$.wizard.go_previous();
+            this.$refs.wizard.go_previous();
         },
         'wizard:step-changed': function() {
-            this.$.wizard.$.content.post = this.post;
+            this.$refs.wizard.$.content.post = this.post;
         },
         'wizard:finish': function() {
             this.$go('/post/' + this.post.id);

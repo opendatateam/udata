@@ -1,7 +1,7 @@
 <template>
 <modal title="{{ _('Confirm deletion') }}"
     class="modal-danger harvest-delete-modal"
-    v-ref="modal">
+    v-ref:modal>
 
     <div class="modal-body">
         <p class="lead text-center">
@@ -41,7 +41,7 @@ export default {
         confirm: function() {
             API.harvest.delete_harvest_source({ident: this.source.id},
                 (response) => {
-                    this.$.modal.close();
+                    this.$refs.modal.close();
                 }
             );
         }

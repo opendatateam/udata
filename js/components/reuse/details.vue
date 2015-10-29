@@ -50,7 +50,7 @@
             </div>
         </div>
     </div>
-    <reuse-form v-ref="form" v-show="toggled" reuse="{{reuse}}"></reuse-form>
+    <reuse-form v-ref:form v-show="toggled" reuse="{{reuse}}"></reuse-form>
     <box-footer v-if="toggled">
         <button type="submit" class="btn btn-primary"
             @click="save($event)" v-i18n="Save"></button>
@@ -96,7 +96,7 @@ export default {
         },
         save: function(e) {
             e.preventDefault();
-            let form = this.$.form;
+            let form = this.$refs.form;
             if (form.validate()) {
                 this.reuse.update(form.serialize(), (response) => {
                     this.reuse.on_fetched(response);

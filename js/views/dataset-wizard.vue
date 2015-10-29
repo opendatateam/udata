@@ -1,5 +1,5 @@
 <template>
-<wizard-component v-ref="wizard" steps="{{steps}}"></wizard-component>
+<wizard-component v-ref:wizard steps="{{steps}}"></wizard-component>
 </template>
 
 <script>
@@ -39,7 +39,7 @@ export default {
                         Object.assign(this.dataset, data);
                         this.dataset.save();
                         this.dataset.$once('updated', () => {
-                            this.$.wizard.go_next();
+                            this.$refs.wizard.go_next();
                         });
                         return false;
                     }
@@ -56,7 +56,7 @@ export default {
                         var resource = component.serialize();
                         this.dataset.save_resource(resource);
                         this.dataset.$once('updated', () => {
-                            this.$.wizard.go_next();
+                            this.$refs.wizard.go_next();
                         });
                         return false;
                     }
@@ -81,13 +81,13 @@ export default {
     },
     events: {
         'wizard:next-step': function() {
-            this.$.wizard.go_next();
+            this.$refs.wizard.go_next();
         },
         'wizard:previous-step': function() {
-            this.$.wizard.go_previous();
+            this.$refs.wizard.go_previous();
         },
         'wizard:step-changed': function() {
-            this.$.wizard.$.content.dataset = this.dataset;
+            this.$refs.wizard.$.content.dataset = this.dataset;
         }
     }
 };

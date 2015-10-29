@@ -57,7 +57,7 @@
             <span class="input-group-addon">
                 <span class="fa fa-cubes"></span>
             </span>
-            <dataset-completer v-ref="completer"></dataset-completer>
+            <dataset-completer v-ref:completer></dataset-completer>
         </div>
     </div>
     <div class="row" v-show="!datasets.length">

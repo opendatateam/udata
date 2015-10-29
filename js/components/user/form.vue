@@ -1,9 +1,5 @@
-<style lang="less">
-
-</style>
-
 <template>
-<form-vertical v-ref="form" fields="{{fields}}" model="{{user}}"></form-vertical>
+<form-vertical v-ref:form fields="{{fields}}" model="{{user}}"></form-vertical>
 </template>
 
 <script>
@@ -33,13 +29,13 @@ module.exports = {
     },
     methods: {
         serialize: function() {
-            return this.$.form.serialize();
+            return this.$refs.form.serialize();
         },
         validate: function() {
-            return this.$.form.validate();
+            return this.$refs.form.validate();
         },
         on_error: function(response) {
-            return this.$.form.on_error(response);
+            return this.$refs.form.on_error(response);
         },
     }
 };

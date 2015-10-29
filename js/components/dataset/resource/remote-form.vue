@@ -1,6 +1,6 @@
 <template>
 <form-horizontal class="resource-form remote-resource-form"
-        fields="{{fields}}" model="{{resource}}" v-ref="form">
+        fields="{{fields}}" model="{{resource}}" v-ref:form>
 </form-horizontal>
 </template>
 
@@ -44,10 +44,10 @@ export default {
     },
     methods: {
         validate: function() {
-            return this.$.form.validate();
+            return this.$refs.form.validate();
         },
         serialize: function() {
-            return this.$.form.serialize();
+            return this.$refs.form.serialize();
         }
     }
 };

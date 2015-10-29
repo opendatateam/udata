@@ -8,7 +8,7 @@
     <div v-if="!toggled">
         <div v-markdown="{{topic.description}}"></div>
     </div>
-    <topic-form v-ref="form" v-if="toggled" topic="{{topic}}"></topic-form>
+    <topic-form v-ref:form v-if="toggled" topic="{{topic}}"></topic-form>
     <box-footer v-if="toggled">
         <button type="submit" class="btn btn-flat btn-primary"
             @click="save($event)" v-i18n="Save"></button>
@@ -38,8 +38,8 @@ module.exports = {
             this.toggled = !this.toggled;
         },
         save: function(e) {
-            if (this.$.form.$.form.validate()) {
-                var data = this.$.form.$.form.serialize();
+            if (this.$refs.form.$.form.validate()) {
+                var data = this.$refs.form.$.form.serialize();
 
                 this.topic.save(data);
                 e.preventDefault();

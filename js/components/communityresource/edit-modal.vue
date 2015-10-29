@@ -9,7 +9,7 @@
 <template>
 <modal title="{{ community.title }}" class="community-modal"
     :class="{ 'modal-danger': confirm, 'modal-primary': !confirm }"
-    v-ref="modal">
+    v-ref:modal>
     <div class="modal-body">
         <div v-show="!edit && !confirm">
             {{{ community.description | markdown }}}
@@ -34,7 +34,7 @@
             </dl>
         </div>
 
-        <community-form v-if="edit" v-ref="form" resource="{{community}}" dataset="{{resource.dataset}}" community="{{true}}"></community-form>
+        <community-form v-if="edit" v-ref:form resource="{{community}}" dataset="{{resource.dataset}}" community="{{true}}"></community-form>
 
         <div v-show="confirm">
             <p class="lead text-center">
@@ -101,14 +101,14 @@ export default {
             }
         },
         save: function() {
-            if (this.$.form.validate()) {
-                Object.assign(this.community, this.$.form.serialize());
+            if (this.$refs.form.validate()) {
+                Object.assign(this.community, this.$refs.form.serialize());
                 if (this.callback) {
                     this.community.on_fetched = this.callback;
                 }
                 this.community.save();
                 this.$go(this.compute_close_url());
-                this.$.modal.close();
+                this.$refs.modal.close();
                 return true;
             }
         },
@@ -119,7 +119,7 @@ export default {
                         this.callback();
                     }
                     this.$go(this.compute_close_url());
-                    this.$.modal.close();
+                    this.$refs.modal.close();
                 }
             );
         }

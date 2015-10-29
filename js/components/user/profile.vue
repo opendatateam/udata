@@ -35,7 +35,7 @@
             <div v-markdown="{{user.about}}"></div>
         </div>
     </div>
-    <user-form v-ref="form" v-show="toggled" user="{{user}}"></user-form>
+    <user-form v-ref:form v-show="toggled" user="{{user}}"></user-form>
     <footer>
         <button type="submit" class="btn btn-primary"
             @click="save($event)" v-i18n="Save"></button>
@@ -79,7 +79,7 @@ module.exports = {
         },
         save: function(e) {
             e.preventDefault();
-            let form = this.$.form;
+            let form = this.$refs.form;
             if (form.validate()) {
                 this.user.update(form.serialize(), (response) => {
                     this.user.on_fetched(response);

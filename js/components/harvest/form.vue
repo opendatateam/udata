@@ -1,5 +1,5 @@
 <template>
-<form-vertical v-ref="form" fields="{{fields}}" model="{{source}}"></form-vertical>
+<form-vertical v-ref:form fields="{{fields}}" model="{{source}}"></form-vertical>
 </template>
 
 <script>
@@ -39,10 +39,10 @@ export default {
     },
     methods: {
         serialize: function() {
-            return this.$.form.serialize();
+            return this.$refs.form.serialize();
         },
         validate: function() {
-            return this.$.form.validate();
+            return this.$refs.form.validate();
         }
     }
 };

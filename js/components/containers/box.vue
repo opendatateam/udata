@@ -73,7 +73,7 @@
             <i v-show="icon" class="fa fa-{{icon}}"></i>
             <h3 class="box-title">{{title}}</h3>
             <div class="box-tools" v-el:tools>
-                <content v-ref="tools" select="aside"></content>
+                <content v-ref:tools select="aside"></content>
             </div>
         </header>
         <div class="box-body {{bodyclass || ''}}">

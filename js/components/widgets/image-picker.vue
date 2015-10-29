@@ -63,7 +63,7 @@
             </div>
         </div>
     </div>
-    <thumbnailer-widget v-ref="thumbnailer"
+    <thumbnailer-widget v-ref:thumbnailer
         v-if="resizing" src="{{src}}" sizes="{{sizes}}">
     </thumbnailer-widget>
 </div>
@@ -126,8 +126,8 @@ export default {
         save: function() {
             if (this.HAS_FILE_API) {
                 let data = {};
-                if (this.$.thumbnailer.bbox) {
-                    data.bbox = this.$.thumbnailer.bbox;
+                if (this.$refs.thumbnailer.bbox) {
+                    data.bbox = this.$refs.thumbnailer.bbox;
                 }
                 this.upload(data);
             } else {

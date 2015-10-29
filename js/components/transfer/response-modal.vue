@@ -1,7 +1,7 @@
 <template>
 <modal title="{{ _('Transfer request') }}"
     class="modal-info transfer-response-modal"
-    v-ref="modal">
+    v-ref:modal>
 
     <div class="modal-body">
         <div>
@@ -102,7 +102,7 @@ export default {
                     title: this._('Response sent'),
                     details: this._('The response has been sent to the requester.')
                 });
-                this.$.modal.close();
+                this.$refs.modal.close();
                 this.$emit('transfer:responded', response.obj);
             });
         }

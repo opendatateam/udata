@@ -1,9 +1,5 @@
-<style lang="less">
-
-</style>
-
 <template>
-<form-vertical v-ref="form" fields="{{fields}}" model="{{post}}"></form-vertical>
+<form-vertical v-ref:form fields="{{fields}}" model="{{post}}"></form-vertical>
 </template>
 
 <script>

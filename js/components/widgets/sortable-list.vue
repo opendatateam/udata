@@ -95,7 +95,7 @@
             <content></content>
             <!-- General tools such as edit or delete-->
             <div class="tools">
-                <content v-ref="tools" select="aside > *"></content>
+                <content v-ref:tools select="aside > *"></content>
             </div>
         </li>
         <li>

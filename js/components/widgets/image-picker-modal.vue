@@ -8,9 +8,9 @@
 
 <template>
 <modal title="{{ title }}" class="image-picker-modal modal-info"
-    v-ref="modal">
+    v-ref:modal>
     <div class="modal-body">
-        <image-picker v-ref="picker" endpoint="{{endpoint}}" sizes="{{sizes}}">
+        <image-picker v-ref:picker endpoint="{{endpoint}}" sizes="{{sizes}}">
         </image-picker>
     </div>
     <footer class="modal-footer">
@@ -37,7 +37,7 @@ module.exports = {
     },
     computed: {
         title: function() {
-            return this.$.picker && this.$.picker.resizing
+            return this.$refs.picker && this.$refs.picker.resizing
                 ? this._('Resize your thumbnail')
                 : this._('Upload an image');
         }
@@ -48,12 +48,12 @@ module.exports = {
     },
     events: {
         'image:saved': function() {
-            this.$.modal.close();
+            this.$refs.modal.close();
         }
     },
     methods: {
         click: function() {
-            this.$.picker.save();
+            this.$refs.picker.save();
         }
     }
 };

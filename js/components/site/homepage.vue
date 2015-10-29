@@ -37,10 +37,10 @@
     </div>
     <!-- Edition mode -->
     <box-container v-show="toggled" icon="home" title="{{title}}" boxclass="box-primary">
-        <form-vertical v-ref="datasetform" v-show="tab == 'datasets'"
+        <form-vertical v-ref:datasetform v-show="tab == 'datasets'"
             fields="{{datasets_fields}}" model="{{settings}}"
         ></form-vertical>
-        <form-vertical v-ref="reuseform" v-show="tab == 'reuses'"
+        <form-vertical v-ref:reuseform v-show="tab == 'reuses'"
             fields="{{reuses_fields}}" model="{{settings}}"
         ></form-vertical>
         <box-footer>
@@ -107,7 +107,7 @@ module.exports = {
         },
         save: function(e) {
             e.preventDefault();
-            let form = this.$.form.$.form;
+            let form = this.$refs.form.$.form;
             if (form.validate()) {
                 this.org.update(form.serialize(), (response) => {
                     this.org.on_fetched(response);

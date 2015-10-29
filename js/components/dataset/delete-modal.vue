@@ -1,7 +1,7 @@
 <template>
 <modal title="{{ _('Confirm deletion') }}"
     class="modal-danger dataset-delete-modal"
-    v-ref="modal">
+    v-ref:modal>
 
     <div class="modal-body">
         <p class="lead text-center">
@@ -42,7 +42,7 @@ export default {
             API.datasets.delete_dataset({dataset: this.dataset.id},
                 (response) => {
                     this.dataset.fetch();
-                    this.$.modal.close();
+                    this.$refs.modal.close();
                 }
             );
         }

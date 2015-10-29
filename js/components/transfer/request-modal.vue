@@ -1,7 +1,7 @@
 <template>
 <modal title="{{ _('Transfer request') }}"
     class="modal-info transfer-request-modal"
-    v-ref="modal">
+    v-ref:modal>
 
     <div class="modal-body">
         <div class="text-center row" v-if="!type">
@@ -118,7 +118,7 @@ export default {
                     title: this._('Transfer requested'),
                     details: this._('The recipient need to accept the transfer in order to complete it.')
                 });
-                this.$.modal.close();
+                this.$refs.modal.close();
                 this.$emit('transfer:requested', response.obj);
             });
         }

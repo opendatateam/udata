@@ -87,7 +87,7 @@
                 <span class="input-group-addon">
                     <span class="fa fa-cubes"></span>
                 </span>
-                <dataset-completer v-ref="completer"></dataset-completer>
+                <dataset-completer v-ref:completer></dataset-completer>
                 <span class="input-group-btn">
                     <button class="btn btn-success" type="button"
                         @click="submit">
@@ -165,7 +165,7 @@ module.exports = {
     watch: {
         editing: function(editing) {
             if (editing) {
-                this.$.completer.selectize.focus();
+                this.$refs.completer.selectize.focus();
             }
         }
     }

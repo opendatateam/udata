@@ -23,7 +23,7 @@
             <span v-repeat="dataset.badges" class="label label-primary">{{badges[kind]}}</span>
         </div>
     </div>
-    <dataset-form v-ref="form" v-show="toggled" dataset="{{dataset}}"></dataset-form>
+    <dataset-form v-ref:form v-show="toggled" dataset="{{dataset}}"></dataset-form>
     <box-footer v-if="toggled">
         <button type="submit" class="btn btn-primary"
             @click="save($event)" v-i18n="Save"></button>
@@ -54,7 +54,7 @@ module.exports = {
         },
         save: function(e) {
             e.preventDefault();
-            let form = this.$.form;
+            let form = this.$refs.form;
             if (form.validate()) {
                 this.dataset.update(form.serialize(), (response) => {
                     this.dataset.on_fetched(response);

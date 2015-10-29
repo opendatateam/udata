@@ -3,7 +3,7 @@
 <template>
 <modal title="{{ _('Confirm deletion') }}"
     class="modal-danger discussion-delete-modal"
-    v-ref="modal">
+    v-ref:modal>
 
     <div class="modal-body">
         <p class="lead text-center">
@@ -46,7 +46,7 @@ module.exports = {
         confirm: function() {
             API.discussions.delete_discussion({id: this.discussionid},
                 function(response) {
-                    this.$.modal.close();
+                    this.$refs.modal.close();
                 }.bind(this)
             );
         }

@@ -39,7 +39,7 @@
         </div>
         <!-- Main content -->
         <section class="content">
-            <component v-ref="content" :is="view"></component>
+            <component v-ref:content :is="view"></component>
         </section>
     </div>
 </template>
@@ -214,8 +214,8 @@ export default {
         'view': function(view, old) {
             this.meta = emptyMeta();
             Vue.nextTick(() => {
-                if (this.$.content.meta) {
-                    Object.assign(this.meta, this.$.content.meta);
+                if (this.$refs.content.meta) {
+                    Object.assign(this.meta, this.$refs.content.meta);
                 }
             });
         }
@@ -277,7 +277,7 @@ export default {
         loadView: function(name, callback) {
 
             let cb = () => {
-                callback.apply(this, [this.$.content]);
+                callback.apply(this, [this.$refs.content]);
             };
 
             if (this.$options.components.hasOwnProperty(name)) {

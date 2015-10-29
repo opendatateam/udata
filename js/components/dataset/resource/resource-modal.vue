@@ -9,7 +9,7 @@
 <template>
 <modal title="{{ resource.title }}" class="resource-modal"
     :class="{ 'modal-danger': confirm, 'modal-primary': !confirm }"
-    v-ref="modal">
+    v-ref:modal>
     <div class="modal-body">
         <div v-show="!edit && !confirm">
             {{{ resource.description | markdown }}}
@@ -46,7 +46,7 @@
             </dl>
         </div>
 
-        <resource-form v-if="edit" v-ref="form" dataset="{{dataset}}" resource="{{resource}}"></resource-form>
+        <resource-form v-if="edit" v-ref:form dataset="{{dataset}}" resource="{{resource}}"></resource-form>
 
         <div v-show="confirm">
             <p class="lead text-center">
@@ -113,15 +113,15 @@ export default {
     },
     methods: {
         save: function() {
-            if (this.$.form.validate()) {
-                this.dataset.save_resource(this.$.form.serialize());
-                this.$.modal.close();
+            if (this.$refs.form.validate()) {
+                this.dataset.save_resource(this.$refs.form.serialize());
+                this.$refs.modal.close();
                 return true;
             }
         },
         delete_confirmed: function() {
             this.dataset.delete_resource(this.resource.id);
-            this.$.modal.close();
+            this.$refs.modal.close();
         }
     }
 };

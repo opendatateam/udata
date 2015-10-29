@@ -14,10 +14,10 @@
 
 <template>
 <div class="input-group dropdown frequency-field">
-    <date-picker  v-ref="picker" field="{{ frequency_date_field }}"
+    <date-picker v-ref:picker field="{{ frequency_date_field }}"
         value="{{frequency_date_value}}">
     </date-picker>
-    <select-input v-ref="select" choices="{{ choices }}" @change="onSelect()"
+    <select-input v-ref:select choices="{{ choices }}" @change="onSelect()"
         class="select-input" field="{{field}}" model="{{model}}"
         schema="{{schema}}" property="{{property}}" value="{{value}}"
         description="{{description}}" placeholder="{{placeholder}}"
@@ -57,9 +57,9 @@ export default {
     },
     methods: {
         onSelect: function() {
-            let value = this.$.select.$el.value;
-            let dateInput = this.$.picker.$$.input;
-            let dateHidden = this.$.picker.$$.hidden;
+            let value = this.$refs.select.$el.value;
+            let dateInput = this.$refs.picker.$$.input;
+            let dateHidden = this.$refs.picker.$$.hidden;
             let futureDate = '';
             switch (value) {
                 case "daily":

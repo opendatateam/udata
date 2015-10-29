@@ -1,5 +1,5 @@
 <template>
-<vform v-ref="form" fields="{{fields}}" model="{{organization}}"></vform>
+<vform v-ref:form fields="{{fields}}" model="{{organization}}"></vform>
 </template>
 
 <script>
@@ -30,13 +30,13 @@ export default {
     },
     methods: {
         serialize: function() {
-            return this.$.form.serialize();
+            return this.$refs.form.serialize();
         },
         validate: function() {
-            return this.$.form.validate();
+            return this.$refs.form.validate();
         },
         on_error: function(response) {
-            return this.$.form.on_error(response);
+            return this.$refs.form.on_error(response);
         },
     }
 };

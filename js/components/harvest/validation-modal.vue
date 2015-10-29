@@ -1,7 +1,7 @@
 <template>
 <modal title="{{ _('Harvest source validation') }}"
     class="modal-info harvest-delete-modal"
-    v-ref="modal">
+    v-ref:modal>
 
     <div class="modal-body">
         <p>
@@ -71,7 +71,7 @@ export default {
                 }},
                 (response) => {
                     this.source.on_fetched(response);
-                    this.$.modal.close();
+                    this.$refs.modal.close();
                 }
             );
         }

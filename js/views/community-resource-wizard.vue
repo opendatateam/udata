@@ -1,5 +1,5 @@
 <template>
-<wizard-component v-ref="wizard" steps="{{steps}}"></wizard-component>
+<wizard-component v-ref:wizard steps="{{steps}}"></wizard-component>
 </template>
 
 <script>
@@ -46,7 +46,7 @@ export default {
                         this.communityResource.dataset = this.dataset_id;
                         this.communityResource.save();
                         this.communityResource.$once('updated', () => {
-                            this.$.wizard.go_next();
+                            this.$refs.wizard.go_next();
                         });
                         return false;
                     }
@@ -72,13 +72,13 @@ export default {
     },
     events: {
         'wizard:next-step': function() {
-            this.$.wizard.go_next();
+            this.$refs.wizard.go_next();
         },
         'wizard:previous-step': function() {
-            this.$.wizard.go_previous();
+            this.$refs.wizard.go_previous();
         },
         'wizard:step-changed': function() {
-            this.$.wizard.$.content.communityResource = this.communityResource;
+            this.$refs.wizard.$.content.communityResource = this.communityResource;
         }
     }
 };

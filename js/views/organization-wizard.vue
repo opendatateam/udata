@@ -1,5 +1,5 @@
 <template>
-<wizard-component v-ref="wizard" steps="{{steps}}"></wizard-component>
+<wizard-component v-ref:wizard steps="{{steps}}"></wizard-component>
 </template>
 
 <script>
@@ -28,7 +28,7 @@ export default {
                         Object.assign(this.organization, data);
                         this.organization.save();
                         this.organization.$once('updated', () => {
-                            this.$.wizard.go_next();
+                            this.$refs.wizard.go_next();
                         });
                         return false;
                     }
@@ -65,17 +65,17 @@ export default {
     },
     events: {
         'wizard:next-step': function() {
-            this.$.wizard.go_next();
+            this.$refs.wizard.go_next();
         },
         'wizard:previous-step': function() {
-            this.$.wizard.go_previous();
+            this.$refs.wizard.go_previous();
         },
         'wizard:step-changed': function() {
-            this.$.wizard.$.content.organization = this.organization;
+            this.$refs.wizard.$.content.organization = this.organization;
         },
         'image:saved': function() {
             this.organization.fetch();
-            this.$.wizard.go_next();
+            this.$refs.wizard.go_next();
             return false;
         }
     }

@@ -1,5 +1,5 @@
 <template>
-<wizard v-ref="wizard" steps="{{steps}}"></wizard>
+<wizard v-ref:wizard steps="{{steps}}"></wizard>
 </template>
 
 <script>
@@ -35,7 +35,7 @@ export default {
                         }
                         this.source.save();
                         this.source.$once('updated', () => {
-                            this.$.wizard.go_next();
+                            this.$refs.wizard.go_next();
                         });
                         return false;
                     }
@@ -58,13 +58,13 @@ export default {
     },
     events: {
         'wizard:next-step': function() {
-            this.$.wizard.go_next();
+            this.$refs.wizard.go_next();
         },
         'wizard:previous-step': function() {
-            this.$.wizard.go_previous();
+            this.$refs.wizard.go_previous();
         },
         'wizard:step-changed': function() {
-            this.$.wizard.$.content.source = this.source;
+            this.$refs.wizard.$.content.source = this.source;
         }
     }
 };

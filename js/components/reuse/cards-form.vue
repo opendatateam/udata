@@ -57,7 +57,7 @@
             <span class="input-group-addon">
                 <span class="fa fa-retweet"></span>
             </span>
-            <reuse-completer v-ref="completer"></reuse-completer>
+            <reuse-completer v-ref:completer></reuse-completer>
         </div>
     </div>
     <div class="row" v-show="!reuses.length">

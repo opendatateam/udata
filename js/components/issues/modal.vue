@@ -13,7 +13,7 @@
 <template>
 <modal title="{{ _('Issue') }}"
     class="issue-modal"
-    v-ref="modal">
+    v-ref:modal>
     <div class="modal-body">
         <dataset-card v-if="issue.class | is_dataset"
             datasetid="{{issue.subject}}"></dataset-card>

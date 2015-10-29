@@ -130,7 +130,7 @@
             <span class="input-group-addon">
                 <span class="fa fa-user"></span>
             </span>
-            <user-completer v-ref="completer"></user-completer>
+            <user-completer v-ref:completer></user-completer>
             <span class="input-group-btn">
                 <button class="btn btn-warning" type="button"
                     @click="adding = false;">
@@ -218,7 +218,7 @@ export default {
         },
         adding: function(adding) {
             if (adding) {
-                this.$.completer.selectize.focus();
+                this.$refs.completer.selectize.focus();
             }
         }
     },

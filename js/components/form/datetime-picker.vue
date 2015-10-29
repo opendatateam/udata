@@ -10,8 +10,8 @@
 
 <template>
 <div class="datetime-picker">
-    <date-picker v-ref="date" serializable="{{ false }}"></date-picker>
-    <time-picker v-ref="time" serializable="{{ false }}"></time-picker>
+    <date-picker v-ref:date serializable="{{ false }}"></date-picker>
+    <time-picker v-ref:time serializable="{{ false }}"></time-picker>
     <input type="hidden" v-el:hidden
         v-attr="
             id: field.id,
