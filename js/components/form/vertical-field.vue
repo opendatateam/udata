@@ -17,7 +17,7 @@
         'has-error': errors.length
         }">
         <span v-show="description" class="form-help"
-            v-attr="data-content: description"
+            :data-content="description"
             v-if="!is_hidden"></span>
         <label for="{{field.id}}" :class="{ 'required': required }"
             v-if="!is_hidden && !is_bool">

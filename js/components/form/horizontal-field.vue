@@ -17,7 +17,7 @@
             <i v-if="errors.length" class="fa fa-times-circle-o"></i>
             {{ is_bool ? '' : field.label }}
             <span v-show="description" class="form-help"
-                v-attr="data-content: description"></span>
+                :data-content="description"></span>
         </label>
         <div class="col-sm-9">
             <component :is="widget"
