@@ -32,8 +32,8 @@ def granularity_labelizer(label, value):
 
 
 def zone_labelizer(label, value):
-    if isinstance(value, basestring):
-        return GeoZone.objects.get(id=value) or value
+    if value and isinstance(value, basestring):
+        return GeoZone.objects(id=value).first() or value
     return value
 
 
