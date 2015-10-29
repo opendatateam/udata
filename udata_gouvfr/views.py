@@ -124,6 +124,7 @@ C3_PARTNERS = (
     'ministere-de-l-ecologie-du-developpement-durable-et-de-l-energie',
     'museum-national-dhistoire-naturelle',
     'irstea',
+    'electricite-reseau-distribution-france',
 )
 NB_DISPLAYED_DATASETS = 18
 
