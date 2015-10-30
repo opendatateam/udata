@@ -10,7 +10,8 @@
         <li>
             <ul class="menu">
                 <li v-for="notification in notifications">
-                    <component :is="notification.type"></component>
+                    <component :is="notification.type"
+                        :details="notification.details"></component>
                 </li>
             </ul>
         </li>
