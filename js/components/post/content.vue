@@ -26,7 +26,7 @@
             endpoint="{{endpoint}}">
         </image-button>
         <p v-if="post.headline" class="lead">{{post.headline}}</p>
-        <div :v-markdown="post.content"></div>
+        <div v-markdown="post.content"></div>
     </div>
     <post-form v-ref:form v-if="toggled" post="{{post}}"></post-form>
     <box-footer v-if="toggled">

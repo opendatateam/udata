@@ -6,7 +6,7 @@
         </a>
     </aside>
     <div v-if="!toggled">
-        <div :v-markdown="topic.description"></div>
+        <div v-markdown="topic.description"></div>
     </div>
     <topic-form v-ref:form v-if="toggled" topic="{{topic}}"></topic-form>
     <box-footer v-if="toggled">

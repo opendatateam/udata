@@ -71,6 +71,7 @@ router.map({
         }
     },
     '/user/:oid/': {
+        name: 'user',
         component: view('user'),
         callback: function(view) {
             view.user_id = user_id;

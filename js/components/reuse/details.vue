@@ -33,7 +33,7 @@
             <image-button src="{{reuse.image}}" size="100" class="thumbnail-button"
                 endpoint="{{endpoint}}">
             </image-button>
-            <div :v-markdown="reuse.description"></div>
+            <div v-markdown="reuse.description"></div>
             <div v-if="reuse.tags" class="label-list">
                 <strong>
                     <span class="fa fa-fw fa-tags"></span>

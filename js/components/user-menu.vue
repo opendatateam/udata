@@ -20,13 +20,13 @@
         </li>
         <!-- Menu Body -->
         <li v-if="$root.me.about || roles" class="user-body text-center">
-            <div :v-markdown="$root.me.about"></div>
+            <div v-markdown="$root.me.about"></div>
             <span class="label label-primary" v-for="role in $root.me.roles">{{role}}</span>
         </li>
         <!-- Menu Footer-->
         <li class="user-footer">
             <div class="pull-left">
-                <a href="/users/{{$root.me.slug}}" class="btn btn-default btn-flat" v-i18n="Profile"></a>
+                <a :href="'/users/' + $root.me.slug" class="btn btn-default btn-flat" v-i18n="Profile"></a>
             </div>
             <div class="pull-right">
                 <a href="/logout" class="btn btn-default btn-flat" v-i18n="Sign out"></a>
