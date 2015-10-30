@@ -41,7 +41,7 @@
         </div>
         <!-- Main content -->
         <section class="content">
-            <component v-ref:content :is="view"></component>
+            <router-view></router-view>
         </section>
     </div>
 </template>
@@ -72,7 +72,6 @@ export default {
     name: 'App',
     data: function() {
         return {
-            view: null,
             me: me,
             site: site,
             config: require('config'),
@@ -99,132 +98,16 @@ export default {
             this.notifications.push(notification);
         }
     },
-    routes: {
-        '/': function() {
-            this.loadView('home');
-        },
-        '/me/': function() {
-            this.loadView('me');
-        },
-        '/site/': function() {
-            this.loadView('site');
-        },
-        '/dataset/new/': function() {
-            this.loadView('dataset-wizard');
-        },
-        '/dataset/new/:oid/': function(oid) {
-            this.loadView('dataset-wizard', function(view) {
-                if (!view.dataset.id) {
-                    view.dataset.fetch(oid);
-                }
-            });
-        },
-        '/dataset/new/:oid/share': function(oid) {
-            this.loadView('dataset-wizard', function(view) {
-                if (!view.dataset.id) {
-                    view.dataset.fetch(oid);
-                }
-            });
-        },
-        '/dataset/:oid/': function(dataset_id) {
-            this.loadView('dataset', function(view) {
-                view.dataset_id = dataset_id;
-            });
-        },
-        '/community-resource/new/': function() {
-            this.loadView('community-resource-wizard');
-        },
-        '/reuse/new/': function() {
-            this.loadView('reuse-wizard');
-        },
-        '/reuse/:oid/': function(reuse_id) {
-            this.loadView('reuse', function(view) {
-                view.reuse_id = reuse_id;
-            });
-        },
-        '/organization/new/': function() {
-            this.loadView('organization-wizard');
-        },
-        '/organization/new/:oid/': function(oid) {
-            this.loadView('organization-wizard', function(view) {
-                if (!view.organization.id) {
-                    view.organization.fetch(oid);
-                }
-            });
-        },
-        '/organization/:oid/': function(org_id) {
-            this.loadView('organization', function(view) {
-                view.org_id = org_id;
-            });
-        },
-        '/user/:oid/': function(user_id) {
-            this.loadView('user', function(view) {
-                view.user_id = user_id;
-            });
-        },
-        '/harvester/new/': function() {
-            this.loadView('harvester-wizard');
-        },
-        '/harvester/:oid/': function(source_id) {
-            this.loadView('harvester', function(view) {
-                view.source_id = source_id;
-            });
-        },
-        '/harvester/:oid/edit': function(source_id) {
-            this.loadView('harvester-edit', function(view) {
-                view.source_id = source_id;
-            });
-        },
-        '/post/new/': function() {
-            this.loadView('post-wizard');
-        },
-        '/post/:oid/': function(post_id) {
-            this.loadView('post', function(view) {
-                view.post_id = post_id;
-            });
-        },
-        '/topic/new/': function() {
-            this.loadView('topic-wizard');
-        },
-        '/topic/:oid/': function(topic_id) {
-            this.loadView('topic', function(view) {
-                view.topic_id = topic_id;
-            });
-        },
-        '/editorial/': function() {
-            this.loadView('editorial');
-        },
-        '/system/': function() {
-            this.loadView('system');
-        },
-        '/issue/:oid/': function(issue_id) {
-            var m = this.$modal({data: {
-                        issueid: issue_id
-                    }},
-                    Vue.extend(require('components/issues/modal.vue'))
-                );
-        },
-        '/discussion/:oid/': function(discussion_id) {
-            var m = this.$modal({data: {
-                        discussionid: discussion_id
-                    }},
-                    Vue.extend(require('components/discussions/modal.vue'))
-                );
-        }
-    },
-    watch: {
-        'view': function(view, old) {
-            this.meta = emptyMeta();
-            Vue.nextTick(() => {
-                if (this.$refs.content.meta) {
-                    Object.assign(this.meta, this.$refs.content.meta);
-                }
-            });
-        }
-    },
-    attached: function() {
-        this.$router.init();
-    },
+    // watch: {
+    //     'view': function(view, old) {
+    //         this.meta = emptyMeta();
+    //         Vue.nextTick(() => {
+    //             if (this.$refs.content.meta) {
+    //                 Object.assign(this.meta, this.$refs.content.meta);
+    //             }
+    //         });
+    //     }
+    // },
     ready: function() {
         this.fix_size();
         this.slimscroll();
@@ -267,35 +150,6 @@ export default {
         $modal: function(options, constructor) {
             options.el = this.$els.modal;
             return this.$addChild(options, constructor);
-        },
-
-        /**
-         * Asynchronously load view (Webpack Lazy loading compatible)
-         * @param  {string}   name     the filename (basename) of the view to load.
-         * @param  {Function} callback An optionnal callback executed
-         *                             in the application scope when
-         *                             the view is loaded
-         */
-        loadView: function(name, callback) {
-
-            let cb = () => {
-                callback.apply(this, [this.$refs.content]);
-            };
-
-            if (this.$options.components.hasOwnProperty(name)) {
-                this.view = name;
-                if (callback) {
-                    this.$nextTick(cb);
-                }
-            } else {
-                require(['./views/' + name + '.vue'], (options) => {
-                    this.$options.components[name] = Vue.extend(options);
-                    this.view = name;
-                    if (callback) {
-                        this.$nextTick(cb);
-                    }
-                });
-            }
         }
     }
 };
