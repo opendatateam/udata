@@ -14,14 +14,14 @@
 
 <template>
 <div class="input-group dropdown frequency-field">
-    <date-picker v-ref:picker field="{{ frequency_date_field }}"
-        value="{{frequency_date_value}}">
+    <date-picker v-ref:picker :field="frequency_date_field"
+        :value="frequency_date_value">
     </date-picker>
-    <select-input v-ref:select choices="{{ choices }}" @change="onSelect()"
-        class="select-input" field="{{field}}" model="{{model}}"
-        schema="{{schema}}" property="{{property}}" value="{{value}}"
-        description="{{description}}" placeholder="{{placeholder}}"
-        required="{{required}}">
+    <select-input v-ref:select :choices="choices" @change="onSelect()"
+        class="select-input" :field="field" :model="model"
+        :schema="schema" :property="property" :value="value"
+        :description="description" :placeholder="placeholder"
+        :required="required">
     </select-input>
 </div>
 </template>
@@ -36,10 +36,11 @@ export default {
     name: 'frequency-field',
     replace: true,
     mixins: [require('components/form/base-field').FieldComponentMixin],
-    data: function() {
-        return {
-            placeholder: this._('Expected update')
-        };
+    props: {
+        placeholder: {
+            type: String,
+            default: function() {return this._('Expected update');}
+        }
     },
     components: {
         'date-picker': require('components/form/date-picker.vue'),

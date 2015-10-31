@@ -81,7 +81,20 @@ import moment from 'moment';
 const VIEWS = ['days', 'months', 'years'];
 
 export default {
-    props: ['selected', 'view'],
+    props: {
+        selected: null,
+        view: {
+            type: String,
+            default: 'days'
+        }
+    },
+    data: function() {
+        return {
+            currentMonth: moment().month(),
+            currentYear: moment().year(),
+            today: moment()
+        };
+    },
     computed: {
         days: function() {
             let days = [],
@@ -139,15 +152,6 @@ export default {
             }
             return years;
         }
-    },
-    data: function() {
-        return {
-            currentMonth: moment().month(),
-            currentYear: moment().year(),
-            today: moment(),
-            selected: null,
-            view: 'days'
-        };
     },
     methods: {
         next: function() {

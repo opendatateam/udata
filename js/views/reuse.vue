@@ -1,27 +1,29 @@
 <template>
     <div class="row">
-        <small-box class="col-lg-4 col-xs-6" v-for="b in boxes"
+        <sbox class="col-lg-4 col-xs-6" v-for="b in boxes"
             :value="b.value" :label="b.label" :color="b.color"
             :icon="b.icon" :target="b.target">
-        </small-box>
+        </sbox>
     </div>
     <div class="row">
-        <reuse-details reuse="{{reuse}}" class="col-xs-12 col-md-6"></reuse-details>
-        <datasets-list datasets="{{reuse.datasets}}" class="col-xs-12 col-md-6"></datasets-list>
-    </div>
-
-    <div class="row">
-        <chart title="Traffic" metrics="{{metrics}}" class="col-xs-12"
-            x="date" y="{{y}}"></chart>
+        <reuse-details :reuse="reuse" class="col-xs-12 col-md-6"></reuse-details>
+        <datasets id="datasets-list" :datasets="reuse.datasets"
+            class="col-xs-12 col-md-6">
+        </datasets>
     </div>
 
     <div class="row">
-        <issues id="issues-widget" class="col-xs-12 col-md-6" issues="{{issues}}"></issues>
-        <discussions id="discussions-widget" class="col-xs-12 col-md-6" discussions="{{discussions}}"></discussions>
+        <chart id="traffic" title="Traffic" :metrics="metrics" class="col-xs-12"
+            x="date" :y="y"></chart>
     </div>
 
     <div class="row">
-        <followers-widget id="followers-widget" class="col-xs-12" followers="{{followers}}"></followers-widget>
+        <issues id="issues-widget" class="col-xs-12 col-md-6" :issues="issues"></issues>
+        <discussions id="discussions-widget" class="col-xs-12 col-md-6" :discussions="discussions"></discussions>
+    </div>
+
+    <div class="row">
+        <followers id="followers-widget" class="col-xs-12" :followers="followers"></followers>
     </div>
 </template>
 
@@ -57,7 +59,6 @@ export default {
         }
 
         return {
-            reuse_id: null,
             reuse: new Reuse(),
             metrics: new Metrics({query: {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
@@ -91,7 +92,8 @@ export default {
                 value: this.reuse.metrics.datasets || 0,
                 label: this.reuse.metrics.datasets ? this._('Datasets') : this._('Dataset'),
                 icon: 'retweet',
-                color: 'green'
+                color: 'green',
+                target: '#datasets-list'
             }, {
                 value: this.reuse.metrics.followers || 0,
                 label: this.reuse.metrics.followers ? this._('Followers') : this._('Follower'),
@@ -102,18 +104,19 @@ export default {
                 value: this.reuse.metrics.views || 0,
                 label: this._('Views'),
                 icon: 'eye',
-                color: 'purple'
+                color: 'purple',
+                target: '#traffic'
             }];
         }
     },
     components: {
-        'small-box': require('components/containers/small-box.vue'),
+        sbox: require('components/containers/small-box.vue'),
+        chart: require('components/charts/widget.vue'),
         'reuse-details': require('components/reuse/details.vue'),
-        'chart': require('components/charts/widget.vue'),
-        'datasets-list': require('components/dataset/card-list.vue'),
-        'followers-widget': require('components/follow/list.vue'),
-        'issues': require('components/issues/list.vue'),
-        'discussions': require('components/discussions/list.vue')
+        datasets: require('components/dataset/card-list.vue'),
+        followers: require('components/follow/list.vue'),
+        issues: require('components/issues/list.vue'),
+        discussions: require('components/discussions/list.vue')
     },
     events: {
         'dataset-card-list:submit': function(ids) {
@@ -141,12 +144,15 @@ export default {
             );
         }
     },
-    watch: {
-        reuse_id: function(id) {
-            if (id) {
-                this.reuse.fetch(id);
-            }
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
         },
+        data() {
+            this.reuse.fetch(this.$route.params.oid);
+        }
+    },
+    watch: {
         'reuse.title': function(title) {
             if (title) {
                 this.meta.title = title;

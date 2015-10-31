@@ -1,6 +1,6 @@
 <template>
-<box-container title="{{title}}" icon="cubes" boxclass="box-solid">
-    <aside>
+<box :title="title" icon="cubes" boxclass="box-solid">
+    <aside slot="tools">
         <a class="text-muted pointer" @click="toggle">
             <i class="fa fa-gear"></i>
         </a>
@@ -23,18 +23,16 @@
             <span v-for="b in dataset.badges" class="label label-primary">{{badges[b.kind]}}</span>
         </div>
     </div>
-    <dataset-form v-ref:form v-show="toggled" dataset="{{dataset}}"></dataset-form>
-    <box-footer v-if="toggled">
+    <dataset-form v-ref:form v-show="toggled" :dataset="dataset"></dataset-form>
+    <footer v-if="toggled" slot="footer">
         <button type="submit" class="btn btn-primary"
             @click="save($event)" v-i18n="Save"></button>
-    </box-footer>
-</box-container>
+    </footer>
+</box>
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'dataset-details',
     props: ['dataset'],
     data: function() {
@@ -45,7 +43,7 @@ module.exports = {
         };
     },
     components: {
-        'box-container': require('components/containers/box.vue'),
+        box: require('components/containers/box.vue'),
         'dataset-form': require('components/dataset/form.vue')
     },
     methods: {

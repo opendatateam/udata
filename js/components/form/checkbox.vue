@@ -6,7 +6,7 @@
 
 <template>
 <div class="checkbox">
-    <label for="{{field.id}}" :class="{ 'required': required }">
+    <label :for="field.id" :class="{ 'required': required }">
         <input type="checkbox"
             :id="field.id"
             :name="field.id"

@@ -139,7 +139,13 @@ export class Model extends Base {
         var schema = this.__schema__
         for (var key in schema.properties) {
             if (schema.properties.hasOwnProperty(key)) {
-                this[key] = schema.required.indexOf(key) >= 0 ? null : undefined;
+                if (schema.properties[key].type == 'array') {
+                    this[key] = []
+                } else if (schema.required.indexOf(key)) {
+                    this[key] = null;
+                } else {
+                    this[key] = undefined;
+                }
             }
         }
         return this;

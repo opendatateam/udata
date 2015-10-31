@@ -10,8 +10,8 @@
 
 <template>
 <div class="datetime-picker">
-    <date-picker v-ref:date serializable="{{ false }}"></date-picker>
-    <time-picker v-ref:time serializable="{{ false }}"></time-picker>
+    <date-picker v-ref:date :serializable="false"></date-picker>
+    <time-picker v-ref:time :serializable="false"></time-picker>
     <input type="hidden" v-el:hidden
         :id="field.id"
         :name="field.id"
@@ -33,12 +33,14 @@ export default {
             value.month(datetime.month());
             value.date(datetime.date());
             this.$els.hidden.value = value.format();
+            return true;
         },
         'calendar:time:selected': function(datetime) {
             let value = moment(this.$els.hidden.value);
             value.hour(datetime.hour());
             value.minute(datetime.minute());
             this.$els.hidden.value = value.format();
+            return true;
         }
     }
 };

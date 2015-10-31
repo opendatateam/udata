@@ -71,6 +71,11 @@ export default  {
     detached: function() {
         this._handler.remove();
     },
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
+        }
+    },
     methods: {
         update: function() {
             if (this.$root.me.id) {

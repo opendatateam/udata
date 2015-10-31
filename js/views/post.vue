@@ -16,7 +16,6 @@ export default {
     name: 'PostView',
     data: function() {
         return {
-            post_id: null,
             post: new Post(),
             meta: {
                 title: null,
@@ -40,12 +39,16 @@ export default {
             this.post.save();
         }
     },
-    watch: {
-        post_id: function(id) {
-            if (id) {
-                this.post.fetch(id);
-            }
+
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
         },
+        data() {
+            this.post.fetch(this.$route.params.oid);
+        }
+    },
+    watch: {
         'post.page': function(page) {
             if (page) {
                 this.meta.page = page;

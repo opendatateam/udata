@@ -18,7 +18,7 @@
         :value="value|dateFormatted"
         :readonly="readonly"></input>
     <div class="dropdown-menu dropdown-menu-right">
-        <calendar selected="{{value}}"></calendar>
+        <calendar :selected="value"></calendar>
     </div>
     <input type="hidden" v-el:hidden
         :id="field.id"
@@ -37,14 +37,18 @@ export default {
     name: 'date-picker',
     replace: true,
     mixins: [require('components/form/base-field').FieldComponentMixin],
-    props: ['serializable'],
+    props: {
+        serializable: {
+            type: Boolean,
+            default: true
+        }
+    },
     components: {
         calendar: require('components/calendar.vue')
     },
     data: function() {
         return {
             picking: false,
-            serializable: true
         };
     },
     filters: {
@@ -60,11 +64,13 @@ export default {
             this.$els.input.value = date.format(this.field.format || DEFAULT_FORMAT);
             this.$els.hidden.value = date.format(ISO_FORMAT);
             this.picking = false;
+            return true;
         },
         'calendar:date:cleared': function() {
             this.$els.input.value = '';
             this.$els.hidden.value = '';
             this.picking = false;
+            return true;
         }
     },
     methods: {

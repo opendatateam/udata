@@ -1,11 +1,13 @@
 <template>
 <select class="form-control" v-model="value"
-    options="options | extract"
     :id="field.id"
     :name="field.id"
     :placeholder="placeholder"
     :required="required"
     :disabled="readonly">
+    <option v-for="option in options | extract" :value="option.value">
+        {{option.text || option.value}}
+    </option>
 </select>
 </template>
 

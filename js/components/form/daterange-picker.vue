@@ -11,22 +11,22 @@
 <div class="input-group dropdown daterange-picker" :class="{ 'open': picking }">
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
     <input type="text" class="input-sm form-control"
-        v-el:start-input placeholder="{{ _('Start') }}"
+        v-el:start-input :placeholder="_('Start')"
         @focus="onFocus"
         @blur="onBlur"
         :required="required"
         :value="start_value"
         :readonly="readonly">
-    <span class="input-group-addon">à</span>
+    <span class="input-group-addon">{{ _('to') }}</span>
     <input type="text" class="input-sm form-control"
-        v-el:end-input placeholder="{{ _('End') }}"
+        v-el:end-input :placeholder="_('End')"
         @focus="onFocus"
         @blur="onBlur"
         :required="required"
         :value="end_value"
         :readonly="readonly">
     <div class="dropdown-menu dropdown-menu-right">
-        <calendar selected="{{value}}"></calendar>
+        <calendar :selected="value"></calendar>
     </div>
     <input type="hidden" v-el:start-hidden
         :id="field.id + '-start'"
@@ -75,11 +75,13 @@ export default {
             this.pickedField.value = date.format(this.field.format || DEFAULT_FORMAT);
             this.hiddenField.value = date.format(ISO_FORMAT);
             this.picking = false;
+            return true;
         },
         'calendar:date:cleared': function() {
             this.pickedField.value = '';
             this.hiddenField.value = '';
             this.picking = false;
+            return true;
         }
     },
     methods: {

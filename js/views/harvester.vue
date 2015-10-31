@@ -8,7 +8,7 @@
         {{ _('This harvest source has not been validated') }}
     </div>
     <div class="row">
-        <source-widget source="{{source}}"
+        <source-widget :source="source"
             :class="{
                 'col-xs-12': !current_job,
                 'col-md-4': current_job,
@@ -16,12 +16,12 @@
         </source-widget>
         <job-widget
             v-if="current_job"
-            job="{{current_job}}"
+            :job="current_job"
             class="col-md-8">
         </job-widget>
     </div>
     <div class="row" v-if="should_validate">
-        <preview class="col-xs-12" source="{{source}}"></preview>
+        <preview class="col-xs-12" :source="source"></preview>
     </div>
 </template>
 
@@ -34,7 +34,6 @@ export default {
     name: 'HarvestSourceView',
     data: function() {
         return {
-            source_id: null,
             source: new HarvestSource(),
             current_job: null,
             current_item: null,
@@ -94,12 +93,15 @@ export default {
             );
         }
     },
-    watch: {
-        source_id: function(id) {
-            if (id) {
-                this.source.fetch(id);
-            }
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
         },
+        data() {
+            this.source.fetch(this.$route.params.oid);
+        }
+    },
+    watch: {
         'source.name': function(name) {
             if (name) {
                 this.meta.title = name;

@@ -73,7 +73,6 @@ export default {
         }
 
         return {
-            org_id: null,
             org: new Organization(),
             metrics: new Metrics({query: {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
@@ -209,6 +208,9 @@ export default {
         }
     },
     route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
+        },
         data() {
             this.org.fetch(this.$route.params.oid);
         }

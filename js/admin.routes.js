@@ -36,10 +36,7 @@ router.map({
         }
     },
     '/dataset/:oid/': {
-        component: view('dataset'),
-        callback: function(view) {
-            view.dataset_id = dataset_id;
-        }
+        component: view('dataset')
     },
     '/community-resource/new/': {
         component: view('community-resource-wizard')
@@ -48,10 +45,7 @@ router.map({
         component: view('reuse-wizard')
     },
     '/reuse/:oid/': {
-        component: view('reuse'),
-        callback: function(view) {
-            view.reuse_id = reuse_id;
-        }
+        component: view('reuse')
     },
     '/organization/new/': {
         component: view('organization-wizard')
@@ -65,10 +59,7 @@ router.map({
         }
     },
     '/organization/:oid/': {
-        component: view('organization'),
-        callback: function(view) {
-            view.org_id = org_id;
-        }
+        component: view('organization')
     },
     '/user/:oid/': {
         name: 'user',
@@ -81,10 +72,7 @@ router.map({
         component: view('harvester-wizard')
     },
     '/harvester/:oid/': {
-        component: view('harvester'),
-        callback: function(view) {
-            view.source_id = source_id;
-        }
+        component: view('harvester')
     },
     '/harvester/:oid/edit': {
         component: view('harvester-edit'),
@@ -96,19 +84,13 @@ router.map({
         component: view('post-wizard')
     },
     '/post/:oid/': {
-        component: view('post'),
-        callback: function(view) {
-            view.post_id = post_id;
-        }
+        component: view('post')
     },
     '/topic/new/': {
         component: view('topic-wizard')
     },
     '/topic/:oid/': {
-        component: view('topic'),
-        callback: function(view) {
-            view.topic_id = topic_id;
-        }
+        component: view('topic')
     },
     '/editorial/': {
         component: view('editorial')
@@ -132,29 +114,6 @@ router.map({
     // }
 });
 
-// TODO: refactor meta handling
-// router.afterEach(function (transition) {
-//     console.log('route', transition.to, router.app.$refs, router.app.$els);
-//     Object.assign(router.app.meta, router.app.$refs.view.meta);
-// });
-
-// // TODO: use the route attribute on each component using it
-// router.afterEach(function (transition) {
-//     Object.assign(router.app.$refs.view, transition.to.params);
-// });
-
-
-    // },
-    // watch: {
-    //     'view': function(view, old) {
-    //         this.meta = emptyMeta();
-    //         Vue.nextTick(() => {
-    //             if (this.$refs.content.meta) {
-    //                 Object.assign(this.meta, this.$refs.content.meta);
-    //             }
-    //         });
-    //     }
-    // }
 
 /**
  * Make the $go shortcut available on every view instance.

@@ -1,41 +1,40 @@
 <template>
     <div class="row">
-        <small-box class="col-lg-4 col-xs-6" v-for="b in boxes"
+        <sbox class="col-lg-4 col-xs-6" v-for="b in boxes"
             :value="b.value" :label="b.label" :color="b.color"
             :icon="b.icon" :target="b.target">
-        </small-box>
+        </sbox>
     </div>
     <div class="row">
         <div class="col-xs-12 col-md-6">
-            <dataset dataset="{{dataset}}"></dataset>
-            <wmap title="{{ _('Spatial coverage') }}"
-                geojson="{{geojson}}"></wmap>
+            <dataset :dataset="dataset"></dataset>
+            <wmap :title="_('Spatial coverage')" :geojson="geojson"></wmap>
         </div>
-        <quality quality="{{ dataset.quality }}" class="col-xs-12 col-md-6"></quality>
+        <quality :quality="dataset.quality" class="col-xs-12 col-md-6"></quality>
     </div>
     <div class="row">
-        <resources dataset="{{dataset}}" class="col-xs-12"></resources>
+        <resources :dataset="dataset" class="col-xs-12"></resources>
     </div>
     <div class="row">
-        <chart id="trafic" class="col-xs-12" title="{{ _('Audience') }}"
-            metrics="{{metrics}}" x="date" y="{{y}}"></chart>
-    </div>
-
-    <div class="row">
-        <reuses id="reuses" class="col-xs-12" reuses="{{reuses}}"></reuses>
+        <chart id="trafic" class="col-xs-12" :title="_('Audience')"
+            :metrics="metrics" x="date" :y="y"></chart>
     </div>
 
     <div class="row">
-        <issues class="col-xs-12" issues="{{issues}}"></issues>
+        <reuses id="reuses" class="col-xs-12" :reuses="reuses"></reuses>
     </div>
 
     <div class="row">
-        <discussions class="col-xs-12" discussions="{{discussions}}"></discussions>
+        <issues class="col-xs-12" :issues="issues"></issues>
     </div>
 
     <div class="row">
-        <followers id="followers" class="col-xs-12 col-md-6" followers="{{followers}}"></followers>
-        <community class="col-xs-12 col-md-6" communities="{{communities}}" without-dataset="{{true}}"></community>
+        <discussions class="col-xs-12" :discussions="discussions"></discussions>
+    </div>
+
+    <div class="row">
+        <followers id="followers" class="col-xs-12 col-md-6" :followers="followers"></followers>
+        <community class="col-xs-12 col-md-6" :communities="communities" :without-dataset="true"></community>
     </div>
 
 </template>
@@ -75,7 +74,6 @@ export default {
         }
 
         return {
-            dataset_id: null,
             dataset: new DatasetFull(),
             metrics: new Metrics({query: {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
@@ -177,12 +175,15 @@ export default {
             );
         }
     },
-    watch: {
-        dataset_id: function(id) {
-            if (id) {
-                this.dataset.fetch(id);
-            }
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
         },
+        data() {
+            this.dataset.fetch(this.$route.params.oid);
+        }
+    },
+    watch: {
         'dataset.title': function(title) {
             if (title) {
                 this.meta.title = title;

@@ -31,11 +31,11 @@
 </style>
 
 <template>
-    <box title="{{ title }}" icon="file"
+    <box :title="title" icon="file"
         boxclass="box-solid resources-widget"
         bodyclass="table-responsive no-padding"
         footerclass="text-center"
-        footer="true" empty="{{ _('No resources') }}">
+        :footer="true" :empty="_('No resources')">
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -62,7 +62,7 @@
                 </tr>
                 <tr v-for="resource in dataset.resources" @click="display(resource)"
                     :class="{ 'pointer': !reodering, 'move': reordering }"
-                    data-id="{{resource.id}}">
+                    :data-id="resource.id">
                     <td v-if="reordering" class="handle">
                         <span class="fa fa-bars"></span>
                     </td>
@@ -90,7 +90,7 @@
         <div class="overlay dropzone" v-if="dropping">
             <span class="fa fa-download fa-2x"></span>
         </div>
-        <footer>
+        <footer slot="footer">
             <button type="button"
                 class="btn btn-primary btn-sm btn-flat pointer"
                 v-show="!reordering"
@@ -135,11 +135,14 @@ export default {
         'box': require('components/containers/box.vue'),
         'pagination-widget': require('components/pagination.vue'),
     },
+    props: {
+        dataset: {
+            type: Object,
+            required: true
+        }
+    },
     data: function() {
         return {
-            // title: Vue._('Resources'),
-            // dropping: false
-            dataset: {},
             reordering: false,
             new_order: []
         };
@@ -149,7 +152,6 @@ export default {
             return this.dropping ? Vue._('Drop resource') : Vue._('Resources');
         }
     },
-    props: ['dataset'],
     events: {
         'uploader:progress': function(id, uploaded, total) {
             this.$find('#progress-' + id)
@@ -164,7 +166,7 @@ export default {
     ready: function() {
         /* In case of a new resource, we display the appropriated popin
            on load. */
-        if ("new_resource" in this.$router.parameters) {
+        if ("new_resource" in this.$route.query) {
             this.on_new();
         }
     },
@@ -217,8 +219,8 @@ export default {
         "dataset.resources": function(resources) {
             /* If a `resource_id` is in the GET parameters we display the popin
                with the appropriated resource loaded. */
-            if ("resource_id" in this.$router.parameters) {
-                let resourceId = this.$router.parameters.resource_id;
+            if ("resource_id" in this.$route.query) {
+                let resourceId = this.$route.query.resource_id;
                 for (let resource of resources) {
                     if (resource.id === resourceId) {
                         this.display(resource);
