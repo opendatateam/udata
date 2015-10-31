@@ -57,8 +57,8 @@
         </h1>
         <div class="btn-group btn-group-sm btn-actions pull-right clearfix"
             v-if="$root.meta.page">
-            <a class="btn btn-link" href="{{$root.meta.page}}"
-                title="{{ _('See it as viewed by visitors') }}">
+            <a class="btn btn-link" :href="$root.meta.page"
+                :title="_('See it as viewed by visitors')">
                 {{ _('See on the site') }} →
             </a>
         </div>

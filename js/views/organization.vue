@@ -6,41 +6,41 @@
         </sbox>
     </div>
     <div class="row">
-        <profile org="{{org}}" class="col-xs-12 col-md-6"></profile>
-        <members org="{{org}}" class="col-xs-12 col-md-6"></members>
+        <profile :org="org" class="col-xs-12 col-md-6"></profile>
+        <members :org="org" class="col-xs-12 col-md-6"></members>
     </div>
 
     <div class="row">
         <chart id="trafic-widget" class="col-xs-12"
-            title="{{charts.traffic.title}}" default="{{charts.traffic.default}}"
-            metrics="{{metrics}}"
-            x="date" y="{{charts.traffic.y}}"
+            :title="charts.traffic.title" :default="charts.traffic.default"
+            :metrics="metrics"
+            x="date" :y="charts.traffic.y"
             >
         </chart>
     </div>
 
     <div class="row">
-        <datasets id="datasets-widget" class="col-xs-12" datasets="{{datasets}}"
-         downloads="{{downloads}}">
+        <datasets id="datasets-widget" class="col-xs-12" :datasets="datasets"
+            :downloads="downloads">
         </datasets>
     </div>
 
     <div class="row">
-        <reuses id="reuses-widget" class="col-xs-12" reuses="{{reuses}}"></reuses>
+        <reuses id="reuses-widget" class="col-xs-12" :reuses="reuses"></reuses>
     </div>
 
     <div class="row">
-        <issues id="issues-widget" class="col-xs-12 col-md-6" issues="{{issues}}"></issues>
-        <discussions id="discussions-widget" class="col-xs-12 col-md-6" discussions="{{discussions}}"></discussions>
+        <issues id="issues-widget" class="col-xs-12 col-md-6" :issues="issues"></issues>
+        <discussions id="discussions-widget" class="col-xs-12 col-md-6" :discussions="discussions"></discussions>
     </div>
 
     <div class="row">
-        <followers id="followers-widget" class="col-xs-12 col-md-6" followers="{{followers}}"></followers>
-        <harvesters id="harvesters-widget" class="col-xs-12 col-md-6" owner="{{org}}"></harvesters>
+        <followers id="followers-widget" class="col-xs-12 col-md-6" :followers="followers"></followers>
+        <harvesters id="harvesters-widget" class="col-xs-12 col-md-6" :owner="org"></harvesters>
     </div>
 
     <div class="row">
-        <communities class="col-xs-12" communities="{{communities}}"></communities>
+        <communities class="col-xs-12" :communities="communities"></communities>
     </div>
 </template>
 
@@ -208,12 +208,12 @@ export default {
             );
         }
     },
+    route: {
+        data() {
+            this.org.fetch(this.$route.params.oid);
+        }
+    },
     watch: {
-        org_id: function(id) {
-            if (id) {
-                this.org.fetch(id);
-            }
-        },
         'org.name': function(name) {
             if (name) {
                 this.meta.title = name;

@@ -1,19 +1,17 @@
 <template>
-    <datatable title="{{ title }}" icon="building"
+    <datatable :title="title" icon="building"
         boxclass="organizations-widget"
-        fields="{{ fields }}"
-        p="{{ organizations }}"
-        empty="{{ _('No organization') }}">
+        :fields="fields "
+        :p="organizations"
+        :empty="_('No organization')">
     </datatable>
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'organizations-widget',
     components: {
-        'datatable': require('components/datatable/widget.vue')
+        datatable: require('components/datatable/widget.vue')
     },
     data: function() {
         return {

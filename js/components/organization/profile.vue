@@ -18,9 +18,9 @@
 }
 </style>
 <template>
-<box-container title="{{ _('Profile') }}" icon="building"
-    boxclass="box-solid org-profile-widget" footer="{{ toggled }}">
-    <aside>
+<box :title="_('Profile')" icon="building"
+    boxclass="box-solid org-profile-widget" :footer="toggled">
+    <aside slot="tools">
         <a class="text-muted pointer" @click="toggle">
             <i class="fa fa-gear"></i>
         </a>
@@ -31,8 +31,8 @@
             <small v-if="org.acronym">{{org.acronym}}</small>
         </h3>
         <div class="profile-body">
-            <image-button src="{{org.logo}}" size="100" class="logo-button"
-                endpoint="{{endpoint}}">
+            <image-button :src="org.logo" :size="100" class="logo-button"
+                :endpoint="endpoint">
             </image-button>
             <div v-markdown="org.description"></div>
             <div v-if="org.badges | length" class="label-list">
@@ -44,31 +44,33 @@
             </div>
         </div>
     </div>
-    <org-form v-ref:form v-show="toggled" organization="{{org}}"></org-form>
-    <footer>
+    <org-form v-ref:form v-show="toggled" :organization="org"></org-form>
+    <footer slot="footer">
         <button type="submit" class="btn btn-primary" v-if="toggled"
             @click="save($event)" v-i18n="Save"></button>
     </footer>
-</box-container>
+</box>
 </template>
 
 <script>
-'use strict';
+import API from 'api';
 
-var API = require('api');
-
-module.exports = {
+export default {
     name: 'org-profile',
-    props: ['org'],
+    props: {
+        org: {
+            type: Object,
+            required: true
+        }
+    },
     data: function() {
         return {
             toggled: false,
-            org: undefined,
             badges: require('models/badges').badges.organization
         }
     },
     components: {
-        'box-container': require('components/containers/box.vue'),
+        box: require('components/containers/box.vue'),
         'image-button': require('components/widgets/image-button.vue'),
         'org-form': require('components/organization/form.vue')
     },

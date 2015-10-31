@@ -13,7 +13,7 @@
 
 <template>
 <form-horizontal class="resource-form file-resource-form"
-    fields="{{fields}}" model="{{resource}}" v-ref:form>
+    :fields="fields" :model="resource" v-ref:form>
 </form-horizontal>
 <div v-show="!resource.url && files.length" v-for="file in files" class="info-box bg-aqua">
     <span class="info-box-icon">
@@ -23,7 +23,7 @@
         <span class="info-box-text">{{file.name}}</span>
         <span class="info-box-number">{{file.filesize | filesize}}</span>
         <div class="progress">
-            <div class="progress-bar" style="width: {{progress}}%"></div>
+            <div class="progress-bar" :style="{width: progress+'%'}"></div>
         </div>
         <span class="progress-description">
         {{progress}}%
@@ -31,7 +31,7 @@
     </div>
 </div>
 <form-horizontal v-if="resource.url"
-    fields="{{file_fields}}" model="{{resource}}" readonly="true">
+    :fields="file_fields" :model="resource" :readonly="true">
 </form-horizontal>
 <div v-if="!files.length" class="resource-upload-dropzone">
     <div class="row">

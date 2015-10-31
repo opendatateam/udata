@@ -1,5 +1,5 @@
 <template>
-    <box-container title="OAuth" icon="plug"
+    <box title="OAuth" icon="plug"
         boxclass="box-info"
         bodyclass="table-responsive no-padding">
         <table class="table table-hover">
@@ -12,7 +12,7 @@
             </thead>
             <tbody>
                 <tr v-for="client in clients"
-                    v-route="/oauth/clients/{{client.id}}/">
+                    v-link="'/oauth/clients/' + client.id + '/'">
                     <td>{{client.name}}</td>
                     <td>{{client.description}}</td>
                     <td>
@@ -21,16 +21,14 @@
                 </tr>
             </tbody>
         </table>
-    </box-container>
+    </box>
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'oauth-widget',
     components: {
-        'box-container': require('components/containers/box.vue')
+        box: require('components/containers/box.vue')
     },
     data: function() {
         return {

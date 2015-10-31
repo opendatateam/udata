@@ -73,7 +73,7 @@
             <i v-show="icon" class="fa fa-{{icon}}"></i>
             <h3 class="box-title">{{title}}</h3>
             <div class="box-tools" v-el:tools>
-                <slot v-ref:tools select="aside"></slot>
+                <slot name="tools" v-ref:tools select="aside"></slot>
             </div>
         </header>
         <div class="box-body {{bodyclass || ''}}">
@@ -84,7 +84,7 @@
         </div>
         <div class="box-footer clearfix {{footerclass || ''}}"
             v-el:footer v-show="has_footer">
-            <slot select="footer"></slot>
+            <slot name="footer"></slot>
         </div>
     </div>
 </template>
@@ -104,16 +104,14 @@ export default {
             }
         }
     },
-    props: [
-        'title',
-        'icon',
-        'boxclass',
-        'bodyclass',
-        'footerclass',
-        'loading',
-        'footer',
-        'actions',
-        'collapsable'
-    ]
+    props: {
+        title: String,
+        icon: null,
+        boxclass: String,
+        bodyclass: String,
+        footerclass: String,
+        loading: Boolean,
+        footer: null
+    }
 };
 </script>

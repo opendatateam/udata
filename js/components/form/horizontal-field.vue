@@ -11,7 +11,7 @@
         'form-group': !is_hidden,
         'has-error': errors.length
         }">
-        <label v-if="!is_hidden" for="{{field.id}}"
+        <label v-if="!is_hidden" :for="field.id"
             :class="{ 'required': required && !is_bool }"
             class="col-sm-3 control-label">
             <i v-if="errors.length" class="fa fa-times-circle-o"></i>
@@ -26,7 +26,7 @@
                 :placeholder="placeholder" :required="required"
                 :readonly="readonly">
             </component>
-            <label for="{{field.id}}" class="help-block"
+            <label :for="field.id" class="help-block"
                 v-for="error in errors">{{error}}</label>
         </div>
     </div>

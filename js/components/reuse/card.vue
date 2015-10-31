@@ -1,36 +1,36 @@
 <template>
 <div class="card reuse-card">
-    <a class="card-logo" href="{{ reuse.page }}">
-        <img alt="{{ reuse.title }}" :src="reuse.image">
+    <a class="card-logo" :href="reuse.page">
+        <img :alt="reuse.title" :src="reuse.image">
     </a>
     <div class="card-body">
         <h4>
-            <a href="{{ reuse.page }}" title="{{reuse.title}}">
+            <a :href="reuse.page" :title="reuse.title">
                 {{ reuse.title | truncate 100 }}
             </a>
         </h4>
     </div>
     <footer>
         <div class="author">
-            <a class="avatar" href="{{owner_url}}" title="{{reuse.title}}">
+            <a class="avatar" :href="owner_url" :title="reuse.title">
             <img :src="owner_avatar" class="avatar" width="20" height="20"/>
             </a>
-            <a class="user" href="{{ owner_url }}" title="{{ owner_name }}">
+            <a class="user" :href="owner_url" :title="owner_name">
             {{ owner_name }}
             </a>
             <span class="date">{{ reuse.created_at | dt }}</span>
         </div>
     </footer>
 
-    <a class="rollover fade in" href="{{ reuse.page }}"
-        title="{{ reuse.title }}">
+    <a class="rollover fade in" :href="reuse.page"
+        :title="reuse.title">
         {{{ reuse.description | markdown 120 }}}
     </a>
     <footer class="rollover fade in">
         <ul>
             <li>
                 <a class="btn btn-xs" rel="tooltip" data-placement="top"
-                    title="{{ _('Type') }}">
+                    :title="_('Type')">
                     <span class="fa fa-file fa-fw"></span>
                     {{ reuse | reusetype }}
                 </a>
@@ -38,7 +38,7 @@
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Number of datasets used') }}">
+                    :title="_('Number of datasets used')">
                     <span class="fa fa-cubes fa-fw"></span>
                     {{ reuse.datasets ? reuse.datasets.length : 0 }}
                 </a>
@@ -47,7 +47,7 @@
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Stars') }}">
+                    :title="_('Stars')">
                     <span class="fa fa-star fa-fw"></span>
                     {{ reuse.metrics ? reuse.metrics.followers || 0 : 0 }}
                 </a>
@@ -65,13 +65,16 @@ import moment from 'moment';
 import config from 'config';
 
 export default {
-    props: ['reuse', 'reuseid'],
-    data: function() {
-        return {
-            reuse: new Reuse(),
-            reuseid: null,
-            reactive: true
-        };
+    props: {
+        reuse: {
+            type: Object,
+            default: function() {return new Reuse();}
+        },
+        reuseid: null,
+        reactive: {
+            type: Boolean,
+            default: true
+        }
     },
     computed: {
         certified: function() {

@@ -7,15 +7,21 @@
     </div>
 
     <div class="row">
-        <reuses class="col-xs-12" reuses="{{ reuses }}" title="{{ _('Reuses about your data (including your organizations)') }}"></reuses>
+        <reuses class="col-xs-12" :reuses="reuses"
+            :title="_('Reuses about your data (including your organizations)')">
+        </reuses>
     </div>
 
     <div class="row">
-        <issues id="issues-widget" class="col-xs-12" issues="{{ issues }}" title="{{ _('Issues about your data (including your organizations)') }}"></issues>
+        <issues id="issues-widget" class="col-xs-12" :issues="issues"
+            :title="_('Issues about your data (including your organizations)')">
+        </issues>
     </div>
 
     <div class="row">
-        <discussions id="discussions-widget" class="col-xs-12" discussions="{{ discussions }}" title="{{ _('Discussions about your data (including your organizations)') }}"></discussions>
+        <discussions id="discussions-widget" class="col-xs-12" :discussions="discussions"
+            :title="_('Discussions about your data (including your organizations)')">
+        </discussions>
     </div>
 
 </template>

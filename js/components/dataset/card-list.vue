@@ -61,13 +61,13 @@
 </style>
 
 <template>
-    <box title="{{ title }}" icon="cubes"
+    <box :title="title" icon="cubes"
         boxclass="box-solid datasets-cards-widget"
-        footerClass="text-center" footer="true">
+        footerClass="text-center" :footer="true">
         <div class="row" v-el:sortable>
             <div class="col-md-6 dataset-card-container"
                 v-for="datasetid in (editing ? sorted : datasets)|ids"
-                data-id="{{datasetid}}"
+                :data-id="datasetid"
             >
                 <button type="button" class="close"
                     v-if="editing"
@@ -75,10 +75,10 @@
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only" v-i18n="Close"></span>
                 </button>
-                <dataset-card datasetid="{{datasetid}}"></dataset-card>
+                <dataset-card :datasetid="datasetid"></dataset-card>
             </div>
         </div>
-        <footer>
+        <footer slot="footer">
             <a v-show="!editing" class="text-uppercase footer-btn pointer"
                 @click="edit">
                 {{ _('Edit') }}
@@ -104,22 +104,25 @@
 </template>
 
 <script>
-'use strict';
+import Sorter from 'mixins/sorter';
 
-var Sorter = require('mixins/sorter');
-
-module.exports = {
+export default {
     name: 'datasets-card-list',
     mixins: [Sorter],
     components: {
-        'box': require('components/containers/box.vue'),
+        box: require('components/containers/box.vue'),
         'dataset-card': require('components/dataset/card.vue'),
         'dataset-completer': require('components/form/dataset-completer.vue')
     },
-    props: ['title', 'datasets'],
+    props: {
+        title: {
+            type: String,
+            default: function() {return this._('Datasets');}
+        },
+        datasets: Array
+    },
     data: function() {
         return {
-            title: this._('Datasets'),
             editing: false,
             sorted: []
         };

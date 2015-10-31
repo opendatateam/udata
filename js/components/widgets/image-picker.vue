@@ -46,7 +46,7 @@
             <span class="info-box-text">{{file.name}}</span>
             <span class="info-box-number">{{file.size | filesize}}</span>
             <div class="progress">
-                <div class="progress-bar" style="width: {{progress}}%"></div>
+                <div class="progress-bar" :style="{width: progress+'%'}"></div>
             </div>
             <span class="progress-description">
             {{progress}}%
@@ -64,7 +64,7 @@
         </div>
     </div>
     <thumbnailer-widget v-ref:thumbnailer
-        v-if="resizing" src="{{src}}" sizes="{{sizes}}">
+        v-if="resizing" :src="src" :sizes="sizes">
     </thumbnailer-widget>
 </div>
 </template>
@@ -80,13 +80,16 @@ export default {
     data: function() {
         return {
             src: null,
-            sizes: [100],
-            // progress: null,
             resizing: false,
-            endpoint: null
         };
     },
-    props: ['endpoint', 'sizes'],
+    props: {
+        endpoint: null,
+        sizes: {
+            type: Array,
+            default: function() {return [100];}
+        }
+    },
     components: {
         'thumbnailer-widget': require('components/widgets/thumbnailer.vue')
     },

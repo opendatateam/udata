@@ -13,13 +13,12 @@ const template = `<div class="selectize-option">
 </div>`;
 
 function cardify(value, $el) {
-    var reuse = new Reuse().fetch(value),
-        card = new Vue({
+    var card = new Vue({
             el: $el[0],
-            mixins: [ReuseCard],
-            data: {reuse: reuse}
+            mixins: [ReuseCard]
         }),
         $btn = $el.find('.remove');
+    card.reuse.fetch(value);
     $el.append($btn);
 }
 
@@ -28,10 +27,11 @@ export default {
     mixins: [BaseCompleter],
     ns: 'reuses',
     endpoint: 'suggest_reuses',
-    data: function() {
-        return {
-            placeholder: this._('Find your reuse')
-        };
+    props: {
+        placeholder: {
+            type: String,
+            default: function() {return this._('Find your reuse');}
+        }
     },
     selectize: {
         plugins: ['remove_button'],

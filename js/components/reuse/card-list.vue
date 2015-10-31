@@ -61,13 +61,13 @@
 </style>
 
 <template>
-    <box title="{{ title }}" icon="retwett"
+    <box :title="title" icon="retwett"
         boxclass="box-solid reuses-cards-widget"
-        footerClass="text-center" footer="true">
+        footerClass="text-center" :footer="true">
         <div class="row" v-el:sortable>
             <div class="col-md-6 reuse-card-container"
                 v-for="reuseid in (editing ? sorted : reuses) |ids"
-                data-id="{{reuseid}}"
+                :data-id="reuseid"
             >
                 <button type="button" class="close"
                     v-if="editing"
@@ -75,10 +75,10 @@
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only" v-i18n="Close"></span>
                 </button>
-                <reuse-card reuseid="{{reuseid}}"></reuse-card>
+                <reuse-card :reuseid="reuseid"></reuse-card>
             </div>
         </div>
-        <footer>
+        <footer slot="footer">
             <a v-show="!editing" class="text-uppercase footer-btn pointer"
                 @click="edit">
                 {{ _('Edit') }}
@@ -104,22 +104,25 @@
 </template>
 
 <script>
-'use strict';
+import Sorter from 'mixins/sorter';
 
-var Sorter = require('mixins/sorter');
-
-module.exports = {
+export default {
     name: 'reuses-card-list',
     mixins: [Sorter],
     components: {
-        'box': require('components/containers/box.vue'),
+        box: require('components/containers/box.vue'),
         'reuse-card': require('components/reuse/card.vue'),
         'reuse-completer': require('components/form/reuse-completer.vue')
     },
-    props: ['title', 'reuses'],
+    props: {
+        title: {
+            type: String,
+            default: function() {return this._('Reuses');}
+        },
+        reuses: Array
+    },
     data: function() {
         return {
-            title: this._('Reuses'),
             editing: false,
             sorted: []
         };

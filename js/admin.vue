@@ -32,7 +32,7 @@
     <sidebar class="main-sidebar"></sidebar>
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
-        <content-header meta="{{meta}}"></content-header>
+        <content-header :meta="meta"></content-header>
         <!-- Notifications -->
         <div v-if="notifications.length > 0" class="notification-zone">
             <alert-box v-for="n in notifications"

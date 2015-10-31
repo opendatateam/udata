@@ -8,29 +8,29 @@
 </style>
 
 <template>
-<box title="{{ title }}" icon="{{ icon }}"
-    boxclass="datatable-widget {{tint ? 'box-' + tint : 'box-solid'}} {{boxclass}}"
+<box :title="title" :icon="icon"
+    :boxclass="boxclasses"
     bodyclass="table-responsive no-padding"
     footerclass="text-center clearfix"
-    footer="{{ show_footer }}"
-    loading="{{ loading === undefined ? p.loading : loading }}">
-    <aside>
-        <div class="btn-group" v-show="downloads && downloads.length">
+    :footer="show_footer"
+    :loading="loading === undefined ? p.loading : loading">
+    <aside slot="tools">
+        <div class="btn-group" v-show="downloads.length">
             <button type="button" class="btn btn-box-tool dropdown-toggle"
                 data-toggle="dropdown" aria-expanded="false">
                 <span class="fa fa-download"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
-                <li v-for="donwload in downloads">
-                    <a href="{{download.url}}">{{download.label}}</a>
+                <li v-for="download in downloads">
+                    <a :href="download.url">{{download.label}}</a>
                 </li>
             </ul>
         </div>
         <div class="box-search" v-if="p.has_search">
             <div class="input-group">
                 <input type="text" class="form-control input-sm pull-right"
-                    style="width: 150px;" placeholder="{{'Search'|i18n}}"
-                    v-model="search_query" debounce="500" @keyup="search | key enter">
+                    style="width: 150px;" :placeholder="_('Search')"
+                    v-model="search_query" debounce="500" @keyup.enter="search">
                 <div class="input-group-btn">
                     <button class="btn btn-sm btn-flat" @click="search">
                         <i class="fa fa-search"></i>
@@ -40,18 +40,18 @@
         </div>
     </aside>
     <header class="datatable-header">
-        <slot select="header"></slot>
+        <slot name="header"></slot>
     </header>
-    <datatable v-if="has_data" p="{{p}}" fields="{{fields}}" track="{{track}}">
+    <datatable v-if="p.has_data" :p="p" :fields="fields" :track="track">
     </datatable>
-    <div class="text-center lead" v-if="!has_data">
+    <div class="text-center lead" v-if="!p.has_data">
     {{ empty || _('No data')}}
     </div>
-    <footer>
+    <footer slot="footer">
         <div :class="{ 'pull-right': p.pages > 1 }" v-el:footer_container>
-            <slot select="footer"></slot>
+            <slot name="footer"></slot>
         </div>
-        <pagination-widget p="{{p}}"></pagination-widget>
+        <pagination-widget :p="p"></pagination-widget>
     </footer>
 </box>
 </template>
@@ -67,12 +67,7 @@ export default {
     data: function() {
         return {
             search_query: null,
-            downloads: [],
-            p: {},
-            track: 'id',
             selected: null,
-            fields: [],
-            loading: undefined
         };
     },
     computed: {
@@ -80,22 +75,32 @@ export default {
             return (this.p && this.p.pages > 1)
                 || $(this.$els.footer_container).find('footer > *').length;
         },
-        has_data: function() {
-            return this.p.data && this.p.data.length;
+        boxclasses: function() {
+            return [
+                'datatable-widget',
+                this.tint ? 'box-' + this.tint : 'box-solid',
+                this.boxclass
+            ].join(' ');
         }
     },
-    props: [
-        'p',
-        'title',
-        'icon',
-        'fields',
-        'boxclass',
-        'tint',
-        'downloads',
-        'empty',
-        'track',
-        'loading'
-    ],
+    props: {
+        p: Object,
+        title: String,
+        icon: String,
+        fields: Array,
+        boxclass: String,
+        tint: String,
+        empty: String,
+        loading: Boolean,
+        track: {
+            type: String,
+            default: 'id'
+        },
+        downloads: {
+            type: Array,
+            default: function() {return [];}
+        }
+    },
     methods: {
         search: function() {
             this.p.search(this.search_query);

@@ -5,7 +5,8 @@
         <div class="sidebar-form">
             <form method="get">
                 <div class="input-group">
-                    <input type="text" name="q" class="form-control" placeholder="{{'Search'|i18n}}..." />
+                    <input type="text" name="q" class="form-control"
+                        :placeholder="search_label" />
                     <span class="input-group-btn">
                         <button type="submit" name="search" id="search-btn" class="btn btn-flat">
                             <i class="fa fa-search"></i>
@@ -59,6 +60,11 @@ const MENU = [{
 export default {
     components: {
         'sidebar-menu-item': require('components/sidebar-menu-item.vue')
+    },
+    data() {
+        return {
+            search_label: this._('Search') + '...'
+        };
     },
     computed: {
         menu: function() {

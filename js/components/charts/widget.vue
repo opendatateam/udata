@@ -27,11 +27,11 @@
 </style>
 
 <template>
-    <box title="{{ title }}" icon="{{ icon || 'line-chart' }}"
+    <box :title="title" :icon="icon"
         boxclass="box-solid"
         bodyclass="chart-responsive"
-        loading="{{ metrics.loading }}">
-        <div class="chart" v-style="height: height" v-el:container>
+        :loading="metrics.loading">
+        <div class="chart" :style="{height: height}" v-el:container>
             <canvas v-el:canvas height="100%"></canvas>
         </div>
         <div class="chart-legend" v-el:legend></div>
@@ -94,21 +94,31 @@ export default {
     data: function() {
         return {
             chart: null,
-            chartType: 'Area',
             canvasHeight: null,
-            height: '300px'
         };
     },
-    props: [
-        'title',
-        'icon',
-        'default',
-        'height',
-        'x',
-        'y',
-        'metrics',
-        'chartType'
-    ],
+    props: {
+        title: String,
+        icon: {
+            type: String,
+            default: 'line-chart'
+        },
+        default: null,
+        height: {
+            type: String,
+            default: '300px'
+        },
+        x: String,
+        y: Array,
+        metrics: {
+            type: Object,
+            required: true
+        },
+        chartType: {
+            type: String,
+            default: 'Area'
+        }
+    },
     computed: {
         series: function() {
             let series = this.y.map((item) => {
@@ -140,7 +150,7 @@ export default {
         }
     },
     components: {
-        'box': require('components/containers/box.vue')
+        box: require('components/containers/box.vue')
     },
     ready: function() {
         this.canvasHeight = this.$els.container.clientHeight;

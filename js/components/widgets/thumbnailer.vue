@@ -85,8 +85,8 @@
             <h5>{{ _('Preview') }}</h5>
             <div class="preview-container" v-for="size in sizes"
                 v-el:preview_containers
-                style="width: {{size}}px; height: {{size}}px;">
-                <img class="preview" alt="{{ _('Preview') }}" v-el:previews :src="src"/>
+                :style="{width: size+'px', height: size+'px'}">
+                <img class="preview" :alt="_('Preview')" v-el:previews :src="src"/>
             </div>
         </div>
     </div>
@@ -94,22 +94,23 @@
 </template>
 
 <script>
-'use strict';
+import JCrop from 'jquery-jcrop';
+import $ from 'jquery';
 
-var JCrop = require('jquery-jcrop'),
-    $ = require('jquery');
-
-module.exports = {
+export default {
     mixins: [require('mixins/uploader')],
-    props: ['src', 'sizes'],
+    props: {
+        src: null,
+        sizes: {
+            type: Array,
+            default: function() {return [50, 100];}
+        }
+    },
     data: function() {
         return {
             centered: false,
-            sizes: [50, 100],
-            src: null
         };
     },
-
     computed: {
         /**
          * Get the current crop Bounding Box (realsize) if any.

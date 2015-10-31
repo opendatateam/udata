@@ -17,15 +17,15 @@
 <script>
 export default {
     name: 'small-box',
-    props: ['value', 'label', 'color', 'icon', 'target'],
-    data: function() {
-        return {
-            value: 0,
-            label: '',
-            color: 'aqua',
-            icon: '',
-            target: null
-        };
+    props: {
+        value: null,  // No type check
+        label: String,
+        icon: String,
+        color: {
+            type: String,
+            default: 'aqua'
+        },
+        target: null  // No type check
     },
     computed:  {
         bgcolor: function() {

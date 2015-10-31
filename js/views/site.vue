@@ -6,28 +6,28 @@
         </sbox>
     </div>
     <div class="row">
-        <chart title="Traffic" metrics="{{metrics}}" class="col-xs-12"
-            x="date" y="{{y}}"></chart>
+        <chart title="Traffic" :metrics="metrics" class="col-xs-12"
+            x="date" :y="y"></chart>
     </div>
 
     <div class="row">
-        <datasets id="datasets" class="col-xs-12" datasets="{{datasets}}"></datasets>
+        <datasets id="datasets" class="col-xs-12" :datasets="datasets"></datasets>
     </div>
     <div class="row">
-        <reuses id="reuses" class="col-xs-12" reuses="{{reuses}}"></reuses>
+        <reuses id="reuses" class="col-xs-12" :reuses="reuses"></reuses>
     </div>
     <div class="row">
-        <organizations id="organizations" class="col-xs-12" organizations="{{organizations}}"></organizations>
+        <organizations id="organizations" class="col-xs-12" :organizations="organizations"></organizations>
     </div>
     <div class="row">
-        <users id="users" class="col-xs-12" users="{{users}}"></users>
+        <users id="users" class="col-xs-12" :users="users"></users>
     </div>
     <div class="row">
-        <issues class="col-xs-12 col-md-6" issues="{{issues}}"></issues>
-        <discussions class="col-xs-12 col-md-6" discussions="{{discussions}}"></discussions>
+        <issues class="col-xs-12 col-md-6" :issues="issues"></issues>
+        <discussions class="col-xs-12 col-md-6" :discussions="discussions"></discussions>
     </div>
     <div class="row">
-        <community class="col-xs-12" communities="{{communities}}"></community>
+        <community class="col-xs-12" :communities="communities"></community>
     </div>
 </template>
 
@@ -43,7 +43,7 @@ import Users from 'models/users';
 import Organizations from 'models/organizations';
 import CommunityResources from 'models/communityresources';
 
-module.exports = {
+export default {
     name: 'SiteView',
     data: function() {
         return {

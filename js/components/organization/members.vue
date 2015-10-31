@@ -73,7 +73,7 @@
              v-for="member in org.members">
             <a class="pointer"
                 @click="member_click(member)">
-                <img class="img-circle" alt="{{ _('User Image') }}"
+                <img class="img-circle" :alt="_('User Image')"
                     :src="member.user.avatar || avatar_placeholder"/>
                 <strong>{{member.user | display}}</strong>
                 <small class="text-muted">{{member.role}}</small>
@@ -90,7 +90,7 @@
                 <span class="direct-chat-name pull-left">{{request.user | display}}</span>
                 <span class="direct-chat-timestamp pull-right">{{request.created_at | dt}}</span>
             </div>
-            <img class="direct-chat-img"  alt="{{ _('User Image') }}"
+            <img class="direct-chat-img"  :alt="_('User Image')"
                 :src="request.user.avatar || avatar_placeholder"/>
             <div class="direct-chat-text">
                 {{ request.comment }}
@@ -155,7 +155,9 @@ export default {
         'pagination-widget': require('components/pagination.vue'),
         'user-completer': require('components/form/user-completer.vue'),
     },
-    props: ['org'],
+    props: {
+        org: Object
+    },
     data: function() {
         return {
             title: this._('Members'),
@@ -164,7 +166,6 @@ export default {
             requests: new Requests(),
             adding: false,
             validating: false,
-            org: {}
         };
     },
     events: {

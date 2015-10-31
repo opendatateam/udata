@@ -33,19 +33,25 @@
 </template>
 
 <script>
+import Row from './row.vue';
+
 export default {
     name: 'datatable',
     replace: true,
     components: {
-        'row': require('./row.vue'),
+        Row
     },
-    props: ['p', 'fields', 'track'],
+    props: {
+        p: Object,
+        fields: Array,
+        track: {
+            type: String,
+            default: 'id'
+        }
+    },
     data: function() {
         return {
-            p: {},
-            track: 'id',
-            selected: null,
-            fields: []
+            selected: null
         };
     },
     computed: {
@@ -56,9 +62,6 @@ export default {
             return (this.p && this.p.pages > 1)
                 || $(this.$els.footer_container).find('footer > *').length;
         },
-        has_data: function() {
-            return this.p.data && this.p.data.length;
-        },
         trackBy: function() {
             return this.track || '';
         }
@@ -66,6 +69,7 @@ export default {
     events: {
         'datatable:item:click': function(item) {
             this.selected = item;
+            return true;
         }
     },
     methods: {

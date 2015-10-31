@@ -1,5 +1,5 @@
 <template>
-    <div class="chart" v-style="height: height" v-el:container>
+    <div class="chart" :style="{height: height}" v-el:container>
         <canvas v-el:canvas height="100%"></canvas>
     </div>
 </template>

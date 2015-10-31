@@ -2,6 +2,7 @@ import API from 'api';
 import validator from 'models/validator';
 import {pubsub, PubSub} from 'pubsub';
 import Sifter from 'sifter';
+import Vue from 'vue';
 
 export const DEFAULT_PAGE_SIZE = 10;
 
@@ -40,8 +41,9 @@ export class Base {
      * @param {Object} value The property value to set.
      */
     _set(name, value) {
-        if (this.hasOwnProperty('$set')) {
-            this.$set(name, value);
+        if (this.hasOwnProperty('__ob__')) {
+            Vue.set(this, name, value);
+            // this.$set(name, value);
         } else {
             this[name] = value;
         }
@@ -192,6 +194,10 @@ export class List extends Base {
 
     get has_search() {
         return this.$options.search !== undefined;
+    }
+
+    get has_data() {
+        return this.items.length > 0;
     }
 
     get data() {
@@ -347,6 +353,10 @@ export class ModelPage extends Model {
         }).length > 0;
     }
 
+    get has_data() {
+        return this.data && this.data.length;
+    }
+
     /**
      * Fetch page from server.
      * @param  {Object} options An optionnal query object
@@ -453,7 +463,6 @@ export class PageList extends List {
     set data(value) {
         super.data = value;
     }
-
     /**
      * Total amount of pages
      * @return {int}

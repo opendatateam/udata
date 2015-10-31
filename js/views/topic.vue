@@ -1,20 +1,18 @@
 <template>
     <div class="row">
-        <topic-details topic="{{topic}}" class="col-xs-12"></topic-details>
+        <topic-details :topic="topic" class="col-xs-12"></topic-details>
     </div>
     <div class="row">
-        <datasets-list datasets="{{topic.datasets}}" class="col-xs-12 col-md-6"></datasets-list>
-        <reuses-list reuses="{{topic.reuses}}" class="col-xs-12 col-md-6"></reuses-list>
+        <datasets-list :datasets="topic.datasets" class="col-xs-12 col-md-6"></datasets-list>
+        <reuses-list :reuses="topic.reuses" class="col-xs-12 col-md-6"></reuses-list>
     </div>
 </template>
 
 <script>
-'use strict';
+import moment from 'moment';
+import Topic from 'models/topic';
 
-var moment = require('moment'),
-    Topic = require('models/topic');
-
-module.exports = {
+export default {
     name: 'TopicView',
     data: function() {
         return {
@@ -27,7 +25,6 @@ module.exports = {
         };
     },
     components: {
-        'small-box': require('components/containers/small-box.vue'),
         'topic-details': require('components/topic/details.vue'),
         'datasets-list': require('components/dataset/card-list.vue'),
         'reuses-list': require('components/reuse/card-list.vue')

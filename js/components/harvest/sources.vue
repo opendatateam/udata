@@ -1,8 +1,8 @@
 <template>
-    <datatable title="{{ title }}" icon="tasks"
+    <datatable :title="title" icon="tasks"
         boxclass="harvesters-widget"
-        fields="{{ fields }}" p="{{ sources }}"
-        empty="{{ _('No harvester') }}">
+        :fields="fields" :p="sources"
+        :empty="_('No harvester')">
     </datatable>
 </template>
 
@@ -15,7 +15,12 @@ export default {
     components: {
         datatable: require('components/datatable/widget.vue')
     },
-    props: ['owner'],
+    props: {
+        owner: {
+            type: Object,
+            default: function() {return {};}
+        }
+    },
     data: function() {
         return {
             title: this._('Harvesters'),
@@ -49,10 +54,10 @@ export default {
         }
     },
     ready: function() {
-        if (!this.owner) {
-            this.sources.fetch();
-        } else if (this.owner && this.owner.id) {
+        if (this.owner.id) {
             this.sources.fetch({owner: this.owner.id});
+        } else {
+            this.sources.fetch();
         }
     },
     watch: {

@@ -1,13 +1,13 @@
 <template>
     <ul class="pagination pagination-sm no-margin" v-show="p && p.pages > 1">
         <li :class="{ 'disabled': !p || p.page == 1 }">
-            <a title="{{ 'First page'|i18n }}" class="pointer"
+            <a :title="_('First page')" class="pointer"
                 @click="p.go_to_page(1)">
                 &laquo;
             </a>
         </li>
         <li :class="{ 'disabled': !p || p.page == 1 }">
-            <a title="{{'Previous page'|i18n}}" class="pointer"
+            <a :title="_('Previous page')" class="pointer"
                 @click="p.previousPage()">
                 &lsaquo;
             </a>
@@ -16,13 +16,13 @@
             <a @click="p.go_to_page(current)" class="pointer">{{ current }}</a>
         </li>
         <li :class="{ 'disabled': !p || p.page == p.pages }">
-            <a title="{{'Next page'|i18n}}" class="pointer"
+            <a :title="_('Next page')" class="pointer"
                 @click="p.nextPage()">
                 &rsaquo;
             </a>
         </li>
         <li :class="{ 'disabled': !p || p.page == p.pages }">
-            <a title="{{'Last page'|i18n}}" class="pointer"
+            <a :title="_('Last page')" class="pointer"
                 @click="p.go_to_page(p.pages)">
                 &raquo;
             </a>
@@ -31,18 +31,14 @@
 </template>
 
 <script>
-'use strict';
+const nb = 2;
 
-var nb = 2;
-module.exports = {
+export default {
     name: 'pagination-widget',
     replace: true,
-    data: function() {
-        return {
-            p: {}
-        }
+    props: {
+        p: Object
     },
-    props: ['p'],
     computed: {
         start: function() {
             if (!this.p) {
@@ -60,9 +56,9 @@ module.exports = {
             if (isNaN(this.start) || isNaN(this.end) || this.start >= this.end) return [];
             return Array
                 .apply(0, Array(this.end + 1 - this.start))
-                .map(function (element, index) {
+                .map((element, index) => {
                     return index + this.start;
-                }.bind(this));
+                });
         }
     }
 };

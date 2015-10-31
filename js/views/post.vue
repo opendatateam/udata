@@ -1,20 +1,18 @@
 <template>
     <div class="row">
-        <post-content post="{{post}}" class="col-xs-12"></post-details>
+        <post-content :post="post" class="col-xs-12"></post-details>
     </div>
     <div class="row">
-        <datasets-list datasets="{{post.datasets}}" class="col-xs-12 col-md-6"></datasets-list>
-        <reuses-list reuses="{{post.reuses}}" class="col-xs-12 col-md-6"></reuses-list>
+        <datasets-list :datasets="post.datasets" class="col-xs-12 col-md-6"></datasets-list>
+        <reuses-list :reuses="post.reuses" class="col-xs-12 col-md-6"></reuses-list>
     </div>
 </template>
 
 <script>
-'use strict';
+import moment from 'moment';
+import Post from 'models/post';
 
-var moment = require('moment'),
-    Post = require('models/post');
-
-module.exports = {
+export default {
     name: 'PostView',
     data: function() {
         return {
@@ -28,7 +26,6 @@ module.exports = {
         };
     },
     components: {
-        'small-box': require('components/containers/small-box.vue'),
         'post-content': require('components/post/content.vue'),
         'datasets-list': require('components/dataset/card-list.vue'),
         'reuses-list': require('components/reuse/card-list.vue')

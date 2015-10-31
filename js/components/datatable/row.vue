@@ -22,13 +22,14 @@ import Cell from './cell.vue';
 export default {
     name: 'datatable-row',
     replace: true,
-    data: function() {
-        return {
-            selected: false,
-            fields: []
-        };
+    props: {
+        item: Object,
+        fields: Array,
+        selected: {
+            type: Boolean,
+            default: false
+        }
     },
-    props: ['item', 'fields', 'selected'],
     created: function() {
         // Loads cells from fields definitions
         for(let field of this.fields) {

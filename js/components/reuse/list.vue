@@ -1,9 +1,9 @@
 <template>
-    <datatable title="{{ title }}" icon="retweet"
+    <datatable :title="title" icon="retweet"
         boxclass="reuses-widget"
-        fields="{{ fields }}" p="{{ reuses }}"
-        downloads="{{downloads}}"
-        empty="{{ _('No reuse') }}">
+        :fields="fields" :p="reuses"
+        :downloads="downloads"
+        :empty="_('No reuse')">
     </datatable>
 </template>
 
@@ -12,11 +12,10 @@
 export default {
     name: 'reuses-widget',
     components: {
-         'datatable': require('components/datatable/widget.vue')
+         datatable: require('components/datatable/widget.vue')
     },
     data: function() {
         return {
-            title: this.title || this._('Reuses'),
             fields: [{
                 key: 'image',
                 type: 'avatar',
@@ -74,6 +73,20 @@ export default {
             this.$go('/reuse/' + reuse.id + '/');
         }
     },
-    props: ['reuses', 'downloads', 'title']
+    props: {
+        reuses: null,
+        downloads: {
+            type: Array,
+            default: function() {
+                return [];
+            }
+        },
+        title: {
+            type: String,
+            default: function() {
+                return this._('Reuses');
+            }
+        }
+    }
 };
 </script>

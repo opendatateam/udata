@@ -52,7 +52,7 @@ export default {
             return this.children && this.children.length;
         },
         active: function() {
-            return this.open || this.$router.current_route && this.route === this.$router.current_route;
+            return this.open || this.$route.path === this.route;
         }
     },
     methods: {

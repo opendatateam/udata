@@ -9,7 +9,7 @@
             <!-- inner menu: contains the actual data -->
             <ul class="menu">
                 <li v-for="action in actions">
-                    <a :v-route="action.route" class="pointer">
+                    <a v-link="action.route">
                         <span class="fa fa-fw {{action.icon}} text-{{action.color}}"></span>
                         <span>{{ action.label }}</span>
                     </a>

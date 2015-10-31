@@ -10,8 +10,7 @@ export const FieldComponentMixin = {
     props: {
         field: {
             type: Object,
-            default: function(){ return {};},
-            required: true
+            default: function(){ return {};}
         },
         model: Object,
         value: null,  // Means any type

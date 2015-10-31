@@ -1,20 +1,20 @@
 <template>
     <div class="row">
         <datasets-list class="col-xs-12 col-md-6"
-            title="{{ _('Featured datasets') }}"
-            datasets="{{home_datasets.items}}">
+            :title="_('Featured datasets')"
+            :datasets="home_datasets.items">
         </datasets-list>
         <reuses-list class="col-xs-12 col-md-6"
-            title="{{ _('Featured reuses') }}"
-            reuses="{{home_reuses.items}}">
+            :title="_('Featured reuses')"
+            :reuses="home_reuses.items">
         </reuses-list>
     </div>
 
     <div class="row">
-        <posts-widget id="posts-widget" class="col-xs-12" posts="{{posts}}"></posts-widget>
+        <posts-widget id="posts-widget" class="col-xs-12" :posts="posts"></posts-widget>
     </div>
     <div class="row">
-        <topics-widget id="topics-widget" class="col-xs-12" topics="{{topics}}"></topics-widget>
+        <topics-widget id="topics-widget" class="col-xs-12" :topics="topics"></topics-widget>
     </div>
 </template>
 
