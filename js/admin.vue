@@ -144,12 +144,14 @@ export default {
         /**
          * Insert a modal Vue in the application.
          * @param  {Object} options     Options to pass to the Vue constructor
-         * @param  {Vue} constructor    An optionnal Vue constrcutor (ie. Vue.extend())
-         * @return {[type]}             [description]
+         * @param  {Vue} constructor    An optionnal Vue constructor (ie. Vue.extend())
+         * @return {Vue}                The child instanciated vm
          */
         $modal: function(options, constructor) {
+            constructor = constructor || Vue;
             options.el = this.$els.modal;
-            return this.$addChild(options, constructor);
+            options.parent = this;
+            return new constructor(options);
         }
     }
 };
