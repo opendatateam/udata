@@ -1,20 +1,20 @@
 <template>
     <div class="row">
-        <datasets-list class="col-xs-12 col-md-6"
+        <datasets class="col-xs-12 col-md-6"
             :title="_('Featured datasets')"
             :datasets="home_datasets.items">
-        </datasets-list>
-        <reuses-list class="col-xs-12 col-md-6"
+        </datasets>
+        <reuses class="col-xs-12 col-md-6"
             :title="_('Featured reuses')"
             :reuses="home_reuses.items">
-        </reuses-list>
+        </reuses>
     </div>
 
     <div class="row">
-        <posts-widget id="posts-widget" class="col-xs-12" :posts="posts"></posts-widget>
+        <posts class="col-xs-12" :posts="posts"></posts>
     </div>
     <div class="row">
-        <topics-widget id="topics-widget" class="col-xs-12" :topics="topics"></topics-widget>
+        <topics class="col-xs-12" :topics="topics"></topics>
     </div>
 </template>
 
@@ -42,10 +42,10 @@ export default {
         }
     },
     components: {
-        'datasets-list': require('components/dataset/card-list.vue'),
-        'reuses-list': require('components/reuse/card-list.vue'),
-        'posts-widget': require('components/post/list.vue'),
-        'topics-widget': require('components/topic/list.vue')
+        datasets: require('components/dataset/card-list.vue'),
+        reuses: require('components/reuse/card-list.vue'),
+        posts: require('components/post/list.vue'),
+        topics: require('components/topic/list.vue')
     },
     events: {
         'dataset-card-list:submit': function(order) {
@@ -59,6 +59,11 @@ export default {
                 {payload: order},
                 this.home_reuses.on_fetched.bind(this.home_reuses)
             );
+        }
+    },
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
         }
     },
     attached: function() {

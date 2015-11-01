@@ -14,7 +14,7 @@
 }
 </style>
 <template>
-<box :title="post.name" icon="building"
+<box :title="post.name || ''" icon="building"
     boxclass="box-solid post-content-widget">
     <aside slot="tools">
         <a class="text-muted pointer" @click="toggle">

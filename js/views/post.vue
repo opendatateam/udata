@@ -1,10 +1,10 @@
 <template>
     <div class="row">
-        <post-content :post="post" class="col-xs-12"></post-details>
+        <post-content :post="post" class="col-xs-12"></post-content>
     </div>
     <div class="row">
-        <datasets-list :datasets="post.datasets" class="col-xs-12 col-md-6"></datasets-list>
-        <reuses-list :reuses="post.reuses" class="col-xs-12 col-md-6"></reuses-list>
+        <datasets :datasets="post.datasets" class="col-xs-12 col-md-6"></datasets>
+        <reuses :reuses="post.reuses" class="col-xs-12 col-md-6"></reuses>
     </div>
 </template>
 
@@ -26,20 +26,21 @@ export default {
     },
     components: {
         'post-content': require('components/post/content.vue'),
-        'datasets-list': require('components/dataset/card-list.vue'),
-        'reuses-list': require('components/reuse/card-list.vue')
+        datasets: require('components/dataset/card-list.vue'),
+        reuses: require('components/reuse/card-list.vue')
     },
     events: {
         'dataset-card-list:submit': function(ids) {
             this.post.datasets = ids;
             this.post.save();
+            return true;
         },
         'reuse-card-list:submit': function(ids) {
             this.post.reuses = ids;
             this.post.save();
+            return true;
         }
     },
-
     route: {
         activate() {
             this.$dispatch('meta:updated', this.meta);

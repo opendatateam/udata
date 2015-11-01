@@ -53,7 +53,9 @@ export default {
                 if (!options.hasOwnProperty('mixins')) {
                     options.mixins = [];
                 }
-                options.mixins.push(Cell);
+                if (!(Cell in options.mixins)) {
+                    options.mixins.push(Cell);
+                }
                 this.$options.components[name] = Vue.extend(options);
             }
         }

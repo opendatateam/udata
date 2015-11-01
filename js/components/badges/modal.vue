@@ -1,5 +1,5 @@
 <template>
-<modal title="{{ _('Badges') }}"
+<modal :title="_('Badges')"
     class="modal-info badges-modal"
     v-ref:modal>
 
@@ -11,14 +11,14 @@
         <div class="text-center row">
             <div class="badges col-xs-6 col-xs-offset-3">
                 <button class="btn btn-primary btn-flat btn-block"
-                    v-for="value in badges"
-                    @click="toggle($key)"
-                    :class="{ 'active': selected.indexOf($key) >= 0 }">
+                    v-for="(key, label) in badges"
+                    @click="toggle(key)"
+                    :class="{ 'active': selected.indexOf(key) >= 0 }">
                     <span class="fa pull-left" :class="{
-                        'fa-bookmark': selected.indexOf($key) >= 0,
-                        'fa-bookmark-o': selected.indexOf($key) < 0
+                        'fa-bookmark': selected.indexOf(key) >= 0,
+                        'fa-bookmark-o': selected.indexOf(key) < 0
                         }"></span>
-                    {{ value }}
+                    {{ label }}
                 </button>
             </div>
         </div>
@@ -45,7 +45,7 @@ import {badges} from 'models/badges';
 export default {
     name: 'BadgesModal',
     components: {
-        'modal': require('components/modal.vue')
+        modal: require('components/modal.vue')
     },
     data: function() {
         return {
@@ -63,9 +63,9 @@ export default {
         },
         hasModifications: function() {
             return (this.selected.length !== this.initial.length)
-                || this.selected.some(function(badge) {
+                || this.selected.some((badge) => {
                     return this.initial.indexOf(badge) < 0;
-                }.bind(this));
+                });
         }
     },
     compiled: function() {

@@ -1,5 +1,5 @@
 <template>
-<job-widget job="{{job}}" loading="{{loading}}" empty="{{empty}}">
+<job-widget :job="job" :loading="loading" :empty="empty">
     <div class="text-center">
         <button class="btn btn-primary btn-flat" @click="preview">
             <span class="fa fa-cog"></span>
@@ -17,10 +17,16 @@ import HarvestSource from 'models/harvest/source';
 
 export default {
     name: 'HarvestPreviewView',
-    props: ['source'],
+    props: {
+        source: {
+            type: Object,
+            default: function() {
+                return new HarvestSource();
+            }
+        }
+    },
     data: function() {
         return {
-            source: new HarvestSource(),
             job: new HarvestJob(),
             loading: false
         };

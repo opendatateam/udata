@@ -72,44 +72,41 @@
         <header class="box-header" v-show="title || icon">
             <i v-show="icon" class="fa fa-{{icon}}"></i>
             <h3 class="box-title">{{title}}</h3>
-            <div class="box-tools" v-el:tools>
-                <slot name="tools" v-ref:tools select="aside"></slot>
+            <div class="box-tools">
+                <slot name="tools"></slot>
             </div>
         </header>
-        <div class="box-body {{bodyclass || ''}}">
+        <div class="box-body {{bodyclass}}">
             <slot></slot>
         </div>
         <div class="overlay" v-show="loading">
             <span class="fa fa-refresh fa-spin"></span>
         </div>
-        <div class="box-footer clearfix {{footerclass || ''}}"
-            v-el:footer v-show="has_footer">
+        <div class="box-footer clearfix {{footerclass}}" v-show="footer">
             <slot name="footer"></slot>
         </div>
     </div>
 </template>
 
 <script>
-import $ from 'jquery';
-
 export default {
     name: 'box-container',
     replace: true,
-    computed: {
-        has_footer: function() {
-            if (this.footer !== undefined) {
-                return this.footer;
-            } else {
-                return $(this.$els.footer).find('footer > *').length > 0;
-            }
-        }
-    },
     props: {
         title: String,
         icon: null,
-        boxclass: String,
-        bodyclass: String,
-        footerclass: String,
+        boxclass: {
+            type: String,
+            default: ''
+        },
+        bodyclass: {
+            type: String,
+            default: ''
+        },
+        footerclass: {
+            type: String,
+            default: ''
+        },
         loading: Boolean,
         footer: null
     }

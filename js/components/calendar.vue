@@ -45,7 +45,8 @@
             <tbody v-show="view == 'months'">
                 <tr>
                     <td colspan="7">
-                        <span class="month" v-for="month in months" @click="pickMonth($index)">{{month}}
+                        <span class="month" v-for="(idx, month) in months"
+                            @click="pickMonth(idx)">{{month}}
                         </span>
                     </td>
                 </tr>
@@ -53,7 +54,8 @@
             <tbody v-show="view == 'years'">
                 <tr>
                     <td colspan="7">
-                        <span class="year" v-for="year in yearsRange" @click="pickYear($value)">
+                        <span class="year" v-for="year in yearsRange"
+                            @click="pickYear(year)">
                         {{year}}
                         </span>
                     </td>

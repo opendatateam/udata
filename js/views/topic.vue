@@ -16,7 +16,6 @@ export default {
     name: 'TopicView',
     data: function() {
         return {
-            topic_id: null,
             topic: new Topic(),
             meta: {
                 title: null,
@@ -33,18 +32,23 @@ export default {
         'dataset-card-list:submit': function(ids) {
             this.topic.datasets = ids;
             this.topic.save();
+            return true;
         },
         'reuse-card-list:submit': function(ids) {
             this.topic.reuses = ids;
             this.topic.save();
+            return true;
+        }
+    },
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
+        },
+        data() {
+            this.topic.fetch(this.$route.params.oid);
         }
     },
     watch: {
-        topic_id: function(id) {
-            if (id) {
-                this.topic.fetch(id);
-            }
-        },
         'topic.name': function(name) {
             if (name) {
                 this.meta.title = name;
