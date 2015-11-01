@@ -1,5 +1,5 @@
 <template>
-<wizard-component v-ref:wizard steps="{{steps}}" finish="true"></wizard-component>
+<wizard v-ref:wizard :steps="steps" :finish="true"></wizard>
 </template>
 
 <script>
@@ -58,7 +58,7 @@ export default {
          };
     },
     components: {
-        'wizard-component': require('components/widgets/wizard.vue'),
+        wizard: require('components/widgets/wizard.vue'),
         'post-form': require('components/post/form.vue'),
         'image-picker': require('components/widgets/image-picker.vue'),
         'dataset-cards-form': require('components/dataset/cards-form.vue'),
@@ -72,10 +72,15 @@ export default {
             this.$refs.wizard.go_previous();
         },
         'wizard:step-changed': function() {
-            this.$refs.wizard.$.content.post = this.post;
+            this.$refs.wizard.$refs.content.post = this.post;
         },
         'wizard:finish': function() {
             this.$go('/post/' + this.post.id);
+        }
+    },
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
         }
     }
 };

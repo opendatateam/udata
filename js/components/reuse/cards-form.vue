@@ -57,7 +57,7 @@
             <span class="input-group-addon">
                 <span class="fa fa-retweet"></span>
             </span>
-            <reuse-completer v-ref:completer></reuse-completer>
+            <completer v-ref:completer></completer>
         </div>
     </div>
     <div class="row" v-show="!reuses.length">
@@ -66,40 +66,38 @@
     <div class="row" v-el:sortable v-show="reuses.length">
         <div class="col-md-6 reuse-card-container"
             v-for="reuseid in reuses | ids"
-            data-id="{{reuseid}}"
-        >
+            :data-id="reuseid">
             <button type="button" class="close" @click="on_remove(reuseid)">
                 <span aria-hidden="true">&times;</span>
                 <span class="sr-only" v-i18n="Remove"></span>
             </button>
-            <reuse-card reuseid="{{reuseid}}"></reuse-card>
+            <card :reuseid="reuseid"></card>
         </div>
     </div>
 </template>
 
 <script>
-'use strict';
+import Sorter from 'mixins/sorter';
 
-var Sorter = require('mixins/sorter');
-
-module.exports = {
+export default {
     name: 'reuses-cards-form',
     mixins: [Sorter],
     components: {
-        'reuse-card': require('components/reuse/card.vue'),
-        'reuse-completer': require('components/form/reuse-completer.vue')
+        card: require('components/reuse/card.vue'),
+        completer: require('components/form/reuse-completer.vue')
     },
-    props: ['reuses'],
-    data: function() {
-        return {
-            reuses: []
-        };
+    props: {
+        reuses: {
+            type: Array,
+            default: function() {return [];}
+        }
     },
     events: {
         'completer:item-add': function(reuse_id, $item) {
             $item.remove();
             this.reuses.push(reuse_id);
             this.$dispatch('reuse-card-list:add', reuse_id);
+            return true;
         }
     },
     methods: {

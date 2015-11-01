@@ -26,10 +26,10 @@
         <div class="col-xs-12">
             <ul class="nav nav-pills nav-justified thumbnail setup-panel">
                 <li :class="{ 'active': step_index === $index }"
-                    v-for="step in steps">
+                    v-for="(index, step) in steps">
                     <a>
                         <h4 class="list-group-item-heading">
-                            {{ $index + 1 }}.
+                            {{ index + 1 }}.
                             {{ step.label }}
                         </h4>
                         <p class="list-group-item-text">{{step.subtitle}}</p>
@@ -40,9 +40,9 @@
     </div>
     <div class="row">
         <div class="col-xs-12">
-            <box boxclass="box-solid" footer="{{true}}">
+            <box boxclass="box-solid" :footer="true">
                 <component :is="active_step.component" v-ref:content></component>
-                <footer>
+                <footer slot="footer">
                     <div class="col-xs-12">
                         <button v-if="previous_step"
                             class="btn btn-warning btn-flat pointer"
@@ -63,11 +63,9 @@
 </template>
 
 <script>
-'use strict';
+import Vue from 'vue';
 
-var Vue = require('vue');
-
-module.exports = {
+export default {
     data: function() {
         return {
             step_index: 0
@@ -100,7 +98,7 @@ module.exports = {
         }
     },
     components: {
-        'box': require('components/containers/box.vue')
+        box: require('components/containers/box.vue')
     },
     methods: {
         click_next: function() {

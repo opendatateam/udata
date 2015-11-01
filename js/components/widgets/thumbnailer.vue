@@ -117,7 +117,7 @@ export default {
          */
         bbox: function() {
             if (!this.$els.checkbox.checked) {
-                var selection = this.Jcrop.tellSelect();
+                let selection = this.Jcrop.tellSelect();
                 return [selection.x, selection.y, selection.x2, selection.y2];
             }
         }
@@ -127,12 +127,17 @@ export default {
          * Adjust the preview given the cropper position and size
          */
         preview: function(coords) {
-            var bounds = this.Jcrop.getBounds(),
+            let bounds = this.Jcrop.getBounds(),
                 w = bounds[0],
-                h = bounds[1];
+                h = bounds[1],
+                containers = this.$els.preview_containers;
 
-            this.$els.preview_containers.forEach(function(el) {
-                var $el = $(el),
+            if (!Array.isArray(containers)) {
+                containers = [containers];
+            }
+
+            containers.forEach(function(el) {
+                let $el = $(el),
                     px = $el.width(),
                     py = $el.height(),
                     rx = px / coords.w,
@@ -149,7 +154,7 @@ export default {
         setImage: function(src) {
             if (!src) return;
 
-            var that = this,
+            let that = this,
                 $pane = $(this.$els.crop_pane),
                 max_width = $pane.width(),
                 max_height = parseInt($pane.css('max-height').replace('px', ''));
@@ -163,7 +168,7 @@ export default {
                     boxWidth: max_width,
                     boxHeight: max_height
                 }, function() {
-                    var bounds = this.getBounds(),
+                    let bounds = this.getBounds(),
                         size = Math.min(bounds[0], bounds[1]);
 
                     that.Jcrop = this;
@@ -177,7 +182,7 @@ export default {
          */
         centered: function(centered) {
             if (centered) {
-                var bounds = this.Jcrop.getBounds(),
+                let bounds = this.Jcrop.getBounds(),
                     attr = bounds[0] > bounds[1] ? 'width' : 'height';
 
                 this.Jcrop.disable();

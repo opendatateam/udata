@@ -57,7 +57,7 @@
             <span class="input-group-addon">
                 <span class="fa fa-cubes"></span>
             </span>
-            <dataset-completer v-ref:completer></dataset-completer>
+            <completer v-ref:completer></completer>
         </div>
     </div>
     <div class="row" v-show="!datasets.length">
@@ -66,52 +66,52 @@
     <div class="row" v-el:sortable v-show="datasets.length">
         <div class="col-md-6 dataset-card-container"
             v-for="datasetid in datasets | ids"
-            data-id="{{datasetid}}"
-        >
+            :data-id="datasetid">
             <button type="button" class="close" @click="on_remove(datasetid)">
                 <span aria-hidden="true">&times;</span>
                 <span class="sr-only" v-i18n="Remove"></span>
             </button>
-            <dataset-card datasetid="{{datasetid}}"></dataset-card>
+            <card :datasetid="datasetid"></card>
         </div>
     </div>
 </template>
 
 <script>
-'use strict';
+import Sorter from 'mixins/sorter';
 
-var Sorter = require('mixins/sorter');
-
-module.exports = {
+export default {
     name: 'datasets-cards-form',
     mixins: [Sorter],
     components: {
-        'dataset-card': require('components/dataset/card.vue'),
-        'dataset-completer': require('components/form/dataset-completer.vue')
+        card: require('components/dataset/card.vue'),
+        completer: require('components/form/dataset-completer.vue')
     },
-    props: ['datasets'],
-    data: function() {
-        /* Prefill the datasets with optional ids contained in
-           `dataset_id` GET parameter. */
-        let datasets = [];
-        if ("dataset_id" in this.$router.parameters) {
-            // There might be a single id or a list.
-            let datasetIds = this.$router.parameters.dataset_id;
-            if (typeof datasetIds === "string") {
-                datasets.push(datasetIds);
-            } else {
-                datasets = datasets.concat(datasetIds);
+    props: {
+        datasets: {
+            type: Array,
+            default: function() {
+                /* Prefill the datasets with optional ids contained in
+                   `dataset_id` GET parameter. */
+                let datasets = [];
+                if ("dataset_id" in this.$route.query) {
+                    // There might be a single id or a list.
+                    let datasetIds = this.$route.query.dataset_id;
+                    if (typeof datasetIds === "string") {
+                        datasets.push(datasetIds);
+                    } else {
+                        datasets = datasets.concat(datasetIds);
+                    }
+                }
+                return datasets;
             }
         }
-        return {
-            datasets: datasets
-        };
     },
     events: {
         'completer:item-add': function(dataset_id, $item) {
             $item.remove();
             this.datasets.push(dataset_id);
             this.$dispatch('dataset-card-list:add', dataset_id);
+            return true;
         }
     },
     methods: {

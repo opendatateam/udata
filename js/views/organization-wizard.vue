@@ -1,5 +1,5 @@
 <template>
-<wizard-component v-ref:wizard steps="{{steps}}"></wizard-component>
+<wizard v-ref:wizard :steps="steps"></wizard>
 </template>
 
 <script>
@@ -57,7 +57,7 @@ export default {
     },
     props: ['orgid'],
     components: {
-        'wizard-component': require('components/widgets/wizard.vue'),
+        wizard: require('components/widgets/wizard.vue'),
         'pre-create': require('components/organization/pre-create.vue'),
         'create-form': require('components/organization/form.vue'),
         'post-create': require('components/organization/post-create.vue'),
@@ -71,12 +71,16 @@ export default {
             this.$refs.wizard.go_previous();
         },
         'wizard:step-changed': function() {
-            this.$refs.wizard.$.content.organization = this.organization;
+            this.$refs.wizard.$refs.content.organization = this.organization;
         },
         'image:saved': function() {
             this.organization.fetch();
             this.$refs.wizard.go_next();
-            return false;
+        }
+    },
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
         }
     }
 };

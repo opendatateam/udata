@@ -1,5 +1,5 @@
 <template>
-<wizard-component v-ref:wizard steps="{{steps}}"></wizard-component>
+<wizard v-ref:wizard :steps="steps"></wizard>
 </template>
 
 <script>
@@ -31,7 +31,7 @@ export default {
                 subtitle: this._('Describe your community resource'),
                 component: 'resource-form',
                 init: (component) => {
-                    this.dataset_id = this.$router.parameters.dataset_id;
+                    this.dataset_id = this.$route.query.dataset_id;
                     this.dataset.fetch(this.dataset_id);
                     component.dataset = this.dataset;
                     component.community = true;
@@ -68,7 +68,7 @@ export default {
         'image-picker': require('components/widgets/image-picker.vue'),
         'post-create': require('components/communityresource/post-create.vue'),
         'publish-as': require('components/widgets/publish-as.vue'),
-        'wizard-component': require('components/widgets/wizard.vue'),
+        wizard: require('components/widgets/wizard.vue'),
     },
     events: {
         'wizard:next-step': function() {
@@ -79,6 +79,11 @@ export default {
         },
         'wizard:step-changed': function() {
             this.$refs.wizard.$.content.communityResource = this.communityResource;
+        }
+    },
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
         }
     }
 };

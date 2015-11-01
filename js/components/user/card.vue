@@ -2,11 +2,11 @@
 <div class="card user-card"
     :class="{ 'pointer': clickable, 'selected': selected }" @click="click">
     <a class="card-logo">
-        <img alt="{{ user | display }}" :src="avatar">
+        <img :alt="user | display" :src="avatar">
     </a>
     <div class="card-body">
         <h4>
-            <a title="{{ user | display }}">
+            <a :title="user | display">
                 {{ user | display }}
             </a>
         </h4>
@@ -16,7 +16,7 @@
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Datasets') }}">
+                    :title="_('Datasets')">
                     <span class="fa fa-cubes fa-fw"></span>
                     {{ user.metrics.datasets || 0 }}
                 </a>
@@ -24,7 +24,7 @@
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Reuses') }}">
+                    :title="_('Reuses')">
                     <span class="fa fa-retweet fa-fw"></span>
                     {{ user.metrics.reuses || 0 }}
                 </a>
@@ -32,7 +32,7 @@
             <li>
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Followers') }}">
+                    :title="_('Followers')">
                     <span class="fa fa-star fa-fw"></span>
                     {{ user.metrics.followers || 0 }}
                 </a>
@@ -41,26 +41,34 @@
     </footer>
 
     <a v-if="user.about" class="rollover fade in"
-        title="{{ user | display }}">
+        :title="user | display">
         {{{ user.about | markdown 180 }}}
     </a>
 </div>
 </template>
 
 <script>
-'use strict';
+import User from 'models/user';
+import placeholders from 'helpers/placeholders';
 
-var User = require('models/user'),
-    placeholders = require('helpers/placeholders');
-
-module.exports = {
-    data: function() {
-        return {
-            clickable: true,
-            selected: false
-        };
+export default {
+    props: {
+        user: {
+            type: Object,
+            default: function() {
+                return new User();
+            }
+        },
+        userid: null,
+        clickable: {
+            type: Boolean,
+            default: true
+        },
+        selected: {
+            type: Boolean,
+            default: false
+        }
     },
-    props: ['user', 'userid', 'selected'],
     computed: {
         avatar: function() {
             if (!this.user || !this.user.avatar) {
@@ -70,9 +78,6 @@ module.exports = {
         }
     },
     created: function() {
-        if (!this.user) {
-            this.user = new User();
-        }
         if (this.userid) {
             this.user.fetch(this.userid);
         }

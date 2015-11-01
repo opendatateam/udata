@@ -1,5 +1,5 @@
 <template>
-<wizard-component v-ref:wizard steps="{{steps}}"></wizard-component>
+<wizard v-ref:wizard :steps="steps"></wizard>
 </template>
 
 <script>
@@ -7,14 +7,20 @@ import Dataset from 'models/dataset';
 import Vue from 'vue';
 
 export default {
-    props: ['dataset'],
+    props: {
+        dataset: {
+            type: Dataset,
+            default: function() {
+                return new Dataset();
+            }
+        }
+    },
     data: function() {
         return {
             meta: {
                 title:this._('New dataset'),
                 // subtitle: this._('Dataset')
             },
-            dataset: new Dataset(),
             publish_as: null,
             steps: [{
                 label: this._('Publish as'),
@@ -72,7 +78,7 @@ export default {
          };
     },
     components: {
-        'wizard-component': require('components/widgets/wizard.vue'),
+        wizard: require('components/widgets/wizard.vue'),
         'publish-as': require('components/widgets/publish-as.vue'),
         'create-form': require('components/dataset/form.vue'),
         'add-resource-form': require('components/dataset/add-resource-form.vue'),
@@ -87,7 +93,12 @@ export default {
             this.$refs.wizard.go_previous();
         },
         'wizard:step-changed': function() {
-            this.$refs.wizard.$.content.dataset = this.dataset;
+            this.$refs.wizard.$refs.content.dataset = this.dataset;
+        }
+    },
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
         }
     }
 };

@@ -1,17 +1,21 @@
 <template>
-<form-vertical v-ref:form fields="{{fields}}" model="{{post}}"></form-vertical>
+<vform v-ref:form :fields="fields" :model="post"></vform>
 </template>
 
 <script>
-'use strict';
+import Post from 'models/post';
 
-var Post = require('models/post');
-
-module.exports = {
-    props: ['post'],
+export default {
+    props: {
+        post: {
+            type: Post,
+            default: function() {
+                return new Post();
+            }
+        }
+    },
     data: function() {
         return {
-            post: new Post(),
             fields: [{
                     id: 'name',
                     label: this._('Name')
@@ -32,7 +36,7 @@ module.exports = {
         };
     },
     components: {
-        'form-vertical': require('components/form/vertical-form.vue')
+        vform: require('components/form/vertical-form.vue')
     }
 };
 </script>
