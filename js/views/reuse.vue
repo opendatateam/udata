@@ -1,4 +1,6 @@
 <template>
+<layout :title="reuse.title || ''" :subtitle="_('Reuse')"
+    :actions="actions" :badges="badges" :page="reuse.page || ''">
     <div class="row">
         <sbox class="col-lg-4 col-xs-6" v-for="b in boxes"
             :value="b.value" :label="b.label" :color="b.color"
@@ -25,6 +27,7 @@
     <div class="row">
         <followers id="followers-widget" class="col-xs-12" :followers="followers"></followers>
     </div>
+</layout>
 </template>
 
 <script>
@@ -35,6 +38,7 @@ import Metrics from 'models/metrics';
 import Vue from 'vue';
 import Issues from 'models/issues';
 import Discussions from 'models/discussions';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'ReuseView',
@@ -42,11 +46,11 @@ export default {
         let actions = [{
                 label: this._('Transfer'),
                 icon: 'send',
-                method: 'transfer_request'
+                method: this.transfer_request
             },{
                 label: this._('Delete'),
                 icon: 'trash',
-                method: 'confirm_delete'
+                method: this.confirm_delete
             }];
 
         if (this.$root.me.is_admin) {
@@ -54,7 +58,7 @@ export default {
             actions.push({
                 label: this._('Badges'),
                 icon: 'bookmark',
-                method: 'setBadges'
+                method: this.setBadges
             });
         }
 
@@ -67,13 +71,8 @@ export default {
             followers: new Followers({ns: 'reuses', query: {page_size: 10}}),
             issues: new Issues({query: {sort: '-created', page_size: 10}}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
-            meta: {
-                title: null,
-                page: null,
-                subtitle: this._('Reuse'),
-                actions: actions,
-                badges: []
-            },
+            actions: actions,
+            badges: [],
             y: [{
                 id: 'views',
                 label: this._('Views')
@@ -116,7 +115,8 @@ export default {
         datasets: require('components/dataset/card-list.vue'),
         followers: require('components/follow/list.vue'),
         issues: require('components/issues/list.vue'),
-        discussions: require('components/discussions/list.vue')
+        discussions: require('components/discussions/list.vue'),
+        Layout
     },
     events: {
         'dataset-card-list:submit': function(ids) {
@@ -145,26 +145,11 @@ export default {
         }
     },
     route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
-        },
         data() {
             this.reuse.fetch(this.$route.params.oid);
         }
     },
     watch: {
-        'reuse.title': function(title) {
-            if (title) {
-                this.meta.title = title;
-                this.$dispatch('meta:updated', this.meta);
-            }
-        },
-        'reuse.page': function(page) {
-            if (page) {
-                this.meta.page = page;
-                this.$dispatch('meta:updated', this.meta);
-            }
-        },
         'reuse.id': function(id) {
             if (id) {
                 this.metrics.fetch({id: id});
@@ -175,7 +160,7 @@ export default {
         },
         'reuse.deleted': function(deleted) {
             if (deleted) {
-                this.meta.badges = [{
+                this.badges = [{
                     class: 'danger',
                     label: this._('Deleted')
                 }];

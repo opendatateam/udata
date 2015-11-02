@@ -1,5 +1,5 @@
 <template>
-<wizard v-ref:wizard :steps="steps"></wizard>
+<wizard v-ref:wizard :steps="steps" :title="_('New harvester')"></wizard>
 </template>
 
 <script>
@@ -8,9 +8,6 @@ import HarvestSource from 'models/harvest/source';
 export default {
     data: function() {
         return {
-            meta: {
-                title: this._('New harvester'),
-            },
             source: new HarvestSource(),
             publish_as: null,
             steps: [{

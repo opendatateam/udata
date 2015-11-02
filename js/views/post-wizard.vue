@@ -1,5 +1,5 @@
 <template>
-<wizard v-ref:wizard :steps="steps" :finish="true"></wizard>
+<wizard v-ref:wizard :steps="steps" :finish="true" :title="_('New Post')"></wizard>
 </template>
 
 <script>
@@ -9,9 +9,6 @@ import Post from 'models/post';
 export default {
     data: function() {
         return {
-            meta: {
-                title:this._('New post')
-            },
             post: new Post(),
             steps: [{
                 label: this._('Writing'),
@@ -76,11 +73,6 @@ export default {
         },
         'wizard:finish': function() {
             this.$go('/post/' + this.post.id);
-        }
-    },
-    route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
         }
     }
 };

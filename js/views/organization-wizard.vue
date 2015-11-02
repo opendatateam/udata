@@ -1,5 +1,5 @@
 <template>
-<wizard v-ref:wizard :steps="steps"></wizard>
+<wizard v-ref:wizard :steps="steps" :title="_('New organization')"></wizard>
 </template>
 
 <script>
@@ -9,10 +9,6 @@ import API from 'api';
 export default {
     data: function() {
         return {
-            meta: {
-                title:this._('New organization'),
-                // subtitle: this._('organization')
-            },
             organization: new Organization(),
             steps: [{
                 label: this._('Verification'),
@@ -76,11 +72,6 @@ export default {
         'image:saved': function() {
             this.organization.fetch();
             this.$refs.wizard.go_next();
-        }
-    },
-    route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
         }
     }
 };

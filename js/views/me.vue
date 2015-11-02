@@ -1,4 +1,5 @@
 <template>
+<layout :title="_('Me')" :subtitle="$root.me.fullname">
     <div class="row">
         <profile :user="$root.me" class="col-xs-12 col-md-6"></profile>
         <chart title="Traffic" :metrics="metrics" class="col-xs-12 col-md-6"
@@ -16,6 +17,7 @@
         <apikey class="col-xs-12 col-md-6" :user="$root.me"></apikey>
         <harvesters class="col-xs-12 col-md-6" :owner="$root.me"></harvesters>
     </div>
+</layout>
 </template>
 
 <script>
@@ -23,6 +25,7 @@ import moment from 'moment';
 import API from 'api';
 import {PageList} from 'models/base';
 import Metrics from 'models/metrics';
+import Layout from 'components/layout.vue';
 
 export default  {
     name: 'MeView',
@@ -48,21 +51,14 @@ export default  {
             }]
         };
     },
-    computed: {
-        meta: function() {
-            return {
-                title: this._('Me'),
-                subtitle: this.$root.me.fullname
-            }
-        }
-    },
     components: {
         profile: require('components/user/profile.vue'),
         chart: require('components/charts/widget.vue'),
         datasets: require('components/dataset/list.vue'),
         reuses: require('components/reuse/list.vue'),
         apikey: require('components/user/apikey.vue'),
-        harvesters: require('components/harvest/sources.vue')
+        harvesters: require('components/harvest/sources.vue'),
+        Layout
     },
     attached: function() {
         this.update();
@@ -71,16 +67,9 @@ export default  {
     detached: function() {
         this._handler.remove();
     },
-    route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
-        }
-    },
     methods: {
         update: function() {
             if (this.$root.me.id) {
-                this.meta.title = this.$root.me.fullname;
-                this.$dispatch('meta:updated', this.meta);
                 this.metrics.fetch({
                     id: this.$root.me.id,
                     start: moment().subtract(15, 'days').format('YYYY-MM-DD'),

@@ -1,5 +1,5 @@
 <template>
-<wizard v-ref:wizard :steps="steps"></wizard>
+<wizard v-ref:wizard :steps="steps" :title="_('New reuse')"></wizard>
 </template>
 
 <script>
@@ -9,10 +9,6 @@ import API from 'api';
 export default {
     data: function() {
         return {
-            meta: {
-                title:this._('New reuse'),
-                // subtitle: this._('reuse')
-            },
             reuse: new Reuse(),
             steps: [{
                 label: this._('Publish as'),
@@ -98,11 +94,6 @@ export default {
             this.reuse.fetch();
             this.$refs.wizard.go_next();
             return false;
-        }
-    },
-    route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
         }
     }
 };

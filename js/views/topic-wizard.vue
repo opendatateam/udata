@@ -1,5 +1,5 @@
 <template>
-<wizard v-ref:wizard :steps="steps" :finish="true"></wizard>
+<wizard v-ref:wizard :steps="steps" :finish="true" :title="_('New topic')"></wizard>
 </template>
 
 <script>
@@ -8,9 +8,6 @@ import Topic from 'models/topic';
 export default {
     data: function() {
         return {
-            meta: {
-                title:this._('New topic')
-            },
             topic: new Topic(),
             steps: [{
                 label: this._('Writing'),
@@ -62,11 +59,6 @@ export default {
         },
         'wizard:finish': function() {
             this.$go('/topic/' + this.topic.id);
-        }
-    },
-    route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
         }
     }
 };

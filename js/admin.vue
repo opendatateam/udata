@@ -1,18 +1,4 @@
 <style lang="less">
-.notification-zone {
-    padding: 15px 15px 0;
-
-    .alert {
-        &:last-child {
-            margin-bottom: 0;
-        }
-
-        &:not(:last-child) {
-            margin-bottom: 5px;
-        }
-    }
-}
-
 // Fix slimscroll overflow
 .main-sidebar:hover {
     .slimScrollDiv {
@@ -30,18 +16,7 @@
     <div v-el:modal></div>
     <app-header class="main-header"></app-header>
     <sidebar class="main-sidebar"></sidebar>
-    <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
-        <content-header :meta="meta"></content-header>
-        <!-- Notifications -->
-        <div v-if="notifications.length > 0" class="notification-zone">
-            <alert-box v-for="n in notifications" :alert="n"></alert-box>
-        </div>
-        <!-- Main content -->
-        <section class="content">
-            <router-view v-ref:content></router-view>
-        </section>
-    </div>
+    <router-view></router-view>
 </template>
 
 <script>
@@ -51,21 +26,6 @@ import me from 'models/me';
 import site from 'models/site';
 import 'jquery-slimscroll';
 
-/**
- * An empty page metadata factory
- * @return {Object} An empty but complete meta object.
- */
-function emptyMeta() {
-    return {
-        title: null,
-        subtitle: null,
-        page: null,
-        breadcrum: [],
-        actions: [],
-        badges: []
-    };
-}
-
 export default {
     name: 'App',
     data: function() {
@@ -73,7 +33,6 @@ export default {
             me: me,
             site: site,
             config: require('config'),
-            meta: emptyMeta(),
             toggled: false,
             notifications: []
         };
@@ -85,9 +44,6 @@ export default {
         'alert-box': require('components/alert.vue'),
     },
     events: {
-        'meta:updated': function(meta) {
-            this.meta = meta;
-        },
         'navigation:toggled': function() {
             $("body").toggleClass('sidebar-collapse');
             $("body").toggleClass('sidebar-open');

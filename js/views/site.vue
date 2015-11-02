@@ -1,4 +1,5 @@
 <template>
+<layout :title="_('Site')">
     <div class="row">
         <sbox class="col-lg-3 col-xs-6" v-for="b in boxes"
             :value="b.value" :label="b.label" :color="b.color"
@@ -29,6 +30,7 @@
     <div class="row">
         <community class="col-xs-12" :communities="communities"></community>
     </div>
+</layout>
 </template>
 
 <script>
@@ -42,6 +44,7 @@ import Discussions from 'models/discussions';
 import Users from 'models/users';
 import Organizations from 'models/organizations';
 import CommunityResources from 'models/communityresources';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'SiteView',
@@ -79,11 +82,6 @@ export default {
         };
     },
     computed: {
-        meta: function() {
-            return {
-                title: 'Site'
-            };
-        },
         boxes: function() {
             if (!this.$root.site.metrics) {
                 return [];
@@ -126,7 +124,8 @@ export default {
         discussions: require('components/discussions/list.vue'),
         community: require('components/communityresource/list.vue'),
         posts: require('components/post/list.vue'),
-        topics: require('components/topic/list.vue')
+        topics: require('components/topic/list.vue'),
+        Layout
     },
     methods: {
         fetch_metrics: function() {
@@ -144,11 +143,6 @@ export default {
         this.discussions.fetch();
         this.organizations.fetch();
         this.communities.fetch();
-    },
-    route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
-        }
     },
     watch: {
         '$root.site.id': function() {

@@ -25,7 +25,7 @@
         </tr>
     </thead>
     <tbody>
-        <tr v-for="item in p.data" :track-by="trackBy" is="row"
+        <tr v-for="item in p.data" track-by="{{trackBy}}" is="row"
             :item="item" :fields="fields" :selected="item === selected">
         </tr>
     </tbody>

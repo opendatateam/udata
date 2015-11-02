@@ -1,4 +1,6 @@
 <template>
+<layout :title="dataset.title || ''" :subtitle="_('Dataset')"
+    :actions="actions" :badges="badges" :page="dataset.page || ''">
     <div class="row">
         <sbox class="col-lg-4 col-xs-6" v-for="b in boxes"
             :value="b.value" :label="b.label" :color="b.color"
@@ -36,7 +38,7 @@
         <followers id="followers" class="col-xs-12 col-md-6" :followers="followers"></followers>
         <community class="col-xs-12 col-md-6" :communities="communities" :without-dataset="true"></community>
     </div>
-
+</layout>
 </template>
 
 <script>
@@ -50,6 +52,7 @@ import Issues from 'models/issues';
 import Metrics from 'models/metrics';
 import Reuses from 'models/reuses';
 import CommunityResources from 'models/communityresources';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'DatasetView',
@@ -57,11 +60,11 @@ export default {
         var actions = [{
                 label: this._('Transfer'),
                 icon: 'send',
-                method: 'transfer_request'
+                method: this.transfer_request
             },{
                 label: this._('Delete'),
                 icon: 'trash',
-                method: 'confirm_delete'
+                method: this.confirm_delete
             }];
 
         if (this.$root.me.is_admin) {
@@ -69,7 +72,7 @@ export default {
             actions.push({
                 label: this._('Badges'),
                 icon: 'bookmark',
-                method: 'setBadges'
+                method: this.setBadges
             });
         }
 
@@ -84,13 +87,8 @@ export default {
             issues: new Issues({query: {sort: '-created', page_size: 10}}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
-            meta: {
-                title: null,
-                page: null,
-                subtitle: this._('Dataset'),
-                actions: actions,
-                badges:  []
-            },
+            actions: actions,
+            badges:  [],
             y: [{
                 id: 'views',
                 label: this._('Views')
@@ -105,7 +103,6 @@ export default {
                 id: 'followers',
                 label: this._('Unique visitors')
             }],
-            notifications: [],
             geojson: null
         };
     },
@@ -153,7 +150,8 @@ export default {
         wmap: require('components/widgets/map.vue'),
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
-        community: require('components/communityresource/list.vue')
+        community: require('components/communityresource/list.vue'),
+        Layout
     },
     methods: {
         confirm_delete: function() {
@@ -176,26 +174,11 @@ export default {
         }
     },
     route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
-        },
         data() {
             this.dataset.fetch(this.$route.params.oid);
         }
     },
     watch: {
-        'dataset.title': function(title) {
-            if (title) {
-                this.meta.title = title;
-                this.$dispatch('meta:updated', this.meta);
-            }
-        },
-        'dataset.page': function(page) {
-            if (page) {
-                this.meta.page = page;
-                this.$dispatch('meta:updated', this.meta);
-            }
-        },
         'dataset.id': function(id) {
             if (id) {
                 this.metrics.fetch({id: id});
@@ -225,7 +208,7 @@ export default {
         },
         'dataset.deleted': function(deleted) {
             if (deleted) {
-                this.meta.badges = [{
+                this.badges = [{
                     class: 'danger',
                     label: this._('Deleted')
                 }];

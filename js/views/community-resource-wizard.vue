@@ -1,5 +1,5 @@
 <template>
-<wizard v-ref:wizard :steps="steps"></wizard>
+<wizard v-ref:wizard :steps="steps" :title="_('New community resource')"></wizard>
 </template>
 
 <script>
@@ -10,9 +10,6 @@ import API from 'api';
 export default {
     data: function() {
         return {
-            meta: {
-                title: this._('New community resource'),
-            },
             communityResource: new CommunityResource(),
             dataset: new Dataset(),
             publish_as: null,
@@ -79,11 +76,6 @@ export default {
         },
         'wizard:step-changed': function() {
             this.$refs.wizard.$.content.communityResource = this.communityResource;
-        }
-    },
-    route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
         }
     }
 };

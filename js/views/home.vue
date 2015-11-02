@@ -1,4 +1,5 @@
 <template>
+<layout :title="_('Dashboard')">
     <div class="row">
         <sbox class="col-lg-3 col-xs-6" v-for="b in dataBoxes"
             :value="b.value" :label="b.label" :color="b.color"
@@ -23,13 +24,14 @@
             :title="_('Discussions about your data (including your organizations)')">
         </discussions>
     </div>
-
+</layout>
 </template>
 
 <script>
 import moment from 'moment';
 import {PageList} from 'models/base';
 import MyMetrics from 'models/mymetrics';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'Home',
@@ -51,11 +53,6 @@ export default {
         };
     },
     computed: {
-        meta: function() {
-            return {
-                title: this._('Dashboard')
-            };
-        },
         dataBoxes: function() {
             if (!this.metrics.id || !this.reuses) {
                 return []
@@ -94,6 +91,7 @@ export default {
         reuses: require('components/reuse/list.vue'),
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
+        Layout
     },
     attached: function() {
         this.update();
@@ -101,11 +99,6 @@ export default {
     },
     detached: function() {
         this._handler.remove();
-    },
-    route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
-        }
     },
     methods: {
         update: function() {

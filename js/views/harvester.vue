@@ -1,4 +1,5 @@
 <template>
+<layout :title="source.name || ''" :subtitle="source.backend || ''" :actions="actions">
     <div class="alert alert-info" v-if="should_validate">
         <button class="pull-right btn btn-primary btn-xs"
             @click="validate_source">{{ _('Validate') }}</button>
@@ -23,12 +24,14 @@
     <div class="row" v-if="should_validate">
         <preview class="col-xs-12" :source="source"></preview>
     </div>
+</layout>
 </template>
 
 <script>
 import HarvestSource from 'models/harvest/source';
 import ItemModal from 'components/harvest/item.vue';
 import Vue from 'vue';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'HarvestSourceView',
@@ -37,19 +40,15 @@ export default {
             source: new HarvestSource(),
             current_job: null,
             current_item: null,
-            meta: {
-                title: null,
-                subtitle: null,
-                actions: [{
-                    label: this._('Edit'),
-                    icon: 'pencil',
-                    method: 'edit'
-                },{
-                    label: this._('Delete'),
-                    icon: 'trash',
-                    method: 'confirm_delete'
-                }]
-            }
+            actions: [{
+                label: this._('Edit'),
+                icon: 'pencil',
+                method: this.edit
+            },{
+                label: this._('Delete'),
+                icon: 'trash',
+                method: this.confirm_delete
+            }]
         };
     },
     computed: {
@@ -96,31 +95,15 @@ export default {
         }
     },
     route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
-        },
         data() {
             this.source.fetch(this.$route.params.oid);
-        }
-    },
-    watch: {
-        'source.name': function(name) {
-            if (name) {
-                this.meta.title = name;
-                this.$dispatch('meta:updated', this.meta);
-            }
-        },
-        'source.backend': function(backend) {
-            if (backend) {
-                this.meta.subtitle = backend;
-                this.$dispatch('meta:updated', this.meta);
-            }
         }
     },
     components: {
         preview: require('components/harvest/preview.vue'),
         'source-widget': require('components/harvest/source.vue'),
         'job-widget': require('components/harvest/job.vue'),
+        Layout
     }
 };
 </script>

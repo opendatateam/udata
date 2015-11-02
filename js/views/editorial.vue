@@ -1,4 +1,5 @@
 <template>
+<layout :title="_('Editorial')">
     <div class="row">
         <datasets class="col-xs-12 col-md-6"
             :title="_('Featured datasets')"
@@ -16,6 +17,7 @@
     <div class="row">
         <topics class="col-xs-12" :topics="topics"></topics>
     </div>
+</layout>
 </template>
 
 <script>
@@ -23,6 +25,8 @@ import Posts from 'models/posts';
 import Topics from 'models/topics';
 import {List} from 'models/base';
 import API from 'api';
+import Layout from 'components/layout.vue';
+
 
 export default {
     name: 'EditorialView',
@@ -34,18 +38,12 @@ export default {
             home_reuses: new List({ns: 'site', fetch: 'get_home_reuses'})
         };
     },
-    computed: {
-        meta: function() {
-            return {
-                title: 'Editorial'
-            };
-        }
-    },
     components: {
         datasets: require('components/dataset/card-list.vue'),
         reuses: require('components/reuse/card-list.vue'),
         posts: require('components/post/list.vue'),
-        topics: require('components/topic/list.vue')
+        topics: require('components/topic/list.vue'),
+        Layout
     },
     events: {
         'dataset-card-list:submit': function(order) {
@@ -59,11 +57,6 @@ export default {
                 {payload: order},
                 this.home_reuses.on_fetched.bind(this.home_reuses)
             );
-        }
-    },
-    route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
         }
     },
     attached: function() {

@@ -1,4 +1,5 @@
 <template>
+<layout :title="user.fullname || ''" :subtitle="_('User')" :page="user.page || ''">
     <div class="row">
         <profile :user="user" class="col-xs-12 col-md-6"></profile>
         <chart title="Traffic" :metrics="metrics" class="col-xs-12 col-md-6"
@@ -20,6 +21,7 @@
     <div class="row">
         <harvesters id="harvesters-widget" class="col-xs-12" :owner="user"></harvesters>
     </div>
+</layout>
 </template>
 
 <script>
@@ -29,6 +31,7 @@ import Reuses from 'models/reuses';
 import Datasets from 'models/datasets';
 import Metrics from 'models/metrics';
 import CommunityResources from 'models/communityresources';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'user-view',
@@ -44,10 +47,6 @@ export default {
             reuses: new Reuses({query: {sort: '-created', page_size: 10}}),
             datasets: new Datasets({query: {sort: '-created', page_size: 10}}),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
-            meta: {
-                title: null,
-                subtitle: this._('User')
-            },
             y: [{
                 id: 'datasets',
                 label: this._('Datasets')
@@ -63,7 +62,8 @@ export default {
         datasets: require('components/dataset/list.vue'),
         reuses: require('components/reuse/list.vue'),
         harvesters: require('components/harvest/sources.vue'),
-        communities: require('components/communityresource/list.vue')
+        communities: require('components/communityresource/list.vue'),
+        Layout
     },
     watch: {
         'user.id': function(id) {
@@ -77,18 +77,9 @@ export default {
                 this.reuses.clear();
                 this.communities.clear();
             }
-        },
-        'user.fullname': function(fullname) {
-            if (fullname) {
-                this.meta.title = fullname;
-                this.$dispatch('meta:updated', this.meta);
-            }
         }
     },
     route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
-        },
         data() {
             this.user.fetch(this.$route.params.oid);
         }

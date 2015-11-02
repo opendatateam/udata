@@ -1,4 +1,6 @@
 <template>
+<layout :title="org.name || ''" :subtitle="_('Organization')"
+    :actions="actions" :badges="badges" :page="org.page || ''">
     <div class="row">
         <sbox class="col-lg-3 col-xs-6" v-for="b in boxes"
             :value="b.value" :label="b.label" :color="b.color"
@@ -42,6 +44,7 @@
     <div class="row">
         <communities class="col-xs-12" :communities="communities"></communities>
     </div>
+</layout>
 </template>
 
 <script>
@@ -53,6 +56,7 @@ import Metrics from 'models/metrics';
 import Organization from 'models/organization';
 import CommunityResources from 'models/communityresources';
 import {PageList} from 'models/base';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'OrganizationView',
@@ -60,7 +64,7 @@ export default {
         let actions = [{
                 label: this._('Delete'),
                 icon: 'trash',
-                method: 'confirm_delete'
+                method: this.confirm_delete
             }];
 
         if (this.$root.me.is_admin) {
@@ -68,7 +72,7 @@ export default {
             actions.push({
                 label: this._('Badges'),
                 icon: 'bookmark',
-                method: 'setBadges'
+                method: this.setBadges
             });
         }
 
@@ -98,13 +102,8 @@ export default {
             }),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
             followers: new Followers({ns: 'organizations', query: {page_size: 10}}),
-            meta: {
-                title: null,
-                page: null,
-                subtitle: this._('Organization'),
-                actions: actions,
-                badges: []
-            },
+            actions: actions,
+            badges: [],
             charts: {
                 traffic: {
                     title: this._('Traffic'),
@@ -186,7 +185,8 @@ export default {
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
         harvesters: require('components/harvest/sources.vue'),
-        communities: require('components/communityresource/list.vue')
+        communities: require('components/communityresource/list.vue'),
+        Layout,
     },
     events: {
         'image:saved': function() {
@@ -208,20 +208,11 @@ export default {
         }
     },
     route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
-        },
         data() {
             this.org.fetch(this.$route.params.oid);
         }
     },
     watch: {
-        'org.name': function(name) {
-            if (name) {
-                this.meta.title = name;
-                this.$dispatch('meta:updated', this.meta);
-            }
-        },
         'org.id': function(id) {
             if (id) {
                 this.metrics.fetch({id: id});
@@ -238,15 +229,9 @@ export default {
                 this.communities.clear();
             }
         },
-        'org.page': function(page) {
-            if (page) {
-                this.meta.page = page;
-                this.$dispatch('meta:updated', this.meta);
-            }
-        },
         'org.deleted': function(deleted) {
             if (deleted) {
-                this.meta.badges = [{
+                this.badges = [{
                     class: 'danger',
                     label: this._('Deleted')
                 }];

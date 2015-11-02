@@ -1,5 +1,5 @@
 <template>
-<wizard v-ref:wizard :steps="steps"></wizard>
+<wizard v-ref:wizard :steps="steps" :title="_('New dataset')"></wizard>
 </template>
 
 <script>
@@ -17,10 +17,6 @@ export default {
     },
     data: function() {
         return {
-            meta: {
-                title:this._('New dataset'),
-                // subtitle: this._('Dataset')
-            },
             publish_as: null,
             steps: [{
                 label: this._('Publish as'),
@@ -94,11 +90,6 @@ export default {
         },
         'wizard:step-changed': function() {
             this.$refs.wizard.$refs.content.dataset = this.dataset;
-        }
-    },
-    route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
         }
     }
 };

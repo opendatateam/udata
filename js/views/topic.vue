@@ -1,4 +1,5 @@
 <template>
+<layout :title="topic.name || ''" :subtitle="_('Topic')" :page="topic.page || ''">
     <div class="row">
         <topic-details :topic="topic" class="col-xs-12"></topic-details>
     </div>
@@ -6,27 +7,26 @@
         <datasets-list :datasets="topic.datasets" class="col-xs-12 col-md-6"></datasets-list>
         <reuses-list :reuses="topic.reuses" class="col-xs-12 col-md-6"></reuses-list>
     </div>
+</layout>
 </template>
 
 <script>
 import moment from 'moment';
 import Topic from 'models/topic';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'TopicView',
     data: function() {
         return {
-            topic: new Topic(),
-            meta: {
-                title: null,
-                subtitle: this._('Topic')
-            }
+            topic: new Topic()
         };
     },
     components: {
         'topic-details': require('components/topic/details.vue'),
         'datasets-list': require('components/dataset/card-list.vue'),
-        'reuses-list': require('components/reuse/card-list.vue')
+        'reuses-list': require('components/reuse/card-list.vue'),
+        Layout
     },
     events: {
         'dataset-card-list:submit': function(ids) {
@@ -41,19 +41,8 @@ export default {
         }
     },
     route: {
-        activate() {
-            this.$dispatch('meta:updated', this.meta);
-        },
         data() {
             this.topic.fetch(this.$route.params.oid);
-        }
-    },
-    watch: {
-        'topic.name': function(name) {
-            if (name) {
-                this.meta.title = name;
-                this.$dispatch('meta:updated', this.meta);
-            }
         }
     }
 };
