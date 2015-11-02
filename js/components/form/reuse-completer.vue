@@ -7,7 +7,7 @@ import ReuseCard from 'components/reuse/card.vue';
 
 const template = `<div class="selectize-option">
     <div class="logo pull-left">
-        <img src="{{image_url}}"/>
+        <img :src="image_url"/>
     </div>
     {{title}}
 </div>`;

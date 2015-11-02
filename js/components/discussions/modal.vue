@@ -11,14 +11,12 @@
 </style>
 
 <template>
-<modal title="{{ _('Discussion') }}"
-    class="discussion-modal"
-    v-ref:modal>
+<modal v-ref:modal :title="_('Discussion')" class="discussion-modal">
     <div class="modal-body">
         <dataset-card v-if="discussion.class | is_dataset"
-            datasetid="{{discussion.subject}}"></dataset-card>
+            :datasetid="discussion.subject"></dataset-card>
         <reuse-card v-if="discussion.class | is_reuse"
-            reuseid="{{discussion.subject}}"></reuse-card>
+            :reuseid="discussion.subject"></reuse-card>
         <h3>{{ discussion.title }}</h3>
         <div class="direct-chat-messages">
             <div class="direct-chat-msg"
@@ -27,7 +25,7 @@
                     <span class="direct-chat-name pull-left">{{message.posted_by | display}}</span>
                     <span class="direct-chat-timestamp pull-right">{{message.posted_on | dt}}</span>
                 </div>
-                <img class="direct-chat-img"  alt="{{ _('User Image') }}"
+                <img class="direct-chat-img"  :alt="_('User Image')"
                     :src="message.posted_by.avatar || avatar_placeholder"/>
                 <div class="direct-chat-text" v-markdown="message.content"></div>
             </div>
@@ -37,9 +35,8 @@
         <form v-if="!discussion.closed">
             <div class="form-group">
                 <textarea class="form-control" rows="3"
-                    placeholder="{{ _('Type your comment') }}"
-                    v-model="comment"
-                    required>
+                    :placeholder="_('Type your comment')"
+                    v-model="comment" required>
                 </textarea>
             </div>
         </form>
@@ -78,7 +75,6 @@ export default {
     },
     data: function() {
         return {
-            discussionid: null,
             discussion: {},
             avatar_placeholder: require('helpers/placeholders').user,
             comment: null
@@ -94,12 +90,14 @@ export default {
             return kind.startsWith('Reuse');
         }
     },
-    props: ['discussionid'],
+    props: {
+        discussionid: null
+    },
     ready: function() {
-        API.discussions.get_discussion({id: this.discussionid}, function(response) {
+        API.discussions.get_discussion({id: this.discussionid}, (response) => {
             this.discussion = response.obj;
             this.$emit('discussion:loaded');
-        }.bind(this));
+        });
     },
     methods: {
         confirm_delete: function() {
@@ -120,10 +118,10 @@ export default {
                 API.discussions.comment_discussion({id: this.discussionid, payload: {
                     comment: comment,
                     close: close || false
-                }}, function(response) {
+                }}, (response) => {
                     this.discussion = response.obj;
                     this.$emit('discussion:loaded');
-                }.bind(this));
+                });
             }
         }
     }

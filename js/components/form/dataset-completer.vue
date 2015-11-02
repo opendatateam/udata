@@ -7,7 +7,7 @@ import DatasetCard from 'components/dataset/card.vue';
 
 const optTpl = `<div class="selectize-option">
     <div class="logo pull-left">
-        <img src="{{image_url}}"/>
+        <img :src="image_url"/>
     </div>
     {{title}}
 </div>`;

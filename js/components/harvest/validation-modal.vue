@@ -1,7 +1,6 @@
 <template>
-<modal title="{{ _('Harvest source validation') }}"
-    class="modal-info harvest-delete-modal"
-    v-ref:modal>
+<modal v-ref:modal :title="_('Harvest source validation')"
+    class="modal-info harvest-delete-modal">
 
     <div class="modal-body">
         <p>
@@ -12,7 +11,7 @@
             <div class="form-group" v-el:group>
                 <label>{{ _('Reason') }}</label>
                 <textarea class="form-control" rows="3" v-el:comment
-                    placeholder="{{ _('Explain your validation') }}"
+                    :placeholder="_('Explain your validation')"
                     v-model="comment">
                 </textarea>
             </div>

@@ -25,7 +25,7 @@ export default {
         withoutDataset: Boolean
     },
     components: {
-         'datatable': require('components/datatable/widget.vue')
+         datatable: require('components/datatable/widget.vue')
     },
     data: function() {
         let fields = [{

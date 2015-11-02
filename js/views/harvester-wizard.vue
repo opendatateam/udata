@@ -1,5 +1,5 @@
 <template>
-<wizard v-ref:wizard steps="{{steps}}"></wizard>
+<wizard v-ref:wizard :steps="steps"></wizard>
 </template>
 
 <script>
@@ -9,7 +9,7 @@ export default {
     data: function() {
         return {
             meta: {
-                title:this._('New harvester'),
+                title: this._('New harvester'),
             },
             source: new HarvestSource(),
             publish_as: null,

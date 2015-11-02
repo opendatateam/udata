@@ -1,27 +1,25 @@
 <template>
-    <box-container title="{{ title }}" icon="cubes"
+    <box :title="title" icon="cubes"
         boxclass="box-solid reused-datasets-widget"
         footerClass="text-center">
         <div class="row">
-            <dataset-card class="col-md-6"
+            <card class="col-md-6"
                 v-for="id in reuse.datasets | ids" :datasetid="id"
-            ></dataset-card>
+            ></card>
 
         </div>
-        <box-footer>
+        <footer slot="footer">
             <a class="uppercase">{{ _('Add') }}</a>
-        </box-footer>
-    </box-container>
+        </footer>
+    </box>
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'datasets-list',
     components: {
-        'box-container': require('components/containers/box.vue'),
-        'dataset-card': require('components/dataset/card.vue')
+        box: require('components/containers/box.vue'),
+        card: require('components/dataset/card.vue')
     },
     data: function() {
         return {

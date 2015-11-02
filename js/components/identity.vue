@@ -9,19 +9,14 @@
 
 <template>
 <a class="identity" @click="click">
-    <img :src="avatar" alt="{{ name }}">
+    <img :src="avatar" :alt="name">
     {{name}}
 </a>
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     replace: true,
-    data: function() {
-        return {};
-    },
     computed: {
         avatar: function() {
             return this.$data.avatar

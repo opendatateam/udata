@@ -16,7 +16,7 @@
 
             <dl class="dl-horizontal dl-wide">
                 <dt>{{ _('URL') }}</dt>
-                <dd><a href="{{community.url}}">{{community.url}}</a></dd>
+                <dd><a :href="community.url">{{community.url}}</a></dd>
                 <dt v-if="community.format">{{ _('Format') }}</dt>
                 <dd v-if="community.format">{{ community.format }}</dd>
                 <dt v-if="community.mime">{{ _('Mime Type') }}</dt>

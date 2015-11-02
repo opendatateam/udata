@@ -1,9 +1,6 @@
-<style lang="less"></style>
-
 <template>
-<modal title="{{ _('Confirm deletion') }}"
-    class="modal-danger discussion-delete-modal"
-    v-ref:modal>
+<modal v-ref:modal :title="_('Confirm deletion')"
+    class="modal-danger discussion-delete-modal">
 
     <div class="modal-body">
         <p class="lead text-center">
@@ -28,13 +25,11 @@
 </template>
 
 <script>
-'use strict';
+import API from 'api';
 
-var API = require('api');
-
-module.exports = {
+export default {
     components: {
-        'modal': require('components/modal.vue')
+        modal: require('components/modal.vue')
     },
     data: function() {
         return {
@@ -45,9 +40,9 @@ module.exports = {
     methods: {
         confirm: function() {
             API.discussions.delete_discussion({id: this.discussionid},
-                function(response) {
+                (response) => {
                     this.$refs.modal.close();
-                }.bind(this)
+                }
             );
         }
     }

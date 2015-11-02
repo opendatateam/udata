@@ -19,7 +19,7 @@
         :value="value|timeFormatted"
         :readonly="readonly || false"></input>
     <div class="dropdown-menu dropdown-menu-right">
-        <time-widget selected="{{value}}"></time-widget>
+        <time-widget :selected="value"></time-widget>
     </div>
     <input type="hidden" v-el:hidden
         :id="field.id"

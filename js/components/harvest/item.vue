@@ -27,11 +27,11 @@
             <dd v-if="item.dataset">
                 <dataset-card class="col-xs-12"
                     v-if="item.dataset.id"
-                    datasetid="{{item.dataset.id}}">
+                    :datasetid="item.dataset.id">
                 </dataset-card>
                 <dataset-card class="col-xs-12"
                     v-if="!item.dataset.id"
-                    dataset="{{item.dataset}}">
+                    :dataset="item.dataset">
                 </dataset-card>
             </dd>
             <dt v-if="item.errors.length">{{ _('Errors') }}</dt>
