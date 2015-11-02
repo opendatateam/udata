@@ -67,6 +67,7 @@ export default {
     events: {
         'harvest:job:selected': function(job) {
             this.current_job = job;
+            return true;
         },
         'harvest:job:item:selected': function(item) {
             this.current_item = item;
@@ -74,6 +75,7 @@ export default {
                 {data: {item: item}},
                 Vue.extend(ItemModal)
             );
+            return true;
         }
     },
     methods: {

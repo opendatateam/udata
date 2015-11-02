@@ -1,30 +1,30 @@
 <template>
 <ul class="timeline">
     <li v-for="activity in enhancedActivities">
-        <i class="{{ activity.icon }} timeline-icon"></i>
+        <i :class="activity.icon" class="timeline-icon"></i>
         <div class="timeline-item">
-            <span class="time" title="{{ activity.created_at }}"><i class="fa fa-clock-o"></i> {{ activity.created_at | timeago }}</span>
+            <span class="time" :title="activity.created_at"><i class="fa fa-clock-o"></i> {{ activity.created_at | timeago }}</span>
             <div class="timeline-header">
                 <h5>
                     <span v-if="activity.aggregatedFollowing">
-                        <span v-for="actor in activity.aggregaterActors">
-                            <a href="{{ actor.url }}">{{actor | displayName}}</a><span v-if="$index < activity.aggregaterActors.length - 2">,</span>
-                            <span v-if="$index === activity.aggregaterActors.length - 2">{{ _('and') }}</span>
+                        <span v-for="(index, actor) in activity.aggregaterActors">
+                            <a :href="actor.url">{{actor | displayName}}</a><span v-if="index < activity.aggregaterActors.length - 2">,</span>
+                            <span v-if="index === activity.aggregaterActors.length - 2">{{ _('and') }}</span>
                         </span>
                         {{ activity.aggregatedLabel }}
                     </span>
                     <span v-if="!activity.aggregatedFollowing">
-                        <a href="{{ actor(activity).url }}">{{ actor(activity) | displayName }}</a>
+                        <a :href="actor(activity).url">{{ actor(activity) | displayName }}</a>
                         {{ activity.label }}
                     </span>
-                    <a href="{{ activity.related_to_url }}">{{ activity.related_to }}</a>
+                    <a :href="activity.related_to_url">{{ activity.related_to }}</a>
                 </h5>
             </div>
             <div class="timeline-body">
-                <dataset-card v-if="activity.related_to_kind === 'Dataset'" datasetid="{{ activity.related_to_id }}"></dataset-card>
-                <organization-card v-if="activity.related_to_kind === 'Organization'" orgid="{{ activity.related_to_id }}"></organization-card>
-                <reuse-card v-if="activity.related_to_kind === 'Reuse'" reuseid="{{ activity.related_to_id }}"></reuse-card>
-                <user-card v-if="activity.related_to_kind === 'User'" userid="{{ activity.related_to_id }}"></user-card>
+                <dataset-card v-if="activity.related_to_kind === 'Dataset'" :datasetid="activity.related_to_id"></dataset-card>
+                <organization-card v-if="activity.related_to_kind === 'Organization'" :orgid="activity.related_to_id"></organization-card>
+                <reuse-card v-if="activity.related_to_kind === 'Reuse'" :reuseid="activity.related_to_id"></reuse-card>
+                <user-card v-if="activity.related_to_kind === 'User'" :userid="activity.related_to_id"></user-card>
             </div>
         </div>
     </li>

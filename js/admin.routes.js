@@ -63,10 +63,7 @@ router.map({
     },
     '/user/:oid/': {
         name: 'user',
-        component: view('user'),
-        callback: function(view) {
-            view.user_id = user_id;
-        }
+        component: view('user')
     },
     '/harvester/new/': {
         component: view('harvester-wizard')
@@ -75,10 +72,7 @@ router.map({
         component: view('harvester')
     },
     '/harvester/:oid/edit': {
-        component: view('harvester-edit'),
-        callback: function(view) {
-            view.source_id = source_id;
-        }
+        component: view('harvester-edit')
     },
     '/post/new/': {
         component: view('post-wizard')

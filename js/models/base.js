@@ -32,7 +32,7 @@ export class Base {
      * @return {[type]} [description]
      */
     get __class__() {
-        return this.constructor.name
+        return this.constructor.name;
     }
 
     /**

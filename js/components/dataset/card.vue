@@ -6,8 +6,8 @@
     <img v-if="dataset.organization && dataset.organization.public_service"
         :src="certified" alt="certified"
         class="certified" rel="popover"
-        data-title="{{ _('Certified public service') }}"
-        data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
+        :data-title="_('Certified public service')"
+        :data-content="_('The identity of this public service public is certified by Etalab')"
         data-container="body" data-trigger="hover"/>
     <div class="card-body">
         <h4>

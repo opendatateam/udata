@@ -63,9 +63,8 @@
             </div>
         </div>
     </div>
-    <thumbnailer-widget v-ref:thumbnailer
-        v-if="resizing" :src="src" :sizes="sizes">
-    </thumbnailer-widget>
+    <thumbnailer v-ref:thumbnailer v-if="resizing" :src="src" :sizes="sizes">
+    </thumbnailer>
 </div>
 </template>
 
@@ -91,7 +90,7 @@ export default {
         }
     },
     components: {
-        'thumbnailer-widget': require('components/widgets/thumbnailer.vue')
+        thumbnailer: require('components/widgets/thumbnailer.vue')
     },
     computed: {
         file: function() {
@@ -112,9 +111,11 @@ export default {
                 log.warning('File APIs not supported');
                 this.upload();
             }
+            return true;
         },
         'uploader:progress': function(id, uploaded, total) {
             this.progress = Math.round(uploaded * 100 / total);
+            return true;
         },
         'uploader:complete': function(id, response) {
             if (this.HAS_FILE_API) {
@@ -123,6 +124,7 @@ export default {
                 this.src = response.url;
                 this.resizing = true;
             }
+            return true;
         }
     },
     methods: {

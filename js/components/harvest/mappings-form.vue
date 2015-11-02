@@ -1,5 +1,5 @@
 <template>
-<form-vertical v-ref:form fields="{{fields}}" model="{{source}}"></form-vertical>
+<vform v-ref:form :fields="fields" :model="source"></vform>
 </template>
 
 <script>
@@ -10,16 +10,22 @@ import HarvestSource from 'models/harvest/source';
 
 export default {
     name: 'HarvestMappingView',
-    props: ['source'],
+    props: {
+        source: {
+            type: HarvestSource,
+            default() {
+                return new HarvestSource();
+            }
+        }
+    },
     data: function() {
         return {
-            source: new HarvestSource(),
             fields: [],
             preview_job: null
         };
     },
     components: {
-        'form-vertical': require('components/form/vertical-form.vue'),
+        vform: require('components/form/vertical-form.vue'),
         'job-widget': require('components/harvest/job.vue')
     },
     methods: {

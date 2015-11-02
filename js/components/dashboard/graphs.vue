@@ -20,12 +20,12 @@
         </small-box>
     </div>
     <div class="row graphs-chart">
-        <chart class="col-xs-6" title="{{ _('Latest dataset uploads') }}"
-                metrics="{{ metrics }}" icon="null"
-                y="{{ dataDatasets }}" chart-type="Line"></chart>
-        <chart class="col-xs-6" title="{{ _('Latest reuse uploads') }}"
-                metrics="{{ metrics }}" icon="null"
-                y="{{ dataReuses }}" chart-type="Line"></chart>
+        <chart class="col-xs-6" :title="_('Latest dataset uploads')"
+                :metrics="metrics" icon="null"
+                :y="dataDatasets" chart-type="Line"></chart>
+        <chart class="col-xs-6" :title="_('Latest reuse uploads')"
+                :metrics="metrics" icon="null"
+                :y="dataReuses" chart-type="Line"></chart>
     </div>
 </template>
 

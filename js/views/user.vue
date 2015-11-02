@@ -34,7 +34,6 @@ export default {
     name: 'user-view',
     data: function() {
         return {
-            user_id: null,
             user: new User(),
             metrics: new Metrics({
                 query: {
@@ -67,11 +66,6 @@ export default {
         communities: require('components/communityresource/list.vue')
     },
     watch: {
-        user_id: function(id) {
-            if (id) {
-                this.user.fetch(id);
-            }
-        },
         'user.id': function(id) {
             if (id) {
                 this.metrics.fetch({id: id});
@@ -89,6 +83,14 @@ export default {
                 this.meta.title = fullname;
                 this.$dispatch('meta:updated', this.meta);
             }
+        }
+    },
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
+        },
+        data() {
+            this.user.fetch(this.$route.params.oid);
         }
     }
 };

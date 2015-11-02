@@ -2,19 +2,19 @@
 <div class="row">
     <div class="col-xs-12">
         <box>
-            <harvest-form source="{{source}}"></harvest-form>
+            <harvest-form :source="source"></harvest-form>
         </box>
     </div>
 </div>
 <div class="row">
     <div class="col-xs-12">
-        <box title="{{ _('Filters') }}">
-            <mappings-form source="{{source}}"></mappings-form>
+        <box :title="_('Filters')">
+            <mappings-form :source="source"></mappings-form>
         </box>
     </div>
 </div>
 <div class="row">
-    <preview class="col-xs-12" source="{{source}}"></preview>
+    <preview class="col-xs-12" :source="source"></preview>
 </div>
 </template>
 
@@ -25,11 +25,16 @@ import Vue from 'vue';
 
 export default {
     name: 'HarvesterEditView',
-    props: ['source'],
+    props: {
+        source: {
+            type: HarvestSource,
+            default() {
+                return new HarvestSource();
+            }
+        }
+    },
     data: function() {
         return {
-            source: new HarvestSource(),
-            source_id: null,
             meta: {
                 title: null,
                 subtitle: this._('Edit')
@@ -37,10 +42,10 @@ export default {
         };
     },
     components: {
-        'box': require('components/containers/box.vue'),
+        box: require('components/containers/box.vue'),
         'harvest-form': require('components/harvest/form.vue'),
         'mappings-form': require('components/harvest/mappings-form.vue'),
-        'preview': require('components/harvest/preview.vue'),
+        preview: require('components/harvest/preview.vue'),
     },
     events: {
         'harvest:job:item:selected': function(item) {
@@ -51,16 +56,19 @@ export default {
         }
     },
     watch: {
-        source_id: function(id) {
-            if (id) {
-                this.source.fetch(id);
-            }
-        },
         'source.name': function(name) {
             if (name) {
                 this.meta.title = name;
                 this.$dispatch('meta:updated', this.meta);
             }
+        }
+    },
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
+        },
+        data() {
+            this.source.fetch(this.$route.params.oid);
         }
     }
 };

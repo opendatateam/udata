@@ -71,8 +71,8 @@ export default {
     replace: true,
     methods: {
         action_click: function(action) {
-            if (action.method && this.$root.$.content.hasOwnProperty(action.method)) {
-                this.$root.$.content[action.method]();
+            if (action.method && this.$root.$refs.content.hasOwnProperty(action.method)) {
+                this.$root.$refs.content[action.method]();
             }
         }
     }

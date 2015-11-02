@@ -1,5 +1,5 @@
 <template>
-<form-vertical v-ref:form fields="{{fields}}" model="{{source}}"></form-vertical>
+<vform v-ref:form :fields="fields" :model="source"></vform>
 </template>
 
 <script>
@@ -8,10 +8,16 @@ import backends from 'models/harvest/backends';
 
 export default {
     name: 'HarvestSourceForm',
-    props: ['source'],
+    props: {
+        source: {
+            type: HarvestSource,
+            default() {
+                return new HarvestSource();
+            }
+        }
+    },
     data: function() {
         return {
-            source: new HarvestSource(),
             fields: [{
                     id: 'name',
                     label: this._('Name')
@@ -35,7 +41,7 @@ export default {
         };
     },
     components: {
-        'form-vertical': require('components/form/vertical-form.vue')
+        vform: require('components/form/vertical-form.vue')
     },
     methods: {
         serialize: function() {

@@ -20,6 +20,11 @@ export default {
                 title: this._('System')
             }
         };
+    },
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
+        }
     }
 };
 </script>

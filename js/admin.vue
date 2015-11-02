@@ -41,7 +41,7 @@
         </div>
         <!-- Main content -->
         <section class="content">
-            <router-view></router-view>
+            <router-view v-ref:content></router-view>
         </section>
     </div>
 </template>
