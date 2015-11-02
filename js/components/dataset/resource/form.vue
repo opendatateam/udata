@@ -76,11 +76,18 @@ import Dataset from 'models/dataset';
 import Resource from 'models/resource';
 
 export default {
-    props: ['dataset', 'resource', 'community'],
+    props: {
+        dataset: {
+            type: Object,
+            default() {return new Dataset()}
+        },
+        resource: {
+            type: Object,
+            default() {return new Resource()}
+        },
+    },
     data: function() {
         return {
-            dataset: new Dataset(),
-            resource: new Resource(),
             actions: [{
                 label: this._('Local file'),
                 details: this._('Send a file from your computer'),

@@ -145,6 +145,11 @@ export default {
         this.organizations.fetch();
         this.communities.fetch();
     },
+    route: {
+        activate() {
+            this.$dispatch('meta:updated', this.meta);
+        }
+    },
     watch: {
         '$root.site.id': function() {
             this.fetch_metrics();

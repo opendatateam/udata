@@ -1,16 +1,9 @@
-<style lang="less">
-
-</style>
-
 <template>
-<!--div v-form="dataset" v-fields="fields"></div-->
-<form-vertical v-ref:form fields="{{fields}}" model="{{dataset}}"></form-vertical>
+<vform v-ref:form :fields="fields" :model="dataset"></vform>
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     props: ['dataset'],
     data: function() {
         return {
@@ -26,7 +19,7 @@ module.exports = {
         };
     },
     components: {
-        'form-vertical': require('components/form/vertical-form.vue')
+        vform: require('components/form/vertical-form.vue')
     }
 };
 </script>

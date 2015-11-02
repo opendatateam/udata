@@ -35,9 +35,7 @@
         <content-header :meta="meta"></content-header>
         <!-- Notifications -->
         <div v-if="notifications.length > 0" class="notification-zone">
-            <alert-box v-for="n in notifications"
-                :type="n.type" :icon="n.icon" :closable="n.closable">
-            </alert-box>
+            <alert-box v-for="n in notifications" :alert="n"></alert-box>
         </div>
         <!-- Main content -->
         <section class="content">
@@ -98,16 +96,6 @@ export default {
             this.notifications.push(notification);
         }
     },
-    // watch: {
-    //     'view': function(view, old) {
-    //         this.meta = emptyMeta();
-    //         Vue.nextTick(() => {
-    //             if (this.$refs.content.meta) {
-    //                 Object.assign(this.meta, this.$refs.content.meta);
-    //             }
-    //         });
-    //     }
-    // },
     ready: function() {
         this.fix_size();
         this.slimscroll();

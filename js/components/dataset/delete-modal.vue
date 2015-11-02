@@ -1,5 +1,5 @@
 <template>
-<modal title="{{ _('Confirm deletion') }}"
+<modal :title="_('Confirm deletion')"
     class="modal-danger dataset-delete-modal"
     v-ref:modal>
 

@@ -7,7 +7,7 @@
 </style>
 
 <template>
-<modal title="{{ community.title }}" class="community-modal"
+<modal :title="community.title" class="community-modal"
     :class="{ 'modal-danger': confirm, 'modal-primary': !confirm }"
     v-ref:modal>
     <div class="modal-body">
@@ -34,7 +34,7 @@
             </dl>
         </div>
 
-        <community-form v-if="edit" v-ref:form resource="{{community}}" dataset="{{resource.dataset}}" community="{{true}}"></community-form>
+        <community-form v-if="edit" v-ref:form :resource="community" :dataset="resource.dataset" :community="true"></community-form>
 
         <div v-show="confirm">
             <p class="lead text-center">

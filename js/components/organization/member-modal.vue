@@ -13,10 +13,10 @@
 </style>
 
 <template>
-<user-modal user="{{user}}" v-ref:modal>
+<user-modal :user="user" v-ref:modal>
     <role-form class="member-form" v-ref:form
-        fields="{{fields}}" model="{{member}}" defs="{{defs}}"
-        readonly="{{!is_admin}}" fill="true">
+        :fields="fields" :model="member" :defs="defs"
+        :readonly="!is_admin" :fill="true">
     </role-form>
     <br v-if="is_admin" />
     <div v-if="is_admin"  class="btn-group btn-group-justified">
@@ -46,13 +46,17 @@
 </template>
 
 <script>
-'use strict';
+import User from 'models/user';
+import API from 'api';
 
-var User = require('models/user'),
-    API = require('api');
-
-module.exports = {
+export default {
     name: 'member-modal',
+    props: {
+        member: {
+            type: Object,
+            default() {return {};}
+        }
+    },
     data: function() {
         return {
             user: new User(),
@@ -63,7 +67,6 @@ module.exports = {
                 widget: 'select-input'
             }],
             org: {},
-            member: {},
             defs: API.definitions.Member
         };
     },
@@ -75,7 +78,6 @@ module.exports = {
             return this.org.is_member(this.user);
         }
     },
-    props: ['member'],
     components: {
         'user-modal': require('components/user/modal.vue'),
         'role-form': require('components/form/horizontal-form.vue')

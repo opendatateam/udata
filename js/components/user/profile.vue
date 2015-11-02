@@ -25,9 +25,7 @@
         </a>
     </aside>
     <div v-show="!toggled">
-        <h3>
-            {{user.fullname}}
-        </h3>
+        <h3>{{user.fullname}}</h3>
         <div class="profile-body">
             <image-button :src="user.avatar" :size="100" class="avatar-button"
                 :endpoint="endpoint">

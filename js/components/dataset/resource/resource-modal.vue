@@ -7,7 +7,7 @@
 </style>
 
 <template>
-<modal title="{{ resource.title }}" class="resource-modal"
+<modal :title="resource.title" class="resource-modal"
     :class="{ 'modal-danger': confirm, 'modal-primary': !confirm }"
     v-ref:modal>
     <div class="modal-body">
@@ -26,7 +26,7 @@
                     {{ _('This resource is an API') }}
                 </dd>
                 <dt>{{ _('URL') }}</dt>
-                <dd><a href="{{resource.url}}">{{resource.url}}</a></dd>
+                <dd><a :href="resource.url">{{resource.url}}</a></dd>
                 <dt v-if="resource.format">{{ _('Format') }}</dt>
                 <dd v-if="resource.format">{{ resource.format }}</dd>
                 <dt v-if="resource.mime">{{ _('Mime Type') }}</dt>
@@ -46,7 +46,7 @@
             </dl>
         </div>
 
-        <resource-form v-if="edit" v-ref:form dataset="{{dataset}}" resource="{{resource}}"></resource-form>
+        <resource-form v-if="edit" v-ref:form :dataset="dataset" :resource="resource"></resource-form>
 
         <div v-show="confirm">
             <p class="lead text-center">

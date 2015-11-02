@@ -1,6 +1,6 @@
 <template>
 <form-horizontal class="resource-form remote-resource-form"
-        fields="{{fields}}" model="{{resource}}" v-ref:form>
+        :fields="fields" :model="resource" v-ref:form>
 </form-horizontal>
 </template>
 

@@ -1,24 +1,24 @@
 <template>
     <div class="row">
-        <profile user="{{user}}" class="col-xs-12 col-md-6"></profile>
-        <chart title="Traffic" metrics="{{metrics}}" class="col-xs-12 col-md-6"
-            x="date" y="{{y}}"></chart>
+        <profile :user="user" class="col-xs-12 col-md-6"></profile>
+        <chart title="Traffic" :metrics="metrics" class="col-xs-12 col-md-6"
+            x="date" :y="y"></chart>
     </div>
 
     <div class="row">
-        <datasets class="col-xs-12" datasets="{{datasets}}"></datasets>
+        <datasets class="col-xs-12" :datasets="datasets"></datasets>
     </div>
 
     <div class="row">
-        <reuses class="col-xs-12" reuses="{{reuses}}"></reuses>
+        <reuses class="col-xs-12" :reuses="reuses"></reuses>
     </div>
 
     <div class="row">
-        <communities class="col-xs-12" communities="{{communities}}"></communities>
+        <communities class="col-xs-12" :communities="communities"></communities>
     </div>
 
     <div class="row">
-        <harvesters id="harvesters-widget" class="col-xs-12" owner="{{user}}"></harvesters>
+        <harvesters id="harvesters-widget" class="col-xs-12" :owner="user"></harvesters>
     </div>
 </template>
 

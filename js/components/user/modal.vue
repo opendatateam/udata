@@ -96,14 +96,14 @@
                 </div>
                 <ul class="user-actions clearfix">
                     <li>
-                        <a href="{{user.page}}" class="text-center"
-                            title="{{ _('Profile') }}">
+                        <a :href="user.page" class="text-center"
+                            :title="_('Profile')">
                             <span class="fa fa-2x fa-user"></span>
                         </a>
                     </li>
                     <li>
                         <a class="text-center pointer" @click="to_dashboard"
-                             title="{{ _('Dashboard') }}">
+                             :title="_('Dashboard')">
                             <span class="fa fa-2x fa-dashboard"></span>
                         </a>
                     </li>
@@ -116,10 +116,9 @@
     </div>
 </div>
 </template>
-<script>
-'use strict';
 
-module.exports = {
+<script>
+export default {
     name: 'user-modal',
     mixins: [
         require('mixins/modal')

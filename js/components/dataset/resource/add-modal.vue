@@ -1,15 +1,15 @@
 <template>
 <modal class="modal-primary add-resource-modal" v-ref:modal
-    title="{{ _('Add a resource') }}">
+    :title="_('Add a resource')">
 
     <div class="modal-body">
-        <resource-form v-ref:form dataset="{{dataset}}"></resource-form>
+        <resource-form v-ref:form :dataset="dataset"></resource-form>
     </div>
 
     <footer class="modal-footer text-center">
         <button type="button"
             class="btn btn-primary btn-flat pointer pull-left"
-            v-show="$.form.resource.filetype"
+            v-show="$refs.form.resource.filetype"
             @click="save">
             {{ _('Save') }}
         </button>

@@ -1,5 +1,5 @@
 <template>
-<modal title="{{ _('Transfer request') }}"
+<modal :title="_('Transfer request')"
     class="modal-info transfer-request-modal"
     v-ref:modal>
 
@@ -32,8 +32,8 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-                    <dataset-card v-if="subject|is 'Dataset'" dataset="{{subject}}"></dataset-card>
-                    <reuse-card v-if="subject|is 'Reuse'" reuse="{{subject}}"></reuse-card>
+                    <dataset-card v-if="subject|is 'Dataset'" :dataset="subject"></dataset-card>
+                    <reuse-card v-if="subject|is 'Reuse'" :reuse="subject"></reuse-card>
                 </div>
             </div>
             <div class="row text-center">
@@ -41,15 +41,15 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-                    <user-card v-if="recipient|is 'user'" user="{{recipient}}"></user-card>
-                    <org-card v-if="recipient|is 'organization'" organization="{{recipient}}"></org-card>
+                    <user-card v-if="recipient|is 'user'" :user="recipient"></user-card>
+                    <org-card v-if="recipient|is 'organization'" :organization="recipient"></org-card>
                 </div>
             </div>
             <form role="form">
                 <div class="form-group">
                     <label>{{ _('Reason') }}</label>
                     <textarea class="form-control" rows="3"
-                        placeholder="{{ _('Explain why you request this transfer') }}"
+                        :placeholder="_('Explain why you request this transfer')"
                         v-model="comment">
                     </textarea>
                 </div>

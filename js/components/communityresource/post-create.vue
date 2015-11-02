@@ -7,11 +7,11 @@
         <p>{{ _('You should communicate about it.') }}</p>
     </div>
 </div>
-<share-widget url="{{communityResource.url}}" title="{{communityResource.title}}"></share-widget>
+<share :url="communityResource.url" :title="communityResource.title"></share>
 
 <div class="row">
     <div class="col-xs-12 lead text-center">
-        <a class="btn btn-primary btn-flat" href="{{communityResource.url}}">
+        <a class="btn btn-primary btn-flat" :href="communityResource.url">
             {{ _('See on the site') }}
         </a>
     </div>
@@ -22,14 +22,14 @@
 import CommunityResource from 'models/communityresource';
 
 export default {
-    props: ['communityResource'],
-    data: function() {
-        return {
-            communityResource: new CommunityResource()
-        };
+    props: {
+        communityResource: {
+            type: Object,
+            default() {return new CommunityResource();}
+        }
     },
     components: {
-        'share-widget': require('components/widgets/share.vue')
+        share: require('components/widgets/share.vue')
     }
 };
 </script>
