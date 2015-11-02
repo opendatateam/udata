@@ -11,7 +11,7 @@
     track="remote_id"
     :empty="empty"
     :tint="job.status | statusClass">
-    <header class="row">
+    <header class="row" slot="header">
         <div class="col-xs-12" :class="{ 'col-md-6': job.created, 'col-md-12': job.created }">
             <slot></slot>
         </div>
