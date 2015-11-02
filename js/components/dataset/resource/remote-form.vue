@@ -6,7 +6,12 @@
 
 <script>
 export default {
-    inherit: true,
+    props: {
+        resource: {
+            type: Object,
+            default() {return new Resource()}
+        },
+    },
     data: function() {
         return {
             fields: [{

@@ -58,8 +58,17 @@ import API from 'api';
 import Dataset from 'models/dataset';
 
 export default {
-    inherit: true,
     mixins: [require('mixins/uploader')],
+    props: {
+        dataset: {
+            type: Object,
+            required: true
+        },
+        resource: {
+            type: Object,
+            default() {return new Resource()}
+        },
+    },
     data: function() {
         return {
             fields: [{

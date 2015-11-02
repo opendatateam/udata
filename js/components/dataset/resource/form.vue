@@ -66,9 +66,9 @@
         </p>
     </a>
 </div>
-<file-form v-if="resource.filetype == 'file'" v-ref:fileform></file-form>
-<remote-form v-if="resource.filetype == 'remote'" v-ref:remoteform></remote-form>
-<api-form v-if="resource.filetype == 'api'" v-ref:apiform></api-form>
+<component v-ref:form v-if="resource.filetype" :is="form"
+    :dataset="dataset" :resource="resource">
+</component>
 </template>
 
 <script>
@@ -103,18 +103,12 @@ export default {
                 details: this._('Register an API to access data'),
                 icon: 'puzzle-piece',
                 filetype: 'api'
-            }],
+            }]
         };
     },
     computed: {
-        $form: function() {
-            if (this.resource.filetype === 'file') {
-                return this.$refs.fileform;
-            } else if (this.resource.filetype === 'remote') {
-                return this.$refs.remoteform;
-            } else if (this.resource.filetype === 'api') {
-                return this.$refs.apiform;
-            }
+        form() {
+            return `${this.resource.filetype}-form`;
         }
     },
     components: {
@@ -128,10 +122,10 @@ export default {
         },
         serialize: function() {
             // Required because of readonly fields and filetype.
-            return Object.assign({} , this.resource, this.$form.serialize());
+            return Object.assign({} , this.resource, this.$refs.form.serialize());
         },
         validate: function() {
-            return this.$form.validate();
+            return this.$refs.form.validate();
         }
     }
 };
