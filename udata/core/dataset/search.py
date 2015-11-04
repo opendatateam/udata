@@ -62,7 +62,10 @@ class DatasetSearch(ModelSearchAdapter):
             'tags': {
                 'type': 'string',
                 'index_name': 'tag',
-                'index': 'not_analyzed'
+                'index': 'not_analyzed',
+                'fields': {
+                    'i18n': {'type': 'string', 'analyzer': i18n_analyzer}
+                }
             },
             'badges': {
                 'type': 'string',
@@ -116,8 +119,8 @@ class DatasetSearch(ModelSearchAdapter):
                 'index_name': 'geozones',
                 'properties': {
                     'id': {'type': 'string', 'index': 'not_analyzed'},
-                    'name': {'type': 'string'},
-                    'code': {'type': 'string'},
+                    'name': {'type': 'string', 'index': 'not_analyzed'},
+                    'keys': {'type': 'string', 'index': 'not_analyzed'},
                 }
             },
             'granularity': {'type': 'string', 'index': 'not_analyzed'},
@@ -132,11 +135,11 @@ class DatasetSearch(ModelSearchAdapter):
         }
     }
     fields = (
+        'geozones.keys^9',
+        'geozones.name^9',
         'title^6',
-        'tags^3',
-        'geozones.name^3',
+        'tags.i18n^3',
         'description',
-        'code',
     )
     sorts = {
         'title': Sort('title.raw'),
@@ -162,9 +165,9 @@ class DatasetSearch(ModelSearchAdapter):
     }
     boosters = [
         BoolBooster('featured', 1.1),
-        GaussDecay('metrics.reuses', max_reuses, decay=0.8),
+        GaussDecay('metrics.reuses', max_reuses, decay=0.1),
         GaussDecay(
-            'metrics.followers', max_followers, max_followers, decay=0.8),
+            'metrics.followers', max_followers, max_followers, decay=0.1),
     ]
 
     @classmethod
@@ -246,7 +249,8 @@ class DatasetSearch(ModelSearchAdapter):
                 geozones.append({
                     'id': zone.id,
                     'name': zone.name,
-                    'code': zone.code
+                    'keys': [key for key in zone.keys
+                             if not key.startswith('-')]  # Avoid -99.
                 })
                 parents |= set(zone.parents)
 
