@@ -107,7 +107,7 @@
             </div>
             <div v-if="request.refused">
                 <form>
-                    <textarea v-el="{{request.id}}" class="form-control" rows="3" required></textarea>
+                    <textarea v-el:textarea class="form-control" rows="3" required></textarea>
                 </form>
                 <div class="input-group-btn">
                     <button class="btn btn-danger btn-flat btn-xs pull-right"
@@ -196,13 +196,18 @@ export default {
             })
         },
         refuse_request: function(request) {
-            request.$set('refused', true);
+            Vue.set(request, 'refused', true);
         },
         confirm_refusal: function(request, index) {
-            let comment = this.$children[index].$$[request.id].value;
+            // Temp fix until migration to vue.js 1.0+
+            let textarea = this.$els.textarea;
+            if (Array.isArray(textarea)) {
+                textarea = textarea[index];
+            }
+            let comment = textarea.value;
             this.org.refuse_membership(request, comment, (response) => {
                 log.debug('refused', response);
-                request.$set('refused', false);
+                Vue.set(request, 'refused', false);
                 this.requests.fetch();
                 this.validating = Boolean(this.requests.length);
             });

@@ -132,6 +132,7 @@ export default {
                 h = bounds[1],
                 containers = this.$els.preview_containers;
 
+            // Temp fix until migration to vue.js 1.0+
             if (!Array.isArray(containers)) {
                 containers = [containers];
             }
