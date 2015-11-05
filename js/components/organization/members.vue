@@ -199,12 +199,9 @@ export default {
             Vue.set(request, 'refused', true);
         },
         confirm_refusal: function(request, index) {
-            // Temp fix until migration to vue.js 1.0+
-            let textarea = this.$els.textarea;
-            if (Array.isArray(textarea)) {
-                textarea = textarea[index];
-            }
-            let comment = textarea.value;
+            // Temp fix until https://github.com/vuejs/vue/issues/1697 is merged
+            // let comment = this.$els.textarea[index].value;
+            let comment = this.$el.querySelectorAll('textarea')[index].value;
             this.org.refuse_membership(request, comment, (response) => {
                 log.debug('refused', response);
                 Vue.set(request, 'refused', false);

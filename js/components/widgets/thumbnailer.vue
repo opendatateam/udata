@@ -130,12 +130,9 @@ export default {
             let bounds = this.Jcrop.getBounds(),
                 w = bounds[0],
                 h = bounds[1],
-                containers = this.$els.preview_containers;
-
-            // Temp fix until migration to vue.js 1.0+
-            if (!Array.isArray(containers)) {
-                containers = [containers];
-            }
+                // Temp fix until https://github.com/vuejs/vue/issues/1697 is merged
+                // containers = this.$els.preview_containers;
+                containers = [...this.$el.querySelectorAll('.preview-container')];
 
             containers.forEach(function(el) {
                 let $el = $(el),

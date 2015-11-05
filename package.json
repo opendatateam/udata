@@ -98,7 +98,7 @@
     "tv4": "^1.2.7",
     "typeahead.js": "^0.11.1",
     "typeahead.js-bootstrap3.less": "hyspace/typeahead.js-bootstrap3.less#v0.2.3",
-    "vue": "1.0.0-migration",
+    "vue": "1.0.4",
     "vue-router": "^0.7.5"
   }
 }
