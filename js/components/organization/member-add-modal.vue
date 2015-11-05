@@ -23,7 +23,7 @@ export default {
     name: 'member-modal',
     props: {
         member: Object
-    }
+    },
     data: function() {
         return {
             user: new User(),
@@ -42,7 +42,6 @@ export default {
     },
     ready: function() {
         this.user.fetch(this.member.user.id);
-        // this.member.$log();
     }
 };
 </script>

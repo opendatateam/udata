@@ -11,12 +11,17 @@
 </style>
 
 <template>
-<modal v-ref:modal :title="_('Discussion')" class="discussion-modal">
-    <div class="modal-body">
-        <dataset-card v-if="discussion.class | is_dataset"
-            :datasetid="discussion.subject"></dataset-card>
-        <reuse-card v-if="discussion.class | is_reuse"
-            :reuseid="discussion.subject"></reuse-card>
+<modal v-ref:modal :title="title" class="discussion-modal" size="lg"
+    :class="{'modal-danger': deleting}">
+    <div class="modal-body" v-show="!deleting">
+        <div class="row">
+            <dataset-card class="col-xs-12 col-md-offset-3 col-md-6"
+                v-if="discussion.class | is_dataset"
+                :datasetid="discussion.subject"></dataset-card>
+            <reuse-card class="col-xs-12 col-md-offset-3 col-md-6"
+                v-if="discussion.class | is_reuse"
+                :reuseid="discussion.subject"></reuse-card>
+        </div>
         <h3>{{ discussion.title }}</h3>
         <div class="direct-chat-messages">
             <div class="direct-chat-msg"
@@ -31,8 +36,16 @@
             </div>
         </div>
     </div>
-    <footer class="modal-footer text-center">
-        <form v-if="!discussion.closed">
+    <div class="modal-body" v-show="deleting">
+        <p class="lead text-center">
+            {{ _('You are about to delete this discussion') }}
+        </p>
+        <p class="lead text-center">
+            {{ _('Are you sure?') }}
+        </p>
+    </div>
+    <footer class="modal-footer text-center" v-show="!deleting">
+        <form v-if="!discussion.closed" v-el:form>
             <div class="form-group">
                 <textarea class="form-control" rows="3"
                     :placeholder="_('Type your comment')"
@@ -57,28 +70,49 @@
             {{ _('Close') }}
         </button>
     </footer>
+    <footer class="modal-footer text-center" v-show="deleting">
+        <button type="button" class="btn btn-warning btn-flat pointer pull-left"
+            @click="delete">
+            {{ _('Confirm') }}
+        </button>
+        <button type="button" class="btn btn-danger btn-flat pointer"
+            @click="cancel_delete">
+            {{ _('Cancel') }}
+        </button>
+    </footer>
 </modal>
 </template>
 
 <script>
 import API  from 'api';
 import Vue from 'vue';
+import BaseForm from 'components/form/base-form';
+import Modal from 'components/modal.vue';
+import DatasetCard from 'components/dataset/card.vue';
+import ReuseCard from 'components/reuse/card.vue';
 
 export default {
     name: 'discussion-modal',
-    mixins: [require('components/form/base-form')],
-    replace: false,
-    components: {
-        'modal': require('components/modal.vue'),
-        'dataset-card': require('components/dataset/card.vue'),
-        'reuse-card': require('components/reuse/card.vue'),
+    mixins: [BaseForm],
+    components: {Modal, DatasetCard, ReuseCard},
+    computed: {
+        title() {
+            return this.deleting ? this._('Confirm deletion') : this._('Discussion');
+        }
     },
     data: function() {
         return {
             discussion: {},
             avatar_placeholder: require('helpers/placeholders').user,
-            comment: null
+            next_route: null,
+            comment: null,
+            deleting: false
         };
+    },
+    events: {
+        'modal:closed': function() {
+            this.$go(this.next_route);
+        }
     },
     filters: {
         is_dataset: function(kind) {
@@ -90,37 +124,51 @@ export default {
             return kind.startsWith('Reuse');
         }
     },
-    props: {
-        discussionid: null
-    },
-    ready: function() {
-        API.discussions.get_discussion({id: this.discussionid}, (response) => {
-            this.discussion = response.obj;
-            this.$emit('discussion:loaded');
-        });
+    route: {
+        data() {
+            if (this.$route.matched.length > 1) {
+                // This is a nested view
+                let idx = this.$route.matched.length - 2,
+                    parent = this.$route.matched[idx];
+                this.next_route = {
+                    name: parent.handler.name,
+                    params: parent.params
+                };
+            }
+            let id = this.$route.params.discussion_id;
+            API.discussions.get_discussion({id}, (response) => {
+                this.discussion = response.obj;
+            });
+        }
     },
     methods: {
-        confirm_delete: function() {
-            this.$refs.modal.close();
-            var m = this.$root.$modal(
-                {data: {discussionid: this.discussion.id}},
-                Vue.extend(require('components/discussions/delete-modal.vue'))
+        confirm_delete() {
+            this.deleting = true;
+        },
+        cancel_delete() {
+            this.deleting = false;
+        },
+        delete() {
+            API.discussions.delete_discussion({id: this.discussion.id},
+                (response) => {
+                    this.$refs.modal.close();
+                }
             );
         },
-        close_discussion: function() {
+        close_discussion() {
             this.send_comment(this.comment, true);
         },
-        comment_discussion: function() {
+        comment_discussion() {
             this.send_comment(this.comment);
         },
-        send_comment: function(comment, close) {
+        send_comment(comment, close) {
             if (this.validate()) {
-                API.discussions.comment_discussion({id: this.discussionid, payload: {
+                API.discussions.comment_discussion({id: this.discussion.id, payload: {
                     comment: comment,
                     close: close || false
                 }}, (response) => {
                     this.discussion = response.obj;
-                    this.$emit('discussion:loaded');
+                    this.comment = null;
                 });
             }
         }

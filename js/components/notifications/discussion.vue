@@ -10,7 +10,10 @@ export default {
     mixins: [require('components/notifications/base')],
     methods: {
         click: function() {
-            this.$go('/discussion/' + this.details.id + '/');
+            let id = this.details.id,
+                subject = this.details.subject,
+                route = `/${subject.type}/${subject.id}/discussion/${id}/`;
+            this.$go(route);
         }
     }
 };

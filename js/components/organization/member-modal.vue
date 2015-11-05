@@ -99,7 +99,7 @@ export default {
                 details: this._('{user} is not a member of this organization anymore')
                     .replace('{user}', this.user.fullname)
             });
-            this.$broadcast('modal:close');
+            this.$refs.modal.close();
         },
         submit: function() {
             var data = {
@@ -121,7 +121,7 @@ export default {
                     .replace('{user}', this.user.fullname)
                     .replace('{role}', response.obj.role)
             });
-            this.$broadcast('modal:close');
+            this.$refs.modal.close();
         },
         on_updated: function(response) {
             this.org.fetch();
@@ -131,7 +131,7 @@ export default {
                     .replace('{user}', this.user.fullname)
                     .replace('{role}', response.obj.role)
             });
-            this.$broadcast('modal:close');
+            this.$refs.modal.close();
         }
     }
 };

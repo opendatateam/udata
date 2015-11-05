@@ -36,7 +36,11 @@ export default {
     },
     events: {
         'datatable:item:click': function(issue) {
-            this.$go('/issue/' + issue.id + '/');
+            let id = issue.id,
+                prefix = issue.class.replace('Issue', '').toLowerCase(),
+                subject = issue.subject,
+                route = `/${prefix}/${subject}/issue/${id}/`;
+            this.$go(route);
         }
     },
     props: {

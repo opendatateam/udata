@@ -36,7 +36,30 @@ router.map({
         }
     },
     '/dataset/:oid/': {
-        component: view('dataset')
+        name: 'dataset',
+        component: view('dataset'),
+        subRoutes: {
+            'issue/:issue_id/': {
+                name: 'dataset-issue',
+                component: modal('issues/modal')
+            },
+            'discussion/:discussion_id/': {
+                name: 'dataset-discussion',
+                component: modal('discussions/modal')
+            },
+            'community-resource/:rid/': {
+                name: 'dataset-community-resource',
+                component: modal('communityresource/edit-modal')
+            },
+            // '/resource/new/': {
+            //     name: 'dataset-new-resource',
+            //     component: modal('dataset/resource/add-modal')
+            // },
+            // '/resource/:rid/': {
+            //     name: 'dataset-resource',
+            //     component: modal('dataset/resource/resource-modal')
+            // }
+        }
     },
     '/community-resource/new/': {
         component: view('community-resource-wizard')
@@ -45,7 +68,18 @@ router.map({
         component: view('reuse-wizard')
     },
     '/reuse/:oid/': {
-        component: view('reuse')
+        name: 'reuse',
+        component: view('reuse'),
+        subRoutes: {
+            'issue/:issue_id/': {
+                name: 'reuse-issue',
+                component: modal('issues/modal')
+            },
+            'discussion/:discussion_id/': {
+                name: 'reuse-issue',
+                component: modal('discussions/modal')
+            }
+        }
     },
     '/organization/new/': {
         component: view('organization-wizard')
@@ -59,6 +93,7 @@ router.map({
         }
     },
     '/organization/:oid/': {
+        name: 'organization',
         component: view('organization')
     },
     '/user/:oid/': {
@@ -91,21 +126,7 @@ router.map({
     },
     '/system/': {
         component: view('system')
-    },
-    // '/issue/:oid/': function(issue_id) {
-    //     var m = this.$modal({data: {
-    //                 issueid: issue_id
-    //             }},
-    //             Vue.extend(require('components/issues/modal.vue'))
-    //         );
-    // },
-    // '/discussion/:oid/': function(discussion_id) {
-    //     var m = this.$modal({data: {
-    //                 discussionid: discussion_id
-    //             }},
-    //             Vue.extend(require('components/discussions/modal.vue'))
-    //         );
-    // }
+    }
 });
 
 
@@ -124,6 +145,16 @@ Vue.prototype.$go = function(route) {
 function view(name) {
     return function(resolve) {
         require(['./views/' + name + '.vue'], resolve);
+    }
+};
+
+/**
+ * Asynchronously load model mald (Webpack Lazy loading compatible)
+ * @param  {string}   name     the filename (basename) of the view to load.
+ */
+function modal(name) {
+    return function(resolve) {
+        require(['./components/'+name+'.vue'], resolve);
     }
 };
 

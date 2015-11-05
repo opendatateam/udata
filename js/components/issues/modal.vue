@@ -11,12 +11,16 @@
 </style>
 
 <template>
-<modal v-ref:modal :title="_('Issue')" class="issue-modal">
+<modal v-ref:modal :title="_('Issue')" class="issue-modal" size="lg">
     <div class="modal-body">
-        <dataset-card v-if="issue.class | is_dataset"
-            :datasetid="issue.subject"></dataset-card>
-        <reuse-card v-if="issue.class | is_reuse"
-            :reuseid="issue.subject"></reuse-card>
+        <div class="row">
+            <dataset-card class="col-xs-12 col-md-offset-3 col-md-6"
+                v-if="issue.class | is_dataset"
+                :datasetid="issue.subject"></dataset-card>
+            <reuse-card class="col-xs-12 col-md-offset-3 col-md-6"
+                v-if="issue.class | is_reuse"
+                :reuseid="issue.subject"></reuse-card>
+        </div>
         <h3>{{ issue.title }}</h3>
         <div class="direct-chat-messages">
             <div class="direct-chat-msg"
@@ -32,7 +36,7 @@
         </div>
     </div>
     <footer class="modal-footer text-center">
-        <form v-if="!issue.closed">
+        <form v-if="!issue.closed" v-el:form>
             <div class="form-group">
                 <textarea class="form-control" rows="3"
                     :placeholder="_('Type your comment')"
@@ -63,21 +67,23 @@ import Vue from 'vue';
 export default {
     name: 'issue-modal',
     mixins: [require('components/form/base-form')],
-    replace: false,
     components: {
         'modal': require('components/modal.vue'),
         'dataset-card': require('components/dataset/card.vue'),
         'reuse-card': require('components/reuse/card.vue'),
     },
-    props: {
-        issueid: null
-    },
     data: function() {
         return {
             issue: {},
             avatar_placeholder: require('helpers/placeholders').user,
-            comment: null
+            comment: null,
+            next_route: null
         };
+    },
+    events: {
+        'modal:closed': function() {
+            this.$go(this.next_route);
+        }
     },
     filters: {
         is_dataset: function(kind) {
@@ -89,11 +95,22 @@ export default {
             return kind.startsWith('Reuse');
         }
     },
-    ready: function() {
-        API.issues.get_issue({id: this.issueid}, (response) => {
-            this.issue = response.obj;
-            this.$emit('issue:loaded');
-        });
+    route: {
+        data() {
+            if (this.$route.matched.length > 1) {
+                // This is a nested view
+                let idx = this.$route.matched.length - 2,
+                    parent = this.$route.matched[idx];
+                this.next_route = {
+                    name: parent.handler.name,
+                    params: parent.params
+                };
+            }
+            let id = this.$route.params.issue_id;
+            API.issues.get_issue({id}, (response) => {
+                this.issue = response.obj;
+            });
+        }
     },
     methods: {
         close_issue: function() {
@@ -104,12 +121,12 @@ export default {
         },
         send_comment: function(comment, close) {
             if (this.validate()) {
-                API.issues.comment_issue({id: this.issueid, payload: {
+                API.issues.comment_issue({id: this.issue.id, payload: {
                     comment: comment,
                     close: close || false
                 }}, (response) => {
                     this.issue = response.obj;
-                    this.$emit('issue:loaded');
+                    this.comment = null;
                 });
             }
         }

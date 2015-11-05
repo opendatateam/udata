@@ -52,38 +52,11 @@ export default {
             community: new CommunityResource(),
         };
     },
-    ready: function() {
-        /* In case of a targeted community resource,
-           we display the appropriated popin on load. */
-        if ('community_id' in this.$route.params) {
-            this.display(this.$route.params['community_id']);
-        }
-    },
-    methods: {
-        display: function(communityId) {
-            this.community.fetch(communityId);
-            this.$root.$modal({
-                    data: {
-                        community: this.community,
-                        dataset: this.community.dataset,
-                        callback: this.refresh,
-                    }
-                },
-                Vue.extend(require('components/communityresource/edit-modal.vue'))
-            );
-        },
-        refresh: function() {
-            this.communities.fetch();
-        }
-    },
     events: {
         'datatable:item:click': function(community) {
-            if (community.organization) {
-                this.$go('/organization/' + community.organization.id + '/?community_id=' + community.id);
-            } else {
-                this.$go('/user/' + community.owner.id + '/?community_id=' + community.id);
-            }
-            this.display(community.id);
+            this.$go({name: 'dataset-community-resource', params: {
+                oid: community.dataset.id, rid: community.id
+            }});
         }
     }
 };

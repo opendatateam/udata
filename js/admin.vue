@@ -12,7 +12,7 @@
 </style>
 
 <template>
-    <!-- header logo: style can be found in header.less -->
+    <!-- Placeholder for non-routable modals -->
     <div v-el:modal></div>
     <app-header class="main-header"></app-header>
     <sidebar class="main-sidebar"></sidebar>
@@ -39,9 +39,7 @@ export default {
     },
     components: {
         'app-header': require('components/header.vue'),
-        'sidebar': require('components/sidebar.vue'),
-        'content-header': require('components/content-header.vue'),
-        'alert-box': require('components/alert.vue'),
+        'sidebar': require('components/sidebar.vue')
     },
     events: {
         'navigation:toggled': function() {

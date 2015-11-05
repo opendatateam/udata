@@ -4,7 +4,7 @@
     <div class="modal-dialog" :class="{ 'modal-sm': size == 'sm', 'modal-lg': size == 'lg' }">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
+                <button type="button" class="close" @click="close">
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only" v-i18n="Close"></span>
                 </button>
@@ -23,15 +23,15 @@ export default {
     replace: true,
     name: 'modal',
     props: ['title', 'size'],
-    events: {
-        'modal:close': function() {
-            this.close();
-        }
-    },
     ready: function() {
-        $(this.$el).modal().on('hidden.bs.modal', () => {
-            this.$destroy(true);
-        });
+        $(this.$el).modal()
+            .on('hide.bs.modal', (e) => {
+                this.$dispatch('modal:close');
+            })
+            .on('hidden.bs.modal', () => {
+                this.$dispatch('modal:closed');
+                this.$destroy(true);
+            });
     },
     methods: {
         close: function() {

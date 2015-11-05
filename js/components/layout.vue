@@ -42,6 +42,11 @@
 
 <template>
 <div class="content-wrapper">
+    <!-- Routable modals should be inserted here
+        Wait for feedback or implementation on named outlets.
+        See: https://github.com/vuejs/vue-router/issues/213
+    -->
+    <router-view></router-view>
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>

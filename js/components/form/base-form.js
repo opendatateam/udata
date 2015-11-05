@@ -116,9 +116,7 @@ export default {
             return s;
         },
         $form: function() {
-            return this.$el.tagName.toLowerCase() === 'form'
-                ? this.$el
-                : this.$el.querySelector('form');
+            return this.$refs.form || this.$els.form;
         }
     },
     attached: function() {
@@ -143,7 +141,9 @@ export default {
         });
     },
     detached: function() {
-        $(this.$form).data('validator', null);
+        if (this.$form) {
+            $(this.$form).data('validator', null);
+        }
     },
     methods: {
         /**
