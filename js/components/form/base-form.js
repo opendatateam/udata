@@ -203,7 +203,7 @@ export default {
                 if ('errors' in data) {
                     this.fill_errors(data.errors);
                 } else {
-                    log.warn('Unknown error:', e);
+                    $(this.$form).append(`<div class="form-group has-error"><p class="help-block">${data.message}</p></div>`);
                 }
             }
         },
@@ -212,7 +212,7 @@ export default {
                 if (element.name in errors) {
                     let name = element.name;
                     let error = errors[name][0];
-                    let errorElement = `<label for="${name}" class="help-block" id="${name}-error">${error}</label>`;
+                    let errorElement = `<p class="help-block" id="${name}-error">${error}</p>`;
                     $(element).closest('.form-group,.field-wrapper').removeClass('has-success').addClass('has-error').append(errorElement);
                 }
             });
