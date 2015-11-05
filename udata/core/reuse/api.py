@@ -6,7 +6,7 @@ from datetime import datetime
 from flask import request
 
 from udata import search
-from udata.api import api, API, ModelAPI, SingleObjectAPI
+from udata.api import api, API, ModelAPI, SingleObjectAPI, errors
 from udata.auth import admin_permission
 from udata.models import Reuse, REUSE_TYPES
 from udata.utils import multi_to_dict
@@ -66,7 +66,7 @@ class ReuseAPI(ModelAPI):
     @api.doc('update_reuse')
     @api.expect(reuse_fields)
     @api.marshal_with(reuse_fields)
-    @api.response(400, 'Validation error')
+    @api.response(400, errors.VALIDATION_ERROR)
     def put(self, reuse):
         '''Update a given reuse'''
         if reuse.deleted:

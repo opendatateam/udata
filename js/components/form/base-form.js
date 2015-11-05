@@ -203,7 +203,7 @@ export default {
                 if ('errors' in data) {
                     this.fill_errors(data.errors);
                 } else {
-                    log.warn('Unknown error:', e);
+                    $(this.$form).append(this.error_element('', data.message));
                 }
             }
         },
@@ -212,10 +212,16 @@ export default {
                 if (element.name in errors) {
                     let name = element.name;
                     let error = errors[name][0];
-                    let errorElement = `<label for="${name}" class="help-block" id="${name}-error">${error}</label>`;
-                    $(element).closest('.form-group,.field-wrapper').removeClass('has-success').addClass('has-error').append(errorElement);
+                    $(element).closest('.form-group,.field-wrapper')
+                              .removeClass('has-success')
+                              .addClass('has-error')
+                              .append(this.error_element(name, error));
                 }
             });
         },
+        error_element: function(id, message) {
+            $(`#form-${id}-error`).remove();
+            return `<p class="form-error" id="form-${id}-error">${message}</p>`;
+        }
     }
 };
