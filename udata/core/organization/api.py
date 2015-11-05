@@ -6,7 +6,7 @@ from datetime import datetime
 from flask import request
 
 from udata import search
-from udata.api import api, API
+from udata.api import api, API, errors
 from udata.auth import admin_permission, current_user
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
@@ -88,7 +88,7 @@ class OrganizationAPI(API):
     @api.doc('update_organization')
     @api.expect(org_fields)
     @api.marshal_with(org_fields)
-    @api.response(400, 'Validation error')
+    @api.response(400, errors.VALIDATION_ERROR)
     def put(self, org):
         '''Update a organization given its identifier'''
         if org.deleted:

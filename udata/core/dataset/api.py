@@ -10,7 +10,7 @@ from werkzeug.datastructures import FileStorage
 
 from udata import fileutils, search
 from udata.auth import admin_permission
-from udata.api import api, SingleObjectAPI, API
+from udata.api import api, SingleObjectAPI, API, errors
 from udata.core import storages
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
@@ -114,7 +114,7 @@ class DatasetAPI(API):
     @api.doc('update_dataset')
     @api.expect(dataset_fields)
     @api.marshal_with(dataset_fields)
-    @api.response(400, 'Validation error')
+    @api.response(400, errors.VALIDATION_ERROR)
     def put(self, dataset):
         '''Update a dataset given its identifier'''
         if dataset.deleted:
