@@ -190,7 +190,7 @@ export class List extends Base {
         this.items = this.$options.data || [];
         this.query = this.$options.query || {};
         if (this.$options.loading !== undefined) {
-            this.loading = !!this.$options.loading;
+            this.loading = Boolean(this.$options.loading);
         } else {
             this.loading = this.$options.data === undefined;
         }

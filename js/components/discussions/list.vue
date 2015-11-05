@@ -36,11 +36,12 @@ export default {
     },
     events: {
         'datatable:item:click': function(discussion) {
-            let id = discussion.id,
-                prefix = discussion.class.replace('Discussion', '').toLowerCase(),
-                subject = discussion.subject,
-                route = `/${prefix}/${subject}/discussion/${id}/`;
-            this.$go(route);
+            let prefix = discussion.class.replace('Discussion', '').toLowerCase(),
+                route = `${prefix}-discussion`;
+            this.$go({name: route, params: {
+                oid: discussion.subject,
+                discussion_id: discussion.id
+            }});
         }
     },
     props: {
