@@ -249,8 +249,7 @@ class DatasetSearch(ModelSearchAdapter):
                 geozones.append({
                     'id': zone.id,
                     'name': zone.name,
-                    'keys': [key for key in zone.keys
-                             if not key.startswith('-')]  # Avoid -99.
+                    'keys': zone.keys_values
                 })
                 parents |= set(zone.parents)
 
