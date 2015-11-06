@@ -42,7 +42,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <box boxclass="box-solid" :footer="true">
-                    <component :is="active_step.component" v-ref:content></component>
+                    <component :is="component" v-ref:content></component>
                     <footer slot="footer">
                         <div class="col-xs-12">
                             <button v-if="previous_step"
@@ -77,24 +77,30 @@ export default {
     },
     props: ['title', 'steps', 'finish'],
     computed: {
-        active_step: function() {
+        active_step() {
             if (!this.steps) {
                 return;
             }
             return this.steps[this.step_index];
         },
-        next_step: function() {
+        component() {
+            if (!this.steps) {
+                return;
+            }
+            return `step-${this.step_index}`;
+        },
+        next_step() {
             if (!this.steps || this.step_index + 1 === this.steps.length) {
                 return;
             }
             return this.steps[this.step_index + 1];
         },
-        can_finish: function() {
+        can_finish() {
             return this.steps
                 && this.step_index + 1 === this.steps.length
                 && this.finish;
         },
-        previous_step: function() {
+        previous_step() {
             if (!this.steps || this.step_index  <= 0) {
                 return;
             }
@@ -103,7 +109,7 @@ export default {
     },
     components: {Box, Layout},
     methods: {
-        click_next: function() {
+        click_next() {
             if (this.active_step.next && !this.active_step.next(this.$refs.content)) {
                 return;
             }
@@ -113,12 +119,12 @@ export default {
                 this.$dispatch('wizard:finish');
             }
         },
-        click_previous: function() {
+        click_previous() {
             if (this.previous_step) {
                 this.$dispatch('wizard:previous-step');
             }
         },
-        go_next: function() {
+        go_next() {
             if (this.next_step) {
                 this.step_index++;
                 Vue.nextTick(() => {
@@ -127,7 +133,7 @@ export default {
                 });
             }
         },
-        go_previous: function() {
+        go_previous() {
             if (this.previous_step) {
                 this.step_index--;
                 Vue.nextTick(() => {
@@ -136,11 +142,20 @@ export default {
                 });
             }
         },
-        init_step: function() {
+        init_step() {
             if (this.active_step.init) {
                 this.active_step.init(this.$refs.content);
             }
         }
+    },
+    created() {
+        // Load steps components
+        this.steps.forEach((step, index) => {
+            let component = step.component instanceof Vue ?
+                step.component :
+                Vue.extend(step.component);
+            this.$options.components[`step-${index}`] = component;
+        });
     }
 };
 </script>

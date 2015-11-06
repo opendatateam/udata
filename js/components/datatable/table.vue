@@ -83,11 +83,6 @@ export default {
         },
         sort_classes_for(field) {
             let classes = {};
-                // classes = {
-                //     'fa-sort': p.sorted != sort_for(field),
-                //     'fa-sort-asc': p.sorted == sort_for(field) && !p.reversed,
-                //     'fa-sort-desc': p.sorted == sort_for(field) && p.reversed
-                // };
 
             if (this.p.sorted != this.sort_for(field)) {
                 classes['fa-sort'] = true;

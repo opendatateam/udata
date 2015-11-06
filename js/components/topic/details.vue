@@ -37,8 +37,8 @@ export default {
             this.toggled = !this.toggled;
         },
         save: function(e) {
-            if (this.$refs.form.$.form.validate()) {
-                var data = this.$refs.form.$.form.serialize();
+            if (this.$refs.form.$refs.form.validate()) {
+                var data = this.$refs.form.$refs.form.serialize();
 
                 this.topic.save(data);
                 e.preventDefault();

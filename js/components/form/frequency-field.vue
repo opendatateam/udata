@@ -59,8 +59,8 @@ export default {
     methods: {
         onSelect: function() {
             let value = this.$refs.select.$el.value;
-            let dateInput = this.$refs.picker.$$.input;
-            let dateHidden = this.$refs.picker.$$.hidden;
+            let dateInput = this.$refs.picker.$els.input;
+            let dateHidden = this.$refs.picker.$els.hidden;
             let futureDate = '';
             switch (value) {
                 case "daily":

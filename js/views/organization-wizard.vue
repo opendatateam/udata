@@ -13,11 +13,11 @@ export default {
             steps: [{
                 label: this._('Verification'),
                 subtitle: this._('Ensure your organization does not exists'),
-                component: 'pre-create'
+                component: require('components/organization/pre-create.vue'),
             }, {
                 label: this._('Description'),
                 subtitle: this._('Describe your organization'),
-                component: 'create-form',
+                component: require('components/organization/form.vue'),
                 next: (component) => {
                     if (component.validate()) {
                         let data = component.serialize();
@@ -32,7 +32,7 @@ export default {
             }, {
                 label: this._('Logo'),
                 subtitle: this._('Upload your organization logo'),
-                component: 'image-picker',
+                component: require('components/widgets/image-picker.vue'),
                 init: (component) => {
                     var endpoint = API.organizations.operations.organization_logo;
                     component.endpoint = endpoint.urlify({org: this.organization.id});
@@ -44,7 +44,7 @@ export default {
             }, {
                 label: this._('Publish'),
                 subtitle: this._('Publish some content'),
-                component: 'post-create',
+                component: require('components/organization/post-create.vue'),
                 init: (component) => {
                     component.organization = this.organization;
                 }
@@ -53,11 +53,7 @@ export default {
     },
     props: ['orgid'],
     components: {
-        wizard: require('components/widgets/wizard.vue'),
-        'pre-create': require('components/organization/pre-create.vue'),
-        'create-form': require('components/organization/form.vue'),
-        'post-create': require('components/organization/post-create.vue'),
-        'image-picker': require('components/widgets/image-picker.vue')
+        wizard: require('components/widgets/wizard.vue')
     },
     events: {
         'wizard:next-step': function() {

@@ -76,7 +76,7 @@ export default {
         },
         save: function(e) {
             e.preventDefault();
-            let form = this.$refs.form.$.form;
+            let form = this.$refs.form.$refs.form;
             if (form.validate()) {
                 this.post.update(form.serialize(), (response) => {
                     this.post.on_fetched(response);

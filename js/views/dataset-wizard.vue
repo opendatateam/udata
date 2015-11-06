@@ -21,7 +21,7 @@ export default {
             steps: [{
                 label: this._('Publish as'),
                 subtitle: this._('Choose who is publishing'),
-                component: 'publish-as',
+                component: require('components/widgets/publish-as.vue'),
                 next: (component) => {
                     if (component.selected) {
                         this.publish_as = component.selected;
@@ -31,7 +31,7 @@ export default {
             }, {
                 label: this._('New dataset'),
                 subtitle: this._('Describe your dataset'),
-                component: 'create-form',
+                component: require('components/dataset/form.vue'),
                 next: (component) => {
                     if (component.validate()) {
                         let data = component.serialize();
@@ -49,7 +49,7 @@ export default {
             }, {
                 label: this._('Resources'),
                 subtitle: this._('Add your firsts resources'),
-                component: 'resource-form',
+                component: require('components/dataset/add-resource-form.vue'),
                 init: (component) => {
                     component.dataset = this.dataset;
                 },
@@ -66,7 +66,7 @@ export default {
             }, {
                 label: this._('Share'),
                 subtitle: this._('Communicate about your publication'),
-                component: 'dataset-created',
+                component: require('components/dataset/created.vue'),
                 init: (component) => {
                     component.dataset = this.dataset;
                 }
@@ -74,12 +74,7 @@ export default {
          };
     },
     components: {
-        wizard: require('components/widgets/wizard.vue'),
-        'publish-as': require('components/widgets/publish-as.vue'),
-        'create-form': require('components/dataset/form.vue'),
-        'add-resource-form': require('components/dataset/add-resource-form.vue'),
-        'resource-form': require('components/dataset/resource/form.vue'),
-        'dataset-created': require('components/dataset/created.vue')
+        wizard: require('components/widgets/wizard.vue')
     },
     events: {
         'wizard:next-step': function() {

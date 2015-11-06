@@ -13,7 +13,7 @@ export default {
             steps: [{
                 label: this._('Harvest as'),
                 subtitle: this._('Choose who is harvesting'),
-                component: 'publishas',
+                component: require('components/widgets/publish-as.vue'),
                 next: (component) => {
                     if (component.selected) {
                         this.publish_as = component.selected;
@@ -23,9 +23,9 @@ export default {
             }, {
                 label: this._('New harvester'),
                 subtitle: this._('Configure your harvester'),
-                component: 'harvest-form',
+                component: require('components/harvest/form.vue'),
                 next: (component) => {
-                    if (component.$.form.validate()) {
+                    if (component.$refs.form.validate()) {
                         Object.assign(this.source, component.serialize());
                         if (this.publish_as) {
                             this.source.organization = this.publish_as;
@@ -40,7 +40,7 @@ export default {
             }, {
                 label: this._('Done'),
                 subtitle: this._('Your harvester is ready'),
-                component: 'created',
+                component: require('components/harvest/created.vue'),
                 init: (component) => {
                     component.source = this.source;
                 }
@@ -48,9 +48,6 @@ export default {
          };
     },
     components: {
-        'harvest-form': require('components/harvest/form.vue'),
-        publishas: require('components/widgets/publish-as.vue'),
-        created: require('components/harvest/created.vue'),
         wizard: require('components/widgets/wizard.vue'),
     },
     events: {
@@ -61,7 +58,7 @@ export default {
             this.$refs.wizard.go_previous();
         },
         'wizard:step-changed': function() {
-            this.$refs.wizard.$.content.source = this.source;
+            this.$refs.wizard.$refs.content.source = this.source;
         }
     }
 };
