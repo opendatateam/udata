@@ -464,21 +464,21 @@ export class PageList extends List {
     }
 
     get data() {
-        return super.data.slice(
+        return this.filtered.slice(
             Math.max(this.page - 1, 0) * this.page_size,
             this.page * this.page_size
         );
     }
 
     set data(value) {
-        super.data = value;
+        this._set('filtered', value);
     }
     /**
      * Total amount of pages
      * @return {int}
      */
     get pages() {
-        return Math.ceil(super.data.length / this.page_size);
+        return Math.ceil(this.items.length / this.page_size);
     }
 
     /**
