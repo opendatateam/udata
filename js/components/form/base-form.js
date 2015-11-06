@@ -140,7 +140,7 @@ export default {
             }
         });
     },
-    detached: function() {
+    beforeDestroy: function() {
         if (this.$form) {
             $(this.$form).data('validator', null);
         }

@@ -71,11 +71,14 @@ export default {
         };
     },
     computed: {
-        show_footer: function() {
-            return (this.p && this.p.pages > 1)
-                || $(this.$els.footer_container).find('footer > *').length;
+        has_footer_children() {
+            return this.$els.footer_container
+                && this.$els.footer_container.children.length;
         },
-        boxclasses: function() {
+        show_footer() {
+            return (this.p && this.p.pages > 1) || this.has_footer_children;
+        },
+        boxclasses() {
             return [
                 'datatable-widget',
                 this.tint ? 'box-' + this.tint : 'box-solid',

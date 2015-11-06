@@ -10,17 +10,13 @@
 <table class="table table-hover datatable">
     <thead>
         <tr>
-            <th class="text-{{field.align || 'left'}}"
-                :class="{ 'pointer': field.sort }"
-                v-for="field in fields"
+            <th v-for="field in fields"
+                :class="classes_for(field)"
                 @click="header_click(field)"
                 :width="field.width | thwidth">
                 {{field.label}}
-                <span class="fa fa-fw" v-if="field.sort" :class="{
-                    'fa-sort': p.sorted != sort_for(field),
-                    'fa-sort-asc': p.sorted == sort_for(field) && !p.reversed,
-                    'fa-sort-desc': p.sorted == sort_for(field) && p.reversed
-                }"></span>
+                <span class="fa fa-fw" v-if="field.sort"
+                    :class="sort_classes_for(field)"></span>
             </th>
         </tr>
     </thead>
@@ -58,10 +54,6 @@ export default {
         remote: function() {
             return this.p && this.p.serverside;
         },
-        show_footer: function() {
-            return (this.p && this.p.pages > 1)
-                || $(this.$els.footer_container).find('footer > *').length;
-        },
         trackBy: function() {
             return this.track || '';
         }
@@ -73,17 +65,43 @@ export default {
         }
     },
     methods: {
-        header_click: function(field) {
+        header_click(field) {
             if (field.sort) {
                 this.p.sort(this.sort_for(field));
             }
         },
-        sort_for: function(field) {
+        sort_for(field) {
             return this.remote ? field.sort : field.key;
+        },
+        classes_for(field) {
+            let classes = {pointer: Boolean(field.sort)},
+                align = field.align || 'left';
+
+            classes[`text-${align}`] = true;
+
+            return classes;
+        },
+        sort_classes_for(field) {
+            let classes = {};
+                // classes = {
+                //     'fa-sort': p.sorted != sort_for(field),
+                //     'fa-sort-asc': p.sorted == sort_for(field) && !p.reversed,
+                //     'fa-sort-desc': p.sorted == sort_for(field) && p.reversed
+                // };
+
+            if (this.p.sorted != this.sort_for(field)) {
+                classes['fa-sort'] = true;
+            } else if (!this.p.reversed) {
+                classes['fa-sort-asc'] = true;
+            } else if (this.p.reversed) {
+                classes['fa-sort-desc'] = true;
+            }
+
+            return classes;
         }
     },
     filters: {
-        thwidth: function(value) {
+        thwidth(value) {
             switch(value) {
                 case undefined:
                     return '';
