@@ -125,3 +125,12 @@ def purge():
     log.info('Purging deleted harvest sources')
     count = actions.purge_sources()
     log.info('Purged %s source(s)', count)
+
+
+@m.option('filename', help='The mapping CSV filename')
+@m.option('domain', help='The remote domain')
+def attach(domain, filename):
+    '''Attach existing dataset to their harvest remote id.'''
+    log.info('Attaching datasets for domain %s', domain)
+    count = actions.attach(domain, filename)
+    log.info('Attached %s datasets to %s', count, domain)
