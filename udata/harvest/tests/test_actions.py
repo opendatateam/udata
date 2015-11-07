@@ -241,9 +241,10 @@ class HarvestActionsTest(DBTestMixin, TestCase):
                 })
             csvfile.flush()
 
-            count = actions.attach('test.org', csvfile.name)
+            result = actions.attach('test.org', csvfile.name)
 
-        self.assertEqual(count, len(datasets))
+        self.assertEqual(result.success, len(datasets))
+        self.assertEqual(result.errors, 0)
         for index, dataset in enumerate(datasets):
             dataset.reload()
             self.assertEqual(dataset.extras['harvest:domain'], 'test.org')
@@ -274,13 +275,13 @@ class HarvestActionsTest(DBTestMixin, TestCase):
                 })
             csvfile.flush()
 
-            count = actions.attach('test.org', csvfile.name)
+            result = actions.attach('test.org', csvfile.name)
 
         dbcount = Dataset.objects(**{
             'extras__harvest:remote_id__exists': True
             }).count()
-        self.assertEqual(count, len(datasets))
-        self.assertEqual(dbcount, count)
+        self.assertEqual(result.success, len(datasets))
+        self.assertEqual(dbcount, result.success)
         for index, dataset in enumerate(datasets):
             dataset.reload()
             self.assertEqual(dataset.extras['harvest:domain'], 'test.org')
@@ -307,9 +308,10 @@ class HarvestActionsTest(DBTestMixin, TestCase):
                 })
             csvfile.flush()
 
-            count = actions.attach('test.org', csvfile.name)
+            result = actions.attach('test.org', csvfile.name)
 
-        self.assertEqual(count, len(datasets))
+        self.assertEqual(result.success, len(datasets))
+        self.assertEqual(result.errors, 1)
 
 
 class ExecutionTestMixin(DBTestMixin):

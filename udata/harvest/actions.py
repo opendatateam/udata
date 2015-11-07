@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import csv
 import logging
 
+from collections import namedtuple
 from datetime import datetime
 
 from bson import ObjectId
@@ -166,6 +167,9 @@ def unschedule(ident):
     return source
 
 
+AttachResult = namedtuple('AttachResult', ['success', 'errors'])
+
+
 def attach(domain, filename):
     '''Attach existing dataset to their harvest remote id before harvesting.
 
@@ -178,6 +182,7 @@ def attach(domain, filename):
     and extras columns does not matter
     '''
     count = 0
+    errors = 0
     with open(filename) as csvfile:
         reader = csv.DictReader(csvfile,
                                 delimiter=b';',
@@ -187,6 +192,7 @@ def attach(domain, filename):
                 dataset = Dataset.objects.get(id=ObjectId(row['local']))
             except:  # noqa  (Never stop on failure)
                 log.warning('Unable to attach dataset : %s', row['local'])
+                errors += 1
                 continue
 
             # Detach previously attached dataset
@@ -203,4 +209,4 @@ def attach(domain, filename):
             dataset.save()
             count += 1
 
-    return count
+    return AttachResult(count, errors)
