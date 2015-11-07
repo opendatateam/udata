@@ -104,6 +104,7 @@ router.map({
         component: view('harvester-wizard')
     },
     '/harvester/:oid/': {
+        name: 'harvester',
         component: view('harvester')
     },
     '/harvester/:oid/edit': {
