@@ -4,23 +4,36 @@ import config from 'config';
 
 Vue.use(VueRouter)
 
-const router = new VueRouter({history: true, root: config.root});
+const router = new VueRouter({
+    history: true,
+    root: config.root
+});
 
 router.map({
     '/': {
-        component: view('home')
+        component: function(resolve) {
+            require(['./views/home.vue'], resolve);
+        }
     },
     '/me/': {
-        component: view('me')
+        component: function(resolve) {
+            require(['./views/me.vue'], resolve);
+        }
     },
     '/site/': {
-        component: view('site')
+        component: function(resolve) {
+            require(['./views/site.vue'], resolve);
+        }
     },
     '/dataset/new/': {
-        component: view('dataset-wizard')
+        component: function(resolve) {
+            require(['./views/dataset-wizard.vue'], resolve);
+        }
     },
-    '/dataset/new/:oid/':{
-        component: view('dataset-wizard'),
+    '/dataset/new/:oid/': {
+        component: function(resolve) {
+            require(['./views/dataset-wizard.vue'], resolve);
+        },
         callback: function(view) {
             if (!view.dataset.id) {
                 view.dataset.fetch(oid);
@@ -28,7 +41,9 @@ router.map({
         }
     },
     '/dataset/new/:oid/share': {
-        component: view('dataset-wizard'),
+        component: function(resolve) {
+            require(['./views/dataset-wizard.vue'], resolve);
+        },
         callback: function(view) {
             if (!view.dataset.id) {
                 view.dataset.fetch(oid);
@@ -37,55 +52,81 @@ router.map({
     },
     '/dataset/:oid/': {
         name: 'dataset',
-        component: view('dataset'),
+        component: function(resolve) {
+            require(['./views/dataset.vue'], resolve);
+        },
         subRoutes: {
             'issue/:issue_id/': {
                 name: 'dataset-issue',
-                component: modal('issues/modal')
+                component: function(resolve) {
+                    require(['./components/issues/modal.vue'], resolve);
+                }
             },
             'discussion/:discussion_id/': {
                 name: 'dataset-discussion',
-                component: modal('discussions/modal')
+                component: function(resolve) {
+                    require(['./components/discussions/modal.vue'], resolve);
+                }
             },
             'community-resource/:rid/': {
                 name: 'dataset-community-resource',
-                component: modal('communityresource/edit-modal')
+                component: function(resolve) {
+                    require(['./components/communityresource/edit-modal.vue'], resolve);
+                }
             },
             // '/resource/new/': {
             //     name: 'dataset-new-resource',
-            //     component: modal('dataset/resource/add-modal')
+            //     component: function(resolve) {
+            //         require(['./components/dataset/resource/add-modal.vue'], resolve);
+            //     }
             // },
             // '/resource/:rid/': {
             //     name: 'dataset-resource',
-            //     component: modal('dataset/resource/resource-modal')
+            //     component: function(resolve) {
+            //         require(['./components/dataset/resource/resource-modal.vue'], resolve);
+            //     }
             // }
         }
     },
     '/community-resource/new/': {
-        component: view('community-resource-wizard')
+        component: function(resolve) {
+            require(['./views/community-resource-wizard.vue'], resolve);
+        }
     },
     '/reuse/new/': {
-        component: view('reuse-wizard')
+        component: function(resolve) {
+            require(['./views/reuse-wizard.vue'], resolve);
+        }
     },
     '/reuse/:oid/': {
         name: 'reuse',
-        component: view('reuse'),
+        component: function(resolve) {
+            require(['./views/reuse.vue'], resolve);
+        },
         subRoutes: {
             'issue/:issue_id/': {
                 name: 'reuse-issue',
-                component: modal('issues/modal')
+                component: function(resolve) {
+                    require(['./components/issues/modal.vue'], resolve);
+                }
             },
             'discussion/:discussion_id/': {
                 name: 'reuse-issue',
-                component: modal('discussions/modal')
+                component: function(resolve) {
+                    require(['./components/discussions/modal.vue'], resolve);
+                }
             }
         }
     },
     '/organization/new/': {
-        component: view('organization-wizard')
+        component: function(resolve) {
+            require(['./views/organization-wizard.vue'], resolve);
+        }
     },
     '/organization/new/:oid/': {
-        component: view('organization-wizard'),
+        component: function(resolve) {
+            require(['./views/organization-wizard.vue'], resolve);
+        },
         callback: function(view) {
             if (!view.organization.id) {
                 view.organization.fetch(oid);
@@ -94,39 +135,61 @@ router.map({
     },
     '/organization/:oid/': {
         name: 'organization',
-        component: view('organization')
+        component: function(resolve) {
+            require(['./views/organization.vue'], resolve);
+        }
     },
     '/user/:oid/': {
         name: 'user',
-        component: view('user')
+        component: function(resolve) {
+            require(['./views/user.vue'], resolve);
+        }
     },
     '/harvester/new/': {
-        component: view('harvester-wizard')
+        component: function(resolve) {
+            require(['./views/harvester-wizard.vue'], resolve);
+        }
     },
     '/harvester/:oid/': {
         name: 'harvester',
-        component: view('harvester')
+        component: function(resolve) {
+            require(['./views/harvester.vue'], resolve);
+        }
     },
     '/harvester/:oid/edit': {
-        component: view('harvester-edit')
+        component: function(resolve) {
+            require(['./views/harvester-edit.vue'], resolve);
+        }
     },
     '/post/new/': {
-        component: view('post-wizard')
+        component: function(resolve) {
+            require(['./views/post-wizard.vue'], resolve);
+        }
     },
     '/post/:oid/': {
-        component: view('post')
+        component: function(resolve) {
+            require(['./views/post.vue'], resolve);
+        }
     },
     '/topic/new/': {
-        component: view('topic-wizard')
+        component: function(resolve) {
+            require(['./views/topic-wizard.vue'], resolve);
+        }
     },
     '/topic/:oid/': {
-        component: view('topic')
+        component: function(resolve) {
+            require(['./views/topic.vue'], resolve);
+        }
     },
     '/editorial/': {
-        component: view('editorial')
+        component: function(resolve) {
+            require(['./views/editorial.vue'], resolve);
+        }
     },
     '/system/': {
-        component: view('system')
+        component: function(resolve) {
+            require(['./views/system.vue'], resolve);
+        }
     }
 });
 
@@ -136,27 +199,6 @@ router.map({
  */
 Vue.prototype.$go = function(route) {
     return router.go(route);
-};
-
-
-/**
- * Asynchronously load view (Webpack Lazy loading compatible)
- * @param  {string}   name     the filename (basename) of the view to load.
- */
-function view(name) {
-    return function(resolve) {
-        require(['./views/' + name + '.vue'], resolve);
-    }
-};
-
-/**
- * Asynchronously load model mald (Webpack Lazy loading compatible)
- * @param  {string}   name     the filename (basename) of the view to load.
- */
-function modal(name) {
-    return function(resolve) {
-        require(['./components/'+name+'.vue'], resolve);
-    }
 };
 
 export default router;
