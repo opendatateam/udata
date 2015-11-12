@@ -3,17 +3,17 @@
 
 <template>
 <datatable icon="cog"
-    title="{{title}}"
+    :title="title"
     bodyclass="table-responsive no-padding"
-    p="{{ p }}" track="false"
-    loading="{{loading !== undefined ? loading : p.loading}}"
-    fields="{{ fields }}"
+    :p="p" :track="false"
+    :loading="loading !== undefined ? loading : p.loading"
+    :fields="fields"
     track="remote_id"
-    empty="{{ empty }}"
-    tint="{{job.status | statusClass}}">
-    <header class="row">
-        <div class="col-xs-12" v-class="col-md-6: job.created, col-md-12: job.created">
-            <content></content>
+    :empty="empty"
+    :tint="job.status | statusClass">
+    <header class="row" slot="header">
+        <div class="col-xs-12" :class="{ 'col-md-6': job.created, 'col-md-12': job.created }">
+            <slot></slot>
         </div>
         <dl class="dl-horizontal col-xs-12 col-md-6" v-show="job.created">
             <dt>{{ _('Created at') }}</dt>
@@ -24,7 +24,7 @@
             <dd><span class="label label-{{ job.status | statusClass }}">{{ job.status | statusI18n }}</span></dd>
             <dt v-if="job.errors && job.errors.length">{{ _('Errors') }}</dt>
             <dd v-if="job.errors && job.errors.length">
-                <div v-repeat="error:job.errors">
+                <div v-for="error in job.errors">
                     <p><strong>{{{error.message | markdown}}}</strong></p>
                     <div v-if="error.details">
                     <code><pre>{{error.details}}</pre></code>
@@ -35,17 +35,17 @@
             <dd v-if="job.items && job.items.length">
                 <span class="text-warning"
                     data-toggle="tooltip" data-placement="top"
-                    title="{{ _('Number of skipped items') }}"
+                    :title="_('Number of skipped items')"
                     >{{job.items | count 'skipped'}}</span>
                 /
                 <span class="text-danger"
                     data-toggle="tooltip" data-placement="top"
-                    title="{{ _('Number of failed items') }}"
+                    :title="_('Number of failed items')"
                     >{{job.items | count 'failed'}}</span>
                 /
                 <span class="text-green"
                     data-toggle="tooltip" data-placement="top"
-                    title="{{ _('Number of succeed items') }}"
+                    :title="_('Number of succeed items')"
                     >{{job.items | count 'done'}}</span>
                 /
                 <strong>{{job.items.length}}</strong>
@@ -67,13 +67,21 @@ import $ from 'jquery';
 
 export default {
     name: 'JobDetails',
-    props: ['job', 'loading', 'empty'],
+    props: {
+        job: {
+            type: Object,
+            default: function() {
+                return new HarvestJob();
+            }
+        },
+        loading: Boolean,
+        empty: String
+    },
     components: {
         datatable: require('components/datatable/widget.vue')
     },
     data: function() {
         return {
-            job: new HarvestJob(),
             fields: [{
                 label: this._('Remote ID'),
                 key: 'remote_id',
@@ -109,7 +117,7 @@ export default {
     },
     filters: {
         statusClass: function(value) {
-            return JOB_STATUS_CLASSES[value];
+            return JOB_STATUS_CLASSES[value] || '';
         },
         statusI18n: function(value) {
             return JOB_STATUS_I18N[value];

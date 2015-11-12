@@ -6,11 +6,12 @@
 
 <template>
 <div class="checkbox">
-    <label for="{{field.id}}" v-class="required: required">
-        <input type="checkbox" v-attr="
-            id: field.id,
-            name: field.id,
-            checked: value"></input>
+    <label :for="field.id" :class="{ 'required': required }">
+        <input type="checkbox"
+            :id="field.id"
+            :name="field.id"
+            :checked="value"
+            ></input>
         {{ field.label }}
     </label>
 </div>

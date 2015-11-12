@@ -1,5 +1,5 @@
 <template>
-<form-vertical v-ref="form" fields="{{fields}}" model="{{dataset}}"></form-vertical>
+<vform v-ref:form :fields="fields" :model="dataset"></vform>
 </template>
 
 <script>
@@ -8,11 +8,17 @@ import licenses from 'models/licenses';
 import granularities from 'models/geogranularities';
 import frequencies from 'models/frequencies';
 
-module.exports = {
-    props: ['dataset'],
+export default {
+    props: {
+        dataset: {
+            type: Object,
+            default: function() {
+                return new Dataset();
+            }
+        }
+    },
     data: function() {
         return {
-            dataset: new Dataset(),
             fields: [{
                     id: 'title',
                     label: this._('Title')
@@ -63,17 +69,17 @@ module.exports = {
         };
     },
     components: {
-        'form-vertical': require('components/form/vertical-form.vue')
+        vform: require('components/form/vertical-form.vue')
     },
     methods: {
         serialize: function() {
-            return this.$.form.serialize();
+            return this.$refs.form.serialize();
         },
         validate: function() {
-            return this.$.form.validate();
+            return this.$refs.form.validate();
         },
         on_error: function(response) {
-            return this.$.form.on_error(response);
+            return this.$refs.form.on_error(response);
         },
     }
 };

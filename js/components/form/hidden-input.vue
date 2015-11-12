@@ -1,9 +1,9 @@
 <template>
-<input type="hidden" v-attr="
-    id: field.id,
-    name: field.id,
-    required: required,
-    value: value"></input>
+<input type="hidden"
+    :id="field.id"
+    :name="field.id"
+    :value="value"
+    :required="required"></input>
 </template>
 
 <script>

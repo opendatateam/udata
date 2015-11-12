@@ -1,9 +1,9 @@
 <template>
-    <datatable title="{{ title }}" icon="comment"
+    <datatable :title="title" icon="comment"
         boxclass="discussions-widget"
-        fields="{{ fields }}"
-        p="{{ discussions }}"
-        empty="{{ _('No discussion') }}">
+        :fields="fields"
+        :p="discussions"
+        :empty="_('No discussion')">
     </datatable>
 </template>
 
@@ -12,11 +12,10 @@
 export default {
     name: 'discussions-widget',
     components: {
-         'datatable': require('components/datatable/widget.vue')
+         datatable: require('components/datatable/widget.vue')
     },
     data: function() {
         return {
-            title: this.title || this._('Discussions'),
             fields: [{
                 label: this._('Title'),
                 key: 'title',
@@ -37,9 +36,22 @@ export default {
     },
     events: {
         'datatable:item:click': function(discussion) {
-            this.$go('/discussion/' + discussion.id + '/');
+            let prefix = discussion.class.replace('Discussion', '').toLowerCase(),
+                route = `${prefix}-discussion`;
+            this.$go({name: route, params: {
+                oid: discussion.subject,
+                discussion_id: discussion.id
+            }});
         }
     },
-    props: ['discussions', 'title']
+    props: {
+        discussions: null,
+        title: {
+            type: String,
+            default: function() {
+                return this._('Discussions');
+            }
+        }
+    }
 };
 </script>

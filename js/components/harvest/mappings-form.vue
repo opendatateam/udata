@@ -1,17 +1,5 @@
 <template>
-<form-vertical v-ref="form" fields="{{fields}}" model="{{source}}"></form-vertical>
-<!--div class="row">
-    <div class="col-xs-12 text-center" v-class="col-md-6: preview_job">
-        <button class="btn btn-primary" v-on="click: preview">
-            <span class="fa fa-cog"></span>
-            {{ _('Preview') }}
-        </button>
-    </div>
-    <job-widget v-if="preview_job"
-        job="{{preview_job}}"
-        class="col-xs-12 col-md-6">
-    </job-widget>
-</div-->
+<vform v-ref:form :fields="fields" :model="source"></vform>
 </template>
 
 <script>
@@ -22,24 +10,30 @@ import HarvestSource from 'models/harvest/source';
 
 export default {
     name: 'HarvestMappingView',
-    props: ['source'],
+    props: {
+        source: {
+            type: HarvestSource,
+            default() {
+                return new HarvestSource();
+            }
+        }
+    },
     data: function() {
         return {
-            source: new HarvestSource(),
             fields: [],
             preview_job: null
         };
     },
     components: {
-        'form-vertical': require('components/form/vertical-form.vue'),
+        vform: require('components/form/vertical-form.vue'),
         'job-widget': require('components/harvest/job.vue')
     },
     methods: {
         serialize: function() {
-            return this.$.form.serialize();
+            return this.$refs.form.serialize();
         },
         validate: function() {
-            return this.$.form.validate();
+            return this.$refs.form.validate();
         },
         preview: function() {
             let job = new HarvestJob();

@@ -1,11 +1,11 @@
 <template>
-<input type="text" class="form-control" v-attr="
-    id: field.id,
-    name: field.id,
-    placeholder: placeholder,
-    required: required,
-    value: value,
-    readonly: readonly"></input>
+<input type="text" class="form-control"
+    :id="field.id"
+    :name="field.id"
+    :placeholder="placeholder"
+    :required="required"
+    :readonly="readonly"
+    :value="value"></input>
 </template>
 
 <script>

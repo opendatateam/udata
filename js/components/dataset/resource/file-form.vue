@@ -13,9 +13,9 @@
 
 <template>
 <form-horizontal class="resource-form file-resource-form"
-    fields="{{fields}}" model="{{resource}}" v-ref="form">
+    :fields="fields" :model="resource" v-ref:form>
 </form-horizontal>
-<div v-show="!resource.url && files.length" v-repeat="file:files" class="info-box bg-aqua">
+<div v-show="!resource.url && files.length" v-for="file in files" class="info-box bg-aqua">
     <span class="info-box-icon">
         <span class="fa fa-cloud-upload"></span>
     </span>
@@ -23,7 +23,7 @@
         <span class="info-box-text">{{file.name}}</span>
         <span class="info-box-number">{{file.filesize | filesize}}</span>
         <div class="progress">
-            <div class="progress-bar" style="width: {{progress}}%"></div>
+            <div class="progress-bar" :style="{width: progress+'%'}"></div>
         </div>
         <span class="progress-description">
         {{progress}}%
@@ -31,7 +31,7 @@
     </div>
 </div>
 <form-horizontal v-if="resource.url"
-    fields="{{file_fields}}" model="{{resource}}" readonly="true">
+    :fields="file_fields" :model="resource" :readonly="true">
 </form-horizontal>
 <div v-if="!files.length" class="resource-upload-dropzone">
     <div class="row">
@@ -45,7 +45,7 @@
             <p>{{ _( "or") }}</p>
         </div>
         <div class="text-center col-xs-12">
-            <span v-el="uploadBtn" class="btn btn-outline btn-flat">
+            <span v-el:upload-btn class="btn btn-outline btn-flat">
             {{ _("Select a file from your computer") }}
             </span>
         </div>
@@ -58,8 +58,17 @@ import API from 'api';
 import Dataset from 'models/dataset';
 
 export default {
-    inherit: true,
     mixins: [require('mixins/uploader')],
+    props: {
+        dataset: {
+            type: Object,
+            required: true
+        },
+        resource: {
+            type: Object,
+            default() {return new Resource()}
+        },
+    },
     data: function() {
         return {
             fields: [{
@@ -135,7 +144,7 @@ export default {
                 this.dataset.resources.unshift(response);
             }
             // Do not override an existing typed or registered title.
-            let title = this.$.form.serialize().title || this.resource.title;
+            let title = this.$refs.form.serialize().title || this.resource.title;
             if (title) {
                 response.title = title;
             }
@@ -144,10 +153,10 @@ export default {
     },
     methods: {
         validate: function() {
-            return this.$.form.validate();
+            return this.$refs.form.validate();
         },
         serialize: function() {
-            return this.$.form.serialize();
+            return this.$refs.form.serialize();
         }
     }
 };

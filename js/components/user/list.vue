@@ -1,19 +1,17 @@
 <template>
-    <datatable title="{{ title }}" icon="users"
+    <datatable :title="title" icon="users"
         boxclass="users-widget"
-        fields="{{ fields }}"
-        p="{{ users }}"
-        empty="{{ _('No user') }}">
+        :fields="fields"
+        :p="users"
+        :empty="_('No user')">
     </datatable>
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'users-widget',
     components: {
-        'datatable': require('components/datatable/widget.vue')
+        datatable: require('components/datatable/widget.vue')
     },
     data: function() {
         return {

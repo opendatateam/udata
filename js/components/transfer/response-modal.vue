@@ -1,7 +1,7 @@
 <template>
-<modal title="{{ _('Transfer request') }}"
+<modal :title="_('Transfer request')"
     class="modal-info transfer-response-modal"
-    v-ref="modal">
+    v-ref:modal>
 
     <div class="modal-body">
         <div>
@@ -13,9 +13,9 @@
             <div class="row">
                 <div class="col-xs-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
                     <dataset-card v-if="transfer.subject|is 'dataset'"
-                        datasetid="{{transfer.subject.id}}"></dataset-card>
+                        :datasetid="transfer.subject.id"></dataset-card>
                     <reuse-card v-if="transfer.subject|is 'reuse'"
-                        reuseid="{{transfer.subject.id}}"></reuse-card>
+                        :reuseid="transfer.subject.id"></reuse-card>
                 </div>
             </div>
             <div class="row text-center">
@@ -26,10 +26,10 @@
             <div class="row">
                 <div class="col-xs-12 col-sm-5">
                     <user-card v-if="transfer.owner|is 'user'"
-                        user="{{transfer.owner}}">
+                        :user="transfer.owner">
                     </user-card>
                     <org-card v-if="transfer.owner|is 'organization'"
-                        organization="{{transfer.owner}}">
+                        :organization="transfer.owner">
                     </org-card>
                 </div>
                 <div class="col-xs-12 col-sm-2 text-center">
@@ -37,8 +37,8 @@
                     <span class="fa fa-long-arrow-right fa-2x"></span>
                 </div>
                 <div class="col-xs-12 col-sm-5">
-                    <user-card v-if="transfer.recipient|is 'user'" user="{{transfer.recipient}}"></user-card>
-                    <org-card v-if="transfer.recipient|is 'organization'" organization="{{transfer.recipient}}"></org-card>
+                    <user-card v-if="transfer.recipient|is 'user'" :user="transfer.recipient"></user-card>
+                    <org-card v-if="transfer.recipient|is 'organization'" :organization="transfer.recipient"></org-card>
                 </div>
             </div>
             <div v-if="transfer.comment" class="row">
@@ -49,7 +49,7 @@
                 <div class="form-group">
                     <label>{{ _('Reason') }}</label>
                     <textarea class="form-control" rows="3"
-                        placeholder="{{ _('Explain your response') }}"
+                        :placeholder="_('Explain your response')"
                         v-model="comment" >
                     </textarea>
                 </div>
@@ -59,11 +59,11 @@
 
     <footer class="modal-footer text-center">
         <button type="button" class="btn btn-success btn-flat pointer pull-left"
-            v-on="click: respond('accept')">
+            @click="respond('accept')">
             {{ _('Accept') }}
         </button>
         <button type="button" class="btn btn-danger btn-flat pointer"
-            v-on="click: respond('refuse')">
+            @click="respond('refuse')">
             {{ _('Refuse') }}
         </button>
     </footer>
@@ -102,7 +102,7 @@ export default {
                     title: this._('Response sent'),
                     details: this._('The response has been sent to the requester.')
                 });
-                this.$.modal.close();
+                this.$refs.modal.close();
                 this.$emit('transfer:responded', response.obj);
             });
         }

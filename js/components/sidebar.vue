@@ -5,7 +5,8 @@
         <div class="sidebar-form">
             <form method="get">
                 <div class="input-group">
-                    <input type="text" name="q" class="form-control" placeholder="{{'Search'|i18n}}..." />
+                    <input type="text" name="q" class="form-control"
+                        :placeholder="search_label" />
                     <span class="input-group-btn">
                         <button type="submit" name="search" id="search-btn" class="btn btn-flat">
                             <i class="fa fa-search"></i>
@@ -17,7 +18,14 @@
         <!-- End form -->
 
         <ul class="sidebar-menu">
-            <sidebar-menu-item v-repeat="menu"></sidebar-menu-item>
+            <sidebar-menu-item v-for="item in menu"
+                :label="item.label"
+                :icon="item.icon"
+                :image="item.image"
+                :route="item.route"
+                :badge="item.badge"
+                :children="item.children">
+            </sidebar-menu-item>
         </ul>
 
     </section>
@@ -52,6 +60,11 @@ const MENU = [{
 export default {
     components: {
         'sidebar-menu-item': require('components/sidebar-menu-item.vue')
+    },
+    data() {
+        return {
+            search_label: this._('Search') + '...'
+        };
     },
     computed: {
         menu: function() {

@@ -1,56 +1,54 @@
 <template>
+<layout :title="source.name || ''" :subtitle="source.backend || ''" :actions="actions">
     <div class="alert alert-info" v-if="should_validate">
         <button class="pull-right btn btn-primary btn-xs"
-            v-on="click:validate_source">{{ _('Validate') }}</button>
+            @click="validate_source">{{ _('Validate') }}</button>
         {{ _('This harvest source has not been validated') }}
     </div>
     <div class="alert alert-warning" v-if="display_warning">
         {{ _('This harvest source has not been validated') }}
     </div>
     <div class="row">
-        <source-widget source="{{source}}"
-            v-class="
-                col-xs-12: !current_job,
-                col-md-4: current_job,
-            ">
+        <source-widget :source="source"
+            :class="{
+                'col-xs-12': !current_job,
+                'col-md-4': current_job,
+            }">
         </source-widget>
         <job-widget
             v-if="current_job"
-            job="{{current_job}}"
+            :job="current_job"
             class="col-md-8">
         </job-widget>
     </div>
     <div class="row" v-if="should_validate">
-        <preview class="col-xs-12" source="{{source}}"></preview>
+        <preview class="col-xs-12" :source="source"></preview>
     </div>
+</layout>
 </template>
 
 <script>
 import HarvestSource from 'models/harvest/source';
 import ItemModal from 'components/harvest/item.vue';
 import Vue from 'vue';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'HarvestSourceView',
     data: function() {
         return {
-            source_id: null,
             source: new HarvestSource(),
             current_job: null,
             current_item: null,
-            meta: {
-                title: null,
-                subtitle: null,
-                actions: [{
-                    label: this._('Edit'),
-                    icon: 'pencil',
-                    method: 'edit'
-                },{
-                    label: this._('Delete'),
-                    icon: 'trash',
-                    method: 'confirm_delete'
-                }]
-            }
+            actions: [{
+                label: this._('Edit'),
+                icon: 'pencil',
+                method: this.edit
+            },{
+                label: this._('Delete'),
+                icon: 'trash',
+                method: this.confirm_delete
+            }]
         };
     },
     computed: {
@@ -68,6 +66,7 @@ export default {
     events: {
         'harvest:job:selected': function(job) {
             this.current_job = job;
+            return true;
         },
         'harvest:job:item:selected': function(item) {
             this.current_item = item;
@@ -75,6 +74,7 @@ export default {
                 {data: {item: item}},
                 Vue.extend(ItemModal)
             );
+            return true;
         }
     },
     methods: {
@@ -94,29 +94,16 @@ export default {
             );
         }
     },
-    watch: {
-        source_id: function(id) {
-            if (id) {
-                this.source.fetch(id);
-            }
-        },
-        'source.name': function(name) {
-            if (name) {
-                this.meta.title = name;
-                this.$dispatch('meta:updated', this.meta);
-            }
-        },
-        'source.backend': function(backend) {
-            if (backend) {
-                this.meta.subtitle = backend;
-                this.$dispatch('meta:updated', this.meta);
-            }
+    route: {
+        data() {
+            this.source.fetch(this.$route.params.oid);
         }
     },
     components: {
         preview: require('components/harvest/preview.vue'),
         'source-widget': require('components/harvest/source.vue'),
         'job-widget': require('components/harvest/job.vue'),
+        Layout
     }
 };
 </script>

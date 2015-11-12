@@ -1,26 +1,37 @@
 <template>
+<layout :title="_('Dashboard')">
     <div class="row">
-        <sbox class="col-lg-3 col-xs-6" v-repeat="dataBoxes"></sbox>
+        <sbox class="col-lg-3 col-xs-6" v-for="b in dataBoxes"
+            :value="b.value" :label="b.label" :color="b.color"
+            :icon="b.icon" :target="b.target">
+        </sbox>
     </div>
 
     <div class="row">
-        <reuses class="col-xs-12" reuses="{{ reuses }}" title="{{ _('Reuses about your data (including your organizations)') }}"></reuses>
+        <reuses class="col-xs-12" :reuses="reuses"
+            :title="_('Reuses about your data (including your organizations)')">
+        </reuses>
     </div>
 
     <div class="row">
-        <issues id="issues-widget" class="col-xs-12" issues="{{ issues }}" title="{{ _('Issues about your data (including your organizations)') }}"></issues>
+        <issues id="issues-widget" class="col-xs-12" :issues="issues"
+            :title="_('Issues about your data (including your organizations)')">
+        </issues>
     </div>
 
     <div class="row">
-        <discussions id="discussions-widget" class="col-xs-12" discussions="{{ discussions }}" title="{{ _('Discussions about your data (including your organizations)') }}"></discussions>
+        <discussions id="discussions-widget" class="col-xs-12" :discussions="discussions"
+            :title="_('Discussions about your data (including your organizations)')">
+        </discussions>
     </div>
-
+</layout>
 </template>
 
 <script>
 import moment from 'moment';
 import {PageList} from 'models/base';
 import MyMetrics from 'models/mymetrics';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'Home',
@@ -42,11 +53,6 @@ export default {
         };
     },
     computed: {
-        meta: function() {
-            return {
-                title: this._('Dashboard')
-            };
-        },
         dataBoxes: function() {
             if (!this.metrics.id || !this.reuses) {
                 return []
@@ -85,6 +91,7 @@ export default {
         reuses: require('components/reuse/list.vue'),
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
+        Layout
     },
     attached: function() {
         this.update();

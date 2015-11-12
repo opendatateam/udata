@@ -9,8 +9,9 @@
         <li class="header text-center" v-i18n="Notifications"></li>
         <li>
             <ul class="menu">
-                <li v-repeat="notifications">
-                    <component is="{{type}}"></component>
+                <li v-for="notification in notifications">
+                    <component :is="notification.type"
+                        :details="notification.details"></component>
                 </li>
             </ul>
         </li>

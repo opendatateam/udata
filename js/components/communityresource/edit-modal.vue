@@ -7,16 +7,16 @@
 </style>
 
 <template>
-<modal title="{{ community.title }}" class="community-modal"
-    v-class="modal-danger: confirm, modal-primary: !confirm"
-    v-ref="modal">
+<modal :title="community.title" class="community-modal"
+    :class="{ 'modal-danger': confirm, 'modal-primary': !confirm }"
+    v-ref:modal>
     <div class="modal-body">
         <div v-show="!edit && !confirm">
             {{{ community.description | markdown }}}
 
             <dl class="dl-horizontal dl-wide">
                 <dt>{{ _('URL') }}</dt>
-                <dd><a href="{{community.url}}">{{community.url}}</a></dd>
+                <dd><a :href="community.url">{{community.url}}</a></dd>
                 <dt v-if="community.format">{{ _('Format') }}</dt>
                 <dd v-if="community.format">{{ community.format }}</dd>
                 <dt v-if="community.mime">{{ _('Mime Type') }}</dt>
@@ -34,7 +34,7 @@
             </dl>
         </div>
 
-        <community-form v-if="edit" v-ref="form" resource="{{community}}" dataset="{{resource.dataset}}" community="{{true}}"></community-form>
+        <community-form v-if="edit" v-ref:form :resource="community" :dataset="community.dataset" :community="true"></community-form>
 
         <div v-show="confirm">
             <p class="lead text-center">
@@ -47,29 +47,29 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button type="button" class="btn btn-outline btn-flat pointer"
-            v-show="!edit && !confirm" v-on="click: edit = true">
-            {{ _('Edit') }}
-        </button>
         <button type="button" class="btn btn-danger btn-sm btn-flat pointer pull-left"
-            v-show="!edit && !confirm" v-on="click: confirm = true">
+            v-show="!edit && !confirm" @click="confirm = true">
             {{ _('Delete') }}
         </button>
-        <button type="button" class="btn btn-danger btn-outline btn-flat pointer"
-            v-show="confirm" v-on="click: delete_confirmed">
-            {{ _('Confirm') }}
+        <button v-show="edit" type="button" class="btn btn-primary btn-sm btn-flat pointer pull-left"
+            @click="edit = false">
+            {{ _('Cancel') }}
         </button>
         <button v-show="confirm" type="button" class="btn btn-warning btn-sm btn-flat pointer pull-left"
-          v-on="click: confirm = false">
+          @click="confirm = false">
             {{ _('Cancel') }}
+        </button>
+        <button type="button" class="btn btn-danger btn-outline btn-flat pointer"
+            v-show="confirm" @click="delete_confirmed">
+            {{ _('Confirm') }}
         </button>
         <button type="button" class="btn btn-outline btn-flat pointer"
-            v-show="edit" v-on="click: save">
-            {{ _('Save') }}
+            v-show="!edit && !confirm" @click="edit = true">
+            {{ _('Edit') }}
         </button>
-        <button v-show="edit" type="button" class="btn btn-primary btn-sm btn-flat pointer pull-left"
-            v-on="click: edit = false">
-            {{ _('Cancel') }}
+        <button type="button" class="btn btn-outline btn-flat pointer"
+            v-show="edit" @click="save">
+            {{ _('Save') }}
         </button>
     </footer>
 </modal>
@@ -90,36 +90,44 @@ export default {
             edit: false,
             confirm: false,
             community: new CommunityResource(),
+            next_route: null
         };
     },
-    methods: {
-        compute_close_url: function() {
-            if (this.community.organization) {
-                return '/organization/' + this.community.organization.id + '/';
-            } else {
-                return '/user/' + this.community.owner.id + '/';
+    events: {
+        'modal:closed': function() {
+            this.$go(this.next_route);
+        }
+    },
+    route: {
+        data() {
+            if (this.$route.matched.length > 1) {
+                // This is a nested view
+                let idx = this.$route.matched.length - 2,
+                    parent = this.$route.matched[idx];
+                this.next_route = {
+                    name: parent.handler.name,
+                    params: parent.params
+                };
             }
-        },
+            this.community.fetch(this.$route.params.rid);
+        }
+    },
+    methods: {
         save: function() {
-            if (this.$.form.validate()) {
-                Object.assign(this.community, this.$.form.serialize());
+            if (this.$refs.form.validate()) {
+                Object.assign(this.community, this.$refs.form.serialize());
                 if (this.callback) {
                     this.community.on_fetched = this.callback;
                 }
                 this.community.save();
-                this.$go(this.compute_close_url());
-                this.$.modal.close();
+                this.$refs.modal.close();
                 return true;
             }
         },
         delete_confirmed: function() {
             API.datasets.delete_community_resource({community: this.community.id},
                 (response) => {
-                    if (this.callback) {
-                        this.callback();
-                    }
-                    this.$go(this.compute_close_url());
-                    this.$.modal.close();
+                    this.$refs.modal.close();
                 }
             );
         }

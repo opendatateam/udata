@@ -1,65 +1,48 @@
 <template>
+<layout :title="post.name || ''" :subtitle="_('Post')" :page="post.page || ''">
     <div class="row">
-        <post-content post="{{post}}" class="col-xs-12"></post-details>
+        <post-content :post="post" class="col-xs-12"></post-content>
     </div>
     <div class="row">
-        <datasets-list datasets="{{post.datasets}}" class="col-xs-12 col-md-6"></datasets-list>
-        <reuses-list reuses="{{post.reuses}}" class="col-xs-12 col-md-6"></reuses-list>
+        <datasets :datasets="post.datasets" class="col-xs-12 col-md-6"></datasets>
+        <reuses :reuses="post.reuses" class="col-xs-12 col-md-6"></reuses>
     </div>
+</layout>
 </template>
 
 <script>
-'use strict';
+import moment from 'moment';
+import Post from 'models/post';
+import Layout from 'components/layout.vue';
 
-var moment = require('moment'),
-    Post = require('models/post');
-
-module.exports = {
+export default {
     name: 'PostView',
     data: function() {
         return {
-            post_id: null,
-            post: new Post(),
-            meta: {
-                title: null,
-                page: null,
-                subtitle: this._('Post')
-            }
+            post: new Post()
         };
     },
     components: {
-        'small-box': require('components/containers/small-box.vue'),
         'post-content': require('components/post/content.vue'),
-        'datasets-list': require('components/dataset/card-list.vue'),
-        'reuses-list': require('components/reuse/card-list.vue')
+        datasets: require('components/dataset/card-list.vue'),
+        reuses: require('components/reuse/card-list.vue'),
+        Layout
     },
     events: {
         'dataset-card-list:submit': function(ids) {
             this.post.datasets = ids;
             this.post.save();
+            return true;
         },
         'reuse-card-list:submit': function(ids) {
             this.post.reuses = ids;
             this.post.save();
+            return true;
         }
     },
-    watch: {
-        post_id: function(id) {
-            if (id) {
-                this.post.fetch(id);
-            }
-        },
-        'post.page': function(page) {
-            if (page) {
-                this.meta.page = page;
-                this.$dispatch('meta:updated', this.meta);
-            }
-        },
-        'post.name': function(name) {
-            if (name) {
-                this.meta.title = name;
-                this.$dispatch('meta:updated', this.meta);
-            }
+    route: {
+        data() {
+            this.post.fetch(this.$route.params.oid);
         }
     }
 };

@@ -21,89 +21,96 @@
 </style>
 
 <template>
-<div class="wizard">
-    <div class="row form-group wizard-steps">
-        <div class="col-xs-12">
-            <ul class="nav nav-pills nav-justified thumbnail setup-panel">
-                <li v-class="active: step_index === $index" v-repeat="steps">
-                    <a>
-                        <h4 class="list-group-item-heading">
-                            {{ $index + 1 }}.
-                            {{ label }}
-                        </h4>
-                        <p class="list-group-item-text">{{subtitle}}</p>
-                    </a>
-                </li>
-            </ul>
+<layout :title="title || ''">
+    <div class="wizard">
+        <div class="row form-group wizard-steps">
+            <div class="col-xs-12">
+                <ul class="nav nav-pills nav-justified thumbnail setup-panel">
+                    <li :class="{ 'active': step_index === $index }"
+                        v-for="(index, step) in steps">
+                        <a>
+                            <h4 class="list-group-item-heading">
+                                {{ index + 1 }}.
+                                {{ step.label }}
+                            </h4>
+                            <p class="list-group-item-text">{{step.subtitle}}</p>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <box boxclass="box-solid" :footer="true">
+                    <component :is="component" v-ref:content></component>
+                    <footer slot="footer">
+                        <div class="col-xs-12">
+                            <button v-if="previous_step"
+                                class="btn btn-warning btn-flat pointer"
+                                @click="click_previous">
+                                {{ _('Previous') }}
+                            </button>
+                            <button v-if="next_step || finish"
+                                class="btn btn-primary btn-flat pull-right pointer"
+                                @click="click_next">
+                                {{ this.step_index + 1 === this.steps.length ? _('Finish') : _('Next') }}
+                            </button>
+                        </div>
+                    </footer>
+                </box>
+            </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-xs-12">
-            <box boxclass="box-solid" footer="{{true}}">
-                <component is="{{active_step.component}}" v-ref="content"></component>
-                <footer>
-                    <div class="col-xs-12">
-                        <button v-if="previous_step"
-                            class="btn btn-warning btn-flat pointer"
-                            v-on="click: click_previous">
-                            {{ _('Previous') }}
-                        </button>
-                        <button v-if="next_step || finish"
-                            class="btn btn-primary btn-flat pull-right pointer"
-                            v-on="click: click_next">
-                            {{ this.step_index + 1 === this.steps.length ? _('Finish') : _('Next') }}
-                        </button>
-                    </div>
-                <footer>
-            </box>
-        </div>
-    </div>
-</div>
+</layout>
 </template>
 
 <script>
-'use strict';
+import Vue from 'vue';
+import Layout from 'components/layout.vue';
+import Box from 'components/containers/box.vue';
 
-var Vue = require('vue');
-
-module.exports = {
+export default {
     data: function() {
         return {
             step_index: 0
         };
     },
-    props: ['steps', 'finish'],
+    props: ['title', 'steps', 'finish'],
     computed: {
-        active_step: function() {
+        active_step() {
             if (!this.steps) {
                 return;
             }
             return this.steps[this.step_index];
         },
-        next_step: function() {
+        component() {
+            if (!this.steps) {
+                return;
+            }
+            return `step-${this.step_index}`;
+        },
+        next_step() {
             if (!this.steps || this.step_index + 1 === this.steps.length) {
                 return;
             }
             return this.steps[this.step_index + 1];
         },
-        can_finish: function() {
+        can_finish() {
             return this.steps
                 && this.step_index + 1 === this.steps.length
                 && this.finish;
         },
-        previous_step: function() {
+        previous_step() {
             if (!this.steps || this.step_index  <= 0) {
                 return;
             }
             return this.steps[this.step_index - 1];
         }
     },
-    components: {
-        'box': require('components/containers/box.vue')
-    },
+    components: {Box, Layout},
     methods: {
-        click_next: function() {
-            if (this.active_step.next && !this.active_step.next(this.$.content)) {
+        click_next() {
+            if (this.active_step.next && !this.active_step.next(this.$refs.content)) {
                 return;
             }
             if (this.next_step) {
@@ -112,12 +119,12 @@ module.exports = {
                 this.$dispatch('wizard:finish');
             }
         },
-        click_previous: function() {
+        click_previous() {
             if (this.previous_step) {
                 this.$dispatch('wizard:previous-step');
             }
         },
-        go_next: function() {
+        go_next() {
             if (this.next_step) {
                 this.step_index++;
                 Vue.nextTick(() => {
@@ -126,7 +133,7 @@ module.exports = {
                 });
             }
         },
-        go_previous: function() {
+        go_previous() {
             if (this.previous_step) {
                 this.step_index--;
                 Vue.nextTick(() => {
@@ -135,11 +142,20 @@ module.exports = {
                 });
             }
         },
-        init_step: function() {
+        init_step() {
             if (this.active_step.init) {
-                this.active_step.init(this.$.content);
+                this.active_step.init(this.$refs.content);
             }
         }
+    },
+    created() {
+        // Load steps components
+        this.steps.forEach((step, index) => {
+            let component = step.component instanceof Vue ?
+                step.component :
+                Vue.extend(step.component);
+            this.$options.components[`step-${index}`] = component;
+        });
     }
 };
 </script>

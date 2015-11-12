@@ -1,29 +1,26 @@
-<style lang="less"></style>
-
 <template>
-    <div class="alert alert-{{type}}"
-        v-class="alert-dismissable: closable">
+    <div class="alert alert-{{alert.type || 'success'}}"
+        :class="{ 'alert-dismissable': closable }">
         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
         <h4>
-            <span class="icon fa fa-{{icon}}"></span>
-            {{title}}
+            <span class="icon fa fa-{{alert.icon || 'check'}}"></span>
+            {{alert.title}}
         </h4>
-        {{details}}
+        {{alert.details}}
     </div>
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'alert-box',
     replace: true,
-    data: function() {
-        return {
-            type: 'success',
-            closable: true,
-            icon: 'check'
-        };
+    props: {
+        alert: Object
+    },
+    computed: {
+        closable() {
+            return this.alert.closable === undefined ? true : this.alert.closable;
+        }
     }
 };
 </script>

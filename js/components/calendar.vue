@@ -13,39 +13,40 @@
 </style>
 
 <template>
-<div class="calendar datepicker" v-class="view">
+<div class="calendar datepicker" :class="[ 'view' ]">
     <div class="datepicker-{{view}}">
         <table class="table table-condensed">
             <thead>
                 <tr>
                     <th class="prev" style="visibility: visible;"
-                        v-on="click: previous">«</th>
+                        @click="previous">«</th>
                     <th colspan="5" class="datepicker-switch"
-                        v-on="click: zoomOut">{{rangeDisplay}}</th>
+                        @click="zoomOut">{{rangeDisplay}}</th>
                     <th class="next" style="visibility: visible;"
-                        v-on="click: next">»</th>
+                        @click="next">»</th>
                 </tr>
                 <tr v-if="view == 'days'">
-                    <th class="dow" v-repeat="days">{{$value}}</th>
+                    <th class="dow" v-for="day in days">{{day}}</th>
                 </tr>
             </thead>
             <tbody v-show="view == 'days'">
-                <tr v-repeat="week:currentMonthDays">
+                <tr v-for="week in currentMonthDays">
                     <td class="day"
-                        v-repeat="day:week"
-                        v-on="click: pickDay(day)"
-                        v-class="
-                            old: isOld(day),
-                            new: isNew(day),
-                            today: day.isSame(today, 'day'),
-                            active: day.isSame(selected, 'day')
-                        ">{{ day.date() }}</td>
+                        v-for="day in week"
+                        @click="pickDay(day)"
+                        :class="{
+                            'old': isOld(day),
+                            'new': isNew(day),
+                            'today': day.isSame(today, 'day'),
+                            'active': day.isSame(selected, 'day')
+                        }">{{ day.date() }}</td>
                 </tr>
             </tbody>
             <tbody v-show="view == 'months'">
                 <tr>
                     <td colspan="7">
-                        <span class="month" v-repeat="months" v-on="click: pickMonth($index)">{{$value}}
+                        <span class="month" v-for="(idx, month) in months"
+                            @click="pickMonth(idx)">{{month}}
                         </span>
                     </td>
                 </tr>
@@ -53,18 +54,19 @@
             <tbody v-show="view == 'years'">
                 <tr>
                     <td colspan="7">
-                        <span class="year" v-repeat="yearsRange" v-on="click: pickYear($value)">
-                        {{$value}}
+                        <span class="year" v-for="year in yearsRange"
+                            @click="pickYear(year)">
+                        {{year}}
                         </span>
                     </td>
                 </tr>
             </tbody>
             <tfoot>
                 <tr>
-                    <th colspan="5" v-on="click: pickDay(today)">
+                    <th colspan="5" @click="pickDay(today)">
                         {{ _('Today') }}
                     </th>
-                    <th colspan="2" v-on="click: clear">
+                    <th colspan="2" @click="clear">
                         <span class="fa fa-remove"></span>
                         {{ _('Clear') }}
                     </th>
@@ -81,7 +83,20 @@ import moment from 'moment';
 const VIEWS = ['days', 'months', 'years'];
 
 export default {
-    props: ['selected', 'view'],
+    props: {
+        selected: null,
+        view: {
+            type: String,
+            default: 'days'
+        }
+    },
+    data: function() {
+        return {
+            currentMonth: moment().month(),
+            currentYear: moment().year(),
+            today: moment()
+        };
+    },
     computed: {
         days: function() {
             let days = [],
@@ -139,15 +154,6 @@ export default {
             }
             return years;
         }
-    },
-    data: function() {
-        return {
-            currentMonth: moment().month(),
-            currentYear: moment().year(),
-            today: moment(),
-            selected: null,
-            view: 'days'
-        };
     },
     methods: {
         next: function() {

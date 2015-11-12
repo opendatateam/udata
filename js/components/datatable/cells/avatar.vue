@@ -7,7 +7,7 @@
 </style>
 
 <template>
-<img v-attr="src:src, width:field.width, height:field.width" />
+<img :src="src" :width="field.width" :height="field.width" />
 </template>
 
 <script>

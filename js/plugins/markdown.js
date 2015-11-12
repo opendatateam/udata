@@ -5,7 +5,6 @@ define(['jquery', 'marked', 'helpers/text'], function($, marked, txt) {
         options = options || {};
 
         Vue.directive('markdown', {
-            isLiteral: true,
             bind: function() {
                 $(this.el).addClass('markdown');
             },

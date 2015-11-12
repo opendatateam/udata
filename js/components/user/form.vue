@@ -1,21 +1,19 @@
-<style lang="less">
-
-</style>
-
 <template>
-<form-vertical v-ref="form" fields="{{fields}}" model="{{user}}"></form-vertical>
+<vform v-ref:form :fields="fields" :model="user"></vform>
 </template>
 
 <script>
-'use strict';
+import User from 'models/user';
 
-var User = require('models/user');
-
-module.exports = {
-    props: ['user'],
+export default {
+    props: {
+        user: {
+            type: User,
+            default: function() {return new User();}
+        }
+    },
     data: function() {
         return {
-            user: new User(),
             fields: [{
                     id: 'first_name',
                     label: this._('First name')
@@ -29,17 +27,17 @@ module.exports = {
         };
     },
     components: {
-        'form-vertical': require('components/form/vertical-form.vue')
+        vform: require('components/form/vertical-form.vue')
     },
     methods: {
         serialize: function() {
-            return this.$.form.serialize();
+            return this.$refs.form.serialize();
         },
         validate: function() {
-            return this.$.form.validate();
+            return this.$refs.form.validate();
         },
         on_error: function(response) {
-            return this.$.form.on_error(response);
+            return this.$refs.form.on_error(response);
         },
     }
 };

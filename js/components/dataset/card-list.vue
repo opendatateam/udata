@@ -61,40 +61,40 @@
 </style>
 
 <template>
-    <box title="{{ title }}" icon="cubes"
+    <box :title="title" icon="cubes"
         boxclass="box-solid datasets-cards-widget"
-        footerClass="text-center" footer="true">
-        <div class="row" v-el="sortable">
+        footerClass="text-center" :footer="true">
+        <div class="row" v-el:sortable>
             <div class="col-md-6 dataset-card-container"
-                v-repeat="datasetid: editing ? sorted : datasets |ids"
-                data-id="{{datasetid}}"
+                v-for="datasetid in (editing ? sorted : datasets)|ids"
+                :data-id="datasetid"
             >
                 <button type="button" class="close"
                     v-if="editing"
-                    v-on="click: on_remove(datasetid)">
+                    @click="on_remove(datasetid)">
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only" v-i18n="Close"></span>
                 </button>
-                <dataset-card datasetid="{{datasetid}}"></dataset-card>
+                <dataset-card :datasetid="datasetid"></dataset-card>
             </div>
         </div>
-        <footer>
+        <footer slot="footer">
             <a v-show="!editing" class="text-uppercase footer-btn pointer"
-                v-on="click: edit">
+                @click="edit">
                 {{ _('Edit') }}
             </a>
             <div v-show="editing" class="input-group input-group-sm text-left">
                 <span class="input-group-addon">
                     <span class="fa fa-cubes"></span>
                 </span>
-                <dataset-completer v-ref="completer"></dataset-completer>
+                <dataset-completer v-ref:completer></dataset-completer>
                 <span class="input-group-btn">
                     <button class="btn btn-success" type="button"
-                        v-on="click: submit">
+                        @click="submit">
                         <span class="fa fa-check"></span>
                     </button>
                     <button class="btn btn-warning" type="button"
-                        v-on="click: cancel">
+                        @click="cancel">
                         <span class="fa fa-close"></span>
                     </button>
                 </span>
@@ -104,22 +104,25 @@
 </template>
 
 <script>
-'use strict';
+import Sorter from 'mixins/sorter';
 
-var Sorter = require('mixins/sorter');
-
-module.exports = {
+export default {
     name: 'datasets-card-list',
     mixins: [Sorter],
     components: {
-        'box': require('components/containers/box.vue'),
+        box: require('components/containers/box.vue'),
         'dataset-card': require('components/dataset/card.vue'),
         'dataset-completer': require('components/form/dataset-completer.vue')
     },
-    props: ['title', 'datasets'],
+    props: {
+        title: {
+            type: String,
+            default: function() {return this._('Datasets');}
+        },
+        datasets: Array
+    },
     data: function() {
         return {
-            title: this._('Datasets'),
             editing: false,
             sorted: []
         };
@@ -165,7 +168,7 @@ module.exports = {
     watch: {
         editing: function(editing) {
             if (editing) {
-                this.$.completer.selectize.focus();
+                this.$refs.completer.selectize.focus();
             }
         }
     }

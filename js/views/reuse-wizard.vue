@@ -1,5 +1,5 @@
 <template>
-<wizard-component v-ref="wizard" steps="{{steps}}"></wizard-component>
+<wizard v-ref:wizard :steps="steps" :title="_('New reuse')"></wizard>
 </template>
 
 <script>
@@ -9,15 +9,11 @@ import API from 'api';
 export default {
     data: function() {
         return {
-            meta: {
-                title:this._('New reuse'),
-                // subtitle: this._('reuse')
-            },
             reuse: new Reuse(),
             steps: [{
                 label: this._('Publish as'),
                 subtitle: this._('Choose who is publishing'),
-                component: 'publish-as',
+                component: require('components/widgets/publish-as.vue'),
                 next: (component) => {
                     if (component.selected) {
                         this.publish_as = component.selected;
@@ -27,7 +23,7 @@ export default {
             }, {
                 label: this._('New reuse'),
                 subtitle: this._('Describe your reuse'),
-                component: 'reuse-form',
+                component: require('components/reuse/form.vue'),
                 next: (component) => {
                     if (component.validate()) {
                         let data = component.serialize();
@@ -37,7 +33,7 @@ export default {
                         Object.assign(this.reuse, data);
                         this.reuse.save();
                         this.reuse.$once('updated', () => {
-                            this.$.wizard.go_next();
+                            this.$refs.wizard.go_next();
                         });
                         return false;
                     }
@@ -45,19 +41,19 @@ export default {
             }, {
                 label: this._('Datasets'),
                 subtitle: this._('Add some related datasets'),
-                component: 'dataset-cards-form',
+                component: require('components/dataset/cards-form.vue'),
                 next: (component) => {
                     this.reuse.datasets = component.datasets;
                     this.reuse.save();
                     this.reuse.$once('updated', () => {
-                        this.$.wizard.go_next();
+                        this.$refs.wizard.go_next();
                     });
                     return false;
                 }
             }, {
                 label: this._('Image'),
                 subtitle: this._('Upload your reuse thumbnail'),
-                component: 'image-picker',
+                component: require('components/widgets/image-picker.vue'),
                 init: (component) => {
                     var endpoint = API.reuses.operations.reuse_image;
                     component.endpoint = endpoint.urlify({reuse: this.reuse.id});
@@ -69,7 +65,7 @@ export default {
             }, {
                 label: this._('Share'),
                 subtitle: this._('Communicate about your publication'),
-                component: 'post-create',
+                component: require('components/reuse/post-create.vue'),
                 init: (component) => {
                     component.reuse = this.reuse;
                 }
@@ -77,26 +73,21 @@ export default {
          };
     },
     components: {
-        'reuse-form': require('components/reuse/form.vue'),
-        'dataset-cards-form': require('components/dataset/cards-form.vue'),
-        'image-picker': require('components/widgets/image-picker.vue'),
-        'post-create': require('components/reuse/post-create.vue'),
-        'publish-as': require('components/widgets/publish-as.vue'),
-        'wizard-component': require('components/widgets/wizard.vue'),
+        wizard: require('components/widgets/wizard.vue')
     },
     events: {
         'wizard:next-step': function() {
-            this.$.wizard.go_next();
+            this.$refs.wizard.go_next();
         },
         'wizard:previous-step': function() {
-            this.$.wizard.go_previous();
+            this.$refs.wizard.go_previous();
         },
         'wizard:step-changed': function() {
-            this.$.wizard.$.content.reuse = this.reuse;
+            this.$refs.wizard.$refs.content.reuse = this.reuse;
         },
         'image:saved': function() {
             this.reuse.fetch();
-            this.$.wizard.go_next();
+            this.$refs.wizard.go_next();
             return false;
         }
     }

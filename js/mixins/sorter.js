@@ -3,7 +3,7 @@ define(['sortablejs'], function(Sortable) {
 
     return {
         ready: function() {
-            this.$sortable = Sortable.create(this.$$.sortable, {
+            this.$sortable = Sortable.create(this.$els.sortable, {
                 // sort: this.$options.sortable.sort || true,
                 disabled: this.$options.sortable.disabled,
                 store: this.$options.sortable.store,

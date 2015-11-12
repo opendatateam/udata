@@ -1,6 +1,6 @@
 <template>
-    <div class="chart" v-style="height: height" v-el="container">
-        <canvas v-el="canvas" height="100%"></canvas>
+    <div class="chart" :style="{height: height}" v-el:container>
+        <canvas v-el:canvas height="100%"></canvas>
     </div>
 </template>
 
@@ -33,7 +33,7 @@ export default {
                     color: "#F5F5F5",
                 }
             ];
-            let ctx = this.$$.canvas.getContext('2d');
+            let ctx = this.$els.canvas.getContext('2d');
             new Chart(ctx).Doughnut(data, {
                 segmentShowStroke : false,
                 showTooltips: false,

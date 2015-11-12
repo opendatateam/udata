@@ -1,6 +1,6 @@
 <template>
 <div class="info-box"
-    v-class="bg-aqua: downloading, bg-gray: !downloading">
+    :class="{ 'bg-aqua': downloading, 'bg-gray': !downloading }">
     <span class="info-box-icon">
         <span class="fa fa-cloud-upload"></span>
     </span>

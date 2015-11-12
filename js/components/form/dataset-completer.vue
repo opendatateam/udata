@@ -7,7 +7,7 @@ import DatasetCard from 'components/dataset/card.vue';
 
 const optTpl = `<div class="selectize-option">
     <div class="logo pull-left">
-        <img src="{{image_url}}"/>
+        <img :src="image_url"/>
     </div>
     {{title}}
 </div>`;
@@ -15,13 +15,12 @@ const optTpl = `<div class="selectize-option">
 
 function cardify(value, $el) {
     if (value && $el.length > 0) {
-        var dataset = new Dataset().fetch(value),
-            card = new Vue({
+        var card = new Vue({
                 el:$el[0],
-                mixins: [DatasetCard],
-                data: {dataset: dataset}
+                mixins: [DatasetCard]
             }),
             $btn = $el.find('.remove');
+        card.dataset.fetch(value);
         $el.append($btn);
     }
 }
@@ -31,10 +30,11 @@ export default {
     mixins: [BaseCompleter],
     ns: 'datasets',
     endpoint: 'suggest_datasets',
-    data: function() {
-        return {
-            placeholder: this._('Find your dataset')
-        };
+    props: {
+        placeholder: {
+            type: String,
+            default: function() {return this._('Find your dataset');}
+        }
     },
     selectize: {
         valueField: 'id',

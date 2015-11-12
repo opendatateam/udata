@@ -1,5 +1,5 @@
 <template>
-<a class="pointer" v-on="click: click">
+<a class="pointer" @click="click">
     <span class="fa fa-fw fa-exchange text-primary"></span>
     <span>{{ _('Pending transfer request') }}</span>
 </a>

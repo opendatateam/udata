@@ -1,27 +1,26 @@
 <template>
-<box-container title="{{topic.name}}" icon="building" boxclass="box-solid">
-    <aside>
-        <a class="text-muted pointer" v-on="click: toggle">
+<box :title="topic.name || ''" icon="building" boxclass="box-solid"
+    :footer="toggled">
+    <aside slot="tools">
+        <a class="text-muted pointer" @click="toggle">
             <i class="fa fa-gear"></i>
         </a>
     </aside>
     <div v-if="!toggled">
-        <div v-markdown="{{topic.description}}"></div>
+        <div v-markdown="topic.description"></div>
     </div>
-    <topic-form v-ref="form" v-if="toggled" topic="{{topic}}"></topic-form>
-    <box-footer v-if="toggled">
+    <topic-form v-ref:form v-if="toggled" :topic="topic"></topic-form>
+    <footer v-if="toggled" slot="footer">
         <button type="submit" class="btn btn-flat btn-primary"
-            v-on="click: save($event)" v-i18n="Save"></button>
+            @click="save($event)" v-i18n="Save"></button>
         <button type="button" class="btn btn-flat btn-warning"
-            v-on="click: cancel($event)" v-i18n="Cancel"></button>
-    </box-footer>
-</box-container>
+            @click="cancel($event)" v-i18n="Cancel"></button>
+    </footer>
+</box>
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'topic-content',
     props: ['topic'],
     data: function() {
@@ -30,7 +29,7 @@ module.exports = {
         }
     },
     components: {
-        'box-container': require('components/containers/box.vue'),
+        box: require('components/containers/box.vue'),
         'topic-form': require('components/topic/form.vue')
     },
     methods: {
@@ -38,8 +37,8 @@ module.exports = {
             this.toggled = !this.toggled;
         },
         save: function(e) {
-            if (this.$.form.$.form.validate()) {
-                var data = this.$.form.$.form.serialize();
+            if (this.$refs.form.$refs.form.validate()) {
+                var data = this.$refs.form.$refs.form.serialize();
 
                 this.topic.save(data);
                 e.preventDefault();

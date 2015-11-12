@@ -7,9 +7,9 @@
 </style>
 
 <template>
-<modal title="{{ resource.title }}" class="resource-modal"
-    v-class="modal-danger: confirm, modal-primary: !confirm"
-    v-ref="modal">
+<modal :title="resource.title" class="resource-modal"
+    :class="{ 'modal-danger': confirm, 'modal-primary': !confirm }"
+    v-ref:modal>
     <div class="modal-body">
         <div v-show="!edit && !confirm">
             {{{ resource.description | markdown }}}
@@ -26,7 +26,7 @@
                     {{ _('This resource is an API') }}
                 </dd>
                 <dt>{{ _('URL') }}</dt>
-                <dd><a href="{{resource.url}}">{{resource.url}}</a></dd>
+                <dd><a :href="resource.url">{{resource.url}}</a></dd>
                 <dt v-if="resource.format">{{ _('Format') }}</dt>
                 <dd v-if="resource.format">{{ resource.format }}</dd>
                 <dt v-if="resource.mime">{{ _('Mime Type') }}</dt>
@@ -46,7 +46,7 @@
             </dl>
         </div>
 
-        <resource-form v-if="edit" v-ref="form" dataset="{{dataset}}" resource="{{resource}}"></resource-form>
+        <resource-form v-if="edit" v-ref:form :dataset="dataset" :resource="resource"></resource-form>
 
         <div v-show="confirm">
             <p class="lead text-center">
@@ -66,32 +66,32 @@
         </button>
         <button type="button" v-show="confirm"
                 class="btn btn-warning btn-sm btn-flat pointer pull-left"
-                v-on="click: confirm = false">
+                @click="confirm = false">
             {{ _('Cancel') }}
         </button>
         <button type="button" v-show="edit"
                 class="btn btn-primary btn-sm btn-flat pointer pull-left"
-                v-on="click: edit = false">
+                @click="edit = false">
             {{ _('Cancel') }}
         </button>
         <button type="button" v-show="!edit && !confirm"
                 class="btn btn-danger btn-xs btn-flat pointer"
-                v-on="click: confirm = true">
+                @click="confirm = true">
             {{ _('Delete') }}
         </button>
         <button type="button" v-show="!edit && !confirm"
                 class="btn btn-outline btn-flat pointer"
-                v-on="click: edit = true">
+                @click="edit = true">
             {{ _('Edit') }}
         </button>
         <button type="button" v-show="confirm"
                 class="btn btn-danger btn-outline btn-flat pointer"
-                v-on="click: delete_confirmed">
+                @click="delete_confirmed">
             {{ _('Confirm') }}
         </button>
         <button type="button" v-show="edit"
                 class="btn btn-outline btn-flat pointer"
-                v-on="click: save">
+                @click="save">
             {{ _('Save') }}
         </button>
     </footer>
@@ -113,15 +113,15 @@ export default {
     },
     methods: {
         save: function() {
-            if (this.$.form.validate()) {
-                this.dataset.save_resource(this.$.form.serialize());
-                this.$.modal.close();
+            if (this.$refs.form.validate()) {
+                this.dataset.save_resource(this.$refs.form.serialize());
+                this.$refs.modal.close();
                 return true;
             }
         },
         delete_confirmed: function() {
             this.dataset.delete_resource(this.resource.id);
-            this.$.modal.close();
+            this.$refs.modal.close();
         }
     }
 };

@@ -13,16 +13,16 @@
 </style>
 
 <template>
-<user-modal user="{{user}}" v-ref="modal">
-    <role-form class="member-form" v-ref="form"
-        fields="{{fields}}" model="{{member}}" defs="{{defs}}"
-        readonly="{{!is_admin}}" fill="true">
+<user-modal :user="user" v-ref:modal>
+    <role-form class="member-form" v-ref:form
+        :fields="fields" :model="member" :defs="defs"
+        :readonly="!is_admin" :fill="true">
     </role-form>
     <br v-if="is_admin" />
     <div v-if="is_admin"  class="btn-group btn-group-justified">
         <div class="btn-group">
             <button type="button" class="btn btn-success btn-flat"
-                 v-on="click:submit">
+                @click="submit">
                 <span class="fa fa-check"></span>
                 {{ _('Validate') }}
             </button>
@@ -36,7 +36,7 @@
     </div>
     <div v-if="is_admin && member_exists" class="btn-group btn-group-justified">
         <div class="btn-group">
-            <button type="button" class="btn btn-danger btn-flat" v-on="click:delete">
+            <button type="button" class="btn btn-danger btn-flat" @click="delete">
                 <span class="fa fa-user-times"></span>
                 {{ _('Delete') }}
             </button>
@@ -46,13 +46,17 @@
 </template>
 
 <script>
-'use strict';
+import User from 'models/user';
+import API from 'api';
 
-var User = require('models/user'),
-    API = require('api');
-
-module.exports = {
+export default {
     name: 'member-modal',
+    props: {
+        member: {
+            type: Object,
+            default() {return {};}
+        }
+    },
     data: function() {
         return {
             user: new User(),
@@ -63,7 +67,6 @@ module.exports = {
                 widget: 'select-input'
             }],
             org: {},
-            member: {},
             defs: API.definitions.Member
         };
     },
@@ -75,7 +78,6 @@ module.exports = {
             return this.org.is_member(this.user);
         }
     },
-    props: ['member'],
     components: {
         'user-modal': require('components/user/modal.vue'),
         'role-form': require('components/form/horizontal-form.vue')
@@ -97,13 +99,13 @@ module.exports = {
                 details: this._('{user} is not a member of this organization anymore')
                     .replace('{user}', this.user.fullname)
             });
-            this.$broadcast('modal:close');
+            this.$refs.modal.close();
         },
         submit: function() {
             var data = {
                 org: this.org.id,
                 user: this.user.id,
-                payload: this.$.form.serialize()
+                payload: this.$refs.form.serialize()
             };
             if (this.member_exists) {
                 API.organizations.update_organization_member(data, this.on_updated.bind(this));
@@ -119,7 +121,7 @@ module.exports = {
                     .replace('{user}', this.user.fullname)
                     .replace('{role}', response.obj.role)
             });
-            this.$broadcast('modal:close');
+            this.$refs.modal.close();
         },
         on_updated: function(response) {
             this.org.fetch();
@@ -129,7 +131,7 @@ module.exports = {
                     .replace('{user}', this.user.fullname)
                     .replace('{role}', response.obj.role)
             });
-            this.$broadcast('modal:close');
+            this.$refs.modal.close();
         }
     }
 };

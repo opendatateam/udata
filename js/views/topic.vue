@@ -1,58 +1,48 @@
 <template>
+<layout :title="topic.name || ''" :subtitle="_('Topic')" :page="topic.page || ''">
     <div class="row">
-        <topic-details topic="{{topic}}" class="col-xs-12"></topic-details>
+        <topic-details :topic="topic" class="col-xs-12"></topic-details>
     </div>
     <div class="row">
-        <datasets-list datasets="{{topic.datasets}}" class="col-xs-12 col-md-6"></datasets-list>
-        <reuses-list reuses="{{topic.reuses}}" class="col-xs-12 col-md-6"></reuses-list>
+        <datasets-list :datasets="topic.datasets" class="col-xs-12 col-md-6"></datasets-list>
+        <reuses-list :reuses="topic.reuses" class="col-xs-12 col-md-6"></reuses-list>
     </div>
+</layout>
 </template>
 
 <script>
-'use strict';
+import moment from 'moment';
+import Topic from 'models/topic';
+import Layout from 'components/layout.vue';
 
-var moment = require('moment'),
-    Topic = require('models/topic');
-
-module.exports = {
+export default {
     name: 'TopicView',
     data: function() {
         return {
-            topic_id: null,
-            topic: new Topic(),
-            meta: {
-                title: null,
-                subtitle: this._('Topic')
-            }
+            topic: new Topic()
         };
     },
     components: {
-        'small-box': require('components/containers/small-box.vue'),
         'topic-details': require('components/topic/details.vue'),
         'datasets-list': require('components/dataset/card-list.vue'),
-        'reuses-list': require('components/reuse/card-list.vue')
+        'reuses-list': require('components/reuse/card-list.vue'),
+        Layout
     },
     events: {
         'dataset-card-list:submit': function(ids) {
             this.topic.datasets = ids;
             this.topic.save();
+            return true;
         },
         'reuse-card-list:submit': function(ids) {
             this.topic.reuses = ids;
             this.topic.save();
+            return true;
         }
     },
-    watch: {
-        topic_id: function(id) {
-            if (id) {
-                this.topic.fetch(id);
-            }
-        },
-        'topic.name': function(name) {
-            if (name) {
-                this.meta.title = name;
-                this.$dispatch('meta:updated', this.meta);
-            }
+    route: {
+        data() {
+            this.topic.fetch(this.$route.params.oid);
         }
     }
 };

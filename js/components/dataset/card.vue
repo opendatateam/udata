@@ -1,17 +1,17 @@
 <template>
 <div class="card dataset-card">
-    <a v-if="dataset.organization" class="card-logo" href="{{ dataset.page }}">
-        <img alt="{{ dataset.organization.name }}" v-attr="src: logo">
+    <a v-if="dataset.organization" class="card-logo" :href="dataset.page">
+        <img :alt="dataset.organization.name" :src="logo">
     </a>
     <img v-if="dataset.organization && dataset.organization.public_service"
-        v-attr="src: certified" alt="certified"
+        :src="certified" alt="certified"
         class="certified" rel="popover"
-        data-title="{{ _('Certified public service') }}"
-        data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
+        :data-title="_('Certified public service')"
+        :data-content="_('The identity of this public service public is certified by Etalab')"
         data-container="body" data-trigger="hover"/>
     <div class="card-body">
         <h4>
-            <a href="{{ dataset.page }}" title="{{dataset.title}}">
+            <a :href="dataset.page" :title="dataset.title">
                 {{ dataset.title | truncate 80 }}
             </a>
         </h4>
@@ -21,7 +21,7 @@
             <li v-if="dataset.spatial && dataset.spatial.territories && dataset.spatial.territories.length > 0">
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Territorial coverage') }}">
+                    :title="_('Territorial coverage')">
                     <span class="fa fa-map-marker fa-fw"></span>
                     {{ dataset.spatial.territories[0].name }}
                 </a>
@@ -29,7 +29,7 @@
             <li v-if="dataset.metrics">
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Reuses') }}">
+                    :title="_('Reuses')">
                     <span class="fa fa-retweet fa-fw"></span>
                     {{ dataset.metrics.reuses || 0 }}
                 </a>
@@ -37,7 +37,7 @@
             <li v-if="dataset.metrics">
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Stars') }}">
+                    :title="_('Stars')">
                     <span class="fa fa-star fa-fw"></span>
                     {{ dataset.metrics.followers || 0 }}
                 </a>
@@ -45,8 +45,8 @@
         </ul>
     </footer>
 
-    <a class="rollover fade in" href="{{ dataset.page }}"
-        title="{{ dataset.title }}">
+    <a class="rollover fade in" :href="dataset.page"
+        :title="dataset.title">
         {{{ dataset.description | markdown 180 }}}
     </a>
     <footer class="rollover fade in">
@@ -55,7 +55,7 @@
             <li v-if="dataset.temporal_coverage">
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Temporal coverage') }}">
+                    :title="_('Temporal coverage')">
                     <span class="fa fa-calendar fa-fw"></span>
                     {{ dataset.temporal_coverage | daterange }}
                 </a>
@@ -65,7 +65,7 @@
             <li v-if="dataset.spatial && dataset.spatial.granularity">
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Territorial coverage granularity') }}">
+                    :title="_('Territorial coverage granularity')">
                     <span class="fa fa-bullseye fa-fw"></span>
                     {{ dataset | granularity_label }}
                 </a>
@@ -75,7 +75,7 @@
             <li v-if="dataset.frequency">
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Frequency') }}">
+                    :title="_('Frequency')">
                     <span class="fa fa-clock-o fa-fw"></span>
                     {{ dataset | frequency_label }}
                 </a>
@@ -95,14 +95,17 @@ import granularities from 'models/geogranularities';
 import frequencies from 'models/frequencies';
 
 export default {
-    data: function() {
-        return {
-            dataset: new Dataset(),
-            datasetid: null,
-            reactive: true
-        };
+    props: {
+        dataset: {
+            type: Object,
+            default: function() {return new Dataset();}
+        },
+        datasetid: null,
+        reactive: {
+            type: Boolean,
+            default: true
+        }
     },
-    props: ['dataset', 'datasetid', 'reactive'],
     computed: {
         logo: function() {
             if (!this.dataset || !this.dataset.organization || !this.dataset.organization.logo) {
