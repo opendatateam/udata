@@ -3,8 +3,8 @@ var webpack = require('webpack');
 
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var node_path = path.join(__dirname, 'node_modules');
-var static_path = path.join(__dirname, 'udata_gouvfr', 'theme', 'static')
-var source_path = path.join(__dirname, 'theme')
+var static_path = path.join(__dirname, 'udata_gouvfr', 'theme', 'static');
+var source_path = path.join(__dirname, 'theme');
 
 var css_loader = ExtractTextPlugin.extract('style', 'css?root='+source_path+'&sourceMap'),
     less_loader = ExtractTextPlugin.extract('style', 'css?root='+source_path+'&sourceMap!less?sourceMap=source-map-less-inline');
