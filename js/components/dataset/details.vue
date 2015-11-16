@@ -1,5 +1,5 @@
 <template>
-<box :title="title" icon="cubes" boxclass="box-solid">
+<box :title="title" icon="cubes" boxclass="box-solid" :footer="toggled">
     <aside slot="tools">
         <a class="text-muted pointer" @click="toggle">
             <i class="fa fa-gear"></i>
