@@ -49,6 +49,10 @@ class ConfigurableTheme(Theme):
 
     def __init__(self, path):
         super(ConfigurableTheme, self).__init__(path)
+
+        self.variants = self.info.get('variants', [])
+        if 'default' not in self.variants:
+            self.variants.insert(0, 'default')
         self.context_processors = {}
 
     @property
@@ -67,6 +71,16 @@ class ConfigurableTheme(Theme):
     @menu.setter
     def menu(self, value):
         self._menu = value
+
+    @property
+    def variant(self):
+        '''Get the current theme variant'''
+        variant = current_app.config['THEME_VARIANT']
+        if variant not in self.variants:
+            log.warning('Unkown theme variant: %s', variant)
+            return 'default'
+        else:
+            return variant
 
     def configure(self):
         if self._configured:
@@ -127,6 +141,7 @@ def context(name):
 
 
 def init_app(app):
+    app.config.setdefault('THEME_VARIANT', 'default')
     themes.init_themes(app, app_identifier='udata',
                        loaders=[udata_themes_loader, plugin_themes_loader])
 
