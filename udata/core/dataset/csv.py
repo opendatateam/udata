@@ -17,7 +17,6 @@ class DatasetCsvAdapter(csv.Adapter):
          lambda r: r.organization.name if r.organization else None),
         ('organization_id',
          lambda r: str(r.organization.id) if r.organization else None),
-        'supplier',
         'description',
         'frequency',
         'license',

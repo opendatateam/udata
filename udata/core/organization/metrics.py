@@ -20,15 +20,13 @@ class DatasetsMetric(Metric):
 
     def get_value(self):
         org = self.target
-        return (Dataset.objects(db.Q(organization=org)
-                | db.Q(supplier=org)).visible().count())
+        return Dataset.objects(organization=org).visible().count()
 
 
 @Dataset.on_create.connect
 @Dataset.on_update.connect
 def update_datasets_metrics(document, **kwargs):
     DatasetsMetric(document.organization).trigger_update()
-    DatasetsMetric(document.supplier).trigger_update()
 
 
 class ReusesMetric(Metric):

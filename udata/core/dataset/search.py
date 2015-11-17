@@ -58,7 +58,6 @@ class DatasetSearch(ModelSearchAdapter):
             'frequency': {'type': 'string'},
             'organization': {'type': 'string'},
             'owner': {'type': 'string'},
-            'supplier': {'type': 'string'},
             'tags': {
                 'type': 'string',
                 'index_name': 'tag',
@@ -177,9 +176,6 @@ class DatasetSearch(ModelSearchAdapter):
     def serialize(cls, dataset):
         org_id = (str(dataset.organization.id)
                   if dataset.organization is not None else None)
-        supplier_id = (str(dataset.supplier.id)
-                       if dataset.supplier is not None else None)
-        supplier_id = supplier_id if supplier_id != org_id else None
         if dataset.organization:
             image_url = dataset.organization.logo(40)
         elif dataset.owner:
@@ -208,7 +204,6 @@ class DatasetSearch(ModelSearchAdapter):
             'frequency': dataset.frequency,
             'organization': org_id,
             'owner': str(dataset.owner.id) if dataset.owner else None,
-            'supplier': supplier_id,
             'dataset_suggest': {
                 'input': cls.completer_tokenize(dataset.title) + [dataset.id],
                 'output': dataset.title,

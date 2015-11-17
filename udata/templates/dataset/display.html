@@ -111,32 +111,6 @@
                     </div>
                 </div>
 
-                {% if dataset.supplier and dataset.supplier != dataset.organization %}
-                <div class="row provider">
-                    <h3>{{ _('Provided by') }}</h3>
-                    <p>
-                        <small>
-                            <a href="{{ url_for('organizations.show', org=dataset.supplier) }}"
-                                title="{{ dataset.supplier.name }}">
-                                {% if dataset.supplier.logo %}
-                                <img src="{{ dataset.supplier.logo }}"
-                                    alt="{{ dataset.supplier.name }}" height="16px"/>
-                                {% endif %}
-
-                                <span class="name">
-                                {{ dataset.supplier.name }}
-                                </span>
-                            </a>
-                            {% if dataset.extras.remote_url %}
-                            <a href="{{ dataset.extras.remote_url }}" class="btn btn-grey btn-primary btn-sm pull-right">
-                                {{ _('See the original website') }}
-                            </a>
-                            {% endif %}
-                        </small>
-                    </p>
-                </div>
-                {% endif %}
-
                 <div class="row" itemprop="description">
                     <div class="col-xs-12">
                     {{ dataset.description|markdown }}
