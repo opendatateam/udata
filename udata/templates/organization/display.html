@@ -46,7 +46,6 @@
 {# Datasets and reuses tabs #}
 {% set dataset_tabs = (
     ('datasets', _('Datasets'), datasets, {'organization': org.id|string}),
-    ('supplied-datasets', _('Supplied datasets'), supplied_datasets, {'supplier': org.id|string}),
     ('private-datasets', _('Private datasets'), private_datasets, {}),
 ) %}
 {% set reuse_tabs = (

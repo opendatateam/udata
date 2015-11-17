@@ -78,15 +78,12 @@ class OrganizationDetailView(OrgView, DetailView):
             abort(410)
 
         datasets = Dataset.objects(organization=self.organization).visible()
-        supplied_datasets = (Dataset.objects(supplier=self.organization)
-                                    .visible())
         reuses = Reuse.objects(organization=self.organization).visible()
         followers = (FollowOrg.objects.followers(self.organization)
                                       .order_by('follower.fullname'))
         context.update({
             'reuses': reuses.paginate(1, self.page_size),
             'datasets': datasets.paginate(1, self.page_size),
-            'supplied_datasets': supplied_datasets[:self.page_size],
             'followers': followers,
             'can_edit': can_edit,
             'can_view': can_view,
@@ -206,21 +203,6 @@ def datasets_resources_csv(org):
     datasets = search.iter(Dataset, organization=str(org.id))
     adapter = ResourcesCsvAdapter(datasets)
     return csv.stream(adapter, '{0}-datasets-resources'.format(org.slug))
-
-
-@blueprint.route('/<org:org>/supplied-datasets.csv')
-def supplied_datasets_csv(org):
-    datasets = Dataset.objects.filter(supplier=str(org.id))
-    adapter = DatasetCsvAdapter(datasets)
-    return csv.stream(adapter, '{0}-supplied-datasets'.format(org.slug))
-
-
-@blueprint.route('/<org:org>/supplied-datasets-resources.csv')
-def supplied_datasets_resources_csv(org):
-    datasets = Dataset.objects.filter(supplier=str(org.id))
-    adapter = ResourcesCsvAdapter(datasets)
-    return csv.stream(adapter,
-                      '{0}-supplied-datasets-resources'.format(org.slug))
 
 
 @sitemap.register_generator
