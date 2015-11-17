@@ -6,7 +6,6 @@
     width: 100%;
     height: 100%;
 
-
     .tt-hint {
         color: @gray-lighter;
         width: 100%;
@@ -65,14 +64,15 @@
             border-radius: 0px;
         }
 
+        @logo-width: 40px;
         p {
             margin: 0 0 0 5px;
             text-overflow: ellipsis;
             overflow: hidden;
             max-height: @max-height - 2px;
+            max-width: calc(~"100% - 10px - " @logo-width);
         }
 
-        @logo-width: 40px;
         @logo-height: @max-height - 2 * @padding;
         div.logo {
             .pull-left();
