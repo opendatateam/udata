@@ -38,7 +38,7 @@ js-built
 /node_modules/
 /udata/static/
 /jsdoc/
-dump.rdb
+*.rdb
 
 # Installer logs
 pip-log.txt
