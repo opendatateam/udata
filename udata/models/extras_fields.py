@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 
+from datetime import date, datetime
+
 from mongoengine import EmbeddedDocument
 from mongoengine.errors import ValidationError
 from mongoengine.fields import DictField
@@ -57,6 +59,7 @@ class Extra(object):
 
 class DefaultExtra(Extra):
     def validate(self, value):
-        if not isinstance(value, (basestring, int, float)):
+        if not isinstance(value, (basestring, int, float, bool, datetime, date)):
             raise ValidationError(
-                'Value should be an instance of string, integer or float')
+                'Value should be an instance of string, integer, float, boolean or datetime'
+            )

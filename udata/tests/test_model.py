@@ -217,8 +217,17 @@ class ExtrasField(DBTestMixin, TestCase):
         class Tester(db.Document):
             extras = db.ExtrasField()
 
-        tester = Tester(
-            extras={'string': 'string', 'integer': 5, 'float': 5.5})
+        now = datetime.now()
+        today = date.today()
+
+        tester = Tester(extras={
+            'string': 'string',
+            'integer': 5,
+            'float': 5.5,
+            'datetime': now,
+            'date': today,
+            'bool': True
+        })
         tester.validate()
 
     def test_validate_unregistered_type(self):
