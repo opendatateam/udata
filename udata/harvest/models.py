@@ -7,7 +7,7 @@ from urlparse import urlparse
 
 from werkzeug import cached_property
 
-from udata.models import db, Dataset
+from udata.models import db, Dataset, OwnedByQuerySet
 from udata.i18n import lazy_gettext as _
 
 
@@ -61,7 +61,6 @@ class HarvestItem(db.EmbeddedDocument):
     kwargs = db.DictField()
 
 
-
 VALIDATION_ACCEPTED = 'accepted'
 VALIDATION_REFUSED = 'refused'
 VALIDATION_PENDING = 'pending'
@@ -81,14 +80,6 @@ class HarvestSourceValidation(db.EmbeddedDocument):
     by = db.ReferenceField('User')
     on = db.DateTimeField()
     comment = db.StringField()
-
-
-class HarvestSourceQuerySet(db.BaseQuerySet):
-    def owned_by(self, *owners):
-        qs = db.Q()
-        for owner in owners:
-            qs |= db.Q(owner=owner) | db.Q(organization=owner)
-        return self(qs)
 
 
 class HarvestSource(db.Document):
@@ -139,7 +130,7 @@ class HarvestSource(db.Document):
             'owner',
         ],
         'ordering': ['-created_at'],
-        'queryset_class': HarvestSourceQuerySet,
+        'queryset_class': OwnedByQuerySet,
     }
 
 

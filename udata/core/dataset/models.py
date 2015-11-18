@@ -12,7 +12,7 @@ from werkzeug import cached_property
 
 from udata.models import (
     db, WithMetrics, BadgeMixin, Discussion, Follow, Issue,
-    SpatialCoverage
+    SpatialCoverage, OwnedByQuerySet
 )
 from udata.i18n import lazy_gettext as _
 from udata.utils import hash_url
@@ -83,7 +83,7 @@ class License(db.Document):
         return self.title
 
 
-class DatasetQuerySet(db.BaseQuerySet):
+class DatasetQuerySet(OwnedByQuerySet):
     def visible(self):
         return self(private__ne=True, resources__0__exists=True, deleted=None)
 
@@ -91,12 +91,6 @@ class DatasetQuerySet(db.BaseQuerySet):
         return self(db.Q(private=True)
                     | db.Q(resources__0__exists=False)
                     | db.Q(deleted__ne=None))
-
-    def owned_by(self, *owners):
-        Qs = db.Q()
-        for owner in owners:
-            Qs |= db.Q(owner=owner) | db.Q(organization=owner)
-        return self(Qs)
 
 
 class Checksum(db.EmbeddedDocument):
@@ -424,6 +418,11 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Document):
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
     organization = db.ReferenceField(
         'Organization', reverse_delete_rule=db.NULLIFY)
+
+    meta = {
+        'ordering': ['-created_at'],
+        'queryset_class': OwnedByQuerySet,
+    }
 
     @property
     def from_community(self):

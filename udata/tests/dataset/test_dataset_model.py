@@ -91,9 +91,9 @@ class DatasetModelTest(TestCase, DBTestMixin):
         community_resource2.dataset = dataset
         community_resource2.save()
         self.assertEqual(len(dataset.community_resources), 2)
-        self.assertEqual(dataset.community_resources[0].id,
-                         community_resource1.id)
         self.assertEqual(dataset.community_resources[1].id,
+                         community_resource1.id)
+        self.assertEqual(dataset.community_resources[0].id,
                          community_resource2.id)
 
     def test_next_update_empty(self):

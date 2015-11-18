@@ -14,7 +14,7 @@ export default {
     components: {
          datatable: require('components/datatable/widget.vue')
     },
-    data: function() {
+    data() {
         return {
             fields: [{
                 key: 'image',
@@ -69,7 +69,7 @@ export default {
         };
     },
     events: {
-        'datatable:item:click': function(reuse) {
+        'datatable:item:click'(reuse) {
             this.$go('/reuse/' + reuse.id + '/');
         }
     },
@@ -77,13 +77,13 @@ export default {
         reuses: null,
         downloads: {
             type: Array,
-            default: function() {
+            default() {
                 return [];
             }
         },
         title: {
             type: String,
-            default: function() {
+            default() {
                 return this._('Reuses');
             }
         }

@@ -13,9 +13,8 @@ export default {
     components: {
         datatable: require('components/datatable/widget.vue')
     },
-    data: function() {
+    data() {
         return {
-            title: this._('Datasets'),
             fields: [{
                 label: this._('Title'),
                 key: 'title',
@@ -72,7 +71,7 @@ export default {
         };
     },
     events: {
-        'datatable:item:click': function(dataset) {
+        'datatable:item:click'(dataset) {
             this.$go('/dataset/' + dataset.id + '/');
         }
     },
@@ -80,8 +79,14 @@ export default {
         datasets: null,
         downloads: {
             type: Array,
-            default: function() {
+            default() {
                 return [];
+            }
+        },
+        title: {
+            type: String,
+            default() {
+                return this._('Datasets');
             }
         }
     }

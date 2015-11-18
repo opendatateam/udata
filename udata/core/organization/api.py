@@ -141,7 +141,7 @@ class OrganizationBadgeAPI(API):
 requests_parser = api.parser()
 requests_parser.add_argument(
     'status',
-    type=unicode,
+    type=str,
     help='If provided, only return requests ith a given status',
     location='args'
 )
@@ -219,7 +219,7 @@ class MembershipAcceptAPI(MembershipAPI):
 
 refuse_parser = api.parser()
 refuse_parser.add_argument(
-    'comment', type=unicode, help='The refusal reason', location='json'
+    'comment', type=str, help='The refusal reason', location='json'
 )
 
 
@@ -301,7 +301,7 @@ class FollowOrgAPI(FollowAPI):
 
 suggest_parser = api.parser()
 suggest_parser.add_argument(
-    'q', type=unicode,
+    'q', type=str,
     help='The string to autocomplete/suggest', location='args', required=True)
 suggest_parser.add_argument(
     'size', type=int, help='The amount of suggestion to fetch',

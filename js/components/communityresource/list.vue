@@ -18,16 +18,22 @@ export default {
     props: {
         communities: {
             type: Object,
-            default: function() {
+            default() {
                 return new CommunityResources();
             }
         },
-        withoutDataset: Boolean
+        withoutDataset: Boolean,
+        title: {
+            type: String,
+            default() {
+                return this._('Community resources');
+            }
+        }
     },
     components: {
          datatable: require('components/datatable/widget.vue')
     },
-    data: function() {
+    data() {
         let fields = [{
             label: this._('Title'),
             key: 'title',
@@ -47,13 +53,12 @@ export default {
             });
         }
         return {
-            title: this._('Community resources'),
             fields: fields,
             community: new CommunityResource(),
         };
     },
     events: {
-        'datatable:item:click': function(community) {
+        'datatable:item:click'(community) {
             this.$go({name: 'dataset-community-resource', params: {
                 oid: community.dataset.id, rid: community.id
             }});
