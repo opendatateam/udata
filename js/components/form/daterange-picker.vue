@@ -8,40 +8,34 @@
 </style>
 
 <template>
-<div class="input-group dropdown daterange-picker" v-class="open: picking">
+<div class="input-group dropdown daterange-picker" :class="{ 'open': picking }">
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
     <input type="text" class="input-sm form-control"
-        v-el="startInput" placeholder="{{ _('Start') }}"
-        v-on="focus: onFocus, blur: onBlur"
-        v-attr="
-            required: required,
-            value: start_value,
-            readonly: readonly
-        ">
-    <span class="input-group-addon">à</span>
+        v-el:start-input :placeholder="_('Start')"
+        @focus="onFocus"
+        @blur="onBlur"
+        :required="required"
+        :value="start_value"
+        :readonly="readonly">
+    <span class="input-group-addon">{{ _('to') }}</span>
     <input type="text" class="input-sm form-control"
-        v-el="endInput" placeholder="{{ _('End') }}"
-        v-on="focus: onFocus, blur: onBlur"
-        v-attr="
-            required: required,
-            value: end_value,
-            readonly: readonly
-        ">
+        v-el:end-input :placeholder="_('End')"
+        @focus="onFocus"
+        @blur="onBlur"
+        :required="required"
+        :value="end_value"
+        :readonly="readonly">
     <div class="dropdown-menu dropdown-menu-right">
-        <calendar selected="{{value}}"></calendar>
+        <calendar :selected="value"></calendar>
     </div>
-    <input type="hidden" v-el="startHidden"
-        v-attr="
-            id: field.id + '-start',
-            name: field.id + '.start',
-            value: start_value
-        "></input>
-    <input type="hidden" v-el="endHidden"
-        v-attr="
-            id: field.id + '-end',
-            name: field.id + '.end',
-            value: end_value
-        "></input>
+    <input type="hidden" v-el:start-hidden
+        :id="field.id + '-start'"
+        :name="field.id + '-start'"
+        :value="start_value"></input>
+    <input type="hidden" v-el:end-hidden
+        :id="field.id + '-end'"
+        :name="field.id + '-end'"
+        :value="end_value"></input>
 </div>
 </template>
 
@@ -81,20 +75,22 @@ export default {
             this.pickedField.value = date.format(this.field.format || DEFAULT_FORMAT);
             this.hiddenField.value = date.format(ISO_FORMAT);
             this.picking = false;
+            return true;
         },
         'calendar:date:cleared': function() {
             this.pickedField.value = '';
             this.hiddenField.value = '';
             this.picking = false;
+            return true;
         }
     },
     methods: {
         onFocus: function(e) {
             this.picking = true;
             this.pickedField = e.target;
-            this.hiddenField = e.target == this.$$.startInput
-                ? this.$$.startHidden
-                : this.$$.endHidden;
+            this.hiddenField = e.target == this.$els.startInput
+                ? this.$els.startHidden
+                : this.$els.endHidden;
         },
         onBlur: function(e) {
             if (e.targetVM !== this) {
@@ -104,10 +100,10 @@ export default {
     },
     ready: function() {
         // Perform all validations on end field because performing on start field unhighlight.
-        $(this.$$.endHidden).rules('add', {
-            dateGreaterThan: '#' + this.$$.startHidden.id,
+        $(this.$els.endHidden).rules('add', {
+            dateGreaterThan: '#' + this.$els.startHidden.id,
             required: (el) => {
-                return (this.$$.startHidden.value && !this.$$.endHidden.value) || (this.$$.endHidden.value && !this.$$.startHidden.value);
+                return (this.$els.startHidden.value && !this.$els.endHidden.value) || (this.$els.endHidden.value && !this.$els.startHidden.value);
             },
             messages: {
                 dateGreaterThan: this._('End date should be after start date'),

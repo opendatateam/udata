@@ -13,19 +13,19 @@
 </style>
 
 <template>
-<div class="calendar datepicker" v-class="view">
+<div class="calendar datepicker" :class="[ 'view' ]">
     <div class="btn-group btn-group-sm btn-group-justified" role="group">
       <div class="btn-group" role="group">
-        <button v-on="click: pickBefore" type="button" class="btn btn-default">{{ _('- 1h') }}</button>
+        <button @click="pickBefore" type="button" class="btn btn-default">{{ _('- 1h') }}</button>
       </div>
       <div class="btn-group" role="group">
-        <button v-on="click: pickNow" type="button" class="btn btn-default">{{ _('Now') }}</button>
+        <button @click="pickNow" type="button" class="btn btn-default">{{ _('Now') }}</button>
       </div>
       <div class="btn-group" role="group">
-        <button v-on="click: pickAfter" type="button" class="btn btn-default">{{ _('+ 1h') }}</button>
+        <button @click="pickAfter" type="button" class="btn btn-default">{{ _('+ 1h') }}</button>
       </div>
     </div>
-    <button v-on="click: close" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <button @click="close" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 </div>
 </template>
 

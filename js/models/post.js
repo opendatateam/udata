@@ -13,11 +13,11 @@ export default class Post extends Model {
         return this;
     }
 
-    update(data) {
+    update(data, on_success, on_error) {
         this.$api('posts.update_post', {
             post: this.id,
             payload: data
-        }, this.on_fetched);
+        }, on_success, on_error);
     }
 
     save() {

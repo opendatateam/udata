@@ -1,16 +1,15 @@
 <template>
 <tr class="pointer"
-    v-class="active: selected"
-    v-on="click: item_click(item)">
-    <td v-repeat="field in fields" track-by="key"
-        v-class="
-            text-center: field.align === 'center',
-            text-left: field.align === 'left',
-            text-right: field.align === 'right',
-            ellipsis: field.ellipsis
-        ">
-        <component is="{{field.type || 'text'}}"
-            item="{{item}}" field="{{field}}">
+    :class="{ 'active': selected }"
+    @click="item_click(item)">
+    <td v-for="field in fields" track-by="key"
+        :class="{
+            'text-center': field.align === 'center',
+            'text-left': field.align === 'left',
+            'text-right': field.align === 'right',
+            'ellipsis': field.ellipsis
+        }">
+        <component :is="field.type || 'text'" :item="item" :field="field">
         </component>
     </td>
 </tr>
@@ -23,13 +22,14 @@ import Cell from './cell.vue';
 export default {
     name: 'datatable-row',
     replace: true,
-    data: function() {
-        return {
-            selected: false,
-            fields: []
-        };
+    props: {
+        item: Object,
+        fields: Array,
+        selected: {
+            type: Boolean,
+            default: false
+        }
     },
-    props: ['item', 'fields', 'selected'],
     created: function() {
         // Loads cells from fields definitions
         for(let field of this.fields) {
@@ -53,7 +53,9 @@ export default {
                 if (!options.hasOwnProperty('mixins')) {
                     options.mixins = [];
                 }
-                options.mixins.push(Cell);
+                if (!(Cell in options.mixins)) {
+                    options.mixins.push(Cell);
+                }
                 this.$options.components[name] = Vue.extend(options);
             }
         }

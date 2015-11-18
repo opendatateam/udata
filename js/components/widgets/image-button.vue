@@ -37,9 +37,9 @@
 
 <template>
 <div class="image-button pointer"
-    v-style="width:size+'px', height:size+'px'"
-    v-on="click: click">
-    <img v-attr="src:src" />
+    :style="{width:size+'px', height:size+'px'}"
+    @click="click">
+    <img :src="src" />
     <small class="change-overlay">{{ _('change') }}</small>
 </div>
 </template>
@@ -48,15 +48,18 @@
 import Vue from 'vue';
 
 export default {
-    data: function() {
-        return {
-            src: null,
-            size: 100,
-            endpoint: null,
-            sizes: [100]
-        };
+    props: {
+        src: null,
+        size: {
+            type: Number,
+            default: 100,
+        },
+        sizes: {
+            type: Array,
+            default: function() {return [100];}
+        },
+        endpoint: null
     },
-    props: ['src', 'size', 'sizes', 'endpoint'],
     methods: {
         click: function() {
             this.$root.$modal(

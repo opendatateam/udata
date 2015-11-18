@@ -1,19 +1,21 @@
-<style lang="less">
-
-</style>
-
 <template>
-<form-vertical v-ref="form" fields="{{fields}}" model="{{source}}"></form-vertical>
+<vform v-ref:form :fields="fields" :model="source"></vform>
 </template>
 
 <script>
 import HarvestSource from 'models/harvest/source';
 
-module.exports = {
-    props: ['source'],
+export default {
+    props: {
+        source: {
+            type: HarvestSource,
+            default() {
+                return new HarvestSource();
+            }
+        }
+    },
     data: function() {
         return {
-            source: new HarvestSource(),
             fields: [{
                 id: 'name',
                 label: this._('Name')
@@ -33,14 +35,14 @@ module.exports = {
         };
     },
     components: {
-        'form-vertical': require('components/form/vertical-form.vue')
+        vform: require('components/form/vertical-form.vue')
     },
     methods: {
         serialize: function() {
-            return this.$.form.serialize();
+            return this.$refs.form.serialize();
         },
         validate: function() {
-            return this.$.form.validate();
+            return this.$refs.form.validate();
         }
     }
 };

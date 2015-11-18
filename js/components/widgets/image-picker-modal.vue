@@ -7,15 +7,13 @@
 </style>
 
 <template>
-<modal title="{{ title }}" class="image-picker-modal modal-info"
-    v-ref="modal">
+<modal :title="title" class="image-picker-modal modal-info" v-ref:modal>
     <div class="modal-body">
-        <image-picker v-ref="picker" endpoint="{{endpoint}}" sizes="{{sizes}}">
-        </image-picker>
+        <picker v-ref:picker :endpoint="endpoint" :sizes="sizes"></picker>
     </div>
     <footer class="modal-footer">
         <button type="button" class="btn btn-primary btn-flat pointer pull-left"
-             v-if="$.picker.resizing" v-on="click: click">
+             v-show="$refs.picker && $refs.picker.resizing" @click="click">
             {{ _('Validate') }}
         </button>
         <button type="button" class="btn btn-warning btn-flat pointer" data-dismiss="modal">
@@ -26,9 +24,7 @@
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     data: function() {
         return {
             endpoint: null,
@@ -37,23 +33,24 @@ module.exports = {
     },
     computed: {
         title: function() {
-            return this.$.picker && this.$.picker.resizing
+            return this.$refs.picker && this.$refs.picker.resizing
                 ? this._('Resize your thumbnail')
                 : this._('Upload an image');
         }
     },
     components: {
-        'modal': require('components/modal.vue'),
-        'image-picker': require('components/widgets/image-picker.vue')
+        modal: require('components/modal.vue'),
+        picker: require('components/widgets/image-picker.vue')
     },
     events: {
         'image:saved': function() {
-            this.$.modal.close();
+            this.$refs.modal.close();
+            return true;
         }
     },
     methods: {
         click: function() {
-            this.$.picker.save();
+            this.$refs.picker.save();
         }
     }
 };

@@ -17,10 +17,7 @@ from wtforms_json import flatten_json
 from . import widgets
 
 from udata.auth import current_user, admin_permission
-from udata.models import (
-    db, User, SpatialCoverage, Organization, GeoZone, spatial_granularities,
-    Dataset, Reuse
-)
+from udata.models import db, User, Organization, Dataset, Reuse
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _

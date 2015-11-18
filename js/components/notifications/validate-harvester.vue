@@ -1,5 +1,5 @@
 <template>
-<a class="pointer" v-on="click: click">
+<a class="pointer" @click="click">
     <span class="fa fa-fw fa-tasks text-aqua"></span>
     {{ _('Pending harvester validation for {name}', details) }}
 </a>

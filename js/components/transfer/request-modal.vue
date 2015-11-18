@@ -1,18 +1,18 @@
 <template>
-<modal title="{{ _('Transfer request') }}"
+<modal :title="_('Transfer request')"
     class="modal-info transfer-request-modal"
-    v-ref="modal">
+    v-ref:modal>
 
     <div class="modal-body">
         <div class="text-center row" v-if="!type">
             <p class="lead col-xs-12">{{ _('Transfer to') }}</p>
 
-            <div class="col-xs-6 pointer" v-on="click: type = 'user'">
+            <div class="col-xs-6 pointer" @click="type = 'user'">
                 <span class="fa fa-3x fa-user"></span>
                 <p>{{ _('An user') }}</p>
             </div>
 
-            <div class="col-xs-6 pointer" v-on="click: type = 'organization'">
+            <div class="col-xs-6 pointer" @click="type = 'organization'">
                 <span class="fa fa-3x fa-building"></span>
                 <p>{{ _('An organization') }}</p>
             </div>
@@ -32,8 +32,8 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-                    <dataset-card v-if="subject|is 'Dataset'" dataset="{{subject}}"></dataset-card>
-                    <reuse-card v-if="subject|is 'Reuse'" reuse="{{subject}}"></reuse-card>
+                    <dataset-card v-if="subject|is 'Dataset'" :dataset="subject"></dataset-card>
+                    <reuse-card v-if="subject|is 'Reuse'" :reuse="subject"></reuse-card>
                 </div>
             </div>
             <div class="row text-center">
@@ -41,15 +41,15 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-                    <user-card v-if="recipient|is 'user'" user="{{recipient}}"></user-card>
-                    <org-card v-if="recipient|is 'organization'" organization="{{recipient}}"></org-card>
+                    <user-card v-if="recipient|is 'user'" :user="recipient"></user-card>
+                    <org-card v-if="recipient|is 'organization'" :organization="recipient"></org-card>
                 </div>
             </div>
             <form role="form">
                 <div class="form-group">
                     <label>{{ _('Reason') }}</label>
                     <textarea class="form-control" rows="3"
-                        placeholder="{{ _('Explain why you request this transfer') }}"
+                        :placeholder="_('Explain why you request this transfer')"
                         v-model="comment">
                     </textarea>
                 </div>
@@ -59,7 +59,7 @@
 
     <footer class="modal-footer text-center">
         <button v-if="recipient" type="button" class="btn btn-success btn-flat pointer pull-left"
-            v-on="click: confirm">
+            @click="confirm">
             {{ _('Confirm') }}
         </button>
         <button v-if="confirm" type="button" class="btn btn-danger btn-flat pointer"
@@ -118,7 +118,7 @@ export default {
                     title: this._('Transfer requested'),
                     details: this._('The recipient need to accept the transfer in order to complete it.')
                 });
-                this.$.modal.close();
+                this.$refs.modal.close();
                 this.$emit('transfer:requested', response.obj);
             });
         }

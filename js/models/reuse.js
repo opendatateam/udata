@@ -36,11 +36,11 @@ export default class Reuse extends Model {
         }
     }
 
-    update(data) {
+    update(data, on_success, on_error) {
         this.$api('reuses.update_reuse', {
             reuse: this.id,
             payload: data
-        }, this.on_fetched);
+        }, on_success, on_error);
     }
 };
 

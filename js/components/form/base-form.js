@@ -116,9 +116,7 @@ export default {
             return s;
         },
         $form: function() {
-            return this.$el.tagName.toLowerCase() === 'form'
-                ? this.$el
-                : this.$el.querySelector('form');
+            return this.$refs.form || this.$els.form;
         }
     },
     attached: function() {
@@ -142,8 +140,10 @@ export default {
             }
         });
     },
-    detached: function() {
-        $(this.$form).data('validator', null);
+    beforeDestroy: function() {
+        if (this.$form) {
+            $(this.$form).data('validator', null);
+        }
     },
     methods: {
         /**
@@ -190,6 +190,38 @@ export default {
             }
 
             return out;
+        },
+        on_error: function (response) {
+            if ('data' in response) {
+                let data = {};
+                try {
+                    data = JSON.parse(response.data);
+                } catch (e) {
+                    log.warn('Parsing error:', e);
+                    return;
+                }
+                if ('errors' in data) {
+                    this.fill_errors(data.errors);
+                } else {
+                    $(this.$form).append(this.error_element('', data.message));
+                }
+            }
+        },
+        fill_errors: function(errors) {
+            [...this.$form.querySelectorAll('input,textarea,select')].forEach((element) => {
+                if (element.name in errors) {
+                    let name = element.name;
+                    let error = errors[name][0];
+                    $(element).closest('.form-group,.field-wrapper')
+                              .removeClass('has-success')
+                              .addClass('has-error')
+                              .append(this.error_element(name, error));
+                }
+            });
+        },
+        error_element: function(id, message) {
+            $(`#form-${id}-error`).remove();
+            return `<p class="form-error" id="form-${id}-error">${message}</p>`;
         }
     }
 };

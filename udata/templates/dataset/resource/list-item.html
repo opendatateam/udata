@@ -38,11 +38,7 @@
 
     {% if can_edit_resource(resource, dataset) %}
         {% if resource.from_community %}
-            {% if resource.owner %}
-                {% set edit_url = url_for('admin.index', path='user/{id}/'.format(id=resource.owner.id), **{'community_id': resource.id}) %}
-            {% else %}
-                {% set edit_url = url_for('admin.index', path='organization/{id}/'.format(id=resource.organization.id), **{'community_id': resource.id}) %}
-            {% endif %}
+            {% set edit_url = url_for('admin.index', path='dataset/{id}/community-resource/{rid}'.format(id=resource.dataset.id, rid=resource.id)) %}
         {% else %}
             {% set edit_url = url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'resource_id': resource.id}) %}
         {% endif %}

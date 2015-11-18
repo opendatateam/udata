@@ -16,16 +16,23 @@
 </style>
 
 <template>
-<li v-class="treeview:children, active: active">
-    <a v-on="click: click">
+<li :class="{ 'treeview': children, 'active': active }">
+    <a @click="click">
         <i v-if="icon" class="fa fa-fw fa-{{icon}}"></i>
-        <img v-if="image" v-attr="src:image" />
+        <img v-if="image" :src="image" />
         <span>{{ label | truncate 25 }}</span>
         <i v-if="is_tree" class="fa fa-angle-{{open ? 'down' : 'left'}} pull-right"></i>
         <small v-if="badge" class="badge pull-right bg-{{badge-color}}">{{badge.label}}</small>
     </a>
     <ul v-if="is_tree" v-show="open" class="treeview-menu">
-        <sidebar-menu-item v-repeat="children"></sidebar-menu-item>
+        <sidebar-menu-item v-for="item in children"
+            :label="item.label"
+            :icon="item.icon"
+            :image="item.image"
+            :route="item.route"
+            :badge="item.badge"
+            :children="item.children">
+        </sidebar-menu-item>
     </ul>
 </li>
 </template>
@@ -34,6 +41,7 @@
 export default {
     name: 'sidebar-menu-item',
     replace: true,
+    props: ['label', 'icon','image', 'route', 'children', 'badge'],
     data: function() {
         return {
             open: false,
@@ -44,7 +52,7 @@ export default {
             return this.children && this.children.length;
         },
         active: function() {
-            return this.open || this.$router.current_route && this.route === this.$router.current_route;
+            return this.open || this.$route.path === this.route;
         }
     },
     methods: {

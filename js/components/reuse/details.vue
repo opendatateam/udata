@@ -17,57 +17,53 @@
     }
 }
 </style>
+
 <template>
-<box-container title="{{title}}" icon="retweet" boxclass="box-solid reuse-details-widget">
-    <aside>
-        <a class="text-muted pointer" v-on="click: toggle">
+<box :title="_('Details')" icon="retweet" boxclass="box-solid reuse-details-widget">
+    <aside slot="tools">
+        <a class="text-muted pointer" @click="toggle">
             <i class="fa fa-gear"></i>
         </a>
     </aside>
     <div v-show="!toggled">
-        <h3>
-            {{reuse.title}}
-            <!--small v-if="org.acronym">{{org.acronym}}</small-->
-        </h3>
+        <h3>{{reuse.title}}</h3>
         <div class="details-body">
-            <image-button src="{{reuse.image}}" size="100" class="thumbnail-button"
-                endpoint="{{endpoint}}">
+            <image-button :src="reuse.image" :size="100" class="thumbnail-button"
+                :endpoint="endpoint">
             </image-button>
-            <div v-markdown="{{reuse.description}}"></div>
+            <div v-markdown="reuse.description"></div>
             <div v-if="reuse.tags" class="label-list">
                 <strong>
                     <span class="fa fa-fw fa-tags"></span>
                     {{ _('Tags') }}:
                 </strong>
-                <span v-repeat="reuse.tags" class="label label-default">{{$value}}</span>
+                <span v-for="tag in reuse.tags" class="label label-default">{{tag}}</span>
             </div>
             <div v-if="reuse.badges | length" class="label-list">
                 <strong>
                     <span class="fa fa-fw fa-bookmark"></span>
                     {{ _('Badges') }}:
                 </strong>
-                <span v-repeat="reuse.badges" class="label label-primary">{{badges[kind]}}</span>
+                <span v-for="b in reuse.badges" class="label label-primary">{{badges[b.kind]}}</span>
             </div>
         </div>
     </div>
-    <reuse-form v-ref="form" v-show="toggled" reuse="{{reuse}}"></reuse-form>
-    <box-footer v-if="toggled">
+    <reuse-form v-ref:form v-show="toggled" :reuse="reuse"></reuse-form>
+    <footer v-if="toggled" slot="footer">
         <button type="submit" class="btn btn-primary"
-            v-on="click: save($event)" v-i18n="Save"></button>
-    </box-footer>
-</box-container>
+            @click="save($event)" v-i18n="Save"></button>
+    </footer>
+</box>
 </template>
 
 <script>
 import API from 'api';
-
 
 export default {
     name: 'reuse-details',
     props: ['reuse'],
     data: function() {
         return {
-            title: this._('Details'),
             toggled: false,
             badges: require('models/badges').badges.reuse
         };
@@ -86,7 +82,7 @@ export default {
         }
     },
     components: {
-        'box-container': require('components/containers/box.vue'),
+        box: require('components/containers/box.vue'),
         'image-button': require('components/widgets/image-button.vue'),
         'reuse-form': require('components/reuse/form.vue')
     },
@@ -95,13 +91,13 @@ export default {
             this.toggled = !this.toggled;
         },
         save: function(e) {
-            if (this.$.form.validate()) {
-                var data = this.$.form.serialize();
-
-                this.reuse.update(data);
-                e.preventDefault();
-
-                this.toggled = false;
+            e.preventDefault();
+            let form = this.$refs.form;
+            if (form.validate()) {
+                this.reuse.update(form.serialize(), (response) => {
+                    this.reuse.on_fetched(response);
+                    this.toggled = false;
+                }, form.on_error);
             }
         }
     }

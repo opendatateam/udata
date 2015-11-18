@@ -131,10 +131,6 @@
                     "$ref": "#/definitions/SpatialCoverage",
                     "description": "The spatial coverage"
                 },
-                "supplier": {
-                    "$ref": "#/definitions/OrganizationReference",
-                    "description": "The supplyer organization (if different from the producer)"
-                },
                 "tags": {
                     "items": {
                         "type": "string"
@@ -1605,11 +1601,6 @@
                     {
                         "in": "query",
                         "name": "granularity",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "supplier",
                         "type": "string"
                     },
                     {

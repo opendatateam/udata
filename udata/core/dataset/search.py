@@ -58,11 +58,13 @@ class DatasetSearch(ModelSearchAdapter):
             'frequency': {'type': 'string'},
             'organization': {'type': 'string'},
             'owner': {'type': 'string'},
-            'supplier': {'type': 'string'},
             'tags': {
                 'type': 'string',
                 'index_name': 'tag',
-                'index': 'not_analyzed'
+                'index': 'not_analyzed',
+                'fields': {
+                    'i18n': {'type': 'string', 'analyzer': i18n_analyzer}
+                }
             },
             'badges': {
                 'type': 'string',
@@ -116,8 +118,8 @@ class DatasetSearch(ModelSearchAdapter):
                 'index_name': 'geozones',
                 'properties': {
                     'id': {'type': 'string', 'index': 'not_analyzed'},
-                    'name': {'type': 'string'},
-                    'code': {'type': 'string'},
+                    'name': {'type': 'string', 'index': 'not_analyzed'},
+                    'keys': {'type': 'string', 'index': 'not_analyzed'},
                 }
             },
             'granularity': {'type': 'string', 'index': 'not_analyzed'},
@@ -132,11 +134,11 @@ class DatasetSearch(ModelSearchAdapter):
         }
     }
     fields = (
+        'geozones.keys^9',
+        'geozones.name^9',
         'title^6',
-        'tags^3',
-        'geozones.name^3',
+        'tags.i18n^3',
         'description',
-        'code',
     )
     sorts = {
         'title': Sort('title.raw'),
@@ -162,9 +164,9 @@ class DatasetSearch(ModelSearchAdapter):
     }
     boosters = [
         BoolBooster('featured', 1.1),
-        GaussDecay('metrics.reuses', max_reuses, decay=0.8),
+        GaussDecay('metrics.reuses', max_reuses, decay=0.1),
         GaussDecay(
-            'metrics.followers', max_followers, max_followers, decay=0.8),
+            'metrics.followers', max_followers, max_followers, decay=0.1),
     ]
 
     @classmethod
@@ -177,9 +179,6 @@ class DatasetSearch(ModelSearchAdapter):
     def serialize(cls, dataset):
         org_id = (str(dataset.organization.id)
                   if dataset.organization is not None else None)
-        supplier_id = (str(dataset.supplier.id)
-                       if dataset.supplier is not None else None)
-        supplier_id = supplier_id if supplier_id != org_id else None
         if dataset.organization:
             image_url = dataset.organization.logo(40)
         elif dataset.owner:
@@ -208,7 +207,6 @@ class DatasetSearch(ModelSearchAdapter):
             'frequency': dataset.frequency,
             'organization': org_id,
             'owner': str(dataset.owner.id) if dataset.owner else None,
-            'supplier': supplier_id,
             'dataset_suggest': {
                 'input': cls.completer_tokenize(dataset.title) + [dataset.id],
                 'output': dataset.title,
@@ -246,7 +244,7 @@ class DatasetSearch(ModelSearchAdapter):
                 geozones.append({
                     'id': zone.id,
                     'name': zone.name,
-                    'code': zone.code
+                    'keys': zone.keys_values
                 })
                 parents |= set(zone.parents)
 

@@ -9,7 +9,7 @@ var vue = require('vue-loader'),
     css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap'),
     less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline'),
     html_loader = 'vue-html?collapseBooleanAttributes=false&collapseWhitespace=false"',
-    js_loader = 'babel';
+    js_loader = 'babel?optional[]=runtime&loose=all&nonStandard=false';
 
 var languages = ['en', 'es', 'fr'];
 
@@ -74,6 +74,14 @@ module.exports = {
                 exclude: path.resolve(__dirname, 'specs', 'loader.js')
             },
         ]
+    },
+    vue: {
+        loaders: {
+            html: html_loader,
+            css: css_loader,
+            less: less_loader,
+            js: js_loader
+        }
     },
     plugins: [
         // Fix AdminLTE packaging

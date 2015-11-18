@@ -26,11 +26,11 @@ export default class Dataset extends Model {
         this.$api(ep, {payload: this}, this.on_fetched);
     }
 
-    update(data) {
+    update(data, on_success, on_error) {
         this.$api('datasets.update_dataset', {
             dataset: this.id,
             payload: data
-        }, this.on_fetched);
+        }, on_success, on_error);
     }
 
     delete_resource(id) {

@@ -8,10 +8,10 @@
         <li>
             <!-- inner menu: contains the actual data -->
             <ul class="menu">
-                <li v-repeat="actions">
-                    <a v-route="{{route}}" class="pointer">
-                        <span class="fa fa-fw {{icon}} text-{{color}}"></span>
-                        <span>{{ label }}</span>
+                <li v-for="action in actions">
+                    <a v-link="action.route">
+                        <span class="fa fa-fw {{action.icon}} text-{{action.color}}"></span>
+                        <span>{{ action.label }}</span>
                     </a>
                 </li>
             </ul>

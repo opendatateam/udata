@@ -8,18 +8,24 @@
 </style>
 <template>
     <div class="row small-boxes">
-        <small-box class="col-lg-4 col-xs-6" v-repeat="dataBoxes"></small-box>
+        <small-box class="col-lg-4 col-xs-6" v-for="b in dataBoxes"
+            :value="b.value" :label="b.label" :color="b.color"
+            :icon="b.icon" :target="b.target">
+        </small-box>
     </div>
     <div class="row small-boxes">
-        <small-box class="col-lg-4 col-xs-6" v-repeat="communityBoxes"></small-box>
+        <small-box class="col-lg-4 col-xs-6" v-for="b in communityBoxes"
+            :value="b.value" :label="b.label" :color="b.color"
+            :icon="b.icon" :target="b.target">
+        </small-box>
     </div>
     <div class="row graphs-chart">
-        <chart class="col-xs-6" title="{{ _('Latest dataset uploads') }}"
-                metrics="{{ metrics }}" icon="null"
-                y="{{ dataDatasets }}" chart-type="Line"></chart>
-        <chart class="col-xs-6" title="{{ _('Latest reuse uploads') }}"
-                metrics="{{ metrics }}" icon="null"
-                y="{{ dataReuses }}" chart-type="Line"></chart>
+        <chart class="col-xs-6" :title="_('Latest dataset uploads')"
+                :metrics="metrics" icon="null"
+                :y="dataDatasets" chart-type="Line"></chart>
+        <chart class="col-xs-6" :title="_('Latest reuse uploads')"
+                :metrics="metrics" icon="null"
+                :y="dataReuses" chart-type="Line"></chart>
     </div>
 </template>
 
@@ -60,19 +66,16 @@ export default {
                 label: this._('Datasets'),
                 icon: 'cubes',
                 color: 'aqua',
-                target: '/datasets/'
             }, {
                 value: this.$root.site.metrics.resources || 0,
                 label: this._('Resources'),
                 icon: 'file-text-o',
                 color: 'maroon',
-                target: '#'
             }, {
                 value: this.$root.site.metrics.reuses || 0,
                 label: this._('Reuses'),
                 icon: 'retweet',
                 color: 'green',
-                target: '/reuses/'
             }];
         },
         communityBoxes: function() {
@@ -84,19 +87,16 @@ export default {
                 label: this._('Users'),
                 icon: 'users',
                 color: 'yellow',
-                target: '#users-widget'
             }, {
                 value: this.$root.site.metrics.organizations || 0,
                 label: this._('Organizations'),
                 icon: 'building',
                 color: 'purple',
-                target: '/organizations/'
             }, {
                 value: this.$root.site.metrics.discussions || 0,
                 label: this._('Discussions'),
                 icon: 'comments',
                 color: 'teal',
-                target: '#'
             }];
         }
     },

@@ -1,12 +1,12 @@
 <template>
-    <datatable title="{{ title }}" icon="newspaper-o"
+    <datatable :title="title " icon="newspaper-o"
         boxclass="posts-widget"
-        fields="{{ fields }}"
-        p="{{ posts }}"
-        empty="{{ _('No post') }}">
-        <footer>
+        :fields="fields"
+        :p="posts"
+        :empty="_('No post')">
+        <footer slot="footer">
             <button type="button" class="btn btn-primary btn-flat btn-sm"
-                v-route="/post/new/">
+                v-link.literal="/post/new/">
                 <span class="fa fa-fw fa-plus"></span>
                 <span v-i18n="New"></span>
             </button>
@@ -16,12 +16,10 @@
 
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'posts-widget',
     components: {
-         'datatable': require('components/datatable/widget.vue')
+         datatable: require('components/datatable/widget.vue')
     },
     data: function() {
         return {

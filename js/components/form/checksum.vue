@@ -15,16 +15,16 @@
             <span class="caret"></span>
         </button>
         <ul class="dropdown-menu" role="menu">
-            <li v-repeat="specs.type.enum"><a href="#">{{$value}}</a></li>
+            <li v-for="algo in specs.type.enum"><a href="#">{{algo}}</a></li>
         </ul>
     </div>
-    <input type="text" class="form-control" v-attr="
-        id: field.id,
-        name: field.id,
-        placeholder: placeholder,
-        required: required,
-        value: value ? value.value : '',
-        readonly: field.readonly || false"></input>
+    <input type="text" class="form-control"
+        :id="field.id"
+        :name="field.id"
+        :placeholder="placeholder"
+        :required="required"
+        :value="value ? value.value : ''"
+        :readonly="field.readonly || false"></input>
 </div>
 </template>
 

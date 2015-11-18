@@ -7,26 +7,27 @@
 </style>
 
 <template>
-    <div class="horizontal-field" v-class="
-        form-group: !is_hidden,
-        has-error: errors.length
-        ">
-        <label v-if="!is_hidden" for="{{field.id}}"
-            v-class="required: required && !is_bool"
+    <div class="horizontal-field" :class="{
+        'form-group': !is_hidden,
+        'has-error': errors.length
+        }">
+        <label v-if="!is_hidden" :for="field.id"
+            :class="{ 'required': required && !is_bool }"
             class="col-sm-3 control-label">
             <i v-if="errors.length" class="fa fa-times-circle-o"></i>
             {{ is_bool ? '' : field.label }}
             <span v-show="description" class="form-help"
-                v-attr="data-content: description"></span>
+                :data-content="description"></span>
         </label>
         <div class="col-sm-9">
-            <component is="{{widget}}"
-                field="{{field}}" value="{{value}}" model="{{model}}"
-                description="{{description}}" property="{{property}}"
-                placeholder="{{placeholder}}" required="{{required}}"
-                readonly="{{readonly}}">
+            <component :is="widget"
+                :field="field" :value="value" :model="model"
+                :description="description" :property="property"
+                :placeholder="placeholder" :required="required"
+                :readonly="readonly">
             </component>
-            <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
+            <label :for="field.id" class="help-block"
+                v-for="error in errors">{{error}}</label>
         </div>
     </div>
 </template>

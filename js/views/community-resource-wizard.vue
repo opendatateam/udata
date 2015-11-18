@@ -1,5 +1,5 @@
 <template>
-<wizard-component v-ref="wizard" steps="{{steps}}"></wizard-component>
+<wizard v-ref:wizard :steps="steps" :title="_('New community resource')"></wizard>
 </template>
 
 <script>
@@ -10,16 +10,13 @@ import API from 'api';
 export default {
     data: function() {
         return {
-            meta: {
-                title: this._('New community resource'),
-            },
             communityResource: new CommunityResource(),
             dataset: new Dataset(),
             publish_as: null,
             steps: [{
                 label: this._('Publish as'),
                 subtitle: this._('Choose who is publishing'),
-                component: 'publish-as',
+                component: require('components/widgets/publish-as.vue'),
                 next: (component) => {
                     if (component.selected) {
                         this.publish_as = component.selected;
@@ -29,9 +26,9 @@ export default {
             }, {
                 label: this._('Resources'),
                 subtitle: this._('Describe your community resource'),
-                component: 'resource-form',
+                component: require('components/dataset/resource/form.vue'),
                 init: (component) => {
-                    this.dataset_id = this.$router.parameters.dataset_id;
+                    this.dataset_id = this.$route.query.dataset_id;
                     this.dataset.fetch(this.dataset_id);
                     component.dataset = this.dataset;
                     component.community = true;
@@ -46,7 +43,7 @@ export default {
                         this.communityResource.dataset = this.dataset_id;
                         this.communityResource.save();
                         this.communityResource.$once('updated', () => {
-                            this.$.wizard.go_next();
+                            this.$refs.wizard.go_next();
                         });
                         return false;
                     }
@@ -54,7 +51,7 @@ export default {
             }, {
                 label: this._('Share'),
                 subtitle: this._('Communicate about your publication'),
-                component: 'post-create',
+                component: require('components/communityresource/post-create.vue'),
                 init: (component) => {
                     this.communityResource._set('url', this.dataset.page + '#resource-' + this.communityResource.id);
                     component.communityResource = this.communityResource;
@@ -63,22 +60,17 @@ export default {
          };
     },
     components: {
-        'resource-form': require('components/dataset/resource/form.vue'),
-        'dataset-cards-form': require('components/dataset/cards-form.vue'),
-        'image-picker': require('components/widgets/image-picker.vue'),
-        'post-create': require('components/communityresource/post-create.vue'),
-        'publish-as': require('components/widgets/publish-as.vue'),
-        'wizard-component': require('components/widgets/wizard.vue'),
+        wizard: require('components/widgets/wizard.vue'),
     },
     events: {
         'wizard:next-step': function() {
-            this.$.wizard.go_next();
+            this.$refs.wizard.go_next();
         },
         'wizard:previous-step': function() {
-            this.$.wizard.go_previous();
+            this.$refs.wizard.go_previous();
         },
         'wizard:step-changed': function() {
-            this.$.wizard.$.content.communityResource = this.communityResource;
+            this.$refs.wizard.$refs.content.communityResource = this.communityResource;
         }
     }
 };

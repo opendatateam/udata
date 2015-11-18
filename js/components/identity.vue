@@ -8,20 +8,15 @@
 </style>
 
 <template>
-<a class="identity" v-on="click: click">
-    <img v-attr="src: avatar" alt="{{ name }}">
+<a class="identity" @click="click">
+    <img :src="avatar" :alt="name">
     {{name}}
 </a>
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     replace: true,
-    data: function() {
-        return {};
-    },
     computed: {
         avatar: function() {
             return this.$data.avatar

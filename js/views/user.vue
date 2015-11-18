@@ -1,25 +1,27 @@
 <template>
+<layout :title="user.fullname || ''" :subtitle="_('User')" :page="user.page || ''">
     <div class="row">
-        <profile user="{{user}}" class="col-xs-12 col-md-6"></profile>
-        <chart title="Traffic" metrics="{{metrics}}" class="col-xs-12 col-md-6"
-            x="date" y="{{y}}"></chart>
+        <profile :user="user" class="col-xs-12 col-md-6"></profile>
+        <chart title="Traffic" :metrics="metrics" class="col-xs-12 col-md-6"
+            x="date" :y="y"></chart>
     </div>
 
     <div class="row">
-        <datasets class="col-xs-12" datasets="{{datasets}}"></datasets>
+        <datasets class="col-xs-12" :datasets="datasets"></datasets>
     </div>
 
     <div class="row">
-        <reuses class="col-xs-12" reuses="{{reuses}}"></reuses>
+        <reuses class="col-xs-12" :reuses="reuses"></reuses>
     </div>
 
     <div class="row">
-        <communities class="col-xs-12" communities="{{communities}}"></communities>
+        <communities class="col-xs-12" :communities="communities"></communities>
     </div>
 
     <div class="row">
-        <harvesters id="harvesters-widget" class="col-xs-12" owner="{{user}}"></harvesters>
+        <harvesters id="harvesters-widget" class="col-xs-12" :owner="user"></harvesters>
     </div>
+</layout>
 </template>
 
 <script>
@@ -29,12 +31,12 @@ import Reuses from 'models/reuses';
 import Datasets from 'models/datasets';
 import Metrics from 'models/metrics';
 import CommunityResources from 'models/communityresources';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'user-view',
     data: function() {
         return {
-            user_id: null,
             user: new User(),
             metrics: new Metrics({
                 query: {
@@ -45,10 +47,6 @@ export default {
             reuses: new Reuses({query: {sort: '-created', page_size: 10}}),
             datasets: new Datasets({query: {sort: '-created', page_size: 10}}),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
-            meta: {
-                title: null,
-                subtitle: this._('User')
-            },
             y: [{
                 id: 'datasets',
                 label: this._('Datasets')
@@ -64,14 +62,10 @@ export default {
         datasets: require('components/dataset/list.vue'),
         reuses: require('components/reuse/list.vue'),
         harvesters: require('components/harvest/sources.vue'),
-        communities: require('components/communityresource/list.vue')
+        communities: require('components/communityresource/list.vue'),
+        Layout
     },
     watch: {
-        user_id: function(id) {
-            if (id) {
-                this.user.fetch(id);
-            }
-        },
         'user.id': function(id) {
             if (id) {
                 this.metrics.fetch({id: id});
@@ -83,12 +77,11 @@ export default {
                 this.reuses.clear();
                 this.communities.clear();
             }
-        },
-        'user.fullname': function(fullname) {
-            if (fullname) {
-                this.meta.title = fullname;
-                this.$dispatch('meta:updated', this.meta);
-            }
+        }
+    },
+    route: {
+        data() {
+            this.user.fetch(this.$route.params.oid);
         }
     }
 };

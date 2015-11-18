@@ -1,7 +1,7 @@
 <template>
-<modal title="{{ _('Confirm deletion') }}"
+<modal :title="_('Confirm deletion')"
     class="modal-danger dataset-delete-modal"
-    v-ref="modal">
+    v-ref:modal>
 
     <div class="modal-body">
         <p class="lead text-center">
@@ -14,7 +14,7 @@
 
     <footer class="modal-footer text-center">
         <button type="button" class="btn btn-warning btn-flat pointer pull-left"
-            v-on="click: confirm">
+            @click="confirm">
             {{ _('Confirm') }}
         </button>
         <button type="button" class="btn btn-danger btn-flat pointer"
@@ -42,7 +42,7 @@ export default {
             API.datasets.delete_dataset({dataset: this.dataset.id},
                 (response) => {
                     this.dataset.fetch();
-                    this.$.modal.close();
+                    this.$refs.modal.close();
                 }
             );
         }

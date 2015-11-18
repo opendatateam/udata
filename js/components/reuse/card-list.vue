@@ -61,40 +61,40 @@
 </style>
 
 <template>
-    <box title="{{ title }}" icon="retwett"
+    <box :title="title" icon="retwett"
         boxclass="box-solid reuses-cards-widget"
-        footerClass="text-center" footer="true">
-        <div class="row" v-el="sortable">
+        footerClass="text-center" :footer="true">
+        <div class="row" v-el:sortable>
             <div class="col-md-6 reuse-card-container"
-                v-repeat="reuseid: editing ? sorted : reuses |ids"
-                data-id="{{reuseid}}"
+                v-for="reuseid in (editing ? sorted : reuses) |ids"
+                :data-id="reuseid"
             >
                 <button type="button" class="close"
                     v-if="editing"
-                    v-on="click: on_remove(reuseid)">
+                    @click="on_remove(reuseid)">
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only" v-i18n="Close"></span>
                 </button>
-                <reuse-card reuseid="{{reuseid}}"></reuse-card>
+                <reuse-card :reuseid="reuseid"></reuse-card>
             </div>
         </div>
-        <footer>
+        <footer slot="footer">
             <a v-show="!editing" class="text-uppercase footer-btn pointer"
-                v-on="click: edit">
+                @click="edit">
                 {{ _('Edit') }}
             </a>
             <div v-show="editing" class="input-group input-group-sm text-left">
                 <span class="input-group-addon">
                     <span class="fa fa-retweet"></span>
                 </span>
-                <reuse-completer v-ref="completer"></reuse-completer>
+                <reuse-completer v-ref:completer></reuse-completer>
                 <span class="input-group-btn">
                     <button class="btn btn-success" type="button"
-                        v-on="click: submit">
+                        @click="submit">
                         <span class="fa fa-check"></span>
                     </button>
                     <button class="btn btn-warning" type="button"
-                        v-on="click: cancel">
+                        @click="cancel">
                         <span class="fa fa-close"></span>
                     </button>
                 </span>
@@ -104,22 +104,25 @@
 </template>
 
 <script>
-'use strict';
+import Sorter from 'mixins/sorter';
 
-var Sorter = require('mixins/sorter');
-
-module.exports = {
+export default {
     name: 'reuses-card-list',
     mixins: [Sorter],
     components: {
-        'box': require('components/containers/box.vue'),
+        box: require('components/containers/box.vue'),
         'reuse-card': require('components/reuse/card.vue'),
         'reuse-completer': require('components/form/reuse-completer.vue')
     },
-    props: ['title', 'reuses'],
+    props: {
+        title: {
+            type: String,
+            default: function() {return this._('Reuses');}
+        },
+        reuses: Array
+    },
     data: function() {
         return {
-            title: this._('Reuses'),
             editing: false,
             sorted: []
         };
@@ -165,7 +168,7 @@ module.exports = {
     watch: {
         editing: function(editing) {
             if (editing) {
-                this.$.completer.selectize.focus();
+                this.$refs.completer.selectize.focus();
             }
         }
     }

@@ -1,10 +1,10 @@
 <template>
-    <datatable title="{{source.name}}" icon="tasks"
+    <datatable :title="source.name || ''" icon="tasks"
         boxclass="harvest-jobs-widget"
-        fields="{{ fields }}"
-        p="{{ jobs }}"
-        empty="{{ _('No job yet') }}">
-        <header>
+        :fields="fields"
+        :p="jobs"
+        :empty="_('No job yet')">
+        <header slot="header">
             {{{ source.description | markdown }}}
             <dl class="dl-horizontal">
                 <dt>{{ _('Backend') }}</dt>
@@ -25,10 +25,13 @@ export default {
     components: {
         datatable: require('components/datatable/widget.vue')
     },
+    props: {
+        source: Object,
+        current: null
+    },
     data: function() {
         return {
             title: this._('Jobs'),
-            source: {},
             jobs: new HarvestJobs({query: {page_size: 10}}),
             fields: [{
                 label: this._('Date'),
@@ -51,9 +54,9 @@ export default {
     events: {
         'datatable:item:click': function(item) {
             this.$dispatch('harvest:job:selected', item);
+            return true;
         }
     },
-    props: ['source', 'current'],
     watch: {
         'source.id': function(id) {
             if (id) {

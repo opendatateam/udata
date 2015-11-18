@@ -18,11 +18,11 @@ export default class Organization extends Model {
         return this;
     }
 
-    update(data) {
+    update(data, on_success, on_error) {
         this.$api('organizations.update_organization', {
             org: this.id,
             payload: JSON.stringify(data)
-        }, this.on_fetched);
+        }, on_success, on_error);
     }
 
     save() {

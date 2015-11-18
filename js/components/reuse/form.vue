@@ -1,5 +1,5 @@
 <template>
-<form-vertical v-ref="form" fields="{{fields}}" model="{{reuse}}"></form-vertical>
+<vform v-ref:form :fields="fields" :model="reuse"></vform>
 </template>
 
 <script>
@@ -7,10 +7,16 @@ import Reuse from 'models/reuse';
 import reuse_types from 'models/reuse_types';
 
 export default {
-    props: ['reuse'],
+    props: {
+        reuse: {
+            type: Object,
+            default: function() {
+                return new Reuse();
+            }
+        }
+    },
     data: function() {
         return {
-            reuse: new Reuse(),
             fields: [{
                     id: 'title',
                     label: this._('Name')
@@ -39,15 +45,18 @@ export default {
         };
     },
     components: {
-        'form-vertical': require('components/form/vertical-form.vue')
+        vform: require('components/form/vertical-form.vue')
     },
     methods: {
         serialize: function() {
-            return this.$.form.serialize();
+            return this.$refs.form.serialize();
         },
         validate: function() {
-            return this.$.form.validate();
-        }
+            return this.$refs.form.validate();
+        },
+        on_error: function(response) {
+            return this.$refs.form.on_error(response);
+        },
     }
 };
 </script>

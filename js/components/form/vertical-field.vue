@@ -12,24 +12,25 @@
 </style>
 
 <template>
-    <div class="vertical-field" v-class="
-        form-group: !is_bool && !is_hidden,
-        has-error: errors.length
-        ">
+    <div class="vertical-field" :class="{
+        'form-group': !is_bool && !is_hidden,
+        'has-error': errors.length
+        }">
         <span v-show="description" class="form-help"
-            v-attr="data-content: description"
+            :data-content="description"
             v-if="!is_hidden"></span>
-        <label for="{{field.id}}" v-class="required: required"
+        <label :for="field.id" :class="{ 'required': required }"
             v-if="!is_hidden && !is_bool">
             {{ field.label }}
         </label>
-        <component is="{{widget}}"
-            field="{{field}}" model="{{model}}" value="{{value}}"
-            description="{{description}}" property="{{property}}"
-            placeholder="{{placeholder}}" required="{{required}}"
-            readonly="{{readonly}}">
+        <component :is="widget"
+            :field="field" :value="value" :model="model"
+            :description="description" :property="property"
+            :placeholder="placeholder" :required="required"
+            :readonly="readonly">
         </component>
-        <label for="{{field.id}}" class="help-block" v-repeat="errors"></label>
+        <label :for="field.id" class="help-block"
+            v-for="error in errors">{{error}}</label>
     </div>
 </template>
 

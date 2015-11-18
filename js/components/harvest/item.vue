@@ -8,11 +8,11 @@
 
 <template>
 <modal class="job-item-modal"
-    v-class="
-        modal-success: item.status === 'done',
-        modal-danger: item.status === 'failed',
-        modal-warning: item.status === 'skipped'
-    ">
+    :class="{
+        'modal-success': item.status === 'done',
+        'modal-danger': item.status === 'failed',
+        'modal-warning': item.status === 'skipped'
+    }">
     <div class="modal-body">
         <dl class="clearfix">
             <dt>{{ _('Remote ID') }}</dt>
@@ -27,16 +27,16 @@
             <dd v-if="item.dataset">
                 <dataset-card class="col-xs-12"
                     v-if="item.dataset.id"
-                    datasetid="{{item.dataset.id}}">
+                    :datasetid="item.dataset.id">
                 </dataset-card>
                 <dataset-card class="col-xs-12"
                     v-if="!item.dataset.id"
-                    dataset="{{item.dataset}}">
+                    :dataset="item.dataset">
                 </dataset-card>
             </dd>
             <dt v-if="item.errors.length">{{ _('Errors') }}</dt>
             <dd v-if="item.errors.length">
-                <div v-repeat="error:item.errors">
+                <div v-for="error in item.errors">
                     {{{error.message | markdown}}}
                     <pre>{{error.details}}</pre>
                 </div>

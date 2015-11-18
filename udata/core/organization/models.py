@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from datetime import datetime
+from itertools import chain
 
 from blinker import Signal
 from flask import url_for
@@ -213,6 +214,14 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     def by_role(self, role):
         return filter(lambda m: m.role == role, self.members)
+
+    def check_availability(self):
+        from udata.models import Dataset  # Circular imports.
+        # Performances: only check the first 20 datasets for now.
+        return chain(
+            *[dataset.check_availability()
+              for dataset in Dataset.objects(organization=self).visible()[:20]]
+        )
 
 pre_save.connect(Organization.pre_save, sender=Organization)
 post_save.connect(Organization.post_save, sender=Organization)

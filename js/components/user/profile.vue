@@ -18,36 +18,33 @@
 }
 </style>
 <template>
-<box-container footer="{{ toggled }}" title="{{title}}" icon="user" boxclass="user-profile-widget">
-    <aside>
-        <a class="text-muted pointer" v-on="click: toggle">
+<box :footer="toggled" :title="title" icon="user" boxclass="user-profile-widget">
+    <aside slot="tools">
+        <a class="text-muted pointer" @click="toggle">
             <i class="fa fa-gear"></i>
         </a>
     </aside>
     <div v-show="!toggled">
-        <h3>
-            {{user.fullname}}
-        </h3>
+        <h3>{{user.fullname}}</h3>
         <div class="profile-body">
-            <image-button src="{{user.avatar}}" size="100" class="avatar-button"
-                endpoint="{{endpoint}}">
+            <image-button :src="user.avatar" :size="100" class="avatar-button"
+                :endpoint="endpoint">
             </image-button>
-            <div v-markdown="{{user.about}}"></div>
+            <div v-markdown="user.about"></div>
         </div>
     </div>
-    <user-form v-ref="form" v-show="toggled" user="{{user}}"></user-form>
-    <footer>
+    <user-form v-ref:form v-show="toggled" :user="user"></user-form>
+    <footer slot="footer">
         <button type="submit" class="btn btn-primary"
-            v-on="click: save($event)" v-i18n="Save"></button>
+            @click="save($event)" v-i18n="Save"></button>
     </footer>
-</box-container>
+</box>
 </template>
+
 <script>
-'use strict';
+import API from 'api';
 
-var API = require('api');
-
-module.exports = {
+export default {
     name: 'user-profile',
     data: function() {
         return {
@@ -62,13 +59,12 @@ module.exports = {
         }
     },
     components: {
-        'box-container': require('components/containers/box.vue'),
+        box: require('components/containers/box.vue'),
         'image-button': require('components/widgets/image-button.vue'),
         'user-form': require('components/user/form.vue')
     },
     events: {
         'image:saved': function() {
-            console.log('image:saved')
             this.$root.me.fetch();
         }
     },
@@ -78,13 +74,13 @@ module.exports = {
             this.toggled = !this.toggled;
         },
         save: function(e) {
-            if (this.$.form.validate()) {
-                var data = this.$.form.serialize();
-
-                this.user.update(data);
-                e.preventDefault();
-
-                this.toggled = false;
+            e.preventDefault();
+            let form = this.$refs.form;
+            if (form.validate()) {
+                this.user.update(form.serialize(), (response) => {
+                    this.user.on_fetched(response);
+                    this.toggled = false;
+                }, form.on_error);
             }
         }
     }

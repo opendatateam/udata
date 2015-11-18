@@ -1,21 +1,23 @@
 <template>
+<layout :title="_('Editorial')">
     <div class="row">
-        <datasets-list class="col-xs-12 col-md-6"
-            title="{{ _('Featured datasets') }}"
-            datasets="{{home_datasets.items}}">
-        </datasets-list>
-        <reuses-list class="col-xs-12 col-md-6"
-            title="{{ _('Featured reuses') }}"
-            reuses="{{home_reuses.items}}">
-        </reuses-list>
+        <datasets class="col-xs-12 col-md-6"
+            :title="_('Featured datasets')"
+            :datasets="home_datasets.items">
+        </datasets>
+        <reuses class="col-xs-12 col-md-6"
+            :title="_('Featured reuses')"
+            :reuses="home_reuses.items">
+        </reuses>
     </div>
 
     <div class="row">
-        <posts-widget id="posts-widget" class="col-xs-12" posts="{{posts}}"></posts-widget>
+        <posts class="col-xs-12" :posts="posts"></posts>
     </div>
     <div class="row">
-        <topics-widget id="topics-widget" class="col-xs-12" topics="{{topics}}"></topics-widget>
+        <topics class="col-xs-12" :topics="topics"></topics>
     </div>
+</layout>
 </template>
 
 <script>
@@ -23,6 +25,8 @@ import Posts from 'models/posts';
 import Topics from 'models/topics';
 import {List} from 'models/base';
 import API from 'api';
+import Layout from 'components/layout.vue';
+
 
 export default {
     name: 'EditorialView',
@@ -34,18 +38,12 @@ export default {
             home_reuses: new List({ns: 'site', fetch: 'get_home_reuses'})
         };
     },
-    computed: {
-        meta: function() {
-            return {
-                title: 'Editorial'
-            };
-        }
-    },
     components: {
-        'datasets-list': require('components/dataset/card-list.vue'),
-        'reuses-list': require('components/reuse/card-list.vue'),
-        'posts-widget': require('components/post/list.vue'),
-        'topics-widget': require('components/topic/list.vue')
+        datasets: require('components/dataset/card-list.vue'),
+        reuses: require('components/reuse/card-list.vue'),
+        posts: require('components/post/list.vue'),
+        topics: require('components/topic/list.vue'),
+        Layout
     },
     events: {
         'dataset-card-list:submit': function(order) {

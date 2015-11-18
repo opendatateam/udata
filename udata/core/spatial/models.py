@@ -53,6 +53,17 @@ class GeoZone(db.Document):
     def __html__(self):
         return gettext(self.name) + ' <i>(' + self.code + ')</i>'
 
+    @property
+    def keys_values(self):
+        """Key values might be a list or not, always return a list."""
+        keys_values = []
+        for value in self.keys.values():
+            if isinstance(value, list):
+                keys_values += value
+            elif not str(value).startswith('-'):  # Avoid -99.
+                keys_values.append(value)
+        return keys_values
+
     def toGeoJSON(self):
         return {
             'id': self.id,

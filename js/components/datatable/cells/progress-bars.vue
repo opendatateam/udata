@@ -1,6 +1,9 @@
 <template>
 <div class="progress progress-sm">
-    <span class="progress-bar progress-bar-{{ progress_class }}" style="width: {{ value + 1 }}0%" title="_('Score:') {{ value }}"> </span>
+    <span class="progress-bar progress-bar-{{ progress_class }}"
+        :style="{width: value + 1 + '0%'}"
+        :title="_('Score:') + ' ' + value">
+    </span>
 </div>
 </template>
 

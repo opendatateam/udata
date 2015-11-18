@@ -7,22 +7,23 @@
 </style>
 
 <template>
-<user-modal user="{{user}}">
+<user-modal :user="user">
     <role-form class="member-form"
-        fields="{{fields}}" model="{{member}}" defs="{{defs}}">
+        :fields="fields" :model="member" :defs="defs">
     </role-form>
 </user-modal>
 </template>
 
 <script>
-'use strict';
+import User from 'models/user';
+import Vue from'vue';
+import API from 'api';
 
-var User = require('models/user'),
-    Vue = require('vue'),
-    API = require('api');
-
-module.exports = {
+export default {
     name: 'member-modal',
+    props: {
+        member: Object
+    },
     data: function() {
         return {
             user: new User(),
@@ -32,18 +33,15 @@ module.exports = {
                 label: this._('Role'),
                 widget: 'select-input'
             }],
-            member: {},
             defs: API.definitions.Member
         };
     },
-    props: ['member'],
     components: {
         'user-modal': require('components/user/modal.vue'),
         'role-form': require('components/form/horizontal-form.vue')
     },
     ready: function() {
         this.user.fetch(this.member.user.id);
-        // this.member.$log();
     }
 };
 </script>
