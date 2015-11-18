@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import date, datetime
+
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form, fields
@@ -31,11 +33,17 @@ class ExtrasFieldTest(TestCase):
     def test_with_valid_data(self):
         Fake, FakeForm = self.factory()
 
+        now = datetime.now()
+        today = date.today()
+
         fake = Fake()
         form = FakeForm(MultiDict({'extras': {
             'integer': 42,
             'float': 42.0,
             'string': 'value',
+            'datetime': now,
+            'date': today,
+            'bool': True,
         }}))
 
         form.validate()
@@ -47,6 +55,9 @@ class ExtrasFieldTest(TestCase):
             'integer': 42,
             'float': 42.0,
             'string': 'value',
+            'datetime': now,
+            'date': today,
+            'bool': True
         })
 
     def test_with_invalid_data(self):
