@@ -190,6 +190,12 @@ router.map({
         component: function(resolve) {
             require(['./views/system.vue'], resolve);
         }
+    },
+    '/search/': {
+        name: 'search',
+        component: function(resolve) {
+            require(['./views/search.vue'], resolve);
+        }
     }
 });
 

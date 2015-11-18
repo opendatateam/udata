@@ -35,7 +35,7 @@ import Layout from 'components/layout.vue';
 
 export default {
     name: 'Home',
-    data: function() {
+    data() {
         return {
             metrics: new MyMetrics(),
             reuses: new PageList({
@@ -53,7 +53,7 @@ export default {
         };
     },
     computed: {
-        dataBoxes: function() {
+        dataBoxes() {
             if (!this.metrics.id || !this.reuses) {
                 return []
             }
@@ -93,15 +93,15 @@ export default {
         discussions: require('components/discussions/list.vue'),
         Layout
     },
-    attached: function() {
+    attached() {
         this.update();
         this._handler = this.$root.me.$on('updated', this.update.bind(this));
     },
-    detached: function() {
+    detached() {
         this._handler.remove();
     },
     methods: {
-        update: function() {
+        update() {
             if (this.$root.me.id) {
                 this.metrics.fetch();
                 this.reuses.fetch();

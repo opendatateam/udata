@@ -515,4 +515,12 @@ export class PageList extends List {
         this.populate();
         return this;
     }
+
+    /**
+     * Useful to clear the paging after server-based filtering.
+     */
+    on_fetched(data) {
+        super.on_fetched(data);
+        this.page = 1;  // Clear the paging
+    }
 };

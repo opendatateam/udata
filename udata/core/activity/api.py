@@ -42,10 +42,10 @@ activity_page_fields = api.model('ActivityPage', fields.pager(activity_fields))
 
 activity_parser = api.page_parser()
 activity_parser.add_argument(
-    'user', type=unicode, help='Filter activities for that particular user',
+    'user', type=str, help='Filter activities for that particular user',
     location='args')
 activity_parser.add_argument(
-    'organization', type=unicode,
+    'organization', type=str,
     help='Filter activities for that particular organization',
     location='args')
 

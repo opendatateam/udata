@@ -8,7 +8,7 @@ from mongoengine.signals import pre_save, post_save
 from udata.core.storages import images, default_image_basename
 from udata.i18n import lazy_gettext as _
 from udata.models import (
-    db, Badge, BadgeMixin, WithMetrics, Issue, Discussion, Follow
+    db, BadgeMixin, WithMetrics, Issue, Discussion, Follow, OwnedByQuerySet
 )
 from udata.utils import hash_url
 
@@ -33,7 +33,7 @@ IMAGE_SIZES = [100, 50, 25]
 IMAGE_MAX_SIZE = 800
 
 
-class ReuseQuerySet(db.BaseQuerySet):
+class ReuseQuerySet(OwnedByQuerySet):
     def visible(self):
         return self(private__ne=True, datasets__0__exists=True, deleted=None)
 
@@ -41,12 +41,6 @@ class ReuseQuerySet(db.BaseQuerySet):
         return self(db.Q(private=True)
                     | db.Q(datasets__0__exists=False)
                     | db.Q(deleted__ne=None))
-
-    def owned_by(self, *owners):
-        Qs = db.Q()
-        for owner in owners:
-            Qs |= db.Q(owner=owner) | db.Q(organization=owner)
-        return self(Qs)
 
 
 class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):

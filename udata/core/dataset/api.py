@@ -52,15 +52,15 @@ community_parser.add_argument(
     'page_size', type=int, default=20, location='args',
     help='The page size to fetch')
 community_parser.add_argument(
-    'organization', type=unicode,
+    'organization', type=str,
     help='Filter activities for that particular organization',
     location='args')
 community_parser.add_argument(
-    'dataset', type=unicode,
+    'dataset', type=str,
     help='Filter activities for that particular dataset',
     location='args')
 community_parser.add_argument(
-    'owner', type=unicode,
+    'owner', type=str,
     help='Filter activities for that particular user',
     location='args')
 
@@ -425,7 +425,7 @@ class DatasetFollowersAPI(FollowAPI):
 
 suggest_parser = api.parser()
 suggest_parser.add_argument(
-    'q', type=unicode, help='The string to autocomplete/suggest',
+    'q', type=str, help='The string to autocomplete/suggest',
     location='args', required=True)
 suggest_parser.add_argument(
     'size', type=int, help='The amount of suggestion to fetch',
@@ -482,9 +482,9 @@ class FrequenciesAPI(API):
 
 
 checkurl_parser = api.parser()
-checkurl_parser.add_argument('url', type=unicode, help='The URL to check',
+checkurl_parser.add_argument('url', type=str, help='The URL to check',
                              location='args', required=True)
-checkurl_parser.add_argument('group', type=unicode,
+checkurl_parser.add_argument('group', type=str,
                              help='The dataset related to the URL',
                              location='args', required=True)
 
