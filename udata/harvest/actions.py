@@ -2,13 +2,16 @@
 from __future__ import unicode_literals
 
 import logging
+import unicodecsv as csv
 
+from collections import namedtuple
 from datetime import datetime
 
+from bson import ObjectId
 from flask import current_app
 
 from udata.auth import current_user
-from udata.models import User, Organization, PeriodicTask
+from udata.models import User, Organization, PeriodicTask, Dataset
 
 from . import backends, signals
 from .models import (
@@ -162,3 +165,48 @@ def unschedule(ident):
     source.periodic_task.delete()
     signals.harvest_source_unscheduled.send(source)
     return source
+
+
+AttachResult = namedtuple('AttachResult', ['success', 'errors'])
+
+
+def attach(domain, filename):
+    '''Attach existing dataset to their harvest remote id before harvesting.
+
+    The expected csv file format is the following:
+
+    - a column with header "local" and the local IDs or slugs
+    - a column with header "remote" and the remote IDs
+
+    The delimiter should be ";". columns order
+    and extras columns does not matter
+    '''
+    count = 0
+    errors = 0
+    with open(filename) as csvfile:
+        reader = csv.DictReader(csvfile,
+                                delimiter=b';',
+                                quotechar=b'"')
+        for row in reader:
+            try:
+                dataset = Dataset.objects.get(id=ObjectId(row['local']))
+            except:  # noqa  (Never stop on failure)
+                log.warning('Unable to attach dataset : %s', row['local'])
+                errors += 1
+                continue
+
+            # Detach previously attached dataset
+            Dataset.objects(**{
+                'extras__harvest:domain': domain,
+                'extras__harvest:remote_id': row['remote']
+            }).update(**{
+                'unset__extras__harvest:domain': True,
+                'unset__extras__harvest:remote_id': True
+            })
+
+            dataset.extras['harvest:domain'] = domain
+            dataset.extras['harvest:remote_id'] = row['remote']
+            dataset.save()
+            count += 1
+
+    return AttachResult(count, errors)

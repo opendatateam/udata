@@ -86,8 +86,9 @@ class OdsHarvester(BaseBackend):
         dataset.title = ods_metadata['title']
         dataset.frequency = "unknown"
         description = ods_metadata.get("description", '').strip()
-        description = html2text.html2text(description.strip('\n').strip())
-        dataset.description = html2text.html2text(description).strip('\n')
+        description = html2text.html2text(description.strip('\n').strip(),
+                                          bodywidth=0)
+        dataset.description = description.strip().strip('\n').strip()
         dataset.private = False
 
         tags = set()

@@ -221,7 +221,8 @@ export default {
         },
         adding: function(adding) {
             if (adding) {
-                this.$refs.completer.selectize.focus();
+                this.$.completer.$options.userIds = this.org.members.map((member) => { return member.user.id; });
+                this.$.completer.selectize.focus();
             }
         }
     },

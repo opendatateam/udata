@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import csv
 import logging
 
 from datetime import datetime
+from tempfile import NamedTemporaryFile
 
 from mock import patch
 
 from udata.models import Dataset, PeriodicTask
 
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import OrganizationFactory, UserFactory
+from udata.tests.factories import (
+    OrganizationFactory, UserFactory, DatasetFactory
+)
 
 from .factories import (
     fake, HarvestSourceFactory, HarvestJobFactory,
@@ -219,6 +223,95 @@ class HarvestActionsTest(DBTestMixin, TestCase):
 
         self.assertEqual(result, len(to_delete))
         self.assertEqual(len(HarvestSource.objects), len(to_keep))
+
+    def test_attach(self):
+        datasets = DatasetFactory.create_batch(3)
+
+        with NamedTemporaryFile() as csvfile:
+            writer = csv.DictWriter(csvfile,
+                                    fieldnames=['local', 'remote'],
+                                    delimiter=b';',
+                                    quotechar=b'"')
+
+            writer.writeheader()
+            for index, dataset in enumerate(datasets):
+                writer.writerow({
+                    'local': str(dataset.id),
+                    'remote': str(index)
+                })
+            csvfile.flush()
+
+            result = actions.attach('test.org', csvfile.name)
+
+        self.assertEqual(result.success, len(datasets))
+        self.assertEqual(result.errors, 0)
+        for index, dataset in enumerate(datasets):
+            dataset.reload()
+            self.assertEqual(dataset.extras['harvest:domain'], 'test.org')
+            self.assertEqual(dataset.extras['harvest:remote_id'], str(index))
+
+    def test_attach_does_not_duplicate(self):
+        attached_datasets = []
+        for i in range(2):
+            dataset = DatasetFactory.build()
+            dataset.extras['harvest:domain'] = 'test.org'
+            dataset.extras['harvest:remote_id'] = str(i)
+            dataset.save()
+            attached_datasets.append(dataset)
+
+        datasets = DatasetFactory.create_batch(3)
+
+        with NamedTemporaryFile() as csvfile:
+            writer = csv.DictWriter(csvfile,
+                                    fieldnames=['local', 'remote'],
+                                    delimiter=b';',
+                                    quotechar=b'"')
+
+            writer.writeheader()
+            for index, dataset in enumerate(datasets):
+                writer.writerow({
+                    'local': str(dataset.id),
+                    'remote': str(index)
+                })
+            csvfile.flush()
+
+            result = actions.attach('test.org', csvfile.name)
+
+        dbcount = Dataset.objects(**{
+            'extras__harvest:remote_id__exists': True
+            }).count()
+        self.assertEqual(result.success, len(datasets))
+        self.assertEqual(dbcount, result.success)
+        for index, dataset in enumerate(datasets):
+            dataset.reload()
+            self.assertEqual(dataset.extras['harvest:domain'], 'test.org')
+            self.assertEqual(dataset.extras['harvest:remote_id'], str(index))
+
+    def test_attach_skip_not_found(self):
+        datasets = DatasetFactory.create_batch(3)
+
+        with NamedTemporaryFile() as csvfile:
+            writer = csv.DictWriter(csvfile,
+                                    fieldnames=['local', 'remote'],
+                                    delimiter=b';',
+                                    quotechar=b'"')
+
+            writer.writeheader()
+            writer.writerow({
+                'local': 'not-found',
+                'remote': '42'
+            })
+            for index, dataset in enumerate(datasets):
+                writer.writerow({
+                    'local': str(dataset.id),
+                    'remote': str(index)
+                })
+            csvfile.flush()
+
+            result = actions.attach('test.org', csvfile.name)
+
+        self.assertEqual(result.success, len(datasets))
+        self.assertEqual(result.errors, 1)
 
 
 class ExecutionTestMixin(DBTestMixin):
