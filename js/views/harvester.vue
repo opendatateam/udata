@@ -96,7 +96,9 @@ export default {
     },
     route: {
         data() {
-            this.source.fetch(this.$route.params.oid);
+            if (this.$route.params.oid !== this.source.id) {
+                this.source.fetch(this.$route.params.oid);
+            }
         }
     },
     components: {

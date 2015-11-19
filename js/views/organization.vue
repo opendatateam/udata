@@ -209,7 +209,9 @@ export default {
     },
     route: {
         data() {
-            this.org.fetch(this.$route.params.oid);
+            if (this.$route.params.oid !== this.org.id) {
+                this.org.fetch(this.$route.params.oid);
+            }
         }
     },
     watch: {

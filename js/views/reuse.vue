@@ -146,7 +146,9 @@ export default {
     },
     route: {
         data() {
-            this.reuse.fetch(this.$route.params.oid);
+            if (this.$route.params.oid !== this.reuse.id) {
+                this.reuse.fetch(this.$route.params.oid);
+            }
         }
     },
     watch: {

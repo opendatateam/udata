@@ -175,7 +175,9 @@ export default {
     },
     route: {
         data() {
-            this.dataset.fetch(this.$route.params.oid);
+            if (this.$route.params.oid !== this.dataset.id) {
+                this.dataset.fetch(this.$route.params.oid);
+            }
         }
     },
     watch: {
