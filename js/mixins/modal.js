@@ -1,29 +1,22 @@
+ import $ from 'jquery';
+
 /**
  * Common boostrap modal behavior
  */
-define(['jquery'], function($) {
-    'use strict';
-
-    function $el(vm) {
-        return $(vm.$el).hasClass('modal') ? $(vm.$el) : vm.$find('.modal');
-    }
-
-    return {
-        events: {
-            'modal:close': function() {
-                this.hide();
-            }
-        },
-        ready: function() {
-            $el(this).modal().on('hidden.bs.modal', function() {
-                this.$destroy(true);
-            }.bind(this));
-        },
-        methods: {
-            hide: function() {
-                $el(this).modal('hide');
-            }
-        }
-    }
-
-});
+export default {
+     ready: function() {
+         $(this.$el).modal()
+             .on('hide.bs.modal', (e) => {
+                 this.$dispatch('modal:close');
+             })
+             .on('hidden.bs.modal', () => {
+                 this.$dispatch('modal:closed');
+                 this.$destroy(true);
+             });
+     },
+     methods: {
+         close: function() {
+             $(this.$el).modal('hide');
+         }
+     }
+ };
