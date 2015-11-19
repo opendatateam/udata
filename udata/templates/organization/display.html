@@ -57,14 +57,13 @@
     ('members', _('Members'), org.members, {}),
     ('followers', _('Followers'), followers, {}),
 ) %}
-{% set actived = False %}
 
 <div class="row">
     <div class="col-xs-12">
         <ul class="nav nav-pills" data-tabs="tabs">
             {% for tab_id, label, content, kwargs in (dataset_tabs + reuse_tabs + user_tabs) %}
             {% if content %}
-            <li {% if not actived %}class="active"{% set actived = True %}{% endif %}>
+            <li>
                 <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
             </li>
             {% endif %}
@@ -74,12 +73,10 @@
 </div>
 <div class="row">
     <div class="tab-content">
-        {% set actived = False %}
 
         {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
         {% if datasets %}
-        <div id="{{tab_id}}"
-            class="tab-pane {% if not actived %}active{% set actived=True %}{% endif %}">
+        <div id="{{tab_id}}" class="tab-pane">
             <ul class="card-list">
 
                 {% for dataset in datasets %}
@@ -136,8 +133,7 @@
 
         {% for tab_id, label, reuses, kwargs in reuse_tabs  %}
         {% if reuses %}
-        <div id="{{tab_id}}"
-            class="tab-pane">
+        <div id="{{tab_id}}" class="tab-pane">
             <ul class="card-list">
 
                 {% for reuse in reuses %}

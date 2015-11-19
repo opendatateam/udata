@@ -80,6 +80,13 @@ define([
         });
 
         $(window).on('hashchange', hash_to_tab);
+
+        if(location.hash === '') {
+          // Open the first tab by default
+          $(".nav-pills li:first-child a").tab('show');
+          // But don't scroll down to it
+          $(window).scrollTop(0);
+        }
     });
 
 });
