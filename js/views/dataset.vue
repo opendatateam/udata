@@ -201,9 +201,9 @@ export default {
             if (coverage.geom) {
                 this.geojson = coverage.geom
             } else {
-                API.spatial.spatial_zones({ids: coverage.zones}, function(response) {
+                API.spatial.spatial_zones({ids: coverage.zones}, (response) => {
                     this.geojson = response.obj;
-                }.bind(this));
+                });
             }
         },
         'dataset.deleted': function(deleted) {
