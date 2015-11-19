@@ -113,8 +113,7 @@ class MyOrgDatasetsAPI(API):
         owners = list(current_user.organizations) + [current_user.id]
         datasets = Dataset.objects.owned_by(*owners).order_by('-last_modified')
         if q:
-            datasets = datasets.filter(db.Q(title__icontains=q) |
-                                       db.Q(description__icontains=q))
+            datasets = datasets.filter(title__icontains=q.decode('utf-8'))
         return list(datasets)
 
 
@@ -131,7 +130,7 @@ class MyOrgCommunityResourcesAPI(API):
                                .order_by('-last_modified'))
         if q:
             community_resources = community_resources.filter(
-                db.Q(title__icontains=q) | db.Q(description__icontains=q))
+                title__icontains=q.decode('utf-8'))
         return list(community_resources)
 
 
@@ -146,8 +145,7 @@ class MyOrgReusesAPI(API):
         owners = list(current_user.organizations) + [current_user.id]
         reuses = Reuse.objects.owned_by(*owners).order_by('-last_modified')
         if q:
-            reuses = reuses.filter(db.Q(title__icontains=q) |
-                                   db.Q(description__icontains=q))
+            reuses = reuses.filter(title__icontains=q.decode('utf-8'))
         return list(reuses)
 
 
@@ -163,7 +161,7 @@ class MyOrgIssuesAPI(API):
             current_user._get_current_object(), *current_user.organizations)
             .order_by('-created'))
         if q:
-            issues = issues.filter(title__icontains=q)
+            issues = issues.filter(title__icontains=q.decode('utf-8'))
         return list(issues)
 
 
@@ -179,7 +177,7 @@ class MyOrgDiscussionsAPI(API):
             current_user._get_current_object(), *current_user.organizations)
             .order_by('-created'))
         if q:
-            discussions = discussions.filter(title__icontains=q)
+            discussions = discussions.filter(title__icontains=q.decode('utf-8'))
         return list(discussions)
 
 
