@@ -49,7 +49,7 @@ export default {
             }, {
                 label: this._('Resources'),
                 subtitle: this._('Add your firsts resources'),
-                component: require('components/dataset/add-resource-form.vue'),
+                component: require('components/dataset/resource/form.vue'),
                 init: (component) => {
                     component.dataset = this.dataset;
                 },
