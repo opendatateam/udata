@@ -269,6 +269,35 @@ class IssuesTest(APITestCase):
         # Metrics unchanged after attempt to close the discussion.
         self.assertEqual(dataset.metrics['issues'], 1)
 
+    def test_list_issues_filter_closed(self):
+        '''Should consider the closed filtering on issues'''
+        user = UserFactory()
+        dataset = DatasetFactory()
+        (issue,) = DatasetIssue.objects.create(subject=dataset, title='',
+                                               user=user),
+        (issue_closed,) = DatasetIssue.objects.create(subject=dataset,
+            title='', closed=datetime.now(), user=user),
+
+        response_all = self.get(url_for('api.issues'))
+        self.assert200(response_all)
+
+        data_all = response_all.json['data']
+        self.assertEqual(len(data_all), 2)
+        self.assertItemsEqual([str(issue.id), str(issue_closed.id)],
+                              [str(d['id']) for d in data_all])
+
+        response_closed = self.get(url_for('api.issues', closed=True))
+        self.assert200(response_closed)
+        data_closed = response_closed.json['data']
+        self.assertEqual(len(data_closed), 1)
+        self.assertEqual(str(issue_closed.id), data_closed[0]['id'])
+
+        response_open = self.get(url_for('api.issues', closed=False))
+        self.assert200(response_open)
+        data_open = response_open.json['data']
+        self.assertEqual(len(data_open), 1)
+
+        self.assertEqual(str(issue.id), data_open[0]['id'])
 
 class IssueCsvTest(FrontTestCase):
 
