@@ -82,12 +82,9 @@ class MeAPITest(APITestCase):
         organization = OrganizationFactory(members=[member])
         datasets = [
             VisibleDatasetFactory(owner=user, title='foo'),
-            VisibleDatasetFactory(owner=user, description='foo'),
         ]
         org_datasets = [
             VisibleDatasetFactory(organization=organization, title='foo'),
-            VisibleDatasetFactory(organization=organization,
-                                  description='foo'),
         ]
 
         # Should not be listed.
@@ -121,12 +118,9 @@ class MeAPITest(APITestCase):
         organization = OrganizationFactory(members=[member])
         community_resources = [
             CommunityResourceFactory(owner=user, title='foo'),
-            CommunityResourceFactory(owner=user, description='foo'),
         ]
         org_community_resources = [
             CommunityResourceFactory(organization=organization, title='foo'),
-            CommunityResourceFactory(organization=organization,
-                                     description='foo'),
         ]
 
         # Should not be listed.
@@ -158,11 +152,9 @@ class MeAPITest(APITestCase):
         organization = OrganizationFactory(members=[member])
         reuses = [
             ReuseFactory(owner=user, title='foo'),
-            ReuseFactory(owner=user, description='foo'),
         ]
         org_reuses = [
             ReuseFactory(organization=organization, title='foo'),
-            ReuseFactory(organization=organization, description='foo'),
         ]
 
         # Should not be listed.
