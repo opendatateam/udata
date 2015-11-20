@@ -196,14 +196,14 @@ export default {
     methods: {
         confirm_delete: function() {
             this.$root.$modal(
-                {data: {organization: this.org}},
-                Vue.extend(require('components/organization/delete-modal.vue'))
+                require('components/organization/delete-modal.vue'),
+                {organization: this.org}
             );
         },
         setBadges: function() {
             this.$root.$modal(
-                {data: {subject: this.org}},
-                Vue.extend(require('components/badges/modal.vue'))
+                require('components/badges/modal.vue'),
+                {subject: this.org}
             );
         }
     },

@@ -63,8 +63,8 @@ export default {
     methods: {
         click: function() {
             this.$root.$modal(
-                {data: {endpoint: this.endpoint, sizes: this.sizes}},
-                Vue.extend(require('components/widgets/image-picker-modal.vue'))
+                require('components/widgets/image-picker-modal.vue'),
+                {endpoint: this.endpoint, sizes: this.sizes}
             ).$once('image:saved', () => {
                 this.$dispatch('image:saved');
             });

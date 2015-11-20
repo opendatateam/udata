@@ -156,20 +156,20 @@ export default {
     methods: {
         confirm_delete: function() {
             var m = this.$root.$modal(
-                {data: {dataset: this.dataset}},
-                Vue.extend(require('components/dataset/delete-modal.vue'))
+                require('components/dataset/delete-modal.vue'),
+                {dataset: this.dataset}
             );
         },
         transfer_request: function() {
             this.$root.$modal(
-                {data: {subject: this.dataset}},
-                Vue.extend(require('components/transfer/request-modal.vue'))
+                require('components/transfer/request-modal.vue'),
+                {subject: this.dataset}
             );
         },
         setBadges: function() {
             this.$root.$modal(
-                {data: {subject: this.dataset}},
-                Vue.extend(require('components/badges/modal.vue'))
+                require('components/badges/modal.vue'),
+                {subject: this.dataset}
             );
         }
     },

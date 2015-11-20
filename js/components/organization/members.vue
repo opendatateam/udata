@@ -172,11 +172,11 @@ export default {
         'completer:item-add': function(user_id, $item) {
             $item.remove();
             this.$root.$modal(
-                {data: {
+                require('components/organization/member-modal.vue'),
+                {
                     member: {user: {id: user_id}},
                     org: this.org
-                }},
-                Vue.extend(require('components/organization/member-modal.vue'))
+                }
             );
             this.adding = false;
         }
@@ -184,13 +184,12 @@ export default {
     methods: {
         member_click: function(member) {
             this.$root.$modal(
-                {data: {member: member, org: this.org}},
-                Vue.extend(require('components/organization/member-modal.vue'))
+                require('components/organization/member-modal.vue'),
+                {member: member, org: this.org}
             );
         },
         accept_request: function(request) {
             this.org.accept_membership(request, function(member) {
-                log.debug('accepted', member);
                 this.requests.fetch();
                 this.validating = Boolean(this.requests.length);
             })

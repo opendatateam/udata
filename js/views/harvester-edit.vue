@@ -45,10 +45,7 @@ export default {
     },
     events: {
         'harvest:job:item:selected': function(item) {
-            this.$root.$modal(
-                {data: {item: item}},
-                Vue.extend(ItemModal)
-            );
+            this.$root.$modal(ItemModal, {item: item});
             return true;
         }
     },

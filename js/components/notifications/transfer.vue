@@ -13,8 +13,8 @@ export default {
     methods: {
         click: function() {
             this.$root.$modal(
-                {data: {transferid: this.details.id}},
-                Vue.extend(require('components/transfer/response-modal.vue'))
+                require('components/transfer/response-modal.vue'),
+                {transferid: this.details.id}
             );
         }
     }
