@@ -11,7 +11,7 @@
 
 <div class="row">
     <div class="col-xs-12 col-md-6 text-center">
-        <button class="btn btn-primary btn-flat" v-link="'/dataset/' + dataset.id/">
+        <button class="btn btn-primary btn-flat" v-link="{name: 'dataset', params: {oid: dataset.id}}">
             {{ _('See in the administration') }}
         </button>
     </div>
