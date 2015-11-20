@@ -52,10 +52,10 @@
 import $ from 'jquery';
 import Vue from 'vue';
 import {FieldComponentMixin} from 'components/form/base-field';
+import commonmark from 'helpers/commonmark';
 
 const EXCERPT_TOKEN = '<!--- excerpt -->';
 
-window.marked = require('marked');
 require('bootstrap-markdown/js/bootstrap-markdown');
 
 $.fn.markdown.messages[Vue.lang] = {
@@ -89,6 +89,7 @@ export default {
             savable: false,
             resize: 'both',
             iconlibrary: 'fa',
+            onPreview: (e) => commonmark(e.getContent()),
             additionalButtons: [
                 [{
                     name: 'extras',

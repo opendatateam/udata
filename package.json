@@ -57,6 +57,7 @@
     "webpack": "1.12.2"
   },
   "dependencies": {
+    "Chart.StackedBar.js": "regaddi/Chart.StackedBar.js#1.0.3",
     "admin-lte": "^2.3.0",
     "babel-runtime": "^5.6.25",
     "backbone": "^1.2.0",
@@ -66,7 +67,6 @@
     "bootstrap-markdown": "^2.9.0",
     "bootstrap-slider": "~5.2.3",
     "chart.js": "^1.0.2",
-    "Chart.StackedBar.js": "regaddi/Chart.StackedBar.js#1.0.3",
     "debounce": "^1.0.0",
     "dotdotdot": "BeSite/jQuery.dotdotdot#v1.7.4",
     "expose-loader": "^0.7.0",
@@ -83,7 +83,7 @@
     "jquery-validation-dist": "^1.13.2-pre",
     "jquery.browser": "0.0.8",
     "leaflet": "^0.7.5",
-    "marked": "^0.3.5",
+    "markdown-it": "^5.0.1",
     "moment": "^2.10.6",
     "raven-js": "^1.1.22",
     "respond.js": "^1.4.2",
