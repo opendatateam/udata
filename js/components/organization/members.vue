@@ -126,7 +126,7 @@
         :class="{ 'text-center': !adding, 'search': adding }">
         <a v-if="!adding" class="text-uppercase footer-btn pointer"
             @click="adding = true">{{ _('Add') }}</a>
-        <div v-if="adding" class="input-group input-group-sm">
+        <div v-show="adding" class="input-group input-group-sm">
             <span class="input-group-addon">
                 <span class="fa fa-user"></span>
             </span>
@@ -221,8 +221,8 @@ export default {
         },
         adding: function(adding) {
             if (adding) {
-                this.$.completer.$options.userIds = this.org.members.map((member) => { return member.user.id; });
-                this.$.completer.selectize.focus();
+                this.$refs.completer.$options.userIds = this.org.members.map((member) => { return member.user.id; });
+                this.$refs.completer.selectize.focus();
             }
         }
     },
