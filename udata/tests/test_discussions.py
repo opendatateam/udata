@@ -85,36 +85,6 @@ class DiscussionsTest(APITestCase):
         })
         self.assertStatus(response, 400)
 
-    def test_list_discussions(self):
-        dataset = Dataset.objects.create(title='Test dataset')
-        open_discussions = []
-        for i in range(3):
-            user = UserFactory()
-            message = Message(content=faker.sentence(), posted_by=user)
-            discussion = Discussion.objects.create(
-                subject=dataset.id,
-                user=user,
-                title='test discussion {}'.format(i),
-                discussion=[message]
-            )
-            open_discussions.append(discussion)
-        # Creating a closed discussion that shouldn't show up in response.
-        user = UserFactory()
-        message = Message(content=faker.sentence(), posted_by=user)
-        discussion = Discussion.objects.create(
-            subject=dataset.id,
-            user=user,
-            title='test discussion {}'.format(i),
-            discussion=[message],
-            closed=datetime.now(),
-            closed_by=user
-        )
-
-        response = self.get(url_for('api.discussions'))
-        self.assert200(response)
-
-        self.assertEqual(len(response.json['data']), len(open_discussions))
-
     def test_list_with_close_discussions(self):
         dataset = Dataset.objects.create(title='Test dataset')
         open_discussions = []
