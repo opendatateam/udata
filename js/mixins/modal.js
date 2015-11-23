@@ -4,7 +4,7 @@
  * Common boostrap modal behavior
  */
 export default {
-     ready: function() {
+     ready() {
          $(this.$el).modal()
              .on('hide.bs.modal', (e) => {
                  this.$dispatch('modal:close');
@@ -15,7 +15,7 @@ export default {
              });
      },
      methods: {
-         close: function() {
+         close() {
              $(this.$el).modal('hide');
          }
      }

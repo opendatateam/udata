@@ -42,7 +42,7 @@ export default {
     replace: true,
     mixins: [require('components/form/base-field').FieldComponentMixin],
     computed: {
-        selectize_options: function() {
+        selectize_options() {
             var opts = this.$options.selectize;
 
             return $.extend({},
@@ -104,12 +104,12 @@ export default {
             }
         }
     },
-    ready: function() {
+    ready() {
         if (!this.field || !this.field.readonly) {
             this.selectize = $(this.$el).selectize(this.selectize_options)[0].selectize;
         }
     },
-    beforeDestroy: function() {
+    beforeDestroy() {
         this.destroy();
     }
 };
