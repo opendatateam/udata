@@ -6,11 +6,11 @@ from flask.ext.security import current_user
 from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, API
 from udata.models import (
-    db, CommunityResource, Dataset, Discussion, FollowUser, Issue, Reuse, User
+    CommunityResource, Dataset, Discussion, FollowUser, Issue, Reuse, User
 )
 
 from udata.core.dataset.api_fields import (
-    community_resource_fields, dataset_full_fields, dataset_fields
+    community_resource_fields, dataset_full_fields
 )
 from udata.core.followers.api import FollowAPI
 from udata.core.issues.api import issue_fields
@@ -106,7 +106,7 @@ class MyMetricsAPI(API):
 class MyOrgDatasetsAPI(API):
     @api.secure
     @api.doc('my_org_datasets', parser=filter_parser)
-    @api.marshal_list_with(dataset_fields)
+    @api.marshal_list_with(dataset_full_fields)
     def get(self):
         '''List all datasets related to me and my organizations.'''
         q = filter_parser.parse_args().get('q')

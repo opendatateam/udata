@@ -68,12 +68,6 @@
                                     {% if dataset.organization.public_service %}
                                     <strong>{{ _('This dataset comes from a certified public service') }}</strong><br/>
                                     {% endif %}
-                                    {% trans
-                                        date=dataset.created_at|dateformat(format='long'),
-                                        update=dataset.last_update|dateformat(format='long'),
-                                        author=dataset.organization.name,
-                                        url=url_for('organizations.show', org=dataset.organization)
-                                    %}Published on {{date}} and updated on {{update}} by <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
                                 </small>
                             {% elif dataset.owner %}
                                 <small>
@@ -218,7 +212,7 @@
                             {# Badges #}
                             {% if dataset.badges %}
                             <li>
-                                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="right auto"
+                                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="top auto"
                                     title="{{ _('Badges') }}">
                                     <span class="glyphicon glyphicon-bookmark"></span>
                                 </a>
@@ -232,7 +226,7 @@
                             {# License #}
                             {% if dataset.license %}
                             <li>
-                                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="right auto"
+                                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="top auto"
                                     title="{{ _('License') }}">
                                     <span class="glyphicon glyphicon-copyright-mark"></span>
                                 </a>
@@ -245,7 +239,7 @@
                             {# Temporal coverage #}
                             {% if dataset.temporal_coverage %}
                             <li>
-                                <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                                <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="top auto"
                                     title="{{ _('Temporal coverage') }}">
                                     <span class="glyphicon glyphicon-calendar"></span>
                                 </a>
@@ -255,19 +249,43 @@
 
                             {% if dataset.frequency %}
                             <li>
-                                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="right auto"
+                                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="top auto"
                                     title="{{ _('Frequency') }}">
-                                    <span class="glyphicon glyphicon-time"></span>
+                                    <span class="glyphicon glyphicon-duplicate"></span>
                                 </a>
                                 {{ dataset.frequency_label }}
                             </li>
                             {% endif %}
 
+                            <li>
+                                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="top auto"
+                                    title="{{ _('Creation date') }}">
+                                    <span class="glyphicon glyphicon-time"></span>
+                                </a>
+                                {{ dataset.created_at|dateformat(format='long') }}
+                            </li>
+
+                            <li>
+                                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="top auto"
+                                    title="{{ _('Modification date') }}">
+                                    <span class="glyphicon glyphicon-refresh"></span>
+                                </a>
+                                {{ dataset.last_modified|dateformat(format='long') }}
+                            </li>
+
+                            <li>
+                                <a href class="btn btn-default btn-xs" rel="tooltip" data-placement="top auto"
+                                    title="{{ _('Latest resource update') }}">
+                                    <span class="glyphicon glyphicon-save-file"></span>
+                                </a>
+                                {{ dataset.last_update|dateformat(format='long') }}
+                            </li>
+
                             {# Spatial coverage #}
                             {% if dataset.spatial %}
                                 {% if dataset.spatial.granularity %}
                                 <li>
-                                    <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                                    <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="top auto"
                                         title="{{ _('Territorial coverage granularity') }}">
                                         <span class="glyphicon glyphicon-screenshot"></span>
                                     </a>
@@ -276,7 +294,7 @@
                                 {% endif %}
                                 {% if dataset.spatial.territories %}
                                 <li>
-                                    <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                                    <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="top auto"
                                         title="{{ _('Territorial coverage') }}">
                                         <span class="fa fa-fw fa-map-marker"></span>
                                     </a>

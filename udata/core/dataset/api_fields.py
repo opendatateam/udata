@@ -160,6 +160,8 @@ dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields))
 
 dataset_full_fields = api.inherit('DatasetFull', dataset_fields, {
     'quality': fields.Raw(description='The dataset quality', readonly=True),
+    'last_update': fields.ISODateTime(
+        description='The resources last modification date', required=True),
 })
 
 dataset_full_page_fields = api.model(
