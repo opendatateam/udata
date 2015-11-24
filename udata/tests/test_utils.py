@@ -7,7 +7,7 @@ from datetime import date, datetime
 
 from udata.utils import (
     get_by, daterange_start, daterange_end, to_bool, to_iso, to_iso_date,
-    to_iso_datetime
+    to_iso_datetime, recursive_get
 )
 
 TEST_LIST = [
@@ -138,3 +138,65 @@ class ToIsoTest(unittest.TestCase):
 
     def test_to_iso_with_date(self):
         self.assertEqual(to_iso(date(1984, 2, 29)), '1984-02-29')
+
+
+class RecursiveGetTest(unittest.TestCase):
+    def test_get_root_attribute(self):
+        class Tester(object):
+            attr = 'value'
+
+        tester = Tester()
+        self.assertEqual(recursive_get(tester, 'attr'), 'value')
+
+    def test_get_root_key(self):
+        tester = {'key': 'value'}
+        self.assertEqual(recursive_get(tester, 'key'), 'value')
+
+    def test_get_nested_attribute(self):
+        class Nested(object):
+            attr = 'value'
+
+        class Tester(object):
+            def __init__(self):
+                self.nested = Nested()
+
+        tester = Tester()
+        self.assertEqual(recursive_get(tester, 'nested.attr'), 'value')
+
+    def test_get_nested_key(self):
+        tester = {'nested': {'key': 'value'}}
+        self.assertEqual(recursive_get(tester, 'nested.key'), 'value')
+
+    def test_attr_not_found(self):
+        class Tester(object):
+            pass
+
+        tester = Tester()
+        self.assertEqual(recursive_get(tester, 'attr'), None)
+
+    def test_key_not_found(self):
+        tester = {'key': 'value'}
+        self.assertEqual(recursive_get(tester, 'not-found'), None)
+
+    def test_nested_attribute_not_found(self):
+        class Nested(object):
+            attr = 'value'
+
+        class Tester(object):
+            def __init__(self):
+                self.nested = Nested()
+
+        tester = Tester()
+        self.assertEqual(recursive_get(tester, 'nested.not_found'), None)
+
+    def test_nested_key_not_found(self):
+        tester = {'nested': {'key': 'value'}}
+        self.assertEqual(recursive_get(tester, 'nested.not_found'), None)
+
+    def test_get_on_none(self):
+        self.assertEqual(recursive_get(None, 'attr'), None)
+
+    def test_get_key_none(self):
+        tester = {'key': 'value'}
+        self.assertEqual(recursive_get(tester, None), None)
+        self.assertEqual(recursive_get(tester, ''), None)
