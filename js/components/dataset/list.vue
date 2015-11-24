@@ -29,9 +29,16 @@ export default {
                 type: 'timeago',
                 width: 120
             }, {
-                label: this._('Modification'),
+                label: this._('Metadata update'),
                 key: 'last_modified',
                 sort: 'last_modified',
+                align: 'left',
+                type: 'timeago',
+                width: 120
+            }, {
+                label: this._('Data update'),
+                key: 'last_update',
+                sort: 'last_update',
                 align: 'left',
                 type: 'timeago',
                 width: 120
