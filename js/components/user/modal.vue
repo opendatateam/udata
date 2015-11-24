@@ -120,6 +120,7 @@
 <script>
 export default {
     name: 'user-modal',
+    replace: true,
     mixins: [
         require('mixins/modal')
     ],
@@ -131,7 +132,7 @@ export default {
     },
     methods: {
         to_dashboard: function() {
-            this.hide();
+            this.close();
             this.$go('/user/' + this.user.id);
         }
     }

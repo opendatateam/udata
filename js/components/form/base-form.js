@@ -139,10 +139,13 @@ export default {
                 $(element).closest('.form-group,.field-wrapper').append(error);
             }
         });
+        this.$broadcast('form:ready');
     },
     beforeDestroy: function() {
         if (this.$form) {
+            this.$broadcast('form:beforeDestroy');
             $(this.$form).data('validator', null);
+            this.$broadcast('form:destroy');
         }
     },
     methods: {

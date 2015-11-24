@@ -156,26 +156,28 @@ export default {
     methods: {
         confirm_delete: function() {
             var m = this.$root.$modal(
-                {data: {dataset: this.dataset}},
-                Vue.extend(require('components/dataset/delete-modal.vue'))
+                require('components/dataset/delete-modal.vue'),
+                {dataset: this.dataset}
             );
         },
         transfer_request: function() {
             this.$root.$modal(
-                {data: {subject: this.dataset}},
-                Vue.extend(require('components/transfer/request-modal.vue'))
+                require('components/transfer/request-modal.vue'),
+                {subject: this.dataset}
             );
         },
         setBadges: function() {
             this.$root.$modal(
-                {data: {subject: this.dataset}},
-                Vue.extend(require('components/badges/modal.vue'))
+                require('components/badges/modal.vue'),
+                {subject: this.dataset}
             );
         }
     },
     route: {
         data() {
-            this.dataset.fetch(this.$route.params.oid);
+            if (this.$route.params.oid !== this.dataset.id) {
+                this.dataset.fetch(this.$route.params.oid);
+            }
         }
     },
     watch: {
@@ -201,9 +203,9 @@ export default {
             if (coverage.geom) {
                 this.geojson = coverage.geom
             } else {
-                API.spatial.spatial_zones({ids: coverage.zones}, function(response) {
+                API.spatial.spatial_zones({ids: coverage.zones}, (response) => {
                     this.geojson = response.obj;
-                }.bind(this));
+                });
             }
         },
         'dataset.deleted': function(deleted) {

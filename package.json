@@ -22,7 +22,8 @@
     "css-loader": "^0.21.0",
     "esdoc": "^1.0.0",
     "exports-loader": "^0.6.2",
-    "extract-text-webpack-plugin": "^0.8.2",
+    "expose-loader": "^0.7.0",
+    "extract-text-webpack-plugin": "^0.9.1",
     "faker": "^3.0.1",
     "file-loader": "^0.8.4",
     "handlebars-loader": "1.0.2",
@@ -54,7 +55,7 @@
     "vue-html-loader": "^1.0.0",
     "vue-loader": "5.0.0",
     "watai": "0.7.0-alpha.1",
-    "webpack": "1.12.2"
+    "webpack": "1.12.6"
   },
   "dependencies": {
     "Chart.StackedBar.js": "regaddi/Chart.StackedBar.js#1.0.3",
@@ -69,7 +70,6 @@
     "chart.js": "^1.0.2",
     "debounce": "^1.0.0",
     "dotdotdot": "BeSite/jQuery.dotdotdot#v1.7.4",
-    "expose-loader": "^0.7.0",
     "fine-uploader": "^5.3.2",
     "font-awesome": "^4.4.0",
     "handlebars": "^3.0.3",
@@ -98,7 +98,7 @@
     "tv4": "^1.2.7",
     "typeahead.js": "^0.11.1",
     "typeahead.js-bootstrap3.less": "hyspace/typeahead.js-bootstrap3.less#v0.2.3",
-    "vue": "1.0.7",
-    "vue-router": "^0.7.5"
+    "vue": "1.0.8",
+    "vue-router": "^0.7.6"
   }
 }

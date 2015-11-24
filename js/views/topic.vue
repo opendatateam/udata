@@ -42,7 +42,9 @@ export default {
     },
     route: {
         data() {
-            this.topic.fetch(this.$route.params.oid);
+            if (this.$route.params.oid !== this.topic.id) {
+                this.topic.fetch(this.$route.params.oid);
+            }
         }
     }
 };

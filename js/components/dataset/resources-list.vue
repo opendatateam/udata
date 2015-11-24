@@ -173,8 +173,8 @@ export default {
     methods: {
         on_new: function() {
             this.$root.$modal(
-                {data: {dataset: this.dataset}},
-                Vue.extend(require('components/dataset/resource/add-modal.vue'))
+                require('components/dataset/resource/add-modal.vue'),
+                {dataset: this.dataset}
             );
         },
         reorder: function() {
@@ -196,11 +196,11 @@ export default {
         display: function(resource) {
             if (!this.reordering) {
                 this.$root.$modal(
-                    {data: {
+                    require('components/dataset/resource/resource-modal.vue'),
+                    {
                         dataset: this.dataset,
                         resource: new Resource({data: resource})
-                    }},
-                    Vue.extend(require('components/dataset/resource/resource-modal.vue'))
+                    }
                 );
             }
         }

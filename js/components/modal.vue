@@ -18,25 +18,12 @@
 
 <script>
 import $ from 'jquery';
+import Modal from 'mixins/modal';
 
 export default {
     replace: true,
     name: 'modal',
     props: ['title', 'size'],
-    ready: function() {
-        $(this.$el).modal()
-            .on('hide.bs.modal', (e) => {
-                this.$dispatch('modal:close');
-            })
-            .on('hidden.bs.modal', () => {
-                this.$dispatch('modal:closed');
-                this.$destroy(true);
-            });
-    },
-    methods: {
-        close: function() {
-            $(this.$el).modal('hide');
-        }
-    }
+    mixins: [Modal]
 };
 </script>

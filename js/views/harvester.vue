@@ -70,10 +70,7 @@ export default {
         },
         'harvest:job:item:selected': function(item) {
             this.current_item = item;
-            this.$root.$modal(
-                {data: {item: item}},
-                Vue.extend(ItemModal)
-            );
+            this.$root.$modal(ItemModal, {item: item});
             return true;
         }
     },
@@ -83,20 +80,22 @@ export default {
         },
         confirm_delete: function() {
             this.$root.$modal(
-                {data: {source: this.source}},
-                Vue.extend(require('components/harvest/delete-modal.vue'))
+                require('components/harvest/delete-modal.vue'),
+                {source: this.source}
             );
         },
         validate_source: function() {
             this.$root.$modal(
-                {data: {source: this.source}},
-                Vue.extend(require('components/harvest/validation-modal.vue'))
+                require('components/harvest/validation-modal.vue'),
+                {source: this.source}
             );
         }
     },
     route: {
         data() {
-            this.source.fetch(this.$route.params.oid);
+            if (this.$route.params.oid !== this.source.id) {
+                this.source.fetch(this.$route.params.oid);
+            }
         }
     },
     components: {

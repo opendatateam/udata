@@ -127,26 +127,28 @@ export default {
     methods: {
         confirm_delete: function() {
             this.$root.$modal(
-                {data: {reuse: this.reuse}},
-                Vue.extend(require('components/reuse/delete-modal.vue'))
+                require('components/reuse/delete-modal.vue'),
+                {reuse: this.reuse}
             );
         },
         transfer_request: function() {
             this.$root.$modal(
-                {data: {subject: this.reuse}},
-                Vue.extend(require('components/transfer/request-modal.vue'))
+                require('components/transfer/request-modal.vue'),
+                {subject: this.reuse}
             );
         },
         setBadges: function() {
             this.$root.$modal(
-                {data: {subject: this.reuse}},
-                Vue.extend(require('components/badges/modal.vue'))
+                require('components/badges/modal.vue'),
+                {subject: this.reuse}
             );
         }
     },
     route: {
         data() {
-            this.reuse.fetch(this.$route.params.oid);
+            if (this.$route.params.oid !== this.reuse.id) {
+                this.reuse.fetch(this.$route.params.oid);
+            }
         }
     },
     watch: {

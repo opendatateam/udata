@@ -28,7 +28,7 @@ export default {
                         });
                         return false;
                     }
-                }.bind(this)
+                }
             }, {
                 label: this._('Logo'),
                 subtitle: this._('Upload your organization logo'),

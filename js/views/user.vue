@@ -81,7 +81,9 @@ export default {
     },
     route: {
         data() {
-            this.user.fetch(this.$route.params.oid);
+            if (this.$route.params.oid !== this.user.id) {
+                this.user.fetch(this.$route.params.oid);
+            }
         }
     }
 };
