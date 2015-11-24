@@ -175,3 +175,25 @@ def to_bool(value):
 def hash_url(url):
     '''Hash an URL to make it indexable'''
     return hashlib.sha1(url.encode('utf-8')).hexdigest() if url else None
+
+
+def recursive_get(obj, key):
+    '''
+    Get an attribute or a key recursively.
+
+    :param obj: The object to fetch attribute or key on
+    :type obj: object|dict
+    :param key: Either a string in dotted-notation ar an array of string
+    :type key: string|list|tuple
+    '''
+    if not obj or not key:
+        return
+    parts = key.split('.') if isinstance(key, basestring) else key
+    key = parts[0]
+    if isinstance(obj, dict):
+        value = obj.get(key, None)
+    else:
+        value = getattr(obj, key, None)
+    if len(parts) > 1:
+        return recursive_get(value, parts[1:])
+    return value
