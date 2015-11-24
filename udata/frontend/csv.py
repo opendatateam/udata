@@ -13,6 +13,7 @@ from flask import Response, stream_with_context
 
 from udata.models import db
 from udata.core.metrics import Metric
+from udata.utils import recursive_get
 
 
 log = logging.getLogger(__name__)
@@ -62,8 +63,8 @@ class Adapter(object):
             method = 'field_{0}'.format(name)
             return (getattr(self, method)
                     if hasattr(self, method)
-                    else lambda o: getattr(o, name, None))
-        return ((lambda o: getattr(o, getter, None))
+                    else lambda o: recursive_get(o, name))
+        return ((lambda o: recursive_get(o, getter))
                 if isinstance(getter, basestring) else getter)
 
     def header(self):
