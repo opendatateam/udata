@@ -189,11 +189,9 @@ def recursive_get(obj, key):
     if not obj or not key:
         return
     parts = key.split('.') if isinstance(key, basestring) else key
-    key = parts[0]
+    key = parts.pop(0)
     if isinstance(obj, dict):
         value = obj.get(key, None)
     else:
         value = getattr(obj, key, None)
-    if len(parts) > 1:
-        return recursive_get(value, parts[1:])
-    return value
+    return recursive_get(value, parts) if parts else value
