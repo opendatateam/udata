@@ -27,7 +27,8 @@ module.exports = {
         'topic/display': './js/topic/display',
         'post/display': './js/post/display',
         'user/display': './js/user/display',
-        'apidoc': './js/apidoc',
+        apidoc: './js/apidoc',
+        widgets: './js/widgets',
     },
     output: {
         path: path.join(__dirname, 'udata', 'static'),
@@ -102,6 +103,11 @@ module.exports = {
         new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp(languages.join('|'))),
         new webpack.ContextReplacementPlugin(/locales$/, new RegExp(languages.join('|'))),
         new webpack.optimize.CommonsChunkPlugin("vue-common.js", ["admin", "dashboard"]),
-        new webpack.optimize.CommonsChunkPlugin('common.js')
+        new webpack.optimize.CommonsChunkPlugin('common.js', [
+            'admin', 'site', 'home', 'search', 'dashboard',
+            'dataset/display', 'reuse/display', 'organization/display',
+            'site/map', 'topic/display', 'post/display', 'user/display',
+            'apidoc'
+        ]),
     ]
 };

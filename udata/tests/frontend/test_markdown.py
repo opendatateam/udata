@@ -91,7 +91,7 @@ class MarkdownTestCase(TestCase, WebTestMixin):
         with self.app.test_request_context('/'):
             result = render_template_string('{{ text|mdstrip(7) }}', text=text)
 
-        self.assertEqual(result, '1 2 ...')
+        self.assertEqual(result, '1 2 3 …')
 
     def test_mdstrip_filter_does_not_truncate_without_size(self):
         '''mdstrip should not truncate by default'''

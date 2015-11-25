@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import abort, request, url_for, render_template
+from flask import abort, request, url_for, render_template, current_app
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.frontend.views import DetailView, SearchView
