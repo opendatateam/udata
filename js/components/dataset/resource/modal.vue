@@ -193,7 +193,7 @@ export default {
             if (!this.is_community) {
                 resources.some((resource) => {
                     if (resource.id === this.$route.params.rid) {
-                        this.resource = resource;
+                        this.resource = new Resource({data: resource});
                         return true;
                     }
                 });
