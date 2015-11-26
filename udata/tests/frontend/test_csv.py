@@ -34,6 +34,7 @@ class Fake(db.Document):
     tags = db.ListField(db.StringField())
     other = db.ListField(db.StringField())
     nested = db.ListField(db.EmbeddedDocumentField(NestedFake))
+    sub = db.EmbeddedDocumentField(NestedFake)
     metrics = db.DictField()
 
     def __unicode__(self):
@@ -51,6 +52,14 @@ class FakeMetricFloat(Metric):
     value_type = float
 
 
+class NestedFactory(MongoEngineFactory):
+    class Meta:
+        model = NestedFake
+
+    key = factory.LazyAttribute(lambda o: faker.word())
+    value = factory.LazyAttribute(lambda o: faker.pyint())
+
+
 class FakeFactory(MongoEngineFactory):
     class Meta:
         model = Fake
@@ -59,6 +68,7 @@ class FakeFactory(MongoEngineFactory):
     description = factory.LazyAttribute(lambda o: faker.paragraph())
     tags = factory.LazyAttribute(
         lambda o: [faker.word() for _ in range(1, randint(1, 4))])
+    sub = factory.SubFactory(NestedFactory)
 
 
 class NestedAdapter(csv.NestedAdapter):
@@ -117,7 +127,7 @@ class CsvTest(FrontTestCase):
         class Adapter(csv.Adapter):
             fields = ['title', 'description']
 
-        objects = [FakeFactory() for _ in range(3)]
+        objects = FakeFactory.build_batch(3)
         adapter = Adapter(objects)
 
         header = adapter.header()
@@ -130,6 +140,25 @@ class CsvTest(FrontTestCase):
             self.assertEqual(row[0], obj.title)
             self.assertEqual(row[1], obj.description)
 
+    def test_adapter_fields_as_list_with_nested(self):
+        @csv.adapter(Fake)
+        class Adapter(csv.Adapter):
+            fields = ['title', 'description', 'sub.key']
+
+        objects = FakeFactory.build_batch(3)
+        adapter = Adapter(objects)
+
+        header = adapter.header()
+        self.assertEqual(header, ['title', 'description', 'sub.key'])
+
+        rows = list(adapter.rows())
+        self.assertEqual(len(rows), len(objects))
+        for obj, row in zip(objects, rows):
+            self.assertEqual(len(row), len(header))
+            self.assertEqual(row[0], obj.title)
+            self.assertEqual(row[1], obj.description)
+            self.assertEqual(row[2], obj.sub.key)
+
     def test_adapter_fields_as_mixed_list(self):
         @csv.adapter(Fake)
         class Adapter(csv.Adapter):
@@ -140,7 +169,7 @@ class CsvTest(FrontTestCase):
                 ('alias', 'title'),
             )
 
-        objects = [FakeFactory() for _ in range(3)]
+        objects = FakeFactory.build_batch(3)
         adapter = Adapter(objects)
 
         header = adapter.header()
@@ -167,7 +196,7 @@ class CsvTest(FrontTestCase):
             def field_tags(self, obj):
                 return ','.join(obj.tags)
 
-        objects = [FakeFactory() for _ in range(3)]
+        objects = FakeFactory.build_batch(3)
         adapter = Adapter(objects)
 
         header = adapter.header()
@@ -195,7 +224,7 @@ class CsvTest(FrontTestCase):
                     ('tags', lambda o: ','.join(o.tags)),
                 )
 
-        objects = [FakeFactory() for _ in range(3)]
+        objects = FakeFactory.build_batch(3)
         adapter = Adapter(objects)
 
         header = adapter.header()
@@ -229,7 +258,7 @@ class CsvTest(FrontTestCase):
         class Adapter(csv.Adapter):
             fields = ['title', 'description']
 
-        objects = [FakeFactory(description='é\xe9') for _ in range(3)]
+        objects = FakeFactory.build_batch(3, description='é\xe9')
         adapter = Adapter(objects)
 
         header = adapter.header()

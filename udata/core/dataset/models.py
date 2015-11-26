@@ -103,6 +103,7 @@ class Checksum(db.EmbeddedDocument):
 
 
 class ResourceMixin(object):
+    id = db.AutoUUIDField(primary_key=True)
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
     filetype = db.StringField(
@@ -150,8 +151,6 @@ class ResourceMixin(object):
 
 
 class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
-    id = db.AutoUUIDField()
-
     on_added = signal('Resource.on_added')
     on_deleted = signal('Resource.on_deleted')
 

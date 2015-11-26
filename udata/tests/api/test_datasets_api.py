@@ -818,6 +818,17 @@ class CommunityResourceAPITest(APITestCase):
         data = json.loads(response.data)
         self.assertEqual(data['id'], str(community_resource.id))
 
+    def test_community_resource_api_get_from_string_id(self):
+        '''It should fetch a community resource from the API'''
+        with self.autoindex():
+            community_resource = CommunityResourceFactory()
+
+        response = self.get(url_for('api.community_resource',
+                                    community=str(community_resource.id)))
+        self.assert200(response)
+        data = json.loads(response.data)
+        self.assertEqual(data['id'], str(community_resource.id))
+
     def test_community_resource_api_create(self):
         '''It should create a community resource from the API'''
         self.login()

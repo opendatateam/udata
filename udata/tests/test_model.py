@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import json
 
-from uuid import uuid4
+from uuid import uuid4, UUID
 from datetime import date, datetime, timedelta
 
 from mongoengine.errors import ValidationError
@@ -14,6 +14,10 @@ from udata.tests import TestCase, DBTestMixin
 
 class UUIDTester(db.Document):
     uuid = db.AutoUUIDField()
+
+
+class UUIDAsIdTester(db.Document):
+    id = db.AutoUUIDField(primary_key=True)
 
 
 class SlugTester(db.Document):
@@ -50,12 +54,19 @@ class AutoUUIDFieldTest(TestCase):
         '''AutoUUIDField should populate itself if not set'''
         obj = UUIDTester()
         self.assertIsNotNone(obj.uuid)
+        self.assertIsInstance(obj.uuid, UUID)
 
     def test_do_not_overwrite(self):
         '''AutoUUIDField shouldn't populate itself if a value is already set'''
         uuid = uuid4()
         obj = UUIDTester(uuid=uuid)
         self.assertEqual(obj.uuid, uuid)
+
+    def test_as_primary_key(self):
+        obj = UUIDAsIdTester()
+        self.assertIsNotNone(obj.id)
+        self.assertIsInstance(obj.id, UUID)
+        self.assertEqual(obj.pk, obj.id)
 
 
 class SlugFieldTest(DBTestMixin, TestCase):

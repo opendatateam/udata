@@ -6,6 +6,11 @@ from udata.frontend import csv
 from .models import Dataset
 
 
+def serialize_spatial_zones(dataset):
+    if dataset.spatial and dataset.spatial.zones:
+        return ','.join(z.name for z in dataset.spatial.zones)
+
+
 @csv.adapter(Dataset)
 class DatasetCsvAdapter(csv.Adapter):
     fields = (
@@ -13,13 +18,15 @@ class DatasetCsvAdapter(csv.Adapter):
         'title',
         'slug',
         ('url', 'external_url'),
-        ('organization',
-         lambda r: r.organization.name if r.organization else None),
-        ('organization_id',
-         lambda r: str(r.organization.id) if r.organization else None),
+        ('organization', 'organization.name'),
+        ('organization_id', 'organization.id'),
         'description',
         'frequency',
         'license',
+        'temporal_coverage.start',
+        'temporal_coverage.end',
+        'spatial.granularity',
+        ('spatial.zones', serialize_spatial_zones),
         'private',
         ('featured', lambda o: o.featured or False),
         'created_at',

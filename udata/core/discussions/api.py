@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 from flask.ext.security import current_user
+from flask_restful.inputs import boolean
 
 from udata.auth import admin_permission
 from udata.api import api, API, fields
@@ -66,8 +67,9 @@ parser.add_argument(
     'sort', type=str, default='-created', location='args',
     help='The sorting attribute')
 parser.add_argument(
-    'closed', type=bool, default=False, location='args',
-    help='Filter closed discussions')
+    'closed', type=boolean, location='args',
+    help='Filter closed discussions. Filters discussions on their closed status'
+    ' if specified')
 parser.add_argument(
     'for', type=str, location='args', action='append',
     help='Filter discussions for a given subject')
@@ -142,8 +144,10 @@ class DiscussionsAPI(API):
         discussions = Discussion.objects
         if args['for']:
             discussions = discussions(subject__in=args['for'])
-        if not args['closed']:
+        if args['closed'] is False:
             discussions = discussions(closed=None)
+        elif args['closed'] is True:
+            discussions = discussions(closed__ne=None)
         return (discussions.order_by(args['sort'])
                            .paginate(args['page'], args['page_size']))
 
