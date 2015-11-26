@@ -31,7 +31,7 @@ export default {
     name: 'SearchView',
     components: {
         datasets: require('components/dataset/list.vue'),
-        communities: require('components/communityresource/list.vue'),
+        communities: require('components/dataset/communityresource/list.vue'),
         reuses: require('components/reuse/list.vue'),
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),

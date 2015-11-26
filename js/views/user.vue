@@ -62,7 +62,7 @@ export default {
         datasets: require('components/dataset/list.vue'),
         reuses: require('components/reuse/list.vue'),
         harvesters: require('components/harvest/sources.vue'),
-        communities: require('components/communityresource/list.vue'),
+        communities: require('components/dataset/communityresource/list.vue'),
         Layout
     },
     watch: {

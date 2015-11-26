@@ -71,7 +71,7 @@ router.map({
             'community-resource/:rid/': {
                 name: 'dataset-community-resource',
                 component: function(resolve) {
-                    require(['./components/communityresource/edit-modal.vue'], resolve);
+                    require(['./components/dataset/communityresource/modal.vue'], resolve);
                 }
             },
             // '/resource/new/': {
@@ -83,7 +83,7 @@ router.map({
             // '/resource/:rid/': {
             //     name: 'dataset-resource',
             //     component: function(resolve) {
-            //         require(['./components/dataset/resource/resource-modal.vue'], resolve);
+            //         require(['./components/dataset/resource/modal.vue'], resolve);
             //     }
             // }
         }

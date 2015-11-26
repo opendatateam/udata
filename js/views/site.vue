@@ -122,7 +122,7 @@ export default {
         users: require('components/user/list.vue'),
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
-        community: require('components/communityresource/list.vue'),
+        community: require('components/dataset/communityresource/list.vue'),
         posts: require('components/post/list.vue'),
         topics: require('components/topic/list.vue'),
         Layout

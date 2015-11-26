@@ -196,7 +196,7 @@ export default {
         display: function(resource) {
             if (!this.reordering) {
                 this.$root.$modal(
-                    require('components/dataset/resource/resource-modal.vue'),
+                    require('components/dataset/resource/modal.vue'),
                     {
                         dataset: this.dataset,
                         resource: new Resource({data: resource})
