@@ -195,13 +195,9 @@ export default {
         },
         display: function(resource) {
             if (!this.reordering) {
-                this.$root.$modal(
-                    require('components/dataset/resource/modal.vue'),
-                    {
-                        dataset: this.dataset,
-                        resource: new Resource({data: resource})
-                    }
-                );
+                this.$go({name: 'dataset-resource', params: {
+                    oid: this.dataset.id, rid: resource.id
+                }});
             }
         }
     },

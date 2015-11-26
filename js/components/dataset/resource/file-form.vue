@@ -56,6 +56,7 @@
 <script>
 import API from 'api';
 import Dataset from 'models/dataset';
+import CommunityResource from 'models/communityresource';
 
 export default {
     mixins: [require('mixins/uploader')],
@@ -110,14 +111,17 @@ export default {
         };
     },
     computed: {
-        upload_endpoint: function() {
+        is_community() {
+            return this.resource instanceof CommunityResource;
+        },
+        upload_endpoint() {
             let operations = API.datasets.operations;
             let params = {};
             let endpoint = 'upload_';
             if (typeof this.dataset !== 'undefined') {
                 params = {dataset: this.dataset.id};
             }
-            if (this.community) {
+            if (this.is_community) {
                 endpoint += 'community_';
                 params.community = this.resource.id;
             } else {
@@ -140,7 +144,7 @@ export default {
             this.progress = Math.round(uploaded * 100 / total);
         },
         'uploader:complete': function(id, response) {
-            if (!this.community) {
+            if (!this.is_community) {
                 this.dataset.resources.unshift(response);
             }
             // Do not override an existing typed or registered title.

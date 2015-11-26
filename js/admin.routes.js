@@ -71,7 +71,13 @@ router.map({
             'community-resource/:rid/': {
                 name: 'dataset-community-resource',
                 component: function(resolve) {
-                    require(['./components/dataset/communityresource/modal.vue'], resolve);
+                    require(['./components/dataset/resource/modal.vue'], resolve);
+                }
+            },
+            '/resource/:rid/': {
+                name: 'dataset-resource',
+                component: function(resolve) {
+                    require(['./components/dataset/resource/modal.vue'], resolve);
                 }
             },
             // '/resource/new/': {
@@ -80,12 +86,6 @@ router.map({
             //         require(['./components/dataset/resource/add-modal.vue'], resolve);
             //     }
             // },
-            // '/resource/:rid/': {
-            //     name: 'dataset-resource',
-            //     component: function(resolve) {
-            //         require(['./components/dataset/resource/modal.vue'], resolve);
-            //     }
-            // }
         }
     },
     '/community-resource/new/': {

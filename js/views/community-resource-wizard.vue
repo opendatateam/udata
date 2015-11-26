@@ -31,7 +31,7 @@ export default {
                     this.dataset_id = this.$route.query.dataset_id;
                     this.dataset.fetch(this.dataset_id);
                     component.dataset = this.dataset;
-                    component.community = true;
+                    component.resource = this.communityResource;
                 },
                 next: (component) => {
                     if (component.validate()) {
