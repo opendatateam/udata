@@ -211,19 +211,6 @@ export default {
             if (id) {
                 this.upload_endpoint = API.datasets.operations.upload_dataset_resource.urlify({dataset: id});
             }
-        },
-        "dataset.resources": function(resources) {
-            /* If a `resource_id` is in the GET parameters we display the popin
-               with the appropriated resource loaded. */
-            if ("resource_id" in this.$route.query) {
-                let resourceId = this.$route.query.resource_id;
-                for (let resource of resources) {
-                    if (resource.id === resourceId) {
-                        this.display(resource);
-                        break;
-                    }
-                }
-            }
         }
     }
 };
