@@ -43,6 +43,11 @@
                 <dd v-if="resource.published">{{ resource.published | dt }}</dd>
                 <dt v-if="resource.metrics && resource.metrics.downloads">{{ _('Downloads') }}</dt>
                 <dd v-if="resource.metrics && resource.metrics.downloads">{{ resource.metrics.downloads }}</dd>
+                <dt v-if="is_community">{{ _('Publish by') }}</dt>
+                <dd v-if="is_community">
+                    <user-card v-if="resource.owner" :user="resource.owner"></user-card>
+                    <org-card v-if="resource.organization" :organization="resource.organization"></org-card>
+                </dd>
             </dl>
         </div>
 
@@ -107,7 +112,9 @@ import CommunityResource from 'models/communityresource';
 export default {
     components: {
         'modal': require('components/modal.vue'),
-        'resource-form': require('components/dataset/resource/form.vue')
+        'resource-form': require('components/dataset/resource/form.vue'),
+        'org-card': require('components/organization/card.vue'),
+        'user-card': require('components/user/card.vue'),
     },
     data: function() {
         return {
