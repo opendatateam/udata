@@ -8,7 +8,7 @@ export default class User extends Model {
      * @return {String}
      */
     get fullname() {
-        return this.first_name + ' ' + this.last_name;
+        return `${this.first_name} ${this.last_name}`;
     }
 
     /**

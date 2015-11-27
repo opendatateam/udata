@@ -141,7 +141,7 @@ export default {
             required: true
         }
     },
-    data: function() {
+    data() {
         return {
             reordering: false,
             new_order: []
@@ -163,7 +163,7 @@ export default {
             this.dataset.resources.unshift(response);
         }
     },
-    ready: function() {
+    ready() {
         /* In case of a new resource, we display the appropriated popin
            on load. */
         if ("new_resource" in this.$route.query) {
@@ -171,19 +171,19 @@ export default {
         }
     },
     methods: {
-        on_new: function() {
+        on_new() {
             this.$root.$modal(
                 require('components/dataset/resource/add-modal.vue'),
                 {dataset: this.dataset}
             );
         },
-        reorder: function() {
+        reorder() {
             this.$sortable.option('disabled', false);
             this.$dnd.dispose();
             this.reordering = true;
             this._initial_order = this.$sortable.toArray();
         },
-        reorder_done: function(toReorder) {
+        reorder_done(toReorder) {
             this.$sortable.option('disabled', true);
             this.reordering = false;
             this.$dnd.setupExtraDropzone(this.$el);
@@ -193,7 +193,7 @@ export default {
                 this.$sortable.sort(this._initial_order);
             }
         },
-        display: function(resource) {
+        display(resource) {
             if (!this.reordering) {
                 this.$go({name: 'dataset-resource', params: {
                     oid: this.dataset.id, rid: resource.id

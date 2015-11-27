@@ -163,7 +163,7 @@ export default {
         }
     },
     methods: {
-        save: function() {
+        save() {
             if (this.$refs.form.validate()) {
                 if (this.is_community) {
                     Object.assign(this.resource, this.$refs.form.serialize());
@@ -175,7 +175,7 @@ export default {
                 return true;
             }
         },
-        delete_confirmed: function() {
+        delete_confirmed() {
             if (this.is_community) {
                 API.datasets.delete_community_resource({community: this.resource.id},
                     (response) => {
