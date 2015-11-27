@@ -144,13 +144,13 @@ export default {
         dataset: require('components/dataset/details.vue'),
         quality: require('components/dataset/quality.vue'),
         chart: require('components/charts/widget.vue'),
-        resources: require('components/dataset/resources-list.vue'),
+        resources: require('components/dataset/resource/list.vue'),
         reuses: require('components/reuse/list.vue'),
         followers: require('components/follow/list.vue'),
         wmap: require('components/widgets/map.vue'),
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
-        community: require('components/communityresource/list.vue'),
+        community: require('components/dataset/communityresource/list.vue'),
         Layout
     },
     methods: {
