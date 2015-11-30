@@ -91,7 +91,7 @@ DATACONNEXIONS_6_CATEGORIES = [
 
 @blueprint.route('/dataconnexions-5')
 def dataconnexions5():
-    reuses = Reuse.objects(badges__kind=DATACONNEXIONS_5_CANDIDATE)
+    reuses = Reuse.objects(badges__kind=DATACONNEXIONS_5_CANDIDATE).visible()
 
     categories = [{
         'tag': tag,
@@ -106,7 +106,7 @@ def dataconnexions5():
 def dataconnexions6():
     # Use tags until we are sure all reuse are correctly labeled
     # reuses = Reuse.objects(badges__kind=DATACONNEXIONS_6_CANDIDATE)
-    reuses = Reuse.objects(tags='dataconnexions-6')
+    reuses = Reuse.objects(tags='dataconnexions-6').visible()
 
     categories = [{
         'tag': tag,
@@ -137,7 +137,7 @@ def c3():
 @blueprint.route('/climate-change-challenge')
 def climate_change_challenge():
     partners = Organization.objects(slug__in=C3_PARTNERS)
-    datasets = Dataset.objects(badges__kind=C3).order_by('-metrics.followers')
+    datasets = Dataset.objects(badges__kind=C3).visible().order_by('-metrics.followers')
     return theme.render('c3.html', partners=partners, datasets=datasets,
                         nb_displayed_datasets=NB_DISPLAYED_DATASETS)
 
