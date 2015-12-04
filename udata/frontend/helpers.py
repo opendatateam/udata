@@ -24,12 +24,14 @@ log = logging.getLogger(__name__)
 
 
 @front.app_template_global(name='static')
-def static_global(filename):
+def static_global(filename, _burst=True, **kwargs):
     if current_app.config['DEBUG']:
         burst = time()
     else:
         burst = pkg_resources.get_distribution('udata').version
-    return url_for('static', filename=filename, _=burst)
+    if _burst:
+        kwargs['_'] = burst
+    return url_for('static', filename=filename, **kwargs)
 
 
 @front.app_template_global(name='form_grid')

@@ -169,7 +169,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
     organization = db.ReferenceField('Organization',
                                      reverse_delete_rule=db.NULLIFY)
-
     frequency = db.StringField(choices=UPDATE_FREQUENCIES.keys())
     frequency_date = db.DateTimeField(verbose_name=_('Future date of update'))
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)

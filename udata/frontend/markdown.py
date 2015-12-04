@@ -67,6 +67,6 @@ def init_app(app):
         if EXCERPT_TOKEN in value:
             value = value.split(EXCERPT_TOKEN, 1)[0]
         if length > 0:
-            value = do_truncate(value, length)
+            value = do_truncate(value, length, end='…')
         rendered = md(value)
         return do_striptags(rendered)
