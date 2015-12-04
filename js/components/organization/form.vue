@@ -28,6 +28,7 @@ export default {
                 }, {
                     id: 'url',
                     label: this._('Website'),
+                    widget: 'url-field',
                 }]
         };
     },
