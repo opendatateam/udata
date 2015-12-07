@@ -18,7 +18,7 @@
         <reuse-list id="reuses" class="col-xs-12" :reuses="reuses"></reuse-list>
     </div>
     <div class="row">
-        <organizations id="organizations" class="col-xs-12" :organizations="organizations"></organizations>
+        <org-list id="organizations" class="col-xs-12" :organizations="organizations"></org-list>
     </div>
     <div class="row">
         <users id="users" class="col-xs-12" :users="users"></users>
@@ -47,6 +47,7 @@ import CommunityResources from 'models/communityresources';
 import Layout from 'components/layout.vue';
 import DatasetList from 'components/dataset/list.vue';
 import ReuseList from 'components/reuse/list.vue';
+import OrgList from 'components/organization/list.vue';
 
 export default {
     name: 'SiteView',
@@ -63,7 +64,7 @@ export default {
             }),
             reuses: new Reuses({query: {sort: '-created', page_size: 10}, mask: ReuseList.MASK}),
             datasets: new Datasets({query: {sort: '-created', page_size: 10}, mask: DatasetList.MASK}),
-            organizations: new Organizations({query: {sort: '-created', page_size: 10}}),
+            organizations: new Organizations({query: {sort: '-created', page_size: 10}, mask: OrgList.MASK}),
             users: new Users({query: {sort: '-created', page_size: 10}}),
             issues: new Issues({query: {sort: '-created', page_size: 10}}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
@@ -118,7 +119,6 @@ export default {
     components: {
         sbox: require('components/containers/small-box.vue'),
         chart: require('components/charts/widget.vue'),
-        organizations: require('components/organization/list.vue'),
         users: require('components/user/list.vue'),
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
@@ -126,6 +126,7 @@ export default {
         posts: require('components/post/list.vue'),
         topics: require('components/topic/list.vue'),
         DatasetList,
+        OrgList,
         ReuseList,
         Layout
     },
