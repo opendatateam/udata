@@ -7,11 +7,11 @@
     </div>
 
     <div class="row">
-        <datasets-list class="col-xs-12" :datasets="datasets"></datasets-list>
+        <dataset-list class="col-xs-12" :datasets="datasets"></dataset-list>
     </div>
 
     <div class="row">
-        <reuses class="col-xs-12" :reuses="reuses"></reuses>
+        <reuse-list class="col-xs-12" :reuses="reuses"></reuse-list>
     </div>
     <div class="row">
         <apikey class="col-xs-12 col-md-6" :user="$root.me"></apikey>
@@ -26,7 +26,8 @@ import API from 'api';
 import {PageList} from 'models/base';
 import Metrics from 'models/metrics';
 import Layout from 'components/layout.vue';
-import DatasetsList from 'components/dataset/list.vue';
+import DatasetList from 'components/dataset/list.vue';
+import ReuseList from 'components/reuse/list.vue';
 
 export default  {
     name: 'MeView',
@@ -40,12 +41,13 @@ export default  {
             metrics: new Metrics(),
             reuses: new PageList({
                 ns: 'me',
-                fetch: 'my_reuses'
+                fetch: 'my_reuses',
+                mask: ReuseList.MASK
             }),
             datasets: new PageList({
                 ns: 'me',
                 fetch: 'my_datasets',
-                mask: DatasetsList.MASK
+                mask: DatasetList.MASK
             }),
             y: [{
                 id: 'datasets',
@@ -61,10 +63,10 @@ export default  {
     components: {
         profile: require('components/user/profile.vue'),
         chart: require('components/charts/widget.vue'),
-        reuses: require('components/reuse/list.vue'),
         apikey: require('components/user/apikey.vue'),
         harvesters: require('components/harvest/sources.vue'),
-        DatasetsList,
+        DatasetList,
+        ReuseList,
         Layout
     },
     attached: function() {

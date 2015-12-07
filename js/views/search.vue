@@ -7,7 +7,7 @@
         <communities class="col-xs-12" :communities="communities"></communities>
     </div>
     <div class="row" v-if="reuses.loading || reuses.has_data">
-        <reuses class="col-xs-12" :reuses="reuses"></reuses>
+        <reuses-list class="col-xs-12" :reuses="reuses"></reuses-list>
     </div>
     <div class="row" v-if="issues.loading || issues.has_data">
         <issues class="col-xs-12" :issues="issues"></issues>
@@ -26,16 +26,17 @@
 <script>
 import {PageList} from 'models/base';
 import Layout from 'components/layout.vue';
-import DatasetsList from 'components/dataset/list.vue';
+import DatasetList from 'components/dataset/list.vue';
+import ReuseList from 'components/reuse/list.vue';
 
 export default {
     name: 'SearchView',
     components: {
         communities: require('components/dataset/communityresource/list.vue'),
-        reuses: require('components/reuse/list.vue'),
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
-        DatasetsList,
+        DatasetList,
+        ReuseList,
         Layout
     },
     computed: {
@@ -51,7 +52,7 @@ export default {
             datasets: new PageList({
                 ns: 'me',
                 fetch: 'my_org_datasets',
-                mask: DatasetsList.MASK
+                mask: DatasetList.MASK
             }),
             communities: new PageList({
                 ns: 'me',
@@ -59,7 +60,8 @@ export default {
             }),
             reuses: new PageList({
                 ns: 'me',
-                fetch: 'my_org_reuses'
+                fetch: 'my_org_reuses',
+                mask: ReuseList.MASK
             }),
             issues: new PageList({
                 ns: 'me',

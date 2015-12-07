@@ -22,13 +22,13 @@
     </div>
 
     <div class="row">
-        <datasets-list id="datasets-widget" class="col-xs-12" :datasets="datasets"
+        <dataset-list id="datasets-widget" class="col-xs-12" :datasets="datasets"
             :downloads="downloads">
-        </datasets-list>
+        </dataset-list>
     </div>
 
     <div class="row">
-        <reuses id="reuses-widget" class="col-xs-12" :reuses="reuses"></reuses>
+        <reuse-list id="reuses-widget" class="col-xs-12" :reuses="reuses"></reuse-list>
     </div>
 
     <div class="row">
@@ -57,7 +57,8 @@ import Organization from 'models/organization';
 import CommunityResources from 'models/communityresources';
 import {PageList} from 'models/base';
 import Layout from 'components/layout.vue';
-import DatasetsList from 'components/dataset/list.vue';
+import DatasetList from 'components/dataset/list.vue';
+import ReuseList from 'components/reuse/list.vue';
 
 export default {
     name: 'OrganizationView',
@@ -90,13 +91,14 @@ export default {
             reuses: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_reuses',
-                search: 'title'
+                search: 'title',
+                mask: ReuseList.MASK
             }),
             datasets: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_datasets',
                 search: 'title',
-                mask: DatasetsList.MASK
+                mask: DatasetList.MASK
             }),
             issues: new PageList({
                 ns: 'organizations',
@@ -185,13 +187,13 @@ export default {
         profile: require('components/organization/profile.vue'),
         members: require('components/organization/members.vue'),
         chart: require('components/charts/widget.vue'),
-        reuses: require('components/reuse/list.vue'),
         followers: require('components/follow/list.vue'),
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
         harvesters: require('components/harvest/sources.vue'),
         communities: require('components/dataset/communityresource/list.vue'),
-        DatasetsList,
+        DatasetList,
+        ReuseList,
         Layout,
     },
     events: {

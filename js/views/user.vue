@@ -7,11 +7,11 @@
     </div>
 
     <div class="row">
-        <datasets-list class="col-xs-12" :datasets="datasets"></datasets-list>
+        <dataset-list class="col-xs-12" :datasets="datasets"></dataset-list>
     </div>
 
     <div class="row">
-        <reuses class="col-xs-12" :reuses="reuses"></reuses>
+        <reuse-list class="col-xs-12" :reuses="reuses"></reuse-list>
     </div>
 
     <div class="row">
@@ -32,7 +32,8 @@ import Datasets from 'models/datasets';
 import Metrics from 'models/metrics';
 import CommunityResources from 'models/communityresources';
 import Layout from 'components/layout.vue';
-import DatasetsList from 'components/dataset/list.vue';
+import DatasetList from 'components/dataset/list.vue';
+import ReuseList from 'components/reuse/list.vue';
 
 export default {
     name: 'user-view',
@@ -45,8 +46,8 @@ export default {
                     end: moment().format('YYYY-MM-DD')
                 }
             }),
-            reuses: new Reuses({query: {sort: '-created', page_size: 10}}),
-            datasets: new Datasets({query: {sort: '-created', page_size: 10}, mask: DatasetsList.MASK}),
+            reuses: new Reuses({query: {sort: '-created', page_size: 10}, mask: ReuseList.MASK}),
+            datasets: new Datasets({query: {sort: '-created', page_size: 10}, mask: DatasetList.MASK}),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
             y: [{
                 id: 'datasets',
@@ -60,10 +61,10 @@ export default {
     components: {
         profile: require('components/user/profile.vue'),
         chart: require('components/charts/widget.vue'),
-        reuses: require('components/reuse/list.vue'),
         harvesters: require('components/harvest/sources.vue'),
         communities: require('components/dataset/communityresource/list.vue'),
-        DatasetsList,
+        DatasetList,
+        ReuseList,
         Layout
     },
     watch: {

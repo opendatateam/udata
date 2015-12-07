@@ -12,10 +12,10 @@
     </div>
 
     <div class="row">
-        <datasets-list id="datasets" class="col-xs-12" :datasets="datasets"></datasets-list>
+        <dataset-list id="datasets" class="col-xs-12" :datasets="datasets"></dataset-list>
     </div>
     <div class="row">
-        <reuses id="reuses" class="col-xs-12" :reuses="reuses"></reuses>
+        <reuse-list id="reuses" class="col-xs-12" :reuses="reuses"></reuse-list>
     </div>
     <div class="row">
         <organizations id="organizations" class="col-xs-12" :organizations="organizations"></organizations>
@@ -45,7 +45,8 @@ import Users from 'models/users';
 import Organizations from 'models/organizations';
 import CommunityResources from 'models/communityresources';
 import Layout from 'components/layout.vue';
-import DatasetsList from 'components/dataset/list.vue';
+import DatasetList from 'components/dataset/list.vue';
+import ReuseList from 'components/reuse/list.vue';
 
 export default {
     name: 'SiteView',
@@ -60,8 +61,8 @@ export default {
                     end: moment().format('YYYY-MM-DD')
                 }
             }),
-            reuses: new Reuses({query: {sort: '-created', page_size: 10}}),
-            datasets: new Datasets({query: {sort: '-created', page_size: 10}, mask: DatasetsList.MASK}),
+            reuses: new Reuses({query: {sort: '-created', page_size: 10}, mask: ReuseList.MASK}),
+            datasets: new Datasets({query: {sort: '-created', page_size: 10}, mask: DatasetList.MASK}),
             organizations: new Organizations({query: {sort: '-created', page_size: 10}}),
             users: new Users({query: {sort: '-created', page_size: 10}}),
             issues: new Issues({query: {sort: '-created', page_size: 10}}),
@@ -117,7 +118,6 @@ export default {
     components: {
         sbox: require('components/containers/small-box.vue'),
         chart: require('components/charts/widget.vue'),
-        reuses: require('components/reuse/list.vue'),
         organizations: require('components/organization/list.vue'),
         users: require('components/user/list.vue'),
         issues: require('components/issues/list.vue'),
@@ -125,7 +125,8 @@ export default {
         community: require('components/dataset/communityresource/list.vue'),
         posts: require('components/post/list.vue'),
         topics: require('components/topic/list.vue'),
-        DatasetsList,
+        DatasetList,
+        ReuseList,
         Layout
     },
     methods: {

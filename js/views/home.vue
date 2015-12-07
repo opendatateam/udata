@@ -8,9 +8,9 @@
     </div>
 
     <div class="row">
-        <reuses class="col-xs-12" :reuses="reuses"
+        <reuse-list class="col-xs-12" :reuses="reuses"
             :title="_('Reuses about your data (including your organizations)')">
-        </reuses>
+        </reuse-list>
     </div>
 
     <div class="row">
@@ -32,6 +32,7 @@ import moment from 'moment';
 import {PageList} from 'models/base';
 import MyMetrics from 'models/mymetrics';
 import Layout from 'components/layout.vue';
+import ReuseList from 'components/reuse/list.vue';
 
 export default {
     name: 'Home',
@@ -40,7 +41,8 @@ export default {
             metrics: new MyMetrics(),
             reuses: new PageList({
                 ns: 'me',
-                fetch: 'my_org_reuses'
+                fetch: 'my_org_reuses',
+                mask: ReuseList.MASK
             }),
             issues: new PageList({
                 ns: 'me',
@@ -88,9 +90,9 @@ export default {
     },
     components: {
         sbox: require('components/containers/small-box.vue'),
-        reuses: require('components/reuse/list.vue'),
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
+        ReuseList,
         Layout
     },
     attached() {
