@@ -103,19 +103,19 @@ class IssuesTest(APITestCase):
         # Creating a closed issue that shouldn't show up in response.
         user = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)
-        issue = DatasetIssue.objects.create(
+        closed_issues = [DatasetIssue.objects.create(
             subject=dataset,
             user=user,
             title='test issue {}'.format(i),
             discussion=[message],
             closed=datetime.now(),
             closed_by=user
-        )
+        )]
 
         response = self.get(url_for('api.issues', id=dataset.id))
         self.assert200(response)
-
-        self.assertEqual(len(response.json['data']), len(open_issues))
+        self.assertEqual(len(response.json['data']), (len(open_issues) +
+                                                      len(closed_issues)))
 
     def test_list_with_close_issues(self):
         dataset = Dataset.objects.create(title='Test dataset')
