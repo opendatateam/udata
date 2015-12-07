@@ -7,7 +7,7 @@
     </div>
 
     <div class="row">
-        <datasets class="col-xs-12" :datasets="datasets"></datasets>
+        <datasets-list class="col-xs-12" :datasets="datasets"></datasets-list>
     </div>
 
     <div class="row">
@@ -26,6 +26,7 @@ import API from 'api';
 import {PageList} from 'models/base';
 import Metrics from 'models/metrics';
 import Layout from 'components/layout.vue';
+import DatasetsList from 'components/dataset/list.vue';
 
 export default  {
     name: 'MeView',
@@ -43,7 +44,8 @@ export default  {
             }),
             datasets: new PageList({
                 ns: 'me',
-                fetch: 'my_datasets'
+                fetch: 'my_datasets',
+                mask: DatasetsList.MASK
             }),
             y: [{
                 id: 'datasets',
@@ -59,10 +61,10 @@ export default  {
     components: {
         profile: require('components/user/profile.vue'),
         chart: require('components/charts/widget.vue'),
-        datasets: require('components/dataset/list.vue'),
         reuses: require('components/reuse/list.vue'),
         apikey: require('components/user/apikey.vue'),
         harvesters: require('components/harvest/sources.vue'),
+        DatasetsList,
         Layout
     },
     attached: function() {

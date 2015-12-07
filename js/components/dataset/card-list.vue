@@ -105,15 +105,15 @@
 
 <script>
 import Sorter from 'mixins/sorter';
+import DatasetCard from 'components/dataset/card.vue';
+import Box from 'components/containers/box.vue';
+import DatasetCompleter from 'components/form/dataset-completer.vue';
 
 export default {
     name: 'datasets-card-list',
     mixins: [Sorter],
-    components: {
-        box: require('components/containers/box.vue'),
-        'dataset-card': require('components/dataset/card.vue'),
-        'dataset-completer': require('components/form/dataset-completer.vue')
-    },
+    MASK: DatasetCard.MASK,
+    components: {Box, DatasetCompleter, DatasetCard},
     props: {
         title: {
             type: String,

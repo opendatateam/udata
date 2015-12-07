@@ -154,18 +154,13 @@ dataset_fields = api.model('Dataset', {
     'page': fields.UrlFor(
         'datasets.show', lambda o: {'dataset': o},
         description='The dataset page URL', required=True),
-})
-
-dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields))
-
-dataset_full_fields = api.inherit('DatasetFull', dataset_fields, {
     'quality': fields.Raw(description='The dataset quality', readonly=True),
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
 })
 
-dataset_full_page_fields = api.model(
-    'DatasetFullPage', fields.pager(dataset_full_fields))
+dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields))
+
 
 dataset_suggestion_fields = api.model('DatasetSuggestion', {
     'id': fields.String(description='The dataset identifier', required=True),

@@ -10,9 +10,6 @@ class ModelResolutionTest(DBTestMixin, TestCase):
     def test_resolve_exact_match(self):
         self.assertEqual(api.resolve_model('Dataset'), Dataset)
 
-    def test_resolve_convention_full(self):
-        self.assertEqual(api.resolve_model('DatasetFull'), Dataset)
-
     def test_resolve_from_dict(self):
         self.assertEqual(api.resolve_model({'class': 'Dataset'}), Dataset)
 

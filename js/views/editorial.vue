@@ -1,10 +1,10 @@
 <template>
 <layout :title="_('Editorial')">
     <div class="row">
-        <datasets class="col-xs-12 col-md-6"
+        <dataset-cards class="col-xs-12 col-md-6"
             :title="_('Featured datasets')"
             :datasets="home_datasets.items">
-        </datasets>
+        </dataset-cards>
         <reuses class="col-xs-12 col-md-6"
             :title="_('Featured reuses')"
             :reuses="home_reuses.items">
@@ -26,6 +26,8 @@ import Topics from 'models/topics';
 import {List} from 'models/base';
 import API from 'api';
 import Layout from 'components/layout.vue';
+import DatasetCards from 'components/dataset/card-list.vue';
+
 
 
 export default {
@@ -34,15 +36,15 @@ export default {
         return {
             posts: new Posts({query: {sort: '-created', page_size: 10}}),
             topics: new Topics({query: {sort: '-created', page_size: 10}}),
-            home_datasets: new List({ns: 'site', fetch: 'get_home_datasets'}),
+            home_datasets: new List({ns: 'site', fetch: 'get_home_datasets', mask: DatasetCards.MASK}),
             home_reuses: new List({ns: 'site', fetch: 'get_home_reuses'})
         };
     },
     components: {
-        datasets: require('components/dataset/card-list.vue'),
         reuses: require('components/reuse/card-list.vue'),
         posts: require('components/post/list.vue'),
         topics: require('components/topic/list.vue'),
+        DatasetCards,
         Layout
     },
     events: {

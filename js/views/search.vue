@@ -1,7 +1,7 @@
 <template>
 <layout :title="_('Search in your data: {q}', {q: $route.query.q})">
     <div class="row" v-if="datasets.loading || datasets.has_data">
-        <datasets class="col-xs-12" :datasets="datasets"></datasets>
+        <datasets-list class="col-xs-12" :datasets="datasets"></datasets-list>
     </div>
     <div class="row" v-if="communities.loading || communities.has_data">
         <communities class="col-xs-12" :communities="communities"></communities>
@@ -26,15 +26,16 @@
 <script>
 import {PageList} from 'models/base';
 import Layout from 'components/layout.vue';
+import DatasetsList from 'components/dataset/list.vue';
 
 export default {
     name: 'SearchView',
     components: {
-        datasets: require('components/dataset/list.vue'),
         communities: require('components/dataset/communityresource/list.vue'),
         reuses: require('components/reuse/list.vue'),
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
+        DatasetsList,
         Layout
     },
     computed: {
@@ -49,7 +50,8 @@ export default {
         return {
             datasets: new PageList({
                 ns: 'me',
-                fetch: 'my_org_datasets'
+                fetch: 'my_org_datasets',
+                mask: DatasetsList.MASK
             }),
             communities: new PageList({
                 ns: 'me',

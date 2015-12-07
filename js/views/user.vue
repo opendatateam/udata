@@ -7,7 +7,7 @@
     </div>
 
     <div class="row">
-        <datasets class="col-xs-12" :datasets="datasets"></datasets>
+        <datasets-list class="col-xs-12" :datasets="datasets"></datasets-list>
     </div>
 
     <div class="row">
@@ -32,6 +32,7 @@ import Datasets from 'models/datasets';
 import Metrics from 'models/metrics';
 import CommunityResources from 'models/communityresources';
 import Layout from 'components/layout.vue';
+import DatasetsList from 'components/dataset/list.vue';
 
 export default {
     name: 'user-view',
@@ -45,7 +46,7 @@ export default {
                 }
             }),
             reuses: new Reuses({query: {sort: '-created', page_size: 10}}),
-            datasets: new Datasets({query: {sort: '-created', page_size: 10}}),
+            datasets: new Datasets({query: {sort: '-created', page_size: 10}, mask: DatasetsList.MASK}),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
             y: [{
                 id: 'datasets',
@@ -59,10 +60,10 @@ export default {
     components: {
         profile: require('components/user/profile.vue'),
         chart: require('components/charts/widget.vue'),
-        datasets: require('components/dataset/list.vue'),
         reuses: require('components/reuse/list.vue'),
         harvesters: require('components/harvest/sources.vue'),
         communities: require('components/dataset/communityresource/list.vue'),
+        DatasetsList,
         Layout
     },
     watch: {

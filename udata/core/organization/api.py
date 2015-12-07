@@ -32,7 +32,7 @@ from .api_fields import (
     refuse_membership_fields,
 )
 
-from udata.core.dataset.api_fields import dataset_full_fields
+from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.models import Dataset
 from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.models import Discussion
@@ -354,7 +354,7 @@ class AvatarAPI(API):
 @ns.route('/<org:org>/datasets/', endpoint='org_datasets')
 class OrgDatasetsAPI(API):
     @api.doc('list_organization_datasets')
-    @api.marshal_list_with(dataset_full_fields)
+    @api.marshal_list_with(dataset_fields)
     def get(self, org):
         '''List organization datasets (including private ones when member)'''
         qs = Dataset.objects.owned_by(org)

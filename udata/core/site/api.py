@@ -9,7 +9,7 @@ from udata.api import api, API, fields
 from udata.auth import admin_permission
 from udata.models import Dataset, Reuse
 
-from udata.core.dataset.api_fields import dataset_ref_fields
+from udata.core.dataset.api_fields import dataset_fields
 from udata.core.reuse.api_fields import reuse_ref_fields
 
 from .views import current_site
@@ -36,8 +36,8 @@ class SiteAPI(API):
 @api.route('/site/home/datasets/', endpoint='home_datasets')
 class SiteHomeDatasetsAPI(API):
     @api.doc('get_home_datasets')
-    @api.secure(admin_permission)
-    @api.marshal_list_with(dataset_ref_fields)
+    # @api.secure(admin_permission)
+    @api.marshal_list_with(dataset_fields)
     def get(self):
         '''List homepage datasets'''
         return current_site.settings.home_datasets
@@ -45,7 +45,7 @@ class SiteHomeDatasetsAPI(API):
     @api.secure(admin_permission)
     @api.doc('set_home_datasets')
     @api.expect(([str], 'Dataset IDs to put in homepage'))
-    @api.marshal_list_with(dataset_ref_fields)
+    @api.marshal_list_with(dataset_fields)
     def put(self):
         '''Set the homepage datasets editorial selection'''
         if not isinstance(request.json, list):

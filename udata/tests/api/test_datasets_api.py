@@ -48,17 +48,6 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(response.json['data']), len(datasets))
         self.assertFalse('quality' in response.json['data'][0])
 
-    def test_dataset_full_api_list(self):
-        '''It should fetch a dataset list from the API'''
-        with self.autoindex():
-            datasets = [DatasetFactory(resources=[ResourceFactory()])
-                        for i in range(2)]
-
-        response = self.get(url_for('api.datasets_full'))
-        self.assert200(response)
-        self.assertEqual(len(response.json['data']), len(datasets))
-        self.assertTrue('quality' in response.json['data'][0])
-
     def test_dataset_api_list_with_extra_filter(self):
         '''It should fetch a dataset list from the API filtering on extras'''
         with self.autoindex():
@@ -213,21 +202,6 @@ class DatasetAPITest(APITestCase):
 
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.spatial.geom, SAMPLE_GEOM)
-
-    def test_dataset_api_retrieve_full(self):
-        '''It should retrieve a full dataset (quality) from the API.'''
-        user = self.login()
-        dataset = DatasetFactory(owner=user, description='')
-        response = self.get(url_for('api.dataset_full', dataset=dataset))
-        self.assert200(response)
-        self.assertEqual(response.json['quality'], {'score': 0})
-        dataset.description = 'b' * 42
-        dataset.save()
-        response = self.get(url_for('api.dataset_full', dataset=dataset))
-        self.assertEqual(response.json['quality'], {
-            'score': 0,
-            'description_length': 42
-        })
 
     @attr('update')
     def test_dataset_api_update(self):

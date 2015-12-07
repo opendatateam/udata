@@ -9,9 +9,9 @@
     </div>
     <div class="row">
         <reuse-details :reuse="reuse" class="col-xs-12 col-md-6"></reuse-details>
-        <datasets id="datasets-list" :datasets="reuse.datasets"
+        <dataset-cards id="datasets-list" :datasets="reuse.datasets"
             class="col-xs-12 col-md-6">
-        </datasets>
+        </dataset-cards>
     </div>
 
     <div class="row">
@@ -39,6 +39,9 @@ import Vue from 'vue';
 import Issues from 'models/issues';
 import Discussions from 'models/discussions';
 import Layout from 'components/layout.vue';
+import DatasetCards from 'components/dataset/card-list.vue';
+
+const MASK = `datasets{${DatasetCards.MASK}},*`;
 
 export default {
     name: 'ReuseView',
@@ -67,7 +70,7 @@ export default {
         }
 
         return {
-            reuse: new Reuse(),
+            reuse: new Reuse({mask: MASK}),
             metrics: new Metrics({query: {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')
@@ -116,10 +119,10 @@ export default {
         sbox: require('components/containers/small-box.vue'),
         chart: require('components/charts/widget.vue'),
         'reuse-details': require('components/reuse/details.vue'),
-        datasets: require('components/dataset/card-list.vue'),
         followers: require('components/follow/list.vue'),
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
+        DatasetCards,
         Layout
     },
     events: {

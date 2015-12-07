@@ -64,7 +64,7 @@
 import moment from 'moment';
 import API from 'api';
 import Vue from 'vue';
-import DatasetFull from 'models/dataset_full';
+import Dataset from 'models/dataset';
 import Discussions from 'models/discussions';
 import Followers from 'models/followers';
 import Issues from 'models/issues';
@@ -102,7 +102,7 @@ export default {
         }
 
         return {
-            dataset: new DatasetFull(),
+            dataset: new Dataset(),
             metrics: new Metrics({query: {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')

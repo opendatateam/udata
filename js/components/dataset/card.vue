@@ -18,12 +18,12 @@
     </div>
     <footer>
         <ul>
-            <li v-if="dataset.spatial && dataset.spatial.territories && dataset.spatial.territories.length > 0">
+            <li v-if="dataset.spatial && dataset.spatial.zones && dataset.spatial.zones.length > 0">
                 <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     :title="_('Territorial coverage')">
                     <span class="fa fa-map-marker fa-fw"></span>
-                    {{ dataset.spatial.territories[0].name }}
+                    {{ dataset.spatial.zones[0].name }}
                 </a>
             </li>
             <li v-if="dataset.metrics">
@@ -92,12 +92,15 @@ import DatasetFilters from 'components/dataset/filters';
 import placeholders from 'helpers/placeholders';
 import config from 'config';
 
+const MASK = 'id,title,description,spatial{zones,granularity},metrics,organization,frequency,temporal_coverage';
+
 export default {
+    MASK,
     mixins: [DatasetFilters],
     props: {
         dataset: {
             type: Object,
-            default: function() {return new Dataset();}
+            default: function() {return new Dataset({mask: MASK});}
         },
         datasetid: null,
         reactive: {

@@ -10,7 +10,7 @@ from udata.models import (
 )
 
 from udata.core.dataset.api_fields import (
-    community_resource_fields, dataset_full_fields
+    community_resource_fields, dataset_fields
 )
 from udata.core.followers.api import FollowAPI
 from udata.core.issues.actions import issues_for
@@ -88,7 +88,7 @@ class MyReusesAPI(API):
 class MyDatasetsAPI(API):
     @api.secure
     @api.doc('my_datasets')
-    @api.marshal_list_with(dataset_full_fields)
+    @api.marshal_list_with(dataset_fields)
     def get(self):
         '''List all my datasets (including private ones)'''
         return list(Dataset.objects.owned_by(current_user.id))
@@ -108,7 +108,7 @@ class MyMetricsAPI(API):
 class MyOrgDatasetsAPI(API):
     @api.secure
     @api.doc('my_org_datasets', parser=filter_parser)
-    @api.marshal_list_with(dataset_full_fields)
+    @api.marshal_list_with(dataset_fields)
     def get(self):
         '''List all datasets related to me and my organizations.'''
         q = filter_parser.parse_args().get('q')

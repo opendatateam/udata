@@ -12,7 +12,7 @@
     </div>
 
     <div class="row">
-        <datasets id="datasets" class="col-xs-12" :datasets="datasets"></datasets>
+        <datasets-list id="datasets" class="col-xs-12" :datasets="datasets"></datasets-list>
     </div>
     <div class="row">
         <reuses id="reuses" class="col-xs-12" :reuses="reuses"></reuses>
@@ -37,7 +37,7 @@
 import moment from 'moment';
 
 import Reuses from 'models/reuses';
-import DatasetsFull from 'models/datasets_full';
+import Datasets from 'models/datasets';
 import Metrics from 'models/metrics';
 import Issues from 'models/issues';
 import Discussions from 'models/discussions';
@@ -45,6 +45,7 @@ import Users from 'models/users';
 import Organizations from 'models/organizations';
 import CommunityResources from 'models/communityresources';
 import Layout from 'components/layout.vue';
+import DatasetsList from 'components/dataset/list.vue';
 
 export default {
     name: 'SiteView',
@@ -60,7 +61,7 @@ export default {
                 }
             }),
             reuses: new Reuses({query: {sort: '-created', page_size: 10}}),
-            datasets: new DatasetsFull({query: {sort: '-created', page_size: 10}}),
+            datasets: new Datasets({query: {sort: '-created', page_size: 10}, mask: DatasetsList.MASK}),
             organizations: new Organizations({query: {sort: '-created', page_size: 10}}),
             users: new Users({query: {sort: '-created', page_size: 10}}),
             issues: new Issues({query: {sort: '-created', page_size: 10}}),
@@ -116,7 +117,6 @@ export default {
     components: {
         sbox: require('components/containers/small-box.vue'),
         chart: require('components/charts/widget.vue'),
-        datasets: require('components/dataset/list.vue'),
         reuses: require('components/reuse/list.vue'),
         organizations: require('components/organization/list.vue'),
         users: require('components/user/list.vue'),
@@ -125,6 +125,7 @@ export default {
         community: require('components/dataset/communityresource/list.vue'),
         posts: require('components/post/list.vue'),
         topics: require('components/topic/list.vue'),
+        DatasetsList,
         Layout
     },
     methods: {
