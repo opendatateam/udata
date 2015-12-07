@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 from flask.ext.security import current_user
+from flask_restful.inputs import boolean
 
 from udata.api import api, API, fields
 from udata.models import Dataset, DatasetIssue, Reuse, ReuseIssue
@@ -60,8 +61,9 @@ parser.add_argument(
     'sort', type=str, default='-created', location='args',
     help='The sorting attribute')
 parser.add_argument(
-    'closed', type=bool, default=False, location='args',
-    help='Filter closed issues')
+    'closed', type=boolean, location='args',
+    help='Filter closed issues. Filters issues on their closed status'
+    ' if specified')
 parser.add_argument(
     'for', type=str, location='args', action='append',
     help='Filter issues for a given subject')
@@ -126,8 +128,10 @@ class IssuesAPI(API):
         issues = Issue.objects
         if args['for']:
             issues = issues(subject__in=args['for'])
-        if not args['closed']:
+        if args['closed'] is False:
             issues = issues(closed=None)
+        elif args['closed'] is True:
+            issues = issues(closed__ne=None)
         return (issues.order_by(args['sort'])
                       .paginate(args['page'], args['page_size']))
 
