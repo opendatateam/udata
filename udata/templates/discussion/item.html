@@ -29,6 +29,7 @@
         </p>
     </div>
 {% endfor %}
+{% if not discussion.closed %}
 <a class="list-group-item add new-comment list-group-indent list-group-thread-{{ discussion.id }} hidden animated"
     data-discussion-id="{{ discussion.id }}"
     href="#">
@@ -37,6 +38,7 @@
         {{ _('Add a comment') }}
     </h4>
 </a>
+{% endif %}
 <div class="list-group-item list-group-form list-group-indent list-group-form-{{ discussion.id }} hidden animated"
     data-discussion-id="{{ discussion.id }}"
     id="discussion-{{ loop_index }}-{{ discussion.discussion|length + 1 }}">
