@@ -26,7 +26,7 @@
     {% block extra_css %}{% endblock %}
 
     <link rel="theme-static-root" href="{{ theme_static('') }}" />
-    <link rel="static-root" href="{{ static('') }}" />
+    <link rel="static-root" href="{{ static('', _burst=False) }}" />
     <link rel="api-root" href="{{ url_for('api.root') }}" />
     <link rel="api-specs" href="{{ url_for('api.specs', _external=True) }}">
 
@@ -40,6 +40,7 @@
         data-roles="{{ current_user.roles|join(',') }}"
     />
     {% endif %}
+    <meta name="territory-enabled" content="{{ config.ACTIVATE_TERRITORIES }}">
 
     {# ATOM Feeds #}
     <link href="{{ url_for('datasets.recent_feed') }}"

@@ -63,10 +63,10 @@ def register_commands(manager):
         name = 'udata.ext.{0}.commands'.format(plugin)
         try:
             __import__(name)
-        except ImportError:
-            pass
+        except ImportError as e:
+            log.warning('Error importing %s: %s', name, e)
         except Exception as e:
-            log.error('Error importing %s: %s', name, e)
+            log.error('Error during import of %s: %s', name, e)
 
 
 def run_manager(config='udata.settings.Defaults'):

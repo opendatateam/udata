@@ -191,3 +191,11 @@ def badge_factory(model):
         kind = FuzzyChoice(model.__badges__.keys())
 
     return BadgeFactory
+
+
+class GeoZoneFactory(MongoEngineFactory):
+    class Meta:
+        model = models.GeoZone
+
+    geom = factory.LazyAttribute(
+        lambda o: [[[[1, 1], [1, 1]], [[1, 1], [1, 1]]]])

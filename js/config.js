@@ -8,5 +8,6 @@ export default {
     lang: $('html').attr('lang') || 'en',
     debug: DEBUG,
     collapse_width: 992,
-    theme_static: $('link[rel=theme-static]').attr('href')
+    theme_static: $('link[rel=theme-static]').attr('href'),
+    territory_enabled: $('meta[name=territory-enabled]').attr('content') ? $('meta[name=territory-enabled]').attr('content').toLowerCase() === 'true' : false
 };

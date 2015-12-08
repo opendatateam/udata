@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
+import importlib
 import logging
 
 from collections import Iterable
@@ -171,6 +171,7 @@ from udata.core.post.models import *
 from udata.core.jobs.models import *
 
 from udata.features.transfer.models import *
+from udata.features.territories.models import *
 
 
 def init_app(app):
@@ -180,8 +181,10 @@ def init_app(app):
     for plugin in app.config['PLUGINS']:
         name = 'udata.ext.{0}.models'.format(plugin)
         try:
-            __import__(name)
-        except ImportError:
-            pass
+            module_obj = importlib.import_module(name)
+            for item in getattr(module_obj, '__all__'):
+                globals()[item] = getattr(module_obj, item)
+        except ImportError as e:
+            log.warning('Error importing %s: %s', name, e)
         except Exception as e:
-            log.error('Error importing %s: %s', name, e)
+            log.error('Error during import of %s: %s', name, e)

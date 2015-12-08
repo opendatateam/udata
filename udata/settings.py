@@ -92,6 +92,8 @@ class Defaults(object):
 
     HARVEST_PREVIEW_MAX_ITEMS = 20
 
+    ACTIVATE_TERRITORIES = False
+
     # CROQUEMORT = {
     #     'url': 'http://localhost:8000',
     #     'delay': 1,
@@ -128,7 +130,6 @@ class Testing(object):
     DEBUG_TOOLBAR = False
     SERVER_NAME = 'localhost'
     DEFAULT_LANGUAGE = 'en'
-
 
 
 class Debug(Defaults):
