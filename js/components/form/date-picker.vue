@@ -8,25 +8,22 @@
 </style>
 
 <template>
-<div class="input-group dropdown date-picker" v-class="open: picking">
+<div class="input-group dropdown date-picker" :class="{ 'open': picking }">
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
-    <input type="text" class="form-control" v-el="input"
-        v-on="focus: onFocus, blur: onBlur"
-        v-attr="
-            placeholder: placeholder,
-            required: required,
-            value: value|dateFormatted,
-            readonly: readonly
-        "></input>
+    <input type="text" class="form-control" v-el:input
+        @focus="onFocus"
+        @blur="onBlur"
+        :placeholder="placeholder"
+        :required="required"
+        :value="value|dateFormatted"
+        :readonly="readonly"></input>
     <div class="dropdown-menu dropdown-menu-right">
-        <calendar selected="{{value}}"></calendar>
+        <calendar :selected="value"></calendar>
     </div>
-    <input type="hidden" v-el="hidden"
-        v-attr="
-            id: field.id,
-            name: serializable ? field.id : '',
-            value: value
-        "></input>
+    <input type="hidden" v-el:hidden
+        :id="field.id"
+        :name="serializable ? field.id : ''"
+        :value="value"></input>
 </div>
 </template>
 
@@ -40,14 +37,18 @@ export default {
     name: 'date-picker',
     replace: true,
     mixins: [require('components/form/base-field').FieldComponentMixin],
-    props: ['serializable'],
+    props: {
+        serializable: {
+            type: Boolean,
+            default: true
+        }
+    },
     components: {
         calendar: require('components/calendar.vue')
     },
     data: function() {
         return {
             picking: false,
-            serializable: true
         };
     },
     filters: {
@@ -60,14 +61,16 @@ export default {
     },
     events: {
         'calendar:date:selected': function(date) {
-            this.$$.input.value = date.format(this.field.format || DEFAULT_FORMAT);
-            this.$$.hidden.value = date.format(ISO_FORMAT);
+            this.$els.input.value = date.format(this.field.format || DEFAULT_FORMAT);
+            this.$els.hidden.value = date.format(ISO_FORMAT);
             this.picking = false;
+            return true;
         },
         'calendar:date:cleared': function() {
-            this.$$.input.value = '';
-            this.$$.hidden.value = '';
+            this.$els.input.value = '';
+            this.$els.hidden.value = '';
             this.picking = false;
+            return true;
         }
     },
     methods: {

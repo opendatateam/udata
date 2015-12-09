@@ -16,12 +16,9 @@ export default {
     name: 'datatable-cell',
     default: '',
     replace: true,
-    props: ['field', 'item'],
-    data: function() {
-        return {
-            item: {},
-            field: {}
-        };
+    props: {
+        field: Object,
+        item: Object
     },
     computed: {
         value: function() {

@@ -1,12 +1,11 @@
 <template>
 <input type="text" class="form-control"
-    v-attr="
-        id: field && field.id || '',
-        name: field && field.id || '',
-        placeholder: placeholder || '',
-        required: required,
-        value: value | lst2str,
-        readonly: readonly || false"
+    :id="field && field.id || ''"
+    :name="field && field.id || ''"
+    :placeholder="placeholder || ''"
+    :required="required"
+    :value="value | lst2str"
+    :readonly="readonly || false"
     />
 </template>
 
@@ -43,7 +42,7 @@ export default {
     replace: true,
     mixins: [require('components/form/base-field').FieldComponentMixin],
     computed: {
-        selectize_options: function() {
+        selectize_options() {
             var opts = this.$options.selectize;
 
             return $.extend({},
@@ -62,11 +61,16 @@ export default {
             );
         }
     },
+    events: {
+        'form:beforeDestroy': function() {
+            this.destroy();
+        }
+    },
     filters: {
         lst2str
     },
     methods: {
-        load_suggestions: function(query, callback) {
+        load_suggestions(query, callback) {
             if (!query.length) return callback();
 
             API[this.$options.ns][this.$options.endpoint]({
@@ -82,6 +86,12 @@ export default {
                 log.error('Unable to fetch completion', message);
                 callback();
             });
+        },
+        destroy() {
+            if (this.selectize) {
+                this.selectize.destroy();
+                this.selectize = undefined;
+            }
         }
     },
     watch: {
@@ -94,16 +104,13 @@ export default {
             }
         }
     },
-    ready: function() {
+    ready() {
         if (!this.field || !this.field.readonly) {
             this.selectize = $(this.$el).selectize(this.selectize_options)[0].selectize;
         }
     },
-    beforeDestroy: function() {
-        if (this.selectize) {
-            this.selectize.destroy();
-            this.selectize = undefined;
-        }
+    beforeDestroy() {
+        this.destroy();
     }
 };
 </script>

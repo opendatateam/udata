@@ -1,31 +1,36 @@
 <template>
+<layout :title="_('Site')">
     <div class="row">
-        <sbox class="col-lg-3 col-xs-6" v-repeat="boxes"></sbox>
+        <sbox class="col-lg-3 col-xs-6" v-for="b in boxes"
+            :value="b.value" :label="b.label" :color="b.color"
+            :icon="b.icon" :target="b.target">
+        </sbox>
     </div>
     <div class="row">
-        <chart title="Traffic" metrics="{{metrics}}" class="col-xs-12"
-            x="date" y="{{y}}"></chart>
+        <chart title="Traffic" :metrics="metrics" class="col-xs-12"
+            x="date" :y="y"></chart>
     </div>
 
     <div class="row">
-        <datasets id="datasets" class="col-xs-12" datasets="{{datasets}}"></datasets>
+        <datasets id="datasets" class="col-xs-12" :datasets="datasets"></datasets>
     </div>
     <div class="row">
-        <reuses id="reuses" class="col-xs-12" reuses="{{reuses}}"></reuses>
+        <reuses id="reuses" class="col-xs-12" :reuses="reuses"></reuses>
     </div>
     <div class="row">
-        <organizations id="organizations" class="col-xs-12" organizations="{{organizations}}"></organizations>
+        <organizations id="organizations" class="col-xs-12" :organizations="organizations"></organizations>
     </div>
     <div class="row">
-        <users id="users" class="col-xs-12" users="{{users}}"></users>
+        <users id="users" class="col-xs-12" :users="users"></users>
     </div>
     <div class="row">
-        <issues class="col-xs-12 col-md-6" issues="{{issues}}"></issues>
-        <discussions class="col-xs-12 col-md-6" discussions="{{discussions}}"></discussions>
+        <issues class="col-xs-12 col-md-6" :issues="issues"></issues>
+        <discussions class="col-xs-12 col-md-6" :discussions="discussions"></discussions>
     </div>
     <div class="row">
-        <community class="col-xs-12" communities="{{communities}}"></community>
+        <community class="col-xs-12" :communities="communities"></community>
     </div>
+</layout>
 </template>
 
 <script>
@@ -39,8 +44,9 @@ import Discussions from 'models/discussions';
 import Users from 'models/users';
 import Organizations from 'models/organizations';
 import CommunityResources from 'models/communityresources';
+import Layout from 'components/layout.vue';
 
-module.exports = {
+export default {
     name: 'SiteView',
     data: function() {
         return {
@@ -76,11 +82,6 @@ module.exports = {
         };
     },
     computed: {
-        meta: function() {
-            return {
-                title: 'Site'
-            };
-        },
         boxes: function() {
             if (!this.$root.site.metrics) {
                 return [];
@@ -121,9 +122,10 @@ module.exports = {
         users: require('components/user/list.vue'),
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
-        community: require('components/communityresource/list.vue'),
+        community: require('components/dataset/communityresource/list.vue'),
         posts: require('components/post/list.vue'),
-        topics: require('components/topic/list.vue')
+        topics: require('components/topic/list.vue'),
+        Layout
     },
     methods: {
         fetch_metrics: function() {

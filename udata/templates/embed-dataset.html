@@ -1,0 +1,81 @@
+<style scoped>
+    .dataset-card {
+        border: 1px solid #EEE;
+        border-bottom: 2px solid #4FA9E5;
+        max-width: {{ width }}px;
+        max-height: {{ height }}px;
+        min-width: 320px;
+        min-height: 90px;
+        padding: 5px;
+        clear: both;
+        margin: 1em;
+        background: #FFF;
+    }
+    .dataset-card:hover {
+        background: #EEE;
+    }
+    .dataset-card * {
+        font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+        font-size: 15px;
+        text-shadow: none;
+        border: none;
+        background-image: none;
+        line-height: 1.4;
+    }
+    .dataset-card .dataset-title {
+        margin: 0;
+        text-align: left;
+        border: none;
+    }
+    .dataset-card .dataset-organization {
+        float: left;
+        left: 0;
+    }
+    .dataset-card .dataset-link {
+        color: #5E5E5E;
+        padding: 5px 0;
+        font-weight: bold;
+        text-decoration: none;
+    }
+    .dataset-card .dataset-link:hover, .dataset-card:hover .dataset-link {
+        text-decoration: underline;
+    }
+    .dataset-card .dataset-image {
+        border: 1px solid #EEE;
+        padding: 1px;
+        margin: 0 5px 0 0;
+        background: #FFF;
+    }
+    .dataset-card .dataset-description {
+        margin: 0 5px;
+        padding: 5px;
+    }
+</style>
+<div class="dataset-card">
+    {% if item.organization %}
+        <a class="dataset-organization"
+           href="{{ item.organization.external_url }}">
+            <img class="dataset-image"
+                 src="{{ item.organization.logo(70, external=True) }}"
+                 alt="{{ item.organization.name }}"
+                 height="70" width="70">
+        </a>
+    {% else %}
+        <a class="dataset-organization"
+           href="{{ item.external_url }}">
+            <img class="dataset-image"
+                 src="{{ ''|placeholder(external=True) }}"
+                 alt=""
+                 height="70" width="70">
+        </a>
+    {% endif %}
+    <h4 class="dataset-title">
+        <a class="dataset-link"
+           href="{{ item.external_url }}" title="{{ item.title }}">
+            {{ item.title }}
+        </a>
+    </h4>
+    <p class="dataset-description">
+        {{ item.description | mdstrip(250) }}
+    </p>
+</div>

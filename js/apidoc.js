@@ -16,7 +16,6 @@ require('swaggerui/lib/jquery.wiggle.min');
 require('script!swaggerui/lib/jquery.ba-bbq.min');
 
 require('expose?Handlebars!handlebars');
-require('expose?marked!marked');
 require('script!swaggerui/lib/underscore-min');
 require('script!swaggerui/lib/backbone-min');
 

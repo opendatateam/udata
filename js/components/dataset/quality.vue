@@ -1,6 +1,6 @@
 <template>
-<box-container title="{{title}}" icon="thumbs-up" boxclass="box-solid" v-if="quality">
-    <doughnut score="{{ quality.score + 1 }}"></doughnut>
+<box :title="title" icon="thumbs-up" boxclass="box-solid" v-if="quality">
+    <doughnut :score="quality.score + 1"></doughnut>
     <h4>{{ _('The aim of that box is to help you improve the quality of the (meta)data associated to your dataset.') }}</h4>
     <p>{{ _('It gives you an overview of what will be useful for contributors to find and reuse your data.') }}</p>
 
@@ -83,7 +83,7 @@
             <strong>{{ _('Some of your resources may have broken links or temporary unavailability. Try to fix it as fast as you can (see the list below).') }}</strong>
         </p>
     </div>
-</box-container>
+</box>
 </template>
 
 <script>
@@ -96,8 +96,8 @@ export default {
         };
     },
     components: {
-        'box-container': require('components/containers/box.vue'),
-        'doughnut': require('components/charts/doughnut.vue')
+        box: require('components/containers/box.vue'),
+        doughnut: require('components/charts/doughnut.vue')
     }
 };
 </script>

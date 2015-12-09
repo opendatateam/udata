@@ -1,24 +1,21 @@
 <template>
-    <datatable title="{{ title }}" icon="retweet"
+    <datatable :title="title" icon="retweet"
         boxclass="reuses-widget"
-        fields="{{ fields }}" p="{{ reuses }}"
-        downloads="{{downloads}}"
-        empty="{{ _('No reuse') }}">
+        :fields="fields" :p="reuses"
+        :downloads="downloads"
+        :empty="_('No reuse')">
     </datatable>
 </template>
 
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'reuses-widget',
     components: {
-         'datatable': require('components/datatable/widget.vue')
+         datatable: require('components/datatable/widget.vue')
     },
-    data: function() {
+    data() {
         return {
-            title: this._('Reuses'),
             fields: [{
                 key: 'image',
                 type: 'avatar',
@@ -72,10 +69,24 @@ module.exports = {
         };
     },
     events: {
-        'datatable:item:click': function(reuse) {
+        'datatable:item:click'(reuse) {
             this.$go('/reuse/' + reuse.id + '/');
         }
     },
-    props: ['reuses', 'downloads']
+    props: {
+        reuses: null,
+        downloads: {
+            type: Array,
+            default() {
+                return [];
+            }
+        },
+        title: {
+            type: String,
+            default() {
+                return this._('Reuses');
+            }
+        }
+    }
 };
 </script>

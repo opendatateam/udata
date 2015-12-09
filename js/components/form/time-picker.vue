@@ -9,25 +9,22 @@
 </style>
 
 <template>
-<div class="input-group dropdown time-picker" v-class="open: picking">
+<div class="input-group dropdown time-picker" :class="{ 'open': picking }">
     <span class="input-group-addon"><span class="fa fa-clock-o"></span></span>
-    <input type="text" class="form-control" v-el="input"
-        v-on="focus: onFocus, blur: onBlur"
-        v-attr="
-            placeholder: placeholder,
-            required: required,
-            value: value|timeFormatted,
-            readonly: readonly || false
-        "></input>
+    <input type="text" class="form-control" v-el:input
+        @focus="onFocus"
+        @blur="onBlur"
+        :placeholder="placeholder"
+        :required="required"
+        :value="value|timeFormatted"
+        :readonly="readonly || false"></input>
     <div class="dropdown-menu dropdown-menu-right">
-        <time-widget selected="{{value}}"></time-widget>
+        <time-widget :selected="value"></time-widget>
     </div>
-    <input type="hidden" v-el="hidden"
-        v-attr="
-            id: field.id,
-            name: serializable ? field.id : '',
-            value: value
-        "></input>
+    <input type="hidden" v-el:hidden
+        :id="field.id"
+        :name="serializable ? field.id : ''"
+        :value="value"></input>
 </div>
 </template>
 
@@ -57,8 +54,8 @@ export default {
     },
     events: {
         'calendar:time:selected': function(date) {
-            this.$$.input.value = date.format(this.field.format || DEFAULT_FORMAT);
-            this.$$.hidden.value = date.format(ISO_FORMAT);
+            this.$els.input.value = date.format(this.field.format || DEFAULT_FORMAT);
+            this.$els.hidden.value = date.format(ISO_FORMAT);
             this.picking = true;
         },
 

@@ -1,5 +1,5 @@
 <template>
-<time datetime="{{value}}" class="timeago">{{value | timeago}}</time>
+<time :datetime="value" class="timeago">{{value | timeago}}</time>
 </template>
 
 <script>

@@ -10,14 +10,12 @@
 
 <template>
 <div class="datetime-picker">
-    <date-picker v-ref="date" serializable="{{ false }}"></date-picker>
-    <time-picker v-ref="time" serializable="{{ false }}"></time-picker>
-    <input type="hidden" v-el="hidden"
-        v-attr="
-            id: field.id,
-            name: field.id,
-            value: value
-        "></input>
+    <date-picker v-ref:date :serializable="false"></date-picker>
+    <time-picker v-ref:time :serializable="false"></time-picker>
+    <input type="hidden" v-el:hidden
+        :id="field.id"
+        :name="field.id"
+        :value="value"></input>
 </div>
 </template>
 
@@ -30,17 +28,19 @@ export default {
     mixins: [require('components/form/base-field').FieldComponentMixin],
     events: {
         'calendar:date:selected': function(datetime) {
-            let value = moment(this.$$.hidden.value);
+            let value = moment(this.$els.hidden.value);
             value.year(datetime.year());
             value.month(datetime.month());
             value.date(datetime.date());
-            this.$$.hidden.value = value.format();
+            this.$els.hidden.value = value.format();
+            return true;
         },
         'calendar:time:selected': function(datetime) {
-            let value = moment(this.$$.hidden.value);
+            let value = moment(this.$els.hidden.value);
             value.hour(datetime.hour());
             value.minute(datetime.minute());
-            this.$$.hidden.value = value.format();
+            this.$els.hidden.value = value.format();
+            return true;
         }
     }
 };

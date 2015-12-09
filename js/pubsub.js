@@ -72,7 +72,7 @@ export class PubSub {
     /**
      * Publish some data on a topic
      * @param  {String}    topic The topic identifier
-     * @param  {...[type]} args  A vriable list of arguments to pass to the listeners
+     * @param  {...[type]} args  A variable list of arguments to pass to the listeners
      */
     publish(topic, ...args) {
         // If the topic doesn't exist, or there's no listeners in queue, just leave

@@ -179,6 +179,7 @@ def assets():
     '''Install and compile assets'''
     header('Building static assets')
     nrun('webpack -c --progress --config webpack.config.prod.js', pty=True)
+    nrun('webpack -c --progress --config webpack.widgets.config.js', pty=True)
 
 
 @task(i18nc, assets)
@@ -191,3 +192,9 @@ def dist():
 @task
 def watch():
     nrun('webpack -d -c --progress --watch', pty=True)
+
+
+@task
+def widgets():
+    nrun('webpack -d -c --progress --watch --config webpack.widgets.config.js',
+         pty=True)

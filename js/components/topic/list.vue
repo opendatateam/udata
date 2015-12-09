@@ -1,12 +1,12 @@
 <template>
-    <datatable title="{{ title }}" icon="book"
+    <datatable :title="title" icon="book"
         boxclass="topics-widget"
-        fields="{{ fields }}"
-        p="{{ topics }}"
-        empty="{{ _('No topic') }}">
-        <footer>
+        :fields="fields"
+        :p="topics"
+        :empty="_('No topic')">
+        <footer slot="footer">
             <button type="button" class="btn btn-primary btn-flat btn-sm"
-                v-route="/topic/new/">
+                v-link.literal="/topic/new/">
                 <span class="fa fa-fw fa-plus"></span>
                 <span v-i18n="New"></span>
             </button>
@@ -16,12 +16,10 @@
 
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'topics-widget',
     components: {
-         'datatable': require('components/datatable/widget.vue')
+         datatable: require('components/datatable/widget.vue')
     },
     data: function() {
         return {

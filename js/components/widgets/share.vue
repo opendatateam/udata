@@ -3,19 +3,19 @@
     <div class="col-xs-12 text-center">
         <div class="btn-group btn-group-lg">
             <a class="btn btn-link" title="Google+"
-                href="https://plus.google.com/share?url={{url}}" target="_blank">
+                :href="google" target="_blank">
                 <span class="fa fa-2x fa-google-plus"></span>
             </a>
             <a class="btn btn-link" title="Twitter"
-                href="https://twitter.com/home?status={{title}}%20-%20{{url}}" target="_blank">
+                :href="twitter" target="_blank">
                 <span class="fa fa-2x fa-twitter"></span>
             </a>
             <a class="btn btn-link" title="Facebook"
-                href="https://www.facebook.com/sharer/sharer.php?u={{url}}" target="_blank">
+                :href="facebook" target="_blank">
                 <span class="fa fa-2x fa-facebook"></span>
             </a>
             <a class="btn btn-link" title="LinkedIn"
-                href="https://www.linkedin.com/shareArticle?mini=true&url={{url}}&title={{title}}" target="_blank">
+                :href="linkedin" target="_blank">
                 <span class="fa fa-2x fa-linkedin"></span>
             </a>
         </div>
@@ -25,6 +25,20 @@
 
 <script>
 export default {
-    props: ['title', 'url']
+    props: ['title', 'url'],
+    computed: {
+        google() {
+            return `https://plus.google.com/share?url=${this.url}`;
+        },
+        twitter() {
+            return `https://twitter.com/home?status=${this.title}%20-%20${this.url}`;
+        },
+        facebook() {
+            return `https://www.facebook.com/sharer/sharer.php?u=${this.url}`;
+        },
+        linkedin() {
+            return `https://www.linkedin.com/shareArticle?mini=true&url=${this.url}&title=${this.title}`;
+        }
+    }
 };
 </script>

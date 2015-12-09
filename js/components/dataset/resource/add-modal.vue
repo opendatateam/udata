@@ -1,16 +1,16 @@
 <template>
-<modal class="modal-primary add-resource-modal" v-ref="modal"
-    title="{{ _('Add a resource') }}">
+<modal class="modal-primary add-resource-modal" v-ref:modal
+    :title="_('Add a resource')">
 
     <div class="modal-body">
-        <resource-form v-ref="form" dataset="{{dataset}}"></resource-form>
+        <resource-form v-ref:form :dataset="dataset"></resource-form>
     </div>
 
     <footer class="modal-footer text-center">
         <button type="button"
             class="btn btn-primary btn-flat pointer pull-left"
-            v-show="$.form.resource.filetype"
-            v-on="click: save">
+            v-show="$refs.form.resource.filetype"
+            @click="save">
             {{ _('Save') }}
         </button>
         <button type="button" class="btn btn-outline btn-flat pointer"
@@ -36,9 +36,9 @@ export default {
     },
     methods: {
         save: function() {
-            if (this.$.form.validate()) {
-                this.dataset.save_resource(this.$.form.serialize());
-                this.$.modal.close();
+            if (this.$refs.form.validate()) {
+                this.dataset.save_resource(this.$refs.form.serialize());
+                this.$refs.modal.close();
                 return true;
             }
         }

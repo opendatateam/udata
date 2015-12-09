@@ -1,9 +1,9 @@
 <template>
-    <datatable title="{{ title }}" icon="cubes"
+    <datatable :title="title" icon="cubes"
         boxclass="datasets-widget"
-        fields="{{ fields }}" p="{{ datasets }}"
-        downloads="{{downloads}}"
-        empty="{{ _('No dataset') }}">
+        :fields="fields" :p="datasets"
+        :downloads="downloads"
+        :empty="_('No dataset')">
     </datatable>
 </template>
 
@@ -11,11 +11,10 @@
 export default {
     name: 'datasets-widget',
     components: {
-        'datatable': require('components/datatable/widget.vue')
+        datatable: require('components/datatable/widget.vue')
     },
-    data: function() {
+    data() {
         return {
-            title: this._('Datasets'),
             fields: [{
                 label: this._('Title'),
                 key: 'title',
@@ -30,9 +29,16 @@ export default {
                 type: 'timeago',
                 width: 120
             }, {
-                label: this._('Modification'),
+                label: this._('Metadata update'),
                 key: 'last_modified',
                 sort: 'last_modified',
+                align: 'left',
+                type: 'timeago',
+                width: 120
+            }, {
+                label: this._('Data update'),
+                key: 'last_update',
+                sort: 'last_update',
                 align: 'left',
                 type: 'timeago',
                 width: 120
@@ -68,15 +74,28 @@ export default {
                 align: 'center',
                 type: 'progress-bars',
                 width: 125
-            }],
-            downloads: []
+            }]
         };
     },
     events: {
-        'datatable:item:click': function(dataset) {
+        'datatable:item:click'(dataset) {
             this.$go('/dataset/' + dataset.id + '/');
         }
     },
-    props: ['datasets', 'downloads']
+    props: {
+        datasets: null,
+        downloads: {
+            type: Array,
+            default() {
+                return [];
+            }
+        },
+        title: {
+            type: String,
+            default() {
+                return this._('Datasets');
+            }
+        }
+    }
 };
 </script>

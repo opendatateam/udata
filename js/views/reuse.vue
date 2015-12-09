@@ -1,25 +1,33 @@
 <template>
+<layout :title="reuse.title || ''" :subtitle="_('Reuse')"
+    :actions="actions" :badges="badges" :page="reuse.page || ''">
     <div class="row">
-        <small-box class="col-lg-4 col-xs-6" v-repeat="boxes"></small-box>
+        <sbox class="col-lg-4 col-xs-6" v-for="b in boxes"
+            :value="b.value" :label="b.label" :color="b.color"
+            :icon="b.icon" :target="b.target">
+        </sbox>
     </div>
     <div class="row">
-        <reuse-details reuse="{{reuse}}" class="col-xs-12 col-md-6"></reuse-details>
-        <datasets-list datasets="{{reuse.datasets}}" class="col-xs-12 col-md-6"></datasets-list>
-    </div>
-
-    <div class="row">
-        <chart title="Traffic" metrics="{{metrics}}" class="col-xs-12"
-            x="date" y="{{y}}"></chart>
-    </div>
-
-    <div class="row">
-        <issues id="issues-widget" class="col-xs-12 col-md-6" issues="{{issues}}"></issues>
-        <discussions id="discussions-widget" class="col-xs-12 col-md-6" discussions="{{discussions}}"></discussions>
+        <reuse-details :reuse="reuse" class="col-xs-12 col-md-6"></reuse-details>
+        <datasets id="datasets-list" :datasets="reuse.datasets"
+            class="col-xs-12 col-md-6">
+        </datasets>
     </div>
 
     <div class="row">
-        <followers-widget id="followers-widget" class="col-xs-12" followers="{{followers}}"></followers-widget>
+        <chart id="traffic" title="Traffic" :metrics="metrics" class="col-xs-12"
+            x="date" :y="y"></chart>
     </div>
+
+    <div class="row">
+        <issues id="issues-widget" class="col-xs-12 col-md-6" :issues="issues"></issues>
+        <discussions id="discussions-widget" class="col-xs-12 col-md-6" :discussions="discussions"></discussions>
+    </div>
+
+    <div class="row">
+        <followers id="followers-widget" class="col-xs-12" :followers="followers"></followers>
+    </div>
+</layout>
 </template>
 
 <script>
@@ -30,6 +38,7 @@ import Metrics from 'models/metrics';
 import Vue from 'vue';
 import Issues from 'models/issues';
 import Discussions from 'models/discussions';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'ReuseView',
@@ -37,11 +46,11 @@ export default {
         let actions = [{
                 label: this._('Transfer'),
                 icon: 'send',
-                method: 'transfer_request'
+                method: this.transfer_request
             },{
                 label: this._('Delete'),
                 icon: 'trash',
-                method: 'confirm_delete'
+                method: this.confirm_delete
             }];
 
         if (this.$root.me.is_admin) {
@@ -49,12 +58,11 @@ export default {
             actions.push({
                 label: this._('Badges'),
                 icon: 'bookmark',
-                method: 'setBadges'
+                method: this.setBadges
             });
         }
 
         return {
-            reuse_id: null,
             reuse: new Reuse(),
             metrics: new Metrics({query: {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
@@ -63,13 +71,8 @@ export default {
             followers: new Followers({ns: 'reuses', query: {page_size: 10}}),
             issues: new Issues({query: {sort: '-created', page_size: 10}}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
-            meta: {
-                title: null,
-                page: null,
-                subtitle: this._('Reuse'),
-                actions: actions,
-                badges: []
-            },
+            actions: actions,
+            badges: [],
             y: [{
                 id: 'views',
                 label: this._('Views')
@@ -88,7 +91,8 @@ export default {
                 value: this.reuse.metrics.datasets || 0,
                 label: this.reuse.metrics.datasets ? this._('Datasets') : this._('Dataset'),
                 icon: 'retweet',
-                color: 'green'
+                color: 'green',
+                target: '#datasets-list'
             }, {
                 value: this.reuse.metrics.followers || 0,
                 label: this.reuse.metrics.followers ? this._('Followers') : this._('Follower'),
@@ -99,18 +103,20 @@ export default {
                 value: this.reuse.metrics.views || 0,
                 label: this._('Views'),
                 icon: 'eye',
-                color: 'purple'
+                color: 'purple',
+                target: '#traffic'
             }];
         }
     },
     components: {
-        'small-box': require('components/containers/small-box.vue'),
+        sbox: require('components/containers/small-box.vue'),
+        chart: require('components/charts/widget.vue'),
         'reuse-details': require('components/reuse/details.vue'),
-        'chart': require('components/charts/widget.vue'),
-        'datasets-list': require('components/dataset/card-list.vue'),
-        'followers-widget': require('components/follow/list.vue'),
-        'issues': require('components/issues/list.vue'),
-        'discussions': require('components/discussions/list.vue')
+        datasets: require('components/dataset/card-list.vue'),
+        followers: require('components/follow/list.vue'),
+        issues: require('components/issues/list.vue'),
+        discussions: require('components/discussions/list.vue'),
+        Layout
     },
     events: {
         'dataset-card-list:submit': function(ids) {
@@ -121,41 +127,31 @@ export default {
     methods: {
         confirm_delete: function() {
             this.$root.$modal(
-                {data: {reuse: this.reuse}},
-                Vue.extend(require('components/reuse/delete-modal.vue'))
+                require('components/reuse/delete-modal.vue'),
+                {reuse: this.reuse}
             );
         },
         transfer_request: function() {
             this.$root.$modal(
-                {data: {subject: this.reuse}},
-                Vue.extend(require('components/transfer/request-modal.vue'))
+                require('components/transfer/request-modal.vue'),
+                {subject: this.reuse}
             );
         },
         setBadges: function() {
             this.$root.$modal(
-                {data: {subject: this.reuse}},
-                Vue.extend(require('components/badges/modal.vue'))
+                require('components/badges/modal.vue'),
+                {subject: this.reuse}
             );
         }
     },
+    route: {
+        data() {
+            if (this.$route.params.oid !== this.reuse.id) {
+                this.reuse.fetch(this.$route.params.oid);
+            }
+        }
+    },
     watch: {
-        reuse_id: function(id) {
-            if (id) {
-                this.reuse.fetch(id);
-            }
-        },
-        'reuse.title': function(title) {
-            if (title) {
-                this.meta.title = title;
-                this.$dispatch('meta:updated', this.meta);
-            }
-        },
-        'reuse.page': function(page) {
-            if (page) {
-                this.meta.page = page;
-                this.$dispatch('meta:updated', this.meta);
-            }
-        },
         'reuse.id': function(id) {
             if (id) {
                 this.metrics.fetch({id: id});
@@ -166,7 +162,7 @@ export default {
         },
         'reuse.deleted': function(deleted) {
             if (deleted) {
-                this.meta.badges = [{
+                this.badges = [{
                     class: 'danger',
                     label: this._('Deleted')
                 }];

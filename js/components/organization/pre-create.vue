@@ -13,7 +13,7 @@
         <form class="search-form">
             <div class="input-group">
                 <input type="text" name="search" class="form-control"
-                    placeholder="{{ _('Search') }}" v-model="search_query">
+                    :placeholder="_('Search')" v-model="search_query">
                 <div class="input-group-btn">
                     <button type="submit" name="submit" class="btn btn-warning btn-flat">
                         <span class="fa fa-search"></span>
@@ -24,11 +24,9 @@
     </div>
 </div>
 <div class="row" v-if="completions">
-    <!--div class="col-xs-12 col-md-6" v-repeat="org:completions">
-        <img v-attr="src: org.image_url || placeholder" width="30" height="30" />
-        {{org.name}}
-    </div-->
-    <organization-card class="col-xs-12 col-md-4 col-lg-3" v-repeat="organization:organizations"></organization-card>
+    <organization-card class="col-xs-12 col-md-4 col-lg-3"
+        v-for="organization in organizations" :organization="organization">
+    </organization-card>
 </div>
 <div class="row" v-if="search_query && !organizations.length">
     <p class="col-xs-12 lead text-center">
@@ -38,14 +36,12 @@
 </template>
 
 <script>
-'use strict';
+import API from 'api';
+import log from 'logger';
+import Organization from 'models/organization';
+import placeholders from 'helpers/placeholders';
 
-var API = require('api'),
-    log = require('logger'),
-    Organization = require('models/organization'),
-    placeholders = require('helpers/placeholders');
-
-module.exports = {
+export default {
     components: {
         'organization-card': require('components/organization/card.vue')
     },
@@ -72,9 +68,9 @@ module.exports = {
             API.organizations.suggest_organizations({
                 q: query,
                 size: 9
-            }, function(data) {
+            }, (data) => {
                 this.completions = data.obj;
-            }.bind(this), function(message) {
+            }, function(message) {
                 log.error('Unable to fetch organizations', message);
             });
         }

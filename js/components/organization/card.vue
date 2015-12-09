@@ -1,18 +1,18 @@
 <template>
 <div class="card organization-card"
-    v-class="pointer: clickable, selected:selected" v-on="click: click">
+    :class="{ 'pointer': clickable, 'selected': selected }" @click="click">
     <a class="card-logo">
-        <img alt="{{ organization.name }}" v-attr="src: logo">
+        <img :alt="organization.name" :src="logo">
     </a>
     <img v-if="organization.public_service"
-        v-attr="src: certified_stamp" alt="certified"
+        :src="certified_stamp" alt="certified"
         class="certified" rel="popover"
-        data-title="{{ _('Certified public service') }}"
-        data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
+        :data-title="_('Certified public service')"
+        :data-content="_('The identity of this public service public is certified by Etalab')"
         data-container="body" data-trigger="hover"/>
     <div class="card-body">
         <h4>
-            <a title="{{organization.name}}">
+            <a :title="organization.name">
                 {{ organization.name | truncate 120 }}
             </a>
         </h4>
@@ -22,7 +22,7 @@
             <li v-if="organization.metrics">
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Datasets') }}">
+                    :title="_('Datasets')">
                     <span class="fa fa-cubes fa-fw"></span>
                     {{ organization.metrics.datasets || 0 }}
                 </a>
@@ -30,7 +30,7 @@
             <li v-if="organization.metrics">
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Reuses') }}">
+                    :title="_('Reuses')">
                     <span class="fa fa-retweet fa-fw"></span>
                     {{ organization.metrics.reuses || 0 }}
                 </a>
@@ -38,7 +38,7 @@
             <li v-if="organization.metrics">
                 <a class="btn btn-xs" rel="tooltip"
                     data-placement="top" data-container="body"
-                    title="{{ _('Followers') }}">
+                    :title="_('Followers')">
                     <span class="fa fa-star fa-fw"></span>
                     {{ organization.metrics.followers || 0 }}
                 </a>
@@ -47,27 +47,35 @@
     </footer>
 
     <a v-if="organization.description" class="rollover fade in"
-        title="{{ organization.name }}">
+        :title="organization.name">
         {{{ organization.description | markdown 180 }}}
     </a>
 </div>
 </template>
 
 <script>
-'use strict';
+import Organization from 'models/organization';
+import placeholders from 'helpers/placeholders';
+import config from 'config';
 
-var Organization = require('models/organization'),
-    placeholders = require('helpers/placeholders'),
-    config = require('config');
-
-module.exports = {
-    data: function() {
-        return {
-            clickable: true,
-            selected: false
-        };
+export default {
+    props: {
+        organization: {
+            type: Object,
+            default: function() {
+                return new Organization();
+            }
+        },
+        orgid: null,
+        clickable: {
+            type: Boolean,
+            default: true
+        },
+        selected: {
+            type: Boolean,
+            default: false
+        }
     },
-    props: ['organization', 'orgid', 'clickable', 'selected'],
     computed: {
         logo: function() {
             if (!this.organization ||  !this.organization.logo) {
@@ -83,9 +91,6 @@ module.exports = {
         }
     },
     created: function() {
-        if (!this.organization) {
-            this.organization = new Organization();
-        }
         if (this.orgid) {
             this.organization.fetch(this.orgid);
         }

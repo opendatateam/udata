@@ -38,17 +38,13 @@
 
     {% if can_edit_resource(resource, dataset) %}
         {% if resource.from_community %}
-            {% if resource.owner %}
-                {% set edit_url = url_for('admin.index', path='user/{id}/'.format(id=resource.owner.id), **{'community_id': resource.id}) %}
-            {% else %}
-                {% set edit_url = url_for('admin.index', path='organization/{id}/'.format(id=resource.organization.id), **{'community_id': resource.id}) %}
-            {% endif %}
+            {% set edit_path = 'dataset/{id}/community-resource/{rid}' %}
         {% else %}
-            {% set edit_url = url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'resource_id': resource.id}) %}
+            {% set edit_path = 'dataset/{id}/resource/{rid}' %}
         {% endif %}
         <div class="btn-group btn-group-xs tools">
             <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
-                href="{{ edit_url }}">
+                href="{{ url_for('admin.index', path=edit_path.format(id=dataset.id, rid=resource.id)) }}">
                 <span class="glyphicon glyphicon-edit"></span>
             </a>
         </div>

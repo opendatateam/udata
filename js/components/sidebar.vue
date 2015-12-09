@@ -3,9 +3,10 @@
     <section class="sidebar">
         <!-- search form -->
         <div class="sidebar-form">
-            <form method="get">
+            <form method="get" @submit.prevent="onSearch">
                 <div class="input-group">
-                    <input type="text" name="q" class="form-control" placeholder="{{'Search'|i18n}}..." />
+                    <input type="text" name="q" class="form-control"
+                        :placeholder="search_label" v-el:terms />
                     <span class="input-group-btn">
                         <button type="submit" name="search" id="search-btn" class="btn btn-flat">
                             <i class="fa fa-search"></i>
@@ -17,7 +18,14 @@
         <!-- End form -->
 
         <ul class="sidebar-menu">
-            <sidebar-menu-item v-repeat="menu"></sidebar-menu-item>
+            <sidebar-menu-item v-for="item in menu"
+                :label="item.label"
+                :icon="item.icon"
+                :image="item.image"
+                :route="item.route"
+                :badge="item.badge"
+                :children="item.children">
+            </sidebar-menu-item>
         </ul>
 
     </section>
@@ -53,12 +61,17 @@ export default {
     components: {
         'sidebar-menu-item': require('components/sidebar-menu-item.vue')
     },
+    data() {
+        return {
+            search_label: this._('Search') + '...'
+        };
+    },
     computed: {
-        menu: function() {
+        menu() {
             var menu = MENU.concat(this.organizations_menus);
             return this.$root.me.has_role('admin') ? menu.concat(bottom_menu) : menu;
         },
-        organizations_menus: function() {
+        organizations_menus() {
             if (!this.$root.me.organizations) {
                 return [];
             }
@@ -69,6 +82,14 @@ export default {
                     'route': '/organization/' + org.id + '/'
                 };
             });
+        }
+    },
+    methods: {
+        onSearch() {
+            const terms = this.$els.terms.value;
+            if (terms && terms.length > 2) {
+                this.$go({name: 'search', query: { terms: terms }});
+            }
         }
     }
 };

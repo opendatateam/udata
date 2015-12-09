@@ -139,10 +139,6 @@ dataset_fields = api.model('Dataset', {
         description='The producer organization'),
     'owner': fields.Nested(
         user_ref_fields, allow_null=True, description='The user information'),
-    'supplier': fields.Nested(
-        org_ref_fields, allow_null=True,
-        description=('The supplyer organization '
-                     '(if different from the producer)')),
     'temporal_coverage': fields.Nested(
         temporal_coverage_fields, allow_null=True,
         description='The temporal coverage'),
@@ -164,6 +160,8 @@ dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields))
 
 dataset_full_fields = api.inherit('DatasetFull', dataset_fields, {
     'quality': fields.Raw(description='The dataset quality', readonly=True),
+    'last_update': fields.ISODateTime(
+        description='The resources last modification date', required=True),
 })
 
 dataset_full_page_fields = api.model(

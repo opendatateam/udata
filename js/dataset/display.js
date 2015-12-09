@@ -18,6 +18,7 @@ import 'widgets/follow-btn';
 import 'widgets/issues-btn';
 import 'widgets/discussions-btn';
 import 'widgets/share-btn';
+import 'widgets/integrate-btn';
 
 let user_reuses;
 

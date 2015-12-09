@@ -10,7 +10,7 @@
         <form class="search-form">
             <div class="input-group">
                 <input type="text" name="search" class="form-control"
-                    placeholder="{{ _('Search') }}" v-model="search_query">
+                    :placeholder="_('Search')" v-model="search_query">
                 <div class="input-group-btn">
                     <button type="submit" name="submit" class="btn btn-warning btn-flat">
                         <span class="fa fa-search"></span>
@@ -21,7 +21,7 @@
     </div>
 </div>
 <div class="row user-card-filter-cardlist" v-if="completions">
-    <card class="{{cardclass}}" v-repeat="user:users"></card>
+    <card :class="cardclass" v-for="user in users" :user="user"></card>
 </div>
 <div class="row" v-if="!search_query">
     <p class="col-xs-12 lead text-center">
@@ -44,14 +44,18 @@ export default {
     components: {
         card: require('components/user/card.vue')
     },
+    props: {
+        cardclass: {
+            type: String,
+            default: 'col-xs-12 col-md-4 col-lg-3'
+        }
+    },
     data: function() {
         return {
             search_query: '',
-            cardclass: 'col-xs-12 col-md-4 col-lg-3',
             completions: []
         };
     },
-    props: ['cardclass'],
     computed: {
         users: function() {
             return this.completions.map(function(user) {

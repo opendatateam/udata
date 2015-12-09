@@ -17,15 +17,14 @@
             <h3 class="box-title">{{title}}</h3>
             <div class="box-tools"></div>
         </header>
-        <div class="box-body no-padding" v-el="container"></div>
+        <div class="box-body no-padding" v-el:container></div>
     </div>
 </template>
 
 <script>
-'use strict';
+import L from 'leaflet';
 
-var L = require('leaflet'),
-    ATTRIBUTIONS = [
+const ATTRIBUTIONS = [
         '&copy;',
         '<a href="http://openstreetmap.org">OpenStreetMap</a>',
         '/',
@@ -36,15 +35,17 @@ var L = require('leaflet'),
     TILES_CONFIG = {subdomains: '1234', attribution: ATTRIBUTIONS},
     INITIAL_SETTINGS = {center: [42, 2.4], zoom: 4, zoomControl: false};
 
-module.exports = {
-    data: function() {
-        return {
-            icon: 'globe'
-        };
+export default {
+    props: {
+        title: String,
+        icon: {
+            type: String,
+            default: 'globe'
+        },
+        geojson: null
     },
-    props: ['title', 'icon', 'geojson'],
     ready: function() {
-        this.map = L.map(this.$$.container, INITIAL_SETTINGS);
+        this.map = L.map(this.$els.container, INITIAL_SETTINGS);
 
         // Disable drag and zoom handlers.
         // this.map.dragging.disable();

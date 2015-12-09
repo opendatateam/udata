@@ -1,13 +1,13 @@
 <template>
-    <a class="small-box pointer" v-class="bgcolor" v-on="click: click">
+    <a class="small-box pointer" :class="[ bgcolor ]" @click="click">
         <div class="inner">
             <h3>{{value | numbers}}</h3>
             <p>{{label}}</p>
         </div>
         <div class="icon">
-            <i class="fa" v-class="faicon"></i>
+            <i class="fa" :class="[ faicon ]"></i>
         </div>
-        <div class="small-box-footer">
+        <div v-if="target" class="small-box-footer">
             <span v-i18n="More infos"></span>
             <i class="fa fa-arrow-circle-right"></i>
         </div>
@@ -17,14 +17,15 @@
 <script>
 export default {
     name: 'small-box',
-    data: function() {
-        return {
-            value: 0,
-            label: '',
-            color: 'aqua',
-            icon: '',
-            target: null
-        };
+    props: {
+        value: null,  // No type check
+        label: String,
+        icon: String,
+        color: {
+            type: String,
+            default: 'aqua'
+        },
+        target: null  // No type check
     },
     computed:  {
         bgcolor: function() {

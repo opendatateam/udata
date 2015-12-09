@@ -7,7 +7,7 @@ import placeholders from 'helpers/placeholders';
 
 const template = `<div class="selectize-option">
     <div class="logo pull-left">
-        <img src="{{user.avatar || user.avatar_url || placeholder}}"/>
+        <img :src="user.avatar || user.avatar_url || placeholder"/>
     </div>
     {{user.first_name}} {{user.last_name}}
 </div>`;

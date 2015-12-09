@@ -7,16 +7,16 @@
         <p>{{ _('You should communicate about it.') }}</p>
     </div>
 </div>
-<share-widget url="{{reuse.page}}" title="{{reuse.title}}"></share-widget>
+<share :url="reuse.page" :title="reuse.title"></share>
 
 <div class="row">
     <div class="col-xs-12 col-md-6 text-center">
-        <button class="btn btn-primary btn-flat" v-route="/reuse/{{reuse.id}}/">
+        <button class="btn btn-primary btn-flat" v-link="'/reuse/'+reuse.id+'/'">
             {{ _('See in the administration') }}
         </button>
     </div>
     <div class="col-xs-12 col-md-6 text-center">
-        <a class="btn btn-primary btn-flat" href="{{reuse.page}}">
+        <a class="btn btn-primary btn-flat" :href="reuse.page">
             {{ _('See on the site') }}
         </a>
     </div>
@@ -27,12 +27,11 @@
 import Reuse from 'models/reuse';
 
 export default {
-    props: ['reuse'],
-    data: function() {
-        return {reuse: {}};
+    props: {
+        reuse: Object
     },
     components: {
-        'share-widget': require('components/widgets/share.vue')
+        share: require('components/widgets/share.vue')
     }
 };
 </script>

@@ -1,5 +1,5 @@
 <template>
-    <box-container title="OAuth" icon="plug"
+    <box title="OAuth" icon="plug"
         boxclass="box-info"
         bodyclass="table-responsive no-padding">
         <table class="table table-hover">
@@ -11,25 +11,24 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-repeat="clients" v-route="/oauth/clients/{{id}}/">
-                    <td>{{name}}</td>
-                    <td>{{description}}</td>
+                <tr v-for="client in clients"
+                    v-link="'/oauth/clients/' + client.id + '/'">
+                    <td>{{client.name}}</td>
+                    <td>{{client.description}}</td>
                     <td>
-                        <i class="fa fa-fw fa-{{enabled ? 'play' : 'stop'}} text-{{enabled ? 'green' : 'red'}}"></i>
+                        <i class="fa fa-fw fa-{{client.enabled ? 'play' : 'stop'}} text-{{client.enabled ? 'green' : 'red'}}"></i>
                     </td>
                 </tr>
             </tbody>
         </table>
-    </box-container>
+    </box>
 </template>
 
 <script>
-'use strict';
-
-module.exports = {
+export default {
     name: 'oauth-widget',
     components: {
-        'box-container': require('components/containers/box.vue')
+        box: require('components/containers/box.vue')
     },
     data: function() {
         return {

@@ -5,10 +5,16 @@ from flask.ext.security import current_user
 
 from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, API
-from udata.models import User, FollowUser, Reuse, Dataset
+from udata.models import (
+    CommunityResource, Dataset, Discussion, FollowUser, Issue, Reuse, User
+)
 
-from udata.core.dataset.api_fields import dataset_full_fields
+from udata.core.dataset.api_fields import (
+    community_resource_fields, dataset_full_fields
+)
 from udata.core.followers.api import FollowAPI
+from udata.core.issues.api import issue_fields
+from udata.core.discussions.api import discussion_fields
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
@@ -17,10 +23,10 @@ from udata.core.storages.api import (
 from .api_fields import (
     apikey_fields,
     me_fields,
+    me_metrics_fields,
     user_fields,
     user_page_fields,
     user_suggestion_fields,
-    notifications_fields,
 )
 from .forms import UserProfileForm
 from .search import UserSearch
@@ -28,6 +34,10 @@ from .search import UserSearch
 ns = api.namespace('users', 'User related operations')
 me = api.namespace('me', 'Connected user related operations')
 search_parser = api.search_parser(UserSearch)
+filter_parser = api.parser()
+filter_parser.add_argument(
+    'q', type=str, help='The string to filter items',
+    location='args', required=False)
 
 
 @me.route('/', endpoint='me')
@@ -80,6 +90,95 @@ class MyDatasetsAPI(API):
     def get(self):
         '''List all my datasets (including private ones)'''
         return list(Dataset.objects.owned_by(current_user.id))
+
+
+@me.route('/metrics/', endpoint='my_metrics')
+class MyMetricsAPI(API):
+    @api.secure
+    @api.doc('my_metrics')
+    @api.marshal_list_with(me_metrics_fields)
+    def get(self):
+        '''Fetch the current user (me) metrics'''
+        return current_user._get_current_object()
+
+
+@me.route('/org_datasets/', endpoint='my_org_datasets')
+class MyOrgDatasetsAPI(API):
+    @api.secure
+    @api.doc('my_org_datasets', parser=filter_parser)
+    @api.marshal_list_with(dataset_full_fields)
+    def get(self):
+        '''List all datasets related to me and my organizations.'''
+        q = filter_parser.parse_args().get('q')
+        owners = list(current_user.organizations) + [current_user.id]
+        datasets = Dataset.objects.owned_by(*owners).order_by('-last_modified')
+        if q:
+            datasets = datasets.filter(title__icontains=q.decode('utf-8'))
+        return list(datasets)
+
+
+@me.route('/org_community_resources/', endpoint='my_org_community_resources')
+class MyOrgCommunityResourcesAPI(API):
+    @api.secure
+    @api.doc('my_org_community_resources', parser=filter_parser)
+    @api.marshal_list_with(community_resource_fields)
+    def get(self):
+        '''List all community resources related to me and my organizations.'''
+        q = filter_parser.parse_args().get('q')
+        owners = list(current_user.organizations) + [current_user.id]
+        community_resources = (CommunityResource.objects.owned_by(*owners)
+                               .order_by('-last_modified'))
+        if q:
+            community_resources = community_resources.filter(
+                title__icontains=q.decode('utf-8'))
+        return list(community_resources)
+
+
+@me.route('/org_reuses/', endpoint='my_org_reuses')
+class MyOrgReusesAPI(API):
+    @api.secure
+    @api.doc('my_org_reuses', parser=filter_parser)
+    @api.marshal_list_with(reuse_fields)
+    def get(self):
+        '''List all reuses related to me and my organizations.'''
+        q = filter_parser.parse_args().get('q')
+        owners = list(current_user.organizations) + [current_user.id]
+        reuses = Reuse.objects.owned_by(*owners).order_by('-last_modified')
+        if q:
+            reuses = reuses.filter(title__icontains=q.decode('utf-8'))
+        return list(reuses)
+
+
+@me.route('/org_issues/', endpoint='my_org_issues')
+class MyOrgIssuesAPI(API):
+    @api.secure
+    @api.doc('my_org_issues', parser=filter_parser)
+    @api.marshal_list_with(issue_fields)
+    def get(self):
+        '''List all issues related to my organizations.'''
+        q = filter_parser.parse_args().get('q')
+        issues = (Issue.objects.from_organizations(
+            current_user._get_current_object(), *current_user.organizations)
+            .order_by('-created'))
+        if q:
+            issues = issues.filter(title__icontains=q.decode('utf-8'))
+        return list(issues)
+
+
+@me.route('/org_discussions/', endpoint='my_org_discussions')
+class MyOrgDiscussionsAPI(API):
+    @api.secure
+    @api.doc('my_org_discussions', parser=filter_parser)
+    @api.marshal_list_with(discussion_fields)
+    def get(self):
+        '''List all discussions related to my organizations.'''
+        q = filter_parser.parse_args().get('q')
+        discussions = (Discussion.objects.from_organizations(
+            current_user._get_current_object(), *current_user.organizations)
+            .order_by('-created'))
+        if q:
+            discussions = discussions.filter(title__icontains=q.decode('utf-8'))
+        return list(discussions)
 
 
 @me.route('/apikey', endpoint='my_apikey')
@@ -142,7 +241,7 @@ class FollowUserAPI(FollowAPI):
 
 suggest_parser = api.parser()
 suggest_parser.add_argument(
-    'q', type=unicode, help='The string to autocomplete/suggest',
+    'q', type=str, help='The string to autocomplete/suggest',
     location='args', required=True)
 suggest_parser.add_argument(
     'size', type=int, help='The amount of suggestion to fetch',

@@ -2,6 +2,7 @@ import API from 'api';
 import validator from 'models/validator';
 import {pubsub, PubSub} from 'pubsub';
 import Sifter from 'sifter';
+import Vue from 'vue';
 
 export const DEFAULT_PAGE_SIZE = 10;
 
@@ -31,7 +32,7 @@ export class Base {
      * @return {[type]} [description]
      */
     get __class__() {
-        return this.constructor.name
+        return this.constructor.name;
     }
 
     /**
@@ -40,8 +41,9 @@ export class Base {
      * @param {Object} value The property value to set.
      */
     _set(name, value) {
-        if (this.hasOwnProperty('$set')) {
-            this.$set(name, value);
+        if (this.hasOwnProperty('__ob__')) {
+            Vue.set(this, name, value);
+            // this.$set(name, value);
         } else {
             this[name] = value;
         }
@@ -94,15 +96,16 @@ export class Base {
      *
      * @param  {String}   endpoint The API endpoint to call
      * @param  {Object}   data     The data object to submit
-     * @param  {Function} callback The callback function to call on success.
+     * @param  {Function} on_success The callback function to call on success.
+     * @param  {Function} on_error The callback function to call on error.
      */
-    $api(endpoint, data, callback) {
-        var parts = endpoint.split('.'),
-            namespace = parts[0],
-            method = parts[1],
-            operation = API[namespace][method];
+    $api(endpoint, data, on_success, on_error=()=>{}) {
+        let parts = endpoint.split('.');
+        let namespace = parts[0];
+        let method = parts[1];
+        let operation = API[namespace][method];
 
-        return operation(data, callback.bind(this));
+        return operation(data, on_success.bind(this), on_error.bind(this));
     }
 };
 
@@ -136,7 +139,13 @@ export class Model extends Base {
         var schema = this.__schema__
         for (var key in schema.properties) {
             if (schema.properties.hasOwnProperty(key)) {
-                this[key] = schema.required.indexOf(key) >= 0 ? null : undefined;
+                if (schema.properties[key].type == 'array') {
+                    this[key] = []
+                } else if (schema.required.indexOf(key)) {
+                    this[key] = null;
+                } else {
+                    this[key] = undefined;
+                }
             }
         }
         return this;
@@ -180,7 +189,11 @@ export class List extends Base {
 
         this.items = this.$options.data || [];
         this.query = this.$options.query || {};
-        this.loading = this.$options.loading || false;
+        if (this.$options.loading !== undefined) {
+            this.loading = Boolean(this.$options.loading);
+        } else {
+            this.loading = this.$options.data === undefined;
+        }
 
         this.sorted = null;
         this.reversed = false;
@@ -191,6 +204,10 @@ export class List extends Base {
 
     get has_search() {
         return this.$options.search !== undefined;
+    }
+
+    get has_data() {
+        return this.items.length > 0;
     }
 
     get data() {
@@ -346,6 +363,10 @@ export class ModelPage extends Model {
         }).length > 0;
     }
 
+    get has_data() {
+        return this.data && this.data.length;
+    }
+
     /**
      * Fetch page from server.
      * @param  {Object} options An optionnal query object
@@ -443,22 +464,21 @@ export class PageList extends List {
     }
 
     get data() {
-        return super.data.slice(
+        return this.filtered.slice(
             Math.max(this.page - 1, 0) * this.page_size,
             this.page * this.page_size
         );
     }
 
     set data(value) {
-        super.data = value;
+        this._set('filtered', value);
     }
-
     /**
      * Total amount of pages
      * @return {int}
      */
     get pages() {
-        return Math.ceil(super.data.length / this.page_size);
+        return Math.ceil(this.items.length / this.page_size);
     }
 
     /**
@@ -494,5 +514,13 @@ export class PageList extends List {
         this.page = page;
         this.populate();
         return this;
+    }
+
+    /**
+     * Useful to clear the paging after server-based filtering.
+     */
+    on_fetched(data) {
+        super.on_fetched(data);
+        this.page = 1;  // Clear the paging
     }
 };

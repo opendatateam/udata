@@ -80,11 +80,10 @@
 <div class="modal fade user-modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="user-details">
-            <img class="img-circle" v-attr="
-                src: user.avatar || placeholder,
-                alt: user.fullname,
-                title: user.fullname
-                "/>
+            <img class="img-circle"
+                :src="user.avatar || placeholder"
+                :alt="user.fullname"
+                :title="user.fullname"/>
             </div-->
             <div class="user-info-block">
                 <button type="button" class="close" data-dismiss="modal">
@@ -97,31 +96,31 @@
                 </div>
                 <ul class="user-actions clearfix">
                     <li>
-                        <a href="{{user.page}}" class="text-center"
-                            title="{{ _('Profile') }}">
+                        <a :href="user.page" class="text-center"
+                            :title="_('Profile')">
                             <span class="fa fa-2x fa-user"></span>
                         </a>
                     </li>
                     <li>
-                        <a class="text-center pointer" v-on="click: to_dashboard"
-                             title="{{ _('Dashboard') }}">
+                        <a class="text-center pointer" @click="to_dashboard"
+                             :title="_('Dashboard')">
                             <span class="fa fa-2x fa-dashboard"></span>
                         </a>
                     </li>
                 </ul>
                 <div class="user-body" v-show="$options._content">
-                    <content></content>
+                    <slot></slot>
                 </div>
             </div>
         </div>
     </div>
 </div>
 </template>
-<script>
-'use strict';
 
-module.exports = {
+<script>
+export default {
     name: 'user-modal',
+    replace: true,
     mixins: [
         require('mixins/modal')
     ],
@@ -133,7 +132,7 @@ module.exports = {
     },
     methods: {
         to_dashboard: function() {
-            this.hide();
+            this.close();
             this.$go('/user/' + this.user.id);
         }
     }

@@ -1,44 +1,50 @@
 <template>
+<layout :title="org.name || ''" :subtitle="_('Organization')"
+    :actions="actions" :badges="badges" :page="org.page || ''">
     <div class="row">
-        <sbox class="col-lg-3 col-xs-6" v-repeat="boxes"></sbox>
+        <sbox class="col-lg-3 col-xs-6" v-for="b in boxes"
+            :value="b.value" :label="b.label" :color="b.color"
+            :icon="b.icon" :target="b.target">
+        </sbox>
     </div>
     <div class="row">
-        <profile org="{{org}}" class="col-xs-12 col-md-6"></profile>
-        <members org="{{org}}" class="col-xs-12 col-md-6"></members>
+        <profile :org="org" class="col-xs-12 col-md-6"></profile>
+        <members :org="org" class="col-xs-12 col-md-6"></members>
     </div>
 
     <div class="row">
         <chart id="trafic-widget" class="col-xs-12"
-            title="{{charts.traffic.title}}" default="{{charts.traffic.default}}"
-            metrics="{{metrics}}"
-            x="date" y="{{charts.traffic.y}}"
+            :title="charts.traffic.title" :default="charts.traffic.default"
+            :metrics="metrics"
+            x="date" :y="charts.traffic.y"
             >
         </chart>
     </div>
 
     <div class="row">
-        <datasets id="datasets-widget" class="col-xs-12" datasets="{{datasets}}"
-         downloads="{{downloads}}">
+        <datasets id="datasets-widget" class="col-xs-12" :datasets="datasets"
+            :downloads="downloads">
         </datasets>
     </div>
 
     <div class="row">
-        <reuses id="reuses-widget" class="col-xs-12" reuses="{{reuses}}"></reuses>
+        <reuses id="reuses-widget" class="col-xs-12" :reuses="reuses"></reuses>
     </div>
 
     <div class="row">
-        <issues id="issues-widget" class="col-xs-12 col-md-6" issues="{{issues}}"></issues>
-        <discussions id="discussions-widget" class="col-xs-12 col-md-6" discussions="{{discussions}}"></discussions>
+        <issues id="issues-widget" class="col-xs-12 col-md-6" :issues="issues"></issues>
+        <discussions id="discussions-widget" class="col-xs-12 col-md-6" :discussions="discussions"></discussions>
     </div>
 
     <div class="row">
-        <followers id="followers-widget" class="col-xs-12 col-md-6" followers="{{followers}}"></followers>
-        <harvesters id="harvesters-widget" class="col-xs-12 col-md-6" owner="{{org}}"></harvesters>
+        <followers id="followers-widget" class="col-xs-12 col-md-6" :followers="followers"></followers>
+        <harvesters id="harvesters-widget" class="col-xs-12 col-md-6" :owner="org"></harvesters>
     </div>
 
     <div class="row">
-        <communities class="col-xs-12" communities="{{communities}}"></communities>
+        <communities class="col-xs-12" :communities="communities"></communities>
     </div>
+</layout>
 </template>
 
 <script>
@@ -50,6 +56,7 @@ import Metrics from 'models/metrics';
 import Organization from 'models/organization';
 import CommunityResources from 'models/communityresources';
 import {PageList} from 'models/base';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'OrganizationView',
@@ -57,7 +64,7 @@ export default {
         let actions = [{
                 label: this._('Delete'),
                 icon: 'trash',
-                method: 'confirm_delete'
+                method: this.confirm_delete
             }];
 
         if (this.$root.me.is_admin) {
@@ -65,12 +72,11 @@ export default {
             actions.push({
                 label: this._('Badges'),
                 icon: 'bookmark',
-                method: 'setBadges'
+                method: this.setBadges
             });
         }
 
         return {
-            org_id: null,
             org: new Organization(),
             metrics: new Metrics({query: {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
@@ -96,13 +102,8 @@ export default {
             }),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
             followers: new Followers({ns: 'organizations', query: {page_size: 10}}),
-            meta: {
-                title: null,
-                page: null,
-                subtitle: this._('Organization'),
-                actions: actions,
-                badges: []
-            },
+            actions: actions,
+            badges: [],
             charts: {
                 traffic: {
                     title: this._('Traffic'),
@@ -184,7 +185,8 @@ export default {
         issues: require('components/issues/list.vue'),
         discussions: require('components/discussions/list.vue'),
         harvesters: require('components/harvest/sources.vue'),
-        communities: require('components/communityresource/list.vue')
+        communities: require('components/dataset/communityresource/list.vue'),
+        Layout,
     },
     events: {
         'image:saved': function() {
@@ -194,29 +196,25 @@ export default {
     methods: {
         confirm_delete: function() {
             this.$root.$modal(
-                {data: {organization: this.org}},
-                Vue.extend(require('components/organization/delete-modal.vue'))
+                require('components/organization/delete-modal.vue'),
+                {organization: this.org}
             );
         },
         setBadges: function() {
             this.$root.$modal(
-                {data: {subject: this.org}},
-                Vue.extend(require('components/badges/modal.vue'))
+                require('components/badges/modal.vue'),
+                {subject: this.org}
             );
         }
     },
+    route: {
+        data() {
+            if (this.$route.params.oid !== this.org.id) {
+                this.org.fetch(this.$route.params.oid);
+            }
+        }
+    },
     watch: {
-        org_id: function(id) {
-            if (id) {
-                this.org.fetch(id);
-            }
-        },
-        'org.name': function(name) {
-            if (name) {
-                this.meta.title = name;
-                this.$dispatch('meta:updated', this.meta);
-            }
-        },
         'org.id': function(id) {
             if (id) {
                 this.metrics.fetch({id: id});
@@ -233,15 +231,9 @@ export default {
                 this.communities.clear();
             }
         },
-        'org.page': function(page) {
-            if (page) {
-                this.meta.page = page;
-                this.$dispatch('meta:updated', this.meta);
-            }
-        },
         'org.deleted': function(deleted) {
             if (deleted) {
-                this.meta.badges = [{
+                this.badges = [{
                     class: 'danger',
                     label: this._('Deleted')
                 }];

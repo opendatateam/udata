@@ -145,6 +145,14 @@ db = UDataMongoEngine()
 session_interface = MongoEngineSessionInterface(db)
 
 
+class OwnedByQuerySet(db.BaseQuerySet):
+    def owned_by(self, *owners):
+        qs = db.Q()
+        for owner in owners:
+            qs |= db.Q(owner=owner) | db.Q(organization=owner)
+        return self(qs)
+
+
 # Load all core models and mixins
 from udata.core.spatial.models import *
 from udata.core.metrics.models import *

@@ -32,7 +32,7 @@
                 <p>{{ _('or') }}</p>
             </div>
             <div class="text-center col-xs-12">
-                <span class="btn btn-outline btn-flat" v-el="uploadBtn">
+                <span class="btn btn-outline btn-flat" v-el:upload-btn>
                     {{ _('Select a file from your computer') }}
                 </span>
             </div>
@@ -46,7 +46,7 @@
             <span class="info-box-text">{{file.name}}</span>
             <span class="info-box-number">{{file.size | filesize}}</span>
             <div class="progress">
-                <div class="progress-bar" style="width: {{progress}}%"></div>
+                <div class="progress-bar" :style="{width: progress+'%'}"></div>
             </div>
             <span class="progress-description">
             {{progress}}%
@@ -63,9 +63,8 @@
             </div>
         </div>
     </div>
-    <thumbnailer-widget v-ref="thumbnailer"
-        v-if="resizing" src="{{src}}" sizes="{{sizes}}">
-    </thumbnailer-widget>
+    <thumbnailer v-ref:thumbnailer v-if="resizing" :src="src" :sizes="sizes">
+    </thumbnailer>
 </div>
 </template>
 
@@ -80,15 +79,18 @@ export default {
     data: function() {
         return {
             src: null,
-            sizes: [100],
-            // progress: null,
             resizing: false,
-            endpoint: null
         };
     },
-    props: ['endpoint', 'sizes'],
+    props: {
+        endpoint: null,
+        sizes: {
+            type: Array,
+            default: function() {return [100];}
+        }
+    },
     components: {
-        'thumbnailer-widget': require('components/widgets/thumbnailer.vue')
+        thumbnailer: require('components/widgets/thumbnailer.vue')
     },
     computed: {
         file: function() {
@@ -109,9 +111,11 @@ export default {
                 log.warning('File APIs not supported');
                 this.upload();
             }
+            return true;
         },
         'uploader:progress': function(id, uploaded, total) {
             this.progress = Math.round(uploaded * 100 / total);
+            return true;
         },
         'uploader:complete': function(id, response) {
             if (this.HAS_FILE_API) {
@@ -120,14 +124,15 @@ export default {
                 this.src = response.url;
                 this.resizing = true;
             }
+            return true;
         }
     },
     methods: {
         save: function() {
             if (this.HAS_FILE_API) {
                 let data = {};
-                if (this.$.thumbnailer.bbox) {
-                    data.bbox = this.$.thumbnailer.bbox;
+                if (this.$refs.thumbnailer.bbox) {
+                    data.bbox = this.$refs.thumbnailer.bbox;
                 }
                 this.upload(data);
             } else {

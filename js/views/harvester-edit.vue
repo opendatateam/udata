@@ -1,66 +1,57 @@
 <template>
-<div class="row">
-    <div class="col-xs-12">
-        <box>
-            <harvest-form source="{{source}}"></harvest-form>
-        </box>
+<layout :title="source.name || ''" :subtitle="_('Edit')">
+    <div class="row">
+        <div class="col-xs-12">
+            <box>
+                <harvest-form :source="source"></harvest-form>
+            </box>
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col-xs-12">
-        <box title="{{ _('Filters') }}">
-            <mappings-form source="{{source}}"></mappings-form>
-        </box>
+    <div class="row">
+        <div class="col-xs-12">
+            <box :title="_('Filters')">
+                <mappings-form :source="source"></mappings-form>
+            </box>
+        </div>
     </div>
-</div>
-<div class="row">
-    <preview class="col-xs-12" source="{{source}}"></preview>
-</div>
+    <div class="row">
+        <preview class="col-xs-12" :source="source"></preview>
+    </div>
+</layout>
 </template>
 
 <script>
 import HarvestSource from 'models/harvest/source';
 import ItemModal from 'components/harvest/item.vue';
 import Vue from 'vue';
+import Layout from 'components/layout.vue';
 
 export default {
     name: 'HarvesterEditView',
-    props: ['source'],
-    data: function() {
-        return {
-            source: new HarvestSource(),
-            source_id: null,
-            meta: {
-                title: null,
-                subtitle: this._('Edit')
+    props: {
+        source: {
+            type: HarvestSource,
+            default() {
+                return new HarvestSource();
             }
-        };
+        }
     },
     components: {
-        'box': require('components/containers/box.vue'),
+        box: require('components/containers/box.vue'),
         'harvest-form': require('components/harvest/form.vue'),
         'mappings-form': require('components/harvest/mappings-form.vue'),
-        'preview': require('components/harvest/preview.vue'),
+        preview: require('components/harvest/preview.vue'),
+        Layout
     },
     events: {
         'harvest:job:item:selected': function(item) {
-            this.$root.$modal(
-                {data: {item: item}},
-                Vue.extend(ItemModal)
-            );
+            this.$root.$modal(ItemModal, {item: item});
+            return true;
         }
     },
-    watch: {
-        source_id: function(id) {
-            if (id) {
-                this.source.fetch(id);
-            }
-        },
-        'source.name': function(name) {
-            if (name) {
-                this.meta.title = name;
-                this.$dispatch('meta:updated', this.meta);
-            }
+    route: {
+        data() {
+            this.source.fetch(this.$route.params.oid);
         }
     }
 };

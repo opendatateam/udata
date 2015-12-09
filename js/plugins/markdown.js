@@ -1,16 +1,15 @@
-define(['jquery', 'marked', 'helpers/text'], function($, marked, txt) {
+define(['jquery', 'helpers/commonmark', 'helpers/text'], function($, commonmark, txt) {
     'use strict';
 
     return function(Vue, options) {
         options = options || {};
 
         Vue.directive('markdown', {
-            isLiteral: true,
             bind: function() {
                 $(this.el).addClass('markdown');
             },
             update: function(value) {
-                this.el.innerHTML = value ? marked(value) : '';
+                this.el.innerHTML = value ? commonmark(value) : '';
             },
             unbind: function() {
                 $(this.el).removeClass('markdown');
@@ -23,13 +22,11 @@ define(['jquery', 'marked', 'helpers/text'], function($, marked, txt) {
             }
             if (max_length) {
                 var div = document.createElement("div");
-                div.innerHTML = marked(text);
+                div.innerHTML = commonmark(text);
                 return txt.truncate(div.textContent || div.innerText || '', max_length);
             } else {
-                return marked(text);
+                return commonmark(text);
             }
         });
     };
 });
-
-

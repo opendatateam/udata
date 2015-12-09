@@ -20,7 +20,6 @@ class DatasetCsvAdapter(csv.Adapter):
         ('url', 'external_url'),
         ('organization', 'organization.name'),
         ('organization_id', 'organization.id'),
-        'supplier',
         'description',
         'frequency',
         'license',

@@ -31,11 +31,11 @@
 </style>
 
 <template>
-    <box title="{{ title }}" icon="file"
+    <box :title="title" icon="file"
         boxclass="box-solid resources-widget"
         bodyclass="table-responsive no-padding"
         footerclass="text-center"
-        footer="true" empty="{{ _('No resources') }}">
+        :footer="true" :empty="_('No resources')">
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -47,8 +47,8 @@
                     <th width="100" v-i18n="Availability"></th>
                 </tr>
             </thead>
-            <tbody v-el="sortable">
-                <tr v-repeat="file:files" track-by="id">
+            <tbody v-el:sortable>
+                <tr v-for="file in files" track-by="id">
                     <td v-if="reordering"></td>
                     <td>
                         <div class="ellipsis">{{ file.name }}</div>
@@ -60,9 +60,9 @@
                     <td>{{ file.type }}</td>
                     <td>{{ file.size | filesize }}</td>
                 </tr>
-                <tr v-repeat="resource:dataset.resources" v-on="click: display(resource)"
-                    v-class="pointer: !reodering, move: reordering"
-                    data-id="{{resource.id}}">
+                <tr v-for="resource in dataset.resources" @click="display(resource)"
+                    :class="{ 'pointer': !reodering, 'move': reordering }"
+                    :data-id="resource.id">
                     <td v-if="reordering" class="handle">
                         <span class="fa fa-bars"></span>
                     </td>
@@ -70,10 +70,10 @@
                     <td>{{ resource.format }}</td>
                     <td>{{ resource.filesize | filesize }}</td>
                     <td class="text-center">
-                        <span class="badge" v-class="
-                            bg-green: resource.metrics.views > 0,
-                            bg-red: (resource.metrics.views || 0) === 0
-                            ">
+                        <span class="badge" :class="{
+                            'bg-green': resource.metrics.views > 0,
+                            'bg-red': (resource.metrics.views || 0) === 0
+                            }">
                             {{ resource.metrics.views || 0 }}
                         </span>
                     </td>
@@ -90,30 +90,30 @@
         <div class="overlay dropzone" v-if="dropping">
             <span class="fa fa-download fa-2x"></span>
         </div>
-        <footer>
+        <footer slot="footer">
             <button type="button"
                 class="btn btn-primary btn-sm btn-flat pointer"
                 v-show="!reordering"
-                v-on="click: on_new">
+                @click="on_new">
                 <span class="fa fa-fw fa-plus"></span>
                 <span v-i18n="Add"></span>
             </button>
             <button type="button"
                 class="btn btn-primary btn-sm btn-flat pointer"
                 v-show="!reordering && dataset.resources && dataset.resources.length > 1"
-                v-on="click: reorder">
+                @click="reorder">
                 <span class="fa fa-fw fa-sort"></span>
                 <span v-i18n="Reorder"></span>
             </button>
             <button type="button" class="btn btn-success btn-sm btn-flat pointer"
                 v-show="reordering"
-                v-on="click: reorder_done(true)">
+                @click="reorder_done(true)">
                 <span class="fa fa-fw fa-check"></span>
                 <span v-i18n="Apply"></span>
             </button>
             <button type="button" class="btn btn-warning btn-sm btn-flat pointer"
                 v-show="reordering"
-                v-on="click: reorder_done(false)">
+                @click="reorder_done(false)">
                 <span class="fa fa-fw fa-times"></span>
                 <span v-i18n="Cancel"></span>
             </button>
@@ -135,11 +135,14 @@ export default {
         'box': require('components/containers/box.vue'),
         'pagination-widget': require('components/pagination.vue'),
     },
-    data: function() {
+    props: {
+        dataset: {
+            type: Object,
+            required: true
+        }
+    },
+    data() {
         return {
-            // title: Vue._('Resources'),
-            // dropping: false
-            dataset: {},
             reordering: false,
             new_order: []
         };
@@ -149,7 +152,6 @@ export default {
             return this.dropping ? Vue._('Drop resource') : Vue._('Resources');
         }
     },
-    props: ['dataset'],
     events: {
         'uploader:progress': function(id, uploaded, total) {
             this.$find('#progress-' + id)
@@ -161,27 +163,27 @@ export default {
             this.dataset.resources.unshift(response);
         }
     },
-    ready: function() {
+    ready() {
         /* In case of a new resource, we display the appropriated popin
            on load. */
-        if ("new_resource" in this.$router.parameters) {
+        if ("new_resource" in this.$route.query) {
             this.on_new();
         }
     },
     methods: {
-        on_new: function() {
+        on_new() {
             this.$root.$modal(
-                {data: {dataset: this.dataset}},
-                Vue.extend(require('components/dataset/resource/add-modal.vue'))
+                require('components/dataset/resource/add-modal.vue'),
+                {dataset: this.dataset}
             );
         },
-        reorder: function() {
+        reorder() {
             this.$sortable.option('disabled', false);
             this.$dnd.dispose();
             this.reordering = true;
             this._initial_order = this.$sortable.toArray();
         },
-        reorder_done: function(toReorder) {
+        reorder_done(toReorder) {
             this.$sortable.option('disabled', true);
             this.reordering = false;
             this.$dnd.setupExtraDropzone(this.$el);
@@ -191,15 +193,11 @@ export default {
                 this.$sortable.sort(this._initial_order);
             }
         },
-        display: function(resource) {
+        display(resource) {
             if (!this.reordering) {
-                this.$root.$modal(
-                    {data: {
-                        dataset: this.dataset,
-                        resource: new Resource({data: resource})
-                    }},
-                    Vue.extend(require('components/dataset/resource/resource-modal.vue'))
-                );
+                this.$go({name: 'dataset-resource', params: {
+                    oid: this.dataset.id, rid: resource.id
+                }});
             }
         }
     },
@@ -212,19 +210,6 @@ export default {
         'dataset.id': function(id) {
             if (id) {
                 this.upload_endpoint = API.datasets.operations.upload_dataset_resource.urlify({dataset: id});
-            }
-        },
-        "dataset.resources": function(resources) {
-            /* If a `resource_id` is in the GET parameters we display the popin
-               with the appropriated resource loaded. */
-            if ("resource_id" in this.$router.parameters) {
-                let resourceId = this.$router.parameters.resource_id;
-                for (let resource of resources) {
-                    if (resource.id === resourceId) {
-                        this.display(resource);
-                        break;
-                    }
-                }
             }
         }
     }

@@ -11,7 +11,8 @@
 
 <div class="row">
     <div class="col-xs-12 col-md-6 text-center">
-        <button class="btn btn-primary btn-flat" v-route="/harvester/{{source.id}}/">
+        <button class="btn btn-primary btn-flat"
+            v-link="{name: 'harvester', params: {oid: source.id}}">
             {{ _('See in the administration') }}
         </button>
     </div>

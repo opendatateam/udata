@@ -4,14 +4,12 @@
 define([
     'jquery',
     'i18n',
-    'marked',
+    'helpers/commonmark',
     'bootstrap-markdown/js/bootstrap-markdown'
-], function($, i18n, md) {
+], function($, i18n, commonmark) {
     'use strict';
 
     var EXCERPT_TOKEN = '<!--- excerpt -->';
-
-    window.marked = md;
 
     $.fn.markdown.messages[i18n.lang] = {
         'Bold': i18n._('Bold'),
@@ -39,6 +37,7 @@ define([
         savable: false,
         resize: 'both',
         iconlibrary: 'fa',
+        onPreview: (e) => commonmark(e.getContent()),
         additionalButtons: [
             [{
                 name: 'extras',

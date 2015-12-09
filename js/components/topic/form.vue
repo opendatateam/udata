@@ -1,21 +1,21 @@
-<style lang="less">
-
-</style>
-
 <template>
-<form-vertical v-ref="form" fields="{{fields}}" model="{{topic}}"></form-vertical>
+<vform v-ref:form :fields="fields" :model="topic"></vform>
 </template>
 
 <script>
-'use strict';
+import Topic from 'models/topic';
 
-var Topic = require('models/topic');
-
-module.exports = {
-    props: ['topic'],
+export default {
+    props: {
+        topic: {
+            type: Topic,
+            default: function() {
+                return new Topic();
+            }
+        }
+    },
     data: function() {
         return {
-            topic: new Topic(),
             fields: [{
                     id: 'name',
                     label: this._('Name')
@@ -26,11 +26,15 @@ module.exports = {
                     id: 'tags',
                     label: this._('Tags'),
                     widget: 'tag-completer'
+                }, {
+                    id: 'featured',
+                    label: this._('Featured'),
+                    widget: 'checkbox'
                 }]
         };
     },
     components: {
-        'form-vertical': require('components/form/vertical-form.vue')
+        vform: require('components/form/vertical-form.vue')
     }
 };
 </script>

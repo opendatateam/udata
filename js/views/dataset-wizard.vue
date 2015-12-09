@@ -1,5 +1,5 @@
 <template>
-<wizard-component v-ref="wizard" steps="{{steps}}"></wizard-component>
+<wizard v-ref:wizard :steps="steps" :title="_('New dataset')"></wizard>
 </template>
 
 <script>
@@ -7,19 +7,21 @@ import Dataset from 'models/dataset';
 import Vue from 'vue';
 
 export default {
-    props: ['dataset'],
+    props: {
+        dataset: {
+            type: Dataset,
+            default: function() {
+                return new Dataset();
+            }
+        }
+    },
     data: function() {
         return {
-            meta: {
-                title:this._('New dataset'),
-                // subtitle: this._('Dataset')
-            },
-            dataset: new Dataset(),
             publish_as: null,
             steps: [{
                 label: this._('Publish as'),
                 subtitle: this._('Choose who is publishing'),
-                component: 'publish-as',
+                component: require('components/widgets/publish-as.vue'),
                 next: (component) => {
                     if (component.selected) {
                         this.publish_as = component.selected;
@@ -29,7 +31,7 @@ export default {
             }, {
                 label: this._('New dataset'),
                 subtitle: this._('Describe your dataset'),
-                component: 'create-form',
+                component: require('components/dataset/form.vue'),
                 next: (component) => {
                     if (component.validate()) {
                         let data = component.serialize();
@@ -39,7 +41,7 @@ export default {
                         Object.assign(this.dataset, data);
                         this.dataset.save();
                         this.dataset.$once('updated', () => {
-                            this.$.wizard.go_next();
+                            this.$refs.wizard.go_next();
                         });
                         return false;
                     }
@@ -47,7 +49,7 @@ export default {
             }, {
                 label: this._('Resources'),
                 subtitle: this._('Add your firsts resources'),
-                component: 'resource-form',
+                component: require('components/dataset/resource/form.vue'),
                 init: (component) => {
                     component.dataset = this.dataset;
                 },
@@ -56,7 +58,7 @@ export default {
                         var resource = component.serialize();
                         this.dataset.save_resource(resource);
                         this.dataset.$once('updated', () => {
-                            this.$.wizard.go_next();
+                            this.$refs.wizard.go_next();
                         });
                         return false;
                     }
@@ -64,7 +66,7 @@ export default {
             }, {
                 label: this._('Share'),
                 subtitle: this._('Communicate about your publication'),
-                component: 'dataset-created',
+                component: require('components/dataset/created.vue'),
                 init: (component) => {
                     component.dataset = this.dataset;
                 }
@@ -72,22 +74,17 @@ export default {
          };
     },
     components: {
-        'wizard-component': require('components/widgets/wizard.vue'),
-        'publish-as': require('components/widgets/publish-as.vue'),
-        'create-form': require('components/dataset/form.vue'),
-        'add-resource-form': require('components/dataset/add-resource-form.vue'),
-        'resource-form': require('components/dataset/resource/form.vue'),
-        'dataset-created': require('components/dataset/created.vue')
+        wizard: require('components/widgets/wizard.vue')
     },
     events: {
         'wizard:next-step': function() {
-            this.$.wizard.go_next();
+            this.$refs.wizard.go_next();
         },
         'wizard:previous-step': function() {
-            this.$.wizard.go_previous();
+            this.$refs.wizard.go_previous();
         },
         'wizard:step-changed': function() {
-            this.$.wizard.$.content.dataset = this.dataset;
+            this.$refs.wizard.$refs.content.dataset = this.dataset;
         }
     }
 };

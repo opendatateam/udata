@@ -1,8 +1,8 @@
 <template>
-    <datatable title="{{ title }}" icon="cogs"
+    <datatable :title="title" icon="cogs"
         boxclass="jobs-widget"
-        fields="{{ fields }}" p="{{ jobs }}"
-        empty="{{ _('No job') }}">
+        :fields="fields" :p="jobs"
+        :empty="_('No job')">
     </datatable>
 </template>
 
@@ -12,7 +12,7 @@ import jobs from 'models/jobs';
 export default {
     name: 'jobs-widget',
     components: {
-        'datatable': require('components/datatable/widget.vue')
+        datatable: require('components/datatable/widget.vue')
     },
     data: function() {
         return {

@@ -27,8 +27,7 @@ class GeoZoneSearch(ModelSearchAdapter):
     def serialize(cls, zone):
         return {
             'zone_suggest': {
-                'input': list(set(
-                    [zone.name, zone.code] + zone.keys.values())),
+                'input': list(set([zone.name, zone.code] + zone.keys_values)),
                 'output': zone.id,
                 'payload': {
                     'name': zone.name,
