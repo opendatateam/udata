@@ -10,7 +10,7 @@
 {% set threadclass = 'col-sm-9' if sidetext else 'col-sm-12' %}
 <div class="row">
     <div class="{{ threadclass }} list-group resources-list smaller">
-    {% for discussion in discussions|rejectattr('closed') %}
+    {% for discussion in discussions %}
         {% set loop_index = loop.index %}
         {% include theme('discussion/item.html') %}
     {% endfor %}
