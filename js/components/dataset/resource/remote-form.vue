@@ -23,6 +23,7 @@ export default {
                 }, {
                     id: 'url',
                     label: this._('URL'),
+                    widget: 'url-field',
                 }, {
                     id: 'filesize',
                     label: this._('Size'),

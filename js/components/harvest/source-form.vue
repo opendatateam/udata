@@ -24,7 +24,8 @@ export default {
                 label: this._('Backend')
             }, {
                 id: 'url',
-                label: this._('URL')
+                label: this._('URL'),
+                widget: 'url-field',
             }, {
                 id: 'description',
                 label: this._('Description'),

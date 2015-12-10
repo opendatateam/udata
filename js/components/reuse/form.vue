@@ -22,7 +22,8 @@ export default {
                     label: this._('Name')
                 }, {
                     id: 'url',
-                    label: this._('URL')
+                    label: this._('URL'),
+                    widget: 'url-field',
                 }, {
                     id: 'type',
                     label: this._('Type'),
