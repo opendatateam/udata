@@ -1,10 +1,10 @@
 <template>
 <layout :title="_('Site')">
     <div class="row">
-        <sbox class="col-lg-3 col-xs-6" v-for="b in boxes"
+        <small-box class="col-lg-3 col-xs-6" v-for="b in boxes"
             :value="b.value" :label="b.label" :color="b.color"
             :icon="b.icon" :target="b.target">
-        </sbox>
+        </small-box>
     </div>
     <div class="row">
         <chart title="Traffic" :metrics="metrics" class="col-xs-12"
@@ -24,11 +24,11 @@
         <users id="users" class="col-xs-12" :users="users"></users>
     </div>
     <div class="row">
-        <issues class="col-xs-12 col-md-6" :issues="issues"></issues>
-        <discussions class="col-xs-12 col-md-6" :discussions="discussions"></discussions>
+        <issue-list class="col-xs-12 col-md-6" :issues="issues"></issue-list>
+        <discussion-list class="col-xs-12 col-md-6" :discussions="discussions"></discussion-list>
     </div>
     <div class="row">
-        <community class="col-xs-12" :communities="communities"></community>
+        <community-list class="col-xs-12" :communities="communities"></community-list>
     </div>
 </layout>
 </template>
@@ -44,10 +44,15 @@ import Discussions from 'models/discussions';
 import Users from 'models/users';
 import Organizations from 'models/organizations';
 import CommunityResources from 'models/communityresources';
+// Widgets
+import SmallBox from 'components/containers/small-box.vue';
 import Layout from 'components/layout.vue';
 import DatasetList from 'components/dataset/list.vue';
 import ReuseList from 'components/reuse/list.vue';
 import OrgList from 'components/organization/list.vue';
+import IssueList from 'components/issues/list.vue';
+import DiscussionList from 'components/discussions/list.vue';
+import CommunityList from 'components/dataset/communityresource/list.vue';
 
 export default {
     name: 'SiteView',
@@ -66,9 +71,9 @@ export default {
             datasets: new Datasets({query: {sort: '-created', page_size: 10}, mask: DatasetList.MASK}),
             organizations: new Organizations({query: {sort: '-created', page_size: 10}, mask: OrgList.MASK}),
             users: new Users({query: {sort: '-created', page_size: 10}}),
-            issues: new Issues({query: {sort: '-created', page_size: 10}}),
-            discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
-            communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
+            issues: new Issues({query: {sort: '-created', page_size: 10}, mask: IssueList.MASK}),
+            discussions: new Discussions({query: {sort: '-created', page_size: 10}, mask:DiscussionList.MASK}),
+            communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}, mask: CommunityList.MASK}),
             y: [{
                 id: 'datasets',
                 label: this._('Datasets')
@@ -117,17 +122,15 @@ export default {
         }
     },
     components: {
-        sbox: require('components/containers/small-box.vue'),
         chart: require('components/charts/widget.vue'),
         users: require('components/user/list.vue'),
-        issues: require('components/issues/list.vue'),
-        discussions: require('components/discussions/list.vue'),
-        community: require('components/dataset/communityresource/list.vue'),
-        posts: require('components/post/list.vue'),
-        topics: require('components/topic/list.vue'),
+        CommunityList,
+        SmallBox,
         DatasetList,
+        DiscussionList,
         OrgList,
         ReuseList,
+        IssueList,
         Layout
     },
     methods: {

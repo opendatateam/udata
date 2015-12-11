@@ -11,7 +11,10 @@ import {Model} from 'models/base';
 import HarvestSources from 'models/harvest/sources';
 import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
 
+const MASK = 'id,name,owner,last_job{status},organization';
+
 export default {
+    MASK,
     name: 'harvesters-widget',
     components: {
         datatable: require('components/datatable/widget.vue')
@@ -25,7 +28,7 @@ export default {
     data: function() {
         return {
             title: this._('Harvesters'),
-            sources: new HarvestSources(),
+            sources: new HarvestSources({mask: MASK}),
             fields: [{
                 label: this._('Name'),
                 key: 'name',

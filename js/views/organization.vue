@@ -32,8 +32,8 @@
     </div>
 
     <div class="row">
-        <issues id="issues-widget" class="col-xs-12 col-md-6" :issues="issues"></issues>
-        <discussions id="discussions-widget" class="col-xs-12 col-md-6" :discussions="discussions"></discussions>
+        <issue-list id="issues-widget" class="col-xs-12 col-md-6" :issues="issues"></issue-list>
+        <discussion-list id="discussions-widget" class="col-xs-12 col-md-6" :discussions="discussions"></discussion-list>
     </div>
 
     <div class="row">
@@ -56,8 +56,11 @@ import Metrics from 'models/metrics';
 import Organization from 'models/organization';
 import CommunityResources from 'models/communityresources';
 import {PageList} from 'models/base';
-import Layout from 'components/layout.vue';
+// WIdgets
 import DatasetList from 'components/dataset/list.vue';
+import DiscussionList from 'components/discussions/list.vue';
+import IssueList from 'components/issues/list.vue';
+import Layout from 'components/layout.vue';
 import ReuseList from 'components/reuse/list.vue';
 
 export default {
@@ -103,10 +106,12 @@ export default {
             issues: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_issues',
+                mask: IssueList.MASK
             }),
             discussions: new PageList({
                 ns: 'organizations',
-                fetch: 'list_organization_discussions'
+                fetch: 'list_organization_discussions',
+                mask: DiscussionList.MASK
             }),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
             followers: new Followers({ns: 'organizations', query: {page_size: 10}}),
@@ -188,12 +193,12 @@ export default {
         members: require('components/organization/members.vue'),
         chart: require('components/charts/widget.vue'),
         followers: require('components/follow/list.vue'),
-        issues: require('components/issues/list.vue'),
-        discussions: require('components/discussions/list.vue'),
         harvesters: require('components/harvest/sources.vue'),
         communities: require('components/dataset/communityresource/list.vue'),
+        DiscussionList,
         DatasetList,
         ReuseList,
+        IssueList,
         Layout,
     },
     events: {

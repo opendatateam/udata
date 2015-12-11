@@ -63,19 +63,19 @@
 <template>
     <box :title="title" icon="cubes"
         boxclass="box-solid datasets-cards-widget"
-        footerclass="text-center" :footer="true">
+        footerclass="text-center" :footer="true" :loading="loading">
         <div class="row" v-el:sortable>
             <div class="col-md-6 dataset-card-container"
-                v-for="datasetid in (editing ? sorted : datasets)|ids"
-                :data-id="datasetid"
+                v-for="dataset in (editing ? sorted : datasets)"
+                :data-id="dataset.id"
             >
                 <button type="button" class="close"
                     v-if="editing"
-                    @click="on_remove(datasetid)">
+                    @click="on_remove(dataset)">
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only" v-i18n="Close"></span>
                 </button>
-                <dataset-card :datasetid="datasetid"></dataset-card>
+                <dataset-card :dataset="dataset"></dataset-card>
             </div>
         </div>
         <footer slot="footer">
@@ -119,7 +119,8 @@ export default {
             type: String,
             default: function() {return this._('Datasets');}
         },
-        datasets: Array
+        datasets: Array,
+        loading: Boolean
     },
     data: function() {
         return {
@@ -155,9 +156,9 @@ export default {
             this.sorted = [];
             this.$sortable.sort(this._initial_order);
         },
-        on_remove: function(datasetid) {
-            this.sorted.splice(this.sorted.indexOf(datasetid), 1);
-            this.$dispatch('dataset-card-list:remove', datasetid);
+        on_remove: function(dataset) {
+            this.sorted.splice(this.sorted.indexOf(dataset.id), 1);
+            this.$dispatch('dataset-card-list:remove', dataset.id);
         }
     },
     sortable: {

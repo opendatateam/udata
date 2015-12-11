@@ -15,7 +15,7 @@
     </div>
 
     <div class="row">
-        <communities class="col-xs-12" :communities="communities"></communities>
+        <community-list class="col-xs-12" :communities="communities"></community-list>
     </div>
 
     <div class="row">
@@ -34,6 +34,7 @@ import CommunityResources from 'models/communityresources';
 import Layout from 'components/layout.vue';
 import DatasetList from 'components/dataset/list.vue';
 import ReuseList from 'components/reuse/list.vue';
+import CommunityList from 'components/dataset/communityresource/list.vue';
 
 export default {
     name: 'user-view',
@@ -62,7 +63,7 @@ export default {
         profile: require('components/user/profile.vue'),
         chart: require('components/charts/widget.vue'),
         harvesters: require('components/harvest/sources.vue'),
-        communities: require('components/dataset/communityresource/list.vue'),
+        CommunityList,
         DatasetList,
         ReuseList,
         Layout

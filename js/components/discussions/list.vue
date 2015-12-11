@@ -14,6 +14,7 @@ export default {
     components: {
          datatable: require('components/datatable/widget.vue')
     },
+    MASK: 'id,title,created,closed,class,subject',
     data: function() {
         return {
             fields: [{

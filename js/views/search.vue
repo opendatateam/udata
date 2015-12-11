@@ -4,16 +4,16 @@
         <datasets-list class="col-xs-12" :datasets="datasets"></datasets-list>
     </div>
     <div class="row" v-if="communities.loading || communities.has_data">
-        <communities class="col-xs-12" :communities="communities"></communities>
+        <community-list class="col-xs-12" :communities="communities"></community-list>
     </div>
     <div class="row" v-if="reuses.loading || reuses.has_data">
         <reuses-list class="col-xs-12" :reuses="reuses"></reuses-list>
     </div>
     <div class="row" v-if="issues.loading || issues.has_data">
-        <issues class="col-xs-12" :issues="issues"></issues>
+        <issue-list class="col-xs-12" :issues="issues"></issue-list>
     </div>
     <div class="row" v-if="discussions.loading || discussions.has_data">
-        <discussions class="col-xs-12" :discussions="discussions"></discussions>
+        <discussion-list class="col-xs-12" :discussions="discussions"></discussion-list>
     </div>
     <div class="row" v-if="no_results">
         <div class="col-xs-12 text-center">
@@ -28,13 +28,16 @@ import {PageList} from 'models/base';
 import Layout from 'components/layout.vue';
 import DatasetList from 'components/dataset/list.vue';
 import ReuseList from 'components/reuse/list.vue';
+import IssueList from 'components/issues/list.vue';
+import DiscussionList from 'components/discussions/list.vue';
+import CommunityList from 'components/dataset/communityresource/list.vue';
 
 export default {
     name: 'SearchView',
     components: {
-        communities: require('components/dataset/communityresource/list.vue'),
-        issues: require('components/issues/list.vue'),
-        discussions: require('components/discussions/list.vue'),
+        CommunityList,
+        DiscussionList,
+        IssueList,
         DatasetList,
         ReuseList,
         Layout
@@ -56,7 +59,8 @@ export default {
             }),
             communities: new PageList({
                 ns: 'me',
-                fetch: 'my_org_community_resources'
+                fetch: 'my_org_community_resources',
+                mask: CommunityList.MASK
             }),
             reuses: new PageList({
                 ns: 'me',
@@ -66,10 +70,12 @@ export default {
             issues: new PageList({
                 ns: 'me',
                 fetch: 'my_org_issues',
+                mask: IssueList.MASK
             }),
             discussions: new PageList({
                 ns: 'me',
-                fetch: 'my_org_discussions'
+                fetch: 'my_org_discussions',
+                mask: DiscussionList.MASK
             }),
         };
     },

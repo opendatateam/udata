@@ -20,6 +20,7 @@ import Datatable from 'components/datatable/widget.vue';
 
 export default {
     name: 'topics-widget',
+    MASK: 'id,name',
     components: {Datatable},
     props: ['topics'],
     data() {

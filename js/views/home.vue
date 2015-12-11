@@ -1,10 +1,10 @@
 <template>
 <layout :title="_('Dashboard')">
     <div class="row">
-        <sbox class="col-lg-3 col-xs-6" v-for="b in dataBoxes"
+        <small-box class="col-lg-3 col-xs-6" v-for="b in dataBoxes"
             :value="b.value" :label="b.label" :color="b.color"
             :icon="b.icon" :target="b.target">
-        </sbox>
+        </small-box>
     </div>
 
     <div class="row">
@@ -14,15 +14,15 @@
     </div>
 
     <div class="row">
-        <issues id="issues-widget" class="col-xs-12" :issues="issues"
+        <issue-list id="issues-widget" class="col-xs-12" :issues="issues"
             :title="_('Issues about your data (including your organizations)')">
-        </issues>
+        </issue-list>
     </div>
 
     <div class="row">
-        <discussions id="discussions-widget" class="col-xs-12" :discussions="discussions"
+        <discussion-list id="discussions-widget" class="col-xs-12" :discussions="discussions"
             :title="_('Discussions about your data (including your organizations)')">
-        </discussions>
+        </discussion-list>
     </div>
 </layout>
 </template>
@@ -31,8 +31,12 @@
 import moment from 'moment';
 import {PageList} from 'models/base';
 import MyMetrics from 'models/mymetrics';
+// Widgets
 import Layout from 'components/layout.vue';
+import SmallBox from 'components/containers/small-box.vue';
 import ReuseList from 'components/reuse/list.vue';
+import IssueList from 'components/issues/list.vue';
+import DiscussionList from 'components/discussions/list.vue';
 
 export default {
     name: 'Home',
@@ -47,10 +51,12 @@ export default {
             issues: new PageList({
                 ns: 'me',
                 fetch: 'my_org_issues',
+                mask: IssueList.MASK
             }),
             discussions: new PageList({
                 ns: 'me',
-                fetch: 'my_org_discussions'
+                fetch: 'my_org_discussions',
+                mask: DiscussionList.MASK
             }),
         };
     },
@@ -89,9 +95,9 @@ export default {
         }
     },
     components: {
-        sbox: require('components/containers/small-box.vue'),
-        issues: require('components/issues/list.vue'),
-        discussions: require('components/discussions/list.vue'),
+        SmallBox,
+        DiscussionList,
+        IssueList,
         ReuseList,
         Layout
     },

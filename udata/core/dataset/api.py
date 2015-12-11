@@ -374,9 +374,7 @@ class CommunityResourcesAPI(API):
 @ns.route('/community_resources/<crid:community>/',
           endpoint='community_resource', doc=common_doc)
 @api.doc(params={'community': 'The community resource unique identifier'})
-class CommunityResourceAPI(SingleObjectAPI, API):
-    model = CommunityResource
-
+class CommunityResourceAPI(API):
     @api.doc('retrieve_community_resource')
     @api.marshal_with(community_resource_fields)
     def get(self, community):

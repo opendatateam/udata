@@ -64,7 +64,18 @@ import placeholders from 'helpers/placeholders';
 import moment from 'moment';
 import config from 'config';
 
+const MASK = [
+    'id', 'title', 'description',
+    'image',
+    'datasets{id}',
+    'organization',
+    'owner',
+    'metrics',
+    'page', 'uri'
+].join(',');
+
 export default {
+    MASK,
     props: {
         reuse: {
             type: Object,

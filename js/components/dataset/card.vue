@@ -92,7 +92,11 @@ import DatasetFilters from 'components/dataset/filters';
 import placeholders from 'helpers/placeholders';
 import config from 'config';
 
-const MASK = 'id,title,description,spatial{zones,granularity},metrics,organization,frequency,temporal_coverage';
+const MASK = [
+    'id', 'title', 'description', 'metrics', 'organization',
+    'spatial{zones,granularity}', 'frequency', 'temporal_coverage',
+    'page', 'uri'
+].join(',');
 
 export default {
     MASK,
