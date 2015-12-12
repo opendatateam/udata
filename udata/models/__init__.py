@@ -8,7 +8,7 @@ from collections import Iterable
 from flask.ext.mongoengine import (
     MongoEngine, MongoEngineSessionInterface, Document, BaseQuerySet
 )
-from mongoengine.base import TopLevelDocumentMetaclass
+from mongoengine.base import TopLevelDocumentMetaclass, get_document
 from mongoengine.errors import ValidationError
 from mongoengine.signals import pre_save, post_save
 
@@ -48,6 +48,23 @@ class UDataMongoEngine(MongoEngine):
         self.ValidationError = ValidationError
         self.post_save = post_save
         self.pre_save = pre_save
+
+    def resolve_model(self, model):
+        '''
+        Resolve a model given a name or dict with `class` entry.
+
+        Conventions are resolved too: DatasetFull will resolve as Dataset
+        '''
+        if not model:
+            raise ValueError('Unsupported model specifications')
+        if isinstance(model, basestring):
+            classname = model
+        elif isinstance(model, dict) and 'class' in model:
+            classname = model['class']
+        else:
+            raise ValueError('Unsupported model specifications')
+
+        return get_document(classname)
 
 
 def serialize(value):
