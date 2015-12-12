@@ -11,6 +11,7 @@
 
 <script>
 import Vue from 'vue';
+import {isFunction} from 'utils';
 
 export default {
     name: 'datatable-cell',
@@ -26,7 +27,7 @@ export default {
                 return this.$options.default;
             }
 
-            if (Vue.util.isFunction(this.field.key)) {
+            if (isFunction(this.field.key)) {
                 result = this.field.key(this.item);
             } else {
                 var parts = this.field.key.split('.'),

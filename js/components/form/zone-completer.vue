@@ -60,6 +60,7 @@ import Vue from 'vue';
 import API from 'api';
 import BaseCompleter from 'components/form/base-completer.vue';
 import GeoLevels from 'models/geolevels';
+import {isString} from 'utils';
 
 
 export default {
@@ -79,7 +80,7 @@ export default {
             searchField: ['name', 'code', 'extraKeys'],
             plugins: ['remove_button'],
             create: function(input, callback) {
-                if (Vue.util.isString(input)) {
+                if (isString(input)) {
                     // Need to fetch the real zone
                     // TODO: expose direct full acces to zone by ID
                     API.spatial.spatial_zone({id: input}, (response) => {

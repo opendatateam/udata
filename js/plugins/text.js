@@ -22,7 +22,7 @@ define(['helpers/text'], function(text) {
          * Join an array
          */
         Vue.filter('join', function(value, separator) {
-            if (Vue.util.isArray(value)) {
+            if (Array.isArray(value)) {
                 return value.join(separator || '');
             }
             return value;
