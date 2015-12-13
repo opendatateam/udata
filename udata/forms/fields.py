@@ -31,6 +31,10 @@ MAX_TAG_LENGTH = 128
 
 
 class FieldHelper(object):
+    def __init__(self, *args, **kwargs):
+        super(FieldHelper, self).__init__(*args, **kwargs)
+        self._form = kwargs['_form'] if '_form' in kwargs else None
+
     @property
     def id(self):
         return '{0}-id'.format(self.name)
@@ -332,12 +336,12 @@ def clean_oid(oid, model):
             raise ValueError('Unsupported identifier: ' + oid)
 
 
-class ModelField(object):
+class ModelFieldMixin(object):
     model = None
 
     def __init__(self, *args, **kwargs):
         self.model = kwargs.pop('model', self.model)
-        super(ModelField, self).__init__(*args, **kwargs)
+        super(ModelFieldMixin, self).__init__(*args, **kwargs)
 
     def _value(self):
         if self.data:
@@ -352,6 +356,34 @@ class ModelField(object):
                                                                 self.model))
             except self.model.DoesNotExist:
                 message = _('{0} does not exists').format(self.model.__name__)
+                raise validators.ValidationError(message)
+
+
+class ModelField(Field):
+    def process_formdata(self, valuelist):
+        if valuelist and len(valuelist) == 1 and valuelist[0]:
+            specs = valuelist[0]
+            model_field = getattr(self._form.model_class, self.name)
+            if isinstance(specs, basestring):
+                if isinstance(model_field, db.ReferenceField):
+                    specs = {'class': str(model_field.document_type.__name__), 'id': specs}
+                elif isinstance(model_field, db.GenericReferenceField):
+                    message = _('Expect both class and identifier')
+                    raise validators.ValidationError(message)
+
+            try:
+                model = db.resolve_model(specs['class'])
+            except db.NotRegistered:
+                message = _('{0} does not exists').format(specs['class'])
+                raise validators.ValidationError(message)
+
+            try:
+                self.data = model.objects.get(id=clean_oid(specs, model))
+            except db.DoesNotExist:
+                message = _('{0} does not exists').format(model.__name__)
+                raise validators.ValidationError(message)
+            except db.ValidationError:
+                message = _('{0} is not a valid identifier').format(specs['id'])
                 raise validators.ValidationError(message)
 
 
@@ -499,19 +531,11 @@ class ReuseListField(ModelList, StringField):
     widget = widgets.ReuseAutocompleter()
 
 
-class UserField(ModelField, StringField):
+class UserField(ModelFieldMixin, StringField):
     model = User
 
 
-class DatasetOrReuseField(ModelChoiceField, StringField):
-    models = [Dataset, Reuse]
-
-
-class DatasetOrOrganizationField(ModelChoiceField, StringField):
-    models = [Dataset, Organization]
-
-
-class DatasetField(ModelField, StringField):
+class DatasetField(ModelFieldMixin, StringField):
     model = Dataset
 
 
@@ -556,7 +580,7 @@ def default_owner():
         return current_user._get_current_object()
 
 
-class CurrentUserField(FieldHelper, ModelField, fields.HiddenField):
+class CurrentUserField(FieldHelper, ModelFieldMixin, fields.HiddenField):
     model = User
 
     def __init__(self, *args, **kwargs):
@@ -579,7 +603,7 @@ class CurrentUserField(FieldHelper, ModelField, fields.HiddenField):
         return True
 
 
-class PublishAsField(FieldHelper, ModelField, fields.HiddenField):
+class PublishAsField(FieldHelper, ModelFieldMixin, fields.HiddenField):
     model = Organization
     owner_field = 'owner'
 
