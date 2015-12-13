@@ -108,7 +108,7 @@ export default {
         }
 
         return {
-            dataset: new Dataset(),
+            dataset: new Dataset({mask: '*'}),
             metrics: new Metrics({query: {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')
