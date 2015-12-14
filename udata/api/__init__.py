@@ -159,37 +159,18 @@ class UDataApi(Api):
                             help='The page size to fetch')
         return parser
 
-    def resolve_model(self, model):
-        '''
-        Resolve a model given a name or dict with `class` entry.
-
-        Conventions are resolved too: DatasetFull will resolve as Dataset
-        '''
-        if not model:
-            raise ValueError('Unsupported model specifications')
-        if isinstance(model, basestring):
-            classname = model
-        elif isinstance(model, dict) and 'class' in model:
-            classname = model['class']
-        else:
-            raise ValueError('Unsupported model specifications')
-
-        # Handle Full convention until fields masks make it in
-        if classname.endswith('Full'):
-            classname = classname[:-4]
-
-        resolved = getattr(models, classname, None)
-        if not resolved or not issubclass(resolved, models.db.Document):
-            raise ValueError('Model not found')
-        return resolved
-
 
 api = UDataApi(apiv1,
     decorators=[csrf.exempt, cors.crossdomain(origin='*', credentials=True)],
     version='1.0', title='uData API',
     description='uData API', default='site',
-    default_label='Site global namespace'
-)
+    default_label='Site global namespace')
+
+
+api.model_reference = api.model('ModelReference', {
+    'class': fields.ClassName(description='The model class', required=True),
+    'id': fields.String(description='The object identifier', required=True),
+})
 
 
 @api.representation('application/json')

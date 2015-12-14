@@ -12,12 +12,10 @@ from flask import current_app
 
 from udata import mail
 from udata.i18n import lazy_gettext as _
-from udata.models import Organization, Activity, Metrics, Topic
+from udata.models import Organization, Activity, Metrics, Topic, Issue, Discussion, Follow
 from udata.tasks import job
 
-from .models import (
-    Dataset, DatasetIssue, DatasetDiscussion, FollowDataset, UPDATE_FREQUENCIES
-)
+from .models import Dataset, UPDATE_FREQUENCIES
 
 log = get_task_logger(__name__)
 
@@ -27,11 +25,11 @@ def purge_datasets(self):
     for dataset in Dataset.objects(deleted__ne=None):
         log.info('Purging dataset "{0}"'.format(dataset))
         # Remove followers
-        FollowDataset.objects(following=dataset).delete()
+        Follow.objects(following=dataset).delete()
         # Remove issues
-        DatasetIssue.objects(subject=dataset).delete()
+        Issue.objects(subject=dataset).delete()
         # Remove discussions
-        DatasetDiscussion.objects(subject=dataset).delete()
+        Discussion.objects(subject=dataset).delete()
         # Remove activity
         Activity.objects(related_to=dataset).delete()
         # Remove metrics

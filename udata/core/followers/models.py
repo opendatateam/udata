@@ -15,8 +15,8 @@ class FollowQuerySet(db.BaseQuerySet):
     def following(self, user):
         return self(follower=user, until=None)
 
-    def followers(self, user):
-        return self(following=user, until=None)
+    def followers(self, followee):
+        return self(following=followee, until=None)
 
     def is_following(self, user, following):
         return self(follower=user, following=following, until=None).count() > 0
@@ -24,7 +24,7 @@ class FollowQuerySet(db.BaseQuerySet):
 
 class Follow(db.Document):
     follower = db.ReferenceField('User', required=True)
-    following = db.ReferenceField(db.DomainModel)
+    following = db.GenericReferenceField()
     since = db.DateTimeField(required=True, default=datetime.now)
     until = db.DateTimeField()
 
@@ -36,7 +36,6 @@ class Follow(db.Document):
             ('following', 'until'),
         ],
         'queryset_class': FollowQuerySet,
-        'allow_inheritance': True,
     }
 
 

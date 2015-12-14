@@ -3,12 +3,12 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import (
-    DatasetIssue, DatasetDiscussion, ReuseIssue, ReuseDiscussion, Member, User
-)
+from udata.models import Issue, Discussion, Member, User
+
 from udata.core.dataset.factories import (
     CommunityResourceFactory, VisibleDatasetFactory
 )
+
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
@@ -177,19 +177,13 @@ class MeAPITest(APITestCase):
 
         sender = UserFactory()
         issues = [
-            DatasetIssue.objects.create(subject=s, title='', user=sender)
-            for s in (dataset, org_dataset)
-        ] + [
-            ReuseIssue.objects.create(subject=s, title='', user=sender)
-            for s in (reuse, org_reuse)
+            Issue.objects.create(subject=s, title='', user=sender)
+            for s in (dataset, org_dataset, reuse, org_reuse)
         ]
 
         # Should not be listed
-        DatasetIssue.objects.create(
-            subject=VisibleDatasetFactory(), title='', user=sender)
-        ReuseIssue.objects.create(subject=ReuseFactory(),
-                                  title='',
-                                  user=sender)
+        Issue.objects.create(subject=VisibleDatasetFactory(), title='', user=sender)
+        Issue.objects.create(subject=ReuseFactory(), title='', user=sender)
 
         response = self.get(url_for('api.my_org_issues'))
         self.assert200(response)
@@ -205,19 +199,17 @@ class MeAPITest(APITestCase):
         org_dataset = VisibleDatasetFactory(organization=organization)
 
         issues = [
-            DatasetIssue.objects.create(
-                subject=org_dataset, title='foo', user=user),
-            ReuseIssue.objects.create(subject=reuse, title='foo', user=user),
+            Issue.objects.create(subject=org_dataset, title='foo', user=user),
+            Issue.objects.create(subject=reuse, title='foo', user=user),
         ]
 
         # Should not be listed.
-        DatasetIssue.objects.create(subject=dataset, title='', user=user),
-        ReuseIssue.objects.create(subject=org_reuse, title='', user=user),
+        Issue.objects.create(subject=dataset, title='', user=user),
+        Issue.objects.create(subject=org_reuse, title='', user=user),
 
         # Should really not be listed.
-        DatasetIssue.objects.create(
-            subject=VisibleDatasetFactory(), title='', user=user)
-        ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=user)
+        Issue.objects.create(subject=VisibleDatasetFactory(), title='', user=user)
+        Issue.objects.create(subject=ReuseFactory(), title='', user=user)
 
         response = self.get(url_for('api.my_org_issues'), qs={'q': 'foo'})
         self.assert200(response)
@@ -233,20 +225,15 @@ class MeAPITest(APITestCase):
         org_dataset = VisibleDatasetFactory(organization=organization)
 
         discussions = [
-            DatasetDiscussion.objects.create(
-                subject=dataset, title='', user=user),
-            DatasetDiscussion.objects.create(
-                subject=org_dataset, title='', user=user),
-            ReuseDiscussion.objects.create(subject=reuse, title='', user=user),
-            ReuseDiscussion.objects.create(
-                subject=org_reuse, title='', user=user),
+            Discussion.objects.create(subject=dataset, title='', user=user),
+            Discussion.objects.create(subject=org_dataset, title='', user=user),
+            Discussion.objects.create(subject=reuse, title='', user=user),
+            Discussion.objects.create(subject=org_reuse, title='', user=user),
         ]
 
         # Should not be listed
-        DatasetDiscussion.objects.create(
-            subject=VisibleDatasetFactory(), title='', user=user)
-        ReuseDiscussion.objects.create(
-            subject=ReuseFactory(), title='', user=user)
+        Discussion.objects.create(subject=VisibleDatasetFactory(), title='', user=user)
+        Discussion.objects.create(subject=ReuseFactory(), title='', user=user)
 
         response = self.get(url_for('api.my_org_discussions'))
         self.assert200(response)
@@ -262,22 +249,17 @@ class MeAPITest(APITestCase):
         org_dataset = VisibleDatasetFactory(organization=organization)
 
         discussions = [
-            DatasetDiscussion.objects.create(
-                subject=dataset, title='foo', user=user),
-            ReuseDiscussion.objects.create(
-                subject=org_reuse, title='foo', user=user),
+            Discussion.objects.create(subject=dataset, title='foo', user=user),
+            Discussion.objects.create(subject=org_reuse, title='foo', user=user),
         ]
 
         # Should not be listed.
-        ReuseDiscussion.objects.create(subject=reuse, title='', user=user),
-        DatasetDiscussion.objects.create(
-            subject=org_dataset, title='', user=user),
+        Discussion.objects.create(subject=reuse, title='', user=user),
+        Discussion.objects.create(subject=org_dataset, title='', user=user),
 
         # Should really not be listed.
-        DatasetDiscussion.objects.create(
-            subject=VisibleDatasetFactory(), title='foo', user=user)
-        ReuseDiscussion.objects.create(
-            subject=ReuseFactory(), title='foo', user=user)
+        Discussion.objects.create(subject=VisibleDatasetFactory(), title='foo', user=user)
+        Discussion.objects.create(subject=ReuseFactory(), title='foo', user=user)
 
         response = self.get(url_for('api.my_org_discussions'), qs={'q': 'foo'})
         self.assert200(response)

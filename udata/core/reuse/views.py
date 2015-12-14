@@ -7,10 +7,10 @@ from werkzeug.contrib.atom import AtomFeed
 from udata.app import nav
 from udata.frontend.views import SearchView, DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import FollowReuse
+from udata.models import Follow, Discussion
 from udata.sitemap import sitemap
 
-from .models import Reuse, ReuseDiscussion
+from .models import Reuse
 from .permissions import ReuseEditPermission
 
 blueprint = I18nBlueprint('reuses', __name__, url_prefix='/reuses')
@@ -91,13 +91,13 @@ class ReuseDetailView(ReuseView, DetailView):
         if self.reuse.deleted and not ReuseEditPermission(self.reuse).can():
             abort(410)
 
-        followers = (FollowReuse.objects.followers(self.reuse)
+        followers = (Follow.objects.followers(self.reuse)
                      .order_by('follower.fullname'))
 
         context.update(
             followers=followers,
             can_edit=ReuseEditPermission(self.reuse),
-            discussions=ReuseDiscussion.objects(subject=self.reuse)
+            discussions=Discussion.objects(subject=self.reuse)
         )
 
         return context

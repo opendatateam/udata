@@ -29,7 +29,7 @@ from .api_fields import (
     upload_fields,
 )
 from .models import (
-    Dataset, Resource, FollowDataset, Checksum, License, UPDATE_FREQUENCIES,
+    Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES,
     CommunityResource
 )
 from .permissions import DatasetEditPermission
@@ -406,7 +406,7 @@ class CommunityResourceAPI(API):
 
 @ns.route('/<id>/followers/', endpoint='dataset_followers')
 class DatasetFollowersAPI(FollowAPI):
-    model = FollowDataset
+    model = Dataset
 
 
 suggest_parser = api.parser()

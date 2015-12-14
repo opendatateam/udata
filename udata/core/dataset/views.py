@@ -6,7 +6,7 @@ from werkzeug.contrib.atom import AtomFeed
 
 from udata.frontend.views import DetailView, SearchView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, DatasetDiscussion, Follow, Reuse
+from udata.models import Dataset, Discussion, Follow, Reuse
 from udata.core.site.views import current_site
 from udata.sitemap import sitemap
 
@@ -85,8 +85,7 @@ class DatasetDetailView(DatasetView, DetailView):
         context['reuses'] = Reuse.objects(datasets=self.dataset).visible()
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = ResourceEditPermission
-        context['discussions'] = DatasetDiscussion.objects(
-            subject=self.dataset)
+        context['discussions'] = Discussion.objects(subject=self.dataset)
         return context
 
 

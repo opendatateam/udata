@@ -9,8 +9,7 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import (
-    CommunityResource, Dataset, Follow, FollowDataset, Member,
-    UPDATE_FREQUENCIES
+    CommunityResource, Dataset, Follow, Member, UPDATE_FREQUENCIES
 )
 
 from . import APITestCase
@@ -677,8 +676,8 @@ class DatasetResourceAPITest(APITestCase):
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(),
-                              FollowDataset)
+        follow = Follow.objects.followers(to_follow).first()
+        self.assertIsInstance(follow.following, Dataset)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
@@ -686,7 +685,7 @@ class DatasetResourceAPITest(APITestCase):
         '''It should unfollow the dataset on DELETE'''
         user = self.login()
         to_follow = DatasetFactory()
-        FollowDataset.objects.create(follower=user, following=to_follow)
+        Follow.objects.create(follower=user, following=to_follow)
 
         response = self.delete(url_for('api.dataset_followers',
                                        id=to_follow.id))

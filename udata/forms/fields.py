@@ -378,7 +378,7 @@ class ModelField(Field):
                 raise validators.ValidationError(message)
 
             try:
-                self.data = model.objects.get(id=clean_oid(specs, model))
+                self.data = model.objects.only('id').get(id=clean_oid(specs, model))
             except db.DoesNotExist:
                 message = _('{0} does not exists').format(model.__name__)
                 raise validators.ValidationError(message)

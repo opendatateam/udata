@@ -6,10 +6,11 @@ from mongoengine import post_save
 
 from udata.models import db, Dataset
 from udata.core.dataset.factories import (
-    ResourceFactory, DatasetFactory, DatasetDiscussionFactory,
-    CommunityResourceFactory
+    ResourceFactory, DatasetFactory, CommunityResourceFactory
 )
-from udata.core.discussions.factories import MessageDiscussionFactory
+from udata.core.discussions.factories import (
+    MessageDiscussionFactory, DiscussionFactory
+)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 
@@ -196,10 +197,8 @@ class DatasetModelTest(TestCase, DBTestMixin):
         user = UserFactory()
         visitor = UserFactory()
         dataset = DatasetFactory(description='', owner=user)
-        DatasetDiscussionFactory(
-            subject=dataset, user=visitor,
-            discussion=[MessageDiscussionFactory(posted_by=visitor)
-                        for i in range(2)])
+        messages = MessageDiscussionFactory.build_batch(2, posted_by=visitor)
+        DiscussionFactory(subject=dataset, user=visitor, discussion=messages)
         self.assertEqual(dataset.quality['discussions'], 1)
         self.assertEqual(dataset.quality['has_untreated_discussions'], True)
         self.assertEqual(dataset.quality['score'], 0)
@@ -208,11 +207,11 @@ class DatasetModelTest(TestCase, DBTestMixin):
         user = UserFactory()
         visitor = UserFactory()
         dataset = DatasetFactory(description='', owner=user)
-        DatasetDiscussionFactory(
+        DiscussionFactory(
             subject=dataset, user=visitor,
             discussion=[
-                MessageDiscussionFactory(posted_by=visitor) for i in range(2)
-                ] + [MessageDiscussionFactory(posted_by=user)]
+                MessageDiscussionFactory(posted_by=user)
+            ] + MessageDiscussionFactory.build_batch(2, posted_by=visitor)
         )
         self.assertEqual(dataset.quality['discussions'], 1)
         self.assertEqual(dataset.quality['has_untreated_discussions'], False)
@@ -224,7 +223,7 @@ class DatasetModelTest(TestCase, DBTestMixin):
         dataset = DatasetFactory(owner=user, frequency='weekly',
                                  tags=['foo', 'bar'], description='a' * 42)
         dataset.add_resource(ResourceFactory(format='pdf'))
-        DatasetDiscussionFactory(
+        DiscussionFactory(
             subject=dataset, user=visitor,
             discussion=[MessageDiscussionFactory(posted_by=visitor)])
         self.assertEqual(dataset.quality['score'], 0)

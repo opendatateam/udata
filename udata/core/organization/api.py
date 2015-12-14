@@ -15,9 +15,7 @@ from udata.utils import multi_to_dict
 from .forms import (
     OrganizationForm, MembershipRequestForm, MembershipRefuseForm, MemberForm
 )
-from .models import (
-    Organization, MembershipRequest, Member, FollowOrg
-)
+from .models import Organization, MembershipRequest, Member
 from .permissions import (
     EditOrganizationPermission, OrganizationPrivatePermission
 )
@@ -296,7 +294,7 @@ class MemberAPI(API):
 
 @ns.route('/<id>/followers/', endpoint='organization_followers')
 class FollowOrgAPI(FollowAPI):
-    model = FollowOrg
+    model = Organization
 
 
 suggest_parser = api.parser()
@@ -381,11 +379,10 @@ class OrgIssuesAPI(API):
     @api.marshal_list_with(issue_fields)
     def get(self, org):
         '''List organization issues'''
-        reuses_ids = [r.id for r in Reuse.objects(organization=org).only('id')]
-        datasets_ids = [d.id
-                        for d in Dataset.objects(organization=org).only('id')]
-        ids = reuses_ids + datasets_ids
-        qs = Issue.objects(subject__in=ids).order_by('-created')
+        reuses = Reuse.objects(organization=org).only('id')
+        datasets = Dataset.objects(organization=org).only('id')
+        subjects = list(reuses) + list(datasets)
+        qs = Issue.objects(subject__in=subjects).order_by('-created')
         return list(qs)
 
 
@@ -395,9 +392,8 @@ class OrgDiscussionsAPI(API):
     @api.marshal_list_with(discussion_fields)
     def get(self, org):
         '''List organization discussions'''
-        reuses_ids = [r.id for r in Reuse.objects(organization=org).only('id')]
-        datasets_ids = [d.id
-                        for d in Dataset.objects(organization=org).only('id')]
-        ids = reuses_ids + datasets_ids
-        qs = Discussion.objects(subject__in=ids).order_by('-created')
+        reuses = Reuse.objects(organization=org).only('id')
+        datasets = Dataset.objects(organization=org).only('id')
+        subjects = list(reuses) + list(datasets)
+        qs = Discussion.objects(subject__in=subjects).order_by('-created')
         return list(qs)

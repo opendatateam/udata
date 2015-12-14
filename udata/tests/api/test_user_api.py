@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import Follow, FollowUser
 from udata.core.user.factories import UserFactory
+from udata.models import Follow
 from udata.utils import faker
 
 from . import APITestCase
@@ -42,7 +42,7 @@ class UserAPITest(APITestCase):
         '''It should unfollow the user on DELETE'''
         user = self.login()
         to_follow = UserFactory()
-        FollowUser.objects.create(follower=user, following=to_follow)
+        Follow.objects.create(follower=user, following=to_follow)
 
         response = self.delete(url_for('api.user_followers', id=to_follow.id))
         self.assert200(response)

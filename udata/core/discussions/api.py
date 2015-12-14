@@ -8,11 +8,10 @@ from flask_restplus.inputs import boolean
 
 from udata.auth import admin_permission
 from udata.api import api, API, fields
-from udata.models import Dataset, DatasetDiscussion, Reuse, ReuseDiscussion
 from udata.core.user.api_fields import user_ref_fields
 
 from .forms import DiscussionCreateForm, DiscussionCommentForm
-from .models import Message, Discussion
+from .models import db, Message, Discussion
 from .permissions import CloseDiscussionPermission
 from .signals import (
     on_new_discussion, on_new_discussion_comment, on_discussion_closed,
@@ -32,9 +31,9 @@ message_fields = api.model('DiscussionMessage', {
 discussion_fields = api.model('Discussion', {
     'id': fields.String(
         description='The discussion identifier', readonly=True),
-    'subject': fields.String(
-        attribute='subject.id',
-        description='The discussion target object identifier', required=True),
+    'subject': fields.Nested(api.model_reference,
+                             description='The discussion target object',
+                             required=True),
     'class': fields.ClassName(description='The object class',
                               discriminator=True, required=True),
     'title': fields.String(description='The discussion title', required=True),
@@ -142,7 +141,8 @@ class DiscussionsAPI(API):
         args = parser.parse_args()
         discussions = Discussion.objects
         if args['for']:
-            discussions = discussions(subject__in=args['for'])
+            ids = [db.ObjectId(id) for id in args['for']]
+            discussions = discussions(__raw__={'subject._ref.$id': {'$in': ids}})
         if args['closed'] is False:
             discussions = discussions(closed=None)
         elif args['closed'] is True:
@@ -161,16 +161,9 @@ class DiscussionsAPI(API):
         message = Message(
             content=form.comment.data,
             posted_by=current_user.id)
-        if isinstance(form.subject.data, Dataset):
-            model = DatasetDiscussion
-        elif isinstance(form.subject.data, Reuse):
-            model = ReuseDiscussion
-        discussion = model.objects.create(
-            subject=form.subject.data.id,
-            title=form.title.data,
-            user=current_user.id,
-            discussion=[message]
-        )
+        discussion = Discussion(user=current_user.id, discussion=[message])
+        form.populate_obj(discussion)
+        discussion.save()
         on_new_discussion.send(discussion)
 
         return discussion, 201

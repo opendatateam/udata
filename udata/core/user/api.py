@@ -6,7 +6,7 @@ from flask.ext.security import current_user
 from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, API
 from udata.models import (
-    CommunityResource, Dataset, FollowUser, Reuse, User
+    CommunityResource, Dataset, Reuse, User
 )
 
 from udata.core.dataset.api_fields import (
@@ -228,7 +228,7 @@ class UserAPI(ModelAPI):
 
 @ns.route('/<id>/followers/', endpoint='user_followers')
 class FollowUserAPI(FollowAPI):
-    model = FollowUser
+    model = User
 
     @api.secure
     @api.doc(notes="You can't follow yourself.",

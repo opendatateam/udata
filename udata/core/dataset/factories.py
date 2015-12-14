@@ -24,13 +24,6 @@ class VisibleDatasetFactory(DatasetFactory):
         return [ResourceFactory()]
 
 
-class DatasetIssueFactory(MongoEngineFactory):
-    class Meta:
-        model = models.DatasetIssue
-
-    title = factory.LazyAttribute(lambda o: faker.sentence())
-
-
 class ChecksumFactory(MongoEngineFactory):
     class Meta:
         model = models.Checksum
@@ -57,13 +50,6 @@ class CommunityResourceFactory(BaseResourceFactory):
 class ResourceFactory(BaseResourceFactory):
     class Meta:
         model = models.Resource
-
-
-class DatasetDiscussionFactory(MongoEngineFactory):
-    class Meta:
-        model = models.DatasetDiscussion
-
-    title = factory.LazyAttribute(lambda o: faker.sentence())
 
 
 class LicenseFactory(MongoEngineFactory):

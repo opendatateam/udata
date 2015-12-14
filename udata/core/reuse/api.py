@@ -8,7 +8,7 @@ from flask import request
 from udata import search
 from udata.api import api, API, ModelAPI, SingleObjectAPI, errors
 from udata.auth import admin_permission
-from udata.models import Dataset, Reuse, REUSE_TYPES
+from udata.models import Dataset
 from udata.utils import multi_to_dict
 
 from udata.core.badges import api as badges_api
@@ -22,7 +22,7 @@ from .api_fields import (
     reuse_type_fields, dataset_ref_fields
 )
 from .forms import ReuseForm
-from .models import FollowReuse
+from .models import Reuse, REUSE_TYPES
 from .permissions import ReuseEditPermission
 from .search import ReuseSearch
 
@@ -166,7 +166,7 @@ class ReuseFeaturedAPI(SingleObjectAPI, API):
 
 @ns.route('/<id>/followers/', endpoint='reuse_followers')
 class FollowReuseAPI(FollowAPI):
-    model = FollowReuse
+    model = Reuse
 
 
 suggest_parser = api.parser()

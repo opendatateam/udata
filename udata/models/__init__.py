@@ -5,6 +5,7 @@ import logging
 
 from collections import Iterable
 
+from bson import ObjectId, DBRef
 from flask.ext.mongoengine import (
     MongoEngine, MongoEngineSessionInterface, Document, BaseQuerySet
 )
@@ -46,6 +47,8 @@ class UDataMongoEngine(MongoEngine):
         self.FileField = FileField
         self.ImageField = ImageField
         self.ValidationError = ValidationError
+        self.ObjectId = ObjectId
+        self.DBRef = DBRef
         self.post_save = post_save
         self.pre_save = pre_save
 

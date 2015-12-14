@@ -14,7 +14,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.frontend import csv
-from udata.models import Member, FollowOrg
+from udata.models import Member, Follow
 
 from . import FrontTestCase
 
@@ -148,7 +148,7 @@ class OrganizationBlueprintTest(FrontTestCase):
         '''It should render the organization page with followers'''
         org = OrganizationFactory()
         followers = [
-            FollowOrg.objects.create(follower=UserFactory(), following=org)
+            Follow.objects.create(follower=UserFactory(), following=org)
             for _ in range(3)]
 
         response = self.get(url_for('organizations.show', org=org))

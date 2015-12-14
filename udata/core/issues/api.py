@@ -7,11 +7,10 @@ from flask.ext.security import current_user
 from flask_restplus.inputs import boolean
 
 from udata.api import api, API, fields
-from udata.models import Dataset, DatasetIssue, Reuse, ReuseIssue
 from udata.core.user.api_fields import user_ref_fields
 
 from .forms import IssueCommentForm, IssueCreateForm
-from .models import Message, Issue
+from .models import db, Message, Issue
 from .permissions import CloseIssuePermission
 from .signals import on_new_issue, on_new_issue_comment, on_issue_closed
 
@@ -27,9 +26,9 @@ message_fields = api.model('IssueMessage', {
 
 issue_fields = api.model('Issue', {
     'id': fields.String(description='The issue identifier', readonly=True),
-    'subject': fields.String(
-        attribute='subject.id',
-        description='The issue target object identifier', required=True),
+    'subject': fields.Nested(api.model_reference,
+                             description='The issue target object',
+                             required=True),
     'class': fields.ClassName(description='The object class',
                               discriminator=True, required=True),
     'title': fields.String(description='The issue title', required=True),
@@ -127,7 +126,8 @@ class IssuesAPI(API):
         args = parser.parse_args()
         issues = Issue.objects
         if args['for']:
-            issues = issues(subject__in=args['for'])
+            ids = [db.ObjectId(id) for id in args['for']]
+            issues = issues(__raw__={'subject._ref.$id': {'$in': ids}})
         if args['closed'] is False:
             issues = issues(closed=None)
         elif args['closed'] is True:
@@ -147,16 +147,9 @@ class IssuesAPI(API):
             content=form.comment.data,
             posted_by=current_user.id
         )
-        if isinstance(form.subject.data, Dataset):
-            model = DatasetIssue
-        elif isinstance(form.subject.data, Reuse):
-            model = ReuseIssue
-        issue = model.objects.create(
-            subject=form.subject.data.id,
-            title=form.title.data,
-            user=current_user.id,
-            discussion=[message]
-        )
+        issue = Issue(user=current_user.id, discussion=[message])
+        form.populate_obj(issue)
+        issue.save()
         on_new_issue.send(issue)
 
         return issue, 201
