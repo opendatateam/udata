@@ -11,7 +11,6 @@
 <div class="row">
     <div class="{{ threadclass }} list-group resources-list smaller">
     {% for discussion in discussions %}
-        {% set loop_index = loop.index %}
         {% include theme('discussion/item.html') %}
     {% endfor %}
         <a class="list-group-item add new-discussion"
