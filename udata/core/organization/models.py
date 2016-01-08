@@ -169,7 +169,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     @property
     def external_url(self):
-        return self.url_for(**{'_external': True})
+        return self.url_for(_external=True)
 
     @property
     def pending_requests(self):

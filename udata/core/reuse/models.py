@@ -121,7 +121,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
 
     @property
     def external_url(self):
-        return self.url_for(**{'_external': True})
+        return self.url_for(_external=True)
 
     @property
     def type_label(self):
