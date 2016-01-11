@@ -6,7 +6,7 @@ from datetime import datetime
 from flask import request
 
 from udata import search
-from udata.api import api, API, ModelAPI, SingleObjectAPI, errors
+from udata.api import api, API, errors
 from udata.auth import admin_permission
 from udata.models import Dataset
 from udata.utils import multi_to_dict
@@ -54,7 +54,7 @@ class ReuseListAPI(API):
 @ns.route('/<reuse:reuse>/', endpoint='reuse', doc=common_doc)
 @api.response(404, 'Reuse not found')
 @api.response(410, 'Reuse has been deleted')
-class ReuseAPI(ModelAPI):
+class ReuseAPI(API):
     @api.doc('get_reuse')
     @api.marshal_with(reuse_fields)
     def get(self, reuse):
@@ -142,9 +142,7 @@ class ReuseBadgeAPI(API):
 
 @ns.route('/<reuse:reuse>/featured/', endpoint='reuse_featured')
 @api.doc(**common_doc)
-class ReuseFeaturedAPI(SingleObjectAPI, API):
-    model = Reuse
-
+class ReuseFeaturedAPI(API):
     @api.doc('feature_reuse')
     @api.secure(admin_permission)
     @api.marshal_with(reuse_fields)

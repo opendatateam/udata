@@ -2,23 +2,23 @@
 from __future__ import unicode_literals
 
 import logging
+import os
 import urllib
 
-from datetime import datetime
 from functools import wraps
 
 from flask import (
-    current_app, g, request, url_for, json, make_response, redirect, Blueprint
+    current_app, g, request, url_for, json, make_response, redirect, Blueprint,
+    render_template_string
 )
 from flask.ext.restplus import Api, Resource, marshal, cors
 
-from udata import search, theme, tracking, models
+from udata import search, theme, tracking
 from udata.app import csrf
 from udata.i18n import I18nBlueprint
 from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
-from udata.utils import multi_to_dict
 from udata.core.user.models import User
 from udata.sitemap import sitemap
 
@@ -34,6 +34,23 @@ apidoc = I18nBlueprint('apidoc', __name__)
 
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = 'X-API-KEY'
+DESCRIPTION = None
+
+FACETS_TYPES = {
+    search.fields.BoolFacet: inputs.boolean
+}
+
+
+def description():
+    '''Load description from markdown file'''
+    if 'short' in request.args:
+        return ''
+    global DESCRIPTION
+    if not DESCRIPTION:
+        filename = os.path.join(os.path.dirname(__file__), 'description.md')
+        with open(filename) as doc:
+            DESCRIPTION = doc.read()
+    return render_template_string(DESCRIPTION)
 
 
 class UDataApi(Api):
@@ -129,7 +146,8 @@ class UDataApi(Api):
         # Add facets filters arguments
         # (apply a value to a facet ie. tag=value)
         for name, facet in adapter.facets.items():
-            parser.add_argument(name, type=str, location='args')
+            facet_type = FACETS_TYPES.get(facet.__class__, str)
+            parser.add_argument(name, type=facet_type, location='args')
         # Sort arguments
         keys = adapter.sorts.keys()
         choices = keys + ['-' + k for k in keys]
@@ -163,7 +181,7 @@ class UDataApi(Api):
 api = UDataApi(apiv1,
     decorators=[csrf.exempt, cors.crossdomain(origin='*', credentials=True)],
     version='1.0', title='uData API',
-    description='uData API', default='site',
+    description=description, default='site',
     default_label='Site global namespace')
 
 
@@ -269,71 +287,6 @@ def fix_apidoc_throbber():
 
 class API(Resource):  # Avoid name collision as resource is a core model
     pass
-
-
-class ModelListAPI(API):
-    model = None
-    fields = None
-    form = None
-    search_adapter = None
-
-    @api.doc(params={})
-    def get(self):
-        '''List all objects'''
-        if self.search_adapter:
-            objects = search.query(self.search_adapter,
-                                   **multi_to_dict(request.args))
-        else:
-            objects = list(self.model.objects)
-        return marshal_page(objects, self.fields)
-
-    @api.secure
-    @api.doc(responses={400: 'Validation error'})
-    def post(self):
-        '''Create a new object'''
-        form = api.validate(self.form)
-        return marshal(form.save(), self.fields), 201
-
-
-class SingleObjectAPI(object):
-    model = None
-
-    def get_or_404(self, **kwargs):
-        for key, value in kwargs.items():
-            if isinstance(value, self.model):
-                return value
-        return self.model.objects.get_or_404(**kwargs)
-
-
-@api.doc(responses={404: 'Object not found'})
-class ModelAPI(SingleObjectAPI, API):
-    fields = None
-    form = None
-
-    def get(self, **kwargs):
-        '''Get a given object'''
-        obj = self.get_or_404(**kwargs)
-        return marshal(obj, self.fields)
-
-    @api.secure
-    @api.doc(responses={400: 'Validation error'})
-    def put(self, **kwargs):
-        '''Update a given object'''
-        obj = self.get_or_404(**kwargs)
-        form = api.validate(self.form, obj)
-        return marshal(form.save(), self.fields)
-
-    @api.secure
-    @api.doc(model=None, responses={204: 'Object deleted'})
-    def delete(self, **kwargs):
-        '''Delete a given object'''
-        obj = self.get_or_404(**kwargs)
-        if hasattr(obj, 'deleted'):
-            obj.deleted = datetime.now()
-            obj.save()
-        else:
-            obj.delete()
-        return '', 204
 
 
 base_reference = api.model('BaseReference', {

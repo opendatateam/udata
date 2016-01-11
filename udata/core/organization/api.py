@@ -62,7 +62,7 @@ class OrganizationListAPI(API):
     @api.secure
     @api.doc('create_organization', responses={400: 'Validation error'})
     @api.expect(org_fields)
-    @api.marshal_with(org_fields)
+    @api.marshal_with(org_fields, code=201)
     def post(self):
         '''Create a new organization'''
         form = api.validate(OrganizationForm)
@@ -87,8 +87,13 @@ class OrganizationAPI(API):
     @api.expect(org_fields)
     @api.marshal_with(org_fields)
     @api.response(400, errors.VALIDATION_ERROR)
+    @api.response(410, 'Organization has been deleted')
     def put(self, org):
-        '''Update a organization given its identifier'''
+        '''
+        Update a organization given its identifier
+
+        :raises PermissionDenied:
+        '''
         if org.deleted:
             api.abort(410, 'Organization has been deleted')
         EditOrganizationPermission(org).test()

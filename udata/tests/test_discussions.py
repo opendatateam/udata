@@ -112,7 +112,7 @@ class DiscussionsTest(APITestCase):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
             discussion = Discussion.objects.create(
-                subject=dataset.id,
+                subject=dataset,
                 user=user,
                 title='test discussion {}'.format(i),
                 discussion=[message]
@@ -145,7 +145,7 @@ class DiscussionsTest(APITestCase):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
             discussion = Discussion.objects.create(
-                subject=dataset.id,
+                subject=dataset,
                 user=user,
                 title='test discussion {}'.format(i),
                 discussion=[message]
@@ -170,11 +170,33 @@ class DiscussionsTest(APITestCase):
         for discussion in response.json['data']:
             self.assertIsNotNone(discussion['closed'])
 
-        response = self.get(url_for('api.discussions', closed=False))
+    def test_list_discussions_for(self):
+        dataset = DatasetFactory()
+        discussions = []
+        for i in range(3):
+            user = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=user)
+            discussion = Discussion.objects.create(
+                subject=dataset,
+                user=user,
+                title='test discussion {}'.format(i),
+                discussion=[message]
+            )
+            discussions.append(discussion)
+        user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        Discussion.objects.create(
+            subject=DatasetFactory(),
+            user=user,
+            title='test discussion {}'.format(i),
+            discussion=[message]
+        )
+
+        kwargs = {'for': str(dataset.id)}
+        response = self.get(url_for('api.discussions', **kwargs))
         self.assert200(response)
-        self.assertEqual(len(response.json['data']), len(open_discussions))
-        for discussion in response.json['data']:
-            self.assertIsNone(discussion['closed'])
+
+        self.assertEqual(len(response.json['data']), len(discussions))
 
     def test_get_discussion(self):
         dataset = Dataset.objects.create(title='Test dataset')

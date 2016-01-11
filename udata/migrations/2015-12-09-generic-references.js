@@ -3,7 +3,7 @@
  */
 
 /**
- * Maps inherited classes to theiru subject collection
+ * Maps inherited classes to their subject collection
  */
 var TYPES = {
     'Discussion.DatasetDiscussion': 'dataset',
@@ -14,8 +14,22 @@ var TYPES = {
     'Follow.FollowReuse': 'reuse',
     'Follow.FollowOrg': 'organization',
     'Follow.FollowUser': 'user',
+    'Activity.UserCreatedDataset': 'dataset',
+    'Activity.UserCreatedOrganization': 'organization',
+    'Activity.UserCreatedReuse': 'reuse',
+    'Activity.UserFollowedDataset': 'dataset',
+    'Activity.UserFollowedOrganization': 'organization',
+    'Activity.UserFollowedReuse': 'reuse',
+    'Activity.UserFollowedUser': 'user',
+    'Activity.UserStarredDataset': 'dataset',
+    'Activity.UserUpdatedDataset': 'dataset',
+    'Activity.UserUpdatedOrganization': 'organization',
+    'Activity.UserUpdatedReuse': 'reuse'
 };
 
+/**
+ * Maps collections to their classes
+ */
 var CLASSES = {
     'dataset': 'Dataset',
     'reuse': 'Reuse',
@@ -24,39 +38,31 @@ var CLASSES = {
 };
 
 /**
- * Produce a (wweird) GenericReferenceField from a class and an ID
+ * Process a collection replacing an inheritance pattern with a generic reference.
+ * @param  {String} collection The collection name
+ * @param  {String} attribute  The attribute to transform into a generic reference
  */
-function ref(cls, id) {
-    cls = TYPES[cls];
-    return {
-        _cls: CLASSES[cls],
-        _ref: {$ref: cls, $id: id}
-    };
+function process(collection, attribute) {
+    var objects = db[collection].find(),
+        count = 0;
+    print('Processing db.' + collection);
+    objects.forEach(function(object) {
+        if (object._cls) {
+            var cls = TYPES[object._cls],
+                op = {$unset: {_cls: true}, $set: {}};
+            // Build a (weird) GenericReference
+            op.$set[attribute] = {
+                _cls: CLASSES[cls],
+                _ref: {$ref: cls, $id: object[attribute]}
+            };
+            db[collection].update({_id: object._id}, op);
+            count++;
+        }
+    });
+    print('Processed ' + count + ' documents in db.' + collection);
 }
 
-var discussions = db.discussion.find();
-print('Processing ' + discussions.count() + ' discussions');
-discussions.forEach(function(discussion) {
-    db.discussion.update({_id: discussion._id}, {
-        $unset: {_cls: true},
-        $set: {subject: ref(discussion._cls, discussion.subject)}
-    });
-});
-
-var issues = db.issue.find();
-print('Processing ' + issues.count() + ' issues');
-issues.forEach(function(issue) {
-    db.issue.update({_id: issue._id}, {
-        $unset: {_cls: true},
-        $set: {subject: ref(issue._cls, issue.subject)}
-    });
-});
-
-var follows = db.follow.find();
-print('Processing ' + follows.count() + ' follows');
-follows.forEach(function(follow) {
-    db.follow.update({_id: follow._id}, {
-        $unset: {_cls: true},
-        $set: {following: ref(follow._cls, follow.following)}
-    });
-});
+process('discussion', 'subject');
+process('issue', 'subject');
+process('follow', 'following');
+// process('activity', 'related_to');

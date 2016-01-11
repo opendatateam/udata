@@ -10,7 +10,7 @@ from udata.api import api, API, fields
 from udata.core.user.api_fields import user_ref_fields
 
 from .forms import IssueCommentForm, IssueCreateForm
-from .models import db, Message, Issue
+from .models import Message, Issue
 from .permissions import CloseIssuePermission
 from .signals import on_new_issue, on_new_issue_comment, on_issue_closed
 
@@ -74,7 +74,6 @@ parser.add_argument(
 
 
 @ns.route('/<id>/', endpoint='issue')
-@api.doc(model=issue_fields)
 class IssueAPI(API):
     '''
     Single Issue Model API (Read and update).
@@ -118,16 +117,14 @@ class IssuesAPI(API):
     '''
     List all issues.
     '''
-    @api.doc('list_issues')
-    @api.doc(parser=parser)
+    @api.doc('list_issues', parser=parser)
     @api.marshal_with(issue_page_fields)
     def get(self):
         '''List all Issues'''
         args = parser.parse_args()
         issues = Issue.objects
         if args['for']:
-            ids = [db.ObjectId(id) for id in args['for']]
-            issues = issues(__raw__={'subject._ref.$id': {'$in': ids}})
+            issues = issues.generic_in(subject=args['for'])
         if args['closed'] is False:
             issues = issues(closed=None)
         elif args['closed'] is True:
@@ -136,8 +133,8 @@ class IssuesAPI(API):
                       .paginate(args['page'], args['page_size']))
 
     @api.secure
-    @api.expect(issue_fields)
     @api.doc('create_issue')
+    @api.expect(issue_fields)
     @api.marshal_with(issue_fields)
     def post(self):
         '''Create a new Issue'''

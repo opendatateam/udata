@@ -132,7 +132,7 @@ class IssuesTest(APITestCase):
             closed_by=user
         )]
 
-        response = self.get(url_for('api.issues', id=dataset.id))
+        response = self.get(url_for('api.issues'))
         self.assert200(response)
         expected_length = len(open_issues + closed_issues)
         self.assertEqual(len(response.json['data']), expected_length)
@@ -164,7 +164,7 @@ class IssuesTest(APITestCase):
             )
             closed_issues.append(issue)
 
-        response = self.get(url_for('api.issues', id=dataset.id, closed=True))
+        response = self.get(url_for('api.issues', closed=True))
         self.assert200(response)
 
         self.assertEqual(len(response.json['data']), len(closed_issues))
@@ -177,6 +177,36 @@ class IssuesTest(APITestCase):
         self.assertEqual(len(response.json['data']), len(open_issues))
         for issue in response.json['data']:
             self.assertIsNone(issue['closed'])
+
+    def test_list_issues_for(self):
+        dataset = Dataset.objects.create(title='Test dataset')
+        issues = []
+        for i in range(3):
+            user = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=user)
+            issue = Issue.objects.create(
+                subject=dataset,
+                user=user,
+                title='test issue {}'.format(i),
+                discussion=[message]
+            )
+            issues.append(issue)
+        # Creating a closed issue that shouldn't show up in response.
+        user = UserFactory()
+        other_dataset = Dataset.objects.create(title='Other Test dataset')
+        message = Message(content=faker.sentence(), posted_by=user)
+        issue = Issue.objects.create(
+            subject=other_dataset,
+            user=user,
+            title='test issue {}'.format(i),
+            discussion=[message]
+        )
+
+        kwargs = {'for': str(dataset.id)}
+        response = self.get(url_for('api.issues', **kwargs))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json['data']), len(issues))
 
     def test_get_issue(self):
         dataset = Dataset.objects.create(title='Test dataset')

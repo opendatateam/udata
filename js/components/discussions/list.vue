@@ -37,10 +37,10 @@ export default {
     },
     events: {
         'datatable:item:click': function(discussion) {
-            let prefix = discussion.class.replace('Discussion', '').toLowerCase(),
+            let prefix = discussion.subject.class.toLowerCase(),
                 route = `${prefix}-discussion`;
             this.$go({name: route, params: {
-                oid: discussion.subject,
+                oid: discussion.subject.id,
                 discussion_id: discussion.id
             }});
         }

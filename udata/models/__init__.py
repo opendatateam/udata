@@ -141,6 +141,25 @@ class UDataQuerySet(BaseQuerySet):
                 doc.save(write_concern=write_concern)
             return doc, True
 
+    def generic_in(self, **kwargs):
+        '''Bypass buggy GenericReferenceField querying issue'''
+        query = {}
+        for key, value in kwargs.items():
+            if not value:
+                continue
+            elif not isinstance(value, (list, tuple)):
+                self.error('expect a list as parameter')
+            elif all(isinstance(v, basestring) for v in value):
+                ids = [ObjectId(v) for v in value]
+                query['{0}._ref.$id'.format(key)] = {'$in': ids}
+            elif all(isinstance(v, DBRef) for v in value):
+                query['{0}._ref'.format(key)] = {'$in': value}
+            elif all(isinstance(v, ObjectId) for v in value):
+                query['{0}._ref.$id'.format(key)] = {'$in': value}
+            else:
+                self.error('expect a list of string, ObjectId or DBRef')
+        return self(__raw__=query)
+
 
 class UDataDocument(Document):
     meta = {

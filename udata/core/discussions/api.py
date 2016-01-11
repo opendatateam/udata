@@ -11,7 +11,7 @@ from udata.api import api, API, fields
 from udata.core.user.api_fields import user_ref_fields
 
 from .forms import DiscussionCreateForm, DiscussionCommentForm
-from .models import db, Message, Discussion
+from .models import Message, Discussion
 from .permissions import CloseDiscussionPermission
 from .signals import (
     on_new_discussion, on_new_discussion_comment, on_discussion_closed,
@@ -79,7 +79,6 @@ parser.add_argument(
 
 
 @ns.route('/<id>/', endpoint='discussion')
-@api.doc(model=discussion_fields)
 class DiscussionAPI(API):
     '''
     Base class for a discussion thread.
@@ -133,16 +132,14 @@ class DiscussionsAPI(API):
     '''
     Base class for a list of discussions.
     '''
-    @api.doc('list_discussions')
+    @api.doc('list_discussions', parser=parser)
     @api.marshal_with(discussion_page_fields)
-    @api.doc(parser=parser)
     def get(self):
         '''List all Discussions'''
         args = parser.parse_args()
         discussions = Discussion.objects
         if args['for']:
-            ids = [db.ObjectId(id) for id in args['for']]
-            discussions = discussions(__raw__={'subject._ref.$id': {'$in': ids}})
+            discussions = discussions.generic_in(subject=args['for'])
         if args['closed'] is False:
             discussions = discussions(closed=None)
         elif args['closed'] is True:
@@ -151,8 +148,8 @@ class DiscussionsAPI(API):
                            .paginate(args['page'], args['page_size']))
 
     @api.secure
-    @api.expect(discussion_fields)
     @api.doc('create_discussion')
+    @api.expect(discussion_fields)
     @api.marshal_with(discussion_fields)
     def post(self):
         '''Create a new Discussion'''

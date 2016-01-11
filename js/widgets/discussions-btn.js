@@ -88,7 +88,10 @@ $('.submit-new-discussion').click(function(e) {
     const data = {
         title: $form.find('#title-new-discussion').val(),
         comment: $form.find('#comment-new-discussion').val(),
-        subject: $form.data('subject')
+        subject: {
+            id: $form.data('subject-id'),
+            class: $form.data('subject-class')
+        }
     };
 
     submitNewComment($this, $form, data, function() {

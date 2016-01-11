@@ -1,8 +1,8 @@
 {% macro issues_btn(obj, icons=None) %}
-{% set basename = obj.__class__.__name__|lower %}
 <button type="button" class="btn btn-danger btn-issues"
     data-api-url="{{ url_for('api.issues', for=obj.id|string) }}"
-    data-subject="{{ obj.id }}"
+    data-subject-id="{{ obj.id }}"
+    data-subject-class="{{ obj.__class__.__name__ }}"
     data-toggle="tooltip" title="{{ _('Issues') }}"
     data-placement="top" data-container="body">
     <span class="{{ ficon('fa-warning') }}"></span>
