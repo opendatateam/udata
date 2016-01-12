@@ -14,7 +14,7 @@
     ],
 } %}
 
-{% set body_class="c3 dataconnexions" %}
+{% set body_class="c3 contest" %}
 
 {% block content %}
 {% cache cache_duration, 'c3', g.lang_code %}
@@ -133,7 +133,7 @@
         </div>
         <div class="clearfix text-center">
             <a class="btn btn-default"
-                href="{{ url_for('datasets.list', badge='c3') }}">
+                href="{{ url_for('datasets.list', badge=badge) }}">
                 <span class="glyphicon glyphicon-list"></span>
                 {{ _('See the %(nb)s datasets', nb=datasets|length) }}
             </a>

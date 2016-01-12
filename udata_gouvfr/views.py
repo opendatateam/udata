@@ -8,7 +8,9 @@ from udata.models import Reuse, Organization, Dataset
 from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
 
-from .models import DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE, C3
+from .models import (
+    DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE, C3, NECMERGITUR
+)
 
 blueprint = I18nBlueprint('gouvfr', __name__,
                           template_folder='templates',
@@ -137,8 +139,22 @@ def c3():
 @blueprint.route('/climate-change-challenge')
 def climate_change_challenge():
     partners = Organization.objects(slug__in=C3_PARTNERS)
-    datasets = Dataset.objects(badges__kind=C3).visible().order_by('-metrics.followers')
-    return theme.render('c3.html', partners=partners, datasets=datasets,
+    datasets = (Dataset.objects(badges__kind=C3).visible()
+                .order_by('-metrics.followers'))
+    return theme.render('c3.html',
+                        partners=partners,
+                        datasets=datasets,
+                        badge=C3,
+                        nb_displayed_datasets=NB_DISPLAYED_DATASETS)
+
+
+@blueprint.route('/nec-mergitur')
+def nec_mergitur():
+    datasets = (Dataset.objects(badges__kind=NECMERGITUR).visible()
+                .order_by('-metrics.followers'))
+    return theme.render('nec_mergitur.html',
+                        datasets=datasets,
+                        badge=NECMERGITUR,
                         nb_displayed_datasets=NB_DISPLAYED_DATASETS)
 
 

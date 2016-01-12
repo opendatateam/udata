@@ -1,0 +1,87 @@
+{% extends theme("base.html") %}
+
+{% set meta = {
+    'title': 'Nec Mergitur',
+    'description': "Un Hackathon pour renforcer la sécurité dans Paris",
+    'keywords': [
+        'paris',
+        'fluctuat',
+        'nec',
+        'mergitur',
+        'hackathon',
+        'évènement',
+        'sécurité',
+        'crise',
+        'alerte',
+    ],
+} %}
+
+{% set body_class="nec_mergitur contest" %}
+
+{% block content %}
+{% cache cache_duration, 'nec_mergitur', g.lang_code %}
+<section class="content">
+    <div class="container">
+        <div class="row">
+            <article class="col-xs-12 col-sm-8 col-md-9">
+                <h1>« Nec Mergitur »</h1>
+                <h2>Un Hackathon pour renforcer la sécurité dans Paris</h2>
+
+                <p class="text-justify lead">
+                La communauté de l’innovation s’est très fortement mobilisée à la suite des attentats et a une nouvelle fois fait la preuve de sa capacité de résilience en utilisant la devise de la ville « Fluctuat nec mergitur ».
+                </p>
+
+                <p class="text-justify">
+                Les Parisiens et Parisiennes ont fait un usage immédiat des réseaux sociaux, notamment Facebook et Twitter. Dès les premières heures, ces outils numériques ont permis aux internautes de venir en aide aux riverains des attaques grâce notamment au hashtag #PorteOuverte et de rassurer leurs proches.
+                </p>
+
+                <p class="text-justify">
+                C’est dans cet esprit que la Ville de Paris a proposé, en accord avec la Préfecture de Police et les services de l’État, d’organiser un grand hackathon début janvier, afin de mobiliser la communauté de l’innovation : les développeurs, les créateurs, mais aussi la société civile pour accompagner la police et les services de l’État dans leur mission de prévention, d’alerte et de gestion des crises, en leur proposant des outils innovants et nouveaux.
+                </p>
+
+                <p class="text-justify">
+                Le hackathon se tiendra à Paris durant 3 jours du vendredi 15 janvier fin d'après-midi au dimanche 17 janvier au soir.
+                </p>
+
+                <p class="text-justify">
+                Afin de permettre à la communauté de l'innovation de développer ces outils, le SGMAP à travers la mission Etalab a référencé les jeux de données téléchargeables gratuitement sur la plateforme data.gouv.fr permettant le développement de services innovants autour de la prévention, d'alerte et de gestion de crise que vous trouverez ci-dessous :
+                </p>
+
+            </article>
+
+            <aside class="col-xs-12 col-sm-4 col-md-3">
+                <div class="text-center">
+                    <img src="{{ url_for('gouvfr.static', filename='nec_mergitur/logo_nec_mergitur.png') }}"
+                        alt="Logo de Nec Mergitur" class="scalable" />
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+{% if datasets %}
+<section class="content participants">
+    <div class="container">
+
+        <div class="row">
+            <h3 class="col-xs-12">Les jeux de données remarquables</h3>
+            <ul class="card-list">
+                {% for dataset in datasets[:nb_displayed_datasets] %}
+                <li class="col-md-4 col-sm-6">
+                    {% include theme('dataset/card.html') %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="clearfix text-center">
+            <a class="btn btn-default"
+                href="{{ url_for('datasets.list', badge=badge) }}">
+                <span class="glyphicon glyphicon-list"></span>
+                {{ _('See the %(nb)s datasets', nb=datasets|length) }}
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endcache %}
+{% endblock %}
