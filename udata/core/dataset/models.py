@@ -162,7 +162,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     description = db.StringField(required=True, default='')
     license = db.ReferenceField('License')
 
-    tags = db.ListField(db.StringField())
+    tags = db.TagListField()
     resources = db.ListField(db.EmbeddedDocumentField(Resource))
 
     private = db.BooleanField()
