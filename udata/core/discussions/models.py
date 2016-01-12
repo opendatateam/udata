@@ -42,3 +42,9 @@ class Discussion(db.Document):
         discussion, False otherwise.
         """
         return any(message.posted_by == person for message in self.discussion)
+
+    @property
+    def external_url(self):
+        return self.subject.url_for(
+            _anchor='discussion-{ id }'.format(id=self.id),
+            _external=True)

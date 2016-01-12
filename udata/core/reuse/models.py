@@ -114,13 +114,14 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
         else:
             cls.on_update.send(document)
 
-    @property
-    def display_url(self):
-        return url_for('reuses.show', reuse=self)
+    def url_for(self, *args, **kwargs):
+        return url_for('reuses.show', reuse=self, *args, **kwargs)
+
+    display_url = property(url_for)
 
     @property
     def external_url(self):
-        return url_for('reuses.show', reuse=self, _external=True)
+        return self.url_for(_external=True)
 
     @property
     def type_label(self):
