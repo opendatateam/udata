@@ -28,7 +28,9 @@ Reuse.__badges__.update({
 
 # Datasets
 C3 = 'c3'
+NECMERGITUR = 'nec'
 Dataset.__badges__[C3] = _('C³')
+Dataset.__badges__[NECMERGITUR] = _('Nec Mergitur')
 
 
 class ZonagesTerritoryDataset(TerritoryDataset):
