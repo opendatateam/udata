@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from bson import ObjectId
 from datetime import date
 
+from flask_restful.inputs import boolean
+
 from udata.api import api, API, marshal, fields
 from udata.models import Metrics
 
@@ -32,7 +34,7 @@ parser.add_argument(
 parser.add_argument(
     'end', type=isodate, help='End of the period to fetch', location='args')
 parser.add_argument(
-    'cumulative', type=bool, help='Either cumulative metrics or not',
+    'cumulative', type=boolean, help='Either cumulative metrics or not',
     default=True, location='args')
 parser.add_argument(
     'day', type=isodate, help='Specific day date to fetch', location='args')

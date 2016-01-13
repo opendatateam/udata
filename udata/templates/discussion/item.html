@@ -1,9 +1,9 @@
-<div class="list-group-item" id="discussion-{{ loop_index }}" data-discussion-id="{{ discussion.id }}">
+<div class="list-group-item" id="discussion-{{ discussion.id }}" data-discussion-id="{{ discussion.id }}">
     <div class="format-label pull-left">
         {{ discussion.user|avatar(52) }}
     </div>
     <span class="list-group-item-link">
-        <a href="#discussion-{{ loop_index }}"><span class="fa fa-link"></span></a>
+        <a href="#discussion-{{ discussion.id }}"><span class="fa fa-link"></span></a>
     </span>
     <h4 class="list-group-item-heading ellipsis open-discussion-thread">
         <span itemprop="name">{{ discussion.title }}</span>
@@ -14,14 +14,14 @@
     </p>
 </div>
 {% for message in discussion.discussion %}
-    <div id="discussion-{{ loop_index }}-{{ loop.index }}"
+    <div id="discussion-{{ discussion.id }}-{{ loop.index }}"
         class="list-group-item list-group-indent list-group-thread-{{ discussion.id }} hidden animated discussion-messages-list {% if loop.first %}body-only{% endif %}">
         {% if not loop.first %}
         <div class="format-label pull-left">
             {{ message.posted_by|avatar(52) }}
         </div>
         <span class="list-group-item-link">
-            <a href="#discussion-{{ loop_index }}-{{ loop.index }}"><span class="fa fa-link"></span></a>
+            <a href="#discussion-{{ discussion.id }}-{{ loop.index }}"><span class="fa fa-link"></span></a>
         </span>
         {% endif %}
         <p class="list-group-item-heading">
@@ -29,6 +29,7 @@
         </p>
     </div>
 {% endfor %}
+{% if not discussion.closed %}
 <a class="list-group-item add new-comment list-group-indent list-group-thread-{{ discussion.id }} hidden animated"
     data-discussion-id="{{ discussion.id }}"
     href="#">
@@ -37,14 +38,15 @@
         {{ _('Add a comment') }}
     </h4>
 </a>
+{% endif %}
 <div class="list-group-item list-group-form list-group-indent list-group-form-{{ discussion.id }} hidden animated"
     data-discussion-id="{{ discussion.id }}"
-    id="discussion-{{ loop_index }}-{{ discussion.discussion|length + 1 }}">
+    id="discussion-{{ discussion.id }}-{{ discussion.discussion|length + 1 }}">
     <div class="format-label pull-left">
         {{ current_user|avatar(52) }}
     </div>
     <span class="list-group-item-link">
-        <a href="#discussion-{{ loop_index }}-{{ discussion.discussion|length + 1 }}"><span class="fa fa-link"></span></a>
+        <a href="#discussion-{{ discussion.id }}-{{ discussion.discussion|length + 1 }}"><span class="fa fa-link"></span></a>
     </span>
     <h4 class="list-group-item-heading">
         {{ _('Commenting on this thread') }}

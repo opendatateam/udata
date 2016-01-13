@@ -343,7 +343,7 @@
                 </div>
 
                 {# Geospatial panel #}
-                {% if dataset.spatial %}
+                {% if dataset.spatial.geom or dataset.spatial.zones %}
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <h3>{{ _('Spatial coverage') }}</h3>
