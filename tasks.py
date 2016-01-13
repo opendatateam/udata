@@ -85,11 +85,11 @@ def qa():
     '''Run a quality report'''
     header('Performing static analysis')
     info('Python static analysis')
-    flake8_results = lrun('flake8 udata', warn=True)
+    flake8_results = lrun('flake8 udata', pty=True, warn=True)
     info('JavaScript static analysis')
-    jshint_results = nrun('jshint js --extra-ext=.vue --extract=auto', warn=True)
-    if flake8_results.failed or jshint_results.failed:
-        exit(flake8_results.return_code or jshint_results.return_code)
+    eslint_results = nrun('eslint js/ --ext .vue,.js', pty=True, warn=True)
+    if flake8_results.failed or eslint_results.failed:
+        exit(flake8_results.return_code or eslint_results.return_code)
     print(green('OK'))
 
 
