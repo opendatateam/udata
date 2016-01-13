@@ -197,7 +197,7 @@ class MaafBackend(backends.BaseBackend):
                     title=row['name'],
                     description=(
                         row['description'] + '\n\n' + SSL_COMMENT).strip(),
-                    type='remote',
+                    filetype='remote',
                     url=row['url'],
                     format=row['format']
                 )
