@@ -13,16 +13,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-10-16 19:05+0200\n"
+"POT-Creation-Date: 2016-01-13 19:02+0100\n"
 "PO-Revision-Date: 2015-09-30 15:06+0000\n"
 "Last-Translator: Larlet David <david@larlet.fr>\n"
+"Language: fr\n"
 "Language-Team: French (http://www.transifex.com/etalab/udata-"
 "gouvfr/language/fr/)\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 1.3\n"
+"Generated-By: Babel 2.1.1\n"
 
 #: udata_gouvfr/metrics.py:14
 msgid "Public services"
@@ -44,11 +45,16 @@ msgstr "Candidat Dataconnexions 6"
 msgid "Dataconnexions 6 laureate"
 msgstr "Lauréat Dataconnexions 6"
 
-#: udata_gouvfr/models.py:30
+#: udata_gouvfr/models.py:31
 msgid "C³"
 msgstr "C³"
 
+#: udata_gouvfr/models.py:32
+msgid "Nec Mergitur"
+msgstr ""
+
 #: udata_gouvfr/templates/c3.html:138
+#: udata_gouvfr/templates/nec_mergitur.html:80
 #, python-format
 msgid "See the %(nb)s datasets"
 msgstr "Voir les %(nb)s jeux de données"
@@ -65,19 +71,19 @@ msgstr "conditions générales d'utilisations"
 msgid "Discover OpenData"
 msgstr "Découvrez l'OpenData"
 
-#: udata_gouvfr/theme/theme.py:36 udata_gouvfr/theme/theme.py:60
+#: udata_gouvfr/theme/theme.py:36 udata_gouvfr/theme/theme.py:61
 msgid "As a citizen"
 msgstr "En tant que citoyen"
 
-#: udata_gouvfr/theme/theme.py:37 udata_gouvfr/theme/theme.py:61
+#: udata_gouvfr/theme/theme.py:37 udata_gouvfr/theme/theme.py:62
 msgid "As a producer"
 msgstr "En tant que producteur"
 
-#: udata_gouvfr/theme/theme.py:38 udata_gouvfr/theme/theme.py:62
+#: udata_gouvfr/theme/theme.py:38 udata_gouvfr/theme/theme.py:63
 msgid "As a reuser"
 msgstr "En tant que réutilisateur"
 
-#: udata_gouvfr/theme/theme.py:39 udata_gouvfr/theme/theme.py:63
+#: udata_gouvfr/theme/theme.py:39 udata_gouvfr/theme/theme.py:64
 msgid "As a developer"
 msgstr "En tant que développeur"
 
@@ -105,15 +111,15 @@ msgstr "Tableau de bord"
 msgid "Events"
 msgstr "Événements"
 
-#: udata_gouvfr/theme/theme.py:64
+#: udata_gouvfr/theme/theme.py:65
 msgid "API"
 msgstr "API"
 
-#: udata_gouvfr/theme/theme.py:65
+#: udata_gouvfr/theme/theme.py:66
 msgid "Credits"
 msgstr "Crédits"
 
-#: udata_gouvfr/theme/theme.py:66
+#: udata_gouvfr/theme/theme.py:67
 msgid "Terms of use"
 msgstr "Conditions générales d'utilisation"
 
@@ -122,7 +128,7 @@ msgid "The Open Data"
 msgstr "L'Open Data"
 
 #: udata_gouvfr/theme/templates/footer.html:24
-#: udata_gouvfr/theme/templates/subnav-small.html:25
+#: udata_gouvfr/theme/templates/subnav-small.html:33
 msgid "Topics"
 msgstr "Thématiques"
 
@@ -213,7 +219,7 @@ msgid "more"
 msgstr "plus"
 
 #: udata_gouvfr/theme/templates/subnav-large.html:20
-#: udata_gouvfr/theme/templates/subnav-small.html:16
+#: udata_gouvfr/theme/templates/subnav-small.html:23
 #: udata_gouvfr/theme/templates/topic/subnav.html:19
 msgid "Search"
 msgstr "Recherche"
@@ -224,8 +230,8 @@ msgstr "Partagez, améliorez et réutilisez les données publiques"
 
 #: udata_gouvfr/theme/templates/subnav-large.html:43
 #: udata_gouvfr/theme/templates/subnav-large.html:46
-#: udata_gouvfr/theme/templates/subnav-small.html:42
-#: udata_gouvfr/theme/templates/subnav-small.html:45
+#: udata_gouvfr/theme/templates/subnav-small.html:51
+#: udata_gouvfr/theme/templates/subnav-small.html:54
 #: udata_gouvfr/theme/templates/topic/subnav.html:50
 #: udata_gouvfr/theme/templates/topic/subnav.html:53
 msgid "Contribute!"
@@ -235,6 +241,10 @@ msgstr "Contribuez !"
 #: udata_gouvfr/theme/templates/reuse/display.html:3
 msgid "Explore with Datagouv"
 msgstr "Explorer avec Datagouv"
+
+#: udata_gouvfr/theme/templates/macros/integrate.html:2
+msgid "Integrate"
+msgstr ""
 
 #: udata_gouvfr/theme/templates/mail/base.html:45
 msgid "on your browser."
@@ -304,26 +314,7 @@ msgstr "Vous pouvez créer une nouvelle organisation ou trouver la vôtre"
 #~ msgstr "Ce jeu de données provient d'un service public certifié"
 
 #~ msgid ""
-#~ "Published on %(date)s and updated on "
-#~ "%(update)s by <a href=\"%(url)s\" "
-#~ "title=\"%(author)s\">%(author)s</a>"
 #~ msgstr ""
-#~ "Publié le %(date)s et mis à jour"
-#~ " le %(update)s par <a href=\"%(url)s\" "
-#~ "title=\"%(author)s\">%(author)s</a>"
-
-#~ msgid ""
-#~ "This dataset has been published on "
-#~ "%(date)s and updated on %(update)s on"
-#~ " the initiative and under the "
-#~ "responsibility of <a href=\"%(url)s\" "
-#~ "title=\"%(author)s\">%(author)s</a>"
-#~ msgstr ""
-#~ "Ce jeu de données a été publié "
-#~ "le %(date)s et mis à jours le "
-#~ "%(update)s à l'initiative et sous la "
-#~ "responsabilité de <a href=\"%(url)s\" "
-#~ "title=\"%(author)s\">%(author)s</a>"
 
 #~ msgid "See all datasets with that badge."
 #~ msgstr "Voir tous les jeux de données avec ce badge."
@@ -333,21 +324,9 @@ msgstr "Vous pouvez créer une nouvelle organisation ou trouver la vôtre"
 
 #~ msgid "This dataset is private and will not be visible by other users"
 #~ msgstr ""
-#~ "Ce jeu de données est privé et "
-#~ "ne sera pas visible des autres "
-#~ "utilisateurs"
 
 #~ msgid "Deleted"
 #~ msgstr "Supprimé"
-
-#~ msgid ""
-#~ "This dataset has been deleted. This "
-#~ "will be permanent in the next 24"
-#~ " hours"
-#~ msgstr ""
-#~ "Ce jeu de données a été supprimé."
-#~ " Cela deviendra permanent dans les "
-#~ "prochaines 24 heures."
 
 #~ msgid "Provided by"
 #~ msgstr "Fourni par"
@@ -424,23 +403,6 @@ msgstr "Vous pouvez créer une nouvelle organisation ou trouver la vôtre"
 #~ msgid "Starting a new discussion thread"
 #~ msgstr "Démarrer une nouvelle discussion"
 
-#~ msgid ""
-#~ "You're about to start a new "
-#~ "discussion thread. Make sure that a "
-#~ "thread about the same topic doesn't "
-#~ "exist yet just above. If you want"
-#~ " to report an anomaly, please use "
-#~ "the dedicated button just under the "
-#~ "datasets."
-#~ msgstr ""
-#~ "Vous êtes sur le point de démarrer"
-#~ " un nouveau fil de discussion. "
-#~ "Vérifiez qu'une discussion sur le même"
-#~ " sujet n'existe pas déjà. Si vous "
-#~ "voulez soumettre une anomalie, veuillez "
-#~ "utiliser le bouton dédié juste sous "
-#~ "les jeux de données."
-
 #~ msgid "Title"
 #~ msgstr "Titre"
 
@@ -449,24 +411,6 @@ msgstr "Vous pouvez créer une nouvelle organisation ou trouver la vôtre"
 
 #~ msgid "Start a discussion"
 #~ msgstr "Démarrer une discussion"
-
-#~ msgid ""
-#~ "Discussion between the organization and "
-#~ "the community about this dataset."
-#~ msgstr ""
-#~ "Discussion entre l'organisation et la "
-#~ "communauté à propos de ce jeu de"
-#~ " données."
-
-#~ msgid ""
-#~ "You have built a more comprehensive "
-#~ "database than those presented here? This"
-#~ " is the time to share it!"
-#~ msgstr ""
-#~ "Vous avez construit une base de "
-#~ "données plus complète que celles "
-#~ "présentées ici ? C'est le moment "
-#~ "de la partager !"
 
 #~ msgid "Open in a new window"
 #~ msgstr "Ouvrir dans une nouvelle fenêtre"
@@ -480,41 +424,6 @@ msgstr "Vous pouvez créer une nouvelle organisation ou trouver la vôtre"
 #~ msgid "Add a reuse"
 #~ msgstr "Ajouter une réutilisation"
 
-#~ msgid ""
-#~ "You reused these data and published "
-#~ "an article, a computer graphics, or "
-#~ "an application?\n"
-#~ "                It's time to let you know!\n"
-#~ "                Reference your work in "
-#~ "just a few clicks and increase "
-#~ "your visibility."
-#~ msgstr ""
-#~ "Vous avez réutilisé ces données et "
-#~ "publié un article, une infographie, ou"
-#~ " une application ?\n"
-#~ "C'est le moment de vous faire connaître !\n"
-#~ "Référencez votre travail en quelques "
-#~ "clics et augmentez votre visibilité."
-
-#~ msgid ""
-#~ "You're about to start a new "
-#~ "discussion thread. Make sure that a "
-#~ "thread about the same topic doesn't "
-#~ "exist yet just above. If you want"
-#~ " to report an anomaly, please use "
-#~ "the dedicated button just under the "
-#~ "reuses."
-#~ msgstr ""
-#~ "Vous êtes sur le point de démarrer"
-#~ " un nouveau fil de discussion. "
-#~ "Vérifiez qu'une discussion sur le même"
-#~ " sujet n'existe pas déjà. Si vous "
-#~ "voulez soumettre une anomalie, veuillez "
-#~ "utiliser le bouton dédié juste sous "
-#~ "les réutilisations."
-
 #~ msgid "Discussion between the reusers and the community about this reuse."
 #~ msgstr ""
-#~ "Discussion entre les réutilisateurs et "
-#~ "la communauté sur cette réutilisation."
 
