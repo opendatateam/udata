@@ -4,6 +4,7 @@
 import '../less/udata/swagger.less';
 
 import $ from 'expose?$!expose?jQuery!jquery';
+import commonmark from 'helpers/commonmark';
 import hljs from 'highlight.js';
 import log from 'logger';
 
@@ -19,6 +20,10 @@ import 'script!swaggerui/lib/backbone-min';
 
 import 'script!swaggerui/swagger-ui.min';
 SwaggerUi = window.SwaggerUi;
+
+// Marked compatibility for SwaggerUI
+window.marked = commonmark;
+marked.setOptions = function() {};
 
 $(function() {
     hljs.initHighlightingOnLoad();
