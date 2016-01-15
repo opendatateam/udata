@@ -19,7 +19,7 @@
 </style>
 
 <template>
-<box :title="_('Details')" icon="retweet" boxclass="box-solid reuse-details-widget">
+<box :title="_('Details')" icon="retweet" boxclass="box-solid reuse-details-widget" :footer="toggled">
     <aside slot="tools">
         <a class="text-muted pointer" @click="toggle">
             <i class="fa fa-gear"></i>
