@@ -6,21 +6,19 @@ import log from 'logger';
 import i18n from 'i18n';
 import Auth from 'auth';
 import API from 'api.light';
+import u from 'utils';
 import L from 'leaflet';
 import pubsub from 'pubsub';
 import template from 'templates/dataset/resource-modal-body.hbs';
 import extrasTpl from 'templates/dataset/extras-modal-body.hbs';
-import addReuseTpl from 'templates/dataset/add-reuse-modal-body.hbs';
-import forms from 'form/common';
 import modal from 'widgets/modal';
+import 'form/common';
 import 'widgets/featured';
 import 'widgets/follow-btn';
 import 'widgets/issues-btn';
 import 'widgets/discussions-btn';
 import 'widgets/share-btn';
 import 'widgets/integrate-btn';
-
-let user_reuses;
 
 function addTooltip($element, content) {
     $element.attr('rel', 'tooltip');
@@ -30,9 +28,8 @@ function addTooltip($element, content) {
 }
 
 function prepare_resources() {
-
     $('.resources-list').items('http://schema.org/DataDownload').each(function() {
-        let $this = $(this);
+        const $this = $(this);
 
         // Prevent default click on link
         $this.find('a[itemprop="url"]').click(function(e) {
@@ -46,10 +43,10 @@ function prepare_resources() {
 
         // Check asynchronuously the status of displayed resources
         $this.find('.format-label').each(function() {
-            let $self = $(this);
-            let url = $self.parent().property('url').first().attr('href');
-            let $Dataset = $('body').items('http://schema.org/Dataset').eq(0);
-            let group = $Dataset.property('alternateName').value(); // This is the slug.
+            const $self = $(this);
+            const url = $self.parent().property('url').first().attr('href');
+            const $Dataset = $('body').items('http://schema.org/Dataset').eq(0);
+            const group = $Dataset.property('alternateName').value(); // This is the slug.
 
             if (!url.startsWith(window.location.origin)
                     // TODO: temporary fix before we move all statics on the same server
@@ -62,7 +59,7 @@ function prepare_resources() {
                     ).done((data) => {
                         if (data.status === '200') {
                             $self.addClass('format-label-success');
-                        } else if (data.status == '404') {
+                        } else if (data.status === '404') {
                             $self.addClass('format-label-warning');
                             addTooltip($self, i18n._('The resource cannot be found.'));
                         }
@@ -79,7 +76,7 @@ function prepare_resources() {
 
         // Display detailled informations in a modal
         $this.click(function() {
-            let $modal = modal({
+            const $modal = modal({
                 title: $this.property('name').value(),
                 content: template($this.microdata()[0]),
                 actions: [{
@@ -89,7 +86,7 @@ function prepare_resources() {
                 }]
             });
             // Click on a download link
-            $modal.find('.resource-click').click(function(e) {
+            $modal.find('.resource-click').click(function() {
                 let eventName = '';
                 if (startsWith(this.href, window.location.origin)) {
                     eventName = 'RESOURCE_DOWNLOAD';
@@ -99,7 +96,6 @@ function prepare_resources() {
                 pubsub.publish(eventName);
             });
         });
-
     });
 
     // Hide expander on click
@@ -108,7 +104,6 @@ function prepare_resources() {
             $(this).remove();
         });
     });
-
 }
 
 function fetch_reuses() {
@@ -119,18 +114,25 @@ function fetch_reuses() {
     }
 }
 
+function loadJson(map, layer, data) {
+    layer.addData(data);
+    layer.addTo(map);
+    map.fitBounds(layer.getBounds());
+}
+
 function load_coverage_map() {
-    let $el = $('#coverage-map'),
-        ATTRIBUTIONS = [
+    const $el = $('#coverage-map');
+    const ATTRIBUTIONS = [
             '&copy;',
             '<a href="http://openstreetmap.org">OpenStreetMap</a>',
             '/',
             '<a href="http://open.mapquest.com/">MapQuest</a>'
-        ].join(' '),
-        TILES_PREFIX = location.protocol === 'https:' ? '//otile{s}-s' : '//otile{s}',
-        TILES_URL = TILES_PREFIX + '.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png',
-        TILES_CONFIG = {subdomains: '1234', attribution: ATTRIBUTIONS},
-        map, layer;
+        ].join(' ');
+    const TILES_PREFIX = location.protocol === 'https:' ? '//otile{s}-s' : '//otile{s}';
+    const TILES_URL = TILES_PREFIX + '.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png';
+    const TILES_CONFIG = {subdomains: '1234', attribution: ATTRIBUTIONS};
+    let map;
+    let layer;
 
     if (!$el.length) {
         return;
@@ -150,12 +152,12 @@ function load_coverage_map() {
     L.tileLayer(TILES_URL, TILES_CONFIG).addTo(map);
 
     layer = L.geoJson(null, {
-        onEachFeature: function (feature, layer) {
+        onEachFeature: function(feature, layer) {
             layer.bindPopup(feature.properties.name);
-            layer.on("mouseover", function () {
+            layer.on('mouseover', function() {
                 layer.openPopup();
             });
-            layer.on("mouseout", function () {
+            layer.on('mouseout', function() {
                 layer.closePopup();
             });
         }
@@ -170,19 +172,13 @@ function load_coverage_map() {
     }
 }
 
-function loadJson(map, layer, data) {
-    layer.addData(data);
-    layer.addTo(map);
-    map.fitBounds(layer.getBounds());
-}
-
 function display_extras() {
-    let $Dataset = $('body').items('http://schema.org/Dataset').eq(0),
-        data = $Dataset.microdata()[0];
+    const $Dataset = $('body').items('http://schema.org/Dataset').eq(0);
+    const data = $Dataset.microdata()[0];
 
-    data['id'] = $Dataset.attr('itemid');
-    if (typeof data['keywords'] == 'string' || data['keywords'] instanceof String) {
-        data['keywords'] = [data['keywords']];
+    data.id = $Dataset.attr('itemid');
+    if (u.isString(data.keywords)) {
+        data.keywords = [data.keywords];
     }
     modal({
         title: i18n._('Details'),

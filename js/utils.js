@@ -3,21 +3,21 @@
  */
 export function isFunction(obj) {
     return obj && Object.prototype.toString.call(obj) === '[object Function]';
-};
+}
 
 /**
  * Check if an object is an Object
  */
 export function isObject(obj) {
     return obj === Object(obj);
-};
+}
 
 /**
  * Check if an object is a String
  */
 export function isString(obj) {
     return typeof obj === 'string' || obj instanceof String;
-};
+}
 
 /**
  * A property getter resolving dot-notation
@@ -27,10 +27,10 @@ export function isString(obj) {
  */
 export function getattr(obj, name) {
     if (!obj || !name) return;
-    let names = name.split(".");
+    const names = name.split('.');
     while(names.length && (obj = obj[names.shift()]));
     return obj;
-};
+}
 
 /**
  * A property setter resolving dot-notation
@@ -40,13 +40,13 @@ export function getattr(obj, name) {
  */
 export function setattr(obj, name, value) {
     if (!obj || !name) return;
-    let names = name.split('.');
+    const names = name.split('.');
     while (names.length && (name = names.shift()) && names.length) {
         if (!obj.hasOwnProperty(name)) obj[name] = {};
         obj = obj[name];
     }
     obj[name] = value;
-};
+}
 
 
 export default {

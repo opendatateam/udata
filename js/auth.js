@@ -4,7 +4,7 @@ import i18n from 'i18n';
 
 const DEFAULTS = {
     need_role: i18n._('Role "{role}" is required')
-}
+};
 
 
 /**
@@ -15,7 +15,7 @@ class Auth {
      * Fetch the needed data from the page.
      */
     constructor() {
-        var $el = $('meta[name=current-user]');
+        const $el = $('meta[name=current-user]');
 
         if ($el.length) {
             this.user = {
@@ -24,7 +24,7 @@ class Auth {
                 first_name: $el.data('first_name'),
                 last_name: $el.data('last_name'),
                 roles: $el.data('roles').split(',')
-            }
+            };
         }
 
         this.auth_url = $('meta[name=auth-url]').attr('content');
@@ -34,10 +34,10 @@ class Auth {
      * Build the authentication URL given the current page and an optionnal message.
      */
     get_auth_url(message) {
-        var params = {next: window.location.href};
+        const params = {next: window.location.href};
 
         if (message) {
-            params.message = message
+            params.message = message;
         }
 
         return this.auth_url + '?' + $.param(params);
@@ -48,7 +48,7 @@ class Auth {
      */
     need_user(message) {
         if (!this.user) {
-            window.location = this.get_auth_url(message)
+            window.location = this.get_auth_url(message);
             return false;
         }
         return true;
@@ -68,11 +68,11 @@ class Auth {
     need_role(role, message) {
         this.need_user();
         if (this.user.roles.indexOf(role) < 0) {
-            var msg = (message || DEFAULTS.need_role).replace('{role}', role);
+            const msg = (message || DEFAULTS.need_role).replace('{role}', role);
             Notify.error(msg);
         }
     }
-};
+}
 
 
 export default new Auth();

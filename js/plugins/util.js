@@ -1,8 +1,4 @@
-import $ from 'jquery';
-import u from 'utils';
-
-export default function(Vue, options) {  // jshint ignore:line
-
+export function install(Vue) {
     /**
      * Give the size of an array or a string
      */
@@ -32,7 +28,7 @@ export default function(Vue, options) {  // jshint ignore:line
         if (object.title) {
             return object.title;
         } else if (object.name) {
-            return object.name
+            return object.name;
         } else if (object.fullname) {
             return object.fullname;
         } else if (object.first_name && object.last_name) {
@@ -55,6 +51,6 @@ export default function(Vue, options) {  // jshint ignore:line
             classname = classname.substring(0, classname.length - 4);
         }
 
-        return classname.toLowerCase() == cls.toLowerCase();
-    })
-};
+        return classname.toLowerCase() === cls.toLowerCase();
+    });
+}
