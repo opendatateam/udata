@@ -1,7 +1,6 @@
 import log from 'logger';
 import $ from 'jquery';
 import u from 'utils';
-import Vue from 'vue';
 
 /**
  * Base inheritable properties reusable by nested components
@@ -10,7 +9,7 @@ export const FieldComponentMixin = {
     props: {
         field: {
             type: Object,
-            default: function(){ return {};}
+            default: function() { return {};}
         },
         model: Object,
         value: null,  // Means any type
@@ -45,23 +44,23 @@ export const BaseField = {
     props: {
         field: {
             type: Object,
-            default: function(){ return {};},
+            default: function() { return {};},
             required: true
         },
         model: {
             type: Object,
-            default: function(){ return {};},
+            default: function() { return {};},
             required: true
         },
         schema: {
             type: Object,
-            default: function(){ return {};},
+            default: function() { return {};},
             required: true
         }
     },
     computed: {
         description: function() {
-            let property = this.property;
+            const property = this.property;
             return property && property.hasOwnProperty('description')
                 ? property.description
                 : undefined;
@@ -87,14 +86,14 @@ export const BaseField = {
             return this.field && this.field.type === 'hidden';
         },
         value: function() {
-            let value = '';
+            let value;
             if (this.model && this.field) {
                 value = u.getattr(this.model, this.field.id);
-                if (!value && this.property && this.property.hasOwnProperty('default')) {
+                if (value === undefined && this.property && this.property.hasOwnProperty('default')) {
                     value = this.property.default;
                 }
             }
-            return value || '';
+            return value;
         },
         placeholder: function() {
             return this.field.placeholder || this.field.label || '';
@@ -106,9 +105,9 @@ export const BaseField = {
             let widget;
             if (this.field.widget) {
                 widget = this.field.widget;
-            } else if (this.property.type == 'boolean') {
+            } else if (this.property.type === 'boolean') {
                 widget = 'checkbox';
-            } else if (this.property.type == 'string') {
+            } else if (this.property.type === 'string') {
                 if (this.property.format === 'markdown') {
                     widget = 'markdown-editor';
                 } else if (this.property.enum) {
