@@ -120,6 +120,24 @@ class CurrentUserFieldTest(TestCase):
         form.populate_obj(ownable)
         self.assertEqual(ownable.owner, user)
 
+    def test_with_user_null_json(self):
+        Ownable, OwnableForm = self.factory()
+        user = UserFactory()
+        login_user(user)
+
+        form = OwnableForm.from_json({
+            'owner': None
+        })
+
+        self.assertEqual(form.owner.data, user)
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        ownable = Ownable()
+        form.populate_obj(ownable)
+        self.assertEqual(ownable.owner, user)
+
     def test_with_user_object_self_from_json(self):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()

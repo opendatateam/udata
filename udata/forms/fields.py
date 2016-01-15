@@ -512,9 +512,13 @@ class CurrentUserField(FieldHelper, ModelField, fields.HiddenField):
     model = User
 
     def __init__(self, *args, **kwargs):
-        default = kwargs.pop('default', default_owner)
-        super(CurrentUserField, self).__init__(default=default,
-                                               *args, **kwargs)
+        kwargs['default'] = kwargs.pop('default', default_owner)
+        super(CurrentUserField, self).__init__(*args, **kwargs)
+
+    def process(self, formdata, data=unset_value):
+        if formdata and self.name in formdata and formdata[self.name] is None:
+            formdata.pop(self.name)  # None value does not trigger default
+        return super(CurrentUserField, self).process(formdata, data)
 
     def pre_validate(self, form):
         if self.data:
