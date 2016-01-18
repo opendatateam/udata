@@ -88,7 +88,7 @@
     "leaflet": "^0.7.7",
     "markdown-it": "^5.1.0",
     "moment": "^2.11.1",
-    "raven-js": "^1.1.22",
+    "raven-js": "^2.0.5",
     "respond.js": "^1.4.2",
     "script-loader": "^0.6.1",
     "selectize": "^0.12.1",

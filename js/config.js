@@ -1,6 +1,30 @@
 /*
- * Parse the headers to extract some informations
+ * Parse the page html headers to extract some informations
  */
+
+
+/**
+ * Simple helper to fetch attribute on given css selector
+ */
+function _attr(selector, name) {
+    const el = document.querySelector(selector);
+    return el ? el.getAttribute(name): undefined;
+}
+
+/**
+ * Simple helper to <meta/> tag content given its name
+ */
+function _meta(name) {
+    return _attr(`meta[name=${name}]`, 'content');
+}
+
+/**
+ * Simple helper to <link/> tag url given its `rel`
+ */
+function _link(rel) {
+    return _attr(`link[rel=${rel}]`, 'href')
+}
+
 
 /**
  * The current user extracted from the header
@@ -18,24 +42,71 @@ if (userEl) {
     };
 }
 
-// export user;
+/**
+ * Map debug features on Webpack DEBUG flag
+ */
 export const debug = DEBUG;
-export const collapse_width = 992;
-export const lang = document.querySelector('html').getAttribute('lang') || 'en';
-export const title = document.querySelector('meta[name=site-title]').getAttribute('content');
 
-export const csrf_token = document.querySelector('meta[name=csrf-token]').getAttribute('content');
-export const api_root = document.querySelector('link[rel=api-root]').getAttribute('href');
-export const api_specs = document.querySelector('link[rel=api-specs]').getAttribute('href');
-export const theme_static = document.querySelector('link[rel=theme-static-root]').getAttribute('href');
-export const static_root = document.querySelector('link[rel=static-root]').getAttribute('href');
-export const admin_root = document.querySelector('link[rel=admin-root]').getAttribute('href');
-export const auth_url = document.querySelector('link[rel=auth-url]').getAttribute('href');
+/**
+ * The current language is guessed from the html lang attribute
+ */
+export const lang = _attr('html', 'lang') || 'en';
+
+/**
+ * Reuse server side site title
+ */
+export const title = _meta('site-title');
+
+/**
+ * Store the CSRF token for legacy forms and AJAX requests
+ */
+export const csrf_token = _meta('csrf-token');
+
+/**
+ * The API root/base URL
+ */
+export const api_root = _link('api-root');
+
+/**
+ * The API Swagger specifications URL
+ */
+export const api_specs = _link('api-specs');
+
+/**
+ * The theme static root URL
+ */
+export const theme_static = _link('theme-static-root');
+
+/**
+ * The base static root URL
+ */
+export const static_root = _link('static-root');
+
+/**
+ * The administration root URL
+ */
+export const admin_root = _link('admin-root');
+
+/**
+ * The authentification URL for logins
+ */
+export const auth_url = _link('auth-url');
+
+/**
+ * Sentry configuration (as json) if available
+ */
+const sentryEl = document.querySelector('link[rel=sentry]');
+export const sentry = {};
+
+if (sentryEl) {
+    sentry.dsn = sentryEl.getAttribute('href');
+    sentry.release = sentryEl.dataset.release || undefined;
+    sentry.tags = JSON.parse(decodeURIComponent(sentryEl.dataset.tags || '{}'));
+}
 
 export default {
     user,
     debug,
-    collapse_width,
     lang,
     title,
     csrf_token,
@@ -45,4 +116,5 @@ export default {
     static_root,
     admin_root,
     auth_url,
+    sentry,
 };

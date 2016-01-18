@@ -3,58 +3,20 @@
   <head>
     {% block raw_head %}
     {% include theme('metadata.html') with context %}
-    <!-- <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    {% set meta = meta or {} %}
-    <meta name="description" content="{{ meta.description or '' }}">
-    <meta name="keywords" content="{{ ', '.join(current_site.keywords + (meta.keywords or [])) }}">
-    {% if config.SITE_AUTHOR %}
-    <meta name="author" content="{{config.SITE_AUTHOR}}">
-    {% endif %}
-    {% if config.SITE_AUTHOR_URL %}
-    <link rel="publisher" href="{{config.SITE_AUTHOR_URL}}"
-    {% if config.SITE_AUTHOR %}title="{{config.SITE_AUTHOR}}"{% endif %}
-    />
-    {% endif %}
-    <meta name="generator" content="uData" />
-
-    <title>{% if meta.title %}{{ meta.title }} - {% endif %}{{ current_site.title }}</title>
-
-
-
-    <link rel="theme-static-root" href="{{ theme_static('') }}" />
-    <link rel="static-root" href="{{ static('') }}" />
-    <link rel="api-root" href="{{ url_for('api.root') }}" />
-    <link rel="admin-root" href="{{ url_for('admin.index') }}" />
-    <link rel="api-specs" href="{{ url_for('api.specs', _external=True) }}">
-
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="auth-url" content="{{ url_for('security.login') }}" />
-
-    {{ i18n_alternate_links() }} -->
 
     <link href="{{ static('site.css') }}" rel="stylesheet">
     <link href="{{ theme_static('theme.css') }}" rel="stylesheet">
     {% block extra_css %}{% endblock %}
 
-    {% if current_user.is_authenticated() %}
-    <meta name="current-user" content="{{ current_user.id }}"
-    data-slug="{{ current_user.slug }}"
-    data-first_name="{{ current_user.first_name }}"
-    data-last_name="{{ current_user.last_name }}"
-    data-roles="{{ current_user.roles|join(',') }}"
-    />
-    {% endif %}
-
     {# ATOM Feeds #}
     <link href="{{ url_for('datasets.recent_feed') }}"
-    rel="alternate" type="application/atom+xml"
-    title="{{ _('Recent datasets') }}" />
+        rel="alternate" type="application/atom+xml"
+        title="{{ _('Recent datasets') }}" />
 
     <link href="{{ url_for('reuses.recent_feed') }}"
-    rel="alternate" type="application/atom+xml"
-    title="{{ _('Recent reuses') }}" />
+        rel="alternate" type="application/atom+xml"
+        title="{{ _('Recent reuses') }}" />
 
     {% block extra_head %}{% endblock %}
 

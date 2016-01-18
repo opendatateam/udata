@@ -2,19 +2,10 @@
 <html lang="{{ g.lang_code }}">
     <head>
         {% set meta = {
-            'title': ' - '.join([_('Admin'), current_site.title]),
+            'title': _('Admin'),
             'description': 'Administration',
             'keywords': ['administration'],
         } %}
-        <!-- <meta charset="UTF-8" />
-        <title>{{ _('Admin') }} - {{ current_site.title }}</title>
-
-        <link rel="admin-root" href="{{ url_for('admin.index') }}">
-        <link rel="theme-static" href="{{ theme_static('') }}">
-        <link rel="api-specs" href="{{ url_for('api.specs', _external=True) }}">
-        {% if config.SENTRY_PUBLIC_DSN %}<link rel="sentry-dsn" href="{{config.SENTRY_PUBLIC_DSN}}">{% endif %}
-        <meta name="site-title" content="{{config.SITE_TITLE}}">
-        <meta name="generator" content="uData"> -->
         {% include theme('metadata.html') with context %}
         <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport' />
         <link href="{{ static('admin.css') }}" rel="stylesheet">
