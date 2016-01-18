@@ -195,6 +195,15 @@ export default {
             return out;
         },
         on_error: function (response) {
+            // Display the error identifier if present
+            if ('X-Sentry-ID' in response.headers) {
+                this.$dispatch('notify', {
+                    type: 'error',
+                    icon: 'exclamation-triangle',
+                    title: this._('An error occured'),
+                    details: this._('The error identifier is {id}', {id: e.data.event_id}),
+                });
+            }
             if ('data' in response) {
                 let data = {};
                 try {
