@@ -2,6 +2,7 @@
  * Dataset display page JS module
  */
 import $ from 'jquery';
+import config from 'config';
 import log from 'logger';
 import i18n from 'i18n';
 import Auth from 'auth';
@@ -11,14 +12,19 @@ import L from 'leaflet';
 import pubsub from 'pubsub';
 import template from 'templates/dataset/resource-modal-body.hbs';
 import extrasTpl from 'templates/dataset/extras-modal-body.hbs';
+import addReuseTpl from 'templates/dataset/add-reuse-modal-body.hbs';
 import modal from 'widgets/modal';
-import 'form/common';
 import 'widgets/featured';
 import 'widgets/follow-btn';
 import 'widgets/issues-btn';
 import 'widgets/discussions-btn';
 import 'widgets/share-btn';
 import 'widgets/integrate-btn';
+
+// Current page dataset microdata
+const $Dataset = $('body').items('http://schema.org/Dataset').eq(0);
+
+let user_reuses;
 
 function addTooltip($element, content) {
     $element.attr('rel', 'tooltip');
@@ -45,7 +51,6 @@ function prepare_resources() {
         $this.find('.format-label').each(function() {
             const $self = $(this);
             const url = $self.parent().property('url').first().attr('href');
-            const $Dataset = $('body').items('http://schema.org/Dataset').eq(0);
             const group = $Dataset.property('alternateName').value(); // This is the slug.
 
             if (!url.startsWith(window.location.origin)
@@ -173,7 +178,6 @@ function load_coverage_map() {
 }
 
 function display_extras() {
-    const $Dataset = $('body').items('http://schema.org/Dataset').eq(0);
     const data = $Dataset.microdata()[0];
 
     data.id = $Dataset.attr('itemid');
@@ -186,8 +190,36 @@ function display_extras() {
     });
 }
 
+function add_reuse() {
+    const $this = $(this);
+    if (user_reuses) {
+        const $modal = modal({
+            title: i18n._('Add a reuse'),
+            content: addReuseTpl({
+                reuses: user_reuses,
+                new_reuse_url: $this.attr('href'),
+                dataset: $('.dataset-container').attr('itemid')
+            })
+        });
+        $modal.on('shown.bs.modal', function() {
+            $modal.find('a.reuse.clickable').click(function() {
+                const reuse_id = $(this).data('id');
+                const dataset_id = $Dataset.attr('itemid');
+                const api_url = '/reuses/' + reuse_id + '/datasets/';
+                const data = {id: dataset_id, class: 'Dataset'};
+                API.post(api_url, data, function(data) {
+                    window.location = config.admin_root + 'reuse/' + reuse_id;
+                });
+                return false;
+            });
+        });
+        return false;
+    }
+}
+
 $(function() {
     log.debug('Dataset display page');
+    $('.reuse.add').click(add_reuse);
     $('.btn-extras').click(display_extras);
     load_coverage_map();
     prepare_resources();

@@ -5,9 +5,7 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import (
-    Reuse, FollowReuse, Follow, Member, REUSE_TYPES, Badge
-)
+from udata.models import Reuse, FollowReuse, Follow, Member, REUSE_TYPES
 
 from . import APITestCase
 from ..factories import (
@@ -118,6 +116,59 @@ class ReuseAPITest(APITestCase):
         self.login()
         reuse = ReuseFactory(deleted=datetime.now())
         response = self.delete(url_for('api.reuse', reuse=reuse))
+        self.assertStatus(response, 410)
+
+    def test_reuse_api_add_dataset(self):
+        '''It should add a dataset to a reuse from the API'''
+        self.login()
+        reuse = ReuseFactory(owner=self.user)
+
+        dataset = DatasetFactory()
+        data = {'id': dataset.id, 'class': 'Dataset'}
+        response = self.post(url_for('api.reuse_add_dataset', reuse=reuse), data)
+        self.assert201(response)
+        reuse.reload()
+        self.assertEqual(len(reuse.datasets), 1)
+        self.assertEqual(reuse.datasets[-1], dataset)
+
+        dataset = DatasetFactory()
+        data = {'id': dataset.id, 'class': 'Dataset'}
+        response = self.post(url_for('api.reuse_add_dataset', reuse=reuse), data)
+        self.assert201(response)
+        reuse.reload()
+        self.assertEqual(len(reuse.datasets), 2)
+        self.assertEqual(reuse.datasets[-1], dataset)
+
+    def test_reuse_api_add_dataset_twice(self):
+        '''It should not add twice a dataset to a reuse from the API'''
+        self.login()
+        dataset = DatasetFactory()
+        reuse = ReuseFactory(owner=self.user, datasets=[dataset])
+
+        data = {'id': dataset.id, 'class': 'Dataset'}
+        response = self.post(url_for('api.reuse_add_dataset', reuse=reuse), data)
+        self.assert200(response)
+        reuse.reload()
+        self.assertEqual(len(reuse.datasets), 1)
+        self.assertEqual(reuse.datasets[-1], dataset)
+
+    def test_reuse_api_add_dataset_not_found(self):
+        '''It should return 404 when adding an unknown dataset to a reuse from the API'''
+        self.login()
+        reuse = ReuseFactory(owner=self.user)
+
+        data = {'id': 'not-found', 'class': 'Dataset'}
+        response = self.post(url_for('api.reuse_add_dataset', reuse=reuse), data)
+
+        self.assert404(response)
+        reuse.reload()
+        self.assertEqual(len(reuse.datasets), 0)
+
+    def test_reuse_api_update_deleted(self):
+        '''It should not update a deleted reuse from the API and raise 410'''
+        self.login()
+        reuse = ReuseFactory(deleted=datetime.now())
+        response = self.put(url_for('api.reuse', reuse=reuse), {})
         self.assertStatus(response, 410)
 
     def test_reuse_api_feature(self):
