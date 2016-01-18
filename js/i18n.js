@@ -1,14 +1,14 @@
 /**
  * i18n handling
  */
-import config from 'config';
 import i18next from 'i18next-client';
 import moment from 'moment';
+import config from 'config';
 
 export const NAMESPACE = 'udata';
-export let lang = config.lang;
+export const lang = config.lang;
 
-let resources = {};
+const resources = {};
 
 resources[lang] = {};
 resources[lang][NAMESPACE] = require('locales/' + NAMESPACE + '.' + lang + '.json');
@@ -29,11 +29,11 @@ i18next.init({
     resStore: resources
 });
 
-export let t = i18next.t;
-export let _ = i18next.t;
+export const t = i18next.t;
+export const _ = i18next.t;
 
 export default {
     lang,
     _,
     t
-}
+};

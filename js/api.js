@@ -5,7 +5,7 @@ import log from 'logger';
 
 const API = new SwaggerClient({
     debug: config.debug,
-    url: config.api,
+    url: config.api_specs,
     useJQuery: true,
     success: function() {
         $(this).trigger('built');
@@ -21,7 +21,7 @@ const API = new SwaggerClient({
  * @return {Object}      The resolved schema
  */
 API.resolve = function($ref) {
-    const def = $ref.replace(config.api, '').replace('#/definitions/', '');
+    const def = $ref.replace(config.api_specs, '').replace('#/definitions/', '');
     return this.definitions[def];
 };
 

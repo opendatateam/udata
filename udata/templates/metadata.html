@@ -1,0 +1,26 @@
+<meta charset="utf-8">
+{% set meta = meta or {} %}
+<meta name="description" content="{{ meta.description or '' }}">
+<meta name="keywords" content="{{ ', '.join(current_site.keywords + (meta.keywords or [])) }}">
+{% if config.SITE_AUTHOR %}
+<meta name="author" content="{{config.SITE_AUTHOR}}">
+{% endif %}
+{% if config.SITE_AUTHOR_URL %}
+<link rel="publisher" href="{{config.SITE_AUTHOR_URL}}"
+{% if config.SITE_AUTHOR %}title="{{config.SITE_AUTHOR}}"{% endif %}
+/>
+{% endif %}
+<meta name="generator" content="uData" />
+<title>{% if meta.title %}{{ meta.title }} - {% endif %}{{ current_site.title }}</title>
+
+<link rel="theme-static-root" href="{{ theme_static('') }}" />
+<link rel="static-root" href="{{ static('', _burst=False) }}" />
+<link rel="api-root" href="{{ url_for('api.root') }}" />
+<link rel="admin-root" href="{{ url_for('admin.index') }}" />
+<link rel="api-specs" href="{{ url_for('api.specs', _external=True) }}"/>
+<link rel="auth-url" href="{{ url_for('security.login') }}" />
+{{ i18n_alternate_links() }}
+{% if config.SENTRY_PUBLIC_DSN %}<link rel="sentry-dsn" href="{{config.SENTRY_PUBLIC_DSN}}">{% endif %}
+
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="site-title" content="{{config.SITE_TITLE}}">

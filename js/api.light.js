@@ -1,10 +1,10 @@
 /**
  * Common stack, plugins and helpers
  */
-define(['jquery'], function($) {
+define(['jquery', 'config'], function($, config) {
     'use strict';
 
-    var API_ROOT = $('link[rel=api-root]').attr('href');
+    var API_ROOT = config.api_root;
 
     if (API_ROOT[API_ROOT.length - 1] == '/') {
         // Remove trailing slash

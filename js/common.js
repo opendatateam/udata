@@ -1,34 +1,29 @@
 /**
  * Common stack, plugins and helpers
  */
-define([
-    'jquery',
-    'auth',
-    'bootstrap',
-    'widgets/site-search',
-    'utils/ellipsis',
-    'vendor/jquery.microdata',
-    'i18n'
-], function($) {
+import config from 'config';
+import $ from 'jquery';
+import 'bootstrap';
+import 'widgets/site-search';
+import 'utils/ellipsis';
+import 'vendor/jquery.microdata';
+import 'i18n';
 
-    var csrftoken = $('meta[name=csrf-token]').attr('content');
-
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
-                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-            }
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
+            xhr.setRequestHeader('X-CSRFToken', config.csrftoken);
         }
-    });
+    }
+});
 
-    $(function() {
-        // Display tooltips and popovers with markup
-        $('[rel=tooltip]').tooltip();
-        $('[rel=popover]').popover().on('click', function(e) {
-            if ($(this).data('trigger').match(/(click|focus)/)) {
-                e.preventDefault();
-                return true;
-            }
-        });
+$(function() {
+    // Display tooltips and popovers with markup
+    $('[rel=tooltip]').tooltip();
+    $('[rel=popover]').popover().on('click', function(e) {
+        if ($(this).data('trigger').match(/(click|focus)/)) {
+            e.preventDefault();
+            return true;
+        }
     });
 });
