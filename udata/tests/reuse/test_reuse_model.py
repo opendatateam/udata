@@ -43,3 +43,10 @@ class ReuseModelTest(TestCase, DBTestMixin):
 
         for reuse in excluded:
             self.assertNotIn(reuse, result)
+
+    def test_tags_normalized(self):
+        user = UserFactory()
+        tags = [' one another!', ' one another!', 'This IS a "tag"…']
+        reuse = ReuseFactory(owner=user, tags=tags)
+        self.assertEqual(len(reuse.tags), 2)
+        self.assertEqual(reuse.tags[1], 'this-is-a-tag')

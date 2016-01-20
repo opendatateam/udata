@@ -143,7 +143,7 @@ class DatasetAPITest(APITestCase):
         self.assertStatus(response, 201)
         self.assertEqual(Dataset.objects.count(), 1)
         dataset = Dataset.objects.first()
-        self.assertEqual(dataset.tags, data['tags'])
+        self.assertEqual(dataset.tags, sorted(data['tags']))
 
     def test_dataset_api_create_with_extras(self):
         '''It should create a dataset with extras from the API'''
