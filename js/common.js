@@ -3,6 +3,7 @@
  */
 import config from 'config';
 import $ from 'jquery';
+import Notify from 'notify';
 import 'bootstrap';
 import 'widgets/site-search';
 import 'utils/ellipsis';
@@ -14,6 +15,16 @@ $.ajaxSetup({
         if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
             xhr.setRequestHeader('X-CSRFToken', config.csrftoken);
         }
+    }
+});
+
+$(document).ajaxError(function(event, jqxhr, settings, thrownError) {
+    const sentry_id = jqxhr.getResponseHeader('X-Sentry-ID');
+    if (sentry_id) {
+        Notify.error([
+            i18n._('An error occured'),
+            i18n._('The error identifier is {id}', {id: sentry_id}),
+        ].join('. '))
     }
 });
 
