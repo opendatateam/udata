@@ -38,3 +38,5 @@
     data-roles="{{ current_user.roles|join(',') }}"
 />
 {% endif %}
+
+<meta name="notify-in" content="{{ meta.notify_in or '#notifications-container' }}">

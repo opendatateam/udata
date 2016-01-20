@@ -104,6 +104,11 @@ if (sentryEl) {
     sentry.tags = JSON.parse(decodeURIComponent(sentryEl.dataset.tags || '{}'));
 }
 
+/**
+ * Notifications container
+ */
+export const notify_in = _meta('notify-in');
+
 export default {
     user,
     debug,
@@ -117,4 +122,5 @@ export default {
     admin_root,
     auth_url,
     sentry,
+    notify_in,
 };
