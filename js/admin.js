@@ -14,7 +14,7 @@ import config from 'config';
 import router from 'admin.routes';
 import API from 'api';
 
- // Ensure retrocompatibily for 0.12.2 replace behavior
+// Ensure retrocompatibily for 0.12.2 replace behavior
 Vue.options.replace = false;
 Vue.config.debug = config.debug;
 

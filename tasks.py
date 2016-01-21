@@ -41,7 +41,7 @@ def test(fast=False):
     header('Run tests suite')
     cmd = 'nosetests --rednose --force-color udata'
     if fast:
-        cmd = ' '.join((cmd, '--stop'))
+        cmd = ' '.join([cmd, '--stop'])
     lrun(cmd, pty=True)
 
 

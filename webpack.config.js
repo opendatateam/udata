@@ -6,7 +6,6 @@ const node_path = path.join(__dirname, 'node_modules');
 
 const css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap');
 const less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline');
-// const html_loader = 'vue-html?collapseBooleanAttributes=false&collapseWhitespace=false"';
 const js_loader = 'babel?presets[]=es2015';
 const handlebars_helpers = path.join(__dirname, 'js', 'templates', 'helpers')
 
@@ -58,14 +57,12 @@ module.exports = {
             {test: /\.vue$/, loader: 'vue'},
             {test: /\.json$/, loader: 'json'},
             {test: /\.hbs$/, loader: 'handlebars?helperDirs[]=' + handlebars_helpers},
-            // {test: /\.html$/, loader: html_loader},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, loader: 'file-loader?name=[name].[ext]'},
             {test: /\.js$/, exclude: /node_modules/, loader: js_loader},
         ]
     },
     vue: {
         loaders: {
-            // html: html_loader,
             css: css_loader,
             less: less_loader,
         }

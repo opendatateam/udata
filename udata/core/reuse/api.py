@@ -104,7 +104,7 @@ class ReuseDatasetsAPI(API):
         except Dataset.DoesNotExist:
             api.abort(404, 'Dataset {0} does not exists'.format(request.json['id']))
         if dataset in reuse.datasets:
-            return dataset
+            return reuse
         reuse.datasets.append(dataset)
         reuse.save()
         return reuse, 201

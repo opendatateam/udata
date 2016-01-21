@@ -62,7 +62,7 @@ $('.display-followers').click(displayFollowers);
 function hash_to_tab() {
     // Link tabs and history
     if (location.hash !== '') {
-        $('a[href="' + location.hash + '"]').tab('show');
+        $(`a[href="${location.hash}"]`).tab('show');
     }
 }
 
