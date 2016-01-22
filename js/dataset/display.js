@@ -7,7 +7,7 @@ import log from 'logger';
 import i18n from 'i18n';
 import Auth from 'auth';
 import API from 'api.light';
-import u from 'utils';
+import utils from 'utils';
 import L from 'leaflet';
 import pubsub from 'pubsub';
 import template from 'templates/dataset/resource-modal-body.hbs';
@@ -181,7 +181,7 @@ function display_extras() {
     const data = $Dataset.microdata()[0];
 
     data.id = $Dataset.attr('itemid');
-    if (u.isString(data.keywords)) {
+    if (utils.isString(data.keywords)) {
         data.keywords = [data.keywords];
     }
     modal({
