@@ -13,7 +13,8 @@ const DEFAULTS = {
 };
 
 // Handle featured button
-$('.btn-follow').click(function() {
+$('.btn-follow').click(function(e) {
+    e.preventDefault()
     const $this = $(this);
     const $icon = $this.find('.glyphicon,.fa');
     const follow_icon = $this.data('follow-icon') || DEFAULTS.follow_icon;

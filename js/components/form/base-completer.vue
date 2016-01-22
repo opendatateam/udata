@@ -15,7 +15,7 @@ import Vue from 'vue';
 import $ from 'jquery';
 import log from 'logger';
 import BaseError from 'models/error';
-import {isFunction,isString} from 'utils';
+import utils from 'utils';
 
 import 'selectize';
 
@@ -31,7 +31,7 @@ function lst2str(value) {
 function forceList(value) {
     if (Array.isArray(value)) {
         return value
-    } else if (isString(value)) {
+    } else if (utils.isString(value)) {
         return value.split(',');
     } else if (value === undefined || value === null) {
         return [];
@@ -47,7 +47,7 @@ export default {
             var opts = this.$options.selectize;
 
             return $.extend({},
-                isFunction(opts) ? opts.apply(this, []) : opts,
+                utils.isFunction(opts) ? opts.apply(this, []) : opts,
                 {
                     persist: false,
                     closeAfterSelect: true,
