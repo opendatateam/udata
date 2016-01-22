@@ -1,12 +1,10 @@
-'use strict';
-
 // Catch all errors
-require('raven');
+import 'raven';
 
-var $ = require('jquery');
-
-var Vue = require('vue'),
-    config = require('config');
+import $ from 'jquery';
+import Vue from 'vue';
+import config from 'config';
+import API from 'api';
 
 // Ensure retrocompatibily for 0.12.2 replace behavior
 Vue.options.replace = false;
@@ -17,8 +15,7 @@ Vue.use(require('plugins/text'));
 Vue.use(require('plugins/i18next'));
 Vue.use(require('plugins/markdown'));
 
-$(require('api')).on('built', function() {
+$(API).on('built', function() {
     new Vue(require('components/dashboard/graphs.vue'));
     new Vue(require('components/activities/timeline.vue'));
 });
-

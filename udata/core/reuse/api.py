@@ -8,7 +8,7 @@ from flask import request
 from udata import search
 from udata.api import api, API, ModelAPI, SingleObjectAPI, errors
 from udata.auth import admin_permission
-from udata.models import Reuse, REUSE_TYPES
+from udata.models import Dataset, Reuse, REUSE_TYPES
 from udata.utils import multi_to_dict
 
 from udata.core.badges import api as badges_api
@@ -18,7 +18,7 @@ from udata.core.storages.api import (
 )
 
 from .api_fields import (
-    reuse_fields, reuse_page_fields, reuse_suggestion_fields, reuse_type_fields
+    reuse_fields, reuse_page_fields, reuse_suggestion_fields, reuse_type_fields, dataset_ref_fields
 )
 from .forms import ReuseForm
 from .models import FollowReuse
@@ -86,6 +86,28 @@ class ReuseAPI(ModelAPI):
         reuse.deleted = datetime.now()
         reuse.save()
         return '', 204
+
+
+@ns.route('/<reuse:reuse>/datasets/', endpoint='reuse_add_dataset')
+class ReuseDatasetsAPI(API):
+    @api.secure
+    @api.doc('reuse_add_dataset', **common_doc)
+    @api.expect(dataset_ref_fields)
+    @api.response(200, 'The dataset is already present', reuse_fields)
+    @api.marshal_with(reuse_fields, code=201)
+    def post(self, reuse):
+        '''Add a dataset to a given reuse'''
+        if 'id' not in request.json:
+            api.abort(400, 'Expect a dataset identifier')
+        try:
+            dataset = Dataset.objects.get_or_404(id=request.json['id'])
+        except Dataset.DoesNotExist:
+            api.abort(404, 'Dataset {0} does not exists'.format(request.json['id']))
+        if dataset in reuse.datasets:
+            return reuse
+        reuse.datasets.append(dataset)
+        reuse.save()
+        return reuse, 201
 
 
 @ns.route('/badges/', endpoint='available_reuse_badges')

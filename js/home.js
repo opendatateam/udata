@@ -1,14 +1,12 @@
-'use strict';
-
-/**
+/*
  * Styles
  */
-require('../less/home.less');
+import '../less/home.less';
 
 // Catch all errors
 // require('raven');
 
-var $ = require('jquery');
-require('bootstrap');
+import $ from 'jquery';
+import 'bootstrap';
 
 $('.carousel').carousel();

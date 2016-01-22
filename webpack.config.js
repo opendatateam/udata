@@ -1,25 +1,24 @@
-var path = require('path');
-var webpack = require('webpack');
+const path = require('path');
+const webpack = require('webpack');
 
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var node_path = path.join(__dirname, 'node_modules');
-var vendor_path = path.join(__dirname, 'js', 'vendor');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const node_path = path.join(__dirname, 'node_modules');
 
-var vue = require('vue-loader'),
-    css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap'),
-    less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline'),
-    html_loader = 'vue-html?collapseBooleanAttributes=false&collapseWhitespace=false"',
-    js_loader = 'babel?optional[]=runtime&loose=all&nonStandard=false';
+const css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap');
+const less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline');
+const js_loader = 'babel?presets[]=es2015';
+const handlebars_helpers = path.join(__dirname, 'js', 'templates', 'helpers')
 
-var languages = ['en', 'es', 'fr'];
+const languages = ['en', 'es', 'fr'];
 
 module.exports = {
     entry: {
-        admin: "./js/admin.js",
+        admin: './js/admin.js',
         site: './js/site.js',
         home: './js/home.js',
         search: './js/search.js',
         dashboard: './js/dashboard.js',
+        apidoc: './js/apidoc',
         'dataset/display': './js/dataset/display',
         'reuse/display': './js/reuse/display',
         'organization/display': './js/organization/display',
@@ -27,13 +26,12 @@ module.exports = {
         'topic/display': './js/topic/display',
         'post/display': './js/post/display',
         'user/display': './js/user/display',
-        apidoc: './js/apidoc',
     },
     output: {
         path: path.join(__dirname, 'udata', 'static'),
-        publicPath: "/static/",
-        filename: "[name].js",
-        chunkFilename: "[id].[hash].js"
+        publicPath: '/static/',
+        filename: '[name].js',
+        chunkFilename: '[id].[hash].js'
     },
     resolve: {
         root: [
@@ -56,31 +54,17 @@ module.exports = {
             {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file'},
             {test: /\.css$/, loader: css_loader},
             {test: /\.less$/, loader: less_loader},
-            {test: /\.vue$/, loader: vue.withLoaders({
-                html: html_loader,
-                css: css_loader,
-                less: less_loader,
-                js: js_loader
-            })},
-            {test: /\.json$/, loader: "json"},
-            {test: /\.hbs$/, loader: 'handlebars?debug=true&helperDirs[]=' + path.join(__dirname, 'js', 'templates', 'helpers')},
-            {test: /\.html$/, loader: html_loader},
-            {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, loader: "file-loader?name=[name].[ext]"},
-            {test: /\.js$/, loader: js_loader,
-                include: [
-                    path.resolve(__dirname, 'js'),
-                    path.resolve(__dirname, 'specs'),
-                ],
-                exclude: path.resolve(__dirname, 'specs', 'loader.js')
-            },
+            {test: /\.vue$/, loader: 'vue'},
+            {test: /\.json$/, loader: 'json'},
+            {test: /\.hbs$/, loader: 'handlebars?helperDirs[]=' + handlebars_helpers},
+            {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, loader: 'file-loader?name=[name].[ext]'},
+            {test: /\.js$/, exclude: /node_modules/, loader: js_loader},
         ]
     },
     vue: {
         loaders: {
-            html: html_loader,
             css: css_loader,
             less: less_loader,
-            js: js_loader
         }
     },
     plugins: [
@@ -99,9 +83,9 @@ module.exports = {
             allChunks: true
         }),
         new webpack.IgnorePlugin(/^(\.\/)?shred/),
-        new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp(languages.join('|'))),
+        new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp('^' + languages.join('|') + '$')),
         new webpack.ContextReplacementPlugin(/locales$/, new RegExp(languages.join('|'))),
-        new webpack.optimize.CommonsChunkPlugin("vue-common.js", ["admin", "dashboard"]),
+        new webpack.optimize.CommonsChunkPlugin('vue-common.js', ['admin', 'dashboard']),
         new webpack.optimize.CommonsChunkPlugin('common.js')
     ]
 };

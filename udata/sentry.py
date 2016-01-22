@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import logging
+import pkg_resources
 import re
 
 from werkzeug.exceptions import HTTPException
@@ -36,6 +37,7 @@ def init_app(app):
             return
 
         sentry = Sentry()
+        tags = app.config['SENTRY_TAGS'] = app.config.get('SENTRY_TAGS', {})
 
         app.config.setdefault('SENTRY_USER_ATTRS',
                               ['slug', 'email', 'fullname'])
@@ -57,6 +59,15 @@ def init_app(app):
         app.config['RAVEN_IGNORE_EXCEPTIONS'] = exceptions
 
         app.config['SENTRY_PUBLIC_DSN'] = public_dsn(app.config['SENTRY_DSN'])
+
+        # Versions Management: uData and plugins versions as tags.
+        packages = ['udata']
+        packages += ['udata_{0}'.format(p) for p in app.config['PLUGINS']]
+
+        for package in packages:
+            version = pkg_resources.get_distribution(package).version
+            if version:
+                tags[package] = version
 
         sentry.init_app(app)
 
