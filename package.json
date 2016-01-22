@@ -75,7 +75,7 @@
     "dotdotdot": "BeSite/jQuery.dotdotdot#v1.7.4",
     "fine-uploader": "^5.4.1",
     "font-awesome": "^4.5.0",
-    "handlebars": "^4.0.5",
+    "handlebars": "^3.0.3",
     "highlight.js": "^8.9.1",
     "i18next-client": "^1.11.4",
     "icheck": "^1.0.2",
