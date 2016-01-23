@@ -74,7 +74,6 @@ module.exports = {
             /admin-lte\/build\/img\/boxed-bg\.jpg$/,
             'admin-lte/dist/img/boxed-bg.jpg'
         ),
-        // new webpack.ContextReplacementPlugin(/admin-lte\/build\/img\/.*$/, 'admin-lte/dist/img/$1'),
         new webpack.ProvidePlugin({
             $: 'jquery',
             jQuery: 'jquery',
@@ -84,6 +83,7 @@ module.exports = {
             allChunks: true
         }),
         new webpack.IgnorePlugin(/^(\.\/)?shred/),
+        // Only include needed translations
         new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp('^' + languages.join('|') + '$')),
         new webpack.ContextReplacementPlugin(/locales$/, new RegExp(languages.join('|'))),
         new webpack.optimize.CommonsChunkPlugin('vue-common.js', ['admin', 'dashboard']),

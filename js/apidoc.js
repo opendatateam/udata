@@ -5,7 +5,7 @@ import '../less/udata/swagger.less';
 
 import $ from 'expose?$!expose?jQuery!jquery';
 import commonmark from 'helpers/commonmark';
-import hljs from 'highlight.js';
+import hljs from 'hljs';
 import log from 'logger';
 
 // Required jQuery plugins
