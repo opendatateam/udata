@@ -76,7 +76,7 @@
     "font-awesome": "^4.5.0",
     "handlebars": "^3.0.3",
     "highlight.js": "^9.1.0",
-    "i18next-client": "^1.11.4",
+    "i18next": "^2.0.22",
     "icheck": "^1.0.2",
     "ion-rangeslider": "^2.1.2",
     "jquery": "~2.1.4",

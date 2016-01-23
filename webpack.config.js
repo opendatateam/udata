@@ -46,7 +46,8 @@ module.exports = {
             'typeahead': path.join(node_path, 'typeahead.js/dist/typeahead.jquery'),
             'handlebars': 'handlebars/runtime',
             'swaggerui': 'swagger-ui/dist',
-            'jquery': require.resolve('jquery')
+            'jquery': require.resolve('jquery'),
+            'i18next': 'i18next/lib/index.js',
         }
     },
     devtool: 'eval-source-map',
