@@ -63,10 +63,11 @@
 <script>
 import API from 'api';
 import Vue from 'vue';
+import BaseForm from 'components/form/base-form';
 
 export default {
     name: 'issue-modal',
-    mixins: [require('components/form/base-form')],
+    mixins: [BaseForm],
     components: {
         'modal': require('components/modal.vue'),
         'dataset-card': require('components/dataset/card.vue'),
