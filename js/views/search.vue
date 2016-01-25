@@ -1,19 +1,24 @@
 <template>
 <layout :title="title">
-    <div class="row">
+    <div class="row" v-if="datasets.loading || datasets.has_data">
         <datasets class="col-xs-12" :datasets="datasets"></datasets>
     </div>
-    <div class="row">
+    <div class="row" v-if="communities.loading || communities.has_data">
         <communities class="col-xs-12" :communities="communities"></communities>
     </div>
-    <div class="row">
+    <div class="row" v-if="reuses.loading || reuses.has_data">
         <reuses class="col-xs-12" :reuses="reuses"></reuses>
     </div>
-    <div class="row">
+    <div class="row" v-if="issues.loading || issues.has_data">
         <issues class="col-xs-12" :issues="issues"></issues>
     </div>
-    <div class="row">
+    <div class="row" v-if="discussions.loading || discussions.has_data">
         <discussions class="col-xs-12" :discussions="discussions"></discussions>
+    </div>
+    <div class="row" v-if="no_results">
+        <div class="col-xs-12 text-center">
+            <p class="lead">{{_('No result found')}}</p>
+        </div>
     </div>
 </layout>
 </template>
@@ -34,16 +39,20 @@ export default {
     },
     computed: {
         title() {
-            let title = this._('Search');
-            if (this.subtitle) {
-                title = `${title} (${this.subtitle})`;
-            }
-            return title;
+            return [
+                this._('Search in your data'),
+                this.$route.query.terms
+            ].join(': ');
+        },
+        no_results() {
+            const collections = [this.datasets, this.communities, this.reuses, this.issues, this.discussions];
+            return !collections.some(function(collection) {
+                return collection.loading || collection.has_data;
+            });
         }
     },
     data() {
         return {
-            subtitle: undefined,
             datasets: new PageList({
                 ns: 'me',
                 fetch: 'my_org_datasets'
@@ -69,7 +78,6 @@ export default {
     route: {
         data() {
             const terms = this.$route.query.terms;
-            this.subtitle = this._('related to your data about "{terms}"', {terms: terms});
             this.datasets.fetch({'q': terms});
             this.communities.fetch({'q': terms});
             this.reuses.fetch({'q': terms});
