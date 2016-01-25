@@ -7,6 +7,9 @@ import moment from 'moment';
 import $ from 'jquery'
 import 'jquery-validation-dist';
 
+// Remove warning for non-interpolated variables
+const interpolation = {defaultVariables:{'O': '{O}', '1': '{1}', 'ISO': '{ISO}'}};
+
 // jQuery validate
 $.extend($.validator.messages, {
     required: _('valid-required'),
@@ -14,17 +17,17 @@ $.extend($.validator.messages, {
     email: _('valid-email'),
     url: _('valid-url'),
     date: _('valid-date'),
-    dateISO: _('valid-date-iso'),
+    dateISO: _('valid-date-iso', {interpolation: interpolation}),
     number: _('valid-number'),
     digits: _('valid-digits'),
     creditcard: _('valid-creditcard'),
     equalTo: _('valid-equal-to'),
-    maxlength: $.validator.format(_('valid-maxlength')),
-    minlength: $.validator.format(_('valid-minlength')),
-    rangelength: $.validator.format(_('valid-range-length')),
-    range: $.validator.format(_('valid-range')),
-    max: $.validator.format(_('valid-max')),
-    min: $.validator.format(_('valid-min'))
+    maxlength: $.validator.format(_('valid-maxlength', {interpolation: interpolation})),
+    minlength: $.validator.format(_('valid-minlength', {interpolation: interpolation})),
+    rangelength: $.validator.format(_('valid-range-length', {interpolation: interpolation})),
+    range: $.validator.format(_('valid-range', {interpolation: interpolation})),
+    max: $.validator.format(_('valid-max', {interpolation: interpolation})),
+    min: $.validator.format(_('valid-min', {interpolation: interpolation}))
 });
 
 
