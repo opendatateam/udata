@@ -1,5 +1,5 @@
 <template>
-<layout :title="title">
+<layout :title="_('Search in your data: {q}', {q: $route.query.q})">
     <div class="row" v-if="datasets.loading || datasets.has_data">
         <datasets class="col-xs-12" :datasets="datasets"></datasets>
     </div>
@@ -38,12 +38,6 @@ export default {
         Layout
     },
     computed: {
-        title() {
-            return [
-                this._('Search in your data'),
-                this.$route.query.terms
-            ].join(': ');
-        },
         no_results() {
             const collections = [this.datasets, this.communities, this.reuses, this.issues, this.discussions];
             return !collections.some(function(collection) {
@@ -77,7 +71,7 @@ export default {
     },
     route: {
         data() {
-            const terms = this.$route.query.terms;
+            const terms = this.$route.query.q;
             this.datasets.fetch({'q': terms});
             this.communities.fetch({'q': terms});
             this.reuses.fetch({'q': terms});
