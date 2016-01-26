@@ -1,12 +1,13 @@
 /**
  * i18n handling
  */
-import i18next from 'i18next-client';
+import i18next from 'i18next';
 import moment from 'moment';
 import config from 'config';
 
 export const NAMESPACE = 'udata';
 export const lang = config.lang;
+
 
 const resources = {};
 
@@ -17,23 +18,27 @@ moment.locale(lang);
 i18next.init({
     debug: DEBUG,
     lng: lang,
-    load: 'unspecific',
-    interpolationPrefix: '{',
-    interpolationSuffix: '}',
+    load: 'languageOnly',
+    interpolation: {
+        prefix: '{',
+        suffix: '}',
+    },
     ns: NAMESPACE,
-    fallbackLng: false,
-    fallbackOnEmpty: true,
-    fallbackOnNull: true,
-    nsseparator: '::', // Allow to use real sentences as keys
-    keyseparator: '$$', // Allow to use real sentences as keys
-    resStore: resources
+    defaultNS: NAMESPACE,
+    returnEmptyString: true,
+    returnNull: true,
+    nsSeparator: '::', // Allow to use real sentences as keys
+    keySeparator: '$$', // Allow to use real sentences as keys
+    resources: resources
 });
 
-export const t = i18next.t;
-export const _ = i18next.t;
+
+// Needed fro proper i18next scope
+export function _(key, options) {
+    return i18next.t(key, options);
+};
 
 export default {
     lang,
-    _,
-    t
+    _
 };

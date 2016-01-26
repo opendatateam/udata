@@ -41,7 +41,7 @@ export default {
         p: Object,
         fields: Array,
         track: {
-            type: String,
+            type: null,
             default: 'id'
         }
     },

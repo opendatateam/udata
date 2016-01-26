@@ -118,12 +118,12 @@
 </template>
 
 <script>
+import Modal from 'mixins/modal';
+
 export default {
     name: 'user-modal',
     replace: true,
-    mixins: [
-        require('mixins/modal')
-    ],
+    mixins: [Modal],
     props: ['user'],
     data: function() {
         return {

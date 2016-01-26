@@ -7,7 +7,8 @@ const node_path = path.join(__dirname, 'node_modules');
 const css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap');
 const less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline');
 const js_loader = 'babel?presets[]=es2015';
-const handlebars_helpers = path.join(__dirname, 'js', 'templates', 'helpers')
+const handlebars_helpers = path.join(__dirname, 'js', 'templates', 'helpers');
+const hbs_loader = `handlebars?helperDirs[]=${handlebars_helpers}`;
 
 const languages = ['en', 'es', 'fr'];
 
@@ -43,9 +44,10 @@ module.exports = {
             'fineuploader': path.join(node_path, 'fine-uploader/fine-uploader/fine-uploader'),
             'bloodhound': path.join(node_path, 'typeahead.js/dist/bloodhound'),
             'typeahead': path.join(node_path, 'typeahead.js/dist/typeahead.jquery'),
-            'handlebars': 'handlebars/runtime.js',
+            'handlebars': 'handlebars/runtime',
             'swaggerui': 'swagger-ui/dist',
-            'jquery': require.resolve('jquery')
+            'jquery': require.resolve('jquery'),
+            'i18next': 'i18next/lib/index.js',
         }
     },
     devtool: 'eval-source-map',
@@ -56,7 +58,7 @@ module.exports = {
             {test: /\.less$/, loader: less_loader},
             {test: /\.vue$/, loader: 'vue'},
             {test: /\.json$/, loader: 'json'},
-            {test: /\.hbs$/, loader: 'handlebars?helperDirs[]=' + handlebars_helpers},
+            {test: /\.hbs$/, loader: hbs_loader},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, loader: 'file-loader?name=[name].[ext]'},
             {test: /\.js$/, exclude: /node_modules/, loader: js_loader},
         ]
@@ -73,7 +75,6 @@ module.exports = {
             /admin-lte\/build\/img\/boxed-bg\.jpg$/,
             'admin-lte/dist/img/boxed-bg.jpg'
         ),
-        // new webpack.ContextReplacementPlugin(/admin-lte\/build\/img\/.*$/, 'admin-lte/dist/img/$1'),
         new webpack.ProvidePlugin({
             $: 'jquery',
             jQuery: 'jquery',
@@ -83,6 +84,7 @@ module.exports = {
             allChunks: true
         }),
         new webpack.IgnorePlugin(/^(\.\/)?shred/),
+        // Only include needed translations
         new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp('^' + languages.join('|') + '$')),
         new webpack.ContextReplacementPlugin(/locales$/, new RegExp(languages.join('|'))),
         new webpack.optimize.CommonsChunkPlugin('vue-common.js', ['admin', 'dashboard']),

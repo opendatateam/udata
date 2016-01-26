@@ -56,15 +56,14 @@
     "style-loader": "^0.13.0",
     "vue-hot-reload-api": "^1.2.2",
     "vue-html-loader": "^1.1.0",
-    "vue-loader": "8.0.2",
+    "vue-loader": "8.0.3",
     "watai": "0.7.0",
-    "webpack": "1.12.11"
+    "webpack": "1.12.12"
   },
   "dependencies": {
     "Chart.StackedBar.js": "regaddi/Chart.StackedBar.js#1.0.3",
     "admin-lte": "^2.3.2",
     "babel-runtime": "^5.6.25",
-    "backbone": "^1.2.0",
     "bootstrap": "^3.3.5",
     "bootstrap-datepicker": "^1.5.1",
     "bootstrap-daterangepicker": "^2.1.17",
@@ -75,9 +74,9 @@
     "dotdotdot": "BeSite/jQuery.dotdotdot#v1.7.4",
     "fine-uploader": "^5.4.1",
     "font-awesome": "^4.5.0",
-    "handlebars": "^4.0.5",
-    "highlight.js": "^8.9.1",
-    "i18next-client": "^1.11.4",
+    "handlebars": "^3.0.3",
+    "highlight.js": "^9.1.0",
+    "i18next": "^2.0.22",
     "icheck": "^1.0.2",
     "ion-rangeslider": "^2.1.2",
     "jquery": "~2.1.4",
@@ -96,12 +95,12 @@
     "sortablejs": "^1.4.2",
     "source-sans-pro": "^2.0.10",
     "spin.js": "^2.3.2",
-    "swagger-client": "^2.1.6",
-    "swagger-ui": "2.1.3",
+    "swagger-client": "^2.1.11",
+    "swagger-ui": "2.1.4",
     "tv4": "^1.2.7",
     "typeahead.js": "^0.11.1",
     "typeahead.js-bootstrap3.less": "hyspace/typeahead.js-bootstrap3.less#v0.2.3",
-    "vue": "1.0.14",
-    "vue-router": "^0.7.8"
+    "vue": "1.0.15",
+    "vue-router": "0.7.10"
   }
 }
