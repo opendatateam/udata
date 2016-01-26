@@ -17,6 +17,7 @@
     />
     {% endif %}
     <meta name="generator" content="uData" />
+    {% if not config.IS_PRODUCTION %}<meta name="robots" content="noindex,nofollow">{% endif %}
 
     <title>{% if meta.title %}{{ meta.title }} - {% endif %}{{ current_site.title }}</title>
 
