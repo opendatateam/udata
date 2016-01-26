@@ -1,19 +1,13 @@
 # Spanish translations for udata.
-# Copyright (C) 2015 ORGANIZATION
+# Copyright (C) 2016 ORGANIZATION
 # This file is distributed under the same license as the udata project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
-# Translators:
-# AuraC <cifuentes.aura@gmail.com>, 2014
-# AuraCifuentes <aura-maria.cifuentes-gallo@modernisation.gouv.fr>, 2014
-# Axel Haustant, 2014
-# Axel Haustant, 2014-2015
-# AuraC <cifuentes.aura@gmail.com>, 2014-2015
-# Paula Forteza <paula.forteza@data.gouv.fr>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-01-13 18:47+0100\n"
+"POT-Creation-Date: 2016-01-26 12:28+0100\n"
 "PO-Revision-Date: 2015-10-16 17:23+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language: es\n"
@@ -23,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.1.1\n"
+"Generated-By: Babel 2.2.0\n"
 
 #: udata/theme.py:36 udata/core/site/metrics.py:91 udata/core/site/views.py:149
 #: udata/templates/header.html:49 udata/templates/search.html:42
@@ -816,13 +810,11 @@ msgstr "ha seguido un usuario"
 
 #: udata/core/user/activities.py:48
 #, fuzzy
-#| msgid "updated a dataset"
 msgid "discussed a dataset"
 msgstr "ha actualizado un conjunto de datos"
 
 #: udata/core/user/activities.py:53
 #, fuzzy
-#| msgid "Add a reuse"
 msgid "discussed a reuse"
 msgstr "Agregar una reutilización"
 
@@ -899,15 +891,15 @@ msgstr "Modelo para {0} no encontrado"
 msgid "Unable to parse date range"
 msgstr "Incapaz de analizar el rango de los datos"
 
-#: udata/forms/fields.py:523 udata/forms/fields.py:546
+#: udata/forms/fields.py:527 udata/forms/fields.py:550
 msgid "You must be authenticated"
 msgstr "Usted debe estar autentificado"
 
-#: udata/forms/fields.py:526
+#: udata/forms/fields.py:530
 msgid "You can only set yourself as owner"
 msgstr "Sólo puede establecerse usted mismo como propietario"
 
-#: udata/forms/fields.py:549
+#: udata/forms/fields.py:553
 msgid "Permission denied for this organization"
 msgstr "Permiso negado para esta organización"
 
@@ -1018,7 +1010,7 @@ msgstr "Administrador"
 msgid "API Documentation"
 msgstr "Documentación IPA"
 
-#: udata/templates/apidoc.html:5 udata/templates/apisamples.html:5
+#: udata/templates/apidoc.html:5
 #, python-format
 msgid "%s dynamic API documentation"
 msgstr "%s documentación de la IPA dinámica"
@@ -1117,7 +1109,7 @@ msgstr "Ejemplo"
 msgid "Examples"
 msgstr "Ejemplos"
 
-#: udata/templates/apidoc.html:101 udata/templates/apisamples.html:28
+#: udata/templates/apidoc.html:101
 msgid ""
 "All examples use the <a href=\"http://httpie.org\">httpie</a> and <a "
 "href=\"http://stedolan.github.io/jq/\">jq</a> utilities for readability "
@@ -1131,11 +1123,11 @@ msgstr ""
 "legibilidad. Sin embargo, no necesita usar estas herramientas en su "
 "código, sólo son ayudas para entender mejor la API. "
 
-#: udata/templates/apidoc.html:104 udata/templates/apisamples.html:31
+#: udata/templates/apidoc.html:104
 msgid "Verifying that httpie is working"
 msgstr "Verificando que httpie está funcionando"
 
-#: udata/templates/apidoc.html:106 udata/templates/apisamples.html:33
+#: udata/templates/apidoc.html:106
 msgid ""
 "Once httpie is installed, you can verify that it works as expected by "
 "typing that command in your shell:\n"
@@ -1145,13 +1137,12 @@ msgstr ""
 "correctamente escribiendo este comando en su ventanilla:"
 
 #: udata/templates/apidoc.html:111 udata/templates/apidoc.html:150
-#: udata/templates/apisamples.html:38 udata/templates/apisamples.html:77
 msgid ""
 "It should return something in this vein:\n"
 "                "
 msgstr "Debería devolver algo de este estilo:"
 
-#: udata/templates/apidoc.html:140 udata/templates/apisamples.html:67
+#: udata/templates/apidoc.html:140
 msgid ""
 "This is very verbose and we don't need all that information yet. That's "
 "why we use jq.\n"
@@ -1160,11 +1151,11 @@ msgstr ""
 "Esto es muy largo y no necesitamos toda esta información aún. Por eso "
 "utilizamos  jq."
 
-#: udata/templates/apidoc.html:143 udata/templates/apisamples.html:70
+#: udata/templates/apidoc.html:143
 msgid "Verifying that jq is working"
 msgstr "Verificando que jq funciona"
 
-#: udata/templates/apidoc.html:145 udata/templates/apisamples.html:72
+#: udata/templates/apidoc.html:145
 msgid ""
 "Once jq is installed, you can verify that it works as expected by typing "
 "that command in your shell:\n"
@@ -1173,7 +1164,7 @@ msgstr ""
 "Una vez que  jq se encuentra instalado, puede verificar que funciona como"
 " correctamente escribiendo este comando en su ventanilla: "
 
-#: udata/templates/apidoc.html:155 udata/templates/apisamples.html:82
+#: udata/templates/apidoc.html:155
 msgid ""
 "That's definitely better! Now that we're sure that it works as expected, "
 "let's shorten a bit the command line:\n"
@@ -1182,7 +1173,7 @@ msgstr ""
 "Esto es definitivamente mejor! Ahora que estamos seguros de que funciona "
 "correctamente, vamos a acortar un poco la línea de comando:"
 
-#: udata/templates/apidoc.html:160 udata/templates/apisamples.html:87
+#: udata/templates/apidoc.html:160
 msgid ""
 "The previous command is now equivalent to the more readable (don't forget"
 " the quotes):\n"
@@ -1191,7 +1182,7 @@ msgstr ""
 "El colando anterior es ahora equivalente al más legible (no se olvide de "
 "las comillas) :"
 
-#: udata/templates/apidoc.html:165 udata/templates/apisamples.html:92
+#: udata/templates/apidoc.html:165
 msgid ""
 "That's a good start, now let's dig into the API itself. We don't know it "
 "yet but we already fetched our first organization.\n"
@@ -1200,11 +1191,11 @@ msgstr ""
 "Es un buen comienzo, ahora vamos a concentrarnos en la API misma. No lo "
 "sabemos todavía, pero ya hemos alcanzado nuestra primera organización:"
 
-#: udata/templates/apidoc.html:169 udata/templates/apisamples.html:96
+#: udata/templates/apidoc.html:169
 msgid "Browsing and retrieving data"
 msgstr "Navegando y recuperando datos "
 
-#: udata/templates/apidoc.html:171 udata/templates/apisamples.html:98
+#: udata/templates/apidoc.html:171
 msgid ""
 "You can retrieve a list of organization (filtered or not) or a unique "
 "organization. When you reach an endpoint, the default page size is 20. "
@@ -1216,7 +1207,7 @@ msgstr ""
 "defecto es 20. Vamos a tomar las primeras 20  organizaciones a partir de "
 "la API:"
 
-#: udata/templates/apidoc.html:199 udata/templates/apisamples.html:126
+#: udata/templates/apidoc.html:199
 msgid ""
 "That list is great to have but what if we want to walk through returned "
 "organizations? Let's fetch the first 5 organizations URIs:\n"
@@ -1225,14 +1216,14 @@ msgstr ""
 "Es muy bueno tener esta lista pero que pasa si queremos pasar a través de"
 " estas organizaciones? Vamos a tomar las primero 5 organizaciones URIs:"
 
-#: udata/templates/apidoc.html:212 udata/templates/apisamples.html:139
+#: udata/templates/apidoc.html:212
 msgid ""
 "Now we'll be able to retrieve a unique organization thanks to the "
 "returned URI:\n"
 "                "
 msgstr "Ahora vamos a poder recuperar una organización única, gracias a la URI:"
 
-#: udata/templates/apidoc.html:217 udata/templates/apisamples.html:144
+#: udata/templates/apidoc.html:217
 msgid ""
 "That's a lot of data to compute. Let's refine these data, if we want only"
 " metrics:\n"
@@ -1241,13 +1232,13 @@ msgstr ""
 "Hay demasiados datos que procesar. Vamos a refinar los datos, si sólo "
 "queremos métricas:"
 
-#: udata/templates/apidoc.html:239 udata/templates/apisamples.html:166
+#: udata/templates/apidoc.html:239
 msgid ""
 "Or maybe just the name of the members of that organization:\n"
 "                "
 msgstr "O tal vez sólo el nombre de los miembros de esa organización:"
 
-#: udata/templates/apidoc.html:263 udata/templates/apisamples.html:190
+#: udata/templates/apidoc.html:263
 msgid ""
 "It's really up-to-you to retrieve the data that matters to your project. "
 "Do not hesitate to go through the <a "
@@ -1262,11 +1253,11 @@ msgstr ""
 "href=\"http://stedolan.github.io/jq/manual/\">manual</a> si quiere "
 "navegar por la API a través de la línea de comandos en profundidad."
 
-#: udata/templates/apidoc.html:267 udata/templates/apisamples.html:194
+#: udata/templates/apidoc.html:267
 msgid "Modifying and deleting data"
 msgstr "Modificando y borrando los datos"
 
-#: udata/templates/apidoc.html:269 udata/templates/apisamples.html:196
+#: udata/templates/apidoc.html:269
 msgid ""
 "Warning, you're entering a danger zone. Data modifications or deletions "
 "with the API are definitive and we don't provide any sandbox to test "
@@ -1279,7 +1270,7 @@ msgstr ""
 "para testearlas previo a la ejecución (por el momento). Sea consciente de"
 " esta responsabilidad antes de utilizar esta gran potencia. "
 
-#: udata/templates/apidoc.html:272 udata/templates/apisamples.html:199
+#: udata/templates/apidoc.html:272
 msgid ""
 "If you try to modify a resource without an authentication token, a 401 "
 "will be returned:\n"
@@ -1288,7 +1279,7 @@ msgstr ""
 "Si intenta modificar un archivo  sin una autentificación, un 401 "
 "aparecerá: "
 
-#: udata/templates/apidoc.html:287 udata/templates/apisamples.html:214
+#: udata/templates/apidoc.html:287
 msgid ""
 "You need to specify your API Key (see above) and use the <code>X-API-"
 "KEY</code> HTTP header. If you try to modify a resource that you're not "
@@ -1299,7 +1290,7 @@ msgstr ""
 "<code>X-API-KEY</code> HTTP. Si intenta modificar un recurso sobre el "
 "cual no tiene control, un 400 aparecerá: "
 
-#: udata/templates/apidoc.html:302 udata/templates/apisamples.html:229
+#: udata/templates/apidoc.html:302
 msgid ""
 "This is the message you will end up with if you specified the wrong API "
 "Key. There is another potential error message that you can encounter:\n"
@@ -1308,7 +1299,7 @@ msgstr ""
 "Este es el mensaje que aparecerá si usted especificó la llave API "
 "incorrecta. Existe otro potencial mensaje de error que puede encontrar: "
 
-#: udata/templates/apidoc.html:315 udata/templates/apisamples.html:242
+#: udata/templates/apidoc.html:315
 msgid ""
 "It occurs if you try to access a resource that you cannot edit with your "
 "credentials. If your Key is valid you should have something like this:\n"
@@ -1317,7 +1308,7 @@ msgstr ""
 "Ocurre si intenta acceder a un recurso que no puede editar con sus "
 "credenciales. Si su llave no es válida algo como esto debe aparecer: "
 
-#: udata/templates/apidoc.html:328 udata/templates/apisamples.html:255
+#: udata/templates/apidoc.html:328
 msgid ""
 "But it didn't change anything! This is perfectly normal, we forgot to "
 "specify the right data to send to the server.\n"
@@ -1326,7 +1317,7 @@ msgstr ""
 "Pero no cambié nada! Esto es perfectamente normal, nos olvidamos de "
 "especificar los datos correctos para enviar al servidor."
 
-#: udata/templates/apidoc.html:340 udata/templates/apisamples.html:267
+#: udata/templates/apidoc.html:340
 msgid ""
 "The resource has been modified with your new values. Finally, you can "
 "delete a resource with the appropriated HTTP verb (beware, no rollback is"
@@ -1337,7 +1328,7 @@ msgstr ""
 " recurso con el verbo HTTP apropriado (cuidado, no se puede volver atrás "
 "usando la API por el momento):"
 
-#: udata/templates/apidoc.html:352 udata/templates/apisamples.html:279
+#: udata/templates/apidoc.html:352
 msgid ""
 "Once you did it, you can verify that it's effective issuing a GET against"
 " the previous URI:\n"
@@ -1346,7 +1337,7 @@ msgstr ""
 "Una vez que lo hizo, puede verificar que funciona sacando un GET contra "
 "las URI previas: "
 
-#: udata/templates/apidoc.html:369 udata/templates/apisamples.html:296
+#: udata/templates/apidoc.html:369
 msgid ""
 "Please consult the reference documentation below for further interactions"
 " with the API or ask us for questions related to it!\n"
@@ -1358,10 +1349,6 @@ msgstr ""
 #: udata/templates/apidoc.html:376
 msgid "Reference"
 msgstr "Referencia"
-
-#: udata/templates/apisamples.html:4
-msgid "API Usage Examples"
-msgstr ""
 
 #: udata/templates/header.html:22 udata/templates/search.html:8
 #: udata/templates/post/subnav.html:18
@@ -1416,11 +1403,11 @@ msgstr "Métricas del sitio"
 msgid "metrics"
 msgstr "métricas "
 
-#: udata/templates/raw.html:47
+#: udata/templates/raw.html:15
 msgid "Recent datasets"
 msgstr "Conjuntos de datos recientes"
 
-#: udata/templates/raw.html:51
+#: udata/templates/raw.html:19
 msgid "Recent reuses"
 msgstr "Reutilizaciones recientes"
 
@@ -1656,13 +1643,11 @@ msgstr "Informaciones"
 
 #: udata/templates/dataset/display.html:274
 #, fuzzy
-#| msgid "Last modification date"
 msgid "Modification date"
 msgstr "Ultima fecha de creación "
 
 #: udata/templates/dataset/display.html:282
 #, fuzzy
-#| msgid "Delete resource"
 msgid "Latest resource update"
 msgstr "Expediente eliminado"
 
@@ -1943,7 +1928,6 @@ msgstr "Nuevo valor"
 
 #: udata/templates/macros/integrate.html:2
 #, fuzzy
-#| msgid "Administrateur"
 msgid "Integrate"
 msgstr "Administrador"
 
@@ -2670,13 +2654,7 @@ msgid "%(user)s is not following anyone"
 msgstr "%(user)s no está siguiendo a nadie"
 
 #~ msgid ""
-#~ "Published on %(date)s and updated on "
-#~ "%(update)s by <a href=\"%(url)s\" "
-#~ "title=\"%(author)s\">%(author)s</a>"
 #~ msgstr ""
-#~ "Publicado el %(date)s y actualizado el"
-#~ " %(update)s por <a href=\"%(url)s\" "
-#~ "title=\"%(author)s\">%(author)s</a>"
 
 #~ msgid "Provided by"
 #~ msgstr "Provisto por"
@@ -2686,4 +2664,7 @@ msgstr "%(user)s no está siguiendo a nadie"
 
 #~ msgid "Supplied datasets"
 #~ msgstr "Conjuntos de datos suministrados"
+
+#~ msgid "API Usage Examples"
+#~ msgstr ""
 
