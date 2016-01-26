@@ -3,7 +3,6 @@
   <head>
     {% block raw_head %}
     {% include theme('metadata.html') with context %}
-    {% if not config.IS_PRODUCTION %}<meta name="robots" content="noindex,nofollow">{% endif %}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{{ static('site.css') }}" rel="stylesheet">
     <link href="{{ theme_static('theme.css') }}" rel="stylesheet">
