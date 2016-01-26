@@ -1,0 +1,43 @@
+<meta charset="utf-8">
+{% set meta = meta or {} %}
+<meta name="description" content="{{ meta.description or '' }}">
+<meta name="keywords" content="{{ ', '.join(current_site.keywords + (meta.keywords or [])) }}">
+{% if config.SITE_AUTHOR %}
+<meta name="author" content="{{config.SITE_AUTHOR}}">
+{% endif %}
+{% if config.SITE_AUTHOR_URL %}
+<link rel="publisher" href="{{config.SITE_AUTHOR_URL}}"
+{% if config.SITE_AUTHOR %}title="{{config.SITE_AUTHOR}}"{% endif %}
+/>
+{% endif %}
+<meta name="generator" content="uData" />
+<link rel="github" href="{{config.SITE_GITHUB_URL or 'https://github.com/etalab/udata'}}" />
+<title>{% if meta.title %}{{ meta.title }} - {% endif %}{{ current_site.title }}</title>
+
+<link rel="theme-static-root" href="{{ theme_static('') }}" />
+<link rel="static-root" href="{{ static('', _burst=False) }}" />
+<link rel="api-root" href="{{ url_for('api.root') }}" />
+<link rel="admin-root" href="{{ url_for('admin.index') }}" />
+<link rel="api-specs" href="{{ url_for('api.specs', _external=True) }}"/>
+<link rel="auth-url" href="{{ url_for('security.login') }}" />
+{{ i18n_alternate_links() }}
+{% if config.SENTRY_PUBLIC_DSN %}
+<link rel="sentry" href="{{config.SENTRY_PUBLIC_DSN}}"
+    data-release="{{config.SENTRY_RELEASE}}"
+    data-tags="{{config.SENTRY_TAGS|default({})|tojson|urlencode}}"
+/>
+{% endif %}
+
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="site-title" content="{{config.SITE_TITLE}}">
+
+{% if current_user.is_authenticated() %}
+<meta name="current-user" content="{{ current_user.id }}"
+    data-slug="{{ current_user.slug }}"
+    data-first_name="{{ current_user.first_name }}"
+    data-last_name="{{ current_user.last_name }}"
+    data-roles="{{ current_user.roles|join(',') }}"
+/>
+{% endif %}
+
+<meta name="notify-in" content="{{ meta.notify_in or '#notifications-container' }}">

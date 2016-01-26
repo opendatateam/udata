@@ -6,7 +6,7 @@ define([
     'use strict';
 
     // Mock the API and the Swagger specs
-    config.api = 'http://localhost/api/1/swagger.json';
+    config.api_specs = 'http://localhost/api/1/swagger.json';
 
     var xhr = sinon.useFakeXMLHttpRequest(),
         requests = [];

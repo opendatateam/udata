@@ -2,11 +2,11 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import config from 'config';
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
 
 const router = new VueRouter({
     history: true,
-    root: config.root
+    root: config.admin_root
 });
 
 router.map({

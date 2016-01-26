@@ -36,10 +36,13 @@ def clean(bower=False, node=False):
 
 
 @task
-def test():
+def test(fast=False):
     '''Run tests suite'''
     header('Run tests suite')
-    lrun('nosetests --rednose --force-color udata', pty=True)
+    cmd = 'nosetests --rednose --force-color udata'
+    if fast:
+        cmd = ' '.join([cmd, '--stop'])
+    lrun(cmd, pty=True)
 
 
 @task

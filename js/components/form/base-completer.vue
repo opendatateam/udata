@@ -15,22 +15,23 @@ import Vue from 'vue';
 import $ from 'jquery';
 import log from 'logger';
 import BaseError from 'models/error';
+import utils from 'utils';
 
 import 'selectize';
 
 class CompleterError extends BaseError {};
 
 function lst2str(value) {
-    if (Vue.util.isArray(value)) {
+    if (Array.isArray(value)) {
         return value.join(',');
     }
     return value || '';
 }
 
 function forceList(value) {
-    if (Vue.util.isArray(value)) {
+    if (Array.isArray(value)) {
         return value
-    } else if (Vue.util.isString(value)) {
+    } else if (utils.isString(value)) {
         return value.split(',');
     } else if (value === undefined || value === null) {
         return [];
@@ -46,7 +47,7 @@ export default {
             var opts = this.$options.selectize;
 
             return $.extend({},
-                Vue.util.isFunction(opts) ? opts.apply(this, []) : opts,
+                utils.isFunction(opts) ? opts.apply(this, []) : opts,
                 {
                     persist: false,
                     closeAfterSelect: true,

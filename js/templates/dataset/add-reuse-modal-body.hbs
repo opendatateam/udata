@@ -10,9 +10,7 @@
     </div>
     {{#each reuses }}
     <div class="col-sm-6 col-md-4">
-        <a class="thumbnail reuse postable" href="{{ add_url }}"
-            title="{{ title }}"
-            data-field-name="dataset" data-field-value="{{../dataset}}">
+        <a class="thumbnail reuse clickable" title="{{ title }}" data-id="{{ id }}">
             <div class="preview">
                 <img class="media-object img-responsive" alt="{{ title }}" src="{{ image }}">
             </div>

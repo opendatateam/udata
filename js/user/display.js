@@ -1,13 +1,7 @@
-/**
+/*
  * User display page
  */
-define([
-    'logger',
-    'widgets/follow-btn',
-], function(log) {
-    return {
-        start: function() {
-            log.debug('User display page');
-        }
-    }
-});
+import log from 'logger';
+import 'widgets/follow-btn';
+
+log.debug('User display page');
