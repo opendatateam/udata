@@ -1,5 +1,6 @@
 <meta charset="utf-8">
 {% set meta = meta or {} %}
+{% if config.DISALLOW_INDEXING %}<meta name="robots" content="noindex,nofollow">{% endif %}
 <meta name="description" content="{{ meta.description or '' }}">
 <meta name="keywords" content="{{ ', '.join(current_site.keywords + (meta.keywords or [])) }}">
 {% if config.SITE_AUTHOR %}
