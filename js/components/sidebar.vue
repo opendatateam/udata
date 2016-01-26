@@ -88,7 +88,7 @@ export default {
         onSearch() {
             const terms = this.$els.terms.value;
             if (terms && terms.length > 2) {
-                this.$go({name: 'search', query: { terms: terms }});
+                this.$go({name: 'search', query: { q: terms }});
             }
         }
     }
