@@ -31,7 +31,8 @@ class OEmbedDatasetAPITest(APITestCase):
         self.assertIn(dataset.title, data['html'])
         self.assertIn(dataset.external_url, data['html'])
         self.assertIn('placeholders/default.png', data['html'])
-        self.assertIn(dataset.description, data['html'])
+        # Because we use mdstrip for the description.
+        self.assertIn(dataset.description[:90], data['html'])
 
     def test_oembed_dataset_api_get_with_organization(self):
         '''It should fetch a dataset in the oembed format with org.'''
