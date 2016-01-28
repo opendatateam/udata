@@ -47,7 +47,7 @@ $(function() {
             log.error('Unable to Load SwaggerUI');
         },
         docExpansion: 'none',
-        jsonEditor:true,
+        // jsonEditor: true,
         sorter: 'alpha'
     });
 
