@@ -130,7 +130,6 @@ class Testing(object):
     DEFAULT_LANGUAGE = 'en'
 
 
-
 class Debug(Defaults):
     DEBUG = True
     DEBUG_TB_INTERCEPT_REDIRECTS = False

@@ -1,6 +1,6 @@
 var path = require('path');
 var webpack = require('webpack');
-var js_loader = 'babel?loose=all&nonStandard=false';
+var js_loader = 'babel?presets[]=es2015';
 
 module.exports = {
     entry: {

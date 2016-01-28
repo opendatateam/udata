@@ -1,12 +1,11 @@
-/**
+/*
  * Post display page JS module
  */
-'use strict';
 
-var $ = require('jquery'),
-    log = require('logger');
+import $ from 'jquery';
+import log from 'logger';
 
-require('widgets/share-btn');
+import 'widgets/share-btn';
 
 $(function() {
     log.debug('Post display page');

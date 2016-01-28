@@ -1,9 +1,8 @@
-import * as i18n from 'i18n';
+import i18n from 'i18n';
 import moment from 'moment';
 import log from 'logger';
 
-export default function(Vue, options) {
-
+export function install(Vue) {
     // Register the i18n filter
     Vue.filter('i18n', function(value, options) {
         return i18n._(value, options);
@@ -32,4 +31,4 @@ export default function(Vue, options) {
     Vue.lang = Vue.prototype.lang = i18n.lang;
 
     log.debug('Plugin i18next loaded');
-};
+}

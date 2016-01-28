@@ -57,7 +57,7 @@ export default class User extends Model {
             return object.owner.id === this.id;
         } else if (object.organization) {
             return this.organizations.some(function(organization) {
-                return organization.id === object.id;
+                return organization.id === object.organization.id;
             });
         }
         return false;

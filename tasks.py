@@ -36,10 +36,13 @@ def clean(bower=False, node=False):
 
 
 @task
-def test():
+def test(fast=False):
     '''Run tests suite'''
     header('Run tests suite')
-    lrun('nosetests --rednose --force-color udata', pty=True)
+    cmd = 'nosetests --rednose --force-color udata'
+    if fast:
+        cmd = ' '.join([cmd, '--stop'])
+    lrun(cmd, pty=True)
 
 
 @task
@@ -175,11 +178,14 @@ def i18nc():
 
 
 @task
-def assets():
+def assets(progress=False):
     '''Install and compile assets'''
     header('Building static assets')
-    nrun('webpack -c --progress --config webpack.config.prod.js', pty=True)
-    nrun('webpack -c --progress --config webpack.widgets.config.js', pty=True)
+    cmd = 'webpack -c --config {0}.js'
+    if progress:
+        cmd += ' --progress'
+    nrun(cmd.format('webpack.config.prod'), pty=True)
+    nrun(cmd.format('webpack.widgets.config'), pty=True)
 
 
 @task(i18nc, assets)

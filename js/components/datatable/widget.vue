@@ -95,7 +95,7 @@ export default {
         tint: String,
         empty: String,
         track: {
-            type: String,
+            type: null,
             default: 'id'
         },
         downloads: {

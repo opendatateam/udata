@@ -6,8 +6,10 @@
 </template>
 
 <script>
+import BaseNotification from 'components/notifications/base';
+
 export default {
-    mixins: [require('components/notifications/base')],
+    mixins: [BaseNotification],
     methods: {
         click: function() {
             let id = this.details.id,

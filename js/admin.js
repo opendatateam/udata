@@ -1,19 +1,18 @@
-'use strict';
-
 /**
  * Styles
  */
-require('../less/admin.less');
+import '../less/admin.less';
 
 // Catch all errors
-require('raven');
+import 'raven';
 
-var $ = require('jquery');
-require('bootstrap');
+import $ from 'jquery';
+import 'bootstrap';
 
-var Vue = require('vue'),
-    config = require('config'),
-    router = require('admin.routes');
+import Vue from 'vue';
+import config from 'config';
+import router from 'admin.routes';
+import API from 'api';
 
 // Ensure retrocompatibily for 0.12.2 replace behavior
 Vue.options.replace = false;
@@ -26,7 +25,7 @@ Vue.use(require('plugins/i18next'));
 Vue.use(require('plugins/markdown'));
 Vue.use(require('plugins/scroll-to'));
 
-$(require('api')).on('built', function() {
+
+$(API).on('built', function() {
     router.start(require('admin.vue'), '#app');
 });
-

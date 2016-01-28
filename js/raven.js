@@ -1,13 +1,14 @@
-define(['raven-js', 'config'], function(Raven, config) {
-    'use strict';
+import Raven from 'raven-js';
+import config from 'config';
 
-    var options = {
-        logger: 'admin'
+if (config.sentry) {
+    const options = {
+        logger: 'admin',
+        release: config.sentry.release,
+        tags: config.sentry.tags,
     }
 
-    if (config.sentry_dsn) {
-        Raven.config(config.sentry_dsn, options).install()
-    }
+    Raven.config(config.sentry.dsn, options).install()
+}
 
-    return Raven;
-});
+export default Raven;
