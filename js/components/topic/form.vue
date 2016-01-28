@@ -26,6 +26,10 @@ export default {
                     id: 'tags',
                     label: this._('Tags'),
                     widget: 'tag-completer'
+                }, {
+                    id: 'featured',
+                    label: this._('Featured'),
+                    widget: 'checkbox'
                 }]
         };
     },

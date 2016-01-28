@@ -162,7 +162,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     description = db.StringField(required=True, default='')
     license = db.ReferenceField('License')
 
-    tags = db.ListField(db.StringField())
+    tags = db.TagListField()
     resources = db.ListField(db.EmbeddedDocumentField(Resource))
 
     private = db.BooleanField()
@@ -225,13 +225,14 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         else:
             cls.on_update.send(document)
 
-    @property
-    def display_url(self):
-        return url_for('datasets.show', dataset=self)
+    def url_for(self, *args, **kwargs):
+        return url_for('datasets.show', dataset=self, *args, **kwargs)
+
+    display_url = property(url_for)
 
     @property
     def external_url(self):
-        return url_for('datasets.show', dataset=self, _external=True)
+        return self.url_for(_external=True)
 
     @property
     def image_url(self):

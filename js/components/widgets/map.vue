@@ -42,19 +42,27 @@ export default {
             type: String,
             default: 'globe'
         },
+        // Whether or not to allow zooming and paning (scrool, tap...)
+        fixed: {
+            type: Boolean,
+            default: true
+        },
         geojson: null
     },
     ready: function() {
         this.map = L.map(this.$els.container, INITIAL_SETTINGS);
 
-        // Disable drag and zoom handlers.
-        // this.map.dragging.disable();
-        // this.map.touchZoom.disable();
-        // this.map.doubleClickZoom.disable();
-        // this.map.scrollWheelZoom.disable();
+        if (this.fixed) {
+            // Disable drag and zoom handlers.
+            this.map.dragging.disable();
+            this.map.touchZoom.disable();
+            this.map.doubleClickZoom.disable();
+            this.map.scrollWheelZoom.disable();
 
-        // Disable tap handler, if present.
-        // if (this.map.tap) this.map.tap.disable();
+            // Disable tap handler, if present.
+            if (this.map.tap) this.map.tap.disable();
+        }
+
 
         L.tileLayer(TILES_URL, TILES_CONFIG).addTo(this.map);
         // this.layer.addTo(this.map);

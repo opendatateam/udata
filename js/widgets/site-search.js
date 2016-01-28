@@ -40,7 +40,7 @@ define([
 
     // Typeahead
     let providers = [organizations, datasets, reuses];
-    if (config.territory_enabled) {
+    if (config.is_territory_enabled) {
         providers.push(territories);
     }
     $('#main-search')

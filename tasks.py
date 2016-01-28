@@ -36,10 +36,13 @@ def clean(bower=False, node=False):
 
 
 @task
-def test():
+def test(fast=False):
     '''Run tests suite'''
     header('Run tests suite')
-    lrun('nosetests --rednose --force-color udata', pty=True)
+    cmd = 'nosetests --rednose --force-color udata'
+    if fast:
+        cmd = ' '.join([cmd, '--stop'])
+    lrun(cmd, pty=True)
 
 
 @task
@@ -85,11 +88,11 @@ def qa():
     '''Run a quality report'''
     header('Performing static analysis')
     info('Python static analysis')
-    flake8_results = lrun('flake8 udata', warn=True)
+    flake8_results = lrun('flake8 udata', pty=True, warn=True)
     info('JavaScript static analysis')
-    jshint_results = nrun('jshint js --extra-ext=.vue --extract=auto', warn=True)
-    if flake8_results.failed or jshint_results.failed:
-        exit(flake8_results.return_code or jshint_results.return_code)
+    eslint_results = nrun('eslint js/ --ext .vue,.js', pty=True, warn=True)
+    if flake8_results.failed or eslint_results.failed:
+        exit(flake8_results.return_code or eslint_results.return_code)
     print(green('OK'))
 
 
@@ -175,11 +178,14 @@ def i18nc():
 
 
 @task
-def assets():
+def assets(progress=False):
     '''Install and compile assets'''
     header('Building static assets')
-    nrun('webpack -c --progress --config webpack.config.prod.js', pty=True)
-    nrun('webpack -c --progress --config webpack.widgets.config.js', pty=True)
+    cmd = 'webpack -c --config {0}.js'
+    if progress:
+        cmd += ' --progress'
+    nrun(cmd.format('webpack.config.prod'), pty=True)
+    nrun(cmd.format('webpack.widgets.config'), pty=True)
 
 
 @task(i18nc, assets)

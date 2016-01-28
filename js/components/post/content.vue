@@ -15,7 +15,8 @@
 </style>
 <template>
 <box :title="post.name || ''" icon="building"
-    boxclass="box-solid post-content-widget">
+    boxclass="box-solid post-content-widget"
+    :footer="toggled">
     <aside slot="tools">
         <a class="text-muted pointer" @click="toggle">
             <i class="fa fa-gear"></i>

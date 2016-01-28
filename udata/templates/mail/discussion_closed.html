@@ -14,7 +14,7 @@
         ),
         subject=(
             '<a href="'|safe
-            + discussion.subject.external_url
+            + discussion.external_url
             + '">'|safe
             + discussion.subject|string
             + '</a>'|safe
@@ -38,7 +38,7 @@
         <td align="center">
             {{ mail_button(
                 _('See the discussion'),
-                discussion.subject.external_url
+                discussion.external_url
             ) }}
         </td>
     </tr>

@@ -4,6 +4,8 @@
     {% include theme("header.html") with context %}
     {% block subnav %}{% endblock %}
 
+    <section id="notifications-container"></section>
+
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         {% for message in messages %}

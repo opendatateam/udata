@@ -1,36 +1,9 @@
-import $ from 'jquery';
-import u from 'utils';
-
-export default function(Vue, options) {  // jshint ignore:line
-
-    /**
-     * Check if an object is a Function
-     */
-    Vue.util.isFunction = u.isFunction;
-
-    /**
-     * Check if an object is a String
-     */
-    Vue.util.isString = u.isString;
-
-    /**
-     * Fetch the class name for given Vue object instance
-     * @param  {Object} cls a Vue instance
-     * @return {string}     The class name, declared or inherited
-     */
-    Vue.util.classname = function(cls) {
-        var constructor = cls.constructor;
-        while (constructor.name == 'VueComponent') {
-            constructor = constructor.super;
-        }
-        return constructor.name
-    }
-
+export function install(Vue) {
     /**
      * Give the size of an array or a string
      */
     Vue.filter('length', function(value) {
-        if (Vue.util.isArray(value)) {
+        if (Array.isArray(value)) {
             return value.length;
         }
         return 0;
@@ -55,7 +28,7 @@ export default function(Vue, options) {  // jshint ignore:line
         if (object.title) {
             return object.title;
         } else if (object.name) {
-            return object.name
+            return object.name;
         } else if (object.fullname) {
             return object.fullname;
         } else if (object.first_name && object.last_name) {
@@ -71,19 +44,13 @@ export default function(Vue, options) {  // jshint ignore:line
     Vue.filter('is', function(obj, cls) {
         if (!obj || !cls) return;
 
-        let classname = obj.__class__ || obj.class || obj.classname || Vue.util.classname(obj);
+        let classname = obj.__class__ || obj.class || obj.classname;
 
         // Resolve known conventions
         if (classname.endsWith('Full')) {
             classname = classname.substring(0, classname.length - 4);
         }
 
-        return classname.toLowerCase() == cls.toLowerCase();
-    })
-
-    Vue.filter('cls', function(obj) {
-        if (!obj) return;
-
-        return obj.class || obj.classname || Vue.util.classname(obj);
-    })
-};
+        return classname.toLowerCase() === cls.toLowerCase();
+    });
+}

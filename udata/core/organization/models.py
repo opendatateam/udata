@@ -163,13 +163,14 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         else:
             cls.on_update.send(document)
 
-    @property
-    def display_url(self):
-        return url_for('organizations.show', org=self)
+    def url_for(self, *args, **kwargs):
+        return url_for('organizations.show', org=self, *args, **kwargs)
+
+    display_url = property(url_for)
 
     @property
     def external_url(self):
-        return url_for('organizations.show', org=self, _external=True)
+        return self.url_for(_external=True)
 
     @property
     def pending_requests(self):

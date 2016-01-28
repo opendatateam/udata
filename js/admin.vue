@@ -53,6 +53,16 @@ export default {
     ready: function() {
         this.fix_size();
         this.slimscroll();
+
+        // Display an error identifier un uncaught error
+        document.addEventListener('ravenSuccess', (e) => {
+            this.notifications.push({
+                type: 'error',
+                icon: 'exclamation-triangle',
+                title: this._('An error occured'),
+                details: this._('The error identifier is {id}', {id: e.data.event_id}),
+            });
+        });
     },
     methods: {
         /**

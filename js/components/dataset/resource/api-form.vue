@@ -21,7 +21,8 @@ export default {
                 }, {
                     id: 'url',
                     label: this._('URL'),
-                    help: this._('The public URL of the API')
+                    help: this._('The public URL of the API'),
+                    widget: 'url-field',
                 }, {
                     id: 'description',
                     label: this._('Description'),

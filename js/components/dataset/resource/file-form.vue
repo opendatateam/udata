@@ -86,7 +86,8 @@ export default {
             file_fields: [{
                     id: 'url',
                     label: this._('URL'),
-                    readonly: true
+                    readonly: true,
+                    widget: 'url-field',
                 }, {
                     id: 'filesize',
                     label: this._('Size'),

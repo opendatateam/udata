@@ -119,7 +119,7 @@ export default {
                     id: this.objectId || this.site.id,
                     start: moment().subtract(12, 'days').format('YYYY-MM-DD'),
                     end: moment().format('YYYY-MM-DD'),
-                    cumulative: '' // false
+                    cumulative: false
                 });
             }
         }

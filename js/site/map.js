@@ -1,15 +1,10 @@
-define([
-    'jquery',
-    'logger',
-    'dashboard/map'
-], function($, log, Map) {
-    'use strict';
+import $ from 'jquery';
+import log from 'logger';
+import Map from 'dashboard/map';
 
-    var map = new Map('.big-map');
+const map = new Map('.big-map');
 
-    $(function() {
-        map.load();
-    });
+$(function() {
+    log.debug('Loading map');
+    map.load();
 });
-
-

@@ -1,9 +1,5 @@
-import config from 'site/config';
+import config from 'config';
 import pubsub from 'pubsub';
 import log from 'logger';
 
-export default {
-    pubsub,
-    log,
-    config
-};
+export {pubsub, log, config};

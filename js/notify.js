@@ -1,11 +1,16 @@
 /**
  * User notification module
  */
-define(['jquery', 'logger', 'templates/notification.hbs'], function($, Log, message_template) {
+define([
+    'jquery',
+    'logger',
+    'config',
+    'templates/notification.hbs'
+], function($, Log, config, message_template) {
     'use strict';
 
     function show_message(message, type, container) {
-        container = container || 'section.default .container:first';
+        container = container || config.notify_in;
         $(container).prepend(message_template({
             level: type == 'error' ? 'danger' : type,
             message: message

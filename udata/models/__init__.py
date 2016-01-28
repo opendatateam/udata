@@ -17,6 +17,7 @@ from flask.ext.fs.mongo import FileField, ImageField
 from udata.utils import Paginable
 
 from .badges_field import BadgesField
+from .taglist_field import TagListField
 from .datetime_fields import DateField, DateRange, Datetimed
 from .extras_fields import ExtrasField, Extra
 from .slug_fields import SlugField
@@ -30,6 +31,7 @@ class UDataMongoEngine(MongoEngine):
     def __init__(self, app=None):
         super(UDataMongoEngine, self).__init__(app)
         self.BadgesField = BadgesField
+        self.TagListField = TagListField
         self.DateField = DateField
         self.Datetimed = Datetimed
         self.Extra = Extra

@@ -11,6 +11,10 @@ __all__ = ('Tag', )
 
 
 class Tag(db.Document):
+    '''
+    This collection is auto-populated every hour map-reducing tag properties
+    from Datasets dans Reuses.
+    '''
     name = db.StringField(required=True, unique=True)
     counts = db.DictField()
     total = db.IntField(default=0)
