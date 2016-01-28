@@ -38,54 +38,52 @@ def clean(bower=False, node=False):
     ]
     for pattern in patterns:
         print('Removing {0}'.format(pattern))
-        run('cd {0} && rm -rf {1}'.format(ROOT, pattern))
+        lrun('rm -rf {0}'.format(pattern))
 
 
 @task
 def test():
     '''Run tests suite'''
-    run('cd {0} && nosetests --rednose --force-color udata_gouvfr'.format(
-        ROOT), pty=True)
+    lrun('nosetests --rednose --force-color udata_gouvfr', pty=True)
 
 
 @task
 def cover():
     '''Run tests suite with coverage'''
-    run(('cd {0} && nosetests --rednose --force-color --with-coverage '
-         '--cover-html --cover-package=udata_gouvfr').format(ROOT), pty=True)
+    lrun('nosetests --rednose --force-color --with-coverage '
+         '--cover-html --cover-package=udata_gouvfr', pty=True)
 
 
 @task
 def qa():
     '''Run a quality report'''
-    run('flake8 {0}/udata_gouvfr'.format(ROOT))
+    lrun('flake8 udata_gouvfr')
 
 
 @task
 def i18n():
     '''Extract translatable strings'''
-    run('python setup.py extract_messages')
-    run('python setup.py update_catalog')
+    lrun('python setup.py extract_messages')
+    lrun('python setup.py update_catalog')
 
 
 @task
 def i18nc():
     '''Compile translations'''
     print(cyan('Compiling translations'))
-    run('cd {0} && python setup.py compile_catalog'.format(ROOT))
+    lrun('python setup.py compile_catalog')
 
 
 @task
 def watch():
-    lrun('webpack -d -c --progress --watch', pty=True)
+    nrun('webpack -d -c --progress --watch', pty=True)
 
 
 @task
 def assets():
     '''Install and compile assets'''
     print(cyan('Building static assets'))
-    lrun(('cd {0} && webpack -c --progress '
-          '--config webpack.config.prod.js').format(ROOT), pty=True)
+    nrun('webpack -c --progress --config webpack.config.prod.js', pty=True)
 
 
 @task(assets, i18nc)
