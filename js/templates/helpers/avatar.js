@@ -18,7 +18,7 @@ define([
 
         return new Handlebars.SafeString(tpl({
             href: options.hash['url'] || undefined,
-            avatar_url: avatar_url || placeholder(type),
+            avatar_url: avatar_url || placeholder.default(type),
             avatar_size: size || 32
         }));
 
