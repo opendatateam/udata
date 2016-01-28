@@ -17,7 +17,7 @@ import 'script!swaggerui/lib/jquery.ba-bbq.min';
 import 'expose?Handlebars!handlebars';
 import 'script!swaggerui/lib/underscore-min';
 import 'script!swaggerui/lib/backbone-min';
-import 'script!swaggerui/lib/jsoneditor-min';
+import 'script!swaggerui/lib/jsoneditor.min';
 
 import 'script!swaggerui/swagger-ui.min';
 SwaggerUi = window.SwaggerUi;
