@@ -1,9 +1,7 @@
-define(['handlebars', 'jquery'], function(Handlebars, $) {
-
-    var theme_static_root = $('link[rel="theme-static-root"]').attr('href');
+define(['handlebars', 'jquery', 'config'], function(Handlebars, $, config) {
 
     return function(value) {
-        return new Handlebars.SafeString(theme_static_root + value);
+        return new Handlebars.SafeString(config.theme_static + value);
     };
 
 });

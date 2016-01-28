@@ -63,6 +63,11 @@ export const title = _meta('site-title');
 export const csrf_token = _meta('csrf-token');
 
 /**
+ * Is the check url feature enabled ?
+ */
+export const check_urls = JSON.parse(_meta('check-urls'));
+
+/**
  * The API root/base URL
  */
 export const api_root = _link('api-root');
@@ -123,4 +128,5 @@ export default {
     auth_url,
     sentry,
     notify_in,
+    check_urls,
 };
