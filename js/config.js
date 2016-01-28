@@ -113,7 +113,7 @@ export const notify_in = _meta('notify-in');
  * Whether territories are enabled or not.
  */
 const territory_enabled = _meta('territory-enabled');
-export const is_territory_enabled = territory_enabled.attr('content') ? territory_enabled.attr('content').toLowerCase() === 'true' : false;
+export const is_territory_enabled = territory_enabled ? territory_enabled.toLowerCase() === 'true' : false;
 
 
 export default {
