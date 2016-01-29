@@ -25,9 +25,9 @@ export default {
             if (this.value) {
                 return this.value;
             } else if (this.field.placeholder) {
-                return placeholders[this.field.placeholder];
+                return placeholders.getFor(this.field.placeholder);
             } else {
-                return placeholders.default;
+                return placeholders.generic;
             }
         }
     }
