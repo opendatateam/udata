@@ -30,6 +30,9 @@ def compute_territory_dataset(territory, dataset, resource_id):
     args = multi_to_dict(request.args)
     if 'territory_attr' not in args or 'csv_column' not in args:
         return abort(404)
+    if not hasattr(territory, args['territory_attr']):
+        return abort(400)
+
     for resource in dataset.resources:
         if resource.id == resource_id:
             break

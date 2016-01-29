@@ -33,8 +33,8 @@ def fetch_territories_logos():
     if not os.path.exists(LOGOS_FOLDER_PATH):
         os.makedirs(LOGOS_FOLDER_PATH)
 
-    for geozone in (GeoZone.objects.filter(level='fr/town')
-                                   .only('flag', 'blazon')):
+    geozones = GeoZone.objects.filter(level='fr/town')
+    for geozone in geozones.only('flag', 'blazon'):
         if geozone.flag or geozone.blazon:
             filename = geozone.flag.filename or geozone.blazon.filename
             with open(logos.path(filename), 'wb') as file_destination:

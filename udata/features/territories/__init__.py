@@ -35,10 +35,10 @@ def check_for_territory(query):
                 # Finally, we fall back on the most popular one.
                 # Warning: it means that we're dropping some territories
                 # here, e.g.: Vitrolles.
-                return (GeoZone.objects
-                        .filter(name__iexact=query, level='fr/town')
-                        .order_by('-population', '-area')
-                        .first())
+                geozones = GeoZone.objects.filter(name__iexact=query,
+                                                  level='fr/town')
+                geozones = geozones.order_by('-population', '-area')
+                return geozones.first()
             except GeoZone.DoesNotExist:
                 return False
         except GeoZone.DoesNotExist:

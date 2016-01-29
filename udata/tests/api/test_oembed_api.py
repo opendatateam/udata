@@ -16,9 +16,9 @@ class OEmbedsDatasetAPITest(APITestCase):
         with self.autoindex():
             dataset = DatasetFactory()
 
-        response = self.get(
-            url_for('api.oembeds',
-                    references='dataset-{id}'.format(id=dataset.id)))
+        url = url_for('api.oembeds',
+                      references='dataset-{id}'.format(id=dataset.id))
+        response = self.get(url)
         self.assert200(response)
         data = json.loads(response.data)[0]
         self.assertIn('html', data)
@@ -40,9 +40,9 @@ class OEmbedsDatasetAPITest(APITestCase):
             organization = OrganizationFactory()
             dataset = DatasetFactory(organization=organization)
 
-        response = self.get(
-            url_for('api.oembeds',
-                    references='dataset-{id}'.format(id=dataset.id)))
+        url = url_for('api.oembeds',
+                      references='dataset-{id}'.format(id=dataset.id))
+        response = self.get(url)
         self.assert200(response)
         data = json.loads(response.data)[0]
         self.assertNotIn('placeholders/default.png', data['html'])
@@ -70,16 +70,16 @@ class OEmbedsDatasetAPITest(APITestCase):
         with self.autoindex():
             user = UserFactory()
 
-        response = self.get(
-            url_for('api.oembeds', references='user-{id}'.format(id=user.id)))
+        url = url_for('api.oembeds', references='user-{id}'.format(id=user.id))
+        response = self.get(url)
         self.assert400(response)
         self.assertEqual(json.loads(response.data)['message'],
                          'Invalid object type.')
 
     def test_oembeds_dataset_api_get_without_valid_id(self):
         '''It should fail at fetching an oembed without a valid id.'''
-        response = self.get(
-            url_for('api.oembeds', references='dataset-123456789'))
+        url = url_for('api.oembeds', references='dataset-123456789')
+        response = self.get(url)
         self.assert400(response)
         self.assertEqual(json.loads(response.data)['message'],
                          'Unknown dataset ID.')
