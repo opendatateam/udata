@@ -1,5 +1,5 @@
 /**
- * Typeahead.js/Bloodhound completion definition for datasets
+ * Typeahead.js/Bloodhound completion definition for territories
  */
 define([
     'jquery',
@@ -9,7 +9,6 @@ define([
     'templates/search/suggestion.hbs',
     'i18n'
 ], function($, API, Bloodhound, header, suggestion, i18n) {
-    const MAX = 3;
     const engine = new Bloodhound({
             queryTokenizer: Bloodhound.tokenizers.whitespace,
             datumTokenizer: function(d) {
@@ -19,7 +18,7 @@ define([
                 return d.id;
             },
             remote: {
-                url: API.build_url('/datasets/suggest/') + '?q=%QUERY&size=' + MAX,
+                url: API.build_url('/territory/suggest/') + '?q=%QUERY',
                 wildcard: '%QUERY',
                 // Keep until model is uniformised
                 transform: function(response) {
@@ -32,12 +31,11 @@ define([
         });
 
     return {
-        name: 'datasets',
+        name: 'territories',
         source: engine,
         display: 'name',
-        limit: MAX,
         templates: {
-            header: header({title: i18n._('Datasets')}),
+            header: header({title: i18n._('Territory')}),
             suggestion: suggestion
         }
     };

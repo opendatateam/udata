@@ -92,6 +92,8 @@ class Defaults(object):
 
     HARVEST_PREVIEW_MAX_ITEMS = 20
 
+    ACTIVATE_TERRITORIES = False
+
     # CROQUEMORT = {
     #     'url': 'http://localhost:8000',
     #     'delay': 1,

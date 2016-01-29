@@ -7,6 +7,7 @@ from udata import search, theme
 from udata.frontend import front
 from udata.models import Dataset, Organization, Reuse, User
 from udata.utils import multi_to_dict
+from udata.features.territories import check_for_territory
 
 
 @front.route('/search/', endpoint='search')
@@ -35,5 +36,6 @@ def render_search():
         ]
         results_labels = ['datasets', 'reuses', 'organizations', 'users']
     results = search.multiquery(*search_queries)
-    return theme.render('search.html',
-                        **dict(zip(results_labels, results)))
+    context = dict(zip(results_labels, results))
+    context['territory'] = check_for_territory(params.get('q'))
+    return theme.render('search.html', **context)

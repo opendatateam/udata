@@ -8,9 +8,10 @@ import lzma
 import tempfile
 import tarfile
 import shutil
-
 from os.path import join
 from urllib import urlretrieve
+
+import mongoengine
 
 from udata.commands import submanager
 from udata.models import GeoLevel, GeoZone
@@ -41,7 +42,7 @@ def load(filename, drop=False):
 
     log.info('Loading GeoZones levels')
 
-    if (drop):
+    if drop:
         log.info('Dropping existing levels')
         GeoLevel.drop_collection()
 
@@ -56,7 +57,7 @@ def load(filename, drop=False):
         total += 1
     log.info('Loaded {0} levels'.format(total))
 
-    if (drop):
+    if drop:
         log.info('Dropping existing spatial zones')
         GeoZone.drop_collection()
 
@@ -67,18 +68,24 @@ def load(filename, drop=False):
 
     for zone in geozones['features']:
         props = zone['properties']
-        GeoZone.objects.create(
-            id=zone['id'],
-            level=props['level'],
-            code=props['code'],
-            name=props['name'],
-            keys=props['keys'],
-            parents=props['parents'],
-            population=props.get('population'),
-            area=props.get('area'),
-            geom=zone['geometry']
-        )
-        total += 1
+        try:
+            GeoZone.objects.create(
+                id=zone['id'],
+                level=props['level'],
+                code=props['code'],
+                name=props['name'],
+                keys=props['keys'],
+                parents=props['parents'],
+                population=props.get('population'),
+                dbpedia=props.get('dbpedia'),
+                logo=props.get('flag') or props.get('blazon'),
+                wikipedia=props.get('wikipedia'),
+                area=props.get('area'),
+                geom=zone['geometry']
+            )
+            total += 1
+        except mongoengine.errors.ValidationError:
+            pass
 
     log.info('Loaded {0} zones'.format(total))
 
