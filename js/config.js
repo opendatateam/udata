@@ -63,6 +63,11 @@ export const title = _meta('site-title');
 export const csrf_token = _meta('csrf-token');
 
 /**
+ * Is the check url feature enabled ?
+ */
+export const check_urls = JSON.parse(_meta('check-urls'));
+
+/**
  * The API root/base URL
  */
 export const api_root = _link('api-root');
@@ -112,8 +117,7 @@ export const notify_in = _meta('notify-in');
 /**
  * Whether territories are enabled or not.
  */
-const territory_enabled = _meta('territory-enabled');
-export const is_territory_enabled = territory_enabled ? territory_enabled.toLowerCase() === 'true' : false;
+export const is_territory_enabled = JSON.parse(_meta('territory-enabled'));;
 
 
 export default {
@@ -130,5 +134,6 @@ export default {
     auth_url,
     sentry,
     notify_in,
+    check_urls,
     is_territory_enabled,
 };
