@@ -1,18 +1,23 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import cgi
+import json
 
 from flask import url_for
 
 from udata.models import Badge, PUBLIC_SERVICE
 from udata.tests import TestCase, DBTestMixin
+from udata.tests.api import APITestCase
 from udata.tests.factories import (
     DatasetFactory, ReuseFactory, OrganizationFactory
 )
-from udata.tests.factories import VisibleReuseFactory
+from udata.tests.factories import VisibleReuseFactory, GeoZoneFactory
 from udata.tests.frontend import FrontTestCase
 from udata.settings import Testing
 
-from .models import DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE
+from .models import (
+    DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE, TERRITORY_DATASETS
+)
 from .views import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
 from .metrics import PublicServicesMetric
 
@@ -234,6 +239,53 @@ class C3Test(FrontTestCase):
     def test_render_c3_without_data(self):
         response = self.client.get(url_for('gouvfr.climate_change_challenge'))
         self.assert200(response)
+
+
+class TerritoriesSettings(GouvFrSettings):
+    ACTIVATE_TERRITORIES = True
+
+
+class TerritoriesTest(FrontTestCase):
+    settings = TerritoriesSettings
+
+    def test_basic(self):
+        arles = GeoZoneFactory(
+            id='fr/town/13004', level='fr/town',
+            name='Arles', code='13004', population=52439)
+        response = self.client.get(
+            url_for('territories.territory', territory=arles))
+        self.assert200(response)
+        self.assertIn('Arles', response.data.decode('utf-8'))
+        self.assertIn(
+            '<div data-udata-territory-id="fr-town-13004-emploi_chiffres"',
+            response.data.decode('utf-8'))
+
+
+class OEmbedsTerritoryAPITest(APITestCase):
+    settings = TerritoriesSettings
+
+    def test_oembed_territory_api_get(self):
+        '''It should fetch a territory in the oembed format.'''
+        arles = GeoZoneFactory(
+            id='fr/town/13004', level='fr/town',
+            name='Arles', code='13004', population=52439)
+        for territory_dataset_class in TERRITORY_DATASETS.values():
+            territory = territory_dataset_class(arles)
+            reference = 'territory-{id}'.format(id=territory.slug)
+            response = self.get(url_for('api.oembeds', references=reference))
+            self.assert200(response)
+            data = json.loads(response.data)[0]
+            self.assertIn('html', data)
+            self.assertIn('width', data)
+            self.assertIn('maxwidth', data)
+            self.assertIn('height', data)
+            self.assertIn('maxheight', data)
+            self.assertTrue(data['type'], 'rich')
+            self.assertTrue(data['version'], '1.0')
+            self.assertIn(territory.title, data['html'])
+            self.assertIn(cgi.escape(territory.url), data['html'])
+            self.assertIn('img/placeholder_territory.png', data['html'])
+            self.assertIn(territory.description.split('\n')[0], data['html'])
 
 
 class SitemapTest(FrontTestCase):
