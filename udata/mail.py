@@ -37,7 +37,8 @@ def send(subject, recipients, template_base, **kwargs):
         recipients = [recipients]
 
     debug = current_app.config.get('DEBUG')
-    connection = debug and dummyconnection or mail.connect
+    send_mail = current_app.config.get('SEND_MAIL', not debug)
+    connection = send_mail and dummyconnection or mail.connect
 
     with connection() as conn:
         for recipient in recipients:
