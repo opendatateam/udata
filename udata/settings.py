@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 class Defaults(object):
     DEBUG = False
     TESTING = False
+    SEND_MAIL = True
     LANGUAGES = {
         'en': 'English',
         'fr': 'Français',
@@ -92,6 +93,8 @@ class Defaults(object):
 
     HARVEST_PREVIEW_MAX_ITEMS = 20
 
+    ACTIVATE_TERRITORIES = False
+
     # CROQUEMORT = {
     #     'url': 'http://localhost:8000',
     #     'delay': 1,
@@ -114,8 +117,9 @@ class Defaults(object):
 
 
 class Testing(object):
-    '''Sane values for testing. Should be applied as ovveride'''
+    '''Sane values for testing. Should be applied as override'''
     TESTING = True
+    SEND_MAIL = False
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_ALWAYS_EAGER = True
@@ -132,6 +136,7 @@ class Testing(object):
 
 class Debug(Defaults):
     DEBUG = True
+    SEND_MAIL = False
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     DEBUG_TB_PANELS = (
         'flask.ext.debugtoolbar.panels.versions.VersionDebugPanel',

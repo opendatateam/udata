@@ -16,5 +16,9 @@ module.exports = {
             {test: /\.js$/, loader: js_loader},
         ]
     },
-
+    plugins: [
+        new webpack.ProvidePlugin({
+            'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
+        })
+    ]
 };

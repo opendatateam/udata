@@ -2,25 +2,7 @@
     <p>{{help_text}}</p>
     <textarea class="integrate-content">
 <div data-udata-dataset-id="{{dataset_id}}"></div>
-<script>
-window.udataURL = '{{site_url}}';
-window.udata = (function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0],
-    t = window.udata || {};
-  if (d.getElementById(id)) return t;
-  js = d.createElement(s);
-  js.id = id;
-  js.src = window.udataURL + "{{widget_url}}";
-  fjs.parentNode.insertBefore(js, fjs);
-
-  t._e = [];
-  t.ready = function(f) {
-    t._e.push(f);
-  };
-
-  return t;
-}(document, "script", "udata-wjs"));
-</script>
+<script src="{{site_url}}{{widget_url}}" id="udata" async defer></script>
     </textarea>
     <a class="btn btn-link integrate-click"
         title="{{tooltip_text}}" rel="tooltip" data-placement="bottom">

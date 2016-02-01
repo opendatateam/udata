@@ -108,6 +108,22 @@ class PostConverter(ModelConverter):
     model = models.Post
 
 
+class TerritoryConverter(ModelConverter):
+    model = models.GeoZone
+
+    def to_python(self, value):
+        try:
+            return self.model.objects.get_or_404(code=value)
+        except NotFound as e:
+            return e
+
+    def to_url(self, obj):
+        if getattr(obj, 'code', None):
+            return str(obj.code)
+        else:
+            raise ValueError('Unable to serialize "%s" to url' % obj)
+
+
 def lazy_raise_404():
     '''Raise 404 lazily to ensure request.endpoint is set'''
     if not request.view_args:
@@ -131,3 +147,4 @@ def init_app(app):
     app.url_map.converters['user'] = UserConverter
     app.url_map.converters['topic'] = TopicConverter
     app.url_map.converters['post'] = PostConverter
+    app.url_map.converters['territory'] = TerritoryConverter

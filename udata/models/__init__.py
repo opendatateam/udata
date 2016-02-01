@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
+import importlib
 import logging
 
 from collections import Iterable
@@ -17,6 +17,7 @@ from flask.ext.fs.mongo import FileField, ImageField
 from udata.utils import Paginable
 
 from .badges_field import BadgesField
+from .taglist_field import TagListField
 from .datetime_fields import DateField, DateRange, Datetimed
 from .extras_fields import ExtrasField, Extra
 from .slug_fields import SlugField
@@ -30,6 +31,7 @@ class UDataMongoEngine(MongoEngine):
     def __init__(self, app=None):
         super(UDataMongoEngine, self).__init__(app)
         self.BadgesField = BadgesField
+        self.TagListField = TagListField
         self.DateField = DateField
         self.Datetimed = Datetimed
         self.Extra = Extra
@@ -171,6 +173,7 @@ from udata.core.post.models import *
 from udata.core.jobs.models import *
 
 from udata.features.transfer.models import *
+from udata.features.territories.models import *
 
 
 def init_app(app):
@@ -180,8 +183,10 @@ def init_app(app):
     for plugin in app.config['PLUGINS']:
         name = 'udata.ext.{0}.models'.format(plugin)
         try:
-            __import__(name)
-        except ImportError:
-            pass
+            module_obj = importlib.import_module(name)
+            for item in getattr(module_obj, '__all__'):
+                globals()[item] = getattr(module_obj, item)
+        except ImportError as e:
+            log.warning('Error importing %s: %s', name, e)
         except Exception as e:
-            log.error('Error importing %s: %s', name, e)
+            log.error('Error during import of %s: %s', name, e)

@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import logging
 import urllib
-import urlparse
 
 from datetime import datetime
 from functools import wraps
@@ -13,7 +12,6 @@ from flask import (
 )
 from flask.ext.restplus import Api, Resource, marshal
 from flask.ext.restful.utils import cors
-from flask.ext.restful import inputs
 
 from udata import search, theme, tracking, models
 from udata.app import csrf
@@ -24,7 +22,6 @@ from udata.auth import (
 from udata.utils import multi_to_dict
 from udata.core.user.models import User
 from udata.sitemap import sitemap
-from udata.models import db, Dataset
 
 from . import fields, oauth2
 from .signals import on_api_call
@@ -281,49 +278,6 @@ class API(Resource):  # Avoid name collision as resource is a core model
     pass
 
 
-oembed_parser = api.parser()
-oembed_parser.add_argument(
-    'url', type=inputs.url, help='URL of the resource to embed.',
-    location='args', required=True)
-
-
-@api.route('/oembed/', endpoint='oembed')
-class OEmbedAPI(API):
-
-    @api.doc('oembed', parser=oembed_parser)
-    def get(self):
-        args = oembed_parser.parse_args()
-        url = urlparse.urlparse(args['url'])
-        try:
-            API, VERSION, item_kind, item_id = url.path.split('/')[1:-1]
-        except (ValueError, IndexError):
-            return api.abort(400, 'Invalid URL.')
-        if item_kind == 'datasets':
-            try:
-                item = Dataset.objects.get(id=item_id)
-            except (db.ValidationError, Dataset.DoesNotExist):
-                return api.abort(400, 'Incorrect ID.')
-            template = 'embed-dataset.html'
-        else:
-            return api.abort(400, 'Invalid object type.')
-        width = maxwidth = 1000
-        height = maxheight = 200
-        html = theme.render(template, **{
-            'width': width,
-            'height': height,
-            'item': item,
-        })
-        return output_json({
-            'type': 'rich',
-            'version': '1.0',
-            'html': html,
-            'width': width,
-            'height': height,
-            'maxwidth': maxwidth,
-            'maxheight': maxheight,
-        }, 200)
-
-
 class ModelListAPI(API):
     model = None
     fields = None
@@ -424,6 +378,8 @@ def init_app(app):
     import udata.core.post.api
     import udata.features.transfer.api
     import udata.features.notifications.api
+    import udata.features.oembed.api
+    import udata.features.territories.api
     import udata.harvest.api
 
     # Load plugins API

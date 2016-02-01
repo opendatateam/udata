@@ -1,0 +1,57 @@
+{% extends theme("layouts/1-column.html") %}
+
+{% set body_class="territory" %}
+
+{% block main_content %}
+{% set logo=territory.logo_url() or theme_static('img/placeholder_territory.png') %}
+<div class="row">
+    <div class="col-sm-9">
+        <h1>
+            {{ territory.name }}
+            {% if territory.keys.postal %}
+                {% if territory.keys.postal is string %}
+                    ({{ territory.keys.postal }})
+                {% endif %}{# elif not allowed here #}
+                {% if territory.keys.postal is not string %}
+                    ({{ territory.keys.postal|join(', ') }})
+                {% endif %}
+            {% endif %}
+        </h1>
+        <div id="coverage-map" class="aside-map" data-zones="{{ url_for('api.zones', ids=[territory.id]) }}"></div>
+    </div>
+
+    <aside class="col-sm-3 panel panel-default">
+        {% if logo %}
+            <div class="text-center">
+                <img src="{{ logo }}" alt="{{ territory.name }}" class="scalable" />
+            </div>
+        {% endif %}
+        <div class="tab-links">
+            <p class="text-center">
+                <strong>
+                    {{ _('INSEE code:') }} {{ territory.code }}
+                </strong>
+            </p>
+            <p class="text-center">
+                <strong>
+                    {{ _('Population:') }} {{ territory.population }}
+                </strong>
+            </p>
+        </div>
+    </aside>
+</div>
+<br/>
+<div class="dataset-list">
+    {% for territory_dataset in territory_datasets %}
+        <div data-udata-territory-id="{{ territory_dataset.slug }}" class="col-sm-4"></div>
+    {% endfor %}
+    {% for dataset in datasets %}
+        <div data-udata-dataset-id="{{ dataset.id }}" class="col-sm-4"></div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script type="text/javascript" src="{{ static('dataset/display.js') }}"></script>
+    <script src="{{ static('widgets.js', _burst=False) }}" id="udata" async defer></script>
+{% endblock %}

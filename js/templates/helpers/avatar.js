@@ -1,8 +1,8 @@
 define([
     'handlebars',
-    'utils/placeholder',
+    'helpers/placeholders',
     'templates/avatar.hbs'
-], function(Handlebars, placeholder, tpl) {
+], function(Handlebars, placeholders, tpl) {
 
     return function(object, size, options) {
         var avatar_url,
@@ -18,7 +18,7 @@ define([
 
         return new Handlebars.SafeString(tpl({
             href: options.hash['url'] || undefined,
-            avatar_url: avatar_url || placeholder.default(type),
+            avatar_url: avatar_url || placeholders.getFor(type),
             avatar_size: size || 32
         }));
 

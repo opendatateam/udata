@@ -7,11 +7,10 @@ define([
     'bloodhound',
     'hbs!templates/search/header',
     'hbs!templates/search/suggestion',
-    'i18n',
-    'logger'
-], function($, API, Bloodhound, header, suggestion, i18n, log) {
-    var MAX = 2,
-        engine = new Bloodhound({
+    'i18n'
+], function($, API, Bloodhound, header, suggestion, i18n) {
+    const MAX = 2;
+    const engine = new Bloodhound({
             name: 'users',
             limit: MAX,
             queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -19,13 +18,13 @@ define([
                 return Bloodhound.tokenizers.whitespace(d.name);
             },
             remote: {
-                url: API.build_url('/users/suggest/') + '?q=%QUERY&size='+MAX,
+                url: API.build_url('/users/suggest/') + '?q=%QUERY&size=' + MAX,
                 // Keep until model is uniformised
                 filter: function(response) {
-                    return $.map(response, function(row, idx) {
+                    return response.map((row) => {
                         row.name = row.first_name + ' ' + row.last_name;
                         return row;
-                    })
+                    });
                 }
             }
         });
