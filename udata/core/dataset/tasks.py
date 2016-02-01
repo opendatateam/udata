@@ -12,7 +12,7 @@ from flask import current_app
 
 from udata import mail
 from udata.i18n import lazy_gettext as _
-from udata.models import Organization, Activity, Metrics
+from udata.models import Organization, Activity, Metrics, Topic
 from udata.tasks import job
 
 from .models import (
@@ -36,6 +36,11 @@ def purge_datasets(self):
         Activity.objects(related_to=dataset).delete()
         # Remove metrics
         Metrics.objects(object_id=dataset.id).delete()
+        # Remove topics' related dataset
+        for topic in Topic.objects(datasets=dataset):
+            datasets = topic.datasets
+            datasets.remove(dataset)
+            topic.update(datasets=datasets)
         # Remove
         dataset.delete()
 
