@@ -37,6 +37,8 @@ def fetch_territories_logos():
     for geozone in geozones.only('flag', 'blazon'):
         if geozone.flag or geozone.blazon:
             filename = geozone.flag.filename or geozone.blazon.filename
+            if os.path.exists(logos.path(filename)):
+                continue
             with open(logos.path(filename), 'wb') as file_destination:
                 r = requests.get(DBPEDIA_MEDIA_URL + filename, stream=True)
                 for chunk in r.iter_content(chunk_size=1024):
@@ -60,6 +62,8 @@ def collect_references_files():
                 break
             filename = resource.url.split('/')[-1]
             reference_path = references.path(filename)
+            if os.path.exists(reference_path):
+                continue
             with codecs.open(reference_path, 'w', encoding='utf8') as fd:
                 r = requests.get(resource.url, stream=True)
                 for chunk in r.iter_content(chunk_size=1024):
