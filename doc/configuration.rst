@@ -32,6 +32,8 @@ Here a sample configuration file:
     ASSETS_AUTO_BUILD = True
     # REQUIREJS_RUN_IN_DEBUG = True
 
+    SEND_MAIL = False
+
     SECRET_KEY = 'A unique secret key'
 
     USE_SSL = True
@@ -66,6 +68,13 @@ DEBUG
 **default**: ``False``
 
 A boolean specifying the debug mode.
+
+SEND_MAIL
+*********
+
+**default**: ``True``
+
+A boolean specifying if the emails should actually be sent.
 
 USE_SSL
 *******
