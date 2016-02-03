@@ -120,6 +120,7 @@ class DatasetAPI(API):
         if dataset.deleted:
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
+        dataset.last_modified = datetime.now()
         form = api.validate(DatasetForm, dataset)
         return form.save()
 
@@ -132,6 +133,7 @@ class DatasetAPI(API):
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
         dataset.deleted = datetime.now()
+        dataset.last_modified = datetime.now()
         dataset.save()
         return '', 204
 
@@ -213,6 +215,8 @@ class ResourcesAPI(API):
         resource = Resource()
         form.populate_obj(resource)
         dataset.add_resource(resource)
+        dataset.last_modified = datetime.now()
+        dataset.save()
         return resource, 201
 
     @api.secure
@@ -272,6 +276,8 @@ class UploadDatasetResources(UploadMixin, API):
         infos = self.extract_infos_from_args(args, dataset)
         resource = Resource(**infos)
         dataset.add_resource(resource)
+        dataset.last_modified = datetime.now()
+        dataset.save()
         return resource, 201
 
 
@@ -315,6 +321,8 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         for k, v in infos.items():
             resource[k] = v
         dataset.update_resource(resource)
+        dataset.last_modified = datetime.now()
+        dataset.save()
         return resource
 
 
@@ -349,6 +357,7 @@ class ResourceAPI(ResourceMixin, API):
         form = api.validate(ResourceForm, resource)
         form.populate_obj(resource)
         resource.modified = datetime.now()
+        dataset.last_modified = datetime.now()
         dataset.save()
         return resource
 
@@ -359,6 +368,7 @@ class ResourceAPI(ResourceMixin, API):
         DatasetEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         dataset.resources.remove(resource)
+        dataset.last_modified = datetime.now()
         dataset.save()
         return '', 204
 

@@ -206,6 +206,7 @@ def attach(domain, filename):
 
             dataset.extras['harvest:domain'] = domain
             dataset.extras['harvest:remote_id'] = row['remote']
+            dataset.last_modified = datetime.now()
             dataset.save()
             count += 1
 
