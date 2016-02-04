@@ -28,7 +28,7 @@ export function get_auth_url(message) {
  * Check if an user is authenticated
  */
 export function need_user(message) {
-    if (!this.user) {
+    if (!user) {
         window.location = get_auth_url(message);
         return false;
     }
@@ -39,7 +39,7 @@ export function need_user(message) {
  * Check that the current authenticated user has a given role.
  */
 export function has_role(role) {
-    return config.user && config.user.roles.indexOf(role) > 0;
+    return user && user.roles.indexOf(role) > 0;
 }
 
 /**
@@ -48,7 +48,7 @@ export function has_role(role) {
  */
 export function need_role(role, message) {
     need_user();
-    if (config.user.roles.indexOf(role) < 0) {
+    if (user.roles.indexOf(role) < 0) {
         const msg = (message || DEFAULT_NEED_ROLE).replace('{role}', role);
         Notify.error(msg);
     }
