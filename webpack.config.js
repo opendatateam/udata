@@ -6,7 +6,7 @@ const node_path = path.join(__dirname, 'node_modules');
 
 const css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap');
 const less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline');
-const js_loader = 'babel?presets[]=es2015';
+const js_loader = 'babel?presets[]=es2015&plugins[]=transform-runtime';
 const handlebars_helpers = path.join(__dirname, 'js', 'templates', 'helpers');
 const hbs_loader = `handlebars?helperDirs[]=${handlebars_helpers}`;
 
