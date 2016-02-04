@@ -25,8 +25,8 @@ m = submanager(
 
 @m.command
 def fetch_territories_logos():
-    """Retrieves images of flags or blazons from wikimedia."""
-    log.info('As of January 2016, the download is about 1GB. Time to relax.')
+    """Retrieves images of logos from wikimedia."""
+    log.info('As of February 2016, the download is about 1GB. Time to relax.')
     # A bit tricky but otherwise you cannot guess the final file URL.
     DBPEDIA_MEDIA_URL = 'http://commons.wikimedia.org/wiki/Special:FilePath/'
     LOGOS_FOLDER_PATH = logos.root
@@ -34,13 +34,16 @@ def fetch_territories_logos():
         os.makedirs(LOGOS_FOLDER_PATH)
 
     geozones = GeoZone.objects.filter(level='fr/town')
-    for geozone in geozones.only('flag', 'blazon'):
-        if geozone.flag or geozone.blazon:
-            filename = geozone.flag.filename or geozone.blazon.filename
-            if os.path.exists(logos.path(filename)):
+    for geozone in geozones.only('logo'):
+        if geozone.logo:
+            filepath = logos.path(geozone.logo.filename)
+            if os.path.exists(filepath):
                 continue
-            with open(logos.path(filename), 'wb') as file_destination:
-                r = requests.get(DBPEDIA_MEDIA_URL + filename, stream=True)
+            r = requests.get(DBPEDIA_MEDIA_URL + geozone.logo.filename,
+                             stream=True)
+            if r.status_code == 404:
+                continue
+            with open(filepath, 'wb') as file_destination:
                 for chunk in r.iter_content(chunk_size=1024):
                     file_destination.write(chunk)
 
