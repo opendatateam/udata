@@ -2,13 +2,19 @@
 from __future__ import unicode_literals
 
 import codecs
+import contextlib
 import logging
+import lzma
 import os
+import shutil
+import tarfile
+import tempfile
+from urllib import urlretrieve
 
 import requests
 
 from udata.models import (
-    Dataset, GeoZone, TERRITORY_DATASETS, ResourceBasedTerritoryDataset
+    Dataset, TERRITORY_DATASETS, ResourceBasedTerritoryDataset
 )
 from udata.commands import submanager
 from udata.core.storages import logos, references
@@ -24,29 +30,23 @@ m = submanager(
 
 
 @m.command
-def fetch_territories_logos():
-    """Retrieves images of logos from wikimedia."""
-    log.info('As of February 2016, the download is about 1GB. Time to relax.')
-    # A bit tricky but otherwise you cannot guess the final file URL.
-    DBPEDIA_MEDIA_URL = 'http://commons.wikimedia.org/wiki/Special:FilePath/'
-    LOGOS_FOLDER_PATH = logos.root
-    if not os.path.exists(LOGOS_FOLDER_PATH):
-        os.makedirs(LOGOS_FOLDER_PATH)
+def load_logos(filename):
+    """Load logos from geologos archive file."""
+    tmp = tempfile.mkdtemp()
 
-    geozones = GeoZone.objects.filter(level='fr/town')
-    for geozone in geozones.only('logo'):
-        if geozone.logo:
-            filepath = logos.path(geozone.logo.filename)
-            if os.path.exists(filepath):
-                continue
-            r = requests.get(DBPEDIA_MEDIA_URL + geozone.logo.filename,
-                             stream=True)
-            if r.status_code == 404:
-                continue
-            with open(filepath, 'wb') as file_destination:
-                for chunk in r.iter_content(chunk_size=1024):
-                    file_destination.write(chunk)
+    if filename.startswith('http'):
+        log.info('Downloading GeoLogos bundle: %s', filename)
+        filename, _ = urlretrieve(filename,
+                                  os.path.join(tmp, 'geologos.tar.xz'))
 
+    log.info('Extracting GeoLogos bundle')
+    with contextlib.closing(lzma.LZMAFile(filename)) as xz:
+        with tarfile.open(fileobj=xz) as f:
+            f.extractall(tmp)
+
+    log.info('Moving to the final location and cleaning up')
+    shutil.move(os.path.join(tmp, 'logos'), logos.root)
+    shutil.rmtree(tmp)
     log.info('Done')
 
 
