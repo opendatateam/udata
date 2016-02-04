@@ -94,8 +94,8 @@ class DatasetQuerySet(OwnedByQuerySet):
 
 
 class Checksum(db.EmbeddedDocument):
-    type = db.StringField(choices=CHECKSUM_TYPES)
-    value = db.StringField()
+    type = db.StringField(choices=CHECKSUM_TYPES, required=True)
+    value = db.StringField(required=True)
 
     def to_mongo(self, *args, **kwargs):
         if bool(self.value):
@@ -383,6 +383,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     def add_resource(self, resource):
         '''Perform an atomic prepend for a new resource'''
+        resource.validate()
         self.update(__raw__={
             '$push': {
                 'resources': {

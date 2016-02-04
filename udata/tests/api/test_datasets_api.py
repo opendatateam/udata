@@ -233,7 +233,8 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_update_without_resources(self):
         '''It should update a dataset from the API without resources'''
         user = self.login()
-        dataset = VisibleDatasetFactory(owner=user)
+        dataset = DatasetFactory(owner=user,
+                                 resources=ResourceFactory.build_batch(3))
         initial_length = len(dataset.resources)
         data = dataset.to_dict()
         del data['resources']
@@ -242,7 +243,8 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(Dataset.objects.count(), 1)
 
-        dataset = Dataset.objects.first()
+        dataset.reload()
+        self.assertEqual(dataset.description, data['description'])
         self.assertEqual(len(dataset.resources), initial_length)
 
     def test_dataset_api_update_with_extras(self):
