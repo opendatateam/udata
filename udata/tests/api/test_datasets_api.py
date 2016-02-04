@@ -523,6 +523,8 @@ class DatasetResourceAPITest(APITestCase):
     def test_reorder(self):
         self.dataset.resources = ResourceFactory.build_batch(3)
         self.dataset.save()
+        self.dataset.reload()  # Otherwise `last_modified` date is inaccurate.
+        initial_last_modified = self.dataset.last_modified
 
         initial_order = [r.id for r in self.dataset.resources]
         expected_order = [{'id': str(id)} for id in reversed(initial_order)]
@@ -531,10 +533,12 @@ class DatasetResourceAPITest(APITestCase):
             response = self.put(url_for('api.resources', dataset=self.dataset),
                                 expected_order)
         self.assertStatus(response, 200)
-
+        self.assertEqual([str(r['id']) for r in response.json],
+                         [str(r['id']) for r in expected_order])
         self.dataset.reload()
         self.assertEqual([str(r.id) for r in self.dataset.resources],
                          [str(r['id']) for r in expected_order])
+        self.assertEqual(self.dataset.last_modified, initial_last_modified)
 
     def test_update(self):
         resource = ResourceFactory()

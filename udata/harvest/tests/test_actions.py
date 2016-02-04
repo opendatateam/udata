@@ -256,6 +256,7 @@ class HarvestActionsTest(DBTestMixin, TestCase):
             dataset = DatasetFactory.build()
             dataset.extras['harvest:domain'] = 'test.org'
             dataset.extras['harvest:remote_id'] = str(i)
+            dataset.last_modified = datetime.now()
             dataset.save()
             attached_datasets.append(dataset)
 
@@ -279,7 +280,7 @@ class HarvestActionsTest(DBTestMixin, TestCase):
 
         dbcount = Dataset.objects(**{
             'extras__harvest:remote_id__exists': True
-            }).count()
+        }).count()
         self.assertEqual(result.success, len(datasets))
         self.assertEqual(dbcount, result.success)
         for index, dataset in enumerate(datasets):
