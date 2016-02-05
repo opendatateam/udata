@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
 import contextlib
 import json
 import logging
 import lzma
-import tempfile
 import tarfile
 import shutil
-from os.path import join
 from urllib import urlretrieve
 
-import mongoengine
-
 from udata.commands import submanager
+from udata.core.storages import tmp
 from udata.models import GeoLevel, GeoZone
 
 log = logging.getLogger(__name__)
@@ -29,16 +27,14 @@ m = submanager(
 @m.command
 def load(filename, drop=False):
     '''Load a GeoZones Bundle'''
-    tmp = tempfile.mkdtemp()
-
     if filename.startswith('http'):
         log.info('Downloading GeoZones bundle: %s', filename)
-        filename, _ = urlretrieve(filename, join(tmp, 'geozones.tar.xz'))
+        filename, _ = urlretrieve(filename, tmp.path('geozones.tar.xz'))
 
     log.info('Extracting GeoZones bundle')
     with contextlib.closing(lzma.LZMAFile(filename)) as xz:
         with tarfile.open(fileobj=xz) as f:
-            f.extractall(tmp)
+            f.extractall(tmp.root)
 
     log.info('Loading GeoZones levels')
 
@@ -47,47 +43,42 @@ def load(filename, drop=False):
         GeoLevel.drop_collection()
 
     log.info('Loading levels.json')
-    total = 0
-    with open(join(tmp, 'levels.json')) as fp:
+    levels_filepath = tmp.path('levels.json')
+    with open(levels_filepath) as fp:
         levels = json.load(fp)
+    os.remove(levels_filepath)
 
     for level in levels:
         GeoLevel.objects.create(id=level['id'], name=level['label'],
                                 parents=level['parents'])
-        total += 1
-    log.info('Loaded {0} levels'.format(total))
+    log.info('Loaded {total} levels'.format(total=len(levels)))
 
     if drop:
         log.info('Dropping existing spatial zones')
         GeoZone.drop_collection()
 
     log.info('Loading zones.json')
-    total = 0
-    with open(join(tmp, 'zones.json')) as fp:
+    zones_filepath = tmp.path('zones.json')
+    with open(zones_filepath) as fp:
         geozones = json.load(fp)
+    os.remove(zones_filepath)
 
     for zone in geozones['features']:
         props = zone['properties']
-        try:
-            GeoZone.objects.create(
-                id=zone['id'],
-                level=props['level'],
-                code=props['code'],
-                name=props['name'],
-                keys=props['keys'],
-                parents=props['parents'],
-                population=props.get('population'),
-                dbpedia=props.get('dbpedia'),
-                logo=props.get('flag') or props.get('blazon'),
-                wikipedia=props.get('wikipedia'),
-                area=props.get('area'),
-                geom=zone['geometry']
-            )
-            total += 1
-        except mongoengine.errors.ValidationError:
-            pass
+        GeoZone.objects.create(
+            id=zone['id'],
+            level=props['level'],
+            code=props['code'],
+            name=props['name'],
+            keys=props['keys'],
+            parents=props['parents'],
+            population=props.get('population'),
+            dbpedia=props.get('dbpedia'),
+            logo=props.get('flag') or props.get('blazon'),
+            wikipedia=props.get('wikipedia'),
+            area=props.get('area'),
+            geom=zone['geometry']
+        )
 
-    log.info('Loaded {0} zones'.format(total))
-
-    log.info('Cleaning temporary working directory')
-    shutil.rmtree(tmp)
+    log.info('Loaded {total} zones'.format(total=len(geozones['features'])))
+    shutil.rmtree(tmp.path('translations'))  # Not in use for now.

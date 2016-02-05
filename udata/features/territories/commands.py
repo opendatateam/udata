@@ -33,8 +33,7 @@ def load_logos(filename):
     """Load logos from geologos archive file."""
     if filename.startswith('http'):
         log.info('Downloading GeoLogos bundle: %s', filename)
-        filename, _ = urlretrieve(filename,
-                                  os.path.join(tmp.root, 'geologos.tar.xz'))
+        filename, _ = urlretrieve(filename, tmp.path('geologos.tar.xz'))
 
     log.info('Extracting GeoLogos bundle')
     with contextlib.closing(lzma.LZMAFile(filename)) as xz:
@@ -44,7 +43,7 @@ def load_logos(filename):
     log.info('Moving to the final location and cleaning up')
     if os.path.exists(logos.root):
         shutil.rmtree(logos.root)
-    shutil.move(os.path.join(tmp.root, 'logos'), logos.root)
+    shutil.move(tmp.path('logos'), logos.root)
     log.info('Done')
 
 
