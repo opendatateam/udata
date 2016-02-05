@@ -8,7 +8,6 @@ import lzma
 import os
 import shutil
 import tarfile
-import tempfile
 from urllib import urlretrieve
 
 import requests
@@ -17,7 +16,7 @@ from udata.models import (
     Dataset, TERRITORY_DATASETS, ResourceBasedTerritoryDataset
 )
 from udata.commands import submanager
-from udata.core.storages import logos, references
+from udata.core.storages import logos, references, tmp
 
 log = logging.getLogger(__name__)
 
@@ -32,21 +31,19 @@ m = submanager(
 @m.command
 def load_logos(filename):
     """Load logos from geologos archive file."""
-    tmp = tempfile.mkdtemp()
-
     if filename.startswith('http'):
         log.info('Downloading GeoLogos bundle: %s', filename)
         filename, _ = urlretrieve(filename,
-                                  os.path.join(tmp, 'geologos.tar.xz'))
+                                  os.path.join(tmp.root, 'geologos.tar.xz'))
 
     log.info('Extracting GeoLogos bundle')
     with contextlib.closing(lzma.LZMAFile(filename)) as xz:
         with tarfile.open(fileobj=xz) as f:
-            f.extractall(tmp)
+            f.extractall(tmp.root)
 
     log.info('Moving to the final location and cleaning up')
-    shutil.move(os.path.join(tmp, 'logos'), logos.root)
-    shutil.rmtree(tmp)
+    shutil.rmtree(logos.root)
+    shutil.move(os.path.join(tmp.root, 'logos'), logos.root)
     log.info('Done')
 
 
