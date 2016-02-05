@@ -42,7 +42,8 @@ def load_logos(filename):
             f.extractall(tmp.root)
 
     log.info('Moving to the final location and cleaning up')
-    shutil.rmtree(logos.root)
+    if os.path.exists(logos.root):
+        shutil.rmtree(logos.root)
     shutil.move(os.path.join(tmp.root, 'logos'), logos.root)
     log.info('Done')
 
