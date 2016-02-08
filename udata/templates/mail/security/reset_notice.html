@@ -1,0 +1,11 @@
+{% extends theme('mail/base.html') %}
+{% from theme('mail/button.html') import mail_button %}
+
+{% block body %}
+
+<p>
+    {{ _('Your password for %(site)s has been reset.', site=config.SITE_TITLE) }}
+</p>
+
+<br/>
+{% endblock %}
