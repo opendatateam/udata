@@ -5,7 +5,7 @@
     </div>
     <![endif]-->
     <div class="container">
-        <nav class="navbar navbar-default navbar-static-top" role="navigation">
+        <nav class="navbar navbar-default navbar-static-top">
             <header class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse"
                         data-target=".navbar-collapse, .subnav-collapse, .sidebg-collapse">
@@ -23,7 +23,7 @@
 
 <section class="topmenu collapse navbar-collapse">
     <div class="container">
-        <nav class="navbar navbar-default navbar-static-top" role="navigation">
+        <nav class="navbar navbar-default navbar-static-top">
             <ul class="nav navbar-nav links">
                 {% for item in current_theme.menu %}
                 <li {% if item.items %}class="dropdown dropdown-hover"{% endif %}>
@@ -65,7 +65,7 @@
                 <li class="dropdown user login">
                     <button class="btn-link dropdown-toggle" data-toggle="dropdown">
                         <span class="username">{{ current_user.fullname }} </span>
-                        <img src="{{ current_user|avatar_url(30) }}" width="30" height="30" />
+                        <img src="{{ current_user|avatar_url(30) }}" width="30" height="30" alt="{{ current_user.fullname }}" />
                     </button>
                     <ul class="dropdown-menu">
                         <li>
@@ -80,7 +80,7 @@
                         <li>
                             <a href="{{ url_for('organizations.show', org=org) }}">
                                 <img src="{{ org.logo(20)|placeholder('organization') }}"
-                                    width="20" height="20"/>
+                                    width="20" height="20" alt="{{ org.acronym or org.name }}"/>
                                 {{ org.acronym or org.name }}
                             </a>
                         </li>

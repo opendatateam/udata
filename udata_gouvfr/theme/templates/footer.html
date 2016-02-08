@@ -66,7 +66,7 @@
                     _('Datasets'), url_for('datasets.recent_feed'),
                     _('Reuses'), url_for('reuses.recent_feed'),
                 ) %}
-                <a href="#" tabindex="-1" title="{{ _('Feeds') }}" rel="popover" class="feed-icon"
+                <a href="#" tabindex="-1" title="{{ _('Feeds') }}" class="feed-icon"
                     data-toggle="popover" data-trigger="focus" data-placement="top"
                     data-html="true" data-content="{{rss_popup|e}}">
                     <span class="fa fa-rss-square"></span>
@@ -75,7 +75,7 @@
 
             <section class="col-xs-9 col-xs-offset-3 col-sm-offset-0 col-sm-2 col-md-2 col-lg-2">
                 <a href="http://www.etalab.gouv.fr">
-                    <img class="logo"
+                    <img class="logo" alt="logo"
                         src="{{ theme_static('img/etalab-logo.png') }}"
                         width="152" height="50" />
                     <p>2015 ETALAB</p>

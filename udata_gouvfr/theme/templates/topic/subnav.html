@@ -7,10 +7,10 @@
             <div class="bg collapse sidebg-collapse"></div>
         </div>
 
-        <div class="search_sidebar col-sm-5 col-md-4 col-xs-12">
+        <div class="search_sidebar col-sm-5 col-md-4 col-xs-12" role="search">
 
             <nav class="sidebar panel">
-                <form role="search" action="{{ url_for('front.search') }}">
+                <form action="{{ url_for('front.search') }}">
                     <div class="input-group input-group-lg">
                         <div class="input-group-btn">
                             <button class="btn" type="submit"><i class="glyphicon glyphicon-search"></i></button>
