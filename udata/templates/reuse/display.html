@@ -32,15 +32,6 @@
         {{ _('Edit') }}
     </a>
 </div>
-{# Admin actions #}
-<div class="btn-group btn-group-xs">
-    <button type="button"
-        class="btn btn-success featured {% if reuse.featured %}active{% endif %}"
-        data-api-url="{{ url_for('api.reuse_featured', reuse=reuse) }}">
-        <span class="glyphicon glyphicon-bullhorn"></span>
-        {{ _('Featured') }}
-    </button>
-</div>
 {# Social actions #}
 <div class="btn-group btn-group-xs">
     {{ follow_btn(reuse) }}
@@ -129,16 +120,6 @@
                                 <span class="glyphicon glyphicon-pencil"></span>
                                 {{ _('Edit') }}
                             </a>
-                        </div>
-                        {% endif %}
-                        {% if sysadmin %}
-                        <div class="btn-group btn-group-sm">
-                            <button type="button"
-                                class="btn btn-success featured {% if reuse.featured %}active{% endif %}"
-                                data-api-url="{{ url_for('api.reuse_featured', reuse=reuse) }}">
-                                <span class="glyphicon glyphicon-bullhorn"></span>
-                                {{ _('Featured') }}
-                            </button>
                         </div>
                         {% endif %}
                     </div>

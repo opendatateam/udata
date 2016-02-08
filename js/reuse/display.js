@@ -4,7 +4,6 @@
 import $ from 'jquery';
 import log from 'logger';
 
-import 'widgets/featured';
 import 'widgets/follow-btn';
 import 'widgets/issues-btn';
 import 'widgets/discussions-btn';
