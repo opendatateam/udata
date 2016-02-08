@@ -36,7 +36,7 @@
                                     </a>
                                 </h4>
                                 {# {% if user.sysadmin %}
-                                <a class="btn btn-xs btn-warning unfeature" rel="tooltip" href
+                                <a class="btn btn-xs btn-warning unfeature" data-toggle="tooltip" href
                                     data-api="{{ url_for('youckan/reuse', reuse.id, 'unfeature') }}"
                                     title="{{ _('Unmark as featured') }}">
                                     <span class="glyphicon glyphicon-trash"></span>

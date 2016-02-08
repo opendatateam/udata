@@ -29,14 +29,14 @@
     <footer class="rollover fade in">
         <ul>
             <li>
-                <a class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a class="btn btn-xs" data-toggle="tooltip" data-placement="top"
                     :title="_('Type')">
                     <span class="fa fa-file fa-fw"></span>
                     {{ reuse | reusetype }}
                 </a>
             </li>
             <li>
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     :title="_('Number of datasets used')">
                     <span class="fa fa-cubes fa-fw"></span>
@@ -45,7 +45,7 @@
             </li>
 
             <li>
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     :title="_('Stars')">
                     <span class="fa fa-star fa-fw"></span>
