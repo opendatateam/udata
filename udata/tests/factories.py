@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from hashlib import sha1
 from uuid import uuid4
 
 import factory
@@ -55,22 +56,32 @@ class AdminFactory(UserFactory):
         return [admin_role]
 
 
-class CommunityResourceFactory(MongoEngineFactory):
+class ChecksumFactory(MongoEngineFactory):
+    class Meta:
+        model = models.Checksum
+
+    type = 'sha1'
+    value = factory.LazyAttribute(lambda o: sha1(faker.word()).hexdigest())
+
+
+class BaseResourceFactory(MongoEngineFactory):
+    title = factory.LazyAttribute(lambda o: faker.sentence())
+    description = factory.LazyAttribute(lambda o: faker.text())
+    filetype = 'file'
+    url = factory.LazyAttribute(lambda o: faker.url())
+    checksum = factory.SubFactory(ChecksumFactory)
+    mime = factory.LazyAttribute(lambda o: faker.mime_type('text'))
+    filesize = factory.LazyAttribute(lambda o: faker.pyint())
+
+
+class CommunityResourceFactory(BaseResourceFactory):
     class Meta:
         model = models.CommunityResource
 
-    title = factory.LazyAttribute(lambda o: faker.sentence())
-    description = factory.LazyAttribute(lambda o: faker.text())
-    url = factory.LazyAttribute(lambda o: faker.url())
 
-
-class ResourceFactory(MongoEngineFactory):
+class ResourceFactory(BaseResourceFactory):
     class Meta:
         model = models.Resource
-
-    title = factory.LazyAttribute(lambda o: faker.sentence())
-    description = factory.LazyAttribute(lambda o: faker.text())
-    url = factory.LazyAttribute(lambda o: faker.url())
 
 
 class DatasetFactory(MongoEngineFactory):

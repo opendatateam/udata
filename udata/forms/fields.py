@@ -23,9 +23,7 @@ from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
 from udata.utils import to_iso_date, get_by
 
-
 # _ = lambda s: s
-
 
 RE_TAG = re.compile('^[\w \-.]*$', re.U)
 MIN_TAG_LENGTH = 2
@@ -202,8 +200,28 @@ class FormField(FieldHelper, fields.FormField):
     def __init__(self, form_class, *args, **kwargs):
         super(FormField, self).__init__(FormWrapper(form_class),
                                         *args, **kwargs)
+        self.prefix = '{0}-'.format(self.name)
+        self.has_data = False
+
+    def process(self, formdata, data=unset_value):
+        self._formdata = formdata
+        return super(FormField, self).process(formdata, data=data)
+
+    def validate(self, form, extra_validators=tuple()):
+        if extra_validators:
+            raise TypeError('FormField does not accept in-line validators, '
+                            'as it gets errors from the enclosed form.')
+
+        # Run normal validation only if there is data for this form
+        self.has_data = bool(self._formdata)
+        self.has_data &= any(k.startswith(self.prefix) for k in self._formdata)
+        if self.has_data:
+            return self.form.validate()
+        return True
 
     def populate_obj(self, obj, name):
+        if not self.has_data:
+            return
         if getattr(self.form_class, 'model_class', None) and not self._obj:
             self._obj = self.form_class.model_class()
         super(FormField, self).populate_obj(obj, name)
@@ -391,16 +409,29 @@ class NestedModelList(fields.FieldList):
         self.nested_model = model_form.model_class
         self.data_submitted = False
         self.initial_data = []
+        self.prefix = '{0}-'.format(self.name)
 
     def process(self, formdata, data=unset_value):
+        self._formdata = formdata
         self.initial_data = data
-        prefix = '{0}-'.format(self.name)
-        if formdata and any(k.startswith(prefix) for k in formdata):
+        self.has_data = formdata and any(k.startswith(self.prefix) for k in formdata)
+        if self.has_data:
             super(NestedModelList, self).process(formdata, data)
         else:
-            super(NestedModelList, self).process(None, data)
+            self.entries = []
+            # super(NestedModelList, self).process(None, data)
+
+    def validate(self, form, extra_validators=tuple()):
+        '''Perform validation only if data has been submitted'''
+        # Run normal validation only if there is data for this form
+        if self.has_data:
+            return super(NestedModelList, self).validate(form, extra_validators)
+        return True
 
     def populate_obj(self, obj, name):
+        if not self.has_data:
+            return
+
         new_values = []
 
         class Holder(object):
@@ -417,7 +448,7 @@ class NestedModelList(fields.FieldList):
 
     def _add_entry(self, formdata=None, data=unset_value, index=None):
         '''
-        Fill the form with previous data if necessary to handle partiel update
+        Fill the form with previous data if necessary to handle partial update
         '''
         if formdata:
             prefix = '-'.join((self.name, str(index)))

@@ -252,7 +252,7 @@ class UploadMixin(object):
         return {
             'title': os.path.basename(filename),
             'url': storage.url(filename, external=True),
-            'checksum': Checksum(value=sha1),
+            'checksum': Checksum(type='sha1', value=sha1),
             'format': extension,
             'mime': storages.utils.mime(filename),
             'filesize': filesize
