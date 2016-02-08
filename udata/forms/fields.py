@@ -198,9 +198,10 @@ class FormWrapper(object):
 
 class FormField(FieldHelper, fields.FormField):
     def __init__(self, form_class, *args, **kwargs):
-        self.has_data = False
         super(FormField, self).__init__(FormWrapper(form_class),
                                         *args, **kwargs)
+        self.prefix = '{0}-'.format(self.name)
+        self.has_data = False
 
     def process(self, formdata, data=unset_value):
         self._formdata = formdata
@@ -209,11 +210,11 @@ class FormField(FieldHelper, fields.FormField):
     def validate(self, form, extra_validators=tuple()):
         if extra_validators:
             raise TypeError('FormField does not accept in-line validators, '
-            'as it gets errors from the enclosed form.')
+                            'as it gets errors from the enclosed form.')
 
         # Run normal validation only if there is data for this form
-        prefix = '{0}-'.format(self.name)
-        self.has_data = self._formdata and any(k.startswith(prefix) for k in self._formdata)
+        self.has_data = bool(self._formdata)
+        self.has_data &= any(k.startswith(self.prefix) for k in self._formdata)
         if self.has_data:
             return self.form.validate()
         return True
