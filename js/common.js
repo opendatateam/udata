@@ -30,8 +30,8 @@ $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
 
 $(function() {
     // Display tooltips and popovers with markup
-    $('[rel=tooltip]').tooltip();
-    $('[rel=popover]').popover().on('click', function(e) {
+    $('[data-toggle="tooltip"]').tooltip();
+    $('[data-toggle="popover"]').popover().on('click', function(e) {
         if ($(this).data('trigger').match(/(click|focus)/)) {
             e.preventDefault();
             return true;

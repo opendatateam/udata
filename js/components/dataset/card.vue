@@ -5,7 +5,7 @@
     </a>
     <img v-if="dataset.organization && dataset.organization.public_service"
         :src="certified" alt="certified"
-        class="certified" rel="popover"
+        class="certified" data-toggle="popover"
         :data-title="_('Certified public service')"
         :data-content="_('The identity of this public service public is certified by Etalab')"
         data-container="body" data-trigger="hover"/>
@@ -19,7 +19,7 @@
     <footer>
         <ul>
             <li v-if="dataset.spatial && dataset.spatial.territories && dataset.spatial.territories.length > 0">
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     :title="_('Territorial coverage')">
                     <span class="fa fa-map-marker fa-fw"></span>
@@ -27,7 +27,7 @@
                 </a>
             </li>
             <li v-if="dataset.metrics">
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     :title="_('Reuses')">
                     <span class="fa fa-retweet fa-fw"></span>
@@ -35,7 +35,7 @@
                 </a>
             </li>
             <li v-if="dataset.metrics">
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     :title="_('Stars')">
                     <span class="fa fa-star fa-fw"></span>
@@ -53,7 +53,7 @@
         <ul>
             <!-- Temporal coverage -->
             <li v-if="dataset.temporal_coverage">
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     :title="_('Temporal coverage')">
                     <span class="fa fa-calendar fa-fw"></span>
@@ -63,7 +63,7 @@
 
             <!-- Territorial coverage -->
             <li v-if="dataset.spatial && dataset.spatial.granularity">
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     :title="_('Territorial coverage granularity')">
                     <span class="fa fa-bullseye fa-fw"></span>
@@ -73,7 +73,7 @@
 
             <!-- frequency -->
             <li v-if="dataset.frequency">
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     :title="_('Frequency')">
                     <span class="fa fa-clock-o fa-fw"></span>

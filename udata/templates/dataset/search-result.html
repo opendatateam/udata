@@ -9,14 +9,14 @@
         </div>
             {% if dataset.organization.public_service %}
             <img src="{{theme_static('img/certified-stamp.png')}}" alt="certified"
-                class="certified" rel="popover"
+                class="certified" data-toggle="popover"
                 data-title="{{ _('Certified public service') }}"
                 data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
                 data-container="body" data-placement="auto" data-trigger="hover"/>
             {% endif %}
         {% else %}
         <div class="result-logo pull-left">
-            <img src="{{ ''|placeholder('organization') }}">
+            <img src="{{ ''|placeholder('organization') }}" alt="">
         </div>
         {% endif %}
         <div class="result-body ellipsis-dot">
@@ -32,7 +32,7 @@
             {# Temporal coverage #}
             {% if dataset.temporal_coverage %}
             <li>
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Temporal coverage') }}">
                     <span class="fa fa-calendar fa-fw"></span>
@@ -44,7 +44,7 @@
             {# Periodicity #}
             {% if dataset.frequency %}
             <li>
-                <a class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a class="btn btn-xs" data-toggle="tooltip" data-placement="top"
                     title="{{ _('Frequency') }}">
                     <span class="fa fa-clock-o fa-fw"></span>
                     {{ dataset.frequency_label }}
@@ -55,7 +55,7 @@
             {# Spatial coverage #}
             {% if dataset.spatial.zones %}
             <li>
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Spatial coverage') }}">
                     <span class="fa fa-map-marker fa-fw"></span>
@@ -66,7 +66,7 @@
 
             {% if dataset.spatial.granularity %}
             <li>
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Territorial coverage granularity') }}">
                     <span class="fa fa-bullseye fa-fw"></span>
@@ -76,7 +76,7 @@
             {% endif %}
 
             <li>
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Reuse number') }}">
                     <span class="{{ ficon('fa-retweet') }} fa-fw"></span>
@@ -85,7 +85,7 @@
             </li>
 
             <li>
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Followers') }}">
                     <span class="{{ ficon('fa-star') }} fa-fw"></span>

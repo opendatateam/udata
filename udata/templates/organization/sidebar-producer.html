@@ -17,7 +17,7 @@
 {% endif %}
 <button type="button"
     class="btn btn-warning btn-follow btn-block btn-sm icon-left {% if is_following(organization) %}active{% endif %}"
-    rel="tooltip" data-placement="left"
+    data-toggle="tooltip" data-placement="left"
     data-api-url="{{ url_for('api.organization_followers', id=organization.id|string) }}"
     data-following-label="{{ _('Unfollow') }}"
     {% if is_following(organization) %}

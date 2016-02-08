@@ -8,7 +8,7 @@
     data-api-url="{{ url_for('api.{0}_followers'.format(basename), id=obj.id|string) }}"
     data-follow-icon="{{ ficon(follow_icon) }}"
     data-following-icon="{{ ficon(following_icon) }}"
-    rel="tooltip" title="{{ _('Follow') }}"
+    data-toggle="tooltip" title="{{ _('Follow') }}"
     data-placement="top" data-container="body">
     <span class="{{ ficon(following_icon if following else follow_icon) }}"></span>
     {% if obj.metrics.followers %}{{obj.metrics.followers}}{% endif %}
