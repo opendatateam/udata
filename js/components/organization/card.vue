@@ -6,7 +6,7 @@
     </a>
     <img v-if="organization.public_service"
         :src="certified_stamp" alt="certified"
-        class="certified" rel="popover"
+        class="certified" data-toggle="popover"
         :data-title="_('Certified public service')"
         :data-content="_('The identity of this public service public is certified by Etalab')"
         data-container="body" data-trigger="hover"/>
@@ -20,7 +20,7 @@
     <footer>
         <ul>
             <li v-if="organization.metrics">
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     :title="_('Datasets')">
                     <span class="fa fa-cubes fa-fw"></span>
@@ -28,7 +28,7 @@
                 </a>
             </li>
             <li v-if="organization.metrics">
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     :title="_('Reuses')">
                     <span class="fa fa-retweet fa-fw"></span>
@@ -36,7 +36,7 @@
                 </a>
             </li>
             <li v-if="organization.metrics">
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     :title="_('Followers')">
                     <span class="fa fa-star fa-fw"></span>

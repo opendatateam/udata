@@ -43,7 +43,7 @@
             {% set edit_path = 'dataset/{id}/resource/{rid}' %}
         {% endif %}
         <div class="btn-group btn-group-xs tools">
-            <a class="btn btn-default" rel="tooltip" title="{{ _('Edit') }}"
+            <a class="btn btn-default" data-toggle="tooltip" title="{{ _('Edit') }}"
                 href="{{ url_for('admin.index', path=edit_path.format(id=dataset.id, rid=resource.id)) }}">
                 <span class="glyphicon glyphicon-edit"></span>
             </a>

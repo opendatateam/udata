@@ -59,13 +59,13 @@
                                 ) }}
                             </small>
                             {% if post.private %}
-                            <small class="private"rel="popover"
+                            <small class="private" data-toggle="popover"
                                 data-title="{{ _('Private') }}" data-trigger="hover" data-placement="top"
                                 data-content="{{ _('This post is private and will not be visible by other users') }}"
                                 >{{ _('Private') }}</small>
                             {% endif %}
                             {% if post.deleted %}
-                            <small class="deleted" rel="popover"
+                            <small class="deleted" data-toggle="popover"
                                 data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
                                 data-content="{{ _('This post has been deleted. This will be permanent in the next 24 hours') }}"
                                 >{{ _('Deleted') }}</small>

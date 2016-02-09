@@ -72,13 +72,13 @@
                                 ) }}
                             </small>
                             {% if reuse.private %}
-                            <small class="private"rel="popover"
+                            <small class="private" data-toggle="popover"
                                 data-title="{{ _('Private') }}" data-trigger="hover" data-placement="top"
                                 data-content="{{ _('This reuse is private and will not be visible by other users') }}"
                                 >{{ _('Private') }}</small>
                             {% endif %}
                             {% if reuse.deleted %}
-                            <small class="deleted" rel="popover"
+                            <small class="deleted" data-toggle="popover"
                                 data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
                                 data-content="{{ _('This reuse has been deleted. This will be permanent in the next 24 hours') }}"
                                 >{{ _('Deleted') }}</small>
@@ -166,7 +166,7 @@
                             {% endif %}
                             <button type="button"
                                 class="btn btn-warning btn-follow btn-block btn-sm icon-left {% if is_following(reuse.owner) %}active{% endif %}"
-                                rel="tooltip" data-placement="left"
+                                data-toggle="tooltip" data-placement="left"
                                 data-api-url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"
                                 data-following-label="{{ _('Unfollow') }}"
                                 {% if is_following(reuse.owner) %}
@@ -192,7 +192,7 @@
                         <ul class="list-unstyled infos-list">
                             {# Reuse type #}
                             <li>
-                                <a href class="btn btn-xs btn-default" rel="tooltip" data-placement="right auto"
+                                <a href class="btn btn-xs btn-default" data-toggle="tooltip" data-placement="right auto"
                                     title="{{ _('Type') }}">
                                     <span class="{{ ficon('fa-file') }}"></span>
                                 </a>

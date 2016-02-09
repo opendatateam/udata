@@ -6,7 +6,7 @@
         </a>
         {{#if organization.public_service }}
         <img src="{{theme 'img/certified-stamp.png' }}" alt="certified"
-            class="certified" rel="popover"
+            class="certified" data-toggle="popover"
             data-title="{{_ 'Certified public service' }}"
             data-content="{{_ 'The identity of this public service public is certified by Etalab' }}"
             data-container="body" data-trigger="hover"/>
@@ -27,7 +27,7 @@
         <ul>
             {{#if spatial.territories }}
             <li>
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     title="{{_ 'Territorial coverage' }}">
                     <span class="fa fa-map-marker fa-fw"></span>
@@ -36,7 +36,7 @@
             </li>
             {{/if}}
             <li>
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     title="{{_ 'Reuses' }}">
                     <span class="fa fa-retweet fa-fw"></span>
@@ -44,7 +44,7 @@
                 </a>
             </li>
             <li>
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     title="{{_ 'Stars' }}">
                     <span class="fa fa-star fa-fw"></span>
@@ -62,7 +62,7 @@
         <ul>
             {{#if temporal_coverage }}
             <li>
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     title="{{_ 'Temporal coverage' }}">
                     <span class="fa fa-calendar fa-fw"></span>
@@ -73,7 +73,7 @@
 
             {{#if spatial.granularity }}
             <li>
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     title="{{_ 'Territorial coverage granularity' }}">
                     <span class="fa fa-bullseye fa-fw"></span>
@@ -84,7 +84,7 @@
 
             {{#if frequency }}
             <li>
-                <a class="btn btn-xs" rel="tooltip"
+                <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     title="{{_ 'Frequency' }}">
                     <span class="fa fa-clock-o fa-fw"></span>
