@@ -2,6 +2,9 @@
 from __future__ import unicode_literals
 
 from flask import url_for
+from werkzeug import cached_property
+
+from udata.models import Organization
 
 __all__ = ('TerritoryDataset', 'ResourceBasedTerritoryDataset')
 
@@ -9,6 +12,7 @@ __all__ = ('TerritoryDataset', 'ResourceBasedTerritoryDataset')
 class TerritoryDataset(object):
     id = ''
     title = ''
+    organization_id = ''
     url_template = ''
     description = ''
 
@@ -23,6 +27,10 @@ class TerritoryDataset(object):
     def slug(self):
         return '{territory_id}-{id}'.format(
             territory_id=self.territory.id.replace('/', '-'), id=self.id)
+
+    @cached_property
+    def organization(self):
+        return Organization.objects.get(id=self.organization_id)
 
 
 class ResourceBasedTerritoryDataset(TerritoryDataset):

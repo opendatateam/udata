@@ -6,7 +6,7 @@
     .dataset-card {
         border: 1px solid #EEE;
         min-width: 300px;
-        min-height: 200px;
+        min-height: 150px;
         clear: both;
         margin: 1em;
         background: #FFF;
@@ -20,7 +20,7 @@
     }
     .dataset-card * {
         font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-        font-size: 14px;
+        font-size: 13px;
         text-shadow: none;
         border: none;
         background-image: none;
@@ -29,8 +29,8 @@
         margin: 0;
     }
     .dataset-card .title {
-        background: #4FA9E5;
-        font-size: 16px;
+        background: #3085C2;
+        font-size: 15px;
         font-weight: normal;
         letter-spacing: .9px;
         color: #FFF;
@@ -88,17 +88,31 @@
     .dataset-card aside a {
         font-size: 12px;
     }
-    .dataset-card .retweet {
+    {# Base64-ed icons from glyphicons halflings, prefixed to avoid collisions. #}
+    .dataset-card .udata-close {
+        background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABBJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ1dWlkOjY1RTYzOTA2ODZDRjExREJBNkUyRDg4N0NFQUNCNDA3IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkVDN0Y4QkI5ODQ3RjExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkVDN0Y4QkI4ODQ3RjExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTgyMjI1ZDItYmFhNy00NTNlLWEyZTEtMzlkODljOGVhMDljIiBzdFJlZjpkb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6ZWJjOWI3YjMtY2NlMC0xMTc4LTg4NTktZjY2YzAxOGQ1YjcyIi8+IDxkYzp0aXRsZT4gPHJkZjpBbHQ+IDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+Z2x5cGhpY29uc19oYWxmbGluZ3M8L3JkZjpsaT4gPC9yZGY6QWx0PiA8L2RjOnRpdGxlPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PjUfc2sAAABbSURBVHjalJDLDQAhCESJFVCSpVoSVjQLmyHZDwecZA68PKMoAMSzvObVmMmUbHG+JbBGIaXk4bxAyhX7nUYh6fc9pRTOkIP0ru4uM3IjZnsnux/cpPvhlwADAJXpVkkd0NrdAAAAAElFTkSuQmCC') no-repeat left center;
+    }
+    .dataset-card .udata-retweet {
         background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAJCAYAAAA7KqwyAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABBJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ1dWlkOjY1RTYzOTA2ODZDRjExREJBNkUyRDg4N0NFQUNCNDA3IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkJCRTU2RDk3ODQ4ODExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkJCRTU2RDk2ODQ4ODExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTgyMjI1ZDItYmFhNy00NTNlLWEyZTEtMzlkODljOGVhMDljIiBzdFJlZjpkb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6ZWJjOWI3YjMtY2NlMC0xMTc4LTg4NTktZjY2YzAxOGQ1YjcyIi8+IDxkYzp0aXRsZT4gPHJkZjpBbHQ+IDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+Z2x5cGhpY29uc19oYWxmbGluZ3M8L3JkZjpsaT4gPC9yZGY6QWx0PiA8L2RjOnRpdGxlPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PlcLFuoAAABqSURBVHjaYvj//z8DEAgA8QUoFoCKLQDi/zjwB5AaqDq4ZpgkUYYgG7ABi4INMAXoGN0ARpgpjIyMENn//xkZ8AB0dUwMFAL6GQB0+gaY82FeAYlhBA4WvAAtqlFiC9mADyQYAo9qgAADAPgxfstsPWwZAAAAAElFTkSuQmCC') no-repeat left center;
     }
-    .dataset-card .calendar {
+    .dataset-card .udata-calendar {
         background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAMCAYAAAC0qUeeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABBJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ1dWlkOjY1RTYzOTA2ODZDRjExREJBNkUyRDg4N0NFQUNCNDA3IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjQ3N0JDMDhGODQ4ODExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjQ3N0JDMDhFODQ4ODExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTgyMjI1ZDItYmFhNy00NTNlLWEyZTEtMzlkODljOGVhMDljIiBzdFJlZjpkb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6ZWJjOWI3YjMtY2NlMC0xMTc4LTg4NTktZjY2YzAxOGQ1YjcyIi8+IDxkYzp0aXRsZT4gPHJkZjpBbHQ+IDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+Z2x5cGhpY29uc19oYWxmbGluZ3M8L3JkZjpsaT4gPC9yZGY6QWx0PiA8L2RjOnRpdGxlPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PhyMeYcAAAA/SURBVHjaYvr//z8DEHwAYRAbHSPLwTj/icAfGKEMogAjzHiiFJNiMhMDCQCsGOgURmJo0p0x8CaTFIMAAQYAtkdiRCzQqvMAAAAASUVORK5CYII=') no-repeat left center;
     }
-    .dataset-card .marker {
+    .dataset-card .udata-marker {
         background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAANCAYAAACQN/8FAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABBJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ1dWlkOjY1RTYzOTA2ODZDRjExREJBNkUyRDg4N0NFQUNCNDA3IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjA4MUEwRDVBODQ4NDExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjA4MUEwRDU5ODQ4NDExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTgyMjI1ZDItYmFhNy00NTNlLWEyZTEtMzlkODljOGVhMDljIiBzdFJlZjpkb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6ZWJjOWI3YjMtY2NlMC0xMTc4LTg4NTktZjY2YzAxOGQ1YjcyIi8+IDxkYzp0aXRsZT4gPHJkZjpBbHQ+IDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+Z2x5cGhpY29uc19oYWxmbGluZ3M8L3JkZjpsaT4gPC9yZGY6QWx0PiA8L2RjOnRpdGxlPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PgYvWcAAAACOSURBVHjadJABDcAgDASRgAQkTAISkDBpSEDCJCBhEuaAweg3TzNImtDvUT7vWmtuVD+hV+nVqEYfvjlBDwE33YfuAWYRq26Yj6voGSBeB1ghGLO+VhqGCJ6gNPAXDRTVswiFjCfREi1Qj6eJxVbib64NlDXHTZbI0y+gMQ+/h85+4oDfc9E32QWrvQIMAMMuzbeiQednAAAAAElFTkSuQmCC') no-repeat left center;
     }
-    .dataset-card .stats {
+    .dataset-card .udata-stats {
         background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABBJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ1dWlkOjY1RTYzOTA2ODZDRjExREJBNkUyRDg4N0NFQUNCNDA3IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjdENzA1QzI3ODQ4RjExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjdENzA1QzI2ODQ4RjExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTgyMjI1ZDItYmFhNy00NTNlLWEyZTEtMzlkODljOGVhMDljIiBzdFJlZjpkb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6ZWJjOWI3YjMtY2NlMC0xMTc4LTg4NTktZjY2YzAxOGQ1YjcyIi8+IDxkYzp0aXRsZT4gPHJkZjpBbHQ+IDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+Z2x5cGhpY29uc19oYWxmbGluZ3M8L3JkZjpsaT4gPC9yZGY6QWx0PiA8L2RjOnRpdGxlPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PkaU3hQAAABPSURBVHjaYvj//z8DMgaCBUAMYixAl2OEKoADRkZGuABQjhFZjomBBEBQMdCmBSDbwDQhZyDzSXIGhu+h7P8Qg1H5eCXR+dQNDbIVAwQYAJyNSJ5I6tz5AAAAAElFTkSuQmCC') no-repeat left center;
+    }
+    .dataset-card .shrink .source,
+    .dataset-card .shrink .description {
+        visibility: hidden;
+        height: 0;
+        width: 0;
+    }
+    .dataset-card .shrink textarea {
+        width: 100%;
+        font-size: 11px;
     }
 </style>
 <article class="dataset-card" id="{{ item_reference }}">
@@ -111,8 +125,8 @@
         <p class="source">
         {% if item.territory %}
             <a href="{{ item.territory.external_url }}">
-                <img src="{{ item.territory.logo_url(external=True) or theme_static('img/placeholder_territory.png', external=True) }}"
-                     alt="{{ item.territory.name }}"
+                <img src="{{ item.organization.logo(external=True) }}"
+                     alt="{{ item.organization.name }}"
                      height="70" width="70">
             </a>
         {% elif item.organization %}
@@ -136,11 +150,11 @@
         </p>
     </div>
     <aside class="meta">
-        <p class="retweet">
-            <a href="{{ item.external_url or item.url }}" class="integrate">{{ _('Embed') }}</a>
+        <p class="udata-retweet">
+            <a href="{{ item.external_url or item.url }}" class="integrate" data-label="{{ _('Close') }}">{{ _('Embed') }}</a>
         </p>
         {% if item.temporal_coverage %}
-        <p class="calendar">
+        <p class="udata-calendar">
             {% if item.territory %}
                 {{ item.temporal_coverage.start }}
                 {% if item.temporal_coverage.end %}
@@ -152,18 +166,18 @@
         </p>
         {% endif %}
         {% if item.spatial and item.spatial.granularity and item.spatial.granularity_label != 'Other' %}
-        <p class="marker">
+        <p class="udata-marker">
             {{ item.spatial.granularity_label }}
         </p>
         {% elif item.territory %}
-        <p class="marker">
+        <p class="udata-marker">
             <a href="{{ item.territory.external_url }}">
                 {{ item.territory.name }}
             </a>
         </p>
         {% endif %}
         {% if item.frequency and item.frequency_label != 'Unknown' %}
-        <p class="stats">
+        <p class="udata-stats">
             {{ item.frequency_label }}
         </p>
         {% endif %}
