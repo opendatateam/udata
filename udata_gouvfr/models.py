@@ -36,6 +36,7 @@ Dataset.__badges__[NECMERGITUR] = _('Nec Mergitur')
 class ZonagesTerritoryDataset(TerritoryDataset):
     id = 'zonages'
     title = 'Zonages des politiques de la ville'
+    organization_id = '534fff8fa3a7292c64a77f3d'
     url_template = 'http://sig.ville.gouv.fr/Cartographie/{code}'
     description = '''
         ZFU, ZUS, et autres quartiers du CUCS. Source :
@@ -46,9 +47,10 @@ class ZonagesTerritoryDataset(TerritoryDataset):
 class ComptesTerritoryDataset(TerritoryDataset):
     id = 'comptes'
     title = 'Comptes de la collectivité'
+    organization_id = '534fff8ea3a7292c64a77f02'
     url_template = (
         'http://alize2.finances.gouv.fr/communes/eneuro/tableau.php'
-        '?icom=0{icom}&dep={dep}&type=BPS&param=0')
+        '?icom={icom}&dep=0{dep}&type=BPS&param=0')
     description = '''
         Chiffres Clés, Fonctionnement, Investissement, Fiscalité,
         Autofinancement, Endettement (source Ministère des Finances).
@@ -60,13 +62,14 @@ class ComptesTerritoryDataset(TerritoryDataset):
 
     @property
     def url(self):
-        return self.url_template.format(icom=self.territory.code[0:2],
-                                        dep=self.territory.code[2:5])
+        return self.url_template.format(icom=self.territory.code[2:5],
+                                        dep=self.territory.code[0:2])
 
 
 class LogementTerritoryDataset(TerritoryDataset):
     id = 'logement'
     title = 'Logement'
+    organization_id = '534fff81a3a7292c64a77e5c'
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=LOG&nivgeo=COM&codgeo={code}')
     description = '''
@@ -81,6 +84,7 @@ class LogementTerritoryDataset(TerritoryDataset):
 class EmploiPopulationTerritoryDataset(TerritoryDataset):
     id = 'emploi_population'
     title = 'Emploi - Population active'
+    organization_id = '534fff81a3a7292c64a77e5c'
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=EMP&nivgeo=COM&codgeo={code}')
     description = '''
@@ -95,6 +99,7 @@ class EmploiPopulationTerritoryDataset(TerritoryDataset):
 class EmploiChiffresTerritoryDataset(TerritoryDataset):
     id = 'emploi_chiffres'
     title = 'Emploi - Chiffres clés'
+    organization_id = '534fff81a3a7292c64a77e5c'
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=ACT&nivgeo=COM&codgeo={code}')
     description = '''
@@ -110,6 +115,7 @@ class EmploiChiffresTerritoryDataset(TerritoryDataset):
 class PopulationTerritoryDataset(TerritoryDataset):
     id = 'population'
     title = 'Population'
+    organization_id = '534fff81a3a7292c64a77e5c'
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=POP&nivgeo=COM&codgeo={code}')
     description = '''
@@ -125,6 +131,7 @@ class PopulationTerritoryDataset(TerritoryDataset):
 class PopulationChiffresTerritoryDataset(TerritoryDataset):
     id = 'population_chiffres'
     title = 'Population - Chiffres clés'
+    organization_id = '534fff81a3a7292c64a77e5c'
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=FAM&nivgeo=COM&codgeo={code}')
     description = '''
@@ -140,6 +147,7 @@ class PopulationChiffresTerritoryDataset(TerritoryDataset):
 class PopulationDiplomesTerritoryDataset(TerritoryDataset):
     id = 'population_diplomes'
     title = 'Population - Diplômes et formations'
+    organization_id = '534fff81a3a7292c64a77e5c'
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=FOR&nivgeo=COM&codgeo={code}')
     description = '''
@@ -156,6 +164,7 @@ class ElectionsRegionales2015Tour2TerritoryDataset(
         ResourceBasedTerritoryDataset):
     id = 'elections_regionales_2015_2'
     title = 'Résultats des élections régionales 2015 (second tour)'
+    organization_id = '534fff91a3a7292c64a77f53'
     description = '''
         Résultats par bureau de vote pour la commune concernée
         (données Ministère de l’Interieur).
