@@ -450,7 +450,7 @@ class IssuesActionsTest(TestCase, DBTestMixin):
             closed_by=user
         )
 
-        issues = issues_for(owner, closed=True)
+        issues = issues_for(owner, only_open=False)
 
         self.assertEqual(len(issues), len(open_issues) + 1)
 

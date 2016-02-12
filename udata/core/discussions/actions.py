@@ -6,7 +6,7 @@ from udata.models import Reuse, Dataset
 from .models import Discussion
 
 
-def discussions_for(user, closed=False):
+def discussions_for(user, only_open=True):
     '''
     Build a queryset to query discussions related to a given user's assets.
 
@@ -18,6 +18,6 @@ def discussions_for(user, closed=False):
     reuses = Reuse.objects.owned_by(user.id, *user.organizations)
 
     qs = Discussion.objects(subject__in=list(datasets) + list(reuses))
-    if not closed:
+    if only_open:
         qs = qs(closed__exists=False)
     return qs
