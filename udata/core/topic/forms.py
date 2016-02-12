@@ -24,3 +24,4 @@ class TopicForm(ModelForm):
 
     tags = fields.TagField(_('Tags'), [validators.required()])
     private = fields.BooleanField(_('Private'))
+    featured = fields.BooleanField(_('Featured'))

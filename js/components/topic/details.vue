@@ -37,13 +37,13 @@ export default {
             this.toggled = !this.toggled;
         },
         save: function(e) {
-            if (this.$refs.form.$refs.form.validate()) {
-                var data = this.$refs.form.$refs.form.serialize();
-
-                this.topic.save(data);
+            const form = this.$refs.form.$refs.form;
+            if (form.validate()) {
                 e.preventDefault();
-
-                this.toggled = false;
+                this.topic.update(form.serialize(), (response) => {
+                    this.topic.on_fetched(response);
+                    this.toggled = false;
+                }, form.on_error);
             }
         },
         cancel: function(e) {
