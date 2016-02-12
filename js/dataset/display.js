@@ -162,10 +162,9 @@ function load_coverage_map() {
         onEachFeature: function(feature, layer) {
             layer.bindPopup(feature.properties.name);
             layer.on('mouseover', function() {
-                layer.openPopup();
-            });
-            layer.on('mouseout', function() {
-                layer.closePopup();
+                if (!$el.data('hide-popup')) {
+                    layer.openPopup();
+                }
             });
         }
     });

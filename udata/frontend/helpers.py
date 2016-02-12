@@ -113,6 +113,12 @@ def placeholder(url, name='default', external=False):
 
 
 @front.app_template_filter()
+def obfuscate(email):
+    """Poor-man obfuscation, don't forget the |safe filter after it."""
+    return email.replace('@', '%40').replace('.', '&#46;')
+
+
+@front.app_template_filter()
 @front.app_template_global()
 def avatar_url(obj, size):
     if hasattr(obj, 'avatar') and obj.avatar:

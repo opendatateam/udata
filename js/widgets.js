@@ -30,22 +30,23 @@ function buildIntegrationFragment(reference) {
     const [kind, ...ids] = reference.split('-');
     const id = ids.join('-');
     const fragment = document.createElement('div');
+    fragment.classList.add('embed');
     const help = document.createElement('p');
+    help.classList.add('udata-help');
     help.innerHTML = `<a href="#">Copy-paste</a> that code into your
-    own HTML and/or <a href="${baseURL}/faq/developer/">read the docs</a>.`;
+    own HTML and/or <a href="${baseURL}/faq/developer/">read the documentation</a>.`;
     fragment.appendChild(help);
     const textarea = document.createElement('textarea');
-    textarea.style.width = '150%';
     textarea.innerHTML = `<div data-udata-${kind}-id="${id}"></div>
 <script src="${scriptURI}" id="udata" async defer></script>`;
     fragment.appendChild(textarea);
     return fragment;
 }
 function easeCopyPasting(content) {
-    const textarea = content.lastChild;
+    const textarea = content.querySelector('textarea');
     textarea.focus();
     textarea.select();
-    const help = content.firstChild;
+    const help = content.querySelector('.udata-help');
     help.firstChild.addEventListener('click', (e) => {
         e.preventDefault();
         textarea.select();
@@ -55,12 +56,22 @@ function easeCopyPasting(content) {
 function handleIntegration(event) {
     event.preventDefault();
     const element = event.target;
-    const aside = element.parentNode.parentNode;
+    const paragraph = element.parentNode;
+    const aside = paragraph.parentNode;
     const content = aside.previousElementSibling;
     const article = aside.parentNode;
-    const fragment = buildIntegrationFragment(article.id);
-    content.innerHTML = fragment.innerHTML;
-    easeCopyPasting(content);
+    const label = element.dataset.label;
+    element.dataset.label = element.innerHTML;
+    element.innerHTML = label;
+    paragraph.classList.toggle('udata-close');
+    paragraph.classList.toggle('udata-retweet');
+    content.classList.toggle('shrink');
+    if (!paragraph.classList.contains('udata-close')) {
+        content.removeChild(content.querySelector('.embed'));
+    } else {
+        content.appendChild(buildIntegrationFragment(article.id));
+        easeCopyPasting(content);
+    }
 }
 
 // Warning: using `Array.from` adds 700 lines once converted through Babel.

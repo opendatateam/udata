@@ -17,7 +17,9 @@
                 {% endif %}
             {% endif %}
         </h1>
-        <div id="coverage-map" class="aside-map" data-zones="{{ url_for('api.zones', ids=[territory.id]) }}"></div>
+        <div id="coverage-map" class="aside-map"
+            data-zones="{{ url_for('api.zones', ids=[territory.id]) }}"
+            data-hide-popup="true"></div>
     </div>
 
     <aside class="col-sm-3 panel panel-default">
@@ -38,9 +40,13 @@
                 </strong>
             </p>
         </div>
+        <a href="m&#x61;ilto:{{ config.CONTACT_EMAIL|obfuscate|safe }}" class="btn btn-warning btn-block btn-sm"
+            data-toggle="tooltip" data-placement="left"
+            data-original-title="{{ _('I belong to that city and I want to publish more datasets.') }}">
+            {{ _('Claim and enrich') }}
+        </a>
     </aside>
 </div>
-<br/>
 <div class="dataset-list">
     {% for territory_dataset in territory_datasets %}
         <div data-udata-territory-id="{{ territory_dataset.slug }}" class="col-sm-4"></div>
