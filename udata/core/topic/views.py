@@ -44,6 +44,7 @@ def display(topic):
     return theme.render(
         'topic/display.html',
         topic=topic,
+        datasets=[d for d in topic.datasets if hasattr(d, 'pk')],
         **dict(zip(keys, results))
     )
 
