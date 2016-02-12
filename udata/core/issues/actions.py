@@ -12,7 +12,7 @@ def issues_for(user, only_open=True):
 
     It includes issues coming from the user's organizations
 
-    :param bool closed: whether to include closed issues or not.
+    :param bool only_open: whether to include closed issues or not.
     '''
     datasets = Dataset.objects.owned_by(user.id, *user.organizations)
     reuses = Reuse.objects.owned_by(user.id, *user.organizations)
