@@ -14,9 +14,8 @@ def issues_for(user, closed=False):
 
     :param bool closed: whether to include closed issues or not.
     '''
-    orgs = [o for o in user.organizations if o.is_member(user)]
-    datasets = Dataset.objects.owned_by(user.id, *orgs)
-    reuses = Reuse.objects.owned_by(user.id, *orgs)
+    datasets = Dataset.objects.owned_by(user.id, *user.organizations)
+    reuses = Reuse.objects.owned_by(user.id, *user.organizations)
 
     qs = Issue.objects(subject__in=list(datasets) + list(reuses))
     if not closed:
