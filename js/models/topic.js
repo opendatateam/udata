@@ -27,4 +27,11 @@ export default class Topic extends Model {
             this.on_fetched);
         }
     }
+
+    update(data, on_success, on_error) {
+        this.$api('topics.update_topic', {
+            topic: this.id,
+            payload: data
+        }, on_success, on_error);
+    }
 };

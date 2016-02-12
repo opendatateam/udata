@@ -394,8 +394,9 @@ class ModelList(object):
         objects = self.model.objects.in_bulk(oids)
         if len(objects.keys()) != len(oids):
             non_existants = set(oids) - set(objects.keys())
-            raise validators.ValidationError(
-                'Unknown identifiers: ' + ', '.join(non_existants))
+            msg = _('Unknown identifiers: {identifiers}').format(
+                identifiers=', '.join(str(ne) for ne in non_existants))
+            raise validators.ValidationError(msg)
 
         self.data = [objects[id] for id in oids]
 
