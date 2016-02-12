@@ -6,14 +6,16 @@ from flask.ext.security import current_user
 from udata import search
 from udata.api import api, ModelAPI, ModelListAPI, API
 from udata.models import (
-    CommunityResource, Dataset, Discussion, FollowUser, Issue, Reuse, User
+    CommunityResource, Dataset, FollowUser, Reuse, User
 )
 
 from udata.core.dataset.api_fields import (
     community_resource_fields, dataset_full_fields
 )
 from udata.core.followers.api import FollowAPI
+from udata.core.issues.actions import issues_for
 from udata.core.issues.api import issue_fields
+from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.storages.api import (
@@ -157,9 +159,8 @@ class MyOrgIssuesAPI(API):
     def get(self):
         '''List all issues related to my organizations.'''
         q = filter_parser.parse_args().get('q')
-        issues = (Issue.objects.from_organizations(
-            current_user._get_current_object(), *current_user.organizations)
-            .order_by('-created'))
+        issues = issues_for(current_user._get_current_object())
+        issues = issues.order_by('-created')
         if q:
             issues = issues.filter(title__icontains=q.decode('utf-8'))
         return list(issues)
@@ -173,9 +174,8 @@ class MyOrgDiscussionsAPI(API):
     def get(self):
         '''List all discussions related to my organizations.'''
         q = filter_parser.parse_args().get('q')
-        discussions = (Discussion.objects.from_organizations(
-            current_user._get_current_object(), *current_user.organizations)
-            .order_by('-created'))
+        discussions = discussions_for(current_user._get_current_object())
+        discussions = discussions.order_by('-created')
         if q:
             discussions = discussions.filter(title__icontains=q.decode('utf-8'))
         return list(discussions)

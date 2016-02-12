@@ -5,9 +5,10 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import Dataset, DatasetIssue, Member
+from udata.models import db, Dataset, DatasetIssue, ReuseIssue, Member
 from udata.core.user.views import blueprint as user_bp
 from udata.core.issues.models import Issue, Message
+from udata.core.issues.actions import issues_for
 from udata.core.issues.notifications import issues_notifications
 from udata.core.issues.signals import on_new_issue
 
@@ -15,8 +16,9 @@ from frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
+
 from .factories import (
-    faker, UserFactory, OrganizationFactory, DatasetFactory,
+    faker, UserFactory, OrganizationFactory, DatasetFactory, ReuseFactory,
     DatasetIssueFactory
 )
 
@@ -299,6 +301,7 @@ class IssuesTest(APITestCase):
 
         self.assertEqual(str(issue.id), data_open[0]['id'])
 
+
 class IssueCsvTest(FrontTestCase):
 
     def test_issues_csv_content_empty(self):
@@ -327,6 +330,131 @@ class IssueCsvTest(FrontTestCase):
             data, '"{issue.id}";"{issue.user}"'.format(issue=issue))
 
 
+class IssuesActionsTest(TestCase, DBTestMixin):
+    def test_issues_for_user(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        reuse = ReuseFactory(owner=owner)
+
+        open_issues = []
+        for i in range(3):
+            user = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=user)
+            open_issues.append(DatasetIssue.objects.create(
+                subject=dataset,
+                user=user,
+                title=faker.sentence(),
+                discussion=[message]
+            ))
+            open_issues.append(ReuseIssue.objects.create(
+                subject=reuse,
+                user=user,
+                title=faker.sentence(),
+                discussion=[message]
+            ))
+
+        # Creating a closed issue that shouldn't show up in response.
+        user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        DatasetIssue.objects.create(
+            subject=dataset,
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+            closed=datetime.now(),
+            closed_by=user
+        )
+
+        issues = issues_for(owner)
+
+        self.assertIsInstance(issues, db.BaseQuerySet)
+        self.assertEqual(len(issues), len(open_issues))
+
+        for issue in issues:
+            self.assertIn(issue, open_issues)
+
+    def test_issues_for_user_with_org(self):
+        user = UserFactory()
+        member = Member(user=user, role='editor')
+        org = OrganizationFactory(members=[member])
+        dataset = DatasetFactory(organization=org)
+        reuse = ReuseFactory(organization=org)
+
+        open_issues = []
+        for i in range(3):
+            sender = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=sender)
+            open_issues.append(DatasetIssue.objects.create(
+                subject=dataset,
+                user=sender,
+                title=faker.sentence(),
+                discussion=[message]
+            ))
+            open_issues.append(ReuseIssue.objects.create(
+                subject=reuse,
+                user=sender,
+                title=faker.sentence(),
+                discussion=[message]
+            ))
+        # Creating a closed issue that shouldn't show up in response.
+        other_user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=other_user)
+        DatasetIssue.objects.create(
+            subject=dataset,
+            user=other_user,
+            title=faker.sentence(),
+            discussion=[message],
+            closed=datetime.now(),
+            closed_by=user
+        )
+
+        issues = issues_for(user)
+
+        self.assertIsInstance(issues, db.BaseQuerySet)
+        self.assertEqual(len(issues), len(open_issues))
+
+        for issue in issues:
+            self.assertIn(issue, open_issues)
+
+    def test_issues_for_user_with_closed(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        reuse = ReuseFactory(owner=owner)
+
+        open_issues = []
+        for i in range(3):
+            user = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=user)
+            open_issues.append(DatasetIssue.objects.create(
+                subject=dataset,
+                user=user,
+                title=faker.sentence(),
+                discussion=[message]
+            ))
+            open_issues.append(ReuseIssue.objects.create(
+                subject=reuse,
+                user=user,
+                title=faker.sentence(),
+                discussion=[message]
+            ))
+
+        # Creating a closed issue that shouldn't show up in response.
+        user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        DatasetIssue.objects.create(
+            subject=dataset,
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+            closed=datetime.now(),
+            closed_by=user
+        )
+
+        issues = issues_for(owner, closed=True)
+
+        self.assertEqual(len(issues), len(open_issues) + 1)
+
+
 class IssuesNotificationsTest(TestCase, DBTestMixin):
     def test_notify_user_issues(self):
         owner = UserFactory()
@@ -343,6 +471,7 @@ class IssuesNotificationsTest(TestCase, DBTestMixin):
                 discussion=[message]
             )
             open_issues[issue.id] = issue
+
         # Creating a closed issue that shouldn't show up in response.
         user = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)

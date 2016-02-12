@@ -9,7 +9,7 @@ from udata.models import (
 
 from udata.tests.factories import (
     CommunityResourceFactory, VisibleDatasetFactory, OrganizationFactory,
-    ReuseFactory
+    ReuseFactory, UserFactory
 )
 
 from . import APITestCase
@@ -174,18 +174,19 @@ class MeAPITest(APITestCase):
         dataset = VisibleDatasetFactory(owner=user)
         org_dataset = VisibleDatasetFactory(organization=organization)
 
+        sender = UserFactory()
         issues = [
-            DatasetIssue.objects.create(subject=dataset, title='', user=user),
-            DatasetIssue.objects.create(
-                subject=org_dataset, title='', user=user),
-            ReuseIssue.objects.create(subject=reuse, title='', user=user),
-            ReuseIssue.objects.create(subject=org_reuse, title='', user=user),
+            DatasetIssue.objects.create(subject=s, title='', user=sender)
+            for s in (dataset, org_dataset)
+        ] + [
+            ReuseIssue.objects.create(subject=s, title='', user=sender)
+            for s in (reuse, org_reuse)
         ]
 
         # Should not be listed
         DatasetIssue.objects.create(
-            subject=VisibleDatasetFactory(), title='', user=user)
-        ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=user)
+            subject=VisibleDatasetFactory(), title='', user=sender)
+        ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=sender)
 
         response = self.get(url_for('api.my_org_issues'))
         self.assert200(response)
