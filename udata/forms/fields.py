@@ -432,6 +432,7 @@ class NestedModelList(fields.FieldList):
         if not self.has_data:
             return
 
+        initial_values = getattr(obj, name, [])
         new_values = []
 
         class Holder(object):
@@ -440,7 +441,12 @@ class NestedModelList(fields.FieldList):
         holder = Holder()
 
         for idx, field in enumerate(self):
-            holder.nested = self.nested_model()
+            initial = None
+            if hasattr(self.nested_model, 'id') and 'id' in field.data:
+                id = self.nested_model.id.to_python(field.data['id'])
+                initial = get_by(initial_values, 'id', id)
+
+            holder.nested = initial or self.nested_model()
             field.populate_obj(holder, 'nested')
             new_values.append(holder.nested)
 
