@@ -65,29 +65,23 @@ export default {
 
 
         L.tileLayer(TILES_URL, TILES_CONFIG).addTo(this.map);
-        // this.layer.addTo(this.map);
-        // this.map.fitBounds(this.layer.getBounds());
     },
     watch: {
         'geojson': function(json) {
             if (json) {
                 this.layer = L.geoJson(json, {
                     onEachFeature: function (feature, layer) {
-                        layer.bindPopup(feature.properties.name);
-                        layer.on("mouseover", function () {
-                            layer.openPopup();
-                        });
-                        layer.on("mouseout", function () {
-                            layer.closePopup();
-                        });
+                        if (feature.properties && feature.properties.name) {
+                            layer.bindPopup(feature.properties.name);
+                            layer.on("mouseover", function () {
+                                layer.openPopup();
+                            });
+                            layer.on("mouseout", function () {
+                                layer.closePopup();
+                            });
+                        }
                     }
                 });
-                // this.layer.on('mouseover', function(e) {
-                //     e.layer.openPopup();
-                // });
-                // this.layer.on('mouseout', function(e) {
-                //     e.layer.closePopup();
-                // });
                 this.layer.addTo(this.map);
                 this.map.fitBounds(this.layer.getBounds());
             }
