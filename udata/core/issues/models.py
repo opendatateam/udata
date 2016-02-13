@@ -11,20 +11,6 @@ log = logging.getLogger(__name__)
 __all__ = ('Issue',)
 
 
-class IssueQuerySet(db.BaseQuerySet):
-    def from_organizations(self, user, *organizations):
-        from udata.models import Dataset, Reuse  # Circular imports.
-        Qs = db.Q()
-        for dataset in Dataset.objects(owner=user).visible():
-            Qs |= db.Q(subject=dataset)
-        for org in organizations:
-            for dataset in Dataset.objects(organization=org).visible():
-                Qs |= db.Q(subject=dataset)
-        for reuse in Reuse.objects.owned_by(*[user.id] + list(organizations)):
-            Qs |= db.Q(subject=reuse)
-        return self(Qs)
-
-
 class Message(db.EmbeddedDocument):
     content = db.StringField(required=True)
     posted_on = db.DateTimeField(default=datetime.now, required=True)
@@ -48,5 +34,4 @@ class Issue(db.Document):
         ],
         'allow_inheritance': True,
         'ordering': ['created'],
-        'queryset_class': IssueQuerySet,
     }
