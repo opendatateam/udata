@@ -70,14 +70,20 @@ export default {
         'geojson': function(json) {
             if (json) {
                 this.layer = L.geoJson(json, {
-                    onEachFeature: function (feature, layer) {
+                    onEachFeature: (feature, layer) => {
                         if (feature.properties && feature.properties.name) {
                             layer.bindPopup(feature.properties.name);
-                            layer.on("mouseover", function () {
+                            layer.on("mouseover", function() {
                                 layer.openPopup();
                             });
-                            layer.on("mouseout", function () {
-                                layer.closePopup();
+                            layer.on("mouseout", function() {
+                                if (layer.closePopup) {
+                                    layer.closePopup();
+                                } else {
+                                    layer.eachLayer(function(layer) {
+                                        layer.closePopup();
+                                    });
+                                }
                             });
                         }
                     }
