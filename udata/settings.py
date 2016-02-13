@@ -67,6 +67,7 @@ class Defaults(object):
         'br',
         'blockquote',
         'code',
+        'dd',
         'dl',
         'dt',
         'em',
