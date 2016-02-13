@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 from flask import url_for
-from werkzeug import cached_property
 
 from udata.models import Organization
 
@@ -28,9 +27,10 @@ class TerritoryDataset(object):
         return '{territory_id}-{id}'.format(
             territory_id=self.territory.id.replace('/', '-'), id=self.id)
 
-    @cached_property
+    @property
     def organization(self):
-        return Organization.objects.get(id=self.organization_id)
+        if self.organization_id:
+            return Organization.objects.get(id=self.organization_id)
 
 
 class ResourceBasedTerritoryDataset(TerritoryDataset):
