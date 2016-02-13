@@ -160,13 +160,21 @@ function load_coverage_map() {
 
     layer = L.geoJson(null, {
         onEachFeature: function(feature, layer) {
-            layer.bindPopup(feature.properties.name);
-            layer.on('mouseover', function() {
-                layer.openPopup();
-            });
-            layer.on('mouseout', function() {
-                layer.closePopup();
-            });
+            if (feature.properties && feature.properties.name) {
+                layer.bindPopup(feature.properties.name);
+                layer.on('mouseover', function() {
+                    layer.openPopup();
+                });
+                layer.on('mouseout', function() {
+                    if (layer.closePopup) {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(layer) {
+                            layer.closePopup();
+                        });
+                    }
+                });
+            }
         }
     });
 
