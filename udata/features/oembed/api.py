@@ -41,7 +41,6 @@ class OEmbedsAPI(API):
                     item = Dataset.objects.get(id=item_id)
                 except (db.ValidationError, Dataset.DoesNotExist):
                     return api.abort(400, 'Unknown dataset ID.')
-                template = 'embed-dataset.html'
             elif (item_kind == 'territory'
                     and current_app.config.get('ACTIVATE_TERRITORIES')):
                 from udata.models import TERRITORY_DATASETS
@@ -57,12 +56,11 @@ class OEmbedsAPI(API):
                     item = TERRITORY_DATASETS[kind](geozone)
                 else:
                     return api.abort(400, 'Unknown kind of territory.')
-                template = 'embed-dataset.html'
             else:
                 return api.abort(400, 'Invalid object type.')
             width = maxwidth = 1000
             height = maxheight = 200
-            html = theme.render(template, **{
+            html = theme.render('embed-dataset.html', **{
                 'width': width,
                 'height': height,
                 'item': item,
