@@ -29,8 +29,7 @@ class TerritoryDataset(object):
 
     @property
     def organization(self):
-        if self.organization_id:
-            return Organization.objects.get(id=self.organization_id)
+        return Organization.objects.get(id=self.organization_id)
 
 
 class ResourceBasedTerritoryDataset(TerritoryDataset):
