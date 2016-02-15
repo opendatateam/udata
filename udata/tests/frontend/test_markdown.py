@@ -117,3 +117,11 @@ class MarkdownTestCase(TestCase, WebTestMixin):
                 '{{ text|mdstrip(20) }}', text=text)
 
         self.assertEqual(result, 'excerpt')
+
+    def test_mdstrip_does_not_truncate_in_tags(self):
+        '''mdstrip should not truncate in middle of a tag'''
+        text = '![Legend](http://www.somewhere.com/image.jpg) Here. aaaaa'
+        with self.app.test_request_context('/'):
+            result = render_template_string('{{ text|mdstrip(5) }}', text=text)
+
+        self.assertEqual(result.strip(), 'Here …')
