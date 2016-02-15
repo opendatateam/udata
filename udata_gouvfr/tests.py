@@ -9,9 +9,9 @@ from udata.models import Badge, PUBLIC_SERVICE
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.api import APITestCase
 from udata.tests.factories import (
-    DatasetFactory, ReuseFactory, OrganizationFactory
+    DatasetFactory, ReuseFactory, OrganizationFactory,
+    VisibleReuseFactory, GeoZoneFactory
 )
-from udata.tests.factories import VisibleReuseFactory, GeoZoneFactory
 from udata.tests.frontend import FrontTestCase
 from udata.settings import Testing
 
@@ -270,6 +270,8 @@ class OEmbedsTerritoryAPITest(APITestCase):
             id='fr/town/13004', level='fr/town',
             name='Arles', code='13004', population=52439)
         for territory_dataset_class in TERRITORY_DATASETS.values():
+            organization = OrganizationFactory(
+                id=territory_dataset_class.organization_id)
             territory = territory_dataset_class(arles)
             reference = 'territory-{id}'.format(id=territory.slug)
             response = self.get(url_for('api.oembeds', references=reference))
@@ -284,7 +286,8 @@ class OEmbedsTerritoryAPITest(APITestCase):
             self.assertTrue(data['version'], '1.0')
             self.assertIn(territory.title, data['html'])
             self.assertIn(cgi.escape(territory.url), data['html'])
-            self.assertIn('img/placeholder_territory.png', data['html'])
+            self.assertIn(
+                'alt="{name}"'.format(name=organization.name), data['html'])
             self.assertIn(territory.description.split('\n')[0], data['html'])
 
 
