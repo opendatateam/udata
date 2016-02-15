@@ -36,6 +36,7 @@ Dataset.__badges__[NECMERGITUR] = _('Nec Mergitur')
 class ZonagesTerritoryDataset(TerritoryDataset):
     id = 'zonages'
     title = 'Zonages des politiques de la ville'
+    # Ministère de l'Egalité des Territoires et du Logement.
     organization_id = '534fff8fa3a7292c64a77f3d'
     url_template = 'http://sig.ville.gouv.fr/Cartographie/{code}'
     description = '''
@@ -47,6 +48,7 @@ class ZonagesTerritoryDataset(TerritoryDataset):
 class ComptesTerritoryDataset(TerritoryDataset):
     id = 'comptes'
     title = 'Comptes de la collectivité'
+    # Ministère des finances et des comptes publics.
     organization_id = '534fff8ea3a7292c64a77f02'
     url_template = (
         'http://alize2.finances.gouv.fr/communes/eneuro/tableau.php'
@@ -69,6 +71,7 @@ class ComptesTerritoryDataset(TerritoryDataset):
 class LogementTerritoryDataset(TerritoryDataset):
     id = 'logement'
     title = 'Logement'
+    # Institut National de la Statistique et des Etudes Economiques (INSEE).
     organization_id = '534fff81a3a7292c64a77e5c'
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=LOG&nivgeo=COM&codgeo={code}')
@@ -84,6 +87,7 @@ class LogementTerritoryDataset(TerritoryDataset):
 class EmploiPopulationTerritoryDataset(TerritoryDataset):
     id = 'emploi_population'
     title = 'Emploi - Population active'
+    # Institut National de la Statistique et des Etudes Economiques (INSEE).
     organization_id = '534fff81a3a7292c64a77e5c'
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=EMP&nivgeo=COM&codgeo={code}')
@@ -99,6 +103,7 @@ class EmploiPopulationTerritoryDataset(TerritoryDataset):
 class EmploiChiffresTerritoryDataset(TerritoryDataset):
     id = 'emploi_chiffres'
     title = 'Emploi - Chiffres clés'
+    # Institut National de la Statistique et des Etudes Economiques (INSEE).
     organization_id = '534fff81a3a7292c64a77e5c'
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=ACT&nivgeo=COM&codgeo={code}')
@@ -115,6 +120,7 @@ class EmploiChiffresTerritoryDataset(TerritoryDataset):
 class PopulationTerritoryDataset(TerritoryDataset):
     id = 'population'
     title = 'Population'
+    # Institut National de la Statistique et des Etudes Economiques (INSEE).
     organization_id = '534fff81a3a7292c64a77e5c'
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=POP&nivgeo=COM&codgeo={code}')
@@ -131,6 +137,7 @@ class PopulationTerritoryDataset(TerritoryDataset):
 class PopulationChiffresTerritoryDataset(TerritoryDataset):
     id = 'population_chiffres'
     title = 'Population - Chiffres clés'
+    # Institut National de la Statistique et des Etudes Economiques (INSEE).
     organization_id = '534fff81a3a7292c64a77e5c'
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=FAM&nivgeo=COM&codgeo={code}')
@@ -147,6 +154,7 @@ class PopulationChiffresTerritoryDataset(TerritoryDataset):
 class PopulationDiplomesTerritoryDataset(TerritoryDataset):
     id = 'population_diplomes'
     title = 'Population - Diplômes et formations'
+    # Institut National de la Statistique et des Etudes Economiques (INSEE).
     organization_id = '534fff81a3a7292c64a77e5c'
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=FOR&nivgeo=COM&codgeo={code}')
@@ -164,6 +172,7 @@ class ElectionsRegionales2015Tour2TerritoryDataset(
         ResourceBasedTerritoryDataset):
     id = 'elections_regionales_2015_2'
     title = 'Résultats des élections régionales 2015 (second tour)'
+    # Ministère de l'Intérieur.
     organization_id = '534fff91a3a7292c64a77f53'
     description = '''
         Résultats par bureau de vote pour la commune concernée
