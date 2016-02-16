@@ -4,6 +4,7 @@
 {% set meta = {
     'title': post.name,
     'description': post.headline|mdstrip|forceescape,
+    'image': post.image(external=True),
     'keywords': post.tags
 } %}
 
