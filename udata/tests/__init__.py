@@ -171,12 +171,13 @@ class DBTestMixin(object):
 class SearchTestMixin(DBTestMixin):
     '''A mixin allowing to optionnaly enable indexation and cleanup after'''
     _used_search = False
+    timeout = 10
 
     def init_search(self):
         self._used_search = True
         self.app.config['AUTO_INDEX'] = True
         es.initialize()
-        es.cluster.health(wait_for_status='yellow', request_timeout=3)
+        es.cluster.health(wait_for_status='yellow', request_timeout=10)
 
     @contextmanager
     def autoindex(self):
