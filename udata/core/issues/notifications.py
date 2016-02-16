@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-from udata.models import Reuse, Dataset, Issue
 from udata.features.notifications.actions import notifier
+
+from .actions import issues_for
 
 
 import logging
@@ -13,14 +14,9 @@ log = logging.getLogger(__name__)
 @notifier('issue')
 def issues_notifications(user):
     '''Notify user about open issues'''
-    orgs = [o for o in user.organizations if o.is_member(user)]
-    datasets = Dataset.objects.owned_by(user, *orgs)
-    reuses = Reuse.objects.owned_by(user, *orgs)
     notifications = []
 
-    for issue in Issue.objects(
-            subject__in=list(datasets) + list(reuses),
-            closed__exists=False):
+    for issue in issues_for(user):
         notifications.append((issue.created, {
             'id': issue.id,
             'title': issue.title,

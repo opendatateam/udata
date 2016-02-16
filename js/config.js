@@ -70,32 +70,32 @@ export const check_urls = JSON.parse(_meta('check-urls'));
 /**
  * The API root/base URL
  */
-export const api_root = _link('api-root');
+export const api_root = _meta('api-root');
 
 /**
  * The API Swagger specifications URL
  */
-export const api_specs = _link('api-specs');
+export const api_specs = _meta('api-specs');
 
 /**
  * The theme static root URL
  */
-export const theme_static = _link('theme-static-root');
+export const theme_static = _meta('theme-static-root');
 
 /**
  * The base static root URL
  */
-export const static_root = _link('static-root');
+export const static_root = _meta('static-root');
 
 /**
  * The administration root URL
  */
-export const admin_root = _link('admin-root');
+export const admin_root = _meta('admin-root');
 
 /**
  * The authentification URL for logins
  */
-export const auth_url = _link('auth-url');
+export const auth_url = _meta('auth-url');
 
 /**
  * Sentry configuration (as json) if available

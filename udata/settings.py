@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 class Defaults(object):
     DEBUG = False
     TESTING = False
+    SEND_MAIL = True
     LANGUAGES = {
         'en': 'English',
         'fr': 'Français',
@@ -49,6 +50,7 @@ class Defaults(object):
     SITE_KEYWORDS = ['opendata', 'udata']
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = None
+    SITE_GITHUB_URL = 'https://github.com/etalab/udata'
     USE_SSL = False
 
     PLUGINS = []
@@ -66,6 +68,7 @@ class Defaults(object):
         'br',
         'blockquote',
         'code',
+        'dd',
         'dl',
         'dt',
         'em',
@@ -117,8 +120,9 @@ class Defaults(object):
 
 
 class Testing(object):
-    '''Sane values for testing. Should be applied as ovveride'''
+    '''Sane values for testing. Should be applied as override'''
     TESTING = True
+    SEND_MAIL = False
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_ALWAYS_EAGER = True
@@ -135,6 +139,7 @@ class Testing(object):
 
 class Debug(Defaults):
     DEBUG = True
+    SEND_MAIL = False
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     DEBUG_TB_PANELS = (
         'flask.ext.debugtoolbar.panels.versions.VersionDebugPanel',

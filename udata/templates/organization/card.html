@@ -7,7 +7,7 @@
     </a>
     {% if organization.public_service %}
     <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
-        class="certified" rel="popover"
+        class="certified" data-toggle="popover"
         data-title="{{ _('Certified public service') }}"
         data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
         data-container="body" data-trigger="hover"/>
@@ -25,7 +25,7 @@
         <ul>
             {% if organization.metrics.datasets %}
             <li>
-                <a class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a class="btn btn-xs" data-toggle="tooltip" data-placement="top"
                     title="{{ _('Number of datasets') }}">
                     <span class="{{ ficon('fa-cubes') }} fa-fw"></span>
                     {{ ngettext('%(num)s dataset', '%(num)s datasets', organization.metrics.datasets or 0) }}
@@ -34,7 +34,7 @@
             {% endif %}
             {% if organization.metrics.reuses %}
             <li>
-                <a class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a class="btn btn-xs" data-toggle="tooltip" data-placement="top"
                     title="{{ _('Number of reuses') }}">
                     <span class="{{ ficon('fa-retweet') }} fa-fw"></span>
                     {{ ngettext('%(num)s reuse', '%(num)s reuses', organization.metrics.reuses or 0) }}
@@ -42,14 +42,14 @@
             </li>
             {% endif %}
             {# <li>
-                <a class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a class="btn btn-xs" data-toggle="tooltip" data-placement="top"
                     title="{{ _('Number of members') }}">
                     <span class="fa fa-users fa-fw"></span>
                     {{ ngettext('%(num)s members', '%(num)s members', organization.members|length) }}
                 </a>
             </li> #}
             <li>
-                <a class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a class="btn btn-xs" data-toggle="tooltip" data-placement="top"
                     title="{{ _('Stars') }}">
                     <span class="{{ ficon('fa-star') }} fa-fw"></span>
                     {{ organization.metrics.followers or 0 }}

@@ -51,15 +51,20 @@ export default {
         'user-card': require('components/user/card.vue'),
     },
     data: function() {
-        this.options = {
-            organization: this.organizationId,
-            user: this.userId,
-        };
         return {
-            activities: new ActivityPage({cumulative: true}).fetch(this.options)
+            activities: new ActivityPage({cumulative: true})
         };
     },
+    ready: function() {
+        this.activities.fetch(this.options);
+    },
     computed: {
+        options: function() {
+            return {
+                organization: this.organizationId,
+                user: this.userId,
+            };
+        },
         enhancedActivities: function() {
             let previousActivity = {};
             // Sort twice by created date to keep creations over updates
@@ -117,7 +122,7 @@ export default {
     methods: {
         actor,
         more: function() {
-            let moreElement = this.$els.more
+            let moreElement = this.$els.more;
             moreElement.classList.remove("fa-chevron-down");
             moreElement.classList.add("fa-spinner", "fa-spin");
             this.activities.nextPage(this.options);
@@ -127,7 +132,7 @@ export default {
             });
         },
         withinSameDay: function(firstDate, secondDate) {
-            return moment(firstDate).isSame(secondDate, 'day')
+            return moment(firstDate).isSame(secondDate, 'day');
         },
         isADuplicate: function(activity, previousActivity) {
             return previousActivity.label === activity.label

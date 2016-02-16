@@ -17,6 +17,7 @@ class Nested(db.EmbeddedDocument):
     id = db.AutoUUIDField()
     name = db.StringField()
     sub = db.EmbeddedDocumentField(SubNested)
+    raw = db.DictField()
 
 
 class Fake(db.Document):
@@ -266,3 +267,29 @@ class NestedModelListFieldTest(TestCase):
             id, name = initial[old_idx]
             self.assertEqual(nested.id, id)
             self.assertEqual(nested.name, name)
+
+    def test_reorder_initial_elements_with_raw(self):
+        fake = Fake.objects.create(nested=[
+            Nested(name=faker.name(), raw={'test': 0}),
+            Nested(name=faker.name(), raw={'test': 1}),
+            Nested(name=faker.name(), raw={'test': 2}),
+            Nested(name=faker.name(), raw={'test': 3}),
+        ])
+        initial = [(n.id, n.name) for n in fake.nested]
+
+        new_order = [1, 2, 3, 0]
+        form = self.factory({'nested': [
+            {'id': str(fake.nested[i].id)} for i in new_order
+        ]}, fake)
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.nested), len(initial))
+        for nested, old_idx in zip(fake.nested, new_order):
+            id, name = initial[old_idx]
+            self.assertEqual(nested.id, id)
+            self.assertEqual(nested.name, name)
+            self.assertEqual(nested.raw['test'], old_idx)

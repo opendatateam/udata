@@ -55,7 +55,7 @@ def init_app(app):
     app.extensions['markdown'] = UDataMarkdown(app, parser, renderer)
 
     @app.template_filter()
-    def mdstrip(value, length=None):
+    def mdstrip(value, length=None, end='…'):
         '''
         Truncate and strip tags from a markdown source
 
@@ -66,7 +66,8 @@ def init_app(app):
             return ''
         if EXCERPT_TOKEN in value:
             value = value.split(EXCERPT_TOKEN, 1)[0]
-        if length > 0:
-            value = do_truncate(value, length, end='…')
         rendered = md(value)
-        return do_striptags(rendered)
+        text = do_striptags(rendered)
+        if length > 0:
+            text = do_truncate(text, length, end=end)
+        return text

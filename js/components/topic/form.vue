@@ -28,8 +28,7 @@ export default {
                     widget: 'tag-completer'
                 }, {
                     id: 'featured',
-                    label: this._('Featured'),
-                    widget: 'checkbox'
+                    label: this._('Featured')
                 }]
         };
     },

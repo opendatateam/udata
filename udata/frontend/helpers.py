@@ -156,7 +156,8 @@ def owner_url(obj):
 def avatar(user, size, classes=''):
     markup = '''
         <a class="avatar {classes}" href="{url}" title="{title}">
-        <img src="{avatar_url}" class="avatar" width="{size}" height="{size}"/>
+            <img src="{avatar_url}" class="avatar" alt="{title}"
+            width="{size}" height="{size}"/>
         </a>
     '''.format(
         title=getattr(user, 'fullname', _('Anonymous user')),
@@ -174,7 +175,8 @@ def avatar(user, size, classes=''):
 def owner_avatar(obj, size=32):
     markup = '''
         <a class="avatar" href="{url}" title="{title}">
-        <img src="{avatar_url}" class="avatar" width="{size}" height="{size}"/>
+            <img src="{avatar_url}" class="avatar" alt="{title}"
+            width="{size}" height="{size}"/>
         </a>
     '''
     return Markup(markup.format(
@@ -239,7 +241,7 @@ def tooltip_ellipsis(source, length=0):
         length = int(length)
     except ValueError:  # invalid literal for int()
         return source  # Fail silently.
-    ellipsis = ('<a href rel="tooltip" data-container="body" '
+    ellipsis = ('<a href data-toggle="tooltip" data-container="body" '
                 'title="{0}">...</a>').format(source)
     return Markup((source[:length] + ellipsis)
                   if len(source) > length and length > 0 else source)

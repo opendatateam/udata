@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from mongoengine import post_save
 
-from udata.models import Dataset
+from udata.models import db, Dataset
 
 from .. import TestCase, DBTestMixin
 from ..factories import (
@@ -66,6 +66,38 @@ class DatasetModelTest(TestCase, DBTestMixin):
             dataset.add_resource(resource)
         self.assertEqual(len(dataset.resources), 2)
         self.assertEqual(dataset.resources[0].id, resource.id)
+
+    def test_add_resource_missing_checksum_type(self):
+        user = UserFactory()
+        dataset = DatasetFactory(owner=user)
+        resource = ResourceFactory()
+        resource.checksum.type = None
+
+        with self.assertRaises(db.ValidationError):
+            dataset.add_resource(resource)
+
+    def test_update_resource(self):
+        user = UserFactory()
+        resource = ResourceFactory()
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        expected_signals = post_save, Dataset.after_save, Dataset.on_update
+
+        resource.description = 'New description'
+
+        with self.assert_emit(*expected_signals):
+            dataset.update_resource(resource)
+        self.assertEqual(len(dataset.resources), 1)
+        self.assertEqual(dataset.resources[0].id, resource.id)
+        self.assertEqual(dataset.resources[0].description, 'New description')
+
+    def test_update_resource_missing_checksum_type(self):
+        user = UserFactory()
+        resource = ResourceFactory()
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        resource.checksum.type = None
+
+        with self.assertRaises(db.ValidationError):
+            dataset.update_resource(resource)
 
     def test_last_update_with_resource(self):
         user = UserFactory()

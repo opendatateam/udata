@@ -22,27 +22,6 @@ class ChecksumForm(ModelForm):
     value = fields.StringField()
 
 
-class ChecksumWidget(object):
-    def __call__(self, field, **kwargs):
-        html = [
-            '<div class="input-group checksum-group">',
-            '<div class="input-group-btn">',
-            field.form.type(class_='btn btn-default'),
-            '</div>',
-            field.value(class_='form-control'),
-            '</div>'
-        ]
-        return widgets.HTMLString(''.join(html))
-
-
-class ChecksumField(fields.FormField):
-    widget = ChecksumWidget()
-
-    def __init__(self, label=None, validators=None, **kwargs):
-        super(ChecksumField, self).__init__(ChecksumForm, label, validators,
-                                            **kwargs)
-
-
 class BaseResourceForm(ModelForm):
     title = fields.StringField(_('Title'), [validators.required()])
     description = fields.MarkdownField(_('Description'))
@@ -55,7 +34,7 @@ class BaseResourceForm(ModelForm):
         _('URL'), [validators.required()], storage=resources)
     format = fields.StringField(
         _('Format'), widget=widgets.FormatAutocompleter())
-    checksum = ChecksumField(_('Checksum'))
+    checksum = fields.FormField(ChecksumForm)
     mime = fields.StringField(
         _('Mime type'),
         description=_('The mime type associated to the extension. '

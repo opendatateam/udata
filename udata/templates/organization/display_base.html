@@ -23,7 +23,7 @@
             <aside class="col-sm-3 panel panel-default">
                 {% if org.public_service %}
                     <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
-                        class="certified" rel="popover"
+                        class="certified" data-toggle="popover"
                         data-title="{{ _('Certified public service') }}"
                         data-content="{{ _('This organization and its datasets are certified by data.gouv.fr') }}"
                         data-container="body" data-placement="left" data-trigger="hover"/>
@@ -79,7 +79,7 @@
                     <p class="text-center">
                         <strong>
                         <a href="{{url_for('organizations.show', org=org)}}#reuses"
-                            rel="tooltip" data-placement="left"
+                            data-toggle="tooltip" data-placement="left"
                             title="{{ _('Use of data by that organization for the community') }}">
                             {{ ngettext('%(num)d reuse', '%(num)d reuses', org.metrics.reuses or 0) }}
                         </a>
@@ -90,7 +90,7 @@
                     <p class="text-center">
                         <strong>
                         <a href="#"
-                            rel="tooltip" data-placement="left"
+                            data-toggle="tooltip" data-placement="left"
                             title="{{ _('Use of data from that organization by the community') }}">
                             {{ ngettext('%(num)d reappropriation', '%(num)d reappropriations', org.metrics.permitted_reuses or 0) }}
                         </a>
@@ -109,7 +109,7 @@
                 {% if not member %}
                     {% set pending_request = org.pending_request(current_user) %}
                     {% if not pending_request %}
-                    <a href rel="tooltip" class="btn btn-primary btn-block btn-sm icon-left membership"
+                    <a href data-toggle="tooltip" class="btn btn-primary btn-block btn-sm icon-left membership"
                         data-placement="left"
                         data-api="{{ url_for('api.request_membership', org=org) }}"
                         title="{{ _('I belong to this organization') }}">
@@ -117,8 +117,8 @@
                         {{ _('Join') }}
                     </a>
                     {% endif %}
-                    <div class="tooltip-wrapper" rel="tooltip" title="{{ _('Waiting for approval') }}" data-placement="left">
-                        <a id="pending-button" href rel="tooltip"
+                    <div class="tooltip-wrapper" data-toggle="tooltip" title="{{ _('Waiting for approval') }}" data-placement="left">
+                        <a id="pending-button" href data-toggle="tooltip"
                             class="btn btn-default btn-block btn-sm icon-left disabled {% if not pending_request %}hide{% endif %}"
                             >
                             <span class="glyphicon glyphicon-user"></span>
@@ -126,21 +126,21 @@
                         </a>
                     </div>
                 {% elif member.role == 'admin' %}
-                <div class="tooltip-wrapper" rel="tooltip" title="{{ _('You are an administrator of this organization') }}" data-placement="left">
+                <div class="tooltip-wrapper" data-toggle="tooltip" title="{{ _('You are an administrator of this organization') }}" data-placement="left">
                     <a href class="btn btn-default btn-block btn-sm icon-left disabled">
                         <span class="glyphicon glyphicon-user"></span>
                         {{ _('Administrator') }}
                     </a>
                 </div>
                 {% elif member.role == 'editor' %}
-                <div class="tooltip-wrapper" rel="tooltip" title="{{ _('You are editor in this organization') }}" data-placement="left">
+                <div class="tooltip-wrapper" data-toggle="tooltip" title="{{ _('You are editor in this organization') }}" data-placement="left">
                     <a href class="btn btn-default btn-block btn-sm icon-left disabled">
                         <span class="glyphicon glyphicon-user"></span>
                         {{ _('Editor') }}
                     </a>
                 </div>
                 {% else %}
-                <div  class="tooltip-wrapper" rel="tooltip" title="{{ _('You are a member of this organization') }}" data-placement="left">
+                <div  class="tooltip-wrapper" data-toggle="tooltip" title="{{ _('You are a member of this organization') }}" data-placement="left">
                     <a href class="btn btn-default btn-block btn-sm icon-left disabled">
                         <span class="glyphicon glyphicon-user"></span>
                         {{ _('Member') }}
@@ -150,7 +150,7 @@
 
                 <button type="button"
                     class="btn btn-primary btn-follow btn-block btn-sm icon-left {% if is_following(org) %}active{% endif %}"
-                    rel="tooltip" data-placement="left"
+                    data-toggle="tooltip" data-placement="left"
                     data-api-url="{{ url_for('api.organization_followers', id=org.id|string) }}"
                     {% if is_following(org) %}
                     title="{{ _('Unfollow') }}">

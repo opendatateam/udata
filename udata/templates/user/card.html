@@ -18,7 +18,7 @@
         <ul>
             {% if user.metrics.datasets %}
             <li>
-                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a href class="btn btn-xs" data-toggle="tooltip" data-placement="top"
                     title="{{ _('Number of datasets') }}">
                     <span class="{{ ficon('fa-cubes') }}"></span>
                     {{ ngettext('%(num)s dataset', '%(num)s datasets', user.metrics.datasets or 0) }}
@@ -27,7 +27,7 @@
             {% endif %}
             {% if user.metrics.reuses %}
             <li>
-                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a href class="btn btn-xs" data-toggle="tooltip" data-placement="top"
                     title="{{ _('Number of reuses') }}">
                     <span class="{{ ficon('fa-retweet') }}"></span>
                     {{ ngettext('%(num)s reuse', '%(num)s reuses', user.metrics.reuses or 0) }}
@@ -35,7 +35,7 @@
             </li>
             {% endif %}
             <li>
-                <a href class="btn btn-xs" rel="tooltip" data-placement="top"
+                <a href class="btn btn-xs" data-toggle="tooltip" data-placement="top"
                     title="{{ _('Stars') }}">
                     <span class="{{ ficon('fa-star') }}"></span>
                     {{ user.metrics.followers or 0 }}

@@ -41,7 +41,7 @@ class SpatialCoverageFieldTest(TestCase):
 
         fake = Fake()
         form.populate_obj(fake)
-        self.assertIsInstance(fake.spatial, SpatialCoverage)
+        self.assertIsNone(fake.spatial)
 
     def test_initial_geom(self):
         Fake, FakeForm = self.factory()
