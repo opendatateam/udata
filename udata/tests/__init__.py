@@ -176,7 +176,7 @@ class SearchTestMixin(DBTestMixin):
         self._used_search = True
         self.app.config['AUTO_INDEX'] = True
         es.initialize()
-        es.cluster.health(wait_for_status='yellow', request_timeout=3)
+        es.cluster.health(wait_for_status='yellow', request_timeout=10)
 
     @contextmanager
     def autoindex(self):
