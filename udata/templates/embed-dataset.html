@@ -123,13 +123,7 @@
     </h4>
     <div class="content">
         <p class="source">
-        {% if item.territory %}
-            <a href="{{ item.territory.external_url }}">
-                <img src="{{ item.organization.logo(external=True) }}"
-                     alt="{{ item.organization.name }}"
-                     height="70" width="70">
-            </a>
-        {% elif item.organization %}
+        {% if item.organization %}
             <a href="{{ item.organization.external_url }}">
                 <img src="{{ item.organization.logo(70, external=True) }}"
                      alt="{{ item.organization.name }}"
