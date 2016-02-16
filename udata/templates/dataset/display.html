@@ -7,6 +7,7 @@
 {% set meta = {
     'title': dataset.title,
     'description': dataset.description|mdstrip|forceescape,
+    'image': dataset.organization and dataset.organization.logo(external=True) or '',
     'keywords': [_('dataset')] + dataset.tags,
 } %}
 

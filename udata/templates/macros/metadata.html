@@ -1,11 +1,18 @@
-<meta charset="utf-8">
-{% set meta = meta or {} %}
-<title>{% if meta.title %}{{ meta.title }} - {% endif %}{{ current_site.title }}</title>
+{% macro metadata(meta) %}
+{% set title = meta.title or _('Home') %}
+{% set description = meta.description or _('Share, improve and reuse public data') %}
+{% set image = meta.image or theme_static('img/logo-600x315.png', external=True) %}
+{% set keywords = meta.keywords or [] %}
+{% set notify_in = meta.notify_in or '#notifications-container' %}
+<meta charset="utf-8" />
+<title>{{ title }} - {{ current_site.title }}</title>
+<meta property="og:title" content="{{ title }} - {{ current_site.title }}" />
 <link rel="author" href="{{ config.SITE_AUTHOR_URL }}" />
-
-{% if config.DISALLOW_INDEXING %}<meta name="robots" content="noindex,nofollow">{% endif %}
-<meta name="description" content="{{ meta.description or '' }}">
-<meta name="keywords" content="{{ ', '.join(current_site.keywords + (meta.keywords or [])) }}">
+{% if config.DISALLOW_INDEXING %}<meta name="robots" content="noindex,nofollow" />{% endif %}
+<meta name="description" content="{{ description }}" />
+<meta property="og:description" content="{{ description }}" />
+<meta property="og:image" content="{{ image }}" />
+<meta name="keywords" content="{{ ', '.join(current_site.keywords + (keywords)) }}" />
 <meta name="theme-static-root" content="{{ theme_static('') }}" />
 <meta name="static-root" content="{{ static('', _burst=False) }}" />
 <meta name="api-root" content="{{ url_for('api.root') }}" />
@@ -20,8 +27,8 @@
     data-tags="{{config.SENTRY_TAGS|default({})|tojson|urlencode}}"
 />
 {% endif %}
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<meta name="site-title" content="{{config.SITE_TITLE}}">
+<meta name="csrf-token" content="{{ csrf_token() }}" />
+<meta name="site-title" content="{{config.SITE_TITLE}}" />
 
 {% if current_user.is_authenticated() %}
 <meta name="current-user" content="{{ current_user.id }}"
@@ -32,5 +39,6 @@
 />
 {% endif %}
 
-<meta name="notify-in" content="{{ meta.notify_in or '#notifications-container' }}" />
+<meta name="notify-in" content="{{ notify_in }}" />
 <meta name="check-urls" content="{{ 'true' if config.CROQUEMORT else 'false' }}" />
+{% endmacro %}

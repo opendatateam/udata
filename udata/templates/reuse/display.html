@@ -6,6 +6,7 @@
 {% set meta = {
     'title': reuse.title,
     'description': reuse.description|mdstrip|forceescape,
+    'image': reuse.image(external=True),
     'keywords': [_('reuse')] + reuse.tags,
 } %}
 
