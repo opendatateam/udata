@@ -56,7 +56,8 @@ class SearchResult(Paginable):
     @property
     def facets(self):
         return dict(
-            (f, self.get_facet(f)) for f in self.query.facets_kwargs
+            (f, self.get_facet(f, fetch=False))
+            for f in self.query.facets_kwargs
         )
 
     def __iter__(self):
@@ -69,10 +70,11 @@ class SearchResult(Paginable):
     def __getitem__(self, index):
         return self.get_objects()[index]
 
-    def get_facet(self, name):
+    def get_facet(self, name, fetch=True):
         if name not in self.query.adapter.facets:
             return None
-        return self.query.adapter.facets[name].from_response(name, self.result)
+        facet = self.query.adapter.facets[name]
+        return facet.from_response(name, self.result, fetch=fetch)
 
     def get_range(self, name):
         min_name = '{0}_min'.format(name)

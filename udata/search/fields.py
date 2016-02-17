@@ -52,8 +52,11 @@ class Facet(object):
                 return
             return {'must': ([query] if isinstance(query, dict) else query)}
 
-    def from_response(self, name, response):
-        '''Parse the elasticsearch response'''
+    def from_response(self, name, response, fetch=True):
+        '''
+        Parse the elasticsearch response.
+        :param bool fetch: In case of DB objects, whether to fetch the object or not
+        '''
         raise NotImplementedError
 
     def labelize(self, label, value):
@@ -84,7 +87,7 @@ class BoolFacet(Facet):
         else:
             return {'must_not': [{'term': {self.field: True}}]}
 
-    def from_response(self, name, response):
+    def from_response(self, name, response, fetch=True):
         facet = response.get('facets', {}).get(name)
         if not facet or not len(facet['terms']):
             return
@@ -128,7 +131,7 @@ class TermFacet(Facet):
         else:
             return {'term': {self.field: value}}
 
-    def from_response(self, name, response):
+    def from_response(self, name, response, fetch=True):
         facet = response.get('facets', {}).get(name)
         if not facet:
             return
@@ -145,23 +148,30 @@ class ModelTermFacet(TermFacet):
         self.model = model
         self.field_name = field_name
 
-    def from_response(self, name, response):
-        is_objectid = isinstance(getattr(self.model, self.field_name),
-                                 db.ObjectIdField)
-        cast = lambda o: ObjectId(o) if is_objectid else o
-
+    def from_response(self, name, response, fetch=True):
         facet = response.get('facets', {}).get(name)
         if not facet:
             return
         ids = [term['term'] for term in facet['terms']]
-        if is_objectid:
-            ids = map(ObjectId, ids)
-        objects = self.model.objects.in_bulk(ids)
+
+        if fetch:
+            is_objectid = isinstance(getattr(self.model, self.field_name),
+                                     db.ObjectIdField)
+            cast = ObjectId if is_objectid else lambda o: o
+            if is_objectid:
+                ids = map(ObjectId, ids)
+            objects = self.model.objects.in_bulk(ids)
+
+            def serialize(term):
+                return objects.get(cast(term))
+        else:
+            def serialize(term):
+                return {'class': self.model.__name__, 'id': term}
+
         return {
             'type': 'models',
             'models': [
-                (objects.get(cast(f['term'])), f['count'])
-                for f in facet['terms']
+                (serialize(f['term']), f['count']) for f in facet['terms']
             ],
             'visible': len(facet['terms']) > 1,
         }
@@ -185,7 +195,7 @@ class ExtrasFacet(Facet):
                     'term': {key.replace(name, self.field): value}})
         return {'must': filters}
 
-    def from_response(self, name, response):
+    def from_response(self, name, response, fetch=True):
         pass
 
 
@@ -212,7 +222,7 @@ class RangeFacet(Facet):
             }
         }
 
-    def from_response(self, name, response):
+    def from_response(self, name, response, fetch=True):
         facet = response.get('facets', {}).get(name)
         if not facet:
             return
@@ -249,7 +259,7 @@ class DateRangeFacet(RangeFacet):
             }
         }
 
-    def from_response(self, name, response):
+    def from_response(self, name, response, fetch=True):
         facet = response.get('facets', {}).get(name)
         if not facet:
             return
@@ -290,7 +300,7 @@ class TemporalCoverageFacet(Facet):
             }
         }]
 
-    def from_response(self, name, response):
+    def from_response(self, name, response, fetch=True):
         aggregations = response.get('aggregations', {})
         min_value = aggregations.get(
             '{0}_min'.format(self.field), {}).get('value')

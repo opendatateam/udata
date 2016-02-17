@@ -839,6 +839,31 @@ class TestModelTermFacet(TestCase, DBTestMixin):
             self.assertIsInstance(row[1], int)
             self.assertEqual(fake.id, row[0].id)
 
+    def test_from_response_no_fetch(self):
+        fakes = [FakeFactory() for _ in range(10)]
+        response = es_factory()
+        response['facets'] = {
+            'test': {
+                '_type': 'terms',
+                'total': 229,
+                'other': 33,
+                'missing': 2,
+                'terms': [{
+                    'term': str(f.id),
+                    'count': faker.random_number(2)
+                } for f in fakes],
+            }
+        }
+
+        extracted = self.facet.from_response('test', response, fetch=False)
+        self.assertEqual(extracted['type'], 'models')
+        self.assertEqual(len(extracted['models']), 10)
+        for fake, row in zip(fakes, extracted['models']):
+            self.assertIsInstance(row[0], dict)
+            self.assertIsInstance(row[1], int)
+            self.assertEqual(row[0]['id'], str(fake.id))
+            self.assertEqual(row[0]['class'], 'Fake')
+
     def test_to_filter(self):
         self.assertEqual(self.facet.to_filter('value'),
                          {'term': {'fakes': 'value'}})
