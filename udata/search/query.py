@@ -174,16 +174,29 @@ class SearchQuery(object):
                 aggregations.update(facet.to_aggregations())
         return aggregations
 
+    @property
+    def facets_kwargs(self):
+        facets = self.kwargs.get('facets')
+        if not self.adapter.facets or not facets:
+            return []
+        if isinstance(facets, basestring):
+            facets = [facets]
+        if facets is True or 'all' in facets:
+            return self.adapter.facets.keys()
+        else:
+            return [
+                f for f in self.adapter.facets.keys()
+                if f in facets
+            ]
+
+    def _facet_query(self, name):
+        facet = self.adapter.facets[name]
+        args = self.kwargs.get(name, [])
+        return facet.to_query(args=args)
+
     def get_facets(self):
-        selected_facets = self.kwargs.get('facets')
-        if not self.adapter.facets or not selected_facets:
-            return {}
-        all_facets = selected_facets is True or 'all' in selected_facets
-        return dict(
-            (name, facet.to_query(args=self.kwargs.get(name, [])))
-            for name, facet in self.adapter.facets.items()
-            if all_facets or name in selected_facets
-        )
+        return dict((name, self._facet_query(name))
+                    for name in self.facets_kwargs)
 
     def get_query(self):
         query = self.build_text_query()

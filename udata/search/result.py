@@ -53,6 +53,12 @@ class SearchResult(Paginable):
     def objects(self):
         return self.get_objects()
 
+    @property
+    def facets(self):
+        return dict(
+            (f, self.get_facet(f)) for f in self.query.facets_kwargs
+        )
+
     def __iter__(self):
         for obj in self.get_objects():
             yield obj
