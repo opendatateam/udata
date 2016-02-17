@@ -68,6 +68,11 @@ module.exports = {
             less: less_loader,
         }
     },
+    babel: {
+        presets: ['es2015'],
+        comments: false,
+        plugins: ['transform-runtime']
+    },
     plugins: [
         // Fix AdminLTE packaging
         new webpack.NormalModuleReplacementPlugin(

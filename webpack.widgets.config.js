@@ -1,6 +1,5 @@
-var path = require('path');
-var webpack = require('webpack');
-var js_loader = 'babel?presets[]=es2015';
+const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
     entry: {
@@ -13,7 +12,14 @@ module.exports = {
     },
     module: {
         loaders: [
-            {test: /\.js$/, loader: js_loader},
+            {
+                test: /\.js$/,
+                loader: 'babel',
+                query: {
+                    presets: ['es2015'],
+                    comments: false
+                }
+            },
         ]
     },
     plugins: [
