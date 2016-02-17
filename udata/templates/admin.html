@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="{{ g.lang_code }}">
     <head>
-        {% set meta = {
+        {% from theme('macros/metadata.html') import metadata with context %}
+        {{ metadata({
             'title': _('Admin'),
             'description': 'Administration',
             'keywords': ['administration'],
-        } %}
-        {% include theme('metadata.html') with context %}
+        }) }}
         <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport' />
         <link href="{{ static('admin.css') }}" rel="stylesheet">
         <link href="{{ static('vue-common.js.css') }}" rel="stylesheet">
