@@ -3,7 +3,7 @@
 
 {% set meta = {
     'title': topic.name,
-    'description': topic.description|mdstrip|forceescape,
+    'description': topic.description|mdstrip(60)|forceescape,
     'keywords': [_('topic')] + topic.tags,
 } %}
 

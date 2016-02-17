@@ -5,7 +5,7 @@
 
 {% set meta = {
     'title': reuse.title,
-    'description': reuse.description|mdstrip|forceescape,
+    'description': reuse.description|mdstrip(60)|forceescape,
     'image': reuse.image(external=True),
     'keywords': [_('reuse')] + reuse.tags,
 } %}
