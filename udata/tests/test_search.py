@@ -423,8 +423,15 @@ class SearchQueryTest(TestCase):
         }
         self.assertEqual(search_query.get_query(), expected)
 
-    def test_facets(self):
+    def test_facets_true(self):
         search_query = search.SearchQuery(FakeSearch, facets=True)
+        facets = search_query.get_facets()
+        self.assertEqual(len(facets), len(FakeSearch.facets))
+        for key in FakeSearch.facets.keys():
+            self.assertIn(key, facets.keys())
+
+    def test_facets_all(self):
+        search_query = search.SearchQuery(FakeSearch, facets='all')
         facets = search_query.get_facets()
         self.assertEqual(len(facets), len(FakeSearch.facets))
         for key in FakeSearch.facets.keys():

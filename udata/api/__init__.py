@@ -39,8 +39,8 @@ HEADER_API_KEY = 'X-API-KEY'
 
 class UDataApi(Api):
     def __init__(self, app=None, **kwargs):
-        kwargs['decorators'] = ([self.authentify]
-                                + (kwargs.pop('decorators', []) or []))
+        decorators = kwargs.pop('decorators', []) or []
+        kwargs['decorators'] = [self.authentify] + decorators
         super(UDataApi, self).__init__(app, **kwargs)
         self.authorizations = {
             'apikey': {
@@ -120,13 +120,19 @@ class UDataApi(Api):
         # q parameter
         parser.add_argument('q', type=str, location='args',
                             help='The search query')
+        facets = adapter.facets.keys()
+        if facets:
+            parser.add_argument('facets', type=str, location='args',
+                                choices=['all'] + facets, action='append',
+                                help='Selected facets to fetch')
         # Add facets filters arguments
         for name, facet in adapter.facets.items():
             parser.add_argument(name, type=str, location='args')
         # Sort arguments
-        choices = (adapter.sorts.keys()
-                   + ['-' + k for k in adapter.sorts.keys()])
-        parser.add_argument('sort', type=str, location='args', choices=choices)
+        keys = adapter.sorts.keys()
+        choices = keys + ['-' + k for k in adapter.sorts.keys()]
+        parser.add_argument('sort', type=str, location='args', choices=choices,
+                            help='The field (and direction) on which sorting apply')
         if paginate:
             parser.add_argument('page', type=int, location='args',
                                 default=0, help='The page to display')

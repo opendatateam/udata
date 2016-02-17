@@ -178,10 +178,11 @@ class SearchQuery(object):
         selected_facets = self.kwargs.get('facets')
         if not self.adapter.facets or not selected_facets:
             return {}
+        all_facets = selected_facets is True or 'all' in selected_facets
         return dict(
             (name, facet.to_query(args=self.kwargs.get(name, [])))
             for name, facet in self.adapter.facets.items()
-            if selected_facets is True or name in selected_facets
+            if all_facets or name in selected_facets
         )
 
     def get_query(self):
