@@ -85,11 +85,44 @@ class DiscussionsTest(APITestCase):
         })
         self.assertStatus(response, 400)
 
-    def test_list_with_close_discussions(self):
+    def test_list_discussions(self):
         dataset = Dataset.objects.create(title='Test dataset')
         open_discussions = []
         closed_discussions = []
+        for i in range(2):
+            user = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=user)
+            discussion = Discussion.objects.create(
+                subject=dataset.id,
+                user=user,
+                title='test discussion {}'.format(i),
+                discussion=[message]
+            )
+            open_discussions.append(discussion)
         for i in range(3):
+            user = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=user)
+            discussion = Discussion.objects.create(
+                subject=dataset.id,
+                user=user,
+                title='test discussion {}'.format(i),
+                discussion=[message],
+                closed=datetime.now(),
+                closed_by=user
+            )
+            closed_discussions.append(discussion)
+
+        response = self.get(url_for('api.discussions'))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json['data']),
+                         len(open_discussions + closed_discussions))
+
+    def test_list_discussions_closed_filter(self):
+        dataset = Dataset.objects.create(title='Test dataset')
+        open_discussions = []
+        closed_discussions = []
+        for i in range(2):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
             discussion = Discussion.objects.create(
@@ -114,9 +147,15 @@ class DiscussionsTest(APITestCase):
 
         response = self.get(url_for('api.discussions', closed=True))
         self.assert200(response)
+        self.assertEqual(len(response.json['data']), len(closed_discussions))
+        for discussion in response.json['data']:
+            self.assertIsNotNone(discussion['closed'])
 
-        self.assertEqual(len(response.json),
-                         len(open_discussions + closed_discussions))
+        response = self.get(url_for('api.discussions', closed=False))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), len(open_discussions))
+        for discussion in response.json['data']:
+            self.assertIsNone(discussion['closed'])
 
     def test_get_discussion(self):
         dataset = Dataset.objects.create(title='Test dataset')
@@ -281,35 +320,6 @@ class DiscussionsTest(APITestCase):
         dataset.reload()
         # Metrics unchanged after attempt to delete the discussion.
         self.assertEqual(dataset.metrics['discussions'], 1)
-
-    def test_list_discussions_filter_closed(self):
-        '''Should consider the closed filtering on discussions'''
-        user = UserFactory()
-        dataset = DatasetFactory()
-        (discussion,) = DatasetDiscussion.objects.create(subject=dataset,
-                                                         title='', user=user),
-        (discussion_closed,) = DatasetDiscussion.objects.create(subject=dataset,
-            title='', closed=datetime.now(), user=user),
-
-        response_all = self.get(url_for('api.discussions'))
-        self.assert200(response_all)
-        data_all = response_all.json['data']
-        self.assertEqual(len(data_all), 2)
-        self.assertItemsEqual([str(discussion.id), str(discussion_closed.id)],
-                              [str(d['id']) for d in data_all])
-
-        response_closed = self.get(url_for('api.discussions', closed=True))
-        self.assert200(response_closed)
-        data_closed = response_closed.json['data']
-        self.assertEqual(len(data_closed), 1)
-        self.assertEqual(str(discussion_closed.id), data_closed[0]['id'])
-
-        response_open = self.get(url_for('api.discussions', closed=False))
-        self.assert200(response_open)
-        data_open = response_open.json['data']
-        self.assertEqual(len(data_open), 1)
-
-        self.assertEqual(str(discussion.id), data_open[0]['id'])
 
 
 class DiscussionCsvTest(FrontTestCase):
