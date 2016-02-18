@@ -120,17 +120,20 @@ class UDataApi(Api):
         # q parameter
         parser.add_argument('q', type=str, location='args',
                             help='The search query')
+        # Expected facets
+        # (ie. I want all facets or I want both tags and licenses facets)
         facets = adapter.facets.keys()
         if facets:
             parser.add_argument('facets', type=str, location='args',
                                 choices=['all'] + facets, action='append',
                                 help='Selected facets to fetch')
         # Add facets filters arguments
+        # (apply a value to a facet ie. tag=value)
         for name, facet in adapter.facets.items():
             parser.add_argument(name, type=str, location='args')
         # Sort arguments
         keys = adapter.sorts.keys()
-        choices = keys + ['-' + k for k in adapter.sorts.keys()]
+        choices = keys + ['-' + k for k in keys]
         parser.add_argument('sort', type=str, location='args', choices=choices,
                             help='The field (and direction) on which sorting apply')
         if paginate:

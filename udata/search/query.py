@@ -176,6 +176,7 @@ class SearchQuery(object):
 
     @property
     def facets_kwargs(self):
+        '''List expected facets from kwargs'''
         facets = self.kwargs.get('facets')
         if not self.adapter.facets or not facets:
             return []
