@@ -31,7 +31,7 @@ module.exports = {
             {test: /\.less$/, loader: less_loader},
             {test: /\.json$/, loader: "json"},
             {test: /\.html$/, loader: "html"},
-            {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, loader: "file?name=[name].[ext]"},
+            {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: "file?name=[name].[ext]"},
         ]
     },
     plugins: [
