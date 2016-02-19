@@ -58,7 +58,7 @@ module.exports = {
             {test: /\.vue$/, loader: 'vue'},
             {test: /\.json$/, loader: 'json'},
             {test: /\.hbs$/, loader: hbs_loader},
-            {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, loader: 'file-loader?name=[name].[ext]'},
+            {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: 'file-loader?name=[name].[ext]'},
             {test: /\.js$/, exclude: /node_modules/, loader: 'babel'},
         ]
     },
