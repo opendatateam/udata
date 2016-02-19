@@ -1,139 +1,144 @@
 {
-    "help": "Return the metadata of a dataset (package) and its resources.\\\n\\\n    :param id: the id or name of the dataset\\\n    :type id: string\\\n\\\n    :rtype: dictionary\\\n\\\n    ",
+    "help": "http://demo.ckan.org/api/3/action/help_show?name=package_show",
     "success": true,
     "result": {
-        "license_title": "Licence ouverte / Open license (Etalab)",
-        "maintainer": null,
+        "license_title": "License not specified",
+        "maintainer": "",
         "relationships_as_object": [],
         "private": false,
-        "maintainer_email": null,
-        "revision_timestamp": "2013-08-01T07:43:31.110424",
-        "id": "f9f07d12-f810-4cb5-b3c0-52d7b1130c2e",
-        "metadata_created": "2013-08-01T07:41:11.023152",
-        "owner_org": "da10a970-916c-4ad3-ab6c-6adbccfb6a69",
-        "metadata_modified": "2013-10-01T15:59:56.322481",
-        "author": null,
-        "author_email": null,
-        "state": "active",
-        "version": null,
-        "license_id": "lool",
-        "type": "dataset",
-        "resources": [
-            {
-                "resource_group_id": "384bef8c-9d25-4491-af2c-532f8b2738f8",
-                "cache_last_updated": null,
-                "revision_timestamp": "2013-10-01T15:59:56.322481",
-                "webstore_last_updated": "2013-10-01T17:59:56.238951",
-                "id": "f5fc0640-3b10-4866-8f7b-05fc2c25fdd3",
-                "filesize": "1375",
-                "state": "active",
-                "hash": "689afc083c6316259955f499580bdf41bfc5e495",
-                "description": "Resource description 1",
-                "format": "CSV",
-                "tracking_summary": {
-                    "total": 0,
-                    "recent": 0
-                },
-                "mimetype_inner": null,
-                "mimetype": "text/csv",
-                "cache_url": null,
-                "name": "Resource 1",
-                "created": "2013-08-01T09:43:09.031465",
-                "url": "http://ckan.test.org/storage/f/2013-10-01T15%3A59%3A32.755Z/resource.csv",
-                "webstore_url": "active",
-                "last_modified": "2013-10-01T17:59:55.552785",
-                "position": 0,
-                "revision_id": "011e4e7a-115b-433b-8656-8bb3d29d0c8e",
-                "resource_type": "file.upload"
-            }
-        ],
-        "num_resources": 1,
-        "tags": [
-            {
-                "vocabulary_id": "721c0574-3be4-4b1f-bafa-17637c80c542",
-                "display_name": "Economie",
-                "name": "Economie",
-                "revision_timestamp": "2013-08-01T07:41:11.023152",
-                "state": "active",
-                "id": "9acbee4a-8f74-4000-806b-c107018df783"
-            },
-            {
-                "vocabulary_id": null,
-                "display_name": "correspondant",
-                "name": "correspondant",
-                "revision_timestamp": "2013-08-01T07:41:11.023152",
-                "state": "active",
-                "id": "16b9586d-96ad-491a-85fb-1e77073de835"
-            },
-            {
-                "vocabulary_id": null,
-                "display_name": "excellence",
-                "name": "excellence",
-                "revision_timestamp": "2013-08-01T07:41:11.023152",
-                "state": "active",
-                "id": "3cb7d210-4be5-4b10-ad12-bdda42ff2dcb"
-            },
-            {
-                "vocabulary_id": null,
-                "display_name": "pôle",
-                "name": "pôle",
-                "revision_timestamp": "2013-08-01T07:41:11.023152",
-                "state": "active",
-                "id": "47f995c6-85ca-4cf0-9af9-13521d24da85"
-            }
-        ],
-        "tracking_summary": {
-            "total": 0,
-            "recent": 0
-        },
-        "groups": [
-            {
-                "title": " Actions Région",
-                "description": "Les actions régionales, l'agriculture, l'aménagement du territoire...",
-                "name": "actions-region",
-                "id": "7859d498-316e-4a31-8487-f7f26df0929e"
-            }
-        ],
-        "relationships_as_subject": [],
+        "maintainer_email": "",
         "num_tags": 4,
+        "id": "7e4d4ef3-f452-4c35-963d-9c6e582374b3",
+        "metadata_created": "2015-07-22T14:29:55.490069",
+        "metadata_modified": "2015-07-22T14:30:18.584924",
+        "author": "Lucy Chambers",
+        "author_email": "",
+        "state": "active",
+        "version": "",
+        "creator_user_id": "01b3756a-e1ca-4d4a-b8f1-6880a00095d6",
+        "type": "dataset",
+        "resources": [{
+            "cache_last_updated": null,
+            "package_id": "7e4d4ef3-f452-4c35-963d-9c6e582374b3",
+            "webstore_last_updated": "2015-07-22T14:30:17.841925",
+            "datastore_active": true,
+            "id": "281dffa6-ea9b-4446-be41-05dced06591f",
+            "size": null,
+            "state": "active",
+            "hash": "b19731f6a08c98079adfaeffadb719f5",
+            "description": "Resource description 1",
+            "format": "CSV",
+            "mimetype_inner": "",
+            "url_type": null,
+            "mimetype": "text/csv",
+            "cache_url": null,
+            "name": "Resource 1",
+            "created": "2015-07-22T14:29:55.618840",
+            "url": "http://ckan.net/storage/f/file/3ffdcd42-5c63-4089-84dd-c23876259973",
+            "webstore_url": "active",
+            "last_modified": null,
+            "position": 0,
+            "revision_id": "0f85d5c5-d105-4586-a762-80805e42f7f8",
+            "resource_type": "file"
+        }, {
+            "cache_last_updated": null,
+            "package_id": "7e4d4ef3-f452-4c35-963d-9c6e582374b3",
+            "webstore_last_updated": null,
+            "datastore_active": false,
+            "id": "6cce3936-b169-4d12-82ba-65fcb79734a0",
+            "size": null,
+            "state": "active",
+            "hash": "",
+            "description": "Mapping Metadata for Adur",
+            "format": "JSON",
+            "last_modified": null,
+            "url_type": null,
+            "openspending_hint": "model",
+            "mimetype": "",
+            "cache_url": null,
+            "name": "",
+            "created": "2015-07-22T14:29:55.618876",
+            "url": "http://ckan.net/storage/f/file/c8ce520c-c2e6-463a-99a3-ad24b023ccb4",
+            "webstore_url": null,
+            "mimetype_inner": "",
+            "position": 1,
+            "revision_id": "bde1269e-65f2-40dc-8e33-a0e5390f7192",
+            "resource_type": "file"
+        }, {
+            "cache_last_updated": null,
+            "package_id": "7e4d4ef3-f452-4c35-963d-9c6e582374b3",
+            "webstore_last_updated": "2015-07-22T14:30:16.913643",
+            "datastore_active": true,
+            "id": "04127ad5-77e5-4a08-9f40-12d3c383e460",
+            "size": null,
+            "state": "active",
+            "hash": "1868d87eb6e3c26238a0d42e46f63f06",
+            "description": "Revised CSV for import",
+            "format": "CSV",
+            "last_modified": null,
+            "url_type": null,
+            "openspending_hint": "data",
+            "mimetype": "",
+            "cache_url": null,
+            "name": "",
+            "created": "2015-07-22T14:29:55.618888",
+            "url": "http://mk.ucant.org/info/data/adur.csv",
+            "webstore_url": "active",
+            "mimetype_inner": "",
+            "position": 2,
+            "revision_id": "a7e11b07-3498-41c9-b015-bece859d59dc",
+            "resource_type": "file"
+        }],
+        "num_resources": 3,
+        "tags": [{
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "country-uk",
+            "id": "0e067184-dfb2-411f-ba01-96e2bf3d16ad",
+            "name": "country-uk"
+        }, {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "date-2009",
+            "id": "9e31c276-45da-4ab6-8b78-1fcd6803adfe",
+            "name": "date-2009"
+        }, {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "openspending",
+            "id": "3c71b3c3-1882-424f-ad9c-b142b215b56b",
+            "name": "openspending"
+        }, {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "regional",
+            "id": "e7fc1078-05f3-464c-8f25-28ed63c34bfc",
+            "name": "regional"
+        }],
+        "groups": [{
+            "display_name": "Data Explorer Examples",
+            "description": "This group contains various real datasets that show CKAN's data previewer in action. The previewer shows a configurable grid view of tabular data, plots columns of data on a graph, and shows geo-coded data on an interactive map. It can also preview image files and web pages.",
+            "image_display_url": "http://farm8.staticflickr.com/7129/7041988029_411d985015_c.jpg",
+            "title": "Data Explorer Examples",
+            "id": "d20fcd0f-64a8-4f0e-837a-0fbfac5b266c",
+            "name": "data-explorer"
+        }],
+        "license_id": "notspecified",
+        "relationships_as_subject": [],
+        "organization": null,
         "name": "dataset-1",
         "isopen": false,
-        "url": null,
+        "url": "http://www.spotlightonspend.org.uk/Downloads/1038",
         "notes": "Description 1",
+        "owner_org": null,
+        "extras": [{
+            "key": "spatial",
+            "value": "{ \"type\": \"Polygon\", \"coordinates\": [ [ [-0.3715, 50.8168],[-0.3715, 50.8747], [-0.2155, 50.8747], [-0.2155, 50.8168], [-0.3715, 50.8168] ] ] }"
+        }, {
+            "key": "spatial-text",
+            "value": "Adur, West Sussex, South East England, England, United Kingdom"
+        }],
         "title": "Dataset 1",
-        "extras": [
-            {
-                "value": "01/08/2013",
-                "key": "date",
-                "__extras": {
-                    "package_id": "f9f07d12-f810-4cb5-b3c0-52d7b1130c2e",
-                    "revision_id": "e108a7c6-0e5f-4714-a8e6-68162c69ae68"
-                }
-            },
-            {
-                "value": "Annuelle",
-                "key": "freqMAJ",
-                "__extras": {
-                    "revision_id": "e108a7c6-0e5f-4714-a8e6-68162c69ae68",
-                    "package_id": "f9f07d12-f810-4cb5-b3c0-52d7b1130c2e"
-                }
-            }
-        ],
-        "license_url": "http://www.etalab.gouv.fr/pages/Licence_ouverte_Open_licence-5899923.html",
-        "organization": {
-            "description": "",
-            "created": "2013-07-18T11:25:15.969631",
-            "title": "Conseil Régional Nord-Pas de Calais",
-            "name": "conseil-regional-nord-pas-de-calais",
-            "revision_timestamp": "2013-07-29T15:25:28.634142",
-            "is_organization": true,
-            "state": "active",
-            "image_url": "/images/npdc-icon.png",
-            "revision_id": "96f29d53-d188-481c-9923-ea7d35045b2e",
-            "type": "organization",
-            "id": "da10a970-916c-4ad3-ab6c-6adbccfb6a69",
-            "approval_status": "approved"
-        },
-        "revision_id": "e108a7c6-0e5f-4714-a8e6-68162c69ae68"
+        "revision_id": "bde1269e-65f2-40dc-8e33-a0e5390f7192"
     }
 }
