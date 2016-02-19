@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 import logging
 from contextlib import contextmanager
 
+from blinker import signal
+
 from flask import current_app
 from flask.ext.mail import Mail, Message
 
@@ -14,12 +16,15 @@ log = logging.getLogger(__name__)
 
 mail = Mail()
 
+mail_sent = signal('mail-sent')
+
 
 class FakeMailer(object):
     '''Display sent mail in logging output'''
     def send(self, msg):
         log.debug(msg.body)
         log.debug(msg.html)
+        mail_sent.send(msg)
 
 
 @contextmanager
@@ -45,7 +50,7 @@ def send(subject, recipients, template_base, **kwargs):
 
     debug = current_app.config.get('DEBUG', False)
     send_mail = current_app.config.get('SEND_MAIL', not debug)
-    connection = send_mail and dummyconnection or mail.connect
+    connection = send_mail and mail.connect or dummyconnection
 
     with connection() as conn:
         for recipient in recipients:
