@@ -116,14 +116,14 @@ class IssuesTest(APITestCase):
 
         response = self.get(url_for('api.issues', id=dataset.id))
         self.assert200(response)
-        self.assertEqual(len(response.json['data']), (len(open_issues) +
-                                                      len(closed_issues)))
+        expected_length = len(open_issues + closed_issues)
+        self.assertEqual(len(response.json['data']), expected_length)
 
-    def test_list_with_close_issues(self):
+    def test_list_issues_closed_filter(self):
         dataset = Dataset.objects.create(title='Test dataset')
         open_issues = []
         closed_issues = []
-        for i in range(3):
+        for i in range(2):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
             issue = DatasetIssue.objects.create(
@@ -149,7 +149,16 @@ class IssuesTest(APITestCase):
         response = self.get(url_for('api.issues', id=dataset.id, closed=True))
         self.assert200(response)
 
-        self.assertEqual(len(response.json), len(open_issues + closed_issues))
+        self.assertEqual(len(response.json['data']), len(closed_issues))
+        for issue in response.json['data']:
+            self.assertIsNotNone(issue['closed'])
+
+        response = self.get(url_for('api.issues', id=dataset.id, closed=False))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json['data']), len(open_issues))
+        for issue in response.json['data']:
+            self.assertIsNone(issue['closed'])
 
     def test_get_issue(self):
         dataset = Dataset.objects.create(title='Test dataset')
@@ -270,36 +279,6 @@ class IssuesTest(APITestCase):
         dataset.reload()
         # Metrics unchanged after attempt to close the discussion.
         self.assertEqual(dataset.metrics['issues'], 1)
-
-    def test_list_issues_filter_closed(self):
-        '''Should consider the closed filtering on issues'''
-        user = UserFactory()
-        dataset = DatasetFactory()
-        (issue,) = DatasetIssue.objects.create(subject=dataset, title='',
-                                               user=user),
-        (issue_closed,) = DatasetIssue.objects.create(subject=dataset,
-            title='', closed=datetime.now(), user=user),
-
-        response_all = self.get(url_for('api.issues'))
-        self.assert200(response_all)
-
-        data_all = response_all.json['data']
-        self.assertEqual(len(data_all), 2)
-        self.assertItemsEqual([str(issue.id), str(issue_closed.id)],
-                              [str(d['id']) for d in data_all])
-
-        response_closed = self.get(url_for('api.issues', closed=True))
-        self.assert200(response_closed)
-        data_closed = response_closed.json['data']
-        self.assertEqual(len(data_closed), 1)
-        self.assertEqual(str(issue_closed.id), data_closed[0]['id'])
-
-        response_open = self.get(url_for('api.issues', closed=False))
-        self.assert200(response_open)
-        data_open = response_open.json['data']
-        self.assertEqual(len(data_open), 1)
-
-        self.assertEqual(str(issue.id), data_open[0]['id'])
 
 
 class IssueCsvTest(FrontTestCase):
