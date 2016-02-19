@@ -9,7 +9,10 @@ from udata.models import Dataset, DatasetDiscussion, Member
 from udata.core.user.views import blueprint as user_bp
 from udata.core.discussions.models import Message, Discussion
 from udata.core.discussions.notifications import discussions_notifications
-from udata.core.discussions.signals import on_new_discussion
+from udata.core.discussions.signals import (
+    on_new_discussion, on_new_discussion_comment,
+    on_discussion_closed, on_discussion_deleted,
+)
 
 from frontend import FrontTestCase
 
@@ -31,11 +34,12 @@ class DiscussionsTest(APITestCase):
         user = self.login()
         dataset = Dataset.objects.create(title='Test dataset')
 
-        response = self.post(url_for('api.discussions'), {
-            'title': 'test title',
-            'comment': 'bla bla',
-            'subject': dataset.id
-        })
+        with self.assert_emit(on_new_discussion):
+            response = self.post(url_for('api.discussions'), {
+                'title': 'test title',
+                'comment': 'bla bla',
+                'subject': dataset.id
+            })
         self.assertStatus(response, 201)
 
         dataset.reload()
@@ -157,9 +161,10 @@ class DiscussionsTest(APITestCase):
         on_new_discussion.send(discussion)  # Updating metrics.
 
         poster = self.login()
-        response = self.post(url_for('api.discussion', id=discussion.id), {
-            'comment': 'new bla bla'
-        })
+        with self.assert_emit(on_new_discussion_comment):
+            response = self.post(url_for('api.discussion', id=discussion.id), {
+                'comment': 'new bla bla'
+            })
         self.assert200(response)
 
         dataset.reload()
@@ -192,10 +197,11 @@ class DiscussionsTest(APITestCase):
         )
         on_new_discussion.send(discussion)  # Updating metrics.
 
-        response = self.post(url_for('api.discussion', id=discussion.id), {
-            'comment': 'close bla bla',
-            'close': True
-        })
+        with self.assert_emit(on_discussion_closed):
+            response = self.post(url_for('api.discussion', id=discussion.id), {
+                'comment': 'close bla bla',
+                'close': True
+            })
         self.assert200(response)
 
         dataset.reload()
@@ -253,7 +259,8 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(DatasetDiscussion.objects(subject=dataset.id).count(),
                          1)
 
-        response = self.delete(url_for('api.discussion', id=discussion.id))
+        with self.assert_emit(on_discussion_deleted):
+            response = self.delete(url_for('api.discussion', id=discussion.id))
         self.assertStatus(response, 204)
 
         dataset.reload()

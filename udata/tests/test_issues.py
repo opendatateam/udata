@@ -10,7 +10,9 @@ from udata.core.user.views import blueprint as user_bp
 from udata.core.issues.models import Issue, Message
 from udata.core.issues.actions import issues_for
 from udata.core.issues.notifications import issues_notifications
-from udata.core.issues.signals import on_new_issue
+from udata.core.issues.signals import (
+    on_new_issue, on_new_issue_comment, on_issue_closed
+)
 
 from frontend import FrontTestCase
 
@@ -33,11 +35,12 @@ class IssuesTest(APITestCase):
         user = self.login()
         dataset = Dataset.objects.create(title='Test dataset')
 
-        response = self.post(url_for('api.issues', **{'for': dataset.id}), {
-            'title': 'test title',
-            'comment': 'bla bla',
-            'subject': dataset.id
-        })
+        with self.assert_emit(on_new_issue):
+            response = self.post(url_for('api.issues', **{'for': dataset.id}), {
+                'title': 'test title',
+                'comment': 'bla bla',
+                'subject': dataset.id
+            })
         self.assertStatus(response, 201)
 
         dataset.reload()
@@ -190,9 +193,10 @@ class IssuesTest(APITestCase):
         on_new_issue.send(issue)  # Updating metrics.
 
         poster = self.login()
-        response = self.post(url_for('api.issue', id=issue.id), {
-            'comment': 'new bla bla'
-        })
+        with self.assert_emit(on_new_issue_comment):
+            response = self.post(url_for('api.issue', id=issue.id), {
+                'comment': 'new bla bla'
+            })
         self.assert200(response)
 
         dataset.reload()
@@ -225,10 +229,11 @@ class IssuesTest(APITestCase):
         )
         on_new_issue.send(issue)  # Updating metrics.
 
-        response = self.post(url_for('api.issue', id=issue.id), {
-            'comment': 'close bla bla',
-            'close': True
-        })
+        with self.assert_emit(on_issue_closed):
+            response = self.post(url_for('api.issue', id=issue.id), {
+                'comment': 'close bla bla',
+                'close': True
+            })
         self.assert200(response)
 
         dataset.reload()
