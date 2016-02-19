@@ -8,7 +8,8 @@ from .models import Dataset
 
 def serialize_spatial_zones(dataset):
     if dataset.spatial and dataset.spatial.zones:
-        return ','.join(z.name for z in dataset.spatial.zones)
+        return ','.join(z.name if hasattr(z, 'name') else z.id
+                        for z in dataset.spatial.zones)
 
 
 @csv.adapter(Dataset)

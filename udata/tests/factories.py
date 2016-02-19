@@ -202,3 +202,19 @@ def badge_factory(model):
         kind = FuzzyChoice(model.__badges__.keys())
 
     return BadgeFactory
+
+
+class SpatialFactory(MongoEngineFactory):
+    class Meta:
+        model = models.SpatialCoverage
+
+
+class GeoZoneFactory(MongoEngineFactory):
+    class Meta:
+        model = models.GeoZone
+
+    id = factory.LazyAttribute(lambda o: faker.uuid4())
+    name = factory.LazyAttribute(lambda o: faker.word())
+    level = factory.LazyAttribute(lambda o: faker.numerify())
+    geom = factory.LazyAttribute(
+        lambda o: [[[[1, 1], [1, 1]], [[1, 1], [1, 1]]]])
