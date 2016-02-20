@@ -21,6 +21,7 @@ from werkzeug.wrappers import Request
 
 from udata import settings
 from udata.app import create_app
+from udata.mail import mail_sent
 from udata.models import db
 from udata.search import es
 
@@ -107,6 +108,19 @@ class TestCase(BaseTestCase):
                 mock_handler.called,
                 'Signal "{0}" should have been emitted'.format(signal_name)
             )
+
+    @contextmanager
+    def capture_mails(self):
+        mails = []
+
+        def on_mail_sent(mail):
+            mails.append(mail)
+
+        mail_sent.connect(on_mail_sent)
+
+        yield mails
+
+        mail_sent.disconnect(on_mail_sent)
 
 
 class WebTestMixin(object):

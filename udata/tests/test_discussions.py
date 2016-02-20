@@ -7,9 +7,18 @@ from flask import url_for
 
 from udata.models import Dataset, DatasetDiscussion, Member
 from udata.core.user.views import blueprint as user_bp
+from udata.core.dataset.views import blueprint as dataset_bp
 from udata.core.discussions.models import Message, Discussion
 from udata.core.discussions.notifications import discussions_notifications
-from udata.core.discussions.signals import on_new_discussion
+from udata.core.discussions.signals import (
+    on_new_discussion, on_new_discussion_comment,
+    on_discussion_closed, on_discussion_deleted,
+)
+
+from udata.core.discussions.tasks import (
+    notify_new_discussion, notify_new_discussion_comment,
+    notify_discussion_closed
+)
 
 from frontend import FrontTestCase
 
@@ -31,11 +40,12 @@ class DiscussionsTest(APITestCase):
         user = self.login()
         dataset = Dataset.objects.create(title='Test dataset')
 
-        response = self.post(url_for('api.discussions'), {
-            'title': 'test title',
-            'comment': 'bla bla',
-            'subject': dataset.id
-        })
+        with self.assert_emit(on_new_discussion):
+            response = self.post(url_for('api.discussions'), {
+                'title': 'test title',
+                'comment': 'bla bla',
+                'subject': dataset.id
+            })
         self.assertStatus(response, 201)
 
         dataset.reload()
@@ -157,9 +167,10 @@ class DiscussionsTest(APITestCase):
         on_new_discussion.send(discussion)  # Updating metrics.
 
         poster = self.login()
-        response = self.post(url_for('api.discussion', id=discussion.id), {
-            'comment': 'new bla bla'
-        })
+        with self.assert_emit(on_new_discussion_comment):
+            response = self.post(url_for('api.discussion', id=discussion.id), {
+                'comment': 'new bla bla'
+            })
         self.assert200(response)
 
         dataset.reload()
@@ -192,10 +203,11 @@ class DiscussionsTest(APITestCase):
         )
         on_new_discussion.send(discussion)  # Updating metrics.
 
-        response = self.post(url_for('api.discussion', id=discussion.id), {
-            'comment': 'close bla bla',
-            'close': True
-        })
+        with self.assert_emit(on_discussion_closed):
+            response = self.post(url_for('api.discussion', id=discussion.id), {
+                'comment': 'close bla bla',
+                'close': True
+            })
         self.assert200(response)
 
         dataset.reload()
@@ -253,7 +265,8 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(DatasetDiscussion.objects(subject=dataset.id).count(),
                          1)
 
-        response = self.delete(url_for('api.discussion', id=discussion.id))
+        with self.assert_emit(on_discussion_deleted):
+            response = self.delete(url_for('api.discussion', id=discussion.id))
         self.assertStatus(response, 204)
 
         dataset.reload()
@@ -418,3 +431,78 @@ class DiscussionsNotificationsTest(TestCase, DBTestMixin):
             self.assertEqual(details['title'], discussion.title)
             self.assertEqual(details['subject']['id'], discussion.subject.id)
             self.assertEqual(details['subject']['type'], 'dataset')
+
+
+class DiscussionsMailsTest(TestCase, DBTestMixin):
+    def create_app(self):
+        app = super(DiscussionsMailsTest, self).create_app()
+        app.register_blueprint(user_bp)
+        app.register_blueprint(dataset_bp)
+        return app
+
+    def test_new_discussion_mail(self):
+        user = UserFactory()
+        owner = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        discussion = DatasetDiscussion.objects.create(
+            subject=DatasetFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[message]
+        )
+
+        with self.capture_mails() as mails:
+            notify_new_discussion(discussion)
+
+        # Should have sent one mail to the owner
+        self.assertEqual(len(mails), 1)
+        self.assertEqual(mails[0].recipients[0], owner.email)
+
+    def test_new_discussion_comment_mail(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=poster)
+        new_message = Message(content=faker.sentence(), posted_by=commenter)
+        discussion = DatasetDiscussion.objects.create(
+            subject=DatasetFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[message, new_message]
+        )
+
+        with self.capture_mails() as mails:
+            notify_new_discussion_comment(discussion, message=new_message)
+
+        # Should have sent one mail to the owner and the other participants
+        # and no mail to the commenter
+        expected_recipients = (owner.email, poster.email)
+        self.assertEqual(len(mails), len(expected_recipients))
+        for mail in mails:
+            self.assertIn(mail.recipients[0], expected_recipients)
+            self.assertNotIn(commenter.email, mail.recipients)
+
+    def test_closed_discussion_mail(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=poster)
+        second_message = Message(content=faker.sentence(), posted_by=commenter)
+        closing_message = Message(content=faker.sentence(), posted_by=owner)
+        discussion = DatasetDiscussion.objects.create(
+            subject=DatasetFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[message, second_message, closing_message]
+        )
+
+        with self.capture_mails() as mails:
+            notify_discussion_closed(discussion, message=closing_message)
+
+        # Should have sent one mail to each participant
+        # and no mail to the closer
+        expected_recipients = (poster.email, commenter.email)
+        self.assertEqual(len(mails), len(expected_recipients))
+        for mail in mails:
+            self.assertIn(mail.recipients[0], expected_recipients)
+            self.assertNotIn(owner.email, mail.recipients)

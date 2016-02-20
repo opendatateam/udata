@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 import logging
 from contextlib import contextmanager
 
+from blinker import signal
+
 from flask import current_app
 from flask.ext.mail import Mail, Message
 
@@ -14,11 +16,21 @@ log = logging.getLogger(__name__)
 
 mail = Mail()
 
+mail_sent = signal('mail-sent')
+
+
+class FakeMailer(object):
+    '''Display sent mail in logging output'''
+    def send(self, msg):
+        log.debug(msg.body)
+        log.debug(msg.html)
+        mail_sent.send(msg)
+
 
 @contextmanager
 def dummyconnection(*args, **kw):
     """Allow to test email templates rendering without actually send emails."""
-    yield
+    yield FakeMailer()
 
 
 def init_app(app):
@@ -36,9 +48,9 @@ def send(subject, recipients, template_base, **kwargs):
     if not isinstance(recipients, (list, tuple)):
         recipients = [recipients]
 
-    debug = current_app.config.get('DEBUG')
+    debug = current_app.config.get('DEBUG', False)
     send_mail = current_app.config.get('SEND_MAIL', not debug)
-    connection = send_mail and dummyconnection or mail.connect
+    connection = send_mail and mail.connect or dummyconnection
 
     with connection() as conn:
         for recipient in recipients:
@@ -54,8 +66,4 @@ def send(subject, recipients, template_base, **kwargs):
                 msg.html = theme.render(
                     'mail/{0}.html'.format(template_base), subject=subject,
                     sender=sender, recipient=recipient, **kwargs)
-                if debug:
-                    log.debug(msg.body)
-                    log.debug(msg.html)
-                else:
-                    conn.send(msg)
+                conn.send(msg)
