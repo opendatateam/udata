@@ -3,13 +3,10 @@
     <h3 class="pointer" :class="textClass" @click="toggle">
         <span class="fa" :class="iconClass"></span>
         {{ title }}
-        <!--small :class="textClass">
-        </small-->
     </h3>
     <div class="collapse" :class="contentClass">
         <slot></slot>
         <p :class="textClass">
-            <!--span class="fa" :class="iconClass"></span-->
             <strong v-if="condition && !showInfo">{{ ok }}</strong>
             <strong v-if="!condition && !showInfo">{{ ko }}</strong>
             <strong v-if="showInfo">{{ info }}</strong>
@@ -66,4 +63,3 @@ export default {
     }
 };
 </script>
-<style lang="less"></style>
