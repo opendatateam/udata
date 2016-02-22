@@ -2,7 +2,8 @@
 <html lang="{{ g.lang_code }}">
   <head>
     {% block raw_head %}
-    {% include theme('metadata.html') with context %}
+    {% from theme('macros/metadata.html') import metadata with context %}
+    {{ metadata(meta or {}) }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{{ static('site.css') }}" rel="stylesheet">
     <link href="{{ theme_static('theme.css') }}" rel="stylesheet">

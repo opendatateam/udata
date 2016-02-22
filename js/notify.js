@@ -1,30 +1,24 @@
 /**
  * User notification module
  */
-define([
-    'jquery',
-    'logger',
-    'config',
-    'templates/notification.hbs'
-], function($, Log, config, message_template) {
-    'use strict';
+import config from 'config';
+import message_template from 'templates/notification.hbs';
 
-    function show_message(message, type, container) {
-        container = container || config.notify_in;
-        $(container).prepend(message_template({
-            level: type == 'error' ? 'danger' : type,
-            message: message
-        }));
-        Log.debug('Notify:', {type: type, message: message, container: container});
-    }
+function show_message(message, type, container) {
+    const parent = document.querySelector(container || config.notify_in);
+    const child = parent.firstChild;
 
-    return {
-        error: function(message, container) {
-            show_message(message, 'error', container);
-        },
+    const content = message_template({
+        level: type == 'error' ? 'danger' : type,
+        message: message
+    });
+    parent.insertAdjacentHTML('afterbegin', content);
+}
 
-        success: function(message, container) {
-            show_message(message, 'success', container);
-        }
-    };
-});
+export function error(message, container) {
+    show_message(message, 'error', container);
+}
+
+export function success(message, container) {
+    show_message(message, 'success', container);
+}

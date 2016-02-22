@@ -49,13 +49,23 @@ class Adapter(object):
         if not self._fields:
             if not isinstance(self.fields, (list, tuple)):
                 raise ValueError('Unsupported fields format')
-            self._fields = [
-                (field, self.getter(field))
-                if isinstance(field, basestring)
-                else (field[0], self.getter(*field))
-                for field
-                in itertools.chain(self.fields, self.dynamic_fields())
-            ]
+            self._fields = []
+            for field in itertools.chain(self.fields, self.dynamic_fields()):
+                name = field if isinstance(field, basestring) else field[0]
+                # Retrieving (dynamically) fields is prone to errors,
+                # we don't want to break the CSV generation for a unique
+                # error so we skip it and introduce a blank to the given
+                # field.
+                field_tuple = (name, None)
+                try:
+                    if isinstance(field, basestring):
+                        field_tuple = (name, self.getter(field))
+                    else:
+                        field_tuple = (name, self.getter(*field))
+                except Exception, e:  # Catch all errors intentionally.
+                    log.error('Error exporting CSV for {name}: {error}'.format(
+                        name=self.__class__.__name__, error=e))
+                self._fields.append(field_tuple)
         return self._fields
 
     def getter(self, name, getter=None):
@@ -79,7 +89,14 @@ class Adapter(object):
         '''Convert an object into a flat csv row'''
         row = []
         for name, getter in self.get_fields():
-            row.append(safestr(getter(obj)))
+            content = ''
+            if getter is not None:
+                try:
+                    content = safestr(getter(obj))
+                except Exception, e:  # Catch all errors intentionally.
+                    log.error('Error exporting CSV for {name}: {error}'.format(
+                        name=self.__class__.__name__, error=e))
+            row.append(content)
         return row
 
     def dynamic_fields(self):
@@ -103,14 +120,24 @@ class NestedAdapter(Adapter):
         if not self._nested_fields:
             if not isinstance(self.nested_fields, (list, tuple)):
                 raise ValueError('Unsupported nested fields format')
-            self._nested_fields = [
-                (field, self.getter(field))
-                if isinstance(field, basestring)
-                else (field[0], self.getter(*field))
-                for field
-                in itertools.chain(self.nested_fields,
-                                   self.nested_dynamic_fields())
-            ]
+            self._nested_fields = []
+            for field in itertools.chain(self.nested_fields,
+                                         self.nested_dynamic_fields()):
+                name = field if isinstance(field, basestring) else field[0]
+                # Retrieving (dynamically) fields is prone to errors,
+                # we don't want to break the CSV generation for a unique
+                # error so we skip it and introduce a blank to the given
+                # field.
+                field_tuple = (name, None)
+                try:
+                    if isinstance(field, basestring):
+                        field_tuple = (name, self.getter(field))
+                    else:
+                        field_tuple = (name, self.getter(*field))
+                except Exception, e:  # Catch all errors intentionally.
+                    log.error('Error exporting CSV for {name}: {error}'.format(
+                        name=self.__class__.__name__, error=e))
+                self._nested_fields.append(field_tuple)
         return self._nested_fields
 
     def get_queryset(self):
@@ -128,7 +155,14 @@ class NestedAdapter(Adapter):
         '''Convert an object into a flat csv row'''
         row = self.to_row(obj)
         for name, getter in self.get_nested_fields():
-            row.append(safestr(getter(nested)))
+            content = ''
+            if getter is not None:
+                try:
+                    content = safestr(getter(nested))
+                except Exception, e:  # Catch all errors intentionally.
+                    log.error('Error exporting CSV for {name}: {error}'.format(
+                        name=self.__class__.__name__, error=e))
+            row.append(content)
         return row
 
     def nested_dynamic_fields(self):

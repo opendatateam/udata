@@ -2,7 +2,8 @@
 
 {% set meta = {
     'title': org.name,
-    'description': org.description|mdstrip|forceescape,
+    'description': org.description|mdstrip(60)|forceescape,
+    'image': org.logo(external=True),
     'keywords': [_('organization')],
 } %}
 

@@ -46,5 +46,5 @@ class Discussion(db.Document):
     @property
     def external_url(self):
         return self.subject.url_for(
-            _anchor='discussion-{ id }'.format(id=self.id),
+            _anchor='discussion-{id}'.format(id=self.id),
             _external=True)
