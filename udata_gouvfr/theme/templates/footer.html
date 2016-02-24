@@ -1,4 +1,4 @@
-{% cache cache_duration, 'footer', g.lang_code|default(config.DEFAULT_LANGUAGE) %}
+{% cache cache_duration, 'footer', g.lang_code|default(config.DEFAULT_LANGUAGE)|string %}
 <section class="footer">
     <div class="container">
         <footer class="row">
