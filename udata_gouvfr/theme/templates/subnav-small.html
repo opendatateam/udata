@@ -26,7 +26,7 @@
                 </div>
             </form>
 
-            {% cache cache_duration, 'featured-topics', g.featured_topics|join(',', attribute='name'), g.lang_code|default(config.DEFAULT_LANGUAGE) %}
+            {% cache cache_duration, 'subnav-small-featured-topics', g.lang_code|default(config.DEFAULT_LANGUAGE)|string %}
             {# Topic chooser #}
             <div class="form-group col-sm-4 col-md-3 col-lg-3 col-xs-12">
                 <button class="dropdown-toggle btn-block btn-light" data-toggle="dropdown">
