@@ -1,6 +1,10 @@
 /**
  * Default JS module
  */
+
+// ES6 environment
+import 'babel-polyfill';
+
 import $ from 'jquery';
 import log from 'logger';
 import Auth from 'auth';
