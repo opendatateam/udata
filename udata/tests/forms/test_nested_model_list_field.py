@@ -10,7 +10,7 @@ from udata.tests.factories import faker
 
 
 class SubNested(db.EmbeddedDocument):
-    name = db.StringField()
+    name = db.StringField(required=True)
 
 
 class Nested(db.EmbeddedDocument):
@@ -243,6 +243,21 @@ class NestedModelListFieldTest(TestCase):
             self.assertEqual(nested.id, id)
             self.assertEqual(nested.name, names[idx])
         self.assertIsNotNone(fake.nested[2].id)
+
+    def test_non_submitted_subnested(self):
+        form = self.factory({'nested': [
+            {'name': faker.name()},
+            {'name': faker.name(), 'sub': {'name': faker.name()}},
+        ]}, sub=True)
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        fake = form.save()
+
+        self.assertEqual(len(fake.nested), 2)
+        self.assertIsNone(fake.nested[0].sub)
+        self.assertIsNotNone(fake.nested[1].sub)
 
     def test_reorder_initial_elements(self):
         fake = Fake.objects.create(nested=[
