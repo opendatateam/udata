@@ -31,13 +31,10 @@ class SpatialCoverageFieldTest(TestCase):
         form = FakeForm()
         self.assertEqual(form.spatial.zones._value(), '')
         self.assertEqual(form.spatial.zones.data, [])
-        # self.assertEqual(form.spatial.granularity._value(), '')
         self.assertEqual(form.spatial.granularity.data, 'other')
         self.assertIsNone(form.spatial.geom.data)
 
-        self.assertEqual(form.spatial.data, {
-            'zones': [], 'granularity': 'other', 'geom': None
-        })
+        self.assertIsNone(form.spatial.data)
 
         fake = Fake()
         form.populate_obj(fake)

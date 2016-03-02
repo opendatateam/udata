@@ -201,7 +201,7 @@ class FormField(FieldHelper, fields.FormField):
         super(FormField, self).__init__(FormWrapper(form_class),
                                         *args, **kwargs)
         self.prefix = '{0}-'.format(self.name)
-        self.has_data = False
+        self._formdata = None
 
     def process(self, formdata, data=unset_value):
         self._formdata = formdata
@@ -213,8 +213,6 @@ class FormField(FieldHelper, fields.FormField):
                             'as it gets errors from the enclosed form.')
 
         # Run normal validation only if there is data for this form
-        self.has_data = bool(self._formdata)
-        self.has_data &= any(k.startswith(self.prefix) for k in self._formdata)
         if self.has_data:
             return self.form.validate()
         return True
@@ -225,6 +223,16 @@ class FormField(FieldHelper, fields.FormField):
         if getattr(self.form_class, 'model_class', None) and not self._obj:
             self._obj = self.form_class.model_class()
         super(FormField, self).populate_obj(obj, name)
+
+    @property
+    def data(self):
+        return self.form.data if self.has_data else None
+
+    @property
+    def has_data(self):
+        return self._formdata and any(
+            k.startswith(self.prefix) for k in self._formdata
+        )
 
 
 def nullable_text(value):
