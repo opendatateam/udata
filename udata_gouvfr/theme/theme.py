@@ -17,20 +17,6 @@ RE_POST_IMG = re.compile(
     r'\<img .* src="https?:(?P<src>.+\.(?:png|jpg))" .* />(?P<content>.+)')
 
 
-theme.defaults({
-    'tab_size': 8,
-    'home_datasets': [],
-    'home_reuses': []
-})
-
-
-class Wikitem(nav.Item):
-    def __init__(self, label, page, **kwargs):
-        super(Wikitem, self).__init__(
-            label, page.lower(),
-            url='//wiki.data.gouv.fr/wiki/{0}'.format(page), **kwargs)
-
-
 gouvfr_menu = nav.Bar('gouvfr_menu', [
     nav.Item(_('Discover OpenData'), 'gouvfr.faq', items=[
         nav.Item(_('As a citizen'), 'gouvfr.faq', {'section': 'citizen'}),

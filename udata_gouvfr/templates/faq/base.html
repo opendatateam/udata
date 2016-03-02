@@ -4,6 +4,7 @@
 <div class="faq-content">
     <a href="{{ url_for('gouvfr.faq') }}">← Retour à l’accueil de la FAQ</a>
     {% block faq_content %}{% endblock %}
+    <a href="{{ current_theme.info.github_faq_url_pattern.format(page_name=page_name) }}" target="_blank" class="center-block btn btn-default"><i class="fa fa-pencil"></i> Proposer une amélioration</a>
     <a href="{{ url_for('gouvfr.faq') }}">← Retour à l’accueil de la FAQ</a>
 </div>
 {% endblock %}

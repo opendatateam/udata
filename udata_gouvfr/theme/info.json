@@ -8,5 +8,6 @@
     "license": "AGPL",
     "version": "0.1.0",
     "doctype": "html5",
-    "variants": ["deuil"]
+    "variants": ["deuil"],
+    "github_faq_url_pattern": "https://github.com/etalab/udata-gouvfr/edit/master/udata_gouvfr/templates/faq/{page_name}.html"
 }
