@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+import logging
 import re
 
 import feedparser
+import requests
 
 from dateutil.parser import parse
 from flask import g, current_app
@@ -12,6 +14,7 @@ from udata import theme
 from udata.app import cache, nav
 from udata.i18n import lazy_gettext as _
 
+log = logging.getLogger(__name__)
 
 RE_POST_IMG = re.compile(
     r'\<img .* src="https?:(?P<src>.+\.(?:png|jpg))" .* />(?P<content>.+)')
@@ -94,9 +97,84 @@ def get_blog_post(url, lang):
     return blogpost
 
 
+@cache.cached(50)
+def get_discourse_posts():
+    topics = []
+    base_url = current_app.config.get('DISCOURSE_URL')
+    category_id = current_app.config.get('DISCOURSE_CATEGORY_ID')
+    listing = current_app.config.get('DISCOURSE_LISTING_TYPE', 'latest')
+    limit = current_app.config.get('DISCOURSE_LISTING_LIMIT', 5)
+    if not base_url:
+        return topics
+
+    # Fetch site wide configuration (including all categories labels)
+    site_url = '{url}/site.json'.format(url=base_url)
+    try:
+        response = requests.get(site_url)
+    except requests.exceptions.RequestException:
+        log.exception('Unable to fetch discourses categories')
+        return topics
+    data = response.json()
+
+    # Resolve categories names
+    categories = {}
+    for category in data['categories']:
+        categories[category['id']] = category['name']
+
+    # Fetch last topic from selected category (if any)
+    pattern = '{url}/l/{listing}.json?limit={limit}'
+    if category_id:
+        pattern = '{url}/c/{category}/l/{listing}.json?limit={limit}'
+        # return topics
+    url = pattern.format(url=base_url,
+                         category=category_id,
+                         listing=listing,
+                         limit=limit)
+    try:
+        response = requests.get(url)
+    except requests.exceptions.RequestException:
+        log.exception('Unable to fetch discourses topics')
+        return topics
+    data = response.json()
+
+    # Resolve posters avatars
+    users = {}
+    for user in data['users']:
+        users[user['id']] = {
+            'id': user['id'],
+            'name': user['username'],
+            'avatar_url': '{0}{1}'.format(base_url, user['avatar_template'])
+        }
+
+    # Parse topics
+    topic_pattern = '{url}/t/{slug}/{id}'
+    for topic in data['topic_list']['topics']:
+        last_posted_at = topic['last_posted_at']
+        topics.append({
+            'id': topic['id'],
+            'title': topic['title'],
+            'fancy_title': topic['fancy_title'],
+            'slug': topic['slug'],
+            'url': topic_pattern.format(url=base_url, **topic),
+            'category': categories[topic['category_id']],
+            'posts': topic['posts_count'],
+            'replies': topic['reply_count'],
+            'likes': topic['like_count'],
+            'views': topic['views'],
+            'created_at': parse(topic['created_at']),
+            'last_posted_at': parse(last_posted_at) if last_posted_at else None,
+            'posters': [
+                users[u['user_id']] for u in topic['posters']
+            ]
+        })
+
+    return topics
+
+
 @theme.context('home')
 def home_context(context):
     config = theme.current.config
     if config and 'atom_url' in config:
         context['blogpost'] = get_blog_post(config['atom_url'], g.lang_code)
+    context['forum_topics'] = get_discourse_posts()
     return context
