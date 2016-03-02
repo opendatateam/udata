@@ -161,7 +161,7 @@ def nec_mergitur():
 @blueprint.route('/faq/', defaults={'section': 'home'})
 @blueprint.route('/faq/<string:section>/')
 def faq(section):
-    return theme.render('faq/{0}.html'.format(section))
+    return theme.render('faq/{0}.html'.format(section), page_name=section)
 
 
 @blueprint.route('/credits/')
