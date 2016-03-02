@@ -66,6 +66,7 @@ module.exports = {
         loaders: {
             css: css_loader,
             less: less_loader,
+            js: 'babel'
         }
     },
     plugins: [

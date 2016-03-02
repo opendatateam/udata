@@ -1,6 +1,10 @@
 /**
  * Reuse display page JS module
  */
+
+// ES6 environment
+import 'babel-polyfill';
+
 import $ from 'jquery';
 import log from 'logger';
 
