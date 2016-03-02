@@ -97,6 +97,6 @@ def get_blog_post(url, lang):
 @theme.context('home')
 def home_context(context):
     config = theme.current.config
-    if 'atom_url' in config:
+    if config and 'atom_url' in config:
         context['blogpost'] = get_blog_post(config['atom_url'], g.lang_code)
     return context
