@@ -73,9 +73,13 @@ nav.Bar(
 
 
 @cache.memoize(50)
-def get_blog_post(url, lang):
+def get_blog_post(lang):
+    wp_atom_url = current_app.config.get('WP_ATOM_URL')
+    if not wp_atom_url:
+        return
+
     for code in lang, current_app.config['DEFAULT_LANGUAGE']:
-        feed_url = url.format(lang=code)
+        feed_url = wp_atom_url.format(lang=code)
         feed = feedparser.parse(feed_url)
         if len(feed['entries']) > 0:
             break
@@ -173,8 +177,6 @@ def get_discourse_posts():
 
 @theme.context('home')
 def home_context(context):
-    config = theme.current.config
-    if config and 'atom_url' in config:
-        context['blogpost'] = get_blog_post(config['atom_url'], g.lang_code)
+    context['blogpost'] = get_blog_post(g.lang_code)
     context['forum_topics'] = get_discourse_posts()
     return context
