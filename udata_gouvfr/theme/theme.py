@@ -99,13 +99,12 @@ def get_blog_post(url, lang):
 
 @cache.cached(50)
 def get_discourse_posts():
-    topics = []
     base_url = current_app.config.get('DISCOURSE_URL')
     category_id = current_app.config.get('DISCOURSE_CATEGORY_ID')
     listing = current_app.config.get('DISCOURSE_LISTING_TYPE', 'latest')
     limit = current_app.config.get('DISCOURSE_LISTING_LIMIT', 5)
     if not base_url:
-        return topics
+        return
 
     # Fetch site wide configuration (including all categories labels)
     site_url = '{url}/site.json'.format(url=base_url)
@@ -113,7 +112,7 @@ def get_discourse_posts():
         response = requests.get(site_url)
     except requests.exceptions.RequestException:
         log.exception('Unable to fetch discourses categories')
-        return topics
+        return
     data = response.json()
 
     # Resolve categories names
@@ -134,7 +133,7 @@ def get_discourse_posts():
         response = requests.get(url)
     except requests.exceptions.RequestException:
         log.exception('Unable to fetch discourses topics')
-        return topics
+        return
     data = response.json()
 
     # Resolve posters avatars
@@ -147,6 +146,7 @@ def get_discourse_posts():
         }
 
     # Parse topics
+    topics = []
     topic_pattern = '{url}/t/{slug}/{id}'
     for topic in data['topic_list']['topics']:
         last_posted_at = topic['last_posted_at']

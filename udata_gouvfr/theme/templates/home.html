@@ -223,25 +223,25 @@
                         <tbody>
                             {% for topic in forum_topics %}
                             <tr>
-                                <td>
-                                    <a href="{{topic.url}}">
-                                        <span class="topic-title">{{topic.title}}</span>
-                                        <span class="label label-primary">{{topic.category}}</span>
+                                <th>
+                                    <a href="{{ topic.url }}">
+                                        {{ topic.title }}
+                                        <span class="label label-primary">{{ topic.category }}</span>
                                     </a>
-                                </td>
+                                </th>
                                 <td>
-                                    <a href="{{topic.url}}">
+                                    <a href="{{ topic.url }}">
                                         {% for poster in topic.posters %}
                                         <img class="img-circle" width="25" height="25"
-                                        src="{{ poster.avatar_url.format(size=50) }}"
-                                        alt="{{ poster.name }}" />
+                                            src="{{ poster.avatar_url.format(size=50) }}"
+                                            alt="{{ poster.name }}" />
                                         {% endfor %}
                                     </a>
                                 </td>
-                                <td><a href="{{topic.url}}">{{topic.created_at|datetimeformat}}</a></td>
-                                <td class="text-center"><a href="{{topic.url}}">{{topic.replies}}</a></td>
-                                <td class="text-center"><a href="{{topic.url}}">{{topic.views}}</a></td>
-                                <td class="text-center"><a href="{{topic.url}}">{{topic.likes}}</a></td>
+                                <td><a href="{{ topic.url }}">{{ topic.created_at|datetimeformat }}</a></td>
+                                <td class="text-center"><a href="{{ topic.url }}">{{ topic.replies }}</a></td>
+                                <td class="text-center"><a href="{{ topic.url }}">{{ topic.views }}</a></td>
+                                <td class="text-center"><a href="{{ topic.url }}">{{ topic.likes }}</a></td>
                             </tr>
                             {% endfor %}
                         </tbody>
