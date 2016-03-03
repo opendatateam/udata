@@ -113,9 +113,10 @@
 
 
 {# Datasets section #}
+{% set nb_datasets = current_site.settings.home_datasets|length %}
 {% set dataset_tabs = (
     ('editorial-datasets', _('Featured datasets'), current_site.settings.home_datasets, {}),
-    ('recent-datasets', _('Latest datasets'), recent_datasets[:9], {'sort': '-created'}),
+    ('recent-datasets', _('Latest datasets'), recent_datasets[:nb_datasets], {'sort': '-created'}),
 ) %}
 
 <section class="default spaced">
