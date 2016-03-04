@@ -171,7 +171,7 @@ class PopulationDiplomesTerritoryDataset(TerritoryDataset):
 class ElectionsRegionales2015Tour2TerritoryDataset(
         ResourceBasedTerritoryDataset):
     id = 'elections_regionales_2015_2'
-    title = 'Résultats des élections régionales 2015 (second tour)'
+    title = 'Élection régionales 2015, second tour'
     # Ministère de l'Intérieur.
     organization_id = '534fff91a3a7292c64a77f53'
     description = '''
