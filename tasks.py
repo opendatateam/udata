@@ -178,29 +178,28 @@ def i18nc():
 
 
 @task
-def assets(progress=False):
+def assets_build(progress=False):
     '''Install and compile assets'''
     header('Building static assets')
-    cmd = 'webpack -c --config {0}.js'
+    cmd = 'npm run assets:build -- --config {0}.js'
     if progress:
         cmd += ' --progress'
     nrun(cmd.format('webpack.config.prod'), pty=True)
     nrun(cmd.format('webpack.widgets.config'), pty=True)
 
 
-@task(i18nc, assets)
+@task
+def assets_watch():
+    nrun('npm run assets:watch', pty=True)
+
+
+@task
+def widgets_watch():
+    nrun('npm run widgets:watch', pty=True)
+
+
+@task(i18nc, assets_build)
 def dist():
     '''Package for distribution'''
     header('Building a distribuable package')
     lrun('python setup.py bdist_wheel', pty=True)
-
-
-@task
-def watch():
-    nrun('webpack -d -c --progress --watch', pty=True)
-
-
-@task
-def widgets():
-    nrun('webpack -d -c --progress --watch --config webpack.widgets.config.js',
-         pty=True)

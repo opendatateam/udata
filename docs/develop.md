@@ -136,14 +136,14 @@ $ npm install
 From here you can build the assets in production mode once and for all:
 
 ```shell
-$ inv assets
+$ npm run assets:build
 ```
 
 or use the watch process which will trigger a build each time a javascript file
 or a less file is touched:
 
 ```shell
-$ inv watch
+$ npm run assets:watch
 ```
 
 ## Working

@@ -9,29 +9,32 @@ from setuptools import setup, find_packages
 
 RE_REQUIREMENT = re.compile(r'^\s*-r\s*(?P<filename>.*)$')
 
-PYPI_RST_FILTERS = (
-    # Replace code-blocks
-    (r'\.\.\s? code-block::\s*(\w|\+)+', '::'),
-    # Remove travis ci badge
-    (r'.*travis-ci\.org/.*', ''),
-    # Remove pypip.in badges
-    (r'.*pypip\.in/.*', ''),
-    (r'.*crate\.io/.*', ''),
-    (r'.*coveralls\.io/.*', ''),
+PYPI_CLEANDOC_FILTERS = (
+    # Remove badges lines
+    (r'\n.*travis-.*', ''),
+    (r'\n.*requires-.*', ''),
+    (r'\n.*david-dm.*', ''),
+    (r'\n.*gitter-.*', ''),
+    (r'\n.*coveralls-.*', ''),
+    # Transform links
+    (r'\[(.+)\]\[(.+)\]', '`\g<1> <\g<2>_>`_'),
+    (r'\[(.+)\]:\s*(.+)\s*', '.. _\g<1>: \g<2>'),
+    (r'\[(.+)\]\((.+)\)', '`\g<1> <\g<2>>`_'),
 )
 
 ROOT = dirname(__file__)
 
 
-def rst(filename):
-    """Load rst file and sanitize it for PyPI.
+def clean_doc(filename):
+    """Load markdown file and sanitize it for PyPI restructuredtext.
 
     Remove unsupported github tags:
-     - code-block directive
-     - travis ci build badge
+     - various badges
+
+    Transform markdown links into restructuredtext
     """
     content = open(join(ROOT, filename)).read()
-    for regex, replacement in PYPI_RST_FILTERS:
+    for regex, replacement in PYPI_CLEANDOC_FILTERS:
         content = re.sub(regex, replacement, content)
     return content
 
@@ -56,21 +59,15 @@ def dependency_links(filename):
             for line in open(join(ROOT, 'requirements', filename))
             if '://' in line]
 
-
-long_description = '\n'.join((
-    rst('README.rst'),
-    rst('CHANGELOG.rst'),
-    ''
-))
-
 install_requires = pip('install.pip')
 tests_require = pip('test.pip')
+readme_md = clean_doc('README.md')
 
 setup(
     name='udata',
     version=__import__('udata').__version__,
     description=__import__('udata').__description__,
-    long_description=long_description,
+    long_description=readme_md,
     url='https://github.com/etalab/udata',
     download_url='http://pypi.python.org/pypi/udata',
     author='Axel Haustant',
