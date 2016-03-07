@@ -6,7 +6,7 @@
         <a href="#discussion-{{ discussion.id }}"><span class="fa fa-link"></span></a>
     </span>
     <h4 class="list-group-item-heading ellipsis open-discussion-thread">
-        <span itemprop="name">{{ discussion.title }}</span>
+        <span>{{ discussion.title }}</span>
     </h4>
     <p class="list-group-item-text ellipsis open-discussion-thread list-group-message-number-{{ discussion.id }}">
         {{ _('Discussion started on') }} {{ discussion.created|dateformat }} {{ _('with') }}

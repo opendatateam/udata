@@ -17,30 +17,35 @@
 {% endblock %}
 
 {% block main_content %}
-<h1>
-    {{ org.name }}
-    {% if can_edit %}
-    <small>
-        <a class="btn btn-xs btn-default"
-            href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}">
-            <span class="glyphicon glyphicon-edit" ></span>
-            {{ _('Edit') }}
-        </a>
-    </small>
-    {% endif %}
-</h1>
-
-<div class="row">
-    <p class="col-md-12">
-        {% if org.deleted %}
-        <small class="deleted" data-toggle="popover"
-            data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
-            data-content="{{ _('This organization has been deleted. This will be permanent in the next 24 hours') }}"
-            >{{ _('Deleted') }}</small>
+<div itemscope itemtype="http://schema.org/{% if org.public_service %}Government{% endif %}Organization">
+    <meta itemprop="alternateName" content="{{ org.slug }}" />
+    <meta itemprop="logo" content="{{ org.logo(external=True) }}" />
+    <meta itemprop="url" content="{{ url_for('organizations.show', org=org, _external=True) }}" />
+    <h1 itemprop="name">
+        {{ org.name }}
+        {% if can_edit %}
+        <small>
+            <a class="btn btn-xs btn-default"
+                href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}">
+                <span class="glyphicon glyphicon-edit" ></span>
+                {{ _('Edit') }}
+            </a>
+        </small>
         {% endif %}
-    </p>
+    </h1>
+
+    <div class="row">
+        <p class="col-md-12">
+            {% if org.deleted %}
+            <small class="deleted" data-toggle="popover"
+                data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
+                data-content="{{ _('This organization has been deleted. This will be permanent in the next 24 hours') }}"
+                >{{ _('Deleted') }}</small>
+            {% endif %}
+        </p>
+    </div>
+    <div itemprop="description">{{ org.description|markdown }}</div>
 </div>
-<div>{{ org.description|markdown }}</div>
 {% endblock %}
 
 {% block secondary_content %}
