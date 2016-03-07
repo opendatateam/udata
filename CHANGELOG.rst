@@ -1,7 +1,0 @@
-Changelog
-=========
-
-Current
--------
-
-- Nothing yet

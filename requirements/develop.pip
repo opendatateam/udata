@@ -1,5 +1,6 @@
 invoke
 honcho
+pypandoc
 transifex-client
 -r test.pip
 -r report.pip
