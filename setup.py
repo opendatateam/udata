@@ -9,29 +9,28 @@ from setuptools import setup, find_packages
 
 RE_REQUIREMENT = re.compile(r'^\s*-r\s*(?P<filename>.*)$')
 
-PYPI_RST_FILTERS = (
-    # Replace code-blocks
-    (r'\.\.\s? code-block::\s*(\w|\+)+', '::'),
-    # Remove travis ci badge
-    (r'.*travis-ci\.org/.*', ''),
-    # Remove pypip.in badges
-    (r'.*pypip\.in/.*', ''),
-    (r'.*crate\.io/.*', ''),
-    (r'.*coveralls\.io/.*', ''),
+PYPI_CLEANDOC_FILTERS = (
+    # Remove badges
+    (r'\n.*travis-ci\.org/.*', ''),
+    (r'\n.*requires\.io/.*', ''),
+    (r'\n.*david-dm\.org/.*', ''),
+    (r'\n.*badges\.gitter\.im/.*', ''),
+    (r'\n.*pypip\.in/.*', ''),
+    (r'\n.*crate\.io/.*', ''),
+    (r'\n.*coveralls\.io/.*', ''),
 )
 
 ROOT = dirname(__file__)
 
 
-def rst(filename):
-    """Load rst file and sanitize it for PyPI.
+def clean_doc(filename):
+    """Load file and sanitize it for PyPI.
 
     Remove unsupported github tags:
-     - code-block directive
-     - travis ci build badge
+     - various badges
     """
     content = open(join(ROOT, filename)).read()
-    for regex, replacement in PYPI_RST_FILTERS:
+    for regex, replacement in PYPI_CLEANDOC_FILTERS:
         content = re.sub(regex, replacement, content)
     return content
 
@@ -56,13 +55,6 @@ def dependency_links(filename):
             for line in open(join(ROOT, 'requirements', filename))
             if '://' in line]
 
-
-long_description = '\n'.join((
-    rst('README.rst'),
-    rst('CHANGELOG.rst'),
-    ''
-))
-
 install_requires = pip('install.pip')
 tests_require = pip('test.pip')
 
@@ -70,7 +62,7 @@ setup(
     name='udata',
     version=__import__('udata').__version__,
     description=__import__('udata').__description__,
-    long_description=long_description,
+    long_description=clean_doc('README.md'),
     url='https://github.com/etalab/udata',
     download_url='http://pypi.python.org/pypi/udata',
     author='Axel Haustant',
