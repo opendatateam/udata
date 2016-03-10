@@ -46,25 +46,7 @@ Vous avez la possibilité d’intégrer des jeux de données directement sur vot
 <pre>
 <code>
 &lt;div data-udata-dataset-id="ID DU JEU DE DONNÉES"&gt;&lt;/div&gt;
-&lt;script&gt;
-window.udataURL = "https://www.data.gouv.fr";
-window.udata = (function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0],
-    t = window.udata || {};
-  if (d.getElementById(id)) return t;
-  js = d.createElement(s);
-  js.id = id;
-  js.src = window.udataURL + "/static/widgets.js";
-  fjs.parentNode.insertBefore(js, fjs);
-
-  t._e = [];
-  t.ready = function(f) {
-    t._e.push(f);
-  };
-
-  return t;
-}(document, "script", "udata-wjs"));
-&lt;/script&gt;
+&lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer&gt;&lt;/script&gt;
 </code>
 </pre>
 
@@ -75,10 +57,7 @@ Si vous souhaitez intégrer plusieurs jeux de données, seule la balise <code>di
 <code>
 &lt;div data-dgfr-dataset-id="ID DU PREMIER JEU DE DONNÉES"&gt;&lt;/div&gt;
 &lt;div data-dgfr-dataset-id="ID DU SECOND JEU DE DONNÉES"&gt;&lt;/div&gt;
+&lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer&gt;&lt;/script&gt;
 </code>
 </pre>
-
-<p>
-Vous pouvez intégrer la partie correspondant à la balise <code>script</code> à la fin de votre <code>HTML</code> afin d’améliorer les performances de chargement de votre contenu.
-</p>
 {% endblock %}
