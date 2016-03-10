@@ -56,7 +56,7 @@
                 <a href="https://github.com/etalab" title="github">
                     <span class="fa fa-github-square"></span>
                 </a>
-                <a href="mailto:info@data.gouv.fr" title="M@il">
+                <a href="m&#x61;ilto:{{ config.CONTACT_EMAIL|obfuscate|safe }}">
                     <span class="fa fa-envelope-square"></span>
                 </a>
                 {% set rss_popup = ('''
