@@ -1,6 +1,10 @@
 /**
  * Common search features
  */
+
+// ES6 environment
+import 'babel-polyfill';
+
 import $ from 'jquery';
 import log from 'logger';
 import 'search/temporal-coverage-facet';

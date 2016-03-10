@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from mongoengine import post_save
 
-from udata.models import db, Dataset
+from udata.models import db, Dataset, Resource
 
 from .. import TestCase, DBTestMixin
 from ..factories import (
@@ -60,6 +60,21 @@ class DatasetModelTest(TestCase, DBTestMixin):
 
         with self.assert_emit(*expected_signals):
             dataset.add_resource(ResourceFactory())
+        self.assertEqual(len(dataset.resources), 1)
+
+        with self.assert_emit(*expected_signals):
+            dataset.add_resource(resource)
+        self.assertEqual(len(dataset.resources), 2)
+        self.assertEqual(dataset.resources[0].id, resource.id)
+
+    def test_add_resource_without_checksum(self):
+        user = UserFactory()
+        dataset = DatasetFactory(owner=user)
+        resource = ResourceFactory(checksum=None)
+        expected_signals = post_save, Dataset.after_save, Dataset.on_update
+
+        with self.assert_emit(*expected_signals):
+            dataset.add_resource(ResourceFactory(checksum=None))
         self.assertEqual(len(dataset.resources), 1)
 
         with self.assert_emit(*expected_signals):

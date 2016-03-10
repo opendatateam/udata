@@ -11,7 +11,7 @@ from udata.tests.factories import faker
 
 class Nested(db.EmbeddedDocument):
     id = db.AutoUUIDField()
-    name = db.StringField()
+    name = db.StringField(required=True)
 
 
 class Fake(db.Document):
@@ -116,3 +116,14 @@ class FormFieldTest(TestCase):
 
         self.assertEqual(fake.nested.id, initial_id)
         self.assertEqual(fake.nested.name, new_name)
+
+    def test_create_with_non_submitted_elements(self):
+        form = self.factory({'name': faker.word()})
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        fake = form.save()
+
+        self.assertIsNotNone(fake.name)
+        self.assertIsNone(fake.nested)

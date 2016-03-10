@@ -1,3 +1,6 @@
+// ES6 environment
+import 'babel-polyfill';
+
 import $ from 'jquery';
 import 'jQuery.dotdotdot';
 
