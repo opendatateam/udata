@@ -55,8 +55,13 @@
 {% endblock %}
 
 {% block content %}
+<div itemscope itemtype="http://schema.org/CreativeWork">
 <section class="reuse-section community-section">
     <div class="container reuse-container">
+        <meta itemprop="alternateName" content="{{ reuse.slug }}" />
+        <meta itemprop="dateCreated" content="{{ reuse.created_at|isoformat }}" />
+        <meta itemprop="dateModified" content="{{ reuse.last_modified|isoformat }}" />
+        <meta itemprop="url" content="{{ url_for('reuses.show', reuse=reuse, _external=True) }}" />
         <div class="row">
 
             <div class="col-md-9 col-sm-9 smaller">
@@ -97,12 +102,12 @@
                     </div>
                 </div>
 
-                <div>
+                <div itemprop="description">
                     {{ reuse.description|markdown }}
                 </div>
 
                 <div class="reuse-image">
-                    <a href="{{ reuse.url }}" target="_blank">
+                    <a itemprop="isBasedOnUrl" href="{{ reuse.url }}" target="_blank">
                         <img src="{{ reuse.image|placeholder('reuse') }}"
                             alt="{{ reuse.title }}" class="scalable" />
                         <br/>
@@ -269,7 +274,7 @@
             <div class="col-xs-12">
                 <ul class="card-list">
                     {% for dataset in reuse.datasets %}
-                    <li class="col-md-4 col-sm-6">
+                    <li class="col-md-4 col-sm-6" itemprop="hasPart">
                     {% include theme('dataset/card.html') %}
                     </li>
                     {% endfor %}
@@ -300,4 +305,5 @@
         {% endwith %}
     </div>
 </section>
+</div>
 {% endblock %}

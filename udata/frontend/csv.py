@@ -210,12 +210,14 @@ def yield_rows(adapter):
     # Generate header
     writer.writerow(adapter.header())
     yield csvfile.getvalue()
+    del csvfile
 
     for row in adapter.rows():
         csvfile = StringIO()
         writer = get_writer(csvfile)
         writer.writerow(row)
         yield csvfile.getvalue()
+        del csvfile
 
 
 def stream(queryset_or_adapter, basename=None):

@@ -52,11 +52,13 @@
 {% endblock %}
 
 {% block content %}
+<div itemscope itemtype="http://schema.org/Dataset" itemid="{{ dataset.id }}">
 <section class="content {% if not dataset.organization.public_service %}non{% endif %}certified">
-    <div class="container dataset-container"  itemscope="itemscope" itemtype="http://schema.org/Dataset" itemid="{{dataset.id}}">
+    <div class="container dataset-container">
         <meta itemprop="alternateName" content="{{dataset.slug}}" />
         <meta itemprop="dateCreated" content="{{dataset.created_at|isoformat}}" />
         <meta itemprop="dateModified" content="{{dataset.last_modified|isoformat}}" />
+        <meta itemprop="url" content="{{ url_for('datasets.show', dataset=dataset, _external=True) }}" />
         <div class="row">
 
             <div class="col-md-9 col-sm-9 smaller">
@@ -135,7 +137,7 @@
                                 data-toggle="collapse" href="#collapsed-resources">
                                 <span class="glyphicon glyphicon-list" ></span>
                                 {{ _('See the %(nb)d resources', nb=dataset.resources|length) }}
-                            </button>
+                            </a>
                         </p>
                     {% endif %}
 
@@ -235,7 +237,7 @@
                                     title="{{ _('License') }}">
                                     <span class="glyphicon glyphicon-copyright-mark"></span>
                                 </a>
-                                {% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
+                                {% if dataset.license.url %}<a itemprop="license" href="{{ dataset.license.url }}">{% endif %}
                                 {{ dataset.license.title }}
                                 {% if dataset.license.url %}</a>{% endif %}
                             </li>
@@ -327,7 +329,7 @@
                         </div>
 
                         {% for key, value in dataset.extras.items() %}
-                        <div itemprop="additionalProperty" itemscope itemtype="http://schema.org/PropertyValue">
+                        <div itemscope itemtype="http://schema.org/PropertyValue">
                             <meta itemprop="name" content="{{key}}"/>
                             <meta itemprop="value" content="{{value.serialize()|to_json if value.serialize else value }}"/>
                         </div>
@@ -387,7 +389,9 @@
         <div class="row">
             <div class="col-sm-9 list-group resources-list smaller">
             {% for resource in dataset.community_resources %}
-                {% include theme('dataset/resource/list-item.html') %}
+                <div itemprop="hasPart">
+                    {% include theme('dataset/resource/list-item.html') %}
+                </div>
             {% endfor %}
                 <a class="list-group-item add"
                     href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
@@ -408,7 +412,7 @@
             <div class="col-sm-9 reuses-list smaller">
                 <div class="row">
                     {% for reuse in reuses %}
-                    <div class="col-sm-6 col-lg-4">
+                    <div class="col-sm-6 col-lg-4" itemprop="isPartOf">
                         <div id="reuse-{{reuse.id}}" class="thumbnail reuse">
                             <a class="preview" href="{{ url_for('reuses.show', reuse=reuse) }}">
                                 <img class="media-object img-responsive" alt="{{ reuse.title }}"
@@ -486,4 +490,5 @@
 
     </div>
 </section>
+</div>
 {% endblock %}

@@ -40,7 +40,7 @@ class UDataMarkdown(object):
             styles=current_app.config['MD_ALLOWED_STYLES'],
             strip_comments=False)
         # Turn markdown to HTML.
-        ast = self.parser.parse(stream)
+        ast = self.parser().parse(stream)
         html = self.renderer.render(ast)
         # Turn string links into HTML ones *after* markdown transformation.
         html = bleach.linkify(html, tokenizer=KeepTokenSanitizer,
@@ -50,7 +50,7 @@ class UDataMarkdown(object):
 
 
 def init_app(app):
-    parser = CommonMark.DocParser()
+    parser = CommonMark.DocParser  # Not an instance because not thread-safe(?)
     renderer = CommonMark.HTMLRenderer()
     app.extensions['markdown'] = UDataMarkdown(app, parser, renderer)
 

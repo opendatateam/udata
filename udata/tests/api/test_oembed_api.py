@@ -9,18 +9,18 @@ from . import APITestCase
 from ..factories import DatasetFactory, OrganizationFactory, UserFactory
 
 
-class OEmbedDatasetAPITest(APITestCase):
+class OEmbedsDatasetAPITest(APITestCase):
 
-    def test_oembed_dataset_api_get(self):
+    def test_oembeds_dataset_api_get(self):
         '''It should fetch a dataset in the oembed format.'''
         with self.autoindex():
             dataset = DatasetFactory()
 
-        dataset_url = url_for(
-            'api.dataset', dataset=dataset.id, _external=True)
-        response = self.get(url_for('api.oembed', **{'url': dataset_url}))
+        url = url_for('api.oembeds',
+                      references='dataset-{id}'.format(id=dataset.id))
+        response = self.get(url)
         self.assert200(response)
-        data = json.loads(response.data)
+        data = json.loads(response.data)[0]
         self.assertIn('html', data)
         self.assertIn('width', data)
         self.assertIn('maxwidth', data)
@@ -34,66 +34,52 @@ class OEmbedDatasetAPITest(APITestCase):
         # Because we use mdstrip for the description.
         self.assertIn(dataset.description[:90], data['html'])
 
-    def test_oembed_dataset_api_get_with_organization(self):
+    def test_oembeds_dataset_api_get_with_organization(self):
         '''It should fetch a dataset in the oembed format with org.'''
         with self.autoindex():
             organization = OrganizationFactory()
             dataset = DatasetFactory(organization=organization)
 
-        dataset_url = url_for(
-            'api.dataset', dataset=dataset.id, _external=True)
-        response = self.get(url_for('api.oembed', **{'url': dataset_url}))
+        url = url_for('api.oembeds',
+                      references='dataset-{id}'.format(id=dataset.id))
+        response = self.get(url)
         self.assert200(response)
-        data = json.loads(response.data)
+        data = json.loads(response.data)[0]
         self.assertNotIn('placeholders/default.png', data['html'])
         self.assertIn(organization.name, data['html'])
         self.assertIn(organization.external_url, data['html'])
 
-    def test_oembed_dataset_api_get_without_url(self):
+    def test_oembeds_dataset_api_get_without_references(self):
         '''It should fail at fetching an oembed without a dataset.'''
-        response = self.get(url_for('api.oembed'))
+        response = self.get(url_for('api.oembeds'))
         self.assert400(response)
         data = json.loads(response.data)
         self.assertEqual(
-            data['message']['url'],
-            ("(URL of the resource to embed.)  "
+            data['message']['references'],
+            ("(References of the resources to embed.)  "
              "Missing required parameter in the query string"))
 
-    def test_oembed_dataset_api_get_without_good_url(self):
-        '''It should fail at fetching an oembed without a wrong url.'''
-        with self.autoindex():
-            dataset = DatasetFactory()
-
-        dataset_url = url_for(
-            'datasets.show', dataset=dataset.id, _external=True)
-        response = self.get(url_for('api.oembed', **{'url': dataset_url}))
+    def test_oembeds_dataset_api_get_without_good_id(self):
+        '''It should fail at fetching an oembed without a good id.'''
+        response = self.get(url_for('api.oembeds', references='123456789'))
         self.assert400(response)
-        self.assertEqual(json.loads(response.data)['message'], 'Invalid URL.')
+        self.assertEqual(json.loads(response.data)['message'], 'Invalid ID.')
 
-    def test_oembed_dataset_api_get_without_good_item(self):
-        '''It should fail at fetching an oembed without a wrong item.'''
+    def test_oembeds_dataset_api_get_without_good_item(self):
+        '''It should fail at fetching an oembed with a wrong item.'''
         with self.autoindex():
             user = UserFactory()
 
-        user_url = url_for('api.user', user=user.id, _external=True)
-        response = self.get(url_for('api.oembed', **{'url': user_url}))
+        url = url_for('api.oembeds', references='user-{id}'.format(id=user.id))
+        response = self.get(url)
         self.assert400(response)
         self.assertEqual(json.loads(response.data)['message'],
                          'Invalid object type.')
 
-    def test_oembed_dataset_api_get_without_valid_id(self):
+    def test_oembeds_dataset_api_get_without_valid_id(self):
         '''It should fail at fetching an oembed without a valid id.'''
-        dataset_url = url_for(
-            'api.dataset', dataset='incorrect-id', _external=True)
-        response = self.get(url_for('api.oembed', **{'url': dataset_url}))
+        url = url_for('api.oembeds', references='dataset-123456789')
+        response = self.get(url)
         self.assert400(response)
-        self.assertEqual(json.loads(response.data)['message'], 'Incorrect ID.')
-
-    def test_oembed_dataset_api_get_without_existing_id(self):
-        '''It should fail at fetching an oembed without a existing id.'''
-        dataset_id = '5661724a4a7bd1d4ab4c7956'  # Inexisting ID.
-        dataset_url = url_for(
-            'api.dataset', dataset=dataset_id, _external=True)
-        response = self.get(url_for('api.oembed', **{'url': dataset_url}))
-        self.assert400(response)
-        self.assertEqual(json.loads(response.data)['message'], 'Incorrect ID.')
+        self.assertEqual(json.loads(response.data)['message'],
+                         'Unknown dataset ID.')

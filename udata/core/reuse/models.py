@@ -57,7 +57,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
         thumbnails=IMAGE_SIZES)
     datasets = db.ListField(
         db.ReferenceField('Dataset', reverse_delete_rule=db.PULL))
-    tags = db.ListField(db.StringField())
+    tags = db.TagListField()
     # badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
 
     private = db.BooleanField()

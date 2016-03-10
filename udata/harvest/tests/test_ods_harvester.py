@@ -63,11 +63,11 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
         d = datasets["test-a"]
         self.assertEqual(d.title, "test-a")
         self.assertEqual(d.description, "test-a-description")
-        self.assertEqual(d.tags, ['environment',
-                                  'keyword2',
-                                  'keyword1',
+        self.assertEqual(d.tags, ['culture',
+                                  'environment',
                                   'heritage',
-                                  'culture'])
+                                  'keyword1',
+                                  'keyword2'])
         self.assertEqual(d.extras["ods:references"], "http://example.com")
         self.assertEqual(d.extras["ods:has_records"], True)
         self.assertEqual(d.extras["harvest:remote_id"], "test-a")
@@ -107,11 +107,11 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
         self.assertIn("test-b", datasets)
         test_b = datasets["test-b"]
         self.assertEqual(test_b.tags, ['buildings',
-                                       'housing',
                                        'equipment',
-                                       'town planning',
+                                       'housing',
                                        'keyword1',
-                                       'spatial planning'])
+                                       'spatial-planning',
+                                       'town-planning'])
         self.assertEqual(len(test_b.resources), 4)
         resource = test_b.resources[2]
         self.assertEqual(resource.title, 'Export au format GeoJSON')

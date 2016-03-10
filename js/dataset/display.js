@@ -211,7 +211,7 @@ function add_reuse() {
             content: addReuseTpl({
                 reuses: user_reuses,
                 new_reuse_url: $this.attr('href'),
-                dataset: $('.dataset-container').attr('itemid')
+                dataset: $Dataset.attr('itemid')
             })
         });
         $modal.on('shown.bs.modal', function() {

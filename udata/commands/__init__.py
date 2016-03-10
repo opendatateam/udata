@@ -57,16 +57,17 @@ def register_commands(manager):
     import udata.core.badges.commands
     import udata.api.commands
     import udata.harvest.commands
+    import udata.features.territories.commands
 
     # Dynamic module commands loading
     for plugin in manager.app.config['PLUGINS']:
         name = 'udata.ext.{0}.commands'.format(plugin)
         try:
             __import__(name)
-        except ImportError:
-            pass
+        except ImportError as e:
+            log.warning('Error importing %s: %s', name, e)
         except Exception as e:
-            log.error('Error importing %s: %s', name, e)
+            log.error('Error during import of %s: %s', name, e)
 
 
 def run_manager(config='udata.settings.Defaults'):

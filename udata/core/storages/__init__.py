@@ -16,9 +16,11 @@ def tmp_upload_to():
 
 resources = fs.Storage('resources', AUTHORIZED_TYPES)
 avatars = fs.Storage('avatars', fs.IMAGES)
+logos = fs.Storage('logos', fs.IMAGES)
 images = fs.Storage('images', fs.IMAGES)
 chunks = fs.Storage('resources', AUTHORIZED_TYPES)
 tmp = fs.Storage('tmp', fs.ALL, upload_to=tmp_upload_to)
+references = fs.Storage('references', AUTHORIZED_TYPES)
 
 
 def default_image_basename(*args, **kwargs):
@@ -29,4 +31,5 @@ def default_image_basename(*args, **kwargs):
 def init_app(app):
     if 'BUCKETS_PREFIX' not in app.config:
         app.config['BUCKETS_PREFIX'] = '/s'
-    fs.init_app(app, resources, avatars, images, chunks, tmp)
+    fs.init_app(
+        app, resources, avatars, logos, images, chunks, tmp, references)

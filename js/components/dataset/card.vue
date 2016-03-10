@@ -114,7 +114,7 @@ export default {
             return this.dataset.organization.logo;
         },
         certified: function() {
-            return config.theme_static + 'img/certified-stamp.png';
+            return `${config.theme_static}img/certified-stamp.png`;
         },
         spatial_label: function() {
 

@@ -8,6 +8,7 @@ from collections import OrderedDict
 from blinker import signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
+from mongoengine.fields import DateTimeField
 from werkzeug import cached_property
 
 from udata.models import (
@@ -155,14 +156,18 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
     on_deleted = signal('Resource.on_deleted')
 
 
-class Dataset(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
+class Dataset(WithMetrics, BadgeMixin, db.Document):
+    created_at = DateTimeField(verbose_name=_('Creation date'),
+                               default=datetime.now, required=True)
+    last_modified = DateTimeField(verbose_name=_('Last modification date'),
+                                  default=datetime.now, required=True)
     title = db.StringField(max_length=255, required=True)
     slug = db.SlugField(
         max_length=255, required=True, populate_from='title', update=True)
     description = db.StringField(required=True, default='')
     license = db.ReferenceField('License')
 
-    tags = db.ListField(db.StringField())
+    tags = db.TagListField()
     resources = db.ListField(db.EmbeddedDocumentField(Resource))
 
     private = db.BooleanField()
