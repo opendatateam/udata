@@ -113,9 +113,10 @@
 
 
 {# Datasets section #}
+{% set nb_datasets = current_site.settings.home_datasets|length %}
 {% set dataset_tabs = (
     ('editorial-datasets', _('Featured datasets'), current_site.settings.home_datasets, {}),
-    ('recent-datasets', _('Latest datasets'), recent_datasets[:9], {'sort': '-created'}),
+    ('recent-datasets', _('Latest datasets'), recent_datasets[:nb_datasets], {'sort': '-created'}),
 ) %}
 
 <section class="default spaced">
@@ -193,6 +194,59 @@
                             class="btn btn-grey btn-primary btn-mini">+</a>
                     </p>
 
+                </div>
+            </div>
+      </div>
+</section>
+{% endif %}
+{% if forum_topics %}
+<section class="default forum-topics">
+      <div class="container forum-topics-container">
+            <div class="row">
+                <div class="col-xs-12">
+                    <h3><a href="{{ config.DISCOURSE_URL }}">{{ _('Latest forum discussions') }}</a></h3>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{{ _('Title') }}</th>
+                                <th>{{ _('Users') }}</th>
+                                <th>{{ _('Created at') }}</th>
+                                <th class="text-center">{{ _('Replies') }}</th>
+                                <th class="text-center">{{ _('Views') }}</th>
+                                <th class="text-center">{{ _('Likes') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for topic in forum_topics %}
+                            <tr>
+                                <th>
+                                    <a href="{{ topic.url }}">
+                                        {{ topic.title }}
+                                        <span class="label label-primary">{{ topic.category }}</span>
+                                    </a>
+                                </th>
+                                <td>
+                                    <a href="{{ topic.url }}">
+                                        {% for poster in topic.posters %}
+                                        <img class="img-circle" width="25" height="25"
+                                            src="{{ poster.avatar_url.format(size=50) }}"
+                                            alt="{{ poster.name }}" />
+                                        {% endfor %}
+                                    </a>
+                                </td>
+                                <td><a href="{{ topic.url }}">{{ topic.created_at|datetimeformat }}</a></td>
+                                <td class="text-center"><a href="{{ topic.url }}">{{ topic.replies }}</a></td>
+                                <td class="text-center"><a href="{{ topic.url }}">{{ topic.views }}</a></td>
+                                <td class="text-center"><a href="{{ topic.url }}">{{ topic.likes }}</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
       </div>
