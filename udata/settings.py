@@ -13,6 +13,7 @@ class Defaults(object):
     }
     DEFAULT_LANGUAGE = 'en'
     SECRET_KEY = 'Default uData secret key'
+    CONTACT_EMAIL = 'contact@example.org'
 
     MONGODB_HOST = 'localhost'
     MONGODB_PORT = 27017
@@ -94,6 +95,8 @@ class Defaults(object):
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
     HARVEST_PREVIEW_MAX_ITEMS = 20
+
+    ACTIVATE_TERRITORIES = False
 
     # CROQUEMORT = {
     #     'url': 'http://localhost:8000',

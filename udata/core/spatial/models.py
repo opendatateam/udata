@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask import url_for
 from werkzeug.local import LocalProxy
 
 from udata.app import cache
 from udata.i18n import lazy_gettext as _, gettext, get_locale
 from udata.models import db
+from udata.core.storages import logos
 
 
 __all__ = (
@@ -36,6 +38,9 @@ class GeoZone(db.Document):
     keys = db.DictField()
     population = db.IntField()
     area = db.FloatField()
+    wikipedia = db.StringField()
+    dbpedia = db.StringField()
+    logo = db.ImageField(fs=logos)
 
     meta = {
         'indexes': [
@@ -51,7 +56,15 @@ class GeoZone(db.Document):
     __str__ = __unicode__
 
     def __html__(self):
-        return gettext(self.name) + ' <i>(' + self.code + ')</i>'
+        return '{name} <i>({code})</i>'.format(
+            name=gettext(self.name), code=self.code)
+
+    def logo_url(self, external=False):
+        filename = self.logo.filename
+        if filename and self.logo.fs.exists(filename):
+            return self.logo.fs.url(filename, external=external)
+        else:
+            return ''
 
     @property
     def keys_values(self):
@@ -63,6 +76,14 @@ class GeoZone(db.Document):
             elif not str(value).startswith('-'):  # Avoid -99.
                 keys_values.append(value)
         return keys_values
+
+    @property
+    def url(self):
+        return url_for('territories.territory', territory=self)
+
+    @property
+    def external_url(self):
+        return url_for('territories.territory', territory=self, _external=True)
 
     def toGeoJSON(self):
         return {

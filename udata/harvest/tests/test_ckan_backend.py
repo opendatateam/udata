@@ -212,8 +212,8 @@ class CkanBackendTest(DBTestMixin, TestCase):
         d = datasets['dataset-1']
         self.assertEqual(d.title, 'Dataset 1')
         self.assertEqual(d.description, "Description 1")
-        self.assertEqual(d.tags, ['economie',
-                                  'correspondant',
+        self.assertEqual(d.tags, ['correspondant',
+                                  'economie',
                                   'excellence',
                                   'pole'])
         self.assertEqual(d.extras['harvest:remote_id'],

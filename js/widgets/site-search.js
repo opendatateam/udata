@@ -1,24 +1,26 @@
 /**
  * Main site search
  */
+ const config = require('config');
+
 define([
     'jquery',
     'dataset/typeahead',
     'reuse/typeahead',
     'organization/typeahead',
-    // 'user/typeahead',
+    'territory/typeahead',
     'typeahead'
-], function($, datasets, reuses, organizations) {
+], function($, datasets, reuses, organizations, territories) {
     'use strict';
 
-    var SEARCH_FOCUS_CLASS = 'col-sm-7 col-lg-8',
-        SEARCH_UNFOCUS_CLASS = 'col-sm-2 col-lg-3',
-        options = {
-            highlight: true,
-            classNames: {
-                menu: 'tt-dropdown-menu'
-            }
-        };
+    const SEARCH_FOCUS_CLASS = 'col-sm-7 col-lg-8';
+    const SEARCH_UNFOCUS_CLASS = 'col-sm-2 col-lg-3';
+    const options = {
+        highlight: true,
+        classNames: {
+            menu: 'tt-dropdown-menu'
+        }
+    };
 
     // Expandable main search bar
     $('#main-search')
@@ -37,10 +39,14 @@ define([
     ;
 
     // Typeahead
+    let providers = [organizations, datasets, reuses];
+    if (config.is_territory_enabled) {
+        providers.push(territories);
+    }
     $('#main-search')
-        .typeahead(options, organizations, datasets, reuses)
-        .on('typeahead:select', function(e, data, datatype) {
-            window.location = data.page
+        .typeahead(options, ...providers)
+        .on('typeahead:select', (e, data, datatype) => {
+            window.location = data.page;
         });
 
 });

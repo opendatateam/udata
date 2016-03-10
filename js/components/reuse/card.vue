@@ -78,10 +78,7 @@ export default {
     },
     computed: {
         certified: function() {
-            return config.theme_static + 'img/certified-stamp.png';
-        },
-        spatial_label: function() {
-
+            return `${config.theme_static}img/certified-stamp.png`;
         },
         owner_avatar: function() {
             if (this.reuse.organization) {

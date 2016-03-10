@@ -68,6 +68,18 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['extras']['key'], 1)
 
+    def test_dataset_api_list_with_facets(self):
+        '''It should fetch a dataset list from the API with facets'''
+        with self.autoindex():
+            for i in range(2):
+                VisibleDatasetFactory(tags=['tag-{0}'.format(i)])
+
+        response = self.get(url_for('api.datasets', **{'facets': 'tag'}))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 2)
+        self.assertIn('facets', response.json)
+        self.assertIn('tag', response.json['facets'])
+
     def test_dataset_api_get(self):
         '''It should fetch a dataset from the API'''
         with self.autoindex():
@@ -144,13 +156,13 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_create_tags(self):
         '''It should create a dataset from the API'''
         data = DatasetFactory.attributes()
-        data['tags'] = [faker.word() for _ in range(3)]
+        data['tags'] = faker.words(nb=3)
         with self.api_user():
             response = self.post(url_for('api.datasets'), data)
         self.assertStatus(response, 201)
         self.assertEqual(Dataset.objects.count(), 1)
         dataset = Dataset.objects.first()
-        self.assertEqual(dataset.tags, data['tags'])
+        self.assertEqual(dataset.tags, sorted(data['tags']))
 
     @attr('create')
     def test_dataset_api_create_with_extras(self):
@@ -546,6 +558,8 @@ class DatasetResourceAPITest(APITestCase):
     def test_reorder(self):
         self.dataset.resources = ResourceFactory.build_batch(3)
         self.dataset.save()
+        self.dataset.reload()  # Otherwise `last_modified` date is inaccurate.
+        initial_last_modified = self.dataset.last_modified
 
         initial_order = [r.id for r in self.dataset.resources]
         expected_order = [{'id': str(id)} for id in reversed(initial_order)]
@@ -554,10 +568,12 @@ class DatasetResourceAPITest(APITestCase):
             response = self.put(url_for('api.resources', dataset=self.dataset),
                                 expected_order)
         self.assertStatus(response, 200)
-
+        self.assertEqual([str(r['id']) for r in response.json],
+                         [str(r['id']) for r in expected_order])
         self.dataset.reload()
         self.assertEqual([str(r.id) for r in self.dataset.resources],
                          [str(r['id']) for r in expected_order])
+        self.assertEqual(self.dataset.last_modified, initial_last_modified)
 
     @attr('update')
     def test_update(self):
@@ -774,7 +790,7 @@ class DatasetResourceAPITest(APITestCase):
             self.assertTrue(suggestion['title'].startswith('test'))
 
     def test_suggest_datasets_api_unicode(self):
-        '''It should suggest datasets withspecial characters'''
+        '''It should suggest datasets with special characters'''
         with self.autoindex():
             for i in range(4):
                 DatasetFactory(

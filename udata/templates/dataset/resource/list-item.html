@@ -1,6 +1,7 @@
 {% set resource_format = resource.format|trim|lower or 'data' %}
 <div id="resource-{{resource.id}}" class="list-group-item"
-    itemscope="itemscope" itemtype="http://schema.org/DataDownload"
+    itemscope itemtype="http://schema.org/DataDownload"
+    itemprop="distribution"
     data-checkurl="{{ url_for('api.checkurl') }}">
     <div class="format-label pull-left ellipsis-dot">
         <span data-format="{{ resource_format }}">
@@ -19,9 +20,13 @@
             <meta itemprop="dateModified" content="{{resource.modified|isoformat}}" />
             <meta itemprop="datePublished" content="{{resource.published|dateformat('long')}}" />
             <meta itemprop="contentSize" content="{{resource.filesize or ''}}" />
-            <meta itemprop="mimetype" content="{{resource.mime or ''}}" />
-            <meta itemprop="downloads" content="{{resource.metrics.views or ''}}" />
+            <meta itemprop="fileFormat" content="{{resource.mime or ''}}" />
+            <div itemprop="interactionStatistic" itemscope itemtype="http://schema.org/InteractionCounter">
+              <meta itemprop="interactionType" content="http://schema.org/DownloadAction" />
+              <meta itemprop="userInteractionCount" content="{{resource.metrics.views or ''}}" />
+            </div>
             {% if resource.checksum %}
+            <!-- non standard -->
             <meta itemprop="checksum" content="{{resource.checksum.value}}" />
             <meta itemprop="checksumType" content="{{resource.checksum.type or 'sha1'}}" />
             {% endif %}

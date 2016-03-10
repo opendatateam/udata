@@ -239,3 +239,10 @@ class DatasetModelTest(TestCase, DBTestMixin):
                 'tags_count',
                 'update_in'
             ])
+
+    def test_tags_normalized(self):
+        user = UserFactory()
+        tags = [' one another!', ' one another!', 'This IS a "tag"…']
+        dataset = DatasetFactory(owner=user, tags=tags)
+        self.assertEqual(len(dataset.tags), 2)
+        self.assertEqual(dataset.tags[1], 'this-is-a-tag')

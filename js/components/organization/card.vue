@@ -84,10 +84,7 @@ export default {
             return this.organization.logo;
         },
         certified_stamp: function() {
-            return config.theme_static + 'img/certified-stamp.png';
-        },
-        spatial_label: function() {
-
+            return `${config.theme_static}img/certified-stamp.png`;
         }
     },
     created: function() {

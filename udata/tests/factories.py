@@ -159,7 +159,7 @@ class TopicFactory(MongoEngineFactory):
 
     name = factory.LazyAttribute(lambda o: faker.sentence())
     description = factory.LazyAttribute(lambda o: faker.text())
-    tags = factory.LazyAttribute(lambda o: [faker.word() for _ in range(3)])
+    tags = factory.LazyAttribute(lambda o: faker.words(nb=3))
 
     @factory.lazy_attribute
     def datasets(self):
@@ -202,3 +202,11 @@ def badge_factory(model):
         kind = FuzzyChoice(model.__badges__.keys())
 
     return BadgeFactory
+
+
+class GeoZoneFactory(MongoEngineFactory):
+    class Meta:
+        model = models.GeoZone
+
+    geom = factory.LazyAttribute(
+        lambda o: [[[[1, 1], [1, 1]], [[1, 1], [1, 1]]]])

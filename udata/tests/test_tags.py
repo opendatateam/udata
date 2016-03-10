@@ -41,8 +41,10 @@ class TagsTests(FrontTestCase):
 
     def test_count(self):
         for i in range(1, 4):
-            VisibleDatasetFactory(tags=['tag-{0}'.format(j) for j in range(i)])
-            VisibleReuseFactory(tags=['tag-{0}'.format(j) for j in range(i)])
+            # Tags should be slugified and deduplicated.
+            tags = ['Tag "{0}"'.format(j) for j in range(i)] + ['tag-0']
+            VisibleDatasetFactory(tags=tags)
+            VisibleReuseFactory(tags=tags)
 
         count_tags.run()
 
