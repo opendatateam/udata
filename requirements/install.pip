@@ -26,6 +26,7 @@ Flask==0.10.1
 html2text
 lxml
 mongoengine==0.10.0
+msgpack-python==0.4.7
 pillow
 py-bcrypt==0.4
 pyliblzma==0.5.3
