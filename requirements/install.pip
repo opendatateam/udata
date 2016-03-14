@@ -35,7 +35,7 @@ pytz
 PyYAML==3.11
 redis
 requests
-unicodecsv==0.13.0
+unicodecsv==0.14.1
 voluptuous
 wtforms-json==0.2.10
 wtforms==2.1
