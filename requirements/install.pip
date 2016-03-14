@@ -38,7 +38,7 @@ requests
 unicodecsv==0.13.0
 voluptuous
 wtforms-json==0.2.10
-wtforms==2.0.2
+wtforms==2.1
 xmltodict
 geojson>=1.3.1
 
