@@ -17,7 +17,7 @@ Flask-Navigation==0.2.0
 Flask-OAuthlib==0.9.1
 flask-restplus==0.7.2
 Flask-Script==2.0.5
-Flask-Security==1.7.4
+Flask-Security==1.7.5
 Flask-Sitemap==0.1.0
 Flask-Themes2==0.1.4
 Flask-Uploads==0.1.3
