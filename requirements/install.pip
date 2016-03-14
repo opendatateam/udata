@@ -6,7 +6,7 @@ celerybeat-mongo==0.0.10
 chardet
 CommonMark==0.6.3
 elasticsearch==2.3.0
-Flask-BabelEx==0.9.2
+Flask-BabelEx==0.9.3
 Flask-Cache==0.13.1
 flask-fs==0.1
 Flask-Gravatar==0.4.2
