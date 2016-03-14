@@ -30,7 +30,7 @@ msgpack-python==0.4.7
 pillow
 py-bcrypt==0.4
 pyliblzma==0.5.3
-python-dateutil==2.4.2
+python-dateutil==2.5.0
 pytz
 PyYAML==3.11
 redis
