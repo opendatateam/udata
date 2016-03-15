@@ -1,57 +1,55 @@
-# French translations for udata-gouvfr.
-# Copyright (C) 2015 ORGANIZATION
-# This file is distributed under the same license as the udata-gouvfr
-# project.
-#
+# Translations template for udata-gouvfr.
+# Copyright (C) 2016 ORGANIZATION
+# This file is distributed under the same license as the udata-gouvfr project.
+# 
 # Translators:
 # Axel Haustant, 2014
 # Axel Haustant, 2014-2015
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2014
-# Larlet David <david@larlet.fr>, 2015
+# Larlet David <david@larlet.fr>, 2015-2016
 # noirbizarre, 2014
 msgid ""
 msgstr ""
-"Project-Id-Version:  udata-gouv.fr\n"
+"Project-Id-Version: udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-01-13 19:02+0100\n"
-"PO-Revision-Date: 2015-09-30 15:06+0000\n"
+"POT-Creation-Date: 2016-03-14 17:25+0100\n"
+"PO-Revision-Date: 2016-03-14 16:27+0000\n"
 "Last-Translator: Larlet David <david@larlet.fr>\n"
-"Language: fr\n"
-"Language-Team: French (http://www.transifex.com/etalab/udata-"
-"gouvfr/language/fr/)\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"Language-Team: French (http://www.transifex.com/etalab/udata-gouvfr/language/fr/)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.1.1\n"
+"Generated-By: Babel 1.3\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: udata_gouvfr/metrics.py:14
 msgid "Public services"
 msgstr "Services publics"
 
-#: udata_gouvfr/models.py:22
+#: udata_gouvfr/models.py:23
 msgid "Dataconnexions 5 candidate"
 msgstr "Candidat Dataconnexions 5"
 
-#: udata_gouvfr/models.py:23
+#: udata_gouvfr/models.py:24
 msgid "Dataconnexions 5 laureate"
 msgstr "Lauréat Dataconnexions 5"
 
-#: udata_gouvfr/models.py:24
+#: udata_gouvfr/models.py:25
 msgid "Dataconnexions 6 candidate"
 msgstr "Candidat Dataconnexions 6"
 
-#: udata_gouvfr/models.py:25
+#: udata_gouvfr/models.py:26
 msgid "Dataconnexions 6 laureate"
 msgstr "Lauréat Dataconnexions 6"
 
-#: udata_gouvfr/models.py:31
+#: udata_gouvfr/models.py:32
 msgid "C³"
 msgstr "C³"
 
-#: udata_gouvfr/models.py:32
+#: udata_gouvfr/models.py:33
 msgid "Nec Mergitur"
-msgstr ""
+msgstr "Nec Mergitur"
 
 #: udata_gouvfr/templates/c3.html:138
 #: udata_gouvfr/templates/nec_mergitur.html:80
@@ -67,59 +65,59 @@ msgstr "Conditions générales d'utilisations"
 msgid "terms"
 msgstr "conditions générales d'utilisations"
 
-#: udata_gouvfr/theme/theme.py:35
+#: udata_gouvfr/theme/theme.py:24
 msgid "Discover OpenData"
 msgstr "Découvrez l'OpenData"
 
-#: udata_gouvfr/theme/theme.py:36 udata_gouvfr/theme/theme.py:61
+#: udata_gouvfr/theme/theme.py:25 udata_gouvfr/theme/theme.py:50
 msgid "As a citizen"
 msgstr "En tant que citoyen"
 
-#: udata_gouvfr/theme/theme.py:37 udata_gouvfr/theme/theme.py:62
+#: udata_gouvfr/theme/theme.py:26 udata_gouvfr/theme/theme.py:51
 msgid "As a producer"
 msgstr "En tant que producteur"
 
-#: udata_gouvfr/theme/theme.py:38 udata_gouvfr/theme/theme.py:63
+#: udata_gouvfr/theme/theme.py:27 udata_gouvfr/theme/theme.py:52
 msgid "As a reuser"
 msgstr "En tant que réutilisateur"
 
-#: udata_gouvfr/theme/theme.py:39 udata_gouvfr/theme/theme.py:64
+#: udata_gouvfr/theme/theme.py:28 udata_gouvfr/theme/theme.py:53
 msgid "As a developer"
 msgstr "En tant que développeur"
 
-#: udata_gouvfr/theme/theme.py:41
+#: udata_gouvfr/theme/theme.py:30
 msgid "Data"
 msgstr "Données"
 
-#: udata_gouvfr/theme/theme.py:42 udata_gouvfr/theme/templates/footer.html:66
+#: udata_gouvfr/theme/theme.py:31 udata_gouvfr/theme/templates/footer.html:66
 msgid "Datasets"
 msgstr "Jeux de données"
 
-#: udata_gouvfr/theme/theme.py:43 udata_gouvfr/theme/templates/footer.html:67
+#: udata_gouvfr/theme/theme.py:32 udata_gouvfr/theme/templates/footer.html:67
 msgid "Reuses"
 msgstr "Réutilisations"
 
-#: udata_gouvfr/theme/theme.py:44 udata_gouvfr/theme/templates/header.html:78
+#: udata_gouvfr/theme/theme.py:33 udata_gouvfr/theme/templates/header.html:78
 msgid "Organizations"
 msgstr "Organisations"
 
-#: udata_gouvfr/theme/theme.py:46
+#: udata_gouvfr/theme/theme.py:35
 msgid "Dashboard"
 msgstr "Tableau de bord"
 
-#: udata_gouvfr/theme/theme.py:47
+#: udata_gouvfr/theme/theme.py:36
 msgid "Events"
 msgstr "Événements"
 
-#: udata_gouvfr/theme/theme.py:65
+#: udata_gouvfr/theme/theme.py:54
 msgid "API"
 msgstr "API"
 
-#: udata_gouvfr/theme/theme.py:66
+#: udata_gouvfr/theme/theme.py:55
 msgid "Credits"
 msgstr "Crédits"
 
-#: udata_gouvfr/theme/theme.py:67
+#: udata_gouvfr/theme/theme.py:56
 msgid "Terms of use"
 msgstr "Conditions générales d'utilisation"
 
@@ -150,11 +148,9 @@ msgstr "Haut de page"
 
 #: udata_gouvfr/theme/templates/header.html:4
 msgid ""
-"Internet Explorer 8 and below are not anymore supported. Please upgrade "
-"or change your browser to access the website."
-msgstr ""
-"Internet Explorer 8 et en dessous ne sont plus supportés. Mettez à jour "
-"ou changez de navigateur pour accéder à ce site."
+"Internet Explorer 8 and below are not anymore supported. Please upgrade or "
+"change your browser to access the website."
+msgstr "Internet Explorer 8 et en dessous ne sont plus supportés. Mettez à jour ou changez de navigateur pour accéder à ce site."
 
 #: udata_gouvfr/theme/templates/header.html:4
 msgid "More information →"
@@ -198,25 +194,53 @@ msgstr "Dernières réutilisations"
 msgid "News in data"
 msgstr "L'actualité en données"
 
-#: udata_gouvfr/theme/templates/home.html:117
+#: udata_gouvfr/theme/templates/home.html:118
 msgid "Featured datasets"
 msgstr "Jeux de données à la une"
 
-#: udata_gouvfr/theme/templates/home.html:118
+#: udata_gouvfr/theme/templates/home.html:119
 msgid "Latest datasets"
 msgstr "Derniers jeux de données"
 
-#: udata_gouvfr/theme/templates/home.html:154
+#: udata_gouvfr/theme/templates/home.html:155
 msgid "See more"
 msgstr "Voir plus"
 
-#: udata_gouvfr/theme/templates/home.html:173
+#: udata_gouvfr/theme/templates/home.html:174
 msgid "The blog"
 msgstr "Le blog"
 
-#: udata_gouvfr/theme/templates/home.html:192
+#: udata_gouvfr/theme/templates/home.html:193
 msgid "more"
 msgstr "plus"
+
+#: udata_gouvfr/theme/templates/home.html:207
+msgid "Latest forum discussions"
+msgstr "Dernières discussions du forum"
+
+#: udata_gouvfr/theme/templates/home.html:216
+msgid "Title"
+msgstr "Titre"
+
+#: udata_gouvfr/theme/templates/home.html:217
+msgid "Users"
+msgstr "Utilisateurs"
+
+#: udata_gouvfr/theme/templates/home.html:218
+msgid "Created at"
+msgstr "Créé le"
+
+#: udata_gouvfr/theme/templates/home.html:219
+msgid "Replies"
+msgstr "Réponses"
+
+#: udata_gouvfr/theme/templates/home.html:220
+msgid "Views"
+msgstr "Vues"
+
+#: udata_gouvfr/theme/templates/home.html:221
+msgid "Likes"
+msgstr ""
 
 #: udata_gouvfr/theme/templates/subnav-large.html:20
 #: udata_gouvfr/theme/templates/subnav-small.html:23
@@ -244,7 +268,7 @@ msgstr "Explorer avec Datagouv"
 
 #: udata_gouvfr/theme/templates/macros/integrate.html:2
 msgid "Integrate"
-msgstr ""
+msgstr "Intégrer"
 
 #: udata_gouvfr/theme/templates/mail/base.html:45
 msgid "on your browser."
@@ -300,130 +324,3 @@ msgstr "Créez ou trouvez votre organisation"
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:45
 msgid "You can create a new organization or find yours."
 msgstr "Vous pouvez créer une nouvelle organisation ou trouver la vôtre"
-
-#~ msgid "dataset"
-#~ msgstr "jeu de données"
-
-#~ msgid "Edit"
-#~ msgstr "Editer"
-
-#~ msgid "Featured"
-#~ msgstr "Mis en avant"
-
-#~ msgid "This dataset comes from a certified public service"
-#~ msgstr "Ce jeu de données provient d'un service public certifié"
-
-#~ msgid ""
-#~ msgstr ""
-
-#~ msgid "See all datasets with that badge."
-#~ msgstr "Voir tous les jeux de données avec ce badge."
-
-#~ msgid "Private"
-#~ msgstr "Privé"
-
-#~ msgid "This dataset is private and will not be visible by other users"
-#~ msgstr ""
-
-#~ msgid "Deleted"
-#~ msgstr "Supprimé"
-
-#~ msgid "Provided by"
-#~ msgstr "Fourni par"
-
-#~ msgid "See the original website"
-#~ msgstr "Voir le site original"
-
-#~ msgid "Resources"
-#~ msgstr "Ressources"
-
-#~ msgid "No resources"
-#~ msgstr "Aucune ressource"
-
-#~ msgid "See the %(nb)d resources"
-#~ msgstr "Voir les %(nb)d ressources"
-
-#~ msgid "Add a resource"
-#~ msgstr "Ajouter une ressource"
-
-#~ msgid "Producer"
-#~ msgstr "Producteur"
-
-#~ msgid "Unfollow"
-#~ msgstr "Ne plus suivre"
-
-#~ msgid "I'll be informed about this organization news"
-#~ msgstr "Je serai informé des actualités de cette organisation"
-
-#~ msgid "Follow"
-#~ msgstr "Suivre"
-
-#~ msgid "Informations"
-#~ msgstr "Informations"
-
-#~ msgid "Badges"
-#~ msgstr "Badges"
-
-#~ msgid "License"
-#~ msgstr "Licence"
-
-#~ msgid "Temporal coverage"
-#~ msgstr "Couverture temporelle"
-
-#~ msgid "Frequency"
-#~ msgstr "Fréquence"
-
-#~ msgid "Territorial coverage granularity"
-#~ msgstr "Granularité de la couverture territoriale"
-
-#~ msgid "Territorial coverage"
-#~ msgstr "Couverture territoriale"
-
-#~ msgid "Suggest a tag with a new discussion thread"
-#~ msgstr "Suggérer un mot-clé avec un nouveau fil de discussion"
-
-#~ msgid "Suggest a tag"
-#~ msgstr "Suggérer un mot-clé"
-
-#~ msgid "Details"
-#~ msgstr "Détails"
-
-#~ msgid "Spatial coverage"
-#~ msgstr "Couverture spatiale"
-
-#~ msgid "Community contributions"
-#~ msgstr "Contributions communautaires"
-
-#~ msgid "Discussions"
-#~ msgstr "Discussions"
-
-#~ msgid "Start a new discussion"
-#~ msgstr "Démarrer une nouvelle discussion"
-
-#~ msgid "Starting a new discussion thread"
-#~ msgstr "Démarrer une nouvelle discussion"
-
-#~ msgid "Title"
-#~ msgstr "Titre"
-
-#~ msgid "Comment"
-#~ msgstr "Commentaire"
-
-#~ msgid "Start a discussion"
-#~ msgstr "Démarrer une discussion"
-
-#~ msgid "Open in a new window"
-#~ msgstr "Ouvrir dans une nouvelle fenêtre"
-
-#~ msgid "Unmark as featured"
-#~ msgstr "Ne plus mettre en avant"
-
-#~ msgid "Mark as featured"
-#~ msgstr "Mettre en avant"
-
-#~ msgid "Add a reuse"
-#~ msgstr "Ajouter une réutilisation"
-
-#~ msgid "Discussion between the reusers and the community about this reuse."
-#~ msgstr ""
-
