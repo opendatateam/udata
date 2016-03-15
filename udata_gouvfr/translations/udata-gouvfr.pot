@@ -8,40 +8,40 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr 0.1.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-01-13 19:02+0100\n"
+"POT-Creation-Date: 2016-03-14 17:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.1.1\n"
+"Generated-By: Babel 1.3\n"
 
 #: udata_gouvfr/metrics.py:14
 msgid "Public services"
 msgstr ""
 
-#: udata_gouvfr/models.py:22
+#: udata_gouvfr/models.py:23
 msgid "Dataconnexions 5 candidate"
 msgstr ""
 
-#: udata_gouvfr/models.py:23
+#: udata_gouvfr/models.py:24
 msgid "Dataconnexions 5 laureate"
 msgstr ""
 
-#: udata_gouvfr/models.py:24
+#: udata_gouvfr/models.py:25
 msgid "Dataconnexions 6 candidate"
 msgstr ""
 
-#: udata_gouvfr/models.py:25
+#: udata_gouvfr/models.py:26
 msgid "Dataconnexions 6 laureate"
 msgstr ""
 
-#: udata_gouvfr/models.py:31
+#: udata_gouvfr/models.py:32
 msgid "C³"
 msgstr ""
 
-#: udata_gouvfr/models.py:32
+#: udata_gouvfr/models.py:33
 msgid "Nec Mergitur"
 msgstr ""
 
@@ -58,59 +58,59 @@ msgstr ""
 msgid "terms"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:35
+#: udata_gouvfr/theme/theme.py:24
 msgid "Discover OpenData"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:36 udata_gouvfr/theme/theme.py:61
+#: udata_gouvfr/theme/theme.py:25 udata_gouvfr/theme/theme.py:50
 msgid "As a citizen"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:37 udata_gouvfr/theme/theme.py:62
+#: udata_gouvfr/theme/theme.py:26 udata_gouvfr/theme/theme.py:51
 msgid "As a producer"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:38 udata_gouvfr/theme/theme.py:63
+#: udata_gouvfr/theme/theme.py:27 udata_gouvfr/theme/theme.py:52
 msgid "As a reuser"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:39 udata_gouvfr/theme/theme.py:64
+#: udata_gouvfr/theme/theme.py:28 udata_gouvfr/theme/theme.py:53
 msgid "As a developer"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:41
+#: udata_gouvfr/theme/theme.py:30
 msgid "Data"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:42 udata_gouvfr/theme/templates/footer.html:66
+#: udata_gouvfr/theme/theme.py:31 udata_gouvfr/theme/templates/footer.html:66
 msgid "Datasets"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:43 udata_gouvfr/theme/templates/footer.html:67
+#: udata_gouvfr/theme/theme.py:32 udata_gouvfr/theme/templates/footer.html:67
 msgid "Reuses"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:44 udata_gouvfr/theme/templates/header.html:78
+#: udata_gouvfr/theme/theme.py:33 udata_gouvfr/theme/templates/header.html:78
 msgid "Organizations"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:46
+#: udata_gouvfr/theme/theme.py:35
 msgid "Dashboard"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:47
+#: udata_gouvfr/theme/theme.py:36
 msgid "Events"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:65
+#: udata_gouvfr/theme/theme.py:54
 msgid "API"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:66
+#: udata_gouvfr/theme/theme.py:55
 msgid "Credits"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:67
+#: udata_gouvfr/theme/theme.py:56
 msgid "Terms of use"
 msgstr ""
 
@@ -187,24 +187,52 @@ msgstr ""
 msgid "News in data"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/home.html:117
+#: udata_gouvfr/theme/templates/home.html:118
 msgid "Featured datasets"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/home.html:118
+#: udata_gouvfr/theme/templates/home.html:119
 msgid "Latest datasets"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/home.html:154
+#: udata_gouvfr/theme/templates/home.html:155
 msgid "See more"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/home.html:173
+#: udata_gouvfr/theme/templates/home.html:174
 msgid "The blog"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/home.html:192
+#: udata_gouvfr/theme/templates/home.html:193
 msgid "more"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:207
+msgid "Latest forum discussions"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:216
+msgid "Title"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:217
+msgid "Users"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:218
+msgid "Created at"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:219
+msgid "Replies"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:220
+msgid "Views"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/home.html:221
+msgid "Likes"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/subnav-large.html:20
