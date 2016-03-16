@@ -37,6 +37,5 @@ def render_search():
         results_labels = ['datasets', 'reuses', 'organizations', 'users']
     results = search.multiquery(*search_queries)
     context = dict(zip(results_labels, results))
-    territories = check_for_territories(params.get('q'))
-    context['territories'] = territories.paginate(1, search.DEFAULT_PAGE_SIZE)
+    context['territories'] = check_for_territories(params.get('q'))
     return theme.render('search.html', **context)

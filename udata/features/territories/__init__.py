@@ -10,7 +10,7 @@ def check_for_territories(query):
     if (not query
             or len(query) < 4
             or not current_app.config.get('ACTIVATE_TERRITORIES')):
-        return False
+        return GeoZone.objects.none()
     # If it's a code, try INSEE/postal, otherwise use the name.
     qs = GeoZone.objects(level='fr/town')
     if len(query) == 5 and query.isdigit():
