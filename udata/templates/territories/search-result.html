@@ -14,10 +14,10 @@
                 {% if territory.keys.postal %}
                     {{ _('Postal code:') }}
                     {% if territory.keys.postal is string %}
-                        ({{ territory.keys.postal }})
+                        {{ territory.keys.postal }}
                     {% endif %}{# elif not allowed here #}
                     {% if territory.keys.postal is not string %}
-                        ({{ territory.keys.postal|join(', ') }})
+                        {{ territory.keys.postal|join(', ') }}
                     {% endif %}
                 {% endif %}
             </div>
