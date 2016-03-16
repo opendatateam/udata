@@ -96,7 +96,7 @@ class Defaults(object):
 
     HARVEST_PREVIEW_MAX_ITEMS = 20
 
-    ACTIVATE_TOWNS = False
+    ACTIVATE_TERRITORIES = False
 
     # CROQUEMORT = {
     #     'url': 'http://localhost:8000',

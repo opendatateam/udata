@@ -108,7 +108,7 @@ class PostConverter(ModelConverter):
     model = models.Post
 
 
-class TownConverter(ModelConverter):
+class TerritoryConverter(ModelConverter):
     model = models.GeoZone
 
     def to_python(self, value):
@@ -147,4 +147,4 @@ def init_app(app):
     app.url_map.converters['user'] = UserConverter
     app.url_map.converters['topic'] = TopicConverter
     app.url_map.converters['post'] = PostConverter
-    app.url_map.converters['town'] = TownConverter
+    app.url_map.converters['territory'] = TerritoryConverter

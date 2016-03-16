@@ -8,9 +8,9 @@ define([
     'dataset/typeahead',
     'reuse/typeahead',
     'organization/typeahead',
-    'town/typeahead',
+    'territory/typeahead',
     'typeahead'
-], function($, datasets, reuses, organizations, towns) {
+], function($, datasets, reuses, organizations, territories) {
     'use strict';
 
     const SEARCH_FOCUS_CLASS = 'col-sm-7 col-lg-8';
@@ -40,8 +40,8 @@ define([
 
     // Typeahead
     let providers = [organizations, datasets, reuses];
-    if (config.is_town_enabled) {
-        providers.push(towns);
+    if (config.is_territory_enabled) {
+        providers.push(territories);
     }
     $('#main-search')
         .typeahead(options, ...providers)

@@ -1,5 +1,5 @@
 /**
- * Typeahead.js/Bloodhound completion definition for towns
+ * Typeahead.js/Bloodhound completion definition for territories
  */
 define([
     'jquery',
@@ -18,7 +18,7 @@ define([
                 return d.id;
             },
             remote: {
-                url: API.build_url('/town/suggest/') + '?q=%QUERY',
+                url: API.build_url('/territory/suggest/') + '?q=%QUERY',
                 wildcard: '%QUERY',
                 // Keep until model is uniformised
                 transform: function(response) {
@@ -31,11 +31,11 @@ define([
         });
 
     return {
-        name: 'towns',
+        name: 'territories',
         source: engine,
         display: 'name',
         templates: {
-            header: header({title: i18n._('Town')}),
+            header: header({title: i18n._('Territory')}),
             suggestion: suggestion
         }
     };

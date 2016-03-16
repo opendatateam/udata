@@ -173,7 +173,7 @@ from udata.core.post.models import *
 from udata.core.jobs.models import *
 
 from udata.features.transfer.models import *
-from udata.features.towns.models import *
+from udata.features.territories.models import *
 
 
 def init_app(app):

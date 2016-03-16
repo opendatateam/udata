@@ -74,8 +74,8 @@ def init_app(app):
     from udata.core.post.views import blueprint as post_blueprint
     from udata.core.tags.views import bp as tags_blueprint
     from udata.admin.views import admin as admin_blueprint
-    from udata.features.towns.views import (
-        blueprint as towns_blueprint
+    from udata.features.territories.views import (
+        blueprint as territories_blueprint
     )
 
     app.register_blueprint(storages_blueprint)
@@ -90,7 +90,7 @@ def init_app(app):
     app.register_blueprint(post_blueprint)
     app.register_blueprint(tags_blueprint)
     app.register_blueprint(admin_blueprint)
-    app.register_blueprint(towns_blueprint)
+    app.register_blueprint(territories_blueprint)
 
     # Load all plugins views and blueprints
     for plugin in app.config['PLUGINS']:

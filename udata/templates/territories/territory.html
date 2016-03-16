@@ -1,42 +1,42 @@
 {% extends theme("layouts/1-column.html") %}
 
-{% set body_class="town" %}
+{% set body_class="territory" %}
 
 {% block main_content %}
-{% set logo=town.logo_url() or theme_static('img/placeholder_town.png') %}
+{% set logo=territory.logo_url() or theme_static('img/placeholder_territory.png') %}
 <div class="row">
     <div class="col-sm-9">
         <h1>
-            {{ town.name }}
-            {% if town.keys.postal %}
-                {% if town.keys.postal is string %}
-                    ({{ town.keys.postal }})
+            {{ territory.name }}
+            {% if territory.keys.postal %}
+                {% if territory.keys.postal is string %}
+                    ({{ territory.keys.postal }})
                 {% endif %}{# elif not allowed here #}
-                {% if town.keys.postal is not string %}
-                    ({{ town.keys.postal|join(', ') }})
+                {% if territory.keys.postal is not string %}
+                    ({{ territory.keys.postal|join(', ') }})
                 {% endif %}
             {% endif %}
         </h1>
         <div id="coverage-map" class="aside-map"
-            data-zones="{{ url_for('api.zones', ids=[town.id]) }}"
+            data-zones="{{ url_for('api.zones', ids=[territory.id]) }}"
             data-hide-popup="true"></div>
     </div>
 
     <aside class="col-sm-3 panel panel-default">
         {% if logo %}
             <div class="text-center">
-                <img src="{{ logo }}" alt="{{ town.name }}" class="scalable" />
+                <img src="{{ logo }}" alt="{{ territory.name }}" class="scalable" />
             </div>
         {% endif %}
         <div class="tab-links">
             <p class="text-center">
                 <strong>
-                    {{ _('INSEE code:') }} {{ town.code }}
+                    {{ _('INSEE code:') }} {{ territory.code }}
                 </strong>
             </p>
             <p class="text-center">
                 <strong>
-                    {{ _('Population:') }} {{ town.population }}
+                    {{ _('Population:') }} {{ territory.population }}
                 </strong>
             </p>
         </div>
@@ -48,8 +48,8 @@
     </aside>
 </div>
 <div class="dataset-list">
-    {% for town_dataset in town_datasets %}
-        <div data-udata-town-id="{{ town_dataset.slug }}" class="col-sm-4"></div>
+    {% for territory_dataset in territory_datasets %}
+        <div data-udata-territory-id="{{ territory_dataset.slug }}" class="col-sm-4"></div>
     {% endfor %}
     {% for dataset in datasets %}
         <div data-udata-dataset-id="{{ dataset.id }}" class="col-sm-4"></div>

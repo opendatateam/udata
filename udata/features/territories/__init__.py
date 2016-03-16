@@ -6,7 +6,7 @@ from flask import current_app
 from udata.models import GeoZone
 
 
-def check_for_town(query):
+def check_for_territory(query):
     if (not query
             or len(query) < 4
             or not current_app.config.get('ACTIVATE_TERRITORIES')):

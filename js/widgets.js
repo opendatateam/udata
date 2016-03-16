@@ -75,19 +75,19 @@ function handleIntegration(event) {
 }
 
 // Warning: using `Array.from` adds 700 lines once converted through Babel.
-const towns = [].slice.call(document.querySelectorAll('[data-udata-town-id]'));
+const territories = [].slice.call(document.querySelectorAll('[data-udata-territory-id]'));
 const datasets = [].slice.call(document.querySelectorAll('[data-udata-dataset-id]'));
 // Extract the base URL from the URL to that script.
 const parser = document.createElement('a');
 const scriptURI = document.querySelector('script#udata').src
 parser.href = scriptURI;
 const baseURL = `${parser.protocol}//${parser.host}`;
-// Keep the chunk > 9 otherwise towns pages will issue more than one query.
-towns.concat(datasets).chunk(9).forEach((elements) => {
+// Keep the chunk > 9 otherwise territories pages will issue more than one query.
+territories.concat(datasets).chunk(9).forEach((elements) => {
     const references = elements.map((el) => {
-        if (el.hasAttribute('data-udata-town-id')) {
-            const townId = el.getAttribute('data-udata-town-id');
-            return `town-${townId}`;
+        if (el.hasAttribute('data-udata-territory-id')) {
+            const territoryId = el.getAttribute('data-udata-territory-id');
+            return `territory-${territoryId}`;
         } else if (el.hasAttribute('data-udata-dataset-id')) {
             const datasetId = el.getAttribute('data-udata-dataset-id');
             return `dataset-${datasetId}`;
