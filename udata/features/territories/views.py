@@ -11,11 +11,11 @@ from udata.i18n import I18nBlueprint
 from udata.utils import multi_to_dict
 from udata.core.storages import references
 
-blueprint = I18nBlueprint('territories', __name__, url_prefix='/territory')
+blueprint = I18nBlueprint('territories', __name__)
 
 
 @blueprint.route(
-    '/<territory:territory>/dataset/<dataset:dataset>/resource/<resource_id>/',
+    '/territory/<territory:territory>/dataset/<dataset:dataset>/resource/<resource_id>/',
     endpoint='territory_dataset_resource')
 def compute_territory_dataset(territory, dataset, resource_id):
     """
@@ -57,7 +57,7 @@ def compute_territory_dataset(territory, dataset, resource_id):
                      attachment_filename=attachment_filename)
 
 
-@blueprint.route('/<territory:territory>/', endpoint='territory')
+@blueprint.route('/town/<territory:territory>/', endpoint='territory')
 def render_territory(territory):
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
