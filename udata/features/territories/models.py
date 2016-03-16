@@ -9,6 +9,7 @@ __all__ = ('TerritoryDataset', 'ResourceBasedTerritoryDataset')
 
 
 class TerritoryDataset(object):
+    order = 0
     id = ''
     title = ''
     organization_id = ''

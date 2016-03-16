@@ -63,9 +63,11 @@ def render_territory(territory):
         return abort(404)
 
     from udata.models import TERRITORY_DATASETS
+    territory_dataset_classes = sorted(
+        TERRITORY_DATASETS.values(), key=lambda a: a.order)
     territory_datasets = [
         territory_dataset_class(territory)
-        for territory_dataset_class in TERRITORY_DATASETS.values()
+        for territory_dataset_class in territory_dataset_classes
     ]
     datasets = list(Dataset.objects.visible().filter(spatial__zones=territory))
     context = {
