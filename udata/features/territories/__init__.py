@@ -16,7 +16,6 @@ def check_for_territories(query):
     if len(query) == 5 and query.isdigit():
         # Match both INSEE and postal codes
         qs = qs(db.Q(code=query) | db.Q(keys__postal__contains=query))
-        return qs.order_by('-population', '-area')
     else:
         # Check names starting with query or exact match.
         qs = qs(db.Q(name__istartswith=query) | db.Q(name__iexact=query))

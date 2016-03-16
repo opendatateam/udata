@@ -38,7 +38,7 @@ define([
         source: engine,
         display: 'name',
         templates: {
-            header: header({title: i18n._('Territories')}),
+            header: header({title: i18n._('Towns')}),
             suggestion: suggestion
         }
     };
