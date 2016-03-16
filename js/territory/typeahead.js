@@ -24,7 +24,9 @@ define([
                 // Keep until model is uniformised
                 transform: function(response) {
                     return response.map((row) => {
-                        row.name = row.title;
+                        // Display postal code for towns
+                        const code = Array.isArray(row.keys.postal) ? row.keys.postal.join(',') : row.keys.postal;
+                        row.name = `${row.title} (${code})`;
                         return row;
                     });
                 }
