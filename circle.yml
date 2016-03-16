@@ -1,4 +1,15 @@
+machine:
+  services:
+    - redis
+    - elasticsearch
 dependencies:
+  cache_directories:
+    - mongodb-linux-x86_64-3.2.4
+  pre:
+    - if [[ ! -d mongodb-linux-x86_64-3.2.4 ]]; then wget http://downloads.mongodb.org/linux/mongodb-linux-x86_64-3.2.4.tgz && tar xvzf mongodb-linux-x86_64-3.2.4.tgz; fi
+    - sudo /etc/init.d/mongodb stop
+    - sudo cp mongodb-linux-x86_64-3.2.4/bin/* /usr/bin
+    - sudo /etc/init.d/mongodb start
   override:
     - pip install -r requirements/travis.pip
 test:
