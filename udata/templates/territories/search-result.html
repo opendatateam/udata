@@ -1,0 +1,47 @@
+{% cache cache_duration, 'territory-search-result', territory.id, g.lang_code %}
+{% set logo=territory.logo_url() or theme_static('img/placeholder_territory.png') %}
+<li class="search-result territory-result">
+    <a href="{{ url_for('territories.territory', territory=territory) }}" title="{{ territory.name }}">
+        <div class="result-logo pull-left">
+            <img alt="{{ territory.name }}"
+                src="{{ logo }}"
+                width="70" height="70">
+        </div>
+        <div class="result-body ellipsis-dot">
+            <h4 class="result-title">{{ territory.name }}</h4>
+            <div class="result-description">
+                {{ _('INSEE code:') }} {{ territory.code }}<br/>
+                {% if territory.keys.postal %}
+                    {{ _('Postal code:') }}
+                    {% if territory.keys.postal is string %}
+                        ({{ territory.keys.postal }})
+                    {% endif %}{# elif not allowed here #}
+                    {% if territory.keys.postal is not string %}
+                        ({{ territory.keys.postal|join(', ') }})
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        <ul class="list-inline result-infos">
+            {# TODO: Make it dynamic #}
+            <li>
+                <a class="btn btn-xs" data-toggle="tooltip"
+                    data-placement="top" data-container="body"
+                    title="{{ _('Administrative level') }}">
+                    <span class="fa fa-bullseye fa-fw"></span>
+                    {{ _('Town') }}
+                </a>
+            </li>
+            {% if territory.population %}
+            <li>
+                <a class="btn btn-xs" data-toggle="tooltip" data-placement="top"
+                    title="{{ _('Population') }}">
+                    <span class="fa fa-users fa-fw"></span>
+                    {{ territory.population }}
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </a>
+</li>
+{% endcache %}

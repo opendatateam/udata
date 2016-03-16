@@ -9,6 +9,7 @@ define([
     'templates/search/suggestion.hbs',
     'i18n'
 ], function($, API, Bloodhound, header, suggestion, i18n) {
+    const MAX = 2;
     const engine = new Bloodhound({
             queryTokenizer: Bloodhound.tokenizers.whitespace,
             datumTokenizer: function(d) {
@@ -18,7 +19,7 @@ define([
                 return d.id;
             },
             remote: {
-                url: API.build_url('/territory/suggest/') + '?q=%QUERY',
+                url: API.build_url('/territory/suggest/') + '?q=%QUERY&size=' + MAX,
                 wildcard: '%QUERY',
                 // Keep until model is uniformised
                 transform: function(response) {
@@ -35,7 +36,7 @@ define([
         source: engine,
         display: 'name',
         templates: {
-            header: header({title: i18n._('Territory')}),
+            header: header({title: i18n._('Territories')}),
             suggestion: suggestion
         }
     };

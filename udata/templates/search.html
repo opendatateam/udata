@@ -52,11 +52,11 @@
             </a>
         </li>
     {% endif %}
-    {% if territory %}
+    {% if territories %}
         <li>
-            <a href="{{ url_for('territories.territory', territory=territory) }}">
-                {{ _('Territory:') }}
-                <span class="badge">{{ territory.name }}</span>
+            <a href="#territories" data-toggle="tab">
+                {{ _('Territories') }}
+                <span class="badge">{{ territories.total }}</span>
             </a>
         </li>
     {% endif %}
@@ -233,6 +233,18 @@
         <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
         {% endif %}
     </div>
+
+    {% if territories %}
+    <div class="tab-pane row" id="territories">
+        <div class="col-xs-12 smaller">
+            <ul class="search-results">
+                {% for territory in territories %}
+                {% include theme('territories/search-result.html') %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
 
 </div>
 {% endblock %}
