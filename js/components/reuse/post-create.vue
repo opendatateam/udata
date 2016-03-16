@@ -28,7 +28,10 @@ import Reuse from 'models/reuse';
 
 export default {
     props: {
-        reuse: Object
+        reuse: {
+            type: Object,
+            default: function() {return {};}
+        }
     },
     components: {
         share: require('components/widgets/share.vue')

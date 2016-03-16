@@ -13,11 +13,10 @@ firstReuseResult: ".reuse-result:first-child .result-title",
 firstOrgResult: ".organization-result:first-child .result-title",
 firstUserResult: ".user-result:first-child .result-title",
 
-datasetsTitleSearchAdminResult: "datasets .box-title",
-communitiesTitleSearchAdminResult: "communities .box-title",
-reusesTitleSearchAdminResult: "reuses .box-title",
-issuesTitleSearchAdminResult: "issues .box-title",
-discussionsTitleSearchAdminResult: "discussions .box-title",
+titleSearchAdminResult: ".content-header h1",
+datasetsSearchAdminResult: ".datasets-widget table tbody",
+reusesSearchAdminResult: ".reuses-widget table tbody",
+notFoundSearchAdminResult: ".content .row .lead",
 
 searchFor: function searchFor(term) {
     return  this.setField(term)()
