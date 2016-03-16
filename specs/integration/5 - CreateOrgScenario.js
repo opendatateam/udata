@@ -1,6 +1,4 @@
-description: "As an anonymous user, " +
-"I want to create an organization from the homepage " +
-"in order to start publishing opendata on the platform.",
+description: "Create an organization",
 
 steps: [
     // Login.
@@ -14,10 +12,7 @@ steps: [
     // Fill the main form.
     CreateOrgComponent.fill(orgName, orgDescription),
     NavigationComponent.next(),
-    CreateOrgComponent.openFileUploader(),
-    {
-        "CreateOrgComponent.cropScreen": true // Waiting for manual upload.
-    },
+    CreateOrgComponent.upload('specs/integration/files/image.png'),
     NavigationComponent.next(),
     {
         "CreateOrgComponent.successTitle": true

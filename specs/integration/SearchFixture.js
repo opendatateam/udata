@@ -1,5 +1,5 @@
 datasetQuery = 'base adresse'
-datasetResult =  "Base d'Adresses Nationale Ouverte - BANO"
+datasetResult =  "BAN - Base Adresse Nationale"
 orgQuery = 'etalab'
 orgResult = 'Etalab'
 reuseQuery = 'geocheck'

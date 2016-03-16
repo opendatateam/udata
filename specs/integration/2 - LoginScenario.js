@@ -1,6 +1,4 @@
-description: "As an anonymous user, " +
-"I want to log in then log out from the homepage " +
-"in order to perform authorization-required actions.",
+description: "Login then logout",
 
 steps: [
     NavigationComponent.home(),
