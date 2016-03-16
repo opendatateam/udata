@@ -1,0 +1,8 @@
+dependencies:
+  override:
+    - pip install -r requirements/travis.pip
+test:
+  override:
+    - nosetests --immediate --with-coverage udata
+  post:
+    - coveralls --rcfile=coverage.rc
