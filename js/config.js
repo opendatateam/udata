@@ -115,9 +115,9 @@ if (sentryEl) {
 export const notify_in = _meta('notify-in');
 
 /**
- * Whether territories are enabled or not.
+ * Whether towns are enabled or not.
  */
-export const is_territory_enabled = JSON.parse(_meta('territory-enabled'));;
+export const is_town_enabled = JSON.parse(_meta('town-enabled'));;
 
 
 export default {
@@ -135,5 +135,5 @@ export default {
     sentry,
     notify_in,
     check_urls,
-    is_territory_enabled,
+    is_town_enabled,
 };

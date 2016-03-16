@@ -24,9 +24,9 @@ class OEmbedsAPI(API):
 
         The `references` are composed by a keyword (`kind`) followed by
         the `id` each of those separated by commas.
-        E.g: dataset-5369992aa3a729239d205183,territory-fr-town-75056-comptes
+        E.g: dataset-5369992aa3a729239d205183,town-fr-town-75056-comptes
 
-        Only datasets and territories are supported for now.
+        Only datasets and towns are supported for now.
         """
         args = oembeds_parser.parse_args()
         references = args['references'].split(',')
@@ -41,21 +41,21 @@ class OEmbedsAPI(API):
                     item = Dataset.objects.get(id=item_id)
                 except (db.ValidationError, Dataset.DoesNotExist):
                     return api.abort(400, 'Unknown dataset ID.')
-            elif (item_kind == 'territory'
-                    and current_app.config.get('ACTIVATE_TERRITORIES')):
-                from udata.models import TERRITORY_DATASETS
+            elif (item_kind == 'town'
+                    and current_app.config.get('ACTIVATE_TOWNS')):
+                from udata.models import TOWN_DATASETS
                 try:
                     country, town, code, kind = item_id.split('-')
                 except ValueError:
-                    return api.abort(400, 'Invalid territory ID.')
+                    return api.abort(400, 'Invalid town ID.')
                 try:
                     geozone = GeoZone.objects.get(code=code)
                 except GeoZone.DoesNotExist:
-                    return api.abort(400, 'Unknown territory identifier.')
-                if kind in TERRITORY_DATASETS:
-                    item = TERRITORY_DATASETS[kind](geozone)
+                    return api.abort(400, 'Unknown town identifier.')
+                if kind in TOWN_DATASETS:
+                    item = TOWN_DATASETS[kind](geozone)
                 else:
-                    return api.abort(400, 'Unknown kind of territory.')
+                    return api.abort(400, 'Unknown kind of town.')
             else:
                 return api.abort(400, 'Invalid object type.')
             width = maxwidth = 1000

@@ -388,7 +388,7 @@ def init_app(app):
     import udata.features.transfer.api
     import udata.features.notifications.api
     import udata.features.oembed.api
-    import udata.features.territories.api
+    import udata.features.towns.api
     import udata.harvest.api
 
     # Load plugins API

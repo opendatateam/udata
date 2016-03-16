@@ -57,7 +57,7 @@ def register_commands(manager):
     import udata.core.badges.commands
     import udata.api.commands
     import udata.harvest.commands
-    import udata.features.territories.commands
+    import udata.features.towns.commands
 
     # Dynamic module commands loading
     for plugin in manager.app.config['PLUGINS']:

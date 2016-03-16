@@ -14,7 +14,7 @@ import requests
 
 from flask import current_app
 
-from udata.models import Dataset, ResourceBasedTerritoryDataset
+from udata.models import Dataset, ResourceBasedTownDataset
 from udata.commands import submanager
 from udata.core.storages import logos, references, tmp
 
@@ -23,9 +23,9 @@ log = logging.getLogger(__name__)
 
 
 m = submanager(
-    'territories',
-    help='Territories specifics operations',
-    description='Handle all territories related operations and maintenance'
+    'towns',
+    help='Towns specifics operations',
+    description='Handle all towns related operations and maintenance'
 )
 
 
@@ -50,18 +50,18 @@ def load_logos(filename):
 
 @m.command
 def collect_references_files():
-    """Retrieve locally CSV files in use for dynamic territories' resources."""
+    """Retrieve locally CSV files in use for dynamic towns' resources."""
     REFERENCES_PATH = references.root
     if not os.path.exists(REFERENCES_PATH):
         os.makedirs(REFERENCES_PATH)
-    if current_app.config.get('ACTIVATE_TERRITORIES'):
-        from udata.models import TERRITORY_DATASETS
-        for territory_class in TERRITORY_DATASETS.values():
-            if not issubclass(territory_class, ResourceBasedTerritoryDataset):
+    if current_app.config.get('ACTIVATE_TOWNS'):
+        from udata.models import TOWN_DATASETS
+        for town_class in TOWN_DATASETS.values():
+            if not issubclass(town_class, ResourceBasedTownDataset):
                 continue
-            dataset = Dataset.objects.get(id=territory_class.dataset_id)
+            dataset = Dataset.objects.get(id=town_class.dataset_id)
             for resource in dataset.resources:
-                if resource.id == territory_class.resource_id:
+                if resource.id == town_class.resource_id:
                     break
                 filename = resource.url.split('/')[-1]
                 reference_path = references.path(filename)

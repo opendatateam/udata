@@ -5,45 +5,45 @@ from flask import url_for
 
 from udata.models import Organization
 
-__all__ = ('TerritoryDataset', 'ResourceBasedTerritoryDataset')
+__all__ = ('TownDataset', 'ResourceBasedTownDataset')
 
 
-class TerritoryDataset(object):
+class TownDataset(object):
     id = ''
     title = ''
     organization_id = ''
     url_template = ''
     description = ''
 
-    def __init__(self, territory):
-        self.territory = territory
+    def __init__(self, town):
+        self.town = town
 
     @property
     def url(self):
-        return self.url_template.format(code=self.territory.code)
+        return self.url_template.format(code=self.town.code)
 
     @property
     def slug(self):
-        return '{territory_id}-{id}'.format(
-            territory_id=self.territory.id.replace('/', '-'), id=self.id)
+        return '{town_id}-{id}'.format(
+            town_id=self.town.id.replace('/', '-'), id=self.id)
 
     @property
     def organization(self):
         return Organization.objects.get(id=self.organization_id)
 
 
-class ResourceBasedTerritoryDataset(TerritoryDataset):
+class ResourceBasedTownDataset(TownDataset):
     dataset_id = ''
     resource_id = ''
-    territory_attr = ''
+    town_attr = ''
     csv_column = ''
 
     def url_for(self, external=False):
-        return url_for('territories.territory_dataset_resource',
-                       territory=self.territory,
+        return url_for('towns.town_dataset_resource',
+                       town=self.town,
                        dataset=self.dataset_id,
                        resource_id=self.resource_id,
-                       territory_attr=self.territory_attr,
+                       town_attr=self.town_attr,
                        csv_column=self.csv_column,
                        _external=external)
     url = property(url_for)
