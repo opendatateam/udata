@@ -16,7 +16,7 @@ from udata.tests.frontend import FrontTestCase
 from udata.settings import Testing
 
 from .models import (
-    DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE, TOWN_DATASETS
+    DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE, TERRITORY_DATASETS
 )
 from .views import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
 from .metrics import PublicServicesMetric
@@ -241,39 +241,39 @@ class C3Test(FrontTestCase):
         self.assert200(response)
 
 
-class TownsSettings(GouvFrSettings):
+class TerritoriesSettings(GouvFrSettings):
     ACTIVATE_TERRITORIES = True
 
 
-class TownsTest(FrontTestCase):
-    settings = TownsSettings
+class TerritoriesTest(FrontTestCase):
+    settings = TerritoriesSettings
 
     def test_basic(self):
         arles = GeoZoneFactory(
             id='fr/town/13004', level='fr/town',
             name='Arles', code='13004', population=52439)
         response = self.client.get(
-            url_for('townes.town', town=arles))
+            url_for('territories.territory', territory=arles))
         self.assert200(response)
         self.assertIn('Arles', response.data.decode('utf-8'))
         self.assertIn(
-            '<div data-udata-town-id="fr-town-13004-emploi_chiffres"',
+            '<div data-udata-territory-id="fr-town-13004-emploi_chiffres"',
             response.data.decode('utf-8'))
 
 
-class OEmbedsTownAPITest(APITestCase):
-    settings = TownsSettings
+class OEmbedsTerritoryAPITest(APITestCase):
+    settings = TerritoriesSettings
 
-    def test_oembed_town_api_get(self):
-        '''It should fetch a town in the oembed format.'''
+    def test_oembed_territory_api_get(self):
+        '''It should fetch a territory in the oembed format.'''
         arles = GeoZoneFactory(
             id='fr/town/13004', level='fr/town',
             name='Arles', code='13004', population=52439)
-        for town_dataset_class in TOWN_DATASETS.values():
+        for territory_dataset_class in TERRITORY_DATASETS.values():
             organization = OrganizationFactory(
-                id=town_dataset_class.organization_id)
-            town = town_dataset_class(arles)
-            reference = 'town-{id}'.format(id=town.slug)
+                id=territory_dataset_class.organization_id)
+            territory = territory_dataset_class(arles)
+            reference = 'territory-{id}'.format(id=territory.slug)
             response = self.get(url_for('api.oembeds', references=reference))
             self.assert200(response)
             data = json.loads(response.data)[0]
@@ -284,11 +284,11 @@ class OEmbedsTownAPITest(APITestCase):
             self.assertIn('maxheight', data)
             self.assertTrue(data['type'], 'rich')
             self.assertTrue(data['version'], '1.0')
-            self.assertIn(town.title, data['html'])
-            self.assertIn(cgi.escape(town.url), data['html'])
+            self.assertIn(territory.title, data['html'])
+            self.assertIn(cgi.escape(territory.url), data['html'])
             self.assertIn(
                 'alt="{name}"'.format(name=organization.name), data['html'])
-            self.assertIn(town.description.split('\n')[0], data['html'])
+            self.assertIn(territory.description.split('\n')[0], data['html'])
 
 
 class SitemapTest(FrontTestCase):

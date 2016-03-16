@@ -4,10 +4,10 @@ from __future__ import unicode_literals
 from udata.i18n import lazy_gettext as _
 from udata.models import (
     db, Dataset, User, Organization, Reuse,
-    TownDataset, ResourceBasedTownDataset
+    TerritoryDataset, ResourceBasedTerritoryDataset
 )
 
-__all__ = ('TOWN_DATASETS',)
+__all__ = ('TERRITORY_DATASETS',)
 
 Dataset.extras.register('datagouv_ckan_last_sync', db.DateTimeField)
 Organization.extras.register('datagouv_ckan_last_sync', db.DateTimeField)
@@ -33,7 +33,7 @@ Dataset.__badges__[C3] = _('C³')
 Dataset.__badges__[NECMERGITUR] = _('Nec Mergitur')
 
 
-class ZonagesTownDataset(TownDataset):
+class ZonagesTerritoryDataset(TerritoryDataset):
     id = 'zonages'
     title = 'Zonages des politiques de la ville'
     # Ministère de l'Egalité des Territoires et du Logement.
@@ -45,7 +45,7 @@ class ZonagesTownDataset(TownDataset):
     '''.strip()
 
 
-class ComptesTownDataset(TownDataset):
+class ComptesTerritoryDataset(TerritoryDataset):
     id = 'comptes'
     title = 'Comptes de la collectivité'
     # Ministère des finances et des comptes publics.
@@ -64,11 +64,11 @@ class ComptesTownDataset(TownDataset):
 
     @property
     def url(self):
-        return self.url_template.format(icom=self.town.code[2:5],
-                                        dep=self.town.code[0:2])
+        return self.url_template.format(icom=self.territory.code[2:5],
+                                        dep=self.territory.code[0:2])
 
 
-class LogementTownDataset(TownDataset):
+class LogementTerritoryDataset(TerritoryDataset):
     id = 'logement'
     title = 'Logement'
     # Institut National de la Statistique et des Etudes Economiques (INSEE).
@@ -84,7 +84,7 @@ class LogementTownDataset(TownDataset):
     }
 
 
-class EmploiPopulationTownDataset(TownDataset):
+class EmploiPopulationTerritoryDataset(TerritoryDataset):
     id = 'emploi_population'
     title = 'Emploi - Population active'
     # Institut National de la Statistique et des Etudes Economiques (INSEE).
@@ -100,7 +100,7 @@ class EmploiPopulationTownDataset(TownDataset):
     }
 
 
-class EmploiChiffresTownDataset(TownDataset):
+class EmploiChiffresTerritoryDataset(TerritoryDataset):
     id = 'emploi_chiffres'
     title = 'Emploi - Chiffres clés'
     # Institut National de la Statistique et des Etudes Economiques (INSEE).
@@ -117,7 +117,7 @@ class EmploiChiffresTownDataset(TownDataset):
     }
 
 
-class PopulationTownDataset(TownDataset):
+class PopulationTerritoryDataset(TerritoryDataset):
     id = 'population'
     title = 'Population'
     # Institut National de la Statistique et des Etudes Economiques (INSEE).
@@ -134,7 +134,7 @@ class PopulationTownDataset(TownDataset):
     }
 
 
-class PopulationChiffresTownDataset(TownDataset):
+class PopulationChiffresTerritoryDataset(TerritoryDataset):
     id = 'population_chiffres'
     title = 'Population - Chiffres clés'
     # Institut National de la Statistique et des Etudes Economiques (INSEE).
@@ -151,7 +151,7 @@ class PopulationChiffresTownDataset(TownDataset):
     }
 
 
-class PopulationDiplomesTownDataset(TownDataset):
+class PopulationDiplomesTerritoryDataset(TerritoryDataset):
     id = 'population_diplomes'
     title = 'Population - Diplômes et formations'
     # Institut National de la Statistique et des Etudes Economiques (INSEE).
@@ -168,8 +168,8 @@ class PopulationDiplomesTownDataset(TownDataset):
     }
 
 
-class ElectionsRegionales2015Tour2TownDataset(
-        ResourceBasedTownDataset):
+class ElectionsRegionales2015Tour2TerritoryDataset(
+        ResourceBasedTerritoryDataset):
     id = 'elections_regionales_2015_2'
     title = 'Élection régionales 2015, second tour'
     # Ministère de l'Intérieur.
@@ -183,21 +183,21 @@ class ElectionsRegionales2015Tour2TownDataset(
     # bureaux-de-vote-tour-2/
     dataset_id = '56728d35c751df240dc664bd'
     resource_id = 'e915b43b-f38c-4f18-ade5-2fb6c8cf80ca'
-    town_attr = 'name'
+    territory_attr = 'name'
     csv_column = 'LIBSUBCOM'
     temporal_coverage = {
         'start': 2015
     }
 
 
-TOWN_DATASETS = {
-    'zonages': ZonagesTownDataset,
-    'comptes': ComptesTownDataset,
-    'logement': LogementTownDataset,
-    'emploi_population': EmploiPopulationTownDataset,
-    'emploi_chiffres': EmploiChiffresTownDataset,
-    'population': PopulationTownDataset,
-    'population_chiffres': PopulationChiffresTownDataset,
-    'population_diplomes': PopulationDiplomesTownDataset,
-    'elections_regionales_2015_2': ElectionsRegionales2015Tour2TownDataset
+TERRITORY_DATASETS = {
+    'zonages': ZonagesTerritoryDataset,
+    'comptes': ComptesTerritoryDataset,
+    'logement': LogementTerritoryDataset,
+    'emploi_population': EmploiPopulationTerritoryDataset,
+    'emploi_chiffres': EmploiChiffresTerritoryDataset,
+    'population': PopulationTerritoryDataset,
+    'population_chiffres': PopulationChiffresTerritoryDataset,
+    'population_diplomes': PopulationDiplomesTerritoryDataset,
+    'elections_regionales_2015_2': ElectionsRegionales2015Tour2TerritoryDataset
 }
