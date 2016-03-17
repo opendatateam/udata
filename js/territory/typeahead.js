@@ -9,7 +9,7 @@ define([
     'templates/search/suggestion.hbs',
     'i18n'
 ], function($, API, Bloodhound, header, suggestion, i18n) {
-    const MAX = 2;
+    const MAX = 3;
     const engine = new Bloodhound({
             queryTokenizer: Bloodhound.tokenizers.whitespace,
             datumTokenizer: function(d) {

@@ -54,10 +54,18 @@
     {% endif %}
     {% if territories %}
         <li>
-            <a href="#territories" data-toggle="tab">
-                {{ _('Territories') }}
-                <span class="badge">{{ territories.count() }}</span>
-            </a>
+            {% set total=territories.count() %}
+            {% if total==1 %}
+                <a href="{{ url_for('territories.territory', territory=territories.0) }}">
+                    {{ _('Town:') }}
+                    <span class="badge">{{ territories.0.name }}</span>
+                </a>
+            {% else %}
+                <a href="#territories" data-toggle="tab">
+                    {{ _('Towns') }}
+                    <span class="badge">{{ total }}</span>
+                </a>
+            {% endif %}
         </li>
     {% endif %}
 </ul>
