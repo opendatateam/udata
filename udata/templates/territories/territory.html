@@ -4,7 +4,6 @@
 
 {% block main_content %}
 {% set logo=territory.logo_url() or theme_static('img/placeholder_territory.png') %}
-{% set wikipedia_url=territory.dbpedia.replace('dbpedia', 'wikipedia').replace('resource', 'wiki') %}
 <div class="row">
     <div class="col-sm-9">
         <h1>
@@ -30,14 +29,14 @@
         {% if territory.logo_url() %}
             <div class="text-center">
                 <small>
-                    {{ _('Source:') }} <a href="{{ wikipedia_url }}">Wikipedia</a> •
+                    {{ _('Source:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a> •
                     {{ _('License:') }} <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA</a>
                 </small>
             </div>
         {% else %}
             <div class="text-center">
                 <small>
-                    {{ _('Submit your logo through:') }} <a href="{{ wikipedia_url }}">Wikipedia</a><br>
+                    {{ _('Submit your logo through:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a><br>
                     ({{ _('we only expose logos under an open license') }})
                 </small>
             </div>
