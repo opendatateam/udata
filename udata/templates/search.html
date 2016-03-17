@@ -52,12 +52,20 @@
             </a>
         </li>
     {% endif %}
-    {% if territory %}
+    {% if territories %}
         <li>
-            <a href="{{ url_for('territories.territory', territory=territory) }}">
-                {{ _('Territory:') }}
-                <span class="badge">{{ territory.name }}</span>
-            </a>
+            {% set total=territories.count() %}
+            {% if total==1 %}
+                <a href="{{ url_for('territories.territory', territory=territories.0) }}">
+                    {{ _('Town:') }}
+                    <span class="badge">{{ territories.0.name }}</span>
+                </a>
+            {% else %}
+                <a href="#territories" data-toggle="tab">
+                    {{ _('Towns') }}
+                    <span class="badge">{{ total }}</span>
+                </a>
+            {% endif %}
         </li>
     {% endif %}
 </ul>
@@ -233,6 +241,18 @@
         <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
         {% endif %}
     </div>
+
+    {% if territories %}
+    <div class="tab-pane row" id="territories">
+        <div class="col-xs-12 smaller">
+            <ul class="search-results">
+                {% for territory in territories %}
+                {% include theme('territories/search-result.html') %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
 
 </div>
 {% endblock %}

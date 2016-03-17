@@ -23,9 +23,22 @@
     </div>
 
     <aside class="col-sm-3 panel panel-default">
-        {% if logo %}
+        <div class="text-center">
+            <img src="{{ logo }}" alt="{{ territory.name }}" class="scalable" />
+        </div>
+        {% if territory.logo_url() %}
             <div class="text-center">
-                <img src="{{ logo }}" alt="{{ territory.name }}" class="scalable" />
+                <small>
+                    {{ _('Source:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a> •
+                    {{ _('License:') }} <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA</a>
+                </small>
+            </div>
+        {% else %}
+            <div class="text-center">
+                <small>
+                    {{ _('Submit your logo through:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a><br>
+                    ({{ _('we only expose logos under an open license') }})
+                </small>
             </div>
         {% endif %}
         <div class="tab-links">
@@ -40,7 +53,7 @@
                 </strong>
             </p>
         </div>
-        <a href="m&#x61;ilto:{{ config.CONTACT_EMAIL|obfuscate|safe }}" class="btn btn-warning btn-block btn-sm"
+        <a href="m&#x61;ilto:{{ config.TERRITORIES_EMAIL|obfuscate|safe }}" class="btn btn-warning btn-block btn-sm"
             data-toggle="tooltip" data-placement="left"
             data-original-title="{{ _('I belong to that city and I want to publish more datasets.') }}">
             {{ _('Claim and enrich') }}

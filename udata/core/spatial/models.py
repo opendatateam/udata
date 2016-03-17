@@ -85,6 +85,11 @@ class GeoZone(db.Document):
     def external_url(self):
         return url_for('territories.territory', territory=self, _external=True)
 
+    @property
+    def wikipedia_url(self):
+        return (self.dbpedia.replace('dbpedia', 'wikipedia')
+                            .replace('resource', 'wiki'))
+
     def toGeoJSON(self):
         return {
             'id': self.id,
