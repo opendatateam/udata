@@ -247,6 +247,8 @@ class UploadMixin(object):
                            datetime.now().strftime('%Y%m%d-%H%M%S')))
         storage = storages.resources
         uploaded_file = args['file']
+        if 'html' in uploaded_file.content_type:
+            api.abort(415, 'Incorrect file content type: HTML')
         filename = storage.save(uploaded_file, prefix=prefix)
         extension = fileutils.extension(filename)
         uploaded_file.seek(0)
