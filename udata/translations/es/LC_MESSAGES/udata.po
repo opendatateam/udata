@@ -14,8 +14,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-03-14 17:18+0100\n"
-"PO-Revision-Date: 2016-03-14 16:18+0000\n"
+"POT-Creation-Date: 2016-03-17 21:11+0100\n"
+"PO-Revision-Date: 2016-03-17 20:12+0000\n"
 "Last-Translator: Larlet David <david@larlet.fr>\n"
 "Language-Team: Spanish (http://www.transifex.com/etalab/udata/language/es/)\n"
 "MIME-Version: 1.0\n"
@@ -27,7 +27,7 @@ msgstr ""
 
 #: udata/theme.py:36 udata/core/site/metrics.py:91
 #: udata/core/site/views.py:149 udata/templates/header.html:49
-#: udata/templates/search.html:42 udata/templates/search.html:104
+#: udata/templates/search.html:42 udata/templates/search.html:112
 #: udata/templates/dataset/search-panel.html:5
 #: udata/templates/organization/display_base.html:7
 #: udata/templates/organization/edit_base.html:7
@@ -44,8 +44,8 @@ msgstr "Organizaciones"
 #: udata/core/organization/views.py:111 udata/core/organization/views.py:114
 #: udata/core/reuse/metrics.py:24 udata/core/site/metrics.py:42
 #: udata/core/site/views.py:128 udata/core/user/metrics.py:28
-#: udata/templates/search.html:27 udata/templates/search.html:76
-#: udata/templates/search.html:107 udata/templates/search.html:118
+#: udata/templates/search.html:27 udata/templates/search.html:84
+#: udata/templates/search.html:115 udata/templates/search.html:126
 #: udata/templates/dataset/display.html:25
 #: udata/templates/dataset/edit_base.html:4
 #: udata/templates/dataset/followers.html:4
@@ -70,9 +70,9 @@ msgstr "Conjunto de datos"
 #: udata/core/organization/metrics.py:35 udata/core/organization/views.py:133
 #: udata/core/organization/views.py:136 udata/core/site/metrics.py:52
 #: udata/core/site/views.py:134 udata/core/user/metrics.py:42
-#: udata/templates/search.html:34 udata/templates/search.html:82
-#: udata/templates/search.html:90 udata/templates/search.html:108
-#: udata/templates/search.html:119 udata/templates/dataset/card.html:45
+#: udata/templates/search.html:34 udata/templates/search.html:90
+#: udata/templates/search.html:98 udata/templates/search.html:116
+#: udata/templates/search.html:127 udata/templates/dataset/card.html:45
 #: udata/templates/dataset/display.html:410
 #: udata/templates/dataset/list.html:33
 #: udata/templates/dataset/search-labels.html:23
@@ -185,7 +185,7 @@ msgstr "ha eliminado un conjunto de datos"
 #: udata/core/dataset/forms.py:26 udata/core/dataset/forms.py:67
 #: udata/core/discussions/forms.py:11 udata/core/issues/forms.py:11
 #: udata/core/reuse/forms.py:22 udata/core/site/forms.py:15
-#: udata/templates/search.html:79 udata/templates/search.html:92
+#: udata/templates/search.html:87 udata/templates/search.html:100
 #: udata/templates/dataset/list.html:30
 #: udata/templates/discussion/threads.html:42
 #: udata/templates/organization/list.html:29
@@ -394,7 +394,7 @@ msgid "API"
 msgstr "IPA"
 
 #: udata/core/dataset/models.py:160 udata/models/datetime_fields.py:58
-#: udata/templates/search.html:80 udata/templates/search.html:93
+#: udata/templates/search.html:88 udata/templates/search.html:101
 #: udata/templates/dataset/display.html:269
 #: udata/templates/dataset/list.html:31
 #: udata/templates/organization/list.html:30
@@ -404,7 +404,7 @@ msgid "Creation date"
 msgstr "Fecha de creación"
 
 #: udata/core/dataset/models.py:162 udata/models/datetime_fields.py:60
-#: udata/templates/search.html:81 udata/templates/search.html:94
+#: udata/templates/search.html:89 udata/templates/search.html:102
 #: udata/templates/dataset/list.html:32
 #: udata/templates/organization/list.html:31
 #: udata/templates/reuse/list.html:33 udata/templates/topic/datasets.html:28
@@ -469,8 +469,8 @@ msgid "A discussion has been closed"
 msgstr "Una discusión fue cerrada"
 
 #: udata/core/followers/metrics.py:29 udata/core/organization/views.py:162
-#: udata/core/site/metrics.py:101 udata/templates/search.html:109
-#: udata/templates/search.html:120 udata/templates/dataset/followers.html:6
+#: udata/core/site/metrics.py:101 udata/templates/search.html:117
+#: udata/templates/search.html:128 udata/templates/dataset/followers.html:6
 #: udata/templates/dataset/search-labels.html:26
 #: udata/templates/dataset/search-panel.html:17
 #: udata/templates/dataset/search-result.html:90
@@ -520,7 +520,7 @@ msgstr "Un problema ha sido cerrado"
 
 #: udata/core/jobs/forms.py:30 udata/core/organization/forms.py:23
 #: udata/core/post/forms.py:18 udata/core/topic/forms.py:18
-#: udata/harvest/forms.py:18 udata/templates/search.html:106
+#: udata/harvest/forms.py:18 udata/templates/search.html:114
 #: udata/templates/api/admin.html:10 udata/templates/user/list.html:30
 msgid "Name"
 msgstr "Nombre"
@@ -753,7 +753,7 @@ msgid "Number of elements in feeds"
 msgstr "Número de elementos de granularidad"
 
 #: udata/core/site/metrics.py:62 udata/core/site/views.py:140
-#: udata/templates/search.html:77 udata/templates/dataset/display.html:119
+#: udata/templates/search.html:85 udata/templates/dataset/display.html:119
 #: udata/templates/dataset/list.html:28
 msgid "Resources"
 msgstr "Recursos"
@@ -1343,22 +1343,26 @@ msgstr "%(site)s buscar"
 msgid "search"
 msgstr "buscar"
 
-#: udata/templates/search.html:58
-msgid "Territory:"
+#: udata/templates/search.html:60
+msgid "Town:"
 msgstr ""
 
-#: udata/templates/search.html:65 udata/templates/dataset/search-labels.html:6
+#: udata/templates/search.html:65
+msgid "Towns"
+msgstr ""
+
+#: udata/templates/search.html:73 udata/templates/dataset/search-labels.html:6
 #: udata/templates/reuse/search-labels.html:9
 msgid "Tag"
 msgstr "Etiqueta"
 
-#: udata/templates/search.html:66
+#: udata/templates/search.html:74
 #: udata/templates/dataset/search-labels.html:10
 #: udata/templates/organization/search-labels.html:3
 msgid "Badge"
 msgstr "Insignia"
 
-#: udata/templates/search.html:83 udata/templates/search.html:96
+#: udata/templates/search.html:91 udata/templates/search.html:104
 #: udata/templates/dataset/card.html:53 udata/templates/dataset/list.html:34
 #: udata/templates/organization/card.html:53
 #: udata/templates/reuse/card.html:52 udata/templates/topic/datasets.html:30
@@ -1366,27 +1370,27 @@ msgstr "Insignia"
 msgid "Stars"
 msgstr "Estrellas"
 
-#: udata/templates/search.html:95
+#: udata/templates/search.html:103
 msgid "Datasets used"
 msgstr "Conjuntos de datos utilizados"
 
-#: udata/templates/search.html:116
+#: udata/templates/search.html:124
 msgid "Last Name"
 msgstr "Apellido"
 
-#: udata/templates/search.html:117
+#: udata/templates/search.html:125
 msgid "First Name"
 msgstr "Nombre"
 
-#: udata/templates/search.html:141 udata/templates/search.html:168
-#: udata/templates/search.html:195 udata/templates/search.html:222
+#: udata/templates/search.html:149 udata/templates/search.html:176
+#: udata/templates/search.html:203 udata/templates/search.html:230
 #: udata/templates/topic/browse.html:34 udata/templates/topic/browse.html:54
 #, python-format
 msgid "See the %(total)s results"
 msgstr "Ver los %(total)s resultados"
 
-#: udata/templates/search.html:152 udata/templates/search.html:179
-#: udata/templates/search.html:206 udata/templates/search.html:233
+#: udata/templates/search.html:160 udata/templates/search.html:187
+#: udata/templates/search.html:214 udata/templates/search.html:241
 #: udata/templates/topic/browse.html:39 udata/templates/topic/browse.html:59
 msgid "No results found"
 msgstr "Resultados no encontrados"
@@ -2448,19 +2452,52 @@ msgstr "Configuración del tema"
 msgid "Current theme has no configuration"
 msgstr "El presente tema no tiene configuración"
 
-#: udata/templates/territories/territory.html:34
+#: udata/templates/territories/search-result.html:13
+#: udata/templates/territories/territory.html:47
 msgid "INSEE code:"
 msgstr ""
 
+#: udata/templates/territories/search-result.html:15
+msgid "Postal code:"
+msgstr ""
+
+#: udata/templates/territories/search-result.html:30
+msgid "Administrative level"
+msgstr ""
+
+#: udata/templates/territories/search-result.html:32
+msgid "Town"
+msgstr "Ciudad"
+
+#: udata/templates/territories/search-result.html:38
+msgid "Population"
+msgstr ""
+
+#: udata/templates/territories/territory.html:32
+msgid "Source:"
+msgstr ""
+
+#: udata/templates/territories/territory.html:33
+msgid "License:"
+msgstr ""
+
 #: udata/templates/territories/territory.html:39
+msgid "Submit your logo through:"
+msgstr ""
+
+#: udata/templates/territories/territory.html:40
+msgid "we only expose logos under an open license"
+msgstr ""
+
+#: udata/templates/territories/territory.html:52
 msgid "Population:"
 msgstr ""
 
-#: udata/templates/territories/territory.html:45
+#: udata/templates/territories/territory.html:58
 msgid "I belong to that city and I want to publish more datasets."
 msgstr ""
 
-#: udata/templates/territories/territory.html:46
+#: udata/templates/territories/territory.html:59
 msgid "Claim and enrich"
 msgstr ""
 
