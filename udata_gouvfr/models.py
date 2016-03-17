@@ -34,6 +34,7 @@ Dataset.__badges__[NECMERGITUR] = _('Nec Mergitur')
 
 
 class ZonagesTerritoryDataset(TerritoryDataset):
+    order = 8
     id = 'zonages'
     title = 'Zonages des politiques de la ville'
     # Ministère de l'Egalité des Territoires et du Logement.
@@ -46,6 +47,7 @@ class ZonagesTerritoryDataset(TerritoryDataset):
 
 
 class ComptesTerritoryDataset(TerritoryDataset):
+    order = 9
     id = 'comptes'
     title = 'Comptes de la collectivité'
     # Ministère des finances et des comptes publics.
@@ -69,6 +71,7 @@ class ComptesTerritoryDataset(TerritoryDataset):
 
 
 class LogementTerritoryDataset(TerritoryDataset):
+    order = 6
     id = 'logement'
     title = 'Logement'
     # Institut National de la Statistique et des Etudes Economiques (INSEE).
@@ -85,6 +88,7 @@ class LogementTerritoryDataset(TerritoryDataset):
 
 
 class EmploiPopulationTerritoryDataset(TerritoryDataset):
+    order = 5
     id = 'emploi_population'
     title = 'Emploi - Population active'
     # Institut National de la Statistique et des Etudes Economiques (INSEE).
@@ -101,6 +105,7 @@ class EmploiPopulationTerritoryDataset(TerritoryDataset):
 
 
 class EmploiChiffresTerritoryDataset(TerritoryDataset):
+    order = 4
     id = 'emploi_chiffres'
     title = 'Emploi - Chiffres clés'
     # Institut National de la Statistique et des Etudes Economiques (INSEE).
@@ -118,6 +123,7 @@ class EmploiChiffresTerritoryDataset(TerritoryDataset):
 
 
 class PopulationTerritoryDataset(TerritoryDataset):
+    order = 1
     id = 'population'
     title = 'Population'
     # Institut National de la Statistique et des Etudes Economiques (INSEE).
@@ -135,6 +141,7 @@ class PopulationTerritoryDataset(TerritoryDataset):
 
 
 class PopulationChiffresTerritoryDataset(TerritoryDataset):
+    order = 2
     id = 'population_chiffres'
     title = 'Population - Chiffres clés'
     # Institut National de la Statistique et des Etudes Economiques (INSEE).
@@ -152,6 +159,7 @@ class PopulationChiffresTerritoryDataset(TerritoryDataset):
 
 
 class PopulationDiplomesTerritoryDataset(TerritoryDataset):
+    order = 3
     id = 'population_diplomes'
     title = 'Population - Diplômes et formations'
     # Institut National de la Statistique et des Etudes Economiques (INSEE).
@@ -170,8 +178,9 @@ class PopulationDiplomesTerritoryDataset(TerritoryDataset):
 
 class ElectionsRegionales2015Tour2TerritoryDataset(
         ResourceBasedTerritoryDataset):
+    order = 7
     id = 'elections_regionales_2015_2'
-    title = 'Élection régionales 2015, second tour'
+    title = 'Élections régionales 2015, second tour'
     # Ministère de l'Intérieur.
     organization_id = '534fff91a3a7292c64a77f53'
     description = '''
