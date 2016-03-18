@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import {Model} from 'models/base';
 import HarvestSources from 'models/harvest/sources';
 import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
 
@@ -17,7 +18,7 @@ export default {
     },
     props: {
         owner: {
-            type: Object,
+            type: Model,
             default: function() {return {};}
         }
     },
@@ -54,8 +55,11 @@ export default {
         }
     },
     ready: function() {
-        if (this.owner.id) {
-            this.sources.fetch({owner: this.owner.id});
+        if (this.owner instanceof Model) {
+            // Only fetch if binding occured and object is already fetched, else wait for watch
+            if (this.owner.id) {
+                this.sources.fetch({owner: this.owner.id});
+            }
         } else {
             this.sources.fetch();
         }
