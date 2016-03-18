@@ -39,7 +39,8 @@ class ZonagesTerritoryDataset(TerritoryDataset):
     title = 'Zonages des politiques de la ville'
     # Ministère de l'Egalité des Territoires et du Logement.
     organization_id = '534fff8fa3a7292c64a77f3d'
-    url_template = 'http://sig.ville.gouv.fr/Cartographie/{code}'
+    url_template = (
+        'http://sig.ville.gouv.fr/Territoire/{code}/onglet/DonneesLocales')
     description = '''
         ZFU, ZUS, et autres quartiers du CUCS. Source :
         Ministère de l’égalité des territoires et du logement.
