@@ -31,6 +31,24 @@ define(['api', 'exports?qq!fineuploader'], function(API, qq) {
                     onSubmitted: this.on_submit,
                     onProgress: this.on_progress,
                     onComplete: this.on_complete
+                },
+                validation: {
+                    allowedExtensions: [
+                        // Base
+                        'csv', 'txt', 'json', 'pdf', 'xml', 'rdf', 'rtf',
+                        // OpenOffice
+                        'ods', 'odt', 'odp', 'odg',
+                        // Microsoft Office
+                        'xls', 'xlsx', 'doc', 'docx', 'pps', 'ppt',
+                        // Archives
+                        'tar', 'gz', 'tgz', 'rar', 'zip', '7z', 'xz', 'bz2',
+                        // Images
+                        'jpeg', 'jpg', 'jpe', 'gif', 'png', 'dwg', 'svg', 'tiff', 'ecw', 'svgz',
+                        // Geo
+                        'shp', 'kml', 'kmz', 'gpx', 'shx', 'ovr',
+                        // Misc
+                        'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'xsd', 'owl'
+                    ]
                 }
             });
 
