@@ -96,7 +96,7 @@ class GeoZone(db.Document):
             'type': 'Feature',
             'geometry': self.geom,
             'properties': {
-                'name': self.name,
+                'name': _(self.name),
                 'level': self.level,
                 'code': self.code,
                 'parents': self.parents,
