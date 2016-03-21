@@ -1,6 +1,5 @@
 <template>
-    <div class="alert alert-{{alert.type || 'success'}}"
-        :class="{ 'alert-dismissable': closable }">
+    <div class="alert" :class="classes">
         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
         <h4>
             <span class="icon fa fa-{{alert.icon || 'check'}}"></span>
@@ -20,6 +19,13 @@ export default {
     computed: {
         closable() {
             return this.alert.closable === undefined ? true : this.alert.closable;
+        },
+        classes() {
+            const classes = {
+                'alert-dismissable': this.closable
+            };
+            classes[`alert-${this.alert.type || 'success'}`] = true;
+            return classes;
         }
     }
 };
