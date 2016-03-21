@@ -30,7 +30,8 @@ define(['api', 'exports?qq!fineuploader'], function(API, qq) {
                     onUpload: this.on_upload,
                     onSubmitted: this.on_submit,
                     onProgress: this.on_progress,
-                    onComplete: this.on_complete
+                    onComplete: this.on_complete,
+                    onError: this.on_error,
                 },
                 validation: {
                     allowedExtensions: [
@@ -146,6 +147,16 @@ define(['api', 'exports?qq!fineuploader'], function(API, qq) {
              */
             on_dropped_files_complete: function(files, target) {
                 this.$uploader.addFiles(files); //this submits the dropped files to Fine Uploader
+            },
+
+            on_error: function(id, name, reason, xhrOrXdr) {
+                this.$dispatch('notify', {
+                    type: 'error',
+                    icon: 'exclamation-triangle',
+                    title: this._('Upload error on {name}', {name}),
+                    details: reason,
+                });
+                this.$emit('uploader:error', id, name, reason);
             },
 
             clear: function() {
