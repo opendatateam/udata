@@ -8,9 +8,8 @@ export UDATA_SETTINGS=/path/to/my/udata.cfg
 
 The configuration file is simply a Python file exporting some variables.
 
-uData use some flask extensions and so provides all avaiable options for theses extensions.
+uData uses some Flask extensions and so provides all available options for these extensions.
 Most of the time, it tries to provide some sane defaults.
-
 
 ## Flask and global behavior options
 
@@ -32,25 +31,22 @@ A boolean specifying if the emails should actually be sent.
 
 A boolean used to force SSL usage for logged in users.
 
-
 ### DEFAULT_LANGUAGE
 
 **default**: `'en'`
 
-The default language used when no language prefix is provided in URLs.
-
+The default fallback language when no language prefix is provided in URLs.
 
 ### SECRET_KEY
 
 A secret key used as salt for cryptographic parts.
-**You must specify your own secure key and use same in all your instances**
+**You must specify your own secure key and use the same in all your instances**.
 
 ### SITE_ID
 
-**default**: 'default'`
+**default**: `'default'`
 
-The site identifier. It is used to ataached some database configuration, metrics...
-
+The site identifier. It is used to attached some database configuration, metrics...
 
 ### PLUGINS
 
@@ -58,36 +54,23 @@ The site identifier. It is used to ataached some database configuration, metrics
 
 A list of enabled uData plugins.
 
-
 ### THEME
 
 **default**: ``'default'``
 
-
 The enabled theme name.
-
 
 ### TEMPLATE_CACHE_DURATION
 
-**default**: 5`
+**default**: `5`
 
-The duration used for templates cache, in minutes.
-
-
-## Flask-Assets options
-
-### ASSETS_DEBUG
-
-**default**: `False`
-
-A boolean indicating whether assets should compiled or not allowing in-browser debugging.
-
+The duration used for templates' cache, in minutes.
 
 ## ElasticSearch configuration
 
 ### ELASTICSEARCH_URL
 
-**default**: 'localhost:9200'`
+**default**: `'localhost:9200'`
 
 The elasticsearch server url used for search indexing.
 
@@ -113,11 +96,11 @@ The mongodb post used by udata.
 
 **default**: `udata`
 
-The mongodb database used by udata. When testing, the test database will use the same name suffixed by `-test`
+The mongodb database used by udata.
+During tests, the test database will use the same name suffixed by `-test`
 
-See [the official Flask-MongoEngine documentation](https://flask-mongoengine.readthedocs.org/en/latest/)
+See [the official Flask-MongoEngine documentation][flask-mongoengine-doc]
 for more details.
-
 
 ## Celery options
 
@@ -138,14 +121,12 @@ CELERYBEAT_SCHEDULER = 'udata.tasks.Scheduler'
 CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
 ```
 
-You can see the full list of Celery options in the
-[Celery official documentation](http://docs.celeryproject.org/en/latest/configuration.html).
-
+You can see the full list of Celery options in the [Celery official documentation][celery-doc].
 
 ## Flask-Mail options
 
 You can see the full configuration option list in
-[the official Flask-Mail documentation](https://pythonhosted.org/flask-mail/).
+[the official Flask-Mail documentation][flask-mail-doc].
 
 ### MAIL_DEFAULT_SENDER
 
@@ -153,13 +134,11 @@ You can see the full configuration option list in
 
 The default identity used for outgoing mails.
 
-
 ## Flask-OAuthlib options
 
 uData is Oauthlib to provide OAuth2 on the API.
 The full option list is available in
-[the official Flask-OAuthlib documentation](https://flask-oauthlib.readthedocs.org/en/latest/oauth2.html#configuration)
-
+[the official Flask-OAuthlib documentation][flask-oauthlib-doc]
 
 ### OAUTH2_PROVIDER_TOKEN_EXPIRES_IN
 
@@ -167,40 +146,34 @@ The full option list is available in
 
 The OAuth2 token duration.
 
-
 ### OAUTH2_PROVIDER_ERROR_ENDPOINT
 
 **default**: `'oauth-i18n.oauth_error'`
 
-The OAuth2 error page. Do not modify unless you know what you do.
-
+The OAuth2 error page. Do not modify unless you know what you are doing.
 
 ## Flask-Cache options
 
-uData use Flask-Cache to handle cache and use Redis by default.
+uData uses Flask-Cache to handle cache and use Redis by default.
 You can see the full options list in
-[the official Flask-Cache documentation](https://pythonhosted.org/Flask-Cache/)
+[the official Flask-Cache documentation][flask-cache-doc]
 
 ### CACHE_TYPE
 
 **default**: `'redis'`
 
-The cache type, which can be adjusted to your needs.
-
+The cache type, which can be adjusted to your needs (_ex:_ `null`, `memcached`)
 
 ### CACHE_KEY_PREFIX
 
 **default**: `'udata-cache'`
 
-A prefix used for cache keys to avoid conflict with other middleware.
-It also allows you use the same backend with different instances.
-
+A prefix used for cache keys to avoid conflicts with other middleware.
+It also allows you to use the same backend with different instances.
 
 ## Flask-FS options
 
 uData use Flask-FS as storage abstraction.
-
-
 
 ## Example configuration file
 
@@ -212,9 +185,6 @@ from __future__ import unicode_literals
 
 
 DEBUG = True
-ASSETS_DEBUG = True
-ASSETS_AUTO_BUILD = True
-# REQUIREJS_RUN_IN_DEBUG = True
 
 SEND_MAIL = False
 
@@ -224,7 +194,7 @@ USE_SSL = True
 SERVER_NAME = 'www.data.dev'
 
 DEFAULT_LANGUAGE = 'fr'
-PLUGINS =  'gouvfr piwik harvest me'.split()
+PLUGINS =  'gouvfr piwik youckan'.split()
 
 SITE_ID = 'www.data.dev'
 SITE_TITLE = 'Data.dev'
@@ -235,3 +205,9 @@ DEBUG_TOOLBAR = True
 FS_PREFIX = '/s'
 FS_ROOT = '/srv/http/www.data.dev/fs'
 ```
+
+[celery-doc]: https://docs.celeryproject.org/en/latest/configuration.html
+[flask-cache-doc]: https://pythonhosted.org/Flask-Cache/
+[flask-mail-doc]: https://pythonhosted.org/flask-mail/
+[flask-mongoengine-doc]: https://flask-mongoengine.readthedocs.org/
+[flask-oauthlib-doc]: https://flask-oauthlib.readthedocs.org/en/latest/oauth2.html#configuration

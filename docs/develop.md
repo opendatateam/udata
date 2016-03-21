@@ -1,7 +1,7 @@
 # Development
 
-There is many way to intall a development environement for uData.
-The prefered one is to use virtualenv and Docker/Docker-Compose.
+There are many ways to intall a development environment for uData.
+To get up and running fast, we recommand to use virtualenv and Docker/Docker-Compose.
 
 ## System dependencies
 
@@ -31,9 +31,10 @@ apt-get install build-essential pkg-config python-dev python-virtualenv libjpeg-
 
 ## Python dependencies
 
-It is recommanded to work within a virtualenv to ensure proper dependencies isolation.
+It is recommended to work within a virtualenv to ensure proper dependencies isolation.
 
-It is recommanded to have a parent workspace where project are cloned, data stored...
+It is recommanded to have a parent workspace where project are cloned,
+and where data are stored...
 It will be designated by `$WORKSPACE` until the end of the documentation.
 
 ```shell
@@ -49,7 +50,8 @@ $ mkvirtualenv udata && setvirtualenvproject .  # for virtualenvwrapper
 $ mkproject udata  # for virtualenvwrapper with configured project dir
 ```
 
-If your system is using Python 3 as primary Python installation,
+uData expect to run with Python 2.7,
+so if your system is using Python 3 as primary Python installation,
 don't forget to specify the python version with the `-p` parameter:
 
 ```shell
@@ -78,9 +80,9 @@ You can use native middleware packages or docker images (prefered method)
 ### The docker way
 
 This is the prefered method as it does not depends of version provided by your OS.
-You need to have [Docker] installed and working for your user.
+You need to have [Docker][] installed and working for your user.
 
-You need to [install docker-compose]:
+You need to [install docker-compose][docker-compose-install]:
 
 ```shell
 $ pip install docker-compose
@@ -95,16 +97,13 @@ $ docker-compose up -d  # Run docker processes in background
 $ docjer-compose ps  # List running docker processes
 ```
 
-ElasticSearch requires the elasticsearch-icu-analysis to be able to sort
-on unicode strings.
+ElasticSearch requires the elasticsearch-icu-analysis to be able to sort on unicode strings.
 You need to look at the compatibility matrix to find the corresponding version
-on [the official documention](https://github.com/elastic/elasticsearch-analysis-icu).
-At the time this doc is written, we use ElasticSearch 1.4.3 and ElasticSearch ICU Analysis 2.4.2
+on [the official documention][analysis-icu].
+At the time this doc is written, we use ElasticSearch 1.7 and ElasticSearch ICU Analysis 2.7.0
 
 ```shell
-$ docker-compose run search /bin/bash
-$ /usr/share/elasticsearch/bin/plugin install elasticsearch/elasticsearch-analysis-icu/2.4.2
-$ exit
+$ docker-compose run search plugin install elasticsearch/elasticsearch-analysis-icu/2.7.0
 $ docker-compose restart search
 ```
 
@@ -112,21 +111,16 @@ $ docker-compose restart search
 
 In case you prefer native packages, you must ensure a sufficient versionning:
 
-* ElasticSearch 1.4+
-* MongoDB 2.6+
+* ElasticSearch 1.7 (udata is not yet compatible with ElasticSearch 2.x)
+* MongoDB 3.2+
 * Redis
-
 
 ## JavaScript dependencies
 
-JavaScript dependencies are managed by npm and requires
-webpack to be installed globaly.
+You need NodeJS 4.2. If it's not already installed or you have a different version,
+you should consider [installing NVM][nvm-install].
 
-```shell
-$ sudo npm install -g webpack
-```
-
-Then, to fetch the udata dependencies:
+Then install JavaScript dependencies:
 
 ```shell
 $ cd $WORKSPACE/udata
@@ -156,21 +150,20 @@ As you installed uData as editable it provides the `udata` launcher on your virt
 $ udata -?
 ```
 
-For developement purpose, you can use the `manage.py` launcher which provides the same commands but in debug mode.
+For developement purpose, you can use the `manage.py` launcher
+which provides the same commands but in debug mode.
 
 ```shell
 $ python udata/manage.py -?
 ```
 
-You can optionnaly specify a configuration file by exporting the `UDATA_SETTINGS` environment variable:
+You can optionally specify a configuration file by exporting the `UDATA_SETTINGS` environment variable:
 
 ```shell
 $ export UDATA_SETTINGS=$WORKSPACE/udata.cfg
 ```
 
-For more details on the configuration file,
-see [configuration documentation](configuration.md)
-
+For more details on the configuration file, see [configuration documentation](configuration.md)
 
 ### Initialization
 
@@ -197,7 +190,7 @@ uData requires at least 3 processes:
 * a beat process (for scheduled tasks)
 
 A Procfile is provided to ease the task.
-You can use [Honcho] (or whatever Procfile manager) to run the 3 processes
+You can use [Honcho][] (or whatever Procfile manager) to run the 3 processes
 in your development environement.
 
 ```shell
@@ -206,7 +199,7 @@ $ honcho start
 
 ### Common tasks
 
-Most of the common and recurrent tasks are automatised with invoke.
+Most of the common and recurrent tasks are automated with invoke.
 
 In the udata directory, you can:
 
@@ -233,7 +226,8 @@ $ inv doc
 $ inv test
 ```
 
-
-[Docker]: https://www.docker.com/
-[install docker-compose]: https://docs.docker.com/compose/install/
-[Honcho]: https://github.com/nickstenning/honcho
+[docker]: https://www.docker.com/
+[docker-compose-install]: https://docs.docker.com/compose/install/
+[honcho]: https://github.com/nickstenning/honcho
+[nvm-install]: https://github.com/creationix/nvm#installation
+[analysis-icu]: https://github.com/elastic/elasticsearch-analysis-icu

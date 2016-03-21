@@ -67,6 +67,16 @@ On the very first run it will download and install images which takes a while.
     If you have no output at all for too long,
     check the [IPv6 possible issue](https://github.com/docker/docker/issues/2174#issuecomment-35697655).
 
+And install the [analysis-icu][] plugin for ElasticSearch:
+
+```shell
+docker-compose run search plugin install elasticsearch/elasticsearch-analysis-icu/2.7.0
+```
+
+!!! note
+    Match the Analysis ICU plugin version to your elasticsearch versionning
+    given those indicated in [the official repository][analysis-icu]
+
 #### Installing natively
 
 If you really don't want to use docker you can install MongoDB 3.2,
@@ -116,6 +126,7 @@ You have to set a [~/.transifexrc][transifexrc] first.
 [transifexrc]: http://docs.transifex.com/client/config/
 [virtualenv]: https://virtualenv.readthedocs.org/
 [nvm-install]: https://github.com/creationix/nvm#installation
+[analysis-icu]: https://github.com/elastic/elasticsearch-analysis-icu
 
 [requires-io-url]: https://requires.io/github/etalab/udata/requirements/?branch=master
 [requires-io-badge]: https://requires.io/github/etalab/udata/requirements.png?branch=master
