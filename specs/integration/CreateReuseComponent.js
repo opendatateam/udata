@@ -19,3 +19,8 @@ fill: function fill(name, url, description) {
                 .then(this.setUrlField(url))
                 .then(this.setDescriptionField(description));
 },
+upload: function uploadFile(filePath) {
+    return this.openFileUploaderLink.then(function(fileField) {
+        return fileField.sendKeys(filePath);
+    })
+},

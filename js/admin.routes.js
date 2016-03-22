@@ -111,7 +111,7 @@ router.map({
                 }
             },
             'discussion/:discussion_id/': {
-                name: 'reuse-issue',
+                name: 'reuse-discussion',
                 component: function(resolve) {
                     require(['./components/discussions/modal.vue'], resolve);
                 }

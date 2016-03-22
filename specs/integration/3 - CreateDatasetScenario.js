@@ -1,6 +1,4 @@
-description: "As an anonymous user, " +
-"I want to create a dataset from the homepage " +
-"in order to add new data to my organization.",
+description: "Create a dataset",
 
 steps: [
     // Login.
@@ -18,10 +16,7 @@ steps: [
     // Add the dedicated resource file.
     CreateDatasetComponent.chooseLocalFile(),
     CreateResourceComponent.setTitle(resourceName),
-    CreateResourceComponent.openFileUploader(),
-    {
-        "CreateResourceComponent.checksumInput": true // Waiting for manual upload.
-    },
+    CreateResourceComponent.upload('specs/integration/files/image.png'),
     NavigationComponent.next(),
     {
         "CreateDatasetComponent.successTitle": true

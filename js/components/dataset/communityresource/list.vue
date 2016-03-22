@@ -58,8 +58,9 @@ export default {
     },
     events: {
         'datatable:item:click'(community) {
+            const dataset_id = community.dataset ? community.dataset.id : 'deleted';
             this.$go({name: 'dataset-community-resource', params: {
-                oid: community.dataset.id, rid: community.id
+                oid: dataset_id, rid: community.id
             }});
         }
     }

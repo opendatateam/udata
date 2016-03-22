@@ -1,6 +1,4 @@
-description: "As an anonymous user, " +
-"I want to create a reuse from the homepage " +
-"in order to add share my discovery.",
+description: "Create a reuse",
 
 steps: [
     // Login.
@@ -18,10 +16,7 @@ steps: [
     // Choose the related dataset.
     CreateReuseComponent.chooseDataset("geozones"),
     NavigationComponent.next(),
-    CreateReuseComponent.openFileUploader(),
-    {
-        "CreateReuseComponent.cropScreen": true // Waiting for manual upload.
-    },
+    CreateReuseComponent.upload('specs/integration/files/image.png'),
     NavigationComponent.next(),
     {
         "CreateReuseComponent.successTitle": true

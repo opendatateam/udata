@@ -1,6 +1,4 @@
-description: "As an anonymous user, " +
-"I want to look for datasets, community resources, reuses, issues and discussions " +
-"in order to find a given thing related to my data.",
+description: "Perform admin search queries",
 
 steps: [
     // Reach the admin dashboard.
@@ -12,52 +10,36 @@ steps: [
     NavigationComponent.adminFromFrontMenu(),
     SearchComponent.searchForAdmin(adminQueryGeo),
     {
-        "SearchComponent.datasetsTitleSearchAdminResult": 'Datasets related to your data about "' + adminQueryGeo + '"'
+        "SearchComponent.titleSearchAdminResult": 'Search in your data: ' + adminQueryGeo
     },
     {
-        "SearchComponent.communitiesTitleSearchAdminResult": 'Community resources related to your data about "' + adminQueryGeo + '"'
+        "SearchComponent.datasetsSearchAdminResult": function hasResults(result) {
+            return result.elementsByCssSelector('tr')
+                .then(function(rows) {
+                    assert.equal(rows.length, 1, result);
+                });
+        }
     },
     {
-        "SearchComponent.reusesTitleSearchAdminResult": 'Reuses related to your data about "' + adminQueryGeo + '"'
-    },
-    {
-        "SearchComponent.issuesTitleSearchAdminResult": 'Issues related to your data about "' + adminQueryGeo + '"'
-    },
-    {
-        "SearchComponent.discussionsTitleSearchAdminResult": 'Discussions related to your data about "' + adminQueryGeo + '"'
+        "SearchComponent.reusesSearchAdminResult": function hasResults(result) {
+            return result.elementsByCssSelector('tr')
+                .then(function(rows) {
+                    assert.equal(rows.length, 1, result);
+                });
+        }
     },
     SearchComponent.searchForAdmin(adminQueryCSV),
     {
-        "SearchComponent.datasetsTitleSearchAdminResult": 'Datasets related to your data about "' + adminQueryCSV + '"'
+        "SearchComponent.titleSearchAdminResult": 'Search in your data: ' + adminQueryCSV
     },
     {
-        "SearchComponent.communitiesTitleSearchAdminResult": 'Community resources related to your data about "' + adminQueryCSV + '"'
+        "SearchComponent.notFoundSearchAdminResult": 'No result found'
     },
-    {
-        "SearchComponent.reusesTitleSearchAdminResult": 'Reuses related to your data about "' + adminQueryCSV + '"'
-    },
-    {
-        "SearchComponent.issuesTitleSearchAdminResult": 'Issues related to your data about "' + adminQueryCSV + '"'
-    },
-    {
-        "SearchComponent.discussionsTitleSearchAdminResult": 'Discussions related to your data about "' + adminQueryCSV + '"'
-    },
-    SearchComponent.searchForAdmin(adminQueryAccent),
-    {
-        "SearchComponent.datasetsTitleSearchAdminResult": 'Datasets related to your data about "' + adminQueryAccent + '"'
-    },
-    {
-        "SearchComponent.communitiesTitleSearchAdminResult": 'Community resources related to your data about "' + adminQueryAccent + '"'
-    },
-    {
-        "SearchComponent.reusesTitleSearchAdminResult": 'Reuses related to your data about "' + adminQueryAccent + '"'
-    },
-    {
-        "SearchComponent.issuesTitleSearchAdminResult": 'Issues related to your data about "' + adminQueryAccent + '"'
-    },
-    {
-        "SearchComponent.discussionsTitleSearchAdminResult": 'Discussions related to your data about "' + adminQueryAccent + '"'
-    },
+    // Waiting for https://github.com/vuejs/vue-router/pull/391
+    // SearchComponent.searchForAdmin(adminQueryAccent),
+    // {
+    //     "SearchComponent.titleSearchAdminResult": 'Search in your data: ' + adminQueryAccent
+    // },
 
     // Logout.
     NavigationComponent.homeFromAdmin(),

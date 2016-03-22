@@ -1,6 +1,4 @@
-description: "As an anonymous user, " +
-"I want to create a community resource from the homepage " +
-"in order to share my work on the platform.",
+description: "Create a community resource",
 
 steps: [
     // Find the BAN dataset and click the add community resource link.
@@ -14,10 +12,7 @@ steps: [
     // Add the dedicated community resource file.
     CreateDatasetComponent.chooseLocalFile(),
     CreateResourceComponent.setTitle(resourceName),
-    CreateResourceComponent.openFileUploader(),
-    {
-        "CreateResourceComponent.checksumInput": true // Waiting for manual upload.
-    },
+    CreateResourceComponent.upload('specs/integration/files/image.png'),
     NavigationComponent.next(),
     {
         "CreateDatasetComponent.successTitle": true

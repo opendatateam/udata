@@ -1,6 +1,4 @@
-description: "As an anonymous user, " +
-"I want to perform various search queries from the homepage " +
-"in order to find datasets, orgs, reuses and users.",
+description: "Perform front search queries",
 
 steps: [
     NavigationComponent.home(),

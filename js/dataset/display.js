@@ -37,7 +37,7 @@ function addTooltip($element, content) {
 }
 
 function prepare_resources() {
-    $('.resources-list').items('http://schema.org/DataDownload').each(function() {
+    $('.resources-list .list-group-item').each(function() {
         const $this = $(this);
 
         // Prevent default click on link

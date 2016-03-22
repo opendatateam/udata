@@ -76,7 +76,7 @@
     "font-awesome": "^4.5.0",
     "handlebars": "^3.0.3",
     "highlight.js": "^9.1.0",
-    "i18next": "^2.0.22",
+    "i18next": "2.3.4",
     "icheck": "^1.0.2",
     "ion-rangeslider": "^2.1.2",
     "jquery": "~2.1.4",
@@ -98,7 +98,7 @@
     "swagger-client": "2.1.11",
     "swagger-ui": "2.1.4",
     "tv4": "^1.2.7",
-    "typeahead.js": "^0.11.1",
+    "typeahead.js": "corejavascript/typeahead.js",
     "typeahead.js-bootstrap3.less": "hyspace/typeahead.js-bootstrap3.less#v0.2.3",
     "vue": "1.0.15",
     "vue-router": "0.7.10"

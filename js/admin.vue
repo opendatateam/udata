@@ -48,9 +48,13 @@ export default {
         },
         notify: function(notification) {
             this.notifications.push(notification);
+        },
+        'notify:close': function(notification) {
+            const index = this.notifications.indexOf(notification);
+            this.notifications.splice(index, 1);
         }
     },
-    ready: function() {
+    ready() {
         this.fix_size();
         this.slimscroll();
 
@@ -68,7 +72,7 @@ export default {
         /**
          * Fix sidebar size
          */
-        fix_size: function () {
+        fix_size() {
             //Get window height and the wrapper height
             var neg = this.$find('.main-header').height() + this.$find('.main-footer').height();
             var window_height = $(window).height();
@@ -85,7 +89,7 @@ export default {
         /**
          * Enable slimscroll on sidebar
          */
-        slimscroll: function () {
+        slimscroll() {
             this.$find('.sidebar').slimscroll({
                 height: ($(window).height() - this.$find('.main-header').height()) + 'px',
                 color: 'rgba(0, 0, 0, 0.2)',
@@ -99,7 +103,7 @@ export default {
          * @param  {Object} data        Data to assign to modal properties
          * @return {Vue}                The child instanciated vm
          */
-        $modal: function(options, data) {
+        $modal(options, data) {
             let constructor = Vue.extend(options);
             return new constructor({
                 el: this.$els.modal,
