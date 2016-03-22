@@ -82,7 +82,7 @@ docker-compose run search plugin install elasticsearch/elasticsearch-analysis-ic
 If you really don't want to use docker you can install MongoDB 3.2,
 ElasticSearch 1.7 with analysis-icu plugin, and Redis 3.0 on your way.
 
-Now open your browser to http://localhost:7000/. It's empty and ugly, yet it works!
+Now open your browser to [http://localhost:7000/][]. It's empty and ugly, yet it works!
 
 ## JS dependencies
 

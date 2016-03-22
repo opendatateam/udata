@@ -75,7 +75,7 @@ $ pip install --no-deps -e udata/
 
 ## Middleware installation
 
-You can use native middleware packages or docker images (prefered method)
+You can use native middleware packages or docker images (prefered method).
 
 ### The docker way
 
