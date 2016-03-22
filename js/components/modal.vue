@@ -10,6 +10,10 @@
                 </button>
                 <h4 class="modal-title" id="modal-title">{{title}}</h4>
             </div>
+            <!-- Notifications -->
+            <div v-if="$root.notifications.length > 0" class="notification-zone modal-body">
+                <alert v-for="n in $root.notifications" :alert="n"></alert>
+            </div>
             <slot></slot>
         </div>
     </div>
@@ -17,13 +21,29 @@
 </template>
 
 <script>
-import $ from 'jquery';
 import Modal from 'mixins/modal';
+import Alert from 'components/alert.vue';
 
 export default {
     replace: true,
     name: 'modal',
     props: ['title', 'size'],
-    mixins: [Modal]
+    mixins: [Modal],
+    components: {
+        Alert
+    }
 };
 </script>
+
+<style lang="less">
+.modal {
+    .notification-zone {
+        padding: 0;
+
+        .alert {
+            border-radius: 0;
+            margin: 0;
+        }
+    }
+}
+</style>

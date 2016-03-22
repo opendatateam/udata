@@ -1,10 +1,35 @@
-define(['api', 'exports?qq!fineuploader'], function(API, qq) {
+define(['api', 'exports?qq!fineuploader', 'i18n'], function(API, qq, i18n) {
     'use strict';
 
     var HAS_FILE_API = window.File && window.FileReader && window.FileList && window.Blob,
         _1GO = Math.pow(1024, 3),
         _1MO = Math.pow(1024, 2),
         _1KO = 1024;
+
+    // Passthru interpolation
+    const interpolation = {defaultVariables: {
+        file: '{file}',
+        minSizeLimit: '{minSizeLimit}',
+        sizeLimit: '{sizeLimit}',
+        netItems: '{netItems}',
+        itemLimit: '{itemLimit}',
+        extensions: '{extensions}',
+    }};
+    const messages = {
+        emptyError: i18n._('{file} is empty, please select files again without it.', {interpolation: interpolation}),
+        maxHeightImageError: i18n._('Image is too tall.'),
+        maxWidthImageError: i18n._('Image is too wide.'),
+        minHeightImageError: i18n._('Image is not tall enough.'),
+        minWidthImageError: i18n._('Image is not wide enough.'),
+        minSizeError: i18n._('{file} is too small, minimum file size is {minSizeLimit}.', {interpolation: interpolation}),
+        noFilesError: i18n._('No files to upload.'),
+        onLeave: i18n._('The files are being uploaded, if you leave now the upload will be canceled.'),
+        retryFailTooManyItemsError: i18n._('Retry failed - you have reached your file limit.'),
+        sizeError: i18n._('{file} is too large, maximum file size is {sizeLimit}.', {interpolation: interpolation}),
+        tooManyItemsError: i18n._('Too many items ({netItems}) would be uploaded. Item limit is {itemLimit}.', {interpolation: interpolation}),
+        typeError: i18n._('{file} has an invalid extension. Valid extension(s): {extensions}.', {interpolation: interpolation}),
+        unsupportedBrowserIos8Safari: i18n._('Unrecoverable error - this browser does not permit file uploading of any kind due to serious bugs in iOS8 Safari. Please use iOS8 Chrome until Apple fixes these issues.'),
+    };
 
     return {
         data: function() {
@@ -30,8 +55,10 @@ define(['api', 'exports?qq!fineuploader'], function(API, qq) {
                     onUpload: this.on_upload,
                     onSubmitted: this.on_submit,
                     onProgress: this.on_progress,
-                    onComplete: this.on_complete
+                    onComplete: this.on_complete,
+                    onError: this.on_error,
                 },
+                messages: messages,
                 validation: {
                     allowedExtensions: [
                         // Base
@@ -146,6 +173,16 @@ define(['api', 'exports?qq!fineuploader'], function(API, qq) {
              */
             on_dropped_files_complete: function(files, target) {
                 this.$uploader.addFiles(files); //this submits the dropped files to Fine Uploader
+            },
+
+            on_error: function(id, name, reason, xhrOrXdr) {
+                this.$dispatch('notify', {
+                    type: 'error',
+                    icon: 'exclamation-triangle',
+                    title: this._('Upload error on {name}', {name}),
+                    details: reason,
+                });
+                this.$emit('uploader:error', id, name, reason);
             },
 
             clear: function() {
