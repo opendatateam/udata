@@ -3,8 +3,19 @@ import SwaggerClient from 'swagger-client';
 import config from 'config';
 import log from 'logger';
 
-
+/**
+ * Update a query string parameter in an URL.
+ *
+ * If the parameter exists, it is replaced.
+ * If not, it is added.
+ *
+ * @param  {String} uri   The original URL to transform
+ * @param  {String} key   The query string parameter name to update
+ * @param  {String} value The query string parameter value to set
+ * @return {String}       The updated URL
+ */
 function updateQueryParam(uri, key, value) {
+    // Match an existing key/value pair
     const re = new RegExp(`([?&])${key}=.*?(&|$)`, 'i');
     const separator = uri.indexOf('?') !== -1 ? '&' : '?';
     if (uri.match(re)) {
