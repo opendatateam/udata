@@ -96,7 +96,7 @@ class GeoZone(db.Document):
             'type': 'Feature',
             'geometry': self.geom,
             'properties': {
-                'name': self.name,
+                'name': _(self.name),
                 'level': self.level,
                 'code': self.code,
                 'parents': self.parents,
@@ -109,7 +109,7 @@ class GeoZone(db.Document):
 
 @cache.memoize()
 def get_spatial_granularities(lang):
-    granularities = [(l.id, l.name)
+    granularities = [(l.id, _(l.name))
                      for l in GeoLevel.objects] + BASE_GRANULARITIES
     return [(id, str(name)) for id, name in granularities]
 
@@ -127,7 +127,7 @@ class SpatialCoverage(db.EmbeddedDocument):
 
     @property
     def granularity_label(self):
-        return dict(spatial_granularities)[self.granularity or 'other']
+        return _(dict(spatial_granularities)[self.granularity or 'other'])
 
     @property
     def top_label(self):
@@ -140,4 +140,4 @@ class SpatialCoverage(db.EmbeddedDocument):
                 continue
             if zone.id in top.parents:
                 top = zone
-        return top.name
+        return _(top.name)

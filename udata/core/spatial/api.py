@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from udata.api import api, API
 
 from udata import search
+from udata.i18n import _
 from udata.models import Dataset
 
 from .api_fields import (
@@ -67,7 +68,7 @@ class SuggestZonesAPI(API):
         return [
             {
                 'id': opt['text'],
-                'name': opt['payload']['name'],
+                'name': _(opt['payload']['name']),
                 'code': opt['payload']['code'],
                 'level': opt['payload']['level'],
                 'keys': opt['payload']['keys'],
@@ -85,7 +86,7 @@ class SpatialLevelsAPI(API):
         '''List all known levels'''
         return [{
             'id': level.id,
-            'name': level.name,
+            'name': _(level.name),
             'parents': [p.id for p in level.parents],
         } for level in GeoLevel.objects]
 
@@ -122,7 +123,7 @@ class SpatialCoverageAPI(API):
                 'type': 'Feature',
                 'geometry': zone.geom,
                 'properties': {
-                    'name': zone.name,
+                    'name': _(zone.name),
                     'code': zone.code,
                     'level': zone.level,
                     'datasets': nb_datasets
