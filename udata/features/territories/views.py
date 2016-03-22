@@ -6,6 +6,7 @@ from flask import abort, current_app, request, send_file
 import unicodecsv as csv
 
 from udata import theme
+from udata.auth import current_user
 from udata.models import Dataset
 from udata.i18n import I18nBlueprint
 from udata.utils import multi_to_dict
@@ -70,9 +71,12 @@ def render_territory(territory):
         for territory_dataset_class in territory_dataset_classes
     ]
     datasets = list(Dataset.objects.visible().filter(spatial__zones=territory))
+    has_pertinent_datasets = (current_user.is_authenticated()
+                              and current_user.can_modify(datasets))
     context = {
         'territory': territory,
         'territory_datasets': territory_datasets,
         'datasets': datasets,
+        'has_pertinent_datasets': has_pertinent_datasets
     }
     return theme.render('territories/territory.html', **context)

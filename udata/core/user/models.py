@@ -169,6 +169,12 @@ class User(db.Document, WithMetrics, UserMixin):
     def clear_api_key(self):
         self.apikey = None
 
+    def can_modify(self, datasets):
+        """Check if one of the datasets is part of user's organizations."""
+        if datasets and self.is_authenticated():
+            organizations = [dataset.organization for dataset in datasets]
+            return bool(set(self.organizations) & set(organizations))
+
     @classmethod
     def get(cls, id_or_slug):
         obj = cls.objects(slug=id_or_slug).first()
