@@ -80,7 +80,7 @@ def render_territory(territory):
                                   and current_user.can_modify(datasets))
         for dataset in datasets:
             if (dataset.organization
-                    and territory.id in dataset.organization.zones):
+                    and territory.id == dataset.organization.zone):
                 town_datasets.append(dataset)
             else:
                 other_datasets.append(dataset)

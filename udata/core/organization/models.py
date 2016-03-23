@@ -123,7 +123,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     requests = db.ListField(db.EmbeddedDocumentField(MembershipRequest))
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
-    zones = db.ListField(db.StringField())
+    zone = db.StringField()
     extras = db.ExtrasField()
 
     deleted = db.DateTimeField()
