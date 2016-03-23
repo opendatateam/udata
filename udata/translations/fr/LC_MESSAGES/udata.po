@@ -13,14 +13,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-03-22 10:17+0100\n"
-"PO-Revision-Date: 2016-03-22 09:21+0000\n"
-"Last-Translator: Axel Haustant\n"
+"POT-Creation-Date: 2016-03-23 11:29+0100\n"
+"PO-Revision-Date: 2016-03-23 10:32+0000\n"
+"Last-Translator: Larlet David <david@larlet.fr>\n"
 "Language-Team: French (http://www.transifex.com/etalab/udata/language/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.2.0\n"
+"Generated-By: Babel 1.3\n"
 "Language: fr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
@@ -596,17 +596,17 @@ msgstr "Éditeur"
 
 #: udata/core/organization/models.py:29 udata/features/transfer/models.py:17
 #: udata/harvest/models.py:22 udata/harvest/models.py:32
-#: udata/harvest/models.py:69 udata/migrations/features/transfer/models.py:17
+#: udata/harvest/models.py:69
 msgid "Pending"
 msgstr "En attente"
 
 #: udata/core/organization/models.py:30 udata/features/transfer/models.py:18
-#: udata/harvest/models.py:70 udata/migrations/features/transfer/models.py:18
+#: udata/harvest/models.py:70
 msgid "Accepted"
 msgstr "Acceptée"
 
 #: udata/core/organization/models.py:31 udata/features/transfer/models.py:19
-#: udata/harvest/models.py:71 udata/migrations/features/transfer/models.py:19
+#: udata/harvest/models.py:71
 msgid "Refused"
 msgstr "Refusée"
 
@@ -825,7 +825,7 @@ msgstr "POI"
 msgid "Other"
 msgstr "Autre"
 
-#: udata/core/spatial/models.py:130
+#: udata/core/spatial/models.py:143
 msgid "other"
 msgstr "autre"
 
@@ -2516,7 +2516,7 @@ msgid "Current theme has no configuration"
 msgstr "Le thème courant n'a pas de configuration"
 
 #: udata/templates/territories/search-result.html:13
-#: udata/templates/territories/territory.html:47
+#: udata/templates/territories/territory.html:44
 msgid "INSEE code:"
 msgstr "Code INSEE :"
 
@@ -2536,31 +2536,36 @@ msgstr "Commune"
 msgid "Population"
 msgstr "Population"
 
-#: udata/templates/territories/territory.html:32
+#: udata/templates/territories/territory.html:6
+#, python-format
+msgid "Datasets related to the town of %(name)s with INSEE code %(code)s"
+msgstr "Jeux de données relatifs à la ville de %(name)s ayant pour code INSEE %(code)s"
+
+#: udata/templates/territories/territory.html:29
 msgid "Source:"
 msgstr "Source :"
 
-#: udata/templates/territories/territory.html:33
+#: udata/templates/territories/territory.html:30
 msgid "License:"
 msgstr "Licence :"
 
-#: udata/templates/territories/territory.html:39
+#: udata/templates/territories/territory.html:36
 msgid "Submit your logo through:"
 msgstr "Soumettez votre logo via :"
 
-#: udata/templates/territories/territory.html:40
+#: udata/templates/territories/territory.html:37
 msgid "we only expose logos under an open license"
 msgstr "seuls les logos sous licences libres sont affichés"
 
-#: udata/templates/territories/territory.html:52
+#: udata/templates/territories/territory.html:49
 msgid "Population:"
 msgstr "Population :"
 
-#: udata/templates/territories/territory.html:58
+#: udata/templates/territories/territory.html:55
 msgid "I belong to that city and I want to publish more datasets."
 msgstr "Je suis le représentant de cette commune et je souhaite publier d’autres jeux de données."
 
-#: udata/templates/territories/territory.html:59
+#: udata/templates/territories/territory.html:57
 msgid "Claim and enrich"
 msgstr "Revendiquer et enrichir"
 
