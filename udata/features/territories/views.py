@@ -72,15 +72,18 @@ def render_territory(territory):
         for territory_dataset_class in territory_dataset_classes
     ]
     datasets = list(Dataset.objects.visible().filter(spatial__zones=territory))
-    has_pertinent_datasets = (current_user.is_authenticated()
-                              and current_user.can_modify(datasets))
     town_datasets = []
     other_datasets = []
-    for dataset in datasets:
-        if dataset.organization and dataset.organization.certified_town:
-            town_datasets.append(dataset)
-        else:
-            other_datasets.append(dataset)
+    has_pertinent_datasets = False
+    if datasets:
+        has_pertinent_datasets = (current_user.is_authenticated()
+                                  and current_user.can_modify(datasets))
+        for dataset in datasets:
+            if (dataset.organization
+                    and territory.id in dataset.organization.zones):
+                town_datasets.append(dataset)
+            else:
+                other_datasets.append(dataset)
     context = {
         'territory': territory,
         'territory_datasets': territory_datasets,

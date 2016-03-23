@@ -15,7 +15,7 @@ from udata.i18n import lazy_gettext as _
 
 __all__ = (
     'Organization', 'Team', 'Member', 'MembershipRequest', 'FollowOrg',
-    'ORG_ROLES', 'MEMBERSHIP_STATUS', 'PUBLIC_SERVICE', 'TOWN', 'CERTIFIED'
+    'ORG_ROLES', 'MEMBERSHIP_STATUS', 'PUBLIC_SERVICE', 'CERTIFIED'
 )
 
 
@@ -34,7 +34,6 @@ MEMBERSHIP_STATUS = {
 LOGO_SIZES = [100, 60, 25]
 
 PUBLIC_SERVICE = 'public-service'
-TOWN = 'town'
 CERTIFIED = 'certified'
 
 
@@ -124,6 +123,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     requests = db.ListField(db.EmbeddedDocumentField(MembershipRequest))
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
+    zones = db.ListField(db.StringField())
     extras = db.ExtrasField()
 
     deleted = db.DateTimeField()
@@ -142,7 +142,6 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     __badges__ = {
         PUBLIC_SERVICE: _('Public Service'),
-        TOWN: _('Town'),
         CERTIFIED: _('Certified'),
     }
 
@@ -190,11 +189,6 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     def public_service(self):
         badges_kind = [badge.kind for badge in self.badges]
         return PUBLIC_SERVICE in badges_kind and CERTIFIED in badges_kind
-
-    @property
-    def certified_town(self):
-        badges_kind = [badge.kind for badge in self.badges]
-        return TOWN in badges_kind and CERTIFIED in badges_kind
 
     def member(self, user):
         for member in self.members:
