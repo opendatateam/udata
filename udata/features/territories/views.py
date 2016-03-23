@@ -74,11 +74,19 @@ def render_territory(territory):
     datasets = list(Dataset.objects.visible().filter(spatial__zones=territory))
     has_pertinent_datasets = (current_user.is_authenticated()
                               and current_user.can_modify(datasets))
+    town_datasets = []
+    other_datasets = []
+    for dataset in datasets:
+        if dataset.organization and dataset.organization.certified_town:
+            town_datasets.append(dataset)
+        else:
+            other_datasets.append(dataset)
     context = {
         'territory': territory,
         'territory_datasets': territory_datasets,
-        'datasets': datasets,
-        'has_pertinent_datasets': has_pertinent_datasets
+        'other_datasets': other_datasets,
+        'has_pertinent_datasets': has_pertinent_datasets,
+        'town_datasets': town_datasets
     }
     return theme.render('territories/territory.html', **context)
 
