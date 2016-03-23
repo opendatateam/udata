@@ -1,8 +1,14 @@
 <template>
-<layout :title="source.name || ''" :subtitle="source.backend || ''" :actions="actions">
+<layout :title="source.name || ''" :subtitle="source.backend || ''" :actions="actions" :badges="badges" >
     <div class="alert alert-info" v-if="should_validate">
-        <button class="pull-right btn btn-primary btn-xs"
-            @click="validate_source">{{ _('Validate') }}</button>
+        <div class="btn-toolbar pull-right">
+            <div class="btn-group">
+                <button class="btn btn-danger btn-xs" @click="confirm_delete">{{ _('Delete') }}</button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary btn-xs" @click="validate_source">{{ _('Validate') }}</button>
+            </div>
+        </div>
         {{ _('This harvest source has not been validated') }}
     </div>
     <div class="alert alert-warning" v-if="display_warning">
@@ -31,11 +37,15 @@
 import HarvestSource from 'models/harvest/source';
 import ItemModal from 'components/harvest/item.vue';
 import Vue from 'vue';
+import Preview from 'components/harvest/preview.vue';
+import SourceWidget from 'components/harvest/source.vue';
+import JobWidget from 'components/harvest/job.vue';
 import Layout from 'components/layout.vue';
 
 export default {
     name: 'HarvestSourceView',
-    data: function() {
+    components: {Preview, SourceWidget, JobWidget, Layout},
+    data() {
         return {
             source: new HarvestSource(),
             current_job: null,
@@ -52,15 +62,25 @@ export default {
         };
     },
     computed: {
-        is_validation_pending: function() {
+        is_validation_pending() {
             return this.source && this.source.validation
                 && this.source.validation.state === 'pending';
         },
-        should_validate: function() {
+        should_validate() {
             return this.is_validation_pending && this.$root.me.is_admin;
         },
-        display_warning: function() {
+        display_warning() {
             return this.is_validation_pending && !this.$root.me.is_admin;
+        },
+        badges() {
+            if (this.source && this.source.deleted) {
+                return [{
+                    class: 'danger',
+                    label: this._('Deleted')
+                }];
+            } else {
+                return [];
+            }
         }
     },
     events: {
@@ -75,16 +95,16 @@ export default {
         }
     },
     methods: {
-        edit: function() {
+        edit() {
             this.$go('/harvester/' + this.source.id + '/edit');
         },
-        confirm_delete: function() {
+        confirm_delete() {
             this.$root.$modal(
                 require('components/harvest/delete-modal.vue'),
                 {source: this.source}
             );
         },
-        validate_source: function() {
+        validate_source() {
             this.$root.$modal(
                 require('components/harvest/validation-modal.vue'),
                 {source: this.source}
@@ -97,12 +117,6 @@ export default {
                 this.source.fetch(this.$route.params.oid);
             }
         }
-    },
-    components: {
-        preview: require('components/harvest/preview.vue'),
-        'source-widget': require('components/harvest/source.vue'),
-        'job-widget': require('components/harvest/job.vue'),
-        Layout
     }
 };
 </script>

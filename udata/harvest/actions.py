@@ -30,9 +30,10 @@ def list_backends():
 
 def list_sources(owner=None):
     '''List all harvest sources'''
+    sources = HarvestSource.objects.visible()
     if owner:
-        return list(HarvestSource.objects.owned_by(owner))
-    return list(HarvestSource.objects)
+        return list(sources.owned_by(owner))
+    return list(sources)
 
 
 def get_source(ident):

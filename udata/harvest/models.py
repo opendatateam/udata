@@ -82,6 +82,11 @@ class HarvestSourceValidation(db.EmbeddedDocument):
     comment = db.StringField()
 
 
+class HarvestSourceQuerySet(OwnedByQuerySet):
+    def visible(self):
+        return self(deleted=None)
+
+
 class HarvestSource(db.Document):
     name = db.StringField(max_length=255)
     slug = db.SlugField(max_length=255, required=True, unique=True,
@@ -130,7 +135,7 @@ class HarvestSource(db.Document):
             'owner',
         ],
         'ordering': ['-created_at'],
-        'queryset_class': OwnedByQuerySet,
+        'queryset_class': HarvestSourceQuerySet,
     }
 
 
