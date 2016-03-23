@@ -41,6 +41,7 @@ export default {
         confirm: function() {
             API.harvest.delete_harvest_source({ident: this.source.id},
                 (response) => {
+                    this.source.fetch();
                     this.$refs.modal.close();
                 }
             );
