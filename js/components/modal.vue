@@ -11,9 +11,7 @@
                 <h4 class="modal-title" id="modal-title">{{title}}</h4>
             </div>
             <!-- Notifications -->
-            <div v-if="$root.notifications.length > 0" class="notification-zone modal-body">
-                <alert v-for="n in $root.notifications" :alert="n"></alert>
-            </div>
+            <notification-zone class="modal-body"></notification-zone>
             <slot></slot>
         </div>
     </div>
@@ -22,16 +20,14 @@
 
 <script>
 import Modal from 'mixins/modal';
-import Alert from 'components/alert.vue';
+import NotificationZone from 'components/notification-zone.vue';
 
 export default {
     replace: true,
     name: 'modal',
     props: ['title', 'size'],
     mixins: [Modal],
-    components: {
-        Alert
-    }
+    components: {NotificationZone}
 };
 </script>
 

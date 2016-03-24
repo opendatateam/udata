@@ -18,24 +18,6 @@
                 color: lighten(black, 20%);
             }
         }
-
-        .dropdown-menu {
-            border-radius: 0;
-        }
-    }
-}
-
-.notification-zone {
-    padding: 15px 15px 0;
-
-    .alert {
-        &:last-child {
-            margin-bottom: 0;
-        }
-
-        &:not(:last-child) {
-            margin-bottom: 5px;
-        }
     }
 }
 </style>
@@ -51,43 +33,50 @@
     <section class="content-header">
         <h1>
             {{title}}
-            <div v-if="actions.length"
-                class="btn-group" role="group">
-                <a class="btn btn-link btn-sm dropdown-toggle"
-                    data-toggle="dropdown" aria-expanded="false">
-                    <span class="fa fa-fw fa-gear"></span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                    <li v-for="action in actions"
-                         :role="action.divider ? 'separator' : false"
-                         :class="{ 'divider': action.divider }">
-                        <a class="pointer"
-                            v-if="!action.divider"
-                            @click="action.method" >
-                            <span v-if="action.icon" class="fa fa-fw fa-{{action.icon}}"></span>
-                            {{action.label}}
-                        </a>
-                    </li>
-                </ul>
-            </div>
             <small v-if="subtitle">{{subtitle}}</small>
             <small v-if="badges">
                 <span v-for="badge in badges"
                     class="label label-{{badge.class}}">{{badge.label}}</span>
             </small>
         </h1>
-        <div class="btn-group btn-group-sm btn-actions pull-right clearfix"
-            v-if="page">
-            <a class="btn btn-link" :href="page"
-                :title="_('See it as viewed by visitors')">
-                {{ _('See on the site') }} →
-            </a>
+        <div class="btn-toolbar btn-actions pull-right clearfix">
+            <div v-if="main_action" class="btn-group btn-group-sm">
+                <div v-if="menu_actions" class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-info" @click="main_action.method">
+                        <span v-if="main_action.icon" class="fa fa-fw fa-{{main_action.icon}}"></span>
+                        {{main_action.label}}
+                    </button>
+                    <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li v-for="action in menu_actions"
+                             :role="action.divider ? 'separator' : false"
+                             :class="{ 'divider': action.divider }">
+                            <a class="pointer"
+                                v-if="!action.divider"
+                                @click="action.method" >
+                                <span v-if="action.icon" class="fa fa-fw fa-{{action.icon}}"></span>
+                                {{action.label}}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <button v-if="!menu_actions" type="button" class="btn btn-info btn-sm">
+                    <span v-if="action.icon" class="fa fa-fw fa-{{action.icon}}"></span>
+                    {{main_action.label}}
+                </button>
+            </div>
+            <div class="btn-group btn-group-sm" v-if="page">
+                <a class="btn btn-link" :href="page" :title="_('See it as viewed by visitors')">
+                    {{ _('See on the site') }} →
+                </a>
+            </div>
         </div>
     </section>
     <!-- Notifications -->
-    <div v-if="$root.notifications.length > 0" class="notification-zone">
-        <alert v-for="n in $root.notifications" :alert="n"></alert>
-    </div>
+    <notification-zone></notification-zone>
     <!-- Main content -->
     <section class="content">
         <slot></slot>
@@ -96,7 +85,7 @@
 </template>
 
 <script>
-import Alert from 'components/alert.vue';
+import NotificationZone from 'components/notification-zone.vue';
 
 export default {
     name: 'DashboardLayout',
@@ -110,8 +99,18 @@ export default {
         },
         badges: Array
     },
-    components: {
-        Alert
+    components: {NotificationZone},
+    computed: {
+        main_action() {
+            if (this.actions) {
+                return this.actions[0];
+            }
+        },
+        menu_actions() {
+            if (this.actions && this.actions.length > 1) {
+                return this.actions.slice(1);
+            }
+        }
     }
 };
 </script>
