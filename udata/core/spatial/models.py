@@ -90,6 +90,19 @@ class GeoZone(db.Document):
         return (self.dbpedia.replace('dbpedia', 'wikipedia')
                             .replace('resource', 'wiki'))
 
+    @property
+    def postal_string(self):
+        """Return a list of postal codes separated by commas."""
+        return ', '.join(self.keys.get('postal', []))
+
+    @property
+    def town_repr(self):
+        """Representation of a town with optional postal codes."""
+        if self.postal_string:
+            return '{name} <small>({postal_codes})</small>'.format(
+                name=self.name, postal_codes=self.postal_string)
+        return self.name
+
     def toGeoJSON(self):
         return {
             'id': self.id,

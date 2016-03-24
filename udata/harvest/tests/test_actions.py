@@ -47,6 +47,21 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         for source in sources:
             self.assertIn(source, result)
 
+    def test_list_sources_deleted(self):
+        self.assertEqual(actions.list_sources(), [])
+
+        sources = HarvestSourceFactory.create_batch(3)
+        deleted_sources = HarvestSourceFactory.create_batch(2, deleted=datetime.now())
+
+        result = actions.list_sources()
+        self.assertEqual(len(result), len(sources))
+
+        for source in sources:
+            self.assertIn(source, result)
+
+        for source in deleted_sources:
+            self.assertNotIn(source, result)
+
     def test_list_sources_for_owner(self):
         owner = UserFactory()
         self.assertEqual(actions.list_sources(owner), [])

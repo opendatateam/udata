@@ -6,10 +6,11 @@ from flask import abort, current_app, request, send_file
 import unicodecsv as csv
 
 from udata import theme
-from udata.models import Dataset
+from udata.models import Dataset, GeoZone
 from udata.i18n import I18nBlueprint
 from udata.utils import multi_to_dict
 from udata.core.storages import references
+from udata.sitemap import sitemap
 
 blueprint = I18nBlueprint('territories', __name__)
 
@@ -76,3 +77,10 @@ def render_territory(territory):
         'datasets': datasets,
     }
     return theme.render('territories/territory.html', **context)
+
+
+@sitemap.register_generator
+def sitemap_urls():
+    for code in GeoZone.objects(level='fr/town').only('code'):
+        yield ('territories.territory', {'territory': code},
+               None, "weekly", 0.5)
