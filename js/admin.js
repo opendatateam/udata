@@ -27,6 +27,7 @@ Vue.use(require('plugins/jquery'));
 Vue.use(require('plugins/i18next'));
 Vue.use(require('plugins/markdown'));
 Vue.use(require('plugins/scroll-to'));
+Vue.use(require('plugins/outside'));
 
 
 $(API).on('built', function() {
