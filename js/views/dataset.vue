@@ -58,6 +58,10 @@ export default {
     name: 'DatasetView',
     data: function() {
         var actions = [{
+                label: this._('Edit'),
+                icon: 'edit',
+                method: this.edit
+            },{
                 label: this._('Transfer'),
                 icon: 'send',
                 method: this.transfer_request
@@ -154,19 +158,22 @@ export default {
         Layout
     },
     methods: {
-        confirm_delete: function() {
+        edit() {
+            this.$go({name: 'dataset-edit', params: {oid: this.dataset.id}});
+        },
+        confirm_delete() {
             var m = this.$root.$modal(
                 require('components/dataset/delete-modal.vue'),
                 {dataset: this.dataset}
             );
         },
-        transfer_request: function() {
+        transfer_request() {
             this.$root.$modal(
                 require('components/transfer/request-modal.vue'),
                 {subject: this.dataset}
             );
         },
-        setBadges: function() {
+        setBadges() {
             this.$root.$modal(
                 require('components/badges/modal.vue'),
                 {subject: this.dataset}

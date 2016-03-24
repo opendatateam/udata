@@ -88,6 +88,12 @@ router.map({
             // },
         }
     },
+    '/dataset/:oid/edit/': {
+        name: 'dataset-edit',
+        component: function(resolve) {
+            require(['./views/dataset-edit.vue'], resolve);
+        },
+    },
     '/community-resource/new/': {
         component: function(resolve) {
             require(['./views/community-resource-wizard.vue'], resolve);

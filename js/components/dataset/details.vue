@@ -1,65 +1,36 @@
 <template>
-<box :title="title" icon="cubes" boxclass="box-solid" :footer="toggled">
-    <aside slot="tools">
-        <a class="text-muted pointer" @click="toggle">
-            <i class="fa fa-gear"></i>
-        </a>
-    </aside>
-    <div v-show="!toggled">
-        <h3>{{dataset.title}}</h3>
-        <div v-markdown="dataset.description"></div>
-        <div v-if="dataset.tags | length" class="label-list">
-            <strong>
-                <span class="fa fa-fw fa-tags"></span>
-                {{ _('Tags') }}:
-            </strong>
-            <span v-for="tag in dataset.tags" class="label label-default">{{tag}}</span>
-        </div>
-        <div v-if="dataset.badges | length" class="label-list">
-            <strong>
-                <span class="fa fa-fw fa-bookmark"></span>
-                {{ _('Badges') }}:
-            </strong>
-            <span v-for="b in dataset.badges" class="label label-primary">{{badges[b.kind]}}</span>
-        </div>
+<box :title="_('Details')" icon="cubes" boxclass="box-solid">
+    <h3>{{dataset.title}}</h3>
+    <div v-markdown="dataset.description"></div>
+    <div v-if="dataset.tags | length" class="label-list">
+        <strong>
+            <span class="fa fa-fw fa-tags"></span>
+            {{ _('Tags') }}:
+        </strong>
+        <span v-for="tag in dataset.tags" class="label label-default">{{tag}}</span>
     </div>
-    <dataset-form v-ref:form v-show="toggled" :dataset="dataset"></dataset-form>
-    <footer v-if="toggled" slot="footer">
-        <button type="submit" class="btn btn-primary"
-            @click="save($event)" v-i18n="Save"></button>
-    </footer>
+    <div v-if="dataset.badges | length" class="label-list">
+        <strong>
+            <span class="fa fa-fw fa-bookmark"></span>
+            {{ _('Badges') }}:
+        </strong>
+        <span v-for="b in dataset.badges" class="label label-primary">{{badges[b.kind]}}</span>
+    </div>
 </box>
 </template>
 
 <script>
+import Box from 'components/containers/box.vue';
+import badges from 'models/badges';
+
 export default {
     name: 'dataset-details',
     props: ['dataset'],
     data: function() {
         return {
-            title: this._('Details'),
-            toggled: false,
-            badges: require('models/badges').badges.dataset
+            badges: badges.dataset
         };
     },
-    components: {
-        box: require('components/containers/box.vue'),
-        'dataset-form': require('components/dataset/form.vue')
-    },
-    methods: {
-        toggle: function() {
-            this.toggled = !this.toggled;
-        },
-        save: function(e) {
-            e.preventDefault();
-            let form = this.$refs.form;
-            if (form.validate()) {
-                this.dataset.update(form.serialize(), (response) => {
-                    this.dataset.on_fetched(response);
-                    this.toggled = false;
-                }, form.on_error);
-            }
-        }
-    }
+    components: {Box}
 };
 </script>
