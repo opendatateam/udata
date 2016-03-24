@@ -2,6 +2,20 @@
 <box :title="_('Details')" icon="cubes" boxclass="box-solid">
     <h3>{{dataset.title}}</h3>
     <div v-markdown="dataset.description"></div>
+    <div v-if="dataset.temporal_coverage" class="label-list">
+        <strong>
+            <span class="fa fa-calendar fa-fw"></span>
+            {{ _('Temporal coverage') }}:
+        </strong>
+        {{ dataset.temporal_coverage | daterange }}
+    </div>
+    <div v-if="dataset.frequency" class="label-list">
+        <strong>
+            <span class="fa fa-clock-o fa-fw"></span>
+            {{ _('Frequency') }}:
+        </strong>
+        {{ dataset | frequency_label }}
+    </div>
     <div v-if="dataset.tags | length" class="label-list">
         <strong>
             <span class="fa fa-fw fa-tags"></span>
@@ -21,10 +35,12 @@
 
 <script>
 import Box from 'components/containers/box.vue';
+import DatasetFilters from 'components/dataset/filters';
 import badges from 'models/badges';
 
 export default {
     name: 'dataset-details',
+    mixins: [DatasetFilters],
     props: ['dataset'],
     data: function() {
         return {

@@ -7,6 +7,23 @@
     .leaflet-popup {
         color: black;
     }
+
+    .box-footer {
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+
+            li {
+                display: inline-block;
+                padding: 0;
+
+                a {
+                    color: #fff;
+                }
+            }
+        }
+    }
 }
 </style>
 
@@ -18,6 +35,9 @@
             <div class="box-tools"></div>
         </header>
         <div class="box-body no-padding" v-el:container></div>
+        <div class="box-footer bg-light-blue-gradient text-center" v-show="footer">
+            <slot></slot>
+        </div>
     </div>
 </template>
 
@@ -47,6 +67,7 @@ export default {
             type: Boolean,
             default: true
         },
+        footer: Boolean,
         geojson: null
     },
     ready: function() {
