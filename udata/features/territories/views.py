@@ -64,6 +64,7 @@ def render_territory(territory):
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
+    # Generate fake territory datasets.
     from udata.models import TERRITORY_DATASETS
     territory_dataset_classes = sorted(
         TERRITORY_DATASETS.values(), key=lambda a: a.order)
@@ -71,19 +72,25 @@ def render_territory(territory):
         territory_dataset_class(territory)
         for territory_dataset_class in territory_dataset_classes
     ]
-    datasets = list(Dataset.objects.visible().filter(spatial__zones=territory))
+
+    # Retrieve all datasets then split between those optionaly owned
+    # by an org for that zone and others. We need to know if the current
+    # user has datasets for that zone in order to display a custom
+    # message to ease the conversion.
+    datasets = Dataset.objects.visible().filter(spatial__zones=territory)
     town_datasets = []
     other_datasets = []
     has_pertinent_datasets = False
     if datasets:
-        has_pertinent_datasets = (current_user.is_authenticated()
-                                  and current_user.can_modify(datasets))
         for dataset in datasets:
             if (dataset.organization
                     and territory.id == dataset.organization.zone):
                 town_datasets.append(dataset)
             else:
                 other_datasets.append(dataset)
+        if not town_datasets:
+            has_pertinent_datasets = (current_user.is_authenticated()
+                                      and current_user.can_modify(datasets))
     context = {
         'territory': territory,
         'territory_datasets': territory_datasets,
@@ -96,6 +103,7 @@ def render_territory(territory):
 
 @sitemap.register_generator
 def sitemap_urls():
-    for code in GeoZone.objects(level='fr/town').only('code'):
-        yield ('territories.territory', {'territory': code},
-               None, "weekly", 0.5)
+    if current_app.config.get('ACTIVATE_TERRITORIES'):
+        for code in GeoZone.objects(level='fr/town').only('code'):
+            yield ('territories.territory', {'territory': code},
+                   None, "weekly", 0.5)
