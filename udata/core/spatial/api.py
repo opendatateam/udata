@@ -66,19 +66,7 @@ class SuggestZonesAPI(API):
     def get(self):
         '''Suggest geospatial zones'''
         args = suggest_parser.parse_args()
-        # Give priority to 3 territories/towns + look by INSEE/postal codes.
-        territories = [
-            {
-                'id': territory.id,
-                'name': territory.name,
-                'code': territory.code,
-                'level': territory.level,
-                'keys': territory.keys,
-                'score': 10,
-            }
-            for territory in check_for_territories(args['q'])[:3]
-        ]
-        return territories + [
+        return [
             {
                 'id': opt['text'],
                 'name': _(opt['payload']['name']),
