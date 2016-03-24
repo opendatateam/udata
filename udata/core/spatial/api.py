@@ -6,6 +6,7 @@ from udata.api import api, API
 from udata import search
 from udata.i18n import _
 from udata.models import Dataset
+from udata.features.territories import check_for_territories
 
 from .api_fields import (
     level_fields,
@@ -65,7 +66,19 @@ class SuggestZonesAPI(API):
     def get(self):
         '''Suggest geospatial zones'''
         args = suggest_parser.parse_args()
-        return [
+        # Give priority to 3 territories/towns + look by INSEE/postal codes.
+        territories = [
+            {
+                'id': territory.id,
+                'name': territory.name,
+                'code': territory.code,
+                'level': territory.level,
+                'keys': territory.keys,
+                'score': 10,
+            }
+            for territory in check_for_territories(args['q'])[:3]
+        ]
+        return territories + [
             {
                 'id': opt['text'],
                 'name': _(opt['payload']['name']),
@@ -74,7 +87,8 @@ class SuggestZonesAPI(API):
                 'keys': opt['payload']['keys'],
                 'score': opt['score'],
             }
-            for opt in search.suggest(args['q'], 'zone_suggest', args['size'])
+            for opt in search.suggest(
+                args['q'], 'zone_suggest', args['size'])
         ]
 
 

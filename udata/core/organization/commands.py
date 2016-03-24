@@ -20,3 +20,15 @@ def attach_zone(insee_code, organization_id_or_slug, level='fr/town'):
     organization.zone = geozone.id
     organization.save()
     log.info('Done')
+
+
+@manager.command
+def detach_zone(organization_id_or_slug):
+    '''Detach the zone of a given organization.'''
+    organization = Organization.objects.get_by_id_or_slug(
+        organization_id_or_slug)
+    log.info('Detaching {organization} from {organization.zone}'.format(
+             organization=organization))
+    organization.zone = None
+    organization.save()
+    log.info('Done')

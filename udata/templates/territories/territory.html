@@ -50,12 +50,6 @@
                 </strong>
             </p>
         </div>
-        <a href="m&#x61;ilto:{{ config.TERRITORIES_EMAIL|obfuscate|safe }}" class="btn btn-warning btn-block btn-sm icon-left"
-            data-toggle="tooltip" data-placement="left"
-            data-original-title="{{ _('I belong to that city and I want to publish more datasets.') }}">
-            <span class="glyphicon glyphicon-envelope"></span>
-            {{ _('Claim and enrich') }}
-        </a>
     </aside>
 </div>
 <div class="dataset-list">
@@ -64,23 +58,23 @@
             <div data-udata-dataset-id="{{ dataset.id }}" class="col-sm-4"></div>
         {% endfor %}
     {% else %}
-        <div class="dataset-item--cta col-sm-12 bg-warning">
+        <div class="dataset-item--cta col-sm-12 bg-primary">
             <div class="format-label pull-left">+</div>
             <p>
                 {% if current_user.is_authenticated() %}
                     {% if has_pertinent_datasets %}
-                        {{ _('You have datasets for that town!') }}<br/>
+                        {{ _('Some of your datasets have an exact match!') }}<br/>
                         <a href="m&#x61;ilto:{{ config.TERRITORIES_EMAIL|obfuscate|safe }}">
                             {{ _('Claim that town') }}</a> {{ _('and your datasets will appear first.') }}
                     {% else %}
-                        {{ _('If you want your datasets to appear in that list, the geographical zone associated must be the exact same one of that town.') }}
+                        {{ _('If you want your datasets to appear in that list, the geographical zone associated must be the exact same one of that town (%(code)s).', code=territory.code) }}
                     {% endif %}
                 {% else %}
                     {{ _('You want to add your own datasets to that list?') }}<br/>
                     <a title="{{ _('Sign In / Register') }}"
                         href="{{ url_for('security.login', next=request.url) }}">
                         {{ _('Log in') }}</a>
-                    {{ _('and create resources for that territory.') }}
+                    {{ _('and create resources for that town.') }}
                 {% endif %}
             </p>
         </div>
