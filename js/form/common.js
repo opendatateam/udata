@@ -33,6 +33,8 @@ define(['jquery', 'i18n', 'jquery-validation-dist', 'bootstrap' ], function($, i
     // jQuery validate
     $('form.validation').validate(rules);
 
+    const interpolation = {defaultVariables: {'O': '{O}', '1': '{1}', 'ISO': '{ISO}'}};
+
     // jQuery validate
     $.extend($.validator.messages, {
         required: i18n._('valid-required'),
@@ -40,17 +42,17 @@ define(['jquery', 'i18n', 'jquery-validation-dist', 'bootstrap' ], function($, i
         email: i18n._('valid-email'),
         url: i18n._('valid-url'),
         date: i18n._('valid-date'),
-        dateISO: i18n._('valid-date-iso'),
+        dateISO: i18n._('valid-date-iso', {interpolation: interpolation}),
         number: i18n._('valid-number'),
         digits: i18n._('valid-digits'),
         creditcard: i18n._('valid-creditcard'),
         equalTo: i18n._('valid-equal-to'),
-        maxlength: $.validator.format(i18n._('valid-maxlength')),
-        minlength: $.validator.format(i18n._('valid-minlength')),
-        rangelength: $.validator.format(i18n._('valid-range-length')),
-        range: $.validator.format(i18n._('valid-range')),
-        max: $.validator.format(i18n._('valid-max')),
-        min: $.validator.format(i18n._('valid-min'))
+        maxlength: $.validator.format(i18n._('valid-maxlength', {interpolation: interpolation})),
+        minlength: $.validator.format(i18n._('valid-minlength', {interpolation: interpolation})),
+        rangelength: $.validator.format(i18n._('valid-range-length', {interpolation: interpolation})),
+        range: $.validator.format(i18n._('valid-range', {interpolation: interpolation})),
+        max: $.validator.format(i18n._('valid-max', {interpolation: interpolation})),
+        min: $.validator.format(i18n._('valid-min', {interpolation: interpolation}))
     });
 
     // Form help messages as popover on info sign
