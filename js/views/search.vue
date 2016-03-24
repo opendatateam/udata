@@ -77,6 +77,7 @@ export default {
             this.reuses.fetch({'q': terms});
             this.issues.fetch({'q': terms});
             this.discussions.fetch({'q': terms});
+            this.$scrollTo(this.$el);
         }
     },
 };

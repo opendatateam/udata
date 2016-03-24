@@ -83,6 +83,7 @@ export default {
         data() {
             if (this.$route.params.oid !== this.user.id) {
                 this.user.fetch(this.$route.params.oid);
+                this.$scrollTo(this.$el);
             }
         }
     }

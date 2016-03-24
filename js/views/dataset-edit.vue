@@ -43,6 +43,7 @@ export default {
         data() {
             if (this.$route.params.oid !== this.dataset.id) {
                 this.dataset.fetch(this.$route.params.oid);
+                this.$scrollTo(this.$el);
             }
         }
     }

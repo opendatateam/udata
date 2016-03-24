@@ -44,6 +44,7 @@ export default {
         data() {
             if (this.$route.params.oid !== this.topic.id) {
                 this.topic.fetch(this.$route.params.oid);
+                this.$scrollTo(this.$el);
             }
         }
     }

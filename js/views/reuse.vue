@@ -155,6 +155,7 @@ export default {
         data() {
             if (this.$route.params.oid !== this.reuse.id) {
                 this.reuse.fetch(this.$route.params.oid);
+                this.$scrollTo(this.$el);
             }
         }
     },

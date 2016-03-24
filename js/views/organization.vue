@@ -218,6 +218,7 @@ export default {
         data() {
             if (this.$route.params.oid !== this.org.id) {
                 this.org.fetch(this.$route.params.oid);
+                this.$scrollTo(this.$el);
             }
         }
     },
