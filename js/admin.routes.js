@@ -185,8 +185,15 @@ router.map({
         }
     },
     '/post/:oid/': {
+        name: 'post',
         component: function(resolve) {
             require(['./views/post.vue'], resolve);
+        }
+    },
+    '/post/:oid/edit/': {
+        name: 'post-edit',
+        component: function(resolve) {
+            require(['./views/post-edit.vue'], resolve);
         }
     },
     '/topic/new/': {
