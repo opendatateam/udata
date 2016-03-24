@@ -159,9 +159,7 @@ export default {
         },
         territories_labels() {
             if (this.geojson && this.geojson.features) {
-                return this.geojson.features.map(function(feature) {
-                    return feature.properties.name;
-                }).join(', ');
+                return this.geojson.features.map(feature => feature.properties.name).join(', ');
             }
         },
         map_footer() {
