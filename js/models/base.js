@@ -23,8 +23,14 @@ function empty_schema() {
  *     - Vue.js compatible setter
  */
 export class Base {
-    constructor() {
+    constructor(options) {
         this.$pubsub = new PubSub();
+        this.$options = options || {};
+        if (this.$options.loading !== undefined) {
+            this.loading = Boolean(this.$options.loading);
+        } else {
+            this.loading = this.$options.data === undefined;
+        }
     }
 
     /**
@@ -114,12 +120,16 @@ export class Base {
  */
 export class Model extends Base {
     constructor(options) {
-        super();
-        this.$options = options || {};
+        super(options);
         this.empty();
         if (this.$options.data) {
             Object.assign(this, this.$options.data);
         }
+        // if (this.$options.loading !== undefined) {
+        //     this.loading = Boolean(this.$options.loading);
+        // } else {
+        //     this.loading = this.$options.data === undefined;
+        // }
     }
 
     /**
@@ -184,16 +194,10 @@ export class Model extends Base {
  */
 export class List extends Base {
     constructor(options) {
-        super();
-        this.$options = options || {};
+        super(options);
 
         this.items = this.$options.data || [];
         this.query = this.$options.query || {};
-        if (this.$options.loading !== undefined) {
-            this.loading = Boolean(this.$options.loading);
-        } else {
-            this.loading = this.$options.data === undefined;
-        }
 
         this.sorted = null;
         this.reversed = false;
