@@ -14,7 +14,6 @@
     <input type="text" class="input-sm form-control"
         v-el:start-input :placeholder="_('Start')"
         @focus="onFocus"
-        @blur="onBlur"
         :required="required"
         :value="start_value"
         :readonly="readonly">
@@ -22,12 +21,11 @@
     <input type="text" class="input-sm form-control"
         v-el:end-input :placeholder="_('End')"
         @focus="onFocus"
-        @blur="onBlur"
         :required="required"
         :value="end_value"
         :readonly="readonly">
     <div class="dropdown-menu dropdown-menu-right">
-        <calendar :selected="value"></calendar>
+        <calendar :selected="current_value"></calendar>
     </div>
     <input type="hidden" v-el:start-hidden
         :id="field.id + '-start'"
@@ -69,6 +67,11 @@ export default {
             return this.value && this.value.hasOwnProperty('end')
                 ? this.value.end
                 : '';
+        },
+        current_value() {
+            if (this.hiddenField) {
+                return this.hiddenField.value;
+            }
         }
     },
     events: {

@@ -13,7 +13,6 @@
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
     <input type="text" class="form-control" v-el:input
         @focus="onFocus"
-        @blur="onBlur"
         :placeholder="placeholder"
         :required="required"
         :value="value|dateFormatted"
