@@ -5,14 +5,16 @@ import json
 
 from flask import url_for
 
-from udata.models import Badge, PUBLIC_SERVICE
+from udata.models import Badge, PUBLIC_SERVICE, Member
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.api import APITestCase
 from udata.tests.factories import (
     DatasetFactory, ReuseFactory, OrganizationFactory,
-    VisibleReuseFactory, GeoZoneFactory
+    VisibleReuseFactory, GeoZoneFactory, VisibleDatasetFactory
 )
+from udata.core.spatial.tests.factories import SpatialCoverageFactory
 from udata.tests.frontend import FrontTestCase
+from udata.tests.test_sitemap import SitemapTestCase
 from udata.settings import Testing
 
 from .models import (
@@ -248,17 +250,150 @@ class TerritoriesSettings(GouvFrSettings):
 class TerritoriesTest(FrontTestCase):
     settings = TerritoriesSettings
 
-    def test_basic(self):
+    def test_with_detault_territory_datasets(self):
         arles = GeoZoneFactory(
             id='fr/town/13004', level='fr/town',
             name='Arles', code='13004', population=52439)
         response = self.client.get(
             url_for('territories.territory', territory=arles))
         self.assert200(response)
-        self.assertIn('Arles', response.data.decode('utf-8'))
-        self.assertIn(
-            '<div data-udata-territory-id="fr-town-13004-emploi_chiffres"',
-            response.data.decode('utf-8'))
+        data = response.data.decode('utf-8')
+        self.assertIn('Arles', data)
+        territory_datasets = self.get_context_variable('territory_datasets')
+        self.assertEqual(len(territory_datasets), 9)
+        for dataset in territory_datasets:
+            self.assertIn(
+                '<div data-udata-territory-id="{dataset.slug}"'.format(
+                    dataset=dataset),
+                data)
+        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
+        self.assertEqual(self.get_context_variable('town_datasets'), [])
+        self.assertEqual(self.get_context_variable('other_datasets'), [])
+        self.assertIn('You want to add your own datasets to that list?', data)
+
+    def test_with_other_datasets(self):
+        arles = GeoZoneFactory(
+            id='fr/town/13004', level='fr/town',
+            name='Arles', code='13004', population=52439)
+        with self.autoindex():
+            organization = OrganizationFactory()
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[arles.id]))
+        response = self.client.get(
+            url_for('territories.territory', territory=arles))
+        self.assert200(response)
+        data = response.data.decode('utf-8')
+        self.assertIn('Arles', data)
+        territory_datasets = self.get_context_variable('territory_datasets')
+        self.assertEqual(len(territory_datasets), 9)
+        for dataset in territory_datasets:
+            self.assertIn(
+                '<div data-udata-territory-id="{dataset.slug}"'.format(
+                    dataset=dataset),
+                data)
+        other_datasets = self.get_context_variable('other_datasets')
+        self.assertEqual(len(other_datasets), 3)
+        for dataset in other_datasets:
+            self.assertIn(
+                '<div data-udata-dataset-id="{dataset.id}"'.format(
+                    dataset=dataset),
+                data)
+        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
+        self.assertEqual(self.get_context_variable('town_datasets'), [])
+        self.assertIn('You want to add your own datasets to that list?', data)
+
+    def test_with_other_datasets_logged_in(self):
+        self.login()
+        arles = GeoZoneFactory(
+            id='fr/town/13004', level='fr/town',
+            name='Arles', code='13004', population=52439)
+        with self.autoindex():
+            organization = OrganizationFactory()
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[arles.id]))
+        response = self.client.get(
+            url_for('territories.territory', territory=arles))
+        self.assert200(response)
+        data = response.data.decode('utf-8')
+        territory_datasets = self.get_context_variable('territory_datasets')
+        self.assertEqual(len(territory_datasets), 9)
+        other_datasets = self.get_context_variable('other_datasets')
+        self.assertEqual(len(other_datasets), 3)
+        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
+        self.assertEqual(self.get_context_variable('town_datasets'), [])
+        self.assertIn('If you want your datasets to appear in that list', data)
+
+    def test_with_other_datasets_and_pertinent_ones(self):
+        arles = GeoZoneFactory(
+            id='fr/town/13004', level='fr/town',
+            name='Arles', code='13004', population=52439)
+        user = self.login()
+        with self.autoindex():
+            member = Member(user=user, role='admin')
+            organization = OrganizationFactory(members=[member])
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[arles.id]))
+        response = self.client.get(
+            url_for('territories.territory', territory=arles))
+        self.assert200(response)
+        data = response.data.decode('utf-8')
+        self.assertIn('Arles', data)
+        territory_datasets = self.get_context_variable('territory_datasets')
+        self.assertEqual(len(territory_datasets), 9)
+        for dataset in territory_datasets:
+            self.assertIn(
+                '<div data-udata-territory-id="{dataset.slug}"'.format(
+                    dataset=dataset),
+                data)
+        other_datasets = self.get_context_variable('other_datasets')
+        self.assertEqual(len(other_datasets), 3)
+        for dataset in other_datasets:
+            self.assertIn(
+                '<div data-udata-dataset-id="{dataset.id}"'.format(
+                    dataset=dataset),
+                data)
+        self.assertTrue(self.get_context_variable('has_pertinent_datasets'))
+        self.assertEqual(self.get_context_variable('town_datasets'), [])
+        self.assertIn('Some of your datasets have an exact match!', data)
+
+    def test_with_town_datasets(self):
+        arles = GeoZoneFactory(
+            id='fr/town/13004', level='fr/town',
+            name='Arles', code='13004', population=52439)
+        with self.autoindex():
+            organization = OrganizationFactory(zone=arles.id)
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[arles.id]))
+        response = self.client.get(
+            url_for('territories.territory', territory=arles))
+        self.assert200(response)
+        data = response.data.decode('utf-8')
+        self.assertIn('Arles', data)
+        territory_datasets = self.get_context_variable('territory_datasets')
+        self.assertEqual(len(territory_datasets), 9)
+        for dataset in territory_datasets:
+            self.assertIn(
+                '<div data-udata-territory-id="{dataset.slug}"'.format(
+                    dataset=dataset),
+                data)
+        town_datasets = self.get_context_variable('town_datasets')
+        self.assertEqual(len(town_datasets), 3)
+        for dataset in town_datasets:
+            self.assertIn(
+                '<div data-udata-dataset-id="{dataset.id}"'.format(
+                    dataset=dataset),
+                data)
+        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
+        self.assertEqual(self.get_context_variable('other_datasets'), [])
+        self.assertNotIn('dataset-item--cta', data)
 
 
 class OEmbedsTerritoryAPITest(APITestCase):
@@ -311,3 +446,18 @@ class SitemapTest(FrontTestCase):
 
         for url in urls:
             self.assertIn('<loc>{url}</loc>'.format(url=url), response.data)
+
+
+class SitemapTerritoriesTest(SitemapTestCase):
+    settings = TerritoriesSettings
+
+    def test_towns_within_sitemap(self):
+        '''It should return the town from the sitemap.'''
+        territory = GeoZoneFactory(
+            id='fr/town/13004', name='Arles', code='13004', level='fr/town')
+
+        self.get_sitemap_tree()
+
+        url = self.get_by_url('territories.territory', territory=territory)
+        self.assertIsNotNone(url)
+        self.assert_url(url, 0.5, 'weekly')
