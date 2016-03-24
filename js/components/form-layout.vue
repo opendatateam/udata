@@ -10,7 +10,7 @@
                     {{ _('Save') }}
                 </button>
                 <button class="btn btn-warning pull-right" v-if="cancel"
-                    @click.prevent="cancel">{{ _('Cancel') }}'></button>
+                    @click.prevent="cancel">{{ _('Cancel') }}</button>
             </footer>
         </box>
     </section>
