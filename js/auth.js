@@ -6,7 +6,7 @@ import config from 'config';
 import Notify from 'notify';
 import i18n from 'i18n';
 
-const DEFAULT_NEED_ROLE = i18n._('Role "{role}" is required');
+const DEFAULT_NEED_ROLE = i18n._('Role "{role}" is required', {role: '{role}'});
 
 
 export const user = config.user;
