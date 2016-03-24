@@ -8,7 +8,8 @@
 </style>
 
 <template>
-<div class="input-group dropdown date-picker" :class="{ 'open': picking }">
+<div class="input-group dropdown date-picker" :class="{ 'open': picking }"
+    v-outside="onOutside">
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
     <input type="text" class="form-control" v-el:input
         @focus="onFocus"
@@ -29,6 +30,7 @@
 
 <script>
 import moment from 'moment';
+import Calendar from 'components/calendar.vue';
 
 const DEFAULT_FORMAT = 'L';
 const ISO_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
@@ -43,16 +45,14 @@ export default {
             default: true
         }
     },
-    components: {
-        calendar: require('components/calendar.vue')
-    },
-    data: function() {
+    components: {Calendar},
+    data() {
         return {
             picking: false,
         };
     },
     filters: {
-        dateFormatted: function(value) {
+        dateFormatted(value) {
             // Will default to current day if value is null or empty.
             return value
                    ? moment(value).format(this.field.format || DEFAULT_FORMAT)
@@ -74,13 +74,11 @@ export default {
         }
     },
     methods: {
-        onFocus: function() {
+        onFocus() {
             this.picking = true;
         },
-        onBlur: function(e) {
-            if (e.targetVM !== this) {
-                this.picking = false;
-            }
+        onOutside() {
+            this.picking = false;
         }
     }
 };
