@@ -195,9 +195,16 @@ router.map({
         }
     },
     '/topic/:oid/': {
+        name: 'topic',
         component: function(resolve) {
             require(['./views/topic.vue'], resolve);
         }
+    },
+    '/topic/:oid/edit/': {
+        name: 'topic-edit',
+        component: function(resolve) {
+            require(['./views/topic-edit.vue'], resolve);
+        },
     },
     '/editorial/': {
         component: function(resolve) {

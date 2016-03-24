@@ -42,8 +42,9 @@
                     </li>
                 </ul>
             </div>
-            <button v-if="!menu_actions" type="button" class="btn btn-info btn-sm">
-                <span v-if="action.icon" class="fa fa-fw fa-{{action.icon}}"></span>
+            <button v-if="!menu_actions" type="button" class="btn btn-info btn-sm"
+                    @click="main_action.method">
+                <span v-if="main_action.icon" class="fa fa-fw fa-{{main_action.icon}}"></span>
                 {{main_action.label}}
             </button>
         </div>
@@ -88,7 +89,7 @@ export default {
     components: {NotificationZone},
     computed: {
         main_action() {
-            if (this.actions) {
+            if (this.actions.length) {
                 return this.actions[0];
             }
         },

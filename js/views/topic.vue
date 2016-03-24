@@ -1,5 +1,6 @@
 <template>
-<layout :title="topic.name || ''" :subtitle="_('Topic')" :page="topic.page || ''">
+<layout :title="topic.name || ''" :subtitle="_('Topic')" :page="topic.page || ''"
+    :actions="actions">
     <div class="row">
         <topic-details :topic="topic" class="col-xs-12"></topic-details>
     </div>
@@ -19,7 +20,12 @@ export default {
     name: 'TopicView',
     data: function() {
         return {
-            topic: new Topic()
+            topic: new Topic(),
+            actions: [{
+                label: this._('Edit'),
+                icon: 'edit',
+                method: this.edit
+            }],
         };
     },
     components: {
@@ -38,6 +44,11 @@ export default {
             this.topic.reuses = ids;
             this.topic.save();
             return true;
+        }
+    },
+    methods: {
+        edit() {
+            this.$go({name: 'topic-edit', params: {oid: this.topic.id}});
         }
     },
     route: {
