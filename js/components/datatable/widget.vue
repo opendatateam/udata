@@ -12,8 +12,8 @@
     :boxclass="boxclasses"
     bodyclass="table-responsive no-padding"
     footerclass="text-center clearfix"
-    :footer="show_footer"
-    :loading="p.loading">
+    :loading="loading !== undefined ? loading : p.loading"
+    :footer="show_footer">
     <aside slot="tools">
         <div class="btn-group" v-show="downloads.length">
             <button type="button" class="btn btn-box-tool dropdown-toggle"
@@ -94,6 +94,7 @@ export default {
         boxclass: String,
         tint: String,
         empty: String,
+        loading: Boolean,
         track: {
             type: null,
             default: 'id'
