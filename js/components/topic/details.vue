@@ -1,5 +1,5 @@
 <template>
-<box :title="topic.name || ''" icon="folder-o" boxclass="box-solid">
+<box :title="topic.name || ''" icon="book" boxclass="box-solid">
     <div v-markdown="topic.description"></div>
     <div v-if="topic.tags | length" class="label-list">
         <strong>

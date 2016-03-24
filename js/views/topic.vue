@@ -18,7 +18,7 @@ import Layout from 'components/layout.vue';
 
 export default {
     name: 'TopicView',
-    data: function() {
+    data() {
         return {
             topic: new Topic(),
             actions: [{
