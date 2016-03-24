@@ -18,7 +18,7 @@
 export default {
     props: {
         title: String,
-        condition: Boolean,
+        condition: [Boolean, null],
         ok: String,
         ko: String,
         info: [String, null],

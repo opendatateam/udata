@@ -59,7 +59,7 @@ const API = new SwaggerClient({
  * @return {Object}      The resolved schema
  */
 API.resolve = function($ref) {
-    const def = $ref.replace(config.api_specs, '').replace('#/definitions/', '');
+    const def = $ref.split('#')[1].replace('/definitions/', '');
     return this.definitions[def];
 };
 

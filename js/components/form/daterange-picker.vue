@@ -8,12 +8,12 @@
 </style>
 
 <template>
-<div class="input-group dropdown daterange-picker" :class="{ 'open': picking }">
+<div class="input-group dropdown daterange-picker" :class="{ 'open': picking }"
+    v-outside="onOutside">
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
     <input type="text" class="input-sm form-control"
         v-el:start-input :placeholder="_('Start')"
         @focus="onFocus"
-        @blur="onBlur"
         :required="required"
         :value="start_value"
         :readonly="readonly">
@@ -21,12 +21,11 @@
     <input type="text" class="input-sm form-control"
         v-el:end-input :placeholder="_('End')"
         @focus="onFocus"
-        @blur="onBlur"
         :required="required"
         :value="end_value"
         :readonly="readonly">
     <div class="dropdown-menu dropdown-menu-right">
-        <calendar :selected="value"></calendar>
+        <calendar :selected="current_value"></calendar>
     </div>
     <input type="hidden" v-el:start-hidden
         :id="field.id + '-start'"
@@ -40,18 +39,18 @@
 </template>
 
 <script>
-const DEFAULT_FORMAT = 'L',
-      ISO_FORMAT = 'YYYY-MM-DD';
+import Calendar from 'components/calendar.vue';
+
+const DEFAULT_FORMAT = 'L';
+const ISO_FORMAT = 'YYYY-MM-DD';
 
 
 export default {
     name: 'daterange-picker',
     replace: true,
     mixins: [require('components/form/base-field').FieldComponentMixin],
-    components: {
-        calendar: require('components/calendar.vue')
-    },
-    data: function() {
+    components: {Calendar},
+    data() {
         return {
             picking: false,
             pickedField: null,
@@ -59,15 +58,20 @@ export default {
         };
     },
     computed: {
-        start_value: function() {
+        start_value() {
             return this.value && this.value.hasOwnProperty('start')
                 ? this.value.start
                 : '';
         },
-        end_value: function() {
+        end_value() {
             return this.value && this.value.hasOwnProperty('end')
                 ? this.value.end
                 : '';
+        },
+        current_value() {
+            if (this.hiddenField) {
+                return this.hiddenField.value;
+            }
         }
     },
     events: {
@@ -98,17 +102,15 @@ export default {
         }
     },
     methods: {
-        onFocus: function(e) {
+        onFocus(e) {
             this.picking = true;
             this.pickedField = e.target;
             this.hiddenField = e.target == this.$els.startInput
                 ? this.$els.startHidden
                 : this.$els.endHidden;
         },
-        onBlur: function(e) {
-            if (e.targetVM !== this) {
-                this.picking = false;
-            }
+        onOutside() {
+            this.picking = false;
         }
     }
 };
