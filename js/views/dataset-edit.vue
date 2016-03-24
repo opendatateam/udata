@@ -5,7 +5,6 @@
 </template>
 
 <script>
-import Box from 'components/containers/box.vue';
 import DatasetForm from 'components/dataset/form.vue';
 import DatasetFull from 'models/dataset_full';
 import FormLayout from 'components/form-layout.vue';
@@ -16,12 +15,14 @@ export default {
             dataset: new DatasetFull(),
         };
     },
-    components: {Box, FormLayout, DatasetForm},
+    components: {FormLayout, DatasetForm},
     computed: {
         title() {
-            return this._('Edit dataset {title}', {
-                title: this.dataset.title || ''
-            });
+            if (this.dataset.id) {
+                return this._('Edit dataset {title}', {
+                    title: this.dataset.title
+                });
+            }
         }
     },
     methods: {

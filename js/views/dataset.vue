@@ -82,11 +82,11 @@ export default {
                 label: this._('Edit'),
                 icon: 'edit',
                 method: this.edit
-            },{
+            }, {
                 label: this._('Transfer'),
                 icon: 'send',
                 method: this.transfer_request
-            },{
+            }, {
                 label: this._('Delete'),
                 icon: 'trash',
                 method: this.confirm_delete

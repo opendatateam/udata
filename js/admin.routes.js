@@ -145,6 +145,12 @@ router.map({
             require(['./views/organization.vue'], resolve);
         }
     },
+    '/organization/:oid/edit/': {
+        name: 'organization-edit',
+        component: function(resolve) {
+            require(['./views/organization-edit.vue'], resolve);
+        },
+    },
     '/user/:oid/': {
         name: 'user',
         component: function(resolve) {
