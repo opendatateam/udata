@@ -19,7 +19,7 @@ export default {
     computed: {
         title() {
             if (this.dataset.id) {
-                return this._('Edit dataset {title}', {
+                return this._('Edit dataset "{title}"', {
                     title: this.dataset.title
                 });
             }

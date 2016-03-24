@@ -124,6 +124,12 @@ router.map({
             }
         }
     },
+    '/reuse/:oid/edit/': {
+        name: 'reuse-edit',
+        component: function(resolve) {
+            require(['./views/reuse-edit.vue'], resolve);
+        },
+    },
     '/organization/new/': {
         component: function(resolve) {
             require(['./views/organization-wizard.vue'], resolve);
