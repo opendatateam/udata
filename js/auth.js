@@ -6,7 +6,7 @@ import config from 'config';
 import Notify from 'notify';
 import i18n from 'i18n';
 
-const DEFAULT_NEED_ROLE = i18n._('Role "{role}" is required', {role: '{role}'});
+const DEFAULT_NEED_ROLE = i18n._('Role "{role}" is required', {role: 'ROLE'});
 
 
 export const user = config.user;
@@ -49,7 +49,7 @@ export function has_role(role) {
 export function need_role(role, message) {
     need_user();
     if (user.roles.indexOf(role) < 0) {
-        const msg = (message || DEFAULT_NEED_ROLE).replace('{role}', role);
+        const msg = (message || DEFAULT_NEED_ROLE).replace('ROLE', role);
         Notify.error(msg);
     }
 }
