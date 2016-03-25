@@ -2,22 +2,24 @@
 from __future__ import unicode_literals
 import StringIO
 
-from flask import abort, current_app, request, send_file
 import unicodecsv as csv
+from flask import abort, current_app, request, send_file
 
 from udata import theme
 from udata.auth import current_user
-from udata.models import Dataset, GeoZone
-from udata.i18n import I18nBlueprint
-from udata.utils import multi_to_dict
 from udata.core.storages import references
+from udata.core.dataset.permissions import DatasetEditPermission
+from udata.i18n import I18nBlueprint
+from udata.models import Dataset, GeoZone
 from udata.sitemap import sitemap
+from udata.utils import multi_to_dict
 
 blueprint = I18nBlueprint('territories', __name__)
 
 
 @blueprint.route(
-    '/territory/<territory:territory>/dataset/<dataset:dataset>/resource/<resource_id>/',
+    ('/territory/<territory:territory>/dataset/<dataset:dataset>'
+     '/resource/<resource_id>/'),
     endpoint='territory_dataset_resource')
 def compute_territory_dataset(territory, dataset, resource_id):
     """
@@ -80,7 +82,7 @@ def render_territory(territory):
     datasets = Dataset.objects.visible().filter(spatial__zones=territory)
     town_datasets = []
     other_datasets = []
-    has_pertinent_datasets = False
+    editable_datasets = []
     if datasets:
         for dataset in datasets:
             if (dataset.organization
@@ -88,14 +90,13 @@ def render_territory(territory):
                 town_datasets.append(dataset)
             else:
                 other_datasets.append(dataset)
-        if not town_datasets:
-            has_pertinent_datasets = (current_user.is_authenticated()
-                                      and current_user.can_modify(datasets))
+            editable_datasets.append(current_user.is_authenticated()
+                                     and DatasetEditPermission(dataset).can())
     context = {
         'territory': territory,
         'territory_datasets': territory_datasets,
         'other_datasets': other_datasets,
-        'has_pertinent_datasets': has_pertinent_datasets,
+        'has_pertinent_datasets': any(editable_datasets),
         'town_datasets': town_datasets
     }
     return theme.render('territories/territory.html', **context)
