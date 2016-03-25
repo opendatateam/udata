@@ -9,7 +9,8 @@ from datetime import date
 from time import time
 from urlparse import urlsplit, urlunsplit
 
-from flask import url_for, request, current_app, json
+from babel.numbers import format_number as format_number_babel
+from flask import g, url_for, request, current_app, json
 from jinja2 import Markup
 from werkzeug import url_decode, url_encode
 
@@ -347,3 +348,10 @@ def to_json(data):
     if not data:
         return Markup('')
     return json.dumps(data)
+
+
+@front.app_template_filter()
+@front.app_template_global()
+def format_number(number):
+    '''A locale aware formatter.'''
+    return format_number_babel(number, locale=g.lang_code)
