@@ -14,10 +14,10 @@ def check_for_territories(query):
     # If it's a code, try INSEE/postal, otherwise use the name.
     qs = GeoZone.objects(level='fr/town')
     if len(query) == 5 and query.isdigit():
-        # Match both INSEE and postal codes
+        # Match both INSEE and postal codes.
         qs = qs(db.Q(code=query) | db.Q(keys__postal__contains=query))
     else:
         # Check names starting with query or exact match.
         qs = qs(db.Q(name__istartswith=query) | db.Q(name__iexact=query))
-    # Sort matching result by pouplation and area
+    # Sort matching results by population and area.
     return qs.order_by('-population', '-area')

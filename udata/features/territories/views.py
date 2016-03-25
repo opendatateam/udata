@@ -2,21 +2,24 @@
 from __future__ import unicode_literals
 import StringIO
 
-from flask import abort, current_app, request, send_file
 import unicodecsv as csv
+from flask import abort, current_app, request, send_file
 
 from udata import theme
-from udata.models import Dataset, GeoZone
-from udata.i18n import I18nBlueprint
-from udata.utils import multi_to_dict
+from udata.auth import current_user
 from udata.core.storages import references
+from udata.core.dataset.permissions import DatasetEditPermission
+from udata.i18n import I18nBlueprint
+from udata.models import Dataset, GeoZone
 from udata.sitemap import sitemap
+from udata.utils import multi_to_dict
 
 blueprint = I18nBlueprint('territories', __name__)
 
 
 @blueprint.route(
-    '/territory/<territory:territory>/dataset/<dataset:dataset>/resource/<resource_id>/',
+    ('/territory/<territory:territory>/dataset/<dataset:dataset>'
+     '/resource/<resource_id>/'),
     endpoint='territory_dataset_resource')
 def compute_territory_dataset(territory, dataset, resource_id):
     """
@@ -63,6 +66,7 @@ def render_territory(territory):
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
+    # Generate fake territory datasets.
     from udata.models import TERRITORY_DATASETS
     territory_dataset_classes = sorted(
         TERRITORY_DATASETS.values(), key=lambda a: a.order)
@@ -70,17 +74,37 @@ def render_territory(territory):
         territory_dataset_class(territory)
         for territory_dataset_class in territory_dataset_classes
     ]
-    datasets = list(Dataset.objects.visible().filter(spatial__zones=territory))
+
+    # Retrieve all datasets then split between those optionaly owned
+    # by an org for that zone and others. We need to know if the current
+    # user has datasets for that zone in order to display a custom
+    # message to ease the conversion.
+    datasets = Dataset.objects.visible().filter(spatial__zones=territory)
+    town_datasets = []
+    other_datasets = []
+    editable_datasets = []
+    if datasets:
+        for dataset in datasets:
+            if (dataset.organization
+                    and territory.id == dataset.organization.zone):
+                town_datasets.append(dataset)
+            else:
+                other_datasets.append(dataset)
+            editable_datasets.append(current_user.is_authenticated()
+                                     and DatasetEditPermission(dataset).can())
     context = {
         'territory': territory,
         'territory_datasets': territory_datasets,
-        'datasets': datasets,
+        'other_datasets': other_datasets,
+        'has_pertinent_datasets': any(editable_datasets),
+        'town_datasets': town_datasets
     }
     return theme.render('territories/territory.html', **context)
 
 
 @sitemap.register_generator
 def sitemap_urls():
-    for code in GeoZone.objects(level='fr/town').only('code'):
-        yield ('territories.territory', {'territory': code},
-               None, "weekly", 0.5)
+    if current_app.config.get('ACTIVATE_TERRITORIES'):
+        for code in GeoZone.objects(level='fr/town').only('code'):
+            yield ('territories.territory', {'territory': code},
+                   None, "weekly", 0.5)

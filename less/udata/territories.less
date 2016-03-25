@@ -1,16 +1,54 @@
-.territory .dataset-list {
-    .col-sm-4 {
-        padding: 5px;
+.territory {
+    .dataset-list {
+        .col-sm-4 {
+            padding: 5px;
+        }
+        .dataset-card {
+            margin: 0 0 1em 0 !important;
+        }
     }
-    .dataset-card {
-        margin: 0 0 1em 0 !important;
+    .panel {
+        padding: 1em;
+
+        .tab-links {
+            margin-top: 1em;
+        }
     }
-}
+    .dataset-item--cta {
+        @base-color: #7d8489;
+        border: 1px solid @base-color;
+        padding: 0;
 
-.territory .panel {
-    padding: 1em;
+        .format-label {
+            width: 1em;
+            height: 1em;
+            background-color: #f9f9f9;
+            margin: 0px;
+            color: @base-color;
+            text-align: center;
+            font-size: 6em;
+            font-weight: bold;
+            line-height: .8;
+            border-right: 1px solid @base-color;
 
-    .tab-links {
-        margin-top: 1em;
+            span {
+                line-height: 52px;
+                text-align: center;
+                font-weight: bold;
+                text-transform: uppercase;
+                display: block;
+            }
+        }
+
+        p {
+            text-align: center;
+            font-size: 1.5em;
+            padding: .5em 1em 0 5em;
+
+            a {
+                text-decoration: underline;
+                color: white;
+            }
+        }
     }
 }
