@@ -1,5 +1,5 @@
 <template>
-<layout :title="_('Me')" :subtitle="$root.me.fullname">
+<layout :title="_('Me')" :subtitle="$root.me.fullname" :actions="actions">
     <div class="row">
         <profile :user="$root.me" class="col-xs-12 col-md-6"></profile>
         <chart title="Traffic" :metrics="metrics" class="col-xs-12 col-md-6"
@@ -31,6 +31,11 @@ export default  {
     name: 'MeView',
     data: function() {
         return {
+            actions: [{
+                label: this._('Edit'),
+                icon: 'edit',
+                method: this.edit
+            }],
             metrics: new Metrics(),
             reuses: new PageList({
                 ns: 'me',
@@ -68,6 +73,9 @@ export default  {
         this._handler.remove();
     },
     methods: {
+        edit() {
+            this.$go({name: 'me-edit'});;
+        },
         update: function() {
             if (this.$root.me.id) {
                 this.metrics.fetch({

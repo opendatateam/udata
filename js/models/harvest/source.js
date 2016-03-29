@@ -5,6 +5,7 @@ import log from 'logger';
 export default class HarvestSource extends Model {
     fetch(ident) {
         ident = ident || this.id || this.slug;
+        this.loading = true;
         if (ident) {
             this.$api('harvest.get_harvest_source',
                 {ident: ident},
@@ -21,6 +22,7 @@ export default class HarvestSource extends Model {
      */
     save() {
         var ep = this.id ? 'harvest.update_harvest_source' : 'harvest.create_harvest_source';
+        this.loading = true;
         this.$api(ep, {payload: this}, this.on_fetched);
     }
 };

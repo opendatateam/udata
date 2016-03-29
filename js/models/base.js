@@ -7,14 +7,6 @@ import Vue from 'vue';
 export const DEFAULT_PAGE_SIZE = 10;
 
 /**
- * An empty JSON schema factory
- * @return {Object} An empty JSON schema
- */
-function empty_schema() {
-    return {properties: {}, required: []};
-}
-
-/**
  * Common class behaviors.
  *
  * Provide:
@@ -23,8 +15,14 @@ function empty_schema() {
  *     - Vue.js compatible setter
  */
 export class Base {
-    constructor() {
+    constructor(options) {
         this.$pubsub = new PubSub();
+        this.$options = options || {};
+        if (this.$options.loading !== undefined) {
+            this.loading = Boolean(this.$options.loading);
+        } else {
+            this.loading = this.$options.data === undefined;
+        }
     }
 
     /**
@@ -55,8 +53,8 @@ export class Base {
      * @param  {Array}  args    A variable number of parameters
      */
     $emit(name, ...args) {
-        var prefix = this.__class__.toLowerCase(),
-            topic = prefix + ':' + name;
+        const prefix = this.__class__.toLowerCase();
+        const topic = prefix + ':' + name;
         pubsub.publish(topic, this, ...args);
         this.$pubsub.publish(name, this, ...args);
     }
@@ -99,23 +97,22 @@ export class Base {
      * @param  {Function} on_success The callback function to call on success.
      * @param  {Function} on_error The callback function to call on error.
      */
-    $api(endpoint, data, on_success, on_error=()=>{}) {
-        let parts = endpoint.split('.');
-        let namespace = parts[0];
-        let method = parts[1];
-        let operation = API[namespace][method];
+    $api(endpoint, data, on_success, on_error=() => {}) {
+        const parts = endpoint.split('.');
+        const namespace = parts[0];
+        const method = parts[1];
+        const operation = API[namespace][method];
 
         return operation(data, on_success.bind(this), on_error.bind(this));
     }
-};
+}
 
 /**
  * A base class for schema based models.
  */
 export class Model extends Base {
     constructor(options) {
-        super();
-        this.$options = options || {};
+        super(options);
         this.empty();
         if (this.$options.data) {
             Object.assign(this, this.$options.data);
@@ -136,11 +133,11 @@ export class Model extends Base {
      * @return {Object}     The instance
      */
     empty() {
-        var schema = this.__schema__
-        for (var key in schema.properties) {
+        const schema = this.__schema__;
+        for (const key in schema.properties) {
             if (schema.properties.hasOwnProperty(key)) {
-                if (schema.properties[key].type == 'array') {
-                    this[key] = []
+                if (schema.properties[key].type === 'array') {
+                    this[key] = [];
                 } else if (schema.required.indexOf(key)) {
                     this[key] = null;
                 } else {
@@ -152,8 +149,8 @@ export class Model extends Base {
     }
 
     on_fetched(data) {
-        for (let prop in data.obj) {
-            let value = data.obj[prop];
+        for (const prop in data.obj) {
+            const value = data.obj[prop];
             this._set(prop, value);
         }
         this.$emit('updated');
@@ -176,7 +173,7 @@ export class Model extends Base {
         this.empty();
         return this;
     }
-};
+}
 
 
 /**
@@ -184,20 +181,14 @@ export class Model extends Base {
  */
 export class List extends Base {
     constructor(options) {
-        super();
-        this.$options = options || {};
+        super(options);
 
         this.items = this.$options.data || [];
         this.query = this.$options.query || {};
-        if (this.$options.loading !== undefined) {
-            this.loading = Boolean(this.$options.loading);
-        } else {
-            this.loading = this.$options.data === undefined;
-        }
 
         this.sorted = null;
         this.reversed = false;
-        this.filtered = [];
+        this.filtered_data = [];
         this._search = '';
         this.populate();
     }
@@ -211,22 +202,22 @@ export class List extends Base {
     }
 
     get data() {
-        return this.filtered;
+        return this.filtered_data;
     }
 
     set data(value) {
-        this._set('filtered', value);
+        this._set('filtered_data', value);
     }
 
     /**
      * Populate the data view (filtered and sorted)
      */
     populate() {
-        let options = {},
-            sifter = new Sifter(this.items);
+        const options = {};
+        const sifter = new Sifter(this.items);
 
         if (this.$options.search) {
-            options.fields = Array.isArray(this.$options.search) ? this.$options.search: [this.$options.search];
+            options.fields = Array.isArray(this.$options.search) ? this.$options.search : [this.$options.search];
         } else {
             options.fields = [];
         }
@@ -237,6 +228,7 @@ export class List extends Base {
                 direction: this.reversed ? 'desc' : 'asc'
             }];
         }
+
         this.data = sifter.search(this._search, options).items.map((result) => {
             return this.items[result.id];
         });
@@ -265,7 +257,7 @@ export class List extends Base {
      * Get an item given its ID
      */
     by_id(id) {
-        var filtered = this.items.filter((item) => {
+        const filtered = this.items.filter((item) => {
             return item.hasOwnProperty('id') && item.id === id;
         });
         return filtered.length === 1 ? filtered[0] : null;
@@ -308,7 +300,7 @@ export class List extends Base {
         this.populate();
         return this;
     }
-};
+}
 
 /**
  * A base class for server-side paginated list.
@@ -339,7 +331,7 @@ export class ModelPage extends Model {
         if (!this.query.sort) {
             return;
         }
-        return this.query.sort[0] == '-'
+        return this.query.sort[0] === '-'
             ? this.query.sort.substring(1, this.query.sort.length)
             : this.query.sort;
     }
@@ -352,14 +344,14 @@ export class ModelPage extends Model {
         if (!this.query.sort) {
             return;
         }
-        return this.query.sort[0] == '-';
+        return this.query.sort[0] === '-';
     }
 
     get has_search() {
-        var op = API[this.$options.ns].operations[this.$options.fetch];
+        const op = API[this.$options.ns].operations[this.$options.fetch];
 
         return op.parameters.filter((p) => {
-            return p.name == 'q';
+            return p.name === 'q';
         }).length > 0;
     }
 
@@ -433,7 +425,7 @@ export class ModelPage extends Model {
         if (this.sorted !== field) {
             this.query.sort = '-' + field;
         } else {
-            reversed = reversed || (this.sorted == field ? !this.reversed : false);
+            reversed = reversed || (this.sorted === field ? !this.reversed : false);
             this.query.sort = reversed ? '-' + field : field;
         }
         this.fetch({page: 1}); // Clear the pagination
@@ -451,7 +443,7 @@ export class ModelPage extends Model {
         this.fetch({page: 1}); // Clear the pagination
         return this;
     }
-};
+}
 
 /**
  * A client-side pager wrapper for list.
@@ -464,15 +456,20 @@ export class PageList extends List {
     }
 
     get data() {
-        return this.filtered.slice(
+        return super.data.slice(
             Math.max(this.page - 1, 0) * this.page_size,
             this.page * this.page_size
         );
+        // return this.filtered_data.slice(
+        //     Math.max(this.page - 1, 0) * this.page_size,
+        //     this.page * this.page_size
+        // );
     }
 
     set data(value) {
-        this._set('filtered', value);
+        this._set('filtered_data', value);
     }
+
     /**
      * Total amount of pages
      * @return {int}
@@ -487,9 +484,8 @@ export class PageList extends List {
      */
     nextPage() {
         if (this.page && this.page < this.pages) {
-            this.page = this.page + 1;
+            this.go_to_page(this.page + 1);
         }
-        this.populate();
         return this;
     }
 
@@ -499,9 +495,8 @@ export class PageList extends List {
      */
     previousPage() {
         if (this.page && this.page > 1) {
-            this.page = this.page - 1;
+            this.go_to_page(this.page - 1);
         }
-        this.populate();
         return this;
     }
 
@@ -523,4 +518,4 @@ export class PageList extends List {
         super.on_fetched(data);
         this.page = 1;  // Clear the paging
     }
-};
+}

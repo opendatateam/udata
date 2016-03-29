@@ -42,12 +42,16 @@ import Layout from 'components/layout.vue';
 
 export default {
     name: 'ReuseView',
-    data: function() {
-        let actions = [{
+    data() {
+        const actions = [{
+                label: this._('Edit'),
+                icon: 'edit',
+                method: this.edit
+            }, {
                 label: this._('Transfer'),
                 icon: 'send',
                 method: this.transfer_request
-            },{
+            }, {
                 label: this._('Delete'),
                 icon: 'trash',
                 method: this.confirm_delete
@@ -83,7 +87,7 @@ export default {
         };
     },
     computed: {
-        boxes: function() {
+        boxes() {
             if (!this.reuse.metrics) {
                 return [];
             }
@@ -125,19 +129,22 @@ export default {
         }
     },
     methods: {
-        confirm_delete: function() {
+        edit() {
+            this.$go({name: 'reuse-edit', params: {oid: this.reuse.id}});
+        },
+        confirm_delete() {
             this.$root.$modal(
                 require('components/reuse/delete-modal.vue'),
                 {reuse: this.reuse}
             );
         },
-        transfer_request: function() {
+        transfer_request() {
             this.$root.$modal(
                 require('components/transfer/request-modal.vue'),
                 {subject: this.reuse}
             );
         },
-        setBadges: function() {
+        setBadges() {
             this.$root.$modal(
                 require('components/badges/modal.vue'),
                 {subject: this.reuse}
@@ -148,6 +155,7 @@ export default {
         data() {
             if (this.$route.params.oid !== this.reuse.id) {
                 this.reuse.fetch(this.$route.params.oid);
+                this.$scrollTo(this.$el);
             }
         }
     },

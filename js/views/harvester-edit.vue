@@ -1,47 +1,56 @@
 <template>
-<layout :title="source.name || ''" :subtitle="_('Edit')">
-    <div class="row">
-        <div class="col-xs-12">
-            <box>
-                <harvest-form :source="source"></harvest-form>
-            </box>
-        </div>
-    </div>
-    <div class="row">
+<form-layout icon="tasks" :title="title" :save="save" :cancel="cancel" footer="true" :model="source">
+    <harvest-form v-ref:form :source="source"></harvest-form>
+    <!--div class="row" slot="extras">
         <div class="col-xs-12">
             <box :title="_('Filters')">
                 <mappings-form :source="source"></mappings-form>
             </box>
         </div>
-    </div>
-    <div class="row">
+    </div-->
+    <div class="row" slot="extras">
         <preview class="col-xs-12" :source="source"></preview>
     </div>
-</layout>
+</form-layout>
 </template>
 
 <script>
+import Box from 'components/containers/box.vue';
+import FormLayout from 'components/form-layout.vue';
+import HarvestForm from 'components/harvest/form.vue';
 import HarvestSource from 'models/harvest/source';
 import ItemModal from 'components/harvest/item.vue';
-import Vue from 'vue';
-import Layout from 'components/layout.vue';
+import Preview from 'components/harvest/preview.vue';
 
 export default {
-    name: 'HarvesterEditView',
-    props: {
-        source: {
-            type: HarvestSource,
-            default() {
-                return new HarvestSource();
+    data: function() {
+        return {
+            source: new HarvestSource(),
+        };
+    },
+    components: {Box, FormLayout, HarvestForm, Preview},
+    computed: {
+        title() {
+            if (this.source.name) {
+                return this._('Edit harvest source "{name}"', {
+                    name: this.source.name
+                });
             }
         }
     },
-    components: {
-        box: require('components/containers/box.vue'),
-        'harvest-form': require('components/harvest/form.vue'),
-        'mappings-form': require('components/harvest/mappings-form.vue'),
-        preview: require('components/harvest/preview.vue'),
-        Layout
+    methods: {
+        save() {
+            let form = this.$refs.form;
+            if (form.validate()) {
+                this.source.update(form.serialize(), (response) => {
+                    this.source.on_fetched(response);
+                    this.$go({name: 'harvester', params: {oid: this.source.id}});
+                }, form.on_error);
+            }
+        },
+        cancel() {
+            this.$go({name: 'harvester', params: {oid: this.source.id}});
+        }
     },
     events: {
         'harvest:job:item:selected': function(item) {
@@ -52,6 +61,7 @@ export default {
     route: {
         data() {
             this.source.fetch(this.$route.params.oid);
+            this.$scrollTo(this.$el);
         }
     }
 };

@@ -52,7 +52,7 @@ class MeAPI(API):
         return current_user._get_current_object()
 
     @api.secure
-    @api.marshal_with(user_fields)
+    @api.marshal_with(me_fields)
     @api.doc('update_me', responses={400: 'Validation error'})
     def put(self, **kwargs):
         '''Update my profile'''

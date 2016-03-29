@@ -133,6 +133,7 @@ class HarvestSource(db.Document):
             'slug',
             'organization',
             'owner',
+            'deleted',
         ],
         'ordering': ['-created_at'],
         'queryset_class': HarvestSourceQuerySet,

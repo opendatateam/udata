@@ -12,6 +12,10 @@
             }
         }
     }
+
+    .treeview-menu > li > a {
+        padding: 10px 5px 10px 20px;
+    }
 }
 </style>
 
@@ -21,15 +25,16 @@
         <i v-if="icon" class="fa fa-fw fa-{{icon}}"></i>
         <img v-if="image" :src="image" />
         <span>{{ label | truncate 25 }}</span>
-        <i v-if="is_tree" class="fa fa-angle-{{open ? 'down' : 'left'}} pull-right"></i>
+        <i v-if="is_tree" class="fa fa-angle-{{active ? 'down' : 'left'}} pull-right"></i>
         <small v-if="badge" class="badge pull-right bg-{{badge-color}}">{{badge.label}}</small>
     </a>
-    <ul v-if="is_tree" v-show="open" class="treeview-menu">
+    <ul v-if="is_tree" v-show="active" class="treeview-menu">
         <sidebar-menu-item v-for="item in children"
             :label="item.label"
             :icon="item.icon"
             :image="item.image"
-            :route="item.route"
+            :route="item.route || route"
+            :scroll-to="item.scrollTo"
             :badge="item.badge"
             :children="item.children">
         </sidebar-menu-item>
@@ -41,26 +46,25 @@
 export default {
     name: 'sidebar-menu-item',
     replace: true,
-    props: ['label', 'icon','image', 'route', 'children', 'badge'],
-    data: function() {
-        return {
-            open: false,
-        };
-    },
+    props: ['label', 'icon','image', 'route', 'children', 'badge', 'scrollTo'],
     computed: {
-        is_tree: function() {
+        is_tree() {
             return this.children && this.children.length;
         },
-        active: function() {
-            return this.open || this.$route.path === this.route;
+        active() {
+            return this.$route.path === this.route;
         }
     },
     methods: {
-        click: function() {
-            if (this.is_tree) {
-                this.open = !this.open;
-            } else {
+        click() {
+            if (this.route) {
                 this.$go(this.route);
+            }
+            // Workaround until https://github.com/vuejs/vue-router/issues/434
+            if (this.scrollTo) {
+                this.$nextTick(() => {
+                    this.$scrollTo(this.scrollTo);
+                })
             }
         }
     }

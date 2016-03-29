@@ -1,5 +1,6 @@
 <template>
-<layout :title="topic.name || ''" :subtitle="_('Topic')" :page="topic.page || ''">
+<layout :title="topic.name || ''" :subtitle="_('Topic')" :page="topic.page || ''"
+    :actions="actions">
     <div class="row">
         <topic-details :topic="topic" class="col-xs-12"></topic-details>
     </div>
@@ -17,9 +18,14 @@ import Layout from 'components/layout.vue';
 
 export default {
     name: 'TopicView',
-    data: function() {
+    data() {
         return {
-            topic: new Topic()
+            topic: new Topic(),
+            actions: [{
+                label: this._('Edit'),
+                icon: 'edit',
+                method: this.edit
+            }],
         };
     },
     components: {
@@ -40,10 +46,16 @@ export default {
             return true;
         }
     },
+    methods: {
+        edit() {
+            this.$go({name: 'topic-edit', params: {oid: this.topic.id}});
+        }
+    },
     route: {
         data() {
             if (this.$route.params.oid !== this.topic.id) {
                 this.topic.fetch(this.$route.params.oid);
+                this.$scrollTo(this.$el);
             }
         }
     }

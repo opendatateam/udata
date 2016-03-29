@@ -24,6 +24,7 @@
                 :image="item.image"
                 :route="item.route"
                 :badge="item.badge"
+                :scroll-to="item.scrollTo"
                 :children="item.children">
             </sidebar-menu-item>
         </ul>
@@ -35,26 +36,52 @@
 import Vue from 'vue';
 
 const MENU = [{
-        'label': Vue._('Dashboard'),
-        'icon': 'dashboard',
-        'route': '/'
+        label: Vue._('Dashboard'),
+        icon: 'dashboard',
+        route: '/'
     }, {
-        'label': Vue._('Me'),
-        'icon': 'male',
-        'route': '/me/'
+        label: Vue._('Me'),
+        icon: 'male',
+        route: '/me/',
+        children: [{
+            label: Vue._('Dataset'),
+            icon: 'cubes',
+            scrollTo: '#datasets'
+        }, {
+            label: Vue._('Reuses'),
+            icon: 'retweet',
+            scrollTo: '#reuses'
+        }]
     }],
     bottom_menu = [{
-        'label': Vue._('Site'),
-        'icon': 'globe',
-        'route': '/site/'
+        label: Vue._('Site'),
+        icon: 'globe',
+        route: '/site/',
+        children: [{
+            label: Vue._('Dataset'),
+            icon: 'cubes',
+            scrollTo: '#datasets'
+        }, {
+            label: Vue._('Reuses'),
+            icon: 'retweet',
+            scrollTo: '#reuses'
+        }, {
+            label: Vue._('Organizations'),
+            icon: 'building',
+            scrollTo: '#organizations'
+        }, {
+            label: Vue._('Users'),
+            icon: 'group',
+            scrollTo: '#users'
+        }]
     }, {
-        'label': Vue._('Editorial'),
-        'icon': 'newspaper-o',
-        'route': '/editorial/'
+        label: Vue._('Editorial'),
+        icon: 'newspaper-o',
+        route: '/editorial/'
     }, {
-        'label': Vue._('System'),
-        'icon': 'cogs',
-        'route': '/system/'
+        label: Vue._('System'),
+        icon: 'cogs',
+        route: '/system/'
     }];
 
 export default {
@@ -77,9 +104,26 @@ export default {
             }
             return this.$root.me.organizations.map(function(org) {
                 return {
-                    'label': org.acronym || org.name,
-                    'image': org.logo,
-                    'route': '/organization/' + org.id + '/'
+                    label: org.acronym || org.name,
+                    image: org.logo,
+                    route: '/organization/' + org.id + '/',
+                    children: [{
+                        label: Vue._('Dataset'),
+                        icon: 'cubes',
+                        scrollTo: '#datasets-widget'
+                    }, {
+                        label: Vue._('Reuses'),
+                        icon: 'retweet',
+                        scrollTo: '#reuses-widget'
+                    }, {
+                        label: Vue._('Issues'),
+                        icon: 'warning',
+                        scrollTo: '#issues-widget'
+                    }, {
+                        label: Vue._('Discussions'),
+                        icon: 'comment',
+                        scrollTo: '#reuses-widget'
+                    }]
                 };
             });
         }

@@ -18,13 +18,12 @@
 
 <script>
 import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
+import Datatable from 'components/datatable/widget.vue';
 import HarvestJobs from 'models/harvest/jobs';
 
 export default {
     name: 'harvest-jobs-widget',
-    components: {
-        datatable: require('components/datatable/widget.vue')
-    },
+    components: {Datatable},
     props: {
         source: Object,
         current: null

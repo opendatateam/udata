@@ -1,40 +1,10 @@
 <style lang="less">
 .content-header {
+    h1 a {
+        color: black;
 
-    > .btn-actions {
-        background: transparent;
-        margin-top: 0px;
-        margin-bottom: 0;
-        position: absolute;
-        top: 15px;
-        right: 10px;
-
-        .btn-link {
-            color: lighten(black, 45%);
-            font-size: 1.2em;
-            padding: 5px;
-
-            &:hover {
-                color: lighten(black, 20%);
-            }
-        }
-
-        .dropdown-menu {
-            border-radius: 0;
-        }
-    }
-}
-
-.notification-zone {
-    padding: 15px 15px 0;
-
-    .alert {
-        &:last-child {
-            margin-bottom: 0;
-        }
-
-        &:not(:last-child) {
-            margin-bottom: 5px;
+        .fa {
+            font-size: 0.4em;
         }
     }
 }
@@ -49,16 +19,18 @@
     <router-view></router-view>
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1>
-            {{title}}
-            <div v-if="actions.length"
-                class="btn-group" role="group">
-                <a class="btn btn-link btn-sm dropdown-toggle"
-                    data-toggle="dropdown" aria-expanded="false">
-                    <span class="fa fa-fw fa-gear"></span>
-                </a>
+        <div v-if="main_action" class="btn-group btn-group-sm btn-actions pull-right clearfix">
+            <div v-if="menu_actions" class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-info" @click="main_action.method">
+                    <span v-if="main_action.icon" class="fa fa-fw fa-{{main_action.icon}}"></span>
+                    {{main_action.label}}
+                </button>
+                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                    <li v-for="action in actions"
+                    <li v-for="action in menu_actions"
                          :role="action.divider ? 'separator' : false"
                          :class="{ 'divider': action.divider }">
                         <a class="pointer"
@@ -70,24 +42,28 @@
                     </li>
                 </ul>
             </div>
+            <button v-if="!menu_actions" type="button" class="btn btn-info btn-sm"
+                    @click="main_action.method">
+                <span v-if="main_action.icon" class="fa fa-fw fa-{{main_action.icon}}"></span>
+                {{main_action.label}}
+            </button>
+        </div>
+        <h1>
+            <a v-if="page" :href="page" :title="_('See on the site')">
+                {{ title }}
+                <span class="fa fa-external-link"></span>
+            </a>
+            <span v-if="!page">{{title}}</span>
+
             <small v-if="subtitle">{{subtitle}}</small>
             <small v-if="badges">
                 <span v-for="badge in badges"
                     class="label label-{{badge.class}}">{{badge.label}}</span>
             </small>
         </h1>
-        <div class="btn-group btn-group-sm btn-actions pull-right clearfix"
-            v-if="page">
-            <a class="btn btn-link" :href="page"
-                :title="_('See it as viewed by visitors')">
-                {{ _('See on the site') }} →
-            </a>
-        </div>
     </section>
     <!-- Notifications -->
-    <div v-if="$root.notifications.length > 0" class="notification-zone">
-        <alert v-for="n in $root.notifications" :alert="n"></alert>
-    </div>
+    <notification-zone></notification-zone>
     <!-- Main content -->
     <section class="content">
         <slot></slot>
@@ -96,7 +72,7 @@
 </template>
 
 <script>
-import Alert from 'components/alert.vue';
+import NotificationZone from 'components/notification-zone.vue';
 
 export default {
     name: 'DashboardLayout',
@@ -110,8 +86,18 @@ export default {
         },
         badges: Array
     },
-    components: {
-        Alert
+    components: {NotificationZone},
+    computed: {
+        main_action() {
+            if (this.actions.length) {
+                return this.actions[0];
+            }
+        },
+        menu_actions() {
+            if (this.actions && this.actions.length > 1) {
+                return this.actions.slice(1);
+            }
+        }
     }
 };
 </script>

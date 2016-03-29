@@ -1,5 +1,5 @@
 <template>
-<layout :title="post.name || ''" :subtitle="_('Post')" :page="post.page || ''">
+<layout :title="post.name || ''" :subtitle="_('Post')" :page="post.page || ''" :actions="actions">
     <div class="row">
         <post-content :post="post" class="col-xs-12"></post-content>
     </div>
@@ -19,7 +19,12 @@ export default {
     name: 'PostView',
     data: function() {
         return {
-            post: new Post()
+            post: new Post(),
+            actions: [{
+                label: this._('Edit'),
+                icon: 'edit',
+                method: this.edit
+            }],
         };
     },
     components: {
@@ -40,10 +45,16 @@ export default {
             return true;
         }
     },
+    methods: {
+        edit() {
+            this.$go({name: 'post-edit', params: {oid: this.post.id}});
+        }
+    },
     route: {
         data() {
             if (this.$route.params.oid !== this.post.id) {
                 this.post.fetch(this.$route.params.oid);
+                this.$scrollTo(this.$el);
             }
         }
     }

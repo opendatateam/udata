@@ -10,7 +10,26 @@
     <div class="row">
         <div class="col-xs-12 col-md-6">
             <dataset :dataset="dataset"></dataset>
-            <wmap :title="_('Spatial coverage')" :geojson="geojson"></wmap>
+            <wmap :title="_('Spatial coverage')" :geojson="geojson" :footer="map_footer">
+                <ul>
+                    <li v-show="dataset.spatial && dataset.spatial.granularity">
+                        <a class="btn btn-xs" data-toggle="tooltip"
+                            data-placement="top" data-container="body"
+                            :title="_('Territorial coverage granularity')">
+                            <span class="fa fa-bullseye fa-fw"></span>
+                            {{ dataset | granularity_label }}
+                        </a>
+                    </li>
+                    <li v-show="territories_labels">
+                        <a class="btn btn-xs" data-toggle="tooltip"
+                            data-placement="top" data-container="body"
+                            :title="_('Territorial coverage')">
+                            <span class="fa fa-map-marker fa-fw"></span>
+                            {{ territories_labels }}
+                        </a>
+                    </li>
+                </ul>
+            </wmap>
         </div>
         <quality :quality="dataset.quality" class="col-xs-12 col-md-6"></quality>
     </div>
@@ -53,15 +72,21 @@ import Metrics from 'models/metrics';
 import Reuses from 'models/reuses';
 import CommunityResources from 'models/communityresources';
 import Layout from 'components/layout.vue';
+import DatasetFilters from 'components/dataset/filters';
 
 export default {
     name: 'DatasetView',
+    mixins: [DatasetFilters],
     data: function() {
         var actions = [{
+                label: this._('Edit'),
+                icon: 'edit',
+                method: this.edit
+            }, {
                 label: this._('Transfer'),
                 icon: 'send',
                 method: this.transfer_request
-            },{
+            }, {
                 label: this._('Delete'),
                 icon: 'trash',
                 method: this.confirm_delete
@@ -107,7 +132,7 @@ export default {
         };
     },
     computed: {
-        boxes: function() {
+        boxes() {
             if (!this.dataset.metrics) {
                 return [];
             }
@@ -131,13 +156,15 @@ export default {
                 color: 'purple',
                 target: '#trafic'
             }];
+        },
+        territories_labels() {
+            if (this.geojson && this.geojson.features) {
+                return this.geojson.features.map(feature => feature.properties.name).join(', ');
+            }
+        },
+        map_footer() {
+            return (this.dataset.spatial && this.dataset.spatial.granularity || this.territories_labels) !== undefined;
         }
-        // coverage: function() {
-        //     if (!this.dataset.spatial || !this.dataset.spatial.geom) {
-        //         return null;
-        //     }
-        //     return this.dataset.spatial.geom;
-        // }
     },
     components: {
         sbox: require('components/containers/small-box.vue'),
@@ -154,19 +181,22 @@ export default {
         Layout
     },
     methods: {
-        confirm_delete: function() {
+        edit() {
+            this.$go({name: 'dataset-edit', params: {oid: this.dataset.id}});
+        },
+        confirm_delete() {
             var m = this.$root.$modal(
                 require('components/dataset/delete-modal.vue'),
                 {dataset: this.dataset}
             );
         },
-        transfer_request: function() {
+        transfer_request() {
             this.$root.$modal(
                 require('components/transfer/request-modal.vue'),
                 {subject: this.dataset}
             );
         },
-        setBadges: function() {
+        setBadges() {
             this.$root.$modal(
                 require('components/badges/modal.vue'),
                 {subject: this.dataset}
@@ -177,6 +207,7 @@ export default {
         data() {
             if (this.$route.params.oid !== this.dataset.id) {
                 this.dataset.fetch(this.$route.params.oid);
+                this.$scrollTo(this.$el);
             }
         }
     },
