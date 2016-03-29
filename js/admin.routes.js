@@ -16,8 +16,15 @@ router.map({
         }
     },
     '/me/': {
+        name: 'me',
         component: function(resolve) {
             require(['./views/me.vue'], resolve);
+        }
+    },
+    '/me/edit/': {
+        name: 'me-edit',
+        component: function(resolve) {
+            require(['./views/me-edit.vue'], resolve);
         }
     },
     '/site/': {
