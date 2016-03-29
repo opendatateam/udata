@@ -5,14 +5,21 @@
         <div class="search_bar row" role="search">
             {% if in_url('sort') and in_url('organization') %}
                 {% set action = url_for('datasets.list') %}
+                {% set placeholder = _('Search in datasets') %}
+            {% elif territory %}
+                {% set action = url_for('front.search') %}
+                {% set placeholder = _('Search in this town') %}
             {% else %}
                 {% set action = url_for('front.search') %}
+                {% set placeholder = _('Search') %}
             {% endif %}
             <form action="{{ action }}"
                 class="col-sm-4 col-md-6 col-lg-6 col-xs-12">
                 {% if in_url('sort') and in_url('organization') %}
                     <input type="hidden" name="sort" value="{{ request.args.sort }}">
                     <input type="hidden" name="organization" value="{{ request.args.organization }}">
+                {% elif territory %}
+                    <input type="hidden" name="geozone" value="{{ territory.id }}">
                 {% endif %}
                 <div class="form-group">
                     <div class="input-group">
@@ -20,7 +27,7 @@
                             <button class="btn" type="submit"><i class="fa fa-search"></i></button>
                         </div>
                         <input id="main-search" name="q" type="search" class="form-control"
-                            autocomplete="off" placeholder="{{ _('Search') }}"
+                            autocomplete="off" placeholder="{{ placeholder }}"
                             value="{{ request.args.q }}">
                     </div>
                 </div>
