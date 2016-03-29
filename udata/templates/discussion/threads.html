@@ -44,7 +44,9 @@
                     <label for="comment-new-discussion">{{ _('Comment') }}</label>
                     <textarea id="comment-new-discussion" name="comment" class="form-control" rows="3" required></textarea>
                 </div>
-                <input type="submit" value="{{ _('Start a discussion') }}" class="btn btn-primary btn-block pull-right submit-new-discussion" />
+                <button type="submit" class="btn btn-primary btn-block pull-right submit-new-discussion">
+                    {{ _('Start a discussion') }}
+                </button>
             </form>
         </div>
         <div class="list-group-item list-group-indent list-group-new-message hidden animated" id="discussion-{{ discussion_length + 1 }}-1">

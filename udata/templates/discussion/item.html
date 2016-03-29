@@ -60,6 +60,8 @@
             <label for="comment-new-message">{{ _('Comment') }}</label>
             <textarea id="comment-new-message" name="comment" class="form-control" rows="3" required></textarea>
         </div>
-        <input type="submit" value="{{ _('Submit your comment') }}" class="btn btn-primary btn-block pull-right submit-new-message" />
+        <button type="submit" class="btn btn-primary btn-block pull-right submit-new-message">
+            {{ _('Submit your comment') }}
+        </button>
     </form>
 </div>
