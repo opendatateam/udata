@@ -110,6 +110,7 @@ $('.btn-issues').click(function(e) {
             return false;
         }
 
+
         if ($form.valid()) {
             const data = {
                 type: $modal.find('input[name="type"]:checked').val(),
@@ -117,6 +118,8 @@ $('.btn-issues').click(function(e) {
                 comment: $modal.find('#comment').val(),
                 subject: $this.data('subject')
             };
+
+            $modal.find('button').attr('disabled', true);
 
             API.post($this.data('api-url'), data, function() {
                 const msg = i18n._('Your issue has been sent to the team');
@@ -128,6 +131,7 @@ $('.btn-issues').click(function(e) {
                 log.error(e.responseJSON);
             }).always(function() {
                 $this.find('.count').text(count > 0 ? count : '');
+                $modal.find('button').attr('disabled', false);
                 $modal.modal('hide');
             });
         }
