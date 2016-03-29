@@ -1,7 +1,7 @@
 <template>
     <datatable :title="title" icon="tasks"
         boxclass="harvesters-widget"
-        :fields="fields" :p="sources"
+        :fields="fields" :p="sources" :loading="sources.loading"
         :empty="_('No harvester')">
     </datatable>
 </template>

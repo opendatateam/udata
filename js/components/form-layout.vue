@@ -13,6 +13,7 @@
                     @click.prevent="cancel">{{ _('Cancel') }}</button>
             </footer>
         </box>
+        <slot name="extras"></slot>
     </section>
 </div>
 </template>

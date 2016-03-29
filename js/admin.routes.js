@@ -175,6 +175,7 @@ router.map({
         }
     },
     '/harvester/:oid/edit': {
+        name: 'harvester-edit',
         component: function(resolve) {
             require(['./views/harvester-edit.vue'], resolve);
         }
