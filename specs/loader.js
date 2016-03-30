@@ -1,10 +1,11 @@
 /**
  * Webpack spec loader
  */
-'use strict';
+import 'babel-polyfill';
 
-require('babel-core/polyfill');
-require('./chai-adapter');
+import Vue from 'vue';
 
-var context = require.context('.', true, /\.specs\.js$/);
+Vue.config.silent = true;
+
+const context = require.context('.', true, /\.specs\.js$/);
 context.keys().forEach(context);

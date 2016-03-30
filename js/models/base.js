@@ -138,7 +138,7 @@ export class Model extends Base {
             if (schema.properties.hasOwnProperty(key)) {
                 if (schema.properties[key].type === 'array') {
                     this[key] = [];
-                } else if (schema.required.indexOf(key)) {
+                } else if (schema.required.indexOf(key) >= 0) {
                     this[key] = null;
                 } else {
                     this[key] = undefined;
@@ -460,10 +460,6 @@ export class PageList extends List {
             Math.max(this.page - 1, 0) * this.page_size,
             this.page * this.page_size
         );
-        // return this.filtered_data.slice(
-        //     Math.max(this.page - 1, 0) * this.page_size,
-        //     this.page * this.page_size
-        // );
     }
 
     set data(value) {
@@ -475,7 +471,7 @@ export class PageList extends List {
      * @return {int}
      */
     get pages() {
-        return Math.ceil(this.items.length / this.page_size);
+        return Math.ceil(this.filtered_data.length / this.page_size);
     }
 
     /**

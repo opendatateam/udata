@@ -73,6 +73,11 @@ module.exports = {
         comments: false,
         plugins: ['transform-runtime']
     },
+    // Store initial values for easier inheritance
+    defaults: {
+        hbs_loader,
+        languages,
+    },
     plugins: [
         // Fix AdminLTE packaging
         new webpack.NormalModuleReplacementPlugin(

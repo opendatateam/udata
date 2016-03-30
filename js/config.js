@@ -25,6 +25,15 @@ function _link(rel) {
     return _attr(`link[rel=${rel}]`, 'href')
 }
 
+/**
+ * A simple helper to parse JSON from a <meta/> tag
+ * @return {[type]} [description]
+ */
+function _jsonMeta(name) {
+    const data =  _meta(name);
+    return data ? JSON.parse(data) : false;
+}
+
 
 /**
  * The current user extracted from the header
@@ -65,7 +74,7 @@ export const csrf_token = _meta('csrf-token');
 /**
  * Is the check url feature enabled ?
  */
-export const check_urls = JSON.parse(_meta('check-urls'));
+export const check_urls = _jsonMeta('check-urls');
 
 /**
  * The API root/base URL
@@ -117,7 +126,7 @@ export const notify_in = _meta('notify-in');
 /**
  * Whether territories are enabled or not.
  */
-export const is_territory_enabled = JSON.parse(_meta('territory-enabled'));;
+export const is_territory_enabled = _jsonMeta('territory-enabled');
 
 
 export default {

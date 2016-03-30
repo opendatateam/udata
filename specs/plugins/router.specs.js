@@ -1,31 +1,31 @@
 describe("Router plugin", function() {
-    var Vue = require('vue');
-
-    Vue.use(require('plugins/router'));
-    Vue.config.async = false;
-
-    // beforeEach(function() {
-    //     setFixtures(sandbox());
-    // });
-
-    // var Tester = Vue.extend({
-    //     template: '{{{text | markdown}}}'
-    // });
-
-    // function tester(text) {
-    //     return new Tester({
-    //         el: '#sandbox',
-    //         data: {
-    //             text: text
-    //         }
+    // var Vue = require('vue');
+    //
+    // Vue.use(require('plugins/router'));
+    // Vue.config.async = false;
+    //
+    // // beforeEach(function() {
+    // //     setFixtures(sandbox());
+    // // });
+    //
+    // // var Tester = Vue.extend({
+    // //     template: '{{{text | markdown}}}'
+    // // });
+    //
+    // // function tester(text) {
+    // //     return new Tester({
+    // //         el: '#sandbox',
+    // //         data: {
+    // //             text: text
+    // //         }
+    // //     });
+    // // }
+    // describe("empty", function() {
+    //     it("should behave...", function() {
+    //         Vue.go('/');
+    //         // var v = new Vue();
     //     });
-    // }
-    describe("empty", function() {
-        it("should behave...", function() {
-            Vue.go('/');
-            // var v = new Vue();
-        });
-    });
+    // });
 
     // describe("truncate filter", function() {
     //     it('should render falsy values as ""', function() {
