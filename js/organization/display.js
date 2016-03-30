@@ -36,6 +36,7 @@ $('a.membership').click(function() {
 
     $modal.find('.btn-success').click(function() {
         const data = {comment: $modal.find('#comment').val()};
+        $modal.find('button').attr('disabled', true);
         API.post(api_url, data, function() {
             const msg = i18n._('A request has been sent to the administrators');
             Notify.success(msg);
@@ -47,6 +48,7 @@ $('a.membership').click(function() {
             log.error(e.responseJSON);
         }).always(function() {
             $modal.modal('hide');
+            $modal.find('button').attr('disabled', false);
         });
         return false;
     });
