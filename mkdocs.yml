@@ -1,0 +1,21 @@
+site_name: uData Documentation
+site_description: uData Open Data Portal Documentation
+site_author: Etalab
+repo_url: https://github.com/etalab/udata
+
+theme: mkdocs
+
+pages:
+    - Home: index.md
+    - Documentation:
+        - Configuration: configuration.md
+        - Development: develop.md
+    
+
+markdown_extensions:
+    - smarty
+    - admonition
+    - toc:
+        permalink: True
+
+copyright: Copyright &copy; 2016 Etalab
