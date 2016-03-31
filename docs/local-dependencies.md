@@ -11,14 +11,21 @@ Alright, now you can [install virtualenv][install-virtualenv] and then type thes
 $ virtualenv --python=python2.7 venv
 $ source venv/bin/activate
 $ pip install -r udata/requirements/develop.pip
-$ pip install --no-deps -e udata/
+$ pip install -e udata/
 ```
 
 
 ## NodeJS and modules
 
 You need NodeJS 4.2. If it's not already installed or you have a different version,
-you should consider [installing NVM][nvm-install]. Then install JavaScript dependencies:
+you should consider [installing NVM][nvm-install] which uses the existing `.nvmrc`.
+
+```shell
+$ nvm install
+$ nvm use
+```
+
+Then install JavaScript dependencies:
 
 ```shell
 $ npm install

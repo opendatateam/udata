@@ -16,7 +16,7 @@ You can launch a unique test too:
 $ nosetests --immediate --stop --tests=udata/tests/api/test_datasets_api.py:DatasetResourceAPITest.test_reorder
 ```
 
-If you want a fancy display, you can use the [nose-mocha-reporter][] with the dedicated option:
+If you want a fancy display, you can use the [nose-mocha-reporter][] (not installed by default) with the dedicated option:
 
 ```shell
 $ nosetests --with-mocha-reporter --immediate --stop --tests=udata/tests/api/test_datasets_api.py:DatasetResourceAPITest
