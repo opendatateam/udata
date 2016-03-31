@@ -1,3 +1,7 @@
-web: python manage.py serve -d -r -h 0.0.0.0 -p 6666
-worker: celery -A udata.worker worker
-beat: celery -A udata.worker beat
+# Uncomment lines given your setup and workflow:
+# mongodb: mongod --config /usr/local/etc/mongod.conf
+# es: elasticsearch --config=/usr/local/opt/elasticsearch17/config/elasticsearch.yml
+# redis: redis-server
+# web: inv serve
+# worker: inv work
+# beat: inv beat

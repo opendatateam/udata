@@ -3,14 +3,22 @@ site_description: uData Open Data Portal Documentation
 site_author: Etalab
 repo_url: https://github.com/etalab/udata
 
-theme: mkdocs
+theme: readthedocs
 
 pages:
     - Home: index.md
-    - Documentation:
-        - Configuration: configuration.md
-        - Development: develop.md
-    
+    - Installing:
+        - 1. System dependencies: system-dependencies.md
+        - 2. Local dependencies: local-dependencies.md
+        - 3. Running the project: running-project.md
+    - Advanced:
+        - Adapting settings: adapting-settings.md
+        - Testing your code: testing-code.md
+        - Launching tasks: launching-tasks.md
+        - Adding translations: adding-translations.md
+        - Creating a custom theme: creating-theme.md
+        - Building the documentation: building-documentation.md
+    - Contributing: contributing-guide.md
 
 markdown_extensions:
     - smarty
