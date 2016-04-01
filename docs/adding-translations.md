@@ -3,13 +3,15 @@
 There are translatable strings from both JS an Python.
 
 We use [Transifex][transifex] for translations on the project.
-First, you have to set a [~/.transifexrc][transifexrc].
+First, you have to create an account and set a [~/.transifexrc][transifexrc].
+
+After that you'll be able to reach the [Transifex page for the project][transifex-udata] and interact with translations.
 
 !!! warning
     We only translate strings from the `master` branch of the repository, do not push languages on any other branch because merging translations is incredibly painful.
 
-## Existing languages
 
+## Existing languages
 
 The command `inv i18n` retrieve all these strings locally that you can then push to Transifex with the command `tx push -s`.
 
@@ -22,7 +24,7 @@ Restart your server and new strings should be translated (don't forget to activa
 
 ## Proposing a new language
 
-Propose the new language on [Transifex][transifex], once accepted you can:
+Propose the new language on [Transifex][transifex-udata], once accepted you can:
 
 * translate on transifex
 * create a branch for the new translations
@@ -36,4 +38,5 @@ Propose the new language on [Transifex][transifex], once accepted you can:
 
 [transifex]: https://www.transifex.com
 [transifexrc]: http://docs.transifex.com/client/config/
+[transifex-udata]: https://www.transifex.com/etalab/udata/
 [famfamfam-flags]: http://www.famfamfam.com/lab/icons/flags/

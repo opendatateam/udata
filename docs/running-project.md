@@ -1,9 +1,9 @@
 # Running the project
 
-Adapt the `Procfile` file at the root of your repository by uncommenting appropriated lines.
+Adapt the `Procfile.sample` file at the root of your repository by copying it to `Procfile` and uncommenting appropriated lines.
 
 !!! note
-    Or use the `--procfile` option which allows you to specify a path to a custom `Procfile` file which can be handy to preserve the original one.
+    Or use the `--procfile` option which allows you to specify a path to a custom `Procfile` from wherever you want.
 
 Then run all dependencies with:
 

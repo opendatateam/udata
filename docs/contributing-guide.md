@@ -33,7 +33,7 @@ or are worried that the code isn't being followed, please contact the owner of t
 
 ## Language
 
-The development language is English. All comments and documentation should be written in English, so that we don't end up with “franglais” methods, and so we can share our learnings with developers around the world.
+The development language is English. All comments and documentation should be written in English, so that we don't end up with “frenghish” methods, and so we can share our learnings with developers around the world.
 
 ## Process
 
@@ -54,7 +54,7 @@ If you’re not familiar with open-source workflows or our set of technologies, 
 
 ## Discussing strategies
 
-We’re trying to develop this project in the open as much as possible. We have a dedicated [Gitter channel][gitter] where we discuss each new strategic change and invite the community to give a valuable feedback. You’re encouraged to join it and participate.
+We’re trying to develop this project in the open as much as possible. We have a dedicated [Gitter channel][gitter] where we discuss each new strategic change and invite the community to give a valuable feedback. You’re encouraged to join and participate.
 
 ## Code guides
 

@@ -8,7 +8,7 @@ export UDATA_SETTINGS=/path/to/my/udata.cfg
 
 The configuration file is simply a Python file declaring variables.
 
-uData uses a few Flask extensions and so provides all available options for these extensions.
+uData uses a few Flask extensions and therefore provides all available options for these extensions.
 Most of the time, it tries to provide sane defaults.
 
 ## Flask and global behavior options
