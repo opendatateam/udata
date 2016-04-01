@@ -1,14 +1,13 @@
-import config from 'config';
 import API from 'api';
 import {_} from 'i18n';
 import {setattr, isObject} from 'utils';
 import log from 'logger';
 import moment from 'moment';
-import $ from 'jquery'
+import $ from 'jquery';
 import 'jquery-validation-dist';
 
 // Remove warning for non-interpolated variables
-const interpolation = {defaultVariables:{'O': '{O}', '1': '{1}', 'ISO': '{ISO}'}};
+const interpolation = {defaultVariables: {'O': '{O}', '1': '{1}', 'ISO': '{ISO}'}};
 
 // jQuery validate
 $.extend($.validator.messages, {
@@ -35,7 +34,7 @@ $.extend($.validator.messages, {
  *  Rule for depend dates, should be greater that param.
  */
 $.validator.addMethod('dateGreaterThan', function(value, element, param) {
-    var start = moment($(param).val());
+    const start = moment($(param).val());
     return this.optional(element) || moment(value).isAfter(start);
 }, $.validator.format(_('Date should be after start date')));
 
@@ -59,12 +58,12 @@ export default {
         fill: Boolean
     },
     computed: {
-        schema: function() {
+        schema() {
             if (!this.fields || !(this.model || this.defs)) {
                 return empty_schema();
             }
-            var s = empty_schema(),
-                schema = this.defs || this.model.__schema__ || empty_schema();
+            const s = empty_schema();
+            const schema = this.defs || this.model && this.model.__schema__ || empty_schema();
 
             this.fields.forEach((field) => {
                 if (schema.hasOwnProperty('properties') && schema.properties.hasOwnProperty(field.id)) {
@@ -75,11 +74,11 @@ export default {
                     return;
                 }
 
-                let properties = field.id.split('.'),
-                    currentSchema = schema,
-                    required = true,
-                    path = '',
-                    prop;
+                const properties = field.id.split('.');
+                let currentSchema = schema;
+                let required = true;
+                let path = '';
+                let prop;
 
                 for (prop of properties) {
                     path += path === '' ? prop : ('.' + prop);
@@ -90,7 +89,7 @@ export default {
                     }
 
                     if (!currentSchema.properties || !currentSchema.properties.hasOwnProperty(prop)) {
-                        log.warn('Property "'+ prop +'" not found in schema');
+                        log.warn(`Property "${prop}" not found in schema`);
                         return;
                     }
 
@@ -118,33 +117,33 @@ export default {
 
             return s;
         },
-        $form: function() {
-            return this.$refs.form || this.$els.form;
+        $form() {
+            return this.$refs.form || this.$els.form || this.$el;
         }
     },
-    attached: function() {
+    attached() {
         $(this.$form).validate({
             ignore: '',
-            errorClass: "help-block",
-            highlight: function(element) {
+            errorClass: 'help-block',
+            highlight(element) {
                 $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
             },
-            unhighlight: function(element) {
+            unhighlight(element) {
                 $(element).closest('.form-group').removeClass('has-error');
             },
-            success: function(label) {
+            success(label) {
                 label.closest('.form-group').addClass('has-success');
                 if (!label.text()) {
                     label.remove();
                 }
             },
-            errorPlacement: function(error, element) {
+            errorPlacement(error, element) {
                 $(element).closest('.form-group,.field-wrapper').children('div').append(error);
             }
         });
         this.$broadcast('form:ready');
     },
-    beforeDestroy: function() {
+    beforeDestroy() {
         if (this.$form) {
             this.$broadcast('form:beforeDestroy');
             $(this.$form).data('validator', null);
@@ -155,7 +154,7 @@ export default {
         /**
          * Trigger a form validation
          */
-        validate: function() {
+        validate() {
             return $(this.$form).valid();
         },
         /**
@@ -163,9 +162,9 @@ export default {
          *
          * @return {Object}
          */
-        serialize: function() {
-            let elements = this.$form.querySelectorAll('input,textarea,select'),
-                out = {};
+        serialize() {
+            const elements = this.$form.querySelectorAll('input,textarea,select');
+            const out = {};
 
             Array.prototype.map.call(elements, function(el) {
                 let value;
@@ -183,11 +182,13 @@ export default {
 
             // Filter out empty optionnal objects
             // TODO: handle recursion
-            for (let prop in out) {
+            for (const prop in out) {
                 if (isObject(out[prop]) && this.schema.required.indexOf(prop) < 0) {
                     let falsy = true;
-                    for (let attr in out[prop]) {
-                        falsy &= !out[prop][attr];
+                    for (const attr in out[prop]) {
+                        if (out[prop].hasOwnProperty(attr)) {
+                            falsy &= !out[prop][attr];
+                        }
                     }
                     if (falsy) {
                         delete out[prop];
@@ -197,7 +198,7 @@ export default {
 
             return out;
         },
-        on_error: function (response) {
+        on_error(response) {
             // Display the error identifier if present
             if ('X-Sentry-ID' in response.headers) {
                 this.$dispatch('notify', {
@@ -222,11 +223,11 @@ export default {
                 }
             }
         },
-        fill_errors: function(errors) {
+        fill_errors(errors) {
             [...this.$form.querySelectorAll('input,textarea,select')].forEach((element) => {
                 if (element.name in errors) {
-                    let name = element.name;
-                    let error = errors[name][0];
+                    const name = element.name;
+                    const error = errors[name][0];
                     $(element).closest('.form-group,.field-wrapper')
                               .removeClass('has-success')
                               .addClass('has-error')
@@ -234,7 +235,7 @@ export default {
                 }
             });
         },
-        error_element: function(id, message) {
+        error_element(id, message) {
             $(`#form-${id}-error`).remove();
             return `<p class="form-error" id="form-${id}-error">${message}</p>`;
         }

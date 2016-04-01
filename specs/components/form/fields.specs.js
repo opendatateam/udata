@@ -1,9 +1,8 @@
-import API from 'specs/mocks/api';
-import { Model } from 'models/base';
+import API from 'api';
 import Vue from 'vue';
+import BaseForm from 'components/form/base-form';
 
-describe("Common Fields features", function() {
-
+describe('Common Fields features', function() {
     Vue.config.async = false;
     Vue.use(require('plugins/i18next'));
     Vue.use(require('plugins/util'));
@@ -13,11 +12,11 @@ describe("Common Fields features", function() {
     beforeEach(function() {
         this.vm = new Vue({
             el: fixture.set(`
-                <form role="form" v-el="form">
-                    <field v-repeat="field:fields" v-ref="field" field="{{field}}"
-                        schema="{{schema}}" model="{{model}}"></field>
-                </form>`),
-            mixins: [require('components/form/base-form')],
+                <form role="form" v-el:form>
+                    <field v-for="field in fields" v-ref:fields :field="field"
+                        :schema="schema" :model="model"></field>
+                </form>`)[0],
+            mixins: [BaseForm],
             components: {
                 field: {
                     mixins: [require('components/form/base-field').BaseField]
@@ -30,8 +29,7 @@ describe("Common Fields features", function() {
         fixture.cleanup();
     });
 
-    describe("Default field", function() {
-
+    describe('Default field', function() {
         beforeEach(function() {
             this.vm.fields = [{
                 id: 'test'
@@ -39,9 +37,9 @@ describe("Common Fields features", function() {
         });
 
         it('should have sane defaults', function() {
-            let vm = this.vm.$.field[0];
+            const vm = this.vm.$refs.fields[0];
             expect(vm.field.id).to.equal('test');
-            expect(vm.value).to.equal('');
+            expect(vm.value).to.undefined;
             expect(vm.required).to.be.false;
             expect(vm.description).to.be.undefined;
             expect(vm.property).to.eql({});
@@ -50,9 +48,9 @@ describe("Common Fields features", function() {
             expect(vm.widget).to.equal('text-input');
         });
 
-        it('should feed value from model', function() {
+        it('should feed initial value from model', function() {
             this.vm.model = {test: 'test'};
-            let vm = this.vm.$.field[0];
+            const vm = this.vm.$refs.fields[0];
 
             expect(vm.value).to.equal('test');
         });
@@ -65,18 +63,16 @@ describe("Common Fields features", function() {
                     }
                 },
                 required: ['test']
-            }
-            let vm = this.vm.$.field[0];
+            };
+            const vm = this.vm.$refs.fields[0];
 
             expect(vm).to.have.deep.property('property.description', 'Test field');
             expect(vm).to.have.property('description', 'Test field');
             expect(vm.required).to.be.true;
         });
-
     });
 
-    describe("Nested field", function() {
-
+    describe('Nested field', function() {
         beforeEach(function() {
             this.vm.fields = [{
                 id: 'nested.test'
@@ -84,9 +80,9 @@ describe("Common Fields features", function() {
         });
 
         it('should have sane defaults', function() {
-            let vm = this.vm.$.field[0];
+            const vm = this.vm.$refs.fields[0];
             expect(vm.field.id).to.equal('nested.test');
-            expect(vm.value).to.equal('');
+            expect(vm.value).to.be.undefined;
             expect(vm.required).to.be.false;
             expect(vm.description).to.be.undefined;
             expect(vm.property).to.eql({});
@@ -97,7 +93,7 @@ describe("Common Fields features", function() {
 
         it('should feed value from model', function() {
             this.vm.model = {nested: {test: 'test'}};
-            let vm = this.vm.$.field[0];
+            const vm = this.vm.$refs.fields[0];
 
             expect(vm.value).to.equal('test');
         });
@@ -110,8 +106,8 @@ describe("Common Fields features", function() {
                     }
                 },
                 required: ['nested.test']
-            }
-            let vm = this.vm.$.field[0];
+            };
+            const vm = this.vm.$refs.fields[0];
 
             expect(vm).to.have.deep.property('property.description', 'Test field');
             expect(vm).to.have.property('description', 'Test field');
@@ -141,9 +137,9 @@ describe("Common Fields features", function() {
 
             this.vm.defs = {$ref: '#/definitions/Root'};
 
-            let vm = this.vm.$.field[0];
+            const vm = this.vm.$refs.fields[0];
             expect(vm.field.id).to.equal('nested.test');
-            expect(vm.value).to.equal('');
+            expect(vm.value).to.undefined;
             expect(vm.required).to.be.true;
             expect(vm.description).to.be.undefined;
             expect(vm.property).to.eql({type: 'integer', format: 'int64'});
@@ -151,7 +147,5 @@ describe("Common Fields features", function() {
             expect(vm.placeholder).to.equal('');
             expect(vm.widget).to.equal('text-input');
         });
-
     });
-
 });

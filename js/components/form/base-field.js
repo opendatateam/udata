@@ -1,6 +1,7 @@
 import log from 'logger';
 import $ from 'jquery';
 import u from 'utils';
+import Vue from 'vue';
 
 /**
  * Base inheritable properties reusable by nested components
@@ -9,7 +10,7 @@ export const FieldComponentMixin = {
     props: {
         field: {
             type: Object,
-            default: function() { return {};}
+            default() { return {};}
         },
         model: Object,
         value: null,  // Means any type
@@ -27,7 +28,7 @@ export const FieldComponentMixin = {
 export const BaseField = {
     name: 'base-field',
     replace: true,
-    data: function() {
+    data() {
         return {
             errors: []
         };
@@ -44,28 +45,28 @@ export const BaseField = {
     props: {
         field: {
             type: Object,
-            default: function() { return {};},
+            default() { return {};},
             required: true
         },
         model: {
             type: Object,
-            default: function() { return {};},
+            default() { return {};},
             required: true
         },
         schema: {
             type: Object,
-            default: function() { return {};},
+            default() { return {};},
             required: true
         }
     },
     computed: {
-        description: function() {
+        description() {
             const property = this.property;
             return property && property.hasOwnProperty('description')
                 ? property.description
                 : undefined;
         },
-        property: function() {
+        property() {
             if (!this.schema.properties.hasOwnProperty(this.field.id)) {
                 log.warn('Field "' + this.field.id + '" not found in schema');
                 return {};
@@ -73,35 +74,35 @@ export const BaseField = {
 
             return this.schema.properties[this.field.id];
         },
-        required: function() {
+        required() {
             if (!this.field || !this.schema.hasOwnProperty('required')) {
                 return false;
             }
             return this.schema.required.indexOf(this.field.id) >= 0;
         },
-        is_bool: function() {
+        is_bool() {
             return this.property && this.property.type === 'boolean';
         },
-        is_hidden: function() {
+        is_hidden() {
             return this.field && this.field.type === 'hidden';
         },
-        value: function() {
+        value() {
             let value;
             if (this.model && this.field) {
                 value = u.getattr(this.model, this.field.id);
-                if (value === undefined && this.property && this.property.hasOwnProperty('default')) {
-                    value = this.property.default;
-                }
+            }
+            if (value === undefined && this.property && this.property.hasOwnProperty('default')) {
+                value = this.property.default;
             }
             return value;
         },
-        placeholder: function() {
+        placeholder() {
             return this.field.placeholder || this.field.label || '';
         },
-        readonly: function() {
+        readonly() {
             return this.field.readonly || false;
         },
-        widget: function() {
+        widget() {
             let widget;
             if (this.field.widget) {
                 widget = this.field.widget;
@@ -117,7 +118,7 @@ export const BaseField = {
             widget = widget || 'text-input';
 
             // Lazy load component if needed
-            if (!this.$options.components.hasOwnProperty(widget)) {
+            if (!Vue.util.resolveAsset(this.$options, 'components', widget)) {
                 this.$options.components[widget] = function(resolve, reject) {
                     require(['./' + widget + '.vue'], resolve);
                 };
@@ -125,7 +126,7 @@ export const BaseField = {
             return widget;
         }
     },
-    ready: function() {
+    ready() {
         // Form help messages as popover on info sign
         $(this.$el).find('.form-help').popover({
             placement: 'left',

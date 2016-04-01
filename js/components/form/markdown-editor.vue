@@ -50,7 +50,8 @@
 
 <script>
 import $ from 'jquery';
-import Vue from 'vue';
+import config from 'config';
+import {_} from 'i18n';
 import {FieldComponentMixin} from 'components/form/base-field';
 import commonmark from 'helpers/commonmark';
 
@@ -58,23 +59,23 @@ const EXCERPT_TOKEN = '<!--- excerpt -->';
 
 require('bootstrap-markdown/js/bootstrap-markdown');
 
-$.fn.markdown.messages[Vue.lang] = {
-    'Bold': Vue._('Bold'),
-    'Italic': Vue._('Italic'),
-    'Heading': Vue._('Heading'),
-    'URL/Link': Vue._('URL/Link'),
-    'Image': Vue._('Image'),
-    'List': Vue._('List'),
-    'Preview': Vue._('Preview'),
-    'strong text': Vue._('strong text'),
-    'emphasized text': Vue._('emphasized text'),
-    'heading text': Vue._('heading text'),
-    'enter link description here': Vue._('enter link description here'),
-    'Insert Hyperlink': Vue._('Insert Hyperlink'),
-    'enter image description here': Vue._('enter image description here'),
-    'Insert Image Hyperlink': Vue._('Insert Image Hyperlink'),
-    'enter image title here': Vue._('enter image title here'),
-    'list text here': Vue._('list text here')
+$.fn.markdown.messages[config.lang] = {
+    'Bold': _('Bold'),
+    'Italic': _('Italic'),
+    'Heading': _('Heading'),
+    'URL/Link': _('URL/Link'),
+    'Image': _('Image'),
+    'List': _('List'),
+    'Preview': _('Preview'),
+    'strong text': _('strong text'),
+    'emphasized text': _('emphasized text'),
+    'heading text': _('heading text'),
+    'enter link description here': _('enter link description here'),
+    'Insert Hyperlink': _('Insert Hyperlink'),
+    'enter image description here': _('enter image description here'),
+    'Insert Image Hyperlink': _('Insert Image Hyperlink'),
+    'enter image title here': _('enter image title here'),
+    'list text here': _('list text here')
 };
 
 export default {
@@ -84,7 +85,7 @@ export default {
     mixins: [FieldComponentMixin],
     ready: function() {
         $(this.$el).markdown({
-            language: Vue.lang,
+            language: config.lang,
             autofocus: false,
             savable: false,
             resize: 'both',
@@ -95,7 +96,7 @@ export default {
                     name: 'extras',
                     data: [{
                         name: 'btnSummary',
-                        title: Vue._('Summary'),
+                        title: _('Summary'),
                         icon: 'fa fa-scissors',
                         callback: function(e){
                             var selected = e.getSelection(),
