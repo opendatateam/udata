@@ -8,7 +8,7 @@
  */
 function _attr(selector, name) {
     const el = document.querySelector(selector);
-    return el ? el.getAttribute(name): undefined;
+    return el ? el.getAttribute(name) : undefined;
 }
 
 /**
@@ -19,21 +19,13 @@ function _meta(name) {
 }
 
 /**
- * Simple helper to <link/> tag url given its `rel`
- */
-function _link(rel) {
-    return _attr(`link[rel=${rel}]`, 'href')
-}
-
-/**
  * A simple helper to parse JSON from a <meta/> tag
  * @return {[type]} [description]
  */
 function _jsonMeta(name) {
-    const data =  _meta(name);
+    const data = _meta(name);
     return data ? JSON.parse(data) : false;
 }
-
 
 /**
  * The current user extracted from the header

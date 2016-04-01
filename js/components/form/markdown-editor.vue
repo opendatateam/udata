@@ -96,7 +96,7 @@ export default {
                     name: 'extras',
                     data: [{
                         name: 'btnSummary',
-                        title: this._('Summary'),
+                        title: _('Summary'),
                         icon: 'fa fa-scissors',
                         callback: function(e){
                             var selected = e.getSelection(),
