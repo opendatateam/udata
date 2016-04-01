@@ -62,16 +62,10 @@ def jstest(watch=False):
 
 
 @task
-def karma():
-    '''Continuous Karma test'''
-    nrun('karma start --browsers=PhantomJS', pty=True)
-
-
-@task
 def doc():
     '''Build the documentation'''
     header('Building documentation')
-    lrun('cd doc && make html', pty=True)
+    lrun('mkdocs serve', pty=True)
 
 
 @task

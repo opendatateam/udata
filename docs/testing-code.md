@@ -1,6 +1,7 @@
 # Testing your code
 
-There a three complementary ways of testing your work: unit tests for the backend, unit tests for the frontend and integration tests.
+There a three complementary ways of testing your work: unit tests for the backend,
+unit tests for the frontend and integration tests.
 
 ## Backend unit tests
 
@@ -16,7 +17,8 @@ You can launch a unique test too:
 $ nosetests --immediate --stop --tests=udata/tests/api/test_datasets_api.py:DatasetResourceAPITest.test_reorder
 ```
 
-If you want a fancy display, you can use the [nose-mocha-reporter][] (not installed by default) with the dedicated option:
+If you want a fancy display, you can use the [nose-mocha-reporter][] (not installed by default)
+with the dedicated option:
 
 ```shell
 $ nosetests --with-mocha-reporter --immediate --stop --tests=udata/tests/api/test_datasets_api.py:DatasetResourceAPITest
@@ -24,7 +26,49 @@ $ nosetests --with-mocha-reporter --immediate --stop --tests=udata/tests/api/tes
 
 ## Frontend unit tests
 
-TODO
+For frontend (and administration) testing, we use the following tools:
+
+* [Karma][] as test runner
+* [mocha][] as test framework
+* [Chai][] (and [some plugins][chai-plugins]) as assertions library
+* [Sinon.JS][] for spies, stubs and mocks
+
+All tests are located in the `specs` directory and should have the following naming pattern
+`*.specs.js` to be recognized by Karma.
+
+The most simple way to launch them is by using the dedicated invoke task:
+
+```shell
+$ inv jstest
+```
+
+It will run a single test pass using PhantomJS as browser.
+
+You can continously run the test on any change detected by using the `--watch` option:
+
+```shell
+$ inv jstest --watch
+```
+
+For more advanced usage, you can use the npm dedicated run-scripts:
+
+```shell
+# Single run in PhantomJS
+$ npm -s run test:unit
+# Watch changes and doesn't prelaunch a browser
+$ npm -s run test:watch
+```
+
+You can pass any option to karma after the `--`:
+
+```bash
+# watch changes, with PhantomJS prelaunched
+$ npm -s run test:watch -- --browsers PhantomJS
+# Single run with JUnit xml output
+$ npm -s run test:unit -- --reporters mocha,junit
+```
+
+See [the official karma documentation][karma] for more details about the possible parameters.
 
 ## Integration tests
 
@@ -56,3 +100,8 @@ Check out the [Watai tutorial][] to add your own tests!
 [webdriver api]: https://github.com/admc/wd/blob/master/doc/api.md
 [selenium]: http://docs.seleniumhq.org/
 [watai tutorial]: https://github.com/MattiSG/Watai/wiki/Tutorial
+[karma]: https://karma-runner.github.io/
+[mocha]: https://mochajs.org/
+[chai]: http://chaijs.com/
+[chai-plugins]: http://chaijs.com/plugins/
+[sinon.js]: http://sinonjs.org/
