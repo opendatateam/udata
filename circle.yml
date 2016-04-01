@@ -16,4 +16,4 @@ dependencies:
     - pip install -r requirements/travis.pip
 test:
   override:
-    - nosetests --immediate --with-coverage udata
+    - nosetests --immediate udata

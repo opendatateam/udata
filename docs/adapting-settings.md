@@ -1,4 +1,4 @@
-# Configuration
+# Adapting settings
 
 You can specify a configuration file by exporting the `UDATA_SETTINGS` environment variable.
 
@@ -6,10 +6,10 @@ You can specify a configuration file by exporting the `UDATA_SETTINGS` environme
 export UDATA_SETTINGS=/path/to/my/udata.cfg
 ```
 
-The configuration file is simply a Python file exporting some variables.
+The configuration file is simply a Python file declaring variables.
 
-uData uses some Flask extensions and so provides all available options for these extensions.
-Most of the time, it tries to provide some sane defaults.
+uData uses a few Flask extensions and therefore provides all available options for these extensions.
+Most of the time, it tries to provide sane defaults.
 
 ## Flask and global behavior options
 

@@ -35,6 +35,7 @@ js-built
 /instance/
 /static/
 /doc/_build/
+/site/
 /node_modules/
 /udata/static/
 /jsdoc/
@@ -62,3 +63,4 @@ coverage.xml
 # Force .gitignore files
 !.gitignore
 .noseids
+Procfile

@@ -25,6 +25,8 @@ $('.btn-follow').click(function(e) {
         return false;
     }
 
+    $this.attr('disabled', true);
+
     if ($this.hasClass('active')) {
         $.ajax({
             url: $this.data('api-url'),
@@ -41,6 +43,8 @@ $('.btn-follow').click(function(e) {
                     $this.text(label).prepend($icon);
                 }
             }
+        }).always(function() {
+            $this.attr('disabled', false);
         });
     } else {
         $.post($this.data('api-url'), function() {
@@ -54,6 +58,8 @@ $('.btn-follow').click(function(e) {
             if (has_text) {
                 $this.text(label).prepend($icon);
             }
+        }).always(function() {
+            $this.attr('disabled', false);
         });
     }
 
