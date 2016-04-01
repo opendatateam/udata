@@ -1,6 +1,7 @@
 invoke
 honcho
 transifex-client
+-r install.pip
 -r test.pip
 -r report.pip
 Flask-DebugToolbar==0.10.0
