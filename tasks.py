@@ -13,7 +13,7 @@ from sys import exit
 
 from invoke import run, task
 
-from tasks_helpers import ROOT, info, header, lrun, nrun, green
+from tasks_helpers import ROOT, info, header, lrun, green
 
 I18N_DOMAIN = 'udata'
 
@@ -69,20 +69,13 @@ def doc():
 
 
 @task
-def jsdoc():
-    '''Build the JS documentation'''
-    header('Build the JS documentation')
-    nrun('esdoc -c esdoc.json', pty=True)
-
-
-@task
 def qa():
     '''Run a quality report'''
     header('Performing static analysis')
     info('Python static analysis')
-    flake8_results = lrun('flake8 udata', pty=True, warn=True)
+    flake8_results = lrun('flake8 udata --jobs 1', pty=True, warn=True)
     info('JavaScript static analysis')
-    eslint_results = nrun('eslint js/ --ext .vue,.js', pty=True, warn=True)
+    eslint_results = lrun('npm -s run lint', pty=True, warn=True)
     if flake8_results.failed or eslint_results.failed:
         exit(flake8_results.return_code or eslint_results.return_code)
     print(green('OK'))
@@ -176,18 +169,18 @@ def assets_build(progress=False):
     cmd = 'npm run assets:build -- --config {0}.js'
     if progress:
         cmd += ' --progress'
-    nrun(cmd.format('webpack.config.prod'), pty=True)
-    nrun(cmd.format('webpack.widgets.config'), pty=True)
+    lrun(cmd.format('webpack.config.prod'), pty=True)
+    lrun(cmd.format('webpack.widgets.config'), pty=True)
 
 
 @task
 def assets_watch():
-    nrun('npm run assets:watch', pty=True)
+    lrun('npm run assets:watch', pty=True)
 
 
 @task
 def widgets_watch():
-    nrun('npm run widgets:watch', pty=True)
+    lrun('npm run widgets:watch', pty=True)
 
 
 @task(i18nc, assets_build)
