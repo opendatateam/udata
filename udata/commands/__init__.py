@@ -47,17 +47,17 @@ def register_commands(manager):
             log.error('Unable to import %s: %s', module, e)
 
     # Load all core modules commands
-    import udata.core.metrics.commands
-    import udata.core.user.commands
-    import udata.core.dataset.commands
-    import udata.core.organization.commands
-    import udata.core.search.commands
-    import udata.core.spatial.commands
-    import udata.core.jobs.commands
-    import udata.core.badges.commands
-    import udata.api.commands
-    import udata.harvest.commands
-    import udata.features.territories.commands
+    import udata.core.metrics.commands  # noqa
+    import udata.core.user.commands  # noqa
+    import udata.core.dataset.commands  # noqa
+    import udata.core.organization.commands  # noqa
+    import udata.core.search.commands  # noqa
+    import udata.core.spatial.commands  # noqa
+    import udata.core.jobs.commands  # noqa
+    import udata.core.badges.commands  # noqa
+    import udata.api.commands  # noqa
+    import udata.harvest.commands  # noqa
+    import udata.features.territories.commands  # noqa
 
     # Dynamic module commands loading
     for plugin in manager.app.config['PLUGINS']:

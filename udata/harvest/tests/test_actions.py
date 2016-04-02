@@ -50,8 +50,9 @@ class HarvestActionsTest(DBTestMixin, TestCase):
     def test_list_sources_deleted(self):
         self.assertEqual(actions.list_sources(), [])
 
+        now = datetime.now()
         sources = HarvestSourceFactory.create_batch(3)
-        deleted_sources = HarvestSourceFactory.create_batch(2, deleted=datetime.now())
+        deleted_sources = HarvestSourceFactory.create_batch(2, deleted=now)
 
         result = actions.list_sources()
         self.assertEqual(len(result), len(sources))
@@ -92,7 +93,9 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         source_url = fake.url()
 
         with self.assert_emit(signals.harvest_source_created):
-            source = actions.create_source('Test source', source_url, 'factory')
+            source = actions.create_source('Test source',
+                                           source_url,
+                                           'factory')
 
         self.assertEqual(source.name, 'Test source')
         self.assertEqual(source.slug, 'test-source')
@@ -231,7 +234,8 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         self.assertIsNone(source.periodic_task)
 
     def test_purge_sources(self):
-        to_delete = HarvestSourceFactory.create_batch(3, deleted=datetime.now())
+        now = datetime.now()
+        to_delete = HarvestSourceFactory.create_batch(3, deleted=now)
         to_keep = HarvestSourceFactory.create_batch(2)
 
         result = actions.purge_sources()
@@ -372,7 +376,7 @@ class ExecutionTestMixin(DBTestMixin):
 
         source = HarvestSourceFactory(backend='factory')
         with self.assert_emit(signals.before_harvest_job),\
-             mock_initialize.connected_to(init):
+                mock_initialize.connected_to(init):
             self.action(source.slug)
 
         source.reload()

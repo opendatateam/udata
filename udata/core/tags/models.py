@@ -3,9 +3,10 @@ from __future__ import unicode_literals, absolute_import
 
 import logging
 
+from udata.models import db
+
 log = logging.getLogger(__name__)
 
-from udata.models import db
 
 __all__ = ('Tag', )
 

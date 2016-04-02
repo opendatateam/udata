@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 # Here to force translations by gettext
-_ = lambda s: s
+_ = lambda s: s  # noqa: force translations
 
 TRANSLATIONS = (
     _('French region'),

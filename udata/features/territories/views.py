@@ -85,13 +85,13 @@ def render_territory(territory):
     editable_datasets = []
     if datasets:
         for dataset in datasets:
-            if (dataset.organization
-                    and territory.id == dataset.organization.zone):
+            if (dataset.organization and
+                    territory.id == dataset.organization.zone):
                 town_datasets.append(dataset)
             else:
                 other_datasets.append(dataset)
-            editable_datasets.append(current_user.is_authenticated()
-                                     and DatasetEditPermission(dataset).can())
+            editable_datasets.append(current_user.is_authenticated() and
+                                     DatasetEditPermission(dataset).can())
     context = {
         'territory': territory,
         'territory_datasets': territory_datasets,

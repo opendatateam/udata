@@ -19,10 +19,6 @@ from udata.core.storages import avatars, default_image_basename
 
 __all__ = ('User', 'Role', 'datastore', 'FollowUser')
 
-
-# def populate_slug(user):
-#     return ' '.join([user.first_name, user.last_name])
-
 AVATAR_SIZES = [100, 32, 25]
 
 
@@ -117,8 +113,8 @@ class User(db.Document, WithMetrics, UserMixin):
 
     @property
     def visible(self):
-        return (self.metrics.get('datasets', 0)
-                + self.metrics.get('reuses', 0)) > 0
+        count = self.metrics.get('datasets', 0) + self.metrics.get('reuses', 0)
+        return count > 0
 
     @cached_property
     def resources_availability(self):

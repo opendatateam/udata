@@ -12,6 +12,14 @@ from udata.models import db
 from udata.frontend.helpers import in_url
 
 
+def iso2date(string):
+    return date(*[int(v) for v in string.split('-')])
+
+
+def dr(start, end):
+    return db.DateRange(start=iso2date(start), end=iso2date(end))
+
+
 class FrontEndRootTest(FrontTestCase):
     def test_rewrite(self):
         '''url_rewrite should replace a parameter in the URL if present'''
@@ -176,8 +184,6 @@ class FrontEndRootTest(FrontTestCase):
     def test_daterange(self):
         '''Daterange filter should display range in an adaptive'''
         g.lang_code = 'en'
-        iso2date = lambda s: date(*[int(v) for v in s.split('-')])
-        dr = lambda s, e: db.DateRange(start=iso2date(s), end=iso2date(e))
 
         specs = (
             (dr('2014-02-01', '2014-02-01'), '2014/02/01'),
@@ -198,8 +204,6 @@ class FrontEndRootTest(FrontTestCase):
     def test_daterange_before_1900(self):
         '''Daterange filter should display range in an adaptive'''
         g.lang_code = 'en'
-        iso2date = lambda s: date(*[int(v) for v in s.split('-')])
-        dr = lambda s, e: db.DateRange(start=iso2date(s), end=iso2date(e))
 
         specs = (
             (dr('1234-02-01', '1234-02-01'), '1234/02/01'),

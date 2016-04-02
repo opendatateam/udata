@@ -10,13 +10,13 @@ log = logging.getLogger(__name__)
 
 def init_app(app):
     # Load core notifications
-    import udata.core.organization.notifications
-    import udata.core.discussions.notifications
-    import udata.core.issues.notifications
-    import udata.harvest.notifications
+    import udata.core.organization.notifications  # noqa
+    import udata.core.discussions.notifications  # noqa
+    import udata.core.issues.notifications  # noqa
+    import udata.harvest.notifications  # noqa
 
     # Load feature notifications
-    import udata.features.transfer.notifications
+    import udata.features.transfer.notifications  # noqa
 
     # Load all plugins views and blueprints
     for plugin in app.config['PLUGINS']:

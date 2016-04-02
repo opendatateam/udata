@@ -12,16 +12,18 @@ from udata.search import (
 from udata.search import RangeFacet, BoolFacet, ExtrasFacet
 from udata.search import TermFacet, ModelTermFacet
 
-# Metrics are require for reuse search
-from . import metrics
+from . import metrics  # noqa: Metrics are require for reuse search
 
 
 __all__ = ('ReuseSearch', )
 
 
-max_datasets = lambda: max(current_site.metrics.get('max_reuse_datasets'), 5)
-max_followers = lambda: max(current_site.metrics.get('max_reuse_followers'),
-                            10)
+def max_datasets():
+    return max(current_site.metrics.get('max_reuse_datasets'), 5)
+
+
+def max_followers():
+    return max(current_site.metrics.get('max_reuse_followers'), 10)
 
 
 class ReuseTypeFacet(TermFacet):
@@ -125,9 +127,9 @@ class ReuseSearch(ModelSearchAdapter):
 
     @classmethod
     def is_indexable(cls, reuse):
-        return (reuse.deleted is None
-                and len(reuse.datasets) > 0
-                and not reuse.private)
+        return (reuse.deleted is None and
+                len(reuse.datasets) > 0 and
+                not reuse.private)
 
     @classmethod
     def serialize(cls, reuse):

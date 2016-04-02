@@ -39,8 +39,9 @@ class IssuesTest(APITestCase):
         user = self.login()
         dataset = Dataset.objects.create(title='Test dataset')
 
+        url = url_for('api.issues', **{'for': dataset.id})
         with self.assert_emit(on_new_issue):
-            response = self.post(url_for('api.issues', **{'for': dataset.id}), {
+            response = self.post(url, {
                 'title': 'test title',
                 'comment': 'bla bla',
                 'subject': dataset.id

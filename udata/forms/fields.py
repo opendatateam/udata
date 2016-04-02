@@ -80,8 +80,8 @@ class DateTimeField(Field, fields.DateTimeField):
 
     def process_formdata(self, valuelist):
         if valuelist:
-            value = valuelist[0]
-            self.data = parse(value) if isinstance(value, basestring) else value
+            dt = valuelist[0]
+            self.data = parse(dt) if isinstance(dt, basestring) else dt
 
 
 class UUIDField(Field, fields.HiddenField):
@@ -423,7 +423,9 @@ class NestedModelList(fields.FieldList):
     def process(self, formdata, data=unset_value):
         self._formdata = formdata
         self.initial_data = data
-        self.has_data = formdata and any(k.startswith(self.prefix) for k in formdata)
+        self.has_data = formdata and any(
+            k.startswith(self.prefix) for k in formdata
+        )
         if self.has_data:
             super(NestedModelList, self).process(formdata, data)
         else:
@@ -433,9 +435,9 @@ class NestedModelList(fields.FieldList):
     def validate(self, form, extra_validators=tuple()):
         '''Perform validation only if data has been submitted'''
         # Run normal validation only if there is data for this form
-        if self.has_data:
-            return super(NestedModelList, self).validate(form, extra_validators)
-        return True
+        if not self.has_data:
+            return True
+        return super(NestedModelList, self).validate(form, extra_validators)
 
     def populate_obj(self, obj, name):
         if not self.has_data:

@@ -74,8 +74,10 @@ validation_fields = api.model('HarvestSourceValidation', {
                            required=True),
     'by': fields.Nested(user_ref_fields, allow_null=True, readonly=True,
                         description='Who performed the validation'),
-    'on': fields.ISODateTime(readonly=True,
-            description='Date date on which validation was performed'),
+    'on': fields.ISODateTime(
+        readonly=True,
+        description='Date date on which validation was performed'
+    ),
     'comment': fields.String(
         description='A comment about the validation. Required on rejection'
     )
@@ -179,7 +181,6 @@ class SourceAPI(API):
         return actions.delete_source(ident), 204
 
 
-
 @ns.route('/source/<string:ident>/validate',
           endpoint='validate_harvest_source')
 @api.doc(params={'ident': 'A source ID or slug'})
@@ -223,7 +224,8 @@ class JobsAPI(API):
         args = parser.parse_args()
         source = actions.get_source(ident)
         qs = HarvestJob.objects(source=source)
-        return qs.order_by('-created').paginate(args['page'], args['page_size'])
+        qs = qs.order_by('-created')
+        return qs.paginate(args['page'], args['page_size'])
 
 
 @ns.route('/job/<string:ident>/', endpoint='harvest_job')

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from mongoengine import post_save
 
-from udata.models import db, Dataset, Resource
+from udata.models import db, Dataset
 
 from .. import TestCase, DBTestMixin
 from ..factories import (
@@ -208,9 +208,10 @@ class DatasetModelTest(TestCase, DBTestMixin):
         dataset = DatasetFactory(description='', owner=user)
         DatasetDiscussionFactory(
             subject=dataset, user=visitor,
-            discussion=[MessageDiscussionFactory(posted_by=visitor)
-                        for i in range(2)]
-            + [MessageDiscussionFactory(posted_by=user)])
+            discussion=[
+                MessageDiscussionFactory(posted_by=visitor) for i in range(2)
+                ] + [MessageDiscussionFactory(posted_by=user)]
+        )
         self.assertEqual(dataset.quality['discussions'], 1)
         self.assertEqual(dataset.quality['has_untreated_discussions'], False)
         self.assertEqual(dataset.quality['score'], 2)

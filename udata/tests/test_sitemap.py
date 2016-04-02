@@ -10,7 +10,7 @@ from udata.tests import TestCase, WebTestMixin, SearchTestMixin
 
 from .factories import (
     TopicFactory, PostFactory, OrganizationFactory, VisibleReuseFactory,
-    VisibleDatasetFactory, GeoZoneFactory
+    VisibleDatasetFactory
 )
 
 # Neede for lxml XPath not supporting default namespace

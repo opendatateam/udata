@@ -13,6 +13,6 @@ blueprint = I18nBlueprint('followers', __name__)
 @blueprint.app_template_global()
 @blueprint.app_template_filter()
 def is_following(obj):
-    return (current_user.is_authenticated()
-            and Follow.objects.is_following(current_user._get_current_object(),
-                                            obj))
+    if not current_user.is_authenticated():
+        return False
+    return Follow.objects.is_following(current_user._get_current_object(), obj)

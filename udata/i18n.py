@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from importlib import import_module
 from os.path import exists, join, dirname
 
-from flask import (
+from flask import (  # noqa
     g, request, current_app, abort, redirect, url_for, has_request_context
 )
 from flask.blueprints import BlueprintSetupState, _endpoint_from_view_func
@@ -18,8 +18,8 @@ except ImportError:
 from babel.support import NullTranslations, Translations
 
 from flask.ext.babelex import Babel, Domain, refresh
-from flask.ext.babelex import format_date, format_datetime
-from flask.ext.babelex import get_locale as get_current_locale
+from flask.ext.babelex import format_date, format_datetime  # noqa
+from flask.ext.babelex import get_locale as get_current_locale  # noqa
 
 from werkzeug.local import LocalProxy
 

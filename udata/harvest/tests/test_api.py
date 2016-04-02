@@ -16,10 +16,7 @@ from udata.tests.factories import (
 from ..models import (
     HarvestSource, VALIDATION_ACCEPTED, VALIDATION_REFUSED, VALIDATION_PENDING
 )
-from .factories import (
-    HarvestSourceFactory, DEFAULT_COUNT as COUNT
-)
-
+from .factories import HarvestSourceFactory
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +43,8 @@ class HarvestAPITest(APITestCase):
         sources = HarvestSourceFactory.create_batch(3, owner=owner)
         HarvestSourceFactory()
 
-        response = self.get(url_for('api.harvest_sources', owner=str(owner.id)))
+        url = url_for('api.harvest_sources', owner=str(owner.id))
+        response = self.get(url)
         self.assert200(response)
 
         self.assertEqual(len(response.json), len(sources))

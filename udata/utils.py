@@ -12,8 +12,8 @@ from math import ceil
 def get_by(lst, field, value):
     '''Find an object in a list given a field value'''
     for row in lst:
-        if ((isinstance(row, dict) and row.get(field) == value)
-                or (getattr(row, field, None) == value)):
+        if ((isinstance(row, dict) and row.get(field) == value) or
+                (getattr(row, field, None) == value)):
             return row
 
 
@@ -69,8 +69,8 @@ class Paginable(object):
         last = 0
         for num in xrange(1, self.pages + 1):
             if (num <= left_edge or
-                    (num > self.page - left_current - 1
-                     and num < self.page + right_current) or
+                    (num > self.page - left_current - 1 and
+                        num < self.page + right_current) or
                     num > self.pages - right_edge):
                 if last + 1 != num:
                     yield None

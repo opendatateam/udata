@@ -156,24 +156,24 @@ class OwnedByQuerySet(db.BaseQuerySet):
 
 
 # Load all core models and mixins
-from udata.core.spatial.models import *
-from udata.core.metrics.models import *
-from udata.core.issues.models import *
-from udata.core.badges.models import *
-from udata.core.discussions.models import *
-from udata.core.followers.models import *
-from udata.core.user.models import *
-from udata.core.organization.models import *
-from udata.core.site.models import *
-from udata.core.dataset.models import *
-from udata.core.reuse.models import *
-from udata.core.activity.models import *
-from udata.core.topic.models import *
-from udata.core.post.models import *
-from udata.core.jobs.models import *
+from udata.core.spatial.models import *  # noqa
+from udata.core.metrics.models import *  # noqa
+from udata.core.issues.models import *  # noqa
+from udata.core.badges.models import *  # noqa
+from udata.core.discussions.models import *  # noqa
+from udata.core.followers.models import *  # noqa
+from udata.core.user.models import *  # noqa
+from udata.core.organization.models import *  # noqa
+from udata.core.site.models import *  # noqa
+from udata.core.dataset.models import *  # noqa
+from udata.core.reuse.models import *  # noqa
+from udata.core.activity.models import *  # noqa
+from udata.core.topic.models import *  # noqa
+from udata.core.post.models import *  # noqa
+from udata.core.jobs.models import *  # noqa
 
-from udata.features.transfer.models import *
-from udata.features.territories.models import *
+from udata.features.transfer.models import *  # noqa
+from udata.features.territories.models import *  # noqa
 
 
 def init_app(app):

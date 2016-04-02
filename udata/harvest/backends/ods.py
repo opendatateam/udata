@@ -7,7 +7,7 @@ import html2text
 
 from udata.models import License, Resource
 from . import BaseBackend, register
-from ..exceptions import HarvestException, HarvestSkipException
+from ..exceptions import HarvestSkipException
 
 
 log = logging.getLogger(__name__)

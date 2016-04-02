@@ -3,7 +3,9 @@ from __future__ import unicode_literals, absolute_import
 
 from udata.auth import login_user, PermissionDenied
 from udata.features.transfer.actions import request_transfer
-from udata.features.transfer.notifications import transfer_request_notifications
+from udata.features.transfer.notifications import (
+    transfer_request_notifications
+)
 from udata.models import Member
 
 from . import TestCase, DBTestMixin
