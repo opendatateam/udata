@@ -108,7 +108,6 @@ class GeoZone(db.Document):
     def county(self):
         for parent in self.parents:
             if parent.startswith('fr/county'):
-                print(parent)
                 return GeoZone.objects.get(id=parent)
 
     def toGeoJSON(self):
