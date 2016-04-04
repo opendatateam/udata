@@ -7,24 +7,11 @@ parser: babel-eslint
 env:                                 # http://eslint.org/docs/user-guide/configuring.html#specifying-environments
     browser: true                    # browser global variables
     node: true                       # Node.js global variables and Node.js-specific rules
+    es6: true
 
-ecmaFeatures:
-    arrowFunctions: true
-    blockBindings: true
-    classes: true
-    defaultParams: true
-    destructuring: true
-    forOf: true
-    generators: false
-    modules: true
-    objectLiteralComputedProperties: true
-    objectLiteralDuplicateProperties: false
-    objectLiteralShorthandMethods: true
-    objectLiteralShorthandProperties: true
-    spread: true
-    superInFunctions: true
-    templateStrings: true
-    jsx: false
+parserOptions:
+    ecmaVersion: 6
+    sourceType: module
 
 rules:
     # Strict mode
@@ -151,7 +138,6 @@ rules:
         - 2
         - before: false
           after: true
-    space-after-keywords: 2                 # http://eslint.org/docs/rules/space-after-keywords
     space-before-blocks: 2                  # http://eslint.org/docs/rules/space-before-blocks
     space-before-function-paren: [2, never] # http://eslint.org/docs/rules/space-before-function-paren
     space-infix-ops: 2                      # http://eslint.org/docs/rules/space-infix-ops
