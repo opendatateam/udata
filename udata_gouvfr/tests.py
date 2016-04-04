@@ -243,6 +243,15 @@ class C3Test(FrontTestCase):
         self.assert200(response)
 
 
+def create_geozones_fixtures():
+    bdr = GeoZoneFactory(
+        id='fr/county/13', level='fr/county', name='Bouches-du-Rhône')
+    arles = GeoZoneFactory(
+        id='fr/town/13004', level='fr/town', parents=[bdr.id],
+        name='Arles', code='13004', population=52439)
+    return bdr, arles
+
+
 class TerritoriesSettings(GouvFrSettings):
     ACTIVATE_TERRITORIES = True
 
@@ -250,12 +259,13 @@ class TerritoriesSettings(GouvFrSettings):
 class TerritoriesTest(FrontTestCase):
     settings = TerritoriesSettings
 
+    def setUp(self):
+        self.bdr, self.arles = create_geozones_fixtures()
+        super(TerritoriesTest, self).setUp()
+
     def test_with_detault_territory_datasets(self):
-        arles = GeoZoneFactory(
-            id='fr/town/13004', level='fr/town',
-            name='Arles', code='13004', population=52439)
         response = self.client.get(
-            url_for('territories.territory', territory=arles))
+            url_for('territories.territory', territory=self.arles))
         self.assert200(response)
         data = response.data.decode('utf-8')
         self.assertIn('Arles', data)
@@ -270,19 +280,17 @@ class TerritoriesTest(FrontTestCase):
         self.assertEqual(self.get_context_variable('town_datasets'), [])
         self.assertEqual(self.get_context_variable('other_datasets'), [])
         self.assertIn('You want to add your own datasets to that list?', data)
+        self.assertIn(self.bdr.name, data)
 
     def test_with_other_datasets(self):
-        arles = GeoZoneFactory(
-            id='fr/town/13004', level='fr/town',
-            name='Arles', code='13004', population=52439)
         with self.autoindex():
             organization = OrganizationFactory()
             for _ in range(3):
                 VisibleDatasetFactory(
                     organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[arles.id]))
+                    spatial=SpatialCoverageFactory(zones=[self.arles.id]))
         response = self.client.get(
-            url_for('territories.territory', territory=arles))
+            url_for('territories.territory', territory=self.arles))
         self.assert200(response)
         data = response.data.decode('utf-8')
         self.assertIn('Arles', data)
@@ -306,17 +314,14 @@ class TerritoriesTest(FrontTestCase):
 
     def test_with_other_datasets_logged_in(self):
         self.login()
-        arles = GeoZoneFactory(
-            id='fr/town/13004', level='fr/town',
-            name='Arles', code='13004', population=52439)
         with self.autoindex():
             organization = OrganizationFactory()
             for _ in range(3):
                 VisibleDatasetFactory(
                     organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[arles.id]))
+                    spatial=SpatialCoverageFactory(zones=[self.arles.id]))
         response = self.client.get(
-            url_for('territories.territory', territory=arles))
+            url_for('territories.territory', territory=self.arles))
         self.assert200(response)
         data = response.data.decode('utf-8')
         territory_datasets = self.get_context_variable('territory_datasets')
@@ -328,9 +333,6 @@ class TerritoriesTest(FrontTestCase):
         self.assertIn('If you want your datasets to appear in that list', data)
 
     def test_with_other_datasets_and_pertinent_ones(self):
-        arles = GeoZoneFactory(
-            id='fr/town/13004', level='fr/town',
-            name='Arles', code='13004', population=52439)
         user = self.login()
         with self.autoindex():
             member = Member(user=user, role='admin')
@@ -338,9 +340,9 @@ class TerritoriesTest(FrontTestCase):
             for _ in range(3):
                 VisibleDatasetFactory(
                     organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[arles.id]))
+                    spatial=SpatialCoverageFactory(zones=[self.arles.id]))
         response = self.client.get(
-            url_for('territories.territory', territory=arles))
+            url_for('territories.territory', territory=self.arles))
         self.assert200(response)
         data = response.data.decode('utf-8')
         self.assertIn('Arles', data)
@@ -363,17 +365,14 @@ class TerritoriesTest(FrontTestCase):
         self.assertIn('Some of your datasets have an exact match!', data)
 
     def test_with_town_datasets(self):
-        arles = GeoZoneFactory(
-            id='fr/town/13004', level='fr/town',
-            name='Arles', code='13004', population=52439)
         with self.autoindex():
-            organization = OrganizationFactory(zone=arles.id)
+            organization = OrganizationFactory(zone=self.arles.id)
             for _ in range(3):
                 VisibleDatasetFactory(
                     organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[arles.id]))
+                    spatial=SpatialCoverageFactory(zones=[self.arles.id]))
         response = self.client.get(
-            url_for('territories.territory', territory=arles))
+            url_for('territories.territory', territory=self.arles))
         self.assert200(response)
         data = response.data.decode('utf-8')
         self.assertIn('Arles', data)
@@ -399,15 +398,16 @@ class TerritoriesTest(FrontTestCase):
 class OEmbedsTerritoryAPITest(APITestCase):
     settings = TerritoriesSettings
 
+    def setUp(self):
+        self.bdr, self.arles = create_geozones_fixtures()
+        super(OEmbedsTerritoryAPITest, self).setUp()
+
     def test_oembed_territory_api_get(self):
         '''It should fetch a territory in the oembed format.'''
-        arles = GeoZoneFactory(
-            id='fr/town/13004', level='fr/town',
-            name='Arles', code='13004', population=52439)
         for territory_dataset_class in TERRITORY_DATASETS.values():
             organization = OrganizationFactory(
                 id=territory_dataset_class.organization_id)
-            territory = territory_dataset_class(arles)
+            territory = territory_dataset_class(self.arles)
             reference = 'territory-{id}'.format(id=territory.slug)
             response = self.get(url_for('api.oembeds', references=reference))
             self.assert200(response)
@@ -424,6 +424,8 @@ class OEmbedsTerritoryAPITest(APITestCase):
             self.assertIn(
                 'alt="{name}"'.format(name=organization.name), data['html'])
             self.assertIn(territory.description.split('\n')[0], data['html'])
+            self.assertIn('Download from localhost', data['html'])
+            self.assertIn('Add to your own website', data['html'])
 
 
 class SitemapTest(FrontTestCase):

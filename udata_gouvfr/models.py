@@ -4,10 +4,9 @@ from __future__ import unicode_literals
 from udata.i18n import lazy_gettext as _
 from udata.models import (
     db, Dataset, User, Organization, Reuse,
-    TerritoryDataset, ResourceBasedTerritoryDataset
+    TerritoryDataset, ResourceBasedTerritoryDataset,
+    TERRITORY_DATASETS
 )
-
-__all__ = ('TERRITORY_DATASETS',)
 
 Dataset.extras.register('datagouv_ckan_last_sync', db.DateTimeField)
 Organization.extras.register('datagouv_ckan_last_sync', db.DateTimeField)
@@ -200,7 +199,7 @@ class ElectionsRegionales2015Tour2TerritoryDataset(
     }
 
 
-TERRITORY_DATASETS = {
+TERRITORY_DATASETS.update({
     'zonages': ZonagesTerritoryDataset,
     'comptes': ComptesTerritoryDataset,
     'logement': LogementTerritoryDataset,
@@ -210,4 +209,4 @@ TERRITORY_DATASETS = {
     'population_chiffres': PopulationChiffresTerritoryDataset,
     'population_diplomes': PopulationDiplomesTerritoryDataset,
     'elections_regionales_2015_2': ElectionsRegionales2015Tour2TerritoryDataset
-}
+})
