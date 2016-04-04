@@ -1,13 +1,15 @@
 /**
  * Dataset display page JS module
  */
+
+// Styles. May need refactoring for proper common.css
+import 'balloon-css/src/balloon.less';
+
 // Catch all errors
 import 'raven';
 
 // ES6 environment
 import 'babel-polyfill';
-
-import $ from 'jquery'; // Only needed for tooltips :(
 
 import Auth from 'auth';
 import Vue from 'vue';
@@ -46,10 +48,8 @@ function parseUrl(url) {
 
 
 function addTooltip(el, content) {
-    el.setAttribute('rel', 'tooltip');
-    el.setAttribute('data-original-title', content);
-    el.dataset.placement = 'left';
-    $(el).tooltip('show');  // Only jQuery requirement left
+    el.dataset.balloon = content;
+    el.setAttribute('data-balloon-pos', 'left');
 }
 
 

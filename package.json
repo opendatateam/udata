@@ -66,6 +66,7 @@
     "Chart.StackedBar.js": "regaddi/Chart.StackedBar.js#1.0.3",
     "admin-lte": "^2.3.3",
     "babel-polyfill": "^6.7.4",
+    "balloon-css": "^0.2.4",
     "bootstrap": "^3.3.6",
     "bootstrap-datepicker": "^1.5.1",
     "bootstrap-daterangepicker": "^2.1.19",

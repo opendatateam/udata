@@ -18,6 +18,10 @@
 <script src="{{ static('dataset.js') }}"></script>
 {% endblock %}
 
+{% block extra_css %}
+<link href="{{ static('dataset.css') }}" rel="stylesheet" />
+{% endblock %}
+
 {% block extra_head %}
 <link rel="canonical" href="{{ url_for('datasets.show', dataset=dataset) }}" />
 {% endblock %}
