@@ -11,8 +11,7 @@ from udata.frontend import csv
 from udata.frontend.views import DetailView, SearchView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import (
-    db, Organization, Reuse, Dataset, FollowOrg, DatasetIssue,
-    DatasetDiscussion
+    Organization, Reuse, Dataset, FollowOrg, DatasetIssue, DatasetDiscussion
 )
 from udata.sitemap import sitemap
 

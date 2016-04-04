@@ -4,12 +4,12 @@ from __future__ import unicode_literals
 import logging
 
 from flask import render_template, current_app, Blueprint, request, redirect
-from flask.ext.principal import (
+from flask.ext.principal import (  # noqa
     Permission as BasePermission, PermissionDenied, identity_loaded, RoleNeed,
     UserNeed
 )
-from flask.ext.security import (
-    Security, current_user, login_required, login_user
+from flask.ext.security import (  # noqa
+    Security, current_user, login_required, login_user  # noqa
 )
 from werkzeug.utils import import_string
 
@@ -42,10 +42,10 @@ admin_permission = Permission()
 @bp.before_app_request
 def ensure_https_authenticated_users():
     # Force authenticated users to use https
-    if (not current_app.config.get('TESTING', False)
-            and current_app.config.get('USE_SSL', False)
-            and current_user.is_authenticated()
-            and not request.is_secure):
+    if (not current_app.config.get('TESTING', False) and
+            current_app.config.get('USE_SSL', False) and
+            current_user.is_authenticated() and
+            not request.is_secure):
         return redirect(request.url.replace('http://', 'https://'))
 
 

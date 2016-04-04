@@ -68,8 +68,7 @@ parser.add_argument(
     help='The sorting attribute')
 parser.add_argument(
     'closed', type=boolean, location='args',
-    help='Filter closed discussions. Filters discussions on their closed status'
-    ' if specified')
+    help='Filters discussions on their closed status if specified')
 parser.add_argument(
     'for', type=str, location='args', action='append',
     help='Filter discussions for a given subject')

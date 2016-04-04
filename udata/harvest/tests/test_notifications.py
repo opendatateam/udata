@@ -4,10 +4,7 @@ from __future__ import unicode_literals, absolute_import
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.factories import UserFactory, AdminFactory
 
-from .factories import (
-    fake, HarvestSourceFactory, HarvestJobFactory,
-    mock_initialize, mock_process, DEFAULT_COUNT as COUNT
-)
+from .factories import HarvestSourceFactory
 
 from udata.tests.test_notifications import NotificationsMixin
 

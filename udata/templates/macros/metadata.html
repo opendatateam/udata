@@ -12,7 +12,7 @@
 <meta name="description" content="{{ description }}" />
 <meta property="og:description" content="{{ description }}" />
 <meta property="og:image" content="{{ image }}" />
-<meta name="keywords" content="{{ ', '.join(current_site.keywords + (keywords)) }}" />
+<meta name="keywords" content="{{ ', '.join(current_site.keywords + keywords) }}" />
 <meta name="theme-static-root" content="{{ theme_static('') }}" />
 <meta name="static-root" content="{{ static('', _burst=False) }}" />
 <meta name="api-root" content="{{ url_for('api.root') }}" />

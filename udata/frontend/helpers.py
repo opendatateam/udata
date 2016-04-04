@@ -98,8 +98,7 @@ def in_url(*args, **kwargs):
     scheme, netloc, path, query, fragments = urlsplit(request.url)
     params = url_decode(query)
     return (
-        all(arg in params for arg in args)
-        and
+        all(arg in params for arg in args) and
         all(key in params and params[key] == value
             for key, value in kwargs.items())
     )
@@ -211,7 +210,8 @@ def facet_formater(results, name):
         def formater(value):
             return labels.get(value, value)
     else:
-        formater = lambda v: v
+        def formater(value):
+            return value
 
     return formater
 
@@ -271,8 +271,13 @@ def is_first_year_day(date):
 def is_last_year_day(date):
     return date.month == 12 and is_last_month_day(date)
 
-short_month = lambda d: format_date(d, pgettext('month-format', 'yyyy/MM'))
-short_day = lambda d: format_date(d, pgettext('day-format', 'yyyy/MM/dd'))
+
+def short_month(date):
+    return format_date(date, pgettext('month-format', 'yyyy/MM'))
+
+
+def short_day(date):
+    return format_date(date, pgettext('day-format', 'yyyy/MM/dd'))
 
 
 @front.app_template_global()
@@ -314,9 +319,9 @@ def i18n_alternate_links():
 
     if page is in a I18nBlueprint
     """
-    if (not request.endpoint
-        or not current_app.url_map.is_endpoint_expecting(request.endpoint,
-                                                         'lang_code')):
+    if (not request.endpoint or
+            not current_app.url_map.is_endpoint_expecting(request.endpoint,
+                                                          'lang_code')):
         return Markup('')
 
     try:

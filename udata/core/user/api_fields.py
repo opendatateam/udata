@@ -21,7 +21,7 @@ user_ref_fields = api.inherit('UserReference', base_reference, {
 })
 
 
-from udata.core.organization.api_fields import org_ref_fields
+from udata.core.organization.api_fields import org_ref_fields  # noqa
 
 user_fields = api.model('User', {
     'id': fields.String(

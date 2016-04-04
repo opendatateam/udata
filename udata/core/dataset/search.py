@@ -22,9 +22,12 @@ from . import metrics  # noqa
 __all__ = ('DatasetSearch', )
 
 
-max_reuses = lambda: max(current_site.metrics.get('max_dataset_reuses'), 10)
-max_followers = lambda: max(current_site.metrics.get('max_dataset_followers'),
-                            10)
+def max_reuses():
+    return max(current_site.metrics.get('max_dataset_reuses'), 10)
+
+
+def max_followers():
+    return max(current_site.metrics.get('max_dataset_followers'), 10)
 
 
 def granularity_labelizer(label, value):
@@ -171,9 +174,9 @@ class DatasetSearch(ModelSearchAdapter):
 
     @classmethod
     def is_indexable(cls, dataset):
-        return (dataset.deleted is None
-                and len(dataset.resources) > 0
-                and not dataset.private)
+        return (dataset.deleted is None and
+                len(dataset.resources) > 0 and
+                not dataset.private)
 
     @classmethod
     def serialize(cls, dataset):
@@ -223,9 +226,9 @@ class DatasetSearch(ModelSearchAdapter):
             'extras': dataset.extras,
             'featured': dataset.featured,
         }
-        if (dataset.temporal_coverage is not None
-                and dataset.temporal_coverage.start
-                and dataset.temporal_coverage.end):
+        if (dataset.temporal_coverage is not None and
+                dataset.temporal_coverage.start and
+                dataset.temporal_coverage.end):
             document.update({
                 'temporal_coverage': {
                     'start': dataset.temporal_coverage.start.toordinal(),

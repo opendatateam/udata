@@ -10,7 +10,7 @@ from udata.auth import current_user
 from udata.core.storages import references
 from udata.core.dataset.permissions import DatasetEditPermission
 from udata.i18n import I18nBlueprint
-from udata.models import Dataset, GeoZone
+from udata.models import Dataset, GeoZone, TERRITORY_DATASETS
 from udata.sitemap import sitemap
 from udata.utils import multi_to_dict
 
@@ -66,10 +66,8 @@ def render_territory(territory):
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
-    # Generate fake territory datasets.
-    from udata.models import TERRITORY_DATASETS
-    territory_dataset_classes = sorted(
-        TERRITORY_DATASETS.values(), key=lambda a: a.order)
+    territory_dataset_classes = sorted(TERRITORY_DATASETS.values(),
+                                       key=lambda a: a.order)
     territory_datasets = [
         territory_dataset_class(territory)
         for territory_dataset_class in territory_dataset_classes
@@ -85,13 +83,13 @@ def render_territory(territory):
     editable_datasets = []
     if datasets:
         for dataset in datasets:
-            if (dataset.organization
-                    and territory.id == dataset.organization.zone):
+            if (dataset.organization and
+                    territory.id == dataset.organization.zone):
                 town_datasets.append(dataset)
             else:
                 other_datasets.append(dataset)
-            editable_datasets.append(current_user.is_authenticated()
-                                     and DatasetEditPermission(dataset).can())
+            editable_datasets.append(current_user.is_authenticated() and
+                                     DatasetEditPermission(dataset).can())
     context = {
         'territory': territory,
         'territory_datasets': territory_datasets,

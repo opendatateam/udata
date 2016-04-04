@@ -55,7 +55,9 @@ def delete(identifier):
     log.info('Deleted source "%s"', identifier)
 
 
-@m.option('-s', '--scheduled', action='store_true', help='list only scheduled source')
+@m.option('-s', '--scheduled',
+          action='store_true',
+          help='list only scheduled source')
 def sources(scheduled=False):
     '''List all harvest sources'''
     sources = actions.list_sources()
@@ -64,7 +66,10 @@ def sources(scheduled=False):
     if sources:
         for source in sources:
             msg = '{source.name} ({source.backend}): {cron}'
-            cron = source.periodic_task.schedule_display if source.periodic_task else 'not scheduled'
+            if source.periodic_task:
+                cron = source.periodic_task.schedule_display
+            else:
+                cron = 'not scheduled'
             log.info(msg.format(source=source, cron=cron))
     elif scheduled:
         log.info('No sources scheduled yet')
@@ -100,11 +105,16 @@ def run(identifier):
 
 
 @m.option('identifier', help='The Harvest source identifier or slug')
-@m.option('-m', '--minute', help='The crontab expression for minute', default=SUPPRESS)
-@m.option('-h', '--hour', help='The crontab expression for hour', default=SUPPRESS)
-@m.option('-d', '--day', dest='day_of_week', help='The crontab expression for day of week', default=SUPPRESS)
-@m.option('-D', '--day-of-month', dest='day_of_month', help='The crontab expression for day of month', default=SUPPRESS)
-@m.option('-M', '--month-of-year', help='The crontab expression for month of year', default=SUPPRESS)
+@m.option('-m', '--minute', default=SUPPRESS,
+          help='The crontab expression for minute')
+@m.option('-h', '--hour', default=SUPPRESS,
+          help='The crontab expression for hour')
+@m.option('-d', '--day', dest='day_of_week', default=SUPPRESS,
+          help='The crontab expression for day of week')
+@m.option('-D', '--day-of-month', dest='day_of_month', default=SUPPRESS,
+          help='The crontab expression for day of month')
+@m.option('-M', '--month-of-year', default=SUPPRESS,
+          help='The crontab expression for month of year')
 def schedule(identifier, **kwargs):
     log.info('Harvest source "%s"', identifier)
     source = actions.schedule(identifier, **kwargs)

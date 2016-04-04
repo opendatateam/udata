@@ -9,7 +9,7 @@ from flask import abort, current_app
 
 from udata.i18n import I18nBlueprint
 
-from .markdown import md, init_app as init_markdown
+from .markdown import init_app as init_markdown
 
 from .. import theme
 
@@ -58,10 +58,10 @@ def _load_views(app, module):
 def init_app(app):
     init_markdown(app)
 
-    from . import helpers, error_handlers
+    from . import helpers, error_handlers  # noqa
 
     # Load all core views and blueprint
-    import udata.core.search.views
+    import udata.core.search.views  # noqa
 
     from udata.core.storages.views import blueprint as storages_blueprint
     from udata.core.user.views import blueprint as user_blueprint

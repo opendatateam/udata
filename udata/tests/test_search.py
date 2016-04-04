@@ -222,12 +222,12 @@ class SearchQueryTest(TestCase):
 
     def test_decay_function_scoring_with_callables(self):
         '''Search should handle field decay with options'''
-        get_dot5 = lambda: 0.5
-        get_5 = lambda: 5
-        get_10 = lambda: 10
-        get_20 = lambda: 20
-        get_30 = lambda: 30
-        get_40 = lambda: 40
+        get_dot5 = lambda: 0.5  # noqa
+        get_5 = lambda: 5  # noqa
+        get_10 = lambda: 10  # noqa
+        get_20 = lambda: 20  # noqa
+        get_30 = lambda: 30  # noqa
+        get_40 = lambda: 40  # noqa
 
         class FakeBoostedSearch(FakeSearch):
             boosters = [

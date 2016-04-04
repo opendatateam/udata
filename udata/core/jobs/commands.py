@@ -29,7 +29,7 @@ def run(name, delay, args, kwargs):
     job = celery.tasks[name]
     if delay:
         log.info('Sending job %s', name)
-        async_result = job.delay(*args, **kwargs)
+        job.delay(*args, **kwargs)
         log.info('Job sended to workers')
     else:
         log.info('Running job %s', name)

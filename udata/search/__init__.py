@@ -113,10 +113,10 @@ def reindex(obj):
         log.info('Nothing to do for %s (%s)', doctype, obj.id)
 
 
-from .adapter import ModelSearchAdapter, metrics_mapping
-from .query import SearchQuery
-from .result import SearchResult, SearchIterator
-from .fields import *
+from .adapter import ModelSearchAdapter, metrics_mapping  # noqa
+from .query import SearchQuery  # noqa
+from .result import SearchResult, SearchIterator  # noqa
+from .fields import *  # noqa
 
 
 def query(*adapters, **kwargs):
@@ -161,10 +161,10 @@ def suggest(q, field, size=10):
 
 def init_app(app):
     # Register core adapters
-    import udata.core.user.search
-    import udata.core.dataset.search
-    import udata.core.reuse.search
-    import udata.core.organization.search
-    import udata.core.spatial.search
+    import udata.core.user.search  # noqa
+    import udata.core.dataset.search  # noqa
+    import udata.core.reuse.search  # noqa
+    import udata.core.organization.search  # noqa
+    import udata.core.spatial.search  # noqa
 
     es.init_app(app)

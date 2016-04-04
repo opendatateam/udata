@@ -5,7 +5,12 @@ from flask import url_for
 
 from udata.models import Organization
 
-__all__ = ('TerritoryDataset', 'ResourceBasedTerritoryDataset')
+__all__ = (
+    'TerritoryDataset', 'ResourceBasedTerritoryDataset', 'TERRITORY_DATASETS'
+)
+
+
+TERRITORY_DATASETS = {}
 
 
 class TerritoryDataset(object):

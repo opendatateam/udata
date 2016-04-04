@@ -28,7 +28,6 @@ class FakeForm(ModelForm):
     nested = NestedListField()
 
 
-
 class ModelListFieldTest(TestCase):
     def test_empty_data(self):
         fake = Fake()

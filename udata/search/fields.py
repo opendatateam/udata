@@ -55,7 +55,7 @@ class Facet(object):
     def from_response(self, name, response, fetch=True):
         '''
         Parse the elasticsearch response.
-        :param bool fetch: In case of DB objects, whether to fetch the object or not
+        :param bool fetch: whether to fetch the object from DB or not
         '''
         raise NotImplementedError
 
@@ -231,8 +231,8 @@ class RangeFacet(Facet):
         facet = response.get('facets', {}).get(name)
         if not facet:
             return
-        failure = (facet['min'] in ES_NUM_FAILURES
-                   or facet['max'] in ES_NUM_FAILURES)
+        failure = (facet['min'] in ES_NUM_FAILURES or
+                   facet['max'] in ES_NUM_FAILURES)
         return {
             'type': 'range',
             'min': None if failure else self.cast(facet['min']),
@@ -368,7 +368,10 @@ class FunctionBooster(object):
             },
         }
 
-_v = lambda v: v() if callable(v) else v
+
+def _v(value):
+    '''Call value if necessary'''
+    return value() if callable(value) else value
 
 
 class DecayFunction(object):

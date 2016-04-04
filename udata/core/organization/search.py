@@ -5,14 +5,21 @@ from udata import search
 from udata.models import Organization
 from udata.core.site.views import current_site
 
-from . import metrics  # Metrics are need for the mapping
+from . import metrics  # noqa: Metrics are need for the mapping
 
 __all__ = ('OrganizationSearch', )
 
 
-max_reuses = lambda: max(current_site.metrics.get('max_org_reuses'), 10)
-max_datasets = lambda: max(current_site.metrics.get('max_org_datasets'), 10)
-max_followers = lambda: max(current_site.metrics.get('max_org_followers'), 10)
+def max_reuses():
+    return max(current_site.metrics.get('max_org_reuses'), 10)
+
+
+def max_datasets():
+    return max(current_site.metrics.get('max_org_datasets'), 10)
+
+
+def max_followers():
+    return max(current_site.metrics.get('max_org_followers'), 10)
 
 
 def organization_badge_labelizer(label, kind):

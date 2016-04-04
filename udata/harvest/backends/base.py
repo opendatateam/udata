@@ -87,7 +87,8 @@ class BaseBackend(object):
             log.error("Error in initialization : %s" % (str(e)))
             log.exception(e)
             self.job.status = 'failed'
-            error = HarvestError(message=str(e), details=traceback.format_exc())
+            error = HarvestError(message=str(e),
+                                 details=traceback.format_exc())
             self.job.errors.append(error)
             self.end()
             msg = 'Initialization failed for "{0.name}" ({0.backend})'

@@ -65,4 +65,3 @@ class FiltersTest(TestCase):
     def test_unknown_hash(self):
         self.assertEqual(filters.hash('xxxx'), None)
         self.assertEqual(filters.hash(None), None)
-

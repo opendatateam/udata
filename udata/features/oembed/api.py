@@ -41,8 +41,8 @@ class OEmbedsAPI(API):
                     item = Dataset.objects.get(id=item_id)
                 except (db.ValidationError, Dataset.DoesNotExist):
                     return api.abort(400, 'Unknown dataset ID.')
-            elif (item_kind == 'territory'
-                    and current_app.config.get('ACTIVATE_TERRITORIES')):
+            elif (item_kind == 'territory' and
+                    current_app.config.get('ACTIVATE_TERRITORIES')):
                 from udata.models import TERRITORY_DATASETS
                 try:
                     country, town, code, kind = item_id.split('-')

@@ -6,7 +6,6 @@ from udata.api import api, API
 from udata import search
 from udata.i18n import _
 from udata.models import Dataset
-from udata.features.territories import check_for_territories
 
 from .api_fields import (
     level_fields,

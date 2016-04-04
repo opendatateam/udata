@@ -20,7 +20,9 @@ def harvest(self, ident):
     backend = Backend(source)
     if backend.perform_initialization():
         finalize = harvest_finalize.s(ident)
-        items = [harvest_item.s(ident, item.remote_id) for item in backend.job.items]
+        items = [
+            harvest_item.s(ident, item.remote_id) for item in backend.job.items
+        ]
         chord(items)(finalize)
 
 

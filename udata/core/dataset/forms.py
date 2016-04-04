@@ -80,7 +80,8 @@ class DatasetForm(ModelForm):
     temporal_coverage = fields.DateRangeField(
         _('Temporal coverage'),
         description=_('The period covered by the data'))
-    spatial = SpatialCoverageField(_('Spatial coverage'),
+    spatial = SpatialCoverageField(
+        _('Spatial coverage'),
         description=_('The geographical area covered by the data.'))
     tags = fields.TagField(_('Tags'), description=_('Some taxonomy keywords'))
     private = fields.BooleanField(
