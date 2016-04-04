@@ -11,13 +11,9 @@ from urlparse import urljoin
 import chardet
 
 from lxml import etree, html
-from voluptuous import (
-    Schema, Optional, All, Any, Lower, In, Length, MultipleInvalid
-)
+from voluptuous import Schema, Optional, All, Any, Lower, In, Length
 
-from udata.models import (
-    db, Dataset, License, Resource, Checksum, SpatialCoverage
-)
+from udata.models import db, License, Resource, Checksum, SpatialCoverage
 from udata.harvest import backends
 from udata.harvest.filters import (
     boolean, email, to_date, taglist, force_list, normalize_string, is_url
@@ -168,15 +164,15 @@ class MaafBackend(backends.BaseBackend):
         if metadata.get('license_id'):
             dataset.license = License.objects.get(id=metadata['license_id'])
 
-        if (metadata.get('temporal_coverage_from')
-                and metadata.get('temporal_coverage_to')):
+        if (metadata.get('temporal_coverage_from') and
+                metadata.get('temporal_coverage_to')):
             dataset.temporal_coverage = db.DateRange(
                 start=metadata['temporal_coverage_from'],
                 end=metadata['temporal_coverage_to']
             )
 
-        if (metadata.get('territorial_coverage_code')
-                or metadata.get('territorial_coverage_granularity')):
+        if (metadata.get('territorial_coverage_code') or
+                metadata.get('territorial_coverage_granularity')):
             dataset.spatial = SpatialCoverage()
 
             if metadata.get('territorial_coverage_granularity'):

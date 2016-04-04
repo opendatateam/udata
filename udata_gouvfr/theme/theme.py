@@ -153,7 +153,8 @@ def get_discourse_posts():
     topics = []
     topic_pattern = '{url}/t/{slug}/{id}'
     for topic in data['topic_list']['topics']:
-        last_posted_at = topic['last_posted_at']
+        last_posted = topic['last_posted_at']
+        last_posted = parse(last_posted) if last_posted else None
         topics.append({
             'id': topic['id'],
             'title': topic['title'],
@@ -166,7 +167,7 @@ def get_discourse_posts():
             'likes': topic['like_count'],
             'views': topic['views'],
             'created_at': parse(topic['created_at']),
-            'last_posted_at': parse(last_posted_at) if last_posted_at else None,
+            'last_posted_at': last_posted,
             'posters': [
                 users[u['user_id']] for u in topic['posters']
             ]

@@ -6,8 +6,8 @@
   "license": "MIT",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack -d -c --watch",
-    "build": "webpack -p"
+    "dev": "webpack -d -c --watch --progress",
+    "build": "webpack -p --progress --config webpack.config.prod.js"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
