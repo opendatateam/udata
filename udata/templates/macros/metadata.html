@@ -41,5 +41,6 @@
 
 <meta name="notify-in" content="{{ notify_in }}" />
 <meta name="check-urls" content="{{ 'true' if config.CROQUEMORT else 'false' }}" />
+<meta name="check-urls-whitelist" content="{{ config.CROQUEMORT_WHITELIST|tojson|urlencode }}" />
 <meta name="territory-enabled" content="{{ 'true' if config.ACTIVATE_TERRITORIES else 'false' }}">
 {% endmacro %}

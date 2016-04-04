@@ -103,7 +103,9 @@
     "tv4": "^1.2.7",
     "typeahead.js": "corejavascript/typeahead.js",
     "typeahead.js-bootstrap3.less": "hyspace/typeahead.js-bootstrap3.less#v0.2.3",
+    "velocity-animate": "^1.2.3",
     "vue": "1.0.21",
+    "vue-resource": "^0.7.0",
     "vue-router": "0.7.13"
   }
 }

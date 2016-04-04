@@ -14,7 +14,8 @@
 {% set body_class = 'dataset-display' %}
 
 {% block extra_js %}
-<script type="text/javascript" src="{{ static('dataset/display.js') }}"></script>
+<script src="{{ static('vue-common.js') }}"></script>
+<script src="{{ static('dataset.js') }}"></script>
 {% endblock %}
 
 {% block extra_head %}
@@ -52,6 +53,8 @@
 {% endblock %}
 
 {% block content %}
+<!-- Placeholder for non-routable modals -->
+<div v-el:modal></div>
 <div itemscope itemtype="http://schema.org/Dataset" itemid="{{ dataset.id }}">
 <section class="content {% if not dataset.organization.public_service %}non{% endif %}certified">
     <div class="container dataset-container">
@@ -133,11 +136,12 @@
                         </div>
 
                         <p class="text-center expander">
-                            <a id="more-resources" type="button" class="btn btn-default"
-                                data-toggle="collapse" href="#collapsed-resources">
+                            <button id="more-resources" type="button" class="btn btn-default"
+                                data-toggle="collapse" href="#collapsed-resources"
+                                @click.prevent="expandResources($event)">
                                 <span class="glyphicon glyphicon-list" ></span>
                                 {{ _('See the %(nb)d resources', nb=dataset.resources|length) }}
-                            </a>
+                            </button>
                         </p>
                     {% endif %}
 
@@ -335,7 +339,7 @@
                         </div>
                         {% endfor %}
 
-                        <button type="button"
+                        <button type="button" @click="showDetails"
                             class="btn btn-primary btn-extras btn-block btn-sm icon-left"
                             title="{{ _('Details') }}">
                             <span class="glyphicon glyphicon-info-sign"></span>
@@ -351,11 +355,13 @@
                     <div class="panel-body">
                         <h3>{{ _('Spatial coverage') }}</h3>
                         {% if dataset.spatial.zones %}
-                            <div id="coverage-map" class="aside-map"
-                                data-zones="{{ url_for('api.zones', ids=dataset.spatial.zones) }}"></div>
+                            <leaflet-map v-ref:map class="aside-map"
+                                data-zones="{{ url_for('api.zones', ids=dataset.spatial.zones) }}">
+                            </leaflet-map>
                         {% elif dataset.spatial.geom %}
-                            <div id="coverage-map" class="aside-map"
-                                data-geojson="{{dataset.spatial.geom|to_json}}"></div>
+                            <leaflet-map class="aside-map"
+                                :geojson="{{dataset.spatial.geom|to_json}}">
+                            </leaflet-map>
                         {% endif %}
                     </div>
                 </div>
@@ -470,8 +476,9 @@
                     </div>
                     {% endfor %}
                     <div class="col-sm-6 col-md-4">
-                        <a class="thumbnail reuse add"
-                            href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}">
+                        <a class="thumbnail reuse add" v-el:add-reuse
+                            href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}"
+                            @click="addReuse($event)">
                             <div class="preview">+</div>
                             <div class="caption">
                                 <h4>{{ _('Add a reuse') }}</h4>

@@ -124,6 +124,8 @@ class Defaults(object):
     #     'delay': 1,
     #     'retry': 10,
     # }
+    #
+    CROQUEMORT_WHITELIST = []
 
     # PIWIK_ID = # Demo = 11, Prod = 1
     # PIWIK_URL = 'stats.data.gouv.fr'

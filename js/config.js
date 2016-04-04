@@ -24,7 +24,7 @@ function _meta(name) {
  */
 function _jsonMeta(name) {
     const data = _meta(name);
-    return data ? JSON.parse(data) : false;
+    return data ? JSON.parse(decodeURIComponent(data)) : false;
 }
 
 /**
@@ -67,6 +67,11 @@ export const csrf_token = _meta('csrf-token');
  * Is the check url feature enabled ?
  */
 export const check_urls = _jsonMeta('check-urls');
+
+/**
+ * List of whitelisted domain for url check
+ */
+export const check_urls_whitelist = _jsonMeta('check-urls-whitelist');
 
 /**
  * The API root/base URL
@@ -136,5 +141,6 @@ export default {
     sentry,
     notify_in,
     check_urls,
+    check_urls_whitelist,
     is_territory_enabled,
 };
