@@ -63,5 +63,6 @@ class Extra(object):
 class DefaultExtra(Extra):
     def validate(self, value):
         if not isinstance(value, ALLOWED_TYPES):
+            types = ', '.join(t.__name__ for t in ALLOWED_TYPES)
             raise ValidationError('Value should be an instance of: {types}',
-                                  types=', '.join(ALLOWED_TYPES))
+                                  types=types)

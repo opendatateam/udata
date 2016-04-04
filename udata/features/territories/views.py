@@ -66,9 +66,8 @@ def render_territory(territory):
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
-    # Generate fake territory datasets.
-    territory_dataset_classes = sorted(
-        TERRITORY_DATASETS.values(), key=lambda a: a.order)
+    territory_dataset_classes = sorted(TERRITORY_DATASETS.values(),
+                                       key=lambda a: a.order)
     territory_datasets = [
         territory_dataset_class(territory)
         for territory_dataset_class in territory_dataset_classes
