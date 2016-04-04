@@ -62,9 +62,7 @@ function extract(root) {
 function microdata(itemtype, el) {
     el = el || document;
     const els = el.querySelectorAll(`[itemscope][itemtype="${itemtype}"]`);
-    return [...els].map(function(el) {
-        return extract(el);
-    });
+    return [...els].map(extract);
 }
 
 microdata.extract = extract;

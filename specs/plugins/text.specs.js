@@ -21,7 +21,7 @@ describe('Text plugin', function() {
     describe('truncate filter', function() {
         it('should truncate a string and add an ellipsis', function() {
             const t = tester('Text should be truncated', 'truncate 15');
-            expect(t.$el).to.contain.text('Text should ...');
+            expect(t.$el).to.contain.text('Text should be…');
         });
 
         it('should not truncate if string is smaller', function() {
