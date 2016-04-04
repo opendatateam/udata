@@ -183,9 +183,7 @@ def init_app(app):
     for plugin in app.config['PLUGINS']:
         name = 'udata.ext.{0}.models'.format(plugin)
         try:
-            module_obj = importlib.import_module(name)
-            for item in getattr(module_obj, '__all__'):
-                globals()[item] = getattr(module_obj, item)
+            importlib.import_module(name)
         except ImportError as e:
             log.warning('Error importing %s: %s', name, e)
         except Exception as e:

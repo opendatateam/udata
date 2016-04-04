@@ -10,7 +10,7 @@ from udata.auth import current_user
 from udata.core.storages import references
 from udata.core.dataset.permissions import DatasetEditPermission
 from udata.i18n import I18nBlueprint
-from udata.models import Dataset, GeoZone
+from udata.models import Dataset, GeoZone, TERRITORY_DATASETS
 from udata.sitemap import sitemap
 from udata.utils import multi_to_dict
 
@@ -67,7 +67,6 @@ def render_territory(territory):
         return abort(404)
 
     # Generate fake territory datasets.
-    from udata.models import TERRITORY_DATASETS
     territory_dataset_classes = sorted(
         TERRITORY_DATASETS.values(), key=lambda a: a.order)
     territory_datasets = [
