@@ -8,9 +8,7 @@ from udata.models import Reuse, Organization, Dataset
 from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
 
-from .models import (
-    DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE, C3, NECMERGITUR
-)
+from .models import DATACONNEXIONS_5_CANDIDATE, C3, NECMERGITUR
 
 blueprint = I18nBlueprint('gouvfr', __name__,
                           template_folder='templates',

@@ -94,8 +94,8 @@ class GouvFrThemeTest(FrontTestCase):
         '''It should render the organization page'''
         org = OrganizationFactory()
         datasets = [DatasetFactory(organization=org) for _ in range(3)]
-        reuses = [ReuseFactory(organization=org, datasets=[d])
-                  for d in datasets]
+        for dataset in datasets:
+            ReuseFactory(organization=org, datasets=[dataset])
 
         response = self.get(url_for('organizations.show', org=org))
         self.assert200(response)
