@@ -22,14 +22,16 @@
 {% block breadcrumb_bar %}
 <!-- Nav tabs -->
 <ul class="nav nav-tabs search-tabs">
-    <li class="active">
-        <a href="#datasets" data-toggle="tab">
-            {{ _('Datasets')}}
-            <span class="badge">{{ datasets.total }}</span>
-        </a>
-    </li>
+    {% if datasets %}
+        <li class="active">
+            <a href="#datasets" data-toggle="tab">
+                {{ _('Datasets')}}
+                <span class="badge">{{ datasets.total }}</span>
+            </a>
+        </li>
+    {% endif %}
     {% if reuses %}
-        <li>
+        <li{% if not datasets %} class="active"{% endif %}>
             <a href="#reuses" data-toggle="tab">
                 {{ _('Reuses') }}
                 <span class="badge">{{ reuses.total }}</span>
@@ -37,7 +39,7 @@
         </li>
     {% endif %}
     {% if organizations %}
-        <li>
+        <li{% if not datasets and not reuses %} class="active"{% endif %}>
             <a href="#organizations" data-toggle="tab">
                 {{ _('Organizations') }}
                 <span class="badge">{{ organizations.total }}</span>
@@ -45,7 +47,7 @@
         </li>
     {% endif %}
     {% if users %}
-        <li>
+        <li{% if not datasets and not reuses and not organizations %} class="active"{% endif %}>
             <a href="#users" data-toggle="tab">
                 {{ _('Users') }}
                 <span class="badge">{{ users.total }}</span>
@@ -53,7 +55,7 @@
         </li>
     {% endif %}
     {% if territories %}
-        <li>
+        <li{% if not datasets and not reuses and not organizations and not users %} class="active"{% endif %}>
             {% set total=territories.count() %}
             {% if total==1 %}
                 <a href="{{ url_for('territories.territory', territory=territories.0) }}">
@@ -78,6 +80,7 @@
 {% endblock %}
 
 {% block toolbar_container %}
+{% if datasets %}
 <div class="btn-toolbar search-toolbar wrapper" data-tab="#datasets">
 {{ s.breadcrum_toolbar(datasets, url=datasets_search_url,
     exports=(
@@ -91,6 +94,7 @@
     followers=(_('Stars'), 'desc')
 ) }}
 </div>
+{% endif %}
 {% if reuses %}
 <div class="btn-toolbar search-toolbar wrapper hide" data-tab="#reuses">
 {{ s.breadcrum_toolbar(reuses, url=reuses_search_url,
@@ -134,7 +138,15 @@
 {% block main_content %}
 <div class="tab-content">
 
-    <div class="tab-pane row active" id="datasets">
+    {% if not datasets and not reuses and not organizations and not users and not territories %}
+        <p class="text-center">
+            <strong>
+                {{ _('No results found, try to be less specific (or fix your typos?)') }}
+            </strong>
+        </p>
+    {% endif %}
+
+    <div class="tab-pane row{% if datasets %} active{% endif %}" id="datasets">
         {% if datasets %}
             <div class="col-md-8 col-lg-9 smaller">
                 <ul class="search-results">
@@ -156,12 +168,10 @@
                 {% set search_url = datasets_search_url %}
                 {% include theme('dataset/search-panel.html') %}
             </aside>
-        {% else %}
-        <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
         {% endif %}
     </div>
 
-    <div class="tab-pane row" id="reuses">
+    <div class="tab-pane row{% if reuses and not datasets %} active{% endif %}" id="reuses">
         {% if reuses %}
             <div class="col-md-8 col-lg-9 smaller">
                 <ul class="search-results">
@@ -188,7 +198,7 @@
         {% endif %}
     </div>
 
-    <div class="tab-pane row" id="organizations">
+    <div class="tab-pane row{% if organizations and not reuses and not datasets %} active{% endif %}" id="organizations">
         {% if organizations %}
             <div class="col-md-8 col-lg-9 smaller">
                 <ul class="search-results">
@@ -215,7 +225,7 @@
         {% endif %}
     </div>
 
-    <div class="tab-pane row" id="users">
+    <div class="tab-pane row{% if users and not organizations and not reuses and not datasets %} active{% endif %}" id="users">
         {% if users %}
             <div class="col-md-8 col-lg-9 smaller">
                 <ul class="search-results">
@@ -243,7 +253,7 @@
     </div>
 
     {% if territories %}
-    <div class="tab-pane row" id="territories">
+    <div class="tab-pane row{% if territories and not users and not organizations and not reuses and not datasets %} active{% endif %}" id="territories">
         <div class="col-xs-12 smaller">
             <ul class="search-results">
                 {% for territory in territories %}

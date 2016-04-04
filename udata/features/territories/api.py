@@ -25,7 +25,7 @@ class SuggestTerritoriesAPI(API):
         return [{
             'id': territory.id,
             'title': territory.name,
-            'keys': territory.keys,
+            'county': territory.county.name,
             'image_url': territory.logo_url(external=True),
             'page': url_for('territories.territory',
                             territory=territory, _external=True)

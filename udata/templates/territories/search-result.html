@@ -8,17 +8,11 @@
                 width="70" height="70">
         </div>
         <div class="result-body ellipsis-dot">
-            <h4 class="result-title">{{ territory.name }}</h4>
+            <h4 class="result-title">{{ territory.town_repr|safe }}</h4>
             <div class="result-description">
                 {{ _('INSEE code:') }} {{ territory.code }}<br/>
-                {% if territory.keys.postal %}
-                    {{ _('Postal code:') }}
-                    {% if territory.keys.postal is string %}
-                        {{ territory.keys.postal }}
-                    {% endif %}{# elif not allowed here #}
-                    {% if territory.keys.postal is not string %}
-                        {{ territory.keys.postal|join(', ') }}
-                    {% endif %}
+                {% if territory.postal_string %}
+                    {{ _('Postal code:') }} {{ territory.postal_string }}
                 {% endif %}
             </div>
         </div>
@@ -37,7 +31,7 @@
                 <a class="btn btn-xs" data-toggle="tooltip" data-placement="top"
                     title="{{ _('Population') }}">
                     <span class="fa fa-users fa-fw"></span>
-                    {{ territory.population }}
+                    {{ territory.population|format_number }}
                 </a>
             </li>
             {% endif %}

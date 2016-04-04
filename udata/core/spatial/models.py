@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from flask import url_for
 from werkzeug.local import LocalProxy
+from werkzeug import cached_property
 
 from udata.app import cache
 from udata.i18n import lazy_gettext as _, gettext, get_locale
@@ -85,23 +86,29 @@ class GeoZone(db.Document):
     def external_url(self):
         return url_for('territories.territory', territory=self, _external=True)
 
-    @property
+    @cached_property
     def wikipedia_url(self):
         return (self.dbpedia.replace('dbpedia', 'wikipedia')
                             .replace('resource', 'wiki'))
 
-    @property
+    @cached_property
     def postal_string(self):
         """Return a list of postal codes separated by commas."""
         return ', '.join(self.keys.get('postal', []))
 
-    @property
+    @cached_property
     def town_repr(self):
-        """Representation of a town with optional postal codes."""
-        if self.postal_string:
-            return '{name} <small>({postal_codes})</small>'.format(
-                name=self.name, postal_codes=self.postal_string)
+        """Representation of a town with optional county."""
+        if self.county:
+            return '{name} <small>({county_name})</small>'.format(
+                name=self.name, county_name=self.county.name)
         return self.name
+
+    @cached_property
+    def county(self):
+        for parent in self.parents:
+            if parent.startswith('fr/county'):
+                return GeoZone.objects.get(id=parent)
 
     def toGeoJSON(self):
         return {
