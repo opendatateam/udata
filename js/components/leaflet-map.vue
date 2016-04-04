@@ -19,6 +19,11 @@ export default {
             type: Boolean,
             default: true
         },
+        // Whetjer or not to display hover popup
+        popup: {
+            type: Boolean,
+            default: true
+        },
         geojson: null
     },
     ready: function() {
@@ -43,7 +48,7 @@ export default {
             if (json) {
                 this.layer = L.geoJson(json, {
                     onEachFeature: (feature, layer) => {
-                        if (feature.properties && feature.properties.name) {
+                        if (this.popup && feature.properties && feature.properties.name) {
                             layer.bindPopup(feature.properties.name);
                             layer.on('mouseover', function() {
                                 layer.openPopup();

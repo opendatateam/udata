@@ -14,9 +14,9 @@
 <div class="row">
     <div class="col-sm-9">
         <h1>{{ territory.town_repr|safe }}</h1>
-        <div id="coverage-map" class="aside-map"
-            data-zones="{{ url_for('api.zones', ids=[territory.id]) }}"
-            data-hide-popup="true"></div>
+        <leaflet-map v-ref:map class="aside-map" :popup="false"
+            data-zones="{{ url_for('api.zones', ids=[territory.id]) }}">
+        </leaflet-map>
     </div>
 
     <aside class="col-sm-3 panel panel-default">
@@ -98,6 +98,7 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script type="text/javascript" src="{{ static('dataset/display.js') }}"></script>
+    <script src="{{ static('vue-common.js') }}"></script>
+    <script src="{{ static('territory.js') }}"></script>
     <script src="{{ static('widgets.js', _burst=False) }}" id="udata" async defer></script>
 {% endblock %}

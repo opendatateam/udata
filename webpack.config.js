@@ -15,6 +15,7 @@ module.exports = {
     entry: {
         admin: './js/admin.js',
         dataset: './js/front/dataset',
+        territory: './js/front/territory',
         site: './js/site.js',
         home: './js/home.js',
         search: './js/search.js',
