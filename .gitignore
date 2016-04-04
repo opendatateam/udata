@@ -51,6 +51,7 @@ cover
 nosetests.xml
 coverage.xml
 /coverage/
+/reports/
 
 # Translations
 *.mo
