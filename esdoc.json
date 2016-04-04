@@ -1,6 +1,0 @@
-{
-  "source": "./js",
-  "destination": "./jsdoc",
-  "title": "uData documentation",
-  "index": "./js/index.md"
-}

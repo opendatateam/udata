@@ -130,12 +130,12 @@ def i18n():
 
     globs = '*.js', '*.vue', '*.hbs'
     regexps = [
-        re.compile(r'(?:|\.|\s|\{)_\(\s*(?:"|\')(.*?)(?:"|\')\s*(?:\)|,)'),
-        # re.compile(r'this\._\(\s*(?:"|\')(.*?)(?:"|\')\s*\)'),
-        re.compile(r'v-i18n="(.*?)"'),
-        re.compile(r'"\{\{\{?\s*\'(.*?)\'\s*\|\s*i18n\}\}\}?"'),
-        re.compile(r'{{_\s*"(.*?)"\s*}}'),
-        re.compile(r'{{_\s*\'(.*?)\'\s*}}'),
+        re.compile(r'(?:|\.|\s|\{)_\(\s*(?:"|\')(.*?)(?:"|\')\s*(?:\)|,)'),  # JS _('trad')
+        re.compile(r'v-i18n="(.*?)"'),  # Vue.js directive v-i18n="trad"
+        re.compile(r'"\{\{\{?\s*\'(.*?)\'\s*\|\s*i18n\}\}\}?"'),  # Vue.js filter {{ 'trad'|i18n }}
+        re.compile(r'{{_\s*"(.*?)"\s*}}'),  # Handlebars {{_ "trad" }}
+        re.compile(r'{{_\s*\'(.*?)\'\s*}}'),  # Handlebars {{_ 'trad' }}
+        re.compile(r'\:[a-z0-9_\-]+="\s*_\(\'(.*?)\'\)\s*"'),  # Vue.js binding :prop="_('trad')"
     ]
 
     for directory, _, _ in os.walk(join(ROOT, 'js')):
