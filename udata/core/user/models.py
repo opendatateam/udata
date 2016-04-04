@@ -107,9 +107,14 @@ class User(db.Document, WithMetrics, UserMixin):
     def sysadmin(self):
         return self.has_role('admin')
 
+    def url_for(self, *args, **kwargs):
+        return url_for('users.show', user=self, *args, **kwargs)
+
+    display_url = property(url_for)
+
     @property
-    def display_url(self):
-        return url_for('users.show', user=self)
+    def external_url(self):
+        return self.url_for(_external=True)
 
     @property
     def visible(self):
