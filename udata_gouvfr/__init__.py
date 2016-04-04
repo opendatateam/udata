@@ -9,4 +9,4 @@ __description__ = 'uData Data.gouv.fr customizations'
 
 
 def init_app(app):
-    from . import harvesters  # noqa: needed fro registeration
+    from . import harvesters  # noqa: needed for registration
