@@ -25,10 +25,6 @@ def lrun(command, *args, **kwargs):
     run('cd {0} && {1}'.format(ROOT, command), *args, **kwargs)
 
 
-def nrun(command, *args, **kwargs):
-    lrun('node_modules/.bin/{0}'.format(command), *args, **kwargs)
-
-
 @task
 def clean(bower=False, node=False):
     '''Cleanup all build artifacts'''
@@ -76,14 +72,14 @@ def i18nc():
 
 @task
 def watch():
-    nrun('webpack -d -c --progress --watch', pty=True)
+    lrun('npm run dev', pty=True)
 
 
 @task
 def assets():
     '''Install and compile assets'''
     print(cyan('Building static assets'))
-    nrun('webpack -c --progress --config webpack.config.prod.js', pty=True)
+    lrun('npm run build', pty=True)
 
 
 @task(assets, i18nc)
