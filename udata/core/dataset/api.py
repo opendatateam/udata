@@ -237,11 +237,11 @@ class ResourcesAPI(API):
 
 
 upload_parser = api.parser()
-upload_parser.add_argument('file', type=FileStorage, location='files')
+upload_parser.add_argument('file', type=FileStorage, location='files',
+                           required=True)
 
 
 class UploadMixin(object):
-
     def extract_infos_from_args(self, args, dataset):
         prefix = '/'.join((dataset.slug,
                            datetime.now().strftime('%Y%m%d-%H%M%S')))
