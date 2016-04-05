@@ -1,7 +1,6 @@
 import config from 'config';
 
 export function install(Vue) {
-
     /**
      * Expect JSON by default
      */
@@ -19,15 +18,15 @@ export function install(Vue) {
     };
 
 
+    /**
+     * Wrap fetch() calls with predefined API parameters
+     */
     class Api {
         constructor() {
+            // Compute API root once
             this.ROOT = config.api_root.endsWith('/')
                 ? config.api_root.substring(0, config.api_root.length - 1)
                 : config.api_root;
-
-            // For reusability
-            this.DEFAULT_HEADERS = DEFAULT_HEADERS;
-            this.WRITE_HEADERS = WRITE_HEADERS;
         }
 
         /**
@@ -69,23 +68,16 @@ export function install(Vue) {
 
         /**
          * Default handler for JSON response
+         * Parse the response if OK otherwise throw it
+         * (let the developper handle it in the catch() handler)
          * @param  {Response} response A response with JSON expected body.
          * @return {Promise}           A promise for data handling
          */
         jsonHandler(response) {
-            // TODO: error handling
+            if (!response.ok) {
+                throw response;
+            }
             return response.json();
-        }
-
-        /**
-         * Perform a GET operation and process JSON
-         * @param  {String} url     An absolute or API root relative URL
-         * @param  {Object} params  Optionnal query strings parameters
-         * @param  {[type]} headers Optionnal HTTP headers
-         * @return {Promise}        An instanciated fetch promise
-         */
-        get(url, params, headers) {
-            return this.getRaw(url, params, headers).then(this.jsonHandler);
         }
 
         /**
@@ -95,12 +87,12 @@ export function install(Vue) {
          * @param  {[type]} headers Optionnal HTTP headers
          * @return {Promise}        An instanciated fetch promise
          */
-        getRaw(url, params, headers) {
+        get(url, params, headers) {
             return fetch(this.build(url, params), {
                 method: 'get',
                 credentials: 'include',
                 headers: Object.assign({}, DEFAULT_HEADERS, headers || {})
-            });
+            }).then(this.jsonHandler);
         }
 
         /**
@@ -169,5 +161,6 @@ export function install(Vue) {
         }
     }
 
+    // Tha wrapper is accessible on Vue.api or this.$api on instances
     Vue.prototype.$api = Vue.api = new Api();
 }

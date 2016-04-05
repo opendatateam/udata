@@ -203,12 +203,10 @@ new Vue({
                     el.classList.add('format-label-warning');
                     addTooltip(el, this._('The server may be hard to reach (FTP).'));
                 } else {
-                    this.$api.getRaw(checkurl, {url: url.href, group: this.dataset.alternateName})
-                    .then(response => {
+                    this.$api.get(checkurl, {url: url.href, group: this.dataset.alternateName})
+                    .then(() => el.classList.add('format-label-success'))
+                    .catch(response => {
                         switch (response.status) {
-                            case 200:
-                                el.classList.add('format-label-success');
-                                break;
                             case 404:
                                 el.classList.add('format-label-warning');
                                 addTooltip(el, this._('The resource cannot be found.'));
@@ -219,9 +217,7 @@ new Vue({
                                 el.classList.add('format-label-danger');
                                 addTooltip(el, this._('The server cannot be found.'));
                         }
-                    })
-                    // May need some handling.
-                    .catch(error => {});
+                    });
                 }
             }
         }
