@@ -16,9 +16,7 @@ install:
   - travis_retry pip install -r travis.$TRAVIS_BRANCH.pip
   - pip install -e .
 script:
-  - nosetests --with-coverage udata_gouvfr
-after_success:
-  - coveralls --rcfile=coverage.rc
+  - nosetests udata_gouvfr
 branches:
   only:
     - master
