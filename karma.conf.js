@@ -71,6 +71,7 @@ module.exports = function(config) {
                     $: 'jquery',
                     jQuery: 'jquery',
                     'window.jQuery': 'jquery',
+                    'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
                 }),
             ]
         },

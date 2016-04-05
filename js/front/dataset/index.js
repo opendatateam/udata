@@ -165,8 +165,8 @@ new Vue({
          */
         fetchReuses() {
             if (Auth.user) {
-                this.$http.get('me/reuses/').then(response => {
-                    this.userReuses = response.data;
+                this.$api.get('me/reuses/').then(data => {
+                    this.userReuses = data;
                 });
             }
         },
@@ -176,8 +176,8 @@ new Vue({
          */
         loadCoverageMap() {
             if (!this.$refs.map) return;
-            this.$http.get(this.$refs.map.$el.dataset.zones).then(response => {
-                this.$refs.map.geojson = response.data;
+            this.$api.get(this.$refs.map.$el.dataset.zones).then(data => {
+                this.$refs.map.geojson = data;
             });
         },
 
@@ -203,20 +203,25 @@ new Vue({
                     el.classList.add('format-label-warning');
                     addTooltip(el, this._('The server may be hard to reach (FTP).'));
                 } else {
-                    this.$http.get(checkurl, {url: url.href, group: this.dataset.alternateName})
+                    this.$api.getRaw(checkurl, {url: url.href, group: this.dataset.alternateName})
                     .then(response => {
-                        if (response.status === 200) {
-                            el.classList.add('format-label-success');
-                        } else if (response.status === 404) {
-                            el.classList.add('format-label-warning');
-                            addTooltip(el, this._('The resource cannot be found.'));
+                        switch (response.status) {
+                            case 200:
+                                el.classList.add('format-label-success');
+                                break;
+                            case 404:
+                                el.classList.add('format-label-warning');
+                                addTooltip(el, this._('The resource cannot be found.'));
+                                break;
+                            case 503:
+                                break;
+                            default:
+                                el.classList.add('format-label-danger');
+                                addTooltip(el, this._('The server cannot be found.'));
                         }
-                    }, response => {
-                        if (response.status !== 503) {
-                            el.classList.add('format-label-danger');
-                            addTooltip(el, this._('The server cannot be found.'));
-                        }
-                    });
+                    })
+                    // May need some handling.
+                    .catch(error => {});
                 }
             }
         }

@@ -59,8 +59,7 @@
     "vue-html-loader": "^1.2.2",
     "vue-loader": "8.2.2",
     "watai": "0.7.0",
-    "webpack": "1.12.14",
-    "whatwg-fetch": "0.11.0"
+    "webpack": "1.12.14"
   },
   "dependencies": {
     "Chart.StackedBar.js": "regaddi/Chart.StackedBar.js#1.0.3",
@@ -106,7 +105,7 @@
     "typeahead.js-bootstrap3.less": "hyspace/typeahead.js-bootstrap3.less#v0.2.3",
     "velocity-animate": "^1.2.3",
     "vue": "1.0.21",
-    "vue-resource": "^0.7.0",
-    "vue-router": "0.7.13"
+    "vue-router": "0.7.13",
+    "whatwg-fetch": "0.11.0"
   }
 }
