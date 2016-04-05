@@ -26,7 +26,7 @@ export default {
         },
         geojson: null
     },
-    ready: function() {
+    ready() {
         this.map = L.map(this.$el, INITIAL_SETTINGS);
 
         if (this.fixed) {
@@ -40,26 +40,21 @@ export default {
             if (this.map.tap) this.map.tap.disable();
         }
 
-
         L.tileLayer(TILES_URL, TILES_CONFIG).addTo(this.map);
     },
     watch: {
-        'geojson': function(json) {
+        geojson: function(json) {
             if (json) {
                 this.layer = L.geoJson(json, {
                     onEachFeature: (feature, layer) => {
                         if (this.popup && feature.properties && feature.properties.name) {
                             layer.bindPopup(feature.properties.name);
-                            layer.on('mouseover', function() {
-                                layer.openPopup();
-                            });
-                            layer.on('mouseout', function() {
+                            layer.on('mouseover', () => layer.openPopup());
+                            layer.on('mouseout', () => {
                                 if (layer.closePopup) {
                                     layer.closePopup();
                                 } else {
-                                    layer.eachLayer(function(layer) {
-                                        layer.closePopup();
-                                    });
+                                    layer.eachLayer(layer => layer.closePopup());
                                 }
                             });
                         }

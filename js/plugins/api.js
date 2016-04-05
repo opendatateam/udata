@@ -107,7 +107,7 @@ export function install(Vue) {
                 method: 'post',
                 credentials: 'include',
                 headers: Object.assign({}, DEFAULT_HEADERS, WRITE_HEADERS, headers || {}),
-                body: JSON.stringify(DATA)
+                body: JSON.stringify(data)
             }).then(this.jsonHandler);
         }
 
@@ -119,7 +119,7 @@ export function install(Vue) {
          * @return {Promise}        An instanciated fetch promise
          */
         upload(url, data, headers) {
-            const body = data;
+            const body = data; // TODO handle body
             return fetch(this.build(url), {
                 method: 'post',
                 credentials: 'include',
@@ -142,7 +142,7 @@ export function install(Vue) {
                 method: 'put',
                 credentials: 'include',
                 headers: Object.assign({}, DEFAULT_HEADERS, WRITE_HEADERS, headers || {}),
-                body: JSON.stringify(DATA)
+                body: JSON.stringify(data)
             }).then(this.jsonHandler);
         }
 
@@ -157,7 +157,12 @@ export function install(Vue) {
                 method: 'delete',
                 credentials: 'include',
                 headers: Object.assign({}, DEFAULT_HEADERS, WRITE_HEADERS, headers || {}),
-            }).then(this.jsonHandler);
+            }).then(response => {
+                // Response should be empty but let errors pass through
+                if (!response.ok) {
+                    throw response;
+                }
+            });
         }
     }
 

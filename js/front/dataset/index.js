@@ -118,9 +118,9 @@ new Vue({
             if ([e.target, e.target.parentNode].some((el) => {el.classList.contains('btn-edit');})) {
                 return;
             }
+            e.preventDefault();
             const resource = this.dataset.resources.filter(resource => resource.id === id)[0];
             this.$modal(ResourceModal, {resource: resource});
-            e.preventDefault();
         },
 
         /**
@@ -151,12 +151,12 @@ new Vue({
                 return !reuse.datasets.some(dataset => dataset.id === this.dataset.id);
             });
             if (reuses.length) {
+                e.preventDefault();
                 this.$modal(AddReuseModal, {
                     dataset: this.dataset,
                     reuses: reuses,
                     formUrl: this.$els.addReuse.href,
                 });
-                e.preventDefault();
             }
         },
 
@@ -186,7 +186,7 @@ new Vue({
          */
         checkResources() {
             if (config.check_urls) {
-                this.dataset.resources.forEach(resource => this.checkResource(resource));
+                this.dataset.resources.forEach(this.checkResource);
             }
         },
 
