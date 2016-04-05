@@ -34,8 +34,8 @@ new Vue({
          */
         loadMap() {
             if (!this.$refs.map) return;
-            this.$http.get(this.$refs.map.$el.dataset.zones).then(response => {
-                this.$refs.map.geojson = response.data;
+            this.$api.get(this.$refs.map.$el.dataset.zones).then(data => {
+                this.$refs.map.geojson = data;
             });
         }
     }
