@@ -205,8 +205,8 @@ new Vue({
                 } else {
                     this.$api.get(checkurl, {url: url.href, group: this.dataset.alternateName})
                     .then(() => el.classList.add('format-label-success'))
-                    .catch(response => {
-                        switch (response.status) {
+                    .catch(error => {
+                        switch (error.status) {
                             case 404:
                                 el.classList.add('format-label-warning');
                                 addTooltip(el, this._('The resource cannot be found.'));
