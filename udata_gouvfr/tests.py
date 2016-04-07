@@ -261,7 +261,7 @@ class TerritoriesTest(FrontTestCase):
         data = response.data.decode('utf-8')
         self.assertIn('Arles', data)
         territory_datasets = self.get_context_variable('territory_datasets')
-        self.assertEqual(len(territory_datasets), 9)
+        self.assertEqual(len(territory_datasets), 10)
         for dataset in territory_datasets:
             self.assertIn(
                 '<div data-udata-territory-id="{dataset.slug}"'.format(
