@@ -16,7 +16,7 @@ describe('Markdown plugin', function() {
             const is_comment = node.nodeType === Node.COMMENT_NODE;
             const is_empty_text = node.nodeType === Node.TEXT_NODE && !/\S/.test(node.nodeValue);
             if (is_comment || is_empty_text) {
-                node.remove();
+                node.parentNode.removeChild(node);
             }
         });
         return el;
