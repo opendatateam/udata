@@ -55,18 +55,23 @@ For more advanced usage, you can use the npm dedicated run-scripts:
 ```shell
 # Single run in PhantomJS
 $ npm -s run test:unit
-# Watch changes and doesn't prelaunch a browser
+# Watch and run tests on change in PhantomJS
 $ npm -s run test:watch
 ```
 
 You can pass any option to karma after the `--`:
 
 ```bash
-# watch changes, with PhantomJS prelaunched
-$ npm -s run test:watch -- --browsers PhantomJS
+# Run tests a in new Chrome and Firefox instances
+$ npm -s run test:unit -- --browsers Chrome,Firefox
 # Single run with JUnit xml output
 $ npm -s run test:unit -- --reporters mocha,junit
 ```
+
+!!! note
+    If using Chrome launcher without `chrome` being on the `$PATH` (or using Chromium),
+    you need to specify the binary path by settings the environment variable
+    `CHROME_BIN`
 
 See [the official karma documentation][karma] for more details about the possible parameters.
 
