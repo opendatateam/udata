@@ -39,6 +39,7 @@
     "karma-chrome-launcher": "^0.2.3",
     "karma-firefox-launcher": "^0.1.7",
     "karma-fixture": "^0.2.5",
+    "karma-ievms": "^0.1.0",
     "karma-junit-reporter": "^0.4.1",
     "karma-mocha": "^0.2.2",
     "karma-mocha-reporter": "^2.0.0",

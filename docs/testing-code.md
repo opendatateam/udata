@@ -75,6 +75,32 @@ $ npm -s run test:unit -- --reporters mocha,junit
 
 See [the official karma documentation][karma] for more details about the possible parameters.
 
+### Testing on IE
+
+You can run the test suite under Modern.ie VMs installed with either [ievms][]
+or [iectrl][] (installation is detailled on websites).
+
+```bash
+# Install IE11 under Win7 (time to have one or more coffee!)
+$ iectrl install 11
+# Run tests under IE11
+$ npm -s run test:unit -- --browsers 'IE11 - Win7'
+```
+
+!!! note
+    uData ensure compatibility for IE officialy supported by Microsoft.
+    Right now, it's IE11.
+
+You maybe need to manually close the first time popup on first run.
+To do so, launch the VM then launch the test suite:
+
+```bash
+$ iectrl start 11
+$ npm -s run test:unit -- --browsers 'IE11 - Win7'
+# You can close it after
+$ iectrl close 11
+```
+
 ## Integration tests
 
 We use [Watai][] which is using [webdriver API][] on top of [Selenium][].
@@ -110,3 +136,5 @@ Check out the [Watai tutorial][] to add your own tests!
 [chai]: http://chaijs.com/
 [chai-plugins]: http://chaijs.com/plugins/
 [sinon.js]: http://sinonjs.org/
+[ievms]: http://xdissent.github.io/ievms/
+[iectrl]: http://xdissent.github.io/iectrl/

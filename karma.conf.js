@@ -120,6 +120,7 @@ module.exports = function(config) {
             require('karma-phantomjs-launcher'),
             require('karma-firefox-launcher'),
             require('karma-chrome-launcher'),
+            require('karma-ievms'),
             require('karma-sourcemap-loader'),
             require('karma-fixture'),
             require('karma-sinon-chai'),
