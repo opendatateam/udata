@@ -88,7 +88,7 @@ $ npm -s run test:unit -- --browsers 'IE11 - Win7'
 ```
 
 !!! note
-    uData ensure compatibility for IE officialy supported by Microsoft.
+    uData ensure compatibility for IE [officialy supported by Microsoft][ie-support].
     Right now, it's IE11.
 
 You maybe need to manually close the first time popup on first run.
@@ -138,3 +138,4 @@ Check out the [Watai tutorial][] to add your own tests!
 [sinon.js]: http://sinonjs.org/
 [ievms]: http://xdissent.github.io/ievms/
 [iectrl]: http://xdissent.github.io/iectrl/
+[ie-support]: https://www.microsoft.com/en-us/WindowsForBusiness/End-of-IE-support
