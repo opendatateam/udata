@@ -60,8 +60,8 @@ class SiteActivityAPI(API):
         qs = Activity.objects
 
         if args['organization']:
-            qs = qs(db.Q(organization=args['organization'])
-                    | db.Q(related_to=args['organization']))
+            qs = qs(db.Q(organization=args['organization']) |
+                    db.Q(related_to=args['organization']))
 
         if args['user']:
             qs = qs(actor=args['user'])

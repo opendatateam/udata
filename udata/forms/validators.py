@@ -3,10 +3,12 @@ from __future__ import unicode_literals
 
 
 from wtforms import validators
-from wtforms.validators import *
-from wtforms.validators import ValidationError, StopValidation
+from wtforms.validators import *  # noqa
+from wtforms.validators import ValidationError, StopValidation  # noqa
 
-_ = lambda s: s
+
+def _(s):
+    return s
 
 
 class RequiredIf(validators.DataRequired):

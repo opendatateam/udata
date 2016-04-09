@@ -25,7 +25,9 @@ metrics_fields = api.model('Metric', {
         description='The metrics as key-value pairs', required=True),
 })
 
-isodate = lambda v: date(*(int(p) for p in v.split('-'))).isoformat()
+
+def isodate(value):
+    return date(*(int(p) for p in value.split('-'))).isoformat()
 
 parser = api.parser()
 parser.add_argument(

@@ -129,7 +129,8 @@ class MarkdownTestCase(TestCase, WebTestMixin):
     def test_mdstrip_custom_end(self):
         '''mdstrip should allow a custom ending string'''
         text = '1234567890'
+        template = '{{ text|mdstrip(5, "$") }}'
         with self.app.test_request_context('/'):
-            result = render_template_string('{{ text|mdstrip(5, "$") }}', text=text)
+            result = render_template_string(template, text=text)
 
         self.assertEqual(result.strip(), '1234 $')

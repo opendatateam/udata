@@ -37,12 +37,32 @@ class Defaults(object):
     CACHE_KEY_PREFIX = 'udata-cache'
     CACHE_TYPE = 'redis'
 
-    SECURITY_PASSWORD_HASH = b'bcrypt'
-    SECURITY_PASSWORD_SALT = b'udata'
-
-    OAUTH2_PROVIDER_TOKEN_EXPIRES_IN = 30 * 24 * 60 * 60  # 30 days
+    # Flask mail settings
 
     MAIL_DEFAULT_SENDER = 'webmaster@udata'
+
+    # Flask security settings
+
+    SECURITY_TRACKABLE = True
+    SECURITY_REGISTERABLE = True
+    SECURITY_CONFIRMABLE = True
+    SECURITY_RECOVERABLE = True
+    SECURITY_CHANGEABLE = True
+
+    SECURITY_PASSWORD_HASH = 'bcrypt'
+    SECURITY_PASSWORD_SALT = b'udata'
+
+    SECURITY_PASSWORD_SALT = 'Default uData secret password salt'
+    SECURITY_CONFIRM_SALT = 'Default uData secret confirm salt'
+    SECURITY_RESET_SALT = 'Default uData secret reset salt'
+    SECURITY_REMEMBER_SALT = 'Default uData remember salt'
+
+    SECURITY_EMAIL_SENDER = MAIL_DEFAULT_SENDER
+
+    # Flask WTF settings
+    CSRF_SESSION_KEY = 'Default uData csrf key'
+
+    OAUTH2_PROVIDER_TOKEN_EXPIRES_IN = 30 * 24 * 60 * 60  # 30 days
 
     AUTO_INDEX = True
 

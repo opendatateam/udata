@@ -132,7 +132,8 @@ def preview(ident):
     return backend.harvest()
 
 
-def schedule(ident, minute='*', hour='*', day_of_week='*', day_of_month='*', month_of_year='*'):
+def schedule(ident, minute='*', hour='*',
+             day_of_week='*', day_of_month='*', month_of_year='*'):
     '''Schedule an harvesting on a source given a crontab'''
     source = get_source(ident)
     if source.periodic_task:
@@ -161,7 +162,8 @@ def unschedule(ident):
     '''Unschedule an harvesting on a source'''
     source = get_source(ident)
     if not source.periodic_task:
-        raise ValueError('Harvesting on source {0} is ot scheduled'.format(source.name))
+        msg = 'Harvesting on source {0} is ot scheduled'.format(source.name)
+        raise ValueError(msg)
 
     source.periodic_task.delete()
     signals.harvest_source_unscheduled.send(source)

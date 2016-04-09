@@ -1,5 +1,5 @@
 <template>
-    <datatable :title="title " icon="newspaper-o"
+    <datatable :title="_('Posts') " icon="newspaper-o"
         boxclass="posts-widget"
         :fields="fields"
         :p="posts"
@@ -16,14 +16,14 @@
 
 
 <script>
+import Datatable from 'components/datatable/widget.vue';
+
 export default {
     name: 'posts-widget',
-    components: {
-         datatable: require('components/datatable/widget.vue')
-    },
-    data: function() {
+    props: ['posts'],
+    components: {Datatable},
+    data() {
         return {
-            title: this._('Posts'),
             fields: [{
                 label: this._('Name'),
                 key: 'name',
@@ -55,9 +55,8 @@ export default {
     },
     events: {
         'datatable:item:click': function(post) {
-            this.$go('/post/' + post.id + '/');
+            this.$go({name: 'post', params: {oid: post.id}});
         }
-    },
-    props: ['posts']
+    }
 };
 </script>

@@ -13,9 +13,9 @@ __all__ = ('Metric', 'MetricMetaClass')
 metric_catalog = {}
 
 
-from udata.models import db
+from udata.models import db  # noqa: need metrics refactoring
 
-from .tasks import update_metric, archive_metric
+from .tasks import update_metric, archive_metric  # noqa
 
 
 def update_on_demand(metric):
@@ -134,15 +134,15 @@ class Metric(object):
 
 def init_app(app):
     # Load all core metrics
-    import udata.core.site.metrics
-    import udata.core.user.metrics
-    import udata.core.issues.metrics
-    import udata.core.discussions.metrics
-    import udata.core.badges.metrics
-    import udata.core.dataset.metrics
-    import udata.core.reuse.metrics
-    import udata.core.organization.metrics
-    import udata.core.followers.metrics
+    import udata.core.site.metrics  # noqa
+    import udata.core.user.metrics  # noqa
+    import udata.core.issues.metrics  # noqa
+    import udata.core.discussions.metrics  # noqa
+    import udata.core.badges.metrics  # noqa
+    import udata.core.dataset.metrics  # noqa
+    import udata.core.reuse.metrics  # noqa
+    import udata.core.organization.metrics  # noqa
+    import udata.core.followers.metrics  # noqa
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:

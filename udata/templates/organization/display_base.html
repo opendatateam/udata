@@ -25,7 +25,7 @@
                     <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
                         class="certified" data-toggle="popover"
                         data-title="{{ _('Certified public service') }}"
-                        data-content="{{ _('This organization and its datasets are certified by data.gouv.fr') }}"
+                        data-content="{{ _('This organization and its datasets are certified by') }} {{ config.SERVER_NAME }}"
                         data-container="body" data-placement="left" data-trigger="hover"/>
                 {% endif %}
                 <div class="text-center">

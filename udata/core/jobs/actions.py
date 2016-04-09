@@ -3,7 +3,7 @@ from __future__ import unicode_literals, absolute_import
 
 import logging
 
-from udata.tasks import schedulables, celery
+from udata.tasks import celery
 
 log = logging.getLogger(__name__)
 

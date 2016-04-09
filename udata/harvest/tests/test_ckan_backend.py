@@ -117,7 +117,7 @@ def package_show_factory(name):
             },
             "groups": [{
                 "title": " Actions Région",
-                "description": "Les actions régionales, l'agriculture, l'aménagement du territoire...",
+                "description": "Les actions régionales, l'agriculture, l'aménagement du territoire...",  # noqa
                 "name": "actions-region",
                 "id": "7859d498-316e-4a31-8487-f7f26df0929e"
             }],
@@ -143,7 +143,7 @@ def package_show_factory(name):
                     "package_id": "f9f07d12-f810-4cb5-b3c0-52d7b1130c2e"
                 }
             }],
-            "license_url": "http://www.etalab.gouv.fr/pages/Licence_ouverte_Open_licence-5899923.html",
+            "license_url": "http://www.etalab.gouv.fr/pages/Licence_ouverte_Open_licence-5899923.html",  # noqa
             "organization": {
                 "description": "",
                 "created": "2013-07-18T11:25:15.969631",

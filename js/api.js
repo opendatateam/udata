@@ -15,6 +15,7 @@ import log from 'logger';
  * @return {String}       The updated URL
  */
 function updateQueryParam(uri, key, value) {
+    if (!uri || !key) return;
     // Match an existing key/value pair
     const re = new RegExp(`([?&])${key}=.*?(&|$)`, 'i');
     const separator = uri.indexOf('?') !== -1 ? '&' : '?';

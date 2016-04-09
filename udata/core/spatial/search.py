@@ -41,6 +41,21 @@ class GeoZoneSearch(ModelSearchAdapter):
     }
 
     @classmethod
+    def compute_weight(cls, population):
+        """Weight must be in the interval [0..2147483647]"""
+        if 0 <= population <= 2147483647:
+            return population
+        else:
+            if population < 0:  # country/eh population is -99.
+                return 0
+            else:  # World population is 6772425850.
+                return 2147483647
+
+    @classmethod
+    def is_indexable(cls, zone):
+        return zone.level not in ('fr/iris', 'fr/canton', 'fr/district')
+
+    @classmethod
     def serialize(cls, zone):
         return {
             'zone_suggest': {
@@ -52,5 +67,6 @@ class GeoZoneSearch(ModelSearchAdapter):
                     'level': zone.level,
                     'keys': zone.keys,
                 },
+                'weight': cls.compute_weight(zone.population),
             },
         }

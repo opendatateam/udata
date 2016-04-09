@@ -60,8 +60,12 @@ import Layout from 'components/layout.vue';
 
 export default {
     name: 'OrganizationView',
-    data: function() {
+    data() {
         let actions = [{
+                label: this._('Edit'),
+                icon: 'edit',
+                method: this.edit
+            }, {
                 label: this._('Delete'),
                 icon: 'trash',
                 method: this.confirm_delete
@@ -134,7 +138,7 @@ export default {
         };
     },
     computed: {
-        boxes: function() {
+        boxes() {
             if (!this.org.metrics) {
                 return [];
             }
@@ -164,7 +168,7 @@ export default {
                 target: '#trafic-widget'
             }];
         },
-        downloads: function() {
+        downloads() {
             return [{
                 label: this._('Datasets as CSV'),
                 url: URLs.build('organization.datasets_csv', {org: this.org})
@@ -194,13 +198,16 @@ export default {
         }
     },
     methods: {
-        confirm_delete: function() {
+        edit() {
+            this.$go({name: 'organization-edit', params: {oid: this.org.id}});
+        },
+        confirm_delete() {
             this.$root.$modal(
                 require('components/organization/delete-modal.vue'),
                 {organization: this.org}
             );
         },
-        setBadges: function() {
+        setBadges() {
             this.$root.$modal(
                 require('components/badges/modal.vue'),
                 {subject: this.org}
@@ -211,6 +218,7 @@ export default {
         data() {
             if (this.$route.params.oid !== this.org.id) {
                 this.org.fetch(this.$route.params.oid);
+                this.$scrollTo(this.$el);
             }
         }
     },

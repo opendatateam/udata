@@ -16,8 +16,15 @@ router.map({
         }
     },
     '/me/': {
+        name: 'me',
         component: function(resolve) {
             require(['./views/me.vue'], resolve);
+        }
+    },
+    '/me/edit/': {
+        name: 'me-edit',
+        component: function(resolve) {
+            require(['./views/me-edit.vue'], resolve);
         }
     },
     '/site/': {
@@ -88,6 +95,12 @@ router.map({
             // },
         }
     },
+    '/dataset/:oid/edit/': {
+        name: 'dataset-edit',
+        component: function(resolve) {
+            require(['./views/dataset-edit.vue'], resolve);
+        },
+    },
     '/community-resource/new/': {
         component: function(resolve) {
             require(['./views/community-resource-wizard.vue'], resolve);
@@ -118,6 +131,12 @@ router.map({
             }
         }
     },
+    '/reuse/:oid/edit/': {
+        name: 'reuse-edit',
+        component: function(resolve) {
+            require(['./views/reuse-edit.vue'], resolve);
+        },
+    },
     '/organization/new/': {
         component: function(resolve) {
             require(['./views/organization-wizard.vue'], resolve);
@@ -139,6 +158,12 @@ router.map({
             require(['./views/organization.vue'], resolve);
         }
     },
+    '/organization/:oid/edit/': {
+        name: 'organization-edit',
+        component: function(resolve) {
+            require(['./views/organization-edit.vue'], resolve);
+        },
+    },
     '/user/:oid/': {
         name: 'user',
         component: function(resolve) {
@@ -157,6 +182,7 @@ router.map({
         }
     },
     '/harvester/:oid/edit': {
+        name: 'harvester-edit',
         component: function(resolve) {
             require(['./views/harvester-edit.vue'], resolve);
         }
@@ -167,8 +193,15 @@ router.map({
         }
     },
     '/post/:oid/': {
+        name: 'post',
         component: function(resolve) {
             require(['./views/post.vue'], resolve);
+        }
+    },
+    '/post/:oid/edit/': {
+        name: 'post-edit',
+        component: function(resolve) {
+            require(['./views/post-edit.vue'], resolve);
         }
     },
     '/topic/new/': {
@@ -177,9 +210,16 @@ router.map({
         }
     },
     '/topic/:oid/': {
+        name: 'topic',
         component: function(resolve) {
             require(['./views/topic.vue'], resolve);
         }
+    },
+    '/topic/:oid/edit/': {
+        name: 'topic-edit',
+        component: function(resolve) {
+            require(['./views/topic-edit.vue'], resolve);
+        },
     },
     '/editorial/': {
         component: function(resolve) {

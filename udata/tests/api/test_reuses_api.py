@@ -125,7 +125,8 @@ class ReuseAPITest(APITestCase):
 
         dataset = DatasetFactory()
         data = {'id': dataset.id, 'class': 'Dataset'}
-        response = self.post(url_for('api.reuse_add_dataset', reuse=reuse), data)
+        url = url_for('api.reuse_add_dataset', reuse=reuse)
+        response = self.post(url, data)
         self.assert201(response)
         reuse.reload()
         self.assertEqual(len(reuse.datasets), 1)
@@ -133,7 +134,8 @@ class ReuseAPITest(APITestCase):
 
         dataset = DatasetFactory()
         data = {'id': dataset.id, 'class': 'Dataset'}
-        response = self.post(url_for('api.reuse_add_dataset', reuse=reuse), data)
+        url = url_for('api.reuse_add_dataset', reuse=reuse)
+        response = self.post(url, data)
         self.assert201(response)
         reuse.reload()
         self.assertEqual(len(reuse.datasets), 2)
@@ -146,30 +148,25 @@ class ReuseAPITest(APITestCase):
         reuse = ReuseFactory(owner=self.user, datasets=[dataset])
 
         data = {'id': dataset.id, 'class': 'Dataset'}
-        response = self.post(url_for('api.reuse_add_dataset', reuse=reuse), data)
+        url = url_for('api.reuse_add_dataset', reuse=reuse)
+        response = self.post(url, data)
         self.assert200(response)
         reuse.reload()
         self.assertEqual(len(reuse.datasets), 1)
         self.assertEqual(reuse.datasets[-1], dataset)
 
     def test_reuse_api_add_dataset_not_found(self):
-        '''It should return 404 when adding an unknown dataset to a reuse from the API'''
+        '''It should return 404 when adding an unknown dataset to a reuse'''
         self.login()
         reuse = ReuseFactory(owner=self.user)
 
         data = {'id': 'not-found', 'class': 'Dataset'}
-        response = self.post(url_for('api.reuse_add_dataset', reuse=reuse), data)
+        url = url_for('api.reuse_add_dataset', reuse=reuse)
+        response = self.post(url, data)
 
         self.assert404(response)
         reuse.reload()
         self.assertEqual(len(reuse.datasets), 0)
-
-    def test_reuse_api_update_deleted(self):
-        '''It should not update a deleted reuse from the API and raise 410'''
-        self.login()
-        reuse = ReuseFactory(deleted=datetime.now())
-        response = self.put(url_for('api.reuse', reuse=reuse), {})
-        self.assertStatus(response, 410)
 
     def test_reuse_api_feature(self):
         '''It should mark the reuse featured on POST'''

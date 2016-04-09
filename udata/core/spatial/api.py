@@ -74,7 +74,8 @@ class SuggestZonesAPI(API):
                 'keys': opt['payload']['keys'],
                 'score': opt['score'],
             }
-            for opt in search.suggest(args['q'], 'zone_suggest', args['size'])
+            for opt in search.suggest(
+                args['q'], 'zone_suggest', args['size'])
         ]
 
 

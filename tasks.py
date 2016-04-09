@@ -54,26 +54,18 @@ def cover():
 
 
 @task
-def jstest(hot=False):
-    '''Run JS tests suite'''
-    header('Run client tests suite')
-    cmd = 'webpack-dev-server --config webpack.config.test.js'
-    if hot:
-        cmd += ' --hot --inline'
-    nrun(cmd, pty=True)
-
-
-@task
-def karma():
-    '''Continuous Karma test'''
-    nrun('karma start --browsers=PhantomJS', pty=True)
+def jstest(watch=False):
+    '''Run Karma tests suite'''
+    header('Run Karma/Mocha test suite')
+    cmd = 'npm run -s test:{0}'.format('watch' if watch else 'unit')
+    lrun(cmd, pty=True)
 
 
 @task
 def doc():
     '''Build the documentation'''
     header('Building documentation')
-    lrun('cd doc && make html', pty=True)
+    lrun('mkdocs serve', pty=True)
 
 
 @task

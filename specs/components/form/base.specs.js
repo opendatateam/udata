@@ -1,74 +1,75 @@
-import API from 'specs/mocks/api';
+import API from 'api';
 import {Model} from 'models/base';
 import Vue from 'vue';
+import BaseForm from 'components/form/base-form';
 
-describe("Common Form features", function() {
-
+describe('Common Form features', function() {
     Vue.config.async = false;
 
     Vue.use(require('plugins/i18next'));
     Vue.use(require('plugins/util'));
 
-    var BaseForm = require('components/form/base-form');
 
     afterEach(function() {
         fixture.cleanup();
     });
 
-    describe("Empty form", function() {
-        var vm = new Vue({
-            el: fixture.set('<form />'),
-            mixins: [BaseForm]
+    describe('Empty form', function() {
+        beforeEach(function() {
+            this.vm = new Vue({
+                el: fixture.set('<form v-el:form />')[0],
+                mixins: [BaseForm]
+            });
         });
 
         it('should have sane defaults', function() {
-            expect(vm).to.have.property('fill').to.be.false;
-            expect(vm).to.have.property('readonly').to.be.false;
-            expect(vm).to.have.property('fields').to.be.undefined;
-            expect(vm).to.have.property('defs').to.be.undefined;
-            expect(vm).to.have.property('model').to.be.undefined;
+            expect(this.vm).to.have.property('fill').to.be.false;
+            expect(this.vm).to.have.property('readonly').to.be.false;
+            expect(this.vm).to.have.property('fields').to.be.undefined;
+            expect(this.vm).to.have.property('defs').to.be.undefined;
+            expect(this.vm).to.have.property('model').to.be.undefined;
         });
 
         it('should have an empty schema', function() {
-            expect(vm).to.have.property('schema');
-            expect(vm.schema).to.eql({
+            expect(this.vm).to.have.property('schema');
+            expect(this.vm.schema).to.eql({
                 properties: {},
                 required: []
             });
         });
 
         it('should validate', function() {
-            expect(vm.validate()).to.be.true;
+            expect(this.vm.validate()).to.be.true;
         });
     });
 
-    describe("Forms with fields and defs", function() {
-        var vm = new Vue({
-            el: fixture.set('<form/>'),
-            mixins: [BaseForm],
-            data: {
-                fields: [{
-                    id: 'title',
-                    label: 'Title'
-                }, {
-                    id: 'private',
-                    label: 'Private'
-                }],
-                defs: {
-                    properties: {
-                        title: {
-                            type: 'string'
-                        },
-                        private: {
-                            type: 'boolean'
-                        }
-                    },
-                    required: ['title']
-                }
-            }
-        });
-
+    describe('Forms with fields and defs', function() {
         it('should have a correct schema', function() {
+            const vm = new Vue({
+                el: fixture.set('<form v-el:form/>')[0],
+                mixins: [BaseForm],
+                data: {
+                    fields: [{
+                        id: 'title',
+                        label: 'Title'
+                    }, {
+                        id: 'private',
+                        label: 'Private'
+                    }],
+                    defs: {
+                        properties: {
+                            title: {
+                                type: 'string'
+                            },
+                            private: {
+                                type: 'boolean'
+                            }
+                        },
+                        required: ['title']
+                    }
+                }
+            });
+
             expect(vm).to.have.property('schema').to.eql({
                 properties: {
                     title: {
@@ -83,10 +84,9 @@ describe("Common Form features", function() {
         });
     });
 
-    describe('Form with model', function () {
-
-        class Pet extends Model {};
-        class Person extends Model {};
+    describe('Form with model', function() {
+        class Pet extends Model {}
+        class Person extends Model {}
 
         before(function() {
             API.mock_defs({
@@ -111,8 +111,8 @@ describe("Common Form features", function() {
         });
 
         it('Should handle schema for flat models', function() {
-            var vm = new Vue({
-                el: fixture.set('<form/>'),
+            const vm = new Vue({
+                el: fixture.set('<form/>')[0],
                 mixins: [BaseForm],
                 data: {
                     model: new Pet(),
@@ -134,8 +134,8 @@ describe("Common Form features", function() {
         });
 
         it('Should handle schema for nested models', function() {
-            var vm = new Vue({
-                el: fixture.set('<form/>'),
+            const vm = new Vue({
+                el: fixture.set('<form/>')[0],
                 mixins: [BaseForm],
                 data: {
                     model: new Person(),
@@ -155,40 +155,33 @@ describe("Common Form features", function() {
                 }
             });
         });
-
     });
 
 
     describe('serialization', function() {
-
         beforeEach(function() {
+            API.mock_defs({});
             this.vm = new Vue({
                 el: fixture.set(`
-                    <form role="form" v-el="form">
-                        <field v-repeat="field in fields" field="{{field}}"
-                            schema="{{schema}}" model="{{model}}"></field>
+                    <form role="form" v-el:form>
+                        <field v-for="field in fields" v-ref:fields :field="field"
+                            :schema="schema" :model="model">
+                        </field>
                     </form>
-                `),
+                `)[0],
                 mixins: [BaseForm],
                 components: {
                     field: {
-                        template: `<component is="{{widget}}" model="{{model}}"
-                                    field="{{field}}" value="{{value}}"
-                                    description="{{description}}" property="{{property}}"
-                                    placeholder="{{placeholder}}" required="{{required}}">
-                                    </component>`,
+                        template: `<component :is="widget"
+                                    :field="field" :value="value" :model="model"
+                                    :description="description" :property="property"
+                                    :placeholder="placeholder" :required="required"
+                                    :readonly="readonly">
+                                </component>`,
                         mixins: [require('components/form/base-field').BaseField]
                     }
-                },
-                data: function() {
-                    return {
-                        fields: [],
-                        model: {},
-                        defs: {}
-                    };
                 }
             });
-
         });
 
         it('should be an empty object for empty form', function() {
@@ -196,34 +189,19 @@ describe("Common Form features", function() {
         });
 
         it('should serialize all values', function() {
-            // this.vm.model = {};
             this.vm.defs = {properties: {
                 // Input is optionnal, just to avoid console warnings
-                input: {
-                    type: 'string'
-                },
-                checkbox: {
-                    type: 'boolean'
-                },
-                textarea: {
-                    type: 'string',
-                    format: 'markdown'
-                },
-                select: {
-                    type: 'string',
-                    enum: ['a', 'b'],
-                    default: 'b'
-                }
+                input: {type: 'string'},
+                checkbox: {type: 'boolean'},
+                textarea: {type: 'string', format: 'markdown'},
+                select: {type: 'string', enum: ['a', 'b'], default: 'b'},
             }};
-            this.vm.fields = [{
-                id: 'input'
-            }, {
-                id: 'checkbox'
-            }, {
-                id: 'textarea'
-            }, {
-                id: 'select',
-            }];
+            this.vm.fields = [
+                {id: 'input'},
+                {id: 'checkbox'},
+                {id: 'textarea'},
+                {id: 'select'}
+            ];
 
             expect(this.vm.serialize()).to.eql({
                 input: '',
@@ -234,38 +212,24 @@ describe("Common Form features", function() {
         });
 
         it('should serialize updated values', function() {
-            this.vm.model = {};
             this.vm.defs = {properties: {
                 // Input is optionnal, just to avoid console warnings
-                input: {
-                    type: 'string'
-                },
-                checkbox: {
-                    type: 'boolean'
-                },
-                textarea: {
-                    type: 'string',
-                    format: 'markdown'
-                },
-                select: {
-                    type: 'string',
-                    enum: ['a', 'b']
-                }
+                input: {type: 'string'},
+                checkbox: {type: 'boolean'},
+                textarea: {type: 'string', format: 'markdown'},
+                select: {type: 'string', enum: ['a', 'b']},
             }};
-            this.vm.fields = [{
-                id: 'input'
-            }, {
-                id: 'checkbox'
-            }, {
-                id: 'textarea'
-            }, {
-                id: 'select',
-            }];
+            this.vm.fields = [
+                {id: 'input'},
+                {id: 'checkbox'},
+                {id: 'textarea'},
+                {id: 'select'},
+            ];
 
-            this.vm.$$.form.querySelector('#input').value = 'a';
-            this.vm.$$.form.querySelector('#checkbox').checked = true;
-            this.vm.$$.form.querySelector('#textarea').value = 'aa';
-            this.vm.$$.form.querySelector('#select').value = 'b';
+            this.vm.$el.querySelector('#input').value = 'a';
+            this.vm.$el.querySelector('#checkbox').checked = true;
+            this.vm.$el.querySelector('#textarea').value = 'aa';
+            this.vm.$el.querySelector('#select').value = 'b';
 
             expect(this.vm.serialize()).to.eql({
                 input: 'a',
@@ -275,26 +239,20 @@ describe("Common Form features", function() {
             });
         });
 
-        describe('Nested values', function () {
+        describe('Nested values', function() {
             it('should handle nested values', function() {
-                this.vm.model = {};
                 // Defs are optionnal, just here to avoid console warnings
                 this.vm.defs = {properties: {
-                    'nested.a': {
-                        type: 'string'
-                    },
-                    'nested.b': {
-                        type: 'string'
-                    }
+                    'nested.a': {type: 'string'},
+                    'nested.b': {type: 'string'},
                 }};
-                this.vm.fields = [{
-                    id: 'nested.a'
-                }, {
-                    id: 'nested.b'
-                }];
+                this.vm.fields = [
+                    {id: 'nested.a'},
+                    {id: 'nested.b'},
+                ];
 
-                this.vm.$$.form.querySelector('#nested\\.a').value = 'aa';
-                this.vm.$$.form.querySelector('#nested\\.b').value = 'bb';
+                this.vm.$els.form.querySelector('#nested\\.a').value = 'aa';
+                this.vm.$els.form.querySelector('#nested\\.b').value = 'bb';
 
                 expect(this.vm.serialize()).to.eql({
                     nested: {
@@ -305,21 +263,15 @@ describe("Common Form features", function() {
             });
 
             it('should not serialize empty nested nested object', function() {
-                this.vm.model = {};
                 // Defs are optionnal, just here to avoid console warnings
                 this.vm.defs = {properties: {
-                    'nested.a': {
-                        type: 'string'
-                    },
-                    'nested.b': {
-                        type: 'string'
-                    }
+                    'nested.a': {type: 'string'},
+                    'nested.b': {type: 'string'},
                 }};
-                this.vm.fields = [{
-                    id: 'nested.a'
-                }, {
-                    id: 'nested.b'
-                }];
+                this.vm.fields = [
+                    {id: 'nested.a'},
+                    {id: 'nested.b'},
+                ];
 
                 expect(this.vm.serialize()).to.eql({});
             });
@@ -331,20 +283,16 @@ describe("Common Form features", function() {
                         b: {type: 'string'}
                     }}
                 });
-                this.vm.model = {};
                 this.vm.defs = {
                     properties: {
-                        'nested': {
-                            $ref: '#/definitions/Nested'
-                        }
+                        'nested': {$ref: '#/definitions/Nested'}
                     },
                     required: ['nested']
                 };
-                this.vm.fields = [{
-                    id: 'nested.a'
-                }, {
-                    id: 'nested.b'
-                }];
+                this.vm.fields = [
+                    {id: 'nested.a'},
+                    {id: 'nested.b'},
+                ];
 
                 expect(this.vm.serialize()).to.eql({
                     nested: {
@@ -354,7 +302,5 @@ describe("Common Form features", function() {
                 });
             });
         });
-
     });
-
 });

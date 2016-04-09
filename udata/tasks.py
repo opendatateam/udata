@@ -100,19 +100,18 @@ def init_app(app):
     ContextTask.current_app = app
 
     # Load core tasks
-    import udata.core.metrics.tasks
-    import udata.core.storages.tasks
-    import udata.core.tags.tasks
-    import udata.core.activity.tasks
-    import udata.core.dataset.tasks
-    import udata.core.reuse.tasks
-    import udata.core.user.tasks
-    import udata.core.organization.tasks
-    import udata.core.followers.tasks
-    import udata.core.issues.tasks
-    import udata.core.discussions.tasks
-    import udata.core.badges.tasks
-    import udata.harvest.tasks
+    import udata.core.metrics.tasks  # noqa
+    import udata.core.tags.tasks  # noqa
+    import udata.core.activity.tasks  # noqa
+    import udata.core.dataset.tasks  # noqa
+    import udata.core.reuse.tasks  # noqa
+    import udata.core.user.tasks  # noqa
+    import udata.core.organization.tasks  # noqa
+    import udata.core.followers.tasks  # noqa
+    import udata.core.issues.tasks  # noqa
+    import udata.core.discussions.tasks  # noqa
+    import udata.core.badges.tasks  # noqa
+    import udata.harvest.tasks  # noqa
 
     # Load plugins tasks
     for plugin in app.config['PLUGINS']:

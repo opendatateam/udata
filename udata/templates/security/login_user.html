@@ -1,18 +1,49 @@
 {% extends theme('layouts/1-column.html') %}
 {% import 'macros/forms.html' as forms with context %}
 
-{% block main_content %}
-<div class="row box">
-    <form class="form-horizontal col-lg-10 col-lg-offset-1 validation"
-        method="post" action="{{ url_for('security.login') }}">
-        {{ forms.render(login_user_form, exclude=[login_user_form.submit]) }}
-        {{ forms.required_disclaimer() }}
+{% set section_class = 'form' %}
 
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" class="btn btn-default">{{ _('Login') }}</button>
-            </div>
-        </div>
-    </form>
+{% block main_content %}
+
+<div class="container auth-container">
+    <div class="row">
+        <div class="col-sm-6">
+            <form class="form-horizontal col-lg-10 col-lg-offset-1 validation validate"
+                method="post" action="{{ url_for('security.login') }}">
+                <fieldset>
+                    <legend>{{ _('Sign In') }}</legend>
+                    {{ forms.render(login_user_form, exclude=[login_user_form.submit]) }}
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-primary btn-block">{{ _('Sign in') }}</button>
+                        </div>
+                    </div>
+                    <p>
+                        {{ _('Forgot your password?') }}
+                        <a href="{{ url_for('security.forgot_password', next=request.url) }}">
+                            {{ _('Recover your password') }}
+                        </a>
+                    </p>
+                </fieldset>
+            </form>
+    </div>
+    <div class="col-sm-6">
+        <form class="form-horizontal">
+            <fieldset>
+                <legend>{{ _('Sign up') }}</legend>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <a title="{{ _('Register') }}"
+                            href="{{ url_for('security.register', next=request.url) }}"
+                            class="btn btn-primary btn-block btn-lg"
+                            >
+                            {{ _('Create an account') }}
+                        </a>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
 </div>
+
 {% endblock %}

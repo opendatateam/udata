@@ -10,7 +10,7 @@ from udata.tests import TestCase, WebTestMixin, SearchTestMixin
 
 from .factories import (
     TopicFactory, PostFactory, OrganizationFactory, VisibleReuseFactory,
-    VisibleDatasetFactory, GeoZoneFactory
+    VisibleDatasetFactory
 )
 
 # Neede for lxml XPath not supporting default namespace
@@ -130,14 +130,3 @@ class SitemapTest(SitemapTestCase):
         url = self.get_by_url('apidoc.swaggerui_redirect')
         self.assertIsNotNone(url)
         self.assert_url(url, 0.9, 'weekly')
-
-    def test_towns_within_sitemap(self):
-        '''It should return the town from the sitemap.'''
-        territory = GeoZoneFactory(
-            id='fr/town/13004', name='Arles', code='13004', level='fr/town')
-
-        self.get_sitemap_tree()
-
-        url = self.get_by_url('territories.territory', territory=territory)
-        self.assertIsNotNone(url)
-        self.assert_url(url, 0.5, 'weekly')

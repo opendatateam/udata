@@ -19,10 +19,6 @@ from udata.core.storages import avatars, default_image_basename
 
 __all__ = ('User', 'Role', 'datastore', 'FollowUser')
 
-
-# def populate_slug(user):
-#     return ' '.join([user.first_name, user.last_name])
-
 AVATAR_SIZES = [100, 32, 25]
 
 
@@ -111,14 +107,19 @@ class User(db.Document, WithMetrics, UserMixin):
     def sysadmin(self):
         return self.has_role('admin')
 
+    def url_for(self, *args, **kwargs):
+        return url_for('users.show', user=self, *args, **kwargs)
+
+    display_url = property(url_for)
+
     @property
-    def display_url(self):
-        return url_for('users.show', user=self)
+    def external_url(self):
+        return self.url_for(_external=True)
 
     @property
     def visible(self):
-        return (self.metrics.get('datasets', 0)
-                + self.metrics.get('reuses', 0)) > 0
+        count = self.metrics.get('datasets', 0) + self.metrics.get('reuses', 0)
+        return count > 0
 
     @cached_property
     def resources_availability(self):

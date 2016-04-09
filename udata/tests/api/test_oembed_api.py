@@ -5,6 +5,8 @@ import json
 
 from flask import url_for
 
+from udata.frontend.markdown import mdstrip
+
 from . import APITestCase
 from ..factories import DatasetFactory, OrganizationFactory, UserFactory
 
@@ -31,8 +33,7 @@ class OEmbedsDatasetAPITest(APITestCase):
         self.assertIn(dataset.title, data['html'])
         self.assertIn(dataset.external_url, data['html'])
         self.assertIn('placeholders/default.png', data['html'])
-        # Because we use mdstrip for the description.
-        self.assertIn(dataset.description[:90], data['html'])
+        self.assertIn(mdstrip(dataset.description, 110), data['html'])
 
     def test_oembeds_dataset_api_get_with_organization(self):
         '''It should fetch a dataset in the oembed format with org.'''

@@ -9,10 +9,10 @@ log = logging.getLogger(__name__)
 
 def init_app(app):
     # Load all core actvitiess
-    import udata.core.user.activities
-    import udata.core.dataset.activities
-    import udata.core.reuse.activities
-    import udata.core.organization.activities
+    import udata.core.user.activities  # noqa
+    import udata.core.dataset.activities  # noqa
+    import udata.core.reuse.activities  # noqa
+    import udata.core.organization.activities  # noqa
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:

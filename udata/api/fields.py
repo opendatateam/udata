@@ -6,7 +6,7 @@ import logging
 from dateutil.parser import parse
 
 from flask import request, url_for
-from flask.ext.restplus.fields import *
+from flask.ext.restplus.fields import *  # noqa
 
 
 log = logging.getLogger(__name__)

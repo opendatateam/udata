@@ -75,16 +75,16 @@ def populate_slug(instance, field):
     except:
         previous = None
 
-    manual = (not previous and value
-              or field.db_field in instance._get_changed_fields())
+    manual = (not previous and value or
+              field.db_field in instance._get_changed_fields())
 
     if not manual and field.populate_from:
         value = getattr(instance, field.populate_from)
         if previous and value == getattr(previous, field.populate_from):
             return value
 
-    if previous and (getattr(previous, field.db_field) == value
-                     or not field.update):
+    if previous and (getattr(previous, field.db_field) == value or
+                     not field.update):
         return value
 
     if field.lower_case:
@@ -106,8 +106,11 @@ def populate_slug(instance, field):
         if previous:
             qs = qs(id__ne=previous.id)
 
-        exists = lambda s: qs(
-            class_check=False, **{field.db_field: s}).limit(1).count(True) > 0
+        def exists(s):
+            return qs(
+                class_check=False, **{field.db_field: s}
+            ).limit(1).count(True) > 0
+
         while exists(slug):
             slug = '{0}-{1}'.format(base_slug, index)
             index += 1

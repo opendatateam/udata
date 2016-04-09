@@ -52,7 +52,7 @@ class MeAPI(API):
         return current_user._get_current_object()
 
     @api.secure
-    @api.marshal_with(user_fields)
+    @api.marshal_with(me_fields)
     @api.doc('update_me', responses={400: 'Validation error'})
     def put(self, **kwargs):
         '''Update my profile'''
@@ -177,7 +177,8 @@ class MyOrgDiscussionsAPI(API):
         discussions = discussions_for(current_user._get_current_object())
         discussions = discussions.order_by('-created')
         if q:
-            discussions = discussions.filter(title__icontains=q.decode('utf-8'))
+            decoded = q.decode('utf-8')
+            discussions = discussions.filter(title__icontains=decoded)
         return list(discussions)
 
 

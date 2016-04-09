@@ -14,6 +14,9 @@ dependencies:
     - elasticsearch-1.7.5/bin/elasticsearch: {background: true}
   override:
     - pip install -r requirements/travis.pip
+    - nvm use && nvm alias default $(nvm current) && npm install
 test:
   override:
-    - nosetests --immediate udata
+    - mkdir -p $CIRCLE_TEST_REPORTS/{python,karma}
+    - nosetests --immediate --with-xunit --xunit-file=$CIRCLE_TEST_REPORTS/python/tests.xml  udata
+    - REPORT_DIR=$CIRCLE_TEST_REPORTS/karma npm -s run test:unit -- --reporters mocha,junit

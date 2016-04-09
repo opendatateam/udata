@@ -49,25 +49,27 @@ class UDataMarkdown(object):
         return Markup(html)
 
 
+def mdstrip(value, length=None, end='…'):
+    '''
+    Truncate and strip tags from a markdown source
+
+    The markdown source is truncated at the excerpt if present and
+    smaller than the required length. Then, all html tags are stripped.
+    '''
+    if not value:
+        return ''
+    if EXCERPT_TOKEN in value:
+        value = value.split(EXCERPT_TOKEN, 1)[0]
+    rendered = md(value)
+    text = do_striptags(rendered)
+    if length > 0:
+        text = do_truncate(text, length, end=end)
+    return text
+
+
 def init_app(app):
     parser = CommonMark.DocParser  # Not an instance because not thread-safe(?)
     renderer = CommonMark.HTMLRenderer()
     app.extensions['markdown'] = UDataMarkdown(app, parser, renderer)
 
-    @app.template_filter()
-    def mdstrip(value, length=None, end='…'):
-        '''
-        Truncate and strip tags from a markdown source
-
-        The markdown source is truncated at the excerpt if present and
-        smaller than the required length. Then, all html tags are stripped.
-        '''
-        if not value:
-            return ''
-        if EXCERPT_TOKEN in value:
-            value = value.split(EXCERPT_TOKEN, 1)[0]
-        rendered = md(value)
-        text = do_striptags(rendered)
-        if length > 0:
-            text = do_truncate(text, length, end=end)
-        return text
+    app.add_template_filter(mdstrip)

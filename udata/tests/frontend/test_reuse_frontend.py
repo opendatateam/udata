@@ -9,8 +9,7 @@ from flask import url_for
 
 from . import FrontTestCase
 from ..factories import (
-    ReuseFactory, UserFactory, AdminFactory, OrganizationFactory,
-    DatasetFactory
+    ReuseFactory, UserFactory, OrganizationFactory, DatasetFactory
 )
 
 

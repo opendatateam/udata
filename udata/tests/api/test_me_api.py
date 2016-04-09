@@ -186,7 +186,9 @@ class MeAPITest(APITestCase):
         # Should not be listed
         DatasetIssue.objects.create(
             subject=VisibleDatasetFactory(), title='', user=sender)
-        ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=sender)
+        ReuseIssue.objects.create(subject=ReuseFactory(),
+                                  title='',
+                                  user=sender)
 
         response = self.get(url_for('api.my_org_issues'))
         self.assert200(response)

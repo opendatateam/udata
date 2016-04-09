@@ -1,4 +1,4 @@
-import API from 'specs/mocks/api';
+import API from 'api';
 import {List, ModelPage, PageList, DEFAULT_PAGE_SIZE} from 'models/base';
 import Vue from 'vue';
 import URL from 'url';
@@ -18,8 +18,8 @@ const ThingSchema = {
 let factoryIndex = 1;
 
 function thingFactory(n, string) {
-    let data = [],
-        end = factoryIndex + (n || 1);
+    const data = [];
+    const end = factoryIndex + (n || 1);
 
     for (factoryIndex; factoryIndex < end; factoryIndex++) {
         data.push({id: factoryIndex, name: faker.fake(string || '{{name.findName}}')});
@@ -65,8 +65,8 @@ describe('Base lists', function() {
     beforeEach(function() {
         factoryIndex = 1;
         this.xhr = sinon.useFakeXMLHttpRequest();
-        let requests = this.requests = [];
-        this.xhr.onCreate = function (req) { requests.push(req); };
+        const requests = this.requests = [];
+        this.xhr.onCreate = function(req) { requests.push(req); };
     });
 
     afterEach(function() {
@@ -75,9 +75,9 @@ describe('Base lists', function() {
 
     describe('List', function() {
         it('should populate data from constructor', function() {
-            let list = new List({
-                    data: thingFactory(3)
-                });
+            const list = new List({
+                data: thingFactory(3)
+            });
 
             expect(this.requests).to.have.length(0);
             expect(list.loading).to.be.false;
@@ -86,21 +86,21 @@ describe('Base lists', function() {
         });
 
         it('should fetch a list from the server', function() {
-            let list = new List({
-                    ns: 'things',
-                    fetch: 'list_things'
-                }),
-                response = JSON.stringify(thingFactory(3));
+            const list = new List({
+                ns: 'things',
+                fetch: 'list_things'
+            });
+            const response = JSON.stringify(thingFactory(3));
 
             expect(list.items).to.have.length(0);
-            expect(list.loading).to.be.false;
+            expect(list.loading).to.be.true;
             list.fetch({id: 'abc'});
 
             expect(this.requests).to.have.length(1);
             expect(list.loading).to.be.true;
 
-            let request = this.requests[0],
-                url = URL.parse(request.url);
+            const request = this.requests[0];
+            const url = URL.parse(request.url);
 
             expect(request.method).to.equal('GET');
             expect(url.pathname).to.equal('/thing/abc/');
@@ -113,9 +113,9 @@ describe('Base lists', function() {
         });
 
         it('should perform sorting without server calls', function() {
-            let list = new List({
-                    data: thingFactory(2).concat(thingFactory(1, 'aaa'), thingFactory(1, 'zzz')),
-                });
+            const list = new List({
+                data: thingFactory(2).concat(thingFactory(1, 'aaa'), thingFactory(1, 'zzz')),
+            });
 
             expect(list.items).to.have.length(4);
             expect(list.data).to.have.length(4);
@@ -140,15 +140,15 @@ describe('Base lists', function() {
         });
 
         it('should perform client side filtering on a field', function() {
-            let list = new List({
-                    data: [
-                        {id: 1, name: 'abc'},
-                        {id: 2, name: 'aaa'},
-                        {id: 3, name: 'bbb'},
-                        {id: 4, name: 'ccc'},
-                    ],
-                    search: 'name'
-                });
+            const list = new List({
+                data: [
+                    {id: 1, name: 'abc'},
+                    {id: 2, name: 'aaa'},
+                    {id: 3, name: 'bbb'},
+                    {id: 4, name: 'ccc'},
+                ],
+                search: 'name'
+            });
 
             expect(list.has_search).to.be.true;
             expect(list.data).to.have.length(4);
@@ -163,15 +163,15 @@ describe('Base lists', function() {
         });
 
         it('should perform client side filtering on multiple fields', function() {
-            let list = new List({
-                    data: [
-                        {id: 1, name: 'abc', tag: 'xxx'},
-                        {id: 2, name: 'aaa', tag: 'xxx'},
-                        {id: 3, name: 'bbb', tag: 'aaa'},
-                        {id: 4, name: 'ccc', tag: 'yyy'},
-                    ],
-                    search: ['name', 'tag']
-                });
+            const list = new List({
+                data: [
+                    {id: 1, name: 'abc', tag: 'xxx'},
+                    {id: 2, name: 'aaa', tag: 'xxx'},
+                    {id: 3, name: 'bbb', tag: 'aaa'},
+                    {id: 4, name: 'ccc', tag: 'yyy'},
+                ],
+                search: ['name', 'tag']
+            });
 
             expect(list.has_search).to.be.true;
             expect(list.data).to.have.length(4);
@@ -186,25 +186,24 @@ describe('Base lists', function() {
         });
 
         describe('Vue.js integration', function() {
-
             afterEach(function() {
                 fixture.cleanup();
             });
 
             it('allows to watch changes', function() {
-                let vm = new Vue({
-                        el: fixture.set('<div/>'),
-                        template: `<ul>
-                                        <li v-repeat=things.data>{{name}}</li>
-                                    </ul>`,
-                        data: {
-                            things: new List({
-                                ns: 'things',
-                                fetch: 'list_things'
-                            })
-                        }
-                    }),
-                    response = JSON.stringify(thingFactory(3));
+                const vm = new Vue({
+                    el: fixture.set('<div/>')[0],
+                    template: `<ul>
+                                    <li v-for="thing in things.data">{{thing.name}}</li>
+                                </ul>`,
+                    data: {
+                        things: new List({
+                            ns: 'things',
+                            fetch: 'list_things'
+                        })
+                    }
+                });
+                const response = JSON.stringify(thingFactory(3));
 
                 expect(vm.$el.children).to.have.length(0);
                 vm.things.fetch({id: 'abc'});
@@ -212,16 +211,15 @@ describe('Base lists', function() {
 
                 expect(vm.$el.children).to.have.length(3);
             });
-
         });
     });
 
     describe('PageList', function() {
         it('should have sane default values', function() {
-            let list = new PageList();
+            const list = new PageList();
 
             expect(this.requests).to.have.length(0);
-            expect(list.loading).to.be.false;
+            expect(list.loading).to.be.true;
             expect(list.items).to.have.length(0);
             expect(list.data).to.have.length(0);
             expect(list.page_size).to.equal(DEFAULT_PAGE_SIZE);
@@ -233,9 +231,9 @@ describe('Base lists', function() {
         });
 
         it('should populate data from constructor', function() {
-            let list = new PageList({
-                    data: thingFactory(3)
-                });
+            const list = new PageList({
+                data: thingFactory(3)
+            });
 
             expect(this.requests).to.have.length(0);
             expect(list.loading).to.be.false;
@@ -250,10 +248,10 @@ describe('Base lists', function() {
         });
 
         it('should allow to specify a page size', function() {
-            let list = new PageList({
-                    data: thingFactory(10),
-                    page_size: 5
-                });
+            const list = new PageList({
+                data: thingFactory(10),
+                page_size: 5
+            });
 
             expect(list.items).to.have.length(10);
             expect(list.data).to.have.length(list.page_size);
@@ -263,19 +261,19 @@ describe('Base lists', function() {
         });
 
         it('should fetch a list from the server', function() {
-            let list = new PageList({
-                    ns: 'things',
-                    fetch: 'list_things'
-                }),
-                response = JSON.stringify(thingFactory(3));
+            const list = new PageList({
+                ns: 'things',
+                fetch: 'list_things'
+            });
+            const response = JSON.stringify(thingFactory(3));
 
             list.fetch({id: 'abc'});
 
             expect(this.requests).to.have.length(1);
             expect(list.loading).to.be.true;
 
-            let request = this.requests[0],
-                url = URL.parse(request.url);
+            const request = this.requests[0];
+            const url = URL.parse(request.url);
 
             expect(request.method).to.equal('GET');
             expect(url.pathname).to.equal('/thing/abc/');
@@ -287,10 +285,10 @@ describe('Base lists', function() {
         });
 
         it('should perform client-side pagination', function() {
-            let list = new PageList({
-                    data: thingFactory(15),
-                    page_size: 5
-                });
+            const list = new PageList({
+                data: thingFactory(15),
+                page_size: 5
+            });
 
             expect(list.items).to.have.length(15);
             expect(list.data).to.have.length(list.page_size);
@@ -332,12 +330,12 @@ describe('Base lists', function() {
         });
 
         it('should perform client-side sorting', function() {
-            let pageSize = 3,
-                list = new PageList({
-                    data: thingFactory(2 * pageSize).concat(thingFactory(1, 'aaa'), thingFactory(1, 'zzz')),
-                    page_size: pageSize
-                }),
-                total = 2 * pageSize + 2;
+            const pageSize = 3;
+            const list = new PageList({
+                data: thingFactory(2 * pageSize).concat(thingFactory(1, 'aaa'), thingFactory(1, 'zzz')),
+                page_size: pageSize
+            });
+            const total = 2 * pageSize + 2;
 
             expect(list.items).to.have.length(total);
             expect(list.data).to.have.length(list.page_size);
@@ -378,16 +376,17 @@ describe('Base lists', function() {
         });
 
         it('should perform client-side filtering with pagination', function() {
-            let pageSize = 2,
-                list = new PageList({
-                    data: thingFactory(pageSize).concat(
-                        thingFactory(2 * pageSize, 'xxx'),
-                        thingFactory(pageSize)
-                    ),
-                    search: 'name',
-                    page_size: pageSize
-                });
+            const pageSize = 2;
+            const list = new PageList({
+                data: thingFactory(pageSize).concat(
+                    thingFactory(2 * pageSize, 'xxx'), // 2*pageSize matching things
+                    thingFactory(pageSize)
+                ), // Total: 4 pages
+                search: 'name',
+                page_size: pageSize
+            });
 
+            // Should expose search ability and be on the first page
             expect(list.has_search).to.be.true;
             expect(list.data).to.have.length(pageSize);
             expect(list.items).to.have.length(4 * pageSize);
@@ -397,6 +396,7 @@ describe('Base lists', function() {
 
             list.search('xxx');
 
+            // Should have filtered search (aka. 2 pages)
             expect(list.page).to.equal(1);
             expect(list.pages).to.equal(2);
             expect(list.data).to.have.length(pageSize);
@@ -423,35 +423,29 @@ describe('Base lists', function() {
             expect(list.pages).to.equal(2);
             expect(list.data[0].id).to.equal(3);
 
+            // Should not have triggered server request
             expect(this.requests).to.have.length(0);
         });
 
         describe('Vue.js integration', function() {
-
             afterEach(function() {
                 fixture.cleanup();
             });
 
             it('allows to watch changes', function() {
-                let vm = new Vue({
-                        el: fixture.set('<div/>'),
-                        template: `<ul>
-                                        <li v-repeat=things.data>{{name}}</li>
-                                    </ul>`,
-                        data: {
-                            things: new List({
-                                ns: 'things',
-                                fetch: 'list_things'
-                            })
-                        },
-                        attached: function() {
-                            console.log('attached');
-                        },
-                        ready: function() {
-                            console.log('ready');
-                        }
-                    }),
-                    response = JSON.stringify(thingFactory(3));
+                const vm = new Vue({
+                    el: fixture.set('<div/>')[0],
+                    template: `<ul>
+                                    <li v-for="thing in things.data">{{thing.name}}</li>
+                                </ul>`,
+                    data: {
+                        things: new List({
+                            ns: 'things',
+                            fetch: 'list_things'
+                        })
+                    }
+                });
+                const response = JSON.stringify(thingFactory(3));
 
                 expect(vm.$el.children).to.have.length(0);
                 vm.things.fetch({id: 'abc'});
@@ -461,8 +455,6 @@ describe('Base lists', function() {
                 );
                 expect(vm.$el.children).to.have.length(3);
             });
-
         });
-
     });
 });

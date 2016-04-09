@@ -8,6 +8,10 @@ class Me extends User {
         return this;
     }
 
+    update(data, on_success, on_error) {
+        this.$api('me.update_me', {payload: JSON.stringify(data)}, on_success, on_error);
+    }
+
     on_user_fetched(response) {
         Raven.setUserContext({
             id: response.obj.id,

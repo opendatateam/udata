@@ -134,8 +134,9 @@ class UDataApi(Api):
         # Sort arguments
         keys = adapter.sorts.keys()
         choices = keys + ['-' + k for k in keys]
+        help_msg = 'The field (and direction) on which sorting apply'
         parser.add_argument('sort', type=str, location='args', choices=choices,
-                            help='The field (and direction) on which sorting apply')
+                            help=help_msg)
         if paginate:
             parser.add_argument('page', type=int, location='args',
                                 default=0, help='The page to display')
@@ -370,26 +371,26 @@ def marshal_page_with(func):
 
 def init_app(app):
     # Load all core APIs
-    import udata.core.activity.api
-    import udata.core.spatial.api
-    import udata.core.metrics.api
-    import udata.core.user.api
-    import udata.core.dataset.api
-    import udata.core.issues.api
-    import udata.core.discussions.api
-    import udata.core.reuse.api
-    import udata.core.organization.api
-    import udata.core.followers.api
-    import udata.core.jobs.api
-    import udata.core.site.api
-    import udata.core.tags.api
-    import udata.core.topic.api
-    import udata.core.post.api
-    import udata.features.transfer.api
-    import udata.features.notifications.api
-    import udata.features.oembed.api
-    import udata.features.territories.api
-    import udata.harvest.api
+    import udata.core.activity.api  # noqa
+    import udata.core.spatial.api  # noqa
+    import udata.core.metrics.api  # noqa
+    import udata.core.user.api  # noqa
+    import udata.core.dataset.api  # noqa
+    import udata.core.issues.api  # noqa
+    import udata.core.discussions.api  # noqa
+    import udata.core.reuse.api  # noqa
+    import udata.core.organization.api  # noqa
+    import udata.core.followers.api  # noqa
+    import udata.core.jobs.api  # noqa
+    import udata.core.site.api  # noqa
+    import udata.core.tags.api  # noqa
+    import udata.core.topic.api  # noqa
+    import udata.core.post.api  # noqa
+    import udata.features.transfer.api  # noqa
+    import udata.features.notifications.api  # noqa
+    import udata.features.oembed.api  # noqa
+    import udata.features.territories.api  # noqa
+    import udata.harvest.api  # noqa
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:

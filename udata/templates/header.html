@@ -45,6 +45,9 @@
             <li>
               <a href="{{ url_for('users.show', user=current_user) }}">{{ _('Profile') }}</a>
             </li>
+            <li>
+              <a href="{{ url_for('security.change_password') }}">{{ _('Change password') }}</a>
+            </li>
             {% if current_user.organizations %}
             <li role="presentation" class="dropdown-header">{{ _('Organizations') }}</li>
             {% for org in current_user.organizations %}

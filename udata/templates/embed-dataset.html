@@ -114,9 +114,64 @@
         width: 100%;
         font-size: 11px;
     }
+    {# Source: https://github.com/kazzkiq/balloon.css #}
+    .dataset-card [data-tooltip] {
+        position: relative;
+    }
+    .dataset-card [data-tooltip]:before,
+    .dataset-card [data-tooltip]:after {
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+            filter: alpha(opacity=0);
+        -khtml-opacity: 0;
+          -moz-opacity: 0;
+               opacity: 0;
+        pointer-events: none;
+        -webkit-transition: all 0.18s ease-out 0.18s;
+                transition: all 0.18s ease-out 0.18s;
+        bottom: 100%;
+        left: 50%;
+        position: absolute;
+        z-index: 10;
+        -webkit-transform: translate(-50%, 10px);
+            -ms-transform: translate(-50%, 10px);
+                transform: translate(-50%, 10px);
+        -webkit-transform-origin: top;
+            -ms-transform-origin: top;
+                transform-origin: top;
+    }
+    .dataset-card [data-tooltip]:after {
+        background: rgba(17, 17, 17, 0.9);
+        border-radius: 4px;
+        color: #fff;
+        content: attr(data-tooltip);
+        font-size: 12px;
+        padding: .5em 1em;
+        white-space: nowrap;
+        margin-bottom: 11px;
+    }
+    .dataset-card [data-tooltip]:before {
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36px" height="12px"><path   fill="rgba(17, 17, 17, 0.9)" transform="rotate(0)" d="M2.658,0.000 C-13.615,0.000 50.938,0.000 34.662,0.000 C28.662,0.000 23.035,12.002 18.660,12.002 C14.285,12.002 8.594,0.000 2.658,0.000 Z"/></svg>') no-repeat;
+        background-size: 100% auto;
+        height: 6px;
+        width: 18px;
+        content: "";
+        margin-bottom: 5px;
+    }
+    .dataset-card [data-tooltip]:hover:before,
+    .dataset-card [data-tooltip]:hover:after {
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+            filter: alpha(opacity=100);
+        -khtml-opacity: 1;
+          -moz-opacity: 1;
+               opacity: 1;
+        pointer-events: auto;
+        -webkit-transform: translate(-50%, 0);
+            -ms-transform: translate(-50%, 0);
+                transform: translate(-50%, 0);
+    }
 </style>
 <article class="dataset-card" id="{{ item_reference }}">
-    <h4 class="udata-title">
+    <h4 class="udata-title" data-tooltip="{{ _('Download from ') }}{{ config.SERVER_NAME }}">
         <a href="{{ item.external_url or item.url }}" title="{{ item.title }}">
             {{ item.title|mdstrip(80) }}
         </a>
@@ -124,9 +179,15 @@
     <div class="udata-content">
         <p class="udata-source">
         {% if item.organization %}
-            <a href="{{ item.organization.external_url }}">
+            <a href="{{ item.organization.external_url }}" data-tooltip="{{ _('Producer') }}">
                 <img src="{{ item.organization.logo(70, external=True) }}"
                      alt="{{ item.organization.name }}"
+                     height="70" width="70">
+            </a>
+        {% elif item.owner %}
+            <a href="{{ item.owner.external_url }}" data-tooltip="{{ _('Uploader') }}">
+                <img src="{{ item.owner.avatar(70, external=True)|placeholder('user', external=True) }}"
+                     alt="{{ item.owner.fullname }}"
                      height="70" width="70">
             </a>
         {% else %}
@@ -137,18 +198,18 @@
             </a>
         {% endif %}
         </p>
-        <p class="udata-description">
-            <a href="{{ item.external_url or item.url }}" title="{{ item.title }}">
+        <p class="udata-description" data-tooltip="{{ _('Download from') }} {{ config.SERVER_NAME }}">
+            <a href="{{ item.external_url or item.url }}">
                 {{ item.description | mdstrip(110) }}
             </a>
         </p>
     </div>
     <aside class="udata-meta">
-        <p class="udata-code">
+        <p class="udata-code" data-tooltip="{{ _('Add to your own website') }}">
             <a href="{{ item.external_url or item.url }}" class="integrate" data-label="{{ _('Close') }}">{{ _('Embed') }}</a>
         </p>
         {% if item.temporal_coverage %}
-        <p class="udata-calendar">
+        <p class="udata-calendar" data-tooltip="{{ _('Temporal coverage') }}">
             {% if item.territory %}
                 {{ item.temporal_coverage.start }}
                 {% if item.temporal_coverage.end %}
@@ -160,18 +221,18 @@
         </p>
         {% endif %}
         {% if item.spatial and item.spatial.granularity and item.spatial.granularity_label != 'Other' %}
-        <p class="udata-marker">
+        <p class="udata-marker" data-tooltip="{{ _('Granularity') }}">
             {{ item.spatial.granularity_label }}
         </p>
         {% elif item.territory %}
-        <p class="udata-marker">
+        <p class="udata-marker" data-tooltip="{{ _('Territory') }}">
             <a href="{{ item.territory.external_url }}">
                 {{ item.territory.name }}
             </a>
         </p>
         {% endif %}
         {% if item.frequency and item.frequency_label != 'Unknown' %}
-        <p class="udata-stats">
+        <p class="udata-stats" data-tooltip="{{ _('Frequency') }}">
             {{ item.frequency_label }}
         </p>
         {% endif %}

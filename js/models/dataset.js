@@ -11,6 +11,7 @@ export default class Dataset extends Model {
     fetch(ident) {
         ident = ident || this.id || this.slug;
         if (ident) {
+            this.loading = true;
             this.$api('datasets.get_dataset', {dataset: ident}, this.on_fetched);
         } else {
             log.error('Unable to fetch Dataset: no identifier specified');
@@ -23,10 +24,12 @@ export default class Dataset extends Model {
      */
     save() {
         var ep = this.id ? 'datasets.update_dataset' : 'datasets.create_dataset';
+        this.loading = true;
         this.$api(ep, {payload: this}, this.on_fetched);
     }
 
     update(data, on_success, on_error) {
+        this.loading = true;
         this.$api('datasets.update_dataset', {
             dataset: this.id,
             payload: data

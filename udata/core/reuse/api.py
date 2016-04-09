@@ -18,7 +18,8 @@ from udata.core.storages.api import (
 )
 
 from .api_fields import (
-    reuse_fields, reuse_page_fields, reuse_suggestion_fields, reuse_type_fields, dataset_ref_fields
+    reuse_fields, reuse_page_fields, reuse_suggestion_fields,
+    reuse_type_fields, dataset_ref_fields
 )
 from .forms import ReuseForm
 from .models import FollowReuse
@@ -102,7 +103,8 @@ class ReuseDatasetsAPI(API):
         try:
             dataset = Dataset.objects.get_or_404(id=request.json['id'])
         except Dataset.DoesNotExist:
-            api.abort(404, 'Dataset {0} does not exists'.format(request.json['id']))
+            msg = 'Dataset {0} does not exists'.format(request.json['id'])
+            api.abort(404, msg)
         if dataset in reuse.datasets:
             return reuse
         reuse.datasets.append(dataset)

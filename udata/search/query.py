@@ -33,8 +33,8 @@ class SearchQuery(object):
             self.page = 1
         try:
             self.page_size = int(
-                self.kwargs.get('page_size', DEFAULT_PAGE_SIZE)
-                or DEFAULT_PAGE_SIZE)
+                self.kwargs.get('page_size', DEFAULT_PAGE_SIZE) or
+                DEFAULT_PAGE_SIZE)
         except:
             self.page_size = DEFAULT_PAGE_SIZE
 
