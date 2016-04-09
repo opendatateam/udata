@@ -3,18 +3,19 @@ from __future__ import unicode_literals
 
 import logging
 
-from flask import render_template, current_app, Blueprint, request, redirect
-from flask.ext.principal import (  # noqa
-    Permission as BasePermission, PermissionDenied, identity_loaded, RoleNeed,
-    UserNeed
-)
+from flask import current_app
+from flask import render_template
+
+from flask.ext.principal import identity_loaded
+from flask.ext.principal import Permission as BasePermission
+from flask.ext.principal import PermissionDenied
+from flask.ext.principal import RoleNeed
+from flask.ext.principal import UserNeed
+
 from flask.ext.security import (  # noqa
     Security, current_user, login_required, login_user  # noqa
 )
 from werkzeug.utils import import_string
-
-
-bp = Blueprint('auth', __name__)
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class UDataSecurity(Security):
     def render_template(self, *args, **kwargs):
         try:
             render = import_string(current_app.config.get('SECURITY_RENDER'))
-        except:
+        except Exception:
             render = render_template
         return render(*args, **kwargs)
 
@@ -39,18 +40,15 @@ class Permission(BasePermission):
 admin_permission = Permission()
 
 
-@bp.before_app_request
-def ensure_https_authenticated_users():
-    # Force authenticated users to use https
-    if (not current_app.config.get('TESTING', False) and
-            current_app.config.get('USE_SSL', False) and
-            current_user.is_authenticated() and
-            not request.is_secure):
-        return redirect(request.url.replace('http://', 'https://'))
-
-
 def init_app(app):
+    from .forms import ExtendedRegisterForm
+    from .views import auth
+    from .views import create_security_blueprint
     from udata.models import datastore
-    security.init_app(app, datastore)
+    state = security.init_app(app, datastore, register_blueprint=False,
+                              confirm_register_form=ExtendedRegisterForm)
 
-    app.register_blueprint(bp)
+    security_bp = create_security_blueprint(state, 'security_blueprint')
+
+    app.register_blueprint(security_bp)
+    app.register_blueprint(auth)
