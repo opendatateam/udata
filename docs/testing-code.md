@@ -55,20 +55,51 @@ For more advanced usage, you can use the npm dedicated run-scripts:
 ```shell
 # Single run in PhantomJS
 $ npm -s run test:unit
-# Watch changes and doesn't prelaunch a browser
+# Watch and run tests on change in PhantomJS
 $ npm -s run test:watch
 ```
 
 You can pass any option to karma after the `--`:
 
 ```bash
-# watch changes, with PhantomJS prelaunched
-$ npm -s run test:watch -- --browsers PhantomJS
+# Run tests a in new Chrome and Firefox instances
+$ npm -s run test:unit -- --browsers Chrome,Firefox
 # Single run with JUnit xml output
 $ npm -s run test:unit -- --reporters mocha,junit
 ```
 
+!!! note
+    If using Chrome launcher without `chrome` being on the `$PATH` (or using Chromium),
+    you need to specify the binary path by settings the environment variable
+    `CHROME_BIN`
+
 See [the official karma documentation][karma] for more details about the possible parameters.
+
+### Testing on IE
+
+You can run the test suite under Modern.ie VMs installed with either [ievms][]
+or [iectrl][] (installation is detailled on websites).
+
+```bash
+# Install IE11 under Win7 (time to have one or more coffee!)
+$ iectrl install 11
+# Run tests under IE11
+$ npm -s run test:unit -- --browsers 'IE11 - Win7'
+```
+
+!!! note
+    uData ensure compatibility for IE [officialy supported by Microsoft][ie-support].
+    Right now, it's IE11.
+
+You maybe need to manually close the first time popup on first run.
+To do so, launch the VM then launch the test suite:
+
+```bash
+$ iectrl start 11
+$ npm -s run test:unit -- --browsers 'IE11 - Win7'
+# You can close it after
+$ iectrl close 11
+```
 
 ## Integration tests
 
@@ -105,3 +136,6 @@ Check out the [Watai tutorial][] to add your own tests!
 [chai]: http://chaijs.com/
 [chai-plugins]: http://chaijs.com/plugins/
 [sinon.js]: http://sinonjs.org/
+[ievms]: http://xdissent.github.io/ievms/
+[iectrl]: http://xdissent.github.io/iectrl/
+[ie-support]: https://www.microsoft.com/en-us/WindowsForBusiness/End-of-IE-support

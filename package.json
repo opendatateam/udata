@@ -10,7 +10,7 @@
     "assets:build": "webpack -p --progress",
     "widgets:watch": "webpack -d -c --progress --watch --config webpack.widgets.config.js",
     "test:watch": "export NODE_ENV=test && WATCH=true karma start",
-    "test:unit": "export NODE_ENV=test && karma start --browsers PhantomJS --single-run",
+    "test:unit": "export NODE_ENV=test && karma start --single-run",
     "lint": "eslint js/ --ext .vue,.js"
   },
   "repository": {
@@ -36,7 +36,10 @@
     "json-loader": "^0.5.4",
     "karma": "0.13.22",
     "karma-chai-dom": "^1.1.0",
+    "karma-chrome-launcher": "^0.2.3",
+    "karma-firefox-launcher": "^0.1.7",
     "karma-fixture": "^0.2.5",
+    "karma-ievms": "^0.1.0",
     "karma-junit-reporter": "^0.4.1",
     "karma-mocha": "^0.2.2",
     "karma-mocha-reporter": "^2.0.0",
@@ -49,7 +52,7 @@
     "mocha": "^2.3.4",
     "mocha-loader": "^0.7.1",
     "null-loader": "^0.1.1",
-    "phantomjs": "^1.9.18",
+    "phantomjs-prebuilt": "^2.1.7",
     "style-loader": "^0.13.0",
     "vue-hot-reload-api": "^1.2.2",
     "vue-html-loader": "^1.1.0",
