@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from datetime import datetime
+
 import feedparser
 
 from flask import url_for
@@ -138,6 +139,25 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_not_found(self):
         '''It should render the dataset page'''
         response = self.get(url_for('datasets.show', dataset='not-found'))
+        self.assert404(response)
+
+    def test_resource_permalink(self):
+        '''It should redirect to the real resource URL'''
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        response = self.get(url_for('datasets.resource',
+                                    dataset=dataset,
+                                    id=resource.id))
+        self.assertStatus(response, 302)
+        self.assertEqual(response.location, resource.url)
+
+    def test_resource_permalink_404(self):
+        '''It should return 404 if resource does not exists'''
+        resource = ResourceFactory()
+        dataset = DatasetFactory()
+        response = self.get(url_for('datasets.resource',
+                                    dataset=dataset,
+                                    id=resource.id))
         self.assert404(response)
 
     def test_recent_feed(self):

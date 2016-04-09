@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import abort, request, url_for, render_template
+from flask import abort, request, url_for, render_template, redirect
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.frontend.views import DetailView, SearchView
@@ -9,6 +9,7 @@ from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Discussion, Follow, Reuse
 from udata.core.site.views import current_site
 from udata.sitemap import sitemap
+from udata.utils import get_by
 
 from .search import DatasetSearch
 from .permissions import ResourceEditPermission, DatasetEditPermission
@@ -101,6 +102,14 @@ class DatasetFollowersView(DatasetView, DetailView):
         context['followers'] = (Follow.objects.followers(self.dataset)
                                               .order_by('follower.fullname'))
         return context
+
+
+@blueprint.route('/<dataset:dataset>/r/<uuid:id>/', endpoint='resource')
+def resource_redirect(dataset, id):
+    resource = get_by(dataset.resources, 'id', id)
+    if not resource:
+        abort(404)
+    return redirect(resource.url)
 
 
 @sitemap.register_generator
