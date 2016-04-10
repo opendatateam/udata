@@ -17,12 +17,23 @@ from .geojson_provider import GeoJsonProvider
 
 faker = Faker()
 faker.add_provider(GeoJsonProvider)
+factory.Faker.add_provider(GeoJsonProvider)
 
 
 def unique_string(length=None):
     '''Generate unique string'''
     string = str(uuid4())
     return string[:length] if length else string
+
+
+def unique_url():
+    '''Generate unique URLs'''
+    return '/'.join([faker.url(), unique_string()])
+
+
+def random_sha1():
+    '''Genrate random sha1'''
+    return sha1(faker.word()).hexdigest()
 
 
 class SiteSettingsFactory(MongoEngineFactory):
@@ -34,8 +45,8 @@ class SiteFactory(MongoEngineFactory):
     class Meta:
         model = models.Site
 
-    id = factory.LazyAttribute(lambda o: faker.word())
-    title = factory.LazyAttribute(lambda o: faker.name())
+    id = factory.Faker('word')
+    title = factory.Faker('name')
     settings = factory.SubFactory(SiteSettingsFactory)
 
 
@@ -43,9 +54,9 @@ class UserFactory(MongoEngineFactory):
     class Meta:
         model = models.User
 
-    first_name = factory.LazyAttribute(lambda o: faker.first_name())
-    last_name = factory.LazyAttribute(lambda o: faker.last_name())
-    email = factory.LazyAttribute(lambda o: faker.email())
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')
+    email = factory.Faker('email')
     active = True
 
 
@@ -61,17 +72,17 @@ class ChecksumFactory(MongoEngineFactory):
         model = models.Checksum
 
     type = 'sha1'
-    value = factory.LazyAttribute(lambda o: sha1(faker.word()).hexdigest())
+    value = factory.LazyAttribute(lambda o: random_sha1())
 
 
 class BaseResourceFactory(MongoEngineFactory):
-    title = factory.LazyAttribute(lambda o: faker.sentence())
-    description = factory.LazyAttribute(lambda o: faker.text())
+    title = factory.Faker('sentence')
+    description = factory.Faker('text')
     filetype = 'file'
-    url = factory.LazyAttribute(lambda o: faker.url())
+    url = factory.Faker('url')
     checksum = factory.SubFactory(ChecksumFactory)
-    mime = factory.LazyAttribute(lambda o: faker.mime_type('text'))
-    filesize = factory.LazyAttribute(lambda o: faker.pyint())
+    mime = factory.Faker('mime_type', category='text')
+    filesize = factory.Faker('pyint')
 
 
 class CommunityResourceFactory(BaseResourceFactory):
@@ -88,8 +99,8 @@ class DatasetFactory(MongoEngineFactory):
     class Meta:
         model = models.Dataset
 
-    title = factory.LazyAttribute(lambda o: faker.sentence())
-    description = factory.LazyAttribute(lambda o: faker.text())
+    title = factory.Faker('sentence')
+    description = factory.Faker('text')
     frequency = 'unknown'
 
 
@@ -103,39 +114,38 @@ class DatasetIssueFactory(MongoEngineFactory):
     class Meta:
         model = models.DatasetIssue
 
-    title = factory.LazyAttribute(lambda o: faker.sentence())
+    title = factory.Faker('sentence')
 
 
 class DatasetDiscussionFactory(MongoEngineFactory):
     class Meta:
         model = models.DatasetDiscussion
 
-    title = factory.LazyAttribute(lambda o: faker.sentence())
+    title = factory.Faker('sentence')
 
 
 class MessageDiscussionFactory(MongoEngineFactory):
     class Meta:
         model = Message
 
-    content = factory.LazyAttribute(lambda o: faker.sentence())
+    content = factory.Faker('sentence')
 
 
 class OrganizationFactory(MongoEngineFactory):
     class Meta:
         model = models.Organization
 
-    name = factory.LazyAttribute(lambda o: faker.sentence())
-    description = factory.LazyAttribute(lambda o: faker.text())
+    name = factory.Faker('sentence')
+    description = factory.Faker('text')
 
 
 class ReuseFactory(MongoEngineFactory):
     class Meta:
         model = models.Reuse
 
-    title = factory.LazyAttribute(lambda o: faker.sentence())
-    description = factory.LazyAttribute(lambda o: faker.text())
-    url = factory.LazyAttribute(
-        lambda o: '/'.join([faker.url(), unique_string()]))
+    title = factory.Faker('sentence')
+    description = factory.Faker('text')
+    url = factory.LazyAttribute(lambda o: unique_url())
     type = FuzzyChoice(models.REUSE_TYPES.keys())
 
 
@@ -150,15 +160,15 @@ class LicenseFactory(MongoEngineFactory):
         model = models.License
 
     id = factory.Sequence(lambda n: '{0}-{1}'.format(faker.word(), n))
-    title = factory.LazyAttribute(lambda o: faker.sentence())
+    title = factory.Faker('sentence')
 
 
 class TopicFactory(MongoEngineFactory):
     class Meta:
         model = models.Topic
 
-    name = factory.LazyAttribute(lambda o: faker.sentence())
-    description = factory.LazyAttribute(lambda o: faker.text())
+    name = factory.Faker('sentence')
+    description = factory.Faker('text')
     tags = factory.LazyAttribute(lambda o: [unique_string() for _ in range(3)])
 
     @factory.lazy_attribute
@@ -174,10 +184,10 @@ class PostFactory(MongoEngineFactory):
     class Meta:
         model = models.Post
 
-    name = factory.LazyAttribute(lambda o: faker.sentence())
-    headline = factory.LazyAttribute(lambda o: faker.sentence())
-    content = factory.LazyAttribute(lambda o: faker.text())
-    private = factory.LazyAttribute(lambda o: False)
+    name = factory.Faker('sentence')
+    headline = factory.Faker('sentence')
+    content = factory.Faker('text')
+    private = False
 
     @factory.lazy_attribute
     def datasets(self):
@@ -191,7 +201,7 @@ class PostFactory(MongoEngineFactory):
 class TransferFactory(MongoEngineFactory):
     class Meta:
         model = models.Transfer
-    comment = factory.LazyAttribute(lambda o: faker.sentence())
+    comment = factory.Faker('sentence')
 
 
 def badge_factory(model):
@@ -208,5 +218,4 @@ class GeoZoneFactory(MongoEngineFactory):
     class Meta:
         model = models.GeoZone
 
-    geom = factory.LazyAttribute(
-        lambda o: [[[[1, 1], [1, 1]], [[1, 1], [1, 1]]]])
+    geom = factory.Faker('multipolygon')
