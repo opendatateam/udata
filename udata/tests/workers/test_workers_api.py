@@ -183,7 +183,7 @@ class JobsAPITest(APITestCase):
             'name': task.name,
             'description': 'New description',
             'task': task.task,
-            'crontab': task.crontab._data
+            'crontab': task.crontab.to_json()
         })
         self.assert403(response)
 
@@ -204,7 +204,7 @@ class JobsAPITest(APITestCase):
             'name': task.name,
             'description': 'New description',
             'task': task.task,
-            'crontab': task.crontab._data
+            'crontab': task.crontab.to_json()
         })
         self.assert200(response)
 

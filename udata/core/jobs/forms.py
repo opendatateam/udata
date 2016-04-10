@@ -32,6 +32,12 @@ class PeriodicTaskForm(ModelForm):
     task = fields.StringField(_('Tasks'))
     enabled = fields.BooleanField(_('Enabled'))
 
+    def save(self, commit=True, **kwargs):
+        '''PeriodicTask is now dynamic and save behavior changed'''
+        if not self.instance:
+            self.instance = self.model_class()  # Force populate_obj in super()
+        return super(PeriodicTaskForm, self).save(commit, **kwargs)
+
 
 class CrontabTaskForm(PeriodicTaskForm):
     crontab = fields.FormField(CrontabForm)
