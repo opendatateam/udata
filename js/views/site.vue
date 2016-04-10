@@ -90,7 +90,7 @@ export default {
         };
     },
     computed: {
-        boxes: function() {
+        boxes() {
             if (!this.$root.site.metrics) {
                 return [];
             }
