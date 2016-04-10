@@ -88,7 +88,7 @@ def render_territory(territory):
                 town_datasets.append(dataset)
             else:
                 other_datasets.append(dataset)
-            editable_datasets.append(current_user.is_authenticated() and
+            editable_datasets.append(current_user.is_authenticated and
                                      DatasetEditPermission(dataset).can())
     context = {
         'territory': territory,

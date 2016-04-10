@@ -41,7 +41,7 @@ class UserDeletedReuse(ReuseRelatedActivity, Activity):
 
 @Reuse.on_create.connect
 def on_user_created_reuse(reuse):
-    if not reuse.private and current_user and current_user.is_authenticated():
+    if not reuse.private and current_user and current_user.is_authenticated:
         user = current_user._get_current_object()
         organization = reuse.organization
         write_activity.delay(UserCreatedReuse, user, reuse, organization)
@@ -49,7 +49,7 @@ def on_user_created_reuse(reuse):
 
 @Reuse.on_update.connect
 def on_user_updated_reuse(reuse):
-    if not reuse.private and current_user and current_user.is_authenticated():
+    if not reuse.private and current_user and current_user.is_authenticated:
         user = current_user._get_current_object()
         organization = reuse.organization
         write_activity.delay(UserUpdatedReuse, user, reuse, organization)
@@ -57,7 +57,7 @@ def on_user_updated_reuse(reuse):
 
 @Reuse.on_delete.connect
 def on_user_deleted_reuse(reuse):
-    if not reuse.private and current_user and current_user.is_authenticated():
+    if not reuse.private and current_user and current_user.is_authenticated:
         user = current_user._get_current_object()
         organization = reuse.organization
         write_activity.delay(UserDeletedReuse, user, reuse, organization)

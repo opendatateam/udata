@@ -552,7 +552,7 @@ class DateRangeField(FieldHelper, fields.StringField):
 
 def default_owner():
     '''Default to current_user if authenticated'''
-    if current_user.is_authenticated():
+    if current_user.is_authenticated:
         return current_user._get_current_object()
 
 
@@ -570,7 +570,7 @@ class CurrentUserField(FieldHelper, ModelField, fields.HiddenField):
 
     def pre_validate(self, form):
         if self.data:
-            if current_user.is_anonymous():
+            if current_user.is_anonymous:
                 raise validators.ValidationError(
                     _('You must be authenticated'))
             elif not admin_permission and current_user.id != self.data.id:
@@ -593,7 +593,7 @@ class PublishAsField(FieldHelper, ModelField, fields.HiddenField):
 
     def pre_validate(self, form):
         if self.data:
-            if not current_user.is_authenticated():
+            if not current_user.is_authenticated:
                 raise validators.ValidationError(
                     _('You must be authenticated'))
             elif not OrganizationPrivatePermission(self.data).can():

@@ -72,7 +72,7 @@ class UDataApi(Api):
 
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if not current_user.is_authenticated():
+            if not current_user.is_authenticated:
                 self.abort(401)
 
             if permission is not None:
@@ -87,7 +87,7 @@ class UDataApi(Api):
         '''Authentify the user if credentials are given'''
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if current_user.is_authenticated():
+            if current_user.is_authenticated:
                 return func(*args, **kwargs)
 
             apikey = request.headers.get(HEADER_API_KEY)

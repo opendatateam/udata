@@ -70,7 +70,7 @@
         <div class="dataset-item--cta col-sm-12 bg-primary">
             <div class="format-label pull-left">+</div>
             <p>
-                {% if current_user.is_authenticated() %}
+                {% if current_user.is_authenticated %}
                     {% if has_pertinent_datasets %}
                         {{ _('Some of your datasets have an exact match!') }}<br/>
                         <a href="m&#x61;ilto:{{ config.TERRITORIES_EMAIL|obfuscate|safe }}">
