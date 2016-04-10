@@ -52,10 +52,10 @@ class Defaults(object):
     SECURITY_PASSWORD_HASH = 'bcrypt'
     SECURITY_PASSWORD_SALT = b'udata'
 
-    SECURITY_PASSWORD_SALT = 'Default uData secret password salt'
-    SECURITY_CONFIRM_SALT = 'Default uData secret confirm salt'
-    SECURITY_RESET_SALT = 'Default uData secret reset salt'
-    SECURITY_REMEMBER_SALT = 'Default uData remember salt'
+    SECURITY_PASSWORD_SALT = b'Default uData secret password salt'
+    SECURITY_CONFIRM_SALT = b'Default uData secret confirm salt'
+    SECURITY_RESET_SALT = b'Default uData secret reset salt'
+    SECURITY_REMEMBER_SALT = b'Default uData remember salt'
 
     SECURITY_EMAIL_SENDER = MAIL_DEFAULT_SENDER
 
