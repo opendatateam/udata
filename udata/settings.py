@@ -49,7 +49,7 @@ class Defaults(object):
     SECURITY_RECOVERABLE = True
     SECURITY_CHANGEABLE = True
 
-    SECURITY_PASSWORD_HASH = 'bcrypt'
+    SECURITY_PASSWORD_HASH = b'bcrypt'
     SECURITY_PASSWORD_SALT = b'udata'
 
     SECURITY_PASSWORD_SALT = b'Default uData secret password salt'
