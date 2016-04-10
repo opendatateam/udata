@@ -1,6 +1,7 @@
 uData
 =====
 
+[![Build status][circleci-badge]][circleci-url]
 [![Python Requirements Status][requires-io-badge]][requires-io-url]
 [![JavaScript Dependencies Status][david-dm-badge]][david-dm-url]
 [![JavaScript Development Dependencies Status][david-dm-dev-badge]][david-dm-dev-url]
@@ -10,6 +11,8 @@ Customizable and skinnable social platform dedicated to (open)data.
 
 The [full documentation](http://udata.readthedocs.org/) is hosted on Read the Docs.
 
+[circleci-url]: https://circleci.com/gh/etalab/udata
+[circleci-badge]: https://circleci.com/gh/etalab/udata.svg?style=shield
 [requires-io-url]: https://requires.io/github/etalab/udata/requirements/?branch=master
 [requires-io-badge]: https://requires.io/github/etalab/udata/requirements.png?branch=master
 [david-dm-url]: https://david-dm.org/etalab/udata
