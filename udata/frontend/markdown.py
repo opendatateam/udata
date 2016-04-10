@@ -68,8 +68,8 @@ def mdstrip(value, length=None, end='…'):
 
 
 def init_app(app):
-    parser = CommonMark.DocParser  # Not an instance because not thread-safe(?)
-    renderer = CommonMark.HTMLRenderer()
+    parser = CommonMark.Parser  # Not an instance because not thread-safe(?)
+    renderer = CommonMark.HtmlRenderer()
     app.extensions['markdown'] = UDataMarkdown(app, parser, renderer)
 
     app.add_template_filter(mdstrip)

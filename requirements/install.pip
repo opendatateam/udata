@@ -4,7 +4,7 @@ blinker==1.4
 celery==3.1.18
 celerybeat-mongo==0.0.8
 chardet
-CommonMark==0.5.4
+CommonMark==0.6.3
 elasticsearch==2.3.0
 Flask-BabelEx==0.9.3
 Flask-Cache==0.13.1
