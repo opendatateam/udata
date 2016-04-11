@@ -435,25 +435,71 @@ describe('Base lists', function() {
             it('allows to watch changes', function() {
                 const vm = new Vue({
                     el: fixture.set('<div/>')[0],
-                    template: `<ul>
-                                    <li v-for="thing in things.data">{{thing.name}}</li>
-                                </ul>`,
+                    template: `<div>
+                                    <span v-el:page>{{things.page}}</span>
+                                    <span v-el:pages>{{things.pages}}</span>
+                                    <ul v-el:list>
+                                        <li v-for="thing in things.data">{{thing.name}}</li>
+                                    </ul>
+                                </div>`,
                     data: {
-                        things: new List({
+                        things: new PageList({
                             ns: 'things',
-                            fetch: 'list_things'
+                            fetch: 'list_things',
+                            page_size: 4
                         })
                     }
                 });
-                const response = JSON.stringify(thingFactory(3));
+                const response = JSON.stringify(thingFactory(5));
 
-                expect(vm.$el.children).to.have.length(0);
+                expect(vm.$els.list.children).to.have.length(0);
+                expect(vm.$els.page).to.have.text('1');
+                expect(vm.$els.pages).to.have.text('0');
                 vm.things.fetch({id: 'abc'});
                 this.requests[0].respond(200,
                     {'Content-Type': 'application/json'},
                     response
                 );
-                expect(vm.$el.children).to.have.length(3);
+                expect(vm.$els.list.children).to.have.length(4);
+                expect(vm.$els.page).to.have.text('1');
+                expect(vm.$els.pages).to.have.text('2');
+            });
+
+            it('allows detect page changes', function() {
+                const vm = new Vue({
+                    el: fixture.set('<div/>')[0],
+                    template: `<div>
+                                    <span v-el:page>{{things.page}}</span>
+                                    <span v-el:pages>{{things.pages}}</span>
+                                    <ul v-el:list>
+                                        <li v-for="thing in things.data">{{thing.name}}</li>
+                                    </ul>
+                                </div>`,
+                    data: {
+                        things: new PageList({
+                            ns: 'things',
+                            fetch: 'list_things',
+                            page_size: 4
+                        })
+                    }
+                });
+                const response = JSON.stringify(thingFactory(5));
+
+                expect(vm.$els.list.children).to.have.length(0);
+                expect(vm.$els.page).to.have.text('1');
+                expect(vm.$els.pages).to.have.text('0');
+                vm.things.fetch({id: 'abc'});
+                this.requests[0].respond(200,
+                    {'Content-Type': 'application/json'},
+                    response
+                );
+                expect(vm.$els.list.children).to.have.length(4);
+                expect(vm.$els.page).to.have.text('1');
+                expect(vm.$els.pages).to.have.text('2');
+                vm.things.nextPage();
+                expect(vm.$els.list.children).to.have.length(1);
+                expect(vm.$els.page).to.have.text('2');
+                expect(vm.$els.pages).to.have.text('2');
             });
         });
     });

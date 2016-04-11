@@ -40,19 +40,19 @@ export default {
         p: Object
     },
     computed: {
-        start: function() {
+        start() {
             if (!this.p) {
                 return -1;
             }
             return this.p.page <= nb ? 1 : this.p.page - nb;
         },
-        end: function() {
+        end() {
             if (!this.p) {
                 return -1;
             }
             return this.p.page + nb > this.p.pages ? this.p.pages : this.p.page + nb;
         },
-        range: function() {
+        range() {
             if (isNaN(this.start) || isNaN(this.end) || this.start >= this.end) return [];
             return Array
                 .apply(0, Array(this.end + 1 - this.start))

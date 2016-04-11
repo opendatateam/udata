@@ -1,6 +1,3 @@
-<style lang="less">
-</style>
-
 <template>
 <datatable icon="cog"
     :title="title"
@@ -64,23 +61,20 @@ import {
 import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/item';
 import {PageList} from 'models/base';
 import $ from 'jquery';
+import Datatable from 'components/datatable/widget.vue';
 
 export default {
     name: 'JobDetails',
     props: {
         job: {
             type: Object,
-            default: function() {
-                return new HarvestJob();
-            }
+            default: () => new HarvestJob()
         },
         loading: Boolean,
         empty: String
     },
-    components: {
-        datatable: require('components/datatable/widget.vue')
-    },
-    data: function() {
+    components: {Datatable},
+    data() {
         return {
             fields: [{
                 label: this._('Remote ID'),
@@ -93,22 +87,16 @@ export default {
                 sort: 'status',
                 type: 'label',
                 width: 100,
-                label_type: function(status) {
-                    return STATUS_CLASSES[status];
-                },
-                label_func: function(status) {
-                    return STATUS_I18N[status];
-                }
-            }]
+                label_type: (status) =>  STATUS_CLASSES[status],
+                label_func: (status) => STATUS_I18N[status],
+            }],
+            p: new PageList({data: this.job.items}),
         };
     },
     computed: {
-        title: function() {
+        title() {
             return this.job.id ? ('Job ' + this.job.id) : 'Job';
         },
-        p: function() {
-            return new PageList({data: this.job.items});
-        }
     },
     events: {
         'datatable:item:click': function(item) {
@@ -116,21 +104,26 @@ export default {
         }
     },
     filters: {
-        statusClass: function(value) {
+        statusClass(value) {
             return JOB_STATUS_CLASSES[value] || '';
         },
-        statusI18n: function(value) {
+        statusI18n(value) {
             return JOB_STATUS_I18N[value];
         },
-        count: function(value, status) {
+        count(value, status) {
             if (!value) return '-';
             return value.filter(function(item) {
                 return item.status === status;
             }).length;
         }
     },
-    ready: function() {
+    ready() {
          $('[data-toggle="tooltip"]').tooltip();
+    },
+    watch: {
+        'job.items': function(items) {
+            this.p.data = items;
+        }
     }
 };
 </script>
