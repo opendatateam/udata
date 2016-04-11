@@ -41,7 +41,10 @@ class ZonagesTownDataset(TerritoryDataset):
     url_template = (
         'http://sig.ville.gouv.fr/Territoire/{code}/onglet/DonneesLocales')
     description = '''
-        ZFU, ZUS, et autres quartiers du CUCS.
+        [ZFU](/datasets/presence-dans-la-commune-d-une-zone-franche-urbaine-zfu-30382923/),
+        [ZUS](/datasets/presence-dans-la-commune-d-une-zone-urbaine-sensible-zus-30382883/),
+        et autres quartiers du
+        [CUCS](/datasets/contrat-urbain-de-cohesion-sociale-cucs-30382914/).
     '''.strip()
 
 
@@ -55,13 +58,14 @@ class ComptesTownDataset(TerritoryDataset):
         'http://alize2.finances.gouv.fr/communes/eneuro/tableau.php'
         '?icom={icom}&dep=0{dep}&type=BPS&param=0')
     description = '''
-        Chiffres Clés, Fonctionnement, Investissement, Fiscalité,
-        Autofinancement, Endettement.
+        Chiffres Clés, fonctionnement, investissement, fiscalité,
+        autofinancement, endettement.
     '''.strip()
     temporal_coverage = {
         'start': 2000,
         'end': 2014
     }
+    license_id = 'notspecified'
 
     @property
     def url(self):
@@ -78,7 +82,9 @@ class LogementTownDataset(TerritoryDataset):
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=LOG&nivgeo=COM&codgeo={code}')
     description = '''
-        Chiffres clés Logement.
+        [Chiffres clés
+        ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-logement-40535148/)
+        logement.
     '''.strip()
     temporal_coverage = {
         'start': 2007,
@@ -95,7 +101,9 @@ class EmploiPopulationTownDataset(TerritoryDataset):
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=EMP&nivgeo=COM&codgeo={code}')
     description = '''
-        Population de 15 à 64 ans par type d’activité.
+        [Population
+        ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-emploi-population-active-40535210/)
+        de 15 à 64 ans par type d’activité.
     '''.strip()
     temporal_coverage = {
         'start': 2007,
@@ -112,7 +120,9 @@ class EmploiChiffresTownDataset(TerritoryDataset):
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=ACT&nivgeo=COM&codgeo={code}')
     description = '''
-        Population de 15 ans ou plus ayant un emploi selon le statut.
+        [Population
+        ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-caracteristiques-de-l-emploi-40535204/)
+        de 15 ans ou plus ayant un emploi selon le statut.
     '''.strip()
     temporal_coverage = {
         'start': 2007,
@@ -129,7 +139,8 @@ class PopulationTownDataset(TerritoryDataset):
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=POP&nivgeo=COM&codgeo={code}')
     description = '''
-        Population par sexe et âge, indicateurs démographiques.
+        [Population](/datasets/population/)
+        par sexe et âge, indicateurs démographiques.
     '''.strip()
     temporal_coverage = {
         'start': 2007,
@@ -146,7 +157,9 @@ class PopulationChiffresTownDataset(TerritoryDataset):
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=FAM&nivgeo=COM&codgeo={code}')
     description = '''
-        Ménages, couples, familles selon leur composition.
+        [Ménages, couples, familles
+        ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-evolution-et-structure-de-la--40535162/)
+        selon leur composition.
     '''.strip()
     temporal_coverage = {
         'start': 2007,
@@ -163,7 +176,9 @@ class PopulationDiplomesTownDataset(TerritoryDataset):
     url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
                     '?ref_id=FOR&nivgeo=COM&codgeo={code}')
     description = '''
-        Scolarisation selon l’âge et le sexe.
+        [Scolarisation
+        ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-diplomes-formation-40535144/)
+        selon l’âge et le sexe.
     '''.strip()
     temporal_coverage = {
         'start': 2007,
@@ -179,7 +194,9 @@ class ElectionsRegionales2015Tour2TownDataset(
     # Ministère de l'Intérieur.
     organization_id = '534fff91a3a7292c64a77f53'
     description = '''
-        Résultats par bureau de vote pour la commune concernée.
+        [Résultats
+        ](/datasets/elections-regionales-2015-et-des-assemblees-de-corse-de-guyane-et-de-martinique-resultats-par-bureaux-de-vote-tour-2/)
+        par bureau de vote pour la commune concernée.
     '''.strip()
     # Equals to: https://www.data.gouv.fr/fr/datasets/elections-regionales-2015
     # -et-des-assemblees-de-corse-de-guyane-et-de-martinique-resultats-par-
@@ -202,7 +219,9 @@ class BanODBLTownDataset(TerritoryDataset):
     url_template = ('http://bano.openstreetmap.fr/BAN_odbl/communes/'
                     'BAN_odbl_{code}.csv')
     description = '''
-        Données de la Base Adresse Nationale sur le périmètre de la commune.
+        Données de la [Base Adresse Nationale
+        ](/datasets/ban-base-adresse-nationale/)
+        sur le périmètre de la commune.
     '''.strip()
 
 
