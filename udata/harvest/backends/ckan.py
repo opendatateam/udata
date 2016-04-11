@@ -35,7 +35,7 @@ resource = {
     'description': All(basestring, normalize_string),
     'format': All(basestring, Lower),
     'mimetype': Any(All(basestring, Lower), None),
-    'filesize': Any(Coerce(int), None),
+    'size': Any(Coerce(int), None),
     'hash': Any(All(basestring, hash), None),
     'created': All(basestring, to_date),
     'last_modified': Any(All(basestring, to_date), None),

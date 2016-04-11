@@ -212,17 +212,17 @@ class CkanBackendTest(DBTestMixin, TestCase):
         d = datasets['dataset-1']
         self.assertEqual(d.title, 'Dataset 1')
         self.assertEqual(d.description, "Description 1")
-        self.assertEqual(d.tags, ['correspondant',
-                                  'economie',
-                                  'excellence',
-                                  'pole'])
+        self.assertEqual(d.tags, ['country-uk',
+                                  'date-2009',
+                                  'openspending',
+                                  'regional'])
         self.assertEqual(d.extras['harvest:remote_id'],
-                         'f9f07d12-f810-4cb5-b3c0-52d7b1130c2e')
+                         '7e4d4ef3-f452-4c35-963d-9c6e582374b3')
         self.assertEqual(d.extras['harvest:domain'], 'ckan.test.org')
         self.assertEqual(d.extras['ckan:name'], 'dataset-1')
         # self.assertEqual(d.license.id, "fr-lo")
 
-        self.assertEqual(len(d.resources), 1)
+        self.assertEqual(len(d.resources), 3)
         resource = d.resources[0]
         self.assertEqual(resource.title, 'Resource 1')
         self.assertEqual(resource.description, 'Resource description 1')
@@ -230,8 +230,8 @@ class CkanBackendTest(DBTestMixin, TestCase):
         self.assertEqual(resource.mime, 'text/csv')
         self.assertIsInstance(resource.modified, datetime)
         self.assertEqual(resource.url,
-                         ("http://ckan.test.org/storage/f/"
-                          "2013-10-01T15%3A59%3A32.755Z/resource.csv"))
+                         ('http://ckan.net/storage/f/file/'
+                          '3ffdcd42-5c63-4089-84dd-c23876259973'))
 
         # dataset-2 has geo feature
         self.assertIn('dataset-2', datasets)
