@@ -64,7 +64,7 @@ new Vue({
         if (config.check_urls) {
             const port = location.port ? `:${location.port}` : '';
             const domain = `${location.hostname}${port}`;
-            data.whitelist = [domain].concat(config.check_urls_whitelist || []);
+            data.ignore = [domain].concat(config.check_urls_ignore || []);
         }
         return data;
     },
@@ -119,7 +119,7 @@ new Vue({
                 return;
             }
             e.preventDefault();
-            const resource = this.dataset.resources.filter(resource => resource.id === id)[0];
+            const resource = this.dataset.resources.find(resource => resource.id === id);
             this.$modal(ResourceModal, {resource: resource});
         },
 
@@ -198,7 +198,7 @@ new Vue({
             const url = parseUrl(resource.url);
             const el = resource.$el.querySelector('.format-label');
             const checkurl = resource.$el.dataset.checkurl;
-            if (!this.whitelist.some(domain => url.origin.endsWith(domain))) {
+            if (!this.ignore.some(domain => url.origin.endsWith(domain))) {
                 if (url.protocol.startsWith('ftp')) {
                     el.classList.add('format-label-warning');
                     addTooltip(el, this._('The server may be hard to reach (FTP).'));

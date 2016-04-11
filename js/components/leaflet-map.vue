@@ -6,8 +6,7 @@ import L from 'leaflet';
 
 const ATTRIBUTIONS = `&copy;<a href="http://openstreetmap.org">OpenStreetMap</a>
                       /<a href="http://open.mapquest.com/">MapQuest</a>`;
-const TILES_PREFIX = location.protocol === 'https:' ? '//otile{s}-s' : '//otile{s}';
-const TILES_URL = TILES_PREFIX + '.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png';
+const TILES_URL = 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png';
 const TILES_CONFIG = {subdomains: '1234', attribution: ATTRIBUTIONS};
 const INITIAL_SETTINGS = {center: [42, 2.4], zoom: 4, zoomControl: false};
 

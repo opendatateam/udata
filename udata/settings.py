@@ -125,7 +125,7 @@ class Defaults(object):
     #     'retry': 10,
     # }
     #
-    CROQUEMORT_WHITELIST = []
+    CROQUEMORT_IGNORE = []
 
     # PIWIK_ID = # Demo = 11, Prod = 1
     # PIWIK_URL = 'stats.data.gouv.fr'

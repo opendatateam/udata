@@ -69,9 +69,9 @@ export const csrf_token = _meta('csrf-token');
 export const check_urls = _jsonMeta('check-urls');
 
 /**
- * List of whitelisted domain for url check
+ * List of ignored domain for url check
  */
-export const check_urls_whitelist = _jsonMeta('check-urls-whitelist');
+export const check_urls_ignore = _jsonMeta('check-urls-ignore');
 
 /**
  * The API root/base URL
@@ -141,6 +141,6 @@ export default {
     sentry,
     notify_in,
     check_urls,
-    check_urls_whitelist,
+    check_urls_ignore,
     is_territory_enabled,
 };
