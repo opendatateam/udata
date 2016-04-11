@@ -1,1 +1,1 @@
-raven[flask]
+raven[flask] >= 5.8.0
