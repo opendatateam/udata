@@ -54,20 +54,14 @@
         display: flex;
         margin: 3px;
     }
+    .dataset-card .udata-content p:not(.udata-source) {
+        flex: 1;
+    }
     .dataset-card .udata-source img {
         border: 1px solid #EEE;
         padding: 1px;
         margin: 0 5px 0 0;
         background: #FFF;
-    }
-    .dataset-card .udata-description {
-        margin: 0 5px;
-        padding: 5px;
-    }
-    .dataset-card .udata-description a {
-        text-decoration: none;
-        color: #5E5E5E;
-        display: block;
     }
     .dataset-card .udata-meta {
         border-top: 1px solid #EEE;
@@ -198,11 +192,11 @@
             </a>
         {% endif %}
         </p>
-        <p class="udata-description" data-tooltip="{{ _('Download from') }} {{ config.SERVER_NAME }}">
-            <a href="{{ item.external_url or item.url }}">
-                {{ item.description | mdstrip(110) }}
-            </a>
-        </p>
+        {% if item.territory %}
+            {{ item.description|markdown(source_tooltip=True) }}
+        {% else %}
+            <p>{{ item.description|mdstrip(110) }}</p>
+        {% endif %}
     </div>
     <aside class="udata-meta">
         <p class="udata-code" data-tooltip="{{ _('Add to your own website') }}">
@@ -234,6 +228,11 @@
         {% if item.frequency and item.frequency_label != 'Unknown' %}
         <p class="udata-stats" data-tooltip="{{ _('Frequency') }}">
             {{ item.frequency_label }}
+        </p>
+        {% endif %}
+        {% if item.license and item.license.id != 'notspecified' %}
+        <p data-tooltip="{{ _('License:') }} {{ item.license }}">
+            © {{ item.license.id }}
         </p>
         {% endif %}
     </aside>
