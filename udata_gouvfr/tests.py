@@ -5,12 +5,13 @@ import json
 
 from flask import url_for
 
+from udata.frontend.markdown import md
 from udata.models import Badge, PUBLIC_SERVICE
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.api import APITestCase
 from udata.tests.factories import (
     DatasetFactory, ReuseFactory, OrganizationFactory,
-    VisibleReuseFactory, GeoZoneFactory
+    VisibleReuseFactory, GeoZoneFactory, LicenseFactory
 )
 from udata.tests.frontend import FrontTestCase
 from udata.tests.test_sitemap import SitemapTestCase
@@ -278,6 +279,8 @@ class OEmbedsTerritoryAPITest(APITestCase):
         arles = GeoZoneFactory(
             id='fr/town/13004', level='fr/town',
             name='Arles', code='13004', population=52439)
+        licence_ouverte = LicenseFactory(id='fr-lo', title='Licence Ouverte')
+        LicenseFactory(id='notspecified', title='Not Specified')
         for territory_dataset_class in TERRITORY_DATASETS.values():
             organization = OrganizationFactory(
                 id=territory_dataset_class.organization_id)
@@ -297,9 +300,20 @@ class OEmbedsTerritoryAPITest(APITestCase):
             self.assertIn(cgi.escape(territory.url), data['html'])
             self.assertIn(
                 'alt="{name}"'.format(name=organization.name), data['html'])
-            self.assertIn(territory.description.split('\n')[0], data['html'])
+            self.assertIn(
+                md(territory.description, source_tooltip=True), data['html'])
             self.assertIn('Download from localhost', data['html'])
             self.assertIn('Add to your own website', data['html'])
+            if territory_dataset_class != TERRITORY_DATASETS['comptes']:
+                self.assertIn(
+                    'License: {title}'.format(title=licence_ouverte.title),
+                    data['html'])
+                self.assertIn(
+                    '© {license_id}'.format(license_id=licence_ouverte.id),
+                    data['html'])
+                self.assertIn(
+                    '<a data-tooltip="Source" href="http://localhost/datasets',
+                    data['html'])
 
 
 class SitemapTest(FrontTestCase):
