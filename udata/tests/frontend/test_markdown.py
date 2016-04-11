@@ -53,15 +53,39 @@ class MarkdownTestCase(TestCase, WebTestMixin):
             self.assertEqual(el.getAttribute('href'), 'http://example.net/')
             self.assertEqual(el.firstChild.data, 'http://example.net/')
 
-    def test_markdown_linkify_mails(self):
-        '''Markdown filter should transform emails to anchors'''
-        text = 'coucou@cmoi.fr'
+    def test_markdown_linkify_relative(self):
+        '''Markdown filter should transform relative urls to external ones'''
+        text = '[foo](/)'
         with self.app.test_request_context('/'):
             result = render_template_string('{{ text|markdown }}', text=text)
             parsed = parser.parse(result)
             el = parsed.getElementsByTagName('a')[0]
-            self.assertEqual(el.getAttribute('href'), 'mailto:coucou@cmoi.fr')
-            self.assertEqual(el.firstChild.data, 'coucou@cmoi.fr')
+            self.assertEqual(el.getAttribute('rel'), '')
+            self.assertEqual(el.getAttribute('href'), 'http://localhost/')
+            self.assertEqual(el.getAttribute('data-tooltip'), '')
+            self.assertEqual(el.firstChild.data, 'foo')
+
+    def test_markdown_linkify_relative_with_tooltip(self):
+        '''Markdown filter should transform + add tooltip'''
+        text = '[foo](/)'
+        with self.app.test_request_context('/'):
+            result = render_template_string(
+                '{{ text|markdown(source_tooltip=True) }}', text=text)
+            parsed = parser.parse(result)
+            el = parsed.getElementsByTagName('a')[0]
+            self.assertEqual(el.getAttribute('rel'), '')
+            self.assertEqual(el.getAttribute('href'), 'http://localhost/')
+            self.assertEqual(el.getAttribute('data-tooltip'), 'Source')
+            self.assertEqual(el.firstChild.data, 'foo')
+
+    def test_markdown_not_linkify_mails(self):
+        '''Markdown filter should not transform emails to anchors'''
+        text = 'coucou@cmoi.fr'
+        with self.app.test_request_context('/'):
+            result = render_template_string('{{ text|markdown }}', text=text)
+            parsed = parser.parse(result)
+            self.assertEqual(parsed.getElementsByTagName('a'), [])
+            self.assertEqual(result.strip(), '<p>coucou@cmoi.fr</p>')
 
     def test_markdown_linkify_within_pre(self):
         '''Markdown filter should not transform urls into <pre> anchors'''

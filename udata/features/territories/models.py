@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import Organization
+from udata.models import License, Organization
 
 __all__ = (
     'TerritoryDataset', 'ResourceBasedTerritoryDataset', 'TERRITORY_DATASETS'
@@ -20,6 +20,7 @@ class TerritoryDataset(object):
     organization_id = ''
     url_template = ''
     description = ''
+    license_id = 'fr-lo'
 
     def __init__(self, territory):
         self.territory = territory
@@ -36,6 +37,10 @@ class TerritoryDataset(object):
     @property
     def organization(self):
         return Organization.objects.get(id=self.organization_id)
+
+    @property
+    def license(self):
+        return License.objects.get(id=self.license_id)
 
 
 class ResourceBasedTerritoryDataset(TerritoryDataset):
