@@ -11,7 +11,7 @@ from flask import (
     current_app, g, request, url_for, json, make_response, redirect, Blueprint,
     render_template_string
 )
-from flask.ext.restplus import Api, Resource, marshal, cors
+from flask.ext.restplus import Api, Resource, inputs, cors
 
 from udata import search, theme, tracking
 from udata.app import csrf
