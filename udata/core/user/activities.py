@@ -70,7 +70,7 @@ class UserFollowedOrganization(FollowActivity, OrgRelatedActivity, Activity):
 
 @on_follow.connect
 def write_activity_on_follow(follow, **kwargs):
-    if current_user.is_authenticated():
+    if current_user.is_authenticated:
         if isinstance(follow.following, Dataset):
             write_activity.delay(
                 UserFollowedDataset, current_user._get_current_object(),
@@ -92,7 +92,7 @@ def write_activity_on_follow(follow, **kwargs):
 @on_new_discussion.connect
 @on_new_discussion_comment.connect
 def write_activity_on_discuss(discussion, **kwargs):
-    if current_user.is_authenticated():
+    if current_user.is_authenticated:
         if isinstance(discussion.subject, Dataset):
             write_activity.delay(
                 UserDiscussedDataset, current_user._get_current_object(),

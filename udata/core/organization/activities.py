@@ -34,7 +34,7 @@ class UserUpdatedOrganization(OrgRelatedActivity, Activity):
 
 @Organization.on_create.connect
 def on_user_created_organization(organization):
-    if current_user and current_user.is_authenticated():
+    if current_user and current_user.is_authenticated:
         user = current_user._get_current_object()
         write_activity.delay(
             UserCreatedOrganization, user, organization,
@@ -43,7 +43,7 @@ def on_user_created_organization(organization):
 
 @Organization.on_update.connect
 def on_user_updated_organization(organization):
-    if current_user and current_user.is_authenticated():
+    if current_user and current_user.is_authenticated:
         user = current_user._get_current_object()
         write_activity.delay(
             UserUpdatedOrganization, user, organization,

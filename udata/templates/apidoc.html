@@ -40,7 +40,7 @@
             <div class="col-xs-12">
                 <p>
                     {{ _('In order to be able to execute write operations,') }}
-                    {% if current_user.is_authenticated() %}
+                    {% if current_user.is_authenticated %}
                         {{ _(
                             'you first need to obtain an %(apikey)s in your profile settings.',
                             apikey='<a href="%s#apikey">%s</a>'|format(

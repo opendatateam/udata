@@ -19,7 +19,7 @@ class SpatialCoverageFactory(MongoEngineFactory):
     class Meta:
         model = SpatialCoverage
 
-    geom = factory.LazyAttribute(lambda o: faker.multipolygon())
+    geom = factory.Faker('multipolygon')
     granularity = factory.LazyAttribute(random_spatial_granularity)
 
 
@@ -29,9 +29,9 @@ class GeoZoneFactory(MongoEngineFactory):
 
     id = factory.LazyAttribute(lambda o: '/'.join((o.level, o.code)))
     level = factory.LazyAttribute(lambda o: unique_string())
-    name = factory.LazyAttribute(lambda o: faker.city())
-    code = factory.LazyAttribute(lambda o: faker.postcode())
-    geom = factory.LazyAttribute(lambda o: faker.multipolygon())
+    name = factory.Faker('city')
+    code = factory.Faker('postcode')
+    geom = factory.Faker('multipolygon')
 
 
 class GeoLevelFactory(MongoEngineFactory):
@@ -39,4 +39,4 @@ class GeoLevelFactory(MongoEngineFactory):
         model = GeoLevel
 
     id = factory.LazyAttribute(lambda o: unique_string())
-    name = factory.LazyAttribute(lambda o: faker.name())
+    name = factory.Faker('name')

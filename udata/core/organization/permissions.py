@@ -32,7 +32,7 @@ class OrganizationPrivatePermission(Permission):
 
 @identity_loaded.connect
 def inject_organization_needs(sender, identity):
-    if current_user.is_authenticated():
+    if current_user.is_authenticated:
         for org in Organization.objects(members__user=current_user.id):
             membership = get_by(org.members, 'user',
                                 current_user._get_current_object())

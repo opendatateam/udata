@@ -71,7 +71,7 @@ class BadgeMixin(object):
             raise db.ValidationError(msg.format(model=self.__class__.__name__,
                                                 kind=kind))
         badge = Badge(kind=kind)
-        if current_user.is_authenticated():
+        if current_user.is_authenticated:
             badge.created_by = current_user.id
 
         self.update(__raw__={

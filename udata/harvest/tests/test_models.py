@@ -5,8 +5,8 @@ import logging
 
 
 from udata.tests import TestCase, DBTestMixin
+from udata.tests.factories import faker
 
-from .factories import fake
 from ..models import HarvestSource
 
 
@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 
 class HarvestSourceTest(DBTestMixin, TestCase):
     def test_defaults(self):
-        source = HarvestSource.objects.create(name='Test', url=fake.url())
+        source = HarvestSource.objects.create(name='Test', url=faker.url())
         self.assertEqual(source.name, 'Test')
         self.assertEqual(source.slug, 'test')
 

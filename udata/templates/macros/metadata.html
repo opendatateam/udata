@@ -30,7 +30,7 @@
 <meta name="csrf-token" content="{{ csrf_token() }}" />
 <meta name="site-title" content="{{config.SITE_TITLE}}" />
 
-{% if current_user.is_authenticated() %}
+{% if current_user.is_authenticated %}
 <meta name="current-user" content="{{ current_user.id }}"
     data-slug="{{ current_user.slug }}"
     data-first_name="{{ current_user.first_name }}"

@@ -6,28 +6,24 @@ import factory
 from flask.signals import Namespace
 
 from factory.mongoengine import MongoEngineFactory
-from faker import Faker
 
 from udata.tests.factories import DatasetFactory
 
 from .. import backends
 from ..models import HarvestSource, HarvestJob
 
-fake = Faker()
-
 
 def dtfactory(start, end):
-    return factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=start, end_date=end))
+    return factory.Faker('date_time_between', start_date=start, end_date=end)
 
 
 class HarvestSourceFactory(MongoEngineFactory):
     class Meta:
         model = HarvestSource
 
-    name = factory.LazyAttribute(lambda o: fake.name())
-    url = factory.LazyAttribute(lambda o: fake.url())
-    description = factory.LazyAttribute(lambda o: fake.text())
+    name = factory.Faker('name')
+    url = factory.Faker('url')
+    description = factory.Faker('text')
 
 
 class HarvestJobFactory(MongoEngineFactory):

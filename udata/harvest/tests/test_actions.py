@@ -13,11 +13,11 @@ from udata.models import Dataset, PeriodicTask
 
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.factories import (
-    OrganizationFactory, UserFactory, DatasetFactory
+    OrganizationFactory, UserFactory, DatasetFactory, faker
 )
 
 from .factories import (
-    fake, HarvestSourceFactory, HarvestJobFactory,
+    HarvestSourceFactory, HarvestJobFactory,
     mock_initialize, mock_process, DEFAULT_COUNT as COUNT
 )
 from ..models import (
@@ -90,7 +90,7 @@ class HarvestActionsTest(DBTestMixin, TestCase):
             self.assertIn(source, result)
 
     def test_create_source(self):
-        source_url = fake.url()
+        source_url = faker.url()
 
         with self.assert_emit(signals.harvest_source_created):
             source = actions.create_source('Test source',
@@ -220,8 +220,8 @@ class HarvestActionsTest(DBTestMixin, TestCase):
     def test_unschedule(self):
         periodic_task = PeriodicTask.objects.create(
             task='harvest',
-            name=fake.name(),
-            description=fake.sentence(),
+            name=faker.name(),
+            description=faker.sentence(),
             enabled=True,
             crontab=PeriodicTask.Crontab()
         )

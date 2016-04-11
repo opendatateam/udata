@@ -77,7 +77,7 @@ def validate_source(ident, comment=None):
     source.validation.on = datetime.now()
     source.validation.comment = comment
     source.validation.state = VALIDATION_ACCEPTED
-    if current_user.is_authenticated():
+    if current_user.is_authenticated:
         source.validation.by = current_user._get_current_object()
     source.save()
     launch(ident)
@@ -90,7 +90,7 @@ def reject_source(ident, comment):
     source.validation.on = datetime.now()
     source.validation.comment = comment
     source.validation.state = VALIDATION_REFUSED
-    if current_user.is_authenticated():
+    if current_user.is_authenticated:
         source.validation.by = current_user._get_current_object()
     source.save()
     return source
