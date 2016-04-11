@@ -61,7 +61,7 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if current_user.is_authenticated() %}
+                {% if current_user.is_authenticated %}
                 <li class="dropdown user login">
                     <button class="btn-link dropdown-toggle" data-toggle="dropdown">
                         <span class="username">{{ current_user.fullname }} </span>
