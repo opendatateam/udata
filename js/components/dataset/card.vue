@@ -7,7 +7,7 @@
         :src="certified" alt="certified"
         class="certified" data-toggle="popover"
         :data-title="_('Certified public service')"
-        :data-content="_('The identity of this public service public is certified by Etalab')"
+        :data-content="_('The identity of this public service public is certified by %(certifier)', certifier=config.SITE_AUTHOR)"
         data-container="body" data-trigger="hover"/>
     <div class="card-body">
         <h4>

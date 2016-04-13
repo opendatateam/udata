@@ -11,7 +11,7 @@
         <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
             class="certified" data-toggle="popover"
             data-title="{% trans %}Certified public service{% endtrans %}"
-            data-content="{% trans %}The identity of this public service public is certified by Etalab{% endtrans %}"
+            data-content="{{_('The identity of this public service is certified by %(certifier)', certifier=config.SITE_AUTHOR)}}"
             data-container="body" data-trigger="hover"/>
         {% endif %}
     {% else %}
