@@ -27,7 +27,8 @@ from udata.search import es
 
 from werkzeug.urls import url_encode
 
-from .factories import UserFactory
+from udata.core.user.factories import UserFactory
+
 
 # Suppress debug data for third party libraries
 for logger in ('factory', 'elasticsearch', 'urllib3'):

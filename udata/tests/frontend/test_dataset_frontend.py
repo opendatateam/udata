@@ -5,12 +5,12 @@ from datetime import datetime
 import feedparser
 from flask import url_for
 
+from udata.core.dataset.factories import ResourceFactory, DatasetFactory
+from udata.core.user.factories import UserFactory
+from udata.core.organization.factories import OrganizationFactory
 from udata.models import FollowDataset
 
 from . import FrontTestCase
-from ..factories import (
-    ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory
-)
 
 
 class DatasetBlueprintTest(FrontTestCase):

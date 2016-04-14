@@ -9,8 +9,8 @@ from flask import url_for
 from udata.frontend import csv
 
 from udata.tests.frontend import FrontTestCase
-from udata.tests.factories import VisibleDatasetFactory, VisibleReuseFactory
-
+from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.tags.models import Tag
 from udata.core.tags.tasks import count_tags
 

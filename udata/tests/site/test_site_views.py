@@ -10,11 +10,11 @@ from flask import url_for
 from udata.frontend import csv
 from udata.models import Badge, Site, PUBLIC_SERVICE
 
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.site.views import current_site
+from udata.core.reuse.factories import ReuseFactory
 from udata.tests.frontend import FrontTestCase
-from udata.tests.factories import (
-    DatasetFactory, ReuseFactory, OrganizationFactory, ResourceFactory
-)
 
 
 class SiteViewsTest(FrontTestCase):

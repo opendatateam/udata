@@ -8,7 +8,9 @@ from flask import url_for
 from udata.frontend.markdown import mdstrip
 
 from . import APITestCase
-from ..factories import DatasetFactory, OrganizationFactory, UserFactory
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.user.factories import UserFactory
+from udata.core.organization.factories import OrganizationFactory
 
 
 class OEmbedsDatasetAPITest(APITestCase):

@@ -5,8 +5,7 @@ from tempfile import NamedTemporaryFile
 
 from udata.models import Badge, CERTIFIED, PUBLIC_SERVICE
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import OrganizationFactory
-
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.badges.commands import toggle
 
 

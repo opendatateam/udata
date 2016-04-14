@@ -6,11 +6,11 @@ from flask import url_for
 from udata.models import (
     DatasetIssue, DatasetDiscussion, ReuseIssue, ReuseDiscussion, Member, User
 )
-
-from udata.tests.factories import (
-    CommunityResourceFactory, VisibleDatasetFactory, OrganizationFactory,
-    ReuseFactory, UserFactory
-)
+from udata.core.dataset.factories import (CommunityResourceFactory,
+                                          VisibleDatasetFactory)
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory
 
 from . import APITestCase
 

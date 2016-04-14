@@ -9,7 +9,7 @@ import httpretty
 
 from udata.models import Dataset, License
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import OrganizationFactory
+from udata.core.organization.factories import OrganizationFactory
 
 from .factories import HarvestSourceFactory
 from .. import actions

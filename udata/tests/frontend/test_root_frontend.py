@@ -3,10 +3,11 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.organization.factories import OrganizationFactory
+
 from . import FrontTestCase
-from udata.tests.factories import (
-    DatasetFactory, ReuseFactory, OrganizationFactory
-)
 
 
 class FrontEndRootTest(FrontTestCase):
