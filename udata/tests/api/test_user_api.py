@@ -4,9 +4,10 @@ from __future__ import unicode_literals
 from flask import url_for
 
 from udata.models import Follow, FollowUser
+from udata.core.user.factories import UserFactory
+from udata.utils import faker
 
 from . import APITestCase
-from ..factories import faker, UserFactory
 
 
 class UserAPITest(APITestCase):

@@ -8,8 +8,6 @@ from udata.models import db
 
 log = logging.getLogger(__name__)
 
-__all__ = ('Discussion',)
-
 
 class Message(db.EmbeddedDocument):
     content = db.StringField(required=True)

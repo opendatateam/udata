@@ -8,12 +8,13 @@ from flask import url_for
 from udata.core.site.models import Site
 from udata.core.site.metrics import SiteMetric
 from udata.core.site.views import current_site
+from udata.core.site.factories import SiteFactory
+from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.reuse.factories import VisibleReuseFactory
+from udata.core.user.factories import AdminFactory
 from udata.models import db, WithMetrics
 
 from udata.tests.api import APITestCase
-from udata.tests.factories import (
-    AdminFactory, VisibleDatasetFactory, VisibleReuseFactory, SiteFactory
-)
 
 
 class FakeModel(db.Document, WithMetrics):

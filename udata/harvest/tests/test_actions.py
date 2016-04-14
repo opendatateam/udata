@@ -12,9 +12,9 @@ from mock import patch
 from udata.models import Dataset, PeriodicTask
 
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import (
-    OrganizationFactory, UserFactory, DatasetFactory
-)
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory
+from udata.core.dataset.factories import DatasetFactory
 
 from .factories import (
     fake, HarvestSourceFactory, HarvestJobFactory,

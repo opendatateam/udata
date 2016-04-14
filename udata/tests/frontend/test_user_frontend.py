@@ -3,12 +3,13 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from . import FrontTestCase
 from udata.models import FollowDataset, FollowOrg, FollowReuse, FollowUser
-from ..factories import (
-    UserFactory, DatasetFactory, ReuseFactory, ResourceFactory,
-    OrganizationFactory
-)
+from udata.core.user.factories import UserFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.organization.factories import OrganizationFactory
+
+from . import FrontTestCase
 
 
 class UserBlueprintTest(FrontTestCase):

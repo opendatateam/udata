@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.tests.factories import GeoZoneFactory
+from udata.core.spatial.factories import GeoZoneFactory
 from udata.tests.frontend import FrontTestCase
 
 
