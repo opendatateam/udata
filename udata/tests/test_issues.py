@@ -17,16 +17,16 @@ from udata.core.issues.signals import (
 from udata.core.issues.tasks import (
     notify_new_issue, notify_new_issue_comment, notify_issue_closed
 )
+from udata.core.dataset.factories import DatasetFactory, DatasetIssueFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.user.factories import UserFactory
+from udata.utils import faker
 
 from frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
-
-from .factories import (
-    faker, UserFactory, OrganizationFactory, DatasetFactory, ReuseFactory,
-    DatasetIssueFactory
-)
 
 
 class IssuesTest(APITestCase):

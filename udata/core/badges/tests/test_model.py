@@ -4,7 +4,7 @@ from __future__ import unicode_literals, absolute_import
 from udata.auth import login_user
 from udata.models import db
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import UserFactory
+from udata.core.user.factories import UserFactory
 
 from ..models import Badge, BadgeMixin
 

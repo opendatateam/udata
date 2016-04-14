@@ -6,7 +6,7 @@ from werkzeug.datastructures import MultiDict
 from udata.forms import ModelForm, fields
 from udata.models import db
 from udata.tests import TestCase
-from udata.tests.factories import faker
+from udata.utils import faker
 
 
 class Nested(db.Document):

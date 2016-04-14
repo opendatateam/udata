@@ -5,13 +5,15 @@ from datetime import datetime
 
 from flask import url_for
 
+from udata.core.badges.factories import badge_factory
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.user.factories import AdminFactory
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.organization.factories import OrganizationFactory
 from udata.models import Reuse, FollowReuse, Follow, Member, REUSE_TYPES
+from udata.utils import faker
 
 from . import APITestCase
-from ..factories import (
-    faker, badge_factory,
-    ReuseFactory, DatasetFactory, AdminFactory, OrganizationFactory
-)
 
 
 class ReuseAPITest(APITestCase):

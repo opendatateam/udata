@@ -4,10 +4,9 @@ from __future__ import unicode_literals
 from flask import url_for
 
 from udata.models import Member
-from udata.tests.factories import (
-    GeoZoneFactory, VisibleDatasetFactory, OrganizationFactory
-)
-from udata.core.spatial.tests.factories import SpatialCoverageFactory
+from udata.core.spatial.factories import GeoZoneFactory, SpatialCoverageFactory
+from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.organization.factories import OrganizationFactory
 from udata.tests.frontend import FrontTestCase
 from udata.settings import Testing
 

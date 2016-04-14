@@ -4,9 +4,11 @@ from __future__ import unicode_literals
 import hashlib
 import re
 
+from uuid import uuid4
 from datetime import date, datetime
 from calendar import monthrange
 from math import ceil
+from faker import Faker
 
 
 def get_by(lst, field, value):
@@ -195,3 +197,12 @@ def recursive_get(obj, key):
     else:
         value = getattr(obj, key, None)
     return recursive_get(value, parts) if parts else value
+
+
+def unique_string(length=None):
+    '''Generate unique string'''
+    string = str(uuid4())
+    return string[:length] if length else string
+
+
+faker = Faker()

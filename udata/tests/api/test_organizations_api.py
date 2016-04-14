@@ -12,10 +12,13 @@ from udata.core.dataset.models import DatasetIssue, DatasetDiscussion
 from udata.core.reuse.models import ReuseIssue, ReuseDiscussion
 
 from . import APITestCase
-from ..factories import (
-    faker, badge_factory, OrganizationFactory, UserFactory,
-    DatasetFactory, ReuseFactory, AdminFactory
-)
+
+from udata.utils import faker
+from udata.core.badges.factories import badge_factory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory, AdminFactory
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.reuse.factories import ReuseFactory
 
 
 class OrganizationAPITest(APITestCase):

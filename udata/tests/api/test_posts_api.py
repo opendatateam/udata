@@ -6,7 +6,8 @@ from flask import url_for
 from udata.core.post.models import Post
 
 from . import APITestCase
-from ..factories import PostFactory, AdminFactory
+from udata.core.post.factories import PostFactory
+from udata.core.user.factories import AdminFactory
 
 
 class PostsAPITest(APITestCase):

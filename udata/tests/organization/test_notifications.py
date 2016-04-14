@@ -3,12 +3,13 @@ from __future__ import unicode_literals, absolute_import
 
 from udata.models import MembershipRequest, Member
 
-from .. import TestCase, DBTestMixin
-from ..factories import UserFactory, OrganizationFactory
-
+from udata.core.user.factories import UserFactory
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import (
     membership_request_notifications
 )
+
+from .. import TestCase, DBTestMixin
 
 
 class OrganizationNotificationsTest(TestCase, DBTestMixin):

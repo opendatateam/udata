@@ -14,11 +14,14 @@ from udata.models import (
 )
 
 from . import APITestCase
-from ..factories import (
-    badge_factory, faker, DatasetFactory, VisibleDatasetFactory,
-    CommunityResourceFactory, ResourceFactory, OrganizationFactory,
-    AdminFactory, UserFactory, LicenseFactory, unique_string
-)
+
+from udata.core.dataset.factories import (
+    DatasetFactory, VisibleDatasetFactory, CommunityResourceFactory,
+    LicenseFactory, ResourceFactory)
+from udata.core.user.factories import UserFactory, AdminFactory
+from udata.core.badges.factories import badge_factory
+from udata.core.organization.factories import OrganizationFactory
+from udata.utils import unique_string, faker
 
 from nose.plugins.attrib import attr
 

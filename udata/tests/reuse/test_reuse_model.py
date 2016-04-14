@@ -3,8 +3,11 @@ from __future__ import unicode_literals, absolute_import
 
 from udata.models import Reuse
 
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.user.factories import UserFactory
+
 from .. import TestCase, DBTestMixin
-from ..factories import ReuseFactory, UserFactory, OrganizationFactory
 
 
 class ReuseModelTest(TestCase, DBTestMixin):

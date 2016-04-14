@@ -4,9 +4,9 @@ from __future__ import unicode_literals
 from flask import url_for
 
 from udata.tests.frontend import FrontTestCase
-from udata.tests.factories import (
-    VisibleDatasetFactory, VisibleReuseFactory, TopicFactory
-)
+from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.reuse.factories import VisibleReuseFactory
+from udata.core.topic.factories import TopicFactory
 
 
 class TopicsBlueprintTest(FrontTestCase):

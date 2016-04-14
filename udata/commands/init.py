@@ -9,6 +9,7 @@ from udata.commands import manager, yellow
 from udata.search import es
 
 from .db import migrate
+from .fixtures import generate_fixtures
 
 log = logging.getLogger(__name__)
 
@@ -16,6 +17,9 @@ log = logging.getLogger(__name__)
 @manager.command
 def init():
     '''Initialize or update data and indexes'''
+    log.info('Build sample fixture data')
+    generate_fixtures()
+
     log.info('Apply DB migrations if needed')
     migrate(record=True)
 
