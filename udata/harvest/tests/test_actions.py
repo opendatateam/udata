@@ -15,6 +15,7 @@ from udata.tests import TestCase, DBTestMixin
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.utils import faker
 
 from .factories import (
     HarvestSourceFactory, HarvestJobFactory,

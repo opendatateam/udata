@@ -18,10 +18,11 @@ from udata.core.discussions.tasks import (
     notify_new_discussion, notify_new_discussion_comment,
     notify_discussion_closed
 )
-from udata.core.user.factories import UserFactory, AdminFactory
+from udata.core.dataset.factories import (
+    DatasetFactory, DatasetDiscussionFactory
+)
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.dataset.factories import (DatasetFactory,
-                                          DatasetDiscussionFactory)
+from udata.core.user.factories import UserFactory, AdminFactory
 from udata.utils import faker
 
 from frontend import FrontTestCase

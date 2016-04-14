@@ -6,11 +6,11 @@ from flask import url_for
 from udata.utils import get_by
 
 from udata.utils import faker
-from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.tests.api import APITestCase
-
-from udata.core.spatial.factories import (SpatialCoverageFactory,
-                                          GeoZoneFactory, GeoLevelFactory)
+from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.spatial.factories import (
+    SpatialCoverageFactory, GeoZoneFactory, GeoLevelFactory
+)
 
 
 class SpatialApiTest(APITestCase):

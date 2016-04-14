@@ -5,7 +5,7 @@ import logging
 
 
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import faker
+from udata.utils import faker
 
 from ..models import HarvestSource
 
