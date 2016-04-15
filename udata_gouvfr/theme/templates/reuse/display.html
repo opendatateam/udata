@@ -1,6 +1,6 @@
 {% extends "reuse/display.html" %}
 
-{% set community_subtitle = _('Explore with Datagouv') %}
+{% set community_subtitle = _('Explore with %(certifier)s', certifier=config.SITE_TITLE ) %}
 
 {% block subnav %}
     {% include theme('subnav-community.html') with context %}
