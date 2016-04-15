@@ -1,4 +1,5 @@
 {% cache cache_duration, 'dataset-search-result', dataset.id|string, g.lang_code %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
 <li class="search-result dataset-result">
     <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}">
         {% if dataset.organization %}
@@ -7,13 +8,7 @@
                 src="{{ dataset.organization.logo(70)|placeholder('organization') }}"
                 width="70" height="70">
         </div>
-            {% if dataset.organization.public_service %}
-            <img src="{{theme_static('img/certified-stamp.png')}}" alt="certified"
-                class="certified" data-toggle="popover"
-                data-title="{{ _('Certified public service') }}"
-                data-content="{{_('The identity of this public service is certified by %(certifier)', certifier=config.SITE_AUTHOR)}}"
-                data-container="body" data-placement="auto" data-trigger="hover"/>
-            {% endif %}
+        {{ badge_if_certified(dataset.organization) }}
         {% else %}
         <div class="result-logo pull-left">
             <img src="{{ ''|placeholder('organization') }}" alt="">

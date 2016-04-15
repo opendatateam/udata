@@ -1,4 +1,5 @@
 {% cache cache_duration, 'org-search-result', organization.id|string, g.lang_code %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
 <li class="search-result organization-result">
     <a href="{{ url_for('organizations.show', org=organization) }}" title="{{ organization.name }}">
         <div class="result-logo pull-left">
@@ -6,13 +7,7 @@
                 src="{{ organization.logo(70)|placeholder('organization') }}"
                 width="70" height="70">
         </div>
-        {% if organization.public_service %}
-        <img src="{{theme_static('img/certified-stamp.png')}}" alt="certified"
-            class="certified" data-toggle="popover"
-            data-title="{{ _('Certified public service') }}"
-            data-content="{{_('The identity of this public service is certified by %(certifier)', certifier=config.SITE_AUTHOR)}}"
-            data-container="body" data-placement="left" data-trigger="hover"/>
-        {% endif %}
+        {{ badge_if_certified(org) }}
         <div class="result-body ellipsis-dot">
             <h4 class="result-title">{{ organization.name }}</h4>
             <div class="result-description">

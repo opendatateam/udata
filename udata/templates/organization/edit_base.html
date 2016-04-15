@@ -1,5 +1,6 @@
 {% extends theme('layouts/form.html') %}
 {% import 'macros/forms.html' as forms with context %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
 {% set tab = tab|default('description') %}
 
 
@@ -12,13 +13,7 @@
 {% block main_content %}
 <div class="row">
     <div class="card side-card text-center col-sm-4 col-md-3 col-lg-2">
-        {% if org.public_service %}
-        <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
-            class="certified" data-toggle="popover"
-            data-title="{{ _('Certified public service') }}"
-            data-content="{{_('The identity of this public service is certified by %(certifier)', certifier=config.SITE_AUTHOR)}}"
-            data-container="body" data-trigger="hover"/>
-        {% endif %}
+        {{ badge_if_certified(org) }}
         <a href="{{ url_for('organizations.show', org=org) }}"
             title="{{ org.name }}">
             <img src="{{ org.logo|placeholder('organization') }}"
