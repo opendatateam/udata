@@ -1,5 +1,6 @@
 {% cache cache_duration, 'dataset-card', dataset.id|string, g.lang_code %}
 {% set dataset_url = url_for('datasets.show', dataset=dataset) %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
 <div class="card dataset-card">
     {% if dataset.organization %}
         <a class="card-logo" href="{{ dataset_url }}">
@@ -7,13 +8,7 @@
                 src="{{ dataset.organization.logo(70)|placeholder('organization') }}"
                 width="70" height="70">
         </a>
-        {% if dataset.organization.public_service %}
-        <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
-            class="certified" data-toggle="popover"
-            data-title="{% trans %}Certified public service{% endtrans %}"
-            data-content="{% trans %}The identity of this public service public is certified by Etalab{% endtrans %}"
-            data-container="body" data-trigger="hover"/>
-        {% endif %}
+        {{ badge_if_certified(dataset.organization) }}
     {% else %}
     <div class="card-logo">
         <img src="{{ ''|placeholder('organization') }}" alt="">

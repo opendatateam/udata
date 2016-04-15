@@ -1,0 +1,9 @@
+{% macro badge_if_certified(org) %}
+{% if org.public_service %}
+<img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
+    class="certified" data-toggle="popover"
+    data-title="{{ _('Certified public service') }}"
+    data-content="{{_('The identity of this public service is certified by %(certifier)s', certifier=config.SITE_AUTHOR)}}"
+    data-container="body" data-trigger="hover"/>
+{% endif %}
+{% endmacro %}

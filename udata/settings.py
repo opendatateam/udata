@@ -70,7 +70,7 @@ class Defaults(object):
     SITE_TITLE = 'uData'
     SITE_KEYWORDS = ['opendata', 'udata']
     SITE_AUTHOR_URL = None
-    SITE_AUTHOR = None
+    SITE_AUTHOR = 'Udata'
     SITE_GITHUB_URL = 'https://github.com/etalab/udata'
     USE_SSL = False
 
