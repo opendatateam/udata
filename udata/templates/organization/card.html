@@ -6,7 +6,7 @@
             src="{{ organization.logo(60)|placeholder('organization') }}"
             width="60" height="60">
     </a>
-    {{ badge_if_certified(org) }}
+    {{ badge_if_certified(organization) }}
     <div class="card-body">
         <h4>
             <a href="{{ url_for('organizations.show', org=organization) }}" title="{{organization.name}}">
