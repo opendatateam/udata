@@ -6,37 +6,43 @@ import logging
 
 from udata.commands import manager
 from udata.core.user.factories import UserFactory, AdminFactory
-from udata.core.dataset.factories import (DatasetFactory, VisibleDatasetFactory,
-                                          DatasetDiscussionFactory)
-from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
+from udata.core.dataset.factories import (
+    VisibleDatasetFactory, DatasetDiscussionFactory, LicenseFactory
+)
+from udata.core.reuse.factories import VisibleReuseFactory
+from udata.core.organization.factories import OrganizationFactory, TeamFactory
 
 log = logging.getLogger(__name__)
 
 
-def generate_users():
-    user = UserFactory(email='user@udata', password='password')
-    admin = AdminFactory(email='admin@udata', password='password')
-    log.info('A new user with email "{0}" and password "password" was '
-             'created.'.format(user.email))
-    log.info('A new admin user with email "{0}" and password "password" was '
-             'created.'.format(admin.email))
-
-
-def generate_datasets():
-    for _, i in enumerate(range(0, 10)):
-        dataset = DatasetFactory() if i % 3 == 0 else VisibleDatasetFactory()
+def generate_datasets(count, organization=None):
+    for _ in range(0, count):
+        dataset = VisibleDatasetFactory(organization=organization)
         DatasetDiscussionFactory(subject=dataset)
-    log.info('10 new datasets were created.')
 
 
-def generate_reuses():
-    for _, i in enumerate(range(0, 10)):
-        ReuseFactory() if i % 3 == 0 else VisibleReuseFactory()
+def generate_reuses(count, user=None):
+    VisibleReuseFactory(owner=user).create_batch(count)
+
+
+def generate_licenses(count):
+    for _ in range(0, count):
+        LicenseFactory()
 
 
 @manager.command
 def generate_fixtures():
-    '''Build sample fixture data'''
-    generate_users()
-    generate_datasets()
-    #generate_reuses()
+    '''Build sample fixture data (users, datasets and reuses).'''
+    user = UserFactory(email='user@udata', password='password')
+    log.info('Generated user "user@udata" with password "password".')
+
+    team = TeamFactory(members=[user])
+    organization = OrganizationFactory(teams=[team])
+    log.info('A team and an organization were generated for "user@udata".')
+
+    generate_datasets(count=5, organization=organization)
+    generate_reuses(count=5)
+    log.info('10 new datasets 5 reuses were generated.')
+
+    generate_licenses(count=2)
+    log.info('2 new licences were generated.')
