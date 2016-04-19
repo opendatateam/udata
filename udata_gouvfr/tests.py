@@ -5,17 +5,17 @@ import json
 
 from flask import url_for
 
+from udata.core.dataset.factories import DatasetFactory, LicenseFactory
+from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.spatial.factories import GeoZoneFactory
 from udata.frontend.markdown import md
 from udata.models import Badge, PUBLIC_SERVICE
+from udata.settings import Testing
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.api import APITestCase
-from udata.tests.factories import (
-    DatasetFactory, ReuseFactory, OrganizationFactory,
-    VisibleReuseFactory, GeoZoneFactory, LicenseFactory
-)
 from udata.tests.frontend import FrontTestCase
 from udata.tests.test_sitemap import SitemapTestCase
-from udata.settings import Testing
 
 from .models import (
     DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE, TERRITORY_DATASETS
