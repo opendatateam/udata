@@ -12,7 +12,7 @@ from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.forms import Form, fields, validators
 
 from . import APITestCase
-from ..factories import UserFactory
+from udata.core.user.factories import UserFactory
 
 ns = api.namespace('fake', 'A Fake namespace')
 

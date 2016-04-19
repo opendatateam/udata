@@ -7,11 +7,12 @@ from lxml import etree
 
 from udata import frontend, api
 from udata.tests import TestCase, WebTestMixin, SearchTestMixin
+from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.post.factories import PostFactory
+from udata.core.reuse.factories import VisibleReuseFactory
+from udata.core.topic.factories import TopicFactory
 
-from .factories import (
-    TopicFactory, PostFactory, OrganizationFactory, VisibleReuseFactory,
-    VisibleDatasetFactory
-)
 
 # Neede for lxml XPath not supporting default namespace
 NAMESPACES = {'s': 'http://www.sitemaps.org/schemas/sitemap/0.9'}

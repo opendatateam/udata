@@ -14,20 +14,21 @@ from udata.core.discussions.signals import (
     on_new_discussion, on_new_discussion_comment,
     on_discussion_closed, on_discussion_deleted,
 )
-
 from udata.core.discussions.tasks import (
     notify_new_discussion, notify_new_discussion_comment,
     notify_discussion_closed
 )
+from udata.core.dataset.factories import (
+    DatasetFactory, DatasetDiscussionFactory
+)
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory, AdminFactory
+from udata.utils import faker
 
 from frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
-from .factories import (
-    faker, AdminFactory, UserFactory, OrganizationFactory, DatasetFactory,
-    DatasetDiscussionFactory
-)
 
 
 class DiscussionsTest(APITestCase):

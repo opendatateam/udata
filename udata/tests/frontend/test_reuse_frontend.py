@@ -7,10 +7,12 @@ import feedparser
 
 from flask import url_for
 
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.user.factories import UserFactory
+from udata.core.organization.factories import OrganizationFactory
+
 from . import FrontTestCase
-from ..factories import (
-    ReuseFactory, UserFactory, OrganizationFactory, DatasetFactory
-)
 
 
 class ReuseBlueprintTest(FrontTestCase):

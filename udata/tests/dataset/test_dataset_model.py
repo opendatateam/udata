@@ -5,13 +5,15 @@ from datetime import datetime, timedelta
 from mongoengine import post_save
 
 from udata.models import db, Dataset
-
-from .. import TestCase, DBTestMixin
-from ..factories import (
-    ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory,
-    DatasetDiscussionFactory, MessageDiscussionFactory,
+from udata.core.dataset.factories import (
+    ResourceFactory, DatasetFactory, DatasetDiscussionFactory,
     CommunityResourceFactory
 )
+from udata.core.discussions.factories import MessageDiscussionFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory
+
+from .. import TestCase, DBTestMixin
 
 
 class DatasetModelTest(TestCase, DBTestMixin):

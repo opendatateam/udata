@@ -7,14 +7,15 @@ from datetime import datetime, timedelta, date
 
 from werkzeug.urls import url_decode, url_parse
 
+from factory.mongoengine import MongoEngineFactory
+
 from udata import search
 from udata.core.metrics import Metric
 from udata.models import db
 from udata.utils import multi_to_dict
 from udata.i18n import gettext as _, format_date
-
 from udata.tests import TestCase, DBTestMixin, SearchTestMixin
-from udata.tests.factories import faker, MongoEngineFactory
+from udata.utils import faker
 
 
 class Fake(db.Document):

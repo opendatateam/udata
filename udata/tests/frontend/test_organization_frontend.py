@@ -7,19 +7,16 @@ from datetime import datetime
 
 from flask import url_for
 
+from udata.core.dataset.factories import (
+    VisibleDatasetFactory, DatasetFactory, ResourceFactory
+)
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
+from udata.core.user.factories import UserFactory
 from udata.frontend import csv
 from udata.models import Member, FollowOrg
 
 from . import FrontTestCase
-from ..factories import (
-    OrganizationFactory,
-    UserFactory,
-    DatasetFactory,
-    VisibleDatasetFactory,
-    ResourceFactory,
-    ReuseFactory,
-    VisibleReuseFactory,
-)
 
 
 class OrganizationBlueprintTest(FrontTestCase):
