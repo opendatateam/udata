@@ -131,3 +131,10 @@ class SitemapTest(SitemapTestCase):
         url = self.get_by_url('apidoc.swaggerui_redirect')
         self.assertIsNotNone(url)
         self.assert_url(url, 0.9, 'weekly')
+
+    def test_terms_within_sitemap(self):
+        '''It should return the terms page from the sitemap.'''
+        self.get_sitemap_tree()
+
+        url = self.get_by_url('site.terms_redirect')
+        self.assertIsNotNone(url)

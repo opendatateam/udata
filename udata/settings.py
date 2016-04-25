@@ -72,7 +72,6 @@ class Defaults(object):
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = 'Udata'
     SITE_GITHUB_URL = 'https://github.com/etalab/udata'
-    SITE_TERMS_URL = '/terms'
     USE_SSL = False
 
     PLUGINS = []
