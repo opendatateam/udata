@@ -54,10 +54,10 @@ class SearchResult(Paginable):
         return self.get_objects()
 
     @property
-    def facets(self):
+    def aggregations(self):
         return dict(
-            (f, self.get_facet(f, fetch=False))
-            for f in self.query.facets_kwargs
+            (f, self.get_aggregation(f, fetch=False))
+            for f in self.query.aggregations_kwargs
         )
 
     def __iter__(self):
@@ -70,23 +70,25 @@ class SearchResult(Paginable):
     def __getitem__(self, index):
         return self.get_objects()[index]
 
-    def get_facet(self, name, fetch=True):
-        if name not in self.query.adapter.facets:
+    def get_aggregation(self, name, fetch=True):
+        if name not in self.query.adapter.aggregations:
             return None
-        facet = self.query.adapter.facets[name]
-        return facet.from_response(name, self.result, fetch=fetch)
+        aggregation = self.query.adapter.aggregations[name]
+        return aggregation.from_response(name, self.result, fetch=fetch)
 
     def get_range(self, name):
         min_name = '{0}_min'.format(name)
         max_name = '{0}_max'.format(name)
         if name not in self.query.adapter.filters:
             return None
-        aggs = self.result.get('aggregations', {})
-        if not aggs or min_name not in aggs or max_name not in aggs:
+        aggregations = self.result.get('aggregations', {})
+        if (not aggregations
+                or min_name not in aggregations
+                or max_name not in aggregations):
             return None
         spec = self.query.adapter.filters[name]
-        min_value = aggs[min_name]['value'] or 0
-        max_value = aggs[max_name]['value'] or 0
+        min_value = aggregations[min_name]['value'] or 0
+        max_value = aggregations[max_name]['value'] or 0
         return {
             'min': spec.cast(min_value),
             'max': spec.cast(max_value),
@@ -95,9 +97,9 @@ class SearchResult(Paginable):
         }
 
     def label_func(self, name):
-        if name not in self.query.adapter.facets:
+        if name not in self.query.adapter.aggregations:
             return None
-        return self.query.adapter.facets[name].labelize
+        return self.query.adapter.aggregations[name].labelize
 
     def labelize(self, name, value):
         func = self.label_func(name)

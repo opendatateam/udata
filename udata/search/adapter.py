@@ -38,7 +38,7 @@ class ModelSearchAdapter(object):
     model = None
     analyzer = None
     fields = None
-    facets = None
+    aggregations = None
     sorts = None
     filters = None
     mapping = None
@@ -82,7 +82,6 @@ metrics_types = {
 def metrics_mapping(cls):
     mapping = {
         'type': 'object',
-        'index_name': 'metrics',
         'properties': {}
     }
     for name, metric in Metric.get_for(cls).items():

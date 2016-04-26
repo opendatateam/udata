@@ -1,4 +1,4 @@
-{% set nb_displayed_facets = 5 %}
+{% set nb_displayed_aggregations = 5 %}
 
 {% macro breadcrum_toolbar(result, url=None, exports=None) %}
 {% if kwargs %}
@@ -54,7 +54,7 @@
             {% for label, endpoint, type in exports %}
             <li role="presentation">
                 <a role="menuitem" tabindex="-1" href="{{ result.query.to_url(
-                    url_for(endpoint), facets=None, page=None, page_size=None, replace=true)
+                    url_for(endpoint), aggregations=None, page=None, page_size=None, replace=true)
                 }}">
                 {{label}}
                 <span class="label label-primary">{{type}}</span>
@@ -82,9 +82,9 @@
 {% endmacro %}
 
 
-{% macro facet_panel(result, name, label, icon=None, url=None) %}
-{% set facet = result.get_facet(name) %}
-{% if facet.visible %}
+{% macro aggregation_panel(result, name, label, icon=None, url=None) %}
+{% set aggregation = result.get_aggregation(name) %}
+{% if aggregation.visible %}
     <div class="panel-heading clickable"
         data-toggle="collapse" data-target="#collapse-{{result.class_name}}-{{name}}">
         <h3 class="panel-title">
@@ -99,43 +99,43 @@
             <span class="fa fa-chevron-down pull-right chevrons"></span>
         </h3>
     </div>
-    {% if facet.type == 'terms' %}
-        {{ term_facet(name, facet, result.query, url=url, class_name=result.class_name) }}
-    {% elif facet.type == 'models' %}
-        {{ model_facet(name, facet, result.query, url=url, class_name=result.class_name) }}
-    {% elif facet.type == 'bool' %}
-        {{ bool_facet(name, facet, result.query, url=url) }}
-    {% elif facet.type == 'range' %}
-        {{ range_facet(name, facet, result.query, url=url) }}
-    {% elif facet.type == 'daterange' %}
-        {{ daterange_facet(name, facet, result.query, url=url) }}
-    {% elif facet.type == 'temporal-coverage' %}
-        {{ temporal_coverage_facet(name, facet, result.query, url=url) }}
+    {% if aggregation.type == 'terms' %}
+        {{ term_aggregation(name, aggregation, result.query, url=url, class_name=result.class_name) }}
+    {% elif aggregation.type == 'models' %}
+        {{ model_aggregation(name, aggregation, result.query, url=url, class_name=result.class_name) }}
+    {% elif aggregation.type == 'bool' %}
+        {{ bool_aggregation(name, aggregation, result.query, url=url) }}
+    {% elif aggregation.type == 'range' %}
+        {{ range_aggregation(name, aggregation, result.query, url=url) }}
+    {% elif aggregation.type == 'daterange' %}
+        {{ daterange_aggregation(name, aggregation, result.query, url=url) }}
+    {% elif aggregation.type == 'temporal-coverage' %}
+        {{ temporal_coverage_aggregation(name, aggregation, result.query, url=url) }}
     {% endif %}
 {% endif %}
 {% endmacro %}
 
 
-{% macro term_facet(name, facet, query, url=None, class_name=None) %}
+{% macro term_aggregation(name, aggregation, query, url=None, class_name=None) %}
 <div id="collapse-{{class_name}}-{{name}}" class="list-group collapse in">
-{% for term, count in facet.terms[:nb_displayed_facets] %}
+{% for term, count in aggregation.terms[:nb_displayed_aggregations] %}
     <a href="{{ query.to_url(url, **{name: term}) }}"
         class="list-group-item">
-        {{ query.adapter.facets[name].labelize('', term) }}
+        {{ query.adapter.aggregations[name].labelize('', term) }}
         <span class="badge pull-right">{{ count }}</span>
     </a>
 {% endfor %}
-{% if facet.terms|length > nb_displayed_facets %}
+{% if aggregation.terms|length > nb_displayed_aggregations %}
     <button class="list-group-item"
         data-toggle="collapse" data-target="#collapse-{{class_name}}-{{name}}-more">
         {{ _('More results…') }}
         <span class="fa fa-chevron-right pull-right"></span>
     </button>
     <div id="collapse-{{class_name}}-{{name}}-more" class="list-group collapse list-group-more">
-    {% for term, count in facet.terms[nb_displayed_facets:] %}
+    {% for term, count in aggregation.terms[nb_displayed_aggregations:] %}
         <a href="{{ query.to_url(url, **{name: term}) }}"
             class="list-group-item">
-            {{ query.adapter.facets[name].labelize('', term) }}
+            {{ query.adapter.aggregations[name].labelize('', term) }}
             <span class="badge pull-right">{{ count }}</span>
         </a>
     {% endfor %}
@@ -145,23 +145,23 @@
 {% endmacro %}
 
 
-{% macro model_facet(name, facet, query, url=None, class_name=None) %}
+{% macro model_aggregation(name, aggregation, query, url=None, class_name=None) %}
 <div id="collapse-{{class_name}}-{{name}}" class="list-group collapse in">
-{% for obj, count in facet.models[:nb_displayed_facets] %}
+{% for obj, count in aggregation.models[:nb_displayed_aggregations] %}
     <a href="{{ query.to_url(url, **{name: obj.id|string}) }}"
         class="list-group-item">
         {{ obj }}
         <span class="badge pull-right">{{ count }}</span>
     </a>
 {% endfor %}
-{% if facet.models|length > nb_displayed_facets %}
+{% if aggregation.models|length > nb_displayed_aggregations %}
     <button class="list-group-item list-group-more"
         data-toggle="collapse" data-target="#collapse-{{class_name}}-{{name}}-more">
         {{ _('More results…') }}
         <span class="fa fa-chevron-right pull-right"></span>
     </button>
     <div id="collapse-{{class_name}}-{{name}}-more" class="list-group collapse list-group-more">
-    {% for obj, count in facet.models[nb_displayed_facets:] %}
+    {% for obj, count in aggregation.models[nb_displayed_aggregations:] %}
         <a href="{{ query.to_url(url, **{name: obj.id|string}) }}"
             class="list-group-item">
             {{ obj }}
@@ -174,75 +174,75 @@
 {% endmacro %}
 
 
-{% macro bool_facet(name, facet, query, url=None) %}
+{% macro bool_aggregation(name, aggregation, query, url=None) %}
 <div id="collapse-{{name}}" class="list-group collapse in">
     <a href="{{ query.to_url(url, **{name: 'true'}) }}"
         class="list-group-item">
         {{ _('Yes') }}
-        <span class="badge pull-right">{{ facet[true] }}</span>
+        <span class="badge pull-right">{{ aggregation[true] }}</span>
     </a>
     <a href="{{ query.to_url(url, **{name: 'false'}) }}"
         class="list-group-item">
         {{ _('No') }}
-        <span class="badge pull-right">{{ facet[false] }}</span>
+        <span class="badge pull-right">{{ aggregation[false] }}</span>
     </a>
 </div>
 {% endmacro %}
 
 
-{% macro range_facet(name, facet, query, url=None) %}
+{% macro range_aggregation(name, aggregation, query, url=None) %}
 <div id="collapse-{{name}}" class="panel-body collapse in">
     <div class="row">
         <div class="col-xs-12 slider-container">
             <input type="text" class="range-picker"
                 data-url-pattern="{{ query.to_url(url, **{name: '__r__', 'replace': True}) }}"
-                data-slider-min="{{ facet.min }}"
-                data-slider-max="{{ facet.max }}"
-                data-slider-value="[{{ facet.min }},{{ facet.max }}]"/>
+                data-slider-min="{{ aggregation.min }}"
+                data-slider-max="{{ aggregation.max }}"
+                data-slider-value="[{{ aggregation.min }},{{ aggregation.max }}]"/>
         </div>
     </div>
     <div class="row">
-        <b class="col-xs-6">{{ facet.min }}</b>
-        <b class="col-xs-6 text-right">{{ facet.max }}</b>
+        <b class="col-xs-6">{{ aggregation.min }}</b>
+        <b class="col-xs-6 text-right">{{ aggregation.max }}</b>
     </div>
 </div>
 {% endmacro %}
 
 
-{% macro daterange_facet(name, facet, query, url=None) %}
+{% macro daterange_aggregation(name, aggregation, query, url=None) %}
 <div id="collapse-{{name}}" class="panel-body collapse in">
     <div class="row">
         <div class="col-xs-12">
             <input type="hidden" class="date-range-picker"
-                value="{{ facet.min.isoformat() }} - {{ facet.max.isoformat() }}" />
+                value="{{ aggregation.min.isoformat() }} - {{ aggregation.max.isoformat() }}" />
         </div>
     </div>
 </div>
 {% endmacro %}
 
 
-{% macro temporal_coverage_facet(name, facet, query, url=None) %}
+{% macro temporal_coverage_aggregation(name, aggregation, query, url=None) %}
 <div id="collapse-{{name}}" class="panel-body collapse in temporal-coverage"
     data-url-pattern="{{ query.to_url(url, **{name: '__r__', 'replace': True}) }}">
     <div class="row">
         <div class="col-xs-12">
             <div class="input-daterange input-group" id="datepicker">
                 <input type="text" class="input-sm form-control" name="start"
-                    value="{{ facet.min.isoformat() }}"
-                    data-isodate="{{ facet.min.isoformat() }}"/>
+                    value="{{ aggregation.min.isoformat() }}"
+                    data-isodate="{{ aggregation.min.isoformat() }}"/>
                 <span class="input-group-addon">{{ _('to') }}</span>
                 <input type="text" class="input-sm form-control" name="end"
-                    value="{{ facet.max.isoformat() }}"
-                    data-isodate="{{ facet.max.isoformat() }}"/>
+                    value="{{ aggregation.max.isoformat() }}"
+                    data-isodate="{{ aggregation.max.isoformat() }}"/>
             </div>
         </div>
     </div>
     <div class="row hide">
         <div class="col-xs-12 text-center">
-            <div class="facet-datepicker"
+            <div class="aggregation-datepicker"
                 date-date-format="yyyy-mm-dd"
-                data-date-start-date="{{ facet.min.isoformat() }}"
-                data-date-end-date="{{ facet.max.isoformat() }}"
+                data-date-start-date="{{ aggregation.min.isoformat() }}"
+                data-date-end-date="{{ aggregation.max.isoformat() }}"
             ></div>
         </div>
     </div>
@@ -269,7 +269,7 @@
         {% if csv_endpoint %}
         <a class="btn btn-xs btn-info pull-right"
             href="{{ result.query.to_url(
-                url_for(csv_endpoint), facets=None, page=None, page_size=None, replace=true)
+                url_for(csv_endpoint), aggregations=None, page=None, page_size=None, replace=true)
             }}">
             <span class="fa fa-download"></span>
             CSV

@@ -22,13 +22,13 @@ class UserSearch(ModelSearchAdapter):
             'first_name': {'type': 'string'},
             'last_name': {'type': 'string'},
             'about': {'type': 'string', 'analyzer': i18n_analyzer},
-            'organizations': {'type': 'string', 'index_name': 'organization'},
+            'organizations': {'type': 'string'},
             'visible': {'type': 'boolean'},
             'metrics': metrics_mapping(User),
             'created': {'type': 'date', 'format': 'date_hour_minute_second'},
             'user_suggest': {
                 'type': 'completion',
-                'index_analyzer': 'simple',
+                'analyzer': 'simple',
                 'search_analyzer': 'simple',
                 'payloads': True,
             },
@@ -49,7 +49,7 @@ class UserSearch(ModelSearchAdapter):
         'views': Sort('metrics.views'),
         'created': Sort('created'),
     }
-    facets = {
+    aggregations = {
         'organization': ModelTermFacet('organizations', Organization),
         'reuses': RangeFacet('metrics.reuses'),
         'datasets': RangeFacet('metrics.datasets'),
