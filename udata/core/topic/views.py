@@ -53,11 +53,12 @@ def display(topic):
 def datasets(topic):
     kwargs = multi_to_dict(request.args)
     kwargs.update(topic=topic)
+    query = TopicSearchQuery(Dataset, aggregations=True, **kwargs)
 
     return theme.render(
         'topic/datasets.html',
         topic=topic,
-        datasets=TopicSearchQuery(Dataset, facets=True, **kwargs).execute()
+        datasets=query.execute()
     )
 
 
@@ -65,11 +66,12 @@ def datasets(topic):
 def reuses(topic):
     kwargs = multi_to_dict(request.args)
     kwargs.update(topic=topic)
+    query = TopicSearchQuery(Reuse, aggregations=True, **kwargs)
 
     return theme.render(
         'topic/reuses.html',
         topic=topic,
-        reuses=TopicSearchQuery(Reuse, facets=True, **kwargs).execute()
+        reuses=query.execute()
     )
 
 

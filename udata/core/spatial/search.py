@@ -33,7 +33,7 @@ class GeoZoneSearch(ModelSearchAdapter):
         'properties': {
             'zone_suggest': {
                 'type': 'completion',
-                'index_analyzer': 'standard',
+                'analyzer': 'standard',
                 'search_analyzer': 'standard',
                 'payloads': True,
             },
