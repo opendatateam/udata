@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import logging
 
+from datetime import datetime
 from flask.ext.script import prompt, prompt_pass
 from flask.ext.security.forms import RegisterForm
 from flask.ext.security.utils import encrypt_password
@@ -13,7 +14,6 @@ from udata.models import User, datastore
 from udata.commands import submanager
 
 log = logging.getLogger(__name__)
-
 
 m = submanager(
     'user',
@@ -37,7 +37,7 @@ def create():
         data['password'] = encrypt_password(data['password'])
         del data['password_confirm']
         user = datastore.create_user(**data)
-        user.activate_user()
+        user.confirmed_at = datetime.utcnow()
         print '\nUser created successfully'
         print 'User(id=%s email=%s)' % (user.id, user.email)
         return
@@ -45,15 +45,18 @@ def create():
     for errors in form.errors.values():
         print '\n'.join(errors)
 
+
 @m.command
 def activate():
-    '''Activate an existing user (validate their email address)'''
+    '''Activate an existing user (validate their email confirmation)'''
     email = prompt('Email')
     user = User.objects(email=email).first()
     if not user:
         print 'Invalid user'
         return
-    user.activate_user()
+    if user.confirmed_at is not None:
+        print 'User email address already corfirmed'
+    user.confirmed_at = datetime.utcnow()
     print 'User activated successfully'
 
 
