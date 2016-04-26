@@ -191,10 +191,6 @@ class SpecificUrlsTest(FrontTestCase):
         self.assert200(response)
         self.assert_template_used('faq/developer.html')
 
-    def test_terms(self):
-        response = self.client.get(url_for('gouvfr.terms'))
-        self.assert200(response)
-
     def test_credits(self):
         response = self.client.get(url_for('gouvfr.credits'))
         self.assert200(response)
@@ -326,7 +322,6 @@ class SitemapTest(FrontTestCase):
 
         urls = [
             url_for('gouvfr.credits_redirect', _external=True),
-            url_for('gouvfr.terms_redirect', _external=True),
             url_for('gouvfr.redevances_redirect', _external=True),
             url_for('gouvfr.faq_redirect', _external=True),
         ]

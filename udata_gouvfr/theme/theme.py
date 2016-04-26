@@ -53,7 +53,7 @@ nav.Bar('gouvfr_footer', [
     nav.Item(_('As a developer'), 'gouvfr.faq', {'section': 'developer'}),
     nav.Item(_('API'), 'apidoc.swaggerui'),
     nav.Item(_('Credits'), 'gouvfr.credits'),
-    nav.Item(_('Terms of use'), 'gouvfr.terms'),
+    nav.Item(_('Terms of use'), 'site.terms'),
 ])
 
 NETWORK_LINKS = [
