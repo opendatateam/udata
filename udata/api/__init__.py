@@ -10,8 +10,7 @@ from functools import wraps
 from flask import (
     current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
-from flask.ext.restplus import Api, Resource, marshal
-from flask.ext.restful.utils import cors
+from flask.ext.restplus import Api, Resource, marshal, cors
 
 from udata import search, theme, tracking, models
 from udata.app import csrf

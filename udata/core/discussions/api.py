@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 from flask.ext.security import current_user
-from flask_restful.inputs import boolean
+from flask_restplus.inputs import boolean
 
 from udata.auth import admin_permission
 from udata.api import api, API, fields

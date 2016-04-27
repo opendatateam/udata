@@ -8,8 +8,6 @@ from flask import json
 from udata.api import api
 from udata.commands import submanager
 
-# from flask.ext.restplus.swagger import Swagger
-
 log = logging.getLogger(__name__)
 
 
@@ -24,7 +22,6 @@ m = submanager(
           help='Pretty print')
 def swagger(pretty):
     '''Dump the swagger specifications'''
-    # data = Swagger(api).as_dict()
     kwargs = dict(indent=4) if pretty else {}
     print(json.dumps(api.__schema__, **kwargs))
 
