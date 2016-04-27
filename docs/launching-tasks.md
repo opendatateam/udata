@@ -24,3 +24,20 @@ You can get the documentation related to all tasks with:
 ```shell
 $ inv -l
 ```
+
+It might be required to update your dependencies to ensure compatibility.
+A task is provided to automate it:
+
+```shell
+# Update dependencies
+$ inv update
+# Update dependencies and migrate data
+$ inv update -d
+```
+
+It's advised to update your workspace when you pull upstream changes or switch branch:
+
+```shell
+# Update dependencies, migrate data, recompile translations...
+$ inv update -d i18nc
+```

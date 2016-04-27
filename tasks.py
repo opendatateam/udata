@@ -34,6 +34,19 @@ def clean(bower=False, node=False):
         info('Removing {0}'.format(pattern))
         run('cd {0} && rm -rf {1}'.format(ROOT, pattern))
 
+@task
+def update(data=False):
+    '''Perform a development update'''
+    header('Update all dependencies and data')
+    info('Updating Python dependencies')
+    lrun('pip install -r requirements/develop.pip')
+    lrun('pip install -e .')
+    info('Updating JavaScript dependencies')
+    lrun('npm install')
+    if data:
+        info('Migrating database')
+        lrun('udata db migrate')
+
 
 @task
 def test(fast=False):
