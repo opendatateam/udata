@@ -32,12 +32,12 @@ A task is provided to automate it:
 # Update dependencies
 $ inv update
 # Update dependencies and migrate data
-$ inv update -d
+$ inv update -m
 ```
 
 It's advised to update your workspace when you pull upstream changes or switch branch:
 
 ```shell
 # Update dependencies, migrate data, recompile translations...
-$ inv update -d i18nc
+$ inv update -m i18nc
 ```
