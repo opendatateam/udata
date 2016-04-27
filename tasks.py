@@ -36,6 +36,23 @@ def clean(bower=False, node=False):
 
 
 @task
+def update(migrate=False):
+    '''Perform a development update'''
+    msg = 'Update all dependencies'
+    if migrate:
+        msg += ' and migrate data'
+    header(msg)
+    info('Updating Python dependencies')
+    lrun('pip install -r requirements/develop.pip')
+    lrun('pip install -e .')
+    info('Updating JavaScript dependencies')
+    lrun('npm install')
+    if migrate:
+        info('Migrating database')
+        lrun('udata db migrate')
+
+
+@task
 def test(fast=False):
     '''Run tests suite'''
     header('Run tests suite')
