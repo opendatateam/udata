@@ -17,10 +17,16 @@ module.exports = function(config) {
 
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-        frameworks: ['mocha', 'chai-dom', 'sinon-chai', 'fixture'],
+        frameworks: ['mocha', 'sinon-chai', 'fixture'],
 
-        files: ['./specs/loader.js'],
-        preprocessors: {'./specs/loader.js': ['webpack', 'sourcemap']},
+        files: [
+            './specs/loader.js',  // Mocha specs
+            './specs/fixtures/**/*',  // Fixtures
+        ],
+        preprocessors: {
+            './specs/loader.js': ['webpack', 'sourcemap'],
+            './specs/fixtures/**/*.html': ['html2js'],
+        },
 
         // list of files to exclude
         exclude: [],
@@ -32,7 +38,7 @@ module.exports = function(config) {
                     path.join(ROOT, 'js'),
                 ],
                 alias: {
-                    'api': 'specs/mocks/api'
+                    'api': 'specs/mocks/api',
                 }
             },
             watch: WATCH,
@@ -124,8 +130,8 @@ module.exports = function(config) {
             require('karma-sourcemap-loader'),
             require('karma-fixture'),
             require('karma-sinon-chai'),
-            require('karma-chai-dom'),
             require('karma-junit-reporter'),
+            require('karma-html2js-preprocessor'),
         ]
 
     });
