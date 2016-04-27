@@ -63,9 +63,9 @@ export class Api {
      * @return {String}        The URL encoded querystring
      */
     encodeParams(params) {
-        return Object.keys(params).map(key => {
-            return [key, params[key]].map(encodeURIComponent).join('=');
-        }).join('&');
+        return Object.keys(params).map(key =>
+            [key, params[key]].map(encodeURIComponent).join('=')
+        ).join('&');
     }
 
     /**
@@ -146,27 +146,6 @@ export class Api {
             credentials: 'include',
             headers: Object.assign({}, DEFAULT_HEADERS, WRITE_HEADERS, headers || {}),
             body: JSON.stringify(data)
-        })
-        .catch(this.onError)
-        .then(this.onResponse);
-    }
-
-    /**
-     * Perform a POST upload operation (multipart/form-data)
-     * @param  {String} url     An absolute or API root relative URL
-     * @param  {Object} data    The body payload
-     * @param  {Object} headers Optionnal HTTP headers
-     * @return {Promise}        An instanciated fetch promise
-     */
-    upload(url, data, headers) {
-        const body = data; // TODO handle body
-        return fetch(this.build(url), {
-            method: 'post',
-            credentials: 'include',
-            headers: Object.assign(
-                {'Content-Type': 'multipart/form-data'}, DEFAULT_HEADERS, WRITE_HEADERS, headers || {}
-            ),
-            body: body
         })
         .catch(this.onError)
         .then(this.onResponse);
