@@ -6,6 +6,7 @@ celerybeat-mongo==0.0.10
 chardet
 CommonMark==0.6.3
 elasticsearch>=1.0.0,<2.0.0
+fake-factory==0.5.7
 Flask-BabelEx==0.9.3
 Flask-Cache==0.13.1
 flask-fs==0.1
@@ -29,7 +30,7 @@ msgpack-python==0.4.7
 pillow
 py-bcrypt==0.4
 pyliblzma==0.5.3
-python-dateutil==2.5.2
+python-dateutil==2.5.3
 pytz
 PyYAML==3.11
 redis
