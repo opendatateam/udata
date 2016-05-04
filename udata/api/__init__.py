@@ -123,14 +123,14 @@ class UDataApi(Api):
         # Expected aggregations
         # (ie. I want all aggregations
         # or I want both tags and licenses aggregations)
-        aggregations = adapter.aggregations.keys()
+        aggregations = adapter.facets.keys()
         if aggregations:
             parser.add_argument('aggregations', type=str, location='args',
                                 choices=['all'] + aggregations, action='append',
                                 help='Selected aggregations to fetch')
         # Add aggregations filters arguments
         # (apply a value to an aggregation ie. tag=value)
-        for name, aggregation in adapter.aggregations.items():
+        for name, aggregation in adapter.facets.items():
             parser.add_argument(name, type=str, location='args')
         # Sort arguments
         keys = adapter.sorts.keys()

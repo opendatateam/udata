@@ -152,9 +152,9 @@ class SearchQuery(object):
     def build_aggregation_queries(self):
         '''Build sort query parameters from kwargs'''
         query = self._bool_query()
-        if not self.adapter.aggregations:
+        if not self.adapter.facets:
             return query
-        for name, aggregation in self.adapter.aggregations.items():
+        for name, aggregation in self.adapter.facets.items():
             new_query = aggregation.filter_from_kwargs(name, self.kwargs)
             if not new_query:
                 continue
@@ -162,19 +162,21 @@ class SearchQuery(object):
         return query
 
     def _aggregation_query(self, name):
-        aggregation = self.adapter.aggregations[name]
+        aggregation = self.adapter.facets[name]
         args = self.kwargs.get(name, [])
         return aggregation.to_query(args=args)
 
     def get_aggregations(self):
         aggregations = dict((name, self._aggregation_query(name))
-                            for name in self.aggregations_kwargs
-                            if self._aggregation_query(name) is not None)
+                            for name in self.facets_kwargs)
+        # aggregations = dict((name, self._aggregation_query(name))
+        #                     for name in self.facets_kwargs
+        #                     if self._aggregation_query(name) is not None)
         # TODO: restore sub-aggregations
         # selected_aggregations = self.kwargs.get('aggregations')
-        # if not self.adapter.aggregations or not selected_aggregations:
+        # if not self.adapter.facets or not selected_aggregations:
         #     return aggregations
-        # for name, aggregation in self.adapter.aggregations.items():
+        # for name, aggregation in self.adapter.facets.items():
         #     if selected_aggregations is True or name in selected_aggregations:
         #         query = aggregation.to_query()
         #         if query:
@@ -182,19 +184,19 @@ class SearchQuery(object):
         return aggregations
 
     @property
-    def aggregations_kwargs(self):
-        '''List expected aggregations from kwargs'''
-        aggregations = self.kwargs.get('aggregations')
-        if not self.adapter.aggregations or not aggregations:
+    def facets_kwargs(self):
+        '''List expected facets from kwargs'''
+        facets = self.kwargs.get('facets')
+        if not self.adapter.facets or not facets:
             return []
-        if isinstance(aggregations, basestring):
-            aggregations = [aggregations]
-        if aggregations is True or 'all' in aggregations:
-            return self.adapter.aggregations.keys()
+        if isinstance(facets, basestring):
+            facets = [facets]
+        if facets is True or 'all' in facets:
+            return self.adapter.facets.keys()
         else:
             return [
-                f for f in self.adapter.aggregations.keys()
-                if f in aggregations
+                f for f in self.adapter.facets.keys()
+                if f in facets
             ]
 
     def get_query(self):
@@ -223,7 +225,7 @@ class SearchQuery(object):
                         params[key].append(value)
                 else:
                     params[key] = value
-        params.pop('aggregations', None)  # Always true when used
+        params.pop('facets', None)  # Always true when used
         href = Href(url or request.base_url)
         return href(params)
 

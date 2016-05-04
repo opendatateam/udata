@@ -42,7 +42,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
         'views': search.Sort('metrics.views'),
         'created': search.Sort('created'),
     }
-    aggregations = {
+    facets = {
         'reuses': search.RangeFacet('metrics.reuses'),
         'badge': search.TermFacet('badges',
                                   labelizer=organization_badge_labelizer),

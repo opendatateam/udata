@@ -121,7 +121,7 @@
 {% for term, count in aggregation.terms[:nb_displayed_aggregations] %}
     <a href="{{ query.to_url(url, **{name: term}) }}"
         class="list-group-item">
-        {{ query.adapter.aggregations[name].labelize('', term) }}
+        {{ query.adapter.facets[name].labelize('', term) }}
         <span class="badge pull-right">{{ count }}</span>
     </a>
 {% endfor %}
@@ -135,7 +135,7 @@
     {% for term, count in aggregation.terms[nb_displayed_aggregations:] %}
         <a href="{{ query.to_url(url, **{name: term}) }}"
             class="list-group-item">
-            {{ query.adapter.aggregations[name].labelize('', term) }}
+            {{ query.adapter.facets[name].labelize('', term) }}
             <span class="badge pull-right">{{ count }}</span>
         </a>
     {% endfor %}
