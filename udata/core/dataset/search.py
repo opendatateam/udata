@@ -146,7 +146,7 @@ class DatasetSearch(ModelSearchAdapter):
         'followers': Sort('metrics.followers'),
         'views': Sort('metrics.views'),
     }
-    aggregations = {
+    facets = {
         'tag': TermFacet('tags'),
         'badge': TermFacet('badges', labelizer=dataset_badge_labelizer),
         'organization': ModelTermFacet('organization', Organization),

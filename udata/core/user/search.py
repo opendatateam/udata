@@ -49,7 +49,7 @@ class UserSearch(ModelSearchAdapter):
         'views': Sort('metrics.views'),
         'created': Sort('created'),
     }
-    aggregations = {
+    facets = {
         'organization': ModelTermFacet('organizations', Organization),
         'reuses': RangeFacet('metrics.reuses'),
         'datasets': RangeFacet('metrics.datasets'),

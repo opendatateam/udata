@@ -71,9 +71,9 @@ class SearchResult(Paginable):
         return self.get_objects()[index]
 
     def get_aggregation(self, name, fetch=True):
-        if name not in self.query.adapter.aggregations:
+        if name not in self.query.adapter.facets:
             return None
-        aggregation = self.query.adapter.aggregations[name]
+        aggregation = self.query.adapter.facets[name]
         return aggregation.from_response(name, self.result, fetch=fetch)
 
     def get_range(self, name):
@@ -97,9 +97,9 @@ class SearchResult(Paginable):
         }
 
     def label_func(self, name):
-        if name not in self.query.adapter.aggregations:
+        if name not in self.query.adapter.facets:
             return None
-        return self.query.adapter.aggregations[name].labelize
+        return self.query.adapter.facets[name].labelize
 
     def labelize(self, name, value):
         func = self.label_func(name)

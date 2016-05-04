@@ -38,7 +38,7 @@ class ModelSearchAdapter(object):
     model = None
     analyzer = None
     fields = None
-    aggregations = None
+    facets = None
     sorts = None
     filters = None
     mapping = None

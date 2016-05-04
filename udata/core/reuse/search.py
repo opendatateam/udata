@@ -43,7 +43,7 @@ class ReuseSearch(ModelSearchAdapter):
         'description^2',
         'datasets.title',
     )
-    aggregations = {
+    facets = {
         'tag': TermFacet('tags'),
         'organization': ModelTermFacet('organization', Organization),
         'owner': ModelTermFacet('owner', User),
