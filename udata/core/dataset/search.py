@@ -63,7 +63,6 @@ class DatasetSearch(ModelSearchAdapter):
             'owner': {'type': 'string'},
             'tags': {
                 'type': 'string',
-                'index_name': 'tag',
                 'index': 'not_analyzed',
                 'fields': {
                     'i18n': {'type': 'string', 'analyzer': i18n_analyzer}
@@ -71,18 +70,16 @@ class DatasetSearch(ModelSearchAdapter):
             },
             'badges': {
                 'type': 'string',
-                'index_name': 'badges',
                 'index': 'not_analyzed'
             },
             'tag_suggest': {
                 'type': 'completion',
-                'index_analyzer': 'simple',
+                'analyzer': 'simple',
                 'search_analyzer': 'simple',
                 'payloads': False,
             },
             'resources': {
                 'type': 'object',
-                'index_name': 'resource',
                 'properties': {
                     'title': {'type': 'string'},
                     'description': {'type': 'string'},
@@ -91,13 +88,13 @@ class DatasetSearch(ModelSearchAdapter):
             },
             'format_suggest': {
                 'type': 'completion',
-                'index_analyzer': 'simple',
+                'analyzer': 'simple',
                 'search_analyzer': 'simple',
                 'payloads': False,
             },
             'dataset_suggest': {
                 'type': 'completion',
-                'index_analyzer': 'simple',
+                'analyzer': 'simple',
                 'search_analyzer': 'simple',
                 'payloads': True,
             },
@@ -118,7 +115,6 @@ class DatasetSearch(ModelSearchAdapter):
             },
             'geozones': {
                 'type': 'object',
-                'index_name': 'geozones',
                 'properties': {
                     'id': {'type': 'string', 'index': 'not_analyzed'},
                     'name': {'type': 'string', 'index': 'not_analyzed'},
@@ -132,7 +128,6 @@ class DatasetSearch(ModelSearchAdapter):
             # },
             'extras': {
                 'type': 'object',
-                'index_name': 'extra',
             },
         }
     }

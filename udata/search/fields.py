@@ -23,7 +23,7 @@ __all__ = (
 )
 
 
-ES_NUM_FAILURES = '-Infinity', 'Infinity', 'NaN'
+ES_NUM_FAILURES = '-Infinity', 'Infinity', 'NaN', None
 
 
 class Sort(object):
@@ -88,17 +88,17 @@ class BoolFacet(Facet):
             return {'must_not': [{'term': {self.field: True}}]}
 
     def from_response(self, name, response, fetch=True):
-        facet = response.get('facets', {}).get(name)
-        if not facet or not len(facet['terms']):
+        aggregation = response.get('aggregations', {}).get(name)
+        if not aggregation or not len(aggregation['terms']):
             return
         true_count = 0
         false_count = 0
-        for row in facet['terms']:
+        for row in aggregation['terms']:
             if row['term'] == 'T':
                 true_count = row['count']
             else:
                 false_count = row['count']
-        false_count += facet['missing'] + facet['other']
+        false_count += aggregation['missing'] + aggregation['other']
         data = {
             'type': 'bool',
             'visible': true_count > 0 and false_count > 0,
@@ -132,13 +132,14 @@ class TermFacet(Facet):
             return {'term': {self.field: value}}
 
     def from_response(self, name, response, fetch=True):
-        facet = response.get('facets', {}).get(name)
-        if not facet:
+        aggregation = response.get('aggregations', {}).get(name)
+        if not aggregation:
             return
         return {
             'type': 'terms',
-            'terms': [(r['term'], r['count']) for r in facet['terms']],
-            'visible': len(facet['terms']) > 1,
+            'terms': [(bucket['key'], bucket['doc_count'])
+                      for bucket in aggregation['buckets']],
+            'visible': len(aggregation['buckets']) > 1,
         }
 
 
@@ -149,10 +150,10 @@ class ModelTermFacet(TermFacet):
         self.field_name = field_name
 
     def from_response(self, name, response, fetch=True):
-        facet = response.get('facets', {}).get(name)
-        if not facet:
+        aggregation = response.get('aggregations', {}).get(name)
+        if not aggregation:
             return
-        ids = [term['term'] for term in facet['terms']]
+        ids = [bucket['key'] for bucket in aggregation['buckets']]
 
         if fetch:
             # Perform a model resolution: models are feched from DB
@@ -176,9 +177,10 @@ class ModelTermFacet(TermFacet):
         return {
             'type': 'models',
             'models': [
-                (serialize(f['term']), f['count']) for f in facet['terms']
+                (serialize(bucket['key']), bucket['doc_count'])
+                for bucket in aggregation['buckets']
             ],
-            'visible': len(facet['terms']) > 1,
+            'visible': len(aggregation['buckets']) > 1,
         }
 
     def labelize(self, label, value):
@@ -189,7 +191,7 @@ class ModelTermFacet(TermFacet):
 
 class ExtrasFacet(Facet):
     def to_query(self, **kwargs):
-        pass
+        return None
 
     def filter_from_kwargs(self, name, kwargs):
         prefix = '{0}.'.format(name)
@@ -201,7 +203,7 @@ class ExtrasFacet(Facet):
         return {'must': filters}
 
     def from_response(self, name, response, fetch=True):
-        pass
+        return None
 
 
 class RangeFacet(Facet):
@@ -211,7 +213,7 @@ class RangeFacet(Facet):
 
     def to_query(self, **kwargs):
         return {
-            'statistical': {
+            'stats': {
                 'field': self.field
             }
         }
@@ -228,16 +230,17 @@ class RangeFacet(Facet):
         }
 
     def from_response(self, name, response, fetch=True):
-        facet = response.get('facets', {}).get(name)
-        if not facet:
+        aggregation = response.get('aggregations', {}).get(name)
+        if not aggregation:
             return
-        failure = (facet['min'] in ES_NUM_FAILURES or
-                   facet['max'] in ES_NUM_FAILURES)
+        failure = (aggregation['min'] in ES_NUM_FAILURES or
+                   aggregation['max'] in ES_NUM_FAILURES)
         return {
             'type': 'range',
-            'min': None if failure else self.cast(facet['min']),
-            'max': None if failure else self.cast(facet['max']),
-            'visible': not failure and facet['max'] - facet['min'] > 2,
+            'min': None if failure else self.cast(aggregation['min']),
+            'max': None if failure else self.cast(aggregation['max']),
+            'visible': (not failure and
+                        aggregation['max'] - aggregation['min'] > 2),
         }
 
     def labelize(self, label, value):
@@ -265,11 +268,11 @@ class DateRangeFacet(RangeFacet):
         }
 
     def from_response(self, name, response, fetch=True):
-        facet = response.get('facets', {}).get(name)
-        if not facet:
+        aggregation = response.get('aggregations', {}).get(name)
+        if not aggregation:
             return
-        min_value = ts_to_dt(facet['min'])
-        max_value = ts_to_dt(facet['max'])
+        min_value = ts_to_dt(aggregation['min'])
+        max_value = ts_to_dt(aggregation['max'])
         return {
             'type': 'daterange',
             'min': min_value,

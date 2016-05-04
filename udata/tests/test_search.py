@@ -86,7 +86,7 @@ class SearchQueryTest(TestCase):
         search_query = search.SearchQuery(FakeSearch)
         body = search_query.get_body()
         self.assertEqual(body['query'], {'match_all': {}})
-        self.assertEqual(body['facets'], {})
+        self.assertEqual(body['aggregations'], {})
         self.assertEqual(body['sort'], [])
 
     def test_paginated_search(self):
@@ -426,30 +426,31 @@ class SearchQueryTest(TestCase):
 
     def test_facets_true(self):
         search_query = search.SearchQuery(FakeSearch, facets=True)
-        facets = search_query.get_facets()
-        self.assertEqual(len(facets), len(FakeSearch.facets))
+        aggregations = search_query.get_aggregations()
+        self.assertEqual(len(aggregations), len(FakeSearch.facets))
         for key in FakeSearch.facets.keys():
-            self.assertIn(key, facets.keys())
+            self.assertIn(key, aggregations.keys())
 
     def test_facets_all(self):
         search_query = search.SearchQuery(FakeSearch, facets='all')
-        facets = search_query.get_facets()
-        self.assertEqual(len(facets), len(FakeSearch.facets))
+        aggregations = search_query.get_aggregations()
+        self.assertEqual(len(aggregations), len(FakeSearch.facets))
         for key in FakeSearch.facets.keys():
-            self.assertIn(key, facets.keys())
+            self.assertIn(key, aggregations.keys())
 
     def test_selected_facets(self):
         selected_facets = ['tag', 'other']
-        search_query = search.SearchQuery(FakeSearch, facets=selected_facets)
-        facets = search_query.get_facets()
-        self.assertEqual(len(facets), len(selected_facets))
+        search_query = search.SearchQuery(
+            FakeSearch, facets=selected_facets)
+        aggregations = search_query.get_aggregations()
+        self.assertEqual(len(aggregations), len(selected_facets))
         for key in FakeSearch.facets.keys():
             if key in selected_facets:
-                self.assertIn(key, facets.keys())
+                self.assertIn(key, aggregations.keys())
             else:
-                self.assertNotIn(key, facets.keys())
+                self.assertNotIn(key, aggregations.keys())
 
-    def test_facet_filter(self):
+    def test_aggregation_filter(self):
         search_query = search.SearchQuery(FakeSearch, q='test', tag='value')
         expectations = [
             {'multi_match': {
@@ -466,7 +467,7 @@ class SearchQueryTest(TestCase):
         for expected in expectations:
             self.assertIn(expected, query['bool']['must'])
 
-    def test_facet_filter_extras(self):
+    def test_aggregation_filter_extras(self):
         search_query = search.SearchQuery(
             FakeSearch, **{'q': 'test', 'extra.key': 'value'})
         expectations = [
@@ -484,7 +485,7 @@ class SearchQueryTest(TestCase):
         for expected in expectations:
             self.assertIn(expected, query['bool']['must'])
 
-    def test_facet_filter_multi(self):
+    def test_aggregation_filter_multi(self):
         search_query = search.SearchQuery(
             FakeSearch,
             q='test',
@@ -621,7 +622,6 @@ class TestMetricsMapping(TestCase):
         mapping = search.metrics_mapping(Fake)
         self.assertEqual(mapping, {
             'type': 'object',
-            'index_name': 'metrics',
             'properties': {
                 'fake-metric-int': {
                     'type': 'integer',
@@ -683,7 +683,7 @@ class TestBoolFacet(TestCase):
 
     def test_from_response(self):
         response = es_factory()
-        response['facets'] = {
+        response['aggregations'] = {
             'test': {
                 '_type': 'terms',
                 'total': 25,
@@ -705,14 +705,16 @@ class TestBoolFacet(TestCase):
         for value in True, 'True', 'true':
             kwargs = {'boolean': value}
             expected = {'must': [{'term': {'boolean': True}}]}
-            self.assertEqual(self.facet.filter_from_kwargs('boolean', kwargs),
-                             expected)
+            self.assertEqual(
+                self.facet.filter_from_kwargs('boolean', kwargs),
+                expected)
 
         for value in False, 'False', 'false':
             kwargs = {'boolean': value}
             expected = {'must_not': [{'term': {'boolean': True}}]}
-            self.assertEqual(self.facet.filter_from_kwargs('boolean', kwargs),
-                             expected)
+            self.assertEqual(
+                self.facet.filter_from_kwargs('boolean', kwargs),
+                expected)
 
     def test_aggregations(self):
         self.assertEqual(self.facet.to_aggregations(), {})
@@ -752,15 +754,15 @@ class TestTermFacet(TestCase):
 
     def test_from_response(self):
         response = es_factory()
-        response['facets'] = {
+        response['aggregations'] = {
             'test': {
                 '_type': 'terms',
                 'total': 229,
                 'other': 33,
                 'missing': 2,
-                'terms': [{
-                    'term': faker.word(),
-                    'count': faker.random_number(2)
+                'buckets': [{
+                    'key': faker.word(),
+                    'doc_count': faker.random_number(2)
                 } for _ in range(10)],
             }
         }
@@ -814,20 +816,21 @@ class TestModelTermFacet(TestCase, DBTestMixin):
 
     def test_labelize(self):
         fake = FakeFactory()
-        self.assertEqual(self.facet.labelize('label', str(fake.id)), 'fake')
+        self.assertEqual(
+            self.facet.labelize('label', str(fake.id)), 'fake')
 
     def test_from_response(self):
         fakes = [FakeFactory() for _ in range(10)]
         response = es_factory()
-        response['facets'] = {
+        response['aggregations'] = {
             'test': {
                 '_type': 'terms',
                 'total': 229,
                 'other': 33,
                 'missing': 2,
-                'terms': [{
-                    'term': str(f.id),
-                    'count': faker.random_number(2)
+                'buckets': [{
+                    'key': str(f.id),
+                    'doc_count': faker.random_number(2)
                 } for f in fakes],
             }
         }
@@ -843,20 +846,21 @@ class TestModelTermFacet(TestCase, DBTestMixin):
     def test_from_response_no_fetch(self):
         fakes = [FakeFactory() for _ in range(10)]
         response = es_factory()
-        response['facets'] = {
+        response['aggregations'] = {
             'test': {
                 '_type': 'terms',
                 'total': 229,
                 'other': 33,
                 'missing': 2,
-                'terms': [{
-                    'term': str(f.id),
-                    'count': faker.random_number(2)
+                'buckets': [{
+                    'key': str(f.id),
+                    'doc_count': faker.random_number(2)
                 } for f in fakes],
             }
         }
 
-        extracted = self.facet.from_response('test', response, fetch=False)
+        extracted = self.facet.from_response(
+            'test', response, fetch=False)
         self.assertEqual(extracted['type'], 'models')
         self.assertEqual(len(extracted['models']), 10)
         for fake, row in zip(fakes, extracted['models']):
@@ -879,16 +883,16 @@ class TestRangeFacet(TestCase):
 
     def test_to_query(self):
         self.assertEqual(self.facet.to_query(), {
-            'statistical': {
+            'stats': {
                 'field': 'some_field'
             }
         })
 
     def test_from_response(self):
         response = es_factory()
-        response['facets'] = {
+        response['aggregations'] = {
             'test': {
-                '_type': 'statistical',
+                '_type': 'stats',
                 'count': 123,
                 'total': 666,
                 'min': 3,
@@ -907,9 +911,9 @@ class TestRangeFacet(TestCase):
 
     def test_from_response_with_error(self):
         response = es_factory()
-        response['facets'] = {
+        response['aggregations'] = {
             'test': {
-                '_type': 'statistical',
+                '_type': 'stats',
                 'count': 0,
                 'total': 0,
                 'min': 'Infinity',
@@ -941,7 +945,8 @@ class TestRangeFacet(TestCase):
         self.assertEqual(self.facet.to_aggregations(), {})
 
     def test_labelize(self):
-        self.assertEqual(self.facet.labelize('label', '4-15'), 'label: 4-15')
+        self.assertEqual(
+            self.facet.labelize('label', '4-15'), 'label: 4-15')
 
 
 class TestDateRangeFacet(TestCase):
@@ -953,7 +958,7 @@ class TestDateRangeFacet(TestCase):
 
     def test_to_query(self):
         self.assertEqual(self.facet.to_query(), {
-            'statistical': {
+            'stats': {
                 'field': 'some_field'
             }
         })
@@ -962,9 +967,9 @@ class TestDateRangeFacet(TestCase):
         now = datetime.now()
         two_days_ago = now - timedelta(days=2)
         response = es_factory()
-        response['facets'] = {
+        response['aggregations'] = {
             'test': {
-                '_type': 'statistical',
+                '_type': 'stats',
                 'count': 123,
                 'total': 666,
                 'min': self._es_timestamp(two_days_ago),
@@ -1024,19 +1029,22 @@ class TestTemporalCoverageFacet(TestCase):
         self.assertEqual(extracted['max'], today)
 
     def test_to_filter(self):
-        self.assertEqual(self.facet.to_filter('2013-01-07-2014-06-07'), [{
-            'range': {
-                'some_field.start': {
-                    'lte': date(2014, 6, 7).toordinal(),
-                },
-            }
-        }, {
-            'range': {
-                'some_field.end': {
-                    'gte': date(2013, 1, 7).toordinal(),
-                },
-            }
-        }])
+        self.assertEqual(
+            self.facet.to_filter('2013-01-07-2014-06-07'),
+            [{
+                'range': {
+                    'some_field.start': {
+                        'lte': date(2014, 6, 7).toordinal(),
+                    },
+                }
+            }, {
+                'range': {
+                    'some_field.end': {
+                        'gte': date(2013, 1, 7).toordinal(),
+                    },
+                }
+            }]
+        )
 
     def test_labelize(self):
         label = self.facet.labelize('label', '1940-01-01-2014-12-31')

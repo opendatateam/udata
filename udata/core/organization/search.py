@@ -69,7 +69,6 @@ class OrganizationSearch(search.ModelSearchAdapter):
             },
             'badges': {
                 'type': 'string',
-                'index_name': 'badges',
                 'index': 'not_analyzed'
             },
             'url': {'type': 'string'},
@@ -77,7 +76,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
             'metrics': search.metrics_mapping(Organization),
             'org_suggest': {
                 'type': 'completion',
-                'index_analyzer': 'simple',
+                'analyzer': 'simple',
                 'search_analyzer': 'simple',
                 'payloads': True,
             },

@@ -51,11 +51,9 @@ class SearchQuery(object):
     def iter(self):
         try:
             body = self.get_body()
-            # Remove facets and aggregations
-            if 'facets' in body:
-                del body['facets']
-            if 'aggs' in body:
-                del body['aggs']
+            # Remove aggregations
+            if 'aggregations' in body:
+                del body['aggregations']
             result = es.scan(index=es.index_name,
                              doc_type=self.adapter.doc_type(),
                              body=body)
@@ -67,11 +65,10 @@ class SearchQuery(object):
     def get_body(self):
         body = {
             'filter': self.get_filter(),
-            'facets': self.get_facets(),
             'from': (self.page - 1) * self.page_size,
             'size': self.page_size,
             'sort': self.get_sort(),
-            'aggs': self.get_aggregations(),
+            'aggregations': self.get_aggregations(),
             'fields': [],  # Only returns IDs
         }
 
@@ -152,26 +149,38 @@ class SearchQuery(object):
             query['must_not'].append(self._multi_match(excluded))
         return query
 
-    def build_facet_queries(self):
+    def build_aggregation_queries(self):
         '''Build sort query parameters from kwargs'''
         query = self._bool_query()
         if not self.adapter.facets:
             return query
-        for name, facet in self.adapter.facets.items():
-            new_query = facet.filter_from_kwargs(name, self.kwargs)
+        for name, aggregation in self.adapter.facets.items():
+            new_query = aggregation.filter_from_kwargs(name, self.kwargs)
             if not new_query:
                 continue
             self._update_bool_query(query, new_query)
         return query
 
+    def _aggregation_query(self, name):
+        aggregation = self.adapter.facets[name]
+        args = self.kwargs.get(name, [])
+        return aggregation.to_query(args=args)
+
     def get_aggregations(self):
-        aggregations = {}
-        selected_facets = self.kwargs.get('facets')
-        if not self.adapter.facets or not selected_facets:
-            return aggregations
-        for name, facet in self.adapter.facets.items():
-            if selected_facets is True or name in selected_facets:
-                aggregations.update(facet.to_aggregations())
+        aggregations = dict((name, self._aggregation_query(name))
+                            for name in self.facets_kwargs)
+        # aggregations = dict((name, self._aggregation_query(name))
+        #                     for name in self.facets_kwargs
+        #                     if self._aggregation_query(name) is not None)
+        # TODO: restore sub-aggregations
+        # selected_aggregations = self.kwargs.get('aggregations')
+        # if not self.adapter.facets or not selected_aggregations:
+        #     return aggregations
+        # for name, aggregation in self.adapter.facets.items():
+        #     if selected_aggregations is True or name in selected_aggregations:
+        #         query = aggregation.to_query()
+        #         if query:
+        #             aggregations.update(query)
         return aggregations
 
     @property
@@ -190,18 +199,9 @@ class SearchQuery(object):
                 if f in facets
             ]
 
-    def _facet_query(self, name):
-        facet = self.adapter.facets[name]
-        args = self.kwargs.get(name, [])
-        return facet.to_query(args=args)
-
-    def get_facets(self):
-        return dict((name, self._facet_query(name))
-                    for name in self.facets_kwargs)
-
     def get_query(self):
         query = self.build_text_query()
-        self._update_bool_query(query, self.build_facet_queries())
+        self._update_bool_query(query, self.build_aggregation_queries())
 
         has_query = False
         for key in 'must', 'must_not', 'should':
