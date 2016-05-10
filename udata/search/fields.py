@@ -63,8 +63,12 @@ class Facet(object):
         '''Get the label for a given value'''
         return self.labelizer(label, value) if self.labelizer else value
 
-    def to_aggregations(self):
-        return {}
+    def to_aggregations(self, name, *args):
+        query = self.to_query(args=args)
+        if query:
+            return {name: query}
+        else:
+            return {}
 
 
 class BoolFacet(Facet):
@@ -191,7 +195,7 @@ class ModelTermFacet(TermFacet):
 
 class ExtrasFacet(Facet):
     def to_query(self, **kwargs):
-        return None
+        pass
 
     def filter_from_kwargs(self, name, kwargs):
         prefix = '{0}.'.format(name)
@@ -203,7 +207,7 @@ class ExtrasFacet(Facet):
         return {'must': filters}
 
     def from_response(self, name, response, fetch=True):
-        return None
+        pass
 
 
 class RangeFacet(Facet):
@@ -282,9 +286,8 @@ class DateRangeFacet(RangeFacet):
 
 
 class TemporalCoverageFacet(Facet):
-    def to_query(self, **kwargs):
-        '''No facet query, only use aggregation'''
-        return None
+    def to_query(self):
+        pass
 
     def parse_value(self, value):
         parts = value.split('-')
@@ -328,14 +331,14 @@ class TemporalCoverageFacet(Facet):
             'visible': (max_date - min_date) > timedelta(days=2),
         }
 
-    def to_aggregations(self):
+    def to_aggregations(self, name, *args):
         return {
-            '{0}_min'.format(self.field): {
+            '{0}_min'.format(name): {
                 'min': {
                     'field': '{0}.start'.format(self.field)
                 }
             },
-            '{0}_max'.format(self.field): {
+            '{0}_max'.format(name): {
                 'max': {
                     'field': '{0}.end'.format(self.field)
                 }

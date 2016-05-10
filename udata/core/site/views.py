@@ -76,7 +76,7 @@ def map():
 @blueprint.route('/datasets.csv')
 def datasets_csv():
     params = multi_to_dict(request.args)
-    params['aggregations'] = False
+    params['facets'] = False
     datasets = search.iter(Dataset, **params)
     adapter = csv.get_adapter(Dataset)
     return csv.stream(adapter(datasets), 'datasets')
@@ -85,7 +85,7 @@ def datasets_csv():
 @blueprint.route('/resources.csv')
 def resources_csv():
     params = multi_to_dict(request.args)
-    params['aggregations'] = False
+    params['facets'] = False
     datasets = search.iter(Dataset, **params)
     return csv.stream(ResourcesCsvAdapter(datasets), 'resources')
 
@@ -93,7 +93,7 @@ def resources_csv():
 @blueprint.route('/organizations.csv')
 def organizations_csv():
     params = multi_to_dict(request.args)
-    params['aggregations'] = False
+    params['facets'] = False
     organizations = search.iter(Organization, **params)
     return csv.stream(OrganizationCsvAdapter(organizations), 'organizations')
 
@@ -101,7 +101,7 @@ def organizations_csv():
 @blueprint.route('/reuses.csv')
 def reuses_csv():
     params = multi_to_dict(request.args)
-    params['aggregations'] = False
+    params['facets'] = False
     reuses = search.iter(Reuse, **params)
     return csv.stream(ReuseCsvAdapter(reuses), 'reuses')
 

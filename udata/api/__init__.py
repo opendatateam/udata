@@ -120,17 +120,17 @@ class UDataApi(Api):
         # q parameter
         parser.add_argument('q', type=str, location='args',
                             help='The search query')
-        # Expected aggregations
-        # (ie. I want all aggregations
-        # or I want both tags and licenses aggregations)
-        aggregations = adapter.facets.keys()
-        if aggregations:
-            parser.add_argument('aggregations', type=str, location='args',
-                                choices=['all'] + aggregations, action='append',
-                                help='Selected aggregations to fetch')
-        # Add aggregations filters arguments
-        # (apply a value to an aggregation ie. tag=value)
-        for name, aggregation in adapter.facets.items():
+        # Expected facets
+        # (ie. I want all facets
+        # or I want both tags and licenses facets)
+        facets = adapter.facets.keys()
+        if facets:
+            parser.add_argument('facets', type=str, location='args',
+                                choices=['all'] + facets, action='append',
+                                help='Selected facets to fetch')
+        # Add facets filters arguments
+        # (apply a value to an facet ie. tag=value)
+        for name, facet in adapter.facets.items():
             parser.add_argument(name, type=str, location='args')
         # Sort arguments
         keys = adapter.sorts.keys()

@@ -71,13 +71,13 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['extras']['key'], 1)
 
-    def test_dataset_api_list_with_aggregations(self):
-        '''It should fetch a dataset list from the API with aggregations'''
+    def test_dataset_api_list_with_facets(self):
+        '''It should fetch a dataset list from the API with facets'''
         with self.autoindex():
             for i in range(2):
                 VisibleDatasetFactory(tags=['tag-{0}'.format(i)])
 
-        response = self.get(url_for('api.datasets', **{'aggregations': 'tag'}))
+        response = self.get(url_for('api.datasets', **{'facets': 'tag'}))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 2)
         self.assertIn('aggregations', response.json)

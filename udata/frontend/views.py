@@ -77,7 +77,7 @@ class SearchView(Templated, BaseView):
 
     def get_queryset(self):
         params = multi_to_dict(request.args)
-        params['aggregations'] = True
+        params['facets'] = True
         return search.query(self.search_adapter or self.model, **params)
 
     def get_context(self):

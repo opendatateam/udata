@@ -13,7 +13,7 @@ from udata.features.territories import check_for_territories
 @front.route('/search/', endpoint='search')
 def render_search():
     params = multi_to_dict(request.args)
-    params['aggregations'] = True
+    params['facets'] = True
     # We only fetch relevant data for the given filter.
     if 'tag' in params:
         search_queries = [

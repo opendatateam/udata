@@ -54,13 +54,36 @@ class FakeSearch(search.ModelSearchAdapter):
         'tag': search.TermFacet('tags'),
         'other': search.TermFacet('other'),
         'range': search.RangeFacet('a_num_field'),
-        'daterange': search.DateRangeFacet('a_daterange_field'),
         'bool': search.BoolFacet('boolean'),
-        'extra': search.ExtrasFacet('extras'),
     }
     sorts = {
         'title': search.Sort('title.raw'),
         'description': search.Sort('description.raw'),
+    }
+
+
+class FakeSearchWithDateRange(search.ModelSearchAdapter):
+    model = Fake
+    fields = [
+        'title^2',
+        'description',
+    ]
+    facets = {
+        'tag': search.TermFacet('tags'),
+        'other': search.TermFacet('other'),
+        'range': search.RangeFacet('a_num_field'),
+        'daterange': search.DateRangeFacet('a_daterange_field'),
+    }
+
+
+class FakeSearchWithExtra(search.ModelSearchAdapter):
+    model = Fake
+    fields = [
+        'title^2',
+        'description',
+    ]
+    facets = {
+        'extra': search.ExtrasFacet('extras'),
     }
 
 
@@ -469,7 +492,7 @@ class SearchQueryTest(TestCase):
 
     def test_aggregation_filter_extras(self):
         search_query = search.SearchQuery(
-            FakeSearch, **{'q': 'test', 'extra.key': 'value'})
+            FakeSearchWithExtra, **{'q': 'test', 'extra.key': 'value'})
         expectations = [
             {'multi_match': {
                 'query': 'test',
@@ -487,7 +510,7 @@ class SearchQueryTest(TestCase):
 
     def test_aggregation_filter_multi(self):
         search_query = search.SearchQuery(
-            FakeSearch,
+            FakeSearchWithDateRange,
             q='test',
             tag=['value-1', 'value-2'],
             other='value',
@@ -717,7 +740,9 @@ class TestBoolFacet(TestCase):
                 expected)
 
     def test_aggregations(self):
-        self.assertEqual(self.facet.to_aggregations(), {})
+        self.assertEqual(
+            self.facet.to_aggregations('foo'),
+            {'foo': {'terms': {'field': 'boolean', 'size': 2}}})
 
     def test_labelize(self):
         self.assertEqual(self.facet.labelize('label', True),
@@ -787,7 +812,9 @@ class TestTermFacet(TestCase):
         )
 
     def test_aggregations(self):
-        self.assertEqual(self.facet.to_aggregations(), {})
+        self.assertEqual(
+            self.facet.to_aggregations('foo'),
+            {'foo': {'terms': {'field': 'tags', 'size': 20}}})
 
     def test_labelize(self):
         self.assertEqual(self.facet.labelize('label', 'fake'), 'fake')
@@ -874,7 +901,9 @@ class TestModelTermFacet(TestCase, DBTestMixin):
                          {'term': {'fakes': 'value'}})
 
     def test_aggregations(self):
-        self.assertEqual(self.facet.to_aggregations(), {})
+        self.assertEqual(
+            self.facet.to_aggregations('foo'),
+            {'foo': {'terms': {'field': 'fakes', 'size': 20}}})
 
 
 class TestRangeFacet(TestCase):
@@ -942,7 +971,9 @@ class TestRangeFacet(TestCase):
         })
 
     def test_aggregations(self):
-        self.assertEqual(self.facet.to_aggregations(), {})
+        self.assertEqual(
+            self.facet.to_aggregations('foo'),
+            {'foo': {'stats': {'field': 'some_field'}}})
 
     def test_labelize(self):
         self.assertEqual(
@@ -997,7 +1028,9 @@ class TestDateRangeFacet(TestCase):
         })
 
     def test_aggregations(self):
-        self.assertEqual(self.facet.to_aggregations(), {})
+        self.assertEqual(
+            self.facet.to_aggregations('foo'),
+            {'foo': {'stats': {'field': 'some_field'}}})
 
 
 class TestTemporalCoverageFacet(TestCase):
@@ -1008,10 +1041,10 @@ class TestTemporalCoverageFacet(TestCase):
         self.assertIsNone(self.facet.to_query())
 
     def test_to_aggregations(self):
-        aggregations = self.facet.to_aggregations()
-        self.assertEqual(aggregations['some_field_min'],
+        aggregations = self.facet.to_aggregations('foo')
+        self.assertEqual(aggregations['foo_min'],
                          {'min': {'field': 'some_field.start'}})
-        self.assertEqual(aggregations['some_field_max'],
+        self.assertEqual(aggregations['foo_max'],
                          {'max': {'field': 'some_field.end'}})
 
     def test_from_response(self):

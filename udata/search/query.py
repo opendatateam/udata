@@ -51,7 +51,7 @@ class SearchQuery(object):
     def iter(self):
         try:
             body = self.get_body()
-            # Remove aggregations
+            # Remove aggregations to avoid overhead on large pagination.
             if 'aggregations' in body:
                 del body['aggregations']
             result = es.scan(index=es.index_name,
@@ -164,28 +164,17 @@ class SearchQuery(object):
     def _aggregation_query(self, name):
         aggregation = self.adapter.facets[name]
         args = self.kwargs.get(name, [])
-        return aggregation.to_query(args=args)
+        return aggregation.to_aggregations(name, *args)
 
     def get_aggregations(self):
-        aggregations = dict((name, self._aggregation_query(name))
-                            for name in self.facets_kwargs)
-        # aggregations = dict((name, self._aggregation_query(name))
-        #                     for name in self.facets_kwargs
-        #                     if self._aggregation_query(name) is not None)
-        # TODO: restore sub-aggregations
-        # selected_aggregations = self.kwargs.get('aggregations')
-        # if not self.adapter.facets or not selected_aggregations:
-        #     return aggregations
-        # for name, aggregation in self.adapter.facets.items():
-        #     if selected_aggregations is True or name in selected_aggregations:
-        #         query = aggregation.to_query()
-        #         if query:
-        #             aggregations.update(query)
+        aggregations = {}
+        for name in self.aggregations_kwargs:
+            aggregations.update(self._aggregation_query(name))
         return aggregations
 
     @property
-    def facets_kwargs(self):
-        '''List expected facets from kwargs'''
+    def aggregations_kwargs(self):
+        '''List expected aggregations from kwargs'''
         facets = self.kwargs.get('facets')
         if not self.adapter.facets or not facets:
             return []
