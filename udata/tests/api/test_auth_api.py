@@ -99,8 +99,7 @@ class APIAuthTest(APITestCase):
 
         self.assert401(response)
         self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json,
-                         {'status': 401, 'message': 'Unauthorized'})
+        self.assertIn('message', response.json)
 
     def test_invalid_apikey(self):
         '''Should raise a HTTP 401 if an invalid API Key is provided'''
@@ -109,8 +108,7 @@ class APIAuthTest(APITestCase):
 
         self.assert401(response)
         self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json,
-                         {'status': 401, 'message': 'Invalid API Key'})
+        self.assertIn('message', response.json)
 
     def test_inactive_user(self):
         '''Should raise a HTTP 401 if the user is inactive'''
@@ -120,8 +118,7 @@ class APIAuthTest(APITestCase):
 
         self.assert401(response)
         self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json,
-                         {'status': 401, 'message': 'Inactive user'})
+        self.assertIn('message', response.json)
 
     def test_validation_errors(self):
         '''Should raise a HTTP 400 and returns errors on validation error'''
@@ -130,7 +127,6 @@ class APIAuthTest(APITestCase):
         self.assert400(response)
         self.assertEqual(response.content_type, 'application/json')
 
-        self.assertEqual(response.json['status'], 400)
         for field in 'required', 'email', 'choices':
             self.assertIn(field, response.json['errors'])
             self.assertIsInstance(response.json['errors'][field], list)
@@ -208,10 +204,7 @@ class APIAuthTest(APITestCase):
         response = self.get(url_for('api.exception'))
 
         self.assert400(response)
-        self.assertEqual(response.json, {
-            'message': 'Not working',
-            'status': 400
-        })
+        self.assertEqual(response.json['message'], 'Not working')
 
     @skip('Need flask-restplus handling')
     def test_permission_denied(self):
@@ -223,7 +216,4 @@ class APIAuthTest(APITestCase):
         response = self.get(url_for('api.exception'))
 
         self.assert403(response)
-        self.assertEqual(response.json, {
-            'message': 'Permission denied',
-            'status': 403
-        })
+        self.assertIn('message', response.json)

@@ -57,10 +57,7 @@ class OEmbedsDatasetAPITest(APITestCase):
         response = self.get(url_for('api.oembeds'))
         self.assert400(response)
         data = json.loads(response.data)
-        self.assertEqual(
-            data['message']['references'],
-            ("(References of the resources to embed.)  "
-             "Missing required parameter in the query string"))
+        self.assertIn('references', data['errors'])
 
     def test_oembeds_dataset_api_get_without_good_id(self):
         '''It should fail at fetching an oembed without a good id.'''

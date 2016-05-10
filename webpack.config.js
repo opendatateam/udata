@@ -14,12 +14,13 @@ const languages = ['en', 'es', 'fr'];
 module.exports = {
     entry: {
         admin: './js/admin.js',
+        dataset: './js/front/dataset',
+        territory: './js/front/territory',
         site: './js/site.js',
         home: './js/home.js',
         search: './js/search.js',
         dashboard: './js/dashboard.js',
         apidoc: './js/apidoc',
-        'dataset/display': './js/dataset/display',
         'reuse/display': './js/reuse/display',
         'organization/display': './js/organization/display',
         'site/map': './js/site/map',
@@ -88,6 +89,7 @@ module.exports = {
             $: 'jquery',
             jQuery: 'jquery',
             'window.jQuery': 'jquery',
+            'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch',
         }),
         new ExtractTextPlugin('[name].css', {
             allChunks: true
@@ -96,7 +98,7 @@ module.exports = {
         // Only include needed translations
         new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp('^' + languages.join('|') + '$')),
         new webpack.ContextReplacementPlugin(/locales$/, new RegExp(languages.join('|'))),
-        new webpack.optimize.CommonsChunkPlugin('vue-common.js', ['admin', 'dashboard']),
+        new webpack.optimize.CommonsChunkPlugin('vue-common.js', ['admin', 'dashboard', 'dataset']),
         new webpack.optimize.CommonsChunkPlugin('common.js')
     ]
 };

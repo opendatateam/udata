@@ -232,8 +232,7 @@ class MembershipAPITest(APITestCase):
         response = self.post(api_url)
         self.assert404(response)
 
-        self.assertEqual(response.json, {
-            'status': 404, 'message': 'Unknown membership request id'})
+        self.assertEqual(response.json['message'], 'Unknown membership request id')
 
     def test_refuse_membership(self):
         user = self.login()
@@ -278,8 +277,7 @@ class MembershipAPITest(APITestCase):
         response = self.post(api_url)
         self.assert404(response)
 
-        self.assertEqual(response.json, {
-            'status': 404, 'message': 'Unknown membership request id'})
+        self.assertEqual(response.json['message'], 'Unknown membership request id')
 
     def test_create_member(self):
         user = self.login()

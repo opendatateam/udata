@@ -36,13 +36,30 @@ def clean(bower=False, node=False):
 
 
 @task
+def update(migrate=False):
+    '''Perform a development update'''
+    msg = 'Update all dependencies'
+    if migrate:
+        msg += ' and migrate data'
+    header(msg)
+    info('Updating Python dependencies')
+    lrun('pip install -r requirements/develop.pip')
+    lrun('pip install -e .')
+    info('Updating JavaScript dependencies')
+    lrun('npm install')
+    if migrate:
+        info('Migrating database')
+        lrun('udata db migrate')
+
+
+@task
 def test(fast=False):
     '''Run tests suite'''
     header('Run tests suite')
     cmd = 'nosetests --rednose --force-color udata'
     if fast:
         cmd = ' '.join([cmd, '--stop'])
-    lrun(cmd, pty=True)
+    lrun(cmd)
 
 
 @task
@@ -50,7 +67,7 @@ def cover():
     '''Run tests suite with coverage'''
     header('Run tests suite with coverage')
     lrun('nosetests --rednose --force-color \
-        --with-coverage --cover-html --cover-package=udata', pty=True)
+        --with-coverage --cover-html --cover-package=udata')
 
 
 @task
@@ -58,7 +75,7 @@ def jstest(watch=False):
     '''Run Karma tests suite'''
     header('Run Karma/Mocha test suite')
     cmd = 'npm run -s test:{0}'.format('watch' if watch else 'unit')
-    lrun(cmd, pty=True)
+    lrun(cmd)
 
 
 @task
@@ -84,7 +101,7 @@ def qa():
 @task
 def serve():
     '''Run a development server'''
-    lrun('python manage.py serve -d -r', pty=True)
+    lrun('python manage.py serve -d -r')
 
 
 @task

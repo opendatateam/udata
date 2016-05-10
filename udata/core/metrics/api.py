@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from bson import ObjectId
 from datetime import date
 
-from flask_restful.inputs import boolean
+from flask_restplus.inputs import boolean
 
 from udata.api import api, API, marshal, fields
 from udata.models import Metrics

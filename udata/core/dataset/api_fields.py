@@ -61,7 +61,7 @@ resource_fields = api.model('Resource', {
         description='The resource availability', readonly=True),
 })
 
-upload_fields = api.extend('UploadedResource', resource_fields, {
+upload_fields = api.inherit('UploadedResource', resource_fields, {
     'success': fields.Boolean(
         description='Whether the upload succeeded or not.',
         readonly=True, default=True),

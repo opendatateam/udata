@@ -15,3 +15,10 @@ class OrganizationFactory(MongoEngineFactory):
 
     name = factory.LazyAttribute(lambda o: faker.sentence())
     description = factory.LazyAttribute(lambda o: faker.text())
+
+
+class TeamFactory(MongoEngineFactory):
+    class Meta:
+        model = models.Team
+
+    name = factory.LazyAttribute(lambda o: faker.sentence())
