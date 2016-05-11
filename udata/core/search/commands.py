@@ -32,10 +32,14 @@ def reindex(doc_type=None):
         if not doc_type or doc_type.lower() == doctype.lower():
             log.info('Reindexing {0} objects'.format(model.__name__))
             if es.indices.exists_type(index=name, doc_type=doctype):
-                es.indices.delete_mapping(index=name, doc_type=doctype)
-            es.indices.put_mapping(index=name,
-                                   doc_type=doctype,
-                                   body=adapter.mapping)
+                log.warn(("The index {name} already exists and his mapping "
+                          "will not be updated with that command, you need "
+                          "to use the ` search init` command if you want to "
+                          "update the mapping.").format(name=name))
+            else:
+                es.indices.put_mapping(index=name,
+                                       doc_type=doctype,
+                                       body=adapter.mapping)
             qs = model.objects
             if hasattr(model.objects, 'visible'):
                 qs = qs.visible()
