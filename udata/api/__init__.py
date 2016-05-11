@@ -184,7 +184,8 @@ class UDataApi(Api):
         return resolved
 
 
-api = UDataApi(apiv1,
+api = UDataApi(
+    apiv1,
     decorators=[csrf.exempt, cors.crossdomain(origin='*', credentials=True)],
     version='1.0', title='uData API',
     description='uData API', default='site',

@@ -272,8 +272,9 @@ class SiteViewsTest(FrontTestCase):
             orgs = [OrganizationFactory() for _ in range(3)]
             hidden_org = OrganizationFactory(deleted=datetime.now())
 
-        response = self.get(url_for('site.organizations_csv',
-                            badge=PUBLIC_SERVICE, page_size=3, facets=True))
+        response = self.get(
+            url_for('site.organizations_csv', badge=PUBLIC_SERVICE,
+                    page_size=3, facets=True))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')
@@ -345,8 +346,8 @@ class SiteViewsTest(FrontTestCase):
             hidden_reuse = ReuseFactory()
 
         response = self.get(
-            url_for(
-                'site.reuses_csv', tag='selected', page_size=3, facets=True))
+            url_for('site.reuses_csv', tag='selected', page_size=3,
+                    facets=True))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')

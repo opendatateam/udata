@@ -74,12 +74,10 @@ class ElasticSearch(object):
 
         if es.indices.exists(self.index_name):
             for doc_type, mapping in mappings:
-                if es.indices.exists_type(index=self.index_name,
-                                          doc_type=doc_type):
-                    es.indices.delete_mapping(index=self.index_name,
-                                              doc_type=doc_type)
-                es.indices.put_mapping(index=self.index_name,
-                                       doc_type=doc_type, body=mapping)
+                if not es.indices.exists_type(index=self.index_name,
+                                              doc_type=doc_type):
+                    es.indices.put_mapping(index=self.index_name,
+                                           doc_type=doc_type, body=mapping)
         else:
             with open(ANALYSIS_JSON) as analysis:
                 es.indices.create(self.index_name, {

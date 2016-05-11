@@ -79,18 +79,16 @@ class ReuseSearch(ModelSearchAdapter):
             'type': {'type': 'string'},
             'tags': {
                 'type': 'string',
-                'index_name': 'tag',
                 'index': 'not_analyzed'
             },
             'tag_suggest': {
                 'type': 'completion',
-                'index_analyzer': 'simple',
+                'analyzer': 'simple',
                 'search_analyzer': 'simple',
                 'payloads': False,
             },
             'badges': {
                 'type': 'string',
-                'index_name': 'badges',
                 'index': 'not_analyzed'
             },
             'created': {'type': 'date', 'format': 'date_hour_minute_second'},
@@ -109,13 +107,12 @@ class ReuseSearch(ModelSearchAdapter):
             'featured': {'type': 'boolean'},
             'reuse_suggest': {
                 'type': 'completion',
-                'index_analyzer': 'simple',
+                'analyzer': 'simple',
                 'search_analyzer': 'simple',
                 'payloads': True,
             },
             'extras': {
                 'type': 'object',
-                'index_name': 'extra',
             },
         }
     }

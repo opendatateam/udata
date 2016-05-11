@@ -198,25 +198,6 @@ def owner_name(obj):
 
 
 @front.app_template_global()
-def facet_formater(results, name):
-    '''Get label from model facet'''
-    facet = results.get_facet(name)
-
-    if facet:
-        labels = dict((
-            (unicode(o.id), unicode(o)) for o, _ in facet['models'] if o
-        ))
-
-        def formater(value):
-            return labels.get(value, value)
-    else:
-        def formater(value):
-            return value
-
-    return formater
-
-
-@front.app_template_global()
 @front.app_template_filter()
 def isodate(value, format='short'):
     dt = date(*map(int, value.split('-')))
