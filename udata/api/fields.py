@@ -80,6 +80,6 @@ def pager(page_fields):
         'next_page': NextPageUrl(description='The next page URL if exists'),
         'previous_page': PreviousPageUrl(
             description='The previous page URL if exists'),
-        'aggregations': Raw(description='Search aggregations results if any'),
+        'facets': Raw(description='Search facets results if any'),
     }
     return pager_fields

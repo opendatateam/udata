@@ -103,7 +103,7 @@ class SiteViewsTest(FrontTestCase):
         self.assertNotIn(str(hidden_dataset.id), ids)
 
     def test_datasets_csv_with_filters(self):
-        '''Should handle filtering but ignore paging or aggregations'''
+        '''Should handle filtering but ignore paging or facets'''
         with self.autoindex():
             filtered_datasets = [
                 DatasetFactory(resources=[ResourceFactory()],
@@ -114,8 +114,8 @@ class SiteViewsTest(FrontTestCase):
             hidden_dataset = DatasetFactory()
 
         response = self.get(
-            url_for('site.datasets_csv', tag='selected', page_size=3,
-                    aggregations=True))
+            url_for(
+                'site.datasets_csv', tag='selected', page_size=3, facets=True))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')
@@ -185,7 +185,7 @@ class SiteViewsTest(FrontTestCase):
                 self.assertIn((str(dataset.id), str(resource.id)), ids)
 
     def test_resources_csv_with_filters(self):
-        '''Should handle filtering but ignore paging or aggregations'''
+        '''Should handle filtering but ignore paging or facets'''
         with self.autoindex():
             filtered_datasets = [DatasetFactory(resources=[ResourceFactory(),
                                                            ResourceFactory()],
@@ -196,7 +196,7 @@ class SiteViewsTest(FrontTestCase):
 
         response = self.get(
             url_for('site.resources_csv', tag='selected', page_size=3,
-                    aggregations=True))
+                    facets=True))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')
@@ -259,7 +259,7 @@ class SiteViewsTest(FrontTestCase):
         self.assertNotIn(str(hidden_org.id), ids)
 
     def test_organizations_csv_with_filters(self):
-        '''Should handle filtering but ignore paging or aggregations'''
+        '''Should handle filtering but ignore paging or facets'''
         user = self.login()
         with self.autoindex():
             public_service_badge = Badge(
@@ -274,7 +274,7 @@ class SiteViewsTest(FrontTestCase):
 
         response = self.get(
             url_for('site.organizations_csv', badge=PUBLIC_SERVICE,
-                    page_size=3, aggregations=True))
+                    page_size=3, facets=True))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')
@@ -336,7 +336,7 @@ class SiteViewsTest(FrontTestCase):
         self.assertNotIn(str(hidden_reuse.id), ids)
 
     def test_reuses_csv_with_filters(self):
-        '''Should handle filtering but ignore paging or aggregations'''
+        '''Should handle filtering but ignore paging or facets'''
         with self.autoindex():
             filtered_reuses = [
                 ReuseFactory(datasets=[DatasetFactory()], tags=['selected'])
@@ -347,7 +347,7 @@ class SiteViewsTest(FrontTestCase):
 
         response = self.get(
             url_for('site.reuses_csv', tag='selected', page_size=3,
-                    aggregations=True))
+                    facets=True))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')

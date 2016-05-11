@@ -54,7 +54,7 @@
             {% for label, endpoint, type in exports %}
             <li role="presentation">
                 <a role="menuitem" tabindex="-1" href="{{ result.query.to_url(
-                    url_for(endpoint), aggregations=None, page=None, page_size=None, replace=true)
+                    url_for(endpoint), facets=None, page=None, page_size=None, replace=true)
                 }}">
                 {{label}}
                 <span class="label label-primary">{{type}}</span>
@@ -269,7 +269,7 @@
         {% if csv_endpoint %}
         <a class="btn btn-xs btn-info pull-right"
             href="{{ result.query.to_url(
-                url_for(csv_endpoint), aggregations=None, page=None, page_size=None, replace=true)
+                url_for(csv_endpoint), facets=None, page=None, page_size=None, replace=true)
             }}">
             <span class="fa fa-download"></span>
             CSV

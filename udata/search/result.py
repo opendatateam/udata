@@ -54,10 +54,10 @@ class SearchResult(Paginable):
         return self.get_objects()
 
     @property
-    def aggregations(self):
+    def facets(self):
         return dict(
             (f, self.get_aggregation(f, fetch=False))
-            for f in self.query.aggregations_kwargs
+            for f in self.query.facets_kwargs
         )
 
     def __iter__(self):

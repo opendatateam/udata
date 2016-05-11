@@ -150,7 +150,7 @@ class SearchQuery(object):
         return query
 
     def build_aggregation_queries(self):
-        '''Build sort query parameters from kwargs'''
+        '''Build aggregation query parameters from kwargs'''
         query = self._bool_query()
         if not self.adapter.facets:
             return query
@@ -168,13 +168,13 @@ class SearchQuery(object):
 
     def get_aggregations(self):
         aggregations = {}
-        for name in self.aggregations_kwargs:
+        for name in self.facets_kwargs:
             aggregations.update(self._aggregation_query(name))
         return aggregations
 
     @property
-    def aggregations_kwargs(self):
-        '''List expected aggregations from kwargs'''
+    def facets_kwargs(self):
+        '''List expected facets from kwargs'''
         facets = self.kwargs.get('facets')
         if not self.adapter.facets or not facets:
             return []

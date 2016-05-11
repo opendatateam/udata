@@ -120,15 +120,14 @@ class UDataApi(Api):
         parser.add_argument('q', type=str, location='args',
                             help='The search query')
         # Expected facets
-        # (ie. I want all facets
-        # or I want both tags and licenses facets)
+        # (ie. I want all facets or I want both tags and licenses facets)
         facets = adapter.facets.keys()
         if facets:
             parser.add_argument('facets', type=str, location='args',
                                 choices=['all'] + facets, action='append',
                                 help='Selected facets to fetch')
         # Add facets filters arguments
-        # (apply a value to an facet ie. tag=value)
+        # (apply a value to a facet ie. tag=value)
         for name, facet in adapter.facets.items():
             parser.add_argument(name, type=str, location='args')
         # Sort arguments
@@ -185,7 +184,8 @@ class UDataApi(Api):
         return resolved
 
 
-api = UDataApi(apiv1,
+api = UDataApi(
+    apiv1,
     decorators=[csrf.exempt, cors.crossdomain(origin='*', credentials=True)],
     version='1.0', title='uData API',
     description='uData API', default='site',

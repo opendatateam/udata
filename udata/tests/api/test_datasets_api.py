@@ -80,8 +80,8 @@ class DatasetAPITest(APITestCase):
         response = self.get(url_for('api.datasets', **{'facets': 'tag'}))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 2)
-        self.assertIn('aggregations', response.json)
-        self.assertIn('tag', response.json['aggregations'])
+        self.assertIn('facets', response.json)
+        self.assertIn('tag', response.json['facets'])
 
     def test_dataset_api_get(self):
         '''It should fetch a dataset from the API'''

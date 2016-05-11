@@ -287,6 +287,7 @@ class DateRangeFacet(RangeFacet):
 
 class TemporalCoverageFacet(Facet):
     def to_query(self):
+        '''No direct query, only use aggregation via `to_aggregations`'''
         pass
 
     def parse_value(self, value):
