@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import FollowDataset, FollowOrg, FollowReuse, FollowUser
+from udata.models import Follow
 from udata.core.user.factories import UserFactory
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.reuse.factories import ReuseFactory
@@ -83,13 +83,13 @@ class UserBlueprintTest(FrontTestCase):
         user = UserFactory()
         for _ in range(2):
             reuse = ReuseFactory()
-            FollowReuse.objects.create(follower=user, following=reuse)
+            Follow.objects.create(follower=user, following=reuse)
             dataset = DatasetFactory()
-            FollowDataset.objects.create(follower=user, following=dataset)
+            Follow.objects.create(follower=user, following=dataset)
             org = OrganizationFactory()
-            FollowOrg.objects.create(follower=user, following=org)
+            Follow.objects.create(follower=user, following=org)
             other_user = UserFactory()
-            FollowUser.objects.create(follower=user, following=other_user)
+            Follow.objects.create(follower=user, following=other_user)
         response = self.get(url_for('users.following', user=user))
         self.assert200(response)
         for name in 'datasets', 'users', 'reuses', 'organizations':
@@ -99,9 +99,10 @@ class UserBlueprintTest(FrontTestCase):
     def test_render_profile_followers(self):
         '''It should render the user profile followers page'''
         user = UserFactory()
-        followers = [FollowUser.objects.create(follower=UserFactory(),
-                                               following=user)
-                     for _ in range(3)]
+        followers = [
+            Follow.objects.create(follower=UserFactory(), following=user)
+            for _ in range(3)
+        ]
         response = self.get(url_for('users.followers', user=user))
 
         self.assert200(response)

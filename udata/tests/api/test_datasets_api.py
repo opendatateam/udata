@@ -9,8 +9,7 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import (
-    CommunityResource, Dataset, Follow, FollowDataset, Member,
-    UPDATE_FREQUENCIES
+    CommunityResource, Dataset, Follow, Member, UPDATE_FREQUENCIES
 )
 
 from . import APITestCase
@@ -47,17 +46,6 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json['data']), len(datasets))
         self.assertFalse('quality' in response.json['data'][0])
-
-    def test_dataset_full_api_list(self):
-        '''It should fetch a dataset list from the API'''
-        with self.autoindex():
-            datasets = [DatasetFactory(resources=[ResourceFactory()])
-                        for i in range(2)]
-
-        response = self.get(url_for('api.datasets_full'))
-        self.assert200(response)
-        self.assertEqual(len(response.json['data']), len(datasets))
-        self.assertTrue('quality' in response.json['data'][0])
 
     def test_dataset_api_list_with_extra_filter(self):
         '''It should fetch a dataset list from the API filtering on extras'''
@@ -213,21 +201,6 @@ class DatasetAPITest(APITestCase):
 
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.spatial.geom, SAMPLE_GEOM)
-
-    def test_dataset_api_retrieve_full(self):
-        '''It should retrieve a full dataset (quality) from the API.'''
-        user = self.login()
-        dataset = DatasetFactory(owner=user, description='')
-        response = self.get(url_for('api.dataset_full', dataset=dataset))
-        self.assert200(response)
-        self.assertEqual(response.json['quality'], {'score': 0})
-        dataset.description = 'b' * 42
-        dataset.save()
-        response = self.get(url_for('api.dataset_full', dataset=dataset))
-        self.assertEqual(response.json['quality'], {
-            'score': 0,
-            'description_length': 42
-        })
 
     @attr('update')
     def test_dataset_api_update(self):
@@ -703,8 +676,8 @@ class DatasetResourceAPITest(APITestCase):
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(),
-                              FollowDataset)
+        follow = Follow.objects.followers(to_follow).first()
+        self.assertIsInstance(follow.following, Dataset)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
@@ -712,7 +685,7 @@ class DatasetResourceAPITest(APITestCase):
         '''It should unfollow the dataset on DELETE'''
         user = self.login()
         to_follow = DatasetFactory()
-        FollowDataset.objects.create(follower=user, following=to_follow)
+        Follow.objects.create(follower=user, following=to_follow)
 
         response = self.delete(url_for('api.dataset_followers',
                                        id=to_follow.id))

@@ -101,6 +101,14 @@ community_resource_fields = api.inherit('CommunityResource', resource_fields, {
 community_resource_page_fields = api.model(
     'CommunityResourcePage', fields.pager(community_resource_fields))
 
+#: Default mask to make it lightweight by default
+DEFAULT_MASK = ','.join((
+    'id', 'title', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
+    'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras',
+    'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
+    'uri', 'page', 'last_update'
+))
+
 dataset_fields = api.model('Dataset', {
     'id': fields.String(description='The dataset identifier', readonly=True),
     'title': fields.String(description='The dataset title', required=True),
@@ -154,18 +162,14 @@ dataset_fields = api.model('Dataset', {
     'page': fields.UrlFor(
         'datasets.show', lambda o: {'dataset': o},
         description='The dataset page URL', required=True),
-})
-
-dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields))
-
-dataset_full_fields = api.inherit('DatasetFull', dataset_fields, {
     'quality': fields.Raw(description='The dataset quality', readonly=True),
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
-})
+}, mask=DEFAULT_MASK)
 
-dataset_full_page_fields = api.model(
-    'DatasetFullPage', fields.pager(dataset_full_fields))
+dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields),
+                                mask='data{{{0}}},*'.format(DEFAULT_MASK))
+
 
 dataset_suggestion_fields = api.model('DatasetSuggestion', {
     'id': fields.String(description='The dataset identifier', required=True),

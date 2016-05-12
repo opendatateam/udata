@@ -6,11 +6,17 @@ import factory
 from factory.mongoengine import MongoEngineFactory
 
 from udata import models
-from udata.utils import faker
+
+
+class DiscussionFactory(MongoEngineFactory):
+    class Meta:
+        model = models.Discussion
+
+    title = factory.Faker('sentence')
 
 
 class MessageDiscussionFactory(MongoEngineFactory):
     class Meta:
         model = models.Message
 
-    content = factory.LazyAttribute(lambda o: faker.sentence())
+    content = factory.Faker('sentence')

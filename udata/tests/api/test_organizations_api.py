@@ -6,10 +6,8 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import (
-    Organization, Member, MembershipRequest, Follow, FollowOrg,
+    Organization, Member, MembershipRequest, Follow, Issue, Discussion
 )
-from udata.core.dataset.models import DatasetIssue, DatasetDiscussion
-from udata.core.reuse.models import ReuseIssue, ReuseDiscussion
 
 from . import APITestCase
 
@@ -361,8 +359,8 @@ class MembershipAPITest(APITestCase):
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(),
-                              FollowOrg)
+        follow = Follow.objects.followers(to_follow).first()
+        self.assertIsInstance(follow.following, Organization)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
@@ -370,7 +368,7 @@ class MembershipAPITest(APITestCase):
         '''It should unfollow the organization on DELETE'''
         user = self.login()
         to_follow = OrganizationFactory()
-        FollowOrg.objects.create(follower=user, following=to_follow)
+        Follow.objects.create(follower=user, following=to_follow)
 
         response = self.delete(
             url_for('api.organization_followers', id=to_follow.id))
@@ -604,14 +602,13 @@ class OrganizationIssuesAPITest(APITestCase):
         reuse = ReuseFactory(organization=org)
         dataset = DatasetFactory(organization=org)
         issues = [
-            DatasetIssue.objects.create(subject=dataset, title='', user=user),
-            ReuseIssue.objects.create(subject=reuse, title='', user=user)
+            Issue.objects.create(subject=dataset, title='', user=user),
+            Issue.objects.create(subject=reuse, title='', user=user)
         ]
 
         # Should not be listed
-        DatasetIssue.objects.create(
-            subject=DatasetFactory(), title='', user=user)
-        ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=user)
+        Issue.objects.create(subject=DatasetFactory(), title='', user=user)
+        Issue.objects.create(subject=ReuseFactory(), title='', user=user)
 
         response = self.get(url_for('api.org_issues', org=org))
 
@@ -631,15 +628,13 @@ class OrganizationDiscussionsAPITest(APITestCase):
         reuse = ReuseFactory(organization=org)
         dataset = DatasetFactory(organization=org)
         discussions = [
-            DatasetDiscussion.objects.create(
-                subject=dataset, title='', user=user),
-            ReuseDiscussion.objects.create(subject=reuse, title='', user=user)
+            Discussion.objects.create(subject=dataset, title='', user=user),
+            Discussion.objects.create(subject=reuse, title='', user=user)
         ]
 
         # Should not be listed
-        DatasetIssue.objects.create(
-            subject=DatasetFactory(), title='', user=user)
-        ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=user)
+        Issue.objects.create(subject=DatasetFactory(), title='', user=user)
+        Issue.objects.create(subject=ReuseFactory(), title='', user=user)
 
         response = self.get(url_for('api.org_discussions', org=org))
 

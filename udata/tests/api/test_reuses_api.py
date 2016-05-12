@@ -10,7 +10,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.user.factories import AdminFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.models import Reuse, FollowReuse, Follow, Member, REUSE_TYPES
+from udata.models import Reuse, Follow, Member, REUSE_TYPES
 from udata.utils import faker
 
 from . import APITestCase
@@ -224,8 +224,8 @@ class ReuseAPITest(APITestCase):
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(),
-                              FollowReuse)
+        follow = Follow.objects.followers(to_follow).first()
+        self.assertIsInstance(follow.following, Reuse)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
@@ -233,7 +233,7 @@ class ReuseAPITest(APITestCase):
         '''It should unfollow the reuse on DELETE'''
         user = self.login()
         to_follow = ReuseFactory()
-        FollowReuse.objects.create(follower=user, following=to_follow)
+        Follow.objects.create(follower=user, following=to_follow)
 
         response = self.delete(url_for('api.reuse_followers', id=to_follow.id))
         self.assert200(response)

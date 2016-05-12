@@ -12,8 +12,7 @@ from mongoengine.fields import DateTimeField
 from werkzeug import cached_property
 
 from udata.models import (
-    db, WithMetrics, BadgeMixin, Discussion, Follow, Issue,
-    SpatialCoverage, OwnedByQuerySet
+    db, WithMetrics, BadgeMixin, SpatialCoverage, OwnedByQuerySet
 )
 from udata.i18n import lazy_gettext as _
 from udata.utils import hash_url
@@ -23,7 +22,6 @@ from .croquemort import check_url_from_cache, check_url_from_group
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
-    'DatasetIssue', 'DatasetDiscussion', 'FollowDataset',
     'UPDATE_FREQUENCIES', 'RESOURCE_TYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE'
 )
@@ -324,7 +322,11 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             * description length
             * and so on
         """
+        from udata.models import Discussion  # noqa: Prevent circular imports
         result = {}
+        if not self.id:
+            # Quality is only relevant on saved Datasets
+            return result
         if self.next_update:
             result['frequency'] = self.frequency
             result['update_in'] = -(self.next_update - datetime.now()).days
@@ -338,7 +340,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
                 resource.closed_format for resource in self.resources)
             result['has_unavailable_resources'] = not all(
                 self.check_availability())
-        discussions = DatasetDiscussion.objects(subject=self.id)
+        discussions = Discussion.objects(subject=self)
         if discussions:
             result['discussions'] = len(discussions)
             result['has_untreated_discussions'] = not all(
@@ -432,15 +434,3 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Document):
     @property
     def from_community(self):
         return True
-
-
-class DatasetIssue(Issue):
-    subject = db.ReferenceField(Dataset)
-
-
-class DatasetDiscussion(Discussion):
-    subject = db.ReferenceField(Dataset)
-
-
-class FollowDataset(Follow):
-    following = db.ReferenceField(Dataset)

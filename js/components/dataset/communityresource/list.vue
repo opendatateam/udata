@@ -9,11 +9,12 @@
 
 <script>
 import Vue from 'vue';
-import CommunityResource from 'models/communityresource';
 import CommunityResources from 'models/communityresources';
+import Datatable from 'components/datatable/widget.vue';
 
 export default {
     name: 'community-widget',
+    MASK: ['id', 'title', 'created_at', 'dataset{id,title}'],
     props: {
         communities: {
             type: Object,
@@ -29,9 +30,7 @@ export default {
             }
         }
     },
-    components: {
-         datatable: require('components/datatable/widget.vue')
-    },
+    components: {Datatable},
     data() {
         let fields = [{
             label: this._('Title'),
@@ -51,10 +50,7 @@ export default {
                 ellipsis: true
             });
         }
-        return {
-            fields: fields,
-            community: new CommunityResource(),
-        };
+        return {fields};
     },
     events: {
         'datatable:item:click'(community) {

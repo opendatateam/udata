@@ -63,19 +63,19 @@
 <template>
     <box :title="title" icon="retwett"
         boxclass="box-solid reuses-cards-widget"
-        footerclass="text-center" :footer="true">
+        footerclass="text-center" :footer="true" :loading="loading">
         <div class="row" v-el:sortable>
             <div class="col-md-6 reuse-card-container"
-                v-for="reuseid in (editing ? sorted : reuses) |ids"
-                :data-id="reuseid"
+                v-for="reuse in (editing ? sorted : reuses)"
+                :data-id="reuse.id"
             >
                 <button type="button" class="close"
                     v-if="editing"
-                    @click="on_remove(reuseid)">
+                    @click="on_remove(reuse.id)">
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only" v-i18n="Close"></span>
                 </button>
-                <reuse-card :reuseid="reuseid"></reuse-card>
+                <reuse-card :reuse="reuse"></reuse-card>
             </div>
         </div>
         <footer slot="footer">
@@ -104,22 +104,23 @@
 </template>
 
 <script>
+import Box from 'components/containers/box.vue';
+import ReuseCard from 'components/reuse/card.vue';
+import ReuseCompleter from 'components/form/reuse-completer.vue';
 import Sorter from 'mixins/sorter';
 
 export default {
     name: 'reuses-card-list',
     mixins: [Sorter],
-    components: {
-        box: require('components/containers/box.vue'),
-        'reuse-card': require('components/reuse/card.vue'),
-        'reuse-completer': require('components/form/reuse-completer.vue')
-    },
+    MASK: ReuseCard.MASK,
+    components: {Box, ReuseCard, ReuseCompleter},
     props: {
         title: {
             type: String,
             default: function() {return this._('Reuses');}
         },
-        reuses: Array
+        reuses: Array,
+        loading: Boolean
     },
     data: function() {
         return {
@@ -155,9 +156,9 @@ export default {
             this.sorted = [];
             this.$sortable.sort(this._initial_order);
         },
-        on_remove: function(reuseid) {
-            this.sorted.splice(this.sorted.indexOf(reuseid), 1);
-            this.$dispatch('reuse-card-list:remove', reuseid);
+        on_remove: function(reuse) {
+            this.sorted.splice(this.sorted.indexOf(reuse.id), 1);
+            this.$dispatch('reuse-card-list:remove', reuse.id);
         }
     },
     sortable: {

@@ -9,12 +9,12 @@ from flask import url_for
 from mongoengine.signals import pre_save, post_save
 
 from udata.core.storages import avatars, default_image_basename
-from udata.models import db, BadgeMixin, WithMetrics, Follow
+from udata.models import db, BadgeMixin, WithMetrics
 from udata.i18n import lazy_gettext as _
 
 
 __all__ = (
-    'Organization', 'Team', 'Member', 'MembershipRequest', 'FollowOrg',
+    'Organization', 'Team', 'Member', 'MembershipRequest',
     'ORG_ROLES', 'MEMBERSHIP_STATUS', 'PUBLIC_SERVICE', 'CERTIFIED'
 )
 
@@ -227,7 +227,3 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
 pre_save.connect(Organization.pre_save, sender=Organization)
 post_save.connect(Organization.post_save, sender=Organization)
-
-
-class FollowOrg(Follow):
-    following = db.ReferenceField(Organization)

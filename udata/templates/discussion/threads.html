@@ -37,7 +37,8 @@
             </p>
             <form role="form" class="clearfix animated"
                 data-api-url="{{ url_for('api.discussions', for=subject.id) }}"
-                data-subject="{{ subject.id }}">
+                data-subject-class="{{ subject.__class__.__name__ }}"
+                data-subject-id="{{ subject.id }}">
                 <div class="form-group">
                     <label for="title-new-discussion">{{ _('Title') }}</label>
                     <input type="text" id="title-new-discussion" name="title" class="form-control" required />

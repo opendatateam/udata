@@ -2,10 +2,10 @@
 <layout :title="dataset.title || ''" :subtitle="_('Dataset')"
     :actions="actions" :badges="badges" :page="dataset.page || ''">
     <div class="row">
-        <sbox class="col-lg-4 col-xs-6" v-for="b in boxes"
+        <small-box class="col-lg-4 col-xs-6" v-for="b in boxes"
             :value="b.value" :label="b.label" :color="b.color"
             :icon="b.icon" :target="b.target">
-        </sbox>
+        </small-box>
     </div>
     <div class="row">
         <div class="col-xs-12 col-md-6">
@@ -42,20 +42,20 @@
     </div>
 
     <div class="row">
-        <reuses id="reuses" class="col-xs-12" :reuses="reuses"></reuses>
+        <reuse-list id="reuses" class="col-xs-12" :reuses="reuses"></reuse-list>
     </div>
 
     <div class="row">
-        <issues class="col-xs-12" :issues="issues"></issues>
+        <issue-list class="col-xs-12" :issues="issues"></issue-list>
     </div>
 
     <div class="row">
-        <discussions class="col-xs-12" :discussions="discussions"></discussions>
+        <discussion-list class="col-xs-12" :discussions="discussions"></discussion-list>
     </div>
 
     <div class="row">
         <followers id="followers" class="col-xs-12 col-md-6" :followers="followers"></followers>
-        <community class="col-xs-12 col-md-6" :communities="communities" :without-dataset="true"></community>
+        <community-list class="col-xs-12 col-md-6" :communities="communities" :without-dataset="true"></community-list>
     </div>
 </layout>
 </template>
@@ -64,15 +64,21 @@
 import moment from 'moment';
 import API from 'api';
 import Vue from 'vue';
-import DatasetFull from 'models/dataset_full';
+import Dataset from 'models/dataset';
 import Discussions from 'models/discussions';
 import Followers from 'models/followers';
 import Issues from 'models/issues';
 import Metrics from 'models/metrics';
 import Reuses from 'models/reuses';
 import CommunityResources from 'models/communityresources';
+// Widgets
+import CommunityList from 'components/dataset/communityresource/list.vue';
+import DiscussionList from 'components/discussions/list.vue';
+import IssueList from 'components/issues/list.vue';
 import Layout from 'components/layout.vue';
 import DatasetFilters from 'components/dataset/filters';
+import ReuseList from 'components/reuse/list.vue';
+import SmallBox from 'components/containers/small-box.vue';
 
 export default {
     name: 'DatasetView',
@@ -102,16 +108,16 @@ export default {
         }
 
         return {
-            dataset: new DatasetFull(),
+            dataset: new Dataset({mask: '*'}),
             metrics: new Metrics({query: {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')
             }}),
-            reuses: new Reuses({query: {sort: '-created', page_size: 10}}),
+            reuses: new Reuses({query: {sort: '-created', page_size: 10}, mask: ReuseList.MASK}),
             followers: new Followers({ns: 'datasets', query: {page_size: 10}}),
-            issues: new Issues({query: {sort: '-created', page_size: 10}}),
-            discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
-            communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
+            issues: new Issues({query: {sort: '-created', page_size: 10}, mask: IssueList.MASK}),
+            discussions: new Discussions({query: {sort: '-created', page_size: 10}, mask: DiscussionList.MASK}),
+            communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}, mask: CommunityList.MASK}),
             actions: actions,
             badges:  [],
             y: [{
@@ -167,17 +173,17 @@ export default {
         }
     },
     components: {
-        sbox: require('components/containers/small-box.vue'),
         dataset: require('components/dataset/details.vue'),
         quality: require('components/dataset/quality.vue'),
         chart: require('components/charts/widget.vue'),
         resources: require('components/dataset/resource/list.vue'),
-        reuses: require('components/reuse/list.vue'),
         followers: require('components/follow/list.vue'),
         wmap: require('components/widgets/map.vue'),
-        issues: require('components/issues/list.vue'),
-        discussions: require('components/discussions/list.vue'),
-        community: require('components/dataset/communityresource/list.vue'),
+        CommunityList,
+        DiscussionList,
+        SmallBox,
+        ReuseList,
+        IssueList,
         Layout
     },
     methods: {

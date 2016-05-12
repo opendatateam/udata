@@ -5,7 +5,7 @@ from flask import current_app
 
 from udata import theme
 from udata.api import api, API, output_json
-from udata.models import db, Dataset, GeoZone
+from udata.models import db, Dataset, GeoZone, TERRITORY_DATASETS
 
 oembeds_parser = api.parser()
 oembeds_parser.add_argument(
@@ -43,7 +43,6 @@ class OEmbedsAPI(API):
                     return api.abort(400, 'Unknown dataset ID.')
             elif (item_kind == 'territory' and
                     current_app.config.get('ACTIVATE_TERRITORIES')):
-                from udata.models import TERRITORY_DATASETS
                 try:
                     country, town, code, kind = item_id.split('-')
                 except ValueError:

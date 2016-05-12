@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
+
+from flask import request
 from flask.ext.security import current_user
 
 from udata import search
-from udata.api import api, ModelAPI, ModelListAPI, API
+from udata.api import api, API
 from udata.models import (
-    CommunityResource, Dataset, FollowUser, Reuse, User
+    CommunityResource, Dataset, Reuse, User
 )
 
 from udata.core.dataset.api_fields import (
-    community_resource_fields, dataset_full_fields
+    community_resource_fields, dataset_fields
 )
 from udata.core.followers.api import FollowAPI
 from udata.core.issues.actions import issues_for
@@ -21,6 +24,7 @@ from udata.core.reuse.api_fields import reuse_fields
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
 )
+from udata.utils import multi_to_dict
 
 from .api_fields import (
     apikey_fields,
@@ -31,6 +35,7 @@ from .api_fields import (
     user_suggestion_fields,
 )
 from .forms import UserProfileForm
+from .permissions import UserEditPermission
 from .search import UserSearch
 
 ns = api.namespace('users', 'User related operations')
@@ -88,7 +93,7 @@ class MyReusesAPI(API):
 class MyDatasetsAPI(API):
     @api.secure
     @api.doc('my_datasets')
-    @api.marshal_list_with(dataset_full_fields)
+    @api.marshal_list_with(dataset_fields)
     def get(self):
         '''List all my datasets (including private ones)'''
         return list(Dataset.objects.owned_by(current_user.id))
@@ -108,7 +113,7 @@ class MyMetricsAPI(API):
 class MyOrgDatasetsAPI(API):
     @api.secure
     @api.doc('my_org_datasets', parser=filter_parser)
-    @api.marshal_list_with(dataset_full_fields)
+    @api.marshal_list_with(dataset_fields)
     def get(self):
         '''List all datasets related to me and my organizations.'''
         q = filter_parser.parse_args().get('q')
@@ -205,36 +210,78 @@ class ApiKeyAPI(API):
 
 
 @ns.route('/', endpoint='users')
-@api.doc(get={
-    'id': 'list_users',
-    'model': user_page_fields,
-    'parser': search_parser})
-@api.doc(post={'id': 'create_user', 'model': user_fields})
-class UserListAPI(ModelListAPI):
+class UserListAPI(API):
     model = User
     fields = user_fields
     form = UserProfileForm
     search_adapter = UserSearch
 
+    @api.doc('list_users')
+    @api.expect(search_parser)
+    @api.marshal_with(user_page_fields)
+    def get(self):
+        '''List all users'''
+        return search.query(UserSearch, **multi_to_dict(request.args))
+
+    @api.secure
+    @api.doc('create_user')
+    @api.expect(user_fields)
+    @api.marshal_with(user_fields, code=201)
+    @api.response(400, 'Validation error')
+    def post(self):
+        '''Create a new object'''
+        form = api.validate(UserProfileForm)
+        user = form.save()
+        return user, 201
+
 
 @ns.route('/<user:user>/', endpoint='user')
-@api.doc(model=user_fields, get={'id': 'get_user'})
-@api.doc(put={'id': 'update_user', 'body': user_fields})
-class UserAPI(ModelAPI):
-    model = User
-    fields = user_fields
-    form = UserProfileForm
+@api.response(404, 'User not found')
+@api.response(410, 'User has been deleted')
+class UserAPI(API):
+    @api.doc('get_user')
+    @api.marshal_with(user_fields)
+    def get(self, user):
+        '''Get a user given its identifier'''
+        if user.deleted and not UserEditPermission(user).can():
+            api.abort(410, 'User has been deleted')
+        return user
+
+    @api.secure
+    @api.doc('update_user')
+    @api.expect(user_fields)
+    @api.marshal_with(user_fields)
+    @api.response(400, 'Validation error')
+    def put(self, user):
+        '''Update a user given its identifier'''
+        if user.deleted:
+            api.abort(410, 'User has been deleted')
+        UserEditPermission(user).test()
+        form = api.validate(UserProfileForm, user)
+        return form.save()
+
+    @api.secure
+    @api.doc('delete_user')
+    @api.response(204, 'Object deleted')
+    def delete(self, user):
+        '''Delete a user given its identifier'''
+        if user.deleted:
+            api.abort(410, 'User has been deleted')
+        UserEditPermission(user).test()
+        user.deleted = datetime.now()
+        user.save()
+        return '', 204
 
 
 @ns.route('/<id>/followers/', endpoint='user_followers')
 class FollowUserAPI(FollowAPI):
-    model = FollowUser
+    model = User
 
     @api.secure
     @api.doc(notes="You can't follow yourself.",
              response={403: 'When tring to follow yourself'})
     def post(self, id):
-        '''Follow an user given its ID'''
+        '''Follow a user given its ID'''
         if id == str(current_user.id):
             api.abort(403, "You can't follow yourself")
         return super(FollowUserAPI, self).post(id)

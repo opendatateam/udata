@@ -7,14 +7,10 @@ from mongoengine.signals import pre_save, post_save
 
 from udata.core.storages import images, default_image_basename
 from udata.i18n import lazy_gettext as _
-from udata.models import (
-    db, BadgeMixin, WithMetrics, Issue, Discussion, Follow, OwnedByQuerySet
-)
+from udata.models import db, BadgeMixin, WithMetrics, OwnedByQuerySet
 from udata.utils import hash_url
 
-__all__ = (
-    'Reuse', 'ReuseIssue', 'ReuseDiscussion', 'FollowReuse', 'REUSE_TYPES'
-)
+__all__ = ('Reuse', 'REUSE_TYPES')
 
 
 REUSE_TYPES = {
@@ -140,15 +136,3 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)
 post_save.connect(Reuse.post_save, sender=Reuse)
-
-
-class ReuseIssue(Issue):
-    subject = db.ReferenceField(Reuse)
-
-
-class ReuseDiscussion(Discussion):
-    subject = db.ReferenceField(Reuse)
-
-
-class FollowReuse(Follow):
-    following = db.ReferenceField(Reuse)

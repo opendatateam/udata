@@ -6,9 +6,9 @@ from datetime import datetime
 from flask import request
 
 from udata import search
-from udata.api import api, API, ModelAPI, SingleObjectAPI, errors
+from udata.api import api, API, errors
 from udata.auth import admin_permission
-from udata.models import Dataset, Reuse, REUSE_TYPES
+from udata.models import Dataset
 from udata.utils import multi_to_dict
 
 from udata.core.badges import api as badges_api
@@ -22,7 +22,7 @@ from .api_fields import (
     reuse_type_fields, dataset_ref_fields
 )
 from .forms import ReuseForm
-from .models import FollowReuse
+from .models import Reuse, REUSE_TYPES
 from .permissions import ReuseEditPermission
 from .search import ReuseSearch
 
@@ -54,7 +54,7 @@ class ReuseListAPI(API):
 @ns.route('/<reuse:reuse>/', endpoint='reuse', doc=common_doc)
 @api.response(404, 'Reuse not found')
 @api.response(410, 'Reuse has been deleted')
-class ReuseAPI(ModelAPI):
+class ReuseAPI(API):
     @api.doc('get_reuse')
     @api.marshal_with(reuse_fields)
     def get(self, reuse):
@@ -142,9 +142,7 @@ class ReuseBadgeAPI(API):
 
 @ns.route('/<reuse:reuse>/featured/', endpoint='reuse_featured')
 @api.doc(**common_doc)
-class ReuseFeaturedAPI(SingleObjectAPI, API):
-    model = Reuse
-
+class ReuseFeaturedAPI(API):
     @api.doc('feature_reuse')
     @api.secure(admin_permission)
     @api.marshal_with(reuse_fields)
@@ -166,7 +164,7 @@ class ReuseFeaturedAPI(SingleObjectAPI, API):
 
 @ns.route('/<id>/followers/', endpoint='reuse_followers')
 class FollowReuseAPI(FollowAPI):
-    model = FollowReuse
+    model = Reuse
 
 
 suggest_parser = api.parser()

@@ -7,7 +7,6 @@ from flask.ext.security import current_user
 from flask_restplus.inputs import boolean
 
 from udata.api import api, API, fields
-from udata.models import Dataset, DatasetIssue, Reuse, ReuseIssue
 from udata.core.user.api_fields import user_ref_fields
 
 from .forms import IssueCommentForm, IssueCreateForm
@@ -27,9 +26,9 @@ message_fields = api.model('IssueMessage', {
 
 issue_fields = api.model('Issue', {
     'id': fields.String(description='The issue identifier', readonly=True),
-    'subject': fields.String(
-        attribute='subject.id',
-        description='The issue target object identifier', required=True),
+    'subject': fields.Nested(api.model_reference,
+                             description='The issue target object',
+                             required=True),
     'class': fields.ClassName(description='The object class',
                               discriminator=True, required=True),
     'title': fields.String(description='The issue title', required=True),
@@ -75,7 +74,6 @@ parser.add_argument(
 
 
 @ns.route('/<id>/', endpoint='issue')
-@api.doc(model=issue_fields)
 class IssueAPI(API):
     '''
     Single Issue Model API (Read and update).
@@ -119,15 +117,14 @@ class IssuesAPI(API):
     '''
     List all issues.
     '''
-    @api.doc('list_issues')
-    @api.doc(parser=parser)
+    @api.doc('list_issues', parser=parser)
     @api.marshal_with(issue_page_fields)
     def get(self):
         '''List all Issues'''
         args = parser.parse_args()
         issues = Issue.objects
         if args['for']:
-            issues = issues(subject__in=args['for'])
+            issues = issues.generic_in(subject=args['for'])
         if args['closed'] is False:
             issues = issues(closed=None)
         elif args['closed'] is True:
@@ -136,8 +133,8 @@ class IssuesAPI(API):
                       .paginate(args['page'], args['page_size']))
 
     @api.secure
-    @api.expect(issue_fields)
     @api.doc('create_issue')
+    @api.expect(issue_fields)
     @api.marshal_with(issue_fields)
     def post(self):
         '''Create a new Issue'''
@@ -147,16 +144,9 @@ class IssuesAPI(API):
             content=form.comment.data,
             posted_by=current_user.id
         )
-        if isinstance(form.subject.data, Dataset):
-            model = DatasetIssue
-        elif isinstance(form.subject.data, Reuse):
-            model = ReuseIssue
-        issue = model.objects.create(
-            subject=form.subject.data.id,
-            title=form.title.data,
-            user=current_user.id,
-            discussion=[message]
-        )
+        issue = Issue(user=current_user.id, discussion=[message])
+        form.populate_obj(issue)
+        issue.save()
         on_new_issue.send(issue)
 
         return issue, 201

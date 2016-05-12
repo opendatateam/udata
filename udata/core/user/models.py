@@ -13,11 +13,11 @@ from itsdangerous import JSONWebSignatureSerializer
 
 from werkzeug import cached_property
 
-from udata.models import db, WithMetrics, Follow
+from udata.models import db, WithMetrics
 from udata.core.storages import avatars, default_image_basename
 
 
-__all__ = ('User', 'Role', 'datastore', 'FollowUser')
+__all__ = ('User', 'Role', 'datastore')
 
 AVATAR_SIZES = [100, 32, 25]
 
@@ -146,8 +146,8 @@ class User(db.Document, WithMetrics, UserMixin):
     @cached_property
     def followers_org_count(self):
         """Return the number of followers of user's organizations."""
-        from udata.models import FollowOrg  # Circular imports.
-        return sum(FollowOrg.objects(following=org).count()
+        from udata.models import Follow  # Circular imports.
+        return sum(Follow.objects(following=org).count()
                    for org in self.organizations)
 
     @property
@@ -193,7 +193,3 @@ datastore = MongoEngineUserDatastore(db, User, Role)
 
 pre_save.connect(User.pre_save, sender=User)
 post_save.connect(User.post_save, sender=User)
-
-
-class FollowUser(Follow):
-    following = db.ReferenceField(User)

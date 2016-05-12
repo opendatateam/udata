@@ -15,11 +15,11 @@
     <div class="modal-body">
         <div class="row">
             <dataset-card class="col-xs-12 col-md-offset-3 col-md-6"
-                v-if="issue.class | is_dataset"
-                :datasetid="issue.subject"></dataset-card>
+                v-if="issue.subject | is 'dataset'"
+                :datasetid="issue.subject.id"></dataset-card>
             <reuse-card class="col-xs-12 col-md-offset-3 col-md-6"
-                v-if="issue.class | is_reuse"
-                :reuseid="issue.subject"></reuse-card>
+                v-if="issue.subject | is 'reuse'"
+                :reuseid="issue.subject.id"></reuse-card>
         </div>
         <h3>{{ issue.title }}</h3>
         <div class="direct-chat-messages">
@@ -84,16 +84,6 @@ export default {
     events: {
         'modal:closed': function() {
             this.$go(this.next_route);
-        }
-    },
-    filters: {
-        is_dataset: function(kind) {
-            if (!kind) return;
-            return kind.startsWith('Dataset');
-        },
-        is_reuse: function(kind) {
-            if (!kind) return;
-            return kind.startsWith('Reuse');
         }
     },
     route: {

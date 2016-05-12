@@ -8,7 +8,7 @@ from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_ref_fields
 from udata.core.user.api_fields import user_ref_fields
-from udata.models import User, Organization, Dataset, Reuse
+from udata.models import db, User, Organization, Dataset, Reuse
 
 from .actions import request_transfer, accept_transfer, refuse_transfer
 from .models import TRANSFER_STATUS, Transfer
@@ -93,11 +93,11 @@ class TransferRequestsAPI(API):
         '''Initiate transfer request'''
         data = request.json
 
-        subject_model = api.resolve_model(data['subject'])
+        subject_model = db.resolve_model(data['subject'])
         subject_id = data['subject']['id']
         subject = subject_model.objects.get(id=subject_id)
 
-        recipient_model = api.resolve_model(data['recipient'])
+        recipient_model = db.resolve_model(data['recipient'])
         recipient_id = data['recipient']['id']
         recipient = recipient_model.objects.get(id=recipient_id)
 

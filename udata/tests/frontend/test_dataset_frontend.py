@@ -8,7 +8,7 @@ from flask import url_for
 from udata.core.dataset.factories import ResourceFactory, DatasetFactory
 from udata.core.user.factories import UserFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.models import FollowDataset
+from udata.models import Follow
 
 from . import FrontTestCase
 
@@ -136,8 +136,9 @@ class DatasetBlueprintTest(FrontTestCase):
         '''It should render the dataset followers list page'''
         dataset = DatasetFactory()
         followers = [
-            FollowDataset.objects.create(follower=UserFactory(),
-                                         following=dataset) for _ in range(3)]
+            Follow.objects.create(follower=UserFactory(), following=dataset)
+            for _ in range(3)
+        ]
 
         response = self.get(url_for('datasets.followers', dataset=dataset))
 
