@@ -11,7 +11,7 @@ import {Model} from 'models/base';
 import HarvestSources from 'models/harvest/sources';
 import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
 
-const MASK = 'id,name,owner,last_job{status},organization';
+const MASK = ['id', 'name', 'owner', 'last_job{status}', 'organization'];
 
 export default {
     MASK,

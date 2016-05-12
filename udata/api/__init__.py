@@ -8,8 +8,7 @@ import urllib
 from functools import wraps
 
 from flask import (
-    current_app, g, request, url_for, json, make_response, redirect, Blueprint,
-    render_template_string
+    current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
 from flask.ext.restplus import Api, Resource, inputs, cors
 
@@ -34,23 +33,10 @@ apidoc = I18nBlueprint('apidoc', __name__)
 
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = 'X-API-KEY'
-DESCRIPTION = None
 
 FACETS_TYPES = {
     search.fields.BoolFacet: inputs.boolean
 }
-
-
-def description():
-    '''Load description from markdown file'''
-    if 'short' in request.args:
-        return ''
-    global DESCRIPTION
-    if not DESCRIPTION:
-        filename = os.path.join(os.path.dirname(__file__), 'description.md')
-        with open(filename) as doc:
-            DESCRIPTION = doc.read()
-    return render_template_string(DESCRIPTION)
 
 
 class UDataApi(Api):
@@ -181,8 +167,9 @@ class UDataApi(Api):
 api = UDataApi(apiv1,
     decorators=[csrf.exempt, cors.crossdomain(origin='*', credentials=True)],
     version='1.0', title='uData API',
-    description=description, default='site',
-    default_label='Site global namespace')
+    description='uData API', default='site',
+    default_label='Site global namespace'
+)
 
 
 api.model_reference = api.model('ModelReference', {

@@ -4,6 +4,8 @@ import {pubsub, PubSub} from 'pubsub';
 import Sifter from 'sifter';
 import Vue from 'vue';
 
+import mask from './mask';
+
 export const DEFAULT_PAGE_SIZE = 10;
 
 /**
@@ -104,7 +106,7 @@ export class Base {
         const operation = API[namespace][method];
 
         if (this.$options.mask && !('X-Fields' in data)) {
-            data['X-Fields'] = this.$options.mask;
+            data['X-Fields'] = mask(this.$options.mask);
         }
 
         return operation(data, on_success.bind(this), on_error.bind(this));
@@ -315,7 +317,7 @@ export class ModelPage extends Model {
         this.query = this.$options.query || {};
         this.cumulative = this.$options.cumulative || false;
         if (this.$options.mask) {
-            this.query['X-Fields'] =  `data{${this.$options.mask}},*`;
+            this.query['X-Fields'] =  `data{${mask(this.$options.mask)}},*`;
         }
         this.loading = true;
         this.serverside = true;

@@ -1,5 +1,5 @@
 /*
- * Migrate disucssions and issues to DBRef/GenericReferenceField
+ * Migrate discussions and issues to DBRef/GenericReferenceField
  */
 
 /**
@@ -65,4 +65,3 @@ function process(collection, attribute) {
 process('discussion', 'subject');
 process('issue', 'subject');
 process('follow', 'following');
-// process('activity', 'related_to');

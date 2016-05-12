@@ -65,14 +65,17 @@ import moment from 'moment';
 import config from 'config';
 
 const MASK = [
-    'id', 'title', 'description',
+    'id',
+    'title',
+    'description',
     'image',
     'datasets{id}',
     'organization',
     'owner',
     'metrics',
-    'page', 'uri'
-].join(',');
+    'page',
+    'uri'
+];
 
 export default {
     MASK,

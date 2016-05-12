@@ -242,7 +242,7 @@ class UserAPI(API):
     @api.doc('get_user')
     @api.marshal_with(user_fields)
     def get(self, user):
-        '''Get an user given its identifier'''
+        '''Get a user given its identifier'''
         if user.deleted and not UserEditPermission(user).can():
             api.abort(410, 'User has been deleted')
         return user
@@ -253,7 +253,7 @@ class UserAPI(API):
     @api.marshal_with(user_fields)
     @api.response(400, 'Validation error')
     def put(self, user):
-        '''Update an user given its identifier'''
+        '''Update a user given its identifier'''
         if user.deleted:
             api.abort(410, 'User has been deleted')
         UserEditPermission(user).test()
@@ -264,7 +264,7 @@ class UserAPI(API):
     @api.doc('delete_user')
     @api.response(204, 'Object deleted')
     def delete(self, user):
-        '''Delete an user given its identifier'''
+        '''Delete a user given its identifier'''
         if user.deleted:
             api.abort(410, 'User has been deleted')
         UserEditPermission(user).test()
@@ -281,7 +281,7 @@ class FollowUserAPI(FollowAPI):
     @api.doc(notes="You can't follow yourself.",
              response={403: 'When tring to follow yourself'})
     def post(self, id):
-        '''Follow an user given its ID'''
+        '''Follow a user given its ID'''
         if id == str(current_user.id):
             api.abort(403, "You can't follow yourself")
         return super(FollowUserAPI, self).post(id)

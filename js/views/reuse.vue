@@ -38,13 +38,14 @@ import Metrics from 'models/metrics';
 import Vue from 'vue';
 import Issues from 'models/issues';
 import Discussions from 'models/discussions';
+import mask from 'models/mask';
 // Widgets
 import DatasetCards from 'components/dataset/card-list.vue';
 import DiscussionList from 'components/discussions/list.vue';
 import IssueList from 'components/issues/list.vue';
 import Layout from 'components/layout.vue';
 
-const MASK = `datasets{${DatasetCards.MASK}},*`;
+const MASK = `datasets{${mask(DatasetCards.MASK)}},*`;
 
 export default {
     name: 'ReuseView',

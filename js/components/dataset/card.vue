@@ -96,7 +96,7 @@ const MASK = [
     'id', 'title', 'description', 'metrics', 'organization',
     'spatial{zones,granularity}', 'frequency', 'temporal_coverage',
     'page', 'uri'
-].join(',');
+];
 
 export default {
     MASK,

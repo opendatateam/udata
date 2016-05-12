@@ -322,7 +322,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             * description length
             * and so on
         """
-        from udata.models import Discussion
+        from udata.models import Discussion  # noqa: Prevent circular imports
         result = {}
         if not self.id:
             # Quality is only relevant on saved Datasets

@@ -14,7 +14,7 @@ export default {
     components: {
          datatable: require('components/datatable/widget.vue')
     },
-    MASK: 'id,title,created,closed,class,subject',
+    MASK: ['id', 'title', 'created', 'closed', 'class', 'subject'],
     data: function() {
         return {
             fields: [{
@@ -37,8 +37,8 @@ export default {
     },
     events: {
         'datatable:item:click': function(discussion) {
-            let prefix = discussion.subject.class.toLowerCase(),
-                route = `${prefix}-discussion`;
+            const prefix = discussion.subject.class.toLowerCase();
+            const route = `${prefix}-discussion`;
             this.$go({name: route, params: {
                 oid: discussion.subject.id,
                 discussion_id: discussion.id

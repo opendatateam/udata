@@ -1,16 +1,16 @@
 <template>
 <layout :title="_('Editorial')">
     <div class="row">
-        <dataset-cards class="col-xs-12 col-md-6"
+        <dataset-card-list class="col-xs-12 col-md-6"
             :title="_('Featured datasets')"
             :datasets="home_datasets.items"
             :loading="home_datasets.loading">
-        </dataset-cards>
-        <reuse-cards class="col-xs-12 col-md-6"
+        </dataset-card-list>
+        <reuse-card-list class="col-xs-12 col-md-6"
             :title="_('Featured reuses')"
             :reuses="home_reuses.items"
             :loading="home_reuses.loading">
-        </reuse-cards>
+        </reuse-card-list>
     </div>
 
     <div class="row">
@@ -28,8 +28,8 @@ import Topics from 'models/topics';
 import {List} from 'models/base';
 import API from 'api';
 import Layout from 'components/layout.vue';
-import DatasetCards from 'components/dataset/card-list.vue';
-import ReuseCards from 'components/reuse/card-list.vue';
+import DatasetCardList from 'components/dataset/card-list.vue';
+import ReuseCardList from 'components/reuse/card-list.vue';
 import TopicList from 'components/topic/list.vue';
 import PostList from 'components/post/list.vue';
 
@@ -48,8 +48,8 @@ export default {
     components: {
         PostList,
         TopicList,
-        DatasetCards,
-        ReuseCards,
+        DatasetCardList,
+        ReuseCardList,
         Layout
     },
     events: {

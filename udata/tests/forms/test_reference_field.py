@@ -144,10 +144,12 @@ class ModelFieldWithReferenceTest(ModelFieldTestMixin, TestCase):
 
 
 class Nested2(db.Document):
+    '''A dummy model just to nesting/ReferenceField'''
     name = db.StringField()
 
 
 class Nested3(db.Document):
+    '''A dummy model just to nesting/ReferenceField'''
     name = db.StringField()
 
 

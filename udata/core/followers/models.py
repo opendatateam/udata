@@ -15,8 +15,8 @@ class FollowQuerySet(db.BaseQuerySet):
     def following(self, user):
         return self(follower=user, until=None)
 
-    def followers(self, followee):
-        return self(following=followee, until=None)
+    def followers(self, user):
+        return self(following=user, until=None)
 
     def is_following(self, user, following):
         return self(follower=user, following=following, until=None).count() > 0

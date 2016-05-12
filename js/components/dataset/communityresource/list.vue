@@ -14,7 +14,7 @@ import Datatable from 'components/datatable/widget.vue';
 
 export default {
     name: 'community-widget',
-    MASK: 'id,title,created_at,dataset{id,title}',
+    MASK: ['id', 'title', 'created_at', 'dataset{id,title}'],
     props: {
         communities: {
             type: Object,

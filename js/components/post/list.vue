@@ -20,7 +20,7 @@ import Datatable from 'components/datatable/widget.vue';
 
 export default {
     name: 'posts-widget',
-    MASK: 'id,name,created_at,last_modified,private',
+    MASK: ['id', 'name', 'created_at', 'last_modified', 'private'],
     props: ['posts'],
     components: {Datatable},
     data() {
