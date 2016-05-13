@@ -12,7 +12,7 @@ If you prefer [Homebrew][] (OSX), the package is named `git`.
 The sources of the project are on [Github][]:
 
 ```shell
-$ git clone https://github.com/etalab/udata.git
+$ git clone https://github.com/opendatateam/udata.git
 ```
 
 
@@ -77,8 +77,8 @@ But first, let's install [local dependencies](local-dependencies.md)!
 [elasticsearch]: https://www.elastic.co/products/elasticsearch
 [redis]: http://redis.io/
 [honcho]: https://github.com/nickstenning/honcho
-[gitter]: https://gitter.im/etalab/udata
-[github]: https://github.com/etalab/udata
+[gitter]: https://gitter.im/opendatateam/udata
+[github]: https://github.com/opendatateam/udata
 [homebrew]: http://brew.sh/
 [python]: https://www.python.org/
 [git]: https://git-scm.com/

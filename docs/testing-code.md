@@ -44,7 +44,7 @@ $ inv jstest
 
 It will run a single test pass using PhantomJS as browser.
 
-You can continously run the test on any change detected by using the `--watch` option:
+You can run the tests continuously as changed are detected by the `--watch` option:
 
 ```shell
 $ inv jstest --watch
@@ -78,7 +78,7 @@ See [the official karma documentation][karma] for more details about the possibl
 ### Testing on IE
 
 You can run the test suite under Modern.ie VMs installed with either [ievms][]
-or [iectrl][] (installation is detailled on websites).
+or [iectrl][] (installation is detailed on websites).
 
 ```bash
 # Install IE11 under Win7 (time to have one or more coffee!)
@@ -88,8 +88,8 @@ $ npm -s run test:unit -- --browsers 'IE11 - Win7'
 ```
 
 !!! note
-    uData ensure compatibility for IE [officialy supported by Microsoft][ie-support].
-    Right now, it's IE11.
+    uData tests ensure the compatibility with IE version(s) [officially supported by Microsoft][ie-support].
+    Right now, it’s IE11.
 
 You maybe need to manually close the first time popup on first run.
 To do so, launch the VM then launch the test suite:

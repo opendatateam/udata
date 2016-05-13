@@ -33,4 +33,4 @@ $ inv i18nc
 That's it! Now check out our advanced documentation for more customization.
 
 [dev-server]: http://localhost:7000/
-[gitter]: https://gitter.im/etalab/udata
+[gitter]: https://gitter.im/opendatateam/udata

@@ -104,7 +104,7 @@ for more details.
 
 ## Celery options
 
-By default, uData is configured to use Redis as Celery backend and a cutomized MongoDB scheduler.
+By default, uData is configured to use Redis as Celery backend and a customized MongoDB scheduler.
 
 The defaults are:
 
