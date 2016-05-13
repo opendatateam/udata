@@ -55,8 +55,10 @@ def activate():
         print 'Invalid user'
         return
     if user.confirmed_at is not None:
-        print 'User email address already corfirmed'
+        print 'User email address already confirmed'
+        return
     user.confirmed_at = datetime.utcnow()
+    user.save()
     print 'User activated successfully'
 
 
