@@ -21,7 +21,7 @@ def init():
     generate_fixtures()
 
     log.info('Apply DB migrations if needed')
-    migrate(record=True)
+    migrate(record=True, dryrun=False)
 
     log.info('Initialize or update ElasticSearch mappings')
     es.initialize()

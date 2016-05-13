@@ -21,7 +21,7 @@ def generate_datasets(count, organization=None):
 
 
 def generate_reuses(count, user=None):
-    VisibleReuseFactory(owner=user).create_batch(count)
+    VisibleReuseFactory.create_batch(count, owner=user)
 
 
 def generate_licenses(count):
