@@ -150,7 +150,7 @@ def status():
           help='Only records the migrations')
 @m.option('-d', '--dry-run', action='store_true', dest='dryrun',
           help='Only print migrations to be applied')
-def migrate(record, dryrun):
+def migrate(record, dryrun=False):
     '''Perform database migrations'''
     handler = record_migration if record else execute_migration
     success = True
