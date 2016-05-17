@@ -6,11 +6,13 @@ from flask import url_for
 from udata.models import License, Organization
 
 __all__ = (
-    'TerritoryDataset', 'ResourceBasedTerritoryDataset', 'TERRITORY_DATASETS'
+    'TerritoryDataset', 'ResourceBasedTerritoryDataset',
+    'COUNTY_DATASETS', 'TOWN_DATASETS'
 )
 
 
-TERRITORY_DATASETS = {}
+COUNTY_DATASETS = {}
+TOWN_DATASETS = {}
 
 
 class TerritoryDataset(object):

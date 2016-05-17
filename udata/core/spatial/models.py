@@ -78,13 +78,19 @@ class GeoZone(db.Document):
                 keys_values.append(value)
         return keys_values
 
+    @cached_property
+    def level_name(self):
+        return self.level[3:]  # Remove 'fr/'.
+
     @property
     def url(self):
-        return url_for('territories.territory', territory=self)
+        return url_for('territories.{level}'.format(level=self.level_name),
+                       territory=self)
 
     @property
     def external_url(self):
-        return url_for('territories.territory', territory=self, _external=True)
+        return url_for('territories.{level}'.format(level=self.level_name),
+                       territory=self, _external=True)
 
     @cached_property
     def wikipedia_url(self):
@@ -100,9 +106,18 @@ class GeoZone(db.Document):
     def town_repr(self):
         """Representation of a town with optional county."""
         if self.county:
-            return '{name} <small>({county_name})</small>'.format(
-                name=self.name, county_name=self.county.name)
+            return ('{name} '
+                    '<small>(<a href="{county_url}">{county_name}</a>)</small>'
+                    '').format(name=self.name,
+                               county_url=self.county.url,
+                               county_name=self.county.name)
         return self.name
+
+    @cached_property
+    def county_repr(self):
+        """Representation of a county."""
+        return '{name} <small>({code})</small>'.format(
+            name=self.name, code=self.code)
 
     @cached_property
     def county(self):

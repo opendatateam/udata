@@ -27,6 +27,6 @@ class SuggestTerritoriesAPI(API):
             'title': territory.name,
             'county': territory.county.name,
             'image_url': territory.logo_url(external=True),
-            'page': url_for('territories.territory',
+            'page': url_for('territories.town',
                             territory=territory, _external=True)
         } for territory in territories]
