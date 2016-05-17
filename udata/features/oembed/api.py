@@ -5,7 +5,7 @@ from flask import current_app
 
 from udata import theme
 from udata.api import api, API, output_json
-from udata.models import db, Dataset, GeoZone, TERRITORY_DATASETS
+from udata.models import db, Dataset, GeoZone, COUNTY_DATASETS, TOWN_DATASETS
 
 oembeds_parser = api.parser()
 oembeds_parser.add_argument(
@@ -51,8 +51,10 @@ class OEmbedsAPI(API):
                     geozone = GeoZone.objects.get(code=code)
                 except GeoZone.DoesNotExist:
                     return api.abort(400, 'Unknown territory identifier.')
-                if kind in TERRITORY_DATASETS:
-                    item = TERRITORY_DATASETS[kind](geozone)
+                if kind in TOWN_DATASETS:
+                    item = TOWN_DATASETS[kind](geozone)
+                elif kind in COUNTY_DATASETS:
+                    item = COUNTY_DATASETS[kind](geozone)
                 else:
                     return api.abort(400, 'Unknown kind of territory.')
             else:

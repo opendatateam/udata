@@ -10,7 +10,7 @@ from udata.auth import current_user
 from udata.core.storages import references
 from udata.core.dataset.permissions import DatasetEditPermission
 from udata.i18n import I18nBlueprint
-from udata.models import Dataset, GeoZone, TERRITORY_DATASETS
+from udata.models import Dataset, GeoZone, COUNTY_DATASETS, TOWN_DATASETS
 from udata.sitemap import sitemap
 from udata.utils import multi_to_dict
 
@@ -38,7 +38,7 @@ def compute_territory_dataset(territory, dataset, resource_id):
         return abort(400)
 
     for resource in dataset.resources:
-        if resource.id == resource_id:
+        if str(resource.id) == str(resource_id):
             break
 
     resource_path = references.path(resource.url.split('/')[-1])
@@ -50,7 +50,9 @@ def compute_territory_dataset(territory, dataset, resource_id):
         writer = csv.DictWriter(csvfile_out, fieldnames=reader.fieldnames)
         writer.writerow(dict(zip(writer.fieldnames, writer.fieldnames)))
         for row in reader:
-            if row[args['csv_column']].encode('utf-8') == match:
+            csv_column = row[args['csv_column']].encode('utf-8')
+            # `lstrip` ensure comparison for counties.
+            if csv_column.lstrip('0') == match.lstrip('0'):
                 writer.writerow(row)
 
     csvfile_out.seek(0)  # Back to 0 otherwise the file is served empty.
@@ -61,12 +63,12 @@ def compute_territory_dataset(territory, dataset, resource_id):
                      attachment_filename=attachment_filename)
 
 
-@blueprint.route('/town/<territory:territory>/', endpoint='territory')
-def render_territory(territory):
+@blueprint.route('/town/<territory:territory>/', endpoint='town')
+def render_town(territory):
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
-    territory_dataset_classes = sorted(TERRITORY_DATASETS.values(),
+    territory_dataset_classes = sorted(TOWN_DATASETS.values(),
                                        key=lambda a: a.order)
     territory_datasets = [
         territory_dataset_class(territory)
@@ -97,12 +99,54 @@ def render_territory(territory):
         'has_pertinent_datasets': any(editable_datasets),
         'town_datasets': town_datasets
     }
-    return theme.render('territories/territory.html', **context)
+    return theme.render('territories/town.html', **context)
+
+
+@blueprint.route('/county/<territory:territory>/', endpoint='county')
+def render_county(territory):
+    if not current_app.config.get('ACTIVATE_TERRITORIES'):
+        return abort(404)
+
+    territory_dataset_classes = sorted(COUNTY_DATASETS.values(),
+                                       key=lambda a: a.order)
+    territory_datasets = [
+        territory_dataset_class(territory)
+        for territory_dataset_class in territory_dataset_classes
+    ]
+
+    # Retrieve all datasets then split between those optionaly owned
+    # by an org for that zone and others. We need to know if the current
+    # user has datasets for that zone in order to display a custom
+    # message to ease the conversion.
+    datasets = Dataset.objects.visible().filter(spatial__zones=territory)
+    county_datasets = []
+    other_datasets = []
+    editable_datasets = []
+    if datasets:
+        for dataset in datasets:
+            if (dataset.organization and
+                    territory.id == dataset.organization.zone):
+                county_datasets.append(dataset)
+            else:
+                other_datasets.append(dataset)
+            editable_datasets.append(current_user.is_authenticated and
+                                     DatasetEditPermission(dataset).can())
+    context = {
+        'territory': territory,
+        'territory_datasets': territory_datasets,
+        'other_datasets': other_datasets,
+        'has_pertinent_datasets': any(editable_datasets),
+        'county_datasets': county_datasets
+    }
+    return theme.render('territories/county.html', **context)
 
 
 @sitemap.register_generator
 def sitemap_urls():
     if current_app.config.get('ACTIVATE_TERRITORIES'):
         for code in GeoZone.objects(level='fr/town').only('code'):
-            yield ('territories.territory', {'territory': code},
+            yield ('territories.town', {'territory': code},
+                   None, "weekly", 0.5)
+        for code in GeoZone.objects(level='fr/county').only('code'):
+            yield ('territories.county', {'territory': code},
                    None, "weekly", 0.5)
