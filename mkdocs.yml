@@ -18,7 +18,9 @@ pages:
         - Adding translations: adding-translations.md
         - Creating a custom theme: creating-theme.md
         - Building the documentation: building-documentation.md
-    - Contributing: contributing-guide.md
+    - Contributing:
+        - Guide: contributing-guide.md
+        - Governance: governance.md
 
 markdown_extensions:
     - smarty

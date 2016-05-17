@@ -56,6 +56,9 @@ If you’re not familiar with open-source workflows or our set of technologies, 
 
 We’re trying to develop this project in the open as much as possible. We have a dedicated [Gitter channel][gitter] where we discuss each new strategic change and invite the community to give a valuable feedback. You’re encouraged to join and participate.
 
+We also [vote for new features](governance.md) in order to include the whole community in the process.
+
+
 ## Code guides
 
 ### Python style guide
@@ -87,4 +90,4 @@ We try to stay as close as possible to [CommonMark][] but use default [extension
 [code-guide]: http://codeguide.co/
 [commonmark]: http://commonmark.org/
 [extensions-mkdocs]: http://www.mkdocs.org/user-guide/writing-your-docs/
-[gitter]: https://gitter.im/etalab/udata
+[gitter]: https://gitter.im/opendatateam/udata
