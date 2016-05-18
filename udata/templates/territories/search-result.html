@@ -1,14 +1,21 @@
 {% cache cache_duration, 'territory-search-result', territory.id, g.lang_code %}
 {% set logo=territory.logo_url() or theme_static('img/placeholder_territory.png') %}
+{% if territory.level == 'fr/town' %}
+    {% set title = territory.town_repr %}
+    {% set label = _('Town') %}
+{% elif territory.level == 'fr/county' %}
+    {% set title = territory.county_repr %}
+    {% set label = _('County') %}
+{% endif %}
 <li class="search-result territory-result">
-    <a href="{{ url_for('territories.town', territory=territory) }}" title="{{ territory.name }}">
+    <a href="{{ territory.url }}" title="{{ territory.name }}">
         <div class="result-logo pull-left">
             <img alt="{{ territory.name }}"
                 src="{{ logo }}"
                 width="70" height="70">
         </div>
         <div class="result-body ellipsis-dot">
-            <h4 class="result-title">{{ territory.town_repr|safe }}</h4>
+            <h4 class="result-title">{{ title|safe }}</h4>
             <div class="result-description">
                 {{ _('INSEE code:') }} {{ territory.code }}<br/>
                 {% if territory.postal_string %}
@@ -17,13 +24,12 @@
             </div>
         </div>
         <ul class="list-inline result-infos">
-            {# TODO: Make it dynamic #}
             <li>
                 <a class="btn btn-xs" data-toggle="tooltip"
                     data-placement="top" data-container="body"
                     title="{{ _('Administrative level') }}">
                     <span class="fa fa-bullseye fa-fw"></span>
-                    {{ _('Town') }}
+                    {{ label }}
                 </a>
             </li>
             {% if territory.population %}
