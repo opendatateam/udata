@@ -7,7 +7,7 @@ from udata import search, theme
 from udata.frontend import front
 from udata.models import Dataset, Organization, Reuse, User
 from udata.utils import multi_to_dict
-from udata.features.territories import check_for_territories
+from udata.features.territories import check_for_counties, check_for_towns
 
 
 @front.route('/search/', endpoint='search')
@@ -37,5 +37,7 @@ def render_search():
         results_labels = ['datasets', 'reuses', 'organizations', 'users']
     results = search.multiquery(*search_queries)
     context = dict(zip(results_labels, results))
-    context['territories'] = check_for_territories(params.get('q'))
+    towns = check_for_towns(params.get('q'))
+    counties = check_for_counties(params.get('q'))
+    context['territories'] = list(set(towns) | set(counties))
     return theme.render('search.html', **context)
