@@ -1,4 +1,4 @@
--r https://raw.githubusercontent.com/etalab/udata/dev/requirements/install.pip
--r https://raw.githubusercontent.com/etalab/udata/dev/requirements/test.pip
+-r https://raw.githubusercontent.com/opendatateam/udata/dev/requirements/install.pip
+-r https://raw.githubusercontent.com/opendatateam/udata/dev/requirements/test.pip
 https://github.com/etalab/udata/tarball/dev
 coveralls
