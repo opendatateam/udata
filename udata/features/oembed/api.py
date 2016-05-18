@@ -48,7 +48,8 @@ class OEmbedsAPI(API):
                 except ValueError:
                     return api.abort(400, 'Invalid territory ID.')
                 try:
-                    geozone = GeoZone.objects.get(code=code)
+                    geozone = GeoZone.objects.get(
+                        code=code, level__in=['fr/county', 'fr/town'])
                 except GeoZone.DoesNotExist:
                     return api.abort(400, 'Unknown territory identifier.')
                 if kind in TOWN_DATASETS:

@@ -112,10 +112,8 @@ class TerritoryConverter(ModelConverter):
     model = models.GeoZone
 
     def to_python(self, value):
-        try:
-            return self.model.objects.get_or_404(code=value)
-        except NotFound as e:
-            return e
+        return self.model.objects.get_or_404(
+            code=value, level__in=['fr/county', 'fr/town'])
 
     def to_url(self, obj):
         if getattr(obj, 'code', None):
