@@ -119,11 +119,18 @@ class GeoZone(db.Document):
         return '{name} <small>({code})</small>'.format(
             name=self.name, code=self.code)
 
+    def get_parent(self, level):
+        for parent in self.parents:
+            if parent.startswith(level):
+                return GeoZone.objects.get(id=parent, level=level)
+
     @cached_property
     def county(self):
-        for parent in self.parents:
-            if parent.startswith('fr/county'):
-                return GeoZone.objects.get(id=parent)
+        return self.get_parent('fr/county')
+
+    @cached_property
+    def region(self):
+        return self.get_parent('fr/region')
 
     def toGeoJSON(self):
         return {
