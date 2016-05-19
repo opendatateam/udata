@@ -41,7 +41,7 @@
             <h3><small>{{ _('Main towns:') }}</small></h3>
             <div class="row">
                 <div class="col-sm-offset-1 col-md-offset-2 col-lg-offset-2">
-                    <ul class="list-unstyled">
+                    <ul class="list-unstyled territories-list">
                         {% for town in territory.towns[:8] %}
                             <li>
                                 <img src="{{ town.logo_url(external=True) or theme_static('img/placeholder_territory.png', external=True) }}" alt="{{ town.name }}" class="float-left" width="13px" />

@@ -25,7 +25,8 @@ class SuggestTerritoriesAPI(API):
             territories = territories[:args['size']]
         # Python sort given that we aggregate two distinct querysets.
         territories = sorted(territories,
-                             key=lambda t: (-t.population, -t.area))
+                             key=lambda t: (t.population, t.area),
+                             reverse=True)
         return [{
             'id': territory.id,
             'title': territory.name,
