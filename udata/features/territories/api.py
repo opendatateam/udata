@@ -20,9 +20,12 @@ class SuggestTerritoriesAPI(API):
         args = suggest_parser.parse_args()
         towns = check_for_towns(args['q'].decode('utf-8'))
         counties = check_for_counties(args['q'].decode('utf-8'))
-        territories = list(set(counties) | set(towns))
+        territories = list(counties) + list(towns)
         if args['size']:
             territories = territories[:args['size']]
+        # Python sort given that we aggregate two distinct querysets.
+        territories = sorted(territories,
+                             key=lambda t: (-t.population, -t.area))
         return [{
             'id': territory.id,
             'title': territory.name,
