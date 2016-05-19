@@ -132,6 +132,13 @@ class GeoZone(db.Document):
     def region(self):
         return self.get_parent('fr/region')
 
+    def get_children(self, level):
+        return GeoZone.objects(level=level, parents__in=[self.id])
+
+    @cached_property
+    def towns(self):
+        return self.get_children('fr/town').order_by('-population', '-area')
+
     def toGeoJSON(self):
         return {
             'id': self.id,

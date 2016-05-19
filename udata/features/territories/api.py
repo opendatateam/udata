@@ -14,8 +14,8 @@ suggest_parser.add_argument(
 
 
 @api.route('/territory/suggest/', endpoint='suggest_territory')
-class SuggestTownsTerritoriesAPI(API):
-    @api.doc(id='suggest_territory_towns', parser=suggest_parser)
+class SuggestTerritoriesAPI(API):
+    @api.doc(id='suggest_territory', parser=suggest_parser)
     def get(self):
         args = suggest_parser.parse_args()
         towns = check_for_towns(args['q'].decode('utf-8'))
