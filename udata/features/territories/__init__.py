@@ -7,10 +7,14 @@ from udata.models import db, GeoZone
 
 
 def check_for_towns(query):
+    """
+    Return a geozone queryset of towns given the `query`.
+
+    If it's a code, try INSEE/postal, otherwise use the name.
+    """
     if (not query or len(query) < 4 or
             not current_app.config.get('ACTIVATE_TERRITORIES')):
         return GeoZone.objects.none()
-    # If it's a code, try INSEE/postal, otherwise use the name.
     qs = GeoZone.objects(level='fr/town')
     if len(query) == 5 and query.isdigit():
         # Match both INSEE and postal codes.
@@ -23,10 +27,14 @@ def check_for_towns(query):
 
 
 def check_for_counties(query):
+    """
+    Return a geozone queryset of counties given the `query`.
+
+    If it's a 2-digits code try it, otherwise use the name.
+    """
     if (not query or len(query) < 2 or
             not current_app.config.get('ACTIVATE_TERRITORIES')):
         return GeoZone.objects.none()
-    # If it's a code, try INSEE/postal, otherwise use the name.
     qs = GeoZone.objects(level='fr/county')
     if len(query) == 2 and query.isdigit():
         # Check county by code.
