@@ -48,7 +48,6 @@ class OEmbedsDatasetAPITest(APITestCase):
         response = self.get(url)
         self.assert200(response)
         data = json.loads(response.data)[0]
-        self.assertNotIn('placeholders/default.png', data['html'])
         self.assertIn(organization.name, data['html'])
         self.assertIn(organization.external_url, data['html'])
 
