@@ -44,3 +44,17 @@ def check_for_counties(query):
         qs = qs(db.Q(name__istartswith=query) | db.Q(name__iexact=query))
     # Sort matching results by population and area.
     return qs.order_by('-population', '-area')
+
+
+def check_for_regions(query):
+    """
+    Return a geozone queryset of regions given the `query`.
+    """
+    if (not query or len(query) < 4 or
+            not current_app.config.get('ACTIVATE_TERRITORIES')):
+        return GeoZone.objects.none()
+    qs = GeoZone.objects(level='fr/region')
+    # Check names starting with query or exact match.
+    qs = qs(db.Q(name__istartswith=query) | db.Q(name__iexact=query))
+    # Sort matching results by population and area.
+    return qs.order_by('-population', '-area')

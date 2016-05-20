@@ -99,6 +99,19 @@ class TerritoriesAPITest(APITestCase):
         self.assertIn('page', result)
         self.assertIn('image_url', result)
 
+    def test_suggest_region(self):
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': 'prov'})
+        self.assert200(response)
+        result = response.json[0]
+        print(result)
+        self.assertEqual(result['title'], self.paca.name)
+        self.assertEqual(result['id'], self.paca.id)
+        self.assertEqual(result['region'], None)
+        self.assertEqual(result['county'], None)
+        self.assertIn('page', result)
+        self.assertIn('image_url', result)
+
     def test_suggest_county_by_id(self):
         response = self.get(
             url_for('api.suggest_territory'), qs={'q': '13'})

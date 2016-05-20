@@ -22,7 +22,7 @@ BASE_GRANULARITIES = [
     ('other', _('Other')),
 ]
 
-HANDLED_ZONES = ('fr/town', 'fr/county')
+HANDLED_ZONES = ('fr/town', 'fr/county', 'fr/region')
 
 
 class GeoLevel(db.Document):
@@ -86,13 +86,11 @@ class GeoZone(db.Document):
 
     @property
     def url(self):
-        return url_for('territories.{level}'.format(level=self.level_name),
-                       territory=self)
+        return url_for('territories.territory', territory=self)
 
     @property
     def external_url(self):
-        return url_for('territories.{level}'.format(level=self.level_name),
-                       territory=self, _external=True)
+        return url_for('territories.territory', territory=self, _external=True)
 
     @cached_property
     def wikipedia_url(self):
@@ -121,6 +119,11 @@ class GeoZone(db.Document):
         return '{name} <small>({code})</small>'.format(
             name=self.name, code=self.code)
 
+    @cached_property
+    def region_repr(self):
+        """Representation of a region."""
+        return self.name
+
     def get_parent(self, level):
         for parent in self.parents:
             if parent.startswith(level):
@@ -140,6 +143,10 @@ class GeoZone(db.Document):
     @cached_property
     def towns(self):
         return self.get_children('fr/town').order_by('-population', '-area')
+
+    @cached_property
+    def counties(self):
+        return self.get_children('fr/county').order_by('-population', '-area')
 
     @property
     def handled_zone(self):

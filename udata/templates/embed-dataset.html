@@ -174,7 +174,7 @@
         <p class="udata-source">
         {% if item.organization %}
             <a href="{{ item.organization.external_url }}" data-tooltip="{{ _('Producer') }}">
-                <img src="{{ item.organization.logo(70, external=True) }}"
+                <img src="{{ item.organization.logo(70, external=True)|placeholder(external=True) }}"
                      alt="{{ item.organization.name }}"
                      height="70" width="70">
             </a>
