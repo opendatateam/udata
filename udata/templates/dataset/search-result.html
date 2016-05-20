@@ -62,7 +62,7 @@
                 {% else %}
                     {% for territory in dataset.spatial.zones %}
                         <li>
-                        {% if territory.level in ('fr/town', 'fr/county') %}
+                        {% if territory.handled_zone %}
                             <a class="btn btn-xs" data-toggle="tooltip"
                                 data-placement="top" data-container="body"
                                 href="{{ territory.url }}" title="{{ _('Spatial coverage') }}">
