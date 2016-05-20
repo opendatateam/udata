@@ -25,7 +25,11 @@ define([
                 transform: function(response) {
                     return response.map((row) => {
                         const extra = row.county || row.region;
-                        row.name = `${row.title} (${extra})`;
+                        if (extra) {
+                            row.name = `${row.title} (${extra})`;
+                        } else {
+                            row.name = `${row.title}`;
+                        }
                         return row;
                     });
                 }

@@ -62,8 +62,8 @@
     </aside>
 </div>
 <div class="dataset-list">
-    {% if town_datasets %}
-        {% for dataset in town_datasets %}
+    {% if territory_datasets %}
+        {% for dataset in territory_datasets %}
             <div data-udata-dataset-id="{{ dataset.id }}" class="col-sm-4"></div>
         {% endfor %}
     {% else %}
@@ -88,8 +88,8 @@
             </p>
         </div>
     {% endif %}
-    {% for territory_dataset in territory_datasets %}
-        <div data-udata-territory-id="{{ territory_dataset.slug }}" class="col-sm-4"></div>
+    {% for dataset in base_datasets %}
+        <div data-udata-territory-id="{{ dataset.slug }}" class="col-sm-4"></div>
     {% endfor %}
     {% for dataset in other_datasets %}
         <div data-udata-dataset-id="{{ dataset.id }}" class="col-sm-4"></div>

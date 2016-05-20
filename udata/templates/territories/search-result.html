@@ -6,6 +6,9 @@
 {% elif territory.level == 'fr/county' %}
     {% set title = territory.county_repr %}
     {% set label = _('County') %}
+{% elif territory.level == 'fr/region' %}
+    {% set title = territory.region_repr %}
+    {% set label = _('Region') %}
 {% endif %}
 <li class="search-result territory-result">
     <a href="{{ territory.url }}" title="{{ territory.name }}">

@@ -15,7 +15,7 @@ import requests
 from flask import current_app
 
 from udata.models import (
-    Dataset, ResourceBasedTerritoryDataset, COUNTY_DATASETS, TOWN_DATASETS
+    Dataset, ResourceBasedTerritoryDataset, TERRITORY_DATASETS
 )
 from udata.commands import submanager
 from udata.core.storages import logos, references, tmp
@@ -57,9 +57,14 @@ def collect_references_files():
     if not os.path.exists(REFERENCES_PATH):
         os.makedirs(REFERENCES_PATH)
     if current_app.config.get('ACTIVATE_TERRITORIES'):
-        for territory_class in COUNTY_DATASETS.values()+TOWN_DATASETS.values():
-            if not issubclass(territory_class, ResourceBasedTerritoryDataset):
-                continue
+        # TERRITORY_DATASETS is a dict of dicts and we want all values
+        # that are resource based to collect related files.
+        territory_classes = [
+            territory_class
+            for territory_dict in TERRITORY_DATASETS.values()
+            for territory_class in territory_dict.values()
+            if issubclass(territory_class, ResourceBasedTerritoryDataset)]
+        for territory_class in territory_classes:
             dataset = Dataset.objects.get(id=territory_class.dataset_id)
             for resource in dataset.resources:
                 if str(resource.id) != str(territory_class.resource_id):

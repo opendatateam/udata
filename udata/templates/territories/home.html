@@ -1,0 +1,35 @@
+{% extends theme("layouts/1-column.html") %}
+
+{% set meta = {
+    'title': _('Regions'),
+    'description': _('Regions'),
+} %}
+
+{% set body_class="territory" %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-sm-9">
+        <h1>{{ _('Regions') }}</h1>
+        {# TODO: display on a map? #}
+        <ul class="list-unstyled territories-list">
+            {% for territory in regions %}
+                <li>
+                    <img src="{{ territory.logo_url(external=True) or theme_static('img/placeholder_territory.png', external=True) }}" alt="{{ territory.name }}" class="float-left" width="13px" />
+                    <a href="{{ territory.url }}"> {{ territory.name }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <aside class="col-sm-3 panel panel-default">
+
+    </aside>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ static('vue-common.js') }}"></script>
+    <script src="{{ static('territory.js') }}"></script>
+    <script src="{{ static('widgets.js', _burst=False) }}" id="udata" async defer></script>
+{% endblock %}
