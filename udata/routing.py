@@ -113,7 +113,7 @@ class TerritoryConverter(ModelConverter):
 
     def to_python(self, value):
         return self.model.objects.get_or_404(
-            code=value, level__in=['fr/county', 'fr/town'])
+            code=value, level__in=models.HANDLED_ZONES)
 
     def to_url(self, obj):
         if getattr(obj, 'code', None):

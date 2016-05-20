@@ -13,7 +13,7 @@ from udata.core.storages import logos
 
 __all__ = (
     'GeoLevel', 'GeoZone', 'SpatialCoverage', 'BASE_GRANULARITIES',
-    'spatial_granularities'
+    'spatial_granularities', 'HANDLED_ZONES'
 )
 
 
@@ -21,6 +21,8 @@ BASE_GRANULARITIES = [
     ('poi', _('POI')),
     ('other', _('Other')),
 ]
+
+HANDLED_ZONES = ('fr/town', 'fr/county')
 
 
 class GeoLevel(db.Document):
@@ -139,6 +141,10 @@ class GeoZone(db.Document):
     def towns(self):
         return self.get_children('fr/town').order_by('-population', '-area')
 
+    @property
+    def handled_zone(self):
+        return self.level in HANDLED_ZONES
+
     def toGeoJSON(self):
         return {
             'id': self.id,
@@ -190,3 +196,8 @@ class SpatialCoverage(db.EmbeddedDocument):
             if zone.id in top.parents:
                 top = zone
         return _(top.name)
+
+    @property
+    def handled_zones(self):
+        """Return only zones with a dedicated page."""
+        return [zone for zone in self.zones if zone.handled_zone]
