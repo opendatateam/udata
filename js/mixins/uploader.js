@@ -1,4 +1,4 @@
-define(['api', 'exports?qq!fineuploader', 'i18n'], function(API, qq, i18n) {
+define(['api', 'fine-uploader', 'i18n'], function(API, qq, i18n) {
     'use strict';
 
     var HAS_FILE_API = window.File && window.FileReader && window.FileList && window.Blob,

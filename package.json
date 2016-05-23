@@ -79,7 +79,7 @@
     "debounce": "^1.0.0",
     "diff": "^2.2.2",
     "dotdotdot": "BeSite/jQuery.dotdotdot#v1.7.4",
-    "fine-uploader": "^5.4.1",
+    "fine-uploader": "5.9.0",
     "font-awesome": "^4.5.0",
     "handlebars": "^3.0.3",
     "highlight.js": "^9.3.0",
