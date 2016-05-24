@@ -181,7 +181,8 @@ export class Api {
             credentials: 'include',
             headers: Object.assign({}, DEFAULT_HEADERS, WRITE_HEADERS, headers || {}),
         })
-        .catch(this.onError);
+        .catch(this.onError)
+        .then(this.onResponse);
     }
 }
 

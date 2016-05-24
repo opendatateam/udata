@@ -15,7 +15,7 @@
 {% else %}
 <br/>
 {% endif %}
-<follow-button
+<follow-button with-label classes="btn-block btn-sm btn-left btn-warning"
     {% if is_following(organization) %}following{% endif %}
     url="{{ url_for('api.organization_followers', id=organization.id|string) }}"
     tooltip="{{ _('I\'ll be informed about this organization news') }}"

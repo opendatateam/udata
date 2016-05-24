@@ -190,32 +190,11 @@
                             {% else %}
                             <br/>
                             {% endif %}
-                            <!-- Before follow -->
-                            <follow-button></follow-button>
-                            <follow-button
-                                following="{{ is_following(reuse.owner)|lower }}"
+                            <follow-button with-label classes="btn-block btn-sm btn-left btn-warning"
+                                {% if is_following(reuse.owner) %}following{% endif %}
                                 url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"
-                                >
+                                tooltip="{{ _('I\'ll be informed about this user news') }}">
                             </follow-button>
-                            <!-- After follow -->
-                            <!--tooltip effect="fadein" placement="left"
-                                content="Lorem ipsum dolor sit amet consectetur adipisicing elit, sed do eiusmod"
-                                >
-                                <button type="button"
-                                    class="btn btn-warning btn-follow btn-block btn-sm icon-left {% if is_following(reuse.owner) %}active{% endif %}"
-                                    data-api-url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"
-                                    data-following-label="{{ _('Unfollow') }}"
-                                {% if is_following(reuse.owner) %}
-                                title="{{ _('Unfollow') }}">
-                                <span class="glyphicon glyphicon-eye-close"></span>
-                                {{ _('Unfollow') }}
-                                {% else %}
-                                title="{{ _("I'll be informed about this user news") }}">
-                                <span class="glyphicon glyphicon-eye-open"></span>
-                                {{ _('Follow') }}
-                                {% endif %}
-                                </button>
-                            </tooltip-->
                         </div>
                     </div>
                 </div>

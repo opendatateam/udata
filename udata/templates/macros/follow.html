@@ -1,16 +1,12 @@
-{% macro follow_btn(obj, icons=None) %}
+{% macro follow_btn(obj, class=None) %}
 {% set basename = obj.__class__.__name__|lower %}
-{% set following = is_following(obj) %}
-{% set following_icon = icons[1] if icons else 'eye-close' %}
-{% set follow_icon = icons[0] if icons else 'eye-open' %}
 
-<button type="button" class="btn {{kwargs.get('btn_class', 'btn-primary')}} btn-follow {% if following %}active{% endif %}"
-    data-api-url="{{ url_for('api.{0}_followers'.format(basename), id=obj.id|string) }}"
-    data-follow-icon="{{ ficon(follow_icon) }}"
-    data-following-icon="{{ ficon(following_icon) }}"
-    data-toggle="tooltip" title="{{ _('Follow') }}"
-    data-placement="top" data-container="body">
-    <span class="{{ ficon(following_icon if following else follow_icon) }}"></span>
-    {% if obj.metrics.followers %}{{obj.metrics.followers}}{% endif %}
-</button>
+<follow-button
+    {% if is_following(obj) %}following{% endif %}
+    url="{{ url_for('api.{0}_followers'.format(basename), id=obj.id|string) }}"
+    classes="{{kwargs.get('btn_class', 'btn-primary')}}"
+    tooltip-placement="top"
+    {% if obj.metrics.followers %}:followers="{{obj.metrics.followers}}"{% endif %}
+    >
+</follow-button>
 {% endmacro %}

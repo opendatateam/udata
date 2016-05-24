@@ -24,10 +24,10 @@ import AddReuseModal from './add-reuse-modal.vue';
 import DetailsModal from './details-modal.vue';
 import ResourceModal from './resource-modal.vue';
 import LeafletMap from 'components/leaflet-map.vue';
+import FollowButton from 'components/buttons/follow.vue';
 
 // Legacy widgets
 import 'widgets/featured';
-import 'widgets/follow-btn';
 import 'widgets/issues-btn';
 import 'widgets/discussions-btn';
 import 'widgets/share-btn';
@@ -55,7 +55,7 @@ function addTooltip(el, content) {
 
 new Vue({
     el: 'body',
-    components: {LeafletMap},
+    components: {LeafletMap, FollowButton},
     data() {
         const data = {
             dataset: this.extractDataset(),

@@ -11,7 +11,6 @@ import log from 'logger';
 
 // Legacy widgets
 import 'widgets/featured';
-import 'widgets/follow-btn';
 import 'widgets/issues-btn';
 import 'widgets/discussions-btn';
 import 'widgets/share-btn';

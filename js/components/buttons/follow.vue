@@ -1,11 +1,9 @@
 <template>
-<tooltip effect="fadein" placement="left" :content="tooltip">
-    <button type="button"
-        class="btn btn-warning btn-follow btn-block btn-sm btn-left"
-        :class="{'active': following}"
-        @click="toggle">
+<tooltip effect="fadein" :placement="tooltipPlacement" :content="tooltip">
+    <button type="button" class="btn btn-follow" :class="btnClasses" @click="toggle">
         <span class="fa" :class="icon"></span>
-        <span v-if="label">{{ label }}</span>
+        <span v-if="withLabel">{{ label }}</span>
+        <span v-if="followers">{{ followers }}</span>
     </button>
 </tooltip>
 </template>
@@ -19,18 +17,44 @@ import { tooltip } from 'vue-strap';
 export default {
     components: {tooltip},
     props: {
+        classes: {
+            type: Array,
+            coerce(value) {
+                if (Array.isArray(value)) return value;
+                return value.split(' ').filter(value => value.trim());
+            }
+        },
+        followers: {
+            type: Number,
+            default: undefined
+        },
         following: {
             type: Boolean,
             default: false
         },
-        label: Boolean,
-        tooltip: String,
+        withLabel: {
+            type: Boolean,
+            default: false
+        },
+        tooltip: {
+            type: String,
+            default: i18n._("I'll be informed about its activity")
+        },
+        tooltipPlacement: {
+            type: String,
+            default: 'left'
+        },
         url: {
             type: String,
             required: true
         }
     },
     computed: {
+        btnClasses() {
+            const classes = {active: this.following};
+            this.classes.forEach(cls => classes[cls] = true);
+            return classes;
+        },
         icon() {
             return this.following ? 'fa-eye-slash': 'fa-eye';
         },
@@ -44,7 +68,12 @@ export default {
                 return;
             }
             const method = this.following ? this.$api.delete(this.url) : this.$api.post(this.url);
-            method.then(() => this.following = !this.following);
+            method.then(data => {
+                this.following = !this.following;
+                if (this.followers !== undefined) {
+                    this.followers = data.followers;
+                }
+            });
         }
     }
 };
