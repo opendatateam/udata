@@ -158,7 +158,6 @@
 
             {# Right sidebar #}
             <aside class="col-md-3 col-sm-3">
-
                 {# Optionnal organization panel #}
                 {% if reuse.organization %}
                 <div class="panel panel-transparent text-center">
@@ -191,17 +190,21 @@
                             {% else %}
                             <br/>
                             {% endif %}
-                            <tooltip
-                              effect="scale"
-                              placement="bottom"
-                              content="Lorem ipsum dolor sit amet consectetur adipisicing elit, sed do eiusmod">
-                              <button class="btn btn-default ">tooltip on bottom</button>
-                            </tooltip>
-                            <button type="button"
-                                class="btn btn-warning btn-follow btn-block btn-sm icon-left {% if is_following(reuse.owner) %}active{% endif %}"
-                                data-toggle="tooltip" data-placement="left"
-                                data-api-url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"
-                                data-following-label="{{ _('Unfollow') }}"
+                            <!-- Before follow -->
+                            <follow-button></follow-button>
+                            <follow-button
+                                following="{{ is_following(reuse.owner)|lower }}"
+                                url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"
+                                >
+                            </follow-button>
+                            <!-- After follow -->
+                            <!--tooltip effect="fadein" placement="left"
+                                content="Lorem ipsum dolor sit amet consectetur adipisicing elit, sed do eiusmod"
+                                >
+                                <button type="button"
+                                    class="btn btn-warning btn-follow btn-block btn-sm icon-left {% if is_following(reuse.owner) %}active{% endif %}"
+                                    data-api-url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"
+                                    data-following-label="{{ _('Unfollow') }}"
                                 {% if is_following(reuse.owner) %}
                                 title="{{ _('Unfollow') }}">
                                 <span class="glyphicon glyphicon-eye-close"></span>
@@ -211,7 +214,8 @@
                                 <span class="glyphicon glyphicon-eye-open"></span>
                                 {{ _('Follow') }}
                                 {% endif %}
-                            </button>
+                                </button>
+                            </tooltip-->
                         </div>
                     </div>
                 </div>

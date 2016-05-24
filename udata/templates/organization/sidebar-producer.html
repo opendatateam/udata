@@ -15,19 +15,10 @@
 {% else %}
 <br/>
 {% endif %}
-<button type="button"
-    class="btn btn-warning btn-follow btn-block btn-sm icon-left {% if is_following(organization) %}active{% endif %}"
-    data-toggle="tooltip" data-placement="left"
-    data-api-url="{{ url_for('api.organization_followers', id=organization.id|string) }}"
-    data-following-label="{{ _('Unfollow') }}"
-    {% if is_following(organization) %}
-    title="{{ _('Unfollow') }}">
-    <span class="glyphicon glyphicon-eye-close"></span>
-    {{ _('Unfollow') }}
-    {% else %}
-    title="{{ _("I'll be informed about this organization news") }}">
-    <span class="glyphicon glyphicon-eye-open"></span>
-    {{ _('Follow') }}
-    {% endif %}
-</button>
+<follow-button
+    {% if is_following(organization) %}following{% endif %}
+    url="{{ url_for('api.organization_followers', id=organization.id|string) }}"
+    tooltip="{{ _('I\'ll be informed about this organization news') }}"
+    >
+</follow-button>
 </div>
