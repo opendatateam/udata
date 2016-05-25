@@ -25,7 +25,7 @@ module.exports = {
         'organization/display': './js/organization/display',
         'site/map': './js/site/map',
         topic: './js/front/topic',
-        'post/display': './js/post/display',
+        post: './js/front/post',
         'user/display': './js/user/display',
     },
     output: {
