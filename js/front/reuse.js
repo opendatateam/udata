@@ -18,6 +18,7 @@ import 'widgets/share-btn';
 import Vue from 'vue';
 
 import FollowButton from 'components/buttons/follow.vue';
+import ShareButton from 'components/buttons/share.vue';
 
 import { popover, tooltip } from 'vue-strap';
 
@@ -26,7 +27,7 @@ Vue.use(require('plugins/api'));
 
 new Vue({
     el: 'body',
-    components: {popover, tooltip, FollowButton},
+    components: {popover, tooltip, FollowButton, ShareButton},
     ready() {
         log.debug('Reuse display page');
     }
