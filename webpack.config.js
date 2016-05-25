@@ -24,7 +24,7 @@ module.exports = {
         apidoc: './js/apidoc',
         'organization/display': './js/organization/display',
         'site/map': './js/site/map',
-        'topic/display': './js/topic/display',
+        topic: './js/front/topic',
         'post/display': './js/post/display',
         'user/display': './js/user/display',
     },
