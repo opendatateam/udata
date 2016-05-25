@@ -36,8 +36,8 @@ def create():
     if form.validate():
         data['password'] = encrypt_password(data['password'])
         del data['password_confirm']
+        data['confirmed_at'] = datetime.utcnow()
         user = datastore.create_user(**data)
-        user.confirmed_at = datetime.utcnow()
         print '\nUser created successfully'
         print 'User(id=%s email=%s)' % (user.id, user.email)
         return
@@ -55,8 +55,10 @@ def activate():
         print 'Invalid user'
         return
     if user.confirmed_at is not None:
-        print 'User email address already corfirmed'
+        print 'User email address already confirmed'
+        return
     user.confirmed_at = datetime.utcnow()
+    user.save()
     print 'User activated successfully'
 
 

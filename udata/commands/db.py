@@ -99,10 +99,11 @@ def execute_migration(plugin, filename, script, dryrun=False):
     return success
 
 
-def record_migration(plugin, filename, script):
+def record_migration(plugin, filename, script, **kwargs):
     '''Only record a migration without applying it'''
     db = get_db(DEFAULT_CONNECTION_NAME)
     db.eval(RECORD_WRAPPER, plugin, filename, script)
+    return True
 
 
 def available_migrations():
@@ -149,7 +150,7 @@ def status():
           help='Only records the migrations')
 @m.option('-d', '--dry-run', action='store_true', dest='dryrun',
           help='Only print migrations to be applied')
-def migrate(record, dryrun):
+def migrate(record, dryrun=False):
     '''Perform database migrations'''
     handler = record_migration if record else execute_migration
     success = True
