@@ -108,7 +108,7 @@
     "typeahead.js": "corejavascript/typeahead.js",
     "typeahead.js-bootstrap3.less": "hyspace/typeahead.js-bootstrap3.less#v0.2.3",
     "velocity-animate": "^1.2.3",
-    "vue": "1.0.21",
+    "vue": "1.0.24",
     "vue-router": "0.7.13",
     "vue-strap": "^1.0.11",
     "whatwg-fetch": "0.11.0"
