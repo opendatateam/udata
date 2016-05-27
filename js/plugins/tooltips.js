@@ -152,16 +152,6 @@ export function install(Vue) {
             popover.content = this.el;
         },
         /**
-         * Remove event listeners
-         */
-        unbind() {
-            // this.el.removeEventListener('blur', this._blurHandler);
-            // this.el.removeEventListener('focus', this._focusHandler);
-            // this.el.removeEventListener('mouseenter', this._mouseenterHandler);
-            // this.el.removeEventListener('mouseleave', this._mouseleaveHandler);
-            // this.el.removeEventListener('clic', this._clickHandler);
-        },
-        /**
          * Find the closest parent node with a popover directive.
          * @return {Vue} The target popover component
          */
