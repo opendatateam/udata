@@ -1,10 +1,6 @@
 /**
  * Dataset display page JS module
  */
-
-// Styles. May need refactoring for proper common.css
-import 'balloon-css/src/balloon.less';
-
 // Catch all errors
 import 'raven';
 
@@ -48,15 +44,9 @@ function parseUrl(url) {
 }
 
 
-function addTooltip(el, content) {
-    el.dataset.balloon = content;
-    el.setAttribute('data-balloon-pos', 'left');
-}
-
-
 new Vue({
     el: 'body',
-    components: {LeafletMap, FollowButton, ShareButton},
+    components: {LeafletMap, ShareButton, FollowButton},
     data() {
         const data = {
             dataset: this.extractDataset(),
@@ -202,7 +192,7 @@ new Vue({
             if (!this.ignore.some(domain => url.origin.endsWith(domain))) {
                 if (url.protocol.startsWith('ftp')) {
                     el.classList.add('format-label-warning');
-                    addTooltip(el, this._('The server may be hard to reach (FTP).'));
+                    el.setTooltip(this._('The server may be hard to reach (FTP).'), true);
                 } else {
                     this.$api.get(checkurl, {url: url.href, group: this.dataset.alternateName})
                     .then(() => el.classList.add('format-label-success'))
@@ -210,13 +200,13 @@ new Vue({
                         switch (error.status) {
                             case 404:
                                 el.classList.add('format-label-warning');
-                                addTooltip(el, this._('The resource cannot be found.'));
+                                el.setTooltip(this._('The resource cannot be found.'), true);
                                 break;
                             case 503:
                                 break;
                             default:
                                 el.classList.add('format-label-danger');
-                                addTooltip(el, this._('The server cannot be found.'));
+                                el.setTooltip(this._('The server cannot be found.'), true);
                         }
                     });
                 }

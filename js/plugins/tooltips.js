@@ -2,6 +2,7 @@ import log from 'logger';
 import tooltip from 'components/tooltip.vue';
 import popover from 'components/popover.vue';
 
+
 export function install(Vue) {
     /**
      * Attach a tooltip on the element.
@@ -30,6 +31,12 @@ export function install(Vue) {
             this._mouseleaveHandler = this.el.addEventListener('mouseleave', this.hideTooltip.bind(this));
             this._focusHandler = this.el.addEventListener('focus', this.showTooltip.bind(this));
             this._blurHandler = this.el.addEventListener('blur', this.hideTooltip.bind(this));
+
+            // Easy tooltip setting
+            this.el.setTooltip = function(content, show) {
+                this.tooltip.content = content;
+                if (show) this.showTooltip();
+            }.bind(this);
         },
         /**
          * Update the tooltip content
