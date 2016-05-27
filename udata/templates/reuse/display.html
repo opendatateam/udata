@@ -87,18 +87,18 @@
                                 ) }}
                             </small>
                             {% if reuse.private %}
-                            <popover effect="fade" placement="top" trigger="hover"
-                                title="{{ _('Private') }}"
-                                content="{{ _('This reuse is private and will not be visible by other users') }}">
-                                <small class="private">{{ _('Private') }}</small>
-                            </popover>
+                            <small class="private" title="{{ _('Private') }}"
+                                v-popover.literal="{{ _('This reuse is private and will not be visible by other users') }}"
+                                popover-placement="top" popover-trigger="hover">
+                                {{ _('Private') }}
+                            </small>
                             {% endif %}
                             {% if reuse.deleted %}
-                            <popover effect="fade" placement="top" trigger="hover"
-                                title="{{ _('Deleted') }}"
-                                content="{{ _('This reuse has been deleted. This will be permanent in the next 24 hours') }}">
-                                <small class="deleted">{{ _('Deleted') }}</small>
-                            </popover>
+                            <small class="deleted" title="{{ _('Deleted') }}"
+                                v-popover.literal="{{ _('This reuse has been deleted. This will be permanent in the next 24 hours') }}"
+                                popover-effect="fade" popover-placement="top" popover-trigger="hover">
+                                {{ _('Deleted') }}
+                            </small>
                             {% endif %}
                         </p>
                     </div>
@@ -208,7 +208,8 @@
                         <ul class="list-unstyled infos-list">
                             {# Reuse type #}
                             <li>
-                                <a href class="btn btn-xs btn-default" data-toggle="tooltip" data-placement="right auto"
+                                <a href class="btn btn-xs btn-default"
+                                    v-tooltip tooltip-placement="left"
                                     title="{{ _('Type') }}">
                                     <span class="{{ ficon('fa-file') }}"></span>
                                 </a>

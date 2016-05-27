@@ -227,8 +227,7 @@
                             {# Badges #}
                             {% if dataset.badges %}
                             <li>
-                                <a href class="btn btn-default btn-xs" data-toggle="tooltip" data-placement="top auto"
-                                    title="{{ _('Badges') }}">
+                                <a href class="btn btn-default btn-xs" v-tooltip title="{{ _('Badges') }}">
                                     <span class="glyphicon glyphicon-bookmark"></span>
                                 </a>
                                 {% for badge in dataset.badges %}
@@ -241,8 +240,7 @@
                             {# License #}
                             {% if dataset.license %}
                             <li>
-                                <a href class="btn btn-default btn-xs" data-toggle="tooltip" data-placement="top auto"
-                                    title="{{ _('License') }}">
+                                <a href class="btn btn-default btn-xs" v-tooltip title="{{ _('License') }}">
                                     <span class="glyphicon glyphicon-copyright-mark"></span>
                                 </a>
                                 {% if dataset.license.url %}<a itemprop="license" href="{{ dataset.license.url }}">{% endif %}
@@ -254,8 +252,7 @@
                             {# Temporal coverage #}
                             {% if dataset.temporal_coverage %}
                             <li>
-                                <a href class="btn btn-xs btn-default" data-toggle="tooltip" data-placement="top auto"
-                                    title="{{ _('Temporal coverage') }}">
+                                <a href class="btn btn-xs btn-default" v-tooltip title="{{ _('Temporal coverage') }}">
                                     <span class="glyphicon glyphicon-calendar"></span>
                                 </a>
                                 {{ dataset.temporal_coverage|daterange }}
@@ -264,8 +261,7 @@
 
                             {% if dataset.frequency %}
                             <li>
-                                <a href class="btn btn-default btn-xs" data-toggle="tooltip" data-placement="top auto"
-                                    title="{{ _('Frequency') }}">
+                                <a href class="btn btn-default btn-xs" v-tooltip title="{{ _('Frequency') }}">
                                     <span class="glyphicon glyphicon-duplicate"></span>
                                 </a>
                                 {{ dataset.frequency_label }}
@@ -273,24 +269,21 @@
                             {% endif %}
 
                             <li>
-                                <a href class="btn btn-default btn-xs" data-toggle="tooltip" data-placement="top auto"
-                                    title="{{ _('Creation date') }}">
+                                <a href class="btn btn-default btn-xs" v-tooltip title="{{ _('Creation date') }}">
                                     <span class="glyphicon glyphicon-time"></span>
                                 </a>
                                 {{ dataset.created_at|dateformat(format='long') }}
                             </li>
 
                             <li>
-                                <a href class="btn btn-default btn-xs" data-toggle="tooltip" data-placement="top auto"
-                                    title="{{ _('Modification date') }}">
+                                <a href class="btn btn-default btn-xs" v-tooltip title="{{ _('Modification date') }}">
                                     <span class="glyphicon glyphicon-refresh"></span>
                                 </a>
                                 {{ dataset.last_modified|dateformat(format='long') }}
                             </li>
 
                             <li>
-                                <a href class="btn btn-default btn-xs" data-toggle="tooltip" data-placement="top auto"
-                                    title="{{ _('Latest resource update') }}">
+                                <a href class="btn btn-default btn-xs" v-tooltip title="{{ _('Latest resource update') }}">
                                     <span class="glyphicon glyphicon-save-file"></span>
                                 </a>
                                 {{ dataset.last_update|dateformat(format='long') }}
@@ -300,7 +293,7 @@
                             {% if dataset.spatial %}
                                 {% if dataset.spatial.granularity %}
                                 <li>
-                                    <a href class="btn btn-xs btn-default" data-toggle="tooltip" data-placement="top auto"
+                                    <a href class="btn btn-xs btn-default" v-tooltip
                                         title="{{ _('Territorial coverage granularity') }}">
                                         <span class="glyphicon glyphicon-screenshot"></span>
                                     </a>
@@ -309,7 +302,7 @@
                                 {% endif %}
                                 {% if dataset.spatial.territories %}
                                 <li>
-                                    <a href class="btn btn-xs btn-default" data-toggle="tooltip" data-placement="top auto"
+                                    <a href class="btn btn-xs btn-default" v-tooltip
                                         title="{{ _('Territorial coverage') }}">
                                         <span class="fa fa-fw fa-map-marker"></span>
                                     </a>
@@ -331,7 +324,7 @@
                             <a href="#"
                                 class="btn btn-primary btn-dark btn-xs suggest-tag"
                                 title="{{ _('Suggest a tag with a new discussion thread') }}"
-                                data-toggle="tooltip" data-placement="right auto">
+                                v-tooltip tooltip-placement="right">
                                 {{ _('Suggest a tag') }}
                             </a>
                         </div>
@@ -463,19 +456,18 @@
                             {% endif %}
                             <div class="btn-group btn-group-xs">
                                 <a class="btn btn-default" href="{{ reuse.url }}"
-                                    data-toggle="tooltip" title="{{ _('Open in a new window') }}" data-containter="body">
+                                    v-tooltip title="{{ _('Open in a new window') }}">
                                     <span class="glyphicon glyphicon-new-window"></span>
                                 </a>
                                 {% if current_user.sysadmin or reuse.owner == current_user %}
-                                <a class="btn btn-default" data-toggle="tooltip" title="{{ _('Edit') }}"
-                                    href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}"
-                                    data-containter="body">
+                                <a class="btn btn-default" v-tooltip title="{{ _('Edit') }}"
+                                    href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}">
                                     <span class="glyphicon glyphicon-edit"></span>
                                 </a>
                                 {% endif %}
                                 {% if current_user.sysadmin %}
                                 {% set btn_class = 'success' if reuse.featured else 'default' %}
-                                <a class="btn btn-{{ btn_class }} featured" data-toggle="tooltip" href
+                                <a class="btn btn-{{ btn_class }} featured" v-tooltip href
                                     {# data-api="{{ url('youckan/reuse', reuse.id, 'featured') }}" #}
                                     {% if reuse.featured %}
                                     title="{{ _('Unmark as featured') }}"

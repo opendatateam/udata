@@ -13,7 +13,6 @@ import log from 'logger';
 import 'widgets/featured';
 import 'widgets/issues-btn';
 import 'widgets/discussions-btn';
-import 'widgets/share-btn';
 
 import Vue from 'vue';
 
@@ -24,6 +23,7 @@ import { popover, tooltip } from 'vue-strap';
 
 Vue.use(require('plugins/i18next'));
 Vue.use(require('plugins/api'));
+Vue.use(require('plugins/tooltips'));
 
 new Vue({
     el: 'body',

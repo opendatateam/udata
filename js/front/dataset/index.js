@@ -38,6 +38,7 @@ Vue.config.debug = config.debug;
 Vue.use(require('plugins/api'));
 Vue.use(require('plugins/text'));
 Vue.use(require('plugins/i18next'));
+Vue.use(require('plugins/tooltips'));
 
 
 function parseUrl(url) {

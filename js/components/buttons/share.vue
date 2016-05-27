@@ -1,9 +1,8 @@
 <template>
-<popover effect="fade" placement="top" :title="_('Share')" v-ref:popover>
-    <button type="button" class="btn btn-primary btn-share" :title="_('Share')">
-        <span class="fa fa-share-alt"></span>
-    </button>
-    <div class="btn-group btn-group-lg" slot="content">
+<button type="button" class="btn btn-primary btn-share" :title="_('Share')" v-tooltip
+    v-popover popover-large :popover-title="_('Share')">
+    <span class="fa fa-share-alt"></span>
+    <div class="btn-group btn-group-lg" slot="content" v-popover-content>
         <a class="btn btn-link" title="Google+" @click="click"
             href="https://plus.google.com/share?url={{url|encode}}" target="_blank">
             <span class="fa fa-2x fa-google-plus"></span>
@@ -21,15 +20,13 @@
             <span class="fa fa-2x fa-linkedin"></span>
         </a>
     </div>
-</popover>
+</button>
 </template>
 <script>
 import i18n from 'i18n';
 import pubsub from 'pubsub';
-import { popover } from 'vue-strap';
 
 export default {
-    components: {popover},
     props: {
         title: {
             type: String,

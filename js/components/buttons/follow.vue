@@ -1,21 +1,17 @@
 <template>
-<tooltip effect="fadein" :placement="tooltipPlacement" :content="tooltip">
-    <button type="button" class="btn btn-follow" :class="btnClasses" @click="toggle">
-        <span class="fa" :class="icon"></span>
-        <span v-if="withLabel">{{ label }}</span>
-        <span v-if="followers">{{ followers }}</span>
-    </button>
-</tooltip>
+<button type="button" class="btn btn-follow" :class="btnClasses" @click="toggle"
+    v-tooltip="tooltip" :tooltip-placement="tooltipPlacement">
+    <span class="fa" :class="icon"></span>
+    <span v-if="withLabel">{{ label }}</span>
+    <span v-if="followers">{{ followers }}</span>
+</button>
 </template>
 
 <script>
 import i18n from 'i18n';
 import Auth from 'auth';
 
-import { tooltip } from 'vue-strap';
-
 export default {
-    components: {tooltip},
     props: {
         classes: {
             type: Array,
