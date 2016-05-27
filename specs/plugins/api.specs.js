@@ -223,9 +223,14 @@ describe('API Plugin', function() {
             it('perform a DELETE query', function() {
                 const url = `${root}somewhere`;
 
-                fetchMock.mock(url, 'delete', {status: 204});
+                fetchMock.mock(url, 'delete', {
+                    status: 204,
+                    body: {value: 'test'},
+                });
 
-                return api.delete('somewhere').then(() => {
+                return api.delete('somewhere').then(data => {
+                    expect(data).to.eql({value: 'test'});
+
                     expect(fetchMock.called(url)).to.be.true;
 
                     const [called_url, params] = fetchMock.calls(url)[0];
