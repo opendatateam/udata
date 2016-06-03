@@ -93,7 +93,7 @@
     "respond.js": "^1.4.2",
     "script-loader": "^0.6.1",
     "selectize": "^0.12.1",
-    "sifter": "noirbizarre/sifter.js#nested-properties-built",
+    "sifter": "0.5.1",
     "sortablejs": "^1.4.2",
     "source-sans-pro": "^2.0.10",
     "spin.js": "^2.3.2",

@@ -213,7 +213,7 @@ export class List extends Base {
      * Populate the data view (filtered and sorted)
      */
     populate() {
-        const options = {};
+        const options = {nesting: true};
         const sifter = new Sifter(this.items);
 
         if (this.$options.search) {
