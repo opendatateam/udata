@@ -17,9 +17,9 @@ except ImportError:
 
 from babel.support import NullTranslations, Translations
 
-from flask.ext.babelex import Babel, Domain, refresh
-from flask.ext.babelex import format_date, format_datetime  # noqa
-from flask.ext.babelex import get_locale as get_current_locale  # noqa
+from flask_babelex import Babel, Domain, refresh
+from flask_babelex import format_date, format_datetime  # noqa
+from flask_babelex import get_locale as get_current_locale  # noqa
 
 from werkzeug.local import LocalProxy
 

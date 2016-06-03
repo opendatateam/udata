@@ -4,9 +4,9 @@ from __future__ import unicode_literals
 import logging
 
 from datetime import datetime
-from flask.ext.script import prompt, prompt_pass
-from flask.ext.security.forms import RegisterForm
-from flask.ext.security.utils import encrypt_password
+from flask_script import prompt, prompt_pass
+from flask_security.forms import RegisterForm
+from flask_security.utils import encrypt_password
 from werkzeug.datastructures import MultiDict
 
 from udata.models import User, datastore

@@ -12,10 +12,10 @@ from os.path import abspath, join, dirname, isfile, exists
 from flask import (
     Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint
 )
-from flask.ext.cache import Cache
+from flask_cache import Cache
 
-from flask.ext.wtf.csrf import CsrfProtect
-from flask.ext.navigation import Navigation
+from flask_wtf.csrf import CsrfProtect
+from flask_navigation import Navigation
 from speaklater import is_lazy_string
 from werkzeug.contrib.fixers import ProxyFix
 

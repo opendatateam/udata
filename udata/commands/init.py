@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 import logging
 
-# from flask.ext.script import Command, Option
-
 from udata.commands import manager, yellow
 from udata.search import es
 

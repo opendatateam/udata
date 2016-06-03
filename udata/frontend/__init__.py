@@ -116,5 +116,5 @@ def init_app(app):
 
     # Load debug toolbar if enabled
     if app.config.get('DEBUG_TOOLBAR'):
-        from flask.ext.debugtoolbar import DebugToolbarExtension
+        from flask_debugtoolbar import DebugToolbarExtension
         DebugToolbarExtension(app)

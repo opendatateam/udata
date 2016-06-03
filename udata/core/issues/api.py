@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
-from flask.ext.security import current_user
+from flask_security import current_user
 from flask_restplus.inputs import boolean
 
 from udata.api import api, API, fields

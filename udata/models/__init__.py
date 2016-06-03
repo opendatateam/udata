@@ -6,14 +6,14 @@ import logging
 from collections import Iterable
 
 from bson import ObjectId, DBRef
-from flask.ext.mongoengine import (
+from flask_mongoengine import (
     MongoEngine, MongoEngineSessionInterface, Document, BaseQuerySet
 )
 from mongoengine.base import TopLevelDocumentMetaclass, get_document
 from mongoengine.errors import ValidationError
 from mongoengine.signals import pre_save, post_save
 
-from flask.ext.fs.mongo import FileField, ImageField
+from flask_fs.mongo import FileField, ImageField
 
 from udata.utils import Paginable
 

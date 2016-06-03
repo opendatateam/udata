@@ -10,7 +10,7 @@ from os.path import join, dirname, isdir, exists
 from flask import current_app, g
 from werkzeug.local import LocalProxy
 
-from flask.ext.themes2 import (
+from flask_themes2 import (
     Themes, Theme, render_theme_template, get_theme, packaged_themes_loader
 )
 

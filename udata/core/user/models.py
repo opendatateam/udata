@@ -7,7 +7,7 @@ from time import time
 
 from blinker import Signal
 from flask import url_for, current_app
-from flask.ext.security import UserMixin, RoleMixin, MongoEngineUserDatastore
+from flask_security import UserMixin, RoleMixin, MongoEngineUserDatastore
 from mongoengine.signals import pre_save, post_save
 from itsdangerous import JSONWebSignatureSerializer
 

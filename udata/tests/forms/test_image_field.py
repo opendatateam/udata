@@ -6,7 +6,7 @@ import shutil
 import tempfile
 
 from flask import url_for
-from flask.ext import fs
+import flask_fs as fs
 
 from udata.models import db
 from udata.forms import Form

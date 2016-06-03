@@ -7,7 +7,7 @@
     for us to transition from flaskext.foo to flask_foo without having to
     force all extensions to upgrade at the same time.
 
-    When a user does ``from flask.ext.foo import bar`` it will attempt to
+    When a user does ``from flask_foo import bar`` it will attempt to
     import ``from flask_foo import bar`` first and when that fails it will
     try to import ``from flaskext.foo import bar``.
 
@@ -21,6 +21,7 @@ from importlib import import_module
 
 
 def setup():
+    # TODO: change this mecanism to drop the deprecated ExtensionImporter
     from flask.exthook import ExtensionImporter
     importer = ExtensionImporter(['udata_%s', 'udataext.%s'], __name__)
     importer.install()
