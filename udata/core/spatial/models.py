@@ -82,7 +82,11 @@ class GeoZone(db.Document):
 
     @cached_property
     def level_name(self):
-        return self.level[3:]  # Remove 'fr/'.
+        """Truncated level name for the sake of readability."""
+        if self.level.startswith('fr/'):
+            return self.level[3:]
+        # Keep the whole level name as a fallback (e.g. `country/fr`)
+        return self.level
 
     @property
     def url(self):
@@ -94,6 +98,7 @@ class GeoZone(db.Document):
 
     @cached_property
     def wikipedia_url(self):
+        """Computed wikipedia URL from the DBpedia one."""
         return (self.dbpedia.replace('dbpedia', 'wikipedia')
                             .replace('resource', 'wiki'))
 
@@ -147,6 +152,10 @@ class GeoZone(db.Document):
     @cached_property
     def counties(self):
         return self.get_children('fr/county').order_by('-population', '-area')
+
+    @cached_property
+    def regions(self):
+        return self.get_children('fr/region').order_by('-population', '-area')
 
     @property
     def handled_zone(self):

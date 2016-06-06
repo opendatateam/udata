@@ -13,7 +13,8 @@ __all__ = (
 TERRITORY_DATASETS = {
     'town': {},
     'county': {},
-    'region': {}
+    'region': {},
+    'country': {}
 }
 
 

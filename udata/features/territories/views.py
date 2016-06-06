@@ -95,7 +95,7 @@ def redirect_town(code):
 
 
 @blueprint.route('/territory/<territory:territory>/', endpoint='territory')
-def render_town(territory):
+def render_territory(territory):
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
@@ -141,7 +141,7 @@ def sitemap_urls():
     if current_app.config.get('ACTIVATE_TERRITORIES'):
         for level in HANDLED_ZONES:
             for item in GeoZone.objects(level=level).only('code'):
-                # Remove 'fr/'
+                # Remove 'fr/' manually from the level.
                 territory = dict_to_namedtuple(
                     'Territory', {'level_name': level[3:], 'code': item.code})
                 yield ('territories.territory', {'territory': territory},

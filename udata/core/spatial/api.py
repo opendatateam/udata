@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask import current_app, abort
+
 from udata.api import api, API
 
 from udata import search
 from udata.i18n import _
-from udata.models import Dataset
+from udata.models import Dataset, TERRITORY_DATASETS
+from udata.core.dataset.api_fields import dataset_ref_fields
 
 from .api_fields import (
     level_fields,
@@ -32,30 +35,13 @@ suggest_parser.add_argument(
     'size', type=int, help='The amount of suggestion to fetch',
     location='args', default=10)
 
-
-@ns.route('/zones/<pathlist:ids>', endpoint='zones')
-class ZonesAPI(API):
-    @api.doc('spatial_zones',
-             params={'ids': 'A zone identifiers list (comma separated)'})
-    @api.marshal_with(feature_collection_fields)
-    def get(self, ids):
-        '''Fetch a zone list as GeoJSON'''
-        zones = GeoZone.objects.in_bulk(ids)
-        zones = [zones[id] for id in ids]
-        return {
-            'type': 'FeatureCollection',
-            'features': [z.toGeoJSON() for z in zones],
-        }
-
-
-@ns.route('/zone/<path:id>', endpoint='zone')
-class ZoneAPI(API):
-    @api.doc('spatial_zone', params={'id': 'A zone identifier'})
-    @api.marshal_with(zone_suggestion_fields)
-    def get(self, id):
-        '''Fetch a zone'''
-        zone = GeoZone.objects.get_or_404(id=id)
-        return zone
+dataset_parser = api.parser()
+dataset_parser.add_argument(
+    'with_dynamic', type=bool, help='Append dynamic datasets',
+    location='args', required=False)
+dataset_parser.add_argument(
+    'size', type=int, help='The amount of datasets to fetch',
+    location='args', default=25)
 
 
 @ns.route('/zones/suggest', endpoint='suggest_zones')
@@ -77,6 +63,81 @@ class SuggestZonesAPI(API):
             for opt in search.suggest(
                 args['q'], 'zone_suggest', args['size'])
         ]
+
+
+@ns.route('/zones/<pathlist:ids>', endpoint='zones')
+class ZonesAPI(API):
+    @api.doc('spatial_zones',
+             params={'ids': 'A zone identifiers list (comma separated)'})
+    @api.marshal_with(feature_collection_fields)
+    def get(self, ids):
+        '''Fetch a zone list as GeoJSON'''
+        zones = GeoZone.objects.in_bulk(ids)
+        zones = [zones[id] for id in ids]
+        return {
+            'type': 'FeatureCollection',
+            'features': [z.toGeoJSON() for z in zones],
+        }
+
+
+@ns.route('/zone/<path:id>/children', endpoint='zone_children')
+class ZoneChildrenAPI(API):
+    @api.doc('spatial_zone', params={'id': 'A zone identifier'})
+    @api.marshal_list_with(feature_collection_fields)
+    def get(self, id):
+        '''Fetch a zone'''
+        zone = GeoZone.objects.get_or_404(id=id)
+        if zone.level_name == 'country':
+            children = zone.regions
+        elif zone.level_name == 'region':
+            children = zone.counties
+        elif zone.level_name == 'county':
+            children = zone.towns
+        else:
+            return abort(404)
+        features = []
+
+        for zone in children:
+            features.append(zone.toGeoJSON())
+
+        return {
+            'type': 'FeatureCollection',
+            'features': features
+        }
+
+
+@ns.route('/zone/<path:id>/datasets', endpoint='zone_datasets')
+class ZoneDatasetsAPI(API):
+    @api.doc('spatial_zone', params={'id': 'A zone identifier'})
+    @api.marshal_with(dataset_ref_fields)
+    def get(self, id):
+        '''Fetch datasets for a given zone'''
+        args = dataset_parser.parse_args()
+        zone = GeoZone.objects.get_or_404(id=id)
+        if (args.get('with_dynamic')
+                and current_app.config.get('ACTIVATE_TERRITORIES')):
+            DATASETS = TERRITORY_DATASETS[zone.level_name]
+            dynamic_dataset_classes = sorted(DATASETS.values(),
+                                             key=lambda a: a.order)
+            datasets = [
+                dynamic_dataset_class(zone)
+                for dynamic_dataset_class in dynamic_dataset_classes
+            ]
+        else:
+            datasets = []
+        datasets += list(Dataset.objects.visible()
+                         .filter(spatial__zones=zone)
+                         .limit(args['size']))
+        return datasets
+
+
+@ns.route('/zone/<path:id>', endpoint='zone')
+class ZoneAPI(API):
+    @api.doc('spatial_zone', params={'id': 'A zone identifier'})
+    def get(self, id):
+        '''Fetch a zone'''
+        zone = GeoZone.objects.get_or_404(id=id)
+        return zone.toGeoJSON()
 
 
 @ns.route('/levels', endpoint='spatial_levels')
@@ -115,7 +176,7 @@ class SpatialCoverageAPI(API):
 
         for zone in GeoZone.objects(level=level.id):
             # fetch nested levels IDs
-            ids = GeoZone.objects(parents=zone.id).distinct('id')
+            ids = GeoZone.objects(parents=zone.id).only('id').distinct('id')
             ids.append(zone.id)
             # Count datasets in zone
             nb_datasets = Dataset.objects(spatial__zones__in=ids).count()

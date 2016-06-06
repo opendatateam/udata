@@ -7,6 +7,10 @@ from udata.utils import get_by
 
 from udata.utils import faker
 from udata.tests.api import APITestCase
+from udata.tests.features.territories.test_territories_process import (
+    create_geozones_fixtures, TerritoriesSettings
+)
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.spatial.factories import (
     SpatialCoverageFactory, GeoZoneFactory, GeoLevelFactory
@@ -188,6 +192,84 @@ class SpatialApiTest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json), len(levels) + 2)
 
+    def test_zone_datasets_empty(self):
+        paca, bdr, arles = create_geozones_fixtures()
+        response = self.get(url_for('api.zone_datasets', id=paca.id))
+        self.assert200(response)
+        self.assertEqual(response.json, [])
+
+    def test_zone_datasets(self):
+        paca, bdr, arles = create_geozones_fixtures()
+        with self.autoindex():
+            organization = OrganizationFactory()
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+
+        response = self.get(url_for('api.zone_datasets', id=paca.id))
+        self.assert200(response)
+        self.assertEqual(len(response.json), 3)
+
+    def test_zone_datasets_with_size(self):
+        paca, bdr, arles = create_geozones_fixtures()
+        with self.autoindex():
+            organization = OrganizationFactory()
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+
+        response = self.get(url_for('api.zone_datasets', id=paca.id),
+                            qs={'size': 2})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 2)
+
+    def test_zone_datasets_with_dynamic(self):
+        paca, bdr, arles = create_geozones_fixtures()
+        with self.autoindex():
+            organization = OrganizationFactory()
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+
+        response = self.get(
+            url_for('api.zone_datasets', id=paca.id), qs={'with_dynamic': 1})
+        self.assert200(response)
+        # No dynamic datasets given that the setting is deactivated by default.
+        self.assertEqual(len(response.json), 3)
+
+    def test_zone_datasets_with_dynamic_and_size(self):
+        paca, bdr, arles = create_geozones_fixtures()
+        with self.autoindex():
+            organization = OrganizationFactory()
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+
+        response = self.get(
+            url_for('api.zone_datasets', id=paca.id),
+            qs={'with_dynamic': 1, 'size': 2})
+        self.assert200(response)
+        # No dynamic datasets given that the setting is deactivated by default.
+        self.assertEqual(len(response.json), 2)
+
+    def test_zone_children(self):
+        paca, bdr, arles = create_geozones_fixtures()
+
+        response = self.get(url_for('api.zone_children', id=paca.id))
+        self.assert200(response)
+        self.assertEqual(response.json['features'][0]['id'], bdr.id)
+
+        response = self.get(url_for('api.zone_children', id=bdr.id))
+        self.assert200(response)
+        self.assertEqual(response.json['features'][0]['id'], arles.id)
+
+        response = self.get(url_for('api.zone_children', id=arles.id))
+        self.assert404(response)
+
     def test_coverage_empty(self):
         GeoLevelFactory(id='top')
         response = self.get(url_for('api.spatial_coverage', level='top'))
@@ -235,3 +317,40 @@ class SpatialApiTest(APITestCase):
             self.assertEqual(properties['level'], 'sub')
             # Nested levels datasets should be counted
             self.assertEqual(properties['datasets'], 3)
+
+
+class SpatialTerritoriesApiTest(APITestCase):
+    settings = TerritoriesSettings
+
+    def test_zone_datasets_with_dynamic_and_setting(self):
+        paca, bdr, arles = create_geozones_fixtures()
+        with self.autoindex():
+            organization = OrganizationFactory()
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+
+        response = self.get(
+            url_for('api.zone_datasets', id=paca.id), qs={'with_dynamic': 1})
+        self.assert200(response)
+        # No dynamic datasets given that they are added by gouvfr extension.
+        self.assertEqual(len(response.json), 3)
+
+    def test_zone_datasets_with_dynamic_and_setting_and_size(self):
+        paca, bdr, arles = create_geozones_fixtures()
+        with self.autoindex():
+            organization = OrganizationFactory()
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+
+        response = self.get(
+            url_for('api.zone_datasets', id=paca.id), qs={
+                'with_dynamic': 1,
+                'size': 2
+            })
+        self.assert200(response)
+        # No dynamic datasets given that they are added by gouvfr extension.
+        self.assertEqual(len(response.json), 2)
