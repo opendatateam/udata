@@ -49,9 +49,8 @@ class TerritoriesAPITest(APITestCase):
         self.assert200(response)
         result = response.json[0]
         self.assertEqual(result['title'], self.arles.name)
-        self.assertEqual(result['county'], self.bdr.name)
+        self.assertEqual(result['parent'], self.bdr.name)
         self.assertEqual(result['id'], self.arles.id)
-        self.assertEqual(result['region'], None)
         self.assertIn('page', result)
         self.assertIn('image_url', result)
 
@@ -62,7 +61,7 @@ class TerritoriesAPITest(APITestCase):
         result = response.json[0]
         self.assertEqual(result['id'], self.arles.id)
         self.assertEqual(result['title'], self.arles.name)
-        self.assertEqual(result['county'], self.bdr.name)
+        self.assertEqual(result['parent'], self.bdr.name)
 
     def test_suggest_town_by_postal_code(self):
         response = self.get(
@@ -71,7 +70,7 @@ class TerritoriesAPITest(APITestCase):
         result = response.json[0]
         self.assertEqual(result['id'], self.arles.id)
         self.assertEqual(result['title'], self.arles.name)
-        self.assertEqual(result['county'], self.bdr.name)
+        self.assertEqual(result['parent'], self.bdr.name)
 
     def test_suggest_towns(self):
         arles_sur_tech = GeoZoneFactory(
@@ -93,9 +92,8 @@ class TerritoriesAPITest(APITestCase):
         self.assert200(response)
         result = response.json[0]
         self.assertEqual(result['title'], self.bdr.name)
-        self.assertEqual(result['region'], self.paca.name)
+        self.assertEqual(result['parent'], self.paca.name)
         self.assertEqual(result['id'], self.bdr.id)
-        self.assertEqual(result['county'], None)
         self.assertIn('page', result)
         self.assertIn('image_url', result)
 
@@ -107,8 +105,7 @@ class TerritoriesAPITest(APITestCase):
         print(result)
         self.assertEqual(result['title'], self.paca.name)
         self.assertEqual(result['id'], self.paca.id)
-        self.assertEqual(result['region'], None)
-        self.assertEqual(result['county'], None)
+        self.assertEqual(result['parent'], None)
         self.assertIn('page', result)
         self.assertIn('image_url', result)
 
@@ -119,7 +116,7 @@ class TerritoriesAPITest(APITestCase):
         result = response.json[0]
         self.assertEqual(result['id'], self.bdr.id)
         self.assertEqual(result['title'], self.bdr.name)
-        self.assertEqual(result['region'], self.paca.name)
+        self.assertEqual(result['parent'], self.paca.name)
 
     def test_suggest_town_and_county(self):
         bouchet = GeoZoneFactory(
