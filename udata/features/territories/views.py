@@ -1,20 +1,29 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import StringIO
+from collections import namedtuple
 
 import unicodecsv as csv
-from flask import abort, current_app, request, send_file
+from flask import abort, current_app, request, send_file, redirect, url_for
 
 from udata import theme
 from udata.auth import current_user
 from udata.core.storages import references
 from udata.core.dataset.permissions import DatasetEditPermission
 from udata.i18n import I18nBlueprint
-from udata.models import Dataset, GeoZone, TERRITORY_DATASETS
+from udata.models import Dataset, GeoZone, TERRITORY_DATASETS, HANDLED_ZONES
 from udata.sitemap import sitemap
 from udata.utils import multi_to_dict
 
 blueprint = I18nBlueprint('territories', __name__)
+
+
+def dict_to_namedtuple(name, data):
+    """Convert a `data` dict to a namedtuple.
+
+    Useful for easy attribute access.
+    """
+    return namedtuple(name, data.keys())(**data)
 
 
 @blueprint.route(
@@ -38,7 +47,7 @@ def compute_territory_dataset(territory, dataset, resource_id):
         return abort(400)
 
     for resource in dataset.resources:
-        if resource.id == resource_id:
+        if str(resource.id) == str(resource_id):
             break
 
     resource_path = references.path(resource.url.split('/')[-1])
@@ -50,7 +59,9 @@ def compute_territory_dataset(territory, dataset, resource_id):
         writer = csv.DictWriter(csvfile_out, fieldnames=reader.fieldnames)
         writer.writerow(dict(zip(writer.fieldnames, writer.fieldnames)))
         for row in reader:
-            if row[args['csv_column']].encode('utf-8') == match:
+            csv_column = row[args['csv_column']].encode('utf-8')
+            # `lstrip` ensure comparison for counties.
+            if csv_column.lstrip('0') == match.lstrip('0'):
                 writer.writerow(row)
 
     csvfile_out.seek(0)  # Back to 0 otherwise the file is served empty.
@@ -61,16 +72,39 @@ def compute_territory_dataset(territory, dataset, resource_id):
                      attachment_filename=attachment_filename)
 
 
-@blueprint.route('/town/<territory:territory>/', endpoint='territory')
+@blueprint.route('/territory/regions/', endpoint='home')
+def render_home():
+    if not current_app.config.get('ACTIVATE_TERRITORIES'):
+        return abort(404)
+
+    context = {
+        'regions': GeoZone.objects(level='fr/region').order_by('code')
+    }
+    return theme.render('territories/home.html', **context)
+
+
+@blueprint.route('/town/<int:code>/', endpoint='town')
+def redirect_town(code):
+    """
+    Legacy redirect now prefixed with `territories`.
+    """
+    # Turn the dict into a namedtuple to be consistent in routing.
+    territory = dict_to_namedtuple('Territory',
+                                   {'code': code, 'level_name': 'town'})
+    return redirect(url_for('territories.territory', territory=territory))
+
+
+@blueprint.route('/territory/<territory:territory>/', endpoint='territory')
 def render_territory(territory):
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
-    territory_dataset_classes = sorted(TERRITORY_DATASETS.values(),
-                                       key=lambda a: a.order)
-    territory_datasets = [
-        territory_dataset_class(territory)
-        for territory_dataset_class in territory_dataset_classes
+    DATASETS = TERRITORY_DATASETS[territory.level_name]
+
+    base_dataset_classes = sorted(DATASETS.values(), key=lambda a: a.order)
+    base_datasets = [
+        base_dataset_class(territory)
+        for base_dataset_class in base_dataset_classes
     ]
 
     # Retrieve all datasets then split between those optionaly owned
@@ -78,31 +112,37 @@ def render_territory(territory):
     # user has datasets for that zone in order to display a custom
     # message to ease the conversion.
     datasets = Dataset.objects.visible().filter(spatial__zones=territory)
-    town_datasets = []
+    territory_datasets = []
     other_datasets = []
     editable_datasets = []
     if datasets:
         for dataset in datasets:
             if (dataset.organization and
                     territory.id == dataset.organization.zone):
-                town_datasets.append(dataset)
+                territory_datasets.append(dataset)
             else:
                 other_datasets.append(dataset)
             editable_datasets.append(current_user.is_authenticated and
                                      DatasetEditPermission(dataset).can())
     context = {
         'territory': territory,
-        'territory_datasets': territory_datasets,
+        'base_datasets': base_datasets,
         'other_datasets': other_datasets,
         'has_pertinent_datasets': any(editable_datasets),
-        'town_datasets': town_datasets
+        'territory_datasets': territory_datasets
     }
-    return theme.render('territories/territory.html', **context)
+    template = 'territories/{level_name}.html'.format(
+        level_name=territory.level_name)
+    return theme.render(template, **context)
 
 
 @sitemap.register_generator
 def sitemap_urls():
     if current_app.config.get('ACTIVATE_TERRITORIES'):
-        for code in GeoZone.objects(level='fr/town').only('code'):
-            yield ('territories.territory', {'territory': code},
-                   None, "weekly", 0.5)
+        for level in HANDLED_ZONES:
+            for item in GeoZone.objects(level=level).only('code'):
+                # Remove 'fr/' manually from the level.
+                territory = dict_to_namedtuple(
+                    'Territory', {'level_name': level[3:], 'code': item.code})
+                yield ('territories.territory', {'territory': territory},
+                       None, "weekly", 0.5)

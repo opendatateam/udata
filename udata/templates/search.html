@@ -56,15 +56,15 @@
     {% endif %}
     {% if territories %}
         <li{% if not datasets and not reuses and not organizations and not users %} class="active"{% endif %}>
-            {% set total=territories.count() %}
+            {% set total=territories|length %}
             {% if total==1 %}
-                <a href="{{ url_for('territories.territory', territory=territories.0) }}">
-                    {{ _('Town:') }}
+                <a href="{{ territories.0.url }}">
+                    {{ _('Territory:') }}
                     <span class="badge">{{ territories.0.name }}</span>
                 </a>
             {% else %}
                 <a href="#territories" data-toggle="tab">
-                    {{ _('Towns') }}
+                    {{ _('Territories') }}
                     <span class="badge">{{ total }}</span>
                 </a>
             {% endif %}

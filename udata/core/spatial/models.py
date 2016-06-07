@@ -13,7 +13,7 @@ from udata.core.storages import logos
 
 __all__ = (
     'GeoLevel', 'GeoZone', 'SpatialCoverage', 'BASE_GRANULARITIES',
-    'spatial_granularities'
+    'spatial_granularities', 'HANDLED_ZONES'
 )
 
 
@@ -21,6 +21,8 @@ BASE_GRANULARITIES = [
     ('poi', _('POI')),
     ('other', _('Other')),
 ]
+
+HANDLED_ZONES = ('fr/town', 'fr/county', 'fr/region')
 
 
 class GeoLevel(db.Document):
@@ -78,6 +80,14 @@ class GeoZone(db.Document):
                 keys_values.append(value)
         return keys_values
 
+    @cached_property
+    def level_name(self):
+        """Truncated level name for the sake of readability."""
+        if self.level.startswith('fr/'):
+            return self.level[3:]
+        # Keep the whole level name as a fallback (e.g. `country/fr`)
+        return self.level
+
     @property
     def url(self):
         return url_for('territories.territory', territory=self)
@@ -88,6 +98,7 @@ class GeoZone(db.Document):
 
     @cached_property
     def wikipedia_url(self):
+        """Computed wikipedia URL from the DBpedia one."""
         return (self.dbpedia.replace('dbpedia', 'wikipedia')
                             .replace('resource', 'wiki'))
 
@@ -100,15 +111,55 @@ class GeoZone(db.Document):
     def town_repr(self):
         """Representation of a town with optional county."""
         if self.county:
-            return '{name} <small>({county_name})</small>'.format(
-                name=self.name, county_name=self.county.name)
+            return ('{name} '
+                    '<small>(<a href="{county_url}">{county_name}</a>)</small>'
+                    '').format(name=self.name,
+                               county_url=self.county.url,
+                               county_name=self.county.name)
         return self.name
 
     @cached_property
-    def county(self):
+    def county_repr(self):
+        """Representation of a county."""
+        return '{name} <small>({code})</small>'.format(
+            name=self.name, code=self.code)
+
+    @cached_property
+    def region_repr(self):
+        """Representation of a region."""
+        return self.name
+
+    def get_parent(self, level):
         for parent in self.parents:
-            if parent.startswith('fr/county'):
-                return GeoZone.objects.get(id=parent)
+            if parent.startswith(level):
+                return GeoZone.objects.get(id=parent, level=level)
+
+    @cached_property
+    def county(self):
+        return self.get_parent('fr/county')
+
+    @cached_property
+    def region(self):
+        return self.get_parent('fr/region')
+
+    def get_children(self, level):
+        return GeoZone.objects(level=level, parents__in=[self.id])
+
+    @cached_property
+    def towns(self):
+        return self.get_children('fr/town').order_by('-population', '-area')
+
+    @cached_property
+    def counties(self):
+        return self.get_children('fr/county').order_by('-population', '-area')
+
+    @cached_property
+    def regions(self):
+        return self.get_children('fr/region').order_by('-population', '-area')
+
+    @property
+    def handled_zone(self):
+        return self.level in HANDLED_ZONES
 
     def toGeoJSON(self):
         return {
@@ -161,3 +212,8 @@ class SpatialCoverage(db.EmbeddedDocument):
             if zone.id in top.parents:
                 top = zone
         return _(top.name)
+
+    @property
+    def handled_zones(self):
+        """Return only zones with a dedicated page."""
+        return [zone for zone in self.zones if zone.handled_zone]
