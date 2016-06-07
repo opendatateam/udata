@@ -143,19 +143,20 @@ class GeoZone(db.Document):
         return self.get_parent('fr/region')
 
     def get_children(self, level):
-        return GeoZone.objects(level=level, parents__in=[self.id])
+        return (GeoZone.objects(level=level, parents__in=[self.id])
+                       .order_by('-population', '-area'))
 
     @cached_property
     def towns(self):
-        return self.get_children('fr/town').order_by('-population', '-area')
+        return self.get_children('fr/town')
 
     @cached_property
     def counties(self):
-        return self.get_children('fr/county').order_by('-population', '-area')
+        return self.get_children('fr/county')
 
     @cached_property
     def regions(self):
-        return self.get_children('fr/region').order_by('-population', '-area')
+        return self.get_children('fr/region')
 
     @property
     def handled_zone(self):

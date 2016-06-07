@@ -85,7 +85,7 @@ class ZoneChildrenAPI(API):
     @api.doc('spatial_zone', params={'id': 'A zone identifier'})
     @api.marshal_list_with(feature_collection_fields)
     def get(self, id):
-        '''Fetch a zone'''
+        '''Fetch children of a zone.'''
         zone = GeoZone.objects.get_or_404(id=id)
         if zone.level_name == 'country':
             children = zone.regions

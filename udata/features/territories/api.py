@@ -33,8 +33,9 @@ class SuggestTerritoriesAPI(API):
         return [{
             'id': territory.id,
             'title': territory.name,
-            'county': territory.county and territory.county.name or None,
-            'region': territory.region and territory.region.name or None,
+            'parent': (territory.county and territory.county.name
+                       or territory.region and territory.region.name
+                       or None),
             'image_url': territory.logo_url(external=True),
             'page': territory.external_url
         } for territory in territories]

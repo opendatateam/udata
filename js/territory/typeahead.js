@@ -24,9 +24,8 @@ define([
                 // Keep until model is uniformised
                 transform: function(response) {
                     return response.map((row) => {
-                        const extra = row.county || row.region;
-                        if (extra) {
-                            row.name = `${row.title} (${extra})`;
+                        if (row.parent) {
+                            row.name = `${row.title} (${row.parent})`;
                         } else {
                             row.name = `${row.title}`;
                         }
