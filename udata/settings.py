@@ -161,6 +161,7 @@ class Testing(object):
     DEBUG_TOOLBAR = False
     SERVER_NAME = 'localhost'
     DEFAULT_LANGUAGE = 'en'
+    ACTIVATE_TERRITORIES = False
 
 
 class Debug(Defaults):

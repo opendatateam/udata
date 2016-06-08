@@ -87,6 +87,8 @@ class ZoneChildrenAPI(API):
     def get(self, id):
         '''Fetch children of a zone.'''
         zone = GeoZone.objects.get_or_404(id=id)
+        if not current_app.config.get('ACTIVATE_TERRITORIES'):
+            return abort(501)
         return {
             'type': 'FeatureCollection',
             'features': [z.toGeoJSON() for z in zone.children]

@@ -17,10 +17,11 @@ def create_geozones_fixtures():
         name='Provence Alpes Côtes dAzur')
     bdr = GeoZoneFactory(
         id='fr/county/13', level='fr/county', parents=[paca.id],
-        name='Bouches-du-Rhône')
+        name='Bouches-du-Rhône', code='13', population=1993177, area=0)
     arles = GeoZoneFactory(
         id='fr/town/13004', level='fr/town', parents=[bdr.id],
-        name='Arles', code='13004', population=52439)
+        name='Arles', code='13004', keys={'postal': '13200'},
+        population=52439, area=0)
     return paca, bdr, arles
 
 

@@ -5,26 +5,9 @@ from flask import url_for
 
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.tests.api import APITestCase
-from udata.settings import Testing
-
-
-def create_geozones_fixtures():
-    paca = GeoZoneFactory(
-        id='fr/region/93', level='fr/region',
-        name='Provence Alpes Côtes dAzur')
-    bdr = GeoZoneFactory(
-        id='fr/county/13', level='fr/county', name='Bouches-du-Rhône',
-        parents=[paca.id], code='13', population=1993177, area=0)
-    arles = GeoZoneFactory(
-        id='fr/town/13004', level='fr/town', parents=[bdr.id],
-        name='Arles', code='13004', keys={'postal': '13200'},
-        population=52439, area=0)
-    return paca, bdr, arles
-
-
-class TerritoriesSettings(Testing):
-    ACTIVATE_TERRITORIES = True
-    HANDLED_ZONES = ('fr/town', 'fr/county', 'fr/region')
+from udata.tests.features.territories.test_territories_process import (
+    TerritoriesSettings, create_geozones_fixtures
+)
 
 
 class TerritoriesAPITest(APITestCase):

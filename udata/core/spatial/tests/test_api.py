@@ -256,21 +256,6 @@ class SpatialApiTest(APITestCase):
         # No dynamic datasets given that the setting is deactivated by default.
         self.assertEqual(len(response.json), 2)
 
-    def test_zone_children(self):
-        paca, bdr, arles = create_geozones_fixtures()
-
-        response = self.get(url_for('api.zone_children', id=paca.id))
-        self.assert200(response)
-        self.assertEqual(response.json['features'][0]['id'], bdr.id)
-
-        response = self.get(url_for('api.zone_children', id=bdr.id))
-        self.assert200(response)
-        self.assertEqual(response.json['features'][0]['id'], arles.id)
-
-        response = self.get(url_for('api.zone_children', id=arles.id))
-        self.assert200(response)
-        self.assertEqual(response.json['features'], [])
-
     def test_coverage_empty(self):
         GeoLevelFactory(id='top')
         response = self.get(url_for('api.spatial_coverage', level='top'))
@@ -318,6 +303,16 @@ class SpatialApiTest(APITestCase):
             self.assertEqual(properties['level'], 'sub')
             # Nested levels datasets should be counted
             self.assertEqual(properties['datasets'], 3)
+
+    def test_zone_children(self):
+        paca, bdr, arles = create_geozones_fixtures()
+
+        response = self.get(url_for('api.zone_children', id=paca.id))
+        self.assertStatus(response, 501)
+        response = self.get(url_for('api.zone_children', id=bdr.id))
+        self.assertStatus(response, 501)
+        response = self.get(url_for('api.zone_children', id=arles.id))
+        self.assertStatus(response, 501)
 
 
 class SpatialTerritoriesApiTest(APITestCase):
