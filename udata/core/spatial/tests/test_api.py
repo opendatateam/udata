@@ -235,7 +235,7 @@ class SpatialApiTest(APITestCase):
                     spatial=SpatialCoverageFactory(zones=[paca.id]))
 
         response = self.get(
-            url_for('api.zone_datasets', id=paca.id), qs={'with_dynamic': 1})
+            url_for('api.zone_datasets', id=paca.id), qs={'dynamic': 1})
         self.assert200(response)
         # No dynamic datasets given that the setting is deactivated by default.
         self.assertEqual(len(response.json), 3)
@@ -251,7 +251,7 @@ class SpatialApiTest(APITestCase):
 
         response = self.get(
             url_for('api.zone_datasets', id=paca.id),
-            qs={'with_dynamic': 1, 'size': 2})
+            qs={'dynamic': 1, 'size': 2})
         self.assert200(response)
         # No dynamic datasets given that the setting is deactivated by default.
         self.assertEqual(len(response.json), 2)
@@ -333,7 +333,7 @@ class SpatialTerritoriesApiTest(APITestCase):
                     spatial=SpatialCoverageFactory(zones=[paca.id]))
 
         response = self.get(
-            url_for('api.zone_datasets', id=paca.id), qs={'with_dynamic': 1})
+            url_for('api.zone_datasets', id=paca.id), qs={'dynamic': 1})
         self.assert200(response)
         # No dynamic datasets given that they are added by gouvfr extension.
         self.assertEqual(len(response.json), 3)
@@ -349,7 +349,7 @@ class SpatialTerritoriesApiTest(APITestCase):
 
         response = self.get(
             url_for('api.zone_datasets', id=paca.id), qs={
-                'with_dynamic': 1,
+                'dynamic': 1,
                 'size': 2
             })
         self.assert200(response)

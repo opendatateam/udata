@@ -137,7 +137,7 @@ const territoryElement = qS(`[${TERRITORY}]`)
 if (territoryElement) {
   const territorySlug = territoryElement.dataset.udataTerritory
   const territoryId = territorySlug.replace(/-/g, '/')
-  const url = `${baseURL}/api/1/spatial/zone/${territoryId}/datasets?with_dynamic=1`
+  const url = `${baseURL}/api/1/spatial/zone/${territoryId}/datasets?dynamic=1`
   // Polyfill added by webpack.
   fetch(url)
     .then(checkStatus)
