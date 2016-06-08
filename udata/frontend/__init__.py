@@ -94,7 +94,7 @@ def init_app(app):
 
     # Load all plugins views and blueprints
     for plugin in app.config['PLUGINS']:
-        module = 'udata.ext.{0}.views'.format(plugin)
+        module = 'udata_{0}.views'.format(plugin)
         _load_views(app, module)
 
     # Optionnaly register debug views

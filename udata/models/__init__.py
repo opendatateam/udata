@@ -220,7 +220,7 @@ def init_app(app):
         app.config['MONGODB_DB'] = '{MONGODB_DB}-test'.format(**app.config)
     db.init_app(app)
     for plugin in app.config['PLUGINS']:
-        name = 'udata.ext.{0}.models'.format(plugin)
+        name = 'udata_{0}.models'.format(plugin)
         try:
             importlib.import_module(name)
         except ImportError as e:

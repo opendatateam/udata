@@ -59,7 +59,7 @@ class PluggableDomain(Domain):
                 translations.merge(wtforms_translations)
 
                 for plugin_name in current_app.config['PLUGINS']:
-                    module_name = 'udata.ext.{0}'.format(plugin_name)
+                    module_name = 'udata_{0}'.format(plugin_name)
                     module = import_module(module_name)
                     translations_dir = join(dirname(module.__file__),
                                             'translations')

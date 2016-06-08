@@ -116,7 +116,7 @@ def init_app(app):
 
     # Load plugins tasks
     for plugin in app.config['PLUGINS']:
-        name = 'udata.ext.{0}.tasks'.format(plugin)
+        name = 'udata_{0}.tasks'.format(plugin)
         try:
             __import__(name)
         except ImportError:

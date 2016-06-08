@@ -108,7 +108,7 @@ def udata_themes_loader(app):
 
 def plugin_themes_loader(app):
     for plugin in app.config['PLUGINS']:
-        module = import_module('udata.ext.{0}'.format(plugin))
+        module = import_module('udata_{0}'.format(plugin))
         path = join(dirname(module.__file__), 'theme')
         if isdir(path):
             yield ConfigurableTheme(path)

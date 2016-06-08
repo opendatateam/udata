@@ -63,7 +63,7 @@ def register_commands(manager):
 
     # Dynamic module commands loading
     for plugin in manager.app.config['PLUGINS']:
-        name = 'udata.ext.{0}.commands'.format(plugin)
+        name = 'udata_{0}.commands'.format(plugin)
         try:
             __import__(name)
         except ImportError as e:
