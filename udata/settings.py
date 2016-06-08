@@ -119,8 +119,7 @@ class Defaults(object):
 
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.
-    HANDLED_ZONES = ()  # ('fr/town', 'fr/county', 'fr/region')
-
+    HANDLED_LEVELS = ()  # ('fr/town', 'fr/county', 'fr/region')
 
     # CROQUEMORT = {
     #     'url': 'http://localhost:8000',

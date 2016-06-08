@@ -6,57 +6,39 @@ from flask import current_app
 from udata.models import db, GeoZone
 
 
-def check_for_towns(query):
+def check_for_territories(query):
     """
-    Return a geozone queryset of towns given the `query`.
+    Return a geozone queryset of territories given the `query`.
 
-    If it's a code, try INSEE/postal, otherwise use the name.
+    Results are sorted by population and area (biggest first).
     """
-    if (not query or len(query) < 4 or
-            not current_app.config.get('ACTIVATE_TERRITORIES')):
+    if not query or not current_app.config.get('ACTIVATE_TERRITORIES'):
         return GeoZone.objects.none()
-    qs = GeoZone.objects(level='fr/town')
-    if len(query) == 5 and query.isdigit():
-        # Match both INSEE and postal codes.
-        qs = qs(db.Q(code=query) | db.Q(keys__postal__contains=query))
-    else:
-        # Check names starting with query or exact match.
-        qs = qs(db.Q(name__istartswith=query) | db.Q(name__iexact=query))
+
+    dbqs = db.Q()
+    query = query.lower()
+    is_digit = query.isdigit()
+    for level in current_app.config.get('HANDLED_LEVELS'):
+        q = db.Q(level=level)
+        if (len(query) == 2 and level == 'fr/county'
+                and (is_digit or query in ('2a', '2b'))):
+            # Counties + Corsica.
+            q &= db.Q(code=query)
+        elif len(query) == 3 and level == 'fr/county' and is_digit:
+            # French DROM-COM.
+            q &= db.Q(code=query)
+        elif len(query) == 5 and level == 'fr/town' and (
+                is_digit or query.startswith('2a') or query.startswith('2b')):
+            # INSEE code then postal codes with Corsica exceptions.
+            q &= db.Q(code=query) | db.Q(keys__postal__contains=query)
+        elif len(query) >= 4:
+            # Check names starting with query or exact match.
+            q &= db.Q(name__istartswith=query) | db.Q(name__iexact=query)
+        else:
+            continue
+
+        # Meta Q object, ready to be passed to a queryset.
+        dbqs |= q
+
     # Sort matching results by population and area.
-    return qs.order_by('-population', '-area')
-
-
-def check_for_counties(query):
-    """
-    Return a geozone queryset of counties given the `query`.
-
-    If it's a 2/3-digits code try it, otherwise use the name.
-    """
-    if (not query or len(query) < 2 or
-            not current_app.config.get('ACTIVATE_TERRITORIES')):
-        return GeoZone.objects.none()
-    qs = GeoZone.objects(level='fr/county')
-    if ((len(query) == 2
-            and (query.isdigit() or query.lower() in ('2a', '2b')))
-            or len(query) == 3 and query.isdigit()):
-        # Check county by code, including Corsica and DROM-COM.
-        qs = qs(db.Q(code__iexact=query))
-    else:
-        # Check names starting with query or exact match.
-        qs = qs(db.Q(name__istartswith=query) | db.Q(name__iexact=query))
-    # Sort matching results by population and area.
-    return qs.order_by('-population', '-area')
-
-
-def check_for_regions(query):
-    """
-    Return a geozone queryset of regions given the `query`.
-    """
-    if (not query or len(query) < 4 or
-            not current_app.config.get('ACTIVATE_TERRITORIES')):
-        return GeoZone.objects.none()
-    qs = GeoZone.objects(level='fr/region')
-    # Check names starting with query or exact match.
-    qs = qs(db.Q(name__istartswith=query) | db.Q(name__iexact=query))
-    # Sort matching results by population and area.
-    return qs.order_by('-population', '-area')
+    return GeoZone.objects(dbqs).order_by('-population', '-area')

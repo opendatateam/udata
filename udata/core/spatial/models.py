@@ -105,18 +105,18 @@ class GeoZone(db.Document):
     @cached_property
     def child_level(self):
         """Return the child level given handled levels."""
-        HANDLED_ZONES = current_app.config.get('HANDLED_ZONES')
+        HANDLED_LEVELS = current_app.config.get('HANDLED_LEVELS')
         try:
-            return HANDLED_ZONES[HANDLED_ZONES.index(self.level) - 1]
+            return HANDLED_LEVELS[HANDLED_LEVELS.index(self.level) - 1]
         except IndexError:
             return None
 
     @cached_property
     def parent_level(self):
         """Return the parent level given handled levels."""
-        HANDLED_ZONES = current_app.config.get('HANDLED_ZONES')
+        HANDLED_LEVELS = current_app.config.get('HANDLED_LEVELS')
         try:
-            return HANDLED_ZONES[HANDLED_ZONES.index(self.level) + 1]
+            return HANDLED_LEVELS[HANDLED_LEVELS.index(self.level) + 1]
         except IndexError:
             return None
 
@@ -155,8 +155,8 @@ class GeoZone(db.Document):
                            .order_by('-population', '-area'))
 
     @property
-    def handled_zone(self):
-        return self.level in HANDLED_ZONES
+    def handled_level(self):
+        return self.level in current_app.config.get('HANDLED_LEVELS')
 
     def toGeoJSON(self):
         return {
@@ -213,4 +213,4 @@ class SpatialCoverage(db.EmbeddedDocument):
     @property
     def handled_zones(self):
         """Return only zones with a dedicated page."""
-        return [zone for zone in self.zones if zone.handled_zone]
+        return [zone for zone in self.zones if zone.handled_level]

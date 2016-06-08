@@ -73,19 +73,20 @@ The duration used for templates' cache, in minutes.
 **default**: `False`
 
 Whether you want to activate pages and API related to territories.
+Don't forget to set the `HANDLED_LEVELS` setting too.
 
 
-### HANDLED_ZONES
+### HANDLED_LEVELS
 
 **default**: `()`
 
-The list of zones that you want to deal with.
+The list of levels that you want to deal with.
 
 Warning: the order is important and will determine parents/children for
 a given territory. You have to set the smallest territory level first:
 
 ```python
-HANDLED_ZONES = ('fr/town', 'fr/county', 'fr/region')
+HANDLED_LEVELS = ('fr/town', 'fr/county', 'fr/region')
 ```
 
 

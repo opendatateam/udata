@@ -4,7 +4,7 @@
     'title': territory.html_title|striptags,
     'description': _('Datasets related to the town of %(name)s with INSEE code %(code)s and postal code %(postal)s', name=territory.html_title|striptags, code=territory.code, postal=territory.postal_string),
     'image': logo,
-    'keywords': [territory.name, territory.code, territory.postal_string, territory.parent.name],
+    'keywords': [territory.name, territory.code, territory.postal_string, territory.parent.name or ''],
 } %}
 
 {% block territory_content %}

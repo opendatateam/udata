@@ -27,7 +27,7 @@ def create_geozones_fixtures():
 
 class TerritoriesSettings(Testing):
     ACTIVATE_TERRITORIES = True
-    HANDLED_ZONES = ('fr/town', 'fr/county', 'fr/region')
+    HANDLED_LEVELS = ('fr/town', 'fr/county', 'fr/region')
 
 
 class TerritoriesTest(FrontTestCase):

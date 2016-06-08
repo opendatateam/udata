@@ -2,9 +2,7 @@
 from __future__ import unicode_literals
 
 from udata.api import api, API
-from udata.features.territories import (
-    check_for_regions, check_for_counties, check_for_towns
-)
+from udata.features.territories import check_for_territories
 
 suggest_parser = api.parser()
 suggest_parser.add_argument(
@@ -20,16 +18,9 @@ class SuggestTerritoriesAPI(API):
     @api.doc(id='suggest_territory', parser=suggest_parser)
     def get(self):
         args = suggest_parser.parse_args()
-        towns = check_for_towns(args['q'].decode('utf-8'))
-        counties = check_for_counties(args['q'].decode('utf-8'))
-        regions = check_for_regions(args['q'].decode('utf-8'))
-        territories = list(regions) + list(counties) + list(towns)
+        territories = check_for_territories(args['q'].decode('utf-8'))
         if args['size']:
             territories = territories[:args['size']]
-        # Python sort given that we aggregate two distinct querysets.
-        territories = sorted(territories,
-                             key=lambda t: (t.population, t.area),
-                             reverse=True)
         return [{
             'id': territory.id,
             'title': territory.name,
