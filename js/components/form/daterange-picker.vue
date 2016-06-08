@@ -40,6 +40,7 @@
 
 <script>
 import Calendar from 'components/calendar.vue';
+import {FieldComponentMixin} from 'components/form/base-field';
 
 const DEFAULT_FORMAT = 'L';
 const ISO_FORMAT = 'YYYY-MM-DD';
@@ -48,7 +49,7 @@ const ISO_FORMAT = 'YYYY-MM-DD';
 export default {
     name: 'daterange-picker',
     replace: true,
-    mixins: [require('components/form/base-field').FieldComponentMixin],
+    mixins: [FieldComponentMixin],
     components: {Calendar},
     data() {
         return {

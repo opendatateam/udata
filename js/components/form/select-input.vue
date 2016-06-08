@@ -13,10 +13,11 @@
 
 <script>
 import {List} from 'models/base';
+import {FieldComponentMixin} from 'components/form/base-field';
 
 export default {
     name: 'select-input',
-    mixins: [require('components/form/base-field').FieldComponentMixin],
+    mixins: [FieldComponentMixin],
     replace: true,
     computed: {
         options: function() {
