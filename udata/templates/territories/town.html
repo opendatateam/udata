@@ -1,15 +1,15 @@
 {% extends theme("territories/territory.html") %}
 
 {% set meta = {
-    'title': territory.town_repr|striptags,
-    'description': _('Datasets related to the town of %(name)s with INSEE code %(code)s and postal code %(postal)s', name=territory.town_repr|striptags, code=territory.code, postal=territory.postal_string),
+    'title': territory.html_title|striptags,
+    'description': _('Datasets related to the town of %(name)s with INSEE code %(code)s and postal code %(postal)s', name=territory.html_title|striptags, code=territory.code, postal=territory.postal_string),
     'image': logo,
-    'keywords': [territory.name, territory.code, territory.postal_string, territory.county.name],
+    'keywords': [territory.name, territory.code, territory.postal_string, territory.parent.name],
 } %}
 
 {% block territory_content %}
     <div class="col-sm-9">
-        <h1>{{ territory.town_repr|safe }}</h1>
+        <h1>{{ territory.html_title|safe }}</h1>
         <leaflet-map v-ref:map class="aside-map" :popup="false"
             data-zones="{{ url_for('api.zones', ids=[territory.id]) }}">
         </leaflet-map>

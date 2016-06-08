@@ -87,22 +87,9 @@ class ZoneChildrenAPI(API):
     def get(self, id):
         '''Fetch children of a zone.'''
         zone = GeoZone.objects.get_or_404(id=id)
-        if zone.level_name == 'country':
-            children = zone.regions
-        elif zone.level_name == 'region':
-            children = zone.counties
-        elif zone.level_name == 'county':
-            children = zone.towns
-        else:
-            return abort(404)
-        features = []
-
-        for zone in children:
-            features.append(zone.toGeoJSON())
-
         return {
             'type': 'FeatureCollection',
-            'features': features
+            'features': [z.toGeoJSON() for z in zone.children]
         }
 
 

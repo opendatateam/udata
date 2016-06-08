@@ -22,6 +22,7 @@ BASE_GRANULARITIES = [
     ('other', _('Other')),
 ]
 
+# WARNING: the order is important to compute parents/children.
 HANDLED_ZONES = ('fr/town', 'fr/county', 'fr/region')
 
 
@@ -59,8 +60,24 @@ class GeoZone(db.Document):
     __str__ = __unicode__
 
     def __html__(self):
+        """In use within the admin."""
         return '{name} <i>({code})</i>'.format(
             name=gettext(self.name), code=self.code)
+
+    @cached_property
+    def html_title(self):
+        """In use within templates."""
+        if self.level_name == 'town':
+            return ('{name} '
+                    '<small>(<a href="{parent_url}">{parent_name}</a>)</small>'
+                    '').format(name=self.name,
+                               parent_url=self.parent.url,
+                               parent_name=self.parent.name)
+        elif self.level_name == 'county':
+            return '{name} <small>({code})</small>'.format(
+                name=self.name, code=self.code)
+        else:
+            return self.name
 
     def logo_url(self, external=False):
         filename = self.logo.filename
@@ -88,6 +105,22 @@ class GeoZone(db.Document):
         # Keep the whole level name as a fallback (e.g. `country/fr`)
         return self.level
 
+    @cached_property
+    def child_level(self):
+        """Return the child level given handled levels."""
+        try:
+            return HANDLED_ZONES[HANDLED_ZONES.index(self.level) - 1]
+        except IndexError:
+            return None
+
+    @cached_property
+    def parent_level(self):
+        """Return the parent level given handled levels."""
+        try:
+            return HANDLED_ZONES[HANDLED_ZONES.index(self.level) + 1]
+        except IndexError:
+            return None
+
     @property
     def url(self):
         return url_for('territories.territory', territory=self)
@@ -107,56 +140,20 @@ class GeoZone(db.Document):
         """Return a list of postal codes separated by commas."""
         return ', '.join(self.keys.get('postal', []))
 
-    @cached_property
-    def town_repr(self):
-        """Representation of a town with optional county."""
-        if self.county:
-            return ('{name} '
-                    '<small>(<a href="{county_url}">{county_name}</a>)</small>'
-                    '').format(name=self.name,
-                               county_url=self.county.url,
-                               county_name=self.county.name)
-        return self.name
+    @property
+    def parent(self):
+        if self.parent_level:
+            for parent in self.parents:
+                if parent.startswith(self.parent_level):
+                    return GeoZone.objects.get(id=parent,
+                                               level=self.parent_level)
 
-    @cached_property
-    def county_repr(self):
-        """Representation of a county."""
-        return '{name} <small>({code})</small>'.format(
-            name=self.name, code=self.code)
-
-    @cached_property
-    def region_repr(self):
-        """Representation of a region."""
-        return self.name
-
-    def get_parent(self, level):
-        for parent in self.parents:
-            if parent.startswith(level):
-                return GeoZone.objects.get(id=parent, level=level)
-
-    @cached_property
-    def county(self):
-        return self.get_parent('fr/county')
-
-    @cached_property
-    def region(self):
-        return self.get_parent('fr/region')
-
-    def get_children(self, level):
-        return (GeoZone.objects(level=level, parents__in=[self.id])
-                       .order_by('-population', '-area'))
-
-    @cached_property
-    def towns(self):
-        return self.get_children('fr/town')
-
-    @cached_property
-    def counties(self):
-        return self.get_children('fr/county')
-
-    @cached_property
-    def regions(self):
-        return self.get_children('fr/region')
+    @property
+    def children(self):
+        if self.child_level:
+            return (GeoZone.objects(level=self.child_level,
+                                    parents__in=[self.id])
+                           .order_by('-population', '-area'))
 
     @property
     def handled_zone(self):

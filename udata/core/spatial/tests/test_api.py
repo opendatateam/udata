@@ -268,7 +268,8 @@ class SpatialApiTest(APITestCase):
         self.assertEqual(response.json['features'][0]['id'], arles.id)
 
         response = self.get(url_for('api.zone_children', id=arles.id))
-        self.assert404(response)
+        self.assert200(response)
+        self.assertEqual(response.json['features'], [])
 
     def test_coverage_empty(self):
         GeoLevelFactory(id='top')

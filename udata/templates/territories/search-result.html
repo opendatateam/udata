@@ -1,13 +1,10 @@
 {% cache cache_duration, 'territory-search-result', territory.id, g.lang_code %}
 {% set logo=territory.logo_url() or theme_static('img/placeholder_territory.png') %}
-{% if territory.level == 'fr/town' %}
-    {% set title = territory.town_repr %}
+{% if territory.level_name == 'town' %}
     {% set label = _('Town') %}
-{% elif territory.level == 'fr/county' %}
-    {% set title = territory.county_repr %}
+{% elif territory.level_name == 'county' %}
     {% set label = _('County') %}
-{% elif territory.level == 'fr/region' %}
-    {% set title = territory.region_repr %}
+{% elif territory.level_name == 'region' %}
     {% set label = _('Region') %}
 {% endif %}
 <li class="search-result territory-result">
@@ -18,7 +15,7 @@
                 width="70" height="70">
         </div>
         <div class="result-body ellipsis-dot">
-            <h4 class="result-title">{{ title|safe }}</h4>
+            <h4 class="result-title">{{ territory.html_title|safe }}</h4>
             <div class="result-description">
                 {{ _('INSEE code:') }} {{ territory.code }}<br/>
                 {% if territory.postal_string %}
