@@ -30,6 +30,7 @@
 
 <script>
 import moment from 'moment';
+import {FieldComponentMixin} from 'components/form/base-field';
 
 const DEFAULT_FORMAT = 'HH:mm';
 const ISO_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
@@ -38,7 +39,7 @@ export default {
     name: 'time-picker',
     replace: true,
     props: ['serializable'],
-    mixins: [require('components/form/base-field').FieldComponentMixin],
+    mixins: [FieldComponentMixin],
     components: {
         'time-widget': require('components/time-widget.vue')
     },

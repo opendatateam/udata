@@ -7,9 +7,11 @@
 </template>
 
 <script>
+import {FieldComponentMixin} from 'components/form/base-field';
+
 export default {
     name: 'hidden-input',
     replace: true,
-    mixins: [require('components/form/base-field').FieldComponentMixin]
+    mixins: [FieldComponentMixin]
 };
 </script>
