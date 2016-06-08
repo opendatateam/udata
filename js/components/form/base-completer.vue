@@ -16,6 +16,7 @@ import $ from 'jquery';
 import log from 'logger';
 import BaseError from 'models/error';
 import utils from 'utils';
+import {FieldComponentMixin} from 'components/form/base-field';
 
 import 'selectize';
 
@@ -41,7 +42,7 @@ function forceList(value) {
 
 export default {
     replace: true,
-    mixins: [require('components/form/base-field').FieldComponentMixin],
+    mixins: [FieldComponentMixin],
     computed: {
         selectize_options() {
             var opts = this.$options.selectize;

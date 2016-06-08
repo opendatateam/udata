@@ -28,6 +28,7 @@
 
 <script>
 import moment from 'moment';
+import {FieldComponentMixin} from 'components/form/base-field';
 
 const DEFAULT_FORMAT = 'L';
 const ISO_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
@@ -35,7 +36,7 @@ const ISO_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 export default {
     name: 'frequency-field',
     replace: true,
-    mixins: [require('components/form/base-field').FieldComponentMixin],
+    mixins: [FieldComponentMixin],
     props: {
         placeholder: {
             type: String,
