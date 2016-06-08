@@ -118,6 +118,9 @@ class Defaults(object):
     HARVEST_PREVIEW_MAX_ITEMS = 20
 
     ACTIVATE_TERRITORIES = False
+    # The order is important to compute parents/children, smaller first.
+    HANDLED_ZONES = ()  # ('fr/town', 'fr/county', 'fr/region')
+
 
     # CROQUEMORT = {
     #     'url': 'http://localhost:8000',

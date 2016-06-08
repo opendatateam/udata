@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import url_for
+from flask import current_app, url_for
 from werkzeug.local import LocalProxy
 from werkzeug import cached_property
 
@@ -13,7 +13,7 @@ from udata.core.storages import logos
 
 __all__ = (
     'GeoLevel', 'GeoZone', 'SpatialCoverage', 'BASE_GRANULARITIES',
-    'spatial_granularities', 'HANDLED_ZONES'
+    'spatial_granularities'
 )
 
 
@@ -21,9 +21,6 @@ BASE_GRANULARITIES = [
     ('poi', _('POI')),
     ('other', _('Other')),
 ]
-
-# WARNING: the order is important to compute parents/children.
-HANDLED_ZONES = ('fr/town', 'fr/county', 'fr/region')
 
 
 class GeoLevel(db.Document):
@@ -108,6 +105,7 @@ class GeoZone(db.Document):
     @cached_property
     def child_level(self):
         """Return the child level given handled levels."""
+        HANDLED_ZONES = current_app.config.get('HANDLED_ZONES')
         try:
             return HANDLED_ZONES[HANDLED_ZONES.index(self.level) - 1]
         except IndexError:
@@ -116,6 +114,7 @@ class GeoZone(db.Document):
     @cached_property
     def parent_level(self):
         """Return the parent level given handled levels."""
+        HANDLED_ZONES = current_app.config.get('HANDLED_ZONES')
         try:
             return HANDLED_ZONES[HANDLED_ZONES.index(self.level) + 1]
         except IndexError:

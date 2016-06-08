@@ -11,7 +11,7 @@ from udata.auth import current_user
 from udata.core.storages import references
 from udata.core.dataset.permissions import DatasetEditPermission
 from udata.i18n import I18nBlueprint
-from udata.models import Dataset, GeoZone, TERRITORY_DATASETS, HANDLED_ZONES
+from udata.models import Dataset, GeoZone, TERRITORY_DATASETS
 from udata.sitemap import sitemap
 from udata.utils import multi_to_dict
 
@@ -139,7 +139,7 @@ def render_territory(territory):
 @sitemap.register_generator
 def sitemap_urls():
     if current_app.config.get('ACTIVATE_TERRITORIES'):
-        for level in HANDLED_ZONES:
+        for level in current_app.config.get('HANDLED_ZONES'):
             for item in GeoZone.objects(level=level).only('code'):
                 # Remove 'fr/' manually from the level.
                 territory = dict_to_namedtuple(
