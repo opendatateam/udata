@@ -45,6 +45,8 @@ function empty_schema() {
 
 /**
  * Input type which are text or formated text
+ *
+ * See: https://www.w3.org/TR/html5/forms.html#attr-input-type
  */
 const TEXT_INPUTS = [
     'color',
@@ -193,7 +195,7 @@ export default {
 
             Array.prototype.map.call(elements, function(el) {
                 let value;
-                if (TEXT_TAGS.includes(el.tagName.toLowerCase()) || TEXT_INPUTS.includes(el.type)) {
+                if (TEXT_TAGS.includes(el.tagName.toLowerCase()) || TEXT_INPUTS.includes(el.type.toLowerCase())) {
                     value = el.value || undefined;
                 } else if (el.type === 'checkbox') {
                     value = el.checked;
