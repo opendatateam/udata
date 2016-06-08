@@ -38,6 +38,17 @@ class TerritoriesAPITest(APITestCase):
         self.assertIn('page', result)
         self.assertIn('image_url', result)
 
+    def test_suggest_town_five_letters(self):
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': 'arles'})
+        self.assert200(response)
+        result = response.json[0]
+        self.assertEqual(result['title'], self.arles.name)
+        self.assertEqual(result['parent'], self.bdr.name)
+        self.assertEqual(result['id'], self.arles.id)
+        self.assertIn('page', result)
+        self.assertIn('image_url', result)
+
     def test_suggest_town_by_insee_code(self):
         response = self.get(
             url_for('api.suggest_territory'), qs={'q': '13004'})
@@ -62,7 +73,7 @@ class TerritoriesAPITest(APITestCase):
             name='Arles-sur-Tech', code='66009', keys={'postal': '66150'},
             population=2687, area=0)
         response = self.get(
-            url_for('api.suggest_territory'), qs={'q': 'arle'})
+            url_for('api.suggest_territory'), qs={'q': 'arles'})
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 2)
@@ -115,3 +126,58 @@ class TerritoriesAPITest(APITestCase):
         # BDR must be first given the population.
         self.assertEqual(results[0]['id'], self.bdr.id)
         self.assertEqual(results[1]['id'], bouchet.id)
+
+    def test_suggest_drom_com(self):
+        guyane = GeoZoneFactory(
+            id='fr/county/973', level='fr/county', name='Guyane', code='973',
+            population=250109, area=0)
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': 'guya'})
+        self.assert200(response)
+        results = response.json
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], guyane.id)
+
+    def test_suggest_drom_com_by_code(self):
+        guyane = GeoZoneFactory(
+            id='fr/county/973', level='fr/county', name='Guyane', code='973',
+            population=250109, area=0)
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': '973'})
+        self.assert200(response)
+        results = response.json
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], guyane.id)
+
+    def test_suggest_corsica(self):
+        bastia = GeoZoneFactory(
+            id='fr/town/2b033', level='fr/town', name='Bastia', code='2b033',
+            population=4479, area=0)
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': 'basti'})
+        self.assert200(response)
+        results = response.json
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], bastia.id)
+
+    def test_suggest_corsica_by_code(self):
+        bastia = GeoZoneFactory(
+            id='fr/town/2b033', level='fr/town', name='Bastia', code='2b033',
+            population=4479, area=0)
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': '2b033'})
+        self.assert200(response)
+        results = response.json
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], bastia.id)
+
+    def test_suggest_corsica_by_county_code(self):
+        haute_corse = GeoZoneFactory(
+            id='fr/county/2b', level='fr/county', name='Haute-Corse',
+            code='2b', population=168640, area=0)
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': '2b'})
+        self.assert200(response)
+        results = response.json
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], haute_corse.id)
