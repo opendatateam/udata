@@ -24,10 +24,9 @@ define([
                 // Keep until model is uniformised
                 transform: function(response) {
                     return response.map((row) => {
+                        row.name = row.title;
                         if (row.parent) {
                             row.name = `${row.title} (${row.parent})`;
-                        } else {
-                            row.name = `${row.title}`;
                         }
                         return row;
                     });

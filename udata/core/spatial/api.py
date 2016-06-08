@@ -37,7 +37,7 @@ suggest_parser.add_argument(
 
 dataset_parser = api.parser()
 dataset_parser.add_argument(
-    'with_dynamic', type=bool, help='Append dynamic datasets',
+    'dynamic', type=bool, help='Append dynamic datasets',
     location='args', required=False)
 dataset_parser.add_argument(
     'size', type=int, help='The amount of datasets to fetch',
@@ -101,7 +101,7 @@ class ZoneDatasetsAPI(API):
         '''Fetch datasets for a given zone'''
         args = dataset_parser.parse_args()
         zone = GeoZone.objects.get_or_404(id=id)
-        if (args.get('with_dynamic')
+        if (args.get('dynamic')
                 and current_app.config.get('ACTIVATE_TERRITORIES')):
             DATASETS = TERRITORY_DATASETS[zone.level_name]
             dynamic_dataset_classes = sorted(DATASETS.values(),
