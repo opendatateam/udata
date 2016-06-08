@@ -43,6 +43,31 @@ function empty_schema() {
     return {properties: {}, required: []};
 }
 
+/**
+ * Input type which are text or formated text
+ */
+const TEXT_INPUTS = [
+    'color',
+    'date',
+    'datetime',
+    'datetime-local',
+    'email',
+    'hidden',
+    'month',
+    'range',
+    'search',
+    'tel',
+    'text',
+    'time',
+    'url',
+    'week',
+];
+
+/**
+ * Form tags that should be considered as text
+ */
+const TEXT_TAGS = ['select', 'textarea'];
+
 
 export default {
     name: 'base-form',
@@ -168,7 +193,7 @@ export default {
 
             Array.prototype.map.call(elements, function(el) {
                 let value;
-                if (el.tagName.toLowerCase() === 'select') {
+                if (TEXT_TAGS.includes(el.tagName.toLowerCase()) || TEXT_INPUTS.includes(el.type)) {
                     value = el.value || undefined;
                 } else if (el.type === 'checkbox') {
                     value = el.checked;
