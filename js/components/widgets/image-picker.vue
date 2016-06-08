@@ -72,10 +72,11 @@
 import $ from 'jquery';
 import API from 'api';
 import log from 'logger';
+import UploaderMixin from 'mixins/uploader';
 
 export default {
     autoUpload: false,
-    mixins: [require('mixins/uploader')],
+    mixins: [UploaderMixin],
     data: function() {
         return {
             src: null,

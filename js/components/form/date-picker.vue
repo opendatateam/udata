@@ -30,6 +30,7 @@
 <script>
 import moment from 'moment';
 import Calendar from 'components/calendar.vue';
+import {FieldComponentMixin} from 'components/form/base-field';
 
 const DEFAULT_FORMAT = 'L';
 const ISO_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
@@ -37,7 +38,7 @@ const ISO_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 export default {
     name: 'date-picker',
     replace: true,
-    mixins: [require('components/form/base-field').FieldComponentMixin],
+    mixins: [FieldComponentMixin],
     props: {
         serializable: {
             type: Boolean,

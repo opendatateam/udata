@@ -21,11 +21,12 @@
 
 <script>
 import moment from 'moment';
+import {FieldComponentMixin} from 'components/form/base-field';
 
 export default {
     name: 'datetime-picker',
     replace: true,
-    mixins: [require('components/form/base-field').FieldComponentMixin],
+    mixins: [FieldComponentMixin],
     events: {
         'calendar:date:selected': function(datetime) {
             let value = moment(this.$els.hidden.value);

@@ -57,9 +57,11 @@
 import API from 'api';
 import Dataset from 'models/dataset';
 import CommunityResource from 'models/communityresource';
+import UploaderMixin from 'mixins/uploader';
+
 
 export default {
-    mixins: [require('mixins/uploader')],
+    mixins: [UploaderMixin],
     props: {
         dataset: {
             type: Object,
