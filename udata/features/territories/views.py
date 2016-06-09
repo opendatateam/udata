@@ -77,10 +77,14 @@ def render_home():
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
-    context = {
-        'regions': GeoZone.objects(level='fr/region').order_by('code')
-    }
-    return theme.render('territories/home.html', **context)
+    regions = GeoZone.objects.get(id='country/fr').children
+
+    return theme.render('territories/home.html', **{
+        'geojson': {
+            'type': 'FeatureCollection',
+            'features': [region.toGeoJSON() for region in regions]
+        }
+    })
 
 
 @blueprint.route('/town/<int:code>/', endpoint='town')
