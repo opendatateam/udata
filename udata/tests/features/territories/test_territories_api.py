@@ -181,3 +181,12 @@ class TerritoriesAPITest(APITestCase):
         results = response.json
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['id'], haute_corse.id)
+
+    def test_not_suggest_country(self):
+        GeoZoneFactory(
+            id='country/fr', level='country', name='France')
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': 'franc'})
+        self.assert200(response)
+        results = response.json
+        self.assertEqual(len(results), 0)

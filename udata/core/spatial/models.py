@@ -103,6 +103,14 @@ class GeoZone(db.Document):
         return self.level
 
     @cached_property
+    def level_i18n_name(self):
+        """In use within templates for dynamic translations."""
+        for level, name in spatial_granularities:
+            if self.level == level:
+                return name
+        return self.level_name  # Fallback that should never happen.
+
+    @cached_property
     def child_level(self):
         """Return the child level given handled levels."""
         HANDLED_LEVELS = current_app.config.get('HANDLED_LEVELS')

@@ -1,12 +1,5 @@
 {% cache cache_duration, 'territory-search-result', territory.id, g.lang_code %}
 {% set logo=territory.logo_url() or theme_static('img/placeholder_territory.png') %}
-{% if territory.level_name == 'town' %}
-    {% set label = _('Town') %}
-{% elif territory.level_name == 'county' %}
-    {% set label = _('County') %}
-{% elif territory.level_name == 'region' %}
-    {% set label = _('Region') %}
-{% endif %}
 <li class="search-result territory-result">
     <a href="{{ territory.url }}" title="{{ territory.name }}">
         <div class="result-logo pull-left">
@@ -29,7 +22,7 @@
                     data-placement="top" data-container="body"
                     title="{{ _('Administrative level') }}">
                     <span class="fa fa-bullseye fa-fw"></span>
-                    {{ label }}
+                    {{ territory.level_i18n_name }}
                 </a>
             </li>
             {% if territory.population %}

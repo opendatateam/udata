@@ -19,6 +19,8 @@ def check_for_territories(query):
     query = query.lower()
     is_digit = query.isdigit()
     for level in current_app.config.get('HANDLED_LEVELS'):
+        if level == 'country':
+            continue  # Level not fully handled yet.
         q = db.Q(level=level)
         if (len(query) == 2 and level == 'fr/county'
                 and (is_digit or query in ('2a', '2b'))):

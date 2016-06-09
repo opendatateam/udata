@@ -140,6 +140,8 @@ def render_territory(territory):
 def sitemap_urls():
     if current_app.config.get('ACTIVATE_TERRITORIES'):
         for level in current_app.config.get('HANDLED_LEVELS'):
+            if level == 'country':
+                continue  # Level not fully handled yet.
             for item in GeoZone.objects(level=level).only('code'):
                 # Remove 'fr/' manually from the level.
                 territory = dict_to_namedtuple(
