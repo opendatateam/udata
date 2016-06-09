@@ -16,6 +16,14 @@ $ git clone https://github.com/etalab/udata.git
 ```
 
 
+## Other system dependencies
+
+Libxml2 and LZMA are needed to install the python dependencies. On Ubuntu :
+```shell
+$ sudo apt-get install libxml2-dev libxslt1-dev liblzma-dev
+```
+
+
 ## MongoDB, ElasticSearch and Redis
 
 The project depends on [MongoDB][] 3.2+, [ElasticSearch][] 1.7 and [Redis][].
