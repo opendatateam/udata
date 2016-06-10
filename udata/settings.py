@@ -165,15 +165,15 @@ class Debug(Defaults):
     SEND_MAIL = False
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     DEBUG_TB_PANELS = (
-        'flask.ext.debugtoolbar.panels.versions.VersionDebugPanel',
-        'flask.ext.debugtoolbar.panels.timer.TimerDebugPanel',
-        'flask.ext.debugtoolbar.panels.headers.HeaderDebugPanel',
-        'flask.ext.debugtoolbar.panels.request_vars.RequestVarsDebugPanel',
-        'flask.ext.debugtoolbar.panels.config_vars.ConfigVarsDebugPanel',
-        'flask.ext.debugtoolbar.panels.template.TemplateDebugPanel',
-        'flask.ext.debugtoolbar.panels.logger.LoggingPanel',
-        'flask.ext.debugtoolbar.panels.profiler.ProfilerDebugPanel',
-        'flask.ext.mongoengine.panels.MongoDebugPanel',
+        'flask_debugtoolbar.panels.versions.VersionDebugPanel',
+        'flask_debugtoolbar.panels.timer.TimerDebugPanel',
+        'flask_debugtoolbar.panels.headers.HeaderDebugPanel',
+        'flask_debugtoolbar.panels.request_vars.RequestVarsDebugPanel',
+        'flask_debugtoolbar.panels.config_vars.ConfigVarsDebugPanel',
+        'flask_debugtoolbar.panels.template.TemplateDebugPanel',
+        'flask_debugtoolbar.panels.logger.LoggingPanel',
+        'flask_debugtoolbar.panels.profiler.ProfilerDebugPanel',
+        'flask_mongoengine.panels.MongoDebugPanel',
     )
     CACHE_TYPE = 'null'
     CACHE_NO_NULL_WARNING = True

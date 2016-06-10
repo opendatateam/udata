@@ -8,10 +8,12 @@ import sys
 from os.path import join, dirname, splitext, basename
 from glob import iglob
 
-from flask.ext.script import Manager
-from flask.ext.script.commands import Clean, ShowUrls, Server
+from flask_script import Manager
+from flask_script.commands import Clean, ShowUrls, Server
 
 from udata.app import create_app, standalone
+
+# TODO: Switch to flask.cli and drop flask-script dependency
 
 # Expect an utf8 compatible terminal
 reload(sys)
@@ -61,7 +63,7 @@ def register_commands(manager):
 
     # Dynamic module commands loading
     for plugin in manager.app.config['PLUGINS']:
-        name = 'udata.ext.{0}.commands'.format(plugin)
+        name = 'udata_{0}.commands'.format(plugin)
         try:
             __import__(name)
         except ImportError as e:

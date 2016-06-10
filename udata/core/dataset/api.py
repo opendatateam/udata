@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 from flask import request
-from flask.ext.security import current_user
+from flask_security import current_user
 
 from werkzeug.datastructures import FileStorage
 

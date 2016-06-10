@@ -6,7 +6,7 @@ import logging
 from datetime import date
 
 from flask import json
-from flask.ext.script import prompt_bool
+from flask_script import prompt_bool
 
 from udata.commands import submanager
 from udata.search import es, adapter_catalog, ANALYSIS_JSON
