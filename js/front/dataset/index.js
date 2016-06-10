@@ -78,7 +78,7 @@ new Vue({
                 el: this.$els.modal,
                 replace: false, // Needed while all components are not migrated to replace: true behavior
                 parent: this,
-                data: data
+                propsData: data
             });
         },
 
