@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block content %}
+<div v-el:modal></div>
 <section class="default">
     <div class="container organization-container"
         data-organization-id="{{ org.id }}"
@@ -109,10 +110,10 @@
                 {% if not member %}
                     {% set pending_request = org.pending_request(current_user) %}
                     {% if not pending_request %}
-                    <a href data-toggle="tooltip" class="btn btn-primary btn-block btn-sm icon-left membership"
-                        data-placement="left"
-                        data-api="{{ url_for('api.request_membership', org=org) }}"
-                        title="{{ _('I belong to this organization') }}">
+                    <a href class="btn btn-primary btn-block btn-sm icon-left membership"
+                        v-tooltip tooltip-placement="left"
+                        title="{{ _('I belong to this organization') }}"
+                        @click.prevent="requestMembership('{{ url_for('api.request_membership', org=org) }}')">
                         <span class="glyphicon glyphicon-user"></span>
                         {{ _('Join') }}
                     </a>

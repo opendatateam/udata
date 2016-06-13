@@ -22,7 +22,7 @@ module.exports = {
         search: './js/search.js',
         dashboard: './js/dashboard.js',
         apidoc: './js/apidoc',
-        'organization/display': './js/organization/display',
+        organization: './js/front/organization',
         'site/map': './js/site/map',
         topic: './js/front/topic',
         post: './js/front/post',
