@@ -47,7 +47,8 @@ dataset_parser.add_argument(
 @ns.route('/zones/suggest', endpoint='suggest_zones')
 class SuggestZonesAPI(API):
     @api.marshal_list_with(zone_suggestion_fields)
-    @api.doc('suggest_zones', parser=suggest_parser)
+    @api.expect(suggest_parser)
+    @api.doc('suggest_zones')
     def get(self):
         '''Suggest geospatial zones'''
         args = suggest_parser.parse_args()
@@ -98,6 +99,7 @@ class ZoneChildrenAPI(API):
 @ns.route('/zone/<path:id>/datasets', endpoint='zone_datasets')
 class ZoneDatasetsAPI(API):
     @api.doc('spatial_zone', params={'id': 'A zone identifier'})
+    @api.expect(dataset_parser)
     @api.marshal_with(dataset_ref_fields)
     def get(self, id):
         '''Fetch datasets for a given zone'''

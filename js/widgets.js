@@ -17,19 +17,23 @@ const scriptURI = qS('script#udata').src
 parser.href = scriptURI
 const baseURL = `${parser.protocol}//${parser.host}`
 
+/**
+ * Return the `array` chunked by `n`, useful to retrieve all datasets
+ * with a minimum of requests.
+ * TODO: more clever chunk to retrieve n, then n * 2, then n * 4, etc?
+ * in order to display first datasets quickly then load on a minimum
+ * of requests.
+ */
 function chunk (array, n) {
-  // Return the `array` chunked by `n`, useful to retrieve all datasets
-  // with a minimum of requests.
-  // TODO: more clever chunk to retrieve n, then n * 2, then n * 4, etc?
-  // in order to display first datasets quickly then load on a minimum
-  // of requests.
   return Array
     .apply(null, Array(Math.ceil(array.length / n))).map((x, i) => i) // range
     .map((x, i) => array.slice(i * n, i * n + n))
 }
 
+/**
+ * `fetch` doesn't provide an error handling based on status code.
+ */
 function checkStatus (response) {
-  // `fetch` doesn't provide an error handling based on status code.
   if (response.status >= 200 && response.status < 300) {
     return response
   } else {
@@ -39,13 +43,17 @@ function checkStatus (response) {
   }
 }
 
+/**
+ * Equivalent to `zip()` in Python.
+ */
 function zip (arrays) {
-  // Equivalent to `zip()` in Python.
   return arrays[0].map((_, i) => arrays.map((array) => array[i]))
 }
 
+/**
+ * Return the fragment to embed the current dataset in another page.
+ */
 function buildIntegrationFragment (reference) {
-  // Return the fragment to embed the current dataset in another page.
   const [kind, ...ids] = reference.split('-')
   const id = ids.join('-')
   const fragment = document.createElement('div')
@@ -62,8 +70,10 @@ function buildIntegrationFragment (reference) {
   return fragment
 }
 
+/**
+ * Handle the "save on clipboard" capability.
+ */
 function easeCopyPasting (content) {
-  // Handle the "save on clipboard" capability.
   const textarea = content.querySelector('textarea')
   textarea.focus()
   textarea.select()
@@ -75,8 +85,10 @@ function easeCopyPasting (content) {
   })
 }
 
+/**
+ * Display/hide the integration box for embeds.
+ */
 function handleIntegration (event) {
-  // Display/hide the integration box for embeds.
   event.preventDefault()
   const element = event.target
   const paragraph = element.parentNode
@@ -97,9 +109,11 @@ function handleIntegration (event) {
   }
 }
 
-const embedDatasets = (territories, datasets) => {
-  // Main function retrieving the HTML code from the API.
-  // Keep the chunk > 12 otherwise territories pages will issue more than one query.
+/**
+ * Main function retrieving the HTML code from the API.
+ * Keep the chunk > 12 otherwise territories pages will issue more than one query.
+ */
+function embedDatasets (territories, datasets) {
   chunk(territories.concat(datasets), 12).forEach((elements) => {
     const references = elements.map((el) => {
       if (el.hasAttribute(TERRITORY_ID)) {

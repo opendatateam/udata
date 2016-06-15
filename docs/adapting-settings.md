@@ -78,7 +78,7 @@ Don't forget to set the `HANDLED_LEVELS` setting too.
 
 ### HANDLED_LEVELS
 
-**default**: `()`
+**default**: `tuple()`
 
 The list of levels that you want to deal with.
 
