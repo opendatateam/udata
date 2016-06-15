@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import itertools
 
 from flask import g, abort
-from flask.ext.security import current_user
+from flask_security import current_user
 
 from udata import search
 from udata.frontend import csv

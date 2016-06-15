@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from datetime import date
 from uuid import uuid4
 
-from flask.ext import fs
+import flask_fs as fs
 
 AUTHORIZED_TYPES = fs.AllExcept(fs.SCRIPTS + fs.EXECUTABLES)
 

@@ -10,7 +10,7 @@ from os.path import join, dirname, isdir, exists
 from flask import current_app, g
 from werkzeug.local import LocalProxy
 
-from flask.ext.themes2 import (
+from flask_themes2 import (
     Themes, Theme, render_theme_template, get_theme, packaged_themes_loader
 )
 
@@ -108,7 +108,7 @@ def udata_themes_loader(app):
 
 def plugin_themes_loader(app):
     for plugin in app.config['PLUGINS']:
-        module = import_module('udata.ext.{0}'.format(plugin))
+        module = import_module('udata_{0}'.format(plugin))
         path = join(dirname(module.__file__), 'theme')
         if isdir(path):
             yield ConfigurableTheme(path)

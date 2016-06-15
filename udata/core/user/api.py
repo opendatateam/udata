@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 from flask import request
-from flask.ext.security import current_user
+from flask_security import current_user
 
 from udata import search
 from udata.api import api, API

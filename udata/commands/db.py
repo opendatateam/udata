@@ -120,7 +120,7 @@ def available_migrations():
             migrations.append(('udata', 'udata', filename))
 
     for plugin in current_app.config['PLUGINS']:
-        name = 'udata.ext.{0}'.format(plugin)
+        name = 'udata_{0}'.format(plugin)
         if resource_isdir(name, 'migrations'):
             for filename in resource_listdir(name, 'migrations'):
                 if filename.endswith('.js'):

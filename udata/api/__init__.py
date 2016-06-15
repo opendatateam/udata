@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import logging
-import os
 import urllib
 
 from functools import wraps
@@ -10,7 +9,7 @@ from functools import wraps
 from flask import (
     current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
-from flask.ext.restplus import Api, Resource, inputs, cors
+from flask_restplus import Api, Resource, inputs, cors
 
 from udata import search, theme, tracking
 from udata.app import csrf
@@ -318,7 +317,7 @@ def init_app(app):
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:
-        name = 'udata.ext.{0}.api'.format(plugin)
+        name = 'udata_{0}.api'.format(plugin)
         try:
             __import__(name)
         except ImportError:

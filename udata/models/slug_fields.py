@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import logging
 import slugify
 
-from flask.ext.mongoengine import Document
+from flask_mongoengine import Document
 from mongoengine.fields import StringField
 
 log = logging.getLogger(__name__)

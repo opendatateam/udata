@@ -15,7 +15,7 @@ from StringIO import StringIO
 from urlparse import urljoin
 
 from flask import request, url_for
-from flask.ext.testing import TestCase as BaseTestCase
+from flask_testing import TestCase as BaseTestCase
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 

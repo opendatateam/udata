@@ -8,16 +8,16 @@ from flask import request
 
 from udata.auth import current_user
 
-from flask.ext.security.views import change_password
-from flask.ext.security.views import confirm_email
-from flask.ext.security.views import forgot_password
-from flask.ext.security.views import login
-from flask.ext.security.views import logout
-from flask.ext.security.views import register
-from flask.ext.security.views import reset_password
-from flask.ext.security.views import send_confirmation
-from flask.ext.security.views import send_login
-from flask.ext.security.views import token_login
+from flask_security.views import change_password
+from flask_security.views import confirm_email
+from flask_security.views import forgot_password
+from flask_security.views import login
+from flask_security.views import logout
+from flask_security.views import register
+from flask_security.views import reset_password
+from flask_security.views import send_confirmation
+from flask_security.views import send_login
+from flask_security.views import token_login
 
 
 def slash_url_suffix(url, suffix):
@@ -31,7 +31,6 @@ def slash_url_suffix(url, suffix):
 
 def create_security_blueprint(state, import_name):
     from udata.i18n import I18nBlueprint
-    # from flask.ext.security.utils import slash_url_suffix
 
     """
     Creates the security extension blueprint

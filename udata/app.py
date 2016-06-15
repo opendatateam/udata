@@ -7,15 +7,16 @@ import logging
 import os
 import types
 
+from importlib import import_module
 from os.path import abspath, join, dirname, isfile, exists
 
 from flask import (
     Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint
 )
-from flask.ext.cache import Cache
+from flask_cache import Cache
 
-from flask.ext.wtf.csrf import CsrfProtect
-from flask.ext.navigation import Navigation
+from flask_wtf.csrf import CsrfProtect
+from flask_navigation import Navigation
 from speaklater import is_lazy_string
 from werkzeug.contrib.fixers import ProxyFix
 
@@ -150,12 +151,11 @@ def standalone(app):
 
     register_features(app)
 
-    from udata import ext
-    ext.init_app(app)
-
-    # from werkzeug.contrib.profiler import ProfilerMiddleware
-    # app.config['PROFILE'] = True
-    # app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
+    for plugin in app.config['PLUGINS']:
+        name = 'udata_{0}'.format(plugin)
+        plugin = import_module(name)
+        if hasattr(plugin, 'init_app') and callable(plugin.init_app):
+            plugin.init_app(app)
 
     return app
 
