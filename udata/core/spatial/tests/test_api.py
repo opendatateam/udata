@@ -40,6 +40,7 @@ class SpatialApiTest(APITestCase):
         self.assertEqual(properties['population'], zone.population)
         self.assertEqual(properties['area'], zone.area)
         self.assertEqual(properties['keys'], zone.keys)
+        self.assertEqual(properties['logo'], zone.logo_url(external=True))
 
     def test_zones_api_many(self):
         zones = [GeoZoneFactory() for _ in range(3)]
@@ -63,6 +64,7 @@ class SpatialApiTest(APITestCase):
             self.assertEqual(properties['population'], zone.population)
             self.assertEqual(properties['area'], zone.area)
             self.assertEqual(properties['keys'], zone.keys)
+            self.assertEqual(properties['logo'], zone.logo_url(external=True))
 
     def test_suggest_zones_on_name(self):
         '''It should suggest zones based on its name'''

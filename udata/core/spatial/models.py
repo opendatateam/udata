@@ -179,6 +179,7 @@ class GeoZone(db.Document):
                 'keys': self.keys,
                 'population': self.population,
                 'area': self.area,
+                'logo': self.logo_url(external=True)
             }
         }
 
