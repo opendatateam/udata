@@ -3,8 +3,9 @@ from __future__ import unicode_literals
 
 from flask import current_app, abort
 
-from udata.api import api, API
+from flask_restplus import inputs
 
+from udata.api import api, API
 from udata import search
 from udata.i18n import _
 from udata.models import Dataset, TERRITORY_DATASETS
@@ -37,7 +38,7 @@ suggest_parser.add_argument(
 
 dataset_parser = api.parser()
 dataset_parser.add_argument(
-    'dynamic', type=bool, help='Append dynamic datasets',
+    'dynamic', type=inputs.boolean, help='Append dynamic datasets',
     location='args', required=False)
 dataset_parser.add_argument(
     'size', type=int, help='The amount of datasets to fetch',
