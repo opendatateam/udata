@@ -118,6 +118,8 @@ class Defaults(object):
     HARVEST_PREVIEW_MAX_ITEMS = 20
 
     ACTIVATE_TERRITORIES = False
+    # The order is important to compute parents/children, smaller first.
+    HANDLED_LEVELS = tuple()
 
     # CROQUEMORT = {
     #     'url': 'http://localhost:8000',
@@ -158,6 +160,7 @@ class Testing(object):
     DEBUG_TOOLBAR = False
     SERVER_NAME = 'localhost'
     DEFAULT_LANGUAGE = 'en'
+    ACTIVATE_TERRITORIES = False
 
 
 class Debug(Defaults):

@@ -24,7 +24,10 @@ define([
                 // Keep until model is uniformised
                 transform: function(response) {
                     return response.map((row) => {
-                        row.name = `${row.title} (${row.county})`;
+                        row.name = row.title;
+                        if (row.parent) {
+                            row.name = `${row.title} (${row.parent})`;
+                        }
                         return row;
                     });
                 }
@@ -36,7 +39,7 @@ define([
         source: engine,
         display: 'name',
         templates: {
-            header: header({title: i18n._('Towns')}),
+            header: header({title: i18n._('Territories')}),
             suggestion: suggestion
         }
     };

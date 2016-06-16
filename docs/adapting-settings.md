@@ -66,6 +66,30 @@ The enabled theme name.
 
 The duration used for templates' cache, in minutes.
 
+## Territories configuration
+
+### ACTIVATE_TERRITORIES
+
+**default**: `False`
+
+Whether you want to activate pages and API related to territories.
+Don't forget to set the `HANDLED_LEVELS` setting too.
+
+
+### HANDLED_LEVELS
+
+**default**: `tuple()`
+
+The list of levels that you want to deal with.
+
+Warning: the order is important and will determine parents/children for
+a given territory. You have to set the smallest territory level first:
+
+```python
+HANDLED_LEVELS = ('fr/town', 'fr/county', 'fr/region', 'country')
+```
+
+
 ## ElasticSearch configuration
 
 ### ELASTICSEARCH_URL

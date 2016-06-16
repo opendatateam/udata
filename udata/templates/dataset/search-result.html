@@ -49,14 +49,42 @@
 
             {# Spatial coverage #}
             {% if dataset.spatial.zones %}
-            <li>
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Spatial coverage') }}">
-                    <span class="fa fa-map-marker fa-fw"></span>
-                    {{ dataset.spatial.top_label }}
-                </a>
-            </li>
+                {# Avoid listing too many territories otherwise it breaks design. #}
+                {% if dataset.spatial.zones|length > 3 %}
+                    <li>
+                        <a class="btn btn-xs" data-toggle="tooltip"
+                            data-placement="top" data-container="body"
+                            title="{{ _('Spatial coverage') }}">
+                            <span class="fa fa-map-marker fa-fw"></span>
+                            {{ dataset.spatial.top_label }}
+                        </a>
+                    </li>
+                {% else %}
+                    {% for territory in dataset.spatial.zones %}
+                        <li>
+                        {% if territory.handled_zone %}
+                            <a class="btn btn-xs" data-toggle="tooltip"
+                                data-placement="top" data-container="body"
+                                href="{{ territory.url }}" title="{{ _('Spatial coverage') }}">
+                                {% set logo=territory.logo_url(external=True) %}
+                                {% if logo %}
+                                    <img src="{{ logo }}" alt="{{ territory.name }}" class="float-left" width="11px" />
+                                {% else %}
+                                    <span class="fa fa-map-marker fa-fw"></span>
+                                {% endif %}
+                                {{ territory.name }}
+                            </a>
+                        {% else %}
+                            <a class="btn btn-xs" data-toggle="tooltip"
+                                data-placement="top" data-container="body"
+                                title="{{ _('Spatial coverage') }}">
+                                <span class="fa fa-map-marker fa-fw"></span>
+                                {{ dataset.spatial.top_label }}
+                            </a>
+                        {% endif %}
+                        </li>
+                    {% endfor %}
+                {% endif %}
             {% endif %}
 
             {% if dataset.spatial.granularity %}
