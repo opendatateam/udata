@@ -48,15 +48,16 @@ export default {
         submit() {
             this.pending = true;
             this.$api.post(this.url, {comment: this.comment})
-                .catch(error => {
-                    Notify.error(this._('Error while requesting membership'));
-                    log.error(e.responseJSON);
-                })
                 .then(data => {
+                    this.pending = false
                     Notify.success(this._('A request has been sent to the administrators'));
                     this.$refs.modal.close();
                 })
-                .always(() => this.pending = false);
+                .catch(error => {
+                    this.pending = false
+                    Notify.error(this._('Error while requesting membership'));
+                    log.error(e.responseJSON);
+                });
         }
     }
 };

@@ -48,7 +48,9 @@ export default {
     computed: {
         btnClasses() {
             const classes = {active: this.following};
-            this.classes.forEach(cls => classes[cls] = true);
+            this.classes.forEach(cls => {
+                classes[cls] = true;
+            });
             return classes;
         },
         icon() {
