@@ -99,7 +99,7 @@ function handleIntegration (event) {
   element.dataset.label = element.innerHTML
   element.innerHTML = label
   paragraph.classList.toggle('udata-close')
-  paragraph.classList.toggle('udata-retweet')
+  paragraph.classList.toggle('udata-code')
   content.classList.toggle('shrink')
   if (!paragraph.classList.contains('udata-close')) {
     content.removeChild(content.querySelector('.embed'))
@@ -107,6 +107,46 @@ function handleIntegration (event) {
     content.appendChild(buildIntegrationFragment(article.id))
     easeCopyPasting(content)
   }
+}
+
+/**
+ * Runner for generators.
+ * See https://blog.getify.com/promises-wrong-ways/
+ * https://github.com/getify/You-Dont-Know-JS/blob/master/es6%20&%20beyond/ch4.md#generators--promises
+ * https://blog.getify.com/not-awaiting-1 & https://blog.getify.com/not-awaiting-2
+ */
+function run (generator, ...args) {
+  const iterator = generator(...args)
+  return Promise.resolve()
+    .then(function handleNext (value) {
+      const next = iterator.next(value)
+      return (function handleResult (next) {
+        if (next.done) {
+          return next.value
+        } else {
+          return Promise.resolve(next.value)
+            .then(
+              handleNext,
+              (error) => {
+                return Promise.resolve(iterator.throw(error))
+                  .then(handleResult)
+              }
+            )
+        }
+      })(next)
+    })
+}
+
+/**
+ * Using generators + promises.
+ * See https://blog.getify.com/promises-wrong-ways/
+ * https://github.com/getify/You-Dont-Know-JS/blob/master/es6%20&%20beyond/ch4.md#generators--promises
+ * https://blog.getify.com/not-awaiting-1 & https://blog.getify.com/not-awaiting-2
+ */
+function * fetchJSON (url) {
+  const rawResponse = yield fetch(url)
+  const validResponse = yield checkStatus(rawResponse)
+  return validResponse.json()
 }
 
 /**
@@ -123,25 +163,16 @@ function embedDatasets (territories, datasets) {
       }
     })
     const url = `${baseURL}/api/1/oembeds/?references=${references}`
-    // Polyfill added by webpack.
-    fetch(url)
-      .then(checkStatus)
-      .then((response) => response.json())
+    run(fetchJSON, url)
       .then((jsonResponse) => {
         // We match the returned list with the list of elements.
         zip([elements, jsonResponse, references])
           .forEach(([element, response, id]) => {
             element.innerHTML = response.html
-            Promise.resolve()
-              .then(() => {
-                const integrateElement = qS(`#${id} .integrate`)
-                if (integrateElement) {
-                  integrateElement.addEventListener('click', handleIntegration)
-                }
-              })
+            const integrateElement = element.querySelector('.integrate')
+            integrateElement.addEventListener('click', handleIntegration)
           })
-      })
-      .catch(console.error.bind(console))
+      }, console.error.bind(console))
   })
 }
 
@@ -152,10 +183,7 @@ if (territoryElement) {
   const territorySlug = territoryElement.dataset.udataTerritory
   const territoryId = territorySlug.replace(/-/g, '/')
   const url = `${baseURL}/api/1/spatial/zone/${territoryId}/datasets?dynamic=1`
-  // Polyfill added by webpack.
-  fetch(url)
-    .then(checkStatus)
-    .then((response) => response.json())
+  run(fetchJSON, url)
     .then((jsonResponse) => {
       // Create a div for each returned item ready to be filled with
       // the usual script dedicated to territories/datasets ids.
@@ -176,8 +204,7 @@ if (territoryElement) {
           return fragment
         })
       embedDatasets(territories, datasets)
-    })
-    .catch(console.error.bind(console))
+    }, console.error.bind(console))
 } else {
   // Warning: using `Array.from` adds 700 lines once converted through Babel.
   const territories = [].slice.call(qSA(`[${TERRITORY_ID}]`))
