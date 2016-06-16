@@ -71,8 +71,13 @@ def collect_references_files():
                     continue
                 filename = resource.url.split('/')[-1]
                 reference_path = references.path(filename)
+                log.info('Found reference: {reference_path}'.format(
+                    reference_path=reference_path))
                 if os.path.exists(reference_path):
+                    log.info('Reference already downloaded')
                     continue
+                log.info('Downloading from {resource_url}'.format(
+                    resource_url=resource.url))
                 with codecs.open(reference_path, 'w', encoding='utf8') as fd:
                     r = requests.get(resource.url, stream=True)
                     for chunk in r.iter_content(chunk_size=1024):
