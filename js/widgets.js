@@ -99,7 +99,7 @@ function handleIntegration (event) {
   element.dataset.label = element.innerHTML
   element.innerHTML = label
   paragraph.classList.toggle('udata-close')
-  paragraph.classList.toggle('udata-retweet')
+  paragraph.classList.toggle('udata-code')
   content.classList.toggle('shrink')
   if (!paragraph.classList.contains('udata-close')) {
     content.removeChild(content.querySelector('.embed'))
@@ -123,7 +123,9 @@ function embedDatasets (territories, datasets) {
       }
     })
     const url = `${baseURL}/api/1/oembeds/?references=${references}`
-    // Polyfill added by webpack.
+    // Warning: if you are tempted to use generators instead of chaining
+    // promises, you'll have to use babel-polyfill which adds 300 Kb
+    // once the file is converted to ES5.
     fetch(url)
       .then(checkStatus)
       .then((response) => response.json())
@@ -132,13 +134,8 @@ function embedDatasets (territories, datasets) {
         zip([elements, jsonResponse, references])
           .forEach(([element, response, id]) => {
             element.innerHTML = response.html
-            Promise.resolve()
-              .then(() => {
-                const integrateElement = qS(`#${id} .integrate`)
-                if (integrateElement) {
-                  integrateElement.addEventListener('click', handleIntegration)
-                }
-              })
+            const integrateElement = element.querySelector('.integrate')
+            integrateElement.addEventListener('click', handleIntegration)
           })
       })
       .catch(console.error.bind(console))
@@ -152,7 +149,6 @@ if (territoryElement) {
   const territorySlug = territoryElement.dataset.udataTerritory
   const territoryId = territorySlug.replace(/-/g, '/')
   const url = `${baseURL}/api/1/spatial/zone/${territoryId}/datasets?dynamic=1`
-  // Polyfill added by webpack.
   fetch(url)
     .then(checkStatus)
     .then((response) => response.json())
