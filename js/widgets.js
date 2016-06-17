@@ -39,7 +39,7 @@ function removeDiacritics (str) {
     {'base': 'oe', 'letters': /[\u0153]/g},
     {'base': 'u', 'letters': /[\u0075\u24E4\uFF55\u00F9\u00FA\u00FB\u0169\u1E79\u016B\u1E7B\u016D\u00FC\u01DC\u01D8\u01D6\u01DA\u1EE7\u016F\u0171\u01D4\u0215\u0217\u01B0\u1EEB\u1EE9\u1EEF\u1EED\u1EF1\u1EE5\u1E73\u0173\u1E77\u1E75\u0289]/g}
   ]
-  rules.map((rule) => {
+  rules.forEach((rule) => {
     str = str.replace(rule.letters, rule.base)
   })
   return str
