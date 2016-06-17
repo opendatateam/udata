@@ -102,6 +102,7 @@
     "sortablejs": "^1.4.2",
     "source-sans-pro": "^2.0.10",
     "spin.js": "^2.3.2",
+    "string_score": "^0.1.22",
     "swagger-client": "2.1.13",
     "swagger-ui": "2.1.4",
     "tv4": "^1.2.7",
