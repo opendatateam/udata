@@ -131,8 +131,8 @@ function embedDatasets (territories, datasets) {
       .then((response) => response.json())
       .then((jsonResponse) => {
         // We match the returned list with the list of elements.
-        zip([elements, jsonResponse, references])
-          .forEach(([element, response, id]) => {
+        zip([elements, jsonResponse])
+          .forEach(([element, response]) => {
             element.innerHTML = response.html
             const integrateElement = element.querySelector('.integrate')
             integrateElement.addEventListener('click', handleIntegration)

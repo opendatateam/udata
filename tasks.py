@@ -99,9 +99,9 @@ def qa():
 
 
 @task
-def serve():
+def serve(host='localhost'):
     '''Run a development server'''
-    lrun('python manage.py serve -d -r')
+    lrun('python manage.py serve -d -r -h %s' % host)
 
 
 @task
@@ -187,7 +187,7 @@ def assets_build(progress=False):
     if progress:
         cmd += ' --progress'
     lrun(cmd.format('webpack.config.prod'), pty=True)
-    lrun(cmd.format('webpack.widgets.config'), pty=True)
+    lrun(cmd.format('webpack.widgets.config.prod'), pty=True)
 
 
 @task
