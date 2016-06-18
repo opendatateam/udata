@@ -1,15 +1,40 @@
+/*
+The aim of that script is to provide a way to embed
+a dataset, many datasets or all datasets for a given
+territory.
+
+E.g.:
+
+<div data-udata-dataset-id=5715ef5fc751df11b82015f8></div>
+<script src="http://example.com/static/widgets.js" id=udata
+  async defer onload=udataScript.load()></script>
+
+You can customize the name of the data attribute which
+stores the id of the dataset within the loader but you must
+set `udata` as the id of the script tag that loads this file.
+*/
+
 /* This file is using http://standardjs.com/ */
 // `fetch` polyfill added by webpack.
 /* global fetch, CustomEvent */
 
 // In use for optionally filtering datasets once loaded.
+// Adds `.score()` to the prototype of String.
 require('string_score')
 
-// Extract the base URL from the URL of that script.
-const parser = document.createElement('a')
-const scriptURI = document.querySelector('script#udata').src
-parser.href = scriptURI
-const baseURL = `${parser.protocol}//${parser.host}`
+/**
+ * Extract the base URL from the URL of the current script,
+ * targeted with `selector`.
+ */
+function extractURLs (selector) {
+  const parser = document.createElement('a')
+  const scriptURL = document.querySelector(selector).src
+  parser.href = scriptURL
+  const baseURL = `${parser.protocol}//${parser.host}`
+  return {scriptURL, baseURL}
+}
+
+const {scriptURL, baseURL} = extractURLs('script#udata')
 
 /**
  * Remove French diacritics from a given string `str`. Adapted from:
@@ -104,7 +129,7 @@ function buildIntegrationFragment (reference) {
   fragment.appendChild(help)
   const textarea = document.createElement('textarea')
   textarea.innerHTML = `<div data-udata-${kind}-id="${id}"></div>
-<script src="${scriptURI}" id="udata" async defer onload="udataScript.load()"></script>`
+<script src="${scriptURL}" id="udata" async defer onload="udataScript.load()"></script>`
   fragment.appendChild(textarea)
   return fragment
 }
@@ -181,8 +206,9 @@ function embedDatasets (territories, datasets, dataTerritoryIdAttr, dataDatasetI
       .catch(console.error.bind(console))
   })
   Promise.all(promises)
-    .then((arrays) => {
-      const datasets = [].concat(...arrays)
+    .then((chunks) => {
+      // Flatten the array of datasets arrays.
+      const datasets = [].concat(...chunks)
       if (datasets.length === items.length) {
         window.dispatchEvent(
           new CustomEvent(
@@ -203,52 +229,51 @@ function embedDatasets (territories, datasets, dataTerritoryIdAttr, dataDatasetI
 }
 
 /**
- * Display matching datasets when the input search is filled.
+ * Display only matching datasets given the value of the search input.
  */
-function handleKeyup (territoryElement, searchNode, datasets, initialDatasets) {
-  searchNode.addEventListener('keyup', (searchEvent) => {
-    const searchValue = searchEvent.target.value
-    if (searchValue.length >= 3) {
-      const scoredResults = datasets.map((dataset) => {
-        const title = removeDiacritics(dataset.querySelector('.udata-title').innerText)
-        return {
-          dataset: dataset,
-          score: title.score(removeDiacritics(searchValue))
-        }
-      })
-      scoredResults.sort((a, b) => a.score > 0 && a.score < b.score)
-      const filteredResults = scoredResults.filter((result) => result.score > 0)
-      if (filteredResults) {
-        territoryElement.innerHTML = ''
-        filteredResults.forEach((result) => {
-          territoryElement.appendChild(result.dataset)
-        })
-      } else {
-        territoryElement.innerHTML = initialDatasets
+function filterDatasets (territoryElement, event, datasets, initialDatasets) {
+  const searchValue = event.target.value
+  if (searchValue.length >= 3) {
+    const scoredResults = datasets.map((dataset) => {
+      const title = removeDiacritics(dataset.querySelector('.udata-title').innerText)
+      return {
+        dataset: dataset,
+        score: title.score(removeDiacritics(searchValue))
       }
+    })
+    scoredResults.sort((a, b) => a.score > 0 && a.score < b.score)
+    const filteredResults = scoredResults.filter((result) => result.score > 0)
+    if (filteredResults) {
+      territoryElement.innerHTML = ''
+      filteredResults.forEach((result) => {
+        territoryElement.appendChild(result.dataset)
+      })
     } else {
       territoryElement.innerHTML = initialDatasets
     }
-  })
+  } else {
+    territoryElement.innerHTML = initialDatasets
+  }
 }
 
 /**
- * Add the search input to the DOM once datasets are loaded.
+ * Insert the styled search input to the DOM
+ * which filters displayed datasets on `keyup`.
  */
-function handleSearch (territoryElement) {
-  window.addEventListener('udataset.loaded', (event) => {
-    const datasets = event.detail.datasets
-    const initialDatasets = territoryElement.innerHTML
-    const searchNode = document.createElement('input')
-    searchNode.placeholder = 'Filter datasets'
-    searchNode.style.display = 'block'
-    searchNode.style.boxSizing = 'border-box'
-    searchNode.style.width = '100%'
-    searchNode.style.margin = '1em'
-    searchNode.style.padding = '.1em'
-    territoryElement.parentNode.insertBefore(searchNode, territoryElement)
-    handleKeyup(territoryElement, searchNode, datasets, initialDatasets)
-  })
+function insertSearchInput (event, territoryElement) {
+  const datasets = event.detail.datasets
+  const initialDatasets = territoryElement.innerHTML
+  const searchNode = document.createElement('input')
+  searchNode.placeholder = 'Filter datasets'
+  searchNode.style.display = 'block'
+  searchNode.style.boxSizing = 'border-box'
+  searchNode.style.width = '100%'
+  searchNode.style.margin = '1em'
+  searchNode.style.padding = '.1em'
+  territoryElement.parentNode.insertBefore(searchNode, territoryElement)
+  searchNode.addEventListener('keyup', (event) =>
+    filterDatasets(territoryElement, event, datasets, initialDatasets)
+  )
 }
 
 global.udataScript = {
@@ -292,7 +317,9 @@ global.udataScript = {
       })
       .catch(console.error.bind(console))
     if (withSearch) {
-      handleSearch(territoryElement)
+      window.addEventListener('udataset.loaded', (event) =>
+        insertSearchInput(event, territoryElement)
+      )
     }
   }
 }
