@@ -15,12 +15,13 @@ set `udata` as the id of the script tag that loads this file.
 */
 
 /* This file is using http://standardjs.com/ */
-// `fetch` polyfill added by webpack.
 /* global fetch, CustomEvent */
 
 // In use for optionally filtering datasets once loaded.
 // Adds `.score()` to the prototype of String.
-require('string_score')
+import 'string_score'
+// Polyfill to be able to use `fetch` on IE and Safari.
+import 'whatwg-fetch'
 
 /**
  * Extract the base URL from the URL of the current script,
@@ -152,7 +153,7 @@ function easeCopyPasting (content) {
 /**
  * Display/hide the integration box for embeds.
  */
-function handleIntegration (event) {
+function toggleIntegration (event) {
   event.preventDefault()
   const element = event.target
   const paragraph = element.parentNode
@@ -199,7 +200,7 @@ function embedDatasets (territories, datasets, dataTerritoryIdAttr, dataDatasetI
           .forEach(([element, response]) => {
             element.innerHTML = response.html
             const integrateElement = element.querySelector('.integrate')
-            integrateElement.addEventListener('click', handleIntegration)
+            integrateElement.addEventListener('click', toggleIntegration)
           })
         return elements
       })
