@@ -5,18 +5,9 @@
 // In use for optionally filtering datasets once loaded.
 require('string_score')
 
-// Constants in use within the HTML.
-const TERRITORY = 'data-udata-territory'
-const TERRITORY_ID = 'data-udata-territory-id'
-const DATASET_ID = 'data-udata-dataset-id'
-
-// Helpers
-const qS = document.querySelector.bind(document)
-const qSA = document.querySelectorAll.bind(document)
-
 // Extract the base URL from the URL of that script.
 const parser = document.createElement('a')
-const scriptURI = qS('script#udata').src
+const scriptURI = document.querySelector('script#udata').src
 parser.href = scriptURI
 const baseURL = `${parser.protocol}//${parser.host}`
 
@@ -46,6 +37,16 @@ function removeDiacritics (str) {
 }
 
 /**
+ * In use for dynamic data attributes get/set.
+ * from `data-udata-territory` to `udataTerritory`.
+ */
+function camelCaseData (dataAttributeString) {
+  // Remove `data-` then camelCase it.
+  return dataAttributeString.substr(5)
+    .replace(/-(.)/g, (match, group1) => group1.toUpperCase())
+}
+
+/**
  * Return the `array` chunked by `n`, useful to retrieve all datasets
  * with a minimum of requests.
  * TODO: more clever chunk to retrieve n, then n * 2, then n * 4, etc?
@@ -69,6 +70,16 @@ function checkStatus (response) {
     error.response = response
     throw error
   }
+}
+
+/**
+ * Return a promisified JSON response from an API URL
+ * if status code is correct.
+ */
+function fetchJSON (url) {
+  return fetch(url)
+    .then(checkStatus)
+    .then((response) => response.json())
 }
 
 /**
@@ -141,24 +152,22 @@ function handleIntegration (event) {
  * Main function retrieving the HTML code from the API.
  * Keep the chunk > 12 otherwise territories pages will issue more than one query.
  */
-function embedDatasets (territories, datasets) {
+function embedDatasets (territories, datasets, dataTerritoryIdAttr, dataDatasetIdAttr) {
   const items = territories.concat(datasets)
   const chunkBy = 12
   const promises = chunk(items, chunkBy).map((elements) => {
     const references = elements.map((el) => {
-      if (el.hasAttribute(TERRITORY_ID)) {
-        return `territory-${el.dataset.udataTerritoryId}`
-      } else if (el.hasAttribute(DATASET_ID)) {
-        return `dataset-${el.dataset.udataDatasetId}`
+      if (el.hasAttribute(dataTerritoryIdAttr)) {
+        return `territory-${el.dataset[camelCaseData(dataTerritoryIdAttr)]}`
+      } else if (el.hasAttribute(dataDatasetIdAttr)) {
+        return `dataset-${el.dataset[camelCaseData(dataDatasetIdAttr)]}`
       }
     })
     const url = `${baseURL}/api/1/oembeds/?references=${references}`
     // Warning: if you are tempted to use generators instead of chaining
     // promises, you'll have to use babel-polyfill which adds 300 Kb
     // once the file is converted to ES5.
-    return fetch(url)
-      .then(checkStatus)
-      .then((response) => response.json())
+    return fetchJSON(url)
       .then((jsonResponse) => {
         // We match the returned list with the list of elements.
         zip([elements, jsonResponse])
@@ -196,7 +205,7 @@ function embedDatasets (territories, datasets) {
 /**
  * Display matching datasets when the input search is filled.
  */
-function handleKeypress (territoryElement, searchNode, datasets, initialDatasets) {
+function handleKeyup (territoryElement, searchNode, datasets, initialDatasets) {
   searchNode.addEventListener('keyup', (searchEvent) => {
     const searchValue = searchEvent.target.value
     if (searchValue.length >= 3) {
@@ -238,26 +247,28 @@ function handleSearch (territoryElement) {
     searchNode.style.margin = '1em'
     searchNode.style.padding = '.1em'
     territoryElement.parentNode.insertBefore(searchNode, territoryElement)
-    handleKeypress(territoryElement, searchNode, datasets, initialDatasets)
+    handleKeyup(territoryElement, searchNode, datasets, initialDatasets)
   })
 }
 
 global.udataScript = {
-  load () {
+  load (dataTerritoryIdAttr = 'data-udata-territory-id',
+        dataDatasetIdAttr = 'data-udata-dataset-id') {
     // Warning: using `Array.from` adds 700 lines once converted through Babel.
-    const territories = [].slice.call(qSA(`[${TERRITORY_ID}]`))
-    const datasets = [].slice.call(qSA(`[${DATASET_ID}]`))
-    embedDatasets(territories, datasets)
+    const territories = [].slice.call(document.querySelectorAll(`[${dataTerritoryIdAttr}]`))
+    const datasets = [].slice.call(document.querySelectorAll(`[${dataDatasetIdAttr}]`))
+    embedDatasets(territories, datasets, dataTerritoryIdAttr, dataDatasetIdAttr)
   },
 
-  loadTerritory (withSearch = false) {
-    const territoryElement = qS(`[${TERRITORY}]`)
-    const territorySlug = territoryElement.dataset.udataTerritory
+  loadTerritory (withSearch = false,
+                 dataTerritoryAttr = 'data-udata-territory',
+                 dataTerritoryIdAttr = 'data-udata-territory-id',
+                 dataDatasetIdAttr = 'data-udata-dataset-id') {
+    const territoryElement = document.querySelector(`[${dataTerritoryAttr}]`)
+    const territorySlug = territoryElement.dataset[camelCaseData(dataTerritoryAttr)]
     const territoryId = territorySlug.replace(/-/g, '/')
     const url = `${baseURL}/api/1/spatial/zone/${territoryId}/datasets?dynamic=1`
-    fetch(url)
-      .then(checkStatus)
-      .then((response) => response.json())
+    fetchJSON(url)
       .then((jsonResponse) => {
         // Create a div for each returned item ready to be filled with
         // the usual script dedicated to territories/datasets ids.
@@ -265,7 +276,7 @@ global.udataScript = {
           .filter((item) => item.class !== 'Dataset')
           .map((item) => {
             const fragment = document.createElement('div')
-            fragment.dataset.udataTerritoryId = `${territorySlug}-${item.id}`
+            fragment.dataset[camelCaseData(dataTerritoryIdAttr)] = `${territorySlug}-${item.id}`
             territoryElement.appendChild(fragment)
             return fragment
           })
@@ -273,11 +284,11 @@ global.udataScript = {
           .filter((item) => item.class === 'Dataset')
           .map((item) => {
             const fragment = document.createElement('div')
-            fragment.dataset.udataDatasetId = item.id
+            fragment.dataset[camelCaseData(dataDatasetIdAttr)] = item.id
             territoryElement.appendChild(fragment)
             return fragment
           })
-        embedDatasets(territories, datasets)
+        embedDatasets(territories, datasets, dataTerritoryIdAttr, dataDatasetIdAttr)
       })
       .catch(console.error.bind(console))
     if (withSearch) {
