@@ -156,6 +156,7 @@ function easeCopyPasting (content) {
 function toggleIntegration (event) {
   event.preventDefault()
   const element = event.target
+  // TODO: use dedicated classes instead of fragile DOM traversal.
   const paragraph = element.parentNode
   const aside = paragraph.parentNode
   const content = aside.previousElementSibling
@@ -175,56 +176,61 @@ function toggleIntegration (event) {
 }
 
 /**
+ * Fetch OEmbeded representations of `datasetChunk`
+ */
+function embedDatasetChunk (datasetChunk, dataTerritoryIdAttr, dataDatasetIdAttr) {
+  const references = datasetChunk.map((el) => {
+    if (el.hasAttribute(dataTerritoryIdAttr)) {
+      return `territory-${el.dataset[camelCaseData(dataTerritoryIdAttr)]}`
+    } else if (el.hasAttribute(dataDatasetIdAttr)) {
+      return `dataset-${el.dataset[camelCaseData(dataDatasetIdAttr)]}`
+    }
+  })
+  const url = `${baseURL}/api/1/oembeds/?references=${references.join(',')}`
+  // Warning: if you are tempted to use generators instead of chaining
+  // promises, you'll have to use babel-polyfill which adds 300 Kb
+  // once the file is converted to ES5.
+  return fetchJSON(url)
+    .then((datasetsOEmbededList) => {
+      // We match the returned list with the list of datasetChunk.
+      zip([datasetChunk, datasetsOEmbededList])
+        .forEach(([dataset, response]) => {
+          dataset.innerHTML = response.html
+          const integrateDataset = dataset.querySelector('.integrate')
+          integrateDataset.addEventListener('click', toggleIntegration)
+        })
+      return datasetChunk
+    })
+    .catch(console.error.bind(console))
+}
+
+/**
  * Main function retrieving the HTML code from the API.
  * Keep the chunk > 12 otherwise territories pages will issue more than one query.
  */
 function embedDatasets (territories, datasets, dataTerritoryIdAttr, dataDatasetIdAttr) {
   const items = territories.concat(datasets)
   const chunkBy = 12
-  const promises = chunk(items, chunkBy).map((elements) => {
-    const references = elements.map((el) => {
-      if (el.hasAttribute(dataTerritoryIdAttr)) {
-        return `territory-${el.dataset[camelCaseData(dataTerritoryIdAttr)]}`
-      } else if (el.hasAttribute(dataDatasetIdAttr)) {
-        return `dataset-${el.dataset[camelCaseData(dataDatasetIdAttr)]}`
-      }
-    })
-    const url = `${baseURL}/api/1/oembeds/?references=${references}`
-    // Warning: if you are tempted to use generators instead of chaining
-    // promises, you'll have to use babel-polyfill which adds 300 Kb
-    // once the file is converted to ES5.
-    return fetchJSON(url)
-      .then((jsonResponse) => {
-        // We match the returned list with the list of elements.
-        zip([elements, jsonResponse])
-          .forEach(([element, response]) => {
-            element.innerHTML = response.html
-            const integrateElement = element.querySelector('.integrate')
-            integrateElement.addEventListener('click', toggleIntegration)
-          })
-        return elements
-      })
-      .catch(console.error.bind(console))
-  })
+  const promises = chunk(items, chunkBy)
+    .map((datasetChunk) =>
+      embedDatasetChunk(datasetChunk, dataTerritoryIdAttr, dataDatasetIdAttr))
   Promise.all(promises)
     .then((chunks) => {
       // Flatten the array of datasets arrays.
       const datasets = [].concat(...chunks)
-      if (datasets.length === items.length) {
-        window.dispatchEvent(
-          new CustomEvent(
-            'udataset.loaded', {
-              detail: {
-                message: 'uData datasets fully loaded.',
-                time: new Date(),
-                datasets: datasets
-              },
-              bubbles: true,
-              cancelable: true
-            }
-          )
+      window.dispatchEvent(
+        new CustomEvent(
+          'udataset.loaded', {
+            detail: {
+              message: 'uData datasets fully loaded.',
+              time: new Date(),
+              datasets: datasets
+            },
+            bubbles: true,
+            cancelable: true
+          }
         )
-      }
+      )
     })
     .catch(console.error.bind(console))
 }
@@ -234,24 +240,24 @@ function embedDatasets (territories, datasets, dataTerritoryIdAttr, dataDatasetI
  */
 function filterDatasets (territoryElement, event, datasets, initialDatasets) {
   const searchValue = event.target.value
-  if (searchValue.length >= 3) {
-    const scoredResults = datasets.map((dataset) => {
-      const title = removeDiacritics(dataset.querySelector('.udata-title').innerText)
-      return {
-        dataset: dataset,
-        score: title.score(removeDiacritics(searchValue))
-      }
-    })
-    scoredResults.sort((a, b) => a.score > 0 && a.score < b.score)
-    const filteredResults = scoredResults.filter((result) => result.score > 0)
-    if (filteredResults) {
-      territoryElement.innerHTML = ''
-      filteredResults.forEach((result) => {
-        territoryElement.appendChild(result.dataset)
-      })
-    } else {
-      territoryElement.innerHTML = initialDatasets
+  if (searchValue.length < 3) {
+    territoryElement.innerHTML = initialDatasets
+    return
+  }
+  const scoredDatasets = datasets.map((dataset) => {
+    const title = removeDiacritics(dataset.querySelector('.udata-title').innerText)
+    return {
+      dataset: dataset,
+      score: title.score(removeDiacritics(searchValue))
     }
+  })
+  const filteredScoredResults = scoredDatasets.filter((result) => result.score > 0)
+  filteredScoredResults.sort((a, b) => a.score < b.score)
+  if (filteredScoredResults) {
+    territoryElement.innerHTML = ''
+    filteredScoredResults.forEach((result) =>
+      territoryElement.appendChild(result.dataset)
+    )
   } else {
     territoryElement.innerHTML = initialDatasets
   }
@@ -272,6 +278,7 @@ function insertSearchInput (event, territoryElement) {
   searchNode.style.margin = '1em'
   searchNode.style.padding = '.1em'
   territoryElement.parentNode.insertBefore(searchNode, territoryElement)
+  // TODO: add a timeout between keyups.
   searchNode.addEventListener('keyup', (event) =>
     filterDatasets(territoryElement, event, datasets, initialDatasets)
   )
@@ -286,19 +293,20 @@ global.udataScript = {
     embedDatasets(territories, datasets, dataTerritoryIdAttr, dataDatasetIdAttr)
   },
 
-  loadTerritory (withSearch = false,
+  loadTerritory (size = 100,
+                 withSearch = false,
                  dataTerritoryAttr = 'data-udata-territory',
                  dataTerritoryIdAttr = 'data-udata-territory-id',
                  dataDatasetIdAttr = 'data-udata-dataset-id') {
     const territoryElement = document.querySelector(`[${dataTerritoryAttr}]`)
     const territorySlug = territoryElement.dataset[camelCaseData(dataTerritoryAttr)]
     const territoryId = territorySlug.replace(/-/g, '/')
-    const url = `${baseURL}/api/1/spatial/zone/${territoryId}/datasets?dynamic=1`
+    const url = `${baseURL}/api/1/spatial/zone/${territoryId}/datasets?dynamic=1&size=${size}`
     fetchJSON(url)
-      .then((jsonResponse) => {
+      .then((territoriesAndDatasets) => {
         // Create a div for each returned item ready to be filled with
         // the usual script dedicated to territories/datasets ids.
-        const territories = jsonResponse
+        const territories = territoriesAndDatasets
           .filter((item) => item.class !== 'Dataset')
           .map((item) => {
             const fragment = document.createElement('div')
@@ -306,7 +314,7 @@ global.udataScript = {
             territoryElement.appendChild(fragment)
             return fragment
           })
-        const datasets = jsonResponse
+        const datasets = territoriesAndDatasets
           .filter((item) => item.class === 'Dataset')
           .map((item) => {
             const fragment = document.createElement('div')
