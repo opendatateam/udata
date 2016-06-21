@@ -8,7 +8,7 @@
   "scripts": {
     "assets:watch": "webpack -c -d  --progress --watch",
     "assets:build": "webpack -p --progress",
-    "widgets:watch": "webpack -d -c --progress --watch --config webpack.widgets.config.js",
+    "widgets:watch": "webpack -d -c --progress --watch --config webpack.config.widgets.js",
     "test:watch": "export NODE_ENV=test && WATCH=true karma start",
     "test:unit": "export NODE_ENV=test && karma start --single-run",
     "lint": "eslint js/ --ext .vue,.js"
@@ -76,7 +76,6 @@
     "bootstrap-markdown": "^2.10.0",
     "bootstrap-slider": "~7.0.0",
     "chart.js": "^1.0.2",
-    "debounce": "^1.0.0",
     "diff": "^2.2.2",
     "dotdotdot": "BeSite/jQuery.dotdotdot#v1.7.4",
     "fine-uploader": "5.9.0",
@@ -102,6 +101,7 @@
     "sortablejs": "^1.4.2",
     "source-sans-pro": "^2.0.10",
     "spin.js": "^2.3.2",
+    "string_score": "^0.1.22",
     "swagger-client": "2.1.13",
     "swagger-ui": "2.1.4",
     "tv4": "^1.2.7",
