@@ -6,7 +6,7 @@
     .dataset-card {
         border: 1px solid #EEE;
         min-width: 300px;
-        min-height: 150px;
+        min-height: 170px;
         clear: both;
         margin: 1em;
         background: #FFF;
@@ -106,6 +106,7 @@
     }
     .dataset-card .shrink textarea {
         width: 100%;
+        height: 4em;
         font-size: 11px;
     }
     {# Source: https://github.com/kazzkiq/balloon.css #}
@@ -192,11 +193,13 @@
             </a>
         {% endif %}
         </p>
-        {% if item.territory %}
-            {{ item.description|markdown(source_tooltip=True) }}
-        {% else %}
-            <p>{{ item.description|mdstrip(110) }}</p>
-        {% endif %}
+        <div class="udata-description">
+            {% if item.territory %}
+                {{ item.description|markdown(source_tooltip=True) }}
+            {% else %}
+                <p>{{ item.description|mdstrip(110) }}</p>
+            {% endif %}
+        </div>
     </div>
     <aside class="udata-meta">
         <p class="udata-code" data-tooltip="{{ _('Add to your own website') }}">

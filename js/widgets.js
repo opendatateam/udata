@@ -172,17 +172,13 @@ function easeCopyPasting (content) {
 /**
  * Display/hide the integration box for embeds.
  */
-function toggleIntegration (event) {
+function toggleIntegration (event, dataset) {
   event.preventDefault()
-  const element = event.target
-  // TODO: use dedicated classes instead of fragile DOM traversal.
-  const paragraph = element.parentNode
-  const aside = paragraph.parentNode
-  const content = aside.previousElementSibling
-  const article = aside.parentNode
-  const label = element.dataset.label
-  element.dataset.label = element.innerHTML
-  element.innerHTML = label
+  const paragraph = dataset.querySelector('.udata-code, .udata-close')
+  const content = dataset.querySelector('.udata-content')
+  const article = dataset.querySelector('.dataset-card')
+  const el = event.target
+  ;[el.dataset.label, el.innerHTML] = [el.innerHTML, el.dataset.label]
   paragraph.classList.toggle('udata-close')
   paragraph.classList.toggle('udata-code')
   content.classList.toggle('shrink')
@@ -216,7 +212,9 @@ function embedDatasetChunk (datasetChunk, dataTerritoryIdAttr, dataDatasetIdAttr
         .forEach(([dataset, response]) => {
           dataset.innerHTML = response.html
           const integrateDataset = dataset.querySelector('.integrate')
-          integrateDataset.addEventListener('click', toggleIntegration)
+          integrateDataset.addEventListener('click', (event) =>
+            toggleIntegration(event, dataset)
+          )
         })
       return datasetChunk
     })
