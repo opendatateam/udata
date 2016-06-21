@@ -309,8 +309,8 @@ global.udataScript = {
    * data-attributes `dataTerritoryIdAttr` and
    * `dataDatasetIdAttr` within the DOM.
    */
-  load (dataTerritoryIdAttr = 'data-udata-territory-id',
-        dataDatasetIdAttr = 'data-udata-dataset-id') {
+  load ({dataTerritoryIdAttr = 'data-udata-territory-id',
+         dataDatasetIdAttr = 'data-udata-dataset-id'} = {}) {
     // Warning: using `Array.from` adds 700 lines once converted through Babel.
     const territories = [].slice.call(document.querySelectorAll(`[${dataTerritoryIdAttr}]`))
     const datasets = [].slice.call(document.querySelectorAll(`[${dataDatasetIdAttr}]`))
@@ -328,11 +328,11 @@ global.udataScript = {
    * The `withSearch` parameter optionally loads an input
    * allowing the user to filter currently displayed datasets.
    */
-  loadTerritory (size = 100,
-                 withSearch = false,
-                 dataTerritoryAttr = 'data-udata-territory',
-                 dataTerritoryIdAttr = 'data-udata-territory-id',
-                 dataDatasetIdAttr = 'data-udata-dataset-id') {
+  loadTerritory ({size = 100,
+                  withSearch = false,
+                  dataTerritoryAttr = 'data-udata-territory',
+                  dataTerritoryIdAttr = 'data-udata-territory-id',
+                  dataDatasetIdAttr = 'data-udata-dataset-id'} = {}) {
     const territoryElement = document.querySelector(`[${dataTerritoryAttr}]`)
     const territorySlug = territoryElement.dataset[camelCaseData(dataTerritoryAttr)]
     const territoryId = territorySlug.replace(/-/g, '/')
