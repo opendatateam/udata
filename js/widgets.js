@@ -181,7 +181,7 @@ function toggleIntegration (event, dataset) {
   ;[el.dataset.label, el.innerHTML] = [el.innerHTML, el.dataset.label]
   paragraph.classList.toggle('udata-close')
   paragraph.classList.toggle('udata-code')
-  content.classList.toggle('shrink')
+  content.classList.toggle('js-hide')
   if (!paragraph.classList.contains('udata-close')) {
     content.removeChild(content.querySelector('.embed'))
   } else {
