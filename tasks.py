@@ -180,14 +180,17 @@ def i18nc():
 
 
 @task
-def assets_build(progress=False):
+def assets_build():
     '''Install and compile assets'''
     header('Building static assets')
-    cmd = 'npm run assets:build -- --config {0}.js'
-    if progress:
-        cmd += ' --progress'
-    lrun(cmd.format('webpack.config.prod'), pty=True)
-    lrun(cmd.format('webpack.config.widgets.prod'), pty=True)
+    lrun('npm run assets:build', pty=True)
+
+
+@task
+def widgets_build():
+    '''Compile and minify widgets'''
+    header('Building widgets')
+    lrun('npm run widgets:build', pty=True)
 
 
 @task
