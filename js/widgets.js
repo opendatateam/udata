@@ -28,6 +28,9 @@ const DATA_TERRITORY = 'data-udata-territory'
 const DATA_TERRITORY_ID = 'data-udata-territory-id'
 const DATA_DATASET_ID = 'data-udata-dataset-id'
 
+// Name of the event triggered when all datasets are loaded.
+const DATASETS_LOADED_EVENT_NAME = 'udataset.loaded'
+
 /**
  * Extract the base URL from the URL of the current script,
  * targeted with `selector`.
@@ -37,10 +40,10 @@ function extractURLs (selector) {
   const scriptURL = document.querySelector(selector).src
   parser.href = scriptURL
   const baseURL = `${parser.protocol}//${parser.host}`
-  return {scriptURL, baseURL}
+  return [scriptURL, baseURL]
 }
 
-const {scriptURL, baseURL} = extractURLs('script#udata')
+const [scriptURL, baseURL] = extractURLs('script#udata')
 
 /**
  * Remove French diacritics from a given string `str`. Adapted from:
@@ -240,7 +243,6 @@ function embedDatasets (territories, datasets) {
       // Flatten the array of datasets arrays.
       const datasets = [].concat(...chunks)
       let event
-      const eventName = 'udataset.loaded'
       const details = {
         detail: {
           message: 'uData datasets fully loaded.',
@@ -251,11 +253,11 @@ function embedDatasets (territories, datasets) {
         cancelable: true
       }
       if (typeof window.CustomEvent === 'function') {
-        event = new CustomEvent(eventName, details)
+        event = new CustomEvent(DATASETS_LOADED_EVENT_NAME, details)
       } else {
         // IE 11 support.
         event = document.createEvent('HTMLEvents')
-        event.initEvent(eventName, true, true)
+        event.initEvent(DATASETS_LOADED_EVENT_NAME, true, true)
         event.details = details
       }
       window.dispatchEvent(event)
@@ -362,7 +364,7 @@ global.udataScript = {
       })
       .catch(console.error.bind(console))
     if (withSearch) {
-      window.addEventListener('udataset.loaded', (event) =>
+      window.addEventListener(DATASETS_LOADED_EVENT_NAME, (event) =>
         insertSearchInput(event, territoryElement)
       )
     }
