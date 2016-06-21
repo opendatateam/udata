@@ -23,6 +23,12 @@ import 'string_score'
 // Polyfill to be able to use `fetch` on IE and Safari.
 import 'whatwg-fetch'
 
+// These global vars (but encapsulated by Babel) avoid the
+// cumbersome options' passing across functions.
+let _dataTerritoryAttr
+let _dataTerritoryIdAttr
+let _dataDatasetIdAttr
+
 /**
  * Extract the base URL from the URL of the current script,
  * targeted with `selector`.
@@ -193,12 +199,12 @@ function toggleIntegration (event, dataset) {
 /**
  * Fetch OEmbeded representations of `datasetChunk`
  */
-function embedDatasetChunk (datasetChunk, dataTerritoryIdAttr, dataDatasetIdAttr) {
+function embedDatasetChunk (datasetChunk) {
   const references = datasetChunk.map((el) => {
-    if (el.hasAttribute(dataTerritoryIdAttr)) {
-      return `territory-${el.dataset[camelCaseData(dataTerritoryIdAttr)]}`
-    } else if (el.hasAttribute(dataDatasetIdAttr)) {
-      return `dataset-${el.dataset[camelCaseData(dataDatasetIdAttr)]}`
+    if (el.hasAttribute(_dataTerritoryIdAttr)) {
+      return `territory-${el.dataset[camelCaseData(_dataTerritoryIdAttr)]}`
+    } else if (el.hasAttribute(_dataDatasetIdAttr)) {
+      return `dataset-${el.dataset[camelCaseData(_dataDatasetIdAttr)]}`
     }
   })
   const url = `${baseURL}/api/1/oembeds/?references=${references.join(',')}`
@@ -225,12 +231,11 @@ function embedDatasetChunk (datasetChunk, dataTerritoryIdAttr, dataDatasetIdAttr
  * Main function retrieving the HTML code from the API.
  * Keep the chunk > 12 otherwise territories pages will issue more than one query.
  */
-function embedDatasets (territories, datasets, dataTerritoryIdAttr, dataDatasetIdAttr) {
+function embedDatasets (territories, datasets) {
   const items = territories.concat(datasets)
   const chunkBy = 12
   const promises = chunk(items, chunkBy)
-    .map((datasetChunk) =>
-      embedDatasetChunk(datasetChunk, dataTerritoryIdAttr, dataDatasetIdAttr))
+    .map((datasetChunk) => embedDatasetChunk(datasetChunk))
   Promise.all(promises)
     .then((chunks) => {
       // Flatten the array of datasets arrays.
@@ -311,10 +316,12 @@ global.udataScript = {
    */
   load ({dataTerritoryIdAttr = 'data-udata-territory-id',
          dataDatasetIdAttr = 'data-udata-dataset-id'} = {}) {
+    _dataTerritoryIdAttr = dataTerritoryIdAttr
+    _dataDatasetIdAttr = dataDatasetIdAttr
     // Warning: using `Array.from` adds 700 lines once converted through Babel.
-    const territories = [].slice.call(document.querySelectorAll(`[${dataTerritoryIdAttr}]`))
-    const datasets = [].slice.call(document.querySelectorAll(`[${dataDatasetIdAttr}]`))
-    embedDatasets(territories, datasets, dataTerritoryIdAttr, dataDatasetIdAttr)
+    const territories = [].slice.call(document.querySelectorAll(`[${_dataTerritoryIdAttr}]`))
+    const datasets = [].slice.call(document.querySelectorAll(`[${_dataDatasetIdAttr}]`))
+    embedDatasets(territories, datasets)
   },
 
   /**
@@ -333,8 +340,11 @@ global.udataScript = {
                   dataTerritoryAttr = 'data-udata-territory',
                   dataTerritoryIdAttr = 'data-udata-territory-id',
                   dataDatasetIdAttr = 'data-udata-dataset-id'} = {}) {
-    const territoryElement = document.querySelector(`[${dataTerritoryAttr}]`)
-    const territorySlug = territoryElement.dataset[camelCaseData(dataTerritoryAttr)]
+    _dataTerritoryAttr = dataTerritoryAttr
+    _dataTerritoryIdAttr = dataTerritoryIdAttr
+    _dataDatasetIdAttr = dataDatasetIdAttr
+    const territoryElement = document.querySelector(`[${_dataTerritoryAttr}]`)
+    const territorySlug = territoryElement.dataset[camelCaseData(_dataTerritoryAttr)]
     const territoryId = territorySlug.replace(/-/g, '/')
     const url = `${baseURL}/api/1/spatial/zone/${territoryId}/datasets?dynamic=1&size=${size}`
     fetchJSON(url)
@@ -345,7 +355,7 @@ global.udataScript = {
           .filter((item) => item.class !== 'Dataset')
           .map((item) => {
             const fragment = document.createElement('div')
-            fragment.dataset[camelCaseData(dataTerritoryIdAttr)] = `${territorySlug}-${item.id}`
+            fragment.dataset[camelCaseData(_dataTerritoryIdAttr)] = `${territorySlug}-${item.id}`
             territoryElement.appendChild(fragment)
             return fragment
           })
@@ -353,11 +363,11 @@ global.udataScript = {
           .filter((item) => item.class === 'Dataset')
           .map((item) => {
             const fragment = document.createElement('div')
-            fragment.dataset[camelCaseData(dataDatasetIdAttr)] = item.id
+            fragment.dataset[camelCaseData(_dataDatasetIdAttr)] = item.id
             territoryElement.appendChild(fragment)
             return fragment
           })
-        embedDatasets(territories, datasets, dataTerritoryIdAttr, dataDatasetIdAttr)
+        embedDatasets(territories, datasets)
       })
       .catch(console.error.bind(console))
     if (withSearch) {
