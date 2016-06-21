@@ -23,11 +23,10 @@ import 'string_score'
 // Polyfill to be able to use `fetch` on IE and Safari.
 import 'whatwg-fetch'
 
-// These global vars (but encapsulated by Babel) avoid the
-// cumbersome options' passing across functions.
-let _dataTerritoryAttr
-let _dataTerritoryIdAttr
-let _dataDatasetIdAttr
+// Constants in use within the HTML to store ids.
+const DATA_TERRITORY = 'data-udata-territory'
+const DATA_TERRITORY_ID = 'data-udata-territory-id'
+const DATA_DATASET_ID = 'data-udata-dataset-id'
 
 /**
  * Extract the base URL from the URL of the current script,
@@ -201,10 +200,10 @@ function toggleIntegration (event, dataset) {
  */
 function embedDatasetChunk (datasetChunk) {
   const references = datasetChunk.map((el) => {
-    if (el.hasAttribute(_dataTerritoryIdAttr)) {
-      return `territory-${el.dataset[camelCaseData(_dataTerritoryIdAttr)]}`
-    } else if (el.hasAttribute(_dataDatasetIdAttr)) {
-      return `dataset-${el.dataset[camelCaseData(_dataDatasetIdAttr)]}`
+    if (el.hasAttribute(DATA_TERRITORY_ID)) {
+      return `territory-${el.dataset[camelCaseData(DATA_TERRITORY_ID)]}`
+    } else if (el.hasAttribute(DATA_DATASET_ID)) {
+      return `dataset-${el.dataset[camelCaseData(DATA_DATASET_ID)]}`
     }
   })
   const url = `${baseURL}/api/1/oembeds/?references=${references.join(',')}`
@@ -317,43 +316,28 @@ function insertSearchInput (event, territoryElement) {
 global.udataScript = {
 
   /**
-   * Load territories and datasets from the API given the set
-   * data-attributes `dataTerritoryIdAttr` and
-   * `dataDatasetIdAttr` within the DOM.
+   * Load dataset(s) and/or dynamically generated one(s) from the API.
    */
-  load ({dataTerritoryIdAttr = 'data-udata-territory-id',
-         dataDatasetIdAttr = 'data-udata-dataset-id'} = {}) {
-    _dataTerritoryIdAttr = dataTerritoryIdAttr
-    _dataDatasetIdAttr = dataDatasetIdAttr
+  load () {
     // Warning: using `Array.from` adds 700 lines once converted through Babel.
-    const territories = [].slice.call(document.querySelectorAll(`[${_dataTerritoryIdAttr}]`))
-    const datasets = [].slice.call(document.querySelectorAll(`[${_dataDatasetIdAttr}]`))
+    const territories = [].slice.call(document.querySelectorAll(`[${DATA_TERRITORY_ID}]`))
+    const datasets = [].slice.call(document.querySelectorAll(`[${DATA_DATASET_ID}]`))
     embedDatasets(territories, datasets)
   },
 
   /**
-   * Load datasets for a given territory from the API given the set
-   * data-attribute `dataTerritoryAttr` within the DOM.
-   * Optionally you can customize data-attributes dynamically
-   * inserted for territories and datasets using
-   * `dataTerritoryIdAttr` and `dataDatasetIdAttr`.
+   * Load datasets for a given territory.
    *
    * The `size` parameter limits the number of loaded datasets.
+   * The `withDynamic` parameter loads dynamically generated datasets.
    * The `withSearch` parameter optionally loads an input
    * allowing the user to filter currently displayed datasets.
    */
-  loadTerritory ({size = 100,
-                  withSearch = false,
-                  dataTerritoryAttr = 'data-udata-territory',
-                  dataTerritoryIdAttr = 'data-udata-territory-id',
-                  dataDatasetIdAttr = 'data-udata-dataset-id'} = {}) {
-    _dataTerritoryAttr = dataTerritoryAttr
-    _dataTerritoryIdAttr = dataTerritoryIdAttr
-    _dataDatasetIdAttr = dataDatasetIdAttr
-    const territoryElement = document.querySelector(`[${_dataTerritoryAttr}]`)
-    const territorySlug = territoryElement.dataset[camelCaseData(_dataTerritoryAttr)]
+  loadTerritory ({size = 100, withDynamic = true, withSearch = false} = {}) {
+    const territoryElement = document.querySelector(`[${DATA_TERRITORY}]`)
+    const territorySlug = territoryElement.dataset[camelCaseData(DATA_TERRITORY)]
     const territoryId = territorySlug.replace(/-/g, '/')
-    const url = `${baseURL}/api/1/spatial/zone/${territoryId}/datasets?dynamic=1&size=${size}`
+    const url = `${baseURL}/api/1/spatial/zone/${territoryId}/datasets?dynamic=${withDynamic}&size=${size}`
     fetchJSON(url)
       .then((territoriesAndDatasets) => {
         // Create a div for each returned item ready to be filled with
@@ -362,7 +346,7 @@ global.udataScript = {
           .filter((item) => item.class !== 'Dataset')
           .map((item) => {
             const fragment = document.createElement('div')
-            fragment.dataset[camelCaseData(_dataTerritoryIdAttr)] = `${territorySlug}-${item.id}`
+            fragment.dataset[camelCaseData(DATA_TERRITORY_ID)] = `${territorySlug}-${item.id}`
             territoryElement.appendChild(fragment)
             return fragment
           })
@@ -370,7 +354,7 @@ global.udataScript = {
           .filter((item) => item.class === 'Dataset')
           .map((item) => {
             const fragment = document.createElement('div')
-            fragment.dataset[camelCaseData(_dataDatasetIdAttr)] = item.id
+            fragment.dataset[camelCaseData(DATA_DATASET_ID)] = item.id
             territoryElement.appendChild(fragment)
             return fragment
           })
