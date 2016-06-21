@@ -180,23 +180,17 @@ def i18nc():
 
 
 @task
-def assets_build(progress=False):
+def assets_build():
     '''Install and compile assets'''
     header('Building static assets')
-    cmd = 'npm run assets:build'
-    if progress:
-        cmd += ' --progress'
-    lrun(cmd, pty=True)
+    lrun('npm run assets:build', pty=True)
 
 
 @task
-def widgets_build(progress=False):
+def widgets_build():
     '''Compile and minify widgets'''
     header('Building widgets')
-    cmd = 'npm run widgets:build'
-    if progress:
-        cmd += ' --progress'
-    lrun(cmd, pty=True)
+    lrun('npm run widgets:build', pty=True)
 
 
 @task
