@@ -45,19 +45,33 @@ Vous avez la possibilité d’intégrer des jeux de données directement sur vot
 </p>
 <pre>
 <code>
-&lt;div data-udata-dataset-id="ID DU JEU DE DONNÉES"&gt;&lt;/div&gt;
-&lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer&gt;&lt;/script&gt;
+&lt;div data-udata-dataset-id="IDENTIFIANT DU JEU DE DONNÉES"&gt;&lt;/div&gt;
+&lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer onload="udataScript.load()"&gt;&lt;/script&gt;
 </code>
 </pre>
 
+<p>Vous pouvez récupérer l’<code>IDENTIFIANT DU JEU DE DONNÉES</code> en cliquant sur le bouton des <em>Détails</em> lorsque vous êtes sur la page d’un jeu de données, il sera de la forme : <code>549d48f9c751df513b04805b</code>.</p>
+
 <p>
-Si vous souhaitez intégrer plusieurs jeux de données, seule la balise <code>div</code> avec l’<code>id</code> du jeu de données doit être dupliquée :
+Si vous souhaitez intégrer plusieurs jeux de données, seule la balise <code>div</code> avec l’<code>identifiant</code> du jeu de données doit être dupliquée :
 </p>
 <pre>
 <code>
-&lt;div data-dgfr-dataset-id="ID DU PREMIER JEU DE DONNÉES"&gt;&lt;/div&gt;
-&lt;div data-dgfr-dataset-id="ID DU SECOND JEU DE DONNÉES"&gt;&lt;/div&gt;
-&lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer&gt;&lt;/script&gt;
+&lt;div data-udata-dataset-id="IDENTIFIANT DU PREMIER JEU DE DONNÉES"&gt;&lt;/div&gt;
+&lt;div data-udata-dataset-id="IDENTIFIANT DU SECOND JEU DE DONNÉES"&gt;&lt;/div&gt;
+&lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer onload="udataScript.load()"&gt;&lt;/script&gt;
+</code>
+
+<p>
+Enfin, si vous souhaitez intégrer tous les jeux de données relatifs à un territoire :
+</p>
+<pre>
+<code>
+&lt;div data-udata-territory="IDENTIFIANT DU TERRITOIRE"&gt;&lt;/div&gt;
+&lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer onload="udataScript.loadTerritory()"&gt;&lt;/script&gt;
 </code>
 </pre>
+
+<p>Vous pouvez récupérer l’<code>IDENTIFIANT DU TERRITOIRE</code> en le construisant, il sera de la forme <code>fr-town-13004</code> où <code>13004</code> est le code INSEE de la commune (attention il diffère du code postal). Vous pouvez aussi récupérer un département <code>fr-county-13</code> ou une région <code>fr-region-93</code>.</p>
+
 {% endblock %}
