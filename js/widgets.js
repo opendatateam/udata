@@ -240,19 +240,26 @@ function embedDatasets (territories, datasets) {
     .then((chunks) => {
       // Flatten the array of datasets arrays.
       const datasets = [].concat(...chunks)
-      window.dispatchEvent(
-        new CustomEvent(
-          'udataset.loaded', {
-            detail: {
-              message: 'uData datasets fully loaded.',
-              time: new Date(),
-              datasets: datasets
-            },
-            bubbles: true,
-            cancelable: true
-          }
-        )
-      )
+      let event
+      const eventName = 'udataset.loaded'
+      const details = {
+        detail: {
+          message: 'uData datasets fully loaded.',
+          time: new Date(),
+          datasets: datasets
+        },
+        bubbles: true,
+        cancelable: true
+      }
+      if (typeof window.CustomEvent === 'function') {
+        event = new CustomEvent(eventName, details)
+      } else {
+        // IE 11 support.
+        event = document.createEvent('HTMLEvents')
+        event.initEvent(eventName, true, true)
+        event.details = details
+      }
+      window.dispatchEvent(event)
     })
     .catch(console.error.bind(console))
 }
