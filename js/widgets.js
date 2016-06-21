@@ -81,8 +81,27 @@ function camelCaseData (dataAttributeString) {
  */
 function chunk (array, n) {
   return Array
-    .apply(null, Array(Math.ceil(array.length / n))).map((x, i) => i) // range
+    .apply(null, Array(Math.ceil(array.length / n)))
+    .map((x, i) => i)
     .map((x, i) => array.slice(i * n, i * n + n))
+}
+
+/**
+ * Return a function, that, as long as it continues to be invoked,
+ * will not be triggered. The function will be called after
+ * it stops being called for `wait` milliseconds. Inspired by:
+ * https://davidwalsh.name/javascript-debounce-function
+ */
+function debounce (func, wait = 350) {
+  let timeout
+  return (...args) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      timeout = null
+      func(...args)
+    }, wait)
+    if (!timeout) func(...args)
+  }
 }
 
 /**
@@ -265,7 +284,7 @@ function filterDatasets (territoryElement, event, datasets, initialDatasets) {
 
 /**
  * Insert the styled search input to the DOM
- * which filters displayed datasets on `keyup`.
+ * which filters displayed datasets on `keydown`.
  */
 function insertSearchInput (event, territoryElement) {
   const datasets = event.detail.datasets
@@ -278,13 +297,20 @@ function insertSearchInput (event, territoryElement) {
   searchNode.style.margin = '1em'
   searchNode.style.padding = '.1em'
   territoryElement.parentNode.insertBefore(searchNode, territoryElement)
-  // TODO: add a timeout between keyups.
-  searchNode.addEventListener('keyup', (event) =>
+  // Do not refresh too soon while the user is typing.
+  const debouncedFilterDatasets = debounce((event) =>
     filterDatasets(territoryElement, event, datasets, initialDatasets)
   )
+  searchNode.addEventListener('keydown', debouncedFilterDatasets)
 }
 
 global.udataScript = {
+
+  /**
+   * Load territories and datasets from the API given the set
+   * data-attributes `dataTerritoryIdAttr` and
+   * `dataDatasetIdAttr` within the DOM.
+   */
   load (dataTerritoryIdAttr = 'data-udata-territory-id',
         dataDatasetIdAttr = 'data-udata-dataset-id') {
     // Warning: using `Array.from` adds 700 lines once converted through Babel.
@@ -293,6 +319,17 @@ global.udataScript = {
     embedDatasets(territories, datasets, dataTerritoryIdAttr, dataDatasetIdAttr)
   },
 
+  /**
+   * Load datasets for a given territory from the API given the set
+   * data-attribute `dataTerritoryAttr` within the DOM.
+   * Optionally you can customize data-attributes dynamically
+   * inserted for territories and datasets using
+   * `dataTerritoryIdAttr` and `dataDatasetIdAttr`.
+   *
+   * The `size` parameter limits the number of loaded datasets.
+   * The `withSearch` parameter optionally loads an input
+   * allowing the user to filter currently displayed datasets.
+   */
   loadTerritory (size = 100,
                  withSearch = false,
                  dataTerritoryAttr = 'data-udata-territory',
