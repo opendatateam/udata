@@ -187,7 +187,7 @@ def assets_build(progress=False):
     if progress:
         cmd += ' --progress'
     lrun(cmd.format('webpack.config.prod'), pty=True)
-    lrun(cmd.format('webpack.widgets.config.prod'), pty=True)
+    lrun(cmd.format('webpack.config.widgets.prod'), pty=True)
 
 
 @task

@@ -1,5 +1,5 @@
 var webpack = require('webpack');
-var config = require('./webpack.widgets.config');
+var config = require('./webpack.config.widgets');
 
 config.plugins = [new webpack.optimize.UglifyJsPlugin({
     minimize: true,
