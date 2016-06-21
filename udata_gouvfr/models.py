@@ -342,6 +342,7 @@ class BanODBLTownDataset(TerritoryDataset):
         ](/datasets/ban-base-adresse-nationale/)
         sur le périmètre de la commune.
     '''.strip()
+    license_id = 'odc-odbl'
 
 
 class AAHDenombrementCAFCountyDataset(ResourceBasedTerritoryDataset):

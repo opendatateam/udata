@@ -316,8 +316,10 @@ class OEmbedsTerritoryAPITest(APITestCase):
             id='fr/town/13004', level='fr/town',
             name='Arles', code='13004', population=52439)
         licence_ouverte = LicenseFactory(id='fr-lo', title='Licence Ouverte')
+        odbl_license = LicenseFactory(id='odc-odbl', title='ODbL')
         LicenseFactory(id='notspecified', title='Not Specified')
-        for territory_dataset_class in TERRITORY_DATASETS['town'].values():
+        town_datasets = TERRITORY_DATASETS['town']
+        for territory_dataset_class in town_datasets.values():
             organization = OrganizationFactory(
                 id=territory_dataset_class.organization_id)
             territory = territory_dataset_class(arles)
@@ -340,13 +342,16 @@ class OEmbedsTerritoryAPITest(APITestCase):
                 md(territory.description, source_tooltip=True), data['html'])
             self.assertIn('Download from localhost', data['html'])
             self.assertIn('Add to your own website', data['html'])
-            if territory_dataset_class not in (
-                    TERRITORY_DATASETS['town']['comptes_t'],):
+            if territory_dataset_class not in (town_datasets['comptes_t'],):
+                if territory_dataset_class == town_datasets['ban_odbl_t']:
+                    license = odbl_license
+                else:
+                    license = licence_ouverte
                 self.assertIn(
-                    'License: {title}'.format(title=licence_ouverte.title),
+                    'License: {title}'.format(title=license.title),
                     data['html'])
                 self.assertIn(
-                    '© {license_id}'.format(license_id=licence_ouverte.id),
+                    '© {license_id}'.format(license_id=license.id),
                     data['html'])
                 self.assertIn(
                     '<a data-tooltip="Source" href="http://localhost/datasets',
