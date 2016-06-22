@@ -275,7 +275,8 @@ function filterDatasets (territoryElement, event, datasets, initialDatasets) {
       score: title.score(removeDiacritics(searchValue))
     }
   })
-  const filteredScoredResults = scoredDatasets.filter((result) => result.score > 0)
+  // Only keep results with high scores, then sort (highest first).
+  const filteredScoredResults = scoredDatasets.filter((result) => result.score > 0.4)
   filteredScoredResults.sort((a, b) => a.score < b.score)
   if (filteredScoredResults) {
     territoryElement.innerHTML = ''
@@ -292,6 +293,8 @@ function filterDatasets (territoryElement, event, datasets, initialDatasets) {
  * which filters displayed datasets on `keydown`.
  */
 function insertSearchInput (event, territoryElement) {
+  // Happen when we reload a territory manually.
+  if (!territoryElement.parentNode) return
   const datasets = event.detail.datasets
   const initialDatasets = territoryElement.innerHTML
   const searchNode = document.createElement('input')
