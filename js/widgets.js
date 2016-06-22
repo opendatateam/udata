@@ -108,7 +108,6 @@ function debounce (func, wait = 350) {
       timeout = null
       func(...args)
     }, wait)
-    if (!timeout) func(...args)
   }
 }
 
@@ -243,22 +242,17 @@ function embedDatasets (territories, datasets) {
       // Flatten the array of datasets arrays.
       const datasets = [].concat(...chunks)
       let event
-      const details = {
-        detail: {
-          message: 'uData datasets fully loaded.',
-          time: new Date(),
-          datasets: datasets
-        },
-        bubbles: true,
-        cancelable: true
-      }
       if (typeof window.CustomEvent === 'function') {
-        event = new CustomEvent(DATASETS_LOADED_EVENT_NAME, details)
+        event = new CustomEvent(DATASETS_LOADED_EVENT_NAME, {
+          detail: { datasets },
+          bubbles: true,
+          cancelable: true
+        })
       } else {
         // IE 11 support.
         event = document.createEvent('HTMLEvents')
         event.initEvent(DATASETS_LOADED_EVENT_NAME, true, true)
-        event.details = details
+        event.detail = { datasets }
       }
       window.dispatchEvent(event)
     })
