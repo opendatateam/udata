@@ -46,7 +46,7 @@ Vous avez la possibilité d’intégrer des jeux de données directement sur vot
 <pre>
 <code>
 &lt;div data-udata-dataset-id="IDENTIFIANT DU JEU DE DONNÉES"&gt;&lt;/div&gt;
-&lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer onload="udataScript.load()"&gt;&lt;/script&gt;
+&lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer onload="udataScript.loadDatasets()"&gt;&lt;/script&gt;
 </code>
 </pre>
 
@@ -59,11 +59,11 @@ Si vous souhaitez intégrer plusieurs jeux de données, seule la balise <code>di
 <code>
 &lt;div data-udata-dataset-id="IDENTIFIANT DU PREMIER JEU DE DONNÉES"&gt;&lt;/div&gt;
 &lt;div data-udata-dataset-id="IDENTIFIANT DU SECOND JEU DE DONNÉES"&gt;&lt;/div&gt;
-&lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer onload="udataScript.load()"&gt;&lt;/script&gt;
+&lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer onload="udataScript.loadDatasets()"&gt;&lt;/script&gt;
 </code>
 
 <p>
-Enfin, si vous souhaitez intégrer tous les jeux de données relatifs à un territoire :
+Si vous souhaitez intégrer tous les jeux de données relatifs à un territoire :
 </p>
 <pre>
 <code>
@@ -73,5 +73,17 @@ Enfin, si vous souhaitez intégrer tous les jeux de données relatifs à un terr
 </pre>
 
 <p>Vous pouvez récupérer l’<code>IDENTIFIANT DU TERRITOIRE</code> en le construisant, il sera de la forme <code>fr-town-13004</code> où <code>13004</code> est le code INSEE de la commune (attention il diffère du code postal). Vous pouvez aussi récupérer un département <code>fr-county-13</code> ou une région <code>fr-region-93</code>.</p>
+
+<p>
+Enfin, si vous souhaitez intégrer tous les jeux de données relatifs à une organisation :
+</p>
+<pre>
+<code>
+&lt;div data-udata-organization="IDENTIFIANT DE L'ORGANISATION"&gt;&lt;/div&gt;
+&lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer onload="udataScript.loadOrganization()"&gt;&lt;/script&gt;
+</code>
+</pre>
+
+<p>Vous pouvez récupérer l’<code>IDENTIFIANT DE L'ORGANISATION</code> dans l’url depuis votre interface d’administration.</p>
 
 {% endblock %}
