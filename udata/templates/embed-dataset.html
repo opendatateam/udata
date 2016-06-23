@@ -6,7 +6,7 @@
     .dataset-card {
         border: 1px solid #EEE;
         min-width: 300px;
-        min-height: 150px;
+        min-height: 170px;
         clear: both;
         margin: 1em;
         background: #FFF;
@@ -98,14 +98,15 @@
     .dataset-card .udata-stats {
         background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABBJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ1dWlkOjY1RTYzOTA2ODZDRjExREJBNkUyRDg4N0NFQUNCNDA3IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjdENzA1QzI3ODQ4RjExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjdENzA1QzI2ODQ4RjExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTgyMjI1ZDItYmFhNy00NTNlLWEyZTEtMzlkODljOGVhMDljIiBzdFJlZjpkb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6ZWJjOWI3YjMtY2NlMC0xMTc4LTg4NTktZjY2YzAxOGQ1YjcyIi8+IDxkYzp0aXRsZT4gPHJkZjpBbHQ+IDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+Z2x5cGhpY29uc19oYWxmbGluZ3M8L3JkZjpsaT4gPC9yZGY6QWx0PiA8L2RjOnRpdGxlPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PkaU3hQAAABPSURBVHjaYvj//z8DMgaCBUAMYixAl2OEKoADRkZGuABQjhFZjomBBEBQMdCmBSDbwDQhZyDzSXIGhu+h7P8Qg1H5eCXR+dQNDbIVAwQYAJyNSJ5I6tz5AAAAAElFTkSuQmCC') no-repeat left center;
     }
-    .dataset-card .shrink .udata-source,
-    .dataset-card .shrink .udata-description {
+    .dataset-card .js-hide .udata-source,
+    .dataset-card .js-hide .udata-description {
         visibility: hidden;
         height: 0;
         width: 0;
     }
-    .dataset-card .shrink textarea {
+    .dataset-card .js-hide textarea {
         width: 100%;
+        height: 4em;
         font-size: 11px;
     }
     {# Source: https://github.com/kazzkiq/balloon.css #}
@@ -192,11 +193,13 @@
             </a>
         {% endif %}
         </p>
-        {% if item.territory %}
-            {{ item.description|markdown(source_tooltip=True) }}
-        {% else %}
-            <p>{{ item.description|mdstrip(110) }}</p>
-        {% endif %}
+        <div class="udata-description">
+            {% if item.territory %}
+                {{ item.description|markdown(source_tooltip=True) }}
+            {% else %}
+                <p>{{ item.description|mdstrip(110) }}</p>
+            {% endif %}
+        </div>
     </div>
     <aside class="udata-meta">
         <p class="udata-code" data-tooltip="{{ _('Add to your own website') }}">

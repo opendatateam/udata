@@ -558,6 +558,17 @@ class OrganizationDatasetsAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json), len(datasets))
 
+    def test_list_org_datasets_with_size(self):
+        '''Should list organization datasets'''
+        org = OrganizationFactory()
+        DatasetFactory.create_batch(3, organization=org)
+
+        response = self.get(
+            url_for('api.org_datasets', org=org), qs={'size': 2})
+
+        self.assert200(response)
+        self.assertEqual(len(response.json), 2)
+
 
 class OrganizationReusesAPITest(APITestCase):
     def test_list_org_reuses(self):
