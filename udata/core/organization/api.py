@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 from flask import request
+from flask_restplus import inputs
 
 from udata import search
 from udata.api import api, API, errors
@@ -354,16 +355,24 @@ class AvatarAPI(API):
         return {'image': org.logo}
 
 
+dataset_parser = api.parser()
+dataset_parser.add_argument(
+    'size', type=int, help='The amount of datasets to fetch',
+    location='args', default=25)
+
+
 @ns.route('/<org:org>/datasets/', endpoint='org_datasets')
 class OrgDatasetsAPI(API):
     @api.doc('list_organization_datasets')
     @api.marshal_list_with(dataset_fields)
+    @api.expect(dataset_parser)
     def get(self, org):
         '''List organization datasets (including private ones when member)'''
+        args = dataset_parser.parse_args()
         qs = Dataset.objects.owned_by(org)
         if not OrganizationPrivatePermission(org).can():
             qs = qs(private__ne=True)
-        return list(qs)
+        return list(qs.limit(args['size']))
 
 
 @ns.route('/<org:org>/reuses/', endpoint='org_reuses')
