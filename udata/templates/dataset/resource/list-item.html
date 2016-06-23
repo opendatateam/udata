@@ -5,7 +5,7 @@
     itemid="{{resource.id}}"
     data-checkurl="{{ url_for('api.checkurl') }}"
     @click="showResource('{{resource.id}}', $event)">
-    <div class="format-label pull-left ellipsis-dot">
+    <div class="format-label pull-left ellipsis-dot" v-tooltip tooltip-placement="left">
         <span data-format="{{ resource_format }}">
             {{ resource_format }}
         </span>
@@ -50,7 +50,7 @@
             {% set edit_path = 'dataset/{id}/resource/{rid}' %}
         {% endif %}
         <div class="btn-group btn-group-xs tools">
-            <a class="btn btn-default btn-edit" data-toggle="tooltip" title="{{ _('Edit') }}"
+            <a class="btn btn-default btn-edit" v-tooltip title="{{ _('Edit') }}"
                 href="{{ url_for('admin.index', path=edit_path.format(id=dataset.id, rid=resource.id)) }}">
                 <span class="glyphicon glyphicon-edit"></span>
             </a>

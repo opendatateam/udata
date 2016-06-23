@@ -42,7 +42,7 @@ export default {
         addToReuse(id) {
             const url = `reuses/${id}/datasets/`;
             const data = {id: this.dataset.id, class: 'Dataset'};
-            this.$http.post(url, data).then(() => {
+            this.$api.post(url, data).then(() => {
                 window.location = `${config.admin_root}reuse/${id}`;
             });
         }

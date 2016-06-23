@@ -5,6 +5,7 @@
 @import "udata/search";
 @import "udata/cards";
 @import "udata/panels";
+@import "udata/buttons";
 @import "udata/icons";
 @import "udata/oauth";
 @import "udata/activity";
@@ -323,5 +324,17 @@ small.deleted {
             }
         }
 
+    }
+}
+
+
+/**
+ * For custom popover widget
+ */
+.popover {
+    display: block;
+
+    &.large {
+      max-width: 450px;
     }
 }

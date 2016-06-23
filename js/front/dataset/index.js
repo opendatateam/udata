@@ -1,10 +1,6 @@
 /**
  * Dataset display page JS module
  */
-
-// Styles. May need refactoring for proper common.css
-import 'balloon-css/src/balloon.less';
-
 // Catch all errors
 import 'raven';
 
@@ -24,13 +20,13 @@ import AddReuseModal from './add-reuse-modal.vue';
 import DetailsModal from './details-modal.vue';
 import ResourceModal from './resource-modal.vue';
 import LeafletMap from 'components/leaflet-map.vue';
+import FollowButton from 'components/buttons/follow.vue';
+import ShareButton from 'components/buttons/share.vue';
 
 // Legacy widgets
 import 'widgets/featured';
-import 'widgets/follow-btn';
 import 'widgets/issues-btn';
 import 'widgets/discussions-btn';
-import 'widgets/share-btn';
 import 'widgets/integrate-btn';
 
 Vue.config.debug = config.debug;
@@ -38,6 +34,7 @@ Vue.config.debug = config.debug;
 Vue.use(require('plugins/api'));
 Vue.use(require('plugins/text'));
 Vue.use(require('plugins/i18next'));
+Vue.use(require('plugins/tooltips'));
 
 
 function parseUrl(url) {
@@ -47,15 +44,9 @@ function parseUrl(url) {
 }
 
 
-function addTooltip(el, content) {
-    el.dataset.balloon = content;
-    el.setAttribute('data-balloon-pos', 'left');
-}
-
-
 new Vue({
     el: 'body',
-    components: {LeafletMap},
+    components: {LeafletMap, ShareButton, FollowButton},
     data() {
         const data = {
             dataset: this.extractDataset(),
@@ -87,7 +78,7 @@ new Vue({
                 el: this.$els.modal,
                 replace: false, // Needed while all components are not migrated to replace: true behavior
                 parent: this,
-                data: data
+                propsData: data
             });
         },
 
@@ -201,7 +192,7 @@ new Vue({
             if (!this.ignore.some(domain => url.origin.endsWith(domain))) {
                 if (url.protocol.startsWith('ftp')) {
                     el.classList.add('format-label-warning');
-                    addTooltip(el, this._('The server may be hard to reach (FTP).'));
+                    el.setTooltip(this._('The server may be hard to reach (FTP).'), true);
                 } else {
                     this.$api.get(checkurl, {url: url.href, group: this.dataset.alternateName})
                     .then(() => el.classList.add('format-label-success'))
@@ -209,13 +200,13 @@ new Vue({
                         switch (error.status) {
                             case 404:
                                 el.classList.add('format-label-warning');
-                                addTooltip(el, this._('The resource cannot be found.'));
+                                el.setTooltip(this._('The resource cannot be found.'), true);
                                 break;
                             case 503:
                                 break;
                             default:
                                 el.classList.add('format-label-danger');
-                                addTooltip(el, this._('The server cannot be found.'));
+                                el.setTooltip(this._('The server cannot be found.'), true);
                         }
                     });
                 }

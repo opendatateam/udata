@@ -13,7 +13,7 @@
 {% set body_class = 'reuse-display' %}
 
 {% block extra_js %}
-<script src="{{ static('reuse/display.js') }}"></script>
+<script src="{{ static('reuse.js') }}"></script>
 {% endblock %}
 
 {% block extra_head %}
@@ -87,16 +87,18 @@
                                 ) }}
                             </small>
                             {% if reuse.private %}
-                            <small class="private" data-toggle="popover"
-                                data-title="{{ _('Private') }}" data-trigger="hover" data-placement="top"
-                                data-content="{{ _('This reuse is private and will not be visible by other users') }}"
-                                >{{ _('Private') }}</small>
+                            <small class="private" title="{{ _('Private') }}"
+                                v-popover.literal="{{ _('This reuse is private and will not be visible by other users') }}"
+                                popover-placement="top" popover-trigger="hover">
+                                {{ _('Private') }}
+                            </small>
                             {% endif %}
                             {% if reuse.deleted %}
-                            <small class="deleted" data-toggle="popover"
-                                data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
-                                data-content="{{ _('This reuse has been deleted. This will be permanent in the next 24 hours') }}"
-                                >{{ _('Deleted') }}</small>
+                            <small class="deleted" title="{{ _('Deleted') }}"
+                                v-popover.literal="{{ _('This reuse has been deleted. This will be permanent in the next 24 hours') }}"
+                                popover-effect="fade" popover-placement="top" popover-trigger="hover">
+                                {{ _('Deleted') }}
+                            </small>
                             {% endif %}
                         </p>
                     </div>
@@ -156,7 +158,6 @@
 
             {# Right sidebar #}
             <aside class="col-md-3 col-sm-3">
-
                 {# Optionnal organization panel #}
                 {% if reuse.organization %}
                 <div class="panel panel-transparent text-center">
@@ -189,21 +190,11 @@
                             {% else %}
                             <br/>
                             {% endif %}
-                            <button type="button"
-                                class="btn btn-warning btn-follow btn-block btn-sm icon-left {% if is_following(reuse.owner) %}active{% endif %}"
-                                data-toggle="tooltip" data-placement="left"
-                                data-api-url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"
-                                data-following-label="{{ _('Unfollow') }}"
-                                {% if is_following(reuse.owner) %}
-                                title="{{ _('Unfollow') }}">
-                                <span class="glyphicon glyphicon-eye-close"></span>
-                                {{ _('Unfollow') }}
-                                {% else %}
-                                title="{{ _("I'll be informed about this user news") }}">
-                                <span class="glyphicon glyphicon-eye-open"></span>
-                                {{ _('Follow') }}
-                                {% endif %}
-                            </button>
+                            <follow-button with-label classes="btn-block btn-sm btn-left btn-warning"
+                                {% if is_following(reuse.owner) %}following{% endif %}
+                                url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"
+                                tooltip="{{ _('I\'ll be informed about this user news') }}">
+                            </follow-button>
                         </div>
                     </div>
                 </div>
@@ -217,7 +208,8 @@
                         <ul class="list-unstyled infos-list">
                             {# Reuse type #}
                             <li>
-                                <a href class="btn btn-xs btn-default" data-toggle="tooltip" data-placement="right auto"
+                                <a href class="btn btn-xs btn-default"
+                                    v-tooltip tooltip-placement="left"
                                     title="{{ _('Type') }}">
                                     <span class="{{ ficon('fa-file') }}"></span>
                                 </a>
