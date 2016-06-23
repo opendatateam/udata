@@ -55,7 +55,7 @@ const [scriptURL, baseURL] = extractURLs('script#udata')
 const apiURL = `${baseURL}/api/1/`
 
 /**
- * Remove French diacritics and special chars from a given string `str`.
+ * Remove only French diacritics and special chars from a given string `str`.
  */
 function removeDiacritics (str) {
   const rules = [
