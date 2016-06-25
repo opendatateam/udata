@@ -2,10 +2,7 @@
  * Organization display page JS module
  */
 // Catch all errors
-import 'raven';
-
-// ES6 environment
-import 'babel-polyfill';
+import 'front/bootstrap';
 
 import log from 'logger';
 import Auth from 'auth';
@@ -20,10 +17,6 @@ import Tab from 'components/tab';
 
 import MembershipRequest from './membership-request.vue';
 
-
-Vue.use(require('plugins/i18next'));
-Vue.use(require('plugins/api'));
-Vue.use(require('plugins/tooltips'));
 
 new Vue({
     el: 'body',

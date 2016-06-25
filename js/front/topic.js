@@ -1,11 +1,7 @@
 /**
- * Reuse display page JS module
+ * Topic display page JS module
  */
-// Catch all errors
-import 'raven';
-
-// ES6 environment
-import 'babel-polyfill';
+import 'front/bootstrap';
 
 import log from 'logger';
 import Vue from 'vue';

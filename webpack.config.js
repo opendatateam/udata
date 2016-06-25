@@ -88,7 +88,6 @@ module.exports = {
             $: 'jquery',
             jQuery: 'jquery',
             'window.jQuery': 'jquery',
-            'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch',
         }),
         new ExtractTextPlugin('[name].css', {
             allChunks: true
