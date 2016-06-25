@@ -24,6 +24,8 @@ Vue.use(require('plugins/text'));
 Vue.use(require('plugins/tooltips'));
 Vue.use(require('plugins/util'));
 
+// Legacy common widgets and helpers (still to be ported)
+import 'legacy';
 
 // Expose the uData global
 require('expose?uData!udata');
