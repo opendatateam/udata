@@ -19,7 +19,7 @@ module.exports = {
         reuse: './js/front/reuse',
         site: './js/front/site.js',
         home: './js/front/home.js',
-        search: './js/search.js',
+        search: './js/front/search.js',
         dashboard: './js/dashboard.js',
         apidoc: './js/apidoc',
         organization: './js/front/organization',
