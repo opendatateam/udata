@@ -7,9 +7,7 @@
     'keywords': [_('organization')],
 } %}
 
-{% block extra_js %}
-<script src="{{ static('organization.js') }}"></script>
-{% endblock %}
+{% set bundle = 'organization' %}
 
 {% block breadcrumb %}
     {{ super() }}

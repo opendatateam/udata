@@ -32,7 +32,7 @@ module.exports = {
         path: path.join(__dirname, 'udata', 'static'),
         publicPath: '/static/',
         filename: '[name].js',
-        chunkFilename: '[id].[hash].js'
+        chunkFilename: 'chunks/[id].[hash].js'
     },
     resolve: {
         root: [
@@ -89,14 +89,15 @@ module.exports = {
             jQuery: 'jquery',
             'window.jQuery': 'jquery',
         }),
-        new ExtractTextPlugin('[name].css', {
-            allChunks: true
-        }),
+        new ExtractTextPlugin('[name].css'),
         new webpack.IgnorePlugin(/^(\.\/)?shred/),
         // Only include needed translations
         new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp('^' + languages.join('|') + '$')),
         new webpack.ContextReplacementPlugin(/locales$/, new RegExp(languages.join('|'))),
-        new webpack.optimize.CommonsChunkPlugin('vue-common.js', ['admin', 'dashboard', 'dataset']),
-        new webpack.optimize.CommonsChunkPlugin('common.js')
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'common',
+            filename: 'common.js',
+            minChunks: 10,  // (Modules must be shared between 10 entries)
+        })
     ]
 };
