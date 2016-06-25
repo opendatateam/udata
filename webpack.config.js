@@ -17,7 +17,7 @@ module.exports = {
         dataset: './js/front/dataset',
         territory: './js/front/territory',
         reuse: './js/front/reuse',
-        site: './js/site.js',
+        site: './js/front/site.js',
         home: './js/home.js',
         search: './js/search.js',
         dashboard: './js/dashboard.js',
