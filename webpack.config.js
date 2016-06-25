@@ -18,7 +18,7 @@ module.exports = {
         territory: './js/front/territory',
         reuse: './js/front/reuse',
         site: './js/front/site.js',
-        home: './js/home.js',
+        home: './js/front/home.js',
         search: './js/search.js',
         dashboard: './js/dashboard.js',
         apidoc: './js/apidoc',
