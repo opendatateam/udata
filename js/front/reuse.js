@@ -15,6 +15,7 @@ import Vue from 'vue';
 import FollowButton from 'components/buttons/follow.vue';
 import ShareButton from 'components/buttons/share.vue';
 
+
 new Vue({
     el: 'body',
     components: {FollowButton, ShareButton},

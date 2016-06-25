@@ -23,6 +23,11 @@ Vue.use(require('plugins/markdown'));
 Vue.use(require('plugins/text'));
 Vue.use(require('plugins/tooltips'));
 Vue.use(require('plugins/util'));
+Vue.use(require('plugins/location'));
+Vue.use(require('plugins/outside'));
+
+// Site-wide components
+Vue.component('site-search', require('components/site-search.vue'));
 
 // Legacy common widgets and helpers (still to be ported)
 import 'legacy';
