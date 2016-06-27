@@ -421,6 +421,6 @@ REGION_DATASETS = {
     'comptes_r': ComptesRegionDataset,
 }
 
-TERRITORY_DATASETS['town'].update(TOWN_DATASETS)
-TERRITORY_DATASETS['county'].update(COUNTY_DATASETS)
+TERRITORY_DATASETS['commune'].update(TOWN_DATASETS)
+TERRITORY_DATASETS['departement'].update(COUNTY_DATASETS)
 TERRITORY_DATASETS['region'].update(REGION_DATASETS)
