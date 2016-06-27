@@ -73,8 +73,12 @@ class GeoZone(db.Document):
         elif self.level_name == 'departement':
             return '{name} <small>({code})</small>'.format(
                 name=self.name, code=self.code)
-        else:
-            return self.name
+        elif self.level_name == 'region':
+            return ('{name} '
+                    '<small>(<a href="{parent_url}">{parent_name}</a>)</small>'
+                    '').format(name=self.name,
+                               parent_url=url_for('territories.home'),
+                               parent_name=_('France'))
 
     def logo_url(self, external=False):
         filename = self.logo.filename

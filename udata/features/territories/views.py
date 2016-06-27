@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 import StringIO
 from collections import namedtuple
+import unicodedata
 
 import unicodecsv as csv
 from flask import abort, current_app, request, send_file, redirect, url_for
@@ -78,12 +79,17 @@ def render_home():
         return abort(404)
 
     regions = GeoZone.objects.get(id='country/fr').children
+    regions = sorted(
+        regions,
+        key=lambda zone: unicodedata.normalize('NFD', zone.name)
+                                    .encode('ascii', 'ignore'))
 
     return theme.render('territories/home.html', **{
         'geojson': {
             'type': 'FeatureCollection',
             'features': [region.toGeoJSON() for region in regions]
-        }
+        },
+        'regions': regions
     })
 
 

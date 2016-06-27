@@ -65,7 +65,8 @@ def load(filename, drop=False):
     zones_filepath = tmp.path('zones.msgpack')
     with open(zones_filepath) as fp:
         unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
-        for i, geozone in enumerate(unpacker, start=1):
+        unpacker.next()
+        for geozone in unpacker:
             try:
                 GeoZone.objects.create(
                     id=geozone['_id'],
@@ -82,7 +83,7 @@ def load(filename, drop=False):
                     geom=geozone['geom']
                 )
             except errors.ValidationError:
-                log.info('Validation error for %s', geozone)
+                log.warning('Validation error for %s', geozone)
                 continue
     os.remove(zones_filepath)
     log.info('Loaded {total} zones'.format(total=i))
