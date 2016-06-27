@@ -16,7 +16,7 @@ m = submanager(
 
 
 @m.command
-def attach_zone(insee_code, organization_id_or_slug, level='fr/town'):
+def attach_zone(insee_code, organization_id_or_slug, level='fr/commune'):
     '''Attach a zone restricted to level for a given organization.'''
     organization = Organization.objects.get_by_id_or_slug(
         organization_id_or_slug)

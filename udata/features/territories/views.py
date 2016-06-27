@@ -72,7 +72,7 @@ def compute_territory_dataset(territory, dataset, resource_id):
                      attachment_filename=attachment_filename)
 
 
-@blueprint.route('/territory/regions/', endpoint='home')
+@blueprint.route('/territoires/', endpoint='home')
 def render_home():
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
@@ -90,15 +90,15 @@ def render_home():
 @blueprint.route('/town/<int:code>/', endpoint='town')
 def redirect_town(code):
     """
-    Legacy redirect now prefixed with `territories`.
+    Legacy redirect now prefixed with `territories` + French name.
     """
     # Turn the dict into a namedtuple to be consistent in routing.
     territory = dict_to_namedtuple('Territory',
-                                   {'code': code, 'level_name': 'town'})
+                                   {'code': code, 'level_name': 'commune'})
     return redirect(url_for('territories.territory', territory=territory))
 
 
-@blueprint.route('/territory/<territory:territory>/', endpoint='territory')
+@blueprint.route('/territoires/<territory:territory>/', endpoint='territory')
 def render_territory(territory):
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)

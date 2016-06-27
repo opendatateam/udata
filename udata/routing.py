@@ -115,7 +115,7 @@ class TerritoryConverter(ModelConverter, PathConverter):
         """
         `value` has a slash in it, that's why we inherit from `PathConverter`.
 
-        E.g.: `town/13200`, `county/13 or `region/93`.
+        E.g.: `commune/13200`, `departement/13 or `region/93`.
         """
         if '/' not in value:
             return

@@ -10,6 +10,7 @@ import shutil
 from urllib import urlretrieve
 
 import msgpack
+from mongoengine import errors
 
 from udata.commands import submanager
 from udata.core.storages import tmp
@@ -65,20 +66,24 @@ def load(filename, drop=False):
     with open(zones_filepath) as fp:
         unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
         for i, geozone in enumerate(unpacker, start=1):
-            GeoZone.objects.create(
-                id=geozone['_id'],
-                level=geozone['level'],
-                code=geozone['code'],
-                name=geozone['name'],
-                keys=geozone.get('keys'),
-                parents=geozone.get('parents'),
-                population=geozone.get('population'),
-                dbpedia=geozone.get('dbpedia'),
-                logo=geozone.get('flag') or geozone.get('blazon'),
-                wikipedia=geozone.get('wikipedia'),
-                area=geozone.get('area'),
-                geom=geozone['geom']
-            )
+            try:
+                GeoZone.objects.create(
+                    id=geozone['_id'],
+                    level=geozone['level'],
+                    code=geozone['code'],
+                    name=geozone['name'],
+                    keys=geozone.get('keys'),
+                    parents=geozone.get('parents'),
+                    population=geozone.get('population'),
+                    dbpedia=geozone.get('dbpedia'),
+                    logo=geozone.get('flag') or geozone.get('blazon'),
+                    wikipedia=geozone.get('wikipedia'),
+                    area=geozone.get('area'),
+                    geom=geozone['geom']
+                )
+            except errors.ValidationError:
+                log.info('Validation error for %s', geozone)
+                continue
     os.remove(zones_filepath)
     log.info('Loaded {total} zones'.format(total=i))
 

@@ -11,7 +11,7 @@ class TerritoriesTest(FrontTestCase):
 
     def test_towns(self):
         arles = GeoZoneFactory(
-            id='fr/town/13004', level='fr/town',
+            id='fr/commune/13004', level='fr/commune',
             name='Arles', code='13004', population=52439)
         response = self.client.get(
             url_for('territories.territory', territory=arles))
@@ -19,7 +19,8 @@ class TerritoriesTest(FrontTestCase):
 
     def test_counties(self):
         aveyron = GeoZoneFactory(
-            id='fr/county/12', level='fr/county', name='Aveyron', code='12')
+            id='fr/departement/12', level='fr/departement', name='Aveyron',
+            code='12')
         response = self.client.get(
             url_for('territories.territory', territory=aveyron))
         self.assert404(response)  # By default counties are deactivated.

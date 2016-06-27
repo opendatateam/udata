@@ -30,7 +30,7 @@
         L.geoJson({{ geojson|tojson }}, {
             onEachFeature: function (feature, layer) {
                 layer.on('click', function () {
-                    window.location = '/fr/territory/region/' + feature.properties.code + '/';
+                    window.location = '/fr/territoires/region/' + feature.properties.code + '/';
                 })
             }
         }).addTo(map);

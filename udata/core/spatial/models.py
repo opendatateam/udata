@@ -64,13 +64,13 @@ class GeoZone(db.Document):
     @cached_property
     def html_title(self):
         """In use within templates."""
-        if self.level_name == 'town':
+        if self.level_name == 'commune':
             return ('{name} '
                     '<small>(<a href="{parent_url}">{parent_name}</a>)</small>'
                     '').format(name=self.name,
                                parent_url=self.parent.url,
                                parent_name=self.parent.name)
-        elif self.level_name == 'county':
+        elif self.level_name == 'departement':
             return '{name} <small>({code})</small>'.format(
                 name=self.name, code=self.code)
         else:

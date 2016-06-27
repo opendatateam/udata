@@ -16,10 +16,10 @@ def create_geozones_fixtures():
         id='fr/region/93', level='fr/region',
         name='Provence Alpes Côtes dAzur')
     bdr = GeoZoneFactory(
-        id='fr/county/13', level='fr/county', parents=[paca.id],
+        id='fr/departement/13', level='fr/departement', parents=[paca.id],
         name='Bouches-du-Rhône', code='13', population=1993177, area=0)
     arles = GeoZoneFactory(
-        id='fr/town/13004', level='fr/town', parents=[bdr.id],
+        id='fr/commune/13004', level='fr/commune', parents=[bdr.id],
         name='Arles', code='13004', keys={'postal': '13200'},
         population=52439, area=0)
     return paca, bdr, arles
@@ -27,7 +27,7 @@ def create_geozones_fixtures():
 
 class TerritoriesSettings(Testing):
     ACTIVATE_TERRITORIES = True
-    HANDLED_LEVELS = ('fr/town', 'fr/county', 'fr/region', 'country')
+    HANDLED_LEVELS = ('fr/commune', 'fr/departement', 'fr/region', 'country')
 
 
 class TerritoriesTest(FrontTestCase):
