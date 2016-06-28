@@ -23,7 +23,7 @@ module.exports = {
         dashboard: './js/front/dashboard.js',
         apidoc: './js/apidoc',
         organization: './js/front/organization',
-        'site/map': './js/site/map',
+        covermap: './js/front/covermap',
         topic: './js/front/topic',
         post: './js/front/post',
         user: './js/front/user',

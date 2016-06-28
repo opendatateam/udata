@@ -6,11 +6,8 @@
     'keywords': [_('coverage'), _('map')],
 } %}
 
+{% set bundle = 'covermap' %}
 {% set section_class = 'big-map' %}
-
-{% block extra_js %}
-<script src="{{ static('site/map.js') }}"></script>
-{% endblock %}
 
 {% block breadcrumb %}
     <li class="active">{{ _('Coverage map') }}</li>
