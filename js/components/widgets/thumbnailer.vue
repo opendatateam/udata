@@ -96,9 +96,10 @@
 <script>
 import JCrop from 'jquery-jcrop';
 import $ from 'jquery';
+import UploaderMixin from 'mixins/uploader';
 
 export default {
-    mixins: [require('mixins/uploader')],
+    mixins: [UploaderMixin],
     props: {
         src: null,
         sizes: {

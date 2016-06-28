@@ -40,7 +40,6 @@ module.exports = {
         ],
         alias: {
             'jquery-slimscroll': path.join(node_path, 'jquery-slimscroll/jquery.slimscroll'),
-            'fineuploader': path.join(node_path, 'fine-uploader/fine-uploader/fine-uploader'),
             'bloodhound': path.join(node_path, 'corejs-typeahead/dist/bloodhound'),
             'typeahead': path.join(node_path, 'corejs-typeahead/dist/typeahead.jquery'),
             'handlebars': 'handlebars/runtime',
