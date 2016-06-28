@@ -21,7 +21,7 @@ module.exports = {
         home: './js/front/home.js',
         search: './js/front/search.js',
         dashboard: './js/front/dashboard.js',
-        apidoc: './js/apidoc',
+        apidoc: './js/front/apidoc',
         organization: './js/front/organization',
         covermap: './js/front/covermap',
         topic: './js/front/topic',
