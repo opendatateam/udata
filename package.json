@@ -105,8 +105,6 @@
     "swagger-client": "2.1.13",
     "swagger-ui": "2.1.4",
     "tv4": "^1.2.7",
-    "typeahead.js": "corejavascript/typeahead.js",
-    "typeahead.js-bootstrap3.less": "hyspace/typeahead.js-bootstrap3.less#v0.2.3",
     "velocity-animate": "^1.2.3",
     "vue": "1.0.24",
     "vue-router": "0.7.13",
