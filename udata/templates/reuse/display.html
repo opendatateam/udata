@@ -10,11 +10,9 @@
     'keywords': [_('reuse')] + reuse.tags,
 } %}
 
-{% set body_class = 'reuse-display' %}
+{% set bundle = 'reuse' %}
 
-{% block extra_js %}
-<script src="{{ static('reuse.js') }}"></script>
-{% endblock %}
+{% set body_class = 'reuse-display' %}
 
 {% block extra_head %}
 <link rel="canonical" href="{{ url_for('reuses.show', reuse=reuse) }}" />
