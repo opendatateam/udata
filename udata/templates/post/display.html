@@ -8,11 +8,9 @@
     'keywords': post.tags
 } %}
 
-{% set body_class = 'post-display' %}
+{% set bundle = 'post' %}
 
-{% block extra_js %}
-<script src="{{ static('post.js') }}"></script>
-{% endblock %}
+{% set body_class = 'post-display' %}
 
 {% block title %}{{ post.name }}{% endblock %}
 

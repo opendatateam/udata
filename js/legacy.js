@@ -7,7 +7,6 @@ import Notify from 'notify';
 import 'bootstrap';
 import 'widgets/site-search';
 import 'utils/ellipsis';
-import 'vendor/jquery.microdata';
 import 'i18n';
 
 $.ajaxSetup({

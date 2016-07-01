@@ -1,5 +1,6 @@
 {% extends theme("layouts/1-column.html") %}
 
+{% set bundle = 'territory' %}
 {% set logo=territory.logo_url(external=True) or theme_static('img/placeholder_territory.png', external=True) %}
 {% set body_class="territory" %}
 
@@ -44,7 +45,5 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{{ static('vue-common.js') }}"></script>
-    <script src="{{ static('territory.js') }}"></script>
     <script src="{{ static('widgets.js', _burst=False) }}" id="udata" async defer onload="udataScript.loadDatasets()"></script>
 {% endblock %}

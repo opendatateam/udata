@@ -6,17 +6,9 @@
     'keywords': [_('metrics'), _('activity')],
 } %}
 
+{% set bundle = 'dashboard' %}
+
 {% set body_class = 'dashboard' %}
-
-{% block extra_js %}
-<script src="{{ static('vue-common.js') }}"></script>
-<script src="{{ static('dashboard.js') }}"></script>
-{% endblock %}
-
-{% block extra_css %}
-<link href="{{ static('vue-common.js.css') }}" rel="stylesheet">
-<link href="{{ static('dashboard.css') }}" rel="stylesheet">
-{% endblock %}
 
 {% block breadcrumb %}
     <li class="active">{{ _('Dashboard') }}</li>
@@ -42,6 +34,7 @@
     </header>
     <div class="container">
         <div class="row">
+            <activity-timeline></activity-timeline>
             <div class="col-sm-12" id="activities">
                 <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
             </div>
