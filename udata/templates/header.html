@@ -12,18 +12,9 @@
     </div>
 
     <div class="col-sm-2 col-lg-3 nav navbar-nav search-bar" role="search">
-      <form class="navbar-form" action="{{ url_for('front.search') }}">
-        <div class="form-group">
-          <div class="input-group input-group-sm">
-            <span class="input-group-addon">
-              <span class="glyphicon glyphicon-search"></span>
-            </span>
-            <input id="main-search" type="text" name="q"
-                class="form-control" placeholder="{{ _('Search') }}"
-                value="{{ request.args.q }}">
-          </div>
-        </div>
-      </form>
+      <site-search  v-ref:search class="navbar-form"
+        placeholder="{{ _('Search') }}" action="{{ url_for('front.search') }}">
+      </site-search>
     </div>
 
     <ul class="nav navbar-nav collapse navbar-collapse collapse-on-search">

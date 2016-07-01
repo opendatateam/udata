@@ -5,7 +5,6 @@ import config from 'config';
 import $ from 'jquery';
 import Notify from 'notify';
 import 'bootstrap';
-import 'widgets/site-search';
 import 'utils/ellipsis';
 import 'i18n';
 
