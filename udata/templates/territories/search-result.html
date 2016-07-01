@@ -18,8 +18,7 @@
         </div>
         <ul class="list-inline result-infos">
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                     title="{{ _('Administrative level') }}">
                     <span class="fa fa-bullseye fa-fw"></span>
                     {{ territory.level_i18n_name }}
@@ -27,7 +26,7 @@
             </li>
             {% if territory.population %}
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip" data-placement="top"
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                     title="{{ _('Population') }}">
                     <span class="fa fa-users fa-fw"></span>
                     {{ territory.population|format_number }}

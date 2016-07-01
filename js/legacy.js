@@ -28,8 +28,7 @@ $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
 });
 
 $(function() {
-    // Display tooltips and popovers with markup
-    $('[data-toggle="tooltip"]').tooltip();
+    // Display popovers with markup
     $('[data-toggle="popover"]').popover().on('click', function(e) {
         if ($(this).data('trigger').match(/(click|focus)/)) {
             e.preventDefault();
