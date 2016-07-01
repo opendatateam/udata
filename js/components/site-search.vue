@@ -9,7 +9,7 @@
         type="hidden" name="sort" :value="$location.query.sort">
     <input v-if="$location.query.sort && $location.query.organization"
         type="hidden" name="organization" :value="$location.query.organization">
-    <input v-if="geozone" type="hidden" name="geozone" :value="geozone">
+    <input v-if="territoryId" type="hidden" name="geozone" :value="territoryId">
     <!-- TODO: Improve the scoping handling: internalize all and allow diffrent actions -->
     <div class="form-group">
         <div class="input-group" :class="{'input-group-lg': size == 'lg'}">
@@ -64,7 +64,7 @@ export default {
         action: String,
         placeholder: String,
         size: String,
-        geozone: String,
+        territoryId: String,
     },
     data() {
         return {
@@ -156,7 +156,7 @@ export default {
 
             this.current = -1;
             this.show = true;
-            
+
             this.groups.forEach(group => {
                 const cached = this.cache.get(`${group.id}-${query}`);
                 if (cached) {
