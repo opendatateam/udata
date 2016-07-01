@@ -3,8 +3,7 @@
     data-api-url="{{ url_for('api.issues', for=obj.id|string) }}"
     data-subject-id="{{ obj.id }}"
     data-subject-class="{{ obj.__class__.__name__ }}"
-    data-toggle="tooltip" title="{{ _('Issues') }}"
-    data-placement="top" data-container="body">
+    v-tooltip tooltip-placement="top" title="{{ _('Issues') }}">
     <span class="{{ ficon('fa-warning') }}"></span>
     <span class="count">{% if obj.metrics.issues %}{{ obj.metrics.issues }}{% endif %}</span>
 </button>

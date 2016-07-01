@@ -19,25 +19,19 @@
     <footer>
         <ul>
             <li v-if="dataset.spatial && dataset.spatial.zones && dataset.spatial.zones.length > 0">
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    :title="_('Territorial coverage')">
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Territorial coverage')">
                     <span class="fa fa-map-marker fa-fw"></span>
                     {{ dataset.spatial.zones[0].name }}
                 </a>
             </li>
             <li v-if="dataset.metrics">
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    :title="_('Reuses')">
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Reuses')">
                     <span class="fa fa-retweet fa-fw"></span>
                     {{ dataset.metrics.reuses || 0 }}
                 </a>
             </li>
             <li v-if="dataset.metrics">
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    :title="_('Stars')">
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Stars')">
                     <span class="fa fa-star fa-fw"></span>
                     {{ dataset.metrics.followers || 0 }}
                 </a>
@@ -53,9 +47,7 @@
         <ul>
             <!-- Temporal coverage -->
             <li v-if="dataset.temporal_coverage">
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    :title="_('Temporal coverage')">
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Temporal coverage')">
                     <span class="fa fa-calendar fa-fw"></span>
                     {{ dataset.temporal_coverage | daterange }}
                 </a>
@@ -63,8 +55,7 @@
 
             <!-- Territorial coverage -->
             <li v-if="dataset.spatial && dataset.spatial.granularity">
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                     :title="_('Territorial coverage granularity')">
                     <span class="fa fa-bullseye fa-fw"></span>
                     {{ dataset | granularity_label }}
@@ -73,9 +64,7 @@
 
             <!-- frequency -->
             <li v-if="dataset.frequency">
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    :title="_('Frequency')">
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Frequency')">
                     <span class="fa fa-clock-o fa-fw"></span>
                     {{ dataset | frequency_label }}
                 </a>
