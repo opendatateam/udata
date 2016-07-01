@@ -19,7 +19,7 @@ I18N_DOMAIN = 'udata'
 
 
 @task
-def clean(bower=False, node=False):
+def clean(ctx, bower=False, node=False):
     '''Cleanup all build artifacts'''
     header('Clean all build artifacts')
     patterns = [
@@ -36,7 +36,7 @@ def clean(bower=False, node=False):
 
 
 @task
-def update(migrate=False):
+def update(ctx, migrate=False):
     '''Perform a development update'''
     msg = 'Update all dependencies'
     if migrate:
@@ -53,7 +53,7 @@ def update(migrate=False):
 
 
 @task
-def test(fast=False):
+def test(ctx, fast=False):
     '''Run tests suite'''
     header('Run tests suite')
     cmd = 'nosetests --rednose --force-color udata'
@@ -63,7 +63,7 @@ def test(fast=False):
 
 
 @task
-def cover():
+def cover(ctx):
     '''Run tests suite with coverage'''
     header('Run tests suite with coverage')
     lrun('nosetests --rednose --force-color \
@@ -71,7 +71,7 @@ def cover():
 
 
 @task
-def jstest(watch=False):
+def jstest(ctx, watch=False):
     '''Run Karma tests suite'''
     header('Run Karma/Mocha test suite')
     cmd = 'npm run -s test:{0}'.format('watch' if watch else 'unit')
@@ -79,14 +79,14 @@ def jstest(watch=False):
 
 
 @task
-def doc():
+def doc(ctx):
     '''Build the documentation'''
     header('Building documentation')
     lrun('mkdocs serve', pty=True)
 
 
 @task
-def qa():
+def qa(ctx):
     '''Run a quality report'''
     header('Performing static analysis')
     info('Python static analysis')
@@ -99,25 +99,25 @@ def qa():
 
 
 @task
-def serve(host='localhost'):
+def serve(ctx, host='localhost'):
     '''Run a development server'''
     lrun('python manage.py serve -d -r -h %s' % host)
 
 
 @task
-def work(loglevel='info'):
+def work(ctx, loglevel='info'):
     '''Run a development worker'''
     run('celery -A udata.worker worker --purge --autoreload -l %s' % loglevel, pty=True)
 
 
 @task
-def beat(loglevel='info'):
+def beat(ctx, loglevel='info'):
     '''Run celery beat process'''
     run('celery -A udata.worker beat -l %s' % loglevel)
 
 
 @task
-def i18n():
+def i18n(ctx):
     '''Extract translatable strings'''
     header('Extract translatable strings')
 
@@ -173,38 +173,40 @@ def i18n():
 
 
 @task
-def i18nc():
+def i18nc(ctx):
     '''Compile translations'''
     header('Compiling translations')
     lrun('python setup.py compile_catalog')
 
 
 @task
-def assets_build():
+def assets_build(ctx):
     '''Install and compile assets'''
     header('Building static assets')
     lrun('npm run assets:build', pty=True)
 
 
 @task
-def widgets_build():
+def widgets_build(ctx):
     '''Compile and minify widgets'''
     header('Building widgets')
     lrun('npm run widgets:build', pty=True)
 
 
 @task
-def assets_watch():
+def assets_watch(ctx):
+    '''Build assets on change'''
     lrun('npm run assets:watch', pty=True)
 
 
 @task
-def widgets_watch():
+def widgets_watch(ctx):
+    '''Build widgets on changes'''
     lrun('npm run widgets:watch', pty=True)
 
 
 @task(i18nc, assets_build)
-def dist():
+def dist(ctx):
     '''Package for distribution'''
     header('Building a distribuable package')
     lrun('python setup.py bdist_wheel', pty=True)
