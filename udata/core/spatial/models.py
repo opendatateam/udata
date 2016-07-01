@@ -116,7 +116,7 @@ class GeoZone(db.Document):
         HANDLED_LEVELS = current_app.config.get('HANDLED_LEVELS')
         try:
             return HANDLED_LEVELS[HANDLED_LEVELS.index(self.level) - 1]
-        except IndexError:
+        except (IndexError, ValueError):
             return None
 
     @cached_property
@@ -125,7 +125,7 @@ class GeoZone(db.Document):
         HANDLED_LEVELS = current_app.config.get('HANDLED_LEVELS')
         try:
             return HANDLED_LEVELS[HANDLED_LEVELS.index(self.level) + 1]
-        except IndexError:
+        except (IndexError, ValueError):
             return None
 
     @property
