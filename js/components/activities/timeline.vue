@@ -1,7 +1,7 @@
 <template>
 <div class="activity-timeline">
-    <div v-if="activities.loading" class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
-    <ul v-if="!activities.loading" class="timeline">
+    <div v-if="activities.loading && !enhancedActivities" class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+    <ul v-if="enhancedActivities" class="timeline">
         <li v-for="activity in enhancedActivities">
             <i :class="activity.icon" class="timeline-icon"></i>
             <div class="timeline-item">

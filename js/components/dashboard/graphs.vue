@@ -11,7 +11,7 @@
 <template>
 <div class="graphs">
     <div v-if="metrics.loading" class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
-    <divv-if="!metrics.loading" class="row small-boxes">
+    <div v-if="!metrics.loading" class="row small-boxes">
         <small-box class="col-lg-4 col-xs-6" v-for="b in dataBoxes"
             :value="b.value" :label="b.label" :color="b.color"
             :icon="b.icon" :target="b.target">
