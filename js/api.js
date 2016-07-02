@@ -44,7 +44,9 @@ const API = new SwaggerClient({
     url: config.api_specs,
     useJQuery: true,
     success: function() {
-        $(this).trigger('built');
+        this.readyCallbacks.forEach(callback => {
+            callback(this);
+        });
     },
     progress: function(msg) {
         log.debug(msg);
@@ -54,6 +56,8 @@ const API = new SwaggerClient({
     }
 });
 
+API.readyCallbacks = [];
+
 /**
  * Resolve a definition from a $ref
  * @param  {String} $ref The reference string
@@ -62,6 +66,15 @@ const API = new SwaggerClient({
 API.resolve = function($ref) {
     const def = $ref.split('#')[1].replace('/definitions/', '');
     return this.definitions[def];
+};
+
+/**
+ * Register a callback to be called when API is ready.
+ * The callback should have the following signature: function(API)
+ * @param  {Function} callback A callback to call when API is ready.
+ */
+API.onReady = function(callback) {
+    this.readyCallbacks.push(callback);
 };
 
 export default API;

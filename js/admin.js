@@ -9,7 +9,6 @@ import 'raven';
 // ES6 environment
 import 'babel-polyfill';
 
-import $ from 'jquery';
 import 'bootstrap';
 
 import Vue from 'vue';
@@ -31,6 +30,6 @@ Vue.use(require('plugins/tooltips'));
 Vue.use(require('plugins/outside'));
 
 
-$(API).on('built', function() {
+API.onReady(function() {
     router.start(require('admin.vue'), '#app');
 });

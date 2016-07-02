@@ -23,7 +23,7 @@ import MembershipRequest from './membership-request.vue';
 import API from 'api';
 
 
-$(API).on('built', function() {
+API.onReady(function() {
     new Vue({
         el: 'body',
         components: {FollowButton, Tab, tabset, ActivityTimeline, DashboardGraphs},

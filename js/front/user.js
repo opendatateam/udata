@@ -16,10 +16,7 @@ import Tab from 'components/tab';
 // TODO: simplify Swagger API handling for front views
 import API from 'api';
 
-// Legacy depedencies soon to be dropped
-import $ from 'jquery';
-
-$(API).on('built', function() {
+API.onReady(function() {
     new Vue({
         el: 'body',
         components: {FollowButton, Tab, tabset, ActivityTimeline},
