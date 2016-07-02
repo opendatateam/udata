@@ -32,8 +32,7 @@ class BaseResourceForm(ModelForm):
                       'a remote file or an API'))
     url = fields.UploadableURLField(
         _('URL'), [validators.required()], storage=resources)
-    format = fields.StringField(
-        _('Format'), widget=widgets.FormatAutocompleter())
+    format = fields.StringField(_('Format'))
     checksum = fields.FormField(ChecksumForm)
     mime = fields.StringField(
         _('Mime type'),
