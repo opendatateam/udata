@@ -101,9 +101,7 @@ export class Base {
      */
     $api(endpoint, data, on_success, on_error = () => {}) {
         API.onReady(() => {
-            const parts = endpoint.split('.');
-            const namespace = parts[0];
-            const method = parts[1];
+            const [namespace, method] = endpoint.split('.');
             const operation = API[namespace][method];
 
             if (this.$options.mask && !('X-Fields' in data)) {
@@ -159,8 +157,7 @@ export class Model extends Base {
     on_fetched(data) {
         for (const prop in data.obj) {
             if (data.obj.hasOwnProperty(prop)) {
-                const value = data.obj[prop];
-                this._set(prop, value);
+                this._set(prop, data.obj[prop]);
             }
         }
         this.$emit('updated');

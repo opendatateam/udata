@@ -43,12 +43,12 @@ const API = new SwaggerClient({
     debug: config.debug,
     url: config.api_specs,
     useJQuery: true,
-    success: function() {
+    success() {
         this.readyCallbacks.forEach(callback => {
             callback(this);
         });
     },
-    progress: function(msg) {
+    progress(msg) {
         log.debug(msg);
     },
     authorizations: {
