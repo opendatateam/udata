@@ -8,10 +8,8 @@
 {% set user_tab = 'activity' %}
 
 {% block user_content %}
-<div class="row">
-    <activity-timeline user-id="{{ user.id }}"></activity-timeline>
-    <div class="col-sm-12" id="activities" user-id="{{ user.id }}">
-        <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
-    </div>
-</div>
+<activity-timeline user-id="{{ user.id }}">
+    {# Load spinner until JS is ready #}
+    <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+</activity-timeline>
 {% endblock %}

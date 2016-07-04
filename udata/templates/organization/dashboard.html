@@ -14,14 +14,10 @@
 {% endblock %}
 
 {% block main_content %}
-<section>
-    <div class="container">
-        <dashboard-graphs object-id="{{ org.id }}"></dashboard-graphs>
-        <div class="col-sm-9" id="graphs" object-id="{{ org.id }}">
-            <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
-        </div>
-    </div>
-</section>
+<dashboard-graphs object-id="{{ org.id }}">
+    {# Load spinner until JS is ready #}
+    <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+</dashboard-graphs>
 {% endblock %}
 
 {% block after_content %}
@@ -35,13 +31,10 @@
         </div>
     </header>
     <div class="container">
-        <activity-timeline organization-id="{{ org.id }}"></activity-timeline>
-        <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
-        <div class="row">
-            <div class="col-sm-12" id="activities" organization-id="{{ org.id }}">
-                <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
-            </div>
-        </div>
+        <activity-timeline class="col-sm-12" organization-id="{{ org.id }}">
+            {# Load spinner until JS is ready #}
+            <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+        </activity-timeline>
     </div>
 </section>
 {% endblock %}
