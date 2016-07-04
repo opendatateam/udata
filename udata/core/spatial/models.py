@@ -31,7 +31,7 @@ class GeoLevel(db.Document):
 
 class GeoZoneQuerySet(db.BaseQuerySet):
     def valid(self):
-        return self(validity__end='')
+        return self(validity__end__exists=False)
 
 
 class GeoZone(db.Document):

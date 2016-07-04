@@ -78,7 +78,7 @@ def render_home():
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
-    regions = GeoZone.objects.valid().filter(level='fr/region')
+    regions = GeoZone.objects(level='fr/region').valid()
     regions = sorted(
         regions,
         key=lambda zone: unicodedata.normalize('NFD', zone.name)
@@ -131,16 +131,15 @@ def render_territory(territory):
 
     # Deal with territories with ancestors (new/old French regions
     # for instance).
-    if territory.ancestors:
-        for ancestor in territory.ancestors:
-            territories.append(
-                GeoZone.objects.get(level=territory.level, id=ancestor))
+    for ancestor in territory.ancestors:
+        territories.append(
+            GeoZone.objects.get(level=territory.level, id=ancestor))
 
     # Retrieve all datasets then split between those optionaly owned
     # by an org for that zone and others. We need to know if the current
     # user has datasets for that zone in order to display a custom
     # message to ease the conversion.
-    datasets = Dataset.objects.visible().filter(spatial__zones__in=territories)
+    datasets = Dataset.objects(spatial__zones__in=territories).visible()
     # Retrieving datasets from old regions.
     territory_datasets = []
     other_datasets = []
