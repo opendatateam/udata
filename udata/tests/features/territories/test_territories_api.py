@@ -6,7 +6,8 @@ from flask import url_for
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.tests.api import APITestCase
 from udata.tests.features.territories.test_territories_process import (
-    TerritoriesSettings, create_geozones_fixtures
+    TerritoriesSettings, create_geozones_fixtures,
+    create_old_new_regions_fixtures
 )
 
 
@@ -97,12 +98,24 @@ class TerritoriesAPITest(APITestCase):
             url_for('api.suggest_territory'), qs={'q': 'prov'})
         self.assert200(response)
         result = response.json[0]
-        print(result)
         self.assertEqual(result['title'], self.paca.name)
         self.assertEqual(result['id'], self.paca.id)
         self.assertEqual(result['parent'], None)
         self.assertIn('page', result)
         self.assertIn('image_url', result)
+
+    def test_suggest_old_new_region(self):
+        lr, occitanie = create_old_new_regions_fixtures()
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': 'langue'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 2)
+        result = response.json[0]
+        self.assertEqual(result['title'], occitanie.name)
+        self.assertEqual(result['id'], occitanie.id)
+        result = response.json[1]
+        self.assertEqual(result['title'], lr.name)
+        self.assertEqual(result['id'], lr.id)
 
     def test_suggest_county_by_id(self):
         response = self.get(

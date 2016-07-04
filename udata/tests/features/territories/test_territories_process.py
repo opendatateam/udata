@@ -25,6 +25,21 @@ def create_geozones_fixtures():
     return paca, bdr, arles
 
 
+def create_old_new_regions_fixtures():
+    lr = GeoZoneFactory(
+        id='fr/region/91', level='fr/region',
+        name='Languedoc-Rousillon',
+        validity={'start': '1956-01-01', 'end': '2015-12-31'},
+        population=2700266)
+    occitanie = GeoZoneFactory(
+        id='fr/region/76', level='fr/region',
+        name='Languedoc-Rousillon et Midi-Pyrénées',
+        ancestors=['fr/region/91'],
+        validity={'start': '2016-01-01', 'end': ''},
+        population=5573000)
+    return lr, occitanie
+
+
 class TerritoriesSettings(Testing):
     ACTIVATE_TERRITORIES = True
     HANDLED_LEVELS = ('fr/commune', 'fr/departement', 'fr/region', 'country')
@@ -367,3 +382,24 @@ class TerritoriesTest(FrontTestCase):
         self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('other_datasets'), [])
         self.assertNotIn('dataset-item--cta', data)
+
+    def test_with_old_region_datasets(self):
+        lr, occitanie = create_old_new_regions_fixtures()
+        with self.autoindex():
+            for region in [lr, occitanie]:
+                organization = OrganizationFactory(zone=region.id)
+                for _ in range(3):
+                    VisibleDatasetFactory(
+                        organization=organization,
+                        spatial=SpatialCoverageFactory(zones=[region.id]))
+        response = self.client.get(
+            url_for('territories.territory', territory=occitanie))
+        self.assert200(response)
+        data = response.data.decode('utf-8')
+        self.assertIn(occitanie.name, data)
+        base_datasets = self.get_context_variable('base_datasets')
+        self.assertEqual(len(base_datasets), 0)
+        territory_datasets = self.get_context_variable('territory_datasets')
+        self.assertEqual(len(territory_datasets), 3)
+        territory_datasets = self.get_context_variable('other_datasets')
+        self.assertEqual(len(territory_datasets), 3)

@@ -78,7 +78,7 @@ def render_home():
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
-    regions = GeoZone.objects.get(id='country/fr').children
+    regions = GeoZone.objects.valid().filter(level='fr/region')
     regions = sorted(
         regions,
         key=lambda zone: unicodedata.normalize('NFD', zone.name)
@@ -109,19 +109,39 @@ def render_territory(territory):
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
-    DATASETS = TERRITORY_DATASETS[territory.level_name]
+    # Check that this territory is still valid (redirect old French
+    # regions for instance).
+    if territory.validity.get('end'):
+        valid_territory = GeoZone.objects.valid().get(
+            level=territory.level,
+            ancestors__contains=territory.id)
+        if valid_territory:
+            return redirect(
+                url_for('territories.territory', territory=valid_territory))
+        else:
+            return abort(404)
 
+    DATASETS = TERRITORY_DATASETS[territory.level_name]
     base_dataset_classes = sorted(DATASETS.values(), key=lambda a: a.order)
     base_datasets = [
         base_dataset_class(territory)
         for base_dataset_class in base_dataset_classes
     ]
+    territories = [territory]
+
+    # Deal with territories with ancestors (new/old French regions
+    # for instance).
+    if territory.ancestors:
+        for ancestor in territory.ancestors:
+            territories.append(
+                GeoZone.objects.get(level=territory.level, id=ancestor))
 
     # Retrieve all datasets then split between those optionaly owned
     # by an org for that zone and others. We need to know if the current
     # user has datasets for that zone in order to display a custom
     # message to ease the conversion.
-    datasets = Dataset.objects.visible().filter(spatial__zones=territory)
+    datasets = Dataset.objects.visible().filter(spatial__zones__in=territories)
+    # Retrieving datasets from old regions.
     territory_datasets = []
     other_datasets = []
     editable_datasets = []

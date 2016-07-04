@@ -29,6 +29,11 @@ class GeoLevel(db.Document):
     parents = db.ListField(db.ReferenceField('self'))
 
 
+class GeoZoneQuerySet(db.BaseQuerySet):
+    def valid(self):
+        return self(validity__end='')
+
+
 class GeoZone(db.Document):
     id = db.StringField(primary_key=True)
     name = db.StringField(required=True)
@@ -37,6 +42,8 @@ class GeoZone(db.Document):
     geom = db.MultiPolygonField(required=True)
     parents = db.ListField()
     keys = db.DictField()
+    validity = db.DictField()
+    ancestors = db.ListField()
     population = db.IntField()
     area = db.FloatField()
     wikipedia = db.StringField()
@@ -48,7 +55,8 @@ class GeoZone(db.Document):
             'name',
             'parents',
             ('level', 'code'),
-        ]
+        ],
+        'queryset_class': GeoZoneQuerySet
     }
 
     def __unicode__(self):
