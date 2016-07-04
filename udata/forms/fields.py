@@ -143,8 +143,6 @@ class ImageForm(WTForm):
 
 
 class ImageField(FieldHelper, fields.FormField):
-    widget = widgets.ImagePicker()
-
     def __init__(self, label=None, validators=None, **kwargs):
         self.sizes = kwargs.pop('sizes', [100])
         self.placeholder = kwargs.pop('placeholder', 'default')
@@ -170,8 +168,6 @@ class ImageField(FieldHelper, fields.FormField):
 
 
 class UploadableURLField(URLField):
-    widget = widgets.UploadableURL()
-
     def __init__(self, *args, **kwargs):
         storage = kwargs.pop('storage')
         self.endpoint = url_for('storage.upload', name=storage.name)
@@ -244,8 +240,6 @@ def nullable_text(value):
 
 
 class SelectField(FieldHelper, fields.SelectField):
-    # widget = widgets.SelectPicker()
-
     def __init__(self, label=None, validators=None, coerce=nullable_text,
                  **kwargs):
         # self._choices = kwargs.pop('choices')
@@ -292,8 +286,6 @@ class SelectMultipleField(FieldHelper, fields.SelectMultipleField):
 
 
 class TagField(StringField):
-    widget = widgets.TagAutocompleter()
-
     def _value(self):
         if self.data:
             return u','.join(self.data)
@@ -523,12 +515,10 @@ class NestedModelList(fields.FieldList):
 
 class DatasetListField(ModelList, StringField):
     model = Dataset
-    widget = widgets.DatasetAutocompleter()
 
 
 class ReuseListField(ModelList, StringField):
     model = Reuse
-    widget = widgets.ReuseAutocompleter()
 
 
 class UserField(ModelFieldMixin, StringField):
@@ -544,8 +534,6 @@ class MarkdownField(FieldHelper, fields.TextAreaField):
 
 
 class DateRangeField(FieldHelper, fields.StringField):
-    widget = widgets.DateRangePicker()
-
     def _value(self):
         if self.data:
             return ' - '.join([to_iso_date(self.data.start),

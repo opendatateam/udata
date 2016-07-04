@@ -223,8 +223,7 @@ def tooltip_ellipsis(source, length=0):
         length = int(length)
     except ValueError:  # invalid literal for int()
         return source  # Fail silently.
-    ellipsis = ('<a href data-toggle="tooltip" data-container="body" '
-                'title="{0}">...</a>').format(source)
+    ellipsis = '<a href v-tooltip title="{0}">...</a>'.format(source)
     return Markup((source[:length] + ellipsis)
                   if len(source) > length and length > 0 else source)
 

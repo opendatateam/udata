@@ -17,22 +17,22 @@ module.exports = {
         dataset: './js/front/dataset',
         territory: './js/front/territory',
         reuse: './js/front/reuse',
-        site: './js/site.js',
-        home: './js/home.js',
-        search: './js/search.js',
-        dashboard: './js/dashboard.js',
-        apidoc: './js/apidoc',
+        site: './js/front/site.js',
+        home: './js/front/home.js',
+        search: './js/front/search.js',
+        dashboard: './js/front/dashboard.js',
+        apidoc: './js/front/apidoc',
         organization: './js/front/organization',
-        'site/map': './js/site/map',
+        covermap: './js/front/covermap',
         topic: './js/front/topic',
         post: './js/front/post',
-        'user/display': './js/user/display',
+        user: './js/front/user',
     },
     output: {
         path: path.join(__dirname, 'udata', 'static'),
         publicPath: '/static/',
         filename: '[name].js',
-        chunkFilename: '[id].[hash].js'
+        chunkFilename: 'chunks/[id].[hash].js'
     },
     resolve: {
         root: [
@@ -41,11 +41,8 @@ module.exports = {
         ],
         alias: {
             'jquery-slimscroll': path.join(node_path, 'jquery-slimscroll/jquery.slimscroll'),
-            'bloodhound': path.join(node_path, 'corejs-typeahead/dist/bloodhound'),
-            'typeahead': path.join(node_path, 'corejs-typeahead/dist/typeahead.jquery'),
             'handlebars': 'handlebars/runtime',
             'swaggerui': 'swagger-ui/dist',
-            'jquery': require.resolve('jquery')
         }
     },
     devtool: 'eval-source-map',
@@ -85,19 +82,17 @@ module.exports = {
             'admin-lte/dist/img/boxed-bg.jpg'
         ),
         new webpack.ProvidePlugin({
-            $: 'jquery',
-            jQuery: 'jquery',
-            'window.jQuery': 'jquery',
-            'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch',
+            jQuery: 'jquery',  // Required by bootstrap.js
+            'window.jQuery': 'jquery',  // Required by swagger.js jquery client
         }),
-        new ExtractTextPlugin('[name].css', {
-            allChunks: true
-        }),
-        new webpack.IgnorePlugin(/^(\.\/)?shred/),
+        new ExtractTextPlugin('[name].css'),
         // Only include needed translations
         new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp('^' + languages.join('|') + '$')),
         new webpack.ContextReplacementPlugin(/locales$/, new RegExp(languages.join('|'))),
-        new webpack.optimize.CommonsChunkPlugin('vue-common.js', ['admin', 'dashboard', 'dataset']),
-        new webpack.optimize.CommonsChunkPlugin('common.js')
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'common',
+            filename: 'common.js',
+            minChunks: 10,  // (Modules must be shared between 10 entries)
+        })
     ]
 };

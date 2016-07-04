@@ -5,9 +5,7 @@ import config from 'config';
 import $ from 'jquery';
 import Notify from 'notify';
 import 'bootstrap';
-import 'widgets/site-search';
 import 'utils/ellipsis';
-import 'vendor/jquery.microdata';
 import 'i18n';
 
 $.ajaxSetup({
@@ -29,8 +27,7 @@ $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
 });
 
 $(function() {
-    // Display tooltips and popovers with markup
-    $('[data-toggle="tooltip"]').tooltip();
+    // Display popovers with markup
     $('[data-toggle="popover"]').popover().on('click', function(e) {
         if ($(this).data('trigger').match(/(click|focus)/)) {
             e.preventDefault();

@@ -1,9 +1,7 @@
 {% extends theme('layouts/1-column.html') %}
 {% from theme('macros/follow.html') import follow_btn with context %}
 
-{% block extra_js %}
-<script src="{{ static('user/display.js') }}"></script>
-{% endblock %}
+{% set bundle = 'user' %}
 
 {% block extra_head %}
 {{ super() }}

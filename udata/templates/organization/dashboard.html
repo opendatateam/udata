@@ -7,16 +7,6 @@
     'keywords': [_('metrics'), _('activity')],
 } %}
 
-{% block extra_js %}
-<script src="{{ static('vue-common.js') }}"></script>
-<script src="{{ static('dashboard.js') }}"></script>
-{% endblock %}
-
-{% block extra_css %}
-<link href="{{ static('vue-common.js.css') }}" rel="stylesheet">
-<link href="{{ static('dashboard.css') }}" rel="stylesheet">
-{% endblock %}
-
 {% block breadcrumb %}
     {{ super() }}
     <li><a href="{{ url_for('organizations.list') }}">{{ org.name }}</a></li>
@@ -24,13 +14,10 @@
 {% endblock %}
 
 {% block main_content %}
-<section>
-    <div class="container">
-        <div class="col-sm-9" id="graphs" object-id="{{ org.id }}">
-            <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
-        </div>
-    </div>
-</section>
+<dashboard-graphs object-id="{{ org.id }}">
+    {# Load spinner until JS is ready #}
+    <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+</dashboard-graphs>
 {% endblock %}
 
 {% block after_content %}
@@ -44,11 +31,10 @@
         </div>
     </header>
     <div class="container">
-        <div class="row">
-            <div class="col-sm-12" id="activities" organization-id="{{ org.id }}">
-                <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
-            </div>
-        </div>
+        <activity-timeline class="col-sm-12" organization-id="{{ org.id }}">
+            {# Load spinner until JS is ready #}
+            <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+        </activity-timeline>
     </div>
 </section>
 {% endblock %}

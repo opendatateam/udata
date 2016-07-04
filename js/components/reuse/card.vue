@@ -29,15 +29,13 @@
     <footer class="rollover fade in">
         <ul>
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip" data-placement="top"
-                    :title="_('Type')">
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Type')">
                     <span class="fa fa-file fa-fw"></span>
                     {{ reuse | reusetype }}
                 </a>
             </li>
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                     :title="_('Number of datasets used')">
                     <span class="fa fa-cubes fa-fw"></span>
                     {{ reuse.datasets ? reuse.datasets.length : 0 }}
@@ -45,9 +43,7 @@
             </li>
 
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    :title="_('Stars')">
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Stars')">
                     <span class="fa fa-star fa-fw"></span>
                     {{ reuse.metrics ? reuse.metrics.followers || 0 : 0 }}
                 </a>

@@ -1,5 +1,5 @@
 /**
- * Topic display page JS module
+ * Generic site display page JS module
  */
 import 'front/bootstrap';
 
@@ -9,6 +9,6 @@ import Vue from 'vue';
 new Vue({
     el: 'body',
     ready() {
-        log.debug('Topic display page');
+        log.debug('Site page');
     }
 });

@@ -13,16 +13,14 @@
             <wmap :title="_('Spatial coverage')" :geojson="geojson" :footer="map_footer">
                 <ul>
                     <li v-show="dataset.spatial && dataset.spatial.granularity">
-                        <a class="btn btn-xs" data-toggle="tooltip"
-                            data-placement="top" data-container="body"
+                        <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                             :title="_('Territorial coverage granularity')">
                             <span class="fa fa-bullseye fa-fw"></span>
                             {{ dataset | granularity_label }}
                         </a>
                     </li>
                     <li v-show="territories_labels">
-                        <a class="btn btn-xs" data-toggle="tooltip"
-                            data-placement="top" data-container="body"
+                        <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                             :title="_('Territorial coverage')">
                             <span class="fa fa-map-marker fa-fw"></span>
                             {{ territories_labels }}

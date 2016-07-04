@@ -1,24 +1,13 @@
 /**
  * Dataset display page JS module
  */
-// Catch all errors
-import 'raven';
-
-// ES6 environment
-import 'babel-polyfill';
+import 'front/bootstrap';
 
 import Vue from 'vue';
-import config from 'config';
 import log from 'logger';
 
 // Components
 import LeafletMap from 'components/leaflet-map.vue';
-
-Vue.config.debug = config.debug;
-
-Vue.use(require('plugins/api'));
-Vue.use(require('plugins/text'));
-Vue.use(require('plugins/i18next'));
 
 
 new Vue({

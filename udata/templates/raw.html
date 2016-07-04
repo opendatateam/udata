@@ -1,11 +1,13 @@
 <!DOCTYPE html>
+{%- set bundle = bundle|default('site') -%}
 <html lang="{{ g.lang_code }}">
   <head>
     {% block raw_head %}
     {% from theme('macros/metadata.html') import metadata with context %}
     {{ metadata(meta or {}) }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{{ static('site.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ static('common.css') }}">
+    <link rel="stylesheet" href="{{ static('{0}.css'.format(bundle)) }}">
     {% block extra_css %}{% endblock %}
     <link href="{{ theme_static('theme.css') }}" rel="stylesheet">
     {# ATOM Feeds #}
@@ -27,7 +29,7 @@
     {% block body %}{% endblock %}
 
     <script src="{{ static('common.js') }}"></script>
-    <script src="{{ static('site.js') }}"></script>
+    <script src="{{ static('{0}.js'.format(bundle)) }}"></script>
     {% block extra_js %}{% endblock %}
 
     {% for snippet in footer_snippets %}

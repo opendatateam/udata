@@ -10,9 +10,7 @@
     'keywords': [_('search')],
 } %}
 
-{% block extra_js %}
-<script src="{{ static('search.js') }}"></script>
-{% endblock %}
+{% set bundle = 'search' %}
 
 {% set datasets_search_url = url_for('datasets.list') %}
 {% set reuses_search_url = url_for('reuses.list') %}
