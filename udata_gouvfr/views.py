@@ -175,7 +175,8 @@ def terms():
 @sitemap.register_generator
 def gouvfr_sitemap_urls():
     yield 'gouvfr.faq_redirect', {}, None, 'weekly', 1
-    for section in ('citizen', 'producer', 'reuser', 'developer'):
+    for section in ('citizen', 'producer', 'reuser', 'developer',
+                    'system-integrator'):
         yield 'gouvfr.faq_redirect', {'section': section}, None, 'weekly', 0.7
     yield 'gouvfr.dataconnexions_redirect', {}, None, 'monthly', 0.4
     yield 'gouvfr.redevances_redirect', {}, None, 'yearly', 0.4
