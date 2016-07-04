@@ -9,13 +9,11 @@ import 'raven';
 // ES6 environment
 import 'babel-polyfill';
 
-import $ from 'jquery';
 import 'bootstrap';
 
 import Vue from 'vue';
 import config from 'config';
 import router from 'admin.routes';
-import API from 'api';
 
 // Ensure retrocompatibily for 0.12.2 replace behavior
 Vue.options.replace = false;
@@ -30,7 +28,4 @@ Vue.use(require('plugins/scroll-to'));
 Vue.use(require('plugins/tooltips'));
 Vue.use(require('plugins/outside'));
 
-
-$(API).on('built', function() {
-    router.start(require('admin.vue'), '#app');
-});
+router.start(require('admin.vue'), '#app');
