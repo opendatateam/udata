@@ -99,17 +99,19 @@ export class Base {
      * @param  {Function} on_success The callback function to call on success.
      * @param  {Function} on_error The callback function to call on error.
      */
-    $api(endpoint, data, on_success, on_error=() => {}) {
-        const parts = endpoint.split('.');
-        const namespace = parts[0];
-        const method = parts[1];
-        const operation = API[namespace][method];
+    $api(endpoint, data, on_success, on_error = () => {}) {
+        API.onReady(() => {
+            const parts = endpoint.split('.');
+            const namespace = parts[0];
+            const method = parts[1];
+            const operation = API[namespace][method];
 
-        if (this.$options.mask && !('X-Fields' in data)) {
-            data['X-Fields'] = mask(this.$options.mask);
-        }
+            if (this.$options.mask && !('X-Fields' in data)) {
+                data['X-Fields'] = mask(this.$options.mask);
+            }
 
-        return operation(data, on_success.bind(this), on_error.bind(this));
+            operation(data, on_success.bind(this), on_error.bind(this));
+        });
     }
 }
 
@@ -119,7 +121,7 @@ export class Base {
 export class Model extends Base {
     constructor(options) {
         super(options);
-        this.empty();
+        API.onReady(this.empty.bind(this));
         if (this.$options.data) {
             Object.assign(this, this.$options.data);
         }
@@ -143,11 +145,11 @@ export class Model extends Base {
         for (const key in schema.properties) {
             if (schema.properties.hasOwnProperty(key)) {
                 if (schema.properties[key].type === 'array') {
-                    this[key] = [];
+                    this._set(key, []);
                 } else if (schema.required.indexOf(key) >= 0) {
-                    this[key] = null;
+                    this._set(key, null);
                 } else {
-                    this[key] = undefined;
+                    this._set(key, undefined);
                 }
             }
         }
@@ -156,8 +158,10 @@ export class Model extends Base {
 
     on_fetched(data) {
         for (const prop in data.obj) {
-            const value = data.obj[prop];
-            this._set(prop, value);
+            if (data.obj.hasOwnProperty(prop)) {
+                const value = data.obj[prop];
+                this._set(prop, value);
+            }
         }
         this.$emit('updated');
         this.loading = false;

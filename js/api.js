@@ -74,7 +74,13 @@ API.resolve = function($ref) {
  * @param  {Function} callback A callback to call when API is ready.
  */
 API.onReady = function(callback) {
-    this.readyCallbacks.push(callback);
+    if (this.ready && this.isBuilt) {
+        // API is already ready, call the callback immediately
+        callback(this);
+    } else {
+        // Register the callback for later call
+        this.readyCallbacks.push(callback);
+    }
 };
 
 export default API;
