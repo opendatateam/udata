@@ -43,7 +43,6 @@ module.exports = {
             'jquery-slimscroll': path.join(node_path, 'jquery-slimscroll/jquery.slimscroll'),
             'handlebars': 'handlebars/runtime',
             'swaggerui': 'swagger-ui/dist',
-            'jquery': require.resolve('jquery')
         }
     },
     devtool: 'eval-source-map',
@@ -83,12 +82,10 @@ module.exports = {
             'admin-lte/dist/img/boxed-bg.jpg'
         ),
         new webpack.ProvidePlugin({
-            $: 'jquery',
-            jQuery: 'jquery',
-            'window.jQuery': 'jquery',
+            jQuery: 'jquery',  // Required by bootstrap.js
+            'window.jQuery': 'jquery',  // Required by swagger.js jquery client
         }),
         new ExtractTextPlugin('[name].css'),
-        new webpack.IgnorePlugin(/^(\.\/)?shred/),
         // Only include needed translations
         new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp('^' + languages.join('|') + '$')),
         new webpack.ContextReplacementPlugin(/locales$/, new RegExp(languages.join('|'))),
