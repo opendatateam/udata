@@ -56,7 +56,7 @@ import Metrics from 'models/metrics';
 import Organization from 'models/organization';
 import CommunityResources from 'models/communityresources';
 import {PageList} from 'models/base';
-// WIdgets
+// Widgets
 import DatasetList from 'components/dataset/list.vue';
 import DiscussionList from 'components/discussions/list.vue';
 import IssueList from 'components/issues/list.vue';

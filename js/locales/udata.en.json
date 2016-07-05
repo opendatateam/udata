@@ -528,6 +528,8 @@
     "minutes": "minutes",
     "n_datasets": "{count} dataset",
     "n_datasets_plural": "{count} datasets",
+    "nbmessages": "{nb} message",
+    "nbmessages_plural": "{nb} messages",
     "or": "or",
     "organization": "organization",
     "reuse": "reuse",
