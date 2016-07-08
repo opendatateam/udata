@@ -138,7 +138,7 @@ function load_coverage_map() {
         return;
     }
 
-    map = L.map($el[0], {zoomControl: false});
+    const map = L.map($el[0], {zoomControl: false});
 
     // Disable drag and zoom handlers.
     map.dragging.disable();
