@@ -132,16 +132,6 @@ function loadJson(map, layer, data) {
 
 function load_coverage_map() {
     const $el = $('#coverage-map');
-    const ATTRIBUTIONS = [
-            '&copy;',
-            '<a href="http://openstreetmap.org">OpenStreetMap</a>',
-            '/',
-            '<a href="http://open.mapquest.com/">MapQuest</a>'
-        ].join(' ');
-    const TILES_PREFIX = location.protocol === 'https:' ? '//otile{s}-s' : '//otile{s}';
-    const TILES_URL = TILES_PREFIX + '.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png';
-    const TILES_CONFIG = {subdomains: '1234', attribution: ATTRIBUTIONS};
-    let map;
     let layer;
 
     if (!$el.length) {
@@ -159,7 +149,7 @@ function load_coverage_map() {
     // Disable tap handler, if present.
     if (map.tap) map.tap.disable();
 
-    L.tileLayer(TILES_URL, TILES_CONFIG).addTo(map);
+    L.tileLayer(config.tiles_url, config.tiles_config).addTo(map);
 
     layer = L.geoJson(null, {
         onEachFeature: function(feature, layer) {

@@ -1,3 +1,4 @@
+import config from 'config';
 import $ from 'jquery';
 import API from 'api.light';
 import log from 'logger';
@@ -18,16 +19,7 @@ const DEFAULTS = {
         }
     },
     LEVELS_URL = '/spatial/levels',
-    COVERAGE_URL = '/spatial/coverage/{level}',
-    ATTRIBUTIONS = [
-        '&copy;',
-        '<a href="http://openstreetmap.org">OpenStreetMap</a>',
-        '/',
-        '<a href="http://open.mapquest.com/">MapQuest</a>'
-    ].join(' '),
-    TILES_PREFIX = location.protocol === 'https:' ? '//otile{s}-s' : '//otile{s}',
-    TILES_URL = TILES_PREFIX + '.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png',
-    TILES_CONFIG = {subdomains: '1234', attribution: ATTRIBUTIONS};
+    COVERAGE_URL = '/spatial/coverage/{level}';
 
 
 if (!window.Spinner) { // Fix for leaflet.spin
@@ -77,7 +69,7 @@ export default class CoverageMap {
             return level;
         });
 
-        L.tileLayer(TILES_URL, TILES_CONFIG).addTo(this.map);
+        L.tileLayer(config.tiles_url, config.tiles_config).addTo(this.map);
 
         L.control.layers(layers, null, {collapsed: false}).addTo(this.map);
         this.map.on('baselayerchange', (ev) => {
