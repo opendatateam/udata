@@ -26,6 +26,7 @@ import 'widgets/integrate-btn';
 
 // Current page dataset microdata
 const $Dataset = $('body').items('http://schema.org/Dataset').eq(0);
+const $Extras = $('body').items('http://schema.org/PropertyValue');
 
 let user_reuses;
 
@@ -186,6 +187,9 @@ function display_extras() {
     data.id = $Dataset.attr('itemid');
     if (utils.isString(data.keywords)) {
         data.keywords = [data.keywords];
+    }
+    if ($Extras.length) {
+        data.additionalProperty = $Extras.microdata();
     }
     modal({
         title: i18n._('Details'),
