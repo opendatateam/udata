@@ -42,18 +42,10 @@
 </template>
 
 <script>
+import config from 'config';
 import L from 'leaflet';
 
-const ATTRIBUTIONS = [
-        '&copy;',
-        '<a href="http://openstreetmap.org">OpenStreetMap</a>',
-        '/',
-        '<a href="http://open.mapquest.com/">MapQuest</a>'
-    ].join(' '),
-    TILES_PREFIX = location.protocol === 'https:' ? '//otile{s}-s' : '//otile{s}',
-    TILES_URL = TILES_PREFIX + '.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png',
-    TILES_CONFIG = {subdomains: '1234', attribution: ATTRIBUTIONS},
-    INITIAL_SETTINGS = {center: [42, 2.4], zoom: 4, zoomControl: false};
+const INITIAL_SETTINGS = {center: [42, 2.4], zoom: 4, zoomControl: false};
 
 export default {
     props: {
@@ -85,7 +77,7 @@ export default {
         }
 
 
-        L.tileLayer(TILES_URL, TILES_CONFIG).addTo(this.map);
+        L.tileLayer(config.tiles_url, config.tiles_config).addTo(this.map);
     },
     watch: {
         'geojson': function(json) {

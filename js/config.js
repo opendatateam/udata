@@ -120,6 +120,32 @@ export const notify_in = _meta('notify-in');
  */
 export const is_territory_enabled = _jsonMeta('territory-enabled');
 
+/**
+ * Detect HiDPI screens
+ */
+export const hidpi = (window.devicePixelRatio > 1 || (
+    window.matchMedia
+    && window.matchMedia('(-webkit-min-device-pixel-ratio: 1.25),(min-resolution: 120dpi)').matches)
+);
+
+/**
+ * Attributions for map tiles
+ */
+export const tiles_attributions = '&copy;' + [
+    '<a href="http://openstreetmap.org/copyright">OpenStreetMap</a>',
+    '<a href="https://cartodb.com/attributions">CartoDB</a>'
+].join('/');
+
+/**
+ * Map tiles URL
+ */
+export const tiles_url = `https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}${hidpi ? '@2x' : ''}.png`;
+
+/**
+ * Leaflet base config
+ */
+export const tiles_config = {subdomains: 'abcd', attribution: tiles_attributions};
+
 
 export default {
     user,
@@ -137,4 +163,8 @@ export default {
     notify_in,
     check_urls,
     is_territory_enabled,
+    hidpi,
+    tiles_attributions,
+    tiles_url,
+    tiles_config,
 };
