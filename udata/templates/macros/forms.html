@@ -15,9 +15,11 @@
 {% macro field(f, sizes='sm-2,md-3') %}
 <fieldset>
     <legend>{{f.label}}</legend>
-    {% for subfield in f %}
-    {{ field(subfield, sizes) }}
-    {% endfor %}
+    {% if f.subfield %}
+      {% for subfield in f %}
+      {{ field(subfield, sizes) }}
+      {% endfor %}
+    {% endif %}
 </fieldset>
 {% set cols = form_grid(sizes) %}
 <div class="form-group{% if f.errors %} has-error{% endif %}">
@@ -39,7 +41,6 @@
         {% endfor %}
     </div>
 </div>
-{% endif %}
 {% endmacro %}
 
 {% macro radio(field) %}
