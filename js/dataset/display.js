@@ -26,6 +26,7 @@ import 'widgets/integrate-btn';
 
 // Current page dataset microdata
 const $Dataset = $('body').items('http://schema.org/Dataset').eq(0);
+const $Extras = $('body').items('http://schema.org/PropertyValue');
 
 let user_reuses;
 
@@ -37,7 +38,7 @@ function addTooltip($element, content) {
 }
 
 function prepare_resources() {
-    $('.resources-list .list-group-item').each(function() {
+    $('.resources-list .list-group-item:not(.add)').each(function() {
         const $this = $(this);
 
         // Prevent default click on link
@@ -57,7 +58,7 @@ function prepare_resources() {
                 const url = $self.parent().property('url').first().attr('href');
                 const group = $Dataset.property('alternateName').value(); // This is the slug.
 
-                if (!url.startsWith(window.location.origin)
+                if (url && !url.startsWith(window.location.origin)
                 // TODO: temporary fix before we move all statics on the same server
                     && !url.match(/:\/\/(.[^/]+)/)[1].endsWith('data.gouv.fr')) {
                         if (url.startsWith('ftp')) {
@@ -138,7 +139,7 @@ function load_coverage_map() {
         return;
     }
 
-    map = L.map($el[0], {zoomControl: false});
+    const map = L.map($el[0], {zoomControl: false});
 
     // Disable drag and zoom handlers.
     map.dragging.disable();
@@ -186,6 +187,9 @@ function display_extras() {
     data.id = $Dataset.attr('itemid');
     if (utils.isString(data.keywords)) {
         data.keywords = [data.keywords];
+    }
+    if ($Extras.length) {
+        data.additionalProperty = $Extras.microdata();
     }
     modal({
         title: i18n._('Details'),
