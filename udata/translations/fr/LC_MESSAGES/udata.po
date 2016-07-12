@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-07-12 10:37+0200\n"
+"POT-Creation-Date: 2016-07-12 15:45+0200\n"
 "PO-Revision-Date: 2016-03-23 10:32+0000\n"
 "Last-Translator: Larlet David <david@larlet.fr>\n"
 "Language: fr\n"
@@ -22,7 +22,7 @@ msgstr ""
 #: udata/theme.py:36 udata/core/site/metrics.py:91 udata/core/site/views.py:149
 #: udata/templates/header.html:52 udata/templates/search.html:44
 #: udata/templates/search.html:116 udata/templates/dataset/search-panel.html:5
-#: udata/templates/organization/display_base.html:7
+#: udata/templates/organization/display_base.html:8
 #: udata/templates/organization/edit_base.html:8
 #: udata/templates/organization/followers.html:5
 #: udata/templates/organization/list.html:13
@@ -590,7 +590,7 @@ msgid "Administrateur"
 msgstr "Administrateur"
 
 #: udata/core/organization/models.py:24
-#: udata/templates/organization/display_base.html:139
+#: udata/templates/organization/display_base.html:134
 msgid "Editor"
 msgstr "Éditeur"
 
@@ -1025,7 +1025,6 @@ msgstr "%(start)s à %(end)s"
 
 #: udata/frontend/markdown.py:31
 #, fuzzy
-#| msgid "Resources"
 msgid "Source"
 msgstr "Ressources"
 
@@ -1469,7 +1468,6 @@ msgstr "à"
 
 #: udata/templates/embed-dataset.html:218
 #, fuzzy
-#| msgid "Spatial granularity"
 msgid "Granularity"
 msgstr "Granularité spatiale"
 
@@ -1855,7 +1853,7 @@ msgid "Edition"
 msgstr "Édition"
 
 #: udata/templates/dataset/followers.html:13
-#: udata/templates/organization/display_base.html:73
+#: udata/templates/organization/display_base.html:68
 #: udata/templates/organization/followers.html:26
 #: udata/templates/user/base.html:70 udata/templates/user/followers.html:14
 #, python-format
@@ -2003,16 +2001,16 @@ msgid "Following since %(date)s"
 msgstr "Abonné depuis %(date)s"
 
 #: udata/templates/macros/certified.html:5
-#: udata/templates/organization/display_base.html:27
 msgid "Certified public service"
 msgstr "Service public certifié"
 
 #: udata/templates/macros/certified.html:6
+#, python-format
 msgid "The identity of this public service is certified by %(certifier)s"
 msgstr "L'identité de ce service public est certifiée par %(certifier)s"
 
 #: udata/templates/macros/follow.html:11
-#: udata/templates/organization/display_base.html:162
+#: udata/templates/organization/display_base.html:157
 #: udata/templates/organization/sidebar-producer.html:30
 #: udata/templates/reuse/display.html:204
 msgid "Follow"
@@ -2320,14 +2318,17 @@ msgid ""
 "Someone has requested a password reset for your %(site)s account. If you "
 "didn't, please ignore this email."
 msgstr ""
-"Quelqu'un a demandé une réinitialisation du mot de passe de votre compte % (site)s."
-"Si vous n'avez pas demandé une réinitialisation, veuillez 'sil vous plaît ignorer cet e-mail."
+"Quelqu'un a demandé une réinitialisation du mot de passe de votre compte "
+"% (site)s.Si vous n'avez pas demandé une réinitialisation, veuillez 'sil "
+"vous plaît ignorer cet e-mail."
 
 #: udata/templates/mail/security/reset_instructions.html:10
 msgid ""
 "To reset your password, please confirm your request through the link "
 "below:"
-msgstr "Pour réinitialiser votre mot de passe, confirmez s'il vous plaît votre demande via le lien ci-dessous"
+msgstr ""
+"Pour réinitialiser votre mot de passe, confirmez s'il vous plaît votre "
+"demande via le lien ci-dessous"
 
 #: udata/templates/mail/security/reset_instructions.html:18
 msgid "Reset my password"
@@ -2347,8 +2348,9 @@ msgstr "Bienvenue à %(site)s!"
 msgid ""
 "To activate your account, please confirm your email address through the "
 "link below:"
-msgstr "Pour activer votre compte, veuillez s'il vous plaît confirmer votre adresse e-mail via le lien ci-dessous"
-
+msgstr ""
+"Pour activer votre compte, veuillez s'il vous plaît confirmer votre "
+"adresse e-mail via le lien ci-dessous"
 
 #: udata/templates/mail/security/welcome.html:18
 msgid "Confirm now"
@@ -2386,7 +2388,7 @@ msgstr[1] "%(num)s réutilisations"
 
 #: udata/templates/organization/dashboard.html:4
 #: udata/templates/organization/dashboard.html:23
-#: udata/templates/organization/display_base.html:103
+#: udata/templates/organization/display_base.html:98
 #: udata/templates/site/dashboard.html:4 udata/templates/site/dashboard.html:22
 msgid "Dashboard"
 msgstr "Tableau de bord"
@@ -2460,15 +2462,11 @@ msgstr "Voir les %(nb)s réutilisations"
 msgid "Display all followers"
 msgstr "Afficher tous les abonnés"
 
-#: udata/templates/organization/display_base.html:28
-msgid "This organization and its datasets are certified by"
-msgstr "Cette organisation et ses jeux de données sont certifiés par"
-
-#: udata/templates/organization/display_base.html:43
+#: udata/templates/organization/display_base.html:38
 msgid "See all organizations with that badge."
 msgstr "Voir toutes les organisations avec ce badge."
 
-#: udata/templates/organization/display_base.html:55
+#: udata/templates/organization/display_base.html:50
 #: udata/templates/user/base.html:82
 #, python-format
 msgid "%(num)d dataset"
@@ -2476,18 +2474,18 @@ msgid_plural "%(num)d datasets"
 msgstr[0] "%(num)d jeu de données"
 msgstr[1] "%(num)d jeux de données"
 
-#: udata/templates/organization/display_base.html:64
+#: udata/templates/organization/display_base.html:59
 #, python-format
 msgid "%(num)d member"
 msgid_plural "%(num)d members"
 msgstr[0] "%(num)d membre"
 msgstr[1] "%(num)d membres"
 
-#: udata/templates/organization/display_base.html:83
+#: udata/templates/organization/display_base.html:78
 msgid "Use of data by that organization for the community"
 msgstr "Usage des données de cette organisation pour la communauté"
 
-#: udata/templates/organization/display_base.html:84
+#: udata/templates/organization/display_base.html:79
 #: udata/templates/user/base.html:88
 #, python-format
 msgid "%(num)d reuse"
@@ -2495,55 +2493,55 @@ msgid_plural "%(num)d reuses"
 msgstr[0] "%(num)d réutilisation"
 msgstr[1] "%(num)d réutilisations"
 
-#: udata/templates/organization/display_base.html:94
+#: udata/templates/organization/display_base.html:89
 msgid "Use of data from that organization by the community"
 msgstr "Usage des données de cette organisation par la communauté."
 
-#: udata/templates/organization/display_base.html:95
+#: udata/templates/organization/display_base.html:90
 #, python-format
 msgid "%(num)d reappropriation"
 msgid_plural "%(num)d reappropriations"
 msgstr[0] "%(num)d réappropriation"
 msgstr[1] "%(num)d réutilisations"
 
-#: udata/templates/organization/display_base.html:115
+#: udata/templates/organization/display_base.html:110
 msgid "I belong to this organization"
 msgstr "J'appartiens à cette organisation"
 
-#: udata/templates/organization/display_base.html:117
+#: udata/templates/organization/display_base.html:112
 msgid "Join"
 msgstr "Rejoindre"
 
-#: udata/templates/organization/display_base.html:120
+#: udata/templates/organization/display_base.html:115
 msgid "Waiting for approval"
 msgstr "En attente d'approbation"
 
-#: udata/templates/organization/display_base.html:125
+#: udata/templates/organization/display_base.html:120
 msgid "Pending request"
 msgstr "Demande en attente"
 
-#: udata/templates/organization/display_base.html:129
+#: udata/templates/organization/display_base.html:124
 msgid "You are an administrator of this organization"
 msgstr "Vous êtes administrateur de cette organisation"
 
-#: udata/templates/organization/display_base.html:132
+#: udata/templates/organization/display_base.html:127
 msgid "Administrator"
 msgstr "Administrateur"
 
-#: udata/templates/organization/display_base.html:136
+#: udata/templates/organization/display_base.html:131
 msgid "You are editor in this organization"
 msgstr "Vous êtes éditeur dans cette organisation"
 
-#: udata/templates/organization/display_base.html:143
+#: udata/templates/organization/display_base.html:138
 msgid "You are a member of this organization"
 msgstr "Vous êtes membre de cette organisation"
 
-#: udata/templates/organization/display_base.html:146
+#: udata/templates/organization/display_base.html:141
 msgid "Member"
 msgstr "Membre"
 
-#: udata/templates/organization/display_base.html:156
-#: udata/templates/organization/display_base.html:158
+#: udata/templates/organization/display_base.html:151
+#: udata/templates/organization/display_base.html:153
 #: udata/templates/organization/sidebar-producer.html:22
 #: udata/templates/organization/sidebar-producer.html:24
 #: udata/templates/organization/sidebar-producer.html:26
@@ -2553,7 +2551,7 @@ msgstr "Membre"
 msgid "Unfollow"
 msgstr "Ne plus suivre"
 
-#: udata/templates/organization/display_base.html:160
+#: udata/templates/organization/display_base.html:155
 #: udata/templates/organization/sidebar-producer.html:28
 msgid "I'll be informed about this organization news"
 msgstr "Je serais informé de l'activité de cette organisation"
@@ -2711,7 +2709,9 @@ msgstr "Réinitialiser le mot de passe"
 msgid ""
 "Forgotten your password? Enter your email address below, and we'll email "
 "instructions for setting a new one."
-msgstr "Vous avez oublié votre mot de passe? Entrez votre adresse email ci-dessous et nous vous aideront a réinitialiser votre compte"
+msgstr ""
+"Vous avez oublié votre mot de passe? Entrez votre adresse email ci-"
+"dessous et nous vous aideront a réinitialiser votre compte"
 
 #: udata/templates/security/login_user.html:14
 msgid "Sign In"
@@ -2730,7 +2730,7 @@ msgid "Recover your password"
 msgstr "Récupérez votre mot de passe"
 
 #: udata/templates/security/login_user.html:33
-#: udata/templates/security/register_user.html:30
+#: udata/templates/security/register_user.html:26
 msgid "Sign up"
 msgstr "Enregistrez-vous"
 
@@ -2751,16 +2751,9 @@ msgstr "Enregistrez-vous"
 msgid ""
 "I have read and accept <a href=\"%(url)s\"> the terms and conditions of "
 "the service.</a>"
-msgstr "J'ai lu et accepté les <a href=\"%(url)s\"> termes et conditions du service.</a>"
-
-#: udata/templates/security/register_user.html:23
-msgid ""
-"In particular, I understand that this site\n"
-"                    values the production and enrichment of datasets over"
-" definitive or partisan interpretations.\n"
-"                    The members of the community are in charge of looking"
-" after the quality of the content it produces."
 msgstr ""
+"J'ai lu et accepté les <a href=\"%(url)s\"> termes et conditions du "
+"service.</a>"
 
 #: udata/templates/site/config.html:8
 msgid "Site configuration"
@@ -2819,7 +2812,6 @@ msgstr "Population"
 
 #: udata/templates/territories/territory.html:6
 #, fuzzy, python-format
-#| msgid "Datasets related to the town of %(name)s with INSEE code %(code)s"
 msgid ""
 "Datasets related to the town of %(name)s with INSEE code %(code)s and "
 "postal code %(postal)s"
@@ -2868,7 +2860,6 @@ msgstr ""
 
 #: udata/templates/territories/territory.html:85
 #, fuzzy
-#| msgid "Login"
 msgid "Log in"
 msgstr "Identifiant"
 
@@ -2954,10 +2945,13 @@ msgstr "%(user)s ne suit personne"
 
 #~ msgid "I belong to that city and I want to publish more datasets."
 #~ msgstr ""
-#~ "Je suis le représentant de cette "
-#~ "commune et je souhaite publier d’autres"
-#~ " jeux de données."
 
 #~ msgid "Claim and enrich"
 #~ msgstr "Revendiquer et enrichir"
+
+#~ msgid ""
+#~ msgstr ""
+
+#~ msgid "This organization and its datasets are certified by"
+#~ msgstr "Cette organisation et ses jeux de données sont certifiés par"
 
