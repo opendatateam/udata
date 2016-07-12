@@ -1,5 +1,6 @@
 {% extends theme("layouts/1-column.html") %}
 {% from theme('macros/follow.html') import follow_btn with context %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
 
 {% set body_class = 'org-display' %}
 
@@ -21,13 +22,7 @@
 
             {# Right sidebar with organization aside ( counters, logo, social...) #}
             <aside class="col-sm-3 panel panel-default">
-                {% if org.public_service %}
-                    <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
-                        class="certified" data-toggle="popover"
-                        data-title="{{ _('Certified public service') }}"
-                        data-content="{{ _('This organization and its datasets are certified by') }} {{ config.SERVER_NAME }}"
-                        data-container="body" data-placement="left" data-trigger="hover"/>
-                {% endif %}
+		{{ badge_if_certified(org) }}
                 <div class="text-center">
                     <img src="{{org.logo|placeholder('organization') }}"
                         alt="{{ org.title }}" class="scalable" />
