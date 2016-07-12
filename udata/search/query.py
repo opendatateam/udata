@@ -7,6 +7,8 @@ import logging
 from flask import request
 from werkzeug.urls import Href
 
+from elasticsearch_dsl import Search
+
 from udata.models import db
 from udata.search import es, i18n_analyzer, DEFAULT_PAGE_SIZE, adapter_catalog
 from udata.search.result import SearchResult, SearchIterator
@@ -40,6 +42,7 @@ class SearchQuery(object):
 
     def execute(self):
         try:
+
             result = es.search(index=es.index_name,
                                doc_type=self.adapter.doc_type(),
                                body=self.get_body())
@@ -63,14 +66,19 @@ class SearchQuery(object):
         return SearchIterator(self, result)
 
     def get_body(self):
-        body = {
-            'filter': self.get_filter(),
-            'from': (self.page - 1) * self.page_size,
-            'size': self.page_size,
-            'sort': self.get_sort(),
-            'aggregations': self.get_aggregations(),
-            'fields': [],  # Only returns IDs
-        }
+        qs = Search(using=es.client, index=es.index_name)
+        # Sorting
+        qs = self.get_sort(qs)
+        # Pagination
+        start = (self.page - 1) * self.page_size
+        qs = qs[start:start + self.page_size]
+        # Aggregations
+        qs = self.build_aggregations(qs)
+        # don't return any fields, just the metadata
+        qs = qs.fields([])
+
+        body = qs.to_dict()
+        print(body)
 
         if hasattr(self.adapter, 'boosters') and self.adapter.boosters:
             body['query'] = {
@@ -82,22 +90,23 @@ class SearchQuery(object):
         else:
             body['query'] = self.get_query()
 
-        return body
+        s = Search.from_dict(body)
+        return s.to_dict()
 
     def get_score_functions(self):
         return [b.to_query() for b in self.adapter.boosters]
 
-    def get_sort(self):
+    def get_sort(self, qs):
         '''Build sort query paramter from kwargs'''
         sorts = self.kwargs.get('sort', [])
         sorts = [sorts] if isinstance(sorts, basestring) else sorts
         sorts = [(s[1:], 'desc')
                  if s.startswith('-') else (s, 'asc')
                  for s in sorts]
-        return [
+        return qs.sort(*[
             {self.adapter.sorts[s].field: d}
             for s, d in sorts if s in self.adapter.sorts
-        ]
+        ])
 
     def get_filter(self):
         return {}
@@ -161,16 +170,15 @@ class SearchQuery(object):
             self._update_bool_query(query, new_query)
         return query
 
-    def _aggregation_query(self, name):
-        aggregation = self.adapter.facets[name]
-        args = self.kwargs.get(name, [])
-        return aggregation.to_aggregations(name, *args)
-
-    def get_aggregations(self):
-        aggregations = {}
+    def build_aggregations(self, qs):
         for name in self.facets_kwargs:
-            aggregations.update(self._aggregation_query(name))
-        return aggregations
+            aggregation = self.adapter.facets[name]
+            args = self.kwargs.get(name, [])
+            aggs = aggregation.to_aggregations(name, *args)
+            if aggs:
+                for name, agg in aggs.items():
+                    qs.aggs.bucket(name, agg)
+        return qs
 
     @property
     def facets_kwargs(self):

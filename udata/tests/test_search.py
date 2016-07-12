@@ -109,8 +109,9 @@ class SearchQueryTest(TestCase):
         search_query = search.SearchQuery(FakeSearch)
         body = search_query.get_body()
         self.assertEqual(body['query'], {'match_all': {}})
-        self.assertEqual(body['aggregations'], {})
-        self.assertEqual(body['sort'], [])
+        self.assertNotIn('aggregations', body)
+        self.assertNotIn('aggs', body)
+        self.assertNotIn('sort', body)
 
     def test_paginated_search(self):
         '''Search should handle pagination'''
@@ -449,14 +450,14 @@ class SearchQueryTest(TestCase):
 
     def test_facets_true(self):
         search_query = search.SearchQuery(FakeSearch, facets=True)
-        aggregations = search_query.get_aggregations()
+        aggregations = search_query.get_body().get('aggs', {})
         self.assertEqual(len(aggregations), len(FakeSearch.facets))
         for key in FakeSearch.facets.keys():
             self.assertIn(key, aggregations.keys())
 
     def test_facets_all(self):
         search_query = search.SearchQuery(FakeSearch, facets='all')
-        aggregations = search_query.get_aggregations()
+        aggregations = search_query.get_body().get('aggs', {})
         self.assertEqual(len(aggregations), len(FakeSearch.facets))
         for key in FakeSearch.facets.keys():
             self.assertIn(key, aggregations.keys())
@@ -465,7 +466,7 @@ class SearchQueryTest(TestCase):
         selected_facets = ['tag', 'other']
         search_query = search.SearchQuery(
             FakeSearch, facets=selected_facets)
-        aggregations = search_query.get_aggregations()
+        aggregations = search_query.get_body().get('aggs', {})
         self.assertEqual(len(aggregations), len(selected_facets))
         for key in FakeSearch.facets.keys():
             if key in selected_facets:
@@ -692,7 +693,14 @@ def es_factory(nb=20, page=1, page_size=20, total=42):
     }
 
 
-class TestBoolFacet(TestCase):
+class FacetTestCase(TestCase):
+    def assert_agg(self, name, expected):
+        aggs = self.facet.to_aggregations(name)
+        as_dict = dict((k, v.to_dict()) for k, v in aggs.items())
+        self.assertEqual(as_dict, expected)
+
+
+class TestBoolFacet(FacetTestCase):
     def setUp(self):
         self.facet = search.BoolFacet('boolean')
 
@@ -740,9 +748,8 @@ class TestBoolFacet(TestCase):
                 expected)
 
     def test_aggregations(self):
-        self.assertEqual(
-            self.facet.to_aggregations('foo'),
-            {'foo': {'terms': {'field': 'boolean', 'size': 2}}})
+        expected = {'foo': {'terms': {'field': 'boolean', 'size': 2}}}
+        self.assert_agg('foo', expected)
 
     def test_labelize(self):
         self.assertEqual(self.facet.labelize('label', True),
@@ -756,7 +763,7 @@ class TestBoolFacet(TestCase):
                          'label: {0}'.format(_('no')))
 
 
-class TestTermFacet(TestCase):
+class TestTermFacet(FacetTestCase):
     def setUp(self):
         self.facet = search.TermFacet('tags')
 
@@ -812,15 +819,14 @@ class TestTermFacet(TestCase):
         )
 
     def test_aggregations(self):
-        self.assertEqual(
-            self.facet.to_aggregations('foo'),
-            {'foo': {'terms': {'field': 'tags', 'size': 20}}})
+        expected = {'foo': {'terms': {'field': 'tags', 'size': 20}}}
+        self.assert_agg('foo', expected)
 
     def test_labelize(self):
         self.assertEqual(self.facet.labelize('label', 'fake'), 'fake')
 
 
-class TestModelTermFacet(TestCase, DBTestMixin):
+class TestModelTermFacet(FacetTestCase, DBTestMixin):
     def setUp(self):
         self.facet = search.ModelTermFacet('fakes', Fake)
 
@@ -901,12 +907,11 @@ class TestModelTermFacet(TestCase, DBTestMixin):
                          {'term': {'fakes': 'value'}})
 
     def test_aggregations(self):
-        self.assertEqual(
-            self.facet.to_aggregations('foo'),
-            {'foo': {'terms': {'field': 'fakes', 'size': 20}}})
+        expected = {'foo': {'terms': {'field': 'fakes', 'size': 20}}}
+        self.assert_agg('foo', expected)
 
 
-class TestRangeFacet(TestCase):
+class TestRangeFacet(FacetTestCase):
     def setUp(self):
         self.facet = search.RangeFacet('some_field')
 
@@ -971,16 +976,15 @@ class TestRangeFacet(TestCase):
         })
 
     def test_aggregations(self):
-        self.assertEqual(
-            self.facet.to_aggregations('foo'),
-            {'foo': {'stats': {'field': 'some_field'}}})
+        expected = {'foo': {'stats': {'field': 'some_field'}}}
+        self.assert_agg('foo', expected)
 
     def test_labelize(self):
         self.assertEqual(
             self.facet.labelize('label', '4-15'), 'label: 4-15')
 
 
-class TestDateRangeFacet(TestCase):
+class TestDateRangeFacet(FacetTestCase):
     def setUp(self):
         self.facet = search.DateRangeFacet('some_field')
 
@@ -1028,9 +1032,8 @@ class TestDateRangeFacet(TestCase):
         })
 
     def test_aggregations(self):
-        self.assertEqual(
-            self.facet.to_aggregations('foo'),
-            {'foo': {'stats': {'field': 'some_field'}}})
+        expected = {'foo': {'stats': {'field': 'some_field'}}}
+        self.assert_agg('foo', expected)
 
 
 class TestTemporalCoverageFacet(TestCase):
@@ -1042,9 +1045,9 @@ class TestTemporalCoverageFacet(TestCase):
 
     def test_to_aggregations(self):
         aggregations = self.facet.to_aggregations('foo')
-        self.assertEqual(aggregations['foo_min'],
+        self.assertEqual(aggregations['foo_min'].to_dict(),
                          {'min': {'field': 'some_field.start'}})
-        self.assertEqual(aggregations['foo_max'],
+        self.assertEqual(aggregations['foo_max'].to_dict(),
                          {'max': {'field': 'some_field.end'}})
 
     def test_from_response(self):

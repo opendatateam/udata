@@ -11,6 +11,8 @@ from udata.models import db
 from udata.i18n import lazy_gettext as _, format_date
 from udata.utils import to_bool
 
+from elasticsearch_dsl import A
+
 
 log = logging.getLogger(__name__)
 
@@ -64,11 +66,7 @@ class Facet(object):
         return self.labelizer(label, value) if self.labelizer else value
 
     def to_aggregations(self, name, *args):
-        query = self.to_query(args=args)
-        if query:
-            return {name: query}
-        else:
-            return {}
+        pass
 
 
 class BoolFacet(Facet):
@@ -80,6 +78,9 @@ class BoolFacet(Facet):
             }
         }
         return query
+
+    def to_aggregations(self, name, *args):
+        return {name: A('terms', field=self.field, size=2)}
 
     def filter_from_kwargs(self, name, kwargs):
         if name not in kwargs:
@@ -128,6 +129,12 @@ class TermFacet(Facet):
             query['terms']['exclude'] = (
                 [args] if isinstance(args, basestring) else args)
         return query
+
+    def to_aggregations(self, name, size=20, *args):
+        kwargs = {'field': self.field, 'size': size}
+        if args:
+            kwargs['exclude'] = [args] if isinstance(args, basestring) else args
+        return {name: A('terms', **kwargs)}
 
     def to_filter(self, value):
         if isinstance(value, (list, tuple)):
@@ -221,6 +228,9 @@ class RangeFacet(Facet):
                 'field': self.field
             }
         }
+
+    def to_aggregations(self, name, size=20, *args):
+        return {name: A('stats', field=self.field)}
 
     def to_filter(self, value):
         boundaries = [self.cast(v) for v in value.split('-')]
@@ -333,17 +343,11 @@ class TemporalCoverageFacet(Facet):
         }
 
     def to_aggregations(self, name, *args):
+        kwmin = {'field': '{0}.start'.format(self.field)}
+        kwmax = {'field': '{0}.end'.format(self.field)}
         return {
-            '{0}_min'.format(name): {
-                'min': {
-                    'field': '{0}.start'.format(self.field)
-                }
-            },
-            '{0}_max'.format(name): {
-                'max': {
-                    'field': '{0}.end'.format(self.field)
-                }
-            }
+            '{0}_min'.format(name): A('min', **kwmin),
+            '{0}_max'.format(name): A('max', **kwmax),
         }
 
     def labelize(self, label, value):
