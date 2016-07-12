@@ -39,6 +39,7 @@ js-built
 /node_modules/
 /udata/static/
 /jsdoc/
+/data/
 *.rdb
 
 # Installer logs
