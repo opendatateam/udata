@@ -4,17 +4,18 @@
 
 <script>
 import Topic from 'models/topic';
+import Vform from 'components/form/vertical-form.vue';
 
 export default {
     props: {
         topic: {
             type: Topic,
-            default: function() {
+            default() {
                 return new Topic();
             }
         }
     },
-    data: function() {
+    data() {
         return {
             fields: [{
                     id: 'name',
@@ -32,8 +33,14 @@ export default {
                 }]
         };
     },
-    components: {
-        vform: require('components/form/vertical-form.vue')
+    components: {Vform},
+    methods: {
+        serialize() {
+            return this.$refs.form.serialize();
+        },
+        validate() {
+            return this.$refs.form.validate();
+        }
     }
 };
 </script>
