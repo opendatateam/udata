@@ -78,7 +78,7 @@ class SearchQuery(object):
         qs = qs.fields([])
 
         body = qs.to_dict()
-        print(body)
+        print(body)  # Here for debugging purpose. Should disappear when the PR is complete
 
         if hasattr(self.adapter, 'boosters') and self.adapter.boosters:
             body['query'] = {
