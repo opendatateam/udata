@@ -7,6 +7,7 @@ from os.path import join, dirname
 
 from elasticsearch import Elasticsearch, JSONSerializer
 from elasticsearch.helpers import scan
+from elasticsearch_dsl import MultiSearch
 from flask import current_app, json
 from speaklater import make_lazy_string
 
@@ -126,20 +127,12 @@ def iter(*adapters, **kwargs):
 
 
 def multiquery(*queries):
-    body = []
+    ms = MultiSearch(using=es.client, index=es.index_name)
     for query in queries:
-        body.append({'type': query.adapter.doc_type()})
-        body.append(query.get_body())
-    try:
-        result = es.msearch(index=es.index_name, body=body)
-    except:
-        log.exception('Unable to perform multiquery')
-        result = [{} for _ in range(len(queries))]
-
-    return [
-        SearchResult(query, response)
-        for response, query in zip(result['responses'], queries)
-    ]
+        qs = query.build_query()
+        ms = ms.add(qs)
+    responses = ms.execute()
+    return responses
 
 
 def suggest(q, field, size=10):

@@ -41,15 +41,11 @@ class SearchQuery(object):
             self.page_size = DEFAULT_PAGE_SIZE
 
     def execute(self):
+        qs = self.build_query()
         try:
-
-            result = es.search(index=es.index_name,
-                               doc_type=self.adapter.doc_type(),
-                               body=self.get_body())
+            return qs.execute()
         except:
             log.exception('Unable to execute search query')
-            result = {}
-        return SearchResult(self, result)
 
     def iter(self):
         try:
@@ -65,7 +61,7 @@ class SearchQuery(object):
             result = None
         return SearchIterator(self, result)
 
-    def get_body(self):
+    def build_query(self):
         qs = Search(using=es.client, index=es.index_name)
         # Sorting
         qs = self.get_sort(qs)
@@ -77,21 +73,17 @@ class SearchQuery(object):
         # don't return any fields, just the metadata
         qs = qs.fields([])
 
-        body = qs.to_dict()
-        print(body)  # Here for debugging purpose. Should disappear when the PR is complete
-
         if hasattr(self.adapter, 'boosters') and self.adapter.boosters:
-            body['query'] = {
+            qs.update_from_dict({'query': {
                 'function_score': {
                     'query': self.get_query(),
                     'functions': self.get_score_functions(),
                 }
-            }
+            }})
         else:
-            body['query'] = self.get_query()
+            qs.update_from_dict({'query': self.get_query()})
 
-        s = Search.from_dict(body)
-        return s.to_dict()
+        return qs
 
     def get_score_functions(self):
         return [b.to_query() for b in self.adapter.boosters]
@@ -225,18 +217,3 @@ class SearchQuery(object):
         params.pop('facets', None)  # Always true when used
         href = Href(url or request.base_url)
         return href(params)
-
-
-def multisearch(*adapters):
-    body = []
-    for adapter in adapters:
-        body.append({'type': adapter.doc_type()})
-        body.append(adapter.get_body())
-    try:
-        result = es.msearch(index=es.index_name, body=body)
-    except:
-        result = [{} for _ in range(len(adapters))]
-    return [
-        SearchResult(response, adapter.__class__, **adapter.kwargs)
-        for response, adapter in zip(result['responses'], adapters)
-    ]
