@@ -126,7 +126,7 @@ def iter(*adapters, **kwargs):
     return SearchQuery(*adapters, **kwargs).iter()
 
 
-def multiquery(*queries):
+def multisearch(*queries):
     ms = MultiSearch(using=es.client, index=es.index_name)
     for query in queries:
         qs = query.build_query()

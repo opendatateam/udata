@@ -35,7 +35,7 @@ def render_search():
             search.SearchQuery(User, **params)
         ]
         results_labels = ['datasets', 'reuses', 'organizations', 'users']
-    results = search.multiquery(*search_queries)
+    results = search.multisearch(*search_queries)
     context = dict(zip(results_labels, results))
     territories = check_for_territories(params.get('q'))
     context['territories'] = territories

@@ -39,7 +39,7 @@ def display(topic):
     }
     keys, queries = zip(*specs.items())
 
-    results = search.multiquery(*queries)
+    results = search.multisearch(*queries)
 
     return theme.render(
         'topic/display.html',
