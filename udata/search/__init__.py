@@ -7,7 +7,7 @@ from os.path import join, dirname
 
 from elasticsearch import Elasticsearch, JSONSerializer
 from elasticsearch.helpers import scan
-from elasticsearch_dsl import MultiSearch
+from elasticsearch_dsl import MultiSearch, Search
 from flask import current_app, json
 from speaklater import make_lazy_string
 
@@ -136,18 +136,16 @@ def multisearch(*queries):
 
 
 def suggest(q, field, size=10):
-    result = es.suggest(index=es.index_name, body={
-        'suggestions': {
-            'text': q,
-            'completion': {
-                'field': field,
-                'size': size,
-            }
-        }
+    s = Search(using=es.client, index=es.index_name)
+    s = s.suggest('suggestions', q, completion={
+        'field': field,
+        'size': size,
     })
-    if 'suggestions' not in result:
+    result = s.execute_suggest()
+    try:
+        return result.suggestions[0]['options']
+    except IndexError:
         return []
-    return result['suggestions'][0]['options']
 
 
 def init_app(app):
