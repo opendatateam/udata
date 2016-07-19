@@ -28,11 +28,13 @@ def organization_badge_labelizer(label, kind):
     return Organization.__badges__.get(kind, '')
 
 
+@search.register
 class OrganizationSearch(search.ModelSearchAdapter):
+    model = Organization
+    fuzzy = True
+
     class Meta:
         doc_type = 'Organization'
-        model = Organization
-        fuzzy = True
 
     name = String(analyzer=search.i18n_analyzer, fields={
         'raw': String(index='not_analyzed')

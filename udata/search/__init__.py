@@ -5,6 +5,7 @@ import logging
 
 from os.path import join, dirname
 
+from mongoengine.signals import post_save
 from elasticsearch import Elasticsearch, JSONSerializer
 from elasticsearch.helpers import scan
 from elasticsearch_dsl import MultiSearch, Search
@@ -112,7 +113,23 @@ def reindex(obj):
         log.info('Nothing to do for %s (%s)', doctype, obj.id)
 
 
-from .adapter import ModelSearchAdapter, metrics_mapping  # noqa
+def reindex_model_on_save(sender, document, **kwargs):
+    '''(Re/Un)Index Mongo document on post_save'''
+    if current_app.config.get('AUTO_INDEX'):
+        reindex.delay(document)
+
+
+def register(adapter):
+    '''Register a search adapter'''
+    # register the class in the catalog
+    if adapter.model and adapter.model not in adapter_catalog:
+        adapter_catalog[adapter.model] = adapter
+        # Automatically reindex objects on save
+        post_save.connect(reindex_model_on_save, sender=adapter.model)
+    return adapter
+
+
+from .adapter import ModelSearchAdapter, metrics_mapping_for  # noqa
 from .query import SearchQuery  # noqa
 from .result import SearchResult, SearchIterator  # noqa
 from .fields import *  # noqa

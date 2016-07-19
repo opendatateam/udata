@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from elasticsearch_dsl import (
-    Boolean, Completion, Date, Long, Object, String
-)
+from elasticsearch_dsl import Boolean, Completion, Date,  Object, String
 
 from udata.core.site.views import current_site
 from udata.models import (
     Reuse, Organization, Dataset, User, REUSE_TYPES
 )
 from udata.search import BoolBooster, GaussDecay
-from udata.search import (
-    ModelSearchAdapter, Sort, i18n_analyzer, metrics_mapping_for
-)
+from udata.search import ModelSearchAdapter, Sort
+from udata.search import i18n_analyzer, metrics_mapping_for, register
 from udata.search import RangeFacet, BoolFacet, ExtrasFacet
 from udata.search import TermFacet, ModelTermFacet
 
@@ -39,11 +36,13 @@ def reuse_badge_labelizer(label, kind):
     return Reuse.__badges__.get(kind, '')
 
 
+@register
 class ReuseSearch(ModelSearchAdapter):
+    model = Reuse
+    fuzzy = True
+
     class Meta:
         doc_type = 'Reuse'
-        model = Reuse
-        fuzzy = True
 
     title = String(analyzer=i18n_analyzer, fields={
         'raw': String(index='not_analyzed')

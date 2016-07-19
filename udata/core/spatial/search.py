@@ -6,7 +6,7 @@ from elasticsearch_dsl import Completion
 from flask import current_app
 
 from udata.i18n import language, _
-from udata.search import ModelSearchAdapter
+from udata.search import ModelSearchAdapter, register
 
 from .models import GeoZone
 
@@ -28,11 +28,13 @@ def labels_for_zone(zone):
     return list(labels)
 
 
+@register
 class GeoZoneSearch(ModelSearchAdapter):
+    model = GeoZone
+    fuzzy = True
+
     class Meta:
         doc_type = 'GeoZone'
-        model = GeoZone
-        fuzzy = True
 
     zone_suggest = Completion(analyzer='standard',
                               search_analyzer='standard',

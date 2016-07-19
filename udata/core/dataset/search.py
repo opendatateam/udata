@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from elasticsearch_dsl import (
-    Boolean, Completion, Date, InnerObjectWrapper, Long, Object, String
-)
+from elasticsearch_dsl import Boolean, Completion, Date, Long, Object, String
 
 from udata.core.site.views import current_site
 from udata.models import (
     Dataset, Organization, License, User, GeoZone,
 )
-from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping_for
+from udata.search import (
+    ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register
+)
 from udata.search.fields import (
     Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
 )
@@ -46,11 +46,13 @@ def dataset_badge_labelizer(label, kind):
     return Dataset.__badges__.get(kind, '')
 
 
+@register
 class DatasetSearch(ModelSearchAdapter):
+    model = Dataset
+    fuzzy = True
+
     class Meta:
-        doc_type = 'Dataset
-        model = Dataset
-        fuzzy = True
+        doc_type = 'Dataset'
 
     title = String(analyzer=i18n_analyzer, fields={
         'raw': String(index='not_analyzed')

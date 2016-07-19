@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 from elasticsearch_dsl import Completion, Date, String, Boolean
 
 from udata.models import User, Organization
-from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping_for
+from udata.search import ModelSearchAdapter
+from udata.search import i18n_analyzer, metrics_mapping_for, register
 from udata.search.fields import Sort, ModelTermFacet, RangeFacet
 from udata.search.fields import GaussDecay
 
@@ -14,11 +15,13 @@ from . import metrics  # noqa
 __all__ = ('UserSearch', )
 
 
+@register
 class UserSearch(ModelSearchAdapter):
+    model = User
+    fuzzy = True
+
     class Meta:
         doc_type = 'User'
-        model = User
-        fuzzy = True
 
     first_name = String()
     last_name = String()

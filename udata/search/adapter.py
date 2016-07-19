@@ -5,34 +5,12 @@ import itertools
 import logging
 
 from flask import current_app
-from mongoengine.signals import post_save
 from elasticsearch_dsl import DocType, Integer, Float, Object
 
 from udata.search import adapter_catalog, reindex
 from udata.core.metrics import Metric
-from udata.search import es
 
 log = logging.getLogger(__name__)
-
-
-def reindex_model_on_save(sender, document, **kwargs):
-    '''(Re/Un)Index Mongo document on post_save'''
-    if current_app.config.get('AUTO_INDEX'):
-        reindex.delay(document)
-
-
-class SearchAdapterMetaClass(type):
-    '''Ensure any child class dispatch the signals'''
-    def __new__(cls, name, bases, attrs):
-        # Ensure any child class dispatch the signals
-        adapter = super(SearchAdapterMetaClass, cls).__new__(
-            cls, name, bases, attrs)
-        # register the class in the catalog
-        if adapter.model and adapter.model not in adapter_catalog:
-            adapter_catalog[adapter.model] = adapter
-            # Automatically reindex objects on save
-            post_save.connect(reindex_model_on_save, sender=adapter.model)
-        return adapter
 
 
 class ModelSearchAdapter(DocType):
@@ -73,7 +51,7 @@ class ModelSearchAdapter(DocType):
         return list(set([value] + tokens + [' '.join(tokens)]))
 
 
-metrics_mapping_types = {
+metrics_types = {
     int: Integer,
     float: Float,
 }
