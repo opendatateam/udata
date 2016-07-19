@@ -6,7 +6,7 @@ import logging
 
 from flask import current_app
 from mongoengine.signals import post_save
-from elasticsearch_dsl import DocType
+from elasticsearch_dsl import DocType, Integer, Float, Object
 
 from udata.search import adapter_catalog, reindex
 from udata.core.metrics import Metric
@@ -73,18 +73,13 @@ class ModelSearchAdapter(DocType):
         return list(set([value] + tokens + [' '.join(tokens)]))
 
 
-metrics_types = {
-    int: 'integer',
-    float: 'float',
+metrics_mapping_types = {
+    int: Integer,
+    float: Float,
 }
 
-
-def metrics_mapping(cls):
-    mapping = {
-        'type': 'object',
-        'properties': {}
-    }
+def metrics_mapping_for(cls):
+    props = {}
     for name, metric in Metric.get_for(cls).items():
-        mapping['properties'][metric.name] = {
-            'type': metrics_types[metric.value_type]}
-    return mapping
+        props[metric.name] = metrics_types[metric.value_type]()
+    return Object(properties=props)

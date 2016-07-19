@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from elasticsearch_dsl import Completion, Date, Long, String
+
 from udata import search
 from udata.models import Organization
 from udata.core.site.views import current_site
@@ -27,8 +29,24 @@ def organization_badge_labelizer(label, kind):
 
 
 class OrganizationSearch(search.ModelSearchAdapter):
-    model = Organization
-    fuzzy = True
+    class Meta:
+        doc_type = 'Organization'
+        model = Organization
+        fuzzy = True
+
+    name = String(analyzer=search.i18n_analyzer, fields={
+        'raw': String(index='not_analyzed')
+    })
+    acronym = String(index='not_analyzed')
+    description = String(analyzer=search.i18n_analyzer)
+    badges = String(index='not_analyzed')
+    url = String()
+    created = Date(format='date_hour_minute_second')
+    metrics = search.metrics_mapping_for(Organization)
+    org_suggest = Completion(analyzer='simple',
+                             search_analyzer='simple',
+                             payloads=True)
+
     fields = (
         'name^6',
         'acronym^6',
@@ -49,38 +67,6 @@ class OrganizationSearch(search.ModelSearchAdapter):
         'permitted_reuses': search.RangeFacet('metrics.permitted_reuses'),
         'datasets': search.RangeFacet('metrics.datasets'),
         'followers': search.RangeFacet('metrics.followers'),
-    }
-    mapping = {
-        'properties': {
-            'name': {
-                'type': 'string',
-                'analyzer': search.i18n_analyzer,
-                'fields': {
-                    'raw': {'type': 'string', 'index': 'not_analyzed'}
-                }
-            },
-            'acronym': {
-                'type': 'string',
-                'index': 'not_analyzed',
-            },
-            'description': {
-                'type': 'string',
-                'analyzer': search.i18n_analyzer
-            },
-            'badges': {
-                'type': 'string',
-                'index': 'not_analyzed'
-            },
-            'url': {'type': 'string'},
-            'created': {'type': 'date', 'format': 'date_hour_minute_second'},
-            'metrics': search.metrics_mapping(Organization),
-            'org_suggest': {
-                'type': 'completion',
-                'analyzer': 'simple',
-                'search_analyzer': 'simple',
-                'payloads': True,
-            },
-        }
     }
     boosters = [
         search.GaussDecay('metrics.followers', max_followers, decay=0.8),

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from elasticsearch_dsl import Completion, Date, String, Boolean
+
 from udata.models import User, Organization
-from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
+from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping_for
 from udata.search.fields import Sort, ModelTermFacet, RangeFacet
 from udata.search.fields import GaussDecay
 
@@ -13,27 +15,21 @@ __all__ = ('UserSearch', )
 
 
 class UserSearch(ModelSearchAdapter):
-    model = User
-    fuzzy = True
-    # analyzer = 'not_analyzed'
+    class Meta:
+        doc_type = 'User'
+        model = User
+        fuzzy = True
 
-    mapping = {
-        'properties': {
-            'first_name': {'type': 'string'},
-            'last_name': {'type': 'string'},
-            'about': {'type': 'string', 'analyzer': i18n_analyzer},
-            'organizations': {'type': 'string'},
-            'visible': {'type': 'boolean'},
-            'metrics': metrics_mapping(User),
-            'created': {'type': 'date', 'format': 'date_hour_minute_second'},
-            'user_suggest': {
-                'type': 'completion',
-                'analyzer': 'simple',
-                'search_analyzer': 'simple',
-                'payloads': True,
-            },
-        }
-    }
+    first_name = String()
+    last_name = String()
+    about = String(analyzer=i18n_analyzer)
+    organizations = String()
+    visible = Boolean()
+    metrics = metrics_mapping_for(User)
+    created = Date(format='date_hour_minute_second')
+    user_suggest = Completion(analyzer='simple',
+                              search_analyzer='simple',
+                              payloads=True)
 
     fields = (
         'last_name^6',

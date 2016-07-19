@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from elasticsearch_dsl import (
+    Boolean, Completion, Date, Long, Object, String
+)
+
 from udata.core.site.views import current_site
 from udata.models import (
     Reuse, Organization, Dataset, User, REUSE_TYPES
 )
 from udata.search import BoolBooster, GaussDecay
 from udata.search import (
-    ModelSearchAdapter, Sort, i18n_analyzer, metrics_mapping
+    ModelSearchAdapter, Sort, i18n_analyzer, metrics_mapping_for
 )
 from udata.search import RangeFacet, BoolFacet, ExtrasFacet
 from udata.search import TermFacet, ModelTermFacet
@@ -36,8 +40,41 @@ def reuse_badge_labelizer(label, kind):
 
 
 class ReuseSearch(ModelSearchAdapter):
-    model = Reuse
-    fuzzy = True
+    class Meta:
+        doc_type = 'Reuse'
+        model = Reuse
+        fuzzy = True
+
+    title = String(analyzer=i18n_analyzer, fields={
+        'raw': String(index='not_analyzed')
+    })
+    description = String(analyzer=i18n_analyzer)
+    url = String()
+    organization = String()
+    owner = String()
+    type = String()
+    tags = String(index='not_analyzed', fields={
+        'i18n': String(index='not_analyzed')
+    })
+    badges = String(index='not_analyzed')
+    tag_suggest = Completion(analyzer='simple',
+                             search_analyzer='simple',
+                             payloads=False)
+    datasets = Object(
+        properties={
+            'id': String(),
+            'title': String(),
+        }
+    )
+    created = Date(format='date_hour_minute_second')
+    last_modified = Date(format='date_hour_minute_second')
+    metrics = metrics_mapping_for(Reuse)
+    featured = Boolean()
+    reuse_suggest = Completion(analyzer='simple',
+                               search_analyzer='simple',
+                               payloads=True)
+    extras = Object()
+
     fields = (
         'title^4',
         'description^2',
@@ -62,59 +99,6 @@ class ReuseSearch(ModelSearchAdapter):
         'datasets': Sort('metrics.datasets'),
         'followers': Sort('metrics.followers'),
         'views': Sort('metrics.views'),
-    }
-    mapping = {
-        'properties': {
-            'title': {
-                'type': 'string',
-                'analyzer': i18n_analyzer,
-                'fields': {
-                    'raw': {'type': 'string', 'index': 'not_analyzed'}
-                }
-            },
-            'description': {'type': 'string', 'analyzer': i18n_analyzer},
-            'url': {'type': 'string'},
-            'organization': {'type': 'string'},
-            'owner': {'type': 'string'},
-            'type': {'type': 'string'},
-            'tags': {
-                'type': 'string',
-                'index': 'not_analyzed'
-            },
-            'tag_suggest': {
-                'type': 'completion',
-                'analyzer': 'simple',
-                'search_analyzer': 'simple',
-                'payloads': False,
-            },
-            'badges': {
-                'type': 'string',
-                'index': 'not_analyzed'
-            },
-            'created': {'type': 'date', 'format': 'date_hour_minute_second'},
-            'last_modified': {
-                'type': 'date',
-                'format': 'date_hour_minute_second'
-            },
-            'dataset': {
-                'type': 'object',
-                'properties': {
-                    'id': {'type': 'string'},
-                    'title': {'type': 'string'}
-                }
-            },
-            'metrics': metrics_mapping(Reuse),
-            'featured': {'type': 'boolean'},
-            'reuse_suggest': {
-                'type': 'completion',
-                'analyzer': 'simple',
-                'search_analyzer': 'simple',
-                'payloads': True,
-            },
-            'extras': {
-                'type': 'object',
-            },
-        }
     }
     boosters = [
         BoolBooster('featured', 1.1),

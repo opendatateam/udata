@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from elasticsearch_dsl import Completion
+
 from flask import current_app
 
 from udata.i18n import language, _
@@ -27,18 +29,14 @@ def labels_for_zone(zone):
 
 
 class GeoZoneSearch(ModelSearchAdapter):
-    model = GeoZone
-    fuzzy = True
-    mapping = {
-        'properties': {
-            'zone_suggest': {
-                'type': 'completion',
-                'analyzer': 'standard',
-                'search_analyzer': 'standard',
-                'payloads': True,
-            },
-        }
-    }
+    class Meta:
+        doc_type = 'GeoZone'
+        model = GeoZone
+        fuzzy = True
+
+    zone_suggest = Completion(analyzer='standard',
+                              search_analyzer='standard',
+                              payloads=True)
 
     @classmethod
     def compute_weight(cls, population):

@@ -9,7 +9,7 @@ from udata.core.site.views import current_site
 from udata.models import (
     Dataset, Organization, License, User, GeoZone,
 )
-from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
+from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping_for
 from udata.search.fields import (
     Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
 )
@@ -47,18 +47,26 @@ def dataset_badge_labelizer(label, kind):
 
 
 class DatasetSearch(ModelSearchAdapter):
-    model = Dataset
-    fuzzy = True
+    class Meta:
+        doc_type = 'Dataset
+        model = Dataset
+        fuzzy = True
 
-    title = String()
-    description = String()
-    license = String()
+    title = String(analyzer=i18n_analyzer, fields={
+        'raw': String(index='not_analyzed')
+    })
+    description = String(analyzer=i18n_analyzer)
+    license = String(index='not_analyzed')
     frequency = String()
     organization = String()
     owner = String()
-    tags = String()
-    badges = String()
-    tag_suggest = Completion()
+    tags = String(index='not_analyzed', fields={
+        'i18n': String(index='not_analyzed')
+    })
+    badges = String(index='not_analyzed')
+    tag_suggest = Completion(analyzer='simple',
+                             search_analyzer='simple',
+                             payloads=False)
     resources = Object(
         properties={
             'title': String(),
@@ -66,11 +74,15 @@ class DatasetSearch(ModelSearchAdapter):
             'license': String()
         }
     )
-    format_suggest = Completion()
-    dataset_suggest = Completion()
-    created = Date()
-    last_modified = Date()
-    # metrics ??
+    format_suggest = Completion(analyzer='simple',
+                                search_analyzer='simple',
+                                payloads=False)
+    dataset_suggest = Completion(analyzer='simple',
+                                 search_analyzer='simple',
+                                 payloads=True)
+    created = Date(format='date_hour_minute_second')
+    last_modified = Date(format='date_hour_minute_second')
+    metrics = metrics_mapping_for(Dataset)
     featured = Boolean()
     temporal_coverage = Object(
         properties={
@@ -80,98 +92,14 @@ class DatasetSearch(ModelSearchAdapter):
     )
     geozones = Object(
         properties={
-            'id': String(),
-            'name': String(),
-            'keys': String()
+            'id': String(index='not_analyzed'),
+            'name': String(index='not_analyzed'),
+            'keys': String(index='not_analyzed')
         }
     )
-    granularity = String()
+    granularity = String(index='not_analyzed')
     extras = Object()
 
-    mapping = {
-        'properties': {
-            'title': {
-                'type': 'string',
-                'analyzer': i18n_analyzer,
-                'fields': {
-                    'raw': {'type': 'string', 'index': 'not_analyzed'}
-                }
-            },
-            'description': {'type': 'string', 'analyzer': i18n_analyzer},
-            'license': {'type': 'string', 'index': 'not_analyzed'},
-            'frequency': {'type': 'string'},
-            'organization': {'type': 'string'},
-            'owner': {'type': 'string'},
-            'tags': {
-                'type': 'string',
-                'index': 'not_analyzed',
-                'fields': {
-                    'i18n': {'type': 'string', 'analyzer': i18n_analyzer}
-                }
-            },
-            'badges': {
-                'type': 'string',
-                'index': 'not_analyzed'
-            },
-            'tag_suggest': {
-                'type': 'completion',
-                'analyzer': 'simple',
-                'search_analyzer': 'simple',
-                'payloads': False,
-            },
-            'resources': {
-                'type': 'object',
-                'properties': {
-                    'title': {'type': 'string'},
-                    'description': {'type': 'string'},
-                    'license': {'type': 'string'},
-                }
-            },
-            'format_suggest': {
-                'type': 'completion',
-                'analyzer': 'simple',
-                'search_analyzer': 'simple',
-                'payloads': False,
-            },
-            'dataset_suggest': {
-                'type': 'completion',
-                'analyzer': 'simple',
-                'search_analyzer': 'simple',
-                'payloads': True,
-            },
-            'created': {'type': 'date', 'format': 'date_hour_minute_second'},
-            'last_modified': {
-                'type': 'date',
-                'format': 'date_hour_minute_second'
-            },
-            'metrics': metrics_mapping(Dataset),
-            'featured': {'type': 'boolean'},
-            # Store dates as ordinals to handle pre-1900 dates.
-            'temporal_coverage': {
-                'type': 'object',
-                'properties': {
-                    'start': {'type': 'long'},
-                    'end': {'type': 'long'},
-                }
-            },
-            'geozones': {
-                'type': 'object',
-                'properties': {
-                    'id': {'type': 'string', 'index': 'not_analyzed'},
-                    'name': {'type': 'string', 'index': 'not_analyzed'},
-                    'keys': {'type': 'string', 'index': 'not_analyzed'},
-                }
-            },
-            'granularity': {'type': 'string', 'index': 'not_analyzed'},
-            # 'geom': {
-            #     'type': 'geo_shape',
-            #     'precision': '100m',
-            # },
-            'extras': {
-                'type': 'object',
-            },
-        }
-    }
     fields = (
         'geozones.keys^9',
         'geozones.name^9',
