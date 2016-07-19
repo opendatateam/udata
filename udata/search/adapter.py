@@ -6,9 +6,11 @@ import logging
 
 from flask import current_app
 from mongoengine.signals import post_save
+from elasticsearch_dsl import DocType
 
 from udata.search import adapter_catalog, reindex
 from udata.core.metrics import Metric
+from udata.search import es
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +35,7 @@ class SearchAdapterMetaClass(type):
         return adapter
 
 
-class ModelSearchAdapter(object):
+class ModelSearchAdapter(DocType):
     """This class allow to describe and customize the search behavior."""
     model = None
     analyzer = None
@@ -44,8 +46,6 @@ class ModelSearchAdapter(object):
     mapping = None
     match_type = 'cross_fields'
     fuzzy = False
-
-    __metaclass__ = SearchAdapterMetaClass
 
     @classmethod
     def doc_type(cls):

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from elasticsearch_dsl import (
+    Boolean, Completion, Date, InnerObjectWrapper, Long, Object, String
+)
+
 from udata.core.site.views import current_site
-
-
 from udata.models import (
     Dataset, Organization, License, User, GeoZone,
 )
@@ -47,6 +49,45 @@ def dataset_badge_labelizer(label, kind):
 class DatasetSearch(ModelSearchAdapter):
     model = Dataset
     fuzzy = True
+
+    title = String()
+    description = String()
+    license = String()
+    frequency = String()
+    organization = String()
+    owner = String()
+    tags = String()
+    badges = String()
+    tag_suggest = Completion()
+    resources = Object(
+        properties={
+            'title': String(),
+            'description': String(),
+            'license': String()
+        }
+    )
+    format_suggest = Completion()
+    dataset_suggest = Completion()
+    created = Date()
+    last_modified = Date()
+    # metrics ??
+    featured = Boolean()
+    temporal_coverage = Object(
+        properties={
+            'start': Long(),
+            'and': Long()
+        }
+    )
+    geozones = Object(
+        properties={
+            'id': String(),
+            'name': String(),
+            'keys': String()
+        }
+    )
+    granularity = String()
+    extras = Object()
+
     mapping = {
         'properties': {
             'title': {

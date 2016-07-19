@@ -11,7 +11,7 @@ from elasticsearch_dsl import Search
 
 from udata.models import db
 from udata.search import es, i18n_analyzer, DEFAULT_PAGE_SIZE, adapter_catalog
-from udata.search.result import SearchResult, SearchIterator
+from udata.search.result import SearchIterator
 
 
 log = logging.getLogger(__name__)

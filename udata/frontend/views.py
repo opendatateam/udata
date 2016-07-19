@@ -6,6 +6,8 @@ import json
 from flask import request, redirect, abort, g
 from flask.views import MethodView
 
+from elasticsearch_dsl.query import MultiMatch
+
 from udata import search, auth, theme
 from udata.utils import multi_to_dict
 
@@ -80,7 +82,18 @@ class SearchView(Templated, BaseView):
     def get_queryset(self):
         params = multi_to_dict(request.args)
         params['facets'] = True
-        return search.query(self.search_adapter or self.model, **params)
+        print(params)
+
+        s = self.search_adapter.search(using=search.es.client)
+        # Do something with params
+        q = MultiMatch(query=params['q'], fields=['title', 'description'])
+        s = s.query(q)
+        print(s.to_dict())
+        # Do something related to sorting
+        # s = s.sort(self.search_adapter.sorts)
+        result = s.execute()
+        print(result)
+        return result
 
     def get_context(self):
         context = super(SearchView, self).get_context()
