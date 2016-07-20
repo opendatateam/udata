@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import bson
+import datetime
 import logging
 
-from os.path import join, dirname
-
 from mongoengine.signals import post_save
-from elasticsearch import Elasticsearch, JSONSerializer
+from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
 from elasticsearch_dsl import MultiSearch, Search
-from flask import current_app, json
-from speaklater import make_lazy_string
+from elasticsearch_dsl.serializer import AttrJSONSerializer
+from flask import current_app
+from werkzeug.local import LocalProxy
+from speaklater import is_lazy_string
 
-from udata.app import UDataJsonEncoder
 from udata.tasks import celery
+
+from . import analyzers
 
 log = logging.getLogger(__name__)
 
@@ -21,12 +24,23 @@ adapter_catalog = {}
 
 DEFAULT_PAGE_SIZE = 20
 
-ANALYSIS_JSON = join(dirname(__file__), 'analysis.json')
 
-
-class EsJSONSerializer(JSONSerializer):
+class EsJSONSerializer(AttrJSONSerializer):
+    # TODO: find a way to reuse UDataJsonEncoder?
     def default(self, data):
-        return UDataJsonEncoder().default(data)
+        if is_lazy_string(data):
+            return unicode(data)
+        elif isinstance(data, bson.objectid.ObjectId):
+            return str(data)
+        elif isinstance(data, datetime.datetime):
+            return data.isoformat()
+        elif hasattr(data, 'serialize'):
+            return data.serialize()
+        # Serialize Raw data for Document and EmbeddedDocument.
+        elif hasattr(data, '_data'):
+            return data._data
+        else:
+            return super(EsJSONSerializer, self).default(data)
 
 
 class ElasticSearch(object):
@@ -68,47 +82,31 @@ class ElasticSearch(object):
 
     def initialize(self):
         '''Create or update indices and mappings'''
-        mappings = [
-            (adapter.doc_type(), adapter.mapping)
-            for adapter in adapter_catalog.values()
-            if adapter.mapping
-        ]
-
-        if es.indices.exists(self.index_name):
-            for doc_type, mapping in mappings:
-                if not es.indices.exists_type(index=self.index_name,
-                                              doc_type=doc_type):
-                    es.indices.put_mapping(index=self.index_name,
-                                           doc_type=doc_type, body=mapping)
-        else:
-            with open(ANALYSIS_JSON) as analysis:
-                es.indices.create(self.index_name, {
-                    'mappings': dict(mappings),
-                    'settings': {'analysis': json.load(analysis)},
-                })
+        for adapter in adapter_catalog.values():
+            adapter.init(using=self.client, index=self.index_name)
 
 
 es = ElasticSearch()
 
 
 def get_i18n_analyzer():
-    return '{0}_analyzer'.format(current_app.config['DEFAULT_LANGUAGE'])
+    language = current_app.config['DEFAULT_LANGUAGE']
+    return getattr(analyzers, '{0}_analyzer'.format(language))
 
-i18n_analyzer = make_lazy_string(get_i18n_analyzer)
+i18n_analyzer = LocalProxy(lambda: get_i18n_analyzer())
 
 
 @celery.task
 def reindex(obj):
-    adapter = adapter_catalog.get(obj.__class__)
-    doctype = adapter.doc_type()
+    adapter_class = adapter_catalog.get(obj.__class__)
+    doctype = adapter_class.doc_type
+    adapter = adapter_class(obj)
     if adapter.is_indexable(obj):
         log.info('Indexing %s (%s)', doctype, obj.id)
-        es.index(index=es.index_name, doc_type=doctype,
-                 id=obj.id, body=adapter.serialize(obj))
+        adapter.save(using=es.client, index=es.index_name)
     elif es.exists(index=es.index_name, doc_type=doctype, id=obj.id):
         log.info('Unindexing %s (%s)', doctype, obj.id)
-        es.delete(index=es.index_name, doc_type=doctype,
-                  id=obj.id, refresh=True)
+        adapter.delete(using=es.client, index=es.index_name)
     else:
         log.info('Nothing to do for %s (%s)', doctype, obj.id)
 

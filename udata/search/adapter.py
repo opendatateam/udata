@@ -4,10 +4,8 @@ from __future__ import unicode_literals
 import itertools
 import logging
 
-from flask import current_app
 from elasticsearch_dsl import DocType, Integer, Float, Object
 
-from udata.search import adapter_catalog, reindex
 from udata.core.metrics import Metric
 
 log = logging.getLogger(__name__)
@@ -27,10 +25,9 @@ class ModelSearchAdapter(DocType):
 
     @classmethod
     def doc_type(cls):
-        return cls.model.__name__
+        return cls._doc_type.name
 
-    @classmethod
-    def is_indexable(cls, document):
+    def is_indexable(self, document):
         return True
 
     @classmethod
@@ -55,6 +52,7 @@ metrics_types = {
     int: Integer,
     float: Float,
 }
+
 
 def metrics_mapping_for(cls):
     props = {}

@@ -5,11 +5,10 @@ import logging
 
 from datetime import date
 
-from flask import json
 from flask_script import prompt_bool
 
 from udata.commands import submanager
-from udata.search import es, adapter_catalog, ANALYSIS_JSON
+from udata.search import es, adapter_catalog
 
 log = logging.getLogger(__name__)
 
@@ -27,7 +26,11 @@ m = submanager(
 def reindex(doc_type=None):
     '''Reindex models'''
     name = es.index_name
-    for model, adapter in adapter_catalog.items():
+    adapters = adapter_catalog.items()
+    # Ensure that adapters are indexed in the same order.
+    adapters.sort()
+    for model, adapter_class in adapters:
+        adapter = adapter_class()
         doctype = adapter.doc_type()
         if not doc_type or doc_type.lower() == doctype.lower():
             log.info('Reindexing {0} objects'.format(model.__name__))
@@ -78,28 +81,22 @@ def init(name=None, delete=False, force=False):
             es.indices.delete(index_name)
         else:
             exit(-1)
-    mappings = [
-        (adapter.doc_type(), adapter.mapping)
-        for adapter in adapter_catalog.values()
-        if adapter.mapping
-    ]
-    with open(ANALYSIS_JSON) as analysis:
-        es.indices.create(index_name, {
-            'mappings': dict(mappings),
-            'settings': {'analysis': json.load(analysis)},
-        })
 
-    for model, adapter in adapter_catalog.items():
-        doctype = adapter.doc_type()
+    adapters = adapter_catalog.items()
+    # Ensure that adapters are indexed in the same order.
+    adapters.sort()
+    for model, adapter_class in adapters:
+        adapter_class.init(using=es.client, index=es.index_name)
+        doctype = adapter_class.doc_type()
         log.info('Indexing {0} objects'.format(model.__name__))
         qs = model.objects
         if hasattr(model.objects, 'visible'):
             qs = qs.visible()
         for obj in qs.timeout(False):
-            if adapter.is_indexable(obj):
+            if adapter_class.is_indexable(obj):
                 try:
                     es.index(index=index_name, doc_type=doctype,
-                             id=obj.id, body=adapter.serialize(obj))
+                             id=obj.id, body=adapter_class.serialize(obj))
                 except:
                     log.exception('Unable to index %s "%s"',
                                   model.__name__, str(obj.id))

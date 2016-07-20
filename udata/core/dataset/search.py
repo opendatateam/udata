@@ -15,6 +15,7 @@ from udata.search.fields import (
 )
 from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
 from udata.search.fields import BoolBooster, GaussDecay
+from udata.search.analyzers import simple
 
 from udata.core.spatial.models import spatial_granularities
 
@@ -66,8 +67,8 @@ class DatasetSearch(ModelSearchAdapter):
         'i18n': String(index='not_analyzed')
     })
     badges = String(index='not_analyzed')
-    tag_suggest = Completion(analyzer='simple',
-                             search_analyzer='simple',
+    tag_suggest = Completion(analyzer=simple,
+                             search_analyzer=simple,
                              payloads=False)
     resources = Object(
         properties={
@@ -76,11 +77,11 @@ class DatasetSearch(ModelSearchAdapter):
             'license': String()
         }
     )
-    format_suggest = Completion(analyzer='simple',
-                                search_analyzer='simple',
+    format_suggest = Completion(analyzer=simple,
+                                search_analyzer=simple,
                                 payloads=False)
-    dataset_suggest = Completion(analyzer='simple',
-                                 search_analyzer='simple',
+    dataset_suggest = Completion(analyzer=simple,
+                                 search_analyzer=simple,
                                  payloads=True)
     created = Date(format='date_hour_minute_second')
     last_modified = Date(format='date_hour_minute_second')
@@ -138,8 +139,7 @@ class DatasetSearch(ModelSearchAdapter):
             'metrics.followers', max_followers, max_followers, decay=0.1),
     ]
 
-    @classmethod
-    def is_indexable(cls, dataset):
+    def is_indexable(self, dataset):
         return (dataset.deleted is None and
                 len(dataset.resources) > 0 and
                 not dataset.private)

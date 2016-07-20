@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from elasticsearch_dsl import Completion, Date, Long, String
+from elasticsearch_dsl import Completion, Date, String
 
 from udata import search
 from udata.models import Organization
 from udata.core.site.views import current_site
+from udata.search.analyzers import simple
 
 from . import metrics  # noqa: Metrics are need for the mapping
 
@@ -45,8 +46,8 @@ class OrganizationSearch(search.ModelSearchAdapter):
     url = String()
     created = Date(format='date_hour_minute_second')
     metrics = search.metrics_mapping_for(Organization)
-    org_suggest = Completion(analyzer='simple',
-                             search_analyzer='simple',
+    org_suggest = Completion(analyzer=simple,
+                             search_analyzer=simple,
                              payloads=True)
 
     fields = (
@@ -76,8 +77,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
         search.GaussDecay('metrics.datasets', max_datasets, decay=0.9),
     ]
 
-    @classmethod
-    def is_indexable(cls, org):
+    def is_indexable(self, org):
         return org.deleted is None
 
     @classmethod

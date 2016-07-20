@@ -12,6 +12,7 @@ from udata.search import ModelSearchAdapter, Sort
 from udata.search import i18n_analyzer, metrics_mapping_for, register
 from udata.search import RangeFacet, BoolFacet, ExtrasFacet
 from udata.search import TermFacet, ModelTermFacet
+from udata.search.analyzers import simple
 
 from . import metrics  # noqa: Metrics are require for reuse search
 
@@ -56,8 +57,8 @@ class ReuseSearch(ModelSearchAdapter):
         'i18n': String(index='not_analyzed')
     })
     badges = String(index='not_analyzed')
-    tag_suggest = Completion(analyzer='simple',
-                             search_analyzer='simple',
+    tag_suggest = Completion(analyzer=simple,
+                             search_analyzer=simple,
                              payloads=False)
     datasets = Object(
         properties={
@@ -69,8 +70,8 @@ class ReuseSearch(ModelSearchAdapter):
     last_modified = Date(format='date_hour_minute_second')
     metrics = metrics_mapping_for(Reuse)
     featured = Boolean()
-    reuse_suggest = Completion(analyzer='simple',
-                               search_analyzer='simple',
+    reuse_suggest = Completion(analyzer=simple,
+                               search_analyzer=simple,
                                payloads=True)
     extras = Object()
 
@@ -105,8 +106,7 @@ class ReuseSearch(ModelSearchAdapter):
         GaussDecay('metrics.followers', max_followers, decay=0.8),
     ]
 
-    @classmethod
-    def is_indexable(cls, reuse):
+    def is_indexable(self, reuse):
         return (reuse.deleted is None and
                 len(reuse.datasets) > 0 and
                 not reuse.private)
