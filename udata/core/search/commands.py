@@ -87,7 +87,6 @@ def init(name=None, delete=False, force=False):
     adapters.sort()
     for model, adapter_class in adapters:
         adapter_class.init(using=es.client, index=es.index_name)
-        doctype = adapter_class.doc_type()
         log.info('Indexing {0} objects'.format(model.__name__))
         qs = model.objects
         if hasattr(model.objects, 'visible'):
@@ -95,8 +94,8 @@ def init(name=None, delete=False, force=False):
         for obj in qs.timeout(False):
             if adapter_class.is_indexable(obj):
                 try:
-                    es.index(index=index_name, doc_type=doctype,
-                             id=obj.id, body=adapter_class.serialize(obj))
+                    adapter = adapter_class.from_model(obj)
+                    adapter.save(using=es.client, index=es.index_name)
                 except:
                     log.exception('Unable to index %s "%s"',
                                   model.__name__, str(obj.id))

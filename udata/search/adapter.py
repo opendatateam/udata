@@ -27,8 +27,17 @@ class ModelSearchAdapter(DocType):
     def doc_type(cls):
         return cls._doc_type.name
 
-    def is_indexable(self, document):
+    @classmethod
+    def is_indexable(cls, document):
         return True
+
+    @classmethod
+    def from_model(cls, document):
+        """By default use the ``to_dict`` method
+
+        and exclude ``_id``, ``_cls`` and ``owner`` fields
+        """
+        return cls(meta={'id': document.id}, **cls.serialize(document))
 
     @classmethod
     def serialize(cls, document):

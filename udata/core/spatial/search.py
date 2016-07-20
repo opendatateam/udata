@@ -52,7 +52,8 @@ class GeoZoneSearch(ModelSearchAdapter):
             else:  # World population is 6772425850.
                 return 2147483647
 
-    def is_indexable(self, zone):
+    @classmethod
+    def is_indexable(cls, zone):
         return zone.level not in ('fr/iris', 'fr/canton', 'fr/district')
 
     @classmethod
