@@ -7,6 +7,7 @@ from flask import current_app
 
 from udata.i18n import language, _
 from udata.search import ModelSearchAdapter, register
+from udata.search.analyzers import standard
 
 from .models import GeoZone
 
@@ -36,8 +37,8 @@ class GeoZoneSearch(ModelSearchAdapter):
     class Meta:
         doc_type = 'GeoZone'
 
-    zone_suggest = Completion(analyzer='standard',
-                              search_analyzer='standard',
+    zone_suggest = Completion(analyzer=standard,
+                              search_analyzer=standard,
                               payloads=True)
 
     @classmethod

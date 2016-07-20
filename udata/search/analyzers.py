@@ -71,3 +71,4 @@ fr_analyzer = analyzer(
 )
 
 simple = analyzer('simple')
+standard = analyzer('standard')
