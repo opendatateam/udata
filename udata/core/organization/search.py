@@ -77,6 +77,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
         search.GaussDecay('metrics.datasets', max_datasets, decay=0.9),
     ]
 
+    @classmethod
     def is_indexable(self, org):
         return org.deleted is None
 

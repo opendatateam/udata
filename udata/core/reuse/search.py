@@ -106,6 +106,7 @@ class ReuseSearch(ModelSearchAdapter):
         GaussDecay('metrics.followers', max_followers, decay=0.8),
     ]
 
+    @classmethod
     def is_indexable(self, reuse):
         return (reuse.deleted is None and
                 len(reuse.datasets) > 0 and

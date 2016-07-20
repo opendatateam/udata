@@ -30,8 +30,7 @@ def reindex(doc_type=None):
     # Ensure that adapters are indexed in the same order.
     adapters.sort()
     for model, adapter_class in adapters:
-        adapter = adapter_class()
-        doctype = adapter.doc_type()
+        doctype = adapter_class.doc_type
         if not doc_type or doc_type.lower() == doctype.lower():
             log.info('Reindexing {0} objects'.format(model.__name__))
             if es.indices.exists_type(index=name, doc_type=doctype):
@@ -42,23 +41,22 @@ def reindex(doc_type=None):
             else:
                 es.indices.put_mapping(index=name,
                                        doc_type=doctype,
-                                       body=adapter.mapping)
+                                       body=adapter_class.mapping)
             qs = model.objects
             if hasattr(model.objects, 'visible'):
                 qs = qs.visible()
             for obj in qs.timeout(False):
-                if adapter.is_indexable(obj):
+                adapter = adapter_class.from_model(obj)
+                if adapter_class.is_indexable(obj):
                     try:
-                        es.index(index=name, doc_type=doctype,
-                                 id=obj.id, body=adapter.serialize(obj))
+                        adapter.save(using=es.client, index=es.index_name)
                     except:
                         log.exception(
                             'Unable to index %s "%s"',
                             model.__name__, str(obj.id))
                 elif es.exists(index=name, doc_type=doctype, id=obj.id):
                     log.info('Unindexing %s (%s)', doctype, obj.id)
-                    es.delete(index=name, doc_type=doctype,
-                              id=obj.id, refresh=True)
+                    adapter.delete(using=es.client, index=es.index_name)
                 else:
                     log.info('Nothing to do for %s (%s)', doctype, obj.id)
     es.indices.refresh(index=name)

@@ -139,6 +139,7 @@ class DatasetSearch(ModelSearchAdapter):
             'metrics.followers', max_followers, max_followers, decay=0.1),
     ]
 
+    @classmethod
     def is_indexable(self, dataset):
         return (dataset.deleted is None and
                 len(dataset.resources) > 0 and
