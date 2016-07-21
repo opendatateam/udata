@@ -33,15 +33,9 @@
     </a>
 </div>
 {% endif %}
+
 {% if sysadmin %}
-<div class="btn-group btn-group-xs">
-    <button type="button"
-        class="btn btn-success featured {% if dataset.featured %}active{% endif %}"
-        data-api-url="{{ url_for('api.dataset_featured', dataset=dataset) }}">
-        <span class="glyphicon glyphicon-bullhorn"></span>
-        {{ _('Featured') }}
-    </button>
-</div>
+<featured dataset-id="{{ dataset.id }}" :featured="{{ dataset.featured|to_json }}"></featured>
 {% endif %}
 
 <div class="btn-group btn-group-xs">
@@ -162,14 +156,7 @@
                         </div>
                         {% endif %}
                         {% if sysadmin %}
-                        <div class="btn-group btn-group-sm">
-                            <button type="button"
-                                class="btn btn-success featured {% if dataset.featured %}active{% endif %}"
-                                data-api-url="{{ url_for('api.dataset_featured', dataset=dataset) }}">
-                                <span class="glyphicon glyphicon-bullhorn"></span>
-                                {{ _('Featured') }}
-                            </button>
-                        </div>
+                        <featured dataset-id="{{ dataset.id }}" :featured="{{ dataset.featured|to_json }}"></featured>
                         {% endif %}
                         <div class="btn-group btn-group-sm">
                             {{ follow_btn(dataset, ['fa-star-o', 'fa-star']) }}
