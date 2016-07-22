@@ -72,3 +72,18 @@ fr_analyzer = analyzer(
 
 simple = analyzer('simple')
 standard = analyzer('standard')
+
+
+def analysis_settings():
+    '''
+    Build the settings dict necessary to initialize filters and analyzers.
+    See: https://github.com/elastic/elasticsearch-dsl-py/issues/410
+    '''
+    analyzers = (de_analyzer, en_analyzer, es_analyzer, fr_analyzer)
+    filters = (de_stop_filter, de_stem_filter, en_stop_filter, en_stem_filter,
+               es_stop_filter, es_stem_filter, fr_stop_filter, fr_stem_filter,
+               fr_elision)
+    return {
+        'analyzer': {a._name: a.get_definition() for a in analyzers},
+        'filter': {f._name: f.get_definition() for f in filters},
+    }

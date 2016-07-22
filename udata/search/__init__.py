@@ -8,7 +8,7 @@ import logging
 from mongoengine.signals import post_save
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
-from elasticsearch_dsl import MultiSearch, Search
+from elasticsearch_dsl import MultiSearch, Search, Index as ESIndex
 from elasticsearch_dsl.serializer import AttrJSONSerializer
 from flask import current_app
 from werkzeug.local import LocalProxy
@@ -87,6 +87,16 @@ class ElasticSearch(object):
 
 
 es = ElasticSearch()
+
+
+class Index(ESIndex):
+    '''
+    An Elasticsearch DSL index handling filters and analyzers registeration.
+    See: https://github.com/elastic/elasticsearch-dsl-py/issues/410
+    '''
+    def _get_mappings(self):
+        mappings, _ = super(Index, self)._get_mappings()
+        return mappings, analyzers.analysis_settings()
 
 
 def get_i18n_analyzer():

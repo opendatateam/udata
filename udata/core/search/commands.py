@@ -8,10 +8,9 @@ from datetime import date
 from flask_script import prompt_bool
 
 from udata.commands import submanager
-from udata.search import es, adapter_catalog
+from udata.search import es, adapter_catalog, Index
 
 log = logging.getLogger(__name__)
-
 
 m = submanager(
     'search',
@@ -20,9 +19,8 @@ m = submanager(
 )
 
 
-@m.option(
-    '-t', '--type', dest='doc_type', default=None,
-    help='Only reindex a given type')
+@m.option('-t', '--type', dest='doc_type', default=None,
+          help='Only reindex a given type')
 def reindex(doc_type=None):
     '''Reindex models'''
     name = es.index_name
@@ -63,12 +61,10 @@ def reindex(doc_type=None):
 
 
 @m.option('-n', '--name', default=None, help='Optionnal index name')
-@m.option(
-    '-d', '--delete', default=False, action='store_true',
-    help='Delete previously aliased indices')
-@m.option(
-    '-f', '--force', default=False, action='store_true',
-    help='Do not prompt on deletion')
+@m.option('-d', '--delete', default=False, action='store_true',
+          help='Delete previously aliased indices')
+@m.option('-f', '--force', default=False, action='store_true',
+          help='Do not prompt on deletion')
 def init(name=None, delete=False, force=False):
     '''Initialize or rebuild the search index'''
     index_name = name or '-'.join([es.index_name, date.today().isoformat()])
@@ -80,11 +76,15 @@ def init(name=None, delete=False, force=False):
         else:
             exit(-1)
 
+    index = Index(index_name, using=es.client)
+    for adapter_class in adapter_catalog.values():
+        index.doc_type(adapter_class)
+    index.create()
+
     adapters = adapter_catalog.items()
     # Ensure that adapters are indexed in the same order.
     adapters.sort()
-    for model, adapter_class in adapters:
-        adapter_class.init(using=es.client, index=es.index_name)
+    for model, adapter_class in reversed(adapters):
         log.info('Indexing {0} objects'.format(model.__name__))
         qs = model.objects
         if hasattr(model.objects, 'visible'):
@@ -93,7 +93,7 @@ def init(name=None, delete=False, force=False):
             if adapter_class.is_indexable(obj):
                 try:
                     adapter = adapter_class.from_model(obj)
-                    adapter.save(using=es.client, index=es.index_name)
+                    adapter.save(using=es.client, index=index_name)
                 except:
                     log.exception('Unable to index %s "%s"',
                                   model.__name__, str(obj.id))
