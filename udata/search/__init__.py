@@ -16,7 +16,7 @@ from speaklater import is_lazy_string
 
 from udata.tasks import celery
 
-from . import analyzers
+from . import analysis
 
 log = logging.getLogger(__name__)
 
@@ -96,7 +96,10 @@ class Index(ESIndex):
     '''
     def _get_mappings(self):
         mappings, _ = super(Index, self)._get_mappings()
-        return mappings, analyzers.analysis_settings()
+        return mappings, {
+            'analyzer': {a._name: a.get_definition() for a in analysis.analyzers},
+            'filter': {f._name: f.get_definition() for f in analysis.filters},
+        }
 
 
 def get_i18n_analyzer():
@@ -122,13 +125,13 @@ def reindex(obj):
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
         try:
             adapter = adapter_class.from_model(obj)
-            adapter.delete(using=es.client, index=index_name)
+            adapter.delete(using=es.client, index=es.index_name)
         except:
             log.exception('Unable to index %s "%s"',
                           model.__name__, str(obj.id))
         adapter.delete(using=es.client, index=es.index_name)
     else:
-        log.info('Nothing to do for %s (%s)', doctype, obj.id)
+        log.info('Nothing to do for %s (%s)', model.__name__, obj.id)
 
 
 def reindex_model_on_save(sender, document, **kwargs):
