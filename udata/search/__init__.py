@@ -108,14 +108,24 @@ i18n_analyzer = LocalProxy(lambda: get_i18n_analyzer())
 
 @celery.task
 def reindex(obj):
-    adapter_class = adapter_catalog.get(obj.__class__)
-    doctype = adapter_class.doc_type
-    adapter = adapter_class(obj)
-    if adapter.is_indexable(obj):
-        log.info('Indexing %s (%s)', doctype, obj.id)
-        adapter.save(using=es.client, index=es.index_name)
-    elif es.exists(index=es.index_name, doc_type=doctype, id=obj.id):
-        log.info('Unindexing %s (%s)', doctype, obj.id)
+    model = obj.__class__
+    adapter_class = adapter_catalog.get(model)
+    if adapter_class.is_indexable(obj):
+        log.info('Indexing %s (%s)', model.__name__, obj.id)
+        try:
+            adapter = adapter_class.from_model(obj)
+            adapter.save(using=es.client, index=es.index_name)
+        except:
+            log.exception('Unable to index %s "%s"',
+                          model.__name__, str(obj.id))
+    elif adapter_class.get(obj.id, index=es.index_name):
+        log.info('Unindexing %s (%s)', model.__name__, obj.id)
+        try:
+            adapter = adapter_class.from_model(obj)
+            adapter.delete(using=es.client, index=index_name)
+        except:
+            log.exception('Unable to index %s "%s"',
+                          model.__name__, str(obj.id))
         adapter.delete(using=es.client, index=es.index_name)
     else:
         log.info('Nothing to do for %s (%s)', doctype, obj.id)
