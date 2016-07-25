@@ -8,7 +8,7 @@ from udata.search import ModelSearchAdapter
 from udata.search import i18n_analyzer, metrics_mapping_for, register
 from udata.search.fields import Sort, ModelTermFacet, RangeFacet
 from udata.search.fields import GaussDecay
-from udata.search.analyzers import simple
+from udata.search.analysis import simple
 
 # Metrics are required for user search
 from . import metrics  # noqa

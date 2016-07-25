@@ -15,7 +15,7 @@ from udata.search.fields import (
 )
 from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
 from udata.search.fields import BoolBooster, GaussDecay
-from udata.search.analyzers import simple
+from udata.search.analysis import simple
 
 from udata.core.spatial.models import spatial_granularities
 

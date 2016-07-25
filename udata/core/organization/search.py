@@ -6,7 +6,7 @@ from elasticsearch_dsl import Completion, Date, String
 from udata import search
 from udata.models import Organization
 from udata.core.site.views import current_site
-from udata.search.analyzers import simple
+from udata.search.analysis import simple
 
 from . import metrics  # noqa: Metrics are need for the mapping
 

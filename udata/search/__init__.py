@@ -104,7 +104,7 @@ class Index(ESIndex):
 
 def get_i18n_analyzer():
     language = current_app.config['DEFAULT_LANGUAGE']
-    return getattr(analyzers, '{0}_analyzer'.format(language))
+    return getattr(analysis, '{0}_analyzer'.format(language))
 
 i18n_analyzer = LocalProxy(lambda: get_i18n_analyzer())
 

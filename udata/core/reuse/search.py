@@ -12,7 +12,7 @@ from udata.search import ModelSearchAdapter, Sort
 from udata.search import i18n_analyzer, metrics_mapping_for, register
 from udata.search import RangeFacet, BoolFacet, ExtrasFacet
 from udata.search import TermFacet, ModelTermFacet
-from udata.search.analyzers import simple
+from udata.search.analysis import simple
 
 from . import metrics  # noqa: Metrics are require for reuse search
 
