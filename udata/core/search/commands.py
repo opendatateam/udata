@@ -8,7 +8,7 @@ from datetime import date
 from flask_script import prompt_bool
 
 from udata.commands import submanager
-from udata.search import es, adapter_catalog, Index
+from udata.search import es, adapter_catalog
 
 log = logging.getLogger(__name__)
 
@@ -76,10 +76,7 @@ def init(name=None, delete=False, force=False):
         else:
             exit(-1)
 
-    index = Index(index_name, using=es.client)
-    for adapter_class in adapter_catalog.values():
-        index.doc_type(adapter_class)
-    index.create()
+    es.initialize(index_name)
 
     adapters = adapter_catalog.items()
     # Ensure that adapters are indexed in the same order.

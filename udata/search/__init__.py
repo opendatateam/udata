@@ -80,10 +80,13 @@ class ElasticSearch(object):
     def scan(self, body, **kwargs):
         return scan(self.client, query=body, **kwargs)
 
-    def initialize(self):
+    def initialize(self, index_name=None):
         '''Create or update indices and mappings'''
-        for adapter in adapter_catalog.values():
-            adapter.init(using=self.client, index=self.index_name)
+        index_name = index_name or self.index_name
+        index = Index(index_name, using=es.client)
+        for adapter_class in adapter_catalog.values():
+            index.doc_type(adapter_class)
+        index.create()
 
 
 es = ElasticSearch()
