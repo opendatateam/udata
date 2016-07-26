@@ -182,9 +182,10 @@ def suggest(q, field, size=10):
         'field': field,
         'size': size,
     })
-    result = s.execute_suggest()
+    result = s.execute_suggest().to_dict()
     try:
-        return result.suggestions[0]['options']
+        suggestions = result.get('suggestions', [])[0]['options']
+        return suggestions
     except (IndexError, AttributeError):
         return []
 
