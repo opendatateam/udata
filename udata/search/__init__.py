@@ -185,7 +185,7 @@ def suggest(q, field, size=10):
     result = s.execute_suggest()
     try:
         return result.suggestions[0]['options']
-    except IndexError:
+    except (IndexError, AttributeError):
         return []
 
 
