@@ -4,17 +4,18 @@
 
 <script>
 import Post from 'models/post';
+import Vform from 'components/form/vertical-form.vue';
 
 export default {
     props: {
         post: {
             type: Post,
-            default: function() {
+            default() {
                 return new Post();
             }
         }
     },
-    data: function() {
+    data() {
         return {
             fields: [{
                     id: 'name',
@@ -35,8 +36,14 @@ export default {
                 }]
         };
     },
-    components: {
-        vform: require('components/form/vertical-form.vue')
+    components: {Vform},
+    methods: {
+        serialize() {
+            return this.$refs.form.serialize();
+        },
+        validate() {
+            return this.$refs.form.validate();
+        }
     }
 };
 </script>
