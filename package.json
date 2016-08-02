@@ -7,7 +7,7 @@
   "main": "index.js",
   "scripts": {
     "assets:watch": "webpack -c -d  --progress --watch",
-    "assets:build": "webpack -p --progress",
+    "assets:build": "webpack --progress",
     "widgets:watch": "webpack -d -c --progress --watch --config webpack.widgets.config.js",
     "test:watch": "export NODE_ENV=test && WATCH=true karma start",
     "test:unit": "export NODE_ENV=test && karma start --single-run",
