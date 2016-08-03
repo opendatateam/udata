@@ -14,6 +14,14 @@ $ pip install -r udata/requirements/develop.pip
 $ pip install -e udata/
 ```
 
+!!! note
+    You might need to install a few more libs.
+    
+    For instance on a fresh Ubuntu 14.04 LTS the following ones will be needed: 
+
+```shell
+$ sudo apt-get install python-dev libxml2-dev libxslt1-dev zlib1g-dev libjpeg-dev liblzma-dev libssl-dev 
+```
 
 ## NodeJS and modules
 
