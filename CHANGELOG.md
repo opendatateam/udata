@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Added a [DCAT](https://www.w3.org/TR/vocab-dcat/) harvester
 - Upgrade to Flask-Mongoengine 0.9.2, Flask-WTF 0.14.2, mongoengine 0.11.0.
   [#812](https://github.com/opendatateam/udata/pull/812)
 - Upgrade to Flask-Login 0.4.0 and switch from Flask-Security to the latest
