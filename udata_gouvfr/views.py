@@ -8,7 +8,7 @@ from udata.models import Reuse, Organization, Dataset
 from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
 
-from .models import DATACONNEXIONS_5_CANDIDATE, C3, NECMERGITUR
+from .models import DATACONNEXIONS_5_CANDIDATE, C3, NECMERGITUR, OPENFIELD16
 
 blueprint = I18nBlueprint('gouvfr', __name__,
                           template_folder='templates',
@@ -153,6 +153,16 @@ def nec_mergitur():
     return theme.render('nec_mergitur.html',
                         datasets=datasets,
                         badge=NECMERGITUR,
+                        nb_displayed_datasets=NB_DISPLAYED_DATASETS)
+
+
+@blueprint.route('/openfield16')
+def openfield16():
+    datasets = (Dataset.objects(badges__kind=OPENFIELD16).visible()
+                .order_by('-metrics.followers'))
+    return theme.render('openfield16.html',
+                        datasets=datasets,
+                        badge=OPENFIELD16,
                         nb_displayed_datasets=NB_DISPLAYED_DATASETS)
 
 

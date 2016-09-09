@@ -1,0 +1,245 @@
+{% extends theme("base.html") %}
+
+{% set meta = {
+    'title': 'Openfield 16',
+    'description': "Pour les 10 ans de l’ouverture du site grand public du Recensement des Equipements Sportifs (RES), le ministère de la Ville, de la Jeunesse et des Sports organisera en partenariat avec Etalab et NUMA le « Openfield16 »",
+    'keywords': [
+        'équipements sportifs"',
+        'RES',
+        'NUMA',
+        'Recensement des Equipements Sportifs',
+        'hackathon',
+        'évènement',
+        'ministère de la Ville, de la Jeunesse et des Sports',
+        'Openfield',
+        'anniversaire',
+    ],
+} %}
+
+{% set body_class="openfield16 contest" %}
+
+{% block content %}
+{% cache cache_duration, 'openfield16', g.lang_code %}
+<section class="content">
+    <div class="container">
+        <div class="row">
+            <article class="col-xs-12 col-sm-8 col-md-9">
+                <h1>Openfield 16</h1>
+
+                <p class="text-justify lead">Nous fêtons cette année les 10 ans de l’ouverture du site grand public du Recensement des Equipements Sportifs (RES) !</p>
+
+                <p class="text-justify">Soucieux de valoriser l’intérêt de ces donnés publiques, le <strong>ministère de la Ville, de la Jeunesse et des Sports</strong> organisera en partenariat avec <strong>Etalab</strong> et <strong>NUMA</strong> le « Openfield16 ». Ce hackathon sera dédié à l’exploitation des données constituant l’écosystème du sport et des politiques sportives de l’Etat. L’ensemble des données publiques de la direction des sports, dont celles du RES notamment, seront mises à disposition des participants. Les données d’autres contributeurs seront également disponibles pour l’occasion.</p>
+
+                <p class="text-justify">L’objectif de l’évènement sera d’imaginer des produits numériques innovants grâce au croisement des données publiques relatives au sport en France. Ces solutions pourront intéresser divers publics tel que l’Etat, les collectivités territoriales, les fédérations sportives mais aussi le grand public.</p>
+
+                <p class="text-justify">Ainsi, entrepreneurs, développeurs, designers, spécialistes des données, amoureux du sport se réuniront les <strong>7, 8 et 9 octobre 2016</strong>, dans les locaux de la direction des sports du ministère de la ville, de la jeunesse et des sports d’abord, puis dans ceux de la société NUMA ensuite, autour d’une idée commune : offrir des solutions numériques innovantes aux pratiquants et acteurs du sport dans le but d’améliorer les pratiques ainsi que leurs conditions.</p>
+
+                <p class="text-justify">Au terme de ce hackathon, <strong>3 équipes lauréates</strong> se verront remettre une dotation financière et seront invités à valoriser leur projet durant le <strong>mardigital du 18 octobre 2016</strong> organisé à Paris.</p>
+
+                <h2>Défi n°1 – La pratique sportive pour tous</h2>
+                <h3>Enjeux</h3>
+
+                <p class="text-justify">Les activités physiques et sportives constituent un élément important de l'éducation, de la culture, de l'intégration et de la vie sociale. Elles contribuent notamment à la lutte contre l'échec scolaire et à la réduction des inégalités sociales et culturelles, ainsi qu'à la santé. <strong>La promotion et le développement des activités physiques et sportives pour tous</strong> sont d'intérêt général.</p>
+                <p class="text-justify">Faciliter la pratique sportive des français est un domaine d’action important de la politique sportive de l’Etat. Cela se traduit notamment par la correction des inégalités d’accès à la pratique sportive en visant les publics qui en sont le plus éloignés (publics féminins, résidents des zones de revitalisation rurales ou des quartiers prioritaires de la politique de la ville, publics handicapés).</p>
+
+                <p class="text-justify">Les données disponibles doivent être mobilisées en vue de produire toutes solutions numériques pouvant faciliter l’accès aux sports pour le public, que celles-ci soient destinées aux acteurs du sport ou aux pratiquants.</p>
+
+                <h3>Exemples de challenge à relever</h3>
+
+                <ul>
+                    <li>Créer des outils permettant aux acteurs locaux de promouvoir une activité sportive et de valoriser un lieu</li>
+                    <li>Imaginer une plateforme de mise en relation permettant aux pratiquants de trouver des partenaires à proximité autour d’une activité et d’un  lieu</li>
+                    <li>Créer des outils permettant aux acteurs locaux de gérer et d’optimiser l’offre globale de créneaux horaires de leurs équipements sportifs</li>
+                    <li>Imaginer une plateforme permettant au pratiquant de partager son avis ou de noter la qualité des conditions de pratique : qualité des lieux, du personnel d’encadrement, de la vie sociale extra sportive…</li>
+                    <li>Imaginer une plateforme de mutualisation de données permettant aux services de l’Etat, collectivités, fédérations sportives et pratiquants de partager leurs informations sur les  lieux de pratiques sportives</li>
+                    <li>Créer un outil d’aide à la décision permettant de mesurer, au regard des moyens consacrés, les résultats obtenus grâce aux dispositifs déployés par l’Etat pour rapprocher de la pratique sportive les publics ciblés comme ceux étant les plus éloignés : personne en situation de handicap, résidents des zones de revitalisation rurales et des quartiers prioritaires de la politique de la ville et femmes.</li>
+                    <li>Créer une application de valorisation des besoins inhérents à la pratique d’une discipline : règles du jeu, contraintes liées au matériel et aux lieux de pratiques, risques inhérents à la pratique</li>
+                </ul>
+
+                <h3>Ressources identifiées</h3>
+
+                <ul>
+                    <li>Recensement des équipements sportifs, espaces et sites de pratiques - 2016</li>
+                    <li>Recensement des licences et clubs auprès des fédérations sportives - 2013</li>
+                    <li>Base des éducateurs sportifs d’Ile-de-France - 2016</li>
+                    <li>Subventions 2015 du Centre National de Développement du Sport  (CNDS)</li>
+                    <li>Dotations Equipement des Territoires Ruraux  (DETR) 2015</li>
+                    <li>Effectifs départementaux des établissements du domaine du sport 2005 à 2014</li>
+                    <li>Itinéraires de randonnée pédestre en Ile-de-France de la Fédération Française de Randonnée Pédestre</li>
+                    <li>Plans d’actions des fédérations sportives et groupements nationaux 2014-2016</li>
+                    <li>Base des Conseillers Techniques Sportifs - 2016</li>
+                    <li>Base des signalements de problèmes des pratiquants de sports de nature 2013-2016</li>
+                </ul>
+
+                <h2>Défi n°2 : la France toujours parmi les meilleurs</h2>
+                <h3>Enjeux</h3>
+
+                <p class="text-justify">Le sport de haut niveau représente l’excellence sportive. Il repose sur des critères bien établis qui sont la reconnaissance du caractère de haut niveau des disciplines sportives, les compétitions de référence, la liste des sportifs de haut niveau et les parcours de l’excellence sportive.</p>
+
+                <p class="text-justify">Parce que le sport de haut niveau joue un rôle social et culturel de première importance, il doit contribuer, par l’exemple, à bâtir un monde pacifique et meilleur, soucieux de préserver la dignité humaine, la compréhension mutuelle, l’esprit de solidarité et le fair-play.</p>
+
+                <p class="text-justify">L’obtention de l’organisation de ces compétitions de référence sur le territoire français,  ainsi que les résultats qu’y obtiennent les athlètes français participent au maintien de la France au rang des grandes nations sportives et à son rayonnement.</p>
+                <p class="text-justify">Les données disponibles doivent être mobilisées en vue de produire des produits numériques visant à valoriser les compétitions de référence auprès du grand public, de faciliter l’obtention de leur organisation en France et permettre aux territoires concernés d’en valoriser le bénéfice qui en découle.</p>
+
+                <h3>Exemples de challenge à relever</h3>
+
+                <ul>
+                    <li>Créer une application pour valoriser auprès du grand public les compétitions de référence, la participation et les résultats obtenus par les athlètes français</li>
+                    <li>Créer un outil d’aide à la décision : mesurer la qualité des résultats obtenus par rapport aux moyens consacrés par l’Etat au travers de l’ensemble des dispositifs consacrés</li>
+                    <li>Proposer au grand public une interface pour regarder en groupe les compétitions de référence</li>
+                    <li>Proposer aux territoires accueillant des compétitions de référence des outils de valorisation de l’événement et de leur territoire.</li>
+                </ul>
+
+                <h3>Ressources identifiées</h3>
+
+                <ul>
+                    <li>Athlètes inscrits sur la liste des sportifs de haut niveau en 2015</li>
+                    <li>Liste des médailles obtenues par des sportifs français aux Jeux Olympiques et paralympiques de 2012 et de 2014</li>
+                    <li>Recensement des équipements sportifs, espaces et sites de pratiques - 2016</li>
+                    <li>Plans d’actions des fédérations sportives et groupements nationaux 2014-2016</li>
+                    <li>Subventions 2015 du Centre National de Développement du Sport  (CNDS)</li>
+                    <li>Dotations Equipement des Territoires Ruraux  (DETR) 2015</li>
+                    <li>Base des Conseillers Techniques Sportifs – 2016</li>
+                </ul>
+
+
+                <h2>Défi n°3 – Le sport comme vecteur de valeurs sociales</h2>
+                <h3>Enjeux</h3>
+
+                <p class="text-justify">Le ministère mène depuis de nombreuses années une politique active en matière de prévention vis-à-vis des comportements contraires aux valeurs du sport et notamment celles qui concernent le respect de l’autre ou le vivre ensemble.</p>
+
+                <p class="text-justify">Le périmètre de cette politique préventive est large. Il couvre la prévention et la lutte contre le racisme, l’homophobie, le sexisme, le bizutage et toutes formes de violences dans le champ sportif ; le respect de l’arbitre ; la prévention du dopage et des conduites dopantes ; la prévention des paris sportifs illicites et du trucage des compétitions.</p>
+
+                <p class="text-justify">Les données doivent être mobilisées en vue de proposer des produits numériques visant à promouvoir et à valoriser auprès du grand public les actions mises en œuvre pour lutter contre les comportements contraires aux valeurs du sport et aider les acteurs du sport à optimiser les moyens consacrés à cette lutte.</p>
+
+                <h3>Exemples de challenge à relever</h3>
+
+                <ul>
+                    <li>Créer une application pour valoriser auprès du grand public les comportements éthiques lors des évènements sportifs : lutte contre le dopage, lutte contre les violences et incivilités, promotion du fairplay.</li>
+                    <li>Créer un outil d’aide à la décision permettant d’évaluer les situations à risque  lors de rencontres sportives</li>
+                </ul>
+
+                <h3>Ressources identifiées</h3>
+
+                <ul>
+                    <li>Liste des produits dopants de l’Agence Française de Lutte contre le Dopage (ALFD)</li>
+                    <li>Base des incidents relevés par la fédération française de football lors de la saison 2015-2016</li>
+                </ul>
+
+                <h2>Défi n°4 – L’emploi au cœur du sport</h2>
+                <h3>Enjeux</h3>
+
+                <p class="text-justify">Le secteur du sport est un vecteur d’emplois qui progresse régulièrement depuis 30 ans. Cependant ce secteur crée peu d’emplois ou d’activités à plein temps, sur toute une année. L’emploi dans ces secteurs se caractérise par du temps partiel, la saisonnalité, des contrats à durée déterminée et atypiques, et du multisalariat.</p>
+
+                <p class="text-justify">Il s’agit alors de construire des parcours de formation qui répondent à la fois aux besoins polyvalents des employeurs et des encadrants nouvellement qualifiés afin de permettre un emploi pérenne et un déroulement de carrière.</p>
+
+                <p class="text-justify">Seuls peuvent, contre rémunération, enseigner, animer ou encadrer une activité physique ou sportive ou entraîner ses pratiquants, les titulaires d'un diplôme, titre à finalité professionnelle ou certificat de qualification :</p>
+                <ol>
+                    <li>Garantissant la compétence de son titulaire en matière de sécurité des pratiquants et des tiers dans l'activité considérée</li>
+                    <li>Et enregistré au répertoire national des certifications professionnelles.</li>
+                </ol>
+
+                <p class="text-justify">Ces formations diplomantes sont dispensées en partie et à des degrés différents selon les spécialités, dans les établissements publics de formation relevant du code du sport qui ont la particularité d’être ancrés au plan régional tout en faisant partie d’un réseau national tant métropolitain qu’ultra-marin. Ces établissements sont porteurs de l’apprentissage de techniques et de métiers mais également d’engagements éducatifs, du vivre ensemble, des valeurs citoyennes à l’égard du stagiaire en garantissant dans les formations les valeurs de la République tels que le respect de la laïcité l’égalité des stagiaires, la non discrimination, la mixité.</p>
+
+                <p class="text-justify">Cependant les établissements publics ne sont pas les seuls sur le territoire national et les organismes de formation habilités par les DRJSCS à préparer aux diplômes professionnels d’Etat sont plus nombreux qu’eux  avec des profils divers.</p>
+
+                <p class="text-justify">Ces diplômes peuvent également être délivrés à un candidat par la voie de la reconnaissance des diplômes acquis à l’étranger, de l’équivalence ou de la Validation d’Acquis d’Expérience (VAE). Ces formations peuvent être suivies sous statut d’apprenti</p>
+
+                <p class="text-justify">L’offre de formation doit répondre au mieux aux attentes des candidats potentiels, des employeurs (établissements d’activités physiques et sportives, associations sportives, collectivités territoriales)  et in fine des pratiquants encadrés par les éducateurs sportifs diplômés. Elle doit favoriser la mobilité professionnelle et la qualité des prestations dans l’espace européen.</p>
+
+                <p class="text-justify">Les données doivent être mobilisées en vue de proposer des produits numériques visant à poursuivre ces objectifs.</p>
+
+                <h3>Exemples de challenge à relever</h3>
+
+                <ul>
+                    <li>Créer une application permettant aux candidats à une formation de faire connaître leur besoin</li>
+                    <li>Créer un outil d’aide à la décision permettant d’optimiser la programmation territorialisée de l’offre formation au regard des besoins potentiels d’un territoire (associations sportives, établissements privés, licenciés…)</li>
+                    <li>Créer une plateforme de rencontre des employeurs potentiels en vue de faciliter l’emploi d’un même éducateur par plusieurs employeurs</li>
+                </ul>
+
+                <h3>Ressources identifiées</h3>
+
+                <ul>
+                    <li>Base des diplômés des métiers du sport 2015</li>
+                    <li>Recensement des licences et clubs auprès des fédérations sportives - 2013</li>
+                    <li>Subventions 2015 du Centre National de Développement du Sport  (CNDS)</li>
+                    <li>Effectifs départementaux des établissements du domaine du sport 2005 à 2014</li>
+                    <li>Effectifs départementaux des emplois d’avenir et CUI - CAE  dans les domaines du sport et de l’animation 2013 – 2015</li>
+                </ul>
+
+                <h2>Défi n°5 – Le sport et l’environnement</h2>
+                <h3>Enjeux</h3>
+
+                <p class="text-justify">La Stratégie nationale de développement durable (SNDD) s’articule autour de neuf défis stratégiques en lien avec l’architecture de la Stratégie européenne de développement durable (SEDD) :</p>
+                <ul>
+                    <li>Une consommation et une production durables</li>
+                    <li>Société de la connaissance</li>
+                    <li>Gouvernance</li>
+                    <li>Changement climatique et énergies</li>
+                    <li>Transport et mobilité durables</li>
+                    <li>Conservation et gestion durable de la biodiversité et des ressources naturelles</li>
+                    <li>Santé publique, prévention et gestion des risques</li>
+                    <li>Démographie, immigration, inclusion sociale</li>
+                    <li>Défis internationaux en matière de développement durable et de pauvreté dans le monde</li>
+                </ul>
+
+                <p class="text-justify">Parce qu’il porte des valeurs exemplaires, parce qu’il a le pouvoir de fédérer et de mobiliser, parce que depuis toujours, il est dans sa nature d’aller plus loin, le sport peut, et doit jouer un rôle très important dans l’effort national vers l’excellence en matière de responsabilité sociale et environnementale. Par ailleurs, l’image des sportifs est un vecteur puissant d’adhésion et leur implication dans les projets de sport et de développement durable est donc essentielle.</p>
+
+                <p class="text-justify">C’est pourquoi, il a été décidé en 2010 d’impliquer et de proposer une déclinaison de cette stratégie pour le sport. La création de la Stratégie nationale du développement durable du sport, adoptée en 2011 est le fruit de cette volonté. Elle reprend et adapte ces 9 défis aux spécificités propres des pratiques sportives.</p>
+
+                <h3>Exemples de challenge à relever</h3>
+
+                <ul>
+                    <li>Créer un outil de mesure de la dépense énergétique liée à l’organisation d’une compétition, d’un événement ou d’un championnat sportif</li>
+                    <li>Créer une plateforme de mise en relation entre les pratiquants pour échanger et/ou partager le matériel sportif nécessaire à la pratique</li>
+                    <li>Créer une plateforme destinée aux pratiquants de faciliter le covoiturage pour les déplacements liés aux entraînements ou aux compétitions</li>
+                </ul>
+
+                <h3>Ressources identifiées</h3>
+
+                <ul>
+                    <li>Recensement des équipements sportifs, espaces et sites de pratiques - 2016</li>
+                    <li>Recensement des licences et clubs auprès des fédérations sportives – 2013</li>
+                    <li>Référentiel d'indicateurs pour auto-évaluer l'éco-responsabilité d'événements sportifs</li>
+                    <li>Facteurs d'émissions d'équipements de sport</li>
+                    <li>Optimouv, logiciel d’optimisation des déplacements dans l’organisation des rencontres sportives</li>
+                </ul>
+
+            </article>
+
+            <aside class="col-xs-12 col-sm-4 col-md-3">
+                <div class="text-center">
+                    <img src="{{ url_for('gouvfr.static', filename='openfield16/logo.jpg') }}"
+                        alt="Logo de Openfield 16" class="scalable" />
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+{% if datasets %}
+<section class="content participants">
+    <div class="container">
+
+        <div class="row">
+            <h3 class="col-xs-12">Les jeux de données remarquables</h3>
+            <ul class="card-list">
+                {% for dataset in datasets[:nb_displayed_datasets] %}
+                <li class="col-md-4 col-sm-6">
+                    {% include theme('dataset/card.html') %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="clearfix text-center">
+            <a class="btn btn-default"
+                href="{{ url_for('datasets.list', badge=badge) }}">
+                <span class="glyphicon glyphicon-list"></span>
+                {{ _('See the %(nb)s datasets', nb=datasets|length) }}
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endcache %}
+{% endblock %}
