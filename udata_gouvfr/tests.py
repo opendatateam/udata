@@ -11,14 +11,15 @@ from udata.tests import TestCase, DBTestMixin
 from udata.tests.api import APITestCase
 from udata.tests.factories import (
     DatasetFactory, ReuseFactory, OrganizationFactory,
-    VisibleReuseFactory, GeoZoneFactory, LicenseFactory
+    VisibleReuseFactory, GeoZoneFactory, LicenseFactory,
+    VisibleDatasetFactory
 )
 from udata.tests.frontend import FrontTestCase
 from udata.tests.test_sitemap import SitemapTestCase
 from udata.settings import Testing
 
 from .models import (
-    DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE, TERRITORY_DATASETS
+    DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE, TERRITORY_DATASETS, OPENFIELD16
 )
 from .views import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
 from .metrics import PublicServicesMetric
@@ -246,6 +247,21 @@ class C3Test(FrontTestCase):
 
     def test_render_c3_without_data(self):
         response = self.client.get(url_for('gouvfr.climate_change_challenge'))
+        self.assert200(response)
+
+
+class OpenField16Test(FrontTestCase):
+    settings = GouvFrSettings
+
+    def test_render_without_data(self):
+        response = self.client.get(url_for('gouvfr.openfield16'))
+        self.assert200(response)
+
+    def test_render_with_data(self):
+        for i in range(3):
+            badge = Badge(kind=OPENFIELD16)
+            VisibleDatasetFactory(badges=[badge])
+        response = self.client.get(url_for('gouvfr.openfield16'))
         self.assert200(response)
 
 
