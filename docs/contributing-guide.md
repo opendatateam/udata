@@ -52,6 +52,8 @@ We’ll take care of tagging your issue with the appropriated labels and answer 
 
 If you’re not familiar with open-source workflows or our set of technologies, do not hesitate to ask for help! We can mentor you or propose good first bugs.
 
+In the frame of this process of development, we use some abbreviations which are explained [here][pr_glossary].
+
 ## Discussing strategies
 
 We’re trying to develop this project in the open as much as possible. We have a dedicated [Gitter channel][gitter] where we discuss each new strategic change and invite the community to give a valuable feedback. You’re encouraged to join and participate.
@@ -91,3 +93,4 @@ We try to stay as close as possible to [CommonMark][] but use default [extension
 [commonmark]: http://commonmark.org/
 [extensions-mkdocs]: http://www.mkdocs.org/user-guide/writing-your-docs/
 [gitter]: https://gitter.im/opendatateam/udata
+[pr_glossary]: http://webdev-bootcamp-osmose.readthedocs.io/en/overhaul/reference/glossary.html
