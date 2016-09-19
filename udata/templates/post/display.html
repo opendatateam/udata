@@ -112,14 +112,6 @@
                         <div class="btn-group btn-group-sm">
                             {{ share_btn(post.name) }}
                         </div>
-                        {% if sysadmin %}
-                        <div class="btn-group btn-group-sm">
-                            <a href="{{ url_for('admin.index', path='post/{id}/'.format(id=post.id)) }}" class="btn btn-success">
-                                <span class="glyphicon glyphicon-pencil"></span>
-                                {{ _('Edit') }}
-                            </a>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
                 {# end button bar #}

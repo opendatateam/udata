@@ -35,16 +35,6 @@
     </a>
 </div>
 {% endif %}
-{% if sysadmin %}
-<div class="btn-group btn-group-xs">
-    <button type="button"
-        class="btn btn-success featured {% if dataset.featured %}active{% endif %}"
-        data-api-url="{{ url_for('api.dataset_featured', dataset=dataset) }}">
-        <span class="glyphicon glyphicon-bullhorn"></span>
-        {{ _('Featured') }}
-    </button>
-</div>
-{% endif %}
 
 <div class="btn-group btn-group-xs">
     {{ follow_btn(dataset, icons=[ficon('fa-star-empty'), ficon('fa-star')]) }}
@@ -163,16 +153,6 @@
                                 <span class="glyphicon glyphicon-pencil"></span>
                                 {{ _('Edit') }}
                             </a>
-                        </div>
-                        {% endif %}
-                        {% if sysadmin %}
-                        <div class="btn-group btn-group-sm">
-                            <button type="button"
-                                class="btn btn-success featured {% if dataset.featured %}active{% endif %}"
-                                data-api-url="{{ url_for('api.dataset_featured', dataset=dataset) }}">
-                                <span class="glyphicon glyphicon-bullhorn"></span>
-                                {{ _('Featured') }}
-                            </button>
                         </div>
                         {% endif %}
                         <div class="btn-group btn-group-sm">
@@ -443,28 +423,6 @@
                                     data-toggle="tooltip" title="{{ _('Open in a new window') }}" data-containter="body">
                                     <span class="glyphicon glyphicon-new-window"></span>
                                 </a>
-                                {% if current_user.sysadmin or reuse.owner == current_user %}
-                                <a class="btn btn-default" data-toggle="tooltip" title="{{ _('Edit') }}"
-                                    href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}"
-                                    data-containter="body">
-                                    <span class="glyphicon glyphicon-edit"></span>
-                                </a>
-                                {% endif %}
-                                {% if current_user.sysadmin %}
-                                {% set btn_class = 'success' if reuse.featured else 'default' %}
-                                <a class="btn btn-{{ btn_class }} featured" data-toggle="tooltip" href
-                                    {# data-api="{{ url('youckan/reuse', reuse.id, 'featured') }}" #}
-                                    {% if reuse.featured %}
-                                    title="{{ _('Unmark as featured') }}"
-                                    {% else %}
-                                    title="{{ _('Mark as featured') }}"
-                                    {% endif %}
-                                    data-featured-title="{{ _('Unmark as featured') }}"
-                                    data-unfeatured-title="{{ _('Mark as featured') }}"
-                                    data-containter="body">
-                                    <span class="glyphicon glyphicon-pushpin"></span>
-                                </a>
-                                {% endif %}
                             </div>
                         </div>
                     </div>

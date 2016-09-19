@@ -17,7 +17,6 @@ import template from 'templates/dataset/resource-modal-body.hbs';
 import extrasTpl from 'templates/dataset/extras-modal-body.hbs';
 import addReuseTpl from 'templates/dataset/add-reuse-modal-body.hbs';
 import modal from 'widgets/modal';
-import 'widgets/featured';
 import 'widgets/follow-btn';
 import 'widgets/issues-btn';
 import 'widgets/discussions-btn';
