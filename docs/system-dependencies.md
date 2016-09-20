@@ -41,7 +41,7 @@ $ docker-compose up
 On the very first run it will download and install Docker images which takes a while depending of your connection.
 
 !!! warning
-    Test your _docker-compose_ is running successfully entering `curl http://locahost:9200`.
+    Test your _docker-compose_ is running successfully entering `curl http://localhost:9200`.
     It should output a JSON search response.
     If you have no output at all for too long,
     check the [IPv6 possible issue](https://github.com/docker/docker/issues/2174#issuecomment-35697655).
