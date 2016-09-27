@@ -15,7 +15,7 @@
           <dt v-if="resource.contentSize">{{ _('Size') }}</dt>
           <dd v-if="resource.contentSize">{{ resource.contentSize|size }}</dd>
           <dt v-if="resource.checksum">{{ resource.checksumType || 'sha1'}}</dt>
-          <dd v-if="resource.checksum">{{checksum}}</dd>
+          <dd v-if="resource.checksum">{{ resource.checksum }}</dd>
           <dt v-if="resource.dateCreated">{{ _('Created on') }}</dt>
           <dd v-if="resource.dateCreated"> {{ resource.dateCreated|dt }}</dd>
           <dt v-if="resource.dateModified">{{ _('Modified on') }}</dt>
