@@ -118,6 +118,66 @@
                 <div class="list-group resources-list">
                     <h3>{{ _('Resources') }}</h3>
 
+                    <!-- 'checksum', 'checksumType' and 'extras' are not standard -->
+                    <!-- To validate if a JSON-LD is valid, use
+                         https://search.google.com/structured-data/testing-tool -->
+                    <script type="application/ld+json">
+                    {
+                    "@context": "http://schema.org",
+                    "@type": "Dataset",
+                    "@id": "{{ dataset.id }}",
+                    "description": "{{ dataset.description }}",
+                    "alternateName": "{{ dataset.slug }}",
+                    "dateCreated": "{{ dataset.created_at|isoformat }}",
+                    "dateModified": "{{ dataset.last_modified|isoformat }}",
+                    "url": "{{ url_for('datasets.show', dataset=dataset, _external=True) }}",
+                    "name": "{{ dataset.title }}",
+                    "keywords": "{{ ', '.join(dataset.tags) }}",
+                    {% if dataset.license.url %}
+                    "license": "{{ dataset.license.url }}",
+                    {% endif %}
+                    "extras": [
+                    {% for key, value in dataset.extras.items() %}
+                    {"@type": "http://schema.org/PropertyValue",
+                    "name": "{{ key }}",
+                    "value": "{{ value.serialize()|to_json if value.serialize else value }}"
+                    }{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                    ],
+                    "distribution": [
+                    {% for resource in dataset.resources %}
+                    {
+                    "@type": "DataDownload",
+                    "@id": "{{ resource.id }}",
+                    "url": "{{ resource.url }}",
+                    "name": "{{ resource.title or _('Nameless resource') }}",
+                    "contentUrl": "{{ resource.url }}",
+                    {% if resource.description %}
+                    "description": "{{ resource.description }}",
+                    {% endif %}
+                    "encodingFormat": "{{ resource.format or '' }}",
+                    "dateCreated": "{{ resource.created_at|isoformat }}",
+                    "dateModified": "{{ resource.modified|isoformat }}",
+                    "datePublished": "{{ resource.published|isoformat }}",
+                    "contentSize": {{ resource.filesize or '' }},
+                    "fileFormat": "{{ resource.mime or '' }}",
+                    {% if resource.checksum %}
+                    "checksum": "{{ resource.checksum.value }}",
+                    "checksumType": "{{ resource.checksum.type or 'sha1' }}",
+                    {% endif %}
+                    "interactionStatistic": {
+                    "@type": "InteractionCounter",
+                    "interactionType": {
+                    "@type": "DownloadAction"
+                    },
+                    "userInteractionCount": "{{ resource.metrics.views or '' }}"
+                    }
+                    }{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                    ]
+                    }
+                    </script>
+
                     {# TODO: extract max_resources conf #}
                     {% set max_resources = 6 %}
                     {% for resource in dataset.resources %}
