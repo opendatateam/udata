@@ -20,11 +20,11 @@ class SearchResult(Paginable):
 
     @property
     def total(self):
-        return self.result.get('hits', {}).get('total', 0)
+        return self.result.hits.total
 
     @property
     def max_score(self):
-        return self.result.get('hits', {}).get('max_score', 0)
+        return self.result.hits.max_score
 
     @property
     def page(self):
@@ -39,8 +39,7 @@ class SearchResult(Paginable):
         return self.query.adapter.model.__name__
 
     def get_ids(self):
-        return [hit['_id']
-                for hit in self.result.get('hits', {}).get('hits', [])]
+        return [hit['_id'] for hit in self.result.hits.hits]
 
     def get_objects(self):
         if not self._objects:
@@ -65,7 +64,7 @@ class SearchResult(Paginable):
             yield obj
 
     def __len__(self):
-        return len(self.result.get('hits', {}).get('hits', []))
+        return len(self.result.hits.get('hits', []))
 
     def __getitem__(self, index):
         return self.get_objects()[index]
