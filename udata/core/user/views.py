@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
 import logging
 
 from flask import g
 
 from udata.frontend.views import DetailView, SearchView
+from udata.frontend.helpers import placeholder
 from udata.models import User, Activity, Organization, Dataset, Reuse, Follow
 from udata.i18n import I18nBlueprint
 
@@ -78,8 +80,24 @@ class UserActivityView(UserView, DetailView):
         context = super(UserActivityView, self).get_context()
         context['activities'] = (Activity.objects(actor=self.object)
                                          .order_by('-created_at').limit(15))
+        context['json_ld'] = json.dumps(self.get_json_ld())
         return context
 
+
+    def get_json_ld(self):
+        user = self.user
+
+        result = {"@type": 'Person',
+                  "@context": "http://schema.org",
+                  "image": placeholder(user.avatar, 'user'),
+                  "name": user.fullname,
+                  "description": user.about
+                  }
+
+        if user.website:
+            result["url"] = user.website
+
+        return result
 
 @blueprint.route('/<user:user>/following/', endpoint='following')
 class UserFollowingView(UserView, DetailView):
