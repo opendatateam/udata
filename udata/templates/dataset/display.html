@@ -118,10 +118,6 @@
                 <div class="list-group resources-list">
                     <h3>{{ _('Resources') }}</h3>
 
-                    <script type="application/ld+json">
-                      {{ json_ld|safe }}
-                    </script>
-
                     {# TODO: extract max_resources conf #}
                     {% set max_resources = 6 %}
                     {% for resource in dataset.resources %}
