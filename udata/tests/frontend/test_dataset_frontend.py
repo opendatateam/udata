@@ -3,6 +3,9 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 import feedparser
+import json
+import re
+
 from flask import url_for
 
 from udata.core.dataset.factories import ResourceFactory, DatasetFactory
@@ -50,9 +53,26 @@ class DatasetBlueprintTest(FrontTestCase):
 
     def test_render_display(self):
         '''It should render the dataset page'''
-        dataset = DatasetFactory()
-        response = self.get(url_for('datasets.show', dataset=dataset))
+        resource = ResourceFactory()
+        dataset = DatasetFactory(tags=['foo', 'bar'], resources=[resource])
+        url = url_for('datasets.show', dataset=dataset)
+        response = self.get(url)
         self.assert200(response)
+        # In the pattern below, we extract the content of the JSON-LD script
+        # The first ? is used to name the extracted string
+        # The second ? is used to express the non-greediness of the extraction
+        pattern = '<script type="application/ld\+json">(?P<jsonld>[\s\S]*?)</script>'
+        jsonld_string = re.search(pattern, response.data).group('jsonld')
+        jsonld = json.loads(jsonld_string)
+        self.assertEquals(jsonld["@context"], "http://schema.org")
+        self.assertEquals(jsonld["@type"], "Dataset")
+        self.assertEquals(jsonld["@id"], str(dataset.id))
+        self.assertEquals(jsonld["keywords"], 'bar, foo')
+        self.assertTrue(jsonld["url"].endswith(url)) # The url contained in the jsonld is absolute
+        self.assertEquals(len(jsonld["distribution"]), 1)
+        for jsonld_resource in jsonld["distribution"]:
+            self.assertEquals(jsonld_resource["@type"], "DataDownload")
+            self.assertEquals(jsonld_resource["@id"], str(resource.id))
 
     def test_raise_404_if_private(self):
         '''It should raise a 404 if the dataset is private'''
