@@ -2,8 +2,9 @@
 from __future__ import unicode_literals
 
 import itertools
+import json
 
-from flask import g, abort
+from flask import g, abort, url_for
 from flask_security import current_user
 
 from udata import search
@@ -81,6 +82,7 @@ class OrganizationDetailView(OrgView, DetailView):
         followers = (Follow.objects.followers(self.organization)
                                    .order_by('follower.fullname'))
         context.update({
+            'json_ld': json.dumps(self.get_json_ld()),
             'reuses': reuses.paginate(1, self.page_size),
             'datasets': datasets.paginate(1, self.page_size),
             'followers': followers,
@@ -94,6 +96,19 @@ class OrganizationDetailView(OrgView, DetailView):
                 if can_view else []),
         })
         return context
+
+    def get_json_ld(self):
+        org = self.organization
+        prefix = 'Government' if org.public_service else ''
+        return {"@context": "http://schema.org",
+                "@type": '{}Organization'.format(prefix),
+                "alternateName": org.slug,
+                "logo": org.logo(external=True),
+                "url": url_for('organizations.show', org=org, _external=True),
+                "name": org.name,
+                "description": org.description
+            }
+
 
 
 @blueprint.route('/<org:org>/dashboard/', endpoint='dashboard')

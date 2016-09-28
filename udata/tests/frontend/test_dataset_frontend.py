@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 import feedparser
-import json
-import re
 
 from flask import url_for
 
@@ -58,21 +56,17 @@ class DatasetBlueprintTest(FrontTestCase):
         url = url_for('datasets.show', dataset=dataset)
         response = self.get(url)
         self.assert200(response)
-        # In the pattern below, we extract the content of the JSON-LD script
-        # The first ? is used to name the extracted string
-        # The second ? is used to express the non-greediness of the extraction
-        pattern = '<script type="application/ld\+json">(?P<jsonld>[\s\S]*?)</script>'
-        jsonld_string = re.search(pattern, response.data).group('jsonld')
-        jsonld = json.loads(jsonld_string)
-        self.assertEquals(jsonld["@context"], "http://schema.org")
-        self.assertEquals(jsonld["@type"], "Dataset")
-        self.assertEquals(jsonld["@id"], str(dataset.id))
-        self.assertEquals(jsonld["keywords"], 'bar, foo')
-        self.assertTrue(jsonld["url"].endswith(url)) # The url contained in the jsonld is absolute
-        self.assertEquals(len(jsonld["distribution"]), 1)
-        for jsonld_resource in jsonld["distribution"]:
-            self.assertEquals(jsonld_resource["@type"], "DataDownload")
-            self.assertEquals(jsonld_resource["@id"], str(resource.id))
+        json_ld = self.get_json_ld(response)
+        self.assertEquals(json_ld["@context"], "http://schema.org")
+        self.assertEquals(json_ld["@type"], "Dataset")
+        self.assertEquals(json_ld["@id"], str(dataset.id))
+        self.assertEquals(json_ld["keywords"], 'bar, foo')
+        # The url contained in the json_ld is absolute
+        self.assertTrue(json_ld["url"].endswith(url))
+        self.assertEquals(len(json_ld["distribution"]), 1)
+        for json_ld_resource in json_ld["distribution"]:
+            self.assertEquals(json_ld_resource["@type"], "DataDownload")
+            self.assertEquals(json_ld_resource["@id"], str(resource.id))
 
     def test_raise_404_if_private(self):
         '''It should raise a 404 if the dataset is private'''

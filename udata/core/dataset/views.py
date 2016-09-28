@@ -88,7 +88,7 @@ class DatasetDetailView(DatasetView, DetailView):
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = ResourceEditPermission
         context['discussions'] = Discussion.objects(subject=self.dataset)
-        context['json_ld'] = self.get_json_ld()
+        context['json_ld'] = json.dumps(self.get_json_ld())
 
         return context
 
@@ -112,7 +112,7 @@ class DatasetDetailView(DatasetView, DetailView):
         if dataset.license and dataset.license.url:
             result["license"] = dataset.license.url
 
-        return json.dumps(result)
+        return result
 
     @staticmethod
     def get_json_ld_resource(resource):
