@@ -6,7 +6,7 @@ from elasticsearch_dsl import Completion, Date, String, Boolean
 from udata.models import User, Organization
 from udata.search import ModelSearchAdapter
 from udata.search import i18n_analyzer, metrics_mapping_for, register
-from udata.search.fields import Sort, ModelTermFacet, RangeFacet
+from udata.search.fields import Sort, ModelTermsFacet, RangeFacet
 from udata.search.fields import GaussDecay
 from udata.search.analysis import simple
 
@@ -50,9 +50,9 @@ class UserSearch(ModelSearchAdapter):
         'created': Sort('created'),
     }
     facets = {
-        'organization': ModelTermFacet('organizations', Organization),
-        'reuses': RangeFacet('metrics.reuses'),
-        'datasets': RangeFacet('metrics.datasets'),
+        # 'organization': ModelTermsFacet('organizations', Organization),
+        # 'reuses': RangeFacet('metrics.reuses'),
+        # 'datasets': RangeFacet('metrics.datasets'),
     }
     boosters = [
         GaussDecay('metrics.reuses', 50, decay=0.8),

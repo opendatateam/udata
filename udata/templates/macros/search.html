@@ -2,7 +2,7 @@
 
 {% macro breadcrum_toolbar(result, url=None, exports=None) %}
 {% if kwargs %}
-    {% set to_url = result.query.to_url %}
+    {% set to_url = result.to_url %}
     {% if in_url('sort') %}
         {% if request.args.sort.startswith('-') %}
             {% set current_sort, current_order = request.args.sort[1:], 'desc' %}
@@ -53,7 +53,7 @@
             <li role="presentation" class="dropdown-header">{{ _('Export') }}</li>
             {% for label, endpoint, type in exports %}
             <li role="presentation">
-                <a role="menuitem" tabindex="-1" href="{{ result.query.to_url(
+                <a role="menuitem" tabindex="-1" href="{{ to_url(
                     url_for(endpoint), facets=None, page=None, page_size=None, replace=true)
                 }}">
                 {{label}}
@@ -268,7 +268,7 @@
         ) }}
         {% if csv_endpoint %}
         <a class="btn btn-xs btn-info pull-right"
-            href="{{ result.query.to_url(
+            href="{{ result.to_url(
                 url_for(csv_endpoint), facets=None, page=None, page_size=None, replace=true)
             }}">
             <span class="fa fa-download"></span>

@@ -11,7 +11,7 @@ from udata.search import BoolBooster, GaussDecay
 from udata.search import ModelSearchAdapter, Sort
 from udata.search import i18n_analyzer, metrics_mapping_for, register
 from udata.search import RangeFacet, BoolFacet, ExtrasFacet
-from udata.search import TermFacet, ModelTermFacet
+from udata.search import TermsFacet, ModelTermsFacet
 from udata.search.analysis import simple
 
 from . import metrics  # noqa: Metrics are require for reuse search
@@ -28,7 +28,7 @@ def max_followers():
     return max(current_site.metrics.get('max_reuse_followers'), 10)
 
 
-class ReuseTypeFacet(TermFacet):
+class ReuseTypeFacet(TermsFacet):
     def labelize(self, label, value):
         return REUSE_TYPES[value]
 
@@ -81,16 +81,17 @@ class ReuseSearch(ModelSearchAdapter):
         'datasets.title',
     )
     facets = {
-        'tag': TermFacet('tags'),
-        'organization': ModelTermFacet('organization', Organization),
-        'owner': ModelTermFacet('owner', User),
-        'dataset': ModelTermFacet('dataset.id', Dataset),
-        'type': ReuseTypeFacet('type'),
-        'datasets': RangeFacet('metrics.datasets'),
-        'followers': RangeFacet('metrics.followers'),
-        'featured': BoolFacet('featured'),
-        'extra': ExtrasFacet('extras'),
-        'badge': TermFacet('badges', labelizer=reuse_badge_labelizer),
+        'tag': TermsFacet(field='tags'),
+        'organization': ModelTermsFacet(field='organization',
+                                        model=Organization),
+        'owner': ModelTermsFacet(field='owner', model=User),
+        'dataset': ModelTermsFacet(field='dataset.id', model=Dataset),
+        # 'type': ReuseTypeFacet(field='type'),
+        # 'datasets': RangeFacet(field='metrics.datasets'),
+        # 'followers': RangeFacet(field='metrics.followers'),
+        # 'featured': BoolFacet(field='featured'),
+        # 'extra': ExtrasFacet(field='extras'),
+        'badge': TermsFacet(field='badges', labelizer=reuse_badge_labelizer),
     }
     sorts = {
         'title': Sort('title.raw'),

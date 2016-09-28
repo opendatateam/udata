@@ -49,6 +49,7 @@ def recent_feed():
 
 @blueprint.route('/', endpoint='list')
 class DatasetListView(SearchView):
+    model = Dataset
     search_adapter = DatasetSearch
     context_name = 'datasets'
     template_name = 'dataset/list.html'

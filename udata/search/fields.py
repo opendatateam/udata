@@ -12,13 +12,14 @@ from udata.i18n import lazy_gettext as _, format_date
 from udata.utils import to_bool
 
 from elasticsearch_dsl import A
+from elasticsearch_dsl.faceted_search import TermsFacet as DSLTermsFacet
 
 
 log = logging.getLogger(__name__)
 
 __all__ = (
     'Sort',
-    'BoolFacet', 'TermFacet', 'ModelTermFacet', 'ExtrasFacet',
+    'BoolFacet', 'TermsFacet', 'ModelTermsFacet', 'ExtrasFacet',
     'RangeFacet', 'DateRangeFacet', 'TemporalCoverageFacet',
     'BoolBooster', 'FunctionBooster',
     'GaussDecay', 'ExpDecay', 'LinearDecay',
@@ -34,39 +35,11 @@ class Sort(object):
 
 
 class Facet(object):
-    def __init__(self, field, labelizer=None):
-        self.field = field
-        self.labelizer = labelizer
 
-    def to_query(self, **kwargs):
-        '''Get the elasticsearch facet query'''
-        raise NotImplementedError
-
-    def to_filter(self, value):
-        '''Extract the elasticsearch query from the kwarg value filter'''
-        raise NotImplementedError
-
-    def filter_from_kwargs(self, name, kwargs):
-        if name in kwargs:
-            value = kwargs[name]
-            query = self.to_filter(value)
-            if not query:
-                return
-            return {'must': ([query] if isinstance(query, dict) else query)}
-
-    def from_response(self, name, response, fetch=True):
-        '''
-        Parse the elasticsearch response.
-        :param bool fetch: whether to fetch the object from DB or not
-        '''
-        raise NotImplementedError
-
-    def labelize(self, label, value):
-        '''Get the label for a given value'''
-        return self.labelizer(label, value) if self.labelizer else value
-
-    def to_aggregations(self, name, *args):
-        pass
+    def __init__(self, **kwargs):
+        super(Facet, self).__init__(**kwargs)
+        self.labelize = self._params.pop('labelizer',
+                                         lambda label, value: value)
 
 
 class BoolFacet(Facet):
@@ -117,46 +90,13 @@ class BoolFacet(Facet):
                           unicode(_('yes') if to_bool(value) else _('no'))])
 
 
-class TermFacet(Facet):
-    def to_query(self, size=20, args=None, **kwargs):
-        query = {
-            'terms': {
-                'field': self.field,
-                'size': size,
-            }
-        }
-        if args:
-            query['terms']['exclude'] = (
-                [args] if isinstance(args, basestring) else args)
-        return query
-
-    def to_aggregations(self, name, size=20, *args):
-        kwargs = {'field': self.field, 'size': size}
-        if args:
-            kwargs['exclude'] = [args] if isinstance(args, basestring) else args
-        return {name: A('terms', **kwargs)}
-
-    def to_filter(self, value):
-        if isinstance(value, (list, tuple)):
-            return [{'term': {self.field: v}} for v in value]
-        else:
-            return {'term': {self.field: value}}
-
-    def from_response(self, name, response, fetch=True):
-        aggregation = response.get('aggregations', {}).get(name)
-        if not aggregation:
-            return
-        return {
-            'type': 'terms',
-            'terms': [(bucket['key'], bucket['doc_count'])
-                      for bucket in aggregation['buckets']],
-            'visible': len(aggregation['buckets']) > 1,
-        }
+class TermsFacet(Facet, DSLTermsFacet):
+    pass
 
 
-class ModelTermFacet(TermFacet):
+class ModelTermsFacet(TermsFacet):
     def __init__(self, field, model, labelizer=None, field_name='id'):
-        super(ModelTermFacet, self).__init__(field, labelizer)
+        super(ModelTermsFacet, self).__init__(field=field, labelizer=labelizer)
         self.model = model
         self.field_name = field_name
 
@@ -219,7 +159,7 @@ class ExtrasFacet(Facet):
 
 class RangeFacet(Facet):
     def __init__(self, field, cast=int, labelizer=None):
-        super(RangeFacet, self).__init__(field, labelizer)
+        super(RangeFacet, self).__init__(field=field, labelizer=labelizer)
         self.cast = cast
 
     def to_query(self, **kwargs):

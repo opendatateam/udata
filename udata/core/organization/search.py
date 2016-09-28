@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from elasticsearch_dsl import Completion, Date, String
 
 from udata import search
+from udata.search.fields import TermsFacet, RangeFacet, Sort
 from udata.models import Organization
 from udata.core.site.views import current_site
 from udata.search.analysis import simple
@@ -56,20 +57,20 @@ class OrganizationSearch(search.ModelSearchAdapter):
         'description',
     )
     sorts = {
-        'name': search.Sort('name.raw'),
-        'reuses': search.Sort('metrics.reuses'),
-        'datasets': search.Sort('metrics.datasets'),
-        'followers': search.Sort('metrics.followers'),
-        'views': search.Sort('metrics.views'),
-        'created': search.Sort('created'),
+        'name': Sort('name.raw'),
+        'reuses': Sort('metrics.reuses'),
+        'datasets': Sort('metrics.datasets'),
+        'followers': Sort('metrics.followers'),
+        'views': Sort('metrics.views'),
+        'created': Sort('created'),
     }
     facets = {
-        'reuses': search.RangeFacet('metrics.reuses'),
-        'badge': search.TermFacet('badges',
-                                  labelizer=organization_badge_labelizer),
-        'permitted_reuses': search.RangeFacet('metrics.permitted_reuses'),
-        'datasets': search.RangeFacet('metrics.datasets'),
-        'followers': search.RangeFacet('metrics.followers'),
+        # 'reuses': RangeFacet('metrics.reuses'),
+        'badge': TermsFacet(field='badges',
+                            labelizer=organization_badge_labelizer),
+        # 'permitted_reuses': RangeFacet('metrics.permitted_reuses'),
+        # 'datasets': RangeFacet('metrics.datasets'),
+        # 'followers': RangeFacet('metrics.followers'),
     }
     boosters = [
         search.GaussDecay('metrics.followers', max_followers, decay=0.8),

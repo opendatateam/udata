@@ -82,17 +82,7 @@ class SearchView(Templated, BaseView):
     def get_queryset(self):
         params = multi_to_dict(request.args)
         params['facets'] = True
-        print(params)
-
-        s = self.search_adapter.search(using=search.es.client)
-        # Do something with params
-        q = MultiMatch(query=params['q'], fields=['title', 'description'])
-        s = s.query(q)
-        print(s.to_dict())
-        # Do something related to sorting
-        # s = s.sort(self.search_adapter.sorts)
-        result = s.execute()
-        print(result)
+        result = search.query(self.model, **params)
         return result
 
     def get_context(self):

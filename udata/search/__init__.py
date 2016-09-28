@@ -180,24 +180,34 @@ from .result import SearchResult, SearchIterator  # noqa
 from .fields import *  # noqa
 
 
+def facets_kwargs(adapter, facets=None):
+    '''List expected facets from kwargs'''
+    if not adapter.facets or not facets:
+        return []
+    if isinstance(facets, basestring):
+        facets = [facets]
+    if facets is True or 'all' in facets:
+        return adapter.facets.keys()
+    else:
+        return [
+            f for f in adapter.facets.keys()
+            if f in facets
+        ]
+
+
 def query(model, **kwargs):
-    from beeprint import pp
-    d = multi_to_dict(request.args)
     adapter = adapter_catalog[model]
-    facets = d.pop('facets', [])
+    facets = kwargs.pop('facets', None)
+    facets = facets_kwargs(adapter, facets)
     if isinstance(facets, basestring):
         facets = [facets]
     facet_search = adapter.facet_search(*facets)
-    # facet_search = facet_search_catalog[model]
-    # from .search import DatasetFacetedSearch
-    # from udata.search import SearchResult
-    q = d.pop('q', '')
-    s = facet_search(q, d)
+    q = kwargs.pop('q', '')
+    s = facet_search(q, kwargs)
     r = s.execute()
-    # pp(r.hits)
+    from beeprint import pp
     pp(r.facets)
     return SearchResult(s, r)
-    # return SearchQuery(*adapters, **kwargs).execute()
 
 
 def iter(*adapters, **kwargs):

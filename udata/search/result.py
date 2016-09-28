@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import copy
 import logging
 
 from bson.objectid import ObjectId
+from flask import request
+from werkzeug.urls import Href
 
 from udata.utils import Paginable
 
@@ -27,8 +30,9 @@ class SearchResult(Paginable):
         return self.result.hits.max_score
 
     @property
-    def page(self):
-        return (self.query.page or 1) if self.pages else 1
+    def pages(self):
+        return 1
+        # return (self.query.page or 1) or 1
 
     @property
     def page_size(self):
@@ -39,6 +43,8 @@ class SearchResult(Paginable):
         return self.query.adapter.model.__name__
 
     def get_ids(self):
+        from beeprint import pp
+        pp(self.result)
         return [hit['_id'] for hit in self.result.hits.hits]
 
     def get_objects(self):
@@ -61,16 +67,13 @@ class SearchResult(Paginable):
             yield obj
 
     def __len__(self):
-        return len(self.result.hits.get('hits', []))
+        return len(self.result.hits.hits)
 
     def __getitem__(self, index):
         return self.get_objects()[index]
 
     def get_aggregation(self, name, fetch=True):
-        if name not in self.query.adapter.facets:
-            return None
-        aggregation = self.query.adapter.facets[name]
-        return aggregation.from_response(name, self.result, fetch=fetch)
+        pass  # TODO: remove
 
     def get_range(self, name):
         min_name = '{0}_min'.format(name)
@@ -93,13 +96,31 @@ class SearchResult(Paginable):
         }
 
     def label_func(self, name):
-        if name not in self.query.adapter.facets:
+        if name not in self.query.facets:
             return None
-        return self.query.adapter.facets[name].labelize
+        return self.query.facets[name].labelize
 
     def labelize(self, name, value):
         func = self.label_func(name)
         return func(value) if func else value
+
+    def to_url(self, url=None, replace=False, **kwargs):
+        '''Serialize the query into an URL'''
+        params = copy.deepcopy(self.query._filters)
+        params['q'] = self.query._query
+        if kwargs:
+            params.pop('page', None)
+            for key, value in kwargs.items():
+                if not replace and key in params:
+                    if not isinstance(params[key], (list, tuple)):
+                        params[key] = [params[key], value]
+                    else:
+                        params[key].append(value)
+                else:
+                    params[key] = value
+        params.pop('facets', None)  # Always true when used
+        href = Href(url or request.base_url)
+        return href(params)
 
 
 class SearchIterator(object):

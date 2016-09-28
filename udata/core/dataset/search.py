@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 from elasticsearch_dsl import Boolean, Completion, Date, Long, Object, String
-from elasticsearch_dsl import FacetedSearch, TermsFacet, RangeFacet
 
 from udata.core.site.views import current_site
 from udata.models import (
@@ -16,7 +15,7 @@ from udata.search.fields import Sort
 # from udata.search.fields import (
 #     Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
 # )
-# from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
+from udata.search.fields import TermsFacet, ModelTermsFacet, RangeFacet
 from udata.search.fields import BoolBooster, GaussDecay
 from udata.search.analysis import simple
 
@@ -124,32 +123,19 @@ class DatasetSearch(ModelSearchAdapter):
 
     facets = {
         'tag': TermsFacet(field='tags'),
-        'badge': TermsFacet(field='badges'),
-        # 'organization': ModelTermFacet('organization', Organization),
-        # 'owner': ModelTermFacet('owner', User),
-        # 'license': ModelTermFacet('license', License),
-        # 'geozone': ModelTermFacet('geozones.id', GeoZone, zone_labelizer),
-        'granularity': TermsFacet(field='granularity'),
+        'badge': TermsFacet(field='badges', labelizer=dataset_badge_labelizer),
+        # 'organization': ModelTermsFacet('organization', Organization),
+        # 'owner': ModelTermsFacet('owner', User),
+        # 'license': ModelTermsFacet('license', License),
+        # 'geozone': ModelTermsFacet('geozones.id', GeoZone, zone_labelizer),
+        'granularity': TermsFacet(field='granularity',
+                                  labelizer=granularity_labelizer),
         'format': TermsFacet(field='resources.format'),
         # 'reuses': RangeFacet(field='metrics.reuses'),
         # 'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
         # 'featured': BoolFacet('featured'),
         # 'extra': ExtrasFacet('extras'),
     }
-    # facets = {
-    #     'tag': TermFacet('tags'),
-    #     'badge': TermFacet('badges', labelizer=dataset_badge_labelizer),
-    #     'organization': ModelTermFacet('organization', Organization),
-    #     'owner': ModelTermFacet('owner', User),
-    #     'license': ModelTermFacet('license', License),
-    #     'geozone': ModelTermFacet('geozones.id', GeoZone, zone_labelizer),
-    #     'granularity': TermFacet('granularity', granularity_labelizer),
-    #     'format': TermFacet('resources.format'),
-    #     'reuses': RangeFacet('metrics.reuses'),
-    #     'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
-    #     'featured': BoolFacet('featured'),
-    #     'extra': ExtrasFacet('extras'),
-    # }
     boosters = [
         BoolBooster('featured', 1.1),
         GaussDecay('metrics.reuses', max_reuses, decay=0.1),
