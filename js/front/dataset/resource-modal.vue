@@ -10,8 +10,6 @@
           <dd><a :href="resource.url" @click="onClick">{{resource.url}}</a></dd>
           <dt v-if="resource.encodingFormat">{{ _('Format') }}</dt>
           <dd v-if="resource.encodingFormat">{{resource.encodingFormat}}</dd>
-          <dt v-if="resource.mimetype">{{ _('MimeType') }}</dt>
-          <dd v-if="resource.mimetype">{{resource.mimetype}}</dd>
           <dt v-if="resource.contentSize">{{ _('Size') }}</dt>
           <dd v-if="resource.contentSize">{{ resource.contentSize|size }}</dd>
           <dt v-if="resource.checksum">{{ resource.checksumType || 'sha1'}}</dt>
@@ -22,8 +20,6 @@
           <dd v-if="resource.dateModified"> {{ resource.dateModified|dt }}</dd>
           <dt v-if="resource.datePublished">{{ _('Published on') }}</dt>
           <dd v-if="resource.datePublished"> {{ resource.datePublished|dt }}</dd>
-          <dt v-if="resource.downloads">{{ _('Downloads') }}</dt>
-          <dd v-if="resource.downloads"> {{ resource.downloads }}</dd>
         </dl>
     </div>
 
