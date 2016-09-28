@@ -44,7 +44,7 @@ class SearchResult(Paginable):
     def get_objects(self):
         if not self._objects:
             ids = [ObjectId(id) for id in self.get_ids()]
-            objects = self.query.adapter.model.objects.in_bulk(ids)
+            objects = self.query.model.objects.in_bulk(ids)
             self._objects = [objects.get(id) for id in ids]
         return self._objects
 
@@ -54,10 +54,7 @@ class SearchResult(Paginable):
 
     @property
     def facets(self):
-        return dict(
-            (f, self.get_aggregation(f, fetch=False))
-            for f in self.query.facets_kwargs
-        )
+        return self.result.facets.to_dict()
 
     def __iter__(self):
         for obj in self.get_objects():

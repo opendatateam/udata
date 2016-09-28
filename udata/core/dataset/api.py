@@ -74,7 +74,7 @@ class DatasetListAPI(API):
     @api.marshal_with(dataset_page_fields)
     def get(self):
         '''List or search all datasets'''
-        return search.query(DatasetSearch, **multi_to_dict(request.args))
+        return search.query(Dataset, **multi_to_dict(request.args))
 
     @api.secure
     @api.doc('create_dataset', responses={400: 'Validation error'})

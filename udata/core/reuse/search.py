@@ -107,7 +107,7 @@ class ReuseSearch(ModelSearchAdapter):
     ]
 
     @classmethod
-    def is_indexable(self, reuse):
+    def is_indexable(cls, reuse):
         return (reuse.deleted is None and
                 len(reuse.datasets) > 0 and
                 not reuse.private)

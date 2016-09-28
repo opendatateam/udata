@@ -6,6 +6,7 @@ import logging
 
 from elasticsearch_dsl import DocType, Integer, Float, Object
 
+from udata.search import UdataFacetedSearch
 from udata.core.metrics import Metric
 
 log = logging.getLogger(__name__)
@@ -55,6 +56,34 @@ class ModelSearchAdapter(DocType):
             for n in value.split(' ')
         ]))
         return list(set([value] + tokens + [' '.join(tokens)]))
+
+    @classmethod
+    def facet_search(cls, *facets):
+        f = dict((k, v) for k, v in cls.facets.items() if k in facets)
+
+        class TempSearch(UdataFacetedSearch):
+            model = cls.model
+            doc_types = cls
+            fields = cls.fields
+            facets = f
+
+        return TempSearch
+
+    # @property
+    # def facets_kwargs(self):
+    #     '''List expected facets from kwargs'''
+    #     facets = self.kwargs.get('facets')
+    #     if not self.adapter.facets or not facets:
+    #         return []
+    #     if isinstance(facets, basestring):
+    #         facets = [facets]
+    #     if facets is True or 'all' in facets:
+    #         return self.adapter.facets.keys()
+    #     else:
+    #         return [
+    #             f for f in self.adapter.facets.keys()
+    #             if f in facets
+    #         ]
 
 
 metrics_types = {

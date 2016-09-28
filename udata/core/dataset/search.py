@@ -2,18 +2,21 @@
 from __future__ import unicode_literals
 
 from elasticsearch_dsl import Boolean, Completion, Date, Long, Object, String
+from elasticsearch_dsl import FacetedSearch, TermsFacet, RangeFacet
 
 from udata.core.site.views import current_site
 from udata.models import (
     Dataset, Organization, License, User, GeoZone,
 )
 from udata.search import (
-    ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register
+    ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
+    register_facet, UdataFacetedSearch
 )
-from udata.search.fields import (
-    Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
-)
-from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
+from udata.search.fields import Sort
+# from udata.search.fields import (
+#     Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
+# )
+# from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
 from udata.search.fields import BoolBooster, GaussDecay
 from udata.search.analysis import simple
 
@@ -118,20 +121,35 @@ class DatasetSearch(ModelSearchAdapter):
         'followers': Sort('metrics.followers'),
         'views': Sort('metrics.views'),
     }
+
     facets = {
-        'tag': TermFacet('tags'),
-        'badge': TermFacet('badges', labelizer=dataset_badge_labelizer),
-        'organization': ModelTermFacet('organization', Organization),
-        'owner': ModelTermFacet('owner', User),
-        'license': ModelTermFacet('license', License),
-        'geozone': ModelTermFacet('geozones.id', GeoZone, zone_labelizer),
-        'granularity': TermFacet('granularity', granularity_labelizer),
-        'format': TermFacet('resources.format'),
-        'reuses': RangeFacet('metrics.reuses'),
-        'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
-        'featured': BoolFacet('featured'),
-        'extra': ExtrasFacet('extras'),
+        'tag': TermsFacet(field='tags'),
+        'badge': TermsFacet(field='badges'),
+        # 'organization': ModelTermFacet('organization', Organization),
+        # 'owner': ModelTermFacet('owner', User),
+        # 'license': ModelTermFacet('license', License),
+        # 'geozone': ModelTermFacet('geozones.id', GeoZone, zone_labelizer),
+        'granularity': TermsFacet(field='granularity'),
+        'format': TermsFacet(field='resources.format'),
+        # 'reuses': RangeFacet(field='metrics.reuses'),
+        # 'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
+        # 'featured': BoolFacet('featured'),
+        # 'extra': ExtrasFacet('extras'),
     }
+    # facets = {
+    #     'tag': TermFacet('tags'),
+    #     'badge': TermFacet('badges', labelizer=dataset_badge_labelizer),
+    #     'organization': ModelTermFacet('organization', Organization),
+    #     'owner': ModelTermFacet('owner', User),
+    #     'license': ModelTermFacet('license', License),
+    #     'geozone': ModelTermFacet('geozones.id', GeoZone, zone_labelizer),
+    #     'granularity': TermFacet('granularity', granularity_labelizer),
+    #     'format': TermFacet('resources.format'),
+    #     'reuses': RangeFacet('metrics.reuses'),
+    #     'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
+    #     'featured': BoolFacet('featured'),
+    #     'extra': ExtrasFacet('extras'),
+    # }
     boosters = [
         BoolBooster('featured', 1.1),
         GaussDecay('metrics.reuses', max_reuses, decay=0.1),
@@ -140,7 +158,7 @@ class DatasetSearch(ModelSearchAdapter):
     ]
 
     @classmethod
-    def is_indexable(self, dataset):
+    def is_indexable(cls, dataset):
         return (dataset.deleted is None and
                 len(dataset.resources) > 0 and
                 not dataset.private)

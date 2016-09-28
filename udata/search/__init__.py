@@ -5,22 +5,27 @@ import bson
 import datetime
 import logging
 
-from mongoengine.signals import post_save
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
+from elasticsearch_dsl import FacetedSearch
 from elasticsearch_dsl import MultiSearch, Search, Index as ESIndex
+from elasticsearch_dsl.faceted_search import FacetedResponse
 from elasticsearch_dsl.serializer import AttrJSONSerializer
-from flask import current_app
-from werkzeug.local import LocalProxy
+from flask import current_app, request
+from functools import partial
+from mongoengine.signals import post_save
 from speaklater import is_lazy_string
+from werkzeug.local import LocalProxy
 
 from udata.tasks import celery
+from udata.utils import multi_to_dict
 
 from . import analysis
 
 log = logging.getLogger(__name__)
 
 adapter_catalog = {}
+facet_search_catalog = {}
 
 DEFAULT_PAGE_SIZE = 20
 
@@ -153,14 +158,46 @@ def register(adapter):
     return adapter
 
 
+def register_facet(model):
+    '''Register a faceted search'''
+    def wrapped(facet_search):
+        facet_search_catalog[model] = facet_search
+    return wrapped
+
+
+class UdataFacetedSearch(FacetedSearch):
+    def search(self):
+        """
+        Construct the Search object.
+        """
+        # from udata.search import SearchResult
+        s = Search(doc_type=self.doc_types, using=es.client, index=es.index_name)
+        return s.response_class(partial(FacetedResponse, self))
+
 from .adapter import ModelSearchAdapter, metrics_mapping_for  # noqa
 from .query import SearchQuery  # noqa
 from .result import SearchResult, SearchIterator  # noqa
 from .fields import *  # noqa
 
 
-def query(*adapters, **kwargs):
-    return SearchQuery(*adapters, **kwargs).execute()
+def query(model, **kwargs):
+    from beeprint import pp
+    d = multi_to_dict(request.args)
+    adapter = adapter_catalog[model]
+    facets = d.pop('facets', [])
+    if isinstance(facets, basestring):
+        facets = [facets]
+    facet_search = adapter.facet_search(*facets)
+    # facet_search = facet_search_catalog[model]
+    # from .search import DatasetFacetedSearch
+    # from udata.search import SearchResult
+    q = d.pop('q', '')
+    s = facet_search(q, d)
+    r = s.execute()
+    # pp(r.hits)
+    pp(r.facets)
+    return SearchResult(s, r)
+    # return SearchQuery(*adapters, **kwargs).execute()
 
 
 def iter(*adapters, **kwargs):
