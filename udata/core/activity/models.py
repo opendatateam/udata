@@ -17,7 +17,7 @@ _registered_activities = {}
 
 
 class EmitNewActivityMetaClass(db.BaseDocumentMetaclass):
-    '''Ensure any child class dispatch the on_new signal'''
+    '''Ensure any child class dispatches the on_new signal'''
     def __new__(cls, name, bases, attrs):
         new_class = super(EmitNewActivityMetaClass, cls).__new__(
             cls, name, bases, attrs)
