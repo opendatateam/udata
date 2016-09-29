@@ -65,7 +65,13 @@ class User(db.Document, WithMetrics, UserMixin):
     apikey = db.StringField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
+
+    # The field below is required for Flask-security
+    # when SECURITY_CONFIRMABLE is True
     confirmed_at = db.DateTimeField()
+
+    # The 5 fields below are required for Flask-security
+    # when SECURITY_TRACKABLE is True
     last_login_at = db.DateTimeField()
     current_login_at = db.DateTimeField()
     last_login_ip = db.StringField()

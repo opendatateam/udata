@@ -69,6 +69,8 @@ CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
 
 
 class License(db.Document):
+    # We need to declare id explicitly since we do not use the default
+    # value set by Mongo.
     id = db.StringField(primary_key=True)
     created_at = db.DateTimeField(default=datetime.now, required=True)
     title = db.StringField(required=True)
@@ -193,6 +195,10 @@ class ResourceMixin(object):
 
 
 class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
+    '''
+    Local file, remote file or API provided by the original provider of the
+    dataset
+    '''
     on_added = signal('Resource.on_added')
     on_deleted = signal('Resource.on_deleted')
 
@@ -511,6 +517,10 @@ post_save.connect(Dataset.post_save, sender=Dataset)
 
 
 class CommunityResource(ResourceMixin, WithMetrics, db.Document):
+    '''
+    Local file, remote file or API added by the community of the users to the
+    original dataset
+    '''
     dataset = db.ReferenceField(Dataset)
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
     organization = db.ReferenceField(
