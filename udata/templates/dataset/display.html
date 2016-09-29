@@ -52,18 +52,14 @@
 {% block content %}
 <!-- Placeholder for non-routable modals -->
 <div v-el:modal></div>
-<div itemscope itemtype="http://schema.org/Dataset" itemid="{{ dataset.id }}">
+<div>
 <section class="content {% if not dataset.organization.public_service %}non{% endif %}certified">
     <div class="container dataset-container">
-        <meta itemprop="alternateName" content="{{dataset.slug}}" />
-        <meta itemprop="dateCreated" content="{{dataset.created_at|isoformat}}" />
-        <meta itemprop="dateModified" content="{{dataset.last_modified|isoformat}}" />
-        <meta itemprop="url" content="{{ url_for('datasets.show', dataset=dataset, _external=True) }}" />
         <div class="row">
 
             <div class="col-md-9 col-sm-9 smaller">
                 <div class="page-header">
-                    <h2 itemprop="name">{{ dataset.title }}</h2>
+                    <h2>{{ dataset.title }}</h2>
 
                     <div class="row">
                         <p class="col-md-12">
@@ -109,7 +105,7 @@
                     </div>
                 </div>
 
-                <div class="row" itemprop="description">
+                <div class="row">
                     <div class="col-xs-12">
                     {{ dataset.description|markdown }}
                     </div>
@@ -236,7 +232,7 @@
                                 <a href class="btn btn-default btn-xs" v-tooltip title="{{ _('License') }}">
                                     <span class="glyphicon glyphicon-copyright-mark"></span>
                                 </a>
-                                {% if dataset.license.url %}<a itemprop="license" href="{{ dataset.license.url }}">{% endif %}
+                                {% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
                                 {{ dataset.license.title }}
                                 {% if dataset.license.url %}</a>{% endif %}
                             </li>
@@ -311,7 +307,6 @@
                                 class="btn btn-primary btn-grey btn-xs"
                                 title="{{ tag }}">
                                 {{ tag|truncate(14, True) }}
-                                <meta itemprop="keywords" content="{{tag}}" />
                             </a>
                             {% endfor %}
                             <a href="#"
@@ -321,13 +316,6 @@
                                 {{ _('Suggest a tag') }}
                             </a>
                         </div>
-
-                        {% for key, value in dataset.extras.items() %}
-                        <div itemscope itemtype="http://schema.org/PropertyValue">
-                            <meta itemprop="name" content="{{key}}"/>
-                            <meta itemprop="value" content="{{value.serialize()|to_json if value.serialize else value }}"/>
-                        </div>
-                        {% endfor %}
 
                         <button type="button" @click="showDetails"
                             class="btn btn-primary btn-extras btn-block btn-sm icon-left"
@@ -398,7 +386,7 @@
         <div class="row">
             <div class="col-sm-9 list-group resources-list smaller">
             {% for resource in dataset.community_resources %}
-                <div itemprop="hasPart">
+                <div>
                     {% include theme('dataset/resource/list-item.html') %}
                 </div>
             {% endfor %}
@@ -421,7 +409,7 @@
             <div class="col-sm-9 reuses-list smaller">
                 <div class="row">
                     {% for reuse in reuses %}
-                    <div class="col-sm-6 col-lg-4" itemprop="isPartOf">
+                    <div class="col-sm-6 col-lg-4">
                         <div id="reuse-{{reuse.id}}" class="thumbnail reuse">
                             <a class="preview" href="{{ url_for('reuses.show', reuse=reuse) }}">
                                 <img class="media-object img-responsive" alt="{{ reuse.title }}"

@@ -1,5 +1,5 @@
-<a itemprop="author" href="{{ url_for('organizations.show', org=organization, _external=True) }}"
-    title="{{ organization.name }}">
+<a href="{{ url_for('organizations.show', org=organization, _external=True) }}"
+   title="{{ organization.name }}">
     <img src="{{ organization.logo(150)|placeholder('organization') }}"
         alt="{{ organization.name }}" class="organization-logo producer"
         width="150" height="150"/>
