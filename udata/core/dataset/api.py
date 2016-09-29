@@ -196,7 +196,7 @@ class ResourcesAPI(API):
     @api.secure
     @api.doc('update_resources', **common_doc)
     @api.expect([resource_fields])
-    @api.marshal_with(resource_fields)
+    @api.marshal_list_with(resource_fields)
     def put(self, dataset):
         '''Reorder resources'''
         DatasetEditPermission(dataset).test()
