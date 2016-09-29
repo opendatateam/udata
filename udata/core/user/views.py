@@ -82,8 +82,9 @@ class UserActivityView(UserView, DetailView):
         return context
 
 
-    def get_json_ld(self):
-        user = self.user
+    def get_json_ld(self, user=None):
+        if user is None:
+            user = self.user
 
         result = {"@type": 'Person',
                   "@context": "http://schema.org",

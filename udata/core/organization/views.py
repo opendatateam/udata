@@ -95,8 +95,9 @@ class OrganizationDetailView(OrgView, DetailView):
         })
         return context
 
-    def get_json_ld(self):
-        org = self.organization
+    def get_json_ld(self, org=None):
+        if org is None:
+            org = self.organization
         prefix = 'Government' if org.public_service else ''
         return {"@context": "http://schema.org",
                 "@type": '{}Organization'.format(prefix),
@@ -106,7 +107,6 @@ class OrganizationDetailView(OrgView, DetailView):
                 "name": org.name,
                 "description": org.description
             }
-
 
 
 @blueprint.route('/<org:org>/dashboard/', endpoint='dashboard')

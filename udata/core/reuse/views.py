@@ -5,6 +5,8 @@ from flask import abort, request, url_for, render_template
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.app import nav
+from udata.core.organization.views import OrganizationDetailView
+from udata.core.user.views import UserActivityView
 from udata.frontend.views import SearchView, DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Follow, Discussion
@@ -104,18 +106,30 @@ class ReuseDetailView(ReuseView, DetailView):
 
     def get_json_ld(self):
         reuse = self.reuse
-        return {'@context': "http://schema.org",
-                '@type': "CreativeWork",
-                "alternateName": reuse.slug,
-                "dateCreated": reuse.created_at.isoformat(),
-                "dateModified": reuse.last_modified.isoformat(),
-                "url": url_for('reuses.show', reuse=reuse, _external=True),
-                "name": reuse.title,
-                "description": reuse.description,
-                "isBasedOnUrl": reuse.url
+        result = {'@context': "http://schema.org",
+                  '@type': "CreativeWork",
+                  "alternateName": reuse.slug,
+                  "dateCreated": reuse.created_at.isoformat(),
+                  "dateModified": reuse.last_modified.isoformat(),
+                  "url": url_for('reuses.show', reuse=reuse, _external=True),
+                  "name": reuse.title,
+                  "description": reuse.description,
+                  "isBasedOnUrl": reuse.url
             }
 
+        if reuse.organization:
+            view = OrganizationDetailView()
+            author = view.get_json_ld(reuse.organization)
+        elif reuse.owner:
+            view = UserActivityView()
+            author = view.get_json_ld(reuse.owner)
+        else:
+            author = None
 
+        if author:
+            result['author'] = author
+
+        return result
 
 @sitemap.register_generator
 def sitemap_urls():

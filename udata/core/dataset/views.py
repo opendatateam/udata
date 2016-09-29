@@ -7,7 +7,9 @@ from werkzeug.contrib.atom import AtomFeed
 from udata.frontend.views import DetailView, SearchView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Discussion, Follow, Reuse
+from udata.core.organization.views import OrganizationDetailView
 from udata.core.site.views import current_site
+from udata.core.user.views import UserActivityView
 from udata.sitemap import sitemap
 
 from .permissions import ResourceEditPermission, DatasetEditPermission
@@ -91,6 +93,7 @@ class DatasetDetailView(DatasetView, DetailView):
 
     def get_json_ld(self):
         dataset = self.dataset
+
         result = {"@context": "http://schema.org",
                   "@type": "Dataset",
                   "@id": str(dataset.id),
@@ -108,6 +111,18 @@ class DatasetDetailView(DatasetView, DetailView):
 
         if dataset.license and dataset.license.url:
             result["license"] = dataset.license.url
+
+        if dataset.organization:
+            view = OrganizationDetailView()
+            author = view.get_json_ld(dataset.organization)
+        elif dataset.owner:
+            view = UserActivityView()
+            author = view.get_json_ld(dataset.owner)
+        else:
+            author = None
+
+        if author:
+            result['author'] = author
 
         return result
 

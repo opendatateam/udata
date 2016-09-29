@@ -52,8 +52,11 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_render_display(self):
         '''It should render the dataset page'''
         resource = ResourceFactory()
-        dataset = DatasetFactory(tags=['foo', 'bar'], resources=[resource],
-                                 description='a&éèëù$£')
+        author = UserFactory()
+        dataset = DatasetFactory(tags=['foo', 'bar'],
+                                 resources=[resource],
+                                 description='a&éèëù$£',
+                                 owner=author)
         url = url_for('datasets.show', dataset=dataset)
         response = self.get(url)
         self.assert200(response)
@@ -65,6 +68,7 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertEquals(json_ld["keywords"], 'bar, foo')
         # The url contained in the json_ld is absolute
         self.assertTrue(json_ld["url"].endswith(url))
+        self.assertEquals(json_ld["author"]['@type'], 'Person')
         self.assertEquals(len(json_ld["distribution"]), 1)
         for json_ld_resource in json_ld["distribution"]:
             self.assertEquals(json_ld_resource["@type"], "DataDownload")
