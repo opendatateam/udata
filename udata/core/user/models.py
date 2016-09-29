@@ -23,10 +23,6 @@ __all__ = ('User', 'Role', 'datastore')
 AVATAR_SIZES = [100, 32, 25]
 
 
-def upload_avatar_to(user):
-    return '/'.join((user.slug, datetime.now().strftime('%Y%m%d-%H%M%S')))
-
-
 # TODO: use simple text for role
 class Role(db.Document, RoleMixin):
     ADMIN = 'admin'

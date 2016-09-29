@@ -39,23 +39,6 @@ PUBLIC_SERVICE = 'public-service'
 CERTIFIED = 'certified'
 
 
-def upload_logo_to(org):
-    return '/'.join((org.slug, datetime.now().strftime('%Y%m%d-%H%M%S')))
-
-
-class OrgUnit(object):
-    '''
-    Simple mixin holding common fields for all organization units.
-    '''
-    name = db.StringField(max_length=255, required=True)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from='name', update=True)
-    description = db.StringField(required=True)
-    url = db.URLField(max_length=255)
-    image_url = db.URLField(max_length=255)
-    extras = db.DictField()
-
-
 class Team(db.EmbeddedDocument):
     name = db.StringField(required=True)
     slug = db.SlugField(
