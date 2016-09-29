@@ -52,13 +52,15 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_render_display(self):
         '''It should render the dataset page'''
         resource = ResourceFactory()
-        dataset = DatasetFactory(tags=['foo', 'bar'], resources=[resource])
+        dataset = DatasetFactory(tags=['foo', 'bar'], resources=[resource],
+                                 description='a&éèëù$£')
         url = url_for('datasets.show', dataset=dataset)
         response = self.get(url)
         self.assert200(response)
         json_ld = self.get_json_ld(response)
         self.assertEquals(json_ld["@context"], "http://schema.org")
         self.assertEquals(json_ld["@type"], "Dataset")
+        self.assertEquals(json_ld["description"], "a&éèëù$£")
         self.assertEquals(json_ld["@id"], str(dataset.id))
         self.assertEquals(json_ld["keywords"], 'bar, foo')
         # The url contained in the json_ld is absolute
