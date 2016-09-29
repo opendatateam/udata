@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
+
 from flask import abort, request, url_for, render_template
 from werkzeug.contrib.atom import AtomFeed
 
@@ -97,10 +99,25 @@ class ReuseDetailView(ReuseView, DetailView):
         context.update(
             followers=followers,
             can_edit=ReuseEditPermission(self.reuse),
-            discussions=Discussion.objects(subject=self.reuse)
+            discussions=Discussion.objects(subject=self.reuse),
+            json_ld=json.dumps(self.get_json_ld())
         )
 
         return context
+
+    def get_json_ld(self):
+        reuse = self.reuse
+        return {'@context': "http://schema.org",
+                '@type': "CreativeWork",
+                "alternateName": reuse.slug,
+                "dateCreated": reuse.created_at.isoformat(),
+                "dateModified": reuse.last_modified.isoformat(),
+                "url": url_for('reuses.show', reuse=reuse, _external=True),
+                "name": reuse.title,
+                "description": reuse.description,
+                "isBasedOnUrl": reuse.url
+            }
+
 
 
 @sitemap.register_generator
