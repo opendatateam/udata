@@ -1145,22 +1145,6 @@ class SearchResultTest(TestCase):
         self.assertEqual(result.pages, 0)
 
 
-class SearchIteratorTest(SearchTestMixin, TestCase):
-    def test_iterate(self):
-        with self.autoindex():
-            objects = [FakeFactory() for _ in range(5)]
-        query = search.SearchQuery(FakeSearch)
-        for idx, obj in enumerate(query.iter(), 1):
-            self.assertIsInstance(obj, Fake)
-        self.assertEqual(idx, len(objects))
-
-    def test_iterate_empty(self):
-        with self.autoindex():
-            [FakeFactory() for _ in range(5)]
-        query = search.SearchQuery(FakeSearch, tag='not-found')
-        self.assertEqual(len(list(query.iter())), 0)
-
-
 class SearchAdaptorTest(SearchTestMixin, TestCase):
     def assert_tokens(self, input, output):
         self.assertEqual(

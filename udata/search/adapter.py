@@ -69,22 +69,6 @@ class ModelSearchAdapter(DocType):
 
         return TempSearch
 
-    # @property
-    # def facets_kwargs(self):
-    #     '''List expected facets from kwargs'''
-    #     facets = self.kwargs.get('facets')
-    #     if not self.adapter.facets or not facets:
-    #         return []
-    #     if isinstance(facets, basestring):
-    #         facets = [facets]
-    #     if facets is True or 'all' in facets:
-    #         return self.adapter.facets.keys()
-    #     else:
-    #         return [
-    #             f for f in self.adapter.facets.keys()
-    #             if f in facets
-    #         ]
-
 
 metrics_types = {
     int: Integer,

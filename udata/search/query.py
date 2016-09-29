@@ -11,7 +11,7 @@ from elasticsearch_dsl import Search
 
 from udata.models import db
 from udata.search import es, i18n_analyzer, DEFAULT_PAGE_SIZE, adapter_catalog
-from udata.search.result import SearchIterator, SearchResult
+from udata.search.result import SearchResult
 
 
 log = logging.getLogger(__name__)
@@ -45,14 +45,6 @@ class SearchQuery(object):
         try:
             data = qs.execute()
             return SearchResult(self, data)
-        except:
-            log.exception('Unable to execute search query')
-
-    def iter(self):
-        qs = self.build_query()
-        try:
-            data = qs.execute()
-            return SearchIterator(self, data)
         except:
             log.exception('Unable to execute search query')
 

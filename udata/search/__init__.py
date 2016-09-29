@@ -168,7 +168,7 @@ class UdataFacetedSearch(FacetedSearch):
 
 from .adapter import ModelSearchAdapter, metrics_mapping_for  # noqa
 from .query import SearchQuery  # noqa
-from .result import SearchResult, SearchIterator  # noqa
+from .result import SearchResult  # noqa
 from .fields import *  # noqa
 
 
@@ -202,8 +202,13 @@ def query(model, **kwargs):
     return SearchResult(search, result)
 
 
-def iter(*adapters, **kwargs):
-    return SearchQuery(*adapters, **kwargs).iter()
+def iter(model, **kwargs):
+    params = multi_to_dict(request.args)
+    params.update(kwargs)
+    search = search_for(model, facets=True, **params)
+    search._s.aggs._params = {}  # Remove aggregations.
+    for result in search._s.scan():
+        yield result.model.objects.get(id=result.meta['id'])
 
 
 def multisearch(*models, **params):

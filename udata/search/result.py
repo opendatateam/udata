@@ -119,20 +119,3 @@ class SearchResult(Paginable):
         params.pop('facets', None)  # Always true when used
         href = Href(url or request.base_url)
         return href(params)
-
-
-class SearchIterator(object):
-    """An ElasticSearch scroll result iterator
-
-    that fetch objects on each hit.
-    """
-    def __init__(self, query, result):
-        self.result = result or self._empty()
-        self.query = query
-
-    def _empty(self):
-        return (x for x in list())
-
-    def __iter__(self):
-        for hit in self.result:
-            yield self.query.adapter.model.objects.get(id=hit.meta['id'])

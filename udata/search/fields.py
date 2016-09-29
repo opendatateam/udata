@@ -103,39 +103,32 @@ class ModelTermsFacet(TermsFacet):
         self.model = model
         self.field_name = field_name
 
-    def from_response(self, name, response, fetch=True):
-        aggregation = response.get('aggregations', {}).get(name)
-        if not aggregation:
-            return
-        ids = [bucket['key'] for bucket in aggregation['buckets']]
+    def get_values(self, data, filter_values):
+        """
+        Turn the raw bucket data into a list of tuples containing the object,
+        number of documents and a flag indicating whether this value has been
+        selected or not.
+        """
+        values = super(ModelTermsFacet, self).get_values(data, filter_values)
+        ids = [key for (key, doc_count, selected) in values]
+        # Perform a model resolution: models are feched from DB
+        # Depending on used models, ID can be a String or an ObjectId
+        is_objectid = isinstance(getattr(self.model, self.field_name),
+                                 db.ObjectIdField)
+        cast = ObjectId if is_objectid else lambda o: o
+        if is_objectid:
+            # Cast identifier as ObjectId if necessary
+            # (in_bullk expect ObjectId and does not cast if necessary)
+            ids = map(ObjectId, ids)
+        objects = self.model.objects.in_bulk(ids)
 
-        if fetch:
-            # Perform a model resolution: models are feched from DB
-            # Depending on used models, ID can be a String or an ObjectId
-            is_objectid = isinstance(getattr(self.model, self.field_name),
-                                     db.ObjectIdField)
-            cast = ObjectId if is_objectid else lambda o: o
-            if is_objectid:
-                # Cast identifier as ObjectId if necessary
-                # (in_bullk expect ObjectId and does not cast if necessary)
-                ids = map(ObjectId, ids)
-            objects = self.model.objects.in_bulk(ids)
+        def serialize(term):
+            return objects.get(cast(term))
 
-            def serialize(term):
-                return objects.get(cast(term))
-        else:
-            # Only return the model class and its identifier
-            def serialize(term):
-                return {'class': self.model.__name__, 'id': term}
-
-        return {
-            'type': 'models',
-            'models': [
-                (serialize(bucket['key']), bucket['doc_count'])
-                for bucket in aggregation['buckets']
-            ],
-            'visible': len(aggregation['buckets']) > 1,
-        }
+        return [
+            (serialize(key), doc_count)
+            for (key, doc_count, selected) in values
+        ]
 
     def labelize(self, label, value):
         return (self.labelizer(label, value)
