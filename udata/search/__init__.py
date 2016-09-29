@@ -25,7 +25,6 @@ from . import analysis
 log = logging.getLogger(__name__)
 
 adapter_catalog = {}
-facet_search_catalog = {}
 
 DEFAULT_PAGE_SIZE = 20
 
@@ -158,13 +157,6 @@ def register(adapter):
     return adapter
 
 
-def register_facet(model):
-    '''Register a faceted search'''
-    def wrapped(facet_search):
-        facet_search_catalog[model] = facet_search
-    return wrapped
-
-
 class UdataFacetedSearch(FacetedSearch):
     def search(self):
         """
@@ -180,8 +172,7 @@ from .result import SearchResult, SearchIterator  # noqa
 from .fields import *  # noqa
 
 
-def facets_kwargs(adapter, facets=None):
-    '''List expected facets from kwargs'''
+def facets_for(adapter, facets=None):
     if not adapter.facets or not facets:
         return []
     if isinstance(facets, basestring):
@@ -195,32 +186,38 @@ def facets_kwargs(adapter, facets=None):
         ]
 
 
-def query(model, **kwargs):
-    adapter = adapter_catalog[model]
-    facets = kwargs.pop('facets', None)
-    facets = facets_kwargs(adapter, facets)
-    if isinstance(facets, basestring):
-        facets = [facets]
+def search_for(model, **params):
+    is_adapter = issubclass(model, ModelSearchAdapter)
+    adapter = model if is_adapter else adapter_catalog[model]
+    facets = facets_for(adapter, params.pop('facets', None))
     facet_search = adapter.facet_search(*facets)
-    q = kwargs.pop('q', '')
-    s = facet_search(q, kwargs)
-    r = s.execute()
-    from beeprint import pp
-    pp(r.facets)
-    return SearchResult(s, r)
+    q = params.pop('q', '')
+    return facet_search(q, params)
+
+
+def query(model, **kwargs):
+    params = multi_to_dict(request.args)
+    search = search_for(model, **params)
+    result = search.execute()
+    return SearchResult(search, result)
 
 
 def iter(*adapters, **kwargs):
     return SearchQuery(*adapters, **kwargs).iter()
 
 
-def multisearch(*queries):
+def multisearch(*models, **params):
     ms = MultiSearch(using=es.client, index=es.index_name)
-    for query in queries:
-        qs = query.build_query()
-        ms = ms.add(qs)
+    queries = []
+    for model in models:
+        s = search_for(model, **params)
+        ms = ms.add(s._s)
+        queries.append(s)
     responses = ms.execute()
-    return responses
+    return [
+        SearchResult(query, response)
+        for response, query in zip(responses, queries)
+    ]
 
 
 def suggest(q, field, size=10):

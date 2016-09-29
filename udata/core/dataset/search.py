@@ -9,7 +9,6 @@ from udata.models import (
 )
 from udata.search import (
     ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
-    register_facet, UdataFacetedSearch
 )
 from udata.search.fields import Sort
 # from udata.search.fields import (

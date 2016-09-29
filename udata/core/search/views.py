@@ -9,6 +9,14 @@ from udata.models import Dataset, Organization, Reuse, User
 from udata.utils import multi_to_dict
 from udata.features.territories import check_for_territories
 
+# Maps template variables names to model types
+MAPPING = {
+    'datasets': Dataset,
+    'reuses': Reuse,
+    'organizations': Organization,
+    'users': User,
+}
+
 
 @front.route('/search/', endpoint='search')
 def render_search():
@@ -16,27 +24,14 @@ def render_search():
     params['facets'] = True
     # We only fetch relevant data for the given filter.
     if 'tag' in params:
-        search_queries = [
-            search.SearchQuery(Dataset, **params),
-            search.SearchQuery(Reuse, **params)
-        ]
-        results_labels = ['datasets', 'reuses']
+        types = ['datasets', 'reuses']
     elif 'badge' in params:
-        search_queries = [
-            search.SearchQuery(Dataset, **params),
-            search.SearchQuery(Organization, **params)
-        ]
-        results_labels = ['datasets', 'organizations']
+        types = ['datasets', 'organizations']
     else:
-        search_queries = [
-            search.SearchQuery(Dataset, **params),
-            search.SearchQuery(Reuse, **params),
-            search.SearchQuery(Organization, **params),
-            search.SearchQuery(User, **params)
-        ]
-        results_labels = ['datasets', 'reuses', 'organizations', 'users']
-    results = search.multisearch(*search_queries)
-    context = dict(zip(results_labels, results))
+        types = ['datasets', 'reuses', 'organizations', 'users']
+    models = [MAPPING[typ] for typ in types]
+    results = search.multisearch(*models, **params)
+    context = dict(zip(types, results))
     territories = check_for_territories(params.get('q'))
     context['territories'] = territories
     return theme.render('search.html', **context)
