@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
-
 from flask import abort, request, url_for, render_template
 from werkzeug.contrib.atom import AtomFeed
 
@@ -88,7 +86,6 @@ class DatasetDetailView(DatasetView, DetailView):
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = ResourceEditPermission
         context['discussions'] = Discussion.objects(subject=self.dataset)
-        context['json_ld'] = json.dumps(self.get_json_ld())
 
         return context
 

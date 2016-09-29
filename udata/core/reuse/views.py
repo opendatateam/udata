@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
-
 from flask import abort, request, url_for, render_template
 from werkzeug.contrib.atom import AtomFeed
 
@@ -100,7 +98,6 @@ class ReuseDetailView(ReuseView, DetailView):
             followers=followers,
             can_edit=ReuseEditPermission(self.reuse),
             discussions=Discussion.objects(subject=self.reuse),
-            json_ld=json.dumps(self.get_json_ld())
         )
 
         return context

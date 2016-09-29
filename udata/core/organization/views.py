@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import itertools
-import json
 
 from flask import g, abort, url_for
 from flask_security import current_user
@@ -82,7 +81,6 @@ class OrganizationDetailView(OrgView, DetailView):
         followers = (Follow.objects.followers(self.organization)
                                    .order_by('follower.fullname'))
         context.update({
-            'json_ld': json.dumps(self.get_json_ld()),
             'reuses': reuses.paginate(1, self.page_size),
             'datasets': datasets.paginate(1, self.page_size),
             'followers': followers,

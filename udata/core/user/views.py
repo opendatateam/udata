@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
 import logging
 
 from flask import g
@@ -80,7 +79,6 @@ class UserActivityView(UserView, DetailView):
         context = super(UserActivityView, self).get_context()
         context['activities'] = (Activity.objects(actor=self.object)
                                          .order_by('-created_at').limit(15))
-        context['json_ld'] = json.dumps(self.get_json_ld())
         return context
 
 

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
+
 from flask import request, redirect, abort, g
 from flask.views import MethodView
 
@@ -152,6 +154,12 @@ class DetailView(SingleObject, Templated, BaseView):
     '''
     def get(self, **kwargs):
         return self.render()
+
+    def get_context(self):
+        context = super(DetailView, self).get_context()
+        if hasattr(self, 'get_json_ld'):
+            context['json_ld'] = json.dumps(self.get_json_ld())
+        return context
 
 
 class FormView(Templated, BaseView):
