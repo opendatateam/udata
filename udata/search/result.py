@@ -135,4 +135,4 @@ class SearchIterator(object):
 
     def __iter__(self):
         for hit in self.result:
-            yield self.query.adapter.model.objects.get(id=hit['_id'])
+            yield self.query.adapter.model.objects.get(id=hit.meta['id'])

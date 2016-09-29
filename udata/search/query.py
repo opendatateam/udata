@@ -49,18 +49,12 @@ class SearchQuery(object):
             log.exception('Unable to execute search query')
 
     def iter(self):
+        qs = self.build_query()
         try:
-            body = self.get_body()
-            # Remove aggregations to avoid overhead on large pagination.
-            if 'aggregations' in body:
-                del body['aggregations']
-            result = es.scan(index=es.index_name,
-                             doc_type=self.adapter.doc_type(),
-                             body=body)
+            data = qs.execute()
+            return SearchIterator(self, data)
         except:
             log.exception('Unable to execute search query')
-            result = None
-        return SearchIterator(self, result)
 
     def build_query(self):
         qs = Search(using=es.client, index=es.index_name)

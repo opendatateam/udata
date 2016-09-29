@@ -41,6 +41,9 @@ class Facet(object):
         self.labelize = self._params.pop('labelizer',
                                          lambda label, value: value)
 
+    def filter_from_kwargs(self, name, kwargs):
+        pass
+
 
 class BoolFacet(Facet):
     def to_query(self, **kwargs):
