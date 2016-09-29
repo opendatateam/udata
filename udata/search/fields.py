@@ -12,7 +12,9 @@ from udata.i18n import lazy_gettext as _, format_date
 from udata.utils import to_bool
 
 from elasticsearch_dsl import A
-from elasticsearch_dsl.faceted_search import TermsFacet as DSLTermsFacet
+from elasticsearch_dsl.faceted_search import (
+    TermsFacet as DSLTermsFacet, RangeFacet as DSLRangeFacet
+)
 
 
 log = logging.getLogger(__name__)
@@ -153,7 +155,7 @@ class ExtrasFacet(Facet):
         pass
 
 
-class RangeFacet(Facet):
+class RangeFacet(Facet, DSLRangeFacet):
     def __init__(self, field, cast=int, labelizer=None):
         super(RangeFacet, self).__init__(field=field, labelizer=labelizer)
         self.cast = cast

@@ -205,7 +205,8 @@ def query(model, **kwargs):
 def iter(model, **kwargs):
     params = multi_to_dict(request.args)
     params.update(kwargs)
-    search = search_for(model, facets=True, **params)
+    params['facets'] = True
+    search = search_for(model, **params)
     search._s.aggs._params = {}  # Remove aggregations.
     for result in search._s.scan():
         yield result.model.objects.get(id=result.meta['id'])

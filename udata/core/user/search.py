@@ -50,7 +50,8 @@ class UserSearch(ModelSearchAdapter):
         'created': Sort('created'),
     }
     facets = {
-        # 'organization': ModelTermsFacet('organizations', Organization),
+        'organization': ModelTermsFacet(field='organizations',
+                                        model=Organization),
         # 'reuses': RangeFacet('metrics.reuses'),
         # 'datasets': RangeFacet('metrics.datasets'),
     }

@@ -51,8 +51,8 @@ class FakeSearch(search.ModelSearchAdapter):
         'description',
     ]
     facets = {
-        'tag': search.TermFacet('tags'),
-        'other': search.TermFacet('other'),
+        'tag': search.TermsFacet('tags'),
+        'other': search.TermsFacet('other'),
         'range': search.RangeFacet('a_num_field'),
         'bool': search.BoolFacet('boolean'),
     }
@@ -69,8 +69,8 @@ class FakeSearchWithDateRange(search.ModelSearchAdapter):
         'description',
     ]
     facets = {
-        'tag': search.TermFacet('tags'),
-        'other': search.TermFacet('other'),
+        'tag': search.TermsFacet('tags'),
+        'other': search.TermsFacet('other'),
         'range': search.RangeFacet('a_num_field'),
         'daterange': search.DateRangeFacet('a_daterange_field'),
     }
@@ -763,9 +763,9 @@ class TestBoolFacet(FacetTestCase):
                          'label: {0}'.format(_('no')))
 
 
-class TestTermFacet(FacetTestCase):
+class TestTermsFacet(FacetTestCase):
     def setUp(self):
-        self.facet = search.TermFacet('tags')
+        self.facet = search.TermsFacet('tags')
 
     def test_to_query(self):
         self.assertEqual(self.facet.to_query(), {
@@ -826,9 +826,9 @@ class TestTermFacet(FacetTestCase):
         self.assertEqual(self.facet.labelize('label', 'fake'), 'fake')
 
 
-class TestModelTermFacet(FacetTestCase, DBTestMixin):
+class TestModelTermsFacet(FacetTestCase, DBTestMixin):
     def setUp(self):
-        self.facet = search.ModelTermFacet('fakes', Fake)
+        self.facet = search.ModelTermsFacet('fakes', Fake)
 
     def test_to_query(self):
         self.assertEqual(self.facet.to_query(), {
