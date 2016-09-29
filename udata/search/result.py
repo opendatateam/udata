@@ -43,8 +43,6 @@ class SearchResult(Paginable):
         return self.query.adapter.model.__name__
 
     def get_ids(self):
-        from beeprint import pp
-        pp(self.result)
         return [hit['_id'] for hit in self.result.hits.hits]
 
     def get_objects(self):
