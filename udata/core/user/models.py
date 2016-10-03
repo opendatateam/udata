@@ -14,6 +14,7 @@ from itsdangerous import JSONWebSignatureSerializer
 from werkzeug import cached_property
 
 from udata.frontend.helpers import placeholder
+from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics
 from udata.core.storages import avatars, default_image_basename
 
@@ -195,7 +196,7 @@ class User(db.Document, WithMetrics, UserMixin):
             '@type': 'Person',
             '@context': 'http://schema.org',
             'name': self.fullname,
-            'description': self.about,
+            'description': mdstrip(self.about),
         }
 
         if self.avatar_url:

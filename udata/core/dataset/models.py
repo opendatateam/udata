@@ -11,6 +11,7 @@ from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from werkzeug import cached_property
 
+from udata.frontend.markdown import mdstrip
 from udata.models import (
     db, WithMetrics, BadgeMixin, SpatialCoverage, OwnedByQuerySet
 )
@@ -181,7 +182,7 @@ class ResourceMixin(object):
             result['fileFormat'] = self.mime
 
         if self.description:
-            result['description'] = self.description
+            result['description'] = mdstrip(self.description)
 
         # These 2 values are not standard
         if self.checksum:
@@ -464,7 +465,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             '@context': 'http://schema.org',
             '@type': 'Dataset',
             '@id': str(self.id),
-            'description': self.description,
+            'description': mdstrip(self.description),
             'alternateName': self.slug,
             'dateCreated': self.created_at.isoformat(),
             'dateModified': self.last_modified.isoformat(),

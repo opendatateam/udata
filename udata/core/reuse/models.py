@@ -7,6 +7,7 @@ from mongoengine.signals import pre_save, post_save
 from werkzeug import cached_property
 
 from udata.core.storages import images, default_image_basename
+from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import db, BadgeMixin, WithMetrics, OwnedByQuerySet
 from udata.utils import hash_url
@@ -144,7 +145,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
             'dateModified': self.last_modified.isoformat(),
             'url': url_for('reuses.show', reuse=self, _external=True),
             'name': self.title,
-            'description': self.description,
+            'description': mdstrip(self.description),
             'isBasedOnUrl': self.url,
         }
 
