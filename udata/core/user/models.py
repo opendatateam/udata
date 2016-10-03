@@ -194,17 +194,17 @@ class User(db.Document, WithMetrics, UserMixin):
         result = {
             '@type': 'Person',
             '@context': 'http://schema.org',
-            'image': placeholder(self.avatar, 'user'),
             'name': self.fullname,
             'description': self.about,
         }
+
+        if self.avatar_url:
+            result['image'] = self.avatar_url
 
         if self.website:
             result['url'] = self.website
 
         return result
-
-
 
 
 datastore = MongoEngineUserDatastore(db, User, Role)
