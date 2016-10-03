@@ -54,14 +54,14 @@ class BoolFacet(Facet, DSLTermsFacet):
     def to_query(self, **kwargs):
         query = {
             'terms': {
-                'field': self.field,
+                'field': self._params['field'],
                 'size': 2,
             }
         }
         return query
 
     def to_aggregations(self, name, *args):
-        return {name: A('terms', field=self.field, size=2)}
+        return {name: A('terms', field=self._params['field'], size=2)}
 
     def filter_from_kwargs(self, name, kwargs):
         if name not in kwargs:
@@ -69,9 +69,9 @@ class BoolFacet(Facet, DSLTermsFacet):
         value = kwargs[name]
         boolean = to_bool(value)
         if boolean:
-            return {'must': [{'term': {self.field: True}}]}
+            return {'must': [{'term': {self._params['field']: True}}]}
         else:
-            return {'must_not': [{'term': {self.field: True}}]}
+            return {'must_not': [{'term': {self._params['field']: True}}]}
 
     def from_response(self, name, response, fetch=True):
         aggregation = response.get('aggregations', {}).get(name)
@@ -151,7 +151,7 @@ class ExtrasFacet(Facet):
         for key, value in kwargs.items():
             if key.startswith(prefix):
                 filters.append({
-                    'term': {key.replace(name, self.field): value}})
+                    'term': {key.replace(name, self._params['field']): value}})
         return {'must': filters}
 
     def from_response(self, name, response, fetch=True):
@@ -166,18 +166,18 @@ class RangeFacet(Facet, DSLRangeFacet):
     def to_query(self, **kwargs):
         return {
             'stats': {
-                'field': self.field
+                'field': self._params['field']
             }
         }
 
     def to_aggregations(self, name, size=20, *args):
-        return {name: A('stats', field=self.field)}
+        return {name: A('stats', field=self._params['field'])}
 
     def to_filter(self, value):
         boundaries = [self.cast(v) for v in value.split('-')]
         return {
             'range': {
-                self.field: {
+                self._params['field']: {
                     'gte': min(*boundaries),
                     'lte': max(*boundaries),
                 }
@@ -215,7 +215,7 @@ class DateRangeFacet(RangeFacet):
         date2 = date(*map(int, parts[3:6]))
         return {
             'range': {
-                self.field: {
+                self._params['field']: {
                     'lte': max(date1, date2).isoformat(),
                     'gte': min(date1, date2).isoformat(),
                 },
@@ -251,13 +251,13 @@ class TemporalCoverageFacet(Facet):
         start, end = self.parse_value(value)
         return [{
             'range': {
-                '{0}.start'.format(self.field): {
+                '{0}.start'.format(self._params['field']): {
                     'lte': max(start, end).toordinal(),
                 },
             }
         }, {
             'range': {
-                '{0}.end'.format(self.field): {
+                '{0}.end'.format(self._params['field']): {
                     'gte': min(start, end).toordinal(),
                 },
             }
@@ -266,9 +266,9 @@ class TemporalCoverageFacet(Facet):
     def from_response(self, name, response, fetch=True):
         aggregations = response.get('aggregations', {})
         min_value = aggregations.get(
-            '{0}_min'.format(self.field), {}).get('value')
+            '{0}_min'.format(self._params['field']), {}).get('value')
         max_value = aggregations.get(
-            '{0}_max'.format(self.field), {}).get('value')
+            '{0}_max'.format(self._params['field']), {}).get('value')
 
         if not (min_value and max_value):
             return None
@@ -284,8 +284,8 @@ class TemporalCoverageFacet(Facet):
         }
 
     def to_aggregations(self, name, *args):
-        kwmin = {'field': '{0}.start'.format(self.field)}
-        kwmax = {'field': '{0}.end'.format(self.field)}
+        kwmin = {'field': '{0}.start'.format(self._params['field'])}
+        kwmax = {'field': '{0}.end'.format(self._params['field'])}
         return {
             '{0}_min'.format(name): A('min', **kwmin),
             '{0}_max'.format(name): A('max', **kwmax),
