@@ -90,7 +90,7 @@ class ReuseSearch(ModelSearchAdapter):
         # 'datasets': RangeFacet(field='metrics.datasets'),
         # 'followers': RangeFacet(field='metrics.followers'),
         'featured': BoolFacet(field='featured'),
-        # 'extra': ExtrasFacet(field='extras'),
+        'extra': ExtrasFacet(field='extras'),
         'badge': TermsFacet(field='badges', labelizer=reuse_badge_labelizer),
     }
     sorts = {

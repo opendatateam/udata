@@ -39,7 +39,8 @@ def display(topic):
     }
     keys, queries = zip(*specs.items())
 
-    results = search.multisearch(*queries)
+    models = [Dataset, Reuse]
+    results = search.multisearch(*models, **queries)  # TODO.
 
     return theme.render(
         'topic/display.html',

@@ -141,7 +141,7 @@ class ModelTermsFacet(TermsFacet):
                 else unicode(self.model.objects.get(id=value)))
 
 
-class ExtrasFacet(Facet):
+class ExtrasFacet(Facet, DSLTermsFacet):
     def to_query(self, **kwargs):
         pass
 
