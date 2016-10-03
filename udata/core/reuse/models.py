@@ -133,6 +133,31 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
         urlhash = hash_url(url)
         return cls.objects(urlhash=urlhash).count() > 0
 
+    def get_json_ld(self):
+        result = {
+            '@context': 'http://schema.org',
+            '@type': 'CreativeWork',
+            'alternateName': self.slug,
+            'dateCreated': self.created_at.isoformat(),
+            'dateModified': self.last_modified.isoformat(),
+            'url': url_for('reuses.show', reuse=self, _external=True),
+            'name': self.title,
+            'description': self.description,
+            'isBasedOnUrl': self.url,
+        }
+
+        if self.organization:
+            author = self.organization.get_json_ld()
+        elif self.owner:
+            author = self.owner.get_json_ld()
+        else:
+            author = None
+
+        if author:
+            result['author'] = author
+
+        return result
+
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)
 post_save.connect(Reuse.post_save, sender=Reuse)

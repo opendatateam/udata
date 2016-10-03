@@ -104,33 +104,6 @@ class ReuseDetailView(ReuseView, DetailView):
 
         return context
 
-    def get_json_ld(self):
-        reuse = self.reuse
-        result = {
-            '@context': 'http://schema.org',
-            '@type': 'CreativeWork',
-            'alternateName': reuse.slug,
-            'dateCreated': reuse.created_at.isoformat(),
-            'dateModified': reuse.last_modified.isoformat(),
-            'url': url_for('reuses.show', reuse=reuse, _external=True),
-            'name': reuse.title,
-            'description': reuse.description,
-            'isBasedOnUrl': reuse.url,
-        }
-
-        if reuse.organization:
-            view = OrganizationDetailView()
-            author = view.get_json_ld(reuse.organization)
-        elif reuse.owner:
-            view = UserActivityView()
-            author = view.get_json_ld(reuse.owner)
-        else:
-            author = None
-
-        if author:
-            result['author'] = author
-
-        return result
 
 @sitemap.register_generator
 def sitemap_urls():

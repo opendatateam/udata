@@ -13,6 +13,7 @@ from itsdangerous import JSONWebSignatureSerializer
 
 from werkzeug import cached_property
 
+from udata.frontend.helpers import placeholder
 from udata.models import db, WithMetrics
 from udata.core.storages import avatars, default_image_basename
 
@@ -186,6 +187,24 @@ class User(db.Document, WithMetrics, UserMixin):
             cls.on_create.send(document)
         else:
             cls.on_update.send(document)
+
+
+    def get_json_ld(self):
+
+        result = {
+            '@type': 'Person',
+            '@context': 'http://schema.org',
+            'image': placeholder(self.avatar, 'user'),
+            'name': self.fullname,
+            'description': self.about,
+        }
+
+        if self.website:
+            result['url'] = self.website
+
+        return result
+
+
 
 
 datastore = MongoEngineUserDatastore(db, User, Role)

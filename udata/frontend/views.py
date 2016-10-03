@@ -157,8 +157,9 @@ class DetailView(SingleObject, Templated, BaseView):
 
     def get_context(self):
         context = super(DetailView, self).get_context()
-        if hasattr(self, 'get_json_ld'):
-            context['json_ld'] = json.dumps(self.get_json_ld())
+
+        if hasattr(self.object, 'get_json_ld'):
+            context['json_ld'] = json.dumps(self.object.get_json_ld())
         return context
 
 

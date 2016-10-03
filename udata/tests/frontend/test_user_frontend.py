@@ -57,7 +57,6 @@ class UserBlueprintTest(FrontTestCase):
         self.assertEquals(json_ld["@context"], "http://schema.org")
         self.assertEquals(json_ld["@type"], "Person")
 
-
     def test_render_profile_datasets(self):
         '''It should render the user profile datasets page'''
         user = UserFactory()

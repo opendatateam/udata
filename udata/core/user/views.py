@@ -6,7 +6,6 @@ import logging
 from flask import g
 
 from udata.frontend.views import DetailView, SearchView
-from udata.frontend.helpers import placeholder
 from udata.models import User, Activity, Organization, Dataset, Reuse, Follow
 from udata.i18n import I18nBlueprint
 
@@ -81,23 +80,6 @@ class UserActivityView(UserView, DetailView):
                                          .order_by('-created_at').limit(15))
         return context
 
-
-    def get_json_ld(self, user=None):
-        if user is None:
-            user = self.user
-
-        result = {
-            '@type': 'Person',
-            '@context': 'http://schema.org',
-            'image': placeholder(user.avatar, 'user'),
-            'name': user.fullname,
-            'description': user.about,
-        }
-
-        if user.website:
-            result['url'] = user.website
-
-        return result
 
 @blueprint.route('/<user:user>/following/', endpoint='following')
 class UserFollowingView(UserView, DetailView):
