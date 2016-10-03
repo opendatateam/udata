@@ -75,7 +75,7 @@ new Vue({
          * @return {Object} The parsed dataset
          */
         extractDataset() {
-            const selector = "script[type='application/ld+json']";
+            const selector = '#json_ld';
             const dataset = JSON.parse(document.querySelector(selector).text)
             dataset.resources = dataset.distribution;
             delete dataset.distribution;
