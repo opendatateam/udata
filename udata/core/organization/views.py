@@ -98,15 +98,16 @@ class OrganizationDetailView(OrgView, DetailView):
     def get_json_ld(self, org=None):
         if org is None:
             org = self.organization
-        prefix = 'Government' if org.public_service else ''
-        return {"@context": "http://schema.org",
-                "@type": '{}Organization'.format(prefix),
-                "alternateName": org.slug,
-                "logo": org.logo(external=True),
-                "url": url_for('organizations.show', org=org, _external=True),
-                "name": org.name,
-                "description": org.description
-            }
+        type_ = 'GovernmentOrganization' if org.public_service else 'Organization'
+        return {
+            '@context': 'http://schema.org',
+            '@type': type_,
+            'alternateName': org.slug,
+            'logo': org.logo(external=True),
+            'url': url_for('organizations.show', org=org, _external=True),
+            'name': org.name,
+            'description': org.description,
+        }
 
 
 @blueprint.route('/<org:org>/dashboard/', endpoint='dashboard')
@@ -220,4 +221,4 @@ def datasets_resources_csv(org):
 @sitemap.register_generator
 def sitemap_urls():
     for org in Organization.objects.visible().only('id', 'slug'):
-        yield 'organizations.show_redirect', {'org': org}, None, "weekly", 0.7
+        yield 'organizations.show_redirect', {'org': org}, None, 'weekly', 0.7

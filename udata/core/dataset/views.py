@@ -94,23 +94,24 @@ class DatasetDetailView(DatasetView, DetailView):
     def get_json_ld(self):
         dataset = self.dataset
 
-        result = {"@context": "http://schema.org",
-                  "@type": "Dataset",
-                  "@id": str(dataset.id),
-                  "description": dataset.description,
-                  "alternateName": dataset.slug,
-                  "dateCreated": dataset.created_at.isoformat(),
-                  "dateModified": dataset.last_modified.isoformat(),
-                  "url": url_for('datasets.show', dataset=dataset, _external=True),
-                  "name": dataset.title,
-                  "keywords": ', '.join(dataset.tags),
-                  "distribution": map(self.get_json_ld_resource, dataset.resources),
-                  # This value is not standard
-                  "extras": map(self.get_json_ld_extra, dataset.extras.items())
+        result = {
+            '@context': 'http://schema.org',
+            '@type': 'Dataset',
+            '@id': str(dataset.id),
+            'description': dataset.description,
+            'alternateName': dataset.slug,
+            'dateCreated': dataset.created_at.isoformat(),
+            'dateModified': dataset.last_modified.isoformat(),
+            'url': url_for('datasets.show', dataset=dataset, _external=True),
+            'name': dataset.title,
+            'keywords': ', '.join(dataset.tags),
+            'distribution': map(self.get_json_ld_resource, dataset.resources),
+            # This value is not standard
+            'extras': map(self.get_json_ld_extra, dataset.extras.items()),
         }
 
         if dataset.license and dataset.license.url:
-            result["license"] = dataset.license.url
+            result['license'] = dataset.license.url
 
         if dataset.organization:
             view = OrganizationDetailView()
@@ -130,42 +131,43 @@ class DatasetDetailView(DatasetView, DetailView):
     def get_json_ld_resource(resource):
 
         result = {
-            "@type": "DataDownload",
-            "@id": str(resource.id),
-            "url": resource.url,
-            "name": resource.title or _('Nameless resource'),
-            "contentUrl": resource.url,
-            "encodingFormat": resource.format or '',
-            "dateCreated": resource.created_at.isoformat(),
-            "dateModified": resource.modified.isoformat(),
-            "datePublished": resource.published.isoformat(),
-            "contentSize": resource.filesize or '',
-            "fileFormat": resource.mime or '',
-            "interactionStatistic": {
-                "@type": "InteractionCounter",
-                "interactionType": {
-                    "@type": "DownloadAction"
+            '@type': 'DataDownload',
+            '@id': str(resource.id),
+            'url': resource.url,
+            'name': resource.title or _('Nameless resource'),
+            'contentUrl': resource.url,
+            'encodingFormat': resource.format or '',
+            'dateCreated': resource.created_at.isoformat(),
+            'dateModified': resource.modified.isoformat(),
+            'datePublished': resource.published.isoformat(),
+            'contentSize': resource.filesize or '',
+            'fileFormat': resource.mime or '',
+            'interactionStatistic': {
+                '@type': 'InteractionCounter',
+                'interactionType': {
+                    '@type': 'DownloadAction',
                 },
                 # We take resource.metrics.views if it exists
-                "userInteractionCount": getattr(resource.metrics, 'views', None) or ''
-            }
+                'userInteractionCount': getattr(resource.metrics, 'views', ''),
+            },
         }
 
         if resource.description:
-            result["description"] = resource.description
+            result['description'] = resource.description
 
         # These 2 values are not standard
         if resource.checksum:
-            result["checksum"] = resource.checksum.value,
-            result["checksumType"] = resource.checksum.type or 'sha1'
+            result['checksum'] = resource.checksum.value,
+            result['checksumType'] = resource.checksum.type or 'sha1'
 
         return result
 
     @staticmethod
     def get_json_ld_extra(key, value):
-        return {"@type": "http://schema.org/PropertyValue",
-                "name": key,
-                "value": value.serialize() if value.serialize else value
+        return {
+            '@type': 'http://schema.org/PropertyValue',
+            'name': key,
+            'value': value.serialize() if value.serialize else value,
         }
 
 
@@ -184,4 +186,4 @@ class DatasetFollowersView(DatasetView, DetailView):
 def sitemap_urls():
     for dataset in Dataset.objects.visible().only('id', 'slug'):
         yield ('datasets.show_redirect', {'dataset': dataset},
-               None, "weekly", 0.8)
+               None, 'weekly', 0.8)

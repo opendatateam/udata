@@ -106,16 +106,17 @@ class ReuseDetailView(ReuseView, DetailView):
 
     def get_json_ld(self):
         reuse = self.reuse
-        result = {'@context': "http://schema.org",
-                  '@type': "CreativeWork",
-                  "alternateName": reuse.slug,
-                  "dateCreated": reuse.created_at.isoformat(),
-                  "dateModified": reuse.last_modified.isoformat(),
-                  "url": url_for('reuses.show', reuse=reuse, _external=True),
-                  "name": reuse.title,
-                  "description": reuse.description,
-                  "isBasedOnUrl": reuse.url
-            }
+        result = {
+            '@context': 'http://schema.org',
+            '@type': 'CreativeWork',
+            'alternateName': reuse.slug,
+            'dateCreated': reuse.created_at.isoformat(),
+            'dateModified': reuse.last_modified.isoformat(),
+            'url': url_for('reuses.show', reuse=reuse, _external=True),
+            'name': reuse.title,
+            'description': reuse.description,
+            'isBasedOnUrl': reuse.url,
+        }
 
         if reuse.organization:
             view = OrganizationDetailView()
@@ -134,4 +135,4 @@ class ReuseDetailView(ReuseView, DetailView):
 @sitemap.register_generator
 def sitemap_urls():
     for reuse in Reuse.objects.visible().only('id', 'slug'):
-        yield 'reuses.show_redirect', {'reuse': reuse}, None, "weekly", 0.8
+        yield 'reuses.show_redirect', {'reuse': reuse}, None, 'weekly', 0.8

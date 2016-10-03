@@ -86,15 +86,16 @@ class UserActivityView(UserView, DetailView):
         if user is None:
             user = self.user
 
-        result = {"@type": 'Person',
-                  "@context": "http://schema.org",
-                  "image": placeholder(user.avatar, 'user'),
-                  "name": user.fullname,
-                  "description": user.about
-                  }
+        result = {
+            '@type': 'Person',
+            '@context': 'http://schema.org',
+            'image': placeholder(user.avatar, 'user'),
+            'name': user.fullname,
+            'description': user.about,
+        }
 
         if user.website:
-            result["url"] = user.website
+            result['url'] = user.website
 
         return result
 
