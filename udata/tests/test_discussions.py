@@ -198,7 +198,7 @@ class DiscussionsTest(APITestCase):
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
         discussion = DatasetDiscussion.objects.create(
-            subject=dataset.id,
+            subject=dataset,
             user=user,
             title='test discussion',
             discussion=[message]
