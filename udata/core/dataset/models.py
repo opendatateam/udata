@@ -159,15 +159,16 @@ class ResourceMixin(object):
             'dateCreated': self.created_at.isoformat(),
             'dateModified': self.modified.isoformat(),
             'datePublished': self.published.isoformat(),
-            'interactionStatistic': {
+        }
+
+        if 'views' in self.metrics.keys():
+            result['interactionStatistic'] = {
                 '@type': 'InteractionCounter',
                 'interactionType': {
                     '@type': 'DownloadAction',
                 },
-                # We take self.metrics.views if it exists
-                'userInteractionCount': getattr(self.metrics, 'views', ''),
-            },
-        }
+                'userInteractionCount': self.metrics['views']
+            }
 
         if self.format:
             result['encodingFormat'] = self.format
