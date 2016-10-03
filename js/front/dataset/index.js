@@ -169,7 +169,7 @@ new Vue({
          */
         checkResource(resource) {
             const url = parseUrl(resource.url);
-            const resource_el = document.querySelector("#resource-" + resource['@id'])
+            const resource_el = document.querySelector(`#resource-${resource['@id']}`)
             const el = resource_el.querySelector('.format-label');
             const checkurl = resource_el.dataset.checkurl;
             if (!this.ignore.some(domain => url.origin.endsWith(domain))) {
