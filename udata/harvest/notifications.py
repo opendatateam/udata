@@ -18,7 +18,10 @@ def validate_harvester_notifications(user):
 
     notifications = []
 
-    for source in HarvestSource.objects(validation__state=VALIDATION_PENDING):
+    qs = HarvestSource.objects(validation__state=VALIDATION_PENDING)
+    qs = qs.only('id', 'created_at', 'name')
+
+    for source in qs:
         notifications.append((source.created_at, {
             'id': source.id,
             'name': source.name,

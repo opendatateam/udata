@@ -16,13 +16,17 @@ def discussions_notifications(user):
     '''Notify user about open discussions'''
     notifications = []
 
-    for discussion in discussions_for(user):
+    # Only fetch required attributes
+    qs = discussions_for(user).only('id', 'created', 'title', 'subject')
+
+    # Do not dereference subject (so it's a DBRef)
+    for discussion in qs.no_dereference():
         notifications.append((discussion.created, {
             'id': discussion.id,
             'title': discussion.title,
             'subject': {
-                'id': discussion.subject.id,
-                'type': discussion.subject.__class__.__name__.lower(),
+                'id': discussion.subject['_ref'].id,
+                'type': discussion.subject['_cls'].lower(),
             }
         }))
 

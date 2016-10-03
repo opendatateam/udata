@@ -14,8 +14,8 @@ def issues_for(user, only_open=True):
 
     :param bool only_open: whether to include closed issues or not.
     '''
-    datasets = Dataset.objects.owned_by(user.id, *user.organizations)
-    reuses = Reuse.objects.owned_by(user.id, *user.organizations)
+    datasets = Dataset.objects.owned_by(user.id, *user.organizations).only('id', 'slug')
+    reuses = Reuse.objects.owned_by(user.id, *user.organizations).only('id', 'slug')
 
     qs = Issue.objects(subject__in=list(datasets) + list(reuses))
     if only_open:
