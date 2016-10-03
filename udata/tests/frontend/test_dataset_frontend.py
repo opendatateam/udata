@@ -65,7 +65,7 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertEquals(json_ld["@type"], "Dataset")
         self.assertEquals(json_ld["description"], "a&éèëù$£")
         self.assertEquals(json_ld["@id"], str(dataset.id))
-        self.assertEquals(json_ld["keywords"], 'bar, foo')
+        self.assertEquals(json_ld["keywords"], 'bar,foo')
         # The url contained in the json_ld is absolute
         self.assertTrue(json_ld["url"].endswith(url))
         self.assertEquals(json_ld["author"]['@type'], 'Person')

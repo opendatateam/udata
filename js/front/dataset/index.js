@@ -79,7 +79,7 @@ new Vue({
             const dataset = JSON.parse(document.querySelector(selector).text)
             dataset.resources = dataset.distribution;
             delete dataset.distribution;
-            dataset.keywords = dataset.keywords.split(',')
+            dataset.keywords = dataset.keywords.split(',').map(keyword => keyword.trim());
             return dataset;
         },
 

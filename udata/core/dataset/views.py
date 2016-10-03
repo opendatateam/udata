@@ -104,7 +104,7 @@ class DatasetDetailView(DatasetView, DetailView):
             'dateModified': dataset.last_modified.isoformat(),
             'url': url_for('datasets.show', dataset=dataset, _external=True),
             'name': dataset.title,
-            'keywords': ', '.join(dataset.tags),
+            'keywords': ','.join(dataset.tags),
             'distribution': map(self.get_json_ld_resource, dataset.resources),
             # This value is not standard
             'extras': map(self.get_json_ld_extra, dataset.extras.items()),
