@@ -46,6 +46,9 @@ class Facet(object):
     def filter_from_kwargs(self, name, kwargs):
         pass
 
+    def to_aggregations(self, name, *args):
+        pass
+
 
 class BoolFacet(Facet, DSLTermsFacet):
     def to_query(self, **kwargs):
