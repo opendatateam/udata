@@ -14,20 +14,26 @@ uData customizations for Etalab / Data.gouv.fr.
 Compatibility
 =============
 
-udata-gouvfr requires Python 2.7+ and uData.
+**udata-gouvfr** requires Python 2.7+ and uData.
 
 
 Installation
 ============
 
-You can install udata-gouvfr with pip:
+Install [udata](https://github.com/opendatateam/udata).
 
-.. code-block:: console
+Remain in the same virtual environment (for Python) and use the same version of npm (for JS).
 
-    $ pip install udata-gouvfr
+Install **udata-gouvfr**:
 
-or with easy_install:
+    git clone https://github.com/etalab/udata-gouvfr.git
+    pip install -e udata-gouvfr
 
-.. code-block:: console
+Modify the local configuration file of **udata** (typically, *udata.cfg*) as following:
 
-    $ easy_install udata-gouvfr
+    PLUGINS = ['gouvfr']
+    THEME = 'gouvfr'
+
+Build the assets:
+
+    inv assets
