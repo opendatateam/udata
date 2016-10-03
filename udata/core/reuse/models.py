@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
+from werkzeug import cached_property
 
 from udata.core.storages import images, default_image_basename
 from udata.i18n import lazy_gettext as _
@@ -133,7 +134,8 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
         urlhash = hash_url(url)
         return cls.objects(urlhash=urlhash).count() > 0
 
-    def get_json_ld(self):
+    @cached_property
+    def json_ld(self):
         result = {
             '@context': 'http://schema.org',
             '@type': 'CreativeWork',
@@ -147,9 +149,9 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
         }
 
         if self.organization:
-            author = self.organization.get_json_ld()
+            author = self.organization.json_ld
         elif self.owner:
-            author = self.owner.get_json_ld()
+            author = self.owner.json_ld
         else:
             author = None
 

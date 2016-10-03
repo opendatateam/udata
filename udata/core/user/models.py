@@ -188,8 +188,8 @@ class User(db.Document, WithMetrics, UserMixin):
         else:
             cls.on_update.send(document)
 
-
-    def get_json_ld(self):
+    @cached_property
+    def json_ld(self):
 
         result = {
             '@type': 'Person',

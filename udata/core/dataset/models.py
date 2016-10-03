@@ -148,7 +148,8 @@ class ResourceMixin(object):
     def is_available(self):
         return self.check_availability(group=None)
 
-    def get_json_ld(self):
+    @cached_property
+    def json_ld(self):
 
         result = {
             '@type': 'DataDownload',
@@ -457,7 +458,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
     def community_resources(self):
         return self.id and CommunityResource.objects.filter(dataset=self) or []
 
-    def get_json_ld(self):
+    @cached_property
+    def json_ld(self):
         result = {
             '@context': 'http://schema.org',
             '@type': 'Dataset',
@@ -469,7 +471,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             'url': url_for('datasets.show', dataset=self, _external=True),
             'name': self.title,
             'keywords': ','.join(self.tags),
-            'distribution': [resource.get_json_ld() for resource in self.resources],
+            'distribution': [resource.json_ld for resource in self.resources],
             # This value is not standard
             'extras': map(self.get_json_ld_extra, self.extras.items()),
         }
@@ -478,9 +480,9 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             result['license'] = self.license.url
 
         if self.organization:
-            author = self.organization.get_json_ld()
+            author = self.organization.json_ld
         elif self.owner:
-            author = self.owner.get_json_ld()
+            author = self.owner.json_ld
         else:
             author = None
 

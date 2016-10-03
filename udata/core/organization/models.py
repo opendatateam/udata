@@ -7,6 +7,7 @@ from itertools import chain
 from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
+from werkzeug import cached_property
 
 from udata.core.storages import avatars, default_image_basename
 from udata.models import db, BadgeMixin, WithMetrics
@@ -225,7 +226,8 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
               for dataset in Dataset.objects(organization=self).visible()[:20]]
         )
 
-    def get_json_ld(self):
+    @cached_property
+    def json_ld(self):
         return {
             '@context': 'http://schema.org',
             '@type': 'GovernmentOrganization' if self.public_service else 'Organization',
