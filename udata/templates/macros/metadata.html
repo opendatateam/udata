@@ -45,9 +45,7 @@
 <meta name="territory-enabled" content="{{ 'true' if config.ACTIVATE_TERRITORIES else 'false' }}">
 
 {% if json_ld %}
-<script type="application/ld+json">
-  {{ json_ld|safe }}
-</script>
+<script type="application/ld+json">{{ json_ld|safe }}</script>
 {% endif %}
 
 {% endmacro %}
