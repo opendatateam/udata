@@ -10,12 +10,11 @@ from udata.models import (
 from udata.search import (
     ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
 )
-from udata.search.fields import Sort
-# from udata.search.fields import (
-#     Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
-# )
-from udata.search.fields import TermsFacet, ModelTermsFacet, RangeFacet
-from udata.search.fields import BoolBooster, GaussDecay
+from udata.search.fields import (
+    Sort,
+    TermsFacet, ModelTermsFacet, RangeFacet, BoolFacet,
+    BoolBooster, GaussDecay
+)
 from udata.search.analysis import simple
 
 from udata.core.spatial.models import spatial_granularities
@@ -134,7 +133,7 @@ class DatasetSearch(ModelSearchAdapter):
         'format': TermsFacet(field='resources.format'),
         # 'reuses': RangeFacet(field='metrics.reuses'),
         # 'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
-        # 'featured': BoolFacet('featured'),
+        'featured': BoolFacet(field='featured'),
         # 'extra': ExtrasFacet('extras'),
     }
     boosters = [

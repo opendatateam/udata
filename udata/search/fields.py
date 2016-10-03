@@ -47,7 +47,7 @@ class Facet(object):
         pass
 
 
-class BoolFacet(Facet):
+class BoolFacet(Facet, DSLTermsFacet):
     def to_query(self, **kwargs):
         query = {
             'terms': {

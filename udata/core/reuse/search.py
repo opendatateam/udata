@@ -7,11 +7,11 @@ from udata.core.site.views import current_site
 from udata.models import (
     Reuse, Organization, Dataset, User, REUSE_TYPES
 )
-from udata.search import BoolBooster, GaussDecay
-from udata.search import ModelSearchAdapter, Sort
-from udata.search import i18n_analyzer, metrics_mapping_for, register
-from udata.search import RangeFacet, BoolFacet, ExtrasFacet
-from udata.search import TermsFacet, ModelTermsFacet
+from udata.search import (
+    BoolBooster, GaussDecay, ModelSearchAdapter, Sort,
+    i18n_analyzer, metrics_mapping_for, register,
+    RangeFacet, BoolFacet, ExtrasFacet, TermsFacet, ModelTermsFacet
+)
 from udata.search.analysis import simple
 
 from . import metrics  # noqa: Metrics are require for reuse search
@@ -89,7 +89,7 @@ class ReuseSearch(ModelSearchAdapter):
         # 'type': ReuseTypeFacet(field='type'),
         # 'datasets': RangeFacet(field='metrics.datasets'),
         # 'followers': RangeFacet(field='metrics.followers'),
-        # 'featured': BoolFacet(field='featured'),
+        'featured': BoolFacet(field='featured'),
         # 'extra': ExtrasFacet(field='extras'),
         'badge': TermsFacet(field='badges', labelizer=reuse_badge_labelizer),
     }
