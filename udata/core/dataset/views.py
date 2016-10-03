@@ -136,12 +136,9 @@ class DatasetDetailView(DatasetView, DetailView):
             'url': resource.url,
             'name': resource.title or _('Nameless resource'),
             'contentUrl': resource.url,
-            'encodingFormat': resource.format or '',
             'dateCreated': resource.created_at.isoformat(),
             'dateModified': resource.modified.isoformat(),
             'datePublished': resource.published.isoformat(),
-            'contentSize': resource.filesize or '',
-            'fileFormat': resource.mime or '',
             'interactionStatistic': {
                 '@type': 'InteractionCounter',
                 'interactionType': {
@@ -151,6 +148,15 @@ class DatasetDetailView(DatasetView, DetailView):
                 'userInteractionCount': getattr(resource.metrics, 'views', ''),
             },
         }
+
+        if resource.format:
+            result['encodingFormat'] = resource.format
+
+        if resource.filesize:
+            result['contentSize'] = resource.filesize
+
+        if resource.mime:
+            result['fileFormat'] = resource.mime
 
         if resource.description:
             result['description'] = resource.description
