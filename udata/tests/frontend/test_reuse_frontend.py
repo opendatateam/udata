@@ -53,9 +53,9 @@ class ReuseBlueprintTest(FrontTestCase):
         response = self.get(url_for('reuses.show', reuse=reuse))
         self.assert200(response)
         json_ld = self.get_json_ld(response)
-        self.assertEquals(json_ld["@context"], "http://schema.org")
-        self.assertEquals(json_ld["@type"], "CreativeWork")
-        self.assertEquals(json_ld["author"]['@type'], 'Person')
+        self.assertEquals(json_ld['@context'], 'http://schema.org')
+        self.assertEquals(json_ld['@type'], 'CreativeWork')
+        self.assertEquals(json_ld['author']['@type'], 'Person')
 
     def test_raise_404_if_private(self):
         '''It should raise a 404 if the reuse is private'''

@@ -54,8 +54,8 @@ class UserBlueprintTest(FrontTestCase):
         response = self.get(url_for('users.show', user=user))
         self.assert200(response)
         json_ld = self.get_json_ld(response)
-        self.assertEquals(json_ld["@context"], "http://schema.org")
-        self.assertEquals(json_ld["@type"], "Person")
+        self.assertEquals(json_ld['@context'], 'http://schema.org')
+        self.assertEquals(json_ld['@type'], 'Person')
 
     def test_render_profile_datasets(self):
         '''It should render the user profile datasets page'''

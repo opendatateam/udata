@@ -42,8 +42,8 @@ class OrganizationBlueprintTest(FrontTestCase):
         response = self.get(url_for('organizations.show', org=organization))
         self.assert200(response)
         json_ld = self.get_json_ld(response)
-        self.assertEquals(json_ld["@context"], "http://schema.org")
-        self.assertEquals(json_ld["@type"], "Organization")
+        self.assertEquals(json_ld['@context'], 'http://schema.org')
+        self.assertEquals(json_ld['@type'], 'Organization')
 
     def test_render_display_if_deleted(self):
         '''It should not render the organization page if deleted'''

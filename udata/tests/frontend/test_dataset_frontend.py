@@ -61,18 +61,18 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.get(url)
         self.assert200(response)
         json_ld = self.get_json_ld(response)
-        self.assertEquals(json_ld["@context"], "http://schema.org")
-        self.assertEquals(json_ld["@type"], "Dataset")
-        self.assertEquals(json_ld["description"], "a&éèëù$£")
-        self.assertEquals(json_ld["@id"], str(dataset.id))
-        self.assertEquals(json_ld["keywords"], 'bar,foo')
+        self.assertEquals(json_ld['@context'], 'http://schema.org')
+        self.assertEquals(json_ld['@type'], 'Dataset')
+        self.assertEquals(json_ld['description'], 'a&éèëù$£')
+        self.assertEquals(json_ld['@id'], str(dataset.id))
+        self.assertEquals(json_ld['keywords'], 'bar,foo')
         # The url contained in the json_ld is absolute
-        self.assertTrue(json_ld["url"].endswith(url))
-        self.assertEquals(json_ld["author"]['@type'], 'Person')
-        self.assertEquals(len(json_ld["distribution"]), 1)
-        for json_ld_resource in json_ld["distribution"]:
-            self.assertEquals(json_ld_resource["@type"], "DataDownload")
-            self.assertEquals(json_ld_resource["@id"], str(resource.id))
+        self.assertTrue(json_ld['url'].endswith(url))
+        self.assertEquals(json_ld['author']['@type'], 'Person')
+        self.assertEquals(len(json_ld['distribution']), 1)
+        for json_ld_resource in json_ld['distribution']:
+            self.assertEquals(json_ld_resource['@type'], 'DataDownload')
+            self.assertEquals(json_ld_resource['@id'], str(resource.id))
 
     def test_raise_404_if_private(self):
         '''It should raise a 404 if the dataset is private'''
