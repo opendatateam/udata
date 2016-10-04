@@ -38,12 +38,19 @@ class OrganizationBlueprintTest(FrontTestCase):
 
     def test_render_display(self):
         '''It should render the organization page'''
-        organization = OrganizationFactory()
-        response = self.get(url_for('organizations.show', org=organization))
+        organization = OrganizationFactory(name='organization_name',
+                                           description='* Title 1\n* Title 2',)
+        url = url_for('organizations.show', org=organization)
+        response = self.get(url)
         self.assert200(response)
         json_ld = self.get_json_ld(response)
         self.assertEquals(json_ld['@context'], 'http://schema.org')
         self.assertEquals(json_ld['@type'], 'Organization')
+        self.assertEquals(json_ld['alternateName'], 'organization-name')
+         # The url contained in the json_ld is absolute
+        self.assertTrue(json_ld['url'].endswith(url))
+        self.assertEquals(json_ld['name'], 'organization_name')
+        self.assertEquals(json_ld['description'], 'Title 1 Title 2')
 
     def test_render_display_if_deleted(self):
         '''It should not render the organization page if deleted'''
