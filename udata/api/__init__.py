@@ -33,10 +33,6 @@ apidoc = I18nBlueprint('apidoc', __name__)
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = 'X-API-KEY'
 
-FACETS_TYPES = {
-    search.fields.BoolFacet: inputs.boolean
-}
-
 
 class UDataApi(Api):
     def __init__(self, app=None, **kwargs):
@@ -131,8 +127,7 @@ class UDataApi(Api):
         # Add facets filters arguments
         # (apply a value to a facet ie. tag=value)
         for name, facet in adapter.facets.items():
-            facet_type = FACETS_TYPES.get(facet.__class__, str)
-            parser.add_argument(name, type=facet_type, location='args')
+            parser.add_argument(name, type=str, location='args')
         # Sort arguments
         keys = adapter.sorts.keys()
         choices = keys + ['-' + k for k in keys]

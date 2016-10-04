@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 __all__ = (
     'Sort',
-    'BoolFacet', 'TermsFacet', 'ModelTermsFacet', 'ExtrasFacet',
+    'TermsFacet', 'ModelTermsFacet', 'ExtrasFacet',
     'RangeFacet', 'DateRangeFacet', 'TemporalCoverageFacet',
     'BoolBooster', 'FunctionBooster',
     'GaussDecay', 'ExpDecay', 'LinearDecay',
@@ -48,54 +48,6 @@ class Facet(object):
 
     def to_aggregations(self, name, *args):
         pass
-
-
-class BoolFacet(Facet, DSLTermsFacet):
-    def to_query(self, **kwargs):
-        query = {
-            'terms': {
-                'field': self._params['field'],
-                'size': 2,
-            }
-        }
-        return query
-
-    def to_aggregations(self, name, *args):
-        return {name: A('terms', field=self._params['field'], size=2)}
-
-    def filter_from_kwargs(self, name, kwargs):
-        if name not in kwargs:
-            return
-        value = kwargs[name]
-        boolean = to_bool(value)
-        if boolean:
-            return {'must': [{'term': {self._params['field']: True}}]}
-        else:
-            return {'must_not': [{'term': {self._params['field']: True}}]}
-
-    def from_response(self, name, response, fetch=True):
-        aggregation = response.get('aggregations', {}).get(name)
-        if not aggregation or not len(aggregation['terms']):
-            return
-        true_count = 0
-        false_count = 0
-        for row in aggregation['terms']:
-            if row['term'] == 'T':
-                true_count = row['count']
-            else:
-                false_count = row['count']
-        false_count += aggregation['missing'] + aggregation['other']
-        data = {
-            'type': 'bool',
-            'visible': true_count > 0 and false_count > 0,
-            True: true_count,
-            False: false_count
-        }
-        return data
-
-    def labelize(self, label, value):
-        return ': '.join([label,
-                          unicode(_('yes') if to_bool(value) else _('no'))])
 
 
 class TermsFacet(Facet, DSLTermsFacet):

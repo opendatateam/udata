@@ -54,7 +54,6 @@ class FakeSearch(search.ModelSearchAdapter):
         'tag': search.TermsFacet(field='tags'),
         'other': search.TermsFacet(field='other'),
         'range': search.RangeFacet(field='a_num_field'),
-        'bool': search.BoolFacet(field='boolean'),
     }
     sorts = {
         'title': search.Sort('title.raw'),
@@ -698,69 +697,6 @@ class FacetTestCase(TestCase):
         aggs = self.facet.to_aggregations(name)
         as_dict = dict((k, v.to_dict()) for k, v in aggs.items())
         self.assertEqual(as_dict, expected)
-
-
-class TestBoolFacet(FacetTestCase):
-    def setUp(self):
-        self.facet = search.BoolFacet(field='boolean')
-
-    def test_to_query(self):
-        self.assertEqual(self.facet.to_query(), {
-            'terms': {
-                'field': 'boolean',
-                'size': 2,
-            }
-        })
-
-    def test_from_response(self):
-        response = es_factory()
-        response['aggregations'] = {
-            'test': {
-                '_type': 'terms',
-                'total': 25,
-                'other': 33,
-                'missing': 22,
-                'terms': [
-                    {'term': 'T', 'count': 10},
-                    {'term': 'F', 'count': 15},
-                ],
-            }
-        }
-
-        extracted = self.facet.from_response('test', response)
-        self.assertEqual(extracted['type'], 'bool')
-        self.assertEqual(extracted[True], 10)
-        self.assertEqual(extracted[False], 70)
-
-    def test_to_filter(self):
-        for value in True, 'True', 'true':
-            kwargs = {'boolean': value}
-            expected = {'must': [{'term': {'boolean': True}}]}
-            self.assertEqual(
-                self.facet.filter_from_kwargs('boolean', kwargs),
-                expected)
-
-        for value in False, 'False', 'false':
-            kwargs = {'boolean': value}
-            expected = {'must_not': [{'term': {'boolean': True}}]}
-            self.assertEqual(
-                self.facet.filter_from_kwargs('boolean', kwargs),
-                expected)
-
-    def test_aggregations(self):
-        expected = {'foo': {'terms': {'field': 'boolean', 'size': 2}}}
-        self.assert_agg('foo', expected)
-
-    def test_labelize(self):
-        self.assertEqual(self.facet.labelize('label', True),
-                         'label: {0}'.format(_('yes')))
-        self.assertEqual(self.facet.labelize('label', False),
-                         'label: {0}'.format(_('no')))
-
-        self.assertEqual(self.facet.labelize('label', 'true'),
-                         'label: {0}'.format(_('yes')))
-        self.assertEqual(self.facet.labelize('label', 'false'),
-                         'label: {0}'.format(_('no')))
 
 
 class TestTermsFacet(FacetTestCase):
