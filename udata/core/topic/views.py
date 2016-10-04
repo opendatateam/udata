@@ -16,7 +16,7 @@ blueprint = I18nBlueprint('topics', __name__, url_prefix='/topics')
 
 @blueprint.route('/<topic:topic>/')
 def display(topic):
-    recent_datasets = Dataset.objects(tags__in=topic.tags).sort('-created')
+    recent_datasets = Dataset.objects(tags__in=topic.tags).order_by('-created')
     featured_reuses = Reuse.objects(tags__in=topic.tags, featured=True)
 
     return theme.render(
