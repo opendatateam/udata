@@ -18,6 +18,8 @@ def validate_harvester_notifications(user):
 
     notifications = []
 
+    # Only fetch required fields for notification serialization
+    # Greatly improve performances and memory usage
     qs = HarvestSource.objects(validation__state=VALIDATION_PENDING)
     qs = qs.only('id', 'created_at', 'name')
 

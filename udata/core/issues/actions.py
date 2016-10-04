@@ -14,6 +14,8 @@ def issues_for(user, only_open=True):
 
     :param bool only_open: whether to include closed issues or not.
     '''
+    # Only fetch required fields for issues filtering (id and slug)
+    # Greatly improve performances and memory usage
     datasets = Dataset.objects.owned_by(user.id, *user.organizations).only('id', 'slug')
     reuses = Reuse.objects.owned_by(user.id, *user.organizations).only('id', 'slug')
 
