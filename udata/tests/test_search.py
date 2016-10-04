@@ -75,17 +75,6 @@ class FakeSearchWithDateRange(search.ModelSearchAdapter):
     }
 
 
-class FakeSearchWithExtra(search.ModelSearchAdapter):
-    model = Fake
-    fields = [
-        'title^2',
-        'description',
-    ]
-    facets = {
-        'extra': search.ExtrasFacet(field='extras'),
-    }
-
-
 class FuzzySearch(FakeSearch):
     fuzzy = True
 
@@ -483,24 +472,6 @@ class SearchQueryTest(TestCase):
                 'fields': ['title^2', 'description']
             }},
             {'term': {'tags': 'value'}},
-        ]
-
-        query = search_query.get_query()
-        self.assertEqual(len(query['bool']['must']), len(expectations))
-        for expected in expectations:
-            self.assertIn(expected, query['bool']['must'])
-
-    def test_aggregation_filter_extras(self):
-        search_query = search.SearchQuery(
-            FakeSearchWithExtra, **{'q': 'test', 'extra.key': 'value'})
-        expectations = [
-            {'multi_match': {
-                'query': 'test',
-                'analyzer': search.i18n_analyzer,
-                'type': 'cross_fields',
-                'fields': ['title^2', 'description']
-            }},
-            {'term': {'extras.key': 'value'}},
         ]
 
         query = search_query.get_query()

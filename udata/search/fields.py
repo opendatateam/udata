@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 __all__ = (
     'Sort',
-    'TermsFacet', 'ModelTermsFacet', 'ExtrasFacet',
+    'TermsFacet', 'ModelTermsFacet',
     'RangeFacet', 'DateRangeFacet', 'TemporalCoverageFacet',
     'BoolBooster', 'FunctionBooster',
     'GaussDecay', 'ExpDecay', 'LinearDecay',
@@ -91,23 +91,6 @@ class ModelTermsFacet(TermsFacet):
         return (self.labelizer(label, value)
                 if self.labelizer
                 else unicode(self.model.objects.get(id=value)))
-
-
-class ExtrasFacet(Facet, DSLTermsFacet):
-    def to_query(self, **kwargs):
-        pass
-
-    def filter_from_kwargs(self, name, kwargs):
-        prefix = '{0}.'.format(name)
-        filters = []
-        for key, value in kwargs.items():
-            if key.startswith(prefix):
-                filters.append({
-                    'term': {key.replace(name, self._params['field']): value}})
-        return {'must': filters}
-
-    def from_response(self, name, response, fetch=True):
-        pass
 
 
 class RangeFacet(Facet, DSLRangeFacet):
