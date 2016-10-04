@@ -3,17 +3,14 @@ from __future__ import unicode_literals
 
 import logging
 
-from datetime import date, datetime, timedelta
-
 from bson.objectid import ObjectId
 
 from udata.models import db
-from udata.i18n import lazy_gettext as _, format_date
-from udata.utils import to_bool
 
 from elasticsearch_dsl import A
 from elasticsearch_dsl.faceted_search import (
-    TermsFacet as DSLTermsFacet, RangeFacet as DSLRangeFacet
+    TermsFacet as DSLTermsFacet, RangeFacet as DSLRangeFacet,
+    DateHistogramFacet
 )
 
 
@@ -22,7 +19,7 @@ log = logging.getLogger(__name__)
 __all__ = (
     'Sort',
     'TermsFacet', 'ModelTermsFacet',
-    'RangeFacet', 'DateRangeFacet', 'TemporalCoverageFacet',
+    'RangeFacet', 'DateHistogramFacet',
     'BoolBooster', 'FunctionBooster',
     'GaussDecay', 'ExpDecay', 'LinearDecay',
 )
@@ -133,100 +130,6 @@ class RangeFacet(Facet, DSLRangeFacet):
     def labelize(self, label, value):
         return (self.labelizer(label, value)
                 if self.labelizer else ': '.join([label, value]))
-
-
-def ts_to_dt(value):
-    '''Convert an elasticsearch timestamp into a Python datetime'''
-    return datetime.fromtimestamp(value * 1E-3)
-
-
-class DateRangeFacet(RangeFacet):
-    def to_filter(self, value):
-        parts = value.split('-')
-        date1 = date(*map(int, parts[0:3]))
-        date2 = date(*map(int, parts[3:6]))
-        return {
-            'range': {
-                self._params['field']: {
-                    'lte': max(date1, date2).isoformat(),
-                    'gte': min(date1, date2).isoformat(),
-                },
-            }
-        }
-
-    def from_response(self, name, response, fetch=True):
-        aggregation = response.get('aggregations', {}).get(name)
-        if not aggregation:
-            return
-        min_value = ts_to_dt(aggregation['min'])
-        max_value = ts_to_dt(aggregation['max'])
-        return {
-            'type': 'daterange',
-            'min': min_value,
-            'max': max_value,
-            'visible': (max_value - min_value) > timedelta(days=2),
-        }
-
-
-class TemporalCoverageFacet(Facet):
-    def to_query(self):
-        '''No direct query, only use aggregation via `to_aggregations`'''
-        pass
-
-    def parse_value(self, value):
-        parts = value.split('-')
-        start = date(*map(int, parts[0:3]))
-        end = date(*map(int, parts[3:6]))
-        return start, end
-
-    def to_filter(self, value):
-        start, end = self.parse_value(value)
-        return [{
-            'range': {
-                '{0}.start'.format(self._params['field']): {
-                    'lte': max(start, end).toordinal(),
-                },
-            }
-        }, {
-            'range': {
-                '{0}.end'.format(self._params['field']): {
-                    'gte': min(start, end).toordinal(),
-                },
-            }
-        }]
-
-    def from_response(self, name, response, fetch=True):
-        aggregations = response.get('aggregations', {})
-        min_value = aggregations.get(
-            '{0}_min'.format(self._params['field']), {}).get('value')
-        max_value = aggregations.get(
-            '{0}_max'.format(self._params['field']), {}).get('value')
-
-        if not (min_value and max_value):
-            return None
-
-        min_date = date.fromordinal(int(min_value))
-        max_date = date.fromordinal(int(max_value))
-
-        return {
-            'type': 'temporal-coverage',
-            'min': min_date,
-            'max': max_date,
-            'visible': (max_date - min_date) > timedelta(days=2),
-        }
-
-    def to_aggregations(self, name, *args):
-        kwmin = {'field': '{0}.start'.format(self._params['field'])}
-        kwmax = {'field': '{0}.end'.format(self._params['field'])}
-        return {
-            '{0}_min'.format(name): A('min', **kwmin),
-            '{0}_max'.format(name): A('max', **kwmax),
-        }
-
-    def labelize(self, label, value):
-        start, end = self.parse_value(value)
-        return '{0}: {1} - {2}'.format(label, format_date(start, 'short'),
-                                       format_date(end, 'short'))
 
 
 class BoolBooster(object):

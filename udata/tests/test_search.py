@@ -71,7 +71,6 @@ class FakeSearchWithDateRange(search.ModelSearchAdapter):
         'tag': search.TermsFacet(field='tags'),
         'other': search.TermsFacet(field='other'),
         'range': search.RangeFacet(field='a_num_field'),
-        'daterange': search.DateRangeFacet(field='a_daterange_field'),
     }
 
 
@@ -889,113 +888,6 @@ class TestRangeFacet(FacetTestCase):
     def test_labelize(self):
         self.assertEqual(
             self.facet.labelize('label', '4-15'), 'label: 4-15')
-
-
-class TestDateRangeFacet(FacetTestCase):
-    def setUp(self):
-        self.facet = search.DateRangeFacet(field='some_field')
-
-    def _es_timestamp(self, dt):
-        return time.mktime(dt.timetuple()) * 1E3
-
-    def test_to_query(self):
-        self.assertEqual(self.facet.to_query(), {
-            'stats': {
-                'field': 'some_field'
-            }
-        })
-
-    def test_from_response(self):
-        now = datetime.now()
-        two_days_ago = now - timedelta(days=2)
-        response = es_factory()
-        response['aggregations'] = {
-            'test': {
-                '_type': 'stats',
-                'count': 123,
-                'total': 666,
-                'min': self._es_timestamp(two_days_ago),
-                'max': self._es_timestamp(now),
-                'mean': 21.5,
-                'sum_of_squares': 29.0,
-                'variance': 2.25,
-                'std_deviation': 1.5
-            }
-        }
-
-        extracted = self.facet.from_response('test', response)
-        self.assertEqual(extracted['type'], 'daterange')
-        self.assertEqual(extracted['min'], two_days_ago.replace(microsecond=0))
-        self.assertEqual(extracted['max'], now.replace(microsecond=0))
-
-    def test_to_filter(self):
-        self.assertEqual(self.facet.to_filter('2013-01-07-2014-06-07'), {
-            'range': {
-                'some_field': {
-                    'lte': '2014-06-07',
-                    'gte': '2013-01-07',
-                },
-            }
-        })
-
-    def test_aggregations(self):
-        expected = {'foo': {'stats': {'field': 'some_field'}}}
-        self.assert_agg('foo', expected)
-
-
-class TestTemporalCoverageFacet(TestCase):
-    def setUp(self):
-        self.facet = search.TemporalCoverageFacet(field='some_field')
-
-    def test_to_query(self):
-        self.assertIsNone(self.facet.to_query())
-
-    def test_to_aggregations(self):
-        aggregations = self.facet.to_aggregations('foo')
-        self.assertEqual(aggregations['foo_min'].to_dict(),
-                         {'min': {'field': 'some_field.start'}})
-        self.assertEqual(aggregations['foo_max'].to_dict(),
-                         {'max': {'field': 'some_field.end'}})
-
-    def test_from_response(self):
-        today = date.today()
-        two_days_ago = today - timedelta(days=2)
-        response = es_factory()
-        response['aggregations'] = {
-            'some_field_min': {'value': float(two_days_ago.toordinal())},
-            'some_field_max': {'value': float(today.toordinal())},
-        }
-
-        extracted = self.facet.from_response('test', response)
-        self.assertEqual(extracted['type'], 'temporal-coverage')
-        self.assertEqual(extracted['min'], two_days_ago)
-        self.assertEqual(extracted['max'], today)
-
-    def test_to_filter(self):
-        self.assertEqual(
-            self.facet.to_filter('2013-01-07-2014-06-07'),
-            [{
-                'range': {
-                    'some_field.start': {
-                        'lte': date(2014, 6, 7).toordinal(),
-                    },
-                }
-            }, {
-                'range': {
-                    'some_field.end': {
-                        'gte': date(2013, 1, 7).toordinal(),
-                    },
-                }
-            }]
-        )
-
-    def test_labelize(self):
-        label = self.facet.labelize('label', '1940-01-01-2014-12-31')
-        expected = 'label: {0} - {1}'.format(
-            format_date(date(1940, 01, 01), 'short'),
-            format_date(date(2014, 12, 31), 'short')
-        )
-        self.assertEqual(label, expected)
 
 
 class SearchResultTest(TestCase):

@@ -13,7 +13,7 @@ from udata.search import (
 )
 from udata.search.fields import (
     Sort,
-    TermsFacet, ModelTermsFacet, RangeFacet,
+    TermsFacet, ModelTermsFacet, RangeFacet, DateHistogramFacet,
     BoolBooster, GaussDecay
 )
 from udata.search.analysis import simple
@@ -137,7 +137,8 @@ class DatasetSearch(ModelSearchAdapter):
                                      (_('Little reused'), (1, 5)),
                                      (_('Quite reused'), (5, 10)),
                                      (_('Heavily reused'), (10, None))]),
-        # 'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
+        'temporal_coverage': DateHistogramFacet(field='temporal_coverage',
+                                                interval='10Y'),
     }
     boosters = [
         BoolBooster('featured', 1.1),
