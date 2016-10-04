@@ -493,11 +493,11 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
         return result
 
     @staticmethod
-    def get_json_ld_extra(key, value):
+    def get_json_ld_extra((key, value)):
         return {
             '@type': 'http://schema.org/PropertyValue',
             'name': key,
-            'value': value.serialize() if value.serialize else value,
+            'value': value.serialize() if hasattr(value, 'serialize') else value,
         }
 
 

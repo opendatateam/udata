@@ -65,7 +65,8 @@ class DatasetBlueprintTest(FrontTestCase):
                                  tags=['foo', 'bar'],
                                  resources=[resource],
                                  description='a&éèëù$£',
-                                 owner=author)
+                                 owner=author,
+                                 extras={'foo': 'bar'})
         url = url_for('datasets.show', dataset=dataset)
         response = self.get(url)
         self.assert200(response)
@@ -103,8 +104,14 @@ class DatasetBlueprintTest(FrontTestCase):
                                   },
                                   u'userInteractionCount': 10,
                               })
-        self.assertEquals(json_ld['author']['@type'], 'Person')
+        self.assertEquals(json_ld['extras'],
+                           [{
+                               '@type': 'http://schema.org/PropertyValue',
+                               'name': 'foo',
+                               'value': 'bar',
+                           }])
         self.assertEquals(json_ld['license'], 'http://www.datagouv.fr/licence')
+        self.assertEquals(json_ld['author']['@type'], 'Person')
 
     def test_raise_404_if_private(self):
         '''It should raise a 404 if the dataset is private'''
