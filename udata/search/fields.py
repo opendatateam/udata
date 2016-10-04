@@ -4,15 +4,12 @@ from __future__ import unicode_literals
 import logging
 
 from bson.objectid import ObjectId
-
-from udata.models import db
-
-from elasticsearch_dsl import A
 from elasticsearch_dsl.faceted_search import (
     TermsFacet as DSLTermsFacet, RangeFacet as DSLRangeFacet,
     DateHistogramFacet
 )
 
+from udata.models import db
 
 log = logging.getLogger(__name__)
 
@@ -91,41 +88,6 @@ class ModelTermsFacet(TermsFacet):
 
 
 class RangeFacet(Facet, DSLRangeFacet):
-
-    def to_query(self, **kwargs):
-        return {
-            'stats': {
-                'field': self._params['field']
-            }
-        }
-
-    def to_aggregations(self, name, size=20, *args):
-        return {name: A('stats', field=self._params['field'])}
-
-    def to_filter(self, value):
-        boundaries = [self.cast(v) for v in value.split('-')]
-        return {
-            'range': {
-                self._params['field']: {
-                    'gte': min(*boundaries),
-                    'lte': max(*boundaries),
-                }
-            }
-        }
-
-    def from_response(self, name, response, fetch=True):
-        aggregation = response.get('aggregations', {}).get(name)
-        if not aggregation:
-            return
-        failure = (aggregation['min'] in ES_NUM_FAILURES or
-                   aggregation['max'] in ES_NUM_FAILURES)
-        return {
-            'type': 'range',
-            'min': None if failure else self.cast(aggregation['min']),
-            'max': None if failure else self.cast(aggregation['max']),
-            'visible': (not failure and
-                        aggregation['max'] - aggregation['min'] > 2),
-        }
 
     def labelize(self, label, value):
         return (self.labelizer(label, value)
