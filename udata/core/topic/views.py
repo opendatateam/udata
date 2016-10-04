@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import g, request
 
-from udata import search, theme
+from udata import theme
 from udata.i18n import I18nBlueprint
 from udata.models import Topic, Reuse, Dataset
 from udata.sitemap import sitemap
@@ -14,39 +14,17 @@ from .permissions import TopicEditPermission
 blueprint = I18nBlueprint('topics', __name__, url_prefix='/topics')
 
 
-class TopicSearchQuery(search.SearchQuery):
-    '''
-    A SearchQuery that should also match on topic tags
-    '''
-    @property
-    def topic(self):
-        return self.kwargs['topic']
-
-    def build_text_query(self):
-        query = super(TopicSearchQuery, self).build_text_query()
-        self._update_bool_query(query, {
-            'should': [{'term': {'tags': tag}} for tag in self.topic.tags]})
-        return query
-
-
 @blueprint.route('/<topic:topic>/')
 def display(topic):
-    specs = {
-        'recent_datasets': TopicSearchQuery(
-            Dataset, sort='-created', page_size=9, topic=topic),
-        'featured_reuses': TopicSearchQuery(
-            Reuse, featured=True, page_size=6, topic=topic),
-    }
-    keys, queries = zip(*specs.items())
-
-    models = [Dataset, Reuse]
-    results = search.multisearch(*models, **queries)  # TODO.
+    recent_datasets = Dataset.objects(tags__in=topic.tags).sort('-created')
+    featured_reuses = Reuse.objects(tags__in=topic.tags, featured=True)
 
     return theme.render(
         'topic/display.html',
         topic=topic,
         datasets=[d for d in topic.datasets if hasattr(d, 'pk')],
-        **dict(zip(keys, results))
+        recent_datasets=recent_datasets.visible(),
+        featured_reuses=featured_reuses.visible()
     )
 
 
