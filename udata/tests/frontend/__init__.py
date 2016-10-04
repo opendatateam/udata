@@ -21,5 +21,7 @@ class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
         # The first ? is used to name the extracted string
         # The second ? is used to express the non-greediness of the extraction
         pattern = '<script id="json_ld" type="application/ld\+json">(?P<json_ld>[\s\S]*?)</script>'
-        json_ld = re.search(pattern, response.data).group('json_ld')
+        search = re.search(pattern, response.data)
+        self.assertIsNotNone(search, (pattern, response.data))
+        json_ld = search.group('json_ld')
         return json.loads(json_ld)
