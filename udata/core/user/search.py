@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from elasticsearch_dsl import Completion, Date, String, Boolean
 
+from udata.i18n import lazy_gettext as _
 from udata.models import User, Organization
 from udata.search import ModelSearchAdapter
 from udata.search import i18n_analyzer, metrics_mapping_for, register
@@ -52,8 +53,14 @@ class UserSearch(ModelSearchAdapter):
     facets = {
         'organization': ModelTermsFacet(field='organizations',
                                         model=Organization),
-        # 'reuses': RangeFacet('metrics.reuses'),
-        # 'datasets': RangeFacet('metrics.datasets'),
+        'datasets': RangeFacet(field='metrics.datasets',
+                               ranges=[(_('No datasets'), (None, 1)),
+                                       (_('Few datasets'), (1, 5)),
+                                       (_('Many datasets'), (5, None))]),
+        'followers': RangeFacet(field='metrics.followers',
+                                ranges=[(_('No followers'), (None, 1)),
+                                        (_('Few followers'), (1, 5)),
+                                        (_('Many followers'), (5, None))]),
     }
     boosters = [
         GaussDecay('metrics.reuses', 50, decay=0.8),

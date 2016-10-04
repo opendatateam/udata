@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from elasticsearch_dsl import Completion, Date, String
 
+from udata.i18n import lazy_gettext as _
 from udata import search
 from udata.search.fields import TermsFacet, RangeFacet, Sort
 from udata.models import Organization
@@ -65,12 +66,20 @@ class OrganizationSearch(search.ModelSearchAdapter):
         'created': Sort('created'),
     }
     facets = {
-        # 'reuses': RangeFacet('metrics.reuses'),
+        'reuses': RangeFacet(field='metrics.reuses',
+                             ranges=[(_('No reuses'), (None, 1)),
+                                     (_('Few reuses'), (1, 5)),
+                                     (_('Many reuses'), (5, None))]),
         'badge': TermsFacet(field='badges',
                             labelizer=organization_badge_labelizer),
-        # 'permitted_reuses': RangeFacet('metrics.permitted_reuses'),
-        # 'datasets': RangeFacet('metrics.datasets'),
-        # 'followers': RangeFacet('metrics.followers'),
+        'datasets': RangeFacet(field='metrics.datasets',
+                               ranges=[(_('No datasets'), (None, 1)),
+                                       (_('Few datasets'), (1, 5)),
+                                       (_('Many datasets'), (5, None))]),
+        'followers': RangeFacet(field='metrics.followers',
+                                ranges=[(_('No followers'), (None, 1)),
+                                        (_('Few followers'), (1, 5)),
+                                        (_('Many followers'), (5, None))]),
     }
     boosters = [
         search.GaussDecay('metrics.followers', max_followers, decay=0.8),

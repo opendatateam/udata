@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from elasticsearch_dsl import Boolean, Completion, Date,  Object, String
 
+from udata.i18n import lazy_gettext as _
 from udata.core.site.views import current_site
 from udata.models import (
     Reuse, Organization, Dataset, User, REUSE_TYPES
@@ -87,8 +88,14 @@ class ReuseSearch(ModelSearchAdapter):
         'owner': ModelTermsFacet(field='owner', model=User),
         'dataset': ModelTermsFacet(field='dataset.id', model=Dataset),
         # 'type': ReuseTypeFacet(field='type'),
-        # 'datasets': RangeFacet(field='metrics.datasets'),
-        # 'followers': RangeFacet(field='metrics.followers'),
+        'datasets': RangeFacet(field='metrics.datasets',
+                               ranges=[(_('No datasets'), (None, 1)),
+                                       (_('Few datasets'), (1, 5)),
+                                       (_('Many datasets'), (5, None))]),
+        'followers': RangeFacet(field='metrics.followers',
+                                ranges=[(_('No followers'), (None, 1)),
+                                        (_('Few followers'), (1, 5)),
+                                        (_('Many followers'), (5, None))]),
         'badge': TermsFacet(field='badges', labelizer=reuse_badge_labelizer),
     }
     sorts = {

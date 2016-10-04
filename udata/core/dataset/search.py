@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from elasticsearch_dsl import Boolean, Completion, Date, Long, Object, String
 
+from udata.i18n import lazy_gettext as _
 from udata.core.site.views import current_site
 from udata.models import (
     Dataset, Organization, License, User, GeoZone,
@@ -131,7 +132,11 @@ class DatasetSearch(ModelSearchAdapter):
         'granularity': TermsFacet(field='granularity',
                                   labelizer=granularity_labelizer),
         'format': TermsFacet(field='resources.format'),
-        # 'reuses': RangeFacet(field='metrics.reuses'),
+        'reuses': RangeFacet(field='metrics.reuses',
+                             ranges=[(_('Never reused'), (None, 1)),
+                                     (_('Little reused'), (1, 5)),
+                                     (_('Quite reused'), (5, 10)),
+                                     (_('Heavily reused'), (10, None))]),
         # 'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
     }
     boosters = [

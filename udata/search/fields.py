@@ -94,9 +94,6 @@ class ModelTermsFacet(TermsFacet):
 
 
 class RangeFacet(Facet, DSLRangeFacet):
-    def __init__(self, field, cast=int, labelizer=None):
-        super(RangeFacet, self).__init__(field=field, labelizer=labelizer)
-        self.cast = cast
 
     def to_query(self, **kwargs):
         return {
