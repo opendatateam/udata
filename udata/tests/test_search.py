@@ -53,7 +53,12 @@ class FakeSearch(search.ModelSearchAdapter):
     facets = {
         'tag': search.TermsFacet(field='tags'),
         'other': search.TermsFacet(field='other'),
-        'range': search.RangeFacet(field='a_num_field'),
+        'range': search.RangeFacet(
+            field='a_num_field',
+            ranges=[(_('Never reused'), (None, 1)),
+                    (_('Little reused'), (1, 5)),
+                    (_('Quite reused'), (5, 10)),
+                    (_('Heavily reused'), (10, None))]),
     }
     sorts = {
         'title': search.Sort('title.raw'),
@@ -70,7 +75,12 @@ class FakeSearchWithDateRange(search.ModelSearchAdapter):
     facets = {
         'tag': search.TermsFacet(field='tags'),
         'other': search.TermsFacet(field='other'),
-        'range': search.RangeFacet(field='a_num_field'),
+        'range': search.RangeFacet(
+            field='a_num_field',
+            ranges=[(_('Never reused'), (None, 1)),
+                    (_('Little reused'), (1, 5)),
+                    (_('Quite reused'), (5, 10)),
+                    (_('Heavily reused'), (10, None))]),
     }
 
 
@@ -819,7 +829,12 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
 
 class TestRangeFacet(FacetTestCase):
     def setUp(self):
-        self.facet = search.RangeFacet(field='some_field')
+        self.facet = search.RangeFacet(
+            field='some_field',
+            ranges=[(_('Never reused'), (None, 1)),
+                    (_('Little reused'), (1, 5)),
+                    (_('Quite reused'), (5, 10)),
+                    (_('Heavily reused'), (10, None))])
 
     def test_to_query(self):
         self.assertEqual(self.facet.to_query(), {
