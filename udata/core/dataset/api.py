@@ -206,7 +206,7 @@ class DatasetBadgeAPI(API):
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources')
 class ResourcesAPI(API):
     @api.secure
-    @api.doc(id='create_resource', body=resource_fields, **common_doc)
+    @api.doc('create_resource', body=resource_fields, **common_doc)
     @api.marshal_with(resource_fields)
     def post(self, dataset):
         '''Create a new resource for a given dataset'''
@@ -269,7 +269,7 @@ class UploadMixin(object):
 @api.doc(parser=upload_parser, **common_doc)
 class UploadDatasetResources(UploadMixin, API):
     @api.secure
-    @api.doc(id='upload_dataset_resources')
+    @api.doc('upload_dataset_resources')
     @api.marshal_with(upload_fields)
     def post(self, dataset):
         '''Upload a new dataset resource'''
@@ -288,7 +288,7 @@ class UploadDatasetResources(UploadMixin, API):
 @api.doc(parser=upload_parser, **common_doc)
 class UploadCommunityResources(UploadMixin, API):
     @api.secure
-    @api.doc(id='upload_community_resources')
+    @api.doc('upload_community_resources')
     @api.marshal_with(upload_fields)
     def post(self, dataset):
         '''Upload a new community resource'''
@@ -312,7 +312,7 @@ class ResourceMixin(object):
 @api.doc(params={'rid': 'The resource unique identifier'})
 class UploadDatasetResource(ResourceMixin, UploadMixin, API):
     @api.secure
-    @api.doc(id='upload_dataset_resource')
+    @api.doc('upload_dataset_resource')
     @api.marshal_with(upload_fields)
     def post(self, dataset, rid):
         '''Upload a file related to a given resource on a given dataset'''
@@ -333,7 +333,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
 @api.doc(params={'community': 'The community resource unique identifier'})
 class UploadCommunityResource(ResourceMixin, UploadMixin, API):
     @api.secure
-    @api.doc(id='upload_community_resource')
+    @api.doc('upload_community_resource')
     @api.marshal_with(upload_fields)
     def post(self, community):
         '''Upload a file related to a given resource on a given dataset'''
@@ -350,7 +350,7 @@ class UploadCommunityResource(ResourceMixin, UploadMixin, API):
 @api.doc(params={'rid': 'The resource unique identifier'})
 class ResourceAPI(ResourceMixin, API):
     @api.secure
-    @api.doc(id='update_resource', body=resource_fields)
+    @api.doc('update_resource', body=resource_fields)
     @api.marshal_with(resource_fields)
     def put(self, dataset, rid):
         '''Update a given resource on a given dataset'''
@@ -427,7 +427,7 @@ class CommunityResourceAPI(SingleObjectAPI, API):
         return community
 
     @api.secure
-    @api.doc(id='update_community_resource',
+    @api.doc('update_community_resource',
              body=community_resource_fields)
     @api.marshal_with(community_resource_fields)
     def put(self, community):
@@ -466,7 +466,7 @@ suggest_parser.add_argument(
 @ns.route('/suggest/', endpoint='suggest_datasets')
 class SuggestDatasetsAPI(API):
     @api.marshal_list_with(dataset_suggestion_fields)
-    @api.doc(id='suggest_datasets', parser=suggest_parser)
+    @api.doc('suggest_datasets', parser=suggest_parser)
     def get(self):
         '''Suggest datasets'''
         args = suggest_parser.parse_args()
@@ -485,7 +485,7 @@ class SuggestDatasetsAPI(API):
 
 @ns.route('/suggest/formats/', endpoint='suggest_formats')
 class SuggestFormatsAPI(API):
-    @api.doc(id='suggest_formats', parser=suggest_parser)
+    @api.doc('suggest_formats', parser=suggest_parser)
     def get(self):
         '''Suggest file formats'''
         args = suggest_parser.parse_args()
@@ -523,7 +523,7 @@ checkurl_parser.add_argument('group', type=str,
 @ns.route('/checkurl/', endpoint='checkurl')
 class CheckUrlAPI(API):
 
-    @api.doc(id='checkurl', parser=checkurl_parser)
+    @api.doc('checkurl', parser=checkurl_parser)
     def get(self):
         '''Checks that a URL exists and returns metadata.'''
         args = checkurl_parser.parse_args()
