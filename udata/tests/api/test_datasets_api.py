@@ -875,10 +875,8 @@ class CommunityResourceAPITest(APITestCase):
     @attr('create')
     def test_community_resource_api_create(self):
         '''It should create a community resource from the API'''
+        dataset = VisibleDatasetFactory()
         self.login()
-        with self.autoindex():
-            resource = ResourceFactory()
-            dataset = DatasetFactory(resources=[resource])
         response = self.post(
             url_for('api.upload_community_resources', dataset=dataset),
             {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
@@ -898,13 +896,11 @@ class CommunityResourceAPITest(APITestCase):
     @attr('create')
     def test_community_resource_api_create_as_org(self):
         '''It should create a community resource as org from the API'''
+        dataset = VisibleDatasetFactory()
         user = self.login()
-        with self.autoindex():
-            resource = ResourceFactory()
-            org = OrganizationFactory(members=[
-                Member(user=user, role='admin')
-            ])
-            dataset = DatasetFactory(resources=[resource])
+        org = OrganizationFactory(members=[
+            Member(user=user, role='admin')
+        ])
         response = self.post(
             url_for('api.upload_community_resources', dataset=dataset),
             {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
@@ -925,9 +921,8 @@ class CommunityResourceAPITest(APITestCase):
     @attr('update')
     def test_community_resource_api_update(self):
         '''It should update a community resource from the API'''
-        self.login()
-        with self.autoindex():
-            community_resource = CommunityResourceFactory()
+        user = self.login()
+        community_resource = CommunityResourceFactory(owner=user)
         data = community_resource.to_dict()
         data['description'] = 'new description'
         response = self.put(url_for('api.community_resource',
@@ -941,14 +936,9 @@ class CommunityResourceAPITest(APITestCase):
     @attr('update')
     def test_community_resource_api_update_with_file(self):
         '''It should update a community resource file from the API'''
+        dataset = VisibleDatasetFactory()
         user = self.login()
-        with self.autoindex():
-            resource = ResourceFactory()
-            org = OrganizationFactory(members=[
-                Member(user=user, role='admin')
-            ])
-            dataset = DatasetFactory(resources=[resource], organization=org)
-            community_resource = CommunityResourceFactory(dataset=dataset)
+        community_resource = CommunityResourceFactory(dataset=dataset, owner=user)
         response = self.post(
             url_for('api.upload_community_resource',
                     community=community_resource),

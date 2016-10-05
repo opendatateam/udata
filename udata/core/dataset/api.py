@@ -34,7 +34,7 @@ from .models import (
     Dataset, Resource, FollowDataset, Checksum, License, UPDATE_FREQUENCIES,
     CommunityResource
 )
-from .permissions import DatasetEditPermission
+from .permissions import DatasetEditPermission, ResourceEditPermission
 from .forms import (
     ResourceForm, DatasetForm, CommunityResourceForm, ResourcesListForm
 )
@@ -210,7 +210,7 @@ class ResourcesAPI(API):
     @api.marshal_with(resource_fields)
     def post(self, dataset):
         '''Create a new resource for a given dataset'''
-        DatasetEditPermission(dataset).test()
+        ResourceEditPermission(dataset).test()
         form = api.validate(ResourceForm)
         resource = Resource()
         form.populate_obj(resource)
@@ -225,7 +225,7 @@ class ResourcesAPI(API):
     @api.marshal_with(resource_fields)
     def put(self, dataset):
         '''Reorder resources'''
-        DatasetEditPermission(dataset).test()
+        ResourceEditPermission(dataset).test()
         data = {'resources': request.json}
         form = ResourcesListForm.from_json(data, obj=dataset, instance=dataset,
                                            csrf_enabled=False)
@@ -273,7 +273,7 @@ class UploadDatasetResources(UploadMixin, API):
     @api.marshal_with(upload_fields)
     def post(self, dataset):
         '''Upload a new dataset resource'''
-        DatasetEditPermission(dataset).test()
+        ResourceEditPermission(dataset).test()
         args = upload_parser.parse_args()
         infos = self.extract_infos_from_args(args, dataset)
         resource = Resource(**infos)
@@ -294,6 +294,7 @@ class UploadCommunityResources(UploadMixin, API):
         '''Upload a new community resource'''
         args = upload_parser.parse_args()
         infos = self.extract_infos_from_args(args, dataset)
+        infos['owner'] = current_user._get_current_object()
         community_resource = CommunityResource.objects.create(**infos)
         return community_resource, 201
 
@@ -316,7 +317,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
     @api.marshal_with(upload_fields)
     def post(self, dataset, rid):
         '''Upload a file related to a given resource on a given dataset'''
-        DatasetEditPermission(dataset).test()
+        ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         args = upload_parser.parse_args()
         infos = self.extract_infos_from_args(args, dataset)
@@ -336,8 +337,8 @@ class UploadCommunityResource(ResourceMixin, UploadMixin, API):
     @api.doc('upload_community_resource')
     @api.marshal_with(upload_fields)
     def post(self, community):
-        '''Upload a file related to a given resource on a given dataset'''
-        DatasetEditPermission(community.dataset).test()
+        '''Update the file related to a given community resource'''
+        ResourceEditPermission(community).test()
         args = upload_parser.parse_args()
         infos = self.extract_infos_from_args(args, community.dataset)
         community.update(**infos)
@@ -354,7 +355,7 @@ class ResourceAPI(ResourceMixin, API):
     @api.marshal_with(resource_fields)
     def put(self, dataset, rid):
         '''Update a given resource on a given dataset'''
-        DatasetEditPermission(dataset).test()
+        ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
         form.populate_obj(resource)
@@ -367,7 +368,7 @@ class ResourceAPI(ResourceMixin, API):
     @api.doc('delete_resource')
     def delete(self, dataset, rid):
         '''Delete a given resource on a given dataset'''
-        DatasetEditPermission(dataset).test()
+        ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         dataset.resources.remove(resource)
         dataset.last_modified = datetime.now()
@@ -432,6 +433,7 @@ class CommunityResourceAPI(SingleObjectAPI, API):
     @api.marshal_with(community_resource_fields)
     def put(self, community):
         '''Update a given community resource'''
+        ResourceEditPermission(community).test()
         form = api.validate(CommunityResourceForm, community)
         form.populate_obj(community)
         if not community.organization:
@@ -445,6 +447,7 @@ class CommunityResourceAPI(SingleObjectAPI, API):
     @api.marshal_with(community_resource_fields)
     def delete(self, community):
         '''Delete a given community resource'''
+        ResourceEditPermission(community).test()
         community.delete()
         return '', 204
 

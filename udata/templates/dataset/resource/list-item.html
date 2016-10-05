@@ -41,7 +41,7 @@
     {{ resource.owner|avatar(52, 'resource-owner') }}
     {% endif %}
 
-    {% if can_edit_resource(resource, dataset) %}
+    {% if can_edit_resource(resource if resource.from_community else dataset) %}
         {% if resource.from_community %}
             {% set edit_path = 'dataset/{id}/community-resource/{rid}' %}
         {% else %}
