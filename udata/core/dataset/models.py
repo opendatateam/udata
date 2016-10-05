@@ -11,6 +11,7 @@ from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from werkzeug import cached_property
 
+from udata.frontend.markdown import mdstrip
 from udata.models import (
     db, WithMetrics, BadgeMixin, SpatialCoverage, OwnedByQuerySet
 )
@@ -147,6 +148,48 @@ class ResourceMixin(object):
     @property
     def is_available(self):
         return self.check_availability(group=None)
+
+    @cached_property
+    def json_ld(self):
+
+        result = {
+            '@type': 'DataDownload',
+            '@id': str(self.id),
+            'url': self.url,
+            'name': self.title or _('Nameless resource'),
+            'contentUrl': self.url,
+            'dateCreated': self.created_at.isoformat(),
+            'dateModified': self.modified.isoformat(),
+            'datePublished': self.published.isoformat(),
+        }
+
+        if 'views' in self.metrics:
+            result['interactionStatistic'] = {
+                '@type': 'InteractionCounter',
+                'interactionType': {
+                    '@type': 'DownloadAction',
+                },
+                'userInteractionCount': self.metrics['views']
+            }
+
+        if self.format:
+            result['encodingFormat'] = self.format
+
+        if self.filesize:
+            result['contentSize'] = self.filesize
+
+        if self.mime:
+            result['fileFormat'] = self.mime
+
+        if self.description:
+            result['description'] = mdstrip(self.description)
+
+        # These 2 values are not standard
+        if self.checksum:
+            result['checksum'] = self.checksum.value,
+            result['checksumType'] = self.checksum.type or 'sha1'
+
+        return result
 
 
 class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
@@ -415,6 +458,48 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
     @property
     def community_resources(self):
         return self.id and CommunityResource.objects.filter(dataset=self) or []
+
+    @cached_property
+    def json_ld(self):
+        result = {
+            '@context': 'http://schema.org',
+            '@type': 'Dataset',
+            '@id': str(self.id),
+            'description': mdstrip(self.description),
+            'alternateName': self.slug,
+            'dateCreated': self.created_at.isoformat(),
+            'dateModified': self.last_modified.isoformat(),
+            'url': url_for('datasets.show', dataset=self, _external=True),
+            'name': self.title,
+            'keywords': ','.join(self.tags),
+            'distribution': [resource.json_ld for resource in self.resources],
+            # This value is not standard
+            'extras': [self.get_json_ld_extra(*item) for item in self.extras.items()],
+        }
+
+        if self.license and self.license.url:
+            result['license'] = self.license.url
+
+        if self.organization:
+            author = self.organization.json_ld
+        elif self.owner:
+            author = self.owner.json_ld
+        else:
+            author = None
+
+        if author:
+            result['author'] = author
+
+        return result
+
+    @staticmethod
+    def get_json_ld_extra(key, value):
+        return {
+            '@type': 'http://schema.org/PropertyValue',
+            'name': key,
+            'value': value.serialize() if hasattr(value, 'serialize') else value,
+        }
+
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)

@@ -7,8 +7,10 @@ from itertools import chain
 from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
+from werkzeug import cached_property
 
 from udata.core.storages import avatars, default_image_basename
+from udata.frontend.markdown import mdstrip
 from udata.models import db, BadgeMixin, WithMetrics
 from udata.i18n import lazy_gettext as _
 
@@ -224,6 +226,18 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
             *[dataset.check_availability()
               for dataset in Dataset.objects(organization=self).visible()[:20]]
         )
+
+    @cached_property
+    def json_ld(self):
+        return {
+            '@context': 'http://schema.org',
+            '@type': 'GovernmentOrganization' if self.public_service else 'Organization',
+            'alternateName': self.slug,
+            'logo': self.logo(external=True),
+            'url': url_for('organizations.show', org=self, _external=True),
+            'name': self.name,
+            'description': mdstrip(self.description),
+        }
 
 pre_save.connect(Organization.pre_save, sender=Organization)
 post_save.connect(Organization.post_save, sender=Organization)

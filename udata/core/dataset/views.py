@@ -7,7 +7,9 @@ from werkzeug.contrib.atom import AtomFeed
 from udata.frontend.views import DetailView, SearchView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Discussion, Follow, Reuse
+from udata.core.organization.views import OrganizationDetailView
 from udata.core.site.views import current_site
+from udata.core.user.views import UserActivityView
 from udata.sitemap import sitemap
 
 from .permissions import ResourceEditPermission, DatasetEditPermission
@@ -86,6 +88,7 @@ class DatasetDetailView(DatasetView, DetailView):
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = ResourceEditPermission
         context['discussions'] = Discussion.objects(subject=self.dataset)
+
         return context
 
 
@@ -104,4 +107,4 @@ class DatasetFollowersView(DatasetView, DetailView):
 def sitemap_urls():
     for dataset in Dataset.objects.visible().only('id', 'slug'):
         yield ('datasets.show_redirect', {'dataset': dataset},
-               None, "weekly", 0.8)
+               None, 'weekly', 0.8)

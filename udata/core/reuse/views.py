@@ -5,6 +5,8 @@ from flask import abort, request, url_for, render_template
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.app import nav
+from udata.core.organization.views import OrganizationDetailView
+from udata.core.user.views import UserActivityView
 from udata.frontend.views import SearchView, DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Follow, Discussion
@@ -97,7 +99,7 @@ class ReuseDetailView(ReuseView, DetailView):
         context.update(
             followers=followers,
             can_edit=ReuseEditPermission(self.reuse),
-            discussions=Discussion.objects(subject=self.reuse)
+            discussions=Discussion.objects(subject=self.reuse),
         )
 
         return context
@@ -106,4 +108,4 @@ class ReuseDetailView(ReuseView, DetailView):
 @sitemap.register_generator
 def sitemap_urls():
     for reuse in Reuse.objects.visible().only('id', 'slug'):
-        yield 'reuses.show_redirect', {'reuse': reuse}, None, "weekly", 0.8
+        yield 'reuses.show_redirect', {'reuse': reuse}, None, 'weekly', 0.8

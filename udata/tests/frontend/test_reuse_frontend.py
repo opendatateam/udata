@@ -48,9 +48,26 @@ class ReuseBlueprintTest(FrontTestCase):
 
     def test_render_display(self):
         '''It should render the reuse page'''
-        reuse = ReuseFactory()
-        response = self.get(url_for('reuses.show', reuse=reuse))
+        author = UserFactory()
+        reuse = ReuseFactory(url='http://www.datagouv.fr/reuse',
+                             title='reuse_title',
+                             owner=author,
+                             description='* Title 1\n* Title 2',)
+        url = url_for('reuses.show', reuse=reuse)
+        response = self.get(url)
         self.assert200(response)
+        json_ld = self.get_json_ld(response)
+        self.assertEquals(json_ld['@context'], 'http://schema.org')
+        self.assertEquals(json_ld['@type'], 'CreativeWork')
+        self.assertEquals(json_ld['alternateName'], 'reuse-title')
+        self.assertIn('dateCreated', json_ld)
+        self.assertIn('dateModified', json_ld)
+        # The url contained in the json_ld is absolute
+        self.assertTrue(json_ld['url'].endswith(url))
+        self.assertEquals(json_ld['name'], 'reuse_title')
+        self.assertEquals(json_ld['description'], 'Title 1 Title 2')
+        self.assertEquals(json_ld['isBasedOnUrl'], 'http://www.datagouv.fr/reuse')
+        self.assertEquals(json_ld['author']['@type'], 'Person')
 
     def test_raise_404_if_private(self):
         '''It should raise a 404 if the reuse is private'''

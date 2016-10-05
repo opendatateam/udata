@@ -50,9 +50,19 @@ class UserBlueprintTest(FrontTestCase):
 
     def test_render_profile(self):
         '''It should render the user profile'''
-        user = UserFactory()
+        user = UserFactory(first_name=' John', last_name='Doe   ',
+                           about='* Title 1\n* Title 2',
+                           website='http://www.datagouv.fr/user',
+                           avatar_url='http://www.datagouv.fr/avatar')
         response = self.get(url_for('users.show', user=user))
         self.assert200(response)
+        json_ld = self.get_json_ld(response)
+        self.assertEquals(json_ld['@context'], 'http://schema.org')
+        self.assertEquals(json_ld['@type'], 'Person')
+        self.assertEquals(json_ld['name'], 'John Doe')
+        self.assertEquals(json_ld['description'], 'Title 1 Title 2')
+        self.assertEquals(json_ld['url'], 'http://www.datagouv.fr/user')
+        self.assertEquals(json_ld['image'], 'http://www.datagouv.fr/avatar')
 
     def test_render_profile_datasets(self):
         '''It should render the user profile datasets page'''

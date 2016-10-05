@@ -7,7 +7,6 @@ import Auth from 'auth';
 import Vue from 'vue';
 import config from 'config';
 import log from 'logger';
-import microdata from 'microdata';
 import utils from 'utils';
 import Velocity from 'velocity-animate';
 
@@ -72,21 +71,15 @@ new Vue({
         },
 
         /**
-         * Extract the current dataset metadatas from microdata markup
+         * Extract the current dataset metadatas from JSON-LD script
          * @return {Object} The parsed dataset
          */
         extractDataset() {
-            const dataset = microdata('http://schema.org/Dataset')[0];
-            if (Array.isArray(dataset.distribution)) {
-                dataset.resources = dataset.distribution;
-            } else {
-                dataset.resources = dataset.distribution ? [dataset.distribution] : [];
-            }
+            const selector = '#json_ld';
+            const dataset = JSON.parse(document.querySelector(selector).text)
+            dataset.resources = dataset.distribution;
             delete dataset.distribution;
-            if (utils.isString(dataset.keywords)) {
-                dataset.keywords = [dataset.keywords];
-            }
-            dataset.extras = microdata('http://schema.org/PropertyValue');
+            dataset.keywords = dataset.keywords.split(',').map(keyword => keyword.trim());
             return dataset;
         },
 
@@ -99,7 +92,7 @@ new Vue({
                 return;
             }
             e.preventDefault();
-            const resource = this.dataset.resources.find(resource => resource.id === id);
+            const resource = this.dataset.resources.find(resource => resource['@id'] === id);
             this.$modal(ResourceModal, {resource: resource});
         },
 
@@ -128,7 +121,7 @@ new Vue({
         addReuse(e) {
             const reuses = this.userReuses.filter((reuse) => {
                 // Exclude those already declaring this dataset
-                return !reuse.datasets.some(dataset => dataset.id === this.dataset.id);
+                return !reuse.datasets.some(dataset => dataset.id === this.dataset['@id']);
             });
             if (reuses.length) {
                 e.preventDefault();
@@ -162,7 +155,7 @@ new Vue({
         },
 
         /**
-         * Asynchronuously check all resources status
+         * Asynchronously check all resources status
          */
         checkResources() {
             if (config.check_urls) {
@@ -171,13 +164,14 @@ new Vue({
         },
 
         /**
-         * Asynchronuously check a displayed resource status
-         * @param  {Object} resource A resource as extracted from microdata
+         * Asynchronously check a displayed resource status
+         * @param  {Object} resource A resource as extracted from JSON-LD
          */
         checkResource(resource) {
             const url = parseUrl(resource.url);
-            const el = resource.$el.querySelector('.format-label');
-            const checkurl = resource.$el.dataset.checkurl;
+            const resource_el = document.querySelector(`#resource-${resource['@id']}`)
+            const el = resource_el.querySelector('.format-label');
+            const checkurl = resource_el.dataset.checkurl;
             if (!this.ignore.some(domain => url.origin.endsWith(domain))) {
                 if (url.protocol.startsWith('ftp')) {
                     el.classList.add('format-label-warning');
