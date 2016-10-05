@@ -394,6 +394,25 @@ class CommunityResourcesAPI(API):
         return (community_resources.order_by(args['sort'])
                                    .paginate(args['page'], args['page_size']))
 
+    @api.secure
+    @api.doc('create_community_resource')
+    @api.expect(community_resource_fields)
+    @api.marshal_with(community_resource_fields)
+    def post(self):
+        '''Create a new community resource'''
+        form = api.validate(CommunityResourceForm)
+        resource = CommunityResource()
+        form.populate_obj(resource)
+        if not resource.dataset:
+            api.abort(400, errors={
+                'dataset': 'A dataset identifier is required'
+            })
+        if not resource.organization:
+            resource.owner = current_user._get_current_object()
+        resource.modified = datetime.now()
+        resource.save()
+        return resource, 201
+
 
 @ns.route('/community_resources/<crid:community>/',
           endpoint='community_resource', doc=common_doc)

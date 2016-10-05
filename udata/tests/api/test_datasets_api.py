@@ -967,3 +967,54 @@ class CommunityResourceAPITest(APITestCase):
                          'new description')
         self.assertTrue(
             CommunityResource.objects.first().url.endswith('test.txt'))
+
+    @attr('create')
+    def test_community_resource_api_create_remote(self):
+        '''It should create a remote community resource from the API'''
+        user = self.login()
+        dataset = VisibleDatasetFactory()
+        attrs = CommunityResourceFactory.attributes()
+        attrs['dataset'] = str(dataset.id)
+        response = self.post(
+            url_for('api.community_resources'),
+            attrs
+        )
+        self.assertStatus(response, 201)
+        data = json.loads(response.data)
+        self.assertEqual(data['title'], attrs['title'])
+        self.assertEqual(data['url'], attrs['url'])
+        self.assertEqual(CommunityResource.objects.count(), 1)
+        community_resource = CommunityResource.objects.first()
+        self.assertEqual(community_resource.dataset, dataset)
+        self.assertEqual(community_resource.owner, user)
+        self.assertIsNone(community_resource.organization)
+
+    @attr('create')
+    def test_community_resource_api_create_remote_needs_dataset(self):
+        '''It should prevent remote community resource creation without dataset from the API'''
+        user = self.login()
+        response = self.post(
+            url_for('api.community_resources'),
+            CommunityResourceFactory.attributes()
+        )
+        self.assertStatus(response, 400)
+        data = json.loads(response.data)
+        self.assertIn('errors', data)
+        self.assertIn('dataset', data['errors'])
+        self.assertEqual(CommunityResource.objects.count(), 0)
+
+    @attr('create')
+    def test_community_resource_api_create_remote_needs_real_dataset(self):
+        '''It should prevent remote community resource creation without a valid dataset identifier'''
+        user = self.login()
+        attrs = CommunityResourceFactory.attributes()
+        attrs['dataset'] = 'xxx'
+        response = self.post(
+            url_for('api.community_resources'),
+            attrs
+        )
+        self.assertStatus(response, 400)
+        data = json.loads(response.data)
+        self.assertIn('errors', data)
+        self.assertIn('dataset', data['errors'])
+        self.assertEqual(CommunityResource.objects.count(), 0)
