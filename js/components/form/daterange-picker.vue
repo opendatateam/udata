@@ -28,12 +28,12 @@
         <calendar :selected="current_value"></calendar>
     </div>
     <input type="hidden" v-el:start-hidden
-        :id="field.id + '-start'"
-        :name="field.id + '-start'"
+        :id="field.id + '.start'"
+        :name="field.id + '.start'"
         :value="start_value"></input>
     <input type="hidden" v-el:end-hidden
-        :id="field.id + '-end'"
-        :name="field.id + '-end'"
+        :id="field.id + '.end'"
+        :name="field.id + '.end'"
         :value="end_value"></input>
 </div>
 </template>
