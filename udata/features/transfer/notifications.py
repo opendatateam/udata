@@ -16,13 +16,19 @@ def transfer_request_notifications(user):
     orgs = [o for o in user.organizations if o.is_member(user)]
     notifications = []
 
-    for transfer in Transfer.objects(
-            recipient__in=[user] + orgs, status='pending'):
+    qs = Transfer.objects(recipient__in=[user] + orgs, status='pending')
+    # Only fetch required fields for notification serialization
+    # Greatly improve performances and memory usage
+    qs = qs.only('id', 'created', 'subject')
+
+    # Do not dereference subject (so it's a DBRef)
+    # Also improve performances and memory usage
+    for transfer in qs.no_dereference():
         notifications.append((transfer.created, {
             'id': transfer.id,
             'subject': {
-                'class': transfer.subject.__class__.__name__.lower(),
-                'id': transfer.subject.id
+                'class': transfer.subject['_cls'].lower(),
+                'id': transfer.subject['_ref'].id
             }
         }))
 

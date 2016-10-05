@@ -16,13 +16,19 @@ def discussions_notifications(user):
     '''Notify user about open discussions'''
     notifications = []
 
-    for discussion in discussions_for(user):
+    # Only fetch required fields for notification serialization
+    # Greatly improve performances and memory usage
+    qs = discussions_for(user).only('id', 'created', 'title', 'subject')
+
+    # Do not dereference subject (so it's a DBRef)
+    # Also improve performances and memory usage
+    for discussion in qs.no_dereference():
         notifications.append((discussion.created, {
             'id': discussion.id,
             'title': discussion.title,
             'subject': {
                 'id': discussion.subject.id,
-                'type': discussion.subject.__class__.__name__.lower(),
+                'type': discussion.subject.collection.lower(),
             }
         }))
 
