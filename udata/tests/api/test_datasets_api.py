@@ -875,10 +875,8 @@ class CommunityResourceAPITest(APITestCase):
     @attr('create')
     def test_community_resource_api_create(self):
         '''It should create a community resource from the API'''
+        dataset = VisibleDatasetFactory()
         self.login()
-        with self.autoindex():
-            resource = ResourceFactory()
-            dataset = DatasetFactory(resources=[resource])
         response = self.post(
             url_for('api.upload_community_resources', dataset=dataset),
             {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
@@ -898,13 +896,11 @@ class CommunityResourceAPITest(APITestCase):
     @attr('create')
     def test_community_resource_api_create_as_org(self):
         '''It should create a community resource as org from the API'''
+        dataset = VisibleDatasetFactory()
         user = self.login()
-        with self.autoindex():
-            resource = ResourceFactory()
-            org = OrganizationFactory(members=[
-                Member(user=user, role='admin')
-            ])
-            dataset = DatasetFactory(resources=[resource])
+        org = OrganizationFactory(members=[
+            Member(user=user, role='admin')
+        ])
         response = self.post(
             url_for('api.upload_community_resources', dataset=dataset),
             {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
@@ -925,9 +921,8 @@ class CommunityResourceAPITest(APITestCase):
     @attr('update')
     def test_community_resource_api_update(self):
         '''It should update a community resource from the API'''
-        self.login()
-        with self.autoindex():
-            community_resource = CommunityResourceFactory()
+        user = self.login()
+        community_resource = CommunityResourceFactory(owner=user)
         data = community_resource.to_dict()
         data['description'] = 'new description'
         response = self.put(url_for('api.community_resource',
@@ -941,14 +936,9 @@ class CommunityResourceAPITest(APITestCase):
     @attr('update')
     def test_community_resource_api_update_with_file(self):
         '''It should update a community resource file from the API'''
+        dataset = VisibleDatasetFactory()
         user = self.login()
-        with self.autoindex():
-            resource = ResourceFactory()
-            org = OrganizationFactory(members=[
-                Member(user=user, role='admin')
-            ])
-            dataset = DatasetFactory(resources=[resource], organization=org)
-            community_resource = CommunityResourceFactory(dataset=dataset)
+        community_resource = CommunityResourceFactory(dataset=dataset, owner=user)
         response = self.post(
             url_for('api.upload_community_resource',
                     community=community_resource),
@@ -967,3 +957,54 @@ class CommunityResourceAPITest(APITestCase):
                          'new description')
         self.assertTrue(
             CommunityResource.objects.first().url.endswith('test.txt'))
+
+    @attr('create')
+    def test_community_resource_api_create_remote(self):
+        '''It should create a remote community resource from the API'''
+        user = self.login()
+        dataset = VisibleDatasetFactory()
+        attrs = CommunityResourceFactory.attributes()
+        attrs['dataset'] = str(dataset.id)
+        response = self.post(
+            url_for('api.community_resources'),
+            attrs
+        )
+        self.assertStatus(response, 201)
+        data = json.loads(response.data)
+        self.assertEqual(data['title'], attrs['title'])
+        self.assertEqual(data['url'], attrs['url'])
+        self.assertEqual(CommunityResource.objects.count(), 1)
+        community_resource = CommunityResource.objects.first()
+        self.assertEqual(community_resource.dataset, dataset)
+        self.assertEqual(community_resource.owner, user)
+        self.assertIsNone(community_resource.organization)
+
+    @attr('create')
+    def test_community_resource_api_create_remote_needs_dataset(self):
+        '''It should prevent remote community resource creation without dataset from the API'''
+        user = self.login()
+        response = self.post(
+            url_for('api.community_resources'),
+            CommunityResourceFactory.attributes()
+        )
+        self.assertStatus(response, 400)
+        data = json.loads(response.data)
+        self.assertIn('errors', data)
+        self.assertIn('dataset', data['errors'])
+        self.assertEqual(CommunityResource.objects.count(), 0)
+
+    @attr('create')
+    def test_community_resource_api_create_remote_needs_real_dataset(self):
+        '''It should prevent remote community resource creation without a valid dataset identifier'''
+        user = self.login()
+        attrs = CommunityResourceFactory.attributes()
+        attrs['dataset'] = 'xxx'
+        response = self.post(
+            url_for('api.community_resources'),
+            attrs
+        )
+        self.assertStatus(response, 400)
+        data = json.loads(response.data)
+        self.assertIn('errors', data)
+        self.assertIn('dataset', data['errors'])
+        self.assertEqual(CommunityResource.objects.count(), 0)
