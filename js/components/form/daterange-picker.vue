@@ -105,9 +105,6 @@ export default {
             });
         }
     },
-    filters: {
-
-    },
     methods: {
         onFocus(e) {
             this.picking = true;
