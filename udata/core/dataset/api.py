@@ -1,4 +1,22 @@
 # -*- coding: utf-8 -*-
+'''
+TODO: We need to cleanup and give more coherence to these APIs
+- upload enpoints should be singular instead of plural
+- community resource APIs should be consistent
+    (single root instead of the current state splitted
+    between /dataset/<id>/community and /community_resource/)
+- Swagger operation IDs needs to be explicits
+- make use of latest RESTPlus decorator:
+  - @api.expect
+  - @api.param
+- permissions needs to be more comprehensible
+- some mutualizations may be removed (common_doc ?)
+- some API need to renaming (ie. featured vs moderated...)
+
+These changes might lead to backward compatibility breakage meaning:
+- new API version
+- admin changes
+'''
 from __future__ import unicode_literals
 import os
 from datetime import datetime
@@ -332,7 +350,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
 @ns.route('/community_resources/<crid:community>/upload/',
           endpoint='upload_community_resource', doc=common_doc)
 @api.doc(params={'community': 'The community resource unique identifier'})
-class UploadCommunityResource(ResourceMixin, UploadMixin, API):
+class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
     @api.secure
     @api.doc('upload_community_resource')
     @api.marshal_with(upload_fields)
