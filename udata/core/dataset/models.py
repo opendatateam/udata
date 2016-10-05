@@ -163,7 +163,7 @@ class ResourceMixin(object):
             'datePublished': self.published.isoformat(),
         }
 
-        if 'views' in self.metrics.keys():
+        if 'views' in self.metrics:
             result['interactionStatistic'] = {
                 '@type': 'InteractionCounter',
                 'interactionType': {
@@ -474,7 +474,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             'keywords': ','.join(self.tags),
             'distribution': [resource.json_ld for resource in self.resources],
             # This value is not standard
-            'extras': map(self.get_json_ld_extra, self.extras.items()),
+            'extras': [self.get_json_ld_extra(*item) for item in self.extras.items()],
         }
 
         if self.license and self.license.url:
@@ -493,7 +493,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
         return result
 
     @staticmethod
-    def get_json_ld_extra((key, value)):
+    def get_json_ld_extra(key, value):
         return {
             '@type': 'http://schema.org/PropertyValue',
             'name': key,
