@@ -15,7 +15,6 @@
 {% endblock %}
 
 {% block main_content %}
-<div>
     <h1>
         {{ org.name }}
         {% if can_edit %}
@@ -40,7 +39,6 @@
         </p>
     </div>
     <div>{{ org.description|markdown }}</div>
-</div>
 {% endblock %}
 
 {% block secondary_content %}

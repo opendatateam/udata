@@ -41,9 +41,7 @@
                         alt="{{ user.fullname }}" class="scalable"/>
                 </div>
                 <h2>{{ user.fullname }}</h2>
-                <div>
-                    {{ user.about|markdown }}
-                </div>
+                {{ user.about|markdown }}
                 {# <hr/> #}
                 <div>
                     <ul class="list-unstyled">

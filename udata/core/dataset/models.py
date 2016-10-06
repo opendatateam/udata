@@ -465,7 +465,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             '@context': 'http://schema.org',
             '@type': 'Dataset',
             '@id': str(self.id),
-            'description': mdstrip(self.description),
             'alternateName': self.slug,
             'dateCreated': self.created_at.isoformat(),
             'dateModified': self.last_modified.isoformat(),
@@ -476,6 +475,9 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             # This value is not standard
             'extras': [self.get_json_ld_extra(*item) for item in self.extras.items()],
         }
+
+        if self.description:
+            result['description'] = mdstrip(self.description)
 
         if self.license and self.license.url:
             result['license'] = self.license.url

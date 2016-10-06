@@ -229,15 +229,24 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     @cached_property
     def json_ld(self):
-        return {
+
+        result = {
             '@context': 'http://schema.org',
             '@type': 'GovernmentOrganization' if self.public_service else 'Organization',
             'alternateName': self.slug,
-            'logo': self.logo(external=True),
             'url': url_for('organizations.show', org=self, _external=True),
             'name': self.name,
-            'description': mdstrip(self.description),
         }
+
+        if self.description:
+            result['description'] = mdstrip(self.description)
+
+        logo = self.logo(external=True)
+        if logo:
+            result['logo'] = logo
+
+        return result
+
 
 pre_save.connect(Organization.pre_save, sender=Organization)
 post_save.connect(Organization.post_save, sender=Organization)

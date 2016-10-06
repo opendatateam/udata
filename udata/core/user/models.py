@@ -196,8 +196,10 @@ class User(db.Document, WithMetrics, UserMixin):
             '@type': 'Person',
             '@context': 'http://schema.org',
             'name': self.fullname,
-            'description': mdstrip(self.about),
         }
+
+        if self.about:
+            result['description'] = mdstrip(self.about)
 
         if self.avatar_url:
             result['image'] = self.avatar_url
