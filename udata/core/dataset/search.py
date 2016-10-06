@@ -138,7 +138,7 @@ class DatasetSearch(ModelSearchAdapter):
                                      (_('Quite reused'), (5, 10)),
                                      (_('Heavily reused'), (10, None))]),
         'temporal_coverage': DateHistogramFacet(field='temporal_coverage',
-                                                interval='10Y'),
+                                                interval='1y'),
     }
     boosters = [
         BoolBooster('featured', 1.1),
