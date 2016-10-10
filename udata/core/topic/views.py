@@ -3,54 +3,87 @@ from __future__ import unicode_literals
 
 from flask import g, request
 
-from udata import theme
+from elasticsearch_dsl import Q
+
+from udata import theme, search
 from udata.i18n import I18nBlueprint
 from udata.models import Topic, Reuse, Dataset
 from udata.sitemap import sitemap
 from udata.utils import multi_to_dict
+
+from udata.core.dataset.search import DatasetSearch
+from udata.core.reuse.search import ReuseSearch
 
 from .permissions import TopicEditPermission
 
 blueprint = I18nBlueprint('topics', __name__, url_prefix='/topics')
 
 
+class TopicSearchMixin(object):
+    def __init__(self, topic, q, params):
+        self.topic = topic
+        super(TopicSearchMixin, self).__init__(q, params)
+
+    def search(self):
+        '''Override search to match on topic tags'''
+        s = super(TopicSearchMixin, self).search()
+        s = s.query('bool', should=[
+            Q('term', tags=tag) for tag in self.topic.tags
+        ])
+        return s
+
+
+def topic_search_for(topic, adapter, **kwargs):
+    facets = search.facets_for(adapter, kwargs.pop('facets', None))
+    FacetedSearch = adapter.facet_search(*facets)
+
+    class TopicSearch(TopicSearchMixin, FacetedSearch):
+        pass
+
+    q = kwargs.pop('q', '')
+    return TopicSearch(topic, q, kwargs)
+
+
 @blueprint.route('/<topic:topic>/')
 def display(topic):
-    recent_datasets = Dataset.objects(tags__in=topic.tags).order_by('-created')
-    featured_reuses = Reuse.objects(tags__in=topic.tags, featured=True)
+    specs = {
+        'recent_datasets': topic_search_for(topic, DatasetSearch),
+        'featured_reuses': topic_search_for(topic, ReuseSearch),
+        # 'recent_datasets': TopicSearchQuery(Dataset, sort='-created', page_size=9, topic=topic),
+        # 'featured_reuses': TopicSearchQuery(Reuse, featured=True, page_size=6, topic=topic),
+    }
+    keys, queries = zip(*specs.items())
+    results = search.multisearch(*queries)
 
     return theme.render(
         'topic/display.html',
         topic=topic,
         datasets=[d for d in topic.datasets if hasattr(d, 'pk')],
-        recent_datasets=recent_datasets.visible(),
-        featured_reuses=featured_reuses.visible()
+        **dict(zip(keys, results))
     )
 
 
 @blueprint.route('/<topic:topic>/datasets')
 def datasets(topic):
     kwargs = multi_to_dict(request.args)
-    kwargs.update(topic=topic)
-    query = TopicSearchQuery(Dataset, facets=True, **kwargs)
+    s = topic_search_for(topic, DatasetSearch, facets=True, **kwargs)
 
     return theme.render(
         'topic/datasets.html',
         topic=topic,
-        datasets=query.execute()
+        datasets=search.query(s)
     )
 
 
 @blueprint.route('/<topic:topic>/reuses')
 def reuses(topic):
     kwargs = multi_to_dict(request.args)
-    kwargs.update(topic=topic)
-    query = TopicSearchQuery(Reuse, facets=True, **kwargs)
+    s = topic_search_for(topic, ReuseSearch, facets=True, **kwargs)
 
     return theme.render(
         'topic/reuses.html',
         topic=topic,
-        reuses=query.execute()
+        reuses=search.query(s)
     )
 
 

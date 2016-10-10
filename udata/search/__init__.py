@@ -186,9 +186,11 @@ def facets_for(adapter, facets=None):
         ]
 
 
-def search_for(model, **params):
-    is_adapter = issubclass(model, ModelSearchAdapter)
-    adapter = model if is_adapter else adapter_catalog[model]
+def search_for(model_or_adapter, **params):
+    if isinstance(model_or_adapter, FacetedSearch):
+        return model_or_adapter
+    is_adapter = issubclass(model_or_adapter, ModelSearchAdapter)
+    adapter = model_or_adapter if is_adapter else adapter_catalog[model_or_adapter]
     facets = facets_for(adapter, params.pop('facets', None))
     facet_search = adapter.facet_search(*facets)
     q = params.pop('q', '')
