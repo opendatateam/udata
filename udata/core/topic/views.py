@@ -86,19 +86,6 @@ def reuses(topic):
     )
 
 
-class TopicView(object):
-    model = Topic
-    object_name = 'topic'
-
-    @property
-    def topic(self):
-        return self.get_object()
-
-
-class ProtectedTopicView(TopicView):
-    require = TopicEditPermission()
-
-
 @blueprint.before_app_request
 def store_featured_topics():
     g.featured_topics = sorted(Topic.objects(featured=True),
