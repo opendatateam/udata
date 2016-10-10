@@ -20,9 +20,9 @@ blueprint = I18nBlueprint('topics', __name__, url_prefix='/topics')
 
 
 class TopicSearchMixin(object):
-    def __init__(self, topic, q, params):
+    def __init__(self, topic, params):
         self.topic = topic
-        super(TopicSearchMixin, self).__init__(q, params)
+        super(TopicSearchMixin, self).__init__(params)
 
     def search(self):
         '''Override search to match on topic tags'''
@@ -35,19 +35,18 @@ class TopicSearchMixin(object):
 
 def topic_search_for(topic, adapter, **kwargs):
     facets = search.facets_for(adapter, kwargs.pop('facets', None))
-    FacetedSearch = adapter.facet_search(*facets)
+    faceted_search_class = adapter.facet_search(*facets)
 
-    class TopicSearch(TopicSearchMixin, FacetedSearch):
+    class TopicSearch(TopicSearchMixin, faceted_search_class):
         pass
 
-    q = kwargs.pop('q', '')
-    return TopicSearch(topic, q, kwargs)
+    return TopicSearch(topic, kwargs)
 
 
 @blueprint.route('/<topic:topic>/')
 def display(topic):
     specs = {
-        'recent_datasets': topic_search_for(topic, DatasetSearch),
+        'recent_datasets': topic_search_for(topic, DatasetSearch, sort='-created'),
         'featured_reuses': topic_search_for(topic, ReuseSearch),
         # 'recent_datasets': TopicSearchQuery(Dataset, sort='-created', page_size=9, topic=topic),
         # 'featured_reuses': TopicSearchQuery(Reuse, featured=True, page_size=6, topic=topic),

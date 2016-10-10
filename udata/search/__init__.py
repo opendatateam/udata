@@ -158,12 +158,19 @@ def register(adapter):
 
 
 class UdataFacetedSearch(FacetedSearch):
+    def __init__(self, params):
+        self.sort = params.pop('sort', None)
+        q = params.pop('q', '')
+        super(UdataFacetedSearch, self).__init__(q, params)
+
     def search(self):
         """
         Construct the Search object.
         """
         # from udata.search import SearchResult
         s = Search(doc_type=self.doc_types, using=es.client, index=es.index_name)
+        if self.sort:
+            s = s.sort(self.sort)
         return s.response_class(partial(FacetedResponse, self))
 
 from .adapter import ModelSearchAdapter, metrics_mapping_for  # noqa
@@ -193,8 +200,7 @@ def search_for(model_or_adapter, **params):
     adapter = model_or_adapter if is_adapter else adapter_catalog[model_or_adapter]
     facets = facets_for(adapter, params.pop('facets', None))
     facet_search = adapter.facet_search(*facets)
-    q = params.pop('q', '')
-    return facet_search(q, params)
+    return facet_search(params)
 
 
 def query(model, **kwargs):
