@@ -5,8 +5,6 @@ from flask import abort, request, url_for, render_template
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.app import nav
-from udata.core.organization.views import OrganizationDetailView
-from udata.core.user.views import UserActivityView
 from udata.frontend.views import SearchView, DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Follow, Discussion

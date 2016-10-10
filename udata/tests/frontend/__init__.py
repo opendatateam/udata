@@ -20,7 +20,9 @@ class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
         # In the pattern below, we extract the content of the JSON-LD script
         # The first ? is used to name the extracted string
         # The second ? is used to express the non-greediness of the extraction
-        pattern = '<script id="json_ld" type="application/ld\+json">(?P<json_ld>[\s\S]*?)</script>'
+        pattern = ('<script id="json_ld" type="application/ld\+json">'
+                   '(?P<json_ld>[\s\S]*?)'
+                   '</script>')
         search = re.search(pattern, response.data)
         self.assertIsNotNone(search, (pattern, response.data))
         json_ld = search.group('json_ld')

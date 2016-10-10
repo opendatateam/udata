@@ -473,7 +473,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             'keywords': ','.join(self.tags),
             'distribution': [resource.json_ld for resource in self.resources],
             # This value is not standard
-            'extras': [self.get_json_ld_extra(*item) for item in self.extras.items()],
+            'extras': [self.get_json_ld_extra(*item)
+                       for item in self.extras.items()],
         }
 
         if self.description:
@@ -496,10 +497,12 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
 
     @staticmethod
     def get_json_ld_extra(key, value):
+
+        value = value.serialize() if hasattr(value, 'serialize') else value
         return {
             '@type': 'http://schema.org/PropertyValue',
             'name': key,
-            'value': value.serialize() if hasattr(value, 'serialize') else value,
+            'value': value,
         }
 
 

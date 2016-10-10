@@ -57,8 +57,10 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertEquals(json_ld['@context'], 'http://schema.org')
         self.assertEquals(json_ld['@type'], 'CreativeWork')
         self.assertEquals(json_ld['alternateName'], reuse.slug)
-        self.assertEquals(json_ld['dateCreated'][:16], reuse.created_at.isoformat()[:16])
-        self.assertEquals(json_ld['dateModified'][:16], reuse.last_modified.isoformat()[:16])
+        self.assertEquals(json_ld['dateCreated'][:16],
+                          reuse.created_at.isoformat()[:16])
+        self.assertEquals(json_ld['dateModified'][:16],
+                          reuse.last_modified.isoformat()[:16])
         self.assertEquals(json_ld['url'], 'http://localhost{}'.format(url))
         self.assertEquals(json_ld['name'], reuse.title)
         self.assertEquals(json_ld['description'], 'Title 1 Title 2')

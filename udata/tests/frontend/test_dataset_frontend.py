@@ -6,7 +6,9 @@ import feedparser
 
 from flask import url_for
 
-from udata.core.dataset.factories import ResourceFactory, DatasetFactory, LicenseFactory
+from udata.core.dataset.factories import (ResourceFactory,
+                                          DatasetFactory,
+                                          LicenseFactory)
 from udata.core.user.factories import UserFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.models import Follow
@@ -70,8 +72,10 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertEquals(json_ld['@id'], str(dataset.id))
         self.assertEquals(json_ld['description'], 'a&éèëù$£')
         self.assertEquals(json_ld['alternateName'], dataset.slug)
-        self.assertEquals(json_ld['dateCreated'][:16], dataset.created_at.isoformat()[:16])
-        self.assertEquals(json_ld['dateModified'][:16], dataset.last_modified.isoformat()[:16])
+        self.assertEquals(json_ld['dateCreated'][:16],
+                          dataset.created_at.isoformat()[:16])
+        self.assertEquals(json_ld['dateModified'][:16],
+                          dataset.last_modified.isoformat()[:16])
         self.assertEquals(json_ld['url'], 'http://localhost{}'.format(url))
         self.assertEquals(json_ld['name'], dataset.title)
         self.assertEquals(json_ld['keywords'], 'bar,foo')
@@ -89,9 +93,11 @@ class DatasetBlueprintTest(FrontTestCase):
             self.assertEquals(json_ld_resource['datePublished'][:16],
                               resource.published.isoformat()[:16])
             self.assertEquals(json_ld_resource['encodingFormat'], 'png')
-            self.assertEquals(json_ld_resource['contentSize'], resource.filesize)
+            self.assertEquals(json_ld_resource['contentSize'],
+                              resource.filesize)
             self.assertEquals(json_ld_resource['fileFormat'], resource.mime)
-            self.assertEquals(json_ld_resource['description'], 'Title 1 Title 2')
+            self.assertEquals(json_ld_resource['description'],
+                              'Title 1 Title 2')
             self.assertEquals(json_ld_resource['interactionStatistic'],
                               {
                                   u'@type': u'InteractionCounter',
@@ -101,11 +107,11 @@ class DatasetBlueprintTest(FrontTestCase):
                                   u'userInteractionCount': 10,
                               })
         self.assertEquals(json_ld['extras'],
-                           [{
-                               '@type': 'http://schema.org/PropertyValue',
-                               'name': 'foo',
-                               'value': 'bar',
-                           }])
+                          [{
+                              '@type': 'http://schema.org/PropertyValue',
+                              'name': 'foo',
+                              'value': 'bar',
+                          }])
         self.assertEquals(json_ld['license'], 'http://www.datagouv.fr/licence')
         self.assertEquals(json_ld['author']['@type'], 'Person')
 
