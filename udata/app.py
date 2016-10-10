@@ -161,7 +161,8 @@ def standalone(app):
 
 
 def init_logging(app):
-    log_level = logging.DEBUG if app.debug else logging.WARNING
+    debug = app.debug or app.config.get('TESTING')
+    log_level = logging.DEBUG if debug else logging.WARNING
     app.logger.setLevel(log_level)
     loggers = [
         logging.getLogger('elasticsearch'),

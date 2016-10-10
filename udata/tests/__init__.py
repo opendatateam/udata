@@ -30,11 +30,6 @@ from werkzeug.urls import url_encode
 from udata.core.user.factories import UserFactory
 
 
-# Suppress debug data for third party libraries
-for logger in ('factory', 'elasticsearch', 'urllib3'):
-    logging.getLogger(logger).setLevel(logging.WARNING)
-
-
 class TestCase(BaseTestCase):
     settings = settings.Testing
 
