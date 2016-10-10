@@ -7,14 +7,12 @@ from elasticsearch_dsl import Q
 
 from udata import theme, search
 from udata.i18n import I18nBlueprint
-from udata.models import Topic, Reuse, Dataset
+from udata.models import Topic
 from udata.sitemap import sitemap
 from udata.utils import multi_to_dict
 
 from udata.core.dataset.search import DatasetSearch
 from udata.core.reuse.search import ReuseSearch
-
-from .permissions import TopicEditPermission
 
 blueprint = I18nBlueprint('topics', __name__, url_prefix='/topics')
 
@@ -34,7 +32,7 @@ class TopicSearchMixin(object):
 
 
 def topic_search_for(topic, adapter, **kwargs):
-    facets = search.facets_for(adapter, kwargs.pop('facets', None))
+    facets = search.facets_for(adapter, kwargs)
     faceted_search_class = adapter.facet_search(*facets)
 
     class TopicSearch(TopicSearchMixin, faceted_search_class):

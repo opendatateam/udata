@@ -18,6 +18,10 @@ from udata.tests import TestCase, DBTestMixin, SearchTestMixin
 from udata.utils import faker
 
 
+#############################################################################
+#                           Fake object for testing                         #
+#############################################################################
+
 class Fake(db.Document):
     title = db.StringField()
     description = db.StringField()
@@ -44,7 +48,11 @@ class FakeFactory(MongoEngineFactory):
         model = Fake
 
 
+@search.register
 class FakeSearch(search.ModelSearchAdapter):
+    class Meta:
+        doc_type = 'Fake'
+
     model = Fake
     fields = [
         'title^2',
@@ -67,6 +75,9 @@ class FakeSearch(search.ModelSearchAdapter):
 
 
 class FakeSearchWithDateRange(search.ModelSearchAdapter):
+    class Meta:
+        doc_type = 'Dataset'
+
     model = Fake
     fields = [
         'title^2',
@@ -88,23 +99,49 @@ class FuzzySearch(FakeSearch):
     fuzzy = True
 
 
-class SearchQueryTest(TestCase):
+#############################################################################
+#                     Elasticsearch DSL specific helpers                    #
+#############################################################################
+
+def get_body(facet_search):
+    '''Extract the JSON body from a FacetedSearch'''
+    return facet_search._s.to_dict()
+
+
+def get_query(facet_search):
+    '''Extract the query part from a FacetedSearch'''
+    return get_body(facet_search).get('query')
+
+
+def facet_agg_key(key):
+    '''Build the facet aggregation key'''
+    return '_filter_{0}'.format(key)
+
+
+#############################################################################
+#                                  Tests                                    #
+#############################################################################
+
+
+class SearchQueryTest(SearchTestMixin, TestCase):
     def test_execute_search_result(self):
         '''Should return a SearchResult with the right model'''
+        self.init_search()
         result = search.query(FakeSearch)
         self.assertIsInstance(result, search.SearchResult)
         self.assertEqual(result.query.adapter, FakeSearch)
 
     def test_execute_search_result_with_model(self):
         '''Should return a SearchResult with the right model'''
+        self.init_search()
         result = search.query(Fake)
         self.assertIsInstance(result, search.SearchResult)
         self.assertEqual(result.query.adapter, FakeSearch)
 
     def test_empty_search(self):
         '''An empty query should match all documents'''
-        search_query = search.SearchQuery(FakeSearch)
-        body = search_query.get_body()
+        search_query = search.search_for(FakeSearch)
+        body = get_body(search_query)
         self.assertEqual(body['query'], {'match_all': {}})
         self.assertNotIn('aggregations', body)
         self.assertNotIn('aggs', body)
@@ -112,8 +149,8 @@ class SearchQueryTest(TestCase):
 
     def test_paginated_search(self):
         '''Search should handle pagination'''
-        search_query = search.SearchQuery(FakeSearch, page=3, page_size=10)
-        body = search_query.get_body()
+        search_query = search.search_for(FakeSearch, page=3, page_size=10)
+        body = get_body(search_query)
         self.assertIn('from', body)
         self.assertEqual(body['from'], 20)
         self.assertIn('size', body)
@@ -121,21 +158,21 @@ class SearchQueryTest(TestCase):
 
     def test_sorted_search_asc(self):
         '''Search should sort by field in ascending order'''
-        search_query = search.SearchQuery(FakeSearch, sort='title')
-        body = search_query.get_body()
+        search_query = search.search_for(FakeSearch, sort='title')
+        body = get_body(search_query)
         self.assertEqual(body['sort'], [{'title.raw': 'asc'}])
 
     def test_sorted_search_desc(self):
         '''Search should sort by field in descending order'''
-        search_query = search.SearchQuery(FakeSearch, sort='-title')
-        body = search_query.get_body()
+        search_query = search.search_for(FakeSearch, sort='-title')
+        body = get_body(search_query)
         self.assertEqual(body['sort'], [{'title.raw': 'desc'}])
 
     def test_multi_sorted_search(self):
         '''Search should sort'''
-        search_query = search.SearchQuery(FakeSearch,
-                                          sort=['-title', 'description'])
-        body = search_query.get_body()
+        search_query = search.search_for(FakeSearch,
+                                         sort=['-title', 'description'])
+        body = get_body(search_query)
         self.assertEqual(body['sort'], [
             {'title.raw': 'desc'},
             {'description.raw': 'asc'},
@@ -148,8 +185,8 @@ class SearchQueryTest(TestCase):
                 search.BoolBooster('some_bool_field', 1.1)
             ]
 
-        query = search.SearchQuery(FakeBoostedSearch)
-        body = query.get_body()
+        query = search.search_for(FakeBoostedSearch)
+        body = get_body(query)
         # Query should be wrapped in function_score
         self.assertIn('function_score', body['query'])
         self.assertIn('query', body['query']['function_score'])
@@ -168,8 +205,8 @@ class SearchQueryTest(TestCase):
                 search.LinearDecay('last_field', 30),
             ]
 
-        query = search.SearchQuery(FakeBoostedSearch)
-        body = query.get_body()
+        query = search.search_for(FakeBoostedSearch)
+        body = get_body(query)
         functions = body['query']['function_score']['functions']
         # Query should be wrapped in a gaus decay function
         self.assertEqual(functions[0], {
@@ -207,8 +244,8 @@ class SearchQueryTest(TestCase):
                 search.LinearDecay('last_field', 30, 40, offset=5, decay=0.5),
             ]
 
-        query = search.SearchQuery(FakeBoostedSearch)
-        body = query.get_body()
+        query = search.search_for(FakeBoostedSearch)
+        body = get_body(query)
         functions = body['query']['function_score']['functions']
         # Query should be wrapped in a gaus decay function
         self.assertEqual(functions[0], {
@@ -261,8 +298,8 @@ class SearchQueryTest(TestCase):
                                    get_40, offset=get_5, decay=get_dot5),
             ]
 
-        query = search.SearchQuery(FakeBoostedSearch)
-        body = query.get_body()
+        query = search.search_for(FakeBoostedSearch)
+        body = get_body(query)
         functions = body['query']['function_score']['functions']
         # Query should be wrapped in a gaus decay function
         self.assertEqual(functions[0], {
@@ -303,8 +340,8 @@ class SearchQueryTest(TestCase):
                 search.FunctionBooster('doc["field"].value * 2')
             ]
 
-        query = search.SearchQuery(FakeBoostedSearch)
-        body = query.get_body()
+        query = search.search_for(FakeBoostedSearch)
+        body = get_body(query)
         # Query should be wrapped in function_score
         self.assertEqual(body['query']['function_score']['functions'][0], {
             'script_score': {'script': 'doc["field"].value * 2'},
@@ -312,7 +349,7 @@ class SearchQueryTest(TestCase):
 
     def test_simple_query(self):
         '''A simple query should use query_string with specified fields'''
-        search_query = search.SearchQuery(FakeSearch, q='test')
+        search_query = search.search_for(FakeSearch, q='test')
         expected = {
             'bool': {
                 'must': [
@@ -325,14 +362,14 @@ class SearchQueryTest(TestCase):
                 ]
             }
         }
-        self.assertEqual(search_query.get_query(), expected)
+        self.assertEqual(get_query(search_query), expected)
 
     def test_default_analyzer(self):
         '''Default analyzer is overridable'''
         class FakeAnalyzerSearch(FakeSearch):
             analyzer = 'simple'
 
-        search_query = search.SearchQuery(FakeAnalyzerSearch, q='test')
+        search_query = search.search_for(FakeAnalyzerSearch, q='test')
         expected = {
             'bool': {
                 'must': [
@@ -345,14 +382,14 @@ class SearchQueryTest(TestCase):
                 ]
             }
         }
-        self.assertEqual(search_query.get_query(), expected)
+        self.assertEqual(get_query(search_query), expected)
 
     def test_default_type(self):
         '''Default analyzer is overridable'''
         class FakeAnalyzerSearch(FakeSearch):
             match_type = 'most_fields'
 
-        search_query = search.SearchQuery(FakeAnalyzerSearch, q='test')
+        search_query = search.search_for(FakeAnalyzerSearch, q='test')
         expected = {
             'bool': {
                 'must': [
@@ -365,11 +402,11 @@ class SearchQueryTest(TestCase):
                 ]
             }
         }
-        self.assertEqual(search_query.get_query(), expected)
+        self.assertEqual(get_query(search_query), expected)
 
     def test_simple_excluding_query(self):
         '''A simple query should negate a simple term in query_string'''
-        search_query = search.SearchQuery(FakeSearch, q='-test')
+        search_query = search.search_for(FakeSearch, q='-test')
         expected = {
             'bool': {
                 'must_not': [
@@ -382,11 +419,11 @@ class SearchQueryTest(TestCase):
                 ]
             }
         }
-        self.assertEqual(search_query.get_query(), expected)
+        self.assertEqual(get_query(search_query), expected)
 
     def test_query_with_both_including_and_excluding_terms(self):
         '''A query should detect negation on each term in query_string'''
-        search_query = search.SearchQuery(FakeSearch, q='test -negated')
+        search_query = search.search_for(FakeSearch, q='test -negated')
         expected = {
             'bool': {
                 'must': [
@@ -407,11 +444,11 @@ class SearchQueryTest(TestCase):
                 ]
             }
         }
-        self.assertEqual(search_query.get_query(), expected)
+        self.assertEqual(get_query(search_query), expected)
 
     def test_simple_query_fuzzy(self):
         '''A simple query should use query_string with specified fields'''
-        search_query = search.SearchQuery(FuzzySearch, q='test')
+        search_query = search.search_for(FuzzySearch, q='test')
         expected = {
             'bool': {
                 'must': [
@@ -426,11 +463,11 @@ class SearchQueryTest(TestCase):
                 ]
             }
         }
-        self.assertEqual(search_query.get_query(), expected)
+        self.assertEqual(get_query(search_query), expected)
 
     def test_simple_query_flatten(self):
         '''A query uses query_string with specified fields and flattens'''
-        search_query = search.SearchQuery(FakeSearch, q='test')
+        search_query = search.search_for(FakeSearch, q='test')
         expected = {
             'bool': {
                 'must': [
@@ -443,36 +480,36 @@ class SearchQueryTest(TestCase):
                 ]
             }
         }
-        self.assertEqual(search_query.get_query(), expected)
+        self.assertEqual(get_query(search_query), expected)
 
     def test_facets_true(self):
-        search_query = search.SearchQuery(FakeSearch, facets=True)
-        aggregations = search_query.get_body().get('aggs', {})
+        search_query = search.search_for(FakeSearch, facets=True)
+        aggregations = get_body(search_query).get('aggs', {})
         self.assertEqual(len(aggregations), len(FakeSearch.facets))
         for key in FakeSearch.facets.keys():
-            self.assertIn(key, aggregations.keys())
+            self.assertIn(facet_agg_key(key), aggregations.keys())
 
     def test_facets_all(self):
-        search_query = search.SearchQuery(FakeSearch, facets='all')
-        aggregations = search_query.get_body().get('aggs', {})
+        search_query = search.search_for(FakeSearch, facets='all')
+        aggregations = get_body(search_query).get('aggs', {})
         self.assertEqual(len(aggregations), len(FakeSearch.facets))
         for key in FakeSearch.facets.keys():
-            self.assertIn(key, aggregations.keys())
+            self.assertIn(facet_agg_key(key), aggregations.keys())
 
     def test_selected_facets(self):
         selected_facets = ['tag', 'other']
-        search_query = search.SearchQuery(
+        search_query = search.search_for(
             FakeSearch, facets=selected_facets)
-        aggregations = search_query.get_body().get('aggs', {})
+        aggregations = get_body(search_query).get('aggs', {})
         self.assertEqual(len(aggregations), len(selected_facets))
         for key in FakeSearch.facets.keys():
             if key in selected_facets:
-                self.assertIn(key, aggregations.keys())
+                self.assertIn(facet_agg_key(key), aggregations.keys())
             else:
-                self.assertNotIn(key, aggregations.keys())
+                self.assertNotIn(facet_agg_key(key), aggregations.keys())
 
     def test_aggregation_filter(self):
-        search_query = search.SearchQuery(FakeSearch, q='test', tag='value')
+        search_query = search.search_for(FakeSearch, q='test', tag='value')
         expectations = [
             {'multi_match': {
                 'query': 'test',
@@ -483,13 +520,13 @@ class SearchQueryTest(TestCase):
             {'term': {'tags': 'value'}},
         ]
 
-        query = search_query.get_query()
+        query = get_query(search_query)
         self.assertEqual(len(query['bool']['must']), len(expectations))
         for expected in expectations:
             self.assertIn(expected, query['bool']['must'])
 
     def test_aggregation_filter_multi(self):
-        search_query = search.SearchQuery(
+        search_query = search.search_for(
             FakeSearchWithDateRange,
             q='test',
             tag=['value-1', 'value-2'],
@@ -520,7 +557,7 @@ class SearchQueryTest(TestCase):
                 },
             }},
         ]
-        query = search_query.get_query()
+        query = get_query(search_query)
         for expected in expectations:
             self.assertIn(expected, query['bool']['must'])
 
@@ -531,7 +568,7 @@ class SearchQueryTest(TestCase):
             'page': 2,
             'facets': True,
         }
-        search_query = search.SearchQuery(FakeSearch, **kwargs)
+        search_query = search.search_for(FakeSearch, **kwargs)
         with self.app.test_request_context('/an_url'):
             url = search_query.to_url()
         parsed_url = url_parse(url)
@@ -550,7 +587,7 @@ class SearchQueryTest(TestCase):
             'tag': ['tag1', 'tag2'],
             'page': 2,
         }
-        search_query = search.SearchQuery(FakeSearch, **kwargs)
+        search_query = search.search_for(FakeSearch, **kwargs)
         with self.app.test_request_context('/an_url'):
             url = search_query.to_url(tag='tag3', other='value')
         parsed_url = url_parse(url)
@@ -569,7 +606,7 @@ class SearchQueryTest(TestCase):
             'tag': ['tag1', 'tag2'],
             'page': 2,
         }
-        search_query = search.SearchQuery(FakeSearch, **kwargs)
+        search_query = search.search_for(FakeSearch, **kwargs)
         with self.app.test_request_context('/an_url'):
             url = search_query.to_url(tag='tag3', other='value', replace=True)
         parsed_url = url_parse(url)
@@ -588,7 +625,7 @@ class SearchQueryTest(TestCase):
             'tag': ['tag1', 'tag2'],
             'page': 2,
         }
-        search_query = search.SearchQuery(FakeSearch, **kwargs)
+        search_query = search.search_for(FakeSearch, **kwargs)
         with self.app.test_request_context('/an_url'):
             url = search_query.to_url(tag=None, other='value', replace=True)
         parsed_url = url_parse(url)
@@ -606,7 +643,7 @@ class SearchQueryTest(TestCase):
             'tag': ['tag1', 'tag2'],
             'page': 2,
         }
-        search_query = search.SearchQuery(FakeSearch, **kwargs)
+        search_query = search.search_for(FakeSearch, **kwargs)
         with self.app.test_request_context('/an_url'):
             url = search_query.to_url('/another_url')
         parsed_url = url_parse(url)
@@ -910,7 +947,7 @@ class SearchResultTest(TestCase):
         '''Search result should map some properties for easy access'''
         response = es_factory(nb=10, total=42)
         max_score = response['hits']['max_score']
-        query = search.SearchQuery(FakeSearch)
+        query = search.search_for(FakeSearch)
         result = search.SearchResult(query, response)
 
         self.assertEqual(result.total, 42)
@@ -921,7 +958,7 @@ class SearchResultTest(TestCase):
 
     def test_no_failures(self):
         '''Search result should not fail on missing properties'''
-        query = search.SearchQuery(FakeSearch)
+        query = search.search_for(FakeSearch)
         result = search.SearchResult(query, {})
 
         self.assertEqual(result.total, 0)
@@ -933,7 +970,7 @@ class SearchResultTest(TestCase):
     def test_pagination(self):
         '''Search results should be paginated'''
         kwargs = {'page': 2, 'page_size': 3}
-        query = search.SearchQuery(FakeSearch, **kwargs)
+        query = search.search_for(FakeSearch, **kwargs)
         result = search.SearchResult(query, es_factory(nb=3, total=11))
 
         self.assertEqual(result.page, 2),
@@ -942,7 +979,7 @@ class SearchResultTest(TestCase):
 
     def test_pagination_empty(self):
         '''Search results should be paginated even if empty'''
-        query = search.SearchQuery(FakeSearch, page=2, page_size=3)
+        query = search.search_for(FakeSearch, page=2, page_size=3)
         result = search.SearchResult(query, {})
 
         self.assertEqual(result.page, 1),
@@ -951,7 +988,7 @@ class SearchResultTest(TestCase):
 
     def test_no_pagination_in_query(self):
         '''Search results should be paginated even if not asked'''
-        query = search.SearchQuery(FakeSearch)
+        query = search.search_for(FakeSearch)
         result = search.SearchResult(query, {})
 
         self.assertEqual(result.page, 1),

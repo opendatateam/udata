@@ -30,9 +30,8 @@ class SearchResult(Paginable):
         return self.result.hits.max_score
 
     @property
-    def pages(self):
-        return 1
-        # return (self.query.page or 1) or 1
+    def page(self):
+        return (self.query.page or 1) if self.pages else 1
 
     @property
     def page_size(self):

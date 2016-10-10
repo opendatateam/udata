@@ -162,29 +162,46 @@ class UdataFacetedSearch(FacetedSearch):
     adapter = None
 
     def __init__(self, params):
-        self.sorts = self.extract_sort(params)
+        self.extract_sort(params)
+        self.extract_pagination(params)
         q = params.pop('q', '')
+
         super(UdataFacetedSearch, self).__init__(q, params)
 
     def extract_sort(self, params):
-        '''Build sort query from parameters'''
+        '''Extract and build sort query from parameters'''
         sorts = params.pop('sort', [])
         sorts = [sorts] if isinstance(sorts, basestring) else sorts
         sorts = [(s[1:], 'desc')
                  if s.startswith('-') else (s, 'asc')
                  for s in sorts]
-        return [
+        self.sorts = [
             {self.adapter.sorts[s].field: d}
             for s, d in sorts if s in self.adapter.sorts
         ]
+
+    def extract_pagination(self, params):
+        '''Extract and build pagination from parameters'''
+        try:
+            self.page = max(int(params.pop('page', 1) or 1), 1)
+        except:
+            self.page = 1
+        try:
+            self.page_size = int(
+                params.pop('page_size', DEFAULT_PAGE_SIZE) or
+                DEFAULT_PAGE_SIZE)
+        except:
+            self.page_size = DEFAULT_PAGE_SIZE
+        self.page_start = (self.page - 1) * self.page_size
+        self.page_end = self.page_start + self.page_size
 
     def search(self):
         """
         Construct the Search object.
         """
-        # from udata.search import SearchResult
         s = Search(doc_type=self.doc_types, using=es.client, index=es.index_name)
         s = s.sort(*self.sorts)
+        s = s[self.page_start:self.page_end]
         return s.response_class(partial(FacetedResponse, self))
 
 from .adapter import ModelSearchAdapter, metrics_mapping_for  # noqa
@@ -193,17 +210,20 @@ from .result import SearchResult  # noqa
 from .fields import *  # noqa
 
 
-def facets_for(adapter, facets=None):
-    if not adapter.facets or not facets:
+def facets_for(adapter, params):
+    facets = params.pop('facets', [])
+    if not adapter.facets:
         return []
     if isinstance(facets, basestring):
         facets = [facets]
     if facets is True or 'all' in facets:
         return adapter.facets.keys()
     else:
+        # Return all requested facets
+        # r facets required for value filtering
         return [
             f for f in adapter.facets.keys()
-            if f in facets
+            if f in facets or f in params
         ]
 
 
@@ -212,7 +232,7 @@ def search_for(model_or_adapter, **params):
         return model_or_adapter
     is_adapter = issubclass(model_or_adapter, ModelSearchAdapter)
     adapter = model_or_adapter if is_adapter else adapter_catalog[model_or_adapter]
-    facets = facets_for(adapter, params.pop('facets', None))
+    facets = facets_for(adapter, params)
     facet_search = adapter.facet_search(*facets)
     return facet_search(params)
 
@@ -220,7 +240,7 @@ def search_for(model_or_adapter, **params):
 def query(model, **kwargs):
     params = multi_to_dict(request.args)
     search = search_for(model, **params)
-    result = search.execute()
+    result = search.execute()  # Do wee keep if failsafe as iw as or not (ie. try/catch)
     return SearchResult(search, result)
 
 
