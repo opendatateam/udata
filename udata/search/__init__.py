@@ -158,10 +158,25 @@ def register(adapter):
 
 
 class UdataFacetedSearch(FacetedSearch):
+    model = None
+    adapter = None
+
     def __init__(self, params):
-        self.sort = params.pop('sort', None)
+        self.sorts = self.extract_sort(params)
         q = params.pop('q', '')
         super(UdataFacetedSearch, self).__init__(q, params)
+
+    def extract_sort(self, params):
+        '''Build sort query from parameters'''
+        sorts = params.pop('sort', [])
+        sorts = [sorts] if isinstance(sorts, basestring) else sorts
+        sorts = [(s[1:], 'desc')
+                 if s.startswith('-') else (s, 'asc')
+                 for s in sorts]
+        return [
+            {self.adapter.sorts[s].field: d}
+            for s, d in sorts if s in self.adapter.sorts
+        ]
 
     def search(self):
         """
@@ -169,8 +184,7 @@ class UdataFacetedSearch(FacetedSearch):
         """
         # from udata.search import SearchResult
         s = Search(doc_type=self.doc_types, using=es.client, index=es.index_name)
-        if self.sort:
-            s = s.sort(self.sort)
+        s = s.sort(*self.sorts)
         return s.response_class(partial(FacetedResponse, self))
 
 from .adapter import ModelSearchAdapter, metrics_mapping_for  # noqa

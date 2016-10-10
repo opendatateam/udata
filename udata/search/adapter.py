@@ -66,6 +66,7 @@ class ModelSearchAdapter(DocType):
             doc_types = cls
             fields = cls.fields
             facets = f
+            adapter = cls
 
         return TempSearch
 
