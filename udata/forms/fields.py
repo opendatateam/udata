@@ -158,7 +158,7 @@ class ImageField(FieldHelper, fields.FormField):
         bbox = self.form.bbox.data or None
         filename = self.form.filename.data or None
         if filename and filename in tmp:
-            with tmp.open(filename) as infile:
+            with tmp.open(filename, 'rb') as infile:
                 field.save(infile, filename, bbox=bbox)
             tmp.delete(filename)
 
