@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import bson
+import copy
 import datetime
 import logging
 
@@ -16,9 +17,11 @@ from functools import partial
 from mongoengine.signals import post_save
 from speaklater import is_lazy_string
 from werkzeug.local import LocalProxy
+from werkzeug.urls import Href
 
 from udata.tasks import celery
 from udata.utils import multi_to_dict
+
 
 from . import analysis
 
@@ -203,6 +206,27 @@ class UdataFacetedSearch(FacetedSearch):
         s = s.sort(*self.sorts)
         s = s[self.page_start:self.page_end]
         return s.response_class(partial(FacetedResponse, self))
+
+    def to_url(self, url=None, replace=False, **kwargs):
+        '''Serialize the query into an URL'''
+        params = copy.deepcopy(self.filter_values)
+        if self._query:
+            params['q'] = self._query
+        if self.page_size != DEFAULT_PAGE_SIZE:
+            params['page_size'] = self.page_size
+        if kwargs:
+            for key, value in kwargs.items():
+                if not replace and key in params:
+                    if not isinstance(params[key], (list, tuple)):
+                        params[key] = [params[key], value]
+                    else:
+                        params[key].append(value)
+                else:
+                    params[key] = value
+        else:
+            params['page'] = self.page
+        href = Href(url or request.base_url)
+        return href(params)
 
 from .adapter import ModelSearchAdapter, metrics_mapping_for  # noqa
 from .query import SearchQuery  # noqa
