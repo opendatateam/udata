@@ -47,6 +47,7 @@ class TopicsBlueprintTest(FrontTestCase):
 
     def test_render_datasets_empty(self):
         '''It should render a topic datasets page even if empty'''
+        self.init_search()
         topic = TopicFactory(tags=['tag'])
 
         response = self.get(url_for('topics.datasets', topic=topic))
@@ -70,6 +71,7 @@ class TopicsBlueprintTest(FrontTestCase):
 
     def test_render_reuses_empty(self):
         '''It should render a topic reuses page even if empty'''
+        self.init_search()
         topic = TopicFactory(tags=['tag'])
 
         response = self.get(url_for('topics.reuses', topic=topic))
