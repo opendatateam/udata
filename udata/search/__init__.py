@@ -186,14 +186,16 @@ class UdataFacetedSearch(FacetedSearch):
     def extract_pagination(self, params):
         '''Extract and build pagination from parameters'''
         try:
-            self.page = max(int(params.pop('page', 1) or 1), 1)
+            params_page = int(params.pop('page', 1) or 1)
+            self.page = max(params_page, 1)
         except:
+            # Failsafe, if page cannot be parsed, we falback on first page
             self.page = 1
         try:
-            self.page_size = int(
-                params.pop('page_size', DEFAULT_PAGE_SIZE) or
-                DEFAULT_PAGE_SIZE)
+            params_page_size = params.pop('page_size', DEFAULT_PAGE_SIZE)
+            self.page_size = int(params_page_size or DEFAULT_PAGE_SIZE)
         except:
+            # Failsafe, if page_size cannot be parsed, we falback on default
             self.page_size = DEFAULT_PAGE_SIZE
         self.page_start = (self.page - 1) * self.page_size
         self.page_end = self.page_start + self.page_size
