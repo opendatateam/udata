@@ -325,7 +325,7 @@ class DatasetAPITest(APITestCase):
         '''It should delete a dataset from the API'''
         user = self.login()
         with self.autoindex():
-            dataset = DatasetFactory(owner=user, resources=[ResourceFactory()])
+            dataset = VisibleDatasetFactory(owner=user)
             response = self.delete(url_for('api.dataset', dataset=dataset))
 
         self.assertStatus(response, 204)

@@ -128,7 +128,7 @@ def reindex(obj):
         except:
             log.exception('Unable to index %s "%s"',
                           model.__name__, str(obj.id))
-    elif adapter_class.get(obj.id, index=es.index_name):
+    elif adapter_class.exists(obj.id, using=es.client, index=es.index_name):
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
         try:
             adapter = adapter_class.from_model(obj)

@@ -70,6 +70,10 @@ class ModelSearchAdapter(DocType):
 
         return TempSearch
 
+    @classmethod
+    def exists(cls, id, **kwargs):
+        return cls.get(id, ignore=404, **kwargs)
+
 
 metrics_types = {
     int: Integer,
