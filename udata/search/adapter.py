@@ -19,8 +19,6 @@ class ModelSearchAdapter(DocType):
     fields = None
     facets = None
     sorts = None
-    filters = None
-    mapping = None
     match_type = 'cross_fields'
     fuzzy = False
 

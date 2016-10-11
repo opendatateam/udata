@@ -5,7 +5,7 @@ from elasticsearch_dsl import Completion, Date, String
 
 from udata.i18n import lazy_gettext as _
 from udata import search
-from udata.search.fields import TermsFacet, RangeFacet, Sort
+from udata.search.fields import TermsFacet, RangeFacet
 from udata.models import Organization
 from udata.core.site.views import current_site
 from udata.search.analysis import simple
@@ -58,12 +58,12 @@ class OrganizationSearch(search.ModelSearchAdapter):
         'description',
     )
     sorts = {
-        'name': Sort('name.raw'),
-        'reuses': Sort('metrics.reuses'),
-        'datasets': Sort('metrics.datasets'),
-        'followers': Sort('metrics.followers'),
-        'views': Sort('metrics.views'),
-        'created': Sort('created'),
+        'name': 'name.raw',
+        'reuses': 'metrics.reuses',
+        'datasets': 'metrics.datasets',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+        'created': 'created',
     }
     facets = {
         'reuses': RangeFacet(field='metrics.reuses',

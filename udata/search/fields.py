@@ -15,7 +15,6 @@ from udata.models import db
 log = logging.getLogger(__name__)
 
 __all__ = (
-    'Sort',
     'TermsFacet', 'ModelTermsFacet',
     'RangeFacet', 'DateHistogramFacet',
     'BoolBooster', 'FunctionBooster',
@@ -24,11 +23,6 @@ __all__ = (
 
 
 ES_NUM_FAILURES = '-Infinity', 'Infinity', 'NaN', None
-
-
-class Sort(object):
-    def __init__(self, field):
-        self.field = field
 
 
 class Facet(object):

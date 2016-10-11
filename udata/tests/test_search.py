@@ -69,8 +69,8 @@ class FakeSearch(search.ModelSearchAdapter):
                     (_('Heavily reused'), (10, None))]),
     }
     sorts = {
-        'title': search.Sort('title.raw'),
-        'description': search.Sort('description.raw'),
+        'title': 'title.raw',
+        'description': 'description.raw',
     }
 
 

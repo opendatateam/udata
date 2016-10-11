@@ -7,7 +7,7 @@ from udata.i18n import lazy_gettext as _
 from udata.models import User, Organization
 from udata.search import ModelSearchAdapter
 from udata.search import i18n_analyzer, metrics_mapping_for, register
-from udata.search.fields import Sort, ModelTermsFacet, RangeFacet
+from udata.search.fields import ModelTermsFacet, RangeFacet
 from udata.search.fields import GaussDecay
 from udata.search.analysis import simple
 
@@ -42,13 +42,13 @@ class UserSearch(ModelSearchAdapter):
         'about'
     )
     sorts = {
-        'last_name': Sort('last_name'),
-        'first_name': Sort('first_name'),
-        'datasets': Sort('metrics.datasets'),
-        'reuses': Sort('metrics.reuses'),
-        'followers': Sort('metrics.followers'),
-        'views': Sort('metrics.views'),
-        'created': Sort('created'),
+        'last_name': 'last_name',
+        'first_name': 'first_name',
+        'datasets': 'metrics.datasets',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+        'created': 'created',
     }
     facets = {
         'organization': ModelTermsFacet(field='organizations',

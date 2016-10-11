@@ -9,7 +9,7 @@ from udata.models import (
     Reuse, Organization, Dataset, User, REUSE_TYPES
 )
 from udata.search import (
-    BoolBooster, GaussDecay, ModelSearchAdapter, Sort,
+    BoolBooster, GaussDecay, ModelSearchAdapter,
     i18n_analyzer, metrics_mapping_for, register,
     RangeFacet, TermsFacet, ModelTermsFacet
 )
@@ -99,12 +99,12 @@ class ReuseSearch(ModelSearchAdapter):
         'badge': TermsFacet(field='badges', labelizer=reuse_badge_labelizer),
     }
     sorts = {
-        'title': Sort('title.raw'),
-        'created': Sort('created'),
-        'last_modified': Sort('last_modified'),
-        'datasets': Sort('metrics.datasets'),
-        'followers': Sort('metrics.followers'),
-        'views': Sort('metrics.views'),
+        'title': 'title.raw',
+        'created': 'created',
+        'last_modified': 'last_modified',
+        'datasets': 'metrics.datasets',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
     }
     boosters = [
         BoolBooster('featured', 1.1),

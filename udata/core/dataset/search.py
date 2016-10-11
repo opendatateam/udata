@@ -12,7 +12,6 @@ from udata.search import (
     ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
 )
 from udata.search.fields import (
-    Sort,
     TermsFacet, ModelTermsFacet, RangeFacet, DateHistogramFacet,
     BoolBooster, GaussDecay
 )
@@ -112,12 +111,12 @@ class DatasetSearch(ModelSearchAdapter):
         'description',
     )
     sorts = {
-        'title': Sort('title.raw'),
-        'created': Sort('created'),
-        'last_modified': Sort('last_modified'),
-        'reuses': Sort('metrics.reuses'),
-        'followers': Sort('metrics.followers'),
-        'views': Sort('metrics.views'),
+        'title': 'title.raw',
+        'created': 'created',
+        'last_modified': 'last_modified',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
     }
 
     facets = {

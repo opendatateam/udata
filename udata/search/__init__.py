@@ -179,7 +179,7 @@ class UdataFacetedSearch(FacetedSearch):
                  if s.startswith('-') else (s, 'asc')
                  for s in sorts]
         self.sorts = [
-            {self.adapter.sorts[s].field: d}
+            {self.adapter.sorts[s]: d}
             for s, d in sorts if s in self.adapter.sorts
         ]
 
