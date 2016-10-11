@@ -13,7 +13,7 @@ from os.path import abspath, join, dirname, isfile, exists
 from flask import (
     Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint
 )
-from flask_cache import Cache
+from flask_caching import Cache
 
 from flask_wtf.csrf import CsrfProtect
 from flask_navigation import Navigation
