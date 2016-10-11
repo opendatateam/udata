@@ -5,8 +5,9 @@ import logging
 
 from bson.objectid import ObjectId
 from elasticsearch_dsl.faceted_search import (
-    TermsFacet as DSLTermsFacet, RangeFacet as DSLRangeFacet,
-    DateHistogramFacet
+    TermsFacet as DSLTermsFacet,
+    RangeFacet as DSLRangeFacet,
+    DateHistogramFacet as DSLDateHistogramFacet,
 )
 
 from udata.models import db
@@ -92,6 +93,10 @@ class RangeFacet(Facet, DSLRangeFacet):
     def labelize(self, label, value):
         return (self.labelizer(label, value)
                 if self.labelizer else ': '.join([label, value]))
+
+
+class DateHistogramFacet(Facet, DSLDateHistogramFacet):
+    pass
 
 
 class BoolBooster(object):
