@@ -161,6 +161,8 @@ class Testing(object):
     SERVER_NAME = 'localhost'
     DEFAULT_LANGUAGE = 'en'
     ACTIVATE_TERRITORIES = False
+    LOGGER_HANDLER_POLICY = 'never'
+    CELERYD_HIJACK_ROOT_LOGGER = False
 
 
 class Debug(Defaults):

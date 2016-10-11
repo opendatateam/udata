@@ -30,11 +30,6 @@ from werkzeug.urls import url_encode
 from udata.core.user.factories import UserFactory
 
 
-# Suppress debug data for third party libraries
-for logger in ('factory', 'elasticsearch', 'urllib3'):
-    logging.getLogger(logger).setLevel(logging.WARNING)
-
-
 class TestCase(BaseTestCase):
     settings = settings.Testing
 
@@ -180,7 +175,7 @@ class DBTestMixin(object):
         '''Clear the database'''
         super(DBTestMixin, self).tearDown()
         db_name = self.app.config['MONGODB_DB']
-        db.connection.drop_database(db_name)
+        db.connection.client.drop_database(db_name)
 
 
 class SearchTestMixin(DBTestMixin):
