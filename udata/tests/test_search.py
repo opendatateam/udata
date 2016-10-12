@@ -9,8 +9,6 @@ from werkzeug.urls import url_decode, url_parse
 
 from factory.mongoengine import MongoEngineFactory
 
-from elasticsearch_dsl.result import Response
-from elasticsearch_dsl.faceted_search import FacetedResponse
 
 from udata import search
 from udata.core.metrics import Metric
@@ -699,13 +697,10 @@ def hit_factory():
 
 def agg_factory(buckets):
     return {
-        '_filter_test': {
-            'doc_count': 229,
+        'test': {
+            'buckets': buckets,
             'doc_count_error_upper_bound': 1,
             'sum_other_doc_count': 94,
-            'test': {
-                'buckets': buckets,
-            }
         }
     }
 
@@ -740,20 +735,20 @@ def response_factory(nb=20, page=1, page_size=20, total=42, **kwargs):
 
 
 class FacetTestCase(TestCase):
-    def factory(self, fetch=True, **kwargs):
+    def factory(self, **kwargs):
         '''
         Build a fake Elasticsearch DSL FacetedResponse
         and extract the facet form it
         '''
         data = response_factory(**kwargs)
 
-        class TestSearch(search.UdataFacetedSearch):
+        class TestSearch(search.SearchQuery):
             facets = {
                 'test': self.facet
             }
 
         s = TestSearch({})
-        response = FacetedResponse(s, data)
+        response = search.SearchResult(s, data)
         return response.facets.test
 
 
@@ -852,18 +847,19 @@ class TestRangeFacet(FacetTestCase):
 
 
 class SearchResultTest(TestCase):
-    def factory(self, **kwargs):
+    def factory(self, response=None, **kwargs):
         '''
-        Build a fake Elasticsearch DSL Response.
+        Build a fake SearchResult.
         '''
-        return Response(response_factory(**kwargs))
+        response = response or response_factory()
+        query = search.search_for(FakeSearch, **kwargs)
+        return search.SearchResult(query, response)
 
     def test_properties(self):
         '''Search result should map some properties for easy access'''
-        response = self.factory(nb=10, total=42)
-        max_score = response.hits.max_score
-        query = search.search_for(FakeSearch)
-        result = search.SearchResult(query, response)
+        response = response_factory(nb=10, total=42)
+        max_score = response['hits']['max_score']
+        result = self.factory(response)
 
         self.assertEqual(result.total, 42)
         self.assertEqual(result.max_score, max_score)
@@ -873,8 +869,7 @@ class SearchResultTest(TestCase):
 
     def test_no_failures(self):
         '''Search result should not fail on missing properties'''
-        query = search.search_for(FakeSearch)
-        result = search.SearchResult(query, Response({}))
+        result = self.factory()
 
         self.assertEqual(result.total, 0)
         self.assertEqual(result.max_score, 0)
@@ -884,9 +879,8 @@ class SearchResultTest(TestCase):
 
     def test_pagination(self):
         '''Search results should be paginated'''
-        kwargs = {'page': 2, 'page_size': 3}
-        query = search.search_for(FakeSearch, **kwargs)
-        result = search.SearchResult(query, self.factory(nb=3, total=11))
+        response = response_factory(nb=3, total=11)
+        result = self.factory(response, page=2, page_size=3)
 
         self.assertEqual(result.page, 2),
         self.assertEqual(result.page_size, 3)
@@ -894,8 +888,7 @@ class SearchResultTest(TestCase):
 
     def test_pagination_empty(self):
         '''Search results should be paginated even if empty'''
-        query = search.search_for(FakeSearch, page=2, page_size=3)
-        result = search.SearchResult(query, Response({}))
+        result = self.factory(page=2, page_size=3)
 
         self.assertEqual(result.page, 1),
         self.assertEqual(result.page_size, 3)
@@ -903,8 +896,7 @@ class SearchResultTest(TestCase):
 
     def test_no_pagination_in_query(self):
         '''Search results should be paginated even if not asked'''
-        query = search.search_for(FakeSearch)
-        result = search.SearchResult(query, Response({}))
+        result = self.factory()
 
         self.assertEqual(result.page, 1),
         self.assertEqual(result.page_size, search.DEFAULT_PAGE_SIZE)
