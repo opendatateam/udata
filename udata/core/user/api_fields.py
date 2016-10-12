@@ -48,6 +48,8 @@ user_fields = api.model('User', {
     'uri': fields.UrlFor(
         'api.user', lambda o: {'user': o},
         description='The user API URI', required=True),
+    'metrics': fields.Raw(
+        description='The user metrics', readonly=True),
 })
 
 me_fields = api.inherit('Me', user_fields, {

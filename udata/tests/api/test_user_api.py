@@ -170,3 +170,22 @@ class UserAPITest(APITestCase):
 
         suggestion = response.json[0]
         self.assertEqual(suggestion['id'], str(user.id))
+
+    def test_users(self):
+        '''It should provide a list of users'''
+        with self.autoindex():
+            user = UserFactory(
+                about=faker.paragraph(),
+                website=faker.url(),
+                avatar_url=faker.url(),
+                metrics={'datasets': 10})
+        response = self.get(url_for('api.users'))
+        self.assert200(response)
+        [json] = response.json['data']
+        self.assertEquals(json['id'], str(user.id))
+        self.assertEquals(json['slug'], user.slug)
+        self.assertEquals(json['first_name'], user.first_name)
+        self.assertEquals(json['last_name'], user.last_name)
+        self.assertEquals(json['website'], user.website)
+        self.assertEquals(json['about'], user.about)
+        self.assertEquals(json['metrics'], user.metrics)
