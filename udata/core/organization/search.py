@@ -67,19 +67,34 @@ class OrganizationSearch(search.ModelSearchAdapter):
     }
     facets = {
         'reuses': RangeFacet(field='metrics.reuses',
-                             ranges=[(_('No reuses'), (None, 1)),
-                                     (_('Few reuses'), (1, 5)),
-                                     (_('Many reuses'), (5, None))]),
+                             ranges=[('none', (None, 1)),
+                                     ('few', (1, 5)),
+                                     ('many', (5, None))],
+                             labels={
+                                'none': _('No reuses'),
+                                'few': _('Few reuses'),
+                                'many': _('Many reuses'),
+                             }),
         'badge': TermsFacet(field='badges',
                             labelizer=organization_badge_labelizer),
         'datasets': RangeFacet(field='metrics.datasets',
-                               ranges=[(_('No datasets'), (None, 1)),
-                                       (_('Few datasets'), (1, 5)),
-                                       (_('Many datasets'), (5, None))]),
+                               ranges=[('none', (None, 1)),
+                                       ('few', (1, 5)),
+                                       ('many', (5, None))],
+                               labels={
+                                    'none': _('No datasets'),
+                                    'few': _('Few datasets'),
+                                    'many': _('Many datasets'),
+                               }),
         'followers': RangeFacet(field='metrics.followers',
-                                ranges=[(_('No followers'), (None, 1)),
-                                        (_('Few followers'), (1, 5)),
-                                        (_('Many followers'), (5, None))]),
+                                ranges=[('none', (None, 1)),
+                                        ('few', (1, 5)),
+                                        ('many', (5, None))],
+                                labels={
+                                     'none': _('No followers'),
+                                     'few': _('Few followers'),
+                                     'many': _('Many followers'),
+                                }),
     }
     boosters = [
         search.GaussDecay('metrics.followers', max_followers, decay=0.8),

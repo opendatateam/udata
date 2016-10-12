@@ -198,6 +198,24 @@
 {% endif %}
 {% endmacro %}
 
+{% macro range_facet(result, name, label, icon, url=None) %}
+{% set ranges = result.facets[name] %}
+{% if ranges|length > 1 %}
+    {{ facet_panel(result, name, label, icon, url) }}
+    <div id="collapse-{{result.class_name}}-{{name}}" class="list-group collapse in">
+    {% for key, count, selected in ranges %}
+        <a href="{{ result.query.to_url(url, **{name: key}) }}"
+            class="list-group-item">
+            {{ result.query.facets[name].labelize('', key) }}
+            <span class="badge pull-right">{{ count }}</span>
+        </a>
+    {% endfor %}
+    </div>
+{% endif %}
+{% endmacro %}
+
+
+
 
 {% macro bool_aggregation(name, aggregation, query, url=None) %}
 <div id="collapse-{{name}}" class="list-group collapse in">

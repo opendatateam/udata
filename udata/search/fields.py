@@ -84,10 +84,20 @@ class ModelTermsFacet(TermsFacet):
 
 
 class RangeFacet(Facet, DSLRangeFacet):
+    def __init__(self, **kwargs):
+        super(RangeFacet, self).__init__(**kwargs)
+        self.labels = self._params.pop('labels', {})
 
-    def labelize(self, label, value):
-        return (self.labelizer(label, value)
-                if self.labelizer else ': '.join([label, value]))
+    def get_values(self, data, filter_values):
+        return [
+            (key, count, selected)
+            for key, count, selected
+            in super(RangeFacet, self).get_values(data, filter_values)
+            if count
+        ]
+
+    def default_labelizer(self, label, value):
+        return self.labels.get(value, value)
 
 
 class DateHistogramFacet(Facet, DSLDateHistogramFacet):

@@ -1,9 +1,9 @@
 {% import theme('macros/search.html') as s %}
 {% set url = search_url %}
 <div class="panel panel-default advanced-search-panel">
-    {{ s.aggregation_panel(organizations, 'datasets', _('Datasets'), ficon('fa-cubes'), url=url) }}
+    {{ s.range_facet(organizations, 'datasets', _('Datasets'), ficon('fa-cubes'), url=url) }}
     {{ s.terms_facet(organizations, 'badge', _('Badges'), ficon('fa-bookmark'), url=url) }}
-    {{ s.aggregation_panel(organizations, 'reuses', _('Reuses'), ficon('fa-retweet'), url=url) }}
-    {{ s.aggregation_panel(organizations, 'permitted_reuses', _('Reappropriations'), ficon('fa-lightbulb-o'), url=url) }}
-    {{ s.aggregation_panel(organizations, 'followers', _('Followers'), ficon('fa-eye'), url=url) }}
+    {{ s.range_facetl(organizations, 'reuses', _('Reuses'), ficon('fa-retweet'), url=url) }}
+    {{ s.range_facetl(organizations, 'permitted_reuses', _('Reappropriations'), ficon('fa-lightbulb-o'), url=url) }}
+    {{ s.range_facetl(organizations, 'followers', _('Followers'), ficon('fa-eye'), url=url) }}
 </div>

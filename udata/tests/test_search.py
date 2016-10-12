@@ -803,55 +803,46 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
 
 class TestRangeFacet(FacetTestCase):
     def setUp(self):
+        self.ranges = [
+            ('first', (None, 1)),
+            ('second', (1, 5)),
+            ('third', (5, None))
+        ]
         self.facet = search.RangeFacet(
             field='some_field',
-            ranges=[(_('Never reused'), (None, 1)),
-                    (_('Little reused'), (1, 5)),
-                    (_('Quite reused'), (5, 10)),
-                    (_('Heavily reused'), (10, None))])
+            ranges=self.ranges,
+            labels={
+                'first': 'First range',
+                'second': 'Second range',
+                'third': 'Third range',
+            })
 
-    def test_from_response(self):
-        result = self.factory(aggregations={
-            'test': {
-                '_type': 'stats',
-                'count': 123,
-                'total': 666,
-                'min': 3,
-                'max': 42,
-                'mean': 21.5,
-                'sum_of_squares': 29.0,
-                'variance': 2.25,
-                'std_deviation': 1.5
-            }
-        })
+    def buckets(self, first=1, second=2, third=3):
+        return [
+          {'to': 1.0, 'to_as_string': '1.0', 'key': 'first', 'doc_count': first},
+          {'from': 1.0, 'from_as_string': '1.0', 'to_as_string': '5.0', 'key': 'second', 'doc_count': second},
+          {'from_as_string': '5.0', 'from': 5.0, 'key': 'third', 'doc_count': third},
+        ]
 
-        self.assertEqual(result['type'], 'range')
-        self.assertEqual(result['min'], 3)
-        self.assertEqual(result['max'], 42)
+    def test_get_values(self):
+        buckets = self.buckets()
+        result = self.factory(aggregations=agg_factory(buckets))
 
-    def test_from_response_with_error(self):
-        result = self.factory(aggregations={
-            'test': {
-                '_type': 'stats',
-                'count': 0,
-                'total': 0,
-                'min': 'Infinity',
-                'max': '-Infinity',
-                'mean': 0.0,
-                'sum_of_squares': 0.0,
-                'variance': 'NaN',
-                'std_deviation': 'NaN'
-            }
-        })
+        self.assertEqual(len(result), len(self.ranges))
+        self.assertEqual(result[0], ('first', 1, False))
+        self.assertEqual(result[1], ('second', 2, False))
+        self.assertEqual(result[2], ('third', 3, False))
 
-        self.assertEqual(result['type'], 'range')
-        self.assertEqual(result['min'], None)
-        self.assertEqual(result['max'], None)
-        self.assertFalse(result['visible'])
+    def test_get_values_with_empty(self):
+        buckets = self.buckets(second=0)
+        result = self.factory(aggregations=agg_factory(buckets))
+
+        self.assertEqual(len(result), len(self.ranges) -1)
+        self.assertEqual(result[0], ('first', 1, False))
+        self.assertEqual(result[1], ('third', 3, False))
 
     def test_labelize(self):
-        self.assertEqual(
-            self.facet.labelize('label', '4-15'), 'label: 4-15')
+        self.assertEqual(self.facet.labelize('label', 'first'), 'First range')
 
 
 class SearchResultTest(TestCase):
