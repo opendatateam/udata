@@ -8,30 +8,48 @@ from bson.objectid import ObjectId
 from flask import request
 from werkzeug.urls import Href
 
+from elasticsearch_dsl.result import Response
+
 from udata.utils import Paginable
 
 
 log = logging.getLogger(__name__)
 
 
-class SearchResult(Paginable):
+class SearchResult(Paginable, Response):
     '''An ElasticSearch result wrapper for easy property access'''
-    def __init__(self, query, result):
-        self.result = result
+    def __init__(self, query, result, *args, **kwargs):
+        super(SearchResult, self).__init__(result, *args, **kwargs)
         self.query = query
         self._objects = None
+        self._facets = None
+
+    @property
+    def query_string(self):
+        return self.query._query
+
+    @property
+    def facets(self):
+        if self._facets is None:
+            self._facets = {}
+            for name, facet in self.query.facets.items():
+                self._facets[name] = facet.get_values(
+                    self.aggregations[name]['buckets'],
+                    self.query.filter_values.get(name, ())
+                )
+        return self._facets
 
     @property
     def total(self):
         try:
-            return self.result.hits.total
+            return self.hits.total
         except KeyError:
             return 0
 
     @property
     def max_score(self):
         try:
-            return self.result.hits.max_score
+            return self.hits.max_score
         except KeyError:
             return 0
 
@@ -49,7 +67,7 @@ class SearchResult(Paginable):
 
     def get_ids(self):
         try:
-            return [hit['_id'] for hit in self.result.hits.hits]
+            return [hit['_id'] for hit in self.hits.hits]
         except KeyError:
             return []
 
@@ -64,16 +82,12 @@ class SearchResult(Paginable):
     def objects(self):
         return self.get_objects()
 
-    @property
-    def facets(self):
-        return self.result.facets.to_dict()
-
     def __iter__(self):
         for obj in self.get_objects():
             yield obj
 
     def __len__(self):
-        return len(self.result.hits.hits)
+        return len(self.hits.hits)
 
     def __getitem__(self, index):
         return self.get_objects()[index]

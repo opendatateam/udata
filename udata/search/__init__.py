@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import bson
-import copy
 import datetime
 import logging
 
@@ -10,17 +9,13 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
 from elasticsearch_dsl import FacetedSearch
 from elasticsearch_dsl import MultiSearch, Search, Index as ESIndex
-from elasticsearch_dsl.faceted_search import FacetedResponse
 from elasticsearch_dsl.serializer import AttrJSONSerializer
-from flask import current_app, request
-from functools import partial
+from flask import current_app
 from mongoengine.signals import post_save
 from speaklater import is_lazy_string
 from werkzeug.local import LocalProxy
-from werkzeug.urls import Href
 
 from udata.tasks import celery
-from udata.utils import multi_to_dict
 
 
 from . import analysis
@@ -160,74 +155,6 @@ def register(adapter):
     return adapter
 
 
-class UdataFacetedSearch(FacetedSearch):
-    model = None
-    adapter = None
-
-    def __init__(self, params):
-        self.extract_sort(params)
-        self.extract_pagination(params)
-        q = params.pop('q', '')
-        super(UdataFacetedSearch, self).__init__(q, params)
-
-    def extract_sort(self, params):
-        '''Extract and build sort query from parameters'''
-        sorts = params.pop('sort', [])
-        sorts = [sorts] if isinstance(sorts, basestring) else sorts
-        sorts = [(s[1:], 'desc')
-                 if s.startswith('-') else (s, 'asc')
-                 for s in sorts]
-        self.sorts = [
-            {self.adapter.sorts[s]: d}
-            for s, d in sorts if s in self.adapter.sorts
-        ]
-
-    def extract_pagination(self, params):
-        '''Extract and build pagination from parameters'''
-        try:
-            params_page = int(params.pop('page', 1) or 1)
-            self.page = max(params_page, 1)
-        except:
-            # Failsafe, if page cannot be parsed, we falback on first page
-            self.page = 1
-        try:
-            params_page_size = params.pop('page_size', DEFAULT_PAGE_SIZE)
-            self.page_size = int(params_page_size or DEFAULT_PAGE_SIZE)
-        except:
-            # Failsafe, if page_size cannot be parsed, we falback on default
-            self.page_size = DEFAULT_PAGE_SIZE
-        self.page_start = (self.page - 1) * self.page_size
-        self.page_end = self.page_start + self.page_size
-
-    def search(self):
-        """
-        Construct the Search object.
-        """
-        s = Search(doc_type=self.doc_types, using=es.client, index=es.index_name)
-        s = s.sort(*self.sorts)
-        s = s[self.page_start:self.page_end]
-        return s.response_class(partial(FacetedResponse, self))
-
-    def to_url(self, url=None, replace=False, **kwargs):
-        '''Serialize the query into an URL'''
-        params = copy.deepcopy(self.filter_values)
-        if self._query:
-            params['q'] = self._query
-        if self.page_size != DEFAULT_PAGE_SIZE:
-            params['page_size'] = self.page_size
-        if kwargs:
-            for key, value in kwargs.items():
-                if not replace and key in params:
-                    if not isinstance(params[key], (list, tuple)):
-                        params[key] = [params[key], value]
-                    else:
-                        params[key].append(value)
-                else:
-                    params[key] = value
-        else:
-            params['page'] = self.page
-        href = Href(url or request.base_url)
-        return href(params)
 
 from .adapter import ModelSearchAdapter, metrics_mapping_for  # noqa
 from .query import SearchQuery  # noqa
@@ -267,8 +194,7 @@ def search_for(model_or_adapter, **params):
 
 def query(model, **params):
     search = search_for(model, **params)
-    result = search.execute()  # Do wee keep if failsafe as iw as or not (ie. try/catch)
-    return SearchResult(search, result)
+    return search.execute()
 
 
 def iter(model, **params):
@@ -288,8 +214,8 @@ def multisearch(*models, **params):
         queries.append(s)
     responses = ms.execute()
     return [
-        SearchResult(query, FacetedResponse(query, response._d_))
-        for response, query in zip(responses, queries)
+        SearchResult(query, response._d_)
+        for query, response in zip(queries, responses)
     ]
 
 
