@@ -171,10 +171,10 @@
 {% if objects|length > 1 %}
     {{ facet_panel(result, name, label, icon, url) }}
     <div id="collapse-{{result.class_name}}-{{name}}" class="list-group collapse in">
-    {% for obj, count in objects[:nb_displayed_aggregations] %}
+    {% for obj, count, selected in objects[:nb_displayed_aggregations] %}
         <a href="{{ result.query.to_url(url, **{name: obj.id|string}) }}"
             class="list-group-item">
-            {{ obj }}
+            {{ result.query.facets[name].labelize('', obj) }}
             <span class="badge pull-right">{{ count }}</span>
         </a>
     {% endfor %}
@@ -185,10 +185,10 @@
             <span class="fa fa-chevron-right pull-right"></span>
         </button>
         <div id="collapse-{{result.class_name}}-{{name}}-more" class="list-group collapse list-group-more">
-        {% for obj, count in objects[nb_displayed_aggregations:] %}
+        {% for obj, count, selected in objects[nb_displayed_aggregations:] %}
             <a href="{{ result.query.to_url(url, **{name: obj.id|string}) }}"
                 class="list-group-item">
-                {{ obj }}
+                {{ result.query.facets[name].labelize('', obj) }}
                 <span class="badge pull-right">{{ count }}</span>
             </a>
         {% endfor %}

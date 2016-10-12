@@ -691,6 +691,19 @@ def hit_factory():
     }
 
 
+def agg_factory(buckets):
+    return {
+        '_filter_test': {
+            'doc_count': 229,
+            'doc_count_error_upper_bound': 1,
+            'sum_other_doc_count': 94,
+            'test': {
+                'buckets': buckets,
+            }
+        }
+    }
+
+
 def response_factory(nb=20, page=1, page_size=20, total=42, **kwargs):
     '''
     Build a fake Elasticsearch DSL FacetedResponse
@@ -721,11 +734,6 @@ def response_factory(nb=20, page=1, page_size=20, total=42, **kwargs):
 
 
 class FacetTestCase(TestCase):
-    def assert_agg(self, name, expected):
-        aggs = self.facet.to_aggregations(name)
-        as_dict = dict((k, v.to_dict()) for k, v in aggs.items())
-        self.assertEqual(as_dict, expected)
-
     def factory(self, fetch=True, **kwargs):
         '''
         Build a fake Elasticsearch DSL FacetedResponse
@@ -740,29 +748,25 @@ class FacetTestCase(TestCase):
 
         s = TestSearch({})
         response = FacetedResponse(s, data)
-        return self.facet.from_response('test', response, fetch=fetch)
+        return response.facets.test
 
 
 class TestTermsFacet(FacetTestCase):
     def setUp(self):
         self.facet = search.TermsFacet(field='tags')
 
-    def test_from_response(self):
-        result = self.factory(aggregations={
-            'test': {
-                '_type': 'terms',
-                'total': 229,
-                'other': 33,
-                'missing': 2,
-                'buckets': [{
-                    'key': faker.word(),
-                    'doc_count': faker.random_number(2)
-                } for _ in range(10)],
-            }
-        })
+    def test_get_values(self):
+        buckets = [{
+            'key': faker.word(),
+            'doc_count': faker.random_number(2)
+        } for _ in range(10)]
+        result = self.factory(aggregations=agg_factory(buckets))
 
-        self.assertEqual(result['type'], 'terms')
-        self.assertEqual(len(result['terms']), 10)
+        self.assertEqual(len(result), 10)
+        for row in result:
+            self.assertIsInstance(row[0], basestring)
+            self.assertIsInstance(row[1], int)
+            self.assertIsInstance(row[2], bool)
 
     def test_labelize(self):
         self.assertEqual(self.facet.labelize('label', 'fake'), 'fake')
@@ -772,31 +776,28 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
     def setUp(self):
         self.facet = search.ModelTermsFacet(field='fakes', model=Fake)
 
-    def test_labelize(self):
+    def test_labelize_id(self):
         fake = FakeFactory()
         self.assertEqual(
             self.facet.labelize('label', str(fake.id)), 'fake')
 
-    def test_from_response(self):
-        fakes = [FakeFactory() for _ in range(10)]
-        result = self.factory(aggregations={
-            'test': {
-                '_type': 'terms',
-                'total': 229,
-                'other': 33,
-                'missing': 2,
-                'buckets': [{
-                    'key': str(f.id),
-                    'doc_count': faker.random_number(2)
-                } for f in fakes],
-            }
-        })
+    def test_labelize_object(self):
+        fake = FakeFactory()
+        self.assertEqual(self.facet.labelize('label', fake), 'fake')
 
-        self.assertEqual(result['type'], 'models')
-        self.assertEqual(len(result['models']), 10)
-        for fake, row in zip(fakes, result['models']):
+    def test_get_values(self):
+        fakes = [FakeFactory() for _ in range(10)]
+        buckets = [{
+            'key': str(f.id),
+            'doc_count': faker.random_number(2)
+        } for f in fakes]
+        result = self.factory(aggregations=agg_factory(buckets))
+
+        self.assertEqual(len(result), 10)
+        for fake, row in zip(fakes, result):
             self.assertIsInstance(row[0], Fake)
             self.assertIsInstance(row[1], int)
+            self.assertIsInstance(row[2], bool)
             self.assertEqual(fake.id, row[0].id)
 
 

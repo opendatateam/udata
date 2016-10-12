@@ -29,8 +29,15 @@ class Facet(object):
 
     def __init__(self, **kwargs):
         super(Facet, self).__init__(**kwargs)
-        self.labelize = self._params.pop('labelizer',
-                                         lambda label, value: value)
+        self.labelizer = self._params.pop('labelizer', None)
+
+    def labelize(self, label, value):
+        '''Get the label for a given value'''
+        labelizer = self.labelizer or self.default_labelizer
+        return labelizer(label, value)
+
+    def default_labelizer(self, label, value):
+        return str(value)
 
 
 class TermsFacet(Facet, DSLTermsFacet):
@@ -66,14 +73,14 @@ class ModelTermsFacet(TermsFacet):
             return objects.get(cast(term))
 
         return [
-            (serialize(key), doc_count)
+            (serialize(key), doc_count, selected)
             for (key, doc_count, selected) in values
         ]
 
     def labelize(self, label, value):
-        return (self.labelizer(label, value)
-                if self.labelizer
-                else unicode(self.model.objects.get(id=value)))
+        if not isinstance(value, self.model):
+            value = self.model.objects.get(id=value)
+        return super(ModelTermsFacet, self).labelize(label, value)
 
 
 class RangeFacet(Facet, DSLRangeFacet):
