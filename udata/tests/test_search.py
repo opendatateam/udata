@@ -747,23 +747,6 @@ class TestTermsFacet(FacetTestCase):
     def setUp(self):
         self.facet = search.TermsFacet(field='tags')
 
-    def test_to_query(self):
-        self.assertEqual(self.facet.to_query(), {
-            'terms': {
-                'field': 'tags',
-                'size': 20,
-            }
-        })
-
-    def test_to_query_with_excludes(self):
-        self.assertEqual(self.facet.to_query(args=['tag1', 'tag2']), {
-            'terms': {
-                'field': 'tags',
-                'size': 20,
-                'exclude': ['tag1', 'tag2']
-            }
-        })
-
     def test_from_response(self):
         result = self.factory(aggregations={
             'test': {
@@ -781,25 +764,6 @@ class TestTermsFacet(FacetTestCase):
         self.assertEqual(result['type'], 'terms')
         self.assertEqual(len(result['terms']), 10)
 
-    def test_to_filter(self):
-        self.assertEqual(
-            self.facet.to_filter('value'),
-            {'term': {'tags': 'value'}}
-        )
-
-    def test_to_filter_multi(self):
-        self.assertEqual(
-            self.facet.to_filter(['value1', 'value2']),
-            [
-                {'term': {'tags': 'value1'}},
-                {'term': {'tags': 'value2'}},
-            ]
-        )
-
-    def test_aggregations(self):
-        expected = {'foo': {'terms': {'field': 'tags', 'size': 20}}}
-        self.assert_agg('foo', expected)
-
     def test_labelize(self):
         self.assertEqual(self.facet.labelize('label', 'fake'), 'fake')
 
@@ -807,23 +771,6 @@ class TestTermsFacet(FacetTestCase):
 class TestModelTermsFacet(FacetTestCase, DBTestMixin):
     def setUp(self):
         self.facet = search.ModelTermsFacet(field='fakes', model=Fake)
-
-    def test_to_query(self):
-        self.assertEqual(self.facet.to_query(), {
-            'terms': {
-                'field': 'fakes',
-                'size': 20,
-            }
-        })
-
-    def test_to_query_with_excludes(self):
-        self.assertEqual(self.facet.to_query(args=['id1', 'id2']), {
-            'terms': {
-                'field': 'fakes',
-                'size': 20,
-                'exclude': ['id1', 'id2']
-            }
-        })
 
     def test_labelize(self):
         fake = FakeFactory()
@@ -852,37 +799,6 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
             self.assertIsInstance(row[1], int)
             self.assertEqual(fake.id, row[0].id)
 
-    def test_from_response_no_fetch(self):
-        fakes = [FakeFactory() for _ in range(10)]
-        result = self.factory(fetch=False, aggregations={
-            'test': {
-                '_type': 'terms',
-                'total': 229,
-                'other': 33,
-                'missing': 2,
-                'buckets': [{
-                    'key': str(f.id),
-                    'doc_count': faker.random_number(2)
-                } for f in fakes],
-            }
-        })
-
-        self.assertEqual(result['type'], 'models')
-        self.assertEqual(len(result['models']), 10)
-        for fake, row in zip(fakes, result['models']):
-            self.assertIsInstance(row[0], dict)
-            self.assertIsInstance(row[1], int)
-            self.assertEqual(row[0]['id'], str(fake.id))
-            self.assertEqual(row[0]['class'], 'Fake')
-
-    def test_to_filter(self):
-        self.assertEqual(self.facet.to_filter('value'),
-                         {'term': {'fakes': 'value'}})
-
-    def test_aggregations(self):
-        expected = {'foo': {'terms': {'field': 'fakes', 'size': 20}}}
-        self.assert_agg('foo', expected)
-
 
 class TestRangeFacet(FacetTestCase):
     def setUp(self):
@@ -892,13 +808,6 @@ class TestRangeFacet(FacetTestCase):
                     (_('Little reused'), (1, 5)),
                     (_('Quite reused'), (5, 10)),
                     (_('Heavily reused'), (10, None))])
-
-    def test_to_query(self):
-        self.assertEqual(self.facet.to_query(), {
-            'stats': {
-                'field': 'some_field'
-            }
-        })
 
     def test_from_response(self):
         result = self.factory(aggregations={
@@ -938,20 +847,6 @@ class TestRangeFacet(FacetTestCase):
         self.assertEqual(result['min'], None)
         self.assertEqual(result['max'], None)
         self.assertFalse(result['visible'])
-
-    def test_to_filter(self):
-        self.assertEqual(self.facet.to_filter('3-8'), {
-            'range': {
-                'some_field': {
-                    'gte': 3,
-                    'lte': 8,
-                }
-            }
-        })
-
-    def test_aggregations(self):
-        expected = {'foo': {'stats': {'field': 'some_field'}}}
-        self.assert_agg('foo', expected)
 
     def test_labelize(self):
         self.assertEqual(

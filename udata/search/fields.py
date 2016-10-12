@@ -32,12 +32,6 @@ class Facet(object):
         self.labelize = self._params.pop('labelizer',
                                          lambda label, value: value)
 
-    def filter_from_kwargs(self, name, kwargs):
-        pass
-
-    def to_aggregations(self, name, *args):
-        pass
-
 
 class TermsFacet(Facet, DSLTermsFacet):
     pass
