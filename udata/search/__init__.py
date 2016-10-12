@@ -168,7 +168,6 @@ class UdataFacetedSearch(FacetedSearch):
         self.extract_sort(params)
         self.extract_pagination(params)
         q = params.pop('q', '')
-
         super(UdataFacetedSearch, self).__init__(q, params)
 
     def extract_sort(self, params):
@@ -257,22 +256,22 @@ def search_for(model_or_adapter, **params):
     if isinstance(model_or_adapter, FacetedSearch):
         return model_or_adapter
     is_adapter = issubclass(model_or_adapter, ModelSearchAdapter)
-    adapter = model_or_adapter if is_adapter else adapter_catalog[model_or_adapter]
+    if is_adapter:
+        adapter = model_or_adapter
+    else:
+        adapter = adapter_catalog[model_or_adapter]
     facets = facets_for(adapter, params)
     facet_search = adapter.facet_search(*facets)
     return facet_search(params)
 
 
-def query(model, **kwargs):
-    params = multi_to_dict(request.args)
+def query(model, **params):
     search = search_for(model, **params)
     result = search.execute()  # Do wee keep if failsafe as iw as or not (ie. try/catch)
     return SearchResult(search, result)
 
 
-def iter(model, **kwargs):
-    params = multi_to_dict(request.args)
-    params.update(kwargs)
+def iter(model, **params):
     params['facets'] = True
     search = search_for(model, **params)
     search._s.aggs._params = {}  # Remove aggregations.
@@ -289,7 +288,7 @@ def multisearch(*models, **params):
         queries.append(s)
     responses = ms.execute()
     return [
-        SearchResult(query, response)
+        SearchResult(query, FacetedResponse(query, response._d_))
         for response, query in zip(responses, queries)
     ]
 

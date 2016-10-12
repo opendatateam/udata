@@ -9,6 +9,9 @@ from werkzeug.urls import url_decode, url_parse
 
 from factory.mongoengine import MongoEngineFactory
 
+from elasticsearch_dsl.result import Response
+from elasticsearch_dsl.faceted_search import FacetedResponse
+
 from udata import search
 from udata.core.metrics import Metric
 from udata.models import db
@@ -124,6 +127,8 @@ def facet_agg_key(key):
 
 
 class SearchQueryTest(SearchTestMixin, TestCase):
+    maxDiff = None
+
     def test_execute_search_result(self):
         '''Should return a SearchResult with the right model'''
         self.init_search()
@@ -355,7 +360,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
                 'must': [
                     {'multi_match': {
                         'query': 'test',
-                        'analyzer': search.i18n_analyzer,
+                        'analyzer': search.i18n_analyzer._name,
                         'type': 'cross_fields',
                         'fields': ['title^2', 'description']
                     }}
@@ -395,7 +400,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
                 'must': [
                     {'multi_match': {
                         'query': 'test',
-                        'analyzer': search.i18n_analyzer,
+                        'analyzer': search.i18n_analyzer._name,
                         'type': 'most_fields',
                         'fields': ['title^2', 'description']
                     }}
@@ -412,7 +417,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
                 'must_not': [
                     {'multi_match': {
                         'query': 'test',
-                        'analyzer': search.i18n_analyzer,
+                        'analyzer': search.i18n_analyzer._name,
                         'type': 'cross_fields',
                         'fields': ['title^2', 'description']
                     }}
@@ -429,7 +434,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
                 'must': [
                     {'multi_match': {
                         'query': 'test',
-                        'analyzer': search.i18n_analyzer,
+                        'analyzer': search.i18n_analyzer._name,
                         'type': 'cross_fields',
                         'fields': ['title^2', 'description']
                     }}
@@ -437,7 +442,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
                 'must_not': [
                     {'multi_match': {
                         'query': 'negated',
-                        'analyzer': search.i18n_analyzer,
+                        'analyzer': search.i18n_analyzer._name,
                         'type': 'cross_fields',
                         'fields': ['title^2', 'description']
                     }}
@@ -454,7 +459,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
                 'must': [
                     {'multi_match': {
                         'query': 'test',
-                        'analyzer': search.i18n_analyzer,
+                        'analyzer': search.i18n_analyzer._name,
                         'type': 'cross_fields',
                         'fields': ['title^2', 'description'],
                         'fuzziness': 'AUTO',
@@ -473,7 +478,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
                 'must': [
                     {'multi_match': {
                         'query': 'test',
-                        'analyzer': search.i18n_analyzer,
+                        'analyzer': search.i18n_analyzer._name,
                         'type': 'cross_fields',
                         'fields': ['title^2', 'description']
                     }}
@@ -513,7 +518,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         expectations = [
             {'multi_match': {
                 'query': 'test',
-                'analyzer': search.i18n_analyzer,
+                'analyzer': search.i18n_analyzer._name,
                 'type': 'cross_fields',
                 'fields': ['title^2', 'description']
             }},
@@ -537,7 +542,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         expectations = [
             {'multi_match': {
                 'query': 'test',
-                'analyzer': search.i18n_analyzer,
+                'analyzer': search.i18n_analyzer._name,
                 'type': 'cross_fields',
                 'fields': ['title^2', 'description']
             }},
@@ -686,14 +691,17 @@ def hit_factory():
     }
 
 
-def es_factory(nb=20, page=1, page_size=20, total=42):
-    '''Build a fake ElasticSearch response'''
+def response_factory(nb=20, page=1, page_size=20, total=42, **kwargs):
+    '''
+    Build a fake Elasticsearch DSL FacetedResponse
+    and extract the facet form it
+    '''
     hits = sorted(
         (hit_factory() for _ in range(nb)),
         key=lambda h: h['_score']
     )
     max_score = hits[-1]['_score']
-    return {
+    data = {
         "hits": {
             "hits": hits,
             "total": total,
@@ -707,6 +715,9 @@ def es_factory(nb=20, page=1, page_size=20, total=42):
         "took": 52,
         "timed_out": False
     }
+    data.update(kwargs)
+
+    return data
 
 
 class FacetTestCase(TestCase):
@@ -714,6 +725,22 @@ class FacetTestCase(TestCase):
         aggs = self.facet.to_aggregations(name)
         as_dict = dict((k, v.to_dict()) for k, v in aggs.items())
         self.assertEqual(as_dict, expected)
+
+    def factory(self, fetch=True, **kwargs):
+        '''
+        Build a fake Elasticsearch DSL FacetedResponse
+        and extract the facet form it
+        '''
+        data = response_factory(**kwargs)
+
+        class TestSearch(search.UdataFacetedSearch):
+            facets = {
+                'test': self.facet
+            }
+
+        s = TestSearch({})
+        response = FacetedResponse(s, data)
+        return self.facet.from_response('test', response, fetch=fetch)
 
 
 class TestTermsFacet(FacetTestCase):
@@ -738,8 +765,7 @@ class TestTermsFacet(FacetTestCase):
         })
 
     def test_from_response(self):
-        response = es_factory()
-        response['aggregations'] = {
+        result = self.factory(aggregations={
             'test': {
                 '_type': 'terms',
                 'total': 229,
@@ -750,11 +776,10 @@ class TestTermsFacet(FacetTestCase):
                     'doc_count': faker.random_number(2)
                 } for _ in range(10)],
             }
-        }
+        })
 
-        extracted = self.facet.from_response('test', response)
-        self.assertEqual(extracted['type'], 'terms')
-        self.assertEqual(len(extracted['terms']), 10)
+        self.assertEqual(result['type'], 'terms')
+        self.assertEqual(len(result['terms']), 10)
 
     def test_to_filter(self):
         self.assertEqual(
@@ -807,8 +832,7 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
 
     def test_from_response(self):
         fakes = [FakeFactory() for _ in range(10)]
-        response = es_factory()
-        response['aggregations'] = {
+        result = self.factory(aggregations={
             'test': {
                 '_type': 'terms',
                 'total': 229,
@@ -819,20 +843,18 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
                     'doc_count': faker.random_number(2)
                 } for f in fakes],
             }
-        }
+        })
 
-        extracted = self.facet.from_response('test', response)
-        self.assertEqual(extracted['type'], 'models')
-        self.assertEqual(len(extracted['models']), 10)
-        for fake, row in zip(fakes, extracted['models']):
+        self.assertEqual(result['type'], 'models')
+        self.assertEqual(len(result['models']), 10)
+        for fake, row in zip(fakes, result['models']):
             self.assertIsInstance(row[0], Fake)
             self.assertIsInstance(row[1], int)
             self.assertEqual(fake.id, row[0].id)
 
     def test_from_response_no_fetch(self):
         fakes = [FakeFactory() for _ in range(10)]
-        response = es_factory()
-        response['aggregations'] = {
+        result = self.factory(fetch=False, aggregations={
             'test': {
                 '_type': 'terms',
                 'total': 229,
@@ -843,13 +865,11 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
                     'doc_count': faker.random_number(2)
                 } for f in fakes],
             }
-        }
+        })
 
-        extracted = self.facet.from_response(
-            'test', response, fetch=False)
-        self.assertEqual(extracted['type'], 'models')
-        self.assertEqual(len(extracted['models']), 10)
-        for fake, row in zip(fakes, extracted['models']):
+        self.assertEqual(result['type'], 'models')
+        self.assertEqual(len(result['models']), 10)
+        for fake, row in zip(fakes, result['models']):
             self.assertIsInstance(row[0], dict)
             self.assertIsInstance(row[1], int)
             self.assertEqual(row[0]['id'], str(fake.id))
@@ -881,8 +901,7 @@ class TestRangeFacet(FacetTestCase):
         })
 
     def test_from_response(self):
-        response = es_factory()
-        response['aggregations'] = {
+        result = self.factory(aggregations={
             'test': {
                 '_type': 'stats',
                 'count': 123,
@@ -894,16 +913,14 @@ class TestRangeFacet(FacetTestCase):
                 'variance': 2.25,
                 'std_deviation': 1.5
             }
-        }
+        })
 
-        extracted = self.facet.from_response('test', response)
-        self.assertEqual(extracted['type'], 'range')
-        self.assertEqual(extracted['min'], 3)
-        self.assertEqual(extracted['max'], 42)
+        self.assertEqual(result['type'], 'range')
+        self.assertEqual(result['min'], 3)
+        self.assertEqual(result['max'], 42)
 
     def test_from_response_with_error(self):
-        response = es_factory()
-        response['aggregations'] = {
+        result = self.factory(aggregations={
             'test': {
                 '_type': 'stats',
                 'count': 0,
@@ -915,13 +932,12 @@ class TestRangeFacet(FacetTestCase):
                 'variance': 'NaN',
                 'std_deviation': 'NaN'
             }
-        }
+        })
 
-        extracted = self.facet.from_response('test', response)
-        self.assertEqual(extracted['type'], 'range')
-        self.assertEqual(extracted['min'], None)
-        self.assertEqual(extracted['max'], None)
-        self.assertFalse(extracted['visible'])
+        self.assertEqual(result['type'], 'range')
+        self.assertEqual(result['min'], None)
+        self.assertEqual(result['max'], None)
+        self.assertFalse(result['visible'])
 
     def test_to_filter(self):
         self.assertEqual(self.facet.to_filter('3-8'), {
@@ -943,10 +959,16 @@ class TestRangeFacet(FacetTestCase):
 
 
 class SearchResultTest(TestCase):
+    def factory(self, **kwargs):
+        '''
+        Build a fake Elasticsearch DSL Response.
+        '''
+        return Response(response_factory(**kwargs))
+
     def test_properties(self):
         '''Search result should map some properties for easy access'''
-        response = es_factory(nb=10, total=42)
-        max_score = response['hits']['max_score']
+        response = self.factory(nb=10, total=42)
+        max_score = response.hits.max_score
         query = search.search_for(FakeSearch)
         result = search.SearchResult(query, response)
 
@@ -959,7 +981,7 @@ class SearchResultTest(TestCase):
     def test_no_failures(self):
         '''Search result should not fail on missing properties'''
         query = search.search_for(FakeSearch)
-        result = search.SearchResult(query, {})
+        result = search.SearchResult(query, Response({}))
 
         self.assertEqual(result.total, 0)
         self.assertEqual(result.max_score, 0)
@@ -971,7 +993,7 @@ class SearchResultTest(TestCase):
         '''Search results should be paginated'''
         kwargs = {'page': 2, 'page_size': 3}
         query = search.search_for(FakeSearch, **kwargs)
-        result = search.SearchResult(query, es_factory(nb=3, total=11))
+        result = search.SearchResult(query, self.factory(nb=3, total=11))
 
         self.assertEqual(result.page, 2),
         self.assertEqual(result.page_size, 3)
@@ -980,7 +1002,7 @@ class SearchResultTest(TestCase):
     def test_pagination_empty(self):
         '''Search results should be paginated even if empty'''
         query = search.search_for(FakeSearch, page=2, page_size=3)
-        result = search.SearchResult(query, {})
+        result = search.SearchResult(query, Response({}))
 
         self.assertEqual(result.page, 1),
         self.assertEqual(result.page_size, 3)
@@ -989,7 +1011,7 @@ class SearchResultTest(TestCase):
     def test_no_pagination_in_query(self):
         '''Search results should be paginated even if not asked'''
         query = search.search_for(FakeSearch)
-        result = search.SearchResult(query, {})
+        result = search.SearchResult(query, Response({}))
 
         self.assertEqual(result.page, 1),
         self.assertEqual(result.page_size, search.DEFAULT_PAGE_SIZE)
