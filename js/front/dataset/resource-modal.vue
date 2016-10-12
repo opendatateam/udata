@@ -22,8 +22,8 @@
           <dd v-if="resource.dateModified"> {{ resource.dateModified|dt }}</dd>
           <dt v-if="resource.datePublished">{{ _('Published on') }}</dt>
           <dd v-if="resource.datePublished"> {{ resource.datePublished|dt }}</dd>
-          <dt v-if="resource.interactionStatistic.userInteractionCount">{{ _('Downloads') }}</dt>
-          <dd v-if="resource.interactionStatistic.userInteractionCount"> {{ resource.interactionStatistic.userInteractionCount }}</dd>
+          <dt v-if="resource.interactionStatistic && resource.interactionStatistic.userInteractionCount">{{ _('Downloads') }}</dt>
+          <dd v-if="resource.interactionStatistic && resource.interactionStatistic.userInteractionCount"> {{ resource.interactionStatistic.userInteractionCount }}</dd>
         </dl>
     </div>
 

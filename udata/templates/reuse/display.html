@@ -54,7 +54,6 @@
 {% endblock %}
 
 {% block content %}
-<div>
 <section class="reuse-section community-section">
     <div class="container reuse-container">
         <div class="row">
@@ -99,9 +98,7 @@
                     </div>
                 </div>
 
-                <div>
-                    {{ reuse.description|markdown }}
-                </div>
+                {{ reuse.description|markdown }}
 
                 <div class="reuse-image">
                     <a href="{{ reuse.url }}">
@@ -292,5 +289,4 @@
         {% endwith %}
     </div>
 </section>
-</div>
 {% endblock %}

@@ -145,9 +145,11 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
             'dateModified': self.last_modified.isoformat(),
             'url': url_for('reuses.show', reuse=self, _external=True),
             'name': self.title,
-            'description': mdstrip(self.description),
             'isBasedOnUrl': self.url,
         }
+
+        if self.description:
+            result['description'] = mdstrip(self.description)
 
         if self.organization:
             author = self.organization.json_ld

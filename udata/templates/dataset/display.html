@@ -52,7 +52,6 @@
 {% block content %}
 <!-- Placeholder for non-routable modals -->
 <div v-el:modal></div>
-<div>
 <section class="content {% if not dataset.organization.public_service %}non{% endif %}certified">
     <div class="container dataset-container">
         <div class="row">
@@ -386,9 +385,7 @@
         <div class="row">
             <div class="col-sm-9 list-group resources-list smaller">
             {% for resource in dataset.community_resources %}
-                <div>
-                    {% include theme('dataset/resource/list-item.html') %}
-                </div>
+                {% include theme('dataset/resource/list-item.html') %}
             {% endfor %}
                 <a class="list-group-item add"
                     href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
@@ -487,5 +484,4 @@
 
     </div>
 </section>
-</div>
 {% endblock %}

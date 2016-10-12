@@ -465,7 +465,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             '@context': 'http://schema.org',
             '@type': 'Dataset',
             '@id': str(self.id),
-            'description': mdstrip(self.description),
             'alternateName': self.slug,
             'dateCreated': self.created_at.isoformat(),
             'dateModified': self.last_modified.isoformat(),
@@ -474,8 +473,12 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             'keywords': ','.join(self.tags),
             'distribution': [resource.json_ld for resource in self.resources],
             # This value is not standard
-            'extras': [self.get_json_ld_extra(*item) for item in self.extras.items()],
+            'extras': [self.get_json_ld_extra(*item)
+                       for item in self.extras.items()],
         }
+
+        if self.description:
+            result['description'] = mdstrip(self.description)
 
         if self.license and self.license.url:
             result['license'] = self.license.url
@@ -494,10 +497,12 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
 
     @staticmethod
     def get_json_ld_extra(key, value):
+
+        value = value.serialize() if hasattr(value, 'serialize') else value
         return {
             '@type': 'http://schema.org/PropertyValue',
             'name': key,
-            'value': value.serialize() if hasattr(value, 'serialize') else value,
+            'value': value,
         }
 
 

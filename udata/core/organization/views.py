@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import itertools
 
-from flask import g, abort, url_for
+from flask import g, abort
 from flask_security import current_user
 
 from udata import search
