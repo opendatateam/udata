@@ -705,7 +705,7 @@ def agg_factory(buckets):
     }
 
 
-def response_factory(nb=20, page=1, page_size=20, total=42, **kwargs):
+def response_factory(nb=20, total=42, **kwargs):
     '''
     Build a fake Elasticsearch DSL FacetedResponse
     and extract the facet form it
@@ -869,7 +869,11 @@ class SearchResultTest(TestCase):
 
     def test_no_failures(self):
         '''Search result should not fail on missing properties'''
-        result = self.factory()
+        response = response_factory()
+        del response['hits']['total']
+        del response['hits']['max_score']
+        del response['hits']['hits']
+        result = self.factory(response)
 
         self.assertEqual(result.total, 0)
         self.assertEqual(result.max_score, 0)
@@ -888,7 +892,11 @@ class SearchResultTest(TestCase):
 
     def test_pagination_empty(self):
         '''Search results should be paginated even if empty'''
-        result = self.factory(page=2, page_size=3)
+        response = response_factory()
+        del response['hits']['total']
+        del response['hits']['max_score']
+        del response['hits']['hits']
+        result = self.factory(response, page=2, page_size=3)
 
         self.assertEqual(result.page, 1),
         self.assertEqual(result.page_size, 3)
@@ -896,11 +904,12 @@ class SearchResultTest(TestCase):
 
     def test_no_pagination_in_query(self):
         '''Search results should be paginated even if not asked'''
-        result = self.factory()
+        response = response_factory(nb=1, total=1)
+        result = self.factory(response)
 
         self.assertEqual(result.page, 1),
         self.assertEqual(result.page_size, search.DEFAULT_PAGE_SIZE)
-        self.assertEqual(result.pages, 0)
+        self.assertEqual(result.pages, 1)
 
 
 class SearchAdaptorTest(SearchTestMixin, TestCase):

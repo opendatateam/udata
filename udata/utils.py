@@ -45,7 +45,7 @@ class Paginable(object):
         if self.page_size:
             return int(ceil(self.total / float(self.page_size)))
         else:
-            return 0
+            return 1
 
     @property
     def has_prev(self):

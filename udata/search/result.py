@@ -43,14 +43,14 @@ class SearchResult(Paginable, Response):
     def total(self):
         try:
             return self.hits.total
-        except KeyError:
+        except (KeyError, AttributeError):
             return 0
 
     @property
     def max_score(self):
         try:
             return self.hits.max_score
-        except KeyError:
+        except (KeyError, AttributeError):
             return 0
 
     @property
