@@ -143,6 +143,12 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         self.assertIsInstance(result, search.SearchResult)
         self.assertEqual(result.query.adapter, FakeSearch)
 
+    def test_only_id(self):
+        '''Should only fetch id field'''
+        search_query = search.search_for(FakeSearch)
+        body = get_body(search_query)
+        self.assertEqual(body['fields'], [])
+
     def test_empty_search(self):
         '''An empty query should match all documents'''
         search_query = search.search_for(FakeSearch)

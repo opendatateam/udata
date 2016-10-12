@@ -28,6 +28,9 @@ class SearchQuery(FacetedSearch):
         self.extract_pagination(params)
         q = params.pop('q', '')
         super(SearchQuery, self).__init__(q, params)
+        # Until https://github.com/elastic/elasticsearch-dsl-py/pull/474
+        # is merged and released
+        self._s = self._s.fields([])
 
     def extract_sort(self, params):
         '''Extract and build sort query from parameters'''
@@ -80,6 +83,7 @@ class SearchQuery(FacetedSearch):
         Construct the Search object.
         """
         s = Search(doc_type=self.doc_types, using=es.client, index=es.index_name)
+        s = s.fields([])  # don't return any fields, just the metadata
         s = s.sort(*self.sorts)
         s = s[self.page_start:self.page_end]
         return s.response_class(partial(SearchResult, self))
