@@ -114,7 +114,7 @@ class MaxDatasetFollowersMetric(SiteMetric):
     def get_value(self):
         dataset = (Dataset.objects(metrics__followers__gt=0).visible()
                           .order_by('-metrics.followers').first())
-        return dataset.metrics.get('followers', 0) if dataset else 0
+        return dataset.metrics['followers'] if dataset else 0
 
 MaxDatasetFollowersMetric.connect(Dataset.on_create, Dataset.on_update)
 
@@ -127,7 +127,7 @@ class MaxDatasetReusesMetric(SiteMetric):
     def get_value(self):
         dataset = (Dataset.objects(metrics__reuses__gt=0).visible()
                    .order_by('-metrics.reuses').first())
-        return dataset.metrics.get('reuses', 0) if dataset else 0
+        return dataset.metrics['reuses'] if dataset else 0
 
 MaxDatasetReusesMetric.connect(Dataset.on_create, Dataset.on_update)
 

@@ -175,17 +175,17 @@ class UserAPITest(APITestCase):
         '''It should provide a list of users'''
         with self.autoindex():
             user = UserFactory(
-                about='* Title 1\n* Title 2',
-                website='http://www.datagouv.fr/user',
-                avatar_url='http://www.datagouv.fr/avatar',
+                about=faker.paragraph(),
+                website=faker.url(),
+                avatar_url=faker.url(),
                 metrics={'datasets': 10})
         response = self.get(url_for('api.users'))
         self.assert200(response)
-        json = response.json['data'][0]
+        [json] = response.json['data']
         self.assertEquals(json['id'], str(user.id))
         self.assertEquals(json['slug'], user.slug)
         self.assertEquals(json['first_name'], user.first_name)
         self.assertEquals(json['last_name'], user.last_name)
         self.assertEquals(json['website'], user.website)
         self.assertEquals(json['about'], user.about)
-        self.assertEquals(json['metrics'], {'datasets': 10})
+        self.assertEquals(json['metrics'], user.metrics)
