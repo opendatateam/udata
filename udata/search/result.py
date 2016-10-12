@@ -23,11 +23,17 @@ class SearchResult(Paginable):
 
     @property
     def total(self):
-        return self.result.hits.total
+        try:
+            return self.result.hits.total
+        except KeyError:
+            return 0
 
     @property
     def max_score(self):
-        return self.result.hits.max_score
+        try:
+            return self.result.hits.max_score
+        except KeyError:
+            return 0
 
     @property
     def page(self):
@@ -42,7 +48,10 @@ class SearchResult(Paginable):
         return self.query.adapter.model.__name__
 
     def get_ids(self):
-        return [hit['_id'] for hit in self.result.hits.hits]
+        try:
+            return [hit['_id'] for hit in self.result.hits.hits]
+        except KeyError:
+            return []
 
     def get_objects(self):
         if not self._objects:
