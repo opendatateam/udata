@@ -114,11 +114,6 @@ def get_query(facet_search):
     return get_body(facet_search).get('query')
 
 
-def facet_agg_key(key):
-    '''Build the facet aggregation key'''
-    return '_filter_{0}'.format(key)
-
-
 #############################################################################
 #                                  Tests                                    #
 #############################################################################
@@ -496,14 +491,14 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         aggregations = get_body(search_query).get('aggs', {})
         self.assertEqual(len(aggregations), len(FakeSearch.facets))
         for key in FakeSearch.facets.keys():
-            self.assertIn(facet_agg_key(key), aggregations.keys())
+            self.assertIn(key, aggregations.keys())
 
     def test_facets_all(self):
         search_query = search.search_for(FakeSearch, facets='all')
         aggregations = get_body(search_query).get('aggs', {})
         self.assertEqual(len(aggregations), len(FakeSearch.facets))
         for key in FakeSearch.facets.keys():
-            self.assertIn(facet_agg_key(key), aggregations.keys())
+            self.assertIn(key, aggregations.keys())
 
     def test_selected_facets(self):
         selected_facets = ['tag', 'other']
@@ -513,9 +508,9 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         self.assertEqual(len(aggregations), len(selected_facets))
         for key in FakeSearch.facets.keys():
             if key in selected_facets:
-                self.assertIn(facet_agg_key(key), aggregations.keys())
+                self.assertIn(key, aggregations.keys())
             else:
-                self.assertNotIn(facet_agg_key(key), aggregations.keys())
+                self.assertNotIn(key, aggregations.keys())
 
     def test_aggregation_filter(self):
         search_query = search.search_for(FakeSearch, q='test', tag='value')
