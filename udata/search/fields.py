@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import logging
 
 from bson.objectid import ObjectId
+from elasticsearch_dsl import Q
 from elasticsearch_dsl.faceted_search import (
     TermsFacet as DSLTermsFacet,
     RangeFacet as DSLRangeFacet,
@@ -87,6 +88,22 @@ class RangeFacet(Facet, DSLRangeFacet):
     def __init__(self, **kwargs):
         super(RangeFacet, self).__init__(**kwargs)
         self.labels = self._params.pop('labels', {})
+
+    def get_value_filter(self, filter_value):
+        '''
+        Fix here until upstream PR is merged
+        https://github.com/elastic/elasticsearch-dsl-py/pull/473
+        '''
+        f, t = self._ranges[filter_value]
+        limits = {}
+        if f is not None:
+            limits['gte'] = f
+        if t is not None:
+            limits['lt'] = t
+
+        return Q('range', **{
+            self._params['field']: limits
+        })
 
     def get_values(self, data, filter_values):
         return [
