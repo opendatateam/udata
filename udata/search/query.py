@@ -99,14 +99,34 @@ class SearchQuery(FacetedSearch):
         return s.response_class(partial(SearchResult, self))
 
     def query(self, search, query):
-        """
-        Add query part to ``search``.
+        '''
+        Customize the search query if necessary.
 
-        Override this if you wish to customize the query used.
-        """
+        It handles the following features:
+         - negation support
+         - optionnal fuzziness
+         - optionnal analyzer
+         - optionnal match_type
+        '''
         if not query:
             return search
-        params = {'query': query}
+
+        included, excluded = [], []
+        for term in query.split(' '):
+            if not term.strip():
+                continue
+            if term.startswith('-'):
+                excluded.append(term[1:])
+            else:
+                included.append(term)
+        if included:
+            search = search.query(self.multi_match(included))
+        if excluded:
+            search = search.query(~self.multi_match(excluded))
+        return search
+
+    def multi_match(self, terms):
+        params = {'query': ' '.join(terms)}
         # Optionnal search type
         if self.match_type:
             params['type'] = self.match_type
@@ -117,7 +137,7 @@ class SearchQuery(FacetedSearch):
         if self.fuzzy:
             params['fuzziness'] = 'AUTO'
             params['prefix_length'] = 2  # Make it configurable ?
-        return search.query('multi_match', fields=self.fields, **params)
+        return Q('multi_match', fields=self.fields, **params)
 
     def to_url(self, url=None, replace=False, **kwargs):
         '''Serialize the query into an URL'''
