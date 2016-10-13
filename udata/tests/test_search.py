@@ -779,11 +779,22 @@ class TestRangeFacet(FacetTestCase):
             })
 
     def buckets(self, first=1, second=2, third=3):
-        return [
-          {'to': 1.0, 'to_as_string': '1.0', 'key': 'first', 'doc_count': first},
-          {'from': 1.0, 'from_as_string': '1.0', 'to_as_string': '5.0', 'key': 'second', 'doc_count': second},
-          {'from_as_string': '5.0', 'from': 5.0, 'key': 'third', 'doc_count': third},
-        ]
+        return [{
+            'to': 1.0,
+            'to_as_string': '1.0',
+            'key': 'first',
+            'doc_count': first
+        }, {
+            'from': 1.0,
+            'from_as_string': '1.0',
+            'to_as_string': '5.0',
+            'key': 'second',
+            'doc_count': second
+        }, {
+            'from_as_string': '5.0',
+            'from': 5.0, 'key':
+            'third', 'doc_count': third
+        }]
 
     def test_get_values(self):
         buckets = self.buckets()
@@ -798,7 +809,7 @@ class TestRangeFacet(FacetTestCase):
         buckets = self.buckets(second=0)
         result = self.factory(aggregations=agg_factory(buckets))
 
-        self.assertEqual(len(result), len(self.ranges) -1)
+        self.assertEqual(len(result), len(self.ranges) - 1)
         self.assertEqual(result[0], ('first', 1, False))
         self.assertEqual(result[1], ('third', 3, False))
 

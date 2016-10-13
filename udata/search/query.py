@@ -10,6 +10,7 @@ from flask import request
 from werkzeug.urls import Href
 
 from elasticsearch_dsl import Search, FacetedSearch, Q
+from elasticsearch_dsl.query import FunctionScore
 
 from udata.search import es, DEFAULT_PAGE_SIZE
 from udata.search.result import SearchResult
@@ -19,20 +20,18 @@ log = logging.getLogger(__name__)
 
 
 class SearchQuery(FacetedSearch):
-    model = None
     adapter = None
     analyzer = None
-    match_type = None
+    boosters = None
     fuzzy = False
+    match_type = None
+    model = None
 
     def __init__(self, params):
         self.extract_sort(params)
         self.extract_pagination(params)
         q = params.pop('q', '')
         super(SearchQuery, self).__init__(q, params)
-        # Until https://github.com/elastic/elasticsearch-dsl-py/pull/474
-        # is merged and released
-        self._s = self._s.fields([])
 
     def extract_sort(self, params):
         '''Extract and build sort query from parameters'''
@@ -124,6 +123,18 @@ class SearchQuery(FacetedSearch):
         if excluded:
             search = search.query(~self.multi_match(excluded))
         return search
+
+    def build_search(self):
+        s = super(SearchQuery, self).build_search()
+        # Handle scoring functions
+        if self.boosters:
+            s.query = FunctionScore(query=s.query, functions=[
+                b.to_query() for b in self.boosters
+            ])
+        # Until https://github.com/elastic/elasticsearch-dsl-py/pull/474
+        # is merged and released
+        s = s.fields([])
+        return s
 
     def multi_match(self, terms):
         params = {'query': ' '.join(terms)}

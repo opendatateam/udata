@@ -15,13 +15,14 @@ log = logging.getLogger(__name__)
 
 class ModelSearchAdapter(DocType):
     """This class allow to describe and customize the search behavior."""
-    model = None
     analyzer = i18n_analyzer
-    fields = None
+    boosters = None
     facets = None
-    sorts = None
-    match_type = 'cross_fields'
+    fields = None
     fuzzy = False
+    match_type = 'cross_fields'
+    model = None
+    sorts = None
 
     @classmethod
     def doc_type(cls):
@@ -61,14 +62,15 @@ class ModelSearchAdapter(DocType):
         f = dict((k, v) for k, v in cls.facets.items() if k in facets)
 
         class TempSearch(SearchQuery):
-            model = cls.model
-            doc_types = cls
-            fields = cls.fields
-            facets = f
             adapter = cls
-            match_type = cls.match_type
-            fuzzy = cls.fuzzy
             analyzer = cls.analyzer
+            boosters = cls.boosters
+            doc_types = cls
+            facets = f
+            fields = cls.fields
+            fuzzy = cls.fuzzy
+            match_type = cls.match_type
+            model = cls.model
 
         return TempSearch
 
