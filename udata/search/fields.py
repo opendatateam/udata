@@ -6,6 +6,7 @@ import logging
 from bson.objectid import ObjectId
 from elasticsearch_dsl import Q
 from elasticsearch_dsl.faceted_search import (
+    Facet as DSLFacet,
     TermsFacet as DSLTermsFacet,
     RangeFacet as DSLRangeFacet,
     DateHistogramFacet as DSLDateHistogramFacet,
@@ -47,7 +48,9 @@ class TermsFacet(Facet, DSLTermsFacet):
     pass
 
 
-class BoolFacet(TermsFacet):
+class BoolFacet(Facet, DSLFacet):
+    agg_type = 'terms'
+
     def get_values(self, data, filter_values):
         return [
             (to_bool(key), doc_count, selected)
@@ -57,7 +60,7 @@ class BoolFacet(TermsFacet):
 
     def get_value_filter(self, filter_value):
         boolean = to_bool(filter_value)
-        q = Q('terms', **{self._params['field']: True})
+        q = Q('term', **{self._params['field']: True})
         return q if boolean else ~q
 
     def default_labelizer(self, label, value):

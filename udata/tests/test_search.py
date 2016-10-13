@@ -682,12 +682,12 @@ class TestBoolFacet(FacetTestCase):
 
     def test_value_filter(self):
         for value in True, 'True', 'true':
-            expected = Q({'terms': {'boolean': True}})
+            expected = Q({'term': {'boolean': True}})
             value_filter = self.facet.get_value_filter(value)
             self.assertEqual(value_filter, expected)
 
         for value in False, 'False', 'false':
-            expected = ~Q({'terms': {'boolean': True}})
+            expected = ~Q({'term': {'boolean': True}})
             value_filter = self.facet.get_value_filter(value)
             self.assertEqual(value_filter, expected)
 
