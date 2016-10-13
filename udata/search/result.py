@@ -92,29 +92,6 @@ class SearchResult(Paginable, Response):
     def __getitem__(self, index):
         return self.get_objects()[index]
 
-    def get_aggregation(self, name, fetch=True):
-        pass  # TODO: remove
-
-    def get_range(self, name):
-        min_name = '{0}_min'.format(name)
-        max_name = '{0}_max'.format(name)
-        if name not in self.query.adapter.filters:
-            return None
-        aggregations = self.result.get('aggregations', {})
-        if (not aggregations
-                or min_name not in aggregations
-                or max_name not in aggregations):
-            return None
-        spec = self.query.adapter.filters[name]
-        min_value = aggregations[min_name]['value'] or 0
-        max_value = aggregations[max_name]['value'] or 0
-        return {
-            'min': spec.cast(min_value),
-            'max': spec.cast(max_value),
-            'query_min': 0,
-            'query_max': 0,
-        }
-
     def label_func(self, name):
         if name not in self.query.facets:
             return None
