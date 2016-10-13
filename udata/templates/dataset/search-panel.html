@@ -9,7 +9,9 @@
     ) }}
     {{ s.terms_facet(datasets, 'tag', _('Tags'), ficon('fa-tags'), url=url) }}
     {{ s.model_terms_facet(datasets, 'license', _('Licenses'), ficon('copyright-mark'), url=url) }}
-    {{ s.aggregation_panel(datasets, 'temporal_coverage', _('Temporal coverage'), ficon('fa-calendar'), url=url) }}
+    {{ s.temporal_coverage_facet(datasets,
+        'temporal_coverage', _('Temporal coverage'), ficon('fa-calendar'), url=url
+    ) }}
     {{ s.model_terms_facet(datasets, 'geozone', _('Spatial coverage'), ficon('fa-map-marker'), url=url) }}
     {{ s.terms_facet(datasets, 'granularity', _('Territorial granularity'), ficon('fa-bullseye'), url=url) }}
     {{ s.terms_facet(datasets, 'format', _('Formats'), ficon('fa-file'), url=url) }}

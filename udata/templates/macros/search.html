@@ -81,40 +81,6 @@
 {% endfor %}
 {% endmacro %}
 
-
-{% macro aggregation_panel(result, name, label, icon=None, url=None) %}
-{% set aggregation = result.get_aggregation(name) %}
-{% if aggregation.visible %}
-    <div class="panel-heading clickable"
-        data-toggle="collapse" data-target="#collapse-{{result.class_name}}-{{name}}">
-        <h3 class="panel-title">
-            {% if in_url(name) %}
-            <a href="{{ url_del(None, name, 'page') }}"
-                class="btn btn-xs btn-link pull-right" title="{{ _('Clear filter') }}">
-                <span class="glyphicon glyphicon-remove"></span>
-            </a>
-            {% endif %}
-            <span class="{{icon or 'glyphicon glyphicon-filter'}} fa-fw"></span>
-            {{ label or name }}
-            <span class="fa fa-chevron-down pull-right chevrons"></span>
-        </h3>
-    </div>
-    {% if aggregation.type == 'terms' %}
-        {{ term_aggregation(name, aggregation, result.query, url=url, class_name=result.class_name) }}
-    {% elif aggregation.type == 'models' %}
-        {{ model_aggregation(name, aggregation, result.query, url=url, class_name=result.class_name) }}
-    {% elif aggregation.type == 'bool' %}
-        {{ bool_aggregation(name, aggregation, result.query, url=url) }}
-    {% elif aggregation.type == 'range' %}
-        {{ range_aggregation(name, aggregation, result.query, url=url) }}
-    {% elif aggregation.type == 'daterange' %}
-        {{ daterange_aggregation(name, aggregation, result.query, url=url) }}
-    {% elif aggregation.type == 'temporal-coverage' %}
-        {{ temporal_coverage_aggregation(name, aggregation, result.query, url=url) }}
-    {% endif %}
-{% endif %}
-{% endmacro %}
-
 {% macro facet_panel(result, name, label, icon=None, url=None) %}
 <div class="panel-heading clickable"
     data-toggle="collapse" data-target="#collapse-{{result.class_name}}-{{name}}">
@@ -214,53 +180,20 @@
 {% endif %}
 {% endmacro %}
 
-
-
-
-{% macro bool_aggregation(name, aggregation, query, url=None) %}
-<div id="collapse-{{name}}" class="list-group collapse in">
-    <a href="{{ query.to_url(url, **{name: 'true'}) }}"
-        class="list-group-item">
-        {{ _('Yes') }}
-        <span class="badge pull-right">{{ aggregation[true] }}</span>
-    </a>
-    <a href="{{ query.to_url(url, **{name: 'false'}) }}"
-        class="list-group-item">
-        {{ _('No') }}
-        <span class="badge pull-right">{{ aggregation[false] }}</span>
-    </a>
-</div>
-{% endmacro %}
-
-
-{% macro range_aggregation(name, aggregation, query, url=None) %}
-<div id="collapse-{{name}}" class="panel-body collapse in">
-    <div class="row">
-        <div class="col-xs-12 slider-container">
-            <input type="text" class="range-picker"
-                data-url-pattern="{{ query.to_url(url, **{name: '__r__', 'replace': True}) }}"
-                data-slider-min="{{ aggregation.min }}"
-                data-slider-max="{{ aggregation.max }}"
-                data-slider-value="[{{ aggregation.min }},{{ aggregation.max }}]"/>
-        </div>
+{% macro temporal_coverage_facet(result, name, label, icon, url=None) %}
+{% set ranges = result.facets[name] %}
+{% if ranges|length > 1 %}
+    {{ facet_panel(result, name, label, icon, url) }}
+    <div id="collapse-{{result.class_name}}-{{name}}" class="list-group collapse in">
+    {% for key, count, selected in ranges %}
+        <a href="{{ result.query.to_url(url, **{name: key}) }}"
+            class="list-group-item">
+            {{ result.query.facets[name].labelize('', key) }}
+            <span class="badge pull-right">{{ count }}</span>
+        </a>
+    {% endfor %}
     </div>
-    <div class="row">
-        <b class="col-xs-6">{{ aggregation.min }}</b>
-        <b class="col-xs-6 text-right">{{ aggregation.max }}</b>
-    </div>
-</div>
-{% endmacro %}
-
-
-{% macro daterange_aggregation(name, aggregation, query, url=None) %}
-<div id="collapse-{{name}}" class="panel-body collapse in">
-    <div class="row">
-        <div class="col-xs-12">
-            <input type="hidden" class="date-range-picker"
-                value="{{ aggregation.min.isoformat() }} - {{ aggregation.max.isoformat() }}" />
-        </div>
-    </div>
-</div>
+{% endif %}
 {% endmacro %}
 
 
