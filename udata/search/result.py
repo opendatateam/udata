@@ -92,6 +92,9 @@ class SearchResult(Paginable, Response):
     def __getitem__(self, index):
         return self.get_objects()[index]
 
+    def get_aggregation(self, name, fetch=True):
+        pass  # TODO: remove
+
     def label_func(self, name):
         if name not in self.query.facets:
             return None

@@ -11,12 +11,14 @@ from elasticsearch_dsl.faceted_search import (
     DateHistogramFacet as DSLDateHistogramFacet,
 )
 
+from udata.i18n import lazy_gettext as _
 from udata.models import db
+from udata.utils import to_bool
 
 log = logging.getLogger(__name__)
 
 __all__ = (
-    'TermsFacet', 'ModelTermsFacet',
+    'BoolFacet', 'TermsFacet', 'ModelTermsFacet',
     'RangeFacet', 'DateHistogramFacet',
     'BoolBooster', 'FunctionBooster',
     'GaussDecay', 'ExpDecay', 'LinearDecay',
@@ -43,6 +45,23 @@ class Facet(object):
 
 class TermsFacet(Facet, DSLTermsFacet):
     pass
+
+
+class BoolFacet(TermsFacet):
+    def get_values(self, data, filter_values):
+        return [
+            (to_bool(key), doc_count, selected)
+            for (key, doc_count, selected)
+            in super(BoolFacet, self).get_values(data, filter_values)
+        ]
+
+    def get_value_filter(self, filter_value):
+        boolean = to_bool(filter_value)
+        q = Q('terms', **{self._params['field']: True})
+        return q if boolean else ~q
+
+    def default_labelizer(self, label, value):
+        return str(_('yes') if to_bool(value) else _('no'))
 
 
 class ModelTermsFacet(TermsFacet):

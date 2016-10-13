@@ -44,10 +44,8 @@ def topic_search_for(topic, adapter, **kwargs):
 @blueprint.route('/<topic:topic>/')
 def display(topic):
     specs = {
-        'recent_datasets': topic_search_for(topic, DatasetSearch, sort='-created'),
-        'featured_reuses': topic_search_for(topic, ReuseSearch),
-        # 'recent_datasets': TopicSearchQuery(Dataset, sort='-created', page_size=9, topic=topic),
-        # 'featured_reuses': TopicSearchQuery(Reuse, featured=True, page_size=6, topic=topic),
+        'recent_datasets': topic_search_for(topic, DatasetSearch, sort='-created', page_size=9),
+        'featured_reuses': topic_search_for(topic, ReuseSearch, featured=True, page_size=6),
     }
     keys, queries = zip(*specs.items())
     results = search.multisearch(*queries)

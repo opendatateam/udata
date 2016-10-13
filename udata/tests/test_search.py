@@ -1,21 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import time
-
-from datetime import datetime, timedelta, date
-
 from flask import json
 from werkzeug.urls import url_decode, url_parse
 
 from factory.mongoengine import MongoEngineFactory
 
+from elasticsearch_dsl import Q, A
 
 from udata import search
 from udata.core.metrics import Metric
 from udata.models import db
 from udata.utils import multi_to_dict
-from udata.i18n import gettext as _, format_date
+from udata.i18n import gettext as _
 from udata.tests import TestCase, DBTestMixin, SearchTestMixin
 from udata.utils import faker
 
@@ -659,6 +656,51 @@ class FacetTestCase(TestCase):
         s = TestSearch({})
         response = search.SearchResult(s, data)
         return response.facets.test
+
+
+class TestBoolFacet(FacetTestCase):
+    def setUp(self):
+        self.facet = search.BoolFacet(field='boolean')
+
+    def test_get_values(self):
+        buckets = [
+            {'key': 'T', 'doc_count': 10},
+            {'key': 'F', 'doc_count': 15},
+        ]
+        result = self.factory(aggregations=agg_factory(buckets))
+
+        self.assertEqual(len(result), 2)
+        for row in result:
+            self.assertIsInstance(row[0], bool)
+            self.assertIsInstance(row[1], int)
+            self.assertIsInstance(row[2], bool)
+        # Assume order is buckets' order
+        self.assertTrue(result[0][0])
+        self.assertEqual(result[0][1], 10)
+        self.assertFalse(result[1][0])
+        self.assertEqual(result[1][1], 15)
+
+    def test_value_filter(self):
+        for value in True, 'True', 'true':
+            expected = Q({'terms': {'boolean': True}})
+            value_filter = self.facet.get_value_filter(value)
+            self.assertEqual(value_filter, expected)
+
+        for value in False, 'False', 'false':
+            expected = ~Q({'terms': {'boolean': True}})
+            value_filter = self.facet.get_value_filter(value)
+            self.assertEqual(value_filter, expected)
+
+    def test_aggregation(self):
+        expected = A({'terms': {'field': 'boolean'}})
+        self.assertEqual(self.facet.get_aggregation(), expected)
+
+    def test_labelize(self):
+        self.assertEqual(self.facet.labelize('label', True), _('yes'))
+        self.assertEqual(self.facet.labelize('label', False), _('no'))
+
+        self.assertEqual(self.facet.labelize('label', 'true'), _('yes'))
+        self.assertEqual(self.facet.labelize('label', 'false'), _('no'))
 
 
 class TestTermsFacet(FacetTestCase):

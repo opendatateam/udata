@@ -11,7 +11,7 @@ from udata.models import (
 from udata.search import (
     BoolBooster, GaussDecay, ModelSearchAdapter,
     i18n_analyzer, metrics_mapping_for, register,
-    RangeFacet, TermsFacet, ModelTermsFacet
+    RangeFacet, TermsFacet, ModelTermsFacet, BoolFacet
 )
 from udata.search.analysis import simple
 
@@ -87,7 +87,7 @@ class ReuseSearch(ModelSearchAdapter):
                                         model=Organization),
         'owner': ModelTermsFacet(field='owner', model=User),
         'dataset': ModelTermsFacet(field='dataset.id', model=Dataset),
-        # 'type': ReuseTypeFacet(field='type'),
+        'type': ReuseTypeFacet(field='type'),
         'datasets': RangeFacet(field='metrics.datasets',
                                ranges=[(_('No datasets'), (None, 1)),
                                        (_('Few datasets'), (1, 5)),
@@ -97,6 +97,7 @@ class ReuseSearch(ModelSearchAdapter):
                                         (_('Few followers'), (1, 5)),
                                         (_('Many followers'), (5, None))]),
         'badge': TermsFacet(field='badges', labelizer=reuse_badge_labelizer),
+        'featured': BoolFacet(field='featured'),
     }
     sorts = {
         'title': 'title.raw',

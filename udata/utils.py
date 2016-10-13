@@ -167,7 +167,7 @@ def to_bool(value):
     if isinstance(value, bool):
         return value
     elif isinstance(value, basestring):
-        return value.lower() == 'true'
+        return value.lower() == 'true' or value.lower() == 't'
     elif isinstance(value, int):
         return value > 0
     else:
