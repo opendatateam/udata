@@ -73,6 +73,8 @@ class SearchQuery(FacetedSearch):
         '''
         Perform filtering instead of default post-filtering.
         '''
+        if not self._filters:
+            return search
         filters = Q('match_all')
         for f in self._filters.values():
             filters &= f
