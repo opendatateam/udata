@@ -6,6 +6,7 @@ import logging
 
 from elasticsearch_dsl import DocType, Integer, Float, Object
 
+from udata.search import i18n_analyzer
 from udata.search.query import SearchQuery
 from udata.core.metrics import Metric
 
@@ -15,7 +16,7 @@ log = logging.getLogger(__name__)
 class ModelSearchAdapter(DocType):
     """This class allow to describe and customize the search behavior."""
     model = None
-    analyzer = None
+    analyzer = i18n_analyzer
     fields = None
     facets = None
     sorts = None
@@ -65,6 +66,9 @@ class ModelSearchAdapter(DocType):
             fields = cls.fields
             facets = f
             adapter = cls
+            match_type = cls.match_type
+            fuzzy = cls.fuzzy
+            analyzer = cls.analyzer
 
         return TempSearch
 

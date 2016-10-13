@@ -5,6 +5,7 @@ import time
 
 from datetime import datetime, timedelta, date
 
+from flask import json
 from werkzeug.urls import url_decode, url_parse
 
 from factory.mongoengine import MongoEngineFactory
@@ -122,6 +123,11 @@ def get_query(facet_search):
 class SearchQueryTest(SearchTestMixin, TestCase):
     maxDiff = None
 
+    def assert_dict_equal(self, d1, d2, *args, **kwargs):
+        d1 = json.loads(json.dumps(d1))
+        d2 = json.loads(json.dumps(d2))
+        self.assertEqual(d1, d2, *args, **kwargs)
+
     def test_execute_search_result(self):
         '''Should return a SearchResult with the right model'''
         self.init_search()
@@ -195,7 +201,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         self.assertIn('function_score', body['query'])
         self.assertIn('query', body['query']['function_score'])
         self.assertIn('functions', body['query']['function_score'])
-        self.assertEqual(body['query']['function_score']['functions'][0], {
+        self.assert_dict_equal(body['query']['function_score']['functions'][0], {
             'filter': {'term': {'some_bool_field': True}},
             'boost_factor': 1.1,
         })
@@ -213,7 +219,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         body = get_body(query)
         functions = body['query']['function_score']['functions']
         # Query should be wrapped in a gaus decay function
-        self.assertEqual(functions[0], {
+        self.assert_dict_equal(functions[0], {
             'gauss': {
                 'a_num_field': {
                     'origin': 10,
@@ -221,7 +227,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
                 }
             },
         })
-        self.assertEqual(functions[1], {
+        self.assert_dict_equal(functions[1], {
             'exp': {
                 'another_field': {
                     'origin': 20,
@@ -229,7 +235,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
                 }
             },
         })
-        self.assertEqual(functions[2], {
+        self.assert_dict_equal(functions[2], {
             'linear': {
                 'last_field': {
                     'origin': 30,
@@ -252,7 +258,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         body = get_body(query)
         functions = body['query']['function_score']['functions']
         # Query should be wrapped in a gaus decay function
-        self.assertEqual(functions[0], {
+        self.assert_dict_equal(functions[0], {
             'gauss': {
                 'a_num_field': {
                     'origin': 10,
@@ -262,7 +268,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
                 }
             },
         })
-        self.assertEqual(functions[1], {
+        self.assert_dict_equal(functions[1], {
             'exp': {
                 'another_field': {
                     'origin': 20,
@@ -272,7 +278,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
                 }
             },
         })
-        self.assertEqual(functions[2], {
+        self.assert_dict_equal(functions[2], {
             'linear': {
                 'last_field': {
                     'origin': 30,
@@ -306,7 +312,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         body = get_body(query)
         functions = body['query']['function_score']['functions']
         # Query should be wrapped in a gaus decay function
-        self.assertEqual(functions[0], {
+        self.assert_dict_equal(functions[0], {
             'gauss': {
                 'a_num_field': {
                     'origin': 10,
@@ -347,26 +353,20 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         query = search.search_for(FakeBoostedSearch)
         body = get_body(query)
         # Query should be wrapped in function_score
-        self.assertEqual(body['query']['function_score']['functions'][0], {
+        self.assert_dict_equal(body['query']['function_score']['functions'][0], {
             'script_score': {'script': 'doc["field"].value * 2'},
         })
 
     def test_simple_query(self):
         '''A simple query should use query_string with specified fields'''
         search_query = search.search_for(FakeSearch, q='test')
-        expected = {
-            'bool': {
-                'must': [
-                    {'multi_match': {
-                        'query': 'test',
-                        'analyzer': search.i18n_analyzer._name,
-                        'type': 'cross_fields',
-                        'fields': ['title^2', 'description']
-                    }}
-                ]
-            }
-        }
-        self.assertEqual(get_query(search_query), expected)
+        expected = {'multi_match': {
+            'query': 'test',
+            'analyzer': search.i18n_analyzer._name,
+            'type': 'cross_fields',
+            'fields': ['title^2', 'description']
+        }}
+        self.assert_dict_equal(get_query(search_query), expected)
 
     def test_default_analyzer(self):
         '''Default analyzer is overridable'''
@@ -374,19 +374,13 @@ class SearchQueryTest(SearchTestMixin, TestCase):
             analyzer = 'simple'
 
         search_query = search.search_for(FakeAnalyzerSearch, q='test')
-        expected = {
-            'bool': {
-                'must': [
-                    {'multi_match': {
-                        'query': 'test',
-                        'analyzer': 'simple',
-                        'type': 'cross_fields',
-                        'fields': ['title^2', 'description']
-                    }}
-                ]
-            }
-        }
-        self.assertEqual(get_query(search_query), expected)
+        expected = {'multi_match': {
+            'query': 'test',
+            'analyzer': 'simple',
+            'type': 'cross_fields',
+            'fields': ['title^2', 'description']
+        }}
+        self.assert_dict_equal(get_query(search_query), expected)
 
     def test_default_type(self):
         '''Default analyzer is overridable'''
@@ -394,19 +388,13 @@ class SearchQueryTest(SearchTestMixin, TestCase):
             match_type = 'most_fields'
 
         search_query = search.search_for(FakeAnalyzerSearch, q='test')
-        expected = {
-            'bool': {
-                'must': [
-                    {'multi_match': {
-                        'query': 'test',
-                        'analyzer': search.i18n_analyzer._name,
-                        'type': 'most_fields',
-                        'fields': ['title^2', 'description']
-                    }}
-                ]
-            }
-        }
-        self.assertEqual(get_query(search_query), expected)
+        expected = {'multi_match': {
+            'query': 'test',
+            'analyzer': search.i18n_analyzer._name,
+            'type': 'most_fields',
+            'fields': ['title^2', 'description']
+        }}
+        self.assert_dict_equal(get_query(search_query), expected)
 
     def test_simple_excluding_query(self):
         '''A simple query should negate a simple term in query_string'''
@@ -423,7 +411,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
                 ]
             }
         }
-        self.assertEqual(get_query(search_query), expected)
+        self.assert_dict_equal(get_query(search_query), expected)
 
     def test_query_with_both_including_and_excluding_terms(self):
         '''A query should detect negation on each term in query_string'''
@@ -448,43 +436,20 @@ class SearchQueryTest(SearchTestMixin, TestCase):
                 ]
             }
         }
-        self.assertEqual(get_query(search_query), expected)
+        self.assert_dict_equal(get_query(search_query), expected)
 
     def test_simple_query_fuzzy(self):
         '''A simple query should use query_string with specified fields'''
         search_query = search.search_for(FuzzySearch, q='test')
-        expected = {
-            'bool': {
-                'must': [
-                    {'multi_match': {
-                        'query': 'test',
-                        'analyzer': search.i18n_analyzer._name,
-                        'type': 'cross_fields',
-                        'fields': ['title^2', 'description'],
-                        'fuzziness': 'AUTO',
-                        'prefix_length': 2,
-                    }}
-                ]
-            }
-        }
-        self.assertEqual(get_query(search_query), expected)
-
-    def test_simple_query_flatten(self):
-        '''A query uses query_string with specified fields and flattens'''
-        search_query = search.search_for(FakeSearch, q='test')
-        expected = {
-            'bool': {
-                'must': [
-                    {'multi_match': {
-                        'query': 'test',
-                        'analyzer': search.i18n_analyzer._name,
-                        'type': 'cross_fields',
-                        'fields': ['title^2', 'description']
-                    }}
-                ]
-            }
-        }
-        self.assertEqual(get_query(search_query), expected)
+        expected = {'multi_match': {
+            'query': 'test',
+            'analyzer': search.i18n_analyzer._name,
+            'type': 'cross_fields',
+            'fields': ['title^2', 'description'],
+            'fuzziness': 'AUTO',
+            'prefix_length': 2,
+        }}
+        self.assert_dict_equal(get_query(search_query), expected)
 
     def test_facets_true(self):
         search_query = search.search_for(FakeSearch, facets=True)
@@ -579,7 +544,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         qs = url_decode(parsed_url.query)
 
         self.assertEqual(parsed_url.path, '/an_url')
-        self.assertEqual(multi_to_dict(qs), {
+        self.assert_dict_equal(multi_to_dict(qs), {
             'q': 'test',
             'tag': ['tag1', 'tag2'],
             'page': '2',
@@ -598,7 +563,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         qs = url_decode(parsed_url.query)
 
         self.assertEqual(parsed_url.path, '/an_url')
-        self.assertEqual(multi_to_dict(qs), {
+        self.assert_dict_equal(multi_to_dict(qs), {
             'q': 'test',
             'tag': ['tag1', 'tag2', 'tag3'],
             'other': 'value',
@@ -617,7 +582,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         qs = url_decode(parsed_url.query)
 
         self.assertEqual(parsed_url.path, '/an_url')
-        self.assertEqual(multi_to_dict(qs), {
+        self.assert_dict_equal(multi_to_dict(qs), {
             'q': 'test',
             'tag': 'tag3',
             'other': 'value',
@@ -636,7 +601,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         qs = url_decode(parsed_url.query)
 
         self.assertEqual(parsed_url.path, '/an_url')
-        self.assertEqual(multi_to_dict(qs), {
+        self.assert_dict_equal(multi_to_dict(qs), {
             'q': 'test',
             'other': 'value',
         })
@@ -654,7 +619,7 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         qs = url_decode(parsed_url.query)
 
         self.assertEqual(parsed_url.path, '/another_url')
-        self.assertEqual(multi_to_dict(qs), {
+        self.assert_dict_equal(multi_to_dict(qs), {
             'q': 'test',
             'tag': ['tag1', 'tag2'],
             'page': '2',

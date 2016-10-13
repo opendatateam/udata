@@ -11,8 +11,7 @@ from werkzeug.urls import Href
 
 from elasticsearch_dsl import Search, FacetedSearch, Q
 
-from udata.models import db
-from udata.search import es, i18n_analyzer, DEFAULT_PAGE_SIZE, adapter_catalog
+from udata.search import es, DEFAULT_PAGE_SIZE
 from udata.search.result import SearchResult
 
 
@@ -22,6 +21,9 @@ log = logging.getLogger(__name__)
 class SearchQuery(FacetedSearch):
     model = None
     adapter = None
+    analyzer = None
+    match_type = None
+    fuzzy = False
 
     def __init__(self, params):
         self.extract_sort(params)
@@ -85,10 +87,37 @@ class SearchQuery(FacetedSearch):
         Construct the Search object.
         """
         s = Search(doc_type=self.doc_types, using=es.client, index=es.index_name)
-        s = s.fields([])  # don't return any fields, just the metadata
+        # don't return any fields, just the metadata
+        s = s.fields([])
+        # Sort from parameters
         s = s.sort(*self.sorts)
+        # Paginate from parameters
         s = s[self.page_start:self.page_end]
+        # Same construction as parent class
+        # Allows to give the same signature as simple search
+        # ie. Response(data) instead of Response(search, data)
         return s.response_class(partial(SearchResult, self))
+
+    def query(self, search, query):
+        """
+        Add query part to ``search``.
+
+        Override this if you wish to customize the query used.
+        """
+        if not query:
+            return search
+        params = {'query': query}
+        # Optionnal search type
+        if self.match_type:
+            params['type'] = self.match_type
+        # Optionnal analyzer
+        if self.analyzer:
+            params['analyzer'] = self.analyzer
+        # Optionnal fuzzines
+        if self.fuzzy:
+            params['fuzziness'] = 'AUTO'
+            params['prefix_length'] = 2  # Make it configurable ?
+        return search.query('multi_match', fields=self.fields, **params)
 
     def to_url(self, url=None, replace=False, **kwargs):
         '''Serialize the query into an URL'''
