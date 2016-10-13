@@ -25,6 +25,7 @@ class TopicsBlueprintTest(FrontTestCase):
 
     def test_render_display_empty(self):
         '''It should render a topic page even if empty'''
+        self.init_search()
         topic = TopicFactory(tags=['tag'])
 
         response = self.get(url_for('topics.display', topic=topic))
