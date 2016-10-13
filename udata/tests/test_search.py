@@ -118,9 +118,7 @@ def get_query(facet_search):
 #############################################################################
 #                                  Tests                                    #
 #############################################################################
-
-
-class SearchQueryTest(SearchTestMixin, TestCase):
+class SearchTestCase(TestCase):
     maxDiff = None
 
     def assert_dict_equal(self, d1, d2, *args, **kwargs):
@@ -128,6 +126,8 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         d2 = json.loads(json.dumps(d2))
         self.assertEqual(d1, d2, *args, **kwargs)
 
+
+class SearchQueryTest(SearchTestMixin, SearchTestCase):
     def test_execute_search_result(self):
         '''Should return a SearchResult with the right model'''
         self.init_search()
@@ -201,7 +201,8 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         self.assertIn('function_score', body['query'])
         self.assertIn('query', body['query']['function_score'])
         self.assertIn('functions', body['query']['function_score'])
-        self.assert_dict_equal(body['query']['function_score']['functions'][0], {
+        first_function = body['query']['function_score']['functions'][0]
+        self.assert_dict_equal(first_function, {
             'filter': {'term': {'some_bool_field': True}},
             'boost_factor': 1.1,
         })
@@ -353,7 +354,8 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         query = search.search_for(FakeBoostedSearch)
         body = get_body(query)
         # Query should be wrapped in function_score
-        self.assert_dict_equal(body['query']['function_score']['functions'][0], {
+        score_function = body['query']['function_score']['functions'][0]
+        self.assert_dict_equal(score_function, {
             'script_score': {'script': 'doc["field"].value * 2'},
         })
 
@@ -626,10 +628,10 @@ class SearchQueryTest(SearchTestMixin, TestCase):
         })
 
 
-class TestMetricsMapping(TestCase):
+class TestMetricsMapping(SearchTestCase):
     def test_map_metrics(self):
-        mapping = search.metrics_mapping(Fake)
-        self.assertEqual(mapping, {
+        mapping = search.metrics_mapping_for(Fake)
+        self.assert_dict_equal(mapping, {
             'type': 'object',
             'properties': {
                 'fake-metric-int': {
