@@ -479,59 +479,6 @@ class SearchQueryTest(SearchTestMixin, SearchTestCase):
             else:
                 self.assertNotIn(key, aggregations.keys())
 
-    def test_aggregation_filter(self):
-        search_query = search.search_for(FakeSearch, q='test', tag='value')
-        expectations = [
-            {'multi_match': {
-                'query': 'test',
-                'analyzer': search.i18n_analyzer._name,
-                'type': 'cross_fields',
-                'fields': ['title^2', 'description']
-            }},
-            {'term': {'tags': 'value'}},
-        ]
-
-        query = get_query(search_query)
-        self.assertEqual(len(query['bool']['must']), len(expectations))
-        for expected in expectations:
-            self.assertIn(expected, query['bool']['must'])
-
-    def test_aggregation_filter_multi(self):
-        search_query = search.search_for(
-            FakeSearchWithDateRange,
-            q='test',
-            tag=['value-1', 'value-2'],
-            other='value',
-            range='3-8',
-            daterange='2013-01-07-2014-06-07'
-        )
-        expectations = [
-            {'multi_match': {
-                'query': 'test',
-                'analyzer': search.i18n_analyzer._name,
-                'type': 'cross_fields',
-                'fields': ['title^2', 'description']
-            }},
-            {'term': {'tags': 'value-1'}},
-            {'term': {'tags': 'value-2'}},
-            {'term': {'other': 'value'}},
-            {'range': {
-                'a_num_field': {
-                    'gte': 3,
-                    'lte': 8,
-                }
-            }},
-            {'range': {
-                'a_daterange_field': {
-                    'lte': '2014-06-07',
-                    'gte': '2013-01-07',
-                },
-            }},
-        ]
-        query = get_query(search_query)
-        for expected in expectations:
-            self.assertIn(expected, query['bool']['must'])
-
     def test_to_url(self):
         kwargs = {
             'q': 'test',
