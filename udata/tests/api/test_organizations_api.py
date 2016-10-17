@@ -55,7 +55,7 @@ class OrganizationAPITest(APITestCase):
         data = OrganizationFactory.attributes()
         self.login()
         response = self.post(url_for('api.organizations'), data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.assertEqual(Organization.objects.count(), 1)
 
         org = Organization.objects.first()
@@ -146,7 +146,7 @@ class MembershipAPITest(APITestCase):
 
         api_url = url_for('api.request_membership', org=organization)
         response = self.post(api_url, data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         organization.reload()
         self.assertEqual(len(organization.requests), 1)
@@ -355,7 +355,7 @@ class MembershipAPITest(APITestCase):
 
         response = self.post(
             url_for('api.organization_followers', id=to_follow.id))
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
@@ -685,7 +685,7 @@ class OrganizationBadgeAPITest(APITestCase):
             response = self.post(
                 url_for('api.organization_badges', org=self.organization),
                 data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 1)
 
@@ -715,7 +715,7 @@ class OrganizationBadgeAPITest(APITestCase):
             response = self.post(
                 url_for('api.organization_badges', org=self.organization),
                 data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 2)
 

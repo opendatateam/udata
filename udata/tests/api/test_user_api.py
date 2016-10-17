@@ -17,7 +17,7 @@ class UserAPITest(APITestCase):
         to_follow = UserFactory()
 
         response = self.post(url_for('api.user_followers', id=to_follow.id))
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         nb_followers = Follow.objects.followers(to_follow).count()
 

@@ -4,9 +4,10 @@ from __future__ import unicode_literals, absolute_import
 import urlparse
 
 import dateutil.parser
-import slugify
 
 from voluptuous import Invalid
+
+from udata import tags
 
 
 def boolean(value):
@@ -55,11 +56,15 @@ def force_list(value):
 
 
 def slug(value):
-    return slugify.slugify(value.lower(), separator='-')
+    return tags.slug(value)
+
+
+def normalize_tag(value):
+    return tags.normalize(value)
 
 
 def taglist(value):
-    return [slug(t) for t in value.split(',')]
+    return tags.tags_list(value)
 
 
 def empty_none(value):
