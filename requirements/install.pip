@@ -36,7 +36,7 @@ PyYAML==3.12
 redis
 requests
 unicodecsv==0.14.1
-voluptuous
+voluptuous==0.9.3
 wtforms-json==0.2.10
 wtforms==2.1
 xmltodict
