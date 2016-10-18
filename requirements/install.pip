@@ -34,7 +34,7 @@ python-dateutil==2.5.3
 pytz
 PyYAML==3.12
 redis
-requests
+requests==2.11.1
 unicodecsv==0.14.1
 voluptuous
 wtforms-json==0.2.10
