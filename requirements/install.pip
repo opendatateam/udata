@@ -27,7 +27,7 @@ html2text
 lxml
 mongoengine==0.10.6
 msgpack-python==0.4.8
-pillow
+pillow==3.4.2
 py-bcrypt==0.4
 pyliblzma==0.5.3
 python-dateutil==2.5.3
