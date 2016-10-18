@@ -31,7 +31,7 @@ pillow
 py-bcrypt==0.4
 pyliblzma==0.5.3
 python-dateutil==2.5.3
-pytz
+pytz==2016.7
 PyYAML==3.12
 redis
 requests
