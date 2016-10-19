@@ -20,3 +20,24 @@ test:
     - mkdir -p $CIRCLE_TEST_REPORTS/{python,karma}
     - nosetests --immediate --with-xunit --xunit-file=$CIRCLE_TEST_REPORTS/python/tests.xml  udata
     - REPORT_DIR=$CIRCLE_TEST_REPORTS/karma npm -s run test:unit -- --reporters mocha,junit
+  post:
+    - inv dist
+
+# Publish on PyPI
+deployment:
+  builds:
+    branch: [master, dev]
+    commands:
+      # Publish on PyPI with the pattern 1.0.0.dev${$CIRCLE_BUILD_NUM}
+      - python setup.py egg_info -b $CIRCLE_BUILD_NUM bdist_wheel upload
+  release:
+    tag: /v[0-9]+(\.[0-9]+)*/
+    owner: opendatateam
+    commands:
+      # Publish on PyPI with the pattern 1.0.0
+      - python setup.py egg_info bdist_wheel upload
+
+general:
+  # Expose CircleCI build artifacts
+  artifacts:
+    - "dist/*.whl"  # Python Wheel
