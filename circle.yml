@@ -35,7 +35,7 @@ deployment:
     owner: opendatateam
     commands:
       # Publish on PyPI with the pattern 1.0.0
-      - python setup.py egg_info bdist_wheel upload
+      - python setup.py bdist_wheel upload
 
 general:
   # Expose CircleCI build artifacts
