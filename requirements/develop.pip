@@ -5,4 +5,4 @@ transifex-client
 -r test.pip
 -r report.pip
 Flask-DebugToolbar==0.10.0
-wheel
+wheel==0.29.0
