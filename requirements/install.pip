@@ -5,7 +5,7 @@ celery==3.1.24
 celerybeat-mongo==0.0.10
 chardet
 CommonMark==0.7.2
-elasticsearch==2.3.0
+elasticsearch==5.0.0
 fake-factory==0.5.7
 Flask-BabelEx==0.9.3
 Flask-Caching==1.0.1
