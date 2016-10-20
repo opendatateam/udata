@@ -5,7 +5,7 @@ import calendar
 import logging
 import pkg_resources
 
-from datetime import date
+from datetime import date, datetime
 from time import time
 from urlparse import urlsplit, urlunsplit
 
@@ -27,6 +27,11 @@ log = logging.getLogger(__name__)
 @front.app_template_global()
 def udata_version():
     return pkg_resources.get_distribution('udata').version
+
+
+@front.app_template_global()
+def now():
+    return datetime.now()
 
 
 @front.app_template_global(name='static')
