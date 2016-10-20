@@ -1,3 +1,2 @@
--r install.pip
 -r test.pip
 invoke>=0.13

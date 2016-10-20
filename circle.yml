@@ -13,7 +13,7 @@ dependencies:
     - if [[ ! -d elasticsearch-1.7.5 ]]; then wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.5.tar.gz && tar xvzf elasticsearch-1.7.5.tar.gz && elasticsearch-1.7.5/bin/plugin install elasticsearch/elasticsearch-analysis-icu/2.7.0; fi
     - elasticsearch-1.7.5/bin/elasticsearch: {background: true}
   override:
-    - pip install -r requirements/travis.pip
+    - pip install -e . -r requirements/circleci.pip
     - nvm use && nvm alias default $(nvm current) && npm install
 test:
   override:
