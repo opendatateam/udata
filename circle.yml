@@ -23,6 +23,8 @@ test:
   post:
     # Build a distributable wheel
     - if [[ $CIRCLE_TAG ]]; then inv dist; else inv dist -b $CIRCLE_BUILD_NUM; fi
+    # Expose result as build artifact
+    - cp dist/*.whl $CIRCLE_ARTIFACTS/
 
 # Secure PyPI upload
 # - use Twine (as recommanded) to upload the built package
@@ -40,9 +42,3 @@ deployment:
     commands:
       - pip install twine
       - twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
-
-general:
-  # Expose CircleCI build artifacts
-  artifacts:
-    # Python Wheel
-    - "dist/*.whl"
