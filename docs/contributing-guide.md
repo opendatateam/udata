@@ -39,14 +39,18 @@ The development language is English. All comments and documentation should be wr
 
 We’re really happy to accept contributions from the community, that’s the main reason why we open-sourced it! There are many ways to contribute, even if you’re not a technical person.
 
-We’re using the infamous [simplified Github workflow][simplified-github-workflow] to accept modifications (even internally), basically you’ll have to:
+We’re using the infamous [simplified Github workflow][simplified-github-workflow] to accept modifications (even internally),
+basically you’ll have to:
 
 * create an issue related to the problem you want to fix (good for traceability and cross-reference)
 * fork the repository
 * create a branch (optionally with the reference to the issue in the name)
 * hack hack hack
 * commit incrementally with readable and detailed commit messages
-* submit a pull-request against the master branch of this repository
+* add the change to the `CHANGELOG.md` file if appropriated
+* submit a pull-request against the right branch of this repository:
+    * `dev` for new features
+    * `master` for bugfixes (unless only present in `dev`)
 
 We’ll take care of tagging your issue with the appropriated labels and answer within a week (hopefully less!) to the problem you encounter.
 

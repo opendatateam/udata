@@ -16,23 +16,30 @@ from invoke import run, task
 from tasks_helpers import ROOT, info, header, lrun, green
 
 I18N_DOMAIN = 'udata'
+STATIC_ASSETS_EXTS = ('js', 'map', 'css', 'eot', 'woff', 'woff2', 'svg', 'ttf', 'otf', 'png', 'jpg', 'gif')
+STATIC_ASSETS_DIRS = ('dataset', 'organization', 'post', 'reuse', 'site', 'topic', 'user')
 
 
 @task
-def clean(ctx, bower=False, node=False):
+def clean(ctx, bower=False, node=False, translations=False, all=False):
     '''Cleanup all build artifacts'''
     header('Clean all build artifacts')
     patterns = [
         'build', 'dist', 'cover', 'docs/_build',
         '**/*.pyc', '*.egg-info', '.tox'
     ]
-    if bower:
+    # Static build assets
+    patterns.extend('udata/static/*.{0}'.format(e) for e in STATIC_ASSETS_EXTS)
+    patterns.extend('udata/static/{0}'.format(d) for d in STATIC_ASSETS_DIRS)
+    if bower or all:
         patterns.append('udata/static/bower')
-    if node:
+    if node or all:
         patterns.append('node_modules')
+    if translations or all:
+        patterns.append('udata/translations/*/LC_MESSAGES/udata.mo')
     for pattern in patterns:
-        info('Removing {0}'.format(pattern))
-        run('cd {0} && rm -rf {1}'.format(ROOT, pattern))
+        info(pattern)
+    lrun('rm -rf {0}'.format(' '.join(patterns)))
 
 
 @task
@@ -183,8 +190,12 @@ def widgets_watch(ctx):
     lrun('npm run widgets:watch', pty=True)
 
 
-@task(i18nc, assets_build)
-def dist(ctx):
+@task(clean, i18nc, assets_build)
+def dist(ctx, buildno=None):
     '''Package for distribution'''
     header('Building a distribuable package')
-    lrun('python setup.py bdist_wheel', pty=True)
+    cmd = ['python setup.py']
+    if buildno:
+        cmd.append('egg_info -b {0}'.format(buildno))
+    cmd.append('bdist_wheel')
+    lrun(' '.join(cmd), pty=True)
