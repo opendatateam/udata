@@ -1,3 +1,1 @@
-# Current (in progress)
-
-- First public release
+docs/changelog.md
