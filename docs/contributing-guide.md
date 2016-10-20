@@ -47,7 +47,7 @@ basically you’ll have to:
 * create a branch (optionally with the reference to the issue in the name)
 * hack hack hack
 * commit incrementally with readable and detailed commit messages
-* add the change to the `CHANGELOG.md` file if necessary
+* add the change to the `CHANGELOG.md` file if appropriated
 * submit a pull-request against the right branch of this repository:
     * `dev` for new features
     * `master` for bugfixes (unless only present in `dev`)

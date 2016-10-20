@@ -1,3 +1,3 @@
 # Current (in progress)
 
-- First public release
+- First published version
