@@ -21,23 +21,28 @@ test:
     - nosetests --immediate --with-xunit --xunit-file=$CIRCLE_TEST_REPORTS/python/tests.xml  udata
     - REPORT_DIR=$CIRCLE_TEST_REPORTS/karma npm -s run test:unit -- --reporters mocha,junit
   post:
-    - inv dist
+    # Build a distributable wheel
+    - if [[ $CIRCLE_TAG ]]; then inv dist; else inv dist -b $CIRCLE_BUILD_NUM; fi
 
-# Publish on PyPI
+# Secure PyPI upload
+# - use Twine (as recommanded) to upload the built package
+# - use environement variables declared on CircleCI webui
 deployment:
   builds:
     branch: [master, dev]
+    owner: opendatateam
     commands:
-      # Publish on PyPI with the pattern 1.0.0.dev${$CIRCLE_BUILD_NUM}
-      - python setup.py egg_info -b $CIRCLE_BUILD_NUM bdist_wheel upload
+      - pip install twine
+      - twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
   release:
     tag: /v[0-9]+(\.[0-9]+)*/
     owner: opendatateam
     commands:
-      # Publish on PyPI with the pattern 1.0.0
-      - python setup.py bdist_wheel upload
+      - pip install twine
+      - twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
 general:
   # Expose CircleCI build artifacts
   artifacts:
-    - "dist/*.whl"  # Python Wheel
+    # Python Wheel
+    - "dist/*.whl"
