@@ -1,60 +1,7 @@
-include LICENSE MANIFEST.in README.rst CHANGELOG.rst
+include LICENSE MANIFEST.in README.md CHANGELOG.md
 
 recursive-include requirements *
 
 recursive-include udata *
-
-prune udata/static/bower
-
-recursive-include udata/static/bower/bootstrap/dist *
-recursive-include udata/static/bower/bootstrap/font *
-recursive-include udata/static/bower/bootstrap/less *.less
-recursive-include udata/static/bower/bootstrap-daterangepicker *.css *.js
-recursive-include udata/static/bower/bootstrap-datepicker *.css *.js *.less
-recursive-include udata/static/bower/bootstrap-markdown *.css *.js *.less
-include udata/static/bower/d3/d3.js
-recursive-include udata/static/bower/font-awesome/less *.less
-recursive-include udata/static/bower/font-awesome/fonts *
-include udata/static/bower/fineuploader-dist/dist/jquery.fine-uploader.js
-include udata/static/bower/fineuploader-dist/dist/fine-uploader.css
-include udata/static/bower/highstock-components/highstock.js
-include udata/static/bower/html5shiv/dist/html5shiv.js
-include udata/static/bower/highlightjs/highlight.pack.js
-recursive-include udata/static/bower/highlightjs/styles *.css
-include udata/static/bower/i18next/i18next.amd.js
-include udata/static/bower/jcrop/css/jquery.Jcrop.css
-include udata/static/bower/jcrop/js/jquery.Jcrop.js
-include udata/static/bower/jquery/dist/jquery.js
-include udata/static/bower/jquery/dist/jquery.min.js
-include udata/static/bower/jquery/dist/jquery.min.map
-include udata/static/bower/jquery-legacy/dist/jquery.js
-include udata/static/bower/jquery-legacy/dist/jquery.min.js
-include udata/static/bower/jquery-legacy/dist/jquery.min.map
-include udata/static/bower/jquery.dotdotdot/src/js/jquery.dotdotdot.js
-include udata/static/bower/jquery.microdata/index.js
-include udata/static/bower/jquery.validation/dist/jquery.validate.js
-recursive-include udata/static/bower/leaflet/dist *
-include udata/static/bower/leaflet.spin/leaflet.spin.js
-include udata/static/bower/marked/lib/marked.js
-include udata/static/bower/momentjs/min/moment-with-langs.js
-include udata/static/bower/normalizeconsole/normalizeconsole.js
-include udata/static/bower/require-handlebars-plugin/hbs.js
-recursive-include udata/static/bower/require-handlebars-plugin/hbs *.js
-include udata/static/bower/requirejs/require.js
-include udata/static/bower/requirejs-domready/domReady.js
-include udata/static/bower/requirejs-router/router.js
-include udata/static/bower/respond/dest/respond.src.js
-include udata/static/bower/seiyria-bootstrap-slider/js/bootstrap-slider.js
-include udata/static/bower/seiyria-bootstrap-slider/less/bootstrap-slider.less
-include udata/static/bower/seiyria-bootstrap-slider/css/bootstrap-slider.css
-include udata/static/bower/selectize/dist/js/standalone/selectize.js
-include udata/static/bower/selectize/dist/less/selectize.less
-include udata/static/bower/selectize/dist/less/selectize.bootstrap3.less
-recursive-include udata/static/bower/selectize/dist/less/plugins *
-include udata/static/bower/socket.io-client/dist/socket.io.js
-recursive-include udata/static/bower/x-editable/dist/bootstrap3-editable *
-recursive-include udata/static/bower/typeahead.js/dist *.js
-include udata/static/bower/typeahead.js-bootstrap3.less/typeahead.less
-recursive-include udata/static/bower/swagger-ui/ *
 
 global-exclude *~ *.egg *.pyc
