@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from elasticsearch_dsl import Boolean, Completion, Date, Long, Object, String
+from elasticsearch_dsl import (
+    Boolean, Completion, Date, Long, Object, String, Nested
+)
 
 from udata.i18n import lazy_gettext as _
 from udata.core.site.views import current_site
@@ -12,7 +14,7 @@ from udata.search import (
     ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
 )
 from udata.search.fields import (
-    TermsFacet, ModelTermsFacet, RangeFacet, DateHistogramFacet,
+    TermsFacet, ModelTermsFacet, RangeFacet, TemporalCoverageFacet,
     BoolBooster, GaussDecay, BoolFacet
 )
 from udata.search.analysis import simple
@@ -87,10 +89,11 @@ class DatasetSearch(ModelSearchAdapter):
     last_modified = Date(format='date_hour_minute_second')
     metrics = metrics_mapping_for(Dataset)
     featured = Boolean()
-    temporal_coverage = Object(
+    temporal_coverage = Nested(
+        multi=False,
         properties={
             'start': Long(),
-            'and': Long()
+            'end': Long()
         }
     )
     geozones = Object(
@@ -142,8 +145,7 @@ class DatasetSearch(ModelSearchAdapter):
                                 'quite': _('Quite reused'),
                                 'many': _('Heavily reused'),
                              }),
-        'temporal_coverage': DateHistogramFacet(field='temporal_coverage',
-                                                interval='1y'),
+        'temporal_coverage': TemporalCoverageFacet(field='temporal_coverage'),
         'featured': BoolFacet(field='featured'),
     }
     boosters = [

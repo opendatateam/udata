@@ -10,6 +10,7 @@ from flask import request
 from werkzeug.urls import Href
 
 from elasticsearch_dsl import Search, FacetedSearch, Q
+from elasticsearch_dsl.aggs import Bucket, Pipeline
 from elasticsearch_dsl.query import FunctionScore
 
 from udata.search import es, DEFAULT_PAGE_SIZE
@@ -68,7 +69,12 @@ class SearchQuery(FacetedSearch):
         """
         for f, facet in self.facets.items():
             agg = facet.get_aggregation()
-            search.aggs.bucket(f, agg)
+            if isinstance(agg, Bucket):
+                search.aggs.bucket(f, agg)
+            elif isinstance(agg, Pipeline):
+                search.aggs.pipeline(f, agg)
+            else:
+                search.aggs.metric(f, agg)
 
     def filter(self, search):
         '''

@@ -3,8 +3,10 @@ from __future__ import unicode_literals
 
 import logging
 
+from datetime import date
+
 from bson.objectid import ObjectId
-from elasticsearch_dsl import Q
+from elasticsearch_dsl import Q, A
 from elasticsearch_dsl.faceted_search import (
     Facet as DSLFacet,
     TermsFacet as DSLTermsFacet,
@@ -12,7 +14,7 @@ from elasticsearch_dsl.faceted_search import (
     DateHistogramFacet as DSLDateHistogramFacet,
 )
 
-from udata.i18n import lazy_gettext as _
+from udata.i18n import lazy_gettext as _, format_date
 from udata.models import db
 from udata.utils import to_bool
 
@@ -20,7 +22,7 @@ log = logging.getLogger(__name__)
 
 __all__ = (
     'BoolFacet', 'TermsFacet', 'ModelTermsFacet',
-    'RangeFacet', 'DateHistogramFacet',
+    'RangeFacet', 'TemporalCoverageFacet',
     'BoolBooster', 'FunctionBooster',
     'GaussDecay', 'ExpDecay', 'LinearDecay',
 )
@@ -139,8 +141,56 @@ class RangeFacet(Facet, DSLRangeFacet):
         return self.labels.get(value, value)
 
 
-class DateHistogramFacet(Facet, DSLDateHistogramFacet):
-    pass
+def get_value(data, name):
+    wrapper = getattr(data, name, {})
+    return getattr(wrapper, 'value')
+
+
+class TemporalCoverageFacet(Facet, DSLFacet):
+    agg_type = 'nested'
+
+    def parse_value(self, value):
+        parts = value.split('-')
+        start = date(*map(int, parts[0:3]))
+        end = date(*map(int, parts[3:6]))
+        return start, end
+
+    def labelize(self, label, value):
+        start, end = self.parse_value(value)
+        return ' - '.join((format_date(start, 'short'),
+                           format_date(end, 'short')))
+
+    def get_aggregation(self):
+        field = self._params['field']
+        a = A('nested', path=field)
+        a.metric('min_start', 'min', field='{0}.start'.format(field))
+        a.metric('max_end', 'max', field='{0}.end'.format(field))
+        return a
+
+    def get_value_filter(self, value):
+        field = self._params['field']
+        start, end = self.parse_value(value)
+        range_start = Q({'range': {'{0}.start'.format(field): {
+            'lte': max(start, end).toordinal(),
+        }}})
+        range_end = Q({'range': {'{0}.end'.format(field): {
+            'gte': min(start, end).toordinal(),
+        }}})
+        return range_start & range_end
+
+    def get_values(self, data, filter_values):
+        field = self._params['field']
+        min_value = get_value(data, 'min_start'.format(field))
+        max_value = get_value(data, 'max_end'.format(field))
+
+        if not (min_value and max_value):
+            return None
+
+        return {
+            'min': date.fromordinal(int(min_value)),
+            'max': date.fromordinal(int(max_value)),
+            'days': max_value - min_value,
+        }
 
 
 class BoolBooster(object):

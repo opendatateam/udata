@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import date, timedelta
+
 from flask import json
 from werkzeug.urls import url_decode, url_parse
 
 from factory.mongoengine import MongoEngineFactory
 
-from elasticsearch_dsl import Q, A
+from elasticsearch_dsl import Q, A, Search
 
 from udata import search
 from udata.core.metrics import Metric
 from udata.models import db
 from udata.utils import multi_to_dict
-from udata.i18n import gettext as _
+from udata.i18n import gettext as _, format_date
 from udata.tests import TestCase, DBTestMixin, SearchTestMixin
 from udata.utils import faker
 
@@ -110,6 +112,9 @@ def get_body(facet_search):
 def get_query(facet_search):
     '''Extract the query part from a FacetedSearch'''
     return get_body(facet_search).get('query')
+
+def es_date(date):
+    return float(date.toordinal())
 
 
 #############################################################################
@@ -601,7 +606,7 @@ def hit_factory():
     }
 
 
-def agg_factory(buckets):
+def bucket_agg_factory(buckets):
     return {
         'test': {
             'buckets': buckets,
@@ -667,7 +672,7 @@ class TestBoolFacet(FacetTestCase):
             {'key': 'T', 'doc_count': 10},
             {'key': 'F', 'doc_count': 15},
         ]
-        result = self.factory(aggregations=agg_factory(buckets))
+        result = self.factory(aggregations=bucket_agg_factory(buckets))
 
         self.assertEqual(len(result), 2)
         for row in result:
@@ -712,7 +717,7 @@ class TestTermsFacet(FacetTestCase):
             'key': faker.word(),
             'doc_count': faker.random_number(2)
         } for _ in range(10)]
-        result = self.factory(aggregations=agg_factory(buckets))
+        result = self.factory(aggregations=bucket_agg_factory(buckets))
 
         self.assertEqual(len(result), 10)
         for row in result:
@@ -743,7 +748,7 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
             'key': str(f.id),
             'doc_count': faker.random_number(2)
         } for f in fakes]
-        result = self.factory(aggregations=agg_factory(buckets))
+        result = self.factory(aggregations=bucket_agg_factory(buckets))
 
         self.assertEqual(len(result), 10)
         for fake, row in zip(fakes, result):
@@ -789,7 +794,7 @@ class TestRangeFacet(FacetTestCase):
 
     def test_get_values(self):
         buckets = self.buckets()
-        result = self.factory(aggregations=agg_factory(buckets))
+        result = self.factory(aggregations=bucket_agg_factory(buckets))
 
         self.assertEqual(len(result), len(self.ranges))
         self.assertEqual(result[0], ('first', 1, False))
@@ -798,7 +803,7 @@ class TestRangeFacet(FacetTestCase):
 
     def test_get_values_with_empty(self):
         buckets = self.buckets(second=0)
-        result = self.factory(aggregations=agg_factory(buckets))
+        result = self.factory(aggregations=bucket_agg_factory(buckets))
 
         self.assertEqual(len(result), len(self.ranges) - 1)
         self.assertEqual(result[0], ('first', 1, False))
@@ -806,6 +811,65 @@ class TestRangeFacet(FacetTestCase):
 
     def test_labelize(self):
         self.assertEqual(self.facet.labelize('label', 'first'), 'First range')
+
+
+class TestTemporalCoverageFacet(FacetTestCase):
+    def setUp(self):
+        self.facet = search.TemporalCoverageFacet(field='some_field')
+
+    def test_get_aggregation(self):
+        expected = A({
+            'nested': {
+                'path': 'some_field'
+            },
+            'aggs': {
+                'min_start': {'min': {'field': 'some_field.start'}},
+                'max_end': {'max': {'field': 'some_field.end'}}
+            }
+        })
+        self.assertEqual(self.facet.get_aggregation(), expected)
+
+    def test_get_values(self):
+        today = date.today()
+        two_days_ago = today - timedelta(days=2, minutes=60)
+        result = self.factory(aggregations={'test': {
+            'min_start': {'value': float(two_days_ago.toordinal())},
+            'max_end': {'value': float(today.toordinal())},
+        }})
+        self.assertEqual(result['min'], two_days_ago)
+        self.assertEqual(result['max'], today)
+        self.assertEqual(result['days'], 2.0)
+
+    def test_value_filter(self):
+        value_filter = self.facet.get_value_filter('2013-01-07-2014-06-07')
+        q_start = Q({'range': {'some_field.start': {
+            'lte': date(2014, 6, 7).toordinal(),
+        }}})
+        q_end = Q({'range': {'some_field.end': {
+            'gte': date(2013, 1, 7).toordinal(),
+        }}})
+        expected = q_start & q_end
+        print(expected.to_dict())
+        self.assertEqual(value_filter, expected)
+
+    def test_value_filter_reversed(self):
+        value_filter = self.facet.get_value_filter('2014-06-07-2013-01-07')
+        q_start = Q({'range': {'some_field.start': {
+            'lte': date(2014, 6, 7).toordinal(),
+        }}})
+        q_end = Q({'range': {'some_field.end': {
+            'gte': date(2013, 1, 7).toordinal(),
+        }}})
+        expected = q_start & q_end
+        self.assertEqual(value_filter, expected)
+
+    def test_labelize(self):
+        label = self.facet.labelize('label', '1940-01-01-2014-12-31')
+        expected = '{0} - {1}'.format(
+            format_date(date(1940, 01, 01), 'short'),
+            format_date(date(2014, 12, 31), 'short')
+        )
+        self.assertEqual(label, expected)
 
 
 class SearchResultTest(TestCase):

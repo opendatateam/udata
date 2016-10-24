@@ -34,7 +34,7 @@ class SearchResult(Paginable, Response):
             self._facets = {}
             for name, facet in self.query.facets.items():
                 self._facets[name] = facet.get_values(
-                    self.aggregations[name]['buckets'],
+                    self.get_aggregation(name),
                     self.query.filter_values.get(name, ())
                 )
         return self._facets
@@ -92,8 +92,20 @@ class SearchResult(Paginable, Response):
     def __getitem__(self, index):
         return self.get_objects()[index]
 
-    def get_aggregation(self, name, fetch=True):
-        pass  # TODO: remove
+    def get_aggregation(self, name):
+        '''
+        Fetch an aggregation result given its name
+
+        As there is no way at this point know the aggregation type
+        (ie. bucket, pipeline or metric)
+        we guess it from the response attributes.
+        Only bucket and metric types are handled
+        '''
+        agg = self.aggregations[name]
+        if 'buckets' in agg:
+            return agg['buckets']
+        else:
+            return agg
 
     def label_func(self, name):
         if name not in self.query.facets:
