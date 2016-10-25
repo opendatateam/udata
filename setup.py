@@ -5,60 +5,67 @@ import re
 import sys
 
 from os.path import join
-
 from setuptools import setup, find_packages
 
-RE_REQUIREMENT = re.compile(r'^\s*-r\s*(?P<filename>.*)$')
+RE_MD_CODE_BLOCK = re.compile(r'```(?P<language>\w+)?\n(?P<lines>.*?)```', re.S)
+RE_SELF_LINK = re.compile(r'\[(.*?)\]\[\]')
+RE_LINK_TO_URL = re.compile(r'\[(?P<text>.*?)\]\((?P<url>.*?)\)')
+RE_LINK_TO_REF = re.compile(r'\[(?P<text>.*?)\]\[(?P<ref>.*?)\]')
+RE_LINK_REF = re.compile(r'^\[(?P<key>[^!].*?)\]:\s*(?P<url>.*)$', re.M)
+RE_BADGE = re.compile(r'^\[\!\[(?P<text>.*?)\]\[(?P<badge>.*?)\]\]\[(?P<target>.*?)\]$', re.M)
 
-PYPI_RST_FILTERS = (
-    # Replace code-blocks
-    (r'\.\.\s? code-block::\s*(\w|\+)+', '::'),
-    # Remove travis ci badge
-    (r'.*travis-ci\.org/.*', ''),
-    # Remove pypip.in badges
-    (r'.*pypip\.in/.*', ''),
-    (r'.*crate\.io/.*', ''),
-    (r'.*coveralls\.io/.*', ''),
-)
+BADGES_TO_KEEP = ['gitter-badge']
 
+RST_BADGE = '''\
+.. image:: {badge}
+    :target: {target}
+    :alt: {text}
+'''
 
-def rst(filename):
+def md2pypi(filename):
     '''
-    Load rst file and sanitize it for PyPI.
+    Load .md (markdown) file and sanitize it for PyPI.
     Remove unsupported github tags:
      - code-block directive
-     - travis ci build badge
+     - travis ci build badges
     '''
     content = open(filename).read()
-    for regex, replacement in PYPI_RST_FILTERS:
-        content = re.sub(regex, replacement, content)
+
+    for match in RE_MD_CODE_BLOCK.finditer(content):
+        rst_block = '\n'.join(
+            ['.. code-block:: {language}'.format(**match.groupdict()), ''] +
+            ['    {0}'.format(l) for l in match.group('lines').split('\n')] +
+            ['']
+        )
+        content = content.replace(match.group(0), rst_block)
+
+    refs = dict(RE_LINK_REF.findall(content))
+    content = RE_LINK_REF.sub('.. _\g<key>: \g<url>', content)
+    content = RE_SELF_LINK.sub('`\g<1>`_', content)
+    content = RE_LINK_TO_URL.sub('`\g<text> <\g<url>>`_', content)
+
+    for match in RE_BADGE.finditer(content):
+        if match.group('badge') not in BADGES_TO_KEEP:
+            content = content.replace(match.group(0), '')
+        else:
+            params = match.groupdict()
+            params['badge'] = refs[match.group('badge')]
+            params['target'] = refs[match.group('target')]
+            content = content.replace(match.group(0),
+                                      RST_BADGE.format(**params))
+    # Must occur after badges
+    for match in RE_LINK_TO_REF.finditer(content):
+        content = content.replace(match.group(0), '`{text} <{url}>`_'.format(
+            text=match.group('text'),
+            url=refs[match.group('ref')]
+        ))
+
     return content
 
 
-def pip(filename):
-    """Parse pip requirement file and transform it to setuptools reqs."""
-    requirements = []
-    for line in open(join('requirements', filename)):
-        line = line.strip()
-        if not line or '://' in line:
-            continue
-        match = RE_REQUIREMENT.match(line)
-        if match:
-            requirements.extend(pip(match.group('filename')))
-        else:
-            requirements.append(line)
-    return requirements
-
-
-def dependency_links(filename):
-    return [line.strip()
-            for line in open(join('requirements', filename))
-            if '://' in line]
-
-
 long_description = '\n'.join((
-    rst('README.rst'),
-    rst('CHANGELOG.rst'),
+    md2pypi('README.md'),
+    md2pypi('CHANGELOG.md'),
     ''
 ))
 
@@ -68,9 +75,8 @@ setup(
     description=__import__('udata_gouvfr').__description__,
     long_description=long_description,
     url='https://github.com/etalab/udata-gouvfr',
-    download_url='http://pypi.python.org/pypi/udata-gouvfr',
-    author='Axel HAustant',
-    author_email='axel@data.gouv.fr',
+    author='Etalab',
+    author_email='pypi@data.gouv.fr',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
@@ -78,7 +84,7 @@ setup(
     ],
     license='LGPL',
     use_2to3=True,
-    keywords='',
+    keywords='udata opendata portal etalab',
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python",
@@ -88,11 +94,7 @@ setup(
         "Topic :: System :: Software Distribution",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.2",
-        "Programming Language :: Python :: 3.3",
         "Topic :: Software Development :: Libraries :: Python Modules",
         ('License :: OSI Approved :: GNU Library or Lesser General Public '
          'License (LGPL)'),

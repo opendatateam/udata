@@ -4,4 +4,4 @@ Changelog
 Current
 -------
 
-- Nothing yet
+- First published release
