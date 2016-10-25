@@ -30,11 +30,11 @@ def max_followers():
 
 
 class ReuseTypeFacet(TermsFacet):
-    def labelize(self, label, value):
+    def default_labelizer(self, value):
         return REUSE_TYPES[value]
 
 
-def reuse_badge_labelizer(label, kind):
+def reuse_badge_labelizer(kind):
     return Reuse.__badges__.get(kind, '')
 
 

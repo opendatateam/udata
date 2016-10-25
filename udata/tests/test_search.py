@@ -708,11 +708,11 @@ class TestBoolFacet(FacetTestCase):
         self.assertEqual(self.facet.get_aggregation(), expected)
 
     def test_labelize(self):
-        self.assertEqual(self.facet.labelize('label', True), _('yes'))
-        self.assertEqual(self.facet.labelize('label', False), _('no'))
+        self.assertEqual(self.facet.labelize(True), _('yes'))
+        self.assertEqual(self.facet.labelize(False), _('no'))
 
-        self.assertEqual(self.facet.labelize('label', 'true'), _('yes'))
-        self.assertEqual(self.facet.labelize('label', 'false'), _('no'))
+        self.assertEqual(self.facet.labelize('true'), _('yes'))
+        self.assertEqual(self.facet.labelize('false'), _('no'))
 
 
 class TestTermsFacet(FacetTestCase):
@@ -733,7 +733,7 @@ class TestTermsFacet(FacetTestCase):
             self.assertIsInstance(row[2], bool)
 
     def test_labelize(self):
-        self.assertEqual(self.facet.labelize('label', 'fake'), 'fake')
+        self.assertEqual(self.facet.labelize('fake'), 'fake')
 
 
 class TestModelTermsFacet(FacetTestCase, DBTestMixin):
@@ -743,11 +743,11 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
     def test_labelize_id(self):
         fake = FakeFactory()
         self.assertEqual(
-            self.facet.labelize('label', str(fake.id)), 'fake')
+            self.facet.labelize(str(fake.id)), 'fake')
 
     def test_labelize_object(self):
         fake = FakeFactory()
-        self.assertEqual(self.facet.labelize('label', fake), 'fake')
+        self.assertEqual(self.facet.labelize(fake), 'fake')
 
     def test_get_values(self):
         fakes = [FakeFactory() for _ in range(10)]
@@ -817,7 +817,7 @@ class TestRangeFacet(FacetTestCase):
         self.assertEqual(result[1], ('third', 3, False))
 
     def test_labelize(self):
-        self.assertEqual(self.facet.labelize('label', 'first'), 'First range')
+        self.assertEqual(self.facet.labelize('first'), 'First range')
 
 
 class TestTemporalCoverageFacet(FacetTestCase):
@@ -870,7 +870,7 @@ class TestTemporalCoverageFacet(FacetTestCase):
         self.assertEqual(value_filter, expected)
 
     def test_labelize(self):
-        label = self.facet.labelize('label', '1940-01-01-2014-12-31')
+        label = self.facet.labelize('1940-01-01-2014-12-31')
         expected = '{0} - {1}'.format(
             format_date(date(1940, 1, 1), 'short'),
             format_date(date(2014, 12, 31), 'short')

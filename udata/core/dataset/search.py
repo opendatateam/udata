@@ -35,17 +35,17 @@ def max_followers():
     return max(current_site.metrics.get('max_dataset_followers'), 10)
 
 
-def granularity_labelizer(label, value):
-    return dict(spatial_granularities).get(value, value)
+def granularity_labelizer(value):
+    return dict(spatial_granularities).get(value)
 
 
-def zone_labelizer(label, value):
+def zone_labelizer(value):
     if value and isinstance(value, basestring):
         return GeoZone.objects(id=value).first() or value
     return value
 
 
-def dataset_badge_labelizer(label, kind):
+def dataset_badge_labelizer(kind):
     return Dataset.__badges__.get(kind, '')
 
 

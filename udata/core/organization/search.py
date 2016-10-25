@@ -27,7 +27,7 @@ def max_followers():
     return max(current_site.metrics.get('max_org_followers'), 10)
 
 
-def organization_badge_labelizer(label, kind):
+def organization_badge_labelizer(kind):
     return Organization.__badges__.get(kind, '')
 
 

@@ -73,7 +73,7 @@
     {% if icon %}
     <span class="{{ icon }} fa-fw"></span>
     {% endif %}
-    <span>{{ labelize(label, value) if labelize else value }}</span>
+    <span>{{ labelize(value) if labelize else value }}</span>
     <a href="{{ ''|url_del('page', **{name: value}) }}">
         <span class="close-icon glyphicon glyphicon-remove"></span>
     </a>

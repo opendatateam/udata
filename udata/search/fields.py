@@ -35,14 +35,10 @@ ES_NUM_FAILURES = '-Infinity', 'Infinity', 'NaN', None
 class Facet(object):
     def __init__(self, **kwargs):
         super(Facet, self).__init__(**kwargs)
-        self.labelizer = self._params.pop('labelizer', None)
+        self.labelize = self._params.pop('labelizer', None)
+        self.labelize = self.labelize or self.default_labelizer
 
-    def labelize(self, label, value):
-        '''Get the label for a given value'''
-        labelizer = self.labelizer or self.default_labelizer
-        return labelizer(label, value)
-
-    def default_labelizer(self, label, value):
+    def default_labelizer(self, value):
         return str(value)
 
     def as_request_parser_kwargs(self):
@@ -68,7 +64,7 @@ class BoolFacet(Facet, DSLFacet):
         q = Q('term', **{self._params['field']: True})
         return q if boolean else ~q
 
-    def default_labelizer(self, label, value):
+    def default_labelizer(self, value):
         return str(_('yes') if to_bool(value) else _('no'))
 
     def as_request_parser_kwargs(self):
@@ -108,10 +104,10 @@ class ModelTermsFacet(TermsFacet):
             for (key, doc_count, selected) in values
         ]
 
-    def labelize(self, label, value):
+    def default_labelizer(self, value):
         if not isinstance(value, self.model):
             value = self.model.objects.get(id=value)
-        return super(ModelTermsFacet, self).labelize(label, value)
+        return super(ModelTermsFacet, self).default_labelizer(value)
 
 
 class RangeFacet(Facet, DSLRangeFacet):
@@ -143,7 +139,7 @@ class RangeFacet(Facet, DSLRangeFacet):
             if count
         ]
 
-    def default_labelizer(self, label, value):
+    def default_labelizer(self, value):
         return self.labels.get(value, value)
 
     def as_request_parser_kwargs(self):
@@ -164,7 +160,7 @@ class TemporalCoverageFacet(Facet, DSLFacet):
         end = date(*map(int, parts[3:6]))
         return start, end
 
-    def labelize(self, label, value):
+    def default_labelizer(self, value):
         start, end = self.parse_value(value)
         return ' - '.join((format_date(start, 'short'),
                            format_date(end, 'short')))
