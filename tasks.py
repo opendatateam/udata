@@ -82,8 +82,12 @@ def assets(ctx):
     lrun('npm run build', pty=True)
 
 
-@task(assets, i18nc)
-def dist(ctx):
+@task(clean, assets, i18nc)
+def dist(ctx, buildno=None):
     '''Package for distribution'''
     print(cyan('Building a distribuable package'))
-    lrun('python setup.py bdist_wheel', pty=True)
+    cmd = ['python setup.py']
+    if buildno:
+        cmd.append('egg_info -b {0}'.format(buildno))
+    cmd.append('bdist_wheel')
+    lrun(' '.join(cmd), pty=True)

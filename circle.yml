@@ -1,0 +1,45 @@
+machine:
+  services:
+    - redis
+dependencies:
+  cache_directories:
+    - mongodb-linux-x86_64-3.2.4
+    - elasticsearch-1.7.5
+  pre:
+    - if [[ ! -d mongodb-linux-x86_64-3.2.4 ]]; then wget http://downloads.mongodb.org/linux/mongodb-linux-x86_64-3.2.4.tgz && tar xvzf mongodb-linux-x86_64-3.2.4.tgz; fi
+    - sudo /etc/init.d/mongodb stop
+    - sudo cp mongodb-linux-x86_64-3.2.4/bin/* /usr/bin
+    - sudo /etc/init.d/mongodb start
+    - if [[ ! -d elasticsearch-1.7.5 ]]; then wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.5.tar.gz && tar xvzf elasticsearch-1.7.5.tar.gz && elasticsearch-1.7.5/bin/plugin install elasticsearch/elasticsearch-analysis-icu/2.7.0; fi
+    - elasticsearch-1.7.5/bin/elasticsearch: {background: true}
+    # Install jq required by circleci-requirements.sh (explanation in file)
+    - sudo apt-get update && sudo apt-get install jq
+  override:
+    - ./circleci-requirements.sh
+    - nvm use && nvm alias default $(nvm current) && npm install
+test:
+  override:
+    - mkdir -p $CIRCLE_TEST_REPORTS/{python,karma}
+    - nosetests --immediate --with-xunit --xunit-file=$CIRCLE_TEST_REPORTS/python/tests.xml  udata_gouvfr
+  post:
+    # Build a distributable wheel
+    - if [[ $CIRCLE_TAG ]]; then inv dist; else inv dist -b $CIRCLE_BUILD_NUM; fi
+    # Expose result as build artifact
+    - cp dist/*.whl $CIRCLE_ARTIFACTS/
+
+# Secure PyPI upload
+# - use Twine (as recommanded) to upload the built package
+# - use environement variables declared on CircleCI webui
+deployment:
+  builds:
+    branch: [master, dev]
+    owner: etalab
+    commands:
+      - pip install twine
+      - twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
+  release:
+    tag: /v[0-9]+(\.[0-9]+)*/
+    owner: etalab
+    commands:
+      - pip install twine
+      - twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
