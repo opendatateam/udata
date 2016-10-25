@@ -9,7 +9,8 @@ from pkg_resources import resource_isdir, resource_listdir, resource_string
 from flask import current_app
 
 from pymongo.errors import PyMongoError, OperationFailure
-from mongoengine.connection import get_db, DEFAULT_CONNECTION_NAME
+from flask_mongoengine.connection import get_db
+from flask_mongoengine.connection import DEFAULT_CONNECTION_NAME
 
 from udata.commands import submanager, green, yellow, cyan, purple, red
 

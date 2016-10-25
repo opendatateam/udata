@@ -57,8 +57,10 @@ class MeAPI(API):
         return current_user._get_current_object()
 
     @api.secure
+    @api.doc('update_me')
+    @api.expect(me_fields)
     @api.marshal_with(me_fields)
-    @api.doc('update_me', responses={400: 'Validation error'})
+    @api.response(400, 'Validation error')
     def put(self, **kwargs):
         '''Update my profile'''
         user = current_user._get_current_object()
@@ -278,8 +280,8 @@ class FollowUserAPI(FollowAPI):
     model = User
 
     @api.secure
-    @api.doc(notes="You can't follow yourself.",
-             response={403: 'When tring to follow yourself'})
+    @api.doc(notes="You can't follow yourself.")
+    @api.response(403, 'When tring to follow yourself')
     def post(self, id):
         '''Follow a user given its ID'''
         if id == str(current_user.id):
