@@ -112,35 +112,6 @@ class UDataApi(Api):
     def render_ui(self):
         return redirect(url_for('apii18n.apidoc'))
 
-    def search_parser(self, adapter, paginate=True):
-        parser = self.parser()
-        # q parameter
-        parser.add_argument('q', type=str, location='args',
-                            help='The search query')
-        # Expected facets
-        # (ie. I want all facets or I want both tags and licenses facets)
-        facets = adapter.facets.keys()
-        if facets:
-            parser.add_argument('facets', type=str, location='args',
-                                choices=['all'] + facets, action='append',
-                                help='Selected facets to fetch')
-        # Add facets filters arguments
-        # (apply a value to a facet ie. tag=value)
-        for name, facet in adapter.facets.items():
-            parser.add_argument(name, type=str, location='args')
-        # Sort arguments
-        keys = adapter.sorts.keys()
-        choices = keys + ['-' + k for k in keys]
-        help_msg = 'The field (and direction) on which sorting apply'
-        parser.add_argument('sort', type=str, location='args', choices=choices,
-                            help=help_msg)
-        if paginate:
-            parser.add_argument('page', type=int, location='args',
-                                default=0, help='The page to display')
-            parser.add_argument('page_size', type=int, location='args',
-                                default=20, help='The page size')
-        return parser
-
     def unauthorized(self, response):
         '''Override to change the WWW-Authenticate challenge'''
         realm = current_app.config.get('HTTP_OAUTH_REALM', 'uData')

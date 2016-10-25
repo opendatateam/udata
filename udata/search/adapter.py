@@ -5,8 +5,9 @@ import itertools
 import logging
 
 from elasticsearch_dsl import DocType, Integer, Float, Object
+from flask_restplus.reqparse import RequestParser
 
-from udata.search import i18n_analyzer
+from udata.search import i18n_analyzer, fields
 from udata.search.query import SearchQuery
 from udata.core.metrics import Metric
 
@@ -77,6 +78,37 @@ class ModelSearchAdapter(DocType):
     @classmethod
     def exists(cls, id, **kwargs):
         return cls.get(id, ignore=404, **kwargs)
+
+    @classmethod
+    def as_request_parser(cls, paginate=True):
+        parser = RequestParser()
+        # q parameter
+        parser.add_argument('q', type=str, location='args',
+                            help='The search query')
+        # Expected facets
+        # (ie. I want all facets or I want both tags and licenses facets)
+        facets = cls.facets.keys()
+        if facets:
+            parser.add_argument('facets', type=str, location='args',
+                                choices=['all'] + facets, action='append',
+                                help='Selected facets to fetch')
+        # Add facets filters arguments
+        # (apply a value to a facet ie. tag=value)
+        for name, facet in cls.facets.items():
+            kwargs = facet.as_request_parser_kwargs()
+            parser.add_argument(name, location='args', **kwargs)
+        # Sort arguments
+        keys = cls.sorts.keys()
+        choices = keys + ['-' + k for k in keys]
+        help_msg = 'The field (and direction) on which sorting apply'
+        parser.add_argument('sort', type=str, location='args', choices=choices,
+                            help=help_msg)
+        if paginate:
+            parser.add_argument('page', type=int, location='args',
+                                default=0, help='The page to display')
+            parser.add_argument('page_size', type=int, location='args',
+                                default=20, help='The page size')
+        return parser
 
 
 metrics_types = {

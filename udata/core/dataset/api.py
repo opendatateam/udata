@@ -39,7 +39,7 @@ from .forms import (
 from .search import DatasetSearch
 
 ns = api.namespace('datasets', 'Dataset related operations')
-search_parser = api.search_parser(DatasetSearch)
+search_parser = DatasetSearch.as_request_parser()
 community_parser = api.parser()
 community_parser.add_argument(
     'sort', type=str, default='-created', location='args',

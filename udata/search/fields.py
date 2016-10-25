@@ -13,6 +13,7 @@ from elasticsearch_dsl.faceted_search import (
     RangeFacet as DSLRangeFacet,
     DateHistogramFacet as DSLDateHistogramFacet,
 )
+from flask_restplus import inputs
 
 from udata.i18n import lazy_gettext as _, format_date
 from udata.models import db
@@ -32,7 +33,6 @@ ES_NUM_FAILURES = '-Infinity', 'Infinity', 'NaN', None
 
 
 class Facet(object):
-
     def __init__(self, **kwargs):
         super(Facet, self).__init__(**kwargs)
         self.labelizer = self._params.pop('labelizer', None)
@@ -44,6 +44,9 @@ class Facet(object):
 
     def default_labelizer(self, label, value):
         return str(value)
+
+    def as_request_parser_kwargs(self):
+        return {'type': str}
 
 
 class TermsFacet(Facet, DSLTermsFacet):
@@ -67,6 +70,9 @@ class BoolFacet(Facet, DSLFacet):
 
     def default_labelizer(self, label, value):
         return str(_('yes') if to_bool(value) else _('no'))
+
+    def as_request_parser_kwargs(self):
+        return {'type': inputs.boolean}
 
 
 class ModelTermsFacet(TermsFacet):
@@ -139,6 +145,9 @@ class RangeFacet(Facet, DSLRangeFacet):
 
     def default_labelizer(self, label, value):
         return self.labels.get(value, value)
+
+    def as_request_parser_kwargs(self):
+        return {'type': str, 'choices': self.labels.keys()}
 
 
 def get_value(data, name):

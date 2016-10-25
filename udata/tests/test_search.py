@@ -9,6 +9,8 @@ from werkzeug.urls import url_decode, url_parse
 from factory.mongoengine import MongoEngineFactory
 
 from elasticsearch_dsl import Q, A, Search
+from flask_restplus import inputs
+from flask_restplus.reqparse import RequestParser
 
 from udata import search
 from udata.core.metrics import Metric
@@ -62,37 +64,42 @@ class FakeSearch(search.ModelSearchAdapter):
     facets = {
         'tag': search.TermsFacet(field='tags'),
         'other': search.TermsFacet(field='other'),
-        'range': search.RangeFacet(
-            field='a_num_field',
-            ranges=[(_('Never reused'), (None, 1)),
-                    (_('Little reused'), (1, 5)),
-                    (_('Quite reused'), (5, 10)),
-                    (_('Heavily reused'), (10, None))]),
     }
     sorts = {
         'title': 'title.raw',
         'description': 'description.raw',
     }
 
+RANGE_LABELS = {
+    'none': _('Never reused'),
+    'little': _('Little reused'),
+    'quite': _('Quite reused'),
+    'heavy': _('Heavily reused'),
+}
 
-class FakeSearchWithDateRange(search.ModelSearchAdapter):
-    class Meta:
-        doc_type = 'Dataset'
-
-    model = Fake
-    fields = [
-        'title^2',
-        'description',
-    ]
+class FakeSearchWithRange(FakeSearch):
     facets = {
-        'tag': search.TermsFacet(field='tags'),
-        'other': search.TermsFacet(field='other'),
         'range': search.RangeFacet(
-            field='a_num_field',
-            ranges=[(_('Never reused'), (None, 1)),
-                    (_('Little reused'), (1, 5)),
-                    (_('Quite reused'), (5, 10)),
-                    (_('Heavily reused'), (10, None))]),
+            field='a_range_field',
+            ranges=[('none', (None, 1)),
+                    ('little', (1, 5)),
+                    ('quite', (5, 10)),
+                    ('heavy', (10, None))
+            ],
+            labels=RANGE_LABELS
+        )
+    }
+
+
+class FakeSearchWithBool(FakeSearch):
+    facets = {
+        'boolean': search.BoolFacet(field='a_bool_field')
+    }
+
+
+class FakeSearchWithCoverage(FakeSearch):
+    facets = {
+        'coverage': search.TemporalCoverageFacet(field='a_coverage_field')
     }
 
 
@@ -952,3 +959,69 @@ class SearchAdaptorTest(SearchTestMixin, TestCase):
         self.assert_tokens(
             'test l\'apostrophe',
             ['test l\'apostrophe', 'test apostrophe', 'test', 'apostrophe'])
+
+
+    def assertHasArgument(self, parser, name, _type, choices=None):
+        candidates = [
+            arg for arg in parser.args if arg.name == name
+        ]
+        self.assertEqual(len(candidates), 1, 'Should have strictly one argument')
+        arg = candidates[0]
+        self.assertEqual(arg.type, _type)
+        self.assertFalse(arg.required)
+        if choices:
+            print(choices, arg.choices)
+            self.assertEqual(set(arg.choices), set(choices))
+
+    def test_as_request_parser_terms_facet(self):
+        parser = FakeSearch.as_request_parser()
+        self.assertIsInstance(parser, RequestParser)
+
+        # query + facets selector + tag and other facets + sorts + pagination
+        self.assertEqual(len(parser.args), 7)
+        self.assertHasArgument(parser, 'q', str)
+        self.assertHasArgument(parser, 'sort', str)
+        self.assertHasArgument(parser, 'facets', str)
+        self.assertHasArgument(parser, 'tag', str)
+        self.assertHasArgument(parser, 'other', str)
+        self.assertHasArgument(parser, 'page', int)
+        self.assertHasArgument(parser, 'page_size', int)
+
+    def test_as_request_parser_bool_facet(self):
+        parser = FakeSearchWithBool.as_request_parser()
+        self.assertIsInstance(parser, RequestParser)
+
+        # query + facets selector + boolean facet + sorts + pagination
+        self.assertEqual(len(parser.args), 6)
+        self.assertHasArgument(parser, 'q', str)
+        self.assertHasArgument(parser, 'sort', str)
+        self.assertHasArgument(parser, 'facets', str)
+        self.assertHasArgument(parser, 'boolean', inputs.boolean)
+        self.assertHasArgument(parser, 'page', int)
+        self.assertHasArgument(parser, 'page_size', int)
+
+    def test_as_request_parser_range_facet(self):
+        parser = FakeSearchWithRange.as_request_parser()
+        self.assertIsInstance(parser, RequestParser)
+
+        # query + facets selector + range facet + sorts + pagination
+        self.assertEqual(len(parser.args), 6)
+        self.assertHasArgument(parser, 'q', str)
+        self.assertHasArgument(parser, 'sort', str)
+        self.assertHasArgument(parser, 'facets', str)
+        self.assertHasArgument(parser, 'range', str, choices=RANGE_LABELS.keys())
+        self.assertHasArgument(parser, 'page', int)
+        self.assertHasArgument(parser, 'page_size', int)
+
+    def test_as_request_parser_temporal_coverage_facet(self):
+        parser = FakeSearchWithCoverage.as_request_parser()
+        self.assertIsInstance(parser, RequestParser)
+
+        # query + facets selector + range facet + sorts + pagination
+        self.assertEqual(len(parser.args), 6)
+        self.assertHasArgument(parser, 'q', str)
+        self.assertHasArgument(parser, 'sort', str)
+        self.assertHasArgument(parser, 'facets', str)
+        self.assertHasArgument(parser, 'coverage', str)
+        self.assertHasArgument(parser, 'page', int)
+        self.assertHasArgument(parser, 'page_size', int)

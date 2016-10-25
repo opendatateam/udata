@@ -40,7 +40,7 @@ from .search import UserSearch
 
 ns = api.namespace('users', 'User related operations')
 me = api.namespace('me', 'Connected user related operations')
-search_parser = api.search_parser(UserSearch)
+search_parser = UserSearch.as_request_parser()
 filter_parser = api.parser()
 filter_parser.add_argument(
     'q', type=str, help='The string to filter items',

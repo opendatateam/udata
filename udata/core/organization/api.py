@@ -44,7 +44,7 @@ from udata.core.storages.api import (
 )
 
 ns = api.namespace('organizations', 'Organization related operations')
-search_parser = api.search_parser(OrganizationSearch)
+search_parser = OrganizationSearch.as_request_parser()
 
 common_doc = {
     'params': {'org': 'The organization ID or slug'}
