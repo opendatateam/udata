@@ -170,6 +170,12 @@ router.map({
             require(['./views/user.vue'], resolve);
         }
     },
+    '/user/edit/:oid/': {
+        name: 'user-edit',
+        component: function(resolve) {
+            require(['./views/user-edit.vue'], resolve);
+        }
+    },
     '/harvester/new/': {
         component: function(resolve) {
             require(['./views/harvester-wizard.vue'], resolve);
