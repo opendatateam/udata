@@ -1,3 +1,5 @@
-# Current (in progress)
+# Changelog
+
+## Current (in progress)
 
 - First published version
