@@ -866,7 +866,7 @@ class TestTemporalCoverageFacet(FacetTestCase):
     def test_labelize(self):
         label = self.facet.labelize('label', '1940-01-01-2014-12-31')
         expected = '{0} - {1}'.format(
-            format_date(date(1940, 01, 01), 'short'),
+            format_date(date(1940, 1, 1), 'short'),
             format_date(date(2014, 12, 31), 'short')
         )
         self.assertEqual(label, expected)
