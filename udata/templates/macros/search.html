@@ -107,7 +107,7 @@
     {% for term, count, selected in terms[:nb_displayed_aggregations] %}
         <a href="{{ result.query.to_url(url, **{name: term}) }}"
             class="list-group-item">
-            {{ result.query.facets[name].labelize('', term) }}
+            {{ result.query.facets[name].labelize(term) }}
             <span class="badge pull-right">{{ count }}</span>
         </a>
     {% endfor %}
@@ -121,7 +121,7 @@
         {% for term, count, selected in terms[nb_displayed_aggregations:] %}
             <a href="{{ result.query.to_url(url, **{name: term}) }}"
                 class="list-group-item">
-                {{ result.query.facets[name].labelize('', term) }}
+                {{ result.query.facets[name].labelize(term) }}
                 <span class="badge pull-right">{{ count }}</span>
             </a>
         {% endfor %}
@@ -140,7 +140,7 @@
     {% for obj, count, selected in objects[:nb_displayed_aggregations] %}
         <a href="{{ result.query.to_url(url, **{name: obj.id|string}) }}"
             class="list-group-item">
-            {{ result.query.facets[name].labelize('', obj) }}
+            {{ result.query.facets[name].labelize(obj) }}
             <span class="badge pull-right">{{ count }}</span>
         </a>
     {% endfor %}
@@ -154,7 +154,7 @@
         {% for obj, count, selected in objects[nb_displayed_aggregations:] %}
             <a href="{{ result.query.to_url(url, **{name: obj.id|string}) }}"
                 class="list-group-item">
-                {{ result.query.facets[name].labelize('', obj) }}
+                {{ result.query.facets[name].labelize(obj) }}
                 <span class="badge pull-right">{{ count }}</span>
             </a>
         {% endfor %}
@@ -172,7 +172,7 @@
     {% for key, count, selected in ranges %}
         <a href="{{ result.query.to_url(url, **{name: key}) }}"
             class="list-group-item">
-            {{ result.query.facets[name].labelize('', key) }}
+            {{ result.query.facets[name].labelize(key) }}
             <span class="badge pull-right">{{ count }}</span>
         </a>
     {% endfor %}
