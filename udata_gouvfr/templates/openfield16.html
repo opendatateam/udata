@@ -1,0 +1,197 @@
+{% extends theme("base.html") %}
+
+{% set meta = {
+    'title': '#openfield16',
+    'description': "Pour les 10 ans de l’ouverture du site grand public du Recensement des Equipements Sportifs (RES), le ministère de la Ville, de la Jeunesse et des Sports organisera en partenariat avec Etalab et NUMA le « Openfield16 »",
+    'keywords': [
+        'équipements sportifs"',
+        'RES',
+        'NUMA',
+        'Recensement des Equipements Sportifs',
+        'hackathon',
+        'évènement',
+        'ministère de la Ville, de la Jeunesse et des Sports',
+        '#openfield16',
+        'anniversaire',
+    ],
+} %}
+
+{% set body_class="openfield16 contest" %}
+
+{% block content %}
+{% cache cache_duration, 'openfield16', g.lang_code %}
+<section class="content">
+    <div class="container">
+        <div class="row">
+            <article class="col-xs-12 col-sm-8 col-md-9">
+                <h1>#openfield16</h1>
+
+                <p class="text-justify lead">Nous fêtons cette année les 10 ans de l’ouverture du site grand public du Recensement des Equipements Sportifs (RES) !</p>
+
+                <p class="text-justify">Soucieux de valoriser l’intérêt de ces donnés publiques, le <a href="http://www.sports.gouv.fr/">ministère de la Ville, de la Jeunesse et des Sports</a> organisera en partenariat avec <a href="http://www.etalab.gouv.fr">Etalab</a> et <a href="https://paris.numa.co/">NUMA</a> le « Openfield16 ». Ce hackathon sera dédié à l’exploitation des données constituant l’écosystème du sport et des politiques sportives de l’Etat. L’ensemble des données publiques de la direction des sports, dont celles du RES notamment, seront mises à disposition des participants. Les données d’autres contributeurs seront également disponibles pour l’occasion.</p>
+
+                <p class="text-justify">L’objectif de l’évènement sera d’imaginer des produits numériques innovants grâce au croisement des données publiques relatives au sport en France. Ces solutions pourront intéresser divers publics tel que l’Etat, les collectivités territoriales, les fédérations sportives mais aussi le grand public.</p>
+
+                <p class="text-justify">Ainsi, entrepreneurs, développeurs, designers, spécialistes des données, amoureux du sport se réuniront les <strong>7, 8 et 9 octobre 2016</strong>, dans les locaux de la direction des sports du ministère de la ville, de la jeunesse et des sports d’abord, puis dans ceux de la société NUMA ensuite, autour d’une idée commune : offrir des solutions numériques innovantes aux pratiquants et acteurs du sport dans le but d’améliorer les pratiques ainsi que leurs conditions.</p>
+
+                <p class="text-justify">Au terme de ce hackathon, <strong>3 équipes lauréates</strong> se verront remettre une dotation financière et seront invités à valoriser leur projet durant le <strong>mardigital du 18 octobre 2016</strong> organisé à Paris.</p>
+
+                <h2>Les défis</h2>
+
+                <ul>
+                    <li>
+                        <a href="https://forum.etalab.gouv.fr/t/defi-1-faciliter-la-pratique-sportive-pour-le-plus-grand-nombre/2832">
+                            Défi n°1 – La pratique sportive pour tous
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://forum.etalab.gouv.fr/t/defi-2-maintenir-le-rang-de-la-france-parmi-les-grandes-nations-sportives/2833">
+                            Défi n°2 : la France toujours parmi les meilleurs
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://forum.etalab.gouv.fr/t/defi-3-contribuer-a-la-lutte-contre-les-comportements-contraires-aux-valeurs-du-sport/2834">
+                            Défi n°3 – Le sport comme vecteur de valeurs sociales
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://forum.etalab.gouv.fr/t/defi-4-promouvoir-et-developper-lemploi-sportif/2835">
+                            Défi n°4 – L’emploi au cœur du sport
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://forum.etalab.gouv.fr/t/defi-5-sensibiliser-au-developpement-durable-dans-le-sport/2836">
+                            Défi n°5 – Le sport et l’environnement
+                        </a>
+                    </li>
+                </ul>
+
+                <h2>Inscriptions</h2>
+                <p>Merci de vous inscrire <a href="https://rdv.etalab.gouv.fr/e/6/hackathon-openfield16">ici</a> afin de valider votre participation à l’évènement #openfield16</p>
+
+                <h2>Calendrier</h2>
+
+                <h3>Vendredi 7 octobre 2016 – lancement du Concours</h3>
+
+                <p>Dans les locaux du ministère de la ville, de la jeunesse et des sports (95 avenue de France, 75013 Paris)</p>
+
+                <dl class="dl-horizontal">
+                    <dt>18h</dt><dd>Accueil</dd>
+
+                    <dt>18h30<dt><dd>Démarrage officiel
+                        <ul>
+                            <li>Mot d’accueil</li>
+                            <li>Rappel du contexte et des objectifs</li>
+                            <li>Présentation du déroulé de l’événement</li>
+                        </ul>
+                    </dd>
+
+                    <dt>19h</dt><dd>Mise en œuvre opérationnelle
+                        <ul>
+                            <li>Présentation des thèmes de travail</li>
+                            <li>Constitution des équipes</li>
+                    </dd>
+
+                    <dt>19h30</dt><dd>Cocktail</dd>
+                </dl>
+
+                <h3>Samedi 8 octobre 2016 – lancement du Concours</h3>
+
+                <p>Dans les locaux de la société NUMA (39 rue du Caire, 75002 Paris)</p>
+
+                <dl class="dl-horizontal">
+                    <dt>9h</dt><dd>Accueil, petit-déjeuner</dd>
+                    <dt>9h30</dt><dd>Démarrage des travaux en équipe</dd>
+                    <dt>13h</dt><dd>Déjeuner</dd>
+                    <dt>19h</dt><dd>Repas du soir</dd>
+                    <dt>20h</dt><dd>Présentation du programme de la journée de dimanche</dd>
+                    <dt>22h</dt><dd>Fermeture des locaux de NUMA</dd>
+                </dl>
+
+                <h3>Dimanche 9 octobre 2016 – poursuite du Concours et clôture</h3>
+                <p>Dans les locaux de la société NUMA (39 rue du Caire, 75002 Paris)</p>
+
+                <dl class="dl-horizontal">
+                    <dt>9h</dt><dd>Petit-déjeuner</dd>
+                    <dt>9h30</dt><dd>Poursuite des travaux en équipe</dd>
+                    <dt>12h</dt><dd>Déjeuner</dd>
+                    <dt>14h30</dt><dd>Préparation des présentations</dd>
+                    <dt>17h<dt><dd>Présentations devant le Jury</dd>
+                    <dt>18h</dt><dd>Délibérations du Jury</dd>
+                    <dt>18h30</dt><dd>Remise des prix</dd>
+                    <dt>19h</dt><dd>Cocktail de clôture</dd>
+                </dl>
+
+
+                <h2>Les données mises en open data dans le cadre d’#openfield16</h2>
+
+                <p>Dans le cadre du hackathon #openfield16, le ministère de la ville, de la jeunesse et des sports met à disposition en open data les jeux de données suivants :</p>
+
+                <ul>
+                    <li><a href="https://www.data.gouv.fr/fr/datasets/referentiel-dindicateurs-pour-auto-evaluer-leco-responsabilite-devenements-sportifs/">Référentiel d'indicateurs pour autoévaluer l'éco-responsabilité d'événements sportifs</a></li>
+                    <li><a href="https://www.data.gouv.fr/fr/datasets/facteurs-demissions-dequipements-de-sport/">Facteurs d'émissions d'équipements de sport</a></li>
+                    <li><a href="https://www.data.gouv.fr/fr/datasets/base-des-conseillers-techniques-sportifs/">Base des Conseillers Techniques Sportifs</a></li>
+                    <li><a href="https://www.data.gouv.fr/fr/datasets/suivi-du-contrat-dobjectifs-des-federations-sportives-et-groupements-nationaux/">Suivi du contrat d’objectifs des fédérations sportives et groupements nationaux</a></li>
+                    <li><a href="https://www.data.gouv.fr/fr/datasets/etablissements-crees-dans-le-champ-du-sport-de-2005-a-2014-ree-sirene/">Etablissements créés dans le champ du sport de 2005 à 2014 – (REE / Sirène)</a></li>
+                    <li><a href="https://www.data.gouv.fr/fr/datasets/subventions-equipements-sportifs-allouees-en-2015-dans-le-cadre-de-la-dotation-dequipement-des-territoires-ruraux-detr/">Subventions « Equipements sportifs » allouées en 2015 dans le cadre de la Dotation d’Equipement des Territoires Ruraux - DETR</a></li>
+                    <li><a href="https://www.data.gouv.fr/fr/datasets/subventions-allouees-en-2015-par-le-centre-national-pour-le-developpement-du-sport-cnds/">Subventions allouées en 2015 par le Centre National pour le Développement du Sport (CNDS)</a></li>
+                    <li><a href="https://www.data.gouv.fr/fr/datasets/relations-geographiques-distantes-des-licences-2013-des-federations-sportives-a-leur-club/">Relations géographiques distantes des licences 2013 des fédérations sportives à leur club</a></li>
+                    <li><a href="https://www.data.gouv.fr/fr/datasets/emploi-davenir-et-cui-cae-dans-les-domaines-du-sport-et-de-lanimation/">Emploi d’avenir et CUI - CAE dans les domaines du sport et de l’animation</a></li>
+                </ul>
+
+                <h2>Conditions spécifiques d’utilisation de certaines données</h2>
+                <p>Dans le cadre de l’évènement #openfield16 de nombreux jeux de données sont disponibles en open data sous licence ouverte afin de permettre à l’ensemble des participants de développer des services innovants.</p>
+                <p>Le ministère de la ville, de la jeunesse et des sports a par ailleurs travaillé à l’ouverture de nouveaux jeux de données qui seront disponibles uniquement pendant la durée du hackathon que nous vous invitons à découvrir ci-dessous :</p>
+
+                <ul>
+                    <li>GR®, GRP® et PR de la Fédération française de randonnée pédestre en Ile-de-France</li>
+                    <li>Base des éducateurs sportifs d’Ile-de-France</li>
+                    <li>Liste des incidents relevés par la fédération française de football lors de la saison 2015-2016</li>
+                    <li>Signalements Suricate – Problèmes signalés par les pratiquants de sports de nature</li>
+                    <li>Optimouv : code source du logiciel d’optimisation des déplacements dans l’organisation des rencontres sportives</li>
+                    <li>Liste des médicaments et des substances dopantes</li>
+                <ul>
+
+            </article>
+
+            <aside class="col-xs-12 col-sm-4 col-md-3">
+                <div class="text-center">
+                    <img src="{{ url_for('gouvfr.static', filename='openfield16/logo.jpg') }}"
+                        alt="Logo de Openfield 16" class="scalable" />
+                </div>
+                <h3>Ressources</h3>
+                <ul class="list-unstyled">
+                    <li><a href="https://rdv.etalab.gouv.fr/e/6/hackathon-openfield16">Page d'inscription</a></li>
+                    <li><a href="https://forum.etalab.gouv.fr/c/agenda/hackathon-openfield16-7-9-oct-2016">Catégorie sur le forum Etalab</a></li>
+                </ul>
+            </aside>
+        </div>
+    </div>
+</section>
+
+{% if datasets %}
+<section class="content participants">
+    <div class="container">
+
+        <div class="row">
+            <h3 class="col-xs-12">Les jeux de données remarquables</h3>
+            <ul class="card-list">
+                {% for dataset in datasets[:nb_displayed_datasets] %}
+                <li class="col-md-4 col-sm-6">
+                    {% include theme('dataset/card.html') %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="clearfix text-center">
+            <a class="btn btn-default"
+                href="{{ url_for('datasets.list', badge=badge) }}">
+                <span class="glyphicon glyphicon-list"></span>
+                {{ _('See the %(nb)s datasets', nb=datasets|length) }}
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endcache %}
+{% endblock %}

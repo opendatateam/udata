@@ -26,6 +26,8 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
         nav.Item(_('As a producer'), 'gouvfr.faq', {'section': 'producer'}),
         nav.Item(_('As a reuser'), 'gouvfr.faq', {'section': 'reuser'}),
         nav.Item(_('As a developer'), 'gouvfr.faq', {'section': 'developer'}),
+        nav.Item(_('As a system integrator'), 'gouvfr.faq',
+                 {'section': 'system-integrator'}),
     ]),
     nav.Item(_('Data'), 'datasets.list', items=[
         nav.Item(_('Datasets'), 'datasets.list'),
@@ -35,6 +37,7 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
     nav.Item(_('Dashboard'), 'site.dashboard'),
     nav.Item(_('Territories'), 'territories.home'),
     nav.Item(_('Events'), '#', url='#', items=[
+        nav.Item('Openfield 16', 'gouvfr.openfield16'),
         nav.Item('Nec Mergitur', 'gouvfr.nec_mergitur'),
         nav.Item('Climate Change Challenge (C³)',
                  'gouvfr.climate_change_challenge'),
@@ -52,6 +55,8 @@ nav.Bar('gouvfr_footer', [
     nav.Item(_('As a producer'), 'gouvfr.faq', {'section': 'producer'}),
     nav.Item(_('As a reuser'), 'gouvfr.faq', {'section': 'reuser'}),
     nav.Item(_('As a developer'), 'gouvfr.faq', {'section': 'developer'}),
+    nav.Item(_('As a system integrator'), 'gouvfr.faq',
+             {'section': 'system-integrator'}),
     nav.Item(_('API'), 'apidoc.swaggerui'),
     nav.Item(_('Credits'), 'gouvfr.credits'),
     nav.Item(_('Terms of use'), 'site.terms'),
