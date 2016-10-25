@@ -848,8 +848,7 @@ class TestTemporalCoverageFacet(FacetTestCase):
         q_end = Q({'range': {'some_field.end': {
             'gte': date(2013, 1, 7).toordinal(),
         }}})
-        expected = q_start & q_end
-        print(expected.to_dict())
+        expected = Q('nested', path='some_field', query=q_start & q_end)
         self.assertEqual(value_filter, expected)
 
     def test_value_filter_reversed(self):
@@ -860,7 +859,7 @@ class TestTemporalCoverageFacet(FacetTestCase):
         q_end = Q({'range': {'some_field.end': {
             'gte': date(2013, 1, 7).toordinal(),
         }}})
-        expected = q_start & q_end
+        expected = Q('nested', path='some_field', query=q_start & q_end)
         self.assertEqual(value_filter, expected)
 
     def test_labelize(self):

@@ -176,7 +176,7 @@ class TemporalCoverageFacet(Facet, DSLFacet):
         range_end = Q({'range': {'{0}.end'.format(field): {
             'gte': min(start, end).toordinal(),
         }}})
-        return range_start & range_end
+        return Q('nested', path=field, query=range_start & range_end)
 
     def get_values(self, data, filter_values):
         field = self._params['field']
