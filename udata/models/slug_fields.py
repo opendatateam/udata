@@ -87,6 +87,12 @@ def populate_slug(instance, field):
                      not field.update):
         return value
 
+    # This can happen when serializing an object which does not contain
+    # the properties used to generate the slug. Typically, when such
+    # an object is passed to one of the Celery workers (see issue #20).
+    if value is None:
+        return
+
     if field.lower_case:
         value = value.lower()
 
