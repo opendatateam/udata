@@ -58,6 +58,13 @@ export default {
                 align: 'center',
                 type: 'metric',
                 width: 95
+            }, {
+                label: this._('Roles'),
+                key: 'roles',
+                sort: 'roles',
+                align: 'center',
+                type: 'metric',
+                width: 95
             }]
         };
     },
