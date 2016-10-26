@@ -39,6 +39,7 @@ class ReuseListAPI(API):
     @api.doc('list_reuses', parser=search_parser)
     @api.marshal_with(reuse_page_fields)
     def get(self):
+        search_parser.parse_args()
         return search.query(ReuseSearch, **multi_to_dict(request.args))
 
     @api.secure

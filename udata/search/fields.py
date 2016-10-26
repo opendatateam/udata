@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import logging
+import re
 
 from datetime import date
 
@@ -31,6 +32,8 @@ __all__ = (
 
 ES_NUM_FAILURES = '-Infinity', 'Infinity', 'NaN', None
 
+RE_TIME_COVERAGE = re.compile(r'\d{4}-\d{2}-\d{2}-\d{4}-\d{2}-\d{2}')
+
 
 class Facet(object):
     def __init__(self, **kwargs):
@@ -43,6 +46,9 @@ class Facet(object):
 
     def as_request_parser_kwargs(self):
         return {'type': str}
+
+    def validate_parameter(self, value):
+        return True
 
 
 class TermsFacet(Facet, DSLTermsFacet):
@@ -109,11 +115,24 @@ class ModelTermsFacet(TermsFacet):
             value = self.model.objects.get(id=value)
         return super(ModelTermsFacet, self).default_labelizer(value)
 
+    def validate_parameter(self, value):
+        if isinstance(value, ObjectId):
+            return True
+        ObjectId(value)
+        return True
+
+
 
 class RangeFacet(Facet, DSLRangeFacet):
     def __init__(self, **kwargs):
         super(RangeFacet, self).__init__(**kwargs)
         self.labels = self._params.pop('labels', {})
+        if len(self.labels) != len(self._ranges):
+            raise ValueError('Missing some labels')
+        for key in self.labels.keys():
+            if key not in self._ranges:
+                raise ValueError('Unknown label key {0}'.format(key))
+
 
     def get_value_filter(self, filter_value):
         '''
@@ -143,7 +162,12 @@ class RangeFacet(Facet, DSLRangeFacet):
         return self.labels.get(value, value)
 
     def as_request_parser_kwargs(self):
-        return {'type': str, 'choices': self.labels.keys()}
+        return {'type': self.validate_parameter, 'choices': self.labels.keys()}
+
+    def validate_parameter(self, value):
+        if value not in self.labels:
+            raise ValueError('Unknown range key: {0}'.format(value))
+        return True
 
 
 def get_value(data, name):
@@ -195,6 +219,20 @@ class TemporalCoverageFacet(Facet, DSLFacet):
             'min': date.fromordinal(int(min_value)),
             'max': date.fromordinal(int(max_value)),
             'days': max_value - min_value,
+        }
+
+    def validate_parameter(self, value):
+        if not RE_TIME_COVERAGE.match(value):
+            msg = '{0} does not match yyyy-mm-dd-yyyy-mm-dd'.format(value)
+            raise ValueError(msg)
+        return True
+
+    def as_request_parser_kwargs(self):
+        return {
+            'type': self.validate_parameter,
+            'help': _('A date range expressed as start-end '
+                      'where both dates are in iso format '
+                      '(ie. yyyy-mm-dd-yyyy-mm-dd)')
         }
 
 

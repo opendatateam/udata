@@ -764,6 +764,16 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
             self.assertIsInstance(row[2], bool)
             self.assertEqual(fake.id, row[0].id)
 
+    def test_validate_parameters(self):
+        fake = FakeFactory()
+        for value in [str(fake.id), fake.id]:
+            self.assertTrue(self.facet.validate_parameter(value))
+
+        bad_values = ['xyz']
+        for value in bad_values:
+            with self.assertRaises(Exception):
+                self.facet.validate_parameter(value)
+
 
 class TestRangeFacet(FacetTestCase):
     def setUp(self):
@@ -818,6 +828,34 @@ class TestRangeFacet(FacetTestCase):
 
     def test_labelize(self):
         self.assertEqual(self.facet.labelize('first'), 'First range')
+
+    def test_validate_parameters(self):
+        for value in self.facet.labels.keys():
+            self.assertTrue(self.facet.validate_parameter(value))
+
+        bad_values = ['xyz']
+        for value in bad_values:
+            with self.assertRaises(Exception):
+                self.facet.validate_parameter(value)
+
+    def test_labels_ranges_mismatch(self):
+        with self.assertRaises(ValueError):
+            search.RangeFacet(
+                field='some_field',
+                ranges=self.ranges,
+                labels={
+                    'first': 'First range',
+                    'second': 'Second range',
+                })
+        with self.assertRaises(ValueError):
+            search.RangeFacet(
+                field='some_field',
+                ranges=self.ranges,
+                labels={
+                    'first': 'First range',
+                    'second': 'Second range',
+                    'unknown': 'Third range',
+                })
 
 
 class TestTemporalCoverageFacet(FacetTestCase):
@@ -876,6 +914,14 @@ class TestTemporalCoverageFacet(FacetTestCase):
             format_date(date(2014, 12, 31), 'short')
         )
         self.assertEqual(label, expected)
+
+    def test_validate_parameters(self):
+        self.assertTrue(self.facet.validate_parameter('1940-01-01-2014-12-31'))
+
+        bad_values = ['xyz']
+        for value in bad_values:
+            with self.assertRaises(Exception):
+                self.facet.validate_parameter(value)
 
 
 class SearchResultTest(TestCase):
@@ -970,7 +1016,6 @@ class SearchAdaptorTest(SearchTestMixin, TestCase):
         self.assertEqual(arg.type, _type)
         self.assertFalse(arg.required)
         if choices:
-            print(choices, arg.choices)
             self.assertEqual(set(arg.choices), set(choices))
 
     def test_as_request_parser_terms_facet(self):
@@ -1002,6 +1047,7 @@ class SearchAdaptorTest(SearchTestMixin, TestCase):
 
     def test_as_request_parser_range_facet(self):
         parser = FakeSearchWithRange.as_request_parser()
+        facet = FakeSearchWithRange.facets['range']
         self.assertIsInstance(parser, RequestParser)
 
         # query + facets selector + range facet + sorts + pagination
@@ -1009,12 +1055,14 @@ class SearchAdaptorTest(SearchTestMixin, TestCase):
         self.assertHasArgument(parser, 'q', str)
         self.assertHasArgument(parser, 'sort', str)
         self.assertHasArgument(parser, 'facets', str)
-        self.assertHasArgument(parser, 'range', str, choices=RANGE_LABELS.keys())
+        self.assertHasArgument(parser, 'range', facet.validate_parameter,
+                                                choices=RANGE_LABELS.keys())
         self.assertHasArgument(parser, 'page', int)
         self.assertHasArgument(parser, 'page_size', int)
 
     def test_as_request_parser_temporal_coverage_facet(self):
         parser = FakeSearchWithCoverage.as_request_parser()
+        facet = FakeSearchWithCoverage.facets['coverage']
         self.assertIsInstance(parser, RequestParser)
 
         # query + facets selector + range facet + sorts + pagination
@@ -1022,6 +1070,6 @@ class SearchAdaptorTest(SearchTestMixin, TestCase):
         self.assertHasArgument(parser, 'q', str)
         self.assertHasArgument(parser, 'sort', str)
         self.assertHasArgument(parser, 'facets', str)
-        self.assertHasArgument(parser, 'coverage', str)
+        self.assertHasArgument(parser, 'coverage', facet.validate_parameter)
         self.assertHasArgument(parser, 'page', int)
         self.assertHasArgument(parser, 'page_size', int)

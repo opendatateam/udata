@@ -58,6 +58,7 @@ class OrganizationListAPI(API):
     @api.marshal_with(org_page_fields)
     def get(self):
         '''List or search all organizations'''
+        search_parser.parse_args()
         return search.query(OrganizationSearch, **multi_to_dict(request.args))
 
     @api.secure

@@ -223,6 +223,7 @@ class UserListAPI(API):
     @api.marshal_with(user_page_fields)
     def get(self):
         '''List all users'''
+        search_parser.parse_args()
         return search.query(UserSearch, **multi_to_dict(request.args))
 
     @api.secure

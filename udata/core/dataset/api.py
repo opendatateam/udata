@@ -74,6 +74,7 @@ class DatasetListAPI(API):
     @api.marshal_with(dataset_page_fields)
     def get(self):
         '''List or search all datasets'''
+        args = search_parser.parse_args()
         return search.query(Dataset, **multi_to_dict(request.args))
 
     @api.secure
