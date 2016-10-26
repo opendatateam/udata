@@ -33,7 +33,7 @@ pyliblzma==0.5.3
 python-dateutil==2.5.3
 pytz
 PyYAML==3.12
-redis
+redis==2.10.5
 requests
 unicodecsv==0.14.1
 voluptuous==0.9.3
