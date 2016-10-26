@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
-
-from flask import request, redirect, abort, g
+from flask import request, redirect, abort, g, json
 from flask.views import MethodView
 
 from elasticsearch_dsl.query import MultiMatch

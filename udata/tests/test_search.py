@@ -857,6 +857,15 @@ class TestRangeFacet(FacetTestCase):
                     'unknown': 'Third range',
                 })
 
+    def test_get_value_filter(self):
+        expected = Q({'range': {
+            'some_field': {
+                'gte': 1,
+                'lt': 5,
+            }
+        }})
+        self.assertEqual(self.facet.get_value_filter('second'), expected)
+
 
 class TestTemporalCoverageFacet(FacetTestCase):
     def setUp(self):

@@ -48,10 +48,10 @@ class Facet(object):
         return {'type': str}
 
     def validate_parameter(self, value):
-        return True
+        return value
 
     def get_value_filter(self, value):
-        self.validate_parameter(value)
+        self.validate_parameter(value)  # Might trigger a double validation
         return super(Facet, self).get_value_filter(value)
 
 
@@ -116,14 +116,17 @@ class ModelTermsFacet(TermsFacet):
 
     def default_labelizer(self, value):
         if not isinstance(value, self.model):
+            self.validate_parameter(value)
             value = self.model.objects.get(id=value)
         return super(ModelTermsFacet, self).default_labelizer(value)
 
     def validate_parameter(self, value):
         if isinstance(value, ObjectId):
-            return True
-        ObjectId(value)
-        return True
+            return value
+        try:
+            return ObjectId(value)
+        except Exception:
+            raise ValueError('"{0}" is not valid identifier'.format(value))
 
 
 
@@ -143,7 +146,7 @@ class RangeFacet(Facet, DSLRangeFacet):
         Fix here until upstream PR is merged
         https://github.com/elastic/elasticsearch-dsl-py/pull/473
         '''
-        self.validate_parameter(value)
+        self.validate_parameter(filter_value)
         f, t = self._ranges[filter_value]
         limits = {}
         if f is not None:
@@ -164,6 +167,7 @@ class RangeFacet(Facet, DSLRangeFacet):
         ]
 
     def default_labelizer(self, value):
+        self.validate_parameter(value)
         return self.labels.get(value, value)
 
     def as_request_parser_kwargs(self):
@@ -172,7 +176,7 @@ class RangeFacet(Facet, DSLRangeFacet):
     def validate_parameter(self, value):
         if value not in self.labels:
             raise ValueError('Unknown range key: {0}'.format(value))
-        return True
+        return value
 
 
 def get_value(data, name):
@@ -190,6 +194,7 @@ class TemporalCoverageFacet(Facet, DSLFacet):
         return start, end
 
     def default_labelizer(self, value):
+        self.validate_parameter(value)
         start, end = self.parse_value(value)
         return ' - '.join((format_date(start, 'short'),
                            format_date(end, 'short')))
