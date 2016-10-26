@@ -23,6 +23,14 @@ export default {
                 }, {
                     id: 'about',
                     label: this._('About'),
+                }, {
+                    id: 'roles',
+                    label: this._('Roles'),
+                    widget: 'select-input',
+                    values: [{id: 'admin', name: 'admin'}],
+                    map: function(item) {
+                        return {value: item.id, text: item.name};
+                    },
                 }]
         };
     },
