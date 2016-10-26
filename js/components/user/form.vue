@@ -7,32 +7,44 @@ import User from 'models/user';
 
 export default {
     props: {
+        // Edited user
         user: {
             type: User,
             default: function() {return new User();}
-        }
+        },
+        // Admin property of the editing user (i.e. NOT of the edited one)
+        admin: {
+            type: Boolean,
+            default: false,
+        },
     },
     data: function() {
-        return {
-            fields: [{
-                    id: 'first_name',
-                    label: this._('First name')
-                }, {
-                    id: 'last_name',
-                    label: this._('Last name'),
-                }, {
-                    id: 'about',
-                    label: this._('About'),
-                }, {
-                    id: 'roles',
-                    label: this._('Roles'),
-                    widget: 'select-input',
-                    values: [{id: 'admin', name: 'admin'}],
-                    map: function(item) {
-                        return {value: item.id, text: item.name};
-                    },
-                }]
-        };
+        let fields = [
+            {
+                id: 'first_name',
+                label: this._('First name'),
+            },
+            {
+                id: 'last_name',
+                label: this._('Last name'),
+            },
+            {
+                id: 'about',
+                label: this._('About'),
+            },
+        ]
+        if (this.admin === true) {
+            fields.push({
+                id: 'roles',
+                label: this._('Roles'),
+                widget: 'select-input',
+                values: [{id: 'admin', name: 'admin'}],
+                map: function(item) {
+                    return {value: item.id, text: item.name};
+                }
+            })
+        }
+        return {fields};
     },
     components: {
         vform: require('components/form/vertical-form.vue')
