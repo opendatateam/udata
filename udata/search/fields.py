@@ -50,6 +50,10 @@ class Facet(object):
     def validate_parameter(self, value):
         return True
 
+    def get_value_filter(self, value):
+        self.validate_parameter(value)
+        return super(Facet, self).get_value_filter(value)
+
 
 class TermsFacet(Facet, DSLTermsFacet):
     pass
@@ -139,6 +143,7 @@ class RangeFacet(Facet, DSLRangeFacet):
         Fix here until upstream PR is merged
         https://github.com/elastic/elasticsearch-dsl-py/pull/473
         '''
+        self.validate_parameter(value)
         f, t = self._ranges[filter_value]
         limits = {}
         if f is not None:
@@ -197,6 +202,7 @@ class TemporalCoverageFacet(Facet, DSLFacet):
         return a
 
     def get_value_filter(self, value):
+        self.validate_parameter(value)
         field = self._params['field']
         start, end = self.parse_value(value)
         range_start = Q({'range': {'{0}.start'.format(field): {
@@ -223,7 +229,7 @@ class TemporalCoverageFacet(Facet, DSLFacet):
 
     def validate_parameter(self, value):
         if not RE_TIME_COVERAGE.match(value):
-            msg = '{0} does not match yyyy-mm-dd-yyyy-mm-dd'.format(value)
+            msg = '"{0}" does not match YYYY-MM-DD-YYYY-MM-DD'.format(value)
             raise ValueError(msg)
         return True
 
@@ -232,7 +238,7 @@ class TemporalCoverageFacet(Facet, DSLFacet):
             'type': self.validate_parameter,
             'help': _('A date range expressed as start-end '
                       'where both dates are in iso format '
-                      '(ie. yyyy-mm-dd-yyyy-mm-dd)')
+                      '(ie. YYYY-MM-DD-YYYY-MM-DD)')
         }
 
 
