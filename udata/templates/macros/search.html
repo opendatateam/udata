@@ -2,7 +2,7 @@
 
 {% macro breadcrum_toolbar(result, url=None, exports=None) %}
 {% if kwargs %}
-    {% set to_url = result.to_url %}
+    {% set to_url = result.query.to_url %}
     {% if in_url('sort') %}
         {% if request.args.sort.startswith('-') %}
             {% set current_sort, current_order = request.args.sort[1:], 'desc' %}
@@ -185,7 +185,7 @@
 {% if coverage and coverage.days > 2 %}
     {{ facet_panel(result, name, label, icon, url) }}
     <div id="collapse-{{result.class_name}}-{{name}}" class="panel-body collapse in temporal-coverage"
-        data-url-pattern="{{ result.to_url(url, **{name: '__r__', 'replace': True}) }}">
+        data-url-pattern="{{ result.query.to_url(url, **{name: '__r__', 'replace': True}) }}">
         <div class="row">
             <div class="col-xs-12">
                 <div class="input-daterange input-group" id="datepicker">
@@ -230,7 +230,7 @@
         ) }}
         {% if csv_endpoint %}
         <a class="btn btn-xs btn-info pull-right"
-            href="{{ result.to_url(
+            href="{{ result.query.to_url(
                 url_for(csv_endpoint), facets=None, page=None, page_size=None, replace=true)
             }}">
             <span class="fa fa-download"></span>

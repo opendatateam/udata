@@ -115,21 +115,3 @@ class SearchResult(Paginable, Response):
     def labelize(self, name, value):
         func = self.label_func(name)
         return func(value) if func else value
-
-    def to_url(self, url=None, replace=False, **kwargs):
-        '''Serialize the query into an URL'''
-        params = copy.deepcopy(self.query._filters)
-        params['q'] = self.query._query
-        if kwargs:
-            params.pop('page', None)
-            for key, value in kwargs.items():
-                if not replace and key in params:
-                    if not isinstance(params[key], (list, tuple)):
-                        params[key] = [params[key], value]
-                    else:
-                        params[key].append(value)
-                else:
-                    params[key] = value
-        params.pop('facets', None)  # Always true when used
-        href = Href(url or request.base_url)
-        return href(params)
