@@ -12,11 +12,6 @@ export default {
             type: User,
             default: function() {return new User();}
         },
-        // Admin property of the editing user (i.e. NOT of the edited one)
-        admin: {
-            type: Boolean,
-            default: false,
-        },
     },
     data: function() {
         let fields = [
@@ -33,7 +28,7 @@ export default {
                 label: this._('About'),
             },
         ]
-        if (this.admin === true) {
+        if (this.$root.me.is_admin === true) {
             fields.push(
                 {
                     id: 'roles',

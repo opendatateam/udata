@@ -1,6 +1,6 @@
 <template>
-<form-layout icon="user" :title="_('Edit profile')" :save="save" :cancel="cancel" footer="true" :model="user">
-    <user-form v-ref:form :user="user" :admin="admin"></user-form>
+<form-layout icon="user" :title="_('Edit user')" :save="save" :cancel="cancel" footer="true" :model="user">
+    <user-form v-ref:form :user="user"></user-form>
 </form-layout>
 </template>
 
@@ -11,7 +11,7 @@ import FormLayout from 'components/form-layout.vue';
 
 export default {
     data: function() {
-        return {user: new User(), admin: true};
+        return {user: new User()};
     },
     components: {FormLayout, UserForm},
     methods: {
