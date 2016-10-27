@@ -61,7 +61,7 @@ def init_app(app):
     from . import helpers, error_handlers  # noqa
 
     # Load all core views and blueprint
-    import udata.core.search.views  # noqa
+    import udata.search.views  # noqa
 
     from udata.core.storages.views import blueprint as storages_blueprint
     from udata.core.user.views import blueprint as user_blueprint
