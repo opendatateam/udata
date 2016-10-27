@@ -64,6 +64,12 @@ class UserBlueprintTest(FrontTestCase):
         self.assertEquals(json_ld['url'], 'http://www.datagouv.fr/user')
         self.assertEquals(json_ld['image'], 'http://www.datagouv.fr/avatar')
 
+    def test_render_profile_of_an_inactive_user(self):
+        '''It should raise a 410'''
+        user = UserFactory(active=False)
+        response = self.get(url_for('users.show', user=user))
+        self.assertStatus(response, 410)
+
     def test_render_profile_datasets(self):
         '''It should render the user profile datasets page'''
         user = UserFactory()

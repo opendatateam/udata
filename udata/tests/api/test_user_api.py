@@ -193,6 +193,32 @@ class UserAPITest(APITestCase):
         self.assertEquals(json['about'], user.about)
         self.assertEquals(json['metrics'], user.metrics)
 
+    def test_get_user(self):
+        '''It should get a user'''
+        user = UserFactory()
+        response = self.get(url_for('api.user', user=user))
+        self.assert200(response)
+
+    def test_get_inactive_user(self):
+        '''It should raise a 410'''
+        user = UserFactory(active=False)
+        response = self.get(url_for('api.user', user=user))
+        self.assertStatus(response, 410)
+
+    def test_get_inactive_user_with_a_non_admin(self):
+        '''It should raise a 410'''
+        user = UserFactory(active=False)
+        self.login()
+        response = self.get(url_for('api.user', user=user))
+        self.assertStatus(response, 410)
+
+    def test_get_inactive_user_with_an_admin(self):
+        '''It should get a user'''
+        user = UserFactory(active=False)
+        self.login(AdminFactory())
+        response = self.get(url_for('api.user', user=user))
+        self.assert200(response)
+
     def test_user_api_update(self):
         '''It should update a user'''
         self.login(AdminFactory())

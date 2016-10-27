@@ -3,8 +3,9 @@ from __future__ import unicode_literals
 
 import logging
 
-from flask import g
+from flask import abort, g
 
+from udata.core.user.api import is_not_available
 from udata.frontend.views import DetailView, SearchView
 from udata.models import User, Activity, Organization, Dataset, Reuse, Follow
 from udata.i18n import I18nBlueprint
@@ -75,6 +76,8 @@ class UserActivityView(UserView, DetailView):
     template_name = 'user/activity.html'
 
     def get_context(self):
+        if is_not_available(self.user):
+            abort(410)
         context = super(UserActivityView, self).get_context()
         context['activities'] = (Activity.objects(actor=self.object)
                                          .order_by('-created_at').limit(15))

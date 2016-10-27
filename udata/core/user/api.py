@@ -238,14 +238,26 @@ class UserListAPI(API):
         return user, 201
 
 
+def is_not_available(user):
+    return user.active is False and (
+        current_user.is_anonymous or
+        current_user.sysadmin is False)
+
+
 @ns.route('/<user:user>/', endpoint='user')
 @api.response(404, 'User not found')
-@api.response(410, 'User has been deleted')
+@api.response(410, 'User is not active or has been deleted')
 class UserAPI(API):
+
+    def check_availability(self, user):
+        if is_not_available(user):
+            api.abort(410, 'User is not active')
+
     @api.doc('get_user')
     @api.marshal_with(user_fields)
     def get(self, user):
         '''Get a user given its identifier'''
+        self.check_availability(user)
         if user.deleted and not UserEditPermission(user).can():
             api.abort(410, 'User has been deleted')
         return user
@@ -257,6 +269,7 @@ class UserAPI(API):
     @api.response(400, 'Validation error')
     def put(self, user):
         '''Update a user given its identifier'''
+        self.check_availability(user)
         if user.deleted:
             api.abort(410, 'User has been deleted')
         UserEditPermission(user).test()
@@ -268,6 +281,7 @@ class UserAPI(API):
     @api.response(204, 'Object deleted')
     def delete(self, user):
         '''Delete a user given its identifier'''
+        self.check_availability(user)
         if user.deleted:
             api.abort(410, 'User has been deleted')
         UserEditPermission(user).test()
