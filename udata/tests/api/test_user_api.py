@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
+
 from flask import url_for
 
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import UserFactory, AdminFactory
 from udata.models import Follow
 from udata.utils import faker
 
@@ -190,3 +192,13 @@ class UserAPITest(APITestCase):
         self.assertEquals(json['website'], user.website)
         self.assertEquals(json['about'], user.about)
         self.assertEquals(json['metrics'], user.metrics)
+
+    def test_user_api_update(self):
+        '''It should update a user'''
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data['active'] = False
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert200(response)
+        self.assertEqual(json.loads(response.data)['active'], False)

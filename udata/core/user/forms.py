@@ -19,3 +19,4 @@ class UserProfileForm(ModelForm):
     avatar = fields.ImageField(_('Avatar'), sizes=AVATAR_SIZES)
     website = fields.URLField(_('Website'))
     about = fields.MarkdownField(_('About'))
+    active = fields.BooleanField()

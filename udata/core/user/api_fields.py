@@ -36,6 +36,7 @@ user_fields = api.model('User', {
     'website': fields.String(description='The user website'),
     'about': fields.Markdown(description='The user self description'),
     'roles': fields.List(fields.String, description='Site wide user roles'),
+    'active': fields.Boolean(),
     'organizations': fields.List(
         fields.Nested(org_ref_fields),
         description='The organization the user belongs to'),

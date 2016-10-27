@@ -34,15 +34,22 @@ export default {
             },
         ]
         if (this.admin === true) {
-            fields.push({
-                id: 'roles',
-                label: this._('Roles'),
-                widget: 'select-input',
-                values: [{id: 'admin', name: 'admin'}],
-                map: function(item) {
-                    return {value: item.id, text: item.name};
+            fields.push(
+                {
+                    id: 'roles',
+                    label: this._('Roles'),
+                    widget: 'select-input',
+                    values: [{id: 'admin', name: 'admin'}],
+                    map: function(item) {
+                        return {value: item.id, text: item.name};
+                    },
+                },
+                {
+                    id: 'active',
+                    label: this._('Active'),
+                    widget: 'checkbox',
                 }
-            })
+            )
         }
         return {fields};
     },
