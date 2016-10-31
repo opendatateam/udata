@@ -15,7 +15,7 @@
 <template>
 <div class="input-group dropdown frequency-field">
     <date-picker v-ref:picker :field="frequency_date_field"
-        :value="frequency_date_value">
+        :value="frequency_date_value" :placeholder="_('Last update')">
     </date-picker>
     <select-input v-ref:select :choices="choices" @change="onSelect()"
         class="select-input" :field="field" :model="model"

@@ -5,7 +5,7 @@ uData
 [![Python Requirements Status][requires-io-badge]][requires-io-url]
 [![JavaScript Dependencies Status][david-dm-badge]][david-dm-url]
 [![JavaScript Development Dependencies Status][david-dm-dev-badge]][david-dm-dev-url]
-[![Join the chat at https://gitter.im/etalab/udata][gitter-badge]][gitter-url]
+[![Join the chat at https://gitter.im/opendatateam/udata][gitter-badge]][gitter-url]
 
 Customizable and skinnable social platform dedicated to (open)data.
 
@@ -20,4 +20,4 @@ The [full documentation](http://udata.readthedocs.org/) is hosted on Read the Do
 [david-dm-dev-url]: https://david-dm.org/opendatateam/udata#info=devDependencies
 [david-dm-dev-badge]: https://david-dm.org/opendatateam/udata/dev-status.svg
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
-[gitter-url]: https://gitter.im/etalab/udata
+[gitter-url]: https://gitter.im/opendatateam/udata

@@ -1,4 +1,22 @@
 # -*- coding: utf-8 -*-
+'''
+TODO: We need to cleanup and give more coherence to these APIs
+- upload enpoints should be singular instead of plural
+- community resource APIs should be consistent
+    (single root instead of the current state splitted
+    between /dataset/<id>/community and /community_resource/)
+- Swagger operation IDs needs to be explicits
+- make use of latest RESTPlus decorator:
+  - @api.expect
+  - @api.param
+- permissions needs to be more comprehensible
+- some mutualizations may be removed (common_doc ?)
+- some API need to renaming (ie. featured vs moderated...)
+
+These changes might lead to backward compatibility breakage meaning:
+- new API version
+- admin changes
+'''
 from __future__ import unicode_literals
 import os
 from datetime import datetime
@@ -32,7 +50,7 @@ from .models import (
     Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES,
     CommunityResource
 )
-from .permissions import DatasetEditPermission
+from .permissions import DatasetEditPermission, ResourceEditPermission
 from .forms import (
     ResourceForm, DatasetForm, CommunityResourceForm, ResourcesListForm
 )
@@ -181,11 +199,11 @@ class DatasetBadgeAPI(API):
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources')
 class ResourcesAPI(API):
     @api.secure
-    @api.doc(id='create_resource', body=resource_fields, **common_doc)
+    @api.doc('create_resource', body=resource_fields, **common_doc)
     @api.marshal_with(resource_fields)
     def post(self, dataset):
         '''Create a new resource for a given dataset'''
-        DatasetEditPermission(dataset).test()
+        ResourceEditPermission(dataset).test()
         form = api.validate(ResourceForm)
         resource = Resource()
         form.populate_obj(resource)
@@ -200,7 +218,7 @@ class ResourcesAPI(API):
     @api.marshal_with(resource_fields)
     def put(self, dataset):
         '''Reorder resources'''
-        DatasetEditPermission(dataset).test()
+        ResourceEditPermission(dataset).test()
         data = {'resources': request.json}
         form = ResourcesListForm.from_json(data, obj=dataset, instance=dataset,
                                            csrf_enabled=False)
@@ -244,11 +262,11 @@ class UploadMixin(object):
 @api.doc(parser=upload_parser, **common_doc)
 class UploadDatasetResources(UploadMixin, API):
     @api.secure
-    @api.doc(id='upload_dataset_resources')
+    @api.doc('upload_dataset_resources')
     @api.marshal_with(upload_fields)
     def post(self, dataset):
         '''Upload a new dataset resource'''
-        DatasetEditPermission(dataset).test()
+        ResourceEditPermission(dataset).test()
         args = upload_parser.parse_args()
         infos = self.extract_infos_from_args(args, dataset)
         resource = Resource(**infos)
@@ -263,12 +281,13 @@ class UploadDatasetResources(UploadMixin, API):
 @api.doc(parser=upload_parser, **common_doc)
 class UploadCommunityResources(UploadMixin, API):
     @api.secure
-    @api.doc(id='upload_community_resources')
+    @api.doc('upload_community_resources')
     @api.marshal_with(upload_fields)
     def post(self, dataset):
         '''Upload a new community resource'''
         args = upload_parser.parse_args()
         infos = self.extract_infos_from_args(args, dataset)
+        infos['owner'] = current_user._get_current_object()
         community_resource = CommunityResource.objects.create(**infos)
         return community_resource, 201
 
@@ -287,11 +306,11 @@ class ResourceMixin(object):
 @api.doc(params={'rid': 'The resource unique identifier'})
 class UploadDatasetResource(ResourceMixin, UploadMixin, API):
     @api.secure
-    @api.doc(id='upload_dataset_resource')
+    @api.doc('upload_dataset_resource')
     @api.marshal_with(upload_fields)
     def post(self, dataset, rid):
         '''Upload a file related to a given resource on a given dataset'''
-        DatasetEditPermission(dataset).test()
+        ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         args = upload_parser.parse_args()
         infos = self.extract_infos_from_args(args, dataset)
@@ -306,13 +325,13 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
 @ns.route('/community_resources/<crid:community>/upload/',
           endpoint='upload_community_resource', doc=common_doc)
 @api.doc(params={'community': 'The community resource unique identifier'})
-class UploadCommunityResource(ResourceMixin, UploadMixin, API):
+class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
     @api.secure
-    @api.doc(id='upload_community_resource')
+    @api.doc('upload_community_resource')
     @api.marshal_with(upload_fields)
     def post(self, community):
-        '''Upload a file related to a given resource on a given dataset'''
-        DatasetEditPermission(community.dataset).test()
+        '''Update the file related to a given community resource'''
+        ResourceEditPermission(community).test()
         args = upload_parser.parse_args()
         infos = self.extract_infos_from_args(args, community.dataset)
         community.update(**infos)
@@ -325,11 +344,11 @@ class UploadCommunityResource(ResourceMixin, UploadMixin, API):
 @api.doc(params={'rid': 'The resource unique identifier'})
 class ResourceAPI(ResourceMixin, API):
     @api.secure
-    @api.doc(id='update_resource', body=resource_fields)
+    @api.doc('update_resource', body=resource_fields)
     @api.marshal_with(resource_fields)
     def put(self, dataset, rid):
         '''Update a given resource on a given dataset'''
-        DatasetEditPermission(dataset).test()
+        ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
         form.populate_obj(resource)
@@ -342,7 +361,7 @@ class ResourceAPI(ResourceMixin, API):
     @api.doc('delete_resource')
     def delete(self, dataset, rid):
         '''Delete a given resource on a given dataset'''
-        DatasetEditPermission(dataset).test()
+        ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         dataset.resources.remove(resource)
         dataset.last_modified = datetime.now()
@@ -369,6 +388,25 @@ class CommunityResourcesAPI(API):
         return (community_resources.order_by(args['sort'])
                                    .paginate(args['page'], args['page_size']))
 
+    @api.secure
+    @api.doc('create_community_resource')
+    @api.expect(community_resource_fields)
+    @api.marshal_with(community_resource_fields)
+    def post(self):
+        '''Create a new community resource'''
+        form = api.validate(CommunityResourceForm)
+        resource = CommunityResource()
+        form.populate_obj(resource)
+        if not resource.dataset:
+            api.abort(400, errors={
+                'dataset': 'A dataset identifier is required'
+            })
+        if not resource.organization:
+            resource.owner = current_user._get_current_object()
+        resource.modified = datetime.now()
+        resource.save()
+        return resource, 201
+
 
 @ns.route('/community_resources/<crid:community>/',
           endpoint='community_resource', doc=common_doc)
@@ -381,11 +419,12 @@ class CommunityResourceAPI(API):
         return community
 
     @api.secure
-    @api.doc(id='update_community_resource',
+    @api.doc('update_community_resource',
              body=community_resource_fields)
     @api.marshal_with(community_resource_fields)
     def put(self, community):
         '''Update a given community resource'''
+        ResourceEditPermission(community).test()
         form = api.validate(CommunityResourceForm, community)
         form.populate_obj(community)
         if not community.organization:
@@ -399,6 +438,7 @@ class CommunityResourceAPI(API):
     @api.marshal_with(community_resource_fields)
     def delete(self, community):
         '''Delete a given community resource'''
+        ResourceEditPermission(community).test()
         community.delete()
         return '', 204
 
@@ -420,7 +460,7 @@ suggest_parser.add_argument(
 @ns.route('/suggest/', endpoint='suggest_datasets')
 class SuggestDatasetsAPI(API):
     @api.marshal_list_with(dataset_suggestion_fields)
-    @api.doc(id='suggest_datasets', parser=suggest_parser)
+    @api.doc('suggest_datasets', parser=suggest_parser)
     def get(self):
         '''Suggest datasets'''
         args = suggest_parser.parse_args()
@@ -439,7 +479,7 @@ class SuggestDatasetsAPI(API):
 
 @ns.route('/suggest/formats/', endpoint='suggest_formats')
 class SuggestFormatsAPI(API):
-    @api.doc(id='suggest_formats', parser=suggest_parser)
+    @api.doc('suggest_formats', parser=suggest_parser)
     def get(self):
         '''Suggest file formats'''
         args = suggest_parser.parse_args()
@@ -477,7 +517,7 @@ checkurl_parser.add_argument('group', type=str,
 @ns.route('/checkurl/', endpoint='checkurl')
 class CheckUrlAPI(API):
 
-    @api.doc(id='checkurl', parser=checkurl_parser)
+    @api.doc('checkurl', parser=checkurl_parser)
     def get(self):
         '''Checks that a URL exists and returns metadata.'''
         args = checkurl_parser.parse_args()
