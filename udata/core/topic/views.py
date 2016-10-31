@@ -61,24 +61,30 @@ def display(topic):
 @blueprint.route('/<topic:topic>/datasets')
 def datasets(topic):
     kwargs = multi_to_dict(request.args)
-    s = topic_search_for(topic, DatasetSearch, facets=True, **kwargs)
+    topic_search = topic_search_for(topic,
+                                    DatasetSearch,
+                                    facets=True,
+                                    **kwargs)
 
     return theme.render(
         'topic/datasets.html',
         topic=topic,
-        datasets=search.query(s)
+        datasets=search.query(topic_search)
     )
 
 
 @blueprint.route('/<topic:topic>/reuses')
 def reuses(topic):
     kwargs = multi_to_dict(request.args)
-    s = topic_search_for(topic, ReuseSearch, facets=True, **kwargs)
+    topic_search = topic_search_for(topic,
+                                    ReuseSearch,
+                                    facets=True,
+                                    **kwargs)
 
     return theme.render(
         'topic/reuses.html',
         topic=topic,
-        reuses=search.query(s)
+        reuses=search.query(topic_search)
     )
 
 

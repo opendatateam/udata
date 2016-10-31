@@ -33,13 +33,6 @@ fr_elision = token_filter(
     ]
 )
 
-# Still in use?
-# whitespace_analyzer = analyzer(
-#     'whitespace_analyzer',
-#     tokenizer=tokenizer('whitespace'),
-#     filter=['lowercase', 'asciifolding']
-# )
-
 # Languages related analyzers.
 de_analyzer = analyzer(
     'de_analyzer',

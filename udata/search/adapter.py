@@ -60,6 +60,17 @@ class ModelSearchAdapter(DocType):
 
     @classmethod
     def facet_search(cls, *facets):
+        '''
+        Build a FacetSearch for a given list of facets
+
+        Elasticsearch DSL doesn't allow to list facets
+        once and for all and then later select them.
+        They are always all requested
+
+        As we don't use them every time and facet computation
+        can take some time, we build the FacetedSearch
+        dynamically with only those requested.
+        '''
         f = dict((k, v) for k, v in cls.facets.items() if k in facets)
 
         class TempSearch(SearchQuery):

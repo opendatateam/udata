@@ -214,6 +214,9 @@ def multisearch(*models, **params):
         queries.append(s)
     responses = ms.execute()
     return [
+        # _d_ is the only way to access the raw data
+        # allowing to rewrap response in a FacetedSearch
+        # because default multisearch loose facets
         SearchResult(query, response._d_)
         for query, response in zip(queries, responses)
     ]

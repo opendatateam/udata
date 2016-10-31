@@ -131,6 +131,13 @@ class ModelTermsFacet(TermsFacet):
 
 
 class RangeFacet(Facet, DSLRangeFacet):
+    '''
+    A Range facet with splited keys and labels.
+
+    This separation allows:
+    - readable keys (without spaces and special chars) in URLs (front and API)
+    - lazily localizable labels (without changing API by language)
+    '''
     def __init__(self, **kwargs):
         super(RangeFacet, self).__init__(**kwargs)
         self.labels = self._params.pop('labels', {})
@@ -149,6 +156,7 @@ class RangeFacet(Facet, DSLRangeFacet):
         self.validate_parameter(filter_value)
         f, t = self._ranges[filter_value]
         limits = {}
+        # lt and gte to ensure non-overlapping ranges
         if f is not None:
             limits['gte'] = f
         if t is not None:
