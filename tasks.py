@@ -218,7 +218,7 @@ def widgets_watch(ctx):
     lrun('npm run widgets:watch', pty=True)
 
 
-@task(clean, i18nc, assets_build)
+@task(clean, i18nc, assets_build, widgets_build)
 def dist(ctx, buildno=None):
     '''Package for distribution'''
     header('Building a distribuable package')
