@@ -24,5 +24,6 @@ class FrontEndRootTest(FrontTestCase):
 
     def test_render_search_no_data(self):
         '''It should render the search page without data'''
+        self.init_search()
         response = self.get(url_for('front.search'))
         self.assert200(response)

@@ -10,6 +10,7 @@ from udata.models import Dataset, Discussion, Follow, Reuse
 from udata.core.site.views import current_site
 from udata.sitemap import sitemap
 
+from .search import DatasetSearch
 from .permissions import ResourceEditPermission, DatasetEditPermission
 
 blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
@@ -49,6 +50,7 @@ def recent_feed():
 @blueprint.route('/', endpoint='list')
 class DatasetListView(SearchView):
     model = Dataset
+    search_adapter = DatasetSearch
     context_name = 'datasets'
     template_name = 'dataset/list.html'
 

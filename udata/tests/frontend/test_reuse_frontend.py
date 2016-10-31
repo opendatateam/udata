@@ -42,7 +42,8 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertEqual(rendered_reuses.total, 1)
 
     def test_render_list_empty(self):
-        '''It should render the reuse list page event if empty'''
+        '''It should render the reuse list page even if empty'''
+        self.init_search()
         response = self.get(url_for('reuses.list'))
         self.assert200(response)
 

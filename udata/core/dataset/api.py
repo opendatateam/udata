@@ -57,7 +57,7 @@ from .forms import (
 from .search import DatasetSearch
 
 ns = api.namespace('datasets', 'Dataset related operations')
-search_parser = api.search_parser(DatasetSearch)
+search_parser = DatasetSearch.as_request_parser()
 community_parser = api.parser()
 community_parser.add_argument(
     'sort', type=str, default='-created', location='args',
@@ -92,7 +92,8 @@ class DatasetListAPI(API):
     @api.marshal_with(dataset_page_fields)
     def get(self):
         '''List or search all datasets'''
-        return search.query(DatasetSearch, **multi_to_dict(request.args))
+        search_parser.parse_args()
+        return search.query(Dataset, **multi_to_dict(request.args))
 
     @api.secure
     @api.doc('create_dataset', responses={400: 'Validation error'})

@@ -4,56 +4,42 @@ from __future__ import unicode_literals
 import itertools
 import logging
 
-from flask import current_app
-from mongoengine.signals import post_save
+from elasticsearch_dsl import DocType, Integer, Float, Object
+from flask_restplus.reqparse import RequestParser
 
-from udata.search import adapter_catalog, reindex
+from udata.search import i18n_analyzer, fields
+from udata.search.query import SearchQuery
 from udata.core.metrics import Metric
 
 log = logging.getLogger(__name__)
 
 
-def reindex_model_on_save(sender, document, **kwargs):
-    '''(Re/Un)Index Mongo document on post_save'''
-    if current_app.config.get('AUTO_INDEX'):
-        reindex.delay(document)
-
-
-class SearchAdapterMetaClass(type):
-    '''Ensure any child class dispatch the signals'''
-    def __new__(cls, name, bases, attrs):
-        # Ensure any child class dispatch the signals
-        adapter = super(SearchAdapterMetaClass, cls).__new__(
-            cls, name, bases, attrs)
-        # register the class in the catalog
-        if adapter.model and adapter.model not in adapter_catalog:
-            adapter_catalog[adapter.model] = adapter
-            # Automatically reindex objects on save
-            post_save.connect(reindex_model_on_save, sender=adapter.model)
-        return adapter
-
-
-class ModelSearchAdapter(object):
+class ModelSearchAdapter(DocType):
     """This class allow to describe and customize the search behavior."""
-    model = None
-    analyzer = None
-    fields = None
+    analyzer = i18n_analyzer
+    boosters = None
     facets = None
-    sorts = None
-    filters = None
-    mapping = None
-    match_type = 'cross_fields'
+    fields = None
     fuzzy = False
-
-    __metaclass__ = SearchAdapterMetaClass
+    match_type = 'cross_fields'
+    model = None
+    sorts = None
 
     @classmethod
     def doc_type(cls):
-        return cls.model.__name__
+        return cls._doc_type.name
 
     @classmethod
     def is_indexable(cls, document):
         return True
+
+    @classmethod
+    def from_model(cls, document):
+        """By default use the ``to_dict`` method
+
+        and exclude ``_id``, ``_cls`` and ``owner`` fields
+        """
+        return cls(meta={'id': document.id}, **cls.serialize(document))
 
     @classmethod
     def serialize(cls, document):
@@ -72,19 +58,78 @@ class ModelSearchAdapter(object):
         ]))
         return list(set([value] + tokens + [' '.join(tokens)]))
 
+    @classmethod
+    def facet_search(cls, *facets):
+        '''
+        Build a FacetSearch for a given list of facets
+
+        Elasticsearch DSL doesn't allow to list facets
+        once and for all and then later select them.
+        They are always all requested
+
+        As we don't use them every time and facet computation
+        can take some time, we build the FacetedSearch
+        dynamically with only those requested.
+        '''
+        f = dict((k, v) for k, v in cls.facets.items() if k in facets)
+
+        class TempSearch(SearchQuery):
+            adapter = cls
+            analyzer = cls.analyzer
+            boosters = cls.boosters
+            doc_types = cls
+            facets = f
+            fields = cls.fields
+            fuzzy = cls.fuzzy
+            match_type = cls.match_type
+            model = cls.model
+
+        return TempSearch
+
+    @classmethod
+    def exists(cls, id, **kwargs):
+        return cls.get(id, ignore=404, **kwargs)
+
+    @classmethod
+    def as_request_parser(cls, paginate=True):
+        parser = RequestParser()
+        # q parameter
+        parser.add_argument('q', type=str, location='args',
+                            help='The search query')
+        # Expected facets
+        # (ie. I want all facets or I want both tags and licenses facets)
+        facets = cls.facets.keys()
+        if facets:
+            parser.add_argument('facets', type=str, location='args',
+                                choices=['all'] + facets, action='append',
+                                help='Selected facets to fetch')
+        # Add facets filters arguments
+        # (apply a value to a facet ie. tag=value)
+        for name, facet in cls.facets.items():
+            kwargs = facet.as_request_parser_kwargs()
+            parser.add_argument(name, location='args', **kwargs)
+        # Sort arguments
+        keys = cls.sorts.keys()
+        choices = keys + ['-' + k for k in keys]
+        help_msg = 'The field (and direction) on which sorting apply'
+        parser.add_argument('sort', type=str, location='args', choices=choices,
+                            help=help_msg)
+        if paginate:
+            parser.add_argument('page', type=int, location='args',
+                                default=0, help='The page to display')
+            parser.add_argument('page_size', type=int, location='args',
+                                default=20, help='The page size')
+        return parser
+
 
 metrics_types = {
-    int: 'integer',
-    float: 'float',
+    int: Integer,
+    float: Float,
 }
 
 
-def metrics_mapping(cls):
-    mapping = {
-        'type': 'object',
-        'properties': {}
-    }
+def metrics_mapping_for(cls):
+    props = {}
     for name, metric in Metric.get_for(cls).items():
-        mapping['properties'][metric.name] = {
-            'type': metrics_types[metric.value_type]}
-    return mapping
+        props[metric.name] = metrics_types[metric.value_type]()
+    return Object(properties=props)

@@ -18,7 +18,7 @@ $ git clone https://github.com/opendatateam/udata.git
 
 ## MongoDB, ElasticSearch and Redis
 
-The project depends on [MongoDB][] 3.2+, [ElasticSearch][] 2.3 and [Redis][].
+The project depends on [MongoDB][] 3.2+, [ElasticSearch][] 2.4 and [Redis][].
 
 Installing these dependencies can be cumbersome given you operating system.
 That's why we made a Docker container to ease that step.
@@ -58,14 +58,14 @@ $ docker-compose restart search
 It will depend on your configuration, join us on [Gitter][] if you have any issue.
 
 !!! note
-    Match the Analysis ICU plugin version to your ElasticSearch version (2.3)
+    Match the Analysis ICU plugin version to your ElasticSearch version (2.4)
     given those indicated in [the official repository][analysis-icu]
 
 For example if you are using [Homebrew][] (OSX):
 
 ```shell
 $ brew install elasticsearch
-$ /usr/local/Cellar/elasticsearch/2.3.1/libexec/bin/plugin install analysis-icu
+$ /usr/local/Cellar/elasticsearch/2.4.1/libexec/bin/plugin install analysis-icu
 ```
 
 Once all dependencies are installed by hand, you can launch these services manually or use [Honcho][] with the proposed Procfile at the root of the repository (you'll have to uncomment related lines).

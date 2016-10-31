@@ -40,7 +40,7 @@ class UrlFor(String):
 
 class NextPageUrl(String):
     def output(self, key, obj):
-        if not getattr(obj, 'has_next'):
+        if not getattr(obj, 'has_next', None):
             return None
         args = request.args.copy()
         args.update(request.view_args)
@@ -50,7 +50,7 @@ class NextPageUrl(String):
 
 class PreviousPageUrl(String):
     def output(self, key, obj):
-        if not getattr(obj, 'has_prev'):
+        if not getattr(obj, 'has_prev', None):
             return None
         args = request.args.copy()
         args.update(request.view_args)

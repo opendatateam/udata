@@ -47,18 +47,6 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(response.json['data']), len(datasets))
         self.assertFalse('quality' in response.json['data'][0])
 
-    def test_dataset_api_list_with_extra_filter(self):
-        '''It should fetch a dataset list from the API filtering on extras'''
-        with self.autoindex():
-            for i in range(2):
-                DatasetFactory(resources=[ResourceFactory()],
-                               extras={'key': i})
-
-        response = self.get(url_for('api.datasets', **{'extra.key': 1}))
-        self.assert200(response)
-        self.assertEqual(len(response.json['data']), 1)
-        self.assertEqual(response.json['data'][0]['extras']['key'], 1)
-
     def test_dataset_api_list_with_facets(self):
         '''It should fetch a dataset list from the API with facets'''
         with self.autoindex():
@@ -337,7 +325,7 @@ class DatasetAPITest(APITestCase):
         '''It should delete a dataset from the API'''
         user = self.login()
         with self.autoindex():
-            dataset = DatasetFactory(owner=user, resources=[ResourceFactory()])
+            dataset = VisibleDatasetFactory(owner=user)
             response = self.delete(url_for('api.dataset', dataset=dataset))
 
         self.assertStatus(response, 204)
