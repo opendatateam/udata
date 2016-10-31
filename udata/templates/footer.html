@@ -1,9 +1,16 @@
+{# Cache footer for 24h #}
+{% cache 86400, 'footer', udata_version() %}
 <footer>
   <div class="container">
     <div class="row">
       <div class="col-lg-12">
-        <p>Copyright &copy; Company 2015</p>
+        <p>
+          <a href="https://github.com/opendatateam/udata/">UData</a>
+          <a href="https://udata.readthedocs.io/en/latest/changelog/">v{{ udata_version() }}</a>
+          - Copyright &copy; Opendata Team {{ now()|dateformat(format='yyyy') }}
+        </p>
       </div>
     </div>
   </div>
 </footer>
+{% endcache %}

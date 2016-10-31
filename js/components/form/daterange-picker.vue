@@ -15,25 +15,25 @@
         v-el:start-input :placeholder="_('Start')"
         @focus="onFocus"
         :required="required"
-        :value="start_value"
+        :value="start_value|dt date_format ''"
         :readonly="readonly">
     <span class="input-group-addon">{{ _('to') }}</span>
     <input type="text" class="input-sm form-control"
         v-el:end-input :placeholder="_('End')"
         @focus="onFocus"
         :required="required"
-        :value="end_value"
+        :value="end_value|dt date_format ''"
         :readonly="readonly">
     <div class="dropdown-menu dropdown-menu-right">
         <calendar :selected="current_value"></calendar>
     </div>
     <input type="hidden" v-el:start-hidden
-        :id="field.id + '-start'"
-        :name="field.id + '-start'"
+        :id="field.id + '.start'"
+        :name="field.id + '.start'"
         :value="start_value"></input>
     <input type="hidden" v-el:end-hidden
-        :id="field.id + '-end'"
-        :name="field.id + '-end'"
+        :id="field.id + '.end'"
+        :name="field.id + '.end'"
         :value="end_value"></input>
 </div>
 </template>
@@ -73,11 +73,14 @@ export default {
             if (this.hiddenField) {
                 return this.hiddenField.value;
             }
+        },
+        date_format() {
+            return this.field.format || DEFAULT_FORMAT;
         }
     },
     events: {
         'calendar:date:selected': function(date) {
-            this.pickedField.value = date.format(this.field.format || DEFAULT_FORMAT);
+            this.pickedField.value = date.format(this.date_format);
             this.hiddenField.value = date.format(ISO_FORMAT);
             this.picking = false;
             return true;
