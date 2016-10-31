@@ -19,8 +19,8 @@ log = logging.getLogger(__name__)
 
 m = submanager(
     'db',
-    help='Databse related operations',
-    description='Handle all databse related operations and maintenance'
+    help='Database related operations',
+    description='Handle all database related operations and maintenance'
 )
 
 # A migration script wrapper recording the stdout lines

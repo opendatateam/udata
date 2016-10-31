@@ -1,3 +1,0 @@
--r install.pip
--r test.pip
-coveralls
