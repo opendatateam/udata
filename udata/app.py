@@ -110,11 +110,16 @@ class UDataJsonEncoder(json.JSONEncoder):
             return str(obj)
         elif isinstance(obj, datetime.datetime):
             return obj.isoformat()
+        elif hasattr(obj, 'to_dict'):
+            return obj.to_dict()
         elif hasattr(obj, 'serialize'):
             return obj.serialize()
         # Serialize Raw data for Document and EmbeddedDocument.
         elif hasattr(obj, '_data'):
             return obj._data
+        # Serialize raw data from Elasticsearch DSL AttrList
+        elif hasattr(obj, '_l_'):
+            return obj._l_
         return super(UDataJsonEncoder, self).default(obj)
 
 

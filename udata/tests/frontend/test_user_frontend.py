@@ -44,7 +44,8 @@ class UserBlueprintTest(FrontTestCase):
             self.assertIn(user.id, rendered_ids)
 
     def test_render_list_empty(self):
-        '''It should render the dataset list page event if empty'''
+        '''It should render the user list page even if empty'''
+        self.init_search()
         response = self.get(url_for('users.list'))
         self.assert200(response)
 

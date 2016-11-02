@@ -15,7 +15,7 @@
         @focus="onFocus"
         :placeholder="placeholder"
         :required="required"
-        :value="value|dateFormatted"
+        :value="value|dt date_format ''"
         :readonly="readonly"></input>
     <div class="dropdown-menu dropdown-menu-right">
         <calendar :selected="value"></calendar>
@@ -51,17 +51,14 @@ export default {
             picking: false,
         };
     },
-    filters: {
-        dateFormatted(value) {
-            // Will default to current day if value is null or empty.
-            return value
-                   ? moment(value).format(this.field.format || DEFAULT_FORMAT)
-                   : '';
+    computed: {
+        date_format() {
+            return this.field.format || DEFAULT_FORMAT;
         }
     },
     events: {
         'calendar:date:selected': function(date) {
-            this.$els.input.value = date.format(this.field.format || DEFAULT_FORMAT);
+            this.$els.input.value = date.format(this.date_format);
             this.$els.hidden.value = date.format(ISO_FORMAT);
             this.picking = false;
             return true;

@@ -92,6 +92,10 @@ class ToBoolTest(unittest.TestCase):
         self.assertEqual(to_bool('False'), False)
         self.assertEqual(to_bool('false'), False)
         self.assertEqual(to_bool('bla'), False)
+        self.assertEqual(to_bool('T'), True)
+        self.assertEqual(to_bool('F'), False)
+        self.assertEqual(to_bool('t'), True)
+        self.assertEqual(to_bool('f'), False)
 
     def test_int_values(self):
         self.assertEqual(to_bool(0), False)

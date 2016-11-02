@@ -48,6 +48,7 @@ class DatasetBlueprintTest(FrontTestCase):
 
     def test_render_list_empty(self):
         '''It should render the dataset list page event if empty'''
+        self.init_search()
         response = self.get(url_for('datasets.list'))
         self.assert200(response)
 
