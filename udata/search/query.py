@@ -32,7 +32,14 @@ class SearchQuery(FacetedSearch):
         self.extract_sort(params)
         self.extract_pagination(params)
         q = params.pop('q', '')
+
+        params = self.clean_parameters(params)
+
         super(SearchQuery, self).__init__(q, params)
+
+    def clean_parameters(self, params):
+        '''Only keep known parameters'''
+        return {k: v for k, v in params.items() if k in self.adapter.facets}
 
     def extract_sort(self, params):
         '''Extract and build sort query from parameters'''

@@ -197,6 +197,11 @@ class SearchQueryTest(SearchTestMixin, SearchTestCase):
             {'description.raw': 'asc'},
         ])
 
+    def test_ignore_unkown_parameters(self):
+        '''Should ignore unknown parameters'''
+        # Should not raise any exception
+        search.search_for(FakeSearch, unknown='whatever')
+
     def test_custom_scoring(self):
         '''Search should handle field boosting'''
         class FakeBoostedSearch(FakeSearch):
