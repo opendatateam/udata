@@ -204,7 +204,7 @@ class SpecificUrlsTest(FrontTestCase):
         self.assert_template_used('faq/system-integrator.html')
 
     def test_terms(self):
-        response = self.client.get(url_for('gouvfr.terms'))
+        response = self.client.get(url_for('site.terms'))
         self.assert200(response)
 
     def test_credits(self):
