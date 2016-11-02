@@ -1,0 +1,3 @@
+https://github.com/etalab/udata/tarball/master
+-r https://raw.githubusercontent.com/opendatateam/udata/master/requirements/test.pip
+invoke>=0.13

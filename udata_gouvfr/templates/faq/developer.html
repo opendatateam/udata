@@ -1,5 +1,11 @@
 {% extends theme('faq/base.html') %}
 
+{% set meta = {
+    'title': _('Découvrir l’OpenData en tant que développeur - FAQ'),
+    'description': _('Questions fréquemment posées sur la plateforme data.gouv.fr'),
+    'keywords': ['Développeur', 'OpenData', 'FAQ', 'Questions fréquemment posées'],
+} %}
+
 {% block faq_content %}
 <h1>Découvrir l’OpenData en tant que développeur</h1>
 
@@ -8,11 +14,10 @@
     <li><a href="#api">les informations relatives à l’API</a></li>
     <li><a href="#harvesting">le moissonnage des dépôts de données ouvertes</a></li>
     <li><a href="#source">le code source de la plateforme</a></li>
-    <li><a href="#embed">l’intégration de cartes sur votre site</a></li>
 </ul>
 
 <h2 id="api">Informations relatives à l’API</h2>
-<p>Le site Data.gouv.fr propose différents moyen d'accéder au catalogue des données :
+<p>Le site « data.gouv.fr » propose différents moyen d'accéder au catalogue des données :
 </p>
 <ul><li> une <a href="{{ url_for('api.root') }}">API complète</a>, documentée avec Swagger</li>
 <li> des dumps au format CSV, mis à jour en temps réel
@@ -26,7 +31,7 @@
 <p>L'intégralité des opérations réalisables depuis le site via votre navigateur peuvent être automatisées (publication d'un jeu de données, création d'organisations, etc). Veuillez consulter <a href="{{ url_for('api.root') }}" title="Accéder à la documentation d'API">la documentation dédiée</a> pour y accéder.</p>
 
 <h2 id="harvesting">Moissonnage des dépôts de données ouvertes</h2>
-<p>Data.gouv.fr met à disposition une infrastructure de moissonnage, permettant d’être automatiquement intégrée sur la plateforme. Il est ainsi possible d’écrire son propre moissonneur en s’inspirant du <a href="https://github.com/etalab/udata/tree/master/udata/harvest/backends">code des moissonneurs existants</a>, fournis en Open Source (comme tout le reste du site data.gouv.fr, distribué sous le nom <a href="https://github.com/etalab/udata">uData</a>).</p>
+<p>« data.gouv.fr » met à disposition une infrastructure de moissonnage, permettant d’être automatiquement intégrée sur la plateforme. Il est ainsi possible d’écrire son propre moissonneur en s’inspirant du <a href="https://github.com/opendatateam/udata/tree/master/udata/harvest/backends">code des moissonneurs existants</a>, fournis en Open Source (comme tout le reste du site « data.gouv.fr », distribué sous le nom <a href="https://github.com/opendatateam/udata">uData</a>).</p>
 <p>Aujourd'hui, les moissoneurs suivants sont disponibles :
 <ul>
     <li>CKAN <i>(générique)</i></li>
@@ -34,10 +39,10 @@
     <li>maaf <i>(spécifique Ministère de l'Agriculture, de l'Agroalimentaire et de la Forêt)</i></li>
 </ul>
 </p>
-<p>Le moissonnage n’est pas le seul moyen de synchroniser des données avec data.gouv.fr, il est possible (voir recommandé) d’utiliser <a href="#api">l’API</a> pour pousser ses données.</p>
+<p>Le moissonnage n’est pas le seul moyen de synchroniser des données avec « data.gouv.fr », il est possible (voir recommandé) d’utiliser <a href="#api">l’API</a> pour pousser ses données.</p>
 
 <h2 id="source">Le code source de la plateforme</h2>
-<p>L’intégralité du code de la plateforme est <a href="https://github.com/etalab/udata/">gratuitement disponible en Open-Source</a> sous <a href="https://www.gnu.org/licenses/agpl-3.0.html">licence AGPL3</a>. Cet outil a été développé de façon modulaire pour permettre à tout un chacun de l’installer et de le personnaliser pour son usage propre en marque blanche. Nous avons par exemple développé les modules <a href="https://github.com/etalab/udata-gouvfr">udata-gouvfr</a> pour le rendu et <a href="https://github.com/etalab/udata-piwik">udata-piwik</a> pour les statistiques.</p><p>Vous pouvez contribuer en suivant la <a href="http://udata.readthedocs.org/en/latest/">documentation dédiée</a> et en proposant des <a href="https://github.com/etalab/udata/pulls">pull-requests</a>.</p>
+<p>L’intégralité du code de la plateforme est <a href="https://github.com/opendatateam/udata/">gratuitement disponible en Open-Source</a> sous <a href="https://www.gnu.org/licenses/agpl-3.0.html">licence AGPL3</a>. Cet outil a été développé de façon modulaire pour permettre à tout un chacun de l’installer et de le personnaliser pour son usage propre en marque blanche. Nous avons par exemple développé les modules <a href="https://github.com/etalab/udata-gouvfr">udata-gouvfr</a> pour le rendu et <a href="https://github.com/opendatateam/udata-piwik">udata-piwik</a> pour les statistiques.</p><p>Vous pouvez contribuer en suivant la <a href="http://udata.readthedocs.org/en/latest/">documentation dédiée</a> et en proposant des <a href="https://github.com/opendatateam/udata/pulls">pull-requests</a>.</p>
 
 <h2 id="embed">Intégrer des cartes sur vos propres sites</h2>
 <p>

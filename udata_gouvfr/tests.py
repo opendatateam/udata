@@ -24,7 +24,7 @@ from udata.tests.features.territories.test_territories_process import (
 
 from .models import (
     DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE,
-    TERRITORY_DATASETS
+    TERRITORY_DATASETS, OPENFIELD16
 )
 from .views import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
 from .metrics import PublicServicesMetric
@@ -70,6 +70,7 @@ class GouvFrThemeTest(FrontTestCase):
 
     def test_render_search_no_data(self):
         '''It should render the search page without data'''
+        self.init_search()
         response = self.get(url_for('front.search'))
         self.assert200(response)
 
@@ -197,6 +198,16 @@ class SpecificUrlsTest(FrontTestCase):
         self.assert200(response)
         self.assert_template_used('faq/developer.html')
 
+    def test_third_party_faq(self):
+        response = self.client.get(
+            url_for('gouvfr.faq', section='system-integrator'))
+        self.assert200(response)
+        self.assert_template_used('faq/system-integrator.html')
+
+    def test_terms(self):
+        response = self.client.get(url_for('site.terms'))
+        self.assert200(response)
+
     def test_credits(self):
         response = self.client.get(url_for('gouvfr.credits'))
         self.assert200(response)
@@ -242,6 +253,21 @@ class C3Test(FrontTestCase):
 
     def test_render_c3_without_data(self):
         response = self.client.get(url_for('gouvfr.climate_change_challenge'))
+        self.assert200(response)
+
+
+class OpenField16Test(FrontTestCase):
+    settings = GouvFrSettings
+
+    def test_render_without_data(self):
+        response = self.client.get(url_for('gouvfr.openfield16'))
+        self.assert200(response)
+
+    def test_render_with_data(self):
+        for i in range(3):
+            badge = Badge(kind=OPENFIELD16)
+            VisibleDatasetFactory(badges=[badge])
+        response = self.client.get(url_for('gouvfr.openfield16'))
         self.assert200(response)
 
 
@@ -550,9 +576,10 @@ class SitemapTest(FrontTestCase):
             url_for('gouvfr.redevances_redirect', _external=True),
             url_for('gouvfr.faq_redirect', _external=True),
         ]
-        for section in ('citizen', 'producer', 'reuser', 'developer'):
+        for section in ('citizen', 'producer', 'reuser', 'developer',
+                        'system-integrator'):
             urls.append(url_for('gouvfr.faq_redirect',
-                                section='citizen', _external=True))
+                                section=section, _external=True))
 
         for url in urls:
             self.assertIn('<loc>{url}</loc>'.format(url=url), response.data)

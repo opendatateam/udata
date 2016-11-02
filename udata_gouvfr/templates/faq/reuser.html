@@ -1,5 +1,11 @@
 {% extends theme('faq/base.html') %}
 
+{% set meta = {
+    'title': _('Découvrir l’OpenData en tant que réutilisateur - FAQ'),
+    'description': _('Questions fréquemment posées sur la plateforme data.gouv.fr'),
+    'keywords': ['Réutilisateur', 'OpenData', 'FAQ', 'Questions fréquemment posées'],
+} %}
+
 {% block faq_content %}
 <h1>Découvrir l’OpenData en tant que réutilisateur</h1>
 
@@ -8,12 +14,12 @@
     <li><a href="#transform">la transformation des données</a></li>
     <li><a href="#dataviz">les outils pour les datavisualisations</a></li>
     <li><a href="#opendatacamps">l'explication des OpenDataCamps</a></li>
-    
+
 </ul>
 
 <h2>Qu'est ce qu'une réutilisation des données publiques ?</h2>
-<p>Depuis 2005, la loi relative à la liberté d'accès aux documents administratifs et à la réutilisation des informations publiques, prévoit la possibilité de réutiliser les informations publiques à d’autres fins que celles pour lesquelles elles sont détenues ou élaborées. 
-Si leur obtention occasionne un coût pour l’administration (recherche, traitement automatisé...), ou si elle souhaite obtenir une rémunération de ses droits de propriété intellectuelle, celle-ci peut demander le paiement d’une redevance après avoir conclu une licence de réutilisation (préalable obligatoire). 
+<p>Depuis 2005, la loi relative à la liberté d'accès aux documents administratifs et à la réutilisation des informations publiques, prévoit la possibilité de réutiliser les informations publiques à d’autres fins que celles pour lesquelles elles sont détenues ou élaborées.
+Si leur obtention occasionne un coût pour l’administration (recherche, traitement automatisé...), ou si elle souhaite obtenir une rémunération de ses droits de propriété intellectuelle, celle-ci peut demander le paiement d’une redevance après avoir conclu une licence de réutilisation (préalable obligatoire).
 </p>
 <p>En conformité au principe général de réutilisation libre, facile et gratuite fixé par les circulaires du Premier ministre du 26 mai 2011 et du 13 septembre 2013 relatives à l’ouverture des données publiques, Etalab est engagée à promouvoir la réutilisation des données publiques ouvertes par le biais d’actions spécifiques.
 </p>
@@ -23,7 +29,7 @@ Si leur obtention occasionne un coût pour l’administration (recherche, traite
     <li>La plateforme « data.gouv.fr » qui héberge <a href="https://www.data.gouv.fr/fr/reuses/">1299</a> réutilisations</li>
 </ul>
 <h3>L’intérêt de réutiliser des données publiques ouvertes</h3>
-<p>La diversité des champs d’application de la politique d’ouverture des données est assez large. En réutilisant des jeux de données publiques, tout le monde peut créer des applications, des services ou des visualisations de données interactives. Ces réutilisations permettent, par exemple, d’améliorer l’action d’un service public ou de résoudre un problème. 
+<p>La diversité des champs d’application de la politique d’ouverture des données est assez large. En réutilisant des jeux de données publiques, tout le monde peut créer des applications, des services ou des visualisations de données interactives. Ces réutilisations permettent, par exemple, d’améliorer l’action d’un service public ou de résoudre un problème.
 </p>
 <p>Exemples :</p>
 <ul>
@@ -32,7 +38,7 @@ Si leur obtention occasionne un coût pour l’administration (recherche, traite
     <li><strong>City</strong> est un projet de représentation de la ville en 3D sur le Web. Les applications sont multiples: permettre de communiquer le plan local d'urbanisme aux citoyens, cartographier les sous-sols pour faire des travaux plus efficaces, représenter les transports publics en temps réel, proposer une modification de sa maison... Les modèles 3D urbains existent mais nécessitent des logiciels propriétaires et de grosses ressources. Le projet prouve qu'il est possible de mettre à disposition toute une métropole (ici la communauté urbaine de Bordeaux) à disposition dans le navigateur (Chrome, pour l'instant).</li>
 </ul>
 <h3>Le format des réutilisations sur « data.gouv.fr »</h3>
-<p>Les réutilisations publiées sur « data.gouv.fr » peuvent être des fichiers téléchargées directement (cartes, tableaux, graphiques, etc) sur le site web ou des liens qui redirigent le visiteur à voir la réutilisation (vers le site web de start-ups, l’AppStore, GooglePlay, etc).  
+<p>Les réutilisations publiées sur « data.gouv.fr » peuvent être des fichiers téléchargées directement (cartes, tableaux, graphiques, etc) sur le site web ou des liens qui redirigent le visiteur à voir la réutilisation (vers le site web de start-ups, l’AppStore, GooglePlay, etc).
 </p>
 
 <h2 id="transform">Comment transformer les données ?</h2>
@@ -46,11 +52,14 @@ Si leur obtention occasionne un coût pour l’administration (recherche, traite
 <p>Il existe des tableurs en ligne qui permettent un travail collaboratif sur une seule et unique base de données. Notons notamment ces outils gratuits : <a rel="nofollow" class="external text" href="http://framacalc.org/_start">Framasoft</a>, <a rel="nofollow" class="external text" href="http://docs.google.com/?hl=fr">Google Docs</a> ou <a rel="nofollow" class="external text" href="https://www.zoho.com/docs/">Zoho Docs</a>. Une fois votre travail terminé, vous pouvez l'exporter dans un fichier tableur classique, ou simplement utiliser son URL, en veillant à limiter les droits d'édition à vous seul.
 </p>
 <h3>Géocoder des adresses</h3>
-<p>L'IGN propose un <a rel="nofollow" class="external text" href="http://logiciels.ign.fr/?-Visualiseur-d-adresses-">logiciel Windows gratuit</a> permettant de visualiser des données adresse, de les géocoder avec une précision à la plaque adresse grâce à la <a rel="nofollow" class="external text" href="http://professionnels.ign.fr/bdadresse">BD Adresse</a>. Le résultat peut être imprimé ou exporté au format kml pour une exploitation dans de nombreux outils de visualisation.
-</p><p>Les conditions d'utilisation sont adaptées à l'exploitation des données de data.gouv.fr puisque le résultat du géocodage de fichiers est librement réutilisable dès lors que les fichiers résultants sont republiés sous <a rel="nofollow" class="external text" href="http://wiki.data.gouv.fr/wiki/Licence_Ouverte_/_Open_Licence">Licence ouverte</a>.
+<p>La Base Adresse Nationale (BAN) propose un outil permettant de géocoder rapidement des données au format CSV.</p>
+<p><a rel="nofollow" class="external text" href="http://adresse.data.gouv.fr/csv/">Le formulaire disponible en ligne</a> permet d'envoyer un fichier pour géocodage avec une limite d'approximativement 10000 adresses maximum.</p>
+<p>Une API publique permet de géocoder les adresses une à une ou en lot (<a rel="nofollow" class="external text" href="http://adresse.data.gouv.fr/api/">voir documentation de l'API</a>).</p>
+<p>L'IGN propose par ailleurs un <a rel="nofollow" class="external text" href="http://logiciels.ign.fr/?-Visualiseur-d-adresses-">logiciel Windows gratuit</a> permettant de visualiser des données adresse, de les géocoder avec une précision à la plaque adresse grâce à la <a rel="nofollow" class="external text" href="http://professionnels.ign.fr/bdadresse">BD Adresse</a>. Le résultat peut être imprimé ou exporté au format kml pour une exploitation dans de nombreux outils de visualisation.
+</p><p>Les conditions d'utilisation sont adaptées à l'exploitation des données de « data.gouv.fr » puisque le résultat du géocodage de fichiers est librement réutilisable dès lors que les fichiers résultants sont republiés sous <a rel="nofollow" class="external text" href="http://wiki.data.gouv.fr/wiki/Licence_Ouverte_/_Open_Licence">Licence ouverte</a>.
 </p>
 <h3>Transformer des données géographiques en fichiers texte ou kml</h3>
-<p>L'IGN propose <a rel="nofollow" class="external text" href="http://logiciels.ign.fr/?-IGNMap,12-">IGN Map</a>, un logiciel gratuit permettant de visualiser des fichiers disponibles dans l'un des nombreux formats géographiques proposés sur data.gouv.fr. Pour traiter un fichier shapefile (.shp), il faut choisir Fichier/Importer/Import d'un fichier Shapefile. Pour un flux WMS, il faut choisir Fichier/Importer/Connexion WMS.
+<p>L'IGN propose <a rel="nofollow" class="external text" href="http://logiciels.ign.fr/?-IGNMap,12-">IGN Map</a>, un logiciel gratuit permettant de visualiser des fichiers disponibles dans l'un des nombreux formats géographiques proposés sur « data.gouv.fr ». Pour traiter un fichier shapefile (.shp), il faut choisir Fichier/Importer/Import d'un fichier Shapefile. Pour un flux WMS, il faut choisir Fichier/Importer/Connexion WMS.
 </p><p>Les fichiers, une fois ouverts, peuvent être inspectés, prévisualisés et exportés au format kml en vue d'être facilement exploités dans des outils de visualisation. IGN Map assure également la reprojection des données depuis des projections telles que le Lambert-93 vers des latitudes et longitudes.
 </p>
 <h3>Transcoder des codes postaux en codes INSEE</h3>
@@ -197,7 +206,7 @@ Ensuite, téléchargez une archive des fichiers générés dans votre <a rel="no
 </p>
 
 <h2 id="opendatacamps">Qu'est-ce qu'un Open Data Camps ?</h2>
-<p>Des passionnés de la donnée se retrouvent une journée entière pour améliorer les données de la plate-forme data.gouv.fr, c’est à dire les mettre en formats ouverts, fusionner des fichiers, détecter des erreurs, produire des visualisations et de nouvelles interprétations. Les travaux engagés aboutiront sur des résultats concrets, donc réalisables et démontrables sur la plate-forme à la fin de la journée.
+<p>Des passionnés de la donnée se retrouvent une journée entière pour améliorer les données de la plate-forme « data.gouv.fr », c’est à dire les mettre en formats ouverts, fusionner des fichiers, détecter des erreurs, produire des visualisations et de nouvelles interprétations. Les travaux engagés aboutiront sur des résultats concrets, donc réalisables et démontrables sur la plate-forme à la fin de la journée.
 </p><p>Vous êtes les acteurs de cette journée : producteurs de données issus de l'administration, datascientists, chercheurs, codeurs, designers, associations, experts du réseau Etalab, et toutes sortes de bonnes volontés travailleront ensemble dans des ateliers qu’ils auront choisis. Si vous possédez un ordinateur portable, n’oubliez pas de venir avec !
 </p>
 <h3>Règles du jeu</h3>
