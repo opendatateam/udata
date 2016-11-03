@@ -62,7 +62,7 @@ export default {
                 label: this._('Roles'),
                 key: 'roles',
                 align: 'center',
-                type: 'metric',
+                type: 'label',
                 width: 95
             }]
         };
