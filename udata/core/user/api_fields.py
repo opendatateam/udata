@@ -102,3 +102,8 @@ notifications_fields = api.model('Notification', {
         description='Key-Value details depending on notification type',
         readonly=True)
 })
+
+
+user_role_fields = api.model('UserRole', {
+    'name': fields.String(description='The role name', readonly=True),
+})

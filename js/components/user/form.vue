@@ -3,6 +3,7 @@
 </template>
 
 <script>
+import roles from 'models/roles';
 import User from 'models/user';
 
 export default {
@@ -39,11 +40,9 @@ export default {
                     label: this._('Roles'),
                     widget: 'select-input',
                     multiple: true,
-                    values: [{id: 'admin', name: 'admin'},
-                             {id: 'editor', name: 'editor'},
-                             {id: 'moderator', name: 'moderator'}],
+                    values: roles,
                     map: function(item) {
-                        return {value: item.id, text: item.name};
+                        return {value: item.name};
                     },
                 },
                 {

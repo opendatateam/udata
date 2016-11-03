@@ -24,6 +24,7 @@ from udata.core.reuse.api_fields import reuse_fields
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
 )
+from udata.core.user.models import Role
 from udata.utils import multi_to_dict
 
 from .api_fields import (
@@ -33,6 +34,7 @@ from .api_fields import (
     user_fields,
     user_page_fields,
     user_suggestion_fields,
+    user_role_fields,
 )
 from .forms import UserProfileForm
 from .permissions import UserEditPermission
@@ -331,3 +333,12 @@ class SuggestUsersAPI(API):
             }
             for opt in search.suggest(args['q'], 'user_suggest', args['size'])
         ]
+
+
+@ns.route('/roles/', endpoint='user_roles')
+class UserRolesAPI(API):
+    @api.marshal_list_with(user_role_fields)
+    @api.doc('user_roles')
+    def get(self):
+        '''List all possible user roles'''
+        return [{'name': role.name} for role in Role.objects()]
