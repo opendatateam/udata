@@ -81,20 +81,16 @@ class IntegerField(FieldHelper, fields.IntegerField):
 
 
 class RolesField(FieldHelper, fields.StringField):
-    def process_formdata(self, value):
-        if value:
-            self.data = value[0]
-
-    def pre_validate(self, form):
-        name = self.data
-        if name:
-            role = datastore.find_role(name)
-            if role is not None:
-                self.data = [role]
-            else:
-                raise validators.ValidationError(
-                    _('The role {role} does not exist').format(role=name))
-        return True
+    def process_formdata(self, valuelist):
+        self.data = []
+        if valuelist:
+            for name in valuelist:
+                role = datastore.find_role(name)
+                if role is not None:
+                    self.data.append(role)
+                else:
+                    raise validators.ValidationError(
+                        _('The role {role} does not exist').format(role=name))
 
 
 class DateTimeField(Field, fields.DateTimeField):

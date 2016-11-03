@@ -38,7 +38,10 @@ export default {
                     id: 'roles',
                     label: this._('Roles'),
                     widget: 'select-input',
-                    values: [{id: 'admin', name: 'admin'}],
+                    multiple: true,
+                    values: [{id: 'admin', name: 'admin'},
+                             {id: 'editor', name: 'editor'},
+                             {id: 'moderator', name: 'moderator'}],
                     map: function(item) {
                         return {value: item.id, text: item.name};
                     },

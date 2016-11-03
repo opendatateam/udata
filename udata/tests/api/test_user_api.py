@@ -225,7 +225,7 @@ class UserAPITest(APITestCase):
         user = UserFactory()
         data = user.to_dict()
         data['active'] = False
-        data['roles'] = 'admin'
+        data['roles'] = ['admin']
         response = self.put(url_for('api.user', user=user), data)
         self.assert200(response)
         response = json.loads(response.data)
@@ -237,6 +237,6 @@ class UserAPITest(APITestCase):
         self.login(AdminFactory())
         user = UserFactory()
         data = user.to_dict()
-        data['roles'] = 'non_existing_role'
+        data['roles'] = ['non_existing_role']
         response = self.put(url_for('api.user', user=user), data)
         self.assert400(response)
