@@ -36,7 +36,7 @@ from .api_fields import (
     user_suggestion_fields,
     user_role_fields,
 )
-from .forms import UserProfileForm
+from .forms import UserProfileForm, UserProfileAdminForm
 from .permissions import UserEditPermission
 from .search import UserSearch
 
@@ -228,14 +228,14 @@ class UserListAPI(API):
         search_parser.parse_args()
         return search.query(UserSearch, **multi_to_dict(request.args))
 
-    @api.secure
+    @api.secure('admin')
     @api.doc('create_user')
     @api.expect(user_fields)
     @api.marshal_with(user_fields, code=201)
     @api.response(400, 'Validation error')
     def post(self):
         '''Create a new object'''
-        form = api.validate(UserProfileForm)
+        form = api.validate(UserProfileAdminForm)
         user = form.save()
         return user, 201
 
@@ -264,7 +264,7 @@ class UserAPI(API):
             api.abort(410, 'User has been deleted')
         return user
 
-    @api.secure
+    @api.secure('admin')
     @api.doc('update_user')
     @api.expect(user_fields)
     @api.marshal_with(user_fields)
@@ -275,10 +275,10 @@ class UserAPI(API):
         if user.deleted:
             api.abort(410, 'User has been deleted')
         UserEditPermission(user).test()
-        form = api.validate(UserProfileForm, user)
+        form = api.validate(UserProfileAdminForm, user)
         return form.save()
 
-    @api.secure
+    @api.secure('admin')
     @api.doc('delete_user')
     @api.response(204, 'Object deleted')
     def delete(self, user):

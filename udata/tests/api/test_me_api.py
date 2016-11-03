@@ -35,12 +35,15 @@ class MeAPITest(APITestCase):
         '''It should update my profile from the API'''
         self.login()
         data = self.user.to_dict()
+        self.assertEqual(self.user.active, True)
         data['about'] = 'new about'
+        data['active'] = False
         response = self.put(url_for('api.me'), data)
         self.assert200(response)
         self.assertEqual(User.objects.count(), 1)
         self.user.reload()
         self.assertEqual(self.user.about, 'new about')
+        self.assertEqual(self.user.active, True)
 
     def test_my_metrics(self):
         self.login()
