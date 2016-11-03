@@ -17,7 +17,7 @@ from wtforms_json import flatten_json
 from . import widgets
 
 from udata.auth import current_user, admin_permission
-from udata.models import db, User, Organization, Dataset, Reuse
+from udata.models import db, User, Organization, Dataset, Reuse, datastore
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
@@ -78,6 +78,12 @@ class StringField(FieldHelper, EmptyNone, fields.StringField):
 
 class IntegerField(FieldHelper, fields.IntegerField):
     pass
+
+
+class RolesField(FieldHelper, fields.StringField):
+    def process_formdata(self, value):
+        if value:
+            self.data = [datastore.find_role(value[0])]
 
 
 class DateTimeField(Field, fields.DateTimeField):

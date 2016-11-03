@@ -225,6 +225,9 @@ class UserAPITest(APITestCase):
         user = UserFactory()
         data = user.to_dict()
         data['active'] = False
+        data['roles'] = 'admin'
         response = self.put(url_for('api.user', user=user), data)
         self.assert200(response)
-        self.assertEqual(json.loads(response.data)['active'], False)
+        response = json.loads(response.data)
+        self.assertEqual(response['active'], False)
+        self.assertEqual(response['roles'], ['admin'])

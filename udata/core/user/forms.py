@@ -19,4 +19,5 @@ class UserProfileForm(ModelForm):
     avatar = fields.ImageField(_('Avatar'), sizes=AVATAR_SIZES)
     website = fields.URLField(_('Website'))
     about = fields.MarkdownField(_('About'))
+    roles = fields.RolesField(_('Roles'))
     active = fields.BooleanField()
