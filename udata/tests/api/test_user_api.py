@@ -231,3 +231,12 @@ class UserAPITest(APITestCase):
         response = json.loads(response.data)
         self.assertEqual(response['active'], False)
         self.assertEqual(response['roles'], ['admin'])
+
+    def test_user_api_update_with_a_non_existing_role(self):
+        '''It should raise a 400'''
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data['roles'] = 'non_existing_role'
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert400(response)
