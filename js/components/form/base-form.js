@@ -195,11 +195,11 @@ export default {
 
             Array.prototype.map.call(elements, function(el) {
                 let value;
-                if (el.tagName.toLowerCase() === 'select' && el.multiple === true) {
+                if (el.tagName.toLowerCase() === 'select' && el.multiple) {
                     value = []
                     for (const index in el.options) {
                         let option = el.options[index]
-                        if (option.selected === true) {
+                        if (option.selected) {
                             value.push(option.value)
                         }
                     }

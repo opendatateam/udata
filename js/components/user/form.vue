@@ -33,7 +33,7 @@ export default {
                 label: this._('About'),
             },
         ]
-        if (this.$root.me.is_admin === true) {
+        if (this.$root.me.is_admin) {
             fields.push(
                 {
                     id: 'roles',
@@ -41,9 +41,7 @@ export default {
                     widget: 'select-input',
                     multiple: true,
                     values: roles,
-                    map: function(item) {
-                        return {value: item.name};
-                    },
+                    map: item => {return {value: item.name, text: item.name}},
                 },
                 {
                     id: 'active',

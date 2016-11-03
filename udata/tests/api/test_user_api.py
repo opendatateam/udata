@@ -225,11 +225,20 @@ class UserAPITest(APITestCase):
         user = UserFactory()
         data = user.to_dict()
         data['active'] = False
-        data['roles'] = ['admin']
         response = self.put(url_for('api.user', user=user), data)
         self.assert200(response)
         response = json.loads(response.data)
         self.assertEqual(response['active'], False)
+
+    def test_user_api_update_with_an_existing_role(self):
+        '''It should update a user'''
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data['roles'] = ['admin']
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert200(response)
+        response = json.loads(response.data)
         self.assertEqual(response['roles'], ['admin'])
 
     def test_user_api_update_with_a_non_existing_role(self):
