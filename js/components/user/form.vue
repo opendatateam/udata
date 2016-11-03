@@ -24,6 +24,10 @@ export default {
                 label: this._('Last name'),
             },
             {
+                id: 'website',
+                label: this._('Website'),
+            },
+            {
                 id: 'about',
                 label: this._('About'),
             },
