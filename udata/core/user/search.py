@@ -50,7 +50,6 @@ class UserSearch(ModelSearchAdapter):
         'followers': 'metrics.followers',
         'views': 'metrics.views',
         'created': 'created',
-        'roles': 'roles',
     }
     facets = {
         'organization': ModelTermsFacet(field='organizations',
