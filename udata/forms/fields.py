@@ -127,7 +127,13 @@ class FileField(FieldHelper, fields.FileField):
 
 
 class URLField(FieldHelper, EmptyNone, html5.URLField):
-    pass
+    def pre_validate(self, form):
+        if self.data:
+            try:
+                db.URLField().validate(self.data)
+            except:
+                raise validators.ValidationError(_('Invalid URL'))
+        return True
 
 
 class TmpFilename(fields.HiddenField):

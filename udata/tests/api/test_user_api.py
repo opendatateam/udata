@@ -230,6 +230,18 @@ class UserAPITest(APITestCase):
         response = json.loads(response.data)
         self.assertEqual(response['active'], False)
 
+    def test_user_api_update_with_website(self):
+        '''It should raise a 400'''
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data['website'] = 'foo'
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert400(response)
+        data['website'] = faker.url()
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert200(response)
+
     def test_user_api_update_with_a_non_admin_connected_user(self):
         '''It should raise a 403'''
         user = UserFactory()
