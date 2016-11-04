@@ -10,7 +10,7 @@ import User from 'models/user';
 import FormLayout from 'components/form-layout.vue';
 
 export default {
-    data: function() {
+    data() {
         return {user: new User()};
     },
     components: {FormLayout, UserForm},
@@ -18,10 +18,12 @@ export default {
         save() {
             let form = this.$refs.form;
             if (form.validate()) {
-                this.user.update(form.serialize(), (response) => {
-                    this.user.on_fetched(response);
-                    this.$go({name: 'user'});
-                }, form.on_error);
+                this.user.update(form.serialize(),
+                                 response => {
+                                     this.user.on_fetched(response);
+                                     this.$go({name: 'user'});
+                                 },
+                                 form.on_error);
             }
         },
         cancel() {
