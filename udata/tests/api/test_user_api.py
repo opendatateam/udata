@@ -257,3 +257,11 @@ class UserAPITest(APITestCase):
         data['roles'] = ['non_existing_role']
         response = self.put(url_for('api.user', user=user), data)
         self.assert400(response)
+
+    def test_user_roles(self):
+        '''It should list the roles'''
+        self.login(AdminFactory())
+        response = self.get(url_for('api.user_roles'))
+        self.assert200(response)
+        response = json.loads(response.data)
+        self.assertEqual(response, [{u'name': u'admin'}])
