@@ -85,7 +85,7 @@ class DatasetBlueprintTest(FrontTestCase):
         for json_ld_resource in json_ld['distribution']:
             self.assertEquals(json_ld_resource['@type'], 'DataDownload')
             self.assertEquals(json_ld_resource['@id'], str(resource.id))
-            self.assertEquals(json_ld_resource['url'], resource.url)
+            self.assertEquals(json_ld_resource['url'], resource.permalink)
             self.assertEquals(json_ld_resource['name'], resource.title)
             self.assertEquals(json_ld_resource['contentUrl'], resource.url)
             self.assertEquals(json_ld_resource['dateCreated'][:16],
@@ -161,7 +161,6 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_resource_permalink_404(self):
         '''It should return 404 if resource does not exists'''
         resource = ResourceFactory()
-        dataset = DatasetFactory()
         response = self.get(url_for('datasets.resource',
                                     id=resource.id))
         self.assert404(response)
