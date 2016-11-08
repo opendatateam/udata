@@ -157,7 +157,7 @@ class ResourceMixin(object):
         result = {
             '@type': 'DataDownload',
             '@id': str(self.id),
-            'url': self.url,
+            'url': url_for('datasets.resource', id=self.id, _external=True),
             'name': self.title or _('Nameless resource'),
             'contentUrl': self.url,
             'dateCreated': self.created_at.isoformat(),

@@ -7,6 +7,8 @@
 
         <dl class="dl-horizontal dl-wide">
           <dt>{{ _('URL') }}</dt>
+          <dd><a :href="resource.contentUrl" @click="onClick">{{resource.contentUrl}}</a></dd>
+          <dt>{{ _('Permalink') }}</dt>
           <dd><a :href="resource.url" @click="onClick">{{resource.url}}</a></dd>
           <dt v-if="resource.encodingFormat">{{ _('Format') }}</dt>
           <dd v-if="resource.encodingFormat">{{resource.encodingFormat}}</dd>
