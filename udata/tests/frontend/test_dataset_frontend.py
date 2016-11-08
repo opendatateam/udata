@@ -7,9 +7,9 @@ import feedparser
 
 from flask import url_for
 
-from udata.core.dataset.factories import (ResourceFactory,
-                                          DatasetFactory,
-                                          LicenseFactory)
+from udata.core.dataset.factories import (
+    ResourceFactory, DatasetFactory, LicenseFactory, CommunityResourceFactory
+)
 from udata.core.user.factories import UserFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.models import Follow
@@ -146,7 +146,14 @@ class DatasetBlueprintTest(FrontTestCase):
         resource = ResourceFactory()
         dataset = DatasetFactory(resources=[resource])
         response = self.get(url_for('datasets.resource',
-                                    dataset=dataset,
+                                    id=resource.id))
+        self.assertStatus(response, 302)
+        self.assertEqual(response.location, resource.url)
+
+    def test_community_resource_permalink(self):
+        '''It should redirect to the real community resource URL'''
+        resource = CommunityResourceFactory()
+        response = self.get(url_for('datasets.resource',
                                     id=resource.id))
         self.assertStatus(response, 302)
         self.assertEqual(response.location, resource.url)
@@ -156,7 +163,6 @@ class DatasetBlueprintTest(FrontTestCase):
         resource = ResourceFactory()
         dataset = DatasetFactory()
         response = self.get(url_for('datasets.resource',
-                                    dataset=dataset,
                                     id=resource.id))
         self.assert404(response)
 

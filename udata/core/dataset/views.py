@@ -6,7 +6,7 @@ from werkzeug.contrib.atom import AtomFeed
 
 from udata.frontend.views import DetailView, SearchView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Discussion, Follow, Reuse
+from udata.models import Dataset, Discussion, Follow, Reuse, CommunityResource
 from udata.core.site.views import current_site
 from udata.sitemap import sitemap
 from udata.utils import get_by
@@ -104,9 +104,13 @@ class DatasetFollowersView(DatasetView, DetailView):
         return context
 
 
-@blueprint.route('/<dataset:dataset>/r/<uuid:id>/', endpoint='resource')
-def resource_redirect(dataset, id):
-    resource = get_by(dataset.resources, 'id', id)
+@blueprint.route('/r/<uuid:id>', endpoint='resource')
+def resource_redirect(id):
+    dataset = Dataset.objects(resources__id=id).first()
+    if dataset:
+        resource = get_by(dataset.resources, 'id', id)
+    else:
+        resource = CommunityResource.objects(id=id).first()
     if not resource:
         abort(404)
     return redirect(resource.url)
