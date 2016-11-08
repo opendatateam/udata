@@ -156,7 +156,7 @@ class ResourceMixin(object):
         '''
         Permanent link to the latest version of this resource.
 
-        If this resource is updated and `url` change, this property won't.
+        If this resource is updated and `url` changes, this property won't.
         '''
         return url_for('datasets.resource', id=self.id, _external=True)
 
