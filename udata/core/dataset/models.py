@@ -153,6 +153,11 @@ class ResourceMixin(object):
 
     @property
     def permalink(self):
+        '''
+        Permanent link to the latest version of this resource.
+
+        If this resource is updated and `url` change, this property won't.
+        '''
         return url_for('datasets.resource', id=self.id, _external=True)
 
     @cached_property

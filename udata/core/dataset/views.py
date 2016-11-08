@@ -106,6 +106,9 @@ class DatasetFollowersView(DatasetView, DetailView):
 
 @blueprint.route('/r/<uuid:id>', endpoint='resource')
 def resource_redirect(id):
+    '''
+    Redirect to the latest version of a resource given its identifier.
+    '''
     dataset = Dataset.objects(resources__id=id).first()
     if dataset:
         resource = get_by(dataset.resources, 'id', id)

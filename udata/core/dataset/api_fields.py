@@ -44,7 +44,8 @@ resource_fields = api.model('Resource', {
         required=True, enum=RESOURCE_TYPES.keys()),
     'format': fields.String(description='The resource format', required=True),
     'url': fields.String(description='The resource URL', required=True),
-    'permalink': fields.String(description='The resource permanent URL',
+    'permalink': fields.String(description='The resource permanent URL to '
+                               'the latest version (won\'t change on update)',
                                readonly=True),
     'checksum': fields.Nested(
         checksum_fields, allow_null=True,
