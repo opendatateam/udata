@@ -68,9 +68,9 @@ class TermsFacet(Facet, DSLTermsFacet):
         for filter_value in filter_values:
             if OR_SEPARATOR in filter_value:
                 for or_value in filter_value.split(OR_SEPARATOR):
-                    should_qs.append(Q('match', **{field_name: or_value}))
+                    should_qs.append(Q('term', **{field_name: or_value}))
             else:
-                must_qs.append(Q('match', **{field_name: filter_value}))
+                must_qs.append(Q('term', **{field_name: filter_value}))
         return Q('bool', must=must_qs, should=should_qs)
 
 

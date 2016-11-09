@@ -39,8 +39,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_list(self):
         '''It should fetch a dataset list from the API'''
         with self.autoindex():
-            datasets = [DatasetFactory(resources=[ResourceFactory()])
-                        for i in range(2)]
+            datasets = [VisibleDatasetFactory() for i in range(2)]
 
         response = self.get(url_for('api.datasets'))
         self.assert200(response)
@@ -53,9 +52,8 @@ class DatasetAPITest(APITestCase):
         with self.autoindex():
             member = Member(user=self.user, role='editor')
             org = OrganizationFactory(members=[member])
-            DatasetFactory(resources=[ResourceFactory()])
-            dataset_org = DatasetFactory(resources=[ResourceFactory()],
-                                         organization=org)
+            VisibleDatasetFactory()
+            dataset_org = VisibleDatasetFactory(organization=org)
 
         response = self.get(url_for('api.datasets'),
                             qs={'organization': str(org.id)})
@@ -70,11 +68,9 @@ class DatasetAPITest(APITestCase):
             member = Member(user=self.user, role='editor')
             org1 = OrganizationFactory(members=[member])
             org2 = OrganizationFactory(members=[member])
-            DatasetFactory(resources=[ResourceFactory()])
-            dataset_org1 = DatasetFactory(resources=[ResourceFactory()],
-                                          organization=org1)
-            dataset_org2 = DatasetFactory(resources=[ResourceFactory()],
-                                          organization=org2)
+            VisibleDatasetFactory()
+            dataset_org1 = VisibleDatasetFactory(organization=org1)
+            dataset_org2 = VisibleDatasetFactory(organization=org2)
 
         response = self.get(
             url_for('api.datasets'),
