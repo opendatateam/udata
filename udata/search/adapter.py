@@ -7,7 +7,7 @@ import logging
 from elasticsearch_dsl import DocType, Integer, Float, Object
 from flask_restplus.reqparse import RequestParser
 
-from udata.search import i18n_analyzer, fields
+from udata.search import i18n_analyzer
 from udata.search.query import SearchQuery
 from udata.core.metrics import Metric
 

@@ -22,6 +22,7 @@ m = submanager(
 
 TIMESTAMP_FORMAT = '%Y-%m-%d-%H-%M'
 
+
 def default_index_name():
     '''Build a time based index name'''
     return '-'.join([es.index_name, datetime.now().strftime(TIMESTAMP_FORMAT)])
@@ -76,9 +77,10 @@ def set_alias(index_name, delete=True):
           help='Only reindex a given type')
 def reindex(doc_type=None):
     '''Reindex models'''
-    if not doc_type.lower() in [m.__name__.lower() for m in adapter_catalog.keys()]:
+    doc_types_names = [m.__name__.lower() for m in adapter_catalog.keys()]
+    if doc_type and not doc_type.lower() in doc_types_names:
         log.error('Unknown type %s', doc_type)
-    # name = es.index_name
+
     index_name = default_index_name()
     log.info('Initiliazing index "{0}"'.format(index_name))
     es.initialize(index_name)
@@ -86,7 +88,8 @@ def reindex(doc_type=None):
         if adapter.doc_type().lower() == doc_type.lower():
             index_model(index_name, adapter)
         else:
-            log.info('Copying {0} objects to the new index'.format(adapter.model.__name__))
+            log.info('Copying {0} objects to the new index'.format(
+                     adapter.model.__name__))
             # Need upgrade to Elasticsearch-py 5.0.0
             # es.reindex({
             #     'source': {'index': es.index_name, 'type': adapter.doc_type()},

@@ -34,6 +34,8 @@ ES_NUM_FAILURES = '-Infinity', 'Infinity', 'NaN', None
 
 RE_TIME_COVERAGE = re.compile(r'\d{4}-\d{2}-\d{2}-\d{4}-\d{2}-\d{2}')
 
+OR_SEPARATOR = '|'
+
 
 class Facet(object):
     def __init__(self, **kwargs):
@@ -56,7 +58,20 @@ class Facet(object):
 
 
 class TermsFacet(Facet, DSLTermsFacet):
-    pass
+
+    def add_filter(self, filter_values):
+        if not filter_values:
+            return
+
+        must_qs, should_qs = [], []
+        field_name = self._params['field']
+        for filter_value in filter_values:
+            if OR_SEPARATOR in filter_value:
+                for or_value in filter_value.split(OR_SEPARATOR):
+                    should_qs.append(Q('match', **{field_name: or_value}))
+            else:
+                must_qs.append(Q('match', **{field_name: filter_value}))
+        return Q('bool', must=must_qs, should=should_qs)
 
 
 class BoolFacet(Facet, DSLFacet):
@@ -129,7 +144,6 @@ class ModelTermsFacet(TermsFacet):
             raise ValueError('"{0}" is not valid identifier'.format(value))
 
 
-
 class RangeFacet(Facet, DSLRangeFacet):
     '''
     A Range facet with splited keys and labels.
@@ -146,7 +160,6 @@ class RangeFacet(Facet, DSLRangeFacet):
         for key in self.labels.keys():
             if key not in self._ranges:
                 raise ValueError('Unknown label key {0}'.format(key))
-
 
     def get_value_filter(self, filter_value):
         '''

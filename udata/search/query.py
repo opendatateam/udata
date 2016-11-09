@@ -98,7 +98,8 @@ class SearchQuery(FacetedSearch):
         """
         Construct the Search object.
         """
-        s = Search(doc_type=self.doc_types, using=es.client, index=es.index_name)
+        s = Search(doc_type=self.doc_types, using=es.client,
+                   index=es.index_name)
         # don't return any fields, just the metadata
         s = s.fields([])
         # Sort from parameters
