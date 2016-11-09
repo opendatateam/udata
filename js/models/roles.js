@@ -1,6 +1,4 @@
 import {List} from 'models/base';
-import log from 'logger';
-
 
 export class Roles extends List {
     constructor(options) {
@@ -10,5 +8,5 @@ export class Roles extends List {
     }
 };
 
-export var roles = new Roles().fetch();
+export const roles = new Roles().fetch();
 export default roles;

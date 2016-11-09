@@ -8,9 +8,8 @@ from flask_security import current_user
 
 from udata import search
 from udata.api import api, API
-from udata.models import (
-    CommunityResource, Dataset, Reuse, User
-)
+from udata.auth import admin_permission
+from udata.models import CommunityResource, Dataset, Reuse, User
 
 from udata.core.dataset.api_fields import (
     community_resource_fields, dataset_fields
@@ -228,7 +227,7 @@ class UserListAPI(API):
         search_parser.parse_args()
         return search.query(UserSearch, **multi_to_dict(request.args))
 
-    @api.secure('admin')
+    @api.secure(admin_permission)
     @api.doc('create_user')
     @api.expect(user_fields)
     @api.marshal_with(user_fields, code=201)
@@ -240,53 +239,45 @@ class UserListAPI(API):
         return user, 201
 
 
-def is_not_available(user):
-    return user.active is False and (
-        current_user.is_anonymous or
-        current_user.sysadmin is False)
-
-
 @ns.route('/<user:user>/', endpoint='user')
 @api.response(404, 'User not found')
 @api.response(410, 'User is not active or has been deleted')
 class UserAPI(API):
 
-    def check_availability(self, user):
-        if is_not_available(user):
+    def check_permissions(self, user, readonly=False):
+        if not user.visible:
             api.abort(410, 'User is not active')
+        if user.deleted and (
+            not readonly or (readonly and not UserEditPermission(user).can())
+        ):
+            api.abort(410, 'User has been deleted')
+        if not readonly:
+            UserEditPermission(user).test()
 
     @api.doc('get_user')
     @api.marshal_with(user_fields)
     def get(self, user):
         '''Get a user given its identifier'''
-        self.check_availability(user)
-        if user.deleted and not UserEditPermission(user).can():
-            api.abort(410, 'User has been deleted')
+        self.check_permissions(user, readonly=True)
         return user
 
-    @api.secure('admin')
+    @api.secure(admin_permission)
     @api.doc('update_user')
     @api.expect(user_fields)
     @api.marshal_with(user_fields)
     @api.response(400, 'Validation error')
     def put(self, user):
         '''Update a user given its identifier'''
-        self.check_availability(user)
-        if user.deleted:
-            api.abort(410, 'User has been deleted')
-        UserEditPermission(user).test()
+        self.check_permissions(user)
         form = api.validate(UserProfileAdminForm, user)
         return form.save()
 
-    @api.secure('admin')
+    @api.secure(admin_permission)
     @api.doc('delete_user')
     @api.response(204, 'Object deleted')
     def delete(self, user):
         '''Delete a user given its identifier'''
-        self.check_availability(user)
-        if user.deleted:
-            api.abort(410, 'User has been deleted')
-        UserEditPermission(user).test()
+        self.check_permissions(user)
         user.deleted = datetime.now()
         user.save()
         return '', 204

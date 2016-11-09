@@ -131,7 +131,7 @@ class URLField(FieldHelper, EmptyNone, html5.URLField):
         if self.data:
             try:
                 db.URLField().validate(self.data)
-            except:
+            except db.ValidationError:
                 raise validators.ValidationError(_('Invalid URL'))
         return True
 

@@ -5,15 +5,15 @@
 </style>
 
 <template>
-<span v-for="label in labels" class="label label-{{color(label)}}">
-    {{format(label)}}
+<span v-for="label in labels" class="label label-{{label | color}}">
+    {{label | format}}
 </span>
 </template>
 
 <script>
 export default {
     name: 'datatable-cell-label',
-    methods: {
+    filters: {
         format(value) {
             return this.field.hasOwnProperty('label_func')
                 ? this.field.label_func(value)
