@@ -64,16 +64,15 @@ class TermsFacet(Facet, DSLTermsFacet):
         """Improve the original one to deal with OR cases."""
         field = self._params['field']
         # Build a `AND` query on values wihtout the OR operator.
-        and_values = (v for v in filter_values if OR_SEPARATOR not in v)
-        filters = [Q('term',  **{field: value}) for value in and_values]
-        # Build a `OR` query for each value containing the OR operator.
-        or_values = (v for v in filter_values if OR_SEPARATOR in v)
-        filters.extend(
+        # and a `OR` query for each value containing the OR operator.
+        filters = [
             Q('bool', should=[
-                Q('term',  **{field: v}) for v in values.split(OR_SEPARATOR)
+                Q('term',  **{field: v}) for v in value.split(OR_SEPARATOR)
             ])
-            for values in or_values
-        )
+            if OR_SEPARATOR in value else
+            Q('term',  **{field: value})
+            for value in filter_values
+        ]
         return Q('bool', must=filters) if len(filters) > 1 else filters[0]
 
     def default_labelizer(self, value):
