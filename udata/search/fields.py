@@ -78,6 +78,10 @@ class TermsFacet(Facet, DSLTermsFacet):
             filters.append(and_filter)
         return Q('bool', must=filters) if len(filters) > 1 else filters[0]
 
+    def default_labelizer(self, value):
+        print(value)
+        return ' {0} '.format(_('OR')).join(value.split(OR_SEPARATOR))
+
 
 class BoolFacet(Facet, DSLFacet):
     agg_type = 'terms'
@@ -135,16 +139,17 @@ class ModelTermsFacet(TermsFacet):
         ]
 
     def default_labelizer(self, value):
-        if not isinstance(value, self.model):
-            self.validate_parameter(value)
-            value = self.model.objects.get(id=value)
-        return super(ModelTermsFacet, self).default_labelizer(value)
+        if isinstance(value, self.model):
+            return str(value)
+        ids = self.validate_parameter(value)
+        values = [str(o) for o in self.model.objects(id__in=ids)]
+        return ' {0} '.format(_('OR')).join(values)
 
     def validate_parameter(self, value):
         if isinstance(value, ObjectId):
             return value
         try:
-            return ObjectId(value)
+            return [ObjectId(v) for v in value.split(OR_SEPARATOR)]
         except Exception:
             raise ValueError('"{0}" is not valid identifier'.format(value))
 
