@@ -8,16 +8,17 @@ from werkzeug.urls import url_decode, url_parse
 
 from factory.mongoengine import MongoEngineFactory
 
-from elasticsearch_dsl import Q, A, Search
+from elasticsearch_dsl import Q, A
 from flask_restplus import inputs
 from flask_restplus.reqparse import RequestParser
 
 from udata import search
 from udata.core.metrics import Metric
-from udata.models import db
+from udata.models import db, Organization
 from udata.utils import multi_to_dict
 from udata.i18n import gettext as _, format_date
 from udata.tests import TestCase, DBTestMixin, SearchTestMixin
+from udata.tests.api import APITestCase
 from udata.utils import faker
 
 
@@ -77,14 +78,16 @@ RANGE_LABELS = {
     'heavy': _('Heavily reused'),
 }
 
+
 class FakeSearchWithRange(FakeSearch):
     facets = {
         'range': search.RangeFacet(
             field='a_range_field',
-            ranges=[('none', (None, 1)),
-                    ('little', (1, 5)),
-                    ('quite', (5, 10)),
-                    ('heavy', (10, None))
+            ranges=[
+                ('none', (None, 1)),
+                ('little', (1, 5)),
+                ('quite', (5, 10)),
+                ('heavy', (10, None))
             ],
             labels=RANGE_LABELS
         )
@@ -119,6 +122,7 @@ def get_body(facet_search):
 def get_query(facet_search):
     '''Extract the query part from a FacetedSearch'''
     return get_body(facet_search).get('query')
+
 
 def es_date(date):
     return float(date.toordinal())
@@ -769,8 +773,7 @@ class TestTermsFacet(FacetTestCase):
         self.assertEqual(self.facet.add_filter(values), expected)
 
 
-
-class TestModelTermsFacet(FacetTestCase, DBTestMixin):
+class TestModelTermsFacet(APITestCase, FacetTestCase, DBTestMixin):
     def setUp(self):
         self.facet = search.ModelTermsFacet(field='fakes', model=Fake)
 
@@ -782,6 +785,17 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
     def test_labelize_object(self):
         fake = FakeFactory()
         self.assertEqual(self.facet.labelize(fake), 'fake')
+
+    def test_labelize_object_with_or(self):
+        with self.autoindex():
+            org1 = Organization(id='534fff8ba3a7292c64a77ed5')
+            org2 = Organization(id='552cc6bec751df224637dddc')
+        org_facet = search.ModelTermsFacet(
+            field='id', model=Organization)
+        self.assertEqual(
+            org_facet.labelize('{0}|{1}'.format(org1.id, org2.id)),
+            '{0} OR {1}'.format(org1.id, org2.id)
+        )
 
     def test_get_values(self):
         fakes = [FakeFactory() for _ in range(10)]
@@ -1049,12 +1063,12 @@ class SearchAdaptorTest(SearchTestMixin, TestCase):
             'test l\'apostrophe',
             ['test l\'apostrophe', 'test apostrophe', 'test', 'apostrophe'])
 
-
     def assertHasArgument(self, parser, name, _type, choices=None):
         candidates = [
             arg for arg in parser.args if arg.name == name
         ]
-        self.assertEqual(len(candidates), 1, 'Should have strictly one argument')
+        self.assertEqual(len(candidates), 1,
+                         'Should have strictly one argument')
         arg = candidates[0]
         self.assertEqual(arg.type, _type)
         self.assertFalse(arg.required)
@@ -1099,7 +1113,7 @@ class SearchAdaptorTest(SearchTestMixin, TestCase):
         self.assertHasArgument(parser, 'sort', str)
         self.assertHasArgument(parser, 'facets', str)
         self.assertHasArgument(parser, 'range', facet.validate_parameter,
-                                                choices=RANGE_LABELS.keys())
+                               choices=RANGE_LABELS.keys())
         self.assertHasArgument(parser, 'page', int)
         self.assertHasArgument(parser, 'page_size', int)
 
