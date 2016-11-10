@@ -42,7 +42,7 @@ class UserSettings(db.EmbeddedDocument):
 class User(db.Document, WithMetrics, UserMixin):
     slug = db.SlugField(
         max_length=255, required=True, populate_from='fullname')
-    email = db.StringField(max_length=255, required=True)
+    email = db.StringField(max_length=255, required=True, unique=True)
     password = db.StringField()
     active = db.BooleanField()
     roles = db.ListField(db.ReferenceField(Role), default=[])
