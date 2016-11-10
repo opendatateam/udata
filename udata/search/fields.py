@@ -79,7 +79,6 @@ class TermsFacet(Facet, DSLTermsFacet):
         return Q('bool', must=filters) if len(filters) > 1 else filters[0]
 
     def default_labelizer(self, value):
-        print(value)
         return ' {0} '.format(_('OR')).join(value.split(OR_SEPARATOR))
 
 
@@ -140,7 +139,7 @@ class ModelTermsFacet(TermsFacet):
 
     def default_labelizer(self, value):
         if isinstance(value, self.model):
-            return str(value)
+            return super(ModelTermsFacet, self).default_labelizer(value)
         ids = self.validate_parameter(value)
         values = [str(o) for o in self.model.objects(id__in=ids)]
         return ' {0} '.format(_('OR')).join(values)
