@@ -750,8 +750,8 @@ class TestTermsFacet(FacetTestCase):
     def test_filter_and(self):
         values = ['tag-1', 'tag-2']
         expected = Q('bool', must=[
-            Q('bool', must=[Q('term', tags='tag-1')]),
-            Q('bool', must=[Q('term', tags='tag-2')]),
+            Q('term', tags='tag-1'),
+            Q('term', tags='tag-2'),
         ])
         self.assertEqual(self.facet.add_filter(values), expected)
 
@@ -772,10 +772,10 @@ class TestTermsFacet(FacetTestCase):
     def test_filter_and_or(self):
         values = ['tag-1', 'tag-2|tag-3', 'tag-4|tag-5', 'tag-6']
         expected = Q('bool', must=[
+            Q('term', tags='tag-1'),
             Q('term', tags='tag-2') | Q('term', tags='tag-3'),
             Q('term', tags='tag-4') | Q('term', tags='tag-5'),
-            Q('bool', must=[Q('term', tags='tag-1')]),
-            Q('bool', must=[Q('term', tags='tag-6')])
+            Q('term', tags='tag-6')
         ])
         self.assertEqual(self.facet.add_filter(values), expected)
 
