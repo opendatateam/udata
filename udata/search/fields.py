@@ -79,7 +79,7 @@ class TermsFacet(Facet, DSLTermsFacet):
         return Q('bool', must=filters) if len(filters) > 1 else filters[0]
 
     def default_labelizer(self, value):
-        return ' {0} '.format(_('OR')).join(value.split(OR_SEPARATOR))
+        return ' {0} '.format(_('OR')).join(str(value).split(OR_SEPARATOR))
 
 
 class BoolFacet(Facet, DSLFacet):

@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 from datetime import date, timedelta
 
+import factory
+
 from flask import json
 from werkzeug.urls import url_decode, url_parse
 
@@ -33,7 +35,7 @@ class Fake(db.Document):
     other = db.ListField(db.StringField())
 
     def __unicode__(self):
-        return 'fake'
+        return self.title
 
 
 class FakeMetricInt(Metric):
@@ -48,6 +50,8 @@ class FakeMetricFloat(Metric):
 
 
 class FakeFactory(MongoEngineFactory):
+    title = factory.LazyAttribute(lambda o: faker.sentence())
+
     class Meta:
         model = Fake
 
@@ -780,21 +784,20 @@ class TestModelTermsFacet(APITestCase, FacetTestCase, DBTestMixin):
     def test_labelize_id(self):
         fake = FakeFactory()
         self.assertEqual(
-            self.facet.labelize(str(fake.id)), 'fake')
+            self.facet.labelize(str(fake.id)), fake.title)
 
     def test_labelize_object(self):
         fake = FakeFactory()
-        self.assertEqual(self.facet.labelize(fake), 'fake')
+        self.assertEqual(self.facet.labelize(fake), fake.title)
 
     def test_labelize_object_with_or(self):
         with self.autoindex():
-            org1 = Organization(id='534fff8ba3a7292c64a77ed5')
-            org2 = Organization(id='552cc6bec751df224637dddc')
-        org_facet = search.ModelTermsFacet(
-            field='id', model=Organization)
+            fake_1 = FakeFactory()
+            fake_2 = FakeFactory()
+        org_facet = search.ModelTermsFacet(field='id', model=Fake)
         self.assertEqual(
-            org_facet.labelize('{0}|{1}'.format(org1.id, org2.id)),
-            '{0} OR {1}'.format(org1.id, org2.id)
+            org_facet.labelize('{0}|{1}'.format(fake_1.id, fake_2.id)),
+            '{0} OR {1}'.format(fake_1.title, fake_2.title)
         )
 
     def test_get_values(self):
