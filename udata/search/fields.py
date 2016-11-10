@@ -107,6 +107,10 @@ class ModelTermsFacet(TermsFacet):
         self.model = model
         self.field_name = field_name
 
+    @property
+    def model_field(self):
+        return getattr(self.model, self.field_name)
+
     def get_values(self, data, filter_values):
         """
         Turn the raw bucket data into a list of tuples containing the object,
@@ -116,21 +120,12 @@ class ModelTermsFacet(TermsFacet):
         values = super(ModelTermsFacet, self).get_values(data, filter_values)
         ids = [key for (key, doc_count, selected) in values]
         # Perform a model resolution: models are feched from DB
-        # Depending on used models, ID can be a String or an ObjectId
-        is_objectid = isinstance(getattr(self.model, self.field_name),
-                                 db.ObjectIdField)
-        cast = ObjectId if is_objectid else lambda o: o
-        if is_objectid:
-            # Cast identifier as ObjectId if necessary
-            # (in_bullk expect ObjectId and does not cast if necessary)
-            ids = map(ObjectId, ids)
+        # We use model field to cast IDs
+        ids = map(self.model_field.to_mongo, ids)
         objects = self.model.objects.in_bulk(ids)
 
-        def serialize(term):
-            return objects.get(cast(term))
-
         return [
-            (serialize(key), doc_count, selected)
+            (objects.get(self.model_field.to_mongo(key)), doc_count, selected)
             for (key, doc_count, selected) in values
         ]
 
@@ -138,14 +133,18 @@ class ModelTermsFacet(TermsFacet):
         if isinstance(value, self.model):
             return super(ModelTermsFacet, self).default_labelizer(value)
         ids = self.validate_parameter(value)
-        values = [str(o) for o in self.model.objects(id__in=ids)]
+        objects = self.model.objects.in_bulk(ids)
+        values = [str(objects.get(id)) for id in ids]
         return ' {0} '.format(OR_LABEL).join(values)
 
     def validate_parameter(self, value):
         if isinstance(value, ObjectId):
             return value
         try:
-            return [ObjectId(v) for v in value.split(OR_SEPARATOR)]
+            return [
+                self.model_field.to_mongo(v)
+                for v in value.split(OR_SEPARATOR)
+            ]
         except Exception:
             raise ValueError('"{0}" is not valid identifier'.format(value))
 

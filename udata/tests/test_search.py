@@ -20,7 +20,7 @@ from udata.models import db
 from udata.utils import multi_to_dict
 from udata.i18n import gettext as _, format_date
 from udata.tests import TestCase, DBTestMixin, SearchTestMixin
-from udata.utils import faker
+from udata.utils import faker, unique_string
 
 
 #############################################################################
@@ -32,6 +32,8 @@ class Fake(db.Document):
     description = db.StringField()
     tags = db.ListField(db.StringField())
     other = db.ListField(db.StringField())
+
+    meta = {'allow_inheritance': True}
 
     def __unicode__(self):
         return self.title
@@ -48,11 +50,22 @@ class FakeMetricFloat(Metric):
     value_type = float
 
 
+class FakeWithStringId(Fake):
+    id = db.StringField(primary_key=True)
+
+
 class FakeFactory(MongoEngineFactory):
     title = factory.LazyAttribute(lambda o: faker.sentence())
 
     class Meta:
         model = Fake
+
+
+class FakeWithStringIdFactory(FakeFactory):
+    id = factory.LazyAttribute(lambda o: unique_string())
+
+    class Meta:
+        model = FakeWithStringId
 
 
 @search.register
@@ -826,6 +839,61 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
         for value in bad_values:
             with self.assertRaises(Exception):
                 self.facet.validate_parameter(value)
+
+    def test_validate_parameters_with_or(self):
+        fake_1 = FakeFactory()
+        fake_2 = FakeFactory()
+        value = '{0}|{1}'.format(fake_1.id, fake_2.id)
+        self.assertTrue(self.facet.validate_parameter(value))
+
+
+class TestModelTermsFacetWithStringId(FacetTestCase, DBTestMixin):
+    def setUp(self):
+        self.facet = search.ModelTermsFacet(field='fakes',
+                                            model=FakeWithStringId)
+
+    def test_labelize_id(self):
+        fake = FakeWithStringIdFactory()
+        self.assertEqual(
+            self.facet.labelize(str(fake.id)), fake.title)
+
+    def test_labelize_object(self):
+        fake = FakeWithStringIdFactory()
+        self.assertEqual(self.facet.labelize(fake), fake.title)
+
+    def test_labelize_object_with_or(self):
+        fake_1 = FakeWithStringIdFactory()
+        fake_2 = FakeWithStringIdFactory()
+        facet = search.ModelTermsFacet(field='id', model=FakeWithStringId)
+        self.assertEqual(
+            facet.labelize('{0}|{1}'.format(fake_1.id, fake_2.id)),
+            '{0} OR {1}'.format(fake_1.title, fake_2.title)
+        )
+
+    def test_get_values(self):
+        fakes = [FakeWithStringIdFactory() for _ in range(10)]
+        buckets = [{
+            'key': str(f.id),
+            'doc_count': faker.random_number(2)
+        } for f in fakes]
+        result = self.factory(aggregations=bucket_agg_factory(buckets))
+
+        self.assertEqual(len(result), 10)
+        for fake, row in zip(fakes, result):
+            self.assertIsInstance(row[0], FakeWithStringId)
+            self.assertIsInstance(row[1], int)
+            self.assertIsInstance(row[2], bool)
+            self.assertEqual(fake.id, row[0].id)
+
+    def test_validate_parameters(self):
+        fake = FakeWithStringIdFactory()
+        self.assertTrue(self.facet.validate_parameter(fake.id))
+
+    def test_validate_parameters_with_or(self):
+        fake_1 = FakeWithStringIdFactory()
+        fake_2 = FakeWithStringIdFactory()
+        value = '{0}|{1}'.format(fake_1.id, fake_2.id)
+        self.assertTrue(self.facet.validate_parameter(value))
 
 
 class TestRangeFacet(FacetTestCase):
