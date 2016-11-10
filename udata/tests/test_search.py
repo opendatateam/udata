@@ -773,9 +773,9 @@ class TestTermsFacet(FacetTestCase):
         values = ['tag-1', 'tag-2|tag-3', 'tag-4|tag-5', 'tag-6']
         expected = Q('bool', must=[
             Q('term', tags='tag-1'),
+            Q('term', tags='tag-6'),
             Q('term', tags='tag-2') | Q('term', tags='tag-3'),
-            Q('term', tags='tag-4') | Q('term', tags='tag-5'),
-            Q('term', tags='tag-6')
+            Q('term', tags='tag-4') | Q('term', tags='tag-5')
         ])
         self.assertEqual(self.facet.add_filter(values), expected)
 
