@@ -60,11 +60,12 @@ class Facet(object):
 class TermsFacet(Facet, DSLTermsFacet):
 
     def add_filter(self, filter_values):
+        """Improve the original one to deal with OR cases."""
         field = self._params['field']
-        # Perform a classic AND on values wihtout OR operator
+        # Perform a classic `AND` on values wihtout the OR operator.
         and_values = [v for v in filter_values if OR_SEPARATOR not in v]
         and_filter = super(TermsFacet, self).add_filter(and_values)
-        # Build a OR query for each value with OR
+        # Build a `OR` query for each value containing the OR operator.
         or_values = [v for v in filter_values if OR_SEPARATOR in v]
         filters = [
             Q('bool', should=[
@@ -72,7 +73,7 @@ class TermsFacet(Facet, DSLTermsFacet):
             ])
             for values in or_values
         ]
-        # Perform an `AND` between all queries if necessary
+        # Perform an `AND` between all filters if necessary.
         if and_filter:
             filters.append(and_filter)
         return Q('bool', must=filters) if len(filters) > 1 else filters[0]
