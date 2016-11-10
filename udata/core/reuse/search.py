@@ -50,10 +50,10 @@ class ReuseSearch(ModelSearchAdapter):
         'raw': String(index='not_analyzed')
     })
     description = String(analyzer=i18n_analyzer)
-    url = String()
-    organization = String()
-    owner = String()
-    type = String()
+    url = String(index='not_analyzed')
+    organization = String(index='not_analyzed')
+    owner = String(index='not_analyzed')
+    type = String(index='not_analyzed')
     tags = String(index='not_analyzed', fields={
         'i18n': String(index='not_analyzed')
     })
@@ -63,7 +63,7 @@ class ReuseSearch(ModelSearchAdapter):
                              payloads=False)
     datasets = Object(
         properties={
-            'id': String(),
+            'id': String(index='not_analyzed'),
             'title': String(),
         }
     )

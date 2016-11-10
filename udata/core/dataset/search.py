@@ -62,9 +62,9 @@ class DatasetSearch(ModelSearchAdapter):
     })
     description = String(analyzer=i18n_analyzer)
     license = String(index='not_analyzed')
-    frequency = String()
-    organization = String()
-    owner = String()
+    frequency = String(index='not_analyzed')
+    organization = String(index='not_analyzed')
+    owner = String(index='not_analyzed')
     tags = String(index='not_analyzed', fields={
         'i18n': String(index='not_analyzed')
     })
@@ -76,7 +76,7 @@ class DatasetSearch(ModelSearchAdapter):
         properties={
             'title': String(),
             'description': String(),
-            'license': String()
+            'format': String(index='not_analyzed')
         }
     )
     format_suggest = Completion(analyzer=simple,

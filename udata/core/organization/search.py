@@ -45,7 +45,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
     acronym = String(index='not_analyzed')
     description = String(analyzer=search.i18n_analyzer)
     badges = String(index='not_analyzed')
-    url = String()
+    url = String(index='not_analyzed')
     created = Date(format='date_hour_minute_second')
     metrics = search.metrics_mapping_for(Organization)
     org_suggest = Completion(analyzer=simple,
