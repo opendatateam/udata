@@ -35,6 +35,7 @@ ES_NUM_FAILURES = '-Infinity', 'Infinity', 'NaN', None
 RE_TIME_COVERAGE = re.compile(r'\d{4}-\d{2}-\d{2}-\d{4}-\d{2}-\d{2}')
 
 OR_SEPARATOR = '|'
+OR_LABEL = _('OR')
 
 
 class Facet(object):
@@ -79,7 +80,7 @@ class TermsFacet(Facet, DSLTermsFacet):
         return Q('bool', must=filters) if len(filters) > 1 else filters[0]
 
     def default_labelizer(self, value):
-        return ' {0} '.format(_('OR')).join(str(value).split(OR_SEPARATOR))
+        return ' {0} '.format(OR_LABEL).join(str(value).split(OR_SEPARATOR))
 
 
 class BoolFacet(Facet, DSLFacet):
@@ -142,7 +143,7 @@ class ModelTermsFacet(TermsFacet):
             return super(ModelTermsFacet, self).default_labelizer(value)
         ids = self.validate_parameter(value)
         values = [str(o) for o in self.model.objects(id__in=ids)]
-        return ' {0} '.format(_('OR')).join(values)
+        return ' {0} '.format(OR_LABEL).join(values)
 
     def validate_parameter(self, value):
         if isinstance(value, ObjectId):

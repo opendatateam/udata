@@ -16,11 +16,10 @@ from flask_restplus.reqparse import RequestParser
 
 from udata import search
 from udata.core.metrics import Metric
-from udata.models import db, Organization
+from udata.models import db
 from udata.utils import multi_to_dict
 from udata.i18n import gettext as _, format_date
 from udata.tests import TestCase, DBTestMixin, SearchTestMixin
-from udata.tests.api import APITestCase
 from udata.utils import faker
 
 
@@ -777,7 +776,7 @@ class TestTermsFacet(FacetTestCase):
         self.assertEqual(self.facet.add_filter(values), expected)
 
 
-class TestModelTermsFacet(APITestCase, FacetTestCase, DBTestMixin):
+class TestModelTermsFacet(FacetTestCase, DBTestMixin):
     def setUp(self):
         self.facet = search.ModelTermsFacet(field='fakes', model=Fake)
 
@@ -791,9 +790,8 @@ class TestModelTermsFacet(APITestCase, FacetTestCase, DBTestMixin):
         self.assertEqual(self.facet.labelize(fake), fake.title)
 
     def test_labelize_object_with_or(self):
-        with self.autoindex():
-            fake_1 = FakeFactory()
-            fake_2 = FakeFactory()
+        fake_1 = FakeFactory()
+        fake_2 = FakeFactory()
         org_facet = search.ModelTermsFacet(field='id', model=Fake)
         self.assertEqual(
             org_facet.labelize('{0}|{1}'.format(fake_1.id, fake_2.id)),
