@@ -29,9 +29,8 @@ def max_followers():
     return max(current_site.metrics.get('max_reuse_followers'), 10)
 
 
-class ReuseTypeFacet(TermsFacet):
-    def default_labelizer(self, value):
-        return REUSE_TYPES[value]
+def reuse_type_labelizer(value):
+    return REUSE_TYPES[value]
 
 
 def reuse_badge_labelizer(kind):
@@ -87,7 +86,7 @@ class ReuseSearch(ModelSearchAdapter):
                                         model=Organization),
         'owner': ModelTermsFacet(field='owner', model=User),
         'dataset': ModelTermsFacet(field='dataset.id', model=Dataset),
-        'type': ReuseTypeFacet(field='type'),
+        'type': TermsFacet(field='type', labelizer=reuse_type_labelizer),
         'datasets': RangeFacet(field='metrics.datasets',
                                ranges=[('none', (None, 1)),
                                        ('few', (1, 5)),

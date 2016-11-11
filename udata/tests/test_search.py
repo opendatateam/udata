@@ -760,6 +760,15 @@ class TestTermsFacet(FacetTestCase):
     def test_labelize(self):
         self.assertEqual(self.facet.labelize('fake'), 'fake')
 
+    def test_labelize_with_or(self):
+        self.assertEqual(self.facet.labelize('fake-1|fake-2'), 'fake-1 OR fake-2')
+
+    def test_labelize_with_or_and_custom_labelizer(self):
+        labelizer = lambda v: 'custom-{0}'.format(v)  # noqa: E731
+        facet = search.TermsFacet(field='tags', labelizer=labelizer)
+        self.assertEqual(facet.labelize('fake-1|fake-2'),
+                         'custom-fake-1 OR custom-fake-2')
+
     def test_filter_and(self):
         values = ['tag-1', 'tag-2']
         expected = Q('bool', must=[

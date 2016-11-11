@@ -41,8 +41,15 @@ OR_LABEL = _('OR')
 class Facet(object):
     def __init__(self, **kwargs):
         super(Facet, self).__init__(**kwargs)
-        self.labelize = self._params.pop('labelizer', None)
-        self.labelize = self.labelize or self.default_labelizer
+        self.labelizer = self._params.pop('labelizer', None)
+
+    def labelize(self, value):
+        labelize = self.labelizer or self.default_labelizer
+        if isinstance(value, basestring):
+            return ' {0} '.format(OR_LABEL).join(
+                str(labelize(v)) for v in value.split(OR_SEPARATOR)
+            )
+        return labelize(value)
 
     def default_labelizer(self, value):
         return str(value)
@@ -59,7 +66,6 @@ class Facet(object):
 
 
 class TermsFacet(Facet, DSLTermsFacet):
-
     def add_filter(self, filter_values):
         """Improve the original one to deal with OR cases."""
         field = self._params['field']
@@ -74,9 +80,6 @@ class TermsFacet(Facet, DSLTermsFacet):
             for value in filter_values
         ]
         return Q('bool', must=filters) if len(filters) > 1 else filters[0]
-
-    def default_labelizer(self, value):
-        return ' {0} '.format(OR_LABEL).join(str(value).split(OR_SEPARATOR))
 
 
 class BoolFacet(Facet, DSLFacet):
@@ -130,12 +133,11 @@ class ModelTermsFacet(TermsFacet):
         ]
 
     def default_labelizer(self, value):
-        if isinstance(value, self.model):
-            return super(ModelTermsFacet, self).default_labelizer(value)
-        ids = self.validate_parameter(value)
-        objects = self.model.objects.in_bulk(ids)
-        values = [str(objects.get(id)) for id in ids]
-        return ' {0} '.format(OR_LABEL).join(values)
+        if not isinstance(value, self.model):
+            self.validate_parameter(value)
+            id = self.model_field.to_mongo(value)
+            value = self.model.objects.get(id=id)
+        return str(value)
 
     def validate_parameter(self, value):
         if isinstance(value, ObjectId):
