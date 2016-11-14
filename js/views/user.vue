@@ -40,11 +40,18 @@ export default {
     name: 'user-view',
     data: function() {
         return {
-            actions: [{
-                label: this._('Edit'),
-                icon: 'edit',
-                method: this.edit
-            }],
+            actions: [
+                {
+                    label: this._('Edit'),
+                    icon: 'edit',
+                    method: this.edit
+                },
+                {
+                    label: this._('Delete'),
+                    icon: 'trash',
+                    method: this.confirm_delete,
+                }
+            ],
             user: new User(),
             metrics: new Metrics({
                 query: {
@@ -99,6 +106,12 @@ export default {
         edit() {
             this.$go('/user/edit/' + this.user.id + '/');
         },
+        confirm_delete() {
+            this.$root.$modal(
+                require('components/user/delete-user-modal.vue'),
+                {user: this.user},
+            );
+        }
     }
 };
 </script>

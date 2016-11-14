@@ -28,6 +28,7 @@ router.map({
         }
     },
     '/site/': {
+        name: 'site',
         component: function(resolve) {
             require(['./views/site.vue'], resolve);
         }

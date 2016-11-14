@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.core.user.factories import UserFactory, AdminFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Follow
 from udata.utils import faker
 
@@ -272,3 +272,14 @@ class UserAPITest(APITestCase):
         response = self.get(url_for('api.user_roles'))
         self.assert200(response)
         self.assertEqual(response.json, [{'name': 'admin'}])
+
+    def test_delete_user(self):
+        user = AdminFactory()
+        self.login(user)
+        other_user = UserFactory()
+        response = self.delete(url_for('api.user', user=other_user))
+        self.assert204(response)
+        response = self.delete(url_for('api.user', user=other_user))
+        self.assert410(response)
+        response = self.delete(url_for('api.user', user=user))
+        self.assert403(response)
