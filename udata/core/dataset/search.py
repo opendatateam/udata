@@ -72,13 +72,11 @@ class DatasetSearch(ModelSearchAdapter):
     tag_suggest = Completion(analyzer=simple,
                              search_analyzer=simple,
                              payloads=False)
-    resources = Object(
-        properties={
-            'title': String(),
-            'description': String(),
-            'format': String(index='not_analyzed')
-        }
-    )
+    resources = Object(properties={
+        'title': String(),
+        'description': String(),
+        'format': String(index='not_analyzed')
+    })
     format_suggest = Completion(analyzer=simple,
                                 search_analyzer=simple,
                                 payloads=False)
@@ -89,20 +87,15 @@ class DatasetSearch(ModelSearchAdapter):
     last_modified = Date(format='date_hour_minute_second')
     metrics = metrics_mapping_for(Dataset)
     featured = Boolean()
-    temporal_coverage = Nested(
-        multi=False,
-        properties={
-            'start': Long(),
-            'end': Long()
-        }
-    )
-    geozones = Object(
-        properties={
-            'id': String(index='not_analyzed'),
-            'name': String(index='not_analyzed'),
-            'keys': String(index='not_analyzed')
-        }
-    )
+    temporal_coverage = Nested(multi=False, properties={
+        'start': Long(),
+        'end': Long()
+    })
+    geozones = Object(properties={
+        'id': String(index='not_analyzed'),
+        'name': String(index='not_analyzed'),
+        'keys': String(index='not_analyzed')
+    })
     granularity = String(index='not_analyzed')
     extras = Object()
 
