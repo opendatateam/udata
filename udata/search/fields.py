@@ -34,12 +34,22 @@ ES_NUM_FAILURES = '-Infinity', 'Infinity', 'NaN', None
 
 RE_TIME_COVERAGE = re.compile(r'\d{4}-\d{2}-\d{2}-\d{4}-\d{2}-\d{2}')
 
+OR_SEPARATOR = '|'
+OR_LABEL = _('OR')
+
 
 class Facet(object):
     def __init__(self, **kwargs):
         super(Facet, self).__init__(**kwargs)
-        self.labelize = self._params.pop('labelizer', None)
-        self.labelize = self.labelize or self.default_labelizer
+        self.labelizer = self._params.pop('labelizer', None)
+
+    def labelize(self, value):
+        labelize = self.labelizer or self.default_labelizer
+        if isinstance(value, basestring):
+            return ' {0} '.format(OR_LABEL).join(
+                str(labelize(v)) for v in value.split(OR_SEPARATOR)
+            )
+        return labelize(value)
 
     def default_labelizer(self, value):
         return str(value)
@@ -56,7 +66,20 @@ class Facet(object):
 
 
 class TermsFacet(Facet, DSLTermsFacet):
-    pass
+    def add_filter(self, filter_values):
+        """Improve the original one to deal with OR cases."""
+        field = self._params['field']
+        # Build a `AND` query on values wihtout the OR operator.
+        # and a `OR` query for each value containing the OR operator.
+        filters = [
+            Q('bool', should=[
+                Q('term',  **{field: v}) for v in value.split(OR_SEPARATOR)
+            ])
+            if OR_SEPARATOR in value else
+            Q('term',  **{field: value})
+            for value in filter_values
+        ]
+        return Q('bool', must=filters) if len(filters) > 1 else filters[0]
 
 
 class BoolFacet(Facet, DSLFacet):
@@ -87,6 +110,10 @@ class ModelTermsFacet(TermsFacet):
         self.model = model
         self.field_name = field_name
 
+    @property
+    def model_field(self):
+        return getattr(self.model, self.field_name)
+
     def get_values(self, data, filter_values):
         """
         Turn the raw bucket data into a list of tuples containing the object,
@@ -96,38 +123,32 @@ class ModelTermsFacet(TermsFacet):
         values = super(ModelTermsFacet, self).get_values(data, filter_values)
         ids = [key for (key, doc_count, selected) in values]
         # Perform a model resolution: models are feched from DB
-        # Depending on used models, ID can be a String or an ObjectId
-        is_objectid = isinstance(getattr(self.model, self.field_name),
-                                 db.ObjectIdField)
-        cast = ObjectId if is_objectid else lambda o: o
-        if is_objectid:
-            # Cast identifier as ObjectId if necessary
-            # (in_bullk expect ObjectId and does not cast if necessary)
-            ids = map(ObjectId, ids)
+        # We use model field to cast IDs
+        ids = map(self.model_field.to_mongo, ids)
         objects = self.model.objects.in_bulk(ids)
 
-        def serialize(term):
-            return objects.get(cast(term))
-
         return [
-            (serialize(key), doc_count, selected)
+            (objects.get(self.model_field.to_mongo(key)), doc_count, selected)
             for (key, doc_count, selected) in values
         ]
 
     def default_labelizer(self, value):
         if not isinstance(value, self.model):
             self.validate_parameter(value)
-            value = self.model.objects.get(id=value)
-        return super(ModelTermsFacet, self).default_labelizer(value)
+            id = self.model_field.to_mongo(value)
+            value = self.model.objects.get(id=id)
+        return str(value)
 
     def validate_parameter(self, value):
         if isinstance(value, ObjectId):
             return value
         try:
-            return ObjectId(value)
+            return [
+                self.model_field.to_mongo(v)
+                for v in value.split(OR_SEPARATOR)
+            ]
         except Exception:
             raise ValueError('"{0}" is not valid identifier'.format(value))
-
 
 
 class RangeFacet(Facet, DSLRangeFacet):
@@ -146,7 +167,6 @@ class RangeFacet(Facet, DSLRangeFacet):
         for key in self.labels.keys():
             if key not in self._ranges:
                 raise ValueError('Unknown label key {0}'.format(key))
-
 
     def get_value_filter(self, filter_value):
         '''

@@ -29,9 +29,8 @@ def max_followers():
     return max(current_site.metrics.get('max_reuse_followers'), 10)
 
 
-class ReuseTypeFacet(TermsFacet):
-    def default_labelizer(self, value):
-        return REUSE_TYPES[value]
+def reuse_type_labelizer(value):
+    return REUSE_TYPES[value]
 
 
 def reuse_badge_labelizer(kind):
@@ -50,10 +49,10 @@ class ReuseSearch(ModelSearchAdapter):
         'raw': String(index='not_analyzed')
     })
     description = String(analyzer=i18n_analyzer)
-    url = String()
-    organization = String()
-    owner = String()
-    type = String()
+    url = String(index='not_analyzed')
+    organization = String(index='not_analyzed')
+    owner = String(index='not_analyzed')
+    type = String(index='not_analyzed')
     tags = String(index='not_analyzed', fields={
         'i18n': String(index='not_analyzed')
     })
@@ -63,7 +62,7 @@ class ReuseSearch(ModelSearchAdapter):
                              payloads=False)
     datasets = Object(
         properties={
-            'id': String(),
+            'id': String(index='not_analyzed'),
             'title': String(),
         }
     )
@@ -87,7 +86,7 @@ class ReuseSearch(ModelSearchAdapter):
                                         model=Organization),
         'owner': ModelTermsFacet(field='owner', model=User),
         'dataset': ModelTermsFacet(field='dataset.id', model=Dataset),
-        'type': ReuseTypeFacet(field='type'),
+        'type': TermsFacet(field='type', labelizer=reuse_type_labelizer),
         'datasets': RangeFacet(field='metrics.datasets',
                                ranges=[('none', (None, 1)),
                                        ('few', (1, 5)),

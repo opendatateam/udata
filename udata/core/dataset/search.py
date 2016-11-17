@@ -62,9 +62,9 @@ class DatasetSearch(ModelSearchAdapter):
     })
     description = String(analyzer=i18n_analyzer)
     license = String(index='not_analyzed')
-    frequency = String()
-    organization = String()
-    owner = String()
+    frequency = String(index='not_analyzed')
+    organization = String(index='not_analyzed')
+    owner = String(index='not_analyzed')
     tags = String(index='not_analyzed', fields={
         'i18n': String(index='not_analyzed')
     })
@@ -72,13 +72,11 @@ class DatasetSearch(ModelSearchAdapter):
     tag_suggest = Completion(analyzer=simple,
                              search_analyzer=simple,
                              payloads=False)
-    resources = Object(
-        properties={
-            'title': String(),
-            'description': String(),
-            'license': String()
-        }
-    )
+    resources = Object(properties={
+        'title': String(),
+        'description': String(),
+        'format': String(index='not_analyzed')
+    })
     format_suggest = Completion(analyzer=simple,
                                 search_analyzer=simple,
                                 payloads=False)
@@ -89,20 +87,15 @@ class DatasetSearch(ModelSearchAdapter):
     last_modified = Date(format='date_hour_minute_second')
     metrics = metrics_mapping_for(Dataset)
     featured = Boolean()
-    temporal_coverage = Nested(
-        multi=False,
-        properties={
-            'start': Long(),
-            'end': Long()
-        }
-    )
-    geozones = Object(
-        properties={
-            'id': String(index='not_analyzed'),
-            'name': String(index='not_analyzed'),
-            'keys': String(index='not_analyzed')
-        }
-    )
+    temporal_coverage = Nested(multi=False, properties={
+        'start': Long(),
+        'end': Long()
+    })
+    geozones = Object(properties={
+        'id': String(index='not_analyzed'),
+        'name': String(index='not_analyzed'),
+        'keys': String(index='not_analyzed')
+    })
     granularity = String(index='not_analyzed')
     extras = Object()
 
@@ -140,10 +133,10 @@ class DatasetSearch(ModelSearchAdapter):
                                      ('quite', (5, 10)),
                                      ('many', (10, None))],
                              labels={
-                                'none': _('Never reused'),
-                                'few': _('Little reused'),
-                                'quite': _('Quite reused'),
-                                'many': _('Heavily reused'),
+                                 'none': _('Never reused'),
+                                 'few': _('Little reused'),
+                                 'quite': _('Quite reused'),
+                                 'many': _('Heavily reused'),
                              }),
         'temporal_coverage': TemporalCoverageFacet(field='temporal_coverage'),
         'featured': BoolFacet(field='featured'),
