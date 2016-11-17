@@ -161,12 +161,32 @@ class UserAPITest(APITestCase):
         with self.autoindex():
             users = UserFactory.create_batch(4)
 
-        user = users[0]
+        first_user = users[0]
         response = self.get(url_for('api.suggest_users'),
-                            qs={'q': str(user.id), 'size': '5'})
+                            qs={'q': str(first_user.id), 'size': '5'})
         self.assert200(response)
 
-        self.assertGreaterEqual(len(response.json), 1)
+        # The batch factory generates ids that might be too close
+        # which then are found with the fuzzy search.
+        suggested_ids = [u['id'] for u in response.json]
+        self.assertGreaterEqual(len(suggested_ids), 1)
+        self.assertIn(str(first_user.id), suggested_ids)
 
-        suggestion = response.json[0]
-        self.assertEqual(suggestion['id'], str(user.id))
+    def test_users(self):
+        '''It should provide a list of users'''
+        with self.autoindex():
+            user = UserFactory(
+                about=faker.paragraph(),
+                website=faker.url(),
+                avatar_url=faker.url(),
+                metrics={'datasets': 10})
+        response = self.get(url_for('api.users'))
+        self.assert200(response)
+        [json] = response.json['data']
+        self.assertEquals(json['id'], str(user.id))
+        self.assertEquals(json['slug'], user.slug)
+        self.assertEquals(json['first_name'], user.first_name)
+        self.assertEquals(json['last_name'], user.last_name)
+        self.assertEquals(json['website'], user.website)
+        self.assertEquals(json['about'], user.about)
+        self.assertEquals(json['metrics'], user.metrics)

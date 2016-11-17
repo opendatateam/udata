@@ -16,13 +16,19 @@ def issues_notifications(user):
     '''Notify user about open issues'''
     notifications = []
 
-    for issue in issues_for(user):
+    # Only fetch required fields for notification serialization
+    # Greatly improve performances and memory usage
+    qs = issues_for(user).only('id', 'title', 'created', 'subject')
+
+    # Do not dereference subject (so it's a DBRef)
+    # Also improve performances and memory usage
+    for issue in qs.no_dereference():
         notifications.append((issue.created, {
             'id': issue.id,
             'title': issue.title,
             'subject': {
-                'id': issue.subject.id,
-                'type': issue.subject.__class__.__name__.lower(),
+                'id': issue.subject['_ref'].id,
+                'type': issue.subject['_cls'].lower(),
             }
         }))
 

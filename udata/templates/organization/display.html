@@ -15,11 +15,7 @@
 {% endblock %}
 
 {% block main_content %}
-<div itemscope itemtype="http://schema.org/{% if org.public_service %}Government{% endif %}Organization">
-    <meta itemprop="alternateName" content="{{ org.slug }}" />
-    <meta itemprop="logo" content="{{ org.logo(external=True) }}" />
-    <meta itemprop="url" content="{{ url_for('organizations.show', org=org, _external=True) }}" />
-    <h1 itemprop="name">
+    <h1>
         {{ org.name }}
         {% if can_edit %}
         <small>
@@ -42,8 +38,7 @@
             {% endif %}
         </p>
     </div>
-    <div itemprop="description">{{ org.description|markdown }}</div>
-</div>
+    <div>{{ org.description|markdown }}</div>
 {% endblock %}
 
 {% block secondary_content %}

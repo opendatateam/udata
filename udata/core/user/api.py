@@ -40,7 +40,7 @@ from .search import UserSearch
 
 ns = api.namespace('users', 'User related operations')
 me = api.namespace('me', 'Connected user related operations')
-search_parser = api.search_parser(UserSearch)
+search_parser = UserSearch.as_request_parser()
 filter_parser = api.parser()
 filter_parser.add_argument(
     'q', type=str, help='The string to filter items',
@@ -57,8 +57,10 @@ class MeAPI(API):
         return current_user._get_current_object()
 
     @api.secure
+    @api.doc('update_me')
+    @api.expect(me_fields)
     @api.marshal_with(me_fields)
-    @api.doc('update_me', responses={400: 'Validation error'})
+    @api.response(400, 'Validation error')
     def put(self, **kwargs):
         '''Update my profile'''
         user = current_user._get_current_object()
@@ -221,6 +223,7 @@ class UserListAPI(API):
     @api.marshal_with(user_page_fields)
     def get(self):
         '''List all users'''
+        search_parser.parse_args()
         return search.query(UserSearch, **multi_to_dict(request.args))
 
     @api.secure
@@ -278,8 +281,8 @@ class FollowUserAPI(FollowAPI):
     model = User
 
     @api.secure
-    @api.doc(notes="You can't follow yourself.",
-             response={403: 'When tring to follow yourself'})
+    @api.doc(notes="You can't follow yourself.")
+    @api.response(403, 'When tring to follow yourself')
     def post(self, id):
         '''Follow a user given its ID'''
         if id == str(current_user.id):

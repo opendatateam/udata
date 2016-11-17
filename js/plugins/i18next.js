@@ -8,8 +8,9 @@ export function install(Vue) {
         return i18n._(value, options);
     });
 
-    Vue.filter('dt', function(value, format) {
-        return value ? moment(value).format(format || 'LLL') : '-';
+    Vue.filter('dt', function(value, format, empty) {
+        empty = empty !== undefined ? empty : '-';
+        return value ? moment(value).format(format || 'LLL') : empty;
     });
 
     Vue.filter('timeago', function(value) {

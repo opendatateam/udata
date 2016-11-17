@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import request, redirect, abort, g
+from flask import request, redirect, abort, g, json
 from flask.views import MethodView
+
+from elasticsearch_dsl.query import MultiMatch
 
 from udata import search, auth, theme
 from udata.utils import multi_to_dict
@@ -78,7 +80,9 @@ class SearchView(Templated, BaseView):
     def get_queryset(self):
         params = multi_to_dict(request.args)
         params['facets'] = True
-        return search.query(self.search_adapter or self.model, **params)
+        adapter = self.search_adapter or self.model
+        result = search.query(adapter, **params)
+        return result
 
     def get_context(self):
         context = super(SearchView, self).get_context()
@@ -152,6 +156,13 @@ class DetailView(SingleObject, Templated, BaseView):
     '''
     def get(self, **kwargs):
         return self.render()
+
+    def get_context(self):
+        context = super(DetailView, self).get_context()
+
+        if hasattr(self.object, 'json_ld'):
+            context['json_ld'] = json.dumps(self.object.json_ld)
+        return context
 
 
 class FormView(Templated, BaseView):

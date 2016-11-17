@@ -10,7 +10,6 @@ MODULES = (
     'dataset',
     'reuse',
     'organization',
-    'search',
     'activity',
     'followers',
     'topic',

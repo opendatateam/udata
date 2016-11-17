@@ -343,8 +343,7 @@ class CsvTest(FrontTestCase):
         self.assert_filename(response, 'export')
 
     def test_empty_stream_from_list(self):
-        with self.assertRaises(ValueError):
-            self.assert_empty_stream_csv('testcsv.from_list')
+        self.assert400(self.get(url_for('testcsv.from_list')))
 
     def test_stream_nested_from_adapter(self):
         fake = FakeFactory.build()

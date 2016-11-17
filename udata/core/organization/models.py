@@ -7,8 +7,10 @@ from itertools import chain
 from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
+from werkzeug import cached_property
 
 from udata.core.storages import avatars, default_image_basename
+from udata.frontend.markdown import mdstrip
 from udata.models import db, BadgeMixin, WithMetrics
 from udata.i18n import lazy_gettext as _
 
@@ -35,23 +37,6 @@ LOGO_SIZES = [100, 60, 25]
 
 PUBLIC_SERVICE = 'public-service'
 CERTIFIED = 'certified'
-
-
-def upload_logo_to(org):
-    return '/'.join((org.slug, datetime.now().strftime('%Y%m%d-%H%M%S')))
-
-
-class OrgUnit(object):
-    '''
-    Simple mixin holding common fields for all organization units.
-    '''
-    name = db.StringField(max_length=255, required=True)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from='name', update=True)
-    description = db.StringField(required=True)
-    url = db.URLField(max_length=255)
-    image_url = db.URLField(max_length=255)
-    extras = db.DictField()
 
 
 class Team(db.EmbeddedDocument):
@@ -224,6 +209,29 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
             *[dataset.check_availability()
               for dataset in Dataset.objects(organization=self).visible()[:20]]
         )
+
+    @cached_property
+    def json_ld(self):
+        type_ = 'GovernmentOrganization' if self.public_service \
+                else 'Organization'
+
+        result = {
+            '@context': 'http://schema.org',
+            '@type': type_,
+            'alternateName': self.slug,
+            'url': url_for('organizations.show', org=self, _external=True),
+            'name': self.name,
+        }
+
+        if self.description:
+            result['description'] = mdstrip(self.description)
+
+        logo = self.logo(external=True)
+        if logo:
+            result['logo'] = logo
+
+        return result
+
 
 pre_save.connect(Organization.pre_save, sender=Organization)
 post_save.connect(Organization.post_save, sender=Organization)

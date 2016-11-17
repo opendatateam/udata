@@ -10,6 +10,7 @@ from udata.models import Dataset, Discussion, Follow, Reuse
 from udata.core.site.views import current_site
 from udata.sitemap import sitemap
 
+from .search import DatasetSearch
 from .permissions import ResourceEditPermission, DatasetEditPermission
 
 blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
@@ -49,6 +50,7 @@ def recent_feed():
 @blueprint.route('/', endpoint='list')
 class DatasetListView(SearchView):
     model = Dataset
+    search_adapter = DatasetSearch
     context_name = 'datasets'
     template_name = 'dataset/list.html'
 
@@ -86,6 +88,7 @@ class DatasetDetailView(DatasetView, DetailView):
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = ResourceEditPermission
         context['discussions'] = Discussion.objects(subject=self.dataset)
+
         return context
 
 
@@ -104,4 +107,4 @@ class DatasetFollowersView(DatasetView, DetailView):
 def sitemap_urls():
     for dataset in Dataset.objects.visible().only('id', 'slug'):
         yield ('datasets.show_redirect', {'dataset': dataset},
-               None, "weekly", 0.8)
+               None, 'weekly', 0.8)

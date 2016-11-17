@@ -97,7 +97,7 @@ class ReuseDetailView(ReuseView, DetailView):
         context.update(
             followers=followers,
             can_edit=ReuseEditPermission(self.reuse),
-            discussions=Discussion.objects(subject=self.reuse)
+            discussions=Discussion.objects(subject=self.reuse),
         )
 
         return context
@@ -106,4 +106,4 @@ class ReuseDetailView(ReuseView, DetailView):
 @sitemap.register_generator
 def sitemap_urls():
     for reuse in Reuse.objects.visible().only('id', 'slug'):
-        yield 'reuses.show_redirect', {'reuse': reuse}, None, "weekly", 0.8
+        yield 'reuses.show_redirect', {'reuse': reuse}, None, 'weekly', 0.8

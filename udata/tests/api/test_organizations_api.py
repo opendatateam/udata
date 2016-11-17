@@ -512,15 +512,16 @@ class MembershipAPITest(APITestCase):
         with self.autoindex():
             orgs = OrganizationFactory.create_batch(3)
 
-        org = orgs[0]
+        first_org = orgs[0]
         response = self.get(url_for('api.suggest_organizations'),
-                            qs={'q': str(org.id), 'size': '5'})
+                            qs={'q': str(first_org.id), 'size': '5'})
         self.assert200(response)
 
-        self.assertGreaterEqual(len(response.json), 1)
-
-        suggestion = response.json[0]
-        self.assertEqual(suggestion['id'], str(org.id))
+        # The batch factory generates ids that might be too close
+        # which then are found with the fuzzy search.
+        suggested_ids = [u['id'] for u in response.json]
+        self.assertGreaterEqual(len(suggested_ids), 1)
+        self.assertIn(str(first_org.id), suggested_ids)
 
 
 class OrganizationDatasetsAPITest(APITestCase):

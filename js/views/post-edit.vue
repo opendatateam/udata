@@ -10,7 +10,7 @@ import Post from 'models/post';
 import FormLayout from 'components/form-layout.vue';
 
 export default {
-    data: function() {
+    data() {
         return {
             post: new Post(),
         };
@@ -27,7 +27,7 @@ export default {
     },
     methods: {
         save() {
-            let form = this.$refs.form;
+            const form = this.$refs.form;
             if (form.validate()) {
                 this.post.update(form.serialize(), (response) => {
                     this.post.on_fetched(response);

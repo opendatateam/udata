@@ -13,6 +13,7 @@ from itsdangerous import JSONWebSignatureSerializer
 
 from werkzeug import cached_property
 
+from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics
 from udata.core.storages import avatars, default_image_basename
 
@@ -20,10 +21,6 @@ from udata.core.storages import avatars, default_image_basename
 __all__ = ('User', 'Role', 'datastore')
 
 AVATAR_SIZES = [100, 32, 25]
-
-
-def upload_avatar_to(user):
-    return '/'.join((user.slug, datetime.now().strftime('%Y%m%d-%H%M%S')))
 
 
 # TODO: use simple text for role
@@ -45,7 +42,7 @@ class UserSettings(db.EmbeddedDocument):
 class User(db.Document, WithMetrics, UserMixin):
     slug = db.SlugField(
         max_length=255, required=True, populate_from='fullname')
-    email = db.StringField(max_length=255, required=True)
+    email = db.StringField(max_length=255, required=True, unique=True)
     password = db.StringField()
     active = db.BooleanField()
     roles = db.ListField(db.ReferenceField(Role), default=[])
@@ -64,7 +61,13 @@ class User(db.Document, WithMetrics, UserMixin):
     apikey = db.StringField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
+
+    # The field below is required for Flask-security
+    # when SECURITY_CONFIRMABLE is True
     confirmed_at = db.DateTimeField()
+
+    # The 5 fields below are required for Flask-security
+    # when SECURITY_TRACKABLE is True
     last_login_at = db.DateTimeField()
     current_login_at = db.DateTimeField()
     last_login_ip = db.StringField()
@@ -186,6 +189,26 @@ class User(db.Document, WithMetrics, UserMixin):
             cls.on_create.send(document)
         else:
             cls.on_update.send(document)
+
+    @cached_property
+    def json_ld(self):
+
+        result = {
+            '@type': 'Person',
+            '@context': 'http://schema.org',
+            'name': self.fullname,
+        }
+
+        if self.about:
+            result['description'] = mdstrip(self.about)
+
+        if self.avatar_url:
+            result['image'] = self.avatar_url
+
+        if self.website:
+            result['url'] = self.website
+
+        return result
 
 
 datastore = MongoEngineUserDatastore(db, User, Role)

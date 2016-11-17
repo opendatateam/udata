@@ -39,25 +39,47 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_list(self):
         '''It should fetch a dataset list from the API'''
         with self.autoindex():
-            datasets = [DatasetFactory(resources=[ResourceFactory()])
-                        for i in range(2)]
+            datasets = [VisibleDatasetFactory() for i in range(2)]
 
         response = self.get(url_for('api.datasets'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), len(datasets))
         self.assertFalse('quality' in response.json['data'][0])
 
-    def test_dataset_api_list_with_extra_filter(self):
-        '''It should fetch a dataset list from the API filtering on extras'''
+    def test_dataset_api_list_filtered_by_org(self):
+        '''It should fetch a dataset list for a given org'''
+        self.login()
         with self.autoindex():
-            for i in range(2):
-                DatasetFactory(resources=[ResourceFactory()],
-                               extras={'key': i})
+            member = Member(user=self.user, role='editor')
+            org = OrganizationFactory(members=[member])
+            VisibleDatasetFactory()
+            dataset_org = VisibleDatasetFactory(organization=org)
 
-        response = self.get(url_for('api.datasets', **{'extra.key': 1}))
+        response = self.get(url_for('api.datasets'),
+                            qs={'organization': str(org.id)})
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 1)
-        self.assertEqual(response.json['data'][0]['extras']['key'], 1)
+        self.assertEqual(response.json['data'][0]['id'], str(dataset_org.id))
+
+    def test_dataset_api_list_filtered_by_org_with_or(self):
+        '''It should fetch a dataset list for two given orgs'''
+        self.login()
+        with self.autoindex():
+            member = Member(user=self.user, role='editor')
+            org1 = OrganizationFactory(members=[member])
+            org2 = OrganizationFactory(members=[member])
+            VisibleDatasetFactory()
+            dataset_org1 = VisibleDatasetFactory(organization=org1)
+            dataset_org2 = VisibleDatasetFactory(organization=org2)
+
+        response = self.get(
+            url_for('api.datasets'),
+            qs={'organization': '{0}|{1}'.format(org1.id, org2.id)})
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 2)
+        returned_ids = [item['id'] for item in response.json['data']]
+        self.assertIn(str(dataset_org1.id), returned_ids)
+        self.assertIn(str(dataset_org2.id), returned_ids)
 
     def test_dataset_api_list_with_facets(self):
         '''It should fetch a dataset list from the API with facets'''
@@ -337,7 +359,7 @@ class DatasetAPITest(APITestCase):
         '''It should delete a dataset from the API'''
         user = self.login()
         with self.autoindex():
-            dataset = DatasetFactory(owner=user, resources=[ResourceFactory()])
+            dataset = VisibleDatasetFactory(owner=user)
             response = self.delete(url_for('api.dataset', dataset=dataset))
 
         self.assertStatus(response, 204)
@@ -851,10 +873,8 @@ class CommunityResourceAPITest(APITestCase):
     @attr('create')
     def test_community_resource_api_create(self):
         '''It should create a community resource from the API'''
+        dataset = VisibleDatasetFactory()
         self.login()
-        with self.autoindex():
-            resource = ResourceFactory()
-            dataset = DatasetFactory(resources=[resource])
         response = self.post(
             url_for('api.upload_community_resources', dataset=dataset),
             {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
@@ -874,13 +894,11 @@ class CommunityResourceAPITest(APITestCase):
     @attr('create')
     def test_community_resource_api_create_as_org(self):
         '''It should create a community resource as org from the API'''
+        dataset = VisibleDatasetFactory()
         user = self.login()
-        with self.autoindex():
-            resource = ResourceFactory()
-            org = OrganizationFactory(members=[
-                Member(user=user, role='admin')
-            ])
-            dataset = DatasetFactory(resources=[resource])
+        org = OrganizationFactory(members=[
+            Member(user=user, role='admin')
+        ])
         response = self.post(
             url_for('api.upload_community_resources', dataset=dataset),
             {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
@@ -901,9 +919,8 @@ class CommunityResourceAPITest(APITestCase):
     @attr('update')
     def test_community_resource_api_update(self):
         '''It should update a community resource from the API'''
-        self.login()
-        with self.autoindex():
-            community_resource = CommunityResourceFactory()
+        user = self.login()
+        community_resource = CommunityResourceFactory(owner=user)
         data = community_resource.to_dict()
         data['description'] = 'new description'
         response = self.put(url_for('api.community_resource',
@@ -917,14 +934,9 @@ class CommunityResourceAPITest(APITestCase):
     @attr('update')
     def test_community_resource_api_update_with_file(self):
         '''It should update a community resource file from the API'''
+        dataset = VisibleDatasetFactory()
         user = self.login()
-        with self.autoindex():
-            resource = ResourceFactory()
-            org = OrganizationFactory(members=[
-                Member(user=user, role='admin')
-            ])
-            dataset = DatasetFactory(resources=[resource], organization=org)
-            community_resource = CommunityResourceFactory(dataset=dataset)
+        community_resource = CommunityResourceFactory(dataset=dataset, owner=user)
         response = self.post(
             url_for('api.upload_community_resource',
                     community=community_resource),
@@ -943,3 +955,54 @@ class CommunityResourceAPITest(APITestCase):
                          'new description')
         self.assertTrue(
             CommunityResource.objects.first().url.endswith('test.txt'))
+
+    @attr('create')
+    def test_community_resource_api_create_remote(self):
+        '''It should create a remote community resource from the API'''
+        user = self.login()
+        dataset = VisibleDatasetFactory()
+        attrs = CommunityResourceFactory.attributes()
+        attrs['dataset'] = str(dataset.id)
+        response = self.post(
+            url_for('api.community_resources'),
+            attrs
+        )
+        self.assertStatus(response, 201)
+        data = json.loads(response.data)
+        self.assertEqual(data['title'], attrs['title'])
+        self.assertEqual(data['url'], attrs['url'])
+        self.assertEqual(CommunityResource.objects.count(), 1)
+        community_resource = CommunityResource.objects.first()
+        self.assertEqual(community_resource.dataset, dataset)
+        self.assertEqual(community_resource.owner, user)
+        self.assertIsNone(community_resource.organization)
+
+    @attr('create')
+    def test_community_resource_api_create_remote_needs_dataset(self):
+        '''It should prevent remote community resource creation without dataset from the API'''
+        user = self.login()
+        response = self.post(
+            url_for('api.community_resources'),
+            CommunityResourceFactory.attributes()
+        )
+        self.assertStatus(response, 400)
+        data = json.loads(response.data)
+        self.assertIn('errors', data)
+        self.assertIn('dataset', data['errors'])
+        self.assertEqual(CommunityResource.objects.count(), 0)
+
+    @attr('create')
+    def test_community_resource_api_create_remote_needs_real_dataset(self):
+        '''It should prevent remote community resource creation without a valid dataset identifier'''
+        user = self.login()
+        attrs = CommunityResourceFactory.attributes()
+        attrs['dataset'] = 'xxx'
+        response = self.post(
+            url_for('api.community_resources'),
+            attrs
+        )
+        self.assertStatus(response, 400)
+        data = json.loads(response.data)
+        self.assertIn('errors', data)
+        self.assertIn('dataset', data['errors'])
+        self.assertEqual(CommunityResource.objects.count(), 0)

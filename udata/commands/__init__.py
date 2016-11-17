@@ -53,7 +53,7 @@ def register_commands(manager):
     import udata.core.user.commands  # noqa
     import udata.core.dataset.commands  # noqa
     import udata.core.organization.commands  # noqa
-    import udata.core.search.commands  # noqa
+    import udata.search.commands  # noqa
     import udata.core.spatial.commands  # noqa
     import udata.core.jobs.commands  # noqa
     import udata.core.badges.commands  # noqa

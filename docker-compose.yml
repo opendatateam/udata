@@ -18,7 +18,7 @@ broker:
     - "6379:6379"
 
 search:
-    image: elasticsearch:2.3
+    image: elasticsearch:2.4
     volumes:
       - ./data/search/data:/usr/share/elasticsearch/data
       - ./data/search/plugins:/usr/share/elasticsearch/plugins

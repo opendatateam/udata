@@ -158,7 +158,7 @@ class ImageField(FieldHelper, fields.FormField):
         bbox = self.form.bbox.data or None
         filename = self.form.filename.data or None
         if filename and filename in tmp:
-            with tmp.open(filename) as infile:
+            with tmp.open(filename, 'rb') as infile:
                 field.save(infile, filename, bbox=bbox)
             tmp.delete(filename)
 
@@ -323,6 +323,9 @@ def clean_oid(oid, model):
         return clean_oid(oid['id'], model)
     else:
         try:
+            # Prevalidation is required as to_python is failsafe
+            # and returns the original value on exception
+            model.id.validate(oid)
             return model.id.to_python(oid)
         except:  # Catch all exceptions as model.type is not predefined
             raise ValueError('Unsupported identifier: ' + oid)
@@ -344,8 +347,8 @@ class ModelFieldMixin(object):
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) == 1 and valuelist[0]:
             try:
-                self.data = self.model.objects.get(id=clean_oid(valuelist[0],
-                                                                self.model))
+                id = clean_oid(valuelist[0], self.model)
+                self.data = self.model.objects.get(id=id)
             except self.model.DoesNotExist:
                 message = _('{0} does not exists').format(self.model.__name__)
                 raise validators.ValidationError(message)

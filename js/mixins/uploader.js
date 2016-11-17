@@ -79,7 +79,9 @@ export default {
                     // Images
                     'jpeg', 'jpg', 'jpe', 'gif', 'png', 'dwg', 'svg', 'tiff', 'ecw', 'svgz',
                     // Geo
-                    'shp', 'kml', 'kmz', 'gpx', 'shx', 'ovr',
+                    'shp', 'kml', 'kmz', 'gpx', 'shx', 'ovr', 'geojson',
+                    // Meteorology
+                    'grib2',
                     // Misc
                     'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'xsd', 'owl'
                 ]
@@ -203,7 +205,7 @@ export default {
             this.$emit('uploader:error', id, name, reason);
         },
 
-        clear: function() {
+        clear() {
             this.$uploader.clearStoredFiles();
         }
     }
