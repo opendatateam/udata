@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
-
 from flask import url_for
 
 from udata.core.user.factories import UserFactory, AdminFactory
@@ -227,8 +225,7 @@ class UserAPITest(APITestCase):
         data['active'] = False
         response = self.put(url_for('api.user', user=user), data)
         self.assert200(response)
-        response = json.loads(response.data)
-        self.assertEqual(response['active'], False)
+        self.assertEqual(response.json['active'], False)
 
     def test_user_api_update_with_website(self):
         '''It should raise a 400'''
@@ -258,8 +255,7 @@ class UserAPITest(APITestCase):
         data['roles'] = ['admin']
         response = self.put(url_for('api.user', user=user), data)
         self.assert200(response)
-        response = json.loads(response.data)
-        self.assertEqual(response['roles'], ['admin'])
+        self.assertEqual(response.json['roles'], ['admin'])
 
     def test_user_api_update_with_a_non_existing_role(self):
         '''It should raise a 400'''
@@ -275,5 +271,4 @@ class UserAPITest(APITestCase):
         self.login(AdminFactory())
         response = self.get(url_for('api.user_roles'))
         self.assert200(response)
-        response = json.loads(response.data)
-        self.assertEqual(response, [{'name': 'admin'}])
+        self.assertEqual(response.json, [{'name': 'admin'}])
