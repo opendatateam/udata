@@ -3,11 +3,8 @@
 </template>
 <script>
 import L from 'leaflet';
+import config from 'config';
 
-const ATTRIBUTIONS = `&copy;<a href="http://openstreetmap.org">OpenStreetMap</a>
-                      /<a href="http://open.mapquest.com/">MapQuest</a>`;
-const TILES_URL = 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png';
-const TILES_CONFIG = {subdomains: '1234', attribution: ATTRIBUTIONS};
 const INITIAL_SETTINGS = {center: [42, 2.4], zoom: 4, zoomControl: false};
 
 export default {
@@ -39,7 +36,7 @@ export default {
             if (this.map.tap) this.map.tap.disable();
         }
 
-        L.tileLayer(TILES_URL, TILES_CONFIG).addTo(this.map);
+        L.tileLayer(config.tiles_url, config.tiles_config).addTo(this.map);
     },
     watch: {
         geojson: function(json) {
