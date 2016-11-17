@@ -1,11 +1,17 @@
 {% extends theme('faq/base.html') %}
 
+{% set meta = {
+    'title': _('Découvrir l’OpenData - FAQ'),
+    'description': _('Questions fréquemment posées sur la plateforme data.gouv.fr'),
+    'keywords': ['Découvrir', 'OpenData', 'FAQ', 'Questions fréquemment posées'],
+} %}
+
 {% block main_content %}
 <div class="container faq-home">
     <div class="row text-center">
         <h1>Découvrir l’OpenData</h1>
 
-        <div class="col-md-3">
+        <div class="col-md-2 col-md-offset-1">
             <a class="thumbnail" href="{{ url_for('gouvfr.faq', section='citizen') }}">
               <div class="caption">
                 <h3>Citoyen</h3>
@@ -14,7 +20,7 @@
             </a>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-2">
             <a class="thumbnail" href="{{ url_for('gouvfr.faq', section='producer') }}">
               <div class="caption">
                 <h3>Producteur</h3>
@@ -23,7 +29,7 @@
             </a>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-2">
             <a class="thumbnail" href="{{ url_for('gouvfr.faq', section='reuser') }}">
               <div class="caption">
                 <h3>Réutilisateur</h3>
@@ -32,11 +38,20 @@
             </a>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-2">
             <a class="thumbnail" href="{{ url_for('gouvfr.faq', section='developer') }}">
               <div class="caption">
                 <h3>Développeur</h3>
-                <p>Quelles sont les intégrations possibles avec la plateforme ?</p>
+                <p>Comment intéragir avec la plateforme ? Avec quelles API ?</p>
+              </div>
+            </a>
+        </div>
+
+        <div class="col-md-2">
+            <a class="thumbnail" href="{{ url_for('gouvfr.faq', section='system-integrator') }}">
+              <div class="caption">
+                <h3>Intégrateur</h3>
+                <p>Quelles sont les intégrations tierces rendues possibles ?</p>
               </div>
             </a>
         </div>
@@ -44,10 +59,10 @@
 </div>
 
 <div class="faq-content">
-    <p>La mission Etalab, placée sous l’autorité du Premier ministre au sein du SGMAP, a pour mission d’accompagner l’ouverture des données publiques de l’Etat et des administrations. À ce titre, elle met en oeuvre et anime la plateforme ouverte des données publiques data.gouv.fr qui héberge les jeux de données et recense leurs réutilisations.
+    <p>La mission Etalab, placée sous l’autorité du Premier ministre au sein du SGMAP, a pour mission d’accompagner l’ouverture des données publiques de l’Etat et des administrations. À ce titre, elle met en oeuvre et anime la plateforme ouverte des données publiques « data.gouv.fr » qui héberge les jeux de données et recense leurs réutilisations.
     </p>
     <h3>A quoi servent les données ouvertes ?</h3>
-    <p>L’ouverture des données (Open Data) vise à encourager la réutilisation des données au-delà de leur utilisation première par l’administration. En utilisant, directement ou via des applications, des données publiées sur la plateforme data.gouv.fr, on peut par exemple :
+    <p>L’ouverture des données (Open Data) vise à encourager la réutilisation des données au-delà de leur utilisation première par l’administration. En utilisant, directement ou via des applications, des données publiées sur la plateforme « data.gouv.fr », on peut par exemple :
     </p>
     <ul>
         <li>répondre à des questions,</li>
@@ -55,7 +70,7 @@
         <li>bénéficier de services utiles au quotidien : pour se déplacer, éviter le gaspillage alimentaire, connaître les services publics à proximité de son domicile,</li>
         <li>encourager la transparence démocratique des institutions et des élus, par exemple : connaître l’utilisation de la réserve parlementaire, les budgets de l’Etat et des collectivités, les titres de presse aidés par l’Etat.</li>
     </ul>
-    <p>Data.gouv.fr s’adresse :
+    <p>« data.gouv.fr » s’adresse :
     </p>
     <ul>
         <li>aux producteurs de données qui souhaitent les publier dans des formats ouverts et réutilisables,</li>
@@ -63,7 +78,7 @@
         <li>mais aussi à tout citoyen, association ou entreprise, qui peut ainsi découvrir et utiliser des données.</li>
     </ul>
 
-    <h3>Comment faire partie de la communauté data.gouv.fr ? </h3>
+    <h3>Comment faire partie de la communauté « data.gouv.fr » ? </h3>
     <p>En consultant <a href="http://www.etalab.gouv.fr/">le blog de la mission Etalab</a> vous pourrez vous inscrire aux différents évènements (Hackathons, OpenData Camps, Conférences) organisés par la mission Etalab.</p>
     <p>Nous vous invitons par ailleurs à suivre les comptes Twitter <a href="https://twitter.com/datagouvfr">@datagouvfr</a> (actualité de la plateforme, annonce des nouveaux jeux de données) et <a href="https://twitter.com/etalab">@etalab</a> (actualité de la mission Etalab et de l’ouverture des données publiques).</p>
     <p>L’équipe de cette plateforme est par ailleurs joignable par mail : <a href="m&#x61;ilto:{{ config.CONTACT_EMAIL|obfuscate|safe }}">{{ config.CONTACT_EMAIL }}</a>.</p>

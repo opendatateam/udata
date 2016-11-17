@@ -1,5 +1,11 @@
 {% extends theme('faq/base.html') %}
 
+{% set meta = {
+    'title': _('Découvrir l’OpenData en tant que producteur - FAQ'),
+    'description': _('Questions fréquemment posées sur la plateforme data.gouv.fr'),
+    'keywords': ['Producteur', 'OpenData', 'FAQ', 'Questions fréquemment posées'],
+} %}
+
 {% block faq_content %}
 <h1>Découvrir l’OpenData en tant que producteur</h1>
 
@@ -9,10 +15,10 @@
 </p>
 <p>Cette protection est indépendante et s'exerce sans préjudice de celles résultant du droit d'auteur ou d'un autre droit sur la base de données ou un de ses éléments constitutifs.
 </p>
-<p>Source <a href:"http://www.legifrance.gouv.fr/affichCode.do?idArticle=LEGIARTI000006279245&idSectionTA=LEGISCTA000006161660&cidTexte=LEGITEXT000006069414&dateTexte=20090613">Legifrance</a> </p>
+<p>Source <a href="http://www.legifrance.gouv.fr/affichCode.do?idArticle=LEGIARTI000006279245&idSectionTA=LEGISCTA000006161660&cidTexte=LEGITEXT000006069414&dateTexte=20090613">Legifrance</a> </p>
 </p>
 <h3>Les services publics certifiés</h3>
-<p>Les organisations inscrites sur la plateforme «data.gouv.fr» estimant assurer une mission de service public peuvent effectuer une demande en ligne pour être reconnue comme tel. Une organisation certifiée bénéficie d’un meilleur référencement.
+<p>Les organisations inscrites sur la plateforme « data.gouv.fr » estimant assurer une mission de service public peuvent effectuer une demande en ligne pour être reconnue comme tel. Une organisation certifiée bénéficie d’un meilleur référencement.
 </p>
 <p>Pour devenir un service public certifié, inscrivez-vous sur le site en tant qu’organisation, puis effectuez la demande en envoyant un mail à l'adresse suivante : certification@data.gouv.fr. Une vérification par email ou courrier vous sera demandée. Vous pouvez néanmoins commencer à publier vos jeux de données avant d’obtenir le badge de certification.
 </p>
@@ -22,19 +28,19 @@
 <p>Par exemple «La Réserve Parlementaire», contiendra plusieurs ressources, typiquement un fichier par année.
 </p>
 <h3>Les jeux de données «à la une»</h3>
-<p>Les jeux de données à la une changent périodiquement. Etalab, en tant qu’administrateur et éditeur de la plateforme «data.gouv.fr», fait une analyse exhaustive des jeux de données hébergés sur la plateforme afin de mettre en avant ceux qui, d’après l’actualité française, pourraient être utiles aux visiteurs de la plateforme.
+<p>Les jeux de données à la une changent périodiquement. Etalab, en tant qu’administrateur et éditeur de la plateforme « data.gouv.fr », fait une analyse exhaustive des jeux de données hébergés sur la plateforme afin de mettre en avant ceux qui, d’après l’actualité française, pourraient être utiles aux visiteurs de la plateforme.
 </p>
 <h2>Comment en tant que producteur, puis-je publier des jeux de données ?</h2>
-<p>Créez un compte sur data.gouv.fr. Dès que vous serez inscrit, vous pourrez «contribuez» et «publier un jeu de données».
+<p>Créez un compte sur « data.gouv.fr ». Dès que vous serez inscrit, vous pourrez «contribuez» et «publier un jeu de données».
 </p>
 <p>Un jeu de données peut être publié simplement avec un titre et une ressource. Pour autant, il sera mieux référencé s'il contient des informations supplémentaires qui le décrivent : période couverte, fréquence de mise à jour, territoire couvert, thématiques…
 </p>
 <h3>Le label qualité «référentiel national»</h3>
 <p>La règle du jeu est simple : le producteur qui souhaite obtenir le label pour un de ses jeux de données s’engage à fournir la donnée brute, à respecter strictement son cycle de mise à jour, et à répondre à J+2 à tout signalement ou demande.
 </p>
-<p>De son côté, data.gouv.fr, met en avant le jeu de donnée, mais surtout le transforme en API, c’est à dire le rend requêtable. Votre application a besoin de saisir un nom d’établissement scolaire ? Plus besoin de recopier la table ou de développer des composants graphiques, il vous suffira d’utiliser les API data.gouv.fr pour obtenir en quelques minutes d’intégration HTML, un sélecteur de collège/lycée totalement intégré à votre application, comme par exemple le sélecteur d’adresse réutilisable de adresse.data.gouv.fr.
+<p>De son côté, « data.gouv.fr », met en avant le jeu de donnée, mais surtout le transforme en API, c’est à dire le rend requêtable. Votre application a besoin de saisir un nom d’établissement scolaire ? Plus besoin de recopier la table ou de développer des composants graphiques, il vous suffira d’utiliser les API « data.gouv.fr » pour obtenir en quelques minutes d’intégration HTML, un sélecteur de collège/lycée totalement intégré à votre application, comme par exemple le sélecteur d’adresse réutilisable de adresse.data.gouv.fr.
 </p>
-<p>Cette décision va transformer data.gouv.fr en composant critique, et c’est un choix assumé, car nous continuerons à offrir une disponibilité H24 aux applications qui souhaitent utiliser ces référentiels ouverts, comme la BAN, premier référentiel national à être distribué aujourd’hui. A vous maintenant de nous dire quels sont selon vous les jeux de données publiques qui devront obtenir ce label en priorité !
+<p>Cette décision va transformer « data.gouv.fr » en composant critique, et c’est un choix assumé, car nous continuerons à offrir une disponibilité H24 aux applications qui souhaitent utiliser ces référentiels ouverts, comme la BAN, premier référentiel national à être distribué aujourd’hui. A vous maintenant de nous dire quels sont selon vous les jeux de données publiques qui devront obtenir ce label en priorité !
 </p>
 <h2>Quels sont les outils de mesure mis à disposition ?</h2>
 <p>Du côté de l’engagement, le tableau de bord producteur (exemple) mesure l’activité en terme de pages vues et de réutilisations. Le nombre de discussions ouvertes et le nombre de réponses y seront associés, ainsi que des éléments de comparaison permettant de se situer vis à vis des autres producteurs. L’engagement de la communauté n’est pas une fin en soi, mais une mesure indirecte de son activité. Il répond à un enjeu interne fort : limiter nos actions de support pour permettre aux acteurs de résoudre leurs problèmes entre eux.
@@ -56,7 +62,7 @@
 Exemple : pour l'impact environnemental, citer les mots-clés tonne-carbone, externalité environnementale, principaux facteurs négatifs et positifs de l'impact des mines sur l'environnement, etc.
 </p>
 <h3>Licence</h3>
-<p>Sélectionner la licence Open Data sous laquelle vous publiez le jeu de données. Dans la plupart des cas, l'Open Licence / Licence Ouverte. Seuls les réutilisations publiées dans un jeu de données peuvent être sous licence fermée. Par exemple, un jeu de données Open Data «Annuaire des associations», et une réutilisation fermée, voire payante, permettant de consulter les adresses des dirigeants des associations.
+<p>Sélectionner la licence Open Data sous laquelle vous publiez le jeu de données. Dans la plupart des cas, l'<a href="https://www.etalab.gouv.fr/licence-ouverte-open-licence">Open Licence / Licence Ouverte</a>. Seuls les réutilisations publiées dans un jeu de données peuvent être sous licence fermée. Par exemple, un jeu de données Open Data «Annuaire des associations», et une réutilisation fermée, voire payante, permettant de consulter les adresses des dirigeants des associations.
 </p>
 <h3>Fréquence de mise à jour</h3>
 <p>La fréquence indique le niveau de détail temporel à l'intérieur de cette période : indiquer "mois" si votre fichier détaille des évolutions mois par mois. Si votre flux d'information est mis à jour annuellement, indiquer «année».
@@ -89,7 +95,7 @@ Exemple : pour l'impact environnemental, citer les mots-clés tonne-carbone, ex
 Une <b>description</b> de la ressource peut être ajoutée de manière optionnelle pour exprimer des compléments d'informations sur la méthodologie (sondage, enquête, données fiscales ..), des précisions sur les données en question (colonnes du fichiers ..), ou tout autre information renforçant le titre.
 </p>
 <h3>Télécharger un fichier ou saisir son URL ?</h3>
-<p>Si vous ne possédez pas de site Web et que la fréquence de mise à jour de vos données est faible, data.gouv.fr permet de télécharger des fichiers depuis votre ordinateur. Néanmois, si vous possédez un site Web, il est préférable de référencer vos données, évitant ainsi de devoir les mettre à jour régulièrement sur data.gouv. Par exemple, référencer la ressource http://monsite.fr/jeu_de_donnees_derniere_version.csv vous permet de déclarer une fois pour toutes une donnée avec une fréquence de mise à jour temps réel.
+<p>Si vous ne possédez pas de site Web et que la fréquence de mise à jour de vos données est faible, « data.gouv.fr » permet de télécharger des fichiers depuis votre ordinateur. Néanmois, si vous possédez un site Web, il est préférable de référencer vos données, évitant ainsi de devoir les mettre à jour régulièrement sur data.gouv. Par exemple, référencer la ressource http://monsite.fr/jeu_de_donnees_derniere_version.csv vous permet de déclarer une fois pour toutes une donnée avec une fréquence de mise à jour temps réel.
 </p>
 <h3>Bureau, département ou service</h3>
 <p>Préciser ici, de manière optionnelle, les indications sur l'organisation effectivement productrice, par exemple SGMAP/Service X.
@@ -99,7 +105,7 @@ Une <b>description</b> de la ressource peut être ajoutée de manière optionnel
 </p>
 <h3>Thématique (groupes)</h2>
 <p>A l'image des mots clés, qui permettent d'accrocher votre jeu de données à d'autres dimensions, des thématiques sont à votre disposition pour ancrer vos jeux dans les grandes catégories éditoriales présentées à côté du moteur de recherche : Agriculture, Culture, Société, Territoires, etc.
-A noter, des thématiques conjoncturelles permettent de raccrocher certains jeux à des sujets d'actualité débattus sur data.gouv.fr : égalité femmes-hommes, Grenelle de l'environnement, etc.
+A noter, des thématiques conjoncturelles permettent de raccrocher certains jeux à des sujets d'actualité débattus sur « data.gouv.fr » : égalité femmes-hommes, Grenelle de l'environnement, etc.
 Un jeu de données peut appartenir à 0, 1 ou 2 thématiques.
 </p>
 
@@ -144,11 +150,11 @@ Un jeu de données peut appartenir à 0, 1 ou 2 thématiques.
 </ol>
 <p>Les standards de la géomatique ne sont pas ceux du Web et pourtant ils structurent l’immense capital d’informations accumulé depuis plusieurs dizaines d’années. D’un côté des normes comme Inspire, WFS, WCS, CSW, Shapefiles, GeoJSON, KML, de l’autre des outils gratuits comme OpenStreetMap ou Google Earth. La passerelle Inspire, en production depuis début 2015, permet aux producteurs et aux réutilisateurs d’exploiter au mieux ces gisements de données colossaux, en les rendant automatiquement disponibles dans les standards du Web. Besoin d’une carte des zones d’inondation en Bourgogne ? Cliquez sur le jeu de données et visualisez-le dans une carte OpenStreet Map n’a jamais été aussi simple.
 </p>
-<p>Fin 2015, le moteur Inspire de «data.gouv.fr» permettra surtout de réunir les données géographiques produites au plus près du terrain par les collectivités dans des référentiels nationaux fédérés. Ce dispositif permettra notamment d’élargir le périmètre de l’API Carto, destiné à simplifier la création de démarches en ligne ayant une composante géographique (déclaration de travaux, demande d’autorisation de ruchers, action associative sur une zone Politique de la Ville, etc.). API Carto sera quant à lui amené à diffuser de la donnée non-publique, soumise au consentement de l’usager, comme des données cadastrales personnelles. API Carto sera donc un distributeur des référentiels nationaux géographiques.
+<p>Fin 2015, le moteur Inspire de « data.gouv.fr » permettra surtout de réunir les données géographiques produites au plus près du terrain par les collectivités dans des référentiels nationaux fédérés. Ce dispositif permettra notamment d’élargir le périmètre de l’API Carto, destiné à simplifier la création de démarches en ligne ayant une composante géographique (déclaration de travaux, demande d’autorisation de ruchers, action associative sur une zone Politique de la Ville, etc.). API Carto sera quant à lui amené à diffuser de la donnée non-publique, soumise au consentement de l’usager, comme des données cadastrales personnelles. API Carto sera donc un distributeur des référentiels nationaux géographiques.
 </p>
 <p>C’est une donnée géographique homogène qui permettra l’émergence d’algorithmes au service de la transition énergétique, de la transparence des politiques d’aménagement, des politiques agricoles…
 </p>
-<p>Enfin, l’intégration géographique permettra de projeter des jeux de données nationaux dans les territoires, promesse de territoire «data.gouv.fr». Pour une organisation inscrite sur «data.gouv.fr», il suffira d’activer l’option, puis de choisir les jeux de données nationaux qu’elle souhaite diffuser sur son compte: comptabilité locale issue de la Direction Générale des Finances, indicateurs socio-économiques INSEE, élections, etc. En miroir, tout producteur national pourra suivre un guide simple pour rendre un jeu de données national compatible avec territoire.data.gouv.fr. Tout référentiel national est bien sûr naturellement intégré dans territoire.data.gouv.fr, par exemple les collèges et lycées sur votre département ou votre région.
+<p>Enfin, l’intégration géographique permettra de projeter des jeux de données nationaux dans les territoires, promesse de territoire « data.gouv.fr ». Pour une organisation inscrite sur « data.gouv.fr », il suffira d’activer l’option, puis de choisir les jeux de données nationaux qu’elle souhaite diffuser sur son compte: comptabilité locale issue de la Direction Générale des Finances, indicateurs socio-économiques INSEE, élections, etc. En miroir, tout producteur national pourra suivre un guide simple pour rendre un jeu de données national compatible avec territoire.data.gouv.fr. Tout référentiel national est bien sûr naturellement intégré dans territoire.data.gouv.fr, par exemple les collèges et lycées sur votre département ou votre région.
 </p>
 <h3>Pour contribuer à la passerelle Inspire en tant qu’autorité locale géographique (DDT, DREAL, DDTM…) :</h3>
 <ol>
