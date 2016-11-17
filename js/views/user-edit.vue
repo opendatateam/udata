@@ -16,7 +16,7 @@ export default {
     components: {FormLayout, UserForm},
     methods: {
         save() {
-            let form = this.$refs.form;
+            const form = this.$refs.form;
             if (form.validate()) {
                 this.user.update(form.serialize(),
                                  response => {

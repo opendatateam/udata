@@ -76,7 +76,7 @@ class UserActivityView(UserView, DetailView):
 
     def get_context(self):
         if not self.user.visible:
-            abort(410)
+            abort(410, 'User is not active')
         context = super(UserActivityView, self).get_context()
         context['activities'] = (Activity.objects(actor=self.object)
                                          .order_by('-created_at').limit(15))

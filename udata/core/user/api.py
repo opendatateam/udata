@@ -246,12 +246,18 @@ class UserAPI(API):
 
     def check_permissions(self, user, readonly=False):
         if not user.visible:
+            # We cannot modify or read an inactive user, unless we are admin
             api.abort(410, 'User is not active')
-        if user.deleted and (
-            not readonly or (readonly and not UserEditPermission(user).can())
+        elif user.deleted and (
+            # We cannot modify a deleted user
+            not readonly or (
+                # We cannot get a deleted user if we do not have the
+                # permissions
+                readonly and not UserEditPermission(user).can())
         ):
             api.abort(410, 'User has been deleted')
-        if not readonly:
+        elif not readonly:
+            # We must have the permission to modify the user
             UserEditPermission(user).test()
 
     @api.doc('get_user')
