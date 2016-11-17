@@ -225,7 +225,7 @@ class UserAPITest(APITestCase):
         data['active'] = False
         response = self.put(url_for('api.user', user=user), data)
         self.assert200(response)
-        self.assertEqual(response.json['active'], False)
+        self.assertFalse(response.json['active'])
 
     def test_user_api_update_with_website(self):
         '''It should raise a 400'''

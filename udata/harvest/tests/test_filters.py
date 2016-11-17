@@ -21,10 +21,10 @@ class FiltersTest(TestCase):
         none_values = ('', '   ', None)
 
         for value in true_values:
-            self.assertEqual(filters.boolean(value), True)
+            self.assertTrue(filters.boolean(value))
 
         for value in false_values:
-            self.assertEqual(filters.boolean(value), False)
+            self.assertFalse(filters.boolean(value))
 
         for value in none_values:
             self.assertIsNone(filters.boolean(value))
