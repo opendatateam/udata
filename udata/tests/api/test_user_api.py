@@ -276,4 +276,4 @@ class UserAPITest(APITestCase):
         response = self.get(url_for('api.user_roles'))
         self.assert200(response)
         response = json.loads(response.data)
-        self.assertEqual(response, [{u'name': u'admin'}])
+        self.assertEqual(response, [{'name': 'admin'}])

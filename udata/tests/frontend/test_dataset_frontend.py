@@ -101,11 +101,11 @@ class DatasetBlueprintTest(FrontTestCase):
                               'Title 1 Title 2')
             self.assertEquals(json_ld_resource['interactionStatistic'],
                               {
-                                  u'@type': u'InteractionCounter',
-                                  u'interactionType': {
-                                      u'@type': u'DownloadAction',
+                                  '@type': 'InteractionCounter',
+                                  'interactionType': {
+                                      '@type': 'DownloadAction',
                                   },
-                                  u'userInteractionCount': 10,
+                                  'userInteractionCount': 10,
                               })
         self.assertEquals(json_ld['extras'],
                           [{

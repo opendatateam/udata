@@ -138,15 +138,15 @@ class URLField(FieldHelper, EmptyNone, html5.URLField):
 
 class TmpFilename(fields.HiddenField):
     def _value(self):
-        return u''
+        return ''
 
 
 class BBoxField(fields.HiddenField):
     def _value(self):
         if self.data:
-            return u','.join([str(x) for x in self.data])
+            return ','.join([str(x) for x in self.data])
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist:
@@ -306,9 +306,9 @@ class SelectMultipleField(FieldHelper, fields.SelectMultipleField):
 class TagField(StringField):
     def _value(self):
         if self.data:
-            return u','.join(self.data)
+            return ','.join(self.data)
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) > 1:
@@ -360,7 +360,7 @@ class ModelFieldMixin(object):
         if self.data:
             return unicode(self.data.id)
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) == 1 and valuelist[0]:
@@ -411,7 +411,7 @@ class ModelChoiceField(StringField):
         if self.data:
             return unicode(self.data.id)
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) == 1 and valuelist[0]:
@@ -431,9 +431,9 @@ class ModelList(object):
 
     def _value(self):
         if self.data:
-            return u','.join([str(o.id) for o in self.data])
+            return ','.join([str(o.id) for o in self.data])
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if not valuelist:
