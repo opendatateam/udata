@@ -68,7 +68,7 @@ class UserBlueprintTest(FrontTestCase):
         '''It should raise a 410 when the user is inactive'''
         user = UserFactory(active=False)
         response = self.get(url_for('users.show', user=user))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_render_profile_of_an_inactive_user_when_admin(self):
         '''It should render the user profile'''

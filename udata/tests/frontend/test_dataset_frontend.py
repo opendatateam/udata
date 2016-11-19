@@ -126,7 +126,7 @@ class DatasetBlueprintTest(FrontTestCase):
         '''It should raise a 410 if the dataset is deleted'''
         dataset = DatasetFactory(deleted=datetime.now())
         response = self.get(url_for('datasets.show', dataset=dataset))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_200_if_deleted_but_authorized(self):
         '''It should not raise a 410 if the can view it'''

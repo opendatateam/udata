@@ -65,6 +65,9 @@ class TestCase(BaseTestCase):
     def assert204(self, response):
         self.assertStatus(response, 204)
 
+    def assert410(self, response):
+        self.assertStatus(response, 410)
+
     def assertEqualDates(self, datetime1, datetime2, limit=1):  # Seconds.
         """Lax date comparison, avoid comparing milliseconds and seconds."""
         delta = (datetime1 - datetime2)

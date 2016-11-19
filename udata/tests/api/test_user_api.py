@@ -201,14 +201,14 @@ class UserAPITest(APITestCase):
         '''It should raise a 410'''
         user = UserFactory(active=False)
         response = self.get(url_for('api.user', user=user))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_get_inactive_user_with_a_non_admin(self):
         '''It should raise a 410'''
         user = UserFactory(active=False)
         self.login()
         response = self.get(url_for('api.user', user=user))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_get_inactive_user_with_an_admin(self):
         '''It should get a user'''

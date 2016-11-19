@@ -39,7 +39,7 @@ class OrganizationAPITest(APITestCase):
         '''It should not fetch a deleted organization from the API'''
         organization = OrganizationFactory(deleted=datetime.now())
         response = self.get(url_for('api.organization', org=organization))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_organization_api_get_deleted_but_authorized(self):
         '''It should fetch a deleted organization from the API if authorized'''
@@ -84,7 +84,7 @@ class OrganizationAPITest(APITestCase):
         data['description'] = 'new description'
         self.login()
         response = self.put(url_for('api.organization', org=org), data)
-        self.assertStatus(response, 410)
+        self.assert410(response)
         self.assertEqual(Organization.objects.first().description,
                          org.description)
 
@@ -115,7 +115,7 @@ class OrganizationAPITest(APITestCase):
         self.login()
         organization = OrganizationFactory(deleted=datetime.now())
         response = self.delete(url_for('api.organization', org=organization))
-        self.assertStatus(response, 410)
+        self.assert410(response)
         self.assertIsNotNone(Organization.objects[0].deleted)
 
     def test_organization_api_delete_as_editor_forbidden(self):
