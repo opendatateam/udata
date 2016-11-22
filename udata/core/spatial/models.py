@@ -22,6 +22,8 @@ BASE_GRANULARITIES = [
     ('other', _('Other')),
 ]
 
+ANCESTORS_SPLITER = '@'
+
 
 class GeoLevel(db.Document):
     id = db.StringField(primary_key=True)
@@ -30,8 +32,10 @@ class GeoLevel(db.Document):
 
 
 class GeoZoneQuerySet(db.BaseQuerySet):
-    def valid(self):
-        return self(validity__end__exists=False)
+    def valid_at(self, valid_date):
+        compare_string = valid_date.isoformat()
+        return self(validity__end__gt=compare_string,
+                    validity__start__lt=compare_string)
 
 
 class GeoZone(db.Document):
@@ -44,6 +48,7 @@ class GeoZone(db.Document):
     keys = db.DictField()
     validity = db.DictField()
     ancestors = db.ListField()
+    successors = db.ListField()
     population = db.IntField()
     area = db.FloatField()
     wikipedia = db.StringField()
@@ -123,6 +128,22 @@ class GeoZone(db.Document):
         return self.level_name  # Fallback that should never happen.
 
     @cached_property
+    def ancestors_objects(self):
+        # We cannot yield elements given it is a cached property.
+        result = []
+        for ancestor in self.ancestors:
+            insee_code, start_date = ancestor.split(ANCESTORS_SPLITER)
+            result.append(GeoZone.objects.get(
+                code=insee_code,
+                level=self.level,
+                validity__start=start_date))
+        return result
+
+    @cached_property
+    def datagouv_id(self):
+        return self.code + ANCESTORS_SPLITER + self.validity['start']
+
+    @cached_property
     def child_level(self):
         """Return the child level given handled levels."""
         HANDLED_LEVELS = current_app.config.get('HANDLED_LEVELS')
@@ -177,6 +198,12 @@ class GeoZone(db.Document):
     @property
     def handled_level(self):
         return self.level in current_app.config.get('HANDLED_LEVELS')
+
+    def valid_at(self, valid_date):
+        if not self.validity:
+            return True
+        compare_string = valid_date.isoformat()
+        return self.validity['start'] <= compare_string <= self.validity['end']
 
     def toGeoJSON(self):
         return {

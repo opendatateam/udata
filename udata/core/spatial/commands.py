@@ -76,6 +76,7 @@ def load(filename, drop=False):
                     keys=geozone.get('keys'),
                     parents=geozone.get('parents'),
                     ancestors=geozone.get('ancestors'),
+                    successors=geozone.get('successors'),
                     validity=geozone.get('validity'),
                     population=geozone.get('population'),
                     dbpedia=geozone.get('dbpedia'),

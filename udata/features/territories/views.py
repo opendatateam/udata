@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 import StringIO
 from collections import namedtuple
+from datetime import date
 import unicodedata
 
 import unicodecsv as csv
@@ -78,7 +79,7 @@ def render_home():
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
-    regions = GeoZone.objects(level='fr/region').valid()
+    regions = GeoZone.objects(level='fr/region').valid_at(date.today())
     regions = sorted(
         regions,
         key=lambda zone: unicodedata.normalize('NFD', zone.name)
@@ -111,10 +112,10 @@ def render_territory(territory):
 
     # Check that this territory is still valid (redirect old French
     # regions for instance).
-    if territory.validity.get('end'):
-        valid_territory = GeoZone.objects.valid().get(
+    if not territory.valid_at(date.today()):
+        valid_territory = GeoZone.objects.valid_at(date.today()).get(
             level=territory.level,
-            ancestors__contains=territory.id)
+            ancestors__contains=territory.datagouv_id)
         if valid_territory:
             return redirect(
                 url_for('territories.territory', territory=valid_territory))
@@ -131,9 +132,8 @@ def render_territory(territory):
 
     # Deal with territories with ancestors (new/old French regions
     # for instance).
-    for ancestor in territory.ancestors:
-        territories.append(
-            GeoZone.objects.get(level=territory.level, id=ancestor))
+    for ancestor_object in territory.ancestors_objects:
+        territories.append(ancestor_object)
 
     # Retrieve all datasets then split between those optionaly owned
     # by an org for that zone and others. We need to know if the current
