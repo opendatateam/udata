@@ -141,16 +141,16 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.get(url_for('datasets.show', dataset='not-found'))
         self.assert404(response)
 
-    def test_resource_permalink(self):
+    def test_resource_latest_url(self):
         '''It should redirect to the real resource URL'''
         resource = ResourceFactory()
-        dataset = DatasetFactory(resources=[resource])
+        DatasetFactory(resources=[resource])
         response = self.get(url_for('datasets.resource',
                                     id=resource.id))
         self.assertStatus(response, 302)
         self.assertEqual(response.location, resource.url)
 
-    def test_community_resource_permalink(self):
+    def test_community_resource_latest_url(self):
         '''It should redirect to the real community resource URL'''
         resource = CommunityResourceFactory()
         response = self.get(url_for('datasets.resource',
@@ -158,7 +158,7 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertStatus(response, 302)
         self.assertEqual(response.location, resource.url)
 
-    def test_resource_permalink_404(self):
+    def test_resource_latest_url_404(self):
         '''It should return 404 if resource does not exists'''
         resource = ResourceFactory()
         response = self.get(url_for('datasets.resource',
