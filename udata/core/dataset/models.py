@@ -152,7 +152,7 @@ class ResourceMixin(object):
         return self.check_availability(group=None)
 
     @property
-    def permalink(self):
+    def latest(self):
         '''
         Permanent link to the latest version of this resource.
 
@@ -166,7 +166,7 @@ class ResourceMixin(object):
         result = {
             '@type': 'DataDownload',
             '@id': str(self.id),
-            'url': self.permalink,
+            'url': self.latest,
             'name': self.title or _('Nameless resource'),
             'contentUrl': self.url,
             'dateCreated': self.created_at.isoformat(),

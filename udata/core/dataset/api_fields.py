@@ -44,11 +44,11 @@ resource_fields = api.model('Resource', {
         required=True, enum=RESOURCE_TYPES.keys()),
     'format': fields.String(description='The resource format', required=True),
     'url': fields.String(description='The resource URL', required=True),
-    'permalink': fields.String(description='The permanent URL redirecting to '
-                               'the latest version of the resource. When the '
-                               'resource data is updated, the URL will '
-                               'change, the permalink won\'t.',
-                               readonly=True),
+    'latest': fields.String(description='The permanent URL redirecting to '
+                            'the latest version of the resource. When the '
+                            'resource data is updated, the URL will '
+                            'change, the latest URL won\'t.',
+                            readonly=True),
     'checksum': fields.Nested(
         checksum_fields, allow_null=True,
         description='A checksum to validate file validity'),

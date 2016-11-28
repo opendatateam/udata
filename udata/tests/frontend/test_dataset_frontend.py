@@ -85,7 +85,7 @@ class DatasetBlueprintTest(FrontTestCase):
         for json_ld_resource in json_ld['distribution']:
             self.assertEquals(json_ld_resource['@type'], 'DataDownload')
             self.assertEquals(json_ld_resource['@id'], str(resource.id))
-            self.assertEquals(json_ld_resource['url'], resource.permalink)
+            self.assertEquals(json_ld_resource['url'], resource.latest)
             self.assertEquals(json_ld_resource['name'], resource.title)
             self.assertEquals(json_ld_resource['contentUrl'], resource.url)
             self.assertEquals(json_ld_resource['dateCreated'][:16],
