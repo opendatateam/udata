@@ -1,11 +1,56 @@
 # System dependencies
 
-## Git and Python
+## Git
 
-First of all, you need [Git][] and [Python][] 2.7 (installed by default on OSX and many Linux distributions).
+First of all, you need [Git][].
 
-If you use `apt-get`, the package is named `git-core`.
+If you use a Debian-like distribution with `apt-get`, the package is named `git-core`.
 If you prefer [Homebrew][] (OSX), the package is named `git`.
+
+## Python requirements
+
+uData requires [Python][] 2.7 (installed by default on OSX and many Linux distributions),
+its development tools and some libraries to be installed (with their headers).
+Most of them might already be installed as they are common development dependencies.
+The full dependencies list is:
+
+* Pillow (Image processing)
+    * libjpeg
+    * zlib
+    * libpng
+    * libtiff
+    * libfreetype
+    * liblcms2
+    * libopenjpeg
+    * libwebp
+* lxml dependencies
+    * libxml2
+    * libxslt
+* Misc dependencies
+    * liblzma (required to load GeoZones)
+    * libyaml (not mandatory but speed up the yaml processing)
+
+### Debian/Ubuntu
+
+On any Debian-like system you can install the development tools and libraries with:
+
+```shell
+$ apt-get install build-essential pkg-config python python-dev python-pip \
+    libjpeg-dev zlib1g-dev libtiff5-dev libfreetype6-dev \
+    liblcms2-dev libopenjpeg-dev libwebp-dev libpng12-dev \
+    libxml2-dev  libxslt1-dev liblzma-dev libyaml-dev
+```
+
+### OSX/Homebrew
+
+On Mac OSX with [Homebrew][], you can install the development tools and libraries with:
+
+```shell
+$ brew install automake autoconf libtool pkg-config python \
+    libjpeg zlib libtiff freetype littlecms openjpeg webp libpng \
+    libxml2 libxslt xz libyaml
+```
+
 
 ## Retrieving the sources
 
