@@ -30,6 +30,10 @@ The full dependencies list is:
     * liblzma (required to load GeoZones)
     * libyaml (not mandatory but speed up the yaml processing)
 
+!!! note
+    By the time this project was started, Python 3 did not have great third dependencies support
+    and some requirements weren't suported yet so it was started with Python 2.7.
+
 ### Debian/Ubuntu
 
 On any Debian-like system you can install the development tools and libraries with:
