@@ -102,7 +102,9 @@ class Index(ESIndex):
     def _get_mappings(self):
         mappings, _ = super(Index, self)._get_mappings()
         return mappings, {
-            'analyzer': {a._name: a.get_definition() for a in analysis.analyzers},
+            'analyzer': {
+                a._name: a.get_definition() for a in analysis.analyzers
+            },
             'filter': {f._name: f.get_definition() for f in analysis.filters},
         }
 
@@ -153,7 +155,6 @@ def register(adapter):
         # Automatically reindex objects on save
         post_save.connect(reindex_model_on_save, sender=adapter.model)
     return adapter
-
 
 
 from .adapter import ModelSearchAdapter, metrics_mapping_for  # noqa

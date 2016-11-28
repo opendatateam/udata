@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+from datetime import datetime
 import logging
 
 from udata.commands import manager
@@ -9,7 +10,7 @@ from udata.core.dataset.factories import VisibleDatasetFactory, LicenseFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.factories import OrganizationFactory, TeamFactory
 from udata.core.reuse.factories import VisibleReuseFactory
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory
 
 log = logging.getLogger(__name__)
 
@@ -32,8 +33,9 @@ def generate_licenses(count):
 @manager.command
 def generate_fixtures():
     '''Build sample fixture data (users, datasets and reuses).'''
-    user = UserFactory(email='user@udata', password='password')
-    log.info('Generated user "user@udata" with password "password".')
+    user = AdminFactory(email='user@udata', password='password',
+                        confirmed_at=datetime.now())
+    log.info('Generated admin user "user@udata" with password "password".')
 
     team = TeamFactory(members=[user])
     organization = OrganizationFactory(teams=[team])

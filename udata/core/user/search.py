@@ -28,7 +28,7 @@ class UserSearch(ModelSearchAdapter):
     first_name = String()
     last_name = String()
     about = String(analyzer=i18n_analyzer)
-    organizations = String()
+    organizations = String(index='not_analyzed')
     visible = Boolean()
     metrics = metrics_mapping_for(User)
     created = Date(format='date_hour_minute_second')
