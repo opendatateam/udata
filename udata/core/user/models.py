@@ -7,9 +7,7 @@ from time import time
 
 from blinker import Signal
 from flask import url_for, current_app
-from flask_security import (
-    UserMixin, RoleMixin, MongoEngineUserDatastore, current_user
-)
+from flask_security import UserMixin, RoleMixin, MongoEngineUserDatastore
 from mongoengine.signals import pre_save, post_save
 from itsdangerous import JSONWebSignatureSerializer
 
@@ -122,14 +120,9 @@ class User(db.Document, WithMetrics, UserMixin):
         return self.url_for(_external=True)
 
     @property
-    def visible_for_search(self):
+    def visible(self):
         count = self.metrics.get('datasets', 0) + self.metrics.get('reuses', 0)
         return count > 0 and self.active
-
-    @property
-    def visible(self):
-        return self.active or (
-            not current_user.is_anonymous and current_user.sysadmin)
 
     @cached_property
     def resources_availability(self):

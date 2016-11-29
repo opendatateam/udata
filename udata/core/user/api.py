@@ -244,27 +244,15 @@ class UserListAPI(API):
 @api.response(410, 'User is not active or has been deleted')
 class UserAPI(API):
 
-    def check_permissions(self, user, readonly=False):
-        if not user.visible:
-            # We cannot modify or read an inactive user, unless we are admin
-            api.abort(410, 'User is not active')
-        elif user.deleted and (
-            # We cannot modify a deleted user
-            not readonly or (
-                # We cannot get a deleted user if we do not have the
-                # permissions
-                readonly and not UserEditPermission(user).can())
-        ):
-            api.abort(410, 'User has been deleted')
-        elif not readonly:
-            # We must have the permission to modify the user
-            UserEditPermission(user).test()
-
     @api.doc('get_user')
     @api.marshal_with(user_fields)
     def get(self, user):
         '''Get a user given its identifier'''
-        self.check_permissions(user, readonly=True)
+        if current_user.is_anonymous or not current_user.sysadmin:
+            if not user.active:
+                api.abort(410, 'User is not active')
+            if user.deleted:
+                api.abort(410, 'User has been deleted')
         return user
 
     @api.secure(admin_permission)
@@ -274,7 +262,6 @@ class UserAPI(API):
     @api.response(400, 'Validation error')
     def put(self, user):
         '''Update a user given its identifier'''
-        self.check_permissions(user)
         form = api.validate(UserProfileAdminForm, user)
         return form.save()
 
@@ -283,7 +270,6 @@ class UserAPI(API):
     @api.response(204, 'Object deleted')
     def delete(self, user):
         '''Delete a user given its identifier'''
-        self.check_permissions(user)
         user.deleted = datetime.now()
         user.save()
         return '', 204

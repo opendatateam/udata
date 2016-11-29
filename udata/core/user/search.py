@@ -98,6 +98,6 @@ class UserSearch(ModelSearchAdapter):
                     'slug': user.slug,
                 },
             },
-            'visible': user.visible_for_search,
+            'visible': user.visible,
             'roles': [role.name for role in user.roles],
         }
