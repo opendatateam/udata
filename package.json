@@ -6,7 +6,7 @@
   "license": "MIT",
   "main": "index.js",
   "scripts": {
-    "assets:watch": "webpack -c -d --progress --watch",
+    "assets:watch": "webpack -c -d  --progress --watch",
     "assets:build": "webpack -p --progress",
     "widgets:watch": "webpack -d -c --progress --watch --config webpack.config.widgets.js",
     "widgets:build": "webpack -p --progress --config webpack.config.widgets.js",
