@@ -22,10 +22,10 @@ by default).
 
 The addition of [fields masks](http://flask-restplus.readthedocs.io/en/stable/mask.html) in Flask-RESTPlus allows us to reduce the retrieved payload within the admin — especially for datasets — and results in a performances boost.
 
-
 ## Fixes
 
 * 2016-11-29: Mark active users as confirmed [#619](https://github.com/opendatateam/udata/pull/618)
+* 2016-11-28: Merge duplicate users [#617](https://github.com/opendatateam/udata/pull/617)
 
 ## Deprecation
 
