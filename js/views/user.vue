@@ -1,5 +1,5 @@
 <template>
-<layout :title="user.fullname || ''" :subtitle="_('User')" :page="user.page || ''">
+<layout :title="user.fullname || ''" :subtitle="_('User')" :page="user.page || ''" :actions="actions">
     <div class="row">
         <profile :user="user" class="col-xs-12 col-md-6"></profile>
         <chart title="Traffic" :metrics="metrics" class="col-xs-12 col-md-6"
@@ -40,6 +40,11 @@ export default {
     name: 'user-view',
     data: function() {
         return {
+            actions: [{
+                label: this._('Edit'),
+                icon: 'edit',
+                method: this.edit
+            }],
             user: new User(),
             metrics: new Metrics({
                 query: {
@@ -89,6 +94,11 @@ export default {
                 this.$scrollTo(this.$el);
             }
         }
+    },
+    methods: {
+        edit() {
+            this.$go('/user/edit/' + this.user.id + '/');
+        },
     }
 };
 </script>

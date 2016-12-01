@@ -17,7 +17,7 @@ from wtforms_json import flatten_json
 from . import widgets
 
 from udata.auth import current_user, admin_permission
-from udata.models import db, User, Organization, Dataset, Reuse
+from udata.models import db, User, Organization, Dataset, Reuse, datastore
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
@@ -80,6 +80,18 @@ class IntegerField(FieldHelper, fields.IntegerField):
     pass
 
 
+class RolesField(FieldHelper, fields.StringField):
+    def process_formdata(self, valuelist):
+        self.data = []
+        for name in valuelist:
+            role = datastore.find_role(name)
+            if role is not None:
+                self.data.append(role)
+            else:
+                raise validators.ValidationError(
+                    _('The role {role} does not exist').format(role=name))
+
+
 class DateTimeField(Field, fields.DateTimeField):
 
     def process_formdata(self, valuelist):
@@ -115,20 +127,26 @@ class FileField(FieldHelper, fields.FileField):
 
 
 class URLField(FieldHelper, EmptyNone, html5.URLField):
-    pass
+    def pre_validate(self, form):
+        if self.data:
+            try:
+                db.URLField().validate(self.data)
+            except db.ValidationError:
+                raise validators.ValidationError(_('Invalid URL'))
+        return True
 
 
 class TmpFilename(fields.HiddenField):
     def _value(self):
-        return u''
+        return ''
 
 
 class BBoxField(fields.HiddenField):
     def _value(self):
         if self.data:
-            return u','.join([str(x) for x in self.data])
+            return ','.join([str(x) for x in self.data])
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist:
@@ -288,9 +306,9 @@ class SelectMultipleField(FieldHelper, fields.SelectMultipleField):
 class TagField(StringField):
     def _value(self):
         if self.data:
-            return u','.join(self.data)
+            return ','.join(self.data)
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) > 1:
@@ -342,7 +360,7 @@ class ModelFieldMixin(object):
         if self.data:
             return unicode(self.data.id)
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) == 1 and valuelist[0]:
@@ -393,7 +411,7 @@ class ModelChoiceField(StringField):
         if self.data:
             return unicode(self.data.id)
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) == 1 and valuelist[0]:
@@ -413,9 +431,9 @@ class ModelList(object):
 
     def _value(self):
         if self.data:
-            return u','.join([str(o.id) for o in self.data])
+            return ','.join([str(o.id) for o in self.data])
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if not valuelist:

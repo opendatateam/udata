@@ -195,7 +195,11 @@ export default {
 
             Array.prototype.map.call(elements, function(el) {
                 let value;
-                if (TEXT_TAGS.includes(el.tagName.toLowerCase()) || TEXT_INPUTS.includes(el.type.toLowerCase())) {
+                if (el.tagName.toLowerCase() === 'select' && el.multiple) {
+                    value = [...el.options]
+                    value = value.filter(option => option.selected)
+                    value = value.map(option => option.value)
+                } else if (TEXT_TAGS.includes(el.tagName.toLowerCase()) || TEXT_INPUTS.includes(el.type.toLowerCase())) {
                     value = el.value || undefined;
                 } else if (el.type === 'checkbox') {
                     value = el.checked;

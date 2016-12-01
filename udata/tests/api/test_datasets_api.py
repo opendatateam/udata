@@ -110,7 +110,7 @@ class DatasetAPITest(APITestCase):
         dataset = VisibleDatasetFactory(deleted=datetime.now())
 
         response = self.get(url_for('api.dataset', dataset=dataset))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_dataset_api_get_deleted_but_authorized(self):
         '''It should a deleted dataset from the API if user is authorized'''
@@ -350,7 +350,7 @@ class DatasetAPITest(APITestCase):
         data = dataset.to_dict()
         data['description'] = 'new description'
         response = self.put(url_for('api.dataset', dataset=dataset), data)
-        self.assertStatus(response, 410)
+        self.assert410(response)
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description,
                          dataset.description)
@@ -376,7 +376,7 @@ class DatasetAPITest(APITestCase):
         dataset = VisibleDatasetFactory(owner=user, deleted=datetime.now())
         response = self.delete(url_for('api.dataset', dataset=dataset))
 
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_dataset_api_feature(self):
         '''It should mark the dataset featured on POST'''

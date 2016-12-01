@@ -37,7 +37,7 @@ class ReuseAPITest(APITestCase):
         '''It should not fetch a deleted reuse from the API and raise 410'''
         reuse = ReuseFactory(deleted=datetime.now())
         response = self.get(url_for('api.reuse', reuse=reuse))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_reuse_api_get_deleted_but_authorized(self):
         '''It should fetch a deleted reuse from the API if authorized'''
@@ -102,7 +102,7 @@ class ReuseAPITest(APITestCase):
         self.login()
         reuse = ReuseFactory(deleted=datetime.now())
         response = self.put(url_for('api.reuse', reuse=reuse), {})
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_reuse_api_delete(self):
         '''It should delete a reuse from the API'''
@@ -118,7 +118,7 @@ class ReuseAPITest(APITestCase):
         self.login()
         reuse = ReuseFactory(deleted=datetime.now())
         response = self.delete(url_for('api.reuse', reuse=reuse))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_reuse_api_add_dataset(self):
         '''It should add a dataset to a reuse from the API'''

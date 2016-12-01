@@ -122,7 +122,7 @@ class User(db.Document, WithMetrics, UserMixin):
     @property
     def visible(self):
         count = self.metrics.get('datasets', 0) + self.metrics.get('reuses', 0)
-        return count > 0
+        return count > 0 and self.active
 
     @cached_property
     def resources_availability(self):

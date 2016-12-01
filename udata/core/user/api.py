@@ -8,9 +8,8 @@ from flask_security import current_user
 
 from udata import search
 from udata.api import api, API
-from udata.models import (
-    CommunityResource, Dataset, Reuse, User
-)
+from udata.auth import admin_permission
+from udata.models import CommunityResource, Dataset, Reuse, User
 
 from udata.core.dataset.api_fields import (
     community_resource_fields, dataset_fields
@@ -24,6 +23,7 @@ from udata.core.reuse.api_fields import reuse_fields
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
 )
+from udata.core.user.models import Role
 from udata.utils import multi_to_dict
 
 from .api_fields import (
@@ -33,8 +33,9 @@ from .api_fields import (
     user_fields,
     user_page_fields,
     user_suggestion_fields,
+    user_role_fields,
 )
-from .forms import UserProfileForm
+from .forms import UserProfileForm, UserProfileAdminForm
 from .permissions import UserEditPermission
 from .search import UserSearch
 
@@ -226,51 +227,49 @@ class UserListAPI(API):
         search_parser.parse_args()
         return search.query(UserSearch, **multi_to_dict(request.args))
 
-    @api.secure
+    @api.secure(admin_permission)
     @api.doc('create_user')
     @api.expect(user_fields)
     @api.marshal_with(user_fields, code=201)
     @api.response(400, 'Validation error')
     def post(self):
         '''Create a new object'''
-        form = api.validate(UserProfileForm)
+        form = api.validate(UserProfileAdminForm)
         user = form.save()
         return user, 201
 
 
 @ns.route('/<user:user>/', endpoint='user')
 @api.response(404, 'User not found')
-@api.response(410, 'User has been deleted')
+@api.response(410, 'User is not active or has been deleted')
 class UserAPI(API):
+
     @api.doc('get_user')
     @api.marshal_with(user_fields)
     def get(self, user):
         '''Get a user given its identifier'''
-        if user.deleted and not UserEditPermission(user).can():
-            api.abort(410, 'User has been deleted')
+        if current_user.is_anonymous or not current_user.sysadmin:
+            if not user.active:
+                api.abort(410, 'User is not active')
+            if user.deleted:
+                api.abort(410, 'User has been deleted')
         return user
 
-    @api.secure
+    @api.secure(admin_permission)
     @api.doc('update_user')
     @api.expect(user_fields)
     @api.marshal_with(user_fields)
     @api.response(400, 'Validation error')
     def put(self, user):
         '''Update a user given its identifier'''
-        if user.deleted:
-            api.abort(410, 'User has been deleted')
-        UserEditPermission(user).test()
-        form = api.validate(UserProfileForm, user)
+        form = api.validate(UserProfileAdminForm, user)
         return form.save()
 
-    @api.secure
+    @api.secure(admin_permission)
     @api.doc('delete_user')
     @api.response(204, 'Object deleted')
     def delete(self, user):
         '''Delete a user given its identifier'''
-        if user.deleted:
-            api.abort(410, 'User has been deleted')
-        UserEditPermission(user).test()
         user.deleted = datetime.now()
         user.save()
         return '', 204
@@ -317,3 +316,12 @@ class SuggestUsersAPI(API):
             }
             for opt in search.suggest(args['q'], 'user_suggest', args['size'])
         ]
+
+
+@ns.route('/roles/', endpoint='user_roles')
+class UserRolesAPI(API):
+    @api.marshal_list_with(user_role_fields)
+    @api.doc('user_roles')
+    def get(self):
+        '''List all possible user roles'''
+        return [{'name': role.name} for role in Role.objects()]

@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from flask import url_for
 
 from udata.models import Follow
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
@@ -63,6 +63,19 @@ class UserBlueprintTest(FrontTestCase):
         self.assertEquals(json_ld['description'], 'Title 1 Title 2')
         self.assertEquals(json_ld['url'], 'http://www.datagouv.fr/user')
         self.assertEquals(json_ld['image'], 'http://www.datagouv.fr/avatar')
+
+    def test_cannot_render_profile_of_an_inactive_user(self):
+        '''It should raise a 410 when the user is inactive'''
+        user = UserFactory(active=False)
+        response = self.get(url_for('users.show', user=user))
+        self.assert410(response)
+
+    def test_render_profile_of_an_inactive_user_when_admin(self):
+        '''It should render the user profile'''
+        self.login(AdminFactory())
+        user = UserFactory(active=True)
+        response = self.get(url_for('users.show', user=user))
+        self.assert200(response)
 
     def test_render_profile_datasets(self):
         '''It should render the user profile datasets page'''

@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import UserFactory, AdminFactory
 from udata.models import Follow
 from udata.utils import faker
 
@@ -190,3 +190,85 @@ class UserAPITest(APITestCase):
         self.assertEquals(json['website'], user.website)
         self.assertEquals(json['about'], user.about)
         self.assertEquals(json['metrics'], user.metrics)
+
+    def test_get_user(self):
+        '''It should get a user'''
+        user = UserFactory()
+        response = self.get(url_for('api.user', user=user))
+        self.assert200(response)
+
+    def test_get_inactive_user(self):
+        '''It should raise a 410'''
+        user = UserFactory(active=False)
+        response = self.get(url_for('api.user', user=user))
+        self.assert410(response)
+
+    def test_get_inactive_user_with_a_non_admin(self):
+        '''It should raise a 410'''
+        user = UserFactory(active=False)
+        self.login()
+        response = self.get(url_for('api.user', user=user))
+        self.assert410(response)
+
+    def test_get_inactive_user_with_an_admin(self):
+        '''It should get a user'''
+        user = UserFactory(active=False)
+        self.login(AdminFactory())
+        response = self.get(url_for('api.user', user=user))
+        self.assert200(response)
+
+    def test_user_api_update(self):
+        '''It should update a user'''
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data['active'] = False
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert200(response)
+        self.assertFalse(response.json['active'])
+
+    def test_user_api_update_with_website(self):
+        '''It should raise a 400'''
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data['website'] = 'foo'
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert400(response)
+        data['website'] = faker.url()
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert200(response)
+
+    def test_user_api_update_with_a_non_admin_connected_user(self):
+        '''It should raise a 403'''
+        user = UserFactory()
+        self.login(user)
+        data = user.to_dict()
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert403(response)
+
+    def test_user_api_update_with_an_existing_role(self):
+        '''It should update a user'''
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data['roles'] = ['admin']
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert200(response)
+        self.assertEqual(response.json['roles'], ['admin'])
+
+    def test_user_api_update_with_a_non_existing_role(self):
+        '''It should raise a 400'''
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data['roles'] = ['non_existing_role']
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert400(response)
+
+    def test_user_roles(self):
+        '''It should list the roles'''
+        self.login(AdminFactory())
+        response = self.get(url_for('api.user_roles'))
+        self.assert200(response)
+        self.assertEqual(response.json, [{'name': 'admin'}])
