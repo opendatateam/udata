@@ -143,6 +143,8 @@ class Defaults(object):
     # }
     # TRACKING_BLACKLIST = ['api.notifications', 'api.checkurl']  # Default: []
 
+    DELETE_ME = True
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''

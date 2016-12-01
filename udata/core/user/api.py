@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from datetime import datetime
-
 from flask import request
-from flask_security import current_user
+from flask_security import current_user, logout_user
 
 from udata import search
 from udata.api import api, API
@@ -67,6 +65,16 @@ class MeAPI(API):
         user = current_user._get_current_object()
         form = api.validate(UserProfileForm, user)
         return form.save()
+
+    @api.secure
+    @api.doc('delete_me')
+    @api.response(204, 'Object deleted')
+    def delete(self, **kwargs):
+        '''Delete my profile'''
+        user = current_user._get_current_object()
+        user.mark_as_deleted()
+        logout_user()
+        return '', 204
 
 
 @me.route('/avatar', endpoint='my_avatar')
@@ -268,10 +276,15 @@ class UserAPI(API):
     @api.secure(admin_permission)
     @api.doc('delete_user')
     @api.response(204, 'Object deleted')
+    @api.response(403, 'When trying to delete yourself')
     def delete(self, user):
         '''Delete a user given its identifier'''
-        user.deleted = datetime.now()
-        user.save()
+        if user.deleted:
+            api.abort(410, 'User has already been deleted')
+        if user == current_user._get_current_object():
+            api.abort(403, 'You cannot delete yourself with this API. ' +
+                      'Use the "me" API instead.')
+        user.mark_as_deleted()
         return '', 204
 
 
@@ -281,7 +294,7 @@ class FollowUserAPI(FollowAPI):
 
     @api.secure
     @api.doc(notes="You can't follow yourself.")
-    @api.response(403, 'When tring to follow yourself')
+    @api.response(403, 'When trying to follow yourself')
     def post(self, id):
         '''Follow a user given its ID'''
         if id == str(current_user.id):
