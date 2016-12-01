@@ -2,13 +2,14 @@
 from __future__ import unicode_literals
 
 from datetime import datetime
+
 import feedparser
 
 from flask import url_for
 
-from udata.core.dataset.factories import (ResourceFactory,
-                                          DatasetFactory,
-                                          LicenseFactory)
+from udata.core.dataset.factories import (
+    ResourceFactory, DatasetFactory, LicenseFactory, CommunityResourceFactory
+)
 from udata.core.user.factories import UserFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.models import Follow
@@ -84,7 +85,7 @@ class DatasetBlueprintTest(FrontTestCase):
         for json_ld_resource in json_ld['distribution']:
             self.assertEquals(json_ld_resource['@type'], 'DataDownload')
             self.assertEquals(json_ld_resource['@id'], str(resource.id))
-            self.assertEquals(json_ld_resource['url'], resource.url)
+            self.assertEquals(json_ld_resource['url'], resource.latest)
             self.assertEquals(json_ld_resource['name'], resource.title)
             self.assertEquals(json_ld_resource['contentUrl'], resource.url)
             self.assertEquals(json_ld_resource['dateCreated'][:16],
@@ -138,6 +139,30 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_not_found(self):
         '''It should render the dataset page'''
         response = self.get(url_for('datasets.show', dataset='not-found'))
+        self.assert404(response)
+
+    def test_resource_latest_url(self):
+        '''It should redirect to the real resource URL'''
+        resource = ResourceFactory()
+        DatasetFactory(resources=[resource])
+        response = self.get(url_for('datasets.resource',
+                                    id=resource.id))
+        self.assertStatus(response, 302)
+        self.assertEqual(response.location, resource.url)
+
+    def test_community_resource_latest_url(self):
+        '''It should redirect to the real community resource URL'''
+        resource = CommunityResourceFactory()
+        response = self.get(url_for('datasets.resource',
+                                    id=resource.id))
+        self.assertStatus(response, 302)
+        self.assertEqual(response.location, resource.url)
+
+    def test_resource_latest_url_404(self):
+        '''It should return 404 if resource does not exists'''
+        resource = ResourceFactory()
+        response = self.get(url_for('datasets.resource',
+                                    id=resource.id))
         self.assert404(response)
 
     def test_recent_feed(self):

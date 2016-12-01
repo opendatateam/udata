@@ -236,7 +236,7 @@ export default {
                     type: 'error',
                     icon: 'exclamation-triangle',
                     title: this._('An error occured'),
-                    details: this._('The error identifier is {id}', {id: e.data.event_id}),
+                    details: this._('The error identifier is {id}', {id: response.headers['X-Sentry-ID']}),
                 });
             }
             if ('data' in response) {

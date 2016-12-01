@@ -15,14 +15,13 @@ log = logging.getLogger(__name__)
 @manager.command
 def init():
     '''Initialize or update data and indexes'''
+    log.info('Initialize or update ElasticSearch mappings')
+    es.initialize()
+
     log.info('Build sample fixture data')
     generate_fixtures()
 
     log.info('Apply DB migrations if needed')
     migrate(record=True)
 
-    log.info('Initialize or update ElasticSearch mappings')
-    es.initialize()
-
     log.info('%s: Feed initial data if needed', yellow('TODO'))
-    log.info('%s: Create an administrator', yellow('TODO'))
