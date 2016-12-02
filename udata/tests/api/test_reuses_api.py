@@ -51,7 +51,7 @@ class ReuseAPITest(APITestCase):
         data = ReuseFactory.attributes()
         self.login()
         response = self.post(url_for('api.reuses'), data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.assertEqual(Reuse.objects.count(), 1)
 
         reuse = Reuse.objects.first()
@@ -66,7 +66,7 @@ class ReuseAPITest(APITestCase):
         org = OrganizationFactory(members=[member])
         data['organization'] = str(org.id)
         response = self.post(url_for('api.reuses'), data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.assertEqual(Reuse.objects.count(), 1)
 
         reuse = Reuse.objects.first()
@@ -220,7 +220,7 @@ class ReuseAPITest(APITestCase):
         to_follow = ReuseFactory()
 
         response = self.post(url_for('api.reuse_followers', id=to_follow.id))
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
@@ -339,7 +339,7 @@ class ReuseBadgeAPITest(APITestCase):
         with self.api_user():
             response = self.post(
                 url_for('api.reuse_badges', reuse=self.reuse), data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.reuse.reload()
         self.assertEqual(len(self.reuse.badges), 1)
 
@@ -366,7 +366,7 @@ class ReuseBadgeAPITest(APITestCase):
         with self.api_user():
             response = self.post(
                 url_for('api.reuse_badges', reuse=self.reuse), data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.reuse.reload()
         self.assertEqual(len(self.reuse.badges), 2)
 

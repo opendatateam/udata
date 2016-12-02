@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import re
 import uuid
 
 from dateutil.parser import parse
@@ -21,13 +20,10 @@ from udata.models import db, User, Organization, Dataset, Reuse, datastore
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
+from udata import tags
 from udata.utils import to_iso_date, get_by
 
 # _ = lambda s: s
-
-RE_TAG = re.compile('^[\w \-.]*$', re.U)
-MIN_TAG_LENGTH = 2
-MAX_TAG_LENGTH = 128
 
 
 class FieldHelper(object):
@@ -312,11 +308,9 @@ class TagField(StringField):
 
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) > 1:
-            self.data = valuelist
+            self.data = [tags.slug(value) for value in valuelist]
         elif valuelist:
-            self.data = list(set([
-                x.strip().lower()
-                for x in valuelist[0].split(',') if x.strip()]))
+            self.data = tags.tags_list(valuelist[0])
         else:
             self.data = []
 
@@ -324,15 +318,12 @@ class TagField(StringField):
         if not self.data:
             return
         for tag in self.data:
-            if not MIN_TAG_LENGTH <= len(tag) <= MAX_TAG_LENGTH:
+            if not tags.MIN_TAG_LENGTH <= len(tag) <= tags.MAX_TAG_LENGTH:
                 message = _(
                     'Tag "%(tag)s" must be between %(min)d '
                     'and %(max)d characters long.',
-                    min=MIN_TAG_LENGTH, max=MAX_TAG_LENGTH, tag=tag)
-                raise validators.ValidationError(message)
-            if not RE_TAG.match(tag):
-                message = _('Tag "%(tag)s" must be alphanumeric characters '
-                            'or symbols: -_.', tag=tag)
+                    min=tags.MIN_TAG_LENGTH,
+                    max=tags.MAX_TAG_LENGTH, tag=tag)
                 raise validators.ValidationError(message)
 
 

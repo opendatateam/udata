@@ -50,7 +50,7 @@ class IssuesTest(APITestCase):
                     'id': dataset.id,
                 }
             })
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         dataset.reload()
         self.assertEqual(dataset.metrics['issues'], 1)
