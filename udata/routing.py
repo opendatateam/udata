@@ -113,24 +113,44 @@ class TerritoryConverter(ModelConverter, PathConverter):
 
     def to_python(self, value):
         """
-        `value` has a slash in it, that's why we inherit from `PathConverter`.
+        `value` has slashs in it, that's why we inherit from `PathConverter`.
 
-        E.g.: `commune/13200`, `departement/13 or `region/93`.
+        E.g.: `commune/COM13200@latest/`, `departement/DEP13@1860-07-01/` or
+        `region/REG76@2016-01-01/Auvergne-Rhone-Alpes/`.
+
+        Note that the slug is not significative but cannot be omitted.
         """
         if '/' not in value:
             return
 
-        level, code = value.split('/')
+        level, permid, slug = value.split('/')
         return self.model.objects.get_or_404(
-            code=code, level='fr/{level}'.format(level=level))
+            permid=permid, level='fr/{level}'.format(level=level))
 
     def to_url(self, obj):
-        """Reconstruct the URL with slash from level name and code."""
+        """
+        Reconstruct the URL from level name, code or datagouv id and slug.
+        """
         level_name = getattr(obj, 'level_name', None)
-        code = getattr(obj, 'code', None)
-        if level_name and code:
-            return '{level_name}/{code}'.format(
-                level_name=level_name, code=code)
+        if not level_name:
+            raise ValueError('Unable to serialize "%s" to url' % obj)
+
+        permid = getattr(obj, 'permid', None)
+        if not permid:
+            # Fallback on code for old redirections.
+            code = getattr(obj, 'code', None)
+            if not code:
+                raise ValueError('Unable to serialize "%s" to url' % obj)
+            territory = self.model.objects.get_or_404(
+                code=code, level='fr/{level}'.format(level=level_name))
+            return '{level_name}/{permid}/{slug}'.format(
+                level_name=level_name, permid=territory.permid,
+                slug=territory.slug)
+
+        slug = getattr(obj, 'slug', None)
+        if level_name and permid:
+            return '{level_name}/{permid}/{slug}'.format(
+                level_name=level_name, permid=permid, slug=slug)
         else:
             raise ValueError('Unable to serialize "%s" to url' % obj)
 

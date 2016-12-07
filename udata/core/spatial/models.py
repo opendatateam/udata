@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import date
+
 from flask import current_app, url_for
 from werkzeug.local import LocalProxy
 from werkzeug import cached_property
@@ -40,9 +42,11 @@ class GeoZoneQuerySet(db.BaseQuerySet):
 
 class GeoZone(db.Document):
     id = db.StringField(primary_key=True)
+    permid = db.StringField(unique_with='level')
+    slug = db.StringField(required=True)
     name = db.StringField(required=True)
     level = db.StringField(required=True)
-    code = db.StringField(unique_with='level')
+    code = db.StringField(required=True)
     geom = db.MultiPolygonField(required=True)
     parents = db.ListField()
     keys = db.DictField()
@@ -77,16 +81,16 @@ class GeoZone(db.Document):
     @cached_property
     def html_title(self):
         """In use within templates."""
-        if self.level_name == 'commune':
+        if self.level_code == 'COM':
             return ('{name} '
                     '<small>(<a href="{parent_url}">{parent_name}</a>)</small>'
                     '').format(name=self.name,
-                               parent_url=self.parent.url,
-                               parent_name=self.parent.name)
-        elif self.level_name == 'departement':
+                               parent_url=self.current_parent.url,
+                               parent_name=self.current_parent.name)
+        elif self.level_code == 'DEP':
             return '{name} <small>({code})</small>'.format(
                 name=self.name, code=self.code)
-        elif self.level_name == 'region':
+        elif self.level_code == 'REG':
             return ('{name} '
                     '<small>(<a href="{parent_url}">{parent_name}</a>)</small>'
                     '').format(name=self.name,
@@ -112,6 +116,11 @@ class GeoZone(db.Document):
         return keys_values
 
     @cached_property
+    def level_code(self):
+        """Truncated level name for the sake of readability."""
+        return self.permid[:3]
+
+    @cached_property
     def level_name(self):
         """Truncated level name for the sake of readability."""
         if self.level.startswith('fr/'):
@@ -129,19 +138,16 @@ class GeoZone(db.Document):
 
     @cached_property
     def ancestors_objects(self):
-        # We cannot yield elements given it is a cached property.
-        result = []
+        """Ancestors objects sorted by name."""
+        ancestors_objects = []
         for ancestor in self.ancestors:
-            insee_code, start_date = ancestor.split(ANCESTORS_SPLITER)
-            result.append(GeoZone.objects.get(
-                code=insee_code,
-                level=self.level,
-                validity__start=start_date))
-        return result
-
-    @cached_property
-    def datagouv_id(self):
-        return self.code + ANCESTORS_SPLITER + self.validity['start']
+            try:
+                ancestor_object = GeoZone.objects.get(permid=ancestor)
+            except GeoZone.DoesNotExist:
+                continue
+            ancestors_objects.append(ancestor_object)
+        ancestors_objects.sort(key=lambda a: a.name)
+        return ancestors_objects
 
     @cached_property
     def child_level(self):
@@ -181,19 +187,28 @@ class GeoZone(db.Document):
         return ', '.join(self.keys.get('postal', []))
 
     @property
-    def parent(self):
+    def parents_objects(self):
         if self.parent_level:
             for parent in self.parents:
                 if parent.startswith(self.parent_level):
-                    return GeoZone.objects.get(id=parent,
-                                               level=self.parent_level)
+                    yield GeoZone.objects.get(id=parent,
+                                              level=self.parent_level)
+
+    @cached_property
+    def current_parent(self):
+        for parent in self.parents_objects:
+            if parent.valid_at(date.today()):
+                return parent
 
     @property
     def children(self):
-        if self.child_level:
-            return (GeoZone.objects(level=self.child_level,
-                                    parents__in=[self.id])
-                           .order_by('-population', '-area'))
+        return (GeoZone.objects(level=self.child_level,
+                                parents__in=[self.id])
+                       .order_by('name'))
+
+    @property
+    def children_popular(self):
+        return self.children.order_by('-population', '-area')
 
     @property
     def handled_level(self):
@@ -211,6 +226,8 @@ class GeoZone(db.Document):
             'type': 'Feature',
             'geometry': self.geom,
             'properties': {
+                'permid': self.permid,
+                'slug': self.slug,
                 'name': gettext(self.name),
                 'level': self.level,
                 'code': self.code,

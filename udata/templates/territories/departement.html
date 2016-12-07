@@ -8,45 +8,53 @@
 } %}
 
 {% block territory_content %}
-    <div class="col-sm-9">
-        <h1>{{ territory.html_title|safe }}</h1>
-        <leaflet-map v-ref:map class="aside-map" :popup="false"
-            data-zones="{{ url_for('api.zones', ids=[territory.id]) }}">
-        </leaflet-map>
-    </div>
+    <div class="col-sm-6">
+        <div class="col-sm-2">
+            <img src="{{ logo }}" alt="{{ territory.name }}" class="scalable" />
+            {% if territory.logo_url() %}
+                <div class="text-center">
+                    <small>
+                        {{ _('Source:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a> •
+                        {{ _('License:') }} <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA</a>
+                    </small>
+                </div>
+            {% else %}
+                <div class="text-center">
+                    <small>
+                        {{ _('Submit your logo through:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a><br>
+                        ({{ _('we only expose logos under an open license') }})
+                    </small>
+                </div>
+            {% endif %}
+        </div>
 
-    <aside class="col-sm-3 panel panel-default">
-        <div class="tab-links">
-            <p class="text-center">
+        <div class="col-sm-10 tab-links">
+            <h1>{{ territory.name }}</h1>
+            <p>
                 <strong>
                     {{ _('INSEE code:') }} {{ territory.code }}
                 </strong>
             </p>
-            <p class="text-center">
-                <strong>
-                    {{ _('Region:') }} <a href="{{ territory.parent.url }}" title="{{ territory.parent.name }}">{{ territory.parent.name }}</a>
-                </strong>
-            </p>
             {% if territory.population %}
-                <p class="text-center">
+                <p>
                     <strong>
                         {{ _('Population:') }} {{ territory.population|format_number }}
                     </strong>
                 </p>
             {% endif %}
-            <h3><small>{{ _('Main towns:') }}</small></h3>
-            <div class="row">
-                <div class="col-sm-offset-1 col-md-offset-2 col-lg-offset-2">
-                    <ul class="list-unstyled territories-list">
-                        {% for town in territory.children[:8] %}
-                            <li>
-                                <img src="{{ town.logo_url(external=True) or theme_static('img/placeholder_territory.png', external=True) }}" alt="{{ town.name }}" class="float-left" width="13px" />
-                                <a href="{{ town.url }}"> {{ town.name }}</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
         </div>
+    </div>
+
+    <aside class="col-sm-6 panel panel-default">
+        <leaflet-map v-ref:map class="aside-map" :popup="false"
+            data-zones="{{ url_for('api.zones', ids=[territory.id]) }}">
+        </leaflet-map>
+        <h3><small>{{ _('Region:') }} <a href="{{ territory.current_parent.url }}">{{ territory.current_parent.name }}</a></small></h3>
+        <h3><small>
+            {{ _('Main towns:') }}
+            {% for town in territory.children_popular[:8] %}
+                <a href="{{ town.url }}"> {{ town.name }}</a>{% if not loop.last %},{% endif %}
+            {% endfor %}
+        </small></h3>
     </aside>
 {% endblock %}

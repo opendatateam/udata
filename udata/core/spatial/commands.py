@@ -11,6 +11,7 @@ from urllib import urlretrieve
 
 import msgpack
 from mongoengine import errors
+import slugify
 
 from udata.commands import submanager
 from udata.core.storages import tmp
@@ -66,27 +67,36 @@ def load(filename, drop=False):
     with open(zones_filepath) as fp:
         unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
         unpacker.next()
-        for geozone in unpacker:
+        for i, geozone in enumerate(unpacker):
+            if (not geozone['geom'] or (
+                geozone['geom']['type'] == 'GeometryCollection'
+                    and not geozone['geom']['geometries'])):
+                log.error('Geometries not found for %s', geozone)
+                continue
+            params = {
+                'id': geozone['_id'],
+                'permid': geozone.get('permid', geozone['code']),
+                'slug': slugify.slugify(geozone['name'], separator='-'),
+                'level': geozone['level'],
+                'code': geozone['code'],
+                'name': geozone['name'],
+                'keys': geozone.get('keys'),
+                'parents': geozone.get('parents'),
+                'ancestors': geozone.get('ancestors'),
+                'successors': geozone.get('successors'),
+                'validity': geozone.get('validity'),
+                'population': geozone.get('population'),
+                'dbpedia': geozone.get('dbpedia'),
+                'logo': geozone.get('flag') or geozone.get('blazon'),
+                'wikipedia': geozone.get('wikipedia'),
+                'area': geozone.get('area'),
+                'geom': geozone['geom']
+            }
             try:
-                GeoZone.objects.create(
-                    id=geozone['_id'],
-                    level=geozone['level'],
-                    code=geozone['code'],
-                    name=geozone['name'],
-                    keys=geozone.get('keys'),
-                    parents=geozone.get('parents'),
-                    ancestors=geozone.get('ancestors'),
-                    successors=geozone.get('successors'),
-                    validity=geozone.get('validity'),
-                    population=geozone.get('population'),
-                    dbpedia=geozone.get('dbpedia'),
-                    logo=geozone.get('flag') or geozone.get('blazon'),
-                    wikipedia=geozone.get('wikipedia'),
-                    area=geozone.get('area'),
-                    geom=geozone['geom']
-                )
-            except errors.ValidationError:
-                log.warning('Validation error for %s', geozone)
+                GeoZone.objects.create(**params)
+            except errors.ValidationError as e:
+                log.warning('Validation error (%s) for %s with %s',
+                            e, geozone, params)
                 continue
     os.remove(zones_filepath)
     log.info('Loaded {total} zones'.format(total=i))

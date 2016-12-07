@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 import StringIO
 from collections import namedtuple
-from datetime import date
+from datetime import date, datetime
 import unicodedata
 
 import unicodecsv as csv
@@ -94,14 +94,27 @@ def render_home():
     })
 
 
-@blueprint.route('/town/<int:code>/', endpoint='town')
+@blueprint.route('/town/<code>/', endpoint='town')
 def redirect_town(code):
     """
     Legacy redirect now prefixed with `territories` + French name.
     """
     # Turn the dict into a namedtuple to be consistent in routing.
-    territory = dict_to_namedtuple('Territory',
-                                   {'code': code, 'level_name': 'commune'})
+    territory = dict_to_namedtuple(
+        'Territory', {'code': str(code), 'level_name': 'commune'})
+    return redirect(url_for('territories.territory', territory=territory))
+
+
+@blueprint.route('/territoires/<level>/<code>@latest/',
+                 endpoint='redirect_territory')
+def redirect_territory(level, code):
+    """
+    Implicit redirect given the INSEE code.
+
+    Optimistically redirect to the latest valid/known INSEE code.
+    """
+    territory = GeoZone.objects.valid_at(datetime.now()).filter(
+        code=code, level='fr/{level}'.format(level=level)).first()
     return redirect(url_for('territories.territory', territory=territory))
 
 
@@ -110,28 +123,26 @@ def render_territory(territory):
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
-    # Check that this territory is still valid (redirect old French
-    # regions for instance).
-    if not territory.valid_at(date.today()):
-        valid_territory = GeoZone.objects.valid_at(date.today()).get(
-            level=territory.level,
-            ancestors__contains=territory.datagouv_id)
-        if valid_territory:
-            return redirect(
-                url_for('territories.territory', territory=valid_territory))
-        else:
-            return abort(404)
+    is_present_territory = territory.valid_at(date.today())
 
-    DATASETS = TERRITORY_DATASETS[territory.level_name]
-    base_dataset_classes = sorted(DATASETS.values(), key=lambda a: a.order)
-    base_datasets = [
-        base_dataset_class(territory)
-        for base_dataset_class in base_dataset_classes
-    ]
+    # Retrieve the present territory if not presently valid.
+    present_territory = None
+    if not is_present_territory:
+        present_territory = GeoZone.objects.valid_at(date.today()).get(
+            level=territory.level, ancestors__contains=territory.permid)
+
+    # Only display dynamic datasets for present territories.
+    base_datasets = []
+    if is_present_territory:
+        DATASETS = TERRITORY_DATASETS[territory.level_code]
+        base_dataset_classes = sorted(DATASETS.values(), key=lambda a: a.order)
+        base_datasets = [
+            base_dataset_class(territory)
+            for base_dataset_class in base_dataset_classes
+        ]
     territories = [territory]
 
-    # Deal with territories with ancestors (new/old French regions
-    # for instance).
+    # Deal with territories with ancestors.
     for ancestor_object in territory.ancestors_objects:
         territories.append(ancestor_object)
 
@@ -155,6 +166,7 @@ def render_territory(territory):
                                      DatasetEditPermission(dataset).can())
     context = {
         'territory': territory,
+        'present_territory': present_territory,
         'base_datasets': base_datasets,
         'other_datasets': other_datasets,
         'has_pertinent_datasets': any(editable_datasets),

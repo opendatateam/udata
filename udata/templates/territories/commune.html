@@ -4,56 +4,59 @@
     'title': territory.html_title|striptags,
     'description': _('Datasets related to the town of %(name)s with INSEE code %(code)s and postal code %(postal)s', name=territory.html_title|striptags, code=territory.code, postal=territory.postal_string),
     'image': logo,
-    'keywords': [territory.name, territory.code, territory.postal_string, territory.parent.name or ''],
+    'keywords': [territory.name, territory.code, territory.postal_string],
 } %}
 
 {% block territory_content %}
-    <div class="col-sm-9">
-        <h1>{{ territory.html_title|safe }}</h1>
-        <leaflet-map v-ref:map class="aside-map" :popup="false"
-            data-zones="{{ url_for('api.zones', ids=[territory.id]) }}">
-        </leaflet-map>
-    </div>
-
-    <aside class="col-sm-3 panel panel-default">
-        <div class="text-center">
+    <div class="col-sm-6">
+        <div class="col-sm-2">
             <img src="{{ logo }}" alt="{{ territory.name }}" class="scalable" />
+            {% if territory.logo_url() %}
+                <div class="text-center">
+                    <small>
+                        {{ _('Source:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a> •
+                        {{ _('License:') }} <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA</a>
+                    </small>
+                </div>
+            {% else %}
+                <div class="text-center">
+                    <small>
+                        {{ _('Submit your logo through:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a><br>
+                        ({{ _('we only expose logos under an open license') }})
+                    </small>
+                </div>
+            {% endif %}
         </div>
-        {% if territory.logo_url() %}
-            <div class="text-center">
-                <small>
-                    {{ _('Source:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a> •
-                    {{ _('License:') }} <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA</a>
-                </small>
-            </div>
-        {% else %}
-            <div class="text-center">
-                <small>
-                    {{ _('Submit your logo through:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a><br>
-                    ({{ _('we only expose logos under an open license') }})
-                </small>
-            </div>
-        {% endif %}
-        <div class="tab-links">
-            <p class="text-center">
+
+        <div class="col-sm-10 tab-links">
+            <h1>{{ territory.name }}</h1>
+            <p>
                 <strong>
                     {{ _('INSEE code:') }} {{ territory.code }}
                 </strong>
             </p>
             {% if territory.postal_string %}
-                <p class="text-center">
+                <p>
                     <strong>
                         {{ _('Postal code:') }} {{ territory.postal_string }}
                     </strong>
                 </p>
             {% endif %}
             {% if territory.population %}
-                <p class="text-center">
+                <p>
                     <strong>
                         {{ _('Population:') }} {{ territory.population|format_number }}
                     </strong>
                 </p>
             {% endif %}
         </div>
+    </div>
+
+    <aside class="col-sm-6 panel panel-default">
+        <leaflet-map v-ref:map class="aside-map" :popup="false"
+            data-zones="{{ url_for('api.zones', ids=[territory.id]) }}">
+        </leaflet-map>
+        <h3><small>{{ _('Region:') }} <a href="{{ territory.current_parent.current_parent.url }}">{{ territory.current_parent.current_parent.name }}</a></small></h3>
+        <h3><small>{{ _('County:') }} <a href="{{ territory.current_parent.url }}">{{ territory.current_parent.name }}</a></small></h3>
     </aside>
 {% endblock %}
