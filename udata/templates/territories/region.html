@@ -1,8 +1,8 @@
 {% extends theme("territories/territory.html") %}
 
 {% set meta = {
-    'title': territory.html_title|striptags,
-    'description': _('Datasets related to the region of %(name)s with INSEE code %(code)s', name=territory.html_title|striptags, code=territory.code),
+    'title': territory.name,
+    'description': _('Datasets related to the region of %(name)s with INSEE code %(code)s', name=territory.name, code=territory.code),
     'image': logo,
     'keywords': [territory.name, territory.code],
 } %}

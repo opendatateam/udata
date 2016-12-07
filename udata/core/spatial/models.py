@@ -24,8 +24,6 @@ BASE_GRANULARITIES = [
     ('other', _('Other')),
 ]
 
-ANCESTORS_SPLITER = '@'
-
 
 class GeoLevel(db.Document):
     id = db.StringField(primary_key=True)
@@ -78,25 +76,6 @@ class GeoZone(db.Document):
         return '{name} <i>({code})</i>'.format(
             name=gettext(self.name), code=self.code)
 
-    @cached_property
-    def html_title(self):
-        """In use within templates."""
-        if self.level_code == 'COM':
-            return ('{name} '
-                    '<small>(<a href="{parent_url}">{parent_name}</a>)</small>'
-                    '').format(name=self.name,
-                               parent_url=self.current_parent.url,
-                               parent_name=self.current_parent.name)
-        elif self.level_code == 'DEP':
-            return '{name} <small>({code})</small>'.format(
-                name=self.name, code=self.code)
-        elif self.level_code == 'REG':
-            return ('{name} '
-                    '<small>(<a href="{parent_url}">{parent_name}</a>)</small>'
-                    '').format(name=self.name,
-                               parent_url=url_for('territories.home'),
-                               parent_name=_('France'))
-
     def logo_url(self, external=False):
         filename = self.logo.filename
         if filename and self.logo.fs.exists(filename):
@@ -117,8 +96,8 @@ class GeoZone(db.Document):
 
     @cached_property
     def level_code(self):
-        """Truncated level name for the sake of readability."""
-        return self.permid[:3]
+        """Truncated level code for the sake of readability."""
+        return self.permid[:3]  # Either 'REG', 'DEP' or 'COM'.
 
     @cached_property
     def level_name(self):
@@ -207,8 +186,8 @@ class GeoZone(db.Document):
                        .order_by('name'))
 
     @property
-    def children_popular(self):
-        return self.children.order_by('-population', '-area')
+    def popular_children(self):
+        return self.children.order_by('-population', '-area')[:10]
 
     @property
     def handled_level(self):

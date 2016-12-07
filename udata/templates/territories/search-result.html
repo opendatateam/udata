@@ -8,7 +8,7 @@
                 width="70" height="70">
         </div>
         <div class="result-body ellipsis-dot">
-            <h4 class="result-title">{{ territory.html_title|safe }}</h4>
+            <h4 class="result-title">{{ territory.name }}</h4>
             <div class="result-description">
                 {{ _('INSEE code:') }} {{ territory.code }}<br/>
                 {% if territory.postal_string %}
