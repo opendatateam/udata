@@ -1,0 +1,31 @@
+[bumpr]
+file = udata/__init__.py
+vcs = git
+commit = true
+tag = true
+push = true
+tests = nosetests
+publish = inv dist
+clean = inv clean
+files =
+    README.md
+
+[bump]
+unsuffix = true
+
+[prepare]
+part = patch
+suffix = dev
+
+[changelog]
+file = CHANGELOG.md
+bump = ## {version} ({date:%Y-%m-%d})
+prepare = ## Current (in progress)
+separator =
+
+[readthedoc]
+id = udata
+
+[replace]
+dev = ?branch=master
+stable = ?tag={version}
