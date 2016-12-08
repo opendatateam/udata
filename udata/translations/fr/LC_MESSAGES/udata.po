@@ -1,7 +1,7 @@
 # Translations template for udata.
 # Copyright (C) 2016 ORGANIZATION
 # This file is distributed under the same license as the udata project.
-# 
+#
 # Translators:
 # Axel Haustant, 2014
 # Axel Haustant, 2014-2016
@@ -1273,13 +1273,13 @@ msgstr "Attention, vous entrez dans une zone de danger. Les modifications et sup
 msgid ""
 "If you try to modify a resource without an authentication token, a 401 will be returned:\n"
 "                "
-msgstr "Si vous tentez de modifier une ressource sans le token d'auuthentification, une erreur 401 sera renvoyée :"
+msgstr "Si vous tentez de modifier une ressource sans le token d'authentification, une erreur 401 sera renvoyée :"
 
 #: udata/templates/apidoc.html:287
 msgid ""
 "You need to specify your API Key (see above) and use the <code>X-API-KEY</code> HTTP header. If you try to modify a resource that you're not in control of, a 400 will be returned instead:\n"
 "                "
-msgstr "Vous devez spécifier votre Clé d'API (voir ci-dessus) et utilise le header HTTP <code>X-API-KEY</code>. Si vous tentez de modifier une ressource que vous ne contrôlez pas, une erreur 400 sera retournée :"
+msgstr "Vous devez spécifier votre Clé d'API (voir ci-dessus) et utiliser le header HTTP <code>X-API-KEY</code>. Si vous tentez de modifier une ressource que vous ne contrôlez pas, une erreur 400 sera retournée :"
 
 #: udata/templates/apidoc.html:302
 msgid ""
