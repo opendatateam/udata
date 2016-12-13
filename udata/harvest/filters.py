@@ -4,9 +4,10 @@ from __future__ import unicode_literals, absolute_import
 import urlparse
 
 import dateutil.parser
-import slugify
 
 from voluptuous import Invalid
+
+from udata import tags
 
 
 def boolean(value):
@@ -55,11 +56,15 @@ def force_list(value):
 
 
 def slug(value):
-    return slugify.slugify(value.lower(), separator='-')
+    return tags.slug(value)
+
+
+def normalize_tag(value):
+    return tags.normalize(value)
 
 
 def taglist(value):
-    return [slug(t) for t in value.split(',')]
+    return tags.tags_list(value)
 
 
 def empty_none(value):
@@ -76,7 +81,7 @@ def line_endings(value):
     """Replaces CR + LF or CR to LF in a string,
     then strip spaces and remove it when empty.
     """
-    return value.replace(u'\r\n', u'\n').replace(u'\r', u'\n')
+    return value.replace('\r\n', '\n').replace('\r', '\n')
 
 
 def normalize_string(value):
@@ -84,7 +89,7 @@ def normalize_string(value):
 
 
 def is_url(add_prefix='http://', full=False, remove_fragment=False,
-           schemes=(u'http', u'https')):
+           schemes=('http', 'https')):
     """Return a converter that converts a clean string to an URL."""
     def converter(value):
         if value is None:
@@ -92,7 +97,7 @@ def is_url(add_prefix='http://', full=False, remove_fragment=False,
         split_url = list(urlparse.urlsplit(value))
         if full and add_prefix \
                 and not all((split_url[0], split_url[1], split_url[2])) \
-                and not split_url[2].startswith(u'/'):
+                and not split_url[2].startswith('/'):
             split_url = list(urlparse.urlsplit(add_prefix + value))
         scheme = split_url[0]
         if scheme != scheme.lower():

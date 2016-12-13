@@ -69,7 +69,7 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
                                   'keyword1',
                                   'keyword2'])
         self.assertEqual(d.extras["ods:references"], "http://example.com")
-        self.assertEqual(d.extras["ods:has_records"], True)
+        self.assertTrue(d.extras["ods:has_records"])
         self.assertEqual(d.extras["harvest:remote_id"], "test-a")
         self.assertEqual(d.extras["harvest:domain"],
                          "etalab-sandbox.opendatasoft.com")

@@ -32,7 +32,7 @@ class PostsAPITest(APITestCase):
         data['reuses'] = [str(r.id) for r in data['reuses']]
         self.login(AdminFactory())
         response = self.post(url_for('api.posts'), data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.assertEqual(Post.objects.count(), 1)
         post = Post.objects.first()
         for dataset, expected in zip(post.datasets, data['datasets']):

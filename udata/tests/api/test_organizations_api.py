@@ -39,7 +39,7 @@ class OrganizationAPITest(APITestCase):
         '''It should not fetch a deleted organization from the API'''
         organization = OrganizationFactory(deleted=datetime.now())
         response = self.get(url_for('api.organization', org=organization))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_organization_api_get_deleted_but_authorized(self):
         '''It should fetch a deleted organization from the API if authorized'''
@@ -55,7 +55,7 @@ class OrganizationAPITest(APITestCase):
         data = OrganizationFactory.attributes()
         self.login()
         response = self.post(url_for('api.organizations'), data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.assertEqual(Organization.objects.count(), 1)
 
         org = Organization.objects.first()
@@ -84,7 +84,7 @@ class OrganizationAPITest(APITestCase):
         data['description'] = 'new description'
         self.login()
         response = self.put(url_for('api.organization', org=org), data)
-        self.assertStatus(response, 410)
+        self.assert410(response)
         self.assertEqual(Organization.objects.first().description,
                          org.description)
 
@@ -115,7 +115,7 @@ class OrganizationAPITest(APITestCase):
         self.login()
         organization = OrganizationFactory(deleted=datetime.now())
         response = self.delete(url_for('api.organization', org=organization))
-        self.assertStatus(response, 410)
+        self.assert410(response)
         self.assertIsNotNone(Organization.objects[0].deleted)
 
     def test_organization_api_delete_as_editor_forbidden(self):
@@ -146,7 +146,7 @@ class MembershipAPITest(APITestCase):
 
         api_url = url_for('api.request_membership', org=organization)
         response = self.post(api_url, data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         organization.reload()
         self.assertEqual(len(organization.requests), 1)
@@ -355,7 +355,7 @@ class MembershipAPITest(APITestCase):
 
         response = self.post(
             url_for('api.organization_followers', id=to_follow.id))
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
@@ -685,7 +685,7 @@ class OrganizationBadgeAPITest(APITestCase):
             response = self.post(
                 url_for('api.organization_badges', org=self.organization),
                 data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 1)
 
@@ -715,7 +715,7 @@ class OrganizationBadgeAPITest(APITestCase):
             response = self.post(
                 url_for('api.organization_badges', org=self.organization),
                 data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 2)
 
