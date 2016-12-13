@@ -123,9 +123,9 @@ class TerritoryConverter(ModelConverter, PathConverter):
         if '/' not in value:
             return
 
-        level, permid, slug = value.split('/')
+        level, zone_id, slug = value.split('/')
         return self.model.objects.get_or_404(
-            permid=permid, level='fr/{level}'.format(level=level))
+            id=zone_id, level='fr/{level}'.format(level=level))
 
     def to_url(self, obj):
         """
@@ -135,22 +135,22 @@ class TerritoryConverter(ModelConverter, PathConverter):
         if not level_name:
             raise ValueError('Unable to serialize "%s" to url' % obj)
 
-        permid = getattr(obj, 'permid', None)
-        if not permid:
+        zone_id = getattr(obj, 'id', None)
+        if not zone_id:
             # Fallback on code for old redirections.
             code = getattr(obj, 'code', None)
             if not code:
                 raise ValueError('Unable to serialize "%s" to url' % obj)
             territory = self.model.objects.get_or_404(
                 code=code, level='fr/{level}'.format(level=level_name))
-            return '{level_name}/{permid}/{slug}'.format(
-                level_name=level_name, permid=territory.permid,
+            return '{level_name}/{zone_id}/{slug}'.format(
+                level_name=level_name, zone_id=territory.id,
                 slug=territory.slug)
 
         slug = getattr(obj, 'slug', None)
-        if level_name and permid:
-            return '{level_name}/{permid}/{slug}'.format(
-                level_name=level_name, permid=permid, slug=slug)
+        if level_name and zone_id:
+            return '{level_name}/{zone_id}/{slug}'.format(
+                level_name=level_name, zone_id=zone_id, slug=slug)
         else:
             raise ValueError('Unable to serialize "%s" to url' % obj)
 

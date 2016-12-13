@@ -68,14 +68,14 @@ def load(filename, drop=False):
         unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
         unpacker.next()
         for i, geozone in enumerate(unpacker):
-            if (not geozone['geom'] or (
+            if ('geom' not in geozone or not geozone['geom'] or (
                 geozone['geom']['type'] == 'GeometryCollection'
                     and not geozone['geom']['geometries'])):
-                log.error('Geometries not found for %s', geozone)
-                continue
+                geom = None
+            else:
+                geom = geozone['geom']
             params = {
                 'id': geozone['_id'],
-                'permid': geozone.get('permid', geozone['code']),
                 'slug': slugify.slugify(geozone['name'], separator='-'),
                 'level': geozone['level'],
                 'code': geozone['code'],
@@ -90,7 +90,7 @@ def load(filename, drop=False):
                 'logo': geozone.get('flag') or geozone.get('blazon'),
                 'wikipedia': geozone.get('wikipedia'),
                 'area': geozone.get('area'),
-                'geom': geozone['geom']
+                'geom': geom
             }
             try:
                 GeoZone.objects.create(**params)

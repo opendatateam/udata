@@ -40,12 +40,11 @@ class GeoZoneQuerySet(db.BaseQuerySet):
 
 class GeoZone(db.Document):
     id = db.StringField(primary_key=True)
-    permid = db.StringField(unique_with='level')
     slug = db.StringField(required=True)
     name = db.StringField(required=True)
     level = db.StringField(required=True)
     code = db.StringField(required=True)
-    geom = db.MultiPolygonField(required=True)
+    geom = db.MultiPolygonField()
     parents = db.ListField()
     keys = db.DictField()
     validity = db.DictField()
@@ -97,7 +96,7 @@ class GeoZone(db.Document):
     @cached_property
     def level_code(self):
         """Truncated level code for the sake of readability."""
-        return self.permid[:3]  # Either 'REG', 'DEP' or 'COM'.
+        return self.id[:3]  # Either 'REG', 'DEP' or 'COM'.
 
     @cached_property
     def level_name(self):
@@ -121,7 +120,7 @@ class GeoZone(db.Document):
         ancestors_objects = []
         for ancestor in self.ancestors:
             try:
-                ancestor_object = GeoZone.objects.get(permid=ancestor)
+                ancestor_object = GeoZone.objects.get(id=ancestor)
             except GeoZone.DoesNotExist:
                 continue
             ancestors_objects.append(ancestor_object)
@@ -169,7 +168,7 @@ class GeoZone(db.Document):
     def parents_objects(self):
         if self.parent_level:
             for parent in self.parents:
-                if parent.startswith(self.parent_level):
+                if parent.startswith(self.parent_level[3:6].upper()):
                     yield GeoZone.objects.get(id=parent,
                                               level=self.parent_level)
 
@@ -205,7 +204,6 @@ class GeoZone(db.Document):
             'type': 'Feature',
             'geometry': self.geom,
             'properties': {
-                'permid': self.permid,
                 'slug': self.slug,
                 'name': gettext(self.name),
                 'level': self.level,

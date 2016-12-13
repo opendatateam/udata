@@ -51,7 +51,7 @@
             {% endif %}
             {% if territory.ancestors_objects %}
                 <h3><small>
-                    {{ _('Ancestors:') }}
+                    {{ _('Previously:') }}
                     {% for ancestor in territory.ancestors_objects %}
                         <a href="{{ ancestor.url }}">{{ ancestor.name }}</a>{% if not loop.last %},{% endif %}
                     {% endfor %}

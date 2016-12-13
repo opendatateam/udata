@@ -37,7 +37,7 @@ class TerritoryDataset(object):
     @property
     def slug(self):
         return '{territory_id}:{id}'.format(
-            territory_id=self.territory.permid, id=self.id)
+            territory_id=self.territory.id, id=self.id)
 
     @property
     def organization(self):

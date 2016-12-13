@@ -129,7 +129,7 @@ def render_territory(territory):
     present_territory = None
     if not is_present_territory:
         present_territory = GeoZone.objects.valid_at(date.today()).get(
-            level=territory.level, ancestors__contains=territory.permid)
+            level=territory.level, ancestors__contains=territory.id)
 
     # Only display dynamic datasets for present territories.
     base_datasets = []
