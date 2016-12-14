@@ -17,7 +17,7 @@ class TopicFactory(MongoEngineFactory):
 
     name = factory.LazyAttribute(lambda o: faker.sentence())
     description = factory.LazyAttribute(lambda o: faker.text())
-    tags = factory.LazyAttribute(lambda o: [utils.unique_string()
+    tags = factory.LazyAttribute(lambda o: [utils.unique_string(16)
                                  for _ in range(3)])
 
     @factory.lazy_attribute

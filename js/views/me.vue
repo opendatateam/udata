@@ -21,6 +21,7 @@
 </template>
 
 <script>
+import config from 'config';
 import moment from 'moment';
 import API from 'api';
 import {PageList} from 'models/base';
@@ -37,7 +38,11 @@ export default  {
                 label: this._('Edit'),
                 icon: 'edit',
                 method: this.edit
-            }],
+            }].concat(config.is_delete_me_enabled ? [{
+                label: this._('Delete'),
+                icon: 'trash',
+                method: this.confirm_delete
+            }] : []),
             metrics: new Metrics(),
             reuses: new PageList({
                 ns: 'me',
@@ -77,6 +82,11 @@ export default  {
         this._handler.remove();
     },
     methods: {
+        confirm_delete() {
+            this.$root.$modal(
+                require('components/user/delete-me-modal.vue'),
+            );
+        },
         edit() {
             this.$go({name: 'me-edit'});;
         },

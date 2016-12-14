@@ -8,6 +8,13 @@ You have to re-initialize the index from scratch, not just use the `reindex` com
 
 ## New & Improved
 
+* 2016-12-01: Add the possibility for a user to delete its account in the admin interface
+
+In some configurations, this feature should be deactivated, typically when
+there is an SSO in front of udata which may cause some inconsistencies. In
+that case, the configuration parameter DELETE_ME should be set to False (True
+by default).
+
 * 2016-05-12: Add fields masks to reduce API payloads [#451](https://github.com/etalab/udata/pull/451)
 
 The addition of [fields masks](http://flask-restplus.readthedocs.io/en/stable/mask.html) in Flask-RESTPlus allows us to reduce the retrieved payload within the admin — especially for datasets — and results in a performances boost.

@@ -25,7 +25,7 @@
         </span>
         {% endif %}
         <p class="list-group-item-heading">
-            {{ message.content }}
+            {{ _('Deleted message') if message.content == 'DELETED' else  message.content }}
         </p>
     </div>
 {% endfor %}

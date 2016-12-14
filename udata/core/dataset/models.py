@@ -151,13 +151,22 @@ class ResourceMixin(object):
     def is_available(self):
         return self.check_availability(group=None)
 
+    @property
+    def latest(self):
+        '''
+        Permanent link to the latest version of this resource.
+
+        If this resource is updated and `url` changes, this property won't.
+        '''
+        return url_for('datasets.resource', id=self.id, _external=True)
+
     @cached_property
     def json_ld(self):
 
         result = {
             '@type': 'DataDownload',
             '@id': str(self.id),
-            'url': self.url,
+            'url': self.latest,
             'name': self.title or _('Nameless resource'),
             'contentUrl': self.url,
             'dateCreated': self.created_at.isoformat(),

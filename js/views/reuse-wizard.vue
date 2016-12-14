@@ -31,7 +31,7 @@ export default {
                             data.organization = this.publish_as;
                         }
                         Object.assign(this.reuse, data);
-                        this.reuse.save();
+                        this.reuse.save(component.on_error);
                         this.reuse.$once('updated', () => {
                             this.$refs.wizard.go_next();
                         });
