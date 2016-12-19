@@ -35,6 +35,7 @@ class UserSearch(ModelSearchAdapter):
     user_suggest = Completion(analyzer=simple,
                               search_analyzer=simple,
                               payloads=True)
+    roles = String(index='not_analyzed')
 
     fields = (
         'last_name^6',
@@ -97,5 +98,6 @@ class UserSearch(ModelSearchAdapter):
                     'slug': user.slug,
                 },
             },
-            'visible': user.visible
+            'visible': user.visible,
+            'roles': [role.name for role in user.roles],
         }

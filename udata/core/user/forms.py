@@ -8,7 +8,7 @@ from udata.models import User
 from .models import AVATAR_SIZES
 
 
-__all__ = ('UserProfileForm', )
+__all__ = ('UserProfileForm', 'UserProfileAdminForm')
 
 
 class UserProfileForm(ModelForm):
@@ -19,3 +19,8 @@ class UserProfileForm(ModelForm):
     avatar = fields.ImageField(_('Avatar'), sizes=AVATAR_SIZES)
     website = fields.URLField(_('Website'))
     about = fields.MarkdownField(_('About'))
+
+
+class UserProfileAdminForm(UserProfileForm):
+    roles = fields.RolesField(_('Roles'))
+    active = fields.BooleanField()

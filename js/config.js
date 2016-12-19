@@ -126,6 +126,11 @@ export const notify_in = _meta('notify-in');
 export const is_territory_enabled = _jsonMeta('territory-enabled');
 
 /**
+ * Whether the 'delete me' feature is enabled or not.
+ */
+export const is_delete_me_enabled = _jsonMeta('delete-me-enabled');
+
+/**
  * Detect HiDPI screens
  */
 export const hidpi = (window.devicePixelRatio > 1 || (
@@ -169,6 +174,7 @@ export default {
     check_urls,
     check_urls_ignore,
     is_territory_enabled,
+    is_delete_me_enabled,
     hidpi,
     tiles_attributions,
     tiles_url,
