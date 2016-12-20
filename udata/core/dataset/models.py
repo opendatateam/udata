@@ -308,6 +308,11 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
         else:
             cls.on_update.send(document)
 
+    def clean(self):
+        super(Dataset, self).clean()
+        if self.frequency in LEGACY_FREQUENCIES:
+            self.frequency = LEGACY_FREQUENCIES[self.frequency]
+
     def url_for(self, *args, **kwargs):
         return url_for('datasets.show', dataset=self, *args, **kwargs)
 
