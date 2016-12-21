@@ -33,10 +33,10 @@ def check_url(url, group=None):
         response = requests.post(check_url,
                                  data=json.dumps(params),
                                  timeout=TIMEOUT)
-    except requests.ConnectionError:
+    except requests.RequestException:
         log.error(ERROR_LOG_MSG, exc_info=True)
         return {}, 503
-    except requests.ConnectTimeout:
+    except requests.Timeout:
         log.error(TIMEOUT_LOG_MSG, exc_info=True)
         return {}, 503
     url_hash = response.json()['url-hash']
@@ -44,11 +44,11 @@ def check_url(url, group=None):
         url=CROQUEMORT['url'], url_hash=url_hash)
     try:
         response = requests.get(retrieve_url, params=params, timeout=TIMEOUT)
-    except requests.ConnectionError:
-        log.error(ERROR_LOG_MSG, exc_info=True)
-        return {}, 503
-    except requests.ConnectTimeout:
+    except requests.Timeout:
         log.error(TIMEOUT_LOG_MSG, exc_info=True)
+        return {}, 503
+    except requests.RequestException:
+        log.error(ERROR_LOG_MSG, exc_info=True)
         return {}, 503
     attempts = 0
     while response.status_code == 404 or 'status' not in response.json():
@@ -60,11 +60,11 @@ def check_url(url, group=None):
             response = requests.get(retrieve_url,
                                     params=params,
                                     timeout=TIMEOUT)
-        except requests.ConnectionError:
-            log.error(ERROR_LOG_MSG, exc_info=True)
-            return {}, 503
-        except requests.ConnectTimeout:
+        except requests.Timeout:
             log.error(TIMEOUT_LOG_MSG, exc_info=True)
+            return {}, 503
+        except requests.RequestException:
+            log.error(ERROR_LOG_MSG, exc_info=True)
             return {}, 503
         time.sleep(delay)
         attempts += 1
@@ -84,11 +84,11 @@ def check_url_from_cache(url, group=None):
         response = requests.get(retrieve_url,
                                 params={'url': url, 'group': group},
                                 timeout=TIMEOUT)
-    except requests.ConnectionError:
-        log.error(ERROR_LOG_MSG, exc_info=True)
-        return {'error': CONNECTION_ERROR_MSG}, {}
-    except requests.ConnectTimeout:
+    except requests.Timeout:
         log.error(TIMEOUT_LOG_MSG, exc_info=True)
+        return {'error': CONNECTION_ERROR_MSG}, {}
+    except requests.RequestException:
+        log.error(ERROR_LOG_MSG, exc_info=True)
         return {'error': CONNECTION_ERROR_MSG}, {}
     if response.status_code == 404:
         return {'error': 'URL {url} not found'.format(url=url)}, {}
@@ -109,11 +109,11 @@ def check_url_from_group(group):
         response = requests.get(retrieve_url,
                                 params={'group': group},
                                 timeout=TIMEOUT)
-    except requests.ConnectionError:
-        log.error(ERROR_LOG_MSG, exc_info=True)
-        return {'error': CONNECTION_ERROR_MSG}, {}
-    except requests.ConnectTimeout:
+    except requests.Timeout:
         log.error(TIMEOUT_LOG_MSG, exc_info=True)
+        return {'error': CONNECTION_ERROR_MSG}, {}
+    except requests.RequestException:
+        log.error(ERROR_LOG_MSG, exc_info=True)
         return {'error': CONNECTION_ERROR_MSG}, {}
     if response.status_code == 404:
         return {'error': 'Group {group} not found'.format(group=group)}, {}
