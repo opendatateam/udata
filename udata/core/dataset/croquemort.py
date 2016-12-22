@@ -35,11 +35,11 @@ def check_url(url, group=None):
         response = requests.post(check_url,
                                  data=json.dumps(params),
                                  timeout=TIMEOUT)
-    except requests.RequestException:
-        log.error(ERROR_LOG_MSG, exc_info=True)
-        return {}, 503
     except requests.Timeout:
         log.error(TIMEOUT_LOG_MSG, exc_info=True)
+        return {}, 503
+    except requests.RequestException:
+        log.error(ERROR_LOG_MSG, exc_info=True)
         return {}, 503
     url_hash = response.json()['url-hash']
     retrieve_url = '{url}/url/{url_hash}'.format(
