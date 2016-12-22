@@ -11,6 +11,8 @@ log = logging.getLogger(__name__)
 # We are waiting 3 sec for the connexion and 9 for the response.
 TIMEOUT = (3.1, 9.1)
 
+DEFAULT_DELAY = 5
+DEFAULT_RETRY = 10
 CONNECTION_ERROR_MSG = 'Unable to reach the URL checker'
 
 ERROR_LOG_MSG = 'Unable to connect to croquemort'
@@ -26,8 +28,8 @@ def check_url(url, group=None):
     if CROQUEMORT is None:
         return {'error': 'Check server not configured.'}, {}
     check_url = '{url}/check/one'.format(url=CROQUEMORT['url'])
-    delay = CROQUEMORT['delay']
-    retry = CROQUEMORT['retry']
+    delay = CROQUEMORT.get('delay', DEFAULT_DELAY)
+    retry = CROQUEMORT.get('retry', DEFAULT_RETRY)
     params = {'url': url, 'group': group}
     try:
         response = requests.post(check_url,

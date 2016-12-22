@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import json
 
 import httpretty
+import requests
 
 from flask import url_for
 
@@ -18,8 +19,8 @@ CHECK_ONE_URL = CROQUEMORT_URL + '/check/one'
 METADATA_URL = CROQUEMORT_URL + '/url'
 
 
-def metadata_factory(url, status, content_type=None):
-    return json.dumps({
+def metadata_factory(url, data=None):
+    response = {
       'etag': '',
       'url': url,
       'content-length': faker.pyint(),
@@ -27,74 +28,96 @@ def metadata_factory(url, status, content_type=None):
       'content-md5': faker.md5(),
       'content-location': '',
       'expires': faker.iso8601(),
-      'status': str(status),
+      'status': '200',
       'updated': faker.iso8601(),
       'last-modified': faker.iso8601(),
       'content-encoding': 'gzip',
-      'content-type': content_type or faker.mime_type()
-    })
+      'content-type': faker.mime_type()
+    }
+    if data:
+        response.update(data)
+    return json.dumps(response)
+
+
+def mock_url_check(url, data=None, status=200):
+    url_hash = faker.md5()
+    httpretty.register_uri(httpretty.POST, CHECK_ONE_URL,
+                           body=json.dumps({'url-hash': url_hash}),
+                           content_type='application/json')
+    httpretty.register_uri(httpretty.GET, METADATA_URL + '/' + url_hash,
+                           body=metadata_factory(url, data),
+                           content_type='application/json',
+                           status=status)
+
+
+def exception_factory(exception):
+    def callback(request, uri, headers):
+        raise exception
+    return callback
 
 
 class CheckUrlSettings(Testing):
-    CROQUEMORT = {'url': CROQUEMORT_URL}
+    CROQUEMORT = {
+        'url': CROQUEMORT_URL,
+        'retry': 2,
+        'delay': 1,
+    }
 
 
 class CheckUrlAPITest(APITestCase):
     settings = CheckUrlSettings
 
-    # def setUp(self):
-    #     super(CheckUrlAPITest, self).setUp()
-    #     self.config_backup = self.app.config.get('CROQUEMORT')
-    #     self.croquemort_url = 'http://check.test'
-    #     self.app.config['CROQUEMORT'] = {'url': self.croquemort_url}
-    #
-    # def tearDown(self):
-    #     self.app.config['CROQUEMORT'] = self.config_backup
-
     @httpretty.activate
     def test_returned_metadata(self):
         url = faker.uri()
-        url_hash = 'abcdef'
-        content_type = 'text/html; charset=utf-8'
-        httpretty.register_uri(httpretty.POST, CHECK_ONE_URL,
-                               body=json.dumps({'url-hash': url_hash}),
-                               content_type='application/json')
-        httpretty.register_uri(httpretty.GET, METADATA_URL + '/' + url_hash,
-                               body=metadata_factory(url, 200,
-                                                     content_type=content_type),
-                               content_type='application/json')
-        response = self.get(url_for('api.checkurl'), qs={'url': url})
+        metadata = {
+            'content-type': 'text/html; charset=utf-8',
+            'status': '200',
+        }
+        mock_url_check(url, metadata)
+        response = self.get(url_for('api.checkurl'),
+                            qs={'url': url, 'group': ''})
         self.assert200(response)
         self.assertEqual(response.json['status'], '200')
         self.assertEqual(response.json['url'], url)
-        self.assertEqual(response.json['content-type'], content_type)
+        self.assertEqual(response.json['content-type'],
+                         'text/html; charset=utf-8')
 
     @httpretty.activate
     def test_invalid_url(self):
         url = faker.uri()
-        url_hash = 'abcdef'
-        httpretty.register_uri(httpretty.POST, CHECK_ONE_URL,
-                               body=json.dumps({'url-hash': url_hash}),
-                               content_type='application/json')
-        httpretty.register_uri(httpretty.GET, METADATA_URL + '/' + url_hash,
-                               body=metadata_factory(url, 503),
-                               content_type='application/json')
-        response = self.get(url_for('api.checkurl'), qs={'url': url})
-        self.assertStatus(response, 500)
-        self.assertEqual(response.json['status'], '503')
+        mock_url_check(url, {'status': 503})
+        response = self.get(url_for('api.checkurl'),
+                            qs={'url': url, 'group': ''})
+        self.assertStatus(response, 503)
 
     @httpretty.activate
     def test_delayed_url(self):
         url = faker.uri()
-        url_hash = 'abcdef'
-        httpretty.register_uri(httpretty.POST, CHECK_ONE_URL,
-                               body=json.dumps({'url-hash': url_hash}),
-                               content_type='application/json')
-        httpretty.register_uri(httpretty.GET, METADATA_URL + '/' + url_hash,
-                               body=metadata_factory(url, 502),
-                               content_type='application/json')
-        response = self.get(url_for('api.checkurl'), qs={'url': url})
-        self.assertStatus(response, 502)
+        mock_url_check(url, status=404)
+        response = self.get(url_for('api.checkurl'),
+                            qs={'url': url, 'group': ''})
+        self.assertStatus(response, 500)
         self.assertEqual(
             response.json['error'],
-            'We were unable to retrieve the URL after 10 attempts.')
+            'We were unable to retrieve the URL after 2 attempts.')
+
+    @httpretty.activate
+    def test_timeout(self):
+        url = faker.uri()
+        exception = requests.Timeout('Request timed out')
+        httpretty.register_uri(httpretty.POST, CHECK_ONE_URL,
+                               body=exception_factory(exception))
+        response = self.get(url_for('api.checkurl'),
+                            qs={'url': url, 'group': ''})
+        self.assertStatus(response, 503)
+
+    @httpretty.activate
+    def test_connection_error(self):
+        url = faker.uri()
+        exception = requests.ConnectionError('Unable to connect')
+        httpretty.register_uri(httpretty.POST, CHECK_ONE_URL,
+                               body=exception_factory(exception))
+        response = self.get(url_for('api.checkurl'),
+                            qs={'url': url, 'group': ''})
+        self.assertStatus(response, 503)
