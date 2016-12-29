@@ -28,8 +28,9 @@ from udata.utils import to_iso_date, get_by
 
 class FieldHelper(object):
     def __init__(self, *args, **kwargs):
+        self._preprocessors = kwargs.pop('preprocessors', [])
         super(FieldHelper, self).__init__(*args, **kwargs)
-        self._form = kwargs['_form'] if '_form' in kwargs else None
+        self._form = kwargs.get('_form', None)
 
     @property
     def id(self):
@@ -51,6 +52,12 @@ class FieldHelper(object):
         if required is True:
             kwargs['required'] = required
         return super(FieldHelper, self).__call__(**kwargs)
+
+    def pre_validate(self, form):
+        '''Calls preprocessors before pre_validation'''
+        for preprocessor in self._preprocessors:
+            preprocessor(form, self)
+        super(FieldHelper, self).pre_validate(form)
 
 
 class Field(FieldHelper, WTField):

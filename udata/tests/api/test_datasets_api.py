@@ -9,7 +9,7 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import (
-    CommunityResource, Dataset, Follow, Member, UPDATE_FREQUENCIES
+    CommunityResource, Dataset, Follow, Member, UPDATE_FREQUENCIES, LEGACY_FREQUENCIES
 )
 
 from . import APITestCase
@@ -255,6 +255,18 @@ class DatasetAPITest(APITestCase):
 
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.spatial.geom, SAMPLE_GEOM)
+
+    @attr('create')
+    def test_dataset_api_create_with_legacy_frequency(self):
+        '''It should create a dataset from the API with a legacy frequency'''
+        self.login()
+
+        for oldFreq, newFreq in LEGACY_FREQUENCIES.items():
+            data = DatasetFactory.attributes()
+            data['frequency'] = oldFreq
+            response = self.post(url_for('api.datasets'), data)
+            self.assert201(response)
+            self.assertEqual(response.json['frequency'], newFreq)
 
     @attr('update')
     def test_dataset_api_update(self):

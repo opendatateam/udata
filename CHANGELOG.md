@@ -8,6 +8,9 @@ You have to re-initialize the index from scratch, not just use the `reindex` com
 
 ## New & Improved
 
+* 2016-12-20: Use all the [Dublin Core Frequencies](http://dublincore.org/groups/collections/frequency/)
+  plus some extra frequencies.
+
 * 2016-12-01: Add the possibility for a user to delete its account in the admin interface
 
 In some configurations, this feature should be deactivated, typically when
@@ -23,3 +26,13 @@ The addition of [fields masks](http://flask-restplus.readthedocs.io/en/stable/ma
 ## Fixes
 
 * 2016-11-29: Mark active users as confirmed [#619](https://github.com/opendatateam/udata/pull/618)
+
+## Deprecation
+
+Theses are deprecated and support will be removed in some feature release.
+See [Deprecation Policy](https://udata.readthedocs.io/versionning/#deprecation-policy).
+
+* Theses frequencies are deprecated for their Dublin Core counter part:
+    * `fortnighly` ⇨ `biweekly`
+    * `biannual` ⇨ `semiannual`
+    * `realtime` ⇨ `continuous`
