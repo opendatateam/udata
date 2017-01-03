@@ -1,5 +1,6 @@
 <template>
 <select class="form-control" v-model="value"
+    :multiple="field.multiple"
     :id="field.id"
     :name="field.id"
     :placeholder="placeholder"

@@ -40,7 +40,7 @@ class TransferAPITest(APITestCase):
             'comment': comment
         })
 
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         action.assert_called_with(dataset, recipient, comment)
 

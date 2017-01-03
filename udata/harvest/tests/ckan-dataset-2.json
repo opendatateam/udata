@@ -53,19 +53,19 @@
             "state": "active",
             "display_name": "bandwidth",
             "id": "0caf1ff8-5d2f-413c-9069-7dbd2722ade8",
-            "name": "bandwidth"
+            "name": "b"
         }, {
             "vocabulary_id": null,
             "state": "active",
             "display_name": "broadband",
             "id": "1ad9cbe1-f87c-4247-83bd-ab60c65212c8",
-            "name": "broadband"
+            "name": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
         }, {
             "vocabulary_id": null,
             "state": "active",
             "display_name": "cables",
             "id": "f1722fd5-2b09-4d7a-b467-50394a595d76",
-            "name": "cables"
+            "name": "CabLes cables"
         }, {
             "vocabulary_id": null,
             "state": "active",

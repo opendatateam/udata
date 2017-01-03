@@ -102,11 +102,11 @@ class DatasetBlueprintTest(FrontTestCase):
                               'Title 1 Title 2')
             self.assertEquals(json_ld_resource['interactionStatistic'],
                               {
-                                  u'@type': u'InteractionCounter',
-                                  u'interactionType': {
-                                      u'@type': u'DownloadAction',
+                                  '@type': 'InteractionCounter',
+                                  'interactionType': {
+                                      '@type': 'DownloadAction',
                                   },
-                                  u'userInteractionCount': 10,
+                                  'userInteractionCount': 10,
                               })
         self.assertEquals(json_ld['extras'],
                           [{
@@ -127,7 +127,7 @@ class DatasetBlueprintTest(FrontTestCase):
         '''It should raise a 410 if the dataset is deleted'''
         dataset = DatasetFactory(deleted=datetime.now())
         response = self.get(url_for('datasets.show', dataset=dataset))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_200_if_deleted_but_authorized(self):
         '''It should not raise a 410 if the can view it'''

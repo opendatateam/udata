@@ -28,6 +28,7 @@ router.map({
         }
     },
     '/site/': {
+        name: 'site',
         component: function(resolve) {
             require(['./views/site.vue'], resolve);
         }
@@ -168,6 +169,12 @@ router.map({
         name: 'user',
         component: function(resolve) {
             require(['./views/user.vue'], resolve);
+        }
+    },
+    '/user/edit/:oid/': {
+        name: 'user-edit',
+        component: function(resolve) {
+            require(['./views/user-edit.vue'], resolve);
         }
     },
     '/harvester/new/': {

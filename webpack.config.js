@@ -4,11 +4,8 @@ const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const node_path = path.join(__dirname, 'node_modules');
 
-// We are monkey-patching the extract-plugin because of
-// https://github.com/webpack/extract-text-webpack-plugin/issues/42
-const css_loader = require.resolve('./js/NonCachingExtractTextLoader') + '?{remove:true}!css?sourceMap';
-const less_loader = require.resolve('./js/NonCachingExtractTextLoader') + '?{remove:true}!css?sourceMap!less?sourceMap=source-map-less-inline';
-
+const css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap');
+const less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline');
 const handlebars_helpers = path.join(__dirname, 'js', 'templates', 'helpers');
 const hbs_loader = `handlebars?helperDirs[]=${handlebars_helpers}`;
 

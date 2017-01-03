@@ -38,7 +38,7 @@ class FollowAPITest(APITestCase):
         with on_follow.connected_to(self.handler):
             response = self.post(url_for('api.follow_fake', id=to_follow.id))
 
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         nb_followers = Follow.objects.followers(to_follow).count()
 
