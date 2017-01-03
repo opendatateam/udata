@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from mongoengine import post_save
 
-from udata.models import db, Dataset
+from udata.models import db, Dataset, LEGACY_FREQUENCIES
 from udata.core.dataset.factories import (
     ResourceFactory, DatasetFactory, CommunityResourceFactory
 )
@@ -243,8 +243,12 @@ class DatasetModelTest(TestCase, DBTestMixin):
             ])
 
     def test_tags_normalized(self):
-        user = UserFactory()
         tags = [' one another!', ' one another!', 'This IS a "tag"…']
-        dataset = DatasetFactory(owner=user, tags=tags)
+        dataset = DatasetFactory(tags=tags)
         self.assertEqual(len(dataset.tags), 2)
         self.assertEqual(dataset.tags[1], 'this-is-a-tag')
+
+    def test_legacy_frequencies(self):
+        for oldFreq, newFreq in LEGACY_FREQUENCIES.items():
+            dataset = DatasetFactory(frequency=oldFreq)
+            self.assertEqual(dataset.frequency, newFreq)
