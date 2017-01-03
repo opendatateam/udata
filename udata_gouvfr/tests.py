@@ -3,7 +3,11 @@ from __future__ import unicode_literals
 import cgi
 import json
 
+import httpretty
+import requests
+
 from flask import url_for
+from werkzeug.contrib.atom import AtomFeed
 
 from udata.frontend.markdown import md
 from udata.models import Badge, PUBLIC_SERVICE
@@ -12,7 +16,7 @@ from udata.tests.api import APITestCase
 from udata.tests.factories import (
     DatasetFactory, ReuseFactory, OrganizationFactory,
     VisibleReuseFactory, GeoZoneFactory, LicenseFactory,
-    VisibleDatasetFactory
+    VisibleDatasetFactory, faker
 )
 from udata.tests.frontend import FrontTestCase
 from udata.tests.test_sitemap import SitemapTestCase
@@ -108,6 +112,67 @@ class GouvFrThemeTest(FrontTestCase):
         reuse = ReuseFactory(organization=org, datasets=[dataset])
 
         response = self.get(url_for('reuses.show', reuse=reuse))
+        self.assert200(response)
+
+
+WP_ATOM_URL = 'http://somewhere.test/feed.atom'
+
+
+def exception_factory(exception):
+    def callback(request, uri, headers):
+        raise exception
+    return callback
+
+
+class GouvFrWithBlogSettings(Testing):
+    TEST_WITH_THEME = True
+    TEST_WITH_PLUGINS = True
+    PLUGINS = ['gouvfr']
+    THEME = 'gouvfr'
+    WP_ATOM_URL = WP_ATOM_URL
+
+
+class GouvFrHomeBlogTest(FrontTestCase):
+    '''Ensure home page render with blog'''
+    settings = GouvFrWithBlogSettings
+
+    @httpretty.activate
+    def test_render_home_with_blog(self):
+        '''It should render the home page with the latest blog article'''
+        post_url = faker.uri()
+        feed = AtomFeed('Some blog', feed_url=WP_ATOM_URL)
+        feed.add('Some post',
+                 '<div>Some content</div>',
+                 content_type='html',
+                 author=faker.name(),
+                 url=post_url,
+                 updated=faker.date_time(),
+                 published=faker.date_time())
+        httpretty.register_uri(httpretty.GET, WP_ATOM_URL,
+                               body=feed.to_string(),
+                               content_type='application/atom+xml')
+        response = self.get(url_for('site.home'))
+        self.assert200(response)
+        print(dir(response))
+        self.assertIn('Some post', response.data.decode('utf8'))
+        self.assertIn(post_url, response.data.decode('utf8'))
+
+    @httpretty.activate
+    def test_render_home_if_blog_timeout(self):
+        '''It should render the home page when blog time out'''
+        exception = requests.Timeout('Blog timed out')
+        httpretty.register_uri(httpretty.GET, WP_ATOM_URL,
+                               body=exception_factory(exception))
+        response = self.get(url_for('site.home'))
+        self.assert200(response)
+
+    @httpretty.activate
+    def test_render_home_if_blog_error(self):
+        '''It should render the home page when blog is not available'''
+        exception = requests.ConnectionError('Connection error')
+        httpretty.register_uri(httpretty.GET, WP_ATOM_URL,
+                               body=exception_factory(exception))
+        response = self.get(url_for('site.home'))
         self.assert200(response)
 
 
