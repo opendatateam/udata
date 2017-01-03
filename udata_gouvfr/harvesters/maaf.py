@@ -39,14 +39,14 @@ ZONES = {
 
 FREQUENCIES = {
     'ponctuelle': 'punctual',
-    'temps réel': 'realtime',
+    'temps réel': 'continuous',
     'quotidienne': 'daily',
     'hebdomadaire': 'weekly',
-    'bimensuelle': 'fortnighly',
+    'bimensuelle': 'semimonthly',
     'mensuelle': 'monthly',
     'bimestrielle': 'bimonthly',
     'trimestrielle': 'quarterly',
-    'semestrielle': 'biannual',
+    'semestrielle': 'semiannual',
     'annuelle': 'annual',
     'triennale': 'triennial',
     'quinquennale': 'quinquennial',
