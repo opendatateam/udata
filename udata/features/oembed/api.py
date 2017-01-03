@@ -26,7 +26,7 @@ class OEmbedsAPI(API):
         the `id` each of those separated by commas.
         E.g:
         dataset-5369992aa3a729239d205183,
-        territory-fr-commune-75056@2016-01-01-comptes
+        territory-DEP33@1860-07-01:emploi_dep
 
         Only datasets and territories are supported for now.
         """
