@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import re
 import uuid
 
 from dateutil.parser import parse
@@ -17,23 +16,21 @@ from wtforms_json import flatten_json
 from . import widgets
 
 from udata.auth import current_user, admin_permission
-from udata.models import db, User, Organization, Dataset, Reuse
+from udata.models import db, User, Organization, Dataset, Reuse, datastore
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
+from udata import tags
 from udata.utils import to_iso_date, get_by
 
 # _ = lambda s: s
 
-RE_TAG = re.compile('^[\w \-.]*$', re.U)
-MIN_TAG_LENGTH = 2
-MAX_TAG_LENGTH = 128
-
 
 class FieldHelper(object):
     def __init__(self, *args, **kwargs):
+        self._preprocessors = kwargs.pop('preprocessors', [])
         super(FieldHelper, self).__init__(*args, **kwargs)
-        self._form = kwargs['_form'] if '_form' in kwargs else None
+        self._form = kwargs.get('_form', None)
 
     @property
     def id(self):
@@ -55,6 +52,12 @@ class FieldHelper(object):
         if required is True:
             kwargs['required'] = required
         return super(FieldHelper, self).__call__(**kwargs)
+
+    def pre_validate(self, form):
+        '''Calls preprocessors before pre_validation'''
+        for preprocessor in self._preprocessors:
+            preprocessor(form, self)
+        super(FieldHelper, self).pre_validate(form)
 
 
 class Field(FieldHelper, WTField):
@@ -78,6 +81,18 @@ class StringField(FieldHelper, EmptyNone, fields.StringField):
 
 class IntegerField(FieldHelper, fields.IntegerField):
     pass
+
+
+class RolesField(FieldHelper, fields.StringField):
+    def process_formdata(self, valuelist):
+        self.data = []
+        for name in valuelist:
+            role = datastore.find_role(name)
+            if role is not None:
+                self.data.append(role)
+            else:
+                raise validators.ValidationError(
+                    _('The role {role} does not exist').format(role=name))
 
 
 class DateTimeField(Field, fields.DateTimeField):
@@ -115,20 +130,26 @@ class FileField(FieldHelper, fields.FileField):
 
 
 class URLField(FieldHelper, EmptyNone, html5.URLField):
-    pass
+    def pre_validate(self, form):
+        if self.data:
+            try:
+                db.URLField().validate(self.data)
+            except db.ValidationError:
+                raise validators.ValidationError(_('Invalid URL'))
+        return True
 
 
 class TmpFilename(fields.HiddenField):
     def _value(self):
-        return u''
+        return ''
 
 
 class BBoxField(fields.HiddenField):
     def _value(self):
         if self.data:
-            return u','.join([str(x) for x in self.data])
+            return ','.join([str(x) for x in self.data])
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist:
@@ -288,17 +309,15 @@ class SelectMultipleField(FieldHelper, fields.SelectMultipleField):
 class TagField(StringField):
     def _value(self):
         if self.data:
-            return u','.join(self.data)
+            return ','.join(self.data)
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) > 1:
-            self.data = valuelist
+            self.data = [tags.slug(value) for value in valuelist]
         elif valuelist:
-            self.data = list(set([
-                x.strip().lower()
-                for x in valuelist[0].split(',') if x.strip()]))
+            self.data = tags.tags_list(valuelist[0])
         else:
             self.data = []
 
@@ -306,15 +325,12 @@ class TagField(StringField):
         if not self.data:
             return
         for tag in self.data:
-            if not MIN_TAG_LENGTH <= len(tag) <= MAX_TAG_LENGTH:
+            if not tags.MIN_TAG_LENGTH <= len(tag) <= tags.MAX_TAG_LENGTH:
                 message = _(
                     'Tag "%(tag)s" must be between %(min)d '
                     'and %(max)d characters long.',
-                    min=MIN_TAG_LENGTH, max=MAX_TAG_LENGTH, tag=tag)
-                raise validators.ValidationError(message)
-            if not RE_TAG.match(tag):
-                message = _('Tag "%(tag)s" must be alphanumeric characters '
-                            'or symbols: -_.', tag=tag)
+                    min=tags.MIN_TAG_LENGTH,
+                    max=tags.MAX_TAG_LENGTH, tag=tag)
                 raise validators.ValidationError(message)
 
 
@@ -323,6 +339,9 @@ def clean_oid(oid, model):
         return clean_oid(oid['id'], model)
     else:
         try:
+            # Prevalidation is required as to_python is failsafe
+            # and returns the original value on exception
+            model.id.validate(oid)
             return model.id.to_python(oid)
         except:  # Catch all exceptions as model.type is not predefined
             raise ValueError('Unsupported identifier: ' + oid)
@@ -339,13 +358,13 @@ class ModelFieldMixin(object):
         if self.data:
             return unicode(self.data.id)
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) == 1 and valuelist[0]:
             try:
-                self.data = self.model.objects.get(id=clean_oid(valuelist[0],
-                                                                self.model))
+                id = clean_oid(valuelist[0], self.model)
+                self.data = self.model.objects.get(id=id)
             except self.model.DoesNotExist:
                 message = _('{0} does not exists').format(self.model.__name__)
                 raise validators.ValidationError(message)
@@ -390,7 +409,7 @@ class ModelChoiceField(StringField):
         if self.data:
             return unicode(self.data.id)
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) == 1 and valuelist[0]:
@@ -410,9 +429,9 @@ class ModelList(object):
 
     def _value(self):
         if self.data:
-            return u','.join([str(o.id) for o in self.data])
+            return ','.join([str(o.id) for o in self.data])
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if not valuelist:

@@ -45,7 +45,7 @@ class Paginable(object):
         if self.page_size:
             return int(ceil(self.total / float(self.page_size)))
         else:
-            return 0
+            return 1
 
     @property
     def has_prev(self):
@@ -167,7 +167,7 @@ def to_bool(value):
     if isinstance(value, bool):
         return value
     elif isinstance(value, basestring):
-        return value.lower() == 'true'
+        return value.lower() == 'true' or value.lower() == 't'
     elif isinstance(value, int):
         return value > 0
     else:

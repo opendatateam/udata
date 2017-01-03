@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from copy import copy
 from datetime import datetime
 from itertools import chain
 from time import time
@@ -13,18 +14,16 @@ from itsdangerous import JSONWebSignatureSerializer
 
 from werkzeug import cached_property
 
+from udata import mail
 from udata.frontend.markdown import mdstrip
-from udata.models import db, WithMetrics
+from udata.i18n import lazy_gettext as _
+from udata.models import db, WithMetrics, Follow
+from udata.core.discussions.models import Discussion
 from udata.core.storages import avatars, default_image_basename
-
 
 __all__ = ('User', 'Role', 'datastore')
 
 AVATAR_SIZES = [100, 32, 25]
-
-
-def upload_avatar_to(user):
-    return '/'.join((user.slug, datetime.now().strftime('%Y%m%d-%H%M%S')))
 
 
 # TODO: use simple text for role
@@ -46,7 +45,7 @@ class UserSettings(db.EmbeddedDocument):
 class User(db.Document, WithMetrics, UserMixin):
     slug = db.SlugField(
         max_length=255, required=True, populate_from='fullname')
-    email = db.StringField(max_length=255, required=True)
+    email = db.StringField(max_length=255, required=True, unique=True)
     password = db.StringField()
     active = db.BooleanField()
     roles = db.ListField(db.ReferenceField(Role), default=[])
@@ -65,7 +64,13 @@ class User(db.Document, WithMetrics, UserMixin):
     apikey = db.StringField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
+
+    # The field below is required for Flask-security
+    # when SECURITY_CONFIRMABLE is True
     confirmed_at = db.DateTimeField()
+
+    # The 5 fields below are required for Flask-security
+    # when SECURITY_TRACKABLE is True
     last_login_at = db.DateTimeField()
     current_login_at = db.DateTimeField()
     last_login_ip = db.StringField()
@@ -120,7 +125,7 @@ class User(db.Document, WithMetrics, UserMixin):
     @property
     def visible(self):
         count = self.metrics.get('datasets', 0) + self.metrics.get('reuses', 0)
-        return count > 0
+        return count > 0 and self.active
 
     @cached_property
     def resources_availability(self):
@@ -207,6 +212,33 @@ class User(db.Document, WithMetrics, UserMixin):
             result['url'] = self.website
 
         return result
+
+    def mark_as_deleted(self):
+        copied_user = copy(self)
+        self.email = '{}@deleted'.format(self.id)
+        self.password = None
+        self.active = False
+        self.first_name = 'DELETED'
+        self.last_name = 'DELETED'
+        self.avatar = None
+        self.avatar_url = None
+        self.website = None
+        self.about = None
+        self.deleted = datetime.now()
+        self.save()
+        for organization in self.organizations:
+            organization.members = [member
+                                    for member in organization.members
+                                    if member.user != self]
+            organization.save()
+        for discussion in Discussion.objects(discussion__posted_by=self):
+            for message in discussion.discussion:
+                if message.posted_by == self:
+                    message.content = 'DELETED'
+            discussion.save()
+        Follow.objects(follower=self).delete()
+        Follow.objects(following=self).delete()
+        mail.send(_('Account deletion'), copied_user, 'account_deleted')
 
 
 datastore = MongoEngineUserDatastore(db, User, Role)

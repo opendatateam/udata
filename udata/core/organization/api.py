@@ -44,7 +44,7 @@ from udata.core.storages.api import (
 )
 
 ns = api.namespace('organizations', 'Organization related operations')
-search_parser = api.search_parser(OrganizationSearch)
+search_parser = OrganizationSearch.as_request_parser()
 
 common_doc = {
     'params': {'org': 'The organization ID or slug'}
@@ -58,6 +58,7 @@ class OrganizationListAPI(API):
     @api.marshal_with(org_page_fields)
     def get(self):
         '''List or search all organizations'''
+        search_parser.parse_args()
         return search.query(OrganizationSearch, **multi_to_dict(request.args))
 
     @api.secure

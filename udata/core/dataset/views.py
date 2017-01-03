@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import abort, request, url_for, render_template
+from flask import abort, request, url_for, render_template, redirect
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.frontend.views import DetailView, SearchView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Discussion, Follow, Reuse
+from udata.models import Dataset, Discussion, Follow, Reuse, CommunityResource
 from udata.core.site.views import current_site
 from udata.sitemap import sitemap
+from udata.utils import get_by
 
+from .search import DatasetSearch
 from .permissions import ResourceEditPermission, DatasetEditPermission
 
 blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
@@ -49,6 +51,7 @@ def recent_feed():
 @blueprint.route('/', endpoint='list')
 class DatasetListView(SearchView):
     model = Dataset
+    search_adapter = DatasetSearch
     context_name = 'datasets'
     template_name = 'dataset/list.html'
 
@@ -99,6 +102,19 @@ class DatasetFollowersView(DatasetView, DetailView):
         context['followers'] = (Follow.objects.followers(self.dataset)
                                               .order_by('follower.fullname'))
         return context
+
+
+@blueprint.route('/r/<uuid:id>', endpoint='resource')
+def resource_redirect(id):
+    '''
+    Redirect to the latest version of a resource given its identifier.
+    '''
+    dataset = Dataset.objects(resources__id=id).first()
+    if dataset:
+        resource = get_by(dataset.resources, 'id', id)
+    else:
+        resource = CommunityResource.objects(id=id).first()
+    return redirect(resource.url) if resource else abort(404)
 
 
 @sitemap.register_generator

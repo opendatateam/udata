@@ -55,7 +55,7 @@ class SiteActivityAPI(API):
     @api.doc('activity', parser=activity_parser)
     @api.marshal_list_with(activity_page_fields)
     def get(self):
-        '''Fetch site activity, optionally filterd by user of org.'''
+        '''Fetch site activity, optionally filtered by user of org.'''
         args = activity_parser.parse_args()
         qs = Activity.objects
 

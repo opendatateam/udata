@@ -83,21 +83,25 @@ class DateRangeTest(unittest.TestCase):
 
 class ToBoolTest(unittest.TestCase):
     def test_bool_values(self):
-        self.assertEqual(to_bool(True), True)
-        self.assertEqual(to_bool(False), False)
+        self.assertTrue(to_bool(True))
+        self.assertFalse(to_bool(False))
 
     def test_string_values(self):
-        self.assertEqual(to_bool('True'), True)
-        self.assertEqual(to_bool('true'), True)
-        self.assertEqual(to_bool('False'), False)
-        self.assertEqual(to_bool('false'), False)
-        self.assertEqual(to_bool('bla'), False)
+        self.assertTrue(to_bool('True'))
+        self.assertTrue(to_bool('true'))
+        self.assertFalse(to_bool('False'))
+        self.assertFalse(to_bool('false'))
+        self.assertFalse(to_bool('bla'))
+        self.assertTrue(to_bool('T'))
+        self.assertFalse(to_bool('F'))
+        self.assertTrue(to_bool('t'))
+        self.assertFalse(to_bool('f'))
 
     def test_int_values(self):
-        self.assertEqual(to_bool(0), False)
-        self.assertEqual(to_bool(-1), False)
-        self.assertEqual(to_bool(1), True)
-        self.assertEqual(to_bool(10), True)
+        self.assertFalse(to_bool(0))
+        self.assertFalse(to_bool(-1))
+        self.assertTrue(to_bool(1))
+        self.assertTrue(to_bool(10))
 
 
 class ToIsoTest(unittest.TestCase):

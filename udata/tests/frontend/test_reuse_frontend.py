@@ -42,7 +42,8 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertEqual(rendered_reuses.total, 1)
 
     def test_render_list_empty(self):
-        '''It should render the reuse list page event if empty'''
+        '''It should render the reuse list page even if empty'''
+        self.init_search()
         response = self.get(url_for('reuses.list'))
         self.assert200(response)
 
@@ -77,7 +78,7 @@ class ReuseBlueprintTest(FrontTestCase):
         '''It should raise a 410 if the reuse is deleted'''
         reuse = ReuseFactory(deleted=datetime.now())
         response = self.get(url_for('reuses.show', reuse=reuse))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_do_not_raise_410_if_deleted_but_authorized(self):
         '''It should display a dalated reuse if authorized'''

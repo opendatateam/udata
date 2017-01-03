@@ -10,7 +10,7 @@ import Topic from 'models/topic';
 import FormLayout from 'components/form-layout.vue';
 
 export default {
-    data: function() {
+    data() {
         return {
             topic: new Topic(),
         };
@@ -27,7 +27,7 @@ export default {
     },
     methods: {
         save() {
-            let form = this.$refs.form;
+            const form = this.$refs.form;
             if (form.validate()) {
                 this.topic.update(form.serialize(), (response) => {
                     this.topic.on_fetched(response);

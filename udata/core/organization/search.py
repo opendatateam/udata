@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from elasticsearch_dsl import Completion, Date, String
+
+from udata.i18n import lazy_gettext as _
 from udata import search
+from udata.search.fields import TermsFacet, RangeFacet
 from udata.models import Organization
 from udata.core.site.views import current_site
+from udata.search.analysis import simple
 
 from . import metrics  # noqa: Metrics are need for the mapping
 
@@ -22,65 +27,74 @@ def max_followers():
     return max(current_site.metrics.get('max_org_followers'), 10)
 
 
-def organization_badge_labelizer(label, kind):
+def organization_badge_labelizer(kind):
     return Organization.__badges__.get(kind, '')
 
 
+@search.register
 class OrganizationSearch(search.ModelSearchAdapter):
     model = Organization
     fuzzy = True
+
+    class Meta:
+        doc_type = 'Organization'
+
+    name = String(analyzer=search.i18n_analyzer, fields={
+        'raw': String(index='not_analyzed')
+    })
+    acronym = String(index='not_analyzed')
+    description = String(analyzer=search.i18n_analyzer)
+    badges = String(index='not_analyzed')
+    url = String(index='not_analyzed')
+    created = Date(format='date_hour_minute_second')
+    metrics = search.metrics_mapping_for(Organization)
+    org_suggest = Completion(analyzer=simple,
+                             search_analyzer=simple,
+                             payloads=True)
+
     fields = (
         'name^6',
         'acronym^6',
         'description',
     )
     sorts = {
-        'name': search.Sort('name.raw'),
-        'reuses': search.Sort('metrics.reuses'),
-        'datasets': search.Sort('metrics.datasets'),
-        'followers': search.Sort('metrics.followers'),
-        'views': search.Sort('metrics.views'),
-        'created': search.Sort('created'),
+        'name': 'name.raw',
+        'reuses': 'metrics.reuses',
+        'datasets': 'metrics.datasets',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+        'created': 'created',
     }
     facets = {
-        'reuses': search.RangeFacet('metrics.reuses'),
-        'badge': search.TermFacet('badges',
-                                  labelizer=organization_badge_labelizer),
-        'permitted_reuses': search.RangeFacet('metrics.permitted_reuses'),
-        'datasets': search.RangeFacet('metrics.datasets'),
-        'followers': search.RangeFacet('metrics.followers'),
-    }
-    mapping = {
-        'properties': {
-            'name': {
-                'type': 'string',
-                'analyzer': search.i18n_analyzer,
-                'fields': {
-                    'raw': {'type': 'string', 'index': 'not_analyzed'}
-                }
-            },
-            'acronym': {
-                'type': 'string',
-                'index': 'not_analyzed',
-            },
-            'description': {
-                'type': 'string',
-                'analyzer': search.i18n_analyzer
-            },
-            'badges': {
-                'type': 'string',
-                'index': 'not_analyzed'
-            },
-            'url': {'type': 'string'},
-            'created': {'type': 'date', 'format': 'date_hour_minute_second'},
-            'metrics': search.metrics_mapping(Organization),
-            'org_suggest': {
-                'type': 'completion',
-                'analyzer': 'simple',
-                'search_analyzer': 'simple',
-                'payloads': True,
-            },
-        }
+        'reuses': RangeFacet(field='metrics.reuses',
+                             ranges=[('none', (None, 1)),
+                                     ('few', (1, 5)),
+                                     ('many', (5, None))],
+                             labels={
+                                'none': _('No reuses'),
+                                'few': _('Few reuses'),
+                                'many': _('Many reuses'),
+                             }),
+        'badge': TermsFacet(field='badges',
+                            labelizer=organization_badge_labelizer),
+        'datasets': RangeFacet(field='metrics.datasets',
+                               ranges=[('none', (None, 1)),
+                                       ('few', (1, 5)),
+                                       ('many', (5, None))],
+                               labels={
+                                    'none': _('No datasets'),
+                                    'few': _('Few datasets'),
+                                    'many': _('Many datasets'),
+                               }),
+        'followers': RangeFacet(field='metrics.followers',
+                                ranges=[('none', (None, 1)),
+                                        ('few', (1, 5)),
+                                        ('many', (5, None))],
+                                labels={
+                                     'none': _('No followers'),
+                                     'few': _('Few followers'),
+                                     'many': _('Many followers'),
+                                }),
     }
     boosters = [
         search.GaussDecay('metrics.followers', max_followers, decay=0.8),

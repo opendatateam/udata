@@ -36,7 +36,7 @@ class TopicsAPITest(APITestCase):
         data['reuses'] = [str(r.id) for r in data['reuses']]
         self.login(AdminFactory())
         response = self.post(url_for('api.topics'), data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.assertEqual(Topic.objects.count(), 1)
         topic = Topic.objects.first()
         for dataset, expected in zip(topic.datasets, data['datasets']):
