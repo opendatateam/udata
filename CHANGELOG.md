@@ -26,6 +26,7 @@ The addition of [fields masks](http://flask-restplus.readthedocs.io/en/stable/ma
 
 * 2016-11-29: Mark active users as confirmed [#619](https://github.com/opendatateam/udata/pull/618)
 * 2016-11-28: Merge duplicate users [#617](https://github.com/opendatateam/udata/pull/617)
+  (A reindexation is necessary after this migration)
 
 ## Deprecation
 
