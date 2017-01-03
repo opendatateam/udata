@@ -6,16 +6,16 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata-gouvfr 0.1.0.dev0\n"
+"Project-Id-Version: udata-gouvfr 0.9.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-07-08 16:09+0200\n"
+"POT-Creation-Date: 2016-12-07 09:56+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.2.0\n"
+"Generated-By: Babel 2.3.4\n"
 
 #: udata_gouvfr/metrics.py:14
 msgid "Public services"
@@ -37,15 +37,16 @@ msgstr ""
 msgid "Dataconnexions 6 laureate"
 msgstr ""
 
-#: udata_gouvfr/models.py:31
+#: udata_gouvfr/models.py:32
 msgid "C³"
 msgstr ""
 
-#: udata_gouvfr/models.py:32
+#: udata_gouvfr/models.py:33
 msgid "Nec Mergitur"
 msgstr ""
 
 #: udata_gouvfr/templates/c3.html:138 udata_gouvfr/templates/nec_mergitur.html:80
+#: udata_gouvfr/templates/openfield16.html:190
 #, python-format
 msgid "See the %(nb)s datasets"
 msgstr ""
@@ -95,23 +96,23 @@ msgstr ""
 msgid "Discover OpenData"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:25 udata_gouvfr/theme/theme.py:52
+#: udata_gouvfr/theme/theme.py:25 udata_gouvfr/theme/theme.py:53
 msgid "As a citizen"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:26 udata_gouvfr/theme/theme.py:53
+#: udata_gouvfr/theme/theme.py:26 udata_gouvfr/theme/theme.py:54
 msgid "As a producer"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:27 udata_gouvfr/theme/theme.py:54
+#: udata_gouvfr/theme/theme.py:27 udata_gouvfr/theme/theme.py:55
 msgid "As a reuser"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:28 udata_gouvfr/theme/theme.py:55
+#: udata_gouvfr/theme/theme.py:28 udata_gouvfr/theme/theme.py:56
 msgid "As a developer"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:29 udata_gouvfr/theme/theme.py:56
+#: udata_gouvfr/theme/theme.py:29 udata_gouvfr/theme/theme.py:57
 msgid "As a system integrator"
 msgstr ""
 
@@ -119,15 +120,15 @@ msgstr ""
 msgid "Data"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:33 udata_gouvfr/theme/templates/footer.html:66
+#: udata_gouvfr/theme/templates/footer.html:66 udata_gouvfr/theme/theme.py:33
 msgid "Datasets"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:34 udata_gouvfr/theme/templates/footer.html:67
+#: udata_gouvfr/theme/templates/footer.html:67 udata_gouvfr/theme/theme.py:34
 msgid "Reuses"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:35 udata_gouvfr/theme/templates/header.html:78
+#: udata_gouvfr/theme/templates/header.html:78 udata_gouvfr/theme/theme.py:35
 msgid "Organizations"
 msgstr ""
 
@@ -139,15 +140,15 @@ msgstr ""
 msgid "Events"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:58
+#: udata_gouvfr/theme/theme.py:59
 msgid "API"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:59
+#: udata_gouvfr/theme/theme.py:60
 msgid "Credits"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:60
+#: udata_gouvfr/theme/theme.py:61
 msgid "Terms of use"
 msgstr ""
 
@@ -172,7 +173,19 @@ msgstr ""
 msgid "Feeds"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/footer.html:85
+#: udata_gouvfr/theme/templates/footer.html:77
+msgid "Go to Etalab’s blog"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:80
+msgid "Open-source engine"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:80
+msgid "Deployed version"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:83
 msgid "Back to top"
 msgstr ""
 

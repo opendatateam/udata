@@ -19,6 +19,9 @@ log = logging.getLogger(__name__)
 RE_POST_IMG = re.compile(
     r'\<img .* src="https?:(?P<src>.+\.(?:png|jpg))" .* />(?P<content>.+)')
 
+# Wordpress ATOM timeout
+WP_TIMEOUT = 5
+
 
 gouvfr_menu = nav.Bar('gouvfr_menu', [
     nav.Item(_('Discover OpenData'), 'gouvfr.faq', items=[
@@ -84,13 +87,24 @@ def get_blog_post(lang):
     if not wp_atom_url:
         return
 
+    feed = None
+
     for code in lang, current_app.config['DEFAULT_LANGUAGE']:
         feed_url = wp_atom_url.format(lang=code)
-        feed = feedparser.parse(feed_url)
-        if len(feed['entries']) > 0:
+        try:
+            response = requests.get(feed_url, timeout=WP_TIMEOUT)
+        except requests.Timeout:
+            log.error('Timeout while fetching %s', feed_url, exc_info=True)
+            continue
+        except requests.RequestException:
+            log.error('Error while fetching %s', feed_url, exc_info=True)
+            continue
+        feed = feedparser.parse(response.content)
+        if len(feed.entries) > 0:
             break
-    if len(feed['entries']) <= 0:
-        return None
+
+    if not feed or len(feed.entries) <= 0:
+        return
 
     post = feed.entries[0]
     blogpost = {
