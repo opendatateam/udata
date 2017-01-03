@@ -30,7 +30,7 @@ lxml==3.6.4
 mongoengine==0.10.6
 msgpack-python==0.4.8
 pillow==3.4.2
-py-bcrypt==0.4
+bcrypt==3.1.1
 pyliblzma==0.5.3
 python-dateutil==2.5.3
 pytz==2016.7
