@@ -5,7 +5,7 @@ import calendar
 import logging
 import pkg_resources
 
-from datetime import date
+from datetime import date, datetime
 from time import time
 from urlparse import urlsplit, urlunsplit
 
@@ -24,12 +24,22 @@ from udata.utils import camel_to_lodash
 log = logging.getLogger(__name__)
 
 
+@front.app_template_global()
+def udata_version():
+    return pkg_resources.get_distribution('udata').version
+
+
+@front.app_template_global()
+def now():
+    return datetime.now()
+
+
 @front.app_template_global(name='static')
 def static_global(filename, _burst=True, **kwargs):
     if current_app.config['DEBUG'] or current_app.config['TESTING']:
         burst = time()
     else:
-        burst = pkg_resources.get_distribution('udata').version
+        burst = udata_version()
     if _burst:
         kwargs['_'] = burst
     return url_for('static', filename=filename, **kwargs)

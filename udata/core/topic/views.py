@@ -3,43 +3,52 @@ from __future__ import unicode_literals
 
 from flask import g, request
 
-from udata import search, theme
+from elasticsearch_dsl import Q
+
+from udata import theme, search
 from udata.i18n import I18nBlueprint
-from udata.models import Topic, Reuse, Dataset
+from udata.models import Topic
 from udata.sitemap import sitemap
 from udata.utils import multi_to_dict
 
-from .permissions import TopicEditPermission
+from udata.core.dataset.search import DatasetSearch
+from udata.core.reuse.search import ReuseSearch
 
 blueprint = I18nBlueprint('topics', __name__, url_prefix='/topics')
 
 
-class TopicSearchQuery(search.SearchQuery):
-    '''
-    A SearchQuery that should also match on topic tags
-    '''
-    @property
-    def topic(self):
-        return self.kwargs['topic']
+class TopicSearchMixin(object):
+    def __init__(self, topic, params):
+        self.topic = topic
+        super(TopicSearchMixin, self).__init__(params)
 
-    def build_text_query(self):
-        query = super(TopicSearchQuery, self).build_text_query()
-        self._update_bool_query(query, {
-            'should': [{'term': {'tags': tag}} for tag in self.topic.tags]})
-        return query
+    def search(self):
+        '''Override search to match on topic tags'''
+        s = super(TopicSearchMixin, self).search()
+        s = s.query('bool', should=[
+            Q('term', tags=tag) for tag in self.topic.tags
+        ])
+        return s
+
+
+def topic_search_for(topic, adapter, **kwargs):
+    facets = search.facets_for(adapter, kwargs)
+    faceted_search_class = adapter.facet_search(*facets)
+
+    class TopicSearch(TopicSearchMixin, faceted_search_class):
+        pass
+
+    return TopicSearch(topic, kwargs)
 
 
 @blueprint.route('/<topic:topic>/')
 def display(topic):
     specs = {
-        'recent_datasets': TopicSearchQuery(
-            Dataset, sort='-created', page_size=9, topic=topic),
-        'featured_reuses': TopicSearchQuery(
-            Reuse, featured=True, page_size=6, topic=topic),
+        'recent_datasets': topic_search_for(topic, DatasetSearch, sort='-created', page_size=9),
+        'featured_reuses': topic_search_for(topic, ReuseSearch, featured=True, page_size=6),
     }
     keys, queries = zip(*specs.items())
-
-    results = search.multiquery(*queries)
+    results = search.multisearch(*queries)
 
     return theme.render(
         'topic/display.html',
@@ -52,40 +61,31 @@ def display(topic):
 @blueprint.route('/<topic:topic>/datasets')
 def datasets(topic):
     kwargs = multi_to_dict(request.args)
-    kwargs.update(topic=topic)
-    query = TopicSearchQuery(Dataset, facets=True, **kwargs)
+    topic_search = topic_search_for(topic,
+                                    DatasetSearch,
+                                    facets=True,
+                                    **kwargs)
 
     return theme.render(
         'topic/datasets.html',
         topic=topic,
-        datasets=query.execute()
+        datasets=search.query(topic_search)
     )
 
 
 @blueprint.route('/<topic:topic>/reuses')
 def reuses(topic):
     kwargs = multi_to_dict(request.args)
-    kwargs.update(topic=topic)
-    query = TopicSearchQuery(Reuse, facets=True, **kwargs)
+    topic_search = topic_search_for(topic,
+                                    ReuseSearch,
+                                    facets=True,
+                                    **kwargs)
 
     return theme.render(
         'topic/reuses.html',
         topic=topic,
-        reuses=query.execute()
+        reuses=search.query(topic_search)
     )
-
-
-class TopicView(object):
-    model = Topic
-    object_name = 'topic'
-
-    @property
-    def topic(self):
-        return self.get_object()
-
-
-class ProtectedTopicView(TopicView):
-    require = TopicEditPermission()
 
 
 @blueprint.before_app_request

@@ -23,26 +23,48 @@ from .croquemort import check_url_from_cache, check_url_from_group
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
-    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES',
+    'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_TYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE'
 )
 
-UPDATE_FREQUENCIES = {
-    'punctual': _('Punctual'),
-    'realtime': _('Real time'),
-    'daily': _('Daily'),
-    'weekly': _('Weekly'),
-    'fortnighly': _('Fortnighly'),
-    'monthly': _('Monthly'),
-    'bimonthly': _('Bimonthly'),
-    'quarterly': _('Quarterly'),
-    'biannual': _('Biannual'),
-    'annual': _('Annual'),
-    'biennial': _('Biennial'),
-    'triennial': _('Triennial'),
-    'quinquennial': _('Quinquennial'),
-    'unknown': _('Unknown'),
+#: Udata frequencies with their labels
+#:
+#: See: http://dublincore.org/groups/collections/frequency/
+UPDATE_FREQUENCIES = {                              # Dublin core equivalent
+    'punctual': _('Punctual'),                      # N/A
+    'continuous': _('Real time'),                   # freq:continuous
+    'hourly': _('Hourly'),                          # N/A
+    'fourTimesADay': _('Four times a day'),         # N/A
+    'threeTimesADay': _('Three times a day'),       # N/A
+    'semidaily': _('Semidaily'),                    # N/A
+    'daily': _('Daily'),                            # freq:daily
+    'fourTimesAWeek': _('Four times a week'),       # N/A
+    'threeTimesAWeek': _('Three times a week'),     # freq:threeTimesAWeek
+    'semiweekly': _('Semiweekly'),                  # freq:semiweekly
+    'weekly': _('Weekly'),                          # freq:weekly
+    'biweekly': _('Biweekly'),                      # freq:bimonthly
+    'semimonthly': _('Semimonthly'),                # freq:semimonthly
+    'threeTimesAMonth': _('Three times a month'),   # freq:threeTimesAMonth
+    'monthly': _('Monthly'),                        # freq:monthly
+    'bimonthly': _('Bimonthly'),                    # freq:bimonthly
+    'quarterly': _('Quarterly'),                    # freq:quarterly
+    'threeTimesAYear': _('Three times a year'),     # freq:threeTimesAYear
+    'semiannual': _('Biannual'),                    # freq:semiannual
+    'annual': _('Annual'),                          # freq:annual
+    'biennial': _('Biennial'),                      # freq:biennial
+    'triennial': _('Triennial'),                    # freq:triennial
+    'quinquennial': _('Quinquennial'),              # N/A
+    'irregular': _('Irregular'),                    # freq:irregular
+    'unknown': _('Unknown'),                        # N/A
 }
+
+#: Map legacy frequencies to currents
+LEGACY_FREQUENCIES = {
+    'fortnighly': 'biweekly',
+    'biannual': 'semiannual',
+    'realtime': 'continuous',
+}
+
 
 DEFAULT_FREQUENCY = 'unknown'
 
@@ -69,6 +91,8 @@ CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
 
 
 class License(db.Document):
+    # We need to declare id explicitly since we do not use the default
+    # value set by Mongo.
     id = db.StringField(primary_key=True)
     created_at = db.DateTimeField(default=datetime.now, required=True)
     title = db.StringField(required=True)
@@ -149,13 +173,22 @@ class ResourceMixin(object):
     def is_available(self):
         return self.check_availability(group=None)
 
+    @property
+    def latest(self):
+        '''
+        Permanent link to the latest version of this resource.
+
+        If this resource is updated and `url` changes, this property won't.
+        '''
+        return url_for('datasets.resource', id=self.id, _external=True)
+
     @cached_property
     def json_ld(self):
 
         result = {
             '@type': 'DataDownload',
             '@id': str(self.id),
-            'url': self.url,
+            'url': self.latest,
             'name': self.title or _('Nameless resource'),
             'contentUrl': self.url,
             'dateCreated': self.created_at.isoformat(),
@@ -193,6 +226,10 @@ class ResourceMixin(object):
 
 
 class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
+    '''
+    Local file, remote file or API provided by the original provider of the
+    dataset
+    '''
     on_added = signal('Resource.on_added')
     on_deleted = signal('Resource.on_deleted')
 
@@ -270,6 +307,11 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             cls.on_create.send(document)
         else:
             cls.on_update.send(document)
+
+    def clean(self):
+        super(Dataset, self).clean()
+        if self.frequency in LEGACY_FREQUENCIES:
+            self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
     def url_for(self, *args, **kwargs):
         return url_for('datasets.show', dataset=self, *args, **kwargs)
@@ -511,6 +553,10 @@ post_save.connect(Dataset.post_save, sender=Dataset)
 
 
 class CommunityResource(ResourceMixin, WithMetrics, db.Document):
+    '''
+    Local file, remote file or API added by the community of the users to the
+    original dataset
+    '''
     dataset = db.ReferenceField(Dataset)
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
     organization = db.ReferenceField(

@@ -21,19 +21,17 @@ export default class Reuse extends Model {
     /**
      * Create or update the given reuse
      */
-    save() {
+    save(on_error) {
+        let ep, args;
         if (this.id) {
-            this.$api('reuses.update_reuse', {
-                reuse: this.id,
-                payload: this
-            },
-            this.on_fetched);
-        } else {
-            this.$api('reuses.create_reuse', {
-                payload: this
-            },
-            this.on_fetched);
+            ep = 'reuses.update_reuse';
+            args = {payload: this, reuse: this.id,};
         }
+        else {
+            ep = 'reuses.create_reuse';
+            args = {payload: this,};
+        }
+        this.$api(ep, args, this.on_fetched, on_error);
     }
 
     update(data, on_success, on_error) {

@@ -53,7 +53,7 @@
             <li role="presentation" class="dropdown-header">{{ _('Export') }}</li>
             {% for label, endpoint, type in exports %}
             <li role="presentation">
-                <a role="menuitem" tabindex="-1" href="{{ result.query.to_url(
+                <a role="menuitem" tabindex="-1" href="{{ to_url(
                     url_for(endpoint), facets=None, page=None, page_size=None, replace=true)
                 }}">
                 {{label}}
@@ -73,7 +73,7 @@
     {% if icon %}
     <span class="{{ icon }} fa-fw"></span>
     {% endif %}
-    <span>{{ labelize(label, value) if labelize else value }}</span>
+    <span>{{ labelize(value) if labelize else value }}</span>
     <a href="{{ ''|url_del('page', **{name: value}) }}">
         <span class="close-icon glyphicon glyphicon-remove"></span>
     </a>
@@ -81,182 +81,144 @@
 {% endfor %}
 {% endmacro %}
 
+{% macro facet_panel(result, name, label, icon=None, url=None) %}
+<div class="panel-heading clickable"
+    data-toggle="collapse" data-target="#collapse-{{result.class_name}}-{{name}}">
+    <h3 class="panel-title">
+        {% if in_url(name) %}
+        <a href="{{ url_del(None, name, 'page') }}"
+            class="btn btn-xs btn-link pull-right" title="{{ _('Clear filter') }}">
+            <span class="glyphicon glyphicon-remove"></span>
+        </a>
+        {% endif %}
+        <span class="{{icon or 'glyphicon glyphicon-filter'}} fa-fw"></span>
+        {{ label or name }}
+        <span class="fa fa-chevron-down pull-right chevrons"></span>
+    </h3>
+</div>
+{% endmacro %}
 
-{% macro aggregation_panel(result, name, label, icon=None, url=None) %}
-{% set aggregation = result.get_aggregation(name) %}
-{% if aggregation.visible %}
-    <div class="panel-heading clickable"
-        data-toggle="collapse" data-target="#collapse-{{result.class_name}}-{{name}}">
-        <h3 class="panel-title">
-            {% if in_url(name) %}
-            <a href="{{ url_del(None, name, 'page') }}"
-                class="btn btn-xs btn-link pull-right" title="{{ _('Clear filter') }}">
-                <span class="glyphicon glyphicon-remove"></span>
+
+{% macro terms_facet(result, name, label, icon, url=None) %}
+{% set terms = result.facets[name] %}
+{% if terms|length > 1 %}
+    {{ facet_panel(result, name, label, icon, url) }}
+    <div id="collapse-{{result.class_name}}-{{name}}" class="list-group collapse in">
+    {% for term, count, selected in terms[:nb_displayed_aggregations] %}
+        <a href="{{ result.query.to_url(url, **{name: term}) }}"
+            class="list-group-item">
+            {{ result.query.facets[name].labelize(term) }}
+            <span class="badge pull-right">{{ count }}</span>
+        </a>
+    {% endfor %}
+    {% if terms|length > nb_displayed_aggregations %}
+        <button class="list-group-item"
+            data-toggle="collapse" data-target="#collapse-{{result.class_name}}-{{name}}-more">
+            {{ _('More results…') }}
+            <span class="fa fa-chevron-right pull-right"></span>
+        </button>
+        <div id="collapse-{{result.class_name}}-{{name}}-more" class="list-group collapse list-group-more">
+        {% for term, count, selected in terms[nb_displayed_aggregations:] %}
+            <a href="{{ result.query.to_url(url, **{name: term}) }}"
+                class="list-group-item">
+                {{ result.query.facets[name].labelize(term) }}
+                <span class="badge pull-right">{{ count }}</span>
             </a>
-            {% endif %}
-            <span class="{{icon or 'glyphicon glyphicon-filter'}} fa-fw"></span>
-            {{ label or name }}
-            <span class="fa fa-chevron-down pull-right chevrons"></span>
-        </h3>
-    </div>
-    {% if aggregation.type == 'terms' %}
-        {{ term_aggregation(name, aggregation, result.query, url=url, class_name=result.class_name) }}
-    {% elif aggregation.type == 'models' %}
-        {{ model_aggregation(name, aggregation, result.query, url=url, class_name=result.class_name) }}
-    {% elif aggregation.type == 'bool' %}
-        {{ bool_aggregation(name, aggregation, result.query, url=url) }}
-    {% elif aggregation.type == 'range' %}
-        {{ range_aggregation(name, aggregation, result.query, url=url) }}
-    {% elif aggregation.type == 'daterange' %}
-        {{ daterange_aggregation(name, aggregation, result.query, url=url) }}
-    {% elif aggregation.type == 'temporal-coverage' %}
-        {{ temporal_coverage_aggregation(name, aggregation, result.query, url=url) }}
+        {% endfor %}
+        </div>
     {% endif %}
+    </div>
 {% endif %}
 {% endmacro %}
 
 
-{% macro term_aggregation(name, aggregation, query, url=None, class_name=None) %}
-<div id="collapse-{{class_name}}-{{name}}" class="list-group collapse in">
-{% for term, count in aggregation.terms[:nb_displayed_aggregations] %}
-    <a href="{{ query.to_url(url, **{name: term}) }}"
-        class="list-group-item">
-        {{ query.adapter.facets[name].labelize('', term) }}
-        <span class="badge pull-right">{{ count }}</span>
-    </a>
-{% endfor %}
-{% if aggregation.terms|length > nb_displayed_aggregations %}
-    <button class="list-group-item"
-        data-toggle="collapse" data-target="#collapse-{{class_name}}-{{name}}-more">
-        {{ _('More results…') }}
-        <span class="fa fa-chevron-right pull-right"></span>
-    </button>
-    <div id="collapse-{{class_name}}-{{name}}-more" class="list-group collapse list-group-more">
-    {% for term, count in aggregation.terms[nb_displayed_aggregations:] %}
-        <a href="{{ query.to_url(url, **{name: term}) }}"
+{% macro model_terms_facet(result, name, label, icon, url=None) %}
+{% set objects = result.facets[name] %}
+{% if objects|length > 1 %}
+    {{ facet_panel(result, name, label, icon, url) }}
+    <div id="collapse-{{result.class_name}}-{{name}}" class="list-group collapse in">
+    {% for obj, count, selected in objects[:nb_displayed_aggregations] %}
+        <a href="{{ result.query.to_url(url, **{name: obj.id|string}) }}"
             class="list-group-item">
-            {{ query.adapter.facets[name].labelize('', term) }}
+            {{ result.query.facets[name].labelize(obj) }}
+            <span class="badge pull-right">{{ count }}</span>
+        </a>
+    {% endfor %}
+    {% if objects|length > nb_displayed_aggregations %}
+        <button class="list-group-item list-group-more"
+            data-toggle="collapse" data-target="#collapse-{{result.class_name}}-{{name}}-more">
+            {{ _('More results…') }}
+            <span class="fa fa-chevron-right pull-right"></span>
+        </button>
+        <div id="collapse-{{result.class_name}}-{{name}}-more" class="list-group collapse list-group-more">
+        {% for obj, count, selected in objects[nb_displayed_aggregations:] %}
+            <a href="{{ result.query.to_url(url, **{name: obj.id|string}) }}"
+                class="list-group-item">
+                {{ result.query.facets[name].labelize(obj) }}
+                <span class="badge pull-right">{{ count }}</span>
+            </a>
+        {% endfor %}
+        </div>
+    {% endif %}
+    </div>
+{% endif %}
+{% endmacro %}
+
+{% macro range_facet(result, name, label, icon, url=None) %}
+{% set ranges = result.facets[name] %}
+{% if ranges|length > 1 %}
+    {{ facet_panel(result, name, label, icon, url) }}
+    <div id="collapse-{{result.class_name}}-{{name}}" class="list-group collapse in">
+    {% for key, count, selected in ranges %}
+        <a href="{{ result.query.to_url(url, **{name: key}) }}"
+            class="list-group-item">
+            {{ result.query.facets[name].labelize(key) }}
             <span class="badge pull-right">{{ count }}</span>
         </a>
     {% endfor %}
     </div>
 {% endif %}
-</div>
 {% endmacro %}
 
-
-{% macro model_aggregation(name, aggregation, query, url=None, class_name=None) %}
-<div id="collapse-{{class_name}}-{{name}}" class="list-group collapse in">
-{% for obj, count in aggregation.models[:nb_displayed_aggregations] %}
-    <a href="{{ query.to_url(url, **{name: obj.id|string}) }}"
-        class="list-group-item">
-        {{ obj }}
-        <span class="badge pull-right">{{ count }}</span>
-    </a>
-{% endfor %}
-{% if aggregation.models|length > nb_displayed_aggregations %}
-    <button class="list-group-item list-group-more"
-        data-toggle="collapse" data-target="#collapse-{{class_name}}-{{name}}-more">
-        {{ _('More results…') }}
-        <span class="fa fa-chevron-right pull-right"></span>
-    </button>
-    <div id="collapse-{{class_name}}-{{name}}-more" class="list-group collapse list-group-more">
-    {% for obj, count in aggregation.models[nb_displayed_aggregations:] %}
-        <a href="{{ query.to_url(url, **{name: obj.id|string}) }}"
-            class="list-group-item">
-            {{ obj }}
-            <span class="badge pull-right">{{ count }}</span>
-        </a>
-    {% endfor %}
-    </div>
-{% endif %}
-</div>
-{% endmacro %}
-
-
-{% macro bool_aggregation(name, aggregation, query, url=None) %}
-<div id="collapse-{{name}}" class="list-group collapse in">
-    <a href="{{ query.to_url(url, **{name: 'true'}) }}"
-        class="list-group-item">
-        {{ _('Yes') }}
-        <span class="badge pull-right">{{ aggregation[true] }}</span>
-    </a>
-    <a href="{{ query.to_url(url, **{name: 'false'}) }}"
-        class="list-group-item">
-        {{ _('No') }}
-        <span class="badge pull-right">{{ aggregation[false] }}</span>
-    </a>
-</div>
-{% endmacro %}
-
-
-{% macro range_aggregation(name, aggregation, query, url=None) %}
-<div id="collapse-{{name}}" class="panel-body collapse in">
-    <div class="row">
-        <div class="col-xs-12 slider-container">
-            <input type="text" class="range-picker"
-                data-url-pattern="{{ query.to_url(url, **{name: '__r__', 'replace': True}) }}"
-                data-slider-min="{{ aggregation.min }}"
-                data-slider-max="{{ aggregation.max }}"
-                data-slider-value="[{{ aggregation.min }},{{ aggregation.max }}]"/>
+{% macro temporal_coverage_facet(result, name, label, icon, url=None) %}
+{% set coverage = result.facets[name] %}
+{% if coverage and coverage.days > 2 %}
+    {{ facet_panel(result, name, label, icon, url) }}
+    <div id="collapse-{{result.class_name}}-{{name}}" class="panel-body collapse in temporal-coverage"
+        data-url-pattern="{{ result.query.to_url(url, **{name: '__r__', 'replace': True}) }}">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="input-daterange input-group" id="datepicker">
+                    <input type="text" class="input-sm form-control" name="start"
+                        value="{{ coverage.min.isoformat() }}"
+                        data-isodate="{{ coverage.min.isoformat() }}"/>
+                    <span class="input-group-addon">{{ _('to') }}</span>
+                    <input type="text" class="input-sm form-control" name="end"
+                        value="{{ coverage.max.isoformat() }}"
+                        data-isodate="{{ coverage.max.isoformat() }}"/>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <b class="col-xs-6">{{ aggregation.min }}</b>
-        <b class="col-xs-6 text-right">{{ aggregation.max }}</b>
-    </div>
-</div>
-{% endmacro %}
-
-
-{% macro daterange_aggregation(name, aggregation, query, url=None) %}
-<div id="collapse-{{name}}" class="panel-body collapse in">
-    <div class="row">
-        <div class="col-xs-12">
-            <input type="hidden" class="date-range-picker"
-                value="{{ aggregation.min.isoformat() }} - {{ aggregation.max.isoformat() }}" />
+        <div class="row hide">
+            <div class="col-xs-12 text-center">
+                <div class="facet-datepicker"
+                    date-date-format="yyyy-mm-dd"
+                    data-date-start-date="{{ coverage.min.isoformat() }}"
+                    data-date-end-date="{{ coverage.max.isoformat() }}"
+                ></div>
+            </div>
         </div>
-    </div>
-</div>
-{% endmacro %}
-
-
-{% macro temporal_coverage_aggregation(name, aggregation, query, url=None) %}
-<div id="collapse-{{name}}" class="panel-body collapse in temporal-coverage"
-    data-url-pattern="{{ query.to_url(url, **{name: '__r__', 'replace': True}) }}">
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="input-daterange input-group" id="datepicker">
-                <input type="text" class="input-sm form-control" name="start"
-                    value="{{ aggregation.min.isoformat() }}"
-                    data-isodate="{{ aggregation.min.isoformat() }}"/>
-                <span class="input-group-addon">{{ _('to') }}</span>
-                <input type="text" class="input-sm form-control" name="end"
-                    value="{{ aggregation.max.isoformat() }}"
-                    data-isodate="{{ aggregation.max.isoformat() }}"/>
+        <div class="row hide">
+            <div class="col-xs-12">
+                <a class="btn btn-default btn-block btn-apply">
+                    <span class="{{ ficon('refresh') }}"></span>
+                    {{ _('Apply') }}
+                </a>
             </div>
         </div>
     </div>
-    <div class="row hide">
-        <div class="col-xs-12 text-center">
-            <div class="facet-datepicker"
-                date-date-format="yyyy-mm-dd"
-                data-date-start-date="{{ aggregation.min.isoformat() }}"
-                data-date-end-date="{{ aggregation.max.isoformat() }}"
-            ></div>
-        </div>
-    </div>
-    <div class="row hide">
-        <div class="col-xs-12">
-            <a class="btn btn-default btn-block btn-apply">
-                <span class="{{ ficon('refresh') }}"></span>
-                {{ _('Apply') }}
-            </a>
-        </div>
-    </div>
-</div>
+{% endif %}
 {% endmacro %}
-
 
 {% macro panel_header(result, csv_endpoint=None) %}
 <div class="panel-heading">

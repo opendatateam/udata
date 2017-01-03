@@ -18,7 +18,8 @@ from udata.utils import get_by, daterange_start, daterange_end
 from . import BaseBackend, register
 from ..exceptions import HarvestException, HarvestSkipException
 from ..filters import (
-    boolean, email, to_date, slug, normalize_string, is_url, empty_none, hash
+    boolean, email, to_date, slug, normalize_tag, normalize_string,
+    is_url, empty_none, hash
 )
 
 log = logging.getLogger(__name__)
@@ -51,7 +52,7 @@ tag = {
     'id': basestring,
     'vocabulary_id': Any(basestring, None),
     'display_name': basestring,
-    'name': All(basestring, slug),
+    'name': All(basestring, normalize_tag),
     'state': basestring,
 }
 
@@ -162,7 +163,7 @@ class CkanBackend(BaseBackend):
         dataset.description = data['notes']
         dataset.license = License.objects(id=data['license_id']).first()
         # dataset.license = license or License.objects.get(id='notspecified')
-        dataset.tags = [t['name'] for t in data['tags']]
+        dataset.tags = [t['name'] for t in data['tags'] if t['name']]
 
         dataset.created_at = data['metadata_created']
         dataset.last_modified = data['metadata_modified']

@@ -3,20 +3,27 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import Issue, Discussion, Member, User
-
+from udata.models import Discussion, Follow, Issue, Member, User
+from udata.core.discussions.models import Message as DiscMsg
+from udata.core.issues.models import Message as IssueMsg
 from udata.core.dataset.factories import (
-    CommunityResourceFactory, VisibleDatasetFactory
+    CommunityResourceFactory,
+    DatasetFactory,
+    VisibleDatasetFactory,
 )
-
+from udata.core.dataset.activities import UserCreatedDataset
+from udata.core.discussions.factories import DiscussionFactory
+from udata.core.issues.factories import IssueFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
+from udata.utils import faker
 
 from . import APITestCase
 
 
 class MeAPITest(APITestCase):
+
     def test_get_profile(self):
         '''It should fetch my user data on GET'''
         self.login()
@@ -35,12 +42,15 @@ class MeAPITest(APITestCase):
         '''It should update my profile from the API'''
         self.login()
         data = self.user.to_dict()
+        self.assertTrue(self.user.active)
         data['about'] = 'new about'
+        data['active'] = False
         response = self.put(url_for('api.me'), data)
         self.assert200(response)
         self.assertEqual(User.objects.count(), 1)
         self.user.reload()
         self.assertEqual(self.user.about, 'new about')
+        self.assertTrue(self.user.active)
 
     def test_my_metrics(self):
         self.login()
@@ -307,3 +317,99 @@ class MeAPITest(APITestCase):
 
         self.user.reload()
         self.assertIsNone(self.user.apikey)
+
+    def test_delete(self):
+        '''It should delete the connected user'''
+        user = self.login()
+        self.assertIsNone(user.deleted)
+        other_user = UserFactory()
+        members = [Member(user=user), Member(user=other_user)]
+        organization = OrganizationFactory(members=members)
+        disc_msg_content = faker.sentence()
+        disc_msg = DiscMsg(content=disc_msg_content,
+                           posted_by=user)
+        other_disc_msg_content = faker.sentence()
+        other_disc_msg = DiscMsg(content=other_disc_msg_content,
+                                 posted_by=other_user)
+        discussion = DiscussionFactory(user=user,
+                                       discussion=[disc_msg, other_disc_msg])
+        issue_msg_content = faker.sentence()
+        issue_msg = IssueMsg(content=issue_msg_content,
+                             posted_by=user)
+        other_issue_msg_content = faker.sentence()
+        other_issue_msg = IssueMsg(content=other_issue_msg_content,
+                                   posted_by=other_user)
+        issue = IssueFactory(user=user,
+                             discussion=[issue_msg, other_issue_msg])
+        dataset = DatasetFactory(owner=user)
+        reuse = ReuseFactory(owner=user)
+        resource = CommunityResourceFactory(owner=user)
+        activity = UserCreatedDataset.objects().create(actor=user, related_to=dataset)
+
+        following = Follow.objects().create(follower=user, following=other_user)
+        followed = Follow.objects().create(follower=other_user, following=user)
+
+        with self.capture_mails() as mails:
+            response = self.delete(url_for('api.me'))
+        self.assertEqual(len(mails), 1)
+        self.assertEqual(mails[0].send_to, set([user.email]))
+        self.assertEqual(mails[0].subject, 'Account deletion')
+        self.assert204(response)
+
+        user.reload()
+        organization.reload()
+        discussion.reload()
+        issue.reload()
+        dataset.reload()
+        reuse.reload()
+        resource.reload()
+        activity.reload()
+
+        # The following are deleted
+        with self.assertRaises(Follow.DoesNotExist):
+            following.reload()
+        # The followers are deleted
+        with self.assertRaises(Follow.DoesNotExist):
+            followed.reload()
+
+        # The personal data of the user are anonymized
+        self.assertEqual(user.email, '{}@deleted'.format(user.id))
+        self.assertEqual(user.password, None)
+        self.assertEqual(user.active, False)
+        self.assertEqual(user.first_name, 'DELETED')
+        self.assertEqual(user.last_name, 'DELETED')
+        self.assertFalse(bool(user.avatar))
+        self.assertEqual(user.avatar_url, None)
+        self.assertEqual(user.website, None)
+        self.assertEqual(user.about, None)
+
+        # The user is marked as deleted
+        self.assertIsNotNone(user.deleted)
+
+        # The user is removed from his organizations
+        self.assertEqual(len(organization.members), 1)
+        self.assertEqual(organization.members[0].user.id, other_user.id)
+
+        # The discussions are kept but the messages are anonymized
+        self.assertEqual(len(discussion.discussion), 2)
+        self.assertEqual(discussion.discussion[0].content, 'DELETED')
+        self.assertEqual(discussion.discussion[1].content,
+                         other_disc_msg_content)
+
+        # The issues are kept and the messages are not anonymized
+        self.assertEqual(len(issue.discussion), 2)
+        self.assertEqual(issue.discussion[0].content, issue_msg_content)
+        self.assertEqual(issue.discussion[1].content,
+                         other_issue_msg_content)
+
+        # The datasets are unchanged
+        self.assertEqual(dataset.owner, user)
+
+        # The reuses are unchanged
+        self.assertEqual(reuse.owner, user)
+
+        # The community resources are unchanged
+        self.assertEqual(resource.owner, user)
+
+        # The activities are unchanged
+        self.assertEqual(activity.actor, user)

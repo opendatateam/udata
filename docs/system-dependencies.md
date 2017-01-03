@@ -1,11 +1,60 @@
 # System dependencies
 
-## Git and Python
+## Git
 
-First of all, you need [Git][] and [Python][] 2.7 (installed by default on OSX and many Linux distributions).
+First of all, you need [Git][].
 
-If you use `apt-get`, the package is named `git-core`.
+If you use a Debian-like distribution with `apt-get`, the package is named `git-core`.
 If you prefer [Homebrew][] (OSX), the package is named `git`.
+
+## Python requirements
+
+uData requires [Python][] 2.7 (installed by default on OSX and many Linux distributions),
+its development tools and some libraries to be installed (with their headers).
+Most of them might already be installed as they are common development dependencies.
+The full dependencies list is:
+
+* Pillow (Image processing)
+    * libjpeg
+    * zlib
+    * libpng
+    * libtiff
+    * libfreetype
+    * liblcms2
+    * libopenjpeg
+    * libwebp
+* lxml dependencies
+    * libxml2
+    * libxslt
+* Misc dependencies
+    * liblzma (required to load GeoZones)
+    * libyaml (not mandatory but speed up the yaml processing)
+
+!!! note
+    By the time this project was started, Python 3 did not have great third dependencies support
+    and some requirements weren't suported yet so it was started with Python 2.7.
+
+### Debian/Ubuntu
+
+On any Debian-like system you can install the development tools and libraries with:
+
+```shell
+$ apt-get install build-essential pkg-config python python-dev python-pip \
+    libjpeg-dev zlib1g-dev libtiff5-dev libfreetype6-dev \
+    liblcms2-dev libopenjpeg-dev libwebp-dev libpng12-dev \
+    libxml2-dev  libxslt1-dev liblzma-dev libyaml-dev
+```
+
+### OSX/Homebrew
+
+On Mac OSX with [Homebrew][], you can install the development tools and libraries with:
+
+```shell
+$ brew install automake autoconf libtool pkg-config python \
+    libjpeg zlib libtiff freetype littlecms openjpeg webp libpng \
+    libxml2 libxslt xz libyaml
+```
+
 
 ## Retrieving the sources
 
@@ -18,7 +67,7 @@ $ git clone https://github.com/opendatateam/udata.git
 
 ## MongoDB, ElasticSearch and Redis
 
-The project depends on [MongoDB][] 3.2+, [ElasticSearch][] 2.3 and [Redis][].
+The project depends on [MongoDB][] 3.2+, [ElasticSearch][] 2.4 and [Redis][].
 
 Installing these dependencies can be cumbersome given you operating system.
 That's why we made a Docker container to ease that step.
@@ -58,14 +107,14 @@ $ docker-compose restart search
 It will depend on your configuration, join us on [Gitter][] if you have any issue.
 
 !!! note
-    Match the Analysis ICU plugin version to your ElasticSearch version (2.3)
+    Match the Analysis ICU plugin version to your ElasticSearch version (2.4)
     given those indicated in [the official repository][analysis-icu]
 
 For example if you are using [Homebrew][] (OSX):
 
 ```shell
 $ brew install elasticsearch
-$ /usr/local/Cellar/elasticsearch/2.3.1/libexec/bin/plugin install analysis-icu
+$ /usr/local/Cellar/elasticsearch/2.4.1/libexec/bin/plugin install analysis-icu
 ```
 
 Once all dependencies are installed by hand, you can launch these services manually or use [Honcho][] with the proposed Procfile at the root of the repository (you'll have to uncomment related lines).

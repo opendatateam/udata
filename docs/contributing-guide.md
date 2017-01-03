@@ -39,14 +39,18 @@ The development language is English. All comments and documentation should be wr
 
 We’re really happy to accept contributions from the community, that’s the main reason why we open-sourced it! There are many ways to contribute, even if you’re not a technical person.
 
-We’re using the infamous [simplified Github workflow][simplified-github-workflow] to accept modifications (even internally), basically you’ll have to:
+We’re using the infamous [simplified Github workflow][simplified-github-workflow] to accept modifications (even internally),
+basically you’ll have to:
 
 * create an issue related to the problem you want to fix (good for traceability and cross-reference)
 * fork the repository
 * create a branch (optionally with the reference to the issue in the name)
 * hack hack hack
 * commit incrementally with readable and detailed commit messages
-* submit a pull-request against the master branch of this repository
+* add the change to the `CHANGELOG.md` file if appropriated
+* submit a pull-request against the right branch of this repository:
+    * `dev` for new features
+    * `master` for bugfixes (unless only present in `dev`)
 
 We’ll take care of tagging your issue with the appropriated labels and answer within a week (hopefully less!) to the problem you encounter.
 
@@ -66,6 +70,16 @@ We also [vote for new features](governance.md) in order to include the whole com
 We follow the PEP-0008 and PEP-0257 as mush as possible in the respect of PEP-0020.
 
 On top of that, we apply the [Python Style Guide][py-style-guide] from Google.
+
+#### Python 3 forward compatible syntax
+
+As it's still planned to migrate to Python 3 some day,
+try to always use a forward compatible syntax in order
+to ensure an easy future migration:
+
+* unicode by default, starts any file with `from __future__ import unicode_literals`
+* Python 3 compatible `print` statement with `from __future__ import print_function`
+* use `io.open` instead of `codecs.open` to manipulate utf-8 files
 
 ### JavaScript style guide
 
