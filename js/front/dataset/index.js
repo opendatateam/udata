@@ -19,7 +19,6 @@ import FollowButton from 'components/buttons/follow.vue';
 import ShareButton from 'components/buttons/share.vue';
 
 // Legacy widgets
-import 'widgets/featured';
 import 'widgets/issues-btn';
 import 'widgets/discussions-btn';
 import 'widgets/integrate-btn';
