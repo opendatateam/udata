@@ -10,7 +10,7 @@ from flask import url_for
 
 
 from udata.tests.api import APITestCase
-from udata.tests.factories import faker
+from udata.utils import faker
 
 from udata.settings import Testing
 
