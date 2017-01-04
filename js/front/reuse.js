@@ -6,7 +6,6 @@ import 'front/bootstrap';
 import log from 'logger';
 
 // Legacy widgets
-import 'widgets/featured';
 import 'widgets/issues-btn';
 import 'widgets/discussions-btn';
 
