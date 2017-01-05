@@ -69,7 +69,6 @@
     "vue-html-loader": "^1.2.3",
     "vue-loader": "8.5.3",
     "vue-style-loader": "^1.0.0",
-    "watai": "0.7.0",
     "webpack": "1.13.1"
   },
   "dependencies": {
