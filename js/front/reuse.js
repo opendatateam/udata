@@ -18,7 +18,7 @@ import DiscussionThreads from 'components/discussions/threads.vue';
 
 new Vue({
     el: 'body',
-    components: {FollowButton, ShareButton, DiscussionTheads, FeaturedButton},
+    components: {FollowButton, ShareButton, DiscussionThreads, FeaturedButton},
     ready() {
         log.debug('Reuse display page');
     }

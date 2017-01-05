@@ -35,6 +35,7 @@ import ThreadsForm from 'components/discussions/threads-form.vue';
 import log from 'logger';
 
 export default {
+    components: {DiscussionThread, ThreadsForm},
     data() {
         return {
             discussions: [],
@@ -51,14 +52,13 @@ export default {
         }).catch(log.error.bind(log));
 
         this.$on('discussions-load', discussions => {
-            this.discussions = discussions;
+            this.discussions.unshift(discussions);
         });
     },
     methods: {
         displayForm() {
             this.formDisplayed = true;
         }
-    },
-    components: {DiscussionThread, ThreadsForm}
+    }
 }
 </script>

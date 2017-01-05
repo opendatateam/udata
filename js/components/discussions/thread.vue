@@ -1,6 +1,6 @@
 <template>
 <div>
-    <div class="list-group-item" id="{{ discussionIdAttr }}" @click="toggleDiscussions">
+    <div class="list-group-item" :id="discussionIdAttr" @click="toggleDiscussions">
         <div class="format-label pull-left">
             <avatar :user="question.posted_by"></avatar>
         </div>
@@ -11,8 +11,9 @@
             <span>{{ discussion.title }}</span>
         </h4>
         <p class="list-group-item-text ellipsis open-discussion-thread list-group-message-number-{{ discussion.id }}">
-            {{ _('Discussion started on') }} {{ discussion.created | dt }} {{ _('with') }}
-            {{ _('nbmessages', {nb: responses.length}) }}
+            {{ _('Discussion started on {created} with {count} messages.',
+                 {created: createdDate, count: responses.length})
+            }}
         </p>
     </div>
     <div v-for="(index, response) in responses" id="{{ discussionIdAttr }}-{{ index }}"
@@ -27,7 +28,7 @@
             </span>
         </template>
         <p class="list-group-item-heading">
-            {{ response.content | markdown }}
+            {{{ response.content | markdown }}}
         </p>
     </div>
     <a v-if="!discussion.closed"
@@ -63,8 +64,11 @@
 <script>
 import Avatar from 'components/avatar.vue';
 import ThreadForm from 'components/discussions/thread-form.vue';
+import moment from 'moment';
+
 
 export default {
+    components: {Avatar, ThreadForm},
     props: {
         discussion: Object,
         position: Number,
@@ -84,6 +88,9 @@ export default {
         },
         discussionIdAttr() {
             return `discussion-${this.discussion.id}`;
+        },
+        createdDate() {
+            return moment(this.discussion.created).format('LL')
         }
     },
     ready() {
@@ -98,7 +105,6 @@ export default {
         displayForm() {
             this.formDisplayed = true;
         }
-    },
-    components: {Avatar, ThreadForm}
+    }
 }
 </script>

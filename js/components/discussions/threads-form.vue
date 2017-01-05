@@ -52,6 +52,7 @@ export default {
                 this.title = '';
                 this.comment = '';
                 this.sending = false;
+                document.location.href = `#discussion-${response.id}`
             })
             .catch(err => {
                 const msg = i18n._('An error occured while submitting your comment');
