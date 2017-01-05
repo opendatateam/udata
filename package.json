@@ -84,7 +84,7 @@
     "bootstrap-slider": "~7.1.0",
     "chart.js": "^1.1.1",
     "diff": "^2.2.3",
-    "dotdotdot": "BeSite/jQuery.dotdotdot#v1.7.4",
+    "jQuery.dotdotdot": "BeSite/jQuery.dotdotdot#v1.7.4",
     "fine-uploader": "~5.11.10",
     "font-awesome": "^4.6.3",
     "handlebars": "^3.0.3",
