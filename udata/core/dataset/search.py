@@ -15,11 +15,13 @@ from udata.search import (
 )
 from udata.search.fields import (
     TermsFacet, ModelTermsFacet, RangeFacet, TemporalCoverageFacet,
-    BoolBooster, GaussDecay, BoolFacet
+    BoolBooster, GaussDecay, BoolFacet, ValueFactor
 )
 from udata.search.analysis import simple
 
-from udata.core.spatial.models import spatial_granularities
+from udata.core.spatial.models import (
+    admin_levels, spatial_granularities, ADMIN_LEVEL_MAX
+)
 
 # Metrics are require for dataset search
 from . import metrics  # noqa
@@ -97,6 +99,7 @@ class DatasetSearch(ModelSearchAdapter):
         'keys': String(index='not_analyzed')
     })
     granularity = String(index='not_analyzed')
+    coverage_weight = Long()
     extras = Object()
 
     fields = (
@@ -143,6 +146,7 @@ class DatasetSearch(ModelSearchAdapter):
     }
     boosters = [
         BoolBooster('featured', 1.5),
+        ValueFactor('coverage_weight', missing=1),
         GaussDecay('metrics.reuses', max_reuses, decay=0.1),
         GaussDecay(
             'metrics.followers', max_followers, max_followers, decay=0.1),
@@ -219,6 +223,7 @@ class DatasetSearch(ModelSearchAdapter):
                 id__in=[z.id for z in dataset.spatial.zones])
             parents = set()
             geozones = []
+            coverage_level = ADMIN_LEVEL_MAX
             for zone in zones:
                 geozones.append({
                     'id': zone.id,
@@ -226,6 +231,7 @@ class DatasetSearch(ModelSearchAdapter):
                     'keys': zone.keys_values
                 })
                 parents |= set(zone.parents)
+                coverage_level = min(coverage_level, admin_levels[zone.level])
 
             geozones.extend([{'id': p} for p in parents])
 
@@ -233,6 +239,7 @@ class DatasetSearch(ModelSearchAdapter):
                 'geozones': geozones,
                 # 'geom': dataset.spatial.geom,
                 'granularity': dataset.spatial.granularity,
+                'coverage_weight': ADMIN_LEVEL_MAX / coverage_level,
             })
 
         return document
