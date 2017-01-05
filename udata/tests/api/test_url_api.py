@@ -15,8 +15,8 @@ from udata.utils import faker
 from udata.settings import Testing
 
 CROQUEMORT_URL = 'http://check.test'
-CHECK_ONE_URL = CROQUEMORT_URL + '/check/one'
-METADATA_URL = CROQUEMORT_URL + '/url'
+CHECK_ONE_URL = '{0}/check/one'.format(CROQUEMORT_URL)
+METADATA_URL = '{0}/url'.format(CROQUEMORT_URL)
 
 
 def metadata_factory(url, data=None):
@@ -28,7 +28,7 @@ def metadata_factory(url, data=None):
       'content-md5': faker.md5(),
       'content-location': '',
       'expires': faker.iso8601(),
-      'status': '200',
+      'status': 200,
       'updated': faker.iso8601(),
       'last-modified': faker.iso8601(),
       'content-encoding': 'gzip',
@@ -44,7 +44,8 @@ def mock_url_check(url, data=None, status=200):
     httpretty.register_uri(httpretty.POST, CHECK_ONE_URL,
                            body=json.dumps({'url-hash': url_hash}),
                            content_type='application/json')
-    httpretty.register_uri(httpretty.GET, METADATA_URL + '/' + url_hash,
+    check_url = '/'.join((METADATA_URL, url_hash))
+    httpretty.register_uri(httpretty.GET, check_url,
                            body=metadata_factory(url, data),
                            content_type='application/json',
                            status=status)
@@ -72,13 +73,13 @@ class CheckUrlAPITest(APITestCase):
         url = faker.uri()
         metadata = {
             'content-type': 'text/html; charset=utf-8',
-            'status': '200',
+            'status': 200,
         }
         mock_url_check(url, metadata)
         response = self.get(url_for('api.checkurl'),
                             qs={'url': url, 'group': ''})
         self.assert200(response)
-        self.assertEqual(response.json['status'], '200')
+        self.assertEqual(response.json['status'], 200)
         self.assertEqual(response.json['url'], url)
         self.assertEqual(response.json['content-type'],
                          'text/html; charset=utf-8')

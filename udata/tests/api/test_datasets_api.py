@@ -7,7 +7,6 @@ from StringIO import StringIO
 from datetime import datetime
 
 from flask import url_for
-from werkzeug.datastructures import FileStorage
 
 from udata.models import (
     CommunityResource, Dataset, Follow, Member, UPDATE_FREQUENCIES, LEGACY_FREQUENCIES
