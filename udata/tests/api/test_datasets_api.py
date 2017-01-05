@@ -593,8 +593,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assert200(response)
         dataset.reload()
         self.assertEqual(len(dataset.resources), 1)
-        self.assertTrue(
-            dataset.resources[0].url.endswith('test.txt'))
+        self.assertTrue(dataset.resources[0].url.endswith('test.txt'))
 
     @attr('update')
     def test_reorder(self):
@@ -710,8 +709,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assert200(response)
         dataset.reload()
         self.assertEqual(len(dataset.resources), 1)
-        self.assertTrue(
-            dataset.resources[0].url.endswith('test.txt'))
+        self.assertTrue(dataset.resources[0].url.endswith('test.txt'))
 
     def test_delete(self):
         resource = ResourceFactory()
