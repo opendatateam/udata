@@ -142,7 +142,7 @@ class DatasetSearch(ModelSearchAdapter):
         'featured': BoolFacet(field='featured'),
     }
     boosters = [
-        BoolBooster('featured', 1.1),
+        BoolBooster('featured', 1.5),
         GaussDecay('metrics.reuses', max_reuses, decay=0.1),
         GaussDecay(
             'metrics.followers', max_followers, max_followers, decay=0.1),
