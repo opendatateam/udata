@@ -14,7 +14,7 @@ dependencies:
     - elasticsearch-2.4.1/bin/elasticsearch: {background: true}
   override:
     - pip install -e . -r requirements/circleci.pip
-    - nvm use && nvm alias default $(nvm current) && npm install
+    - nvm install && nvm alias default $(nvm current) && npm install
 test:
   override:
     - mkdir -p $CIRCLE_TEST_REPORTS/{python,karma}
