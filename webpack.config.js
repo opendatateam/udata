@@ -48,21 +48,21 @@ module.exports = {
     devtool: 'eval-source-map',
     module: {
         loaders: [
-            {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file'},
+            {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file-loader'},
             {test: /\.css$/, loader: css_loader},
             {test: /\.less$/, loader: less_loader},
-            {test: /\.vue$/, loader: 'vue'},
-            {test: /\.json$/, loader: 'json'},
+            {test: /\.vue$/, loader: 'vue-loader'},
+            {test: /\.json$/, loader: 'json-loader'},
             {test: /\.hbs$/, loader: hbs_loader},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: 'file-loader?name=[name].[ext]'},
-            {test: /\.js$/, exclude: /node_modules/, loader: 'babel'},
+            {test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader'},
         ]
     },
     vue: {
         loaders: {
             css: css_loader,
             less: less_loader,
-            js: 'babel'
+            js: 'babel-loader'
         }
     },
     babel: {
