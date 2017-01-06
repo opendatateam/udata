@@ -8,7 +8,7 @@ from elasticsearch_dsl import (
 from udata.i18n import lazy_gettext as _
 from udata.core.site.views import current_site
 from udata.models import (
-    Dataset, Organization, License, User, GeoZone,
+    Dataset, Organization, License, User, GeoZone, CERTIFIED
 )
 from udata.search import (
     ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
@@ -106,6 +106,7 @@ class DatasetSearch(ModelSearchAdapter):
     granularity = String(index='not_analyzed')
     coverage_weight = Long()
     extras = Object()
+    from_certified = Boolean()
 
     fields = (
         'geozones.keys^9',
@@ -151,6 +152,7 @@ class DatasetSearch(ModelSearchAdapter):
     }
     boosters = [
         BoolBooster('featured', 1.5),
+        BoolBooster('from_certified', 1.2),
         ValueFactor('coverage_weight', missing=1),
         ValueFactor('temporal_weight', missing=1),
         GaussDecay('metrics.reuses', max_reuses, decay=0.1),
@@ -174,6 +176,8 @@ class DatasetSearch(ModelSearchAdapter):
             image_url = dataset.owner.avatar(40)
         else:
             image_url = None
+
+        certified = dataset.organization and dataset.organization.certified
 
         document = {
             'title': dataset.title,
@@ -211,6 +215,7 @@ class DatasetSearch(ModelSearchAdapter):
             'metrics': dataset.metrics,
             'extras': dataset.extras,
             'featured': dataset.featured,
+            'from_certified': certified,
         }
         if (dataset.temporal_coverage is not None and
                 dataset.temporal_coverage.start and
