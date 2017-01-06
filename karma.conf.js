@@ -45,19 +45,19 @@ module.exports = function(config) {
             devtool: 'inline-source-map',
             module: {
                 loaders: [
-                    {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'null'},
-                    {test: /\.css$/, loader: 'null'},
-                    {test: /\.less$/, loader: 'null'},
-                    {test: /\.vue$/, loader: 'vue'},
-                    {test: /\.json$/, loader: 'json'},
-                    {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: 'null'},
-                    {test: /\.js$/, exclude: /node_modules/, loader: 'babel'},
+                    {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'null-loader'},
+                    {test: /\.css$/, loader: 'null-loader'},
+                    {test: /\.less$/, loader: 'null-loader'},
+                    {test: /\.vue$/, loader: 'vue-loader'},
+                    {test: /\.json$/, loader: 'json-loader'},
+                    {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: 'null-loader'},
+                    {test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader'},
                 ]
             },
             vue: {
                 loaders: {
-                    css: 'null',
-                    less: 'null'
+                    css: 'null-loader',
+                    less: 'null-loader'
                 }
             },
             babel: {
