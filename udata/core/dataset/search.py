@@ -29,7 +29,7 @@ from . import metrics  # noqa
 __all__ = ('DatasetSearch', )
 
 
-# Number of years from which scoring is not impacted anymore
+# After this number of years, scoring is kept constant instead of increasing.
 MAX_TEMPORAL_WEIGHT = 10
 
 
