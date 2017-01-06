@@ -8,6 +8,9 @@ You have to re-initialize the index from scratch, not just use the `reindex` com
 
 ## New & Improved
 
+* 2017-01-06: Add some dataset ponderation factor: temporal coverage, spatial coverage,
+  certified provenance and more weight for featured ones. Need reindexation to be taken in account.
+
 * 2016-12-20: Use all the [Dublin Core Frequencies](http://dublincore.org/groups/collections/frequency/)
   plus some extra frequencies.
 
