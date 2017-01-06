@@ -22,10 +22,16 @@ BASE_GRANULARITIES = [
     ('other', _('Other')),
 ]
 
+ADMIN_LEVEL_MIN = 1
+ADMIN_LEVEL_MAX = 110
+
 
 class GeoLevel(db.Document):
     id = db.StringField(primary_key=True)
     name = db.StringField(required=True)
+    admin_level = db.IntField(min_value=ADMIN_LEVEL_MIN,
+                              max_value=ADMIN_LEVEL_MAX,
+                              default=100)
     parents = db.ListField(db.ReferenceField('self'))
 
 
@@ -193,6 +199,14 @@ def get_spatial_granularities(lang):
 
 spatial_granularities = LocalProxy(
     lambda: get_spatial_granularities(get_locale()))
+
+
+@cache.cached(timeout=50)
+def get_spatial_admin_levels():
+    return dict((l.id, l.admin_level) for l in GeoLevel.objects)
+
+
+admin_levels = LocalProxy(get_spatial_admin_levels)
 
 
 class SpatialCoverage(db.EmbeddedDocument):

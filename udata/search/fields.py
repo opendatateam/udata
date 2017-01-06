@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 __all__ = (
     'BoolFacet', 'TermsFacet', 'ModelTermsFacet',
     'RangeFacet', 'TemporalCoverageFacet',
-    'BoolBooster', 'FunctionBooster',
+    'BoolBooster', 'FunctionBooster', 'ValueFactor',
     'GaussDecay', 'ExpDecay', 'LinearDecay',
 )
 
@@ -297,6 +297,15 @@ class FunctionBooster(object):
                 'script': self.function,
             },
         }
+
+
+class ValueFactor(object):
+    def __init__(self, field, **params):
+        self.params = params
+        self.params['field'] = field
+
+    def to_query(self):
+        return {'field_value_factor': self.params}
 
 
 def _v(value):
