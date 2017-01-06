@@ -29,6 +29,10 @@ from . import metrics  # noqa
 __all__ = ('DatasetSearch', )
 
 
+# Number of years from which scoring is not impacted anymore
+MAX_TEMPORAL_WEIGHT = 10
+
+
 def max_reuses():
     return max(current_site.metrics.get('max_dataset_reuses'), 10)
 
@@ -93,6 +97,7 @@ class DatasetSearch(ModelSearchAdapter):
         'start': Long(),
         'end': Long()
     })
+    temporal_weight = Long(),
     geozones = Object(properties={
         'id': String(index='not_analyzed'),
         'name': String(index='not_analyzed'),
@@ -147,6 +152,7 @@ class DatasetSearch(ModelSearchAdapter):
     boosters = [
         BoolBooster('featured', 1.5),
         ValueFactor('coverage_weight', missing=1),
+        ValueFactor('temporal_weight', missing=1),
         GaussDecay('metrics.reuses', max_reuses, decay=0.1),
         GaussDecay(
             'metrics.followers', max_followers, max_followers, decay=0.1),
@@ -209,11 +215,12 @@ class DatasetSearch(ModelSearchAdapter):
         if (dataset.temporal_coverage is not None and
                 dataset.temporal_coverage.start and
                 dataset.temporal_coverage.end):
+            start = dataset.temporal_coverage.start.toordinal()
+            end = dataset.temporal_coverage.end.toordinal()
+            weight = min((end - start) / 365, MAX_TEMPORAL_WEIGHT)
             document.update({
-                'temporal_coverage': {
-                    'start': dataset.temporal_coverage.start.toordinal(),
-                    'end': dataset.temporal_coverage.end.toordinal(),
-                }
+                'temporal_coverage': {'start': start, 'end': end},
+                'temporal_weight': weight,
             })
 
         if dataset.spatial is not None:
