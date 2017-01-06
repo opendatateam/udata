@@ -8,7 +8,7 @@ CommonMark==0.7.2
 elasticsearch==2.3.0
 elasticsearch-dsl==2.1.0
 factory-boy==2.8.1
-Faker==0.7.3
+Faker==0.7.7
 Flask-BabelEx==0.9.3
 Flask-Caching==1.0.1
 flask-fs==0.2.0
