@@ -8,23 +8,29 @@ from elasticsearch_dsl import (
 from udata.i18n import lazy_gettext as _
 from udata.core.site.views import current_site
 from udata.models import (
-    Dataset, Organization, License, User, GeoZone,
+    Dataset, Organization, License, User, GeoZone, CERTIFIED
 )
 from udata.search import (
     ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
 )
 from udata.search.fields import (
     TermsFacet, ModelTermsFacet, RangeFacet, TemporalCoverageFacet,
-    BoolBooster, GaussDecay, BoolFacet
+    BoolBooster, GaussDecay, BoolFacet, ValueFactor
 )
 from udata.search.analysis import simple
 
-from udata.core.spatial.models import spatial_granularities
+from udata.core.spatial.models import (
+    admin_levels, spatial_granularities, ADMIN_LEVEL_MAX
+)
 
 # Metrics are require for dataset search
 from . import metrics  # noqa
 
 __all__ = ('DatasetSearch', )
+
+
+# After this number of years, scoring is kept constant instead of increasing.
+MAX_TEMPORAL_WEIGHT = 10
 
 
 def max_reuses():
@@ -91,13 +97,16 @@ class DatasetSearch(ModelSearchAdapter):
         'start': Long(),
         'end': Long()
     })
+    temporal_weight = Long(),
     geozones = Object(properties={
         'id': String(index='not_analyzed'),
         'name': String(index='not_analyzed'),
         'keys': String(index='not_analyzed')
     })
     granularity = String(index='not_analyzed')
+    coverage_weight = Long()
     extras = Object()
+    from_certified = Boolean()
 
     fields = (
         'geozones.keys^9',
@@ -142,7 +151,10 @@ class DatasetSearch(ModelSearchAdapter):
         'featured': BoolFacet(field='featured'),
     }
     boosters = [
-        BoolBooster('featured', 1.1),
+        BoolBooster('featured', 1.5),
+        BoolBooster('from_certified', 1.2),
+        ValueFactor('coverage_weight', missing=1),
+        ValueFactor('temporal_weight', missing=1),
         GaussDecay('metrics.reuses', max_reuses, decay=0.1),
         GaussDecay(
             'metrics.followers', max_followers, max_followers, decay=0.1),
@@ -164,6 +176,8 @@ class DatasetSearch(ModelSearchAdapter):
             image_url = dataset.owner.avatar(40)
         else:
             image_url = None
+
+        certified = dataset.organization and dataset.organization.certified
 
         document = {
             'title': dataset.title,
@@ -201,15 +215,17 @@ class DatasetSearch(ModelSearchAdapter):
             'metrics': dataset.metrics,
             'extras': dataset.extras,
             'featured': dataset.featured,
+            'from_certified': certified,
         }
         if (dataset.temporal_coverage is not None and
                 dataset.temporal_coverage.start and
                 dataset.temporal_coverage.end):
+            start = dataset.temporal_coverage.start.toordinal()
+            end = dataset.temporal_coverage.end.toordinal()
+            weight = min((end - start) / 365, MAX_TEMPORAL_WEIGHT)
             document.update({
-                'temporal_coverage': {
-                    'start': dataset.temporal_coverage.start.toordinal(),
-                    'end': dataset.temporal_coverage.end.toordinal(),
-                }
+                'temporal_coverage': {'start': start, 'end': end},
+                'temporal_weight': weight,
             })
 
         if dataset.spatial is not None:
@@ -219,6 +235,7 @@ class DatasetSearch(ModelSearchAdapter):
                 id__in=[z.id for z in dataset.spatial.zones])
             parents = set()
             geozones = []
+            coverage_level = ADMIN_LEVEL_MAX
             for zone in zones:
                 geozones.append({
                     'id': zone.id,
@@ -226,6 +243,7 @@ class DatasetSearch(ModelSearchAdapter):
                     'keys': zone.keys_values
                 })
                 parents |= set(zone.parents)
+                coverage_level = min(coverage_level, admin_levels[zone.level])
 
             geozones.extend([{'id': p} for p in parents])
 
@@ -233,6 +251,7 @@ class DatasetSearch(ModelSearchAdapter):
                 'geozones': geozones,
                 # 'geom': dataset.spatial.geom,
                 'granularity': dataset.spatial.granularity,
+                'coverage_weight': ADMIN_LEVEL_MAX / coverage_level,
             })
 
         return document
