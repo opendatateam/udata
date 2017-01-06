@@ -79,7 +79,6 @@
     "babel-runtime": "^6.9.1",
     "bootstrap": "^3.3.6",
     "bootstrap-datepicker": "^1.6.1",
-    "bootstrap-daterangepicker": "^2.1.22",
     "bootstrap-markdown": "^2.10.0",
     "bootstrap-slider": "~7.1.0",
     "chart.js": "^1.1.1",
