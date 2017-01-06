@@ -18,7 +18,6 @@
             </div>
             <input name="q" type="search" class="form-control" autocomplete="off"
                 :placeholder="placeholder || _('Search')"
-                :value="$location.query.q"
                 v-model="query" debounce="200"
                 @keydown.up.prevent="up"
                 @keydown.down.prevent="down"
@@ -67,9 +66,10 @@ export default {
         territoryId: String,
     },
     data() {
+        const query = this.$location.query.q || '';
         return {
             current: -1,
-            query: '',
+            query: decodeURIComponent(query.replace('+', ' ')),
             show: false,
             cache: new Cache('site-search', sessionStorage),
             groups: [
