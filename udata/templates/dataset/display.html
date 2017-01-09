@@ -24,25 +24,6 @@
     <li class="active">{{ dataset.title|truncate(128) }}</li>
 {% endblock %}
 
-{% block toolbar %}
-{% if can_edit %}
-<div class="btn-group btn-group-xs">
-    <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}" class="btn btn-success">
-        <span class="glyphicon glyphicon-pencil"></span>
-        {{ _('Edit') }}
-    </a>
-</div>
-{% endif %}
-
-{% if sysadmin %}
-<featured dataset-id="{{ dataset.id }}" :featured="{{ dataset.featured|to_json }}"></featured>
-{% endif %}
-
-<div class="btn-group btn-group-xs">
-    {{ follow_btn(dataset, icons=[ficon('fa-star-empty'), ficon('fa-star')]) }}
-</div>
-{% endblock %}
-
 {% block content %}
 <!-- Placeholder for non-routable modals -->
 <div v-el:modal></div>
@@ -156,7 +137,9 @@
                         </div>
                         {% endif %}
                         {% if sysadmin %}
-                        <featured dataset-id="{{ dataset.id }}" :featured="{{ dataset.featured|to_json }}"></featured>
+                        <div class="btn-group btn-group-sm">
+                            <featured-button subject-id="{{ dataset.id }}" subject-type="dataset" :featured="{{ dataset.featured|to_json }}"></featured-button>
+                        </div>
                         {% endif %}
                         <div class="btn-group btn-group-sm">
                             {{ follow_btn(dataset, ['fa-star-o', 'fa-star']) }}
@@ -431,19 +414,7 @@
                                 </a>
                                 {% endif %}
                                 {% if current_user.sysadmin %}
-                                {% set btn_class = 'success' if reuse.featured else 'default' %}
-                                <a class="btn btn-{{ btn_class }} featured" v-tooltip href
-                                    {# data-api="{{ url('youckan/reuse', reuse.id, 'featured') }}" #}
-                                    {% if reuse.featured %}
-                                    title="{{ _('Unmark as featured') }}"
-                                    {% else %}
-                                    title="{{ _('Mark as featured') }}"
-                                    {% endif %}
-                                    data-featured-title="{{ _('Unmark as featured') }}"
-                                    data-unfeatured-title="{{ _('Mark as featured') }}"
-                                    data-containter="body">
-                                    <span class="glyphicon glyphicon-pushpin"></span>
-                                </a>
+                                <featured-button compact subject-id="{{ reuse.id }}" subject-type="reuse" :featured="{{ reuse.featured|to_json }}"></featured-button>
                                 {% endif %}
                             </div>
                         </div>
