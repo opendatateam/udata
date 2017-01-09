@@ -1,10 +1,9 @@
 <template>
-<button type="button"
-    class="btn btn-success featured"
-    :class="{active: featured}"
+<button type="button" class="btn featured"
+    :class="{active: featured, 'btn-success': !compact, 'btn-default': compact}"
     @click="toggleFeatured">
     <span class="fa fa-bullhorn"></span>
-    {{ _('Featured') }}
+    <span v-if="!compact">{{ _('Featured') }}</span>
 </button>
 </template>
 
@@ -16,8 +15,8 @@ export default {
     props: {
         subjectId: String,
         subjectType: String,
-        featured: false,
-        btnClass: 'success'
+        featured: Boolean,
+        compact: Boolean
     },
     methods: {
         toggleFeatured() {

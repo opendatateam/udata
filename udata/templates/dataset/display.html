@@ -414,7 +414,7 @@
                                 </a>
                                 {% endif %}
                                 {% if current_user.sysadmin %}
-                                <featured-button subject-id="{{ reuse.id }}" subject-type="reuse" :featured="{{ reuse.featured|to_json }}"></featured-button>
+                                <featured-button compact subject-id="{{ reuse.id }}" subject-type="reuse" :featured="{{ reuse.featured|to_json }}"></featured-button>
                                 {% endif %}
                             </div>
                         </div>
