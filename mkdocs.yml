@@ -19,6 +19,7 @@ pages:
         - Creating a custom theme: creating-theme.md
         - Building the documentation: building-documentation.md
     - Contributing: contributing-guide.md
+    - Versionning: versionning.md
     - Changelog: changelog.md
 
 markdown_extensions:
