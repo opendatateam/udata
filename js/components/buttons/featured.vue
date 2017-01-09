@@ -1,7 +1,8 @@
 <template>
 <button type="button" class="btn featured"
     :class="{active: featured, 'btn-success': !compact, 'btn-default': compact}"
-    @click="toggleFeatured">
+    @click="toggleFeatured"
+    v-tooltip="_('Feature this content')" tooltip-placement="tooltipPlacement">
     <span class="fa fa-bullhorn"></span>
     <span v-if="!compact">{{ _('Featured') }}</span>
 </button>
