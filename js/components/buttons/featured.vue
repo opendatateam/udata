@@ -1,13 +1,11 @@
 <template>
-<div class="btn-group btn-group-sm">
-    <button type="button"
-        class="btn btn-success featured"
-        :class="{active: featured}"
-        @click="toggleFeatured">
-        <span class="fa fa-bullhorn"></span>
-        {{ _('Featured') }}
-    </button>
-</div>
+<button type="button"
+    class="btn btn-success featured"
+    :class="{active: featured}"
+    @click="toggleFeatured">
+    <span class="fa fa-bullhorn"></span>
+    {{ _('Featured') }}
+</button>
 </template>
 
 <script>
@@ -19,7 +17,7 @@ export default {
         subjectId: String,
         subjectType: String,
         featured: false,
-        required: true
+        btnClass: 'success'
     },
     methods: {
         toggleFeatured() {

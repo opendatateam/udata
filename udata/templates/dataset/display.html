@@ -137,7 +137,9 @@
                         </div>
                         {% endif %}
                         {% if sysadmin %}
-                        <featured-button subject-id="{{ dataset.id }}" subject-type="dataset" :featured="{{ dataset.featured|to_json }}"></featured-button>
+                        <div class="btn-group btn-group-sm">
+                            <featured-button subject-id="{{ dataset.id }}" subject-type="dataset" :featured="{{ dataset.featured|to_json }}"></featured-button>
+                        </div>
                         {% endif %}
                         <div class="btn-group btn-group-sm">
                             {{ follow_btn(dataset, ['fa-star-o', 'fa-star']) }}
