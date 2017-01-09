@@ -19,7 +19,7 @@ RE_LINK_REF = re.compile(r'^\[(?P<key>[^!].*?)\]:\s*(?P<url>.*)$', re.M)
 RE_BADGE = re.compile(r'^\[\!\[(?P<text>.*?)\]\[(?P<badge>.*?)\]\]\[(?P<target>.*?)\]$', re.M)
 RE_TITLE = re.compile(r'^(?P<level>#+)\s*(?P<title>.*)$', re.M)
 
-BADGES_TO_KEEP = ['gitter-badge']
+BADGES_TO_KEEP = ['gitter-badge', 'readthedocs-badge']
 
 RST_TITLE_LEVELS = ['=', '-', '*']
 
