@@ -47,3 +47,6 @@ Flask-RESTful==0.3.3
 # Pin OAuthlib until https://github.com/idan/oauthlib/issues/433
 # and https://github.com/idan/oauthlib/issues/359 are fixed
 oauthlib==1.1.2
+
+# Lock Jinja version because of changes impacting markdown rendering
+Jinja2<2.9
