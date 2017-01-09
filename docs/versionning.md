@@ -58,7 +58,7 @@ The step to perform a release are:
 2. ensure translations are up to date
 3. ensure CircleCI build is successful on master branch
 4. ensure your working copy is clean
-5. run `bumpr -d` to preview the actions performed and the changes
+5. run `bumpr -d -v` to preview the actions performed and the changes
 6. run `bumpr` to perform the release. This will:
     - clean up remaining build artifacts
     - execute tests

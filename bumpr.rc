@@ -5,7 +5,7 @@ commit = true
 tag = true
 push = true
 clean = inv clean
-tests = nosetests
+tests = inv tests jstest
 publish = inv dist
 files =
     README.md
