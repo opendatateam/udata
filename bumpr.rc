@@ -4,9 +4,9 @@ vcs = git
 commit = true
 tag = true
 push = true
+clean = inv clean
 tests = nosetests
 publish = inv dist
-clean = inv clean
 files =
     README.md
 
