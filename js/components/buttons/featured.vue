@@ -16,7 +16,8 @@ import log from 'logger';
 
 export default {
     props: {
-        datasetId: String,
+        subjectId: String,
+        subjectType: String,
         featured: false,
         required: true
     },
@@ -24,7 +25,7 @@ export default {
         toggleFeatured() {
             Auth.need_role('admin');
             const method = this.featured ? 'delete' : 'post';
-            this.$api[method](`datasets/${this.datasetId}/featured/`)
+            this.$api[method](`${this.subjectType.toLowerCase()}s/${this.subjectId}/featured/`)
                 .then(response => {
                     this.featured = !this.featured;
                 })

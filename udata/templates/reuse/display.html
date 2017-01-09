@@ -24,35 +24,6 @@
     <li class="active">{{ reuse.title }}</li>
 {% endblock %}
 
-{% block toolbar %}
-{# Owner actions #}
-<div class="btn-group btn-group-xs">
-    <a href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}" class="btn btn-success">
-        <span class="glyphicon glyphicon-pencil"></span>
-        {{ _('Edit') }}
-    </a>
-</div>
-{# Admin actions #}
-<div class="btn-group btn-group-xs">
-    <button type="button"
-        class="btn btn-success featured {% if reuse.featured %}active{% endif %}"
-        data-api-url="{{ url_for('api.reuse_featured', reuse=reuse) }}">
-        <span class="glyphicon glyphicon-bullhorn"></span>
-        {{ _('Featured') }}
-    </button>
-</div>
-{# Social actions #}
-<div class="btn-group btn-group-xs">
-    {{ follow_btn(reuse) }}
-</div>
-<div class="btn-group btn-group-xs">
-    {{ issues_btn(reuse) }}
-</div>
-<div class="btn-group btn-group-xs">
-    {{ share_btn(reuse.title) }}
-</div>
-{% endblock %}
-
 {% block content %}
 <section class="reuse-section community-section">
     <div class="container reuse-container">
@@ -133,12 +104,7 @@
                         {% endif %}
                         {% if sysadmin %}
                         <div class="btn-group btn-group-sm">
-                            <button type="button"
-                                class="btn btn-success featured {% if reuse.featured %}active{% endif %}"
-                                data-api-url="{{ url_for('api.reuse_featured', reuse=reuse) }}">
-                                <span class="glyphicon glyphicon-bullhorn"></span>
-                                {{ _('Featured') }}
-                            </button>
+                            <featured-button subject-id="{{ reuse.id }}" subject-type="reuse" :featured="{{ reuse.featured|to_json }}"></featured-button>
                         </div>
                         {% endif %}
                     </div>
