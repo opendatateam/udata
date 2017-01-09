@@ -25,7 +25,8 @@ export default {
         toggleFeatured() {
             Auth.need_role('admin');
             const method = this.featured ? 'delete' : 'post';
-            this.$api[method](`${this.subjectType.toLowerCase()}s/${this.subjectId}/featured/`)
+            const url = `${this.subjectType.toLowerCase()}s/${this.subjectId}/featured/`;
+            this.$api[method](url)
                 .then(response => {
                     this.featured = !this.featured;
                 })
