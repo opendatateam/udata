@@ -3,6 +3,7 @@ file = udata/__init__.py
 vcs = git
 commit = true
 tag = true
+tag_format = v{version}
 push = true
 clean = inv clean
 tests = inv test jstest
