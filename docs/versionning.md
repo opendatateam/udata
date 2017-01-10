@@ -2,11 +2,11 @@
 
 ## Versionning process
 
-UData [semantic versionning][semver] to publish its published releases.
+UData uses [semantic versionning][semver] to publish its published releases.
 
 ### Branches management
 
-There is two main branches on the UData git repository: `master` and `dev`
+There is two main branches on the [UData git repository][github]: `master` and `dev`
 
 The `master` is the stable development branch on which:
 
@@ -71,8 +71,8 @@ The step to perform a release are:
     - prepare the changelog for the next iteration
     - commit
     - push (commits and tags)
-7. check on github that everythin has been pushed
-8. wait for CircleCI tagged build to succeed
+7. check on [github][] that everything has been pushed
+8. wait for [CircleCI][] tagged build to succeed
 9. check on [PyPI](https://pypi.python.org/pypi/udata) that the new release is present
 10. celebrate
 
@@ -109,6 +109,8 @@ It's up to the developpers and system administrators to read the [changelog](cha
 
 [bumpr]: https://github.com/noirbizarre/bumpr/
 [semver]: http://semver.org/
+[github]: https://github.com/opendatateam/udata
 [issues]: https://github.com/opendatateam/udata/issues
 [pulls]: https://github.com/opendatateam/udata/pulls
 [milestones]: https://github.com/opendatateam/udata/milestones
+[CircleCI]: https://circleci.com/gh/opendatateam/udata
