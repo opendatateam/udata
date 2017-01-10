@@ -1,7 +1,5 @@
-Changelog
-=========
+# Changelog
 
-Current
--------
+## Current (in progress)
 
 - First published release

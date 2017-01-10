@@ -1,19 +1,16 @@
-uData-gouvfr
-============
+# uData-gouvfr
 
 [![Build status][circleci-badge]][circleci-url]
 [![Join the chat at https://gitter.im/etalab/udata-gouvfr][gitter-badge]][gitter-url]
 
 uData customizations for Etalab / Data.gouv.fr.
 
-Compatibility
--------------
+## Compatibility
 
 **udata-gouvfr** requires Python 2.7+ and [uData][].
 
 
-Installation
-------------
+## Installation
 
 Install [uData][].
 
