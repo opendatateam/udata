@@ -29,6 +29,7 @@ RST_BADGE = '''\
     :alt: {text}
 '''
 
+
 def md2pypi(filename):
     '''
     Load .md (markdown) file and sanitize it for PyPI.
@@ -68,7 +69,7 @@ def md2pypi(filename):
         ))
 
     for match in RE_TITLE.finditer(content):
-        underchar = RST_TITLE_LEVELS[len(match.group('level'))]
+        underchar = RST_TITLE_LEVELS[len(match.group('level')) - 1]
         title = match.group('title')
         underline = underchar * len(title)
 
