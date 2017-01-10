@@ -8,6 +8,8 @@
 BASE_BRANCH="master"
 if [[ $CIRCLE_PR_NUMBER ]]; then
   BASE_BRANCH=$(curl -fsSL https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/pulls/$CIRCLE_PR_NUMBER | jq -r '.base.ref')
+elif [[ $CIRCLE_TAG ]]; then
+  BASE_BRANCH='master'
 else
   BASE_BRANCH=$CIRCLE_BRANCH
 fi
