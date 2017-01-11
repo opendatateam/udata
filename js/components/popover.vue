@@ -1,0 +1,47 @@
+<template>
+<div class="popover" :class="classes" v-show="show" :style="style" :transition="effect">
+    <div class="arrow"></div>
+    <h3 class="popover-title" v-show="title">{{title}}</h3>
+    <div class="popover-content" v-el:content>{{content}}</div>
+</div>
+</template>
+<script>
+import log from 'logger';
+import TooltipMixin from 'mixins/tooltip';
+
+import { popover } from 'vue-strap'; // Needed for style
+
+export default {
+    mixins: [TooltipMixin],
+    props: {
+        // An optionnal title
+        title: [String, Element, HTMLElement],
+        // The popover content
+        content: [String, Element, HTMLElement],
+        // Wider popover
+        large: {type: Boolean, default: false},
+    },
+    computed: {
+        classes() {
+            const classes = {large: this.large};
+            classes[this.placement] = true;
+            return classes;
+        }
+    },
+    watch: {
+        /**
+         * Transclude content if necessary
+         */
+        content(value) {
+            if (value instanceof HTMLElement) {
+                this.$els.content.innerHTML = '';
+                this.$els.content.appendChild(value);
+            }
+        }
+    }
+}
+</script>
+
+<style lang="less">
+// Rely on vue-strap popover style
+</style>

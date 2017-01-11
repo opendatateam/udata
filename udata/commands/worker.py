@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import logging
 
-from flask.ext.script import Command
+from flask_script import Command
 
 from udata.commands import manager
 from udata.tasks import celery

@@ -41,5 +41,13 @@
 
 <meta name="notify-in" content="{{ notify_in }}" />
 <meta name="check-urls" content="{{ 'true' if config.CROQUEMORT else 'false' }}" />
+<meta name="check-urls-ignore" content="{{ config.CROQUEMORT_IGNORE|tojson|urlencode }}" />
 <meta name="territory-enabled" content="{{ 'true' if config.ACTIVATE_TERRITORIES else 'false' }}">
+
+<meta name="delete-me-enabled" content="{{ 'true' if config.DELETE_ME else 'false' }}">
+
+{% if json_ld %}
+<script id="json_ld" type="application/ld+json">{{ json_ld|safe }}</script>
+{% endif %}
+
 {% endmacro %}

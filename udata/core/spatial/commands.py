@@ -51,7 +51,8 @@ def load(filename, drop=False):
             GeoLevel.objects.create(
                 id=level['id'],
                 name=level['label'],
-                parents=level['parents']
+                parents=level['parents'],
+                admin_level=level.get('admin_level')
             )
     os.remove(levels_filepath)
     log.info('Loaded {total} levels'.format(total=i))

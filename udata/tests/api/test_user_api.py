@@ -3,10 +3,11 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import Follow, FollowUser
+from udata.core.user.factories import AdminFactory, UserFactory
+from udata.models import Follow
+from udata.utils import faker
 
 from . import APITestCase
-from ..factories import faker, UserFactory
 
 
 class UserAPITest(APITestCase):
@@ -16,7 +17,7 @@ class UserAPITest(APITestCase):
         to_follow = UserFactory()
 
         response = self.post(url_for('api.user_followers', id=to_follow.id))
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         nb_followers = Follow.objects.followers(to_follow).count()
 
@@ -41,7 +42,7 @@ class UserAPITest(APITestCase):
         '''It should unfollow the user on DELETE'''
         user = self.login()
         to_follow = UserFactory()
-        FollowUser.objects.create(follower=user, following=to_follow)
+        Follow.objects.create(follower=user, following=to_follow)
 
         response = self.delete(url_for('api.user_followers', id=to_follow.id))
         self.assert200(response)
@@ -160,12 +161,125 @@ class UserAPITest(APITestCase):
         with self.autoindex():
             users = UserFactory.create_batch(4)
 
-        user = users[0]
+        first_user = users[0]
         response = self.get(url_for('api.suggest_users'),
-                            qs={'q': str(user.id), 'size': '5'})
+                            qs={'q': str(first_user.id), 'size': '5'})
         self.assert200(response)
 
-        self.assertGreaterEqual(len(response.json), 1)
+        # The batch factory generates ids that might be too close
+        # which then are found with the fuzzy search.
+        suggested_ids = [u['id'] for u in response.json]
+        self.assertGreaterEqual(len(suggested_ids), 1)
+        self.assertIn(str(first_user.id), suggested_ids)
 
-        suggestion = response.json[0]
-        self.assertEqual(suggestion['id'], str(user.id))
+    def test_users(self):
+        '''It should provide a list of users'''
+        with self.autoindex():
+            user = UserFactory(
+                about=faker.paragraph(),
+                website=faker.url(),
+                avatar_url=faker.url(),
+                metrics={'datasets': 10})
+        response = self.get(url_for('api.users'))
+        self.assert200(response)
+        [json] = response.json['data']
+        self.assertEquals(json['id'], str(user.id))
+        self.assertEquals(json['slug'], user.slug)
+        self.assertEquals(json['first_name'], user.first_name)
+        self.assertEquals(json['last_name'], user.last_name)
+        self.assertEquals(json['website'], user.website)
+        self.assertEquals(json['about'], user.about)
+        self.assertEquals(json['metrics'], user.metrics)
+
+    def test_get_user(self):
+        '''It should get a user'''
+        user = UserFactory()
+        response = self.get(url_for('api.user', user=user))
+        self.assert200(response)
+
+    def test_get_inactive_user(self):
+        '''It should raise a 410'''
+        user = UserFactory(active=False)
+        response = self.get(url_for('api.user', user=user))
+        self.assert410(response)
+
+    def test_get_inactive_user_with_a_non_admin(self):
+        '''It should raise a 410'''
+        user = UserFactory(active=False)
+        self.login()
+        response = self.get(url_for('api.user', user=user))
+        self.assert410(response)
+
+    def test_get_inactive_user_with_an_admin(self):
+        '''It should get a user'''
+        user = UserFactory(active=False)
+        self.login(AdminFactory())
+        response = self.get(url_for('api.user', user=user))
+        self.assert200(response)
+
+    def test_user_api_update(self):
+        '''It should update a user'''
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data['active'] = False
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert200(response)
+        self.assertFalse(response.json['active'])
+
+    def test_user_api_update_with_website(self):
+        '''It should raise a 400'''
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data['website'] = 'foo'
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert400(response)
+        data['website'] = faker.url()
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert200(response)
+
+    def test_user_api_update_with_a_non_admin_connected_user(self):
+        '''It should raise a 403'''
+        user = UserFactory()
+        self.login(user)
+        data = user.to_dict()
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert403(response)
+
+    def test_user_api_update_with_an_existing_role(self):
+        '''It should update a user'''
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data['roles'] = ['admin']
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert200(response)
+        self.assertEqual(response.json['roles'], ['admin'])
+
+    def test_user_api_update_with_a_non_existing_role(self):
+        '''It should raise a 400'''
+        self.login(AdminFactory())
+        user = UserFactory()
+        data = user.to_dict()
+        data['roles'] = ['non_existing_role']
+        response = self.put(url_for('api.user', user=user), data)
+        self.assert400(response)
+
+    def test_user_roles(self):
+        '''It should list the roles'''
+        self.login(AdminFactory())
+        response = self.get(url_for('api.user_roles'))
+        self.assert200(response)
+        self.assertEqual(response.json, [{'name': 'admin'}])
+
+    def test_delete_user(self):
+        user = AdminFactory()
+        self.login(user)
+        other_user = UserFactory()
+        response = self.delete(url_for('api.user', user=other_user))
+        self.assert204(response)
+        response = self.delete(url_for('api.user', user=other_user))
+        self.assert410(response)
+        response = self.delete(url_for('api.user', user=user))
+        self.assert403(response)

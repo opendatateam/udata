@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import io
 import re
 
 from os.path import join, dirname
@@ -37,7 +38,7 @@ def md2pypi(filename):
      - code-block directive
      - travis ci build badges
     '''
-    content = open(filename).read()
+    content = io.open(filename).read()
 
     for match in RE_MD_CODE_BLOCK.finditer(content):
         rst_block = '\n'.join(

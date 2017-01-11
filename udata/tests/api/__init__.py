@@ -8,7 +8,7 @@ from flask import json
 from udata.core import storages
 from udata.core.storages.views import blueprint
 
-from ..factories import UserFactory
+from udata.core.user.factories import UserFactory
 from ..frontend import FrontTestCase
 
 

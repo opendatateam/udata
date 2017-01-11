@@ -3,8 +3,11 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.reuse.factories import ReuseFactory
+from udata.utils import faker
+
 from . import APITestCase
-from ..factories import faker, ReuseFactory, DatasetFactory, ResourceFactory
 
 
 class TagsAPITest(APITestCase):

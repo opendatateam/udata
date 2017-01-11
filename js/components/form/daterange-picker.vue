@@ -41,6 +41,7 @@
 <script>
 import Calendar from 'components/calendar.vue';
 import {FieldComponentMixin} from 'components/form/base-field';
+import $ from 'jquery';
 
 const DEFAULT_FORMAT = 'L';
 const ISO_FORMAT = 'YYYY-MM-DD';
@@ -90,20 +91,20 @@ export default {
             this.hiddenField.value = '';
             this.picking = false;
             return true;
-        },
-        'form:ready': function() {
-            // Perform all validations on end field because performing on start field unhighlight.
-            $(this.$els.endHidden).rules('add', {
-                dateGreaterThan: '#' + this.$els.startHidden.id,
-                required: (el) => {
-                    return (this.$els.startHidden.value && !this.$els.endHidden.value) || (this.$els.endHidden.value && !this.$els.startHidden.value);
-                },
-                messages: {
-                    dateGreaterThan: this._('End date should be after start date'),
-                    required: this._('Both dates are required')
-                }
-            });
         }
+    },
+    ready() {
+        // Perform all validations on end field because performing on start field unhighlight.
+        $(this.$els.endHidden).rules('add', {
+            dateGreaterThan: '#' + this.$els.startHidden.id,
+            required: (el) => {
+                return (this.$els.startHidden.value && !this.$els.endHidden.value) || (this.$els.endHidden.value && !this.$els.startHidden.value);
+            },
+            messages: {
+                dateGreaterThan: this._('End date should be after start date'),
+                required: this._('Both dates are required')
+            }
+        });
     },
     methods: {
         onFocus(e) {

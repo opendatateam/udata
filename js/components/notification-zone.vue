@@ -1,5 +1,5 @@
 <template>
-<div v-show="$root.notifications.length > 0" class="notification-zone">
+<div v-show="$root.notifications && $root.notifications.length > 0" class="notification-zone">
     <alert v-for="n in $root.notifications" :alert="n"></alert>
 </div>
 </template>

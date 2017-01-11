@@ -6,10 +6,10 @@ from datetime import datetime
 from flask import url_for
 
 from udata.features.notifications import actions
+from udata.core.user.factories import UserFactory
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
-from .factories import UserFactory
 
 
 class NotificationsMixin(object):

@@ -5,7 +5,7 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import Dataset, DatasetDiscussion, Member
+from udata.models import Dataset, Member
 from udata.core.user.views import blueprint as user_bp
 from udata.core.dataset.views import blueprint as dataset_bp
 from udata.core.discussions.models import Message, Discussion
@@ -14,20 +14,20 @@ from udata.core.discussions.signals import (
     on_new_discussion, on_new_discussion_comment,
     on_discussion_closed, on_discussion_deleted,
 )
-
 from udata.core.discussions.tasks import (
     notify_new_discussion, notify_new_discussion_comment,
     notify_discussion_closed
 )
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.discussions.factories import DiscussionFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory, AdminFactory
+from udata.utils import faker
 
 from frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
-from .factories import (
-    faker, AdminFactory, UserFactory, OrganizationFactory, DatasetFactory,
-    DatasetDiscussionFactory
-)
 
 
 class DiscussionsTest(APITestCase):
@@ -44,9 +44,12 @@ class DiscussionsTest(APITestCase):
             response = self.post(url_for('api.discussions'), {
                 'title': 'test title',
                 'comment': 'bla bla',
-                'subject': dataset.id
+                'subject': {
+                    'class': 'Dataset',
+                    'id': dataset.id,
+                }
             })
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         dataset.reload()
         self.assertEqual(dataset.metrics['discussions'], 1)
@@ -73,7 +76,10 @@ class DiscussionsTest(APITestCase):
 
         response = self.post(url_for('api.discussions'), {
             'title': 'test title',
-            'subject': dataset.id
+            'subject': {
+                'class': 'Dataset',
+                'id': dataset.id,
+            }
         })
         self.assertStatus(response, 400)
 
@@ -83,7 +89,10 @@ class DiscussionsTest(APITestCase):
 
         response = self.post(url_for('api.discussions'), {
             'comment': 'bla bla',
-            'subject': dataset.id
+            'subject': {
+                'class': 'Dataset',
+                'id': dataset.id,
+            }
         })
         self.assertStatus(response, 400)
 
@@ -103,7 +112,7 @@ class DiscussionsTest(APITestCase):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
             discussion = Discussion.objects.create(
-                subject=dataset.id,
+                subject=dataset,
                 user=user,
                 title='test discussion {}'.format(i),
                 discussion=[message]
@@ -113,7 +122,7 @@ class DiscussionsTest(APITestCase):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
             discussion = Discussion.objects.create(
-                subject=dataset.id,
+                subject=dataset,
                 user=user,
                 title='test discussion {}'.format(i),
                 discussion=[message],
@@ -136,7 +145,7 @@ class DiscussionsTest(APITestCase):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
             discussion = Discussion.objects.create(
-                subject=dataset.id,
+                subject=dataset,
                 user=user,
                 title='test discussion {}'.format(i),
                 discussion=[message]
@@ -146,7 +155,7 @@ class DiscussionsTest(APITestCase):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
             discussion = Discussion.objects.create(
-                subject=dataset.id,
+                subject=dataset,
                 user=user,
                 title='test discussion {}'.format(i),
                 discussion=[message],
@@ -161,18 +170,40 @@ class DiscussionsTest(APITestCase):
         for discussion in response.json['data']:
             self.assertIsNotNone(discussion['closed'])
 
-        response = self.get(url_for('api.discussions', closed=False))
+    def test_list_discussions_for(self):
+        dataset = DatasetFactory()
+        discussions = []
+        for i in range(3):
+            user = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=user)
+            discussion = Discussion.objects.create(
+                subject=dataset,
+                user=user,
+                title='test discussion {}'.format(i),
+                discussion=[message]
+            )
+            discussions.append(discussion)
+        user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        Discussion.objects.create(
+            subject=DatasetFactory(),
+            user=user,
+            title='test discussion {}'.format(i),
+            discussion=[message]
+        )
+
+        kwargs = {'for': str(dataset.id)}
+        response = self.get(url_for('api.discussions', **kwargs))
         self.assert200(response)
-        self.assertEqual(len(response.json['data']), len(open_discussions))
-        for discussion in response.json['data']:
-            self.assertIsNone(discussion['closed'])
+
+        self.assertEqual(len(response.json['data']), len(discussions))
 
     def test_get_discussion(self):
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
         discussion = Discussion.objects.create(
-            subject=dataset.id,
+            subject=dataset,
             user=user,
             title='test discussion',
             discussion=[message]
@@ -183,7 +214,8 @@ class DiscussionsTest(APITestCase):
 
         data = response.json
 
-        self.assertEqual(data['subject'], str(dataset.id))
+        self.assertEqual(data['subject']['class'], 'Dataset')
+        self.assertEqual(data['subject']['id'], str(dataset.id))
         self.assertEqual(data['user']['id'], str(user.id))
         self.assertEqual(data['title'], 'test discussion')
         self.assertIsNotNone(data['created'])
@@ -197,7 +229,7 @@ class DiscussionsTest(APITestCase):
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        discussion = DatasetDiscussion.objects.create(
+        discussion = Discussion.objects.create(
             subject=dataset,
             user=user,
             title='test discussion',
@@ -217,7 +249,8 @@ class DiscussionsTest(APITestCase):
 
         data = response.json
 
-        self.assertEqual(data['subject'], str(dataset.id))
+        self.assertEqual(data['subject']['class'], 'Dataset')
+        self.assertEqual(data['subject']['id'], str(dataset.id))
         self.assertEqual(data['user']['id'], str(user.id))
         self.assertEqual(data['title'], 'test discussion')
         self.assertIsNotNone(data['created'])
@@ -234,8 +267,8 @@ class DiscussionsTest(APITestCase):
         user = UserFactory()
         dataset = Dataset.objects.create(title='Test dataset', owner=owner)
         message = Message(content='bla bla', posted_by=user)
-        discussion = DatasetDiscussion.objects.create(
-            subject=dataset.id,
+        discussion = Discussion.objects.create(
+            subject=dataset,
             user=user,
             title='test discussion',
             discussion=[message]
@@ -254,7 +287,8 @@ class DiscussionsTest(APITestCase):
 
         data = response.json
 
-        self.assertEqual(data['subject'], str(dataset.id))
+        self.assertEqual(data['subject']['class'], 'Dataset')
+        self.assertEqual(data['subject']['id'], str(dataset.id))
         self.assertEqual(data['user']['id'], str(user.id))
         self.assertEqual(data['title'], 'test discussion')
         self.assertIsNotNone(data['created'])
@@ -270,8 +304,8 @@ class DiscussionsTest(APITestCase):
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        discussion = DatasetDiscussion.objects.create(
-            subject=dataset.id,
+        discussion = Discussion.objects.create(
+            subject=dataset,
             user=user,
             title='test discussion',
             discussion=[message]
@@ -294,15 +328,14 @@ class DiscussionsTest(APITestCase):
         user = UserFactory()
         dataset = Dataset.objects.create(title='Test dataset', owner=owner)
         message = Message(content='bla bla', posted_by=user)
-        discussion = DatasetDiscussion.objects.create(
-            subject=dataset.id,
+        discussion = Discussion.objects.create(
+            subject=dataset,
             user=user,
             title='test discussion',
             discussion=[message]
         )
         on_new_discussion.send(discussion)  # Updating metrics.
-        self.assertEqual(DatasetDiscussion.objects(subject=dataset.id).count(),
-                         1)
+        self.assertEqual(Discussion.objects(subject=dataset).count(), 1)
 
         with self.assert_emit(on_discussion_deleted):
             response = self.delete(url_for('api.discussion', id=discussion.id))
@@ -310,16 +343,14 @@ class DiscussionsTest(APITestCase):
 
         dataset.reload()
         self.assertEqual(dataset.metrics['discussions'], 0)
-        self.assertEqual(DatasetDiscussion.objects(subject=dataset.id).count(),
-                         0)
+        self.assertEqual(Discussion.objects(subject=dataset).count(), 0)
 
     def test_delete_discussion_permissions(self):
-        owner = self.login()
-        dataset = Dataset.objects.create(title='Test dataset', owner=owner)
+        dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        discussion = DatasetDiscussion.objects.create(
-            subject=dataset.id,
+        discussion = Discussion.objects.create(
+            subject=dataset,
             user=user,
             title='test discussion',
             discussion=[message]
@@ -353,7 +384,7 @@ class DiscussionCsvTest(FrontTestCase):
         organization = OrganizationFactory()
         dataset = DatasetFactory(organization=organization)
         user = UserFactory(first_name='John', last_name='Snow')
-        discussion = DatasetDiscussionFactory(subject=dataset, user=user)
+        discussion = DiscussionFactory(subject=dataset, user=user)
         response = self.get(
             url_for('organizations.discussions_csv', org=organization))
         self.assert200(response)
@@ -374,7 +405,7 @@ class DiscussionsNotificationsTest(TestCase, DBTestMixin):
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            discussion = DatasetDiscussion.objects.create(
+            discussion = Discussion.objects.create(
                 subject=dataset,
                 user=user,
                 title=faker.sentence(),
@@ -384,7 +415,7 @@ class DiscussionsNotificationsTest(TestCase, DBTestMixin):
         # Creating a closed discussion that shouldn't show up in response.
         user = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)
-        discussion = DatasetDiscussion.objects.create(
+        discussion = Discussion.objects.create(
             subject=dataset,
             user=user,
             title=faker.sentence(),
@@ -413,7 +444,7 @@ class DiscussionsNotificationsTest(TestCase, DBTestMixin):
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            discussion = DatasetDiscussion.objects.create(
+            discussion = Discussion.objects.create(
                 subject=dataset,
                 user=user,
                 title=faker.sentence(),
@@ -423,7 +454,7 @@ class DiscussionsNotificationsTest(TestCase, DBTestMixin):
         # Creating a closed discussion that shouldn't show up in response.
         user = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)
-        discussion = DatasetDiscussion.objects.create(
+        discussion = Discussion.objects.create(
             subject=dataset,
             user=user,
             title=faker.sentence(),
@@ -454,7 +485,7 @@ class DiscussionsMailsTest(TestCase, DBTestMixin):
         user = UserFactory()
         owner = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)
-        discussion = DatasetDiscussion.objects.create(
+        discussion = Discussion.objects.create(
             subject=DatasetFactory(owner=owner),
             user=user,
             title=faker.sentence(),
@@ -474,7 +505,7 @@ class DiscussionsMailsTest(TestCase, DBTestMixin):
         commenter = UserFactory()
         message = Message(content=faker.sentence(), posted_by=poster)
         new_message = Message(content=faker.sentence(), posted_by=commenter)
-        discussion = DatasetDiscussion.objects.create(
+        discussion = Discussion.objects.create(
             subject=DatasetFactory(owner=owner),
             user=poster,
             title=faker.sentence(),
@@ -499,7 +530,7 @@ class DiscussionsMailsTest(TestCase, DBTestMixin):
         message = Message(content=faker.sentence(), posted_by=poster)
         second_message = Message(content=faker.sentence(), posted_by=commenter)
         closing_message = Message(content=faker.sentence(), posted_by=owner)
-        discussion = DatasetDiscussion.objects.create(
+        discussion = Discussion.objects.create(
             subject=DatasetFactory(owner=owner),
             user=poster,
             title=faker.sentence(),

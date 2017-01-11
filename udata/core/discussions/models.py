@@ -8,8 +8,6 @@ from udata.models import db
 
 log = logging.getLogger(__name__)
 
-__all__ = ('Discussion',)
-
 
 class Message(db.EmbeddedDocument):
     content = db.StringField(required=True)
@@ -19,7 +17,7 @@ class Message(db.EmbeddedDocument):
 
 class Discussion(db.Document):
     user = db.ReferenceField('User')
-    subject = db.ReferenceField(db.DomainModel)
+    subject = db.GenericReferenceField()
     title = db.StringField(required=True)
     discussion = db.ListField(db.EmbeddedDocumentField(Message))
     created = db.DateTimeField(default=datetime.now, required=True)
@@ -32,7 +30,6 @@ class Discussion(db.Document):
             'subject',
             'created'
         ],
-        'allow_inheritance': True,
         'ordering': ['created'],
     }
 

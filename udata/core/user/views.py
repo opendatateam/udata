@@ -3,7 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 
-from flask import g
+from flask import abort, g
+from flask_security import current_user
 
 from udata.frontend.views import DetailView, SearchView
 from udata.models import User, Activity, Organization, Dataset, Reuse, Follow
@@ -75,6 +76,9 @@ class UserActivityView(UserView, DetailView):
     template_name = 'user/activity.html'
 
     def get_context(self):
+        if current_user.is_anonymous or not current_user.sysadmin:
+            if not self.user.active:
+                abort(410, 'User is not active')
         context = super(UserActivityView, self).get_context()
         context['activities'] = (Activity.objects(actor=self.object)
                                          .order_by('-created_at').limit(15))

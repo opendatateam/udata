@@ -16,7 +16,7 @@ def init_app(app):
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:
-        name = 'udata.ext.{0}.activities'.format(plugin)
+        name = 'udata_{0}.activities'.format(plugin)
         try:
             __import__(name)
         except ImportError:

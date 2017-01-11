@@ -5,6 +5,7 @@
 @import "udata/search";
 @import "udata/cards";
 @import "udata/panels";
+@import "udata/buttons";
 @import "udata/icons";
 @import "udata/oauth";
 @import "udata/activity";
@@ -16,7 +17,6 @@
 @import "udata/auth";
 @import "dashboard";
 @import "~bootstrap-slider/dist/css/bootstrap-slider.css";
-@import "~typeahead.js-bootstrap3.less/typeahead";
 @import "~leaflet/dist/leaflet.css";
 
 
@@ -91,12 +91,6 @@ body > footer {
     color: @navbar-default-color;
     background-color: @navbar-default-bg;
     border-color: @navbar-default-border;
-}
-
-.box {
-    padding: 5px;
-    border: 1px solid @gray-lighter;
-    border-radius: 3px;
 }
 
 @navbar-height: 35px;
@@ -323,5 +317,17 @@ small.deleted {
             }
         }
 
+    }
+}
+
+
+/**
+ * For custom popover widget
+ */
+.popover {
+    display: block;
+
+    &.large {
+      max-width: 450px;
     }
 }

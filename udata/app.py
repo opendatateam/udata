@@ -7,15 +7,16 @@ import logging
 import os
 import types
 
+from importlib import import_module
 from os.path import abspath, join, dirname, isfile, exists
 
 from flask import (
     Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint
 )
-from flask.ext.cache import Cache
+from flask_caching import Cache
 
-from flask.ext.wtf.csrf import CsrfProtect
-from flask.ext.navigation import Navigation
+from flask_wtf.csrf import CsrfProtect
+from flask_navigation import Navigation
 from speaklater import is_lazy_string
 from werkzeug.contrib.fixers import ProxyFix
 
@@ -109,11 +110,16 @@ class UDataJsonEncoder(json.JSONEncoder):
             return str(obj)
         elif isinstance(obj, datetime.datetime):
             return obj.isoformat()
+        elif hasattr(obj, 'to_dict'):
+            return obj.to_dict()
         elif hasattr(obj, 'serialize'):
             return obj.serialize()
         # Serialize Raw data for Document and EmbeddedDocument.
         elif hasattr(obj, '_data'):
             return obj._data
+        # Serialize raw data from Elasticsearch DSL AttrList
+        elif hasattr(obj, '_l_'):
+            return obj._l_
         return super(UDataJsonEncoder, self).default(obj)
 
 
@@ -150,18 +156,18 @@ def standalone(app):
 
     register_features(app)
 
-    from udata import ext
-    ext.init_app(app)
-
-    # from werkzeug.contrib.profiler import ProfilerMiddleware
-    # app.config['PROFILE'] = True
-    # app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
+    for plugin in app.config['PLUGINS']:
+        name = 'udata_{0}'.format(plugin)
+        plugin = import_module(name)
+        if hasattr(plugin, 'init_app') and callable(plugin.init_app):
+            plugin.init_app(app)
 
     return app
 
 
 def init_logging(app):
-    log_level = logging.DEBUG if app.debug else logging.WARNING
+    debug = app.debug or app.config.get('TESTING')
+    log_level = logging.DEBUG if debug else logging.WARNING
     app.logger.setLevel(log_level)
     loggers = [
         logging.getLogger('elasticsearch'),

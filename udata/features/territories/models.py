@@ -10,7 +10,12 @@ __all__ = (
 )
 
 
-TERRITORY_DATASETS = {}
+TERRITORY_DATASETS = {
+    'town': {},
+    'county': {},
+    'region': {},
+    'country': {}
+}
 
 
 class TerritoryDataset(object):

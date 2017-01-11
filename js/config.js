@@ -24,7 +24,7 @@ function _meta(name) {
  */
 function _jsonMeta(name) {
     const data = _meta(name);
-    return data ? JSON.parse(data) : false;
+    return data ? JSON.parse(decodeURIComponent(data)) : false;
 }
 
 /**
@@ -67,6 +67,11 @@ export const csrf_token = _meta('csrf-token');
  * Is the check url feature enabled ?
  */
 export const check_urls = _jsonMeta('check-urls');
+
+/**
+ * List of ignored domain for url check
+ */
+export const check_urls_ignore = _jsonMeta('check-urls-ignore');
 
 /**
  * The API root/base URL
@@ -121,6 +126,11 @@ export const notify_in = _meta('notify-in');
 export const is_territory_enabled = _jsonMeta('territory-enabled');
 
 /**
+ * Whether the 'delete me' feature is enabled or not.
+ */
+export const is_delete_me_enabled = _jsonMeta('delete-me-enabled');
+
+/**
  * Detect HiDPI screens
  */
 export const hidpi = (window.devicePixelRatio > 1 || (
@@ -162,7 +172,9 @@ export default {
     sentry,
     notify_in,
     check_urls,
+    check_urls_ignore,
     is_territory_enabled,
+    is_delete_me_enabled,
     hidpi,
     tiles_attributions,
     tiles_url,

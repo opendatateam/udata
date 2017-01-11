@@ -4,9 +4,9 @@ from __future__ import unicode_literals
 from bson import ObjectId
 from datetime import date
 
-from flask_restful.inputs import boolean
+from flask_restplus.inputs import boolean
 
-from udata.api import api, API, marshal, fields
+from udata.api import api, API, fields
 from udata.models import Metrics
 
 from udata.core.site.views import current_site
@@ -44,8 +44,10 @@ parser.add_argument(
 
 @api.route('/metrics/<id>', endpoint='metrics')
 class MetricsAPI(API):
-    @api.doc(id='metrics_for', model=[metrics_fields], parser=parser)
-    @api.doc(params={'id': 'The object ID to fetch metric for'})
+    @api.doc('metrics_for')
+    @api.marshal_list_with(metrics_fields)
+    @api.expect(parser)
+    @api.param('id', 'The object ID to fetch metric for')
     @api.doc(description='If day is set, start and end will be ignored')
     def get(self, id):
         '''Fetch metrics for an object given its ID'''
@@ -77,4 +79,4 @@ class MetricsAPI(API):
                     if name in reference_values
                 }
                 reference_values = current_values
-        return marshal(metrics, metrics_fields)
+        return metrics

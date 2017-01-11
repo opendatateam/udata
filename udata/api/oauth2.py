@@ -5,7 +5,7 @@ from bson import ObjectId
 from datetime import datetime, timedelta
 
 from flask import abort, request
-from flask.ext.oauthlib.provider import OAuth2Provider
+from flask_oauthlib.provider import OAuth2Provider
 from werkzeug.security import gen_salt
 from werkzeug.exceptions import Unauthorized
 

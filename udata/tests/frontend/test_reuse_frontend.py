@@ -7,10 +7,12 @@ import feedparser
 
 from flask import url_for
 
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.user.factories import UserFactory
+from udata.core.organization.factories import OrganizationFactory
+
 from . import FrontTestCase
-from ..factories import (
-    ReuseFactory, UserFactory, OrganizationFactory, DatasetFactory
-)
 
 
 class ReuseBlueprintTest(FrontTestCase):
@@ -40,15 +42,31 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertEqual(rendered_reuses.total, 1)
 
     def test_render_list_empty(self):
-        '''It should render the reuse list page event if empty'''
+        '''It should render the reuse list page even if empty'''
+        self.init_search()
         response = self.get(url_for('reuses.list'))
         self.assert200(response)
 
     def test_render_display(self):
         '''It should render the reuse page'''
-        reuse = ReuseFactory()
-        response = self.get(url_for('reuses.show', reuse=reuse))
+        reuse = ReuseFactory(owner=UserFactory(),
+                             description='* Title 1\n* Title 2')
+        url = url_for('reuses.show', reuse=reuse)
+        response = self.get(url)
         self.assert200(response)
+        json_ld = self.get_json_ld(response)
+        self.assertEquals(json_ld['@context'], 'http://schema.org')
+        self.assertEquals(json_ld['@type'], 'CreativeWork')
+        self.assertEquals(json_ld['alternateName'], reuse.slug)
+        self.assertEquals(json_ld['dateCreated'][:16],
+                          reuse.created_at.isoformat()[:16])
+        self.assertEquals(json_ld['dateModified'][:16],
+                          reuse.last_modified.isoformat()[:16])
+        self.assertEquals(json_ld['url'], 'http://localhost{}'.format(url))
+        self.assertEquals(json_ld['name'], reuse.title)
+        self.assertEquals(json_ld['description'], 'Title 1 Title 2')
+        self.assertEquals(json_ld['isBasedOnUrl'], reuse.url)
+        self.assertEquals(json_ld['author']['@type'], 'Person')
 
     def test_raise_404_if_private(self):
         '''It should raise a 404 if the reuse is private'''
@@ -60,7 +78,7 @@ class ReuseBlueprintTest(FrontTestCase):
         '''It should raise a 410 if the reuse is deleted'''
         reuse = ReuseFactory(deleted=datetime.now())
         response = self.get(url_for('reuses.show', reuse=reuse))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_do_not_raise_410_if_deleted_but_authorized(self):
         '''It should display a dalated reuse if authorized'''

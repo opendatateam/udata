@@ -8,11 +8,9 @@
     'keywords': post.tags
 } %}
 
-{% set body_class = 'post-display' %}
+{% set bundle = 'post' %}
 
-{% block extra_js %}
-<script src="{{ static('post/display.js') }}"></script>
-{% endblock %}
+{% set body_class = 'post-display' %}
 
 {% block title %}{{ post.name }}{% endblock %}
 
@@ -50,7 +48,7 @@
 
             <div class="col-sm-8 smaller">
                 <div class="page-header">
-                    <h2 itemprop="name">{{ post.name }}</h2>
+                    <h2>{{ post.name }}</h2>
 
                     <div class="row">
                         <p class="col-xs-12">
@@ -60,15 +58,15 @@
                                 ) }}
                             </small>
                             {% if post.private %}
-                            <small class="private" data-toggle="popover"
-                                data-title="{{ _('Private') }}" data-trigger="hover" data-placement="top"
-                                data-content="{{ _('This post is private and will not be visible by other users') }}"
+                            <small class="private" title="{{ _('Private') }}"
+                                v.popover.literal="{{ _('This post is private and will not be visible by other users') }}"
+                                popover-trigger="hover" popover-placement="top"
                                 >{{ _('Private') }}</small>
                             {% endif %}
                             {% if post.deleted %}
-                            <small class="deleted" data-toggle="popover"
-                                data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
-                                data-content="{{ _('This post has been deleted. This will be permanent in the next 24 hours') }}"
+                            <small class="deleted" title="{{ _('Deleted') }}"
+                                v-popover.literal="{{ _('This post has been deleted. This will be permanent in the next 24 hours') }}"
+                                popover-trigger="hover" popover-placement="top"
                                 >{{ _('Deleted') }}</small>
                             {% endif %}
                         </p>

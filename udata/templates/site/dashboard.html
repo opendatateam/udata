@@ -6,17 +6,9 @@
     'keywords': [_('metrics'), _('activity')],
 } %}
 
+{% set bundle = 'dashboard' %}
+
 {% set body_class = 'dashboard' %}
-
-{% block extra_js %}
-<script src="{{ static('vue-common.js') }}"></script>
-<script src="{{ static('dashboard.js') }}"></script>
-{% endblock %}
-
-{% block extra_css %}
-<link href="{{ static('vue-common.js.css') }}" rel="stylesheet">
-<link href="{{ static('dashboard.css') }}" rel="stylesheet">
-{% endblock %}
 
 {% block breadcrumb %}
     <li class="active">{{ _('Dashboard') }}</li>
@@ -25,8 +17,11 @@
 {% block content %}
 <section>
     <div class="container">
-        <div class="col-sm-12" id="graphs">
-            <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+        <div class="row">
+            <dashboard-graphs class="col-sm-12">
+                {# Load spinner until JS is ready #}
+                <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+            </dashboard-graphs>
         </div>
     </div>
 </section>
@@ -42,9 +37,10 @@
     </header>
     <div class="container">
         <div class="row">
-            <div class="col-sm-12" id="activities">
+            <activity-timeline class="col-sm-12">
+                {# Load spinner until JS is ready #}
                 <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
-            </div>
+            </activity-timeline>
         </div>
     </div>
 </section>

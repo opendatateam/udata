@@ -3,12 +3,13 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
+from udata.models import Follow
+from udata.core.user.factories import UserFactory, AdminFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.organization.factories import OrganizationFactory
+
 from . import FrontTestCase
-from udata.models import FollowDataset, FollowOrg, FollowReuse, FollowUser
-from ..factories import (
-    UserFactory, DatasetFactory, ReuseFactory, ResourceFactory,
-    OrganizationFactory
-)
 
 
 class UserBlueprintTest(FrontTestCase):
@@ -43,13 +44,36 @@ class UserBlueprintTest(FrontTestCase):
             self.assertIn(user.id, rendered_ids)
 
     def test_render_list_empty(self):
-        '''It should render the dataset list page event if empty'''
+        '''It should render the user list page even if empty'''
+        self.init_search()
         response = self.get(url_for('users.list'))
         self.assert200(response)
 
     def test_render_profile(self):
         '''It should render the user profile'''
-        user = UserFactory()
+        user = UserFactory(about='* Title 1\n* Title 2',
+                           website='http://www.datagouv.fr/user',
+                           avatar_url='http://www.datagouv.fr/avatar')
+        response = self.get(url_for('users.show', user=user))
+        self.assert200(response)
+        json_ld = self.get_json_ld(response)
+        self.assertEquals(json_ld['@context'], 'http://schema.org')
+        self.assertEquals(json_ld['@type'], 'Person')
+        self.assertEquals(json_ld['name'], user.fullname)
+        self.assertEquals(json_ld['description'], 'Title 1 Title 2')
+        self.assertEquals(json_ld['url'], 'http://www.datagouv.fr/user')
+        self.assertEquals(json_ld['image'], 'http://www.datagouv.fr/avatar')
+
+    def test_cannot_render_profile_of_an_inactive_user(self):
+        '''It should raise a 410 when the user is inactive'''
+        user = UserFactory(active=False)
+        response = self.get(url_for('users.show', user=user))
+        self.assert410(response)
+
+    def test_render_profile_of_an_inactive_user_when_admin(self):
+        '''It should render the user profile'''
+        self.login(AdminFactory())
+        user = UserFactory(active=True)
         response = self.get(url_for('users.show', user=user))
         self.assert200(response)
 
@@ -82,13 +106,13 @@ class UserBlueprintTest(FrontTestCase):
         user = UserFactory()
         for _ in range(2):
             reuse = ReuseFactory()
-            FollowReuse.objects.create(follower=user, following=reuse)
+            Follow.objects.create(follower=user, following=reuse)
             dataset = DatasetFactory()
-            FollowDataset.objects.create(follower=user, following=dataset)
+            Follow.objects.create(follower=user, following=dataset)
             org = OrganizationFactory()
-            FollowOrg.objects.create(follower=user, following=org)
+            Follow.objects.create(follower=user, following=org)
             other_user = UserFactory()
-            FollowUser.objects.create(follower=user, following=other_user)
+            Follow.objects.create(follower=user, following=other_user)
         response = self.get(url_for('users.following', user=user))
         self.assert200(response)
         for name in 'datasets', 'users', 'reuses', 'organizations':
@@ -98,9 +122,10 @@ class UserBlueprintTest(FrontTestCase):
     def test_render_profile_followers(self):
         '''It should render the user profile followers page'''
         user = UserFactory()
-        followers = [FollowUser.objects.create(follower=UserFactory(),
-                                               following=user)
-                     for _ in range(3)]
+        followers = [
+            Follow.objects.create(follower=UserFactory(), following=user)
+            for _ in range(3)
+        ]
         response = self.get(url_for('users.followers', user=user))
 
         self.assert200(response)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask.ext.security.forms import RegisterForm
+from flask_security.forms import RegisterForm
 from udata.forms import fields
 from udata.forms import validators
 

@@ -6,7 +6,9 @@
     {{ s.filter_label('type', _('Type'), ficon('file'),
         labelize=reuses.label_func('type')
     ) }}
-    {{ s.filter_label('tag', _('Tag'), ficon('tag')) }}
+    {{ s.filter_label('tag', _('Tag'), ficon('tag'),
+        labelize=reuses.label_func('tag')
+    ) }}
     {{ s.filter_label('datasets', _('Datasets'), ficon('fa-cubes'),
         labelize=reuses.label_func('datasets')
     ) }}

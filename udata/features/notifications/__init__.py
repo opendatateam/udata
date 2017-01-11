@@ -20,7 +20,7 @@ def init_app(app):
 
     # Load all plugins views and blueprints
     for plugin in app.config['PLUGINS']:
-        module = 'udata.ext.{0}.notifications'.format(plugin)
+        module = 'udata_{0}.notifications'.format(plugin)
         try:
             import_module(module)
         except ImportError:

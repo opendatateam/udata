@@ -8,11 +8,18 @@ from flask import render_template_string
 from .. import TestCase, WebTestMixin
 
 from udata.frontend.markdown import md, init_app, EXCERPT_TOKEN
+from udata.settings import Testing
 
 parser = html5lib.HTMLParser(tree=html5lib.getTreeBuilder("dom"))
 
 
+class MarkdownSettings(Testing):
+    USE_SSL = False
+
+
 class MarkdownTestCase(TestCase, WebTestMixin):
+    settings = MarkdownSettings
+
     def create_app(self):
         app = super(MarkdownTestCase, self).create_app()
         init_app(app)

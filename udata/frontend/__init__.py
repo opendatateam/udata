@@ -61,7 +61,7 @@ def init_app(app):
     from . import helpers, error_handlers  # noqa
 
     # Load all core views and blueprint
-    import udata.core.search.views  # noqa
+    import udata.search.views  # noqa
 
     from udata.core.storages.views import blueprint as storages_blueprint
     from udata.core.user.views import blueprint as user_blueprint
@@ -94,7 +94,7 @@ def init_app(app):
 
     # Load all plugins views and blueprints
     for plugin in app.config['PLUGINS']:
-        module = 'udata.ext.{0}.views'.format(plugin)
+        module = 'udata_{0}.views'.format(plugin)
         _load_views(app, module)
 
     # Optionnaly register debug views
@@ -116,5 +116,5 @@ def init_app(app):
 
     # Load debug toolbar if enabled
     if app.config.get('DEBUG_TOOLBAR'):
-        from flask.ext.debugtoolbar import DebugToolbarExtension
+        from flask_debugtoolbar import DebugToolbarExtension
         DebugToolbarExtension(app)

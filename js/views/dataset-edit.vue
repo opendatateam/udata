@@ -6,13 +6,13 @@
 
 <script>
 import DatasetForm from 'components/dataset/form.vue';
-import DatasetFull from 'models/dataset_full';
+import Dataset from 'models/dataset';
 import FormLayout from 'components/form-layout.vue';
 
 export default {
     data: function() {
         return {
-            dataset: new DatasetFull(),
+            dataset: new Dataset(),
         };
     },
     components: {FormLayout, DatasetForm},

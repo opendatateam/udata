@@ -60,6 +60,9 @@ If you’re not familiar with open-source workflows or our set of technologies, 
 
 We’re trying to develop this project in the open as much as possible. We have a dedicated [Gitter channel][gitter] where we discuss each new strategic change and invite the community to give a valuable feedback. You’re encouraged to join and participate.
 
+We also [vote for new features](governance.md) in order to include the whole community in the process.
+
+
 ## Code guides
 
 ### Python style guide
@@ -67,6 +70,16 @@ We’re trying to develop this project in the open as much as possible. We have 
 We follow the PEP-0008 and PEP-0257 as mush as possible in the respect of PEP-0020.
 
 On top of that, we apply the [Python Style Guide][py-style-guide] from Google.
+
+#### Python 3 forward compatible syntax
+
+As it's still planned to migrate to Python 3 some day,
+try to always use a forward compatible syntax in order
+to ensure an easy future migration:
+
+* unicode by default, starts any file with `from __future__ import unicode_literals`
+* Python 3 compatible `print` statement with `from __future__ import print_function`
+* use `io.open` instead of `codecs.open` to manipulate utf-8 files
 
 ### JavaScript style guide
 
@@ -91,4 +104,4 @@ We try to stay as close as possible to [CommonMark][] but use default [extension
 [code-guide]: http://codeguide.co/
 [commonmark]: http://commonmark.org/
 [extensions-mkdocs]: http://www.mkdocs.org/user-guide/writing-your-docs/
-[gitter]: https://gitter.im/etalab/udata
+[gitter]: https://gitter.im/opendatateam/udata

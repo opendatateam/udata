@@ -5,7 +5,7 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import db, Dataset, DatasetIssue, ReuseIssue, Member
+from udata.models import db, Dataset, Member
 from udata.core.dataset.views import blueprint as dataset_bp
 from udata.core.user.views import blueprint as user_bp
 from udata.core.issues.models import Issue, Message
@@ -17,16 +17,17 @@ from udata.core.issues.signals import (
 from udata.core.issues.tasks import (
     notify_new_issue, notify_new_issue_comment, notify_issue_closed
 )
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.user.factories import UserFactory
+from udata.core.issues.factories import IssueFactory
+from udata.utils import faker
 
 from frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
-
-from .factories import (
-    faker, UserFactory, OrganizationFactory, DatasetFactory, ReuseFactory,
-    DatasetIssueFactory
-)
 
 
 class IssuesTest(APITestCase):
@@ -44,9 +45,12 @@ class IssuesTest(APITestCase):
             response = self.post(url, {
                 'title': 'test title',
                 'comment': 'bla bla',
-                'subject': dataset.id
+                'subject': {
+                    'class': 'Dataset',
+                    'id': dataset.id,
+                }
             })
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         dataset.reload()
         self.assertEqual(dataset.metrics['issues'], 1)
@@ -73,7 +77,10 @@ class IssuesTest(APITestCase):
 
         response = self.post(url_for('api.issues', **{'for': dataset.id}), {
             'title': 'test title',
-            'subject': dataset.id
+            'subject': {
+                'class': 'Dataset',
+                'id': dataset.id,
+            }
         })
         self.assertStatus(response, 400)
 
@@ -83,7 +90,10 @@ class IssuesTest(APITestCase):
 
         response = self.post(url_for('api.issues', **{'for': dataset.id}), {
             'comment': 'bla bla',
-            'subject': dataset.id
+            'subject': {
+                'class': 'Dataset',
+                'id': dataset.id,
+            }
         })
         self.assertStatus(response, 400)
 
@@ -103,7 +113,7 @@ class IssuesTest(APITestCase):
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            issue = DatasetIssue.objects.create(
+            issue = Issue.objects.create(
                 subject=dataset,
                 user=user,
                 title='test issue {}'.format(i),
@@ -113,7 +123,7 @@ class IssuesTest(APITestCase):
         # Creating a closed issue that shouldn't show up in response.
         user = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)
-        closed_issues = [DatasetIssue.objects.create(
+        closed_issues = [Issue.objects.create(
             subject=dataset,
             user=user,
             title='test issue {}'.format(i),
@@ -122,7 +132,7 @@ class IssuesTest(APITestCase):
             closed_by=user
         )]
 
-        response = self.get(url_for('api.issues', id=dataset.id))
+        response = self.get(url_for('api.issues'))
         self.assert200(response)
         expected_length = len(open_issues + closed_issues)
         self.assertEqual(len(response.json['data']), expected_length)
@@ -134,7 +144,7 @@ class IssuesTest(APITestCase):
         for i in range(2):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            issue = DatasetIssue.objects.create(
+            issue = Issue.objects.create(
                 subject=dataset,
                 user=user,
                 title='test issue {}'.format(i),
@@ -144,7 +154,7 @@ class IssuesTest(APITestCase):
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            issue = DatasetIssue.objects.create(
+            issue = Issue.objects.create(
                 subject=dataset,
                 user=user,
                 title='test issue {}'.format(i),
@@ -154,7 +164,7 @@ class IssuesTest(APITestCase):
             )
             closed_issues.append(issue)
 
-        response = self.get(url_for('api.issues', id=dataset.id, closed=True))
+        response = self.get(url_for('api.issues', closed=True))
         self.assert200(response)
 
         self.assertEqual(len(response.json['data']), len(closed_issues))
@@ -168,11 +178,41 @@ class IssuesTest(APITestCase):
         for issue in response.json['data']:
             self.assertIsNone(issue['closed'])
 
+    def test_list_issues_for(self):
+        dataset = Dataset.objects.create(title='Test dataset')
+        issues = []
+        for i in range(3):
+            user = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=user)
+            issue = Issue.objects.create(
+                subject=dataset,
+                user=user,
+                title='test issue {}'.format(i),
+                discussion=[message]
+            )
+            issues.append(issue)
+        # Creating a closed issue that shouldn't show up in response.
+        user = UserFactory()
+        other_dataset = Dataset.objects.create(title='Other Test dataset')
+        message = Message(content=faker.sentence(), posted_by=user)
+        issue = Issue.objects.create(
+            subject=other_dataset,
+            user=user,
+            title='test issue {}'.format(i),
+            discussion=[message]
+        )
+
+        kwargs = {'for': str(dataset.id)}
+        response = self.get(url_for('api.issues', **kwargs))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json['data']), len(issues))
+
     def test_get_issue(self):
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        issue = DatasetIssue.objects.create(
+        issue = Issue.objects.create(
             subject=dataset,
             user=user,
             title='test issue',
@@ -184,7 +224,8 @@ class IssuesTest(APITestCase):
 
         data = response.json
 
-        self.assertEqual(data['subject'], str(dataset.id))
+        self.assertEqual(data['subject']['class'], 'Dataset')
+        self.assertEqual(data['subject']['id'], str(dataset.id))
         self.assertEqual(data['user']['id'], str(user.id))
         self.assertEqual(data['title'], 'test issue')
         self.assertIsNotNone(data['created'])
@@ -198,7 +239,7 @@ class IssuesTest(APITestCase):
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        issue = DatasetIssue.objects.create(
+        issue = Issue.objects.create(
             subject=dataset,
             user=user,
             title='test issue',
@@ -218,7 +259,8 @@ class IssuesTest(APITestCase):
 
         data = response.json
 
-        self.assertEqual(data['subject'], str(dataset.id))
+        self.assertEqual(data['subject']['class'], 'Dataset')
+        self.assertEqual(data['subject']['id'], str(dataset.id))
         self.assertEqual(data['user']['id'], str(user.id))
         self.assertEqual(data['title'], 'test issue')
         self.assertIsNotNone(data['created'])
@@ -235,7 +277,7 @@ class IssuesTest(APITestCase):
         user = UserFactory()
         dataset = Dataset.objects.create(title='Test dataset', owner=owner)
         message = Message(content='bla bla', posted_by=user)
-        issue = DatasetIssue.objects.create(
+        issue = Issue.objects.create(
             subject=dataset,
             user=user,
             title='test issue',
@@ -255,7 +297,8 @@ class IssuesTest(APITestCase):
 
         data = response.json
 
-        self.assertEqual(data['subject'], str(dataset.id))
+        self.assertEqual(data['subject']['class'], 'Dataset')
+        self.assertEqual(data['subject']['id'], str(dataset.id))
         self.assertEqual(data['user']['id'], str(user.id))
         self.assertEqual(data['title'], 'test issue')
         self.assertIsNotNone(data['created'])
@@ -271,7 +314,7 @@ class IssuesTest(APITestCase):
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
-        issue = DatasetIssue.objects.create(
+        issue = Issue.objects.create(
             subject=dataset,
             user=user,
             title='test issue',
@@ -309,7 +352,7 @@ class IssueCsvTest(FrontTestCase):
         organization = OrganizationFactory()
         dataset = DatasetFactory(organization=organization)
         user = UserFactory(first_name='John', last_name='Snow')
-        issue = DatasetIssueFactory(subject=dataset, user=user)
+        issue = IssueFactory(subject=dataset, user=user)
         response = self.get(
             url_for('organizations.issues_csv', org=organization))
         self.assert200(response)
@@ -329,13 +372,13 @@ class IssuesActionsTest(TestCase, DBTestMixin):
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            open_issues.append(DatasetIssue.objects.create(
+            open_issues.append(Issue.objects.create(
                 subject=dataset,
                 user=user,
                 title=faker.sentence(),
                 discussion=[message]
             ))
-            open_issues.append(ReuseIssue.objects.create(
+            open_issues.append(Issue.objects.create(
                 subject=reuse,
                 user=user,
                 title=faker.sentence(),
@@ -345,7 +388,7 @@ class IssuesActionsTest(TestCase, DBTestMixin):
         # Creating a closed issue that shouldn't show up in response.
         user = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)
-        DatasetIssue.objects.create(
+        Issue.objects.create(
             subject=dataset,
             user=user,
             title=faker.sentence(),
@@ -373,13 +416,13 @@ class IssuesActionsTest(TestCase, DBTestMixin):
         for i in range(3):
             sender = UserFactory()
             message = Message(content=faker.sentence(), posted_by=sender)
-            open_issues.append(DatasetIssue.objects.create(
+            open_issues.append(Issue.objects.create(
                 subject=dataset,
                 user=sender,
                 title=faker.sentence(),
                 discussion=[message]
             ))
-            open_issues.append(ReuseIssue.objects.create(
+            open_issues.append(Issue.objects.create(
                 subject=reuse,
                 user=sender,
                 title=faker.sentence(),
@@ -388,7 +431,7 @@ class IssuesActionsTest(TestCase, DBTestMixin):
         # Creating a closed issue that shouldn't show up in response.
         other_user = UserFactory()
         message = Message(content=faker.sentence(), posted_by=other_user)
-        DatasetIssue.objects.create(
+        Issue.objects.create(
             subject=dataset,
             user=other_user,
             title=faker.sentence(),
@@ -414,13 +457,13 @@ class IssuesActionsTest(TestCase, DBTestMixin):
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            open_issues.append(DatasetIssue.objects.create(
+            open_issues.append(Issue.objects.create(
                 subject=dataset,
                 user=user,
                 title=faker.sentence(),
                 discussion=[message]
             ))
-            open_issues.append(ReuseIssue.objects.create(
+            open_issues.append(Issue.objects.create(
                 subject=reuse,
                 user=user,
                 title=faker.sentence(),
@@ -430,7 +473,7 @@ class IssuesActionsTest(TestCase, DBTestMixin):
         # Creating a closed issue that shouldn't show up in response.
         user = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)
-        DatasetIssue.objects.create(
+        Issue.objects.create(
             subject=dataset,
             user=user,
             title=faker.sentence(),
@@ -453,7 +496,7 @@ class IssuesNotificationsTest(TestCase, DBTestMixin):
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            issue = DatasetIssue.objects.create(
+            issue = Issue.objects.create(
                 subject=dataset,
                 user=user,
                 title=faker.sentence(),
@@ -464,7 +507,7 @@ class IssuesNotificationsTest(TestCase, DBTestMixin):
         # Creating a closed issue that shouldn't show up in response.
         user = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)
-        DatasetIssue.objects.create(
+        Issue.objects.create(
             subject=dataset,
             user=user,
             title=faker.sentence(),
@@ -493,7 +536,7 @@ class IssuesNotificationsTest(TestCase, DBTestMixin):
         for i in range(3):
             user = UserFactory()
             message = Message(content=faker.sentence(), posted_by=user)
-            issue = DatasetIssue.objects.create(
+            issue = Issue.objects.create(
                 subject=dataset,
                 user=user,
                 title=faker.sentence(),
@@ -503,7 +546,7 @@ class IssuesNotificationsTest(TestCase, DBTestMixin):
         # Creating a closed issue that shouldn't show up in response.
         user = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)
-        DatasetIssue.objects.create(
+        Issue.objects.create(
             subject=dataset,
             user=user,
             title=faker.sentence(),
@@ -534,7 +577,7 @@ class IssuesMailsTest(TestCase, DBTestMixin):
         user = UserFactory()
         owner = UserFactory()
         message = Message(content=faker.sentence(), posted_by=user)
-        issue = DatasetIssue.objects.create(
+        issue = Issue.objects.create(
             subject=DatasetFactory(owner=owner),
             user=user,
             title=faker.sentence(),
@@ -554,14 +597,14 @@ class IssuesMailsTest(TestCase, DBTestMixin):
         commenter = UserFactory()
         message = Message(content=faker.sentence(), posted_by=poster)
         new_message = Message(content=faker.sentence(), posted_by=commenter)
-        issue = DatasetIssue.objects.create(
+        issue = Issue.objects.create(
             subject=DatasetFactory(owner=owner),
             user=poster,
             title=faker.sentence(),
             discussion=[message, new_message]
         )
 
-        # issue = DatasetIssueFactory()
+        # issue = IssueFactory()
         with self.capture_mails() as mails:
             notify_new_issue_comment(issue, message=new_message)
 
@@ -580,14 +623,14 @@ class IssuesMailsTest(TestCase, DBTestMixin):
         message = Message(content=faker.sentence(), posted_by=poster)
         second_message = Message(content=faker.sentence(), posted_by=commenter)
         closing_message = Message(content=faker.sentence(), posted_by=owner)
-        issue = DatasetIssue.objects.create(
+        issue = Issue.objects.create(
             subject=DatasetFactory(owner=owner),
             user=poster,
             title=faker.sentence(),
             discussion=[message, second_message, closing_message]
         )
 
-        # issue = DatasetIssueFactory()
+        # issue = IssueFactory()
         with self.capture_mails() as mails:
             notify_issue_closed(issue, message=closing_message)
 

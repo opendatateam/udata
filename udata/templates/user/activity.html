@@ -5,17 +5,11 @@
     <li class="active">{{ _('Activity') }}</li>
 {% endblock %}
 
-{% block extra_js %}
-<script src="{{ static('vue-common.js') }}"></script>
-<script src="{{ static('dashboard.js') }}"></script>
-{% endblock %}
-
 {% set user_tab = 'activity' %}
 
 {% block user_content %}
-<div class="row">
-    <div class="col-sm-12" id="activities" user-id="{{ user.id }}">
-        <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
-    </div>
-</div>
+<activity-timeline user-id="{{ user.id }}">
+    {# Load spinner until JS is ready #}
+    <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+</activity-timeline>
 {% endblock %}

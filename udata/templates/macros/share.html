@@ -1,6 +1,3 @@
 {% macro share_btn(title, url=None) %}
-<button type="button" class="btn btn-primary btn-share" title="{{ _('Share') }}"
-    data-toggle="tooltip" data-placement="top" data-share-title="{{title|urlencode}}" data-share-url="{{url or request.url}}">
-    <span class="fa fa-share-alt"></span>
-</button>
+<share-button title="{{title}}" url="{{url or request.url}}"></share-button>
 {% endmacro %}
