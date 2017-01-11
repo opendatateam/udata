@@ -31,25 +31,20 @@
     <footer class="rollover fade in">
         <ul>
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip" data-placement="top"
-                    title="{{ _('Type') }}">
+                <a class="btn btn-xs" v-tooltip title="{{ _('Type') }}">
                     <span class="fa fa-file fa-fw"></span>
                     {{ reuse.type_label }}
                 </a>
             </li>
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Number of datasets used') }}">
+                <a class="btn btn-xs" v-tooltip title="{{ _('Number of datasets used') }}">
                     <span class="fa fa-cubes fa-fw"></span>
                     {{ reuse.datasets|length or 0 }}
                 </a>
             </li>
 
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Stars') }}">
+                <a class="btn btn-xs" v-tooltip title="{{ _('Stars') }}">
                     <span class="fa fa-star fa-fw"></span>
                     {{ reuse.metrics.followers or 0 }}
                 </a>

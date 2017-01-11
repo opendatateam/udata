@@ -43,14 +43,7 @@ export function install(Vue) {
      */
     Vue.filter('is', function(obj, cls) {
         if (!obj || !cls) return;
-
-        let classname = obj.__class__ || obj.class || obj.classname;
-
-        // Resolve known conventions
-        if (classname.endsWith('Full')) {
-            classname = classname.substring(0, classname.length - 4);
-        }
-
+        const classname = obj.__class__ || obj.class || obj.classname;
         return classname.toLowerCase() === cls.toLowerCase();
     });
 }

@@ -38,5 +38,5 @@ Propose the new language on [Transifex][transifex-udata], once accepted you can:
 
 [transifex]: https://www.transifex.com
 [transifexrc]: http://docs.transifex.com/client/config/
-[transifex-udata]: https://www.transifex.com/etalab/udata/
+[transifex-udata]: https://www.transifex.com/opendatateam/udata/
 [famfamfam-flags]: http://www.famfamfam.com/lab/icons/flags/

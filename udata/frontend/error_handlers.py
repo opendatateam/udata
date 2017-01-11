@@ -6,6 +6,11 @@ from udata.frontend import front
 from udata.auth import PermissionDenied
 
 
+@front.app_errorhandler(ValueError)
+def validation_error(error):
+    return theme.render('errors/400.html', error=error), 400
+
+
 @front.app_errorhandler(403)
 @front.app_errorhandler(PermissionDenied)
 def forbidden(error):

@@ -2,7 +2,7 @@
 from __future__ import unicode_literals, absolute_import
 
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import UserFactory, AdminFactory
+from udata.core.user.factories import UserFactory, AdminFactory
 
 from .factories import HarvestSourceFactory
 

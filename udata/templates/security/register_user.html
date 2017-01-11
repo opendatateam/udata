@@ -18,7 +18,7 @@
                     </label>
                 </div>
                 <div class="col-xs-10 col-md-8 col-lg-9 text-left">
-                    <label>{{ _('I have read and accept <a href="%(url)s"> the terms and conditions of the service.</a>', url='/terms') }}</label>
+                    <label>{{ _('I have read and accept <a href="%(url)s"> the terms and conditions of the service.</a>', url=url_for('site.terms')) }}</label>
                     <br/>
                     {{ _('In particular, I understand that this site
                     values the production and enrichment of datasets over definitive or partisan interpretations.

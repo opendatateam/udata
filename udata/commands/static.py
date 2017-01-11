@@ -11,7 +11,7 @@ from os.path import exists, join, isdir
 from sys import exit
 
 from flask import current_app
-from flask.ext.script import prompt_bool
+from flask_script import prompt_bool
 
 from udata.commands import manager
 

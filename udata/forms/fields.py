@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import re
 import uuid
 
 from dateutil.parser import parse
 
 from flask import url_for
-from flask.ext.mongoengine.wtf import fields as mefields
-from flask.ext.fs.mongo import ImageReference
+from flask_mongoengine.wtf import fields as mefields
+from flask_fs.mongo import ImageReference
 from wtforms import Form as WTForm, Field as WTField, validators, fields
 from wtforms.fields import html5
 from wtforms.utils import unset_value
@@ -17,20 +16,22 @@ from wtforms_json import flatten_json
 from . import widgets
 
 from udata.auth import current_user, admin_permission
-from udata.models import db, User, Organization, Dataset, Reuse
+from udata.models import db, User, Organization, Dataset, Reuse, datastore
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
+from udata import tags
 from udata.utils import to_iso_date, get_by
 
 # _ = lambda s: s
 
-RE_TAG = re.compile('^[\w \-.]*$', re.U)
-MIN_TAG_LENGTH = 2
-MAX_TAG_LENGTH = 128
-
 
 class FieldHelper(object):
+    def __init__(self, *args, **kwargs):
+        self._preprocessors = kwargs.pop('preprocessors', [])
+        super(FieldHelper, self).__init__(*args, **kwargs)
+        self._form = kwargs.get('_form', None)
+
     @property
     def id(self):
         return '{0}-id'.format(self.name)
@@ -51,6 +52,12 @@ class FieldHelper(object):
         if required is True:
             kwargs['required'] = required
         return super(FieldHelper, self).__call__(**kwargs)
+
+    def pre_validate(self, form):
+        '''Calls preprocessors before pre_validation'''
+        for preprocessor in self._preprocessors:
+            preprocessor(form, self)
+        super(FieldHelper, self).pre_validate(form)
 
 
 class Field(FieldHelper, WTField):
@@ -74,6 +81,18 @@ class StringField(FieldHelper, EmptyNone, fields.StringField):
 
 class IntegerField(FieldHelper, fields.IntegerField):
     pass
+
+
+class RolesField(FieldHelper, fields.StringField):
+    def process_formdata(self, valuelist):
+        self.data = []
+        for name in valuelist:
+            role = datastore.find_role(name)
+            if role is not None:
+                self.data.append(role)
+            else:
+                raise validators.ValidationError(
+                    _('The role {role} does not exist').format(role=name))
 
 
 class DateTimeField(Field, fields.DateTimeField):
@@ -111,20 +130,26 @@ class FileField(FieldHelper, fields.FileField):
 
 
 class URLField(FieldHelper, EmptyNone, html5.URLField):
-    pass
+    def pre_validate(self, form):
+        if self.data:
+            try:
+                db.URLField().validate(self.data)
+            except db.ValidationError:
+                raise validators.ValidationError(_('Invalid URL'))
+        return True
 
 
 class TmpFilename(fields.HiddenField):
     def _value(self):
-        return u''
+        return ''
 
 
 class BBoxField(fields.HiddenField):
     def _value(self):
         if self.data:
-            return u','.join([str(x) for x in self.data])
+            return ','.join([str(x) for x in self.data])
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist:
@@ -139,8 +164,6 @@ class ImageForm(WTForm):
 
 
 class ImageField(FieldHelper, fields.FormField):
-    widget = widgets.ImagePicker()
-
     def __init__(self, label=None, validators=None, **kwargs):
         self.sizes = kwargs.pop('sizes', [100])
         self.placeholder = kwargs.pop('placeholder', 'default')
@@ -156,7 +179,7 @@ class ImageField(FieldHelper, fields.FormField):
         bbox = self.form.bbox.data or None
         filename = self.form.filename.data or None
         if filename and filename in tmp:
-            with tmp.open(filename) as infile:
+            with tmp.open(filename, 'rb') as infile:
                 field.save(infile, filename, bbox=bbox)
             tmp.delete(filename)
 
@@ -166,8 +189,6 @@ class ImageField(FieldHelper, fields.FormField):
 
 
 class UploadableURLField(URLField):
-    widget = widgets.UploadableURL()
-
     def __init__(self, *args, **kwargs):
         storage = kwargs.pop('storage')
         self.endpoint = url_for('storage.upload', name=storage.name)
@@ -240,8 +261,6 @@ def nullable_text(value):
 
 
 class SelectField(FieldHelper, fields.SelectField):
-    # widget = widgets.SelectPicker()
-
     def __init__(self, label=None, validators=None, coerce=nullable_text,
                  **kwargs):
         # self._choices = kwargs.pop('choices')
@@ -288,21 +307,17 @@ class SelectMultipleField(FieldHelper, fields.SelectMultipleField):
 
 
 class TagField(StringField):
-    widget = widgets.TagAutocompleter()
-
     def _value(self):
         if self.data:
-            return u','.join(self.data)
+            return ','.join(self.data)
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) > 1:
-            self.data = valuelist
+            self.data = [tags.slug(value) for value in valuelist]
         elif valuelist:
-            self.data = list(set([
-                x.strip().lower()
-                for x in valuelist[0].split(',') if x.strip()]))
+            self.data = tags.tags_list(valuelist[0])
         else:
             self.data = []
 
@@ -310,15 +325,12 @@ class TagField(StringField):
         if not self.data:
             return
         for tag in self.data:
-            if not MIN_TAG_LENGTH <= len(tag) <= MAX_TAG_LENGTH:
+            if not tags.MIN_TAG_LENGTH <= len(tag) <= tags.MAX_TAG_LENGTH:
                 message = _(
                     'Tag "%(tag)s" must be between %(min)d '
                     'and %(max)d characters long.',
-                    min=MIN_TAG_LENGTH, max=MAX_TAG_LENGTH, tag=tag)
-                raise validators.ValidationError(message)
-            if not RE_TAG.match(tag):
-                message = _('Tag "%(tag)s" must be alphanumeric characters '
-                            'or symbols: -_.', tag=tag)
+                    min=tags.MIN_TAG_LENGTH,
+                    max=tags.MAX_TAG_LENGTH, tag=tag)
                 raise validators.ValidationError(message)
 
 
@@ -335,18 +347,18 @@ def clean_oid(oid, model):
             raise ValueError('Unsupported identifier: ' + oid)
 
 
-class ModelField(object):
+class ModelFieldMixin(object):
     model = None
 
     def __init__(self, *args, **kwargs):
         self.model = kwargs.pop('model', self.model)
-        super(ModelField, self).__init__(*args, **kwargs)
+        super(ModelFieldMixin, self).__init__(*args, **kwargs)
 
     def _value(self):
         if self.data:
             return unicode(self.data.id)
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) == 1 and valuelist[0]:
@@ -355,6 +367,34 @@ class ModelField(object):
                 self.data = self.model.objects.get(id=id)
             except self.model.DoesNotExist:
                 message = _('{0} does not exists').format(self.model.__name__)
+                raise validators.ValidationError(message)
+
+
+class ModelField(Field):
+    def process_formdata(self, valuelist):
+        if valuelist and len(valuelist) == 1 and valuelist[0]:
+            specs = valuelist[0]
+            model_field = getattr(self._form.model_class, self.name)
+            if isinstance(specs, basestring):
+                if isinstance(model_field, db.ReferenceField):
+                    specs = {'class': str(model_field.document_type.__name__), 'id': specs}
+                elif isinstance(model_field, db.GenericReferenceField):
+                    message = _('Expect both class and identifier')
+                    raise validators.ValidationError(message)
+
+            try:
+                model = db.resolve_model(specs['class'])
+            except db.NotRegistered:
+                message = _('{0} does not exists').format(specs['class'])
+                raise validators.ValidationError(message)
+
+            try:
+                self.data = model.objects.only('id').get(id=clean_oid(specs, model))
+            except db.DoesNotExist:
+                message = _('{0} does not exists').format(model.__name__)
+                raise validators.ValidationError(message)
+            except db.ValidationError:
+                message = _('{0} is not a valid identifier').format(specs['id'])
                 raise validators.ValidationError(message)
 
 
@@ -369,7 +409,7 @@ class ModelChoiceField(StringField):
         if self.data:
             return unicode(self.data.id)
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if valuelist and len(valuelist) == 1 and valuelist[0]:
@@ -389,9 +429,9 @@ class ModelList(object):
 
     def _value(self):
         if self.data:
-            return u','.join([str(o.id) for o in self.data])
+            return ','.join([str(o.id) for o in self.data])
         else:
-            return u''
+            return ''
 
     def process_formdata(self, valuelist):
         if not valuelist:
@@ -494,27 +534,17 @@ class NestedModelList(fields.FieldList):
 
 class DatasetListField(ModelList, StringField):
     model = Dataset
-    widget = widgets.DatasetAutocompleter()
 
 
 class ReuseListField(ModelList, StringField):
     model = Reuse
-    widget = widgets.ReuseAutocompleter()
 
 
-class UserField(ModelField, StringField):
+class UserField(ModelFieldMixin, StringField):
     model = User
 
 
-class DatasetOrReuseField(ModelChoiceField, StringField):
-    models = [Dataset, Reuse]
-
-
-class DatasetOrOrganizationField(ModelChoiceField, StringField):
-    models = [Dataset, Organization]
-
-
-class DatasetField(ModelField, StringField):
+class DatasetField(ModelFieldMixin, StringField):
     model = Dataset
 
 
@@ -523,8 +553,6 @@ class MarkdownField(FieldHelper, fields.TextAreaField):
 
 
 class DateRangeField(FieldHelper, fields.StringField):
-    widget = widgets.DateRangePicker()
-
     def _value(self):
         if self.data:
             return ' - '.join([to_iso_date(self.data.start),
@@ -559,7 +587,7 @@ def default_owner():
         return current_user._get_current_object()
 
 
-class CurrentUserField(FieldHelper, ModelField, fields.HiddenField):
+class CurrentUserField(FieldHelper, ModelFieldMixin, fields.HiddenField):
     model = User
 
     def __init__(self, *args, **kwargs):
@@ -582,7 +610,7 @@ class CurrentUserField(FieldHelper, ModelField, fields.HiddenField):
         return True
 
 
-class PublishAsField(FieldHelper, ModelField, fields.HiddenField):
+class PublishAsField(FieldHelper, ModelFieldMixin, fields.HiddenField):
     model = Organization
     owner_field = 'owner'
 

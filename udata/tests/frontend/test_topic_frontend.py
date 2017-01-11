@@ -4,9 +4,9 @@ from __future__ import unicode_literals
 from flask import url_for
 
 from udata.tests.frontend import FrontTestCase
-from udata.tests.factories import (
-    VisibleDatasetFactory, VisibleReuseFactory, TopicFactory
-)
+from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.reuse.factories import VisibleReuseFactory
+from udata.core.topic.factories import TopicFactory
 
 
 class TopicsBlueprintTest(FrontTestCase):
@@ -25,6 +25,7 @@ class TopicsBlueprintTest(FrontTestCase):
 
     def test_render_display_empty(self):
         '''It should render a topic page even if empty'''
+        self.init_search()
         topic = TopicFactory(tags=['tag'])
 
         response = self.get(url_for('topics.display', topic=topic))
@@ -47,6 +48,7 @@ class TopicsBlueprintTest(FrontTestCase):
 
     def test_render_datasets_empty(self):
         '''It should render a topic datasets page even if empty'''
+        self.init_search()
         topic = TopicFactory(tags=['tag'])
 
         response = self.get(url_for('topics.datasets', topic=topic))
@@ -70,6 +72,7 @@ class TopicsBlueprintTest(FrontTestCase):
 
     def test_render_reuses_empty(self):
         '''It should render a topic reuses page even if empty'''
+        self.init_search()
         topic = TopicFactory(tags=['tag'])
 
         response = self.get(url_for('topics.reuses', topic=topic))

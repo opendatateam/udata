@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 from flask import request
+from flask_restplus import inputs
 
 from udata import search
 from udata.api import api, API, errors
@@ -15,9 +16,7 @@ from udata.utils import multi_to_dict
 from .forms import (
     OrganizationForm, MembershipRequestForm, MembershipRefuseForm, MemberForm
 )
-from .models import (
-    Organization, MembershipRequest, Member, FollowOrg
-)
+from .models import Organization, MembershipRequest, Member
 from .permissions import (
     EditOrganizationPermission, OrganizationPrivatePermission
 )
@@ -32,7 +31,7 @@ from .api_fields import (
     refuse_membership_fields,
 )
 
-from udata.core.dataset.api_fields import dataset_full_fields
+from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.models import Dataset
 from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.models import Discussion
@@ -45,7 +44,7 @@ from udata.core.storages.api import (
 )
 
 ns = api.namespace('organizations', 'Organization related operations')
-search_parser = api.search_parser(OrganizationSearch)
+search_parser = OrganizationSearch.as_request_parser()
 
 common_doc = {
     'params': {'org': 'The organization ID or slug'}
@@ -59,12 +58,13 @@ class OrganizationListAPI(API):
     @api.marshal_with(org_page_fields)
     def get(self):
         '''List or search all organizations'''
+        search_parser.parse_args()
         return search.query(OrganizationSearch, **multi_to_dict(request.args))
 
     @api.secure
     @api.doc('create_organization', responses={400: 'Validation error'})
     @api.expect(org_fields)
-    @api.marshal_with(org_fields)
+    @api.marshal_with(org_fields, code=201)
     def post(self):
         '''Create a new organization'''
         form = api.validate(OrganizationForm)
@@ -89,8 +89,13 @@ class OrganizationAPI(API):
     @api.expect(org_fields)
     @api.marshal_with(org_fields)
     @api.response(400, errors.VALIDATION_ERROR)
+    @api.response(410, 'Organization has been deleted')
     def put(self, org):
-        '''Update a organization given its identifier'''
+        '''
+        Update a organization given its identifier
+
+        :raises PermissionDenied:
+        '''
         if org.deleted:
             api.abort(410, 'Organization has been deleted')
         EditOrganizationPermission(org).test()
@@ -296,7 +301,7 @@ class MemberAPI(API):
 
 @ns.route('/<id>/followers/', endpoint='organization_followers')
 class FollowOrgAPI(FollowAPI):
-    model = FollowOrg
+    model = Organization
 
 
 suggest_parser = api.parser()
@@ -351,16 +356,24 @@ class AvatarAPI(API):
         return {'image': org.logo}
 
 
+dataset_parser = api.parser()
+dataset_parser.add_argument(
+    'size', type=int, help='The amount of datasets to fetch',
+    location='args', default=25)
+
+
 @ns.route('/<org:org>/datasets/', endpoint='org_datasets')
 class OrgDatasetsAPI(API):
     @api.doc('list_organization_datasets')
-    @api.marshal_list_with(dataset_full_fields)
+    @api.marshal_list_with(dataset_fields)
+    @api.expect(dataset_parser)
     def get(self, org):
         '''List organization datasets (including private ones when member)'''
+        args = dataset_parser.parse_args()
         qs = Dataset.objects.owned_by(org)
         if not OrganizationPrivatePermission(org).can():
             qs = qs(private__ne=True)
-        return list(qs)
+        return list(qs.limit(args['size']))
 
 
 @ns.route('/<org:org>/reuses/', endpoint='org_reuses')
@@ -381,11 +394,10 @@ class OrgIssuesAPI(API):
     @api.marshal_list_with(issue_fields)
     def get(self, org):
         '''List organization issues'''
-        reuses_ids = [r.id for r in Reuse.objects(organization=org).only('id')]
-        datasets_ids = [d.id
-                        for d in Dataset.objects(organization=org).only('id')]
-        ids = reuses_ids + datasets_ids
-        qs = Issue.objects(subject__in=ids).order_by('-created')
+        reuses = Reuse.objects(organization=org).only('id')
+        datasets = Dataset.objects(organization=org).only('id')
+        subjects = list(reuses) + list(datasets)
+        qs = Issue.objects(subject__in=subjects).order_by('-created')
         return list(qs)
 
 
@@ -395,9 +407,8 @@ class OrgDiscussionsAPI(API):
     @api.marshal_list_with(discussion_fields)
     def get(self, org):
         '''List organization discussions'''
-        reuses_ids = [r.id for r in Reuse.objects(organization=org).only('id')]
-        datasets_ids = [d.id
-                        for d in Dataset.objects(organization=org).only('id')]
-        ids = reuses_ids + datasets_ids
-        qs = Discussion.objects(subject__in=ids).order_by('-created')
+        reuses = Reuse.objects(organization=org).only('id')
+        datasets = Dataset.objects(organization=org).only('id')
+        subjects = list(reuses) + list(datasets)
+        qs = Discussion.objects(subject__in=subjects).order_by('-created')
         return list(qs)

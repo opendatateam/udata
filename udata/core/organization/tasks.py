@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from udata import mail
 from udata.i18n import lazy_gettext as _
-from udata.models import Organization, FollowOrg, Activity, Metrics
+from udata.models import Organization, Follow, Activity, Metrics
 from udata.tasks import job, task, get_logger
 
 log = get_logger(__name__)
@@ -14,7 +14,7 @@ def purge_organizations(self):
     for organization in Organization.objects(deleted__ne=None):
         log.info('Purging organization "{0}"'.format(organization))
         # Remove followers
-        FollowOrg.objects(following=organization).delete()
+        Follow.objects(following=organization).delete()
         # Remove activity
         Activity.objects(related_to=organization).delete()
         Activity.objects(organization=organization).delete()

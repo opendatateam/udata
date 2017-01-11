@@ -108,18 +108,29 @@ class PostConverter(ModelConverter):
     model = models.Post
 
 
-class TerritoryConverter(ModelConverter):
+class TerritoryConverter(ModelConverter, PathConverter):
     model = models.GeoZone
 
     def to_python(self, value):
-        try:
-            return self.model.objects.get_or_404(code=value)
-        except NotFound as e:
-            return e
+        """
+        `value` has a slash in it, that's why we inherit from `PathConverter`.
+
+        E.g.: `town/13200`, `county/13 or `region/93`.
+        """
+        if '/' not in value:
+            return
+
+        level, code = value.split('/')
+        return self.model.objects.get_or_404(
+            code=code, level='fr/{level}'.format(level=level))
 
     def to_url(self, obj):
-        if getattr(obj, 'code', None):
-            return str(obj.code)
+        """Reconstruct the URL with slash from level name and code."""
+        level_name = getattr(obj, 'level_name', None)
+        code = getattr(obj, 'code', None)
+        if level_name and code:
+            return '{level_name}/{code}'.format(
+                level_name=level_name, code=code)
         else:
             raise ValueError('Unable to serialize "%s" to url' % obj)
 

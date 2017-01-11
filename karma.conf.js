@@ -17,10 +17,16 @@ module.exports = function(config) {
 
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-        frameworks: ['mocha', 'chai-dom', 'sinon-chai', 'fixture'],
+        frameworks: ['mocha', 'sinon-chai', 'fixture'],
 
-        files: ['./specs/loader.js'],
-        preprocessors: {'./specs/loader.js': ['webpack', 'sourcemap']},
+        files: [
+            './specs/loader.js',  // Mocha specs
+            './specs/fixtures/**/*',  // Fixtures
+        ],
+        preprocessors: {
+            './specs/loader.js': ['webpack', 'sourcemap'],
+            './specs/fixtures/**/*.html': ['html2js'],
+        },
 
         // list of files to exclude
         exclude: [],
@@ -32,26 +38,26 @@ module.exports = function(config) {
                     path.join(ROOT, 'js'),
                 ],
                 alias: {
-                    'api': 'specs/mocks/api'
+                    'api': 'specs/mocks/api',
                 }
             },
             watch: WATCH,
             devtool: 'inline-source-map',
             module: {
                 loaders: [
-                    {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'null'},
-                    {test: /\.css$/, loader: 'null'},
-                    {test: /\.less$/, loader: 'null'},
-                    {test: /\.vue$/, loader: 'vue'},
-                    {test: /\.json$/, loader: 'json'},
-                    {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: 'null'},
-                    {test: /\.js$/, exclude: /node_modules/, loader: 'babel'},
+                    {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'null-loader'},
+                    {test: /\.css$/, loader: 'null-loader'},
+                    {test: /\.less$/, loader: 'null-loader'},
+                    {test: /\.vue$/, loader: 'vue-loader'},
+                    {test: /\.json$/, loader: 'json-loader'},
+                    {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: 'null-loader'},
+                    {test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader'},
                 ]
             },
             vue: {
                 loaders: {
-                    css: 'null',
-                    less: 'null'
+                    css: 'null-loader',
+                    less: 'null-loader'
                 }
             },
             babel: {
@@ -124,8 +130,8 @@ module.exports = function(config) {
             require('karma-sourcemap-loader'),
             require('karma-fixture'),
             require('karma-sinon-chai'),
-            require('karma-chai-dom'),
             require('karma-junit-reporter'),
+            require('karma-html2js-preprocessor'),
         ]
 
     });

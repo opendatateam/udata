@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from functools import wraps
-from flask.ext.sitemap import Sitemap, sitemap_page_needed
+from flask_sitemap import Sitemap, sitemap_page_needed
 
 from udata.app import cache
 

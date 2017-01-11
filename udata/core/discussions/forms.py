@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.forms import Form, fields, validators
+from udata.forms import ModelForm, Form, fields, validators
 from udata.i18n import lazy_gettext as _
+
+from .models import Discussion
 
 __all__ = ('DiscussionCreateForm', 'DiscussionCommentForm')
 
 
-class DiscussionCreateForm(Form):
+class DiscussionCreateForm(ModelForm):
+    model_class = Discussion
+    
     title = fields.StringField(_('Title'), [validators.required()])
     comment = fields.StringField(_('Comment'), [validators.required()])
-    subject = fields.DatasetOrReuseField(_('Subject'), [validators.required()])
+    subject = fields.ModelField(_('Subject'), [validators.required()])
 
 
 class DiscussionCommentForm(Form):

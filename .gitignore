@@ -65,3 +65,9 @@ coverage.xml
 !.gitignore
 .noseids
 Procfile
+
+# Local configuration file of udata
+udata.cfg
+
+# Local data directory
+data

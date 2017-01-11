@@ -7,19 +7,16 @@ from datetime import datetime
 
 from flask import url_for
 
+from udata.core.dataset.factories import (
+    VisibleDatasetFactory, DatasetFactory, ResourceFactory
+)
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
+from udata.core.user.factories import UserFactory
 from udata.frontend import csv
-from udata.models import Member, FollowOrg
+from udata.models import Member, Follow
 
 from . import FrontTestCase
-from ..factories import (
-    OrganizationFactory,
-    UserFactory,
-    DatasetFactory,
-    VisibleDatasetFactory,
-    ResourceFactory,
-    ReuseFactory,
-    VisibleReuseFactory,
-)
 
 
 class OrganizationBlueprintTest(FrontTestCase):
@@ -36,20 +33,29 @@ class OrganizationBlueprintTest(FrontTestCase):
 
     def test_render_list_empty(self):
         '''It should render the organization list page event if empty'''
+        self.init_search()
         response = self.get(url_for('organizations.list'))
         self.assert200(response)
 
     def test_render_display(self):
         '''It should render the organization page'''
-        organization = OrganizationFactory()
-        response = self.get(url_for('organizations.show', org=organization))
+        organization = OrganizationFactory(description='* Title 1\n* Title 2',)
+        url = url_for('organizations.show', org=organization)
+        response = self.get(url)
         self.assert200(response)
+        json_ld = self.get_json_ld(response)
+        self.assertEquals(json_ld['@context'], 'http://schema.org')
+        self.assertEquals(json_ld['@type'], 'Organization')
+        self.assertEquals(json_ld['alternateName'], organization.slug)
+        self.assertEquals(json_ld['url'], 'http://localhost{}'.format(url))
+        self.assertEquals(json_ld['name'], organization.name)
+        self.assertEquals(json_ld['description'], 'Title 1 Title 2')
 
     def test_render_display_if_deleted(self):
         '''It should not render the organization page if deleted'''
         organization = OrganizationFactory(deleted=datetime.now())
         response = self.get(url_for('organizations.show', org=organization))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_render_display_if_deleted_but_authorized(self):
         '''It should render the organization page if deleted but user can'''
@@ -151,7 +157,7 @@ class OrganizationBlueprintTest(FrontTestCase):
         '''It should render the organization page with followers'''
         org = OrganizationFactory()
         followers = [
-            FollowOrg.objects.create(follower=UserFactory(), following=org)
+            Follow.objects.create(follower=UserFactory(), following=org)
             for _ in range(3)]
 
         response = self.get(url_for('organizations.show', org=org))

@@ -48,11 +48,28 @@ export function setattr(obj, name, value) {
     obj[name] = value;
 }
 
+/**
+ * Parse a query string into an object
+ * @param  {String} qs  A querystring, with or without the leading '?'
+ * @return {Object}     The parsed query string
+ */
+export function parseQS(qs) {
+    const result = {};
+    if (!qs || qs === '?') return result;
+    if (qs.startsWith('?')) qs = qs.substr(1);
+    qs.split('&').forEach(function(part) {
+        const [key, value] = part.split('=');
+        result[decodeURIComponent(key)] = decodeURIComponent(value);
+    });
+    return result;
+}
+
 
 export default {
     isFunction,
     isObject,
     isString,
     getattr,
-    setattr
+    setattr,
+    parseQS,
 };

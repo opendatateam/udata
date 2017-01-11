@@ -22,13 +22,13 @@ import os
 from datetime import datetime
 
 from flask import request
-from flask.ext.security import current_user
+from flask_security import current_user
 
 from werkzeug.datastructures import FileStorage
 
 from udata import fileutils, search
 from udata.auth import admin_permission
-from udata.api import api, SingleObjectAPI, API, errors
+from udata.api import api, API, errors
 from udata.core import storages
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
@@ -39,9 +39,7 @@ from .api_fields import (
     community_resource_fields,
     community_resource_page_fields,
     dataset_fields,
-    dataset_full_fields,
     dataset_page_fields,
-    dataset_full_page_fields,
     dataset_suggestion_fields,
     frequency_fields,
     license_fields,
@@ -49,7 +47,7 @@ from .api_fields import (
     upload_fields,
 )
 from .models import (
-    Dataset, Resource, FollowDataset, Checksum, License, UPDATE_FREQUENCIES,
+    Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES,
     CommunityResource
 )
 from .permissions import DatasetEditPermission, ResourceEditPermission
@@ -59,7 +57,7 @@ from .forms import (
 from .search import DatasetSearch
 
 ns = api.namespace('datasets', 'Dataset related operations')
-search_parser = api.search_parser(DatasetSearch)
+search_parser = DatasetSearch.as_request_parser()
 community_parser = api.parser()
 community_parser.add_argument(
     'sort', type=str, default='-created', location='args',
@@ -94,7 +92,8 @@ class DatasetListAPI(API):
     @api.marshal_with(dataset_page_fields)
     def get(self):
         '''List or search all datasets'''
-        return search.query(DatasetSearch, **multi_to_dict(request.args))
+        search_parser.parse_args()
+        return search.query(Dataset, **multi_to_dict(request.args))
 
     @api.secure
     @api.doc('create_dataset', responses={400: 'Validation error'})
@@ -105,15 +104,6 @@ class DatasetListAPI(API):
         form = api.validate(DatasetForm)
         dataset = form.save()
         return dataset, 201
-
-
-@ns.route('/full/', endpoint='datasets_full')
-class DatasetFullListAPI(API):
-    '''Datasets collection endpoint with all infos (quality).'''
-    @api.doc('list_datasets_full', parser=search_parser)
-    @api.marshal_with(dataset_full_page_fields)
-    def get(self):
-        return search.query(DatasetSearch, **multi_to_dict(request.args))
 
 
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)
@@ -156,24 +146,9 @@ class DatasetAPI(API):
         return '', 204
 
 
-@ns.route('/<dataset:dataset>/full/', endpoint='dataset_full', doc=common_doc)
-@api.response(404, 'Dataset not found')
-@api.response(410, 'Dataset has been deleted')
-class DatasetFullAPI(API):
-    @api.doc('get_dataset_full')
-    @api.marshal_with(dataset_full_fields)
-    def get(self, dataset):
-        '''Get a dataset given its identifier'''
-        if dataset.deleted and not DatasetEditPermission(dataset).can():
-            api.abort(410, 'Dataset has been deleted')
-        return dataset
-
-
 @ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')
 @api.doc(**common_doc)
-class DatasetFeaturedAPI(SingleObjectAPI, API):
-    model = Dataset
-
+class DatasetFeaturedAPI(API):
     @api.secure(admin_permission)
     @api.doc('feature_dataset')
     @api.marshal_with(dataset_fields)
@@ -240,7 +215,7 @@ class ResourcesAPI(API):
     @api.secure
     @api.doc('update_resources', **common_doc)
     @api.expect([resource_fields])
-    @api.marshal_with(resource_fields)
+    @api.marshal_list_with(resource_fields)
     def put(self, dataset):
         '''Reorder resources'''
         ResourceEditPermission(dataset).test()
@@ -437,9 +412,7 @@ class CommunityResourcesAPI(API):
 @ns.route('/community_resources/<crid:community>/',
           endpoint='community_resource', doc=common_doc)
 @api.doc(params={'community': 'The community resource unique identifier'})
-class CommunityResourceAPI(SingleObjectAPI, API):
-    model = CommunityResource
-
+class CommunityResourceAPI(API):
     @api.doc('retrieve_community_resource')
     @api.marshal_with(community_resource_fields)
     def get(self, community):
@@ -473,7 +446,7 @@ class CommunityResourceAPI(SingleObjectAPI, API):
 
 @ns.route('/<id>/followers/', endpoint='dataset_followers')
 class DatasetFollowersAPI(FollowAPI):
-    model = FollowDataset
+    model = Dataset
 
 
 suggest_parser = api.parser()

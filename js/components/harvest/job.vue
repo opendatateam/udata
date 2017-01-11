@@ -30,18 +30,15 @@
             </dd>
             <dt v-if="job.items && job.items.length">{{ _('Items') }}</dt>
             <dd v-if="job.items && job.items.length">
-                <span class="text-warning"
-                    data-toggle="tooltip" data-placement="top"
+                <span class="text-warning" v-tooltip tooltip-placement="top"
                     :title="_('Number of skipped items')"
                     >{{job.items | count 'skipped'}}</span>
                 /
-                <span class="text-danger"
-                    data-toggle="tooltip" data-placement="top"
+                <span class="text-danger" v-tooltip tooltip-placement="top"
                     :title="_('Number of failed items')"
                     >{{job.items | count 'failed'}}</span>
                 /
-                <span class="text-green"
-                    data-toggle="tooltip" data-placement="top"
+                <span class="text-green" v-tooltip tooltip-placement="top"
                     :title="_('Number of succeed items')"
                     >{{job.items | count 'done'}}</span>
                 /
@@ -60,7 +57,6 @@ import {
 } from 'models/harvest/job';
 import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/item';
 import {PageList} from 'models/base';
-import $ from 'jquery';
 import Datatable from 'components/datatable/widget.vue';
 
 export default {
@@ -116,9 +112,6 @@ export default {
                 return item.status === status;
             }).length;
         }
-    },
-    ready() {
-         $('[data-toggle="tooltip"]').tooltip();
     },
     watch: {
         'job.items': function(items) {

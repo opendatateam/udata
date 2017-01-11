@@ -34,6 +34,11 @@ export function install(Vue) {
     });
 
     /**
+     * Display a bytes size in a human readable format
+     */
+    Vue.filter('size', text.size);
+
+    /**
      * More readable numbers
      */
     Vue.filter('numbers', function(value) {
