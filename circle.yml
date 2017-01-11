@@ -15,6 +15,7 @@ dependencies:
     # Install jq required by circleci-requirements.sh (explanation in file)
     - sudo apt-get update && sudo apt-get install jq
   override:
+    - pip install -U pip
     - ./circleci-requirements.sh
     - nvm use && nvm alias default $(nvm current) && npm install
 test:
