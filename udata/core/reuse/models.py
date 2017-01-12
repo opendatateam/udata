@@ -42,7 +42,7 @@ class ReuseQuerySet(OwnedByQuerySet):
 
 
 class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
-    title = db.StringField(max_length=255, required=True)
+    title = db.StringField(required=True)
     slug = db.SlugField(
         max_length=255, required=True, populate_from='title', update=True)
     description = db.StringField(required=True)
