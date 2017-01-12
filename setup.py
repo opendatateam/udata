@@ -20,7 +20,7 @@ RE_LINK_REF = re.compile(r'^\[(?P<key>[^!].*?)\]:\s*(?P<url>.*)$', re.M)
 RE_BADGE = re.compile(r'^\[\!\[(?P<text>.*?)\]\[(?P<badge>.*?)\]\]\[(?P<target>.*?)\]$', re.M)
 RE_TITLE = re.compile(r'^(?P<level>#+)\s*(?P<title>.*)$', re.M)
 
-BADGES_TO_KEEP = ['gitter-badge']
+BADGES_TO_KEEP = ['gitter-badge', 'readthedocs-badge']
 
 RST_TITLE_LEVELS = ['=', '-', '*']
 
@@ -29,6 +29,7 @@ RST_BADGE = '''\
     :target: {target}
     :alt: {text}
 '''
+
 
 def md2pypi(filename):
     '''
@@ -69,7 +70,7 @@ def md2pypi(filename):
         ))
 
     for match in RE_TITLE.finditer(content):
-        underchar = RST_TITLE_LEVELS[len(match.group('level'))]
+        underchar = RST_TITLE_LEVELS[len(match.group('level')) - 1]
         title = match.group('title')
         underline = underchar * len(title)
 
