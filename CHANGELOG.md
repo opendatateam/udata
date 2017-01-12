@@ -1,12 +1,17 @@
 # Changelog
 
-## Breaking Changes
+## Current (in progress)
+
+### Breaking Changes
 
 * 2016-05-11: Upgrade of ElasticSearch from 1.7 to 2.3 [#449](https://github.com/opendatateam/udata/pull/449)
 
 You have to re-initialize the index from scratch, not just use the `reindex` command given that ElasticSearch 2+ doesn't provide a way to [delete mappings](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-mapping.html) anymore. The command is `udata search init` and may take some time given the amount of data you are dealing with.
 
-## New & Improved
+### New & Improved
+
+* 2017-01-06: Add some dataset ponderation factor: temporal coverage, spatial coverage,
+  certified provenance and more weight for featured ones. Need reindexation to be taken into account.
 
 * 2016-12-20: Use all the [Dublin Core Frequencies](http://dublincore.org/groups/collections/frequency/)
   plus some extra frequencies.
@@ -22,12 +27,13 @@ by default).
 
 The addition of [fields masks](http://flask-restplus.readthedocs.io/en/stable/mask.html) in Flask-RESTPlus allows us to reduce the retrieved payload within the admin — especially for datasets — and results in a performances boost.
 
-
-## Fixes
+### Fixes
 
 * 2016-11-29: Mark active users as confirmed [#619](https://github.com/opendatateam/udata/pull/618)
+* 2016-11-28: Merge duplicate users [#617](https://github.com/opendatateam/udata/pull/617)
+  (A reindexation is necessary after this migration)
 
-## Deprecation
+### Deprecation
 
 Theses are deprecated and support will be removed in some feature release.
 See [Deprecation Policy](https://udata.readthedocs.io/versionning/#deprecation-policy).
@@ -36,3 +42,8 @@ See [Deprecation Policy](https://udata.readthedocs.io/versionning/#deprecation-p
     * `fortnighly` ⇨ `biweekly`
     * `biannual` ⇨ `semiannual`
     * `realtime` ⇨ `continuous`
+
+
+## 0.9.0 (2017-01-10)
+
+- First published version

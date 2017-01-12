@@ -7,7 +7,6 @@ import Auth from 'auth';
 import Vue from 'vue';
 import config from 'config';
 import log from 'logger';
-import utils from 'utils';
 import Velocity from 'velocity-animate';
 
 // Components
@@ -16,10 +15,10 @@ import DetailsModal from './details-modal.vue';
 import ResourceModal from './resource-modal.vue';
 import LeafletMap from 'components/leaflet-map.vue';
 import FollowButton from 'components/buttons/follow.vue';
+import FeaturedButton from 'components/buttons/featured.vue';
 import ShareButton from 'components/buttons/share.vue';
 
 // Legacy widgets
-import 'widgets/featured';
 import 'widgets/issues-btn';
 import 'widgets/discussions-btn';
 import 'widgets/integrate-btn';
@@ -34,7 +33,7 @@ function parseUrl(url) {
 
 new Vue({
     el: 'body',
-    components: {LeafletMap, ShareButton, FollowButton},
+    components: {LeafletMap, ShareButton, FollowButton, FeaturedButton},
     data() {
         const data = {
             dataset: this.extractDataset(),

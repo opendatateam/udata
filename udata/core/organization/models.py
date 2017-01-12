@@ -171,9 +171,13 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         return [r for r in self.requests if r.status == 'accepted']
 
     @property
+    def certified(self):
+        return any(b.kind == CERTIFIED for b in self.badges)
+
+    @property
     def public_service(self):
-        badges_kind = [badge.kind for badge in self.badges]
-        return PUBLIC_SERVICE in badges_kind and CERTIFIED in badges_kind
+        is_public_service = any(b.kind == PUBLIC_SERVICE for b in self.badges)
+        return self.certified and is_public_service
 
     def member(self, user):
         for member in self.members:
