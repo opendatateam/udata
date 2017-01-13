@@ -175,6 +175,17 @@ class SourceAPI(API):
         return actions.get_source(ident)
 
     @api.secure
+    @api.doc('update_harvest_source')
+    @api.expect(source_fields)
+    @api.marshal_with(source_fields)
+    def put(self, ident):
+        '''Create a new harvests source'''
+        source = actions.get_source(ident)
+        form = api.validate(HarvestSourceForm, source)
+        source = actions.update_source(ident, form.data)
+        return source
+
+    @api.secure
     @api.doc('delete_harvest_source')
     @api.marshal_with(source_fields)
     def delete(self, ident):

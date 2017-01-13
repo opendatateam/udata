@@ -12,6 +12,9 @@ ns = Namespace()
 #: Sent when a new HarvestSource is created
 harvest_source_created = ns.signal('harvest:source-created')
 
+#: Sent when a HarvestSource is updated
+harvest_source_updated = ns.signal('harvest:source-updated')
+
 #: Sent when a HarvestSource is deleted
 harvest_source_deleted = ns.signal('harvest:source-deleted')
 

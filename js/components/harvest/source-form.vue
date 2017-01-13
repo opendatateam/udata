@@ -5,6 +5,7 @@
 <script>
 import HarvestSource from 'models/harvest/source';
 
+
 export default {
     props: {
         source: {
