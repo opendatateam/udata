@@ -122,3 +122,29 @@ class CheckUrlAPITest(APITestCase):
         response = self.get(url_for('api.checkurl'),
                             qs={'url': url, 'group': ''})
         self.assertStatus(response, 503)
+
+    @httpretty.activate
+    def test_json_error_check_one(self):
+        url = faker.uri()
+        httpretty.register_uri(httpretty.POST, CHECK_ONE_URL,
+                               body='<strong>not json</strong>',
+                               content_type='test/html')
+        response = self.get(url_for('api.checkurl'),
+                            qs={'url': url, 'group': ''})
+        self.assertStatus(response, 503)
+
+    @httpretty.activate
+    def test_json_error_check_url(self):
+        url = faker.uri()
+        url_hash = faker.md5()
+        httpretty.register_uri(httpretty.POST, CHECK_ONE_URL,
+                               body=json.dumps({'url-hash': url_hash}),
+                               content_type='application/json')
+        check_url = '/'.join((METADATA_URL, url_hash))
+        httpretty.register_uri(httpretty.GET, check_url,
+                               body='<strong>not json</strong>',
+                               content_type='test/html')
+        response = self.get(url_for('api.checkurl'),
+                            qs={'url': url, 'group': ''})
+        self.assertStatus(response, 500)
+        self.assertIn('error', response.json)
