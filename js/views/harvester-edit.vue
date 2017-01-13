@@ -23,7 +23,7 @@ import ItemModal from 'components/harvest/item.vue';
 import Preview from 'components/harvest/preview.vue';
 
 export default {
-    data: function() {
+    data() {
         return {
             source: new HarvestSource(),
         };
