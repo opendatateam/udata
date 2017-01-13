@@ -239,9 +239,9 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
                                default=datetime.now, required=True)
     last_modified = DateTimeField(verbose_name=_('Last modification date'),
                                   default=datetime.now, required=True)
-    title = db.StringField(max_length=255, required=True)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from='title', update=True)
+    title = db.StringField(required=True)
+    slug = db.SlugField(max_length=255, required=True,
+                        populate_from='title', update=True)
     description = db.StringField(required=True, default='')
     license = db.ReferenceField('License')
 
