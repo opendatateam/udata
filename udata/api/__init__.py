@@ -239,6 +239,7 @@ def fix_apidoc_throbber():
 
 
 class API(Resource):  # Avoid name collision as resource is a core model
+    @api.hide
     def options(self):
         pass  # Only here to allow default Flask response
 
