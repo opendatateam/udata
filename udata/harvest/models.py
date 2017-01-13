@@ -114,7 +114,7 @@ class HarvestSource(db.Owned, db.Document):
 
     @classmethod
     def get(cls, ident):
-        return cls.objects(slug=ident).first() or cls.objects.get(id=ident)
+        return cls.objects(slug=ident).first() or cls.objects.get(pk=ident)
 
     def get_last_job(self):
         return HarvestJob.objects(source=self).order_by('-created').first()

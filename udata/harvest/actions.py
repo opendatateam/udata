@@ -71,6 +71,15 @@ def create_source(name, url, backend,
     return source
 
 
+def update_source(ident, data):
+    '''Update an harvest source'''
+    print(data)
+    source = get_source(ident)
+    source.modify(**data)
+    signals.harvest_source_updated.send(source)
+    return source
+
+
 def validate_source(ident, comment=None):
     '''Validate a source for automatic harvesting'''
     source = get_source(ident)

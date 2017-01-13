@@ -112,6 +112,25 @@ class HarvestAPITest(APITestCase):
 
         self.assert403(response)
 
+    def test_update_source(self):
+        '''It should update a source'''
+        user = self.login()
+        source = HarvestSourceFactory(owner=user)
+        new_url = faker.url()
+        data = {
+            'name': source.name,
+            'description': source.description,
+            'url': new_url,
+            'backend': 'factory',
+        }
+        api_url = url_for('api.harvest_source', ident=str(source.id))
+        response = self.put(api_url, data)
+
+        self.assert200(response)
+
+        source = response.json
+        self.assertEqual(source['url'], new_url)
+
     def test_validate_source(self):
         '''It should allow to validate a source if admin'''
         self.login(AdminFactory())

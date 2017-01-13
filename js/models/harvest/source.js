@@ -18,11 +18,19 @@ export default class HarvestSource extends Model {
     }
 
     /**
-     * Create or update the given dataset.
+     * Create or update the given harvest source.
      */
     save() {
-        var ep = this.id ? 'harvest.update_harvest_source' : 'harvest.create_harvest_source';
+        const ep = this.id ? 'harvest.update_harvest_source' : 'harvest.create_harvest_source';
         this.loading = true;
         this.$api(ep, {payload: this}, this.on_fetched);
     }
-};
+
+    update(data, on_success, on_error) {
+        this.loading = true;
+        this.$api('harvest.update_harvest_source', {
+            ident: this.id,
+            payload: data
+        }, on_success, on_error);
+    }
+}

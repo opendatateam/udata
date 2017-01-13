@@ -112,6 +112,19 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         self.assertIsNone(source.validation.by)
         self.assertIsNone(source.validation.comment)
 
+    def test_update_source(self):
+        source = HarvestSourceFactory()
+        data = source.to_dict()
+        new_url = faker.url()
+        data['url'] = new_url
+
+        with self.assert_emit(signals.harvest_source_updated):
+            source = actions.update_source(source.id, data)
+
+        self.assertEqual(source.url, new_url)
+        source.reload()
+        self.assertEqual(source.url, new_url)
+
     @patch('udata.harvest.actions.launch')
     def test_validate_source(self, mock):
         source = HarvestSourceFactory()
