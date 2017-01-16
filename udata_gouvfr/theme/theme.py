@@ -38,6 +38,7 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
         nav.Item(_('Organizations'), 'organizations.list'),
     ]),
     nav.Item(_('Dashboard'), 'site.dashboard'),
+    nav.Item(_('Territories'), 'territories.home'),
     nav.Item(_('Events'), '#', url='#', items=[
         nav.Item('Openfield 16', 'gouvfr.openfield16'),
         nav.Item('Nec Mergitur', 'gouvfr.nec_mergitur'),
@@ -61,7 +62,7 @@ nav.Bar('gouvfr_footer', [
              {'section': 'system-integrator'}),
     nav.Item(_('API'), 'apidoc.swaggerui'),
     nav.Item(_('Credits'), 'gouvfr.credits'),
-    nav.Item(_('Terms of use'), 'gouvfr.terms'),
+    nav.Item(_('Terms of use'), 'site.terms'),
 ])
 
 NETWORK_LINKS = [

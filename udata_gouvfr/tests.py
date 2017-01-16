@@ -9,21 +9,27 @@ import requests
 from flask import url_for
 from werkzeug.contrib.atom import AtomFeed
 
+from udata.core.dataset.factories import (
+    DatasetFactory, LicenseFactory, VisibleDatasetFactory
+)
+from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.spatial.factories import GeoZoneFactory, SpatialCoverageFactory
 from udata.frontend.markdown import md
 from udata.models import Badge, PUBLIC_SERVICE
+from udata.settings import Testing
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.api import APITestCase
-from udata.tests.factories import (
-    DatasetFactory, ReuseFactory, OrganizationFactory,
-    VisibleReuseFactory, GeoZoneFactory, LicenseFactory,
-    VisibleDatasetFactory, faker
-)
 from udata.tests.frontend import FrontTestCase
 from udata.tests.test_sitemap import SitemapTestCase
-from udata.settings import Testing
+from udata.tests.features.territories.test_territories_process import (
+    create_geozones_fixtures
+)
+from udata.utils import faker
 
 from .models import (
-    DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE, TERRITORY_DATASETS, OPENFIELD16
+    DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE,
+    TERRITORY_DATASETS, OPENFIELD16
 )
 from .views import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
 from .metrics import PublicServicesMetric
@@ -69,6 +75,7 @@ class GouvFrThemeTest(FrontTestCase):
 
     def test_render_search_no_data(self):
         '''It should render the search page without data'''
+        self.init_search()
         response = self.get(url_for('front.search'))
         self.assert200(response)
 
@@ -264,7 +271,7 @@ class SpecificUrlsTest(FrontTestCase):
         self.assert_template_used('faq/system-integrator.html')
 
     def test_terms(self):
-        response = self.client.get(url_for('gouvfr.terms'))
+        response = self.client.get(url_for('site.terms'))
         self.assert200(response)
 
     def test_credits(self):
@@ -332,12 +339,13 @@ class OpenField16Test(FrontTestCase):
 
 class TerritoriesSettings(GouvFrSettings):
     ACTIVATE_TERRITORIES = True
+    HANDLED_LEVELS = ('fr/town', 'fr/county', 'fr/region')
 
 
 class TerritoriesTest(FrontTestCase):
     settings = TerritoriesSettings
 
-    def test_with_gouvfr_territory_datasets(self):
+    def test_with_gouvfr_town_territory_datasets(self):
         bdr = GeoZoneFactory(
             id='fr/county/13', level='fr/county', name='Bouches-du-Rhône')
         arles = GeoZoneFactory(
@@ -347,28 +355,63 @@ class TerritoriesTest(FrontTestCase):
             url_for('territories.territory', territory=arles))
         self.assert200(response)
         data = response.data.decode('utf-8')
-        self.assertIn('Arles', data)
-        territory_datasets = self.get_context_variable('territory_datasets')
-        self.assertEqual(len(territory_datasets), 10)
-        for dataset in territory_datasets:
+        self.assertIn(arles.name, data)
+        base_datasets = self.get_context_variable('base_datasets')
+        self.assertEqual(len(base_datasets), 10)
+        for dataset in base_datasets:
             self.assertIn(
                 '<div data-udata-territory-id="{dataset.slug}"'.format(
                     dataset=dataset),
                 data)
         self.assertIn(bdr.name, data)
 
+    def test_with_gouvfr_county_territory_datasets(self):
+        bdr = GeoZoneFactory(
+            id='fr/county/13', level='fr/county', name='Bouches-du-Rhône')
+        response = self.client.get(
+            url_for('territories.territory', territory=bdr))
+        self.assert200(response)
+        data = response.data.decode('utf-8')
+        self.assertIn(bdr.name, data)
+        base_datasets = self.get_context_variable('base_datasets')
+        self.assertEqual(len(base_datasets), 11)
+        for dataset in base_datasets:
+            self.assertIn(
+                '<div data-udata-territory-id="{dataset.slug}"'.format(
+                    dataset=dataset),
+                data)
+
+    def test_with_gouvfr_region_territory_datasets(self):
+        paca = GeoZoneFactory(
+            id='fr/region/93', level='fr/region',
+            name='Provence Alpes Côtes dAzur')
+        response = self.client.get(
+            url_for('territories.territory', territory=paca))
+        self.assert200(response)
+        data = response.data.decode('utf-8')
+        self.assertIn(paca.name, data)
+        base_datasets = self.get_context_variable('base_datasets')
+        self.assertEqual(len(base_datasets), 8)
+        for dataset in base_datasets:
+            self.assertIn(
+                '<div data-udata-territory-id="{dataset.slug}"'.format(
+                    dataset=dataset),
+                data)
+
 
 class OEmbedsTerritoryAPITest(APITestCase):
     settings = TerritoriesSettings
 
-    def test_oembed_territory_api_get(self):
-        '''It should fetch a territory in the oembed format.'''
+    def test_oembed_town_territory_api_get(self):
+        '''It should fetch a town territory in the oembed format.'''
         arles = GeoZoneFactory(
             id='fr/town/13004', level='fr/town',
             name='Arles', code='13004', population=52439)
         licence_ouverte = LicenseFactory(id='fr-lo', title='Licence Ouverte')
+        odbl_license = LicenseFactory(id='odc-odbl', title='ODbL')
         LicenseFactory(id='notspecified', title='Not Specified')
-        for territory_dataset_class in TERRITORY_DATASETS.values():
+        town_datasets = TERRITORY_DATASETS['town']
+        for territory_dataset_class in town_datasets.values():
             organization = OrganizationFactory(
                 id=territory_dataset_class.organization_id)
             territory = territory_dataset_class(arles)
@@ -391,7 +434,57 @@ class OEmbedsTerritoryAPITest(APITestCase):
                 md(territory.description, source_tooltip=True), data['html'])
             self.assertIn('Download from localhost', data['html'])
             self.assertIn('Add to your own website', data['html'])
-            if territory_dataset_class != TERRITORY_DATASETS['comptes']:
+            if territory_dataset_class not in (town_datasets['comptes_t'],):
+                if territory_dataset_class == town_datasets['ban_odbl_t']:
+                    license = odbl_license
+                else:
+                    license = licence_ouverte
+                self.assertIn(
+                    'License: {title}'.format(title=license.title),
+                    data['html'])
+                self.assertIn(
+                    '© {license_id}'.format(license_id=license.id),
+                    data['html'])
+                self.assertIn(
+                    '<a data-tooltip="Source" href="http://localhost/datasets',
+                    data['html'])
+
+    def test_oembed_county_territory_api_get(self):
+        '''It should fetch a county territory in the oembed format.'''
+        midi_pyrenees = GeoZoneFactory(
+            id='fr/region/73', level='fr/region', name='Midi-Pyrénées',
+            code='73')
+        aveyron = GeoZoneFactory(
+            id='fr/county/12', level='fr/county', name='Aveyron', code='12',
+            parents=[midi_pyrenees.id])
+        licence_ouverte = LicenseFactory(id='fr-lo', title='Licence Ouverte')
+        LicenseFactory(id='notspecified', title='Not Specified')
+        for territory_dataset_class in TERRITORY_DATASETS['county'].values():
+            organization = OrganizationFactory(
+                id=territory_dataset_class.organization_id)
+            territory = territory_dataset_class(aveyron)
+            reference = 'territory-{id}'.format(id=territory.slug)
+            response = self.get(url_for('api.oembeds', references=reference))
+            self.assert200(response)
+            data = json.loads(response.data)[0]
+            self.assertIn('html', data)
+            self.assertIn('width', data)
+            self.assertIn('maxwidth', data)
+            self.assertIn('height', data)
+            self.assertIn('maxheight', data)
+            self.assertTrue(data['type'], 'rich')
+            self.assertTrue(data['version'], '1.0')
+            self.assertIn(territory.title, data['html'])
+            self.assertIn(cgi.escape(territory.url), data['html'])
+            self.assertIn(
+                'alt="{name}"'.format(name=organization.name), data['html'])
+            self.assertIn(
+                md(territory.description, source_tooltip=True), data['html'])
+            self.assertIn('Download from localhost', data['html'])
+            self.assertIn('Add to your own website', data['html'])
+            if territory_dataset_class not in (
+                    TERRITORY_DATASETS['county']['comptes_c'],
+                    TERRITORY_DATASETS['county']['zonages_c']):
                 self.assertIn(
                     'License: {title}'.format(title=licence_ouverte.title),
                     data['html'])
@@ -401,6 +494,139 @@ class OEmbedsTerritoryAPITest(APITestCase):
                 self.assertIn(
                     '<a data-tooltip="Source" href="http://localhost/datasets',
                     data['html'])
+
+    def test_oembed_region_territory_api_get(self):
+        '''It should fetch a region territory in the oembed format.'''
+        midi_pyrenees = GeoZoneFactory(
+            id='fr/region/73', level='fr/region', name='Midi-Pyrénées',
+            code='73')
+        licence_ouverte = LicenseFactory(id='fr-lo', title='Licence Ouverte')
+        LicenseFactory(id='notspecified', title='Not Specified')
+        for territory_dataset_class in TERRITORY_DATASETS['region'].values():
+            organization = OrganizationFactory(
+                id=territory_dataset_class.organization_id)
+            territory = territory_dataset_class(midi_pyrenees)
+            reference = 'territory-{id}'.format(id=territory.slug)
+            response = self.get(url_for('api.oembeds', references=reference))
+            self.assert200(response)
+            data = json.loads(response.data)[0]
+            self.assertIn('html', data)
+            self.assertIn('width', data)
+            self.assertIn('maxwidth', data)
+            self.assertIn('height', data)
+            self.assertIn('maxheight', data)
+            self.assertTrue(data['type'], 'rich')
+            self.assertTrue(data['version'], '1.0')
+            self.assertIn(territory.title, data['html'])
+            self.assertIn(cgi.escape(territory.url), data['html'])
+            self.assertIn(
+                'alt="{name}"'.format(name=organization.name), data['html'])
+            self.assertIn(
+                md(territory.description, source_tooltip=True), data['html'])
+            self.assertIn('Download from localhost', data['html'])
+            self.assertIn('Add to your own website', data['html'])
+            if territory_dataset_class not in (
+                    TERRITORY_DATASETS['region']['comptes_r'],
+                    TERRITORY_DATASETS['region']['zonages_r']):
+                self.assertIn(
+                    'License: {title}'.format(title=licence_ouverte.title),
+                    data['html'])
+                self.assertIn(
+                    '© {license_id}'.format(license_id=licence_ouverte.id),
+                    data['html'])
+                self.assertIn(
+                    '<a data-tooltip="Source" href="http://localhost/datasets',
+                    data['html'])
+
+
+class SpatialTerritoriesApiTest(APITestCase):
+    settings = TerritoriesSettings
+
+    def test_zone_datasets_with_dynamic_region(self):
+        paca, bdr, arles = create_geozones_fixtures()
+        with self.autoindex():
+            organization = OrganizationFactory()
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+
+        response = self.get(
+            url_for('api.zone_datasets', id=paca.id), qs={'dynamic': 1})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 11)
+
+    def test_zone_datasets_with_dynamic_region_and_size(self):
+        paca, bdr, arles = create_geozones_fixtures()
+        with self.autoindex():
+            organization = OrganizationFactory()
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+
+        response = self.get(
+            url_for('api.zone_datasets', id=paca.id),
+            qs={'dynamic': 1, 'size': 2})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 10)
+
+    def test_zone_datasets_without_dynamic_region(self):
+        paca, bdr, arles = create_geozones_fixtures()
+        with self.autoindex():
+            organization = OrganizationFactory()
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+
+        response = self.get(
+            url_for('api.zone_datasets', id=paca.id))
+        self.assert200(response)
+        self.assertEqual(len(response.json), 3)
+
+    def test_zone_datasets_with_dynamic_county(self):
+        paca, bdr, arles = create_geozones_fixtures()
+        with self.autoindex():
+            organization = OrganizationFactory()
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[bdr.id]))
+
+        response = self.get(
+            url_for('api.zone_datasets', id=bdr.id), qs={'dynamic': 1})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 14)
+
+    def test_zone_datasets_with_dynamic_town(self):
+        paca, bdr, arles = create_geozones_fixtures()
+        with self.autoindex():
+            organization = OrganizationFactory()
+            for _ in range(3):
+                VisibleDatasetFactory(
+                    organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[arles.id]))
+
+        response = self.get(
+            url_for('api.zone_datasets', id=arles.id), qs={'dynamic': 1})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 13)
+
+    def test_zone_children(self):
+        paca, bdr, arles = create_geozones_fixtures()
+
+        response = self.get(url_for('api.zone_children', id=paca.id))
+        self.assert200(response)
+        self.assertEqual(response.json['features'][0]['id'], bdr.id)
+
+        response = self.get(url_for('api.zone_children', id=bdr.id))
+        self.assert200(response)
+        self.assertEqual(response.json['features'][0]['id'], arles.id)
+
+        response = self.get(url_for('api.zone_children', id=arles.id))
+        self.assert200(response)
+        self.assertEqual(response.json['features'], [])
 
 
 class SitemapTest(FrontTestCase):
@@ -413,7 +639,6 @@ class SitemapTest(FrontTestCase):
 
         urls = [
             url_for('gouvfr.credits_redirect', _external=True),
-            url_for('gouvfr.terms_redirect', _external=True),
             url_for('gouvfr.redevances_redirect', _external=True),
             url_for('gouvfr.faq_redirect', _external=True),
         ]
@@ -430,7 +655,7 @@ class SitemapTerritoriesTest(SitemapTestCase):
     settings = TerritoriesSettings
 
     def test_towns_within_sitemap(self):
-        '''It should return the town from the sitemap.'''
+        '''It should return the towns from the sitemap.'''
         territory = GeoZoneFactory(
             id='fr/town/13004', name='Arles', code='13004', level='fr/town')
 
@@ -439,3 +664,36 @@ class SitemapTerritoriesTest(SitemapTestCase):
         url = self.get_by_url('territories.territory', territory=territory)
         self.assertIsNotNone(url)
         self.assert_url(url, 0.5, 'weekly')
+
+    def test_counties_within_sitemap(self):
+        '''It should return the counties from the sitemap.'''
+        territory = GeoZoneFactory(
+            id='fr/county/12', level='fr/county', name='Aveyron', code='12')
+
+        self.get_sitemap_tree()
+
+        url = self.get_by_url('territories.territory', territory=territory)
+        self.assertIsNotNone(url)
+        self.assert_url(url, 0.5, 'weekly')
+
+    def test_regions_within_sitemap(self):
+        '''It should return the regions from the sitemap.'''
+        territory = GeoZoneFactory(
+            id='fr/region/93', level='fr/region',
+            name='Provence Alpes Côtes dAzur')
+
+        self.get_sitemap_tree()
+
+        url = self.get_by_url('territories.territory', territory=territory)
+        self.assertIsNotNone(url)
+        self.assert_url(url, 0.5, 'weekly')
+
+    def test_countries_without_sitemap(self):
+        '''It should NOT return the countries from the sitemap.'''
+        territory = GeoZoneFactory(
+            id='country/fr', level='country', name='France')
+
+        self.get_sitemap_tree()
+
+        url = self.get_by_url('territories.territory', territory=territory)
+        self.assertIsNone(url)

@@ -3,35 +3,25 @@
         <div class="cover-marianne"></div>
 
         <div class="search_bar row" role="search">
+            {# TODO: find a way to embed this logic into the site-search component #}
             {% if in_url('sort') and in_url('organization') %}
                 {% set action = url_for('datasets.list') %}
                 {% set placeholder = _('Search in datasets') %}
             {% elif territory %}
-                {% set action = url_for('front.search') %}
-                {% set placeholder = _('Search in this town') %}
+                {% set action = url_for('datasets.list') %}
+                {% set placeholder = _('Search in this ') + territory.level_i18n_name|lower %}
             {% else %}
                 {% set action = url_for('front.search') %}
                 {% set placeholder = _('Search') %}
             {% endif %}
-            <form action="{{ action }}"
-                class="col-sm-4 col-md-6 col-lg-6 col-xs-12">
-                {% if in_url('sort') and in_url('organization') %}
-                    <input type="hidden" name="sort" value="{{ request.args.sort }}">
-                    <input type="hidden" name="organization" value="{{ request.args.organization }}">
-                {% elif territory %}
-                    <input type="hidden" name="geozone" value="{{ territory.id }}">
-                {% endif %}
-                <div class="form-group">
-                    <div class="input-group">
-                        <div class="input-group-btn">
-                            <button class="btn" type="submit"><i class="fa fa-search"></i></button>
-                        </div>
-                        <input id="main-search" name="q" type="search" class="form-control"
-                            autocomplete="off" placeholder="{{ placeholder }}"
-                            value="{{ request.args.q }}">
-                    </div>
-                </div>
-            </form>
+            <div class="col-sm-4 col-md-6 col-lg-6 col-xs-12">
+                <site-search v-ref:search
+                    action="{{ action }}"
+                    placeholder="{{ placeholder }}"
+                    {% if territory %}territory-id="{{ territory.id }}"{% endif %}
+                    >
+                </site-search>
+            </div>
 
             {% cache cache_duration, 'subnav-small-featured-topics', g.lang_code|default(config.DEFAULT_LANGUAGE)|string %}
             {# Topic chooser #}

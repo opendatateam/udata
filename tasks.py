@@ -72,6 +72,7 @@ def i18nc(ctx):
 
 @task
 def watch(ctx):
+    '''Build assets on change'''
     lrun('npm run dev', pty=True)
 
 
