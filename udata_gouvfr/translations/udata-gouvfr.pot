@@ -1,14 +1,14 @@
 # Translations template for udata-gouvfr.
-# Copyright (C) 2016 ORGANIZATION
+# Copyright (C) 2017 ORGANIZATION
 # This file is distributed under the same license as the udata-gouvfr project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata-gouvfr 0.9.0.dev0\n"
+"Project-Id-Version: udata-gouvfr 1.0.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-12-07 09:56+0100\n"
+"POT-Creation-Date: 2017-01-16 14:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,14 +51,6 @@ msgstr ""
 msgid "See the %(nb)s datasets"
 msgstr ""
 
-#: udata_gouvfr/templates/terms.html:4 udata_gouvfr/templates/terms.html:5
-msgid "Terms"
-msgstr ""
-
-#: udata_gouvfr/templates/terms.html:7
-msgid "terms"
-msgstr ""
-
 #: udata_gouvfr/templates/faq/citizen.html:4
 msgid "Découvrir l’OpenData en tant que citoyen - FAQ"
 msgstr ""
@@ -92,63 +84,67 @@ msgstr ""
 msgid "Découvrir l’OpenData en tant qu’intégrateur - FAQ"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:24
+#: udata_gouvfr/theme/theme.py:27
 msgid "Discover OpenData"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:25 udata_gouvfr/theme/theme.py:53
+#: udata_gouvfr/theme/theme.py:28 udata_gouvfr/theme/theme.py:57
 msgid "As a citizen"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:26 udata_gouvfr/theme/theme.py:54
+#: udata_gouvfr/theme/theme.py:29 udata_gouvfr/theme/theme.py:58
 msgid "As a producer"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:27 udata_gouvfr/theme/theme.py:55
+#: udata_gouvfr/theme/theme.py:30 udata_gouvfr/theme/theme.py:59
 msgid "As a reuser"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:28 udata_gouvfr/theme/theme.py:56
+#: udata_gouvfr/theme/theme.py:31 udata_gouvfr/theme/theme.py:60
 msgid "As a developer"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:29 udata_gouvfr/theme/theme.py:57
+#: udata_gouvfr/theme/theme.py:32 udata_gouvfr/theme/theme.py:61
 msgid "As a system integrator"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:32
+#: udata_gouvfr/theme/theme.py:35
 msgid "Data"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/footer.html:66 udata_gouvfr/theme/theme.py:33
+#: udata_gouvfr/theme/templates/footer.html:66 udata_gouvfr/theme/theme.py:36
 msgid "Datasets"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/footer.html:67 udata_gouvfr/theme/theme.py:34
+#: udata_gouvfr/theme/templates/footer.html:67 udata_gouvfr/theme/theme.py:37
 msgid "Reuses"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/header.html:78 udata_gouvfr/theme/theme.py:35
+#: udata_gouvfr/theme/templates/header.html:78 udata_gouvfr/theme/theme.py:38
 msgid "Organizations"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:37
+#: udata_gouvfr/theme/theme.py:40
 msgid "Dashboard"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:38
+#: udata_gouvfr/theme/theme.py:41
+msgid "Territories"
+msgstr ""
+
+#: udata_gouvfr/theme/theme.py:42
 msgid "Events"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:59
+#: udata_gouvfr/theme/theme.py:63
 msgid "API"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:60
+#: udata_gouvfr/theme/theme.py:64
 msgid "Credits"
 msgstr ""
 
-#: udata_gouvfr/theme/theme.py:61
+#: udata_gouvfr/theme/theme.py:65
 msgid "Terms of use"
 msgstr ""
 
@@ -157,7 +153,7 @@ msgid "The Open Data"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/footer.html:24
-#: udata_gouvfr/theme/templates/subnav-small.html:40
+#: udata_gouvfr/theme/templates/subnav-small.html:30
 msgid "Topics"
 msgstr ""
 
@@ -285,31 +281,40 @@ msgstr ""
 msgid "Likes"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/subnav-large.html:20
-#: udata_gouvfr/theme/templates/subnav-small.html:14
-#: udata_gouvfr/theme/templates/topic/subnav.html:19
+#: udata_gouvfr/theme/templates/subnav-large.html:15
+#: udata_gouvfr/theme/templates/subnav-small.html:15
+#: udata_gouvfr/theme/templates/topic/subnav.html:14
 msgid "Search"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/subnav-large.html:40
+#: udata_gouvfr/theme/templates/subnav-large.html:33
 msgid "Share, improve and reuse public data"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/subnav-large.html:43
-#: udata_gouvfr/theme/templates/subnav-large.html:46
-#: udata_gouvfr/theme/templates/subnav-small.html:58
-#: udata_gouvfr/theme/templates/subnav-small.html:61
-#: udata_gouvfr/theme/templates/topic/subnav.html:50
-#: udata_gouvfr/theme/templates/topic/subnav.html:53
+#: udata_gouvfr/theme/templates/subnav-large.html:36
+#: udata_gouvfr/theme/templates/subnav-large.html:39
+#: udata_gouvfr/theme/templates/subnav-small.html:48
+#: udata_gouvfr/theme/templates/subnav-small.html:51
+#: udata_gouvfr/theme/templates/topic/subnav.html:43
+#: udata_gouvfr/theme/templates/topic/subnav.html:46
 msgid "Contribute!"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/subnav-small.html:8
+#: udata_gouvfr/theme/templates/subnav-small.html:9
 msgid "Search in datasets"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/subnav-small.html:11
-msgid "Search in this town"
+#: udata_gouvfr/theme/templates/subnav-small.html:12
+msgid "Search in this "
+msgstr ""
+
+#: udata_gouvfr/theme/templates/terms.html:4
+#: udata_gouvfr/theme/templates/terms.html:5
+msgid "Terms"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/terms.html:7
+msgid "terms"
 msgstr ""
 
 #: udata_gouvfr/theme/templates/dataset/display.html:3
