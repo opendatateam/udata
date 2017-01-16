@@ -1,19 +1,19 @@
 <template>
 <layout :title="_('Search in your data: {q}', {q: $route.query.q})">
     <div class="row" v-if="datasets.loading || datasets.has_data">
-        <datasets class="col-xs-12" :datasets="datasets"></datasets>
+        <datasets-list class="col-xs-12" :datasets="datasets"></datasets-list>
     </div>
     <div class="row" v-if="communities.loading || communities.has_data">
-        <communities class="col-xs-12" :communities="communities"></communities>
+        <community-list class="col-xs-12" :communities="communities"></community-list>
     </div>
     <div class="row" v-if="reuses.loading || reuses.has_data">
-        <reuses class="col-xs-12" :reuses="reuses"></reuses>
+        <reuses-list class="col-xs-12" :reuses="reuses"></reuses-list>
     </div>
     <div class="row" v-if="issues.loading || issues.has_data">
-        <issues class="col-xs-12" :issues="issues"></issues>
+        <issue-list class="col-xs-12" :issues="issues"></issue-list>
     </div>
     <div class="row" v-if="discussions.loading || discussions.has_data">
-        <discussions class="col-xs-12" :discussions="discussions"></discussions>
+        <discussion-list class="col-xs-12" :discussions="discussions"></discussion-list>
     </div>
     <div class="row" v-if="no_results">
         <div class="col-xs-12 text-center">
@@ -26,15 +26,20 @@
 <script>
 import {PageList} from 'models/base';
 import Layout from 'components/layout.vue';
+import DatasetList from 'components/dataset/list.vue';
+import ReuseList from 'components/reuse/list.vue';
+import IssueList from 'components/issues/list.vue';
+import DiscussionList from 'components/discussions/list.vue';
+import CommunityList from 'components/dataset/communityresource/list.vue';
 
 export default {
     name: 'SearchView',
     components: {
-        datasets: require('components/dataset/list.vue'),
-        communities: require('components/dataset/communityresource/list.vue'),
-        reuses: require('components/reuse/list.vue'),
-        issues: require('components/issues/list.vue'),
-        discussions: require('components/discussions/list.vue'),
+        CommunityList,
+        DiscussionList,
+        IssueList,
+        DatasetList,
+        ReuseList,
         Layout
     },
     computed: {
@@ -49,23 +54,28 @@ export default {
         return {
             datasets: new PageList({
                 ns: 'me',
-                fetch: 'my_org_datasets'
+                fetch: 'my_org_datasets',
+                mask: DatasetList.MASK
             }),
             communities: new PageList({
                 ns: 'me',
-                fetch: 'my_org_community_resources'
+                fetch: 'my_org_community_resources',
+                mask: CommunityList.MASK
             }),
             reuses: new PageList({
                 ns: 'me',
-                fetch: 'my_org_reuses'
+                fetch: 'my_org_reuses',
+                mask: ReuseList.MASK
             }),
             issues: new PageList({
                 ns: 'me',
                 fetch: 'my_org_issues',
+                mask: IssueList.MASK
             }),
             discussions: new PageList({
                 ns: 'me',
-                fetch: 'my_org_discussions'
+                fetch: 'my_org_discussions',
+                mask: DiscussionList.MASK
             }),
         };
     },

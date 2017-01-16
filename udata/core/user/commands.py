@@ -3,9 +3,10 @@ from __future__ import unicode_literals
 
 import logging
 
-from flask.ext.script import prompt, prompt_pass
-from flask.ext.security.forms import RegisterForm
-from flask.ext.security.utils import encrypt_password
+from datetime import datetime
+from flask_script import prompt, prompt_pass
+from flask_security.forms import RegisterForm
+from flask_security.utils import encrypt_password
 from werkzeug.datastructures import MultiDict
 
 from udata.models import User, datastore
@@ -13,7 +14,6 @@ from udata.models import User, datastore
 from udata.commands import submanager
 
 log = logging.getLogger(__name__)
-
 
 m = submanager(
     'user',
@@ -36,6 +36,7 @@ def create():
     if form.validate():
         data['password'] = encrypt_password(data['password'])
         del data['password_confirm']
+        data['confirmed_at'] = datetime.utcnow()
         user = datastore.create_user(**data)
         print '\nUser created successfully'
         print 'User(id=%s email=%s)' % (user.id, user.email)
@@ -43,6 +44,22 @@ def create():
     print '\nError creating user:'
     for errors in form.errors.values():
         print '\n'.join(errors)
+
+
+@m.command
+def activate():
+    '''Activate an existing user (validate their email confirmation)'''
+    email = prompt('Email')
+    user = User.objects(email=email).first()
+    if not user:
+        print 'Invalid user'
+        return
+    if user.confirmed_at is not None:
+        print 'User email address already confirmed'
+        return
+    user.confirmed_at = datetime.utcnow()
+    user.save()
+    print 'User activated successfully'
 
 
 @m.command

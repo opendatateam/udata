@@ -154,7 +154,11 @@ $('.btn-issues').click(function(e) {
         if ($form.valid()) {
             const data = {
                 comment: $form.find('#comment').val(),
-                close: close
+                close: close,
+                subject: {
+                    id: $this.data('subject-id'),
+                    class: $this.data('subject-class')
+                }
             };
 
             API.post($form.attr('action'), data, function() {

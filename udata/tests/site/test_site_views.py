@@ -10,11 +10,11 @@ from flask import url_for
 from udata.frontend import csv
 from udata.models import Badge, Site, PUBLIC_SERVICE
 
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.site.views import current_site
+from udata.core.reuse.factories import ReuseFactory
 from udata.tests.frontend import FrontTestCase
-from udata.tests.factories import (
-    DatasetFactory, ReuseFactory, OrganizationFactory, ResourceFactory
-)
 
 
 class SiteViewsTest(FrontTestCase):
@@ -29,11 +29,11 @@ class SiteViewsTest(FrontTestCase):
         '''It should render the robots.txt with all pages allowed.'''
         response = self.get('/robots.txt')
         self.assertEqual(response.data.split('\n'), [
-            u'User-agent: *',
-            u'Disallow: /fr/users/',
-            u'Disallow: /en/users/',
-            u'Disallow: /es/users/',
-            u''
+            'User-agent: *',
+            'Disallow: /fr/users/',
+            'Disallow: /en/users/',
+            'Disallow: /es/users/',
+            ''
         ])
 
     def test_render_home(self):
@@ -272,8 +272,9 @@ class SiteViewsTest(FrontTestCase):
             orgs = [OrganizationFactory() for _ in range(3)]
             hidden_org = OrganizationFactory(deleted=datetime.now())
 
-        response = self.get(url_for('site.organizations_csv',
-                            badge=PUBLIC_SERVICE, page_size=3, facets=True))
+        response = self.get(
+            url_for('site.organizations_csv', badge=PUBLIC_SERVICE,
+                    page_size=3, facets=True))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')
@@ -345,8 +346,8 @@ class SiteViewsTest(FrontTestCase):
             hidden_reuse = ReuseFactory()
 
         response = self.get(
-            url_for(
-                'site.reuses_csv', tag='selected', page_size=3, facets=True))
+            url_for('site.reuses_csv', tag='selected', page_size=3,
+                    facets=True))
 
         self.assert200(response)
         self.assertEqual(response.mimetype, 'text/csv')
@@ -378,4 +379,8 @@ class SiteViewsTest(FrontTestCase):
 
     def test_map_view(self):
         response = self.get(url_for('site.map'))
+        self.assert200(response)
+
+    def test_terms_view(self):
+        response = self.client.get(url_for('site.terms'))
         self.assert200(response)

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import url_for
 from udata.api import api, API
 from udata.features.territories import check_for_territories
 
@@ -25,8 +24,7 @@ class SuggestTerritoriesAPI(API):
         return [{
             'id': territory.id,
             'title': territory.name,
-            'county': territory.county.name,
+            'parent': territory.parent and territory.parent.name or None,
             'image_url': territory.logo_url(external=True),
-            'page': url_for('territories.territory',
-                            territory=territory, _external=True)
+            'page': territory.external_url
         } for territory in territories]

@@ -6,16 +6,17 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import (
-    Organization, Member, MembershipRequest, Follow, FollowOrg,
+    Organization, Member, MembershipRequest, Follow, Issue, Discussion
 )
-from udata.core.dataset.models import DatasetIssue, DatasetDiscussion
-from udata.core.reuse.models import ReuseIssue, ReuseDiscussion
 
 from . import APITestCase
-from ..factories import (
-    faker, badge_factory, OrganizationFactory, UserFactory,
-    DatasetFactory, ReuseFactory, AdminFactory
-)
+
+from udata.utils import faker
+from udata.core.badges.factories import badge_factory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory, AdminFactory
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.reuse.factories import ReuseFactory
 
 
 class OrganizationAPITest(APITestCase):
@@ -38,7 +39,7 @@ class OrganizationAPITest(APITestCase):
         '''It should not fetch a deleted organization from the API'''
         organization = OrganizationFactory(deleted=datetime.now())
         response = self.get(url_for('api.organization', org=organization))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_organization_api_get_deleted_but_authorized(self):
         '''It should fetch a deleted organization from the API if authorized'''
@@ -54,7 +55,7 @@ class OrganizationAPITest(APITestCase):
         data = OrganizationFactory.attributes()
         self.login()
         response = self.post(url_for('api.organizations'), data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.assertEqual(Organization.objects.count(), 1)
 
         org = Organization.objects.first()
@@ -83,7 +84,7 @@ class OrganizationAPITest(APITestCase):
         data['description'] = 'new description'
         self.login()
         response = self.put(url_for('api.organization', org=org), data)
-        self.assertStatus(response, 410)
+        self.assert410(response)
         self.assertEqual(Organization.objects.first().description,
                          org.description)
 
@@ -114,7 +115,7 @@ class OrganizationAPITest(APITestCase):
         self.login()
         organization = OrganizationFactory(deleted=datetime.now())
         response = self.delete(url_for('api.organization', org=organization))
-        self.assertStatus(response, 410)
+        self.assert410(response)
         self.assertIsNotNone(Organization.objects[0].deleted)
 
     def test_organization_api_delete_as_editor_forbidden(self):
@@ -145,7 +146,7 @@ class MembershipAPITest(APITestCase):
 
         api_url = url_for('api.request_membership', org=organization)
         response = self.post(api_url, data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         organization.reload()
         self.assertEqual(len(organization.requests), 1)
@@ -229,8 +230,7 @@ class MembershipAPITest(APITestCase):
         response = self.post(api_url)
         self.assert404(response)
 
-        self.assertEqual(response.json, {
-            'status': 404, 'message': 'Unknown membership request id'})
+        self.assertEqual(response.json['message'], 'Unknown membership request id')
 
     def test_refuse_membership(self):
         user = self.login()
@@ -275,8 +275,7 @@ class MembershipAPITest(APITestCase):
         response = self.post(api_url)
         self.assert404(response)
 
-        self.assertEqual(response.json, {
-            'status': 404, 'message': 'Unknown membership request id'})
+        self.assertEqual(response.json['message'], 'Unknown membership request id')
 
     def test_create_member(self):
         user = self.login()
@@ -356,12 +355,12 @@ class MembershipAPITest(APITestCase):
 
         response = self.post(
             url_for('api.organization_followers', id=to_follow.id))
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(),
-                              FollowOrg)
+        follow = Follow.objects.followers(to_follow).first()
+        self.assertIsInstance(follow.following, Organization)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
@@ -369,7 +368,7 @@ class MembershipAPITest(APITestCase):
         '''It should unfollow the organization on DELETE'''
         user = self.login()
         to_follow = OrganizationFactory()
-        FollowOrg.objects.create(follower=user, following=to_follow)
+        Follow.objects.create(follower=user, following=to_follow)
 
         response = self.delete(
             url_for('api.organization_followers', id=to_follow.id))
@@ -513,15 +512,16 @@ class MembershipAPITest(APITestCase):
         with self.autoindex():
             orgs = OrganizationFactory.create_batch(3)
 
-        org = orgs[0]
+        first_org = orgs[0]
         response = self.get(url_for('api.suggest_organizations'),
-                            qs={'q': str(org.id), 'size': '5'})
+                            qs={'q': str(first_org.id), 'size': '5'})
         self.assert200(response)
 
-        self.assertGreaterEqual(len(response.json), 1)
-
-        suggestion = response.json[0]
-        self.assertEqual(suggestion['id'], str(org.id))
+        # The batch factory generates ids that might be too close
+        # which then are found with the fuzzy search.
+        suggested_ids = [u['id'] for u in response.json]
+        self.assertGreaterEqual(len(suggested_ids), 1)
+        self.assertIn(str(first_org.id), suggested_ids)
 
 
 class OrganizationDatasetsAPITest(APITestCase):
@@ -558,6 +558,17 @@ class OrganizationDatasetsAPITest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(len(response.json), len(datasets))
+
+    def test_list_org_datasets_with_size(self):
+        '''Should list organization datasets'''
+        org = OrganizationFactory()
+        DatasetFactory.create_batch(3, organization=org)
+
+        response = self.get(
+            url_for('api.org_datasets', org=org), qs={'size': 2})
+
+        self.assert200(response)
+        self.assertEqual(len(response.json), 2)
 
 
 class OrganizationReusesAPITest(APITestCase):
@@ -603,14 +614,13 @@ class OrganizationIssuesAPITest(APITestCase):
         reuse = ReuseFactory(organization=org)
         dataset = DatasetFactory(organization=org)
         issues = [
-            DatasetIssue.objects.create(subject=dataset, title='', user=user),
-            ReuseIssue.objects.create(subject=reuse, title='', user=user)
+            Issue.objects.create(subject=dataset, title='', user=user),
+            Issue.objects.create(subject=reuse, title='', user=user)
         ]
 
         # Should not be listed
-        DatasetIssue.objects.create(
-            subject=DatasetFactory(), title='', user=user)
-        ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=user)
+        Issue.objects.create(subject=DatasetFactory(), title='', user=user)
+        Issue.objects.create(subject=ReuseFactory(), title='', user=user)
 
         response = self.get(url_for('api.org_issues', org=org))
 
@@ -630,15 +640,13 @@ class OrganizationDiscussionsAPITest(APITestCase):
         reuse = ReuseFactory(organization=org)
         dataset = DatasetFactory(organization=org)
         discussions = [
-            DatasetDiscussion.objects.create(
-                subject=dataset, title='', user=user),
-            ReuseDiscussion.objects.create(subject=reuse, title='', user=user)
+            Discussion.objects.create(subject=dataset, title='', user=user),
+            Discussion.objects.create(subject=reuse, title='', user=user)
         ]
 
         # Should not be listed
-        DatasetIssue.objects.create(
-            subject=DatasetFactory(), title='', user=user)
-        ReuseIssue.objects.create(subject=ReuseFactory(), title='', user=user)
+        Issue.objects.create(subject=DatasetFactory(), title='', user=user)
+        Issue.objects.create(subject=ReuseFactory(), title='', user=user)
 
         response = self.get(url_for('api.org_discussions', org=org))
 
@@ -677,7 +685,7 @@ class OrganizationBadgeAPITest(APITestCase):
             response = self.post(
                 url_for('api.organization_badges', org=self.organization),
                 data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 1)
 
@@ -707,7 +715,7 @@ class OrganizationBadgeAPITest(APITestCase):
             response = self.post(
                 url_for('api.organization_badges', org=self.organization),
                 data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 2)
 

@@ -2,15 +2,19 @@
 from __future__ import unicode_literals
 
 from datetime import datetime
+
 import feedparser
+
 from flask import url_for
 
-from udata.models import FollowDataset
+from udata.core.dataset.factories import (
+    ResourceFactory, DatasetFactory, LicenseFactory, CommunityResourceFactory
+)
+from udata.core.user.factories import UserFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.models import Follow
 
 from . import FrontTestCase
-from ..factories import (
-    ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory
-)
 
 
 class DatasetBlueprintTest(FrontTestCase):
@@ -45,14 +49,73 @@ class DatasetBlueprintTest(FrontTestCase):
 
     def test_render_list_empty(self):
         '''It should render the dataset list page event if empty'''
+        self.init_search()
         response = self.get(url_for('datasets.list'))
         self.assert200(response)
 
     def test_render_display(self):
         '''It should render the dataset page'''
-        dataset = DatasetFactory()
-        response = self.get(url_for('datasets.show', dataset=dataset))
+        resource = ResourceFactory(format='png',
+                                   description='* Title 1\n* Title 2',
+                                   metrics={'views': 10})
+        license = LicenseFactory(url='http://www.datagouv.fr/licence')
+        dataset = DatasetFactory(license=license,
+                                 tags=['foo', 'bar'],
+                                 resources=[resource],
+                                 description='a&éèëù$£',
+                                 owner=UserFactory(),
+                                 extras={'foo': 'bar'})
+        url = url_for('datasets.show', dataset=dataset)
+        response = self.get(url)
         self.assert200(response)
+        json_ld = self.get_json_ld(response)
+        self.assertEquals(json_ld['@context'], 'http://schema.org')
+        self.assertEquals(json_ld['@type'], 'Dataset')
+        self.assertEquals(json_ld['@id'], str(dataset.id))
+        self.assertEquals(json_ld['description'], 'a&éèëù$£')
+        self.assertEquals(json_ld['alternateName'], dataset.slug)
+        self.assertEquals(json_ld['dateCreated'][:16],
+                          dataset.created_at.isoformat()[:16])
+        self.assertEquals(json_ld['dateModified'][:16],
+                          dataset.last_modified.isoformat()[:16])
+        self.assertEquals(json_ld['url'], 'http://localhost{}'.format(url))
+        self.assertEquals(json_ld['name'], dataset.title)
+        self.assertEquals(json_ld['keywords'], 'bar,foo')
+        self.assertEquals(len(json_ld['distribution']), 1)
+        for json_ld_resource in json_ld['distribution']:
+            self.assertEquals(json_ld_resource['@type'], 'DataDownload')
+            self.assertEquals(json_ld_resource['@id'], str(resource.id))
+            self.assertEquals(json_ld_resource['url'], resource.latest)
+            self.assertEquals(json_ld_resource['name'], resource.title)
+            self.assertEquals(json_ld_resource['contentUrl'], resource.url)
+            self.assertEquals(json_ld_resource['dateCreated'][:16],
+                              resource.created_at.isoformat()[:16])
+            self.assertEquals(json_ld_resource['dateModified'][:16],
+                              resource.modified.isoformat()[:16])
+            self.assertEquals(json_ld_resource['datePublished'][:16],
+                              resource.published.isoformat()[:16])
+            self.assertEquals(json_ld_resource['encodingFormat'], 'png')
+            self.assertEquals(json_ld_resource['contentSize'],
+                              resource.filesize)
+            self.assertEquals(json_ld_resource['fileFormat'], resource.mime)
+            self.assertEquals(json_ld_resource['description'],
+                              'Title 1 Title 2')
+            self.assertEquals(json_ld_resource['interactionStatistic'],
+                              {
+                                  '@type': 'InteractionCounter',
+                                  'interactionType': {
+                                      '@type': 'DownloadAction',
+                                  },
+                                  'userInteractionCount': 10,
+                              })
+        self.assertEquals(json_ld['extras'],
+                          [{
+                              '@type': 'http://schema.org/PropertyValue',
+                              'name': 'foo',
+                              'value': 'bar',
+                          }])
+        self.assertEquals(json_ld['license'], 'http://www.datagouv.fr/licence')
+        self.assertEquals(json_ld['author']['@type'], 'Person')
 
     def test_raise_404_if_private(self):
         '''It should raise a 404 if the dataset is private'''
@@ -64,7 +127,7 @@ class DatasetBlueprintTest(FrontTestCase):
         '''It should raise a 410 if the dataset is deleted'''
         dataset = DatasetFactory(deleted=datetime.now())
         response = self.get(url_for('datasets.show', dataset=dataset))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_200_if_deleted_but_authorized(self):
         '''It should not raise a 410 if the can view it'''
@@ -76,6 +139,30 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_not_found(self):
         '''It should render the dataset page'''
         response = self.get(url_for('datasets.show', dataset='not-found'))
+        self.assert404(response)
+
+    def test_resource_latest_url(self):
+        '''It should redirect to the real resource URL'''
+        resource = ResourceFactory()
+        DatasetFactory(resources=[resource])
+        response = self.get(url_for('datasets.resource',
+                                    id=resource.id))
+        self.assertStatus(response, 302)
+        self.assertEqual(response.location, resource.url)
+
+    def test_community_resource_latest_url(self):
+        '''It should redirect to the real community resource URL'''
+        resource = CommunityResourceFactory()
+        response = self.get(url_for('datasets.resource',
+                                    id=resource.id))
+        self.assertStatus(response, 302)
+        self.assertEqual(response.location, resource.url)
+
+    def test_resource_latest_url_404(self):
+        '''It should return 404 if resource does not exists'''
+        resource = ResourceFactory()
+        response = self.get(url_for('datasets.resource',
+                                    id=resource.id))
         self.assert404(response)
 
     def test_recent_feed(self):
@@ -136,8 +223,9 @@ class DatasetBlueprintTest(FrontTestCase):
         '''It should render the dataset followers list page'''
         dataset = DatasetFactory()
         followers = [
-            FollowDataset.objects.create(follower=UserFactory(),
-                                         following=dataset) for _ in range(3)]
+            Follow.objects.create(follower=UserFactory(), following=dataset)
+            for _ in range(3)
+        ]
 
         response = self.get(url_for('datasets.followers', dataset=dataset))
 

@@ -3,8 +3,9 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
+from udata.core.post.factories import PostFactory
+
 from . import FrontTestCase
-from ..factories import PostFactory
 
 
 class OrganizationBlueprintTest(FrontTestCase):

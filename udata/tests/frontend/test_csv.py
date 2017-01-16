@@ -4,16 +4,21 @@ from __future__ import unicode_literals
 import re
 import StringIO
 
+import factory
+
 from random import randint
+
+from factory.mongoengine import MongoEngineFactory
 
 from flask import url_for, Blueprint
 
 from udata.models import db
 from udata.core.metrics import Metric, init_app as init_metrics
 from udata.frontend import csv
+from udata.utils import faker
 
 from . import FrontTestCase
-from ..factories import faker, factory, MongoEngineFactory
+
 
 RE_ATTACHMENT = re.compile(r'^attachment; filename=(?P<filename>.*)$')
 RE_FILENAME = re.compile(
@@ -338,8 +343,7 @@ class CsvTest(FrontTestCase):
         self.assert_filename(response, 'export')
 
     def test_empty_stream_from_list(self):
-        with self.assertRaises(ValueError):
-            self.assert_empty_stream_csv('testcsv.from_list')
+        self.assert400(self.get(url_for('testcsv.from_list')))
 
     def test_stream_nested_from_adapter(self):
         fake = FakeFactory.build()

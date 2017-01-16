@@ -1,9 +1,7 @@
 {% extends theme('layouts/1-column.html') %}
 {% from theme('macros/follow.html') import follow_btn with context %}
 
-{% block extra_js %}
-<script src="{{ static('user/display.js') }}"></script>
-{% endblock %}
+{% set bundle = 'user' %}
 
 {% block extra_head %}
 {{ super() }}
@@ -36,23 +34,21 @@
 {% block main_content %}
 <div class="row">
     <div class="col-md-3">
-        <div class="panel panel-default" itemscope itemtype="http://schema.org/Person">
+        <div class="panel panel-default">
             <div class="panel-body">
                 <div class="text-center">
                     <img src="{{ user.avatar|placeholder('user') }}"
-                        alt="{{ user.fullname }}" class="scalable" itemprop="image"/>
+                        alt="{{ user.fullname }}" class="scalable"/>
                 </div>
-                <h2 itemprop="name">{{ user.fullname }}</h2>
-                <div itemprop="description">
-                    {{ user.about|markdown }}
-                </div>
+                <h2>{{ user.fullname }}</h2>
+                {{ user.about|markdown }}
                 {# <hr/> #}
                 <div>
                     <ul class="list-unstyled">
                         {% if user.website %}
                         <li>
                             <span class="glyphicon glyphicon-link"></span>
-                            <a itemprop="url" href="{{user.website}}" rel="nofollow">{{user.website}}</a>
+                            <a href="{{user.website}}" rel="nofollow">{{user.website}}</a>
                         </li>
                         {% endif %}
                     </ul>

@@ -9,7 +9,8 @@ from pkg_resources import resource_isdir, resource_listdir, resource_string
 from flask import current_app
 
 from pymongo.errors import PyMongoError, OperationFailure
-from mongoengine.connection import get_db, DEFAULT_CONNECTION_NAME
+from flask_mongoengine.connection import get_db
+from flask_mongoengine.connection import DEFAULT_CONNECTION_NAME
 
 from udata.commands import submanager, green, yellow, cyan, purple, red
 
@@ -99,10 +100,11 @@ def execute_migration(plugin, filename, script, dryrun=False):
     return success
 
 
-def record_migration(plugin, filename, script):
+def record_migration(plugin, filename, script, **kwargs):
     '''Only record a migration without applying it'''
     db = get_db(DEFAULT_CONNECTION_NAME)
     db.eval(RECORD_WRAPPER, plugin, filename, script)
+    return True
 
 
 def available_migrations():
@@ -119,7 +121,7 @@ def available_migrations():
             migrations.append(('udata', 'udata', filename))
 
     for plugin in current_app.config['PLUGINS']:
-        name = 'udata.ext.{0}'.format(plugin)
+        name = 'udata_{0}'.format(plugin)
         if resource_isdir(name, 'migrations'):
             for filename in resource_listdir(name, 'migrations'):
                 if filename.endswith('.js'):
@@ -149,7 +151,7 @@ def status():
           help='Only records the migrations')
 @m.option('-d', '--dry-run', action='store_true', dest='dryrun',
           help='Only print migrations to be applied')
-def migrate(record, dryrun):
+def migrate(record, dryrun=False):
     '''Perform database migrations'''
     handler = record_migration if record else execute_migration
     success = True

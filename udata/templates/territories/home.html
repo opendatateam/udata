@@ -1,0 +1,40 @@
+{% extends theme("layouts/1-column.html") %}
+
+{% set meta = {
+    'title': _('French regions'),
+    'description': _('French regions'),
+} %}
+
+{% set body_class="territory" %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-sm-12">
+        <div id="map-nav" style="height:800px; width:100%"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ static('vue-common.js') }}"></script>
+    <script src="{{ static('territory.js') }}"></script>
+    <script>
+        var defaultCenter = [47, 2];
+        var defaultZoom = 6;
+        var tilelayer = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png');
+        var map = L.map('map-nav', {
+            center: defaultCenter,
+            zoom: defaultZoom,
+            zoomControl: false
+        });
+        L.geoJson({{ geojson|tojson }}, {
+            onEachFeature: function (feature, layer) {
+                layer.on('click', function () {
+                    window.location = '/fr/territory/region/' + feature.properties.code + '/';
+                })
+            }
+        }).addTo(map);
+        tilelayer.addTo(map);
+        map.setView(defaultCenter, defaultZoom);
+    </script>
+{% endblock %}

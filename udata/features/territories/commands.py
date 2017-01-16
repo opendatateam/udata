@@ -14,7 +14,9 @@ import requests
 
 from flask import current_app
 
-from udata.models import Dataset, ResourceBasedTerritoryDataset
+from udata.models import (
+    Dataset, ResourceBasedTerritoryDataset, TERRITORY_DATASETS
+)
 from udata.commands import submanager
 from udata.core.storages import logos, references, tmp
 
@@ -55,18 +57,25 @@ def collect_references_files():
     if not os.path.exists(REFERENCES_PATH):
         os.makedirs(REFERENCES_PATH)
     if current_app.config.get('ACTIVATE_TERRITORIES'):
-        from udata.models import TERRITORY_DATASETS
-        for territory_class in TERRITORY_DATASETS.values():
-            if not issubclass(territory_class, ResourceBasedTerritoryDataset):
-                continue
+        # TERRITORY_DATASETS is a dict of dicts and we want all values
+        # that are resource based to collect related files.
+        territory_classes = [
+            territory_class
+            for territory_dict in TERRITORY_DATASETS.values()
+            for territory_class in territory_dict.values()
+            if issubclass(territory_class, ResourceBasedTerritoryDataset)]
+        for territory_class in territory_classes:
             dataset = Dataset.objects.get(id=territory_class.dataset_id)
             for resource in dataset.resources:
-                if resource.id == territory_class.resource_id:
-                    break
+                if str(resource.id) != str(territory_class.resource_id):
+                    continue
                 filename = resource.url.split('/')[-1]
                 reference_path = references.path(filename)
+                log.info('Found reference: %s', reference_path)
                 if os.path.exists(reference_path):
+                    log.info('Reference already downloaded')
                     continue
+                log.info('Downloading from: %s', resource.url)
                 with codecs.open(reference_path, 'w', encoding='utf8') as fd:
                     r = requests.get(resource.url, stream=True)
                     for chunk in r.iter_content(chunk_size=1024):

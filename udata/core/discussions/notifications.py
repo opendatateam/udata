@@ -27,8 +27,8 @@ def discussions_notifications(user):
             'id': discussion.id,
             'title': discussion.title,
             'subject': {
-                'id': discussion.subject.id,
-                'type': discussion.subject.collection.lower(),
+                'id': discussion.subject['_ref'].id,
+                'type': discussion.subject['_cls'].lower(),
             }
         }))
 

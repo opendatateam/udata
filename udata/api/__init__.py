@@ -4,22 +4,19 @@ from __future__ import unicode_literals
 import logging
 import urllib
 
-from datetime import datetime
 from functools import wraps
 
 from flask import (
     current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
-from flask.ext.restplus import Api, Resource, marshal
-from flask.ext.restful.utils import cors
+from flask_restplus import Api, Resource, inputs, cors
 
-from udata import search, theme, tracking, models
+from udata import search, theme, tracking
 from udata.app import csrf
 from udata.i18n import I18nBlueprint
 from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
-from udata.utils import multi_to_dict
 from udata.core.user.models import User
 from udata.sitemap import sitemap
 
@@ -45,8 +42,8 @@ class UDataApi(Api):
         self.authorizations = {
             'apikey': {
                 'type': 'apiKey',
-                'passAs': 'header',
-                'keyname': HEADER_API_KEY
+                'in': 'header',
+                'name': HEADER_API_KEY
             }
         }
 
@@ -68,7 +65,7 @@ class UDataApi(Api):
 
     def _apply_secure(self, func, permission=None):
         '''Enforce authentication on a given method/verb'''
-        self._handle_api_doc(func, {'authorizations': 'apikey'})
+        self._handle_api_doc(func, {'security': 'apikey'})
 
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -76,7 +73,7 @@ class UDataApi(Api):
                 self.abort(401)
 
             if permission is not None:
-                with permission.require(403):
+                with permission.require():
                     return func(*args, **kwargs)
             else:
                 return func(*args, **kwargs)
@@ -115,35 +112,6 @@ class UDataApi(Api):
     def render_ui(self):
         return redirect(url_for('apii18n.apidoc'))
 
-    def search_parser(self, adapter, paginate=True):
-        parser = self.parser()
-        # q parameter
-        parser.add_argument('q', type=str, location='args',
-                            help='The search query')
-        # Expected facets
-        # (ie. I want all facets or I want both tags and licenses facets)
-        facets = adapter.facets.keys()
-        if facets:
-            parser.add_argument('facets', type=str, location='args',
-                                choices=['all'] + facets, action='append',
-                                help='Selected facets to fetch')
-        # Add facets filters arguments
-        # (apply a value to a facet ie. tag=value)
-        for name, facet in adapter.facets.items():
-            parser.add_argument(name, type=str, location='args')
-        # Sort arguments
-        keys = adapter.sorts.keys()
-        choices = keys + ['-' + k for k in keys]
-        help_msg = 'The field (and direction) on which sorting apply'
-        parser.add_argument('sort', type=str, location='args', choices=choices,
-                            help=help_msg)
-        if paginate:
-            parser.add_argument('page', type=int, location='args',
-                                default=0, help='The page to display')
-            parser.add_argument('page_size', type=int, location='args',
-                                default=20, help='The page size')
-        return parser
-
     def unauthorized(self, response):
         '''Override to change the WWW-Authenticate challenge'''
         realm = current_app.config.get('HTTP_OAUTH_REALM', 'uData')
@@ -160,38 +128,20 @@ class UDataApi(Api):
                             help='The page size to fetch')
         return parser
 
-    def resolve_model(self, model):
-        '''
-        Resolve a model given a name or dict with `class` entry.
-
-        Conventions are resolved too: DatasetFull will resolve as Dataset
-        '''
-        if not model:
-            raise ValueError('Unsupported model specifications')
-        if isinstance(model, basestring):
-            classname = model
-        elif isinstance(model, dict) and 'class' in model:
-            classname = model['class']
-        else:
-            raise ValueError('Unsupported model specifications')
-
-        # Handle Full convention until fields masks make it in
-        if classname.endswith('Full'):
-            classname = classname[:-4]
-
-        resolved = getattr(models, classname, None)
-        if not resolved or not issubclass(resolved, models.db.Document):
-            raise ValueError('Model not found')
-        return resolved
-
 
 api = UDataApi(
-    apiv1, ui=False,
+    apiv1,
     decorators=[csrf.exempt, cors.crossdomain(origin='*', credentials=True)],
     version='1.0', title='uData API',
     description='uData API', default='site',
     default_label='Site global namespace'
 )
+
+
+api.model_reference = api.model('ModelReference', {
+    'class': fields.ClassName(description='The model class', required=True),
+    'id': fields.String(description='The object identifier', required=True),
+})
 
 
 @api.representation('application/json')
@@ -239,25 +189,29 @@ def collect_stats(response):
     return response
 
 
+default_error = api.model('Error', {
+    'message': fields.String
+})
+
+
 @api.errorhandler(PermissionDenied)
+@api.marshal_with(default_error, code=403)
 def handle_permission_denied(error):
+    '''Error occuring when the user does not have the required permissions'''
     message = 'You do not have the permission to modify that object.'
-    return {
-        'message': message,
-        'status': 403
-    }, 403
+    return {'message': message}, 403
 
 
 @api.errorhandler(ValueError)
+@api.marshal_with(default_error, code=400)
 def handle_value_error(error):
-    return {
-        'message': str(error),
-        'status': 400
-    }, 400
+    '''A generic value error'''
+    return {'message': str(error)}, 400
 
 
 @apidoc.route('/api/')
 @apidoc.route('/api/1/')
+@api.documentation
 def default_api():
     return redirect(url_for('apidoc.swaggerui'))
 
@@ -285,72 +239,9 @@ def fix_apidoc_throbber():
 
 
 class API(Resource):  # Avoid name collision as resource is a core model
-    pass
-
-
-class ModelListAPI(API):
-    model = None
-    fields = None
-    form = None
-    search_adapter = None
-
-    @api.doc(params={})
-    def get(self):
-        '''List all objects'''
-        if self.search_adapter:
-            objects = search.query(self.search_adapter,
-                                   **multi_to_dict(request.args))
-        else:
-            objects = list(self.model.objects)
-        return marshal_page(objects, self.fields)
-
-    @api.secure
-    @api.doc(responses={400: 'Validation error'})
-    def post(self):
-        '''Create a new object'''
-        form = api.validate(self.form)
-        return marshal(form.save(), self.fields), 201
-
-
-class SingleObjectAPI(object):
-    model = None
-
-    def get_or_404(self, **kwargs):
-        for key, value in kwargs.items():
-            if isinstance(value, self.model):
-                return value
-        return self.model.objects.get_or_404(**kwargs)
-
-
-@api.doc(responses={404: 'Object not found'})
-class ModelAPI(SingleObjectAPI, API):
-    fields = None
-    form = None
-
-    def get(self, **kwargs):
-        '''Get a given object'''
-        obj = self.get_or_404(**kwargs)
-        return marshal(obj, self.fields)
-
-    @api.secure
-    @api.doc(responses={400: 'Validation error'})
-    def put(self, **kwargs):
-        '''Update a given object'''
-        obj = self.get_or_404(**kwargs)
-        form = api.validate(self.form, obj)
-        return marshal(form.save(), self.fields)
-
-    @api.secure
-    @api.doc(model=None, responses={204: 'Object deleted'})
-    def delete(self, **kwargs):
-        '''Delete a given object'''
-        obj = self.get_or_404(**kwargs)
-        if hasattr(obj, 'deleted'):
-            obj.deleted = datetime.now()
-            obj.save()
-        else:
-            obj.delete()
-        return '', 204
+    @api.hide
+    def options(self):
+        pass  # Only here to allow default Flask response
 
 
 base_reference = api.model('BaseReference', {
@@ -394,7 +285,7 @@ def init_app(app):
 
     # Load plugins API
     for plugin in app.config['PLUGINS']:
-        name = 'udata.ext.{0}.api'.format(plugin)
+        name = 'udata_{0}.api'.format(plugin)
         try:
             __import__(name)
         except ImportError:

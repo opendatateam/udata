@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from blinker import signal
 
 from flask import current_app
-from flask.ext.mail import Mail, Message
+from flask_mail import Mail, Message
 
 from udata import theme, i18n
 

@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from elasticsearch_dsl import Boolean, Completion, Date,  Object, String
+
+from udata.i18n import lazy_gettext as _
 from udata.core.site.views import current_site
 from udata.models import (
     Reuse, Organization, Dataset, User, REUSE_TYPES
 )
-from udata.search import BoolBooster, GaussDecay
 from udata.search import (
-    ModelSearchAdapter, Sort, i18n_analyzer, metrics_mapping
+    BoolBooster, GaussDecay, ModelSearchAdapter,
+    i18n_analyzer, metrics_mapping_for, register,
+    RangeFacet, TermsFacet, ModelTermsFacet, BoolFacet
 )
-from udata.search import RangeFacet, BoolFacet, ExtrasFacet
-from udata.search import TermFacet, ModelTermFacet
+from udata.search.analysis import simple
 
 from . import metrics  # noqa: Metrics are require for reuse search
 
@@ -26,98 +29,92 @@ def max_followers():
     return max(current_site.metrics.get('max_reuse_followers'), 10)
 
 
-class ReuseTypeFacet(TermFacet):
-    def labelize(self, label, value):
-        return REUSE_TYPES[value]
+def reuse_type_labelizer(value):
+    return REUSE_TYPES[value]
 
 
-def reuse_badge_labelizer(label, kind):
+def reuse_badge_labelizer(kind):
     return Reuse.__badges__.get(kind, '')
 
 
+@register
 class ReuseSearch(ModelSearchAdapter):
     model = Reuse
     fuzzy = True
+
+    class Meta:
+        doc_type = 'Reuse'
+
+    title = String(analyzer=i18n_analyzer, fields={
+        'raw': String(index='not_analyzed')
+    })
+    description = String(analyzer=i18n_analyzer)
+    url = String(index='not_analyzed')
+    organization = String(index='not_analyzed')
+    owner = String(index='not_analyzed')
+    type = String(index='not_analyzed')
+    tags = String(index='not_analyzed', fields={
+        'i18n': String(index='not_analyzed')
+    })
+    badges = String(index='not_analyzed')
+    tag_suggest = Completion(analyzer=simple,
+                             search_analyzer=simple,
+                             payloads=False)
+    datasets = Object(
+        properties={
+            'id': String(index='not_analyzed'),
+            'title': String(),
+        }
+    )
+    created = Date(format='date_hour_minute_second')
+    last_modified = Date(format='date_hour_minute_second')
+    metrics = metrics_mapping_for(Reuse)
+    featured = Boolean()
+    reuse_suggest = Completion(analyzer=simple,
+                               search_analyzer=simple,
+                               payloads=True)
+    extras = Object()
+
     fields = (
         'title^4',
         'description^2',
         'datasets.title',
     )
     facets = {
-        'tag': TermFacet('tags'),
-        'organization': ModelTermFacet('organization', Organization),
-        'owner': ModelTermFacet('owner', User),
-        'dataset': ModelTermFacet('dataset.id', Dataset),
-        'type': ReuseTypeFacet('type'),
-        'datasets': RangeFacet('metrics.datasets'),
-        'followers': RangeFacet('metrics.followers'),
-        'featured': BoolFacet('featured'),
-        'extra': ExtrasFacet('extras'),
-        'badge': TermFacet('badges', labelizer=reuse_badge_labelizer),
+        'tag': TermsFacet(field='tags'),
+        'organization': ModelTermsFacet(field='organization',
+                                        model=Organization),
+        'owner': ModelTermsFacet(field='owner', model=User),
+        'dataset': ModelTermsFacet(field='dataset.id', model=Dataset),
+        'type': TermsFacet(field='type', labelizer=reuse_type_labelizer),
+        'datasets': RangeFacet(field='metrics.datasets',
+                               ranges=[('none', (None, 1)),
+                                       ('few', (1, 5)),
+                                       ('many', (5, None))],
+                               labels={
+                                    'none': _('No datasets'),
+                                    'few': _('Few datasets'),
+                                    'many': _('Many datasets'),
+                               }),
+        'followers': RangeFacet(field='metrics.followers',
+                                ranges=[('none', (None, 1)),
+                                        ('few', (1, 5)),
+                                        ('many', (5, None))],
+                                labels={
+                                     'none': _('No followers'),
+                                     'few': _('Few followers'),
+                                     'many': _('Many followers'),
+                                }),
+        'badge': TermsFacet(field='badges', labelizer=reuse_badge_labelizer),
+        'featured': BoolFacet(field='featured'),
     }
     sorts = {
-        'title': Sort('title.raw'),
-        'created': Sort('created'),
-        'last_modified': Sort('last_modified'),
-        'datasets': Sort('metrics.datasets'),
-        'followers': Sort('metrics.followers'),
-        'views': Sort('metrics.views'),
-    }
-    mapping = {
-        'properties': {
-            'title': {
-                'type': 'string',
-                'analyzer': i18n_analyzer,
-                'fields': {
-                    'raw': {'type': 'string', 'index': 'not_analyzed'}
-                }
-            },
-            'description': {'type': 'string', 'analyzer': i18n_analyzer},
-            'url': {'type': 'string'},
-            'organization': {'type': 'string'},
-            'owner': {'type': 'string'},
-            'type': {'type': 'string'},
-            'tags': {
-                'type': 'string',
-                'index_name': 'tag',
-                'index': 'not_analyzed'
-            },
-            'tag_suggest': {
-                'type': 'completion',
-                'index_analyzer': 'simple',
-                'search_analyzer': 'simple',
-                'payloads': False,
-            },
-            'badges': {
-                'type': 'string',
-                'index_name': 'badges',
-                'index': 'not_analyzed'
-            },
-            'created': {'type': 'date', 'format': 'date_hour_minute_second'},
-            'last_modified': {
-                'type': 'date',
-                'format': 'date_hour_minute_second'
-            },
-            'dataset': {
-                'type': 'object',
-                'properties': {
-                    'id': {'type': 'string'},
-                    'title': {'type': 'string'}
-                }
-            },
-            'metrics': metrics_mapping(Reuse),
-            'featured': {'type': 'boolean'},
-            'reuse_suggest': {
-                'type': 'completion',
-                'index_analyzer': 'simple',
-                'search_analyzer': 'simple',
-                'payloads': True,
-            },
-            'extras': {
-                'type': 'object',
-                'index_name': 'extra',
-            },
-        }
+        'title': 'title.raw',
+        'created': 'created',
+        'last_modified': 'last_modified',
+        'datasets': 'metrics.datasets',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
     }
     boosters = [
         BoolBooster('featured', 1.1),

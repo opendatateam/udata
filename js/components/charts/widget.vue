@@ -41,7 +41,6 @@
 <script>
 import $ from 'jquery';
 import moment from 'moment';
-import debounce from 'debounce';
 import Chart from 'chart.js';
 import 'Chart.StackedBar.js';
 

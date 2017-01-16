@@ -1,25 +1,36 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from elasticsearch_dsl import (
+    Boolean, Completion, Date, Long, Object, String, Nested
+)
+
+from udata.i18n import lazy_gettext as _
 from udata.core.site.views import current_site
-
-
 from udata.models import (
-    Dataset, Organization, License, User, GeoZone,
+    Dataset, Organization, License, User, GeoZone, CERTIFIED
 )
-from udata.search import ModelSearchAdapter, i18n_analyzer, metrics_mapping
+from udata.search import (
+    ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
+)
 from udata.search.fields import (
-    Sort, BoolFacet, TemporalCoverageFacet, ExtrasFacet
+    TermsFacet, ModelTermsFacet, RangeFacet, TemporalCoverageFacet,
+    BoolBooster, GaussDecay, BoolFacet, ValueFactor
 )
-from udata.search.fields import TermFacet, ModelTermFacet, RangeFacet
-from udata.search.fields import BoolBooster, GaussDecay
+from udata.search.analysis import simple
 
-from udata.core.spatial.models import spatial_granularities
+from udata.core.spatial.models import (
+    admin_levels, spatial_granularities, ADMIN_LEVEL_MAX
+)
 
 # Metrics are require for dataset search
 from . import metrics  # noqa
 
 __all__ = ('DatasetSearch', )
+
+
+# After this number of years, scoring is kept constant instead of increasing.
+MAX_TEMPORAL_WEIGHT = 10
 
 
 def max_reuses():
@@ -30,112 +41,73 @@ def max_followers():
     return max(current_site.metrics.get('max_dataset_followers'), 10)
 
 
-def granularity_labelizer(label, value):
-    return dict(spatial_granularities).get(value, value)
+def granularity_labelizer(value):
+    return dict(spatial_granularities).get(value)
 
 
-def zone_labelizer(label, value):
+def zone_labelizer(value):
     if value and isinstance(value, basestring):
         return GeoZone.objects(id=value).first() or value
     return value
 
 
-def dataset_badge_labelizer(label, kind):
+def dataset_badge_labelizer(kind):
     return Dataset.__badges__.get(kind, '')
 
 
+@register
 class DatasetSearch(ModelSearchAdapter):
     model = Dataset
     fuzzy = True
-    mapping = {
-        'properties': {
-            'title': {
-                'type': 'string',
-                'analyzer': i18n_analyzer,
-                'fields': {
-                    'raw': {'type': 'string', 'index': 'not_analyzed'}
-                }
-            },
-            'description': {'type': 'string', 'analyzer': i18n_analyzer},
-            'license': {'type': 'string', 'index': 'not_analyzed'},
-            'frequency': {'type': 'string'},
-            'organization': {'type': 'string'},
-            'owner': {'type': 'string'},
-            'tags': {
-                'type': 'string',
-                'index_name': 'tag',
-                'index': 'not_analyzed',
-                'fields': {
-                    'i18n': {'type': 'string', 'analyzer': i18n_analyzer}
-                }
-            },
-            'badges': {
-                'type': 'string',
-                'index_name': 'badges',
-                'index': 'not_analyzed'
-            },
-            'tag_suggest': {
-                'type': 'completion',
-                'index_analyzer': 'simple',
-                'search_analyzer': 'simple',
-                'payloads': False,
-            },
-            'resources': {
-                'type': 'object',
-                'index_name': 'resource',
-                'properties': {
-                    'title': {'type': 'string'},
-                    'description': {'type': 'string'},
-                    'license': {'type': 'string'},
-                }
-            },
-            'format_suggest': {
-                'type': 'completion',
-                'index_analyzer': 'simple',
-                'search_analyzer': 'simple',
-                'payloads': False,
-            },
-            'dataset_suggest': {
-                'type': 'completion',
-                'index_analyzer': 'simple',
-                'search_analyzer': 'simple',
-                'payloads': True,
-            },
-            'created': {'type': 'date', 'format': 'date_hour_minute_second'},
-            'last_modified': {
-                'type': 'date',
-                'format': 'date_hour_minute_second'
-            },
-            'metrics': metrics_mapping(Dataset),
-            'featured': {'type': 'boolean'},
-            # Store dates as ordinals to handle pre-1900 dates.
-            'temporal_coverage': {
-                'type': 'object',
-                'properties': {
-                    'start': {'type': 'long'},
-                    'end': {'type': 'long'},
-                }
-            },
-            'geozones': {
-                'type': 'object',
-                'index_name': 'geozones',
-                'properties': {
-                    'id': {'type': 'string', 'index': 'not_analyzed'},
-                    'name': {'type': 'string', 'index': 'not_analyzed'},
-                    'keys': {'type': 'string', 'index': 'not_analyzed'},
-                }
-            },
-            'granularity': {'type': 'string', 'index': 'not_analyzed'},
-            # 'geom': {
-            #     'type': 'geo_shape',
-            #     'precision': '100m',
-            # },
-            'extras': {
-                'type': 'object',
-                'index_name': 'extra',
-            },
-        }
-    }
+
+    class Meta:
+        doc_type = 'Dataset'
+
+    title = String(analyzer=i18n_analyzer, fields={
+        'raw': String(index='not_analyzed')
+    })
+    description = String(analyzer=i18n_analyzer)
+    license = String(index='not_analyzed')
+    frequency = String(index='not_analyzed')
+    organization = String(index='not_analyzed')
+    owner = String(index='not_analyzed')
+    tags = String(index='not_analyzed', fields={
+        'i18n': String(index='not_analyzed')
+    })
+    badges = String(index='not_analyzed')
+    tag_suggest = Completion(analyzer=simple,
+                             search_analyzer=simple,
+                             payloads=False)
+    resources = Object(properties={
+        'title': String(),
+        'description': String(),
+        'format': String(index='not_analyzed')
+    })
+    format_suggest = Completion(analyzer=simple,
+                                search_analyzer=simple,
+                                payloads=False)
+    dataset_suggest = Completion(analyzer=simple,
+                                 search_analyzer=simple,
+                                 payloads=True)
+    created = Date(format='date_hour_minute_second')
+    last_modified = Date(format='date_hour_minute_second')
+    metrics = metrics_mapping_for(Dataset)
+    featured = Boolean()
+    temporal_coverage = Nested(multi=False, properties={
+        'start': Long(),
+        'end': Long()
+    })
+    temporal_weight = Long(),
+    geozones = Object(properties={
+        'id': String(index='not_analyzed'),
+        'name': String(index='not_analyzed'),
+        'keys': String(index='not_analyzed')
+    })
+    granularity = String(index='not_analyzed')
+    coverage_weight = Long()
+    extras = Object()
+    from_certified = Boolean()
+
     fields = (
         'geozones.keys^9',
         'geozones.name^9',
@@ -144,29 +116,45 @@ class DatasetSearch(ModelSearchAdapter):
         'description',
     )
     sorts = {
-        'title': Sort('title.raw'),
-        'created': Sort('created'),
-        'last_modified': Sort('last_modified'),
-        'reuses': Sort('metrics.reuses'),
-        'followers': Sort('metrics.followers'),
-        'views': Sort('metrics.views'),
+        'title': 'title.raw',
+        'created': 'created',
+        'last_modified': 'last_modified',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
     }
+
     facets = {
-        'tag': TermFacet('tags'),
-        'badge': TermFacet('badges', labelizer=dataset_badge_labelizer),
-        'organization': ModelTermFacet('organization', Organization),
-        'owner': ModelTermFacet('owner', User),
-        'license': ModelTermFacet('license', License),
-        'geozone': ModelTermFacet('geozones.id', GeoZone, zone_labelizer),
-        'granularity': TermFacet('granularity', granularity_labelizer),
-        'format': TermFacet('resources.format'),
-        'reuses': RangeFacet('metrics.reuses'),
-        'temporal_coverage': TemporalCoverageFacet('temporal_coverage'),
-        'featured': BoolFacet('featured'),
-        'extra': ExtrasFacet('extras'),
+        'tag': TermsFacet(field='tags'),
+        'badge': TermsFacet(field='badges', labelizer=dataset_badge_labelizer),
+        'organization': ModelTermsFacet(field='organization',
+                                        model=Organization),
+        'owner': ModelTermsFacet(field='owner', model=User),
+        'license': ModelTermsFacet(field='license', model=License),
+        'geozone': ModelTermsFacet(field='geozones.id', model=GeoZone,
+                                   labelizer=zone_labelizer),
+        'granularity': TermsFacet(field='granularity',
+                                  labelizer=granularity_labelizer),
+        'format': TermsFacet(field='resources.format'),
+        'reuses': RangeFacet(field='metrics.reuses',
+                             ranges=[('none', (None, 1)),
+                                     ('few', (1, 5)),
+                                     ('quite', (5, 10)),
+                                     ('many', (10, None))],
+                             labels={
+                                 'none': _('Never reused'),
+                                 'few': _('Little reused'),
+                                 'quite': _('Quite reused'),
+                                 'many': _('Heavily reused'),
+                             }),
+        'temporal_coverage': TemporalCoverageFacet(field='temporal_coverage'),
+        'featured': BoolFacet(field='featured'),
     }
     boosters = [
-        BoolBooster('featured', 1.1),
+        BoolBooster('featured', 1.5),
+        BoolBooster('from_certified', 1.2),
+        ValueFactor('coverage_weight', missing=1),
+        ValueFactor('temporal_weight', missing=1),
         GaussDecay('metrics.reuses', max_reuses, decay=0.1),
         GaussDecay(
             'metrics.followers', max_followers, max_followers, decay=0.1),
@@ -188,6 +176,8 @@ class DatasetSearch(ModelSearchAdapter):
             image_url = dataset.owner.avatar(40)
         else:
             image_url = None
+
+        certified = dataset.organization and dataset.organization.certified
 
         document = {
             'title': dataset.title,
@@ -225,15 +215,17 @@ class DatasetSearch(ModelSearchAdapter):
             'metrics': dataset.metrics,
             'extras': dataset.extras,
             'featured': dataset.featured,
+            'from_certified': certified,
         }
         if (dataset.temporal_coverage is not None and
                 dataset.temporal_coverage.start and
                 dataset.temporal_coverage.end):
+            start = dataset.temporal_coverage.start.toordinal()
+            end = dataset.temporal_coverage.end.toordinal()
+            weight = min((end - start) / 365, MAX_TEMPORAL_WEIGHT)
             document.update({
-                'temporal_coverage': {
-                    'start': dataset.temporal_coverage.start.toordinal(),
-                    'end': dataset.temporal_coverage.end.toordinal(),
-                }
+                'temporal_coverage': {'start': start, 'end': end},
+                'temporal_weight': weight,
             })
 
         if dataset.spatial is not None:
@@ -243,6 +235,7 @@ class DatasetSearch(ModelSearchAdapter):
                 id__in=[z.id for z in dataset.spatial.zones])
             parents = set()
             geozones = []
+            coverage_level = ADMIN_LEVEL_MAX
             for zone in zones:
                 geozones.append({
                     'id': zone.id,
@@ -250,6 +243,7 @@ class DatasetSearch(ModelSearchAdapter):
                     'keys': zone.keys_values
                 })
                 parents |= set(zone.parents)
+                coverage_level = min(coverage_level, admin_levels[zone.level])
 
             geozones.extend([{'id': p} for p in parents])
 
@@ -257,6 +251,7 @@ class DatasetSearch(ModelSearchAdapter):
                 'geozones': geozones,
                 # 'geom': dataset.spatial.geom,
                 'granularity': dataset.spatial.granularity,
+                'coverage_weight': ADMIN_LEVEL_MAX / coverage_level,
             })
 
         return document

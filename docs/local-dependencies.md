@@ -14,6 +14,15 @@ $ pip install -r udata/requirements/develop.pip
 $ pip install -e udata/
 ```
 
+Some dependencies have an optionnal compilation support for Cython
+resulting in more performances (mostly XML harvesting).
+To enable it, you need to install Cython before all other dependencies:
+
+```shell
+$ pip install Cython
+$ pip install -r udata/requirements/develop.pip
+$ pip install -e udata/
+```
 
 ## NodeJS and modules
 

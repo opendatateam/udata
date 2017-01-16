@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.api import api, API
+from flask import current_app, abort
 
+from flask_restplus import inputs
+
+from udata.api import api, API
 from udata import search
 from udata.i18n import _
-from udata.models import Dataset
+from udata.models import Dataset, TERRITORY_DATASETS
+from udata.core.dataset.api_fields import dataset_ref_fields
 
 from .api_fields import (
     level_fields,
@@ -32,6 +36,36 @@ suggest_parser.add_argument(
     'size', type=int, help='The amount of suggestion to fetch',
     location='args', default=10)
 
+dataset_parser = api.parser()
+dataset_parser.add_argument(
+    'dynamic', type=inputs.boolean, help='Append dynamic datasets',
+    location='args', required=False)
+dataset_parser.add_argument(
+    'size', type=int, help='The amount of datasets to fetch',
+    location='args', default=25)
+
+
+@ns.route('/zones/suggest', endpoint='suggest_zones')
+class SuggestZonesAPI(API):
+    @api.marshal_list_with(zone_suggestion_fields)
+    @api.expect(suggest_parser)
+    @api.doc('suggest_zones')
+    def get(self):
+        '''Suggest geospatial zones'''
+        args = suggest_parser.parse_args()
+        return [
+            {
+                'id': opt['text'],
+                'name': _(opt['payload']['name']),
+                'code': opt['payload']['code'],
+                'level': opt['payload']['level'],
+                'keys': opt['payload']['keys'],
+                'score': opt['score'],
+            }
+            for opt in search.suggest(
+                args['q'], 'zone_suggest', args['size'])
+        ]
+
 
 @ns.route('/zones/<pathlist:ids>', endpoint='zones')
 class ZonesAPI(API):
@@ -48,35 +82,54 @@ class ZonesAPI(API):
         }
 
 
+@ns.route('/zone/<path:id>/children', endpoint='zone_children')
+class ZoneChildrenAPI(API):
+    @api.doc('spatial_zone', params={'id': 'A zone identifier'})
+    @api.marshal_list_with(feature_collection_fields)
+    def get(self, id):
+        '''Fetch children of a zone.'''
+        zone = GeoZone.objects.get_or_404(id=id)
+        if not current_app.config.get('ACTIVATE_TERRITORIES'):
+            return abort(501)
+        return {
+            'type': 'FeatureCollection',
+            'features': [z.toGeoJSON() for z in zone.children]
+        }
+
+
+@ns.route('/zone/<path:id>/datasets', endpoint='zone_datasets')
+class ZoneDatasetsAPI(API):
+    @api.doc('spatial_zone', params={'id': 'A zone identifier'})
+    @api.expect(dataset_parser)
+    @api.marshal_with(dataset_ref_fields)
+    def get(self, id):
+        '''Fetch datasets for a given zone'''
+        args = dataset_parser.parse_args()
+        zone = GeoZone.objects.get_or_404(id=id)
+        if (args.get('dynamic')
+                and current_app.config.get('ACTIVATE_TERRITORIES')):
+            DATASETS = TERRITORY_DATASETS[zone.level_name]
+            dynamic_dataset_classes = sorted(DATASETS.values(),
+                                             key=lambda a: a.order)
+            datasets = [
+                dynamic_dataset_class(zone)
+                for dynamic_dataset_class in dynamic_dataset_classes
+            ]
+        else:
+            datasets = []
+        datasets += list(Dataset.objects.visible()
+                         .filter(spatial__zones=zone)
+                         .limit(args['size']))
+        return datasets
+
+
 @ns.route('/zone/<path:id>', endpoint='zone')
 class ZoneAPI(API):
     @api.doc('spatial_zone', params={'id': 'A zone identifier'})
-    @api.marshal_with(zone_suggestion_fields)
     def get(self, id):
         '''Fetch a zone'''
         zone = GeoZone.objects.get_or_404(id=id)
-        return zone
-
-
-@ns.route('/zones/suggest', endpoint='suggest_zones')
-class SuggestZonesAPI(API):
-    @api.marshal_list_with(zone_suggestion_fields)
-    @api.doc('suggest_zones', parser=suggest_parser)
-    def get(self):
-        '''Suggest geospatial zones'''
-        args = suggest_parser.parse_args()
-        return [
-            {
-                'id': opt['text'],
-                'name': _(opt['payload']['name']),
-                'code': opt['payload']['code'],
-                'level': opt['payload']['level'],
-                'keys': opt['payload']['keys'],
-                'score': opt['score'],
-            }
-            for opt in search.suggest(
-                args['q'], 'zone_suggest', args['size'])
-        ]
+        return zone.toGeoJSON()
 
 
 @ns.route('/levels', endpoint='spatial_levels')
@@ -115,7 +168,7 @@ class SpatialCoverageAPI(API):
 
         for zone in GeoZone.objects(level=level.id):
             # fetch nested levels IDs
-            ids = GeoZone.objects(parents=zone.id).distinct('id')
+            ids = GeoZone.objects(parents=zone.id).only('id').distinct('id')
             ids.append(zone.id)
             # Count datasets in zone
             nb_datasets = Dataset.objects(spatial__zones__in=ids).count()

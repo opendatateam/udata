@@ -11,9 +11,9 @@ from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from werkzeug import cached_property
 
+from udata.frontend.markdown import mdstrip
 from udata.models import (
-    db, WithMetrics, BadgeMixin, Discussion, Follow, Issue,
-    SpatialCoverage, OwnedByQuerySet
+    db, WithMetrics, BadgeMixin, SpatialCoverage, OwnedByQuerySet
 )
 from udata.i18n import lazy_gettext as _
 from udata.utils import hash_url
@@ -23,27 +23,48 @@ from .croquemort import check_url_from_cache, check_url_from_group
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
-    'DatasetIssue', 'DatasetDiscussion', 'FollowDataset',
-    'UPDATE_FREQUENCIES', 'RESOURCE_TYPES',
+    'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_TYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE'
 )
 
-UPDATE_FREQUENCIES = {
-    'punctual': _('Punctual'),
-    'realtime': _('Real time'),
-    'daily': _('Daily'),
-    'weekly': _('Weekly'),
-    'fortnighly': _('Fortnighly'),
-    'monthly': _('Monthly'),
-    'bimonthly': _('Bimonthly'),
-    'quarterly': _('Quarterly'),
-    'biannual': _('Biannual'),
-    'annual': _('Annual'),
-    'biennial': _('Biennial'),
-    'triennial': _('Triennial'),
-    'quinquennial': _('Quinquennial'),
-    'unknown': _('Unknown'),
+#: Udata frequencies with their labels
+#:
+#: See: http://dublincore.org/groups/collections/frequency/
+UPDATE_FREQUENCIES = {                              # Dublin core equivalent
+    'punctual': _('Punctual'),                      # N/A
+    'continuous': _('Real time'),                   # freq:continuous
+    'hourly': _('Hourly'),                          # N/A
+    'fourTimesADay': _('Four times a day'),         # N/A
+    'threeTimesADay': _('Three times a day'),       # N/A
+    'semidaily': _('Semidaily'),                    # N/A
+    'daily': _('Daily'),                            # freq:daily
+    'fourTimesAWeek': _('Four times a week'),       # N/A
+    'threeTimesAWeek': _('Three times a week'),     # freq:threeTimesAWeek
+    'semiweekly': _('Semiweekly'),                  # freq:semiweekly
+    'weekly': _('Weekly'),                          # freq:weekly
+    'biweekly': _('Biweekly'),                      # freq:bimonthly
+    'semimonthly': _('Semimonthly'),                # freq:semimonthly
+    'threeTimesAMonth': _('Three times a month'),   # freq:threeTimesAMonth
+    'monthly': _('Monthly'),                        # freq:monthly
+    'bimonthly': _('Bimonthly'),                    # freq:bimonthly
+    'quarterly': _('Quarterly'),                    # freq:quarterly
+    'threeTimesAYear': _('Three times a year'),     # freq:threeTimesAYear
+    'semiannual': _('Biannual'),                    # freq:semiannual
+    'annual': _('Annual'),                          # freq:annual
+    'biennial': _('Biennial'),                      # freq:biennial
+    'triennial': _('Triennial'),                    # freq:triennial
+    'quinquennial': _('Quinquennial'),              # N/A
+    'irregular': _('Irregular'),                    # freq:irregular
+    'unknown': _('Unknown'),                        # N/A
 }
+
+#: Map legacy frequencies to currents
+LEGACY_FREQUENCIES = {
+    'fortnighly': 'biweekly',
+    'biannual': 'semiannual',
+    'realtime': 'continuous',
+}
+
 
 DEFAULT_FREQUENCY = 'unknown'
 
@@ -70,6 +91,8 @@ CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
 
 
 class License(db.Document):
+    # We need to declare id explicitly since we do not use the default
+    # value set by Mongo.
     id = db.StringField(primary_key=True)
     created_at = db.DateTimeField(default=datetime.now, required=True)
     title = db.StringField(required=True)
@@ -150,8 +173,63 @@ class ResourceMixin(object):
     def is_available(self):
         return self.check_availability(group=None)
 
+    @property
+    def latest(self):
+        '''
+        Permanent link to the latest version of this resource.
+
+        If this resource is updated and `url` changes, this property won't.
+        '''
+        return url_for('datasets.resource', id=self.id, _external=True)
+
+    @cached_property
+    def json_ld(self):
+
+        result = {
+            '@type': 'DataDownload',
+            '@id': str(self.id),
+            'url': self.latest,
+            'name': self.title or _('Nameless resource'),
+            'contentUrl': self.url,
+            'dateCreated': self.created_at.isoformat(),
+            'dateModified': self.modified.isoformat(),
+            'datePublished': self.published.isoformat(),
+        }
+
+        if 'views' in self.metrics:
+            result['interactionStatistic'] = {
+                '@type': 'InteractionCounter',
+                'interactionType': {
+                    '@type': 'DownloadAction',
+                },
+                'userInteractionCount': self.metrics['views']
+            }
+
+        if self.format:
+            result['encodingFormat'] = self.format
+
+        if self.filesize:
+            result['contentSize'] = self.filesize
+
+        if self.mime:
+            result['fileFormat'] = self.mime
+
+        if self.description:
+            result['description'] = mdstrip(self.description)
+
+        # These 2 values are not standard
+        if self.checksum:
+            result['checksum'] = self.checksum.value,
+            result['checksumType'] = self.checksum.type or 'sha1'
+
+        return result
+
 
 class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
+    '''
+    Local file, remote file or API provided by the original provider of the
+    dataset
+    '''
     on_added = signal('Resource.on_added')
     on_deleted = signal('Resource.on_deleted')
 
@@ -161,9 +239,9 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
                                default=datetime.now, required=True)
     last_modified = DateTimeField(verbose_name=_('Last modification date'),
                                   default=datetime.now, required=True)
-    title = db.StringField(max_length=255, required=True)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from='title', update=True)
+    title = db.StringField(required=True)
+    slug = db.SlugField(max_length=255, required=True,
+                        populate_from='title', update=True)
     description = db.StringField(required=True, default='')
     license = db.ReferenceField('License')
 
@@ -229,6 +307,11 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             cls.on_create.send(document)
         else:
             cls.on_update.send(document)
+
+    def clean(self):
+        super(Dataset, self).clean()
+        if self.frequency in LEGACY_FREQUENCIES:
+            self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
     def url_for(self, *args, **kwargs):
         return url_for('datasets.show', dataset=self, *args, **kwargs)
@@ -324,7 +407,11 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             * description length
             * and so on
         """
+        from udata.models import Discussion  # noqa: Prevent circular imports
         result = {}
+        if not self.id:
+            # Quality is only relevant on saved Datasets
+            return result
         if self.next_update:
             result['frequency'] = self.frequency
             result['update_in'] = -(self.next_update - datetime.now()).days
@@ -338,7 +425,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
                 resource.closed_format for resource in self.resources)
             result['has_unavailable_resources'] = not all(
                 self.check_availability())
-        discussions = DatasetDiscussion.objects(subject=self.id)
+        discussions = Discussion.objects(subject=self)
         if discussions:
             result['discussions'] = len(discussions)
             result['has_untreated_discussions'] = not all(
@@ -414,11 +501,62 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
     def community_resources(self):
         return self.id and CommunityResource.objects.filter(dataset=self) or []
 
+    @cached_property
+    def json_ld(self):
+        result = {
+            '@context': 'http://schema.org',
+            '@type': 'Dataset',
+            '@id': str(self.id),
+            'alternateName': self.slug,
+            'dateCreated': self.created_at.isoformat(),
+            'dateModified': self.last_modified.isoformat(),
+            'url': url_for('datasets.show', dataset=self, _external=True),
+            'name': self.title,
+            'keywords': ','.join(self.tags),
+            'distribution': [resource.json_ld for resource in self.resources],
+            # This value is not standard
+            'extras': [self.get_json_ld_extra(*item)
+                       for item in self.extras.items()],
+        }
+
+        if self.description:
+            result['description'] = mdstrip(self.description)
+
+        if self.license and self.license.url:
+            result['license'] = self.license.url
+
+        if self.organization:
+            author = self.organization.json_ld
+        elif self.owner:
+            author = self.owner.json_ld
+        else:
+            author = None
+
+        if author:
+            result['author'] = author
+
+        return result
+
+    @staticmethod
+    def get_json_ld_extra(key, value):
+
+        value = value.serialize() if hasattr(value, 'serialize') else value
+        return {
+            '@type': 'http://schema.org/PropertyValue',
+            'name': key,
+            'value': value,
+        }
+
+
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
 
 
 class CommunityResource(ResourceMixin, WithMetrics, db.Document):
+    '''
+    Local file, remote file or API added by the community of the users to the
+    original dataset
+    '''
     dataset = db.ReferenceField(Dataset)
     owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
     organization = db.ReferenceField(
@@ -432,15 +570,3 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Document):
     @property
     def from_community(self):
         return True
-
-
-class DatasetIssue(Issue):
-    subject = db.ReferenceField(Dataset)
-
-
-class DatasetDiscussion(Discussion):
-    subject = db.ReferenceField(Dataset)
-
-
-class FollowDataset(Follow):
-    following = db.ReferenceField(Dataset)

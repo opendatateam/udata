@@ -8,8 +8,12 @@ from udata.features.transfer.notifications import (
 )
 from udata.models import Member
 
+from udata.utils import faker
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory
+
 from . import TestCase, DBTestMixin
-from .factories import faker, DatasetFactory, UserFactory, OrganizationFactory
 
 
 class TransferTest(TestCase, DBTestMixin):

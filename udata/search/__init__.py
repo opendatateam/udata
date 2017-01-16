@@ -1,17 +1,24 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import bson
+import datetime
 import logging
 
-from os.path import join, dirname
-
-from elasticsearch import Elasticsearch, JSONSerializer
+from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
-from flask import current_app, json
-from speaklater import make_lazy_string
+from elasticsearch_dsl import FacetedSearch
+from elasticsearch_dsl import MultiSearch, Search, Index as ESIndex
+from elasticsearch_dsl.serializer import AttrJSONSerializer
+from flask import current_app
+from mongoengine.signals import post_save
+from speaklater import is_lazy_string
+from werkzeug.local import LocalProxy
 
-from udata.app import UDataJsonEncoder
 from udata.tasks import celery
+
+
+from . import analysis
 
 log = logging.getLogger(__name__)
 
@@ -19,12 +26,23 @@ adapter_catalog = {}
 
 DEFAULT_PAGE_SIZE = 20
 
-ANALYSIS_JSON = join(dirname(__file__), 'analysis.json')
 
-
-class EsJSONSerializer(JSONSerializer):
+class EsJSONSerializer(AttrJSONSerializer):
+    # TODO: find a way to reuse UDataJsonEncoder?
     def default(self, data):
-        return UDataJsonEncoder().default(data)
+        if is_lazy_string(data):
+            return unicode(data)
+        elif isinstance(data, bson.objectid.ObjectId):
+            return str(data)
+        elif isinstance(data, datetime.datetime):
+            return data.isoformat()
+        elif hasattr(data, 'serialize'):
+            return data.serialize()
+        # Serialize Raw data for Document and EmbeddedDocument.
+        elif hasattr(data, '_data'):
+            return data._data
+        else:
+            return super(EsJSONSerializer, self).default(data)
 
 
 class ElasticSearch(object):
@@ -64,99 +82,159 @@ class ElasticSearch(object):
     def scan(self, body, **kwargs):
         return scan(self.client, query=body, **kwargs)
 
-    def initialize(self):
+    def initialize(self, index_name=None):
         '''Create or update indices and mappings'''
-        mappings = [
-            (adapter.doc_type(), adapter.mapping)
-            for adapter in adapter_catalog.values()
-            if adapter.mapping
-        ]
-
-        if es.indices.exists(self.index_name):
-            for doc_type, mapping in mappings:
-                if es.indices.exists_type(index=self.index_name,
-                                          doc_type=doc_type):
-                    es.indices.delete_mapping(index=self.index_name,
-                                              doc_type=doc_type)
-                es.indices.put_mapping(index=self.index_name,
-                                       doc_type=doc_type, body=mapping)
-        else:
-            with open(ANALYSIS_JSON) as analysis:
-                es.indices.create(self.index_name, {
-                    'mappings': dict(mappings),
-                    'settings': {'analysis': json.load(analysis)},
-                })
+        index_name = index_name or self.index_name
+        index = Index(index_name, using=es.client)
+        for adapter_class in adapter_catalog.values():
+            index.doc_type(adapter_class)
+        index.create()
 
 
 es = ElasticSearch()
 
 
-def get_i18n_analyzer():
-    return '{0}_analyzer'.format(current_app.config['DEFAULT_LANGUAGE'])
+class Index(ESIndex):
+    '''
+    An Elasticsearch DSL index handling filters and analyzers registeration.
+    See: https://github.com/elastic/elasticsearch-dsl-py/issues/410
+    '''
+    def _get_mappings(self):
+        mappings, _ = super(Index, self)._get_mappings()
+        return mappings, {
+            'analyzer': {
+                a._name: a.get_definition() for a in analysis.analyzers
+            },
+            'filter': {f._name: f.get_definition() for f in analysis.filters},
+        }
 
-i18n_analyzer = make_lazy_string(get_i18n_analyzer)
+
+def get_i18n_analyzer():
+    language = current_app.config['DEFAULT_LANGUAGE']
+    return getattr(analysis, '{0}_analyzer'.format(language))
+
+i18n_analyzer = LocalProxy(lambda: get_i18n_analyzer())
 
 
 @celery.task
 def reindex(obj):
-    adapter = adapter_catalog.get(obj.__class__)
-    doctype = adapter.doc_type()
-    if adapter.is_indexable(obj):
-        log.info('Indexing %s (%s)', doctype, obj.id)
-        es.index(index=es.index_name, doc_type=doctype,
-                 id=obj.id, body=adapter.serialize(obj))
-    elif es.exists(index=es.index_name, doc_type=doctype, id=obj.id):
-        log.info('Unindexing %s (%s)', doctype, obj.id)
-        es.delete(index=es.index_name, doc_type=doctype,
-                  id=obj.id, refresh=True)
+    model = obj.__class__
+    adapter_class = adapter_catalog.get(model)
+    if adapter_class.is_indexable(obj):
+        log.info('Indexing %s (%s)', model.__name__, obj.id)
+        try:
+            adapter = adapter_class.from_model(obj)
+            adapter.save(using=es.client, index=es.index_name)
+        except:
+            log.exception('Unable to index %s "%s"',
+                          model.__name__, str(obj.id))
+    elif adapter_class.exists(obj.id, using=es.client, index=es.index_name):
+        log.info('Unindexing %s (%s)', model.__name__, obj.id)
+        try:
+            adapter = adapter_class.from_model(obj)
+            adapter.delete(using=es.client, index=es.index_name)
+        except:
+            log.exception('Unable to index %s "%s"',
+                          model.__name__, str(obj.id))
+        adapter.delete(using=es.client, index=es.index_name)
     else:
-        log.info('Nothing to do for %s (%s)', doctype, obj.id)
+        log.info('Nothing to do for %s (%s)', model.__name__, obj.id)
 
 
-from .adapter import ModelSearchAdapter, metrics_mapping  # noqa
+def reindex_model_on_save(sender, document, **kwargs):
+    '''(Re/Un)Index Mongo document on post_save'''
+    if current_app.config.get('AUTO_INDEX'):
+        reindex.delay(document)
+
+
+def register(adapter):
+    '''Register a search adapter'''
+    # register the class in the catalog
+    if adapter.model and adapter.model not in adapter_catalog:
+        adapter_catalog[adapter.model] = adapter
+        # Automatically reindex objects on save
+        post_save.connect(reindex_model_on_save, sender=adapter.model)
+    return adapter
+
+
+from .adapter import ModelSearchAdapter, metrics_mapping_for  # noqa
 from .query import SearchQuery  # noqa
-from .result import SearchResult, SearchIterator  # noqa
+from .result import SearchResult  # noqa
 from .fields import *  # noqa
 
 
-def query(*adapters, **kwargs):
-    return SearchQuery(*adapters, **kwargs).execute()
+def facets_for(adapter, params):
+    facets = params.pop('facets', [])
+    if not adapter.facets:
+        return []
+    if isinstance(facets, basestring):
+        facets = [facets]
+    if facets is True or 'all' in facets:
+        return adapter.facets.keys()
+    else:
+        # Return all requested facets
+        # r facets required for value filtering
+        return [
+            f for f in adapter.facets.keys()
+            if f in facets or f in params
+        ]
 
 
-def iter(*adapters, **kwargs):
-    return SearchQuery(*adapters, **kwargs).iter()
+def search_for(model_or_adapter, **params):
+    if isinstance(model_or_adapter, FacetedSearch):
+        return model_or_adapter
+    is_adapter = issubclass(model_or_adapter, ModelSearchAdapter)
+    if is_adapter:
+        adapter = model_or_adapter
+    else:
+        adapter = adapter_catalog[model_or_adapter]
+    facets = facets_for(adapter, params)
+    facet_search = adapter.facet_search(*facets)
+    return facet_search(params)
 
 
-def multiquery(*queries):
-    body = []
-    for query in queries:
-        body.append({'type': query.adapter.doc_type()})
-        body.append(query.get_body())
-    try:
-        result = es.msearch(index=es.index_name, body=body)
-    except:
-        log.exception('Unable to perform multiquery')
-        result = [{} for _ in range(len(queries))]
+def query(model, **params):
+    search = search_for(model, **params)
+    return search.execute()
 
+
+def iter(model, **params):
+    params['facets'] = True
+    search = search_for(model, **params)
+    search._s.aggs._params = {}  # Remove aggregations.
+    for result in search._s.scan():
+        yield result.model.objects.get(id=result.meta['id'])
+
+
+def multisearch(*models, **params):
+    ms = MultiSearch(using=es.client, index=es.index_name)
+    queries = []
+    for model in models:
+        s = search_for(model, **params)
+        ms = ms.add(s._s)
+        queries.append(s)
+    responses = ms.execute()
     return [
-        SearchResult(query, response)
-        for response, query in zip(result['responses'], queries)
+        # _d_ is the only way to access the raw data
+        # allowing to rewrap response in a FacetedSearch
+        # because default multisearch loose facets
+        SearchResult(query, response._d_)
+        for query, response in zip(queries, responses)
     ]
 
 
 def suggest(q, field, size=10):
-    result = es.suggest(index=es.index_name, body={
-        'suggestions': {
-            'text': q,
-            'completion': {
-                'field': field,
-                'size': size,
-            }
-        }
+    s = Search(using=es.client, index=es.index_name)
+    s = s.suggest('suggestions', q, completion={
+        'field': field,
+        'size': size,
     })
-    if 'suggestions' not in result:
+    result = s.execute_suggest().to_dict()
+    try:
+        suggestions = result.get('suggestions', [])[0]['options']
+        return suggestions
+    except (IndexError, AttributeError):
         return []
-    return result['suggestions'][0]['options']
 
 
 def init_app(app):

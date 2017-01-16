@@ -16,8 +16,13 @@ from invoke import run, task
 from tasks_helpers import ROOT, info, header, lrun, green
 
 I18N_DOMAIN = 'udata'
-STATIC_ASSETS_EXTS = ('js', 'map', 'css', 'eot', 'woff', 'woff2', 'svg', 'ttf', 'otf', 'png', 'jpg', 'gif')
-STATIC_ASSETS_DIRS = ('dataset', 'organization', 'post', 'reuse', 'site', 'topic', 'user')
+STATIC_ASSETS_EXTS = (
+    'js', 'map', 'css', 'eot', 'woff', 'woff2', 'svg', 'ttf', 'otf', 'png',
+    'jpg', 'gif'
+)
+STATIC_ASSETS_DIRS = (
+    'dataset', 'organization', 'post', 'reuse', 'site', 'topic', 'user'
+)
 
 
 @task
@@ -43,13 +48,30 @@ def clean(ctx, bower=False, node=False, translations=False, all=False):
 
 
 @task
+def update(ctx, migrate=False):
+    '''Perform a development update'''
+    msg = 'Update all dependencies'
+    if migrate:
+        msg += ' and migrate data'
+    header(msg)
+    info('Updating Python dependencies')
+    lrun('pip install -r requirements/develop.pip')
+    lrun('pip install -e .')
+    info('Updating JavaScript dependencies')
+    lrun('npm install')
+    if migrate:
+        info('Migrating database')
+        lrun('udata db migrate')
+
+
+@task
 def test(ctx, fast=False):
     '''Run tests suite'''
     header('Run tests suite')
     cmd = 'nosetests --rednose --force-color udata'
     if fast:
         cmd = ' '.join([cmd, '--stop'])
-    lrun(cmd, pty=True)
+    lrun(cmd)
 
 
 @task
@@ -57,7 +79,7 @@ def cover(ctx):
     '''Run tests suite with coverage'''
     header('Run tests suite with coverage')
     lrun('nosetests --rednose --force-color \
-        --with-coverage --cover-html --cover-package=udata', pty=True)
+        --with-coverage --cover-html --cover-package=udata')
 
 
 @task
@@ -65,7 +87,7 @@ def jstest(ctx, watch=False):
     '''Run Karma tests suite'''
     header('Run Karma/Mocha test suite')
     cmd = 'npm run -s test:{0}'.format('watch' if watch else 'unit')
-    lrun(cmd, pty=True)
+    lrun(cmd)
 
 
 @task
@@ -89,15 +111,16 @@ def qa(ctx):
 
 
 @task
-def serve(ctx):
+def serve(ctx, host='localhost'):
     '''Run a development server'''
-    lrun('python manage.py serve -d -r', pty=True)
+    lrun('python manage.py serve -d -r -h %s' % host)
 
 
 @task
 def work(ctx, loglevel='info'):
     '''Run a development worker'''
-    run('celery -A udata.worker worker --purge --autoreload -l %s' % loglevel, pty=True)
+    run('celery -A udata.worker worker --purge --autoreload -l %s' % loglevel,
+        pty=True)
 
 
 @task
@@ -122,7 +145,7 @@ def i18n(ctx):
                             '{}.en.json'.format(I18N_DOMAIN))
     not_found = {}
     not_found_filename = join(ROOT, 'js', 'locales',
-                            '{}.notfound.json'.format(I18N_DOMAIN))
+                              '{}.notfound.json'.format(I18N_DOMAIN))
     if exists(catalog_filename):
         with codecs.open(catalog_filename, encoding='utf8') as f:
             catalog = json.load(f)
@@ -170,27 +193,32 @@ def i18nc(ctx):
 
 
 @task
-def assets_build(ctx, progress=False):
+def assets_build(ctx):
     '''Install and compile assets'''
     header('Building static assets')
-    cmd = 'npm run assets:build -- --config {0}.js'
-    if progress:
-        cmd += ' --progress'
-    lrun(cmd.format('webpack.config.prod'), pty=True)
-    lrun(cmd.format('webpack.widgets.config'), pty=True)
+    lrun('npm run assets:build', pty=True)
+
+
+@task
+def widgets_build(ctx):
+    '''Compile and minify widgets'''
+    header('Building widgets')
+    lrun('npm run widgets:build', pty=True)
 
 
 @task
 def assets_watch(ctx):
+    '''Build assets on change'''
     lrun('npm run assets:watch', pty=True)
 
 
 @task
 def widgets_watch(ctx):
+    '''Build widgets on changes'''
     lrun('npm run widgets:watch', pty=True)
 
 
-@task(clean, i18nc, assets_build)
+@task(clean, i18nc, assets_build, widgets_build)
 def dist(ctx, buildno=None):
     '''Package for distribution'''
     header('Building a distribuable package')

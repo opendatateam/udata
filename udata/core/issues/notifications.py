@@ -27,8 +27,8 @@ def issues_notifications(user):
             'id': issue.id,
             'title': issue.title,
             'subject': {
-                'id': issue.subject.id,
-                'type': issue.subject.collection.lower(),
+                'id': issue.subject['_ref'].id,
+                'type': issue.subject['_cls'].lower(),
             }
         }))
 

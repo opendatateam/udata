@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import logging
 import slugify
 
-from flask.ext.mongoengine import Document
+from flask_mongoengine import Document
 from mongoengine.fields import StringField
 
 log = logging.getLogger(__name__)
@@ -86,6 +86,12 @@ def populate_slug(instance, field):
     if previous and (getattr(previous, field.db_field) == value or
                      not field.update):
         return value
+
+    # This can happen when serializing an object which does not contain
+    # the properties used to generate the slug. Typically, when such
+    # an object is passed to one of the Celery workers (see issue #20).
+    if value is None:
+        return
 
     if field.lower_case:
         value = value.lower()

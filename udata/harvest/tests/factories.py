@@ -6,11 +6,14 @@ import factory
 from flask.signals import Namespace
 
 from factory.mongoengine import MongoEngineFactory
+from factory.fuzzy import FuzzyChoice
 
-from udata.tests.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory
 
 from .. import backends
 from ..models import HarvestSource, HarvestJob
+
+from udata.utils import faker as fake
 
 
 def dtfactory(start, end):
@@ -33,7 +36,7 @@ class HarvestJobFactory(MongoEngineFactory):
     created = dtfactory('-3h', '-2h')
     started = dtfactory('-2h', '-1h')
     ended = dtfactory('-1h', 'new')
-    status = factory.fuzzy.FuzzyChoice(HarvestJob.status.choices)
+    status = FuzzyChoice(HarvestJob.status.choices)
     source = factory.SubFactory(HarvestSourceFactory)
 
 

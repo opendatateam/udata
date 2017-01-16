@@ -6,7 +6,7 @@ import logging
 from dateutil.parser import parse
 
 from flask import request, url_for
-from flask.ext.restplus.fields import *  # noqa
+from flask_restplus.fields import *  # noqa
 
 
 log = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class UrlFor(String):
 
 class NextPageUrl(String):
     def output(self, key, obj):
-        if not obj.has_next:
+        if not getattr(obj, 'has_next', None):
             return None
         args = request.args.copy()
         args.update(request.view_args)
@@ -50,7 +50,7 @@ class NextPageUrl(String):
 
 class PreviousPageUrl(String):
     def output(self, key, obj):
-        if not obj.has_prev:
+        if not getattr(obj, 'has_prev', None):
             return None
         args = request.args.copy()
         args.update(request.view_args)

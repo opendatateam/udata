@@ -17,14 +17,16 @@ Once the project is up and running, it's time to customize it! Take a look at ou
 
 The project is currently [in production for France][data-gouv-fr] and [in development for Luxembourg][data-gouv-lu-repository]. We can help you to set up your infrastructure, you can contact the team via [a Github issue][github-new-issue] or [through Gitter to chat directly][gitter].
 
+Take a look at the [governance](governance.md) section to know how we deal with feature voting from all the community.
+
 
 ## I found a bug or I want to propose an improvement
 
 For a bug, please [report it directly as a Github issue][github-new-issue] following the proposed template. We’ll answer you as soon as possible.
 
-For a contribution as a enthousiast citizen, check out our [contributing guide](contributing-guide.md). It's good to have you on board!
+For a contribution as a enthusiastic citizen, check out our [contributing guide](contributing-guide.md). It's good to have you on board!
 
 [data-gouv-fr]: https://www.data.gouv.fr/
 [data-gouv-lu-repository]: https://github.com/opendatalu/udata-gouvlu
-[github-new-issue]: https://github.com/etalab/udata/issues/new
-[gitter]: https://gitter.im/etalab/udata
+[github-new-issue]: https://github.com/opendatateam/udata/issues/new
+[gitter]: https://gitter.im/opendatateam/udata

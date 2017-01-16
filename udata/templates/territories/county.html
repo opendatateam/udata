@@ -1,0 +1,52 @@
+{% extends theme("territories/territory.html") %}
+
+{% set meta = {
+    'title': territory.html_title|striptags,
+    'description': _('Datasets related to the county of %(name)s with INSEE code %(code)s', name=territory.html_title|striptags, code=territory.code),
+    'image': logo,
+    'keywords': [territory.name, territory.code],
+} %}
+
+{% block territory_content %}
+    <div class="col-sm-9">
+        <h1>{{ territory.html_title|safe }}</h1>
+        <leaflet-map v-ref:map class="aside-map" :popup="false"
+            data-zones="{{ url_for('api.zones', ids=[territory.id]) }}">
+        </leaflet-map>
+    </div>
+
+    <aside class="col-sm-3 panel panel-default">
+        <div class="tab-links">
+            <p class="text-center">
+                <strong>
+                    {{ _('INSEE code:') }} {{ territory.code }}
+                </strong>
+            </p>
+            <p class="text-center">
+                <strong>
+                    {{ _('Region:') }} <a href="{{ territory.parent.url }}" title="{{ territory.parent.name }}">{{ territory.parent.name }}</a>
+                </strong>
+            </p>
+            {% if territory.population %}
+                <p class="text-center">
+                    <strong>
+                        {{ _('Population:') }} {{ territory.population|format_number }}
+                    </strong>
+                </p>
+            {% endif %}
+            <h3><small>{{ _('Main towns:') }}</small></h3>
+            <div class="row">
+                <div class="col-sm-offset-1 col-md-offset-2 col-lg-offset-2">
+                    <ul class="list-unstyled territories-list">
+                        {% for town in territory.children[:8] %}
+                            <li>
+                                <img src="{{ town.logo_url(external=True) or theme_static('img/placeholder_territory.png', external=True) }}" alt="{{ town.name }}" class="float-left" width="13px" />
+                                <a href="{{ town.url }}"> {{ town.name }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </aside>
+{% endblock %}

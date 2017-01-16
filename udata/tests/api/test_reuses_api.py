@@ -5,13 +5,15 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import Reuse, FollowReuse, Follow, Member, REUSE_TYPES
+from udata.core.badges.factories import badge_factory
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.user.factories import AdminFactory
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.models import Reuse, Follow, Member, REUSE_TYPES
+from udata.utils import faker
 
 from . import APITestCase
-from ..factories import (
-    faker, badge_factory,
-    ReuseFactory, DatasetFactory, AdminFactory, OrganizationFactory
-)
 
 
 class ReuseAPITest(APITestCase):
@@ -35,7 +37,7 @@ class ReuseAPITest(APITestCase):
         '''It should not fetch a deleted reuse from the API and raise 410'''
         reuse = ReuseFactory(deleted=datetime.now())
         response = self.get(url_for('api.reuse', reuse=reuse))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_reuse_api_get_deleted_but_authorized(self):
         '''It should fetch a deleted reuse from the API if authorized'''
@@ -49,7 +51,7 @@ class ReuseAPITest(APITestCase):
         data = ReuseFactory.attributes()
         self.login()
         response = self.post(url_for('api.reuses'), data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.assertEqual(Reuse.objects.count(), 1)
 
         reuse = Reuse.objects.first()
@@ -64,7 +66,7 @@ class ReuseAPITest(APITestCase):
         org = OrganizationFactory(members=[member])
         data['organization'] = str(org.id)
         response = self.post(url_for('api.reuses'), data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.assertEqual(Reuse.objects.count(), 1)
 
         reuse = Reuse.objects.first()
@@ -100,7 +102,7 @@ class ReuseAPITest(APITestCase):
         self.login()
         reuse = ReuseFactory(deleted=datetime.now())
         response = self.put(url_for('api.reuse', reuse=reuse), {})
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_reuse_api_delete(self):
         '''It should delete a reuse from the API'''
@@ -116,7 +118,7 @@ class ReuseAPITest(APITestCase):
         self.login()
         reuse = ReuseFactory(deleted=datetime.now())
         response = self.delete(url_for('api.reuse', reuse=reuse))
-        self.assertStatus(response, 410)
+        self.assert410(response)
 
     def test_reuse_api_add_dataset(self):
         '''It should add a dataset to a reuse from the API'''
@@ -218,12 +220,12 @@ class ReuseAPITest(APITestCase):
         to_follow = ReuseFactory()
 
         response = self.post(url_for('api.reuse_followers', id=to_follow.id))
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         self.assertEqual(Follow.objects.following(to_follow).count(), 0)
         self.assertEqual(Follow.objects.followers(to_follow).count(), 1)
-        self.assertIsInstance(Follow.objects.followers(to_follow).first(),
-                              FollowReuse)
+        follow = Follow.objects.followers(to_follow).first()
+        self.assertIsInstance(follow.following, Reuse)
         self.assertEqual(Follow.objects.following(user).count(), 1)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
@@ -231,7 +233,7 @@ class ReuseAPITest(APITestCase):
         '''It should unfollow the reuse on DELETE'''
         user = self.login()
         to_follow = ReuseFactory()
-        FollowReuse.objects.create(follower=user, following=to_follow)
+        Follow.objects.create(follower=user, following=to_follow)
 
         response = self.delete(url_for('api.reuse_followers', id=to_follow.id))
         self.assert200(response)
@@ -337,7 +339,7 @@ class ReuseBadgeAPITest(APITestCase):
         with self.api_user():
             response = self.post(
                 url_for('api.reuse_badges', reuse=self.reuse), data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.reuse.reload()
         self.assertEqual(len(self.reuse.badges), 1)
 
@@ -364,7 +366,7 @@ class ReuseBadgeAPITest(APITestCase):
         with self.api_user():
             response = self.post(
                 url_for('api.reuse_badges', reuse=self.reuse), data)
-        self.assertStatus(response, 201)
+        self.assert201(response)
         self.reuse.reload()
         self.assertEqual(len(self.reuse.badges), 2)
 

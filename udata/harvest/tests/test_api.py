@@ -9,14 +9,15 @@ from .. import actions
 
 from udata.models import Member
 from udata.tests.api import APITestCase
-from udata.tests.factories import (
-    faker, OrganizationFactory, AdminFactory, UserFactory
-)
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import AdminFactory, UserFactory
+from udata.utils import faker
 
 from ..models import (
     HarvestSource, VALIDATION_ACCEPTED, VALIDATION_REFUSED, VALIDATION_PENDING
 )
 from .factories import HarvestSourceFactory
+
 
 log = logging.getLogger(__name__)
 

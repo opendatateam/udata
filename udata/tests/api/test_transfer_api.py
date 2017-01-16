@@ -5,13 +5,12 @@ from mock import patch
 
 from flask import url_for
 
+from udata.core.dataset.factories import DatasetFactory
+from udata.features.transfer.factories import TransferFactory
+from udata.core.user.factories import UserFactory
+from udata.utils import faker
+
 from . import APITestCase
-from ..factories import (
-    faker,
-    DatasetFactory,
-    UserFactory,
-    TransferFactory,
-)
 
 
 class TransferAPITest(APITestCase):
@@ -41,7 +40,7 @@ class TransferAPITest(APITestCase):
             'comment': comment
         })
 
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         action.assert_called_with(dataset, recipient, comment)
 
