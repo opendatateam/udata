@@ -17,10 +17,10 @@ import LeafletMap from 'components/leaflet-map.vue';
 import FollowButton from 'components/buttons/follow.vue';
 import FeaturedButton from 'components/buttons/featured.vue';
 import ShareButton from 'components/buttons/share.vue';
+import DiscussionThreads from 'components/discussions/threads.vue';
 
 // Legacy widgets
 import 'widgets/issues-btn';
-import 'widgets/discussions-btn';
 import 'widgets/integrate-btn';
 
 
@@ -33,7 +33,7 @@ function parseUrl(url) {
 
 new Vue({
     el: 'body',
-    components: {LeafletMap, ShareButton, FollowButton, FeaturedButton},
+    components: {LeafletMap, ShareButton, FollowButton, DiscussionThreads, FeaturedButton},
     data() {
         const data = {
             dataset: this.extractDataset(),

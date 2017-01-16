@@ -345,11 +345,12 @@
     <div class="container">
 
         <h3>{{ _('Discussions') }}</h3>
-        {% with subject=dataset,
-                sidetext=_('Discussion between the organization and the community about this dataset.'),
-                subtext=_('If you want to report an anomaly, please use the dedicated button just under the resources.')  %}
-            {% include theme('discussion/threads.html') %}
-        {% endwith %}
+        <div class="row">
+            <discussion-threads class="col-sm-9" subject-id="{{ dataset.id }}" subject-class="{{ dataset.__class__.__name__ }}"></discussion-threads>
+            <div class="col-sm-3 note">
+                <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
+            </div>
+        </div>
 
         <h3>{{ _('Community resources') }}</h3>
         <div class="row">
