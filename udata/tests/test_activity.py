@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-
 from udata.models import db, Activity
 from udata.tests import TestCase, DBTestMixin, WebTestMixin
-
-from udata.tests.factories import OrganizationFactory, UserFactory
+from udata.core.user.factories import UserFactory
+from udata.core.organization.factories import OrganizationFactory
 from udata.auth import login_user
 
 

@@ -1,35 +1,15 @@
 {% set resource_format = resource.format|trim|lower or 'data' %}
 <div id="resource-{{resource.id}}" class="list-group-item"
-    itemscope itemtype="http://schema.org/DataDownload"
-    itemprop="distribution"
-    data-checkurl="{{ url_for('api.checkurl') }}">
-    <div class="format-label pull-left ellipsis-dot">
+    data-checkurl="{{ url_for('api.checkurl') }}"
+    @click="showResource('{{resource.id}}', $event)">
+    <div class="format-label pull-left ellipsis-dot" v-tooltip tooltip-placement="left">
         <span data-format="{{ resource_format }}">
             {{ resource_format }}
         </span>
     </div>
     <h4 class="list-group-item-heading ellipsis">
-        <a itemprop="url" href="{{resource.url}}">
-            <span itemprop="name">{{ resource.title or _('Nameless resource') }}</span>
-            <meta itemprop="contentUrl" content="{{resource.url}}" />
-            {% if resource.description %}
-            <meta itemprop="description" content="{{ resource.description|markdown|forceescape }}" />
-            {% endif %}
-            <meta itemprop="encodingFormat" content="{{resource.format or ''}}" />
-            <meta itemprop="dateCreated" content="{{resource.created_at|isoformat}}" />
-            <meta itemprop="dateModified" content="{{resource.modified|isoformat}}" />
-            <meta itemprop="datePublished" content="{{resource.published|dateformat('long')}}" />
-            <meta itemprop="contentSize" content="{{resource.filesize or ''}}" />
-            <meta itemprop="fileFormat" content="{{resource.mime or ''}}" />
-            <div itemprop="interactionStatistic" itemscope itemtype="http://schema.org/InteractionCounter">
-              <meta itemprop="interactionType" content="http://schema.org/DownloadAction" />
-              <meta itemprop="userInteractionCount" content="{{resource.metrics.views or ''}}" />
-            </div>
-            {% if resource.checksum %}
-            <!-- non standard -->
-            <meta itemprop="checksum" content="{{resource.checksum.value}}" />
-            <meta itemprop="checksumType" content="{{resource.checksum.type or 'sha1'}}" />
-            {% endif %}
+        <a href="{{resource.url}}">
+            <span>{{ resource.title or _('Nameless resource') }}</span>
         </a>
     </h4>
     <p class="list-group-item-text ellipsis">
@@ -48,7 +28,7 @@
             {% set edit_path = 'dataset/{id}/resource/{rid}' %}
         {% endif %}
         <div class="btn-group btn-group-xs tools">
-            <a class="btn btn-default" data-toggle="tooltip" title="{{ _('Edit') }}"
+            <a class="btn btn-default btn-edit" v-tooltip title="{{ _('Edit') }}"
                 href="{{ url_for('admin.index', path=edit_path.format(id=dataset.id, rid=resource.id)) }}">
                 <span class="glyphicon glyphicon-edit"></span>
             </a>

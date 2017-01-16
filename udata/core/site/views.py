@@ -163,7 +163,13 @@ class SiteDashboard(SiteView, DetailView):
         return context
 
 
+@blueprint.route('/terms/')
+def terms():
+    return theme.render('terms.html')
+
+
 @sitemap.register_generator
 def site_sitemap_urls():
     yield 'site.home_redirect', {}, None, 'daily', 1
     yield 'site.dashboard_redirect', {}, None, 'weekly', 0.6
+    yield 'site.terms_redirect', {}, None, 'monthly', 0.2

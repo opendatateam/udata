@@ -6,17 +6,10 @@
     'keywords': ['API', 'documentation', 'swagger'],
 } %}
 
+{% set bundle = 'apidoc' %}
+
 {% block extra_head %}
 <meta name="swagger-specs" content="{{ specs_url }}" />
-{% endblock %}
-
-
-{% block extra_css %}
-<link href="{{ static('apidoc.css') }}" rel="stylesheet">
-{% endblock %}
-
-{% block extra_js %}
-<script src="{{ static('apidoc.js') }}"></script>
 {% endblock %}
 
 

@@ -4,14 +4,17 @@ from datetime import datetime, timedelta
 
 from mongoengine import post_save
 
-from udata.models import db, Dataset
+from udata.models import db, Dataset, LEGACY_FREQUENCIES
+from udata.core.dataset.factories import (
+    ResourceFactory, DatasetFactory, CommunityResourceFactory
+)
+from udata.core.discussions.factories import (
+    MessageDiscussionFactory, DiscussionFactory
+)
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory
 
 from .. import TestCase, DBTestMixin
-from ..factories import (
-    ResourceFactory, DatasetFactory, UserFactory, OrganizationFactory,
-    DatasetDiscussionFactory, MessageDiscussionFactory,
-    CommunityResourceFactory
-)
 
 
 class DatasetModelTest(TestCase, DBTestMixin):
@@ -180,40 +183,38 @@ class DatasetModelTest(TestCase, DBTestMixin):
     def test_quality_has_only_closed_formats(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
-        self.assertEqual(dataset.quality['has_only_closed_formats'], True)
+        self.assertTrue(dataset.quality['has_only_closed_formats'])
         self.assertEqual(dataset.quality['score'], 0)
 
     def test_quality_has_opened_formats(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
         dataset.add_resource(ResourceFactory(format='csv'))
-        self.assertEqual(dataset.quality['has_only_closed_formats'], False)
+        self.assertFalse(dataset.quality['has_only_closed_formats'])
         self.assertEqual(dataset.quality['score'], 4)
 
     def test_quality_has_untreated_discussions(self):
         user = UserFactory()
         visitor = UserFactory()
         dataset = DatasetFactory(description='', owner=user)
-        DatasetDiscussionFactory(
-            subject=dataset, user=visitor,
-            discussion=[MessageDiscussionFactory(posted_by=visitor)
-                        for i in range(2)])
+        messages = MessageDiscussionFactory.build_batch(2, posted_by=visitor)
+        DiscussionFactory(subject=dataset, user=visitor, discussion=messages)
         self.assertEqual(dataset.quality['discussions'], 1)
-        self.assertEqual(dataset.quality['has_untreated_discussions'], True)
+        self.assertTrue(dataset.quality['has_untreated_discussions'])
         self.assertEqual(dataset.quality['score'], 0)
 
     def test_quality_has_treated_discussions(self):
         user = UserFactory()
         visitor = UserFactory()
         dataset = DatasetFactory(description='', owner=user)
-        DatasetDiscussionFactory(
+        DiscussionFactory(
             subject=dataset, user=visitor,
             discussion=[
-                MessageDiscussionFactory(posted_by=visitor) for i in range(2)
-                ] + [MessageDiscussionFactory(posted_by=user)]
+                MessageDiscussionFactory(posted_by=user)
+            ] + MessageDiscussionFactory.build_batch(2, posted_by=visitor)
         )
         self.assertEqual(dataset.quality['discussions'], 1)
-        self.assertEqual(dataset.quality['has_untreated_discussions'], False)
+        self.assertFalse(dataset.quality['has_untreated_discussions'])
         self.assertEqual(dataset.quality['score'], 2)
 
     def test_quality_all(self):
@@ -222,7 +223,7 @@ class DatasetModelTest(TestCase, DBTestMixin):
         dataset = DatasetFactory(owner=user, frequency='weekly',
                                  tags=['foo', 'bar'], description='a' * 42)
         dataset.add_resource(ResourceFactory(format='pdf'))
-        DatasetDiscussionFactory(
+        DiscussionFactory(
             subject=dataset, user=visitor,
             discussion=[MessageDiscussionFactory(posted_by=visitor)])
         self.assertEqual(dataset.quality['score'], 0)
@@ -242,8 +243,12 @@ class DatasetModelTest(TestCase, DBTestMixin):
             ])
 
     def test_tags_normalized(self):
-        user = UserFactory()
         tags = [' one another!', ' one another!', 'This IS a "tag"…']
-        dataset = DatasetFactory(owner=user, tags=tags)
+        dataset = DatasetFactory(tags=tags)
         self.assertEqual(len(dataset.tags), 2)
         self.assertEqual(dataset.tags[1], 'this-is-a-tag')
+
+    def test_legacy_frequencies(self):
+        for oldFreq, newFreq in LEGACY_FREQUENCIES.items():
+            dataset = DatasetFactory(frequency=oldFreq)
+            self.assertEqual(dataset.frequency, newFreq)

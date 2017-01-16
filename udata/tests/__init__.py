@@ -15,7 +15,7 @@ from StringIO import StringIO
 from urlparse import urljoin
 
 from flask import request, url_for
-from flask.ext.testing import TestCase as BaseTestCase
+from flask_testing import TestCase as BaseTestCase
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
@@ -27,11 +27,7 @@ from udata.search import es
 
 from werkzeug.urls import url_encode
 
-from .factories import UserFactory
-
-# Suppress debug data for third party libraries
-for logger in ('factory', 'elasticsearch', 'urllib3'):
-    logging.getLogger(logger).setLevel(logging.WARNING)
+from udata.core.user.factories import UserFactory
 
 
 class TestCase(BaseTestCase):
@@ -68,6 +64,9 @@ class TestCase(BaseTestCase):
 
     def assert204(self, response):
         self.assertStatus(response, 204)
+
+    def assert410(self, response):
+        self.assertStatus(response, 410)
 
     def assertEqualDates(self, datetime1, datetime2, limit=1):  # Seconds.
         """Lax date comparison, avoid comparing milliseconds and seconds."""
@@ -179,7 +178,7 @@ class DBTestMixin(object):
         '''Clear the database'''
         super(DBTestMixin, self).tearDown()
         db_name = self.app.config['MONGODB_DB']
-        db.connection.drop_database(db_name)
+        db.connection.client.drop_database(db_name)
 
 
 class SearchTestMixin(DBTestMixin):

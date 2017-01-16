@@ -25,8 +25,7 @@
         <ul>
             {% if dataset.spatial and dataset.spatial.territories %}
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
+                <a class="btn btn-xs" v-tooltip
                     title="{{ _('Territorial coverage') }}">
                     <span class="fa fa-map-marker fa-fw"></span>
                     {{ dataset.spatial.top_label }}
@@ -35,16 +34,14 @@
             {% endif %}
             {% if dataset.metrics %}
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
+                <a class="btn btn-xs" v-tooltip
                     title="{{ _('Reuses') }}">
                     <span class="{{ ficon('fa-retweet') }} fa-fw"></span>
                     {{ dataset.metrics.reuses or 0 }}
                 </a>
             </li>
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
+                <a class="btn btn-xs" v-tooltip
                     title="{{ _('Stars') }}">
                     <span class="{{ ficon('fa-star') }} fa-fw"></span>
                     {{ dataset.metrics.followers or 0 }}
@@ -65,9 +62,7 @@
             {# Temporal coverage #}
             {% if dataset.temporal_coverage %}
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Temporal coverage') }}">
+                <a class="btn btn-xs" v-tooltip title="{{ _('Temporal coverage') }}">
                     <span class="fa fa-calendar fa-fw"></span>
                     {{ dataset.temporal_coverage|daterange }}
                 </a>
@@ -77,9 +72,7 @@
             {# Territorial coverage #}
             {% if dataset.spatial and dataset.spatial.granularity %}
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Territorial coverage granularity') }}">
+                <a class="btn btn-xs" v-tooltip title="{{ _('Territorial coverage granularity') }}">
                     <span class="fa fa-bullseye fa-fw"></span>
                     {{ dataset.spatial.granularity_label }}
                 </a>
@@ -89,9 +82,7 @@
             {# frequency #}
             {% if dataset.frequency %}
             <li>
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    title="{{ _('Frequency') }}">
+                <a class="btn btn-xs" v-tooltip title="{{ _('Frequency') }}">
                     <span class="fa fa-clock-o fa-fw"></span>
                     {{ dataset.frequency_label }}
                 </a>

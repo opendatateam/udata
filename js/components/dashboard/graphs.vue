@@ -1,13 +1,17 @@
 <style lang="less">
-.small-boxes {
-    margin: 1em 0 0;
-}
-.graphs-chart .box-title {
-    margin-top: 0;
+.graphs {
+    .small-boxes {
+        margin: 1em 0 0;
+    }
+    .graphs-chart .box-title {
+        margin-top: 0;
+    }
 }
 </style>
 <template>
-    <div class="row small-boxes">
+<div class="graphs">
+    <div v-if="metrics.loading" class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+    <div v-if="!metrics.loading" class="row small-boxes">
         <small-box class="col-lg-4 col-xs-6" v-for="b in dataBoxes"
             :value="b.value" :label="b.label" :color="b.color"
             :icon="b.icon" :target="b.target">
@@ -15,18 +19,19 @@
     </div>
     <div class="row small-boxes">
         <small-box class="col-lg-4 col-xs-6" v-for="b in communityBoxes"
-            :value="b.value" :label="b.label" :color="b.color"
-            :icon="b.icon" :target="b.target">
-        </small-box>
+        :value="b.value" :label="b.label" :color="b.color"
+        :icon="b.icon" :target="b.target">
+    </small-box>
     </div>
     <div class="row graphs-chart">
         <chart class="col-xs-6" :title="_('Latest dataset uploads')"
-                :metrics="metrics" icon="null"
-                :y="dataDatasets" chart-type="Line"></chart>
+        :metrics="metrics" icon="null"
+        :y="dataDatasets" chart-type="Line"></chart>
         <chart class="col-xs-6" :title="_('Latest reuse uploads')"
-                :metrics="metrics" icon="null"
-                :y="dataReuses" chart-type="Line"></chart>
+        :metrics="metrics" icon="null"
+        :y="dataReuses" chart-type="Line"></chart>
     </div>
+</div>
 </template>
 
 <script>
@@ -35,7 +40,6 @@ import moment from 'moment';
 import site from 'models/site';
 
 export default {
-    el: "#graphs",
     name: 'GraphView',
     props: ['objectId'],
     data: function() {

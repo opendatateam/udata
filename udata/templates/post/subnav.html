@@ -9,16 +9,9 @@
         <div class="search_sidebar col-sm-5 col-md-4 col-xs-12" role="search">
 
             <nav class="sidebar panel">
-                <form action="{{ url_for('front.search') }}">
-                    <div class="input-group">
-                        <div class="input-group-btn">
-                            <button class="btn" type="submit"><i class="fa fa-search"></i></button>
-                        </div>
-                        <input id="search-input" name="q" type="search" class="form-control"
-                            autocomplete="off" placeholder="{{ _('Search') }}"
-                            value="{{request.args.q}}">
-                    </div>
-                </form>
+                <site-search v-ref:search action="{{ url_for('front.search') }}"
+                    size="lg" placeholder="{{ _('Search') }}">
+                </site-search>
             </nav>
 
             <nav class="sidebar panel">
@@ -36,7 +29,7 @@
 
         <div class="topic-excerpt col-sm-7 col-md-8 col-xs-12">
             <h3>{{ topic.name }}</h3>
-            {{ topic.description|markdown }}
+            {{ topic.description|markdown|truncate(500) }}
         </div>
 
         <div class="topic-toolbar btn-toolbar pull-right">

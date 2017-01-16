@@ -16,13 +16,9 @@ class Fake(db.Document):
     name = db.StringField()
 
 
-class FollowFake(Follow):
-    following = db.ReferenceField(Fake)
-
-
 @api.route('/fake/<id>/follow/', endpoint='follow_fake')
 class FollowFakeAPI(FollowAPI):
-    model = FollowFake
+    model = Fake
 
 
 class FollowAPITest(APITestCase):
@@ -31,7 +27,7 @@ class FollowAPITest(APITestCase):
         super(FollowAPITest, self).setUp()
 
     def handler(self, sender):
-        self.assertIsInstance(sender, FollowFake)
+        self.assertIsInstance(sender, Follow)
         self.signal_emitted = True
 
     def test_follow(self):
@@ -42,7 +38,7 @@ class FollowAPITest(APITestCase):
         with on_follow.connected_to(self.handler):
             response = self.post(url_for('api.follow_fake', id=to_follow.id))
 
-        self.assertStatus(response, 201)
+        self.assert201(response)
 
         nb_followers = Follow.objects.followers(to_follow).count()
 
@@ -59,7 +55,7 @@ class FollowAPITest(APITestCase):
         '''It should do nothing when following an already followed object'''
         user = self.login()
         to_follow = Fake.objects.create()
-        FollowFake.objects.create(follower=user, following=to_follow)
+        Follow.objects.create(follower=user, following=to_follow)
 
         with on_follow.connected_to(self.handler):
             response = self.post(url_for('api.follow_fake', id=to_follow.id))
@@ -76,7 +72,7 @@ class FollowAPITest(APITestCase):
         '''It should unfollow on DELETE'''
         user = self.login()
         to_follow = Fake.objects.create()
-        FollowFake.objects.create(follower=user, following=to_follow)
+        Follow.objects.create(follower=user, following=to_follow)
 
         with on_unfollow.connected_to(self.handler):
             response = self.delete(url_for('api.follow_fake', id=to_follow.id))

@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import abort, request, url_for, render_template
+from flask import abort, request, url_for, render_template, redirect
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.frontend.views import DetailView, SearchView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, DatasetDiscussion, Follow, Reuse
+from udata.models import Dataset, Discussion, Follow, Reuse, CommunityResource
 from udata.core.site.views import current_site
 from udata.sitemap import sitemap
+from udata.utils import get_by
 
+from .search import DatasetSearch
 from .permissions import ResourceEditPermission, DatasetEditPermission
 
 blueprint = I18nBlueprint('datasets', __name__, url_prefix='/datasets')
@@ -49,6 +51,7 @@ def recent_feed():
 @blueprint.route('/', endpoint='list')
 class DatasetListView(SearchView):
     model = Dataset
+    search_adapter = DatasetSearch
     context_name = 'datasets'
     template_name = 'dataset/list.html'
 
@@ -85,8 +88,8 @@ class DatasetDetailView(DatasetView, DetailView):
         context['reuses'] = Reuse.objects(datasets=self.dataset).visible()
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = ResourceEditPermission
-        context['discussions'] = DatasetDiscussion.objects(
-            subject=self.dataset)
+        context['discussions'] = Discussion.objects(subject=self.dataset)
+
         return context
 
 
@@ -101,8 +104,21 @@ class DatasetFollowersView(DatasetView, DetailView):
         return context
 
 
+@blueprint.route('/r/<uuid:id>', endpoint='resource')
+def resource_redirect(id):
+    '''
+    Redirect to the latest version of a resource given its identifier.
+    '''
+    dataset = Dataset.objects(resources__id=id).first()
+    if dataset:
+        resource = get_by(dataset.resources, 'id', id)
+    else:
+        resource = CommunityResource.objects(id=id).first()
+    return redirect(resource.url) if resource else abort(404)
+
+
 @sitemap.register_generator
 def sitemap_urls():
     for dataset in Dataset.objects.visible().only('id', 'slug'):
         yield ('datasets.show_redirect', {'dataset': dataset},
-               None, "weekly", 0.8)
+               None, 'weekly', 0.8)

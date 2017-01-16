@@ -34,7 +34,7 @@
             <h3 class="box-title">{{title}}</h3>
             <div class="box-tools"></div>
         </header>
-        <div class="box-body no-padding" v-el:container></div>
+        <leaflet-map class="box-body no-padding" :geojson="geojson"></leaflet-map>
         <div class="box-footer bg-light-blue-gradient text-center" v-show="footer">
             <slot></slot>
         </div>
@@ -42,10 +42,7 @@
 </template>
 
 <script>
-import config from 'config';
-import L from 'leaflet';
-
-const INITIAL_SETTINGS = {center: [42, 2.4], zoom: 4, zoomControl: false};
+import LeafletMap from '../leaflet-map.vue';
 
 export default {
     props: {
@@ -54,57 +51,9 @@ export default {
             type: String,
             default: 'globe'
         },
-        // Whether or not to allow zooming and paning (scrool, tap...)
-        fixed: {
-            type: Boolean,
-            default: true
-        },
         footer: Boolean,
         geojson: null
     },
-    ready: function() {
-        this.map = L.map(this.$els.container, INITIAL_SETTINGS);
-
-        if (this.fixed) {
-            // Disable drag and zoom handlers.
-            this.map.dragging.disable();
-            this.map.touchZoom.disable();
-            this.map.doubleClickZoom.disable();
-            this.map.scrollWheelZoom.disable();
-
-            // Disable tap handler, if present.
-            if (this.map.tap) this.map.tap.disable();
-        }
-
-
-        L.tileLayer(config.tiles_url, config.tiles_config).addTo(this.map);
-    },
-    watch: {
-        'geojson': function(json) {
-            if (json) {
-                this.layer = L.geoJson(json, {
-                    onEachFeature: (feature, layer) => {
-                        if (feature.properties && feature.properties.name) {
-                            layer.bindPopup(feature.properties.name);
-                            layer.on("mouseover", function() {
-                                layer.openPopup();
-                            });
-                            layer.on("mouseout", function() {
-                                if (layer.closePopup) {
-                                    layer.closePopup();
-                                } else {
-                                    layer.eachLayer(function(layer) {
-                                        layer.closePopup();
-                                    });
-                                }
-                            });
-                        }
-                    }
-                });
-                this.layer.addTo(this.map);
-                this.map.fitBounds(this.layer.getBounds());
-            }
-        }
-    }
+    components: {LeafletMap}
 };
 </script>

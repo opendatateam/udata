@@ -112,7 +112,7 @@ class JobAPI(API):
         '''Fetch a single scheduled job'''
         return self.get_or_404(id)
 
-    @api.secure('admin')
+    @api.secure(admin_permission)
     @api.marshal_with(job_fields)
     def put(self, id):
         '''Update a single scheduled job'''
@@ -127,7 +127,7 @@ class JobAPI(API):
             form = api.validate(IntervalTaskForm, task)
         return form.save()
 
-    @api.secure('admin')
+    @api.secure(admin_permission)
     @api.doc(responses={204: 'Successfuly deleted'})
     def delete(self, id):
         '''Delete a single scheduled job'''

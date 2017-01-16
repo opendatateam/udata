@@ -6,13 +6,7 @@
     'keywords': [_('home')],
 } %}
 
-{% block extra_css %}
-<link href="{{ static('home.css') }}" rel="stylesheet">
-{% endblock %}
-
-{% block extra_js %}
-<script src="{{ static('home.js') }}"></script>
-{% endblock %}
+{% set bundle = 'home' %}
 
 {% block content %}
 <div id="home-carousel" class="carousel slide megarousel">

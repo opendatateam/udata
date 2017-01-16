@@ -12,7 +12,8 @@ import httpretty
 
 from udata.models import Dataset, License
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import faker, OrganizationFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.utils import faker
 
 from .factories import HarvestSourceFactory
 from .. import actions
@@ -236,13 +237,15 @@ class CkanBackendTest(DBTestMixin, TestCase):
         # dataset-2 has geo feature
         self.assertIn('dataset-2', datasets)
         d = datasets['dataset-2']
-        self.assertEqual(d.tags, ['africa',
-                                  'bandwidth',
-                                  'broadband',
-                                  'cables',
-                                  'fibre',
-                                  'optic',
-                                  'terrestrial'])
+        self.assertEqual(
+            d.tags,
+            ['africa',
+             # 'b' must be absent,
+             'b' * 32,  # 'b' * 33 must be truncated
+             'cables-cables',  # the tag must be slugified
+             'fibre',
+             'optic',
+             'terrestrial'])
         self.assertEqual(len(d.resources), 1)
         self.assertEqual(d.spatial.geom['coordinates'],
                          [[[[50.8, -34.2],

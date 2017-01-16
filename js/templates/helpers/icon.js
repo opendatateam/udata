@@ -1,4 +1,4 @@
-define(['handlebars'], function(Handlebars) {
+define(['jquery', 'handlebars'], function($, Handlebars) {
 
     return function(value, options) {
         var cls = value.indexOf('fa-') == 0 ? 'fa '+ value : 'glyphicon glyphicon-' + value;

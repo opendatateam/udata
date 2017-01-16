@@ -9,9 +9,9 @@
     </div>
     <div class="row">
         <reuse-details :reuse="reuse" class="col-xs-12 col-md-6"></reuse-details>
-        <datasets id="datasets-list" :datasets="reuse.datasets"
+        <dataset-cards id="datasets-list" :datasets="reuse.datasets"
             class="col-xs-12 col-md-6">
-        </datasets>
+        </dataset-cards>
     </div>
 
     <div class="row">
@@ -20,7 +20,7 @@
     </div>
 
     <div class="row">
-        <issues id="issues-widget" class="col-xs-12 col-md-6" :issues="issues"></issues>
+        <issue-list id="issues-widget" class="col-xs-12 col-md-6" :issues="issues"></issue-list>
         <discussions id="discussions-widget" class="col-xs-12 col-md-6" :discussions="discussions"></discussions>
     </div>
 
@@ -38,7 +38,14 @@ import Metrics from 'models/metrics';
 import Vue from 'vue';
 import Issues from 'models/issues';
 import Discussions from 'models/discussions';
+import mask from 'models/mask';
+// Widgets
+import DatasetCards from 'components/dataset/card-list.vue';
+import DiscussionList from 'components/discussions/list.vue';
+import IssueList from 'components/issues/list.vue';
 import Layout from 'components/layout.vue';
+
+const MASK = `datasets{${mask(DatasetCards.MASK)}},*`;
 
 export default {
     name: 'ReuseView',
@@ -67,14 +74,14 @@ export default {
         }
 
         return {
-            reuse: new Reuse(),
+            reuse: new Reuse({mask: MASK}),
             metrics: new Metrics({query: {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')
             }}),
             followers: new Followers({ns: 'reuses', query: {page_size: 10}}),
-            issues: new Issues({query: {sort: '-created', page_size: 10}}),
-            discussions: new Discussions({query: {sort: '-created', page_size: 10}}),
+            issues: new Issues({query: {sort: '-created', page_size: 10}, mask: IssueList.MASK}),
+            discussions: new Discussions({query: {sort: '-created', page_size: 10}, mask: DiscussionList.MASK}),
             actions: actions,
             badges: [],
             y: [{
@@ -116,10 +123,10 @@ export default {
         sbox: require('components/containers/small-box.vue'),
         chart: require('components/charts/widget.vue'),
         'reuse-details': require('components/reuse/details.vue'),
-        datasets: require('components/dataset/card-list.vue'),
         followers: require('components/follow/list.vue'),
-        issues: require('components/issues/list.vue'),
-        discussions: require('components/discussions/list.vue'),
+        DiscussionList,
+        IssueList,
+        DatasetCards,
         Layout
     },
     events: {

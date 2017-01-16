@@ -14,24 +14,25 @@ const languages = ['en', 'es', 'fr'];
 module.exports = {
     entry: {
         admin: './js/admin.js',
-        site: './js/site.js',
-        home: './js/home.js',
-        search: './js/search.js',
-        dashboard: './js/dashboard.js',
-        apidoc: './js/apidoc',
-        'dataset/display': './js/dataset/display',
-        'reuse/display': './js/reuse/display',
-        'organization/display': './js/organization/display',
-        'site/map': './js/site/map',
-        'topic/display': './js/topic/display',
-        'post/display': './js/post/display',
-        'user/display': './js/user/display',
+        dataset: './js/front/dataset',
+        territory: './js/front/territory',
+        reuse: './js/front/reuse',
+        site: './js/front/site.js',
+        home: './js/front/home.js',
+        search: './js/front/search.js',
+        dashboard: './js/front/dashboard.js',
+        apidoc: './js/front/apidoc',
+        organization: './js/front/organization',
+        covermap: './js/front/covermap',
+        topic: './js/front/topic',
+        post: './js/front/post',
+        user: './js/front/user',
     },
     output: {
         path: path.join(__dirname, 'udata', 'static'),
         publicPath: '/static/',
         filename: '[name].js',
-        chunkFilename: '[id].[hash].js'
+        chunkFilename: 'chunks/[id].[hash].js'
     },
     resolve: {
         root: [
@@ -40,31 +41,28 @@ module.exports = {
         ],
         alias: {
             'jquery-slimscroll': path.join(node_path, 'jquery-slimscroll/jquery.slimscroll'),
-            'bloodhound': path.join(node_path, 'corejs-typeahead/dist/bloodhound'),
-            'typeahead': path.join(node_path, 'corejs-typeahead/dist/typeahead.jquery'),
             'handlebars': 'handlebars/runtime',
             'swaggerui': 'swagger-ui/dist',
-            'jquery': require.resolve('jquery')
         }
     },
     devtool: 'eval-source-map',
     module: {
         loaders: [
-            {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file'},
+            {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file-loader'},
             {test: /\.css$/, loader: css_loader},
             {test: /\.less$/, loader: less_loader},
-            {test: /\.vue$/, loader: 'vue'},
-            {test: /\.json$/, loader: 'json'},
+            {test: /\.vue$/, loader: 'vue-loader'},
+            {test: /\.json$/, loader: 'json-loader'},
             {test: /\.hbs$/, loader: hbs_loader},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: 'file-loader?name=[name].[ext]'},
-            {test: /\.js$/, exclude: /node_modules/, loader: 'babel'},
+            {test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader'},
         ]
     },
     vue: {
         loaders: {
             css: css_loader,
             less: less_loader,
-            js: 'babel'
+            js: 'babel-loader'
         }
     },
     babel: {
@@ -84,18 +82,17 @@ module.exports = {
             'admin-lte/dist/img/boxed-bg.jpg'
         ),
         new webpack.ProvidePlugin({
-            $: 'jquery',
-            jQuery: 'jquery',
-            'window.jQuery': 'jquery',
+            jQuery: 'jquery',  // Required by bootstrap.js
+            'window.jQuery': 'jquery',  // Required by swagger.js jquery client
         }),
-        new ExtractTextPlugin('[name].css', {
-            allChunks: true
-        }),
-        new webpack.IgnorePlugin(/^(\.\/)?shred/),
+        new ExtractTextPlugin('[name].css'),
         // Only include needed translations
         new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp('^' + languages.join('|') + '$')),
         new webpack.ContextReplacementPlugin(/locales$/, new RegExp(languages.join('|'))),
-        new webpack.optimize.CommonsChunkPlugin('vue-common.js', ['admin', 'dashboard']),
-        new webpack.optimize.CommonsChunkPlugin('common.js')
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'common',
+            filename: 'common.js',
+            minChunks: 10,  // (Modules must be shared between 10 entries)
+        })
     ]
 };

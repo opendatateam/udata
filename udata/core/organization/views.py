@@ -4,14 +4,14 @@ from __future__ import unicode_literals
 import itertools
 
 from flask import g, abort
-from flask.ext.security import current_user
+from flask_security import current_user
 
 from udata import search
 from udata.frontend import csv
 from udata.frontend.views import DetailView, SearchView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import (
-    Organization, Reuse, Dataset, FollowOrg, DatasetIssue, DatasetDiscussion
+    Organization, Reuse, Dataset, Follow, Issue, Discussion
 )
 from udata.sitemap import sitemap
 
@@ -78,8 +78,8 @@ class OrganizationDetailView(OrgView, DetailView):
 
         datasets = Dataset.objects(organization=self.organization).visible()
         reuses = Reuse.objects(organization=self.organization).visible()
-        followers = (FollowOrg.objects.followers(self.organization)
-                                      .order_by('follower.fullname'))
+        followers = (Follow.objects.followers(self.organization)
+                                   .order_by('follower.fullname'))
         context.update({
             'reuses': reuses.paginate(1, self.page_size),
             'datasets': datasets.paginate(1, self.page_size),
@@ -180,7 +180,7 @@ def datasets_csv(org):
 @blueprint.route('/<org:org>/issues.csv')
 def issues_csv(org):
     datasets = Dataset.objects.filter(organization=str(org.id))
-    issues = [DatasetIssue.objects.filter(subject=dataset)
+    issues = [Issue.objects.filter(subject=dataset)
               for dataset in datasets]
     # Turns a list of lists into a flat list.
     adapter = IssuesOrDiscussionCsvAdapter(itertools.chain(*issues))
@@ -190,7 +190,7 @@ def issues_csv(org):
 @blueprint.route('/<org:org>/discussions.csv')
 def discussions_csv(org):
     datasets = Dataset.objects.filter(organization=str(org.id))
-    discussions = [DatasetDiscussion.objects.filter(subject=dataset)
+    discussions = [Discussion.objects.filter(subject=dataset)
                    for dataset in datasets]
     # Turns a list of lists into a flat list.
     adapter = IssuesOrDiscussionCsvAdapter(itertools.chain(*discussions))
@@ -207,4 +207,4 @@ def datasets_resources_csv(org):
 @sitemap.register_generator
 def sitemap_urls():
     for org in Organization.objects.visible().only('id', 'slug'):
-        yield 'organizations.show_redirect', {'org': org}, None, "weekly", 0.7
+        yield 'organizations.show_redirect', {'org': org}, None, 'weekly', 0.7

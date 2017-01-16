@@ -8,4 +8,4 @@ Please report any difficulty you encounter with a dedicated [Github issue][githu
 
 
 [udata-gouvfr theme]: https://github.com/etalab/udata-gouvfr/
-[github-new-issue]: https://github.com/etalab/udata/issues/new
+[github-new-issue]: https://github.com/opendatateam/udata/issues/new

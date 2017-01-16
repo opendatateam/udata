@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import logging
 
 
-# from flask.ext.script import Manager
+# from flask_script import Manager
 
 from udata.commands import submanager
 from udata.models import User, Dataset, Reuse, Organization

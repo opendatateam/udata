@@ -5,14 +5,15 @@ import logging
 
 from collections import Iterable
 
-from flask.ext.mongoengine import (
+from bson import ObjectId, DBRef
+from flask_mongoengine import (
     MongoEngine, MongoEngineSessionInterface, Document, BaseQuerySet
 )
-from mongoengine.base import TopLevelDocumentMetaclass
+from mongoengine.base import TopLevelDocumentMetaclass, get_document
 from mongoengine.errors import ValidationError
 from mongoengine.signals import pre_save, post_save
 
-from flask.ext.fs.mongo import FileField, ImageField
+from flask_fs.mongo import FileField, ImageField
 
 from udata.utils import Paginable
 
@@ -46,8 +47,27 @@ class UDataMongoEngine(MongoEngine):
         self.FileField = FileField
         self.ImageField = ImageField
         self.ValidationError = ValidationError
+        self.ObjectId = ObjectId
+        self.DBRef = DBRef
         self.post_save = post_save
         self.pre_save = pre_save
+
+    def resolve_model(self, model):
+        '''
+        Resolve a model given a name or dict with `class` entry.
+
+        Conventions are resolved too: DatasetFull will resolve as Dataset
+        '''
+        if not model:
+            raise ValueError('Unsupported model specifications')
+        if isinstance(model, basestring):
+            classname = model
+        elif isinstance(model, dict) and 'class' in model:
+            classname = model['class']
+        else:
+            raise ValueError('Unsupported model specifications')
+
+        return get_document(classname)
 
 
 def serialize(value):
@@ -121,6 +141,25 @@ class UDataQuerySet(BaseQuerySet):
                 doc.save(write_concern=write_concern)
             return doc, True
 
+    def generic_in(self, **kwargs):
+        '''Bypass buggy GenericReferenceField querying issue'''
+        query = {}
+        for key, value in kwargs.items():
+            if not value:
+                continue
+            elif not isinstance(value, (list, tuple)):
+                self.error('expect a list as parameter')
+            elif all(isinstance(v, basestring) for v in value):
+                ids = [ObjectId(v) for v in value]
+                query['{0}._ref.$id'.format(key)] = {'$in': ids}
+            elif all(isinstance(v, DBRef) for v in value):
+                query['{0}._ref'.format(key)] = {'$in': value}
+            elif all(isinstance(v, ObjectId) for v in value):
+                query['{0}._ref.$id'.format(key)] = {'$in': value}
+            else:
+                self.error('expect a list of string, ObjectId or DBRef')
+        return self(__raw__=query)
+
 
 class UDataDocument(Document):
     meta = {
@@ -181,7 +220,7 @@ def init_app(app):
         app.config['MONGODB_DB'] = '{MONGODB_DB}-test'.format(**app.config)
     db.init_app(app)
     for plugin in app.config['PLUGINS']:
-        name = 'udata.ext.{0}.models'.format(plugin)
+        name = 'udata_{0}.models'.format(plugin)
         try:
             importlib.import_module(name)
         except ImportError as e:

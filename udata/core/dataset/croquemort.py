@@ -3,6 +3,9 @@ import logging
 import time
 
 import requests
+
+from requests.status_codes import codes
+
 from flask import current_app
 
 log = logging.getLogger(__name__)
@@ -17,6 +20,15 @@ CONNECTION_ERROR_MSG = 'Unable to reach the URL checker'
 
 ERROR_LOG_MSG = 'Unable to connect to croquemort'
 TIMEOUT_LOG_MSG = 'Timeout connectin to Croquemort'
+
+
+def is_pending(response):
+    if response.status_code == codes.not_found:
+        return True
+    try:
+        return 'status' not in response.json()
+    except ValueError:
+        return True
 
 
 def check_url(url, group=None):
@@ -37,23 +49,26 @@ def check_url(url, group=None):
                                  timeout=TIMEOUT)
     except requests.Timeout:
         log.error(TIMEOUT_LOG_MSG, exc_info=True)
-        return {}, 503
+        return {}, codes.service_unavailable
     except requests.RequestException:
         log.error(ERROR_LOG_MSG, exc_info=True)
-        return {}, 503
-    url_hash = response.json()['url-hash']
-    retrieve_url = '{url}/url/{url_hash}'.format(
-        url=CROQUEMORT['url'], url_hash=url_hash)
+        return {}, codes.service_unavailable
+    try:
+        url_hash = response.json()['url-hash']
+        retrieve_url = '{url}/url/{url_hash}'.format(
+            url=CROQUEMORT['url'], url_hash=url_hash)
+    except ValueError:
+        return {}, codes.service_unavailable
     try:
         response = requests.get(retrieve_url, params=params, timeout=TIMEOUT)
     except requests.Timeout:
         log.error(TIMEOUT_LOG_MSG, exc_info=True)
-        return {}, 503
+        return {}, codes.service_unavailable
     except requests.RequestException:
         log.error(ERROR_LOG_MSG, exc_info=True)
-        return {}, 503
+        return {}, codes.service_unavailable
     attempts = 0
-    while response.status_code == 404 or 'status' not in response.json():
+    while is_pending(response):
         if attempts >= retry:
             msg = ('We were unable to retrieve the URL after'
                    ' {attempts} attempts.').format(attempts=attempts)
@@ -64,10 +79,10 @@ def check_url(url, group=None):
                                     timeout=TIMEOUT)
         except requests.Timeout:
             log.error(TIMEOUT_LOG_MSG, exc_info=True)
-            return {}, 503
+            return {}, codes.service_unavailable
         except requests.RequestException:
             log.error(ERROR_LOG_MSG, exc_info=True)
-            return {}, 503
+            return {}, codes.service_unavailable
         time.sleep(delay)
         attempts += 1
     return {}, response.json()
@@ -92,7 +107,7 @@ def check_url_from_cache(url, group=None):
     except requests.RequestException:
         log.error(ERROR_LOG_MSG, exc_info=True)
         return {'error': CONNECTION_ERROR_MSG}, {}
-    if response.status_code == 404:
+    if response.status_code == codes.not_found:
         return {'error': 'URL {url} not found'.format(url=url)}, {}
     else:
         return {}, response.json()
@@ -117,7 +132,7 @@ def check_url_from_group(group):
     except requests.RequestException:
         log.error(ERROR_LOG_MSG, exc_info=True)
         return {'error': CONNECTION_ERROR_MSG}, {}
-    if response.status_code == 404:
+    if response.status_code == codes.not_found:
         return {'error': 'Group {group} not found'.format(group=group)}, {}
     else:
         return {}, response.json()

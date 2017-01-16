@@ -5,10 +5,10 @@ import logging
 
 import wtforms_json
 wtforms_json.init()
-from flask.ext.mongoengine.wtf import model_form  # noqa
+from flask_mongoengine.wtf import model_form  # noqa
 
-from flask.ext.mongoengine.wtf.models import ModelForm as MEModelForm  # noqa
-from flask.ext.wtf import Form as WTForm  # noqa
+from flask_mongoengine.wtf.models import ModelForm as MEModelForm  # noqa
+from flask_wtf import Form as WTForm  # noqa
 
 from udata import i18n  # noqa
 

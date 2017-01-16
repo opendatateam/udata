@@ -48,7 +48,7 @@ describe('Common Form features', function() {
             const vm = new Vue({
                 el: fixture.set('<form v-el:form/>')[0],
                 mixins: [BaseForm],
-                data: {
+                propsData: {
                     fields: [{
                         id: 'title',
                         label: 'Title'
@@ -114,7 +114,7 @@ describe('Common Form features', function() {
             const vm = new Vue({
                 el: fixture.set('<form/>')[0],
                 mixins: [BaseForm],
-                data: {
+                propsData: {
                     model: new Pet(),
                     fields: [{
                         id: 'id'
@@ -137,7 +137,7 @@ describe('Common Form features', function() {
             const vm = new Vue({
                 el: fixture.set('<form/>')[0],
                 mixins: [BaseForm],
-                data: {
+                propsData: {
                     model: new Person(),
                     fields: [{
                         id: 'id'

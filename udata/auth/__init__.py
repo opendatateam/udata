@@ -6,13 +6,13 @@ import logging
 from flask import current_app
 from flask import render_template
 
-from flask.ext.principal import identity_loaded  # noqa: facade pattern
-from flask.ext.principal import Permission as BasePermission
-from flask.ext.principal import PermissionDenied  # noqa: facade pattern
-from flask.ext.principal import RoleNeed
-from flask.ext.principal import UserNeed  # noqa: facade pattern
+from flask_principal import identity_loaded  # noqa: facade pattern
+from flask_principal import Permission as BasePermission
+from flask_principal import PermissionDenied  # noqa: facade pattern
+from flask_principal import RoleNeed
+from flask_principal import UserNeed  # noqa: facade pattern
 
-from flask.ext.security import (  # noqa
+from flask_security import (  # noqa
     Security, current_user, login_required, login_user  # noqa
 )
 from werkzeug.utils import import_string

@@ -39,7 +39,7 @@ export default {
                             data.organization = this.publish_as;
                         }
                         Object.assign(this.dataset, data);
-                        this.dataset.save();
+                        this.dataset.save(component.on_error);
                         this.dataset.$once('updated', () => {
                             this.$refs.wizard.go_next();
                         });

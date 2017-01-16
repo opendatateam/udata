@@ -82,4 +82,35 @@ describe('Utils', function() {
                 .to.have.property('attr', 'value');
         });
     });
+
+    describe('parseQS', function() {
+        it('should parse an empty string', function() {
+            expect(u.parseQS('')).to.eql({});
+            expect(u.parseQS('?')).to.eql({});
+            expect(u.parseQS(null)).to.eql({});
+            expect(u.parseQS(undefined)).to.eql({});
+        });
+
+        it('should parse a single key-value pair', function() {
+            expect(u.parseQS('?key=value')).to.eql({key: 'value'});
+            expect(u.parseQS('key=value')).to.eql({key: 'value'});
+        });
+
+        it('should parse multiple key-value pairs', function() {
+            const qs = '?key1=value1&key2=value2&key3=value3';
+            expect(u.parseQS(qs)).to.eql({
+                key1: 'value1',
+                key2: 'value2',
+                key3: 'value3',
+            });
+        });
+
+        it('should should decode value', function() {
+            expect(u.parseQS('?key=value%20encoded')).to.eql({key: 'value encoded'});
+        });
+
+        it('should should decode key', function() {
+            expect(u.parseQS('?key%2Fencoded=value')).to.eql({'key/encoded': 'value'});
+        });
+    });
 });

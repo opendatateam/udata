@@ -20,25 +20,19 @@
     <footer>
         <ul>
             <li v-if="organization.metrics">
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    :title="_('Datasets')">
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Datasets')">
                     <span class="fa fa-cubes fa-fw"></span>
                     {{ organization.metrics.datasets || 0 }}
                 </a>
             </li>
             <li v-if="organization.metrics">
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    :title="_('Reuses')">
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Reuses')">
                     <span class="fa fa-retweet fa-fw"></span>
                     {{ organization.metrics.reuses || 0 }}
                 </a>
             </li>
             <li v-if="organization.metrics">
-                <a class="btn btn-xs" data-toggle="tooltip"
-                    data-placement="top" data-container="body"
-                    :title="_('Followers')">
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Followers')">
                     <span class="fa fa-star fa-fw"></span>
                     {{ organization.metrics.followers || 0 }}
                 </a>

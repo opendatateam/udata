@@ -4,17 +4,15 @@ from __future__ import unicode_literals
 from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
+from werkzeug import cached_property
 
 from udata.core.storages import images, default_image_basename
+from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import (
-    db, BadgeMixin, WithMetrics, Issue, Discussion, Follow, OwnedByQuerySet
-)
+from udata.models import db, BadgeMixin, WithMetrics, OwnedByQuerySet
 from udata.utils import hash_url
 
-__all__ = (
-    'Reuse', 'ReuseIssue', 'ReuseDiscussion', 'FollowReuse', 'REUSE_TYPES'
-)
+__all__ = ('Reuse', 'REUSE_TYPES')
 
 
 REUSE_TYPES = {
@@ -44,7 +42,7 @@ class ReuseQuerySet(OwnedByQuerySet):
 
 
 class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
-    title = db.StringField(max_length=255, required=True)
+    title = db.StringField(required=True)
     slug = db.SlugField(
         max_length=255, required=True, populate_from='title', update=True)
     description = db.StringField(required=True)
@@ -137,18 +135,34 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
         urlhash = hash_url(url)
         return cls.objects(urlhash=urlhash).count() > 0
 
+    @cached_property
+    def json_ld(self):
+        result = {
+            '@context': 'http://schema.org',
+            '@type': 'CreativeWork',
+            'alternateName': self.slug,
+            'dateCreated': self.created_at.isoformat(),
+            'dateModified': self.last_modified.isoformat(),
+            'url': url_for('reuses.show', reuse=self, _external=True),
+            'name': self.title,
+            'isBasedOnUrl': self.url,
+        }
+
+        if self.description:
+            result['description'] = mdstrip(self.description)
+
+        if self.organization:
+            author = self.organization.json_ld
+        elif self.owner:
+            author = self.owner.json_ld
+        else:
+            author = None
+
+        if author:
+            result['author'] = author
+
+        return result
+
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)
 post_save.connect(Reuse.post_save, sender=Reuse)
-
-
-class ReuseIssue(Issue):
-    subject = db.ReferenceField(Reuse)
-
-
-class ReuseDiscussion(Discussion):
-    subject = db.ReferenceField(Reuse)
-
-
-class FollowReuse(Follow):
-    following = db.ReferenceField(Reuse)

@@ -10,6 +10,7 @@ from udata.core.spatial.forms import SpatialCoverageField
 from .models import (
     Dataset, Resource, License, Checksum, CommunityResource,
     UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_TYPES, CHECKSUM_TYPES,
+    LEGACY_FREQUENCIES
 )
 
 __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')
@@ -32,8 +33,7 @@ class BaseResourceForm(ModelForm):
                       'a remote file or an API'))
     url = fields.UploadableURLField(
         _('URL'), [validators.required()], storage=resources)
-    format = fields.StringField(
-        _('Format'), widget=widgets.FormatAutocompleter())
+    format = fields.StringField(_('Format'))
     checksum = fields.FormField(ChecksumForm)
     mime = fields.StringField(
         _('Mime type'),
@@ -61,6 +61,12 @@ class CommunityResourceForm(BaseResourceForm):
     organization = fields.PublishAsField(_('Publish as'))
 
 
+def map_legacy_frequencies(form, field):
+    ''' Map legacy frequencies to new ones'''
+    if field.data in LEGACY_FREQUENCIES:
+        field.data = LEGACY_FREQUENCIES[field.data]
+
+
 class DatasetForm(ModelForm):
     model_class = Dataset
 
@@ -75,6 +81,7 @@ class DatasetForm(ModelForm):
         _('Update frequency'),
         choices=UPDATE_FREQUENCIES.items(), default=DEFAULT_FREQUENCY,
         validators=[validators.optional()],
+        preprocessors=[map_legacy_frequencies],
         description=_('The frequency at which data are updated.'))
     frequency_date = fields.DateTimeField(_('Expected frequency date'))
     temporal_coverage = fields.DateRangeField(

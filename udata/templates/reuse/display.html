@@ -10,14 +10,13 @@
     'keywords': [_('reuse')] + reuse.tags,
 } %}
 
-{% set body_class = 'reuse-display' %}
+{% set bundle = 'reuse' %}
 
-{% block extra_js %}
-<script src="{{ static('reuse/display.js') }}"></script>
-{% endblock %}
+{% set body_class = 'reuse-display' %}
 
 {% block extra_head %}
 <link rel="canonical" href="{{ url_for('reuses.show', reuse=reuse) }}" />
+<link rel="stylesheet" type="text/css" href="{{ static('reuse.css') }}">
 {% endblock %}
 
 {% block breadcrumb %}
@@ -25,48 +24,14 @@
     <li class="active">{{ reuse.title }}</li>
 {% endblock %}
 
-{% block toolbar %}
-{# Owner actions #}
-<div class="btn-group btn-group-xs">
-    <a href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}" class="btn btn-success">
-        <span class="glyphicon glyphicon-pencil"></span>
-        {{ _('Edit') }}
-    </a>
-</div>
-{# Admin actions #}
-<div class="btn-group btn-group-xs">
-    <button type="button"
-        class="btn btn-success featured {% if reuse.featured %}active{% endif %}"
-        data-api-url="{{ url_for('api.reuse_featured', reuse=reuse) }}">
-        <span class="glyphicon glyphicon-bullhorn"></span>
-        {{ _('Featured') }}
-    </button>
-</div>
-{# Social actions #}
-<div class="btn-group btn-group-xs">
-    {{ follow_btn(reuse) }}
-</div>
-<div class="btn-group btn-group-xs">
-    {{ issues_btn(reuse) }}
-</div>
-<div class="btn-group btn-group-xs">
-    {{ share_btn(reuse.title) }}
-</div>
-{% endblock %}
-
 {% block content %}
-<div itemscope itemtype="http://schema.org/CreativeWork">
 <section class="reuse-section community-section">
     <div class="container reuse-container">
-        <meta itemprop="alternateName" content="{{ reuse.slug }}" />
-        <meta itemprop="dateCreated" content="{{ reuse.created_at|isoformat }}" />
-        <meta itemprop="dateModified" content="{{ reuse.last_modified|isoformat }}" />
-        <meta itemprop="url" content="{{ url_for('reuses.show', reuse=reuse, _external=True) }}" />
         <div class="row">
 
             <div class="col-md-9 col-sm-9 smaller">
                 <div class="page-header">
-                    <h2 itemprop="name">{{ reuse.title }}</h2>
+                    <h2>{{ reuse.title }}</h2>
 
                     <div class="row">
                         <p class="col-xs-12">
@@ -87,27 +52,27 @@
                                 ) }}
                             </small>
                             {% if reuse.private %}
-                            <small class="private" data-toggle="popover"
-                                data-title="{{ _('Private') }}" data-trigger="hover" data-placement="top"
-                                data-content="{{ _('This reuse is private and will not be visible by other users') }}"
-                                >{{ _('Private') }}</small>
+                            <small class="private" title="{{ _('Private') }}"
+                                v-popover.literal="{{ _('This reuse is private and will not be visible by other users') }}"
+                                popover-placement="top" popover-trigger="hover">
+                                {{ _('Private') }}
+                            </small>
                             {% endif %}
                             {% if reuse.deleted %}
-                            <small class="deleted" data-toggle="popover"
-                                data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
-                                data-content="{{ _('This reuse has been deleted. This will be permanent in the next 24 hours') }}"
-                                >{{ _('Deleted') }}</small>
+                            <small class="deleted" title="{{ _('Deleted') }}"
+                                v-popover.literal="{{ _('This reuse has been deleted. This will be permanent in the next 24 hours') }}"
+                                popover-effect="fade" popover-placement="top" popover-trigger="hover">
+                                {{ _('Deleted') }}
+                            </small>
                             {% endif %}
                         </p>
                     </div>
                 </div>
 
-                <div itemprop="description">
-                    {{ reuse.description|markdown }}
-                </div>
+                {{ reuse.description|markdown }}
 
                 <div class="reuse-image">
-                    <a itemprop="isBasedOnUrl" href="{{ reuse.url }}">
+                    <a href="{{ reuse.url }}">
                         <img src="{{ reuse.image|placeholder('reuse') }}"
                             alt="{{ reuse.title }}" class="scalable" />
                         <br/>
@@ -139,12 +104,7 @@
                         {% endif %}
                         {% if sysadmin %}
                         <div class="btn-group btn-group-sm">
-                            <button type="button"
-                                class="btn btn-success featured {% if reuse.featured %}active{% endif %}"
-                                data-api-url="{{ url_for('api.reuse_featured', reuse=reuse) }}">
-                                <span class="glyphicon glyphicon-bullhorn"></span>
-                                {{ _('Featured') }}
-                            </button>
+                            <featured-button subject-id="{{ reuse.id }}" subject-type="reuse" :featured="{{ reuse.featured|to_json }}"></featured-button>
                         </div>
                         {% endif %}
                     </div>
@@ -156,7 +116,6 @@
 
             {# Right sidebar #}
             <aside class="col-md-3 col-sm-3">
-
                 {# Optionnal organization panel #}
                 {% if reuse.organization %}
                 <div class="panel panel-transparent text-center">
@@ -189,21 +148,11 @@
                             {% else %}
                             <br/>
                             {% endif %}
-                            <button type="button"
-                                class="btn btn-warning btn-follow btn-block btn-sm icon-left {% if is_following(reuse.owner) %}active{% endif %}"
-                                data-toggle="tooltip" data-placement="left"
-                                data-api-url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"
-                                data-following-label="{{ _('Unfollow') }}"
-                                {% if is_following(reuse.owner) %}
-                                title="{{ _('Unfollow') }}">
-                                <span class="glyphicon glyphicon-eye-close"></span>
-                                {{ _('Unfollow') }}
-                                {% else %}
-                                title="{{ _("I'll be informed about this user news") }}">
-                                <span class="glyphicon glyphicon-eye-open"></span>
-                                {{ _('Follow') }}
-                                {% endif %}
-                            </button>
+                            <follow-button with-label classes="btn-block btn-sm btn-left btn-warning"
+                                {% if is_following(reuse.owner) %}following{% endif %}
+                                url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"
+                                tooltip="{{ _('I\'ll be informed about this user news') }}">
+                            </follow-button>
                         </div>
                     </div>
                 </div>
@@ -217,7 +166,8 @@
                         <ul class="list-unstyled infos-list">
                             {# Reuse type #}
                             <li>
-                                <a href class="btn btn-xs btn-default" data-toggle="tooltip" data-placement="right auto"
+                                <a href class="btn btn-xs btn-default"
+                                    v-tooltip tooltip-placement="left"
                                     title="{{ _('Type') }}">
                                     <span class="{{ ficon('fa-file') }}"></span>
                                 </a>
@@ -274,7 +224,7 @@
             <div class="col-xs-12">
                 <ul class="card-list">
                     {% for dataset in reuse.datasets %}
-                    <li class="col-md-4 col-sm-6" itemprop="hasPart">
+                    <li class="col-md-4 col-sm-6">
                     {% include theme('dataset/card.html') %}
                     </li>
                     {% endfor %}
@@ -296,14 +246,13 @@
     </header>
 
     <div class="container">
-
         <h3>{{ _('Discussions') }}</h3>
-        {% with subject=reuse,
-                sidetext=_('Discussion between the reusers and the community about this reuse.'),
-                subtext=_('If you want to report an anomaly, please use the dedicated button just under the reuse.')  %}
-            {% include theme('discussion/threads.html') %}
-        {% endwith %}
+        <div class="row">
+            <discussion-threads class="col-sm-9" subject-id="{{ reuse.id }}" subject-class="{{ reuse.__class__.__name__ }}"></discussion-threads>
+            <div class="col-sm-3 note">
+                <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
+            </div>
+        </div>
     </div>
 </section>
-</div>
 {% endblock %}

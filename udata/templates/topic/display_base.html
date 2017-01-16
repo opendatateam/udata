@@ -7,11 +7,9 @@
     'keywords': [_('topic')] + topic.tags,
 } %}
 
-{% set body_class = 'topic-display' %}
+{% set bundle = 'topic' %}
 
-{% block extra_js %}
-<script src="{{ static('topic/display.js') }}"></script>
-{% endblock %}
+{% set body_class = 'topic-display' %}
 
 {% block content %}
 {{ breadcrumb(self) }}

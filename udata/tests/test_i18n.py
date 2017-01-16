@@ -7,7 +7,7 @@ from werkzeug.routing import BuildError
 from udata.i18n import I18nBlueprint, language
 
 from . import DBTestMixin, WebTestMixin, TestCase
-from .factories import UserFactory
+from udata.core.user.factories import UserFactory
 
 
 bp = I18nBlueprint('i18nbp', __name__, static_folder='static')

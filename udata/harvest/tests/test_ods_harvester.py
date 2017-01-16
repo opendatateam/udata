@@ -9,7 +9,7 @@ import httpretty
 
 from udata.models import Dataset, License
 from udata.tests import TestCase, DBTestMixin
-from udata.tests.factories import OrganizationFactory
+from udata.core.organization.factories import OrganizationFactory
 
 from .factories import HarvestSourceFactory
 from .. import actions
@@ -69,7 +69,7 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
                                   'keyword1',
                                   'keyword2'])
         self.assertEqual(d.extras["ods:references"], "http://example.com")
-        self.assertEqual(d.extras["ods:has_records"], True)
+        self.assertTrue(d.extras["ods:has_records"])
         self.assertEqual(d.extras["harvest:remote_id"], "test-a")
         self.assertEqual(d.extras["harvest:domain"],
                          "etalab-sandbox.opendatasoft.com")

@@ -118,7 +118,7 @@ backend_fields = api.model('HarvestBackend', {
     'label': fields.String(description='The backend display name')
 })
 
-preview_dataset_fields = api.extend('DatasetPreview', dataset_fields, {
+preview_dataset_fields = api.clone('DatasetPreview', dataset_fields, {
     'uri': fields.UrlFor(
         'api.dataset', lambda o: {'dataset': 'not-available'},
         description='The dataset API URI (fake)'),
@@ -127,13 +127,13 @@ preview_dataset_fields = api.extend('DatasetPreview', dataset_fields, {
         description='The dataset page URL (fake)'),
 })
 
-preview_item_fields = api.extend('HarvestItemPreview', item_fields, {
+preview_item_fields = api.clone('HarvestItemPreview', item_fields, {
     'dataset': fields.Nested(preview_dataset_fields,
                              description='The processed dataset',
                              allow_null=True),
 })
 
-preview_job_fields = api.extend('HarvestJobPreview', job_fields, {
+preview_job_fields = api.clone('HarvestJobPreview', job_fields, {
     'items': fields.List(fields.Nested(preview_item_fields),
                          description='The job collected items'),
 })

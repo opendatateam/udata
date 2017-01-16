@@ -1,6 +1,6 @@
 {% macro integrate_btn(id) %}
 <button type="button" class="btn btn-primary btn-integrate" title="{{ _('Integrate') }}"
-    data-toggle="tooltip" data-placement="top" data-dataset-id="{{ id }}" data-widget-url="{{ static('widgets.js', _burst=False) }}" data-site-url="{{ url_for('site.home_redirect', _external=True) }}">
+    v-tooltip tooltip-placement="top" data-dataset-id="{{ id }}" data-widget-url="{{ static('widgets.js', _burst=False) }}" data-site-url="{{ url_for('site.home_redirect', _external=True) }}">
     <span class="fa fa-code"></span>
 </button>
 {% endmacro %}

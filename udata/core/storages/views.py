@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 import os
 
 from flask import Blueprint, request, jsonify
-from flask.ext.security import login_required
-from flask.ext import fs
+from flask_security import login_required
+import flask_fs as fs
 
 from . import utils
 

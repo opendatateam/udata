@@ -1,69 +1,16 @@
 {% extends theme("layouts/1-column.html") %}
 
+{% set bundle = 'territory' %}
 {% set logo=territory.logo_url(external=True) or theme_static('img/placeholder_territory.png', external=True) %}
-{% set meta = {
-    'title': territory.town_repr|striptags,
-    'description': _('Datasets related to the town of %(name)s with INSEE code %(code)s and postal code %(postal)s', name=territory.town_repr|striptags, code=territory.code, postal=territory.postal_string),
-    'image': logo,
-    'keywords': [territory.name, territory.code, territory.postal_string, territory.county.name],
-} %}
-
 {% set body_class="territory" %}
 
 {% block main_content %}
 <div class="row">
-    <div class="col-sm-9">
-        <h1>{{ territory.town_repr|safe }}</h1>
-        <div id="coverage-map" class="aside-map"
-            data-zones="{{ url_for('api.zones', ids=[territory.id]) }}"
-            data-hide-popup="true"></div>
-    </div>
-
-    <aside class="col-sm-3 panel panel-default">
-        <div class="text-center">
-            <img src="{{ logo }}" alt="{{ territory.name }}" class="scalable" />
-        </div>
-        {% if territory.logo_url() %}
-            <div class="text-center">
-                <small>
-                    {{ _('Source:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a> •
-                    {{ _('License:') }} <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA</a>
-                </small>
-            </div>
-        {% else %}
-            <div class="text-center">
-                <small>
-                    {{ _('Submit your logo through:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a><br>
-                    ({{ _('we only expose logos under an open license') }})
-                </small>
-            </div>
-        {% endif %}
-        <div class="tab-links">
-            <p class="text-center">
-                <strong>
-                    {{ _('INSEE code:') }} {{ territory.code }}
-                </strong>
-            </p>
-            {% if territory.postal_string %}
-                <p class="text-center">
-                    <strong>
-                        {{ _('Postal code:') }} {{ territory.postal_string }}
-                    </strong>
-                </p>
-            {% endif %}
-            {% if territory.population %}
-                <p class="text-center">
-                    <strong>
-                        {{ _('Population:') }} {{ territory.population|format_number }}
-                    </strong>
-                </p>
-            {% endif %}
-        </div>
-    </aside>
+    {% block territory_content %}{% endblock %}
 </div>
 <div class="dataset-list">
-    {% if town_datasets %}
-        {% for dataset in town_datasets %}
+    {% if territory_datasets %}
+        {% for dataset in territory_datasets %}
             <div data-udata-dataset-id="{{ dataset.id }}" class="col-sm-4"></div>
         {% endfor %}
     {% else %}
@@ -74,22 +21,22 @@
                     {% if has_pertinent_datasets %}
                         {{ _('Some of your datasets have an exact match!') }}<br/>
                         <a href="m&#x61;ilto:{{ config.TERRITORIES_EMAIL|obfuscate|safe }}">
-                            {{ _('Claim that town') }}</a> {{ _('and your datasets will appear first.') }}
+                            {{ _('Claim that territory') }}</a> {{ _('and your datasets will appear first.') }}
                     {% else %}
-                        {{ _('If you want your datasets to appear in that list, the geographical zone associated must be the exact same one of that town (%(code)s).', code=territory.code) }}
+                        {{ _('If you want your datasets to appear in that list, the geographical zone associated must be the exact same one of that territory (%(code)s).', code=territory.code) }}
                     {% endif %}
                 {% else %}
                     {{ _('You want to add your own datasets to that list?') }}<br/>
                     <a title="{{ _('Sign In / Register') }}"
                         href="{{ url_for('security.login', next=request.url) }}">
                         {{ _('Log in') }}</a>
-                    {{ _('and create resources for that town.') }}
+                    {{ _('and create resources for that territory.') }}
                 {% endif %}
             </p>
         </div>
     {% endif %}
-    {% for territory_dataset in territory_datasets %}
-        <div data-udata-territory-id="{{ territory_dataset.slug }}" class="col-sm-4"></div>
+    {% for dataset in base_datasets %}
+        <div data-udata-territory-id="{{ dataset.slug }}" class="col-sm-4"></div>
     {% endfor %}
     {% for dataset in other_datasets %}
         <div data-udata-dataset-id="{{ dataset.id }}" class="col-sm-4"></div>
@@ -98,6 +45,5 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script type="text/javascript" src="{{ static('dataset/display.js') }}"></script>
-    <script src="{{ static('widgets.js', _burst=False) }}" id="udata" async defer></script>
+    <script src="{{ static('widgets.js', _burst=False) }}" id="udata" async defer onload="udataScript.loadDatasets()"></script>
 {% endblock %}
