@@ -4,7 +4,7 @@
         <label for="title-new-discussion">{{ _('Title') }}</label>
         <input type="text" id="title-new-discussion" v-model="title" class="form-control" required />
         <label for="comment-new-discussion">{{ _('Comment') }}</label>
-        <textarea id="comment-new-discussion" v-model="comment" class="form-control" rows="3" required></textarea>
+        <textarea v-el:textarea id="comment-new-discussion" v-model="comment" class="form-control" rows="3" required></textarea>
     </div>
     <button type="submit" :disabled="this.sending || !this.title || !this.comment" class="btn btn-primary btn-block pull-right submit-new-discussion">
         {{ _('Start a discussion') }}
@@ -32,6 +32,15 @@ export default {
         }
     },
     methods: {
+        /**
+         * Prefill the form and focus the comment area
+         */
+        prefill(title, comment) {
+            this.title = title || '';
+            this.comment = comment || '';
+            this.$els.textarea.setSelectionRange(comment.length, comment.length);
+            this.$els.textarea.focus();
+        },
         submit() {
             if (!Auth.need_user(i18n._('You need to be logged in to comment.'))) {
                 return;
