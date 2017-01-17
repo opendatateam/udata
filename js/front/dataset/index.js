@@ -9,6 +9,9 @@ import config from 'config';
 import log from 'logger';
 import Velocity from 'velocity-animate';
 
+// Plugins
+import ScrollTo from 'plugins/scroll-to';
+
 // Components
 import AddReuseModal from './add-reuse-modal.vue';
 import DetailsModal from './details-modal.vue';
@@ -30,6 +33,7 @@ function parseUrl(url) {
     return a;
 }
 
+Vue.use(require('plugins/scroll-to'));
 
 new Vue({
     el: 'body',
@@ -193,6 +197,16 @@ new Vue({
                     });
                 }
             }
+        },
+
+        /**
+         * Suggest a tag aka.trigger a new discussion
+         */
+        suggestTag() {
+            this.$refs.discussions.start(
+                this._('New tag suggestion to improve metadata'),
+                this._('Hello,\n\nI propose this new tag: ')
+            );
         }
     }
 });
