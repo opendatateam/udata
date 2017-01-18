@@ -514,7 +514,10 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             'name': self.title,
             'keywords': ','.join(self.tags),
             'distribution': [resource.json_ld for resource in self.resources],
-            # This value is not standard
+            # Theses values are not standard
+            'contributedDistribution': [
+                resource.json_ld for resource in self.community_resources
+            ],
             'extras': [self.get_json_ld_extra(*item)
                        for item in self.extras.items()],
         }
