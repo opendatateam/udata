@@ -34,15 +34,13 @@ import TopicList from 'components/topic/list.vue';
 import PostList from 'components/post/list.vue';
 
 
-
 export default {
-    name: 'EditorialView',
-    data: function() {
+    data() {
         return {
             posts: new Posts({query: {sort: '-created', page_size: 10}, mask: PostList.MASK}),
             topics: new Topics({query: {sort: '-created', page_size: 10}, mask: TopicList.MASK}),
-            home_datasets: new List({ns: 'site', fetch: 'get_home_datasets', mask: DatasetCards.MASK}),
-            home_reuses: new List({ns: 'site', fetch: 'get_home_reuses', mask: ReuseCards.MASK})
+            home_datasets: new List({ns: 'site', fetch: 'get_home_datasets', mask: DatasetCardList.MASK}),
+            home_reuses: new List({ns: 'site', fetch: 'get_home_reuses', mask: ReuseCardList.MASK})
         };
     },
     components: {
@@ -66,7 +64,7 @@ export default {
             );
         }
     },
-    attached: function() {
+    attached() {
         this.home_datasets.fetch();
         this.home_reuses.fetch();
         this.posts.fetch();
