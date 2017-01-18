@@ -9,9 +9,6 @@ import config from 'config';
 import log from 'logger';
 import Velocity from 'velocity-animate';
 
-// Plugins
-import ScrollTo from 'plugins/scroll-to';
-
 // Components
 import AddReuseModal from './add-reuse-modal.vue';
 import DetailsModal from './details-modal.vue';
@@ -82,21 +79,24 @@ new Vue({
             const dataset = JSON.parse(document.querySelector(selector).text)
             dataset.resources = dataset.distribution;
             delete dataset.distribution;
+            dataset.communityResources = dataset.contributedDistribution;
+            delete dataset.contributedDistribution;
             dataset.keywords = dataset.keywords.split(',').map(keyword => keyword.trim());
             return dataset;
         },
 
         /**
-         * Display a resource in a modal
+         * Display a resource or a community ressource in a modal
          */
-        showResource(id, e) {
+        showResource(id, e, isCommunity) {
             // Ensure edit button work
             if ([e.target, e.target.parentNode].some((el) => {el.classList.contains('btn-edit');})) {
                 return;
             }
             e.preventDefault();
-            const resource = this.dataset.resources.find(resource => resource['@id'] === id);
-            this.$modal(ResourceModal, {resource: resource});
+            const attr = isCommunity ? 'communityResources' : 'resources';
+            const resource = this.dataset[attr].find(resource => resource['@id'] === id);
+            this.$modal(ResourceModal, {resource});
         },
 
         /**
