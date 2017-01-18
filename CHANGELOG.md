@@ -8,6 +8,8 @@
 
 You have to re-initialize the index from scratch, not just use the `reindex` command given that ElasticSearch 2+ doesn't provide a way to [delete mappings](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-mapping.html) anymore. The command is `udata search init` and may take some time given the amount of data you are dealing with.
 
+* 2017-01-18: User search and listing has been removed (privacy concern)
+
 ### New & Improved
 
 * 2017-01-06: Add some dataset ponderation factor: temporal coverage, spatial coverage,
