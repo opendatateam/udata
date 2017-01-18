@@ -10,7 +10,7 @@
 
 
 {% block breadcrumb %}
-    <li><a href="{{ url_for('users.list') }}">{{ _('Users') }}</a></li>
+    <li>{{ _('Users') }}</li>
     <li><a href="{{ url_for('users.show', user=user) }}">{{ user.fullname }}</a></li>
 {% endblock %}
 
