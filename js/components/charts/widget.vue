@@ -11,7 +11,7 @@
             display: inline-block;
             margin-right: 5px;
 
-            span {
+            .line-legend-icon {
                 display: inline-block;
                 width: 20px;
                 height: 16px;
