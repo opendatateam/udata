@@ -1,8 +1,9 @@
 <template>
 <div>
-    <div class="list-group-item" :id="discussionIdAttr" @click="toggleDiscussions">
+    <div class="list-group-item" :id="discussionIdAttr" @click="toggleDiscussions"
+        :class="{expanded: detailed}">
         <div class="format-label pull-left">
-            <avatar :user="question.posted_by"></avatar>
+            <avatar :user="discussion.user"></avatar>
         </div>
         <span class="list-group-item-link">
             <a href="#{{ discussionIdAttr }}"><span class="fa fa-link"></span></a>
@@ -12,16 +13,16 @@
         </h4>
         <p class="list-group-item-text ellipsis open-discussion-thread list-group-message-number-{{ discussion.id }}">
             {{ _('Discussion started on {created} with {count} messages.',
-                 {created: createdDate, count: responses.length})
+                 {created: createdDate, count: discussion.discussion.length})
             }}
         </p>
     </div>
-    <div v-for="(index, response) in responses" id="{{ discussionIdAttr }}-{{ index }}"
+    <div v-for="(index, response) in discussion.discussion" id="{{ discussionIdAttr }}-{{ index }}"
         class="list-group-item list-group-indent animated discussion-messages-list"
-        :class="{'body-only': index == 0, 'hidden': !detailed}">
+        :class="{'body-only': index == 0}" v-show="detailed">
         <template v-if="index > 0">
             <div class="format-label pull-left">
-                {{ response.posted_by | display }}
+                <avatar :user="response.posted_by"></avatar>
             </div>
             <span class="list-group-item-link">
                 <a href="#{{ discussionIdAttr }}-{{ index }}"><span class="fa fa-link"></span></a>
@@ -33,16 +34,14 @@
     </div>
     <a v-if="!discussion.closed"
         class="list-group-item add new-comment list-group-indent animated"
-        :class="{hidden: formDisplayed || !detailed}"
-        @click="displayForm">
+        v-show="!formDisplayed && detailed" @click="displayForm">
         <div class="format-label pull-left">+</div>
         <h4 class="list-group-item-heading">
             {{ _('Add a comment') }}
         </h4>
     </a>
     <div class="list-group-item list-group-form list-group-indent animated"
-        id="{{ discussionIdAttr }}-{{ position }}"
-        :class="{hidden: !formDisplayed}">
+        id="{{ discussionIdAttr }}-{{ position }}" v-show="formDisplayed">
         <div class="format-label pull-left">
             {{ current_user | display }}
         </div>
@@ -80,23 +79,12 @@ export default {
         }
     },
     computed: {
-        question() {
-            return this.discussion.discussion[0];
-        },
-        responses() {
-            return this.discussion.discussion.splice(1);
-        },
         discussionIdAttr() {
             return `discussion-${this.discussion.id}`;
         },
         createdDate() {
             return moment(this.discussion.created).format('LL')
         }
-    },
-    ready() {
-        this.$on('discussion-load', discussion => {
-            this.discussion = discussion;
-        });
     },
     methods: {
         toggleDiscussions() {
