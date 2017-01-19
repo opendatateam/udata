@@ -24,7 +24,8 @@ export default {
       return {
           // Flags to `true` when the form is in sending process. This prevents
           // duplicate POSTing.
-          sending: false
+          sending: false,
+          comment: ''
       }
   },
   methods: {
