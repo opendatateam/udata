@@ -40,13 +40,14 @@
             {{ _('Add a comment') }}
         </h4>
     </a>
-    <div class="list-group-item list-group-form list-group-indent animated"
-        id="{{ discussionIdAttr }}-{{ position }}" v-show="formDisplayed" v-if="currentUser">
+    <div v-el:form id="{{ discussionIdAttr }}-new-comment" v-show="formDisplayed" v-if="currentUser"
+        class="list-group-item list-group-form list-group-indent animated">
         <div class="format-label pull-left">
             <avatar :user="currentUser"></avatar>
         </div>
         <span class="list-group-item-link">
-            <a href="#{{ discussionIdAttr }}-{{ position }}"><span class="fa fa-link"></span></a>
+            <a href="#{{ discussionIdAttr }}-new-comment"><span class="fa fa-link"></span></a>
+            <a @click="hideForm"><span class="fa fa-times"></span></a>
         </span>
         <h4 class="list-group-item-heading">
             {{ _('Commenting on this thread') }}
@@ -55,7 +56,7 @@
             {{ _("You're about to answer to this particular thread about:") }}<br />
             {{ discussion.title }}
         </p>
-        <thread-form :discussion-id="discussion.id"></thread-form>
+        <thread-form v-ref:form :discussion-id="discussion.id"></thread-form>
     </div>
 </div>
 </template>
@@ -84,7 +85,7 @@ export default {
     events: {
         'discussion:updated': function(discussion) {
             // Hide the form on comment submitted
-            this.formDisplayed = false
+            this.hideForm()
             return true; // Don't stop propagation
         }
     },
@@ -106,8 +107,43 @@ export default {
         displayForm() {
             if (!Auth.need_user(this._('You need to be logged in to comment.'))) {
                 return;
-            } 
-            this.formDisplayed = true;
+            }
+            this.formDisplayed = true; // Form is at the end of the expanded discussion
+            this.detailed = true;
+        },
+        /**
+         * Hide the comment form
+         */
+        hideForm() {
+            this.formDisplayed = false;
+        },
+
+        /**
+         * Trigger a new prefilled comment.
+         */
+        start(comment) {
+            this.displayForm()
+            // Wait for next tick because the form needs to be visible to scroll
+            this.$nextTick(() => {
+                if (this.$els.form && this.$refs.form) { // Avoid logging errors
+                    this.$scrollTo(this.$els.form);
+                    this.$refs.form.prefill(comment);
+                }
+            })
+        },
+
+        /**
+         * Focus the thread or a specific comment if position is given
+         */
+        focus(index) {
+            this.detailed = true;
+            if (index) {
+                this.$nextTick(() => {
+                    this.$scrollTo(`#${discussionIdAttr}-${index}`);
+                })
+            } else {
+                this.$scrollTo(this);
+            }
         }
     }
 }

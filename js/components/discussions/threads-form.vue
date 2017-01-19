@@ -35,8 +35,9 @@ export default {
          * Prefill the form and focus the comment area
          */
         prefill(title, comment) {
+            comment = comment || '';
+            this.comment = comment;
             this.title = title || '';
-            this.comment = comment || '';
             this.$els.textarea.setSelectionRange(comment.length, comment.length);
             this.$els.textarea.focus();
         },
@@ -57,7 +58,7 @@ export default {
                 this.title = '';
                 this.comment = '';
                 this.sending = false;
-                document.location.href = `#discussion-${response.id}`
+                document.location.href = `#discussion-${response.id}`;
             })
             .catch(err => {
                 const msg = this._('An error occured while submitting your comment');

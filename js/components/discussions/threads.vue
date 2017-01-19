@@ -6,13 +6,14 @@
         <div class="format-label pull-left">+</div>
         <h4 class="list-group-item-heading">{{ _('Start a new discussion') }}</h4>
     </a>
-    <div class="list-group-item list-group-form list-group-form-discussion animated"
-        v-show="formDisplayed" v-if="currentUser" v-el:form>
+    <div v-el:form id="discussion-create" v-show="formDisplayed" v-if="currentUser"
+        class="list-group-item list-group-form list-group-form-discussion animated">
         <div class="format-label pull-left">
             <avatar :user="currentUser"></avatar>
         </div>
         <span class="list-group-item-link">
             <a href="#discussion-create"><span class="fa fa-link"></span></a>
+            <a @click="hideForm"><span class="fa fa-times"></span></a>
         </span>
         <h4 class="list-group-item-heading">
             {{ _('Starting a new discussion thread') }}
@@ -33,6 +34,11 @@ import DiscussionThread from 'components/discussions/thread.vue';
 import ThreadsForm from 'components/discussions/threads-form.vue';
 import log from 'logger';
 
+const DISCUSSION_REGEX = /^#discussion-([0-9a-f]{24})$/;
+const COMMENT_REGEX = /^#discussion-([0-9a-f]{24})-(\d+)$/;
+const NEW_COMMENT_REGEX = /^#discussion-([0-9a-f]{24})-new-comment$/;
+
+
 export default {
     components: {Avatar, DiscussionThread, ThreadsForm},
     data() {
@@ -52,11 +58,11 @@ export default {
          * @type {Discussion} the newly created discussion
          */
         'discussion:created': function(discussion) {
-            this.formDisplayed = false;
+            this.hideForm()
             this.discussions.unshift(discussion);
             this.$nextTick(() => {
                 // Scroll to new discussion when displayed and expand it
-                const $thread = this.$refs.threads.find($thread => $thread.discussion == discussion);
+                const $thread = this.threadFor(discussion.id);
                 $thread.detailed = true;
                 this.$scrollTo($thread);
             });
@@ -74,6 +80,11 @@ export default {
     ready() {
         this.$api.get('discussions', {for: this.subjectId}).then(response => {
             this.discussions = response.data;
+            if (document.location.hash) {
+                this.$nextTick(() => { // Wait for data to be binded
+                    this.jumpToHash(document.location.hash);
+                });
+            }
         }).catch(log.error.bind(log));
     },
     methods: {
@@ -88,6 +99,13 @@ export default {
         },
 
         /**
+         * Close the discussion form
+         */
+        hideForm() {
+            this.formDisplayed = false;
+        },
+
+        /**
          * Trigger a new prefilled discussion.
          */
         start(title, comment) {
@@ -99,6 +117,31 @@ export default {
                     this.$refs.form.prefill(title, comment);
                 }
             })
+        },
+
+        /**
+         * Get the thread compoent for a given discussion id
+         */
+        threadFor(id) {
+            return this.$refs.threads.find($thread => $thread.discussion.id == id);
+        },
+
+        /**
+         * Handle deep linking
+         */
+        jumpToHash(hash) {
+            if (hash === '#discussion-create') {
+                this.start();
+            } else if (DISCUSSION_REGEX.test(hash)) {
+                const [, id] = hash.match(DISCUSSION_REGEX);
+                this.threadFor(id).focus();
+            } else if (COMMENT_REGEX.test(hash)) {
+                const [, id, index] = hash.match(COMMENT_REGEX)
+                this.threadFor(id).focus(index);
+            } else if (NEW_COMMENT_REGEX.test(hash)) {
+                const [, id] = hash.match(NEW_COMMENT_REGEX);
+                this.threadFor(id).start();
+            }
         }
     }
 }
