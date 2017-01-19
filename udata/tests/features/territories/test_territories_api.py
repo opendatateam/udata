@@ -10,12 +10,12 @@ from udata.tests.features.territories.test_territories_process import (
 )
 
 
-class TerritoriesAPITest(APITestCase):
+class MetropolitanTerritoriesAPITest(APITestCase):
     settings = TerritoriesSettings
 
     def setUp(self):
         self.paca, self.bdr, self.arles = create_geozones_fixtures()
-        super(TerritoriesAPITest, self).setUp()
+        super(MetropolitanTerritoriesAPITest, self).setUp()
 
     def test_suggest_no_parameter(self):
         response = self.get(url_for('api.suggest_territory'))
@@ -127,6 +127,10 @@ class TerritoriesAPITest(APITestCase):
         self.assertEqual(results[0]['id'], self.bdr.id)
         self.assertEqual(results[1]['id'], bouchet.id)
 
+
+class WorldTerritoriesAPITest(APITestCase):
+    settings = TerritoriesSettings
+
     def test_suggest_drom_com(self):
         guyane = GeoZoneFactory(
             id='fr/county/973', level='fr/county', name='Guyane', code='973',
@@ -187,6 +191,17 @@ class TerritoriesAPITest(APITestCase):
             id='country/fr', level='country', name='France')
         response = self.get(
             url_for('api.suggest_territory'), qs={'q': 'franc'})
+        self.assert200(response)
+        results = response.json
+        self.assertEqual(len(results), 0)
+
+    def test_not_suggest_not_handled(self):
+        GeoZoneFactory(
+            id='country/cn', level='country', name='China')
+        GeoZoneFactory(
+            id='country-group/world', level='country-group', name='World')
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': 'sir'})
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 0)

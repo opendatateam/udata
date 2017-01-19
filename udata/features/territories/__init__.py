@@ -18,7 +18,8 @@ def check_for_territories(query):
     dbqs = db.Q()
     query = query.lower()
     is_digit = query.isdigit()
-    for level in current_app.config.get('HANDLED_LEVELS'):
+    handled_levels = list(current_app.config.get('HANDLED_LEVELS'))
+    for level in handled_levels:
         if level == 'country':
             continue  # Level not fully handled yet.
         q = db.Q(level=level)
@@ -42,5 +43,9 @@ def check_for_territories(query):
         # Meta Q object, ready to be passed to a queryset.
         dbqs |= q
 
-    # Sort matching results by population and area.
-    return GeoZone.objects(dbqs).order_by('-population', '-area')
+    # Sort matching results by population and area,
+    # excluding unhandled levels and country if present.
+    handled_levels.remove('country')
+    return (GeoZone.objects(dbqs)
+            .filter(level__in=handled_levels)
+            .order_by('-population', '-area'))
