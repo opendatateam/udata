@@ -38,11 +38,13 @@
 import Metrics from 'models/metrics';
 import moment from 'moment';
 import site from 'models/site';
+import SmallBox from 'components/containers/small-box.vue';
+import Chart from 'components/charts/widget.vue';
 
 export default {
-    name: 'GraphView',
+    components: {Chart, SmallBox},
     props: ['objectId'],
-    data: function() {
+    data() {
         return {
             site: site,
             metrics: new Metrics({
@@ -61,8 +63,8 @@ export default {
         };
     },
     computed: {
-        dataBoxes: function() {
-            if (!this.$root.site.metrics) {
+        dataBoxes() {
+            if (!this.$root.site || !this.$root.site.metrics) {
                 return [];
             }
             return [{
@@ -82,7 +84,7 @@ export default {
                 color: 'green',
             }];
         },
-        communityBoxes: function() {
+        communityBoxes() {
             if (!this.$root.site.metrics) {
                 return [];
             }
@@ -103,10 +105,6 @@ export default {
                 color: 'teal',
             }];
         }
-    },
-    components: {
-        'small-box': require('components/containers/small-box.vue'),
-        'chart': require('components/charts/widget.vue')
     },
     watch: {
         'site.id': function(id) {

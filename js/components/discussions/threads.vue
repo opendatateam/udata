@@ -3,15 +3,14 @@
     <discussion-thread v-for="discussion in discussions" :discussion="discussion">
     </discussion-thread>
     <a class="list-group-item add new-discussion"
-        @click="displayForm"
-        :class="{hidden: formDisplayed}">
+        @click="displayForm" v-show="formDisplayed">
         <div class="format-label pull-left">+</div>
         <h4 class="list-group-item-heading">
             {{ _('Start a new discussion') }}
         </h4>
     </a>
     <div class="list-group-item list-group-form list-group-form-discussion animated"
-        :class="{hidden: !formDisplayed}">
+        v-show="formDisplayed" v-el:form>
         <div class="format-label pull-left">
             {{ current_user | display }}
         </div>
@@ -24,7 +23,7 @@
         <p class="list-group-item-text">
             {{ _("You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above.") }}
         </p>
-        <threads-form :subject-id="subjectId" :subject-class="subjectClass"></threads-form>
+        <threads-form v-ref:form :subject-id="subjectId" :subject-class="subjectClass"></threads-form>
     </div>
 </div>
 </template>
@@ -58,6 +57,18 @@ export default {
     methods: {
         displayForm() {
             this.formDisplayed = true;
+        },
+
+        /**
+         * Trigger a new prefilled discussion.
+         */
+        start(title, comment) {
+            this.formDisplayed = true;
+            // Wait for next tick because the form needs to be visible to scroll
+            this.$nextTick(() => {
+                this.$scrollTo(this.$els.form);
+                this.$refs.form.prefill(title, comment);
+            })
         }
     }
 }

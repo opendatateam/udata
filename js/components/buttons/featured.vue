@@ -2,7 +2,7 @@
 <button type="button" class="btn featured"
     :class="{active: featured, 'btn-success': !compact, 'btn-default': compact}"
     @click="toggleFeatured"
-    v-tooltip="_('Feature this content')" tooltip-placement="tooltipPlacement">
+    v-tooltip="_('Feature this content')" tooltip-placement="top">
     <span class="fa fa-bullhorn"></span>
     <span v-if="!compact">{{ _('Featured') }}</span>
 </button>

@@ -278,7 +278,7 @@
                                 {{ tag|truncate(14, True) }}
                             </a>
                             {% endfor %}
-                            <a href="#"
+                            <a @click="suggestTag"
                                 class="btn btn-primary btn-dark btn-xs suggest-tag"
                                 title="{{ _('Suggest a tag with a new discussion thread') }}"
                                 v-tooltip tooltip-placement="right">
@@ -346,7 +346,10 @@
 
         <h3>{{ _('Discussions') }}</h3>
         <div class="row">
-            <discussion-threads class="col-sm-9" subject-id="{{ dataset.id }}" subject-class="{{ dataset.__class__.__name__ }}"></discussion-threads>
+            <discussion-threads v-ref:discussions class="col-sm-9"
+                subject-id="{{ dataset.id }}"
+                subject-class="{{ dataset.__class__.__name__ }}">
+            </discussion-threads>
             <div class="col-sm-3 note">
                 <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
             </div>

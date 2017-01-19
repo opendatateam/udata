@@ -1,12 +1,14 @@
 <template>
 <a class="avatar" :href="user.url" :title="user | display">
-    <img v-if="user.avatar" :src="user.avatar"
-        class="avatar" :alt="user | display" :width="size" :height="size">
+    <img class="avatar" :src="url"
+        :alt="user | display" :width="size" :height="size">
 </a>
 </template>
 
 <script>
-export const DEFAULT_SIZE = 52;
+import placeholders from 'helpers/placeholders';
+
+const DEFAULT_SIZE = 52;
 
 export default {
     props: {
@@ -14,6 +16,11 @@ export default {
         size: {
             type: Number,
             default: DEFAULT_SIZE
+        }
+    },
+    computed: {
+        url() {
+            return this.user.avatar || placeholders.user;
         }
     }
 }

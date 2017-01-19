@@ -156,6 +156,12 @@ export const tiles_url = `https://cartodb-basemaps-{s}.global.ssl.fastly.net/lig
  */
 export const tiles_config = {subdomains: 'abcd', attribution: tiles_attributions};
 
+/**
+ * Tags constraints
+ * Should be kept synced with udata/tags.py in case of modification
+ */
+export const tags = {MIN_LENGTH: 3, MAX_LENGTH: 32};
+
 
 export default {
     user,
@@ -176,6 +182,7 @@ export default {
     is_territory_enabled,
     is_delete_me_enabled,
     hidpi,
+    tags,
     tiles_attributions,
     tiles_url,
     tiles_config,
