@@ -78,6 +78,13 @@ export default {
             formDisplayed: false,
         }
     },
+    events: {
+        'discussion:updated': function(discussion) {
+            // Hide the form on comment submitted
+            this.formDisplayed = false
+            return true; // Don't stop propagation
+        }
+    },
     computed: {
         discussionIdAttr() {
             return `discussion-${this.discussion.id}`;

@@ -1,6 +1,6 @@
 <template>
 <div class="list-group resources-list smaller">
-    <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion">
+    <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion" track-by="id">
     </discussion-thread>
     <a class="list-group-item add new-discussion" @click="displayForm" v-show="!formDisplayed">
         <div class="format-label pull-left">+</div>
@@ -43,16 +43,28 @@ export default {
         subjectClass: String
     },
     events: {
-        'discussions:created': function(discussion) {
+        /**
+         * Add the created discussion in the list and display it
+         * @type {Discussion} the newly created discussion
+         */
+        'discussion:created': function(discussion) {
             this.formDisplayed = false;
             this.discussions.unshift(discussion);
             this.$nextTick(() => {
-                // Scroll to new discussion when displayed
-                // and expand it
-                const $thread = this.threadFor(discussion);
+                // Scroll to new discussion when displayed and expand it
+                const $thread = this.$refs.threads.find($thread => $thread.discussion == discussion);
                 $thread.detailed = true;
                 this.$scrollTo($thread);
             });
+        },
+        /**
+         * Replace the updated discussion in the list
+         * @type {Discussion} the updated discussion
+         */
+        'discussion:updated': function(discussion) {
+            const index = this.discussions.indexOf(this.discussions.find(d => d.id == discussion.id));
+            // See: https://v1.vuejs.org/guide/list.html#Array-Change-Detection
+            this.discussions.$set(index, discussion);
         }
     },
     ready() {
@@ -75,14 +87,6 @@ export default {
                 this.$scrollTo(this.$els.form);
                 this.$refs.form.prefill(title, comment);
             })
-        },
-
-        /**
-         * Get the thread component for a given discussion
-         *
-         */
-        threadFor(discussion) {
-            return this.$refs.threads.find($thread => $thread.discussion == discussion);
         }
     }
 }

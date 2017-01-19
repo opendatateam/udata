@@ -37,7 +37,7 @@ export default {
           this.$api
           .post(`discussions/${this.discussionId}/`, {comment: this.comment})
           .then(response => {
-              this.$dispatch('discussion-load', response);
+              this.$dispatch('discussion:updated', response);
               this.comment = '';
               this.sending = false;
           })
