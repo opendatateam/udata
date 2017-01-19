@@ -145,23 +145,26 @@
 <script>
 import Vue from 'vue';
 import log from 'logger';
+
+import placeholders from 'helpers/placeholders';
+
 import User from 'models/user';
 import Requests from 'models/requests';
 
+import BoxContainer from 'components/containers/box.vue';
+import MemberModal from 'components/organization/member-modal.vue';
+import PaginationWidget from 'components/pagination.vue';
+import UserCompleter from 'components/form/user-completer.vue';
+
 export default {
-    name: 'members-list',
-    components: {
-        'box-container': require('components/containers/box.vue'),
-        'pagination-widget': require('components/pagination.vue'),
-        'user-completer': require('components/form/user-completer.vue'),
-    },
+    components: {BoxContainer, PaginationWidget, UserCompleter},
     props: {
         org: Object
     },
-    data: function() {
+    data() {
         return {
             title: this._('Members'),
-            avatar_placeholder: require('helpers/placeholders').user,
+            avatar_placeholder: placeholders.user,
             placeholder: this._('Type an user name'),
             requests: new Requests(),
             adding: false,
@@ -171,36 +174,30 @@ export default {
     events: {
         'completer:item-add': function(user_id, $item) {
             $item.remove();
-            this.$root.$modal(
-                require('components/organization/member-modal.vue'),
-                {
-                    member: {user: {id: user_id}},
-                    org: this.org
-                }
-            );
+            this.$root.$modal(MemberModal, {
+                member: {user: {id: user_id}},
+                org: this.org
+            });
             this.adding = false;
         }
     },
     methods: {
-        member_click: function(member) {
-            this.$root.$modal(
-                require('components/organization/member-modal.vue'),
-                {member: member, org: this.org}
-            );
+        member_click(member) {
+            this.$root.$modal(MemberModal, {member: member, org: this.org});
         },
-        accept_request: function(request) {
+        accept_request(request) {
             this.org.accept_membership(request, function(member) {
                 this.requests.fetch();
                 this.validating = Boolean(this.requests.length);
             })
         },
-        refuse_request: function(request) {
+        refuse_request(request) {
             Vue.set(request, 'refused', true);
         },
-        confirm_refusal: function(request, index) {
+        confirm_refusal(request, index) {
             // Temp fix until https://github.com/vuejs/vue/issues/1697 is merged
             // let comment = this.$els.textarea[index].value;
-            let comment = this.$el.querySelectorAll('textarea')[index].value;
+            const comment = this.$el.querySelectorAll('textarea')[index].value;
             this.org.refuse_membership(request, comment, (response) => {
                 log.debug('refused', response);
                 Vue.set(request, 'refused', false);
@@ -208,7 +205,7 @@ export default {
                 this.validating = Boolean(this.requests.length);
             });
         },
-        toggle_validation: function() {
+        toggle_validation() {
             this.validating = !this.validating;
         }
     },
@@ -218,14 +215,14 @@ export default {
                 this.requests.fetch({org: id, status: 'pending'});
             }
         },
-        adding: function(adding) {
+        adding(adding) {
             if (adding) {
-                this.$refs.completer.$options.userIds = this.org.members.map((member) => { return member.user.id; });
+                this.$refs.completer.$options.userIds = this.org.members.map(member => member.user.id);
                 this.$refs.completer.selectize.focus();
             }
         }
     },
-    ready: function() {
+    ready() {
         if (window.location.hash === '#membership-requests') {
             this.validating = true;
         }

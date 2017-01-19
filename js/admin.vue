@@ -104,11 +104,11 @@ export default {
          * @return {Vue}                The child instanciated vm
          */
         $modal(options, data) {
-            let constructor = Vue.extend(options);
+            const constructor = Vue.extend(options);
             return new constructor({
                 el: this.$els.modal,
                 parent: this,
-                data: data
+                propsData: data
             });
         }
     }

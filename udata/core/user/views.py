@@ -6,7 +6,7 @@ import logging
 from flask import abort, g
 from flask_security import current_user
 
-from udata.frontend.views import DetailView, SearchView
+from udata.frontend.views import DetailView
 from udata.models import User, Activity, Organization, Dataset, Reuse, Follow
 from udata.i18n import I18nBlueprint
 
@@ -26,14 +26,6 @@ def set_g_sysadmin():
 @blueprint.app_context_processor
 def inject_sysadmin_perms():
     return {'sysadmin': sysadmin}
-
-
-@blueprint.route('/', endpoint='list')
-class UserListView(SearchView):
-    model = User
-    template_name = 'user/list.html'
-    context_name = 'users'
-    default_sort = ('last_name', 'first_name')
 
 
 class UserView(object):

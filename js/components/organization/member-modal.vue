@@ -46,18 +46,22 @@
 </template>
 
 <script>
-import User from 'models/user';
 import API from 'api';
+import User from 'models/user';
+import Organization from 'models/organization';
+import UserModal from 'components/user/modal.vue';
+import RoleForm from 'components/form/horizontal-form.vue';
 
 export default {
-    name: 'member-modal',
+    components: {UserModal, RoleForm},
     props: {
         member: {
             type: Object,
             default() {return {};}
-        }
+        },
+        org: Organization
     },
-    data: function() {
+    data() {
         return {
             user: new User(),
             // horizontal: true,
@@ -66,33 +70,28 @@ export default {
                 label: this._('Role'),
                 widget: 'select-input'
             }],
-            org: {},
             defs: API.definitions.Member
         };
     },
     computed: {
-        is_admin: function() {
+        is_admin() {
             return this.org.is_admin(this.$root.me);
         },
-        member_exists: function() {
+        member_exists() {
             return this.org.is_member(this.user);
         }
     },
-    components: {
-        'user-modal': require('components/user/modal.vue'),
-        'role-form': require('components/form/horizontal-form.vue')
-    },
-    ready: function() {
+    ready() {
         this.user.fetch(this.member.user.id);
     },
     methods: {
-        delete: function() {
+        delete() {
             API.organizations.delete_organization_member(
                 {org: this.org.id, user: this.user.id},
                 this.on_deleted.bind(this)
             );
         },
-        on_deleted: function(response) {
+        on_deleted(response) {
             this.org.fetch();
             this.$dispatch('notify', {
                 title: this._('Member deleted'),
@@ -101,8 +100,8 @@ export default {
             });
             this.$refs.modal.close();
         },
-        submit: function() {
-            var data = {
+        submit() {
+            const data = {
                 org: this.org.id,
                 user: this.user.id,
                 payload: this.$refs.form.serialize()
@@ -113,7 +112,7 @@ export default {
                 API.organizations.create_organization_member(data, this.on_created.bind(this));
             }
         },
-        on_created: function(response) {
+        on_created(response) {
             this.org.fetch();
             this.$dispatch('notify', {
                 title: this._('Member added'),
@@ -123,7 +122,7 @@ export default {
             });
             this.$refs.modal.close();
         },
-        on_updated: function(response) {
+        on_updated(response) {
             this.org.fetch();
             this.$dispatch('notify', {
                 title: this._('Member role updated'),
