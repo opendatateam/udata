@@ -13,7 +13,6 @@
 </template>
 
 <script>
-import i18n from 'i18n';
 import Auth from 'auth';
 import log from 'logger';
 import Notify from 'notify';
@@ -42,9 +41,6 @@ export default {
             this.$els.textarea.focus();
         },
         submit() {
-            if (!Auth.need_user(i18n._('You need to be logged in to comment.'))) {
-                return;
-            }
             const data = {
                 title: this.title,
                 comment: this.comment,
@@ -64,7 +60,7 @@ export default {
                 document.location.href = `#discussion-${response.id}`
             })
             .catch(err => {
-                const msg = i18n._('An error occured while submitting your comment');
+                const msg = this._('An error occured while submitting your comment');
                 Notify.error(msg);
                 log.error(err);
                 this.sending = false;
