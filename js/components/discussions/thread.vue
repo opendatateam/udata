@@ -41,9 +41,9 @@
         </h4>
     </a>
     <div class="list-group-item list-group-form list-group-indent animated"
-        id="{{ discussionIdAttr }}-{{ position }}" v-show="formDisplayed">
+        id="{{ discussionIdAttr }}-{{ position }}" v-show="formDisplayed" v-if="currentUser">
         <div class="format-label pull-left">
-            {{ current_user | display }}
+            <avatar :user="currentUser"></avatar>
         </div>
         <span class="list-group-item-link">
             <a href="#{{ discussionIdAttr }}-{{ position }}"><span class="fa fa-link"></span></a>
@@ -61,6 +61,8 @@
 </template>
 
 <script>
+import Auth from 'auth';
+import config from 'config';
 import Avatar from 'components/avatar.vue';
 import ThreadForm from 'components/discussions/thread-form.vue';
 import moment from 'moment';
@@ -76,6 +78,7 @@ export default {
         return {
             detailed: false,
             formDisplayed: false,
+            currentUser: config.user,
         }
     },
     events: {
@@ -97,7 +100,13 @@ export default {
         toggleDiscussions() {
             this.detailed = !this.detailed;
         },
+        /**
+         * Display the comment form or triggers an authentication if required
+         */
         displayForm() {
+            if (!Auth.need_user(this._('You need to be logged in to comment.'))) {
+                return;
+            } 
             this.formDisplayed = true;
         }
     }

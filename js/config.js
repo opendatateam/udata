@@ -39,6 +39,7 @@ if (userEl) {
         slug: userEl.dataset.slug,
         first_name: userEl.dataset.first_name,
         last_name: userEl.dataset.last_name,
+        avatar: userEl.dataset.avatar,
         roles: userEl.dataset.roles.split(','),
     };
 }

@@ -7,9 +7,9 @@
         <h4 class="list-group-item-heading">{{ _('Start a new discussion') }}</h4>
     </a>
     <div class="list-group-item list-group-form list-group-form-discussion animated"
-        v-show="formDisplayed" v-el:form>
+        v-show="formDisplayed" v-if="currentUser" v-el:form>
         <div class="format-label pull-left">
-            {{ current_user | display }}
+            <avatar :user="currentUser"></avatar>
         </div>
         <span class="list-group-item-link">
             <a href="#discussion-create"><span class="fa fa-link"></span></a>
@@ -26,16 +26,20 @@
 </template>
 
 <script>
+import Auth from 'auth';
+import config from 'config';
+import Avatar from 'components/avatar.vue';
 import DiscussionThread from 'components/discussions/thread.vue';
 import ThreadsForm from 'components/discussions/threads-form.vue';
 import log from 'logger';
 
 export default {
-    components: {DiscussionThread, ThreadsForm},
+    components: {Avatar, DiscussionThread, ThreadsForm},
     data() {
         return {
             discussions: [],
-            formDisplayed: false
+            formDisplayed: false,
+            currentUser: config.user,
         }
     },
     props: {
@@ -73,7 +77,13 @@ export default {
         }).catch(log.error.bind(log));
     },
     methods: {
+        /**
+         * Display the start discussion form or triggers an authentication if required
+         */
         displayForm() {
+            if (!Auth.need_user(this._('You need to be logged in to start a discussion.'))) {
+                return;
+            }
             this.formDisplayed = true;
         },
 
@@ -81,11 +91,13 @@ export default {
          * Trigger a new prefilled discussion.
          */
         start(title, comment) {
-            this.formDisplayed = true;
+            this.displayForm()
             // Wait for next tick because the form needs to be visible to scroll
             this.$nextTick(() => {
-                this.$scrollTo(this.$els.form);
-                this.$refs.form.prefill(title, comment);
+                if (this.$els.form && this.$refs.form) { // Avoid logging errors
+                    this.$scrollTo(this.$els.form);
+                    this.$refs.form.prefill(title, comment);
+                }
             })
         }
     }
