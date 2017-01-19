@@ -2,12 +2,9 @@
 <div class="list-group resources-list smaller">
     <discussion-thread v-for="discussion in discussions" :discussion="discussion">
     </discussion-thread>
-    <a class="list-group-item add new-discussion"
-        @click="displayForm" v-show="formDisplayed">
+    <a class="list-group-item add new-discussion" @click="displayForm" v-show="!formDisplayed">
         <div class="format-label pull-left">+</div>
-        <h4 class="list-group-item-heading">
-            {{ _('Start a new discussion') }}
-        </h4>
+        <h4 class="list-group-item-heading">{{ _('Start a new discussion') }}</h4>
     </a>
     <div class="list-group-item list-group-form list-group-form-discussion animated"
         v-show="formDisplayed" v-el:form>
