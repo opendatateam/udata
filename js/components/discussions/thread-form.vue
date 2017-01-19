@@ -2,7 +2,7 @@
 <form role="form" class="clearfix animated" @submit.prevent="submit">
     <div class="form-group">
         <label for="comment-new-message">{{ _('Comment') }}</label>
-        <textarea id="comment-new-message" v-model="comment" class="form-control" rows="3" required></textarea>
+        <textarea v-el:textarea id="comment-new-message" v-model="comment" class="form-control" rows="3" required></textarea>
     </div>
     <button @click="submit" :disabled="this.sending || !this.comment" class="btn btn-primary btn-block pull-right submit-new-message">
         {{ _('Submit your comment') }}
@@ -27,6 +27,15 @@ export default {
       }
   },
   methods: {
+      /**
+       * Prefill the form and focus the comment area
+       */
+      prefill(comment) {
+          comment = comment || '';
+          this.comment = comment;
+          this.$els.textarea.setSelectionRange(comment.length, comment.length);
+          this.$els.textarea.focus();
+      },
       submit() {
           this.sending = true;
           this.$api
@@ -35,6 +44,7 @@ export default {
               this.$dispatch('discussion:updated', response);
               this.comment = '';
               this.sending = false;
+              document.location.href = `#discussion-${this.discussionId}-${response.discussion.length - 1}`;
           })
           .catch(err => {
               const msg = this._('An error occured while submitting your comment')
