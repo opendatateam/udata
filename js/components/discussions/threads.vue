@@ -42,14 +42,16 @@ export default {
         subjectId: String,
         subjectClass: String
     },
+    events: {
+        'discussions:created': function(discussion) {
+            this.formDisplayed = false;
+            this.discussions.unshift(discussion);
+        }
+    },
     ready() {
         this.$api.get('discussions', {for: this.subjectId}).then(response => {
             this.discussions = response.data;
         }).catch(log.error.bind(log));
-
-        this.$on('discussions-load', discussions => {
-            this.discussions.unshift(discussions);
-        });
     },
     methods: {
         displayForm() {

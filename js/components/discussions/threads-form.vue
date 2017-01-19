@@ -57,7 +57,7 @@ export default {
             this.$api
             .post('discussions/', data)
             .then(response => {
-                this.$dispatch('discussions-load', response);
+                this.$dispatch('discussions:created', response);
                 this.title = '';
                 this.comment = '';
                 this.sending = false;
