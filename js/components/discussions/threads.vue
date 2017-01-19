@@ -1,6 +1,6 @@
 <template>
 <div class="list-group resources-list smaller">
-    <discussion-thread v-for="discussion in discussions" :discussion="discussion">
+    <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion">
     </discussion-thread>
     <a class="list-group-item add new-discussion" @click="displayForm" v-show="!formDisplayed">
         <div class="format-label pull-left">+</div>
@@ -46,6 +46,13 @@ export default {
         'discussions:created': function(discussion) {
             this.formDisplayed = false;
             this.discussions.unshift(discussion);
+            this.$nextTick(() => {
+                // Scroll to new discussion when displayed
+                // and expand it
+                const $thread = this.threadFor(discussion);
+                $thread.detailed = true;
+                this.$scrollTo($thread);
+            });
         }
     },
     ready() {
@@ -68,6 +75,14 @@ export default {
                 this.$scrollTo(this.$els.form);
                 this.$refs.form.prefill(title, comment);
             })
+        },
+
+        /**
+         * Get the thread component for a given discussion
+         *
+         */
+        threadFor(discussion) {
+            return this.$refs.threads.find($thread => $thread.discussion == discussion);
         }
     }
 }
