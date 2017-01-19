@@ -10,18 +10,22 @@ from udata.tests.features.territories.test_territories_process import (
 )
 
 
-class MetropolitanTerritoriesAPITest(APITestCase):
+class TerritoriesAPITest(APITestCase):
     settings = TerritoriesSettings
 
     def setUp(self):
         self.paca, self.bdr, self.arles = create_geozones_fixtures()
-        super(MetropolitanTerritoriesAPITest, self).setUp()
+        super(TerritoriesAPITest, self).setUp()
 
     def test_suggest_no_parameter(self):
         response = self.get(url_for('api.suggest_territory'))
         self.assert400(response)
 
     def test_suggest_empty(self):
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': 'tes'})
+        self.assert200(response)
+        self.assertEqual(response.json, [])
         response = self.get(
             url_for('api.suggest_territory'), qs={'q': 'test'})
         self.assert200(response)
@@ -127,10 +131,6 @@ class MetropolitanTerritoriesAPITest(APITestCase):
         self.assertEqual(results[0]['id'], self.bdr.id)
         self.assertEqual(results[1]['id'], bouchet.id)
 
-
-class WorldTerritoriesAPITest(APITestCase):
-    settings = TerritoriesSettings
-
     def test_suggest_drom_com(self):
         guyane = GeoZoneFactory(
             id='fr/county/973', level='fr/county', name='Guyane', code='973',
@@ -190,18 +190,17 @@ class WorldTerritoriesAPITest(APITestCase):
         GeoZoneFactory(
             id='country/fr', level='country', name='France')
         response = self.get(
-            url_for('api.suggest_territory'), qs={'q': 'franc'})
+            url_for('api.suggest_territory'), qs={'q': 'fra'})
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 0)
-
-    def test_not_suggest_not_handled(self):
-        GeoZoneFactory(
-            id='country/cn', level='country', name='China')
-        GeoZoneFactory(
-            id='country-group/world', level='country-group', name='World')
         response = self.get(
-            url_for('api.suggest_territory'), qs={'q': 'sir'})
+            url_for('api.suggest_territory'), qs={'q': 'fran'})
+        self.assert200(response)
+        results = response.json
+        self.assertEqual(len(results), 0)
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': 'franc'})
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 0)
