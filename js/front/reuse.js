@@ -10,16 +10,11 @@ import 'widgets/issues-btn';
 
 import Vue from 'vue';
 
-// Plugins
-import ScrollTo from 'plugins/scroll-to';
-
 // Components
 import FollowButton from 'components/buttons/follow.vue';
 import ShareButton from 'components/buttons/share.vue';
 import FeaturedButton from 'components/buttons/featured.vue';
 import DiscussionThreads from 'components/discussions/threads.vue';
-
-Vue.use(require('plugins/scroll-to'));
 
 new Vue({
     el: 'body',

@@ -1,8 +1,9 @@
 <template>
 <div>
-    <div class="list-group-item" :id="discussionIdAttr" @click="toggleDiscussions">
+    <div class="list-group-item" :id="discussionIdAttr" @click="toggleDiscussions"
+        :class="{expanded: detailed}">
         <div class="format-label pull-left">
-            <avatar :user="question.posted_by"></avatar>
+            <avatar :user="discussion.user"></avatar>
         </div>
         <span class="list-group-item-link">
             <a href="#{{ discussionIdAttr }}"><span class="fa fa-link"></span></a>
@@ -12,16 +13,16 @@
         </h4>
         <p class="list-group-item-text ellipsis open-discussion-thread list-group-message-number-{{ discussion.id }}">
             {{ _('Discussion started on {created} with {count} messages.',
-                 {created: createdDate, count: responses.length})
+                 {created: createdDate, count: discussion.discussion.length})
             }}
         </p>
     </div>
-    <div v-for="(index, response) in responses" id="{{ discussionIdAttr }}-{{ index }}"
+    <div v-for="(index, response) in discussion.discussion" id="{{ discussionIdAttr }}-{{ index }}"
         class="list-group-item list-group-indent animated discussion-messages-list"
-        :class="{'body-only': index == 0, 'hidden': !detailed}">
+        :class="{'body-only': index == 0}" v-show="detailed">
         <template v-if="index > 0">
             <div class="format-label pull-left">
-                {{ response.posted_by | display }}
+                <avatar :user="response.posted_by"></avatar>
             </div>
             <span class="list-group-item-link">
                 <a href="#{{ discussionIdAttr }}-{{ index }}"><span class="fa fa-link"></span></a>
@@ -33,21 +34,20 @@
     </div>
     <a v-if="!discussion.closed"
         class="list-group-item add new-comment list-group-indent animated"
-        :class="{hidden: formDisplayed || !detailed}"
-        @click="displayForm">
+        v-show="!formDisplayed && detailed" @click="displayForm">
         <div class="format-label pull-left">+</div>
         <h4 class="list-group-item-heading">
             {{ _('Add a comment') }}
         </h4>
     </a>
-    <div class="list-group-item list-group-form list-group-indent animated"
-        id="{{ discussionIdAttr }}-{{ position }}"
-        :class="{hidden: !formDisplayed}">
+    <div v-el:form id="{{ discussionIdAttr }}-new-comment" v-show="formDisplayed" v-if="currentUser"
+        class="list-group-item list-group-form list-group-indent animated">
         <div class="format-label pull-left">
-            {{ current_user | display }}
+            <avatar :user="currentUser"></avatar>
         </div>
         <span class="list-group-item-link">
-            <a href="#{{ discussionIdAttr }}-{{ position }}"><span class="fa fa-link"></span></a>
+            <a href="#{{ discussionIdAttr }}-new-comment"><span class="fa fa-link"></span></a>
+            <a @click="hideForm"><span class="fa fa-times"></span></a>
         </span>
         <h4 class="list-group-item-heading">
             {{ _('Commenting on this thread') }}
@@ -56,12 +56,14 @@
             {{ _("You're about to answer to this particular thread about:") }}<br />
             {{ discussion.title }}
         </p>
-        <thread-form :discussion-id="discussion.id"></thread-form>
+        <thread-form v-ref:form :discussion-id="discussion.id"></thread-form>
     </div>
 </div>
 </template>
 
 <script>
+import Auth from 'auth';
+import config from 'config';
 import Avatar from 'components/avatar.vue';
 import ThreadForm from 'components/discussions/thread-form.vue';
 import moment from 'moment';
@@ -77,15 +79,17 @@ export default {
         return {
             detailed: false,
             formDisplayed: false,
+            currentUser: config.user,
+        }
+    },
+    events: {
+        'discussion:updated': function(discussion) {
+            // Hide the form on comment submitted
+            this.hideForm()
+            return true; // Don't stop propagation
         }
     },
     computed: {
-        question() {
-            return this.discussion.discussion[0];
-        },
-        responses() {
-            return this.discussion.discussion.splice(1);
-        },
         discussionIdAttr() {
             return `discussion-${this.discussion.id}`;
         },
@@ -93,17 +97,53 @@ export default {
             return moment(this.discussion.created).format('LL')
         }
     },
-    ready() {
-        this.$on('discussion-load', discussion => {
-            this.discussion = discussion;
-        });
-    },
     methods: {
         toggleDiscussions() {
             this.detailed = !this.detailed;
         },
+        /**
+         * Display the comment form or triggers an authentication if required
+         */
         displayForm() {
-            this.formDisplayed = true;
+            if (!Auth.need_user(this._('You need to be logged in to comment.'))) {
+                return;
+            }
+            this.formDisplayed = true; // Form is at the end of the expanded discussion
+            this.detailed = true;
+        },
+        /**
+         * Hide the comment form
+         */
+        hideForm() {
+            this.formDisplayed = false;
+        },
+
+        /**
+         * Trigger a new prefilled comment.
+         */
+        start(comment) {
+            this.displayForm()
+            // Wait for next tick because the form needs to be visible to scroll
+            this.$nextTick(() => {
+                if (this.$els.form && this.$refs.form) { // Avoid logging errors
+                    this.$scrollTo(this.$els.form);
+                    this.$refs.form.prefill(comment);
+                }
+            })
+        },
+
+        /**
+         * Focus the thread or a specific comment if position is given
+         */
+        focus(index) {
+            this.detailed = true;
+            if (index) {
+                this.$nextTick(() => {
+                    this.$scrollTo(`#${discussionIdAttr}-${index}`);
+                })
+            } else {
+                this.$scrollTo(this);
+            }
         }
     }
 }

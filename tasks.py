@@ -21,7 +21,7 @@ STATIC_ASSETS_EXTS = (
     'jpg', 'gif'
 )
 STATIC_ASSETS_DIRS = (
-    'dataset', 'organization', 'post', 'reuse', 'site', 'topic', 'user'
+    'dataset', 'organization', 'post', 'reuse', 'site', 'topic', 'user', 'chunks',
 )
 
 
