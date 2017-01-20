@@ -23,6 +23,10 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_empty(self):
         response = self.get(
+            url_for('api.suggest_territory'), qs={'q': 'tes'})
+        self.assert200(response)
+        self.assertEqual(response.json, [])
+        response = self.get(
             url_for('api.suggest_territory'), qs={'q': 'test'})
         self.assert200(response)
         self.assertEqual(response.json, [])
@@ -185,6 +189,16 @@ class TerritoriesAPITest(APITestCase):
     def test_not_suggest_country(self):
         GeoZoneFactory(
             id='country/fr', level='country', name='France')
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': 'fra'})
+        self.assert200(response)
+        results = response.json
+        self.assertEqual(len(results), 0)
+        response = self.get(
+            url_for('api.suggest_territory'), qs={'q': 'fran'})
+        self.assert200(response)
+        results = response.json
+        self.assertEqual(len(results), 0)
         response = self.get(
             url_for('api.suggest_territory'), qs={'q': 'franc'})
         self.assert200(response)
