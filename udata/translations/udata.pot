@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 1.0.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-01-16 14:16+0100\n"
+"POT-Creation-Date: 2017-01-20 10:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,10 +23,9 @@ msgstr ""
 #: udata/templates/organization/followers.html:5
 #: udata/templates/organization/list.html:13
 #: udata/templates/organization/list.html:27
-#: udata/templates/reuse/search-panel.html:4 udata/templates/search.html:42
-#: udata/templates/search.html:116 udata/templates/user/base.html:91
-#: udata/templates/user/following.html:17 udata/templates/user/search-panel.html:5
-#: udata/theme.py:36
+#: udata/templates/reuse/search-panel.html:4 udata/templates/search.html:41
+#: udata/templates/search.html:107 udata/templates/user/base.html:91
+#: udata/templates/user/following.html:17 udata/theme.py:36
 msgid "Organizations"
 msgstr ""
 
@@ -42,13 +41,12 @@ msgstr ""
 #: udata/templates/organization/search-labels.html:6
 #: udata/templates/organization/search-panel.html:4
 #: udata/templates/reuse/list.html:34 udata/templates/reuse/search-labels.html:12
-#: udata/templates/reuse/search-panel.html:8 udata/templates/search.html:26
-#: udata/templates/search.html:87 udata/templates/search.html:119
-#: udata/templates/search.html:130 udata/templates/topic/browse.html:9
-#: udata/templates/topic/datasets.html:14 udata/templates/topic/reuses.html:28
-#: udata/templates/user/datasets.html:8 udata/templates/user/following.html:15
-#: udata/templates/user/list.html:27 udata/templates/user/search-labels.html:6
-#: udata/templates/user/search-panel.html:7 udata/theme.py:37
+#: udata/templates/reuse/search-panel.html:8 udata/templates/search.html:25
+#: udata/templates/search.html:78 udata/templates/search.html:110
+#: udata/templates/topic/browse.html:9 udata/templates/topic/datasets.html:14
+#: udata/templates/topic/reuses.html:28 udata/templates/user/datasets.html:8
+#: udata/templates/user/following.html:15 udata/templates/user/list.html:27
+#: udata/theme.py:37
 msgid "Datasets"
 msgstr ""
 
@@ -56,7 +54,7 @@ msgstr ""
 #: udata/core/organization/views.py:132 udata/core/organization/views.py:135
 #: udata/core/site/metrics.py:52 udata/core/site/views.py:134
 #: udata/core/user/metrics.py:42 udata/templates/dataset/card.html:38
-#: udata/templates/dataset/display.html:375 udata/templates/dataset/list.html:33
+#: udata/templates/dataset/display.html:378 udata/templates/dataset/list.html:33
 #: udata/templates/dataset/search-labels.html:25
 #: udata/templates/dataset/search-panel.html:18
 #: udata/templates/organization/display.html:51
@@ -64,14 +62,12 @@ msgstr ""
 #: udata/templates/organization/search-labels.html:9
 #: udata/templates/organization/search-panel.html:6
 #: udata/templates/reuse/display.html:23 udata/templates/reuse/list.html:13
-#: udata/templates/reuse/list.html:29 udata/templates/search.html:34
-#: udata/templates/search.html:93 udata/templates/search.html:102
-#: udata/templates/search.html:120 udata/templates/search.html:131
-#: udata/templates/topic/browse.html:15 udata/templates/topic/datasets.html:29
-#: udata/templates/topic/reuses.html:14 udata/templates/user/following.html:16
-#: udata/templates/user/list.html:28 udata/templates/user/reuses.html:8
-#: udata/templates/user/search-labels.html:9
-#: udata/templates/user/search-panel.html:8 udata/theme.py:38
+#: udata/templates/reuse/list.html:29 udata/templates/search.html:33
+#: udata/templates/search.html:84 udata/templates/search.html:93
+#: udata/templates/search.html:111 udata/templates/topic/browse.html:15
+#: udata/templates/topic/datasets.html:29 udata/templates/topic/reuses.html:14
+#: udata/templates/user/following.html:16 udata/templates/user/list.html:28
+#: udata/templates/user/reuses.html:8 udata/theme.py:38
 msgid "Reuses"
 msgstr ""
 
@@ -170,7 +166,7 @@ msgstr ""
 #: udata/core/reuse/forms.py:22 udata/core/site/forms.py:15
 #: udata/templates/dataset/list.html:30 udata/templates/discussion/threads.html:43
 #: udata/templates/organization/list.html:29 udata/templates/reuse/list.html:31
-#: udata/templates/search.html:90 udata/templates/search.html:104
+#: udata/templates/search.html:81 udata/templates/search.html:95
 #: udata/templates/topic/datasets.html:26 udata/templates/topic/reuses.html:25
 msgid "Title"
 msgstr ""
@@ -427,15 +423,15 @@ msgstr ""
 #: udata/core/dataset/models.py:238 udata/models/datetime_fields.py:58
 #: udata/templates/dataset/display.html:230 udata/templates/dataset/list.html:31
 #: udata/templates/organization/list.html:30 udata/templates/reuse/list.html:32
-#: udata/templates/search.html:91 udata/templates/search.html:105
+#: udata/templates/search.html:82 udata/templates/search.html:96
 #: udata/templates/topic/datasets.html:27 udata/templates/topic/reuses.html:26
 msgid "Creation date"
 msgstr ""
 
 #: udata/core/dataset/models.py:240 udata/models/datetime_fields.py:60
 #: udata/templates/dataset/list.html:32 udata/templates/organization/list.html:31
-#: udata/templates/reuse/list.html:33 udata/templates/search.html:92
-#: udata/templates/search.html:106 udata/templates/topic/datasets.html:28
+#: udata/templates/reuse/list.html:33 udata/templates/search.html:83
+#: udata/templates/search.html:97 udata/templates/topic/datasets.html:28
 #: udata/templates/topic/reuses.html:27
 msgid "Last modification date"
 msgstr ""
@@ -493,7 +489,7 @@ msgid "Subject"
 msgstr ""
 
 #: udata/core/discussions/metrics.py:16 udata/core/discussions/metrics.py:24
-#: udata/templates/dataset/display.html:347 udata/templates/reuse/display.html:249
+#: udata/templates/dataset/display.html:347 udata/templates/reuse/display.html:255
 msgid "Discussions"
 msgstr ""
 
@@ -522,13 +518,11 @@ msgstr ""
 #: udata/templates/organization/list.html:34
 #: udata/templates/organization/search-labels.html:12
 #: udata/templates/organization/search-panel.html:8
-#: udata/templates/reuse/display.html:194 udata/templates/reuse/list.html:35
+#: udata/templates/reuse/display.html:200 udata/templates/reuse/list.html:35
 #: udata/templates/reuse/search-labels.html:15
-#: udata/templates/reuse/search-panel.html:9 udata/templates/search.html:121
-#: udata/templates/search.html:132 udata/templates/topic/reuses.html:29
-#: udata/templates/user/followers.html:7 udata/templates/user/list.html:29
-#: udata/templates/user/search-labels.html:12
-#: udata/templates/user/search-panel.html:9
+#: udata/templates/reuse/search-panel.html:9 udata/templates/search.html:112
+#: udata/templates/topic/reuses.html:29 udata/templates/user/followers.html:7
+#: udata/templates/user/list.html:29
 msgid "Followers"
 msgstr ""
 
@@ -564,7 +558,7 @@ msgstr ""
 #: udata/core/jobs/forms.py:30 udata/core/organization/forms.py:23
 #: udata/core/post/forms.py:18 udata/core/topic/forms.py:18
 #: udata/harvest/forms.py:18 udata/templates/api/admin.html:10
-#: udata/templates/search.html:118 udata/templates/user/list.html:30
+#: udata/templates/search.html:109 udata/templates/user/list.html:30
 msgid "Name"
 msgstr ""
 
@@ -776,7 +770,7 @@ msgid "The details about the reuse (build process, specifics, self-critics...)."
 msgstr ""
 
 #: udata/core/reuse/forms.py:33 udata/templates/home.html:92
-#: udata/templates/reuse/display.html:216
+#: udata/templates/reuse/display.html:222
 msgid "Used datasets"
 msgstr ""
 
@@ -838,13 +832,13 @@ msgstr ""
 
 #: udata/core/site/metrics.py:62 udata/core/site/views.py:140
 #: udata/templates/dataset/display.html:89 udata/templates/dataset/list.html:28
-#: udata/templates/search.html:88
+#: udata/templates/search.html:79
 msgid "Resources"
 msgstr ""
 
 #: udata/core/site/metrics.py:81 udata/core/site/views.py:155
-#: udata/templates/search.html:50 udata/templates/user/base.html:13
-#: udata/templates/user/following.html:18 udata/templates/user/list.html:13
+#: udata/templates/user/base.html:13 udata/templates/user/following.html:18
+#: udata/templates/user/list.html:13
 msgid "Users"
 msgstr ""
 
@@ -1585,57 +1579,48 @@ msgstr ""
 msgid "search"
 msgstr ""
 
-#: udata/templates/search.html:60
+#: udata/templates/search.html:51
 msgid "Territory:"
 msgstr ""
 
-#: udata/templates/dataset/display.html:321 udata/templates/search.html:65
+#: udata/templates/dataset/display.html:321 udata/templates/search.html:56
 msgid "Territories"
 msgstr ""
 
 #: udata/templates/dataset/search-labels.html:6
-#: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:73
+#: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:64
 msgid "Tag"
 msgstr ""
 
 #: udata/templates/dataset/search-labels.html:12
-#: udata/templates/organization/search-labels.html:3 udata/templates/search.html:76
+#: udata/templates/organization/search-labels.html:3 udata/templates/search.html:67
 msgid "Badge"
 msgstr ""
 
 #: udata/templates/dataset/card.html:45 udata/templates/dataset/list.html:34
 #: udata/templates/organization/card.html:43 udata/templates/reuse/card.html:47
-#: udata/templates/search.html:94 udata/templates/search.html:108
+#: udata/templates/search.html:85 udata/templates/search.html:99
 #: udata/templates/topic/datasets.html:30 udata/templates/user/card.html:36
 msgid "Stars"
 msgstr ""
 
-#: udata/templates/search.html:107
+#: udata/templates/search.html:98
 msgid "Datasets used"
 msgstr ""
 
-#: udata/templates/search.html:128
-msgid "Last Name"
-msgstr ""
-
-#: udata/templates/search.html:129
-msgid "First Name"
-msgstr ""
-
-#: udata/templates/search.html:144
+#: udata/templates/search.html:124
 msgid "No results found, try to be less specific (or fix your typos?)"
 msgstr ""
 
-#: udata/templates/search.html:161 udata/templates/search.html:186
-#: udata/templates/search.html:213 udata/templates/search.html:240
-#: udata/templates/topic/browse.html:34 udata/templates/topic/browse.html:54
+#: udata/templates/search.html:141 udata/templates/search.html:166
+#: udata/templates/search.html:193 udata/templates/topic/browse.html:34
+#: udata/templates/topic/browse.html:54
 #, python-format
 msgid "See the %(total)s results"
 msgstr ""
 
-#: udata/templates/search.html:197 udata/templates/search.html:224
-#: udata/templates/search.html:251 udata/templates/topic/browse.html:39
-#: udata/templates/topic/browse.html:59
+#: udata/templates/search.html:177 udata/templates/search.html:204
+#: udata/templates/topic/browse.html:39 udata/templates/topic/browse.html:59
 msgid "No results found"
 msgstr ""
 
@@ -1652,7 +1637,7 @@ msgid "Maintainer"
 msgstr ""
 
 #: udata/templates/api/admin.html:31 udata/templates/dataset/display.html:135
-#: udata/templates/dataset/display.html:412
+#: udata/templates/dataset/display.html:415
 #: udata/templates/dataset/resource/display.html:12
 #: udata/templates/dataset/resource/list-item.html:31
 #: udata/templates/organization/display.html:25
@@ -1790,45 +1775,45 @@ msgstr ""
 msgid "Latest resource update"
 msgstr ""
 
-#: udata/templates/dataset/display.html:283
+#: udata/templates/dataset/display.html:283 udata/templates/reuse/display.html:189
 msgid "Suggest a tag with a new discussion thread"
 msgstr ""
 
-#: udata/templates/dataset/display.html:285
+#: udata/templates/dataset/display.html:285 udata/templates/reuse/display.html:191
 msgid "Suggest a tag"
 msgstr ""
 
-#: udata/templates/dataset/display.html:339 udata/templates/reuse/display.html:242
+#: udata/templates/dataset/display.html:339 udata/templates/reuse/display.html:248
 msgid "Community contributions"
 msgstr ""
 
-#: udata/templates/dataset/display.html:351 udata/templates/reuse/display.html:253
+#: udata/templates/dataset/display.html:354 udata/templates/reuse/display.html:261
 msgid "Discussion between the organization and the community about this dataset."
 msgstr ""
 
-#: udata/templates/dataset/display.html:355
+#: udata/templates/dataset/display.html:358
 msgid "Community resources"
 msgstr ""
 
-#: udata/templates/dataset/display.html:365
+#: udata/templates/dataset/display.html:368
 msgid "New community resource"
 msgstr ""
 
-#: udata/templates/dataset/display.html:371
+#: udata/templates/dataset/display.html:374
 msgid ""
 "You have built a more comprehensive database than those presented here? This "
 "is the time to share it!"
 msgstr ""
 
-#: udata/templates/dataset/display.html:408
+#: udata/templates/dataset/display.html:411
 msgid "Open in a new window"
 msgstr ""
 
-#: udata/templates/dataset/display.html:430
+#: udata/templates/dataset/display.html:433
 msgid "Add a reuse"
 msgstr ""
 
-#: udata/templates/dataset/display.html:438
+#: udata/templates/dataset/display.html:441
 msgid ""
 "You reused these data and published an article, a computer graphics, or an "
 "application?\n"
@@ -1856,7 +1841,6 @@ msgstr ""
 
 #: udata/templates/dataset/search-labels.html:3
 #: udata/templates/reuse/search-labels.html:3
-#: udata/templates/user/search-labels.html:3
 msgid "Organization"
 msgstr ""
 
@@ -2272,14 +2256,13 @@ msgstr ""
 
 #: udata/templates/organization/card.html:22
 #: udata/templates/organization/search-result.html:21
-#: udata/templates/user/card.html:21 udata/templates/user/search-result.html:19
+#: udata/templates/user/card.html:21
 msgid "Number of datasets"
 msgstr ""
 
 #: udata/templates/organization/card.html:24
 #: udata/templates/organization/search-result.html:23
 #: udata/templates/reuse/search-result.html:27 udata/templates/user/card.html:23
-#: udata/templates/user/search-result.html:21
 #, python-format
 msgid "%(num)s dataset"
 msgid_plural "%(num)s datasets"
@@ -2287,13 +2270,12 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: udata/templates/organization/card.html:30 udata/templates/user/card.html:29
-#: udata/templates/user/search-result.html:28
 msgid "Number of reuses"
 msgstr ""
 
 #: udata/templates/organization/card.html:32
 #: udata/templates/organization/search-result.html:32
-#: udata/templates/user/card.html:31 udata/templates/user/search-result.html:30
+#: udata/templates/user/card.html:31
 #, python-format
 msgid "%(num)s reuse"
 msgid_plural "%(num)s reuses"
@@ -2499,12 +2481,10 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: udata/templates/organization/search-result.html:57
-#: udata/templates/user/search-result.html:37
 msgid "Number of followers"
 msgstr ""
 
 #: udata/templates/organization/search-result.html:59
-#: udata/templates/user/search-result.html:39
 #, python-format
 msgid "%(num)s follower"
 msgid_plural "%(num)s followers"
@@ -2577,7 +2557,7 @@ msgstr ""
 msgid "I'll be informed about this user news"
 msgstr ""
 
-#: udata/templates/reuse/display.html:199
+#: udata/templates/reuse/display.html:205
 msgid "No followers yet"
 msgstr ""
 

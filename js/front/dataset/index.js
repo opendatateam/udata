@@ -30,15 +30,13 @@ function parseUrl(url) {
     return a;
 }
 
-Vue.use(require('plugins/scroll-to'));
-
 new Vue({
     el: 'body',
     components: {LeafletMap, ShareButton, FollowButton, DiscussionThreads, FeaturedButton},
     data() {
         const data = {
             dataset: this.extractDataset(),
-            userReuses: [],
+            userReuses: []
         };
         if (config.check_urls) {
             const port = location.port ? `:${location.port}` : '';

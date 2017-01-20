@@ -25,6 +25,7 @@ Vue.use(require('plugins/tooltips'));
 Vue.use(require('plugins/util'));
 Vue.use(require('plugins/location'));
 Vue.use(require('plugins/outside'));
+Vue.use(require('plugins/scroll-to'));
 
 // Site-wide components
 Vue.component('site-search', require('components/site-search.vue'));

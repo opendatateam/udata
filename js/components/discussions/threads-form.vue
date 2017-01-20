@@ -13,7 +13,6 @@
 </template>
 
 <script>
-import i18n from 'i18n';
 import Auth from 'auth';
 import log from 'logger';
 import Notify from 'notify';
@@ -36,15 +35,13 @@ export default {
          * Prefill the form and focus the comment area
          */
         prefill(title, comment) {
+            comment = comment || '';
+            this.comment = comment;
             this.title = title || '';
-            this.comment = comment || '';
             this.$els.textarea.setSelectionRange(comment.length, comment.length);
             this.$els.textarea.focus();
         },
         submit() {
-            if (!Auth.need_user(i18n._('You need to be logged in to comment.'))) {
-                return;
-            }
             const data = {
                 title: this.title,
                 comment: this.comment,
@@ -57,14 +54,14 @@ export default {
             this.$api
             .post('discussions/', data)
             .then(response => {
-                this.$dispatch('discussions-load', response);
+                this.$dispatch('discussion:created', response);
                 this.title = '';
                 this.comment = '';
                 this.sending = false;
-                document.location.href = `#discussion-${response.id}`
+                document.location.href = `#discussion-${response.id}`;
             })
             .catch(err => {
-                const msg = i18n._('An error occured while submitting your comment');
+                const msg = this._('An error occured while submitting your comment');
                 Notify.error(msg);
                 log.error(err);
                 this.sending = false;
