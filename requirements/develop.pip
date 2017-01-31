@@ -1,6 +1,6 @@
 invoke>=0.13.0
 honcho==0.7.1
-transifex-client==0.12.2
+transifex-client==0.12.3
 -r install.pip
 -r test.pip
 -r report.pip
