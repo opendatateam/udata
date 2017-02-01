@@ -12,7 +12,7 @@ from udata.models import Badge, Site, PUBLIC_SERVICE
 
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.site.views import current_site
+from udata.core.site.models import current_site
 from udata.core.reuse.factories import ReuseFactory
 from udata.tests.frontend import FrontTestCase
 

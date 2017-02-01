@@ -105,6 +105,8 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
             cls.on_create.send(document)
         else:
             cls.on_update.send(document)
+        if document.deleted:
+            cls.on_delete.send(document)
 
     def url_for(self, *args, **kwargs):
         return url_for('reuses.show', reuse=self, *args, **kwargs)

@@ -6,9 +6,9 @@ from elasticsearch_dsl import (
 )
 
 from udata.i18n import lazy_gettext as _
-from udata.core.site.views import current_site
+from udata.core.site.models import current_site
 from udata.models import (
-    Dataset, Organization, License, User, GeoZone, CERTIFIED
+    Dataset, Organization, License, User, GeoZone
 )
 from udata.search import (
     ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,

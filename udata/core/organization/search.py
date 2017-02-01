@@ -7,7 +7,7 @@ from udata.i18n import lazy_gettext as _
 from udata import search
 from udata.search.fields import TermsFacet, RangeFacet
 from udata.models import Organization
-from udata.core.site.views import current_site
+from udata.core.site.models import current_site
 from udata.search.analysis import simple
 
 from . import metrics  # noqa: Metrics are need for the mapping
