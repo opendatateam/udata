@@ -189,10 +189,6 @@ export default {
 .site-search {
     position: relative;
 
-    .form-group {
-        margin-bottom: 0;
-    }
-
     .result-group {
         position: relative;
     }
