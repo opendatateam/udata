@@ -95,12 +95,6 @@ On the very first run it will download and install Docker images which takes a w
     If you have no output at all for too long,
     check the [IPv6 possible issue](https://github.com/docker/docker/issues/2174#issuecomment-35697655).
 
-And install the [analysis-icu][] plugin for ElasticSearch:
-
-```shell
-$ docker-compose run search plugin install analysis-icu
-$ docker-compose restart search
-```
 
 ### By hand
 

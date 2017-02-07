@@ -21,7 +21,7 @@ STATIC_ASSETS_EXTS = (
     'jpg', 'gif'
 )
 STATIC_ASSETS_DIRS = (
-    'dataset', 'organization', 'post', 'reuse', 'site', 'topic', 'user'
+    'dataset', 'organization', 'post', 'reuse', 'site', 'topic', 'user', 'chunks',
 )
 
 
@@ -139,13 +139,10 @@ def i18n(ctx):
     lrun('python setup.py update_catalog')
 
     info('Extract JavaScript strings')
-    keys = []
+    keys = set()
     catalog = {}
     catalog_filename = join(ROOT, 'js', 'locales',
                             '{}.en.json'.format(I18N_DOMAIN))
-    not_found = {}
-    not_found_filename = join(ROOT, 'js', 'locales',
-                              '{}.notfound.json'.format(I18N_DOMAIN))
     if exists(catalog_filename):
         with codecs.open(catalog_filename, encoding='utf8') as f:
             catalog = json.load(f)
@@ -168,20 +165,18 @@ def i18n(ctx):
             for regexp in regexps:
                 for match in regexp.finditer(content):
                     key = match.group(1)
-                    keys.append(key)
+                    key = key.replace('\\n', '\n')
+                    keys.add(key)
                     if key not in catalog:
                         catalog[key] = key
 
+    # Remove old/not found translations
+    for key in catalog.keys():
+        if key not in keys:
+            del catalog[key]
+
     with codecs.open(catalog_filename, 'w', encoding='utf8') as f:
         json.dump(catalog, f, sort_keys=True, indent=4, ensure_ascii=False,
-                  encoding='utf8', separators=(',', ': '))
-
-    for key, value in catalog.items():
-        if key not in keys:
-            not_found[key] = value
-
-    with codecs.open(not_found_filename, 'w', encoding='utf8') as f:
-        json.dump(not_found, f, sort_keys=True, indent=4, ensure_ascii=False,
                   encoding='utf8', separators=(',', ': '))
 
 

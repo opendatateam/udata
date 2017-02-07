@@ -7,7 +7,6 @@ import Auth from 'auth';
 import Vue from 'vue';
 import config from 'config';
 import log from 'logger';
-import utils from 'utils';
 import Velocity from 'velocity-animate';
 
 // Components
@@ -16,11 +15,12 @@ import DetailsModal from './details-modal.vue';
 import ResourceModal from './resource-modal.vue';
 import LeafletMap from 'components/leaflet-map.vue';
 import FollowButton from 'components/buttons/follow.vue';
+import FeaturedButton from 'components/buttons/featured.vue';
 import ShareButton from 'components/buttons/share.vue';
+import DiscussionThreads from 'components/discussions/threads.vue';
 
 // Legacy widgets
 import 'widgets/issues-btn';
-import 'widgets/discussions-btn';
 import 'widgets/integrate-btn';
 
 
@@ -30,14 +30,13 @@ function parseUrl(url) {
     return a;
 }
 
-
 new Vue({
     el: 'body',
-    components: {LeafletMap, ShareButton, FollowButton},
+    components: {LeafletMap, ShareButton, FollowButton, DiscussionThreads, FeaturedButton},
     data() {
         const data = {
             dataset: this.extractDataset(),
-            userReuses: [],
+            userReuses: []
         };
         if (config.check_urls) {
             const port = location.port ? `:${location.port}` : '';
@@ -78,21 +77,24 @@ new Vue({
             const dataset = JSON.parse(document.querySelector(selector).text)
             dataset.resources = dataset.distribution;
             delete dataset.distribution;
+            dataset.communityResources = dataset.contributedDistribution;
+            delete dataset.contributedDistribution;
             dataset.keywords = dataset.keywords.split(',').map(keyword => keyword.trim());
             return dataset;
         },
 
         /**
-         * Display a resource in a modal
+         * Display a resource or a community ressource in a modal
          */
-        showResource(id, e) {
+        showResource(id, e, isCommunity) {
             // Ensure edit button work
             if ([e.target, e.target.parentNode].some((el) => {el.classList.contains('btn-edit');})) {
                 return;
             }
             e.preventDefault();
-            const resource = this.dataset.resources.find(resource => resource['@id'] === id);
-            this.$modal(ResourceModal, {resource: resource});
+            const attr = isCommunity ? 'communityResources' : 'resources';
+            const resource = this.dataset[attr].find(resource => resource['@id'] === id);
+            this.$modal(ResourceModal, {resource});
         },
 
         /**
@@ -193,6 +195,16 @@ new Vue({
                     });
                 }
             }
+        },
+
+        /**
+         * Suggest a tag aka.trigger a new discussion
+         */
+        suggestTag() {
+            this.$refs.discussions.start(
+                this._('New tag suggestion to improve metadata'),
+                this._('Hello,\n\nI propose this new tag: ')
+            );
         }
     }
 });

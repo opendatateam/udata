@@ -24,35 +24,6 @@
     <li class="active">{{ reuse.title }}</li>
 {% endblock %}
 
-{% block toolbar %}
-{# Owner actions #}
-<div class="btn-group btn-group-xs">
-    <a href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}" class="btn btn-success">
-        <span class="glyphicon glyphicon-pencil"></span>
-        {{ _('Edit') }}
-    </a>
-</div>
-{# Admin actions #}
-<div class="btn-group btn-group-xs">
-    <button type="button"
-        class="btn btn-success featured {% if reuse.featured %}active{% endif %}"
-        data-api-url="{{ url_for('api.reuse_featured', reuse=reuse) }}">
-        <span class="glyphicon glyphicon-bullhorn"></span>
-        {{ _('Featured') }}
-    </button>
-</div>
-{# Social actions #}
-<div class="btn-group btn-group-xs">
-    {{ follow_btn(reuse) }}
-</div>
-<div class="btn-group btn-group-xs">
-    {{ issues_btn(reuse) }}
-</div>
-<div class="btn-group btn-group-xs">
-    {{ share_btn(reuse.title) }}
-</div>
-{% endblock %}
-
 {% block content %}
 <section class="reuse-section community-section">
     <div class="container reuse-container">
@@ -133,12 +104,7 @@
                         {% endif %}
                         {% if sysadmin %}
                         <div class="btn-group btn-group-sm">
-                            <button type="button"
-                                class="btn btn-success featured {% if reuse.featured %}active{% endif %}"
-                                data-api-url="{{ url_for('api.reuse_featured', reuse=reuse) }}">
-                                <span class="glyphicon glyphicon-bullhorn"></span>
-                                {{ _('Featured') }}
-                            </button>
+                            <featured-button subject-id="{{ reuse.id }}" subject-type="reuse" :featured="{{ reuse.featured|to_json }}"></featured-button>
                         </div>
                         {% endif %}
                     </div>
@@ -218,6 +184,12 @@
                                 {{ tag|truncate(14, True) }}
                             </a>
                             {% endfor %}
+                            <a @click="suggestTag"
+                                class="btn btn-primary btn-dark btn-xs suggest-tag"
+                                title="{{ _('Suggest a tag with a new discussion thread') }}"
+                                v-tooltip tooltip-placement="right">
+                                {{ _('Suggest a tag') }}
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -280,13 +252,15 @@
     </header>
 
     <div class="container">
-
         <h3>{{ _('Discussions') }}</h3>
-        {% with subject=reuse,
-                sidetext=_('Discussion between the reusers and the community about this reuse.'),
-                subtext=_('If you want to report an anomaly, please use the dedicated button just under the reuse.')  %}
-            {% include theme('discussion/threads.html') %}
-        {% endwith %}
+        <div class="row">
+            <discussion-threads v-ref:discussions class="col-sm-9"
+                subject-id="{{ reuse.id }}" subject-class="{{ reuse.__class__.__name__ }}">
+            </discussion-threads>
+            <div class="col-sm-3 note">
+                <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
+            </div>
+        </div>
     </div>
 </section>
 {% endblock %}

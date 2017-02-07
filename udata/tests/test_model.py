@@ -22,7 +22,7 @@ class UUIDAsIdTester(db.Document):
 
 class SlugTester(db.Document):
     title = db.StringField()
-    slug = db.SlugField(populate_from='title')
+    slug = db.SlugField(populate_from='title', max_length=1000)
     meta = {
         'allow_inheritance': True,
     }
@@ -152,6 +152,13 @@ class SlugFieldTest(DBTestMixin, TestCase):
         obj = SlugTester.objects.create(title='title')
         inherited = InheritedSlugTester.objects.create(title='title')
         self.assertNotEqual(obj.slug, inherited.slug)
+
+    def test_crop(self):
+        '''SlugField should truncate itself on save if not set'''
+        obj = SlugTester(title='x' * (SlugTester.slug.max_length + 1))
+        obj.save()
+        self.assertEqual(len(obj.title), SlugTester.slug.max_length + 1)
+        self.assertEqual(len(obj.slug), SlugTester.slug.max_length)
 
 
 class DateFieldTest(DBTestMixin, TestCase):

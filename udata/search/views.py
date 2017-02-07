@@ -5,7 +5,7 @@ from flask import request
 
 from udata import search, theme
 from udata.frontend import front
-from udata.models import Dataset, Organization, Reuse, User
+from udata.models import Dataset, Organization, Reuse
 from udata.utils import multi_to_dict
 from udata.features.territories import check_for_territories
 
@@ -14,7 +14,6 @@ MAPPING = {
     'datasets': Dataset,
     'reuses': Reuse,
     'organizations': Organization,
-    'users': User,
 }
 
 
@@ -28,7 +27,7 @@ def render_search():
     elif 'badge' in params:
         types = ['datasets', 'organizations']
     else:
-        types = ['datasets', 'reuses', 'organizations', 'users']
+        types = ['datasets', 'reuses', 'organizations']
     models = [MAPPING[typ] for typ in types]
     results = search.multisearch(*models, **params)
     context = dict(zip(types, results))
