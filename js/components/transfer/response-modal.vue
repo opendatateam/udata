@@ -73,24 +73,25 @@
 <script>
 import API from 'api';
 import Vue from 'vue';
+import Modal from 'components/modal.vue';
+import OrgCard from 'components/organization/card.vue';
+import UserCard from 'components/user/card.vue';
+import DatasetCard from 'components/dataset/card.vue';
+import ReuseCard from 'components/reuse/card.vue';
 
 export default {
-    components: {
-        'modal': require('components/modal.vue'),
-        'org-card': require('components/organization/card.vue'),
-        'user-card': require('components/user/card.vue'),
-        'dataset-card': require('components/dataset/card.vue'),
-        'reuse-card': require('components/reuse/card.vue')
+    components: {Modal, OrgCard, UserCard, DatasetCard, ReuseCard},
+    props: {
+        transferid: String,
     },
-    data: function() {
+    data() {
         return {
-            transferid: null,
             transfer: {},
             comment: null
         };
     },
     methods: {
-        respond: function(response) {
+        respond(response) {
             API.transfer.respond_to_transfer({
                 id: this.transferid,
                 payload: {
@@ -107,7 +108,7 @@ export default {
             });
         }
     },
-    ready: function() {
+    ready() {
         API.transfer.get_transfer({id: this.transferid}, (response) => {
             this.transfer = response.obj;
             this.$emit('transfer:loaded');
