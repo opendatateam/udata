@@ -41,6 +41,8 @@ def index_model(index_name, adapter):
     qs = model.objects
     if hasattr(model.objects, 'visible'):
         qs = qs.visible()
+    if adapter.exclude_fields:
+        qs = qs.exclude(*adapter.exclude_fields)
     for obj in qs.timeout(False):
         if adapter.is_indexable(obj):
             try:

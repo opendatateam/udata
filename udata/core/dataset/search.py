@@ -59,6 +59,7 @@ def dataset_badge_labelizer(kind):
 class DatasetSearch(ModelSearchAdapter):
     model = Dataset
     fuzzy = True
+    exclude_fields = ['spatial.geom', 'spatial.zones.geom']
 
     class Meta:
         doc_type = 'Dataset'
