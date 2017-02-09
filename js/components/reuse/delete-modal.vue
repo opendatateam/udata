@@ -27,18 +27,15 @@
 
 <script>
 import API from 'api';
+import Modal from 'components/modal.vue';
 
 export default {
-    components: {
-        modal: require('components/modal.vue')
-    },
-    data: function() {
-        return {
-            reuse: {}
-        };
+    components: {Modal},
+    props: {
+        reuse: Object
     },
     methods: {
-        confirm: function() {
+        confirm() {
             API.reuses.delete_reuse({reuse: this.reuse.id},
                 (response) => {
                     this.reuse.fetch();
