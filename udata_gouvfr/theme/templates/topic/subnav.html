@@ -1,3 +1,4 @@
+{% from theme('macros/search.html') import site_search with context %}
 <nav class="navbar navbar-static-top navbar-subnav subnav-large subnav-topic {% if topic.color %}topic-{{topic.color}}{% endif %}">
     <div class="cover-topic"></div>
     <div class="container">
@@ -10,9 +11,7 @@
         <div class="search_sidebar col-sm-5 col-md-4 col-xs-12" role="search">
 
             <nav class="sidebar panel">
-                <site-search v-ref:search action="{{ url_for('front.search') }}"
-                    size="lg" placeholder="{{ _('Search') }}">
-                </site-search>
+                {{ site_search(size='lg') }}
             </nav>
 
             <nav class="sidebar panel collapse subnav-collapse">
