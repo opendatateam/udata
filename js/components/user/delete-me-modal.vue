@@ -30,11 +30,10 @@
 
 <script>
 import API from 'api';
+import Modal from 'components/modal.vue';
 
 export default {
-    components: {
-        modal: require('components/modal.vue')
-    },
+    components: {Modal},
     methods: {
         confirm() {
             API.me.delete_me(

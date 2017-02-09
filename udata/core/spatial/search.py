@@ -33,6 +33,7 @@ def labels_for_zone(zone):
 class GeoZoneSearch(ModelSearchAdapter):
     model = GeoZone
     fuzzy = True
+    exclude_fields = ['geom']
 
     class Meta:
         doc_type = 'GeoZone'

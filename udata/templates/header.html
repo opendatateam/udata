@@ -1,3 +1,4 @@
+{% from theme('macros/search.html') import site_search with context %}
 <nav class="navbar navbar-default navbar-static-top">
   <div class="container">
     <div class="navbar-header">
@@ -12,9 +13,7 @@
     </div>
 
     <div class="col-sm-2 col-lg-3 nav navbar-nav search-bar" role="search">
-      <site-search  v-ref:search class="navbar-form"
-        placeholder="{{ _('Search') }}" action="{{ url_for('front.search') }}">
-      </site-search>
+      {{ site_search(class='navbar-form') }}
     </div>
 
     <ul class="nav navbar-nav collapse navbar-collapse collapse-on-search">

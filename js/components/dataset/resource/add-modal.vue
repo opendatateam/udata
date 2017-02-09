@@ -23,19 +23,19 @@
 
 <script>
 import Dataset from 'models/dataset';
+import Modal from 'components/modal.vue';
+import ResourceForm from 'components/dataset/resource/form.vue';
 
 export default {
-    data: function() {
-        return {
-            dataset: new Dataset()
-        };
+    props: {
+        dataset: {
+            type: Dataset,
+            required: true,
+        }
     },
-    components: {
-        'modal': require('components/modal.vue'),
-        'resource-form': require('components/dataset/resource/form.vue')
-    },
+    components: {Modal, ResourceForm},
     methods: {
-        save: function() {
+        save() {
             if (this.$refs.form.validate()) {
                 this.dataset.save_resource(this.$refs.form.serialize());
                 this.$refs.modal.close();

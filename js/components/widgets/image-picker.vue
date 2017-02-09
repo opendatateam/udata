@@ -73,11 +73,13 @@ import $ from 'jquery';
 import API from 'api';
 import log from 'logger';
 import UploaderMixin from 'mixins/uploader';
+import Thumbnailer from 'components/widgets/thumbnailer.vue';
 
 export default {
     autoUpload: false,
     mixins: [UploaderMixin],
-    data: function() {
+    components: {Thumbnailer},
+    data() {
         return {
             src: null,
             resizing: false,
@@ -87,19 +89,16 @@ export default {
         endpoint: null,
         sizes: {
             type: Array,
-            default: function() {return [100];}
+            default: () => [100],
         }
     },
-    components: {
-        thumbnailer: require('components/widgets/thumbnailer.vue')
-    },
     computed: {
-        file: function() {
+        file() {
             if (this.files.length > 0) {
                 return this.files[0];
             }
         },
-        upload_endpoint: function() {
+        upload_endpoint() {
             return this.endpoint;
         }
     },
@@ -129,9 +128,9 @@ export default {
         }
     },
     methods: {
-        save: function() {
+        save() {
             if (this.HAS_FILE_API) {
-                let data = {};
+                const data = {};
                 if (this.$refs.thumbnailer.bbox) {
                     data.bbox = this.$refs.thumbnailer.bbox;
                 }

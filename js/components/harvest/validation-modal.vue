@@ -33,25 +33,26 @@
 
 <script>
 import API from 'api';
+import Modal from 'components/modal.vue';
 
 export default {
-    components: {
-        modal: require('components/modal.vue')
+    components: {Modal},
+    props: {
+        source: Object,
     },
-    data: function() {
+    data() {
         return {
-            source: {},
             comment: null
         };
     },
     methods: {
-        validate: function() {
+        validate() {
             this.perform_validation('accepted');
         },
-        reject: function() {
+        reject() {
             this.perform_validation('refused');
         },
-        perform_validation: function(state) {
+        perform_validation(state) {
             if (state === 'refused' && !this.comment) {
                 this.$els.group.className.replace('has-success', '');
                 if (!this.$els.group.className.indexOf('has-error') >= 0) {
