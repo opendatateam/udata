@@ -23,6 +23,7 @@ class ModelSearchAdapter(DocType):
     fuzzy = False
     match_type = 'cross_fields'
     model = None
+    exclude_fields = None  # Exclude fields from being fetched on indexation
     sorts = None
 
     @classmethod
