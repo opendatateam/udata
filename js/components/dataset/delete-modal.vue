@@ -27,18 +27,15 @@
 
 <script>
 import API from 'api';
+import Modal from 'components/modal.vue';
 
 export default {
-    components: {
-        modal: require('components/modal.vue')
-    },
-    data: function() {
-        return {
-            dataset: {}
-        };
+    components: {Modal},
+    props: {
+        dataset: Object,
     },
     methods: {
-        confirm: function() {
+        confirm() {
             API.datasets.delete_dataset({dataset: this.dataset.id},
                 (response) => {
                     this.dataset.fetch();
