@@ -7,11 +7,11 @@
     </div>
 
     <div class="row">
-        <dataset-list class="col-xs-12" :datasets="datasets"></dataset-list>
+        <dataset-list id="datasets" class="col-xs-12" :datasets="datasets"></dataset-list>
     </div>
 
     <div class="row">
-        <reuse-list class="col-xs-12" :reuses="reuses"></reuse-list>
+        <reuse-list  id="reuses" class="col-xs-12" :reuses="reuses"></reuse-list>
     </div>
     <div class="row">
         <apikey class="col-xs-12 col-md-6" :user="$root.me"></apikey>
