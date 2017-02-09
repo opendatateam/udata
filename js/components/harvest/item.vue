@@ -55,21 +55,19 @@
 <script>
 import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/item';
 
+import Modal from 'components/modal.vue';
+import DatasetCard from 'components/dataset/card.vue';
+
 export default {
-    name: 'JobItemModal',
-    components: {
-        'modal': require('components/modal.vue'),
-        'dataset-card': require('components/dataset/card.vue')
-    },
-    props: ['item'],
-    data: function() {
-        return {};
+    components: {Modal, DatasetCard},
+    props: {
+        item: Object,
     },
     filters: {
-        statusClass: function(value) {
+        statusClass(value) {
             return STATUS_CLASSES[value];
         },
-        statusI18n: function(value) {
+        statusI18n(value) {
             return STATUS_I18N[value];
         }
     }
