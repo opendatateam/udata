@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+from datetime import datetime
+
 from udata.models import Reuse
 
 from udata.core.organization.factories import OrganizationFactory
@@ -53,3 +55,9 @@ class ReuseModelTest(TestCase, DBTestMixin):
         reuse = ReuseFactory(owner=user, tags=tags)
         self.assertEqual(len(reuse.tags), 2)
         self.assertEqual(reuse.tags[1], 'this-is-a-tag')
+
+    def test_send_on_delete(self):
+        reuse = ReuseFactory()
+        with self.assert_emit(Reuse.on_delete):
+            reuse.deleted = datetime.now()
+            reuse.save()

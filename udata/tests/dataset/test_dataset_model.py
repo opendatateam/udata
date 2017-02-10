@@ -252,3 +252,9 @@ class DatasetModelTest(TestCase, DBTestMixin):
         for oldFreq, newFreq in LEGACY_FREQUENCIES.items():
             dataset = DatasetFactory(frequency=oldFreq)
             self.assertEqual(dataset.frequency, newFreq)
+
+    def test_send_on_delete(self):
+        dataset = DatasetFactory()
+        with self.assert_emit(Dataset.on_delete):
+            dataset.deleted = datetime.now()
+            dataset.save()

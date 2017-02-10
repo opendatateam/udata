@@ -57,7 +57,7 @@ class ConfigurableTheme(Theme):
 
     @property
     def site(self):
-        from udata.core.site.views import current_site
+        from udata.core.site.models import current_site
         return current_site
 
     @property
