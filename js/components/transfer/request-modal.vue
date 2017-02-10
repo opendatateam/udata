@@ -72,22 +72,23 @@
 
 <script>
 import API from 'api';
+import Modal from 'components/modal.vue';
+import OrgFilter from 'components/organization/card-filter.vue';
+import UserFilter from 'components/user/card-filter.vue';
+import OrgCard from 'components/organization/card.vue';
+import UserCard from 'components/user/card.vue';
+import DatasetCard from 'components/dataset/card.vue';
+import ReuseCard from 'components/reuse/card.vue';
 
 export default {
-    components: {
-        'modal': require('components/modal.vue'),
-        'org-filter': require('components/organization/card-filter.vue'),
-        'user-filter': require('components/user/card-filter.vue'),
-        'org-card': require('components/organization/card.vue'),
-        'user-card': require('components/user/card.vue'),
-        'dataset-card': require('components/dataset/card.vue'),
-        'reuse-card': require('components/reuse/card.vue')
+    components: {Modal, OrgFilter, UserFilter, OrgCard, UserCard, DatasetCard, ReuseCard},
+    props: {
+        subject: Object,
     },
-    data: function() {
+    data() {
         return {
             type: null,
             recipient: null,
-            subject: null,
             comment: null
         };
     },
@@ -100,7 +101,7 @@ export default {
         }
     },
     methods: {
-        confirm: function() {
+        confirm() {
             API.transfer.request_transfer({
                 payload: {
                     subject: {

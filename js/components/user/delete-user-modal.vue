@@ -31,15 +31,12 @@
 
 <script>
 import API from 'api';
+import Modal from 'components/modal.vue';
 
 export default {
-    components: {
-        modal: require('components/modal.vue')
-    },
-    data() {
-        return {
-            user: {}
-        };
+    components: {Modal},
+    props: {
+        user: Object,
     },
     methods: {
         confirm() {

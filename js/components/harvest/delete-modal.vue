@@ -27,18 +27,15 @@
 
 <script>
 import API from 'api';
+import Modal from 'components/modal.vue';
 
 export default {
-    components: {
-        'modal': require('components/modal.vue')
-    },
-    data: function() {
-        return {
-            source: {}
-        };
+    components: {Modal},
+    props:  {
+        source: Object
     },
     methods: {
-        confirm: function() {
+        confirm() {
             API.harvest.delete_harvest_source({ident: this.source.id},
                 (response) => {
                     this.source.fetch();

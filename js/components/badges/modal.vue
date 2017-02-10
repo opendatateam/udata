@@ -41,34 +41,34 @@
 <script>
 import API from 'api';
 import {badges} from 'models/badges';
+import Modal from 'components/modal.vue';
 
 export default {
-    name: 'BadgesModal',
-    components: {
-        modal: require('components/modal.vue')
+    components: {Modal},
+    props: {
+        subject: Object
     },
-    data: function() {
+    data() {
         return {
             selected: [],
             initial: [],
-            subject: null,
             badges: {},
             added: {},
             removed: {}
         };
     },
     computed: {
-        hasBadges: function() {
+        hasBadges() {
             return Object.keys(this.badges).length > 0;
         },
-        hasModifications: function() {
+        hasModifications() {
             return (this.selected.length !== this.initial.length)
                 || this.selected.some((badge) => {
                     return this.initial.indexOf(badge) < 0;
                 });
         }
     },
-    compiled: function() {
+    compiled() {
         this.badges = badges.available(this.subject);
 
         if (this.subject.hasOwnProperty('badges')) {
@@ -80,8 +80,8 @@ export default {
         }
     },
     methods: {
-        confirm: function() {
-            let to_add = this.selected.filter((badge) => {
+        confirm() {
+            const to_add = this.selected.filter((badge) => {
                         return this.initial.indexOf(badge) < 0;
                     }),
                 to_remove = this.initial.filter((badge) => {
@@ -105,8 +105,8 @@ export default {
                 });
             });
         },
-        checkAllDone: function() {
-            let allAdded = Object.keys(this.added).every((key) => {
+        checkAllDone() {
+            const allAdded = Object.keys(this.added).every((key) => {
                     return this.added[key];
                 }),
                 allRemoved = Object.keys(this.removed).every((key) => {
@@ -118,7 +118,7 @@ export default {
                 this.$emit('badges:modified');
             }
         },
-        toggle: function(badge) {
+        toggle(badge) {
             if (this.selected.indexOf(badge) >= 0) {
                 this.selected.$remove(badge);
             } else {

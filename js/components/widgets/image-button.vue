@@ -56,12 +56,12 @@ export default {
         },
         sizes: {
             type: Array,
-            default: function() {return [100];}
+            default: () => [100],
         },
         endpoint: null
     },
     methods: {
-        click: function() {
+        click() {
             this.$root.$modal(
                 require('components/widgets/image-picker-modal.vue'),
                 {endpoint: this.endpoint, sizes: this.sizes}

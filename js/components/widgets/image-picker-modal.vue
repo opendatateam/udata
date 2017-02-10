@@ -24,23 +24,24 @@
 </template>
 
 <script>
+import Modal  from 'components/modal.vue';
+import Picker from 'components/widgets/image-picker.vue';
+
 export default {
-    data: function() {
-        return {
-            endpoint: null,
-            sizes: [100]
-        };
+    components: {Modal, Picker},
+    props: {
+        endpoint: String,
+        sizes: {
+            type: Array,
+            default: () => [100],
+        }
     },
     computed: {
-        title: function() {
+        title() {
             return this.$refs.picker && this.$refs.picker.resizing
                 ? this._('Resize your thumbnail')
                 : this._('Upload an image');
         }
-    },
-    components: {
-        modal: require('components/modal.vue'),
-        picker: require('components/widgets/image-picker.vue')
     },
     events: {
         'image:saved': function() {
@@ -49,7 +50,7 @@ export default {
         }
     },
     methods: {
-        click: function() {
+        click() {
             this.$refs.picker.save();
         }
     }
