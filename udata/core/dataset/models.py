@@ -307,6 +307,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             cls.on_create.send(document)
         else:
             cls.on_update.send(document)
+        if document.deleted:
+            cls.on_delete.send(document)
 
     def clean(self):
         super(Dataset, self).clean()

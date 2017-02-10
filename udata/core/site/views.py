@@ -1,38 +1,24 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import g, request, current_app, send_from_directory, Blueprint
+from flask import request, current_app, send_from_directory, Blueprint
 from werkzeug.contrib.atom import AtomFeed
-from werkzeug.local import LocalProxy
 
 from udata import search, theme
 from udata.frontend import csv
 from udata.frontend.views import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import (
-    Dataset, Activity, Site, Reuse, Organization, Post
-)
+from udata.models import Dataset, Activity, Reuse, Organization, Post
 from udata.utils import multi_to_dict
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.reuse.csv import ReuseCsvAdapter
 from udata.sitemap import sitemap
 
+from .models import current_site
+
 noI18n = Blueprint('noI18n', __name__)
 blueprint = I18nBlueprint('site', __name__)
-
-
-def get_current_site():
-    if getattr(g, 'site', None) is None:
-        site_id = current_app.config['SITE_ID']
-        g.site, _ = Site.objects.get_or_create(id=site_id, defaults={
-            'title': current_app.config.get('SITE_TITLE'),
-            'keywords': current_app.config.get('SITE_KEYWORDS', []),
-        })
-    return g.site
-
-
-current_site = LocalProxy(get_current_site)
 
 
 @blueprint.app_context_processor

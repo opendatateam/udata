@@ -9,7 +9,7 @@ from flask_restplus.inputs import boolean
 from udata.api import api, API, fields
 from udata.models import Metrics
 
-from udata.core.site.views import current_site
+from udata.core.site.models import current_site
 
 
 metrics_fields = api.model('Metric', {

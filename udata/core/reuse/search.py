@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from elasticsearch_dsl import Boolean, Completion, Date,  Object, String
 
 from udata.i18n import lazy_gettext as _
-from udata.core.site.views import current_site
+from udata.core.site.models import current_site
 from udata.models import (
     Reuse, Organization, Dataset, User, REUSE_TYPES
 )
