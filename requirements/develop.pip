@@ -4,5 +4,5 @@ transifex-client==0.12.4
 -r install.pip
 -r test.pip
 -r report.pip
-Flask-DebugToolbar==0.10.0
+Flask-DebugToolbar==0.10.1
 wheel
