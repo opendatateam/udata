@@ -37,6 +37,8 @@ class Defaults(object):
     CACHE_KEY_PREFIX = 'udata-cache'
     CACHE_TYPE = 'redis'
 
+    SERVER_NAME = 'localhost:7000'
+
     # Flask mail settings
 
     MAIL_DEFAULT_SENDER = 'webmaster@udata'
