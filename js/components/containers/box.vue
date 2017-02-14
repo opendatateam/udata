@@ -90,7 +90,6 @@
 
 <script>
 export default {
-    name: 'box-container',
     replace: true,
     props: {
         title: String,

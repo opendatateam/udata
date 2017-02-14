@@ -3,9 +3,8 @@ import 'front/bootstrap';
 
 import Vue from 'vue';
 
-import site from 'models/site';
-
 import ActivityTimeline from 'components/activities/timeline.vue';
+import SmallBox from 'components/containers/small-box.vue';
 import DashboardGraphs from 'components/dashboard/graphs.vue';
 
 // Ensure retrocompatibily for 0.12.2 replace behavior
@@ -14,8 +13,5 @@ Vue.options.replace = false;
 
 new Vue({
     el: 'body',
-    components: {ActivityTimeline, DashboardGraphs},
-    data() {
-        return {site};
-    }
+    components: {ActivityTimeline, DashboardGraphs, SmallBox},
 });
