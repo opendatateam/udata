@@ -125,15 +125,10 @@ export default {
     },
     computed: {
         series() {
-            const series = this.y.map((item) => {
-                return item.id;
-            });
+            const series = this.y.map(item => item.id);
             const raw = this.metrics.timeserie(series);
-            const data = {
-                labels: raw.map((item) => {
-                    return moment(item.date).format('L');
-                }),
-
+            return {
+                labels: raw.map(item => moment(item.date).format('L')),
                 datasets: this.y.map((serie, idx) => {
                     const dataset = {label: serie.label};
                     const color = serie.color || COLORS[idx];
@@ -143,14 +138,10 @@ export default {
                     // datasetpointStrokeColor: "#c1c7d1",
                     dataset.pointHighlightFill = '#fff';
                     dataset.pointHighlightStroke = color;
-                    dataset.data = raw.map((item) => {
-                        return item[serie.id];
-                    });
+                    dataset.data = raw.map(item => item[serie.id]);
                     return dataset;
                 })
             };
-
-            return data;
         }
     },
     components: {Box},
