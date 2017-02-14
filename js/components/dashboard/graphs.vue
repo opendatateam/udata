@@ -1,7 +1,30 @@
 <style lang="less">
+/**
+ * Style fixes: this component is meant to be used outside admin
+ */
 .graphs {
-    .graphs-chart .box-title {
-        margin-top: 0;
+    .graphs-chart {
+        .box-title {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .box > .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            > .fa {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                margin-left: -15px;
+                margin-top: -15px;
+                font-size: 30px;
+            }
+        }
     }
 }
 </style>
