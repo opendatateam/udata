@@ -4,7 +4,7 @@
 # 
 # Translators:
 # Axel Haustant, 2014
-# Axel Haustant, 2014-2016
+# Axel Haustant, 2014-2017
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2014
 # Larlet David <david@larlet.fr>, 2015-2016
 # noirbizarre, 2014
@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-01-16 14:17+0100\n"
-"PO-Revision-Date: 2017-01-16 13:29+0000\n"
+"POT-Creation-Date: 2017-02-15 23:54+0100\n"
+"PO-Revision-Date: 2017-02-15 22:55+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/etalab/udata-gouvfr/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -95,23 +95,23 @@ msgstr "Découvrir l’OpenData en tant qu’intégrateur - FAQ"
 msgid "Discover OpenData"
 msgstr "Découvrez l'OpenData"
 
-#: udata_gouvfr/theme/theme.py:28 udata_gouvfr/theme/theme.py:57
+#: udata_gouvfr/theme/theme.py:28 udata_gouvfr/theme/theme.py:47
 msgid "As a citizen"
 msgstr "En tant que citoyen"
 
-#: udata_gouvfr/theme/theme.py:29 udata_gouvfr/theme/theme.py:58
+#: udata_gouvfr/theme/theme.py:29 udata_gouvfr/theme/theme.py:48
 msgid "As a producer"
 msgstr "En tant que producteur"
 
-#: udata_gouvfr/theme/theme.py:30 udata_gouvfr/theme/theme.py:59
+#: udata_gouvfr/theme/theme.py:30 udata_gouvfr/theme/theme.py:49
 msgid "As a reuser"
 msgstr "En tant que réutilisateur"
 
-#: udata_gouvfr/theme/theme.py:31 udata_gouvfr/theme/theme.py:60
+#: udata_gouvfr/theme/theme.py:31 udata_gouvfr/theme/theme.py:50
 msgid "As a developer"
 msgstr "En tant que développeur"
 
-#: udata_gouvfr/theme/theme.py:32 udata_gouvfr/theme/theme.py:61
+#: udata_gouvfr/theme/theme.py:32 udata_gouvfr/theme/theme.py:51
 msgid "As a system integrator"
 msgstr "En tant qu’intégrateur"
 
@@ -135,23 +135,15 @@ msgstr "Organisations"
 msgid "Dashboard"
 msgstr "Tableau de bord"
 
-#: udata_gouvfr/theme/theme.py:41
-msgid "Territories"
-msgstr "Territoires"
-
-#: udata_gouvfr/theme/theme.py:42
-msgid "Events"
-msgstr "Événements"
-
-#: udata_gouvfr/theme/theme.py:63
+#: udata_gouvfr/theme/theme.py:53
 msgid "API"
 msgstr "API"
 
-#: udata_gouvfr/theme/theme.py:64
+#: udata_gouvfr/theme/theme.py:54
 msgid "Credits"
 msgstr "Crédits"
 
-#: udata_gouvfr/theme/theme.py:65
+#: udata_gouvfr/theme/theme.py:55
 msgid "Terms of use"
 msgstr "Conditions générales d'utilisation"
 
@@ -160,7 +152,7 @@ msgid "The Open Data"
 msgstr "L'Open Data"
 
 #: udata_gouvfr/theme/templates/footer.html:24
-#: udata_gouvfr/theme/templates/subnav-small.html:30
+#: udata_gouvfr/theme/templates/subnav-small.html:26
 msgid "Topics"
 msgstr "Thématiques"
 
@@ -288,32 +280,30 @@ msgstr "Vues"
 msgid "Likes"
 msgstr "Favoris"
 
-#: udata_gouvfr/theme/templates/subnav-large.html:15
-#: udata_gouvfr/theme/templates/subnav-small.html:15
-#: udata_gouvfr/theme/templates/topic/subnav.html:14
-msgid "Search"
-msgstr "Recherche"
-
 #: udata_gouvfr/theme/templates/subnav-large.html:33
 msgid "Share, improve and reuse public data"
 msgstr "Partagez, améliorez et réutilisez les données publiques"
 
 #: udata_gouvfr/theme/templates/subnav-large.html:36
 #: udata_gouvfr/theme/templates/subnav-large.html:39
-#: udata_gouvfr/theme/templates/subnav-small.html:48
-#: udata_gouvfr/theme/templates/subnav-small.html:51
-#: udata_gouvfr/theme/templates/topic/subnav.html:43
-#: udata_gouvfr/theme/templates/topic/subnav.html:46
+#: udata_gouvfr/theme/templates/subnav-small.html:44
+#: udata_gouvfr/theme/templates/subnav-small.html:47
+#: udata_gouvfr/theme/templates/topic/subnav.html:42
+#: udata_gouvfr/theme/templates/topic/subnav.html:45
 msgid "Contribute!"
 msgstr "Contribuez !"
 
-#: udata_gouvfr/theme/templates/subnav-small.html:9
+#: udata_gouvfr/theme/templates/subnav-small.html:10
 msgid "Search in datasets"
 msgstr "Rechercher dans les jeux de données"
 
-#: udata_gouvfr/theme/templates/subnav-small.html:12
+#: udata_gouvfr/theme/templates/subnav-small.html:13
 msgid "Search in this "
-msgstr ""
+msgstr "Chercher ici"
+
+#: udata_gouvfr/theme/templates/subnav-small.html:16
+msgid "Search"
+msgstr "Recherche"
 
 #: udata_gouvfr/theme/templates/terms.html:4
 #: udata_gouvfr/theme/templates/terms.html:5
