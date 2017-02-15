@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.0.0 (2017-02-16)
 
 - Remove some main menu entries (events, CADA, Etalab)
 - Use a new SVG logo
