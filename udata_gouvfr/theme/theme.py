@@ -38,17 +38,7 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
         nav.Item(_('Organizations'), 'organizations.list'),
     ]),
     nav.Item(_('Dashboard'), 'site.dashboard'),
-    nav.Item(_('Territories'), 'territories.home'),
-    nav.Item(_('Events'), '#', url='#', items=[
-        nav.Item('Openfield 16', 'gouvfr.openfield16'),
-        nav.Item('Nec Mergitur', 'gouvfr.nec_mergitur'),
-        nav.Item('Climate Change Challenge (C³)',
-                 'gouvfr.climate_change_challenge'),
-        nav.Item('Dataconnexions', 'gouvfr.dataconnexions'),
-    ]),
-    # nav.Item('Dataconnexions', 'gouvfr.dataconnexions'),
-    nav.Item('Etalab', 'etalab', url='http://www.etalab.gouv.fr/'),
-    nav.Item('CADA', 'cada', url='http://cada.data.gouv.fr/'),
+    # nav.Item(_('Territories'), 'territories.home'),
 ])
 
 theme.menu(gouvfr_menu)
@@ -72,7 +62,7 @@ NETWORK_LINKS = [
     ('Service-public.fr', 'http://www.service-public.fr'),
     ('Opendata France', 'http://opendatafrance.net'),
     ('CADA.fr', 'http://www.cada.fr'),
-    ('Etalab.gouv.fr', 'http://www.etalab.gouv.fr'),
+    ('Etalab.gouv.fr', 'https://www.etalab.gouv.fr'),
 ]
 
 nav.Bar(
