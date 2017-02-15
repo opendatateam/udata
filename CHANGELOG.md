@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.0.0 (2017-02-16)
 
 - Remove some main menu entries (events, CADA, Etalab)
