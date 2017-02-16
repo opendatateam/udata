@@ -55,7 +55,11 @@ module.exports = {
             {test: /\.json$/, loader: 'json-loader'},
             {test: /\.hbs$/, loader: hbs_loader},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: 'file-loader?name=[name].[ext]'},
-            {test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader'},
+            {test: /\.js$/, loader: 'babel-loader', include: [
+                    path.resolve(__dirname, 'js'),
+                    path.resolve(__dirname, 'node_modules/vue-strap/src'),
+                ]
+            }
         ]
     },
     vue: {

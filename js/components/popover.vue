@@ -9,7 +9,7 @@
 import log from 'logger';
 import TooltipMixin from 'mixins/tooltip';
 
-import { popover } from 'vue-strap'; // Needed for style
+import 'vue-strap/src/Popover.vue'; // Needed for style
 
 export default {
     mixins: [TooltipMixin],

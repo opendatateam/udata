@@ -9,7 +9,7 @@
 import log from 'logger';
 import TooltipMixin from 'mixins/tooltip';
 
-import { tooltip } from 'vue-strap'; // Needed for style
+import 'vue-strap/src/Tooltip.vue'; // Needed for style
 
 export default {
     mixins: [TooltipMixin],

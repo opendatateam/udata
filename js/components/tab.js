@@ -1,7 +1,7 @@
-import {tab} from 'vue-strap';
+import Tab from 'vue-strap/src/Tab.vue';
 
 export default {
-    mixins: [tab],
+    mixins: [Tab],
     props: {
         id: String
     }
