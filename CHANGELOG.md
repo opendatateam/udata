@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Pin PyMongo version (only compatible with PyMongo 3+)
 
 ## 1.0.0 (2017-02-16)
 
