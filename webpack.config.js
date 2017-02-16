@@ -94,5 +94,10 @@ module.exports = {
             filename: 'common.js',
             minChunks: 10,  // (Modules must be shared between 10 entries)
         })
-    ]
+    ],
+    node: {
+        fs: 'empty',
+        net: 'empty',
+        tls: 'empty'
+    }
 };
