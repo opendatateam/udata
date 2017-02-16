@@ -1,12 +1,18 @@
-var webpack = require("webpack"),
-    config = require('./webpack.config');
+var webpack = require('webpack');
+var config = require('./webpack.config');
 
 config.plugins.push(new webpack.optimize.UglifyJsPlugin({
     minimize: true,
-    output: {comments: false},
-    mangle: false,
+    output: {
+        comments: false,
+        screw_ie8: true
+    },
+    mangle: {
+        screw_ie8: true
+    },
     compress: {
-        warnings: false
+        warnings: false,
+        screw_ie8: true
     }
 }));
 
