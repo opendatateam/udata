@@ -42,7 +42,7 @@ The addition of [fields masks](http://flask-restplus.readthedocs.io/en/stable/ma
 ### Deprecation
 
 Theses are deprecated and support will be removed in some feature release.
-See [Deprecation Policy](https://udata.readthedocs.io/versionning/#deprecation-policy).
+See [Deprecation Policy](https://udata.readthedocs.io/en/stable/versionning/#deprecation-policy).
 
 * Theses frequencies are deprecated for their Dublin Core counter part:
     * `fortnighly` ⇨ `biweekly`
