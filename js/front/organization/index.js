@@ -17,11 +17,17 @@ import ActivityTimeline from 'components/activities/timeline.vue';
 import DashboardGraphs from 'components/dashboard/graphs.vue';
 import Tab from 'components/tab';
 
+import SmallBox from 'components/containers/small-box.vue';
+
 import MembershipRequest from './membership-request.vue';
+
+// Ensure retrocompatibily for 0.12.2 replace behavior
+Vue.options.replace = false;
+
 
 new Vue({
     el: 'body',
-    components: {FollowButton, Tab, tabset, ActivityTimeline, DashboardGraphs},
+    components: {FollowButton, Tab, tabset, ActivityTimeline, DashboardGraphs, SmallBox},
     data() {
         return {
             followersVisible: false,

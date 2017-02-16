@@ -107,7 +107,7 @@ class User(db.Document, WithMetrics, UserMixin):
     @cached_property
     def organizations(self):
         from udata.core.organization.models import Organization
-        return Organization.objects(members__user=self)
+        return Organization.objects(members__user=self, deleted__exists=False)
 
     @property
     def sysadmin(self):

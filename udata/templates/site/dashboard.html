@@ -15,13 +15,30 @@
 {% endblock %}
 
 {% block content %}
-<section>
+{# Boxes definitions: (label, metric, icon, color) #}
+{% set boxes = [
+    (_('Datasets'), 'datasets', 'cubes', 'aqua'),
+    (_('Resources'), 'resources', 'file-text-o', 'maroon'),
+    (_('Reuses'), 'reuses', 'retweet', 'green'),
+    (_('Users'), 'users', 'users', 'yellow'),
+    (_('Organizations'), 'organizations', 'building', 'purple'),
+    (_('Discussions'), 'discussions', 'comments', 'teal'),
+] %}
+<section class="default">
     <div class="container">
         <div class="row">
-            <dashboard-graphs class="col-sm-12">
-                {# Load spinner until JS is ready #}
-                <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
-            </dashboard-graphs>
+            {# Load spinner until JS is ready #}
+            <div v-if="false" class="col-xs-12 text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+            {% for (label, metric, icon, color) in boxes %}
+            <small-box class="col-lg-4 col-md-4 col-xs-6"
+                value="{{current_site.metrics[metric]}}" label="{{label}}" color="{{color}}"
+                icon="{{icon}}">
+            </small-box>
+            {% endfor %}
+        </div>
+
+        <div class="row">
+            <dashboard-graphs class="col-xs-12"  object-id="{{ current_site.id }}"></dashboard-graphs>
         </div>
     </div>
 </section>
