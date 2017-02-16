@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.0.1 (2017-02-16)
 
 - Pin PyMongo version (only compatible with PyMongo 3+)
 
