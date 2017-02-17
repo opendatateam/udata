@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix assets packaging for production [#763](https://github.com/opendatateam/udata/pull/763)[#765](https://github.com/opendatateam/udata/pull/765)
 
 ## 1.0.1 (2017-02-16)
 
