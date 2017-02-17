@@ -25,8 +25,8 @@ log = logging.getLogger(__name__)
 
 
 @front.app_template_global()
-def udata_version():
-    return pkg_resources.get_distribution('udata').version
+def package_version(name):
+    return pkg_resources.get_distribution(name).version
 
 
 @front.app_template_global()
@@ -39,7 +39,7 @@ def static_global(filename, _burst=True, **kwargs):
     if current_app.config['DEBUG'] or current_app.config['TESTING']:
         burst = time()
     else:
-        burst = udata_version()
+        burst = package_version('udata')
     if _burst:
         kwargs['_'] = burst
     return url_for('static', filename=filename, **kwargs)
