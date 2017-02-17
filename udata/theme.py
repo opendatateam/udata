@@ -29,6 +29,7 @@ def get_current_theme():
         g.theme.configure()
     return g.theme
 
+
 current = LocalProxy(get_current_theme)
 
 
