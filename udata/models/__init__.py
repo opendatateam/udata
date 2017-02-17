@@ -56,7 +56,7 @@ class UDataMongoEngine(MongoEngine):
         '''
         Resolve a model given a name or dict with `class` entry.
 
-        Conventions are resolved too: DatasetFull will resolve as Dataset
+        :raises ValueError: model specification is wrong or does not exists
         '''
         if not model:
             raise ValueError('Unsupported model specifications')
@@ -67,7 +67,11 @@ class UDataMongoEngine(MongoEngine):
         else:
             raise ValueError('Unsupported model specifications')
 
-        return get_document(classname)
+        try:
+            return get_document(classname)
+        except self.NotRegistered:
+            message = '{0} does not exists'.format(classname)
+            raise ValueError(message)
 
 
 def serialize(value):
