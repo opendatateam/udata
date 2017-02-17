@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import url_for, redirect
+from flask import url_for, redirect, abort
+from jinja2.exceptions import TemplateNotFound
 
 from udata import theme
 from udata.models import Reuse, Organization, Dataset
@@ -169,7 +170,10 @@ def openfield16():
 @blueprint.route('/faq/', defaults={'section': 'home'})
 @blueprint.route('/faq/<string:section>/')
 def faq(section):
-    return theme.render('faq/{0}.html'.format(section), page_name=section)
+    try:
+        return theme.render('faq/{0}.html'.format(section), page_name=section)
+    except TemplateNotFound:
+        abort(404)
 
 
 @blueprint.route('/credits/')

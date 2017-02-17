@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Ensure missing FAQ sections raises a 404 [#156](https://github.com/etalab/udata-gouvfr/issues/156)
 
 ## 1.0.0 (2017-02-16)
 

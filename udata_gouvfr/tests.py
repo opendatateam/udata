@@ -270,6 +270,10 @@ class SpecificUrlsTest(FrontTestCase):
         self.assert200(response)
         self.assert_template_used('faq/system-integrator.html')
 
+    def test_404_on_faq(self):
+        response = self.client.get(url_for('gouvfr.faq', section='whatever'))
+        self.assert404(response)
+
     def test_terms(self):
         response = self.client.get(url_for('site.terms'))
         self.assert200(response)
