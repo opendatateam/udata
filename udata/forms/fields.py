@@ -382,11 +382,10 @@ class ModelField(Field):
                     message = _('Expect both class and identifier')
                     raise validators.ValidationError(message)
 
-            try:
-                model = db.resolve_model(specs['class'])
-            except db.NotRegistered:
-                message = _('{0} does not exists').format(specs['class'])
-                raise validators.ValidationError(message)
+            # No try/except required
+            # In case of error, ValueError is raised
+            # and is properly handled as form validation error
+            model = db.resolve_model(specs['class'])
 
             try:
                 self.data = model.objects.only('id').get(id=clean_oid(specs, model))
