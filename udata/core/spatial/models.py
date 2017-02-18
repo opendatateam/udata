@@ -201,7 +201,7 @@ spatial_granularities = LocalProxy(
     lambda: get_spatial_granularities(get_locale()))
 
 
-@cache.cached(timeout=50)
+@cache.cached(timeout=50, key_prefix='admin_levels')
 def get_spatial_admin_levels():
     return dict((l.id, l.admin_level) for l in GeoLevel.objects)
 

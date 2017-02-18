@@ -7,6 +7,7 @@
 - Ensure topics datasets and reuses can display event with a topic parameter [#769](https://github.com/opendatateam/udata/pull/769)
 - Raise a `400 Bad Request` when a bad `class` attribute is provided to the API
   (for entry point not using forms). [#772](https://github.com/opendatateam/udata/issues/772)
+- Fix datasets with spatial coverage not being indexed [#778](https://github.com/opendatateam/udata/issues/778)
 
 ## 1.0.1 (2017-02-16)
 
