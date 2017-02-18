@@ -4,6 +4,13 @@
 
 {% set toolbar_class='search-toolbar' %}
 
+{% set meta = {
+    'title': _('Datasets'),
+    'description': _("%(site)s dataset search", site=config['SITE_TITLE']),
+    'keywords': [_('search'), _('datasets')],
+    'robots': 'noindex',
+} %}
+
 {% block extra_js %}
 <script src="{{ static('search.js') }}"></script>
 {% endblock %}
