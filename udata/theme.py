@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import imp
 import logging
+import pkg_resources
 
 from importlib import import_module
 from os.path import join, dirname, isdir, exists
@@ -52,6 +53,9 @@ def theme_static_with_version(ctx, filename, external=False):
         return url
     if current_app.config['DEBUG'] or current_app.config['TESTING']:
         burst = time()
+    elif current.pkg_version:
+        # If a package name is provided for versionning, use it
+        burst = pkg_resources.get_distribution(current.pkg_version).version
     else:
         burst = current.version
     return '?'.join((url, '_={0}'.format(burst)))
@@ -71,6 +75,8 @@ class ConfigurableTheme(Theme):
         if 'default' not in self.variants:
             self.variants.insert(0, 'default')
         self.context_processors = {}
+
+        self.pkg_version = self.info.get('pkg_version')
 
     @property
     def site(self):
