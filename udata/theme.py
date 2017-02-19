@@ -6,12 +6,15 @@ import logging
 
 from importlib import import_module
 from os.path import join, dirname, isdir, exists
+from time import time
 
 from flask import current_app, g
+from jinja2 import contextfunction
 from werkzeug.local import LocalProxy
 
 from flask_themes2 import (
-    Themes, Theme, render_theme_template, get_theme, packaged_themes_loader
+    Themes, Theme, render_theme_template, get_theme, packaged_themes_loader,
+    global_theme_static
 )
 
 from udata.app import nav
@@ -39,6 +42,19 @@ default_menu = nav.Bar('default_menu', [
     nav.Item(_('Reuses'), 'reuses.list'),
     nav.Item(_('Map'), 'site.map'),
 ])
+
+
+@contextfunction
+def theme_static_with_version(ctx, filename, external=False):
+    '''Override the default theme static to add cache burst'''
+    url = global_theme_static(ctx, filename, external=external)
+    if url.endswith('/'):  # this is a directory, no need for cache burst
+        return url
+    if current_app.config['DEBUG'] or current_app.config['TESTING']:
+        burst = time()
+    else:
+        burst = current.version
+    return '?'.join((url, '_={0}'.format(burst)))
 
 
 class ConfigurableTheme(Theme):
@@ -150,6 +166,9 @@ def init_app(app):
     theme = app.theme_manager.themes[app.config['THEME']]
     prefix = '/'.join(('_themes', theme.identifier))
     app.config['STATIC_DIRS'].append((prefix, theme.static_path))
+
+    # Override the default theme_static
+    app.jinja_env.globals['theme_static'] = theme_static_with_version
 
     # Hook into flask security to user themed auth pages
     app.config.setdefault('SECURITY_RENDER', 'udata.theme:render')
