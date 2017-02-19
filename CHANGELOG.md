@@ -4,6 +4,7 @@
 
 - Ensure missing FAQ sections raises a 404 [#156](https://github.com/etalab/udata-gouvfr/issues/156)
 - Provide deep PyPI versions links into the footer [#155](https://github.com/etalab/udata-gouvfr/pull/155)
+- Provide proper cache versionning for theme assets [#155](https://github.com/etalab/udata-gouvfr/pull/155)
 
 ## 1.0.0 (2017-02-16)
 
