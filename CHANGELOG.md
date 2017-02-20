@@ -8,6 +8,8 @@
 - Raise a `400 Bad Request` when a bad `class` attribute is provided to the API
   (for entry point not using forms). [#772](https://github.com/opendatateam/udata/issues/772)
 - Fix datasets with spatial coverage not being indexed [#778](https://github.com/opendatateam/udata/issues/778)
+- Ensure theme assets cache is versionned (and flushed when necessary)
+  [#781](https://github.com/opendatateam/udata/pull/781)
 
 ## 1.0.1 (2017-02-16)
 

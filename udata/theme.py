@@ -3,15 +3,19 @@ from __future__ import unicode_literals
 
 import imp
 import logging
+import pkg_resources
 
 from importlib import import_module
 from os.path import join, dirname, isdir, exists
+from time import time
 
 from flask import current_app, g
+from jinja2 import contextfunction
 from werkzeug.local import LocalProxy
 
 from flask_themes2 import (
-    Themes, Theme, render_theme_template, get_theme, packaged_themes_loader
+    Themes, Theme, render_theme_template, get_theme, packaged_themes_loader,
+    global_theme_static
 )
 
 from udata.app import nav
@@ -41,6 +45,22 @@ default_menu = nav.Bar('default_menu', [
 ])
 
 
+@contextfunction
+def theme_static_with_version(ctx, filename, external=False):
+    '''Override the default theme static to add cache burst'''
+    url = global_theme_static(ctx, filename, external=external)
+    if url.endswith('/'):  # this is a directory, no need for cache burst
+        return url
+    if current_app.config['DEBUG'] or current_app.config['TESTING']:
+        burst = time()
+    elif current.pkg_version:
+        # If a package name is provided for versionning, use it
+        burst = pkg_resources.get_distribution(current.pkg_version).version
+    else:
+        burst = current.version
+    return '{url}?_={burst}'.format(url=url, burst=burst)
+
+
 class ConfigurableTheme(Theme):
     context_processors = None
     defaults = None
@@ -55,6 +75,8 @@ class ConfigurableTheme(Theme):
         if 'default' not in self.variants:
             self.variants.insert(0, 'default')
         self.context_processors = {}
+
+        self.pkg_version = self.info.get('pkg_version')
 
     @property
     def site(self):
@@ -150,6 +172,9 @@ def init_app(app):
     theme = app.theme_manager.themes[app.config['THEME']]
     prefix = '/'.join(('_themes', theme.identifier))
     app.config['STATIC_DIRS'].append((prefix, theme.static_path))
+
+    # Override the default theme_static
+    app.jinja_env.globals['theme_static'] = theme_static_with_version
 
     # Hook into flask security to user themed auth pages
     app.config.setdefault('SECURITY_RENDER', 'udata.theme:render')
