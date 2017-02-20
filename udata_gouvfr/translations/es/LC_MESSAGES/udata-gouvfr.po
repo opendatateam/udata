@@ -1,8 +1,7 @@
-# Spanish translations for udata-gouvfr.
-# Copyright (C) 2016 ORGANIZATION
-# This file is distributed under the same license as the udata-gouvfr
-# project.
-#
+# Translations template for udata-gouvfr.
+# Copyright (C) 2017 ORGANIZATION
+# This file is distributed under the same license as the udata-gouvfr project.
+# 
 # Translators:
 # AuraCifuentes <aura-maria.cifuentes-gallo@modernisation.gouv.fr>, 2014
 # Axel Haustant, 2014,2016
@@ -10,19 +9,18 @@
 # Paula Forteza <paula.forteza@data.gouv.fr>, 2015
 msgid ""
 msgstr ""
-"Project-Id-Version:  udata-gouv.fr\n"
+"Project-Id-Version: udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-15 23:54+0100\n"
-"PO-Revision-Date: 2016-07-08 19:54+0000\n"
+"POT-Creation-Date: 2017-02-20 22:31+0100\n"
+"PO-Revision-Date: 2017-02-20 21:32+0000\n"
 "Last-Translator: Axel Haustant\n"
-"Language: es\n"
-"Language-Team: Spanish (http://www.transifex.com/etalab/udata-"
-"gouvfr/language/es/)\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Language-Team: Spanish (http://www.transifex.com/etalab/udata-gouvfr/language/es/)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
+"Language: es\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: udata_gouvfr/metrics.py:14
 msgid "Public services"
@@ -120,11 +118,11 @@ msgstr ""
 msgid "Data"
 msgstr "Datos"
 
-#: udata_gouvfr/theme/templates/footer.html:66 udata_gouvfr/theme/theme.py:36
+#: udata_gouvfr/theme/templates/footer.html:68 udata_gouvfr/theme/theme.py:36
 msgid "Datasets"
 msgstr "Conjunto de datos"
 
-#: udata_gouvfr/theme/templates/footer.html:67 udata_gouvfr/theme/theme.py:37
+#: udata_gouvfr/theme/templates/footer.html:69 udata_gouvfr/theme/theme.py:37
 msgid "Reuses"
 msgstr "Reutilizaciones"
 
@@ -148,47 +146,52 @@ msgstr "Créditos"
 msgid "Terms of use"
 msgstr "Términos de uso"
 
-#: udata_gouvfr/theme/templates/footer.html:7
+#: udata_gouvfr/theme/templates/footer.html:9
 msgid "The Open Data"
 msgstr "Los datos abiertos"
 
-#: udata_gouvfr/theme/templates/footer.html:24
+#: udata_gouvfr/theme/templates/footer.html:26
 #: udata_gouvfr/theme/templates/subnav-small.html:26
 msgid "Topics"
 msgstr "Temas"
 
-#: udata_gouvfr/theme/templates/footer.html:37
+#: udata_gouvfr/theme/templates/footer.html:39
 msgid "Network"
 msgstr "Vínculo"
 
-#: udata_gouvfr/theme/templates/footer.html:46
+#: udata_gouvfr/theme/templates/footer.html:48
 msgid "Contact"
 msgstr "Contacto"
 
-#: udata_gouvfr/theme/templates/footer.html:69
+#: udata_gouvfr/theme/templates/footer.html:71
 msgid "Feeds"
 msgstr "Alimentaciones"
 
-#: udata_gouvfr/theme/templates/footer.html:77
+#: udata_gouvfr/theme/templates/footer.html:79
 msgid "Go to Etalab’s blog"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/footer.html:80
+#: udata_gouvfr/theme/templates/footer.html:82
 msgid "Open-source engine"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/footer.html:80
+#: udata_gouvfr/theme/templates/footer.html:83
+#: udata_gouvfr/theme/templates/footer.html:86
 msgid "Deployed version"
 msgstr ""
 
-#: udata_gouvfr/theme/templates/footer.html:83
+#: udata_gouvfr/theme/templates/footer.html:85
+msgid "Data.gouv.fr extension"
+msgstr ""
+
+#: udata_gouvfr/theme/templates/footer.html:89
 msgid "Back to top"
 msgstr "Volver arriba"
 
 #: udata_gouvfr/theme/templates/header.html:4
 msgid ""
-"Internet Explorer 8 and below are not anymore supported. Please upgrade "
-"or change your browser to access the website."
+"Internet Explorer 8 and below are not anymore supported. Please upgrade or "
+"change your browser to access the website."
 msgstr ""
 
 #: udata_gouvfr/theme/templates/header.html:4
@@ -370,9 +373,7 @@ msgstr "Publicar una reutilización "
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:33
 msgid "Contribute and add a new reuse to this site catalog."
-msgstr ""
-"Contribuir y agregar una nueva reutilización para publicar en este "
-"catalogo. "
+msgstr "Contribuir y agregar una nueva reutilización para publicar en este catalogo. "
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:42
 msgid "Create or find your organization"
@@ -381,13 +382,3 @@ msgstr "Crear o encontrar su organización"
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:45
 msgid "You can create a new organization or find yours."
 msgstr "Usted puede crear una nueva organización io encontrar la suya."
-
-#~ msgid "Search in this town"
-#~ msgstr ""
-
-#~ msgid "Territories"
-#~ msgstr ""
-
-#~ msgid "Events"
-#~ msgstr "Eventos"
-

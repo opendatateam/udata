@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-15 23:54+0100\n"
-"PO-Revision-Date: 2017-02-15 22:55+0000\n"
+"POT-Creation-Date: 2017-02-20 22:31+0100\n"
+"PO-Revision-Date: 2017-02-20 21:32+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/etalab/udata-gouvfr/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -119,11 +119,11 @@ msgstr "En tant qu’intégrateur"
 msgid "Data"
 msgstr "Données"
 
-#: udata_gouvfr/theme/templates/footer.html:66 udata_gouvfr/theme/theme.py:36
+#: udata_gouvfr/theme/templates/footer.html:68 udata_gouvfr/theme/theme.py:36
 msgid "Datasets"
 msgstr "Jeux de données"
 
-#: udata_gouvfr/theme/templates/footer.html:67 udata_gouvfr/theme/theme.py:37
+#: udata_gouvfr/theme/templates/footer.html:69 udata_gouvfr/theme/theme.py:37
 msgid "Reuses"
 msgstr "Réutilisations"
 
@@ -147,40 +147,45 @@ msgstr "Crédits"
 msgid "Terms of use"
 msgstr "Conditions générales d'utilisation"
 
-#: udata_gouvfr/theme/templates/footer.html:7
+#: udata_gouvfr/theme/templates/footer.html:9
 msgid "The Open Data"
 msgstr "L'Open Data"
 
-#: udata_gouvfr/theme/templates/footer.html:24
+#: udata_gouvfr/theme/templates/footer.html:26
 #: udata_gouvfr/theme/templates/subnav-small.html:26
 msgid "Topics"
 msgstr "Thématiques"
 
-#: udata_gouvfr/theme/templates/footer.html:37
+#: udata_gouvfr/theme/templates/footer.html:39
 msgid "Network"
 msgstr "Réseau"
 
-#: udata_gouvfr/theme/templates/footer.html:46
+#: udata_gouvfr/theme/templates/footer.html:48
 msgid "Contact"
 msgstr "Contact"
 
-#: udata_gouvfr/theme/templates/footer.html:69
+#: udata_gouvfr/theme/templates/footer.html:71
 msgid "Feeds"
 msgstr "Flux"
 
-#: udata_gouvfr/theme/templates/footer.html:77
+#: udata_gouvfr/theme/templates/footer.html:79
 msgid "Go to Etalab’s blog"
 msgstr "Aller sur le blog d'Etalab"
 
-#: udata_gouvfr/theme/templates/footer.html:80
+#: udata_gouvfr/theme/templates/footer.html:82
 msgid "Open-source engine"
 msgstr "Moteur open-source"
 
-#: udata_gouvfr/theme/templates/footer.html:80
+#: udata_gouvfr/theme/templates/footer.html:83
+#: udata_gouvfr/theme/templates/footer.html:86
 msgid "Deployed version"
 msgstr "Version déployée"
 
-#: udata_gouvfr/theme/templates/footer.html:83
+#: udata_gouvfr/theme/templates/footer.html:85
+msgid "Data.gouv.fr extension"
+msgstr "Extension pour Data.gouv.fr"
+
+#: udata_gouvfr/theme/templates/footer.html:89
 msgid "Back to top"
 msgstr "Haut de page"
 
