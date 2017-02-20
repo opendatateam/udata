@@ -61,6 +61,7 @@ def display(topic):
 @blueprint.route('/<topic:topic>/datasets')
 def datasets(topic):
     kwargs = multi_to_dict(request.args)
+    kwargs.pop('topic', None)
     topic_search = topic_search_for(topic,
                                     DatasetSearch,
                                     facets=True,
@@ -76,6 +77,7 @@ def datasets(topic):
 @blueprint.route('/<topic:topic>/reuses')
 def reuses(topic):
     kwargs = multi_to_dict(request.args)
+    kwargs.pop('topic', None)
     topic_search = topic_search_for(topic,
                                     ReuseSearch,
                                     facets=True,

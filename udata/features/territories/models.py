@@ -45,7 +45,7 @@ class TerritoryDataset(object):
 
     @property
     def license(self):
-        return License.objects.get(id=self.license_id)
+        return License.objects(id=self.license_id).first()
 
 
 class ResourceBasedTerritoryDataset(TerritoryDataset):

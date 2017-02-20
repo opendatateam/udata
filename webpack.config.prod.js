@@ -1,19 +1,32 @@
-var webpack = require("webpack"),
-    config = require('./webpack.config');
+var webpack = require('webpack');
+var config = require('./webpack.config');
 
-config.plugins.push(new webpack.optimize.UglifyJsPlugin({
-    minimize: true,
-    output: {comments: false},
-    mangle: false,
-    compress: {
-        warnings: false
-    }
-}));
+config.plugins.push(
+    new webpack.DefinePlugin({
+        'process.env': {
+            NODE_ENV: '"production"'
+        }
+    }),
+    new webpack.optimize.UglifyJsPlugin({
+        minimize: true,
+        output: {
+            comments: false,
+            screw_ie8: true
+        },
+        mangle: {
+            screw_ie8: true,
+            keep_fnames: true
+        },
+        compress: {
+            warnings: false,
+            screw_ie8: true
+        }
+    }),
+    new webpack.optimize.DedupePlugin(),
+    new webpack.optimize.OccurenceOrderPlugin(true)
+);
 
 config.devtool = 'source-map';
-
-config.plugins.push(new webpack.optimize.DedupePlugin());
-config.plugins.push(new webpack.optimize.OccurenceOrderPlugin(true));
 
 /**
  * Image optimization.

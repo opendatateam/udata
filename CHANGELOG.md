@@ -4,6 +4,29 @@
 
 - Nothing yet
 
+## 1.0.2 (2017-02-20)
+
+- Fix assets packaging for production [#763](https://github.com/opendatateam/udata/pull/763) [#765](https://github.com/opendatateam/udata/pull/765)
+- Transform `udata_version` jinja global into a reusable (by themes) `package_version` [#768](https://github.com/opendatateam/udata/pull/768)
+- Ensure topics datasets and reuses can display event with a topic parameter [#769](https://github.com/opendatateam/udata/pull/769)
+- Raise a `400 Bad Request` when a bad `class` attribute is provided to the API
+  (for entry point not using forms). [#772](https://github.com/opendatateam/udata/issues/772)
+- Fix datasets with spatial coverage not being indexed [#778](https://github.com/opendatateam/udata/issues/778)
+- Ensure theme assets cache is versionned (and flushed when necessary)
+  [#781](https://github.com/opendatateam/udata/pull/781)
+- Raise maximum tag length to 96 in order to at least support
+  [official INSPIRE tags](http://inspire.ec.europa.eu/theme)
+  [#782](https://github.com/opendatateam/udata/pull/782)
+- Properly raise 400 error on transfer API in case of bad subject or recipient
+  [#784](https://github.com/opendatateam/udata/pull/784)
+- Fix broken OEmbed rendering [#783](https://github.com/opendatateam/udata/issues/783)
+- Improve crawlers behavior by adding some `meta[name=robots]` on pages requiring it
+  [#777](https://github.com/opendatateam/udata/pull/777)
+
+## 1.0.1 (2017-02-16)
+
+- Pin PyMongo version (only compatible with PyMongo 3+)
+
 ## 1.0.0 (2017-02-16)
 
 ### Breaking Changes
@@ -42,7 +65,7 @@ The addition of [fields masks](http://flask-restplus.readthedocs.io/en/stable/ma
 ### Deprecation
 
 Theses are deprecated and support will be removed in some feature release.
-See [Deprecation Policy](https://udata.readthedocs.io/versionning/#deprecation-policy).
+See [Deprecation Policy](https://udata.readthedocs.io/en/stable/versionning/#deprecation-policy).
 
 * Theses frequencies are deprecated for their Dublin Core counter part:
     * `fortnighly` ⇨ `biweekly`

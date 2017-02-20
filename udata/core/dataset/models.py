@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import httplib
 from datetime import datetime, timedelta
-
 from collections import OrderedDict
 
 from blinker import signal
@@ -162,7 +162,9 @@ class ResourceMixin(object):
         if self.filetype == 'remote':
             # We perform a quick check for performances matters.
             error, response = check_url_from_cache(self.url, group)
-            if error or int(response.get('status', 500)) >= 500:
+            if error or 'status' not in response:
+                return False
+            elif int(response['status']) >= httplib.INTERNAL_SERVER_ERROR:
                 return False
             else:
                 return True
@@ -354,7 +356,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
             return [resource.check_availability(self.slug)
                     for resource in remote_resources]
         else:
-            return [int(url_infos['status']) == 200
+            return [(int(url_infos.get('status', httplib.UNPROCESSABLE_ENTITY))
+                     == httplib.OK)
                     for url_infos in response['urls']]
 
     @property

@@ -8,8 +8,10 @@
 <title>{{ title }} - {{ current_site.title }}</title>
 <meta property="og:title" content="{{ title }} - {{ current_site.title }}" />
 <link rel="author" href="{{ config.SITE_AUTHOR_URL }}" />
-{% if config.DISALLOW_INDEXING %}<meta name="robots" content="noindex,nofollow" />{% endif %}
 <meta name="description" content="{{ description }}" />
+{% if config.DISALLOW_INDEXING %}<meta name="robots" content="noindex,nofollow" />
+{% elif meta.robots %}<meta name="robots" content="{{ meta.robots }}" />
+{% endif %}
 <meta property="og:description" content="{{ description }}" />
 <meta property="og:image" content="{{ image }}" />
 <meta name="keywords" content="{{ ', '.join(current_site.keywords + keywords) }}" />

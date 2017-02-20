@@ -3,6 +3,13 @@
 {% from theme('macros/paginator.html') import paginator with context %}
 {% import theme('macros/search.html') as s %}
 
+{% set meta = {
+    'title': _('%(topic)s datasets', topic=topic.name),
+    'description': _("%(site)s %(topic)s related datasets", site=config['SITE_TITLE'], topic=topic.name),
+    'keywords': [_('search'), _('datasets'), _('topic')] + topic.tags,
+    'robots': 'noindex',
+} %}
+
 {% set toolbar_class='search-toolbar' %}
 {% block breadcrumb %}
     <li>

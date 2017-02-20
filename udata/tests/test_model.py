@@ -327,11 +327,11 @@ class ModelResolutionTest(DBTestMixin, TestCase):
         self.assertEqual(db.resolve_model({'class': 'Dataset'}), Dataset)
 
     def test_raise_if_not_found(self):
-        with self.assertRaises(db.NotRegistered):
+        with self.assertRaises(ValueError):
             db.resolve_model('NotFound')
 
     def test_raise_if_not_a_document(self):
-        with self.assertRaises(db.NotRegistered):
+        with self.assertRaises(ValueError):
             db.resolve_model('UDataMongoEngine')
 
     def test_raise_if_none(self):

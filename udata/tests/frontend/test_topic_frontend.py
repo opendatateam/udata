@@ -56,6 +56,15 @@ class TopicsBlueprintTest(FrontTestCase):
 
         self.assertEqual(len(self.get_context_variable('datasets')), 0)
 
+    def test_render_datasets_with_topic_param(self):
+        '''Should render a topic datasets page even with a topic parameter'''
+        self.init_search()
+        topic = TopicFactory(tags=['tag'])
+
+        url = url_for('topics.datasets', topic=topic, qs={'topic': 'whatever'})
+        response = self.get(url)
+        self.assert200(response)
+
     def test_render_reuses(self):
         '''It should render a topic reuses page'''
         with self.autoindex():
@@ -79,3 +88,12 @@ class TopicsBlueprintTest(FrontTestCase):
         self.assert200(response)
 
         self.assertEqual(len(self.get_context_variable('reuses')), 0)
+
+    def test_render_reuses_with_topic_parameter(self):
+        '''Should render a topic reuses page even with a topic parameter'''
+        self.init_search()
+        topic = TopicFactory(tags=['tag'])
+
+        url = url_for('topics.reuses', topic=topic, qs={'topic': 'whatever'})
+        response = self.get(url)
+        self.assert200(response)

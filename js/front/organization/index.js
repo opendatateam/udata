@@ -10,7 +10,7 @@ import i18n from 'i18n';
 
 import Vue from 'vue';
 
-import {tabset} from 'vue-strap';
+import Tabset from 'vue-strap/src/Tabset.vue';
 
 import FollowButton from 'components/buttons/follow.vue';
 import ActivityTimeline from 'components/activities/timeline.vue';
@@ -27,7 +27,7 @@ Vue.options.replace = false;
 
 new Vue({
     el: 'body',
-    components: {FollowButton, Tab, tabset, ActivityTimeline, DashboardGraphs, SmallBox},
+    components: {FollowButton, Tab, Tabset, ActivityTimeline, DashboardGraphs, SmallBox},
     data() {
         return {
             followersVisible: false,

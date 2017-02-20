@@ -7,9 +7,9 @@
   "main": "index.js",
   "scripts": {
     "assets:watch": "webpack --progress --watch",
-    "assets:build": "webpack -p --progress",
+    "assets:build": "webpack --progress --config webpack.config.prod.js",
     "widgets:watch": "webpack --progress --watch --config webpack.config.widgets.js",
-    "widgets:build": "webpack -p --progress --config webpack.config.widgets.js",
+    "widgets:build": "webpack -p --progress --config webpack.config.widgets.prod.js",
     "build": "npm run assets:build && npm run widgets:build",
     "test": "npm run test:unit",
     "test:watch": "export NODE_ENV=test && WATCH=true karma start",
