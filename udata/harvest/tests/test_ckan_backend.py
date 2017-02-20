@@ -13,6 +13,7 @@ import httpretty
 from udata.models import Dataset, License
 from udata.tests import TestCase, DBTestMixin
 from udata.core.organization.factories import OrganizationFactory
+from udata.tags import MAX_TAG_LENGTH
 from udata.utils import faker
 
 from .factories import HarvestSourceFactory
@@ -240,8 +241,7 @@ class CkanBackendTest(DBTestMixin, TestCase):
         self.assertEqual(
             d.tags,
             ['africa',
-             # 'b' must be absent,
-             'b' * 32,  # 'b' * 33 must be truncated
+             'b' * MAX_TAG_LENGTH,  # tag must be truncated
              'cables-cables',  # the tag must be slugified
              'fibre',
              'optic',

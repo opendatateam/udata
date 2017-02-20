@@ -10,6 +10,9 @@
 - Fix datasets with spatial coverage not being indexed [#778](https://github.com/opendatateam/udata/issues/778)
 - Ensure theme assets cache is versionned (and flushed when necessary)
   [#781](https://github.com/opendatateam/udata/pull/781)
+- Raise maximum tag length to 96 in order to at least support
+  [official INSPIRE tags](http://inspire.ec.europa.eu/theme)
+  [#782](https://github.com/opendatateam/udata/pull/782)
 
 ## 1.0.1 (2017-02-16)
 

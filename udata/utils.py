@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import hashlib
+import math
 import re
 
 from uuid import uuid4
@@ -29,6 +30,7 @@ def multi_to_dict(multi):
 
 FIRST_CAP_RE = re.compile('(.)([A-Z][a-z]+)')
 ALL_CAP_RE = re.compile('([a-z0-9])([A-Z])')
+UUID_LENGTH = 36
 
 
 def camel_to_lodash(name):
@@ -199,9 +201,10 @@ def recursive_get(obj, key):
     return recursive_get(value, parts) if parts else value
 
 
-def unique_string(length=None):
+def unique_string(length=UUID_LENGTH):
     '''Generate unique string'''
-    string = str(uuid4())
+    # We need a string at least as long as length
+    string = str(uuid4()) * int(math.ceil(length / float(UUID_LENGTH)))
     return string[:length] if length else string
 
 
