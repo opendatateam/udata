@@ -15,6 +15,7 @@
   [#782](https://github.com/opendatateam/udata/pull/782)
 - Properly raise 400 error on transfer API in case of bad subject or recipient
   [#784](https://github.com/opendatateam/udata/pull/784)
+- Fix broken OEmbed rendering [#783](https://github.com/opendatateam/udata/issues/783)
 
 ## 1.0.1 (2017-02-16)
 
