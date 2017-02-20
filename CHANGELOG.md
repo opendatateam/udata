@@ -13,6 +13,8 @@
 - Raise maximum tag length to 96 in order to at least support
   [official INSPIRE tags](http://inspire.ec.europa.eu/theme)
   [#782](https://github.com/opendatateam/udata/pull/782)
+- Properly raise 400 error on transfer API in case of bad subject or recipient
+  [#784](https://github.com/opendatateam/udata/pull/784)
 
 ## 1.0.1 (2017-02-16)
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from bson import ObjectId
 from mock import patch
 
 from flask import url_for
@@ -57,3 +58,49 @@ class TransferAPITest(APITestCase):
 
         self.assertEqual(data['comment'], comment)
         self.assertEqual(data['status'], 'pending')
+
+    def test_400_on_bad_subject(self):
+        user = self.login()
+        recipient = UserFactory()
+        comment = faker.sentence()
+
+        response = self.post(url_for('api.transfers'), {
+            'subject': {
+                'class': 'Dataset',
+                'id': str(ObjectId()),
+            },
+            'recipient': {
+                'class': 'User',
+                'id': str(recipient.id),
+            },
+            'comment': comment
+        })
+
+        self.assert400(response)
+
+        data = response.json
+
+        self.assertIn('subject', data['errors'])
+
+    def test_400_on_bad_recipient(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        comment = faker.sentence()
+
+        response = self.post(url_for('api.transfers'), {
+            'subject': {
+                'class': 'Dataset',
+                'id': str(dataset.id),
+            },
+            'recipient': {
+                'class': 'User',
+                'id': str(ObjectId()),
+            },
+            'comment': comment
+        })
+
+        self.assert400(response)
+
+        data = response.json
+
+        self.assertIn('recipient', data['errors'])

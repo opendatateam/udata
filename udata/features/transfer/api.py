@@ -95,11 +95,19 @@ class TransferRequestsAPI(API):
 
         subject_model = db.resolve_model(data['subject'])
         subject_id = data['subject']['id']
-        subject = subject_model.objects.get(id=subject_id)
+        try:
+            subject = subject_model.objects.get(id=subject_id)
+        except subject_model.DoesNotExist:
+            msg = 'Unkown subject id "{0}"'.format(subject_id)
+            ns.abort(400, errors={'subject': msg})
 
         recipient_model = db.resolve_model(data['recipient'])
         recipient_id = data['recipient']['id']
-        recipient = recipient_model.objects.get(id=recipient_id)
+        try:
+            recipient = recipient_model.objects.get(id=recipient_id)
+        except recipient_model.DoesNotExist:
+            msg = 'Unkown recipient id "{0}"'.format(recipient_id)
+            ns.abort(400, errors={'recipient': msg})
 
         comment = data.get('comment')
 
