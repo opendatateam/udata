@@ -58,7 +58,7 @@ def theme_static_with_version(ctx, filename, external=False):
         burst = pkg_resources.get_distribution(current.pkg_version).version
     else:
         burst = current.version
-    return '?'.join((url, '_={0}'.format(burst)))
+    return '{url}?_={burst}'.format(url=url, burst=burst)
 
 
 class ConfigurableTheme(Theme):
