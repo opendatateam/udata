@@ -14,7 +14,7 @@ from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.tags.models import Tag
 from udata.core.tags.tasks import count_tags
-from udata.tags import tags_list, normalize, slug
+from udata.tags import tags_list, normalize, slug, MAX_TAG_LENGTH
 
 log = logging.getLogger(__name__)
 
@@ -112,5 +112,5 @@ class TagsUtilsTest(TestCase):
         self.assertEquals('', normalize('a'))
         self.assertEquals('', normalize('aa'))
         self.assertEquals('aaa', normalize('aaa'))
-        self.assertEquals('a' * 32, normalize('a' * 33))
+        self.assertEquals('a' * MAX_TAG_LENGTH, normalize('a' * (MAX_TAG_LENGTH + 1)))
         self.assertEquals('aaa-a', normalize('aAa a'))
