@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.0.1 (2017-02-20)
 
 - Ensure missing FAQ sections raises a 404 [#156](https://github.com/etalab/udata-gouvfr/issues/156)
