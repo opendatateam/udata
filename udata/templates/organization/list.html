@@ -4,6 +4,13 @@
 
 {% set toolbar_class='search-toolbar' %}
 
+{% set meta = {
+    'title': _('Organizations'),
+    'description': _("%(site)s organization search", site=config['SITE_TITLE']),
+    'keywords': [_('search'), _('organizations')],
+    'robots': 'noindex',
+} %}
+
 {% block extra_js %}
 <script src="{{ static('search.js') }}"></script>
 {% endblock %}

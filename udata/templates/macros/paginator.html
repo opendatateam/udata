@@ -5,27 +5,27 @@
 <div class="text-center">
     <ul class="pagination">
         <li {% if p.page == 1 %}class="disabled"{% endif %}>
-            <a href="{{ url_rewrite(page=1) }}" title="{% trans %}First page{% endtrans %}">
+            <a href="{{ url_rewrite(page=1) }}" title="{% trans %}First page{% endtrans %}" rel="nofollow">
                 &laquo;
             </a>
         </li>
         <li {% if p.page == 1 %}class="disabled"{% endif %}>
-            <a href="{{ url_rewrite(page=p.page - 1) }}" title="{% trans %}Previous page{% endtrans %}">
+            <a href="{{ url_rewrite(page=p.page - 1) }}" title="{% trans %}Previous page{% endtrans %}" rel="nofollow">
                 &lsaquo;
             </a>
         </li>
         {% for num_page in range(start, end + 1) %}
         <li {% if num_page == p.page %}class="active"{% endif %}>
-            <a href="{{ url_rewrite(page=num_page) }}">{{ num_page }}</a>
+            <a href="{{ url_rewrite(page=num_page) }}" rel="nofollow">{{ num_page }}</a>
         </li>
         {% endfor %}
         <li {% if p.page == p.pages %}class="disabled"{% endif %}>
-            <a href="{{ url_rewrite(page=p.page + 1) }}" title="{% trans %}Next page{% endtrans %}">
+            <a href="{{ url_rewrite(page=p.page + 1) }}" title="{% trans %}Next page{% endtrans %}" rel="nofollow">
                 &rsaquo;
             </a>
         </li>
         <li {% if p.page == p.pages %}class="disabled"{% endif %}>
-            <a href="{{ url_rewrite(page=p.pages) }}" title="{% trans %}Last page{% endtrans %}">
+            <a href="{{ url_rewrite(page=p.pages) }}" title="{% trans %}Last page{% endtrans %}" rel="nofollow">
                 &raquo;
             </a>
         </li>

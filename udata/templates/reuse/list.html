@@ -4,6 +4,13 @@
 
 {% set toolbar_class='search-toolbar' %}
 
+{% set meta = {
+    'title': _('Reuses'),
+    'description': _("%(site)s reuse search", site=config['SITE_TITLE']),
+    'keywords': [_('search'), _('reuses')],
+    'robots': 'noindex',
+} %}
+
 {% block extra_js %}
 <script src="{{ static('search.js') }}"></script>
 {% endblock %}
