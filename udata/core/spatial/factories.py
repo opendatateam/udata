@@ -115,7 +115,7 @@ class GeoZoneFactory(MongoEngineFactory):
     id = factory.LazyAttribute(lambda o: '/'.join((o.level, o.code)))
     level = factory.LazyAttribute(lambda o: unique_string())
     name = factory.LazyAttribute(lambda o: faker.city())
-    code = factory.LazyAttribute(lambda o: faker.postcode())
+    code = factory.LazyAttribute(lambda o: faker.zipcode())
     geom = factory.LazyAttribute(lambda o: faker.multipolygon())
 
 
