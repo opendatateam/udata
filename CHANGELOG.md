@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix JavaScript locales handling [#786](https://github.com/opendatateam/udata/pull/786)
+- Optimize images sizes for territory placeholders [#788](https://github.com/opendatateam/udata/issues/788)
 
 ## 1.0.2 (2017-02-20)
 

@@ -40,7 +40,7 @@
                     <ul class="list-unstyled territories-list">
                         {% for town in territory.children[:8] %}
                             <li>
-                                <img src="{{ town.logo_url(external=True) or theme_static('img/placeholder_territory.png', external=True) }}" alt="{{ town.name }}" class="float-left" width="13px" />
+                                <img src="{{ town.logo_url(external=True) or theme_static('img/placeholder_territory_mini.png', external=True) }}" alt="{{ town.name }}" class="float-left" width="13px" />
                                 <a href="{{ town.url }}"> {{ town.name }}</a>
                             </li>
                         {% endfor %}
