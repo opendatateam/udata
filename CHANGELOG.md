@@ -4,6 +4,7 @@
 
 - Fix JavaScript locales handling [#786](https://github.com/opendatateam/udata/pull/786)
 - Optimize images sizes for territory placeholders [#788](https://github.com/opendatateam/udata/issues/788)
+- Restore placeholders in search suggestions, fix [#790](https://github.com/opendatateam/udata/issues/790)
 
 ## 1.0.2 (2017-02-20)
 
