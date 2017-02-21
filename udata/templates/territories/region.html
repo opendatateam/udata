@@ -53,7 +53,7 @@
                     <ul class="list-unstyled territories-list">
                         {% for county in territory.children[:8] %}
                             <li>
-                                <img src="{{ county.logo_url(external=True) or theme_static('img/placeholder_territory.png', external=True) }}" alt="{{ county.name }}" class="float-left" width="13px" />
+                                <img src="{{ county.logo_url(external=True) or theme_static('img/placeholder_territory_mini.png', external=True) }}" alt="{{ county.name }}" class="float-left" width="13px" />
                                 <a href="{{ county.url }}"> {{ county.name }}</a>
                             </li>
                         {% endfor %}
