@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.0.2 (2017-02-21)
 
 - Optimize png images from theme [#159](https://github.com/etalab/udata-gouvfr/issues/159)
