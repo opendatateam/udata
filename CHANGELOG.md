@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
--  Optimize png images from theme [#159](https://github.com/etalab/udata-gouvfr/issues/159)
+- Optimize png images from theme [#159](https://github.com/etalab/udata-gouvfr/issues/159)
+- Optimize png images sizes for territory placeholders [#788](https://github.com/opendatateam/udata/issues/788)
 
 ## 1.0.1 (2017-02-20)
 
