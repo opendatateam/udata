@@ -12,10 +12,7 @@ export const lang = config.lang;
 const resources = {};
 
 resources[lang] = {};
-// Force split and async loading of locale (and so remove them from common.js)
-require.ensure([], function() {
-  resources[lang][NAMESPACE] = require('locales/' + NAMESPACE + '.' + lang + '.json');
-});
+resources[lang][NAMESPACE] = require('locales/' + NAMESPACE + '.' + lang + '.json');
 
 moment.locale(lang);
 i18next.init({

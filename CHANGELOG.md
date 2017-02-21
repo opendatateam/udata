@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix JavaScript locales handling [#786](https://github.com/opendatateam/udata/pull/786)
 
 ## 1.0.2 (2017-02-20)
 
