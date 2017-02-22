@@ -178,9 +178,9 @@ The OAuth2 error page. Do not modify unless you know what you are doing.
 
 ## Flask-Cache options
 
-uData uses Flask-Cache to handle cache and use Redis by default.
+uData uses Flask-Caching to handle cache and use Redis by default.
 You can see the full options list in
-[the official Flask-Cache documentation][flask-cache-doc]
+[the official Flask-Caching documentation][flask-caching-doc]
 
 ### CACHE_TYPE
 
@@ -231,7 +231,7 @@ FS_ROOT = '/srv/http/www.data.dev/fs'
 ```
 
 [celery-doc]: https://docs.celeryproject.org/en/latest/configuration.html
-[flask-cache-doc]: https://pythonhosted.org/Flask-Cache/
+[flask-caching-doc]: https://pythonhosted.org/Flask-Caching/
 [flask-mail-doc]: https://pythonhosted.org/flask-mail/
 [flask-mongoengine-doc]: https://flask-mongoengine.readthedocs.org/
 [flask-oauthlib-doc]: https://flask-oauthlib.readthedocs.org/en/latest/oauth2.html#configuration

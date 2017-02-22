@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
 from datetime import datetime
 
 from flask_security import current_user
@@ -8,8 +9,10 @@ from flask_restplus.inputs import boolean
 
 from udata.auth import admin_permission
 from udata.api import api, API, fields
+from udata.api.cache import ONE_DAY, ONE_WEEK
 from udata.core.user.api_fields import user_ref_fields
 
+import caches  # NOQA: to consume signals.
 from .forms import DiscussionCreateForm, DiscussionCommentForm
 from .models import Message, Discussion
 from .permissions import CloseDiscussionPermission
@@ -133,6 +136,9 @@ class DiscussionsAPI(API):
     Base class for a list of discussions.
     '''
     @api.doc('list_discussions', parser=parser)
+    @api.cache_page(check_serverside=False, serializer=json.dumps,
+                    client_timeout=ONE_DAY, server_timeout=ONE_WEEK,
+                    key='discussions%s')
     @api.marshal_with(discussion_page_fields)
     def get(self):
         '''List all Discussions'''
