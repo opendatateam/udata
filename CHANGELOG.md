@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix badges trying to use API too early
+  [#799](https://github.com/opendatateam/udata/pull/799)
 
 ## 1.0.3 (2017-02-21)
 
