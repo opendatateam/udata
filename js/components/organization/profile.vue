@@ -33,7 +33,7 @@
                 <span class="fa fa-fw fa-bookmark"></span>
                 {{ _('Badges') }}:
             </strong>
-            <span v-for="b in org.badges" class="label label-primary">{{badges[b.kind]}}</span>
+            <span v-for="b in org.badges" class="label label-primary">{{ badges[b.kind] }}</span>
         </div>
     </div>
 </box>
@@ -41,26 +41,26 @@
 
 <script>
 import API from 'api';
+import badges from 'models/badges';
 import Box from 'components/containers/box.vue';
 import ImageButton from 'components/widgets/image-button.vue';
 
 export default {
-    name: 'org-profile',
     props: {
         org: {
             type: Object,
             required: true
         }
     },
-    data: function() {
+    data() {
         return {
             toggled: false,
-            badges: require('models/badges').badges.organization
+            badges: badges.organization
         }
     },
     components: {Box, ImageButton},
     computed: {
-        endpoint: function() {
+        endpoint() {
             if (this.org.id) {
                 var operation = API.organizations.operations.organization_logo;
                 return operation.urlify({org: this.org.id});
