@@ -4,6 +4,8 @@
 
 - Fix badges trying to use API too early
   [#799](https://github.com/opendatateam/udata/pull/799)
+- Some minor tuning on generic references
+  [#801](https://github.com/opendatateam/udata/pull/801)
 
 ## 1.0.3 (2017-02-21)
 
