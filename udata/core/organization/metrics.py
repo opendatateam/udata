@@ -5,7 +5,7 @@ from udata.core.metrics import Metric
 from udata.i18n import lazy_gettext as _
 from udata.core.followers.metrics import FollowersMetric
 from udata.core.badges.metrics import BadgesMetric
-from udata.models import Dataset, Reuse, Organization
+from udata.models import db, Dataset, Reuse, Organization
 
 __all__ = (
     'DatasetsMetric', 'ReusesMetric', 'MembersMetric', 'OrgFollowersMetric',
@@ -37,6 +37,7 @@ class ReusesMetric(Metric):
     def get_value(self):
         return Reuse.objects(organization=self.target).count()
 
+
 ReusesMetric.connect(Reuse.on_create, Reuse.on_update)
 
 
@@ -59,6 +60,7 @@ class MembersMetric(Metric):
     def get_value(self):
         return len(self.target.members)
 
+
 MembersMetric.connect(Organization.on_create, Organization.on_update)
 
 
@@ -68,3 +70,13 @@ class OrgFollowersMetric(FollowersMetric):
 
 class OrgBadgesMetric(BadgesMetric):
     model = Organization
+
+
+@db.Owned.on_owner_change.connect
+def update_downer_metrics(document, previous):
+    if not isinstance(previous, Organization):
+        return
+    if isinstance(document, Dataset):
+        DatasetsMetric(previous).trigger_update()
+    elif isinstance(document, Reuse):
+        ReusesMetric(previous).trigger_update()
