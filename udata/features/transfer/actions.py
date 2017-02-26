@@ -46,10 +46,8 @@ def accept_transfer(transfer, comment=None):
     recipient = transfer.recipient
     if isinstance(recipient, Organization):
         subject.organization = recipient
-        subject.owner = None
     elif isinstance(recipient, User):
         subject.owner = recipient
-        subject.organization = None
 
     subject.save()
 
