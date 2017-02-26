@@ -12,9 +12,7 @@ from mongoengine.fields import DateTimeField
 from werkzeug import cached_property
 
 from udata.frontend.markdown import mdstrip
-from udata.models import (
-    db, WithMetrics, BadgeMixin, SpatialCoverage, OwnedByQuerySet
-)
+from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
 from udata.i18n import lazy_gettext as _
 from udata.utils import hash_url
 
@@ -107,7 +105,7 @@ class License(db.Document):
         return self.title
 
 
-class DatasetQuerySet(OwnedByQuerySet):
+class DatasetQuerySet(db.OwnedQuerySet):
     def visible(self):
         return self(private__ne=True, resources__0__exists=True, deleted=None)
 
@@ -236,7 +234,7 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
     on_deleted = signal('Resource.on_deleted')
 
 
-class Dataset(WithMetrics, BadgeMixin, db.Document):
+class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     created_at = DateTimeField(verbose_name=_('Creation date'),
                                default=datetime.now, required=True)
     last_modified = DateTimeField(verbose_name=_('Last modification date'),
@@ -251,9 +249,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
     resources = db.ListField(db.EmbeddedDocumentField(Resource))
 
     private = db.BooleanField()
-    owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
-    organization = db.ReferenceField('Organization',
-                                     reverse_delete_rule=db.NULLIFY)
     frequency = db.StringField(choices=UPDATE_FREQUENCIES.keys())
     frequency_date = db.DateTimeField(verbose_name=_('Future date of update'))
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
@@ -276,14 +271,12 @@ class Dataset(WithMetrics, BadgeMixin, db.Document):
     }
 
     meta = {
-        'allow_inheritance': True,
         'indexes': [
             '-created_at',
             'slug',
-            'organization',
             'resources.id',
             'resources.urlhash',
-        ],
+        ] + db.Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'queryset_class': DatasetQuerySet,
     }
@@ -560,19 +553,16 @@ pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
 
 
-class CommunityResource(ResourceMixin, WithMetrics, db.Document):
+class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     '''
     Local file, remote file or API added by the community of the users to the
     original dataset
     '''
     dataset = db.ReferenceField(Dataset)
-    owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
-    organization = db.ReferenceField(
-        'Organization', reverse_delete_rule=db.NULLIFY)
 
     meta = {
         'ordering': ['-created_at'],
-        'queryset_class': OwnedByQuerySet,
+        'queryset_class': db.OwnedQuerySet,
     }
 
     @property
