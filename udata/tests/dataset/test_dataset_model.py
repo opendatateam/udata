@@ -11,7 +11,6 @@ from udata.core.dataset.factories import (
 from udata.core.discussions.factories import (
     MessageDiscussionFactory, DiscussionFactory
 )
-from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 
 from .. import TestCase, DBTestMixin
