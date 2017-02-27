@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.0.3 (2017-02-27)
 
 - Translations update
 - Switch `udata-js` link to `metaclic` [#161](https://github.com/etalab/udata-gouvfr/pull/161)
