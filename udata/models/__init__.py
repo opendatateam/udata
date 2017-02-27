@@ -151,15 +151,21 @@ class UDataQuerySet(BaseQuerySet):
         for key, value in kwargs.items():
             if not value:
                 continue
-            elif not isinstance(value, (list, tuple)):
-                self.error('expect a list as parameter')
-            elif all(isinstance(v, basestring) for v in value):
-                ids = [ObjectId(v) for v in value]
-                query['{0}._ref.$id'.format(key)] = {'$in': ids}
-            elif all(isinstance(v, DBRef) for v in value):
-                query['{0}._ref'.format(key)] = {'$in': value}
-            elif all(isinstance(v, ObjectId) for v in value):
-                query['{0}._ref.$id'.format(key)] = {'$in': value}
+            # Optimize query for when there is only one value
+            if isinstance(value, (list, tuple)) and len(value) == 1:
+                value = value[0]
+            if isinstance(value, (list, tuple)):
+                if all(isinstance(v, basestring) for v in value):
+                    ids = [ObjectId(v) for v in value]
+                    query['{0}._ref.$id'.format(key)] = {'$in': ids}
+                elif all(isinstance(v, DBRef) for v in value):
+                    query['{0}._ref'.format(key)] = {'$in': value}
+                elif all(isinstance(v, ObjectId) for v in value):
+                    query['{0}._ref.$id'.format(key)] = {'$in': value}
+            elif isinstance(value, ObjectId):
+                query['{0}._ref.$id'.format(key)] = value
+            elif isinstance(value, basestring):
+                query['{0}._ref.$id'.format(key)] = ObjectId(value)
             else:
                 self.error('expect a list of string, ObjectId or DBRef')
         return self(__raw__=query)
