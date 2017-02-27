@@ -8,6 +8,8 @@
   [#801](https://github.com/opendatateam/udata/pull/801)
 - Cleanup factories
   [#808](https://github.com/opendatateam/udata/pull/808)
+- Fix user default metrics not being set [migration]
+  [#809](https://github.com/opendatateam/udata/pull/809)
 
 ## 1.0.3 (2017-02-21)
 
