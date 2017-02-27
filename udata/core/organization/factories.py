@@ -1,24 +1,21 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 import factory
-from factory.mongoengine import MongoEngineFactory
 
-from udata import models
-from udata.utils import faker
+from .models import Organization, Team
 
 
-class OrganizationFactory(MongoEngineFactory):
+class OrganizationFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
-        model = models.Organization
+        model = Organization
 
-    name = factory.LazyAttribute(lambda o: faker.sentence())
-    description = factory.LazyAttribute(lambda o: faker.text())
+    name = factory.Faker('sentence')
+    description = factory.Faker('text')
 
 
-class TeamFactory(MongoEngineFactory):
+class TeamFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
-        model = models.Team
+        model = Team
 
-    name = factory.LazyAttribute(lambda o: faker.sentence())
+    name = factory.Faker('sentence')

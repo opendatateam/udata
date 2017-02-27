@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 import factory
-from factory.mongoengine import MongoEngineFactory
 
+from udata import utils
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
-from udata import models, utils
-from udata.utils import faker
+
+from .models import Topic
 
 
-class TopicFactory(MongoEngineFactory):
+class TopicFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
-        model = models.Topic
+        model = Topic
 
-    name = factory.LazyAttribute(lambda o: faker.sentence())
-    description = factory.LazyAttribute(lambda o: faker.text())
+    name = factory.Faker('sentence')
+    description = factory.Faker('text')
     tags = factory.LazyAttribute(lambda o: [utils.unique_string(16)
                                  for _ in range(3)])
 

@@ -1,20 +1,19 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from hashlib import sha1
 
 import factory
 
-from factory.mongoengine import MongoEngineFactory
-
-from udata import models
 from udata.utils import faker
 
+from .models import Dataset, Resource, Checksum, CommunityResource, License
 
-class DatasetFactory(MongoEngineFactory):
+
+class DatasetFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
-        model = models.Dataset
+        model = Dataset
 
-    title = factory.LazyAttribute(lambda o: faker.sentence())
-    description = factory.LazyAttribute(lambda o: faker.text())
+    title = factory.Faker('sentence')
+    description = factory.Faker('text')
     frequency = 'unknown'
 
 
@@ -24,37 +23,37 @@ class VisibleDatasetFactory(DatasetFactory):
         return [ResourceFactory()]
 
 
-class ChecksumFactory(MongoEngineFactory):
+class ChecksumFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
-        model = models.Checksum
+        model = Checksum
 
     type = 'sha1'
-    value = factory.LazyAttribute(lambda o: sha1(faker.word()).hexdigest())
+    value = factory.Faker('sha1')
 
 
-class BaseResourceFactory(MongoEngineFactory):
-    title = factory.LazyAttribute(lambda o: faker.sentence())
-    description = factory.LazyAttribute(lambda o: faker.text())
+class BaseResourceFactory(factory.mongoengine.MongoEngineFactory):
+    title = factory.Faker('sentence')
+    description = factory.Faker('text')
     filetype = 'file'
-    url = factory.LazyAttribute(lambda o: faker.url())
+    url = factory.Faker('url')
     checksum = factory.SubFactory(ChecksumFactory)
-    mime = factory.LazyAttribute(lambda o: faker.mime_type('text'))
-    filesize = factory.LazyAttribute(lambda o: faker.pyint())
+    mime = factory.Faker('mime_type', category='text')
+    filesize = factory.Faker('pyint')
 
 
 class CommunityResourceFactory(BaseResourceFactory):
     class Meta:
-        model = models.CommunityResource
+        model = CommunityResource
 
 
 class ResourceFactory(BaseResourceFactory):
     class Meta:
-        model = models.Resource
+        model = Resource
 
 
-class LicenseFactory(MongoEngineFactory):
+class LicenseFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
-        model = models.License
+        model = License
 
     id = factory.Sequence(lambda n: '{0}-{1}'.format(faker.word(), n))
-    title = factory.LazyAttribute(lambda o: faker.sentence())
+    title = factory.Faker('sentence')
