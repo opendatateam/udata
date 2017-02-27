@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 import factory
-from factory.mongoengine import MongoEngineFactory
 
-from udata import models
+from .models import Discussion, Message
 
 
-class DiscussionFactory(MongoEngineFactory):
+class DiscussionFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
-        model = models.Discussion
+        model = Discussion
 
     title = factory.Faker('sentence')
 
 
-class MessageDiscussionFactory(MongoEngineFactory):
+class MessageDiscussionFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
-        model = models.Message
+        model = Message
 
     content = factory.Faker('sentence')

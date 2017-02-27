@@ -1,23 +1,20 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 import factory
-from factory.mongoengine import MongoEngineFactory
 
-from udata import models
-from udata.utils import faker
+from .models import Site, SiteSettings
 
 
-class SiteSettingsFactory(MongoEngineFactory):
+class SiteSettingsFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
-        model = models.SiteSettings
+        model = SiteSettings
 
 
-class SiteFactory(MongoEngineFactory):
+class SiteFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
-        model = models.Site
+        model = Site
 
-    id = factory.LazyAttribute(lambda o: faker.word())
-    title = factory.LazyAttribute(lambda o: faker.name())
+    id = factory.Faker('word')
+    title = factory.Faker('name')
     settings = factory.SubFactory(SiteSettingsFactory)

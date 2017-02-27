@@ -11,50 +11,12 @@ from udata.core.dataset.factories import (
 from udata.core.discussions.factories import (
     MessageDiscussionFactory, DiscussionFactory
 )
-from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 
 from .. import TestCase, DBTestMixin
 
 
 class DatasetModelTest(TestCase, DBTestMixin):
-    def test_owned_by_user(self):
-        user = UserFactory()
-        dataset = DatasetFactory(owner=user)
-        DatasetFactory(owner=UserFactory())
-
-        result = Dataset.objects.owned_by(user)
-
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0], dataset)
-
-    def test_owned_by_org(self):
-        org = OrganizationFactory()
-        dataset = DatasetFactory(organization=org)
-        DatasetFactory(organization=OrganizationFactory())
-
-        result = Dataset.objects.owned_by(org)
-
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0], dataset)
-
-    def test_owned_by_org_or_user(self):
-        user = UserFactory()
-        org = OrganizationFactory()
-        datasets = [DatasetFactory(owner=user),
-                    DatasetFactory(organization=org)]
-        excluded = [DatasetFactory(owner=UserFactory()),
-                    DatasetFactory(organization=OrganizationFactory())]
-
-        result = Dataset.objects.owned_by(org, user)
-
-        self.assertEqual(len(result), 2)
-        for dataset in result:
-            self.assertIn(dataset, datasets)
-
-        for dataset in excluded:
-            self.assertNotIn(dataset, result)
-
     def test_add_resource(self):
         user = UserFactory()
         dataset = DatasetFactory(owner=user)

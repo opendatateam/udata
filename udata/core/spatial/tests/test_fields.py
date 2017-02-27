@@ -8,8 +8,9 @@ from werkzeug.datastructures import MultiDict
 from udata.forms import Form
 from udata.models import db
 from udata.tests import TestCase
+from udata.utils import faker
 
-from ..factories import faker, GeoZoneFactory, random_spatial_granularity
+from ..factories import GeoZoneFactory
 from ..models import SpatialCoverage
 from ..forms import SpatialCoverageField
 
@@ -62,7 +63,7 @@ class SpatialCoverageFieldTest(TestCase):
         fake = Fake()
         form = FakeForm(MultiDict({
             'spatial-zones': '',
-            'spatial-granularity': random_spatial_granularity()
+            'spatial-granularity': faker.spatial_granularity()
         }))
 
         form.validate()
@@ -79,7 +80,7 @@ class SpatialCoverageFieldTest(TestCase):
         fake = Fake()
         form = FakeForm(MultiDict({
             'spatial-zones': zone.id,
-            'spatial-granularity': random_spatial_granularity()
+            'spatial-granularity': faker.spatial_granularity()
         }))
 
         form.validate()
@@ -98,7 +99,7 @@ class SpatialCoverageFieldTest(TestCase):
         form = FakeForm.from_json({
             'spatial': {
                 'zones': zone.id,
-                'granularity': random_spatial_granularity()
+                'granularity': faker.spatial_granularity()
             }
         })
 
@@ -117,7 +118,7 @@ class SpatialCoverageFieldTest(TestCase):
         fake = Fake()
         form = FakeForm(MultiDict({
             'spatial-zones': ','.join([z.id for z in zones]),
-            'spatial-granularity': random_spatial_granularity()
+            'spatial-granularity': faker.spatial_granularity()
         }))
 
         form.validate()
@@ -139,7 +140,7 @@ class SpatialCoverageFieldTest(TestCase):
         form = FakeForm.from_json({
             'spatial': {
                 'zones': ','.join([z.id for z in zones]),
-                'granularity': random_spatial_granularity()
+                'granularity': faker.spatial_granularity()
             }
         })
 
@@ -237,10 +238,10 @@ class SpatialCoverageFieldTest(TestCase):
         Fake, FakeForm = self.factory()
 
         fake = Fake(spatial=SpatialCoverage(
-            granularity=random_spatial_granularity()
+            granularity=faker.spatial_granularity()
         ))
 
-        granularity = random_spatial_granularity()
+        granularity = faker.spatial_granularity()
 
         data = MultiDict({'spatial-granularity': granularity})
 
@@ -277,7 +278,7 @@ class SpatialCoverageFieldTest(TestCase):
         fake = Fake(spatial=None)
         form = FakeForm(MultiDict({
             'spatial-zones': str(zone.id),
-            'spatial-granularity': random_spatial_granularity()
+            'spatial-granularity': faker.spatial_granularity()
         }), fake)
 
         form.validate()
