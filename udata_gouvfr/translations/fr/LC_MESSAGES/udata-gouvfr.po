@@ -6,14 +6,14 @@
 # Axel Haustant, 2014
 # Axel Haustant, 2014-2017
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2014
-# Larlet David <david@larlet.fr>, 2015-2016
+# Larlet David <david@larlet.fr>, 2015-2017
 # noirbizarre, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-02-20 22:31+0100\n"
-"PO-Revision-Date: 2017-02-20 21:32+0000\n"
+"PO-Revision-Date: 2017-02-27 14:00+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/etalab/udata-gouvfr/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -304,7 +304,7 @@ msgstr "Rechercher dans les jeux de données"
 
 #: udata_gouvfr/theme/templates/subnav-small.html:13
 msgid "Search in this "
-msgstr "Chercher ici"
+msgstr "Chercher dans"
 
 #: udata_gouvfr/theme/templates/subnav-small.html:16
 msgid "Search"
