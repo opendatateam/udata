@@ -144,8 +144,8 @@ class DiscussionsAPI(API):
             discussions = discussions(closed=None)
         elif args['closed'] is True:
             discussions = discussions(closed__ne=None)
-        return (discussions.order_by(args['sort'])
-                           .paginate(args['page'], args['page_size']))
+        discussions = discussions.order_by(args['sort'])
+        return discussions.paginate(args['page'], args['page_size'])
 
     @api.secure
     @api.doc('create_discussion')

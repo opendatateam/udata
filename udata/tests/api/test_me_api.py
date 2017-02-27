@@ -19,6 +19,7 @@ from udata.core.issues.factories import IssueFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
+from udata.i18n import _
 from udata.utils import faker
 
 from . import APITestCase
@@ -31,7 +32,7 @@ class MeAPITest(APITestCase):
         self.login()
         response = self.get(url_for('api.me'))
         self.assert200(response)
-        # self.assertEqual(response.json['email'], self.user.email)
+        self.assertEqual(response.json['email'], self.user.email)
         self.assertEqual(response.json['first_name'], self.user.first_name)
         self.assertEqual(response.json['roles'], [])
 
@@ -368,7 +369,7 @@ class MeAPITest(APITestCase):
             response = self.delete(url_for('api.me'))
         self.assertEqual(len(mails), 1)
         self.assertEqual(mails[0].send_to, set([user.email]))
-        self.assertEqual(mails[0].subject, 'Account deletion')
+        self.assertEqual(mails[0].subject, _('Account deletion'))
         self.assert204(response)
 
         user.reload()

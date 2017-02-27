@@ -33,23 +33,24 @@ export class Badges {
 
     _buildProperty(name) {
         Object.defineProperty(this, name, {
-            get: function() {
+            get() {
                 if (this._badges.hasOwnProperty(name)) {
                     return this._badges[name];
                 }
 
                 const ns = this._types[name];
                 const operation = 'available_' + name + '_badges';
-
-                if (!API.hasOwnProperty(ns) || !API[ns].hasOwnProperty(operation)) {
-                    throw new BadgeError(`Badge for ${name} does not exists`);
-                }
-
                 const badges = this._badges[name] = {};
 
-                API[ns][operation]({}, (response) => {
-                    Object.assign(badges, response.obj);
-                });
+                API.onReady(() => {
+                    if (!API.hasOwnProperty(ns) || !API[ns].hasOwnProperty(operation)) {
+                        throw new BadgeError(`Badge for "${name}" does not exists`);
+                    }
+
+                    API[ns][operation]({}, (response) => {
+                        Object.assign(badges, response.obj);
+                    });
+                })
 
                 return badges;
             }
