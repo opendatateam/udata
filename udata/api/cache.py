@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import binascii
 import httplib
-import os
 from datetime import datetime
 from functools import wraps
 
-from flask import request, make_response
+from flask import request, make_response as flask_make_response
+from werkzeug.datastructures import Headers, ResponseCacheControl
 
 from udata.app import cache
 
+ZERO = 0
 ONE_MINUTE = 60
 ONE_HOUR = ONE_MINUTE * 60
 ONE_DAY = ONE_HOUR * 24
@@ -19,9 +19,9 @@ ONE_MONTH = ONE_DAY * 30
 ONE_YEAR = ONE_DAY * 365
 
 
-def cache_page(class_instance, check_serverside=True, personal=False,
-               client_timeout=0, server_timeout=ONE_HOUR, key='view-cache%s',
-               x_cache_header=True, serializer=lambda a: a):
+def cache_page(class_instance=None, check_serverside=True, personal=False,
+               client_timeout=ZERO, server_timeout=ONE_HOUR,
+               key_pattern='cache%s', make_response=flask_make_response):
     """An attempt to make the ultimate Flask cache decorator.
 
     Differs from the official Flask Caching Decorator
@@ -34,6 +34,7 @@ def cache_page(class_instance, check_serverside=True, personal=False,
     * Respects browser's hard-refresh.
 
     Parameters:
+    * `class_instance`: allows the decorator to be applied on a class method.
     * `check_serverside`: either the client verifies with the server if
       its cached versions are still valid or not.
     * `personal`: set to `True` if the response contains sensitive
@@ -42,12 +43,11 @@ def cache_page(class_instance, check_serverside=True, personal=False,
       cache as being invalid.
     * `server_timeout`: time in seconds before the server considers the
       cache as being invalid.
-    * `key`: you can customize the cache key, it must contains `%s`
-      which will be replaced by the full path (including query string).
-    * `x_cache_header`: either put a `X-Cache` header to know which
-      cache is being hit or not. Useful to debug but not required.
-    * `serializer`: if the response from your view needs to be
-      serialized prior to be converted to a Flask Response object.
+    * `key_pattern`: you can customize the cache key, it can be either
+      a callable or a string. If it contains `%s`, the placeholder will
+      be replaced by the full path (including query string).
+    * `make_response`: a way to override the default Flask way of
+      creating a response object.
 
     Inspirations:
     * http://codereview.stackexchange.com/questions/147038/↩︎
@@ -63,47 +63,55 @@ def cache_page(class_instance, check_serverside=True, personal=False,
     * https://developers.google.com/web/fundamentals/performance/↩︎
       optimizing-content-efficiency/images/http-cache-decision-tree.png
     """
+    def _generate_cache_control():
+        cache_control = ResponseCacheControl()
+        # Before you think the logic is reversed, read Jake's article.
+        if check_serverside:
+            cache_control.no_cache = True
+        else:
+            cache_control.must_revalidate = True
+        if personal:
+            cache_control.private = True
+        else:
+            cache_control.public = True
+        cache_control.max_age = client_timeout
+        return cache_control
+
+    def _generate_cache_key(str_or_callable):
+        if callable(str_or_callable):
+            return str_or_callable()
+        else:
+            try:
+                # Include querystring with `full_path`.
+                return str_or_callable % request.full_path
+            except TypeError:
+                return str_or_callable
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            # Before you think the logic is reversed, read Jake's article.
-            cache_policy = check_serverside and 'no-cache' or 'must-revalidate'
-            if personal:
-                cache_policy += ', private'
-            else:
-                cache_policy += ', public'
-            cache_policy += ', max-age={}'.format(client_timeout)
-            headers = {}
-            headers['Cache-Control'] = cache_policy
-            client_etag = request.headers.get('If-None-Match')
-            cache_key = key % request.full_path  # Include querystring.
+            headers = Headers()
+            headers.add('Cache-Control', _generate_cache_control())
+            cache_key = _generate_cache_key(key_pattern)
             resp = cache.get(cache_key)
-            cache_control = request.headers.get('Cache-Control', '')
             # Respect the hard-refresh of the browser.
-            if resp is not None and cache_control != 'no-cache':
-                if x_cache_header:
-                    headers['X-Cache'] = 'HIT from Server'
-                cached_etag = resp.headers.get('ETag')
-                if client_etag and cached_etag and client_etag == cached_etag:
-                    if x_cache_header:
-                        headers['X-Cache'] = 'HIT from Client'
-                    headers['Last-Modified'] = \
-                        resp.headers.get('Last-Modified')
+            if resp and not request.cache_control.no_cache:
+                headers.add('X-Cache', 'HIT from Server')
+                etag, is_weak = resp.get_etag()
+                if request.if_none_match.contains(etag):
+                    headers.add('X-Cache', 'HIT from Client')
                     resp = make_response('', httplib.NOT_MODIFIED)
             else:
-                resp = make_response(serializer(func(*args, **kwargs)))
-                ok_status = resp.status_code == httplib.OK
-                if ok_status and request.method in ['GET', 'HEAD']:
-                    if x_cache_header:
-                        headers['X-Cache'] = 'MISS'
-                    # Add headers to the response object so they get cached.
-                    # Alternative algorithm: hex(random.getrandbits(32))
-                    resp.headers.add('ETag', binascii.hexlify(os.urandom(4)))
-                    resp.headers.add('Last-Modified', str(datetime.utcnow()))
+                result = func(*args, **kwargs)
+                resp = make_response(result)
+                if (request.method in ('GET', 'HEAD') and
+                        resp.status_code == httplib.OK):
+                    headers.add('X-Cache', 'MISS')
+                    resp.add_etag()
+                    resp.last_modified = datetime.utcnow()
                     cache.set(cache_key, resp, timeout=server_timeout)
                 else:
-                    if x_cache_header:
-                        headers['X-Cache'] = 'NOCACHE'
+                    headers.add('X-Cache', 'NOCACHE')
             resp.headers.extend(headers)
             return resp
         return wrapper

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import httplib
 import logging
 import urllib
 
@@ -147,7 +148,7 @@ api.model_reference = api.model('ModelReference', {
 
 
 @api.representation('application/json')
-def output_json(data, code, headers=None):
+def output_json(data, code=httplib.OK, headers=None):
     '''Use Flask JSON to serialize'''
     resp = make_response(json.dumps(data), code)
     resp.headers.extend(headers or {})

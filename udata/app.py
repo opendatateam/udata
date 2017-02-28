@@ -14,7 +14,6 @@ from flask import (
     Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint
 )
 from flask_caching import Cache
-
 from flask_wtf.csrf import CsrfProtect
 from flask_navigation import Navigation
 from speaklater import is_lazy_string

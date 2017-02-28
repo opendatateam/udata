@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
-
 from flask import current_app, abort
 from flask_restplus import inputs
 
@@ -72,9 +70,9 @@ class SuggestZonesAPI(API):
 class ZonesAPI(API):
     @api.doc('spatial_zones',
              params={'ids': 'A zone identifiers list (comma separated)'})
-    @api.cache_page(check_serverside=False, serializer=json.dumps,
+    @api.cache_page(check_serverside=False, key_pattern='zones%s',
                     client_timeout=ONE_DAY, server_timeout=ONE_WEEK,
-                    key='zones%s')
+                    make_response=api.make_response)
     @api.marshal_with(feature_collection_fields)
     def get(self, ids):
         '''Fetch a zone list as GeoJSON'''
