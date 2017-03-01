@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
-from factory.mongoengine import MongoEngineFactory
+import factory
+
 from factory.fuzzy import FuzzyChoice
 
-from udata import models
-from udata.utils import faker
+from .models import Badge
 
 
 def badge_factory(model):
-    class BadgeFactory(MongoEngineFactory):
+    class BadgeFactory(factory.mongoengine.MongoEngineFactory):
         class Meta:
-            model = models.Badge
+            model = Badge
 
         kind = FuzzyChoice(model.__badges__.keys())
 

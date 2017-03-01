@@ -23,6 +23,11 @@ export const user = getFor('user');
 export const reuse = getFor('reuse');
 
 /**
+ * Territory placeholder
+ */
+export const territory = `${config.theme_static}img/placeholder_territory_medium.png`;
+
+/**
  * Generic placeholder
  */
 export const generic = user;
@@ -33,5 +38,6 @@ export default {
     user,
     organization,
     reuse,
+    territory,
     generic,
 };

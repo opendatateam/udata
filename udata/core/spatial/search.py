@@ -9,10 +9,20 @@ from udata.i18n import language, _
 from udata.search import ModelSearchAdapter, register
 from udata.search.analysis import standard
 
-from .models import GeoZone
+from .models import GeoZone, admin_levels, ADMIN_LEVEL_MAX
 
 
 __all__ = ('GeoZoneSearch', )
+
+
+PONDERATION_STEP = 10000
+# Compute weight relative to 10⁸.
+# Only 12 countries + UE have emore population.
+# This is not significative in the ranking algorithm for countries.
+# Given ES indexes weight as an integer,
+# zones start to gain weight at MAX_POPULATION / PONDERATION_STEP
+# Here starts at 10k inhabitants
+MAX_POPULATION = 1E8
 
 
 def labels_for_zone(zone):
@@ -43,15 +53,23 @@ class GeoZoneSearch(ModelSearchAdapter):
                               payloads=True)
 
     @classmethod
-    def compute_weight(cls, population):
-        """Weight must be in the interval [0..2147483647]"""
-        if 0 <= population <= 2147483647:
-            return population
-        else:
-            if population < 0:  # country/eh population is -99.
-                return 0
-            else:  # World population is 6772425850.
-                return 2147483647
+    def compute_weight(cls, zone):
+        '''
+        Give a weight to the zone according to its administrative level first
+        and then its population.
+        Scoring is in [0 ..  ~(ADMIN_LEVEL_MAX * (10 + 1) * PONDERATION_STEP)]
+        '''
+        # Each level give a step
+        level = max(admin_levels.get(zone.level, ADMIN_LEVEL_MAX), 1)
+        level_weight = (ADMIN_LEVEL_MAX / level) * 10 * PONDERATION_STEP
+        # Population gives 0 < weight < PONDERATION_STEP
+        # to rank between level steps only
+        # NB: to be realy progressive, we should take the max population
+        # by administrative level but it would either to much time consumption
+        # or too much refactoring (storing the max population by level)
+        population = min(max(0, zone.population), MAX_POPULATION)
+        population_weight = (population / MAX_POPULATION) * PONDERATION_STEP
+        return int(level_weight + population_weight)
 
     @classmethod
     def is_indexable(cls, zone):
@@ -69,6 +87,6 @@ class GeoZoneSearch(ModelSearchAdapter):
                     'level': zone.level,
                     'keys': zone.keys,
                 },
-                'weight': cls.compute_weight(zone.population),
+                'weight': cls.compute_weight(zone),
             },
         }

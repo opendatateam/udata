@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from udata.core.metrics import Metric
 from udata.i18n import lazy_gettext as _
-from udata.models import Dataset, Reuse, User, Follow
+from udata.models import db, Dataset, Reuse, User, Follow
 
 from udata.core.followers.metrics import FollowersMetric
 from udata.core.followers.signals import on_follow, on_unfollow
@@ -44,7 +44,18 @@ class ReusesMetric(UserMetric):
     def get_value(self):
         return Reuse.objects(owner=self.user).count()
 
+
 ReusesMetric.connect(Reuse.on_create, Reuse.on_update)
+
+
+@db.Owned.on_owner_change.connect
+def update_downer_metrics(document, previous):
+    if not isinstance(previous, User):
+        return
+    if isinstance(document, Dataset):
+        DatasetsMetric(previous).trigger_update()
+    elif isinstance(document, Reuse):
+        ReusesMetric(previous).trigger_update()
 
 
 class UserFollowersMetric(FollowersMetric):

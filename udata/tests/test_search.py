@@ -20,7 +20,7 @@ from udata.models import db
 from udata.utils import multi_to_dict
 from udata.i18n import gettext as _, format_date
 from udata.tests import TestCase, DBTestMixin, SearchTestMixin
-from udata.utils import faker, unique_string
+from udata.utils import faker
 
 
 #############################################################################
@@ -55,14 +55,14 @@ class FakeWithStringId(Fake):
 
 
 class FakeFactory(MongoEngineFactory):
-    title = factory.LazyAttribute(lambda o: faker.sentence())
+    title = factory.Faker('sentence')
 
     class Meta:
         model = Fake
 
 
 class FakeWithStringIdFactory(FakeFactory):
-    id = factory.LazyAttribute(lambda o: unique_string())
+    id = factory.Faker('unique_string')
 
     class Meta:
         model = FakeWithStringId
@@ -86,6 +86,7 @@ class FakeSearch(search.ModelSearchAdapter):
         'title': 'title.raw',
         'description': 'description.raw',
     }
+
 
 RANGE_LABELS = {
     'none': _('Never reused'),

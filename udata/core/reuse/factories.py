@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 import factory
-from factory.mongoengine import MongoEngineFactory
+
 from factory.fuzzy import FuzzyChoice
 
-from udata import models, utils
 from udata.core.dataset.factories import DatasetFactory
 from udata.utils import faker
 
+from .models import Reuse, REUSE_TYPES
 
-class ReuseFactory(MongoEngineFactory):
+
+class ReuseFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
-        model = models.Reuse
+        model = Reuse
 
-    title = factory.LazyAttribute(lambda o: faker.sentence())
-    description = factory.LazyAttribute(lambda o: faker.text())
+    title = factory.Faker('sentence')
+    description = factory.Faker('text')
     url = factory.LazyAttribute(
-        lambda o: '/'.join([faker.url(), utils.unique_string()]))
-    type = FuzzyChoice(models.REUSE_TYPES.keys())
+        lambda o: '/'.join([faker.url(), faker.unique_string()]))
+    type = FuzzyChoice(REUSE_TYPES.keys())
 
 
 class VisibleReuseFactory(ReuseFactory):
