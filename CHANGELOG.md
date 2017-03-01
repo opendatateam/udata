@@ -12,6 +12,8 @@
   [#809](https://github.com/opendatateam/udata/pull/809)
 - Fix metric update after transfer
   [#810](https://github.com/opendatateam/udata/pull/810)
+- Improve spatial completion ponderation (spatial zones reindexation required)
+  [#811](https://github.com/opendatateam/udata/pull/811)
 
 ## 1.0.3 (2017-02-21)
 
