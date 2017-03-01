@@ -15,7 +15,7 @@ from flask import (
 )
 from flask_caching import Cache
 
-from flask_wtf.csrf import CsrfProtect
+from flask_wtf.csrf import CSRFProtect
 from flask_navigation import Navigation
 from speaklater import is_lazy_string
 from werkzeug.contrib.fixers import ProxyFix
@@ -27,7 +27,7 @@ ROOT_DIR = abspath(join(dirname(__file__)))
 log = logging.getLogger(__name__)
 
 cache = Cache()
-csrf = CsrfProtect()
+csrf = CSRFProtect()
 nav = Navigation()
 
 
