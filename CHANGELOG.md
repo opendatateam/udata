@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.0.4 (2017-03-01)
 
 - Fix badges trying to use API too early
   [#799](https://github.com/opendatateam/udata/pull/799)
