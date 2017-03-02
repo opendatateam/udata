@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Upgrade to Flask-Mongoengine 0.9.2, Flask-WTF 0.14.2, mongoengine 0.11.0.
 
 ## 1.0.4 (2017-03-01)
 

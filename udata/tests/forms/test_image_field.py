@@ -11,7 +11,6 @@ import flask_fs as fs
 from udata.models import db
 from udata.forms import Form
 from udata.forms.fields import ImageField
-from udata.frontend.helpers import placeholder
 from udata.tests import DBTestMixin, FSTestMixin, TestCase
 from udata.core.storages import tmp
 from udata.core.storages.views import blueprint

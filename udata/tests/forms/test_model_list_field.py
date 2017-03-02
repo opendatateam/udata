@@ -18,7 +18,7 @@ class Fake(db.Document):
     nested = db.ListField(db.ReferenceField(Nested))
 
 
-class NestedListField(fields.ModelList, fields.StringField):
+class NestedListField(fields.ModelList, fields.Field):
     model = Nested
 
 
