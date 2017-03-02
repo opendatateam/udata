@@ -9,8 +9,7 @@ from pkg_resources import resource_isdir, resource_listdir, resource_string
 from flask import current_app
 
 from pymongo.errors import PyMongoError, OperationFailure
-from flask_mongoengine.connection import get_db
-from flask_mongoengine.connection import DEFAULT_CONNECTION_NAME
+from mongoengine.connection import get_db
 
 from udata.commands import submanager, green, yellow, cyan, purple, red
 
@@ -72,13 +71,13 @@ DATE_FORMAT = '%Y-%m-%d %H:%M'
 
 def get_migration(plugin, filename):
     '''Get an existing migration record if exists'''
-    db = get_db(DEFAULT_CONNECTION_NAME)
+    db = get_db()
     return db.migrations.find_one({'plugin': plugin, 'filename': filename})
 
 
 def execute_migration(plugin, filename, script, dryrun=False):
     '''Execute and record a migration'''
-    db = get_db(DEFAULT_CONNECTION_NAME)
+    db = get_db()
     js = SCRIPT_WRAPPER.format(script)
     lines = script.splitlines()
     success = True
@@ -102,7 +101,7 @@ def execute_migration(plugin, filename, script, dryrun=False):
 
 def record_migration(plugin, filename, script, **kwargs):
     '''Only record a migration without applying it'''
-    db = get_db(DEFAULT_CONNECTION_NAME)
+    db = get_db()
     db.eval(RECORD_WRAPPER, plugin, filename, script)
     return True
 
@@ -172,7 +171,7 @@ def unrecord(plugin, filename):
     migration = get_migration(plugin, filename)
     if migration:
         log.info('Removing migration %s:%s', plugin, filename)
-        db = get_db(DEFAULT_CONNECTION_NAME)
+        db = get_db()
         db.eval(UNRECORD_WRAPPER, migration['_id'])
     else:
         log.error('Migration not found %s:%s', plugin, filename)
