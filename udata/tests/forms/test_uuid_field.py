@@ -35,7 +35,7 @@ class UUIDFieldTest(TestCase):
         Fake, FakeForm = self.factory()
 
         fake = Fake(id=uuid.uuid4())
-        form = FakeForm(None, fake)
+        form = FakeForm(None, obj=fake)
         self.assertEqual(form.id._value(), str(fake.id))
 
     def test_with_valid_uuid_string(self):

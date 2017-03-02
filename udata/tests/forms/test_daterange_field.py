@@ -38,7 +38,7 @@ class DateRangeFieldTest(TestCase):
                           end=date.today())
 
         fake = Fake(daterange=dr)
-        form = FakeForm(None, fake)
+        form = FakeForm(None, obj=fake)
         expected = ' - '.join([to_iso_date(dr.start), to_iso_date(dr.end)])
         self.assertEqual(form.daterange._value(), expected)
 

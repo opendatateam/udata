@@ -61,7 +61,7 @@ class PublishFieldTest(TestCase):
         user = UserFactory()
         ownable = Ownable(owner=user)
 
-        form = OwnableForm(None, ownable)
+        form = OwnableForm(None, obj=ownable)
         self.assertEqual(form.owner.data, user)
         self.assertIsNone(form.organization.data)
 
@@ -70,7 +70,7 @@ class PublishFieldTest(TestCase):
         org = OrganizationFactory()
         ownable = Ownable(organization=org)
 
-        form = OwnableForm(None, ownable)
+        form = OwnableForm(None, obj=ownable)
         self.assertIsNone(form.owner.data)
         self.assertEqual(form.organization.data, org)
 
@@ -82,7 +82,7 @@ class PublishFieldTest(TestCase):
 
         login_user(user)
 
-        form = OwnableForm(None, ownable)
+        form = OwnableForm(None, obj=ownable)
         self.assertIsNone(form.owner.data)
         self.assertEqual(form.organization.data, org)
 
@@ -219,7 +219,7 @@ class PublishFieldTest(TestCase):
 
         form = OwnableForm(MultiDict({
             'organization': str(neworg.id)
-        }), ownable)
+        }), obj=ownable)
 
         self.assertEqual(form.organization.data, neworg)
 
@@ -240,7 +240,7 @@ class PublishFieldTest(TestCase):
 
         form = OwnableForm(MultiDict({
             'organization': str(neworg.id)
-        }), ownable)
+        }), obj=ownable)
 
         self.assertEqual(form.organization.data, neworg)
 
@@ -292,7 +292,7 @@ class PublishFieldTest(TestCase):
 
         form = OwnableForm(MultiDict({
             'organization': str(org.id)
-        }), ownable)
+        }), obj=ownable)
 
         self.assertTrue(form.validate())
         self.assertEqual(form.errors, {})
@@ -311,7 +311,7 @@ class PublishFieldTest(TestCase):
 
         form = OwnableForm(MultiDict({
             'owner': str(user.id)
-        }), ownable)
+        }), obj=ownable)
 
         self.assertEqual(form.owner.data, user)
         self.assertEqual(form.organization.data, org)
@@ -336,7 +336,7 @@ class PublishFieldTest(TestCase):
 
         form = OwnableForm(MultiDict({
             'organization': str(org.id)
-        }), ownable)
+        }), obj=ownable)
 
         self.assertEqual(form.owner.data, user)
         self.assertEqual(form.organization.data, org)
@@ -357,7 +357,7 @@ class PublishFieldTest(TestCase):
         org = OrganizationFactory(members=[Member(user=user, role='editor')])
         ownable = Ownable(organization=org)
 
-        form = OwnableForm(MultiDict({}), ownable)
+        form = OwnableForm(MultiDict({}), obj=ownable)
 
         self.assertEqual(form.organization.data, org)
 
@@ -374,7 +374,7 @@ class PublishFieldTest(TestCase):
         user = UserFactory()
         ownable = Ownable(owner=user)
 
-        form = OwnableForm(MultiDict({}), ownable)
+        form = OwnableForm(MultiDict({}), obj=ownable)
 
         self.assertEqual(form.owner.data, user)
 

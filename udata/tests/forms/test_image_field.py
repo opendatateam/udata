@@ -65,7 +65,7 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
 
     def test_with_unbound_image(self):
         doc = self.D()
-        form = self.F(None, doc)
+        form = self.F(None, obj=doc)
         self.assertEqual(form.image.filename.data, None)
         self.assertEqual(form.image.bbox.data, None)
 
@@ -77,7 +77,7 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
         with open(self.data('image.png')) as img:
             doc.image.save(img, 'image.jpg')
         doc.save()
-        form = self.F(None, doc)
+        form = self.F(None, obj=doc)
         self.assertEqual(form.image.filename.data, 'image.jpg')
         self.assertEqual(form.image.bbox.data, None)
 
@@ -86,7 +86,7 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
         with open(self.data('image.png')) as img:
             doc.thumbnail.save(img, 'image.jpg', bbox=[10, 10, 100, 100])
         doc.save()
-        form = self.F(None, doc)
+        form = self.F(None, obj=doc)
         self.assertEqual(form.thumbnail.filename.data, 'image.jpg')
         self.assertEqual(form.thumbnail.bbox.data, [10, 10, 100, 100])
 

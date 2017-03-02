@@ -43,7 +43,7 @@ class CurrentUserFieldTest(TestCase):
         login_user(user)
         ownable = Ownable(owner=user)
 
-        form = OwnableForm(None, ownable)
+        form = OwnableForm(None, obj=ownable)
         self.assertEqual(form.owner.data, user)
 
     def test_with_valid_user_self(self):

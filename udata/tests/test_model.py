@@ -49,7 +49,7 @@ class DatetimedTester(db.Datetimed, db.Document):
     name = db.StringField()
 
 
-class AutoUUIDFieldTest(TestCase):
+class AutoUUIDFieldTest(DBTestMixin, TestCase):
     def test_auto_populate(self):
         '''AutoUUIDField should populate itself if not set'''
         obj = UUIDTester()
@@ -67,6 +67,19 @@ class AutoUUIDFieldTest(TestCase):
         self.assertIsNotNone(obj.id)
         self.assertIsInstance(obj.id, UUID)
         self.assertEqual(obj.pk, obj.id)
+
+    def test_query_as_uuid(self):
+        obj = UUIDAsIdTester.objects.create()
+        self.assertIsInstance(obj.id, UUID)
+        self.assertEqual(UUIDAsIdTester.objects.get(id=obj.id), obj)
+
+    def test_query_as_text(self):
+        obj = UUIDAsIdTester.objects.create()
+        self.assertEqual(UUIDAsIdTester.objects.get(id=str(obj.id)), obj)
+
+    def test_always_an_uuid(self):
+        obj = UUIDTester(uuid=str(uuid4()))
+        self.assertIsInstance(obj.uuid, UUID)
 
 
 class SlugFieldTest(DBTestMixin, TestCase):

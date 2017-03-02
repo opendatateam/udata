@@ -23,8 +23,6 @@ from udata.i18n import lazy_gettext as _
 from udata import tags
 from udata.utils import to_iso_date, get_by
 
-# _ = lambda s: s
-
 
 class FieldHelper(object):
     def __init__(self, *args, **kwargs):
@@ -96,14 +94,13 @@ class RolesField(FieldHelper, fields.StringField):
 
 
 class DateTimeField(Field, fields.DateTimeField):
-
     def process_formdata(self, valuelist):
         if valuelist:
             dt = valuelist[0]
             self.data = parse(dt) if isinstance(dt, basestring) else dt
 
 
-class UUIDField(Field, fields.HiddenField):
+class UUIDField(HiddenField):
     def process_formdata(self, valuelist):
         if valuelist:
             try:
