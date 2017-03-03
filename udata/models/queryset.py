@@ -39,8 +39,8 @@ class DBPaginator(Paginable):
 
 
 class UDataQuerySet(BaseQuerySet):
-    def paginate(self, page, per_page, error_out=True):
-        result = super(UDataQuerySet, self).paginate(page, per_page, error_out)
+    def paginate(self, page, per_page, **kwargs):
+        result = super(UDataQuerySet, self).paginate(page, per_page)
         return DBPaginator(result)
 
     def bulk_list(self, ids):

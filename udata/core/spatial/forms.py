@@ -6,7 +6,7 @@ import json
 import logging
 
 from udata.forms import widgets, ModelForm, validators
-from udata.forms.fields import ModelList, StringField, SelectField, FormField
+from udata.forms.fields import ModelList, Field, SelectField, FormField
 from udata.i18n import lazy_gettext as _
 
 from .models import GeoZone, SpatialCoverage, spatial_granularities
@@ -27,12 +27,12 @@ class ZonesAutocompleter(widgets.TextInput):
         return super(ZonesAutocompleter, self).__call__(field, **kwargs)
 
 
-class ZonesField(ModelList, StringField):
+class ZonesField(ModelList, Field):
     model = GeoZone
     widget = ZonesAutocompleter()
 
 
-class GeomField(StringField):
+class GeomField(Field):
     def process_formdata(self, valuelist):
         if valuelist:
             value = valuelist[0]

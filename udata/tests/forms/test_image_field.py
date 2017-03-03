@@ -11,7 +11,6 @@ import flask_fs as fs
 from udata.models import db
 from udata.forms import Form
 from udata.forms.fields import ImageField
-from udata.frontend.helpers import placeholder
 from udata.tests import DBTestMixin, FSTestMixin, TestCase
 from udata.core.storages import tmp
 from udata.core.storages.views import blueprint
@@ -65,7 +64,7 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
 
     def test_with_unbound_image(self):
         doc = self.D()
-        form = self.F(None, doc)
+        form = self.F(None, obj=doc)
         self.assertEqual(form.image.filename.data, None)
         self.assertEqual(form.image.bbox.data, None)
 
@@ -77,7 +76,7 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
         with open(self.data('image.png')) as img:
             doc.image.save(img, 'image.jpg')
         doc.save()
-        form = self.F(None, doc)
+        form = self.F(None, obj=doc)
         self.assertEqual(form.image.filename.data, 'image.jpg')
         self.assertEqual(form.image.bbox.data, None)
 
@@ -86,7 +85,7 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
         with open(self.data('image.png')) as img:
             doc.thumbnail.save(img, 'image.jpg', bbox=[10, 10, 100, 100])
         doc.save()
-        form = self.F(None, doc)
+        form = self.F(None, obj=doc)
         self.assertEqual(form.thumbnail.filename.data, 'image.jpg')
         self.assertEqual(form.thumbnail.bbox.data, [10, 10, 100, 100])
 

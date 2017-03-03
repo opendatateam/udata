@@ -45,7 +45,7 @@ class SpatialCoverageFieldTest(TestCase):
         geom = faker.multipolygon()
 
         fake = Fake(spatial=SpatialCoverage(geom=geom))
-        form = FakeForm(None, fake)
+        form = FakeForm(None, obj=fake)
         self.assertEqual(form.spatial.geom.data, geom)
 
     def test_initial_zones(self):
@@ -53,7 +53,7 @@ class SpatialCoverageFieldTest(TestCase):
         zones = [GeoZoneFactory() for _ in range(3)]
 
         fake = Fake(spatial=SpatialCoverage(zones=zones))
-        form = FakeForm(None, fake)
+        form = FakeForm(None, obj=fake)
         self.assertEqual(
             form.spatial.zones._value(), ','.join([z.id for z in zones]))
 
@@ -224,7 +224,7 @@ class SpatialCoverageFieldTest(TestCase):
         zone = GeoZoneFactory()
         data = MultiDict({'spatial-zones': zone.id})
 
-        form = FakeForm(data, fake)
+        form = FakeForm(data, obj=fake)
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -245,7 +245,7 @@ class SpatialCoverageFieldTest(TestCase):
 
         data = MultiDict({'spatial-granularity': granularity})
 
-        form = FakeForm(data, fake)
+        form = FakeForm(data, obj=fake)
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -279,7 +279,7 @@ class SpatialCoverageFieldTest(TestCase):
         form = FakeForm(MultiDict({
             'spatial-zones': str(zone.id),
             'spatial-granularity': faker.spatial_granularity()
-        }), fake)
+        }), obj=fake)
 
         form.validate()
         self.assertEqual(form.errors, {})
