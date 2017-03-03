@@ -70,14 +70,14 @@ class SuggestZonesAPI(API):
 class ZonesAPI(API):
     @api.doc('spatial_zones',
              params={'ids': 'A zone identifiers list (comma separated)'})
-    @api.cache_page(check_serverside=False, key_pattern='zones%s',
-                    client_timeout=ONE_DAY, server_timeout=ONE_WEEK,
-                    make_response=api.make_response)
+    @api.cache(check_serverside=False, key_pattern='zones%s',
+               client_timeout=ONE_DAY, server_timeout=ONE_WEEK,
+               make_response=api.make_response)
     @api.marshal_with(feature_collection_fields)
     def get(self, ids):
         '''Fetch a zone list as GeoJSON'''
         zones = GeoZone.objects.in_bulk(ids)
-        zones = [zones[id_] for id_ in ids if id_ in zones]
+        zones = [zones[id] for id in ids if id in zones]
         return {
             'type': 'FeatureCollection',
             'features': [z.toGeoJSON() for z in zones],

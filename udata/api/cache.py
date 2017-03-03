@@ -19,9 +19,9 @@ ONE_MONTH = ONE_DAY * 30
 ONE_YEAR = ONE_DAY * 365
 
 
-def cache_page(class_instance=None, check_serverside=True, personal=False,
-               client_timeout=ZERO, server_timeout=ONE_HOUR,
-               key_pattern='cache%s', make_response=flask_make_response):
+def cache_response(class_instance=None, check_serverside=True, personal=False,
+                   client_timeout=ZERO, server_timeout=ONE_HOUR,
+                   key_pattern='cache%s', make_response=flask_make_response):
     """An attempt to make the ultimate Flask cache decorator.
 
     Differs from the official Flask Caching Decorator
@@ -29,38 +29,40 @@ def cache_page(class_instance=None, check_serverside=True, personal=False,
     by dealing with appropriated headers for server AND client-side caches.
 
     Key points:
-    * Generates the cache key using the full path (using the query string).
-    * Uses `Cache-Control`, `ETag` and `Last-Modified` headers.
-    * Respects browser's hard-refresh.
+    - Generates the cache key using the full path (using the query string).
+    - Uses `Cache-Control`, `ETag` and `Last-Modified` headers.
+    - Respects browser's hard-refresh.
 
     Parameters:
-    * `class_instance`: allows the decorator to be applied on a class method.
-    * `check_serverside`: either the client verifies with the server if
-      its cached versions are still valid or not.
-    * `personal`: set to `True` if the response contains sensitive
-      informations only pertinent for a given user.
-    * `client_timeout`: time in seconds before the client considers the
-      cache as being invalid.
-    * `server_timeout`: time in seconds before the server considers the
-      cache as being invalid.
-    * `key_pattern`: you can customize the cache key, it can be either
-      a callable or a string. If it contains `%s`, the placeholder will
-      be replaced by the full path (including query string).
-    * `make_response`: a way to override the default Flask way of
-      creating a response object.
+    :param instance class_instance: allows the decorator to be applied
+        on a class method.
+    :param bool check_serverside: either the client verifies with the
+        server if its cached versions are still valid or not.
+    :param bool personal: set to `True` if the response contains
+        sensitive informations only pertinent for a given user.
+    :param int client_timeout: time in seconds before the client
+        considers the cache as being invalid.
+    :param int server_timeout: time in seconds before the server
+        considers the cache as being invalid.
+    :param string key_pattern: you can customize the cache key, it can
+        be either a callable or a string. If it contains `%s`, the
+        placeholder will be replaced by the full path
+        (including query string).
+    :param function make_response: a way to override the default Flask
+        way of creating a response object.
 
     Inspirations:
-    * http://codereview.stackexchange.com/questions/147038/↩︎
+    - http://codereview.stackexchange.com/questions/147038/↩︎
       improving-the-flask-cache-decorator
-    * https://gist.github.com/glenrobertson/954da3acec84606885f5
+    - https://gist.github.com/glenrobertson/954da3acec84606885f5
 
     Resources:
-    * https://jakearchibald.com/2016/caching-best-practices/
-    * https://developers.google.com/web/fundamentals/performance/↩︎
+    - https://jakearchibald.com/2016/caching-best-practices/
+    - https://developers.google.com/web/fundamentals/performance/↩︎
       optimizing-content-efficiency/http-caching
 
     Image:
-    * https://developers.google.com/web/fundamentals/performance/↩︎
+    - https://developers.google.com/web/fundamentals/performance/↩︎
       optimizing-content-efficiency/images/http-cache-decision-tree.png
     """
     def _generate_cache_control():

@@ -135,9 +135,9 @@ class DiscussionsAPI(API):
     Base class for a list of discussions.
     '''
     @api.doc('list_discussions', parser=parser)
-    @api.cache_page(check_serverside=False, key_pattern='discussions%s',
-                    client_timeout=ONE_DAY, server_timeout=ONE_WEEK,
-                    make_response=api.make_response)
+    @api.cache(check_serverside=False, key_pattern='discussions%s',
+               client_timeout=ONE_DAY, server_timeout=ONE_WEEK,
+               make_response=api.make_response)
     @api.marshal_with(discussion_page_fields)
     def get(self):
         '''List all Discussions'''

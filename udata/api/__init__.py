@@ -12,7 +12,7 @@ from flask import (
 )
 from flask_restplus import Api, Resource, cors
 
-from udata import search, theme, tracking  # NOQA: search must be imported.
+from udata import search, theme, tracking  # noqa: search must be imported.
 from udata.app import csrf
 from udata.i18n import I18nBlueprint
 from udata.auth import (
@@ -22,7 +22,7 @@ from udata.core.user.models import User
 from udata.sitemap import sitemap
 
 from . import fields, oauth2
-from .cache import cache_page
+from .cache import cache_response
 from .signals import on_api_call
 
 
@@ -130,7 +130,8 @@ class UDataApi(Api):
                             help='The page size to fetch')
         return parser
 
-    cache_page = cache_page
+    cache = cache_response
+
 
 api = UDataApi(
     apiv1,
