@@ -1,26 +1,23 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 import factory
-from factory.mongoengine import MongoEngineFactory
 
-from udata import models
-from udata.utils import faker
+from .models import User, Role
 
 
-class UserFactory(MongoEngineFactory):
+class UserFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
-        model = models.User
+        model = User
 
-    first_name = factory.LazyAttribute(lambda o: faker.first_name())
-    last_name = factory.LazyAttribute(lambda o: faker.last_name())
-    email = factory.LazyAttribute(lambda o: faker.email())
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')
+    email = factory.Faker('email')
     active = True
 
 
 class AdminFactory(UserFactory):
     @factory.lazy_attribute
     def roles(self):
-        admin_role, _ = models.Role.objects.get_or_create(name='admin')
+        admin_role, _ = Role.objects.get_or_create(name='admin')
         return [admin_role]

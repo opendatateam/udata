@@ -3,24 +3,21 @@ from __future__ import unicode_literals
 
 import factory
 
-from flask.signals import Namespace
-
-from factory.mongoengine import MongoEngineFactory
 from factory.fuzzy import FuzzyChoice
+
+from flask.signals import Namespace
 
 from udata.core.dataset.factories import DatasetFactory
 
 from .. import backends
 from ..models import HarvestSource, HarvestJob
 
-from udata.utils import faker as fake
-
 
 def dtfactory(start, end):
     return factory.Faker('date_time_between', start_date=start, end_date=end)
 
 
-class HarvestSourceFactory(MongoEngineFactory):
+class HarvestSourceFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
         model = HarvestSource
 
@@ -29,7 +26,7 @@ class HarvestSourceFactory(MongoEngineFactory):
     description = factory.Faker('text')
 
 
-class HarvestJobFactory(MongoEngineFactory):
+class HarvestJobFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
         model = HarvestJob
 

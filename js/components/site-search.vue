@@ -47,6 +47,7 @@
 
 <script>
 import { Cache } from 'cache';
+import placeholders from 'helpers/placeholders';
 
 function group(id, name, template) {
     return {id, name,
@@ -79,6 +80,7 @@ export default {
                 group('territory', this._('Territories'), 'territory'),
             ],
             minLength: 2,
+            placeholders: placeholders,
         }
     },
     computed: {
@@ -94,14 +96,14 @@ export default {
     },
     partials: {
         default: `<div class="logo">
-            <img :src="item.image_url" class="avatar" width="30" height="30" alt="">
+            <img :src="item.image_url || placeholders.generic" class="avatar" width="30" height="30" alt="">
             </div>
             <p v-html="item.title | highlight query"></p>`,
-        organization: `<div class="logo"><img :src="item.image_url" class="avatar" width="30" height="30" alt=""></div>
+        organization: `<div class="logo"><img :src="item.image_url || placeholders.organization" class="avatar" width="30" height="30" alt=""></div>
             <p v-html="item.name | highlight query"></p>
             <small v-if="item.acronym" v-html="item.acronym | highlight query"></small>`,
         territory: `<div class="logo">
-            <img :src="item.image_url" class="avatar" width="30" height="30" alt="">
+            <img :src="item.image_url || placeholders.territory" class="avatar" width="30" height="30" alt="">
             </div>
             <p v-html="item.title | highlight query"></p>
             <small v-if="item.parent">{{ item.parent }}</small>`,

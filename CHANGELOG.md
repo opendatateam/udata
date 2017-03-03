@@ -4,10 +4,26 @@
 
 - Nothing yet
 
+## 1.0.4 (2017-03-01)
+
+- Fix badges trying to use API too early
+  [#799](https://github.com/opendatateam/udata/pull/799)
+- Some minor tuning on generic references
+  [#801](https://github.com/opendatateam/udata/pull/801)
+- Cleanup factories
+  [#808](https://github.com/opendatateam/udata/pull/808)
+- Fix user default metrics not being set [migration]
+  [#809](https://github.com/opendatateam/udata/pull/809)
+- Fix metric update after transfer
+  [#810](https://github.com/opendatateam/udata/pull/810)
+- Improve spatial completion ponderation (spatial zones reindexation required)
+  [#811](https://github.com/opendatateam/udata/pull/811)
+
 ## 1.0.3 (2017-02-21)
 
 - Fix JavaScript locales handling [#786](https://github.com/opendatateam/udata/pull/786)
 - Optimize images sizes for territory placeholders [#788](https://github.com/opendatateam/udata/issues/788)
+- Restore placeholders in search suggestions, fix [#790](https://github.com/opendatateam/udata/issues/790)
 - Fix share popover in production build [#793](https://github.com/opendatateam/udata/pull/793)
 
 ## 1.0.2 (2017-02-20)
