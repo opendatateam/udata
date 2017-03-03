@@ -4,6 +4,9 @@
 
 - Upgrade to Flask-Mongoengine 0.9.2, Flask-WTF 0.14.2, mongoengine 0.11.0.
   [#812](https://github.com/opendatateam/udata/pull/812)
+- Upgrade to Flask-Login 0.4.0 and switch from Flask-Security to the latest
+  [Flask-Security-Fork](https://pypi.python.org/pypi/Flask-Security-Fork)
+  [#813](https://github.com/opendatateam/udata/pull/813)
 
 ## 1.0.4 (2017-03-01)
 
