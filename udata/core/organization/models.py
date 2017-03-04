@@ -115,7 +115,6 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     deleted = db.DateTimeField()
 
     meta = {
-        'allow_inheritance': True,
         'indexes': ['-created_at', 'slug'],
         'ordering': ['-created_at'],
         'queryset_class': OrganizationQuerySet,

@@ -127,7 +127,7 @@ class HarvestSource(db.Owned, db.Document):
         'indexes': [
             '-created_at',
             'slug',
-            'deleted',
+            ('deleted', '-created_at'),
         ] + db.Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'queryset_class': HarvestSourceQuerySet,
@@ -144,3 +144,12 @@ class HarvestJob(db.Document):
     errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
     items = db.ListField(db.EmbeddedDocumentField(HarvestItem))
     source = db.ReferenceField(HarvestSource, reverse_delete_rule=db.NULLIFY)
+
+    meta = {
+        'indexes': [
+            '-created',
+            'source',
+            ('source', '-created')
+        ],
+        'ordering': ['-created'],
+    }
