@@ -37,7 +37,7 @@ class HarvestAPITest(APITestCase):
 
         response = self.get(url_for('api.harvest_sources'))
         self.assert200(response)
-        self.assertEqual(len(response.json), len(sources))
+        self.assertEqual(len(response.json['data']), len(sources))
 
     def test_list_sources_for_owner(self):
         owner = UserFactory()
@@ -48,7 +48,7 @@ class HarvestAPITest(APITestCase):
         response = self.get(url)
         self.assert200(response)
 
-        self.assertEqual(len(response.json), len(sources))
+        self.assertEqual(len(response.json['data']), len(sources))
 
     def test_list_sources_for_org(self):
         org = OrganizationFactory()
@@ -58,7 +58,7 @@ class HarvestAPITest(APITestCase):
         response = self.get(url_for('api.harvest_sources', owner=str(org.id)))
         self.assert200(response)
 
-        self.assertEqual(len(response.json), len(sources))
+        self.assertEqual(len(response.json['data']), len(sources))
 
     def test_create_source_with_owner(self):
         '''It should create and attach a new source to an owner'''

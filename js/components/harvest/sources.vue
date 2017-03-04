@@ -10,22 +10,20 @@
 import {Model} from 'models/base';
 import HarvestSources from 'models/harvest/sources';
 import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
+import Datatable from 'components/datatable/widget.vue';
 
-const MASK = ['id', 'name', 'owner', 'last_job{status}', 'organization'];
+const MASK = ['id', 'name', 'owner', 'last_job{status,ended}', 'organization'];
 
 export default {
     MASK,
-    name: 'harvesters-widget',
-    components: {
-        datatable: require('components/datatable/widget.vue')
-    },
+    components: {Datatable},
     props: {
         owner: {
             type: Model,
-            default: function() {return {};}
+            default: () => {}
         }
     },
-    data: function() {
+    data() {
         return {
             title: this._('Harvesters'),
             sources: new HarvestSources({mask: MASK}),
@@ -41,7 +39,7 @@ export default {
                 sort: 'last_job.status',
                 type: 'label',
                 width: 100,
-                label_type: function(status) {
+                label_type(status) {
                     if (!status) return 'default';
                     return STATUS_CLASSES[status];
                 },
@@ -49,6 +47,13 @@ export default {
                     if (!status) return this._('No job yet');
                     return STATUS_I18N[status];
                 }
+            }, {
+                label: this._('Last run'),
+                key: 'last_job.ended',
+                sort: 'last_job.ended',
+                align: 'left',
+                type: 'timeago',
+                width: 120
             }]
         };
     },
@@ -57,7 +62,7 @@ export default {
             this.$go('/harvester/' + harvester.id + '/');
         }
     },
-    ready: function() {
+    ready() {
         if (this.owner instanceof Model) {
             // Only fetch if binding occured and object is already fetched, else wait for watch
             if (this.owner.id) {

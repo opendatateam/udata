@@ -1,8 +1,7 @@
-import {List} from 'models/base';
-import log from 'logger';
+import {ModelPage} from 'models/base';
 
 
-export default class HarvestSources extends List {
+export default class HarvestSourcePage extends ModelPage {
     constructor(options) {
         super(options);
         this.$options.ns = 'harvest';
