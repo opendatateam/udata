@@ -11,17 +11,15 @@
 </template>
 
 <script>
-import $ from 'jquery';
 import placeholders from 'helpers/placeholders';
 
 export default {
-    name: 'datatable-cell-avatar',
-    attached: function() {
+    attached() {
         // Dirty hack to fix class on field/td iteration
-        $(this.$el).closest('td').addClass('avatar-cell');
+        this.$el.closest('td').classList.add('avatar-cell');
     },
     computed: {
-        src: function() {
+        src() {
             if (this.value) {
                 return this.value;
             } else if (this.field.placeholder) {
