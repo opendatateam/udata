@@ -1,8 +1,21 @@
 import {Model} from 'models/base';
+import {_} from 'i18n';
 import log from 'logger';
 
+export const VALIDATION_STATUS_CLASSES = {
+    'pending': 'default',
+    'accepted': 'success',
+    'refused': 'danger',
+};
 
-export default class HarvestSource extends Model {
+export const VALIDATION_STATUS_I18N = {
+    'pending': _('Pending'),
+    'accepted': _('Accepted'),
+    'refused': _('Refused'),
+};
+
+
+export class HarvestSource extends Model {
     fetch(ident) {
         ident = ident || this.id || this.slug;
         this.loading = true;
@@ -34,3 +47,5 @@ export default class HarvestSource extends Model {
         }, on_success, on_error);
     }
 }
+
+export default HarvestSource;

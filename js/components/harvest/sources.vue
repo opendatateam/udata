@@ -9,10 +9,12 @@
 <script>
 import {Model} from 'models/base';
 import HarvestSources from 'models/harvest/sources';
+import {VALIDATION_STATUS_I18N, VALIDATION_STATUS_CLASSES} from 'models/harvest/source';
 import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
 import Datatable from 'components/datatable/widget.vue';
+import placeholders from 'helpers/placeholders';
 
-const MASK = ['id', 'name', 'owner', 'last_job{status,ended}', 'organization'];
+const MASK = ['id', 'name', 'owner', 'last_job{status,ended}', 'organization', 'backend', 'validation{state}'];
 
 export default {
     MASK,
@@ -20,46 +22,98 @@ export default {
     props: {
         owner: {
             type: Model,
-            default: () => {}
+            default: () => {id: null}
         }
     },
     data() {
         return {
             title: this._('Harvesters'),
             sources: new HarvestSources({mask: MASK}),
-            fields: [{
+        };
+    },
+    computed: {
+        fields() {
+            const fields = [];
+            // Only display owner if not filtered
+            if (!(this.owner instanceof Model)) {
+                fields.push({
+                    key(item) {
+                        if (item.organization) {
+                            return item.organization.logo || placeholders.organization;
+                        } else {
+                            return item.owner.avatar || placeholders.user;
+                        }
+                    },
+                    type: 'avatar',
+                    width: 30,
+                });
+            }
+            fields.push({
                 label: this._('Name'),
                 key: 'name',
-                sort: 'name',
                 align: 'left',
                 type: 'text'
+            });
+            // Only display owner if not filtered
+            if (!(this.owner instanceof Model)) {
+                fields.push({
+                    label: this._('Owner'),
+                    key(item) {
+                        if (item.organization) {
+                            return item.organization.name;
+                        } else {
+                            return `${item.owner.first_name} ${item.owner.last_name}`;
+                        }
+                    },
+                    align: 'left',
+                    type: 'text',
+                    width: 250
+                });
+            }
+            fields.push({
+                label: this._('Backend'),
+                key: 'backend',
+                align: 'left',
+                type: 'text',
+                width: 100
             }, {
                 label: this._('Status'),
-                key: 'last_job.status',
-                sort: 'last_job.status',
+                key(item) {
+                    if (item.validation.state == 'pending') {
+                        return 'validation';
+                    } else if (item.validation.state == 'refused') {
+                        return 'refused';
+                    } else {
+                        return item.last_job.status;
+                    }
+                },
                 type: 'label',
                 width: 100,
                 label_type(status) {
                     if (!status) return 'default';
-                    return STATUS_CLASSES[status];
+                    else if (status == 'validation') return 'default';
+                    else if (status == 'refused') return 'danger';
+                    else return STATUS_CLASSES[status];
                 },
                 label_func: (status) => {
                     if (!status) return this._('No job yet');
+                    else if (status == 'validation') return this._('Validation');
+                    else if (status == 'refused') return this._('Refused');
                     return STATUS_I18N[status];
                 }
             }, {
                 label: this._('Last run'),
                 key: 'last_job.ended',
-                sort: 'last_job.ended',
                 align: 'left',
                 type: 'timeago',
                 width: 120
-            }]
-        };
+            });
+            return fields;
+        }
     },
     events: {
         'datatable:item:click': function(harvester) {
-            this.$go('/harvester/' + harvester.id + '/');
+            this.$go({name: 'harvester', params: {oid: harvester.id}});
         }
     },
     ready() {
