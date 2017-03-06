@@ -39,6 +39,13 @@
     - allows use of hot components reloading.
 - Pure Vue.js modals. Fix the default membership role. Added contribute modal.
   [#873](https://github.com/opendatateam/udata/pull/873)
+- Lot of fixes and improvements on Harvest admin UI
+  [#817](https://github.com/opendatateam/udata/pull/817):
+    - harvester edition fixed (and missing API added)
+    - harvester deletion fixed
+    - harvester listing is now paginated
+    - more detailed harvesters widgets
+    - ensure harvest source are owned by a user or an organization, not both [migration]
 
 ## 1.0.9 (2017-04-23)
 
