@@ -114,7 +114,7 @@ def resource_redirect(id):
         resource = get_by(dataset.resources, 'id', id)
     else:
         resource = CommunityResource.objects(id=id).first()
-    return redirect(resource.url) if resource else abort(404)
+    return redirect(resource.url.strip()) if resource else abort(404)
 
 
 @sitemap.register_generator
