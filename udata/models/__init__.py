@@ -16,6 +16,7 @@ from .taglist_field import TagListField
 from .datetime_fields import DateField, DateRange, Datetimed
 from .extras_fields import ExtrasField, Extra
 from .slug_fields import SlugField
+from .url_field import URLField
 from .uuid_fields import AutoUUIDField
 from .owned import Owned, OwnedQuerySet
 from .queryset import UDataQuerySet
@@ -43,6 +44,7 @@ class UDataMongoEngine(MongoEngine):
         self.BaseDocumentMetaclass = TopLevelDocumentMetaclass
         self.FileField = FileField
         self.ImageField = ImageField
+        self.URLField = URLField
         self.ValidationError = ValidationError
         self.ObjectId = ObjectId
         self.DBRef = DBRef

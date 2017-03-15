@@ -49,6 +49,10 @@ class DatetimedTester(db.Datetimed, db.Document):
     name = db.StringField()
 
 
+class URLTester(db.Document):
+    url = db.URLField()
+
+
 class AutoUUIDFieldTest(DBTestMixin, TestCase):
     def test_auto_populate(self):
         '''AutoUUIDField should populate itself if not set'''
@@ -202,6 +206,26 @@ class DateFieldTest(DBTestMixin, TestCase):
         obj = DateTester(a_date='invalid')
         with self.assertRaises(ValidationError):
             obj.save()
+
+
+class URLFieldTest(DBTestMixin, TestCase):
+    def test_none_if_empty_and_not_required(self):
+        obj = URLTester()
+        self.assertIsNone(obj.url)
+        obj.save()
+        obj.reload()
+        self.assertIsNone(obj.url)
+
+    def test_not_valid(self):
+        obj = URLTester(url='invalid')
+        with self.assertRaises(ValidationError):
+            obj.save()
+
+    def test_strip_spaces(self):
+        url = '  https://www.somewhere.com/with/spaces/   '
+        obj = URLTester(url=url)
+        obj.save().reload()
+        self.assertEqual(obj.url, url.strip())
 
 
 class DatetimedTest(DBTestMixin, TestCase):
