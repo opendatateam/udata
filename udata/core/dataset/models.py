@@ -130,7 +130,7 @@ class ResourceMixin(object):
     description = db.StringField()
     filetype = db.StringField(
         choices=RESOURCE_TYPES.keys(), default='file', required=True)
-    url = db.StringField()
+    url = db.URLField(required=True)
     urlhash = db.StringField()
     checksum = db.EmbeddedDocumentField(Checksum)
     format = db.StringField()

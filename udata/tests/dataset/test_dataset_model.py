@@ -11,7 +11,6 @@ from udata.core.dataset.factories import (
 from udata.core.discussions.factories import (
     MessageDiscussionFactory, DiscussionFactory
 )
-from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 
 from .. import TestCase, DBTestMixin
@@ -221,3 +220,18 @@ class DatasetModelTest(TestCase, DBTestMixin):
         with self.assert_emit(Dataset.on_delete):
             dataset.deleted = datetime.now()
             dataset.save()
+
+
+class ResourceModelTest(TestCase, DBTestMixin):
+    def test_url_is_required(self):
+        with self.assertRaises(db.ValidationError):
+            DatasetFactory(resources=[ResourceFactory(url=None)])
+
+    def test_bad_url(self):
+        with self.assertRaises(db.ValidationError):
+            DatasetFactory(resources=[ResourceFactory(url='not-an-url')])
+
+    def test_url_is_stripped(self):
+        url = 'http://www.somewhere.com/with/spaces/   '
+        dataset = DatasetFactory(resources=[ResourceFactory(url=url)])
+        self.assertEqual(dataset.resources[0].url, url.strip())
