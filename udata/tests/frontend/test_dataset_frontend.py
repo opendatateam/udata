@@ -210,6 +210,16 @@ class DatasetBlueprintTest(FrontTestCase):
                                     id=resource.id))
         self.assert404(response)
 
+    def test_resource_latest_url_stripped(self):
+        '''It should return strip extras spaces from the resource URL'''
+        url = 'http://www.somewhere.com/path/with/spaces/   '
+        resource = ResourceFactory(url=url)
+        DatasetFactory(resources=[resource])
+        response = self.get(url_for('datasets.resource',
+                                    id=resource.id))
+        self.assertStatus(response, 302)
+        self.assertEqual(response.location, url.strip())
+
     def test_recent_feed(self):
         datasets = [DatasetFactory(
             resources=[ResourceFactory()]) for i in range(3)]
