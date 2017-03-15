@@ -135,6 +135,11 @@ class URLField(EmptyNone, Field):
                 raise validators.ValidationError(_('Invalid URL'))
         return True
 
+    def process_formdata(self, valuelist):
+        super(URLField, self).process_formdata(valuelist)
+        if self.data:
+            self.data = self.data.strip()
+
 
 class UploadableURLField(URLField):
     def __init__(self, *args, **kwargs):
