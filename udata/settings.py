@@ -145,6 +145,9 @@ class Defaults(object):
 
     DELETE_ME = True
 
+    # Optimize uploaded images
+    FS_IMAGES_OPTIMIZE = True
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
