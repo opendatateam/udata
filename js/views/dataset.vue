@@ -79,32 +79,8 @@ import ReuseList from 'components/reuse/list.vue';
 import SmallBox from 'components/containers/small-box.vue';
 
 export default {
-    name: 'DatasetView',
     mixins: [DatasetFilters],
-    data: function() {
-        var actions = [{
-                label: this._('Edit'),
-                icon: 'edit',
-                method: this.edit
-            }, {
-                label: this._('Transfer'),
-                icon: 'send',
-                method: this.transfer_request
-            }, {
-                label: this._('Delete'),
-                icon: 'trash',
-                method: this.confirm_delete
-            }];
-
-        if (this.$root.me.is_admin) {
-            actions.push({divider: true});
-            actions.push({
-                label: this._('Badges'),
-                icon: 'bookmark',
-                method: this.setBadges
-            });
-        }
-
+    data() {
         return {
             dataset: new Dataset({mask: '*'}),
             metrics: new Metrics({query: {
@@ -116,7 +92,6 @@ export default {
             issues: new Issues({query: {sort: '-created', page_size: 10}, mask: IssueList.MASK}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}, mask: DiscussionList.MASK}),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}, mask: CommunityList.MASK}),
-            actions: actions,
             badges:  [],
             y: [{
                 id: 'views',
@@ -136,6 +111,31 @@ export default {
         };
     },
     computed: {
+        actions() {
+            const actions = [{
+                    label: this._('Edit'),
+                    icon: 'edit',
+                    method: this.edit
+                }, {
+                    label: this._('Transfer'),
+                    icon: 'send',
+                    method: this.transfer_request
+                }, {
+                    label: this._('Delete'),
+                    icon: 'trash',
+                    method: this.confirm_delete
+                }];
+
+            if (this.$root.me.is_admin) {
+                actions.push({divider: true});
+                actions.push({
+                    label: this._('Badges'),
+                    icon: 'bookmark',
+                    method: this.setBadges
+                });
+            }
+            return actions;
+        },
         boxes() {
             if (!this.dataset.metrics) {
                 return [];

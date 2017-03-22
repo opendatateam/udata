@@ -54,29 +54,6 @@ const MASK = `datasets{${mask(DatasetCards.MASK)}},*`;
 export default {
     components: {SmallBox, Chart, ReuseDetails, FollowerList, DiscussionList, IssueList, DatasetCards, Layout},
     data() {
-        const actions = [{
-                label: this._('Edit'),
-                icon: 'edit',
-                method: this.edit
-            }, {
-                label: this._('Transfer'),
-                icon: 'send',
-                method: this.transfer_request
-            }, {
-                label: this._('Delete'),
-                icon: 'trash',
-                method: this.confirm_delete
-            }];
-
-        if (this.$root.me.is_admin) {
-            actions.push({divider: true});
-            actions.push({
-                label: this._('Badges'),
-                icon: 'bookmark',
-                method: this.setBadges
-            });
-        }
-
         return {
             reuse: new Reuse({mask: MASK}),
             metrics: new Metrics({query: {
@@ -86,7 +63,6 @@ export default {
             followers: new Followers({ns: 'reuses', query: {page_size: 10}}),
             issues: new Issues({query: {sort: '-created', page_size: 10}, mask: IssueList.MASK}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}, mask: DiscussionList.MASK}),
-            actions: actions,
             badges: [],
             y: [{
                 id: 'views',
@@ -98,6 +74,31 @@ export default {
         };
     },
     computed: {
+        actions() {
+            const actions = [{
+                    label: this._('Edit'),
+                    icon: 'edit',
+                    method: this.edit
+                }, {
+                    label: this._('Transfer'),
+                    icon: 'send',
+                    method: this.transfer_request
+                }, {
+                    label: this._('Delete'),
+                    icon: 'trash',
+                    method: this.confirm_delete
+                }];
+
+            if (this.$root.me.is_admin) {
+                actions.push({divider: true});
+                actions.push({
+                    label: this._('Badges'),
+                    icon: 'bookmark',
+                    method: this.setBadges
+                });
+            }
+            return actions;
+        },
         boxes() {
             if (!this.reuse.metrics) {
                 return [];
