@@ -9,6 +9,8 @@ import config from 'config';
 import log from 'logger';
 import Velocity from 'velocity-animate';
 
+import FrontMixin from 'front/mixin';
+
 // Components
 import AddReuseModal from './add-reuse-modal.vue';
 import DetailsModal from './details-modal.vue';
@@ -31,7 +33,7 @@ function parseUrl(url) {
 }
 
 new Vue({
-    el: 'body',
+    mixins: [FrontMixin],
     components: {LeafletMap, ShareButton, FollowButton, DiscussionThreads, FeaturedButton, IntegrateButton},
     data() {
         const data = {
@@ -53,28 +55,12 @@ new Vue({
     },
     methods: {
         /**
-         * Insert a modal Vue in the application.
-         * @param  {Object} options     The modal component definition (options passed to Vue.extend())
-         * @param  {Object} data        Data to assign to modal properties
-         * @return {Vue}                The child instanciated vm
-         */
-        $modal(options, data) {
-            const constructor = Vue.extend(options);
-            return new constructor({
-                el: this.$els.modal,
-                replace: false, // Needed while all components are not migrated to replace: true behavior
-                parent: this,
-                propsData: data
-            });
-        },
-
-        /**
          * Extract the current dataset metadatas from JSON-LD script
          * @return {Object} The parsed dataset
          */
         extractDataset() {
             const selector = '#json_ld';
-            const dataset = JSON.parse(document.querySelector(selector).text)
+            const dataset = JSON.parse(document.querySelector(selector).text);
             dataset.resources = dataset.distribution;
             delete dataset.distribution;
             dataset.communityResources = dataset.contributedDistribution;
@@ -170,7 +156,7 @@ new Vue({
          */
         checkResource(resource) {
             const url = parseUrl(resource.url);
-            const resource_el = document.querySelector(`#resource-${resource['@id']}`)
+            const resource_el = document.querySelector(`#resource-${resource['@id']}`);
             const el = resource_el.querySelector('.format-label');
             const checkurl = resource_el.dataset.checkurl;
             if (!this.ignore.some(domain => url.origin.endsWith(domain))) {

@@ -10,6 +10,8 @@ import 'widgets/issues-btn';
 
 import Vue from 'vue';
 
+import FrontMixin from 'front/mixin';
+
 // Components
 import FollowButton from 'components/buttons/follow.vue';
 import ShareButton from 'components/buttons/share.vue';
@@ -17,7 +19,7 @@ import FeaturedButton from 'components/buttons/featured.vue';
 import DiscussionThreads from 'components/discussions/threads.vue';
 
 new Vue({
-    el: 'body',
+    mixins: [FrontMixin],
     components: {FollowButton, ShareButton, DiscussionThreads, FeaturedButton},
     ready() {
         log.debug('Reuse display page');

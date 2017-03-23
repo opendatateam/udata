@@ -10,6 +10,7 @@ import i18n from 'i18n';
 
 import Vue from 'vue';
 
+import FrontMixin from 'front/mixin';
 import Tabset from 'vue-strap/src/Tabset.vue';
 
 import FollowButton from 'components/buttons/follow.vue';
@@ -26,7 +27,7 @@ Vue.options.replace = false;
 
 
 new Vue({
-    el: 'body',
+    mixins: [FrontMixin],
     components: {FollowButton, Tab, Tabset, ActivityTimeline, DashboardGraphs, SmallBox},
     data() {
         return {
@@ -41,13 +42,7 @@ new Vue({
         */
         requestMembership(url) {
             if (Auth.need_user(i18n._('You need to be logged in to request membership to an organization'))) {
-                return new Vue({
-                    mixins: [MembershipRequest],
-                    el: this.$els.modal,
-                    replace: false, // Needed while all components are not migrated to replace: true behavior
-                    parent: this,
-                    propsData: {url}
-                });
+                this.$modal(MembershipRequest, {url});
             }
         },
         showFollowers() {
