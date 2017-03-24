@@ -126,8 +126,8 @@
                 {# end resources #}
 
                 {# button bar #}
-                <div class="row opinion">
-                    <div class="btn-toolbar">
+                <div class="row opinion"><div class="col-xs-12">
+                    <div class="btn-toolbar pull-right">
                         {% if can_edit %}
                         <div class="btn-group btn-group-sm">
                             <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}" class="btn btn-success">
@@ -154,7 +154,7 @@
                             {{ issues_btn(dataset) }}
                         </div>
                     </div>
-                </div>
+                </div></div>
                 {# end button bar #}
 
             </div>
