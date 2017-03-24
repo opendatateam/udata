@@ -5,22 +5,20 @@ import 'front/bootstrap';
 
 import log from 'logger';
 
-// Legacy widgets
-import 'widgets/issues-btn';
-
 import Vue from 'vue';
 
 import FrontMixin from 'front/mixin';
 
 // Components
-import FollowButton from 'components/buttons/follow.vue';
-import ShareButton from 'components/buttons/share.vue';
-import FeaturedButton from 'components/buttons/featured.vue';
 import DiscussionThreads from 'components/discussions/threads.vue';
+import FeaturedButton from 'components/buttons/featured.vue';
+import FollowButton from 'components/buttons/follow.vue';
+import IssuesButton from 'components/buttons/issues.vue';
+import ShareButton from 'components/buttons/share.vue';
 
 new Vue({
     mixins: [FrontMixin],
-    components: {FollowButton, ShareButton, DiscussionThreads, FeaturedButton},
+    components: {FollowButton, ShareButton, DiscussionThreads, FeaturedButton, IssuesButton},
     ready() {
         log.debug('Reuse display page');
     },

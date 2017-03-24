@@ -20,10 +20,8 @@ import FollowButton from 'components/buttons/follow.vue';
 import FeaturedButton from 'components/buttons/featured.vue';
 import ShareButton from 'components/buttons/share.vue';
 import IntegrateButton from 'components/buttons/integrate.vue';
+import IssuesButton from 'components/buttons/issues.vue';
 import DiscussionThreads from 'components/discussions/threads.vue';
-
-// Legacy widgets
-import 'widgets/issues-btn';
 
 
 function parseUrl(url) {
@@ -34,7 +32,9 @@ function parseUrl(url) {
 
 new Vue({
     mixins: [FrontMixin],
-    components: {LeafletMap, ShareButton, FollowButton, DiscussionThreads, FeaturedButton, IntegrateButton},
+    components: {
+        LeafletMap, DiscussionThreads, FeaturedButton, IntegrateButton, IssuesButton, ShareButton, FollowButton
+    },
     data() {
         const data = {
             dataset: this.extractDataset(),

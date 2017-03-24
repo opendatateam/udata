@@ -1,53 +1,5 @@
 {% macro issues_btn(obj, icons=None) %}
-<button type="button" class="btn btn-danger btn-issues"
-    data-api-url="{{ url_for('api.issues', for=obj.id|string) }}"
-    data-subject-id="{{ obj.id }}"
-    data-subject-class="{{ obj.__class__.__name__ }}"
-    v-tooltip tooltip-placement="top" title="{{ _('Issues') }}">
-    <span class="{{ ficon('fa-warning') }}"></span>
-    <span class="count">{% if obj.metrics.issues %}{{ obj.metrics.issues }}{% endif %}</span>
-</button>
-{% endmacro %}
-
-{% macro issues_list(issues, related=False, status='open') %}
-{% if not issues %}
-    <p class="text-center">{{ _('No Issues') }}</p>
-{% else %}
-    {% if status == 'open' %}
-        {% set filtered_issues = issues|rejectattr('closed') %}
-    {% elif status == 'closed' %}
-        {% set filtered_issues = issues|selectattr('closed') %}
-    {% else %}
-        {% set filtered_issues = issues %}
-    {% endif %}
-    <div class="issue-list {{status}}-issues">
-        {% for issue in filtered_issues %}
-            {{ issue_list_item(issue, related) }}
-        {% else %}
-            <p class="text-center">{{ _('No Issues') }}</p>
-        {% endfor %}
-    </div>
-{% endif %}
-{% endmacro %}
-
-{% macro issue_list_item(issue, related=False) %}
-<div class="issue" data-issue-id="{{issue.id}}" data-api-url="{{url_for('api.issue', id=issue.id)}}">
-    <div class="pull-left">
-        <img class="media-object" width="50" height="50"
-            src="{{issue.user.avatar(50)}}" alt="{{issue.user.fullname}}">
-    </div>
-    {% if related %}
-    <a class="pull-left" href="{{ issue.subject.display_url }}">
-        <img class="media-object" width="50" height="50"
-            src="{{issue.subject.image_url}}" alt="{{ _('Subject thumbnail') }}">
-    </a>
-    {% endif %}
-    <div class="media-body">
-        <h4 class="media-heading text-left">
-            {{ _('On') }}{{ issue.created|dateformat }}
-            {% if related %}{{ _('about') }} {{issue.subject}}{% endif %}
-        </h4>
-        <div class="message text-left">{{issue.title}}</div>
-    </div>
-</div>
+<issues-button subject-id="{{ obj.id }}" subject-class="{{ obj.__class__.__name__ }}"
+    {% if obj.metrics.issues %}count="{{ obj.metrics.issues }}"{% endif %}>
+</issues-button>
 {% endmacro %}
