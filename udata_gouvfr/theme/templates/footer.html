@@ -61,18 +61,21 @@
                 <a href="m&#x61;ilto:{{ config.CONTACT_EMAIL|obfuscate|safe }}">
                     <span class="fa fa-envelope-square"></span>
                 </a>
-                {% set rss_popup = ('''
-                    <a title="{0}" href="{1}"><span class="fa fa-rss"></span>{0}</a><br/>
-                    <a title="{2}" href="{3}"><span class="fa fa-rss"></span>{2}</a>
-                '''|string).format(
-                    _('Datasets'), url_for('datasets.recent_feed'),
-                    _('Reuses'), url_for('reuses.recent_feed'),
-                ) %}
-                <a href="#" tabindex="-1" title="{{ _('Feeds') }}" class="feed-icon"
-                    data-toggle="popover" data-trigger="focus" data-placement="top"
-                    data-html="true" data-content="{{rss_popup|e}}">
+                <span tabindex="-1" title="{{ _('Feeds') }}" class="feed-icon"
+                    v-popover popover-trigger="focus" popover-placement="top" popover-class="rss-popover">
                     <span class="fa fa-rss-square"></span>
-                </a>
+                    <span data-popover-content>
+                        <a title="{{ _('Datasets' )}}" href="{{ url_for('datasets.recent_feed') }}">
+                            <span class="fa fa-rss"></span>
+                            {{ _('Datasets') }}
+                        </a>
+                        <br/>
+                        <a title="{{ _('Reuses' )}}" href="{{ url_for('reuses.recent_feed') }}">
+                            <span class="fa fa-rss"></span>
+                            {{ _('Reuses') }}
+                        </a>
+                    </span>
+                </span>
             </section>
 
             <section class="col-xs-9 col-xs-offset-3 col-sm-offset-0 col-sm-2 col-md-2 col-lg-2">
