@@ -64,15 +64,15 @@
                                 {% endfor %}
                             {% endif %}
                             {% if dataset.private %}
-                            <small class="private" data-toggle="popover"
-                                data-title="{{ _('Private') }}" data-trigger="hover" data-placement="top"
-                                data-content="{{ _('This dataset is private and will not be visible by other users') }}"
+                            <small class="private"
+                                v-popover.literal="{{ _('This dataset is private and will not be visible by other users') }}"
+                                popover-title="{{ _('Private') }}" popover-trigger="hover" popover-placement="top"
                                 >{{ _('Private') }}</small>
                             {% endif %}
                             {% if dataset.deleted %}
-                            <small class="deleted" data-toggle="popover"
-                                data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
-                                data-content="{{ _('This dataset has been deleted. This will be permanent in the next 24 hours') }}"
+                            <small class="deleted"
+                                v-popover.literal="{{ _('This dataset has been deleted. This will be permanent in the next 24 hours') }}"
+                                popover-title="{{ _('Deleted') }}" popover-trigger="hover" popover-placement="top"
                                 >{{ _('Deleted') }}</small>
                             {% endif %}
                         </p>

@@ -1,17 +1,7 @@
 /**
  * Common stack, plugins and helpers
  */
-import $ from 'jquery';
-import 'bootstrap';
+import $ from 'jquery';  // here only as bootstrap dependency
+import 'bootstrap';  // Stil required for navbar, dropdowns, contribute modal and remaining tabsets
 import 'utils/ellipsis';
 import 'i18n';
-
-$(function() {
-    // Display popovers with markup
-    $('[data-toggle="popover"]').popover().on('click', function(e) {
-        if ($(this).data('trigger').match(/(click|focus)/)) {
-            e.preventDefault();
-            return true;
-        }
-    });
-});
