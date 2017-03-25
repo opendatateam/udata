@@ -62,7 +62,6 @@
 </template>
 
 <script>
-import Auth from 'auth';
 import config from 'config';
 import Avatar from 'components/avatar.vue';
 import ThreadForm from 'components/discussions/thread-form.vue';
@@ -105,9 +104,7 @@ export default {
          * Display the comment form or triggers an authentication if required
          */
         displayForm() {
-            if (!Auth.need_user(this._('You need to be logged in to comment.'))) {
-                return;
-            }
+            this.$auth(this._('You need to be logged in to comment.'));
             this.formDisplayed = true; // Form is at the end of the expanded discussion
             this.detailed = true;
         },

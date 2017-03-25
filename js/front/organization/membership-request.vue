@@ -25,7 +25,6 @@
 
 <script>
 import Modal from 'components/modal.vue';
-import Notify from 'notify';
 import log from 'logger';
 
 export default {
@@ -49,14 +48,14 @@ export default {
             this.pending = true;
             this.$api.post(this.url, {comment: this.comment})
                 .then(data => {
-                    this.pending = false
-                    Notify.success(this._('A request has been sent to the administrators'));
+                    this.pending = false;
+                    this.$dispatch('notify:success', this._('A request has been sent to the administrators'));
                     this.$refs.modal.close();
                 })
                 .catch(error => {
-                    this.pending = false
-                    Notify.error(this._('Error while requesting membership'));
-                    log.error(e.responseJSON);
+                    this.pending = false;
+                    this.$dispatch('notify:error', this._('Error while requesting membership'));
+                    log.error(error);
                 });
         }
     }

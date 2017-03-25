@@ -9,7 +9,6 @@
 
 <script>
 import moment from 'moment';
-import Auth from 'auth';
 import Modal from 'components/modal.vue';
 import pubsub from 'pubsub';
 
@@ -44,9 +43,8 @@ export default {
     },
     events: {
         new() {
-            if (Auth.need_user(this._('You need to be logged in to submit a new issue.'))) {
-                this.view = 'new';
-            }
+            this.$auth(this._('You need to be logged in to submit a new issue.'));
+            this.view = 'new';
         },
         close() {
             this.$refs.modal.close();

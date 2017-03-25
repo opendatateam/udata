@@ -1,7 +1,7 @@
 /**
  * Generic site display page JS module
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 import log from 'logger';
 import Vue from 'vue';
@@ -14,7 +14,7 @@ import 'widgets/range-picker';
 
 
 new Vue({
-    el: 'body',
+    mixins: [FrontMixin],
     ready() {
         log.debug('Search page');
         // Display toolbar depending on active tab

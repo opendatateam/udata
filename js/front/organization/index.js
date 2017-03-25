@@ -1,16 +1,12 @@
 /**
  * Organization display page JS module
  */
-// Catch all errors
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 import log from 'logger';
-import Auth from 'auth';
-import i18n from 'i18n';
 
 import Vue from 'vue';
 
-import FrontMixin from 'front/mixin';
 import Tabset from 'vue-strap/src/Tabset.vue';
 
 import FollowButton from 'components/buttons/follow.vue';
@@ -41,9 +37,8 @@ new Vue({
         * Display the membership request modal
         */
         requestMembership(url) {
-            if (Auth.need_user(i18n._('You need to be logged in to request membership to an organization'))) {
-                this.$modal(MembershipRequest, {url});
-            }
+            this.$auth(this._('You need to be logged in to request membership to an organization'));
+            this.$modal(MembershipRequest, {url});
         },
         showFollowers() {
             this.followersVisible = true;

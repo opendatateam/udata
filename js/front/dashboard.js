@@ -1,5 +1,5 @@
 // ES6 environment
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 import Vue from 'vue';
 
@@ -12,6 +12,6 @@ Vue.options.replace = false;
 
 
 new Vue({
-    el: 'body',
+    mixins: [FrontMixin],
     components: {ActivityTimeline, DashboardGraphs, SmallBox},
 });

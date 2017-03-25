@@ -117,11 +117,6 @@ if (sentryEl) {
 }
 
 /**
- * Notifications container
- */
-export const notify_in = _meta('notify-in');
-
-/**
  * Whether territories are enabled or not.
  */
 export const is_territory_enabled = _jsonMeta('territory-enabled');
@@ -177,7 +172,6 @@ export default {
     admin_root,
     auth_url,
     sentry,
-    notify_in,
     check_urls,
     check_urls_ignore,
     is_territory_enabled,

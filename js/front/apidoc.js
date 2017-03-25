@@ -1,7 +1,7 @@
 /**
  * Display a SwaggerUI documentation
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 import 'less/udata/swagger.less';
 
@@ -35,7 +35,7 @@ window.hljs = hljs;
 
 
 new Vue({
-    el: 'body',
+    mixins: [FrontMixin],
     ready() {
         hljs.initHighlightingOnLoad();
 

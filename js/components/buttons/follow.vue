@@ -9,7 +9,6 @@
 
 <script>
 import i18n from 'i18n';
-import Auth from 'auth';
 
 export default {
     props: {
@@ -62,9 +61,7 @@ export default {
     },
     methods: {
         toggle() {
-            if (!Auth.need_user(i18n._('You need to be logged in to follow.'))) {
-                return;
-            }
+            this.$auth(this._('You need to be logged in to follow.'));
             const method = this.following ? this.$api.delete(this.url) : this.$api.post(this.url);
             method.then(data => {
                 this.following = !this.following;

@@ -12,7 +12,6 @@
 
 <script>
 import log from 'logger';
-import Notify from 'notify';
 
 export default {
   props: {
@@ -47,9 +46,9 @@ export default {
               document.location.href = `#discussion-${this.discussionId}-${response.discussion.length - 1}`;
           })
           .catch(err => {
-              const msg = this._('An error occured while submitting your comment')
-              Notify.error(msg)
-              log.error(err)
+              const msg = this._('An error occured while submitting your comment');
+              this.$dispatch('notify.error', msg);
+              log.error(err);
               this.sending = false;
           });
       }

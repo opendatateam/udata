@@ -1,13 +1,13 @@
 /**
  * Generic site display page JS module
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 import log from 'logger';
 import Vue from 'vue';
 
 new Vue({
-    el: 'body',
+    mixins: [FrontMixin],
     ready() {
         log.debug('Site page');
     }

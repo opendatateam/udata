@@ -1,13 +1,11 @@
 /**
  * Reuse display page JS module
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 import log from 'logger';
 
 import Vue from 'vue';
-
-import FrontMixin from 'front/mixin';
 
 // Components
 import DiscussionThreads from 'components/discussions/threads.vue';

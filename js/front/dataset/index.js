@@ -1,15 +1,13 @@
 /**
  * Dataset display page JS module
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
-import Auth from 'auth';
 import Vue from 'vue';
 import config from 'config';
 import log from 'logger';
 import Velocity from 'velocity-animate';
 
-import FrontMixin from 'front/mixin';
 
 // Components
 import AddReuseModal from './add-reuse-modal.vue';
@@ -124,7 +122,7 @@ new Vue({
          * Fetch the current user reuses for display in add reuse modal
          */
         fetchReuses() {
-            if (Auth.user) {
+            if (this.$user) {
                 this.$api.get('me/reuses/').then(data => {
                     this.userReuses = data;
                 });

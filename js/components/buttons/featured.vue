@@ -9,7 +9,6 @@
 </template>
 
 <script>
-import Auth from 'auth';
 import log from 'logger';
 
 export default {
@@ -21,7 +20,7 @@ export default {
     },
     methods: {
         toggleFeatured() {
-            Auth.need_role('admin');
+            this.$role('admin');
             const method = this.featured ? 'delete' : 'post';
             const url = `${this.subjectType.toLowerCase()}s/${this.subjectId}/featured/`;
             this.$api[method](url)

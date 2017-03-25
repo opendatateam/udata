@@ -39,7 +39,6 @@
 </div>
 </template>
 <script>
-import Auth from 'auth';
 import log from 'logger';
 import Avatar from 'components/avatar.vue';
 
@@ -74,7 +73,7 @@ export default {
             );
         },
         submit(close, success, error) {
-            if (!Auth.need_user(this._('You need to be logged in to submit a comment.'))) return;
+            this.$auth(this._('You need to be logged in to submit a comment.'));
             if (!this.canSubmit) return;
             this.$api
                 .post(`issues/${this.issue.id}/`, {close, comment: this.comment})
