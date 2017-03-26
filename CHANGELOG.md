@@ -8,6 +8,11 @@
   [Flask-Security-Fork](https://pypi.python.org/pypi/Flask-Security-Fork)
   [#813](https://github.com/opendatateam/udata/pull/813)
 - Ensure URLs are stripped [#823](https://github.com/opendatateam/udata/pull/823)
+- Migrated remaining widgets to Vue.js [#827](https://github.com/opendatateam/udata/pull/827):
+    - bug fixes on migrated migrated widgets (Issues button/modal, integrate popover, coverage map)
+    - more coherent JS environment for developpers
+    - lighter assets
+    - drop Handlebars dependency
 
 ## 1.0.5 (2017-03-27)
 
