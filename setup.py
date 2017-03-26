@@ -124,6 +124,9 @@ setup(
     entry_points={
         'console_scripts': [
             'udata = udata.commands:console_script',
+        ],
+        'udata.themes': [
+            'default = udata.theme.default',
         ]
     },
     license='GNU AGPLv3+',
