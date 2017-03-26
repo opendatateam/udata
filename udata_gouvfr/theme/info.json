@@ -7,7 +7,6 @@
     "website": "http://data.gouv.fr",
     "license": "AGPL",
     "version": "0.1.0",
-    "pkg_version": "udata-gouvfr",
     "doctype": "html5",
     "variants": ["deuil"],
     "github_faq_url_pattern": "https://github.com/etalab/udata-gouvfr/edit/master/udata_gouvfr/templates/faq/{page_name}.html"
