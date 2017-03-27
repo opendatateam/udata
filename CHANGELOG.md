@@ -4,6 +4,7 @@
 
 - Fixes error display in forms [#830](https://github.com/opendatateam/udata/pull/830)
 - Fixes date range picker dates validation [#830](https://github.com/opendatateam/udata/pull/830)
+- Fix badges entries not showing in admin [#825](https://github.com/opendatateam/udata/pull/825)
 
 ## 1.0.4 (2017-03-01)
 
