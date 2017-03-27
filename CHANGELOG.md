@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.0.5 (2017-03-27)
 
 - Fixes error display in forms [#830](https://github.com/opendatateam/udata/pull/830)
