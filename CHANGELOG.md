@@ -14,8 +14,7 @@
     - lighter assets
     - drop Handlebars dependency
 - Themes are now entrypoint-based [#829](https://github.com/opendatateam/udata/pull/829).
-  This is now documented, see [the related documention](https://udata.readthedocs.io/en/stable/creating-theme/)
-  to create a new theme.
+  There is also a new [theming documention](https://udata.readthedocs.io/en/stable/creating-theme/).
 
 ## 1.0.5 (2017-03-27)
 
