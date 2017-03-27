@@ -34,7 +34,7 @@ $.extend($.validator.messages, {
  *  Rule for depend dates, should be greater that param.
  */
 $.validator.addMethod('dateGreaterThan', function(value, element, param) {
-    const start = moment($(param).val());
+    const start = moment(document.getElementById(param).value);
     return this.optional(element) || moment(value).isAfter(start);
 }, $.validator.format(_('Date should be after start date')));
 
