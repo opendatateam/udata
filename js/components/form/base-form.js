@@ -165,7 +165,7 @@ export default {
                 }
             },
             errorPlacement(error, element) {
-                $(element).closest('.form-group,.field-wrapper').children('div').append(error);
+                $(element).closest('.form-group,.field-wrapper').append(error);
             }
         });
         this.$broadcast('form:ready');
