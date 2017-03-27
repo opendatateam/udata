@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fixes error display in forms [#830](https://github.com/opendatateam/udata/pull/830)
+- Fixes date range picker dates validation [#830](https://github.com/opendatateam/udata/pull/830)
 
 ## 1.0.4 (2017-03-01)
 
