@@ -18,9 +18,9 @@ export function get_auth_url(message) {
         params.message = message;
     }
 
-    return config.auth_url + '?' + Object.keys(params).map(function(key) {
-        return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
-    }).join('&');
+    return config.auth_url + '?' + Object.keys(params)
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+        .join('&');
 }
 
 

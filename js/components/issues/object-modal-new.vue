@@ -1,7 +1,7 @@
 <template>
 <div class="new-issue-form">
     <div class="modal-body">
-        <p><strong>{{ _("You're about to submit a new issue related to a tendencious usage of the platform, illegal data opened or shameless advertisement. Note that questions and discussions about the data itself now take place in the community section of each dataset.") }}</strong></p>
+        <p><strong>{{ _("You're about to submit a new issue related to a tendencious usage of the platform, illegal data opened or shameless advertisement. Note that questions and discussions about the data itself now takes place in the community section of each dataset.") }}</strong></p>
         <form role="form">
             <div class="form-group" >
                 <label for="title">{{ _('Title') }}</label>
