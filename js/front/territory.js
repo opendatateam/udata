@@ -1,7 +1,7 @@
 /**
  * Dataset display page JS module
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 import Vue from 'vue';
 import log from 'logger';
@@ -11,7 +11,7 @@ import LeafletMap from 'components/leaflet-map.vue';
 
 
 new Vue({
-    el: 'body',
+    mixins: [FrontMixin],
     components: {LeafletMap},
     ready() {
         this.loadMap();

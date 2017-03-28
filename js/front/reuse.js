@@ -1,24 +1,22 @@
 /**
  * Reuse display page JS module
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 import log from 'logger';
-
-// Legacy widgets
-import 'widgets/issues-btn';
 
 import Vue from 'vue';
 
 // Components
-import FollowButton from 'components/buttons/follow.vue';
-import ShareButton from 'components/buttons/share.vue';
-import FeaturedButton from 'components/buttons/featured.vue';
 import DiscussionThreads from 'components/discussions/threads.vue';
+import FeaturedButton from 'components/buttons/featured.vue';
+import FollowButton from 'components/buttons/follow.vue';
+import IssuesButton from 'components/buttons/issues.vue';
+import ShareButton from 'components/buttons/share.vue';
 
 new Vue({
-    el: 'body',
-    components: {FollowButton, ShareButton, DiscussionThreads, FeaturedButton},
+    mixins: [FrontMixin],
+    components: {FollowButton, ShareButton, DiscussionThreads, FeaturedButton, IssuesButton},
     ready() {
         log.debug('Reuse display page');
     },

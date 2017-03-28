@@ -4,11 +4,10 @@
         <img :alt="dataset.organization.name" :src="logo">
     </a>
     <img v-if="dataset.organization && dataset.organization.public_service"
-        :src="certified" alt="certified"
-        class="certified" data-toggle="popover"
-        :data-title="_('Certified public service')"
-        :data-content="_('The identity of this public service is certified by %(certifier)s', certifier=config.SITE_AUTHOR)"
-        data-container="body" data-trigger="hover"/>
+        :src="certified" alt="certified" class="certified"
+        v-popover="_('The identity of this public service is certified by %(certifier)s', certifier=config.SITE_AUTHOR)"
+        :popover-title="_('Certified public service')"
+        popover-trigger="hover"/>
     <div class="card-body">
         <h4>
             <a :href="dataset.page" :title="dataset.title">

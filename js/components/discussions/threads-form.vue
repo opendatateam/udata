@@ -13,9 +13,7 @@
 </template>
 
 <script>
-import Auth from 'auth';
 import log from 'logger';
-import Notify from 'notify';
 
 export default {
     props: {
@@ -62,7 +60,7 @@ export default {
             })
             .catch(err => {
                 const msg = this._('An error occured while submitting your comment');
-                Notify.error(msg);
+                this.$dispatch('notify:error', msg);
                 log.error(err);
                 this.sending = false;
             });

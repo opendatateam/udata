@@ -64,15 +64,15 @@
                                 {% endfor %}
                             {% endif %}
                             {% if dataset.private %}
-                            <small class="private" data-toggle="popover"
-                                data-title="{{ _('Private') }}" data-trigger="hover" data-placement="top"
-                                data-content="{{ _('This dataset is private and will not be visible by other users') }}"
+                            <small class="private"
+                                v-popover.literal="{{ _('This dataset is private and will not be visible by other users') }}"
+                                popover-title="{{ _('Private') }}" popover-trigger="hover" popover-placement="top"
                                 >{{ _('Private') }}</small>
                             {% endif %}
                             {% if dataset.deleted %}
-                            <small class="deleted" data-toggle="popover"
-                                data-title="{{ _('Deleted') }}" data-trigger="hover" data-placement="top"
-                                data-content="{{ _('This dataset has been deleted. This will be permanent in the next 24 hours') }}"
+                            <small class="deleted"
+                                v-popover.literal="{{ _('This dataset has been deleted. This will be permanent in the next 24 hours') }}"
+                                popover-title="{{ _('Deleted') }}" popover-trigger="hover" popover-placement="top"
                                 >{{ _('Deleted') }}</small>
                             {% endif %}
                         </p>
@@ -126,8 +126,8 @@
                 {# end resources #}
 
                 {# button bar #}
-                <div class="row opinion">
-                    <div class="btn-toolbar">
+                <div class="row opinion"><div class="col-xs-12">
+                    <div class="btn-toolbar pull-right">
                         {% if can_edit %}
                         <div class="btn-group btn-group-sm">
                             <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}" class="btn btn-success">
@@ -148,13 +148,13 @@
                             {{ share_btn(dataset.title) }}
                         </div>
                         <div class="btn-group btn-group-sm">
-                            {{ integrate_btn(dataset.id) }}
+                            {{ integrate_btn(dataset) }}
                         </div>
                         <div class="btn-group btn-group-sm">
                             {{ issues_btn(dataset) }}
                         </div>
                     </div>
-                </div>
+                </div></div>
                 {# end button bar #}
 
             </div>

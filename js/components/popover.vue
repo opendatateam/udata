@@ -20,11 +20,13 @@ export default {
         content: [String, Element, HTMLElement],
         // Wider popover
         large: {type: Boolean, default: false},
+        extraclass: String,
     },
     computed: {
         classes() {
             const classes = {large: this.large};
             classes[this.placement] = true;
+            if (this.extraclass) classes[this.extraclass] = true;
             return classes;
         }
     },

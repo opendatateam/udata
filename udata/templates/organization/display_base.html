@@ -24,11 +24,10 @@
             {# Right sidebar with organization aside ( counters, logo, social...) #}
             <aside class="col-sm-3 panel panel-default">
                 {% if org.public_service %}
-                    <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified"
-                        class="certified" data-toggle="popover"
-                        data-title="{{ _('Certified public service') }}"
-                        data-content="{{ _('The identity of this public service is certified by %(certifier)s', certifier=config.SITE_AUTHOR) }}"
-                        data-container="body" data-placement="left" data-trigger="hover"/>
+                    <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified" class="certified"
+                        v-popover.literal="{{ _('The identity of this public service is certified by %(certifier)s', certifier=config.SITE_AUTHOR) }}"
+                        popover-title="{{ _('Certified public service') }}"
+                        popover-placement="left" popover-trigger="hover"/>
                 {% endif %}
                 <div class="text-center">
                     <img src="{{org.logo|placeholder('organization') }}"

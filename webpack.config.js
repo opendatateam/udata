@@ -6,8 +6,6 @@ const node_path = path.join(__dirname, 'node_modules');
 
 const css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap');
 const less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline');
-const handlebars_helpers = path.join(__dirname, 'js', 'templates', 'helpers');
-const hbs_loader = `handlebars?helperDirs[]=${handlebars_helpers}`;
 
 const languages = ['en', 'es', 'fr'];
 
@@ -41,7 +39,6 @@ module.exports = {
         ],
         alias: {
             'jquery-slimscroll': path.join(node_path, 'jquery-slimscroll/jquery.slimscroll'),
-            'handlebars': 'handlebars/runtime',
             'swaggerui': 'swagger-ui/dist',
         }
     },
@@ -53,7 +50,6 @@ module.exports = {
             {test: /\.less$/, loader: less_loader},
             {test: /\.vue$/, loader: 'vue-loader'},
             {test: /\.json$/, loader: 'json-loader'},
-            {test: /\.hbs$/, loader: hbs_loader},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: 'file-loader?name=[name].[ext]'},
             {test: /\.js$/, loader: 'babel-loader', include: [
                     path.resolve(__dirname, 'js'),
@@ -76,7 +72,6 @@ module.exports = {
     },
     // Store initial values for easier inheritance
     defaults: {
-        hbs_loader,
         languages,
     },
     plugins: [

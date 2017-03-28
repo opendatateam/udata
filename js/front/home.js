@@ -1,7 +1,7 @@
 /**
  * Generic site display page JS module
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 // TODO: cleanup/refactorize less
 import 'less/home.less';
@@ -15,7 +15,7 @@ import 'bootstrap';
 
 
 new Vue({
-    el: 'body',
+    mixins: [FrontMixin],
     ready() {
         log.debug('Home page');
         $('.carousel').carousel();

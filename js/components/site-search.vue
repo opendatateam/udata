@@ -29,8 +29,7 @@
         </div>
     </div>
     <ul class="dropdown-menu suggestion" v-el:dropdown>
-        <li v-for="group in groups" track-by="id"
-            v-if="group.items.length" class="result-group">
+        <li v-for="group in groupsWithResults" track-by="id" class="result-group">
             <span v-if="group.loading" class="fa fa-spin fa-spinner group-status"></span>
             <strong class="search-header">{{ group.name }}</strong>
             <ul>
@@ -92,6 +91,9 @@ export default {
                 }
             });
             return items;
+        },
+        groupsWithResults() {
+            return this.groups.filter(group => group.items.length);
         }
     },
     partials: {

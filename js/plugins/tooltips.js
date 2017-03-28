@@ -71,7 +71,7 @@ export function install(Vue) {
      * Attach a popover on the element.
      */
     Vue.directive('popover', {
-        params: ['title', 'popoverTitle', 'popoverPlacement', 'popoverTrigger', 'popoverEffect', 'popoverLarge'],
+        params: ['title', 'popoverTitle', 'popoverPlacement', 'popoverTrigger', 'popoverEffect', 'popoverLarge', 'popoverClass'],
         /**
          * Insert the popover element and attach the event listeners
          */
@@ -90,6 +90,7 @@ export function install(Vue) {
                     placement: this.params.popoverPlacement || 'top',
                     effect: this.params.popoverEffect || 'fadein',
                     large: this.params.popoverLarge || false,
+                    extraclass: this.params.popoverClass,
                 }
             }, popover));
 

@@ -1,13 +1,13 @@
 /**
  * Dataset display page JS module
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
-import Auth from 'auth';
 import Vue from 'vue';
 import config from 'config';
 import log from 'logger';
 import Velocity from 'velocity-animate';
+
 
 // Components
 import AddReuseModal from './add-reuse-modal.vue';
@@ -17,11 +17,9 @@ import LeafletMap from 'components/leaflet-map.vue';
 import FollowButton from 'components/buttons/follow.vue';
 import FeaturedButton from 'components/buttons/featured.vue';
 import ShareButton from 'components/buttons/share.vue';
+import IntegrateButton from 'components/buttons/integrate.vue';
+import IssuesButton from 'components/buttons/issues.vue';
 import DiscussionThreads from 'components/discussions/threads.vue';
-
-// Legacy widgets
-import 'widgets/issues-btn';
-import 'widgets/integrate-btn';
 
 
 function parseUrl(url) {
@@ -31,8 +29,10 @@ function parseUrl(url) {
 }
 
 new Vue({
-    el: 'body',
-    components: {LeafletMap, ShareButton, FollowButton, DiscussionThreads, FeaturedButton},
+    mixins: [FrontMixin],
+    components: {
+        LeafletMap, DiscussionThreads, FeaturedButton, IntegrateButton, IssuesButton, ShareButton, FollowButton
+    },
     data() {
         const data = {
             dataset: this.extractDataset(),
@@ -53,28 +53,12 @@ new Vue({
     },
     methods: {
         /**
-         * Insert a modal Vue in the application.
-         * @param  {Object} options     The modal component definition (options passed to Vue.extend())
-         * @param  {Object} data        Data to assign to modal properties
-         * @return {Vue}                The child instanciated vm
-         */
-        $modal(options, data) {
-            const constructor = Vue.extend(options);
-            return new constructor({
-                el: this.$els.modal,
-                replace: false, // Needed while all components are not migrated to replace: true behavior
-                parent: this,
-                propsData: data
-            });
-        },
-
-        /**
          * Extract the current dataset metadatas from JSON-LD script
          * @return {Object} The parsed dataset
          */
         extractDataset() {
             const selector = '#json_ld';
-            const dataset = JSON.parse(document.querySelector(selector).text)
+            const dataset = JSON.parse(document.querySelector(selector).text);
             dataset.resources = dataset.distribution;
             delete dataset.distribution;
             dataset.communityResources = dataset.contributedDistribution;
@@ -138,7 +122,7 @@ new Vue({
          * Fetch the current user reuses for display in add reuse modal
          */
         fetchReuses() {
-            if (Auth.user) {
+            if (this.$user) {
                 this.$api.get('me/reuses/').then(data => {
                     this.userReuses = data;
                 });
@@ -170,7 +154,7 @@ new Vue({
          */
         checkResource(resource) {
             const url = parseUrl(resource.url);
-            const resource_el = document.querySelector(`#resource-${resource['@id']}`)
+            const resource_el = document.querySelector(`#resource-${resource['@id']}`);
             const el = resource_el.querySelector('.format-label');
             const checkurl = resource_el.dataset.checkurl;
             if (!this.ignore.some(domain => url.origin.endsWith(domain))) {

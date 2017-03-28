@@ -1,7 +1,7 @@
 /**
  * Display a SwaggerUI documentation
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 import 'less/udata/swagger.less';
 
@@ -18,7 +18,7 @@ import 'swaggerui/lib/jquery.slideto.min';
 import 'swaggerui/lib/jquery.wiggle.min';
 import 'script!swaggerui/lib/jquery.ba-bbq.min';
 
-import 'expose?Handlebars!handlebars';
+import 'script!swaggerui/lib/handlebars-4.0.5';
 import 'script!swaggerui/lib/lodash.min';
 import 'script!swaggerui/lib/backbone-min';
 import 'script!swaggerui/lib/jsoneditor.min';
@@ -35,7 +35,7 @@ window.hljs = hljs;
 
 
 new Vue({
-    el: 'body',
+    mixins: [FrontMixin],
     ready() {
         hljs.initHighlightingOnLoad();
 

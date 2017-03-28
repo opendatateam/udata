@@ -1,7 +1,7 @@
 /*
  * User display page
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 import log from 'logger';
 
@@ -14,7 +14,7 @@ import ActivityTimeline from 'components/activities/timeline.vue';
 import Tab from 'components/tab';
 
 new Vue({
-    el: 'body',
+    mixins: [FrontMixin],
     components: {FollowButton, Tab, Tabset, ActivityTimeline},
     data() {
         return {

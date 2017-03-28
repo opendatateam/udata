@@ -27,7 +27,6 @@
 </template>
 
 <script>
-import Auth from 'auth';
 import config from 'config';
 import Avatar from 'components/avatar.vue';
 import DiscussionThread from 'components/discussions/thread.vue';
@@ -92,9 +91,7 @@ export default {
          * Display the start discussion form or triggers an authentication if required
          */
         displayForm() {
-            if (!Auth.need_user(this._('You need to be logged in to start a discussion.'))) {
-                return;
-            }
+            this.$auth(this._('You need to be logged in to start a discussion.'));
             this.formDisplayed = true;
         },
 
