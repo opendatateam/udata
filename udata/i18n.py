@@ -69,6 +69,17 @@ class PluggableDomain(Domain):
                             translations_dir, locale, domain=domain)
                         translations.merge(plugins_translations)
 
+                # Allows the theme to provide or override translations
+                from . import theme
+
+                theme_translations_dir = join(theme.current.path, 'translations')
+                if exists(theme_translations_dir):
+                    domain = theme.current.identifier
+                    theme_translations = Translations.load(theme_translations,
+                                                           locale,
+                                                           domain=domain)
+                    translations.merge(theme_translations)
+
                 cache[str(locale)] = translations
 
         return translations

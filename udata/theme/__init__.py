@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import imp
 import logging
 import pkg_resources
+import pkgutil
 
-from importlib import import_module
-from os.path import join, dirname, isdir, exists
 from time import time
 
 from flask import current_app, g
@@ -14,8 +12,7 @@ from jinja2 import contextfunction
 from werkzeug.local import LocalProxy
 
 from flask_themes2 import (
-    Themes, Theme, render_theme_template, get_theme, packaged_themes_loader,
-    global_theme_static
+    Themes, Theme, render_theme_template, get_theme, global_theme_static
 )
 
 from udata.app import nav
@@ -53,11 +50,8 @@ def theme_static_with_version(ctx, filename, external=False):
         return url
     if current_app.config['DEBUG'] or current_app.config['TESTING']:
         burst = time()
-    elif current.pkg_version:
-        # If a package name is provided for versionning, use it
-        burst = pkg_resources.get_distribution(current.pkg_version).version
     else:
-        burst = current.version
+        burst = current.entrypoint.dist.version
     return '{url}?_={burst}'.format(url=url, burst=burst)
 
 
@@ -68,15 +62,16 @@ class ConfigurableTheme(Theme):
     _menu = None
     _configured = False
 
-    def __init__(self, path):
+    def __init__(self, entrypoint):
+        self.entrypoint = entrypoint
+        # Compute path without loading the module
+        path = pkgutil.get_loader(entrypoint.module_name).filename
         super(ConfigurableTheme, self).__init__(path)
 
         self.variants = self.info.get('variants', [])
         if 'default' not in self.variants:
             self.variants.insert(0, 'default')
         self.context_processors = {}
-
-        self.pkg_version = self.info.get('pkg_version')
 
     @property
     def site(self):
@@ -108,10 +103,7 @@ class ConfigurableTheme(Theme):
     def configure(self):
         if self._configured:
             return
-        config_path = join(self.path, 'theme.py')
-        if exists(config_path):
-            imp.load_source('udata.frontend.theme.{0}'.format(self.identifier),
-                            config_path)
+        self.entrypoint.load()
         if self.defaults and self.identifier not in self.site.themes:
             self.site.themes[self.identifier] = self.defaults
             try:
@@ -124,17 +116,10 @@ class ConfigurableTheme(Theme):
         return self.context_processors.get(context_name, default)
 
 
-def udata_themes_loader(app):
-    for theme in packaged_themes_loader(app):
-        yield ConfigurableTheme(theme.path)
-
-
-def plugin_themes_loader(app):
-    for plugin in app.config['PLUGINS']:
-        module = import_module('udata_{0}'.format(plugin))
-        path = join(dirname(module.__file__), 'theme')
-        if isdir(path):
-            yield ConfigurableTheme(path)
+def themes_loader(app):
+    '''Load themes from entrypoints'''
+    for entrypoint in pkg_resources.iter_entry_points('udata.themes'):
+        yield ConfigurableTheme(entrypoint)
 
 
 def render(template, **context):
@@ -165,8 +150,7 @@ def context(name):
 
 def init_app(app):
     app.config.setdefault('THEME_VARIANT', 'default')
-    themes.init_themes(app, app_identifier='udata',
-                       loaders=[udata_themes_loader, plugin_themes_loader])
+    themes.init_themes(app, app_identifier='udata', loaders=[themes_loader])
 
     # Load all theme assets
     theme = app.theme_manager.themes[app.config['THEME']]
