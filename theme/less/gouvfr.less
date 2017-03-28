@@ -102,7 +102,12 @@ section.footer {
             font-size: 2.5em;
         }
 
-        a:hover {
+        span.feed-icon {
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        a:hover, span.feed-icon:hover {
             font-size: 1em;
             color: @gray-lighter;
             text-decoration: none;
@@ -112,38 +117,37 @@ section.footer {
                 color: white;
             }
         }
-
-        .popover {
-            font-size: @font-size-base;
-            font-weight: normal;
-            opacity: 1;
-
-            .popover-title {
-                color: @gray-darker;
-            }
-
-            a {
-                color: @gray-darker;
-                @rss-color: darken(orange, 5%);
-
-                &:hover {
-                    color: lighten(@gray-darker, 10%);
-
-                    .fa-rss {
-                        color: lighten(@rss-color, 10%);
-                    }
-                }
-
-                .fa-rss {
-                    color: @rss-color;
-                    font-size: @font-size-base;
-                    opacity: 1;
-                }
-            }
-        }
     }
 }
 
+.rss-popover {
+    font-size: @font-size-base;
+    font-weight: normal;
+    opacity: 1;
+
+    .popover-title {
+        color: @gray-darker;
+    }
+
+    a {
+        color: @gray-darker;
+        @rss-color: darken(orange, 5%);
+
+        &:hover {
+            color: lighten(@gray-darker, 10%);
+
+            .fa-rss {
+                color: lighten(@rss-color, 10%);
+            }
+        }
+
+        .fa-rss {
+            color: @rss-color;
+            font-size: @font-size-base;
+            opacity: 1;
+        }
+    }
+}
 
 /* Page Sections */
 section.colored {

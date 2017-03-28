@@ -38,8 +38,8 @@
 
                 <ul>
                     <li>Publier la réutilisation de données sur <a href="{{ url_for('site.home') }}">www.data.gouv.fr</a> en ajoutant dans la section «<i>tags</i>» le tag «<i>dataconnexions</i>» et le tag correspondant à la catégorie de prix choisie ({%- for cat in categories -%}
-                        <a href="#" data-toggle="popover" title="{{cat.label}}"
-                            data-content="{{cat.description}}" data-placement="top" data-trigger="hover">
+                        <a v-popover.literal="{{cat.description}}" title="{{cat.label}}"
+                            popover-placement="top" popover-trigger="hover">
                             {{- cat.tag -}}
                         </a>
                         {%- if not loop.last -%}, {% endif %}

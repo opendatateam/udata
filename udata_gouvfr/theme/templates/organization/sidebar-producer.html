@@ -1,8 +1,7 @@
 {% if organization.public_service %}
-<img src="{{ theme_static('img/certified-stamp.png')}}" alt="certified"
-    class="certified" data-toggle="popover"
-    data-title="{{ _('Certified public service') }}"
-    data-content="{{ _('The identity of this public service public is certified by Etalab') }}"
-    data-container="body" data-placement="left" data-trigger="hover"/>
+<img src="{{ theme_static('img/certified-stamp.png')}}" alt="certified" class="certified"
+    v-popover.literal="{{ _('The identity of this public service public is certified by Etalab') }}"
+    popover-title="{{ _('Certified public service') }}"
+    popover-placement="left" popover-trigger="hover"/>
 {% endif %}
 {% include 'organization/sidebar-producer.html' %}
