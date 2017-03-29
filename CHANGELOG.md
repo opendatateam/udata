@@ -4,6 +4,8 @@
 
 - Default values are properly displayed on dataset form
   [#745](https://github.com/opendatateam/udata/issues/745)
+- Prevent a redirect on discussion fetch
+  [#795](https://github.com/opendatateam/udata/issues/795)
 
 ## 1.0.5 (2017-03-27)
 
