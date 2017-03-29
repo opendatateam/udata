@@ -20,7 +20,7 @@ export default {
     },
     computed: {
         url() {
-            return this.user.avatar || placeholders.user;
+            return this.user.avatar_thumbnail || this.user.avatar || placeholders.user;
         }
     }
 }
