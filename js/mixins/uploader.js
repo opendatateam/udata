@@ -1,5 +1,6 @@
 import i18n from 'i18n';
 import qq from 'fine-uploader';
+import allowedExtensions from 'models/allowedExtensions';
 
 const HAS_FILE_API = window.File && window.FileReader && window.FileList && window.Blob;
 const _1GO = Math.pow(1024, 3);
@@ -66,26 +67,7 @@ export default {
                 onError: this.on_error,
             },
             messages: messages,
-            validation: {
-                allowedExtensions: [
-                    // Base
-                    'csv', 'txt', 'json', 'pdf', 'xml', 'rdf', 'rtf',
-                    // OpenOffice
-                    'ods', 'odt', 'odp', 'odg',
-                    // Microsoft Office
-                    'xls', 'xlsx', 'doc', 'docx', 'pps', 'ppt',
-                    // Archives
-                    'tar', 'gz', 'tgz', 'rar', 'zip', '7z', 'xz', 'bz2',
-                    // Images
-                    'jpeg', 'jpg', 'jpe', 'gif', 'png', 'dwg', 'svg', 'tiff', 'ecw', 'svgz', 'jp2',
-                    // Geo
-                    'shp', 'kml', 'kmz', 'gpx', 'shx', 'ovr', 'geojson',
-                    // Meteorology
-                    'grib2',
-                    // Misc
-                    'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'xsd', 'owl'
-                ]
-            }
+            validation: {allowedExtensions: allowedExtensions.items}
         });
 
         this.$dnd = new qq.DragAndDrop({
@@ -176,6 +158,7 @@ export default {
          * See: http://docs.fineuploader.com/branch/master/api/events.html#complete
          */
         on_complete(id, name, response) {
+            if (!response.success) return;
             const file = this.$uploader.getFile(id);
             this.files.$remove(this.files.indexOf(file));
             this.$emit('uploader:complete', id, response, file);
@@ -195,7 +178,13 @@ export default {
          *
          * See: http://docs.fineuploader.com/branch/master/api/events.html#error
          */
-        on_error(id, name, reason) {
+        on_error(id, name, reason, xhr) {
+            // If there is a JSON message display it instead of the non-explicit default one
+            try {
+                reason = JSON.parse(xhr.responseText).message || reason;
+            } catch(e) {
+                log.error('Unable to parse error', xhr.responseText);
+            }
             this.$dispatch('notify', {
                 type: 'error',
                 icon: 'exclamation-triangle',
