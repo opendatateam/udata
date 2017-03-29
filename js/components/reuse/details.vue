@@ -22,7 +22,7 @@
 <box :title="_('Details')" icon="retweet" boxclass="box-solid reuse-details-widget">
     <h3>{{reuse.title}}</h3>
     <div class="details-body">
-        <image-button :src="reuse.image" :size="100" class="thumbnail-button"
+        <image-button :src="reuse.image_thumbnail" :size="100" class="thumbnail-button"
             :endpoint="endpoint">
         </image-button>
         <div v-markdown="reuse.description"></div>

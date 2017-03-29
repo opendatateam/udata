@@ -24,7 +24,7 @@
         <small v-if="org.acronym">{{org.acronym}}</small>
     </h3>
     <div class="profile-body">
-        <image-button :src="org.logo" :size="100" class="logo-button"
+        <image-button :src="org.logo_thumbnail" :size="100" class="logo-button"
             :endpoint="endpoint">
         </image-button>
         <div v-markdown="org.description"></div>
