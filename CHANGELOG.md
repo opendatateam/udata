@@ -16,6 +16,9 @@
 - Themes are now entrypoint-based [#829](https://github.com/opendatateam/udata/pull/829).
   There is also a new [theming documention](https://udata.readthedocs.io/en/stable/creating-theme/).
 - Images are now optimized and you can force rerendering using the `udata images render` command.
+- Allowed files extensions are now configurable via the `ALLOWED_RESOURCES_EXTENSIONS` setting
+  and both admin and API will have the same behavior
+  [#833](https://github.com/opendatateam/udata/pull/833).
 
 ## 1.0.5 (2017-03-27)
 

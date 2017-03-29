@@ -21,7 +21,7 @@ from __future__ import unicode_literals
 import os
 from datetime import datetime
 
-from flask import request
+from flask import request, current_app
 from flask_security import current_user
 
 from werkzeug.datastructures import FileStorage
@@ -505,6 +505,15 @@ class FrequenciesAPI(API):
         '''List all available frequencies'''
         return [{'id': id, 'label': label}
                 for id, label in UPDATE_FREQUENCIES.items()]
+
+
+@ns.route('/extensions/', endpoint='allowed_extensions')
+class AllowedExtensionsAPI(API):
+    @api.doc('allowed_extensions')
+    @api.response(200, 'Success', [str])
+    def get(self):
+        '''List all allowed resources extensions'''
+        return current_app.config['ALLOWED_RESOURCES_EXTENSIONS']
 
 
 checkurl_parser = api.parser()

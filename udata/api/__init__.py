@@ -9,6 +9,7 @@ from functools import wraps
 from flask import (
     current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
+from flask_fs import UnauthorizedFileType
 from flask_restplus import Api, Resource, inputs, cors
 
 from udata import search, theme, tracking
@@ -207,6 +208,18 @@ def handle_permission_denied(error):
 def handle_value_error(error):
     '''A generic value error'''
     return {'message': str(error)}, 400
+
+
+@api.errorhandler(UnauthorizedFileType)
+@api.marshal_with(default_error, code=400)
+def handle_unauthorized_file_type(error):
+    '''Error occuring when the user try to upload a non-allowed file type'''
+    url = url_for('api.allowed_extensions', _external=True)
+    msg = (
+        'This file type is not allowed.'
+        'The allowed file type list is available at {url}'
+    ).format(url=url)
+    return {'message': msg}, 400
 
 
 @apidoc.route('/api/')

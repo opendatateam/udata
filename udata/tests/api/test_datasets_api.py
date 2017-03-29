@@ -887,6 +887,14 @@ class DatasetReferencesAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json), len(UPDATE_FREQUENCIES))
 
+    def test_dataset_allowed_resources_extensions(self):
+        '''It should fetch the resources allowed extensions list from the API'''
+        extensions = ['csv', 'json', 'xml']
+        self.app.config['ALLOWED_RESOURCES_EXTENSIONS'] = extensions
+        response = self.get(url_for('api.allowed_extensions'))
+        self.assert200(response)
+        self.assertEqual(response.json, extensions)
+
 
 class CommunityResourceAPITest(APITestCase):
 
