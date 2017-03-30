@@ -78,7 +78,7 @@ export default {
         }
     },
     ready() {
-        this.$api.get('discussions', {for: this.subjectId}).then(response => {
+        this.$api.get('discussions/', {for: this.subjectId}).then(response => {
             this.discussions = response.data;
             if (document.location.hash) {
                 this.$nextTick(() => { // Wait for data to be binded
