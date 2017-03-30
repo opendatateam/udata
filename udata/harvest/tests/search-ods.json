@@ -49,6 +49,44 @@
         "attachments": [],
         "fields": []
     }, {
+        "datasetid": "test-d",
+        "metas": {
+            "domain": "etalab-sandbox",
+            "language": "en",
+            "title": "test-d",
+            "records_count": 1,
+            "modified": "2015-04-10T09:39:13+00:00",
+            "visibility": "domain"
+        },
+        "interop_metas": {
+          "inspire": {
+            "hierarchy_level": "dataset",
+            "extend_bounding_box_westbound_longitude": "0.1568",
+            "contact_individual_name": "ACME",
+            "extend_bounding_box_southbound_latitude": "46.4944",
+            "contact_email": "tnt@acme.com",
+            "extend_bounding_box_northbound_latitude": "46.6848",
+            "extend_bounding_box_eastbound_longitude": "0.5084",
+            "file_identifier": "{73E--sfA386709}"
+          }
+        },
+        "has_records": true,
+        "features": ["geo"],
+        "attachments": [],
+        "fields": [{
+            "label": "test",
+            "type": "text",
+            "name": "test"
+        }, {
+            "label": "geo",
+            "type": "geo_point_2d",
+            "name": "geo"
+        }, {
+            "label": "value",
+            "type": "text",
+            "name": "value"
+        }]
+    }, {
         "datasetid": "test-a",
         "metas": {
             "publisher": "test",
