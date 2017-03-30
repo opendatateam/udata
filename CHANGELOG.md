@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Default values are properly displayed on dataset form
+  [#745](https://github.com/opendatateam/udata/issues/745)
 
 ## 1.0.5 (2017-03-27)
 
