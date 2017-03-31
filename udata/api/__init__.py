@@ -33,6 +33,14 @@ apidoc = I18nBlueprint('apidoc', __name__)
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = 'X-API-KEY'
 
+# TODO: make upstream flask-restplus automatically handle
+# flask-restplus headers and allow lazy evaluation
+# of headers (ie. callable)
+PREFLIGHT_HEADERS = (
+    HEADER_API_KEY,
+    'X-Fields',
+)
+
 
 class UDataApi(Api):
     def __init__(self, app=None, **kwargs):
@@ -131,7 +139,12 @@ class UDataApi(Api):
 
 api = UDataApi(
     apiv1,
-    decorators=[csrf.exempt, cors.crossdomain(origin='*', credentials=True)],
+    decorators=[csrf.exempt,
+                cors.crossdomain(origin='*',
+                                 credentials=True,
+                                 headers=PREFLIGHT_HEADERS
+                )
+    ],
     version='1.0', title='uData API',
     description='uData API', default='site',
     default_label='Site global namespace'

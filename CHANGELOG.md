@@ -12,6 +12,8 @@
   [#840](https://github.com/opendatateam/udata/issues/840)
 - Temporarily ignore INSPIRE in ODS harvester
   [#837](https://github.com/opendatateam/udata/pull/837)
+- Allow `X-API-KEY` and `X-Fields` in cors preflight headers
+  [#841](https://github.com/opendatateam/udata/pull/841)
 
 ## 1.0.5 (2017-03-27)
 
