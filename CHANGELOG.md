@@ -19,6 +19,9 @@
 - Allowed files extensions are now configurable via the `ALLOWED_RESOURCES_EXTENSIONS` setting
   and both admin and API will have the same behavior
   [#833](https://github.com/opendatateam/udata/pull/833).
+- bleach and html5lib have been updated leading to more secure html/markdown cleanup
+  and (better performances)[http://bluesock.org/~willkg/blog/dev/bleach_2_0.html]
+  [#838](https://github.com/opendatateam/udata/pull/838)
 
 ## 1.0.5 (2017-03-27)
 
