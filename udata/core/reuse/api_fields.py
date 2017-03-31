@@ -34,7 +34,7 @@ reuse_fields = api.model('Reuse', {
     'private': fields.Boolean(
         description='Is the reuse private to the owner or the organization'),
     'image': fields.ImageField(description='The reuse thumbnail thumbnail (cropped) URL'),
-    'image_thumbnail': fields.ImageField(size=BIGGEST_IMAGE_SIZE,
+    'image_thumbnail': fields.ImageField(attribute='image', size=BIGGEST_IMAGE_SIZE,
         description='The reuse thumbnail thumbnail URL. This is the square '
         '({0}x{0}) and cropped version.'.format(BIGGEST_IMAGE_SIZE)),
     'created_at': fields.ISODateTime(

@@ -39,7 +39,7 @@ user_fields = api.model('User', {
         description='The user last name', required=True),
     'avatar': fields.ImageField(original=True,
         description='The user avatar URL'),
-    'avatar_thumbnail': fields.ImageField(size=BIGGEST_AVATAR_SIZE,
+    'avatar_thumbnail': fields.ImageField(attribute='avatar', size=BIGGEST_AVATAR_SIZE,
         description='The user avatar thumbnail URL. This is the square '
         '({0}x{0}) and cropped version.'.format(BIGGEST_AVATAR_SIZE)),
     'website': fields.String(description='The user website'),
