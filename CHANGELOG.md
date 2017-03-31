@@ -8,6 +8,8 @@
   [#795](https://github.com/opendatateam/udata/issues/795)
 - API exposes both original and biggest thumbnail for organization logo, reuse image and user avatar
   [#824](https://github.com/opendatateam/udata/issues/824)
+- Restore the broken URL check feature
+  [#840](https://github.com/opendatateam/udata/issues/840)
 
 ## 1.0.5 (2017-03-27)
 
