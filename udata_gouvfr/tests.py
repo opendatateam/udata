@@ -29,7 +29,7 @@ from udata.utils import faker
 
 from .models import (
     DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE,
-    TERRITORY_DATASETS, OPENFIELD16
+    TERRITORY_DATASETS, OPENFIELD16, SPD
 )
 from .views import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
 from .metrics import PublicServicesMetric
@@ -338,6 +338,21 @@ class OpenField16Test(FrontTestCase):
             badge = Badge(kind=OPENFIELD16)
             VisibleDatasetFactory(badges=[badge])
         response = self.client.get(url_for('gouvfr.openfield16'))
+        self.assert200(response)
+
+
+class SpdTest(FrontTestCase):
+    settings = GouvFrSettings
+
+    def test_render_without_data(self):
+        response = self.client.get(url_for('gouvfr.spd'))
+        self.assert200(response)
+
+    def test_render_with_data(self):
+        for i in range(3):
+            badge = Badge(kind=SPD)
+            VisibleDatasetFactory(badges=[badge])
+        response = self.client.get(url_for('gouvfr.spd'))
         self.assert200(response)
 
 

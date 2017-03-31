@@ -29,9 +29,11 @@ Reuse.__badges__.update({
 C3 = 'c3'
 NECMERGITUR = 'nec'
 OPENFIELD16 = 'openfield16'
+SPD = 'spd'
 Dataset.__badges__[C3] = _('C³')
 Dataset.__badges__[NECMERGITUR] = _('Nec Mergitur')
 Dataset.__badges__[OPENFIELD16] = 'Openfield 16'
+Dataset.__badges__[SPD] = _('Reference Data')
 
 
 class PopulationDataset(TerritoryDataset):

@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Introduce SPD page and badge
 
 ## 1.0.3 (2017-02-27)
 
