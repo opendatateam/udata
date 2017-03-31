@@ -66,7 +66,7 @@ class OdsHarvester(BaseBackend):
             response = self.get(self.api_url, params={
                 "start": count,
                 "rows": 50,
-                "interopmetas": True,
+                "interopmetas": 'true',
             })
             response.raise_for_status()
             data = response.json()
