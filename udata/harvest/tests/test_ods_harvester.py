@@ -47,13 +47,13 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
 
         self.assertEqual(
             httpretty.last_request().querystring,
-            {'start': ['0'], 'rows': ['50']}
+            {'start': ['0'], 'rows': ['50'], 'interopmetas': ['true']}
         )
 
         source.reload()
 
         job = source.get_last_job()
-        self.assertEqual(len(job.items), 3)
+        self.assertEqual(len(job.items), 4)
         self.assertEqual(job.status, 'done')
 
         datasets = {d.extras["harvest:remote_id"]: d for d in Dataset.objects}
@@ -136,3 +136,6 @@ class OdsHarvesterTest(DBTestMixin, TestCase):
 
         # test-c has no data
         self.assertNotIn('test-c', datasets)
+
+        # test-d is INSPIRE
+        self.assertNotIn('test-d', datasets)

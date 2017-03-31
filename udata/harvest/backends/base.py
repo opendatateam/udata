@@ -142,7 +142,7 @@ class BaseBackend(object):
             item.dataset = dataset
             item.status = 'done'
         except HarvestSkipException as e:
-            log.info("SKipped item %s : %s" % (item.remote_id, str(e)))
+            log.info("Skipped item %s : %s" % (item.remote_id, str(e)))
             item.status = 'skipped'
             item.errors.append(HarvestError(message=str(e)))
         except Exception as e:
