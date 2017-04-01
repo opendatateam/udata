@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.0.6 (2017-04-01)
 
 - Default values are properly displayed on dataset form
   [#745](https://github.com/opendatateam/udata/issues/745)
