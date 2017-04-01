@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.0.6 (2017-04-01)
 
 - Default values are properly displayed on dataset form
