@@ -91,7 +91,7 @@ export const BaseField = {
             if (this.model && this.field) {
                 value = u.getattr(this.model, this.field.id);
             }
-            if (value === undefined && this.property && this.property.hasOwnProperty('default')) {
+            if ((value === undefined || value === null) && this.property && this.property.hasOwnProperty('default')) {
                 value = this.property.default;
             }
             return value;

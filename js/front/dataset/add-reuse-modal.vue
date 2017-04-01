@@ -15,7 +15,7 @@
                 <a class="thumbnail reuse clickable" :title="reuse.title"
                     @click.prevent="addToReuse(reuse.id)">
                     <div class="preview">
-                        <img class="media-object img-responsive" :alt="reuse.title" :src="reuse.image">
+                        <img class="media-object img-responsive" :alt="reuse.title" :src="reuse.image_thumbnail">
                     </div>
                     <div class="caption">
                         <h4>{{ reuse.title }}</h4>

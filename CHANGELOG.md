@@ -23,6 +23,21 @@
   and (better performances)[http://bluesock.org/~willkg/blog/dev/bleach_2_0.html]
   [#838](https://github.com/opendatateam/udata/pull/838)
 
+## 1.0.6 (2017-04-01)
+
+- Default values are properly displayed on dataset form
+  [#745](https://github.com/opendatateam/udata/issues/745)
+- Prevent a redirect on discussion fetch
+  [#795](https://github.com/opendatateam/udata/issues/795)
+- API exposes both original and biggest thumbnail for organization logo, reuse image and user avatar
+  [#824](https://github.com/opendatateam/udata/issues/824)
+- Restore the broken URL check feature
+  [#840](https://github.com/opendatateam/udata/issues/840)
+- Temporarily ignore INSPIRE in ODS harvester
+  [#837](https://github.com/opendatateam/udata/pull/837)
+- Allow `X-API-KEY` and `X-Fields` in cors preflight headers
+  [#841](https://github.com/opendatateam/udata/pull/841)
+
 ## 1.0.5 (2017-03-27)
 
 - Fixes error display in forms [#830](https://github.com/opendatateam/udata/pull/830)

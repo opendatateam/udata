@@ -3,6 +3,10 @@ from __future__ import unicode_literals
 
 from udata.api import api, fields, base_reference
 
+from .models import AVATAR_SIZES
+
+BIGGEST_AVATAR_SIZE = AVATAR_SIZES[0]
+
 
 user_ref_fields = api.inherit('UserReference', base_reference, {
     'first_name': fields.String(
@@ -17,7 +21,8 @@ user_ref_fields = api.inherit('UserReference', base_reference, {
     'uri': fields.UrlFor(
         'api.user', lambda o: {'user': o},
         description='The user API URI', required=True),
-    'avatar': fields.ImageField(size=100, description='The user avatar URL'),
+    'avatar': fields.ImageField(size=BIGGEST_AVATAR_SIZE,
+        description='The user avatar URL'),
 })
 
 
@@ -32,7 +37,11 @@ user_fields = api.model('User', {
         description='The user first name', required=True),
     'last_name': fields.String(
         description='The user last name', required=True),
-    'avatar': fields.ImageField(description='The user avatar URL'),
+    'avatar': fields.ImageField(original=True,
+        description='The user avatar URL'),
+    'avatar_thumbnail': fields.ImageField(attribute='avatar', size=BIGGEST_AVATAR_SIZE,
+        description='The user avatar thumbnail URL. This is the square '
+        '({0}x{0}) and cropped version.'.format(BIGGEST_AVATAR_SIZE)),
     'website': fields.String(description='The user website'),
     'about': fields.Markdown(description='The user self description'),
     'roles': fields.List(fields.String, description='Site wide user roles'),

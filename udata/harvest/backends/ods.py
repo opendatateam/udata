@@ -63,8 +63,11 @@ class OdsHarvester(BaseBackend):
             return count < max_value
 
         while should_fetch():
-            response = self.get(self.api_url,
-                                params={"start": count, "rows": 50})
+            response = self.get(self.api_url, params={
+                "start": count,
+                "rows": 50,
+                "interopmetas": 'true',
+            })
             response.raise_for_status()
             data = response.json()
             nhits = data["nhits"]
@@ -76,9 +79,15 @@ class OdsHarvester(BaseBackend):
         ods_dataset = item.kwargs["dataset"]
         dataset_id = ods_dataset["datasetid"]
         ods_metadata = ods_dataset["metas"]
+        ods_interopmetas = ods_dataset.get('interop_metas', {})
 
         if not ods_dataset.get('has_records'):
             msg = 'Dataset {datasetid} has no record'.format(**ods_dataset)
+            raise HarvestSkipException(msg)
+
+        # TODO: This behavior should be enabled with an option
+        if 'inspire' in ods_interopmetas:
+            msg = 'Dataset {datasetid} has INSPIRE metadata'.format(**ods_dataset)
             raise HarvestSkipException(msg)
 
         dataset = self.get_dataset(item.remote_id)

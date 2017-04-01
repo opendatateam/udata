@@ -8,7 +8,9 @@ from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.user.api_fields import user_ref_fields
 
-from .models import REUSE_TYPES
+from .models import REUSE_TYPES, IMAGE_SIZES
+
+BIGGEST_IMAGE_SIZE = IMAGE_SIZES[0]
 
 
 reuse_fields = api.model('Reuse', {
@@ -31,7 +33,10 @@ reuse_fields = api.model('Reuse', {
         description='Is the reuse featured', readonly=True),
     'private': fields.Boolean(
         description='Is the reuse private to the owner or the organization'),
-    'image': fields.ImageField(description='The reuse thumbnail'),
+    'image': fields.ImageField(description='The reuse thumbnail thumbnail (cropped) URL'),
+    'image_thumbnail': fields.ImageField(attribute='image', size=BIGGEST_IMAGE_SIZE,
+        description='The reuse thumbnail thumbnail URL. This is the square '
+        '({0}x{0}) and cropped version.'.format(BIGGEST_IMAGE_SIZE)),
     'created_at': fields.ISODateTime(
         description='The reuse creation date', readonly=True),
     'last_modified': fields.ISODateTime(
@@ -73,7 +78,8 @@ reuse_suggestion_fields = api.model('ReuseSuggestion', {
 
 reuse_ref_fields = api.inherit('ReuseReference', base_reference, {
     'title': fields.String(description='The reuse title', readonly=True),
-    'image': fields.ImageField(description='The reuse thumbnail'),
+    'image': fields.ImageField(size=BIGGEST_IMAGE_SIZE,
+        description='The reuse thumbnail'),
     'uri': fields.UrlFor(
         'api.reuse', lambda o: {'reuse': o},
         description='The reuse API URI', readonly=True),

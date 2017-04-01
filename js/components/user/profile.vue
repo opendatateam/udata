@@ -21,7 +21,7 @@
 <box :title="title" icon="user" boxclass="user-profile-widget">
     <h3>{{user.fullname}}</h3>
         <div class="profile-body">
-            <image-button :src="user.avatar" :size="100" class="avatar-button"
+            <image-button :src="user.avatar_thumbnail" :size="100" class="avatar-button"
                 :endpoint="endpoint">
             </image-button>
         <div v-markdown="user.about"></div>
