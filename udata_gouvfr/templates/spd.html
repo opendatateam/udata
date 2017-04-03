@@ -1,0 +1,113 @@
+{% extends theme("base.html") %}
+
+{% set meta = {
+    'title': 'Service Public de la Donnée',
+    'description': 'Service Public de la donnée de référence, des données sur lesquelles vous pouvez compter.',
+    'keywords': [
+        'SPD',
+        _('Reference Data'),
+        'Service Public de la Donnée',
+    ],
+} %}
+
+{% set body_class="spd" %}
+
+{% block content %}
+{% cache cache_duration, 'spd', g.lang_code %}
+<section class="content">
+    <div class="container">
+        <div class="faq-content">
+            <article class="col-xs-12">
+                <h1>Service public de la donnée : des données sur lesquelles vous pouvez compter</h1>
+
+                <section class="col-sm-12">
+
+                    <p class="text-justify">Le service public de la donnée
+                        créé par la loi pour une République numérique
+                        vise à mettre à disposition, en vue de faciliter leur réutilisation,
+                        les jeux de données de référence qui présentent le plus fort impact économique et social.
+                        Il s’adresse principalement aux entreprises et aux administrations
+                        pour qui la disponibilité d’une donnée de qualité est critique.
+                        Les producteurs et les diffuseurs prennent des engagements auprès de ces utilisateurs.
+                        La mission Etalab est chargée de la mise en oeuvre et de la gouvernance de ce nouveau service public.
+                        Elle référence l’ensemble des données concernées sur cette page.</p>
+
+                </section>
+                <section class="col-sm-6">
+
+                    <h2>Les données de référence</h2>
+
+                    <p>À ce jour, neuf jeux de données, qui couvrent un large champ thématique
+                        ont été identifiées comme des données de référence.</p>
+
+                    <ul class="card-list">
+                        {% for dataset in datasets %}
+                        <li>
+                        {% include theme('dataset/card.html') %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                </section>
+                <section class="col-sm-6">
+
+                    <h2>L’organisation du service public de la donnée</h2>
+
+                    <p>Elle est déterminée par le décret d’application
+                        <a href="https://www.legifrance.gouv.fr/affichTexte.do?cidTexte=JORFTEXT000034194946&categorieLien=id">2017-331</a> 
+                        du 14 mars 2017 relatif au service public de mise à disposition des données de référence.</p>
+
+                    <p><strong>Les producteurs</strong> produisent la donnée de référence et documentent les métadonnées.<br>
+                        Ils traitent les remontées des utilisateurs ou le cas échéant,
+                        orientent les utilisateurs vers le service compétent pour traiter ces demandes.<br>
+                        Ils prennent des engagements sur la mise à jour des données.<br>
+                        Ils désignent les diffuseurs pour chacun des jeux de données de référence.</p>
+
+                    <p><strong>Les diffuseurs</strong> mettent à disposition les données avec un haut niveau de qualité.<br>
+                        Ils s’engagent sur des niveaux de performance et de disponibilité.</p>
+
+                    <p><strong>Les utilisateurs</strong> utilisent les données de référence pour produire
+                        de nouveaux services et créer de la valeur économique et sociale.<br>
+                        Ils participent à la montée en qualité des données de référence
+                        (signalement des erreurs, propositions d’amélioration).</p>
+
+                    <p><strong>La mission Etalab</strong>, en charge du portail data.gouv.fr
+                        recense l’ensemble des jeux de données de référence.<br>
+                        Elle gère le service public de la donnée en lien avec les producteurs.<br>
+                        Elle anime le dispositif et en assure la promotion auprès des utilisateurs.<br>
+                        Elle développe des outils mutualisables, notamment sur la montée en qualité des données.</p>
+
+                    <p>Par ailleurs, en cas de défaillance des diffuseurs,
+                        ou de non-respect des engagements notamment en matière de performance et de disponibilité,
+                        la mission Etalab est habilitée à se substituer au diffuseur désigné par le producteur.</p>
+
+                </section>
+                <section class="col-sm-12">
+
+                    <h2>Les prochaines étapes</h2>
+
+                    <p class="text-justify">Le service public de la donnée se construit progressivement,
+                        dans un mode itératif avec les producteurs et les utilisateurs.
+                        Chaque producteur doit publier ses engagements sur les conditions de la mise à disposition
+                        (documentation des données, fréquence de mise à jour, performance
+                        et disponibilité de la mise à disposition).</p>
+
+                    <p class="text-justify">La mission Etalab publiera sur ce site les indicateurs de disponibilité des données,
+                        et assurera plus généralement le suivi du respect de ces engagements.</p>
+
+                    <h2>Références</h2>
+
+                    <ul>
+                        <li>L’article <a href="https://www.legifrance.gouv.fr/affichCodeArticle.do?cidTexte=LEGITEXT000031366350&idArticle=LEGIARTI000033205649&dateTexte=29990101&categorieLien=cid">L321-4</a> du Code des relations entre le public et les administrations</li>
+                        <li>Le décret d’application <a href="https://www.legifrance.gouv.fr/affichTexte.do?cidTexte=JORFTEXT000034194946&categorieLien=id">2017-331</a> du 14 mars 2017 relatif au service public de mise à disposition des données de référence</li>
+                        <li>La synthèse de la <a href="http://www.etalab.gouv.fr/consultation-spd">consultation publique</a> organisée par Etalab en octobre 2016</li>
+                    </ul>
+
+                </section>
+            </article>
+        </div>
+    </div>
+</section>
+
+{% endcache %}
+{% endblock %}

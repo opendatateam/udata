@@ -3,7 +3,11 @@ from __future__ import unicode_literals
 import cgi
 import json
 
+import httpretty
+import requests
+
 from flask import url_for
+from werkzeug.contrib.atom import AtomFeed
 
 from udata.core.dataset.factories import (
     DatasetFactory, LicenseFactory, VisibleDatasetFactory
@@ -21,10 +25,11 @@ from udata.tests.test_sitemap import SitemapTestCase
 from udata.tests.features.territories.test_territories_process import (
     create_geozones_fixtures
 )
+from udata.utils import faker
 
 from .models import (
     DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE,
-    TERRITORY_DATASETS, OPENFIELD16
+    TERRITORY_DATASETS, OPENFIELD16, SPD
 )
 from .views import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
 from .metrics import PublicServicesMetric
@@ -117,6 +122,67 @@ class GouvFrThemeTest(FrontTestCase):
         self.assert200(response)
 
 
+WP_ATOM_URL = 'http://somewhere.test/feed.atom'
+
+
+def exception_factory(exception):
+    def callback(request, uri, headers):
+        raise exception
+    return callback
+
+
+class GouvFrWithBlogSettings(Testing):
+    TEST_WITH_THEME = True
+    TEST_WITH_PLUGINS = True
+    PLUGINS = ['gouvfr']
+    THEME = 'gouvfr'
+    WP_ATOM_URL = WP_ATOM_URL
+
+
+class GouvFrHomeBlogTest(FrontTestCase):
+    '''Ensure home page render with blog'''
+    settings = GouvFrWithBlogSettings
+
+    @httpretty.activate
+    def test_render_home_with_blog(self):
+        '''It should render the home page with the latest blog article'''
+        post_url = faker.uri()
+        feed = AtomFeed('Some blog', feed_url=WP_ATOM_URL)
+        feed.add('Some post',
+                 '<div>Some content</div>',
+                 content_type='html',
+                 author=faker.name(),
+                 url=post_url,
+                 updated=faker.date_time(),
+                 published=faker.date_time())
+        httpretty.register_uri(httpretty.GET, WP_ATOM_URL,
+                               body=feed.to_string(),
+                               content_type='application/atom+xml')
+        response = self.get(url_for('site.home'))
+        self.assert200(response)
+        print(dir(response))
+        self.assertIn('Some post', response.data.decode('utf8'))
+        self.assertIn(post_url, response.data.decode('utf8'))
+
+    @httpretty.activate
+    def test_render_home_if_blog_timeout(self):
+        '''It should render the home page when blog time out'''
+        exception = requests.Timeout('Blog timed out')
+        httpretty.register_uri(httpretty.GET, WP_ATOM_URL,
+                               body=exception_factory(exception))
+        response = self.get(url_for('site.home'))
+        self.assert200(response)
+
+    @httpretty.activate
+    def test_render_home_if_blog_error(self):
+        '''It should render the home page when blog is not available'''
+        exception = requests.ConnectionError('Connection error')
+        httpretty.register_uri(httpretty.GET, WP_ATOM_URL,
+                               body=exception_factory(exception))
+        response = self.get(url_for('site.home'))
+        self.assert200(response)
+
+
 class GouvFrMetricsTest(DBTestMixin, TestCase):
     '''Check metrics'''
     settings = GouvFrSettings
@@ -204,6 +270,10 @@ class SpecificUrlsTest(FrontTestCase):
         self.assert200(response)
         self.assert_template_used('faq/system-integrator.html')
 
+    def test_404_on_faq(self):
+        response = self.client.get(url_for('gouvfr.faq', section='whatever'))
+        self.assert404(response)
+
     def test_terms(self):
         response = self.client.get(url_for('site.terms'))
         self.assert200(response)
@@ -268,6 +338,21 @@ class OpenField16Test(FrontTestCase):
             badge = Badge(kind=OPENFIELD16)
             VisibleDatasetFactory(badges=[badge])
         response = self.client.get(url_for('gouvfr.openfield16'))
+        self.assert200(response)
+
+
+class SpdTest(FrontTestCase):
+    settings = GouvFrSettings
+
+    def test_render_without_data(self):
+        response = self.client.get(url_for('gouvfr.spd'))
+        self.assert200(response)
+
+    def test_render_with_data(self):
+        for i in range(3):
+            badge = Badge(kind=SPD)
+            VisibleDatasetFactory(badges=[badge])
+        response = self.client.get(url_for('gouvfr.spd'))
         self.assert200(response)
 
 

@@ -1,25 +1,25 @@
 # Translations template for udata-gouvfr.
-# Copyright (C) 2016 ORGANIZATION
+# Copyright (C) 2017 ORGANIZATION
 # This file is distributed under the same license as the udata-gouvfr project.
 # 
 # Translators:
 # Axel Haustant, 2014
-# Axel Haustant, 2014-2016
+# Axel Haustant, 2014-2017
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2014
-# Larlet David <david@larlet.fr>, 2015-2016
+# Larlet David <david@larlet.fr>, 2015-2017
 # noirbizarre, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-07-08 16:09+0200\n"
-"PO-Revision-Date: 2016-07-08 19:47+0000\n"
-"Last-Translator: Larlet David <david@larlet.fr>\n"
+"POT-Creation-Date: 2017-02-20 22:31+0100\n"
+"PO-Revision-Date: 2017-02-27 14:00+0000\n"
+"Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/etalab/udata-gouvfr/language/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.2.0\n"
+"Generated-By: Babel 2.3.4\n"
 "Language: fr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
@@ -43,27 +43,20 @@ msgstr "Candidat Dataconnexions 6"
 msgid "Dataconnexions 6 laureate"
 msgstr "Lauréat Dataconnexions 6"
 
-#: udata_gouvfr/models.py:31
+#: udata_gouvfr/models.py:32
 msgid "C³"
 msgstr "C³"
 
-#: udata_gouvfr/models.py:32
+#: udata_gouvfr/models.py:33
 msgid "Nec Mergitur"
 msgstr "Nec Mergitur"
 
 #: udata_gouvfr/templates/c3.html:138
 #: udata_gouvfr/templates/nec_mergitur.html:80
+#: udata_gouvfr/templates/openfield16.html:190
 #, python-format
 msgid "See the %(nb)s datasets"
 msgstr "Voir les %(nb)s jeux de données"
-
-#: udata_gouvfr/templates/terms.html:4 udata_gouvfr/templates/terms.html:5
-msgid "Terms"
-msgstr "Conditions générales d'utilisations"
-
-#: udata_gouvfr/templates/terms.html:7
-msgid "terms"
-msgstr "conditions générales d'utilisations"
 
 #: udata_gouvfr/templates/faq/citizen.html:4
 msgid "Découvrir l’OpenData en tant que citoyen - FAQ"
@@ -98,88 +91,101 @@ msgstr "Découvrir l’OpenData en tant que réutilisateur - FAQ"
 msgid "Découvrir l’OpenData en tant qu’intégrateur - FAQ"
 msgstr "Découvrir l’OpenData en tant qu’intégrateur - FAQ"
 
-#: udata_gouvfr/theme/theme.py:24
+#: udata_gouvfr/theme/theme.py:27
 msgid "Discover OpenData"
 msgstr "Découvrez l'OpenData"
 
-#: udata_gouvfr/theme/theme.py:25 udata_gouvfr/theme/theme.py:52
+#: udata_gouvfr/theme/theme.py:28 udata_gouvfr/theme/theme.py:47
 msgid "As a citizen"
 msgstr "En tant que citoyen"
 
-#: udata_gouvfr/theme/theme.py:26 udata_gouvfr/theme/theme.py:53
+#: udata_gouvfr/theme/theme.py:29 udata_gouvfr/theme/theme.py:48
 msgid "As a producer"
 msgstr "En tant que producteur"
 
-#: udata_gouvfr/theme/theme.py:27 udata_gouvfr/theme/theme.py:54
+#: udata_gouvfr/theme/theme.py:30 udata_gouvfr/theme/theme.py:49
 msgid "As a reuser"
 msgstr "En tant que réutilisateur"
 
-#: udata_gouvfr/theme/theme.py:28 udata_gouvfr/theme/theme.py:55
+#: udata_gouvfr/theme/theme.py:31 udata_gouvfr/theme/theme.py:50
 msgid "As a developer"
 msgstr "En tant que développeur"
 
-#: udata_gouvfr/theme/theme.py:29 udata_gouvfr/theme/theme.py:56
+#: udata_gouvfr/theme/theme.py:32 udata_gouvfr/theme/theme.py:51
 msgid "As a system integrator"
 msgstr "En tant qu’intégrateur"
 
-#: udata_gouvfr/theme/theme.py:32
+#: udata_gouvfr/theme/theme.py:35
 msgid "Data"
 msgstr "Données"
 
-#: udata_gouvfr/theme/theme.py:33 udata_gouvfr/theme/templates/footer.html:66
+#: udata_gouvfr/theme/templates/footer.html:68 udata_gouvfr/theme/theme.py:36
 msgid "Datasets"
 msgstr "Jeux de données"
 
-#: udata_gouvfr/theme/theme.py:34 udata_gouvfr/theme/templates/footer.html:67
+#: udata_gouvfr/theme/templates/footer.html:69 udata_gouvfr/theme/theme.py:37
 msgid "Reuses"
 msgstr "Réutilisations"
 
-#: udata_gouvfr/theme/theme.py:35 udata_gouvfr/theme/templates/header.html:78
+#: udata_gouvfr/theme/templates/header.html:78 udata_gouvfr/theme/theme.py:38
 msgid "Organizations"
 msgstr "Organisations"
 
-#: udata_gouvfr/theme/theme.py:37
+#: udata_gouvfr/theme/theme.py:40
 msgid "Dashboard"
 msgstr "Tableau de bord"
 
-#: udata_gouvfr/theme/theme.py:38
-msgid "Events"
-msgstr "Événements"
-
-#: udata_gouvfr/theme/theme.py:58
+#: udata_gouvfr/theme/theme.py:53
 msgid "API"
 msgstr "API"
 
-#: udata_gouvfr/theme/theme.py:59
+#: udata_gouvfr/theme/theme.py:54
 msgid "Credits"
 msgstr "Crédits"
 
-#: udata_gouvfr/theme/theme.py:60
+#: udata_gouvfr/theme/theme.py:55
 msgid "Terms of use"
 msgstr "Conditions générales d'utilisation"
 
-#: udata_gouvfr/theme/templates/footer.html:7
+#: udata_gouvfr/theme/templates/footer.html:9
 msgid "The Open Data"
 msgstr "L'Open Data"
 
-#: udata_gouvfr/theme/templates/footer.html:24
-#: udata_gouvfr/theme/templates/subnav-small.html:40
+#: udata_gouvfr/theme/templates/footer.html:26
+#: udata_gouvfr/theme/templates/subnav-small.html:26
 msgid "Topics"
 msgstr "Thématiques"
 
-#: udata_gouvfr/theme/templates/footer.html:37
+#: udata_gouvfr/theme/templates/footer.html:39
 msgid "Network"
 msgstr "Réseau"
 
-#: udata_gouvfr/theme/templates/footer.html:46
+#: udata_gouvfr/theme/templates/footer.html:48
 msgid "Contact"
 msgstr "Contact"
 
-#: udata_gouvfr/theme/templates/footer.html:69
+#: udata_gouvfr/theme/templates/footer.html:71
 msgid "Feeds"
 msgstr "Flux"
 
+#: udata_gouvfr/theme/templates/footer.html:79
+msgid "Go to Etalab’s blog"
+msgstr "Aller sur le blog d'Etalab"
+
+#: udata_gouvfr/theme/templates/footer.html:82
+msgid "Open-source engine"
+msgstr "Moteur open-source"
+
+#: udata_gouvfr/theme/templates/footer.html:83
+#: udata_gouvfr/theme/templates/footer.html:86
+msgid "Deployed version"
+msgstr "Version déployée"
+
 #: udata_gouvfr/theme/templates/footer.html:85
+msgid "Data.gouv.fr extension"
+msgstr "Extension pour Data.gouv.fr"
+
+#: udata_gouvfr/theme/templates/footer.html:89
 msgid "Back to top"
 msgstr "Haut de page"
 
@@ -279,32 +285,39 @@ msgstr "Vues"
 msgid "Likes"
 msgstr "Favoris"
 
-#: udata_gouvfr/theme/templates/subnav-large.html:20
-#: udata_gouvfr/theme/templates/subnav-small.html:14
-#: udata_gouvfr/theme/templates/topic/subnav.html:19
-msgid "Search"
-msgstr "Recherche"
-
-#: udata_gouvfr/theme/templates/subnav-large.html:40
+#: udata_gouvfr/theme/templates/subnav-large.html:33
 msgid "Share, improve and reuse public data"
 msgstr "Partagez, améliorez et réutilisez les données publiques"
 
-#: udata_gouvfr/theme/templates/subnav-large.html:43
-#: udata_gouvfr/theme/templates/subnav-large.html:46
-#: udata_gouvfr/theme/templates/subnav-small.html:58
-#: udata_gouvfr/theme/templates/subnav-small.html:61
-#: udata_gouvfr/theme/templates/topic/subnav.html:50
-#: udata_gouvfr/theme/templates/topic/subnav.html:53
+#: udata_gouvfr/theme/templates/subnav-large.html:36
+#: udata_gouvfr/theme/templates/subnav-large.html:39
+#: udata_gouvfr/theme/templates/subnav-small.html:44
+#: udata_gouvfr/theme/templates/subnav-small.html:47
+#: udata_gouvfr/theme/templates/topic/subnav.html:42
+#: udata_gouvfr/theme/templates/topic/subnav.html:45
 msgid "Contribute!"
 msgstr "Contribuez !"
 
-#: udata_gouvfr/theme/templates/subnav-small.html:8
+#: udata_gouvfr/theme/templates/subnav-small.html:10
 msgid "Search in datasets"
 msgstr "Rechercher dans les jeux de données"
 
-#: udata_gouvfr/theme/templates/subnav-small.html:11
-msgid "Search in this town"
-msgstr "Rechercher dans cette ville"
+#: udata_gouvfr/theme/templates/subnav-small.html:13
+msgid "Search in this "
+msgstr "Chercher dans"
+
+#: udata_gouvfr/theme/templates/subnav-small.html:16
+msgid "Search"
+msgstr "Recherche"
+
+#: udata_gouvfr/theme/templates/terms.html:4
+#: udata_gouvfr/theme/templates/terms.html:5
+msgid "Terms"
+msgstr "Conditions générales d'utilisations"
+
+#: udata_gouvfr/theme/templates/terms.html:7
+msgid "terms"
+msgstr "conditions générales d'utilisations"
 
 #: udata_gouvfr/theme/templates/dataset/display.html:3
 #: udata_gouvfr/theme/templates/reuse/display.html:3

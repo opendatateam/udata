@@ -19,6 +19,9 @@ log = logging.getLogger(__name__)
 RE_POST_IMG = re.compile(
     r'\<img .* src="https?:(?P<src>.+\.(?:png|jpg))" .* />(?P<content>.+)')
 
+# Wordpress ATOM timeout
+WP_TIMEOUT = 5
+
 
 gouvfr_menu = nav.Bar('gouvfr_menu', [
     nav.Item(_('Discover OpenData'), 'gouvfr.faq', items=[
@@ -35,17 +38,7 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
         nav.Item(_('Organizations'), 'organizations.list'),
     ]),
     nav.Item(_('Dashboard'), 'site.dashboard'),
-    nav.Item(_('Territories'), 'territories.home'),
-    nav.Item(_('Events'), '#', url='#', items=[
-        nav.Item('Openfield 16', 'gouvfr.openfield16'),
-        nav.Item('Nec Mergitur', 'gouvfr.nec_mergitur'),
-        nav.Item('Climate Change Challenge (C³)',
-                 'gouvfr.climate_change_challenge'),
-        nav.Item('Dataconnexions', 'gouvfr.dataconnexions'),
-    ]),
-    # nav.Item('Dataconnexions', 'gouvfr.dataconnexions'),
-    nav.Item('Etalab', 'etalab', url='http://www.etalab.gouv.fr/'),
-    nav.Item('CADA', 'cada', url='http://cada.data.gouv.fr/'),
+    # nav.Item(_('Territories'), 'territories.home'),
 ])
 
 theme.menu(gouvfr_menu)
@@ -69,7 +62,7 @@ NETWORK_LINKS = [
     ('Service-public.fr', 'http://www.service-public.fr'),
     ('Opendata France', 'http://opendatafrance.net'),
     ('CADA.fr', 'http://www.cada.fr'),
-    ('Etalab.gouv.fr', 'http://www.etalab.gouv.fr'),
+    ('Etalab.gouv.fr', 'https://www.etalab.gouv.fr'),
 ]
 
 nav.Bar(
@@ -84,13 +77,24 @@ def get_blog_post(lang):
     if not wp_atom_url:
         return
 
+    feed = None
+
     for code in lang, current_app.config['DEFAULT_LANGUAGE']:
         feed_url = wp_atom_url.format(lang=code)
-        feed = feedparser.parse(feed_url)
-        if len(feed['entries']) > 0:
+        try:
+            response = requests.get(feed_url, timeout=WP_TIMEOUT)
+        except requests.Timeout:
+            log.error('Timeout while fetching %s', feed_url, exc_info=True)
+            continue
+        except requests.RequestException:
+            log.error('Error while fetching %s', feed_url, exc_info=True)
+            continue
+        feed = feedparser.parse(response.content)
+        if len(feed.entries) > 0:
             break
-    if len(feed['entries']) <= 0:
-        return None
+
+    if not feed or len(feed.entries) <= 0:
+        return
 
     post = feed.entries[0]
     blogpost = {
