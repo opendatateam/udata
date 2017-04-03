@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix display for zone completer existing values
+  [#845](https://github.com/opendatateam/udata/issues/845)
 
 ## 1.0.6 (2017-04-01)
 
