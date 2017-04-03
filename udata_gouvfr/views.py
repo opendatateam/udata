@@ -170,7 +170,7 @@ def openfield16():
                         nb_displayed_datasets=NB_DISPLAYED_DATASETS)
 
 
-@blueprint.route('/spd')
+@blueprint.route('/reference')
 def spd():
     datasets = Dataset.objects(badges__kind=SPD)
     return theme.render('spd.html', datasets=datasets, badge=SPD)
