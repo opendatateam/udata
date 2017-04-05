@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.0.4 (2017-04-05)
 
 - Introduce SPD page and badge
