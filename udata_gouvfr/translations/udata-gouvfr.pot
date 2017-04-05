@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata-gouvfr 1.0.1.dev0\n"
+"Project-Id-Version: udata-gouvfr 1.0.5.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-20 22:31+0100\n"
+"POT-Creation-Date: 2017-04-05 18:29+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,12 +37,16 @@ msgstr ""
 msgid "Dataconnexions 6 laureate"
 msgstr ""
 
-#: udata_gouvfr/models.py:32
+#: udata_gouvfr/models.py:33
 msgid "C³"
 msgstr ""
 
-#: udata_gouvfr/models.py:33
+#: udata_gouvfr/models.py:34
 msgid "Nec Mergitur"
+msgstr ""
+
+#: udata_gouvfr/models.py:36 udata_gouvfr/templates/spd.html:8
+msgid "Reference Data"
 msgstr ""
 
 #: udata_gouvfr/templates/c3.html:138 udata_gouvfr/templates/nec_mergitur.html:80
