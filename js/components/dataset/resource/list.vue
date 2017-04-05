@@ -153,8 +153,8 @@ export default {
     },
     events: {
         'uploader:progress': function(id, uploaded, total) {
-            this.$find('#progress-' + id)
-                .css('width',  Math.round(uploaded * 100 / total) + '%');
+            const el = this.$el.getElementById(`progress-${id}`);
+            el.style.width = `${Math.round(uploaded * 100 / total)}%`;
         },
         'uploader:complete': function(id, response) {
             const file = this.$uploader.getFile(id);

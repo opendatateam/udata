@@ -7,7 +7,6 @@
 </template>
 
 <script>
-import $ from 'jquery';
 import Vue from 'vue';
 
 import config from 'config';
@@ -29,8 +28,8 @@ export default {
     components: {AppHeader, Sidebar},
     events: {
         'navigation:toggled': function() {
-            $("body").toggleClass('sidebar-collapse');
-            $("body").toggleClass('sidebar-open');
+            document.body.classList.toggle('sidebar-collapse');
+            document.body.classList.toggle('sidebar-open');
         },
         notify: function(notification) {
             this.notifications.push(notification);
