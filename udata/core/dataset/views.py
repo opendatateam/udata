@@ -88,7 +88,6 @@ class DatasetDetailView(DatasetView, DetailView):
         context['reuses'] = Reuse.objects(datasets=self.dataset).visible()
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = ResourceEditPermission
-        context['discussions'] = Discussion.objects(subject=self.dataset)
 
         return context
 
