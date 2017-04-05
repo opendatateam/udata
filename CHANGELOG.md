@@ -5,6 +5,10 @@
 - Use the new entrypoint-based theme management
   [#164](https://github.com/etalab/udata-gouvfr/pull/164)
 
+## 1.0.4 (2017-04-05)
+
+- Introduce SPD page and badge
+
 ## 1.0.3 (2017-02-27)
 
 - Translations update

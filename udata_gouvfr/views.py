@@ -9,7 +9,10 @@ from udata.models import Reuse, Organization, Dataset
 from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
 
-from .models import DATACONNEXIONS_5_CANDIDATE, C3, NECMERGITUR, OPENFIELD16
+from .models import (
+    DATACONNEXIONS_5_CANDIDATE, C3, NECMERGITUR, OPENFIELD16, SPD
+)
+
 
 blueprint = I18nBlueprint('gouvfr', __name__,
                           template_folder='templates',
@@ -165,6 +168,12 @@ def openfield16():
                         datasets=datasets,
                         badge=OPENFIELD16,
                         nb_displayed_datasets=NB_DISPLAYED_DATASETS)
+
+
+@blueprint.route('/reference')
+def spd():
+    datasets = Dataset.objects(badges__kind=SPD)
+    return theme.render('spd.html', datasets=datasets, badge=SPD)
 
 
 @blueprint.route('/faq/', defaults={'section': 'home'})
