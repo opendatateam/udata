@@ -6,6 +6,8 @@
   [#845](https://github.com/opendatateam/udata/issues/845)
 - Proper badge display on dataset and organization page
   [#849](https://github.com/opendatateam/udata/issues/849)
+- Remove useless `discussions` from views contexts.
+  [#850](https://github.com/opendatateam/udata/pull/850)
 
 ## 1.0.6 (2017-04-01)
 
