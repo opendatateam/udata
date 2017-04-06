@@ -107,4 +107,4 @@ class BadgeMixin(object):
     def badge_label(self, badge):
         '''Display the badge label for a given kind'''
         kind = badge.kind if isinstance(badge, Badge) else badge
-        return this.__badges__[kind]
+        return self.__badges__[kind]
