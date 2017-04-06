@@ -7,9 +7,9 @@
                 src="{{ logo }}"
                 width="64" height="70">
         </div>
-        <div class="result-body ellipsis-dot">
-            <h4 class="result-title">{{ territory.html_title|safe }}</h4>
-            <div class="result-description">
+        <div class="result-body">
+            <h4 class="result-title ellipsis">{{ territory.html_title|safe }}</h4>
+            <div class="result-description clamp-2">
                 {{ _('INSEE code:') }} {{ territory.code }}<br/>
                 {% if territory.postal_string %}
                     {{ _('Postal code:') }} {{ territory.postal_string }}
