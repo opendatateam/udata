@@ -8,6 +8,8 @@
   [#849](https://github.com/opendatateam/udata/issues/849)
 - Remove useless `discussions` from views contexts.
   [#850](https://github.com/opendatateam/udata/pull/850)
+- Fix the inline resource edit button not redirecting to admin
+  [#852](https://github.com/opendatateam/udata/pull/852)
 
 ## 1.0.6 (2017-04-01)
 
