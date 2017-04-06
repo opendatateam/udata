@@ -4,6 +4,8 @@
 
 - Use the new entrypoint-based theme management
   [#164](https://github.com/etalab/udata-gouvfr/pull/164)
+- Adjust the dataset reuses title overflow for proper display
+  [#172](https://github.com/etalab/udata-gouvfr/pull/172)
 
 ## 1.0.4 (2017-04-05)
 
