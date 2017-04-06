@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Added a missing translation
+- Alphabetical ordering on SPD datasets
 
 ## 1.0.4 (2017-04-05)
 
