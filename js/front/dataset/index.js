@@ -88,9 +88,7 @@ new Vue({
          */
         showResource(id, e, isCommunity) {
             // Ensure edit button work
-            if ([e.target, e.target.parentNode].some((el) => {el.classList.contains('btn-edit');})) {
-                return;
-            }
+            if ([e.target, e.target.parentNode].some(el => el.classList.contains('btn-edit'))) return;
             e.preventDefault();
             const attr = isCommunity ? 'communityResources' : 'resources';
             const resource = this.dataset[attr].find(resource => resource['@id'] === id);
