@@ -4,6 +4,8 @@
 
 - Fix display for zone completer existing values
   [#845](https://github.com/opendatateam/udata/issues/845)
+- Proper badge display on dataset and organization page
+  [#849](https://github.com/opendatateam/udata/issues/849)
 
 ## 1.0.6 (2017-04-01)
 
