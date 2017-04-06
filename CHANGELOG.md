@@ -22,6 +22,8 @@
 - bleach and html5lib have been updated leading to more secure html/markdown cleanup
   and (better performances)[http://bluesock.org/~willkg/blog/dev/bleach_2_0.html]
   [#838](https://github.com/opendatateam/udata/pull/838)
+- Drop `jquery-slimscroll` and fix admin menu scrolling
+  [#851](https://github.com/opendatateam/udata/pull/851)
 
 ## 1.0.6 (2017-04-01)
 

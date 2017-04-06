@@ -21,7 +21,6 @@ Vue.config.debug = config.debug;
 
 Vue.use(require('plugins/util'));
 Vue.use(require('plugins/text'));
-Vue.use(require('plugins/jquery'));
 Vue.use(require('plugins/i18next'));
 Vue.use(require('plugins/markdown'));
 Vue.use(require('plugins/scroll-to'));
