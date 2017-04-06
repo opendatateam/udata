@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.0.5 (2017-04-06)
 
 - Added a missing translation
 - Alphabetical ordering on SPD datasets
