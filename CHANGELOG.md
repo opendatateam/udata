@@ -2,6 +2,15 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 1.0.5 (2017-04-06)
+
+- Added a missing translation
+- Alphabetical ordering on SPD datasets
+
+## 1.0.4 (2017-04-05)
+
 - Introduce SPD page and badge
 
 ## 1.0.3 (2017-02-27)
