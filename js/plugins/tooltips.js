@@ -71,7 +71,7 @@ export function install(Vue) {
      * Attach a popover on the element.
      */
     Vue.directive('popover', {
-        params: ['title', 'popoverTitle', 'popoverPlacement', 'popoverTrigger', 'popoverEffect', 'popoverLarge'],
+        params: ['title', 'popoverTitle', 'popoverPlacement', 'popoverTrigger', 'popoverEffect', 'popoverLarge', 'popoverClass'],
         /**
          * Insert the popover element and attach the event listeners
          */
@@ -90,8 +90,15 @@ export function install(Vue) {
                     placement: this.params.popoverPlacement || 'top',
                     effect: this.params.popoverEffect || 'fadein',
                     large: this.params.popoverLarge || false,
+                    extraclass: this.params.popoverClass,
                 }
             }, popover));
+
+            // Transclude child content if found
+            const content = this.el.querySelector('[data-popover-content]');
+            if (content) {
+                this.popover.content = content;
+            }
 
             switch(this.trigger) {
                 case 'hover':
@@ -140,38 +147,6 @@ export function install(Vue) {
             popoverTitle(value) {
                 this.popover.title = value;
             },
-        }
-    });
-
-    /**
-     * Attach a popover on the element.
-     */
-    Vue.directive('popover-content', {
-        /**
-         * Transclude the popover content into the popover
-         */
-        bind() {
-            const popover = this.findPopover();
-            if (!popover) {
-                log.error('popover-content need a parent popover directive');
-                return;
-            }
-            popover.content = this.el;
-        },
-        /**
-         * Find the closest parent node with a popover directive.
-         * @return {Vue} The target popover component
-         */
-        findPopover() {
-            let el = this.el;
-            while (el.parentElement) {
-                el = el.parentElement;
-                if (el._vue_directives) {
-                    for (const directive of el._vue_directives) {
-                        if (directive.name === 'popover') return directive.popover;
-                    }
-                }
-            }
         }
     });
 }

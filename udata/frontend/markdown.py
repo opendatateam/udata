@@ -5,7 +5,6 @@ from urlparse import urlparse
 
 import bleach
 import CommonMark
-from html5lib.sanitizer import HTMLSanitizer
 from flask import current_app, Markup
 from werkzeug.local import LocalProxy
 from jinja2.filters import do_truncate, do_striptags
@@ -19,7 +18,7 @@ EXCERPT_TOKEN = '<!--- --- -->'
 
 def avoid_mailto_callback(attrs, new=False):
     """Remove completely the link containing a `mailto`."""
-    if attrs['href'].startswith('mailto:'):
+    if attrs[(None, 'href')].startswith('mailto:'):
         return None
     return attrs
 
@@ -28,7 +27,7 @@ def source_tooltip_callback(attrs, new=False):
     """
     Add a `data-tooltip` attribute with `Source` content for embeds.
     """
-    attrs['data-tooltip'] = _('Source')
+    attrs[(None, 'data-tooltip')] = _('Source')
     return attrs
 
 
@@ -39,26 +38,19 @@ def nofollow_callback(attrs, new=False):
     otherwise add `nofollow`.
     That callback is not splitted in order to parse the URL only once.
     """
-    parsed_url = urlparse(attrs['href'])
+    parsed_url = urlparse(attrs[(None, 'href')])
     if parsed_url.netloc in ('', current_app.config['SERVER_NAME']):
-        attrs['href'] = '{scheme}://{netloc}{path}'.format(
+        attrs[(None, 'href')] = '{scheme}://{netloc}{path}'.format(
             scheme=current_app.config['USE_SSL'] and 'https' or 'http',
             netloc=current_app.config['SERVER_NAME'],
             path=parsed_url.path)
         return attrs
     else:
-        rel = [x for x in attrs.get('rel', '').split(' ') if x]
+        rel = [x for x in attrs.get((None, 'rel'), '').split(' ') if x]
         if 'nofollow' not in [x.lower() for x in rel]:
             rel.append('nofollow')
-        attrs['rel'] = ' '.join(rel)
+        attrs[(None, 'rel')] = ' '.join(rel)
         return attrs
-
-
-class KeepTokenSanitizer(HTMLSanitizer):
-    """Keep the `EXCERPT_TOKEN` with bleach."""
-
-    def sanitize_token(self, token):
-        return token
 
 
 class UDataMarkdown(object):
@@ -89,9 +81,8 @@ class UDataMarkdown(object):
             callbacks.append(source_tooltip_callback)
 
         # Turn string links into HTML ones *after* markdown transformation.
-        html = bleach.linkify(
-            html, tokenizer=KeepTokenSanitizer,
-            skip_pre=True, parse_email=True, callbacks=callbacks)
+        html = bleach.linkify(html, skip_tags=['pre'],
+                              parse_email=True, callbacks=callbacks)
         # Return a `Markup` element considered as safe by Jinja.
         return Markup(html)
 

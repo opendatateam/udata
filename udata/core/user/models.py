@@ -42,7 +42,7 @@ class UserSettings(db.EmbeddedDocument):
     prefered_language = db.StringField()
 
 
-class User(db.Document, WithMetrics, UserMixin):
+class User(WithMetrics, UserMixin, db.Document):
     slug = db.SlugField(
         max_length=255, required=True, populate_from='fullname')
     email = db.StringField(max_length=255, required=True, unique=True)
@@ -107,7 +107,7 @@ class User(db.Document, WithMetrics, UserMixin):
     @cached_property
     def organizations(self):
         from udata.core.organization.models import Organization
-        return Organization.objects(members__user=self)
+        return Organization.objects(members__user=self, deleted__exists=False)
 
     @property
     def sysadmin(self):

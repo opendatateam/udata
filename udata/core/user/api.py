@@ -34,7 +34,6 @@ from .api_fields import (
     user_role_fields,
 )
 from .forms import UserProfileForm, UserProfileAdminForm
-from .permissions import UserEditPermission
 from .search import UserSearch
 
 ns = api.namespace('users', 'User related operations')

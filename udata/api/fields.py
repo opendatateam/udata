@@ -59,13 +59,21 @@ class PreviousPageUrl(String):
 
 
 class ImageField(String):
-    def __init__(self, size=None, **kwargs):
+    def __init__(self, size=None, original=False, **kwargs):
         super(ImageField, self).__init__(**kwargs)
+        self.original = original
         self.size = size
 
     def format(self, field):
-        return (field(self.size, external=True)
-                if self.size else field(external=True))
+        if not field:
+            return
+        elif self.original:
+            return field.fs.url(field.original, external=True)
+        elif self.size:
+            return field(self.size, external=True)
+        else:
+            # This will respect max_size if defined
+            return field.fs.url(field.filename, external=True)
 
 
 def pager(page_fields):

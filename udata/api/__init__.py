@@ -9,6 +9,7 @@ from functools import wraps
 from flask import (
     current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
+from flask_fs import UnauthorizedFileType
 from flask_restplus import Api, Resource, inputs, cors
 
 from udata import search, theme, tracking
@@ -32,6 +33,14 @@ apidoc = I18nBlueprint('apidoc', __name__)
 
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = 'X-API-KEY'
+
+# TODO: make upstream flask-restplus automatically handle
+# flask-restplus headers and allow lazy evaluation
+# of headers (ie. callable)
+PREFLIGHT_HEADERS = (
+    HEADER_API_KEY,
+    'X-Fields',
+)
 
 
 class UDataApi(Api):
@@ -131,7 +140,12 @@ class UDataApi(Api):
 
 api = UDataApi(
     apiv1,
-    decorators=[csrf.exempt, cors.crossdomain(origin='*', credentials=True)],
+    decorators=[csrf.exempt,
+                cors.crossdomain(origin='*',
+                                 credentials=True,
+                                 headers=PREFLIGHT_HEADERS
+                )
+    ],
     version='1.0', title='uData API',
     description='uData API', default='site',
     default_label='Site global namespace'
@@ -209,6 +223,18 @@ def handle_value_error(error):
     return {'message': str(error)}, 400
 
 
+@api.errorhandler(UnauthorizedFileType)
+@api.marshal_with(default_error, code=400)
+def handle_unauthorized_file_type(error):
+    '''Error occuring when the user try to upload a non-allowed file type'''
+    url = url_for('api.allowed_extensions', _external=True)
+    msg = (
+        'This file type is not allowed.'
+        'The allowed file type list is available at {url}'
+    ).format(url=url)
+    return {'message': msg}, 400
+
+
 @apidoc.route('/api/')
 @apidoc.route('/api/1/')
 @api.documentation
@@ -239,7 +265,9 @@ def fix_apidoc_throbber():
 
 
 class API(Resource):  # Avoid name collision as resource is a core model
-    pass
+    @api.hide
+    def options(self):
+        pass  # Only here to allow default Flask response
 
 
 base_reference = api.model('BaseReference', {

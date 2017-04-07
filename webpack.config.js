@@ -6,8 +6,6 @@ const node_path = path.join(__dirname, 'node_modules');
 
 const css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap');
 const less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline');
-const handlebars_helpers = path.join(__dirname, 'js', 'templates', 'helpers');
-const hbs_loader = `handlebars?helperDirs[]=${handlebars_helpers}`;
 
 const languages = ['en', 'es', 'fr'];
 
@@ -41,28 +39,30 @@ module.exports = {
         ],
         alias: {
             'jquery-slimscroll': path.join(node_path, 'jquery-slimscroll/jquery.slimscroll'),
-            'handlebars': 'handlebars/runtime',
             'swaggerui': 'swagger-ui/dist',
         }
     },
     devtool: 'eval-source-map',
     module: {
         loaders: [
-            {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file'},
+            {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file-loader'},
             {test: /\.css$/, loader: css_loader},
             {test: /\.less$/, loader: less_loader},
-            {test: /\.vue$/, loader: 'vue'},
-            {test: /\.json$/, loader: 'json'},
-            {test: /\.hbs$/, loader: hbs_loader},
+            {test: /\.vue$/, loader: 'vue-loader'},
+            {test: /\.json$/, loader: 'json-loader'},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: 'file-loader?name=[name].[ext]'},
-            {test: /\.js$/, exclude: /node_modules/, loader: 'babel'},
+            {test: /\.js$/, loader: 'babel-loader', include: [
+                    path.resolve(__dirname, 'js'),
+                    path.resolve(__dirname, 'node_modules/vue-strap/src'),
+                ]
+            }
         ]
     },
     vue: {
         loaders: {
             css: css_loader,
             less: less_loader,
-            js: 'babel'
+            js: 'babel-loader'
         }
     },
     babel: {
@@ -72,7 +72,6 @@ module.exports = {
     },
     // Store initial values for easier inheritance
     defaults: {
-        hbs_loader,
         languages,
     },
     plugins: [
@@ -94,5 +93,10 @@ module.exports = {
             filename: 'common.js',
             minChunks: 10,  // (Modules must be shared between 10 entries)
         })
-    ]
+    ],
+    node: {
+        fs: 'empty',
+        net: 'empty',
+        tls: 'empty'
+    }
 };

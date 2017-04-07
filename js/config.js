@@ -39,6 +39,7 @@ if (userEl) {
         slug: userEl.dataset.slug,
         first_name: userEl.dataset.first_name,
         last_name: userEl.dataset.last_name,
+        avatar: userEl.dataset.avatar,
         roles: userEl.dataset.roles.split(','),
     };
 }
@@ -116,11 +117,6 @@ if (sentryEl) {
 }
 
 /**
- * Notifications container
- */
-export const notify_in = _meta('notify-in');
-
-/**
  * Whether territories are enabled or not.
  */
 export const is_territory_enabled = _jsonMeta('territory-enabled');
@@ -156,6 +152,12 @@ export const tiles_url = `https://cartodb-basemaps-{s}.global.ssl.fastly.net/lig
  */
 export const tiles_config = {subdomains: 'abcd', attribution: tiles_attributions};
 
+/**
+ * Tags constraints
+ * Should be kept synced with udata/tags.py in case of modification
+ */
+export const tags = {MIN_LENGTH: 3, MAX_LENGTH: 32};
+
 
 export default {
     user,
@@ -170,12 +172,12 @@ export default {
     admin_root,
     auth_url,
     sentry,
-    notify_in,
     check_urls,
     check_urls_ignore,
     is_territory_enabled,
     is_delete_me_enabled,
     hidpi,
+    tags,
     tiles_attributions,
     tiles_url,
     tiles_config,

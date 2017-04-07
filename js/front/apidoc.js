@@ -1,7 +1,7 @@
 /**
  * Display a SwaggerUI documentation
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 import 'less/udata/swagger.less';
 
@@ -18,8 +18,8 @@ import 'swaggerui/lib/jquery.slideto.min';
 import 'swaggerui/lib/jquery.wiggle.min';
 import 'script!swaggerui/lib/jquery.ba-bbq.min';
 
-import 'expose?Handlebars!handlebars';
-import 'script!swaggerui/lib/underscore-min';
+import 'script!swaggerui/lib/handlebars-4.0.5';
+import 'script!swaggerui/lib/lodash.min';
 import 'script!swaggerui/lib/backbone-min';
 import 'script!swaggerui/lib/jsoneditor.min';
 
@@ -30,14 +30,14 @@ SwaggerUi = window.SwaggerUi;
 window.marked = commonmark;
 marked.setOptions = function() {};
 
+// Fix legacy import from Swagger UI
+window.hljs = hljs;
+
 
 new Vue({
-    el: 'body',
+    mixins: [FrontMixin],
     ready() {
         hljs.initHighlightingOnLoad();
-        $('pre code').each(function(i, e) {
-            hljs.highlightBlock(e);
-        });
 
         const swaggerUi = new SwaggerUi({
             url: $('meta[name="swagger-specs"]').attr('content'),
@@ -45,16 +45,14 @@ new Vue({
             supportedSubmitMethods: ['get'],
             onComplete: function(swaggerApi, swaggerUi) {
                 log.debug('Loaded SwaggerUI');
-
-                $('#swagger-ui-container pre code').each(function(i, e) {
-                    hljs.highlightBlock(e);
-                });
             },
             onFailure: function() {
                 log.error('Unable to Load SwaggerUI');
             },
             docExpansion: 'none',
-            // jsonEditor: true,
+            jsonEditor: false,
+            defaultModelRendering: 'model',
+            validatorUrl: null,
             sorter: 'alpha'
         });
 

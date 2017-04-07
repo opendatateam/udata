@@ -18,7 +18,6 @@
             </div>
             <input name="q" type="search" class="form-control" autocomplete="off"
                 :placeholder="placeholder || _('Search')"
-                :value="$location.query.q"
                 v-model="query" debounce="200"
                 @keydown.up.prevent="up"
                 @keydown.down.prevent="down"
@@ -30,8 +29,7 @@
         </div>
     </div>
     <ul class="dropdown-menu suggestion" v-el:dropdown>
-        <li v-for="group in groups" track-by="id"
-            v-if="group.items.length" class="result-group">
+        <li v-for="group in groupsWithResults" track-by="id" class="result-group">
             <span v-if="group.loading" class="fa fa-spin fa-spinner group-status"></span>
             <strong class="search-header">{{ group.name }}</strong>
             <ul>
@@ -48,6 +46,7 @@
 
 <script>
 import { Cache } from 'cache';
+import placeholders from 'helpers/placeholders';
 
 function group(id, name, template) {
     return {id, name,
@@ -67,9 +66,10 @@ export default {
         territoryId: String,
     },
     data() {
+        const query = this.$location.query.q || '';
         return {
             current: -1,
-            query: '',
+            query: decodeURIComponent(query.replace('+', ' ')),
             show: false,
             cache: new Cache('site-search', sessionStorage),
             groups: [
@@ -79,6 +79,7 @@ export default {
                 group('territory', this._('Territories'), 'territory'),
             ],
             minLength: 2,
+            placeholders: placeholders,
         }
     },
     computed: {
@@ -90,18 +91,21 @@ export default {
                 }
             });
             return items;
+        },
+        groupsWithResults() {
+            return this.groups.filter(group => group.items.length);
         }
     },
     partials: {
         default: `<div class="logo">
-            <img :src="item.image_url" class="avatar" width="30" height="30" alt="">
+            <img :src="item.image_url || placeholders.generic" class="avatar" width="30" height="30" alt="">
             </div>
             <p v-html="item.title | highlight query"></p>`,
-        organization: `<div class="logo"><img :src="item.image_url" class="avatar" width="30" height="30" alt=""></div>
+        organization: `<div class="logo"><img :src="item.image_url || placeholders.organization" class="avatar" width="30" height="30" alt=""></div>
             <p v-html="item.name | highlight query"></p>
             <small v-if="item.acronym" v-html="item.acronym | highlight query"></small>`,
         territory: `<div class="logo">
-            <img :src="item.image_url" class="avatar" width="30" height="30" alt="">
+            <img :src="item.image_url || placeholders.territory" class="avatar" width="30" height="30" alt="">
             </div>
             <p v-html="item.title | highlight query"></p>
             <small v-if="item.parent">{{ item.parent }}</small>`,
@@ -188,10 +192,6 @@ export default {
 <style lang="less">
 .site-search {
     position: relative;
-
-    .form-group {
-        margin-bottom: 0;
-    }
 
     .result-group {
         position: relative;

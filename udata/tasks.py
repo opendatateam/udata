@@ -92,8 +92,7 @@ def init_app(app):
 
     from udata.models import db
     with app.app_context():
-        default_url = 'mongodb://{host}:{port}'.format(
-            host=db.connection.host, port=db.connection.port)
+        default_url = 'mongodb://{0}:{1}'.format(*db.connection.address)
     app.config.setdefault('CELERY_MONGODB_SCHEDULER_URL', default_url)
 
     celery.conf.update(app.config)

@@ -57,10 +57,12 @@
 import API from 'api';
 import Dataset from 'models/dataset';
 import CommunityResource from 'models/communityresource';
+import FormHorizontal from 'components/form/horizontal-form.vue';
 import UploaderMixin from 'mixins/uploader';
 
 
 export default {
+    components: {FormHorizontal},
     mixins: [UploaderMixin],
     props: {
         dataset: {
@@ -72,7 +74,7 @@ export default {
             default() {return new Resource()}
         },
     },
-    data: function() {
+    data() {
         return {
             fields: [{
                     id: 'title',
@@ -139,9 +141,7 @@ export default {
             return operations[endpoint].urlify(params);
         }
     },
-    components: {
-        'form-horizontal': require('components/form/horizontal-form.vue')
-    },
+
     events: {
         'uploader:progress': function(id, uploaded, total) {
             this.progress = Math.round(uploaded * 100 / total);
@@ -159,10 +159,10 @@ export default {
         }
     },
     methods: {
-        validate: function() {
+        validate() {
             return this.$refs.form.validate();
         },
-        serialize: function() {
+        serialize() {
             return this.$refs.form.serialize();
         }
     }

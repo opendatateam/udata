@@ -145,6 +145,29 @@ class Defaults(object):
 
     DELETE_ME = True
 
+    # Optimize uploaded images
+    FS_IMAGES_OPTIMIZE = True
+
+    # Default resources extensions whitelist
+    ALLOWED_RESOURCES_EXTENSIONS = [
+        # Base
+        'csv', 'txt', 'json', 'pdf', 'xml', 'rdf', 'rtf', 'xsd',
+        # OpenOffice
+        'ods', 'odt', 'odp', 'odg',
+        # Microsoft Office
+        'xls', 'xlsx', 'doc', 'docx', 'pps', 'ppt',
+        # Archives
+        'tar', 'gz', 'tgz', 'rar', 'zip', '7z', 'xz', 'bz2',
+        # Images
+        'jpeg', 'jpg', 'jpe', 'gif', 'png', 'dwg', 'svg', 'tiff', 'ecw', 'svgz', 'jp2',
+        # Geo
+        'shp', 'kml', 'kmz', 'gpx', 'shx', 'ovr', 'geojson',
+        # Meteorology
+        'grib2',
+        # Misc
+        'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl',
+    ]
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''

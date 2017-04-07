@@ -20,7 +20,7 @@ from udata.models import db
 from udata.utils import multi_to_dict
 from udata.i18n import gettext as _, format_date
 from udata.tests import TestCase, DBTestMixin, SearchTestMixin
-from udata.utils import faker, unique_string
+from udata.utils import faker
 
 
 #############################################################################
@@ -55,14 +55,14 @@ class FakeWithStringId(Fake):
 
 
 class FakeFactory(MongoEngineFactory):
-    title = factory.LazyAttribute(lambda o: faker.sentence())
+    title = factory.Faker('sentence')
 
     class Meta:
         model = Fake
 
 
 class FakeWithStringIdFactory(FakeFactory):
-    id = factory.LazyAttribute(lambda o: unique_string())
+    id = factory.Faker('unique_string')
 
     class Meta:
         model = FakeWithStringId
@@ -86,6 +86,7 @@ class FakeSearch(search.ModelSearchAdapter):
         'title': 'title.raw',
         'description': 'description.raw',
     }
+
 
 RANGE_LABELS = {
     'none': _('Never reused'),
@@ -239,6 +240,54 @@ class SearchQueryTest(SearchTestMixin, SearchTestCase):
         self.assert_dict_equal(first_function, {
             'filter': {'term': {'some_bool_field': True}},
             'boost_factor': 1.1,
+        })
+
+    def test_value_factor_without_parameters(self):
+        '''Search should handle field value factor without parameters'''
+        class FakeValueFactorSearch(FakeSearch):
+            boosters = [
+                search.ValueFactor('some_int_field')
+            ]
+
+        query = search.search_for(FakeValueFactorSearch)
+        body = get_body(query)
+        # Query should be wrapped in function_score
+        self.assertIn('function_score', body['query'])
+        self.assertIn('query', body['query']['function_score'])
+        self.assertIn('functions', body['query']['function_score'])
+        value_factor = body['query']['function_score']['functions'][0]
+        # Should add be field_value_factor with parameter function
+        self.assert_dict_equal(value_factor, {
+            'field_value_factor': {
+                'field': 'some_int_field'
+            }
+        })
+
+    def test_value_factor_with_parameters(self):
+        '''Search should handle field value factor with parameters'''
+        class FakeValueFactorSearch(FakeSearch):
+            boosters = [
+                search.ValueFactor('some_int_field',
+                                   factor=1.2,
+                                   modifier='sqrt',
+                                   missing=1)
+            ]
+
+        query = search.search_for(FakeValueFactorSearch)
+        body = get_body(query)
+        # Query should be wrapped in function_score
+        self.assertIn('function_score', body['query'])
+        self.assertIn('query', body['query']['function_score'])
+        self.assertIn('functions', body['query']['function_score'])
+        value_factor = body['query']['function_score']['functions'][0]
+        # Should add be field_value_factor with parameter function
+        self.assert_dict_equal(value_factor, {
+            'field_value_factor': {
+                'field': 'some_int_field',
+                'factor': 1.2,
+                'modifier': 'sqrt',
+                'missing': 1
+            }
         })
 
     def test_decay_function_scoring(self):

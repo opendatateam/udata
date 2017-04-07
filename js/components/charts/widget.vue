@@ -11,7 +11,7 @@
             display: inline-block;
             margin-right: 5px;
 
-            span {
+            .line-legend-icon {
                 display: inline-block;
                 width: 20px;
                 height: 16px;
@@ -27,6 +27,7 @@
 </style>
 
 <template>
+<div class="chart-widget">
     <box :title="title" :icon="icon"
         boxclass="box-solid"
         bodyclass="chart-responsive"
@@ -36,13 +37,15 @@
         </div>
         <div class="chart-legend" v-el:legend></div>
     </box>
+</div>
 </template>
 
 <script>
-import $ from 'jquery';
 import moment from 'moment';
 import Chart from 'chart.js';
 import 'Chart.StackedBar.js';
+
+import Box from 'components/containers/box.vue';
 
 /*
  * Set common global chart options
@@ -61,9 +64,11 @@ const AREA_OPTIONS = {
     scaleShowVerticalLines: true,
     bezierCurveTension: 0.3,
 };
-const LINE_OPTIONS = $.extend({}, AREA_OPTIONS, {
+
+const LINE_OPTIONS = Object.assign({}, AREA_OPTIONS, {
     datasetFill: false,
 });
+
 const BAR_OPTIONS = {
     scaleBeginAtZero: true,
     scaleShowGridLines: true,
@@ -75,9 +80,10 @@ const BAR_OPTIONS = {
     barDatasetSpacing: 1,
     datasetFill: false,
 };
-const STACKEDBAR_OPTIONS = $.extend({}, BAR_OPTIONS, {
+const STACKEDBAR_OPTIONS = Object.assign({}, BAR_OPTIONS, {
     scaleShowVerticalLines: false,
 });
+
 const COLORS = [
     '#a0d0e0',
     '#3c8dbc',
@@ -89,8 +95,7 @@ const COLORS = [
 
 
 export default {
-    name: 'chartjs-chart',
-    data: function() {
+    data() {
         return {
             chart: null,
             canvasHeight: null,
@@ -119,91 +124,80 @@ export default {
         }
     },
     computed: {
-        series: function() {
-            let series = this.y.map((item) => {
-                return item.id;
-            });
-            let raw = this.metrics.timeserie(series);
-            let data = {
-                labels: raw.map((item) => {
-                    return moment(item.date).format('L');
-                }),
-
+        series() {
+            const series = this.y.map(item => item.id);
+            const raw = this.metrics.timeserie(series);
+            return {
+                labels: raw.map(item => moment(item.date).format('L')),
                 datasets: this.y.map((serie, idx) => {
-                    let dataset = {label: serie.label};
-                    let color = serie.color || COLORS[idx];
+                    const dataset = {label: serie.label};
+                    const color = serie.color || COLORS[idx];
                     dataset.fillColor = this.toRGBA(color, .5);
                     dataset.strokeColor = color;
                     dataset.pointColor = color;
                     // datasetpointStrokeColor: "#c1c7d1",
                     dataset.pointHighlightFill = '#fff';
                     dataset.pointHighlightStroke = color;
-                    dataset.data = raw.map((item) => {
-                        return item[serie.id];
-                    });
+                    dataset.data = raw.map(item => item[serie.id]);
                     return dataset;
                 })
             };
-
-            return data;
         }
     },
-    components: {
-        box: require('components/containers/box.vue')
-    },
-    ready: function() {
+    components: {Box},
+    ready() {
         this.canvasHeight = this.$els.container.clientHeight;
         this.buildChart();
         this.metrics.$on('updated', this.buildChart.bind(this));
     },
-    beforeDestroy: function() {
+    beforeDestroy() {
         this.cleanChart();
     },
     watch: {
-        'y': function(new_value, old_value) {
+        y(new_value, old_value) {
             if (new_value != old_value) {
                 this.buildChart();
             }
         }
     },
     methods: {
-        buildChart: function() {
+        buildChart() {
             if (!this.y || !this.metrics || !this.chartType) {
                 return;
             }
-            let factory = this['build' + this.chartType];
-            let ctx = this.$els.canvas.getContext('2d');
+            const factory = this['build' + this.chartType];
+            const ctx = this.$els.canvas.getContext('2d');
             this.cleanChart();
             ctx.canvas.height = this.canvasHeight;
             this.chart = factory(ctx);
             this.$els.legend.innerHTML = this.chart.generateLegend();
         },
-        buildArea: function(ctx) {
+        buildArea(ctx) {
             return new Chart(ctx).Line(this.series, AREA_OPTIONS);
         },
-        buildBar: function(ctx) {
+        buildBar(ctx) {
             return new Chart(ctx).Bar(this.series, BAR_OPTIONS);
         },
-        buildStackedBar: function(ctx) {
+        buildStackedBar(ctx) {
             return new Chart(ctx).StackedBar(this.series, STACKEDBAR_OPTIONS);
         },
-        buildLine: function(ctx) {
+        buildLine(ctx) {
             return new Chart(ctx).Line(this.series, LINE_OPTIONS);
         },
-        cleanChart: function() {
+        cleanChart() {
             if (this.chart) {
                 this.chart.destroy();
                 this.chart = null;
             }
         },
-        toRGBA: function(hex, opacity) {
+        toRGBA(hex, opacity) {
             // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-            let shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+            const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
             hex = hex.replace(shorthandRegex, function(m, r, g, b) {
                 return r + r + g + g + b + b;
             });
 
-            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return result ?
                 'rgba('
                     + parseInt(result[1], 16) + ','

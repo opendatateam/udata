@@ -1,21 +1,21 @@
 /*
  * User display page
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 import log from 'logger';
 
 import Vue from 'vue';
 
-import {tabset} from 'vue-strap';
+import Tabset from 'vue-strap/src/Tabset.vue';
 
 import FollowButton from 'components/buttons/follow.vue';
 import ActivityTimeline from 'components/activities/timeline.vue';
 import Tab from 'components/tab';
 
 new Vue({
-    el: 'body',
-    components: {FollowButton, Tab, tabset, ActivityTimeline},
+    mixins: [FrontMixin],
+    components: {FollowButton, Tab, Tabset, ActivityTimeline},
     data() {
         return {
             // Current tab index

@@ -2,13 +2,17 @@
 from __future__ import unicode_literals
 
 import hashlib
+import math
 import re
+
+import factory
 
 from uuid import uuid4
 from datetime import date, datetime
 from calendar import monthrange
 from math import ceil
 from faker import Faker
+from faker.providers import BaseProvider
 
 
 def get_by(lst, field, value):
@@ -29,6 +33,7 @@ def multi_to_dict(multi):
 
 FIRST_CAP_RE = re.compile('(.)([A-Z][a-z]+)')
 ALL_CAP_RE = re.compile('([a-z0-9])([A-Z])')
+UUID_LENGTH = 36
 
 
 def camel_to_lodash(name):
@@ -199,10 +204,30 @@ def recursive_get(obj, key):
     return recursive_get(value, parts) if parts else value
 
 
-def unique_string(length=None):
-    '''Generate unique string'''
-    string = str(uuid4())
+def unique_string(length=UUID_LENGTH):
+    '''Generate a unique string'''
+    # We need a string at least as long as length
+    string = str(uuid4()) * int(math.ceil(length / float(UUID_LENGTH)))
     return string[:length] if length else string
 
 
+class UDataProvider(BaseProvider):
+    '''
+    A Faker provider for UData missing requirements.
+
+    Might be conributed to upstream Faker project
+    '''
+    def unique_string(self, length=UUID_LENGTH):
+        '''Generate a unique string'''
+        return unique_string(length)
+
+
 faker = Faker()
+
+
+def add_faker_provider(provider):
+    faker.add_provider(provider)
+    factory.Faker.add_provider(provider)
+
+
+add_faker_provider(UDataProvider)

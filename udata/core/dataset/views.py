@@ -7,7 +7,7 @@ from werkzeug.contrib.atom import AtomFeed
 from udata.frontend.views import DetailView, SearchView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Discussion, Follow, Reuse, CommunityResource
-from udata.core.site.views import current_site
+from udata.core.site.models import current_site
 from udata.sitemap import sitemap
 from udata.utils import get_by
 
@@ -114,7 +114,7 @@ def resource_redirect(id):
         resource = get_by(dataset.resources, 'id', id)
     else:
         resource = CommunityResource.objects(id=id).first()
-    return redirect(resource.url) if resource else abort(404)
+    return redirect(resource.url.strip()) if resource else abort(404)
 
 
 @sitemap.register_generator

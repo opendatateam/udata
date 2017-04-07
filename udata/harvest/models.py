@@ -7,7 +7,7 @@ from urlparse import urlparse
 
 from werkzeug import cached_property
 
-from udata.models import db, Dataset, OwnedByQuerySet
+from udata.models import db, Dataset
 from udata.i18n import lazy_gettext as _
 
 
@@ -82,12 +82,12 @@ class HarvestSourceValidation(db.EmbeddedDocument):
     comment = db.StringField()
 
 
-class HarvestSourceQuerySet(OwnedByQuerySet):
+class HarvestSourceQuerySet(db.OwnedQuerySet):
     def visible(self):
         return self(deleted=None)
 
 
-class HarvestSource(db.Document):
+class HarvestSource(db.Owned, db.Document):
     name = db.StringField(max_length=255)
     slug = db.SlugField(max_length=255, required=True, unique=True,
                         populate_from='name', update=True)
@@ -106,10 +106,6 @@ class HarvestSource(db.Document):
                                           default=HarvestSourceValidation)
 
     deleted = db.DateTimeField()
-
-    owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
-    organization = db.ReferenceField('Organization',
-                                     reverse_delete_rule=db.NULLIFY)
 
     @property
     def domain(self):
@@ -131,10 +127,8 @@ class HarvestSource(db.Document):
         'indexes': [
             '-created_at',
             'slug',
-            'organization',
-            'owner',
             'deleted',
-        ],
+        ] + db.Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'queryset_class': HarvestSourceQuerySet,
     }

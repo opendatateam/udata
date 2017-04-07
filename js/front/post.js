@@ -1,7 +1,7 @@
 /**
- * Dataset display page JS module
+ * Post display page JS module
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
 import log from 'logger';
 
@@ -12,7 +12,7 @@ import ShareButton from 'components/buttons/share.vue';
 
 
 new Vue({
-    el: 'body',
+    mixins: [FrontMixin],
     components: {ShareButton},
     ready() {
         log.debug('Post page ready');

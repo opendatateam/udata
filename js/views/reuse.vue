@@ -2,10 +2,10 @@
 <layout :title="reuse.title || ''" :subtitle="_('Reuse')"
     :actions="actions" :badges="badges" :page="reuse.page || ''">
     <div class="row">
-        <sbox class="col-lg-4 col-xs-6" v-for="b in boxes"
+        <small-box class="col-lg-4 col-xs-6" v-for="b in boxes"
             :value="b.value" :label="b.label" :color="b.color"
             :icon="b.icon" :target="b.target">
-        </sbox>
+        </small-box>
     </div>
     <div class="row">
         <reuse-details :reuse="reuse" class="col-xs-12 col-md-6"></reuse-details>
@@ -21,11 +21,11 @@
 
     <div class="row">
         <issue-list id="issues-widget" class="col-xs-12 col-md-6" :issues="issues"></issue-list>
-        <discussions id="discussions-widget" class="col-xs-12 col-md-6" :discussions="discussions"></discussions>
+        <discussion-list id="discussions-widget" class="col-xs-12 col-md-6" :discussions="discussions"></discussion-list>
     </div>
 
     <div class="row">
-        <followers id="followers-widget" class="col-xs-12" :followers="followers"></followers>
+        <follower-list id="followers-widget" class="col-xs-12" :followers="followers"></follower-list>
     </div>
 </layout>
 </template>
@@ -40,39 +40,20 @@ import Issues from 'models/issues';
 import Discussions from 'models/discussions';
 import mask from 'models/mask';
 // Widgets
+import Chart from 'components/charts/widget.vue';
 import DatasetCards from 'components/dataset/card-list.vue';
 import DiscussionList from 'components/discussions/list.vue';
+import FollowerList from 'components/follow/list.vue';
 import IssueList from 'components/issues/list.vue';
 import Layout from 'components/layout.vue';
+import ReuseDetails from 'components/reuse/details.vue';
+import SmallBox from 'components/containers/small-box.vue';
 
 const MASK = `datasets{${mask(DatasetCards.MASK)}},*`;
 
 export default {
-    name: 'ReuseView',
+    components: {SmallBox, Chart, ReuseDetails, FollowerList, DiscussionList, IssueList, DatasetCards, Layout},
     data() {
-        const actions = [{
-                label: this._('Edit'),
-                icon: 'edit',
-                method: this.edit
-            }, {
-                label: this._('Transfer'),
-                icon: 'send',
-                method: this.transfer_request
-            }, {
-                label: this._('Delete'),
-                icon: 'trash',
-                method: this.confirm_delete
-            }];
-
-        if (this.$root.me.is_admin) {
-            actions.push({divider: true});
-            actions.push({
-                label: this._('Badges'),
-                icon: 'bookmark',
-                method: this.setBadges
-            });
-        }
-
         return {
             reuse: new Reuse({mask: MASK}),
             metrics: new Metrics({query: {
@@ -82,7 +63,6 @@ export default {
             followers: new Followers({ns: 'reuses', query: {page_size: 10}}),
             issues: new Issues({query: {sort: '-created', page_size: 10}, mask: IssueList.MASK}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}, mask: DiscussionList.MASK}),
-            actions: actions,
             badges: [],
             y: [{
                 id: 'views',
@@ -94,6 +74,31 @@ export default {
         };
     },
     computed: {
+        actions() {
+            const actions = [{
+                    label: this._('Edit'),
+                    icon: 'edit',
+                    method: this.edit
+                }, {
+                    label: this._('Transfer'),
+                    icon: 'send',
+                    method: this.transfer_request
+                }, {
+                    label: this._('Delete'),
+                    icon: 'trash',
+                    method: this.confirm_delete
+                }];
+
+            if (this.$root.me.is_admin) {
+                actions.push({divider: true});
+                actions.push({
+                    label: this._('Badges'),
+                    icon: 'bookmark',
+                    method: this.setBadges
+                });
+            }
+            return actions;
+        },
         boxes() {
             if (!this.reuse.metrics) {
                 return [];
@@ -118,16 +123,6 @@ export default {
                 target: '#traffic'
             }];
         }
-    },
-    components: {
-        sbox: require('components/containers/small-box.vue'),
-        chart: require('components/charts/widget.vue'),
-        'reuse-details': require('components/reuse/details.vue'),
-        followers: require('components/follow/list.vue'),
-        DiscussionList,
-        IssueList,
-        DatasetCards,
-        Layout
     },
     events: {
         'dataset-card-list:submit': function(ids) {

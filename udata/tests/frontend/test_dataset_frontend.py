@@ -8,7 +8,8 @@ import feedparser
 from flask import url_for
 
 from udata.core.dataset.factories import (
-    ResourceFactory, DatasetFactory, LicenseFactory, CommunityResourceFactory
+    ResourceFactory, DatasetFactory, LicenseFactory, CommunityResourceFactory,
+    VisibleDatasetFactory
 )
 from udata.core.user.factories import UserFactory
 from udata.core.organization.factories import OrganizationFactory
@@ -55,6 +56,13 @@ class DatasetBlueprintTest(FrontTestCase):
 
     def test_render_display(self):
         '''It should render the dataset page'''
+        dataset = VisibleDatasetFactory()
+        url = url_for('datasets.show', dataset=dataset)
+        response = self.get(url)
+        self.assert200(response)
+
+    def test_json_ld(self):
+        '''It should render a json-ld markup into the dataset page'''
         resource = ResourceFactory(format='png',
                                    description='* Title 1\n* Title 2',
                                    metrics={'views': 10})
@@ -65,6 +73,12 @@ class DatasetBlueprintTest(FrontTestCase):
                                  description='a&éèëù$£',
                                  owner=UserFactory(),
                                  extras={'foo': 'bar'})
+        community_resource = CommunityResourceFactory(
+            dataset=dataset,
+            format='csv',
+            description='* Title 1\n* Title 2',
+            metrics={'views': 42})
+
         url = url_for('datasets.show', dataset=dataset)
         response = self.get(url)
         self.assert200(response)
@@ -82,32 +96,63 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertEquals(json_ld['name'], dataset.title)
         self.assertEquals(json_ld['keywords'], 'bar,foo')
         self.assertEquals(len(json_ld['distribution']), 1)
-        for json_ld_resource in json_ld['distribution']:
-            self.assertEquals(json_ld_resource['@type'], 'DataDownload')
-            self.assertEquals(json_ld_resource['@id'], str(resource.id))
-            self.assertEquals(json_ld_resource['url'], resource.latest)
-            self.assertEquals(json_ld_resource['name'], resource.title)
-            self.assertEquals(json_ld_resource['contentUrl'], resource.url)
-            self.assertEquals(json_ld_resource['dateCreated'][:16],
-                              resource.created_at.isoformat()[:16])
-            self.assertEquals(json_ld_resource['dateModified'][:16],
-                              resource.modified.isoformat()[:16])
-            self.assertEquals(json_ld_resource['datePublished'][:16],
-                              resource.published.isoformat()[:16])
-            self.assertEquals(json_ld_resource['encodingFormat'], 'png')
-            self.assertEquals(json_ld_resource['contentSize'],
-                              resource.filesize)
-            self.assertEquals(json_ld_resource['fileFormat'], resource.mime)
-            self.assertEquals(json_ld_resource['description'],
-                              'Title 1 Title 2')
-            self.assertEquals(json_ld_resource['interactionStatistic'],
-                              {
-                                  '@type': 'InteractionCounter',
-                                  'interactionType': {
-                                      '@type': 'DownloadAction',
-                                  },
-                                  'userInteractionCount': 10,
-                              })
+
+        json_ld_resource = json_ld['distribution'][0]
+        self.assertEquals(json_ld_resource['@type'], 'DataDownload')
+        self.assertEquals(json_ld_resource['@id'], str(resource.id))
+        self.assertEquals(json_ld_resource['url'], resource.latest)
+        self.assertEquals(json_ld_resource['name'], resource.title)
+        self.assertEquals(json_ld_resource['contentUrl'], resource.url)
+        self.assertEquals(json_ld_resource['dateCreated'][:16],
+                          resource.created_at.isoformat()[:16])
+        self.assertEquals(json_ld_resource['dateModified'][:16],
+                          resource.modified.isoformat()[:16])
+        self.assertEquals(json_ld_resource['datePublished'][:16],
+                          resource.published.isoformat()[:16])
+        self.assertEquals(json_ld_resource['encodingFormat'], 'png')
+        self.assertEquals(json_ld_resource['contentSize'],
+                          resource.filesize)
+        self.assertEquals(json_ld_resource['fileFormat'], resource.mime)
+        self.assertEquals(json_ld_resource['description'],
+                          'Title 1 Title 2')
+        self.assertEquals(json_ld_resource['interactionStatistic'],
+                          {
+                              '@type': 'InteractionCounter',
+                              'interactionType': {
+                                  '@type': 'DownloadAction',
+                              },
+                              'userInteractionCount': 10,
+                          })
+
+        self.assertEquals(len(json_ld['contributedDistribution']), 1)
+        json_ld_resource = json_ld['contributedDistribution'][0]
+        self.assertEquals(json_ld_resource['@type'], 'DataDownload')
+        self.assertEquals(json_ld_resource['@id'], str(community_resource.id))
+        self.assertEquals(json_ld_resource['url'], community_resource.latest)
+        self.assertEquals(json_ld_resource['name'], community_resource.title)
+        self.assertEquals(json_ld_resource['contentUrl'],
+                          community_resource.url)
+        self.assertEquals(json_ld_resource['dateCreated'][:16],
+                          community_resource.created_at.isoformat()[:16])
+        self.assertEquals(json_ld_resource['dateModified'][:16],
+                          community_resource.modified.isoformat()[:16])
+        self.assertEquals(json_ld_resource['datePublished'][:16],
+                          community_resource.published.isoformat()[:16])
+        self.assertEquals(json_ld_resource['encodingFormat'],
+                          community_resource.format)
+        self.assertEquals(json_ld_resource['contentSize'],
+                          community_resource.filesize)
+        self.assertEquals(json_ld_resource['fileFormat'],
+                          community_resource.mime)
+        self.assertEquals(json_ld_resource['description'], 'Title 1 Title 2')
+        self.assertEquals(json_ld_resource['interactionStatistic'], {
+            '@type': 'InteractionCounter',
+            'interactionType': {
+                '@type': 'DownloadAction',
+            },
+            'userInteractionCount': 42,
+        })
+
         self.assertEquals(json_ld['extras'],
                           [{
                               '@type': 'http://schema.org/PropertyValue',
@@ -164,6 +209,16 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.get(url_for('datasets.resource',
                                     id=resource.id))
         self.assert404(response)
+
+    def test_resource_latest_url_stripped(self):
+        '''It should return strip extras spaces from the resource URL'''
+        url = 'http://www.somewhere.com/path/with/spaces/   '
+        resource = ResourceFactory(url=url)
+        DatasetFactory(resources=[resource])
+        response = self.get(url_for('datasets.resource',
+                                    id=resource.id))
+        self.assertStatus(response, 302)
+        self.assertEqual(response.location, url.strip())
 
     def test_recent_feed(self):
         datasets = [DatasetFactory(

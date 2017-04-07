@@ -8,6 +8,7 @@
     'title': _('Search'),
     'description': _("%(site)s search", site=config['SITE_TITLE']),
     'keywords': [_('search')],
+    'robots': 'noindex',
 } %}
 
 {% set bundle = 'search' %}
@@ -15,7 +16,6 @@
 {% set datasets_search_url = url_for('datasets.list') %}
 {% set reuses_search_url = url_for('reuses.list') %}
 {% set organizations_search_url = url_for('organizations.list') %}
-{% set users_search_url = url_for('users.list') %}
 
 {% block breadcrumb_bar %}
 <!-- Nav tabs -->
@@ -44,16 +44,8 @@
             </a>
         </li>
     {% endif %}
-    {% if users %}
-        <li{% if not datasets and not reuses and not organizations %} class="active"{% endif %}>
-            <a href="#users" data-toggle="tab">
-                {{ _('Users') }}
-                <span class="badge">{{ users.total }}</span>
-            </a>
-        </li>
-    {% endif %}
     {% if territories %}
-        <li{% if not datasets and not reuses and not organizations and not users %} class="active"{% endif %}>
+        <li{% if not datasets and not reuses and not organizations %} class="active"{% endif %}>
             {% set total=territories|length %}
             {% if total==1 %}
                 <a href="{{ territories.0.url }}">
@@ -122,23 +114,12 @@
     ) }}
     </div>
 {% endif %}
-{% if users %}
-    <div class="btn-toolbar search-toolbar wrapper hide" data-tab="#users">
-    {{ s.breadcrum_toolbar(users, url=users_search_url,
-        last_name=( _('Last Name'), 'asc'),
-        first_name=( _('First Name'), 'asc'),
-        datasets=(_('Datasets'), 'desc'),
-        reuses=(_('Reuses'), 'desc'),
-        followers=(_('Followers'), 'desc')
-    ) }}
-    </div>
-{% endif %}
 {% endblock %}
 
 {% block main_content %}
 <div class="tab-content">
 
-    {% if not datasets and not reuses and not organizations and not users and not territories %}
+    {% if not datasets and not reuses and not organizations and not territories %}
         <p class="text-center">
             <strong>
                 {{ _('No results found, try to be less specific (or fix your typos?)') }}
@@ -225,35 +206,8 @@
         {% endif %}
     </div>
 
-    <div class="tab-pane row{% if users and not organizations and not reuses and not datasets %} active{% endif %}" id="users">
-        {% if users %}
-            <div class="col-md-8 col-lg-9 smaller">
-                <ul class="search-results">
-                    {% for user in users %}
-                    {% include theme('user/search-result.html') %}
-                    {% endfor %}
-                </ul>
-                {% if users.has_next %}
-                <p class="text-center">
-                    <a class="btn btn-grey btn-sm" href="{{ url_for('users.list', **request.args) }}">
-                        <span class="glyphicon glyphicon-list"></span>
-                        {{ _('See the %(total)s results', total=users.total) }}
-                    </a>
-                </p>
-                {% endif %}
-            </div>
-
-            <aside class="col-md-4 col-lg-3">
-                {% set search_url = users_search_url %}
-                {% include theme('user/search-panel.html') %}
-            </aside>
-        {% else %}
-        <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
-        {% endif %}
-    </div>
-
     {% if territories %}
-    <div class="tab-pane row{% if territories and not users and not organizations and not reuses and not datasets %} active{% endif %}" id="territories">
+    <div class="tab-pane row{% if territories and not organizations and not reuses and not datasets %} active{% endif %}" id="territories">
         <div class="col-xs-12 smaller">
             <ul class="search-results">
                 {% for territory in territories %}

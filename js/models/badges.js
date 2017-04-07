@@ -1,7 +1,7 @@
 import API from 'api';
 import BaseError from 'models/error';
 
-export class BadgeError extends BaseError {};
+export class BadgeError extends BaseError {}
 
 /**
  * Known badges
@@ -26,30 +26,31 @@ export class Badges {
         this._types = types;
 
         // Build a getter for each badges type
-        for (let name of Object.keys(types)) {
+        for (const name of Object.keys(types)) {
             this._buildProperty(name);
         }
     }
 
     _buildProperty(name) {
         Object.defineProperty(this, name, {
-            get: function() {
+            get() {
                 if (this._badges.hasOwnProperty(name)) {
                     return this._badges[name];
                 }
 
-                let ns = this._types[name],
-                    operation = 'available_' + name + '_badges';
+                const ns = this._types[name];
+                const operation = 'available_' + name + '_badges';
+                const badges = this._badges[name] = {};
 
-                if (!API.hasOwnProperty(ns) || !API[ns].hasOwnProperty(operation)) {
-                    throw new BadgeError(`Badge for ${name} does not exists`);
-                }
+                API.onReady(() => {
+                    if (!API.hasOwnProperty(ns) || !API[ns].hasOwnProperty(operation)) {
+                        throw new BadgeError(`Badge for "${name}" does not exists`);
+                    }
 
-                let badges = this._badges[name] = {};
-
-                API[ns][operation]({}, (response) => {
-                    Object.assign(badges, response.obj);
-                });
+                    API[ns][operation]({}, (response) => {
+                        Object.assign(badges, response.obj);
+                    });
+                })
 
                 return badges;
             }
@@ -72,15 +73,15 @@ export class Badges {
      * @param {Function} callback An optionnal callback function(badge)
      */
     add(obj, kind, callback) {
-        let data = {payload: {kind: kind}},
-            type = obj.constructor.__badges_type__,
-            key = obj.constructor.__key__ || type,
-            ns = this._types[type],
-            operation = 'add_' + type + '_badge';
+        const data = {payload: {kind: kind}};
+        const type = obj.constructor.__badges_type__;
+        const key = obj.constructor.__key__ || type;
+        const ns = this._types[type];
+        const operation = 'add_' + type + '_badge';
 
         data[key] = obj.id;
 
-        API[ns][operation](data, function(response) {
+        API[ns][operation](data, (response) => {
             obj.badges.push(response.obj);
             if (callback) {
                 callback(response.obj);
@@ -95,26 +96,24 @@ export class Badges {
      * @param {Function} callback An optionnal callback
      */
     remove(obj, kind, callback) {
-        let data = {badge_kind: kind},
-            type = obj.constructor.__badges_type__,
-            key = obj.constructor.__key__ || type,
-            ns = this._types[type],
-            operation = 'delete_' + type + '_badge';
+        const data = {badge_kind: kind};
+        const type = obj.constructor.__badges_type__;
+        const key = obj.constructor.__key__ || type;
+        const ns = this._types[type];
+        const operation = 'delete_' + type + '_badge';
 
         data[key] = obj.id;
 
-        API[ns][operation](data, function(response) {
-            let badge = obj.badges.filter(function(o) {
-                    return o.kind === kind;
-                })[0];
+        API[ns][operation](data, () => {
+            const badge = obj.badges.filter(o => o.kind === kind)[0];
             obj.badges.$remove(badge);
             if (callback) {
                 callback();
             }
         });
     }
-};
+}
 
-export var badges = new Badges(TYPES);
+export const badges = new Badges(TYPES);
 
 export default badges;

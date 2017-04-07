@@ -23,8 +23,6 @@ from udata.i18n import lazy_gettext as _
 from udata import tags
 from udata.utils import to_iso_date, get_by
 
-# _ = lambda s: s
-
 
 class FieldHelper(object):
     def __init__(self, *args, **kwargs):
@@ -83,7 +81,7 @@ class IntegerField(FieldHelper, fields.IntegerField):
     pass
 
 
-class RolesField(FieldHelper, fields.StringField):
+class RolesField(Field):
     def process_formdata(self, valuelist):
         self.data = []
         for name in valuelist:
@@ -96,14 +94,13 @@ class RolesField(FieldHelper, fields.StringField):
 
 
 class DateTimeField(Field, fields.DateTimeField):
-
     def process_formdata(self, valuelist):
         if valuelist:
             dt = valuelist[0]
             self.data = parse(dt) if isinstance(dt, basestring) else dt
 
 
-class UUIDField(Field, fields.HiddenField):
+class UUIDField(Field):
     def process_formdata(self, valuelist):
         if valuelist:
             try:
@@ -129,7 +126,7 @@ class FileField(FieldHelper, fields.FileField):
     pass
 
 
-class URLField(FieldHelper, EmptyNone, html5.URLField):
+class URLField(EmptyNone, Field):
     def pre_validate(self, form):
         if self.data:
             try:
@@ -138,54 +135,10 @@ class URLField(FieldHelper, EmptyNone, html5.URLField):
                 raise validators.ValidationError(_('Invalid URL'))
         return True
 
-
-class TmpFilename(fields.HiddenField):
-    def _value(self):
-        return ''
-
-
-class BBoxField(fields.HiddenField):
-    def _value(self):
-        if self.data:
-            return ','.join([str(x) for x in self.data])
-        else:
-            return ''
-
     def process_formdata(self, valuelist):
-        if valuelist:
-            self.data = [int(float(x)) for x in valuelist[0].split(',')]
-        else:
-            self.data = None
-
-
-class ImageForm(WTForm):
-    filename = TmpFilename()
-    bbox = BBoxField(validators=[validators.optional()])
-
-
-class ImageField(FieldHelper, fields.FormField):
-    def __init__(self, label=None, validators=None, **kwargs):
-        self.sizes = kwargs.pop('sizes', [100])
-        self.placeholder = kwargs.pop('placeholder', 'default')
-        super(ImageField, self).__init__(ImageForm, label, validators,
-                                         **kwargs)
-
-    def process(self, formdata, data=unset_value):
-        self.src = data(100) if isinstance(data, ImageReference) else None
-        super(ImageField, self).process(formdata, data)
-
-    def populate_obj(self, obj, name):
-        field = getattr(obj, name)
-        bbox = self.form.bbox.data or None
-        filename = self.form.filename.data or None
-        if filename and filename in tmp:
-            with tmp.open(filename, 'rb') as infile:
-                field.save(infile, filename, bbox=bbox)
-            tmp.delete(filename)
-
-    @property
-    def endpoint(self):
-        return url_for('storage.upload', name='tmp')
+        super(URLField, self).process_formdata(valuelist)
+        if self.data:
+            self.data = self.data.strip()
 
 
 class UploadableURLField(URLField):
@@ -256,6 +209,55 @@ class FormField(FieldHelper, fields.FormField):
         )
 
 
+class TmpFilename(Field):
+    def _value(self):
+        return ''
+
+
+class BBoxField(Field):
+    def _value(self):
+        if self.data:
+            return ','.join([str(x) for x in self.data])
+        else:
+            return ''
+
+    def process_formdata(self, valuelist):
+        if valuelist:
+            self.data = [int(float(x)) for x in valuelist[0].split(',')]
+        else:
+            self.data = None
+
+
+class ImageForm(WTForm):
+    filename = TmpFilename()
+    bbox = BBoxField(validators=[validators.optional()])
+
+
+class ImageField(FormField):
+    def __init__(self, label=None, validators=None, **kwargs):
+        self.sizes = kwargs.pop('sizes', [100])
+        self.placeholder = kwargs.pop('placeholder', 'default')
+        super(ImageField, self).__init__(ImageForm, label, validators,
+                                         **kwargs)
+
+    def process(self, formdata, data=unset_value):
+        self.src = data(100) if isinstance(data, ImageReference) else None
+        super(ImageField, self).process(formdata, data)
+
+    def populate_obj(self, obj, name):
+        field = getattr(obj, name)
+        bbox = self.form.bbox.data or None
+        filename = self.form.filename.data or None
+        if filename and filename in tmp:
+            with tmp.open(filename, 'rb') as infile:
+                field.save(infile, filename, bbox=bbox)
+            tmp.delete(filename)
+
+    @property
+    def endpoint(self):
+        return url_for('storage.upload', name='tmp')
+
+
 def nullable_text(value):
     return None if value == 'None' else fields.core.text_type(value)
 
@@ -306,7 +308,7 @@ class SelectMultipleField(FieldHelper, fields.SelectMultipleField):
             yield (value, label, selected)
 
 
-class TagField(StringField):
+class TagField(Field):
     def _value(self):
         if self.data:
             return ','.join(self.data)
@@ -382,11 +384,10 @@ class ModelField(Field):
                     message = _('Expect both class and identifier')
                     raise validators.ValidationError(message)
 
-            try:
-                model = db.resolve_model(specs['class'])
-            except db.NotRegistered:
-                message = _('{0} does not exists').format(specs['class'])
-                raise validators.ValidationError(message)
+            # No try/except required
+            # In case of error, ValueError is raised
+            # and is properly handled as form validation error
+            model = db.resolve_model(specs['class'])
 
             try:
                 self.data = model.objects.only('id').get(id=clean_oid(specs, model))
@@ -532,19 +533,19 @@ class NestedModelList(fields.FieldList):
         return super(NestedModelList, self)._add_entry(formdata, data, index)
 
 
-class DatasetListField(ModelList, StringField):
+class DatasetListField(ModelList, Field):
     model = Dataset
 
 
-class ReuseListField(ModelList, StringField):
+class ReuseListField(ModelList, Field):
     model = Reuse
 
 
-class UserField(ModelFieldMixin, StringField):
+class UserField(ModelFieldMixin, Field):
     model = User
 
 
-class DatasetField(ModelFieldMixin, StringField):
+class DatasetField(ModelFieldMixin, Field):
     model = Dataset
 
 
@@ -552,7 +553,7 @@ class MarkdownField(FieldHelper, fields.TextAreaField):
     widget = widgets.MarkdownEditor()
 
 
-class DateRangeField(FieldHelper, fields.StringField):
+class DateRangeField(Field):
     def _value(self):
         if self.data:
             return ' - '.join([to_iso_date(self.data.start),
@@ -587,7 +588,7 @@ def default_owner():
         return current_user._get_current_object()
 
 
-class CurrentUserField(FieldHelper, ModelFieldMixin, fields.HiddenField):
+class CurrentUserField(ModelFieldMixin, Field):
     model = User
 
     def __init__(self, *args, **kwargs):
@@ -610,7 +611,7 @@ class CurrentUserField(FieldHelper, ModelFieldMixin, fields.HiddenField):
         return True
 
 
-class PublishAsField(FieldHelper, ModelFieldMixin, fields.HiddenField):
+class PublishAsField(ModelFieldMixin, Field):
     model = Organization
     owner_field = 'owner'
 
@@ -641,7 +642,7 @@ class PublishAsField(FieldHelper, ModelFieldMixin, fields.HiddenField):
         return True
 
 
-class ExtrasField(FieldHelper, fields.Field):
+class ExtrasField(Field):
     def __init__(self, *args, **kwargs):
         if 'extras' not in kwargs:
             raise ValueError('extras parameter should be specified')

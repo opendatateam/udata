@@ -9,7 +9,7 @@ from werkzeug import cached_property
 from udata.core.storages import images, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import db, BadgeMixin, WithMetrics, OwnedByQuerySet
+from udata.models import db, BadgeMixin, WithMetrics
 from udata.utils import hash_url
 
 __all__ = ('Reuse', 'REUSE_TYPES')
@@ -31,7 +31,7 @@ IMAGE_SIZES = [100, 50, 25]
 IMAGE_MAX_SIZE = 800
 
 
-class ReuseQuerySet(OwnedByQuerySet):
+class ReuseQuerySet(db.OwnedQuerySet):
     def visible(self):
         return self(private__ne=True, datasets__0__exists=True, deleted=None)
 
@@ -41,8 +41,8 @@ class ReuseQuerySet(OwnedByQuerySet):
                     db.Q(deleted__ne=None))
 
 
-class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
-    title = db.StringField(max_length=255, required=True)
+class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
+    title = db.StringField(required=True)
     slug = db.SlugField(
         max_length=255, required=True, populate_from='title', update=True)
     description = db.StringField(required=True)
@@ -59,9 +59,6 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
     # badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
 
     private = db.BooleanField()
-    owner = db.ReferenceField('User', reverse_delete_rule=db.NULLIFY)
-    organization = db.ReferenceField(
-        'Organization', reverse_delete_rule=db.NULLIFY)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
@@ -77,8 +74,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
     __badges__ = {}
 
     meta = {
-        'allow_inheritance': True,
-        'indexes': ['-created_at', 'owner', 'urlhash'],
+        'indexes': ['-created_at', 'urlhash'] + db.Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'queryset_class': ReuseQuerySet,
     }
@@ -105,6 +101,8 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Document):
             cls.on_create.send(document)
         else:
             cls.on_update.send(document)
+        if document.deleted:
+            cls.on_delete.send(document)
 
     def url_for(self, *args, **kwargs):
         return url_for('reuses.show', reuse=self, *args, **kwargs)

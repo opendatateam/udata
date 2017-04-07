@@ -56,7 +56,7 @@ import Metrics from 'models/metrics';
 import Organization from 'models/organization';
 import CommunityResources from 'models/communityresources';
 import {PageList} from 'models/base';
-// WIdgets
+// Widgets
 import DatasetList from 'components/dataset/list.vue';
 import DiscussionList from 'components/discussions/list.vue';
 import IssueList from 'components/issues/list.vue';
@@ -66,25 +66,6 @@ import ReuseList from 'components/reuse/list.vue';
 export default {
     name: 'OrganizationView',
     data() {
-        let actions = [{
-                label: this._('Edit'),
-                icon: 'edit',
-                method: this.edit
-            }, {
-                label: this._('Delete'),
-                icon: 'trash',
-                method: this.confirm_delete
-            }];
-
-        if (this.$root.me.is_admin) {
-            actions.push({divider: true});
-            actions.push({
-                label: this._('Badges'),
-                icon: 'bookmark',
-                method: this.setBadges
-            });
-        }
-
         return {
             org: new Organization(),
             metrics: new Metrics({query: {
@@ -115,7 +96,6 @@ export default {
             }),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
             followers: new Followers({ns: 'organizations', query: {page_size: 10}}),
-            actions: actions,
             badges: [],
             charts: {
                 traffic: {
@@ -147,6 +127,27 @@ export default {
         };
     },
     computed: {
+        actions() {
+            const actions = [{
+                    label: this._('Edit'),
+                    icon: 'edit',
+                    method: this.edit
+                }, {
+                    label: this._('Delete'),
+                    icon: 'trash',
+                    method: this.confirm_delete
+                }];
+
+            if (this.$root.me.is_admin) {
+                actions.push({divider: true});
+                actions.push({
+                    label: this._('Badges'),
+                    icon: 'bookmark',
+                    method: this.setBadges
+                });
+            }
+            return actions;
+        },
         boxes() {
             if (!this.org.metrics) {
                 return [];

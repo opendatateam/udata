@@ -27,18 +27,15 @@
 
 <script>
 import API from 'api';
+import Modal from 'components/modal.vue';
 
 export default {
-    components: {
-        modal: require('components/modal.vue')
-    },
-    data: function() {
-        return {
-            organization: {}
-        };
+    components: {Modal},
+    props: {
+        organization: Object
     },
     methods: {
-        confirm: function() {
+        confirm() {
             API.organizations.delete_organization(
                 {org: this.organization.id},
                 (response) => {

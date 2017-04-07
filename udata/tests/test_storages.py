@@ -65,6 +65,22 @@ class TestStorageUtils(TestCase):
         self.assertIsNone(utils.mime('test'))
 
 
+class TestConfigurableAllowedExtensions(TestCase):
+    def test_has_default(self):
+        self.assertIn('csv', storages.CONFIGURABLE_AUTHORIZED_TYPES)
+        self.assertIn('xml', storages.CONFIGURABLE_AUTHORIZED_TYPES)
+        self.assertIn('json', storages.CONFIGURABLE_AUTHORIZED_TYPES)
+        self.assertNotIn('exe', storages.CONFIGURABLE_AUTHORIZED_TYPES)
+        self.assertNotIn('bat', storages.CONFIGURABLE_AUTHORIZED_TYPES)
+
+    def test_with_config(self):
+        self.app.config['ALLOWED_RESOURCES_EXTENSIONS'] = ['csv', 'json']
+        self.assertIn('csv', storages.CONFIGURABLE_AUTHORIZED_TYPES)
+        self.assertIn('json', storages.CONFIGURABLE_AUTHORIZED_TYPES)
+        self.assertNotIn('xml', storages.CONFIGURABLE_AUTHORIZED_TYPES)
+        self.assertNotIn('exe', storages.CONFIGURABLE_AUTHORIZED_TYPES)
+        self.assertNotIn('bat', storages.CONFIGURABLE_AUTHORIZED_TYPES)
+
 class StorageTestMixin(object):
     def create_app(self):
         app = super(StorageTestMixin, self).create_app()

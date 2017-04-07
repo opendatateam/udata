@@ -22,7 +22,7 @@ class UUIDAsIdTester(db.Document):
 
 class SlugTester(db.Document):
     title = db.StringField()
-    slug = db.SlugField(populate_from='title')
+    slug = db.SlugField(populate_from='title', max_length=1000)
     meta = {
         'allow_inheritance': True,
     }
@@ -49,7 +49,11 @@ class DatetimedTester(db.Datetimed, db.Document):
     name = db.StringField()
 
 
-class AutoUUIDFieldTest(TestCase):
+class URLTester(db.Document):
+    url = db.URLField()
+
+
+class AutoUUIDFieldTest(DBTestMixin, TestCase):
     def test_auto_populate(self):
         '''AutoUUIDField should populate itself if not set'''
         obj = UUIDTester()
@@ -67,6 +71,19 @@ class AutoUUIDFieldTest(TestCase):
         self.assertIsNotNone(obj.id)
         self.assertIsInstance(obj.id, UUID)
         self.assertEqual(obj.pk, obj.id)
+
+    def test_query_as_uuid(self):
+        obj = UUIDAsIdTester.objects.create()
+        self.assertIsInstance(obj.id, UUID)
+        self.assertEqual(UUIDAsIdTester.objects.get(id=obj.id), obj)
+
+    def test_query_as_text(self):
+        obj = UUIDAsIdTester.objects.create()
+        self.assertEqual(UUIDAsIdTester.objects.get(id=str(obj.id)), obj)
+
+    def test_always_an_uuid(self):
+        obj = UUIDTester(uuid=str(uuid4()))
+        self.assertIsInstance(obj.uuid, UUID)
 
 
 class SlugFieldTest(DBTestMixin, TestCase):
@@ -153,6 +170,13 @@ class SlugFieldTest(DBTestMixin, TestCase):
         inherited = InheritedSlugTester.objects.create(title='title')
         self.assertNotEqual(obj.slug, inherited.slug)
 
+    def test_crop(self):
+        '''SlugField should truncate itself on save if not set'''
+        obj = SlugTester(title='x' * (SlugTester.slug.max_length + 1))
+        obj.save()
+        self.assertEqual(len(obj.title), SlugTester.slug.max_length + 1)
+        self.assertEqual(len(obj.slug), SlugTester.slug.max_length)
+
 
 class DateFieldTest(DBTestMixin, TestCase):
     def test_none_if_empty_and_not_required(self):
@@ -182,6 +206,26 @@ class DateFieldTest(DBTestMixin, TestCase):
         obj = DateTester(a_date='invalid')
         with self.assertRaises(ValidationError):
             obj.save()
+
+
+class URLFieldTest(DBTestMixin, TestCase):
+    def test_none_if_empty_and_not_required(self):
+        obj = URLTester()
+        self.assertIsNone(obj.url)
+        obj.save()
+        obj.reload()
+        self.assertIsNone(obj.url)
+
+    def test_not_valid(self):
+        obj = URLTester(url='invalid')
+        with self.assertRaises(ValidationError):
+            obj.save()
+
+    def test_strip_spaces(self):
+        url = '  https://www.somewhere.com/with/spaces/   '
+        obj = URLTester(url=url)
+        obj.save().reload()
+        self.assertEqual(obj.url, url.strip())
 
 
 class DatetimedTest(DBTestMixin, TestCase):
@@ -320,11 +364,11 @@ class ModelResolutionTest(DBTestMixin, TestCase):
         self.assertEqual(db.resolve_model({'class': 'Dataset'}), Dataset)
 
     def test_raise_if_not_found(self):
-        with self.assertRaises(db.NotRegistered):
+        with self.assertRaises(ValueError):
             db.resolve_model('NotFound')
 
     def test_raise_if_not_a_document(self):
-        with self.assertRaises(db.NotRegistered):
+        with self.assertRaises(ValueError):
             db.resolve_model('UDataMongoEngine')
 
     def test_raise_if_none(self):

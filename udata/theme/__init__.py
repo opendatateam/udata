@@ -1,0 +1,168 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+import logging
+import pkg_resources
+import pkgutil
+
+from time import time
+
+from flask import current_app, g
+from jinja2 import contextfunction
+from werkzeug.local import LocalProxy
+
+from flask_themes2 import (
+    Themes, Theme, render_theme_template, get_theme, global_theme_static
+)
+
+from udata.app import nav
+from udata.i18n import lazy_gettext as _
+
+log = logging.getLogger(__name__)
+
+
+themes = Themes()
+
+
+def get_current_theme():
+    if getattr(g, 'theme', None) is None:
+        g.theme = current_app.theme_manager.themes[current_app.config['THEME']]
+        g.theme.configure()
+    return g.theme
+
+
+current = LocalProxy(get_current_theme)
+
+
+default_menu = nav.Bar('default_menu', [
+    nav.Item(_('Organizations'), 'organizations.list'),
+    nav.Item(_('Datasets'), 'datasets.list'),
+    nav.Item(_('Reuses'), 'reuses.list'),
+    nav.Item(_('Map'), 'site.map'),
+])
+
+
+@contextfunction
+def theme_static_with_version(ctx, filename, external=False):
+    '''Override the default theme static to add cache burst'''
+    url = global_theme_static(ctx, filename, external=external)
+    if url.endswith('/'):  # this is a directory, no need for cache burst
+        return url
+    if current_app.config['DEBUG'] or current_app.config['TESTING']:
+        burst = time()
+    else:
+        burst = current.entrypoint.dist.version
+    return '{url}?_={burst}'.format(url=url, burst=burst)
+
+
+class ConfigurableTheme(Theme):
+    context_processors = None
+    defaults = None
+    admin_form = None
+    _menu = None
+    _configured = False
+
+    def __init__(self, entrypoint):
+        self.entrypoint = entrypoint
+        # Compute path without loading the module
+        path = pkgutil.get_loader(entrypoint.module_name).filename
+        super(ConfigurableTheme, self).__init__(path)
+
+        self.variants = self.info.get('variants', [])
+        if 'default' not in self.variants:
+            self.variants.insert(0, 'default')
+        self.context_processors = {}
+
+    @property
+    def site(self):
+        from udata.core.site.models import current_site
+        return current_site
+
+    @property
+    def config(self):
+        return self.site.themes.get(self.identifier)
+
+    @property
+    def menu(self):
+        return self._menu or default_menu
+
+    @menu.setter
+    def menu(self, value):
+        self._menu = value
+
+    @property
+    def variant(self):
+        '''Get the current theme variant'''
+        variant = current_app.config['THEME_VARIANT']
+        if variant not in self.variants:
+            log.warning('Unkown theme variant: %s', variant)
+            return 'default'
+        else:
+            return variant
+
+    def configure(self):
+        if self._configured:
+            return
+        self.entrypoint.load()
+        if self.defaults and self.identifier not in self.site.themes:
+            self.site.themes[self.identifier] = self.defaults
+            try:
+                self.site.save()
+            except:
+                log.exception('Unable to save theme configuration')
+        self._configured = True
+
+    def get_processor(self, context_name, default=lambda c: c):
+        return self.context_processors.get(context_name, default)
+
+
+def themes_loader(app):
+    '''Load themes from entrypoints'''
+    for entrypoint in pkg_resources.iter_entry_points('udata.themes'):
+        yield ConfigurableTheme(entrypoint)
+
+
+def render(template, **context):
+    '''
+    Render a template with uData frontend specifics
+
+        * Theme
+    '''
+    theme = current_app.config['THEME']
+    return render_theme_template(get_theme(theme), template, **context)
+
+
+def defaults(values):
+    g.theme.defaults = values
+
+
+def menu(navbar):
+    g.theme.menu = navbar
+
+
+def context(name):
+    '''A decorator for theme context processors'''
+    def wrapper(func):
+        g.theme.context_processors[name] = func
+        return func
+    return wrapper
+
+
+def init_app(app):
+    app.config.setdefault('THEME_VARIANT', 'default')
+    themes.init_themes(app, app_identifier='udata', loaders=[themes_loader])
+
+    # Load all theme assets
+    theme = app.theme_manager.themes[app.config['THEME']]
+    prefix = '/'.join(('_themes', theme.identifier))
+    app.config['STATIC_DIRS'].append((prefix, theme.static_path))
+
+    # Override the default theme_static
+    app.jinja_env.globals['theme_static'] = theme_static_with_version
+
+    # Hook into flask security to user themed auth pages
+    app.config.setdefault('SECURITY_RENDER', 'udata.theme:render')
+
+    @app.context_processor
+    def inject_current_theme():
+        return {'current_theme': current}

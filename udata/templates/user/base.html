@@ -3,14 +3,15 @@
 
 {% set bundle = 'user' %}
 
-{% block extra_head %}
-{{ super() }}
-<meta name="robots" content="noindex,follow">
-{% endblock %}
-
+{% set meta = {
+    'title': user.fullname,
+    'description': _("%(site)s %(username)s profile", site=config['SITE_TITLE'], username=user.fullname),
+    'keywords': [_('user'), _('profile')],
+    'robots': 'noindex',
+} %}
 
 {% block breadcrumb %}
-    <li><a href="{{ url_for('users.list') }}">{{ _('Users') }}</a></li>
+    <li>{{ _('Users') }}</li>
     <li><a href="{{ url_for('users.show', user=user) }}">{{ user.fullname }}</a></li>
 {% endblock %}
 

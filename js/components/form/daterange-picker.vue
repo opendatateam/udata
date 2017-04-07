@@ -96,7 +96,7 @@ export default {
     ready() {
         // Perform all validations on end field because performing on start field unhighlight.
         $(this.$els.endHidden).rules('add', {
-            dateGreaterThan: '#' + this.$els.startHidden.id,
+            dateGreaterThan: this.$els.startHidden.id,
             required: (el) => {
                 return (this.$els.startHidden.value && !this.$els.endHidden.value) || (this.$els.endHidden.value && !this.$els.startHidden.value);
             },

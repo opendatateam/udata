@@ -127,14 +127,13 @@ import API from 'api';
 import Sorter from 'mixins/sorter';
 import Uploader from 'mixins/uploader';
 import Resource from 'models/resource';
+import Box from 'components/containers/box.vue';
+import PaginationWidget from 'components/pagination.vue';
 
 export default {
     name: 'resources-list',
     mixins: [Uploader, Sorter],
-    components: {
-        'box': require('components/containers/box.vue'),
-        'pagination-widget': require('components/pagination.vue'),
-    },
+    components: {Box, PaginationWidget},
     props: {
         dataset: {
             type: Object,
@@ -148,17 +147,17 @@ export default {
         };
     },
     computed: {
-        title: function() {
+        title() {
             return this.dropping ? Vue._('Drop resource') : Vue._('Resources');
         }
     },
     events: {
         'uploader:progress': function(id, uploaded, total) {
-            this.$find('#progress-' + id)
-                .css('width',  Math.round(uploaded * 100 / total) + '%');
+            const el = this.$el.getElementById(`progress-${id}`);
+            el.style.width = `${Math.round(uploaded * 100 / total)}%`;
         },
         'uploader:complete': function(id, response) {
-            var file = this.$uploader.getFile(id);
+            const file = this.$uploader.getFile(id);
             this.files.$remove(this.files.indexOf(file));
             this.dataset.resources.unshift(response);
         }

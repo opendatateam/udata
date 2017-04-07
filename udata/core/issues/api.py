@@ -129,8 +129,8 @@ class IssuesAPI(API):
             issues = issues(closed=None)
         elif args['closed'] is True:
             issues = issues(closed__ne=None)
-        return (issues.order_by(args['sort'])
-                      .paginate(args['page'], args['page_size']))
+        issues = issues.order_by(args['sort'])
+        return issues.paginate(args['page'], args['page_size'])
 
     @api.secure
     @api.doc('create_issue')

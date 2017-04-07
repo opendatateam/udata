@@ -14,10 +14,24 @@
 {% endblock %}
 
 {% block main_content %}
-<dashboard-graphs object-id="{{ org.id }}">
-    {# Load spinner until JS is ready #}
-    <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
-</dashboard-graphs>
+{# Load spinner until JS is ready #}
+<div v-if="false" class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+{# Boxes definitions: (label, metric, icon, color) #}
+{% set boxes = [
+    (_('Datasets'), 'datasets', 'cubes', 'aqua'),
+    (_('Reuses'), 'reuses', 'retweet', 'green'),
+    (_('Followers'), 'followers', 'users', 'purple'),
+] %}
+<div class="row">
+    {% for (label, metric, icon, color) in boxes %}
+    <small-box class="col-lg-4 col-md-4 col-xs-6"
+        value="{{org.metrics[metric]}}" label="{{label}}" color="{{color}}"
+        icon="{{icon}}">
+    </small-box>
+    {% endfor %}
+</div>
+
+<dashboard-graphs object-id="{{ org.id }}"></dashboard-graphs>
 {% endblock %}
 
 {% block after_content %}

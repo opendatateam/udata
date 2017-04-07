@@ -57,6 +57,8 @@ class OEmbedsAPI(API):
                 if level in TERRITORY_DATASETS:
                     if kind in TERRITORY_DATASETS[level]:
                         item = TERRITORY_DATASETS[level][kind](geozone)
+                    else:
+                        return api.abort(400, 'Unknown territory dataset id.')
                 else:
                     return api.abort(400, 'Unknown kind of territory.')
             else:
@@ -78,4 +80,4 @@ class OEmbedsAPI(API):
                 'maxwidth': maxwidth,
                 'maxheight': maxheight,
             })
-        return output_json(result, 200)
+        return result

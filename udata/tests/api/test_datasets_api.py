@@ -20,6 +20,7 @@ from udata.core.dataset.factories import (
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.badges.factories import badge_factory
 from udata.core.organization.factories import OrganizationFactory
+from udata.tags import MIN_TAG_LENGTH, MAX_TAG_LENGTH
 from udata.utils import unique_string, faker
 
 from nose.plugins.attrib import attr
@@ -182,17 +183,16 @@ class DatasetAPITest(APITestCase):
         '''It should fail to create a dataset from the API because
         the tag is too short'''
         data = DatasetFactory.attributes()
-        data['tags'] = [unique_string(2)]
+        data['tags'] = [unique_string(MIN_TAG_LENGTH - 1)]
         with self.api_user():
             response = self.post(url_for('api.datasets'), data)
         self.assertStatus(response, 400)
 
     @attr('create')
     def test_dataset_api_fail_to_create_too_long_tags(self):
-        '''It should fail to create a dataset from the API because
-        the tag is too long'''
+        '''Should fail creating a dataset with a tag long'''
         data = DatasetFactory.attributes()
-        data['tags'] = [unique_string(33)]
+        data['tags'] = [unique_string(MAX_TAG_LENGTH + 1)]
         with self.api_user():
             response = self.post(url_for('api.datasets'), data)
         self.assertStatus(response, 400)
@@ -593,8 +593,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assert200(response)
         dataset.reload()
         self.assertEqual(len(dataset.resources), 1)
-        self.assertTrue(
-            dataset.resources[0].url.endswith('test.txt'))
+        self.assertTrue(dataset.resources[0].url.endswith('test.txt'))
 
     @attr('update')
     def test_reorder(self):
@@ -710,8 +709,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assert200(response)
         dataset.reload()
         self.assertEqual(len(dataset.resources), 1)
-        self.assertTrue(
-            dataset.resources[0].url.endswith('test.txt'))
+        self.assertTrue(dataset.resources[0].url.endswith('test.txt'))
 
     def test_delete(self):
         resource = ResourceFactory()
@@ -888,6 +886,14 @@ class DatasetReferencesAPITest(APITestCase):
         response = self.get(url_for('api.dataset_frequencies'))
         self.assert200(response)
         self.assertEqual(len(response.json), len(UPDATE_FREQUENCIES))
+
+    def test_dataset_allowed_resources_extensions(self):
+        '''It should fetch the resources allowed extensions list from the API'''
+        extensions = ['csv', 'json', 'xml']
+        self.app.config['ALLOWED_RESOURCES_EXTENSIONS'] = extensions
+        response = self.get(url_for('api.allowed_extensions'))
+        self.assert200(response)
+        self.assertEqual(response.json, extensions)
 
 
 class CommunityResourceAPITest(APITestCase):

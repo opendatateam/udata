@@ -1,14 +1,13 @@
 /**
  * Dataset display page JS module
  */
-import 'front/bootstrap';
+import FrontMixin from 'front/mixin';
 
-import Auth from 'auth';
 import Vue from 'vue';
 import config from 'config';
 import log from 'logger';
-import utils from 'utils';
 import Velocity from 'velocity-animate';
+
 
 // Components
 import AddReuseModal from './add-reuse-modal.vue';
@@ -16,13 +15,11 @@ import DetailsModal from './details-modal.vue';
 import ResourceModal from './resource-modal.vue';
 import LeafletMap from 'components/leaflet-map.vue';
 import FollowButton from 'components/buttons/follow.vue';
+import FeaturedButton from 'components/buttons/featured.vue';
 import ShareButton from 'components/buttons/share.vue';
-
-// Legacy widgets
-import 'widgets/featured';
-import 'widgets/issues-btn';
-import 'widgets/discussions-btn';
-import 'widgets/integrate-btn';
+import IntegrateButton from 'components/buttons/integrate.vue';
+import IssuesButton from 'components/buttons/issues.vue';
+import DiscussionThreads from 'components/discussions/threads.vue';
 
 
 function parseUrl(url) {
@@ -31,14 +28,15 @@ function parseUrl(url) {
     return a;
 }
 
-
 new Vue({
-    el: 'body',
-    components: {LeafletMap, ShareButton, FollowButton},
+    mixins: [FrontMixin],
+    components: {
+        LeafletMap, DiscussionThreads, FeaturedButton, IntegrateButton, IssuesButton, ShareButton, FollowButton
+    },
     data() {
         const data = {
             dataset: this.extractDataset(),
-            userReuses: [],
+            userReuses: []
         };
         if (config.check_urls) {
             const port = location.port ? `:${location.port}` : '';
@@ -55,45 +53,32 @@ new Vue({
     },
     methods: {
         /**
-         * Insert a modal Vue in the application.
-         * @param  {Object} options     The modal component definition (options passed to Vue.extend())
-         * @param  {Object} data        Data to assign to modal properties
-         * @return {Vue}                The child instanciated vm
-         */
-        $modal(options, data) {
-            const constructor = Vue.extend(options);
-            return new constructor({
-                el: this.$els.modal,
-                replace: false, // Needed while all components are not migrated to replace: true behavior
-                parent: this,
-                propsData: data
-            });
-        },
-
-        /**
          * Extract the current dataset metadatas from JSON-LD script
          * @return {Object} The parsed dataset
          */
         extractDataset() {
             const selector = '#json_ld';
-            const dataset = JSON.parse(document.querySelector(selector).text)
+            const dataset = JSON.parse(document.querySelector(selector).text);
             dataset.resources = dataset.distribution;
             delete dataset.distribution;
+            dataset.communityResources = dataset.contributedDistribution;
+            delete dataset.contributedDistribution;
             dataset.keywords = dataset.keywords.split(',').map(keyword => keyword.trim());
             return dataset;
         },
 
         /**
-         * Display a resource in a modal
+         * Display a resource or a community ressource in a modal
          */
-        showResource(id, e) {
+        showResource(id, e, isCommunity) {
             // Ensure edit button work
             if ([e.target, e.target.parentNode].some((el) => {el.classList.contains('btn-edit');})) {
                 return;
             }
             e.preventDefault();
-            const resource = this.dataset.resources.find(resource => resource['@id'] === id);
-            this.$modal(ResourceModal, {resource: resource});
+            const attr = isCommunity ? 'communityResources' : 'resources';
+            const resource = this.dataset[attr].find(resource => resource['@id'] === id);
+            this.$modal(ResourceModal, {resource});
         },
 
         /**
@@ -137,7 +122,7 @@ new Vue({
          * Fetch the current user reuses for display in add reuse modal
          */
         fetchReuses() {
-            if (Auth.user) {
+            if (this.$user) {
                 this.$api.get('me/reuses/').then(data => {
                     this.userReuses = data;
                 });
@@ -168,8 +153,8 @@ new Vue({
          * @param  {Object} resource A resource as extracted from JSON-LD
          */
         checkResource(resource) {
-            const url = parseUrl(resource.url);
-            const resource_el = document.querySelector(`#resource-${resource['@id']}`)
+            const url = parseUrl(resource.contentUrl);
+            const resource_el = document.querySelector(`#resource-${resource['@id']}`);
             const el = resource_el.querySelector('.format-label');
             const checkurl = resource_el.dataset.checkurl;
             if (!this.ignore.some(domain => url.origin.endsWith(domain))) {
@@ -194,6 +179,16 @@ new Vue({
                     });
                 }
             }
+        },
+
+        /**
+         * Suggest a tag aka.trigger a new discussion
+         */
+        suggestTag() {
+            this.$refs.discussions.start(
+                this._('New tag suggestion to improve metadata'),
+                this._('Hello,\n\nI propose this new tag: ')
+            );
         }
     }
 });

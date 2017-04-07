@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
+
 from flask import url_for
 
 from udata.models import Discussion, Follow, Issue, Member, User
@@ -17,6 +19,7 @@ from udata.core.issues.factories import IssueFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
+from udata.i18n import _
 from udata.utils import faker
 
 from . import APITestCase
@@ -29,9 +32,22 @@ class MeAPITest(APITestCase):
         self.login()
         response = self.get(url_for('api.me'))
         self.assert200(response)
-        # self.assertEqual(response.json['email'], self.user.email)
+        self.assertEqual(response.json['email'], self.user.email)
         self.assertEqual(response.json['first_name'], self.user.first_name)
         self.assertEqual(response.json['roles'], [])
+
+    def test_get_profile_with_deleted_org(self):
+        '''It should not display my membership to deleted organizations'''
+        user = self.login()
+        member = Member(user=user, role='editor')
+        org = OrganizationFactory(members=[member])
+        deleted_org = OrganizationFactory(members=[member],
+                                          deleted=datetime.now())
+        response = self.get(url_for('api.me'))
+        self.assert200(response)
+        orgs = [o['id'] for o in response.json['organizations']]
+        self.assertIn(str(org.id), orgs)
+        self.assertNotIn(str(deleted_org.id), orgs)
 
     def test_get_profile_401(self):
         '''It should raise a 401 on GET /me if no user is authenticated'''
@@ -353,7 +369,7 @@ class MeAPITest(APITestCase):
             response = self.delete(url_for('api.me'))
         self.assertEqual(len(mails), 1)
         self.assertEqual(mails[0].send_to, set([user.email]))
-        self.assertEqual(mails[0].subject, 'Account deletion')
+        self.assertEqual(mails[0].subject, _('Account deletion'))
         self.assert204(response)
 
         user.reload()

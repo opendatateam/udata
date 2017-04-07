@@ -30,7 +30,7 @@ class Issue(db.Document):
         'indexes': [
             'user',
             'subject',
-            'created'
+            '-created'
         ],
-        'ordering': ['created'],
+        'ordering': ['-created'],
     }

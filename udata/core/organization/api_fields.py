@@ -4,7 +4,9 @@ from __future__ import unicode_literals
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
 
-from .models import ORG_ROLES, MEMBERSHIP_STATUS
+from .models import ORG_ROLES, MEMBERSHIP_STATUS, LOGO_SIZES
+
+BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
 
 
 org_ref_fields = api.inherit('OrganizationReference', base_reference, {
@@ -19,8 +21,8 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
     'page': fields.UrlFor(
         'organizations.show', lambda o: {'org': o},
         description='The organization web page URL', readonly=True),
-    'logo': fields.ImageField(
-        size=100, description='The organization logo URL'),
+    'logo': fields.ImageField(size=BIGGEST_LOGO_SIZE,
+        description='The organization logo URL'),
 })
 
 
@@ -71,7 +73,11 @@ org_fields = api.model('Organization', {
     'page': fields.UrlFor(
         'organizations.show', lambda o: {'org': o},
         description='The organization page URL', readonly=True),
-    'logo': fields.ImageField(description='The organization logo URLs'),
+    'logo': fields.ImageField(original=True,
+        description='The organization logo URL'),
+    'logo_thumbnail': fields.ImageField(attribute='logo', size=BIGGEST_LOGO_SIZE,
+        description='The organization logo thumbnail URL. This is the square '
+        '({0}x{0}) and cropped version.'.format(BIGGEST_LOGO_SIZE)),
     'members': fields.List(
         fields.Nested(member_fields, description='The organization members')),
     'badges': fields.List(fields.Nested(badge_fields),

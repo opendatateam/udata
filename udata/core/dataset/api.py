@@ -21,7 +21,7 @@ from __future__ import unicode_literals
 import os
 from datetime import datetime
 
-from flask import request
+from flask import request, current_app
 from flask_security import current_user
 
 from werkzeug.datastructures import FileStorage
@@ -240,7 +240,8 @@ class UploadMixin(object):
                            datetime.now().strftime('%Y%m%d-%H%M%S')))
         storage = storages.resources
         uploaded_file = args['file']
-        if 'html' in uploaded_file.content_type:
+        mimetype = uploaded_file.mimetype or ''
+        if 'html' in mimetype:
             api.abort(415, 'Incorrect file content type: HTML')
         filename = storage.save(uploaded_file, prefix=prefix)
         extension = fileutils.extension(filename)
@@ -504,6 +505,15 @@ class FrequenciesAPI(API):
         '''List all available frequencies'''
         return [{'id': id, 'label': label}
                 for id, label in UPDATE_FREQUENCIES.items()]
+
+
+@ns.route('/extensions/', endpoint='allowed_extensions')
+class AllowedExtensionsAPI(API):
+    @api.doc('allowed_extensions')
+    @api.response(200, 'Success', [str])
+    def get(self):
+        '''List all allowed resources extensions'''
+        return current_app.config['ALLOWED_RESOURCES_EXTENSIONS']
 
 
 checkurl_parser = api.parser()

@@ -7,16 +7,9 @@ from faker.providers import BaseProvider
 
 from geojson.utils import generate_random
 
-from factory.mongoengine import MongoEngineFactory
-
-from udata.utils import unique_string, faker
+from udata.utils import add_faker_provider
 
 from .models import GeoLevel, GeoZone, SpatialCoverage, spatial_granularities
-
-
-def random_spatial_granularity(*args, **kwargs):
-    return faker.random_element(
-        [row[0] for row in spatial_granularities])
 
 
 class GeoJsonProvider(BaseProvider):
@@ -97,31 +90,39 @@ class GeoJsonProvider(BaseProvider):
         }
 
 
-faker.add_provider(GeoJsonProvider)
+class SpatialProvider(BaseProvider):
+    def spatial_granularity(self):
+        return self.generator.random_element([
+            row[0] for row in spatial_granularities
+        ])
 
 
-class SpatialCoverageFactory(MongoEngineFactory):
+add_faker_provider(GeoJsonProvider)
+add_faker_provider(SpatialProvider)
+
+
+class SpatialCoverageFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
         model = SpatialCoverage
 
-    geom = factory.LazyAttribute(lambda o: faker.multipolygon())
-    granularity = factory.LazyAttribute(random_spatial_granularity)
+    geom = factory.Faker('multipolygon')
+    granularity = factory.Faker('spatial_granularity')
 
 
-class GeoZoneFactory(MongoEngineFactory):
+class GeoZoneFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
         model = GeoZone
 
     id = factory.LazyAttribute(lambda o: '/'.join((o.level, o.code)))
-    level = factory.LazyAttribute(lambda o: unique_string())
-    name = factory.LazyAttribute(lambda o: faker.city())
-    code = factory.LazyAttribute(lambda o: faker.postcode())
-    geom = factory.LazyAttribute(lambda o: faker.multipolygon())
+    level = factory.Faker('unique_string')
+    name = factory.Faker('city')
+    code = factory.Faker('zipcode')
+    geom = factory.Faker('multipolygon')
 
 
-class GeoLevelFactory(MongoEngineFactory):
+class GeoLevelFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
         model = GeoLevel
 
-    id = factory.LazyAttribute(lambda o: unique_string())
-    name = factory.LazyAttribute(lambda o: faker.name())
+    id = factory.Faker('unique_string')
+    name = factory.Faker('name')
