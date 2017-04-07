@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.0.7 (2017-04-07)
 
 - Fix display for zone completer existing values
