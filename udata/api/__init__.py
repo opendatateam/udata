@@ -39,6 +39,8 @@ HEADER_API_KEY = 'X-API-KEY'
 PREFLIGHT_HEADERS = (
     HEADER_API_KEY,
     'X-Fields',
+    'Content-Type',
+    'Accept',
 )
 
 
