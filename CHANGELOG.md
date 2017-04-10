@@ -2,8 +2,8 @@
 
 ## Current (in progress)
 
-- Allow `Content-Type` and `Accept` in cors preflight headers
-  [#857](https://github.com/opendatateam/udata/pull/857)
+- Allow any headers in cors preflight headers
+  [#858](https://github.com/opendatateam/udata/pull/858)
 
 ## 1.0.7 (2017-04-07)
 
