@@ -60,7 +60,8 @@ class GeoZone(db.Document):
     area = db.FloatField()
     wikipedia = db.StringField()
     dbpedia = db.StringField()
-    logo = db.ImageField(fs=logos)
+    flag = db.ImageField(fs=logos)
+    blazon = db.ImageField(fs=logos)
 
     meta = {
         'indexes': [
@@ -82,9 +83,12 @@ class GeoZone(db.Document):
             name=gettext(self.name), code=self.code)
 
     def logo_url(self, external=False):
-        filename = self.logo.filename
-        if filename and self.logo.fs.exists(filename):
-            return self.logo.fs.url(filename, external=external)
+        flag_filename = self.flag.filename
+        blazon_filename = self.blazon.filename
+        if flag_filename and self.flag.fs.exists(flag_filename):
+            return self.flag.fs.url(flag_filename, external=external)
+        elif blazon_filename and self.blazon.fs.exists(blazon_filename):
+            return self.blazon.fs.url(blazon_filename, external=external)
         else:
             return ''
 

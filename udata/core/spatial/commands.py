@@ -70,8 +70,8 @@ def load(filename, drop=False):
         unpacker.next()
         for i, geozone in enumerate(unpacker):
             if ('geom' not in geozone or not geozone['geom'] or (
-                geozone['geom']['type'] == 'GeometryCollection'
-                    and not geozone['geom']['geometries'])):
+                geozone['geom']['type'] == 'GeometryCollection' and
+                    not geozone['geom']['geometries'])):
                 geom = None
             else:
                 geom = geozone['geom']
@@ -88,7 +88,8 @@ def load(filename, drop=False):
                 'validity': geozone.get('validity'),
                 'population': geozone.get('population'),
                 'dbpedia': geozone.get('dbpedia'),
-                'logo': geozone.get('flag') or geozone.get('blazon'),
+                'flag': geozone.get('flag'),
+                'blazon': geozone.get('blazon'),
                 'wikipedia': geozone.get('wikipedia'),
                 'area': geozone.get('area'),
                 'geom': geom

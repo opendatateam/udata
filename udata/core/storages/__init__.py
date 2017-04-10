@@ -15,6 +15,7 @@ class ConfigurableAuthorizedTypes(object):
     def __contains__(self, value):
         return value in current_app.config['ALLOWED_RESOURCES_EXTENSIONS']
 
+
 CONFIGURABLE_AUTHORIZED_TYPES = ConfigurableAuthorizedTypes()
 
 
@@ -22,6 +23,7 @@ def tmp_upload_to():
     uuid = str(uuid4()).replace('-', '')
     isodate = date.today().isoformat()
     return '/'.join((isodate, uuid))
+
 
 resources = fs.Storage('resources', CONFIGURABLE_AUTHORIZED_TYPES)
 avatars = fs.Storage('avatars', fs.IMAGES)
