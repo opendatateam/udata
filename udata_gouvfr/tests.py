@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 import cgi
 import json
+import sys
 
 import httpretty
 import requests
@@ -42,7 +43,17 @@ class GouvFrSettings(Testing):
     THEME = 'gouvfr'
 
 
-class GouvFrThemeTest(FrontTestCase):
+class UnloadTheme(object):
+    '''
+    As setuptools entrypoint is loaded only once,
+    this mixin ensure theme is reloaded.
+    '''
+    def tearDown(self):
+        super(UnloadTheme, self).tearDown()
+        del sys.modules['udata_gouvfr.theme']
+
+
+class GouvFrThemeTest(UnloadTheme, FrontTestCase):
     '''Ensure themed views render'''
     settings = GouvFrSettings
 
@@ -139,7 +150,7 @@ class GouvFrWithBlogSettings(Testing):
     WP_ATOM_URL = WP_ATOM_URL
 
 
-class GouvFrHomeBlogTest(FrontTestCase):
+class GouvFrHomeBlogTest(UnloadTheme, FrontTestCase):
     '''Ensure home page render with blog'''
     settings = GouvFrWithBlogSettings
 
@@ -160,7 +171,6 @@ class GouvFrHomeBlogTest(FrontTestCase):
                                content_type='application/atom+xml')
         response = self.get(url_for('site.home'))
         self.assert200(response)
-        print(dir(response))
         self.assertIn('Some post', response.data.decode('utf8'))
         self.assertIn(post_url, response.data.decode('utf8'))
 

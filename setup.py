@@ -93,6 +93,11 @@ setup(
     install_requires=[
         'feedparser',
     ],
+    entry_points={
+        'udata.themes': [
+            'gouvfr = udata_gouvfr.theme',
+        ]
+    },
     license='LGPL',
     use_2to3=True,
     keywords='udata opendata portal etalab',
