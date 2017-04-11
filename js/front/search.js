@@ -1,5 +1,5 @@
 /**
- * Generic site display page JS module
+ * Search display page JS module
  */
 import FrontMixin from 'front/mixin';
 
@@ -10,7 +10,6 @@ import Vue from 'vue';
 import $ from 'jquery';
 import 'bootstrap';
 import 'search/temporal-coverage-facet';
-import 'widgets/range-picker';
 
 
 new Vue({
