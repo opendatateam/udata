@@ -16,19 +16,6 @@ new Vue({
     mixins: [FrontMixin],
     ready() {
         log.debug('Search page');
-        // Display toolbar depending on active tab
-        $('.search-tabs a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
-            const $tab = $(e.target);
-            $('.btn-toolbar.wrapper').each(function() {
-                const $this = $(this);
-                if ($this.data('tab') === $tab.attr('href')) {
-                    $this.removeClass('hide');
-                } else {
-                    $this.addClass('hide');
-                }
-            });
-        });
-
         $('.advanced-search-panel .list-group-more').on('shown.bs.collapse', function() {
             $('button[data-target="#' + this.id + '"]').hide();
         });
@@ -39,5 +26,37 @@ new Vue({
             $('div[data-target="#' + this.id + '"] .chevrons').first()
                 .toggleClass('fa-chevron-down fa-chevron-up');
         });
+    },
+    methods: {
+        /**
+         * Change the current active tab
+         * @param {String} id The tab identifier to display
+         */
+        setTab(id) {
+            // Active tab
+            [...document.querySelectorAll('.search-tabs li')].forEach(tab => {
+                if (tab.dataset.tab === id) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            // Active tab pane
+            [...document.querySelectorAll('.tab-pane')].forEach(tabpane => {
+                if (tabpane.id === id) {
+                    tabpane.classList.add('active');
+                } else {
+                    tabpane.classList.remove('active');
+                }
+            });
+            // Active toolbar
+            [...document.querySelectorAll('.btn-toolbar.wrapper')].forEach(toolbar => {
+                if (toolbar.dataset.tab === id) {
+                    toolbar.classList.remove('hide');
+                } else {
+                    toolbar.classList.add('hide');
+                }
+            });
+        }
     }
 });

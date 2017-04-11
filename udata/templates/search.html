@@ -21,31 +21,31 @@
 <!-- Nav tabs -->
 <ul class="nav nav-tabs search-tabs">
     {% if datasets %}
-        <li class="active">
-            <a href="#datasets" data-toggle="tab">
+        <li class="active" data-tab="datasets">
+            <a href @click.prevent="setTab('datasets')">
                 {{ _('Datasets')}}
                 <span class="badge">{{ datasets.total }}</span>
             </a>
         </li>
     {% endif %}
     {% if reuses %}
-        <li{% if not datasets %} class="active"{% endif %}>
-            <a href="#reuses" data-toggle="tab">
+        <li{% if not datasets %} class="active"{% endif %} data-tab="reuses">
+            <a href @click.prevent="setTab('reuses')">
                 {{ _('Reuses') }}
                 <span class="badge">{{ reuses.total }}</span>
             </a>
         </li>
     {% endif %}
     {% if organizations %}
-        <li{% if not datasets and not reuses %} class="active"{% endif %}>
-            <a href="#organizations" data-toggle="tab">
+        <li{% if not datasets and not reuses %} class="active"{% endif %} data-tab="organizations">
+            <a href @click.prevent="setTab('organizations')">
                 {{ _('Organizations') }}
                 <span class="badge">{{ organizations.total }}</span>
             </a>
         </li>
     {% endif %}
     {% if territories %}
-        <li{% if not datasets and not reuses and not organizations %} class="active"{% endif %}>
+        <li{% if not datasets and not reuses and not organizations %} class="active"{% endif %} data-tab="territories">
             {% set total=territories|length %}
             {% if total==1 %}
                 <a href="{{ territories.0.url }}">
@@ -53,7 +53,7 @@
                     <span class="badge">{{ territories.0.name }}</span>
                 </a>
             {% else %}
-                <a href="#territories" data-toggle="tab">
+                <a href@click.prevent="setTab('territories')">
                     {{ _('Territories') }}
                     <span class="badge">{{ total }}</span>
                 </a>
@@ -73,7 +73,7 @@
 
 {% block toolbar_container %}
 {% if datasets %}
-<div class="btn-toolbar search-toolbar wrapper" data-tab="#datasets">
+<div class="btn-toolbar search-toolbar wrapper" data-tab="datasets">
 {{ s.breadcrum_toolbar(datasets, url=datasets_search_url,
     exports=(
         (_('Datasets'), 'site.datasets_csv', 'csv'),
@@ -88,7 +88,7 @@
 </div>
 {% endif %}
 {% if reuses %}
-<div class="btn-toolbar search-toolbar wrapper hide" data-tab="#reuses">
+<div class="btn-toolbar search-toolbar wrapper hide" data-tab="reuses">
 {{ s.breadcrum_toolbar(reuses, url=reuses_search_url,
     exports=(
         (_('Reuses'), 'site.reuses_csv', 'csv'),
@@ -102,7 +102,7 @@
 </div>
 {% endif %}
 {% if organizations %}
-    <div class="btn-toolbar search-toolbar wrapper hide" data-tab="#organizations">
+    <div class="btn-toolbar search-toolbar wrapper hide" data-tab="organizations">
     {{ s.breadcrum_toolbar(organizations, url=organizations_search_url,
         exports=(
             (_('Organizations'), 'site.organizations_csv', 'csv'),
