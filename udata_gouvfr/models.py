@@ -46,12 +46,13 @@ EMPLOI_FILENAME = 'rp2013_cc_act.xls'
 BASE_LOGEMENT_URL = 'https://www.insee.fr/fr/statistiques/tableaux/2020507'
 LOGEMENT_FILENAME = 'rp2013_cc_log.xls'
 
+INSEE_ORG_ID = '534fff81a3a7292c64a77e5c'
+
 
 class PopulationDataset(TerritoryDataset):
     order = 1
     title = 'Population'
-    # Institut National de la Statistique et des Etudes Economiques (INSEE).
-    organization_id = '534fff81a3a7292c64a77e5c'
+    organization_id = INSEE_ORG_ID
     description = '''
         [Population](/datasets/population/)
         par sexe et âge, indicateurs démographiques.
@@ -77,8 +78,7 @@ class PopulationRegionDataset(PopulationDataset):
 class ChiffresDataset(TerritoryDataset):
     order = 2
     title = 'Chiffres clés'
-    # Institut National de la Statistique et des Etudes Economiques (INSEE).
-    organization_id = '534fff81a3a7292c64a77e5c'
+    organization_id = INSEE_ORG_ID
     description = '''
         [Ménages, couples, familles
         ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-evolution-et-structure-de-la--40535162/)
@@ -105,8 +105,7 @@ class ChiffresRegionDataset(ChiffresDataset):
 class FormationsDataset(TerritoryDataset):
     order = 3
     title = 'Diplômes - Formation'
-    # Institut National de la Statistique et des Etudes Economiques (INSEE).
-    organization_id = '534fff81a3a7292c64a77e5c'
+    organization_id = INSEE_ORG_ID
     description = '''
         [Scolarisation
         ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-diplomes-formation-40535144/)
@@ -133,8 +132,7 @@ class FormationsRegionDataset(FormationsDataset):
 class EmploiDataset(TerritoryDataset):
     order = 4
     title = 'Emploi'
-    # Institut National de la Statistique et des Etudes Economiques (INSEE).
-    organization_id = '534fff81a3a7292c64a77e5c'
+    organization_id = INSEE_ORG_ID
     description = '''
         [Population
         ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-caracteristiques-de-l-emploi-40535204/)
@@ -161,8 +159,7 @@ class EmploiRegionDataset(EmploiDataset):
 class LogementDataset(TerritoryDataset):
     order = 6
     title = 'Logement'
-    # Institut National de la Statistique et des Etudes Economiques (INSEE).
-    organization_id = '534fff81a3a7292c64a77e5c'
+    organization_id = INSEE_ORG_ID
     description = '''
         [Chiffres clés
         ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-logement-40535148/)
@@ -242,8 +239,9 @@ class ZonagesDepartementDataset(ZonagesDataset):
 
     @property
     def url(self):
-        return self.url_template.format(code=self.territory.code,
-                                        code_region=self.territory.parent.code)
+        return self.url_template.format(
+            code=self.territory.code,
+            code_region=self.territory.current_parent.code)
 
 
 class ZonagesRegionDataset(ZonagesDataset):
@@ -355,11 +353,10 @@ class AAHRepartitionCAFDepartementDataset(ResourceBasedTerritoryDataset):
 
 
 class GeoSireneCommuneDataset(TerritoryDataset):
-    order = 13
+    order = 7
     id = 'geo_sirene_com'
     title = 'SIRENE'
-    # Institut National de la Statistique et des Etudes Economiques (INSEE).
-    organization_id = '534fff81a3a7292c64a77e5c'
+    organization_id = INSEE_ORG_ID
     url_template = 'http://212.47.238.202/geo_sirene/last/communes/{code}.csv'
     description = '''
         Extraite de la base [SIRENE](/datasets/5862206588ee38254d3f4e5e/)
@@ -373,7 +370,9 @@ TOWN_DATASETS = {
     'formations_com': FormationsCommuneDataset,
     'emploi_com': EmploiCommuneDataset,
     'logement_com': LogementCommuneDataset,
-    'elections_regionales_2015_2_com': Regionales2015Tour2CommuneDataset,
+    # Not ready for prime time, it has to be done with secateur
+    # once redirected to the original dataset page.
+    # 'elections_regionales_2015_2_com': Regionales2015Tour2CommuneDataset,
     'zonages_com': ZonagesCommuneDataset,
     'comptes_com': ComptesCommuneDataset,
     'ban_odbl_com': BanODBLCommuneDataset,
@@ -385,11 +384,13 @@ COUNTY_DATASETS = {
     'formations_dep': FormationsDepartementDataset,
     'emploi_dep': EmploiDepartementDataset,
     'logement_dep': LogementDepartementDataset,
-    'elections_regionales_2015_2_dep': Regionales2015Tour2DepartementDataset,
+    # Not ready for prime time, it has to be done with secateur
+    # once redirected to the original dataset page.
+    # 'elections_regionales_2015_2_dep': Regionales2015Tour2DepartementDataset,
+    # 'aah_denombrement_caf_dep': AAHDenombrementCAFDepartementDataset,
+    # 'aah_repartition_caf_dep': AAHRepartitionCAFDepartementDataset,
     'zonages_dep': ZonagesDepartementDataset,
     'comptes_dep': ComptesDepartementDataset,
-    'aah_denombrement_caf_dep': AAHDenombrementCAFDepartementDataset,
-    'aah_repartition_caf_dep': AAHRepartitionCAFDepartementDataset,
 }
 REGION_DATASETS = {
     'population_reg': PopulationRegionDataset,
