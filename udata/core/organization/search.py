@@ -126,7 +126,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
                 'payload': {
                     'name': organization.name,
                     'acronym': organization.acronym,
-                    'image_url': organization.logo(40),
+                    'image_url': organization.logo(40, external=True),
                     'slug': organization.slug,
                 },
             }
