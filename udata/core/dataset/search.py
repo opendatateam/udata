@@ -172,9 +172,9 @@ class DatasetSearch(ModelSearchAdapter):
         org_id = (str(dataset.organization.id)
                   if dataset.organization is not None else None)
         if dataset.organization:
-            image_url = dataset.organization.logo(40)
+            image_url = dataset.organization.logo(40, external=True)
         elif dataset.owner:
-            image_url = dataset.owner.avatar(40)
+            image_url = dataset.owner.avatar(40, external=True)
         else:
             image_url = None
 
