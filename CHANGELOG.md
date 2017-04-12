@@ -5,6 +5,8 @@
 - Allow more headers in cors preflight headers
   [#857](https://github.com/opendatateam/udata/pull/857)
   [#860](https://github.com/opendatateam/udata/pull/860)
+- Fix editorialization admin
+  [#863](https://github.com/opendatateam/udata/pull/863)
 
 ## 1.0.7 (2017-04-07)
 

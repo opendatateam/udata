@@ -93,7 +93,7 @@ export default {
     props: {
         dataset: {
             type: Object,
-            default: function() {return new Dataset({mask: MASK});}
+            default: () => new Dataset({mask: MASK})
         },
         datasetid: null,
         reactive: {
@@ -102,32 +102,32 @@ export default {
         }
     },
     computed: {
-        logo: function() {
+        logo() {
             if (!this.dataset || !this.dataset.organization || !this.dataset.organization.logo) {
                 return placeholders.organization;
             }
             return this.dataset.organization.logo;
         },
-        certified: function() {
+        certified() {
             return `${config.theme_static}img/certified-stamp.png`;
         },
-        spatial_label: function() {
+        spatial_label() {
 
         }
     },
     methods: {
-        fetch: function() {
+        fetch() {
             if (this.datasetid) {
                 this.dataset.fetch(this.datasetid);
             }
         }
     },
     watch: {
-        datasetid: function(id) {
+        datasetid(id) {
             this.fetch();
         }
     },
-    ready: function() {
+    ready() {
         this.fetch();
     }
 };
