@@ -22,8 +22,7 @@ test:
     - nvm use; REPORT_DIR=$CIRCLE_TEST_REPORTS/karma npm -s run test:unit -- --reporters mocha,junit
   post:
     # Build a distributable wheel
-    - nvm use
-    - if [[ $CIRCLE_TAG ]]; then inv dist; else inv dist -b $CIRCLE_BUILD_NUM; fi
+    - nvm use && if [[ $CIRCLE_TAG ]]; then inv dist; else inv dist -b $CIRCLE_BUILD_NUM; fi
     # Expose result as build artifact
     - cp dist/*.whl $CIRCLE_ARTIFACTS/
 
