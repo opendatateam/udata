@@ -7,7 +7,7 @@ import ReuseCard from 'components/reuse/card.vue';
 
 const template = `<div class="selectize-option">
     <div class="logo pull-left">
-        <img :src="image_url"/>
+        <img src="{{image_url}}"/>
     </div>
     {{title}}
 </div>`;
@@ -23,7 +23,6 @@ function cardify(value, $el) {
 }
 
 export default {
-    name: 'reuse_completer',
     mixins: [BaseCompleter],
     ns: 'reuses',
     endpoint: 'suggest_reuses',
