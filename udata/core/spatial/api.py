@@ -106,9 +106,9 @@ class ZoneDatasetsAPI(API):
         '''Fetch datasets for a given zone'''
         args = dataset_parser.parse_args()
         zone = GeoZone.objects.get_or_404(id=id)
-        if (args.get('dynamic')
-                and current_app.config.get('ACTIVATE_TERRITORIES')):
-            DATASETS = TERRITORY_DATASETS[zone.level_name]
+        if (args.get('dynamic') and
+                current_app.config.get('ACTIVATE_TERRITORIES')):
+            DATASETS = TERRITORY_DATASETS[zone.level_code]
             dynamic_dataset_classes = sorted(DATASETS.values(),
                                              key=lambda a: a.order)
             datasets = [

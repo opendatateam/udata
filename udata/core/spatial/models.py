@@ -190,9 +190,9 @@ class GeoZone(db.Document):
 
     @property
     def children(self):
-        return (GeoZone.objects(level=self.child_level,
-                                parents__in=[self.id])
-                       .order_by('name'))
+        return (GeoZone
+                .objects(level=self.child_level, parents__in=[self.id])
+                .order_by('name'))
 
     @property
     def popular_children(self):

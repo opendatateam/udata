@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from flask import current_app
 
 from udata import theme
-from udata.api import api, API, output_json
+from udata.api import api, API
 from udata.models import db, Dataset, GeoZone, TERRITORY_DATASETS
 
 oembeds_parser = api.parser()

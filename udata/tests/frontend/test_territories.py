@@ -11,7 +11,7 @@ class TerritoriesTest(FrontTestCase):
 
     def test_towns(self):
         arles = GeoZoneFactory(
-            id='fr/commune/13004', level='fr/commune',
+            id='COM13004@1942-01-01', level='fr/commune',
             name='Arles', code='13004', population=52439)
         response = self.client.get(
             url_for('territories.territory', territory=arles))
@@ -19,7 +19,7 @@ class TerritoriesTest(FrontTestCase):
 
     def test_counties(self):
         aveyron = GeoZoneFactory(
-            id='fr/departement/12', level='fr/departement', name='Aveyron',
+            id='DEP12@1860-07-01', level='fr/departement', name='Aveyron',
             code='12')
         response = self.client.get(
             url_for('territories.territory', territory=aveyron))
@@ -27,7 +27,7 @@ class TerritoriesTest(FrontTestCase):
 
     def test_regions(self):
         paca = GeoZoneFactory(
-            id='fr/region/93', level='fr/region',
+            id='REG93@1970-01-09', level='fr/region',
             name='Provence Alpes Côtes dAzur')
         response = self.client.get(
             url_for('territories.territory', territory=paca))

@@ -25,5 +25,7 @@ class SuggestTerritoriesAPI(API):
             'id': territory.id,
             'title': territory.name,
             'image_url': territory.logo_url(external=True),
+            'parent': (territory.current_parent and
+                       territory.current_parent.name or None),
             'page': territory.external_url
         } for territory in territories]
