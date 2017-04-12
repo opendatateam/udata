@@ -19,9 +19,10 @@ test:
   override:
     - mkdir -p $CIRCLE_TEST_REPORTS/{python,karma}
     - nosetests --with-xunit --xunit-file=$CIRCLE_TEST_REPORTS/python/tests.xml  udata
-    - REPORT_DIR=$CIRCLE_TEST_REPORTS/karma npm -s run test:unit -- --reporters mocha,junit
+    - nvm use; REPORT_DIR=$CIRCLE_TEST_REPORTS/karma npm -s run test:unit -- --reporters mocha,junit
   post:
     # Build a distributable wheel
+    - nvm use
     - if [[ $CIRCLE_TAG ]]; then inv dist; else inv dist -b $CIRCLE_BUILD_NUM; fi
     # Expose result as build artifact
     - cp dist/*.whl $CIRCLE_ARTIFACTS/
