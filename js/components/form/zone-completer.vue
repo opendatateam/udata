@@ -64,22 +64,21 @@ import utils from 'utils';
 
 
 export default {
-    name: 'zone-completer',
     mixins: [BaseCompleter],
     ns: 'spatial',
     endpoint: 'suggest_zones',
-    data: function() {
+    data() {
         return {
             levels: new GeoLevels()
         }
     },
-    selectize: function() {
+    selectize() {
         return {
             valueField: 'id',
             labelField: 'name',
             searchField: ['name', 'code', 'extraKeys'],
             plugins: ['remove_button'],
-            create: function(input, callback) {
+            create(input, callback) {
                 if (utils.isString(input)) {
                     // Need to fetch the real zone
                     // TODO: expose direct full acces to zone by ID
@@ -92,7 +91,7 @@ export default {
             },
             render: {
                 option: (data, escape) => {
-                    var opt = [
+                    const opt = [
                             '<div class="selectize-zone">',
                             '<span class="title">',
                             '<span class="name">',
@@ -108,7 +107,7 @@ export default {
                         ];
                     if (data.keys) {
                         opt.push('<ul>');
-                        Object.keys(data.keys).map(function(key) {
+                        Object.keys(data.keys).map(key => {
                             opt.push('<li><span class="text-uppercase">');
                             opt.push(escape(key));
                             opt.push('</span>: <span class="value">');
@@ -120,31 +119,33 @@ export default {
                     opt.push('</div>');
                     return opt.join('');
                 },
-                item: function(data, escape) {
+                item(data, escape) {
+                    // values are taken from completion API on create
+                    // and from geojson properties on display when existing.
+                    const name = data.hasOwnProperty('properties') ? data.properties.name : data.name;
+                    const code = data.hasOwnProperty('properties') ? data.properties.code : data.code;
                     return [
                         '<div class="selectize-zone-item">',
-                        escape(data.name),
+                        escape(name),
                         ' <span class="code">(',
-                        escape(data.code),
+                        escape(code),
                         ')</span></div>'
                     ].join('');
                 }
             }
         };
     },
-    dataLoaded: function(data) {
-        return data.map(function(item) {
-            item.extraKeys = Object.keys(item.keys).map(function(key) {
-                return item.keys[key];
-            });
+    dataLoaded(data) {
+        return data.map(item => {
+            item.extraKeys = Object.keys(item.keys).map(key => item.keys[key]);
             return item;
         });
     },
-    ready: function() {
+    ready() {
         this.levels.fetch();
     },
     methods: {
-        levelLabel: function(zone) {
+        levelLabel(zone) {
             return this.levels.by_id(zone.level).name;
         }
     }

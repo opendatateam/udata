@@ -103,3 +103,8 @@ class BadgeMixin(object):
             return self.remove_badge(kind)
         else:
             return self.add_badge(kind)
+
+    def badge_label(self, badge):
+        '''Display the badge label for a given kind'''
+        kind = badge.kind if isinstance(badge, Badge) else badge
+        return self.__badges__[kind]

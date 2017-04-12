@@ -7,9 +7,9 @@ dependencies:
     - elasticsearch-2.4.3
   pre:
     - if [[ ! -d mongodb-linux-x86_64-3.2.4 ]]; then wget http://downloads.mongodb.org/linux/mongodb-linux-x86_64-3.2.4.tgz && tar xvzf mongodb-linux-x86_64-3.2.4.tgz; fi
-    - sudo /etc/init.d/mongodb stop
+    - sudo /etc/init.d/mongod stop
     - sudo cp mongodb-linux-x86_64-3.2.4/bin/* /usr/bin
-    - sudo /etc/init.d/mongodb start
+    - sudo /etc/init.d/mongod start
     - if [[ ! -d elasticsearch-2.4.3 ]]; then wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-2.4.3.tar.gz && tar xvzf elasticsearch-2.4.3.tar.gz && elasticsearch-2.4.3/bin/plugin install analysis-icu; fi
     - elasticsearch-2.4.3/bin/elasticsearch: {background: true}
   override:
@@ -19,10 +19,10 @@ test:
   override:
     - mkdir -p $CIRCLE_TEST_REPORTS/{python,karma}
     - nosetests --with-xunit --xunit-file=$CIRCLE_TEST_REPORTS/python/tests.xml  udata
-    - REPORT_DIR=$CIRCLE_TEST_REPORTS/karma npm -s run test:unit -- --reporters mocha,junit
+    - nvm use; REPORT_DIR=$CIRCLE_TEST_REPORTS/karma npm -s run test:unit -- --reporters mocha,junit
   post:
     # Build a distributable wheel
-    - if [[ $CIRCLE_TAG ]]; then inv dist; else inv dist -b $CIRCLE_BUILD_NUM; fi
+    - nvm use && if [[ $CIRCLE_TAG ]]; then inv dist; else inv dist -b $CIRCLE_BUILD_NUM; fi
     # Expose result as build artifact
     - cp dist/*.whl $CIRCLE_ARTIFACTS/
 
