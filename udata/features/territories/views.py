@@ -5,17 +5,14 @@ from collections import namedtuple
 from datetime import date, datetime
 import unicodedata
 
-import unicodecsv as csv
-from flask import abort, current_app, request, send_file, redirect, url_for
+from flask import abort, current_app, redirect, url_for
 
 from udata import theme
 from udata.auth import current_user
-from udata.core.storages import references
 from udata.core.dataset.permissions import DatasetEditPermission
 from udata.i18n import I18nBlueprint
 from udata.models import Dataset, GeoZone, TERRITORY_DATASETS
 from udata.sitemap import sitemap
-from udata.utils import multi_to_dict
 
 blueprint = I18nBlueprint('territories', __name__)
 
@@ -26,52 +23,6 @@ def dict_to_namedtuple(name, data):
     Useful for easy attribute access.
     """
     return namedtuple(name, data.keys())(**data)
-
-
-@blueprint.route(
-    ('/territory/<territory:territory>/dataset/<dataset:dataset>'
-     '/resource/<resource_id>/'),
-    endpoint='territory_dataset_resource')
-def compute_territory_dataset(territory, dataset, resource_id):
-    """
-    Dynamically generate a CSV file about the territory from a national one.
-
-    The file targeted by the resource MUST be downloaded within the
-    `references` folder with the original name prior to call that view.
-
-    The GET paramaters `territory_attr` and `csv_column` are used to
-    determine which attribute MUST match the given column of the CSV.
-    """
-    args = multi_to_dict(request.args)
-    if 'territory_attr' not in args or 'csv_column' not in args:
-        return abort(404)
-    if not hasattr(territory, args['territory_attr']):
-        return abort(400)
-
-    for resource in dataset.resources:
-        if str(resource.id) == str(resource_id):
-            break
-
-    resource_path = references.path(resource.url.split('/')[-1])
-    match = getattr(territory, args['territory_attr']).encode('utf-8')
-
-    csvfile_out = StringIO.StringIO()
-    with open(resource_path, 'rb') as csvfile_in:
-        reader = csv.DictReader(csvfile_in, delimiter=str(';'))
-        writer = csv.DictWriter(csvfile_out, fieldnames=reader.fieldnames)
-        writer.writerow(dict(zip(writer.fieldnames, writer.fieldnames)))
-        for row in reader:
-            csv_column = row[args['csv_column']].encode('utf-8')
-            # `lstrip` ensure comparison for counties.
-            if csv_column.lstrip('0') == match.lstrip('0'):
-                writer.writerow(row)
-
-    csvfile_out.seek(0)  # Back to 0 otherwise the file is served empty.
-    attachment_filename = '{territory_name}_{resource_name}.csv'.format(
-        territory_name=territory.name,
-        resource_name=resource.title.replace(' ', '_'))
-    return send_file(csvfile_out, as_attachment=True,
-                     attachment_filename=attachment_filename)
 
 
 @blueprint.route('/territoires/', endpoint='home')
