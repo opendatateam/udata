@@ -7,6 +7,8 @@
   [#860](https://github.com/opendatateam/udata/pull/860)
 - Fix editorialization admin
   [#863](https://github.com/opendatateam/udata/pull/863)
+- Fix missing completer images and ensure completion API is usable on a different domain
+  [#864](https://github.com/opendatateam/udata/pull/864)
 
 ## 1.0.7 (2017-04-07)
 

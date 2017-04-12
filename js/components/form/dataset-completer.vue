@@ -7,7 +7,7 @@ import DatasetCard from 'components/dataset/card.vue';
 
 const optTpl = `<div class="selectize-option">
     <div class="logo pull-left">
-        <img :src="image_url"/>
+        <img src="{{image_url}}"/>
     </div>
     {{title}}
 </div>`;
@@ -26,7 +26,6 @@ function cardify(value, $el) {
 }
 
 export default {
-    name: 'dataset_completer',
     mixins: [BaseCompleter],
     ns: 'datasets',
     endpoint: 'suggest_datasets',
