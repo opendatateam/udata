@@ -183,34 +183,16 @@ class LogementRegionDataset(LogementDataset):
     url_template = BASE_LOGEMENT_URL + '/REG/{code}/' + LOGEMENT_FILENAME
 
 
-class Regionales2015Tour2Dataset(ResourceBasedTerritoryDataset):
+class GeoSireneCommuneDataset(TerritoryDataset):
     order = 7
-    title = 'Élections régionales 2015, second tour'
-    # Ministère de l'Intérieur.
-    organization_id = '534fff91a3a7292c64a77f53'
+    id = 'geo_sirene_com'
+    title = 'SIRENE'
+    organization_id = INSEE_ORG_ID
+    url_template = 'http://212.47.238.202/geo_sirene/last/communes/{code}.csv'
     description = '''
-        [Résultats
-        ](/datasets/elections-regionales-2015-et-des-assemblees-de-corse-de-guyane-et-de-martinique-resultats-par-bureaux-de-vote-tour-2/)
-        par bureau de vote pour la commune concernée.
+        Extraite de la base [SIRENE](/datasets/5862206588ee38254d3f4e5e/)
+        sur le périmètre de la commune.
     '''.strip()
-    # Equals to: https://www.data.gouv.fr/fr/datasets/elections-regionales-2015
-    # -et-des-assemblees-de-corse-de-guyane-et-de-martinique-resultats-par-
-    # bureaux-de-vote-tour-2/
-    dataset_id = '56728d35c751df240dc664bd'
-    resource_id = 'e915b43b-f38c-4f18-ade5-2fb6c8cf80ca'
-    temporal_coverage = {'start': 2015}
-
-
-class Regionales2015Tour2CommuneDataset(Regionales2015Tour2Dataset):
-    id = 'elections_regionales_2015_2_com'
-    territory_attr = 'name'
-    csv_column = 'LIBSUBCOM'
-
-
-class Regionales2015Tour2DepartementDataset(Regionales2015Tour2Dataset):
-    id = 'elections_regionales_2015_2_dep'
-    territory_attr = 'code'
-    csv_column = 'CODDPT'
 
 
 class ZonagesDataset(TerritoryDataset):
@@ -312,67 +294,12 @@ class BanODBLCommuneDataset(TerritoryDataset):
     license_id = 'odc-odbl'
 
 
-class AAHDenombrementCAFDepartementDataset(ResourceBasedTerritoryDataset):
-    order = 11
-    id = 'aah_denombrement_caf_dep'
-    title = 'Allocation aux Adultes Handicapés, dénombrement'
-    #  Caisse Nationale des Allocations familiales.
-    organization_id = '5595066cc751df4582a453ba'
-    description = '''
-        [Bénéficiaires percevant l'allocation aux adultes handicapés (AAH)
-        ](/datasets/personnes-percevant-l-allocation-aux-adultes-handicapes-aah-par-caf/),
-        dénombrement pour le département concerné.
-    '''.strip()
-    # Equals to: https://www.data.gouv.fr/fr/datasets/personnes-percevant-
-    # l-allocation-aux-adultes-handicapes-aah-par-caf/
-    dataset_id = '560d9160b595086cd501d755'
-    resource_id = '7a870488-f0de-4a40-9d8f-52e065e43c10'
-    territory_attr = 'code'
-    csv_column = 'dep'
-    temporal_coverage = {'start': 1993, 'end': 2015}
-
-
-class AAHRepartitionCAFDepartementDataset(ResourceBasedTerritoryDataset):
-    order = 12
-    id = 'aah_repartition_caf_dep'
-    title = 'Allocation aux Adultes Handicapés, répartition'
-    #  Caisse Nationale des Allocations familiales.
-    organization_id = '5595066cc751df4582a453ba'
-    description = '''
-        [Bénéficiaires percevant l'allocation aux adultes handicapés (AAH)
-        ](/datasets/personnes-percevant-l-allocation-aux-adultes-handicapes-aah-par-caf/),
-        répartition pour le département concerné.
-    '''.strip()
-    # Equals to: https://www.data.gouv.fr/fr/datasets/personnes-percevant-
-    # l-allocation-aux-adultes-handicapes-aah-par-caf/
-    dataset_id = '560d9160b595086cd501d755'
-    resource_id = 'b00056f5-ead5-4d7d-86b3-e1323fc02f0d'
-    territory_attr = 'code'
-    csv_column = 'Dep'
-    temporal_coverage = {'start': 2012, 'end': 2015}
-
-
-class GeoSireneCommuneDataset(TerritoryDataset):
-    order = 7
-    id = 'geo_sirene_com'
-    title = 'SIRENE'
-    organization_id = INSEE_ORG_ID
-    url_template = 'http://212.47.238.202/geo_sirene/last/communes/{code}.csv'
-    description = '''
-        Extraite de la base [SIRENE](/datasets/5862206588ee38254d3f4e5e/)
-        sur le périmètre de la commune.
-    '''.strip()
-
-
 TOWN_DATASETS = {
     'population_com': PopulationCommuneDataset,
     'chiffres_com': ChiffresCommuneDataset,
     'formations_com': FormationsCommuneDataset,
     'emploi_com': EmploiCommuneDataset,
     'logement_com': LogementCommuneDataset,
-    # Not ready for prime time, it has to be done with secateur
-    # once redirected to the original dataset page.
-    # 'elections_regionales_2015_2_com': Regionales2015Tour2CommuneDataset,
     'zonages_com': ZonagesCommuneDataset,
     'comptes_com': ComptesCommuneDataset,
     'ban_odbl_com': BanODBLCommuneDataset,
@@ -384,11 +311,6 @@ COUNTY_DATASETS = {
     'formations_dep': FormationsDepartementDataset,
     'emploi_dep': EmploiDepartementDataset,
     'logement_dep': LogementDepartementDataset,
-    # Not ready for prime time, it has to be done with secateur
-    # once redirected to the original dataset page.
-    # 'elections_regionales_2015_2_dep': Regionales2015Tour2DepartementDataset,
-    # 'aah_denombrement_caf_dep': AAHDenombrementCAFDepartementDataset,
-    # 'aah_repartition_caf_dep': AAHRepartitionCAFDepartementDataset,
     'zonages_dep': ZonagesDepartementDataset,
     'comptes_dep': ComptesDepartementDataset,
 }
