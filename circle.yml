@@ -16,7 +16,7 @@ dependencies:
     - sudo apt-get update && sudo apt-get install jq
   override:
     - ./circleci-requirements.sh
-    - nvm use && nvm alias default $(nvm current) && npm install
+    - nvm install && nvm alias default $(nvm current) && npm install
 test:
   override:
     - mkdir -p $CIRCLE_TEST_REPORTS/{python,karma}
