@@ -1,7 +1,8 @@
-# Translations template for udata-gouvfr.
+# Spanish translations for udata-gouvfr.
 # Copyright (C) 2017 ORGANIZATION
-# This file is distributed under the same license as the udata-gouvfr project.
-# 
+# This file is distributed under the same license as the udata-gouvfr
+# project.
+#
 # Translators:
 # AuraCifuentes <aura-maria.cifuentes-gallo@modernisation.gouv.fr>, 2014
 # Axel Haustant, 2014,2016
@@ -9,18 +10,19 @@
 # Paula Forteza <paula.forteza@data.gouv.fr>, 2015
 msgid ""
 msgstr ""
-"Project-Id-Version: udata-gouv.fr\n"
+"Project-Id-Version:  udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-20 22:31+0100\n"
+"POT-Creation-Date: 2017-04-05 18:29+0200\n"
 "PO-Revision-Date: 2017-02-20 21:32+0000\n"
 "Last-Translator: Axel Haustant\n"
-"Language-Team: Spanish (http://www.transifex.com/etalab/udata-gouvfr/language/es/)\n"
+"Language: es\n"
+"Language-Team: Spanish (http://www.transifex.com/etalab/udata-"
+"gouvfr/language/es/)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: udata_gouvfr/metrics.py:14
 msgid "Public services"
@@ -42,12 +44,16 @@ msgstr "Candidato de Dataconnexions 6"
 msgid "Dataconnexions 6 laureate"
 msgstr "Nominado de Dataconnexions 6"
 
-#: udata_gouvfr/models.py:32
+#: udata_gouvfr/models.py:33
 msgid "C³"
 msgstr "C³ "
 
-#: udata_gouvfr/models.py:33
+#: udata_gouvfr/models.py:34
 msgid "Nec Mergitur"
+msgstr ""
+
+#: udata_gouvfr/models.py:36 udata_gouvfr/templates/spd.html:8
+msgid "Reference Data"
 msgstr ""
 
 #: udata_gouvfr/templates/c3.html:138
@@ -190,8 +196,8 @@ msgstr "Volver arriba"
 
 #: udata_gouvfr/theme/templates/header.html:4
 msgid ""
-"Internet Explorer 8 and below are not anymore supported. Please upgrade or "
-"change your browser to access the website."
+"Internet Explorer 8 and below are not anymore supported. Please upgrade "
+"or change your browser to access the website."
 msgstr ""
 
 #: udata_gouvfr/theme/templates/header.html:4
@@ -373,7 +379,9 @@ msgstr "Publicar una reutilización "
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:33
 msgid "Contribute and add a new reuse to this site catalog."
-msgstr "Contribuir y agregar una nueva reutilización para publicar en este catalogo. "
+msgstr ""
+"Contribuir y agregar una nueva reutilización para publicar en este "
+"catalogo. "
 
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:42
 msgid "Create or find your organization"
@@ -382,3 +390,4 @@ msgstr "Crear o encontrar su organización"
 #: udata_gouvfr/theme/templates/snippets/publish-action-modal.html:45
 msgid "You can create a new organization or find yours."
 msgstr "Usted puede crear una nueva organización io encontrar la suya."
+

@@ -7,6 +7,11 @@
 - Adjust the dataset reuses title overflow for proper display
   [#172](https://github.com/etalab/udata-gouvfr/pull/172)
 
+## 1.0.5 (2017-04-06)
+
+- Added a missing translation
+- Alphabetical ordering on SPD datasets
+
 ## 1.0.4 (2017-04-05)
 
 - Introduce SPD page and badge
