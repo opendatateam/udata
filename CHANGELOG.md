@@ -24,6 +24,8 @@
   [#838](https://github.com/opendatateam/udata/pull/838)
 - Drop `jquery-slimscroll` and fix admin menu scrolling
   [#851](https://github.com/opendatateam/udata/pull/851)
+- drop jquery.dotdotdot for a lighter css-only solution (less memory consumption)
+  [#853](https://github.com/opendatateam/udata/pull/853)
 
 ## 1.0.7 (2017-04-07)
 
