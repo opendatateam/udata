@@ -11,9 +11,7 @@
     'robots': 'noindex,nofollow',
 } %}
 
-{% block extra_js %}
-<script src="{{ static('search.js') }}"></script>
-{% endblock %}
+{% set bundle = 'search' %}
 
 {% block breadcrumb %}
     <li class="active">
