@@ -2,8 +2,8 @@
 <div id="resource-{{resource.id}}" class="list-group-item"
     data-checkurl="{{ url_for('api.checkurl') }}"
     @click="showResource('{{resource.id}}', $event, {{ resource.owner is defined|tojson }})">
-    <div class="format-label pull-left ellipsis-dot" v-tooltip tooltip-placement="left">
-        <span data-format="{{ resource_format }}">
+    <div class="format-label pull-left" v-tooltip tooltip-placement="left">
+        <span class="ellipsis" data-format="{{ resource_format }}">
             {{ resource_format }}
         </span>
     </div>

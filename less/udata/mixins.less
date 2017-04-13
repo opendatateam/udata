@@ -21,6 +21,19 @@
     text-overflow: ellipsis;
 }
 
+/**
+ * Dirty tricks for Webkit based browsers
+ * to perform multiline ellipsis
+ */
+.clamp(@lines) {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: @lines;
+    -webkit-box-orient: vertical;
+}
+
+.clamp-2 { .clamp(2) }
+
 
 .square-stamp(@color) {
     padding: 2px 4px;
