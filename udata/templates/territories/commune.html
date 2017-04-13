@@ -10,9 +10,9 @@
 {% block territory_content %}
     <p class="breadcrumb">
         <a href="{{ url_for('territories.home') }}">France</a> →
-        <a href="{{ territory.current_parent.current_parent.url }}">{{ territory.current_parent.current_parent.name }}</a> →
-        <a href="{{ territory.current_parent.url }}">{{ territory.current_parent.name }}</a> →
-        <a href="{{ territory.url }}">{{ territory.name }}</a>
+        {{ _('Region:') }} <a href="{{ territory.current_parent.current_parent.url }}">{{ territory.current_parent.current_parent.name }}</a> →
+        {{ _('County:') }} <a href="{{ territory.current_parent.url }}">{{ territory.current_parent.name }}</a> →
+        {{ _('Town:') }} <a href="{{ territory.url }}">{{ territory.name }}</a>
     </p>
     <div class="col-sm-8">
         <div class="col-sm-3">

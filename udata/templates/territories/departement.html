@@ -8,8 +8,13 @@
 } %}
 
 {% block territory_content %}
-    <div class="col-sm-6">
-        <div class="col-sm-2">
+    <p class="breadcrumb">
+        <a href="{{ url_for('territories.home') }}">France</a> →
+        {{ _('Region:') }} <a href="{{ territory.current_parent.url }}">{{ territory.current_parent.name }}</a> →
+        {{ _('County:') }} <a href="{{ territory.url }}">{{ territory.name }}</a>
+    </p>
+    <div class="col-sm-8">
+        <div class="col-sm-3">
             <img src="{{ logo }}" alt="{{ territory.name }}" class="scalable" />
             {% if territory.logo_url() %}
                 <div class="text-center">
@@ -28,7 +33,7 @@
             {% endif %}
         </div>
 
-        <div class="col-sm-10 tab-links">
+        <div class="col-sm-9 tab-links">
             <h1>{{ territory.name }}</h1>
             <p>
                 <strong>
@@ -42,19 +47,18 @@
                     </strong>
                 </p>
             {% endif %}
+            <h3><small>
+                {{ _('Main towns:') }}
+                {% for town in territory.popular_children %}
+                    <a href="{{ town.url }}"> {{ town.name }}</a>{% if not loop.last %},{% endif %}
+                {% endfor %}
+            </small></h3>
         </div>
     </div>
 
-    <aside class="col-sm-6 panel panel-default">
+    <aside class="col-sm-4 panel panel-default">
         <leaflet-map v-ref:map class="aside-map" :popup="false"
             data-zones="{{ url_for('api.zones', ids=[territory.id]) }}">
         </leaflet-map>
-        <h3><small>{{ _('Region:') }} <a href="{{ territory.current_parent.url }}">{{ territory.current_parent.name }}</a></small></h3>
-        <h3><small>
-            {{ _('Main towns:') }}
-            {% for town in territory.popular_children %}
-                <a href="{{ town.url }}"> {{ town.name }}</a>{% if not loop.last %},{% endif %}
-            {% endfor %}
-        </small></h3>
     </aside>
 {% endblock %}

@@ -8,8 +8,12 @@
 } %}
 
 {% block territory_content %}
-    <div class="col-sm-6">
-        <div class="col-sm-2">
+    <p class="breadcrumb">
+        <a href="{{ url_for('territories.home') }}">France</a> →
+        {{ _('Region:') }} <a href="{{ territory.url }}">{{ territory.name }}</a>
+    </p>
+    <div class="col-sm-8">
+        <div class="col-sm-3">
             <img src="{{ logo }}" alt="{{ territory.name }}" class="scalable" />
             {% if territory.logo_url() %}
                 <div class="text-center">
@@ -28,7 +32,7 @@
             {% endif %}
         </div>
 
-        <div class="col-sm-10 tab-links">
+        <div class="col-sm-9 tab-links">
             <h1>{{ territory.name }}</h1>
             <p>
                 <strong>
@@ -57,32 +61,19 @@
                     {% endfor %}
                 </small></h3>
             {% endif %}
-            <h3><small>{{ _('Main counties:') }}</small></h3>
-            <div class="row">
-                <div class="col-sm-offset-1 col-md-offset-2 col-lg-offset-2">
-                    <ul class="list-unstyled territories-list">
-                        {% for county in territory.children[:8] %}
-                            <li>
-                                <img src="{{ county.logo_url(external=True) or theme_static('img/placeholder_territory_mini.png', external=True) }}" alt="{{ county.name }}" class="float-left" width="13px" />
-                                <a href="{{ county.url }}"> {{ county.name }}</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
+            <h3><small>
+                {{ _('Counties:') }}
+                {% for county in territory.children %}
+                    <a href="{{ county.url }}"> {{ county.name }}</a>{% if not loop.last %},{% endif %}
+                {% endfor %}
+            </small></h3>
         </div>
     </div>
 
-    <aside class="col-sm-6 panel panel-default">
+    <aside class="col-sm-4 panel panel-default">
         <leaflet-map v-ref:map class="aside-map" :popup="false"
             data-zones="{{ url_for('api.zones', ids=[territory.id]) }}">
         </leaflet-map>
-        <h3><small>
-            {{ _('Counties:') }}
-            {% for county in territory.children %}
-                <a href="{{ county.url }}"> {{ county.name }}</a>{% if not loop.last %},{% endif %}
-            {% endfor %}
-        </small></h3>
     </aside>
 
 {% endblock %}
