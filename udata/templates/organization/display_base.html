@@ -43,7 +43,7 @@
                                 <a href="{{ url_for('front.search', badge=badge) }}"
                                     title="{{ _('See all organizations with that badge.') }}">
                                     <span class="glyphicon glyphicon-bookmark"></span>
-                                    {{ badge }}</a>
+                                    {{ org.badge_label(badge) }}</a>
                             </small><br/>
                         {% endfor %}
                     </p>

@@ -53,16 +53,14 @@
                                     %}This dataset has been published on {{date}} and updated on {{update}} on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
                                 </small>
                             {% endif %}
-                            {% if badges %}
-                                {% for badge in badges %}
-                                    <small class="small-badge">
-                                        <a href="{{ url_for('front.search', badge=badge) }}"
-                                            title="{{ _('See all datasets with that badge.') }}">
-                                            <span class="glyphicon glyphicon-bookmark"></span>
-                                            {{ badge }}</a>
-                                    </small>
-                                {% endfor %}
-                            {% endif %}
+                            {% for badge in dataset.badges %}
+                                <small class="small-badge">
+                                    <a href="{{ url_for('front.search', badge=badge) }}"
+                                        title="{{ _('See all datasets with that badge.') }}">
+                                        <span class="glyphicon glyphicon-bookmark"></span>
+                                        {{ dataset.badge_label(badge) }}</a>
+                                </small>
+                            {% endfor %}
                             {% if dataset.private %}
                             <small class="private"
                                 v-popover.literal="{{ _('This dataset is private and will not be visible by other users') }}"
@@ -190,7 +188,7 @@
                                 </a>
                                 {% for badge in dataset.badges %}
                                     <a href="{{ url_for('front.search', badge=badge) }}">
-                                        {{ badge }}</a>{% if not loop.last %}, {% endif %}
+                                        {{ dataset.badge_label(badge) }}</a>{% if not loop.last %}, {% endif %}
                                 {% endfor %}
                             </li>
                             {% endif %}

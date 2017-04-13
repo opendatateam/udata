@@ -97,7 +97,6 @@ class ReuseDetailView(ReuseView, DetailView):
         context.update(
             followers=followers,
             can_edit=ReuseEditPermission(self.reuse),
-            discussions=Discussion.objects(subject=self.reuse),
         )
 
         return context
