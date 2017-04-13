@@ -6,6 +6,8 @@
   [#164](https://github.com/etalab/udata-gouvfr/pull/164)
 - Adjust the dataset reuses title overflow for proper display
   [#172](https://github.com/etalab/udata-gouvfr/pull/172)
+- Drop glyphicons and remove some useles classes
+  [#175](https://github.com/etalab/udata-gouvfr/pull/175)
 
 ## 1.0.5 (2017-04-06)
 

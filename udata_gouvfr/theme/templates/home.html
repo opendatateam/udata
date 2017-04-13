@@ -32,13 +32,6 @@
                                     {{ reuse.title }}
                                     </a>
                                 </h4>
-                                {# {% if user.sysadmin %}
-                                <a class="btn btn-xs btn-warning unfeature" v-tooltip href
-                                    data-api="{{ url_for('youckan/reuse', reuse.id, 'unfeature') }}"
-                                    title="{{ _('Unmark as featured') }}">
-                                    <span class="glyphicon glyphicon-trash"></span>
-                                </a>
-                                {% endif %} #}
                             </div>
                         </div>
                         {% endfor %}
@@ -151,7 +144,7 @@
                         <div class="clearfix"></div>
                         <p class="text-center">
                             <a href="{{ url_for('datasets.list', **kwargs) }}" class="btn btn-default btn-more">
-                                <span class="glyphicon glyphicon-list" ></span>
+                                <span class="fa fa-fw fa-list" ></span>
                                 {{ _('See more') }}
                             </a>
                         </p>

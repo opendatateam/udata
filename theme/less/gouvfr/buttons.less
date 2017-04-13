@@ -39,6 +39,10 @@
 .btn-big {
     font-size: 13px;
     padding: 12px 16px;
+
+    &.btn-left {
+        .fa-left-square(42px);
+    }
 }
 
 .btn-sm {
@@ -84,8 +88,8 @@
     text-align: left;
     text-transform: none;
     padding: 6px 10px;
-    .glyphicon {
-        padding-top: 1px;
+    .fa {
+        padding-top: 2px;
         color: rgba(255, 255, 255, 0.5) !important;
     }
     &:hover {
@@ -97,25 +101,6 @@
         background: rgba(0, 0, 0, 0.1) !important;
         color: white;
         border: 1px solid rgba(0, 0, 0, 0.1);
-    }
-}
-
-.icon-left {
-
-    .glyph-left-square(32px);
-
-    &.btn-sm {
-        .glyph-left-square(30px);
-    }
-
-    &.btn-punch {
-        @media (min-width: @screen-xs) {
-            .glyph-left-square(37px);
-        }
-    }
-
-    &.btn-big {
-        .glyph-left-square(42px);
     }
 }
 
@@ -137,22 +122,18 @@
 
 .btn-transparent {
     @base-color: fadeout(white, 50%);
-    // background-color: @base-color;
     background-color: rgba(255, 255, 255, 0.3);
 
-    .glyphicon {
+    .fa {
         color: @bg-dark !important;
         background-color: white !important;
-
     }
 
     &:hover {
         color: white;
         background-color: rgba(255, 255, 255, 0.55);
-        // color: @bg-dark;
-        // background-color: fadein(@base-color, 20%);
 
-        .glyphicon {
+        .fa {
             color: white !important;
             background-color: @bg-dark !important;
         }
