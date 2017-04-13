@@ -21,7 +21,7 @@
         <small>
             <a class="btn btn-xs btn-default"
                 href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}">
-                <span class="glyphicon glyphicon-edit" ></span>
+                <span class="fa fa-edit" ></span>
                 {{ _('Edit') }}
             </a>
         </small>
@@ -74,7 +74,7 @@
             {% if datasets.total > datasets|length %}
             <a class="btn btn-default"
                 href="{{ url_for('datasets.list', sort='-created', **kwargs) }}">
-                <span class="glyphicon glyphicon-list"></span>
+                <span class="fa fa-fw fa-list"></span>
                 {{ _('See the %(nb)s datasets', nb=datasets.total) }}
             </a>
             {% endif %}
@@ -130,7 +130,7 @@
         <p class="text-center">
             <a class="btn btn-default"
                 href="{{ url_for('reuses.list', sort='-created', **kwargs) }}">
-                <span class="glyphicon glyphicon-list" ></span>
+                <span class="fa fa-fw fa-list" ></span>
                 {{ _('See the %(nb)s reuses', nb=reuses.total) }}
             </a>
         </p>
@@ -164,7 +164,7 @@
                 <p class="text-center">
                     <a class="btn btn-default display-followers"
                         href="#" @click="showFollowers" v-show="!followersVisible">
-                        <span class="glyphicon glyphicon-list" ></span>
+                        <span class="fa fa-fw fa-list" ></span>
                         {{ _('Display all followers') }}
                     </a>
                 </p>
@@ -209,7 +209,7 @@
                 {% if datasets.total > datasets|length %}
                 <a class="btn btn-default"
                     href="{{ url_for('datasets.list', sort='-created', **kwargs) }}">
-                    <span class="glyphicon glyphicon-list"></span>
+                    <span class="fa fa-fw fa-list"></span>
                     {{ _('See the %(nb)s datasets', nb=datasets.total) }}
                 </a>
                 {% endif %}
@@ -265,7 +265,7 @@
             <p class="text-center">
                 <a class="btn btn-default"
                     href="{{ url_for('reuses.list', sort='-created', **kwargs) }}">
-                    <span class="glyphicon glyphicon-list" ></span>
+                    <span class="fa fa-fw fa-list" ></span>
                     {{ _('See the %(nb)s reuses', nb=reuses.total) }}
                 </a>
             </p>
@@ -299,7 +299,7 @@
                     <p class="text-center">
                         <a class="btn btn-default display-followers"
                             href="#" @click="showFollowers" v-show="!followersVisible">
-                            <span class="glyphicon glyphicon-list" ></span>
+                            <span class="fa fa-fw fa-list" ></span>
                             {{ _('Display all followers') }}
                         </a>
                     </p>

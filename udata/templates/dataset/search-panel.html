@@ -8,7 +8,7 @@
         'badge', _('Badges'), ficon('fa-bookmark'), url=url
     ) }}
     {{ s.terms_facet(datasets, 'tag', _('Tags'), ficon('fa-tags'), url=url) }}
-    {{ s.model_terms_facet(datasets, 'license', _('Licenses'), ficon('copyright-mark'), url=url) }}
+    {{ s.model_terms_facet(datasets, 'license', _('Licenses'), ficon('fa-copyright'), url=url) }}
     {{ s.temporal_coverage_facet(datasets,
         'temporal_coverage', _('Temporal coverage'), ficon('fa-calendar'), url=url
     ) }}

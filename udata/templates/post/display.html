@@ -81,18 +81,19 @@
                 <div class="post-image">
                     <img src="{{ post.image }}"
                         alt="{{ post.name }}" class="scalable" />
-                    <br/>
                     {% if post.credit_to %}
-                        {{ _('Photo credit') }} to
+                    <div class="credit">
+                        {{ _('Photo credit') }}
                         {% if post.credit_url %}<a href="{{ post.credit_url }}"
                             title="{{ post.credit_to }}"
                             class="credit-link"
                             >{% endif %}
                         {{ post.credit_to }}
                         {% if post.credit_url %}
-                        <span class="glyphicon glyphicon-new-window"></span>
+                        <span class="fa fa-external-link-square"></span>
                         </a>
                         {% endif %}
+                    </div>
                     {% endif %}
                 </div>
                 {% endif %}
@@ -113,7 +114,7 @@
                         {% if sysadmin %}
                         <div class="btn-group btn-group-sm">
                             <a href="{{ url_for('admin.index', path='post/{id}/'.format(id=post.id)) }}" class="btn btn-success">
-                                <span class="glyphicon glyphicon-pencil"></span>
+                                <span class="fa fa-pencil"></span>
                                 {{ _('Edit') }}
                             </a>
                         </div>

@@ -6,10 +6,10 @@
     {{ s.filter_label('tag', _('Tag'), ficon('fa-tag'),
         labelize=datasets.label_func('tag')
     ) }}
-    {{ s.filter_label('license', _('License'), ficon('copyright-mark'),
+    {{ s.filter_label('license', _('License'), ficon('fa-copyright'),
         labelize=datasets.label_func('license')
     ) }}
-    {{ s.filter_label('badge', _('Badge'), ficon('bookmark'),
+    {{ s.filter_label('badge', _('Badge'), ficon('fa-bookmark'),
         labelize=datasets.label_func('badge')
     ) }}
     {{ s.filter_label('temporal_coverage', _('Temporal coverage'), ficon('fa-calendar'),

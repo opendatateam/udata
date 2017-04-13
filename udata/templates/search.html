@@ -138,7 +138,7 @@
                 {% if datasets.has_next %}
                 <p class="text-center">
                     <a class="btn btn-grey btn-sm" href="{{ url_for('datasets.list', **request.args) }}">
-                        <span class="glyphicon glyphicon-list"></span>
+                        <span class="fa fa-fw fa-list"></span>
                         {{ _('See the %(total)s results', total=datasets.total) }}
                     </a>
                 </p>
@@ -163,7 +163,7 @@
                 {% if reuses.has_next %}
                 <p class="text-center">
                     <a class="btn btn-grey btn-sm" href="{{ url_for('reuses.list', **request.args) }}">
-                        <span class="glyphicon glyphicon-list"></span>
+                        <span class="fa fa-fw fa-list"></span>
                         {{ _('See the %(total)s results', total=reuses.total) }}
                     </a>
                 </p>
@@ -190,7 +190,7 @@
                 {% if organizations.has_next %}
                 <p class="text-center">
                     <a class="btn btn-grey btn-sm" href="{{ url_for('organizations.list', **request.args) }}">
-                        <span class="glyphicon glyphicon-list"></span>
+                        <span class="fa fa-fw fa-list"></span>
                         {{ _('See the %(total)s results', total=organizations.total) }}
                     </a>
                 </p>
