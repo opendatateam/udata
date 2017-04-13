@@ -11,9 +11,10 @@ import 'less/site.less';
 // Catch all errors
 import 'raven';
 
-// ES6 environment polyfills
+// ES6/DOM environment polyfills
 import 'babel-polyfill';
 import 'whatwg-fetch';
+import 'url-search-params-polyfill';
 
 import config from 'config';
 import Vue from 'vue';

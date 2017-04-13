@@ -82,13 +82,14 @@
 {% endmacro %}
 
 {% macro facet_panel(result, name, label, icon=None, url=None, classes='list-group') %}
-<div class="panel-heading clickable" @click="togglePanel('{{result.class_name}}-{{name}}')">
+<div class="panel-heading clickable" @click="togglePanel('{{result.class_name}}-{{name}}', $event)">
     <h3 class="panel-title">
         <span class="{{icon or 'fa fa-filter'}} fa-fw"></span>
         {{ label or name }}
         <span id="chevrons-{{result.class_name}}-{{name}}" class="fa fa-chevron-down pull-right"></span>
         {% if in_url(name) %}
-        <a href="{{ url_del(None, name, 'page') }}" class="btn-remove pull-right" title="{{ _('Clear filter') }}">
+        <a id="facet-{{result.class_name}}-{{name}}-remove" class="btn-remove pull-right"
+            href="{{ url_del(None, name, 'page') }}" title="{{ _('Clear filter') }}">
             <span class="fa fa-remove"></span>
         </a>
         {% endif %}
@@ -180,37 +181,9 @@
 {% set coverage = result.facets[name] %}
 {% if coverage and coverage.days > 2 %}
     {% call facet_panel(result, name, label, icon, url, classes='panel-body temporal-coverage') %}
-        {#data-url-pattern="{{ result.query.to_url(url, **{name: '__r__', 'replace': True}) }}">#}
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="input-daterange input-group" id="datepicker">
-                <input type="text" class="input-sm form-control" name="start"
-                    value="{{ coverage.min.isoformat() }}"
-                    data-isodate="{{ coverage.min.isoformat() }}"/>
-                <span class="input-group-addon">{{ _('to') }}</span>
-                <input type="text" class="input-sm form-control" name="end"
-                    value="{{ coverage.max.isoformat() }}"
-                    data-isodate="{{ coverage.max.isoformat() }}"/>
-            </div>
-        </div>
-    </div>
-    <div class="row hide">
-        <div class="col-xs-12 text-center">
-            <div class="facet-datepicker"
-                date-date-format="yyyy-mm-dd"
-                data-date-start-date="{{ coverage.min.isoformat() }}"
-                data-date-end-date="{{ coverage.max.isoformat() }}"
-            ></div>
-        </div>
-    </div>
-    <div class="row hide">
-        <div class="col-xs-12">
-            <a class="btn btn-default btn-block btn-apply">
-                <span class="{{ ficon('refresh') }}"></span>
-                {{ _('Apply') }}
-            </a>
-        </div>
-    </div>
+        <temporal-coverage-facet name="{{ name }}"
+            min="{{ coverage.min.isoformat() }}" max="{{ coverage.max.isoformat() }}">
+        </temporal-coverage-facet>
     {% endcall %}
 {% endif %}
 {% endmacro %}

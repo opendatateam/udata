@@ -1,8 +1,8 @@
 <style lang="less">
 .date-picker {
     .dropdown-menu {
-        min-width:100%;
-        width:auto;
+        min-width: 100%;
+        width: auto;
     }
 }
 </style>
@@ -15,15 +15,15 @@
         @focus="onFocus"
         :placeholder="placeholder"
         :required="required"
-        :value="value|dt date_format ''"
+        :value="value|dt dateFormat ''"
         :readonly="readonly"></input>
     <div class="dropdown-menu dropdown-menu-right">
         <calendar :selected="value"></calendar>
     </div>
-    <input type="hidden" v-el:hidden
-        :id="field.id"
-        :name="serializable ? field.id : ''"
-        :value="value"></input>
+    <input v-if="serializable" type="hidden"
+        :name="field.id"
+        :value="value|dt ISO_FORMAT ''">
+    </input>
 </div>
 </template>
 
@@ -49,23 +49,22 @@ export default {
     data() {
         return {
             picking: false,
+            ISO_FORMAT,
         };
     },
     computed: {
-        date_format() {
+        dateFormat() {
             return this.field.format || DEFAULT_FORMAT;
         }
     },
     events: {
         'calendar:date:selected': function(date) {
-            this.$els.input.value = date.format(this.date_format);
-            this.$els.hidden.value = date.format(ISO_FORMAT);
+            this.value = date
             this.picking = false;
             return true;
         },
         'calendar:date:cleared': function() {
-            this.$els.input.value = '';
-            this.$els.hidden.value = '';
+            this.value = null;
             this.picking = false;
             return true;
         }

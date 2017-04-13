@@ -7,12 +7,12 @@ import log from 'logger';
 import Vue from 'vue';
 import velocity from 'velocity-animate';
 
-// Legacy depdencies soon to be dropped
-import 'search/temporal-coverage-facet';
+import TemporalCoverageFacet from 'components/facets/temporal-coverage.vue';
 
 
 new Vue({
     mixins: [FrontMixin],
+    components: {TemporalCoverageFacet},
     ready() {
         log.debug('Search page');
     },
@@ -51,8 +51,10 @@ new Vue({
          * Collapse or open a facet panel
          * @param  {String} id The panel identifier to toggle
          */
-        togglePanel(id) {
+        togglePanel(id, evt) {
             const panel = document.getElementById(`facet-${id}`);
+            const removeBtn = document.getElementById(`facet-${id}-remove`);
+            if (removeBtn && removeBtn.contains(evt.target)) return;  // Do not react on remove button click
             const chevrons = document.getElementById(`chevrons-${id}`);
             if (panel.classList.contains('in')) {
                 velocity(panel, 'slideUp', {duration: 500}).then(() => {
