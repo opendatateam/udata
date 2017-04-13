@@ -42,7 +42,7 @@
                             <small class="small-badge">
                                 <a href="{{ url_for('front.search', badge=badge) }}"
                                     title="{{ _('See all organizations with that badge.') }}">
-                                    <span class="glyphicon glyphicon-bookmark"></span>
+                                    <span class="fa fa-bookmark"></span>
                                     {{ org.badge_label(badge) }}</a>
                             </small><br/>
                         {% endfor %}
@@ -109,40 +109,40 @@
                 {% if not member %}
                     {% set pending_request = org.pending_request(current_user) %}
                     {% if not pending_request %}
-                    <a href class="btn btn-primary btn-block btn-sm icon-left membership"
+                    <a href class="btn btn-primary btn-block btn-sm btn-left membership"
                         v-tooltip tooltip-placement="left"
                         title="{{ _('I belong to this organization') }}"
                         @click.prevent="requestMembership('{{ url_for('api.request_membership', org=org) }}')">
-                        <span class="glyphicon glyphicon-user"></span>
+                        <span class="fa fa-user-plus"></span>
                         {{ _('Join') }}
                     </a>
                     {% endif %}
                     <a id="pending-button" href v-tooltip tooltip-placement="left"
                         title="{{ _('Waiting for approval') }}"
-                        class="btn btn-default btn-block btn-sm icon-left disabled {% if not pending_request %}hide{% endif %}"
+                        class="btn btn-default btn-block btn-sm btn-left disabled {% if not pending_request %}hide{% endif %}"
                         >
-                        <span class="glyphicon glyphicon-user"></span>
+                        <span class="fa fa-user-plus"></span>
                         {{ _('Pending request') }}
                     </a>
                 {% elif member.role == 'admin' %}
                 <a href v-tooltip tooltip-placement="left"
-                    class="btn btn-default btn-block btn-sm icon-left disabled"
+                    class="btn btn-default btn-block btn-sm btn-left disabled"
                     title="{{ _('You are an administrator of this organization') }}">
-                    <span class="glyphicon glyphicon-user"></span>
+                    <span class="fa fa-user"></span>
                     {{ _('Administrator') }}
                 </a>
                 {% elif member.role == 'editor' %}
                 <a href v-tooltip tooltip-placement="left"
-                    class="btn btn-default btn-block btn-sm icon-left disabled"
+                    class="btn btn-default btn-block btn-sm btn-left disabled"
                     title="{{ _('You are editor in this organization') }}">
-                    <span class="glyphicon glyphicon-user"></span>
+                    <span class="fa fa-user"></span>
                     {{ _('Editor') }}
                 </a>
                 {% else %}
                 <a href v-tooltip tooltip-placement="left"
-                    class="btn btn-default btn-block btn-sm icon-left disabled"
+                    class="btn btn-default btn-block btn-sm btn-left disabled"
                     title="{{ _('You are a member of this organization') }}">
-                    <span class="glyphicon glyphicon-user"></span>
+                    <span class="fa fa-user"></span>
                     {{ _('Member') }}
                 </a>
                 {% endif %}

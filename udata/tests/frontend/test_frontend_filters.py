@@ -227,9 +227,9 @@ class FrontEndRootTest(FrontTestCase):
             render_template_string('{{"value"|daterange}}')
 
     def test_ficon(self):
-        '''Should choose a font icon between glyphicon and font-awesome'''
+        '''Should render a font-awesome icon class'''
         self.assertEqual(render_template_string('{{ficon("icon")}}'),
-                         'glyphicon glyphicon-icon')
+                         'fa fa-icon')
         self.assertEqual(render_template_string('{{ficon("fa-icon")}}'),
                          'fa fa-icon')
 
